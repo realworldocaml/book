@@ -41,10 +41,13 @@ type symbol =
    case it is a token alias.
 
    Token aliases are eliminated by replacing them with the corresponding
-   terminal symbols very early on during the joining of the partial grammars
-   -- see the function [dealias_pg] in [PartialGrammar].
+   terminal symbols very early on during the joining of the partial grammars;
+   see the module [ExpandTokenAliases].
 
-   In a complete grammar, there are no token aliases any longer. *)
+   In a complete grammar, there are no token aliases any longer. That is,
+   we keep track of the aliases that have been declared (they can be found
+   via the field [tk_alias]), but we never use them, since they have been
+   eliminated up front. *)
 
 type alias =
     string option
@@ -123,6 +126,7 @@ type token_properties =
                tk_filename      : filename;
                tk_ocamltype     : Stretch.ocamltype option;
                tk_position      : Positions.t;
+               tk_alias         : alias;
                tk_attributes    : attributes;
       mutable  tk_associativity : token_associativity;
       mutable  tk_precedence    : precedence_level;
@@ -174,8 +178,11 @@ and parameters =
 
 (* ------------------------------------------------------------------------ *)
 
-(* A producer is a pair of identifier and a parameter. In concrete syntax,
-   it could be [e = expr], for instance. It carries a number of attributes. *)
+(* A producer is a pair of identifier and a parameter. In concrete syntax, it
+   could be [e = expr], for instance. The identifier [e] is always present.
+   (A use of the keyword [$i] in a semantic action is turned by the lexer
+   and parser into a reference to an identifier [_i].) A producer carries
+   a number of attributes. *)
 
 and producer =
     identifier located * parameter * attributes

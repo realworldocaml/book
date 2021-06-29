@@ -1,5 +1,6 @@
 open Stdune
-open Dune
+open Dune_engine
+open Dune_rules
 include Cmdliner.Arg
 
 let package_name = conv Package.Name.conv
@@ -16,7 +17,7 @@ end
 
 let path = Path.conv
 
-let profile = conv Dune.Profile.conv
+let profile = conv Dune_rules.Profile.conv
 
 module Dep = struct
   module Dep_conf = Dep_conf
@@ -27,7 +28,7 @@ module Dep = struct
 
   let make_alias_sw ~dir s =
     let path =
-      Dune.Alias.Name.to_string s
+      Dune_engine.Alias.Name.to_string s
       |> Stdune.Path.Local.relative dir
       |> Stdune.Path.Local.to_string
     in
@@ -47,12 +48,12 @@ module Dep = struct
         else
           (1, true)
       in
-      let s = String.drop s pos in
-      let dir, alias =
-        let path = Stdune.Path.Local.of_string s in
-        Dune.Alias.Name.parse_local_path (Loc.none, path)
-      in
-      Some (recursive, dir, alias)
+      let s = String_with_vars.make_text Loc.none (String.drop s pos) in
+      Some
+        ( if recursive then
+          Dep_conf.Alias_rec s
+        else
+          Dep_conf.Alias s )
 
   let dep_parser =
     Dune_lang.Syntax.set Stanza.syntax (Active Stanza.latest_version)
@@ -60,8 +61,7 @@ module Dep = struct
 
   let parser s =
     match parse_alias s with
-    | Some (true, dir, name) -> `Ok (alias_rec ~dir name)
-    | Some (false, dir, name) -> `Ok (alias ~dir name)
+    | Some dep -> `Ok dep
     | None -> (
       match
         Dune_lang.Decoder.parse dep_parser Univ_map.empty
@@ -122,3 +122,7 @@ let bytes =
   conv (decode, pp_print_int64)
 
 let context_name : Context_name.t conv = conv Context_name.conv
+
+let lib_name = conv Dune_engine.Lib_name.conv
+
+let version = pair ~sep:'.' int int

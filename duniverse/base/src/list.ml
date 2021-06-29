@@ -1,5 +1,6 @@
 open! Import
 module Array = Array0
+module Either = Either0
 
 
 include List1
@@ -9,13 +10,41 @@ include List1
 let invalid_argf = Printf.invalid_argf
 
 module T = struct
-  type 'a t = 'a list [@@deriving_inline sexp]
+  type 'a t = 'a list [@@deriving_inline sexp, sexp_grammar]
+
   let t_of_sexp :
-    'a . (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
+    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t
+    =
     list_of_sexp
+  ;;
+
   let sexp_of_t :
-    'a . ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
+    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    =
     sexp_of_list
+  ;;
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "list" ]
+      ; ggid = "j\132);\135qH\158\135\222H\001\007\004\158\218"
+      ; types =
+          [ "t", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ list_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "list.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 end
 
@@ -24,31 +53,35 @@ module Or_unequal_lengths = struct
     | Ok of 'a
     | Unequal_lengths
   [@@deriving_inline compare, sexp_of]
-  let compare : 'a . ('a -> 'a -> int) -> 'a t -> 'a t -> int =
-    fun _cmp__a ->
-    fun a__001_ ->
-    fun b__002_ ->
+
+  let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
+    fun _cmp__a a__001_ b__002_ ->
     if Ppx_compare_lib.phys_equal a__001_ b__002_
     then 0
-    else
-      (match (a__001_, b__002_) with
-       | (Ok _a__003_, Ok _b__004_) -> _cmp__a _a__003_ _b__004_
-       | (Ok _, _) -> (-1)
-       | (_, Ok _) -> 1
-       | (Unequal_lengths, Unequal_lengths) -> 0)
-  let sexp_of_t : type a.
-    (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t =
-    fun _of_a ->
-    function
-    | Ok v0 ->
-      let v0 = _of_a v0 in
-      Ppx_sexp_conv_lib.Sexp.List [Ppx_sexp_conv_lib.Sexp.Atom "Ok"; v0]
-    | Unequal_lengths -> Ppx_sexp_conv_lib.Sexp.Atom "Unequal_lengths"
+    else (
+      match a__001_, b__002_ with
+      | Ok _a__003_, Ok _b__004_ -> _cmp__a _a__003_ _b__004_
+      | Ok _, _ -> -1
+      | _, Ok _ -> 1
+      | Unequal_lengths, Unequal_lengths -> 0)
+  ;;
+
+  let sexp_of_t
+    : type a. (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t
+    =
+    fun _of_a -> function
+      | Ok v0 ->
+        let v0 = _of_a v0 in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Ok"; v0 ]
+      | Unequal_lengths -> Ppx_sexp_conv_lib.Sexp.Atom "Unequal_lengths"
+  ;;
+
   [@@@end]
 end
 
 include T
 
+let invariant f t = iter t ~f
 let of_list t = t
 
 let range' ~compare ~stride ?(start = `inclusive) ?(stop = `exclusive) start_i stop_i =
@@ -135,7 +168,7 @@ let unordered_append l1 l2 =
 let check_length2_exn name l1 l2 =
   let n1 = length l1 in
   let n2 = length l2 in
-  if n1 <> n2 then raise (invalid_argf "length mismatch in %s: %d <> %d " name n1 n2 ())
+  if n1 <> n2 then invalid_argf "length mismatch in %s: %d <> %d" name n1 n2 ()
 ;;
 
 let check_length3_exn name l1 l2 l3 =
@@ -143,9 +176,7 @@ let check_length3_exn name l1 l2 l3 =
   let n2 = length l2 in
   let n3 = length l3 in
   if n1 <> n2 || n2 <> n3
-  then
-    raise
-      (invalid_argf "length mismatch in %s: %d <> %d || %d <> %d" name n1 n2 n2 n3 ())
+  then invalid_argf "length mismatch in %s: %d <> %d || %d <> %d" name n1 n2 n2 n3 ()
 ;;
 
 let check_length2 l1 l2 ~f =
@@ -531,7 +562,7 @@ let reduce l ~f =
 
 let reduce_exn l ~f =
   match reduce l ~f with
-  | None -> raise (Invalid_argument "List.reduce_exn")
+  | None -> invalid_arg "List.reduce_exn"
   | Some v -> v
 ;;
 
@@ -577,7 +608,7 @@ let reduce_balanced l ~f =
 
 let reduce_balanced_exn l ~f =
   match reduce_balanced l ~f with
-  | None -> raise (Invalid_argument "List.reduce_balanced_exn")
+  | None -> invalid_arg "List.reduce_balanced_exn"
   | Some v -> v
 ;;
 
@@ -655,7 +686,7 @@ let rec last_exn list =
   match list with
   | [ x ] -> x
   | _ :: tl -> last_exn tl
-  | [] -> raise (Invalid_argument "List.last")
+  | [] -> invalid_arg "List.last"
 ;;
 
 (** optionally returns final element of list *)
@@ -816,53 +847,45 @@ let partition3_map t ~f =
 ;;
 
 let partition_tf t ~f =
-  let f x = if f x then `Fst x else `Snd x in
+  let f x : _ Either.t = if f x then First x else Second x in
   partition_map t ~f
 ;;
 
-let partition_result t =
-  let f x =
-    match x with
-    | Ok v -> `Fst v
-    | Error e -> `Snd e
-  in
-  partition_map t ~f
-;;
+let partition_result t = partition_map t ~f:Result.to_either
 
 module Assoc = struct
   type ('a, 'b) t = ('a * 'b) list [@@deriving_inline sexp]
+
   let t_of_sexp :
-    'a 'b .
-    (Ppx_sexp_conv_lib.Sexp.t -> 'a) ->
-    (Ppx_sexp_conv_lib.Sexp.t -> 'b) ->
-    Ppx_sexp_conv_lib.Sexp.t -> ('a, 'b) t
+    'a 'b. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> (Ppx_sexp_conv_lib.Sexp.t -> 'b)
+    -> Ppx_sexp_conv_lib.Sexp.t -> ('a, 'b) t
     =
-    let _tp_loc = "src/list.ml.Assoc.t" in
-    fun _of_a ->
-    fun _of_b ->
-    fun t ->
+    let _tp_loc = "list.ml.Assoc.t" in
+    fun _of_a _of_b t ->
       list_of_sexp
         (function
-          | Ppx_sexp_conv_lib.Sexp.List (v0::v1::[]) ->
+          | Ppx_sexp_conv_lib.Sexp.List [ v0; v1 ] ->
             let v0 = _of_a v0
-            and v1 = _of_b v1 in (v0, v1)
-          | sexp ->
-            Ppx_sexp_conv_lib.Conv_error.tuple_of_size_n_expected _tp_loc
-              2 sexp) t
+            and v1 = _of_b v1 in
+            v0, v1
+          | sexp -> Ppx_sexp_conv_lib.Conv_error.tuple_of_size_n_expected _tp_loc 2 sexp)
+        t
+  ;;
+
   let sexp_of_t :
-    'a 'b .
-    ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-    ('b -> Ppx_sexp_conv_lib.Sexp.t) ->
-    ('a, 'b) t -> Ppx_sexp_conv_lib.Sexp.t
+    'a 'b. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+    -> ('a, 'b) t -> Ppx_sexp_conv_lib.Sexp.t
     =
-    fun _of_a ->
-    fun _of_b ->
-    fun v ->
-    sexp_of_list
-      (function
-        | (v0, v1) ->
-          let v0 = _of_a v0
-          and v1 = _of_b v1 in Ppx_sexp_conv_lib.Sexp.List [v0; v1]) v
+    fun _of_a _of_b v ->
+      sexp_of_list
+        (function
+          | v0, v1 ->
+            let v0 = _of_a v0
+            and v1 = _of_b v1 in
+            Ppx_sexp_conv_lib.Sexp.List [ v0; v1 ])
+        v
+  ;;
+
   [@@@end]
 
   let find t ~equal key =
@@ -1079,8 +1102,8 @@ let transpose =
   let rec transpose_aux t rev_columns =
     match
       partition_map t ~f:(function
-        | [] -> `Snd ()
-        | x :: xs -> `Fst (x, xs))
+        | [] -> Second ()
+        | x :: xs -> First (x, xs))
     with
     | _ :: _, _ :: _ -> None
     | [], _ -> Some (rev_append rev_columns [])
@@ -1092,17 +1115,21 @@ let transpose =
 ;;
 
 exception Transpose_got_lists_of_different_lengths of int list [@@deriving_inline sexp]
+
 let () =
   Ppx_sexp_conv_lib.Conv.Exn_converter.add
-    ([%extension_constructor Transpose_got_lists_of_different_lengths])
+    [%extension_constructor Transpose_got_lists_of_different_lengths]
     (function
       | Transpose_got_lists_of_different_lengths v0 ->
         let v0 = sexp_of_list sexp_of_int v0 in
         Ppx_sexp_conv_lib.Sexp.List
-          [Ppx_sexp_conv_lib.Sexp.Atom
-             "src/list.ml.Transpose_got_lists_of_different_lengths";
-           v0]
+          [ Ppx_sexp_conv_lib.Sexp.Atom
+              "list.ml.Transpose_got_lists_of_different_lengths"
+          ; v0
+          ]
       | _ -> assert false)
+;;
+
 [@@@end]
 
 let transpose_exn l =
@@ -1119,3 +1146,9 @@ let intersperse t ~sep =
 
 let fold_result t ~init ~f = Container.fold_result ~fold ~init ~f t
 let fold_until t ~init ~f = Container.fold_until ~fold ~init ~f t
+
+let is_suffix list ~suffix ~equal:equal_elt =
+  let list_len = length list in
+  let suffix_len = length suffix in
+  list_len >= suffix_len && equal equal_elt (drop list (list_len - suffix_len)) suffix
+;;

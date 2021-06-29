@@ -1,2 +1,1 @@
-File "cstruct_len_zero.ml", line 3, characters 17-20:
 Error: ppx_cstruct: [@len] argument should be > 0

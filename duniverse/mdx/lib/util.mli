@@ -71,3 +71,10 @@ end
 module Array : sig
   val slice : 'a array -> from:int -> to_:int -> 'a array
 end
+
+module Process : sig
+  val wait : pid:int -> int
+  (** Wait for the given process and return an exit code.
+      Exit code is the same as the child process if it exits normally, or 255
+      otherwise. *)
+end

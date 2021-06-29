@@ -24,8 +24,8 @@ val parse :
   parent_lang:Common.lang ->
   name:Common.name ->
   attributes:(Common.name * string Common.value) list ->
-  Parsetree.expression Common.value list ->
-  Parsetree.expression
+  Ppxlib.expression Common.value list ->
+  Ppxlib.expression
 (** [parse ~loc ~parent_lang ~name ~attributes children]
     evaluates to a parse tree for applying the TyXML function corresponding
     to element [name] to suitable arguments representing [attributes] and
@@ -36,7 +36,7 @@ val comment :
   loc:Location.t ->
   lang:Common.lang ->
   string ->
-  Parsetree.expression
+  Ppxlib.expression
 (** [comment ~loc ~ns s] evaluates to a parse tree that represents an XML comment. *)
 
 val find_assembler :

@@ -1,4 +1,5 @@
 opam-version: "2.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/sexplib"
@@ -11,10 +12,9 @@ build: [
 ]
 depends: [
   "ocaml"    {>= "4.04.2"}
-  "parsexp"  
-  "sexplib0" 
-  "dune"     {>= "1.5.1"}
-  "bigarray-compat"
+  "parsexp"  {>= "v0.14" & < "v0.15"}
+  "sexplib0" {>= "v0.14" & < "v0.15"}
+  "dune"     {>= "2.0.0"}
   "num"
 ]
 synopsis: "Library for serializing OCaml values to and from S-expressions"
@@ -24,7 +24,3 @@ The Core suite of libraries is an industrial strength alternative to
 OCaml's standard library that was developed by Jane Street, the
 largest industrial user of OCaml.
 "
-url {
-  src: "git+https://github.com/dune-universe/sexplib.git#duniverse-v0.13"
-}
-

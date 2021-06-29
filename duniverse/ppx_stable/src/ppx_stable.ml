@@ -88,7 +88,7 @@ let mk_lident ~loc str = Located.mk ~loc (Longident.Lident str)
 let mk_module ~loc ~name ~items =
   pstr_module
     ~loc
-    (module_binding ~loc ~name:(Located.mk ~loc name) ~expr:(pmod_structure ~loc items))
+    (module_binding ~loc ~name:(Located.mk ~loc (Some name)) ~expr:(pmod_structure ~loc items))
 ;;
 
 (* fun ~name:name -> exp *)

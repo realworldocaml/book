@@ -1,4 +1,5 @@
-open Base
+open! Base
+open Import
 
 let for_all_string s ~f =
   let b = ref true in
@@ -29,12 +30,117 @@ module Line = struct
     ; orig : string
     ; data : 'a
     }
-  [@@deriving sexp_of, compare]
+  [@@deriving_inline sexp_of, compare, equal]
+
+  let _ = fun (_ : 'a not_blank) -> ()
+
+  let sexp_of_not_blank :
+    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a not_blank -> Ppx_sexp_conv_lib.Sexp.t
+    =
+    fun _of_a -> function
+      | { trailing_blanks = v_trailing_blanks; orig = v_orig; data = v_data } ->
+        let bnds = [] in
+        let bnds =
+          let arg = _of_a v_data in
+          Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "data"; arg ] :: bnds
+        in
+        let bnds =
+          let arg = sexp_of_string v_orig in
+          Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "orig"; arg ] :: bnds
+        in
+        let bnds =
+          let arg = sexp_of_string v_trailing_blanks in
+          Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "trailing_blanks"; arg ]
+          :: bnds
+        in
+        Ppx_sexp_conv_lib.Sexp.List bnds
+  ;;
+
+  let _ = sexp_of_not_blank
+
+  let compare_not_blank : 'a. ('a -> 'a -> int) -> 'a not_blank -> 'a not_blank -> int =
+    fun _cmp__a a__001_ b__002_ ->
+    if Ppx_compare_lib.phys_equal a__001_ b__002_
+    then 0
+    else (
+      match compare_string a__001_.trailing_blanks b__002_.trailing_blanks with
+      | 0 ->
+        (match compare_string a__001_.orig b__002_.orig with
+         | 0 -> _cmp__a a__001_.data b__002_.data
+         | n -> n)
+      | n -> n)
+  ;;
+
+  let _ = compare_not_blank
+
+  let equal_not_blank : 'a. ('a -> 'a -> bool) -> 'a not_blank -> 'a not_blank -> bool =
+    fun _cmp__a a__003_ b__004_ ->
+    if Ppx_compare_lib.phys_equal a__003_ b__004_
+    then true
+    else
+      Ppx_compare_lib.( && )
+        (equal_string a__003_.trailing_blanks b__004_.trailing_blanks)
+        (Ppx_compare_lib.( && )
+           (equal_string a__003_.orig b__004_.orig)
+           (_cmp__a a__003_.data b__004_.data))
+  ;;
+
+  let _ = equal_not_blank
+
+  [@@@end]
 
   type 'a t =
     | Blank of string
     | Not_blank of 'a not_blank
-  [@@deriving sexp_of, compare]
+  [@@deriving_inline sexp_of, compare, equal]
+
+  let _ = fun (_ : 'a t) -> ()
+
+  let sexp_of_t
+    : type a. (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t
+    =
+    fun _of_a -> function
+      | Blank v0 ->
+        let v0 = sexp_of_string v0 in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Blank"; v0 ]
+      | Not_blank v0 ->
+        let v0 = sexp_of_not_blank _of_a v0 in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Not_blank"; v0 ]
+  ;;
+
+  let _ = sexp_of_t
+
+  let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
+    fun _cmp__a a__005_ b__006_ ->
+    if Ppx_compare_lib.phys_equal a__005_ b__006_
+    then 0
+    else (
+      match a__005_, b__006_ with
+      | Blank _a__007_, Blank _b__008_ -> compare_string _a__007_ _b__008_
+      | Blank _, _ -> -1
+      | _, Blank _ -> 1
+      | Not_blank _a__009_, Not_blank _b__010_ ->
+        compare_not_blank _cmp__a _a__009_ _b__010_)
+  ;;
+
+  let _ = compare
+
+  let equal : 'a. ('a -> 'a -> bool) -> 'a t -> 'a t -> bool =
+    fun _cmp__a a__013_ b__014_ ->
+    if Ppx_compare_lib.phys_equal a__013_ b__014_
+    then true
+    else (
+      match a__013_, b__014_ with
+      | Blank _a__015_, Blank _b__016_ -> equal_string _a__015_ _b__016_
+      | Blank _, _ -> false
+      | _, Blank _ -> false
+      | Not_blank _a__017_, Not_blank _b__018_ ->
+        equal_not_blank _cmp__a _a__017_ _b__018_)
+  ;;
+
+  let _ = equal
+
+  [@@@end]
 
   let map t ~f =
     match t with
@@ -75,7 +181,82 @@ type 'a single_line =
   ; orig : string
   ; data : 'a
   }
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+
+let _ = fun (_ : 'a single_line) -> ()
+
+let sexp_of_single_line :
+  'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a single_line -> Ppx_sexp_conv_lib.Sexp.t
+  =
+  fun _of_a -> function
+    | { leading_blanks = v_leading_blanks
+      ; trailing_spaces = v_trailing_spaces
+      ; orig = v_orig
+      ; data = v_data
+      } ->
+      let bnds = [] in
+      let bnds =
+        let arg = _of_a v_data in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "data"; arg ] :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_orig in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "orig"; arg ] :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_trailing_spaces in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "trailing_spaces"; arg ]
+        :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_leading_blanks in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "leading_blanks"; arg ]
+        :: bnds
+      in
+      Ppx_sexp_conv_lib.Sexp.List bnds
+;;
+
+let _ = sexp_of_single_line
+
+let compare_single_line :
+  'a. ('a -> 'a -> int) -> 'a single_line -> 'a single_line -> int
+  =
+  fun _cmp__a a__021_ b__022_ ->
+  if Ppx_compare_lib.phys_equal a__021_ b__022_
+  then 0
+  else (
+    match compare_string a__021_.leading_blanks b__022_.leading_blanks with
+    | 0 ->
+      (match compare_string a__021_.trailing_spaces b__022_.trailing_spaces with
+       | 0 ->
+         (match compare_string a__021_.orig b__022_.orig with
+          | 0 -> _cmp__a a__021_.data b__022_.data
+          | n -> n)
+       | n -> n)
+    | n -> n)
+;;
+
+let _ = compare_single_line
+
+let equal_single_line :
+  'a. ('a -> 'a -> bool) -> 'a single_line -> 'a single_line -> bool
+  =
+  fun _cmp__a a__023_ b__024_ ->
+  if Ppx_compare_lib.phys_equal a__023_ b__024_
+  then true
+  else
+    Ppx_compare_lib.( && )
+      (equal_string a__023_.leading_blanks b__024_.leading_blanks)
+      (Ppx_compare_lib.( && )
+         (equal_string a__023_.trailing_spaces b__024_.trailing_spaces)
+         (Ppx_compare_lib.( && )
+            (equal_string a__023_.orig b__024_.orig)
+            (_cmp__a a__023_.data b__024_.data)))
+;;
+
+let _ = equal_single_line
+
+[@@@end]
 
 type 'a multi_lines =
   { leading_spaces : string
@@ -83,13 +264,155 @@ type 'a multi_lines =
   ; indentation : string
   ; lines : 'a Line.t list
   }
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+
+let _ = fun (_ : 'a multi_lines) -> ()
+
+let sexp_of_multi_lines :
+  'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a multi_lines -> Ppx_sexp_conv_lib.Sexp.t
+  =
+  fun _of_a -> function
+    | { leading_spaces = v_leading_spaces
+      ; trailing_spaces = v_trailing_spaces
+      ; indentation = v_indentation
+      ; lines = v_lines
+      } ->
+      let bnds = [] in
+      let bnds =
+        let arg = sexp_of_list (Line.sexp_of_t _of_a) v_lines in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "lines"; arg ] :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_indentation in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "indentation"; arg ]
+        :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_trailing_spaces in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "trailing_spaces"; arg ]
+        :: bnds
+      in
+      let bnds =
+        let arg = sexp_of_string v_leading_spaces in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "leading_spaces"; arg ]
+        :: bnds
+      in
+      Ppx_sexp_conv_lib.Sexp.List bnds
+;;
+
+let _ = sexp_of_multi_lines
+
+let compare_multi_lines :
+  'a. ('a -> 'a -> int) -> 'a multi_lines -> 'a multi_lines -> int
+  =
+  fun _cmp__a a__025_ b__026_ ->
+  if Ppx_compare_lib.phys_equal a__025_ b__026_
+  then 0
+  else (
+    match compare_string a__025_.leading_spaces b__026_.leading_spaces with
+    | 0 ->
+      (match compare_string a__025_.trailing_spaces b__026_.trailing_spaces with
+       | 0 ->
+         (match compare_string a__025_.indentation b__026_.indentation with
+          | 0 ->
+            compare_list
+              (fun a__027_ b__028_ -> Line.compare _cmp__a a__027_ b__028_)
+              a__025_.lines
+              b__026_.lines
+          | n -> n)
+       | n -> n)
+    | n -> n)
+;;
+
+let _ = compare_multi_lines
+
+let equal_multi_lines :
+  'a. ('a -> 'a -> bool) -> 'a multi_lines -> 'a multi_lines -> bool
+  =
+  fun _cmp__a a__031_ b__032_ ->
+  if Ppx_compare_lib.phys_equal a__031_ b__032_
+  then true
+  else
+    Ppx_compare_lib.( && )
+      (equal_string a__031_.leading_spaces b__032_.leading_spaces)
+      (Ppx_compare_lib.( && )
+         (equal_string a__031_.trailing_spaces b__032_.trailing_spaces)
+         (Ppx_compare_lib.( && )
+            (equal_string a__031_.indentation b__032_.indentation)
+            (equal_list
+               (fun a__033_ b__034_ -> Line.equal _cmp__a a__033_ b__034_)
+               a__031_.lines
+               b__032_.lines)))
+;;
+
+let _ = equal_multi_lines
+
+[@@@end]
 
 type 'a t =
   | Empty of string
   | Single_line of 'a single_line
   | Multi_lines of 'a multi_lines
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+
+let _ = fun (_ : 'a t) -> ()
+
+let sexp_of_t
+  : type a. (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t
+  =
+  fun _of_a -> function
+    | Empty v0 ->
+      let v0 = sexp_of_string v0 in
+      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Empty"; v0 ]
+    | Single_line v0 ->
+      let v0 = sexp_of_single_line _of_a v0 in
+      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Single_line"; v0 ]
+    | Multi_lines v0 ->
+      let v0 = sexp_of_multi_lines _of_a v0 in
+      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Multi_lines"; v0 ]
+;;
+
+let _ = sexp_of_t
+
+let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
+  fun _cmp__a a__037_ b__038_ ->
+  if Ppx_compare_lib.phys_equal a__037_ b__038_
+  then 0
+  else (
+    match a__037_, b__038_ with
+    | Empty _a__039_, Empty _b__040_ -> compare_string _a__039_ _b__040_
+    | Empty _, _ -> -1
+    | _, Empty _ -> 1
+    | Single_line _a__041_, Single_line _b__042_ ->
+      compare_single_line _cmp__a _a__041_ _b__042_
+    | Single_line _, _ -> -1
+    | _, Single_line _ -> 1
+    | Multi_lines _a__045_, Multi_lines _b__046_ ->
+      compare_multi_lines _cmp__a _a__045_ _b__046_)
+;;
+
+let _ = compare
+
+let equal : 'a. ('a -> 'a -> bool) -> 'a t -> 'a t -> bool =
+  fun _cmp__a a__049_ b__050_ ->
+  if Ppx_compare_lib.phys_equal a__049_ b__050_
+  then true
+  else (
+    match a__049_, b__050_ with
+    | Empty _a__051_, Empty _b__052_ -> equal_string _a__051_ _b__052_
+    | Empty _, _ -> false
+    | _, Empty _ -> false
+    | Single_line _a__053_, Single_line _b__054_ ->
+      equal_single_line _cmp__a _a__053_ _b__054_
+    | Single_line _, _ -> false
+    | _, Single_line _ -> false
+    | Multi_lines _a__057_, Multi_lines _b__058_ ->
+      equal_multi_lines _cmp__a _a__057_ _b__058_)
+;;
+
+let _ = equal
+
+[@@@end]
 
 let invariant inv t =
   match t with

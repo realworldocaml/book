@@ -1,0 +1,18 @@
+(copy_files# ../src/native/*.c)
+
+(rule
+ (deps ../src/cflags.sexp ../src/cflags_optimized.sexp Makefile
+   detect_cpu_features.c misc.c misc_sse.c md5.c sha1.c sha256.c sha512.c
+   hash_stubs.c aes_generic.c aes_aesni.c ghash_generic.c ghash_pclmul.c
+   ghash_ctmul.c des_generic.c chacha.c chacha_generic.c poly1305-donna.c
+   entropy_cpu_stubs.c)
+ (targets libmirage_crypto_freestanding_stubs.a)
+ (action
+  (no-infer
+   (progn
+    (run %{make})))))
+
+(install
+ (package mirage-crypto)
+ (section lib)
+ (files libmirage_crypto_freestanding_stubs.a))

@@ -580,7 +580,7 @@ module Streaming_rpc = struct
       upon (Pipe.closed pipe_r) (fun () ->
         if not (Ivar.is_full close_reason) then begin
           abort t conn id;
-          Ivar.fill close_reason Closed_locally;
+          Ivar.fill_if_empty close_reason Closed_locally;
         end);
       let pipe_metadata : Pipe_metadata.t =
         { query_id = id;
@@ -627,7 +627,7 @@ module Pipe_rpc = struct
         type t = Bigstring.t ref
         let create ?(initial_size=4096) () =
           if initial_size < 0 then
-            failwiths
+            failwiths ~here:[%here]
               "Rpc.Pipe_rpc.Direct_stream_writer.Group.Buffer.create \
                got negative buffer size"
               initial_size Int.sexp_of_t;
@@ -701,7 +701,13 @@ module Pipe_rpc = struct
 
       let to_list t = Bag.to_list t.components
 
-      let flushed t = Deferred.all_unit (List.map (to_list t) ~f:flushed)
+      let flushed_or_closed t =
+        to_list t
+        |> List.map ~f:(fun t -> Deferred.any_unit [flushed t; closed t])
+        |> Deferred.all_unit
+      ;;
+
+      let flushed t = flushed_or_closed t
 
       module Expert = struct
         let write_without_pushback t ~buf ~pos ~len =
@@ -715,7 +721,7 @@ module Pipe_rpc = struct
 
         let write t ~buf ~pos ~len =
           write_without_pushback t ~buf ~pos ~len;
-          flushed t
+          flushed_or_closed t
         ;;
       end
 
@@ -746,7 +752,7 @@ module Pipe_rpc = struct
 
       let write t x =
         write_without_pushback t x;
-        flushed t
+        flushed_or_closed t
       ;;
     end
   end

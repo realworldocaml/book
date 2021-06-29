@@ -15,9 +15,11 @@ Welcome to dune's documentation!
    dune-files
    concepts
    tests
+   instrumentation
    foreign-code
    documentation
    jsoo
+   sites
    opam
    variants
    formatting
@@ -31,3 +33,4 @@ Welcome to dune's documentation!
    caching
    toplevel-integration
    goals
+   hacking

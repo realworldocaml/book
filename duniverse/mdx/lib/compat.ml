@@ -77,6 +77,10 @@ module Filename = struct
   let extension name =
     let l = extension_len name in
     if l = 0 then "" else String.sub name (String.length name - l) l
+
+  let remove_extension name =
+    let l = extension_len name in
+    if l = 0 then name else String.sub name 0 (String.length name - l)
 #endif
 end
 

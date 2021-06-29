@@ -28,13 +28,11 @@ test:
 
 .PHONY: all-supported-ocaml-versions
 all-supported-ocaml-versions:
-	dune runtest --workspace dune-workspace.dev
+	dune build @install --workspace dune-workspace.dev --debug-dep
 
 .PHONY: cinaps
 cinaps:
-	cinaps -styler ocp-indent -i src/migrate_parsetree_versions.ml*
-	cinaps -styler ocp-indent -i src/migrate_parsetree_4??_4??.ml*
-	cinaps -styler ocp-indent -i src/migrate_parsetree.ml
+	dune build @cinaps
 
 .PHONY: clean
 clean:

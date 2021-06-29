@@ -6,11 +6,9 @@
 open! Import
 
 type 'a t [@@deriving_inline sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
 [@@@end]
 
 val empty : _ t
@@ -80,11 +78,9 @@ val copy : 'a t -> 'a t
 module For_testing : sig
   module Unsafe_cheap_option : sig
     type 'a t [@@deriving_inline sexp]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-      end[@@ocaml.doc "@inline"]
+
+    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
     [@@@end]
 
     val none : _ t

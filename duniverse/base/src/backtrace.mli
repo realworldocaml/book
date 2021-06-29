@@ -13,9 +13,9 @@ open! Import
     string at newlines and removes some of the cruft, leaving a human-friendly list of
     frames, but [to_string] does not. *)
 type t [@@deriving_inline sexp_of]
-include
-  sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
 
 val get : ?at_most_num_frames:int -> unit -> t
@@ -54,10 +54,12 @@ val elide : bool ref
     [most_recent] before a subsequent [raise] of a (physically) distinct exception, or the
     backtrace is lost.
 
-    The initial value of [am_recording ()] is determined by the setting of the environment
-    variable OCAMLRUNPARAM. If OCAMLRUNPARAM is set, then [am_recording () = true] iff the
-    character "b" occurs in OCAMLRUNPARAM. If OCAMLRUNPARAM is not set (as is always the
-    case when running in a web browser), then [am_recording ()] is initially true.
+    The initial value of [am_recording ()] is determined by the environment variable
+    OCAMLRUNPARAM. If OCAMLRUNPARAM is set and contains a "b" parameter, then
+    [am_recording ()] is set according to OCAMLRUNPARAM: true if "b" or "b=1" appears;
+    false if "b=0" appears. If OCAMLRUNPARAM is not set (as is always the case when
+    running in a web browser) or does not contain a "b" parameter, then [am_recording ()]
+    is initially true.
 
     This is the same functionality as provided by the OCaml stdlib [Printexc] functions
     [backtrace_status], [record_backtraces], [get_backtrace]. *)

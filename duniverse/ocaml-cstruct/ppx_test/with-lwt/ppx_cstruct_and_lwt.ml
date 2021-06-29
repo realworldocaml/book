@@ -10,5 +10,6 @@ type foo64 =
   [@@uint64_t]
 ]
 
-let%lwt foo = Lwt.return ()
-
+let foo = 
+  let%lwt foo = Lwt.return () in 
+  Lwt.return foo

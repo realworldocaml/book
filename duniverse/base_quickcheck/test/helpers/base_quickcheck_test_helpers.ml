@@ -1,6 +1,6 @@
 open! Base
 open Base_quickcheck
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 include Base_quickcheck_test_helpers_intf
 
 let () = sexp_style := Sexp_style.simple_pretty

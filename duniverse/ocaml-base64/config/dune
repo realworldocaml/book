@@ -1,3 +1,7 @@
 (executable
- (name config)
- (libraries dune-configurator))
+ (name config))
+
+(rule
+ (with-stdout-to
+  which-unsafe-file
+  (run ./config.exe)))

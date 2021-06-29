@@ -1,6 +1,6 @@
 ## TLS - Transport Layer Security purely in OCaml
 
-%%VERSION%%
+v0.13.1
 
 Transport Layer Security (TLS) is probably the most widely deployed security
 protocol on the Internet. It provides communication privacy to prevent

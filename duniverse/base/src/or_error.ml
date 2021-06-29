@@ -1,29 +1,31 @@
 open! Import
 
 type 'a t = ('a, Error.t) Result.t [@@deriving_inline compare, equal, hash, sexp]
-let compare : 'a . ('a -> 'a -> int) -> 'a t -> 'a t -> int =
-  fun _cmp__a ->
-  fun a__001_ ->
-  fun b__002_ -> Result.compare _cmp__a Error.compare a__001_ b__002_
-let equal : 'a . ('a -> 'a -> bool) -> 'a t -> 'a t -> bool =
-  fun _cmp__a ->
-  fun a__007_ ->
-  fun b__008_ -> Result.equal _cmp__a Error.equal a__007_ b__008_
+
+let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
+  fun _cmp__a a__001_ b__002_ -> Result.compare _cmp__a Error.compare a__001_ b__002_
+;;
+
+let equal : 'a. ('a -> 'a -> bool) -> 'a t -> 'a t -> bool =
+  fun _cmp__a a__007_ b__008_ -> Result.equal _cmp__a Error.equal a__007_ b__008_
+;;
+
 let hash_fold_t :
-  'a .
-  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-  Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
+  'a. (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+  -> Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
   =
-  fun _hash_fold_a ->
-  fun hsv ->
-  fun arg -> Result.hash_fold_t _hash_fold_a Error.hash_fold_t hsv arg
-let t_of_sexp :
-  'a . (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
-  let _tp_loc = "src/or_error.ml.t" in
-  fun _of_a -> fun t -> Result.t_of_sexp _of_a Error.t_of_sexp t
-let sexp_of_t :
-  'a . ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
-  fun _of_a -> fun v -> Result.sexp_of_t _of_a Error.sexp_of_t v
+  fun _hash_fold_a hsv arg -> Result.hash_fold_t _hash_fold_a Error.hash_fold_t hsv arg
+;;
+
+let t_of_sexp : 'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
+  let _tp_loc = "or_error.ml.t" in
+  fun _of_a t -> Result.t_of_sexp _of_a Error.t_of_sexp t
+;;
+
+let sexp_of_t : 'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
+  fun _of_a v -> Result.sexp_of_t _of_a Error.sexp_of_t v
+;;
+
 [@@@end]
 
 let invariant invariant_a t =
@@ -69,7 +71,6 @@ end
 let ok = Result.ok
 let is_ok = Result.is_ok
 let is_error = Result.is_error
-let ignore = ignore_m
 
 let try_with ?(backtrace = false) f =
   try Ok (f ()) with
@@ -106,7 +107,7 @@ let combine_errors l = Result.map_error (Result.combine_errors l) ~f:Error.of_li
 let combine_errors_unit l = Result.map (combine_errors l) ~f:(fun (_ : unit list) -> ())
 
 let filter_ok_at_least_one l =
-  let ok, errs = List.partition_map l ~f:Result.ok_fst in
+  let ok, errs = List.partition_map l ~f:Result.to_either in
   match ok with
   | [] -> Error (Error.of_list errs)
   | _ -> Ok ok

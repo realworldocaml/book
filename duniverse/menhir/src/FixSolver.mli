@@ -11,17 +11,12 @@
 (*                                                                            *)
 (******************************************************************************)
 
-module Make
-(M : Fix.IMPERATIVE_MAPS)
-(P : sig
-  include Fix.PROPERTY
-  val union: property -> property -> property
-end)
-: sig
+open Fix
 
-  (* Variables and constraints. A constraint is an inequality between
-     a constant or a variable, on the left-hand side, and a variable,
-     on the right-hand side. *)
+module Make
+(M : IMPERATIVE_MAPS)
+(P : MINIMAL_SEMI_LATTICE)
+: sig
 
   type variable =
     M.key
@@ -29,14 +24,21 @@ end)
   type property =
     P.property
 
-  (* An imperative interface, where we create a new constraint system,
-     and are given three functions to add constraints and (once we are
-     done adding) to solve the system. *)
+  (* [record_ConVar x y] records an inequality between a constant and
+     a variable. *)
 
-  val create: unit ->
-    (property -> variable -> unit) *
-    (variable -> variable -> unit) *
-    (unit -> (variable -> property))
+  val record_ConVar: property -> variable -> unit
+
+  (* [record_VarVar x y] records an inequality between two variables. *)
+
+  val record_VarVar: variable -> variable -> unit
+
+  (* The functor [Solve] computes the least solution of the
+     constraints. The value [None] represents bottom. *)
+
+  module Solve () :
+    SOLUTION
+    with type variable = variable
+     and type property = property option
 
 end
-

@@ -17,53 +17,39 @@ include Monad.S with type 'a t := 'a t
 (** The empty queue. *)
 val empty : 'a t
 
-(** [enqueue t x] returns a queue with adds [x] to the end of [t]. Complexity: O(1). *)
+(** [enqueue t x] returns a queue with adds [x] to the end of [t].  Complexity: O(1). *)
 val enqueue : 'a t -> 'a -> 'a t
 
+(** Returns the front (least recently enqueued) element.  Raises [Empty] if no element is
+    found.  Complexity: O(1). *)
+val peek_exn : 'a t -> 'a
 
-(** Enqueues a single element on the *top* of the queue.  Complexity: amortized O(1)
-    [enqueue_top] is deprecated, use [Fdeque.t] instead. *)
-val enqueue_top : 'a t -> 'a -> 'a t
-[@@deprecated "[since 2019-05] Use [Fdeque.t] instead."]
+val top_exn : 'a t -> 'a [@@deprecated "[since 2019-11] Use [peek_exn] instead."]
 
-(** Returns the bottom (most recently enqueued) element.  Raises [Empty] if no element is
-    found.  Complexity: O(1).
-
-    [bot_exn] is deprecated, use [Fdeque.t] instead. *)
-val bot_exn : 'a t -> 'a
-[@@deprecated "[since 2019-05] Use [Fdeque.t] instead."]
-
-(** Like [bot_exn], but returns its result optionally, without exception. Complexity:
-    O(1).
-
-    [bot] is deprecated, use [Fdeque.t] instead. *)
-val bot : 'a t -> 'a option
-[@@deprecated "[since 2019-05] Use [Fdeque.t] instead."]
-
-(** Like [bot_exn], except returns top (least recently enqueued) element. Complexity:
+(** Like [peek_exn], but returns its result optionally, without exception.  Complexity:
     O(1). *)
-val top_exn : 'a t -> 'a
+val peek : 'a t -> 'a option
 
-(** Like [top_exn], but returns its result optionally, without exception,
-    Complexity: O(1). *)
-val top : 'a t -> 'a option
+val top : 'a t -> 'a option [@@deprecated "[since 2019-11] Use [peek] instead."]
 
-(** [dequeue_exn t] removes and returns the front of [t], raising [Empty] if [t]
-    is empty. Complexity: amortized O(1)*)
+(** [dequeue_exn t] removes and returns the front of [t], raising [Empty] if [t] is empty.
+    Complexity: amortized O(1). *)
 val dequeue_exn : 'a t -> 'a * 'a t
 
 (** Like [dequeue_exn], but returns result optionally, without exception.  Complexity:
-    amortized O(1) *)
+    amortized O(1). *)
 val dequeue : 'a t -> ('a * 'a t) option
 
-(** Returns version of queue with top element removed.  Complexity: amortized O(1). *)
-val discard_exn : 'a t -> 'a t
+(** Returns version of queue with front element removed.  Complexity: amortized O(1). *)
+val drop_exn : 'a t -> 'a t
+
+val discard_exn : 'a t -> 'a t [@@deprecated "[since 2019-11] Use [drop_exn] instead."]
 
 (** [to_list t] returns a list of the elements in [t] in order from least-recently-added
-    (at the head) to most-recently-added (at the tail). Complexity: O(n). *)
+    (at the head) to most-recently-added (at the tail).  Complexity: O(n). *)
 val to_list : 'a t -> 'a list
 
-(** [of_list] is the inverse of [to_list]. Complexity: O(n). *)
+(** [of_list] is the inverse of [to_list].  Complexity: O(n). *)
 val of_list : 'a list -> 'a t
 
 (** [to_sequence] returns a [Sequence.t] of the elements in [t] in order from

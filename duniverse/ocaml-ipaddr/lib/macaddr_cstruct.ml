@@ -21,14 +21,13 @@ let try_with_result fn a =
   with Macaddr.Parse_error (msg, _) -> Error (`Msg ("Macaddr: " ^ msg))
 
 let of_cstruct_exn cs =
-  if Cstruct.len cs <> 6
-  then raise (Macaddr.Parse_error ("MAC is exactly 6 bytes", Cstruct.to_string cs))
+  if Cstruct.len cs <> 6 then
+    raise (Macaddr.Parse_error ("MAC is exactly 6 bytes", Cstruct.to_string cs))
   else Cstruct.to_string cs |> Macaddr.of_octets_exn
 
-let of_cstruct cs =
-  try_with_result of_cstruct_exn cs
+let of_cstruct cs = try_with_result of_cstruct_exn cs
 
-let write_cstruct_exn (mac:Macaddr.t) cs =
+let write_cstruct_exn (mac : Macaddr.t) cs =
   let len = Cstruct.len cs in
   let mac = Macaddr.to_octets mac in
   if len <> 6 then raise (Macaddr.Parse_error ("MAC is exactly 6 bytes", mac));

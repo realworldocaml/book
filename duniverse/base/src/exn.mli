@@ -1,16 +1,16 @@
 (** Exceptions.
 
     [sexp_of_t] uses a global table of sexp converters.  To register a converter for a new
-    exception, add [[@@deriving_inline sexp][@@@end]] to its definition. If no suitable converter is
+    exception, add [[@@deriving sexp]] to its definition. If no suitable converter is
     found, the standard converter in [Printexc] will be used to generate an atomic
     S-expression. *)
 
 open! Import
 
 type t = exn [@@deriving_inline sexp_of]
-include
-  sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
 
 include Pretty_printer.S with type t := t

@@ -1,5 +1,5 @@
 open! Core_kernel
-open  Expect_test_helpers_kernel
+open  Expect_test_helpers_core
 
 let%expect_test "bool fairness" =
   let open Int.O in

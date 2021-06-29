@@ -20,7 +20,7 @@ open Sexplib0
 let of_sexp fn = function
   | Sexp.List _ -> failwith "expecting sexp atom"
   | Sexp.Atom s -> (
-    match fn s with Ok r -> r | Error (`Msg msg) -> failwith msg )
+      match fn s with Ok r -> r | Error (`Msg msg) -> failwith msg)
 
 let to_sexp fn t = Sexp.Atom (fn t)
 

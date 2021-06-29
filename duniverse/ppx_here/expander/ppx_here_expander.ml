@@ -24,6 +24,7 @@ let expand_filename fname =
   | _ -> fname
 
 let lift_position ~loc =
+  let loc = { loc with loc_ghost = true } in
   let (module Builder) = Ast_builder.make loc in
   let open Builder in
   let pos = loc.Location.loc_start in

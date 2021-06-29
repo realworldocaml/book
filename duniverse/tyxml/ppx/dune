@@ -2,16 +2,14 @@
  (name tyxml_ppx)
  (public_name tyxml-ppx.internal)
  (libraries re.str
-            ppx_tools_versioned
             markup
             tyxml-syntax
+            ppxlib
  )
- (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (preprocess (pps ppxlib.metaquot))
  (flags (:standard
          -safe-string
-         -open Migrate_parsetree
-         -open Ast_408
-         -open Ppx_tools_408
+         -open Ppxlib
          -w "-9"
  ))
 )

@@ -10,4 +10,5 @@ module Link = Link
 module Request = Request
 module Response = Response
 module S = S
+module Path = Path
 module Transfer = Transfer

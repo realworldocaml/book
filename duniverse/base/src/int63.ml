@@ -52,15 +52,7 @@ include Immediate64.Make (Int) (Int63_emul)
 
 module Backend = struct
   module type S = sig
-    type t [@@deriving_inline hash]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      end[@@ocaml.doc "@inline"]
-    [@@@end]
+    type t
 
     include Int_intf.S with type t := t
 
@@ -78,6 +70,9 @@ module Backend = struct
     val to_nativeint_trunc : t -> nativeint
     val of_float_unchecked : float -> t
     val repr : (t, t) Int63_emul.Repr.t
+    val bswap16 : t -> t
+    val bswap32 : t -> t
+    val bswap48 : t -> t
   end
   with type t := t
 
@@ -92,6 +87,8 @@ module Backend = struct
     let to_nativeint_trunc x = to_nativeint x
     let to_nativeint x = Some (to_nativeint x)
     let repr = Int63_emul.Repr.Int
+    let bswap32 t = Int64.to_int_trunc (Int64.bswap32 (Int64.of_int t))
+    let bswap48 t = Int64.to_int_trunc (Int64.bswap48 (Int64.of_int t))
   end
 
   let impl : (module S) =

@@ -30,7 +30,8 @@ let file =
   let doc = "The file to use." in
   named
     (fun x -> `File x)
-    Arg.(required & pos 0 (some string) None & info [] ~doc ~docv:file_docv)
+    Arg.(
+      required & pos 0 (some non_dir_file) None & info [] ~doc ~docv:file_docv)
 
 let section =
   let doc =
@@ -67,6 +68,12 @@ let verbose_findlib =
     Arg.(value & flag & info [ "verbose-findlib" ] ~doc)
 
 let prelude =
+  let parse s =
+    let _, file = Mdx.Prelude.env_and_file s in
+    let parse, _ = Arg.non_dir_file in
+    match parse file with `Ok _ -> `Ok s | `Error e -> `Error e
+  in
+  let prelude = (parse, Fmt.string) in
   let doc =
     "A file to load as prelude. Can be prefixed with $(i,env:) to specify a \
      specific environment to load the prelude in. Multiple prelude files can \
@@ -75,7 +82,7 @@ let prelude =
   in
   named
     (fun x -> `Prelude x)
-    Arg.(value & opt_all string [] & info [ "prelude" ] ~doc ~docv:"FILE")
+    Arg.(value & opt_all prelude [] & info [ "prelude" ] ~doc ~docv:"FILE")
 
 let prelude_str =
   let doc =
@@ -92,7 +99,7 @@ let root =
   let doc = "The directory to run the tests from." in
   named
     (fun x -> `Root x)
-    Arg.(value & opt (some string) None & info [ "root" ] ~doc ~docv:"DIR")
+    Arg.(value & opt (some dir) None & info [ "root" ] ~doc ~docv:"DIR")
 
 let force_output =
   let doc = "Force generation of corrected file (even if there was no diff)" in

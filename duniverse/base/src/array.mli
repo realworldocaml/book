@@ -2,13 +2,14 @@
 
 open! Import
 
-type 'a t = 'a array [@@deriving_inline compare, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+type 'a t = 'a array [@@deriving_inline compare, sexp, sexp_grammar]
+
+val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 include Binary_searchable.S1 with type 'a t := 'a t
@@ -287,19 +288,6 @@ val sorted_copy : 'a t -> compare:('a -> 'a -> int) -> 'a t
 
 val last : 'a t -> 'a
 val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-
-(** [unsafe_truncate t ~len] drops [length t - len] elements from the end of [t], changing
-    [t] so that [length t = len] afterwards.
-
-    [unsafe_truncate] raises if [len <= 0 || len > length t].
-
-    It is not safe to do [unsafe_truncate] in the middle of a call to [map], [iter], etc.,
-    or if you have given this array out to anything not under your control: in general,
-    code can rely on an array's length not changing.  One must ensure code that calls
-    [unsafe_truncate] on an array does not interfere with other code that manipulates the
-    array. *)
-val unsafe_truncate : _ t -> len:int -> unit
-[@@deprecated "[since 2019-07] It will be removed in the future"]
 
 
 (** The input array is copied internally so that future modifications of it do not change

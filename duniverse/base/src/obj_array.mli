@@ -5,9 +5,9 @@
 open! Import
 
 type t [@@deriving_inline sexp_of]
-include
-  sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
 
 include Blit.S with type t := t
@@ -61,8 +61,3 @@ val unsafe_set_omit_phys_equal_check : t -> int -> Caml.Obj.t -> unit
     space leaks.  It does this by setting [t.(i)] to [Caml.Obj.repr 0].  As a performance hack,
     it only does this when [not (Caml.Obj.is_int t.(i))]. *)
 val unsafe_clear_if_pointer : t -> int -> unit
-
-(** [truncate t ~len] shortens [t]'s length to [len].  It is an error if [len <= 0] or
-    [len > length t].*)
-val truncate : t -> len:int -> unit
-[@@deprecated "[since 2019-07] It will be removed in the future"]

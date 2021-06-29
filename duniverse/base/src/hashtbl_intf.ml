@@ -3,12 +3,10 @@ open! Import
 module Key = struct
   module type S = sig
     type t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
 
     (** Two [t]s that [compare] equal must have equal hashes for the hashtable
@@ -17,6 +15,12 @@ module Key = struct
   end
 
   type 'a t = (module S with type t = 'a)
+end
+
+module Merge_into_action = struct
+  type 'a t =
+    | Remove
+    | Set_to of 'a
 end
 
 module type Accessors = sig
@@ -118,13 +122,13 @@ module type Accessors = sig
       values. *)
   val partition_map
     :  ('a, 'b) t
-    -> f:('b -> [ `Fst of 'c | `Snd of 'd ])
+    -> f:('b -> ('c, 'd) Either.t)
     -> ('a, 'c) t * ('a, 'd) t
 
   (** Like [partition_map], but the function [f] takes both key and data as arguments. *)
   val partition_mapi
     :  ('a, 'b) t
-    -> f:(key:'a key -> data:'b -> [ `Fst of 'c | `Snd of 'd ])
+    -> f:(key:'a key -> data:'b -> ('c, 'd) Either.t)
     -> ('a, 'c) t * ('a, 'd) t
 
   (** Returns a pair of tables [(t1, t2)], where [t1] contains all the elements of the
@@ -166,11 +170,49 @@ module type Accessors = sig
     -> if_not_found:('a key -> 'c)
     -> 'c
 
+  (** Just like [find_and_call], but takes an extra argument which is passed to [if_found]
+      and [if_not_found], so that the client code can avoid allocating closures or using
+      refs to pass this additional information.  This function is only useful in code
+      which tries to minimize heap allocation. *)
+  val find_and_call1
+    :  ('a, 'b) t
+    -> 'a key
+    -> a:'d
+    -> if_found:('b -> 'd -> 'c)
+    -> if_not_found:('a key -> 'd -> 'c)
+    -> 'c
+
+  val find_and_call2
+    :  ('a, 'b) t
+    -> 'a key
+    -> a:'d
+    -> b:'e
+    -> if_found:('b -> 'd -> 'e -> 'c)
+    -> if_not_found:('a key -> 'd -> 'e -> 'c)
+    -> 'c
+
   val findi_and_call
     :  ('a, 'b) t
     -> 'a key
     -> if_found:(key:'a key -> data:'b -> 'c)
     -> if_not_found:('a key -> 'c)
+    -> 'c
+
+  val findi_and_call1
+    :  ('a, 'b) t
+    -> 'a key
+    -> a:'d
+    -> if_found:(key:'a key -> data:'b -> 'd -> 'c)
+    -> if_not_found:('a key -> 'd -> 'c)
+    -> 'c
+
+  val findi_and_call2
+    :  ('a, 'b) t
+    -> 'a key
+    -> a:'d
+    -> b:'e
+    -> if_found:(key:'a key -> data:'b -> 'd -> 'e -> 'c)
+    -> if_not_found:('a key -> 'd -> 'e -> 'c)
     -> 'c
 
   (** [find_and_remove t k] returns Some (the current binding) of k in t and removes it,
@@ -213,17 +255,13 @@ module type Accessors = sig
     -> f:(key:'k key -> [ `Left of 'a | `Right of 'b | `Both of 'a * 'b ] -> 'c option)
     -> ('k, 'c) t
 
+
   (** Every [key] in [src] will be removed or set in [dst] according to the return value
       of [f]. *)
-  type 'a merge_into_action =
-    | Remove
-    | Set_to of 'a
-
-
   val merge_into
     :  src:('k, 'a) t
     -> dst:('k, 'b) t
-    -> f:(key:'k key -> 'a -> 'b option -> 'b merge_into_action)
+    -> f:(key:'k key -> 'a -> 'b option -> 'b Merge_into_action.t)
     -> unit
 
   (** Returns the list of all keys for given hashtable. *)
@@ -249,12 +287,12 @@ module type Accessors = sig
 
   val filter_mapi_inplace : ('a, 'b) t -> f:(key:'a key -> data:'b -> 'b option) -> unit
 
-  (** [equal t1 t2 f] and [similar t1 t2 f] both return true iff [t1] and [t2] have the
+  (** [equal f t1 t2] and [similar f t1 t2] both return true iff [t1] and [t2] have the
       same keys and for all keys [k], [f (find_exn t1 k) (find_exn t2 k)].  [equal] and
       [similar] only differ in their types. *)
-  val equal : ('a, 'b) t -> ('a, 'b) t -> ('b -> 'b -> bool) -> bool
+  val equal : ('b -> 'b -> bool) -> ('a, 'b) t -> ('a, 'b) t -> bool
 
-  val similar : ('a, 'b1) t -> ('a, 'b2) t -> ('b1 -> 'b2 -> bool) -> bool
+  val similar : ('b1 -> 'b2 -> bool) -> ('a, 'b1) t -> ('a, 'b2) t -> bool
 
   (** Returns the list of all (key, data) pairs for given hashtable. *)
   val to_alist : ('a, 'b) t -> ('a key * 'b) list
@@ -553,7 +591,7 @@ module type S_without_submodules = sig
 
   (** We provide a [sexp_of_t] but not a [t_of_sexp] for this type because one needs to be
       explicit about the hash and comparison functions used when creating a hashtable.
-      Note that [Hashtbl.Poly.t] does have [[@@deriving_inline sexp][@@@end]], and uses OCaml's built-in
+      Note that [Hashtbl.Poly.t] does have [[@@deriving sexp]], and uses OCaml's built-in
       polymorphic comparison and and polymorphic hashing. *)
   val sexp_of_t : ('a -> Sexp.t) -> ('b -> Sexp.t) -> ('a, 'b) t -> Sexp.t
 
@@ -575,11 +613,9 @@ end
 
 module type S_poly = sig
   type ('a, 'b) t [@@deriving_inline sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a,'b) t :=  ('a, 'b) t
-    end[@@ocaml.doc "@inline"]
+
+  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
   [@@@end]
 
   val hashable : 'a Hashable.t
@@ -602,17 +638,17 @@ module type For_deriving = sig
 
   module type Sexp_of_m = sig
     type t [@@deriving_inline sexp_of]
-    include
-      sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end
 
   module type M_of_sexp = sig
     type t [@@deriving_inline of_sexp]
-    include
-      sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-      end[@@ocaml.doc "@inline"]
+
+    val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
     [@@@end]
 
     include Key.S with type t := t
@@ -717,6 +753,7 @@ module type Hashtbl = sig
   module type For_deriving = For_deriving
 
   module Key = Key
+  module Merge_into_action = Merge_into_action
 
   type nonrec ('key, 'data, 'z) create_options = ('key, 'data, 'z) create_options
 

@@ -76,7 +76,7 @@ let ifprintf ppft fmt =
   ikfprintf (fun _ t -> t) ppft fmt
 
 let stdout = of_channel Lwt_io.stdout
-let stderr = of_channel Lwt_io.stdout
+let stderr = of_channel Lwt_io.stderr
 
 let printf fmt = fprintf stdout fmt
 let eprintf fmt = fprintf stderr fmt

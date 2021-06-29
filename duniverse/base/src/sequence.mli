@@ -32,15 +32,13 @@
 open! Import
 
 type +'a t [@@deriving_inline compare, equal, sexp_of]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-    val sexp_of_t :
-      ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
+
 type 'a sequence = 'a t
 
 include Indexed_container.S1 with type 'a t := 'a t
@@ -68,14 +66,13 @@ module Step : sig
     | Skip of 's
     | Yield of 'a * 's
   [@@deriving_inline sexp_of]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val sexp_of_t :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-        ('s -> Ppx_sexp_conv_lib.Sexp.t) ->
-        ('a, 's) t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t
+    :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
+    -> ('s -> Ppx_sexp_conv_lib.Sexp.t)
+    -> ('a, 's) t
+    -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
@@ -128,19 +125,18 @@ module Merge_with_duplicates_element : sig
     | Right of 'b
     | Both of 'a * 'b
   [@@deriving_inline compare, hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare :
-        ('a -> 'a -> int) ->
-        ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
-      val hash_fold_t :
-        (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-        (Ppx_hash_lib.Std.Hash.state -> 'b -> Ppx_hash_lib.Std.Hash.state) ->
-        Ppx_hash_lib.Std.Hash.state ->
-        ('a, 'b) t -> Ppx_hash_lib.Std.Hash.state
-      include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a,'b) t :=  ('a, 'b) t
-    end[@@ocaml.doc "@inline"]
+
+  val compare : ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
+
+  val hash_fold_t
+    :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> (Ppx_hash_lib.Std.Hash.state -> 'b -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> ('a, 'b) t
+    -> Ppx_hash_lib.Std.Hash.state
+
+  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
   [@@@end]
 end
 
@@ -258,7 +254,7 @@ val filter_map : 'a t -> f:('a -> 'b option) -> 'b t
 val filter_mapi : 'a t -> f:(int -> 'a -> 'b option) -> 'b t
 
 (** [filter_opt t] produces the elements of [t] which are not [None].  [filter_opt t] =
-    [filter_map t ~f:ident]. *)
+    [filter_map t ~f:Fn.id]. *)
 val filter_opt : 'a option t -> 'a t
 
 (** [sub t ~pos ~len] is the [len]-element subsequence of [t], starting at [pos].  If the
@@ -411,6 +407,9 @@ val bounded_length : _ t -> at_most:int -> [ `Is of int | `Greater ]
     max] When [min] or [max] are not provided, the check for that bound is omitted.  Walks
     through only as much of the sequence as necessary. *)
 val length_is_bounded_by : ?min:int -> ?max:int -> _ t -> bool
+
+val of_seq : 'a Caml.Seq.t -> 'a t
+val to_seq : 'a t -> 'a Caml.Seq.t
 
 (** [Generator] is a monadic interface to generate sequences in a direct style, similar to
     Python's generators.

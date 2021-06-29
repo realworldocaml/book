@@ -56,6 +56,15 @@ module type Test = sig
     -> (module S with type t = 'a)
     -> unit
 
+  (** Like [run], but does not catch exceptions raised by [f]. Allows arbitrary error
+      types and returns the input that failed along with the error. *)
+  val result
+    :  f:('a -> (unit, 'e) Result.t)
+    -> ?config:Config.t (** defaults to [default_config] *)
+    -> ?examples:'a list (** defaults to the empty list *)
+    -> (module S with type t = 'a)
+    -> (unit, 'a * 'e) Result.t
+
   (** Calls [f] with the sequence of values that [run] would get in the same
       configuration. *)
   val with_sample

@@ -38,6 +38,8 @@ Available tags are:
 *   `js-only` for tests that should only run in Javascript
 *   `32-bits-only` for tests that should only run in 32 bits architectures
 *   `64-bits-only` for tests that should only run in 64 bits architectures
+*   `fast-flambda` for tests that might only pass when compiling with flambda, -O3
+    and cross library inlining
 *   `x-library-inlining-sensitive` for tests that might only pass when compiling
     with cross library inlining switched on
 

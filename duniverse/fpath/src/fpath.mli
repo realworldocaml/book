@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2014 The fpath programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -30,8 +30,6 @@
     {b Note.} [Fpath] processes paths without accessing the file system.
 
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
-
-open Astring
 
 (** {1:segs Separators and segments} *)
 
@@ -350,7 +348,7 @@ val to_string : t -> string
 (** [to_string p] is the path [p] as a string. The result can
     be safely converted back with {!v}. *)
 
-val of_string : string -> (t, [`Msg of string]) Result.result
+val of_string : string -> (t, [`Msg of string]) result
 (** [of_string s] is the string [s] as a path. The following transformations
     are performed on the string:
     {ul
@@ -361,9 +359,9 @@ val of_string : string -> (t, [`Msg of string]) Result.result
     {- On Windows empty absolute UNC paths are completed to
        their root. For example ["\\\\server\\share"] becomes
        ["\\\\server\\share\\"],
-       but incomplete UNC volumes like ["\\\\a"] return [Result.Error].}}
+       but incomplete UNC volumes like ["\\\\a"] return [Error].}}
 
-    [Result.Error (`Msg (strf "%S: invalid path" s))] is returned if
+    [Error (`Msg (strf "%S: invalid path" s))] is returned if
     {ul
     {- [s] or the path following the {{!split_volume}volume} is empty ([""]),
        except on Windows UNC paths, see above.}
@@ -507,58 +505,51 @@ module Set : sig
         [ppf]. *)
 end
 
-type +'a map
-(** The type for maps from paths to values of type ['a]. Paths are compared
-    with {!compare}. *)
-
 (** Path maps. *)
 module Map : sig
 
   (** {1 Path maps} *)
 
   include Map.S with type key := t
-                 and type 'a t := 'a map
 
-  type 'a t = 'a map
-
-  val min_binding : 'a map -> (path * 'a) option
+  val min_binding : 'a t -> (path * 'a) option
   (** Exception safe {!Map.S.min_binding}. *)
 
-  val get_min_binding : 'a map -> (path * 'a)
+  val get_min_binding : 'a t -> (path * 'a)
   (** [get_min_binding] is like {!min_binding} but @raise Invalid_argument
       on the empty map. *)
 
-  val max_binding : 'a map -> (path * 'a) option
+  val max_binding : 'a t -> (path * 'a) option
   (** Exception safe {!Map.S.max_binding}. *)
 
-  val get_max_binding : 'a map -> string * 'a
+  val get_max_binding : 'a t -> string * 'a
   (** [get_min_binding] is like {!max_binding} but @raise Invalid_argument
       on the empty map. *)
 
-  val choose : 'a map -> (path * 'a) option
+  val choose : 'a t -> (path * 'a) option
   (** Exception safe {!Map.S.choose}. *)
 
-  val get_any_binding : 'a map -> (path * 'a)
+  val get_any_binding : 'a t -> (path * 'a)
   (** [get_any_binding] is like {!choose} but @raise Invalid_argument
       on the empty map. *)
 
-  val find : path -> 'a map -> 'a option
+  val find : path -> 'a t -> 'a option
   (** Exception safe {!Map.S.find}. *)
 
-  val get : path -> 'a map -> 'a
+  val get : path -> 'a t -> 'a
   (** [get k m] is like {!Map.S.find} but raises [Invalid_argument] if
       [k] is not bound in [m]. *)
 
-  val dom : 'a map -> set
+  val dom : 'a t -> set
   (** [dom m] is the domain of [m]. *)
 
-  val of_list : (path * 'a) list -> 'a map
+  val of_list : (path * 'a) list -> 'a t
   (** [of_list bs] is [List.fold_left (fun m (k, v) -> add k v m) empty
       bs]. *)
 
   val pp : ?sep:(Format.formatter -> unit -> unit) ->
     (Format.formatter -> path * 'a -> unit) -> Format.formatter ->
-    'a map -> unit
+    'a t -> unit
   (** [pp ~sep pp_binding ppf m] formats the bindings of [m] on
       [ppf]. Each binding is formatted with [pp_binding] and
       bindings are separated by [sep] (defaults to
@@ -566,10 +557,14 @@ module Map : sig
       untouched. *)
 
   val dump : (Format.formatter -> 'a -> unit) -> Format.formatter ->
-    'a map -> unit
+    'a t -> unit
   (** [dump pp_v ppf m] prints an unspecified representation of [m] on
         [ppf] using [pp_v] to print the map codomain elements. *)
 end
+
+type +'a map = 'a Map.t
+(** The type for maps from paths to values of type ['a]. Paths are compared
+    with {!compare}. *)
 
 (** {1:tips Tips}
 
@@ -993,7 +988,7 @@ end
     {- [equal (rem_ext ~multi:true @@ v "f.tar.gz/") (v "f/")]}} *)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli
+   Copyright (c) 2014 The fpath programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

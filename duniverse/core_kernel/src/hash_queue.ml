@@ -282,11 +282,10 @@ module Make_backend (Table : Hashtbl_intf.Hashtbl) : S_backend = struct
 
     let remove t k =
       ensure_can_modify t;
-      match Table.find t.table k with
+      match Table.find_and_remove t.table k with
       | None -> `No_such_key
       | Some elt ->
         Doubly_linked.remove t.queue elt;
-        Table.remove t.table (Elt.value elt).key;
         `Ok
     ;;
 
@@ -302,6 +301,15 @@ module Make_backend (Table : Hashtbl_intf.Hashtbl) : S_backend = struct
       match remove t k with
       | `No_such_key -> raise_remove_unknown_key t k
       | `Ok -> ()
+    ;;
+
+    let lookup_and_remove t k =
+      ensure_can_modify t;
+      match Table.find_and_remove t.table k with
+      | None -> None
+      | Some elt ->
+        Doubly_linked.remove t.queue elt;
+        Some (Elt.value elt).value
     ;;
 
     let replace t k v =

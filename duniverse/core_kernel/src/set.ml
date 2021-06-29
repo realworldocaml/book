@@ -204,7 +204,6 @@ end
 
 module Make_tree (Elt : Comparator.S1) = struct
   let comparator = Elt.comparator
-  let compare_elt = comparator.Comparator.compare
   let empty = Tree.empty_without_value_restriction
   let singleton e = Tree.singleton ~comparator e
   let invariants t = Tree.invariants t ~comparator
@@ -246,7 +245,7 @@ module Make_tree (Elt : Comparator.S1) = struct
   let compare_direct t1 t2 = Tree.compare_direct ~comparator t1 t2
   let equal t1 t2 = Tree.equal t1 t2 ~comparator
   let is_subset t ~of_ = Tree.is_subset t ~of_ ~comparator
-  let subset t1 t2 = is_subset t1 ~of_:t2
+  let are_disjoint t1 t2 = Tree.are_disjoint t1 t2 ~comparator
   let of_list l = Tree.of_list l ~comparator
   let of_hash_set h = Tree.of_hash_set h ~comparator
   let of_hashtbl_keys h = Tree.of_hashtbl_keys h ~comparator
@@ -263,7 +262,6 @@ module Make_tree (Elt : Comparator.S1) = struct
   let group_by t ~equiv = Tree.group_by t ~equiv ~comparator
   let split t a = Tree.split t a ~comparator
   let nth t i = Tree.nth t i
-  let find_index = nth
   let remove_index t i = Tree.remove_index t i ~comparator
   let to_tree t = t
   let of_tree t = t
@@ -490,36 +488,85 @@ module Make_binable (Elt : Elt_binable) = Make_binable_using_comparator (struct
     include Comparator.Make (Elt)
   end)
 
-module M = Set.M
+module For_deriving = struct
+  module M = Set.M
 
-let bin_shape_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_shape_t
-;;
+  let bin_shape_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_shape_t
+  ;;
 
-let bin_size_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_size_t
-;;
+  let bin_size_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_size_t
+  ;;
 
-let bin_write_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_write_t
-;;
+  let bin_write_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_write_t
+  ;;
 
-let bin_read_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_read_t
-;;
+  let bin_read_m__t (type t c) (m : (t, c) Elt_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_read_t
+  ;;
 
-let __bin_read_m__t__ (type t c) (m : (t, c) Elt_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.__bin_read_t__
-;;
+  let __bin_read_m__t__ (type t c) (m : (t, c) Elt_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.__bin_read_t__
+  ;;
 
-module type For_deriving = Set.For_deriving
+  module type Quickcheck_generator_m = sig
+    include Comparator.S
 
-include (Set : For_deriving with type ('a, 'b) t := ('a, 'b) t)
+    val quickcheck_generator : t Quickcheck.Generator.t
+  end
+
+  module type Quickcheck_observer_m = sig
+    include Comparator.S
+
+    val quickcheck_observer : t Quickcheck.Observer.t
+  end
+
+  module type Quickcheck_shrinker_m = sig
+    include Comparator.S
+
+    val quickcheck_shrinker : t Quickcheck.Shrinker.t
+  end
+
+  let quickcheck_generator_m__t
+        (type t cmp)
+        (module Elt : Quickcheck_generator_m
+          with type t = t
+           and type comparator_witness = cmp)
+    =
+    quickcheck_generator (module Elt) Elt.quickcheck_generator
+  ;;
+
+  let quickcheck_observer_m__t
+        (type t cmp)
+        (module Elt : Quickcheck_observer_m
+          with type t = t
+           and type comparator_witness = cmp)
+    =
+    quickcheck_observer Elt.quickcheck_observer
+  ;;
+
+  let quickcheck_shrinker_m__t
+        (type t cmp)
+        (module Elt : Quickcheck_shrinker_m
+          with type t = t
+           and type comparator_witness = cmp)
+    =
+    quickcheck_shrinker Elt.quickcheck_shrinker
+  ;;
+
+  module type For_deriving = Set.For_deriving
+
+  include (Set : For_deriving with type ('a, 'b) t := ('a, 'b) t)
+end
+
+include For_deriving
 
 module Stable = struct
   module V1 = struct
@@ -533,6 +580,7 @@ module Stable = struct
       include Stable_module_types.S0_without_comparator with type t := t
     end
 
+    include For_deriving
     module Make (Elt : Stable_module_types.S0) = Make_binable_using_comparator (Elt)
   end
 end

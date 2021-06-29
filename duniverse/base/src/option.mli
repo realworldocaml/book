@@ -5,16 +5,20 @@ open! Import
 type 'a t = 'a option =
   | None
   | Some of 'a
-[@@deriving_inline compare, hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val hash_fold_t :
-      (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-      Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+[@@deriving_inline compare, hash, sexp, sexp_grammar]
+
+val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+
+val hash_fold_t
+  :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+  -> Ppx_hash_lib.Std.Hash.state
+  -> 'a t
+  -> Ppx_hash_lib.Std.Hash.state
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 include Container.S1 with type 'a t := 'a t
@@ -72,5 +76,9 @@ val filter : 'a t -> f:('a -> bool) -> 'a t
 (** [try_with f] returns [Some x] if [f] returns [x] and [None] if [f] raises an
     exception.  See [Result.try_with] if you'd like to know which exception. *)
 val try_with : (unit -> 'a) -> 'a t
+
+(** [try_with_join f] returns the optional value returned by [f] if it exits normally, and
+    [None] if [f] raises an exception. *)
+val try_with_join : (unit -> 'a t) -> 'a t
 
 val validate : none:unit Validate.check -> some:'a Validate.check -> 'a t Validate.check

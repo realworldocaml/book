@@ -1,0 +1,30 @@
+version: "0.10.1"
+opam-version: "2.0"
+homepage:     "https://github.com/mirage/mirage-crypto"
+dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
+bug-reports:  "https://github.com/mirage/mirage-crypto/issues"
+doc:          "https://mirage.github.io/mirage-crypto/doc"
+authors:      ["David Kaloper <dk505@cam.ac.uk>" "Hannes Mehnert <hannes@mehnert.org>" ]
+maintainer:   "Hannes Mehnert <hannes@mehnert.org>"
+license:      "ISC"
+synopsis:     "Feed the entropy source in an Async-friendly way"
+
+build: [ ["dune" "subst"] {dev}
+         ["dune" "build" "-p" name "-j" jobs ]
+         ["dune" "runtest" "-p" name "-j" jobs] {with-test} ]
+
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune" {>= "2.6"}
+  "dune-configurator" {>= "2.0.0"}
+  "async"
+  "logs"
+  "mirage-crypto" {=version}
+  "mirage-crypto-rng" {=version}
+]
+available: os != "win32"
+description: """
+
+Mirage-crypto-rng-async feeds the entropy source for Mirage_crypto_rng-based
+random number genreator implementations, in an Async-friendly way.
+"""

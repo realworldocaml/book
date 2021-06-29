@@ -17,4 +17,6 @@
 open! Async_kernel
 
 include
-  Expect_test_config.S with type 'a IO_flush.t = 'a with type 'a IO_run.t = 'a Deferred.t
+  Expect_test_config_types.S
+  with type 'a IO_flush.t = 'a
+  with type 'a IO_run.t = 'a Deferred.t

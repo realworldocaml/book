@@ -1,12 +1,17 @@
 # CHANGES
 
-## 2020/02/XX
+## 2020/11/20
 
 * New module `DataFlow`, which performs a forward data flow analysis over a
   directed graph. (Such a computation could previously be performed by using
   the generic solver `Fix.Make`, but it was somewhat awkward to write, as it
   required access to predecessors. The new algorithm is easier to use and is
   more efficient.)
+
+* In `Memoize`, new combinator `curried`, which can be used in combination
+  with `fix` or `defensive_fix`. Thus, for instance, `curried fix` is a
+  fixed point combinator that constructs a memoizing two-argument curried
+  function.
 
 ## 2020/01/31
 
@@ -24,7 +29,7 @@
 * Breaking change: the module `Fix.Number`
   is renamed `Fix.GraphNumbering`.
 
-## 2018/11/30
+## 2018/12/06
 
 * New release, including new modules (`Gensym`, `Memoize`,
   `Tabulate`, `Number`, `HashCons`, `Prop`, `Glue`),

@@ -37,7 +37,7 @@ let%expect_test "Symmetric_diff_element.{left,right}" =
 ;;
 
 let%expect_test _ =
-  let open Expect_test_helpers_kernel in
+  let open Expect_test_helpers_core in
   print_and_check_stable_type
     [%here]
     (module struct

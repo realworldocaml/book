@@ -21,6 +21,30 @@ let%test_module "Caseless Suffix/Prefix" =
   end)
 ;;
 
+let%test_module "Caseless Substring" =
+  (module struct
+    let%test _ = Caseless.is_substring "OCaml" ~substring:"AmL"
+    let%test _ = Caseless.is_substring "OCaml" ~substring:"oc"
+    let%test _ = Caseless.is_substring "OCaml" ~substring:"ocAmL"
+    let%test _ = Caseless.is_substring "a@!$b" ~substring:"a@!$B"
+    let%test _ = not (Caseless.is_substring "a@!$b" ~substring:"C@!$B")
+    let%test _ = not (Caseless.is_substring "a@!$b" ~substring:"a@!$C")
+    let%test _ = not (Caseless.is_substring "aa" ~substring:"aaa")
+    let%test _ = not (Caseless.is_substring "aa" ~substring:"AAA")
+
+    let%test_unit _ =
+      Base_quickcheck.Test.run_exn
+        (module struct
+          type t = string * string [@@deriving quickcheck, sexp_of]
+        end)
+        ~f:(fun (t, substring) ->
+          let actual = Caseless.is_substring t ~substring in
+          let expect = is_substring (lowercase t) ~substring:(lowercase substring) in
+          [%test_result: bool] actual ~expect)
+    ;;
+  end)
+;;
+
 let%test_module "Caseless Comparable" =
   (module struct
     (* examples from docs *)
@@ -91,87 +115,125 @@ let%test_module "Search_pattern" =
         let prefix s n = sub s ~pos:0 ~len:n
         let suffix s n = sub s ~pos:(length s - n) ~len:n
 
-        let slow_create pattern =
+        let slow_create pattern ~case_sensitive =
+          let string_equal =
+            if case_sensitive then String.equal else String.Caseless.equal
+          in
           (* Compute the longest prefix-suffix array from definition, O(n^3) *)
           let n = length pattern in
-          let kmp_arr = Array.create ~len:n (-1) in
+          let kmp_array = Array.create ~len:n (-1) in
           for i = 0 to n - 1 do
             let x = prefix pattern (i + 1) in
             for j = 0 to i do
-              if String.equal (prefix x j) (suffix x j) then kmp_arr.(i) <- j
+              if string_equal (prefix x j) (suffix x j) then kmp_array.(i) <- j
             done
           done;
-          pattern, kmp_arr
+          ({ pattern; kmp_array; case_sensitive } : Private.t)
         ;;
 
-        let sexp_of_int = Sexplib.Conv.sexp_of_int
-
-        let test_both (s, a) =
-          let create_s = create s |> [%sexp_of: t] in
-          let slow_create_s = slow_create s |> [%sexp_of: string * int array] in
-          let expected = [%sexp (s, a : string * int array)] in
-          require
-            [%here]
-            (Sexp.equal create_s expected && Sexp.equal slow_create_s expected)
-            ~if_false_then_print_s:
-              (lazy
-                [%message
-                  "not equal"
-                    (create_s : Sexp.t)
-                    (slow_create_s : Sexp.t)
-                    (expected : Sexp.t)])
+        let test_both
+              ({ pattern; case_sensitive; kmp_array = _ } as expected : Private.t)
+          =
+          let create_repr = Private.representation (create pattern ~case_sensitive) in
+          let slow_create_repr = slow_create pattern ~case_sensitive in
+          require_equal [%here] (module Private) create_repr expected;
+          require_equal [%here] (module Private) slow_create_repr expected
         ;;
 
-        let cmp_both s =
-          let create_s = create s |> [%sexp_of: t] in
-          let slow_create_s = slow_create s |> [%sexp_of: string * int array] in
-          require
-            [%here]
-            (Sexp.equal create_s slow_create_s)
-            ~if_false_then_print_s:
-              (lazy [%message "not equal" (create_s : Sexp.t) (slow_create_s : Sexp.t)])
+        let cmp_both pattern ~case_sensitive =
+          let create_repr = Private.representation (create pattern ~case_sensitive) in
+          let slow_create_repr = slow_create pattern ~case_sensitive in
+          require_equal [%here] (module Private) create_repr slow_create_repr
         ;;
 
-        let%expect_test _ = test_both ("", [||])
-        let%expect_test _ = test_both ("ababab", [| 0; 0; 1; 2; 3; 4 |])
-        let%expect_test _ = test_both ("abaCabaD", [| 0; 0; 1; 0; 1; 2; 3; 0 |])
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            test_both { pattern = ""; case_sensitive; kmp_array = [||] })
+        ;;
+
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            test_both
+              { pattern = "ababab"
+              ; case_sensitive
+              ; kmp_array = [| 0; 0; 1; 2; 3; 4 |]
+              })
+        ;;
+
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            test_both
+              { pattern = "abaCabaD"
+              ; case_sensitive
+              ; kmp_array = [| 0; 0; 1; 0; 1; 2; 3; 0 |]
+              })
+        ;;
+
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            test_both
+              { pattern = "abaCabaDabaCabaCabaDabaCabaEabab"
+              ; case_sensitive
+              ; kmp_array =
+                  [| 0
+                   ; 0
+                   ; 1
+                   ; 0
+                   ; 1
+                   ; 2
+                   ; 3
+                   ; 0
+                   ; 1
+                   ; 2
+                   ; 3
+                   ; 4
+                   ; 5
+                   ; 6
+                   ; 7
+                   ; 4
+                   ; 5
+                   ; 6
+                   ; 7
+                   ; 8
+                   ; 9
+                   ; 10
+                   ; 11
+                   ; 12
+                   ; 13
+                   ; 14
+                   ; 15
+                   ; 0
+                   ; 1
+                   ; 2
+                   ; 3
+                   ; 2
+                  |]
+              })
+        ;;
+
+        let%expect_test _ =
+          test_both { pattern = "aaA"; case_sensitive = true; kmp_array = [| 0; 1; 0 |] }
+        ;;
 
         let%expect_test _ =
           test_both
-            ( "abaCabaDabaCabaCabaDabaCabaEabab"
-            , [| 0
-               ; 0
-               ; 1
-               ; 0
-               ; 1
-               ; 2
-               ; 3
-               ; 0
-               ; 1
-               ; 2
-               ; 3
-               ; 4
-               ; 5
-               ; 6
-               ; 7
-               ; 4
-               ; 5
-               ; 6
-               ; 7
-               ; 8
-               ; 9
-               ; 10
-               ; 11
-               ; 12
-               ; 13
-               ; 14
-               ; 15
-               ; 0
-               ; 1
-               ; 2
-               ; 3
-               ; 2
-              |] )
+            { pattern = "aaA"; case_sensitive = false; kmp_array = [| 0; 1; 2 |] }
+        ;;
+
+        let%expect_test _ =
+          test_both
+            { pattern = "aAaAaA"
+            ; case_sensitive = true
+            ; kmp_array = [| 0; 0; 1; 2; 3; 4 |]
+            }
+        ;;
+
+        let%expect_test _ =
+          test_both
+            { pattern = "aAaAaA"
+            ; case_sensitive = false
+            ; kmp_array = [| 0; 1; 2; 3; 4; 5 |]
+            }
         ;;
 
         let rec x k =
@@ -182,8 +244,37 @@ let%test_module "Search_pattern" =
             b ^ make 1 (Caml.Char.unsafe_chr (65 + k)) ^ b)
         ;;
 
-        let%expect_test _ = cmp_both (x 10)
-        let%expect_test _ = cmp_both (x 5 ^ "E" ^ x 4 ^ "D" ^ x 3 ^ "B" ^ x 2 ^ "C" ^ x 3)
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            cmp_both ~case_sensitive (x 10))
+        ;;
+
+        let%expect_test _ =
+          List.iter [%all: bool] ~f:(fun case_sensitive ->
+            cmp_both
+              ~case_sensitive
+              (x 5 ^ "E" ^ x 4 ^ "D" ^ x 3 ^ "B" ^ x 2 ^ "C" ^ x 3))
+        ;;
+
+        let%test_unit _ =
+          Base_quickcheck.Test.run_exn
+            (module struct
+              type t = string [@@deriving quickcheck, sexp_of]
+            end)
+            ~f:(fun pattern ->
+              let case_insensitive =
+                Private.representation (create pattern ~case_sensitive:false)
+              in
+              let case_sensitive_but_lowercase =
+                Private.representation (create (lowercase pattern) ~case_sensitive:true)
+              in
+              [%test_result: String.Caseless.t]
+                case_insensitive.pattern
+                ~expect:case_sensitive_but_lowercase.pattern;
+              [%test_result: int array]
+                case_insensitive.kmp_array
+                ~expect:case_sensitive_but_lowercase.kmp_array)
+        ;;
       end)
     ;;
 
@@ -590,6 +681,26 @@ let%expect_test "is_substring_at" =
     (raised (
       Invalid_argument
       "String.is_substring_at: invalid index -1 for string of length 26")) |}]
+;;
+
+let%expect_test "chopping prefixes and suffixes" =
+  let s = "__x__" in
+  print_s [%sexp (String.chop_suffix s ~suffix:"__" : string option)];
+  [%expect {| (__x) |}];
+  print_s [%sexp (String.chop_prefix s ~prefix:"__" : string option)];
+  [%expect {| (x__) |}];
+  print_s [%sexp (String.chop_suffix s ~suffix:"==" : string option)];
+  [%expect {| () |}];
+  print_s [%sexp (String.chop_prefix s ~prefix:"==" : string option)];
+  [%expect {| () |}];
+  print_endline (String.chop_suffix_if_exists s ~suffix:"__");
+  [%expect {| __x |}];
+  print_endline (String.chop_prefix_if_exists s ~prefix:"__");
+  [%expect {| x__ |}];
+  print_endline (String.chop_suffix_if_exists s ~suffix:"==");
+  [%expect {| __x__ |}];
+  print_endline (String.chop_prefix_if_exists s ~prefix:"==");
+  [%expect {| __x__ |}]
 ;;
 
 let%test_module "functions that raise Not_found_s" =

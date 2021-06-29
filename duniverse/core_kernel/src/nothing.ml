@@ -2,16 +2,13 @@ open! Import
 
 module Stable = struct
   module V1 = struct
-    type t = |
+    type t = Base.Nothing.t = |
 
     module Shape = struct
       type t [@@deriving bin_shape]
     end
 
-    let unreachable_code = function
-      | (_ : t) -> .
-    ;;
-
+    let unreachable_code = Base.Nothing.unreachable_code
     let bin_shape_t = Shape.bin_shape_t
     let tp_loc = [%here].pos_fname ^ ".Stable.V1.t"
     let all = []
@@ -46,20 +43,6 @@ module Stable = struct
   end
 end
 
-module T = struct
-  include Stable.V1
-
-  let to_string : t -> _ = function
-    | _ -> .
-  ;;
-
-  let of_string (_ : string) = failwith "Nothing.of_string: not supported"
-end
-
-include T
-
-include Identifiable.Make (struct
-    include T
-
-    let module_name = "Core_kernel.Nothing"
-  end)
+include Stable.V1
+include Base.Nothing
+include Identifiable.Extend (Base.Nothing) (Stable.V1)

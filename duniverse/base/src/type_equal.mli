@@ -33,14 +33,13 @@ open! Import
 open T
 
 type ('a, 'b) t = T : ('a, 'a) t [@@deriving_inline sexp_of]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val sexp_of_t :
-      ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-      ('b -> Ppx_sexp_conv_lib.Sexp.t) ->
-      ('a, 'b) t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val sexp_of_t
+  :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
+  -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+  -> ('a, 'b) t
+  -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
 
 (** just an alias, needed when [t] gets shadowed below *)
@@ -183,25 +182,19 @@ module Composition_preserves_injectivity (M1 : Injective) (M2 : Injective) :
     content and must have a nontrivial runtime representation. *)
 module Id : sig
   type 'a t [@@deriving_inline sexp_of]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val sexp_of_t :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 
   (** Every [Id.t] contains a unique id that is distinct from the [Uid.t] in any other
       [Id.t]. *)
   module Uid : sig
     type t [@@deriving_inline hash]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      end[@@ocaml.doc "@inline"]
+
+    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
     [@@@end]
 
     include Sexpable.S with type t := t
@@ -213,7 +206,7 @@ module Id : sig
   (** [create ~name] defines a new type identity.  Two calls to [create] will result in
       two distinct identifiers, even for the same arguments with the same type.  If the
       type ['a] doesn't support sexp conversion, then a good practice is to have the
-      converter be [<:sexp_of< _ >>], (or [sexp_of_opaque], if not using pa_sexp). *)
+      converter be [[%sexp_of: _]], (or [sexp_of_opaque], if not using ppx_sexp_conv). *)
   val create : name:string -> ('a -> Sexp.t) -> 'a t
 
   (** Accessors *)

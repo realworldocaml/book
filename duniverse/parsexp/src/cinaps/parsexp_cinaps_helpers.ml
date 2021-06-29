@@ -1,0 +1,1 @@
+module Gen_parser_automaton = Gen_parser_automaton

@@ -47,13 +47,13 @@ let () =
 ```
 
 In the program, functions such as `Lwt_io.write` create promises. The
-`let%lwt ... in` construct is used to wait for a promise to become determined;
-the code after `in` is scheduled to run in a "callback." `Lwt.pick` races
-promises against each other, and behaves as the first one to complete.
-`Lwt_main.run` forces the whole promise-computation network to be executed. All
-the visible OCaml code is run in a single thread, but Lwt internally uses a
-combination of worker threads and non-blocking file descriptors to resolve in
-parallel the promises that do I/O.
+`let* ... in` construct is used to wait for a promise to become determined; the
+code after `in` is scheduled to run in a "callback." `Lwt.pick` races promises
+against each other, and behaves as the first one to complete. `Lwt_main.run`
+forces the whole promise-computation network to be executed. All the visible
+OCaml code is run in a single thread, but Lwt internally uses a combination of
+worker threads and non-blocking file descriptors to resolve in parallel the
+promises that do I/O.
 
 
 <br/>

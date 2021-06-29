@@ -219,9 +219,11 @@ let choose_async_method = function
     | Some am -> am
     | None -> !default_async_method_var
 
+[@@@ocaml.warning "-16"]
 let execute_job ?async_method ~job ~result ~free =
   let async_method = choose_async_method async_method in
   run_job_aux async_method job (fun job -> let x = wrap_result result job in free job; x)
+[@@@ocaml.warning "+16"]
 
 external self_result : 'a job -> 'a = "lwt_unix_self_result"
 (* returns the result of a job using the [result] field of the C
@@ -816,11 +818,11 @@ struct
     in
     loop io_vectors.prefix
 
-  external stub_iov_max : unit -> int = "lwt_unix_iov_max"
+  external stub_iov_max : unit -> int option = "lwt_unix_iov_max"
 
   let system_limit =
     if Sys.win32 then None
-    else Some (stub_iov_max ())
+    else stub_iov_max ()
 
   let check tag io_vector =
     let buffer_length =
@@ -1626,16 +1628,22 @@ let recv_msg ~socket ~io_vectors =
 external stub_send_msg :
   Unix.file_descr ->
   int -> IO_vectors.io_vector list ->
-  int -> Unix.file_descr list ->
-    int =
-  "lwt_unix_send_msg"
+  int -> Unix.file_descr list -> Unix.sockaddr option ->
+    int = "lwt_unix_send_msg_byte" "lwt_unix_send_msg"
 
 let send_msg ~socket ~io_vectors ~fds =
   let vector_count = check_io_vectors "Lwt_unix.send_msg" io_vectors in
   let fd_count = List.length fds in
   wrap_syscall Write socket (fun () ->
     stub_send_msg
-      socket.fd vector_count io_vectors.IO_vectors.prefix fd_count fds)
+      socket.fd vector_count io_vectors.IO_vectors.prefix fd_count fds None)
+
+let send_msgto ~socket ~io_vectors ~fds ~dest =
+  let vector_count = check_io_vectors "Lwt_unix.send_msgto" io_vectors in
+  let fd_count = List.length fds in
+  wrap_syscall Write socket (fun () ->
+    stub_send_msg
+      socket.fd vector_count io_vectors.IO_vectors.prefix fd_count fds (Some dest))
 
 type inet_addr = Unix.inet_addr
 
@@ -1819,6 +1827,9 @@ type socket_bool_option =
   | SO_ACCEPTCONN
   | TCP_NODELAY
   | IPV6_ONLY
+#if OCAML_VERSION >= (4, 12, 0)
+  | SO_REUSEPORT
+#endif
 
 type socket_int_option =
   Unix.socket_int_option =
@@ -2293,6 +2304,8 @@ external reset_after_fork : unit -> unit = "lwt_unix_reset_after_fork"
 let fork () =
   match Unix.fork () with
   | 0 ->
+    (* Let the engine handle the fork *)
+    Lwt_engine.fork ();
     (* Reset threading. *)
     reset_after_fork ();
     (* Stop the old event for notifications. *)

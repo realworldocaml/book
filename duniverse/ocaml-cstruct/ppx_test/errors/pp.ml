@@ -7,4 +7,4 @@ let () = at_exit (fun () -> sys_exit 0)
 let () = Clflags.(error_style := Some Short)
 #endif
 
-let () = Migrate_parsetree.Driver.run_main ()
+let () = Ppxlib.Driver.standalone ()

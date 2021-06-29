@@ -35,7 +35,7 @@ module Args : sig
   with type ('a, 'b, 'c) t := ('a, 'b, 'c) Ast_pattern.t
 end
 
-(** {6 Generator registration} *)
+(** {5 Generator registration} *)
 
 (** Type of registered derivers *)
 type t

@@ -6,7 +6,7 @@ e-mail.  It is generated from the `mime.types` file found in Unix systems, but
 has no dependency on a filesystem since it includes the contents of the
 database as an ML datastructure.
 
-For example, here's how to lookup MIME types in the [utop] REPL:
+For example, here's how to lookup MIME types in the `utop` REPL:
 
     #require "magic-mime";;
     Magic_mime.lookup "/foo/bar.txt";;

@@ -1,5 +1,5 @@
 open Base
-open Expect_test_common.Std
+open Expect_test_common
 
 module Saved_output : sig
   type t
@@ -16,7 +16,7 @@ module Test_outcome : sig
     ; saved_output : Saved_output.t Map.M(File.Location).t
     ; trailing_output : Saved_output.t
     ; uncaught_exn : Saved_output.t option
-    ; upon_unreleasable_issue : Expect_test_config.Upon_unreleasable_issue.t
+    ; upon_unreleasable_issue : Expect_test_config_types.Upon_unreleasable_issue.t
     }
 
   (* Merge two [t]s with the same expectations *)

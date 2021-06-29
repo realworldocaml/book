@@ -1,4 +1,4 @@
-version: "0.8.0"
+version: "0.10.1"
 opam-version: "2.0"
 homepage:     "https://github.com/mirage/mirage-crypto"
 dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
@@ -9,27 +9,28 @@ maintainer:   "Hannes Mehnert <hannes@mehnert.org>"
 license:      "ISC"
 synopsis:     "Simple symmetric cryptography for the modern age"
 
-build: [ ["dune" "subst"] {pinned}
+build: [ ["dune" "subst"] {dev}
          ["dune" "build" "-p" name "-j" jobs ]
          ["dune" "runtest" "-p" name "-j" jobs] {with-test} ]
 
 depends: [
   "conf-pkg-config" {build}
   "ocaml" {>= "4.08.0"}
-  "dune" {>= "1.7"}
+  "dune" {>= "2.6"}
   "dune-configurator" {>= "2.0.0"}
   "ounit" {with-test}
   "cstruct" {>="3.2.0"}
+  "eqaf" {>= "0.7"}
+  "bigarray-compat" # required to get eqaf.cstruct
 ]
 depopts: [
-  "mirage-xen-posix"
   "ocaml-freestanding"
 ]
 conflicts: [
-  "mirage-xen" {< "3.1.0"}
-  "ocaml-freestanding" {< "0.4.1"}
+  "mirage-xen" {< "6.0.0"}
+  "ocaml-freestanding" {< "0.6.0"}
 ]
 description: """
-Mirage-crypto provides symmetric ciphers (DES, AES, RC4), and hashes (MD5,
-SHA-1, SHA-2).
+Mirage-crypto provides symmetric ciphers (DES, AES, RC4, ChaCha20/Poly1305), and
+hashes (MD5, SHA-1, SHA-2).
 """

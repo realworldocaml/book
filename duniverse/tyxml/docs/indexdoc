@@ -27,12 +27,6 @@ Xml_print
 Xml_stream
 }
 
-{1 Ppx library}
-
-{!modules:
-Tyxml_ppx
-}
-
 {1 Indexes}
 
 {!indexlist}

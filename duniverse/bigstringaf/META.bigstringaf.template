@@ -1,0 +1,3 @@
+# DUNE_GEN
+
+freestanding_linkopts = "-l:libbigstringaf_freestanding_stubs.a"

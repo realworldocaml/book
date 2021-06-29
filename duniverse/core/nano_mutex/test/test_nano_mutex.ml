@@ -12,13 +12,18 @@ let%test_unit _ =
 
 let%test_unit _ =
   List.iter
-    [ 2, 100, 0.; 10, 100, 0.; 10, 100, 0.001; 100, 10, 0.001 ]
+    ([ 2, 100, 0.; 10, 100, 0.; 10, 100, 0.001 ]
+     @
+     if Sys.word_size = 32
+     then [] (* not enough address space when the stack limit is high *)
+     else [ 100, 10, 0.001 ])
     ~f:(fun (num_threads, num_iterations, pause_for) ->
       try
         let l = create () in
         let am_holding_lock = ref false in
         let one_thread () =
           Thread.create
+            ~on_uncaught_exn:`Print_to_stderr
             (fun () ->
                for _ = 1 to num_iterations do
                  lock_exn l;
@@ -35,6 +40,7 @@ let%test_unit _ =
       with
       | exn ->
         failwiths
+          ~here:[%here]
           "test failed"
           (num_threads, num_iterations, pause_for, exn)
           [%sexp_of: int * int * float * exn])

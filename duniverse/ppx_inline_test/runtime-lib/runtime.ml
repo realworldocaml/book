@@ -96,7 +96,6 @@ module Action : sig
   type t = [
     | `Ignore
     | `Test_mode of test_mode
-    | `Collect of (unit -> unit) list ref
   ]
   val get : unit -> t
   val set : t -> unit
@@ -104,7 +103,6 @@ end = struct
   type t = [
     | `Ignore
     | `Test_mode of test_mode
-    | `Collect of (unit -> unit) list ref
   ]
   let action : t ref = ref `Ignore
   let force_drop =
@@ -310,7 +308,6 @@ let () =
 let am_test_runner =
   match Action.get () with
   | `Test_mode _ -> true
-  | `Collect _ -> assert false
   | `Ignore -> false
 
 let am_running_inline_test_env_var =
@@ -337,16 +334,16 @@ let testing =
      then `Testing `Am_child_of_test_runner
      else `Not_testing)
 
+let wall_time_clock_ns () =
+  Time_now.nanoseconds_since_unix_epoch ()
+
+
 let time_without_resetting_random_seeds f =
-  let before_sec = Sys.time () in
-  let res =
-    try f ()
-    with e ->
-      time_sec := Sys.time () -. before_sec;
-      raise e
-  in
-  time_sec := Sys.time () -. before_sec;
-  res
+  let before_ns = wall_time_clock_ns () in
+  Base.Exn.protect ~finally:(fun[@inline] () ->
+    time_sec := Base.Int63.(wall_time_clock_ns () - before_ns |> to_float)  /. 1e9)
+    ~f
+
 
 let saved_caml_random_state = lazy (Caml.Random.State.make [| 100; 200; 300 |])
 let saved_base_random_state = lazy (Base.Random.State.make [| 111; 222; 333 |])
@@ -409,12 +406,13 @@ let eprintf_or_delay fmt =
 let add_hooks ((module C) : config) f =
   fun () -> C.pre_test_hook (); f ()
 
-let test ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
+let[@inline never] test ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
       ~start_pos ~end_pos f =
-  let f = add_hooks config f in
-  let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
   match Action.get () with
+  | `Ignore -> ()
   | `Test_mode { which_tests = { libname; only_test_location; which_tags }; what_to_do } ->
+    let f = add_hooks config f in
+    let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
     let complete_tags = tags @ Module_context.current_tags () in
     let should_run =
       Some libname = !dynamic_lib
@@ -460,9 +458,6 @@ let test ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_numbe
              backtrace (string_of_module_descr ())
        end
    end
-  | `Ignore -> ()
-  | `Collect r ->
-    r := (fun () -> if not (time_and_reset_random_seeds f) then failwith (descr ())) :: !r
 
 let set_lib_and_partition static_lib partition =
   match !dynamic_lib with
@@ -473,7 +468,7 @@ let set_lib_and_partition static_lib partition =
   | None ->
     dynamic_lib := Some static_lib;
     match Action.get () with
-    | `Collect _ | `Ignore -> ()
+    | `Ignore -> ()
     | `Test_mode { which_tests; what_to_do } ->
       if which_tests.libname = static_lib then begin
         let requires_partition =
@@ -501,25 +496,13 @@ let test_unit ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos f 
   test ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos
     (fun () -> f (); true)
 
-let collect f =
-  let prev_action = Action.get () in
-  let tests = ref [] in
-  Action.set (`Collect tests);
-  try
-    f (); (* see comment below about why we don't reset random states *)
-    let tests = List.rev !tests in
-    Action.set prev_action;
-    tests
-  with e ->
-    Action.set prev_action;
-    raise e
-
-let test_module ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
+let[@inline never] test_module ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
       ~start_pos ~end_pos f =
-  let f = add_hooks config f in
-  let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
   match Action.get () with
+  | `Ignore -> ()
   | `Test_mode { which_tests = { libname; only_test_location = _; which_tags }; what_to_do } ->
+    let f = add_hooks config f in
+    let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
     let partial_tags = tags @ Module_context.current_tags () in
     let should_run =
       Some libname = !dynamic_lib
@@ -562,10 +545,6 @@ let test_module ~config ~descr ~tags ~filename:def_filename ~line_number:def_lin
               (String.uncapitalize_ascii descr) sep exn_str backtrace (string_of_module_descr ())
         end
     end
-  | `Ignore -> ()
-  | `Collect r ->
-    (* tEST_MODULE are going to be executed inline, unlike before *)
-    r := List.rev_append (collect f) !r
 
 let summarize () =
   match Action.get () with
@@ -581,7 +560,7 @@ let summarize () =
   | `Test_mode { which_tests = _; what_to_do = `List_partitions } ->
     List.iter (Printf.printf "%s\n") (Partition.all ());
     Test_result.Success
-  | (`Test_mode _ | `Collect _ as action) -> begin
+  | `Test_mode { what_to_do = `Run_partition _; which_tests } -> begin
       begin match !log with
       | None -> ()
       | Some ch -> close_out ch
@@ -593,15 +572,12 @@ let summarize () =
             Printf.eprintf "%d tests ran, %d test_modules ran\n%!" !tests_ran !test_modules_ran
           end;
           let errors =
-            match action with
-            | `Collect _ -> None
-            | `Test_mode { what_to_do = `List_partitions; _ } -> assert false
-            | `Test_mode { what_to_do = `Run_partition _; which_tests = { only_test_location; _ }; _ } ->
-              let unused_tests =
-                List.filter (fun (_, _, used) -> not !used) only_test_location in
-              match unused_tests with
-              | [] -> None
-              | _ :: _ -> Some unused_tests
+            let unused_tests =
+              List.filter (fun (_, _, used) -> not !used) which_tests.only_test_location
+            in
+            match unused_tests with
+            | [] -> None
+            | _ :: _ -> Some unused_tests
           in
           match errors with
           | Some tests ->

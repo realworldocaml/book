@@ -3,14 +3,39 @@ open! Caml.Nativeint
 include Nativeint_replace_polymorphic_compare
 
 module T = struct
-  type t = nativeint [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = nativeint [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_nativeint
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_nativeint in fun x -> func x
+    let func = hash_nativeint in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (nativeint_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_nativeint : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "nativeint" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ nativeint_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "nativeint.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare = Nativeint_replace_polymorphic_compare.compare
@@ -34,12 +59,17 @@ include Conv.Make_hex (struct
     open Nativeint_replace_polymorphic_compare
 
     type t = nativeint [@@deriving_inline compare, hash]
+
     let compare = (compare_nativeint : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       hash_fold_nativeint
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = hash_nativeint in fun x -> func x
+      let func = hash_nativeint in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let zero = zero
@@ -62,6 +92,7 @@ include Pretty_printer.Register (struct
    functions are available within this module. *)
 open! Nativeint_replace_polymorphic_compare
 
+let invariant (_ : t) = ()
 let num_bits = Word_size.num_bits Word_size.word_size
 let float_lower_bound = Float0.lower_bound_for_int num_bits
 let float_upper_bound = Float0.upper_bound_for_int num_bits
@@ -143,8 +174,18 @@ module Pow2 = struct
     x land Caml.Nativeint.pred x = 0n
   ;;
 
-  (* C stub for nativeint clz to use the CLZ/BSR instruction where possible *)
-  external nativeint_clz : nativeint -> int = "Base_int_math_nativeint_clz" [@@noalloc]
+  (* C stubs for nativeint clz and ctz to use the CLZ/BSR/CTZ/BSF instruction where possible *)
+  external clz
+    :  (nativeint[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_nativeint_clz" "Base_int_math_nativeint_clz_unboxed"
+  [@@noalloc]
+
+  external ctz
+    :  (nativeint[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_nativeint_ctz" "Base_int_math_nativeint_ctz_unboxed"
+  [@@noalloc]
 
   (** Hacker's Delight Second Edition p106 *)
   let floor_log2 i =
@@ -154,7 +195,7 @@ module Pow2 = struct
         (Sexp.message
            "[Nativeint.floor_log2] got invalid input"
            [ "", sexp_of_nativeint i ]);
-    Sys.word_size_in_bits - 1 - nativeint_clz i
+    num_bits - 1 - clz i
   ;;
 
   (** Hacker's Delight Second Edition p106 *)
@@ -167,7 +208,7 @@ module Pow2 = struct
            [ "", sexp_of_nativeint i ]);
     if Caml.Nativeint.equal i Caml.Nativeint.one
     then 0
-    else Sys.word_size_in_bits - nativeint_clz (Caml.Nativeint.pred i)
+    else num_bits - clz (Caml.Nativeint.pred i)
   ;;
 end
 
@@ -269,3 +310,5 @@ include O
    here so that efficient versions of the comparison functions are exported by
    this module. *)
 include Nativeint_replace_polymorphic_compare
+
+external bswap : t -> t = "%bswap_native"

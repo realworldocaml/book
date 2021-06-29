@@ -10,9 +10,13 @@
 (*                                                                            *)
 (******************************************************************************)
 
+(**[Memoize] offers a number of combinators that help construct possibly
+   recursive memoizing functions, that is, functions that lazily record their
+   input/output graph, so as to avoid repeated computation. *)
+
 open Sigs
 
-(* [Make] constructs a memoizer for a type [key] that is
+(**[Make] constructs a memoizer for a type [key] that is
    equipped with an implementation of imperative maps. *)
 
 module Make
@@ -20,7 +24,7 @@ module Make
      : MEMOIZER with type key = M.key
                  and type 'a t = 'a M.t
 
-(* [ForOrderedType] is a special case of [Make] where it
+(**[ForOrderedType] is a special case of [Make] where it
    suffices to pass an ordered type [T] as an argument.
    A reference to a persistent map is used to hold the
    memoization table. *)
@@ -30,7 +34,7 @@ module ForOrderedType
      : MEMOIZER with type key = T.t
                  and type 'a t = 'a Map.Make(T).t ref
 
-(* [ForHashedType] is a special case of [Make] where it
+(**[ForHashedType] is a special case of [Make] where it
    suffices to pass a hashed type [T] as an argument. A
    hash table is used to hold the memoization table. *)
 
@@ -39,7 +43,7 @@ module ForHashedType
      : MEMOIZER with type key = T.t
                  and type 'a t = 'a Hashtbl.Make(T).t
 
-(* [ForType] is a special case of [Make] where it suffices
+(**[ForType] is a special case of [Make] where it suffices
    to pass an arbitrary type [T] as an argument. A hash table
    is used to hold the memoization table. OCaml's built-in
    generic equality and hash functions are used. *)
@@ -48,7 +52,7 @@ module ForType
   (T : TYPE)
      : MEMOIZER with type key = T.t
 
-(* Memoizers for some common types. *)
+(**Memoizers for some common types. *)
 
 module Char
      : MEMOIZER with type key = char

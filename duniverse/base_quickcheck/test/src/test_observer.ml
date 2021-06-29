@@ -240,3 +240,58 @@ let%expect_test "of_lazy, unforced" =
          | Either.Second (_ : (int, string) Type_equal.t) -> .));
   [%expect {| (observer transparent) |}]
 ;;
+
+let bigstring = Observer.bigstring
+
+let%expect_test "[bigstring]" =
+  test_observer
+    Observer.bigstring
+    (m_biject m_string ~f:Base_bigstring.of_string ~f_inverse:Base_bigstring.to_string);
+  [%expect {| (observer transparent) |}]
+;;
+
+let float32_vec = Observer.float32_vec
+let float64_vec = Observer.float64_vec
+
+let%expect_test "[float32_vec], [float64_vec]" =
+  let test observer kind =
+    (module struct
+      include (val m_float)
+
+      let examples = [ 1.; -1.; Float.nan ]
+    end)
+    |> m_list
+    |> m_biject ~f:Array.of_list ~f_inverse:Array.to_list
+    |> m_biject
+         ~f:(Bigarray.Array1.of_array kind Fortran_layout)
+         ~f_inverse:Private.Bigarray_helpers.Array1.to_array
+    |> test_observer observer
+  in
+  test float32_vec Float32;
+  [%expect {| (observer transparent) |}];
+  test float64_vec Float64;
+  [%expect {| (observer transparent) |}]
+;;
+
+let float32_mat = Observer.float32_mat
+let float64_mat = Observer.float64_mat
+
+let%expect_test "[float32_mat], [float64_mat]" =
+  let test observer kind =
+    (module struct
+      type t = float array array [@@deriving compare, sexp_of]
+
+      let examples =
+        [ [||]; [| [| 0. |] |]; [| [| 0.; 1. |] |]; [| [| 0. |]; [| 1. |] |] ]
+      ;;
+    end)
+    |> m_biject
+         ~f:(Bigarray.Array2.of_array kind Fortran_layout)
+         ~f_inverse:Private.Bigarray_helpers.Array2.to_array
+    |> test_observer observer
+  in
+  test float32_mat Float32;
+  [%expect {| (observer transparent) |}];
+  test float64_mat Float64;
+  [%expect {| (observer transparent) |}]
+;;

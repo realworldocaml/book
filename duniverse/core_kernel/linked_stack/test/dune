@@ -1,3 +1,2 @@
-(library (name linked_stack_test)
- (libraries base_test expect_test_helpers_kernel linked_stack)
+(library (name linked_stack_test) (libraries base_test_helpers linked_stack)
  (preprocess (pps ppx_jane)))

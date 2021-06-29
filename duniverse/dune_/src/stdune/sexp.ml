@@ -11,20 +11,15 @@ let rec to_string = function
   | List l ->
     Printf.sprintf "(%s)" (List.map ~f:to_string l |> String.concat ~sep:" ")
 
-let rec pp ppf = function
-  | Atom s -> Format.pp_print_string ppf (Escape.quote_if_needed s)
-  | List [] -> Format.pp_print_string ppf "()"
-  | List (first :: rest) ->
-    Format.pp_open_box ppf 1;
-    Format.pp_print_string ppf "(";
-    Format.pp_open_hvbox ppf 0;
-    pp ppf first;
-    List.iter rest ~f:(fun sexp ->
-        Format.pp_print_space ppf ();
-        pp ppf sexp);
-    Format.pp_close_box ppf ();
-    Format.pp_print_string ppf ")";
-    Format.pp_close_box ppf ()
+let rec pp = function
+  | Atom s -> Pp.text (Escape.quote_if_needed s)
+  | List [] -> Pp.text "()"
+  | List xs ->
+    Pp.box ~indent:1
+      (let open Pp.O in
+      Pp.text "("
+      ++ Pp.hvbox (List.map xs ~f:pp |> Pp.concat ~sep:Pp.space)
+      ++ Pp.text ")")
 
 let hash = Stdlib.Hashtbl.hash
 
@@ -69,3 +64,7 @@ let rec of_dyn : Dyn.t -> t = function
     List (List.map fields ~f:(fun (field, f) -> List [ Atom field; of_dyn f ]))
   | Variant (s, []) -> Atom s
   | Variant (s, xs) -> List (Atom s :: List.map xs ~f:of_dyn)
+
+let rec to_dyn : t -> Dyn.t = function
+  | Atom s -> String s
+  | List xs -> List (List.map ~f:to_dyn xs)

@@ -1,3 +1,34 @@
+v6.0.0 2020-09-10
+-----------------
+
+**breaking changes**
+- Add the function `Cstruct.length`, `Cstruct.len` will
+  be deprecated to next release (@dinosaure, @hannesm, @avsm, #279)
+- `Cstruct.to_string` requires 2 optional arguments `?off` and `?len`
+  (@hannesm, @cfcs, @talex5, @dinosaure, #262)
+
+- Use `ppxlib` instead `ppx_tools_versioned`
+  (@pveber, @avsm, @dinosaure, #280)
+- Delete the support of old version of OCaml (< 4.07.0) for `ppx_cstruct`
+  (@avsm, @dinosaure, #280)
+- Add useful functions to be able to parse some contents
+  with `Cstruct.t` like the `astring` library (#227,
+  @dinosaure, @avsm, @samoht, @hannesm).
+- Improve the interface of `Cstruct.t` with capabilities
+  (@hannesm, @cfcs, @talex5, @dinosaure, #262)
+
+v5.2.0 2020-06-10
+-----------------
+
+Upgrade the `ppx_cstruct` library to use the OCaml 4.11
+AST rather than than OCaml 4.04, which in turn should
+make it easier to port to ppxlib in the future and
+improve interoperability with other PPXs (@bikallem #275).
+
+Also upgrades build files to use dune 2.0 (@bikallem #275)
+and fixes the GitHub Actions versions (@smorimoto #273)
+and also test OCaml 4.10.0 (@avsm).
+
 v5.1.1 2019-11-23
 -----------------
 

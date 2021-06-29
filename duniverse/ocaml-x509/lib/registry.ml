@@ -53,6 +53,15 @@ module ANSI_X9_62 = struct
   and ecdsa_sha256 = ecdsa_sha2 <| 2
   and ecdsa_sha384 = ecdsa_sha2 <| 3
   and ecdsa_sha512 = ecdsa_sha2 <| 4
+
+  (* from RFC 5480 *)
+  let certicom = base 1 3 <| 132 <| 0
+  let curves = ansi_x9_62 <| 3 <| 1
+
+  let secp224r1 = certicom <| 33
+  let secp256r1 = curves <| 7
+  let secp384r1 = certicom <| 34
+  let secp521r1 = certicom <| 35
 end
 
 module PKCS1 = struct
@@ -70,6 +79,15 @@ module PKCS1 = struct
   and sha384_rsa_encryption    = pkcs1 <| 12
   and sha512_rsa_encryption    = pkcs1 <| 13
   and sha224_rsa_encryption    = pkcs1 <| 14
+end
+
+module RFC8410 = struct
+  let thawte = base 1 3 <| 101
+
+  let x25519 = thawte <| 110
+  and x448 = thawte <| 111
+  and ed25519 = thawte <| 112
+  and ed448 = thawte <| 113
 end
 
 module PKCS2 = struct
@@ -96,17 +114,22 @@ module PKCS5 = struct
   and pbkdf2           = pkcs5 <| 12
   and pbes2            = pkcs5 <| 13
   and pbmac1           = pkcs5 <| 14
+
+  let aes = nist_alg <| 1
+  let aes128_cbc = aes <| 2
+  and aes192_cbc = aes <| 22
+  and aes256_cbc = aes <| 42
 end
 
 module PKCS7 = struct
   let pkcs7 = pkcs <| 7
 
-  let data                   = pkcs7 <| 1
-  and signedData             = pkcs7 <| 2
-  and envelopedData          = pkcs7 <| 3
-  and signedAndEnvelopedData = pkcs7 <| 4
-  and digestedData           = pkcs7 <| 5
-  and encryptedData          = pkcs7 <| 6
+  let data                      = pkcs7 <| 1
+  and signed_data               = pkcs7 <| 2
+  and enveloped_data            = pkcs7 <| 3
+  and signed_and_enveloped_data = pkcs7 <| 4
+  and digested_data             = pkcs7 <| 5
+  and encrypted_data            = pkcs7 <| 6
 end
 
 module PKCS9 = struct
@@ -125,6 +148,29 @@ module PKCS9 = struct
   and smime_oid_registry   = pkcs9 <| 16
   and friendly_name        = pkcs9 <| 20
   and cert_types           = pkcs9 <| 22
+  and crl_types            = pkcs9 <| 23
+end
+
+module PKCS12 = struct
+  let pkcs12 = pkcs <| 12
+
+  let bagtypes = pkcs12 <| 10 <| 1
+
+  let key_bag = bagtypes <| 1
+  and pkcs8_shrouded_key_bag = bagtypes <| 2
+  and cert_bag = bagtypes <| 3
+  and crl_bag = bagtypes <| 4
+  and secret_bag = bagtypes <| 5
+  and safe_contents_bag = bagtypes <| 6
+
+  let pbe_ids = pkcs12 <| 1
+
+  let pbe_with_SHA_and_128Bit_RC4 = pbe_ids <| 1
+  and pbe_with_SHA_and_40Bit_RC4 = pbe_ids <| 2
+  and pbe_with_SHA_and_3_KeyTripleDES_CBC = pbe_ids <| 3
+  and pbe_with_SHA_and_2_KeyTripleDES_CBC = pbe_ids <| 4
+  and pbe_with_SHA_and_128Bit_RC2_CBC = pbe_ids <| 5
+  and pbe_with_SHA_and_40Bit_RC2_CBC = pbe_ids <| 6
 end
 
 module X520 = struct

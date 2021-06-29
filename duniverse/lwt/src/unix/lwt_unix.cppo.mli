@@ -11,8 +11,8 @@
 
     The semantics of all operations is the following: if the action
     (for example reading from a {b file descriptor}) can be performed
-    immediately, it is done and returns immediately, otherwise it
-    returns a sleeping thread which is woken up when the operation
+    immediately, it is performed and returns an already resolved promise,
+    otherwise it returns a pending promise which is resolved when the operation
     completes.
 
     Most operations on sockets and pipes (on Windows it is only
@@ -48,12 +48,12 @@ val handle_unix_error : ('a -> 'b Lwt.t) -> 'a -> 'b Lwt.t
 (** {2 Sleeping} *)
 
 val sleep : float -> unit Lwt.t
-  (** [sleep d] is a thread that remains suspended for [d] seconds
-      and then terminates. *)
+  (** [sleep d] is a promise that remains in a pending state for [d] seconds
+      and after which it is resolved with value [()]. *)
 
 val yield : unit -> unit Lwt.t
-  (** [yield ()] is a thread that suspends itself and then resumes
-      as soon as possible and terminates. *)
+  (** [yield ()] is a promise in a pending state. It resumes itself as soon as
+      possible and resolves with value [()]. *)
 
 val auto_yield : float -> (unit -> unit Lwt.t)
   (** [auto_yield timeout] returns a function [f], and [f ()] has the following
@@ -68,8 +68,8 @@ exception Timeout
   (** Exception raised by timeout operations *)
 
 val timeout : float -> 'a Lwt.t
-  (** [timeout d] is a thread that remains suspended for [d] seconds
-      and then fails with {!Timeout}. *)
+  (** [timeout d] is a promise that remains pending for [d] seconds
+      and then is rejected with {!Timeout}. *)
 
 val with_timeout : float -> (unit -> 'a Lwt.t) -> 'a Lwt.t
   (** [with_timeout d f] is a short-hand for:
@@ -185,13 +185,21 @@ val fork : unit -> int
       child process.
 
       Notes:
-      - in the child process all pending jobs are canceled,
-      - if you are going to use Lwt in the parent and the child, it is
+
+      - In the child process all pending [Lwt_unix] I/O jobs are abandoned.
+        This may cause the child's copy of their associated promises to remain
+        forever pending.
+      - If you are going to use Lwt in the parent and the child, it is
         a good idea to call {!Lwt_io.flush_all} before callling
         {!fork} to avoid double-flush.
-      - otherwise, if you will not use Lwt in the child, call
+      - Otherwise, if you will not use Lwt in the child, call
         {!Lwt_main.Exit_hooks.remove_all} to avoid Lwt calling {!Lwt_main.run}
-        during process exit. *)
+        during process exit.
+      - None of the above is necessary if you intend to call [exec]. Indeed, in
+        that case, it is not even necessary to use [Lwt_unix.fork]. You can use
+        [Unix.fork].
+      - To abandon some more promises, see
+        {!Lwt_main.abandon_yielded_and_paused}. *)
 
 type process_status =
     Unix.process_status =
@@ -980,6 +988,18 @@ val send_msg :
 
     @since 5.0.0 *)
 
+val send_msgto :
+  socket:file_descr -> io_vectors:IO_vectors.t -> fds:Unix.file_descr list ->
+    dest:Unix.sockaddr ->
+    int Lwt.t
+(** [send_msgto ~socket ~io_vectors ~fds ~dest] is similar to [send_msg] but
+    takes an additional [dest] argument to set the address when using a
+    connection-less socket.
+
+    Not implemented on Windows.
+
+    @since 5.4.0 *)
+
 type credentials = {
   cred_pid : int;
   cred_uid : int;
@@ -1008,6 +1028,9 @@ type socket_bool_option =
   | SO_ACCEPTCONN
   | TCP_NODELAY
   | IPV6_ONLY
+#if OCAML_VERSION >= (4, 12, 0)
+  | SO_REUSEPORT
+#endif
 
 type socket_int_option =
     Unix.socket_int_option =

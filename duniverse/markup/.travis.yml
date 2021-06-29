@@ -9,26 +9,25 @@ env:
   - COMPILER=4.06.1
   - COMPILER=4.07.1
   - COMPILER=4.09.0
-
-matrix:
-  allow_failures:
-    - env: COMPILER=4.09.0
+  - COMPILER=4.10.1
+  - COMPILER=4.11.1
 
 before_script:
-  - wget https://github.com/ocaml/opam/releases/download/2.0.5/opam-2.0.5-x86_64-linux
-  - sudo mv opam-2.0.5-x86_64-linux /usr/local/bin/opam
+  - wget https://github.com/ocaml/opam/releases/download/2.0.7/opam-2.0.7-x86_64-linux
+  - sudo mv opam-2.0.7-x86_64-linux /usr/local/bin/opam
   - sudo chmod a+x /usr/local/bin/opam
   - opam init -y --bare --disable-sandboxing --disable-shell-hook
   - "[ -d _opam/bin ] || (rm -rf _opam && opam switch create . $COMPILER $REPOSITORIES --no-install)"
   - eval `opam env`
   - opam --version
   - ocaml -version
-
-script:
-  - opam lint
   - opam install -y ounit lwt js_of_ocaml
   - opam pin add -y --no-action markup .
   - opam install -y --deps-only markup
+  - opam list
+
+script:
+  - opam lint
   - make test
   - make coverage
   - "[ -z $COVERALLS ] || bisect-ppx-report send-to Coveralls"
@@ -43,8 +42,3 @@ cache:
   directories:
     - $HOME/.opam
     - ./_opam
-
-notifications:
-  email:
-    on_success: always
-    on_failure: always

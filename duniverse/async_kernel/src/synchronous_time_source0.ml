@@ -100,17 +100,20 @@ module T1 = struct
     let is_some t = not (is_none t)
 
     let sexp_of_t
-          { alarm = _
-          ; at
-          ; callback = _
-          ; execution_context = _
-          ; interval
-          ; next_fired = _
-          ; status
-          }
+          ({ alarm = _
+           ; at
+           ; callback = _
+           ; execution_context = _
+           ; interval
+           ; next_fired = _
+           ; status
+           } as t)
       =
-      [%message
-        "" (status : Status.t) (at : Time_ns.t) (interval : Time_ns.Span.t option)]
+      if is_none t
+      then [%sexp "none"]
+      else
+        [%message
+          "" (status : Status.t) (at : Time_ns.t) (interval : Time_ns.Span.t option)]
     ;;
 
     let invariant t =
@@ -331,6 +334,7 @@ let fire t (event : Event.t) =
 ;;
 
 let alarm_precision t = Timing_wheel.alarm_precision t.events
+let next_alarm_fires_at t = Timing_wheel.next_alarm_fires_at t.events
 let now t = if t.is_wall_clock then Time_ns.now () else timing_wheel_now t
 let timing_wheel_now = timing_wheel_now
 
@@ -483,6 +487,55 @@ module Event = struct
 
   let reschedule_after t event span = reschedule_at t event (Time_ns.after (now t) span)
 
+  module Option = struct
+    type value = t
+    type nonrec t = t
+
+    let is_none = is_none
+    let is_some = is_some
+
+    let some value =
+      (* This assert shouldn't fail because [t] is a [value] and so should never
+         be [none]. *)
+      assert (is_some value);
+      value
+    ;;
+
+    (* It should be impossible for [some_is_representable] to return [false]
+       because its input is a [value], but since it's only loosely enforced we
+       handle the general case. *)
+    let some_is_representable value =
+      assert (is_some value);
+      true
+    ;;
+
+    let none = none
+    let unchecked_value = Fn.id
+    let value t ~default = if is_none t then default else unchecked_value t
+
+    let value_exn t =
+      if is_none t
+      then raise_s [%message "[Synchronous_time_source.Event.Option.value_exn None]"];
+      t
+    ;;
+
+    let to_option t = if is_none t then None else Some t
+
+    let of_option = function
+      | None -> none
+      | Some t -> some t
+    ;;
+
+    let sexp_of_t t = to_option t |> [%sexp_of: t option]
+
+    module Optional_syntax = struct
+      module Optional_syntax = struct
+        let is_none = is_none
+        let unsafe_value = Fn.id
+      end
+    end
+  end
+
 end
 
 let run_after t span callback = ignore (Event.after t span callback : Event.t)
@@ -596,3 +649,11 @@ let advance_directly t ~to_ =
   advance_internal t ~to_ ~send_exn;
   finish_advancing t
 ;;
+
+module Expert = struct
+  let max_alarm_time_in_min_timing_wheel_interval t =
+    Timing_wheel.max_alarm_time_in_min_interval t.events
+  ;;
+
+  let has_events_to_run t = Event.is_some t.fired_events
+end

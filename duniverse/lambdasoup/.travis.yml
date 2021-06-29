@@ -2,7 +2,7 @@ language: generic
 
 env:
   - SWITCH=4.10.0
-  - SWITCH=4.09.0 COVERAGE=yes
+  - SWITCH=4.09.1 COVERAGE=yes
   - SWITCH=4.08.1
   - SWITCH=4.02.3
   - SWITCH=4.03.0
@@ -13,8 +13,8 @@ env:
 
 before_script:
   - set -e
-  - wget https://github.com/ocaml/opam/releases/download/2.0.6/opam-2.0.6-x86_64-linux
-  - sudo mv opam-2.0.6-x86_64-linux /usr/local/bin/opam
+  - wget https://github.com/ocaml/opam/releases/download/2.0.7/opam-2.0.7-x86_64-linux
+  - sudo mv opam-2.0.7-x86_64-linux /usr/local/bin/opam
   - sudo chmod a+x /usr/local/bin/opam
   - sudo apt-get install python-bs4
   - opam init -y --compiler $SWITCH --disable-sandboxing

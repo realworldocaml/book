@@ -46,6 +46,10 @@ let create () =
   let rec seq = { prev = seq; next = seq } in
   seq
 
+let clear seq =
+  seq.prev <- seq;
+  seq.next <- seq
+
 let is_empty seq = seq.next == seq
 
 let length seq =

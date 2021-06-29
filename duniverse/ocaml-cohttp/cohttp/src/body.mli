@@ -17,16 +17,13 @@
 
 (** HTTP request and response body handling *)
 
+type t = [ `Empty | `String of string | `Strings of string list ]
+[@@deriving sexp]
 (** Every HTTP body can at least be an empty value or a [string] *)
-type t = [
-  | `Empty
-  | `String of string
-  | `Strings of string list
-] [@@deriving sexp]
 
-(** Signature for the core of HTTP body handling.  Implementations
-    will extend this signature to add more functions for streaming
-    responses via backend-specific functionality.  *)
 include S.Body with type t := t
+(** Signature for the core of HTTP body handling. Implementations will extend
+    this signature to add more functions for streaming responses via
+    backend-specific functionality. *)
 
 val length : t -> int64

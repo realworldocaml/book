@@ -1,4 +1,8 @@
-## v5.0.0
+## v5.0.1 (2020-09-30)
+
+* Fix V4.Prefix.broadcast and last with /32 prefixes (#102 @verbosemode)
+
+## v5.0.0 (2020-06-16)
 
 * Do not zero out the non-prefix-length part of the address in
   `{V4,V6}.Prefix.t` (#99 @hannesm)

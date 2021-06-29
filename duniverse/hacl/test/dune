@@ -1,3 +1,0 @@
-(test
- (name test)
- (libraries hacl_x25519 hex))

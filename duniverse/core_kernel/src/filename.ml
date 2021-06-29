@@ -48,6 +48,8 @@ include struct
   let dir_sep = dir_sep
   let quote = quote
   let temp_dir_name = get_temp_dir_name ()
+  let dirname = dirname
+  let basename = basename
 end
 
 let is_absolute p = not (is_relative p)
@@ -74,53 +76,19 @@ let concat p1 p2 =
   collapse_trailing p1 ^ "/" ^ collapse_leading p2
 ;;
 
-(* Finds the largest index i in [s] that is less than [from] and for which
-   [f s.[i]]
-   returns true. Then it returns [i+1]. Raises an exception if [from] isn't a
-   valid index
-   in [s]. *)
-let string_rexists s ~f ~from:n =
-  let rec loop n =
-    if Int.(n = 0) then None else if f s.[n - 1] then Some n else loop (n - 1)
-  in
-  loop n
+let to_absolute_exn p ~relative_to =
+  if is_relative relative_to
+  then
+    failwithf
+      "Filename.to_absolute_exn called with a [relative_to] that is a relative path: %s"
+      relative_to
+      ()
+  else if is_absolute p
+  then p
+  else concat relative_to p
 ;;
 
-let skip_end_slashes s ~from =
-  match string_rexists s ~from ~f:Char.(( <> ) '/') with
-  | Some v -> `Ends_at v
-  | None -> `All_slashes
-;;
-
-(*
-   Fix for #0004549. (in the inria bug tracker)
-*)
-let split = function
-  | "" -> ".", "."
-  | s ->
-    (match skip_end_slashes s ~from:(String.length s) with
-     | `All_slashes -> "/", "/"
-     | `Ends_at basename_end ->
-       (match string_rexists s ~f:Char.(( = ) '/') ~from:basename_end with
-        | None -> ".", String.sub ~pos:0 ~len:basename_end s
-        | Some basename_start ->
-          let basename =
-            String.sub s ~pos:basename_start ~len:(basename_end - basename_start)
-          in
-          let dirname =
-            match skip_end_slashes s ~from:basename_start with
-            | `All_slashes -> "/"
-            | `Ends_at dirname_end -> String.sub ~pos:0 ~len:dirname_end s
-          in
-          dirname, basename))
-;;
-
-(*
-   http://www.opengroup.org/onlinepubs/9699919799/utilities/basename.html
-   http://www.opengroup.org/onlinepubs/9699919799/utilities/dirname.html
-*)
-let basename path = snd (split path)
-let dirname path = fst (split path)
+let split s = dirname s, basename s
 
 (* [max_pathname_component_size] comes from getconf _POSIX_NAME_MAX / *)
 let max_pathname_component_size = 255

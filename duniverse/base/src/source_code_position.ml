@@ -17,3 +17,7 @@ end
 
 include M
 include Comparable.Make_using_comparator (M)
+
+let of_pos (pos_fname, pos_lnum, pos_cnum, _) =
+  { pos_fname; pos_lnum; pos_cnum; pos_bol = 0 }
+;;

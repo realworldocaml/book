@@ -107,6 +107,17 @@ val basename : string -> string
 (** See {!Filename.basename}. *)
 val dirname : string -> string
 
+(** Returns the absolute path by prepending [relative_to] if the path is not already
+    absolute.
+
+    Using the result of [Core.Unix.getcwd] as [relative_to] is often a reasonable choice.
+
+    Note that [to_absolute_exn] may return a non-canonical path (e.g. /foo/bar/../baz).
+
+    Raises if [relative_to] is a relative path.
+*)
+val to_absolute_exn : string -> relative_to:string -> string
+
 (** [split filename] returns (dirname filename, basename filename) *)
 val split : string -> string * string
 

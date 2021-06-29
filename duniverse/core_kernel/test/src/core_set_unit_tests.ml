@@ -55,12 +55,7 @@ module Unit_tests (Elt : sig
           val is_poly : bool
         end) : Set_intf.Creators_and_accessors_generic = struct
   module Set = struct
-    include (
-      Set :
-        module type of struct
-        include Set
-      end
-      with module Named := Set.Named)
+    include Set
 
     let add = simplify_accessor add
     let remove = simplify_accessor remove
@@ -72,6 +67,7 @@ module Unit_tests (Elt : sig
     let inter = simplify_accessor inter
     let union = simplify_accessor union
     let is_subset = simplify_accessor is_subset
+    let are_disjoint = simplify_accessor are_disjoint
 
     module Named = struct
       let is_subset = simplify_accessor Set.Named.is_subset
@@ -204,6 +200,18 @@ module Unit_tests (Elt : sig
 
   let%test _ = Set.equal set_nonempty (Set.inter set_nonempty set_nonempty)
 
+  let%test_unit "inter = all members of s1 that are members of s2" =
+    Quickcheck.test
+      (Quickcheck.Generator.tuple2 gen_set gen_set)
+      ~sexp_of:[%sexp_of: Set.t * Set.t]
+      ~f:(fun (s1, s2) ->
+        [%test_result: Set.t]
+          (Set.inter s1 s2)
+          ~expect:
+            (Set.fold s1 ~init:(Set.empty ()) ~f:(fun inter elt ->
+               if Set.mem s2 elt then Set.add inter elt else inter)))
+  ;;
+
   let is_subset _ ~of_:_ = assert false
 
   let%test _ = Set.is_subset set_empty ~of_:set_nonempty
@@ -211,6 +219,28 @@ module Unit_tests (Elt : sig
   let%test _ = Set.is_subset set_nonempty ~of_:set_nonempty
   let%test _ = Set.is_subset set_empty ~of_:set_empty
   let%test _ = not (Set.is_subset set_nonempty ~of_:(Set.singleton Elt.present))
+
+  let%test_unit "is_subset = all members of subset are members of superset" =
+    Quickcheck.test
+      (Quickcheck.Generator.tuple2 gen_set gen_set)
+      ~sexp_of:[%sexp_of: Set.t * Set.t]
+      ~f:(fun (superset, subset) ->
+        [%test_result: bool]
+          (Set.is_subset subset ~of_:superset)
+          ~expect:(Set.for_all subset ~f:(Set.mem superset)))
+  ;;
+
+  let are_disjoint _ _ = assert false
+
+  let%test_unit "are_disjoint = is_empty inter" =
+    Quickcheck.test
+      (Quickcheck.Generator.tuple2 gen_set gen_set)
+      ~sexp_of:[%sexp_of: Set.t * Set.t]
+      ~f:(fun (s1, s2) ->
+        [%test_result: bool]
+          (Set.are_disjoint s1 s2)
+          ~expect:(Set.is_empty (Set.inter s1 s2)))
+  ;;
 
   module Named = struct
     let is_subset _ ~of_:_ = assert false
@@ -1007,12 +1037,7 @@ let%test_module "Set.Poly" =
   (module Unit_tests
        (Elt_poly)
        (struct
-         include (
-           Set.Poly :
-             module type of struct
-             include Set.Poly
-           end
-           with type 'a named := 'a Set.Poly.named)
+         include Set.Poly
 
          type ('a, 'b) set = ('a, 'b) Set.t
          type ('a, 'b) t_ = 'a t
@@ -1033,12 +1058,7 @@ let%test_module "Int.Set" =
   (module Unit_tests
        (Elt_int)
        (struct
-         include (
-           Int.Set :
-             module type of struct
-             include Int.Set
-           end
-           with type named := Int.Set.named)
+         include Int.Set
 
          type ('a, 'b) set = ('a, 'b) Set.t
          type ('a, 'b) t_ = t
@@ -1080,12 +1100,7 @@ let%test_module "Set.Poly.Tree" =
   (module Unit_tests
        (Elt_poly)
        (struct
-         include (
-           Set.Poly.Tree :
-             module type of struct
-             include Set.Poly.Tree
-           end
-           with type 'a named := 'a Set.Poly.Tree.named)
+         include Set.Poly.Tree
 
          type ('a, 'b) set = 'a Set.Poly.Tree.t
          type ('a, 'b) t_ = 'a t
@@ -1106,12 +1121,7 @@ let%test_module "Int.Set.Tree" =
   (module Unit_tests
        (Elt_int)
        (struct
-         include (
-           Int.Set.Tree :
-             module type of struct
-             include Int.Set.Tree
-           end
-           with type named := Int.Set.Tree.named)
+         include Int.Set.Tree
 
          type ('a, 'b) set = ('a, 'b) Set.Tree.t
          type ('a, 'b) t_ = t
@@ -1129,7 +1139,7 @@ let%test_module "Int.Set.Tree" =
 ;;
 
 let%expect_test _ =
-  let open Expect_test_helpers_kernel in
+  let open Expect_test_helpers_core in
   print_and_check_stable_type
     [%here]
     (module struct

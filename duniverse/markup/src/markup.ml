@@ -80,7 +80,6 @@ type doctype = Common.doctype =
    force_quirks      : bool}
 
 type signal = Common.signal
-type content_signal = Common.content_signal
 
 let signal_to_string = Common.signal_to_string
 

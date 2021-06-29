@@ -15,6 +15,10 @@ module Stable = struct
     end
 
     include T
+
+    let to_string = Fn.id
+    let of_string = Fn.id
+
     include Comparable.Stable.V1.Make (T)
     include Hashable.Stable.V1.Make (T)
   end

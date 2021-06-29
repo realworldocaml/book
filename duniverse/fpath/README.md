@@ -12,7 +12,6 @@ license.
 [astring]: http://erratique.ch/software/astring
 
 Home page: http://erratique.ch/software/fpath  
-Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 ## Installation
 

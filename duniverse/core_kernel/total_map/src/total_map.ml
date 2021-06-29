@@ -1,12 +1,55 @@
+module Stable = struct
+  open Core_kernel.Core_kernel_stable
+
+  module V1 = struct
+    type ('key, 'a, 'cmp, 'enum) t = ('key, 'a, 'cmp) Map.V1.t
+
+    module type Key = sig
+      type t [@@deriving sexp, bin_io, compare, enumerate]
+    end
+
+    module type Key_with_witnesses = sig
+      include Key
+      include Comparator.V1.S with type t := t
+      include Enumeration.S with type t := t
+    end
+
+    module type S = sig
+      module Key : sig
+        type t [@@deriving sexp, bin_io, compare, enumerate]
+      end
+
+      type comparator_witness
+      type enumeration_witness
+
+      type nonrec 'a t = (Key.t, 'a, comparator_witness, enumeration_witness) t
+      [@@deriving bin_io, sexp, compare]
+    end
+
+    module Make_with_witnesses (Key : Key_with_witnesses) = struct
+      module Key = struct
+        include Key
+        include Comparable.V1.Make (Key)
+      end
+
+      type comparator_witness = Key.comparator_witness
+      type enumeration_witness = Key.enumeration_witness
+      type nonrec 'a t = 'a Key.Map.t [@@deriving bin_io, sexp, compare]
+    end
+  end
+end
+
 open! Core_kernel
 open! Import
+module Enumeration = Enumeration
 
-type ('key, 'a, 'cmp, 'enum) t = ('key, 'a, 'cmp) Map.t
+type ('key, 'a, 'cmp, 'enum) t = ('key, 'a, 'cmp, 'enum) Stable.V1.t
 
 let to_map t = t
 
 let key_not_in_enumeration t key =
   failwiths
+    ~here:[%here]
     "Key was not provided in the enumeration given to [Total_map.Make]"
     key
     (Map.comparator t).sexp_of_t
@@ -79,6 +122,12 @@ module type Key = sig
   type t [@@deriving sexp, bin_io, compare, enumerate]
 end
 
+module type Key_with_witnesses = sig
+  include Key
+  include Comparator.S with type t := t
+  include Enumeration.S with type t := t
+end
+
 module type S = sig
   module Key : Key
 
@@ -94,9 +143,10 @@ module type S = sig
   val create_const : 'a -> 'a t
 end
 
-module Make_using_comparator (Key : sig
+module Make_with_witnesses (Key : sig
     include Key
     include Comparator.S with type t := t
+    include Enumeration.S with type t := t
   end) =
 struct
   module Key = struct
@@ -105,7 +155,7 @@ struct
   end
 
   type comparator_witness = Key.comparator_witness
-  type enumeration_witness
+  type enumeration_witness = Key.enumeration_witness
   type 'a t = 'a Key.Map.t [@@deriving sexp, compare]
 
   let all_set = Key.Set.of_list Key.all
@@ -139,7 +189,7 @@ struct
     t
   ;;
 
-  include Bin_prot.Utils.Make_binable1 (struct
+  include Bin_prot.Utils.Make_binable1_without_uuid [@alert "-legacy"] (struct
       type nonrec 'a t = 'a t
 
       module Binable = Key.Map
@@ -167,7 +217,8 @@ struct
     end)
 end
 
-module Make (Key : Key) = Make_using_comparator (struct
+module Make (Key : Key) = Make_with_witnesses (struct
     include Key
     include Comparable.Make_binable (Key)
+    include Enumeration.Make (Key)
   end)

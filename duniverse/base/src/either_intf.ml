@@ -31,23 +31,22 @@ module type Focused = sig
 end
 
 module type Either = sig
-  type ('f, 's) t =
+  type ('f, 's) t = ('f, 's) Either0.t =
     | First of 'f
     | Second of 's
   [@@deriving_inline compare, hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare :
-        ('f -> 'f -> int) ->
-        ('s -> 's -> int) -> ('f, 's) t -> ('f, 's) t -> int
-      val hash_fold_t :
-        (Ppx_hash_lib.Std.Hash.state -> 'f -> Ppx_hash_lib.Std.Hash.state) ->
-        (Ppx_hash_lib.Std.Hash.state -> 's -> Ppx_hash_lib.Std.Hash.state) ->
-        Ppx_hash_lib.Std.Hash.state ->
-        ('f, 's) t -> Ppx_hash_lib.Std.Hash.state
-      include Ppx_sexp_conv_lib.Sexpable.S2 with type ('f,'s) t :=  ('f, 's) t
-    end[@@ocaml.doc "@inline"]
+
+  val compare : ('f -> 'f -> int) -> ('s -> 's -> int) -> ('f, 's) t -> ('f, 's) t -> int
+
+  val hash_fold_t
+    :  (Ppx_hash_lib.Std.Hash.state -> 'f -> Ppx_hash_lib.Std.Hash.state)
+    -> (Ppx_hash_lib.Std.Hash.state -> 's -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> ('f, 's) t
+    -> Ppx_hash_lib.Std.Hash.state
+
+  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('f, 's) t := ('f, 's) t
+
   [@@@end]
 
   include Invariant.S2 with type ('a, 'b) t := ('a, 'b) t

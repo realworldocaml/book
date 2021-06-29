@@ -1,4 +1,6 @@
-open! Core_kernel
+open! Base
+
+let unstage = Staged.unstage
 
 (* Regression tests to ensure that [Validate.field], [Validate.field_folder], and
    [Validate.field_direct_folder] continue to work with private record types. *)

@@ -33,7 +33,7 @@ let random_size = function
   | Some size -> size
   | None      -> Random.int 20
 
-let random_string ?size ~chars:(lo, hi) =
+let random_string ?size ~chars:(lo, hi) () =
   String.init (random_size size)
     (fun _ -> Char.chr (random_int_r lo hi))
 
@@ -54,7 +54,7 @@ module Int64 = struct
   let max_p_int = Int64.of_int Stdlib.max_int
 
   let to_nat_checked i64 =
-    if i64 < 0L || i64 > max_int then None else Some (to_int i64)
+    if i64 < 0L || i64 > max_p_int then None else Some (to_int i64)
 
 end
 
@@ -146,12 +146,12 @@ module Gen_string : Prim_s with type t = string = struct
 
   type t = string
 
-  let of_cstruct = Cstruct.to_string
+  let of_cstruct x = Cstruct.to_string x
 
   let to_writer = Writer.of_string
 
   let random ?size () =
-    random_string ?size ~chars:(32, 127)
+    random_string ?size ~chars:(32, 127) ()
 
   let (concat, length) = String.(concat "", length)
 end
@@ -167,7 +167,7 @@ module Octets : Prim_s with type t = Cstruct.t = struct
   let to_writer = Writer.of_cstruct
 
   let random ?size () =
-    random_string ?size ~chars:(0, 256) |> Cstruct.of_string
+    random_string ?size ~chars:(0, 256) () |> Cstruct.of_string
 
   let concat = Cstruct.concat
 

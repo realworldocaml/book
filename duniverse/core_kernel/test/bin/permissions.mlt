@@ -81,17 +81,13 @@ Line _, characters _-_:
 Error: In this `with' constraint, the new definition of t
        does not match its original definition in the constrained signature:
        Type declarations do not match:
-         type ('a, 'b) t = ('a, 'b) t/2
+         type ('a, 'b) t = ('a, 'b) t
            constraint 'b = \[< `Read | `Who_can_write of .* \] (regexp)
        is not included in
          type ('a, -'perm) t
+       Their constraints differ.
        *: Expected declaration (glob)
        *: Actual declaration (glob)
-       Their constraints differ.
-       File "_none_", line 1:
-         Definition of type t/1
-       *, characters 0-51: (glob)
-         Definition of type t/2
 |}]
 
 (* Constraints don't work with included signatures, part 2 *)
@@ -111,18 +107,14 @@ Line _, characters _-_:
 Error: In this `with' constraint, the new definition of t
        does not match its original definition in the constrained signature:
        Type declarations do not match:
-         type ('a, 'b) t = ('a, 'b) t/2
+         type ('a, 'b) t = ('a, 'b) t
            constraint 'b = \[< `Read | `Who_can_write of .* \] (regexp)
        is not included in
          type ('a, -'b) t constraint 'b = [< 'c perms ]
+       Their constraints differ.
        *: (glob)
          Expected declaration
        *: Actual declaration (glob)
-       Their constraints differ.
-       File "_none_", line 1:
-         Definition of type t/1
-       *, characters 0-51: (glob)
-         Definition of type t/2
 |}]
 
 (* Constraints don't work with type aliases, part 1 *)

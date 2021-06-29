@@ -8,10 +8,6 @@ open! Import
 
 module Time_ns = Core_kernel.Core_kernel_private.Time_ns_alternate_sexp
 
-(* 4.05 adds a [?cloexec] argument to all functions. It cannot be ignored for the
-   functions with labels, so to keep the code compatible with all supported versions of
-   OCaml, we sometimes use the non-labelled versions. *)
-module UnixNoLabels = Unix
 module Unix = UnixLabels
 
 let ( ^/ ) = Core_filename.concat
@@ -590,6 +586,7 @@ let len_r len = ("len", Int.sexp_of_t len)
 let uid_r uid = ("uid", Int.sexp_of_t uid)
 let gid_r gid = ("gid", Int.sexp_of_t gid)
 let fd_r fd = ("fd", File_descr.sexp_of_t fd)
+let close_on_exec_r boolopt = ("close_on_exec", [%sexp (boolopt : bool option)])
 let dir_handle_r handle =
   let fd =
     try File_descr.sexp_of_t (dirfd handle)
@@ -829,44 +826,55 @@ let execvpe ~prog ~argv ~env =
     (fun () -> [prog_r prog; args_r argv; env_r env])
 ;;
 
-type env =
-  [ `Replace of (string * string) list
-  | `Extend of (string * string) list
-  | `Override of (string * string option) list
-  | `Replace_raw of string list
-  ]
-[@@deriving sexp]
+module Env = struct
+  type t =
+    [ `Replace of (string * string) list
+    | `Extend of (string * string) list
+    | `Override of (string * string option) list
+    | `Replace_raw of string list
+    ]
+  [@@deriving sexp]
 
-let env_map env =
-  let current () =
-    List.map (Array.to_list (Unix.environment ()))
-      ~f:(fun s -> String.lsplit2_exn s ~on:'=')
-  in
-  let map_of_list list = String.Map.of_alist_reduce list ~f:(fun _ x -> x) in
-  match env with
-  | `Replace env -> map_of_list env
-  | `Extend extend -> map_of_list (current () @ extend)
-  | `Override overrides ->
-    List.fold_left overrides ~init:(map_of_list (current ()))
-      ~f:(fun acc (key, v) ->
-        match v with
-        | None -> Map.remove acc key
-        | Some data -> Map.set acc ~key ~data)
-;;
+  let current ~base () =
+    let base =
+      match base with
+      | Some v -> force v
+      | None -> Array.to_list (Unix.environment ())
+    in
+    List.map base ~f:(fun s -> String.lsplit2_exn s ~on:'=')
+  ;;
 
-let env_assignments env =
-  match env with
-  | `Replace_raw env -> env
-  | `Replace _
-  | `Extend  _
-  | `Override _ as env ->
-    Map.fold (env_map env) ~init:[]
-      ~f:(fun ~key ~data acc -> (key ^ "=" ^ data) :: acc)
-;;
+  let env_map ~base env =
+    let map_of_list list = String.Map.of_alist_reduce list ~f:(fun _ x -> x) in
+    match env with
+    | `Replace env -> map_of_list env
+    | `Extend extend -> map_of_list (current ~base () @ extend)
+    | `Override overrides ->
+      List.fold_left overrides ~init:(map_of_list (current ~base ()))
+        ~f:(fun acc (key, v) ->
+          match v with
+          | None -> Map.remove acc key
+          | Some data -> Map.set acc ~key ~data)
+  ;;
+
+  let expand ?base env =
+    match env with
+    | `Replace_raw env -> env
+    | `Replace _
+    | `Extend  _
+    | `Override _ as env ->
+      Map.fold (env_map ~base env) ~init:[]
+        ~f:(fun ~key ~data acc -> (key ^ "=" ^ data) :: acc)
+  ;;
+
+  let expand_array ?base env = Array.of_list (expand ?base env)
+end
+
+type env = Env.t [@@deriving sexp]
 
 let exec ~prog ~argv ?(use_path = true) ?env () =
   let argv = Array.of_list argv in
-  let env = Option.map env ~f:(Fn.compose Array.of_list env_assignments) in
+  let env = Option.map env ~f:Env.expand_array in
   match use_path, env with
   | false, None -> execv ~prog ~argv
   | false, Some env -> execve ~prog ~argv ~env
@@ -950,7 +958,7 @@ let wait_gen
   match f waitpid_result with
   | Some a -> a
   | None ->
-    failwiths "waitpid syscall returned invalid result for mode"
+    failwiths ~here:[%here] "waitpid syscall returned invalid result for mode"
       (pid, mode, waitpid_result)
       ([%sexp_of: int * mode * waitpid_result])
 ;;
@@ -986,7 +994,7 @@ let waitpid pid =
 let waitpid_exn pid =
   let exit_or_signal = waitpid pid in
   if Result.is_error exit_or_signal then
-    failwiths "child process didn't exit with status 0"
+    failwiths ~here:[%here] "child process didn't exit with status 0"
       (`Child_pid pid, exit_or_signal)
       ([%sexp_of: [ `Child_pid of Pid.t ] * Exit_or_signal.t])
 ;;
@@ -1194,7 +1202,11 @@ end = struct
   let unlock = 2
 end
 
-external flock : File_descr.t -> Flock_command.t -> bool = "core_unix_flock"
+external real_flock : blocking:bool -> File_descr.t -> Flock_command.t -> bool = "core_unix_flock"
+
+let flock = real_flock ~blocking:false
+let flock_blocking fd command =
+  assert (real_flock ~blocking:true fd command)
 
 let lseek fd pos ~mode =
   improve (fun () -> Unix.LargeFile.lseek fd pos ~mode)
@@ -1318,12 +1330,16 @@ let access_exn filename perm = Result.ok_exn (access filename perm)
 external remove : string -> unit = "core_unix_remove"
 let remove = unary_filename remove
 
-let dup = unary_fd Unix.dup
+let dup ?close_on_exec fd =
+  improve
+    (fun () -> Unix.dup ?cloexec:close_on_exec fd)
+    (fun () -> [fd_r fd; close_on_exec_r close_on_exec])
 
-let dup2 ~src ~dst =
-  improve (fun () -> UnixNoLabels.dup2 src dst)
+let dup2 ?close_on_exec ~src ~dst () =
+  improve (fun () -> Unix.dup2 ?cloexec:close_on_exec ~src ~dst)
     (fun () -> [("src", File_descr.sexp_of_t src);
-                ("dst", File_descr.sexp_of_t dst)])
+                ("dst", File_descr.sexp_of_t dst);
+                close_on_exec_r close_on_exec])
 ;;
 
 let set_nonblock = unary_fd Unix.set_nonblock
@@ -1498,7 +1514,7 @@ let closedir = (* Non-intr *)
   unary_dir_handle (fun dh ->
     try Unix.closedir dh with | Invalid_argument _ -> ())
 
-let pipe () = UnixNoLabels.pipe ()
+let pipe ?close_on_exec () = Unix.pipe ?cloexec:close_on_exec ()
 
 let mkfifo name ~perm =
   improve (fun () -> Unix.mkfifo name ~perm)
@@ -1572,6 +1588,7 @@ end = struct
 
   let get_path prog_search_path =
     (match prog_search_path with
+     | Some [] -> invalid_arg "Core.Unix.create_process: empty prog_search_path"
      | Some dirs -> dirs
      | None -> Core_sys.getenv "PATH"
                |> Option.value_map ~f:(String.split ~on:':') ~default:["/bin"; "/usr/bin"]
@@ -1650,7 +1667,7 @@ end = struct
 end
 
 let create_process_env ?working_dir ?prog_search_path ?argv0 ~prog ~args ~env () =
-  let env_assignments = env_assignments env in
+  let env_assignments = Env.expand env in
   Execvp_emulation.run
     ~prog
     ~args
@@ -1905,7 +1922,7 @@ module Passwd = struct
       dir : string;
       shell : string;
     }
-  [@@deriving compare, sexp]
+  [@@deriving compare, fields, sexp]
 
   let of_unix u =
     let module U = Unix in
@@ -2070,7 +2087,7 @@ module Inet_addr0 = struct
       module T1 = struct
         include T0
         include Sexpable.Of_stringable (T0)
-        include Binable.Of_stringable  (T0)
+        include (Binable.Of_stringable_without_uuid [@alert "-legacy"])  (T0)
       end
       include T1
       include Comparable.Make(T1)
@@ -2412,22 +2429,23 @@ let domain_of_sockaddr = Unix.domain_of_sockaddr
 
 let addr_r addr = ("addr", sexp_of_sockaddr addr)
 
-let socket_or_pair f ~domain ~kind ~protocol =
-  improve (fun () -> f domain kind protocol)
+let socket_or_pair f ?close_on_exec ~domain ~kind ~protocol () =
+  improve (fun () -> f ?cloexec:close_on_exec ~domain ~kind ~protocol)
     (fun () -> [("domain", sexp_of_socket_domain domain);
                 ("kind", sexp_of_socket_type kind);
-                ("protocol", Int.sexp_of_t protocol)])
+                ("protocol", Int.sexp_of_t protocol);
+                close_on_exec_r close_on_exec])
 ;;
 
-let socket =
-  socket_or_pair
-    (fun domain kind protocol -> UnixNoLabels.socket domain kind protocol)
-let socketpair =
-  socket_or_pair
-    (fun domain kind protocol -> UnixNoLabels.socketpair domain kind protocol)
+let socket = socket_or_pair Unix.socket
+let socketpair = socket_or_pair Unix.socketpair
 
-let accept fd =
-  let fd, addr = unary_fd Unix.accept fd in
+let accept ?close_on_exec fd =
+  let fd, addr =
+    improve
+      (fun () -> Unix.accept ?cloexec:close_on_exec fd)
+      (fun () -> [fd_r fd; close_on_exec_r close_on_exec])
+  in
   let addr =
     match addr with
     | ADDR_UNIX _ -> ADDR_UNIX ""
@@ -2529,6 +2547,7 @@ type socket_bool_option = Unix.socket_bool_option =
   | SO_ACCEPTCONN
   | TCP_NODELAY
   | IPV6_ONLY
+  | SO_REUSEPORT [@if ocaml_version >= (4, 12, 0)]
 [@@deriving sexp]
 
 type socket_int_option = Unix.socket_int_option =
@@ -2620,6 +2639,13 @@ external get_mcast_loop : File_descr.t -> bool = "core_unix_mcast_get_loop"
 external set_mcast_loop : File_descr.t -> bool -> unit = "core_unix_mcast_set_loop"
 
 external set_mcast_ifname : File_descr.t -> string -> unit = "core_unix_mcast_set_ifname"
+
+let set_mcast_ifname fd ifname =
+  (* Improve the error info in the common case.  (It's inconvenient for the C stub to fill
+     in the interface name, but it's easy here.) *)
+  try set_mcast_ifname fd ifname with
+  | Unix_error (message, errno, "") -> raise (Unix_error (message, errno, ifname))
+;;
 
 let open_connection addr =
   improve (fun () -> Unix.open_connection addr) (fun () -> [addr_r addr])

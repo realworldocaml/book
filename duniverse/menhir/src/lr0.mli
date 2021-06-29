@@ -134,6 +134,9 @@ val error_compatible: lr1state -> lr1state -> bool
 (* Union of two states. The two states must have the same core. The
    new state is obtained by pointwise union of the lookahead sets. *)
 
+(* If [s'] is a subset of [s], then [union s' s] is physically equal
+   to [s]. *)
+
 val union: lr1state -> lr1state -> lr1state
 
 (* Restriction of a state to a set of tokens of interest. Every

@@ -1025,6 +1025,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
   let report_if = Error.report_if report in
   let unmatched_end_tag l name k =
     report l (`Unmatched_end_tag name) !throw k in
+  let misnested_tag l t context_name k =
+    report l (`Misnested_tag (t.name, context_name, t.Token_tag.attributes)) !throw k in
 
   let open_elements = Stack.create () in
   let active_formatting_elements = Active.create () in
@@ -1512,8 +1514,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
         close_element_with_implied "template" l (fun () -> reset_mode () ())
       end
 
-    | l, `Start {name = "head"} ->
-      report l (`Misnested_tag ("head", "head")) !throw mode
+    | l, `Start ({name = "head"} as t) ->
+      misnested_tag l t "head" mode
 
     | l, `End {name} when not @@ list_mem_string name ["body"; "html"; "br"] ->
       report l (`Unmatched_end_tag name) !throw mode
@@ -1542,9 +1544,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
           "style"} as v ->
         in_head_mode_rules in_head_noscript_mode v
 
-      | l, `Start {name = "head" | "noscript" as name} ->
-        report l (`Misnested_tag (name, "noscript")) !throw
-          in_head_noscript_mode
+      | l, `Start ({name = "head" | "noscript"} as t) ->
+        misnested_tag l t "noscript" in_head_noscript_mode
 
       | l, `End {name} when name <> "br" ->
         report l (`Unmatched_end_tag name) !throw in_head_noscript_mode
@@ -1579,10 +1580,10 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       | l, `Start ({name = "frameset"} as t) ->
         push_and_emit l t in_frameset_mode
 
-      | l, `Start {name =
+      | l, `Start ({name =
           "base" | "basefont" | "bgsound" | "link" | "meta" | "noframes" |
-          "script" | "style" | "template" | "title" as name} as v ->
-        report l (`Misnested_tag (name, "html")) !throw (fun () ->
+          "script" | "style" | "template" | "title"} as t) as v ->
+        misnested_tag l t "html" (fun () ->
         in_head_mode_rules after_head_mode v)
 
       | _, `End {name = "template"} as v ->
@@ -1635,8 +1636,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
     | l, `Doctype _ ->
       report l (`Bad_document "doctype should be first") !throw mode
 
-    | l, `Start {name = "html"} ->
-      report l (`Misnested_tag ("html", context_name)) !throw mode
+    | l, `Start ({name = "html"} as t) ->
+      misnested_tag l t context_name mode
 
     | _, `Start {name =
         "base" | "basefont" | "bgsound" | "link" | "meta" | "noframes" |
@@ -1644,11 +1645,11 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
     | _, `End {name = "template"} as v ->
       in_head_mode_rules mode v
 
-    | l, `Start {name = "body"} ->
-      report l (`Misnested_tag ("body", context_name)) !throw mode
+    | l, `Start ({name = "body"} as t) ->
+      misnested_tag l t context_name mode
 
     | l, `Start ({name = "frameset"} as t) ->
-      report l (`Misnested_tag ("frameset", context_name)) !throw (fun () ->
+      misnested_tag l t context_name (fun () ->
       match !open_elements with
       | [_] -> mode ()
       | _ ->
@@ -1706,13 +1707,13 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       push_and_emit l t mode)
 
     | l, `Start ({name =
-        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" as name} as t) ->
+        "h1" | "h2" | "h3" | "h4" | "h5" | "h6"} as t) ->
       close_current_p_element l (fun () ->
       (fun mode' ->
         match Stack.current_element open_elements with
         | Some {element_name = `HTML,
             ("h1" | "h2" | "h3" | "h4" | "h5" | "h6" as name')} ->
-          report l (`Misnested_tag (name, name')) !throw (fun () ->
+          misnested_tag l t name' (fun () ->
           pop l mode')
         | _ -> mode' ()) (fun () ->
       push_and_emit l t mode))
@@ -1730,7 +1731,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
     | l, `Start ({name = "form"} as t) ->
       if !form_element_pointer <> None &&
          not @@ Stack.has open_elements "template" then
-        report l (`Misnested_tag ("form", "form")) !throw mode
+        misnested_tag l t "form" mode
       else begin
         close_current_p_element l (fun () ->
         let in_template = Stack.has open_elements "template" in
@@ -1757,7 +1758,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
     | l, `Start ({name = "button"} as t) ->
       (fun mode' ->
         if Stack.in_scope open_elements "button" then
-          report l (`Misnested_tag ("button", "button")) !throw (fun () ->
+          misnested_tag l t "button" (fun () ->
           close_element_with_implied "button" l mode')
         else mode' ())
       (fun () ->
@@ -1843,7 +1844,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
         match Active.has_before_marker active_formatting_elements "a" with
         | None -> k ()
         | Some existing ->
-          report l (`Misnested_tag ("a", "a")) !throw (fun () ->
+          misnested_tag l t "a" (fun () ->
           adoption_agency_algorithm l "a" (fun () ->
           Stack.remove open_elements existing;
           Active.remove active_formatting_elements existing;
@@ -1866,7 +1867,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       (fun k ->
         if not @@ Stack.in_scope open_elements "nobr" then k ()
         else
-          report l (`Misnested_tag ("nobr", "nobr")) !throw (fun () ->
+          misnested_tag l t "nobr" (fun () ->
           adoption_agency_algorithm l "nobr" (fun () ->
           reconstruct_active_formatting_elements k)))
       (fun () -> push_and_emit ~formatting:true l t mode))
@@ -1968,25 +1969,33 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
         reconstruct_active_formatting_elements (fun () ->
         push_and_emit l t mode))
 
-    | l, `Start ({name = "rb" | "rp" | "rtc" as name} as t) ->
+    | l, `Start ({name = "rb" | "rtc"} as t) ->
       (fun mode' ->
-        if Stack.in_scope open_elements "ruby" then
-          pop_implied l (fun () ->
+        let finish () =
           if Stack.current_element_is open_elements ["ruby"] then
             mode' ()
           else
-            report l (`Misnested_tag (name, context_name)) !throw mode'))
+            misnested_tag l t context_name mode'
+        in
+        if Stack.in_scope open_elements "ruby" then
+          pop_implied l finish
+        else
+          finish ())
       (fun () ->
         push_and_emit l t mode)
 
-    | l, `Start ({name = "rt"} as t) ->
+    | l, `Start ({name = "rp" | "rt"} as t) ->
       (fun mode' ->
-        if Stack.in_scope open_elements "ruby" then
-          pop_implied ~except:"rtc" l (fun () ->
+        let finish () =
           if Stack.current_element_is open_elements ["ruby"; "rtc"] then
             mode' ()
           else
-            report l (`Misnested_tag ("rt", context_name)) !throw mode'))
+            misnested_tag l t context_name mode'
+        in
+        if Stack.in_scope open_elements "ruby" then
+          pop_implied ~except:"rtc" l finish
+        else
+          finish ())
       (fun () ->
         push_and_emit l t mode)
 
@@ -2002,10 +2011,10 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       if t.self_closing then pop l mode
       else mode ()))
 
-    | l, `Start {name =
+    | l, `Start ({name =
         "caption" | "col" | "colgroup" | "frame" | "head" | "tbody" | "td" |
-        "tfoot" | "th" | "thead" | "tr" as name} ->
-      report l (`Misnested_tag (name, context_name)) !throw mode
+        "tfoot" | "th" | "thead" | "tr"} as t) ->
+      misnested_tag l t context_name mode
 
     | l, `Start t ->
       reconstruct_active_formatting_elements (fun () ->
@@ -2126,8 +2135,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       push tokens v;
       push_implicit l "tbody" in_table_body_mode)
 
-    | l, `Start {name = "table"} as v ->
-      report l (`Misnested_tag ("table", "table")) !throw (fun () ->
+    | l, `Start ({name = "table"} as t) as v ->
+      misnested_tag l t "table" (fun () ->
       if not @@ Stack.has open_elements "table" then mode ()
       else begin
         push tokens v;
@@ -2150,12 +2159,12 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       in_head_mode_rules mode v
 
     | l, `Start ({name = "input"} as t) when Element.is_not_hidden t ->
-      report l (`Misnested_tag ("input", "table")) !throw (fun () ->
+      misnested_tag l t "table" (fun () ->
       push_and_emit ~acknowledge:true l t (fun () ->
       pop l mode))
 
     | l, `Start ({name = "form"} as t) ->
-      report l (`Misnested_tag ("form", "table")) !throw (fun () ->
+      misnested_tag l t "table" (fun () ->
       push_and_emit l t (fun () ->
       pop l mode))
 
@@ -2205,10 +2214,10 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
           close_element_with_implied "caption" l in_table_mode
         end
 
-      | l, `Start {name =
+      | l, `Start ({name =
           "caption" | "col" | "colgroup" | "tbody" | "td" | "tfoot" | "th" |
-          "thead" | "tr" as name} as v ->
-        report l (`Misnested_tag (name, "caption")) !throw (fun () ->
+          "thead" | "tr"} as t) as v ->
+        misnested_tag l t "caption" (fun () ->
         if not @@ Stack.in_table_scope open_elements "caption" then
           in_caption_mode ()
         else begin
@@ -2292,8 +2301,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
         pop_to_table_body_context l (fun () ->
         push_and_emit l t in_row_mode)
 
-      | l, `Start {name = ("th" | "td") as name} as v ->
-        report l (`Misnested_tag (name, "table")) !throw (fun () ->
+      | l, `Start ({name = "th" | "td"} as t) as v ->
+        misnested_tag l t "table" (fun () ->
         pop_to_table_body_context l (fun () ->
         push tokens v;
         push_implicit l "tr" in_row_mode))
@@ -2305,12 +2314,12 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
           pop_to_table_body_context l (fun () ->
           pop l in_table_mode)
 
-      | l, `Start {name =
-          "caption" | "col" | "colgroup" | "tbody" | "tfoot" | "thead"
-          as name} as v ->
+      | l, `Start ({name =
+          "caption" | "col" | "colgroup" | "tbody" | "tfoot" | "thead"} as t)
+          as v ->
         if not @@ Stack.one_in_table_scope open_elements
             ["tbody"; "thead"; "tfoot"] then
-          report l (`Misnested_tag (name, "table")) !throw in_table_body_mode
+          misnested_tag l t "table" in_table_body_mode
         else begin
           push tokens v;
           pop_to_table_body_context l (fun () ->
@@ -2357,8 +2366,8 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       | l, `End {name = "table"} as v ->
         if not @@ Stack.in_table_scope open_elements "tr" then
           match snd v with
-          | `Start {name} ->
-            report l (`Misnested_tag (name, "tr")) !throw in_row_mode
+          | `Start t ->
+            misnested_tag l t "tr" in_row_mode
           | `End {name} ->
             report l (`Unmatched_end_tag name) !throw in_row_mode
         else
@@ -2396,11 +2405,11 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
           Active.clear_until_marker active_formatting_elements;
           in_row_mode ())
 
-      | l, `Start {name =
+      | l, `Start ({name =
           "caption" | "col" | "colgroup" | "tbody" | "td" | "tfoot" | "th" |
-          "thead" | "tr" as name} as v ->
+          "thead" | "tr"} as t) as v ->
         if not @@ Stack.one_in_table_scope open_elements ["td"; "th"] then
-          report l (`Misnested_tag (name, "td/th")) !throw in_cell_mode
+          misnested_tag l t "td/th" in_cell_mode
         else
           close_cell l (fun () ->
           Active.clear_until_marker active_formatting_elements;
@@ -2489,12 +2498,12 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       else
         close_element l "select" (fun () -> reset_mode () ())
 
-    | l, `Start {name = "select"} ->
-      report l (`Misnested_tag ("select", "select")) !throw (fun () ->
+    | l, `Start ({name = "select"} as t) ->
+      misnested_tag l t "select" (fun () ->
       close_element l "select" (fun () -> reset_mode () ()))
 
-    | l, `Start {name = "input" | "keygen" | "textarea" as name} as v ->
-      report l (`Misnested_tag (name, "select")) !throw (fun () ->
+    | l, `Start ({name = "input" | "keygen" | "textarea"} as t) as v ->
+      misnested_tag l t "select" (fun () ->
       if not @@ Stack.in_select_scope open_elements "select" then
         mode ()
       else begin
@@ -2515,10 +2524,10 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
   (* 8.2.5.4.17. *)
   and in_select_in_table_mode () =
     dispatch tokens begin function
-      | l, `Start {name =
+      | l, `Start ({name =
           "caption" | "table" | "tbody" | "tfoot" | "thead" | "tr" | "td" |
-          "th" as name} as v ->
-        report l (`Misnested_tag (name, "table")) !throw (fun () ->
+          "th"} as t) as v ->
+        misnested_tag l t "table" (fun () ->
         push tokens v;
         close_element l "select" (fun () -> reset_mode () ()))
 
@@ -2793,7 +2802,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
       if name = "font" && not @@ is_html_font_tag t then
         foreign_start_tag mode l t
       else
-        report l (`Misnested_tag (name, "xml tag")) !throw (fun () ->
+        misnested_tag l t "xml tag" (fun () ->
         push tokens v;
         pop l (fun () ->
         pop_until (function

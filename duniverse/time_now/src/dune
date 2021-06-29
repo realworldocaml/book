@@ -4,4 +4,4 @@
  (js_of_ocaml (javascript_files runtime.js)))
 
 (rule (targets config.h) (deps)
- (action (bash "cp %{lib:jst-config:config.h} .")))
+ (action (copy %{lib:jst-config:config.h} config.h)))

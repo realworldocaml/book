@@ -137,7 +137,8 @@ module Connection = struct
     >>= fun res -> Transport.close transport >>| fun () -> Result.ok_exn res
   ;;
 
-  let serve
+  let make_serve_func
+        tcp_creator
         ~implementations
         ~initial_connection_state
         ~where_to_listen
@@ -152,11 +153,13 @@ module Connection = struct
         ?(on_handler_error = `Ignore)
         ()
     =
-    Tcp.Server.create_sock
+    tcp_creator
       ?max_connections
+      ?max_accepts_per_batch:None
       ?backlog
-      where_to_listen
+      ?socket:None
       ~on_handler_error
+      where_to_listen
       (fun inet socket ->
          match (Socket.getpeername socket :> Socket.Address.t) with
          | exception _could_raise_if_the_socket_disconnects_quickly -> Deferred.unit
@@ -181,6 +184,22 @@ module Connection = struct
                ~connection_state
                ~on_handshake_error
                (make_transport ~max_message_size (Socket.fd socket))))
+  ;;
+
+  let serve ~implementations ~initial_connection_state ~where_to_listen =
+    make_serve_func
+      Tcp.Server.create_sock
+      ~implementations
+      ~initial_connection_state
+      ~where_to_listen
+  ;;
+
+  let serve_inet ~implementations ~initial_connection_state ~where_to_listen =
+    make_serve_func
+      Tcp.Server.create_sock_inet
+      ~implementations
+      ~initial_connection_state
+      ~where_to_listen
   ;;
 
   let client'

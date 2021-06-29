@@ -1,5 +1,7 @@
 module Host = Host
 
+module Key_type = Key_type
+
 module Public_key = Public_key
 
 module Private_key = Private_key
@@ -19,3 +21,5 @@ module Signing_request = Signing_request
 module CRL = Crl
 
 module Authenticator = Authenticator
+
+module PKCS12 = P12

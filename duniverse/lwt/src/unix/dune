@@ -85,6 +85,7 @@ let () = Jbuild_plugin.V1.send @@ {|
   unix_recv_send_utils
   unix_recv_msg
   unix_send_msg
+  unix_send_msg_byte
   unix_get_credentials
   unix_mcast_utils
   unix_mcast_set_loop

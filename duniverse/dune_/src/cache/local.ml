@@ -27,46 +27,13 @@ module Trimming_result = struct
 end
 
 let default_root () =
-  Path.L.relative (Path.of_string Xdg.cache_dir) [ "dune"; "db" ]
+  Path.L.relative
+    (Path.of_filename_relative_to_initial_cwd Xdg.cache_dir)
+    [ "dune"; "db" ]
 
-let file_store_version = "v3"
+let file_store_root cache = Path.L.relative cache.root [ "files"; "v4" ]
 
-let metadata_store_version = "v3"
-
-let file_store_root cache =
-  Path.L.relative cache.root [ "files"; file_store_version ]
-
-let metadata_store_root cache =
-  Path.L.relative cache.root [ "meta"; metadata_store_version ]
-
-let detect_unexpected_dirs_under_cache_root cache =
-  let expected_in_root path =
-    (* We only report unexpected directories, since quite a few temporary files
-       are created at the cache root, and it would be tedious to keep track of
-       all of them. *)
-    match (Path.is_directory (Path.relative cache.root path), path) with
-    | false, _ -> true
-    | true, "files"
-    | true, "meta"
-    | true, "runtime" ->
-      true
-    | true, dir -> String.is_prefix ~prefix:"promoting." dir
-  in
-  let open Result.O in
-  let expected_in_files = String.equal file_store_version in
-  let expected_in_meta = String.equal metadata_store_version in
-  let detect_in ~dir expected =
-    let+ names = Path.readdir_unsorted dir in
-    List.filter_map names ~f:(fun name ->
-        Option.some_if (not (expected name)) (Path.relative dir name))
-  in
-  let+ in_root = detect_in ~dir:cache.root expected_in_root
-  and+ in_files =
-    detect_in ~dir:(Path.relative cache.root "files") expected_in_files
-  and+ in_meta =
-    detect_in ~dir:(Path.relative cache.root "meta") expected_in_meta
-  in
-  List.sort ~compare:Path.compare (in_root @ in_files @ in_meta)
+let metadata_store_root cache = Path.L.relative cache.root [ "meta"; "v4" ]
 
 (* A file storage scheme. *)
 module type FSScheme = sig
@@ -95,6 +62,8 @@ module FirstTwoCharsSubdir : FSScheme = struct
     let first_two_chars = String.sub digest ~pos:0 ~len:2 in
     Path.L.relative root [ first_two_chars; digest ]
 
+  (* List all entries in a given cache root. Returns the empty list of the root
+     doesn't exist. *)
   let list ~root =
     let open Result.O in
     let f dir =
@@ -107,6 +76,7 @@ module FirstTwoCharsSubdir : FSScheme = struct
     in
     match Path.readdir_unsorted root >>= Result.List.concat_map ~f with
     | Ok res -> res
+    | Error ENOENT -> []
     | Error e -> User_error.raise [ Pp.text (Unix.error_message e) ]
 end
 
@@ -116,6 +86,15 @@ let metadata_path cache key =
   FSSchemeImpl.path ~root:(metadata_store_root cache) key
 
 let file_path cache key = FSSchemeImpl.path ~root:(file_store_root cache) key
+
+(* Support for an older version of the cache. *)
+module V3 = struct
+  let file_store_root cache = Path.L.relative cache.root [ "files"; "v3" ]
+
+  let metadata_store_root cache = Path.L.relative cache.root [ "meta"; "v3" ]
+
+  let file_path cache key = FSSchemeImpl.path ~root:(file_store_root cache) key
+end
 
 module Metadata_file = struct
   type t =
@@ -197,17 +176,20 @@ let deduplicate cache (file : File.t) =
   match cache.duplication_mode with
   | Copy -> ()
   | Hardlink -> (
-    let path = Path.Build.to_string file.path in
-    let path_in_cache = file_path cache file.digest |> Path.to_string in
-    let tmpname = Path.Build.to_string (Path.Build.of_string ".dedup") in
-    cache.info [ Pp.textf "deduplicate %s from %s" path path_in_cache ];
-    let rm p = try Unix.unlink p with _ -> () in
+    let path = Path.build file.path in
+    let path_in_cache = file_path cache file.digest in
+    let tmpname = Path.build (Path.Build.of_string ".dedup") in
+    cache.info
+      [ Pp.textf "deduplicate %s from %s" (Path.to_string path)
+          (Path.to_string path_in_cache)
+      ];
     try
-      rm tmpname;
-      Unix.link path_in_cache tmpname;
-      Unix.rename tmpname path
-    with Unix.Unix_error (e, syscall, _) ->
-      rm tmpname;
+      Path.unlink_no_err tmpname;
+      Path.link path_in_cache tmpname;
+      Path.rename tmpname path
+    with
+    | Unix.Unix_error (e, syscall, _) ->
+      Path.unlink_no_err tmpname;
       cache.warn
         [ Pp.textf "error handling dune-cache command: %s: %s" syscall
             (Unix.error_message e)
@@ -222,11 +204,11 @@ let promote_sync cache paths key metadata ~repository ~duplication =
   let open Result.O in
   let* repo =
     match repository with
+    | None -> Result.Ok None
     | Some idx -> (
       match List.nth cache.repositories idx with
       | None -> Result.Error (Printf.sprintf "repository out of range: %i" idx)
-      | repo -> Result.Ok repo )
-    | None -> Result.Ok None
+      | repo -> Result.Ok repo)
   in
   let metadata =
     apply
@@ -240,7 +222,7 @@ let promote_sync cache paths key metadata ~repository ~duplication =
   let promote (path, expected_digest) =
     let* abs_path = make_path cache (Path.Build.local path) in
     cache.info [ Pp.textf "promote %s" (Path.to_string abs_path) ];
-    let stat = Unix.lstat (Path.to_string abs_path) in
+    let stat = Path.lstat abs_path in
     let* stat =
       if stat.st_kind = S_REG then
         Result.Ok stat
@@ -253,48 +235,51 @@ let promote_sync cache paths key metadata ~repository ~duplication =
        [duplication] setting) of the promoted file in a temporary directory to
        correctly handle the situation when the file is modified or deleted
        during the promotion process. *)
-    let tmp =
-      let dst = Path.relative cache.temp_dir "data" in
-      if Path.exists dst then Path.unlink dst;
-      duplicate ~duplication cache ~src:abs_path ~dst;
-      dst
-    in
-    let effective_digest = Digest.file_with_stats tmp (Path.stat tmp) in
-    if Digest.compare effective_digest expected_digest != Ordering.Eq then (
-      let message =
-        Printf.sprintf "digest mismatch: %s != %s"
-          (Digest.to_string effective_digest)
-          (Digest.to_string expected_digest)
-      in
-      cache.info [ Pp.text message ];
-      Result.Error message
-    ) else
-      let in_the_cache = file_path cache effective_digest in
-      (* CR-soon: we assume that if the file with [effective_digest] exists in
-         the file storage, then its content matches the digest, i.e. the user
-         never modifies it. In principle, we could add a consistency check but
-         this would have a non-negligible performance cost. A good compromise
-         seems to be to add a "paranoid" mode to Dune cache where we always
-         check file contents for consistency with the expected digest, so one
-         could enable it when needed. In the paranoid mode, we could futhermore
-         check for a digest collision via [Io.compare_files in_the_cache tmp]. *)
-      match Path.exists in_the_cache with
-      | true ->
-        (* We no longer need the temporary file. *)
-        Path.unlink tmp;
-        (* Update the timestamp of the existing cache entry, moving it to the
-           back of the trimming queue. *)
-        Path.touch in_the_cache;
-        Result.Ok (Already_promoted { path; digest = effective_digest })
-      | false ->
-        Path.mkdir_p (Path.parent_exn in_the_cache);
-        let dest = Path.to_string in_the_cache in
-        (* Move the temporary file to the cache. *)
-        Unix.rename (Path.to_string tmp) dest;
-        (* Remove write permissions, making the cache entry immutable. We assume
-           that users do not modify the files in the cache. *)
-        Unix.chmod dest (stat.st_perm land 0o555);
-        Result.Ok (Promoted { path; digest = effective_digest })
+    Temp.with_temp_path ~dir:cache.temp_dir ~prefix:"temp" ~suffix:"data"
+      ~f:(function
+      | Error exn ->
+        let message =
+          sprintf "Failed to create a temp file: %s"
+            (Exn.to_dyn exn |> Dyn.to_string)
+        in
+        cache.info [ Pp.text message ];
+        Result.Error message
+      | Ok tmp -> (
+        duplicate ~duplication cache ~src:abs_path ~dst:tmp;
+        let effective_digest = Digest.file_with_stats tmp (Path.stat tmp) in
+        if Digest.compare effective_digest expected_digest != Ordering.Eq then (
+          let message =
+            Printf.sprintf "digest mismatch: %s != %s"
+              (Digest.to_string effective_digest)
+              (Digest.to_string expected_digest)
+          in
+          cache.info [ Pp.text message ];
+          Result.Error message
+        ) else
+          let in_the_cache = file_path cache effective_digest in
+          (* CR-someday: we assume that if the file with [effective_digest]
+             exists in the file storage, then its content matches the digest,
+             i.e. the user never modifies it. In principle, we could add a
+             consistency check but this would have a non-negligible performance
+             cost. A good compromise seems to be to add a "paranoid" mode to
+             Dune cache where we always check file contents for consistency with
+             the expected digest, so one could enable it when needed. In the
+             paranoid mode, we could furthermore check for a digest collision
+             via [Io.compare_files in_the_cache tmp]. *)
+          match Path.exists in_the_cache with
+          | true ->
+            (* Update the timestamp of the existing cache entry, moving it to
+               the back of the trimming queue. *)
+            Path.touch in_the_cache;
+            Result.Ok (Already_promoted { path; digest = effective_digest })
+          | false ->
+            Path.mkdir_p (Path.parent_exn in_the_cache);
+            (* Move the temporary file to the cache. *)
+            Path.rename tmp in_the_cache;
+            (* Remove write permissions, making the cache entry immutable. We
+               assume that users do not modify the files in the cache. *)
+            Path.chmod in_the_cache ~mode:(stat.st_perm land 0o555);
+            Result.Ok (Promoted { path; digest = effective_digest })))
   in
   let+ promoted = Result.List.map ~f:promote paths in
   let metadata_path = metadata_path cache key
@@ -355,7 +340,7 @@ let search cache key =
 
 let set_build_dir cache p = Result.Ok { cache with build_root = Some p }
 
-let teardown cache = Path.rm_rf ~allow_external:true cache.temp_dir
+let teardown cache = Temp.destroy Dir cache.temp_dir
 
 let hint _ _ = Result.Ok ()
 
@@ -387,10 +372,10 @@ let make ?(root = default_root ())
     ; command_handler
     ; duplication_mode
     ; temp_dir =
-        (* CR-soon amokhov: Introduce [val getpid : unit -> t] in [pid.ml] so
+        (* CR-someday amokhov: Introduce [val getpid : unit -> t] in [pid.ml] so
            that we don't use the untyped version of pid anywhere. *)
-        Path.temp_dir ~temp_dir:root "promoting."
-          ("." ^ string_of_int (Unix.getpid ()))
+        Temp.temp_in_dir ~perms:0o700 Temp.Dir ~dir:root ~prefix:"promoting."
+          ~suffix:("." ^ string_of_int (Unix.getpid ()))
     }
   in
   match
@@ -404,8 +389,7 @@ let make ?(root = default_root ())
 
 let duplication_mode cache = cache.duplication_mode
 
-let _garbage_collect cache ~trimmed_so_far =
-  let metadata_files = FSSchemeImpl.list ~root:(metadata_store_root cache) in
+let trim_bad_metadata_files ~metadata_files ~trimmed_so_far ~file_path cache =
   List.fold_left metadata_files ~init:trimmed_so_far
     ~f:(fun trimmed_so_far path ->
       let should_be_removed =
@@ -418,29 +402,35 @@ let _garbage_collect cache ~trimmed_so_far =
             ];
           true
         | Result.Ok { Metadata_file.files; _ } ->
-          if
-            List.for_all
-              ~f:(fun { File.digest; _ } ->
-                Path.exists (file_path cache digest))
-              files
-          then
-            false
-          else (
+          let is_broken =
+            List.exists files ~f:(fun { File.digest; _ } ->
+                let reference = file_path cache digest in
+                not (Path.exists reference))
+          in
+          if is_broken then
             cache.info
               [ Pp.textf "remove metadata file %s as it refers to missing files"
                   (Path.to_string_maybe_quoted path)
               ];
-            true
-          )
+          is_broken
       in
-      if should_be_removed then (
+      match should_be_removed with
+      | true ->
         let bytes = (Path.stat path).st_size in
         Path.unlink_no_err path;
         Trimming_result.add trimmed_so_far ~bytes
-      ) else
-        trimmed_so_far)
+      | false -> trimmed_so_far)
 
-let garbage_collect = _garbage_collect ~trimmed_so_far:Trimming_result.empty
+let garbage_collect_impl ~trimmed_so_far cache =
+  let metadata_files = FSSchemeImpl.list ~root:(V3.metadata_store_root cache) in
+  let trimmed_so_far =
+    trim_bad_metadata_files ~metadata_files ~trimmed_so_far
+      ~file_path:V3.file_path cache
+  in
+  let metadata_files = FSSchemeImpl.list ~root:(metadata_store_root cache) in
+  trim_bad_metadata_files ~metadata_files ~trimmed_so_far ~file_path cache
+
+let garbage_collect = garbage_collect_impl ~trimmed_so_far:Trimming_result.empty
 
 (* We call a cached file "unused" if there are currently no hard links to it
    from build directories. Note that [st_nlink] can return 0 if the file has
@@ -449,13 +439,17 @@ let garbage_collect = _garbage_collect ~trimmed_so_far:Trimming_result.empty
    skip it while trimming. *)
 let file_exists_and_is_unused ~stats = stats.Unix.st_nlink = 1
 
+let files_in_cache_for_all_supported_versions cache =
+  let files = FSSchemeImpl.list ~root:(file_store_root cache) in
+  let files_v3 = FSSchemeImpl.list ~root:(V3.file_store_root cache) in
+  files @ files_v3
+
 let trim cache ~goal =
-  let root = file_store_root cache in
-  let files = FSSchemeImpl.list ~root in
+  let files = files_in_cache_for_all_supported_versions cache in
   let f path =
     let stats = Path.stat path in
     if file_exists_and_is_unused ~stats then
-      Some (path, stats.st_size, stats.st_mtime)
+      Some (path, stats.st_size, stats.st_ctime)
     else
       None
   and compare (_, _, t1) (_, _, t2) = Ordering.of_int (Stdlib.compare t1 t2) in
@@ -465,19 +459,18 @@ let trim cache ~goal =
       trimmed_so_far
     else (
       Path.unlink path;
-      (* CR-soon amokhov: We should really be using block_size * #blocks because
-         that's how much we save actually. *)
+      (* CR-someday amokhov: We should really be using block_size * #blocks
+         because that's how much we save actually. *)
       Trimming_result.add trimmed_so_far ~bytes
     )
   in
   let trimmed_so_far =
     List.fold_left ~init:Trimming_result.empty ~f:delete files
   in
-  _garbage_collect cache ~trimmed_so_far
+  garbage_collect_impl cache ~trimmed_so_far
 
 let overhead_size cache =
-  let root = file_store_root cache in
-  let files = FSSchemeImpl.list ~root in
+  let files = files_in_cache_for_all_supported_versions cache in
   let stats =
     let f p =
       try

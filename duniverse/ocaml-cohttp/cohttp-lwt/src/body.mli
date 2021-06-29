@@ -14,25 +14,20 @@
  *
   }}}*)
 
-type t = [
-  | Cohttp.Body.t
-  | `Stream of string Lwt_stream.t
-] [@@deriving sexp]
+type t = [ Cohttp.Body.t | `Stream of string Lwt_stream.t ] [@@deriving sexp]
 
 include Cohttp.S.Body with type t := t
 
 val is_empty : t -> bool Lwt.t
-
 val to_string : t -> string Lwt.t
 val to_string_list : t -> string list Lwt.t
-
 val to_stream : t -> string Lwt_stream.t
 val of_stream : string Lwt_stream.t -> t
+val to_form : t -> (string * string list) list Lwt.t
 
-val create_stream : ('a -> Cohttp.Transfer.chunk Lwt.t) -> 'a -> string Lwt_stream.t
+val create_stream :
+  ('a -> Cohttp.Transfer.chunk Lwt.t) -> 'a -> string Lwt_stream.t
 
 val length : t -> (int64 * t) Lwt.t
-
 val write_body : (string -> unit Lwt.t) -> t -> unit Lwt.t
-
 val drain_body : t -> unit Lwt.t

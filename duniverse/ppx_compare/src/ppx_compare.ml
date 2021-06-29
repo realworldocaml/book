@@ -4,11 +4,11 @@ open Ppx_compare_expander
 
 let add_deriver name (module E : Ppx_compare_expander.S) =
   let str_type_decl =
-    Deriving.Generator.make_noarg E.str_type_decl
+    Deriving.Generator.V2.make_noarg E.str_type_decl
       ~attributes:E.str_attributes
   in
   let sig_type_decl =
-    Deriving.Generator.make_noarg E.sig_type_decl
+    Deriving.Generator.V2.make_noarg E.sig_type_decl
   in
   Deriving.add name
     ~str_type_decl
@@ -38,7 +38,7 @@ let () =
                    (Extension.declare name
                       Core_type Ast_pattern.(ptyp __)
                       (fun ~loc ~path:_ ty ->
-                         type_ ~loc
+                         type_ ~hide:true ~loc
                            (replace_underscores_by_variables ty)))
                ; Context_free.Rule.extension
                    (Extension.declare name

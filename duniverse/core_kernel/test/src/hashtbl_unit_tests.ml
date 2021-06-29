@@ -60,7 +60,6 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
            Hashtbl_intf.Accessors
            with type ('a, 'b) t := ('a, 'b) Hashtbl.t
            with type 'a key := 'a Hashtbl.key
-           with type 'a merge_into_action = 'a Hashtbl.merge_into_action
 
          include
            Hashtbl_intf.Multi
@@ -243,7 +242,7 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
              let to_option t = if is_even t then Some (succ t) else None
 
              let to_partition t =
-               if is_even t then `Fst (succ t) else `Snd (pred t)
+               if is_even t then First (succ t) else Second (pred t)
              ;;
            end
 
@@ -261,7 +260,9 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
              ;;
 
              let to_data_partition ~key ~data =
-               if Key.to_bool key then `Fst (succ data) else `Snd (pred data)
+               if Key.to_bool key
+               then First (succ data)
+               else Second (pred data)
              ;;
 
              let merge ~key x =
@@ -316,10 +317,6 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
          open For_tests
 
          let invariant = Hashtbl.invariant
-
-         type 'a merge_into_action = 'a Hashtbl.merge_into_action =
-           | Remove
-           | Set_to of 'a
 
          (* This test is mostly validating constructors, making sure all of them satisfy
             [invariant] and that we have correctly constructed corresponding hash tables
@@ -1031,12 +1028,20 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
 
          let find_and_call = Hashtbl.find_and_call
          let findi_and_call = Hashtbl.findi_and_call
+         let find_and_call1 = Hashtbl.find_and_call1
+         let findi_and_call1 = Hashtbl.findi_and_call1
+         let find_and_call2 = Hashtbl.find_and_call2
+         let findi_and_call2 = Hashtbl.findi_and_call2
 
          let%test_unit _ =
            Qc.test
-             (Gen.tuple2 constructor_gen Key.quickcheck_generator)
-             ~sexp_of:[%sexp_of: constructor * Key.t]
-             ~f:(fun (constructor, key) ->
+             (Gen.tuple4
+                constructor_gen
+                Key.quickcheck_generator
+                Int.quickcheck_generator
+                String.quickcheck_generator)
+             ~sexp_of:[%sexp_of: constructor * Key.t * int * string]
+             ~f:(fun (constructor, key, a, b) ->
                let map, t = map_and_table constructor in
                [%test_result: (Data.t, Key.t) Either.t]
                  (Hashtbl.find_and_call
@@ -1047,7 +1052,66 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
                  ~expect:
                    (match Map.find map key with
                     | Some data -> First data
-                    | None -> Second key))
+                    | None -> Second key);
+               [%test_result: (Key.t * Data.t, Key.t) Either.t]
+                 (Hashtbl.findi_and_call
+                    t
+                    key
+                    ~if_found:(fun ~key ~data -> Either.first (key, data))
+                    ~if_not_found:Either.second)
+                 ~expect:
+                   (match Map.find map key with
+                    | Some data -> First (key, data)
+                    | None -> Second key);
+               [%test_result: (Data.t, Key.t) Either.t * int]
+                 (Hashtbl.find_and_call1
+                    t
+                    key
+                    ~a
+                    ~if_found:(fun data a -> Either.first data, a)
+                    ~if_not_found:(fun key a -> Either.second key, a))
+                 ~expect:
+                   (match Map.find map key with
+                    | Some data -> First data, a
+                    | None -> Second key, a);
+               [%test_result: (Key.t * Data.t, Key.t) Either.t * int]
+                 (Hashtbl.findi_and_call1
+                    t
+                    key
+                    ~a
+                    ~if_found:(fun ~key ~data a ->
+                      Either.first (key, data), a)
+                    ~if_not_found:(fun key a -> Either.second key, a))
+                 ~expect:
+                   (match Map.find map key with
+                    | Some data -> First (key, data), a
+                    | None -> Second key, a);
+               [%test_result: (Data.t, Key.t) Either.t * int * string]
+                 (Hashtbl.find_and_call2
+                    t
+                    key
+                    ~a
+                    ~b
+                    ~if_found:(fun data a b -> Either.first data, a, b)
+                    ~if_not_found:(fun key a b -> Either.second key, a, b))
+                 ~expect:
+                   (match Map.find map key with
+                    | Some data -> First data, a, b
+                    | None -> Second key, a, b);
+               [%test_result:
+                 (Key.t * Data.t, Key.t) Either.t * int * string]
+                 (Hashtbl.findi_and_call2
+                    t
+                    key
+                    ~a
+                    ~b
+                    ~if_found:(fun ~key ~data a b ->
+                      Either.first (key, data), a, b)
+                    ~if_not_found:(fun key a b -> Either.second key, a, b))
+                 ~expect:
+                   (match Map.find map key with
+                    | Some data -> First (key, data), a, b
+                    | None -> Second key, a, b))
          ;;
 
          let find_and_remove = Hashtbl.find_and_remove
@@ -1089,13 +1153,14 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
              ~f:(fun (constructor1, constructor2) ->
                let map1, t1 = map_and_table constructor1 in
                let map2, t2 = map_and_table constructor2 in
-               let f ~key data2 data1_opt =
-                 Key_and_data.merge
-                   ~key
-                   (match data1_opt with
-                    | Some data1 -> `Both (data1, data2)
-                    | None -> `Right data2)
-                 |> function
+               let f ~key data2 data1_opt : _ Hashtbl.Merge_into_action.t =
+                 match
+                   Key_and_data.merge
+                     ~key
+                     (match data1_opt with
+                      | Some data1 -> `Both (data1, data2)
+                      | None -> `Right data2)
+                 with
                  | None -> Remove
                  | Some x -> Set_to x
                in
@@ -1120,7 +1185,7 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
                let map1, t1 = map_and_table constructor1 in
                let map2, t2 = map_and_table constructor2 in
                [%test_result: bool]
-                 (Hashtbl.equal t1 t2 Data.equal)
+                 (Hashtbl.equal Data.equal t1 t2)
                  ~expect:(Map.equal Data.equal map1 map2))
          ;;
 
@@ -1134,7 +1199,7 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
                let map1, t1 = map_and_table constructor1 in
                let map2, t2 = map_and_table constructor2 in
                [%test_result: bool]
-                 (Hashtbl.similar t1 t2 Data.equal)
+                 (Hashtbl.similar Data.equal t1 t2)
                  ~expect:(Map.equal Data.equal map1 map2))
          ;;
 
@@ -1263,6 +1328,7 @@ module Make_quickcheck_comparison_to_Map (Hashtbl : Hashtbl_intf.Hashtbl) = stru
 
        include (Hashtbl : For_deriving with type ('a, 'b) t := ('a, 'b) t)
        module Hashable = Hashtbl.Hashable
+       module Merge_into_action = Hashtbl.Merge_into_action
        module Poly = Hashtbl.Poly
        module Make_plain = Hashtbl.Make_plain
        module Make = Hashtbl.Make
@@ -1343,14 +1409,9 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
            None :: List.map values ~f:(fun value -> Some value)
          ;;
 
-         type 'a fst_or_snd =
-           [ `Fst of 'a
-           | `Snd of 'a
-           ]
-         [@@deriving sexp]
-
-         let fst_or_snd values =
-           List.concat_map values ~f:(fun value -> [ `Fst value; `Snd value ])
+         let first_or_second values =
+           List.concat_map values ~f:(fun value ->
+             [ First value; Second value ])
          ;;
 
          let default_mutate t = Hashtbl.clear t
@@ -1651,10 +1712,6 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
 
        open Test
 
-       type 'a merge_into_action = 'a Hashtbl.merge_into_action =
-         | Remove
-         | Set_to of 'a
-
        (* functions that both mutate and accept callbacks *)
 
        let find_or_add = Hashtbl.find_or_add
@@ -1709,9 +1766,9 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
            [%sexp_of: data option]
            (option sample_data)
            (fun opt ->
-              let action =
+              let action : _ Hashtbl.Merge_into_action.t =
                 match opt with
-                | None -> Hashtbl.Remove
+                | None -> Remove
                 | Some x -> Set_to x
               in
               test_mutate_2ts (fun dst src ->
@@ -1895,6 +1952,11 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
 
        let find_and_call = Hashtbl.find_and_call
        let findi_and_call = Hashtbl.findi_and_call
+       let find_and_call1 = Hashtbl.find_and_call1
+       let findi_and_call1 = Hashtbl.findi_and_call1
+       let find_and_call2 = Hashtbl.find_and_call2
+       let findi_and_call2 = Hashtbl.findi_and_call2
+
 
        let%test_unit "find_and_call" =
          for_each "key" sexp_of_key sample_keys (fun key ->
@@ -2067,8 +2129,8 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
        let%test_unit "partition_map" =
          for_each
            "f result"
-           [%sexp_of: data fst_or_snd]
-           (fst_or_snd sample_data)
+           [%sexp_of: (data, data) Either.t]
+           (first_or_second sample_data)
            (fun x ->
               let callback _ = x in
               let test_result =
@@ -2084,8 +2146,8 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
        let%test_unit "partition_mapi" =
          for_each
            "f result"
-           [%sexp_of: data fst_or_snd]
-           (fst_or_snd sample_data)
+           [%sexp_of: (data, data) Either.t]
+           (first_or_second sample_data)
            (fun x ->
               let callback _ = x in
               let test_result =
@@ -2178,7 +2240,7 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
            let callback _ = bool in
            let test_result = [%test_result: bool] in
            test_caller_2ts ~callback ~test_result (fun t1 t2 f ->
-             Hashtbl.equal t1 t2 (fun a b -> f (a, b))))
+             Hashtbl.equal (fun a b -> f (a, b)) t1 t2))
        ;;
 
        let sexp_of_t = Hashtbl.sexp_of_t
@@ -2263,6 +2325,7 @@ module Make_mutation_in_callbacks (Hashtbl : Hashtbl_intf.Hashtbl) = struct
 
        include (Hashtbl : For_deriving with type ('a, 'b) t := ('a, 'b) t)
        module Hashable = Hashtbl.Hashable
+       module Merge_into_action = Hashtbl.Merge_into_action
        module Poly = Hashtbl.Poly
        module Make_plain = Hashtbl.Make_plain
        module Make = Hashtbl.Make
@@ -2299,4 +2362,10 @@ let%test_unit _ =
   List.iter [ [%sexp_of: unit Table.t]; [%sexp_of: (int, unit) t] ] ~f:(fun sexp_of_t ->
     let list = t |> [%sexp_of: t] |> [%of_sexp: (int * unit) list] in
     assert (List.is_sorted list ~compare:(fun (i1, _) (i2, _) -> i1 - i2)))
+;;
+
+(* Make sure we follow the conventional type signature for [equal]. *)
+let%test_unit _ =
+  ignore
+    ([%equal: string Int.Table.t] : string Int.Table.t -> string Int.Table.t -> bool)
 ;;

@@ -31,7 +31,7 @@
     functional matter ({!Engine}, this module), and effectful parts:
     {!Tls_lwt} and {!Tls_mirage}.
 
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {e v0.13.1 - {{:https://github.com/mirleft/ocaml-tls }homepage}} *)
 
 
 (** {1 Abstract state type} *)
@@ -88,12 +88,9 @@ type fatal = [
   | `NoCertificateReceived
   | `NoCertificateVerifyReceived
   | `NotRSACertificate
-  | `NotRSASignature
   | `KeyTooSmall
-  | `RSASignatureMismatch
-  | `RSASignatureVerificationFailed
-  | `UnsupportedSignatureScheme
-  | `HashAlgorithmMismatch
+  | `SignatureVerificationFailed of string
+  | `SigningFailed of string
   | `BadCertificateChain
   | `MACMismatch
   | `MACUnderflow
@@ -107,6 +104,7 @@ type fatal = [
   | `HandshakeFragmentsNotEmpty
   | `InsufficientDH
   | `InvalidDH
+  | `BadECDH of Mirage_crypto_ec.error
   | `InvalidRenegotiation
   | `InvalidClientHello of client_hello_errors
   | `InvalidServerHello
@@ -124,26 +122,19 @@ type fatal = [
   | `MissingContentType
   | `Downgrade12
   | `Downgrade11
-  | `UnsupportedKeyExchange
 ]
 
 (** type of failures *)
 type failure = [
   | `Error of error
   | `Fatal of fatal
-]
+] [@@deriving sexp_of]
 
 (** [alert_of_failure failure] is [alert], the TLS alert type for this failure. *)
 val alert_of_failure : failure -> Packet.alert_type
 
 (** [string_of_failure failure] is [string], the string representation of the [failure]. *)
 val string_of_failure : failure -> string
-
-(** [failure_of_sexp sexp] is [failure], the unmarshalled [sexp]. *)
-val failure_of_sexp : Sexplib.Sexp.t -> failure
-
-(** [sexp_of_failure failure] is [sexp], the marshalled [failure]. *)
-val sexp_of_failure : failure -> Sexplib.Sexp.t
 
 (** {1 Protocol handling} *)
 
@@ -153,12 +144,11 @@ val sexp_of_failure : failure -> Sexplib.Sexp.t
     {!state}, an end of file ([`Eof]), or an incoming ([`Alert]).
     Possibly some [`Response] to the other endpoint is needed, and
     potentially some [`Data] for the application was received. *)
-type ret = [
-  | `Ok of [ `Ok of state | `Eof | `Alert of Packet.alert_type ]
-         * [ `Response of Cstruct.t option ]
-         * [ `Data of Cstruct.t option ]
-  | `Fail of failure * [ `Response of Cstruct.t ]
-]
+type ret =
+  ([ `Ok of state | `Eof | `Alert of Packet.alert_type ]
+   * [ `Response of Cstruct.t option ]
+   * [ `Data of Cstruct.t option ],
+   failure * [ `Response of Cstruct.t ]) result
 
 (** [handle_tls state buffer] is [ret], depending on incoming [state]
     and [buffer], the result is the appropriate {!ret} *)
@@ -203,13 +193,7 @@ val key_update : ?request:bool -> state -> (state * Cstruct.t, failure) result
 type epoch = [
   | `InitialEpoch
   | `Epoch of Core.epoch_data
-]
-
-(** [epoch_of_sexp sexp] is [epoch], the unmarshalled [sexp]. *)
-val epoch_of_sexp : Sexplib.Sexp.t -> epoch
-
-(** [sexp_of_epoch epoch] is [sexp], the marshalled [epoch]. *)
-val sexp_of_epoch : epoch -> Sexplib.Sexp.t
+] [@@deriving sexp_of]
 
 (** [epoch state] is [epoch], which contains the session
     information. *)

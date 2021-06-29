@@ -22,7 +22,7 @@
 
   - [X] Merge `Hashtbl_intf.Key_common` and `Hashtbl_intf.Key_plain`.
 
-  - [ ] Use `Either.t` as the return value for `Map.partition`.
+  - [X] Use `Either.t` as the return value for `Map.partition`.
 
   - [X] Rename `Monad_intf.all_ignore` to `Monad_intf.all_unit`.
 

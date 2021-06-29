@@ -229,7 +229,7 @@ module Gen_sig = struct
     [ psig_module ~loc
         (module_declaration
            ~loc
-           ~name:(Located.mk ~loc (variants_module ty_name))
+           ~name:(Located.mk ~loc (Some (variants_module ty_name)))
            ~type_:(pmty_signature ~loc
                      (variant_defs @ [ v_fold_fun ~variant_type loc variants
                                      ; v_iter_fun ~variant_type loc variants
@@ -474,7 +474,7 @@ module Gen_str = struct
     [ pstr_module ~loc
         (module_binding
            ~loc
-           ~name:(Located.mk ~loc (variants_module variant_name))
+           ~name:(Located.mk ~loc (Some (variants_module variant_name)))
            ~expr:(pmod_structure ~loc
                     (variants @ [ v_fold_fun loc ty
                                 ; v_iter_fun loc ty

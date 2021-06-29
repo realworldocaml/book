@@ -15,7 +15,7 @@ if opam switch list | grep 'test-menhir' >/dev/null ; then
   echo "The switch test-menhir already exists." ;
 else
   echo "Creating switch test-menhir..." ;
-  opam switch create test-menhir 4.10.0 ;
+  opam switch create test-menhir 4.11.1 ;
   echo "Installing required packages..." ;
   opam install --yes dune visitors coq ;
 fi

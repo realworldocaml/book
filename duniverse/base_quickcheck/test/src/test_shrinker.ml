@@ -62,6 +62,71 @@ let%expect_test "shrinker" =
       (10 => 9))) |}]
 ;;
 
+let filter = Shrinker.filter
+
+let%expect_test "shrinker" =
+  test_shrinker
+    (Shrinker.filter (Shrinker.list natural_number_shrinker) ~f:(fun list ->
+       not (List.is_empty list)))
+    (m_list (m_nat ~up_to:3));
+  [%expect
+    {|
+    (shrinker
+     (((1) => (0))
+      ((2) => (1))
+      ((3) => (2))
+      ((0 3) => (3))
+      ((0 3) => (0))
+      ((0 3) => (0 2))
+      ((1 2) => (2))
+      ((1 2) => (0 2))
+      ((1 2) => (1))
+      ((1 2) => (1 1))
+      ((2 1) => (1))
+      ((2 1) => (1 1))
+      ((2 1) => (2))
+      ((2 1) => (2 0))
+      ((3 0) => (0))
+      ((3 0) => (2 0))
+      ((3 0) => (3)))) |}]
+;;
+
+let filter_map = Shrinker.filter_map
+
+let%expect_test "shrinker" =
+  test_shrinker
+    (Shrinker.filter_map
+       (Shrinker.list natural_number_shrinker)
+       ~f:(function
+         | [] -> None
+         | list -> Some (List.map list ~f:Int.pred))
+       ~f_inverse:(List.map ~f:Int.succ))
+    (m_list (m_nat ~up_to:3));
+  [%expect
+    {|
+    (shrinker
+     (((0) => (-1))
+      ((1) => (0))
+      ((2) => (1))
+      ((3) => (2))
+      ((0 3) => (3))
+      ((0 3) => (-1 3))
+      ((0 3) => (0))
+      ((0 3) => (0 2))
+      ((1 2) => (2))
+      ((1 2) => (0 2))
+      ((1 2) => (1))
+      ((1 2) => (1 1))
+      ((2 1) => (1))
+      ((2 1) => (1 1))
+      ((2 1) => (2))
+      ((2 1) => (2 0))
+      ((3 0) => (0))
+      ((3 0) => (2 0))
+      ((3 0) => (3))
+      ((3 0) => (3 -1)))) |}]
+;;
+
 let fixed_point = Shrinker.fixed_point
 
 let%expect_test "fixed_point" =
@@ -490,4 +555,81 @@ let%expect_test "of_lazy, unforced" =
       (__ => _)
       (zz => z)
       (zz => z))) |}]
+;;
+
+let bigstring = Shrinker.bigstring
+let float32_vec = Shrinker.float32_vec
+let float64_vec = Shrinker.float64_vec
+
+let%expect_test "[bigstring], [float32_vec], [float64_vec]" =
+  let test (type elt pack layout) t sexp_of_elt examples kind layout =
+    let module M = struct
+      type t = (elt, pack, layout) Bigarray.Array1.t
+
+      let compare = Poly.compare
+      let sexp_of_t = [%sexp_of: (elt, _, _) Private.Bigarray_helpers.Array1.t]
+
+      let examples =
+        List.init
+          (List.length examples + 1)
+          ~f:(fun n ->
+            List.take examples n |> Array.of_list |> Bigarray.Array1.of_array kind layout)
+      ;;
+    end
+    in
+    test_shrinker t (module M)
+  in
+  test Shrinker.bigstring [%sexp_of: char] [ 'a'; 'b' ] Char C_layout;
+  [%expect {| (shrinker (((a) => ()) ((a b) => (b)) ((a b) => (a)))) |}];
+  test Shrinker.float32_vec [%sexp_of: float] [ 1.; 2. ] Float32 Fortran_layout;
+  [%expect {| (shrinker (((1) => ()) ((1 2) => (2)) ((1 2) => (1)))) |}];
+  test Shrinker.float64_vec [%sexp_of: float] [ 1.; 2. ] Float64 Fortran_layout;
+  [%expect {| (shrinker (((1) => ()) ((1 2) => (2)) ((1 2) => (1)))) |}]
+;;
+
+let float32_mat = Shrinker.float32_mat
+let float64_mat = Shrinker.float64_mat
+
+let%expect_test "[float32_mat]" =
+  let test (type pack) t kind =
+    let module M = struct
+      type t = (float, pack, Bigarray.fortran_layout) Bigarray.Array2.t
+
+      let compare = Poly.compare
+      let sexp_of_t = [%sexp_of: (float, _, _) Private.Bigarray_helpers.Array2.t]
+
+      let examples =
+        List.init 3 ~f:(fun imax ->
+          List.init 3 ~f:(fun jmax ->
+            Array.init jmax ~f:(fun j ->
+              Array.init imax ~f:(fun i -> Float.of_int (((j + 1) * 10) + i + 1)))
+            |> Bigarray.Array2.of_array kind Fortran_layout))
+        |> List.concat
+      ;;
+    end
+    in
+    test_shrinker t (module M);
+    [%expect
+      {|
+      (shrinker
+       (((()) => ())
+        ((() ()) => (()))
+        ((() ()) => (()))
+        (((11)) => ())
+        (((11)) => (()))
+        (((11) (21)) => ((21)))
+        (((11) (21)) => (() ()))
+        (((11) (21)) => ((11)))
+        (((11 12)) => ())
+        (((11 12)) => ((12)))
+        (((11 12)) => ((11)))
+        (((11 12) (21 22)) => ((21 22)))
+        (((11 12) (21 22)) => ((12) (22)))
+        (((11 12) (21 22)) => ((11 12)))
+        (((11 12) (21 22)) => ((11) (21))))) |}]
+  in
+  test float32_mat Bigarray.Float32;
+  [%expect {| |}];
+  test float64_mat Float64;
+  [%expect {| |}]
 ;;

@@ -91,8 +91,8 @@ let priv ~e ~d ~n ~p ~q ~dp ~dq ~q' =
   guard Z.(dq = d mod (pred q)) (`Msg "dq <> d mod (q - 1)") >>= fun () ->
   (* e has been checked (valid_e) to be coprime to p-1 and q-1 ->
      muliplicative inverse exists *)
-  guard Z.(d = invert e (pred p * pred q))
-    (`Msg "d <> e ^ -1 mod (p - 1) * (q - 1)") >>= fun () ->
+  guard Z.(one = d * e mod (lcm (pred p) (pred q)))
+    (`Msg "1 <> d * e mod lcm (p - 1) (q - 1)") >>= fun () ->
   Ok { e ; d ; n ; p ; q ; dp ; dq ; q' }
 
 let priv_of_sexp s =
@@ -109,7 +109,7 @@ let priv_of_primes ~e ~p ~q =
   let n  = Z.(p * q) in
   pub ~e ~n >>= fun _pub ->
   (* valid_e checks e coprime to p-1 and q-1, a multiplicative inverse exists *)
-  let d = Z.(invert e (pred p * pred q)) in
+  let d = Z.(invert e (lcm (pred p) (pred q))) in
   let dp = Z.(d mod (pred p))
   and dq = Z.(d mod (pred q))
   in

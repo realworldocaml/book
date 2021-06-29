@@ -15,7 +15,7 @@
    It is kept in sync with [Parser], but exercises menhir's features. */
 
 /* As of 2014/12/02, the $previouserror keyword and the --error-recovery
-   mode no longer exists. Thus, we replace all calls to [Error.signal]
+   mode no longer exist. Thus, we replace all calls to [Error.signal]
    with calls to [Error.error], and report just one error. */
 
 /* ------------------------------------------------------------------------- */
@@ -77,17 +77,59 @@ let unparenthesize (o : Stretch.t option) : Stretch.t option =
 /* ------------------------------------------------------------------------- */
 /* Tokens. */
 
-%token TOKEN TYPE LEFT RIGHT NONASSOC START PREC PUBLIC COLON BAR EOF EQUAL
-%token INLINE LPAREN RPAREN COMMA QUESTION STAR PLUS PARAMETER ON_ERROR_REDUCE
-%token PERCENTATTRIBUTE SEMI
-%token <string Positions.located> LID UID QID
-%token <Stretch.t> HEADER
-%token <Stretch.ocamltype> OCAMLTYPE
-%token <Stretch.t Lazy.t> PERCENTPERCENT
-%token <Syntax.raw_action> ACTION
-%token <Syntax.attribute> ATTRIBUTE GRAMMARATTRIBUTE
+%token
+  TOKEN            "%token"
+  TYPE             "%type"
+  LEFT             "%left"
+  RIGHT            "%right"
+  NONASSOC         "%nonassoc"
+  START            "%start"
+  PREC             "%prec"
+  PUBLIC           "%public"
+  COLON            ":"
+  BAR              "|"
+  EOF              ""
+  EQUAL            "="
+  INLINE           "%inline"
+  LPAREN           "("
+  RPAREN           ")"
+  COMMA            ","
+  QUESTION         "?"
+  STAR             "*"
+  PLUS             "+"
+  PARAMETER        "%parameter"
+  ON_ERROR_REDUCE  "%on_error_reduce"
+  PERCENTATTRIBUTE "%attribute"
+  SEMI             ";"
+
+%token <string Positions.located>
+  LID              "lident"
+  UID              "UIdent"
+  QID              "\"alias\""
+
+%token <Stretch.t>
+  HEADER           "%{ header %}"
+
+%token <Stretch.ocamltype>
+  OCAMLTYPE        "<unit>"
+
+%token <Stretch.t Lazy.t>
+  PERCENTPERCENT   "%%"
+
+%token <Syntax.raw_action>
+  ACTION           "{}"
+
+%token <Syntax.attribute>
+  ATTRIBUTE        "[@foo]"
+  GRAMMARATTRIBUTE "%[@foo]"
+
 /* For the new rule syntax: */
-%token LET TILDE UNDERSCORE COLONEQUAL EQUALEQUAL
+%token
+  LET              "let"
+  TILDE            "~"
+  UNDERSCORE       "_"
+  COLONEQUAL       ":="
+  EQUALEQUAL       "=="
 
 /* ------------------------------------------------------------------------- */
 /* Type annotations and start symbol. */

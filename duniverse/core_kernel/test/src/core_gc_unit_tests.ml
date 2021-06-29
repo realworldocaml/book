@@ -91,6 +91,11 @@ let%test_module ("gc"[@tags "no-js"]) =
       done;
       check ()
     ;;
+
+    let%test "is_zero_alloc does not allocate" =
+      let open Gc.For_testing in
+      is_zero_alloc (fun () -> ignore (is_zero_alloc Fn.id : bool))
+    ;;
   end)
 ;;
 

@@ -46,16 +46,17 @@ let variance_error ~loc ~tyvar ~actual ~expect =
 
 let create_with_variance ~loc ~covariant ~contravariant param_list =
   let pat_list, by_variance_list =
-    List.map param_list ~f:(fun ((core_type, variance) as param) ->
+    List.map param_list ~f:(fun ((core_type, (variance, injectivity)) as param) ->
       let loc = core_type.ptyp_loc in
       let name = get_type_param_name param in
-      match variance with
-      | Invariant | Covariant ->
+      match (variance, injectivity) with
+      | ((NoVariance | Covariant), NoInjectivity) ->
         let pat, expr = gensym covariant loc in
         pat, `Covariant (name.txt, expr)
-      | Contravariant ->
+      | (Contravariant, NoInjectivity) ->
         let pat, expr = gensym contravariant loc in
-        pat, `Contravariant (name.txt, expr))
+        pat, `Contravariant (name.txt, expr)
+      | (_, Injective) -> Location.raise_errorf ~loc "Injective type parameters aren't supported.")
     |> List.unzip
   in
   let covariant_t =

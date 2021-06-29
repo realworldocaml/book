@@ -5,8 +5,8 @@
 
 include module type of Parser_automaton_internal.Public
 
-val feed     : ('u, 's) state -> char -> 's -> 's
-val feed_eoi : ('u, 's) state ->         's -> 's
+val feed : ('u, 's) state -> char -> 's -> 's
+val feed_eoi : ('u, 's) state -> 's -> 's
 
 (**/**)
 

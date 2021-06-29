@@ -84,10 +84,13 @@ module Entropy : sig
       See {{:http://www.ieee-security.org/TC/SP2014/papers/Not-So-RandomNumbersinVirtualizedLinuxandtheWhirlwindRNG.pdf}}
       for further details. *)
 
-  val cpu_rng_bootstrap : int -> Cstruct.t
+  val cpu_rng_bootstrap : (int -> Cstruct.t, [`Not_supported]) Result.t
   (** [cpu_rng_bootstrap id] returns 8 bytes of random data using the CPU
       RNG (rdseed or rdrand). On 32bit platforms, only 4 bytes are filled.
-      The [id] is used as prefix. *)
+      The [id] is used as prefix.
+
+      @raise Failure if no CPU RNG is available, or if it doesn't return a
+      random value. *)
 
   val bootstrap : int -> Cstruct.t
   (** [bootstrap id] is either [cpu_rng_bootstrap], if the CPU supports it, or
@@ -96,11 +99,11 @@ module Entropy : sig
   (** {1 Timer source} *)
 
   val interrupt_hook : unit -> unit -> Cstruct.t
-  (** [interrupt_hook ()] collects the lower 4 bytes from [rdtsc], to be
+  (** [interrupt_hook ()] collects lower bytes from the cycle counter, to be
       used for entropy collection in the event loop. *)
 
   val timer_accumulator : g option -> unit -> unit
-  (** [timer_accumulator g] is the accumulator for the [`Timer] source,
+  (** [timer_accumulator g] is the accumulator for the timer source,
       applying {!interrupt_hook} on each call. *)
 
   (** {1 Periodic pulled sources} *)
@@ -109,9 +112,10 @@ module Entropy : sig
   (** [feed_pools g source f] feeds all pools of [g] using [source] by executing
       [f] for each pool. *)
 
-  val cpu_rng : g option -> unit
+  val cpu_rng : (g option -> unit -> unit, [`Not_supported]) Result.t
   (** [cpu_rng g] uses the CPU RNG (rdrand or rdseed) to feed all pools
-      of [g]. *)
+      of [g]. It uses {!feed_pools} internally. If neither rdrand nor rdseed
+      are available, [fun () -> ()] is returned. *)
 
   (**/**)
   val id : source -> int

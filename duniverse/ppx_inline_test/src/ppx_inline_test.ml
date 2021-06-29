@@ -40,9 +40,8 @@ let () =
           Location.raise_errorf ~loc:id.loc
             "invalid 'inline-test' cookie (%s), expected one of: drop, drop_with_deadcode"
             s)
-;;
 
-(* Same as above, but for the standard one passed by dune *)
+(* Same as above, but for the Dune setting *)
 let () =
   Driver.Cookies.add_simple_handler "inline_tests"
     Ast_pattern.(estring __')
@@ -133,7 +132,9 @@ let all_tags =
   ; "js-only"
   ; "64-bits-only"
   ; "32-bits-only"
-  ; "x-library-inlining-sensitive" ]
+  ; "fast-flambda"
+  ; "x-library-inlining-sensitive"
+  ]
 
 let validate_tag tag =
   if not (List.mem all_tags tag ~equal:String.equal)
@@ -177,7 +178,7 @@ let expand_test_module ~loc ~path:_ ~name:id ~tags m =
   validate_extension_point_exn ~name_of_ppx_rewriter ~loc ~tags;
   apply_to_descr "test_module" ~loc ~inner_loc:m.pmod_loc None id tags
     (pexp_fun ~loc Nolabel None (punit ~loc)
-       (pexp_letmodule ~loc (Located.mk ~loc "M")
+       (pexp_letmodule ~loc (Located.mk ~loc (Some "M"))
           m
           (eunit ~loc)))
 ;;

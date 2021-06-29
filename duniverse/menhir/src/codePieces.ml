@@ -28,13 +28,6 @@ open Grammar
 let ntvar nt =
   Infer.ntvar (Nonterminal.print true nt)
 
-(* The variable that holds the environment. This is a parameter to all
-   functions. We do not make it a global variable because we wish to
-   preserve re-entrancy. *)
-
-let env =
-   prefix "env"
-
 (* A variable used to hold a semantic value. *)
 
 let semv =
@@ -64,13 +57,24 @@ let token =
 (* These names should agree with the printing function [Keyword.posvar]. *)
 
 let beforeendp =
-  "_endpos__0_"
+  Keyword.(posvar Before WhereEnd FlavorPosition)
+    (* "_endpos__0_" *)
 
 let startp =
-  "_startpos"
+  Keyword.(posvar Left WhereStart FlavorPosition)
+    (* "_startpos" *)
 
 let endp =
-  "_endpos"
+  Keyword.(posvar Left WhereEnd FlavorPosition)
+    (* "_endpos" *)
+
+let startpos ids i =
+  Keyword.(posvar (RightNamed ids.(i)) WhereStart FlavorPosition)
+    (* sprintf "_startpos_%s_" ids.(i) *)
+
+let endpos ids i =
+  Keyword.(posvar (RightNamed ids.(i)) WhereEnd FlavorPosition)
+    (* sprintf "_endpos_%s_" ids.(i) *)
 
 (* ------------------------------------------------------------------------ *)
 
@@ -122,52 +126,27 @@ let semvtype = function
   | Symbol.N nt ->
       [ semvtypent nt ]
 
-(* [symvalt] returns the empty list if the symbol at hand carries no
-   semantic value and the singleton list [[f t]] if it carries a
-   semantic value of type [t]. *)
+(* [has_semv symbol] indicates whether [symbol] carries a semantic value. *)
 
-let symvalt symbol f =
+let has_semv symbol =
   match semvtype symbol with
   | [] ->
-      []
-  | [ t ] ->
-      [ f t ]
-  | _ ->
-      assert false
-
-(* [symval symbol x] returns either the empty list or the singleton
-   list [[x]], depending on whether [symbol] carries a semantic
-   value. *)
-
-let symval symbol x =
-  match semvtype symbol with
-  | [] ->
-      []
+      false
   | [ _t ] ->
-      [ x ]
+      true
   | _ ->
       assert false
-
-(* [tokval] is a version of [symval], specialized for terminal symbols. *)
-
-let tokval tok x =
-  symval (Symbol.T tok) x
 
 (* ------------------------------------------------------------------------ *)
 
 (* Patterns for tokens. *)
 
-(* [tokpat tok] is a pattern that matches the token [tok], without binding
-   its semantic value. *)
+(* [tokpat tok pat] is a pattern that matches the token [tok] and binds
+   its semantic value (if it has one) to the pattern [pat]. *)
 
-let tokpat tok =
-  PData (TokenType.tokendata (Terminal.print tok), tokval tok PWildcard)
-
-(* [tokpatv tok] is a pattern that matches the token [tok], and binds
-   its semantic value, if it has one, to the variable [semv]. *)
-
-let tokpatv tok =
-  PData (TokenType.tokendata (Terminal.print tok), tokval tok (PVar semv))
+let tokpat tok pat =
+  let data = TokenType.tokendata (Terminal.print tok) in
+  PData (data, if1 (has_semv (Symbol.T tok)) pat)
 
 (* [tokspat toks] is a pattern that matches any token in the set [toks],
    without binding its semantic value. *)
@@ -175,7 +154,7 @@ let tokpatv tok =
 let tokspat toks =
   POr (
     TerminalSet.fold (fun tok pats ->
-      tokpat tok :: pats
+      tokpat tok PWildcard :: pats
     ) toks []
   )
 
@@ -197,7 +176,7 @@ let destructuretokendef name codomain bindsemv branch = {
             if Terminal.pseudo tok then
               branches
             else
-              { branchpat = (if bindsemv then tokpatv else tokpat) tok;
+              { branchpat = tokpat tok (if bindsemv then PVar semv else PWildcard);
                 branchbody = branch tok } :: branches
           ) []
         )

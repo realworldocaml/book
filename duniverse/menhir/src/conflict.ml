@@ -13,10 +13,24 @@
 
 open Grammar
 
+(* -------------------------------------------------------------------------- *)
+(* I suppose now is as good a time as any to do this. *)
+
 let () =
-  if Settings.graph then
-    DependencyGraph.print_dependency_graph()
-  (* artificial dependency *)
+  if Settings.reference_graph then
+    ReferenceGraph.print_reference_graph()
+
+(* -------------------------------------------------------------------------- *)
+(* If [--dump] is present, honor it before performing conflict resolution. *)
+
+let () =
+  if Settings.dump then
+    (* The default reductions have not been decided yet at this point. *)
+    let module Default = struct
+      let has_default_reduction _node = None
+    end in
+    let module D = Dump.Make(Default) in
+    D.dump (Settings.base ^ ".automaton")
 
 (* -------------------------------------------------------------------------- *)
 (* Explaining shift actions. *)
@@ -234,7 +248,7 @@ let rec follow1 tok derivation offset' = function
 
           let comment =
             "lookahead token is inherited" ^
-            (if pos + 1 < length then Printf.sprintf " because %scan vanish" (Symbol.printao (pos + 1) rhs) else "")
+            (if pos + 1 < length then Printf.sprintf " because %s can vanish" (Symbol.printao (pos + 1) rhs) else "")
           in
           let derivation =
             Derivation.build pos rhs derivation (Some comment)

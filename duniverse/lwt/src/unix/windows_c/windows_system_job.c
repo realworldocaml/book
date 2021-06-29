@@ -46,8 +46,10 @@ CAMLprim value lwt_unix_system_job(value cmdline)
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
     si.cb = sizeof(si);
-    if (!CreateProcess(NULL, String_val(cmdline), NULL, NULL, TRUE, 0, NULL,
-                       NULL, &si, &pi)) {
+    /* The cast to LPSTR below is only legitimate because we are calling
+       CreateProcessA. See https://github.com/ocsigen/lwt/pull/790. */
+    if (!CreateProcess(NULL, (LPSTR)String_val(cmdline), NULL, NULL, TRUE, 0,
+                       NULL, NULL, &si, &pi)) {
         win32_maperr(GetLastError());
         uerror("CreateProcess", Nothing);
     } else {

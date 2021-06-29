@@ -71,6 +71,12 @@ val signal: category -> Positions.positions -> ('a, out_channel, unit, unit) for
 
 val exit_if: category -> unit
 
+(* [with_new_category f] creates a new category [c], executes [f c], then
+   invokes [exit_if c], and transmits the result returned by [f]. It works
+   also if [f] raises an exception. *)
+
+val with_new_category: (category -> 'b) -> 'b
+
 (* ---------------------------------------------------------------------------- *)
 
 (* Certain warnings about the grammar can optionally be treated as errors. *)

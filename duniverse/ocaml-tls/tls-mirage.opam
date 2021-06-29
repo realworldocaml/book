@@ -1,3 +1,4 @@
+version: "0.13.1"
 opam-version: "2.0"
 homepage:     "https://github.com/mirleft/ocaml-tls"
 dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
@@ -8,16 +9,16 @@ maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.
 license:      "BSD-2-Clause"
 
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 
 depends: [
-  "ocaml" {>= "4.07.0"}
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "1.0"}
   "tls" {= version}
-  "x509" {>= "0.10.0"}
+  "x509" {>= "0.13.0"}
   "fmt"
   "lwt" {>= "3.0.0"}
   "mirage-flow" {>= "2.0.0"}
@@ -26,8 +27,6 @@ depends: [
   "ptime" {>= "0.8.1"}
   "mirage-crypto"
   "mirage-crypto-pk"
-  "hacl_x25519" {>= "0.1.1"}
-  "fiat-p256" {>= "0.2.1"}
 ]
 tags: [ "org:mirage"]
 synopsis: "Transport Layer Security purely in OCaml, MirageOS layer"

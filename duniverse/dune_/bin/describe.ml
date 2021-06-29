@@ -1,6 +1,13 @@
 open Stdune
 open Import
 
+(* This command is not yet versioned, but some people are using it in
+   non-released tools. If you change the format of the output, please contact:
+
+   - rotor people for "describe workspace"
+
+   - duniverse people for "describe opam-files" *)
+
 let doc = "Describe the workspace."
 
 let man =
@@ -23,12 +30,65 @@ let info = Term.info "describe" ~doc ~man
 
 (* Crawl the workspace to get all the data *)
 module Crawl = struct
-  open Dune
+  open Dune_rules
+  open Dune_engine
 
   let uid_of_library lib =
     Digest.generic
       (Lib.name lib, Path.to_string (Lib_info.src_dir (Lib.info lib)))
     |> Digest.to_string
+
+  let dyn_path p = Dyn.String (Path.to_string p)
+
+  let modules ~obj_dir =
+    Modules.fold_no_vlib ~init:[] ~f:(fun m acc ->
+        let source ml_kind =
+          Dyn.Encoder.option dyn_path
+            (Option.map (Module.source m ~ml_kind) ~f:Module.File.path)
+        in
+        let cmt ml_kind =
+          Dyn.Encoder.option dyn_path
+            (Obj_dir.Module.cmt_file obj_dir m ~ml_kind)
+        in
+        Dyn.Encoder.record
+          [ ("name", Module_name.to_dyn (Module.name m))
+          ; ("impl", source Impl)
+          ; ("intf", source Intf)
+          ; ("cmt", cmt Impl)
+          ; ("cmti", cmt Intf)
+          ]
+        :: acc)
+
+  let executables sctx ~project ~dir exes =
+    let modules_, obj_dir =
+      let first_exe = snd (List.hd exes.Dune_file.Executables.names) in
+      Dir_contents.get sctx ~dir |> Dir_contents.ocaml
+      |> Ml_sources.modules_and_obj_dir ~for_:(Exe { first_exe })
+    in
+    let obj_dir = Obj_dir.of_local obj_dir in
+    let modules_ = modules ~obj_dir modules_ in
+    let scope = Super_context.find_scope_by_project sctx project in
+    let compile_info = Exe_rules.compile_info ~scope exes in
+    match Lib.Compile.direct_requires compile_info with
+    | Error _ -> None
+    | Ok libs ->
+      let include_dirs = Obj_dir.all_cmis obj_dir in
+      Some
+        (Dyn.Variant
+           ( "executables"
+           , [ Dyn.Encoder.record
+                 [ ( "names"
+                   , List
+                       (List.map
+                          ~f:(fun (_, name) -> Dyn.String name)
+                          exes.names) )
+                 ; ( "requires"
+                   , Dyn.Encoder.(list string) (List.map ~f:uid_of_library libs)
+                   )
+                 ; ("modules", List modules_)
+                 ; ("include_dirs", Dyn.Encoder.list dyn_path include_dirs)
+                 ]
+             ] ))
 
   let library sctx lib =
     match Lib.requires lib with
@@ -38,29 +98,12 @@ module Crawl = struct
       let info = Lib.info lib in
       let src_dir = Lib_info.src_dir info in
       let obj_dir = Lib_info.obj_dir info in
-      let dyn_path p = Dyn.String (Path.to_string p) in
       let modules_ =
         if Lib.is_local lib then
           Dir_contents.get sctx ~dir:(Path.as_in_build_dir_exn src_dir)
           |> Dir_contents.ocaml
-          |> Ml_sources.modules_of_library ~name
-          |> Modules.fold_no_vlib ~init:[] ~f:(fun m acc ->
-                 let source ml_kind =
-                   Dyn.Encoder.option dyn_path
-                     (Option.map (Module.source m ~ml_kind) ~f:Module.File.path)
-                 in
-                 let cmt ml_kind =
-                   Dyn.Encoder.option dyn_path
-                     (Obj_dir.Module.cmt_file obj_dir m ~ml_kind)
-                 in
-                 Dyn.Encoder.record
-                   [ ("name", Module_name.to_dyn (Module.name m))
-                   ; ("impl", source Impl)
-                   ; ("intf", source Intf)
-                   ; ("cmt", cmt Impl)
-                   ; ("cmti", cmt Intf)
-                   ]
-                 :: acc)
+          |> Ml_sources.modules ~for_:(Library name)
+          |> modules ~obj_dir
         else
           []
       in
@@ -81,7 +124,7 @@ module Crawl = struct
                 ]
             ] ))
 
-  let workspace { Dune.Main.workspace; scontexts } (context : Context.t) =
+  let workspace { Dune_rules.Main.workspace; scontexts } (context : Context.t) =
     let sctx = Context_name.Map.find_exn scontexts context.name in
     let libs =
       List.fold_left workspace.conf.projects ~init:Lib.Set.empty
@@ -94,31 +137,81 @@ module Crawl = struct
           match Lib.requires lib with
           | Error _ -> libs
           | Ok requires -> Lib.Set.of_list requires |> Lib.Set.union libs)
+      |> Lib.Set.to_list
+      |> List.filter_map ~f:(library sctx)
     in
-    Dyn.List (Lib.Set.to_list libs |> List.filter_map ~f:(library sctx))
+    let open Fiber.O in
+    let+ dune_files =
+      Dune_load.Dune_files.eval workspace.conf.dune_files ~context
+    in
+    let exes_and_libs =
+      Dune_load.Dune_file.fold_stanzas dune_files ~init:libs
+        ~f:(fun dune_file stanza accu ->
+          let dir = Path.Build.append_source context.build_dir dune_file.dir in
+          match stanza with
+          | Dune_file.Executables exes -> (
+            match executables sctx ~project:dune_file.project ~dir exes with
+            | None -> accu
+            | Some exes -> exes :: accu )
+          | _ -> accu)
+    in
+    Dyn.List exes_and_libs
+end
+
+module Opam_files = struct
+  let get () =
+    let project =
+      Dune_engine.File_tree.root () |> Dune_engine.File_tree.Dir.project
+    in
+    let packages =
+      Dune_project.packages project |> Dune_engine.Package.Name.Map.values
+    in
+    Dyn.List
+      (List.map packages ~f:(fun pkg ->
+           let opam_file = Path.source (Dune_engine.Package.opam_file pkg) in
+           let contents =
+             if not (Dune_project.generate_opam_files project) then
+               Io.read_file opam_file
+             else
+               let template_file =
+                 Dune_rules.Opam_create.template_file opam_file
+               in
+               let template =
+                 if Path.exists template_file then
+                   Some (template_file, Io.read_file template_file)
+                 else
+                   None
+               in
+               Dune_rules.Opam_create.generate project pkg ~template
+           in
+           Dyn.Tuple [ String (Path.to_string opam_file); String contents ]))
 end
 
 (* What to describe. To determine what to describe, we convert the positional
    arguments of the command line to a list of atoms and we parse it using the
    regular [Dune_lang.Decoder].
 
-   This way we can reuse all the existing versionning, error reporting, etc...
+   This way we can reuse all the existing versioning, error reporting, etc...
    machinery. This also allow to easily extend this to arbitrary complex phrases
    without hassle. *)
 module What = struct
-  type t = Workspace
+  type t =
+    | Workspace
+    | Opam_files
 
   let default = Workspace
 
   let parse =
     let open Dune_lang.Decoder in
-    sum [ ("workspace", return Workspace) ]
+    sum [ ("workspace", return Workspace); ("opam-files", return Opam_files) ]
 
   let parse ~lang args =
     match args with
     | [] -> default
     | _ ->
-      let parse = Dune_lang.Syntax.set Dune.Stanza.syntax (Active lang) parse in
+      let parse =
+        Dune_lang.Syntax.set Dune_engine.Stanza.syntax (Active lang) parse
+      in
       let ast =
         Dune_lang.Ast.add_loc ~loc:Loc.none
           (List (List.map args ~f:Dune_lang.atom_or_quoted_string))
@@ -128,6 +221,7 @@ module What = struct
   let describe t setup context =
     match t with
     | Workspace -> Crawl.workspace setup context
+    | Opam_files -> Fiber.return (Opam_files.get ())
 end
 
 module Format = struct
@@ -170,12 +264,16 @@ module Lang = struct
        if v = (0, 1) then
          `Ok v
        else
-         `Error
-           ( true
-           , "Only --lang 0.1 is available at the moment as this command is \
+         let msg =
+           let pp =
+             "Only --lang 0.1 is available at the moment as this command is \
               not yet stabilised. If you would like to release a software that \
               relies on the output of 'dune describe', please open a ticket on \
-              https://github.com/ocaml/dune." )
+              https://github.com/ocaml/dune." |> Pp.text
+           in
+           Stdlib.Format.asprintf "%a" Pp.to_fmt pp
+         in
+         `Error (true, msg)
 end
 
 let print_as_sexp dyn =
@@ -188,7 +286,11 @@ let print_as_sexp dyn =
     |> Dune_lang.Ast.add_loc ~loc:Loc.none
     |> Dune_lang.Cst.concrete
   in
-  Dune.Format_dune_lang.pp_top_sexps Stdlib.Format.std_formatter [ cst ]
+  let version =
+    Dune_lang.Syntax.greatest_supported_version Dune_engine.Stanza.syntax
+  in
+  Pp.to_fmt Stdlib.Format.std_formatter
+    (Dune_engine.Format_dune_lang.pp_top_sexps ~version [ cst ])
 
 let term =
   let+ common = Common.term
@@ -210,10 +312,9 @@ let term =
       let context =
         Import.Main.find_context_exn setup.workspace ~name:context_name
       in
-      let res = What.describe what setup context in
-      Fiber.return
-        ( match format with
-        | Csexp -> Csexp.to_channel stdout (Sexp.of_dyn res)
-        | Sexp -> print_as_sexp res ))
+      let+ res = What.describe what setup context in
+      match format with
+      | Csexp -> Csexp.to_channel stdout (Sexp.of_dyn res)
+      | Sexp -> print_as_sexp res)
 
 let command = (term, info)

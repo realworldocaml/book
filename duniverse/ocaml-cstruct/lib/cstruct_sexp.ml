@@ -31,7 +31,7 @@ let t_of_sexp = function
   | sexp -> Conv.of_sexp_error "Cstruct.t_of_sexp: atom needed" sexp
 
 let sexp_of_t t =
-  let n   = Cstruct.len t in
+  let n   = Cstruct.length t in
   let str = Bytes.create n in
   Cstruct.blit_to_bytes t 0 str 0 n ;
   (* The following call is safe, since str is not visible elsewhere. *)

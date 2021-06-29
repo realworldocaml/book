@@ -1,0 +1,5 @@
+(library (name ppx_sexp_message_expander)
+ (public_name ppx_sexp_message.expander)
+ (libraries base ppxlib ppx_sexp_conv.expander ppx_here.expander)
+ (preprocess (pps ppxlib.metaquot))
+ (ppx_runtime_libraries ppx_sexp_conv.runtime-lib))

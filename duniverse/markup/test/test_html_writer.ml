@@ -36,10 +36,10 @@ let tests = [
        raw_text          = None;
        force_quirks      = false}
     in
-    expect "doctype" [`Doctype doctype] [S "<!DOCTYPE "; S "html"; S ">"];
+    expect "doctype" [`Doctype doctype] [S "<!DOCTYPE html>"];
 
     let doctype = {doctype with doctype_name = None} in
-    expect "bad doctype" [`Doctype doctype] []);
+    expect "bad doctype" [`Doctype doctype] [S "<!DOCTYPE>"]);
 
   ("html.writer.comment" >:: fun _ ->
     expect "comment" [`Comment "foo"] [S "<!--"; S "foo"; S "-->"]);

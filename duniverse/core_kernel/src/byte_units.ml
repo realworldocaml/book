@@ -3,38 +3,8 @@
 open! Import
 open Std_internal
 module Repr = Int63
-
-module T : sig
-  type t [@@deriving compare, hash, sexp_of]
-
-  val to_string : t -> string
-  val of_repr : Repr.t -> t
-  val to_repr : t -> Repr.t
-end = struct
-  type t = Repr.t [@@deriving compare, hash]
-
-  let of_repr = Fn.id
-  let to_repr = Fn.id
-
-  let to_string n =
-    let open Repr in
-    let kib = of_int 1024 in
-    let mib = kib * kib in
-    let gib = kib * mib in
-    let n_abs = abs n in
-    if n_abs < kib
-    then sprintf "%dB" (to_int_exn n)
-    else if n_abs < mib
-    then sprintf "%gK" (to_float n /. to_float kib)
-    else if n_abs < gib
-    then sprintf "%gM" (to_float n /. to_float mib)
-    else sprintf "%gG" (to_float n /. to_float gib)
-  ;;
-
-  let sexp_of_t n = Sexp.Atom (to_string n)
-end
-
-include T
+module T = Byte_units0
+include (T : module type of T with module Repr := Repr)
 include Comparable.Make_plain (T)
 include Hashable.Make_plain (T)
 
@@ -47,10 +17,12 @@ module Infix = struct
   let ( * ) t s = of_repr (Repr.of_float (Repr.to_float (to_repr t) *. s))
 end
 
+include Infix
+
 let zero = of_repr Repr.zero
 let scale = Infix.( * )
 let iscale t s = of_repr (Repr.( * ) (to_repr t) (Repr.of_int s))
-let bytes_int_exn t = Repr.to_int_exn (to_repr t)
+let bytes_int_exn = T.bytes_int_exn
 let bytes_int63 = to_repr
 let bytes_int64 t = Repr.to_int64 (to_repr t)
 let bytes_float t = Repr.to_float (to_repr t)
@@ -116,8 +88,8 @@ let of_string s =
   let length = String.length s in
   if Int.( < ) length 2
   then invalid_argf "'%s' passed to Byte_units.of_string - too short" s ();
-  let base_str = String.sub s ~pos:0 ~len:(length - 1) in
-  let ext_char = Char.lowercase s.[length - 1] in
+  let base_str = String.sub s ~pos:0 ~len:(Int.( - ) length 1) in
+  let ext_char = Char.lowercase s.[Int.( - ) length 1] in
   let base =
     try Float.of_string base_str with
     | _ ->
@@ -139,6 +111,8 @@ let of_string s =
   | ext ->
     invalid_argf "'%s' passed to Byte_units.of_string - illegal extension %c" s ext ()
 ;;
+
+let arg_type = Command.Arg_type.create of_string
 
 let largest_measure t =
   let t_abs = of_repr (Repr.abs (to_repr t)) in
@@ -194,7 +168,7 @@ module Stable = struct
   module V1 = struct
     type nonrec t = t [@@deriving compare, hash]
 
-    include Binable0.Of_binable
+    include Binable0.Of_binable_without_uuid [@alert "-legacy"]
         (Float)
         (struct
           type nonrec t = t
@@ -253,7 +227,7 @@ module Stable = struct
   module V2 = struct
     type nonrec t = t [@@deriving compare, hash]
 
-    include Binable0.Of_binable
+    include Binable0.Of_binable_without_uuid [@alert "-legacy"]
         (Int63)
         (struct
           type nonrec t = t

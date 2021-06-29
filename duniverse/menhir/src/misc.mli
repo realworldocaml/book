@@ -11,15 +11,6 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(* Projecting out of an option. May fail abruptly! *)
-
-val unSome: 'a option -> 'a
-
-(* Converting an option to a string, with [None] converted
-   to the empty string. *)
-
-val o2s: 'a option -> ('a -> string) -> string
-
 (* Projection out of a singleton list. *)
 
 val single: 'a list -> 'a
@@ -39,6 +30,11 @@ val tabulate: int -> (int -> 'a) -> (int -> 'a)
 (* [sum n f] computes the sum [f 0 + f 1 + ... + f (n-1)]. *)
 
 val sum: int -> (int -> int) -> int
+
+(* [with_buffer n f] creates a fresh buffer of size [n], passes it to [f],
+   and returns the final content of the buffer. *)
+
+val with_buffer: int -> (Buffer.t -> unit) -> string
 
 (* [separated_list_to_string printer sep l] converts [l] into a string
    representation built by using [printer] on each element and [sep] as
@@ -62,12 +58,6 @@ val inverse: 'a array -> ('a -> int)
 
 val support_assoc : ('a * 'a) list -> 'a -> 'a
 
-(* [index] indexes a list of (distinct) strings, that is, assigns an
-   integer index to each string and builds mappings both ways between
-   strings and indices. *)
-
-val index: string list -> int * string array * int StringMap.t
-
 (* Turning an implicit list, stored using pointers through a hash
    table, into an explicit list. The head of the implicit list is
    not included in the explicit list. *)
@@ -77,14 +67,24 @@ val materialize: ('a, 'a option) Hashtbl.t -> 'a -> 'a list
 (* [iteri] implements a [for] loop over integers, from 0 to
    [n-1]. *)
 
-val iteri: int -> (int -> unit) -> unit
+val iteri:         int -> (int -> unit) -> unit
+val iterij: int -> int -> (int -> unit) -> unit
+
+(* [foldij i j f accu] iterates on the semi-open interval [i, j),
+   with an accumulator. [foldij_lazy i j f accu] is analogous,
+   but is interruptible: if at some point the function [f] does
+   not demand its second argument, then iteration stops early.
+   [foldij] and [foldij_lazy] iterate in the same direction, from
+   left to right, but do not build the accumulator in the same way:
+   the calls to [f] are associated differently. (In that respect,
+   [foldij] is a left fold, while [foldij_lazy] is a right fold.) *)
 
 (* [foldi] implements a [for] loop over integers, from 0 to [n-1],
-   with an accumulator. [foldij] implements a [for] loop over
-   integers, from [start] to [n-1], with an accumulator. *)
+   with an accumulator. *)
 
-val foldi: int -> (int -> 'a -> 'a) -> 'a -> 'a
-val foldij: int -> int -> (int -> 'a -> 'a) -> 'a -> 'a
+val foldi:              int -> (int ->          'a  -> 'a) -> 'a -> 'a
+val foldij:      int -> int -> (int ->          'a  -> 'a) -> 'a -> 'a
+val foldij_lazy: int -> int -> (int -> (unit -> 'a) -> 'a) -> 'a -> 'a
 
 (* [mapij start n f] produces the list [ f start; ... f (n-1) ]. *)
 
@@ -124,9 +124,9 @@ val normalize: string -> string
 
 val postincrement: int ref -> int
 
-(* [map_opt f l] returns the list of [y]s such that [f x = Some y] where [x]
+(* [filter_map f l] returns the list of [y]s such that [f x = Some y] where [x]
    is in [l], preserving the order of elements of [l]. *)
-val map_opt : ('a -> 'b option) -> 'a list -> 'b list
+val filter_map : ('a -> 'b option) -> 'a list -> 'b list
 
 (* [new_encode_decode capacity] creates a new service for assigning unique
    integer codes to strings. [capacity] is the initial capacity of the
@@ -135,11 +135,6 @@ val map_opt : ('a -> 'b option) -> 'a list -> 'b list
    integer codes and [verbose] prints statistics about the use of the service
    so far. *)
 val new_encode_decode: int -> (string -> int) * (int -> string) * (unit -> unit)
-
-(* [new_claim()] creates a new service for claiming names. It returns a
-   function [claim] of type [int -> unit] such that the call [claim x]
-   succeeds if and only if [claim x] has never been called before. *)
-val new_claim: unit -> (string -> unit)
 
 (* If [preferable] is a partial order on elements, then [best preferable xs]
    returns the best (least) element of [xs], if there is one. Its complexity
@@ -189,3 +184,18 @@ val nth: int -> string
 (* [Array.for_all] *)
 
 val array_for_all : ('a -> bool) -> 'a array -> bool
+val array_for_all2 : ('a -> 'b -> bool) -> 'a array -> 'b array -> bool
+
+val array_fold_left2:
+  ('a -> 'b1 -> 'b2 -> 'a) -> 'a -> 'b1 array -> 'b2 array -> 'a
+
+(* [List.make] *)
+
+val list_make: int -> 'a -> 'a list
+
+(* [padded_index n i] produces a padded string representation of the index
+   [i], which must lie in the semi-open interval [0, n). It is defined in such
+   a way that all indices are mapped to strings of equal length. This ensures
+   that alphabetical ordering coincides with numeric ordering. *)
+
+val padded_index: int -> int -> string

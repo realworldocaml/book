@@ -1,9 +1,9 @@
 (Binary ((name patdiff)
  (version_release (Manual (
    Simple (
-     (major_number   121)
-     (minor_number   09)
-     (release_number 07)))))
+     (major_number   122)
+     (minor_number   22)
+     (release_number 42)))))
  (license     Proprietary)
  (group       "JS Core Utils")
  (build_arch  x86_64)
@@ -18,7 +18,7 @@
    (File (
      (file_name                patdiff)
      (installation_directory   /usr/bin)
-     (build_file_name          patdiff.exe)
+     (build_file_name          main.exe)
      (build_artifact_directory "../bin")
      (owner                    root)
      (group                    root)

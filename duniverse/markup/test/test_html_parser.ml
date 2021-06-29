@@ -137,7 +137,7 @@ let tests = [
     expect ~prefix:true "<html><!DOCTYPE html><html></p><head></head></html>"
       [ 1,  1, S (start_element "html");
         1,  7, E (`Bad_document "doctype should be first");
-        1, 22, E (`Misnested_tag ("html", "html"));
+        1, 22, E (`Misnested_tag ("html", "html", []));
         1, 28, E (`Unmatched_end_tag "p");
         1, 32, S (start_element "head")]);
 
@@ -193,8 +193,8 @@ let tests = [
       [ 1,  1, S (start_element "html");
         1,  1, S (start_element "head");
         1,  7, E (`Bad_document "doctype should be first");
-        1, 22, E (`Misnested_tag ("html", "head"));
-        1, 28, E (`Misnested_tag ("head", "head"));
+        1, 22, E (`Misnested_tag ("html", "head", []));
+        1, 28, E (`Misnested_tag ("head", "head", []));
         1, 34, E (`Unmatched_end_tag "p");
         1, 38, S  `End_element;
         1, 45, S (start_element "body")]);
@@ -208,8 +208,8 @@ let tests = [
         1, 14, S (`Text [" "]);
         1, 15, S (`Comment "foo");
         1, 25, E (`Bad_document "doctype should be first");
-        1, 40, E (`Misnested_tag ("html", "html"));
-        1, 46, E (`Misnested_tag ("meta", "html"));
+        1, 40, E (`Misnested_tag ("html", "html", []));
+        1, 46, E (`Misnested_tag ("meta", "html", []));
         1, 46, S (start_element "meta");
         1, 46, S  `End_element;
         1, 52, E (`Bad_document "duplicate head element");
@@ -328,7 +328,7 @@ let tests = [
         1,  1, S (start_element "p");
         1,  4, S  `End_element;
         1,  4, S (start_element "h1");
-        1,  8, E (`Misnested_tag ("h2", "h1"));
+        1,  8, E (`Misnested_tag ("h2", "h1", []));
         1,  8, S  `End_element;
         1,  8, S (start_element "h2");
         1, 12, S (`Text ["foo"]);
@@ -515,6 +515,25 @@ let tests = [
         4, 12, S  `End_element;
         4, 12, S  `End_element]);
 
+  ("html.parser.ruby" >:: fun _ ->
+    expect "<rb>a<rt>b"
+      [ 1,  1, S (start_element "html");
+        1,  1, S (start_element "head");
+        1,  1, S  `End_element;
+        1,  1, S (start_element "body");
+        1,  1, E (`Misnested_tag ("rb", "body", []));
+        1,  1, S (start_element "rb");
+        1,  6, E (`Misnested_tag ("rt", "body", []));
+        1,  5, S (`Text ["a"]);
+        1,  6, S (start_element "rt");
+        1,  6, E (`Unmatched_start_tag "rt");
+        1,  1, E (`Unmatched_start_tag "rb");
+        1, 10, S (`Text ["b"]);
+        1, 11, S  `End_element;
+        1, 11, S  `End_element;
+        1, 11, S  `End_element;
+        1, 11, S  `End_element]);
+
   ("html.parser.truncated-body" >:: fun _ ->
     expect "<body>"
       [ 1,  1, S (start_element "html");
@@ -533,19 +552,19 @@ let tests = [
         1, 14, S  `End_element]);
 
   ("html.parser.junk-in-body" >:: fun _ ->
-    expect "<body>\x00<!DOCTYPE html><html><meta><body></body>"
+    expect "<body>\x00<!DOCTYPE html><html><meta><body attr='value'></body>"
       [ 1,  1, S (start_element "html");
         1,  1, S (start_element "head");
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
         1,  7, E (`Bad_token ("U+0000", "body", "null"));
         1,  8, E (`Bad_document "doctype should be first");
-        1, 23, E (`Misnested_tag ("html", "body"));
+        1, 23, E (`Misnested_tag ("html", "body", []));
         1, 29, S (start_element "meta");
         1, 29, S  `End_element;
-        1, 35, E (`Misnested_tag ("body", "body"));
-        1, 48, S  `End_element;
-        1, 48, S  `End_element]);
+        1, 35, E (`Misnested_tag ("body", "body", ["attr", "value"]));
+        1, 61, S  `End_element;
+        1, 61, S  `End_element]);
 
   ("html.parser.nested-html-in-body" >:: fun _ ->
     expect "<div><html></html>foo</div><div>bar</div>"
@@ -554,7 +573,7 @@ let tests = [
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
         1,  1, S (start_element "div");
-        1,  6, E (`Misnested_tag ("html", "body"));
+        1,  6, E (`Misnested_tag ("html", "body", []));
         1,  1, E (`Unmatched_start_tag "div");
         1, 19, E (`Bad_content "html");
         1, 19, S (`Text ["foo"]);
@@ -572,8 +591,8 @@ let tests = [
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
         1,  1, S (start_element "p");
-        1,  4, E (`Misnested_tag ("html", "body"));
-        1, 10, E (`Misnested_tag ("body", "body"));
+        1,  4, E (`Misnested_tag ("html", "body", []));
+        1, 10, E (`Misnested_tag ("body", "body", []));
         1, 16, S  `End_element;
         1, 16, S (start_element "p");
         1, 26, E (`Bad_document ("content after body"));
@@ -888,9 +907,9 @@ let tests = [
       [ 1,  1, S (start_element "head");
         1,  7, S (start_element "noscript");
         1, 17, E (`Bad_document "doctype should be first");
-        1, 32, E (`Misnested_tag ("html", "noscript"));
-        1, 38, E (`Misnested_tag ("head", "noscript"));
-        1, 44, E (`Misnested_tag ("noscript", "noscript"));
+        1, 32, E (`Misnested_tag ("html", "noscript", []));
+        1, 38, E (`Misnested_tag ("head", "noscript", []));
+        1, 44, E (`Misnested_tag ("noscript", "noscript", []));
         1, 54, E (`Unmatched_end_tag "head");
         1, 61, S  `End_element;
         1, 72, S  `End_element]);
@@ -971,7 +990,7 @@ let tests = [
   ("html.parser.nested-button" >:: fun _ ->
     expect ~context:None "<button><button>submit</button></button>"
       [ 1,  1, S (start_element "button");
-        1,  9, E (`Misnested_tag ("button", "button"));
+        1,  9, E (`Misnested_tag ("button", "button", []));
         1,  9, S  `End_element;
         1,  9, S (start_element "button");
         1, 17, S (`Text ["submit"]);
@@ -996,7 +1015,7 @@ let tests = [
 
   ("html.parser.nested-achor" >:: fun _ ->
     expect ~context:None "<a><a></a></a>"
-      [ 1,  4, E (`Misnested_tag ("a", "a"));
+      [ 1,  4, E (`Misnested_tag ("a", "a", []));
         1, 11, E (`Unmatched_end_tag "a");
         1,  1, S (start_element "a");
         1,  4, S  `End_element;
@@ -1006,7 +1025,7 @@ let tests = [
   ("html.parser.nested-anchor.reconstruct" >:: fun _ ->
     expect ~context:None "<p><a>foo<a>bar<p>baz"
       [ 1,  1, S (start_element "p");
-        1, 10, E (`Misnested_tag ("a", "a"));
+        1, 10, E (`Misnested_tag ("a", "a", []));
         1, 10, E (`Unmatched_start_tag "a");
         1,  4, S (start_element "a");
         1,  7, S (`Text ["foo"]);
@@ -1024,7 +1043,7 @@ let tests = [
 
   ("html.parser.nested-nobr" >:: fun _ ->
     expect ~context:None "foo<nobr>bar<nobr>baz</nobr>quux</nobr>blah"
-      [ 1, 13, E (`Misnested_tag ("nobr", "nobr"));
+      [ 1, 13, E (`Misnested_tag ("nobr", "nobr", []));
         1, 33, E (`Unmatched_end_tag "nobr");
         1,  1, S (`Text ["foo"]);
         1,  4, S (start_element "nobr");
@@ -1082,15 +1101,15 @@ let tests = [
   ("html.parser.table-content-in-body" >:: fun _ ->
     expect ~context:(Some (`Fragment "body"))
       "<caption><col><colgroup><tbody><td><tfoot><th><thead><tr>"
-      [ 1,  1, E (`Misnested_tag ("caption", "body"));
-        1, 10, E (`Misnested_tag ("col", "body"));
-        1, 15, E (`Misnested_tag ("colgroup", "body"));
-        1, 25, E (`Misnested_tag ("tbody", "body"));
-        1, 32, E (`Misnested_tag ("td", "body"));
-        1, 36, E (`Misnested_tag ("tfoot", "body"));
-        1, 43, E (`Misnested_tag ("th", "body"));
-        1, 47, E (`Misnested_tag ("thead", "body"));
-        1, 54, E (`Misnested_tag ("tr", "body"))]);
+      [ 1,  1, E (`Misnested_tag ("caption", "body", []));
+        1, 10, E (`Misnested_tag ("col", "body", []));
+        1, 15, E (`Misnested_tag ("colgroup", "body", []));
+        1, 25, E (`Misnested_tag ("tbody", "body", []));
+        1, 32, E (`Misnested_tag ("td", "body", []));
+        1, 36, E (`Misnested_tag ("tfoot", "body", []));
+        1, 43, E (`Misnested_tag ("th", "body", []));
+        1, 47, E (`Misnested_tag ("thead", "body", []));
+        1, 54, E (`Misnested_tag ("tr", "body", []))]);
 
   ("html.parser.caption" >:: fun _ ->
     expect ~context:None "<table><caption>foo<p>bar</caption></table>"
@@ -1125,7 +1144,7 @@ let tests = [
     expect ~context:None "<table><td></td></table>"
       [ 1,  1, S (start_element "table");
         1,  8, S (start_element "tbody");
-        1,  8, E (`Misnested_tag ("td", "table"));
+        1,  8, E (`Misnested_tag ("td", "table", []));
         1,  8, S (start_element "tr");
         1,  8, S (start_element "td");
         1, 12, S  `End_element;
@@ -1143,7 +1162,7 @@ let tests = [
   ("html.parser.nested-table" >:: fun _ ->
     expect ~context:None "<table><table></table>"
       [ 1,  1, S (start_element "table");
-        1,  8, E (`Misnested_tag ("table", "table"));
+        1,  8, E (`Misnested_tag ("table", "table", []));
         1,  8, S  `End_element;
         1,  8, S (start_element "table");
         1, 15, S  `End_element]);
@@ -1152,7 +1171,7 @@ let tests = [
     expect ~context:None "<table><caption><caption></caption></table>"
       [ 1,  1, S (start_element "table");
         1,  8, S (start_element "caption");
-        1, 17, E (`Misnested_tag ("caption", "caption"));
+        1, 17, E (`Misnested_tag ("caption", "caption", []));
         1, 17, S  `End_element;
         1, 17, S (start_element "caption");
         1, 26, S  `End_element;
@@ -1200,7 +1219,7 @@ let tests = [
   ("html.parser.form.nested" >:: fun _ ->
     expect ~context:(Some (`Fragment "body")) "<form><form></form>"
       [ 1,  1, S (start_element "form");
-        1,  7, E (`Misnested_tag ("form", "form"));
+        1,  7, E (`Misnested_tag ("form", "form", []));
         1, 13, S  `End_element]
   );
 
@@ -1251,7 +1270,7 @@ let tests = [
     expect ~context:None "<frameset><!DOCTYPE html><html>f"
       [ 1,  1, S (start_element "frameset");
         1, 11, E (`Bad_document "doctype should be first");
-        1, 26, E (`Misnested_tag ("html", "frameset"));
+        1, 26, E (`Misnested_tag ("html", "frameset", []));
         1, 32, E (`Bad_content "frameset");
         1, 33, E (`Unexpected_eoi "frameset");
         1, 33, S  `End_element]);
@@ -1271,19 +1290,19 @@ let tests = [
       [ 1,  1, S (start_element "frameset");
         1, 11, S  `End_element;
         1, 22, E (`Bad_document "doctype should be first");
-        1, 37, E (`Misnested_tag ("html", "html"));
+        1, 37, E (`Misnested_tag ("html", "html", []));
         1, 43, E (`Bad_content "html")]);
 
   ("html.parser.frameset-in-body" >:: fun _ ->
     expect ~context:(Some (`Fragment "body")) "<frameset><p>"
-      [ 1,  1, E (`Misnested_tag ("frameset", "body"));
+      [ 1,  1, E (`Misnested_tag ("frameset", "body", []));
         1, 11, S (start_element "p");
         1, 14, S  `End_element];
 
     expect ~context:None "<body><p><frameset><p></body>"
       [ 1,  1, S (start_element "body");
         1,  7, S (start_element "p");
-        1, 10, E (`Misnested_tag ("frameset", "body"));
+        1, 10, E (`Misnested_tag ("frameset", "body", []));
         1, 20, S  `End_element;
         1, 20, S (start_element "p");
         1, 30, S  `End_element;
@@ -1291,7 +1310,7 @@ let tests = [
 
     expect ~context:None "<p><frameset><p>"
       [ 1,  1, S (start_element "p");
-        1,  4, E (`Misnested_tag ("frameset", "body"));
+        1,  4, E (`Misnested_tag ("frameset", "body", []));
         1, 14, S  `End_element;
         1, 14, S (start_element "p");
         1, 17, S  `End_element];
@@ -1302,7 +1321,7 @@ let tests = [
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
         1,  1, S (start_element "p");
-        1,  4, E (`Misnested_tag ("frameset", "body"));
+        1,  4, E (`Misnested_tag ("frameset", "body", []));
         1,  4, S  `End_element;
         1,  4, S  `End_element;
         1,  4, S (start_element "frameset");

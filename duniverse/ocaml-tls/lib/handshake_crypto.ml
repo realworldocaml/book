@@ -2,7 +2,7 @@ open Mirage_crypto.Hash
 
 open State
 
-let (<+>) = Utils.Cs.(<+>)
+let (<+>) = Cstruct.append
 
 let halve secret =
   let size = Cstruct.len secret in
@@ -22,7 +22,9 @@ let prf_mac = function
   | `RSA_WITH_AES_256_GCM_SHA384
   | `DHE_RSA_WITH_AES_256_GCM_SHA384
   | `ECDHE_RSA_WITH_AES_256_GCM_SHA384
-  | `ECDHE_RSA_WITH_AES_256_CBC_SHA384 -> (module SHA384 : S)
+  | `ECDHE_RSA_WITH_AES_256_CBC_SHA384
+  | `ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+  | `ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 -> (module SHA384 : S)
   | _ -> (module SHA256 : S)
 
 let pseudo_random_function version cipher len secret label seed =
@@ -48,7 +50,7 @@ let hash version cipher data =
     H.digest data
 
 let finished version cipher master_secret label ps =
-  let data = Utils.Cs.appends ps in
+  let data = Cstruct.concat ps in
   let seed = hash version cipher data in
   pseudo_random_function version cipher 12 master_secret label seed
 
@@ -66,7 +68,7 @@ let derive_master_secret version (session : session_data) premaster log =
   let prf = pseudo_random_function version session.ciphersuite 48 premaster in
   if session.extended_ms then
     let session_hash =
-      let data = Utils.Cs.appends log in
+      let data = Cstruct.concat log in
       hash version session.ciphersuite data
     in
     prf "extended master secret" session_hash

@@ -856,7 +856,7 @@ let%expect_test "[advance_clock_to_interval_num]" =
       let interval_nums_removed = List.sort !removed ~compare:Interval_num.compare in
       require [%here] (Poly.equal interval_nums_removed interval_nums)
     with
-    | exn -> failwiths "failure" (exn, t) [%sexp_of: exn * _ t]
+    | exn -> failwiths ~here:[%here] "failure" (exn, t) [%sexp_of: exn * _ t]
   in
   let num_bits = 6 in
   let all_sums = all_sums num_bits in

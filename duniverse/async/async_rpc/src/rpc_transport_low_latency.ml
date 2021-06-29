@@ -56,7 +56,11 @@ module Config = struct
     || t.start_batching_after_num_messages < 0
     || Time_ns.Span.( <= ) t.write_timeout Time_ns.Span.zero
     then
-      failwiths "Rpc_transport_low_latency.Config.validate: invalid config" t sexp_of_t;
+      failwiths
+        ~here:[%here]
+        "Rpc_transport_low_latency.Config.validate: invalid config"
+        t
+        sexp_of_t;
     t
   ;;
 
@@ -153,7 +157,7 @@ module Reader_internal = struct
   let refill t =
     shift_unconsumed t;
     let result =
-      Bigstring.read_assume_fd_is_nonblocking
+      Bigstring_unix.read_assume_fd_is_nonblocking
         (Fd.file_descr_exn t.fd)
         t.buf
         ~pos:t.max
@@ -522,7 +526,7 @@ module Writer_internal = struct
 
   let single_write t : Single_write_result.t =
     match
-      Bigstring.write_assume_fd_is_nonblocking
+      Bigstring_unix.write_assume_fd_is_nonblocking
         (Fd.file_descr_exn t.fd)
         t.buf
         ~pos:0

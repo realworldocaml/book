@@ -56,7 +56,6 @@ open Let_syntax
 let all = `Make_sure_to_define_all_elsewhere
 let _ = all
 let unit = return ()
-let ignore = ignore_m
 
 let both t1 t2 =
   create (fun result ->

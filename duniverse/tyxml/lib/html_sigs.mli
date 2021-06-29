@@ -327,10 +327,9 @@ module type T = sig
   [@@reflect.attribute "min" ["input"]]
 
   val a_inputmode :
-    [< `Verbatim | `Latin | `Latin_name | `Latin_prose | `Full_width_latin
-    | `Kana | `Katakana | `Numeric | `Tel | `Email | `Url ] wrap ->
+    [< `None | `Text | `Decimal | `Numeric | `Tel | `Search | `Email | `Url ] wrap ->
     [> `Inputmode] attrib
-  (** @see <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes> Input HTML documentation. *)
+  (** @see <https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode> inputmode documentation. *)
 
   val a_novalidate : unit -> [> | `Novalidate] attrib
 
@@ -387,6 +386,9 @@ module type T = sig
   val a_start : number wrap -> [> | `Start] attrib
 
   val a_step : float_number option wrap -> [> | `Step] attrib
+
+  val a_translate : [< | `Yes | `No]  wrap -> [> | `Translate] attrib
+  (** @see <https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/translate> [translate] global attribute documentation. *)
 
   val a_wrap : [< | `Soft | `Hard] wrap -> [> | `Wrap] attrib
 
@@ -854,6 +856,12 @@ module type T = sig
     src: Xml.uri wrap ->
     alt: text wrap ->
     ([< img_attrib], [> img]) nullary
+
+  val picture : img:([< | img] elt wrap) -> ([< | picture_attrib], [< | picture_content_fun], [> | picture]) star
+  [@@reflect.filter_whitespace]
+  [@@reflect.element "picture"]
+  (** @see <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/picture>
+      Picture element documentation on MDN *)
 
   val iframe :
     ([< | iframe_attrib], [< | iframe_content_fun], [> | iframe]) star

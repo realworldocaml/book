@@ -39,6 +39,7 @@ let%test_module _ =
         if not (Map.equal ( = ) !actual !expected)
         then
           failwiths
+            ~here:[%here]
             "mismatch"
             (location, `actual actual, `expected expected)
             [%sexp_of: Source_code_position.t * [ `actual of t ] * [ `expected of t ]]

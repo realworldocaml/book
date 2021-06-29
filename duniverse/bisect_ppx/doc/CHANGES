@@ -1,3 +1,66 @@
+Version 2.6.0 (2021-02-06):
+---------------------------
+
+  Changes
+
+  - Port to ppxlib (#327, Sonja Heinze).
+  - CSS: use ligature fonts, if installed (#339).
+  - Internal: switch to Dune cram tests, finding lots of bugs in the process
+    (beb80b3, 593a7c2, #352).
+
+  Bugs fixed
+
+  - Workaround for typing issue with instrumentation of or-patterns under GADTs;
+    includes a new match instrumenter (#325, reported by Mehdi Bouaziz).
+  - The second subexpression of (||) and (&&) is in tail position iff the whole
+    expression is in tail position; Bisect was unconditionally wrapping the
+    second expression in successor code (#359, reported by Benjamin Monate).
+  - HTML: words that have an instrumentation point on one of their characters
+    were not searchable (#346).
+  - Don't clobber the global random number generator (#344).
+  - (or) nested inside (||) not properly instrumented (#347).
+  - Subexpressions of Pexp_newtype were always treated as if they were in tail
+    position (#348).
+  - assert instrumentation was placed at the wrong point in the generated code
+    (#349).
+  - assert false should not be instrumented; the point is unreachable (#355).
+  - Instrumentation of or-patterns inside local open patterns could trigger
+    unused open warning (#350).
+
+  Removed
+
+  These removals were planned and announced in the 2.0.0 release.
+
+  - PPX option --mode (#200).
+  - PPX option --no-comment-parsing (#202).
+  - PPX option --exclude (#244).
+  - PPX option --exclude-file, which has been renamed to --exclusions (#245).
+  - Reporter options --html, --text, --coveralls, which have been replaced by
+    html, summary, send-to subcommands, respectively (#145).
+  - Support for discovering .out files. Bisect switched to extension .coverage
+    in 2.0.0 (#110).
+  - --dump, --csv, and the old-style text report (#251).
+  - The old command line, including single-dashed (-) multi-character options,
+    and usage of bisect-ppx-report without a subcommand (such as
+    bisect-ppx-report html) (#145).
+
+Version 2.5.0 (2020-10-19):
+---------------------------
+  Additions
+
+  - Support Dune's --instrument-with integration, introduced in Dune 2.7.0
+    (#331, Pau Ruiz Safont).
+
+  Bugs fixed
+
+  - runtime.unix_open is not a function in js_of_ocaml integration, occurring
+    since Dune 2.7.0 (#334).
+  - Don't assume that (&&) is always applied to two arguments (#333, reported
+    Vladimir Keleshev).
+  - esy sandbox directory specified in environment variable cur__target_dir
+    might not exist (#328, reported David Sancho).
+  - Reporter: don't crash on symlink cycles (#324, reported Rudi Grinberg).
+
 Version 2.4.1 (2020-05-10):
 ---------------------------
   Bugs fixed

@@ -150,6 +150,3 @@ let%test _ =
   sprintf first_class_format3 (0, 42) (Time.now ()) 10
   = "u = (0 42), t = [Time.to_string (Time.now ())], v = 10"
 ;;
-
-
-

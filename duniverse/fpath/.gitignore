@@ -6,3 +6,4 @@ tmp
 *.native
 *.byte
 *.install
+_b0

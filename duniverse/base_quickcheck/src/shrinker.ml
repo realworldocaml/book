@@ -17,6 +17,12 @@ end
 include T
 
 let map t ~f ~f_inverse = create (fun x -> Sequence.map ~f (shrink t (f_inverse x)))
+let filter t ~f = create (fun x -> Sequence.filter ~f (shrink t x))
+
+let filter_map t ~f ~f_inverse =
+  create (fun x -> Sequence.filter_map ~f (shrink t (f_inverse x)))
+;;
+
 let of_lazy lazy_t = create (fun x -> Sequence.of_lazy (lazy (shrink (force lazy_t) x)))
 
 let fixed_point of_shrinker =
@@ -41,6 +47,58 @@ let int63 = atomic
 let int64 = atomic
 let nativeint = atomic
 let float = atomic
+
+let bigarray1 src =
+  let dim = Bigarray.Array1.dim src in
+  match dim with
+  | 0 -> Sequence.empty
+  | _ ->
+    let kind = Bigarray.Array1.kind src in
+    let layout = Bigarray.Array1.layout src in
+    let offset = Bigarray_helpers.Layout.offset layout in
+    Sequence.init dim ~f:(fun to_skip ->
+      let to_skip = to_skip + offset in
+      Bigarray_helpers.Array1.init kind layout (dim - 1) ~f:(fun i ->
+        src.{(if i < to_skip then i else i + 1)}))
+;;
+
+let bigstring = create bigarray1
+let float32_vec = create bigarray1
+let float64_vec = create bigarray1
+
+let bigarray2 =
+  let module Dims = struct
+    type t =
+      { dim1 : int
+      ; dim2 : int
+      }
+    [@@deriving fields]
+
+    let create a = Bigarray.Array2.{ dim1 = dim1 a; dim2 = dim2 a }
+  end
+  in
+  let shrink field src =
+    let dims = Dims.create src in
+    match Field.get field dims with
+    | 0 -> Sequence.empty
+    | _ ->
+      let kind = Bigarray.Array2.kind src in
+      let layout = Bigarray.Array2.layout src in
+      let offset = Bigarray_helpers.Layout.offset layout in
+      let ({ dim1; dim2 } : Dims.t) = Field.map field dims ~f:Int.pred in
+      Sequence.init (Field.get field dims) ~f:(fun to_skip ->
+        let to_skip = to_skip + offset in
+        let skip i = if i < to_skip then i else i + 1 in
+        Bigarray_helpers.Array2.init kind layout dim1 dim2 ~f:(fun dim1 dim2 ->
+          let ({ dim1; dim2 } : Dims.t) = Field.map field { dim1; dim2 } ~f:skip in
+          src.{dim1, dim2}))
+  in
+  fun src ->
+    Sequence.round_robin [ shrink Dims.Fields.dim1 src; shrink Dims.Fields.dim2 src ]
+;;
+
+let float32_mat = create bigarray2
+let float64_mat = create bigarray2
 
 let option value_t =
   create (function

@@ -105,10 +105,20 @@ val find_and_call1
   :  ('k, 'v) t
   -> compare:('k -> 'k -> int)
   -> 'k
-  -> 'a
+  -> a:'a
   -> if_found:('v -> 'a -> 'b)
   -> if_not_found:('k -> 'a -> 'b)
   -> 'b
+
+val find_and_call2
+  :  ('k, 'v) t
+  -> compare:('k -> 'k -> int)
+  -> 'k
+  -> a:'a
+  -> b:'b
+  -> if_found:('v -> 'a -> 'b -> 'c)
+  -> if_not_found:('k -> 'a -> 'b -> 'c)
+  -> 'c
 
 val findi_and_call
   :  ('k, 'v) t
@@ -117,6 +127,25 @@ val findi_and_call
   -> if_found:(key:'k -> data:'v -> 'a)
   -> if_not_found:('k -> 'a)
   -> 'a
+
+val findi_and_call1
+  :  ('k, 'v) t
+  -> compare:('k -> 'k -> int)
+  -> 'k
+  -> a:'a
+  -> if_found:(key:'k -> data:'v -> 'a -> 'b)
+  -> if_not_found:('k -> 'a -> 'b)
+  -> 'b
+
+val findi_and_call2
+  :  ('k, 'v) t
+  -> compare:('k -> 'k -> int)
+  -> 'k
+  -> a:'a
+  -> b:'b
+  -> if_found:(key:'k -> data:'v -> 'a -> 'b -> 'c)
+  -> if_not_found:('k -> 'a -> 'b -> 'c)
+  -> 'c
 
 (** Returns true if key is present in the tree, and false otherwise. *)
 val mem : ('k, 'v) t -> compare:('k -> 'k -> int) -> 'k -> bool

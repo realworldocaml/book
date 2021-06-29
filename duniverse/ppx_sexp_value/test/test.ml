@@ -175,3 +175,18 @@ let%test_module "expressions and their evaluation" =
     ;;
   end)
 ;;
+
+let _no_warnings_from_merlin_check_about_overlapping_locations =
+  let module Foo = struct
+    type t = [ `A ]
+    let sexp_of_t _ = Sexp.Atom "A"
+  end in
+  let foo = `A in
+  let maybe_foo = Some `A in
+  [%sexp { foo : Foo.t }],
+  [%sexp { foo : [< `A ] }],
+  [%sexp { foo : [< Foo.t ] }],
+  [%sexp { maybe_foo : Foo.t option }],
+  [%sexp { maybe_foo : [< `A ] option }],
+  [%sexp { maybe_foo : [< Foo.t ] option }]
+;;

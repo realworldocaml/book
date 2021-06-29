@@ -23,12 +23,7 @@
    [html_sigs_reflected.ml]. See comments by functions below and in
    [sigs_reflected.mli] for details. *)
 
-open Ast_helper
-open Ast_mapper
-open Asttypes
-open Parsetree
-module AC = Ast_convenience
-
+open Ppxlib.Ast_helper
 
 let find_attr s l =
   let f attr = attr.attr_name.txt = s in
@@ -59,20 +54,22 @@ module FunTyp = struct
 
   (** Check if a type contains the "elt" constructor, somewhere. *)
   let contains_elt t =
-    (* Ast_iterator is not available in 4.02, so we use a mapper. *)
-    let typ mapper = function
+    let iterate = object
+      inherit Ast_traverse.iter as super
+    
+      method! core_type = function
       | [%type: [%t? _] elt] -> raise Found
-      | ty -> default_mapper.typ mapper ty
-    in
-    let m = {Ast_mapper.default_mapper with typ} in
-    try ignore (m.typ m t) ; false
+      | ty -> super#core_type ty
+    end in
+    
+    try iterate#core_type t ; false
     with Found -> true
 
   (** Extract the type inside [wrap]. *)
   let unwrap = function
     (* Optional argument are [_ wrap *predef*.option], In 4.02 *)
     | {ptyp_desc = Ptyp_constr (lid, [[%type: [%t? _] wrap] as t])}
-      when Longident.last lid.txt = "option" ->
+      when Longident.last_exn lid.txt = "option" ->
       Some t
     | [%type: [%t? _] wrap] as t -> Some t
     | _ -> None
@@ -80,7 +77,7 @@ module FunTyp = struct
   (** Extract the type of for html/svg attributes. *)
   let extract_attribute_argument (lab, t) =
     if contains_elt t then None
-    else match AC.Label.explode lab, unwrap t with
+    else match lab, unwrap t with
       | Nolabel, _ | _, None -> None
       | (Labelled lab | Optional lab), Some t -> Some (lab, t)
 
@@ -94,14 +91,14 @@ module FunTyp = struct
 (* Given the name of a TyXML attribute function and a list of its argument
    types, selects the attribute value parser (in module [Attribute_value])
    that should be used for that attribute. *)
-let rec to_attribute_parser lang name = function
+let rec to_attribute_parser lang name ~loc = function
   | [] -> [%expr nowrap presence]
   | [[%type: [%t? ty] wrap]] ->
-    [%expr wrap [%e to_attribute_parser lang name [ty]]]
+    [%expr wrap [%e to_attribute_parser lang name [ty] ~loc]]
 
   | [[%type: character]] -> [%expr char]
   | [[%type: bool] as ty]
-    when AC.has_attr "onoff" ty.ptyp_attributes -> [%expr onoff]
+    when (List.exists (fun ty -> ty.attr_name.txt = "onoff") ty.ptyp_attributes) -> [%expr onoff]
   | [[%type: bool]] -> [%expr bool]
   | [[%type: unit]] -> [%expr nowrap unit]
 
@@ -217,7 +214,7 @@ let rec to_attribute_parser lang name = function
   | _ ->
     let name = strip_a name in
     let name = if name = "in" then "in_" else name in
-    AC.evar name
+    Ast_builder.Default.evar ~loc name
 
 end
 
@@ -227,6 +224,11 @@ end
    (e.g. "a_input_max" does not directly correspond to "max"). The annotation is
    parsed to get the markup name and the element types in which the translation
    from markup name to TyXML name should be performed. *)
+
+let get_str = function
+  | {pexp_desc=Pexp_constant (Pconst_string (s, _, _)); _} -> Some s
+  | _ -> None
+
 let ocaml_attributes_to_renamed_attribute name attributes =
   let maybe_attribute = find_attr "reflect.attribute" attributes in
 
@@ -241,7 +243,7 @@ let ocaml_attributes_to_renamed_attribute name attributes =
     | PStr [%str
         [%e? const]
         [%e? element_names]] ->
-      begin match Ast_convenience.get_str const with
+      begin match get_str const with
         | None -> error ()
         | Some real_name ->
           let element_names =
@@ -251,7 +253,7 @@ let ocaml_attributes_to_renamed_attribute name attributes =
             in
             let rec traverse acc = function
               | [%expr [%e? e]::[%e? tail]] ->
-                begin match Ast_convenience.get_str e with
+                begin match get_str e with
                   | Some element_name -> traverse (element_name::acc) tail
                   | None -> error e.pexp_loc
                 end
@@ -286,9 +288,9 @@ let val_item_to_element_info lang value_description =
     | Some { attr_loc = loc ; attr_payload = payload} ->
       let assembler, real_name = match payload with
         | PStr [%str [%e? assembler] [%e? name]] ->
-          Ast_convenience.get_str assembler, Ast_convenience.get_str name
+          get_str assembler, get_str name
         | PStr [%str [%e? assembler]] ->
-          Ast_convenience.get_str assembler, None
+          get_str assembler, None
         | _ -> None, None
       in
       begin match assembler with
@@ -318,7 +320,7 @@ let val_item_to_element_info lang value_description =
       let aux x acc = match FunTyp.extract_attribute_argument x with
         | None -> acc
         | Some (label, ty) ->
-          let parser = FunTyp.to_attribute_parser lang label [ty] in
+          let parser = FunTyp.to_attribute_parser lang label [ty] ~loc:ty.ptyp_loc in
           (name, label, parser) :: acc
       in
       List.fold_right aux arguments []
@@ -343,112 +345,112 @@ let val_item_to_element_info lang value_description =
     Some (assembler, labeled_attributes, rename)
 
 
-
 let attribute_parsers = ref []
 let labeled_attributes = ref []
 let renamed_attributes = ref []
 let element_assemblers = ref []
 let renamed_elements = ref []
-
-(* Walks over signature items, looking for elements and attributes. Calls the
-   functions immediately above, and accumulates their results in the above
-   references. This function is relevant for [html_sigs.mli] and
-   [svg_sigs.mli]. *)
-let signature_item lang mapper item =
-  begin match item.psig_desc with
-  | Psig_value {pval_name = {txt = name}; pval_type = type_; pval_attributes}
-      when is_attribute name ->
-    (* Attribute declaration. *)
-
-    let argument_types = List.map snd @@ FunTyp.arguments type_ in
-    let attribute_parser_mapping =
-      name, FunTyp.to_attribute_parser lang name argument_types in
-    attribute_parsers := attribute_parser_mapping::!attribute_parsers;
-
-    let renaming = ocaml_attributes_to_renamed_attribute name pval_attributes in
-    renamed_attributes := renaming @ !renamed_attributes
-
-  | Psig_value v ->
-    (* Non-attribute, but potentially an element declaration. *)
-
-    begin match val_item_to_element_info lang v with
-    | None -> ()
-    | Some (assembler, labeled_attributes', rename) ->
-      element_assemblers := (v.pval_name.txt, assembler)::!element_assemblers;
-      labeled_attributes := labeled_attributes' @ !labeled_attributes;
-      renamed_elements := rename @ !renamed_elements
-    end
-
-  | _ -> ()
-  end;
-
-  default_mapper.signature_item mapper item
-
-
-
 let reflected_variants = ref []
 
-(* Walks over type declarations (which will be in signature items). For each
-   that is marked with [@@reflect.total_variant], expects it to be a polymorphic
-   variant. Splits the constructors into those that have no arguments, and one
-   constructor that has one string argument. This constructor information is
-   accumulated in [reflected_variants]. This function is relevant for
-   [html_types.mli]. *)
-let type_declaration mapper declaration =
-  let is_reflect attr = attr.attr_name.txt = "reflect.total_variant" in
-  if List.exists is_reflect declaration.ptype_attributes then begin
-    let name = declaration.ptype_name.txt in
+class reflector lang = object
+  inherit Ast_traverse.iter as super
 
-    match declaration.ptype_manifest with
-    | Some {ptyp_desc = Ptyp_variant (rows, _, _); ptyp_loc} ->
-      let rows =
-        rows |> List.map (function
-          | {prf_desc = Rtag (label, _, types)} -> label, types
-          | {prf_desc = Rinherit {ptyp_loc}} ->
+  (* Walks over signature items, looking for elements and attributes. Calls the
+     functions immediately above, and accumulates their results in the above
+     references. This function is relevant for [html_sigs.mli] and
+     [svg_sigs.mli]. *)
+  method! signature_item item =
+    begin match item.psig_desc with
+      | Psig_value {pval_name = {txt = name}; pval_type = type_; pval_attributes; pval_loc = loc}
+        when is_attribute name ->
+        (* Attribute declaration. *)
+
+        let argument_types = List.map snd @@ FunTyp.arguments type_ in
+        let attribute_parser_mapping =
+          name, FunTyp.to_attribute_parser lang name argument_types ~loc in
+        attribute_parsers := attribute_parser_mapping::!attribute_parsers;
+
+        let renaming = ocaml_attributes_to_renamed_attribute name pval_attributes in
+        renamed_attributes := renaming @ !renamed_attributes
+
+      | Psig_value v ->
+        (* Non-attribute, but potentially an element declaration. *)
+
+        begin match val_item_to_element_info lang v with
+          | None -> ()
+          | Some (assembler, labeled_attributes', rename) ->
+            element_assemblers := (v.pval_name.txt, assembler)::!element_assemblers;
+            labeled_attributes := labeled_attributes' @ !labeled_attributes;
+            renamed_elements := rename @ !renamed_elements
+        end
+
+      | _ -> ()
+    end;
+    super#signature_item item
+
+  (* Walks over type declarations (which will be in signature items). For each
+     that is marked with [@@reflect.total_variant], expects it to be a polymorphic
+     variant. Splits the constructors into those that have no arguments, and one
+     constructor that has one string argument. This constructor information is
+     accumulated in [reflected_variants]. This function is relevant for
+     [html_types.mli]. *)
+  method! type_declaration declaration =
+    let is_reflect attr = attr.attr_name.txt = "reflect.total_variant" in
+    if List.exists is_reflect declaration.ptype_attributes then begin
+      let name = declaration.ptype_name.txt in
+
+      match declaration.ptype_manifest with
+      | Some {ptyp_desc = Ptyp_variant (rows, _, _); ptyp_loc} ->
+        let rows =
+          rows |> List.map (function
+            | {prf_desc = Rtag (label, _, types)} -> label, types
+            | {prf_desc = Rinherit {ptyp_loc}} ->
+              Location.raise_errorf ~loc:ptyp_loc
+                "Inclusion is not supported by [@@reflect.total_variant]")
+        in
+
+        let nullary, unary =
+          List.partition (fun (_, types) -> types = []) rows in
+
+        let unary =
+          match unary with
+          | [name, [[%type: string]]] -> name.txt
+          | _ ->
             Location.raise_errorf ~loc:ptyp_loc
-              "Inclusion is not supported by [@@reflect.total_variant]")
-      in
+              "Expected exactly one non-nullary constructor `C of string"
+        in
 
-      let nullary, unary =
-        List.partition (fun (_, types) -> types = []) rows in
+        let nullary = List.map (fun ({txt},_) -> txt) nullary in
 
-      let unary =
-        match unary with
-        | [name, [[%type: string]]] -> name.txt
-        | _ ->
-          Location.raise_errorf ~loc:ptyp_loc
-            "Expected exactly one non-nullary constructor `C of string"
-      in
+        reflected_variants := (name, (unary, nullary))::!reflected_variants
 
-      let nullary = List.map (fun ({txt},_) -> txt) nullary in
-
-      reflected_variants := (name, (unary, nullary))::!reflected_variants
-
-    | _ ->
-      Location.raise_errorf ~loc:declaration.ptype_loc
-        "[@@reflect.total_variant] expects a polymorphic variant type"
-  end;
-
-  default_mapper.type_declaration mapper declaration
+      | _ ->
+        Location.raise_errorf ~loc:declaration.ptype_loc
+          "[@@reflect.total_variant] expects a polymorphic variant type"
+    end;
+    super#type_declaration declaration
+end
 
 (** Small set of combinators to help {!make_module}. *)
 module Combi = struct
-  let list f l = AC.list @@ List.map f l
-  let tuple2 f1 f2 (x1, x2) = Exp.tuple [f1 x1; f2 x2]
-  let tuple3 f1 f2 f3 (x1, x2, x3) = Exp.tuple [f1 x1; f2 x2; f3 x3]
-  let str = AC.str
-  let id = AC.evar
+  module Builder = Ast_builder.Make(struct let loc = Location.none end)
+  let list f l = Builder.elist @@ List.map f l
+  let tuple2 f1 f2 (x1, x2) = Builder.pexp_tuple [f1 x1; f2 x2]
+  let tuple3 f1 f2 f3 (x1, x2, x3) = Builder.pexp_tuple [f1 x1; f2 x2; f3 x3]
+  let str = Builder.estring
+  let id = Builder.evar
   let expr x = x
   let let_ p f (x,e) = Str.value Nonrecursive [Vb.mk (p x) (f e)]
   let rec compose_ids =
     function
     | [ i ]   -> id i
-    | i :: tl -> AC.app (id i) [compose_ids tl]
+    | i :: tl -> Builder.eapply (id i) [compose_ids tl]
     | []      -> assert false
 end
 
 (** Create a module based on the various things collected while reading the file. *)
 let emit_module () =
+  let loc = Location.none in
   begin if !attribute_parsers <> [] then [%str
     open Attribute_value
 
@@ -468,33 +470,33 @@ let emit_module () =
 
     ] else []
   end @
-
-  List.map Combi.(let_ AC.pvar (tuple2 str (list str))) !reflected_variants
+  List.map
+    Combi.(let_ (Ast_builder.Default.pvar ~loc) (tuple2 str (list str)))
+    !reflected_variants
 
 
 (* Crude I/O tools to read a signature and output a structure.
    The executable will take as first argument the name of the signature
    and as second argument the name of the structure.
-
 *)
-let version =  Versions.ocaml_408
 
 let read_sig filename =
-  Location.input_name := filename ;
   let handle =
     try open_in filename
     with Sys_error msg -> prerr_endline msg; exit 1
   in
   let buf = Lexing.from_channel handle in
-  Location.init buf filename ;
-  let ast = Parse.interface version buf in
+  buf.lex_curr_p <- {
+    pos_fname = filename;
+    pos_lnum = 1;
+    pos_bol = 0;
+    pos_cnum = 0;
+  };
+  let ast = Parse.interface buf in
   close_in handle ;
   ast
 
 let write_struct filename ast =
-  let {Versions. copy_structure; _ } =
-    Versions.migrate version Versions.ocaml_current in
-  let ast = copy_structure ast in
   let handle =
     try open_out filename
     with Sys_error msg -> prerr_endline msg; exit 1
@@ -522,13 +524,9 @@ let () =
     else `Html
   in
 
-  let mapper =
-    let signature_item = signature_item lang in
-    {default_mapper with signature_item; type_declaration}
-  in
-
   let reflected_struct sig_ =
-    ignore @@ mapper.signature mapper sig_ ;
+    let iterate = new reflector lang in
+    iterate#signature sig_ ;
     emit_module ()
   in
 

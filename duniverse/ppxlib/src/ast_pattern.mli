@@ -173,9 +173,9 @@ val pack0 : ('a, 'b, 'c) t -> ('a, unit -> 'b, 'c) t
 val pack2 : ('a, 'b -> 'c -> 'd, 'e) t -> ('a, 'b * 'c -> 'd, 'e) t
 val pack3 : ('a, 'b -> 'c -> 'd -> 'e, 'f) t -> ('a, 'b * 'c * 'd -> 'e, 'f) t
 
-(** AST patterns for each constructur/record of the parsetree are generated in the same
-    way AST builders are generated. In addition, for every {it wrapper} we generate a
-    pattern to match the [loc] and [attributes] fields. For instanct for the [expression]
+(** AST patterns for each constructor/record of the parsetree are generated in the same
+    way AST builders are generated. In addition, for every {i wrapper} we generate a
+    pattern to match the [loc] and [attributes] fields. For instance for the [expression]
     type:
 
     {[

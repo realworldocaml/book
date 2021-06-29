@@ -8,7 +8,7 @@ let executable_name = Sys.executable_name
 let wrap1 f x1 = In_thread.run (fun () -> f x1)
 let wrap2 f x1 x2 = In_thread.run (fun () -> f x1 x2)
 
-let when_file_changes ?(poll_delay = sec 0.5) file =
+let when_file_changes ?on_exn ?(poll_delay = sec 0.5) file =
   let last_reported_mtime = ref Time.epoch in
   let reader, writer = Pipe.create () in
   let rec loop () =
@@ -17,7 +17,7 @@ let when_file_changes ?(poll_delay = sec 0.5) file =
     if not (Pipe.is_closed writer)
     then (
       (match stat_result with
-       | Error _ -> ()
+       | Error exn -> Option.iter on_exn ~f:(fun f -> f exn)
        | Ok st ->
          let mtime = st.mtime in
          if not (Time.equal mtime !last_reported_mtime)

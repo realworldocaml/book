@@ -102,6 +102,131 @@ let%test_module _ =
   end)
 ;;
 
+let%expect_test "specified key module" =
+  (* incorrect use *)
+  let module Key_incorrect = struct
+    type _ t =
+      | Foo : int t
+      | Bar : string t
+    [@@deriving sexp_of]
+
+    let to_type_id (type a) (t : a t) : a Type_equal.Id.t =
+      match t with
+      | Foo -> Type_equal.Id.create ~name:"foo" [%sexp_of: int]
+      | Bar -> Type_equal.Id.create ~name:"bar" [%sexp_of: string]
+    ;;
+  end
+  in
+  let module U_incorrect =
+    Make
+      (Key_incorrect)
+      (struct
+        type 'a t = 'a [@@deriving sexp_of]
+      end)
+  in
+  print_s
+    [%sexp
+      (Or_error.try_with (fun () ->
+         U_incorrect.find
+           (U_incorrect.of_alist_exn [ T (Foo, 3); T (Bar, "three") ])
+           Foo)
+       : int option Or_error.t)];
+  [%expect
+    {|
+    (Error (
+      "[Key.to_type_id] must not provide different type ids when called on the same input"
+      (key Foo)
+      (type_id1 ((name foo) (uid <uid>)))
+      (type_id2 ((name foo) (uid <uid>))))) |}];
+  (* correct use *)
+  let module Key_correct = struct
+    type _ t =
+      | Foo : int t
+      | Bar : string t
+    [@@deriving sexp_of]
+
+    let foo_id = Type_equal.Id.create ~name:"foo" [%sexp_of: int]
+    let bar_id = Type_equal.Id.create ~name:"bar" [%sexp_of: string]
+
+    let to_type_id (type a) (t : a t) : a Type_equal.Id.t =
+      match t with
+      | Foo -> foo_id
+      | Bar -> bar_id
+    ;;
+  end
+  in
+  let module U_correct =
+    Make
+      (Key_correct)
+      (struct
+        type 'a t = 'a [@@deriving sexp_of]
+      end)
+  in
+  print_s
+    [%sexp
+      (U_correct.find (U_correct.of_alist_exn [ T (Foo, 3); T (Bar, "three") ]) Foo
+       : int option)];
+  [%expect {| (3) |}]
+;;
+
+let%expect_test "merge" =
+  let module Key = struct
+    type _ t =
+      | Foo : int t
+      | Bar : string t
+      | Baz : char t
+    [@@deriving sexp_of]
+
+    let foo_id = Type_equal.Id.create ~name:"foo" [%sexp_of: int]
+    let bar_id = Type_equal.Id.create ~name:"bar" [%sexp_of: string]
+    let baz_id = Type_equal.Id.create ~name:"baz" [%sexp_of: char]
+
+    let to_type_id (type a) (t : a t) : a Type_equal.Id.t =
+      match t with
+      | Foo -> foo_id
+      | Bar -> bar_id
+      | Baz -> baz_id
+    ;;
+  end
+  in
+  let module Input_data1 = struct
+    type (_, 'a) t = 'a option [@@deriving sexp_of]
+  end
+  in
+  let module Input1 = Make1 (Key) (Input_data1) in
+  let module Input_data2 = struct
+    type (_, 'a) t = 'a list [@@deriving sexp_of]
+  end
+  in
+  let module Input2 = Make1 (Key) (Input_data2) in
+  let module Output_data = struct
+    type ('s, 'a) t =
+      { key : 'a Key.t
+      ; merge_result :
+          [ `Left of ('s, 'a) Input_data1.t
+          | `Right of ('s, 'a) Input_data2.t
+          | `Both of ('s, 'a) Input_data1.t * ('s, 'a) Input_data2.t
+          ]
+      }
+    [@@deriving sexp_of]
+  end
+  in
+  let module Output = Make1 (Key) (Output_data) in
+  let module Merge = Merge (Key) (Input_data1) (Input_data2) (Output_data) in
+  let merged =
+    Merge.merge
+      (Input1.of_alist_exn [ T (Foo, Some 3); T (Bar, Some "three") ])
+      (Input2.of_alist_exn [ T (Foo, [ 4; 5; 6 ]); T (Baz, [ 'a'; 'b'; 'c' ]) ])
+      ~f:{ f = (fun ~key merge_result -> Some { key; merge_result }) }
+  in
+  print_s [%sexp (merged : _ Output.t)];
+  [%expect
+    {|
+    ((bar ((key Bar) (merge_result (Left (three)))))
+     (baz ((key Baz) (merge_result (Right (a b c)))))
+     (foo ((key Foo) (merge_result (Both ((3) (4 5 6))))))) |}]
+;;
+
 module With_default = struct
   open! With_default
 

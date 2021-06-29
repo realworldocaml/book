@@ -1,17 +1,15 @@
 {
-  open Expect_test_common.Std
-  open Ppx_compare_lib.Builtin
+  open Import
+  open Expect_test_common
   open Ppx_sexp_conv_lib.Conv
 
   let escaped s =
     let unescaped = Scanf.unescaped s in
+    (* [test/test_matcher.ml] tests the behavior of [Scanf.unescaped] on newlines. *)
     if String.contains unescaped '\n'
     then
       failwith "(escaped) strings can't contain escaped newlines";
     Fmt.Literal unescaped
-
-  let%test_unit _ =
-    [%test_result: string] (Scanf.unescaped "xx\\n\032yy") ~expect:"xx\n yy"
 }
 
 let space = [' ' '\t']
@@ -118,7 +116,10 @@ and quoted_string_terminators acc = parse
     in
     (match Ppx_inline_test_lib.Runtime.testing with
     | `Testing `Am_test_runner ->
-      [%test_result: string] (Cst.to_string res) ~expect:s
+      let cst = Cst.to_string res in
+      if not (String.equal cst s)
+      then
+        failwith (Printf.sprintf "ppx_expect internal error: expected: %S, got: %S" s cst)
     | `Testing `Am_child_of_test_runner | `Not_testing -> ());
     res
 

@@ -2,20 +2,18 @@
 
 open! Import
 
-type t = Uchar0.t [@@deriving_inline compare, hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : t -> t -> int
-    val hash_fold_t :
-      Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-    include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-  end[@@ocaml.doc "@inline"]
+type t = Uchar0.t [@@deriving_inline hash, sexp]
+
+val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
 [@@@end]
 
 include Comparable.S with type t := t
 include Pretty_printer.S with type t := t
+include Invariant.S with type t := t
 
 (** [succ_exn t] is the scalar value after [t] in the set of Unicode scalar values, and
     raises if [t = max_value]. *)

@@ -6,15 +6,10 @@ type t = Sign0.t =
   | Neg
   | Zero
   | Pos
-[@@deriving_inline enumerate, hash]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val all : t list
-    val hash_fold_t :
-      Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-  end[@@ocaml.doc "@inline"]
+[@@deriving_inline enumerate]
+
+val all : t list
+
 [@@@end]
 
 (** This provides [to_string]/[of_string], sexp conversion, Map, Hashtbl, etc. *)

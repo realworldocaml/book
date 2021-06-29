@@ -9,7 +9,7 @@ let spellcheck names name =
     | _ -> 3
   in
   let _, suggestions =
-    List.fold_left names ~init:(Int.max_value, [])
+    List.fold_left names ~init:(Int.max_int, [])
       ~f:(fun ((best_distance, names_at_best_distance) as acc) registered_name ->
         match Ocaml_common.Misc.edit_distance name registered_name cutoff with
         | None -> acc

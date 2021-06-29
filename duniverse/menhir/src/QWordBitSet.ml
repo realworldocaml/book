@@ -79,17 +79,21 @@ let add i s =
   | Q (hhi, hlo, lhi, llo) ->
       if i < middle then
         if i < quarter then
-          Q (hhi, hlo, lhi, A.add i llo)
+          let llo' = A.add i llo in
+          if llo == llo' then s else Q (hhi, hlo, lhi, llo')
         else
           let i = i - quarter in
-          Q (hhi, hlo, A.add i lhi, llo)
+          let lhi' = A.add i lhi in
+          if lhi == lhi' then s else Q (hhi, hlo, lhi', llo)
       else
         let i = i - middle in
         if i < quarter then
-          Q (hhi, A.add i hlo, lhi, llo)
+          let hlo' = A.add i hlo in
+          if hlo == hlo' then s else Q (hhi, hlo', lhi, llo)
         else
           let i = i - quarter in
-          Q (A.add i hhi, hlo, lhi, llo)
+          let hhi' = A.add i hhi in
+          if hhi == hhi' then s else Q (hhi', hlo, lhi, llo)
 
 let remove i s =
   match s with
@@ -98,17 +102,21 @@ let remove i s =
   | Q (hhi, hlo, lhi, llo) ->
       if i < middle then
         if i < quarter then
-          construct hhi hlo lhi (A.remove i llo)
+          let llo' = A.remove i llo in
+          if llo == llo' then s else construct hhi hlo lhi llo'
         else
           let i = i - quarter in
-          construct hhi hlo (A.remove i lhi) llo
+          let lhi' = A.remove i lhi in
+          if lhi == lhi' then s else construct hhi hlo lhi' llo
       else
         let i = i - middle in
         if i < quarter then
-          construct hhi (A.remove i hlo) lhi llo
+          let hlo' = A.remove i hlo in
+          if hlo == hlo' then s else construct hhi hlo' lhi llo
         else
           let i = i - quarter in
-          construct (A.remove i hhi) hlo lhi llo
+          let hhi' = A.remove i hhi in
+          if hhi == hhi' then s else construct hhi' hlo lhi llo
 
 let fold f s accu =
   match s with
@@ -186,8 +194,12 @@ let union s1 s2 =
   | s, E ->
       s
   | Q (hhi1, hlo1, lhi1, llo1), Q (hhi2, hlo2, lhi2, llo2) ->
-      Q (A.union hhi1 hhi2, A.union hlo1 hlo2,
-         A.union lhi1 lhi2, A.union llo1 llo2)
+      let hhi = A.union hhi1 hhi2
+      and hlo = A.union hlo1 hlo2
+      and lhi = A.union lhi1 lhi2
+      and llo = A.union llo1 llo2 in
+      if hhi == hhi2 && hlo == hlo2 && lhi == lhi2 && llo == llo2 then s2
+      else Q (hhi, hlo, lhi, llo)
 
 let inter s1 s2 =
   match s1, s2 with

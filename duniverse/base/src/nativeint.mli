@@ -21,3 +21,10 @@ val of_int64 : int64 -> t option
 val to_int_trunc : t -> int
 val to_int32_trunc : t -> int32
 val of_int64_trunc : int64 -> t
+
+(** {2 Byte swap functions}
+
+    See {{!modtype:Int.Int_without_module_types}[Int]'s byte swap section} for
+    a description of Base's approach to exposing byte swap primitives. *)
+
+val bswap : t -> t

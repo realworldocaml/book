@@ -50,7 +50,7 @@ struct
           | Error err -> of_sexp_error err sexp
         ;;
 
-        include Binable.Of_binable
+        include Binable.Of_binable_without_uuid [@alert "-legacy"]
             (String)
             (struct
               type nonrec t = t

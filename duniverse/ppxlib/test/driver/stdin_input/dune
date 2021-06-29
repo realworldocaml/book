@@ -1,0 +1,6 @@
+(executable
+ (public_name identity_driver)
+ (libraries ppxlib))
+
+(cram
+ (deps %{bin:identity_driver}))

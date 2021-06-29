@@ -22,6 +22,8 @@ module Header : sig
   val pp : Format.formatter -> t -> unit
 
   val of_string : string -> t option
+
+  val infer_from_file : string -> t option
 end
 
 (** Code blocks. *)
@@ -73,9 +75,7 @@ type section = int * string
 (** The type for sections. *)
 
 type t = {
-  line : int;
-  column : int;
-  file : string;
+  loc : Location.t;
   section : section option;
   dir : string option;
   source_trees : string list;
@@ -93,9 +93,7 @@ type t = {
 (** The type for supported code blocks. *)
 
 val mk :
-  line:int ->
-  file:string ->
-  column:int ->
+  loc:Location.t ->
   section:section option ->
   labels:Label.t list ->
   legacy_labels:bool ->
@@ -103,6 +101,14 @@ val mk :
   contents:string list ->
   errors:Output.t list ->
   (t, [ `Msg of string ]) Result.result
+
+val mk_include :
+  loc:Location.t ->
+  section:section option ->
+  labels:Label.t list ->
+  (t, [ `Msg of string ]) Result.result
+(** [mk_include] builds an include block from a comment [<!-- $MDX ... -->]
+    that is not followed by a code block [``` ... ```]. *)
 
 (** {2 Printers} *)
 

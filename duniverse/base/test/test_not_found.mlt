@@ -1,6 +1,6 @@
 open Base
 
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 
 ;;
 print_s [%sexp (Not_found_s [%message "foo"] : exn)]

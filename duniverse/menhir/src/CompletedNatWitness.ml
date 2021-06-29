@@ -71,6 +71,9 @@ let add_lazy p1 p2 =
 
 let print conv p =
   match p with
+  | Finite (0, _) ->
+      (* Avoid producing a trailing space. *)
+      Printf.sprintf "(* 0 *)"
   | Finite (i, xs) ->
       Printf.sprintf "(* %d *) " i ^
       String.concat " " (List.map conv (Seq.elements xs))

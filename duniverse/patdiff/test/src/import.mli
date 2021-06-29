@@ -2,7 +2,8 @@ open! Core
 open! Async
 
 include module type of struct
-  include Expect_test_helpers
+  include Expect_test_helpers_core
+  include Expect_test_helpers_async
 end
 
 val links : (string * [ `In_path_as | `In_temp_as ] * string) list

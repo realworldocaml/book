@@ -16,20 +16,17 @@
 
 (** HTTP/1.1 request handling *)
 
-(** This contains the metadata for a HTTP/1.1 request header, including
-    the {!headers}, {!version}, {!meth} and {!uri}.  The body is handled by
-    the separate {!S} module type, as it is dependent on the IO
-    implementation.
+include S.Request
+(** This contains the metadata for a HTTP/1.1 request header, including the
+    {!headers}, {!version}, {!meth} and {!uri}. The body is handled by the
+    separate {!S} module type, as it is dependent on the IO implementation.
 
     The interface exposes a [fieldslib] interface which provides individual
-    accessor functions for each of the records below.  It also provides [sexp]
+    accessor functions for each of the records below. It also provides [sexp]
     serializers to convert to-and-from an {!Core.Std.Sexp.t}. *)
-include S.Request
 
-(** Human-readable output, used by the toplevel printer *)
 val pp_hum : Format.formatter -> t -> unit
+(** Human-readable output, used by the toplevel printer *)
 
 (** Functor to construct the IO-specific HTTP request handling functions *)
-module Make(IO : S.IO) : S.Http_io
-  with type t = t
-   and module IO = IO
+module Make (IO : S.IO) : S.Http_io with type t = t and module IO = IO

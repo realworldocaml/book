@@ -1,11 +1,20 @@
 open! Import
 
 type ('a, 'b) t = T : ('a, 'a) t [@@deriving_inline sexp_of]
-let sexp_of_t : type a b.
-  (a -> Ppx_sexp_conv_lib.Sexp.t) ->
-  (b -> Ppx_sexp_conv_lib.Sexp.t) -> (a, b) t -> Ppx_sexp_conv_lib.Sexp.t
-  = fun _of_a -> fun _of_b -> function | T -> Ppx_sexp_conv_lib.Sexp.Atom "T"
+
+let sexp_of_t
+  : type a b.
+    (a -> Ppx_sexp_conv_lib.Sexp.t)
+    -> (b -> Ppx_sexp_conv_lib.Sexp.t)
+    -> (a, b) t
+    -> Ppx_sexp_conv_lib.Sexp.t
+  =
+  fun _of_a _of_b -> function
+    | T -> Ppx_sexp_conv_lib.Sexp.Atom "T"
+;;
+
 [@@@end]
+
 type ('a, 'b) equal = ('a, 'b) t
 
 let refl = T
@@ -84,12 +93,15 @@ module Id = struct
     module Key = struct
       type _ t = ..
       type type_witness_int = [ `type_witness of int ] [@@deriving_inline sexp_of]
+
       let sexp_of_type_witness_int =
         (function
           | `type_witness v0 ->
             Ppx_sexp_conv_lib.Sexp.List
-              [Ppx_sexp_conv_lib.Sexp.Atom "type_witness"; sexp_of_int v0] :
-              type_witness_int -> Ppx_sexp_conv_lib.Sexp.t)
+              [ Ppx_sexp_conv_lib.Sexp.Atom "type_witness"; sexp_of_int v0 ]
+            : type_witness_int -> Ppx_sexp_conv_lib.Sexp.t)
+      ;;
+
       [@@@end]
 
       let sexp_of_t _sexp_of_a t =

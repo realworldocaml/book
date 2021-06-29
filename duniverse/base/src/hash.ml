@@ -1,7 +1,7 @@
 (*
    This is the interface to the runtime support for [ppx_hash].
 
-   The [ppx_hash] syntax extension supports: [@@deriving_inline hash][@@@end] and [%hash_fold: TYPE] and
+   The [ppx_hash] syntax extension supports: [@@deriving hash] and [%hash_fold: TYPE] and
    [%hash: TYPE]
 
    For type [t] a function [hash_fold_t] of type [Hash.state -> t -> Hash.state] is

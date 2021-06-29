@@ -5,8 +5,8 @@ BUILD_DIR := ../../_build/default/src/stage2
 # [make update] is used under the programmer's manual control, after the
 # grammar in [parser.mly] has been modified.
 
-# It updates the file [parserMessages.messages] with new error states (if
-# necessary) and with new auto-generated comments for all error states.
+# It updates the file [parserMessages.messages] with new auto-generated
+# comments for all error states.
 
 .PHONY: update
 update:

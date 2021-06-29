@@ -547,7 +547,7 @@
         "451":{
             "code":"451",
             "title":"Wrong Exchange server",
-            "summary":"The server cannot reach the client's mailbox.",
+            "summary":"the server cannot reach the client's mailbox",
             "descriptions":{
                 "MS-ASHTTP":{
                     "body":"If the client is attempting to connect to the wrong server (that is, a server that cannot access the user's mailbox), or if there is a more efficient server to use to reach the user's mailbox, then a 451 Redirect error is returned.",

@@ -11,7 +11,7 @@ type t =
   | `Unmatched_start_tag of string
   | `Unmatched_end_tag of string
   | `Bad_namespace of string
-  | `Misnested_tag of string * string
+  | `Misnested_tag of string * string * (string * string) list
   | `Bad_content of string ]
 
 let explode_string s =
@@ -59,7 +59,7 @@ let to_string ?location error =
     | `Bad_namespace s ->
       fmt "unknown namespace '%s'" s
 
-    | `Misnested_tag (s, in_) ->
+    | `Misnested_tag (s, in_, _attributes) ->
       fmt "misnested tag: '%s' in '%s'" s in_
 
     | `Bad_content s ->

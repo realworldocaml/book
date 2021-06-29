@@ -3,6 +3,8 @@ module Var : sig
 
   val compare : t -> t -> Ordering.t
 
+  val temp_dir : t
+
   module Set : Set.S with type elt = t
 end
 
@@ -35,7 +37,7 @@ val remove : t -> var:Var.t -> t
 
 val diff : t -> t -> t
 
-val update : t -> var:string -> f:(string option -> string option) -> t
+val update : t -> var:Var.t -> f:(string option -> string option) -> t
 
 val to_dyn : t -> Dyn.t
 

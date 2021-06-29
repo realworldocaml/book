@@ -3,14 +3,39 @@ include Int_intf
 include Int0
 
 module T = struct
-  type t = int [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = int [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_int
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_int in fun x -> func x
+    let func = hash_int in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (int_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_int : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "int" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ int_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "int.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare x y = Int_replace_polymorphic_compare.compare x y
@@ -60,12 +85,17 @@ include Conv.Make_hex (struct
     open Int_replace_polymorphic_compare
 
     type t = int [@@deriving_inline compare, hash]
+
     let compare = (compare_int : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       hash_fold_int
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = hash_int in fun x -> func x
+      let func = hash_int in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let zero = zero
@@ -88,6 +118,7 @@ include Pretty_printer.Register (struct
    of the comparison functions are available within this module. *)
 open! Int_replace_polymorphic_compare
 
+let invariant (_ : t) = ()
 let between t ~low ~high = low <= t && t <= high
 let clamp_unchecked t ~min ~max = if t < min then min else if t <= max then t else max
 
@@ -197,21 +228,33 @@ module Pow2 = struct
     x land (x - 1) = 0
   ;;
 
-  (* C stub for int clz to use the CLZ/BSR instruction where possible *)
-  external int_clz : int -> int = "Base_int_math_int_clz" [@@noalloc]
+  (* C stubs for int clz and ctz to use the CLZ/BSR/CTZ/BSF instruction where possible *)
+  external clz
+    :  (* Note that we pass the tagged int here. See int_math_stubs.c for details on why
+          this is correct. *)
+    int
+    -> (int[@untagged])
+    = "Base_int_math_int_clz" "Base_int_math_int_clz_untagged"
+  [@@noalloc]
+
+  external ctz
+    :  (int[@untagged])
+    -> (int[@untagged])
+    = "Base_int_math_int_ctz" "Base_int_math_int_ctz_untagged"
+  [@@noalloc]
 
   (** Hacker's Delight Second Edition p106 *)
   let floor_log2 i =
     if i <= 0
     then
       raise_s (Sexp.message "[Int.floor_log2] got invalid input" [ "", sexp_of_int i ]);
-    Sys.word_size_in_bits - 1 - int_clz i
+    num_bits - 1 - clz i
   ;;
 
   let ceil_log2 i =
     if i <= 0
     then raise_s (Sexp.message "[Int.ceil_log2] got invalid input" [ "", sexp_of_int i ]);
-    if i = 1 then 0 else Sys.word_size_in_bits - int_clz (i - 1)
+    if i = 1 then 0 else num_bits - clz (i - 1)
   ;;
 end
 
@@ -254,6 +297,8 @@ module O = struct
     end)
 
   include F
+
+  external bswap16 : int -> int = "%bswap16"
 
   (* These inlined versions of (%), (/%), and (//) perform better than their functorized
      counterparts in [F] (see benchmarks below).

@@ -26,6 +26,27 @@ type cst =
   | CstNonTerminal of Production.index * cst array
   | CstError
 
+(* The fringe of a concrete syntax tree. *)
+
+let rec fringe cst accu =
+  match cst with
+  | CstTerminal tok ->
+      tok :: accu
+  | CstNonTerminal (_, csts) ->
+      fringe_rhs csts (Array.length csts) 0 accu
+  | CstError ->
+      (* Not sure if this is appropriate. *)
+      Terminal.error :: accu
+
+and fringe_rhs csts n i accu =
+  if i = n then
+    accu
+  else
+    fringe csts.(i) (fringe_rhs csts n (i + 1) accu)
+
+let fringe cst =
+  fringe cst []
+
 (* This is a (mostly) unambiguous printer for concrete syntax trees,
    in an sexp-like notation. *)
 
@@ -77,31 +98,30 @@ let print =
 
 (* This is a pretty-printer for concrete syntax trees. The notation is
    the same as that used by the above printer; the only difference is
-   that the [Pprint] library is used to manage indentation. *)
+   that the [PPrint] library is used to manage indentation. *)
 
-open Pprint
+open PPrint
 
 let rec build : cst -> document = function
   | CstTerminal tok ->
-      text (Terminal.print tok)
+      string (Terminal.print tok)
   | CstNonTerminal (prod, csts) ->
       brackets (
         group (
-          text (Nonterminal.print false (Production.nt prod)) ^^
+          string (Nonterminal.print false (Production.nt prod)) ^^
           colon ^^
           group (
             nest 2 (
               Array.fold_left (fun doc cst ->
-                doc ^^ break1 ^^ build cst
+                doc ^/^ build cst
               ) empty csts
             )
           ) ^^
-          break0
+          break 0
         )
       )
   | CstError ->
-      text "error"
+      string "error"
 
 let show f cst =
-  Channel.pretty 0.8 80 f (build cst)
-
+  ToChannel.pretty 0.8 80 f (build cst)

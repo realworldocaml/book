@@ -76,8 +76,6 @@ type t =
   ; (* [handle_thread_pool_stuck] is called once per second if the thread pool is"stuck",
        i.e has not completed a job for one second and has no available threads. *)
     mutable handle_thread_pool_stuck : Thread_pool.t -> stuck_for:Time_ns.Span.t -> unit
-  ; busy_pollers : Busy_pollers.t
-  ; mutable busy_poll_thread_is_running : bool
   ; mutable next_tsc_calibration : Tsc.t
   ; kernel_scheduler : Kernel_scheduler.t
   ; (* [have_lock_do_cycle] is used to customize the implementation of running a cycle.
@@ -258,8 +256,6 @@ let invariant t : unit =
       ~signal_manager:(check Raw_signal_manager.invariant)
       ~thread_pool:(check Thread_pool.invariant)
       ~handle_thread_pool_stuck:ignore
-      ~busy_pollers:(check Busy_pollers.invariant)
-      ~busy_poll_thread_is_running:ignore
       ~next_tsc_calibration:ignore
       ~kernel_scheduler:(check Kernel_scheduler.invariant)
       ~max_inter_cycle_timeout:ignore
@@ -560,8 +556,6 @@ Async will be unable to timeout with sub-millisecond precision.|}]
           Interruptor.thread_safe_interrupt interruptor)
     ; thread_pool
     ; handle_thread_pool_stuck = default_handle_thread_pool_stuck
-    ; busy_pollers = Busy_pollers.create ()
-    ; busy_poll_thread_is_running = false
     ; next_tsc_calibration = Tsc.now ()
     ; kernel_scheduler
     ; have_lock_do_cycle = None
@@ -1001,45 +995,6 @@ let set_max_inter_cycle_timeout span =
   <- Max_inter_cycle_timeout.create_exn (Time_ns.Span.of_span_float_round_nearest span)
 ;;
 
-let start_busy_poller_thread_if_not_running t =
-  if not t.busy_poll_thread_is_running
-  then (
-    t.busy_poll_thread_is_running <- true;
-    let kernel_scheduler = t.kernel_scheduler in
-    let _thread : Thread.t =
-      Thread.create
-        (fun () ->
-           let rec loop () =
-             lock t;
-             if Busy_pollers.is_empty t.busy_pollers
-             then (
-               t.busy_poll_thread_is_running <- false;
-               unlock t (* We don't loop here, thus exiting the thread. *))
-             else (
-               Busy_pollers.poll t.busy_pollers;
-               if Kernel_scheduler.num_pending_jobs kernel_scheduler > 0
-               then Kernel_scheduler.run_cycle kernel_scheduler;
-               unlock t;
-               (* The purpose of this [yield] is to release the OCaml lock while not
-                  holding the async lock, so that the busy-poll loop spends a significant
-                  fraction of its time not holding both locks, which thus allows other
-                  OCaml threads that want to hold both locks the chance to run. *)
-               Thread.yield ();
-               loop ())
-           in
-           loop ())
-        ()
-    in
-    ())
-;;
-
-let add_busy_poller poll =
-  let t = the_one_and_only ~should_lock:true in
-  let result = Busy_pollers.add t.busy_pollers poll in
-  start_busy_poller_thread_if_not_running t;
-  result
-;;
-
 type 'b folder = { folder : 'a. 'b -> t -> (t, 'a) Field.t -> 'b }
 
 let t () = the_one_and_only ~should_lock:true
@@ -1063,8 +1018,6 @@ let fold_fields (type a) ~init folder : a =
     ~signal_manager:f
     ~thread_pool:f
     ~handle_thread_pool_stuck:f
-    ~busy_poll_thread_is_running:f
-    ~busy_pollers:f
     ~next_tsc_calibration:f
     ~kernel_scheduler:f
     ~have_lock_do_cycle:f

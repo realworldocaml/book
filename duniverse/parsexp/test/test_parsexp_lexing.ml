@@ -1,10 +1,10 @@
-open Import
-open Parsexp
+open! Import
 
 let assoc s =
   Lexer.assoc (Eager.Lexbuf_consumer.create ()) (Lexing.from_string s)
   |> [%sexp_of: (string * Sexp.t) list]
   |> print_s
+;;
 
 let sexps s =
   let lexbuf = Lexing.from_string s in
@@ -15,6 +15,7 @@ let sexps s =
     | Some sexp -> sexp :: loop ()
   in
   loop () |> List.iter ~f:print_s
+;;
 
 let%expect_test "simple test" =
   assoc {|
@@ -29,10 +30,12 @@ a = 123
      (y 42)
      (z blah)
      (a 123)) |}]
+;;
 
 let%expect_test "empty lexing" =
   sexps "";
   [%expect {| |}]
+;;
 
 let%expect_test "the lexer doesn't consume more than it should" =
   sexps {| abc"123" |};
@@ -45,4 +48,4 @@ let%expect_test "the lexer doesn't consume more than it should" =
     abc
     ()
   |}]
-
+;;

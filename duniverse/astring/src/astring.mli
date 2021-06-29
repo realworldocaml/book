@@ -1037,63 +1037,57 @@ v} *)
         [ppf]. *)
   end
 
-  type +'a map
-  (** The type for maps from strings to values of type 'a. *)
-
   (** String maps. *)
   module Map : sig
 
     (** {1 String maps} *)
 
     include Map.S with type key := string
-                   and type 'a t := 'a map
 
-    type 'a t = 'a map
-
-    val min_binding : 'a map -> (string * 'a) option
+    val min_binding : 'a t -> (string * 'a) option
     (** Exception safe {!Map.S.min_binding}. *)
 
-    val get_min_binding : 'a map -> (string * 'a)
+    val get_min_binding : 'a t -> (string * 'a)
     (** [get_min_binding] is like {!min_binding} but @raise Invalid_argument
         on the empty map. *)
 
-    val max_binding : 'a map -> (string * 'a) option
+    val max_binding : 'a t -> (string * 'a) option
     (** Exception safe {!Map.S.max_binding}. *)
 
-    val get_max_binding : 'a map -> string * 'a
+    val get_max_binding : 'a t -> string * 'a
     (** [get_max_binding] is like {!max_binding} but @raise Invalid_argument
         on the empty map. *)
 
-    val choose : 'a map -> (string * 'a) option
+    val choose : 'a t -> (string * 'a) option
     (** Exception safe {!Map.S.choose}. *)
 
-    val get_any_binding : 'a map -> (string * 'a)
+    val get_any_binding : 'a t -> (string * 'a)
     (** [get_any_binding] is like {!choose} but @raise Invalid_argument
         on the empty map. *)
 
-    val find : string -> 'a map -> 'a option
+    val find : string -> 'a t -> 'a option
     (** Exception safe {!Map.S.find}. *)
 
-    val get : string -> 'a map -> 'a
+    val get : string -> 'a t -> 'a
     (** [get k m] is like {!Map.S.find} but raises [Invalid_argument] if
         [k] is not bound in [m]. *)
 
-    val dom : 'a map -> set
+    val dom : 'a t -> set
     (** [dom m] is the domain of [m]. *)
 
-    val of_list : (string * 'a) list -> 'a map
+    val of_list : (string * 'a) list -> 'a t
     (** [of_list bs] is [List.fold_left (fun m (k, v) -> add k v m) empty
         bs]. *)
 
-    val of_stdlib_map : 'a Map.Make(String).t -> 'a map
+    val of_stdlib_map : 'a Map.Make(String).t -> 'a t
     (** [of_stdlib_map m] is a map from the stdlib-compatible map [m]. *)
 
-    val to_stdlib_map : 'a map -> 'a Map.Make(String).t
+    val to_stdlib_map : 'a t -> 'a Map.Make(String).t
     (** [to_stdlib_map m] is the stdlib-compatible map equivalent to [m]. *)
 
     val pp : ?sep:(Format.formatter -> unit -> unit) ->
       (Format.formatter -> string * 'a -> unit) -> Format.formatter ->
-      'a map -> unit
+      'a t -> unit
     (** [pp ~sep pp_binding ppf m] formats the bindings of [m] on
         [ppf]. Each binding is formatted with [pp_binding] and
         bindings are separated by [sep] (defaults to
@@ -1101,14 +1095,17 @@ v} *)
         untouched. *)
 
     val dump : (Format.formatter -> 'a -> unit) -> Format.formatter ->
-      'a map -> unit
+      'a t -> unit
     (** [dump pp_v ppf m] prints an unspecified representation of [m] on
         [ppf] using [pp_v] to print the map codomain elements. *)
 
-    val dump_string_map : Format.formatter -> string map -> unit
+    val dump_string_map : Format.formatter -> string t -> unit
     (** [dump_string_map ppf m] prints an unspecified representation of the
         string map [m] on [ppf]. *)
   end
+
+  type +'a map = 'a Map.t
+  (** The type for maps from strings to values of type 'a. *)
 
   (** {1:convert OCaml base type conversions} *)
 

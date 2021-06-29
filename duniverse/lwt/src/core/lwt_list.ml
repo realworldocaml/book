@@ -11,9 +11,9 @@
 let tail_recursive_map f l =
   List.rev (List.rev_map f l)
 
-let tail_recursive_mapi f l =
+let tail_recursive_mapi_rev f l =
   let rec inner acc i = function
-    | [] -> List.rev acc
+    | [] -> acc
     | hd::tl -> (inner [@ocaml.tailcall]) ((f i hd)::acc) (i + 1) tl
   in
   inner [] 0 l
@@ -29,7 +29,7 @@ let rec iter_s f l =
     iter_s f l
 
 let iter_p f l =
-  let ts = tail_recursive_map (Lwt.apply f) l in
+  let ts = List.rev_map (Lwt.apply f) l in
   Lwt.join ts
 
 let rec iteri_s i f l =
@@ -44,7 +44,7 @@ let iteri_s f l = iteri_s 0 f l
 
 let iteri_p f l =
   let f' i = Lwt.apply (f i) in
-  let ts = tail_recursive_mapi f' l in
+  let ts = tail_recursive_mapi_rev f' l in
   Lwt.join ts
 
 let map_s f l =
@@ -56,16 +56,16 @@ let map_s f l =
   in
   inner [] l
 
-let rec _collect acc = function
+let rec _collect_rev acc = function
   | [] ->
-    List.rev acc |> Lwt.return
+    Lwt.return acc
   | t::ts ->
     t >>= fun i ->
-    (_collect [@ocaml.tailcall]) (i::acc) ts
+    (_collect_rev [@ocaml.tailcall]) (i::acc) ts
 
 let map_p f l =
-  let ts = tail_recursive_map (Lwt.apply f) l in
-  _collect [] ts
+  let ts = List.rev_map (Lwt.apply f) l in
+  _collect_rev [] ts
 
 let filter_map_s f l =
   let rec inner acc = function
@@ -78,15 +78,15 @@ let filter_map_s f l =
   inner [] l
 
 let filter_map_p f l =
-  let rec _collect_optional acc = function
-  | []    -> List.rev acc |> Lwt.return
+  let rec _collect_optional_rev acc = function
+  | []    -> Lwt.return acc
   | t::ts ->
     t >>= function
-    | Some v -> (_collect_optional [@ocaml.tailcall]) (v::acc) ts
-    | None -> (_collect_optional [@ocaml.tailcall]) acc ts
+    | Some v -> (_collect_optional_rev [@ocaml.tailcall]) (v::acc) ts
+    | None -> (_collect_optional_rev [@ocaml.tailcall]) acc ts
   in
-  let ts = tail_recursive_map (Lwt.apply f) l in
-  _collect_optional [] ts
+  let ts = List.rev_map (Lwt.apply f) l in
+  _collect_optional_rev [] ts
 
 let mapi_s f l =
   let rec inner acc i = function
@@ -99,8 +99,8 @@ let mapi_s f l =
 
 let mapi_p f l =
   let f' i = Lwt.apply (f i) in
-  let ts = tail_recursive_mapi f' l in
-  _collect [] ts
+  let ts = tail_recursive_mapi_rev f' l in
+  _collect_rev [] ts
 
 let rec rev_map_append_s acc f l =
   match l with

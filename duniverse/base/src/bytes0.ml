@@ -14,10 +14,6 @@
    Defining [module Bytes = Bytes0] is also necessary because it prevents
    ocamldep from mistakenly causing a file to depend on [Base.Bytes]. *)
 
-let blit_string = Caml.Bytes.blit_string
-
-let sub_string t ~pos ~len = Caml.Bytes.sub_string t pos len
-
 open! Import0
 module Sys = Sys0
 
@@ -44,6 +40,7 @@ include Primitives
 
 let max_length = Sys.max_string_length
 let blit = Caml.Bytes.blit
+let blit_string = Caml.Bytes.blit_string
 let compare = Caml.Bytes.compare
 let copy = Caml.Bytes.copy
 let create = Caml.Bytes.create
@@ -61,9 +58,3 @@ let unsafe_to_string ~no_mutation_while_string_reachable:s =
 ;;
 
 let unsafe_of_string_promise_no_mutation = Caml.Bytes.unsafe_of_string
-
-(* These are eta expanded in order to label arguments, following the
-   Base conventions. *)
-let blit_string ~src ~src_pos ~dst ~dst_pos ~len =
-  blit_string src src_pos dst dst_pos len
-;;

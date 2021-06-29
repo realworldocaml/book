@@ -1,4 +1,4 @@
 (executables
   (names discover)
-  (libraries base dune.configurator)
+  (libraries dune.configurator)
 )

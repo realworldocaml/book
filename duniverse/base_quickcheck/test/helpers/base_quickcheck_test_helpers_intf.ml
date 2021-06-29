@@ -22,7 +22,7 @@ module type Base_quickcheck_test_helpers = sig
   val test_generator
     :  ?config:Test.Config.t
     -> ?mode:[ `exhaustive | `inexhaustive ] (** default: [`exhaustive] *)
-    -> ?cr:Expect_test_helpers_kernel.CR.t
+    -> ?cr:Expect_test_helpers_core.CR.t
     -> 'a Generator.t
     -> (module With_examples with type t = 'a)
     -> unit
@@ -32,7 +32,7 @@ module type Base_quickcheck_test_helpers = sig
   val test_observer
     :  ?config:Test.Config.t
     -> ?mode:[ `transparent | `opaque ] (** default: [`transparent] *)
-    -> ?cr:Expect_test_helpers_kernel.CR.t
+    -> ?cr:Expect_test_helpers_core.CR.t
     -> 'a Observer.t
     -> (module With_examples with type t = 'a)
     -> unit
@@ -42,7 +42,7 @@ module type Base_quickcheck_test_helpers = sig
   val test_shrinker
     :  ?config:Test.Config.t
     -> ?mode:[ `compound | `atomic ] (** default: [`compound] *)
-    -> ?cr:Expect_test_helpers_kernel.CR.t
+    -> ?cr:Expect_test_helpers_core.CR.t
     -> 'a Shrinker.t
     -> (module With_examples with type t = 'a)
     -> unit

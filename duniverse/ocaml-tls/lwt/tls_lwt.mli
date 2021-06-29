@@ -83,7 +83,7 @@ module Unix : sig
 
   (** [epoch t] returns [epoch], which contains information of the
       active session. *)
-  val epoch  : t -> [ `Ok of Tls.Core.epoch_data | `Error ]
+  val epoch  : t -> (Tls.Core.epoch_data, unit) result
 end
 
 (** {1 High-level API} *)
@@ -111,7 +111,7 @@ val connect_ext : Tls.Config.client -> string * int -> (ic * oc) Lwt.t
 (** [connect authenticator (host, port)] is [ic, oc], the input
     and output channel of a TLS connection to [host] on [port] using the
     default configuration and the [authenticator]. *)
-val connect : X509_lwt.authenticator -> string * int -> (ic * oc) Lwt.t
+val connect : X509.Authenticator.t -> string * int -> (ic * oc) Lwt.t
 
 (** [of_t t] is [ic, oc], the input and output channel.  [close]
     defaults to [!Unix.close]. *)

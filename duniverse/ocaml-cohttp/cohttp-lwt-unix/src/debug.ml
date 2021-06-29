@@ -17,50 +17,68 @@
 let _debug_active = ref false
 let debug_active () = !_debug_active
 
-let default_reporter () =
-  (* Note: we want the logging operation to not block the other operation.
-   * Hence, the reporter creates Lwt promises. *)
-  let fmtr, fmtr_flush =
-    let b = Buffer.create 512 in
-    ( Fmt.with_buffer ~like:Fmt.stdout b
-    , fun () ->
-      let m = Buffer.contents b in Buffer.reset b;
-      m ) in
-  let report _src _level ~over k msgf =
+open Lwt.Infix
+
+let default_reporter (file_descr, ppf) =
+  let ppf, flush =
+    let buf = Buffer.create 0x100 in
+    ( Fmt.with_buffer ~like:ppf buf,
+      fun () ->
+        let str = Buffer.contents buf in
+        Buffer.reset buf;
+        str )
+  in
+  let report src level ~over k msgf =
     let k _ =
-      let write () = Lwt_io.write Lwt_io.stderr (fmtr_flush ()) in
-      let unblock () = over (); Lwt.return_unit in
-      Lwt.ignore_result @@ Lwt.catch
-        (fun () -> (Lwt.finalize write unblock : unit Lwt.t))
-        (fun e  ->
-          Logs.warn (fun f ->
-            f "Flushing stderr failed: %s" (Printexc.to_string e));
-          Lwt.return_unit
-        );
+      let write () =
+        let buf = Bytes.unsafe_of_string (flush ()) in
+        let rec go off len =
+          Lwt_unix.write file_descr buf off len >>= fun len' ->
+          if len' = len then Lwt.return_unit else go (off + len') (len - len')
+        in
+        go 0 (Bytes.length buf)
+      in
+      let clean () =
+        over ();
+        Lwt.return_unit
+      in
+      Lwt.async (fun () ->
+          Lwt.catch
+            (fun () -> Lwt.finalize write clean)
+            (fun exn ->
+              Logs.warn (fun m ->
+                  m "Flushing error: %s." (Printexc.to_string exn));
+              Lwt.return_unit));
       k ()
     in
-    msgf @@ fun ?header:_ ?tags:_ fmt ->
-    Format.kfprintf k fmtr ("@[" ^^ fmt ^^ "@]@.")
+    let with_metadata header _tags k ppf fmt =
+      Format.kfprintf k ppf
+        ("%a[%a]: " ^^ fmt ^^ "\n%!")
+        Logs_fmt.pp_header (level, header)
+        Fmt.(styled `Magenta string)
+        (Logs.Src.name src)
+    in
+    msgf @@ fun ?header ?tags fmt -> with_metadata header tags k ppf fmt
   in
-  { Logs.report = report }
+  { Logs.report }
 
-let set_log = lazy (
-  (* If no reporter has been set by the application, set default one
-     that prints to stderr *)
-  if (Logs.reporter ()) == Logs.nop_reporter
-  then
-    Logs.set_level @@ Some Logs.Debug;
-    Logs.set_reporter (default_reporter ());
-)
+let set_log =
+  lazy
+    ((* If no reporter has been set by the application, set default one
+        that prints to stderr *)
+     if Logs.reporter () == Logs.nop_reporter then
+       Logs.set_level @@ Some Logs.Debug;
+     Logs.set_reporter (default_reporter (Lwt_unix.stderr, Fmt.stderr)))
 
 let activate_debug () =
   Lazy.force set_log;
-  _debug_active := true;
-  Logs.debug (fun f -> f "Cohttp debugging output is active")
+  if not !_debug_active then (
+    _debug_active := true;
+    Logs.debug (fun f -> f "Cohttp debugging output is active"))
 
 let () =
-  try (
-   match Sys.getenv "COHTTP_DEBUG" with
-   | "false" | "0" -> ()
-   | _ -> activate_debug ()
-  ) with Not_found -> ()
+  try
+    match Sys.getenv "COHTTP_DEBUG" with
+    | "false" | "0" -> ()
+    | _ -> activate_debug ()
+  with Not_found -> ()

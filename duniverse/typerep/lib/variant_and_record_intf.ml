@@ -56,7 +56,8 @@ end) = struct
          | C of { x : int; y : string }
      ]}
 
-     this type has two constructors. for each of them we'll have a corresponding [Tag.t]
+     this type has three constructors. For each of them we'll have a corresponding
+     [Tag.t]:
 
      {[
        val tag_A : (t, (int * string)) Tag.t
@@ -64,10 +65,10 @@ end) = struct
        val tag_C : (t, (int * string)) Tag.t
      ]}
 
-     Inline record in variant are typed as if their definition was using tuples, without
-     the parenthesis.  This is consistent with their runtime representation.  But the
-     distinction is carried and available for introspection as part of the [Tag.t].  See
-     [args_labels]. *)
+     Note, inline record in variant are typed as if their definition was using tuples,
+     without the parenthesis.  This is consistent with their runtime representation.  But
+     the distinction is carried and available for introspection as part of the [Tag.t].
+     See [args_labels]. *)
   module Tag : sig
     type ('variant, 'args) create = Args of ('args -> 'variant) | Const of 'variant
     type ('variant, 'args) t

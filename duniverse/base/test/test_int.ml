@@ -118,3 +118,16 @@ let%test "comparisons" =
   valid_compare max_value max_value;
   true
 ;;
+
+let test f x = test_conversion ~to_string:Int.Hex.to_string_hum f x
+let numbers = [ 0x10_20; 0x11_22_33; 0x11_22_33_1F; 0x11_22_33_44 ]
+
+let%expect_test "bswap16" =
+  List.iter numbers ~f:(test bswap16);
+  [%expect
+    {|
+    0x1020 --> 0x2010
+    0x11_2233 --> 0x3322
+    0x1122_331f --> 0x1f33
+    0x1122_3344 --> 0x4433 |}]
+;;

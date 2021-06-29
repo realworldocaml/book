@@ -218,7 +218,7 @@ let invariant _ t =
       if alive.state_is_initial then assert (phys_equal alive.state alive.initial_state);
       assert (alive.pos + alive.len <= Bigstring.length alive.buf);
   with exn ->
-    failwiths "invariant failed" (exn, t) [%sexp_of: exn * _ t]
+    failwiths ~here:[%here] "invariant failed" (exn, t) [%sexp_of: exn * _ t]
 ;;
 
 let create (Unpack_one.T { initial_state; unpack }) =

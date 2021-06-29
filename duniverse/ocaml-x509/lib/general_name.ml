@@ -94,10 +94,17 @@ module Asn = struct
 
   and or_address = null (* Horrible crap, need to fill it. *)
 
+  let dir_name =
+    let f = function | `C1 s -> s | `C2 s -> s | `C3 s -> s
+                     | `C4 s -> s | `C5 s -> s | `C6 s -> s
+    and g s = `C1 s
+    in
+    Asn.S.map f g Distinguished_name.Asn.directory_name
+
   let edi_party_name =
     sequence2
-      (optional ~label:"nameAssigner" @@ implicit 0 Distinguished_name.Asn.directory_name)
-      (required ~label:"partyName"    @@ implicit 1 Distinguished_name.Asn.directory_name)
+      (optional ~label:"nameAssigner" @@ implicit 0 dir_name)
+      (required ~label:"partyName"    @@ implicit 1 dir_name)
 
   let general_name =
     let f = function

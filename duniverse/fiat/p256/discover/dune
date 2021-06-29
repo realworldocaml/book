@@ -1,8 +1,0 @@
-(executable
- (name discover)
- (libraries dune.configurator))
-
-(rule
- (targets cflags.sexp)
- (action
-  (run ./discover.exe)))

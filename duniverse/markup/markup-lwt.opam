@@ -14,7 +14,7 @@ dev-repo: "git+https://github.com/aantron/markup.ml.git"
 
 depends: [
   "base-unix"
-  "dune"
+  "dune" {>= "2.7.0"}
   "lwt"
   "markup"
   "ocaml"

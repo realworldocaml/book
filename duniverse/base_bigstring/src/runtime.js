@@ -12,34 +12,27 @@ function bigstring_is_mmapped_stub(x){
 }
 
 //Provides: bigstring_blit_stub
-//Requires: caml_ba_get_1, caml_ba_set_1
+//Requires: caml_bigstring_blit_ba_to_ba
 function bigstring_blit_stub(s1, i1, s2, i2, len){
-  for (var i = 0; i < len; i++) caml_ba_set_1(s2,i2 + i,caml_ba_get_1(s1,i1 + i));
-  return 0;
+  return caml_bigstring_blit_ba_to_ba(s1,i1,s2,i2,len);
 }
 
 //Provides: bigstring_blit_bytes_bigstring_stub
-//Requires: caml_bytes_get, caml_ba_set_1
-function bigstring_blit_bytes_bigstring_stub(v_str, v_src_pos, v_bstr, v_dst_pos, v_len){
-  for (var i = 0; i < v_len; i++) caml_ba_set_1(v_bstr,v_dst_pos + i,caml_bytes_get(v_str,v_src_pos + i));
-  return 0;
+//Requires: caml_bigstring_blit_bytes_to_ba
+function bigstring_blit_bytes_bigstring_stub(src, src_pos, dst, dst_pos, len){
+  return caml_bigstring_blit_bytes_to_ba(src,src_pos,dst,dst_pos,len);
 }
 
 //Provides: bigstring_blit_bigstring_bytes_stub
-//Requires: caml_bytes_set, caml_ba_get_1
-function bigstring_blit_bigstring_bytes_stub(v_bstr, v_src_pos, v_str, v_dst_pos, v_len){
-  for(var i = 0; i < v_len; i++){
-    var c = caml_ba_get_1(v_bstr,v_src_pos + i);
-    caml_bytes_set(v_str,v_dst_pos + i,c);
-  }
-  return 0;
+//Requires: caml_bigstring_blit_ba_to_bytes
+function bigstring_blit_bigstring_bytes_stub(src, src_pos, dst, dst_pos, len){
+  return caml_bigstring_blit_ba_to_bytes(src,src_pos,dst,dst_pos,len);
 }
 
 //Provides: bigstring_blit_string_bigstring_stub
-//Requires: caml_string_get, caml_ba_set_1
-function bigstring_blit_string_bigstring_stub(v_str, v_src_pos, v_bstr, v_dst_pos, v_len){
-  for (var i = 0; i < v_len; i++) caml_ba_set_1(v_bstr,v_dst_pos + i,caml_string_get(v_str,v_src_pos + i));
-  return 0;
+//Requires: caml_bigstring_blit_string_to_ba
+function bigstring_blit_string_bigstring_stub(src, src_pos, dst, dst_pos, len){
+  return caml_bigstring_blit_string_to_ba(src,src_pos,dst,dst_pos,len);
 }
 
 //Provides: bigstring_memset_stub

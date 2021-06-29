@@ -6,6 +6,5 @@ Test that we are testing the patdiff in the tree, not /bin/patdiff.
   patdiff is a function
   patdiff () 
   { 
-      patdiff.exe "$@"
+      "$HERE/../../bin/main.exe" "$@"
   }
-  $ which patdiff.exe | grep -q /usr/local/home

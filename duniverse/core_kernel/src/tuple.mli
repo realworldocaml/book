@@ -35,6 +35,7 @@ module T2 : sig
   val map2 : f:('b -> 'c) -> ('a, 'b) t -> ('a, 'c) t
   [@@deprecated "[since 2015-12] use map_snd"]
 
+  val map : ('a, 'a) t -> f:('a -> 'b) -> ('b, 'b) t
   val map_fst : ('a, 'b) t -> f:('a -> 'c) -> ('c, 'b) t
   val map_snd : ('a, 'b) t -> f:('b -> 'c) -> ('a, 'c) t
   val swap : ('a, 'b) t -> ('b, 'a) t
@@ -77,6 +78,7 @@ module T3 : sig
   val map3 : f:('c -> 'd) -> ('a, 'b, 'c) t -> ('a, 'b, 'd) t
   [@@deprecated "[since 2015-12] use map_trd"]
 
+  val map : ('a, 'a, 'a) t -> f:('a -> 'b) -> ('b, 'b, 'b) t
   val map_fst : ('a, 'b, 'c) t -> f:('a -> 'd) -> ('d, 'b, 'c) t
   val map_snd : ('a, 'b, 'c) t -> f:('b -> 'd) -> ('a, 'd, 'c) t
   val map_trd : ('a, 'b, 'c) t -> f:('c -> 'd) -> ('a, 'b, 'd) t

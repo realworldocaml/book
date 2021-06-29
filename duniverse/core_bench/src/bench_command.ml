@@ -120,8 +120,8 @@ let wrapper_param =
         let f =
           let open Bench_command_column in
           function
-          | Analysis analysis -> `Fst analysis
-          | Display_column col -> `Snd col
+          | Analysis analysis -> First analysis
+          | Display_column col -> Second col
         in
         List.partition_map columns ~f
       in

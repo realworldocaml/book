@@ -19,15 +19,13 @@
  (name tyxml_syntax)
  (public_name tyxml-syntax)
  (libraries uutf re.str
-            ppx_tools_versioned
+            ppxlib
  )
- (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (preprocess (pps ppxlib.metaquot))
  (modules_without_implementation sigs_reflected)
  (flags (:standard
          -safe-string
-         -open Migrate_parsetree
-         -open Ast_408
-         -open Ppx_tools_408
+         -open Ppxlib
          -w "-9"
  ))
 )

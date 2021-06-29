@@ -21,6 +21,11 @@ let nativeint = of_hash_fold Nativeint.hash_fold_t
 let float = of_hash_fold Float.hash_fold_t
 let string = of_hash_fold String.hash_fold_t
 let sexp = of_hash_fold Sexp.hash_fold_t
+let bigstring = of_hash_fold (Bigarray_helpers.Array1.hash_fold hash_fold_char)
+let float32_vec = of_hash_fold (Bigarray_helpers.Array1.hash_fold hash_fold_float)
+let float64_vec = of_hash_fold (Bigarray_helpers.Array1.hash_fold hash_fold_float)
+let float32_mat = of_hash_fold (Bigarray_helpers.Array2.hash_fold hash_fold_float)
+let float64_mat = of_hash_fold (Bigarray_helpers.Array2.hash_fold hash_fold_float)
 
 let either fst_t snd_t =
   create (fun either ~size ~hash ->

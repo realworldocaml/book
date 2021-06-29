@@ -2,14 +2,12 @@ open! Import
 
 module type S = sig
   type t [@@deriving_inline hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val hash_fold_t :
-        Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-      val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-    end[@@ocaml.doc "@inline"]
+
+  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
   [@@@end]
 
   include Stringable.S with type t := t
@@ -19,15 +17,13 @@ end
 
 module Make (T : sig
     type t [@@deriving_inline compare, hash, sexp]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-        include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : t -> t -> int
+    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
     [@@@end]
 
     include Stringable.S with type t := t
@@ -41,16 +37,13 @@ struct
 end
 
 module Make_using_comparator (T : sig
-    type t [@@deriving_inline compare, hash, sexp]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-        include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-      end[@@ocaml.doc "@inline"]
+    type t [@@deriving_inline hash, sexp]
+
+    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
     [@@@end]
 
     include Comparator.S with type t := t

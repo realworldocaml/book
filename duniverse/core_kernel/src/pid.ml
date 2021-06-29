@@ -16,7 +16,7 @@ module Stable = struct
             let of_sexpable = ensure
           end)
 
-      include Binable.Stable.Of_binable.V1
+      include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
           (Int.Stable.V1)
           (struct
             type t = Int.Stable.V1.t

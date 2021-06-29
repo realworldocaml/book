@@ -86,7 +86,9 @@ let%test_module "Thread_safe_queue" =
            let t = create () in
            let all_threads = ref [] in
            let create_thread f =
-             let thread = Thread.create f () in
+             let thread =
+               Thread.create f () ~on_uncaught_exn:`Print_to_stderr
+             in
              all_threads := thread :: !all_threads
            in
            let num_enqueues = ref 0 in

@@ -1,7 +1,7 @@
 open Base
 open Stdio
-open Expect_test_common.Std
-open Expect_test_matcher.Std
+open Expect_test_common
+open Expect_test_matcher
 module Test_result = Ppx_inline_test_lib.Runtime.Test_result
 module Collector_test_outcome = Expect_test_collector.Test_outcome
 
@@ -49,7 +49,7 @@ let convert_collector_test ~allow_output_patterns (test : Collector_test_outcome
         (match Caml.Printexc.raw_backtrace_to_string bt with
          | "" -> exn
          | bt ->
-           Expect_test_config.Upon_unreleasable_issue
+           Expect_test_config_types.Upon_unreleasable_issue
            .message_when_expectation_contains_backtrace
              test.upon_unreleasable_issue
            ^ exn
@@ -115,10 +115,9 @@ let create_group ~allow_output_patterns (filename, tests) =
     | digests ->
       Printf.ksprintf
         failwith
-        !"Expect tests make inconsistent assumption about file \"%{File.Name}\" \
-          %{sexp:D.t list}"
-        filename
-        digests
+        "Expect tests make inconsistent assumption about file \"%s\" %s"
+        (File.Name.to_string filename)
+        (Sexp.to_string_hum (List.sexp_of_t D.sexp_of_t digests))
   in
   let file_contents = In_channel.read_all (resolve_filename filename) in
   let current_digest =
@@ -128,11 +127,11 @@ let create_group ~allow_output_patterns (filename, tests) =
   then
     Printf.ksprintf
       failwith
-      !"File \"%{File.Name}\" changed, you need rebuild inline_tests_runner to be able \
-        to run expect tests (expected digest: %{D}, current digest: %{D})"
-      filename
-      expected_digest
-      current_digest;
+      "File \"%s\" changed, you need rebuild inline_tests_runner to be able to run \
+       expect tests (expected digest: %s, current digest: %s)"
+      (File.Name.to_string filename)
+      (D.to_string expected_digest)
+      (D.to_string current_digest);
   let tests =
     List.map tests ~f:(convert_collector_test ~allow_output_patterns)
     |> Map.of_alist_reduce (module File.Location) ~f:Matcher.Test_outcome.merge_exn

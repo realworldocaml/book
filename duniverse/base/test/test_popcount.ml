@@ -1,7 +1,7 @@
 open! Import
 
 module type T = sig
-  type t [@@deriving compare, sexp_of]
+  type t [@@deriving compare, quickcheck, sexp_of]
 
   (* for implementing popcount_naive *)
 
@@ -10,7 +10,6 @@ module type T = sig
   val ( + ) : t -> t -> t
   val ( lsr ) : t -> int -> t
   val ( land ) : t -> t -> t
-  val quickcheck_generator : t Quickcheck.Generator.t
   val to_int_exn : t -> int
   val popcount : t -> int
 end
@@ -25,13 +24,34 @@ module Make (Int : T) = struct
   ;;
 
   let%test_unit _ =
-    Quickcheck.test Int.quickcheck_generator ~sexp_of:[%sexp_of: Int.t] ~f:(fun int ->
-      let expect = popcount_naive int in
-      [%test_result: int] ~expect (Int.popcount int))
+    Base_quickcheck.Test.run_exn
+      (module Int)
+      ~f:(fun int ->
+        let expect = popcount_naive int in
+        [%test_result: int] ~expect (Int.popcount int))
   ;;
 end
 
-include Make (Quickcheck.Int)
-include Make (Quickcheck.Int32)
-include Make (Quickcheck.Int64)
-include Make (Quickcheck.Nativeint)
+include Make (struct
+    include Int
+
+    type t = int [@@deriving quickcheck]
+  end)
+
+include Make (struct
+    include Int32
+
+    type t = int32 [@@deriving quickcheck]
+  end)
+
+include Make (struct
+    include Int64
+
+    type t = int64 [@@deriving quickcheck]
+  end)
+
+include Make (struct
+    include Nativeint
+
+    type t = nativeint [@@deriving quickcheck]
+  end)

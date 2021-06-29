@@ -2,7 +2,7 @@
 
 open! Import
 
-(** This module is similar to the [Ast_helper] module distrubuted with OCaml but uses
+(** This module is similar to the [Ast_helper] module distributed with OCaml but uses
     different conventions.
 
     {3 Locations}
