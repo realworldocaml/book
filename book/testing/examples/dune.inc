@@ -61,6 +61,21 @@
  (deps (alias manual_property_test)))
 
 (rule
+ (alias monadic_quickcheck_test)
+ (deps
+  (source_tree ./correct/monadic_quickcheck_test)
+  (package base)
+  (package core_kernel)
+  (package ppx_jane)
+  (package stdio))
+ (action
+  (system "dune build @all @runtest --root ./correct/monadic_quickcheck_test")))
+
+(alias
+ (name runtest)
+ (deps (alias monadic_quickcheck_test)))
+
+(rule
  (alias multi_block_expect_test)
  (deps
   (source_tree ./correct/multi_block_expect_test)
@@ -135,6 +150,21 @@
 (alias
  (name runtest)
  (deps (alias soup_test)))
+
+(rule
+ (alias soup_test_corrected)
+ (deps
+  (source_tree ./correct/soup_test_corrected)
+  (package base)
+  (package core_kernel)
+  (package ppx_jane)
+  (package stdio))
+ (action
+  (system "dune build @all @runtest --root ./correct/soup_test_corrected")))
+
+(alias
+ (name runtest)
+ (deps (alias soup_test_corrected)))
 
 (rule
  (alias soup_test_fixed)
