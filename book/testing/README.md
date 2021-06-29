@@ -1,26 +1,29 @@
 # Testing
 
-Testing is not the best loved part of software engineering, often
-feeling like a painful distraction from the work of building out the
-functionality of a project.  OCaml's type-system can make testing seem
-even less appealing, since the type system's ability to squash many
-kinds of bugs at compile time makes it seem like that testing isn't
-all that important.
+Testing is not the best-loved part of programming. Writing tests can
+be paintstaking and dreary work, and it can feel like a distraction
+from the core work of creating new features.  At first blush, OCaml's
+type-system makes testing seem even less appealing, since the type
+system's ability to squash many kinds of bugs at compile time catches
+lots of mistakes that you would otherwise need to write tests to
+protect against.
 
 But make no mistake, clever types notwithstanding, testing is
-essential for developing and evolving complex software systems.  The
-goal of this chapter is to teach you more about how to write effective
-tests in OCaml, and to teach you some of the best tools for doing so.
+essential for developing and evolving reliable software systems.  And
+OCaml's type system, viewed properly, is an aid to testing, not a
+reason to avoid it.
 
-Tooling is especially important in the context of testing because one
-of the things that prevents people from doing as much testing as they
-should is the sheer tedium of it.  But with the right tools in hand,
-writing tests can be lightweight and fun.  And when testing is fun, a
-lot more testing gets done.
+The goal of this chapter is to teach you more about how to write
+effective tests in OCaml, and to teach you some of the best tools for
+the job.  Tooling is especially important in the context of testing
+because one of the things that prevents people from doing as much
+testing as they should is the sheer tedium of it.  But with the right
+tools in hand, writing tests can be lightweight and fun.  And when
+testing is fun, a lot more testing gets done.
 
 Before talking about the testing tools that are available in OCaml,
 let's discuss at a high level what we want out of our tests and our
-testing tools in the first place.
+testing tools.
 
 ## What makes for good tests?
 
@@ -28,10 +31,10 @@ Here are some of the properties that characterize well-written tests
 in a good testing environment.
 
 - **Easy to write and run**. Tests should require a minimum of
-  boilerplate to create and to hook into your build pipeline.
-  Ideally, you should set things up so that tests are run
-  automatically on every proposed change, preventing people from
-  accidentally breaking the build.
+  boilerplate to create and to hook into your process.  Ideally, you
+  should set things up so that tests are run automatically on every
+  proposed change, preventing people from accidentally breaking the
+  build.
 - **Easy to update**. Tests that are hard to adjust in the face of
   code changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
@@ -100,7 +103,7 @@ running via the test runner.
 No output is generated because the test passed successfully.
 But if we break the test,
 
-```ocaml file=examples/erroneous/broken_inline_test/test.ml
+```ocaml file=examples/correct/broken_inline_test/test.ml
 open! Base
 
 let%test "rev" =
@@ -109,7 +112,7 @@ let%test "rev" =
 
 we'll see an error when we run it.
 
-```sh dir=examples/erroneous/broken_inline_test
+```sh dir=examples/correct/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
   
@@ -119,7 +122,7 @@ we'll see an error when we run it.
 
 ### More readable errors with `test_eq`
 
-One annoyance with the test output we just saw is that it doesn't show
+One problem with the test output we just saw is that it doesn't show
 the data associated with the failed test, thus making it harder to
 diagnose and fix the problem when it occurs.  We can fix this if we
 signal a test failure by throwing an exception, rather than by
@@ -136,7 +139,7 @@ Here's what our new test looks like. You'll notice that it's a little
 more concise, mostly because this is a more concise way to express the
 comparison function.
 
-```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
+```ocaml file=examples/correct/test_eq-inline_test/test.ml
 open! Base
 
 let%test_unit "rev" =
@@ -145,7 +148,7 @@ let%test_unit "rev" =
 
 Here's what it looks like when we run the test.
 
-```sh dir=examples/erroneous/test_eq-inline_test
+```sh dir=examples/correct/test_eq-inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-71: rev threw
   (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
@@ -201,7 +204,7 @@ libraries has several downsides.
   fundamental about your code, and will better survive refactoring of
   the implementation.  Also, the discipline of keeping tests outside
   of requires you to write code that can be tested that way, which
-  pushes towards designs that are better factored out.
+  pushes towards better designs.
 
 For all of these reasons, our recommendation is to put the bulk of
 your tests in test-only libraries created for that purpose.  There are
@@ -250,12 +253,16 @@ randomly generated examples.
 
 We can write a property test using only the tools we've learned so
 far.  In this example, we'll check an obvious-seeming invariant
-connecting three operations: `Int.sign`, which computes a `Sign.t`
-representing the sign of an integer (`Positive`, `Negative`, or
-`Zero`), `Int.neg`, which negates a number, and `Sign.flip`, which,
-well, flips a `Sign.t`, i.e., mapping `Positive` to `Negative` and
-vice-versa.  The invariant is simply that the sign of the negation of
-an integer `x` is the flip of the sign of `x`.
+connecting three operations:
+
+- `Int.sign`, which computes a `Sign.t` representing the sign of an
+integer, either `Positive`, `Negative`, or `Zero`
+- `Int.neg`, which negates a number
+- `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
+  `Negative` and vice-versa.
+
+The invariant is simply that the sign of the negation of an integer
+`x` is the flip of the sign of `x`.
 
 Here's one way of implementing this test as a property test.
 
@@ -280,7 +287,7 @@ As you might expect, the test passes.
 One choice we had to make in our implementation is which probability
 distribution to use for selecting examples.  This may seem like an
 unimportant question, but when it comes to testing, not all
-probability distributions are equally good.
+probability distributions are created equal.
 
 In fact, the choice we made, which was to pick integers uniformly and
 at random from the full set of integers, is problematic, since it
@@ -288,22 +295,22 @@ picks interesting special cases, like zero and one, with the same
 probability as everything else.  Given the number of integers, the
 chance of testing any of those special cases is rather low.  This
 accords poorly with the intuition that one should make sure to test
-out corner cases.
+corner cases.
 
-That's where Quickcheck comes in.  Quickcheck is a library to help
-automate the construction of testing distributions. Let's try
-rewriting the example we provided above with Quickcheck.  Note that we
-open `Core_kernel` here because `Core_kernel` integrates the
-quickcheck library with some convenient helpers.  There's also a
-standalone `Base_quickcheck` library that can be used without
-`Core_kernel`.
+This is a place where `Quickcheck` can help.  `Quickcheck` is a
+library to help automate the construction of testing
+distributions. Let's try rewriting the above example using it.  Note
+that we open `Core_kernel` here because `Core_kernel` has nicely
+integrated support for `Quickcheck`, with helper functions already
+integrated into most common modules.  There's also a standalone
+`Base_quickcheck` library that can be used without `Core_kernel`.
 
-```ocaml file=examples/erroneous/quickcheck_property_test/test.ml
+```ocaml file=examples/correct/quickcheck_property_test/test.ml
 open Core_kernel
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
-    (Int.gen_incl Int.min_value Int.max_value)
+    Int.quickcheck_generator
     ~f:(fun x ->
         [%test_eq: Sign.t]
           (Int.sign (Int.neg x))
@@ -318,9 +325,9 @@ In any case, running the test uncovers the fact that the property
 we've been testing doesn't actually hold on all outputs, as you can
 see below.
 
-```sh dir=examples/erroneous/quickcheck_property_test
+```sh dir=examples/correct/quickcheck_property_test
   $ dune runtest
-  File "test.ml", line 3, characters 0-244: negation flips the sign threw
+  File "test.ml", line 3, characters 0-226: negation flips the sign threw
   ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
     (error
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
@@ -341,8 +348,9 @@ see below.
 
 The example that triggers the exception is `-4611686018427387904`,
 also known as `Int.min_value`, which is the smallest value of type
-`Int.t`. Note that the largest int, `Int.max_value`, is smaller in
-absolute value than `Int.max_value`.
+`Int.t`.  This uncovers something about integers which may not have
+been obvious, which is that the largest int, `Int.max_value`, is
+smaller in absolute value than `Int.max_value`.
 
 ```ocaml env=main
 # Int.min_value
@@ -351,9 +359,9 @@ absolute value than `Int.max_value`.
 - : int = 4611686018427387903
 ```
 
-It turns out that the standard behavior for negation is that the
-negation of the minimum value of an int is equal to itself, as you can
-see here.
+That means there's no natural choice for the negation of `min_value`.
+It turns out that the standard behavior here (not just for OCaml) is
+for the negation of `min_value` to be equal to itself.
 
 ```ocaml env=main
 # Int.neg Int.min_value
@@ -370,14 +378,14 @@ often want to build probability distributions over more complex types.
 Here's a simple example, where we want to test the behavior of
 `List.rev_append`.  For this test, we're going to use a probability
 distribution for generating pairs of lists of integers.  The following
-example shows how htat can be done using Quickcheck's combinators.
+example shows how that can be done using Quickcheck's combinators.
 
 ```ocaml file=examples/correct/bigger_quickcheck_test/test.ml
 open Core_kernel
 
 let gen_int_list_pair =
   let int_list_gen =
-    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+    List.quickcheck_generator Int.quickcheck_generator
   in
   Quickcheck.Generator.both int_list_gen int_list_gen
 
@@ -471,29 +479,30 @@ an error handling context in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 
 In combination with `Let_syntax`, the generator monad gives us a
-convenient way to specify generators for custom types. Imagine we
+convenient way to specify generators for custom types.  Imagine we
 wanted to construct a generator for the `shape` type defined above.
 
-Using `Let_syntax`, a generator for this would look as follows.
+Here's an example generator where we make sure that the radius,
+height, and width of the shape in question can't be negative.
 
 ```ocaml env=main
 # let gen_shape =
     let open Quickcheck.Generator.Let_syntax in
-    let module G = Quickcheck.Generator in
+    let module G = Base_quickcheck.Generator in
     let circle =
-      let%map radius = Float.gen_positive in
+      let%map radius = G.float_positive_or_zero in
       Circle { radius }
     in
     let rect =
-      let%map height = Float.gen_positive
-      and width = Float.gen_positive
+      let%map height = G.float_positive_or_zero
+      and width = G.float_positive_or_zero
       in
       Rect { height; width }
     in
     let poly =
       let%map points =
         List.gen_non_empty
-          (G.both Float.gen_positive Float.gen_positive)
+          (G.both G.float_positive_or_zero G.float_positive_or_zero)
       in
       Poly points
     in
@@ -529,7 +538,7 @@ Here's a simple example of a test written in this style.  While the
 test generates output (though a call to `print_endline`), that output
 isn't captured in the source, at least, not yet.
 
-```ocaml file=examples/erroneous/trivial_expect_test/test.ml
+```ocaml file=examples/correct/trivial_expect_test/test.ml
 open! Base
 open! Stdio
 
@@ -541,7 +550,7 @@ If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
+```sh dir=examples/correct/trivial_expect_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
@@ -647,7 +656,7 @@ uses the `lambdasoup` package to traverse some HTML and spit out a set
 of strings.  The goal of this function is to produce the set of
 hosts that show up in the href of links within the document.
 
-```ocaml file=examples/erroneous/soup_test/test.ml,part=0
+```ocaml file=examples/correct/soup_test/test.ml,part=0
 open! Base
 open! Stdio
 
@@ -661,7 +670,7 @@ let get_href_hosts soup =
 We can then try this out by adding an expect test that runs this code
 on some sample data.
 
-```ocaml file=examples/erroneous/soup_test/test.ml,part=1
+```ocaml file=examples/correct/soup_test/test.ml,part=1
 let%expect_test _ =
   let example_html = {|
     <html>
@@ -680,7 +689,7 @@ let%expect_test _ =
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
+```sh dir=examples/correct/soup_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
@@ -714,7 +723,7 @@ string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
 of simple `github.com`.  We can fix that by using the `uri` library to
 parse the string and extract the host.  Here's the modified code.
 
-```ocaml file=examples/erroneous/soup_test_half_fixed/test.ml,part=0
+```ocaml file=examples/correct/soup_test_half_fixed/test.ml,part=0
 let get_href_hosts soup =
   Soup.select "a[href]" soup
   |> Soup.to_list
@@ -726,7 +735,7 @@ let get_href_hosts soup =
 And if we run the test again, we'll see that the output is now as it
 should be.
 
-```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
+```sh dir=examples/correct/soup_test_half_fixed,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
