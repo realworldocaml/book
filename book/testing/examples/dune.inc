@@ -92,6 +92,24 @@
  (deps (alias simple_inline_test)))
 
 (rule
+ (alias soup_test_corrected)
+ (deps
+  (source_tree ./correct/soup_test_corrected)
+  (package base)
+  (package bin_prot)
+  (package lambdasoup)
+  (package ppx_jane)
+  (package stdio)
+  (package typerep)
+  (package uri))
+ (action
+  (system "dune build @all @runtest --root ./correct/soup_test_corrected")))
+
+(alias
+ (name runtest)
+ (deps (alias soup_test_corrected)))
+
+(rule
  (alias soup_test_fixed)
  (deps
   (source_tree ./correct/soup_test_fixed)
