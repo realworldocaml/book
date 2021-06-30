@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -307,7 +307,7 @@ open Core_kernel
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
-    Int.quickcheck_generator
+    (Int.gen_incl Int.min_value Int.max_value)
     ~f:(fun x ->
         [%test_eq: Sign.t]
           (Int.sign (Int.neg x))
@@ -324,7 +324,7 @@ see below.
 
 ```sh dir=examples/erroneous/quickcheck_property_test
   $ dune runtest
-  File "test.ml", line 3, characters 0-226: negation flips the sign threw
+  File "test.ml", line 3, characters 0-244: negation flips the sign threw
   ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
     (error
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
@@ -335,7 +335,7 @@ see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -379,7 +379,7 @@ open Core_kernel
 
 let gen_int_list_pair =
   let int_list_gen =
-    List.quickcheck_generator Int.quickcheck_generator
+    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
   in
   Quickcheck.Generator.both int_list_gen int_list_gen
 
