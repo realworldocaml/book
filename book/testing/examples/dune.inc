@@ -60,17 +60,6 @@
  (deps (alias multi_block_expect_test)))
 
 (rule
- (alias quickcheck_property_test)
- (deps
-  (source_tree ./correct/quickcheck_property_test))
- (action
-  (system "dune build @all @runtest --root ./correct/quickcheck_property_test")))
-
-(alias
- (name runtest)
- (deps (alias quickcheck_property_test)))
-
-(rule
  (alias simple_expect_test)
  (deps
   (source_tree ./correct/simple_expect_test)
