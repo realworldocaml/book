@@ -103,7 +103,7 @@ let () =
   let fd = Fd.file_descr_exn server_to_client_fdw in
   let open Core in
   let devnull = Unix.openfile ~mode:[O_WRONLY] "/dev/null" in
-  Unix.dup2 ~src:devnull ~dst:fd;
+  Unix.dup2 ~src:devnull ~dst:fd ();
   Unix.close devnull
 ;;
 

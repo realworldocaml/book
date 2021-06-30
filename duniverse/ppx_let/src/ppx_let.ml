@@ -12,5 +12,16 @@ let ext extension_name =
 let () =
   Driver.register_transformation
     "let"
-    ~extensions:[ ext Bind; ext Bind_open; ext Map; ext Map_open ]
+    ~extensions:
+      [ ext Sub
+      ; ext Sub_open
+      ; ext Bind
+      ; ext Bind_open
+      ; ext Map
+      ; ext Map_open
+      ; ext Mapn
+      ; ext Mapn_open
+      ; ext Bindn
+      ; ext Bindn_open
+      ]
 ;;

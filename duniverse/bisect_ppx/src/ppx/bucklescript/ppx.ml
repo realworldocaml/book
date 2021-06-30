@@ -1,10 +1,3 @@
-let () =
-  let argc = Array.length Sys.argv in
-  let argv =
-    let output_file = Sys.argv.(argc - 1) in
-    Array.(append
-      (sub Sys.argv 0 (argc - 1))
-      [|"-o"; output_file; "--dump-ast"; "--conditional"|])
-  in
+let _ = Bisect_ppx.Register.conditional := true
 
-  Migrate_parsetree.Driver.run_main ~argv ()
+let () = Ppxlib.Driver.run_as_ppx_rewriter ()

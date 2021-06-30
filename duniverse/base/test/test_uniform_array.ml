@@ -74,6 +74,16 @@ let%expect_test "exists" =
   [%expect {| |}]
 ;;
 
+let%expect_test "iteri" =
+  let test arr = of_list arr |> iteri ~f:(printf "(%d %c)") in
+  test [];
+  [%expect {| |}];
+  test [ 'a' ];
+  [%expect {| (0 a) |}];
+  test [ 'a'; 'b'; 'c'; 'd' ];
+  [%expect {| (0 a)(1 b)(2 c)(3 d) |}]
+;;
+
 module Sequence = struct
   type nonrec 'a t = 'a t
   type 'a z = 'a

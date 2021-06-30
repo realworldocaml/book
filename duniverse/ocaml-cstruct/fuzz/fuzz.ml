@@ -33,7 +33,7 @@ let check_within ~base x =
   check Cstruct.(x.len >= 0 && x.len <= base.len)
 
 let () =
-  assert (Array.length Sys.argv = 2);   (* Prevent accidentally running in quickcheck mode *)
+  (* assert (Array.length Sys.argv = 2);   (* Prevent accidentally running in quickcheck mode *) *)
   add_test ~name:"blit" [cstruct; int; cstruct; int; int] (fun src srcoff dst dstoff len ->
       try Cstruct.blit src srcoff dst dstoff len
       with Invalid_argument _ ->
@@ -115,7 +115,7 @@ let () =
       guard (i >= 0 && i < Cstruct.len c);
       Cstruct.memset c x;
       check (Cstruct.get_uint8 c i = x land 0xff)
-    );
+     );
   add_test ~name:"set_len" [cstruct; int] (fun base len ->
       match[@ocaml.warning "-3"] Cstruct.set_len base len with
       | x ->
@@ -165,3 +165,21 @@ let () =
       let x = Cstruct.concat cs in
       check (Cstruct.len x = Cstruct.lenv cs)
     );
+  add_test ~name:"span" [ cstruct; list char ] (fun cs p ->
+      let sat chr = List.exists ((=) chr) p in
+      let a, b = Cstruct.span ~sat cs in
+      let r = Cstruct.concat [ a; b ] in
+      check (Cstruct.to_string r = Cstruct.to_string cs));
+  add_test ~name:"cut" [ cstruct; cstruct; ] (fun buf sep ->
+      guard (Cstruct.len sep > 0);
+      ( match Cstruct.cut ~sep buf with
+        | Some (l, r) ->
+          let r = Cstruct.concat [ l; sep; r; ] in
+          check (Cstruct.to_string r = Cstruct.to_string buf)
+        | None -> () ));
+  add_test ~name:"cuts" [ cstruct; cstruct; ] (fun buf sep ->
+      guard (Cstruct.len sep > 0);
+      let lst = Cstruct.cuts ~sep buf in
+      let lst = List.map Cstruct.to_string lst in
+      let res = String.concat (Cstruct.to_string sep) lst in
+      check (res = Cstruct.to_string buf));

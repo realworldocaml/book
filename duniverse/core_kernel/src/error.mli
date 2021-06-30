@@ -16,8 +16,8 @@ include
     details. *)
 
 (** {[
-     failwiths ?strict ?here message a sexp_of_a
-     = Error.raise (Error.create ?strict ?here s a sexp_of_a)
+     failwiths ?strict ~here message a sexp_of_a
+     = Error.raise (Error.create ?strict ~here s a sexp_of_a)
    ]}
 
    As with [Error.create], [sexp_of_a a] is lazily computed when the error is converted
@@ -25,18 +25,11 @@ include
    sexp conversion, those mutations will be reflected in the error message. Use
    [~strict:()] to force [sexp_of_a a] to be computed immediately.
 
-   The [pa_fail] preprocessor replaces [failwiths] with [failwiths ?here:[%here]] so that
-   one does not need to (and cannot) supply [[%here]]. [pa_fail] does not add
-   [?here:[%here]] to [Error.failwiths].
-
-   In this signature we write [?here:Lexing.position] rather than
-   [?here:Source_code_position.t] to avoid a circular dependency.
-
-   [failwithp here] is like [failwiths ~here], except that you can provide a source
-   position yourself (which is only interesting if you don't provide [[%here]]). *)
+   In this signature we write [~here:Lexing.position] rather than
+   [~here:Source_code_position.t] to avoid a circular dependency. *)
 val failwiths
   :  ?strict:unit
-  -> ?here:Lexing.position
+  -> here:Lexing.position
   -> string
   -> 'a
   -> ('a -> Base.Sexp.t)
@@ -49,3 +42,4 @@ val failwithp
   -> 'a
   -> ('a -> Base.Sexp.t)
   -> _
+[@@deprecated "[since 2020-03] Use [failwiths] instead."]

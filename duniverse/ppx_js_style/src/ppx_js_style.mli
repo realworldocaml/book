@@ -36,3 +36,6 @@ val iter_style_errors :
   f:(loc:Location.t -> error -> unit) -> Ast_traverse.iter
 
 val check : Ast_traverse.iter
+
+(** If [true] (the default) complain when using [@inline never] instead of [@cold] *)
+val cold_instead_of_inline_never : bool ref

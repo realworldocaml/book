@@ -34,3 +34,10 @@ let print_s ?mach sexp =
      | Some () -> Sexp.to_string_mach sexp
      | None -> Sexp.to_string_hum sexp)
 ;;
+
+let eprint_s ?mach sexp =
+  prerr_endline
+    (match mach with
+     | Some () -> Sexp.to_string_mach sexp
+     | None -> Sexp.to_string_hum sexp)
+;;

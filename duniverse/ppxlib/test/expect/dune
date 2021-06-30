@@ -1,13 +1,20 @@
 (executable
  (name expect_test)
- (modules expect_test printers)
+ (enabled_if
+  (>= %{ocaml_version} "4.08.0"))
  (link_flags (-linkall))
  (modes byte)
- (libraries unix compiler-libs.toplevel ppxlib ppxlib.traverse))
+ (libraries
+  unix
+  compiler-libs.toplevel
+  ppxlib
+  ppxlib.metaquot
+  ppxlib.traverse
+  findlib.top
+  ;; We don't actually use findlib.dynload, however it is a
+  ;; special library that causes to record the various
+  ;; libraries statically linked in with findlib so that
+  ;; they are not loaded dynamically at runtime
+  findlib.dynload))
 
-(rule
- (deps    printers_lt_408.ml printers_ge_408.ml)
- (targets printers.ml)
- (action  (with-stdout-to printers.ml (run %{ocaml} %{dep:gen-printers} %{ocaml_version}))))
-
-(ocamllex expect_test)
+(ocamllex expect_lexer)

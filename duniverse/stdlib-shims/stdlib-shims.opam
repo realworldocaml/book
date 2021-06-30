@@ -1,4 +1,4 @@
-version: "0.1.0"
+version: "0.3.0"
 opam-version: "2.0"
 maintainer: "The stdlib-shims programmers"
 authors: "The stdlib-shims programmers"
@@ -8,7 +8,6 @@ dev-repo: "git+https://github.com/ocaml/stdlib-shims.git"
 bug-reports: "https://github.com/ocaml/stdlib-shims/issues"
 tags: ["stdlib" "compatibility" "org:ocaml"]
 license: ["typeof OCaml system"]
-available: [  ]
 depends: [
   "dune"
   "ocaml" {>= "4.02.3"}

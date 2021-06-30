@@ -32,3 +32,30 @@ let find_and_sum tbl k1 k2 =
          (fun x2 -> return (x1 + x2)))
 
 [%%expect{| |}];;
+
+(* we check annotated ignores when extensions are used too *)
+let%foo _ = "whatever"
+
+[%%expect{|
+Line _, characters _-_:
+Error: Jane Street style: Ignored expression must come with a type annotation
+|}];;
+
+(* expect test expansion is done before annotated ignores, so this is allowed *)
+let%expect_test _ = "whatever"
+
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_expect: extension is disabled because the tests would be ignored (the build system didn't pass -inline-test-lib)
+|}];;
+
+(* a regression test (this used to result in a strange error message): *)
+let foo = [%expect "foo"]
+
+[%%expect{|
+Line _, characters _-_:
+Error: Extension `expect' was not translated.
+Hint: `expect' is available for structure items but is used here in the
+context of an expression.
+Did you put it at the wrong level?
+|}];;

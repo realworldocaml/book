@@ -20,6 +20,13 @@ let src = Logs.Src.create "cram.pp"
 
 module Log = (val Logs.src_log src : Logs.LOG)
 
+let vpad_of_lines t =
+  let rec aux i = function
+    | h :: t when String.trim h = "" -> aux (i + 1) t
+    | _ -> i
+  in
+  aux 0 t
+
 let run (`Setup ()) (`File file) (`Section section) =
   Mdx.parse_file Normal file >>! fun t ->
   let t =
@@ -32,6 +39,7 @@ let run (`Setup ()) (`File file) (`Section section) =
   match t with
   | [] -> 1
   | _ ->
+      let rvpad = ref 1 in
       List.iter
         (function
           | Mdx.Section _ | Text _ -> ()
@@ -43,7 +51,10 @@ let run (`Setup ()) (`File file) (`Section section) =
                 match b.value with
                 | Toplevel _ -> Fmt.pr "%a\n" pp_lines contents
                 | OCaml _ ->
-                    Fmt.pr "%a\n%a\n" Mdx.Block.pp_line_directive (file, b.line)
+                    let vpad = vpad_of_lines contents in
+                    rvpad := vpad + !rvpad;
+                    let line = b.loc.loc_start.pos_lnum + !rvpad in
+                    Fmt.pr "%a\n%a\n" Mdx.Block.pp_line_directive (file, line)
                       pp_lines contents
                 | _ -> () ))
         t;

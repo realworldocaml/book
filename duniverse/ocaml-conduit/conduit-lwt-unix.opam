@@ -1,4 +1,4 @@
-version: "2.1.0"
+version: "4.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -12,16 +12,21 @@ depends: [
   "ocaml" {>= "4.07.0"}
   "dune"
   "base-unix"
-  "ppx_sexp_conv" {>="v0.12.0"}
+  "logs"
+  "ppx_sexp_conv" {>="v0.13.0"}
   "conduit-lwt" {=version}
   "lwt" {>= "3.0.0"}
   "uri" {>= "1.9.4"}
   "ipaddr" {>= "4.0.0"}
   "ipaddr-sexp"
+  "ca-certs"
+  "lwt_log" {with-test}
+  "ssl" {with-test}
+  "lwt_ssl" {with-test}
 ]
 depopts: ["tls" "lwt_ssl" "launchd"]
 conflicts: [
-  "tls" {< "0.11.0"}
+  "tls" {< "0.13.0"}
   "ssl" {< "0.5.9"}
 ]
 build: [

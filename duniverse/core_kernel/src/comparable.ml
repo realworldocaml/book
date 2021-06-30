@@ -1,6 +1,8 @@
 open! Import
 module List = Base.List
 include Comparable_intf
+module Infix = Base.Comparable.Infix
+module Polymorphic_compare = Base.Comparable.Polymorphic_compare
 module Validate = Base.Comparable.Validate
 
 module With_zero (T : sig

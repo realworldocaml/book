@@ -4,6 +4,10 @@
   doing `type t = If | Then | Else [@@deriving variants]`. We suffix such
   function names with an underscore.
 
+## v0.14.1
+
+- Upgrade `ppxlib` to use version 0.14.0
+
 ## v0.11
 
 - Depend on ppxlib instead of (now deprecated) ppx\_core, ppx\_driver and

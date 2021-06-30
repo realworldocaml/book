@@ -2,6 +2,7 @@
 #define H__MIRAGE_CRYPTO
 
 #include <stdint.h>
+#include <string.h>
 #include "bitfn.h"
 
 #include <caml/mlvalues.h>
@@ -45,6 +46,14 @@ extern struct _mc_cpu_features mc_detected_cpu_features;
   GENERIC_CALL;
 
 #endif /* __mc_ACCELERATE__ */
+
+#if defined (__x86_64__) || defined (__aarch64__) || defined (__powerpc64__)
+#define ARCH_64BIT
+#elif defined (__i386__) || defined (__arm__)
+#define ARCH_32BIT
+#else
+#error "unsupported platform"
+#endif
 
 #ifndef __unused
 #define __unused(x) x __attribute__((unused))

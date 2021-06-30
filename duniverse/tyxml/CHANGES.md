@@ -1,3 +1,15 @@
+# 4.5.0
+
+* Move all the PPXs to ppxlib
+  (#271, Initial code by Sonja @pitag-ha Heinze)
+
+* Add the `translate` attribute
+  (#281 by Javier @jchavarri Chávarri)
+* Update allowed `inputmode`s
+  (#279 by Joel @joelburget Burget)
+* Add the `picture` element
+  (#263 by Stéphane @slegrand45 Legrand)
+
 # 4.4.0
 
 * Add support for Reason's JSX syntax with a new `tyxml-jsx` package 

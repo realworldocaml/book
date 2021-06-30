@@ -126,10 +126,6 @@ end = struct
     module Provide_of_sexp = Table.Provide_of_sexp
     module Provide_bin_io = Table.Provide_bin_io
 
-    type 'a merge_into_action = 'a Table.merge_into_action =
-      | Remove
-      | Set_to of 'a
-
     (* benchmarks begin here *)
 
     let sexp_of_t = Table.sexp_of_t
@@ -718,7 +714,7 @@ end = struct
 
     let () =
       ( !! ) "partition_map [halve]" (fun size ->
-        let f data = if data % 2 = 0 then `Fst (data + 1) else `Snd (data - 1) in
+        let f data = if data % 2 = 0 then First (data + 1) else Second (data - 1) in
         let t = Example.t size in
         stage (fun () -> ignore (partition_map t ~f : int t * int t)))
     ;;
@@ -728,7 +724,7 @@ end = struct
     let () =
       ( !! ) "partition_mapi [halve]" (fun size ->
         let f ~key:_ ~data =
-          if data % 2 = 0 then `Fst (data + 1) else `Snd (data - 1)
+          if data % 2 = 0 then First (data + 1) else Second (data - 1)
         in
         let t = Example.t size in
         stage (fun () -> ignore (partition_mapi t ~f : int t * int t)))
@@ -811,6 +807,58 @@ end = struct
         stage (fun () ->
           let key = Example.random_key r `either in
           ignore (findi_and_call t key ~if_found ~if_not_found : int)))
+    ;;
+
+    let find_and_call1 = Table.find_and_call1
+
+    let () =
+      ( !! ) "find_and_call1 + <rand key>" (fun size ->
+        let if_not_found _ () = 0 in
+        let if_found data () = data in
+        let r = Example.random size in
+        let t = Example.t size in
+        stage (fun () ->
+          let key = Example.random_key r `either in
+          ignore (find_and_call1 t key ~a:() ~if_found ~if_not_found : int)))
+    ;;
+
+    let findi_and_call1 = Table.findi_and_call1
+
+    let () =
+      ( !! ) "findi_and_call1 + <rand key>" (fun size ->
+        let if_not_found _ () = 0 in
+        let if_found ~key:_ ~data () = data in
+        let r = Example.random size in
+        let t = Example.t size in
+        stage (fun () ->
+          let key = Example.random_key r `either in
+          ignore (findi_and_call1 t key ~a:() ~if_found ~if_not_found : int)))
+    ;;
+
+    let find_and_call2 = Table.find_and_call2
+
+    let () =
+      ( !! ) "find_and_call2 + <rand key>" (fun size ->
+        let if_not_found _ () () = 0 in
+        let if_found data () () = data in
+        let r = Example.random size in
+        let t = Example.t size in
+        stage (fun () ->
+          let key = Example.random_key r `either in
+          ignore (find_and_call2 t key ~a:() ~b:() ~if_found ~if_not_found : int)))
+    ;;
+
+    let findi_and_call2 = Table.findi_and_call2
+
+    let () =
+      ( !! ) "findi_and_call2 + <rand key>" (fun size ->
+        let if_not_found _ () () = 0 in
+        let if_found ~key:_ ~data () () = data in
+        let r = Example.random size in
+        let t = Example.t size in
+        stage (fun () ->
+          let key = Example.random_key r `either in
+          ignore (findi_and_call2 t key ~a:() ~b:() ~if_found ~if_not_found : int)))
     ;;
 
     let merge = Table.merge
@@ -922,7 +970,7 @@ end = struct
       ( !! ) "equal [same]" (fun size ->
         let t1 = Example.t size in
         let t2 = copy t1 in
-        stage (fun () -> ignore (equal t1 t2 Int.equal : bool)))
+        stage (fun () -> ignore (equal Int.equal t1 t2 : bool)))
     ;;
 
     let similar = Table.similar
@@ -931,7 +979,7 @@ end = struct
       ( !! ) "similar [same]" (fun size ->
         let t1 = Example.t size in
         let t2 = copy t1 in
-        stage (fun () -> ignore (similar t1 t2 Int.equal : bool)))
+        stage (fun () -> ignore (similar Int.equal t1 t2 : bool)))
     ;;
 
     let to_alist = Table.to_alist

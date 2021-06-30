@@ -85,7 +85,10 @@ let description t = t.description
 
 let is_closed t = Ivar.is_full t.close_started
 
-let writer t = if is_closed t then Error `Closed else Ok t.writer
+let writer t =
+  if is_closed t || not (Writer.can_send t.writer)
+  then Error `Closed
+  else Ok t.writer
 
 let bytes_to_write t = Writer.bytes_to_write t.writer
 
@@ -98,7 +101,7 @@ let handle_send_result : t -> 'a Transport.Send_result.t -> 'a = fun t r ->
     (* All of the places we call [handle_send_result] check whether [t] is closed
        (usually via the [writer] function above). This checks whether [t.writer] is
        closed, which should not happen unless [t] is closed. *)
-    failwiths "RPC connection got closed writer" t sexp_of_t_hum_writer
+    failwiths ~here:[%here] "RPC connection got closed writer" t sexp_of_t_hum_writer
   | Message_too_big _ ->
     raise_s [%sexp
       "Message cannot be sent",
@@ -286,8 +289,11 @@ let heartbeat_now t ~last_heartbeat =
     in
     don't_wait_for (close t ~reason:(Info.of_thunk reason));
   end else begin
-    Writer.send_bin_prot t.writer P.Message.bin_writer_nat0_t Heartbeat
-    |> handle_send_result t
+    match writer t with
+    | Error `Closed -> ()
+    | Ok writer ->
+      Writer.send_bin_prot writer P.Message.bin_writer_nat0_t Heartbeat
+      |> handle_send_result t
   end
 
 let default_handshake_timeout = Time_ns.Span.of_sec 30.
@@ -375,39 +381,41 @@ let run_after_handshake t ~implementations ~connection_state =
 ;;
 
 let do_handshake t ~handshake_timeout =
-  if Writer.is_closed t.writer then
+  match writer t with
+  | Error `Closed ->
     return (Error Handshake_error.Transport_closed)
-  else begin
-    Writer.send_bin_prot t.writer Header.bin_t.writer Header.v1 |> handle_send_result t;
-    (* If we use [max_connections] in the server, then this read may just hang until the
-       server starts accepting new connections (which could be never).  That is why a
-       timeout is used *)
-    let result =
-      Monitor.try_with ~run:`Now (fun () ->
-        Reader.read_one_message_bin_prot t.reader Header.bin_t.reader)
-    in
-    Time_source.with_timeout
-      (Time_source.of_synchronous t.time_source)
-      handshake_timeout
-      result
-    >>| function
-    | `Timeout ->
-      (* There's a pending read, the reader is basically useless now, so we clean it
-         up. *)
-      don't_wait_for (close t ~reason:(Info.of_string "Handshake timeout"));
-      Error Handshake_error.Timeout
-    | `Result (Error exn) ->
-      let reason = Info.of_string "[Reader.read_one_message_bin_prot] raised" in
-      don't_wait_for (close t ~reason);
-      Error (Reading_header_failed (Error.of_exn exn))
-    | `Result (Ok (Error `Eof   )) -> Error Eof
-    | `Result (Ok (Error `Closed)) -> Error Transport_closed
-    | `Result (Ok (Ok     peer))   ->
-      match Header.negotiate ~us:Header.v1 ~peer with
-      | Error e -> Error (Negotiation_failed e)
-      | Ok 1 -> Ok ()
-      | Ok i -> Error (Negotiated_unexpected_version i)
-  end
+  | Ok writer ->
+    begin
+      Writer.send_bin_prot writer Header.bin_t.writer Header.v1 |> handle_send_result t;
+      (* If we use [max_connections] in the server, then this read may just hang until the
+         server starts accepting new connections (which could be never).  That is why a
+         timeout is used *)
+      let result =
+        Monitor.try_with ~run:`Now (fun () ->
+          Reader.read_one_message_bin_prot t.reader Header.bin_t.reader)
+      in
+      Time_source.with_timeout
+        (Time_source.of_synchronous t.time_source)
+        handshake_timeout
+        result
+      >>| function
+      | `Timeout ->
+        (* There's a pending read, the reader is basically useless now, so we clean it
+           up. *)
+        don't_wait_for (close t ~reason:(Info.of_string "Handshake timeout"));
+        Error Handshake_error.Timeout
+      | `Result (Error exn) ->
+        let reason = Info.of_string "[Reader.read_one_message_bin_prot] raised" in
+        don't_wait_for (close t ~reason);
+        Error (Reading_header_failed (Error.of_exn exn))
+      | `Result (Ok (Error `Eof   )) -> Error Eof
+      | `Result (Ok (Error `Closed)) -> Error Transport_closed
+      | `Result (Ok (Ok     peer))   ->
+        match Header.negotiate ~us:Header.v1 ~peer with
+        | Error e -> Error (Negotiation_failed e)
+        | Ok 1 -> Ok ()
+        | Ok i -> Error (Negotiated_unexpected_version i)
+    end
 ;;
 
 let contains_magic_prefix =

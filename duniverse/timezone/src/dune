@@ -1,0 +1,3 @@
+(library (name timezone) (public_name timezone)
+ (js_of_ocaml (javascript_files runtime.js)) (libraries core_kernel)
+ (preprocess (pps ppx_jane)))

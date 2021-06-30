@@ -10,7 +10,7 @@ let create ?message ?close_on_exec ?unlink_on_exit path =
 let create_exn ?message ?close_on_exec ?unlink_on_exit path =
   create ?message ?close_on_exec ?unlink_on_exit path
   >>| fun b ->
-  if not b then failwiths "Lock_file.create" path [%sexp_of: string]
+  if not b then failwiths ~here:[%here] "Lock_file.create" path [%sexp_of: string]
 ;;
 
 let random = lazy (Random.State.make_self_init ~allow_in_tests:true ())
@@ -34,7 +34,7 @@ let repeat_with_abort ~abort ~f =
 let fail_on_abort path ~held_by = function
   | `Ok -> ()
   | `Aborted ->
-    failwiths "Lock_file timed out waiting for existing lock" path
+    failwiths ~here:[%here] "Lock_file timed out waiting for existing lock" path
       (fun path -> (match held_by with
          | None -> [%sexp (path : string)]
          | Some held_by ->

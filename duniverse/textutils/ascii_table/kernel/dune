@@ -1,0 +1,2 @@
+(library (name ascii_table_kernel) (public_name textutils.ascii_table_kernel)
+ (libraries core_kernel.ansi_kernel core_kernel) (preprocess (pps ppx_jane)))

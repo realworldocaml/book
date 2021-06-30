@@ -50,6 +50,9 @@ val timer_count : unit -> int
 val fake_io : Unix.file_descr -> unit
   (** Simulates activity on the given file descriptor. *)
 
+val fork : unit -> unit
+  (** Called internally by Lwt_unix.fork to make sure we don't get strange behaviour *)
+
 (** {2 Engines} *)
 
 (** An engine represents a set of functions used to register different
@@ -71,6 +74,7 @@ class virtual abstract : object
   (** {2 Event loop methods} *)
 
   method virtual iter : bool -> unit
+  method fork : unit
   method on_readable : Unix.file_descr -> (event -> unit) -> event
   method on_writable : Unix.file_descr -> (event -> unit) -> event
   method on_timer : float -> bool -> (event -> unit) -> event

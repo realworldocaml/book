@@ -7,7 +7,8 @@ type t = longident =
   | Ldot of t * string
   | Lapply of t * t
 
-include Comparable.S with type t := t
+val compare : t -> t -> int
+val sexp_of_t : t -> Sexp.t
 
 val flatten_exn : t -> string list
 val last_exn : t -> string
@@ -19,3 +20,6 @@ val last_exn : t -> string
 val parse : string -> t
 
 val name : t -> string
+
+module Map : Map.S with type key = t
+module Set : Set.S with type elt = t

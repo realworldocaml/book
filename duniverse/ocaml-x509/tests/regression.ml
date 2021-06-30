@@ -31,7 +31,7 @@ let test_jc_ca_fail () =
   | _ -> Alcotest.fail "something went wrong with jc_ca"
 
 let test_jc_ca_all_hashes () =
-  match Validation.verify_chain_of_trust ~hash_whitelist:[`SHA1] ~host:(host "jabber.ccc.de") ~time ~anchors:[cacert] [jc ; cacert] with
+  match Validation.verify_chain_of_trust ~allowed_hashes:[`SHA1] ~host:(host "jabber.ccc.de") ~time ~anchors:[cacert] [jc ; cacert] with
   | Ok _ -> ()
   | _ -> Alcotest.fail "something went wrong with jc_ca"
 
@@ -124,27 +124,135 @@ let test_frac_s () =
   | Ok _ -> Alcotest.failf "certificate %s, expected decoding error" file
   | Error (`Msg _) -> ()
 
+let decode_valid_pem file =
+  let data = regression file in
+  match Private_key.decode_pem data with
+   | Ok _ -> ()
+   | Error (`Msg _) ->
+     Alcotest.failf "private key %s failed to be verified" file
+
 let test_gcloud_key () =
   (* discussion in https://github.com/mirage/mirage-crypto/issues/62 *)
   let file = "gcloud" in
-  let data = regression file in
-  (match Private_key.decode_pem data with
-   | Ok _ -> Alcotest.failf "private key %s, expected decoding error" file
-   | Error (`Msg _) -> ());
-  let se = Z.of_string "65537"
-  (* this is the corrected d, not the one in the pem file *)
-  and sd = Z.of_string "14478488456493997022050901254933187283477471093730790501398788655730567398785569687606371375833982881640341621750217365889195783772533872059213352159991519189252958281611111674194879268059270441114992706457776068423799377349279105810697994588771736756653040288343674720701103312293833268317569088656494668685468231474583321288404898183773189583378716851384814309675472367486143664598456832085685494812222081088113517604012395897413142572181545766173226135421363439763543055673991957871436777026724320844849270331575138060361110954859703148073754901925506317313296044480539229720254636858871012875313416588048255023749"
-  and sp = Z.of_string "153903575880038685371306078431309624429262243098160628077155385424784731704538502041682563231842507936315834999272165353754081206847521073697105321898935865522941018859502063500927758809727634595752231111149172755709224739427971151799944749671230555614514021717987321482212474581192462617805386071920647746527"
-  and sq = Z.of_string "147755586168842154977618773600930512327712333912540690382962931855233965897097814139102488669702400832893695675498969512696944576662243412004204531041931249551207758395795244675585651830739018019197553505240463928167645984560980989768623533294470387237934457819888352229242173694504296968786124698140038767907"
+  decode_valid_pem file
+
+let test_openssl_2048_key () =
+  (* this key has a d > lcm (p - 1) (q - 1) *)
+  let file = "openssl_2048" in
+  decode_valid_pem file
+
+let ed25519_priv =
+  Cstruct.of_hex "D4EE72DBF913584AD5B6D8F1F769F8AD3AFE7C28CBF1D4FBE097A88F44755842"
+
+let ed25519_priv_key () =
+  let data =
+    {|-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEINTuctv5E1hK1bbY8fdp+K06/nwoy/HU++CXqI9EdVhC
+-----END PRIVATE KEY-----
+|}
   in
-  (match Private_key.decode_pem ~sloppy:true data with
-   | Ok (`RSA { Mirage_crypto_pk.Rsa.p ; q ; e ; d ; _ }) ->
-     if se = e && sd = d && sp = p && sq = q then
-       ()
-     else
-       Alcotest.failf "private key %s, wrong e, d, p, q" file
-   | Error (`Msg _) ->
-     Alcotest.failf "private key %s, expected sloppy decoding" file)
+  match Private_key.decode_pem (Cstruct.of_string data) with
+  | Ok (`ED25519 k as ke) when Cstruct.equal ed25519_priv (Mirage_crypto_ec.Ed25519.priv_to_cstruct k) ->
+    let encoded = Private_key.encode_pem ke in
+    if not (String.equal (Cstruct.to_string encoded) data) then
+      Alcotest.failf "ED25519 encoding failed"
+  | Ok (`ED25519 _) -> Alcotest.failf "wrong ED25519 private key"
+  | Ok _ | Error (`Msg _) -> Alcotest.failf "ED25519 private key decode failure"
+
+let ed25519_pub_key () =
+  let data =
+    {|-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE=
+-----END PUBLIC KEY-----
+|}
+  and pub =
+    match Mirage_crypto_ec.Ed25519.priv_of_cstruct ed25519_priv with
+    | Error _ -> Alcotest.fail "couldn't decode private Ed25519 key"
+    | Ok p ->
+      match Private_key.public (`ED25519 p) with
+      | `ED25519 p -> p
+      | _ -> Alcotest.fail "couldn't convert private Ed25519 key to public"
+  in
+  let to_cs = Mirage_crypto_ec.Ed25519.pub_to_cstruct in
+  match Public_key.decode_pem (Cstruct.of_string data) with
+  | Ok (`ED25519 k) when Cstruct.equal (to_cs pub) (to_cs k) ->
+    let encoded = Public_key.encode_pem (`ED25519 k) in
+    if not (String.equal (Cstruct.to_string encoded) data) then
+      Alcotest.failf "ED25519 public key encoding failure"
+  | _ -> Alcotest.failf "bad ED25519 public key"
+
+let p384_key () =
+  let priv_data = {|-----BEGIN PRIVATE KEY-----
+MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDDzBTbwp91ON4CNuDE+
+pjKsehNV7I3eTpyKpMlSUqHAguO8hK+t28A/730TP2L0rPyhZANiAATZbEoUICtu
+yXyN4G6DDHaUHwwe2bfcsTvY9LnlLCPvu24JTuGjf7pT2faiuvjGb49jk8C2KJWt
+0DISTEJ945y41DY0cIPl1okaN+E3yJ66kKpJ0XeKoOJ0rTTopazzjzI=
+-----END PRIVATE KEY-----
+|}
+  and pub_data = {|-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE2WxKFCArbsl8jeBugwx2lB8MHtm33LE7
+2PS55Swj77tuCU7ho3+6U9n2orr4xm+PY5PAtiiVrdAyEkxCfeOcuNQ2NHCD5daJ
+GjfhN8ieupCqSdF3iqDidK006KWs848y
+-----END PUBLIC KEY-----
+|}
+  in
+  match
+    Private_key.decode_pem (Cstruct.of_string priv_data),
+    Public_key.decode_pem (Cstruct.of_string pub_data)
+  with
+  | Ok (`P384 priv), Ok (`P384 pub) ->
+    let to_cs = Mirage_crypto_ec.P384.Dsa.pub_to_cstruct in
+    let pub' = Mirage_crypto_ec.P384.Dsa.pub_of_priv priv in
+    Alcotest.(check bool __LOC__ true (Cstruct.equal (to_cs pub) (to_cs pub')));
+    let pub_data' = Public_key.encode_pem (`P384 pub) in
+    Alcotest.(check bool __LOC__ true
+                (Cstruct.equal (Cstruct.of_string pub_data) pub_data'));
+    let priv_data' = Private_key.encode_pem (`P384 priv) in
+    begin match Private_key.decode_pem priv_data' with
+      | Ok (`P384 priv) ->
+        let pub' = Mirage_crypto_ec.P384.Dsa.pub_of_priv priv in
+        Alcotest.(check bool __LOC__ true
+                    (Cstruct.equal (to_cs pub) (to_cs pub')))
+      | _ -> Alcotest.failf "cannot decode re-encoded P384 private key"
+    end
+  | _ -> Alcotest.failf "bad P384 key"
+
+let ed25519_cert () =
+  let file = "example-25519" in
+  match Certificate.decode_pem (regression file) with
+  | Error (`Msg msg) ->
+    Alcotest.failf "ED25519 certificate %s, decoding error %s" file msg
+  | Ok cert ->
+    match Validation.valid_ca cert with
+    | Error e ->
+      Alcotest.failf "verifying 25519 ca certificate failed %a"
+        Validation.pp_ca_error e
+    | Ok () ->
+      match Validation.verify_chain ~host:(host "www.example.com") ~time ~anchors:[cert] [cert] with
+      | Ok _ -> ()
+      | Error e ->
+        Alcotest.failf "verifying 25519 certificate failed %a"
+          Validation.pp_chain_error e
+
+let le_p384_root () =
+  let file = "letsencrypt-root-x2" in
+  match Certificate.decode_pem (regression file) with
+  | Error (`Msg msg) ->
+    Alcotest.failf "let's encrypt P384 certificate %s, decoding error %s"
+      file msg
+  | Ok cert ->
+    match Validation.valid_ca cert with
+    | Error e ->
+      Alcotest.failf "verifying P384 ca certificate failed %a"
+        Validation.pp_ca_error e
+    | Ok () -> ()
+
+let p256_key () =
+  let file = "priv_p256" in
+  match Private_key.decode_pem (regression file) with
+  | Error (`Msg msg) ->
+    Alcotest.failf "private P256 key %s decoding error %s" file msg
+  | Ok _ -> ()
 
 let regression_tests = [
   "RSA: key too small (jc_jc)", `Quick, test_jc_jc ;
@@ -158,7 +266,14 @@ let regression_tests = [
   "distinguished name pp", `Quick, test_distinguished_name_pp ;
   "algorithm without null", `Quick, test_yubico ;
   "valid until generalized_time with fractional seconds", `Quick, test_frac_s ;
-  "sloppy private key parsing", `Quick, test_gcloud_key ;
+  "parse valid key where 1 <> d * e mod (p - 1) * (q - 1)", `Quick, test_gcloud_key ;
+  "parse valid key where d <> e ^ -1 mod lcm ((p - 1) (q - 1))", `Quick, test_openssl_2048_key ;
+  "ed25519 private key", `Quick, ed25519_priv_key ;
+  "ed25519 public key", `Quick, ed25519_pub_key ;
+  "p384 key", `Quick, p384_key ;
+  "ed25519 certificate", `Quick, ed25519_cert ;
+  "p384 certificate", `Quick, le_p384_root ;
+  "p256 key", `Quick, p256_key ;
 ]
 
 let host_set_test =

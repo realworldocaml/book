@@ -19,19 +19,23 @@ open Async_kernel
 open Cohttp_async
 
 let show_headers h =
-  Cohttp.Header.iter (fun k v ->
-      List.iter v ~f:(fun v_i -> Logs.info (fun m -> m "%s: %s%!" k v_i))) h
+  Cohttp.Header.iter
+    (fun k v ->
+      List.iter v ~f:(fun v_i -> Logs.info (fun m -> m "%s: %s%!" k v_i)))
+    h
 
 let make_net_req uri meth' body () =
   let meth = Cohttp.Code.method_of_string meth' in
   let uri = Uri.of_string uri in
-  let headers = Cohttp.Header.of_list [ "connection", "close" ] in
+  let headers = Cohttp.Header.of_list [ ("connection", "close") ] in
   Client.call meth ~headers ~body:Body.(of_string body) uri
   >>= fun (res, body) ->
   show_headers (Cohttp.Response.headers res);
   body
   |> Body.to_pipe
-  |> Pipe.iter ~f:(fun b -> Stdlib.print_string b; return ())
+  |> Pipe.iter ~f:(fun b ->
+         Stdlib.print_string b;
+         return ())
 
 let _ =
   (* enable logging to stdout *)
@@ -43,10 +47,9 @@ let _ =
     Spec.(
       empty
       +> anon ("url" %: string)
-      +> flag "-X" (optional_with_default "GET" string)
-        ~doc:" Set HTTP method"
-      +> flag "data-binary" (optional_with_default "" string)
-        ~doc:" Data to send when using POST"
-    )
+      +> flag "-X" (optional_with_default "GET" string) ~doc:" Set HTTP method"
+      +> flag "data-binary"
+           (optional_with_default "" string)
+           ~doc:" Data to send when using POST")
     make_net_req
   |> run

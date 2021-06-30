@@ -6,22 +6,23 @@ module type Attrs = sig
 end
 
 module type S = sig
-  (** [type_ ty] is [ty -> ty -> result_type] where [result_type] is [int] for [compare]
-      and [bool] for [equal]. *)
-  val type_ : loc:Location.t -> core_type -> core_type
+  (** [type_ ~hide ty] is [ty -> ty -> result_type] where [result_type] is [int] for
+      [compare] and [bool] for [equal].
+
+      [hide] controls whether some [[@merlin.hide]] attributes should be added.
+  *)
+  val type_ : hide:bool -> loc:Location.t -> core_type -> core_type
 
   (** [core_type ty] is an expression of type [ty -> ty -> result_type] *)
   val core_type : core_type -> expression
 
   val str_type_decl
-    :  loc:Location.t
-    -> path:string
+    :  ctxt:Expansion_context.Deriver.t
     -> rec_flag * type_declaration list
     -> structure
 
   val sig_type_decl
-    :  loc:Location.t
-    -> path:string
+    :  ctxt:Expansion_context.Deriver.t
     -> rec_flag * type_declaration list
     -> signature
 

@@ -207,7 +207,7 @@ void encode_terminal_status(struct termios *terminal_status, value *dst)
     }
 }
 
-void decode_terminal_status(struct termios *terminal_status, value *src)
+int decode_terminal_status(struct termios *terminal_status, value *src)
 {
     long *pc;
     int i;
@@ -232,7 +232,8 @@ void decode_terminal_status(struct termios *terminal_status, value *src)
                 if (i >= 0 && i < num) {
                     *dst = (*dst & ~msk) | pc[i];
                 } else {
-                    unix_error(EINVAL, "tcsetattr", Nothing);
+                    errno = EINVAL;
+                    return EINVAL;
                 }
                 pc += num;
                 break;
@@ -253,11 +254,12 @@ void decode_terminal_status(struct termios *terminal_status, value *src)
                                                   speedtable[i].speed);
                                 break;
                         }
-                        if (res == -1) uerror("tcsetattr", Nothing);
+                        if (res == -1) return res;
                         goto ok;
                     }
                 }
-                unix_error(EINVAL, "tcsetattr", Nothing);
+                errno = EINVAL;
+                return EINVAL;
             ok:
                 break;
             }
@@ -268,5 +270,6 @@ void decode_terminal_status(struct termios *terminal_status, value *src)
             }
         }
     }
+    return 0;
 }
 #endif

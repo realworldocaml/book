@@ -32,8 +32,6 @@ module T = struct
 end
 include T
 
-include Comparable.Make(T)
-
 let rec flat accu = function
     Lident s -> s :: accu
   | Ldot(lid, s) -> flat (s :: accu) lid
@@ -51,7 +49,7 @@ let unflatten ~init l =
 
 (* for cases without dotted operators (e.g. [parse "A.B.C"]) *)
 let parse_simple s =
-  match String.split s ~on:'.' with
+  match String.split_on_char s ~sep:'.' with
   | [] -> assert false
   | s :: l -> unflatten ~init:(Lident s) l
 
@@ -60,18 +58,21 @@ let parse s =
   let invalid () =
     invalid_arg (Printf.sprintf "Ppxlib.Longident.parse: %S" s)
   in
-  match String.index s '(', String.rindex s ')' with
+  match String.index_opt s '(', String.rindex_opt s ')' with
   | None, None -> parse_simple  s
   | None, _ | _, None -> invalid ()
   | Some l, Some r ->
       if Int.( r <> String.length s - 1 ) then invalid ();
       let group = if Int.(r = l + 1) then "()" else
-          String.strip (String.sub s ~pos:(l+1) ~len:(r-l-1))
+          String.trim (String.sub s ~pos:(l+1) ~len:(r-l-1))
       in
       if Int.(l = 0) then Lident group
       else if Char.(s.[l - 1] <> '.') then invalid ()
       else
         let before = String.sub s ~pos:0 ~len:(l-1) in
-        match String.split before ~on:'.' with
+        match String.split_on_char before ~sep:'.' with
         | [] -> assert false
         | s :: l -> Ldot(unflatten ~init:(Lident s) l, group)
+
+module Map = Map.Make (T)
+module Set = Set.Make (T)

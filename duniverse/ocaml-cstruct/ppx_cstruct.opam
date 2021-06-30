@@ -1,4 +1,4 @@
-version: "5.1.1"
+version: "6.0.0"
 opam-version: "2.0"
 maintainer:   "anil@recoil.org"
 authors:      ["Anil Madhavapeddy" "Richard Mortier" "Thomas Gazagnaire"
@@ -17,12 +17,11 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "ocaml" {>= "4.03.0"}
-  "dune"
+  "ocaml" {>= "4.07.0"}
+  "dune" {>= "2.0.0"}
   "cstruct" {=version}
   "ounit" {with-test}
-  "ppx_tools_versioned" {>= "5.0.1"}
-  "ocaml-migrate-parsetree"
+  "ppxlib" {>= "0.16.0"}
   "ppx_sexp_conv" {with-test}
   "sexplib" {>="v0.9.0"}
   "cstruct-sexp" {with-test}

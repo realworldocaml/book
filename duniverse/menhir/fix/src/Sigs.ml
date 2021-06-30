@@ -12,7 +12,7 @@
 
 (* -------------------------------------------------------------------------- *)
 
-(* A type alone. *)
+(**A type alone. *)
 
 module type TYPE = sig
   type t
@@ -20,7 +20,7 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* An ordered type. A hashed type. These are standard notions. *)
+(**An ordered type. A hashed type. These are standard notions. *)
 
 module type OrderedType =
   Map.OrderedType
@@ -30,7 +30,7 @@ module type HashedType =
 
 (* -------------------------------------------------------------------------- *)
 
-(* A type whose elements can be enumerated. *)
+(**A type whose elements can be enumerated. *)
 
 module type FINITE_TYPE = sig
   type t
@@ -39,15 +39,15 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Association maps. *)
+(**Association maps. *)
 
-(* Following the convention of the ocaml standard library, [find] raises the
+(**Following the convention of the ocaml standard library, [find] raises the
    exception [Not_found] when the key is not in the domain of the map. In
    contrast, [get] returns an option. *)
 
-(* Persistent maps. The empty map is a constant. Insertion creates a new map. *)
+(**Persistent maps. The empty map is a constant. Insertion creates a new map. *)
 
-(* This is a fragment of the standard signature [Map.S]. *)
+(**This is a fragment of the standard signature [Map.S]. *)
 
 module type PERSISTENT_MAPS = sig
   type key
@@ -58,11 +58,11 @@ module type PERSISTENT_MAPS = sig
   val iter: (key -> 'data -> unit) -> 'data t -> unit
 end
 
-(* Imperative maps. A fresh empty map is produced by [create].
+(**Imperative maps. A fresh empty map is produced by [create].
    Insertion updates a map in place.
    [clear] empties an existing map. *)
 
-(* The order of the arguments to [add] and [find] is consistent with the order
+(**The order of the arguments to [add] and [find] is consistent with the order
    used in [PERSISTENT_MAPS] above. Thus, it departs from the convention used
    in OCaml's [Hashtbl] module. *)
 
@@ -82,17 +82,17 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* The signature [PROPERTY] is used by [Fix.Make], the least fixed point
+(**The signature [PROPERTY] is used by [Fix.Make], the least fixed point
    computation algorithm. *)
 
-(* The type [property] must form a partial order. It must be equipped with a
+(**The type [property] must form a partial order. It must be equipped with a
    least element [bottom] and with an equality test [equal]. (In the function
    call [equal p q], it is permitted to assume that [p <= q] holds.) We do not
    require an ordering test [leq]. We do not require a join operation [lub].
    We do require the ascending chain condition: every monotone sequence must
    eventually stabilize. *)
 
-(* The function [is_maximal] determines whether a property [p] is maximal with
+(**The function [is_maximal] determines whether a property [p] is maximal with
    respect to the partial order. Only a conservative check is required: in any
    event, it is permitted for [is_maximal p] to be [false]. If [is_maximal p]
    is [true], then [p] must have no strict upper bound. In particular, in the
@@ -108,7 +108,9 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* The signature [SEMI_LATTICE] is used by [Fix.DataFlow]. *)
+(**The signature [SEMI_LATTICE] offers separate [leq] and [join] functions.
+   The functor [Glue.MinimalSemiLattice] can be used, if necessary, to convert
+   this signature to [MINIMAL_SEMI_LATTICE]. *)
 
 module type SEMI_LATTICE = sig
   type property
@@ -116,21 +118,45 @@ module type SEMI_LATTICE = sig
   val join: property -> property -> property
 end
 
+(**The signature [MINIMAL_SEMI_LATTICE] is used by [Fix.DataFlow]. *)
+
+module type MINIMAL_SEMI_LATTICE = sig
+  type property
+
+  (** [leq_join p q] must compute the join of [p] and [q]. If the result
+      is logically equal to [q], then [q] itself must be returned. Thus,
+      we have [leq_join p q == q] if and only if [leq p q] holds. *)
+  val leq_join: property -> property -> property
+end
+
 (* -------------------------------------------------------------------------- *)
 
-(* Memoizers -- higher-order functions that construct memoizing functions. *)
+(**The type of a fixed point combinator that constructs a value of
+    type ['a]. *)
+
+type 'a fix =
+  ('a -> 'a) -> 'a
+
+(* -------------------------------------------------------------------------- *)
+
+(**Memoizers -- higher-order functions that construct memoizing functions. *)
 
 module type MEMOIZER = sig
-  (* A type of keys. *)
+
+  (**A type of keys. *)
   type key
-  (* A memoization combinator for this type. *)
+
+  (**A memoization combinator for this type. *)
   val memoize: (key -> 'a) -> (key -> 'a)
-  (* A memoization combinator where the memoization table is exposed. *)
+
+  (**A memoization combinator where the memoization table is exposed. *)
   type 'a t
   val visibly_memoize: (key -> 'a) -> (key -> 'a) * 'a t
-  (* A recursive memoization combinator. *)
-  val fix: ((key -> 'a) -> (key -> 'a)) -> (key -> 'a)
-  (* [defensive_fix] works like [fix], except it additionally detects circular
+
+  (**A recursive memoization combinator. *)
+  val fix: (key -> 'a) fix
+
+  (**[defensive_fix] works like [fix], except it additionally detects circular
      dependencies, which can arise if the second-order function supplied by
      the user does not follow a well-founded recursion pattern. When the user
      invokes [f x], where [f] is the function returned by [defensive_fix], if
@@ -140,29 +166,38 @@ module type MEMOIZER = sig
      possible; this corresponds to an infinite dependency chain, without a
      cycle. *)
   exception Cycle of key list * key
-  val defensive_fix: ((key -> 'a) -> (key -> 'a)) -> (key -> 'a)
+  val defensive_fix: (key -> 'a) fix
+
+  (**This combinator can be used to obtain a curried version of [fix] or
+     [defensive_fix] in a concrete instance where the type [key] is a
+     product type. *)
+  val curried: ('a * 'b -> 'c) fix -> ('a -> 'b -> 'c) fix
+
 end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Tabulators -- higher-order functions that construct tabulated functions. *)
+(**Tabulators: higher-order functions that construct tabulated functions. *)
 
-(* Like memoization, tabulation guarantees that, for every key [x], the image
+(**Like memoization, tabulation guarantees that, for every key [x], the image
    [f x] is computed at most once. Unlike memoization, where this computation
    takes place on demand, in the case of tabulation, the computation of every
    [f x] takes place immediately, when [tabulate] is invoked. The graph of the
    function [f], a table, is constructed and held in memory. *)
 
 module type TABULATOR = sig
-  (* A type of keys. *)
+
+  (**A type of keys. *)
   type key
-  (* A tabulation combinator for this type. *)
+
+  (**A tabulation combinator for this type. *)
   val tabulate: (key -> 'a) -> (key -> 'a)
+
 end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Solvers -- higher-order functions that compute the least solution of a
+(**Solvers: higher-order functions that compute the least solution of a
    monotone system of equations. *)
 
 module type SOLVER = sig
@@ -170,29 +205,29 @@ module type SOLVER = sig
   type variable
   type property
 
-  (* A valuation is a mapping of variables to properties. *)
+  (**A valuation is a mapping of variables to properties. *)
   type valuation = variable -> property
 
-  (* A right-hand side, when supplied with a valuation that gives
+  (**A right-hand side, when supplied with a valuation that gives
      meaning to its free variables, evaluates to a property. More
      precisely, a right-hand side is a monotone function of
      valuations to properties. *)
   type rhs = valuation -> property
 
-  (* A system of equations is a mapping of variables to right-hand
+  (**A system of equations is a mapping of variables to right-hand
      sides. *)
   type equations = variable -> rhs
 
-  (* [lfp eqs] produces the least solution of the system of monotone
+  (**[lfp eqs] produces the least solution of the system of monotone
      equations [eqs]. *)
 
-  (* It is guaranteed that, for each variable [v], the application [eqs v] is
+  (**It is guaranteed that, for each variable [v], the application [eqs v] is
      performed at most once (whereas the right-hand side produced by this
      application is, in general, evaluated multiple times). This guarantee can
      be used to perform costly pre-computation, or memory allocation, when [eqs]
      is applied to its first argument. *)
 
-  (* When [lfp] is applied to a system of equations [eqs], it performs no
+  (**When [lfp] is applied to a system of equations [eqs], it performs no
      actual computation. It produces a valuation, [get], which represents
      the least solution of the system of equations. The actual fixed point
      computation takes place, on demand, when [get] is applied. *)
@@ -202,7 +237,8 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* The signature [SOLUTION] is used to describe the result of [Fix.DataFlow]. *)
+(**The signature [SOLUTION] is used to describe the result of
+    [Fix.DataFlow]. *)
 
 module type SOLUTION = sig
   type variable
@@ -212,7 +248,7 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Directed, rooted graphs. *)
+(**Directed, rooted graphs. *)
 
 module type GRAPH = sig
   type t
@@ -222,15 +258,16 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* The signature [DATA_FLOW_GRAPH] is used to describe a data flow analysis
-   problem. It is used to describe the input to [Fix.DataFlow]. *)
+(**The signature [DATA_FLOW_GRAPH] is used to describe a data flow analysis
+    problem. It is used to describe the input to [Fix.DataFlow]. *)
 
-(* The function [foreach_root] describes the root nodes of the data flow graph
-   as well as the properties associated with them. *)
+(**The function [foreach_root] describes the root nodes of the data flow graph
+    as well as the properties associated with them. *)
 
-(* The function [foreach_successor] describes the edges of the data flow graph
-   as well as the manner in which a property at the source of an edge is
-   transformed into a property at the target. *)
+(**The function [foreach_successor] describes the edges of the data flow graph
+    as well as the manner in which a property at the source of an edge is
+    transformed into a property at the target. The property at the target
+    must of course be a monotonic function of the property at the source. *)
 
 module type DATA_FLOW_GRAPH = sig
   type variable
@@ -244,9 +281,9 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Numberings. *)
+(**Numberings. *)
 
-(* An ongoing numbering of (a subset of) a type [t] offers a function [encode]
+(**An ongoing numbering of (a subset of) a type [t] offers a function [encode]
    which maps a value of type [t] to a unique integer code. If applied twice
    to the same value, [encode] returns the same code; if applied to a value
    that has never been encountered, it returns a fresh code. The function
@@ -261,9 +298,9 @@ module type ONGOING_NUMBERING = sig
   val has_been_encoded: t -> bool
 end
 
-(* A numbering of (a subset of) a type [t] is a triple of an integer [n] and
+(**A numbering of (a subset of) a type [t] is a triple of an integer [n] and
    two functions [encode] and [decode] which represent an isomorphism between
-   this subset of [t] and the interval [0..n). *)
+   this subset of [t] and the interval [\[0..n)]. *)
 
 module type NUMBERING = sig
   type t
@@ -272,7 +309,7 @@ module type NUMBERING = sig
   val decode: int -> t
 end
 
-(* A combination of the above two signatures. According to this signature, a
+(**A combination of the above two signatures. According to this signature, a
    numbering process is organized in two phases. During the first phase, the
    numbering is ongoing; one can encode keys, but not decode. Applying the
    functor [Done()] ends the first phase. A fixed numbering then becomes
@@ -286,9 +323,9 @@ end
 
 (* -------------------------------------------------------------------------- *)
 
-(* Injections. *)
+(**Injections. *)
 
-(* An injection of [t] into [u] is an injective function of type [t -> u].
+(**An injection of [t] into [u] is an injective function of type [t -> u].
    Because [encode] is injective, [encode x] can be thought of as the identity
    of the object [x]. *)
 

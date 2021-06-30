@@ -80,7 +80,7 @@ type bench_kind = Bench | Bench_fun
 
 let thunk_bench kind e = match kind with
   | Bench_fun -> e
-  | Bench -> let loc = e.pexp_loc in [%expr fun () -> [%e e]]
+  | Bench -> let loc = {e.pexp_loc with loc_ghost=true} in [%expr fun () -> [%e e]]
 
 let enabled () =
   match Ppx_inline_test_libname.get () with
@@ -93,6 +93,7 @@ let assert_enabled loc =
       "ppx_bench: extension is disabled as no -inline-test-lib was given"
 
 let expand_bench_exp ~loc ~path kind index name e =
+  let loc = { loc with loc_ghost = true } in
   assert_enabled loc;
   match index with
   | None ->
@@ -122,11 +123,12 @@ let expand_bench_exp ~loc ~path kind index name e =
       ]
 
 let expand_bench_module ~loc ~path name_suffix name m =
+  let loc = { loc with loc_ghost = true } in
   assert_enabled loc;
   apply_to_descr_bench
     path "add_bench_module" loc ~inner_loc:m.pmod_loc None ?name_suffix name
     (pexp_fun ~loc Nolabel None (punit ~loc)
-       (pexp_letmodule ~loc (Located.mk ~loc "M")
+       (pexp_letmodule ~loc (Located.mk ~loc (Some "M"))
           m
           (eunit ~loc)))
 
@@ -189,6 +191,7 @@ let () =
       match loc, Ppx_inline_test_libname.get () with
       | None, _ | _, None -> ([], [])
       | Some loc, Some (libname, _) ->
+        let loc = { loc with loc_ghost = true } in
         (* See comment in benchmark_accumulator.ml *)
         let header =
           let loc = { loc with loc_end = loc.loc_start } in

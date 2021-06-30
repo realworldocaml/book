@@ -28,6 +28,7 @@ let arrow
 ;;
 
 let compound_generator ~loc ~make_compound_expr generator_list =
+  let loc = { loc with loc_ghost = true } in
   let size_pat, size_expr = gensym "size" loc in
   let random_pat, random_expr = gensym "random" loc in
   [%expr
@@ -36,7 +37,7 @@ let compound_generator ~loc ~make_compound_expr generator_list =
         make_compound_expr
           ~loc
           (List.map generator_list ~f:(fun generator ->
-             let loc = generator.pexp_loc in
+             let loc = { generator.pexp_loc with loc_ghost = true } in
              [%expr
                Base_quickcheck.Generator.generate
                  [%e generator]
@@ -100,7 +101,7 @@ let variant
   in
   let make_pair clause =
     pexp_tuple
-      ~loc:(Clause.location clause)
+      ~loc:{ (Clause.location clause) with loc_ghost = true }
       [ Clause.weight clause; make_generator clause ]
   in
   match
@@ -122,11 +123,11 @@ let variant
     in
     let bindings =
       List.map2_exn nonrec_pats nonrecursive_clauses ~f:(fun pat clause ->
-        let loc = Clause.location clause in
+        let loc = { (Clause.location clause) with loc_ghost = true } in
         let expr = make_pair clause in
         value_binding ~loc ~pat ~expr)
       @ List.map2_exn rec_pats recursive_clauses ~f:(fun pat clause ->
-        let loc = Clause.location clause in
+        let loc = { (Clause.location clause) with loc_ghost = true } in
         let weight_expr = Clause.weight clause in
         let gen_expr =
           [%expr

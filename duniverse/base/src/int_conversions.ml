@@ -2,13 +2,14 @@ open! Import
 module Int = Int0
 module Sys = Sys0
 
-let[@cold] convert_failure x a b to_string =
+let convert_failure x a b to_string =
   Printf.failwithf
     "conversion from %s to %s failed: %s is out of range"
     a
     b
     (to_string x)
     ()
+[@@cold] [@@inline never] [@@local never] [@@specialise never]
 ;;
 
 let num_bits_int = Sys.int_size_in_bits
@@ -284,14 +285,11 @@ end
 
 module Make_hex (I : sig
     type t [@@deriving_inline compare, hash]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      end[@@ocaml.doc "@inline"]
+
+    val compare : t -> t -> int
+    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
     [@@@end]
 
     val to_string : t -> string
@@ -304,12 +302,17 @@ module Make_hex (I : sig
 struct
   module T_hex = struct
     type t = I.t [@@deriving_inline compare, hash]
+
     let compare = (I.compare : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       I.hash_fold_t
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = I.hash in fun x -> func x
+      let func = I.hash in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let chars_per_delimiter = 4
@@ -328,7 +331,7 @@ struct
     let to_string_hum ?(delimiter = '_') t = to_string' t ~delimiter
 
     let invalid str =
-      failwith (Printf.sprintf "%s.of_string: invalid input %S" I.module_name str)
+      Printf.failwithf "%s.of_string: invalid input %S" I.module_name str ()
     ;;
 
     let of_string_with_delimiter str =

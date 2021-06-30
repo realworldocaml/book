@@ -19,7 +19,7 @@ module type S = sig
   module Zone  : sig
     include module type of struct include Time.Zone end [@ocaml.remove_aliases]
 
-    include Core_zone.Extend_zone with type t := t
+    include Timezone.Extend_zone with type t := t
 
     val arg_type : t Core_kernel.Command.Arg_type.t
   end
@@ -301,8 +301,8 @@ end
     you mean a time in the US or Europe, in that order.  Time zones also sometimes use two
     different abbreviations depending on whether the time in question is in standard time,
     or daylight savings time.  These abbreviations are kept in the timezone databases, which
-    is how programs like date manage to output meaningful abbreviations, it is only reading
-    in times with abbreviations that is poorly specified.
+    is how programs like date manage to output meaningful abbreviations. The only poorly
+    specified operation is reading in times with abbreviations.
 
     This library contains a function that attempts to make an accurate determination of the
     machine timezone by testing the md5 sum of the currently referenced timezone file

@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Rope
 
 let%test _ = is_empty empty
@@ -93,7 +93,7 @@ let%expect_test "is_prefix" =
 ;;
 
 let%expect_test "to_string and For_testing.to_string_tailcall produce identical results" =
-  Expect_test_helpers_kernel.require_does_not_raise [%here] (fun () ->
+  Expect_test_helpers_core.require_does_not_raise [%here] (fun () ->
     Quickcheck.test
       ~shrinker:quickcheck_shrinker
       ~sexp_of:For_testing.sexp_of_t

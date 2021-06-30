@@ -7,12 +7,12 @@
 
 open! Import
 
-type t = bytes [@@deriving_inline sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-  end[@@ocaml.doc "@inline"]
+type t = bytes [@@deriving_inline sexp, sexp_grammar]
+
+include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 (** {1 Common Interfaces} *)
@@ -25,6 +25,8 @@ include Stringable.S with type t := t
     sequence it was initially called with. *)
 include
   Pretty_printer.S with type t := t
+
+include Invariant.S with type t := t
 
 module To_string : sig
   val sub : (t, string) Blit.sub

@@ -1,5 +1,3 @@
-type key_type = [ `RSA | `EC of Asn.oid ]
-
 (*
  * X509 certs
  *)
@@ -169,9 +167,7 @@ let pp_hash ppf hash =
       | `SHA256 -> "SHA256" | `SHA384 -> "SHA384" | `SHA512 -> "SHA512")
 
 let pp_sigalg ppf (asym, hash) =
-  Fmt.pf ppf "%s-%a"
-    (match asym with `RSA -> "RSA" | `ECDSA -> "ECDSA")
-    pp_hash hash
+  Fmt.pf ppf "%a-%a" Key_type.pp_signature_scheme asym pp_hash hash
 
 let pp ppf { asn ; _ } =
   let tbs = asn.tbs_cert in

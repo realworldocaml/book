@@ -48,12 +48,10 @@ end
 
 module Make (M : sig
     type t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) =
 struct
@@ -96,13 +94,10 @@ end
 
 module Derived (M : sig
     type 'a t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-        val sexp_of_t :
-          ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) =
 struct
@@ -125,17 +120,15 @@ end
 
 module Derived2 (M : sig
     type ('a, 'b) t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare :
-          ('a -> 'a -> int) ->
-          ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
-        val sexp_of_t :
-          ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('b -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('a, 'b) t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
+
+    val sexp_of_t
+      :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('a, 'b) t
+      -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) =
 struct

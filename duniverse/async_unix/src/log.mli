@@ -5,8 +5,7 @@
     result of organic design (i.e., older versions of this interface did the same thing).
 
     A (limited) [Blocking] module is supplied to accommodate the portion of a program that
-    runs outside of Async.
-*)
+    runs outside of Async. *)
 
 open! Core
 open! Import
@@ -14,7 +13,9 @@ open! Import
 module Level : sig
   (** Describes both the level of a log and the level of a message sent to a log.  There
       is an ordering to levels (`Debug < `Info < `Error), and a log set to a level will
-      never display messages at a lower log level. *)
+      never display messages at a lower log level.
+
+      Messages without a level are treated as `Info. *)
   type t =
     [ `Debug
     | `Info (** default level *)
@@ -40,6 +41,8 @@ module Message : sig
   val create
     :  ?level:Level.t
     -> ?time:Time.t
+    -> ?time_source:Synchronous_time_source.t
+    (** [time_source] is used to provide a default time, if none is specified *)
     -> ?tags:(string * string) list
     -> [ `String of string | `Sexp of Sexp.t ]
     -> t
@@ -93,14 +96,13 @@ module Rotation : sig
         startup (i.e., is the symlink pointing me at the right log file?).
       - Atomicity is hard.
       - Symlinks encourage tailing, which is a bad way to communicate information.
-      - They complicate archiving processes (the symlink must be skipped).
-  *)
+      - They complicate archiving processes (the symlink must be skipped). *)
   type t [@@deriving sexp_of]
 
   module type Id_intf = sig
     type t
 
-    val create : Time.Zone.t -> t
+    val create : ?time_source:Synchronous_time_source.t -> Time.Zone.t -> t
 
     (** For any rotation scheme that renames logs on rotation, this defines how to do
         the renaming. *)
@@ -210,6 +212,7 @@ module Output : sig
 
   val rotating_file
     :  ?perm:Unix.file_perm
+    -> ?time_source:Synchronous_time_source.t
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -219,6 +222,7 @@ module Output : sig
       put on the tail *)
   val rotating_file_with_tail
     :  ?perm:Unix.file_perm
+    -> ?time_source:Synchronous_time_source.t
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -245,8 +249,8 @@ module Blocking : sig
       functions after the scheduler has started will raise an exception.  They otherwise
       behave similarly to the logging functions in the Async world.
 
-      There are more detailed comments for the API below near the non-blocking signatures.
-  *)
+      There are more detailed comments for the API below near the non-blocking
+      signatures. *)
 
   module Output : sig
     type t
@@ -262,6 +266,8 @@ module Blocking : sig
   val level : unit -> Level.t
   val set_level : Level.t -> unit
   val set_output : Output.t -> unit
+  val set_time_source : Synchronous_time_source.t -> unit
+  val set_transform : (Message.t -> Message.t) option -> unit
 
   val raw
     :  ?time:Time.t
@@ -325,6 +331,10 @@ module type Global_intf = sig
   val set_output : Output.t list -> unit
   val get_output : unit -> Output.t list
   val set_on_error : [ `Raise | `Call of Error.t -> unit ] -> unit
+  val get_time_source : unit -> Synchronous_time_source.t
+  val set_time_source : Synchronous_time_source.t -> unit
+  val get_transform : unit -> (Message.t -> Message.t) option
+  val set_transform : (Message.t -> Message.t) option -> unit
   val would_log : Level.t option -> bool
   val set_level_via_param : unit -> unit Command.Param.t
 
@@ -427,6 +437,23 @@ val set_output : t -> Output.t list -> unit
 
 val get_output : t -> Output.t list
 
+(** Changes the time source of the log, which controls the default timestamp on
+    messages. *)
+val get_time_source : t -> Synchronous_time_source.t
+
+val set_time_source : t -> Synchronous_time_source.t -> unit
+
+(** Changes the [transform] function within log.  This allows you to *synchronously*
+    change things about the message at the time that they were written.
+
+    The transform function *will not* be called if the initial message is of a level that
+    would not currently be logged.
+
+    The transform function *will* be called if even if there are no log outputs. *)
+val get_transform : t -> (Message.t -> Message.t) option
+
+val set_transform : t -> (Message.t -> Message.t) option -> unit
+
 
 (** If [`Raise] is given, then background errors raised by logging will be raised to the
     monitor that was in scope when [create] was called.  Errors can be redirected anywhere
@@ -446,12 +473,15 @@ val flushed : t -> unit Deferred.t
 (** Informs the current [Output]s to rotate if possible. *)
 val rotate : t -> unit Deferred.t
 
-(** Creates a new log.  See [set_level], [set_on_error] and [set_output] for
-    more. *)
+(** Creates a new log.  See [set_level], [set_on_error], [set_output],
+    [set_time_source], and [set_transform] for more. *)
 val create
   :  level:Level.t
   -> output:Output.t list
   -> on_error:[ `Raise | `Call of Error.t -> unit ]
+  -> ?time_source:Synchronous_time_source.t
+  -> ?transform:(Message.t -> Message.t)
+  -> unit
   -> t
 
 (** Printf-like logging for messages at each log level or raw (no level) messages. Raw
@@ -545,7 +575,10 @@ val surroundf
   -> 'a
 
 (** [would_log] returns true if a message at the given log level would be logged if sent
-    immediately. *)
+    immediately.
+
+    This will return [false] if there are no outputs for the log, unless there is
+    a [transform] set. *)
 val would_log
   :  t
   -> Level.t option

@@ -1,5 +1,3 @@
-open Mdx.Migrate_ast
-
 val try_finally : always:(unit -> unit) -> (unit -> 'a) -> 'a
 
 val map_error_loc :
@@ -67,20 +65,20 @@ val extension_constructor :
   ext_type_params:Types.type_expr list ->
   ext_args:Types.type_expr list ->
   ext_ret_type:Types.type_expr option ->
-  ext_private:Asttypes_.private_flag ->
+  ext_private:Asttypes.private_flag ->
   ext_loc:Location.t ->
-  ext_attributes:Parsetree_.attributes ->
+  ext_attributes:Parsetree.attributes ->
   Types.extension_constructor
 
 val is_predef_or_global : Ident.t -> bool
 
 val map_sig_attributes :
-  f:(Parsetree_.attributes -> Parsetree_.attributes) ->
+  f:(Parsetree.attributes -> Parsetree.attributes) ->
   Types.signature ->
   Types.signature
 
 val attribute :
-  name:string Location.loc -> payload:Parsetree_.payload -> Parsetree_.attribute
+  name:string Location.loc -> payload:Parsetree.payload -> Parsetree.attribute
 
 val match_env :
   value:(Env.summary -> Ident.t -> 'a) ->
@@ -100,3 +98,10 @@ val match_env :
   module_unbound:(Env.summary -> 'a) ->
   Env.summary ->
   'a
+
+val top_directive_name : Parsetree.toplevel_phrase -> string option
+(** Returns the name of the toplevel directive or [None] if the given phrase
+    is not a directive *)
+
+val top_directive_require : string -> Parsetree.toplevel_phrase
+(** [top_directive require "pkg"] builds the AST for [#require "pkg"] *)

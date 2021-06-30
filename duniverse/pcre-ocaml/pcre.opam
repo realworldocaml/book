@@ -12,7 +12,7 @@ bug-reports: "https://github.com/mmottl/pcre-ocaml/issues"
 homepage: "https://mmottl.github.io/pcre-ocaml"
 doc: "https://mmottl.github.io/pcre-ocaml/api"
 license: "LGPL-2.1+ with OCaml linking exception"
-version: "7.4.3"
+version: "7.4.6"
 dev-repo: "git+https://github.com/mmottl/pcre-ocaml.git"
 synopsis: "Bindings to the Perl Compatibility Regular Expressions library"
 description: """
@@ -21,7 +21,7 @@ substitution, similar to the functionality offered by the Perl language."""
 depends: [
   "ocaml" {>= "4.08"}
   "dune" {>= "1.10"}
+  "dune-configurator"
   "conf-libpcre" {build}
-  "base" {build}
   "base-bytes"
 ]

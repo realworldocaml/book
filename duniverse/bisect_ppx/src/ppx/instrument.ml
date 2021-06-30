@@ -34,33 +34,28 @@
 
 
 
-(* From ocaml-migrate-parsetree. *)
-module Ast = Migrate_parsetree.Ast_411
-module Ast_411 = Ast
-(* Workaround for
-  https://travis-ci.org/aantron/bisect_ppx/jobs/538321848#L588 *)
+module Parsetree = Ppxlib.Parsetree
+module Location = Ppxlib.Location
+module Ast_builder = Ppxlib.Ast_builder
+module Longident = Ppxlib.Longident
 
-module Location = Ast.Location
-module Parsetree = Ast.Parsetree
+module Pat = Ppxlib.Ast_helper.Pat
+module Exp = Ppxlib.Ast_helper.Exp
+module Str = Ppxlib.Ast_helper.Str
+module Cl = Ppxlib.Ast_helper.Cl
+module Cf = Ppxlib.Ast_helper.Cf
 
-module Pat = Ast.Ast_helper.Pat
-module Exp = Ast.Ast_helper.Exp
-module Str = Ast.Ast_helper.Str
-module Cl = Ast.Ast_helper.Cl
-module Cf = Ast.Ast_helper.Cf
-
-(* From ppx_tools_versioned. *)
-module Ast_convenience = Ast_convenience_411
-module Ast_mapper_class = Ast_mapper_class_411
-
-(* From Bisect_ppx. *)
 module Common = Bisect_common
 
 
 
-let option_map f = function
-  | Some v -> Some (f v)
-  | None -> None
+(* Can be removed once Bisect_ppx requires OCaml >= 4.08. *)
+module Option =
+struct
+  let map f = function
+    | Some v -> Some (f v)
+    | None -> None
+end
 
 
 
@@ -136,9 +131,11 @@ sig
       Parsetree.expression
 
   val instrument_cases :
-    points -> Parsetree.case list ->
-      Parsetree.case list *
-      ((Parsetree.expression -> Parsetree.expression) list)
+    points -> ?use_aliases:bool -> Parsetree.case list ->
+      Parsetree.case list
+      * Parsetree.case list
+      * Parsetree.value_binding list
+      * bool
 
   val runtime_initialization :
     points -> string -> Parsetree.structure_item list
@@ -155,20 +152,19 @@ struct
       points ?override_loc ?use_loc_of ?(at_end = false) ?(post = false) e =
 
     let rec outline () =
-      let point_loc = choose_location_of_point ~override_loc ~use_loc_of e in
-      if expression_should_not_be_instrumented ~point_loc ~use_loc_of then
+      let loc = choose_location_of_point ~override_loc ~use_loc_of e in
+      if expression_should_not_be_instrumented ~point_loc:loc ~use_loc_of then
         e
       else
-        let point_index = get_index_of_point_at_location ~point_loc in
+        let point_index = get_index_of_point_at_location ~point_loc:loc in
+        let open Parsetree in
         if not post then
           [%expr
             ___bisect_visit___ [%e point_index];
             [%e e]]
-            [@metaloc point_loc]
         else
           [%expr
             ___bisect_post_visit___ [%e point_index] [%e e]]
-            [@metaloc point_loc]
 
     and choose_location_of_point ~override_loc ~use_loc_of e =
       match use_loc_of with
@@ -206,7 +202,7 @@ struct
           points := new_point::!points;
           new_point
       in
-      Ast_convenience.int point.identifier
+      Ast_builder.Default.eint ~loc point.identifier
 
     in
 
@@ -372,439 +368,502 @@ struct
       - We also don't instrument refutation cases ([| -> .]).
 
       So, without further ado, here is the function that does all this magic: *)
-  let instrument_pattern points index case =
-    let module Helper_types =
-      struct
-        type location_trace = Location.t list
-        type rotated_case = location_trace * Parsetree.pattern
-          (* The [Parsetree.pattern] above will not contain or-patterns. *)
-      end
-    in
-    let open Helper_types in
 
-    let rec outline () =
-      if is_assert_false_or_refutation case then
-        [case], fun e -> e
-      else
-        let entire_pattern = Parsetree.(case.pc_lhs) in
-        let loc = Parsetree.(entire_pattern.ppat_loc) in
+  let is_assert_false_or_refutation (case : Parsetree.case) =
+    match case.pc_rhs with
+    | [%expr assert false] -> true
+    | {pexp_desc = Pexp_unreachable; _} -> true
+    | _ -> false
 
-        let rotated_cases : rotated_case list =   (* No or-patterns. *)
-          rotate_or_patterns_to_top loc entire_pattern in
+  let insert_instrumentation points (case : Parsetree.case) f =
+    match case.pc_guard with
+    | None ->
+      {case with
+        pc_rhs = f case.pc_rhs;
+      }
+    | Some guard ->
+      {case with
+        pc_guard = Some (f guard);
+        pc_rhs = instrument_expr points case.pc_rhs;
+      }
 
-        match rotated_cases with
-        | [] -> (* Should be unreachable. *)
-          [insert_instrumentation
-            case
-            (fun e -> instrument_expr points e)],
-          fun e -> e
+  let instrumentation_for_location_trace points location_trace e =
+    location_trace
+    |> List.sort_uniq (fun l l' ->
+      l.Location.loc_start.Lexing.pos_cnum -
+      l'.Location.loc_start.Lexing.pos_cnum)
+    |> List.fold_left (fun e l ->
+      instrument_expr points ~override_loc:l e) e
 
-        | [(location_trace, _)] ->
-          [insert_instrumentation
-            case
-            (instrumentation_for_location_trace location_trace)],
-          fun e -> e
+  let add_bisect_matched_value_alias loc p =
+    let open Parsetree in
+    [%pat? [%p p] as ___bisect_matched_value___]
 
-        | _::_::_ ->
-          let exception_cases, value_cases =
-            List.partition
-              (fun (_, p) -> has_exception_pattern p) rotated_cases
-          in
-          match exception_cases, value_cases with
-          | [], _ ->
-            let new_case_pattern_with_alias =
-              add_bisect_matched_value_alias loc entire_pattern in
-            let nested_match = generate_nested_match loc rotated_cases in
-            [insert_instrumentation
-              {case with pc_lhs = new_case_pattern_with_alias}
-              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])],
-            fun e -> e
-
-          | _, [] ->
-            let new_case_pattern_with_aliases =
-              alias_exceptions loc entire_pattern in
-            let nested_match =
-              rotated_cases
-              |> List.map (fun (trace, p) -> (trace, drop_exception_patterns p))
-              |> generate_nested_match loc
-            in
-            [insert_instrumentation
-              {case with pc_lhs = new_case_pattern_with_aliases}
-              (fun e -> [%expr [%e nested_match]; [%e e]] [@metaloc loc])],
-            fun e -> e
-
-          | _ ->
-            let variables = bound_variables (snd (List.hd rotated_cases)) in
-            let thunk_name = Printf.sprintf "___bisect_case_%i___" index in
-            let rec make_thunk = function
-              | [] ->
-                Exp.fun_ ~loc Nolabel None
-                  [%pat? ()] case.pc_rhs
-              | x::rest ->
-                Exp.fun_ ~loc Nolabel None (Pat.var ~loc x) (make_thunk rest)
-            in
-            let thunk = make_thunk variables in
-            let thunk_call =
-              Exp.apply ~loc
-                (Exp.ident ~loc (Ast_convenience.lid ~loc thunk_name))
-                (List.map (fun {Location.loc; txt} ->
-                  Ast_convenience.Label.Nolabel,
-                  Exp.ident ~loc (Ast_convenience.lid ~loc txt))
-                  variables
-                @ [Ast_convenience.Label.Nolabel, [%expr ()]])
-            in
-            rotated_cases
-            |> List.map (fun (trace, pattern) ->
-              {case with
-                pc_lhs = pattern;
-                pc_rhs = instrumentation_for_location_trace trace thunk_call}),
-            fun e ->
-              Exp.let_ ~loc Nonrecursive
-                [Ast.Ast_helper.Vb.mk ~loc
-                  (Pat.var ~loc {Location.loc; txt = thunk_name}) thunk] e
-
-    and is_assert_false_or_refutation case =
-      match case.pc_rhs with
-      | [%expr assert false] -> true
-      | {pexp_desc = Pexp_unreachable; _} -> true
-      | _ -> false
-
-    and insert_instrumentation case f =
-      match case.pc_guard with
-      | None ->
-        {case with
-          pc_rhs = f case.pc_rhs;
-        }
-      | Some guard ->
-        {case with
-          pc_guard = Some (f guard);
-          pc_rhs = instrument_expr points case.pc_rhs;
+  let generate_nested_match points loc rotated_cases =
+    rotated_cases
+    |> List.map (fun (location_trace, rotated_pattern) ->
+      Exp.case
+        rotated_pattern
+        (instrumentation_for_location_trace points location_trace [%expr ()]))
+    |> fun nested_match_cases ->
+      nested_match_cases @ [Exp.case [%pat? _] [%expr ()]]
+    |> Exp.match_ ~loc ([%expr ___bisect_matched_value___])
+    |> fun nested_match ->
+      Exp.attr
+        nested_match
+        {
+          attr_name = {txt = "ocaml.warning"; loc};
+          attr_payload = PStr [[%stri "-4-8-9-11-26-27-28-33"]];
+          attr_loc = loc
         }
 
-    and instrumentation_for_location_trace location_trace e =
-      location_trace
-      |> List.sort_uniq (fun l l' ->
-        l.Location.loc_start.Lexing.pos_cnum -
-        l'.Location.loc_start.Lexing.pos_cnum)
-      |> List.fold_left (fun e l ->
-        instrument_expr points ~override_loc:l e) e
+  (* This function works recursively. It should be called with a pattern [p]
+     (second argument) and its location (first argument).
 
-    and add_bisect_matched_value_alias loc p =
-      [%pat? [%p p] as ___bisect_matched_value___] [@metaloc loc]
+     It evaluates to a list of patterns. Each of these resulting patterns
+     contains no nested or-patterns. Joining the resulting patterns in a single
+     or-pattern would create a pattern equivalent to [p].
 
-    and generate_nested_match loc rotated_cases =
-      rotated_cases
-      |> List.map (fun (location_trace, rotated_pattern) ->
-        Exp.case
-          rotated_pattern
-          (instrumentation_for_location_trace location_trace [%expr ()]))
-      |> fun nested_match_cases ->
-        nested_match_cases @ [Exp.case [%pat? _] [%expr ()]]
-      |> Exp.match_ ~loc ([%expr ___bisect_matched_value___])
-      |> fun nested_match ->
-        Exp.attr
-          nested_match
-          {attr_name = Location.mkloc "ocaml.warning" loc;
-           attr_payload = PStr [[%stri "-4-8-9-11-26-27-28"]];
-           attr_loc = loc}
+     Each pattern in the list is paired with a list of locations. These are the
+     locations of the original cases of or-patterns in [p] that were chosen for
+     the corresponding result pattern. For example:
 
-    (* This function works recursively. It should be called with a pattern [p]
-       (second argument) and its location (first argument).
+       C (A | B), D (E | F)
 
-       It evaluates to a list of patterns. Each of these resulting patterns
-       contains no nested or-patterns. Joining the resulting patterns in a
-       single or-pattern would create a pattern equivalent to [p].
+     becomes the list of pairs
 
-       Each pattern in the list is paired with a list of locations. These are
-       the locations of the original cases of or-patterns in [p] that were
-       chosen for the corresponding result pattern. For example:
+       (C A, D E), [loc A, loc E]
+       (C A, D F), [loc A, loc F]
+       (C B, D E), [loc B, loc E]
+       (C B, D F), [loc B, loc F]
 
-         C (A | B), D (E | F)
+     During recursion, the invariant on the location is that it is the location
+     of the nearest enclosing or-pattern, or the entire pattern, if there is no
+     enclosing or-pattern. *)
+  let rotate_or_patterns_to_top loc p =
+    let rec recur ~enclosing_loc p =
+      let loc = Parsetree.(p.ppat_loc) in
+      let attrs = Parsetree.(p.ppat_attributes) in
 
-       becomes the list of pairs
-
-         (C A, D E), [loc A, loc E]
-         (C A, D F), [loc A, loc F]
-         (C B, D E), [loc B, loc E]
-         (C B, D F), [loc B, loc F]
-
-        During recursion, the invariant on the location is that it is the
-        location of the nearest enclosing or-pattern, or the entire pattern, if
-        there is no enclosing or-pattern. *)
-    and rotate_or_patterns_to_top loc p : rotated_case list =
-
-      let rec recurse ~enclosing_loc p : rotated_case list =
-        let loc = Parsetree.(p.ppat_loc) in
-        let attrs = Parsetree.(p.ppat_attributes) in
-
-        match p.ppat_desc with
-
-        (* If the pattern ends with something trivial, that is not an
-           or-pattern, and has no nested patterns (so can't have a nested
-           or-pattern), then that pattern is the only top-level case. The
-           location trace is just the location of the overall pattern.
-
-           Here are some examples of how this plays out. Let's say the entire
-           pattern was "x". Then the case list will be just "x", with its own
-           location for the trace.
-
-           If the entire pattern was "x as y", this recursive call will return
-           just "x" with the location of "x as y" for the trace. The wrapping
-           recursive call will turn the "x" back into "x as y".
-
-           If the entire pattern was "A x | B", this recursive call will return
-           just "x" with the location of "A" (not the whole pattern!). The
-           wrapping recursive call, for constructor "A", will turn the "x" into
-           "A x". A yet-higher wrapping recursive call, for the actual
-           or-pattern, will concatenate this with a second top-level case,
-           corresponding to "B". *)
-        | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
-        | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
-        | Ppat_unpack _ | Ppat_extension _ ->
-          [([enclosing_loc], p)]
-
-        (* Recursively rotate or-patterns in [p'] to the top. Then, for each
-           one, re-wrap it in an alias pattern. The location traces are not
-           affected. *)
-        | Ppat_alias (p', x) ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.alias ~loc ~attrs p'' x))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_construct (c, Some p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_variant (c, Some p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.variant ~loc ~attrs c (Some p'')))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_constraint (p', t) ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.constraint_ ~loc ~attrs p'' t))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_lazy p' ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.lazy_ ~loc ~attrs p''))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_open (c, p') ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.open_ ~loc ~attrs c p''))
-
-        (* Same logic as [Ppat_alias]. *)
-        | Ppat_exception p' ->
-          recurse ~enclosing_loc p'
-          |> List.map (fun (location_trace, p'') ->
-            (location_trace, Pat.exception_ ~loc ~attrs p''))
-
-        (* Recursively rotate or-patterns in each pattern in [ps] to the top.
-           Then, take a Cartesian product of the cases, and re-wrap each row in
-           a replacement tuple pattern.
-
-           For example, suppose we have the pair pattern
-
-             (A | B, C | D)
-
-           The recursive calls will produce lists of rotated cases for each
-           component pattern:
-
-             A | B   =>   [A, loc A]; [B, loc B]
-             C | D   =>   [C, loc C]; [D, loc D]
-
-           We now need every possible combination of one case from the first
-           component, one case from the second, and so on, and to concatenate
-           all the location traces accordingly:
-
-             [A; C, loc A; loc C]
-             [A; D, loc A; loc D]
-             [B; C, loc B; loc C]
-             [B; D, loc B; loc D]
-
-           This is performed by [all_combinations].
-
-           Finally, we need to take each one of these rows, and re-wrap the
-           pattern lists (on the left side) into tuples.
-
-           This is typical of "and-patterns", i.e. those that match various
-           product types (though that carry multiple pieces of data
-           simultaneously). *)
-        | Ppat_tuple ps ->
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            (location_trace, Pat.tuple ~loc ~attrs ps'))
-
-        (* Same logic as for [Ppat_tuple]. *)
-        | Ppat_record (entries, closed) ->
-          let labels, ps = List.split entries in
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            (location_trace,
-             Pat.record ~loc ~attrs (List.combine labels ps') closed))
-
-        (* Same logic as for [Ppat_tuple]. *)
-        | Ppat_array ps ->
-          ps
-          |> List.map (recurse ~enclosing_loc)
-          |> all_combinations
-          |> List.map (fun (location_trace, ps') ->
-            location_trace, Pat.array ~loc ~attrs ps')
-
-        (* For or-patterns, recurse into each branch. Then, concatenate the
-           resulting case lists. Don't reassemble an or-pattern. *)
-        | Ppat_or (p_1, p_2) ->
-          let ps_1 = recurse ~enclosing_loc:p_1.ppat_loc p_1 in
-          let ps_2 = recurse ~enclosing_loc:p_2.ppat_loc p_2 in
-          ps_1 @ ps_2
-
-      (* Performs the Cartesian product operation described at [Ppat_tuple]
-         above, concatenating location traces along the way.
-
-         The argument is rows of top-level case lists (so a list of lists), each
-         case list resulting from rotating some nested pattern. Since tuples,
-         arrays, etc., have lists of nested patterns, we have a list of
-         case lists. *)
-      and all_combinations
-          : rotated_case list list ->
-              (location_trace * Parsetree.pattern list) list =
-        function
-        | [] -> []
-        | cases::more ->
-          let multiply product cases =
-            product |> List.map (fun (location_trace_1, ps) ->
-              cases |> List.map (fun (location_trace_2, p) ->
-                location_trace_1 @ location_trace_2, ps @ [p]))
-            |> List.flatten
-          in
-
-          let initial =
-            cases
-            |> List.map (fun (location_trace, p) -> location_trace, [p])
-          in
-
-          List.fold_left multiply initial more
-      in
-
-      recurse ~enclosing_loc:loc p
-
-    and has_exception_pattern p =
       match p.ppat_desc with
-      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        false
 
-      | Ppat_or (p_1, p_2) ->
-        has_exception_pattern p_1 || has_exception_pattern p_2
+      (* If the pattern ends with something trivial, that is not an or-pattern,
+         and has no nested patterns (so can't have a nested or-pattern), then
+         that pattern is the only top-level case. The location trace is just the
+         location of the overall pattern.
 
-      | Ppat_constraint (p', _) ->
-        has_exception_pattern p'
+         Here are some examples of how this plays out. Let's say the entire
+         pattern was "x". Then the case list will be just "x", with its own
+         location for the trace.
 
-      | Ppat_exception _ ->
-        true
+         If the entire pattern was "x as y", this recursive call will return
+         just "x" with the location of "x as y" for the trace. The wrapping
+         recursive call will turn the "x" back into "x as y".
 
-      | Ppat_open (_, p') ->
-        has_exception_pattern p'
+         If the entire pattern was "A x | B", this recursive call will return
+         just "x" with the location of "A" (not the whole pattern!). The
+         wrapping recursive call, for constructor "A", will turn the "x" into
+         "A x". A yet-higher wrapping recursive call, for the actual or-pattern,
+         will concatenate this with a second top-level case, corresponding to
+         "B". *)
+      | Ppat_any | Ppat_var _ | Ppat_constant _ | Ppat_interval _
+      | Ppat_construct (_, None) | Ppat_variant (_, None) | Ppat_type _
+      | Ppat_unpack _ | Ppat_extension _ ->
+        [([enclosing_loc], p)]
 
-    and alias_exceptions loc p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        p
+      (* Recursively rotate or-patterns in [p'] to the top. Then, for each one,
+         re-wrap it in an alias pattern. The location traces are not
+         affected. *)
+      | Ppat_alias (p', x) ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.alias ~loc ~attrs p'' x))
 
-      | Ppat_or (p_1, p_2) ->
-        {p with ppat_desc =
-          Ppat_or (alias_exceptions loc p_1, alias_exceptions loc p_2)}
+      | Ppat_construct (c, Some p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.construct ~loc ~attrs c (Some p'')))
+
+      | Ppat_variant (c, Some p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.variant ~loc ~attrs c (Some p'')))
 
       | Ppat_constraint (p', t) ->
-        {p with ppat_desc =
-          Ppat_constraint (alias_exceptions loc p', t)}
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.constraint_ ~loc ~attrs p'' t))
+
+      | Ppat_lazy p' ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.lazy_ ~loc ~attrs p''))
+
+      | Ppat_open (c, p') ->
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.open_ ~loc ~attrs c p''))
 
       | Ppat_exception p' ->
-        {p with ppat_desc =
-          Ppat_exception (add_bisect_matched_value_alias loc p')}
+        recur ~enclosing_loc p'
+        |> List.map (fun (location_trace, p'') ->
+          (location_trace, Pat.exception_ ~loc ~attrs p''))
 
-      | Ppat_open (m, p') ->
-        {p with ppat_desc =
-          Ppat_open (m, alias_exceptions loc p')}
+      (* Recursively rotate or-patterns in each pattern in [ps] to the top.
+         Then, take a Cartesian product of the cases, and re-wrap each row in a
+         replacement tuple pattern.
 
-    and drop_exception_patterns p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _
-      | Ppat_interval _ | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _
-      | Ppat_record _ | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        p (* Should be unreachable. *)
+         For example, suppose we have the pair pattern
 
-      | Ppat_or _ ->
-        p (* Should be unreachable. *)
+           (A | B, C | D)
 
-      (* Dropping exception patterns will change the meaning of type constraints
-         on them, so drop the type constraints along the way. *)
-      | Ppat_constraint (p', _) ->
-        drop_exception_patterns p'
+         The recursive calls will produce lists of rotated cases for each
+         component pattern:
 
-      | Ppat_exception p' ->
-        p'
+           A | B   =>   [A, loc A]; [B, loc B]
+           C | D   =>   [C, loc C]; [D, loc D]
 
-      | Ppat_open (m, p') ->
-        {p with ppat_desc =
-          Ppat_open (m, drop_exception_patterns p')}
+         We now need every possible combination of one case from the first
+         component, one case from the second, and so on, and to concatenate all
+         the location traces accordingly:
 
-    and bound_variables p =
-      match Parsetree.(p.ppat_desc) with
-      | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
-      | Ppat_variant (_, None) | Ppat_type _ | Ppat_unpack _
-      | Ppat_extension _ ->
-        []
+           [A; C, loc A; loc C]
+           [A; D, loc A; loc D]
+           [B; C, loc B; loc C]
+           [B; D, loc B; loc D]
 
-      | Ppat_var x ->
-        [x]
+         This is performed by [all_combinations].
 
-      | Ppat_alias (p', x) ->
-        x::(bound_variables p')
+         Finally, we need to take each one of these rows, and re-wrap the
+         pattern lists (on the left side) into tuples.
 
-      | Ppat_tuple ps | Ppat_array ps ->
-        List.map bound_variables ps
-        |> List.flatten
+         This is typical of "and-patterns", i.e. those that match various
+         product types (those that carry multiple pieces of data
+         simultaneously). *)
+      | Ppat_tuple ps ->
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          (location_trace, Pat.tuple ~loc ~attrs ps'))
 
-      | Ppat_record (fields, _) ->
-        List.map (fun (_, p') -> bound_variables p') fields
-        |> List.flatten
+      | Ppat_record (entries, closed) ->
+        let labels, ps = List.split entries in
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          (location_trace,
+            Pat.record ~loc ~attrs (List.combine labels ps') closed))
 
-      | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
-      | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
-      | Ppat_open (_, p') ->
-        bound_variables p'
+      | Ppat_array ps ->
+        ps
+        |> List.map (recur ~enclosing_loc)
+        |> all_combinations
+        |> List.map (fun (location_trace, ps') ->
+          location_trace, Pat.array ~loc ~attrs ps')
 
-      | Ppat_or (p_1, _) ->
-        bound_variables p_1 (* Should be unreachable. *)
+      (* For or-patterns, recur into each branch. Then, concatenate the
+          resulting case lists. Don't reassemble an or-pattern. *)
+      | Ppat_or (p_1, p_2) ->
+        let ps_1 = recur ~enclosing_loc:p_1.ppat_loc p_1 in
+        let ps_2 = recur ~enclosing_loc:p_2.ppat_loc p_2 in
+        ps_1 @ ps_2
 
+    (* Performs the Cartesian product operation described at [Ppat_tuple] above,
+       concatenating location traces along the way.
+
+       The argument is rows of top-level case lists (so a list of lists), each
+       case list resulting from rotating some nested pattern. Since tuples,
+       arrays, etc., have lists of nested patterns, we have a list of case
+       lists. *)
+    and all_combinations = function
+      | [] -> []
+      | cases::more ->
+        let multiply product cases =
+          product |> List.map (fun (location_trace_1, ps) ->
+            cases |> List.map (fun (location_trace_2, p) ->
+              location_trace_1 @ location_trace_2, ps @ [p]))
+          |> List.flatten
+        in
+
+        let initial =
+          cases
+          |> List.map (fun (location_trace, p) -> location_trace, [p])
+        in
+
+        List.fold_left multiply initial more
     in
 
-    outline ()
+    recur ~enclosing_loc:loc p
 
-  let instrument_cases points cases =
-    List.mapi (instrument_pattern points) cases
-    |> List.split
-    |> fun (cases, thunks) ->
-      List.flatten cases, thunks
+  let rec partition_exceptions (p : Parsetree.pattern) =
+    match p.ppat_desc with
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_extension _ ->
+      Some p, None
+
+    | Ppat_exception _ ->
+      None, Some p
+
+    | Ppat_constraint (p', t) ->
+      let reassemble p' = {p with ppat_desc = Ppat_constraint (p', t)} in
+      let p_value, p_exception = partition_exceptions p' in
+      Option.map reassemble p_value, Option.map reassemble p_exception
+
+    | Ppat_open (m, p') ->
+      let reassemble p' = {p with ppat_desc = Ppat_open (m, p')} in
+      let p_value, p_exception = partition_exceptions p' in
+      Option.map reassemble p_value, Option.map reassemble p_exception
+
+    | Ppat_or (p1, p2) ->
+      let reassemble p1' p2' =
+        match p1', p2' with
+        | None, None -> None
+        | (Some _ as p1'), None -> p1'
+        | None, (Some _ as p2') -> p2'
+        | Some p1', Some p2' -> Some {p with ppat_desc = Ppat_or (p1', p2')}
+      in
+      let p1_value, p1_exception = partition_exceptions p1 in
+      let p2_value, p2_exception = partition_exceptions p2 in
+      reassemble p1_value p2_value, reassemble p1_exception p2_exception
+
+  let rec alias_exceptions loc p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_extension _ ->
+      p
+
+    | Ppat_or (p_1, p_2) ->
+      {p with ppat_desc =
+        Ppat_or (alias_exceptions loc p_1, alias_exceptions loc p_2)}
+
+    | Ppat_constraint (p', t) ->
+      {p with ppat_desc =
+        Ppat_constraint (alias_exceptions loc p', t)}
+
+    | Ppat_exception p' ->
+      {p with ppat_desc =
+        Ppat_exception (add_bisect_matched_value_alias loc p')}
+
+    | Ppat_open (m, p') ->
+      {p with ppat_desc =
+        Ppat_open (m, alias_exceptions loc p')}
+
+  let rec drop_exception_patterns p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_var _ | Ppat_alias _ | Ppat_constant _ | Ppat_interval _
+    | Ppat_tuple _ | Ppat_construct _ | Ppat_variant _ | Ppat_record _
+    | Ppat_array _ | Ppat_type _ | Ppat_lazy _ | Ppat_unpack _
+    | Ppat_extension _ ->
+      p (* Should be unreachable. *)
+
+    | Ppat_or _ ->
+      p (* Should be unreachable. *)
+
+    (* Dropping exception patterns will change the meaning of type constraints
+       on them, so drop the type constraints along the way. *)
+    | Ppat_constraint (p', _) ->
+      drop_exception_patterns p'
+
+    | Ppat_exception p' ->
+      p'
+
+    | Ppat_open (m, p') ->
+      {p with ppat_desc =
+        Ppat_open (m, drop_exception_patterns p')}
+
+  let rec bound_variables p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
+    | Ppat_variant (_, None) | Ppat_type _ | Ppat_unpack _ | Ppat_extension _ ->
+      []
+
+    | Ppat_var x ->
+      [x]
+
+    | Ppat_alias (p', x) ->
+      x::(bound_variables p')
+
+    | Ppat_tuple ps | Ppat_array ps ->
+      List.map bound_variables ps
+      |> List.flatten
+
+    | Ppat_record (fields, _) ->
+      List.map (fun (_, p') -> bound_variables p') fields
+      |> List.flatten
+
+    | Ppat_construct (_, Some p') | Ppat_variant (_, Some p')
+    | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
+    | Ppat_open (_, p') ->
+      bound_variables p'
+
+    | Ppat_or (p_1, _) ->
+      bound_variables p_1 (* Should be unreachable. *)
+
+  let rec has_polymorphic_variant p =
+    match Parsetree.(p.ppat_desc) with
+    | Ppat_any | Ppat_constant _ | Ppat_interval _ | Ppat_construct (_, None)
+    | Ppat_unpack _ | Ppat_extension _ | Ppat_var _ ->
+      false
+
+    | Ppat_type _ | Ppat_variant _ ->
+      true
+
+    | Ppat_alias (p', _) | Ppat_construct (_, Some p')
+    | Ppat_constraint (p', _) | Ppat_lazy p' | Ppat_exception p'
+    | Ppat_open (_, p') ->
+      has_polymorphic_variant p'
+
+    | Ppat_tuple ps | Ppat_array ps ->
+      List.exists has_polymorphic_variant ps
+
+    | Ppat_record (fields, _) ->
+      List.exists (fun (_, p') -> has_polymorphic_variant p') fields
+
+    | Ppat_or (p1, p2) ->
+      has_polymorphic_variant p1 || has_polymorphic_variant p2
+
+  let rec make_function loc body = function
+    | [] ->
+      Exp.fun_ ~loc Ppxlib.Nolabel None [%pat? ()] body
+    | x::rest ->
+      Exp.fun_ ~loc Ppxlib.Nolabel None (Pat.var ~loc x) (make_function loc body rest)
+
+  let instrument_cases
+      points ?(use_aliases = false) (cases : Parsetree.case list) =
+    let cases =
+      List.map (fun case ->
+        case, partition_exceptions case.Parsetree.pc_lhs) cases
+    in
+    let use_aliases =
+      use_aliases || (cases |> List.exists (function
+        | (_, (Some p, _)) when has_polymorphic_variant p -> true
+        | _ -> false))
+    in
+    cases
+    |> List.fold_left begin fun
+        (value_cases, exception_cases, functions, need_binding, index)
+        ((case : Parsetree.case), (value_pattern, exception_pattern)) ->
+      let loc = case.pc_lhs.ppat_loc in
+
+      let case, functions =
+        match value_pattern, exception_pattern with
+        | Some p, Some _ ->
+          let variables = bound_variables p in
+          let apply loc name =
+            Exp.apply ~loc
+              (Exp.ident ~loc {txt = Longident.parse name; loc})
+              (List.map (fun {Location.loc; txt} ->
+                Ppxlib.Nolabel,
+                Exp.ident ~loc {txt = Longident.parse txt; loc})
+                variables
+              @ [Ppxlib.Nolabel, [%expr ()]])
+          in
+
+          let case, functions =
+            match case.pc_guard with
+            | None ->
+              case, functions
+            | Some guard ->
+              let guard_name = Printf.sprintf "___bisect_guard_%i___" index in
+              let guard_function =
+                Ppxlib.Ast_helper.Vb.mk ~loc
+                  (Pat.var ~loc {Location.loc; txt = guard_name})
+                  (make_function loc guard variables)
+              in
+              {case with pc_guard = Some (apply guard.pexp_loc guard_name)},
+              guard_function::functions
+          in
+
+          let case_name = Printf.sprintf "___bisect_case_%i___" index in
+          let case_function =
+            Ppxlib.Ast_helper.Vb.mk ~loc
+              (Pat.var ~loc {Location.loc; txt = case_name})
+              (make_function loc case.pc_rhs variables)
+          in
+          {case with pc_rhs = apply case.pc_rhs.pexp_loc case_name},
+          case_function::functions
+        | _ ->
+          case, functions
+      in
+
+      let value_cases, need_binding =
+        match value_pattern with
+        | None -> value_cases, need_binding
+        | Some p ->
+          let loc = p.ppat_loc in
+          let case = {case with pc_lhs = p} in
+          if is_assert_false_or_refutation case then
+            case::value_cases, need_binding
+          else
+            let case, need_binding =
+              match rotate_or_patterns_to_top loc p with
+              | [] ->
+                insert_instrumentation points
+                  case
+                  (fun e -> instrument_expr points e),
+                need_binding
+              | [(location_trace, _)] ->
+                insert_instrumentation points
+                  case
+                  (instrumentation_for_location_trace points location_trace),
+                need_binding
+              | rotated_cases ->
+                let case =
+                  if use_aliases then
+                    {case with pc_lhs =
+                      add_bisect_matched_value_alias loc case.pc_lhs}
+                  else
+                    case
+                in
+                let nested_match =
+                  generate_nested_match points loc rotated_cases in
+                insert_instrumentation points
+                  case
+                  (fun e -> [%expr [%e nested_match]; [%e e]]),
+                true
+            in
+            case::value_cases, need_binding
+      in
+
+      let exception_cases =
+        match exception_pattern with
+        | None -> exception_cases
+        | Some p ->
+          let loc = p.Parsetree.ppat_loc in
+          let case = {case with pc_lhs = p} in
+          let case =
+            match rotate_or_patterns_to_top loc p with
+            | [] ->
+              insert_instrumentation points
+                case
+                (fun e -> instrument_expr points e)
+            | [(location_trace, _)] ->
+              insert_instrumentation points
+                case
+                (instrumentation_for_location_trace points location_trace)
+            | rotated_cases ->
+              let nested_match =
+                rotated_cases
+                |> List.map (fun (trace, p) -> trace, drop_exception_patterns p)
+                |> generate_nested_match points loc
+              in
+              insert_instrumentation points
+                {case with pc_lhs = alias_exceptions loc p}
+                (fun e -> [%expr [%e nested_match]; [%e e]])
+          in
+          case::exception_cases
+      in
+
+      value_cases, exception_cases, functions, need_binding, index + 1
+    end ([], [], [], false, 0)
+    |> fun (v, e, f, n, _) ->
+      List.rev v, List.rev e, List.rev f, n && not use_aliases
 
   let runtime_initialization points file =
     let loc = Location.in_file file in
@@ -819,13 +878,17 @@ struct
       "Bisect_visit___" ^ (Buffer.contents buffer)
     in
 
-    let point_count = Ast_convenience.int ~loc (List.length !points) in
-    let points_data = Ast_convenience.str ~loc (Common.write_points !points) in
-    let file = Ast_convenience.str ~loc file in
+    let point_count = Ast_builder.Default.eint ~loc (List.length !points) in
+    let points_data =
+      Ast_builder.Default.estring ~loc (Common.write_points !points) in
+    let file = Ast_builder.Default.estring ~loc file in
 
     let ast_convenience_str_opt = function
-      | None -> Ast_convenience.constr ~loc "None" []
-      | Some v -> Ast_convenience.(constr ~loc "Some" [str ~loc v])
+      | None ->
+        Exp.construct ~loc {txt = Longident.parse "None"; loc} None
+      | Some v ->
+        Some (Ast_builder.Default.estring ~loc v)
+        |> Exp.construct ~loc {txt = Longident.parse "Some"; loc}
     in
     let bisect_file = ast_convenience_str_opt !Common.bisect_file in
     let bisect_silent = ast_convenience_str_opt !Common.bisect_silent in
@@ -901,6 +964,7 @@ struct
          https://github.com/aantron/bisect_ppx/issues/160 *)
     let generated_module =
       let bisect_visit_function =
+        let open Parsetree in
         [%stri
           let ___bisect_visit___ =
             let point_definitions = [%e points_data] in
@@ -911,23 +975,21 @@ struct
             in
             cb
         ]
-          [@metaloc loc]
       in
 
       let bisect_post_visit =
+        let open Parsetree in
         [%stri
           let ___bisect_post_visit___ point_index result =
             ___bisect_visit___ point_index;
             result
         ]
-          [@metaloc loc]
       in
 
-      let open Ast.Ast_helper in
-
+      let open Ppxlib.Ast_helper in
       Str.module_ ~loc @@
         Mb.mk ~loc
-          (Location.mkloc (Some mangled_module_name) loc)
+          {txt = Some mangled_module_name; loc}
           (Mod.structure ~loc [
             bisect_visit_function;
             bisect_post_visit;
@@ -935,16 +997,17 @@ struct
     in
 
     let module_open =
-      let open Ast.Ast_helper in
+      let open Ppxlib.Ast_helper in
 
       (* This requires the assumption that the mangled module name doesn't have
          any periods. *)
       Str.open_ ~loc @@
         Opn.mk ~loc @@
-          Mod.ident ~loc (Ast_convenience.lid ~loc mangled_module_name)
+          Mod.ident ~loc {txt = Longident.parse mangled_module_name; loc}
     in
 
-    let stop_comment = [%stri [@@@ocaml.text "/*"]] [@metaloc loc] in
+    let open Parsetree in
+    let stop_comment = [%stri [@@@ocaml.text "/*"]] in
 
     [stop_comment; generated_module; module_open; stop_comment]
 end
@@ -958,24 +1021,24 @@ class instrumenter =
   let instrument_cases = Generated_code.instrument_cases points in
 
   object (self)
-    inherit Ast_mapper_class.mapper as super
+    inherit Ppxlib.Ast_traverse.map_with_expansion_context as super
 
-    method! class_expr ce =
+    method! class_expr ctxt ce =
       let loc = ce.pcl_loc in
       let attrs = ce.pcl_attributes in
-      let ce = super#class_expr ce in
+      let ce = super#class_expr ctxt ce in
 
       match ce.pcl_desc with
       | Pcl_fun (l, e, p, ce) ->
-        Cl.fun_ ~loc ~attrs l (option_map instrument_expr e) p ce
+        Cl.fun_ ~loc ~attrs l (Option.map instrument_expr e) p ce
 
       | _ ->
         ce
 
-    method! class_field cf =
+    method! class_field ctxt cf =
       let loc = cf.pcf_loc in
       let attrs = cf.pcf_attributes in
-      let cf = super#class_field cf in
+      let cf = super#class_field ctxt cf in
 
       match cf.pcf_desc with
       | Pcf_method (name, private_, cf) ->
@@ -992,7 +1055,49 @@ class instrumenter =
       | _ ->
         cf
 
-    method! expr e =
+    method! expression ctxt e =
+      let is_trivial_function = Parsetree.(function
+        | [%expr (&&)]
+        | [%expr (&)]
+        | [%expr not]
+        | [%expr (=)]
+        | [%expr (<>)]
+        | [%expr (<)]
+        | [%expr (<=)]
+        | [%expr (>)]
+        | [%expr (>=)]
+        | [%expr (==)]
+        | [%expr (!=)]
+        | [%expr ref]
+        | [%expr (!)]
+        | [%expr (:=)]
+        | [%expr (@)]
+        | [%expr (^)]
+        | [%expr (+)]
+        | [%expr (-)]
+        | [%expr ( * )]
+        | [%expr (/)]
+        | [%expr (+.)]
+        | [%expr (-.)]
+        | [%expr ( *. )]
+        | [%expr (/.)]
+        | [%expr (mod)]
+        | [%expr (land)]
+        | [%expr (lor)]
+        | [%expr (lxor)]
+        | [%expr (lsl)]
+        | [%expr (lsr)]
+        | [%expr (asr)]
+        | [%expr raise]
+        | [%expr raise_notrace]
+        | [%expr failwith]
+        | [%expr ignore]
+        | [%expr Sys.opaque_identity]
+        | [%expr Obj.magic]
+        | [%expr (##)] -> true
+        | _ -> false)
+      in
+
       let rec traverse ?(successor = `None) ~is_in_tail_position e =
         let attrs = e.Parsetree.pexp_attributes in
         if Coverage_attributes.has_off_attribute attrs then
@@ -1039,50 +1144,48 @@ class instrumenter =
           | Pexp_apply (([%expr (||)] | [%expr (or)]), [(_l, e); (_l', e')]) ->
             let e_mark =
               instrument_expr ~use_loc_of:e ~at_end:true [%expr true] in
-            let e'_mark =
+            let e'_new =
               match e'.pexp_desc with
-              | Pexp_apply ([%expr (||)], _) ->
-                [%expr true]
+              | Pexp_apply (([%expr (||)] | [%expr (or)]), _) ->
+                traverse ~is_in_tail_position e'
+              | Pexp_apply (e'', _)
+                when is_in_tail_position && not (is_trivial_function e'') ->
+                traverse ~is_in_tail_position:true e'
+              | Pexp_send _ | Pexp_new _ when is_in_tail_position ->
+                traverse ~is_in_tail_position:true e'
               | _ ->
-                instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]
+                let open Parsetree in
+                [%expr
+                  if [%e traverse ~is_in_tail_position:false e'] then
+                    [%e
+                      instrument_expr ~use_loc_of:e' ~at_end:true [%expr true]]
+                  else
+                    false]
             in
+            let open Parsetree in
             [%expr
               if [%e traverse ~is_in_tail_position:false e] then
                 [%e e_mark]
               else
-                if [%e traverse ~is_in_tail_position:false e'] then
-                  [%e e'_mark]
-                else
-                  false]
-              [@metaloc loc]
+                [%e e'_new]]
 
           | Pexp_apply (e, arguments) ->
             let arguments =
-              match e with
-              | [%expr (&&)]
-              | [%expr (&)] ->
-                begin match arguments with
-                | [(ll, el); (lr, er)] ->
-                  [(ll,
-                    traverse ~is_in_tail_position:false el);
-                   (lr,
-                    instrument_expr (traverse ~is_in_tail_position:false er))]
-                | _ ->
-                  assert false
-                end
+              match e, arguments with
+              | ([%expr (&&)] | [%expr (&)]),
+                [(ll, el); (lr, er)] ->
+                [(ll,
+                  traverse ~is_in_tail_position:false el);
+                 (lr,
+                  instrument_expr (traverse ~is_in_tail_position er))]
 
-              | [%expr (@@)] ->
-                begin match arguments with
-                | [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
-                  [(ll,
-                    traverse
-                      ~successor:`Redundant ~is_in_tail_position:false el);
-                   (lr,
-                    traverse ~is_in_tail_position:false er)]
-                | _ ->
-                  List.map (fun (label, e) ->
-                    (label, traverse ~is_in_tail_position:false e)) arguments
-                end
+              | [%expr (@@)],
+                [(ll, ({pexp_desc = Pexp_apply _; _} as el)); (lr, er)] ->
+                [(ll,
+                  traverse
+                    ~successor:`Redundant ~is_in_tail_position:false el);
+                 (lr,
+                  traverse ~is_in_tail_position:false er)]
 
               | _ ->
                 List.map (fun (label, e) ->
@@ -1100,54 +1203,15 @@ class instrumenter =
             let apply = Exp.apply ~loc ~attrs e arguments in
             let all_arguments_labeled =
               arguments
-              |> List.for_all (fun (label, _) -> label <> Ast.Asttypes.Nolabel)
+              |> List.for_all (fun (label, _) -> label <> Ppxlib.Nolabel)
             in
             if is_in_tail_position || all_arguments_labeled then
               apply
             else
-              begin match e with
-              | [%expr (&&)]
-              | [%expr (&)]
-              | [%expr not]
-              | [%expr (=)]
-              | [%expr (<>)]
-              | [%expr (<)]
-              | [%expr (<=)]
-              | [%expr (>)]
-              | [%expr (>=)]
-              | [%expr (==)]
-              | [%expr (!=)]
-              | [%expr ref]
-              | [%expr (!)]
-              | [%expr (:=)]
-              | [%expr (@)]
-              | [%expr (^)]
-              | [%expr (+)]
-              | [%expr (-)]
-              | [%expr ( * )]
-              | [%expr (/)]
-              | [%expr (+.)]
-              | [%expr (-.)]
-              | [%expr ( *. )]
-              | [%expr (/.)]
-              | [%expr (mod)]
-              | [%expr (land)]
-              | [%expr (lor)]
-              | [%expr (lxor)]
-              | [%expr (lsl)]
-              | [%expr (lsr)]
-              | [%expr (asr)]
-              | [%expr raise]
-              | [%expr raise_notrace]
-              | [%expr failwith]
-              | [%expr ignore]
-              | [%expr Sys.opaque_identity]
-              | [%expr Obj.magic]
-              | [%expr (##)]
-                ->
+              if is_trivial_function e then
                 apply
-              | _ ->
-                match successor with
+              else
+                begin match successor with
                 | `None ->
                   let use_loc_of =
                     match e, arguments with
@@ -1161,7 +1225,7 @@ class instrumenter =
                   apply
                 | `Expression e' ->
                   instrument_expr ~use_loc_of:e' ~at_end:false ~post:true apply
-              end
+                end
 
           | Pexp_send (e, m) ->
             let apply =
@@ -1191,18 +1255,30 @@ class instrumenter =
                 instrument_expr ~use_loc_of:e' ~post:true e
               end
 
+          | Pexp_assert [%expr false] ->
+            e
+
           | Pexp_assert e ->
             Exp.assert_ (traverse ~is_in_tail_position:false e)
-            |> instrument_expr ~at_end:true
+            |> instrument_expr ~use_loc_of:e ~post:true
 
           (* Expressions that have subexpressions that might not get visited. *)
           | Pexp_function cases ->
-            Exp.function_ ~loc ~attrs
-              (fst @@ traverse_cases ~is_in_tail_position:true cases)
+            let cases, _, _, need_binding =
+              instrument_cases
+                (traverse_cases ~is_in_tail_position:true cases)
+            in
+            if need_binding then
+              Exp.fun_ ~loc ~attrs
+                Ppxlib.Nolabel None ([%pat? ___bisect_matched_value___])
+                (Exp.match_ ~loc
+                  ([%expr ___bisect_matched_value___]) cases)
+            else
+              Exp.function_ ~loc ~attrs cases
 
           | Pexp_fun (label, default_value, p, e) ->
             let default_value =
-              option_map (fun e ->
+              Option.map (fun e ->
                 instrument_expr
                   (traverse ~is_in_tail_position:false e)) default_value
             in
@@ -1217,24 +1293,45 @@ class instrumenter =
             Exp.fun_ ~loc ~attrs label default_value p e
 
           | Pexp_match (e, cases) ->
-            let cases, thunks = traverse_cases ~is_in_tail_position cases in
+            let value_cases, exception_cases, functions, need_binding =
+              instrument_cases (traverse_cases ~is_in_tail_position cases) in
+            let top_level_cases =
+              if need_binding then
+                let value_case = Parsetree.{
+                  pc_lhs = [%pat? ___bisect_matched_value___];
+                  pc_guard = None;
+                  pc_rhs =
+                    Exp.match_ ~loc ~attrs
+                      ([%expr ___bisect_matched_value___])
+                      value_cases;
+                }
+                in
+                exception_cases @ [value_case]
+              else
+                exception_cases @ value_cases
+            in
             let match_ =
               Exp.match_ ~loc ~attrs
                 (traverse ~successor:`Redundant ~is_in_tail_position:false e)
-                cases
+                top_level_cases
             in
-            List.fold_left (fun e add_thunk -> add_thunk e) match_ thunks
+            begin match functions with
+            | [] -> match_
+            | _ -> Exp.let_ ~loc Nonrecursive functions match_
+            end
 
           | Pexp_try (e, cases) ->
-            Exp.try_ ~loc ~attrs
-              (traverse ~is_in_tail_position:false e)
-              (fst @@ traverse_cases ~is_in_tail_position cases)
+            let cases, _, _, _ =
+              instrument_cases ~use_aliases:true
+                (traverse_cases ~is_in_tail_position cases)
+            in
+            Exp.try_ ~loc ~attrs (traverse ~is_in_tail_position:false e) cases
 
           | Pexp_ifthenelse (if_, then_, else_) ->
             Exp.ifthenelse ~loc ~attrs
               (traverse ~successor:`Redundant ~is_in_tail_position:false if_)
               (instrument_expr (traverse ~is_in_tail_position then_))
-              (option_map (fun e ->
+              (Option.map (fun e ->
                 instrument_expr (traverse ~is_in_tail_position e)) else_)
 
           | Pexp_while (while_, do_) ->
@@ -1262,9 +1359,6 @@ class instrumenter =
               | _ -> instrument_expr e
             in
             Exp.poly ~loc ~attrs e t
-
-          | Pexp_newtype (t, e) ->
-            Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position:true e)
 
           | Pexp_letop {let_; ands; body} ->
             let traverse_binding_op binding_op =
@@ -1304,18 +1398,18 @@ class instrumenter =
 
           | Pexp_construct (c, e) ->
             Exp.construct ~loc ~attrs
-              c (option_map (traverse ~is_in_tail_position:false) e)
+              c (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_variant (c, e) ->
             Exp.variant ~loc ~attrs
-              c (option_map (traverse ~is_in_tail_position:false) e)
+              c (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_record (fields, e) ->
             Exp.record ~loc ~attrs
               (fields
               |> List.map (fun (f, e) ->
                 (f, traverse ~is_in_tail_position:false e)))
-              (option_map (traverse ~is_in_tail_position:false) e)
+              (Option.map (traverse ~is_in_tail_position:false) e)
 
           | Pexp_field (e, f) ->
             Exp.field ~loc ~attrs (traverse ~is_in_tail_position:false e) f
@@ -1360,23 +1454,29 @@ class instrumenter =
           | Pexp_letmodule (m, e, e') ->
             Exp.letmodule ~loc ~attrs
               m
-              (self#module_expr e)
+              (self#module_expr ctxt e)
               (traverse ~is_in_tail_position e')
 
           | Pexp_letexception (c, e) ->
             Exp.letexception ~loc ~attrs c (traverse ~is_in_tail_position e)
 
-          | Pexp_object c ->
-            Exp.object_ ~loc ~attrs (self#class_structure c)
-
-          | Pexp_pack m ->
-            Exp.pack ~loc ~attrs (self#module_expr m)
-
           | Pexp_open (m, e) ->
             Exp.open_ ~loc ~attrs
-              (self#open_declaration m)
+              (self#open_declaration ctxt m)
               (traverse ~is_in_tail_position e)
 
+          | Pexp_newtype (t, e) ->
+            Exp.newtype ~loc ~attrs t (traverse ~is_in_tail_position e)
+
+          (* Expressions that don't need instrumentation, and where AST
+             traversal leaves the expression language. *)
+          | Pexp_object c ->
+            Exp.object_ ~loc ~attrs (self#class_structure ctxt c)
+
+          | Pexp_pack m ->
+            Exp.pack ~loc ~attrs (self#module_expr ctxt m)
+
+          (* Expressions that are not recursively traversed at all. *)
           | Pexp_extension _ | Pexp_unreachable ->
             e
         end
@@ -1386,12 +1486,12 @@ class instrumenter =
         |> List.map begin fun case ->
           {case with
             Parsetree.pc_guard =
-              option_map
+              Option.map
                 (traverse ~is_in_tail_position:false) case.Parsetree.pc_guard;
             pc_rhs = traverse ~is_in_tail_position case.pc_rhs;
           }
           end
-        |> instrument_cases
+
       in
 
       traverse ~is_in_tail_position:false e
@@ -1400,7 +1500,7 @@ class instrumenter =
        [false] again upon encountering [[@@@coverage.on]]. *)
     val mutable structure_instrumentation_suppressed = false
 
-    method! structure_item si =
+    method! structure_item ctxt si =
       let loc = si.pstr_loc in
 
       match si.pstr_desc with
@@ -1438,7 +1538,7 @@ class instrumenter =
               if do_not_instrument then
                 binding
               else
-                {binding with pvb_expr = self#expr binding.pvb_expr}
+                {binding with pvb_expr = self#expression ctxt binding.pvb_expr}
             end
           in
           Str.value ~loc rec_flag bindings
@@ -1447,7 +1547,7 @@ class instrumenter =
         if structure_instrumentation_suppressed then
           si
         else
-          Str.eval ~loc ~attrs:a (self#expr e)
+          Str.eval ~loc ~attrs:a (self#expression ctxt e)
 
       | Pstr_attribute attribute ->
         let kind = Coverage_attributes.recognize attribute in
@@ -1473,83 +1573,50 @@ class instrumenter =
         si
 
       | _ ->
-        super#structure_item si
+        super#structure_item ctxt si
 
     (* Don't instrument payloads of extensions and attributes. *)
-    method! extension e =
+    method! extension _ e =
       e
 
-    method! attribute a =
+    method! attribute _ a =
       a
 
-    (* This is set to [true] when the [structure] or [signature] method is
-       called the first time. It is used to determine whether Bisect_ppx is
-       looking at the top-level structure (module) in the file, or a nested
-       structure (module).
+    method! structure ctxt ast =
+      let saved_structure_instrumentation_suppressed =
+        structure_instrumentation_suppressed in
+      let result = super#structure ctxt ast in
+      structure_instrumentation_suppressed <-
+        saved_structure_instrumentation_suppressed;
+      result
 
-       For [.mli] and [.rei] files, the [signature] method will be called first.
-       That method will set this variable to [true], and do nothing else.
-
-       The more interesting case is [.ml] and [.re] files. For those, the
-       [structure] method will be called first. That method will set this
-       variable to [true]. However, if the variable started out [false],
-       [structure] will insert Bisect_ppx initialization code into the
-       structure. *)
-    val mutable saw_top_level_structure_or_signature = false
-
-    method! signature ast =
-      if not saw_top_level_structure_or_signature then
-        saw_top_level_structure_or_signature <- true;
-      super#signature ast
-
-    method! structure ast =
+    method transform_impl_file ctxt ast =
       let saved_structure_instrumentation_suppressed =
         structure_instrumentation_suppressed in
 
       let result =
-        if saw_top_level_structure_or_signature then
-          super#structure ast
-          (* This is *not* the first structure we see, or we are inside an
-             interface file, so the structure is nested within the file, either
-             inside [struct]..[end] or in an attribute or extension point.
-             Traverse the structure recursively as normal. *)
+        let path = Ppxlib.Expansion_context.Base.input_name ctxt in
+        let file_should_not_be_instrumented =
+          (* Bisect_ppx is hardcoded to ignore files with certain names. If we
+             have one of these, return the AST uninstrumented. In particular,
+             do not recurse into it. *)
+          let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
+          let always_ignore_basenames = [".ocamlinit"; "topfind"] in
+
+          List.mem path always_ignore_paths ||
+          List.mem (Filename.basename path) always_ignore_basenames ||
+          Exclusions.contains_file path ||
+          Coverage_attributes.has_exclude_file_attribute ast
+        in
+
+        if file_should_not_be_instrumented then
+          ast
 
         else begin
-          (* This is the first structure we see in te file, and we are not in an
-             interface file, so Bisect_ppx is beginning to (potentially)
-             instrument the current file. We need to check whether this file is
-             excluded from instrumentation before proceeding. *)
-          saw_top_level_structure_or_signature <- true;
-
-          let path = !Location.input_name in
-
-          let file_should_not_be_instrumented =
-            (* Bisect_ppx is hardcoded to ignore files with certain names. If we
-               have one of these, return the AST uninstrumented. In particular,
-               do not recurse into it. *)
-            let always_ignore_paths = ["//toplevel//"; "(stdin)"] in
-            let always_ignore_basenames = [".ocamlinit"; "topfind"] in
-
-            List.mem path always_ignore_paths ||
-            List.mem (Filename.basename path) always_ignore_basenames ||
-            Exclusions.contains_file path ||
-            Coverage_attributes.has_exclude_file_attribute ast
-          in
-
-          if file_should_not_be_instrumented then
-            ast
-
-          else begin
-            (* This file should be instrumented. Traverse the AST recursively,
-               then prepend some generated code for initializing the Bisect_ppx
-               runtime and telling it about the instrumentation points in this
-               file. *)
-            let instrumented_ast = super#structure ast in
-            let runtime_initialization =
-              Generated_code.runtime_initialization points path
-            in
-            runtime_initialization @ instrumented_ast
-          end
+          let instrumented_ast = super#structure ctxt ast in
+          let runtime_initialization =
+            Generated_code.runtime_initialization points path in
+          runtime_initialization @ instrumented_ast
         end
       in
 

@@ -166,7 +166,7 @@ let read_value_description env parent vd =
   | [] -> Value {Value.id; doc; type_}
   | primitives -> External {External.id; doc; type_; primitives}
 
-let read_type_parameter (ctyp, var) =
+let read_type_parameter (ctyp, var_and_injectivity)  =
   let open TypeDecl in
   let desc =
     match ctyp.ctyp_desc with
@@ -174,13 +174,27 @@ let read_type_parameter (ctyp, var) =
     | Ttyp_var s -> Var s
     | _ -> assert false
   in
-  let var =
-    match var with
-    | Covariant -> Some Pos
-    | Contravariant -> Some Neg
-    | Invariant -> None
+  let variance, injectivity =
+#if OCAML_MAJOR = 4 && OCAML_MINOR < 12
+    let var =
+      match var_and_injectivity with
+      | Covariant -> Some Pos
+      | Contravariant -> Some Neg
+      | Invariant -> None in
+        var, false
+#else
+    let var =
+      match fst var_and_injectivity with
+      | Covariant -> Some Pos
+      | Contravariant -> Some Neg
+      | NoVariance -> None in
+    let injectivity = match snd var_and_injectivity with
+      | Injective -> true
+      | NoInjectivity -> false in
+    var, injectivity
+#endif
   in
-    (desc, var)
+    {desc; variance; injectivity}
 
 let read_label_declaration env parent label_parent ld =
   let open TypeDecl.Field in

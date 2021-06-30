@@ -15,6 +15,17 @@ with type t := t
 
 (** {2 Extensions} *)
 
+(** [Caseless] compares and hashes characters ignoring case, so that for example
+    [Caseless.equal 'A' 'a'] and [Caseless.('a' < 'B')] are [true], and
+    [Caseless.Map], [Caseless.Table] lookup and [Caseless.Set] membership is
+    case-insensitive. *)
+module Caseless : sig
+  type nonrec t = t [@@deriving bin_io, hash, sexp]
+
+  include Comparable.S_binable with type t := t
+  include Hashable.S_binable with type t := t
+end
+
 include Identifiable.S with type t := t and type comparator_witness := comparator_witness
 
 (** {3 Quickcheck Support} *)

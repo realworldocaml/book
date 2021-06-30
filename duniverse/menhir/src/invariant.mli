@@ -50,11 +50,6 @@ val fold: ('a -> bool -> Symbol.t -> Lr1.NodeSet.t -> 'a) -> 'a -> word -> 'a
 
 val fold_top: (bool -> Symbol.t -> 'a) -> 'a -> word -> 'a
 
-(* [print w] produces a string representation of the word [w]. Only the
-   symbols are shown. One space is printed in front of each symbol. *)
-
-val print: word -> string
-
 (* ------------------------------------------------------------------------- *)
 (* Information about the stack. *)
 
@@ -63,8 +58,11 @@ val print: word -> string
 val stack: Lr1.node -> word
 
 (* [prodstack prod] is the structure of the stack when production
-   [prod] is about to be reduced. This function should not be called
-   if production [prod] is never reduced. *)
+   [prod] is about to be reduced. *)
+
+(* Until 2020/11/20, it was forbidden to call this function if production
+   [prod] is never reduced. It is now possible to do so. In that case, it
+   returns a word where every cell contains an empty set of states. *)
 
 val prodstack: Production.index -> word
 
@@ -123,3 +121,19 @@ val errorpeeker: Lr1.node -> bool
    outgoing transition along [symbol]. *)
 
 val universal: Symbol.t -> bool
+
+(* ------------------------------------------------------------------------- *)
+(* More information about the stack. *)
+
+module Long : sig
+
+  (* [Long.stack s] is the known suffix of the stack in state [s], presented
+     as an array of symbols, where the rightmost end of the array represents
+     the top of the stack (just as in the right-hand side of a production).
+     This known suffix is as long as possible, based on an analysis of the
+     automaton; it is possibly longer than the suffix obtained by [stack s],
+     whose length is always the maximum position of the items in state [s]. *)
+
+  val stack: Lr1.node -> Symbol.t array
+
+end

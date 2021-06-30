@@ -782,7 +782,12 @@ let max_span_float_value_for_1us_rounding =
 let of_span_float_round_nearest_microsecond s =
   if Span_float.( > ) s max_span_float_value_for_1us_rounding
   || Span_float.( < ) s min_span_float_value_for_1us_rounding
-  then failwiths "Time_ns.Span does not support this span" s [%sexp_of: Span_float.t];
+  then
+    failwiths
+      ~here:[%here]
+      "Time_ns.Span does not support this span"
+      s
+      [%sexp_of: Span_float.t];
   (* Using [Time.Span.to_sec] (being the identity) so that
      we make don't apply too many conversion
      - Too many : `[Span.t] -> [a] -> [t]`

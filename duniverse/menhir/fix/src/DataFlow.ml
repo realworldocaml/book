@@ -23,9 +23,15 @@ open Sigs
    discovery of dependencies, whereas in this situation, all dependencies are
    explicitly provided by the user. *)
 
+(* We require a minimal semi-lattice, equipped with a [leq_join] operation, as
+   opposed to a semi-lattice, which offers separate [leq] and [join]
+   operations. Although [leq_join] is less powerful, it is sufficient for our
+   purposes, and is potentially more efficient than the sequence of [leq]
+   [join]. *)
+
 module Run
   (M : MINIMAL_IMPERATIVE_MAPS)
-  (P : SEMI_LATTICE)
+  (P : MINIMAL_SEMI_LATTICE)
   (G : DATA_FLOW_GRAPH with type variable = M.key and type property = P.property)
 = struct
   open P
@@ -46,8 +52,8 @@ module Run
      [unit] should suffice, but our minimal map API does not offer a [remove]
      function. Thus, we have to use a map of variables to Booleans.) *)
 
-  let pending : variable Stack.t =
-    Stack.create()
+  let pending : variable Queue.t =
+    Queue.create()
 
   let dirty : bool M.t =
     M.create()
@@ -58,7 +64,7 @@ module Run
   let schedule (x : variable) =
     if not (is_dirty x) then begin
       M.add x true dirty;
-      Stack.push x pending
+      Queue.push x pending
     end
 
   (* [update x' p'] ensures that the property associated with the variable [x']
@@ -73,9 +79,12 @@ module Run
         schedule x'
     | p ->
         (* [x'] has been discovered earlier. *)
-        if not (P.leq p' p) then begin
-          (* [x'] is affected by this update and must itself be scheduled. *)
-          M.add x' (P.join p' p) properties;
+        let p'' = P.leq_join p' p in
+        if p'' != p then begin
+          (* The failure of the physical equality test [p'' == p] implies that
+             [P.leq p' p] does not hold. Thus, [x'] is affected by this update
+             and must itself be scheduled. *)
+          M.add x' p'' properties;
           schedule x'
         end
 
@@ -100,11 +109,11 @@ module Run
   let () =
     try
       while true do
-        let x = Stack.pop pending in
+        let x = Queue.pop pending in
         M.add x false dirty;
         examine x
       done
-    with Stack.Empty ->
+    with Queue.Empty ->
       ()
 
   (* Expose the solution. *)

@@ -37,5 +37,5 @@ extern void get_sockaddr(value mladdr, union sock_addr_union *addr /*out*/,
                          socklen_t *addr_len /*out*/);
 value wrapper_recv_msg(int fd, int n_iovs, struct iovec *iovs);
 value wrapper_send_msg(int fd, int n_iovs, struct iovec *iovs,
-                       value val_n_fds, value val_fds);
+                       value val_n_fds, value val_fds, value dest);
 #endif

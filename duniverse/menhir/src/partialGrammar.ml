@@ -36,9 +36,9 @@ let join_declaration filename (grammar : grammar) decl =
      difficult by the fact that %token and %left-%right-%nonassoc
      declarations are independent. *)
 
-  (* Declarations of token aliases are lost at this point. *)
+  (* If a token carries an alias, it is recorded in the field [tk_alias]. *)
 
-  | DToken (ocamltype, terminal, _alias, attributes) ->
+  | DToken (ocamltype, terminal, alias, attributes) ->
       let token_property =
         try
 
@@ -64,6 +64,7 @@ let join_declaration filename (grammar : grammar) decl =
             tk_filename    = filename;
             tk_position    = decl.position;
             tk_attributes  = attributes;
+            tk_alias       = alias;
           }
 
         with Not_found ->
@@ -77,7 +78,8 @@ let join_declaration filename (grammar : grammar) decl =
             tk_precedence    = UndefinedPrecedence;
             tk_position      = decl.position;
             tk_attributes    = attributes;
-            tk_is_declared   = true
+            tk_is_declared   = true;
+            tk_alias         = alias;
           }
 
       in
@@ -121,6 +123,7 @@ let join_declaration filename (grammar : grammar) decl =
             tk_precedence    = prec;
             tk_is_declared   = false;
             tk_attributes    = [];
+            tk_alias         = None;
             (* Will be updated later. *)
             tk_position      = decl.position;
           } in

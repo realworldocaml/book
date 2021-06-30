@@ -419,7 +419,10 @@ let%test_unit _ =
     ~expect:[ 1; 2; 3; 4; 5; 1; 2 ]
 ;;
 
-let%test_unit _ = require_does_raise [%here] (fun () -> cycle_list_exn [])
+let%expect_test _ =
+  require_does_raise [%here] (fun () -> cycle_list_exn []);
+  [%expect {| (Invalid_argument Sequence.cycle_list_exn) |}]
+;;
 
 let%test_unit _ =
   [%test_result: (char * int) list]
@@ -539,25 +542,28 @@ let%expect_test "[equal]" =
 
 let%test_unit "[equal] randomised test" =
   let with_gen ?examples gen =
-    Quickcheck.test
+    Base_quickcheck.Test.run_exn
       ?examples
-      gen
-      ~sexp_of:[%sexp_of: int list * int list]
+      (module struct
+        type t = int list * int list [@@deriving quickcheck, sexp_of]
+
+        let quickcheck_generator = gen
+      end)
       ~f:(fun (left, right) ->
         [%test_result: bool]
           ~expect:(List.equal Int.equal left right)
           (Comparable.lift (Sequence.equal Int.equal) ~f:Sequence.of_list left right))
   in
-  let list_gen = Quickcheck.Generator.list Quickcheck.Int.quickcheck_generator in
+  let list_gen = [%generator: int list] in
   (* certainly equal. *)
   with_gen
     ~examples:
       (List.map ~f:(fun x -> x, x) [ []; [ 1 ]; [ Int.max_value ]; [ 5; 4; 3; 2; 1 ] ])
-    (Quickcheck.Generator.map list_gen ~f:(fun x -> x, x));
+    (Base_quickcheck.Generator.map list_gen ~f:(fun x -> x, x));
   (* Probably not equal. *)
   with_gen
     ~examples:[ [], []; [], [ 1 ]; [ 1 ], []; [ Int.min_value ], [ Int.max_value ] ]
-    (Quickcheck.Generator.tuple2 list_gen list_gen)
+    (Base_quickcheck.Generator.both list_gen list_gen)
 ;;
 
 let%test_unit _ =
@@ -647,6 +653,30 @@ let%test_module "group" =
 
     let%test _ =
       group ~break:(fun _ _ -> false) mis |> [%compare.equal: char list t] single_letters
+    ;;
+  end)
+;;
+
+let%test_module "Caml.Seq" =
+  (module struct
+    let list = [ 1; 2; 3; 4 ]
+
+    let%expect_test "of_seq" =
+      list |> Caml.List.to_seq |> Sequence.of_seq |> Sequence.iter ~f:(printf "%d\n");
+      [%expect {|
+        1
+        2
+        3
+        4 |}]
+    ;;
+
+    let%expect_test "to_seq" =
+      list |> Sequence.of_list |> Sequence.to_seq |> Caml.Seq.iter (printf "%d\n");
+      [%expect {|
+        1
+        2
+        3
+        4 |}]
     ;;
   end)
 ;;

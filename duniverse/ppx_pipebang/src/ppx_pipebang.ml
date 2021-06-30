@@ -6,7 +6,9 @@ let expand (e : Parsetree.expression) =
       Some (
         match y with
         | { pexp_desc = Pexp_construct (id, None); _ } ->
-          { y with pexp_desc = Pexp_construct (id, Some x) }
+          { y with
+            pexp_desc = Pexp_construct (id, Some x);
+            pexp_loc = e.pexp_loc }
         | { pexp_desc = Pexp_apply (f, args); pexp_attributes = []; _ }
           when (match f.pexp_desc with
             (* Do not inline |> as this would create applications with too many

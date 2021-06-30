@@ -5,11 +5,9 @@ open! Import
 
 module type S = sig
   type 'a t [@@deriving_inline sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-    end[@@ocaml.doc "@inline"]
+
+  include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
   [@@@end]
 
   include Invariant.S1 with type 'a t := 'a t

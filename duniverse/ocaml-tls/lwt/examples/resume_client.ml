@@ -3,7 +3,6 @@ open Lwt
 open Ex_common
 
 let http_client ?ca ?fp hostname port =
-  Mirage_crypto_rng_lwt.initialize () >>= fun () ->
   let port          = int_of_string port in
   auth ~hostname ?ca ?fp () >>= fun authenticator ->
   let config = Tls.Config.client ~authenticator () in

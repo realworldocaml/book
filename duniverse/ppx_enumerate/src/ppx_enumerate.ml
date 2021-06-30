@@ -207,7 +207,7 @@ let rec list_append loc l1 l2 =
       [%expr  Ppx_enumerate_lib.List.append [%e l1] [%e l2] ]
 
 let rec enum ~exhaust_check ~main_type ty =
-  let loc = ty.ptyp_loc in
+  let loc = { ty.ptyp_loc with loc_ghost = true } in
   match ty.ptyp_desc with
   | Ptyp_constr ({ txt = Lident "bool"; _ }, []) -> [%expr [false; true] ]
   | Ptyp_constr ({ txt = Lident "unit"; _ }, []) -> [%expr  [()] ]

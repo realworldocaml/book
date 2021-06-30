@@ -37,7 +37,7 @@ let rec pp = function
   | Template t -> Template.pp t
 
 module Deprecated = struct
-  let pp ppf t = Pp.render_ignore_tags ppf (pp t)
+  let pp ppf t = Pp.to_fmt ppf (pp t)
 
   let pp_print_quoted_string ppf s =
     if String.contains s '\n' then (
@@ -80,29 +80,29 @@ module Deprecated = struct
     let tfuncs =
       (Format.pp_get_formatter_tag_functions ppf () [@warning "-3"])
     in
-    (Format.pp_set_formatter_tag_functions ppf
-       { tfuncs with
-         mark_open_tag =
-           (function
-           | "atom" ->
-             state := In_atom :: !state;
-             ""
-           | "makefile-action" ->
-             state := In_makefile_action :: !state;
-             ""
-           | "makefile-stuff" ->
-             state := In_makefile_stuff :: !state;
-             ""
-           | s -> tfuncs.mark_open_tag s)
-       ; mark_close_tag =
-           (function
-           | "atom"
-           | "makefile-action"
-           | "makefile-stuff" ->
-             state := List.tl !state;
-             ""
-           | s -> tfuncs.mark_close_tag s)
-       } [@warning "-3"]);
+    Format.pp_set_formatter_tag_functions ppf
+      { tfuncs with
+        mark_open_tag =
+          (function
+          | "atom" ->
+            state := In_atom :: !state;
+            ""
+          | "makefile-action" ->
+            state := In_makefile_action :: !state;
+            ""
+          | "makefile-stuff" ->
+            state := In_makefile_stuff :: !state;
+            ""
+          | s -> tfuncs.mark_open_tag s)
+      ; mark_close_tag =
+          (function
+          | "atom"
+          | "makefile-action"
+          | "makefile-stuff" ->
+            state := List.tl !state;
+            ""
+          | s -> tfuncs.mark_close_tag s)
+      } [@warning "-3"];
     Format.pp_set_formatter_out_functions ppf
       { ofuncs with
         out_newline =

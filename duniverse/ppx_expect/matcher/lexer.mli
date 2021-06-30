@@ -1,4 +1,4 @@
-open Expect_test_common.Std
+open Expect_test_common
 
 (** Strip all surrounding whitespace and return the result as a list of lines *)
 val strip_surrounding_whitespaces : string -> unit Cst.t

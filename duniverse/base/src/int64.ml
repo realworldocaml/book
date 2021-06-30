@@ -2,14 +2,39 @@ open! Import
 open! Caml.Int64
 
 module T = struct
-  type t = int64 [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = int64 [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_int64
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_int64 in fun x -> func x
+    let func = hash_int64 in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (int64_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_int64 : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "int64" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ int64_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "int64.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare = Int64_replace_polymorphic_compare.compare
@@ -59,6 +84,20 @@ let of_float f =
 
 let ( ** ) b e = pow b e
 
+external bswap64 : t -> t = "%bswap_int64"
+
+let[@inline always] bswap16 x = Caml.Int64.shift_right_logical (bswap64 x) 48
+
+let[@inline always] bswap32 x =
+  (* This is strictly better than coercing to an int32 to perform byteswap. Coercing
+     from an int32 will add unnecessary shift operations to sign extend the number
+     appropriately.
+  *)
+  Caml.Int64.shift_right_logical (bswap64 x) 32
+;;
+
+let[@inline always] bswap48 x = Caml.Int64.shift_right_logical (bswap64 x) 16
+
 include Comparable.Validate_with_zero (struct
     include T
 
@@ -70,6 +109,7 @@ include Comparable.Validate_with_zero (struct
    functions are available within this module. *)
 open Int64_replace_polymorphic_compare
 
+let invariant (_ : t) = ()
 let between t ~low ~high = low <= t && t <= high
 let clamp_unchecked t ~min ~max = if t < min then min else if t <= max then t else max
 
@@ -163,8 +203,18 @@ module Pow2 = struct
     x land Caml.Int64.pred x = Caml.Int64.zero
   ;;
 
-  (* C stub for int clz to use the CLZ/BSR instruction where possible *)
-  external int64_clz : int64 -> int = "Base_int_math_int64_clz" [@@noalloc]
+  (* C stubs for int clz and ctz to use the CLZ/BSR/CTZ/BSF instruction where possible *)
+  external clz
+    :  (int64[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_int64_clz" "Base_int_math_int64_clz_unboxed"
+  [@@noalloc]
+
+  external ctz
+    :  (int64[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_int64_ctz" "Base_int_math_int64_ctz_unboxed"
+  [@@noalloc]
 
   (** Hacker's Delight Second Edition p106 *)
   let floor_log2 i =
@@ -172,7 +222,7 @@ module Pow2 = struct
     then
       raise_s
         (Sexp.message "[Int64.floor_log2] got invalid input" [ "", sexp_of_int64 i ]);
-    num_bits - 1 - int64_clz i
+    num_bits - 1 - clz i
   ;;
 
   (** Hacker's Delight Second Edition p106 *)
@@ -181,9 +231,7 @@ module Pow2 = struct
     then
       raise_s
         (Sexp.message "[Int64.ceil_log2] got invalid input" [ "", sexp_of_int64 i ]);
-    if Caml.Int64.equal i Caml.Int64.one
-    then 0
-    else num_bits - int64_clz (Caml.Int64.pred i)
+    if Caml.Int64.equal i Caml.Int64.one then 0 else num_bits - clz (Caml.Int64.pred i)
   ;;
 end
 
@@ -192,12 +240,17 @@ include Conv.Make (T)
 
 include Conv.Make_hex (struct
     type t = int64 [@@deriving_inline compare, hash]
+
     let compare = (compare_int64 : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       hash_fold_int64
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = hash_int64 in fun x -> func x
+      let func = hash_int64 in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let zero = zero

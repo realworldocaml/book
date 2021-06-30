@@ -2,8 +2,9 @@
 ;; be linked after all other libraries and units.
 
 (library
- (name          ppxlib_runner)
- (public_name   ppxlib.runner)
- (flags (:standard -safe-string))
- (libraries     ppxlib)
+ (name ppxlib_runner)
+ (public_name ppxlib.runner)
+ (flags
+  (:standard -safe-string))
+ (libraries ppxlib)
  (library_flags -linkall))

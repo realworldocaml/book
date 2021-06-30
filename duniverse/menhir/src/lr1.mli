@@ -13,17 +13,33 @@
 
 open Grammar
 
-(* This module constructs an LR(1) automaton by following Pager's
-   method, that is, by merging states on the fly when they are found
-   to be (weakly) compatible. *)
+(* This module first constructs an LR(1) automaton by using an appropriate
+   construction method (LALR, Pager, canonical).
+   Then, this automaton is further transformed (in place), in three steps:
 
-(* Shift/reduce conflicts are silently resolved when (and only when)
-   that is allowed in a clean way by user-specified priorities. This
-   includes shift/reduce/reduce conflicts when (and only when) there
-   is agreement that the shift action should be preferred. Conflicts
-   that cannot be silently resolved in this phase will be reported,
-   explained, and arbitrarily resolved immediately before code
-   generation. *)
+   1. Silent conflict resolution (without warnings),
+      following the user's precedence declarations.
+      This is done immediately.
+      This can remove transitions and reductions.
+
+   2. Default conflict resolution (with warnings),
+      following a fixed default policy.
+      This is done via an explicit call to [default_conflict_resolution()].
+      This can remove reductions.
+
+   3. Addition of extra reductions,
+      following the user's [%on_error_reduce] declarations.
+      This is done via an explicit call to [extra_reductions()].
+
+   Conflicts are explained after step 1, and before steps 2 and 3.
+   This is the main reason why these steps are separate. *)
+
+(* During step 1, shift/reduce conflicts are silently resolved if (and only
+   if) that is allowed in a clean way by user-specified priorities. This
+   includes multi-way shift/reduce/reduce conflicts if (and only if) there is
+   agreement that the shift action should be preferred. Conflicts that cannot
+   be silently resolved in this phase are reported, explained, then
+   arbitrarily resolved in step 2. *)
 
 (* ------------------------------------------------------------------------- *)
 (* Accessors. *)
@@ -34,7 +50,11 @@ type node
 
 module Node : Set.OrderedType with type t = node
 
-module NodeSet : Set.S with type elt = node
+module NodeSet : sig
+  include Set.S with type elt = node
+  val leq_join: t -> t -> t
+  val print: t -> string
+end
 
 module NodeMap : Map.S with type key = node
 
@@ -61,6 +81,10 @@ val nt_of_entry: node -> Nonterminal.t
 val n: int
 val number: node -> int
 
+(* A state is printed simply as its number. *)
+
+val print: node -> string
+
 (* This provides access to the LR(1) state that a node stands for. *)
 
 val state: node -> Lr0.lr1state
@@ -75,6 +99,19 @@ val start2item: node -> Item.t
    a start node. *)
 
 val incoming_symbol: node -> Symbol.t option
+
+(* [is_start s] determines whether [s] is an initial state. *)
+
+val is_start: node -> bool
+
+(* With each start production [S' -> S], exactly two states are
+   associated: a start state, which contains the item [S' -> . S [#]],
+   and an exit state, which contains the item [S' -> S . [#]]. *)
+
+(* [is_start_or_exit node] determines whether [node] is one of these
+   two states and, if so, returns the corresponding start symbol [S]. *)
+
+val is_start_or_exit: node -> Nonterminal.t option
 
 (* This maps a node to its predecessors. *)
 
@@ -140,11 +177,31 @@ val iterx: (node -> unit) -> unit
 
 val targets: ('a -> node list -> node -> 'a) -> 'a -> Symbol.t -> 'a
 
-(* Iteration over all nodes with conflicts. [conflicts f] invokes [f
-   toks node] once for every node [node] with a conflict, where [toks]
-   are the tokens involved in the conflicts at that node. *)
+(* Iteration over all nodes with conflicts. [conflicts f] invokes [f toks
+   node] once for every node [node] with a conflict, where [toks] are the
+   tokens involved in the conflicts at that node.
+
+   If this function is invoked after conflicts have been resolved, then
+   no conflicts are reported. *)
 
 val conflicts: (TerminalSet.t -> node -> unit) -> unit
+
+(* [conflict_tokens node] returns the set of tokens where [node] has a
+   conflict.
+
+   If this function is invoked after conflicts have been resolved, then
+   no conflict tokens are reported. *)
+
+val conflict_tokens: node -> TerminalSet.t
+
+(* [has_eos_conflict node] indicates whether [node] has an end-of-stream
+   conflict. If so, the list of productions and the lookahead tokens that are
+   involved are returned.
+
+   If this function is invoked after conflicts have been resolved, then
+   no end-of-stream conflicts are reported. *)
+
+val has_eos_conflict: node -> (Production.index list * TerminalSet.t) option
 
 (* ------------------------------------------------------------------------- *)
 (* Modifications of the automaton. *)

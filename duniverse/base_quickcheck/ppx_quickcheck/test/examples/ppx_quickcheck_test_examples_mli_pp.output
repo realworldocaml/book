@@ -9,7 +9,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Dotted_reference :
 sig
@@ -20,7 +20,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Nonrec_reference :
 sig
@@ -32,7 +32,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Application_of_polymorphic_type :
 sig
@@ -43,7 +43,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Tuple :
 sig
@@ -54,7 +54,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Poly_variant :
 sig
@@ -67,7 +67,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Inherit_poly_variant :
 sig
@@ -79,7 +79,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Record_type :
 sig
@@ -92,7 +92,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Nullary_and_unary_variant :
 sig
@@ -107,7 +107,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Binary_and_record_variant :
 sig
@@ -126,7 +126,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Simple_arrow :
 sig
@@ -137,7 +137,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Named_arrow :
 sig
@@ -148,7 +148,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Optional_arrow :
 sig
@@ -159,7 +159,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Curried_arrow :
 sig
@@ -170,7 +170,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Simple_higher_order :
 sig
@@ -181,7 +181,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Named_higher_order :
 sig
@@ -192,7 +192,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Optional_higher_order :
 sig
@@ -204,7 +204,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Poly_unary :
 sig
@@ -218,7 +218,7 @@ sig
         'a Base_quickcheck.Observer.t -> 'a t Base_quickcheck.Observer.t
       val quickcheck_shrinker :
         'a Base_quickcheck.Shrinker.t -> 'a t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Instance_of_unary :
 sig
@@ -229,7 +229,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Poly_binary :
 sig
@@ -249,7 +249,7 @@ sig
         'a Base_quickcheck.Shrinker.t ->
           'b Base_quickcheck.Shrinker.t ->
             ('a, 'b) t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Instance_of_binary :
 sig
@@ -260,7 +260,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Poly_with_variance :
 sig
@@ -280,7 +280,7 @@ sig
         'a Base_quickcheck.Shrinker.t ->
           'b Base_quickcheck.Shrinker.t ->
             ('a, 'b) t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Instance_with_variance :
 sig
@@ -291,7 +291,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Poly_with_phantom :
 sig
@@ -308,7 +308,7 @@ sig
       val quickcheck_shrinker :
         'v_x__001_ Base_quickcheck.Shrinker.t ->
           'v_x__001_ t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end with type _ t =  unit option
 module Instance_with_phantom :
 sig
@@ -319,7 +319,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Recursive :
 sig
@@ -332,7 +332,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Recursive_with_indirect_base_case :
 sig
@@ -344,7 +344,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Mutually_recursive :
 sig
@@ -366,7 +366,7 @@ sig
       val quickcheck_shrinker_expr : expr Base_quickcheck.Shrinker.t
       val quickcheck_shrinker_op : op Base_quickcheck.Shrinker.t
       val quickcheck_shrinker_args : args Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Extensions :
 sig
@@ -392,7 +392,7 @@ functor (Elt : sig type t val examples : t list end) ->
         val quickcheck_generator : t Base_quickcheck.Generator.t
         val quickcheck_observer : t Base_quickcheck.Observer.t
         val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-      end[@@ocaml.doc "@inline"]
+      end[@@ocaml.doc "@inline"][@@merlin.hide ]
   end
 module Attribute_override :
 sig
@@ -406,7 +406,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Attribute_override_recursive :
 sig
@@ -420,7 +420,7 @@ sig
       val quickcheck_generator : t Base_quickcheck.Generator.t
       val quickcheck_observer : t Base_quickcheck.Observer.t
       val quickcheck_shrinker : t Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
 end
 module Deriving_from_wildcard :
 sig
@@ -437,7 +437,7 @@ sig
       val quickcheck_shrinker_transparent :
         'v_x__004_ Base_quickcheck.Shrinker.t ->
           'v_x__004_ transparent Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
   type _ opaque[@@deriving quickcheck]
   include
     sig
@@ -451,7 +451,7 @@ sig
       val quickcheck_shrinker_opaque :
         'v_x__007_ Base_quickcheck.Shrinker.t ->
           'v_x__007_ opaque Base_quickcheck.Shrinker.t
-    end[@@ocaml.doc "@inline"]
+    end[@@ocaml.doc "@inline"][@@merlin.hide ]
   val compare_opaque : ('a -> 'a -> int) -> 'a opaque -> 'a opaque -> int
   val sexp_of_opaque : ('a -> Sexp.t) -> 'a opaque -> Sexp.t
   val opaque_examples : int64 opaque list

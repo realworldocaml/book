@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Flags
 
 let a = Int63.of_int 0x1

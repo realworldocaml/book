@@ -26,7 +26,6 @@ let cached_session : Tls.Core.epoch_data =
 
 let echo_client ?ca hostname port =
   let open Lwt_io in
-  Mirage_crypto_rng_lwt.initialize () >>= fun () ->
   auth ~hostname ?ca () >>= fun authenticator ->
   X509_lwt.private_of_pems
     ~cert:server_cert
@@ -64,6 +63,6 @@ let trust =
 
 let cmd =
   Term.(const jump $ setup_log $ port $ host $ trust),
-  Term.info "server" ~version:"%%VERSION_NUM%%"
+  Term.info "server" ~version:"0.13.1"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

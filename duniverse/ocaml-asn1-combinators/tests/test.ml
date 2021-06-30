@@ -369,7 +369,11 @@ let anticases = [
   [ "0300"; "030101"; "030208ff" ];
 
   case "null with indefinite length" Asn.S.null
-  [ "0580"; "058000"; "05800000" ]
+  [ "0580"; "058000"; "05800000" ];
+
+  case "32 bit length overflow"
+  Asn.S.(sequence2 (required integer) (required integer))
+  [ "30850100000006020180020180" ];
 ]
 
 let der_anticases = [

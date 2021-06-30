@@ -14,30 +14,29 @@
  *
   }}}*)
 
-(** Read and write the HTTP/1.1 transfer-encoding formats.
-    Currently supported are [chunked] and [content-length].
-  *)
+(** Read and write the HTTP/1.1 transfer-encoding formats. Currently supported
+    are [chunked] and [content-length]. *)
 
 (** The encoding format detected from the [transfer-encoding] and
     [content-length] headers *)
 type encoding =
-  | Chunked             (** dynamic chunked encoding *)
-  | Fixed of int64      (** fixed size content *)
-  | Unknown             (** unknown body size, which leads to best-effort *)
+  | Chunked  (** dynamic chunked encoding *)
+  | Fixed of int64  (** fixed size content *)
+  | Unknown  (** unknown body size, which leads to best-effort *)
 [@@deriving sexp]
 
 (** A chunk of body that also signals if there to more to arrive *)
 type chunk =
-  | Chunk of string (** chunk of data and not the end of stream *)
-  | Final_chunk of string (** the last chunk of data, so no more should be read *)
-  | Done (** no more body data is present *)
+  | Chunk of string  (** chunk of data and not the end of stream *)
+  | Final_chunk of string
+      (** the last chunk of data, so no more should be read *)
+  | Done  (** no more body data is present *)
 [@@deriving sexp]
 
-(** Convert the encoding format to a human-readable string *)
 val string_of_encoding : encoding -> string
+(** Convert the encoding format to a human-readable string *)
 
-(** [has_body encoding] returns the appropriate variant that indicates
-    whether the HTTP request or response has an associated body.
-    It does not guess: instead [Unknown] is returned if there is no
-    explicit association. *)
 val has_body : encoding -> [ `No | `Unknown | `Yes ]
+(** [has_body encoding] returns the appropriate variant that indicates whether
+    the HTTP request or response has an associated body. It does not guess:
+    instead [Unknown] is returned if there is no explicit association. *)

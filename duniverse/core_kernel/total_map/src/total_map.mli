@@ -30,6 +30,7 @@
 
 open! Core_kernel
 open! Import
+module Enumeration = Enumeration
 
 type ('key, 'a, 'cmp, 'enum) t = private ('key, 'a, 'cmp) Map.t
 
@@ -97,10 +98,16 @@ module Sequence (A : Applicative) : sig
 end
 
 (** The only reason that the Applicative interface isn't included here is that we don't
-    have an [Applicative.S3]. *)
+    have an [Applicative.S4]. *)
 
 module type Key = sig
   type t [@@deriving sexp, bin_io, compare, enumerate]
+end
+
+module type Key_with_witnesses = sig
+  include Key
+  include Comparator.S with type t := t
+  include Enumeration.S with type t := t
 end
 
 module type S = sig
@@ -120,7 +127,28 @@ end
 
 module Make (Key : Key) : S with module Key = Key
 
-module Make_using_comparator (Key : sig
-    include Key
-    include Comparator.S with type t := t
-  end) : S with module Key = Key with type comparator_witness = Key.comparator_witness
+module Make_with_witnesses (Key : Key_with_witnesses) :
+  S
+  with module Key = Key
+  with type comparator_witness = Key.comparator_witness
+  with type enumeration_witness = Key.enumeration_witness
+
+module Stable : sig
+  module V1 : sig
+    module type S = sig
+      module Key : Key
+
+      type comparator_witness
+      type enumeration_witness
+
+      type nonrec 'a t = (Key.t, 'a, comparator_witness, enumeration_witness) t
+      [@@deriving bin_io, sexp, compare]
+    end
+
+    module Make_with_witnesses (Key : Key_with_witnesses) :
+      S
+      with module Key = Key
+      with type comparator_witness = Key.comparator_witness
+      with type enumeration_witness = Key.enumeration_witness
+  end
+end

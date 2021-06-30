@@ -1,0 +1,8 @@
+#print_column_numbers true;;
+
+let f () =
+  !"%{sexp:nosuchtype}"
+[%%expect{|
+Line _, characters 3-13:
+Error: Unbound value sexp_of_nosuchtype
+|}]

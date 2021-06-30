@@ -7,22 +7,45 @@
     In the following names, blank means ' ' or '\t', while space means blank or newline.
 *)
 
-open Base
+open! Base
+open Import
 
 module Line : sig
   type 'a not_blank =
     { trailing_blanks : string (** regexp: "[ \t]*" *)
-    ; (** Original contents of the line without the trailing blanks or indentation. *)
-      orig            : string (** regexp: "[^\n]*[^ \t\n]" *)
-    ; (** Data associated to the line. *)
-      data            : 'a
+    ; orig : string
+    (** Original contents of the line without the trailing blanks or indentation.
+        regexp: "[^\n]*[^ \t\n]" *)
+    ; data : 'a
+    (** Data associated to the line. *)
     }
-  [@@deriving sexp_of, compare]
+  [@@deriving_inline sexp_of, compare, equal]
+  include
+    sig
+      [@@@ocaml.warning "-32"]
+      val sexp_of_not_blank :
+        ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
+        'a not_blank -> Ppx_sexp_conv_lib.Sexp.t
+      val compare_not_blank :
+        ('a -> 'a -> int) -> 'a not_blank -> 'a not_blank -> int
+      val equal_not_blank :
+        ('a -> 'a -> bool) -> 'a not_blank -> 'a not_blank -> bool
+    end[@@ocaml.doc "@inline"]
+  [@@@end]
 
   type 'a t =
     | Blank     of string  (** regexp: "[ \t]*" *)
     | Not_blank of 'a not_blank
-  [@@deriving sexp_of, compare]
+  [@@deriving_inline sexp_of, compare, equal]
+  include
+    sig
+      [@@@ocaml.warning "-32"]
+      val sexp_of_t :
+        ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+      val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+      val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+    end[@@ocaml.doc "@inline"]
+  [@@@end]
 
   val invariant : ('a -> unit) -> 'a t -> unit
 
@@ -52,7 +75,19 @@ type 'a single_line =
   ; orig            : string (** regexp: "[^ \t\n]([^\n]*[^ \t\n])?" *)
   ; data            : 'a
   }
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+include
+  sig
+    [@@@ocaml.warning "-32"]
+    val sexp_of_single_line :
+      ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
+      'a single_line -> Ppx_sexp_conv_lib.Sexp.t
+    val compare_single_line :
+      ('a -> 'a -> int) -> 'a single_line -> 'a single_line -> int
+    val equal_single_line :
+      ('a -> 'a -> bool) -> 'a single_line -> 'a single_line -> bool
+  end[@@ocaml.doc "@inline"]
+[@@@end]
 
 (** Any [%expect] node with one or more newlines and at least one non-blank line.
 
@@ -93,13 +128,34 @@ type 'a multi_lines =
   ; indentation     : string (** regexp: "[ \t]*" *)
   ; lines           : 'a Line.t list (** regexp: not_blank (.* not_blank)? *)
   }
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+include
+  sig
+    [@@@ocaml.warning "-32"]
+    val sexp_of_multi_lines :
+      ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
+      'a multi_lines -> Ppx_sexp_conv_lib.Sexp.t
+    val compare_multi_lines :
+      ('a -> 'a -> int) -> 'a multi_lines -> 'a multi_lines -> int
+    val equal_multi_lines :
+      ('a -> 'a -> bool) -> 'a multi_lines -> 'a multi_lines -> bool
+  end[@@ocaml.doc "@inline"]
+[@@@end]
 
 type 'a t =
   | Empty       of string (** regexp: "[ \t\n]*" *)
   | Single_line of 'a single_line
   | Multi_lines of 'a multi_lines
-[@@deriving sexp_of, compare]
+[@@deriving_inline sexp_of, compare, equal]
+include
+  sig
+    [@@@ocaml.warning "-32"]
+    val sexp_of_t :
+      ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+  end[@@ocaml.doc "@inline"]
+[@@@end]
 
 val invariant : ('a -> unit) -> 'a t -> unit
 

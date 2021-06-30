@@ -19,11 +19,10 @@ open Sexplib0.Sexp_conv
 type t = int [@@deriving sexp]
 
 let to_string = string_of_int
-
 let count = ref 0
 
 let create () =
   incr count;
   !count
 
-let compare (a:t) (b:t) = Stdlib.compare a b
+let compare (a : t) (b : t) = Stdlib.compare a b

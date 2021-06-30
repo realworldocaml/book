@@ -20,6 +20,7 @@ module Stable = struct
         val days_in_month : year:int -> month:Month.t -> int
         val to_int : t -> int
         val of_int_exn : int -> t
+        val invalid_value__for_internal_use_only : t
       end = struct
         (* We used to store dates like this:
            type t = { y: int; m: Month.Stable.V1.t; d: int; }
@@ -116,6 +117,12 @@ module Stable = struct
 
         let to_int t = t
         let of_int_exn n = create_exn ~y:(year n) ~m:(month n) ~d:(day n)
+        let invalid_value__for_internal_use_only = 0
+
+        let%test "invalid value" =
+          Exn.does_raise (fun () ->
+            (of_int_exn invalid_value__for_internal_use_only : t))
+        ;;
       end
 
       include T
@@ -270,6 +277,42 @@ module Stable = struct
 
     include Without_comparable
     include Comparable.Stable.V1.Make (Without_comparable)
+  end
+
+  module Option = struct
+    module V1 = struct
+      type t = int
+      [@@deriving
+        bin_io
+      , bin_shape ~basetype:"826a3e79-3321-451a-9707-ed6c03b84e2f"
+      , compare
+      , hash
+      , typerep]
+
+      let none = V1.(to_int invalid_value__for_internal_use_only)
+      let is_none t = t = none
+      let is_some t = not (is_none t)
+      let some_is_representable _ = true
+      let some t = V1.to_int t
+      let unchecked_value = V1.of_int_exn
+      let to_option t = if is_some t then Some (unchecked_value t) else None
+
+      let of_option opt =
+        match opt with
+        | None -> none
+        | Some v -> some v
+      ;;
+
+      let value_exn t =
+        if is_some t
+        then unchecked_value t
+        else raise_s [%message [%here] "Date.Option.value_exn none"]
+      ;;
+
+      let value t ~default = if is_some t then unchecked_value t else default
+      let sexp_of_t t = to_option t |> Option.sexp_of_t V1.sexp_of_t
+      let t_of_sexp sexp = (Option.t_of_sexp V1.t_of_sexp) sexp |> of_option
+    end
   end
 end
 
@@ -471,10 +514,53 @@ let add_days_skipping t ~skip n =
   loop t (abs n)
 ;;
 
+let rec first_day_satisfying t ~step ~condition =
+  if condition t then t else first_day_satisfying (add_days t step) ~step ~condition
+;;
+
+let next_day_satisfying t ~step ~condition =
+  let next_day = add_days t step in
+  first_day_satisfying next_day ~step ~condition
+;;
+
+let following_weekday t = next_day_satisfying t ~step:1 ~condition:is_weekday
+let previous_weekday t = next_day_satisfying t ~step:(-1) ~condition:is_weekday
+let round_forward_to_weekday t = first_day_satisfying t ~step:1 ~condition:is_weekday
+let round_backward_to_weekday t = first_day_satisfying t ~step:(-1) ~condition:is_weekday
+
+let round_forward_to_business_day t ~is_holiday =
+  first_day_satisfying t ~step:1 ~condition:(is_business_day ~is_holiday)
+;;
+
+let round_backward_to_business_day t ~is_holiday =
+  first_day_satisfying t ~step:(-1) ~condition:(is_business_day ~is_holiday)
+;;
+
 let add_weekdays t n = add_days_skipping t ~skip:is_weekend n
+let add_weekdays_rounding_in_direction_of_step = add_weekdays
+
+let add_weekdays_rounding_forward t n =
+  add_days_skipping (round_forward_to_weekday t) ~skip:is_weekend n
+;;
+
+let add_weekdays_rounding_backward t n =
+  add_days_skipping (round_backward_to_weekday t) ~skip:is_weekend n
+;;
 
 let add_business_days t ~is_holiday n =
   add_days_skipping t n ~skip:(fun d -> is_weekend d || is_holiday d)
+;;
+
+let add_business_days_rounding_in_direction_of_step = add_business_days
+
+let add_business_days_rounding_forward t ~is_holiday n =
+  add_days_skipping (round_forward_to_business_day ~is_holiday t) n ~skip:(fun d ->
+    not (is_business_day ~is_holiday d))
+;;
+
+let add_business_days_rounding_backward t ~is_holiday n =
+  add_days_skipping (round_backward_to_business_day ~is_holiday t) n ~skip:(fun d ->
+    not (is_business_day ~is_holiday d))
 ;;
 
 let dates_between ~min:t1 ~max:t2 =
@@ -497,16 +583,6 @@ let weekdays_between ~min ~max =
 
 let business_dates_between ~min ~max ~is_holiday =
   weekdays_between ~min ~max |> List.filter ~f:(fun d -> not (is_holiday d))
-;;
-
-let rec previous_weekday t =
-  let previous_day = add_days t (-1) in
-  if is_weekday previous_day then previous_day else previous_weekday previous_day
-;;
-
-let rec following_weekday t =
-  let following_day = add_days t 1 in
-  if is_weekday following_day then following_day else following_weekday following_day
 ;;
 
 let first_strictly_after t ~on:dow =
@@ -551,4 +627,40 @@ module Private = struct
   let leap_year_table = leap_year_table
   let non_leap_year_table = non_leap_year_table
   let ordinal_date = ordinal_date
+end
+
+module Option = struct
+  module Stable = Stable.Option
+  include Stable.V1
+
+  module Optional_syntax = struct
+    module Optional_syntax = struct
+      let is_none = is_none
+      let unsafe_value = unchecked_value
+    end
+  end
+
+  let quickcheck_generator =
+    Quickcheck.Generator.map
+      (Option.quickcheck_generator quickcheck_generator)
+      ~f:of_option
+  ;;
+
+  let quickcheck_shrinker =
+    Quickcheck.Shrinker.map
+      (Option.quickcheck_shrinker quickcheck_shrinker)
+      ~f:of_option
+      ~f_inverse:to_option
+  ;;
+
+  let quickcheck_observer =
+    Quickcheck.Observer.of_hash
+      (module struct
+        type nonrec t = t [@@deriving hash]
+      end)
+  ;;
+
+  include Comparable.Make_plain (struct
+      type nonrec t = t [@@deriving compare, sexp_of]
+    end)
 end

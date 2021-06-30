@@ -216,11 +216,27 @@ let tests = [
     |> to_list
     |> assert_equal [
       doctype;
+      `Text ["\n"];
       start_element "div";
       `Text ["\n"; " "];
       start_element "p";
       `End_element;
       `Text ["\n"];
+      `End_element;
+      `Text ["\n"]]);
+
+  ("utility.pretty_print.doctype.existing-newline" >:: fun _ ->
+    [doctype;
+     `Text ["\n"];
+     start_element "div";
+     `End_element]
+    |> of_list
+    |> pretty_print
+    |> to_list
+    |> assert_equal [
+      doctype;
+      `Text ["\n"];
+      start_element "div";
       `End_element;
       `Text ["\n"]]);
 

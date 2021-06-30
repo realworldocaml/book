@@ -1,5 +1,5 @@
-(** This module extends {{!Base.Maybe_bound}[Base.Maybe_bound]} with bin_io and with compare functions in the
-    form of [As_lower_bound] and [As_upper_bound] modules. *)
+(** This module extends {{!Base.Maybe_bound}[Base.Maybe_bound]} with bin_io and with
+    compare functions in the form of [As_lower_bound] and [As_upper_bound] modules. *)
 
 type 'a t = 'a Base.Maybe_bound.t =
   | Incl of 'a

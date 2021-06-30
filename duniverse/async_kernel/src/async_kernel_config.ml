@@ -36,7 +36,7 @@ module Max_num_open_file_descrs = struct
       let validate = Int.validate_positive
     end)
 
-  let default = create_exn (1 lsl 15)
+  let default = create_exn (1 lsl 16)
   let equal (t1 : t) t2 = t1 = t2
 end
 

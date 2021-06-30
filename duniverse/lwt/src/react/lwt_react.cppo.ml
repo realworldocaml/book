@@ -101,7 +101,8 @@ module E = struct
   let of_stream stream =
     let event, push = create () in
     let t =
-      Lwt.pause () >>= fun () -> Lwt_stream.iter (fun v -> push v) stream in
+      Lwt.pause () >>= fun () ->
+      Lwt_stream.iter (fun v -> try push v with exn -> !Lwt.async_exception_hook exn) stream in
     with_finaliser (cancel_thread t) event
 
   let delay thread =

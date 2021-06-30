@@ -1,7 +1,7 @@
 open! Core_kernel
 open! Uuid
 open! Uuid.Private
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 
 let%expect_test _ =
   Quickcheck.test_distinct_values

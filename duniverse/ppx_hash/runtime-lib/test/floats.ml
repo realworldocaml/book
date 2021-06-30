@@ -9,7 +9,7 @@ let check_safety ~hash ~compare ~sexp_of_t (a,b) =
   let same_hash = (0 = Int.compare hash_a hash_b) in
   let safe = (same_as_determined_by_compare --> same_hash) in
   if not safe then
-    failwiths "safety violation: equal values hash differently"
+    failwiths ~here:[%here] "safety violation: equal values hash differently"
       ((a,hash_a),(b,hash_b))
       [%sexp_of: (t * Int.t) * (t * Int.t)]
 

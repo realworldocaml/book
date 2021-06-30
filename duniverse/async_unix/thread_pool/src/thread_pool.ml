@@ -431,6 +431,7 @@ module Internal = struct
     let ocaml_thread =
       Or_error.try_with (fun () ->
         Core.Thread.create
+          ~on_uncaught_exn:`Print_to_stderr
           (fun () ->
              Thread.initialize_ocaml_thread thread t.cpu_affinity;
              let rec loop () =

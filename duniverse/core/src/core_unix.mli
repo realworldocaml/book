@@ -253,7 +253,7 @@ module Exit_or_signal : sig
 
   type t = (unit, error) Result.t [@@deriving compare, sexp]
 
-  (** [of_unix] assumes that any signal numbers in the incoming value are O'Caml internal
+  (** [of_unix] assumes that any signal numbers in the incoming value are OCaml internal
       signal numbers. *)
   val of_unix : Unix.process_status -> t
 
@@ -266,7 +266,7 @@ module Exit_or_signal_or_stop : sig
 
   type t = (unit, error) Result.t [@@deriving sexp]
 
-  (** [of_unix] assumes that any signal numbers in the incoming value are O'Caml internal
+  (** [of_unix] assumes that any signal numbers in the incoming value are OCaml internal
       signal numbers. *)
   val of_unix : Unix.process_status -> t
 
@@ -274,32 +274,48 @@ module Exit_or_signal_or_stop : sig
   val or_error : t -> unit Or_error.t
 end
 
-(** [env] is used to control the environment of a child process, and can take four forms.
-    [`Replace_raw] replaces the entire environment with strings in the Unix style, like
-    ["VARIABLE_NAME=value"].  [`Replace] has the same effect as [`Replace_raw], but using
-    bindings represented as ["VARIABLE_NAME", "value"].  [`Extend] adds entries to the
-    existing environment rather than replacing the whole environment. [`Override] is
-    similar to [`Extend] but allows unsetting variables too.
+module Env : sig
+  (** [t] is used to control the environment of a child process, and can take four forms.
+      [`Replace_raw] replaces the entire environment with strings in the Unix style, like
+      ["VARIABLE_NAME=value"].  [`Replace] has the same effect as [`Replace_raw], but using
+      bindings represented as ["VARIABLE_NAME", "value"].  [`Extend] adds entries to the
+      existing environment rather than replacing the whole environment. [`Override] is
+      similar to [`Extend] but allows unsetting variables too.
 
-    If [env] contains multiple bindings for the same variable, the last takes precedence.
-    In the case of [`Extend], bindings in [env] take precedence over the existing
-    environment. *)
-type env = [ `Replace of (string * string) list
+      If [env] contains multiple bindings for the same variable, the last takes precedence.
+      In the case of [`Extend], bindings in [env] take precedence over the existing
+      environment. *)
+  type t = [ `Replace of (string * string) list
            | `Extend of (string * string) list
            | `Override of (string * string option) list
            | `Replace_raw of string list
            ]
-[@@deriving sexp]
+  [@@deriving sexp]
+
+  (** [expand ?base t] returns the environment resulting from applying the changes
+      described by [t] on the given base environment, defaulting to current
+      environment. It can be useful to use the type [t] on functions that only take the
+      full environment, like [Spawn.spawn] or [open_process_full]. It can also be
+      useful, when passing a base, to combine multiple [t] by applying them in succession.
+  *)
+  val expand : ?base:string list Lazy.t -> t -> string list
+
+  (** [expand_array t] is a shorthand for [Array.of_list (expand t)]. *)
+  val expand_array : ?base:string list Lazy.t -> t -> string array
+end
+
+type env = Env.t [@@deriving sexp]
 
 (** [exec ~prog ~argv ?search_path ?env] execs [prog] with [argv].  If [use_path = true]
     (the default) and [prog] doesn't contain a slash, then [exec] searches the [PATH]
     environment variable for [prog].  If [env] is supplied, it determines the environment
     when [prog] is executed.
 
-    The first element in [argv] should be the program itself; the correct way to call
-    [exec] is:
+    While not strictly necessary, by convention, the first element in [argv] should be the
+    name of the file being executed, e.g.:
 
-    {[    exec ~prog ~argv:[ prog; arg1; arg2; ...] ()    ]} *)
+    {[ exec ~prog ~argv:[ prog; arg1; arg2; ...] () ]}
+*)
 val exec
   :  prog:string
   -> argv:string list
@@ -309,8 +325,8 @@ val exec
   -> never_returns
 
 (** [fork_exec ~prog ~argv ?use_path ?env ()] forks and execs [prog] with [argv] in the
-    child process, returning the child PID to the parent. As in [exec], the first element
-    in [argv] should be the program itself. *)
+    child process, returning the child PID to the parent. As in [exec], by convention, the
+    0th element in [argv] should be the program itself. *)
 val fork_exec
   :  prog:string
   -> argv:string list
@@ -685,7 +701,10 @@ type lock_command =
 (** [lockf fd cmd size] place a lock on a file_descr that prevents any other process from
     calling lockf successfully on the same file.  Due to a limitation in the current
     implementation the length will be converted to a native int, potentially throwing an
-    exception if it is too large. *)
+    exception if it is too large.
+
+    Note that, despite the name, this function does not call the UNIX lockf() system call;
+    rather it calls fcntl() with one of F_SETLK, F_SETLKW, or F_GETLK. *)
 val lockf : File_descr.t -> mode:lock_command -> len:Int64.t -> unit
 
 module Flock_command : sig
@@ -697,8 +716,15 @@ module Flock_command : sig
 end
 
 (** [flock fd cmd] places or releases a lock on the fd as per the flock C call of the same
-    name. *)
-val flock : File_descr.t -> Flock_command.t -> bool
+    name. The request is "nonblocking" (LOCK_NB in C), meaning that if the lock cannot be
+    granted immediately, the return value is false. However, the system call still blocks
+    until the lock status can be ascertained. [true] is returned if the lock was granted.
+*)
+val flock : File_descr.t  -> Flock_command.t -> bool
+
+(** [flock_blocking fd cmd] places or releases a lock on the fd as per the flock C call.
+    The function does not return until a lock can be granted. *)
+val flock_blocking : File_descr.t  -> Flock_command.t -> unit
 
 (** Return [true] if the given file descriptor refers to a terminal or
     console window, [false] otherwise. *)
@@ -803,11 +829,19 @@ val access_exn
 
 (** Return a new file descriptor referencing the same file as
     the given descriptor. *)
-val dup : File_descr.t -> File_descr.t
+val dup
+  : ?close_on_exec:bool  (** default: false *)
+  -> File_descr.t
+  -> File_descr.t
 
 (** [dup2 ~src ~dst] duplicates [src] to [dst], closing [dst] if already
     opened. *)
-val dup2 : src:File_descr.t -> dst:File_descr.t -> unit
+val dup2
+  : ?close_on_exec:bool (** default: false *)
+  -> src:File_descr.t
+  -> dst:File_descr.t
+  -> unit
+  -> unit
 
 (** Set the ``non-blocking'' flag on the given descriptor.
     When the non-blocking flag is set, reading on a descriptor
@@ -879,7 +913,10 @@ val closedir : dir_handle -> unit
 (** Create a pipe. The first component of the result is opened
     for reading, that's the exit to the pipe. The second component is
     opened for writing, that's the entrance to the pipe. *)
-val pipe : unit -> File_descr.t * File_descr.t
+val pipe
+  : ?close_on_exec:bool (** default: false *)
+  -> unit
+  -> File_descr.t * File_descr.t
 
 (** Create a named pipe with the given permissions. *)
 val mkfifo : string -> perm:file_perm -> unit
@@ -1212,7 +1249,7 @@ module Passwd : sig
       dir : string;
       shell : string;
     }
-  [@@deriving compare, sexp]
+  [@@deriving compare, fields, sexp]
 
   val getbyname : string -> t option
   val getbyname_exn : string -> t
@@ -1421,19 +1458,30 @@ val domain_of_sockaddr : sockaddr -> socket_domain
 (** Create a new socket in the given domain, and with the
     given kind. The third argument is the protocol type; 0 selects
     the default protocol for that kind of sockets. *)
-val socket : domain:socket_domain -> kind:socket_type -> protocol:int -> File_descr.t
+val socket
+  : ?close_on_exec:bool (** default: false *)
+  -> domain:socket_domain
+  -> kind:socket_type
+  -> protocol:int
+  -> unit
+  -> File_descr.t
 
 (** Create a pair of unnamed sockets, connected together. *)
 val socketpair
-  :  domain:socket_domain
+  : ?close_on_exec:bool (** default: false *)
+  -> domain:socket_domain
   -> kind:socket_type
   -> protocol:int
+  -> unit
   -> File_descr.t * File_descr.t
 
 (** Accept connections on the given socket. The returned descriptor
     is a socket connected to the client; the returned address is
     the address of the connecting client. *)
-val accept : File_descr.t -> File_descr.t * sockaddr
+val accept
+  : ?close_on_exec:bool  (** default: false *)
+  -> File_descr.t
+  -> File_descr.t * sockaddr
 
 (** Bind a socket to an address. *)
 val bind : File_descr.t -> addr:sockaddr -> unit
@@ -1547,6 +1595,7 @@ type socket_bool_option =
   | SO_ACCEPTCONN          (** Report whether socket listening is enabled *)
   | TCP_NODELAY            (** Control the Nagle algorithm for TCP sockets *)
   | IPV6_ONLY              (** Forbid binding an IPv6 socket to an IPv4 address *)
+  | SO_REUSEPORT [@if ocaml_version >= (4, 12, 0)] (** Allow reuse of address and port bindings *)
 [@@deriving sexp]
 
 (** The socket options that can be consulted with {!UnixLabels.getsockopt_int}
@@ -2164,7 +2213,8 @@ val sysconf_exn : sysconf -> int64
     the name unique.  Unlike C's [mkstemp], [prefix] should not include six X's at the
     end.
 
-    The file descriptor will have close-on-exec flag set if O_CLOEXEC flag is supported.
+    The file descriptor will have close-on-exec flag set, atomically when the O_CLOEXEC
+    flag is supported.
 
     @raise Unix_error on errors.
 *)

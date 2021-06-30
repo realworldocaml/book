@@ -1,12 +1,5 @@
 # Contributing to Markup.ml
 
-Markup.ml is developed on [GitHub][repo]. Feel free to open an issue, or send me
-an email at [antonbachin@yahoo.com][email]. If you have a strong interest and
-would like to join the project as a co-maintainer, it is welcome!
-
-[repo]:    https://github.com/aantron/markup.ml
-[email]:   mailto:antonbachin@yahoo.com
-
 <br/>
 
 #### Table of contents
@@ -24,15 +17,13 @@ would like to join the project as a co-maintainer, it is welcome!
 <a id="getting-started"></a>
 ## Getting started
 
-A development version of Markup.ml can be installed in two ways. The easiest is
+To get a development version of Markup.ml, do:
 
 ```
-opam source --dev-repo --pin markup
+git clone https://github.com/aantron/markup.ml.git
+cd markup.ml
+opam install --deps-only .
 ```
-
-The other way is to clone this repo (perhaps after forking it), then execute
-`make install` in it. If you go this route, execute `make uninstall` later to
-remove the pin.
 
 
 
@@ -41,17 +32,15 @@ remove the pin.
 <a id="building"></a>
 ## Building and testing
 
-To test the code, you need to have packages `ounit` and `lwt` installed. Then,
-simply run `make test` to build the library and run unit tests. To generate a
-coverage report, install package `bisect_ppx`, and run `make coverage`. There
-are several other kinds of testing:
+To test the code, run `make test`. To generate a coverage report, run `make
+coverage`. There are several other kinds of testing:
 
 - `make performance-test` measures time for Markup.ml to parse some XML and HTML
   files. You should have `ocamlnet` and `xmlm` installed. Those libraries will
   also be measured, for comparison.
 - `make js-test` checks that `Markup_lwt` can be linked into a `js_of_ocaml`
   program, i.e. that it is not accidentally pulling in any Unix dependencies.
-- `make dependency-test` pins and installs Markup.ml using OPAM, then builds
+- `make dependency-test` pins and installs Markup.ml using opam, then builds
   some small programs that depend on Markup.ml. This tests correct installation
   and that no dependencies are missing.
 
@@ -66,25 +55,23 @@ are several other kinds of testing:
 ### Common concepts
 
 The library is internally written entirely in continuation-passing style (CPS),
-more popularly known simply as *using callbacks*. Except for really trivial
-helpers, most internal functions in Markup.ml take two continuations
-(callbacks): one to call if the function succeeds, and one to call if it fails
-with an exception. So, for a function we would think of as taking as one `int`
-argument, and returning a `string`, the type signature would look like this:
+i.e., roughly speaking, *using callbacks*. Except for really trivial helpers,
+most internal functions in Markup.ml take two continuations (callbacks): one to
+call if the function succeeds, and one to call if it fails with an exception.
+So, for a function `f` we would think of as taking as one `int` argument, and
+returning a `string`, the type signature would look like this:
 
 ```ocaml
-val do_something : int -> (exn -> unit) -> (string -> unit) -> unit
+val f : int -> (exn -> unit) -> (string -> unit) -> unit
 ```
 
-The code will call it on `1337` as `do_something 1337 throw k`. If
-`do_something` succeeds, say with result `"foo"`, it will call `k "foo"`. If it
-fails, say with `Exit`, it will call `throw Exit`. Popular names in other
-languages for `throw` and `k` are `on_failure` and `on_success`, but this code
-was originally written without popular languages in mind :)
+The code will call it on `1337` as `f 1337 throw k`. If `f` succeeds, say with
+result `"foo"`, it will call `k "foo"`. If it fails, say with `Exit`, it will
+call `throw Exit`.
 
-The point of all this is that `do_something` doesn't have to return right away:
-it can, perhaps transitively, trigger some I/O, and call `throw` or `k` only
-later, when the I/O completes.
+The point of all this is that `f` doesn't have to return right away: it can,
+perhaps transitively, trigger some I/O, and call `throw` or `k` only later,
+when the I/O completes.
 
 Due to pervasive use of CPS, there are two useful type aliases defined in
 [`Markup.Common`][common]:
@@ -94,16 +81,13 @@ type 'a cont = 'a -> unit
 type 'a cps = exn cont -> 'a cont -> unit
 ```
 
-With these aliases, the signature of `do_something` can be abbreviated as:
+With these aliases, the signature of `f` can be abbreviated as:
 
 ```ocaml
-val do_something : int -> string cps
+val f : int -> string cps
 ```
 
-which should be much more legible. It might be a [nice easy PR][rename-cps] to
-rename alias `'a cont` to `'a callback`.
-
-[rename-cps]: https://github.com/aantron/markup.ml/issues/23
+which is much more legible.
 
 The other important internal type in Markup.ml is the continuation-passing style
 stream, or *kstream* (`k` being the traditional meta-variable for a
@@ -114,33 +98,32 @@ element, and for kstreams this looks like:
 Kstream.next : 'a Kstream.t -> exn cont -> unit cont -> 'a cont -> unit
 ```
 
-The way this works is that when you call `next stream on_exn on_empty k`, `next`
-eventually calls:
+When you call `next kstream on_exn on_empty k`, `next` eventually calls:
 
 - `on_exn exn` if trying to retrieve the next element resulted in exception
   `exn`,
 - `on_empty ()` if the stream ended, or
-- `k v` in the remaining case, when the stream has a next value, where we are
-  calling that value `v`.
+- `k v` in the remaining case, when the stream has a next value `v`.
 
-Most of Markup.ml is composed as a big chain of stream processors, tied together
-by these kstreams. For example, each parser
+Each of the parsers and serializers in Markup.ml is a chain of stream
+processors, tied together by these kstreams. For example, the HTML and XML parsers both...
 
-- takes a stream of bytes,
-- transforms it into a stream of Unicode characters paired with locations,
-- transforms that into a stream of language tokens, like an "open tag,"
-- and transforms that into a stream of parsing signals, like "the start of an
-  element."
+- take a stream of bytes,
+- transform it into a stream of Unicode characters paired with locations,
+- transform that into a stream of language tokens, like "start tag,"
+- and transform that into a stream of parsing signals, like "start element."
 
 <br/>
 
 The synchronous default API of Markup.ml, seen in the [`README`][readme], is a
-thin wrapper over this internal implementation, which simply expects each call
-to a CPS function to call its continuations (callbacks) *before* the function
-returns.
+thin wrapper over this internal implementation. What makes it synchronous is
+that the underlying I/O functions guarantee that each call to a CPS function `f`
+will call one of its continuations (callbacks) *before* `f` returns.
 
 Likewise, the Lwt API is another thin wrapper, which translates between CPS and
-Lwt promises.
+Lwt promises. What makes this API asynchronous is that underlying I/O functions
+might not call their continuations until long after the functions have returned,
+and this delay is propagated to the continuations nearest to the surface API.
 
 [readme]: https://github.com/aantron/markup.ml#readme
 
@@ -152,7 +135,7 @@ Lwt promises.
 As for how the stream processors are chained together, The HTML specification
 strongly suggests a structure for the parser in the section
 [*8.2.1 Overview of the parsing model*][model], from where the following diagram
-is ripped without any shame whatsoever:
+is taken:
 
 <p align="center">
 <img src="https://www.w3.org/TR/html5/images/parsing-model-overview.svg" />
@@ -164,7 +147,7 @@ The XML parser follows the same structure, even though it is not explicitly
 suggested by the XML specification.
 
 The modules can be arranged in the following categories. Where a module directly
-implements a box from the diagram, it is indicated in boldface.
+implements a box from the diagram, the box name is indicated in boldface.
 
 Until the modules dealing with Lwt, only `Markup.Stream_io` does I/O. The rest
 of the modules are pure with respect to I/O.

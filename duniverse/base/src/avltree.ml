@@ -266,77 +266,45 @@ let[@inline always] rec findi_and_call_impl
                           t
                           ~compare
                           k
-                          arg
+                          arg1
+                          arg2
                           ~call_if_found
                           ~call_if_not_found
                           ~if_found
                           ~if_not_found
   =
-  (* A little manual unrolling of the recursion.
-     This is really worth 5% on average *)
   match t with
-  | Empty -> call_if_not_found ~if_not_found k arg
+  | Empty -> call_if_not_found ~if_not_found k arg1 arg2
   | Leaf { key = k'; value = v } ->
     if compare k k' = 0
-    then call_if_found ~if_found ~key:k' ~data:v arg
-    else call_if_not_found ~if_not_found k arg
+    then call_if_found ~if_found ~key:k' ~data:v arg1 arg2
+    else call_if_not_found ~if_not_found k arg1 arg2
   | Node { left; key = k'; value = v; height = _; right } ->
     let c = compare k k' in
     if c = 0
-    then call_if_found ~if_found ~key:k' ~data:v arg
-    else if c < 0
-    then (
-      match left with
-      | Empty -> call_if_not_found ~if_not_found k arg
-      | Leaf { key = k'; value = v } ->
-        if compare k k' = 0
-        then call_if_found ~if_found ~key:k' ~data:v arg
-        else call_if_not_found ~if_not_found k arg
-      | Node { left; key = k'; value = v; height = _; right } ->
-        let c = compare k k' in
-        if c = 0
-        then call_if_found ~if_found ~key:k' ~data:v arg
-        else
-          findi_and_call_impl
-            (if c < 0 then left else right)
-            ~compare
-            k
-            arg
-            ~call_if_found
-            ~call_if_not_found
-            ~if_found
-            ~if_not_found)
-    else (
-      match right with
-      | Empty -> call_if_not_found ~if_not_found k arg
-      | Leaf { key = k'; value = v } ->
-        if compare k k' = 0
-        then call_if_found ~if_found ~key:k' ~data:v arg
-        else call_if_not_found ~if_not_found k arg
-      | Node { left; key = k'; value = v; height = _; right } ->
-        let c = compare k k' in
-        if c = 0
-        then call_if_found ~if_found ~key:k' ~data:v arg
-        else
-          findi_and_call_impl
-            (if c < 0 then left else right)
-            ~compare
-            k
-            arg
-            ~call_if_found
-            ~call_if_not_found
-            ~if_found
-            ~if_not_found)
+    then call_if_found ~if_found ~key:k' ~data:v arg1 arg2
+    else
+      findi_and_call_impl
+        (if c < 0 then left else right)
+        ~compare
+        k
+        arg1
+        arg2
+        ~call_if_found
+        ~call_if_not_found
+        ~if_found
+        ~if_not_found
 ;;
 
 let find_and_call =
-  let call_if_found ~if_found ~key:_ ~data () = if_found data in
-  let call_if_not_found ~if_not_found key () = if_not_found key in
+  let call_if_found ~if_found ~key:_ ~data () () = if_found data in
+  let call_if_not_found ~if_not_found key () () = if_not_found key in
   fun t ~compare k ~if_found ~if_not_found ->
     findi_and_call_impl
       t
       ~compare
       k
+      ()
       ()
       ~call_if_found
       ~call_if_not_found
@@ -345,13 +313,14 @@ let find_and_call =
 ;;
 
 let findi_and_call =
-  let call_if_found ~if_found ~key ~data () = if_found ~key ~data in
-  let call_if_not_found ~if_not_found key () = if_not_found key in
+  let call_if_found ~if_found ~key ~data () () = if_found ~key ~data in
+  let call_if_not_found ~if_not_found key () () = if_not_found key in
   fun t ~compare k ~if_found ~if_not_found ->
     findi_and_call_impl
       t
       ~compare
       k
+      ()
       ()
       ~call_if_found
       ~call_if_not_found
@@ -360,14 +329,63 @@ let findi_and_call =
 ;;
 
 let find_and_call1 =
-  let call_if_found ~if_found ~key:_ ~data arg = if_found data arg in
-  let call_if_not_found ~if_not_found key arg = if_not_found key arg in
-  fun t ~compare k arg ~if_found ~if_not_found ->
+  let call_if_found ~if_found ~key:_ ~data arg () = if_found data arg in
+  let call_if_not_found ~if_not_found key arg () = if_not_found key arg in
+  fun t ~compare k ~a ~if_found ~if_not_found ->
     findi_and_call_impl
       t
       ~compare
       k
-      arg
+      a
+      ()
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+;;
+
+let findi_and_call1 =
+  let call_if_found ~if_found ~key ~data arg () = if_found ~key ~data arg in
+  let call_if_not_found ~if_not_found key arg () = if_not_found key arg in
+  fun t ~compare k ~a ~if_found ~if_not_found ->
+    findi_and_call_impl
+      t
+      ~compare
+      k
+      a
+      ()
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+;;
+
+let find_and_call2 =
+  let call_if_found ~if_found ~key:_ ~data arg1 arg2 = if_found data arg1 arg2 in
+  let call_if_not_found ~if_not_found key arg1 arg2 = if_not_found key arg1 arg2 in
+  fun t ~compare k ~a ~b ~if_found ~if_not_found ->
+    findi_and_call_impl
+      t
+      ~compare
+      k
+      a
+      b
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+;;
+
+let findi_and_call2 =
+  let call_if_found ~if_found ~key ~data arg1 arg2 = if_found ~key ~data arg1 arg2 in
+  let call_if_not_found ~if_not_found key arg1 arg2 = if_not_found key arg1 arg2 in
+  fun t ~compare k ~a ~b ~if_found ~if_not_found ->
+    findi_and_call_impl
+      t
+      ~compare
+      k
+      a
+      b
       ~call_if_found
       ~call_if_not_found
       ~if_found

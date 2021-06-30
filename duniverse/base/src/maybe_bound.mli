@@ -8,12 +8,11 @@ type 'a t =
   | Excl of 'a
   | Unbounded
 [@@deriving_inline enumerate, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val all : 'a list -> 'a t list
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+
+val all : 'a list -> 'a t list
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
 [@@@end]
 
 val map : 'a t -> f:('a -> 'b) -> 'b t
@@ -39,21 +38,18 @@ type interval_comparison =
   | In_range
   | Above_upper_bound
 [@@deriving_inline sexp, compare, hash]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val sexp_of_interval_comparison :
-      interval_comparison -> Ppx_sexp_conv_lib.Sexp.t
-    val interval_comparison_of_sexp :
-      Ppx_sexp_conv_lib.Sexp.t -> interval_comparison
-    val compare_interval_comparison :
-      interval_comparison -> interval_comparison -> int
-    val hash_fold_interval_comparison :
-      Ppx_hash_lib.Std.Hash.state ->
-      interval_comparison -> Ppx_hash_lib.Std.Hash.state
-    val hash_interval_comparison :
-      interval_comparison -> Ppx_hash_lib.Std.Hash.hash_value
-  end[@@ocaml.doc "@inline"]
+
+val sexp_of_interval_comparison : interval_comparison -> Ppx_sexp_conv_lib.Sexp.t
+val interval_comparison_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> interval_comparison
+val compare_interval_comparison : interval_comparison -> interval_comparison -> int
+
+val hash_fold_interval_comparison
+  :  Ppx_hash_lib.Std.Hash.state
+  -> interval_comparison
+  -> Ppx_hash_lib.Std.Hash.state
+
+val hash_interval_comparison : interval_comparison -> Ppx_hash_lib.Std.Hash.hash_value
+
 [@@@end]
 
 (** [compare_to_interval_exn ~lower ~upper x ~compare] raises if [lower] and [upper] are

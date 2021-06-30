@@ -23,6 +23,8 @@ val create_random : Random.State.t -> t
     which case it shows all zeros (the nil UUID). *)
 val to_string_hum : t -> string
 
+val arg_type : t Command.Arg_type.t
+
 module Unstable : sig
   (** Unlike [Stable] deserializers, [Unstable.t_of_sexp] validates the input. *)
   type nonrec t = t [@@deriving bin_io, compare, hash, sexp]

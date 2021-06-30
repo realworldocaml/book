@@ -232,8 +232,20 @@ let emit, rules =
    (normalized) result. This is succinctly expressed by combining a claim
    and a memoizer. *)
 
+(* [new_claim()] creates a new service for claiming names. It returns a
+   function [claim] of type [int -> unit] such that the call [claim x]
+   succeeds if and only if [claim x] has never been called before. *)
+let new_claim () : (string -> unit) =
+  let names = ref StringSet.empty in
+  let claim name =
+    if StringSet.mem name !names then
+      Error.error [] "internal name clash over %s" name;
+    names := StringSet.add name !names
+  in
+  claim
+
 let mangle : label -> nonterminal =
-  let ensure_fresh = Misc.new_claim() in
+  let ensure_fresh = new_claim() in
   let module M = Fix.Memoize.ForHashedType(Label) in
   M.memoize (fun label ->
     let name = mangle label in
@@ -483,7 +495,7 @@ let unthingify_parameter rules thing =
      if StringMap.mem symbol rules then Some param else None
 
 let unthingify_attribute_declaration rules (params, attrs) =
-  (Misc.map_opt (unthingify_parameter rules) params, attrs)
+  (Misc.filter_map (unthingify_parameter rules) params, attrs)
 
 let unthingify_attribute_declarations rules decls =
   List.map (unthingify_attribute_declaration rules) decls

@@ -1,0 +1,14 @@
+(executable
+ (public_name print_greetings)
+ (libraries ppxlib)
+ (modules print_greetings)
+ (preprocess
+  (pps ppxlib.metaquot)))
+
+(executable
+ (public_name print_magic_number)
+ (libraries ocaml-compiler-libs.common)
+ (modules print_magic_number))
+
+(cram
+ (deps %{bin:print_greetings} %{bin:print_magic_number}))

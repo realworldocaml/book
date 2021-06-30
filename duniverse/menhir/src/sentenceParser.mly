@@ -26,8 +26,8 @@
 /* Tokens. */
 
 %token COLON EOF EOL
-%token<Grammar.Terminal.t * Lexing.position * Lexing.position> TERMINAL
-%token<Grammar.Nonterminal.t * Lexing.position * Lexing.position> NONTERMINAL
+%token<SentenceParserAux.raw_symbol> TERMINAL
+%token<SentenceParserAux.raw_symbol> NONTERMINAL
 %token<string> COMMENT
   /* only manually-written comments, beginning with a single # */
 
@@ -37,16 +37,6 @@
 %{
 
   open SentenceParserAux
-
-  (* Removing the position information in a terminal or non-terminal symbol. *)
-
-  let strip_symbol (x, _, _) = x
-
-  (* Removing the position information in a sentence. *)
-
-  let strip_sentence (nto, terminals) =
-    Option.map strip_symbol nto,
-    List.map strip_symbol terminals
 
   (* Computing the start and end positions of a sentence. *)
 
@@ -67,16 +57,19 @@
           Lexing.dummy_pos (* cannot happen *)
     in
     [Positions.import (opening, closing)],
-    strip_sentence (nto, terminals)
+    (nto, terminals)
 
 %}
 
-%type <located_sentence> located_sentence
+%type <raw_sentence> sentence
 
-%type <SentenceParserAux.sentence option> optional_sentence
+%type <located_raw_sentence> located_sentence
+
+%type <SentenceParserAux.raw_sentence option> optional_sentence
+
+%type<SentenceParserAux.located_raw_sentence SentenceParserAux.or_comment list> entry
+
 %start optional_sentence
-
-%type<SentenceParserAux.located_sentence SentenceParserAux.or_comment list> entry
 %start entry
 
 %%
@@ -102,7 +95,7 @@ optional_sentence:
 | EOF
     { None }
 | sentence
-    { Some (strip_sentence $1) }
+    { Some $1 }
 
 /* A sentence is a pair of an optional non-terminal start symbol and a list
    of terminal symbols. It is terminated by a newline. */

@@ -1,0 +1,20 @@
+version: "0.15.0"
+opam-version: "2.0"
+maintainer: "Spiros Eliopoulos <spiros@inhabitedtype.com>"
+authors: [ "Spiros Eliopoulos <spiros@inhabitedtype.com>" ]
+license: "BSD-3-clause"
+homepage: "https://github.com/inhabitedtype/angstrom"
+bug-reports: "https://github.com/inhabitedtype/angstrom/issues"
+dev-repo: "git+https://github.com/inhabitedtype/angstrom.git"
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+depends: [
+  "ocaml" {>= "4.04.1"}
+  "dune" {>= "1.0"}
+  "angstrom" {>= "0.7.0"}
+  "async" {>= "v0.10.0"}
+]
+synopsis: "Async support for Angstrom"

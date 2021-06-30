@@ -26,6 +26,20 @@ static uint64_t __inline __builtin_clzll(uint64_t x)
   return r;
 }
 
+static uint32_t __inline __builtin_ctz(uint32_t x)
+{
+  int r = 0;
+  _BitScanReverse(&r, x);
+  return r;
+}
+
+static uint64_t __inline __builtin_ctzll(uint64_t x)
+{
+  int r = 0;
+  _BitScanReverse64(&r, x);
+  return r;
+}
+
 #endif
 
 static int64_t int_pow(int64_t base, int64_t exponent) {
@@ -66,27 +80,107 @@ CAMLprim value Base_int_math_int_popcount(value v) {
 #endif
 }
 
-/* The specification of all below [clz] functions is undefined for [v = 0]. */
-CAMLprim value Base_int_math_int_clz(value v) {
+/* The specification of all below [clz] and [ctz] functions are undefined for [v = 0]. */
+
+/*
+ * For an int [x] in the [2n + 1] representation:
+ *
+ *   clz(x) = __builtin_clz(x >> 1) - 1
+ *
+ * If [x] is negative, then the macro [Int_val] would perform a arithmetic
+ * shift right, rather than a logical shift right, and sign extend the number.
+ * Therefore
+ *
+ *   __builtin_clz(Int_val(x))
+ *
+ *  would always be zero, so
+ *
+ *    clz(x) = __builtin_clz(Int_val(x)) - 1
+ *
+ *  would always be -1. This is not what we want.
+ *
+ *  The logical shift right adds a leading zero to the argument of
+ *  __builtin_clz, which the -1 accounts for. Rather than adding the leading
+ *  zero and subtracting, we can just compute the clz of the tagged
+ *  representation, and that should be equivalent, while also handing negative
+ *  inputs correctly (the result will now be 0).
+ */
+intnat Base_int_math_int_clz_untagged(value v) {
 #ifdef ARCH_SIXTYFOUR
-  return Val_int (__builtin_clzll (Long_val(v)));
+  return __builtin_clzll (v);
 #else
-  return Val_int (__builtin_clz   (Int_val (v)));
+  return __builtin_clz   (v);
 #endif
+}
+
+CAMLprim value Base_int_math_int_clz(value v) {
+  return Val_int (Base_int_math_int_clz_untagged (v));
+}
+
+intnat Base_int_math_int32_clz_unboxed(int32_t v) {
+  return __builtin_clz (v);
 }
 
 CAMLprim value Base_int_math_int32_clz(value v) {
-  return Val_int (__builtin_clz   (Int32_val(v)));
+  return Val_int (Base_int_math_int32_clz_unboxed (Int32_val(v)));
+}
+
+intnat Base_int_math_int64_clz_unboxed(int64_t v) {
+  return __builtin_clzll (v);
 }
 
 CAMLprim value Base_int_math_int64_clz(value v) {
-  return Val_int (__builtin_clzll (Int64_val(v)));
+  return Val_int (Base_int_math_int64_clz_unboxed (Int64_val(v)));
+}
+
+intnat Base_int_math_nativeint_clz_unboxed(intnat v) {
+#ifdef ARCH_SIXTYFOUR
+  return __builtin_clzll (v);
+#else
+  return __builtin_clz   (v);
+#endif
 }
 
 CAMLprim value Base_int_math_nativeint_clz(value v) {
+  return Val_int (Base_int_math_nativeint_clz_unboxed (Nativeint_val(v)));
+}
+
+intnat Base_int_math_int_ctz_untagged(intnat v) {
 #ifdef ARCH_SIXTYFOUR
-  return Val_int (__builtin_clzll (Nativeint_val(v)));
+  return __builtin_ctzll (v);
 #else
-  return Val_int (__builtin_clz   (Nativeint_val(v)));
+  return __builtin_ctz   (v);
 #endif
+}
+
+CAMLprim value Base_int_math_int_ctz(value v) {
+  return Val_int (Base_int_math_int_ctz_untagged (Int_val(v)));
+}
+
+intnat Base_int_math_int32_ctz_unboxed(int32_t v) {
+  return __builtin_ctz (v);
+}
+
+CAMLprim value Base_int_math_int32_ctz(value v) {
+  return Val_int (Base_int_math_int32_ctz_unboxed (Int32_val(v)));
+}
+
+intnat Base_int_math_int64_ctz_unboxed(int64_t v) {
+  return __builtin_ctzll (v);
+}
+
+CAMLprim value Base_int_math_int64_ctz(value v) {
+  return Val_int (Base_int_math_int64_ctz_unboxed (Int64_val(v)));
+}
+
+intnat Base_int_math_nativeint_ctz_unboxed(intnat v) {
+#ifdef ARCH_SIXTYFOUR
+  return __builtin_ctzll (v);
+#else
+  return __builtin_ctz   (v);
+#endif
+}
+
+CAMLprim value Base_int_math_nativeint_ctz(value v) {
+  return Val_int (Base_int_math_nativeint_ctz_unboxed (Nativeint_val(v)));
 }

@@ -16,25 +16,19 @@
   }}}*)
 
 (* input channel type - a string with a (file) position and length *)
-type buf =
-  {
-    str : string;
-    mutable pos : int;
-    len : int;
-  }
+type buf = { str : string; mutable pos : int; len : int }
 
-let open_in str =
-  {
-    str = str;
-    pos = 0;
-    len = String.length str;
-  }
+let open_in str = { str; pos = 0; len = String.length str }
 
 module M = struct
   type 'a t = 'a
+
   let return a = a
+
   type conn = buf
-  let (>>=) = (|>)
+
+  let ( >>= ) = ( |> )
+
   type ic = buf
 
   (* output channels are just buffers *)
@@ -42,7 +36,7 @@ module M = struct
 
   (* the following read/write logic has only been lightly tested... *)
   let read_rest x =
-    let s = String.sub x.str x.pos (x.len-x.pos) in
+    let s = String.sub x.str x.pos (x.len - x.pos) in
     x.pos <- x.len;
     s
 
@@ -53,32 +47,34 @@ module M = struct
         while x.str.[x.pos] != '\n' do
           x.pos <- x.pos + 1
         done;
-        let l = if x.pos > 0 && x.str.[x.pos-1] = '\r' then x.pos-start-1 else x.pos-start in
+        let l =
+          if x.pos > 0 && x.str.[x.pos - 1] = '\r' then x.pos - start - 1
+          else x.pos - start
+        in
         let s = String.sub x.str start l in
         x.pos <- x.pos + 1;
         Some s
-      with _ ->
-        Some (read_rest x)
-    else
-      None
+      with _ -> Some (read_rest x)
+    else None
 
   let read_line x = return (read_line' x)
 
   let read_exactly' x n =
-    if x.len-x.pos < n then None
-    else begin
+    if x.len - x.pos < n then None
+    else
       let s = String.sub x.str x.pos n in
       x.pos <- x.pos + n;
       Some s
-    end
 
   let read x n =
     match read_exactly' x n with
     | None when x.pos >= x.len -> raise End_of_file
     | None -> return (read_rest x)
-    | Some(x) -> return x
+    | Some x -> return x
 
-  let write x s = Buffer.add_string x s; return ()
+  let write x s =
+    Buffer.add_string x s;
+    return ()
 
   let flush _x = return ()
 end

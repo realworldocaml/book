@@ -1,4 +1,4 @@
-version: "1.5.1"
+version: "1.5.2"
 opam-version: "2.0"
 
 homepage: "http://github.com/ocaml/odoc"
@@ -33,7 +33,7 @@ depends: [
   "tyxml" {>= "4.3.0"}
 
   "alcotest" {dev & >= "0.8.3"}
-  "markup" {dev & >= "0.8.0"}
+  "markup" {dev & >= "1.0.0"}
   "ocamlfind" {dev}
   "sexplib" {dev & >= "113.33.00"}
 

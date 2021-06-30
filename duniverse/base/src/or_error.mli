@@ -10,16 +10,18 @@ open! Import
 
 (** Serialization and comparison of an [Error] force the error's lazy message. *)
 type 'a t = ('a, Error.t) Result.t [@@deriving_inline compare, equal, hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-    val hash_fold_t :
-      (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-      Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+
+val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+
+val hash_fold_t
+  :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+  -> Ppx_hash_lib.Std.Hash.state
+  -> 'a t
+  -> Ppx_hash_lib.Std.Hash.state
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
 [@@@end]
 
 (** [Applicative] functions don't have quite the same semantics as
@@ -34,7 +36,6 @@ include Monad.S with type 'a t := 'a t
 
 val is_ok : _ t -> bool
 val is_error : _ t -> bool
-val ignore : _ t -> unit t [@@deprecated "[since 2019-02] Use [ignore_m] instead"]
 
 (** [try_with f] catches exceptions thrown by [f] and returns them in the [Result.t] as an
     [Error.t].  [try_with_join] is like [try_with], except that [f] can throw exceptions

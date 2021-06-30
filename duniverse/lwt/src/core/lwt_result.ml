@@ -90,6 +90,17 @@ module Infix = struct
   let (>|=) e f = map f e
 end
 
+module Let_syntax = struct
+  module Let_syntax = struct
+    let return = return
+    let map t ~f = map f t
+    let bind t ~f = bind t f
+    let both = both
+    module Open_on_rhs = struct
+    end
+  end
+end
+
 module Syntax = struct
   let (let*) = bind
   let (and*) = both

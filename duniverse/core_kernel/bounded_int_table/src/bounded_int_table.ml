@@ -73,7 +73,11 @@ let invariant invariant_key invariant_data t =
   with
   | exn ->
     let sexp_of_key = sexp_of_key t in
-    failwiths "invariant failed" (exn, t) [%sexp_of: exn * (key, _) t_detailed]
+    failwiths
+      ~here:[%here]
+      "invariant failed"
+      (exn, t)
+      [%sexp_of: exn * (key, _) t_detailed]
 ;;
 
 let debug = ref false
@@ -81,7 +85,8 @@ let check_invariant t = if !debug then invariant ignore ignore t
 let is_empty t = length t = 0
 
 let create ?sexp_of_key ~num_keys ~key_to_int () =
-  if num_keys < 0 then failwiths "num_keys must be nonnegative" num_keys [%sexp_of: int];
+  if num_keys < 0
+  then failwiths ~here:[%here] "num_keys must be nonnegative" num_keys [%sexp_of: int];
   let t =
     { num_keys
     ; sexp_of_key
@@ -159,6 +164,7 @@ let entry_opt t key =
   | _ ->
     let sexp_of_key = sexp_of_key t in
     failwiths
+      ~here:[%here]
       "key's index out of range"
       (key, index, `Should_be_between_0_and (t.num_keys - 1))
       [%sexp_of: key * int * [ `Should_be_between_0_and of int ]]
@@ -176,6 +182,7 @@ let find_exn t key =
   | None ->
     let sexp_of_key = sexp_of_key t in
     failwiths
+      ~here:[%here]
       "Bounded_int_table.find_exn got unknown key"
       (key, t)
       [%sexp_of: key * (key, _) t]
@@ -224,6 +231,7 @@ let add_exn t ~key ~data =
   | `Duplicate _ ->
     let sexp_of_key = sexp_of_key t in
     failwiths
+      ~here:[%here]
       "Bounded_int_table.add_exn of key whose index is already present"
       (key, t.key_to_int key)
       [%sexp_of: key * int]
@@ -243,6 +251,7 @@ let remove t key =
        | None ->
          let sexp_of_key = sexp_of_key t in
          failwiths
+           ~here:[%here]
            "Bounded_int_table.remove bug"
            (key, last, t)
            [%sexp_of: key * int * (key, _) t_detailed]
@@ -307,7 +316,7 @@ struct
     of_serialized (Serialized.t_of_sexp Key.t_of_sexp data_of_sexp sexp)
   ;;
 
-  include Binable.Of_binable1
+  include Binable.Of_binable1_without_uuid [@alert "-legacy"]
       (struct
         type 'data t = (Key.t, 'data) Serialized.t [@@deriving bin_io]
       end)

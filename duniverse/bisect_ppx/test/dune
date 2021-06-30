@@ -1,1 +1,1 @@
-(ignored_subdirs (bucklescript))
+(dirs (:standard \ bucklescript))

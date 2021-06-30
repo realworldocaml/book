@@ -13,4 +13,9 @@
  (name cppo_main)
  (package cppo)
  (public_name cppo)
+ (modules :standard \ compat)
+ (preprocess (per_module
+  ((action (progn
+    (run ocaml %{dep:compat.ml} %{input-file})
+    (cat %{input-file}))) cppo_eval)))
  (libraries unix str))

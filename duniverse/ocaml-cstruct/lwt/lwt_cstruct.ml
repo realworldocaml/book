@@ -25,7 +25,7 @@ let complete op t =
   let rec loop t =
     op t >>= fun n ->
     let t = Cstruct.shift t n in
-    if Cstruct.len t = 0
+    if Cstruct.length t = 0
     then return ()
     else if n = 0
     then fail End_of_file

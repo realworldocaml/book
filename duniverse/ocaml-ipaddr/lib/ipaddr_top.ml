@@ -1,15 +1,16 @@
-let printers = [
-  "Ipaddr.pp";
-  "Ipaddr.Prefix.pp";
-  "Ipaddr.V4.pp";
-  "Ipaddr.V4.Prefix.pp";
-  "Ipaddr.V6.pp";
-  "Ipaddr.V6.Prefix.pp";
-  "Macaddr.pp";
-]
+let printers =
+  [
+    "Ipaddr.pp";
+    "Ipaddr.Prefix.pp";
+    "Ipaddr.V4.pp";
+    "Ipaddr.V4.Prefix.pp";
+    "Ipaddr.V6.pp";
+    "Ipaddr.V6.Prefix.pp";
+    "Macaddr.pp";
+  ]
 
-let eval_string
-      ?(print_outcome = false) ?(err_formatter = Format.err_formatter) str =
+let eval_string ?(print_outcome = false) ?(err_formatter = Format.err_formatter)
+    str =
   let lexbuf = Lexing.from_string str in
   let phrase = !Toploop.parse_toplevel_phrase lexbuf in
   Toploop.execute_phrase print_outcome err_formatter phrase

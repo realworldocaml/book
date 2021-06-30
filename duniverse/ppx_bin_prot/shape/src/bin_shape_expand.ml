@@ -98,10 +98,11 @@ let of_type : (
     | Rtag (_,false,[]) ->
       raise_errorf ~loc "impossible row_type: Rtag (_,_,false,[])"
     | Rinherit t ->
-      [%expr Bin_prot.Shape.inherit_ [%e loc_string t.ptyp_loc] [%e traverse t]]
+      [%expr Bin_prot.Shape.inherit_
+               [%e loc_string { t.ptyp_loc with loc_ghost = true}] [%e traverse t]]
 
   and traverse typ =
-    let loc = typ.ptyp_loc in
+    let loc = { typ.ptyp_loc with loc_ghost = true } in
     match typ.ptyp_desc with
     | Ptyp_constr (lid,typs) ->
       let args = List.map typs ~f:traverse in
@@ -334,4 +335,5 @@ let shape_extension ~loc:_ typ =
   of_type ~allow_free_vars ~context typ
 
 let digest_extension ~loc typ =
+  let loc = { loc with loc_ghost = true } in
   [%expr Bin_prot.Shape.Digest.to_hex (Bin_prot.Shape.eval_to_digest [%e shape_extension ~loc typ])]

@@ -6,7 +6,7 @@ include Cache
 (** The default root directory of the local cache. *)
 val default_root : unit -> Path.t
 
-(** A matadata file contains a list of [files] produced by a cached build rule,
+(** A metadata file contains a list of [files] produced by a cached build rule,
     along with some [metadata] that can be empty.
 
     One example of what can be included in the [metadata] field is a git commit
@@ -65,13 +65,6 @@ val overhead_size : t -> int64
 module Trimming_result : sig
   type t = { trimmed_bytes : int64 }
 end
-
-(** Return a list of unexpected paths that exist in the root directory of the
-    cache. A non-empty result suggests that the cache directory contains
-    multiple versions of the cache, making [trim] and [garbage_collect] less
-    effective. *)
-val detect_unexpected_dirs_under_cache_root :
-  t -> (Path.t list, Unix.error) result
 
 (** Trim the cache by removing a set of unused files from it so that the total
     freed space is greater or equal to the specificed [goal], in bytes. We call

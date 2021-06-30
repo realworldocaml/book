@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "Easy functional HTML scraping and manipulation with CSS selectors"
 
-version: "0.7.1"
+version: "0.7.2"
 license: "MIT"
 homepage: "https://github.com/aantron/lambdasoup"
 doc: "https://aantron.github.io/lambdasoup"
@@ -15,11 +15,11 @@ dev-repo: "git+https://github.com/aantron/lambdasoup.git"
 depends: [
   # As a consequence of depending on Dune, Lambda Soup requires OCaml 4.02.3.
   "dune"
-  "markup" {>= "0.7.1"}
+  "markup" {>= "1.0.0"}
   "ocaml" {>= "4.02.0"}
 
   "bisect_ppx" {dev & >= "2.0.0"}
-  "ounit" {with-test}
+  "ounit2" {with-test}
 ]
 
 build: [

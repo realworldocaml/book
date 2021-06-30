@@ -1,6 +1,6 @@
 (lang dune 1.10)
 (name pcre)
-(version 7.4.3)
+(version 7.4.6)
 
 (generate_opam_files true)
 
@@ -21,8 +21,8 @@ substitution, similar to the functionality offered by the Perl language.")
   (depends
     (ocaml (>= 4.08))
     (dune (>= 1.10))
+    dune-configurator
     (conf-libpcre :build)
-    (base :build)
     base-bytes
   )
 )

@@ -1,0 +1,2 @@
+(library (name ansi_kernel) (public_name core_kernel.ansi_kernel)
+ (libraries core_kernel) (preprocess (pps ppx_jane -check-doc-comments)))

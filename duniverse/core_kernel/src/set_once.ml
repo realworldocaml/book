@@ -23,7 +23,7 @@ module Stable = struct
 
     include T
 
-    include Binable.Of_binable1
+    include Binable.Of_binable1_without_uuid [@alert "-legacy"]
         (Format)
         (struct
           include T

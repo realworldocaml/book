@@ -1,8 +1,20 @@
-open Base
+open! Base
+open Import
 
 module Name : sig
   (** Strongly-typed filename *)
-  type t [@@deriving sexp, compare]
+  type t [@@deriving_inline sexp, compare]
+
+  include sig
+    [@@@ocaml.warning "-32"]
+
+    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+    val compare : t -> t -> int
+  end
+  [@@ocaml.doc "@inline"]
+
+  [@@@end]
 
   val relative_to : dir:string -> t -> string
 
@@ -20,7 +32,18 @@ module Location : sig
     ; start_pos : int
     ; end_pos : int
     }
-  [@@deriving sexp, compare]
+  [@@deriving_inline sexp, compare]
+
+  include sig
+    [@@@ocaml.warning "-32"]
+
+    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+    val compare : t -> t -> int
+  end
+  [@@ocaml.doc "@inline"]
+
+  [@@@end]
 
   val beginning_of_file : Name.t -> t
 
@@ -28,7 +51,17 @@ module Location : sig
 end
 
 module Digest : sig
-  type t [@@deriving sexp_of, compare]
+  type t [@@deriving_inline sexp_of, compare]
+
+  include sig
+    [@@@ocaml.warning "-32"]
+
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val compare : t -> t -> int
+  end
+  [@@ocaml.doc "@inline"]
+
+  [@@@end]
 
   val of_string : string -> t
   val to_string : t -> string

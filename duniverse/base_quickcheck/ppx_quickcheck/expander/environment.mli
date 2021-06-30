@@ -10,7 +10,7 @@ val lookup : t -> loc:location -> tyvar:string -> expression
 val create
   :  loc:location
   -> prefix:string
-  -> (core_type * variance) list
+  -> (core_type * (variance * injectivity)) list
   -> pattern list * t
 
 (** For generators, we want contravariant type parameters to map to observer names. For
@@ -19,5 +19,5 @@ val create_with_variance
   :  loc:location
   -> covariant:string
   -> contravariant:string
-  -> (core_type * variance) list
+  -> (core_type * (variance * injectivity)) list
   -> pattern list * [ `Covariant of t ] * [ `Contravariant of t ]

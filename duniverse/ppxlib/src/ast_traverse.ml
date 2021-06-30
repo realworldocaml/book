@@ -30,7 +30,12 @@ class virtual ['res] lift = object
   inherit ['res] Ast.lift
 end
 
+let module_name = function
+  | None -> "_"
+  | Some name -> name
+
 let enter name path = if String.is_empty path then name else path ^ "." ^ name
+let enter_opt name_opt path = enter (module_name name_opt) path
 
 class map_with_path = object
   inherit [string] map_with_context as super
@@ -60,10 +65,10 @@ class map_with_path = object
      isn't, and the "path" constructed here would be able to differentiate
      between them. *)
   method! module_binding path mb =
-       super#module_binding (enter mb.pmb_name.txt path) mb
+    super#module_binding (enter_opt mb.pmb_name.txt path) mb
 
   method! module_declaration path md =
-    super#module_declaration (enter md.pmd_name.txt path) md
+    super#module_declaration (enter_opt md.pmd_name.txt path) md
 
   method! module_type_declaration path mtd =
     super#module_type_declaration (enter mtd.pmtd_name.txt path) mtd
@@ -79,6 +84,9 @@ let var_names_of = object
     | _ -> acc
 end
 
+let ec_enter_module_opt ~loc name_opt ctxt =
+  Expansion_context.Base.enter_module ~loc (module_name name_opt) ctxt
+
 class map_with_expansion_context = object (self)
   inherit [Expansion_context.Base.t] map_with_context as super
 
@@ -87,12 +95,12 @@ class map_with_expansion_context = object (self)
 
   method! module_binding ctxt mb =
     super#module_binding
-      (Expansion_context.Base.enter_module ~loc:mb.pmb_loc mb.pmb_name.txt ctxt)
+      (ec_enter_module_opt ~loc:mb.pmb_loc mb.pmb_name.txt ctxt)
       mb
 
   method! module_declaration ctxt md =
     super#module_declaration
-      (Expansion_context.Base.enter_module ~loc:md.pmd_loc md.pmd_name.txt ctxt)
+      (ec_enter_module_opt ~loc:md.pmd_loc md.pmd_name.txt ctxt)
       md
 
   method! module_type_declaration ctxt mtd =
@@ -107,11 +115,11 @@ class map_with_expansion_context = object (self)
 
   method! value_binding ctxt {pvb_pat; pvb_expr; pvb_attributes; pvb_loc} =
     let all_var_names = var_names_of#pattern pvb_pat [] in
-    let var_name = Base.List.last all_var_names in
+    let var_name = Stdppx.List.last all_var_names in
     let in_binding_ctxt =
-      Base.Option.fold var_name
-        ~init:ctxt
-        ~f:(fun ctxt var_name -> Expansion_context.Base.enter_value ~loc:pvb_loc var_name ctxt)
+      match var_name with
+      | None -> ctxt
+      | Some var_name -> Expansion_context.Base.enter_value ~loc:pvb_loc var_name ctxt
     in
     let pvb_pat = self#pattern ctxt pvb_pat in
     let pvb_expr = self#expression in_binding_ctxt pvb_expr in

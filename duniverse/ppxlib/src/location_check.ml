@@ -1,4 +1,4 @@
-open! Import
+open Import
 
 module Non_intersecting_ranges : sig
   type t
@@ -62,7 +62,7 @@ end = struct
 
   let union t1 t2 =
     let init, l = longest_first t1.ranges t2.ranges ~stop_after:42 in
-    let ranges = List.fold l ~init ~f:insert in
+    let ranges = List.fold_left l ~init ~f:insert in
     { min_pos = min_pos t1.min_pos t2.min_pos
     ; max_pos = max_pos t1.max_pos t2.max_pos
     ; ranges }
@@ -83,7 +83,7 @@ end = struct
       assert false
 
   let find_outside loc t =
-    List.find_exn t.ranges ~f:(fun (_, l) ->
+    List.find t.ranges ~f:(fun (_, l) ->
       Location.compare_pos loc.loc_start l.loc_start > 0 ||
       Location.compare_pos loc.loc_end l.loc_end < 0
     )
@@ -93,20 +93,22 @@ let reloc_pmty_functors x =
   let outmost_loc = x.pmty_loc in
   let rec aux x =
     match x.pmty_desc with
-    | Pmty_functor (id, mty_opt, initial_res) ->
+    | Pmty_functor (Unit, initial_res) ->
       let res = aux initial_res in
-      if Location.compare outmost_loc res.pmty_loc = 0 then
-        let loc_start =
-          (match mty_opt with
-          | None -> id.loc
-          | Some mty -> mty.pmty_loc).loc_end
-        in
-        let res = { res with pmty_loc = { res.pmty_loc with loc_start } } in
-        { x with pmty_desc = Pmty_functor (id, mty_opt, res) }
-      else if phys_equal res initial_res then
+      if res == initial_res then
         x
       else
-        { x with pmty_desc = Pmty_functor (id, mty_opt, res) }
+        { x with pmty_desc = Pmty_functor (Unit, res) }
+    | Pmty_functor (Named (id, mty), initial_res) ->
+      let res = aux initial_res in
+      if Location.compare outmost_loc res.pmty_loc = 0 then
+        let loc_start = mty.pmty_loc.loc_end in
+        let res = { res with pmty_loc = { res.pmty_loc with loc_start } } in
+        { x with pmty_desc = Pmty_functor (Named (id, mty), res) }
+      else if res == initial_res then
+        x
+      else
+        { x with pmty_desc = Pmty_functor (Named (id, mty), res) }
     | _ -> x
   in
   aux x
@@ -115,20 +117,22 @@ let reloc_pmod_functors x =
   let outmost_loc = x.pmod_loc in
   let rec aux x =
     match x.pmod_desc with
-    | Pmod_functor (id, mty_opt, initial_res) ->
+    | Pmod_functor (Unit, initial_res) ->
       let res = aux initial_res in
-      if Location.compare outmost_loc res.pmod_loc = 0 then
-        let loc_start =
-          (match mty_opt with
-          | None -> id.loc
-          | Some mty -> mty.pmty_loc).loc_end
-        in
-        let res = { res with pmod_loc = { res.pmod_loc with loc_start } } in
-        { x with pmod_desc = Pmod_functor (id, mty_opt, res) }
-      else if phys_equal res initial_res then
+      if res == initial_res then
         x
       else
-        { x with pmod_desc = Pmod_functor (id, mty_opt, res) }
+        { x with pmod_desc = Pmod_functor (Unit, res) }
+    | Pmod_functor (Named (id, mty), initial_res) ->
+      let res = aux initial_res in
+      if Location.compare outmost_loc res.pmod_loc = 0 then
+        let loc_start = mty.pmty_loc.loc_end in
+        let res = { res with pmod_loc = { res.pmod_loc with loc_start } } in
+        { x with pmod_desc = Pmod_functor (Named (id, mty), res) }
+      else if res == initial_res then
+        x
+      else
+        { x with pmod_desc = Pmod_functor (Named (id, mty), res) }
     | _ -> x
   in
   aux x
@@ -142,7 +146,7 @@ let same_file_so_far = ref true
 
 let stayed_in_the_same_file =
   fun fname ->
-    (* CR-soon trefis: remove uses of Location.none from the ppxes. *)
+    (* TODO: remove uses of Location.none from the ppxes. *)
     if String.equal fname "_none_" then
       true (* do nothing for now. *)
     else
@@ -155,7 +159,7 @@ let should_ignore loc attrs =
   (* If the filename changed, then there were line directives, and the locations
      are all messed up. *)
   not (stayed_in_the_same_file loc.loc_start.pos_fname) ||
-  (* Ignore things explicitely marked. *)
+  (* Ignore things explicitly marked. *)
   List.exists ~f:(fun attr ->
     String.equal attr.attr_name.txt Merlin_helpers.hide_attribute.attr_name.txt
   ) attrs
@@ -198,8 +202,7 @@ let enforce_invariants fname =
   object(self)
     inherit [Non_intersecting_ranges.t] Ast_traverse.fold as super
 
-    (* CR-someday trefis: we should generate a class which enforces the location
-       invariant.
+    (* TODO: we should generate a class which enforces the location invariant.
        And then we should only override the methods where we need an escape
        hatch because the parser isn't doing the right thing.
 
@@ -520,10 +523,10 @@ let enforce_invariants fname =
         ignore (do_check ~node_name:"exception" x.ptyexn_loc attrs_locs siblings_locs);
         do_check ~node_name:"exception" x.ptyexn_loc childs_locs siblings_locs
 
-    (******************************************)
-    (* The following is overriden because the *)
-    (* lhs is sometimes included in the rhs.  *)
-    (******************************************)
+    (*******************************************)
+    (* The following is overridden because the *)
+    (* lhs is sometimes included in the rhs.   *)
+    (*******************************************)
 
     method! with_constraint x siblings_loc =
       match x with
@@ -535,7 +538,7 @@ let enforce_invariants fname =
 
 
     (******************************************)
-    (* The following is overriden because of: *)
+    (* The following is overridden because of:*)
     (* - Foo.{ bar; ... }                     *)
     (* - Foo.[ bar; ... ]                     *)
     (* - Foo.( bar; ... )                     *)
@@ -604,7 +607,7 @@ let enforce_invariants fname =
         super#expression_desc x acc
 
     (*******************************************************)
-    (* The following is overriden because of:              *)
+    (* The following is overridden because of:             *)
     (* - punning.                                          *)
     (* - record field with type constraint.                *)
     (* - unpack locations being incorrect when constrained *)
@@ -632,16 +635,16 @@ let enforce_invariants fname =
                let acc = self#longident_loc lid acc in
                let acc = self#pattern pat acc in acc) labels acc
       | Ppat_constraint ({ ppat_desc = Ppat_unpack a; _ }, b) ->
-        let acc = self#loc self#string a acc in
+        let acc = self#loc (self#option self#string) a acc in
         self#core_type b acc
       | _ ->
         super#pattern_desc x acc
 
-    (**********************************************************)
-    (* The following is overriden because the location of the *)
-    (* fake structure for a generative argument covers the    *)
-    (* location of the functor.                               *)
-    (**********************************************************)
+    (***********************************************************)
+    (* The following is overridden because the location of the *)
+    (* fake structure for a generative argument covers the     *)
+    (* location of the functor.                                *)
+    (***********************************************************)
 
     method! module_expr_desc x acc =
       match x with
@@ -651,11 +654,11 @@ let enforce_invariants fname =
       | _ ->
         super#module_expr_desc x acc
 
-    (**********************************************************)
-    (* The following is overriden because the location of the *)
-    (* open_infos for Pcl_open only covers the "open" keyword *)
-    (* and not the module opened.                             *)
-    (**********************************************************)
+    (***********************************************************)
+    (* The following is overridden because the location of the *)
+    (* open_infos for Pcl_open only covers the "open" keyword  *)
+    (* and not the module opened.                              *)
+    (***********************************************************)
 
     method! class_expr_desc x acc =
       match x with
@@ -692,8 +695,8 @@ let enforce_invariants fname =
         super#class_type_desc x acc
 
     (**********************************************************)
-    (* The following is overriden because docstrings have the *)
-    (* same location as the item they get attached to.        *)
+    (* The following is overridden because docstrings have    *)
+    (* the same location as the item they get attached to.    *)
     (**********************************************************)
 
     method! attribute x acc =

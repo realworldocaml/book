@@ -18,7 +18,7 @@ let semver_re = Str.regexp "\
 \\([0-9]+\\)\
 \\.\\([0-9]+\\)\
 \\.\\([0-9]+\\)\
-\\(-\\([^+]*\\)\\)?\
+\\([~-]\\([^+]*\\)\\)?\
 \\(\\+\\(.*\\)\\)?\
 \r?$"
 
@@ -108,6 +108,10 @@ let main () =
             VAR_VERSION_FULL    is the original string
 
           Example: cppo -V OCAML:4.02.1
+
+          Note that cppo recognises both '-' and '~' preceding the pre-release
+          meaning -V OCAML:4.11.0+alpha1 sets OCAML_BUILD to alpha1 but
+          -V OCAML:4.12.0~alpha1 sets OCAML_PRERELEASE to alpha1.
 ";
 
     "-o", Arg.String (fun s -> out_file := Some s),

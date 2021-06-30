@@ -5,9 +5,7 @@
  (libraries bytes))
 
 (rule
- (targets unsafe.ml)
- (deps (:config ../config/config.exe) unsafe_pre407.ml unsafe_stable.ml)
- (action (run %{config})))
+ (copy %{read:../config/which-unsafe-file} unsafe.ml))
 
 (library
  (name base64_rfc2045)

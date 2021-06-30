@@ -5,7 +5,7 @@ open Core
 (** {1 Config type} *)
 
 (** certificate chain and private key of the first certificate *)
-type certchain = Cert.t list * Mirage_crypto_pk.Rsa.priv
+type certchain = Cert.t list * X509.Private_key.t
 
 (** polymorphic variant of own certificates *)
 type own_cert = [
@@ -43,25 +43,16 @@ type config = private {
   alpn_protocols : string list ; (** optional ordered list of accepted alpn_protocols *)
   groups : group list ; (** the first FFDHE will be used for TLS 1.2 and below if a DHE ciphersuite is used *)
   zero_rtt : int32 ;
-}
-
-val config_of_sexp : Sexplib.Sexp.t -> config
-val sexp_of_config : config -> Sexplib.Sexp.t
+} [@@deriving sexp_of]
 
 (** [ciphers13 config] are the ciphersuites for TLS 1.3 in the configuration. *)
 val ciphers13 : config -> Ciphersuite.ciphersuite13 list
 
 (** opaque type of a client configuration *)
-type client
-
-val client_of_sexp : Sexplib.Sexp.t -> client
-val sexp_of_client : client -> Sexplib.Sexp.t
+type client [@@deriving sexp]
 
 (** opaque type of a server configuration *)
-type server
-
-val server_of_sexp : Sexplib.Sexp.t -> server
-val sexp_of_server : server -> Sexplib.Sexp.t
+type server [@@deriving sexp]
 
 (** {1 Constructors} *)
 
@@ -154,6 +145,12 @@ module Ciphers : sig
   val fs : ciphersuite list
   (** [fs] is a list of ciphersuites which provide forward secrecy
       (sublist of [default]). *)
+
+  val http2 : ciphersuite list
+  (** [http2] is a list of ciphersuites which are allowed to be used with HTTP2:
+     not a member of
+     {{:https://httpwg.org/specs/rfc7540.html#BadCipherSuites}bad cipher
+     suites}. These are only ephemeral key exchanges with AEAD ciphers. *)
 
   val fs_of : ciphersuite list -> ciphersuite list
   (** [fs_of ciphers] selects all ciphersuites which provide forward

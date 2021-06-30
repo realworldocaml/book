@@ -151,10 +151,10 @@ let write ?(escape_attribute=escape_attribute) ?(escape_text=escape_text) signal
       | `PI (target, s) ->
         emit_list ["<?"; target; " "; s; ">"] throw e k
 
-      | `Doctype {doctype_name = Some name} ->
-        emit_list ["<!DOCTYPE "; name; ">"] throw e k
+      | `Doctype _ as doctype ->
+        emit_list [signal_to_string doctype] throw e k
 
-      | `Doctype _ | `Xml _ ->
+      | `Xml _ ->
         next_signal throw e k
     end
 

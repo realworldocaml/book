@@ -216,6 +216,34 @@ let of_string_iso8601_extended ?pos ?len str =
           ~_:(exn : exn)]
 ;;
 
+let every =
+  let rec every_valid_ofday_span span ~start ~stop ~acc =
+    (* Assumes [span], [start], and [stop] are valid ofdays. Assumes [start < stop].
+       Assumes [span > 0]. *)
+    let acc = start :: acc in
+    let start = Span.( + ) start span in
+    if Span.( > ) start stop (* cannot overflow *)
+    then List.rev acc
+    else every_valid_ofday_span span ~start ~stop ~acc
+  in
+  (* internal [every] named to show up in stack traces *)
+  let every span ~start ~stop =
+    if Span.( > ) start stop
+    then
+      Or_error.error_s
+        [%message
+          "[Time_ns.Ofday.every] called with [start] > [stop]" (start : t) (stop : t)]
+    else if Span.( <= ) span Span.zero
+    then
+      Or_error.error_s
+        [%message "[Time_ns.Ofday.every] called with negative span" ~_:(span : Span.t)]
+    else if is_invalid span
+    then Ok [ start ]
+    else Ok (every_valid_ofday_span span ~start ~stop ~acc:[])
+  in
+  every
+;;
+
 let small_diff =
   let hour = Span.to_int63_ns Span.hour in
   fun ofday1 ofday2 ->

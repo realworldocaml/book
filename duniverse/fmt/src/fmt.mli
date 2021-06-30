@@ -36,7 +36,7 @@ val epr : ('a, Format.formatter, unit) format -> 'a
 val str : ('a, Format.formatter, unit, string) format4 -> 'a
 (** [str] is {!Format.asprintf}.
 
-    {b Note.} When using [strf] {!utf_8} and {!style_renderer} are
+    {b Note.} When using [str] {!utf_8} and {!style_renderer} are
     always respectively set to [true] and [`None]. See also
     {!str_like}. *)
 
@@ -72,7 +72,7 @@ val error : ('b, Format.formatter , unit, ('a, string) result) format4 -> 'b
 (** [error fmt ...] is [kstr (fun s -> Error s) fmt ...] *)
 
 val error_msg :
-  ('b, Format.formatter , unit, ('a, [`Msg of string]) result) format4 -> 'b
+  ('b, Format.formatter , unit, ('a, [> `Msg of string]) result) format4 -> 'b
 (** [error_msg fmt ...] is [kstr (fun s -> Error (`Msg s)) fmt ...] *)
 
 (** {1 Formatters} *)
@@ -207,7 +207,7 @@ val bool : bool t
 (** [bool] is {!Format.pp_print_bool}. *)
 
 val int : int t
-(** [int] is [pf ppf "%d"]. *)
+(** [int ppf] is [pf ppf "%d"]. *)
 
 val nativeint : nativeint t
 (** [nativeint ppf] is [pf ppf "%nd"]. *)

@@ -101,14 +101,6 @@ let check_deprecated_string ~f ~loc s =
     if month = 0 || month > 12 then f ~loc (Invalid_deprecated Invalid_month)
 ;;
 
-let not_really_a_binding ~ext_name:s =
-  List.mem [
-    "test"; "test_unit"; "test_module";
-    "bench"; "bench_fun"; "bench_module";
-    "expect"; "expect_test";
-  ] s ~equal:String.equal
-;;
-
 let ignored_expr_must_be_annotated ignored_reason (expr : Parsetree.expression) ~f =
   match expr.pexp_desc with
   (* explicitely annotated -> good *)
@@ -304,25 +296,6 @@ let iter_style_errors ~f = object (self)
     );
     super#value_binding vb
 
-  method! extension (ext_name, payload as ext) =
-    if not !annotated_ignores then super#extension ext else
-    if not (not_really_a_binding ~ext_name:ext_name.Location.txt) then
-      self#payload payload
-    else
-      (* We want to allow "let % test _ = ..." (and similar extensions which don't
-         actually bind) without warning. *)
-      match payload with
-      | PStr str ->
-        let check_str_item i =
-          let loc = i.Parsetree.pstr_loc in
-          Ast_pattern.(parse (pstr_value __ __)) loc i
-            (fun _rec_flag vbs ->
-               List.iter ~f:super#value_binding vbs)
-        in
-        List.iter ~f:check_str_item str
-      | _ ->
-        super#payload payload
-
   method! expression e =
     begin match e with
     | {pexp_desc = Pexp_constant c; pexp_loc; _ } ->
@@ -478,6 +451,12 @@ module Comments_checking = struct
 end
 
 let () =
+  (* We rely on the fact that let%test and similar things are preprocessed before we run,
+     because ppx_driver applies the [~extension] arguments of
+     [Driver.register_transformation] before applying the [~impl] argument that
+     ppx_js_style uses.
+     It means that [let%test _ = ..] doesn't count as unannotated ignore, although
+     [let%bind _ = ..] also doesn't count as unannotated ignore for the same reason. *)
   Driver.add_arg "-annotated-ignores"
     (Set annotated_ignores)
     ~doc:" If set, forces all ignored expressions (either under ignore or \

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# `replicate f n` creates a new file called `f.n` containing n copies of f.
+for i in `seq 1 $2`; do
+    cat $1 >> $1.$2
+done

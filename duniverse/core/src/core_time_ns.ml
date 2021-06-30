@@ -41,15 +41,19 @@ module Span = struct
   module Option = struct
     type span = t [@@deriving sexp]
     type t = Int63.t [@@deriving bin_io, compare, hash, typerep] (* nanoseconds or none *)
+
     let none = Int63.min_value
     let is_none t = Int63.(t = none)
     let is_some t = Int63.(t <> none)
     let some_is_representable span = is_some (to_int63_ns span)
 
+    let[@cold] raise_some_error span =
+      raise_s [%message [%here] "Span.Option.some value not representable" (span : span)]
+
     let some span =
       if some_is_representable span
       then to_int63_ns span
-      else raise_s [%message [%here] "Span.Option.some value not representable"]
+      else raise_some_error span
 
     let value t ~default = if is_none t then default else of_int63_ns t
     let unchecked_value t = of_int63_ns t
@@ -61,6 +65,34 @@ module Span = struct
 
     let of_option = function None -> none | Some t -> some t
     let to_option t = if is_none t then None else Some (of_int63_ns t)
+
+    module For_quickcheck = struct
+      module Some = struct
+        type t = span
+
+        let quickcheck_generator =
+          Quickcheck.Generator.filter quickcheck_generator ~f:some_is_representable
+
+        let quickcheck_observer = quickcheck_observer
+
+        let quickcheck_shrinker =
+          Base_quickcheck.Shrinker.filter quickcheck_shrinker ~f:some_is_representable
+      end
+
+      type t = Some.t option [@@deriving quickcheck]
+    end
+
+    let quickcheck_generator =
+      Quickcheck.Generator.map For_quickcheck.quickcheck_generator ~f:of_option
+
+    let quickcheck_observer  =
+      Quickcheck.Observer.unmap For_quickcheck.quickcheck_observer ~f:to_option
+
+    let quickcheck_shrinker  =
+      Quickcheck.Shrinker.map
+        For_quickcheck.quickcheck_shrinker
+        ~f:of_option
+        ~f_inverse:to_option
 
     module Optional_syntax = struct
       module Optional_syntax = struct
@@ -279,11 +311,11 @@ module Ofday = struct
         module Bin_repr = struct
           type t =
             { ofday : Time_ns.Stable.Ofday.V1.t;
-              zone  : Core_zone.Stable.V1.t;
+              zone  : Timezone.Stable.V1.t;
             } [@@deriving bin_io]
         end
 
-        include Binable.Of_binable (Bin_repr) (struct
+        include (Binable.Of_binable_without_uuid [@alert "-legacy"]) (Bin_repr) (struct
             type nonrec t = t
 
             let to_binable t : Bin_repr.t =
@@ -293,7 +325,7 @@ module Ofday = struct
               create repr.ofday repr.zone
           end)
 
-        type sexp_repr = Time_ns.Stable.Ofday.V1.t * Core_zone.Stable.V1.t
+        type sexp_repr = Time_ns.Stable.Ofday.V1.t * Timezone.Stable.V1.t
         [@@deriving sexp]
 
         let sexp_of_t t = [%sexp_of: sexp_repr] (ofday t, zone t)
@@ -337,6 +369,28 @@ module Ofday = struct
 
     let of_option = function None -> none | Some t -> some t
     let to_option t = if is_none t then None else Some (value_exn t)
+
+
+    (* Can't use the quickcheck generator and shrinker inherited from [Span.Option]
+       because they may produce spans whose representation is larger than
+       [start_of_next_day] *)
+    let quickcheck_generator : t Quickcheck.Generator.t =
+      Quickcheck.Generator.map ~f:of_option
+        (Option.quickcheck_generator
+           (Quickcheck.Generator.filter
+              ~f:some_is_representable
+              Time_ns.Ofday.quickcheck_generator))
+    ;;
+
+    let quickcheck_shrinker : t Quickcheck.Shrinker.t =
+      Quickcheck.Shrinker.map ~f:of_option ~f_inverse:to_option
+        (Option.quickcheck_shrinker
+           (Base_quickcheck.Shrinker.filter
+              ~f:some_is_representable
+              Time_ns.Ofday.quickcheck_shrinker))
+    ;;
+
+    let quickcheck_observer = Span.Option.quickcheck_observer
 
     module Optional_syntax = struct
       module Optional_syntax = struct
@@ -420,7 +474,7 @@ let to_ofday_zoned t ~zone =
 
 module Stable0 = struct
   module V1 = struct
-    module T = struct
+    module T0 = struct
       (* We use the unstable sexp here, and rely on comprehensive tests of the stable
          conversion to make sure we don't change it. *)
       type nonrec t = t [@@deriving bin_io, compare, sexp, hash]
@@ -428,9 +482,13 @@ module Stable0 = struct
       let of_int63_exn t = of_span_since_epoch (Span.of_int63_ns t)
       let to_int63 t = to_int63_ns_since_epoch t
     end
+    module T = struct
+      include T0
+      module Comparator = Comparator.Stable.V1.Make (T0)
+      include Comparator
+    end
     include T
-    module Comparator = Comparator.Stable.V1.Make (T)
-    include Comparator
+    include Comparable.Stable.V1.Make (T)
   end
 end
 include Stable0.V1.Comparator
@@ -438,7 +496,7 @@ include Stable0.V1.Comparator
 module Option = struct
   type time = t [@@deriving sexp, compare]
 
-  type t = Span.Option.t [@@deriving bin_io, compare, hash, typerep]
+  type t = Span.Option.t [@@deriving bin_io, compare, hash, typerep, quickcheck]
 
   let none = Span.Option.none
   let some time = Span.Option.some (to_span_since_epoch time)
@@ -520,6 +578,7 @@ module Stable = struct
   end
   include Stable0
   module Alternate_sexp = Core_kernel.Time_ns.Stable.Alternate_sexp
+
 end
 
 (*

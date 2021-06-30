@@ -65,7 +65,7 @@ let%test_module "Verify reading/writing stable table sexp" =
 
     let%test_unit "t_of_sexp" =
       let loaded_table = [%of_sexp: string String.Stable.V1.Table.t] expected_sexp in
-      assert (Hashtbl.equal loaded_table table String.equal)
+      assert (Hashtbl.equal String.equal loaded_table table)
     ;;
   end)
 ;;

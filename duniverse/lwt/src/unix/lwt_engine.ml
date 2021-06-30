@@ -106,6 +106,8 @@ class virtual abstract = object(self)
   method readable_count = Lwt_sequence.length readables
   method writable_count = Lwt_sequence.length writables
   method timer_count = Lwt_sequence.length timers
+
+  method fork = ()
 end
 
 class type t = object
@@ -430,6 +432,7 @@ let fake_io fd = !current#fake_io fd
 let readable_count () = !current#readable_count
 let writable_count () = !current#writable_count
 let timer_count () = !current#timer_count
+let fork () = !current#fork
 
 module Versioned =
 struct

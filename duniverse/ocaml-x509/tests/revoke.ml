@@ -37,21 +37,25 @@ let key () =
 let selfsigned ?(name = "test") now =
   let pub, priv = key () in
   let name = [ Distinguished_name.(Relative_distinguished_name.singleton (CN name)) ] in
-  let req = Signing_request.create name priv in
-  let valid_from, valid_until = validity now in
-  match X509.Signing_request.sign req ~valid_from ~valid_until ~extensions:(ca_exts ()) priv name with
-  | Ok cacert -> (cacert, pub, priv)
+  match Signing_request.create name priv with
   | Error _ -> assert false
+  | Ok req ->
+    let valid_from, valid_until = validity now in
+    match X509.Signing_request.sign req ~valid_from ~valid_until ~extensions:(ca_exts ()) priv name with
+    | Ok cacert -> (cacert, pub, priv)
+    | Error _ -> assert false
 
 let cert ?serial ?(name = "sub") now ca pubca privca issuer =
   let pub, priv = key () in
   let name = [ Distinguished_name.(Relative_distinguished_name.singleton (CN name)) ] in
-  let req = Signing_request.create name priv in
-  let valid_from, valid_until = validity now in
-  let extensions = key_ids (if ca then ca_exts () else leaf_exts)  pub pubca in
-  match X509.Signing_request.sign req ~valid_from ~valid_until ?serial ~extensions privca issuer with
-  | Ok cert -> (cert, pub, priv)
+  match Signing_request.create name priv with
   | Error _ -> assert false
+  | Ok req ->
+    let valid_from, valid_until = validity now in
+    let extensions = key_ids (if ca then ca_exts () else leaf_exts)  pub pubca in
+    match X509.Signing_request.sign req ~valid_from ~valid_until ?serial ~extensions privca issuer with
+    | Ok cert -> (cert, pub, priv)
+    | Error _ -> assert false
 
 let verify () =
   let now = Ptime_clock.now () in
@@ -69,12 +73,14 @@ let crl () =
   let cert, _, _ = cert ~serial now false capub capriv issuer in
   let revoked = { CRL.serial ; date = now ; extensions = Extension.empty } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert] with
-  | Ok _ -> Alcotest.fail "expected revocation"
-  | Error (`Revoked _) -> ()
-  | Error _ -> Alcotest.fail "expected revoked failure!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert] with
+    | Ok _ -> Alcotest.fail "expected revocation"
+    | Error (`Revoked _) -> ()
+    | Error _ -> Alcotest.fail "expected revoked failure!"
 
 let verify' () =
   let now = Ptime_clock.now () in
@@ -96,12 +102,14 @@ let crl' () =
   let cert, _pub, _priv = cert now false ipub ipriv (Certificate.subject ica) in
   let revoked = { CRL.serial ; date = now ; extensions = Extension.empty } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
-  | Ok _ -> Alcotest.fail "expected revocation"
-  | Error (`Revoked _) -> ()
-  | Error _ -> Alcotest.fail "expected revoked failure!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
+    | Ok _ -> Alcotest.fail "expected revocation"
+    | Error (`Revoked _) -> ()
+    | Error _ -> Alcotest.fail "expected revoked failure!"
 
 let crl'leaf () =
   let now = Ptime_clock.now () in
@@ -112,12 +120,14 @@ let crl'leaf () =
   let cert, _pub, _priv = cert ~serial now false ipub ipriv issuer in
   let revoked = { CRL.serial ; date = now ; extensions = Extension.empty } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] ipriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
-  | Ok _ -> Alcotest.fail "expected revocation"
-  | Error (`Revoked _) -> ()
-  | Error _ -> Alcotest.fail "expected revoked failure!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] ipriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
+    | Ok _ -> Alcotest.fail "expected revocation"
+    | Error (`Revoked _) -> ()
+    | Error _ -> Alcotest.fail "expected revoked failure!"
 
 let crl'leaf'wrong () =
   let now = Ptime_clock.now () in
@@ -128,11 +138,13 @@ let crl'leaf'wrong () =
   let cert, _pub, _priv = cert ~serial now false ipub ipriv (Certificate.subject ica) in
   let revoked = { CRL.serial ; date = now ; extensions = Extension.empty } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] ipriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
-  | Ok _ -> ()
-  | Error _ -> Alcotest.fail "expected success!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] ipriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
+    | Ok _ -> ()
+    | Error _ -> Alcotest.fail "expected success!"
 
 let verify'' () =
   let now = Ptime_clock.now () in
@@ -143,11 +155,13 @@ let verify'' () =
   let cert, _pub, _priv = cert now false ipub ipriv (Certificate.subject ica) in
   let revoked = { CRL.serial ; date = now ; extensions = Extension.empty } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
-  | Ok _ -> ()
-  | Error _ -> Alcotest.fail "expected verify to succeed!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
+    | Ok _ -> ()
+    | Error _ -> Alcotest.fail "expected verify to succeed!"
 
 let crl'' () =
   let now = Ptime_clock.now () in
@@ -159,11 +173,13 @@ let crl'' () =
   let extensions = Extension.(singleton Reason (false, `Remove_from_CRL)) in
   let revoked = { CRL.serial ; date = now ; extensions } in
   let extensions = Extension.(singleton CRL_number (false, 1)) in
-  let crl = CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv in
-  let revoked = CRL.is_revoked [crl] ?hash_whitelist:None in
-  match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
-  | Ok _ -> ()
-  | Error _ -> Alcotest.fail "expected proper verification!"
+  match CRL.revoke ~issuer ~this_update:now ~extensions [revoked] capriv with
+  | Error _ -> Alcotest.fail "couldn't revoke"
+  | Ok crl ->
+    let revoked = CRL.is_revoked [crl] ?allowed_hashes:None in
+    match Validation.verify_chain ~host:None ~time ~revoked ~anchors:[ca] [cert ; ica] with
+    | Ok _ -> ()
+    | Error _ -> Alcotest.fail "expected proper verification!"
 
 let revoke_tests = [
   "Verify with a chain works", `Quick, verify ;

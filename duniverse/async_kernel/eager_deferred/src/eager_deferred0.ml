@@ -40,7 +40,6 @@ let both t1 t2 =
 
 let ok t = if is_determined t then return (Ok (value_exn t)) else Deferred.ok t
 let ignore_m t = if is_determined t then unit else Deferred.ignore_m t
-let ignore = ignore_m
 
 let any ts =
   match List.find ts ~f:is_determined with
@@ -96,7 +95,7 @@ module List = struct
   ;;
 
   let all ds = seqmapi ds ~f:(fun _ x -> x)
-  let all_unit ds = ignore (fold ds ~init:() ~f:(fun () d -> d) : unit T.t)
+  let all_unit ds = ignore_m (fold ds ~init:() ~f:(fun () d -> d) : unit T.t)
 
   let iteri ?(how = `Sequential) t ~f =
     match how with

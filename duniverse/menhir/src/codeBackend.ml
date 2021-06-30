@@ -39,13 +39,6 @@ open Interface
    cell's contents are passed as extra parameters, and it is [run]'s
    responsibility to allocate that cell.
 
-   (When [run] is the target of a shift transition, the position
-   parameters [startp] and [endp] are redundant with the [env]
-   parameter, because they are always equal to [env.startp] and
-   [env.endp]. However, this does not appear to make a great
-   difference in terms of code size, and makes our life easier, so we
-   do not attempt to eliminate this redundancy.)
-
    The first thing in [run] is to discard a token, if the state was entered
    through a shift transition, and to peek at the lookahead token. When the
    current token is to be discarded, the [discard] function is invoked. It
@@ -118,6 +111,21 @@ open Interface
    that branch with a simple [assert false]. TEMPORARY do it *)
 
 (* ------------------------------------------------------------------------ *)
+
+(* At this time, the code back-end supports only the legacy error handling
+   strategy. It does not (yet?) support the simplified strategy. Let the
+   user know about this. *)
+
+let () =
+  match Settings.strategy with
+  | `Legacy ->
+      ()
+  | `Simplified ->
+      Error.error []
+        "The code back-end does not support --strategy simplified.\n\
+         Please use either --strategy legacy or --table."
+
+(* ------------------------------------------------------------------------ *)
 (* Here is a description of our error handling mechanism.
 
    With every state [s], we associate an [error] function.
@@ -167,6 +175,12 @@ open Interface
    I note that a state that can handle [error] and has a default
    reduction must in fact have a reduction action on [error]. *)
 
+(* The variable that holds the environment. This is a parameter of all
+   functions. *)
+
+let env =
+   prefix "env"
+
 (* The type of environments. *)
 
 let tcenv =
@@ -185,11 +199,6 @@ let assertfalse =
 
 let discard =
   prefix "discard"
-
-(* The [initenv] function. *)
-
-let initenv =
-  prefix "init"
 
 (* The [run] function associated with a state [s]. *)
 
@@ -277,27 +286,26 @@ let tresult =
 (* ------------------------------------------------------------------------ *)
 (* Helpers for code production. *)
 
-let var x : expr =
-  EVar x
-
-let pvar x : pattern =
-  PVar x
-
-let magic e : expr =
-  EMagic e
-
-let nomagic e =
-  e
+let eassert e =
+  EApp (EVar "assert", [ e ])
 
 (* The following assertion checks that [env.error] is [false]. *)
 
 let assertnoerror : pattern * expr =
   PUnit,
-  EApp (EVar "assert", [ EApp (EVar "not", [ ERecordAccess (EVar env, ferror) ]) ])
+  eassert (EApp (EVar "not", [ ERecordAccess (EVar env, ferror) ]))
+
+let eprintf format args =
+  EApp (
+    EVar "Printf.fprintf",
+    (EVar "stderr") ::
+    (EStringConst (format ^ "\n%!")) ::
+    args
+  )
 
 let trace (format : string) (args : expr list) : (pattern * expr) list =
   if Settings.trace then
-    [ PUnit, EApp (EVar "Printf.fprintf", (EVar "stderr") :: (EStringConst (format ^"\n%!")) :: args) ]
+    [ PUnit, eprintf format args ]
   else
     []
 
@@ -424,8 +432,8 @@ let shiftreduce : Production.index -> bool =
        default reduction. *)
 
     Lr1.NodeSet.fold (fun s accu ->
-      accu && (match Default.has_default_reduction s with None -> false | Some _ -> true)
-           && (runpushes s)
+      accu && Option.defined (Default.has_default_reduction s)
+           && runpushes s
     ) (Lr1.production_where prod) true
 
   )
@@ -499,13 +507,6 @@ let tlexer =
 
 (* This is the type of parser environments. *)
 
-let field modifiable name t =
-  {
-    modifiable = modifiable;
-    fieldname = name;
-    fieldtype = type2scheme t
-  }
-
 let envtypedef = {
   typename = tcenv;
   typeparams = [];
@@ -571,10 +572,10 @@ let curryif flag t =
 let celltype tailtype holds_state symbol _ =
   TypTuple (
     tailtype ::
-    elementif (Invariant.endp symbol) tposition @
-    elementif holds_state tstate @
+    if1 (Invariant.endp symbol) tposition @
+    if1 holds_state tstate @
     semvtype symbol @
-    elementif (Invariant.startp symbol) tposition
+    if1 (Invariant.startp symbol) tposition
   )
 
 (* Types for stacks.
@@ -627,7 +628,8 @@ let gototypescheme nt =
 let reduce_expects_state_param prod =
   let nt = Production.nt prod in
   Production.length prod = 0 &&
-  Invariant.fold (fun _ holds_state _ _ -> holds_state) false (Invariant.gotostack nt)
+  Invariant.fold (fun _ holds_state _ _ -> holds_state)
+    false (Invariant.gotostack nt)
 
 (* The type of the [reduce] function. If shiftreduce optimization
    is performed for this production, then the top stack cell is
@@ -673,14 +675,16 @@ let can_die =
    [match/with], and an [option] value. It is used only in a very rare case
    anyway. *)
 
+(* TEMPORARY either remove this or add support for [match with exception] *)
+
 let letunless e x e1 e2 =
   EMatch (
     ETry (
       EData ("Some", [ e ]),
-      [ { branchpat = PData (excdef.excname, []); branchbody = EData ("None", []) } ]
+      [ branch (PData (excdef.excname, [])) (EData ("None", [])) ]
     ),
-    [ { branchpat = PData ("Some", [ PVar x ]); branchbody = e1 };
-      { branchpat = PData ("None", []); branchbody = e2 } ]
+    [ branch (PData ("Some", [ PVar x ])) e1 ;
+      branch (PData ("None", []))         e2 ]
   )
 
 (* ------------------------------------------------------------------------ *)
@@ -695,14 +699,25 @@ let letunless e x e1 e2 =
    so we are able to access it at a fixed offset, provided we know that it
    exists. This is exploited when reducing an epsilon production. *)
 
-(* The contents of a stack cell, exposed as individual parameters. The choice of
-   identifiers is suitable for use in the definition of [run]. *)
+(* The contents of the top stack cell, exposed as individual parameters. The
+   choice of identifiers is suitable for use in the definition of [run]. *)
 
-let runcellparams var holds_state symbol =
-  elementif (Invariant.endp symbol) (var endp) @
-  elementif holds_state (var state) @
-  symval symbol (var semv) @
-  elementif (Invariant.startp symbol) (var startp)
+let runcellparams stack : xparams =
+  Invariant.fold_top (fun holds_state symbol ->
+    if1 (Invariant.endp symbol) (xvar endp) @
+    if1 holds_state (xvar state) @
+    if1 (has_semv symbol) (xvar semv) @
+    if1 (Invariant.startp symbol) (xvar startp)
+  ) [] stack
+
+(* May the semantic action associated with production [prod] refer to the
+   variable [ids.(i)]? *)
+
+let action_may_refer_to_value prod i =
+  Production.is_start prod ||
+  let ids = Production.identifiers prod
+  and action = Production.action prod in
+  StringSet.mem ids.(i) (Action.semvars action)
 
 (* The contents of a stack cell, exposed as individual parameters, again.
    The choice of identifiers is suitable for use in the definition of a
@@ -714,21 +729,23 @@ let runcellparams var holds_state symbol =
 
 let reducecellparams prod i holds_state symbol =
   let ids = Production.identifiers prod in
-
   (* The semantic value is bound to the variable [ids.(i)]. Its type is [t]. As
      of 2016/03/11, we generate a type annotation. Indeed, because of our use of
      [magic], the semantic value would otherwise have an unknown type; and, if
      it is a function, the OCaml compiler could warn (incorrectly) that this
-     function does not use its argument. *)
-
+     function does not use its argument. As of 2020/12/28, we use a wildcard
+     pattern if we can determine that the semantic action does not refer to
+     the variable [ids.(i)]. *)
   let semvpat t =
-    PAnnot (PVar ids.(i), t)
+    if action_may_refer_to_value prod i then
+      PAnnot (PVar ids.(i), t)
+    else
+      PWildcard
   in
-
-  elementif (Invariant.endp symbol) (PVar (Printf.sprintf "_endpos_%s_" ids.(i))) @
-  elementif holds_state (if i = 0 then PVar state else PWildcard) @
-  symvalt symbol semvpat @
-  elementif (Invariant.startp symbol) (PVar (Printf.sprintf "_startpos_%s_" ids.(i)))
+  if1 (Invariant.endp symbol) (PVar (Printf.sprintf "_endpos_%s_" ids.(i))) @
+  if1 holds_state (if i = 0 then PVar state else PWildcard) @
+  List.map semvpat (semvtype symbol) @
+  if1 (Invariant.startp symbol) (PVar (Printf.sprintf "_startpos_%s_" ids.(i)))
 
 (* The contents of a stack cell, exposed as individual parameters,
    again. The choice of identifiers is suitable for use in the
@@ -738,18 +755,18 @@ let errorcellparams (i, pat) holds_state symbol _ =
   i + 1,
   ptuple (
     pat ::
-    elementif (Invariant.endp symbol) PWildcard @
-    elementif holds_state (if i = 0 then PVar state else PWildcard) @
-    symval symbol PWildcard @
-    elementif (Invariant.startp symbol) PWildcard
+    if1 (Invariant.endp symbol) PWildcard @
+    if1 holds_state (if i = 0 then PVar state else PWildcard) @
+    if1 (has_semv symbol) PWildcard @
+    if1 (Invariant.startp symbol) PWildcard
   )
 
 (* Calls to [run]. *)
 
-let runparams magic var s =
-  var env ::
-  magic (var stack) ::
-  listif (runpushes s) (Invariant.fold_top (runcellparams var) [] (Invariant.stack s))
+let runparams s : xparams =
+  xvar env ::
+  xmagic (xvar stack) ::
+  ifn (runpushes s) (runcellparams (Invariant.stack s))
 
 let call_run s actuals =
   EApp (EVar (run s), actuals)
@@ -763,63 +780,72 @@ let call_run s actuals =
 let reduceparams prod =
   PVar env ::
   PVar stack ::
-  listif (shiftreduce prod) (
+  ifn (shiftreduce prod) (
     Invariant.fold_top
       (reducecellparams prod (Production.length prod - 1))
     [] (Invariant.prodstack prod)
   ) @
-  elementif (reduce_expects_state_param prod) (PVar state)
+  if1 (reduce_expects_state_param prod) (PVar state)
 
 (* Calls to [reduce]. One must specify the production [prod] as well
    as the current state [s]. *)
 
+(* TEMPORARY use [let] bindings followed with [reduceparams], so as
+   to reduce duplication *)
 let call_reduce prod s =
   let actuals =
     (EVar env) ::
     (EMagic (EVar stack)) ::
-    listif (shiftreduce prod)
-      (Invariant.fold_top (runcellparams var) [] (Invariant.stack s))
+    ifn (shiftreduce prod)
+      (xparams2exprs (runcellparams (Invariant.stack s)))
       (* compare with [runpushcell s] *) @
-    elementif (reduce_expects_state_param prod) (estatecon s)
+    if1 (reduce_expects_state_param prod) (estatecon s)
   in
   EApp (EVar (reduce prod), actuals)
 
 (* Calls to [goto]. *)
 
-let gotoparams var nt =
-  var env ::
-  var stack ::
-  Invariant.fold_top (runcellparams var) [] (Invariant.gotostack nt)
+let gotoparams nt : xparams =
+  xvar env ::
+  xvar stack ::
+  runcellparams (Invariant.gotostack nt)
 
 let call_goto nt =
-  EApp (EVar (goto nt), gotoparams var nt)
+  EApp (EVar (goto nt), xparams2exprs (gotoparams nt))
 
 (* Calls to [errorcase]. *)
 
-let errorcaseparams magic var =
-  [ var env; magic (var stack); var state ]
+let errorcaseparams : xparams =
+  [ xvar env; xmagic (xvar stack); xvar state ]
 
 let call_errorcase =
-  EApp (EVar errorcase, errorcaseparams magic var)
+  EApp (EVar errorcase, xparams2exprs errorcaseparams)
 
 (* Calls to [error]. *)
 
-let errorparams magic var =
-  [ var env; magic (var stack) ]
+let errorparams =
+  [ xvar env; xmagic (xvar stack) ]
 
-let call_error magic s =
-  EApp (EVar (error s), errorparams magic var)
+let call_error s =
+  EApp (EVar (error s), xparams2exprs errorparams)
 
-let call_error_via_errorcase magic s = (* TEMPORARY document *)
+(* We prefer to call [errorcase] rather than [error], when possible, and even
+   though [errorcase] itself calls [error], because this reduces the number of
+   call sites of the [error] functions and typically allows all of these
+   functions to be inlined into [errorcase]. This greatly reduces the number
+   of functions that we produce. *)
+
+let call_error s =
   if Invariant.represented s then
-    EApp (EVar errorcase, [ var env; magic (var stack); estatecon s ])
+    EApp (EVar errorcase, [ EVar env; EMagic (EVar stack); estatecon s ])
+      (* TEMPORARY use [let] binding and reduce duplication *)
   else
-    call_error magic s
+    call_error s
 
 (* Calls to [assertfalse]. *)
 
 let call_assertfalse =
-  EApp (EVar assertfalse, [ EVar "()" ])
+  EApp (EVar assertfalse, [ EUnit ])
 
 (* ------------------------------------------------------------------------ *)
 (* Code production for the automaton functions. *)
@@ -838,12 +864,7 @@ let errorpeekers =
    inserted in a [run] function for state [s]. *)
 
 let reducebranch toks prod s =
-  {
-    branchpat =
-      tokspat toks;
-    branchbody =
-      call_reduce prod s
-  }
+  branch (tokspat toks) (call_reduce prod s)
 
 (* Code for shifting from state [s] to state [s'] via the token [tok].
    This produces a branch, to be inserted in a [run] function for
@@ -861,6 +882,8 @@ let reducebranch toks prod s =
 
 let shiftbranchbody s tok s' =
 
+  (* TEMPORARY avoid redundancy with [runparams]; use [let] bindings *)
+
   (* Construct the actual parameters for [run s']. *)
 
   let actuals =
@@ -868,10 +891,10 @@ let shiftbranchbody s tok s' =
     (EMagic (EVar stack)) ::
     Invariant.fold_top (fun holds_state symbol ->
       assert (Symbol.equal (Symbol.T tok) symbol);
-      elementif (Invariant.endp symbol) getendp @
-      elementif holds_state (estatecon s) @
-      tokval tok (EVar semv) @
-      elementif (Invariant.startp symbol) getstartp
+      if1 (Invariant.endp symbol) getendp @
+      if1 holds_state (estatecon s) @
+      if1 (has_semv (Symbol.T tok)) (EVar semv) @
+      if1 (Invariant.startp symbol) getstartp
     ) [] (Invariant.stack s')
   in
 
@@ -883,20 +906,17 @@ let shiftbranchbody s tok s' =
 
 let shiftbranch s tok s' =
   assert (not (Terminal.pseudo tok));
-  {
-    branchpat =
-      PData (tokendata (Terminal.print tok), tokval tok (PVar semv));
-    branchbody =
-      shiftbranchbody s tok s'
-  }
+  branch
+    (tokpat tok (PVar semv))
+    (shiftbranchbody s tok s')
 
 (* This generates code for pushing a new stack cell upon entering the
    [run] function for state [s]. *)
 
 let runpushcell s e =
   if runpushes s then
-    let contents = var stack :: Invariant.fold_top (runcellparams var) [] (Invariant.stack s) in
-    mlet [ pvar stack ] [ etuple contents ] e
+    let contents = xvar stack :: runcellparams (Invariant.stack s) in
+    mlet [ PVar stack ] [ etuple (xparams2exprs contents) ] e
   else
     e
 
@@ -915,12 +935,12 @@ let runpushcellunless shiftreduce s e =
    The parameter [defred] tells which default reduction, if any, we
    are about to perform. *)
 
-(* 2014/12/06 New convention regarding initial states (i.e., states
-   which have no incoming symbol). The function [initenv] does not
-   invoke the lexer, so the [run] function for an initial state must
-   do it. (Except in the very special case where the initial state
-   has a default reduction on [#] -- this means the grammar recognizes
-   only the empty word. We have ruled out this case.) *)
+(* 2014/12/06 New convention regarding initial states (i.e., states which have
+   no incoming symbol). We do not invoke the lexer when we construct the
+   initial environment, so the [run] function for an initial state must do it.
+   (Except in the very special case where the initial state has a default
+   reduction on [#] -- this means the grammar recognizes only the empty word.
+   We have ruled out this case.) *)
 
 let gettoken s defred e =
   match Lr1.incoming_symbol s, defred with
@@ -974,7 +994,7 @@ let gettoken s defred e =
         incr errorpeekers;
         EIfThenElse (
           ERecordAccess (EVar env, ferror),
-          tracecomment "Resuming error handling" (call_error_via_errorcase magic s),
+          tracecomment "Resuming error handling" (call_error s),
           blet ([ PVar token, ERecordAccess (EVar env, ftoken) ], e)
         )
       end
@@ -990,7 +1010,7 @@ let runheader s body =
   in {
     valpublic = false;
     valpat = PVar (run s);
-    valval = EAnnot (EFun (runparams nomagic pvar s, body), runtypescheme s)
+    valval = EAnnot (EFun (xparams2pats (runparams s), body), runtypescheme s)
   }
 
 (* This produces the comment attached with a default reduction. *)
@@ -1039,7 +1059,7 @@ let initiate s =
 
   blet (
     [ assertnoerror ],
-    errorbookkeeping (call_error_via_errorcase magic s)
+    errorbookkeeping (call_error s)
   )
 
 (* This produces the body of the [run] function for state [s]. *)
@@ -1053,7 +1073,7 @@ let rundef s : valdef =
 
          If shiftreduce optimization is being performed, then no
          stack cell is allocated. The contents of the top stack
-         cell are passed do [reduce] as extra parameters. *)
+         cell are passed to [reduce] as extra parameters. *)
 
       runheader s (
         runpushcellunless (shiftreduce prod) s (
@@ -1107,7 +1127,7 @@ let rundef s : valdef =
         if TerminalSet.subset TerminalSet.universe covered then
           branches
         else
-          branches @ [ { branchpat = PWildcard; branchbody = initiate s } ]
+          branches @ [ branch PWildcard (initiate s) ]
       in
 
       (* Finally, construct the code for [run]. The former pushes things
@@ -1167,7 +1187,7 @@ let reducebody prod =
   let unitbindings =
     Misc.foldi length (fun i unitbindings ->
       match semvtype rhs.(i) with
-      | [] ->
+      | [] when action_may_refer_to_value prod i ->
           (PVar ids.(i), EUnit) :: unitbindings
       | _ ->
           unitbindings
@@ -1196,17 +1216,17 @@ let reducebody prod =
 
   let posbindings action =
     let bind_startp = Invariant.startp symbol in
-    elementif (Action.has_beforeend action)
+    if1 (Action.has_beforeend action)
       ( extract beforeendp
       ) @
-    elementif bind_startp
+    if1 bind_startp
       ( if length > 0 then
           PVar startp,
           EVar (Printf.sprintf "_startpos_%s_" ids.(0))
         else
           extract startp
       ) @
-    elementif (Invariant.endp symbol)
+    if1 (Invariant.endp symbol)
       ( if length > 0 then
           PVar endp,
           EVar (Printf.sprintf "_endpos_%s_" ids.(length - 1))
@@ -1281,8 +1301,8 @@ let reducedef prod =
 
 let gotopushcell nt e =
   if gotopushes nt then
-    let contents = var stack :: Invariant.fold_top (runcellparams var) [] (Invariant.gotostack nt) in
-    mlet [ pvar stack ] [ etuple contents ] e
+    let contents = xvar stack :: runcellparams (Invariant.gotostack nt) in
+    mlet [ PVar stack ] [ etuple (xparams2exprs contents) ] e
   else
     e
 
@@ -1295,12 +1315,10 @@ let gotobody nt =
 
   let branches =
     Lr1.targets (fun branches sources target ->
-      {
-        branchpat =
-          pstatescon sources;
-        branchbody =
-          call_run target (runparams magic var target)
-      } :: branches
+      branch
+        (pstatescon sources)
+        (call_run target (xparams2exprs (runparams target)))
+      :: branches
     ) [] (Symbol.N nt)
   in
 
@@ -1334,10 +1352,7 @@ let gotobody nt =
          theoretically useless but helps avoid warnings if the
          compiler does not have GADTs. *)
 
-      let default = {
-        branchpat = PWildcard;
-        branchbody = call_assertfalse
-      } in
+      let default = branch PWildcard call_assertfalse in
       EMatch (
         EVar state,
         branches @ (if Invariant.universal (Symbol.N nt) then [] else [ default ])
@@ -1351,7 +1366,7 @@ let gotodef nt = {
   valpat =
     PVar (goto nt);
   valval =
-    EAnnot (EFun (gotoparams pvar nt, gotopushcell nt (gotobody nt)), gototypescheme nt)
+    EAnnot (EFun (xparams2pats (gotoparams nt), gotopushcell nt (gotobody nt)), gototypescheme nt)
 }
 
 (* ------------------------------------------------------------------------ *)
@@ -1359,33 +1374,40 @@ let gotodef nt = {
 
 (* This is the body of the [error] function associated with state [s]. *)
 
+(* This code does not check whether the state [s] has a default reduction. It
+   is unclear whether this is intentional. See the corresponding comment in
+   MenhirLib.Engine. *)
+
 let handle s e =
   tracecomment (Printf.sprintf "Handling error in state %d" (Lr1.number s)) e
 
 let errorbody s =
-  try
-    let s' = SymbolMap.find (Symbol.T Terminal.error) (Lr1.transitions s) in
 
-    (* There is a shift transition on error. *)
+  match SymbolMap.find (Symbol.T Terminal.error) (Lr1.transitions s) with
 
-    handle s (
-      shiftbranchbody s Terminal.error s'
-    )
+  | s' ->
 
-  with Not_found ->
-    try
-      let prods = TerminalMap.lookup Terminal.error (Lr1.reductions s) in
+      (* There is a shift transition on error. *)
+
+      handle s (
+        shiftbranchbody s Terminal.error s'
+      )
+
+  | exception Not_found ->
+
+  match TerminalMap.lookup Terminal.error (Lr1.reductions s) with
+
+  | prods ->
       let prod = Misc.single prods in
 
-      (* There is a reduce transition on error. If shiftreduce
-         optimization is enabled for this production, then we must pop
-         an extra cell for [reduce]'s calling convention to be met. *)
+      (* There is a reduce transition on error. If shiftreduce optimization is
+         enabled for this production, then we must pop an extra cell for
+         [reduce]'s calling convention to be met. *)
 
       let extrapop e =
         if shiftreduce prod then
-          let pat =
-            ptuple (PVar stack :: Invariant.fold_top (runcellparams pvar) [] (Invariant.stack s))
-          in
+          let contents = xvar stack :: runcellparams (Invariant.stack s) in
+          let pat = ptuple (xparams2pats contents) in
           blet ([ pat, EVar stack ], e)
         else
           e
@@ -1397,7 +1419,7 @@ let errorbody s =
         )
       )
 
-    with Not_found ->
+  | exception Not_found ->
 
       (* This state is unable to handle errors. Pop the stack to find
          a state that does handle errors, a state that can further pop
@@ -1415,7 +1437,7 @@ let errorbody s =
             | Invariant.Represented ->
                 call_errorcase
             | Invariant.UnRepresented s ->
-                call_error magic s
+                call_error s
           )
 
 (* This is the [error] function associated with state [s]. *)
@@ -1428,7 +1450,7 @@ let errordef s = {
   valval =
     EAnnot (
       EFun (
-        errorparams nomagic pvar,
+        xparams2pats errorparams,
         errorbody s
       ),
       errortypescheme s
@@ -1442,10 +1464,10 @@ let errorcasedef =
   let branches =
     Lr1.fold (fun branches s ->
       if Invariant.represented s then
-        {
-          branchpat  = pstatecon s;
-          branchbody = EApp (EVar (error s), [ EVar env; EMagic (EVar stack) ])
-        } :: branches
+        branch
+          (pstatecon s)
+          (EApp (EVar (error s), [ EVar env; EMagic (EVar stack) ]))
+        :: branches
       else
         branches
     ) []
@@ -1458,7 +1480,7 @@ let errorcasedef =
     valval =
       EAnnot (
         EFun (
-          errorcaseparams nomagic pvar,
+          xparams2pats errorcaseparams,
           EMatch (
             EVar state,
             branches
@@ -1484,6 +1506,10 @@ let errorcasedef =
    a sentinel cell with a valid [endp] field at offset 1. For simplicity, we
    always create a sentinel cell. *)
 
+(* When we allocate a fresh parser environment, the [token] field receives a
+   dummy value. It will be overwritten by the first call to [run], which will
+   invoke [discard]. This allows us to invoke the lexer in just one place. *)
+
 let entrydef s =
   let nt = Item.startnt (Lr1.start2item s) in
   let lexer = "lexer"
@@ -1497,15 +1523,23 @@ let entrydef s =
   {
     valpublic = true;
     valpat = PVar (Nonterminal.print true nt);
-    valval = EAnnot (
-               EFun ( [ PVar lexer; PVar lexbuf ],
-                 blet (
-                   [ PVar env, EApp (EVar initenv, [ EVar lexer; EVar lexbuf ]) ],
-                   EMagic (EApp (EVar (run s), [ EVar env; initial_stack ]))
-                 )
-               ),
-               entrytypescheme Front.grammar (Nonterminal.print true nt)
-             )
+    valval =
+      EAnnot (
+        EFun ( [ PVar lexer; PVar lexbuf ],
+          blet (
+            [ PVar env,
+                ERecord ([
+                  (flexer, EVar lexer);
+                  (flexbuf, EVar lexbuf);
+                  (ftoken, EMagic EUnit);
+                  (ferror, efalse)
+                ])
+            ],
+            EMagic (EApp (EVar (run s), [ EVar env; initial_stack ]))
+          )
+        ),
+        entrytypescheme Front.grammar (Nonterminal.print true nt)
+      )
   }
 
 (* ------------------------------------------------------------------------ *)
@@ -1514,18 +1548,18 @@ let entrydef s =
 (* This is [assertfalse], used when internal failure is detected.
    This should never happen if our tool is correct. *)
 
+let internal_failure =
+  "Internal failure -- please contact the parser generator's developers."
+
 let assertfalsedef = {
   valpublic = false;
   valpat = PVar assertfalse;
   valval =
     EAnnot (
       EFun ([ PUnit ],
-        blet ([
-            PUnit, EApp (EVar "Printf.fprintf",
-                       [ EVar "stderr";
-                         EStringConst "Internal failure -- please contact the parser generator's developers.\n%!" ]);
-          ],
-          EApp (EVar "assert", [ efalse ])
+        blet (
+          [ PUnit, eprintf internal_failure []],
+          eassert efalse
         )
       ),
       scheme [ "a" ] (arrow tunit (tvar "a"))
@@ -1591,38 +1625,6 @@ let discarddef = {
       (arrow tenv tenv)
 }
 
-(* This is [initenv], used to allocate a fresh parser environment.
-   It fills in all fields in a straightforward way. The [token]
-   field receives a dummy value. It will be overwritten by the
-   first call to [run], which will invoke [discard]. This allows
-   us to invoke the lexer in just one place. *)
-
-let initenvdef =
-  let lexer = "lexer"
-  and lexbuf = "lexbuf" in
-  {
-    valpublic = false;
-    valpat = PVar initenv;
-    valval =
-      annotate (
-        EFun ( [ PVar lexer; PVar lexbuf ],
-          blet (
-            (* We do not have a dummy token at hand, so we forge one. *)
-            (* It will be overwritten by the first call to the lexer. *)
-            [ PVar token, EMagic EUnit ],
-            ERecord ([
-              (flexer, EVar lexer);
-              (flexbuf, EVar lexbuf);
-              (ftoken, EVar token);
-              (ferror, efalse)
-            ]
-            )
-          )
-        )
-       )
-       (marrow [ tlexer; tlexbuf ] tenv)
-  }
-
 (* ------------------------------------------------------------------------ *)
 (* Here is complete code for the parser. *)
 
@@ -1655,7 +1657,7 @@ let program =
           defs
         else
           reducedef prod :: defs
-      ) [ discarddef; initenvdef; printtokendef; assertfalsedef; errorcasedef ])))
+      ) [ discarddef; printtokendef; assertfalsedef; errorcasedef ])))
     ) ::
 
     SIStretch grammar.postludes ::

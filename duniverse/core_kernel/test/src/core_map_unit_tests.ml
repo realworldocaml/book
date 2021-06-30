@@ -69,6 +69,7 @@ struct
     let partition_map x = simplify_accessor partition_map x
     let partitioni_tf x = simplify_accessor partitioni_tf x
     let partition_tf x = simplify_accessor partition_tf x
+    let combine_errors x = simplify_accessor combine_errors x
     let compare_direct x = simplify_accessor compare_direct x
     let equal x = simplify_accessor equal x
     let iter2 x = simplify_accessor iter2 x
@@ -160,6 +161,7 @@ struct
     include T
     include Comparable.Make (T)
 
+    let to_string t = Sexp.to_string (sexp_of_t t)
     let sample = of_int 0
 
     let samples =
@@ -881,8 +883,8 @@ struct
     let m1, m2 =
       Map.partition_mapi m0 ~f:(fun ~key ~data ->
         match Int.of_string data with
-        | n -> `Fst n
-        | exception _ -> `Snd (data ^ Int.to_string (Key.to_int key)))
+        | n -> First n
+        | exception _ -> Second (data ^ Int.to_string (Key.to_int key)))
     in
     Map.equal Int.equal m1 (Map.of_alist_exn [ k2, 2; k4, 5 ])
     && Map.equal String.equal m2 (Map.of_alist_exn [ k1, "a1"; k3, "d3" ])
@@ -896,8 +898,8 @@ struct
     let m1, m2 =
       Map.partition_map m0 ~f:(fun data ->
         match Int.of_string data with
-        | n -> `Fst n
-        | exception _ -> `Snd data)
+        | n -> First n
+        | exception _ -> Second data)
     in
     Map.equal Int.equal m1 (Map.of_alist_exn [ k2, 2; k4, 5 ])
     && Map.equal String.equal m2 (Map.of_alist_exn [ k1, "a"; k3, "d" ])
@@ -931,6 +933,24 @@ struct
     in
     Map.equal String.equal m1 (Map.of_alist_exn [ k2, "2"; k4, "5" ])
     && Map.equal String.equal m2 (Map.of_alist_exn [ k1, "a"; k3, "d" ])
+  ;;
+
+  let combine_errors _ = assert false
+
+  let%test _ =
+    let open Some_keys in
+    let m_ok = Map.of_alist_exn [ k1, Ok "a"; k2, Ok "2"; k3, Ok "d"; k4, Ok "5" ] in
+    let ok_m = Map.combine_errors m_ok in
+    let m_err =
+      Map.of_alist_exn
+        [ k1, Ok "a"; k2, error_s (Atom "2"); k3, Ok "d"; k4, error_s (Atom "5") ]
+    in
+    let err_m = Map.combine_errors m_err in
+    Or_error.equal
+      (Map.equal String.equal)
+      ok_m
+      (Ok (Map.of_alist_exn [ k1, "a"; k2, "2"; k3, "d"; k4, "5" ]))
+    && Or_error.is_error err_m
   ;;
 
   let keys _ = assert false
@@ -1876,7 +1896,7 @@ struct
       expect
         (Validate.result
            (Map.validate
-              ~name:(fun key -> Sexp.to_string ([%sexp_of: Key.t] key))
+              ~name:Key.to_string
               (Validate.of_error (fun i ->
                  if i mod 2 = 0 then Ok () else error "must be even" i [%sexp_of: int]))
               map))
@@ -1888,6 +1908,31 @@ struct
     assert (validate is_error (Map.of_alist_exn [ Key.of_int 0, 1 ]));
     assert (validate is_ok (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 1, 0 ]));
     assert (validate is_error (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 1, 1 ]))
+  ;;
+
+  let validatei ~name:_ _ = assert false
+
+  let%test_unit _ =
+    let checki (key, data) =
+      if Key.to_int key mod 2 = 0 && data mod 2 = 0
+      then Ok ()
+      else error_s [%message "key and data must be even" (key : Key.t) (data : int)]
+    in
+    let validatei expect map =
+      expect
+        (Validate.result
+           (Map.validatei ~name:Key.to_string (Validate.of_error checki) map))
+    in
+    let is_ok = Result.is_ok in
+    let is_error = Result.is_error in
+    assert (validatei is_ok (Map.empty ()));
+    assert (validatei is_ok (Map.of_alist_exn [ Key.of_int 0, 0 ]));
+    assert (validatei is_error (Map.of_alist_exn [ Key.of_int 0, 1 ]));
+    assert (validatei is_error (Map.of_alist_exn [ Key.of_int 1, 0 ]));
+    assert (validatei is_ok (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 2, 0 ]));
+    assert (validatei is_error (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 1, 1 ]));
+    assert (validatei is_error (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 2, 1 ]));
+    assert (validatei is_error (Map.of_alist_exn [ Key.of_int 0, 0; Key.of_int 1, 2 ]))
   ;;
 
   (* Ensure polymorphic equality raises for maps. *)

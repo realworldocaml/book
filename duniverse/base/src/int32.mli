@@ -42,3 +42,19 @@ val bits_of_float : float -> t
 (** Creates a 32-bit IEEE-754 "single" float from the given bits, and converts it to a
     regular 64-bit OCaml float. *)
 val float_of_bits : t -> float
+
+(** {2 Byte swap operations}
+
+    See {{!modtype:Int.Int_without_module_types}[Int]'s byte swap section} for
+    a description of Base's approach to exposing byte swap primitives.
+
+    When compiling for 64-bit machines, if signedness of the output value does not matter,
+    use byteswap functions for [int64], if possible, for better performance. As of
+    writing, 32-bit byte swap operations on 64-bit machines have extra overhead for moving
+    to 32-bit registers and sign-extending values when returning to 64-bit registers.
+
+    The x86 instruction sequence that demonstrates the overhead is in
+    [base/bench/bench_int.ml] *)
+
+val bswap16 : t -> t
+val bswap32 : t -> t

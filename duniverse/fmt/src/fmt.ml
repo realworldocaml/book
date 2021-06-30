@@ -170,16 +170,6 @@ let stack ?sep pp_elt = iter Stack.iter pp_elt
 
 module Dump = struct
 
-  (* Sequencing *)
-
-  let iter iter_f pp_name pp_elt =
-    let pp_v = iter ~sep:sp iter_f (box pp_elt) in
-    parens (pp_name ++ sp ++ pp_v)
-
-  let iter_bindings iter_f pp_name pp_k pp_v =
-    let pp_v = iter_bindings ~sep:sp iter_f (pair pp_k pp_v) in
-    parens (pp_name ++ sp ++ pp_v)
-
   (* Stlib types *)
 
   let sig_names =
@@ -210,6 +200,18 @@ module Dump = struct
   let result ~ok ~error ppf = function
   | Ok v -> pf ppf "@[<2>Ok@ @[%a@]@]" ok v
   | Error e -> pf ppf "@[<2>Error@ @[%a@]@]" error e
+
+  (* Sequencing *)
+
+  let iter iter_f pp_name pp_elt =
+    let pp_v = iter ~sep:sp iter_f (box pp_elt) in
+    parens (pp_name ++ sp ++ pp_v)
+
+  let iter_bindings iter_f pp_name pp_k pp_v =
+    let pp_v = iter_bindings ~sep:sp iter_f (pair pp_k pp_v) in
+    parens (pp_name ++ sp ++ pp_v)
+
+  (* Stdlib data structures *)
 
   let list pp_elt = brackets (list ~sep:semi (box pp_elt))
   let array pp_elt = oxford_brackets (array ~sep:semi (box pp_elt))

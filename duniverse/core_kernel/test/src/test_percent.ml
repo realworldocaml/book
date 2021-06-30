@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Percent
 
 let%test_module "Percent.V1" =
@@ -163,4 +163,17 @@ let%expect_test "generator" =
     Percent.quickcheck_generator
     ~f:(fun t -> Validate.maybe_raise (Percent.validate t));
   [%expect {| |}]
+;;
+
+let%expect_test ("to_mult and of_mult no boxing in arrays"[@tags "fast-flambda"]) =
+  let float_arr = Array.init 1 ~f:(fun i -> Float.of_int i) in
+  let percent_arr = Array.create ~len:1 Percent.zero in
+  require_no_allocation [%here] (fun () ->
+    percent_arr.(0) <- Percent.of_mult float_arr.(0);
+    float_arr.(0) <- Percent.to_mult percent_arr.(0))
+;;
+
+let%test "Percent.Option cannot represent nan" =
+  let nan = Percent.of_mult Float.nan in
+  Percent.Option.((not (some_is_representable nan)) && is_none (some nan))
 ;;

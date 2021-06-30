@@ -2,14 +2,39 @@ open! Import
 open! Caml.Int32
 
 module T = struct
-  type t = int32 [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = int32 [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_int32
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_int32 in fun x -> func x
+    let func = hash_int32 in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (int32_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_int32 : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "int32" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ int32_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "int32.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare (x : t) y = compare x y
@@ -104,6 +129,7 @@ end
 
 include Compare
 
+let invariant (_ : t) = ()
 let ( / ) = div
 let ( * ) = mul
 let ( - ) = sub
@@ -136,6 +162,10 @@ let to_nativeint = Conv.int32_to_nativeint
 let to_nativeint_exn = to_nativeint
 let pow b e = of_int_exn (Int_math.Private.int_pow (to_int_exn b) (to_int_exn e))
 let ( ** ) b e = pow b e
+
+external bswap32 : t -> t = "%bswap_int32"
+
+let bswap16 x = Caml.Int32.shift_right_logical (bswap32 x) 16
 
 module Pow2 = struct
   open! Import
@@ -180,8 +210,18 @@ module Pow2 = struct
     x land Caml.Int32.pred x = Caml.Int32.zero
   ;;
 
-  (* C stub for int clz to use the CLZ/BSR instruction where possible. *)
-  external int32_clz : int32 -> int = "Base_int_math_int32_clz" [@@noalloc]
+  (* C stubs for int32 clz and ctz to use the CLZ/BSR/CTZ/BSF instruction where possible *)
+  external clz
+    :  (int32[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_int32_clz" "Base_int_math_int32_clz_unboxed"
+  [@@noalloc]
+
+  external ctz
+    :  (int32[@unboxed])
+    -> (int[@untagged])
+    = "Base_int_math_int32_ctz" "Base_int_math_int32_ctz_unboxed"
+  [@@noalloc]
 
   (** Hacker's Delight Second Edition p106 *)
   let floor_log2 i =
@@ -189,7 +229,7 @@ module Pow2 = struct
     then
       raise_s
         (Sexp.message "[Int32.floor_log2] got invalid input" [ "", sexp_of_int32 i ]);
-    num_bits - 1 - int32_clz i
+    num_bits - 1 - clz i
   ;;
 
   (** Hacker's Delight Second Edition p106 *)
@@ -199,9 +239,7 @@ module Pow2 = struct
       raise_s
         (Sexp.message "[Int32.ceil_log2] got invalid input" [ "", sexp_of_int32 i ]);
     (* The [i = 1] check is needed because clz(0) is undefined *)
-    if Caml.Int32.equal i Caml.Int32.one
-    then 0
-    else num_bits - int32_clz (Caml.Int32.pred i)
+    if Caml.Int32.equal i Caml.Int32.one then 0 else num_bits - clz (Caml.Int32.pred i)
   ;;
 end
 
@@ -210,12 +248,17 @@ include Conv.Make (T)
 
 include Conv.Make_hex (struct
     type t = int32 [@@deriving_inline compare, hash]
+
     let compare = (compare_int32 : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       hash_fold_int32
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = hash_int32 in fun x -> func x
+      let func = hash_int32 in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let zero = zero

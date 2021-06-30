@@ -1,3 +1,0 @@
-(executable
- (name inspect)
- (libraries bisect_ppx.common notty.unix str))

@@ -1,0 +1,26 @@
+version: "1.1.0"
+opam-version: "2.0"
+name: "pbkdf"
+synopsis: "Password based key derivation functions (PBKDF) from PKCS#5"
+description: """
+An implementation of PBKDF 1 and 2 as defined by [PKCS#5](https://tools.ietf.org/html/rfc2898) using
+ [mirage-crypto](https://github.com/mirage/mirage-crypto)
+"""
+maintainer: ["Alfredo Beaumont <alfredo.beaumont@gmail.com>"]
+authors: ["Alfredo Beaumont <alfredo.beaumont@gmail.com>" "Sonia Meruelo <smeruelo@gmail.com>"]
+license: "BSD2"
+homepage: "https://github.com/abeaumont/ocaml-pbkdf"
+bug-reports: "https://github.com/abeaumont/ocaml-pbkdf/issues"
+dev-repo: "git+https://github.com/abeaumont/ocaml-pbkdf.git"
+doc: "https://abeaumont.github.io/ocaml-pbkdf/"
+depends: [
+  "ocaml" {>= "4.07.0"}
+  "dune"
+  "mirage-crypto"
+  "alcotest" {with-test & >= "0.8.1"}
+]
+build: [
+  [ "dune" "subst" ] {pinned}
+  [ "dune" "build" "-j" jobs "-p" name "@install" ]
+  [ "dune" "runtest" "-p" name "-j" jobs ] {with-test}
+]

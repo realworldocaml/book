@@ -1,9 +1,8 @@
-let printers = [ "Cohttp.Header.pp_hum"
-               ; "Cohttp.Request.pp_hum"
-               ; "Cohttp.Response.pp_hum" ]
+let printers =
+  [ "Cohttp.Header.pp_hum"; "Cohttp.Request.pp_hum"; "Cohttp.Response.pp_hum" ]
 
-let eval_string
-      ?(print_outcome = false) ?(err_formatter = Format.err_formatter) str =
+let eval_string ?(print_outcome = false) ?(err_formatter = Format.err_formatter)
+    str =
   let lexbuf = Lexing.from_string str in
   let phrase = !Toploop.parse_toplevel_phrase lexbuf in
   Toploop.execute_phrase print_outcome err_formatter phrase
@@ -17,4 +16,3 @@ let rec install_printers = function
 let () =
   if not (install_printers printers) then
     Format.eprintf "Problem installing Cohttp-printers@."
-

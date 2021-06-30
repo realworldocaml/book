@@ -28,9 +28,7 @@ let pp_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
     Mdx.Toplevel.of_lines
       ~syntax:Normal
-      ~file:b.file
-      ~line:b.line
-      ~column:b.column
+      ~loc:b.loc
       b.contents
   in
   pp_list pp_toplevel ppf ts

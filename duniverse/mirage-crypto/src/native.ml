@@ -30,6 +30,18 @@ module DES = struct
   external k_s     : unit -> int = "mc_des_key_size" [@@noalloc]
 end
 
+module Chacha = struct
+  external round : int -> buffer -> off -> buffer -> off -> unit = "mc_chacha_round" [@@noalloc]
+end
+
+module Poly1305 = struct
+  external init     : ctx -> buffer -> off -> unit = "mc_poly1305_init" [@@noalloc]
+  external update   : ctx -> buffer -> off -> size -> unit = "mc_poly1305_update" [@@noalloc]
+  external finalize : ctx -> buffer -> off -> unit = "mc_poly1305_finalize" [@@noalloc]
+  external ctx_size : unit -> int = "mc_poly1305_ctx_size" [@@noalloc]
+  external mac_size : unit -> int = "mc_poly1305_mac_size" [@@noalloc]
+end
+
 module MD5 = struct
   external init     : ctx -> unit = "mc_md5_init" [@@noalloc]
   external update   : ctx -> buffer -> off -> size -> unit = "mc_md5_update" [@@noalloc]
@@ -92,7 +104,7 @@ external blit : buffer -> off -> buffer -> off -> size -> unit = "caml_blit_bigs
 external misc_mode : unit -> int = "mc_misc_mode" [@@noalloc]
 
 external _detect_cpu_features : unit -> unit = "mc_detect_cpu_features" [@@noalloc]
-external _detect_entropy : unit -> unit = "caml_entropy_detect"
+external _detect_entropy : unit -> unit = "mc_entropy_detect"
 
 let () =
   _detect_cpu_features ();

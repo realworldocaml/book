@@ -1,0 +1,3 @@
+(cram
+ (deps ../test.sh)
+ (alias compatible))

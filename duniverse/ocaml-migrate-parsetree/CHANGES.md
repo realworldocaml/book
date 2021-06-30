@@ -1,3 +1,16 @@
+v2.1.0 2020-10-22 Bordeaux
+--------------------------
+
+- Add support for 4.12 (#107, @ceastlund)
+
+v2.0.0 2020-08-11 Canterbury
+----------------------------
+
+- No longer expose the unwrapped modules (#94, @jonludlam)
+
+- Remove everything but Ast versions and upgrade/downgrade
+  conversions (#103, @ceastlund)
+
 v1.7.3 2020-05-07 Canterbury
 ----------------------------
 

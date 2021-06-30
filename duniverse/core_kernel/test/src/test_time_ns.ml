@@ -1,5 +1,5 @@
 open! Core_kernel
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 
 type time_ns = Time_ns.t [@@deriving compare]
 
@@ -345,6 +345,115 @@ let%test_module "Ofday" =
       (Failure "minute > 60"))
     ("Time_ns.Ofday.of_string_iso8601_extended: cannot parse string" 00:59:61
       (Failure "invalid second: 61")) |}]
+    ;;
+
+    let%expect_test "every" =
+      let open Time_ns in
+      let test ?(verbose = true) span start stop =
+        let result = Ofday.every span ~start ~stop in
+        if verbose then print_s [%sexp (result : Ofday.t list Or_error.t)];
+        let crossed_bounds = Ofday.( > ) start stop in
+        let non_positive_span = Span.( <= ) span Span.zero in
+        let should_be_error = crossed_bounds || non_positive_span in
+        match result with
+        | Error _ ->
+          require
+            [%here]
+            should_be_error
+            ~if_false_then_print_s:
+              (lazy
+                [%message
+                  "should have produced Ok"
+                    (crossed_bounds : bool)
+                    (non_positive_span : bool)])
+        | Ok list ->
+          require
+            [%here]
+            (not should_be_error)
+            ~if_false_then_print_s:
+              (lazy
+                [%message
+                  "should have produced Error"
+                    (crossed_bounds : bool)
+                    (non_positive_span : bool)]);
+          require
+            [%here]
+            (List.is_sorted list ~compare:Ofday.compare)
+            ~if_false_then_print_s:(lazy [%message "not sorted"]);
+          require
+            [%here]
+            (List.for_all list ~f:(fun ofday ->
+               Ofday.( >= ) ofday start && Ofday.( <= ) ofday stop))
+            ~if_false_then_print_s:(lazy [%message "exceeds bounds"])
+      in
+      let hour = Span.hour in
+      let ten_min = Span.of_min 10.0 in
+      let sod = Ofday.start_of_day in
+      let eod = Ofday.approximate_end_of_day in
+      test hour eod sod;
+      [%expect
+        {|
+        (Error (
+          "[Time_ns.Ofday.every] called with [start] > [stop]"
+          (start 23:59:59.999999999)
+          (stop  00:00:00.000000000))) |}];
+      test hour sod eod;
+      [%expect
+        {|
+        (Ok (
+          00:00:00.000000000
+          01:00:00.000000000
+          02:00:00.000000000
+          03:00:00.000000000
+          04:00:00.000000000
+          05:00:00.000000000
+          06:00:00.000000000
+          07:00:00.000000000
+          08:00:00.000000000
+          09:00:00.000000000
+          10:00:00.000000000
+          11:00:00.000000000
+          12:00:00.000000000
+          13:00:00.000000000
+          14:00:00.000000000
+          15:00:00.000000000
+          16:00:00.000000000
+          17:00:00.000000000
+          18:00:00.000000000
+          19:00:00.000000000
+          20:00:00.000000000
+          21:00:00.000000000
+          22:00:00.000000000
+          23:00:00.000000000)) |}];
+      test ten_min sod (Ofday.of_string "00:20");
+      [%expect {| (Ok (00:00:00.000000000 00:10:00.000000000 00:20:00.000000000)) |}];
+      test ten_min sod (Ofday.of_string "00:25");
+      [%expect {| (Ok (00:00:00.000000000 00:10:00.000000000 00:20:00.000000000)) |}];
+      test hour sod (Ofday.of_string "00:25");
+      [%expect {| (Ok (00:00:00.000000000)) |}];
+      test hour sod sod;
+      [%expect {| (Ok (00:00:00.000000000)) |}];
+      test (Span.of_hr 25.) sod eod;
+      [%expect {| (Ok (00:00:00.000000000)) |}];
+      test Span.max_value_representable sod eod;
+      [%expect {| (Ok (00:00:00.000000000)) |}];
+      test Span.min_value_representable sod eod;
+      [%expect
+        {|
+        (Error (
+          "[Time_ns.Ofday.every] called with negative span"
+          -53375d23h53m38.427387904s)) |}];
+      let span_gen =
+        (* avoid intervals so small we generate, e.g., millions of values *)
+        Quickcheck.Generator.filter Span.quickcheck_generator ~f:(fun span ->
+          Span.( >= ) (Span.abs span) Span.second)
+      in
+      Expect_test_helpers_base.quickcheck
+        [%here]
+        [%quickcheck.generator: [%custom span_gen] * Ofday.t * Ofday.t]
+        ~sexp_of:[%sexp_of: Span.t * Ofday.t * Ofday.t]
+        ~f:(fun (span, start, stop) -> test ~verbose:false span start stop);
+      [%expect {| |}]
     ;;
   end)
 ;;

@@ -201,6 +201,7 @@ and Scheduler : sig
     ; mutable cycle_start : Time_ns.t
     ; mutable in_cycle : bool
     ; mutable run_every_cycle_start : (unit -> unit) list
+    ; mutable run_every_cycle_end : (unit -> unit) list
     ; mutable last_cycle_time : Time_ns.Span.t
     ; mutable last_cycle_num_jobs : int
     ; mutable total_cycle_time : Time_ns.Span.t

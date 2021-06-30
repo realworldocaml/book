@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Suite 500, Boston, MA 02110-1301, USA.
 *)
 
-open Ast_helper
-module Label = Ast_convenience.Label
+open Ppxlib.Ast_helper
+open Ppxlib.Parsetree
 
 (** Lang utilities *)
 
@@ -44,9 +44,9 @@ let lang = function
   | Svg -> "SVG"
 
 let make_lid ~loc i s =
-  Location.mkloc
-    (Longident.parse @@ implementation i ^ "." ^ s)
-    loc
+  { txt =
+    (Longident.parse @@ implementation i ^ "." ^ s);
+    loc }
 
 let make ~loc i s =
   Exp.ident ~loc @@ make_lid ~loc i s
@@ -56,9 +56,6 @@ let make ~loc i s =
 let find f l =
   try Some (List.find f l)
   with Not_found -> None
-
-let with_loc loc f x =
-  with_default_loc loc @@ fun () -> f x
 
 let error loc ppf =
   (* Originally written by @Drup in 24d87befcc505a9e3a1b081849b12560ce38028f. *)
@@ -75,14 +72,14 @@ let error loc ppf =
 
 (** Ast manipulation *)
 
-let int loc = with_loc loc Ast_convenience.int
+let int loc = Ast_builder.Default.eint ~loc
 
-let float loc = with_loc loc Ast_convenience.float
+let float loc fl = Ast_builder.Default.efloat ~loc @@ string_of_float fl
 
-let string loc = with_loc loc Ast_convenience.str
+let string loc = Ast_builder.Default.estring ~loc
 
 let add_constraints ~list lang e =
-  let loc = {e.Parsetree.pexp_loc with loc_ghost = true} in
+  let loc = {e.pexp_loc with loc_ghost = true} in
   let elt = make_lid ~loc lang "elt" in
   let wrap =
     if list then make_lid ~loc lang "list_wrap"
@@ -95,7 +92,7 @@ let add_constraints ~list lang e =
 
 type 'a value =
   | Val of 'a
-  | Antiquot of Parsetree.expression
+  | Antiquot of expression
 
 let value x = Val x
 let antiquot e = Antiquot e
@@ -152,4 +149,4 @@ let wrap_value lang loc = function
 let txt ~loc ~lang s =
   let txt = make ~loc lang "txt" in
   let arg = wrap lang loc @@ string loc s in
-  Ast_helper.Exp.apply ~loc txt [Label.nolabel, arg]
+  Ast_helper.Exp.apply ~loc txt [Nolabel, arg]

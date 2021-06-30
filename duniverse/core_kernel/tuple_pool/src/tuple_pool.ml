@@ -26,6 +26,7 @@ module Pool = struct
       if capacity <= old_capacity
       then
         failwiths
+          ~here:[%here]
           "Pool.grow got too small capacity"
           (`capacity capacity, `old_capacity old_capacity)
           [%sexp_of: [ `capacity of int ] * [ `old_capacity of int ]];
@@ -140,7 +141,8 @@ module Pool = struct
     let to_int t = t
 
     let of_int i =
-      if i < 0 then failwiths "Tuple_id.of_int got negative int" i [%sexp_of: int];
+      if i < 0
+      then failwiths ~here:[%here] "Tuple_id.of_int got negative int" i [%sexp_of: int];
       i
     ;;
 
@@ -246,10 +248,14 @@ module Pool = struct
           in
           if phys_equal t should_equal
           then t
-          else failwiths "should equal" should_equal [%sexp_of: _ t])
+          else failwiths ~here:[%here] "should equal" should_equal [%sexp_of: _ t])
       with
       | exn ->
-        failwiths "Pointer.of_id_exn got strange id" (id, exn) [%sexp_of: Id.t * exn]
+        failwiths
+          ~here:[%here]
+          "Pointer.of_id_exn got strange id"
+          (id, exn)
+          [%sexp_of: Id.t * exn]
     ;;
   end
 
@@ -424,12 +430,13 @@ module Pool = struct
       then (
         let header_index = Pointer.header_index pointer in
         if not (is_valid_header_index t ~header_index)
-        then failwiths "invalid header index" header_index [%sexp_of: int];
+        then failwiths ~here:[%here] "invalid header index" header_index [%sexp_of: int];
         if not (unsafe_pointer_is_live t pointer) then failwith "pointer not live");
       pointer
     with
     | exn ->
       failwiths
+        ~here:[%here]
         "Pool.pointer_of_id_exn got invalid id"
         (id, t, exn)
         [%sexp_of: Pointer.Id.t * _ t * exn]
@@ -461,7 +468,8 @@ module Pool = struct
                assert (is_valid_header_index t ~header_index);
                let tuple_num = header_index_to_tuple_num metadata ~header_index in
                if free.(tuple_num)
-               then failwiths "cycle in free list" tuple_num [%sexp_of: int];
+               then
+                 failwiths ~here:[%here] "cycle in free list" tuple_num [%sexp_of: int];
                free.(tuple_num) <- true;
                r := unsafe_header t ~header_index
              done))
@@ -481,7 +489,8 @@ module Pool = struct
                    done)
                done))
     with
-    | exn -> failwiths "Pool.invariant failed" (exn, t) [%sexp_of: exn * _ t]
+    | exn ->
+      failwiths ~here:[%here] "Pool.invariant failed" (exn, t) [%sexp_of: exn * _ t]
   ;;
 
   let capacity t = (metadata t).capacity
@@ -527,12 +536,14 @@ module Pool = struct
 
   let create_with_dummy slots ~capacity ~dummy =
     if capacity < 0
-    then failwiths "Pool.create got invalid capacity" capacity [%sexp_of: int];
+    then
+      failwiths ~here:[%here] "Pool.create got invalid capacity" capacity [%sexp_of: int];
     let slots_per_tuple = Slots.slots_per_tuple slots in
     let max_capacity = max_capacity ~slots_per_tuple in
     if capacity > max_capacity
     then
       failwiths
+        ~here:[%here]
         "Pool.create got too large capacity"
         (capacity, `max max_capacity)
         [%sexp_of: int * [ `max of int ]];
@@ -611,6 +622,7 @@ module Pool = struct
     if capacity = old_capacity
     then
       failwiths
+        ~here:[%here]
         "Pool.grow cannot grow pool; capacity already at maximum"
         capacity
         [%sexp_of: int];
@@ -641,7 +653,9 @@ module Pool = struct
     t'
   ;;
 
-  let[@cold] raise_malloc_full t = failwiths "Pool.malloc of full pool" t [%sexp_of: _ t]
+  let[@cold] raise_malloc_full t =
+    failwiths ~here:[%here] "Pool.malloc of full pool" t [%sexp_of: _ t]
+  ;;
 
   let malloc (type slots) (t : slots t) : slots Pointer.t =
     let metadata = metadata t in
@@ -682,7 +696,11 @@ module Pool = struct
        - be able to use unsafe functions after. *)
     if not (pointer_is_valid t pointer)
     then
-      failwiths "Pool.free of invalid pointer" (pointer, t) [%sexp_of: _ Pointer.t * _ t];
+      failwiths
+        ~here:[%here]
+        "Pool.free of invalid pointer"
+        (pointer, t)
+        [%sexp_of: _ Pointer.t * _ t];
     unsafe_free t pointer
   ;;
 
@@ -1129,7 +1147,8 @@ module Error_check (Pool : S) = struct
     let is_null t = Pointer.is_null t.pointer
 
     let follow t =
-      if not t.is_valid then failwiths "attempt to use invalid pointer" t [%sexp_of: _ t];
+      if not t.is_valid
+      then failwiths ~here:[%here] "attempt to use invalid pointer" t [%sexp_of: _ t];
       t.pointer
     ;;
 

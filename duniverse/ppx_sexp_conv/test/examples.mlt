@@ -8,8 +8,8 @@ end
 [%%expect{|
 Exception:
 (Of_sexp_error
- "examples.mlt.Position_for_polymorphic_variant_errors.t3_of_sexp: no matching variant found"
- (invalid_sexp C)).
+  "examples.mlt.Position_for_polymorphic_variant_errors.t3_of_sexp: no matching variant found"
+  (invalid_sexp C))
 |}]
 
 let _ = [%sexp_of: 'a]
@@ -29,3 +29,9 @@ let _ = [%sexp (() : 'a)]
 Line _, characters _-_:
 Error: Type variables not allowed in [%sexp_of: ]. Please use locally abstract types instead.
 |}]
+
+type 'a t =
+  | None
+  | Something_else of { value : 'a }
+[@@deriving sexp]
+[%%expect{||}]

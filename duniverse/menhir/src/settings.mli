@@ -43,17 +43,21 @@ val construction_mode: construction_mode
 
 val explain: bool
 
-(* Whether the automaton should be dumped. *)
+(* Whether the automaton should be dumped before conflict resolution. *)
 
 val dump: bool
 
-(* Whether the automaton's construction should be explained (very verbose). *)
+(* Whether the automaton should be dumped after conflict resolution. *)
 
-val follow: bool
+val dump_resolved: bool
 
-(* Whether the grammar's dependence graph should be dumped. *)
+(* Whether the grammar's reference graph should be dumped. *)
 
-val graph: bool
+val reference_graph: bool
+
+(* Whether the automaton's graph should be dumped. *)
+
+val automaton_graph: bool
 
 (* Whether tracing instructions should be generated. *)
 
@@ -222,6 +226,11 @@ val compile_errors: string option
 
 val compare_errors: (string * string) option
 
+(* If present, this is a pair of .messages files whose contents should
+   be merged. *)
+
+val merge_errors: (string * string) option
+
 (* This flag causes Menhir to read the error message descriptions stored in
    [filename] and re-generate the auto-generated comments, which begin with
    [##]. This allows bringing these comments up to date when the grammar
@@ -234,6 +243,12 @@ val update_errors: string option
    no comments). *)
 
 val echo_errors: string option
+
+(* This flag causes Menhir to read the error message descriptions stored in
+   [filename] and echo the error sentences, including the concrete syntax
+   of each sentence, in an auto-comment. *)
+
+val echo_errors_concrete: string option
 
 (* This flag causes Menhir to produce a [.cmly] file, which contains a
    binary-format description of the grammar and automaton. *)
@@ -253,3 +268,14 @@ type dollars =
   | DollarsAllowed
 
 val dollars: dollars
+
+(* This flag requires every token to come with a token alias. If that is
+   not the case, warnings are emitted. *)
+
+val require_aliases : bool
+
+(* The error handling strategy that should be used by the code back-end, the
+   table back-end, and the reference interpreter. See [IncrementalEngine] for
+   an explanation of the available strategies. *)
+
+val strategy: [`Legacy | `Simplified]

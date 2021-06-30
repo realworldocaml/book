@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 
 let%expect_test "[am_running_inline_test]" =
   print_s [%message (am_running_inline_test : bool)];

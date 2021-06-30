@@ -78,8 +78,9 @@
 % Links to Menhir's repository.
 
 \newcommand{\repo}[2]{\href{https://gitlab.inria.fr/fpottier/menhir/blob/master/#1}{#2}}
-\newcommand{\menhirlibconvert}{\repo{src/Convert.mli}{\texttt{MenhirLib.Convert}}\xspace}
-\newcommand{\menhirlibincrementalengine}{\repo{src/IncrementalEngine.ml}{\texttt{MenhirLib.IncrementalEngine}}\xspace}
+\newcommand{\menhirlibconvert}{\repo{lib/Convert.mli}{\texttt{MenhirLib.Convert}}\xspace}
+\newcommand{\menhirliberrorreports}{\repo{lib/ErrorReports.mli}{\texttt{MenhirLib.ErrorReports}}\xspace}
+\newcommand{\menhirlibincrementalengine}{\repo{lib/IncrementalEngine.ml}{\texttt{MenhirLib.IncrementalEngine}}\xspace}
 \newcommand{\standardmly}{\repo{src/standard.mly}{\texttt{standard.mly}}\xspace}
 \newcommand{\distrib}[1]{\repo{#1}{\texttt{#1}}}
 
@@ -93,6 +94,7 @@
 \newcommand{\menhir}{Menhir\xspace}
 \newcommand{\menhirlib}{\texttt{MenhirLib}\xspace}
 \newcommand{\menhirsdk}{\texttt{MenhirSdk}\xspace}
+\newcommand{\coqmenhirlib}{\texttt{MenhirLib}\xspace} % for now
 \newcommand{\menhirinterpreter}{\texttt{MenhirInterpreter}\xspace}
 \newcommand{\cmenhir}{\texttt{menhir}\xspace}
 \newcommand{\ml}{\texttt{.ml}\xspace}
@@ -115,8 +117,11 @@
 \newcommand{\ocamllex}{\texttt{ocamllex}\xspace}
 \newcommand{\token}{\texttt{token}\xspace}
 \newcommand{\automaton}{\texttt{.automaton}\xspace}
+\newcommand{\automatonresolved}{\texttt{.automaton.resolved}\xspace}
 \newcommand{\conflicts}{\texttt{.conflicts}\xspace}
 \newcommand{\dott}{\texttt{.dot}\xspace}
+\newcommand{\legacy}{\texttt{legacy}\xspace}
+\newcommand{\simplified}{\texttt{simplified}\xspace}
 
 % Environments.
 
@@ -146,6 +151,7 @@
 \newcommand{\odepend}{\oo{depend}}
 \newcommand{\orawdepend}{\oo{raw-depend}}
 \newcommand{\odump}{\oo{dump}}
+\newcommand{\odumpresolved}{\oo{dump-resolved}}
 \newcommand{\oerrorrecovery}{\oo{error-recovery}}
 \newcommand{\oexplain}{\oo{explain}}
 \newcommand{\oexternaltokens}{\oo{external-tokens}}
@@ -171,6 +177,7 @@
 \newcommand{\oocamldep}{\oo{ocamldep}}
 \newcommand{\oonlypreprocess}{\oo{only-preprocess}}
 \newcommand{\oonlytokens}{\oo{only-tokens}}
+\newcommand{\orequirealiases}{\oo{require-aliases}}
 \newcommand{\ostrict}{\oo{strict}}
 \newcommand{\osuggestcomp}{\oo{suggest-comp-flags}}
 \newcommand{\osuggestlinkb}{\oo{suggest-link-flags-byte}}
@@ -188,15 +195,19 @@
 \newcommand{\ocoqlibnopath}{\oo{coq-lib-no-path}}
 \newcommand{\ocoqnocomplete}{\oo{coq-no-complete}}
 \newcommand{\ocoqnoactions}{\oo{coq-no-actions}}
+\newcommand{\ocoqnoversioncheck}{\oo{coq-no-version-check}}
 \newcommand{\olisterrors}{\oo{list-errors}}
 \newcommand{\ointerpreterror}{\oo{interpret-error}}
 \newcommand{\ocompileerrors}{\oo{compile-errors}}
 \newcommand{\ocompareerrors}{\oo{compare-errors}}
 \newcommand{\oupdateerrors}{\oo{update-errors}}
 \newcommand{\oechoerrors}{\oo{echo-errors}}
+\newcommand{\oechoerrorsconcrete}{\oo{echo-errors-concrete}}
+\newcommand{\omergeerrors}{\oo{merge-errors}}
+\newcommand{\ostrategy}{\oo{strategy}}
 
 % The .messages file format.
-\newcommand{\messages}{\texttt{.messages}\xspace}
+\newcommand{\messages}{\text{\tt .messages}\xspace}
 
 % Adding mathstruts to ensure a common baseline.
 \newcommand{\mycommonbaseline}{

@@ -153,7 +153,7 @@ let with_file_descr_deferred_exn t f =
   | `Ok x -> x
   | `Error exn -> raise exn
   | `Already_closed ->
-    raise_s [%message "Fd.with_file_descr_deferred_exn got closed fd" ~_:(t : t)]
+    raise_s [%message "Fd.with_file_descr_deferred_exn got closed fd" ~_:(t : t_hum)]
 ;;
 
 let start_watching t read_or_write watching =
@@ -215,10 +215,8 @@ let ready_to t read_or_write =
   | `Watching ->
     (match%map Ivar.read ready with
      | (`Bad_fd | `Closed | `Ready) as x -> x
-     | `Interrupted -> assert false)
+     | `Interrupted -> (* impossible *) assert false)
 ;;
-
-(* impossible *)
 
 let interruptible_every_ready_to t read_or_write ~interrupt f x =
   if debug
@@ -249,10 +247,8 @@ let every_ready_to t read_or_write f x =
   | `Watching ->
     (match%map Ivar.read finished with
      | (`Bad_fd | `Closed) as x -> x
-     | `Interrupted -> assert false)
+     | `Interrupted -> (* impossible *) assert false)
 ;;
-
-(* impossible *)
 
 let syscall_in_thread t ~name f =
   match%map
@@ -260,7 +256,10 @@ let syscall_in_thread t ~name f =
       In_thread.syscall ~name (fun () -> f file_descr))
   with
   | `Error e ->
-    raise_s [%message "Fd.syscall_in_thread problem -- please report this" ~_:(e : exn)]
+    (* [In_thread.syscall] catches any exceptions [f] can raise, so this can only be
+       reached when there's something wrong with the [In_thread] machinery itself. *)
+    raise_s
+      [%message "Fd.syscall_in_thread problem -- please report this" name ~_:(e : exn)]
   | `Already_closed -> `Already_closed
   | `Ok x ->
     (match x with
@@ -273,7 +272,7 @@ let syscall_in_thread_exn t ~name f =
   | `Ok x -> x
   | `Error exn -> raise exn
   | `Already_closed ->
-    raise_s [%message "Fd.syscall_in_thread_exn of a closed fd" ~_:(t : t)]
+    raise_s [%message "Fd.syscall_in_thread_exn of a closed fd" name ~_:(t : t_hum)]
 ;;
 
 let of_in_channel ic kind =

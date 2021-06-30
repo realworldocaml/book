@@ -16,6 +16,31 @@ include Caml.Gc
 
 module Stat = struct
   module T = struct
+    [%%if ocaml_version >= (4, 12, 0)]
+
+    type t = Caml.Gc.stat =
+      { minor_words : float
+      ; promoted_words : float
+      ; major_words : float
+      ; minor_collections : int
+      ; major_collections : int
+      ; heap_words : int
+      ; heap_chunks : int
+      ; live_words : int
+      ; live_blocks : int
+      ; free_words : int
+      ; free_blocks : int
+      ; largest_free : int
+      ; fragments : int
+      ; compactions : int
+      ; top_heap_words : int
+      ; stack_size : int
+      ; forced_major_collections : int
+      }
+    [@@deriving compare, hash, bin_io, sexp, fields]
+
+    [%%else]
+
     type t = Caml.Gc.stat =
       { minor_words : float
       ; promoted_words : float
@@ -35,7 +60,9 @@ module Stat = struct
       ; stack_size : int
       }
     [@@deriving compare, hash, bin_io, sexp, fields]
-  end
+
+    [%%endif]
+   end
 
   include T
   include Comparable.Make (T)
@@ -214,12 +241,74 @@ external heap_chunks : unit -> int = "core_kernel_gc_heap_chunks" [@@noalloc]
 external compactions : unit -> int = "core_kernel_gc_compactions" [@@noalloc]
 external top_heap_words : unit -> int = "core_kernel_gc_top_heap_words" [@@noalloc]
 external major_plus_minor_words : unit -> int = "core_kernel_gc_major_plus_minor_words"
+external allocated_words : unit -> int = "core_kernel_gc_allocated_words"
 
 let zero = Sys.opaque_identity (int_of_string "0")
 
 (* The compiler won't optimize int_of_string away so it won't
    perform constant folding below. *)
 let rec keep_alive o = if zero <> 0 then keep_alive (Sys.opaque_identity o)
+
+module For_testing = struct
+  let prepare_heap_to_count_minor_allocation () =
+    (* We call [minor] to empty the minor heap, so that our allocation is unlikely to
+       trigger a minor gc. *)
+    minor ();
+    (* We allocate two words in case the [Gc.minor] finishes a major gc cycle, in which
+       case it requests a minor gc to occur at the next minor allocation.  We don't want
+       the subsequent minor allocation to trigger a minor GC, because there is a bug
+       (https://github.com/ocaml/ocaml/issues/7798) in the OCaml runtime that double
+       counts [Gc.minor_words] in that case. *)
+    ignore (Sys.opaque_identity (ref (Sys.opaque_identity 1)) : int ref)
+  ;;
+
+  (* We disable inlining for this function so the GC stats and the call to [f] are never
+     rearranged. *)
+  let[@cold] measure_internal ~on_result f =
+    let minor_words_before = minor_words () in
+    let major_words_before = major_words () in
+    (* We wrap [f ()] with [Sys.opaque_identity] to prevent the return value from being
+       optimized away. *)
+    let x = Sys.opaque_identity (f ()) in
+    let minor_words_after = minor_words () in
+    let major_words_after = major_words () in
+    let major_words_allocated = major_words_after - major_words_before in
+    let minor_words_allocated = minor_words_after - minor_words_before in
+    on_result ~major_words_allocated ~minor_words_allocated x
+  ;;
+
+  let is_zero_alloc (type a) (f : unit -> a) =
+    (* Instead of using [Allocation_report.measure], and matching on the result, we use
+       this construction, in order to have [is_zero_alloc] not allocate itself. This
+       enables [is_zero_alloc] to be used in a nested way.
+
+       This also means we cannot call [prepare_heap_to_count_minor_allocation]. This is
+       okay, since we do not need a precise count, we only need to check if the count is
+       zero or not. *)
+    measure_internal
+      f
+      ~on_result:(fun ~major_words_allocated ~minor_words_allocated value ->
+        ignore (Sys.opaque_identity value : a);
+        major_words_allocated == 0 && minor_words_allocated == 0)
+  ;;
+
+  module Allocation_report = struct
+    type t =
+      { major_words_allocated : int
+      ; minor_words_allocated : int
+      }
+
+    let create ~major_words_allocated ~minor_words_allocated =
+      { major_words_allocated; minor_words_allocated }
+    ;;
+  end
+
+  let measure_allocation f =
+    prepare_heap_to_count_minor_allocation ();
+    measure_internal f ~on_result:(fun ~major_words_allocated ~minor_words_allocated x ->
+      x, Allocation_report.create ~major_words_allocated ~minor_words_allocated)
+  ;;
+end
 
 module Expert = struct
   let add_finalizer x f =

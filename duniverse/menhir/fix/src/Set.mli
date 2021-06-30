@@ -10,7 +10,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(* The lattice of sets. The ordering is set inclusion. Therefore,
+(**The lattice of sets. The ordering is set inclusion. Therefore,
    the empty set is the bottom element. *)
 
 open Sigs

@@ -209,15 +209,6 @@ module Server : sig
       [on_handler_error] determines what happens if the handler throws an exception. If an
       exception is raised by on_handler_error (either explicitly via [`Raise], or in the
       closure passed to [`Call]) no further connections will be accepted. *)
-  type ('address, 'listening_on, 'callback) create_options =
-    ?max_connections:int (** default is [10_000] *)
-    -> ?max_accepts_per_batch:int (** default is [1] *)
-    -> ?backlog:int (** default is [64] *)
-    -> ?socket:([ `Unconnected ], 'address) Socket.t
-    -> on_handler_error:[ `Raise | `Ignore | `Call of 'address -> exn -> unit ]
-    -> ('address, 'listening_on) Where_to_listen.t
-    -> 'callback
-    -> ('address, 'listening_on) t Deferred.t
 
   (** [create_sock where_to_listen handler] starts a server listening to a socket as
       specified by [where_to_listen].  It returns a server once the socket is ready to
@@ -229,10 +220,31 @@ module Server : sig
       raises (either via [`Raise] or [`Call f] where [f] raises), or if [close] is
       called. *)
   val create_sock
-    : ( 'address
-      , 'listening_on
-      , 'address -> ([ `Active ], 'address) Socket.t -> unit Deferred.t )
-        create_options
+    :  ?max_connections:int (** defaults to [10_000]. *)
+    -> ?max_accepts_per_batch:int (** defaults to [1]. *)
+    -> ?backlog:int (** defaults to [64] *)
+    -> ?socket:([ `Unconnected ], ([< Socket.Address.t ] as 'address)) Socket.t
+    -> on_handler_error:[ `Call of 'address -> exn -> unit | `Ignore | `Raise ]
+    -> ('address, 'listening_on) Where_to_listen.t
+    -> ('address -> ([ `Active ], 'address) Socket.t -> unit Deferred.t)
+    -> ('address, 'listening_on) t Deferred.t
+
+  (** as [create_sock], but only supports inet sockets, not unix sockets, and returns the
+      server immediately rather than asynchronously. *)
+  val create_sock_inet
+    :  ?max_connections:int
+    -> ?max_accepts_per_batch:int
+    -> ?backlog:int
+    -> ?socket:([ `Unconnected ], Socket.Address.Inet.t) Socket.t
+    -> on_handler_error:[ `Call of Socket.Address.Inet.t -> exn -> unit
+                        | `Ignore
+                        | `Raise
+                        ]
+    -> Where_to_listen.inet
+    -> (Socket.Address.Inet.t
+        -> ([ `Active ], Socket.Address.Inet.t) Socket.t
+        -> unit Deferred.t)
+    -> (Socket.Address.Inet.t, int) t
 
   (** [create where_to_listen handler] is a convenience wrapper around [create_sock] that
       pass a reader and writer for the client socket to the callback.  If the deferred
@@ -242,10 +254,28 @@ module Server : sig
       [buffer_age_limit] passes on to the underlying writer option of the same name. *)
   val create
     :  ?buffer_age_limit:Writer.buffer_age_limit
-    -> ( 'address
-       , 'listening_on
-       , 'address -> Reader.t -> Writer.t -> unit Deferred.t )
-         create_options
+    -> ?max_connections:int (** defaults to [10_000]. *)
+    -> ?max_accepts_per_batch:int (** defaults to [1]. *)
+    -> ?backlog:int (** defaults to [64]. *)
+    -> ?socket:([ `Unconnected ], ([< Socket.Address.t ] as 'address)) Socket.t
+    -> on_handler_error:[ `Call of 'address -> exn -> unit | `Ignore | `Raise ]
+    -> ('address, 'listening_on) Where_to_listen.t
+    -> ('address -> Reader.t -> Writer.t -> unit Deferred.t)
+    -> ('address, 'listening_on) t Deferred.t
+
+  val create_inet
+    :  ?buffer_age_limit:Writer.buffer_age_limit
+    -> ?max_connections:int (** defaults to [10_000]. *)
+    -> ?max_accepts_per_batch:int (** defaults to [1]. *)
+    -> ?backlog:int (** defaults to [64]. *)
+    -> ?socket:([ `Unconnected ], Socket.Address.Inet.t) Socket.t
+    -> on_handler_error:[ `Call of Socket.Address.Inet.t -> exn -> unit
+                        | `Ignore
+                        | `Raise
+                        ]
+    -> Where_to_listen.inet
+    -> (Socket.Address.Inet.t -> Reader.t -> Writer.t -> unit Deferred.t)
+    -> (Socket.Address.Inet.t, int) t
 
   (** [listening_socket t] accesses the listening socket, which should be used with care.
       An anticipated use is with {!Async_udp.bind_to_interface_exn}.  Accepting

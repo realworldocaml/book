@@ -16,12 +16,13 @@
  *)
 
 type t = {
-  ip: Ipaddr_sexp.t;
-  ipv6: Ipaddr_sexp.V6.t;
-  ipv6p: Ipaddr_sexp.V6.Prefix.t;
-  ipv4: Ipaddr_sexp.V4.t;
-  ipv4p: Ipaddr_sexp.V4.Prefix.t;
-  scope: Ipaddr_sexp.scope;
-  mac: Macaddr_sexp.t;
-  ipp: Ipaddr_sexp.Prefix.t;
-} [@@deriving sexp]
+  ip : Ipaddr_sexp.t;
+  ipv6 : Ipaddr_sexp.V6.t;
+  ipv6p : Ipaddr_sexp.V6.Prefix.t;
+  ipv4 : Ipaddr_sexp.V4.t;
+  ipv4p : Ipaddr_sexp.V4.Prefix.t;
+  scope : Ipaddr_sexp.scope;
+  mac : Macaddr_sexp.t;
+  ipp : Ipaddr_sexp.Prefix.t;
+}
+[@@deriving sexp]

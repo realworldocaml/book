@@ -130,14 +130,16 @@ irredundant. For more information, see \sref{sec:errors:new}.
 
 \docswitch{\ocoq} This switch causes \menhir to produce Coq code. See \sref{sec:coq}.
 
-\docswitch{\ocoqlibpath \nt{path}} This switch allows specifying under what name (or path) the Coq support library
-MenhirLib is known to Coq. When \menhir runs in \ocoq mode, the generated
-parser contains references to several modules in this library. This path is
-used to qualify these references. Its default value is \texttt{MenhirLib}.
+\docswitch{\ocoqlibpath \nt{path}} This switch allows specifying under what
+name (or path) the Coq support library is known to Coq. When \menhir runs in
+\ocoq mode, the generated parser contains references to several modules in
+this library. This path is used to qualify these references. Its default value
+is \coqmenhirlib.
 
-\docswitch{\ocoqlibnopath} This switch indicates that references to the Coq library MenhirLib
-should \emph{not} be qualified. This was the default behavior of \menhir prior to 2018/05/30.
-This switch is provided for compatibility, but normally should not be used.
+\docswitch{\ocoqlibnopath} This switch indicates that references to the Coq
+library \coqmenhirlib should \emph{not} be qualified. This was the default
+behavior of \menhir prior to 2018/05/30. This switch is provided for
+compatibility, but normally should not be used.
 
 \docswitch{\ocoqnoactions} (Used in conjunction with \ocoq.) This switch
 causes the semantic actions present in the \vy file to be ignored and
@@ -154,15 +156,35 @@ sense of \sref{sec:conflicts:benign}). This can be desirable also because, for
 a complex grammar, completeness may require a heavy certificate and its
 validation by Coq may take time.
 
+\docswitch{\ocoqnoversioncheck} (Used in conjunction with \ocoq.) This switch
+prevents the generation of the check that verifies that the versions of
+\menhir and \coqmenhirlib match.
+
 \docswitch{\odepend} See \sref{sec:build}.
 
-\docswitch{\odump} This switch causes a description of the automaton
-to be written to the file \nt{basename}\automaton.
+\docswitch{\odump} This switch causes a description of the automaton to be
+written to the file \nt{basename}\automaton. This description is written after
+benign conflicts have been resolved, before severe conflicts are resolved
+(\sref{sec:conflicts}), and before extra reductions are introduced
+(\sref{sec:onerrorreduce}).
+
+\docswitch{\odumpresolved} This command line switch causes a description of
+the automaton to be written to the file \nt{basename}\automatonresolved. This
+description is written after all conflicts have been resolved
+(\sref{sec:conflicts}) and after extra reductions have been introduced
+(\sref{sec:onerrorreduce}).
 
 \docswitch{\oechoerrors \nt{filename}} This switch causes \menhir to
 read the \messages file \nt{filename} and to produce on the standard output
 channel just the input sentences. (That is, all messages, blank lines, and
 comments are filtered out.) For more information, see \sref{sec:errors:new}.
+
+\docswitch{\oechoerrorsconcrete \nt{filename}} This switch causes \menhir to
+read the \messages file \nt{filename} and to produce on the standard output
+channel just the input sentences. Each sentence is followed with a comment of
+the form \verb+## Concrete syntax: ...+ that shows this sentence in concrete
+syntax. This comment is printed only if the user has defined an alias for
+every token (\sref{sec:tokens}).
 
 \docswitch{\oexplain} This switch causes conflict explanations to be
 written  to the file \nt{basename}\conflicts. See also \sref{sec:conflicts}.
@@ -227,6 +249,12 @@ causes some information about the grammar to be logged to the standard error
 channel. When \nt{level} is 2, the \emph{nullable}, \emph{FIRST}, and
 \emph{FOLLOW} tables are displayed.
 
+\docswitch{\omergeerrors \nt{filename1} \omergeerrors \nt{filename2}} Two such
+switches must always be used in conjunction so as to specify the names of two
+\messages files, \nt{filename1} and \nt{filename2}. This command causes
+\menhir to merge these two \messages files and print the result on the
+standard output channel. For more information, see \sref{sec:errors:new}.
+
 \docswitch{\onodollars} This switch disallows the use of positional keywords
 of the form \kw{\$i}.
 
@@ -259,15 +287,29 @@ a single set of tokens is to be shared between several parsers. The directory
 
 \docswitch{\orawdepend} See \sref{sec:build}.
 
+\docswitch{\orequirealiases} This switch causes \menhir to check that a token
+alias (\sref{sec:tokens}) has been defined for every token. There is no
+requirement for this alias to be actually used; it must simply exist. A
+missing alias gives rise to a warning (and, in \ostrict mode, to an error).
+
 \docswitch{\ostdlib \nt{directory}} This switch exists only for
 backwards compatibility and is ignored. It may be removed in the future.
+
+\docswitch{\ostrategy \nt{strategy}} This switch selects an error handling
+strategy, to be used by the code back-end, the table back-end, and the
+reference interpreter. The available strategies are \legacy and
+simplified. (However, at the time of writing, the code back-end does
+not yet support the simplified strategy.) When this switch is
+omitted, the \legacy strategy is used. The choice of a strategy
+matters only if the grammar uses the \error token. For more details, see
+\sref{sec:errors}.
 
 \docswitch{\ostrict} This switch causes several warnings about the grammar
 and about the automaton to be considered errors. This includes warnings about
 useless precedence declarations, non-terminal symbols that produce the empty
 language, unreachable non-terminal symbols, productions that are never
-reduced, conflicts that are not resolved by precedence declarations, and
-end-of-stream conflicts.
+reduced, conflicts that are not resolved by precedence declarations,
+end-of-stream conflicts, and missing token aliases.
 
 \docswitch{\oo{suggest-*}} See \sref{sec:build}.
 
@@ -1786,7 +1828,7 @@ token, it makes sense for it to \emph{shift} that token.
 \label{fig:reducing:text}
 \end{figure}
 
-In our example, the proof that shifting is possible is the derivation tree
+In our example, the proof that reducing is possible is the derivation tree
 shown in Figures~\ref{fig:reducing:tree} and~\ref{fig:reducing:text}. Again,
 the sentential form found at the fringe of the tree begins with the conflict
 string, followed with the conflict token.
@@ -2499,6 +2541,10 @@ This API is ``monolithic'' in the sense that there is just one function, which
 does everything: it pulls tokens from the lexer, parses, and eventually
 returns a semantic value (or fails by throwing the exception \texttt{Error}).
 
+% We may wish to note that the behavior of the function \verb+main+
+% is influenced by the strategy that is chosen at compile time via
+% \ostrategy.
+
 % ------------------------------------------------------------------------------
 
 \subsection{Incremental API}
@@ -2666,6 +2712,7 @@ monolithic API.)
 
 \begin{verbatim}
   val resume:
+    ?strategy:[ `Legacy | `Simplified ] ->
     'a checkpoint ->
     'a checkpoint
 \end{verbatim}
@@ -2675,6 +2722,10 @@ parser has suspended itself with a checkpoint of the form
 \verb+AboutToReduce (env, prod)+ or \verb+HandlingError env+.
 This function expects just the previous checkpoint \verb+checkpoint+. It produces a new
 checkpoint. It does not raise any exception.
+%
+The optional argument \verb+strategy+ influences the manner in which
+\verb+resume+ deals with checkpoints of the form \verb+ErrorHandling _+. Its
+default value is \verb+`Legacy+. For more details, see \sref{sec:errors}.
 
 The incremental API subsumes the monolithic API. Indeed, \verb+main+ can be
 (and is in fact) implemented by first using
@@ -2715,7 +2766,9 @@ and \verb+resume+.
 %% val loop
 
 \begin{verbatim}
-  val loop: supplier -> 'a checkpoint -> 'a
+  val loop:
+    ?strategy:[ `Legacy | `Simplified ] ->
+    supplier -> 'a checkpoint -> 'a
 \end{verbatim}
 
 \verb+loop supplier checkpoint+ begins parsing from \verb+checkpoint+, reading
@@ -2724,6 +2777,10 @@ checkpoint of the form \verb+Accepted v+ or \verb+Rejected+. In the former
 case, it returns \verb+v+. In the latter case, it raises the
 exception \verb+Error+. (By the way, this is how we implement the monolithic
 API on top of the incremental API.)
+%
+The optional argument \verb+strategy+ influences the manner in which
+\verb+loop+ deals with checkpoints of the form \verb+ErrorHandling _+. Its
+default value is \verb+`Legacy+. For more details, see \sref{sec:errors}.
 
 \begin{verbatim}
   val loop_handle:
@@ -3240,6 +3297,7 @@ state (as determined by \verb+env+) has an outgoing transition labeled with
 
 \menhir's traditional error handling mechanism is considered deprecated: although
 it is still supported for the time being, it might be removed in the future.
+%
 We recommend setting up an error handling mechanism using the new tools
 offered by \menhir (\sref{sec:errors:new}).
 
@@ -3253,23 +3311,45 @@ by the lexical analyzer. Instead, when an error is detected, the current
 lookahead token is discarded and replaced with the \error token, which becomes
 the current lookahead token. At this point, the parser enters \emph{error
 handling} mode.
+%
+In error handling mode, the parser behaves as follows:
+\begin{itemize}
+\item If the current state has a shift action on the \error token, then this
+  action takes place. Under the \legacy strategy, the parser then
+  reads the next token and returns to normal mode. Under the
+  simplified strategy, it does \emph{not} request the next token, so
+  the current token remains \error, and the parser remains in error handling
+  mode.
+\item If the current state has a reduce action on the \error token, then this
+  action takes place. (This behavior differs from that of \yacc and
+  \ocamlyacc, which do not reduce on \error. It is somewhat unclear why not.)
+  The current token remains \error and the parser remains in error handling
+  mode.
+\item If the current state has no action on the \error token, then, under the
+  simplified strategy, the parser rejects the input. Under the
+  \legacy strategy, the parser pops a cell off its stack and remains
+  in error handling mode. If the stack is empty, then the parser rejects the
+  input.
+\end{itemize}
 
-In error handling mode, automaton states are popped off the automaton's stack
-until a state that can \emph{act} on \error is found. This includes
-\emph{both} shift \emph{and} reduce actions. (\yacc and \ocamlyacc do not
-trigger reduce actions on \error. It is somewhat unclear why this is so.)
+In the monolithic API, the parser rejects the input by raising the exception
+\texttt{Error}. This exception carries no information. The position of the
+error can be obtained by reading the lexical analyzer's environment record. In
+the incremental API, the parser rejects the input by returning the checkpoint
+\texttt{Rejected}.
 
-When a state that can reduce on \error is found, reduction is performed.
-Since the lookahead token is still \error, the automaton remains in error
-handling mode.
-
-When a state that can shift on \error is found, the \error token is shifted.
-At this point, the parser returns to normal mode.
-
-When no state that can act on \error is found on the automaton's stack, the
-parser stops and raises the exception \texttt{Error}. This exception carries
-no information. The position of the error can be obtained by reading the
-lexical analyzer's environment record.
+Which strategy should one choose? First, let us note that the difference
+between the strategies \legacy and \simplified matters only if the grammar
+uses the \error token. The following rule of thumb can be used to select
+between them:
+\begin{itemize}
+\item If the \error token is used only to catch an error and stop, then the
+  \simplified strategy should be preferred. (In this this restricted style,
+  the \error token always appears at the end of a production, whose semantic
+  action raises an exception.)
+\item If the \error token is used to survive an error and continue parsing,
+  then the legacy strategy should be selected.
+\end{itemize}
 
 \paragraph{Error recovery}
 
@@ -3352,25 +3432,28 @@ should not be used.
 \subsection{The \messages file format}
 \label{sec:messages:format}
 
-A \messages file is a text file. Comment lines, which begin with a \verb+#+
-character, are ignored everywhere. As is evident in the following description,
-blank lines are significant: they are used as separators between entries and
-within an entry.
+\paragraph{Definition}
 
-A~\messages file is composed of a list of entries. Two entries are separated
-by one or more blank lines. Each entry consists of one or more input
-sentences, followed with one or more blank lines, followed with a message. The
-syntax of an input sentence is described in \sref{sec:sentences}. A message is
-arbitrary text, but cannot contain a blank line. We stress that there cannot
-be a blank line between two sentences (if there is one, \menhir becomes confused
-and may complain about some word not being ``a known non-terminal symbol'').
+A \messages file is a text file. It is composed of a list of entries. Each
+entry consists of one or more input sentences, followed with one or more blank
+lines, followed with a message. Two entries are separated by one or more blank
+lines. The syntax of an input sentence is described in \sref{sec:sentences}.
+A~message is an arbitrary piece of text, but cannot cannot a blank line.
+
+Blank lines are significant: they are used as separators, both between
+entries, and (within an entry) between the sentences and the message. Thus,
+there cannot be a blank line between two sentences. (If there is one, \menhir
+becomes confused and may complain about some word not being ``a known
+non-terminal symbol''). There also cannot be a blank line inside a message.
 
 \begin{figure}
 \begin{verbatim}
 grammar: TYPE UID
+# This hand-written comment concerns just the sentence above.
 grammar: TYPE OCAMLTYPE UID PREC
+# This hand-written comment concerns just the sentence above.
 
-# A (handwritten) comment.
+# This hand-written comment concerns both sentences above.
 
 Ill-formed declaration.
 Examples of well-formed declarations:
@@ -3394,6 +3477,8 @@ grammar: TYPE UID
 ## The known suffix of the stack is as follows:
 ## TYPE
 ##
+# This hand-written comment concerns just the sentence above.
+#
 grammar: TYPE OCAMLTYPE UID PREC
 ##
 ## Ends in an error in state: 5.
@@ -3406,8 +3491,9 @@ grammar: TYPE OCAMLTYPE UID PREC
 ## The known suffix of the stack is as follows:
 ## symbol
 ##
+# This hand-written comment concerns just the sentence above.
 
-# A (handwritten) comment.
+# This hand-written comment concerns both sentences above.
 
 Ill-formed declaration.
 Examples of well-formed declarations:
@@ -3422,6 +3508,24 @@ As an example, \fref{fig:messages:entry} shows a valid entry, taken
 from \menhir's own \messages file. This entry contains two input sentences,
 which lead to errors in two distinct states. A single message is associated
 with these two error states.
+
+\paragraph{Comments}
+
+Comment lines, which begin with a \verb+#+ character, are ignored everywhere.
+However, users who wish to take advantage of \menhir's facility for merging
+two \messages files (\sref{sec:messages:merge}) should follow certain
+conventions regarding the placement of comments:
+\begin{itemize}
+\item If a comment concerns a specific sentence and should remain attached
+  to this sentence, then it must immediately follow this sentence
+  (without a blank line in between).
+\item If a comment concerns all sentences in an entry, then it should appear
+  between the sentences and the message, with blank lines in between.
+\item One should avoid placing comments between two entries, as the merging
+  algorithm will not be able to handle them in a satisfactory way.
+\end{itemize}
+
+\paragraph{Auto-generated comments}
 
 Several commands, described next (\sref{sec:messages:tools}),
 produce \messages files where each input sentence is followed with an
@@ -3478,24 +3582,30 @@ Ideally, the set of input sentences in a \messages file should be correct
 is, no two sentences lead to the same error state), and complete (that is,
 every error state is reached by some sentence).
 
-Correctness and irredundancy are checked by the
-command \ocompileerrors \nt{filename}, where \nt{filename} is the name of
-a \messages file. This command fails if a sentence does not cause an error at
-all, or causes an error too early. It also fails if two sentences lead to the
-same error state.
+\paragraph{Verifying correctness and irredundancy}
+
+The correctness and irredundancy of a \messages file are checked by supplying
+\ocompileerrors \nt{filename} on the command line, where \nt{filename} is the
+name of the \messages file. (These arguments must be supplied in addition to
+the other usual arguments, such as the name of the \mly file.) This command
+fails if a sentence does not cause an error at all, or causes an error too
+early. It also fails if two sentences lead to the same error state.
 %
 If the file is correct and irredundant, then (as its name suggests) this
 command compiles the \messages file down to an \ocaml function, whose code
 is printed on the standard output channel. This function, named \verb+message+,
 has type \verb+int -> string+, and maps a state number to a message. It
 raises the exception \verb+Not_found+ if its argument is not the number of
-a state for which a message has been defined.
+a state for which a message has been defined. If the set of input sentences
+is complete, then it cannot raise \verb+Not_found+.
 
-Completeness is checked via the commands \olisterrors and
-\ocompareerrors. The former produces, from scratch, a complete
-set of input sentences, that is, a set of input sentences that reaches all
-error states. The latter compares two sets of sentences (more precisely,
-the two underlying sets of error states) for inclusion.
+\paragraph{Verifying completeness}
+
+The completeness of a \messages file is checked via the commands \olisterrors
+and \ocompareerrors. The former produces, from scratch, a complete set of
+input sentences, that is, a set of input sentences that reaches all error
+states. The latter compares two sets of sentences (more precisely, the two
+underlying sets of error states) for inclusion.
 
 The command \olisterrors first computes all possible ways of causing an error.
 From this information, it deduces a list of all error states, that is, all
@@ -3527,15 +3637,45 @@ compare \nt{filename1} and \nt{filename2}.
 
 In the case of a grammar that evolves fairly often, it can take significant
 human time and effort to update the \messages file and ensure correctness,
-irredundancy, and completeness. A way of reducing this effort is to abandon
+irredundancy, and completeness. A tempting way of reducing this effort is to abandon
 completeness. This implies that the auto-generated \verb+message+ function can
 raise \verb+Not_found+ and that a generic ``syntax error'' message must be
 produced in that case. We prefer to discourage this approach, as it implies
 that the end user is exposed to a mixture of specific and generic syntax error
 messages, and there is no guarantee that the specific (hand-written) messages
-will appear in \emph{all} situations where there are expected to appear.
+will appear in \emph{all} situations where they are expected to appear.
 Instead, we recommend waiting for the grammar to become stable and enforcing
 completeness.
+
+\paragraph{Merging \messages files}
+\label{sec:messages:merge}
+
+The command \omergeerrors \nt{filename1} \omergeerrors \nt{filename2} attempts
+to merge the \messages files \nt{filename1} and \nt{filename2}, and prints the
+result on the standard output channel. This command can be useful if two users
+have worked independently and each of them has produced a \messages file that
+covers a subset of all error states. The merging algorithm works roughly as
+follows:
+%
+\begin{itemize}
+\item All entries in \nt{filename2} are preserved literally.
+\item An entry in \nt{filename1} that contains the dummy message
+  \verb+<YOUR SYNTAX ERROR MESSAGE HERE>+ is ignored.
+\item An entry in \nt{filename1} that leads to a state for which
+  there is no entry in \nt{filename2} is copied to \nt{filename2}.
+\item An entry in \nt{filename1} that leads to a state for which
+  there is also an entry in \nt{filename2}, with a distinct message,
+  gives rise to a conflict. It is inserted into \nt{filename2}
+  together with a comment that signals the conflict.
+\end{itemize}
+%
+The algorithm is asymmetric: the content of \nt{filename1} is inserted into or
+appended to \nt{filename2}. For this reason, if one of the files is a large
+``reference'' file and the other file is a small ``delta'', then it is
+recommended to provide the ``delta'' as \nt{filename1} and the ``reference''
+as \nt{filename2}.
+
+\paragraph{Other commands}
 
 The command \oupdateerrors \nt{filename} is used to update the auto-generated
 comments in the \messages file \nt{filename}. It is typically used after a
@@ -3805,26 +3945,52 @@ declaration is complete, then at this point, a semicolon is expected''.
 \subsection{A working example}
 \label{sec:errors:example}
 
-The CompCert verified compiler offers a real-world example of this approach to
-error handling. The ``pre-parser'' is where syntax errors are detected: see
+The demo \distrib{demos/calc-syntax-errors} illustrates this approach to error
+handling. It is based on the demo \distrib{demos/calc}, which involves a very
+simple grammar of arithmetic expressions. Compared with \distrib{demos/calc},
+one \donerrorreduce declaration is added so as to reduce the number of error
+states. There remain just 9~error states, for which we write 5~distinct syntax
+error messages. These messages are stored in the file
+\distrib{demos/calc-syntax-errors/parserMessages.messages}.
+%
+The file \distrib{demos/calc-syntax-errors/dune} instructs the build system to
+check this file for correctness, irredundancy and completeness and to compile
+this file into an OCaml module \verb+parserMessages.ml+.
+%
+This OCaml module contains a single function, \verb+ParserMessages.messages+,
+which maps a state number to a diagnostic message. It is called from the main
+module, \distrib{demos/calc-syntax-errors/calc.ml}.
+%
+There, we use the facilities offered by the module
+\menhirliberrorreports to print a full syntax error message,
+which includes the precise location of the error as well as
+the diagnostic message returned by
+the function \verb+ParserMessages.messages+.
+%
+As icing on the cake, we allow the diagnostic message to contain placeholders
+of the form
+\verb+$i+, where \verb+i+ is an integer constant, understood as a 0-based
+index into the parser's stack. We replace such a placeholder with the fragment
+of the source text that corresponds to this stack entry.
+%
+A number of expected-output files demonstrate the kind of syntax error
+messages that we produce; see for instance
+\distrib{demos/calc-syntax-errors/calc03.exp} and
+\distrib{demos/calc-syntax-errors/calc07.exp}.
+
+The CompCert verified compiler offers another real-world example. The
+``pre-parser'' is where syntax errors are detected: see
 \compcertgithubfile{cparser/pre\_parser.mly}.
 % (The pre-parser is also in charge of distinguishing type names versus variable
 % names, but that is an independent issue.)
-A database of erroneous input sentences and (templates for) diagnostic messages is stored in
-\compcertgithubfile{cparser/handcrafted.messages}. It is compiled, using \ocompileerrors,
-to an \ocaml file named \texttt{cparser/pre\_parser\_messages.ml}. The
-function \verb+Pre_parser_messages.message+, which maps a state number to (a template for) a
-diagnostic message, is called from
-\compcertgithubfile{cparser/ErrorReports.ml},
-where we construct and display a full-fledged diagnostic message.
-
-In CompCert, we allow a template for a diagnostic message to contain the
-special form \verb+$i+, where \verb+i+ is an integer constant, understood as
-an index into the parser's stack. The code
-in \compcertgithubfile{cparser/ErrorReports.ml} automatically replaces this
-special form with the fragment of the source text that corresponds to this
-stack entry. This mechanism is not built into \menhir; it is implemented in
-CompCert using \menhir's incremental API.
+A database of erroneous input sentences and (templates for) diagnostic
+messages is stored in \compcertgithubfile{cparser/handcrafted.messages}.
+% It is compiled, using \ocompileerrors, to an \ocaml file named
+% \texttt{cparser/pre\_parser\_messages.ml}. The function
+% \verb+Pre_parser_messages.message+, which maps a state number to (a template
+% for) a diagnostic message, is called from
+% \compcertgithubfile{cparser/ErrorReports.ml}, where we construct and display a
+% full-fledged diagnostic message.
 
 % ------------------------------------------------------------------------------
 
@@ -3921,7 +4087,7 @@ state~\verb+init+. We omit the details here.)
 %
 \begin{verbatim}
   Inductive parse_result :=
-  | Fail_pr:    parse_result
+  | Fail_pr_full: state -> token -> parse_result
   | Timeout_pr: parse_result
   | Parsed_pr:
       symbol_semantic_type (NT (start_nt init)) ->
@@ -3929,14 +4095,18 @@ state~\verb+init+. We omit the details here.)
       parse_result.
 \end{verbatim}
 
-The outcome \verb+Fail_pr+ means that parsing has failed because of a syntax
+The outcome \verb+Fail_pr_full+ means that parsing has failed because of a syntax
 error. (If the completeness of the parser with respect to the grammar has been
-proved, this implies that the input is invalid). The outcome \verb+Timeout_pr+
-means that the fuel has been exhausted. Of course, this cannot happen if the
-parser was given an infinite amount of fuel, as suggested above. The outcome
-\verb+Parsed_pr+ means that the parser has succeeded in parsing a prefix of
-the input stream. It carries the semantic value that has been constructed for
-this prefix, as well as the remainder of the input stream.
+proved, this implies that the input is invalid). It contains two pieces of information:
+the state of the parser and the token which caused the error. These are provided for
+error reporting, if desired. It is important to note that, even though they should be correct,
+the validity of these two pieces of information is not certified by either the correctness
+or the completeness theorem. For more discussion on this, see \sref{sec:coq:errmsg}.
+The outcome \verb+Timeout_pr+ means that the fuel has been exhausted.
+Of course, this cannot happen if the parser was given an infinite amount of fuel,
+as suggested above. The outcome \verb+Parsed_pr+ means that the parser has
+succeeded in parsing a prefix of the input stream. It carries the semantic value
+that has been constructed for this prefix, as well as the remainder of the input stream.
 
 For each entry point \verb+entry+ of the grammar, \menhir generates a
 parsing function \verb+entry+, whose type is
@@ -3993,10 +4163,42 @@ https://coq.inria.fr/opam/released}.}
 The Coq sources of this library can be found in
 the \texttt{coq-menhirlib} directory of the Menhir repository.
 
-The CompCert verified compiler~\cite{compcert,compcert-github} can be used as
-an example if one wishes to use \menhir to generate a formally verified parser
-as part of some other project. See in particular the directory
+The directory \distrib{demos/coq-minicalc} contains a minimal example that
+shows how to set things up.
+
+The CompCert verified compiler~\cite{compcert,compcert-github} offers a
+real-world example. There, see in particular the directory
 \compcertgithubfile{cparser}.
+
+\subsection{Error messaging options for Coq mode}
+\label{sec:coq:errmsg}
+Users of the Coq mode have several options for providing error messages from the parser.
+If they wish, they can follow the pattern of CompCert and use Menhir's incremental mode for
+a \textit{non-verified} separate parser (\sref{sec:errors:example}). This may also aid in parsing
+languages (such as C) that need a lexical feedback loop for correct parsing.
+
+A similar option is available in \distrib{demos/calc-syntax-errors}, where a second parser is used after the
+first to determine errors.
+
+The parse result \verb+Fail_pr_full+ provides the third and simplest option.
+As it carries state and token information, it allows constructing meaningful
+error messages with a small amount of work. The generated function
+\verb+Aut.N_of_state+ converts a state to a state number. While this is not as
+powerful as the advanced error handling enabled by the incremental API for
+non-verified parsers, this does allow interoperability with the existing
+\messages files and tooling, described in \sref{sec:messages:format} and
+\sref{sec:messages:tools}. This allows error messaging without a second
+parser. An example is provided in \distrib{demos/coq-syntax-errors}.
+
+Note that the extra information carried by the data constructor
+\verb+Fail_pr_full+ (and by the related data constructor \verb+Fail_sr_full+
+that is used internally) is not verified. This extra information is provided
+for convenience, but there is no proof of its correctness.
+
+Users who wish to ignore this extra information can use the abbreviated
+notation \verb+Fail_pr+ and \verb+Fail_sr+. This notation is used in the
+statements of the theorems about the parser. It is available only in Coq code,
+such as in \distrib{demos/coq-minicalc}, not in extracted OCaml code.
 
 % ------------------------------------------------------------------------------
 
@@ -4036,9 +4238,9 @@ is obtained after the following steps have been carried out:
 \end{itemize}
 
 The library \menhirsdk offers an API for reading a \cmly file.
-The functor \repo{src/cmly_read.mli}{\texttt{MenhirSdk.Cmly\_read.Read}}
+The functor \repo{sdk/cmly_read.mli}{\texttt{MenhirSdk.Cmly\_read.Read}}
 reads such a file and produces a module whose signature is
-\repo{src/cmly_api.ml}{\texttt{MenhirSdk.Cmly\_api.GRAMMAR}}.
+\repo{sdk/cmly_api.ml}{\texttt{MenhirSdk.Cmly\_api.GRAMMAR}}.
 This API is not explained in this document; for details,
 the reader is expected to follow the above links.
 
@@ -4233,7 +4435,7 @@ that are passed to it.
 
 \docskip
 
-One difficulty with the this approach is that the \ocaml compiler usually
+One difficulty with this approach is that the \ocaml compiler usually
 needs to consult a few \texttt{.cm[iox]} files. Indeed, if the \mly file
 contains a reference to an external \ocaml module, say \texttt{A}, then the
 \ocaml compiler typically needs to read one or more files named
@@ -4326,14 +4528,14 @@ compiler.
 suggested link flags, and exit. These flags are intended to be passed to
 \texttt{ocamlc} when producing a bytecode executable. What flags are
 suggested? In the absence of the \otable switch, no flags are suggested. When
-\otable is set, the object file \texttt{menhirLib.cmo} is suggested, so as to
+\otable is set, the object file \texttt{menhirLib.cma} is suggested, so as to
 ensure that \menhirlib is linked in.
 
 \docswitch{\osuggestlinko} This switch causes \menhir to print a set of
 suggested link flags, and exit. These flags are intended to be passed to
 \texttt{ocamlopt} when producing a native code executable. What flags are
 suggested? In the absence of the \otable switch, no flags are suggested. When
-\otable is set, the object file \texttt{menhirLib.cmx} is suggested, so as to
+\otable is set, the object file \texttt{menhirLib.cmxa} is suggested, so as to
 ensure that \menhirlib is linked in.
 
 \docswitch{\osuggestmenhirlib} This switch causes \menhir to print (the
@@ -4479,7 +4681,7 @@ scientific) benchmark suggests that the parsers produced by \ocamlyacc and
 time spent in the lexer and in the semantic actions.
 
 \question{How do I write \Makefile rules for \menhir?}
-This can a bit tricky. % understatement
+This can be a bit tricky. % understatement
 If you must do this, see \sref{sec:build}.
 It is recommended instead to use a build system
 with built-in support for \menhir, such as \hyperlink{dune}{\dune} (preferred)
@@ -4563,6 +4765,28 @@ please use and adapt the rules found in the file \distrib{src/stage2/dune}.
 % \dune will automatically add this line for us
 % when a project is first compiled.
 
+\question{My \mly file begins with a module alias declaration \texttt{module F
+    = Foo}. Because of this, the \mli file generated by Menhir contains
+  references to \texttt{F} instead of \texttt{Foo}. This does not make sense!}
+%
+Beginning with \menhir 20200525, \menhir prefers to use the types inferred by
+the \ocaml compiler over the types provided by the user in \dtype
+declarations. (This may sound strange, but these types can differ in some
+situations that involve polymorphic variants. Using the inferred type is
+required for type soundness.)
+%
+In the presence of a~module alias declaration such as \texttt{module F =
+  Foo}, OCaml can infer types that begin with \texttt{F.} instead of
+\texttt{Foo.}, and Menhir currently does not detect that \texttt{F} is a local
+name.
+%
+The suggested fix is to avoid placing module alias declarations in \mly files.
+%
+% fp: If people insist on using module aliases, the simplest way of supporting
+%     them would be to generate a module alias definition both in the .ml file
+%     and in the .mli file. This could be done by adding a new %module_alias
+%     declaration to Menhir.
+
 \question{\menhir reports \emph{more} shift/reduce conflicts than
 \ocamlyacc! How come?} \ocamlyacc sometimes merges two states
 of the automaton that \menhir considers distinct. This happens
@@ -4578,7 +4802,7 @@ possible to convert them, after the fact, to a simpler, revised API. In the
 revised API, there are no lexing buffers, and a lexer is just a function from
 unit to tokens. Converters are provided by the library module
 \menhirlibconvert. This can be useful, for instance, for users of
-\texttt{ulex}, the Unicode lexer generator. Also, please note that \menhir's
+\texttt{sedlex}, the Unicode-friendly lexer generator. Also, please note that \menhir's
 incremental API (\sref{sec:incremental}) does not mention the type
 \verb+Lexing.lexbuf+. In this API, the parser expects to be supplied with
 triples of a token and start/end positions of type \verb+Lexing.position+.

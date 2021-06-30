@@ -388,7 +388,7 @@ let%test_unit _ =
 
 let%expect_test _ =
   show_raise (fun () -> zip_exn [ 1 ] [ 4; 5; 6 ]);
-  [%expect {| (raised (Invalid_argument "length mismatch in zip_exn: 1 <> 3 ")) |}]
+  [%expect {| (raised (Invalid_argument "length mismatch in zip_exn: 1 <> 3")) |}]
 ;;
 
 let%test_unit _ =
@@ -491,6 +491,32 @@ let%test _ = is_prefix [ 1 ] ~prefix:[ 1 ] ~equal:( = )
 let%test _ = not (is_prefix [ 1 ] ~prefix:[ 1; 2 ] ~equal:( = ))
 let%test _ = not (is_prefix [ 1; 3 ] ~prefix:[ 1; 2 ] ~equal:( = ))
 let%test _ = is_prefix [ 1; 2; 3 ] ~prefix:[ 1; 2 ] ~equal:( = )
+let%test _ = is_suffix [] ~suffix:[] ~equal:( = )
+let%test _ = is_suffix [ 1 ] ~suffix:[] ~equal:( = )
+let%test _ = is_suffix [ 1 ] ~suffix:[ 1 ] ~equal:( = )
+let%test _ = not (is_suffix [ 1 ] ~suffix:[ 1; 2 ] ~equal:( = ))
+let%test _ = not (is_suffix [ 1; 3 ] ~suffix:[ 1; 2 ] ~equal:( = ))
+let%test _ = is_suffix [ 1; 2; 3 ] ~suffix:[ 2; 3 ] ~equal:( = )
+
+let%expect_test "is_prefix does not allocate" =
+  let list = Sys.opaque_identity [ 1; 2; 3 ] in
+  let prefix = Sys.opaque_identity [ 1; 2 ] in
+  let equal = Int.equal in
+  let (_ : bool) =
+    require_no_allocation [%here] (fun () -> is_prefix list ~equal ~prefix)
+  in
+  [%expect {| |}]
+;;
+
+let%expect_test "is_suffix does not allocate" =
+  let list = Sys.opaque_identity [ 1; 2; 3 ] in
+  let suffix = Sys.opaque_identity [ 2; 3 ] in
+  let equal = Int.equal in
+  let (_ : bool) =
+    require_no_allocation [%here] (fun () -> is_suffix list ~equal ~suffix)
+  in
+  [%expect {| |}]
+;;
 
 let%test_unit _ =
   List.iter

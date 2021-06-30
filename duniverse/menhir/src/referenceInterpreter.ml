@@ -245,9 +245,17 @@ end
 
 (* ------------------------------------------------------------------------ *)
 
+(* The strategy used by the reference interpreter is determined by the
+   command line switch [--strategy]. *)
+
+let strategy =
+  Settings.strategy
+
+(* ------------------------------------------------------------------------ *)
+
 (* Define a palatable user entry point. *)
 
-let interpret log nt lexer lexbuf =
+let interpret nt log lexer lexbuf =
 
   (* Instantiate the LR engine. *)
 
@@ -261,7 +269,7 @@ let interpret log nt lexer lexbuf =
   (* Run it. *)
 
   try
-    Some (E.entry (Lr1.entry_of_nt nt) lexer lexbuf)
+    Some (E.entry strategy (Lr1.entry_of_nt nt) lexer lexbuf)
   with T.Error ->
     None
 
@@ -355,7 +363,7 @@ let check_error_path log nt input =
         loop (E.offer checkpoint (t, Lexing.dummy_pos, Lexing.dummy_pos)) spurious
       end
     | E.Shifting _ ->
-      loop (E.resume checkpoint) spurious
+      loop (E.resume ~strategy checkpoint) spurious
     | E.AboutToReduce (env, prod) ->
         (* If we have requested the last input token and if this is not
            a default reduction, then this is a spurious reduction.
@@ -369,7 +377,7 @@ let check_error_path log nt input =
           else
             spurious
         in
-        loop (E.resume checkpoint) spurious
+        loop (E.resume ~strategy checkpoint) spurious
     | E.HandlingError env ->
         (* Check that all of the input has been read. Otherwise, the error
            has occurred sooner than expected. *)

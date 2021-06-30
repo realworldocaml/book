@@ -20,8 +20,8 @@ let get_protocol (t : t) =
       (t :> int list)
       ~f:(fun v ->
         match Map.find Known_protocol.by_magic_number v with
-        | Some p -> `Fst p
-        | None -> `Snd v)
+        | Some p -> First p
+        | None -> Second v)
   in
   match protocols with
   | [] -> Ok (None, Int.Set.of_list versions)

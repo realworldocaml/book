@@ -108,7 +108,7 @@ let print_packet p =
        let window = get_tcpv4_window tcp in
        printf "tcpv4 port %d->%d seq %lu ack %lu win %d off %d flags %s opt %d fin %b syn %b payload_len=%d\n"
          src_port dst_port seqnum
-         acknum window off flags options fin syn (Cstruct.len payload);
+         acknum window off flags options fin syn (Cstruct.length payload);
        ()
      end
      |_ -> printf "unknown ip proto %d\n" proto
@@ -150,7 +150,7 @@ let parse () =
   printf "start parse\n%!";
   let fd = Unix.(openfile "http.cap" [O_RDONLY] 0) in
   let t = Unix_cstruct.of_fd fd in
-  printf "total pcap file length %d\n%!" (Cstruct.len t);
+  printf "total pcap file length %d\n%!" (Cstruct.length t);
 
   let header, body = Cstruct.split t sizeof_pcap_header in
   print_pcap_header header;

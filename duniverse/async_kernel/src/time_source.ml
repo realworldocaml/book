@@ -112,8 +112,12 @@ let advance_by_alarms ?wait_for t ~to_ =
       then finish ()
       else (
         advance_directly t ~to_:next_alarm_fires_at;
-        let%bind () = run_queued_alarms () in
-        walk_alarms ())
+        let queued_alarms_ran = run_queued_alarms () in
+        if Deferred.is_determined queued_alarms_ran
+        then walk_alarms ()
+        else (
+          let%bind () = queued_alarms_ran in
+          walk_alarms ()))
   in
   (* This first [run_queued_alarms] call allows [Clock_ns.every] the opportunity to run
      its continuation deferreds so that they can reschedule alarms.  This is particularly

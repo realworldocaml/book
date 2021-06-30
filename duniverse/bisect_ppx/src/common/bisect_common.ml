@@ -171,11 +171,12 @@ let write_runtime_data channel =
   in
   output_string channel data
 
-let () =
-  Random.self_init ()
+let prng =
+  Random.State.make_self_init () [@coverage off]
 
 let random_filename base_name =
-  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
+  Printf.sprintf "%s%09d.coverage"
+    base_name (abs (Random.State.int prng 1000000000))
 
 let write_points points =
   let points_array = Array.of_list points in
@@ -226,31 +227,3 @@ let register_file file ~point_count ~point_definitions =
 
 let bisect_file = ref None
 let bisect_silent = ref None
-
-type options = (Arg.key * Arg.spec * Arg.doc) list
-
-let deprecated binary basename options =
-  let make make_spec fn =
-    (basename,
-    make_spec (fun v ->
-      Printf.eprintf "%s argument '%s' is deprecated.\n" binary basename;
-      Printf.eprintf "Use '-%s' instead.\n" basename;
-      Printf.eprintf "This requires Bisect_ppx >= 2.0.0.\n";
-      fn v),
-    " Deprecated")
-  in
-
-  let (_, spec, _) =
-    options |> List.find (fun (option, _, _) -> option = "-" ^ basename) in
-
-  let deprecated_option =
-    match spec with
-    | Arg.Unit f -> make (fun f -> Arg.Unit f) f
-    | Arg.Set r -> make (fun f -> Arg.Unit f) (fun () -> r := true)
-    | Arg.String f -> make (fun f -> Arg.String f) f
-    | Arg.Set_string r -> make (fun f -> Arg.String f) ((:=) r)
-    | Arg.Int f -> make (fun f -> Arg.Int f) f
-    | _ -> prerr_endline basename; assert false
-  in
-
-  options @ [deprecated_option]

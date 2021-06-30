@@ -80,8 +80,6 @@ end
 (** [unit] is a deferred that is always determined with value [()] *)
 val unit : unit t
 
-val ignore : _ t -> unit t [@@deprecated "[since 2019-06] Use [ignore_m] instead"]
-
 (** [never ()] returns a deferred that never becomes determined. *)
 val never : unit -> _ t
 
@@ -105,7 +103,7 @@ val any_unit : unit t list -> unit t
 (** [don't_wait_for t] ignores [t].  It is like [Fn.ignore], but is more constrained
     because it requires a [unit Deferred.t].
 
-    Rather than [ignore (t : _ t)], do [don't_wait_for (Deferred.ignore t)].
+    Rather than [ignore (t : _ t)], do [don't_wait_for (Deferred.ignore_m t)].
 
     We chose to give [don't_wait_for] type [unit t] rather than [_ t] to catch errors
     where a value is accidentally ignored. *)
@@ -118,8 +116,7 @@ module Choice : sig
   val map : 'a t -> f:('a -> 'b) -> 'b t
 end
 
-
-type 'a choice = 'a Choice.t
+type 'a choice = 'a Choice.t [@@deprecated "[since 2020-01] Use [Choice.t] instead."]
 
 val choice : 'a t -> ('a -> 'b) -> 'b Choice.t
 

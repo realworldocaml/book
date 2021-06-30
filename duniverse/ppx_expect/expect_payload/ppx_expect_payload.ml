@@ -1,4 +1,4 @@
-open Expect_test_common.Std
+open Expect_test_common
 open Ppxlib
 
 let transl_loc (loc : Location.t) : File.Location.t =
@@ -86,7 +86,7 @@ let make ~kind payload ~(extension_id_loc : Location.t) =
 let pattern () =
   Ast_pattern.(
     map
-      (single_expr_payload (pexp_loc __ (pexp_constant (pconst_string __ __))))
-      ~f:(fun f loc s tag -> f (Some (loc, s, tag)))
+      (single_expr_payload (pexp_loc __ (pexp_constant (pconst_string __ __ __))))
+      ~f:(fun f loc s _loc tag -> f (Some (loc, s, tag)))
     ||| map (pstr nil) ~f:(fun f -> f None))
 ;;

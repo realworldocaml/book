@@ -1,0 +1,2 @@
+File "test-case.t", line 3: Error in the cram code block
+Blocks must start with a command or similar, not with an output line. To indicate a line as a command, start it with a dollar followed by a space.

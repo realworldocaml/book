@@ -1,4 +1,4 @@
-version: "2.1.0"
+version: "4.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["Anil Madhavapeddy" "Thomas Leonard" "Thomas Gazagnaire"]
@@ -9,22 +9,26 @@ bug-reports: "https://github.com/mirage/ocaml-conduit/issues"
 depends: [
   "ocaml" {>= "4.07.0"}
   "dune"
-  "ppx_sexp_conv" {>="v0.12.0"}
+  "ppx_sexp_conv" {>="v0.13.0"}
   "sexplib"
+  "uri" {>= "4.0.0"}
   "cstruct" {>= "3.0.0"}
-  "mirage-stack" {>= "2.0.0"}
+  "mirage-stack" {>= "2.2.0"}
   "mirage-clock" {>= "3.0.0"}
   "mirage-flow" {>= "2.0.0"}
   "mirage-flow-combinators" {>= "2.0.0"}
   "mirage-random" {>= "2.0.0"}
-  "dns-client" {>= "4.1.0"}
-  "conduit-lwt"
+  "mirage-time" {>= "2.0.0"}
+  "dns-client" {>= "5.0.0"}
+  "conduit-lwt" {=version}
   "vchan" {>= "5.0.0"}
   "xenstore"
   "tls" {>= "0.11.0"}
   "tls-mirage" {>= "0.11.0"}
+  "ca-certs-nss"
   "ipaddr" {>= "3.0.0"}
   "ipaddr-sexp"
+  "tcpip" {with-test}
 ]
 conflicts: [
   "mirage-conduit"

@@ -8,7 +8,7 @@ let time f =
   let t2 = Sys.time () in
   ( Printf.eprintf "[time] %f.04 s\n%!" (t2 -.  t1) ; r )
 
-let (<+>) = Tls.Utils.Cs.(<+>)
+let (<+>) = Cstruct.append
 
 let list_to_cstruct xs =
   let open Cstruct in
@@ -29,7 +29,7 @@ let hexdump_to_str cs =
 
 let assert_cs_eq ?msg cs1 cs2 =
   assert_equal
-    ~cmp:Tls.Utils.Cs.equal
+    ~cmp:Cstruct.equal
     ~printer:hexdump_to_str
     ?msg
     cs1 cs2

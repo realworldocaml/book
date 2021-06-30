@@ -1,7 +1,7 @@
 opam-version: "2.0"
 
 synopsis: "Code coverage for OCaml"
-version: "2.4.1"
+version: "2.6.0"
 license: "MIT"
 homepage: "https://github.com/aantron/bisect_ppx"
 doc: "https://github.com/aantron/bisect_ppx"
@@ -21,23 +21,16 @@ maintainer: [
 depends: [
   "base-unix"
   "cmdliner" {>= "1.0.0"}
-  "dune"
+  "dune" {>= "2.7.0"}
   "ocaml" {>= "4.02.0"}
-  "ocaml-migrate-parsetree" {>= "1.7.0"}
-  "ppx_tools_versioned" {>= "5.4.0"}
+  "ppxlib" {>= "0.21.0"}
 
-  "ocamlfind" {with-test}
-  "ounit2" {with-test}
+  "ocamlformat" {with-test & = "0.16.0"}
 ]
 
 build: [
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "runtest" "-p" name] {with-test}
-]
-
-post-messages: [
-  "Bisect_ppx 2.0.0 has deprecated some command-line options. See
-  https://github.com/aantron/bisect_ppx/releases/tag/2.0.0"
+  ["dune" "build" "-p" name "-j" jobs "@compatible"] {with-test}
 ]
 
 description: "Bisect_ppx helps you test thoroughly. It is a small preprocessor

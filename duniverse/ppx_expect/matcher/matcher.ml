@@ -1,6 +1,6 @@
 open Base
 open Stdio
-open Expect_test_common.Std
+open Expect_test_common
 
 let fprintf = Out_channel.fprintf
 
@@ -35,9 +35,44 @@ end
 
 module Test_outcome = struct
   module Expectations = struct
-    type t = Fmt.t Cst.t Expectation.t Map.M(File.Location).t [@@deriving compare]
+    type t = Fmt.t Cst.t Expectation.t Map.M(File.Location).t
+    [@@deriving_inline compare, equal]
 
-    let equal = [%compare.equal: t]
+    let _ = fun (_ : t) -> ()
+
+    let compare =
+      (fun a__001_ b__002_ ->
+         Map.compare_m__t
+           (module File.Location)
+           (fun a__003_ b__004_ ->
+              Expectation.compare
+                (fun a__005_ b__006_ -> Cst.compare Fmt.compare a__005_ b__006_)
+                a__003_
+                b__004_)
+           a__001_
+           b__002_
+         : t -> t -> int)
+    ;;
+
+    let _ = compare
+
+    let equal =
+      (fun a__009_ b__010_ ->
+         Map.equal_m__t
+           (module File.Location)
+           (fun a__011_ b__012_ ->
+              Expectation.equal
+                (fun a__013_ b__014_ -> Cst.equal Fmt.equal a__013_ b__014_)
+                a__011_
+                b__012_)
+           a__009_
+           b__010_
+         : t -> t -> bool)
+    ;;
+
+    let _ = equal
+
+    [@@@end]
   end
 
   type t =
@@ -46,7 +81,7 @@ module Test_outcome = struct
     ; saved_output : Saved_output.t Map.M(File.Location).t
     ; trailing_output : Saved_output.t
     ; uncaught_exn : Saved_output.t option
-    ; upon_unreleasable_issue : Expect_test_config.Upon_unreleasable_issue.t
+    ; upon_unreleasable_issue : Expect_test_config_types.Upon_unreleasable_issue.t
     }
 
   let merge_exn
@@ -62,12 +97,13 @@ module Test_outcome = struct
     if not (Expectations.equal t.expectations expectations)
     then failwith "merging tests of different expectations";
     if not
-         (Expect_test_config.Upon_unreleasable_issue.equal
+         (Expect_test_config_types.Upon_unreleasable_issue.equal
             t.upon_unreleasable_issue
             upon_unreleasable_issue)
     then failwith "merging tests of different [Upon_unreleasable_issue]";
     if not
-         ([%compare.equal: Fmt.t Cst.t Expectation.t option]
+         (Option.equal
+            (Expectation.equal (Cst.equal Fmt.equal))
             t.uncaught_exn_expectation
             uncaught_exn_expectation)
     then failwith "merging tests of different uncaught exception expectations";
@@ -164,7 +200,7 @@ let evaluate_test
   =
   let cr_for_multiple_outputs ~cr_body outputs =
     let prefix =
-      Expect_test_config.Upon_unreleasable_issue.comment_prefix
+      Expect_test_config_types.Upon_unreleasable_issue.comment_prefix
         test.upon_unreleasable_issue
     in
     let cr = Printf.sprintf "(* %sexpect_test: %s *)" prefix cr_body in
@@ -315,7 +351,7 @@ let output_corrected oc ~file_contents ~mode test_corrections =
                extension point, so we have to find the square brackets ourselves :( *)
             let start = ref e.extid_location.start_pos in
             while not (Char.equal file_contents.[!start] '[') do
-              if [%compare: int] ofs !start >= 0
+              if Int.( >= ) ofs !start
               then
                 raise_s
                   (Sexp.message
@@ -333,7 +369,7 @@ let output_corrected oc ~file_contents ~mode test_corrections =
             while !stop < file_len && not (Char.equal file_contents.[!stop] ']') do
               Int.incr stop
             done;
-            if [%compare: int] !stop file_len >= 0
+            if Int.( >= ) !stop file_len
             then
               raise_s
                 (Sexp.message

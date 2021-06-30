@@ -1,0 +1,4 @@
+(library
+ (name ppx_get_env)
+ (kind ppx_rewriter)
+ (libraries ppxlib))

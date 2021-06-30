@@ -1,6 +1,6 @@
 open Core_kernel
 open Import
-include (Scheduler0 : module type of Scheduler0 with type t := Scheduler0.t)
+include Scheduler0
 module Synchronous_time_source = Synchronous_time_source0
 module Event = Synchronous_time_source.Event
 module Alarm = Timing_wheel.Alarm
@@ -74,6 +74,7 @@ type t = Scheduler0.t =
   ; mutable cycle_start : Time_ns.t
   ; mutable in_cycle : bool
   ; mutable run_every_cycle_start : (unit -> unit) list
+  ; mutable run_every_cycle_end : (unit -> unit) list
   ; mutable last_cycle_time : Time_ns.Span.t
   ; mutable last_cycle_num_jobs : int
   ; mutable total_cycle_time : Time_ns.Span.t
@@ -131,6 +132,8 @@ let num_jobs_run t =
   + Job_queue.num_jobs_run t.low_priority_jobs
 ;;
 
+let last_cycle_num_jobs t = t.last_cycle_num_jobs
+
 let invariant t : unit =
   try
     let check f field = f (Field.get field t) in
@@ -150,6 +153,7 @@ let invariant t : unit =
       ~cycle_start:ignore
       ~in_cycle:ignore
       ~run_every_cycle_start:ignore
+      ~run_every_cycle_end:ignore
       ~last_cycle_time:ignore
       ~total_cycle_time:ignore
       ~last_cycle_num_jobs:
@@ -225,6 +229,7 @@ let create () =
     ; cycle_count = 0
     ; in_cycle = false
     ; run_every_cycle_start = []
+    ; run_every_cycle_end = []
     ; last_cycle_time = sec 0.
     ; last_cycle_num_jobs = 0
     ; total_cycle_time = sec 0.

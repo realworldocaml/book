@@ -18,7 +18,7 @@ let with_loaded_files file ~f =
   with e -> Unix.close fd1 ; Unix.close fd2 ;
     Alcotest.failf "exception %s" (Printexc.to_string e)
 
-let hash_whitelist = [ `SHA1 ; `SHA256 ; `SHA384 ; `SHA512 ]
+let allowed_hashes = [ `SHA1 ; `SHA256 ; `SHA384 ; `SHA512 ]
 
 let one f () =
   with_loaded_files f ~f:(fun cert crl ->
@@ -27,7 +27,7 @@ let one f () =
       let pubkey = Certificate.public_key cert in
       CRL.decode_der crl >>= fun crl ->
       Rresult.R.error_to_msg ~pp_error:Validation.pp_signature_error
-        (CRL.validate crl ~hash_whitelist pubkey))
+        (CRL.validate crl ~allowed_hashes pubkey))
 
 let crl_tests = [
   "CRL 1 is good", `Quick, one "1" ;

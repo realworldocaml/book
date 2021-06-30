@@ -1,7 +1,4 @@
-#use "topfind";;
 #require "base";;
-#load "ppxlib_metaquot_lifters.cmo";;
-#load "ppxlib_metaquot.cmo";;
 
 open Ppxlib
 
@@ -14,8 +11,6 @@ let quoter = Quoter.create ();;
 [%%expect{|
 val quoter : Quoter.t = <abstr>
 |}]
-
-#install_printer Pprintast.expression;;
 
 let expr1 =
   Ast.evar "foo" ~loc:Location.none

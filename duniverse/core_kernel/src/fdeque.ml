@@ -42,8 +42,14 @@ let make ~length ~front ~back =
 let empty = { front = []; back = []; length = 0 }
 let enqueue_front t x = make ~length:(t.length + 1) ~front:(x :: t.front) ~back:t.back
 let enqueue_back t x = make ~length:(t.length + 1) ~back:(x :: t.back) ~front:t.front
-let raise_front_invariant () = raise (Bug "Fdeque: |front| = 0, |back| >= 2")
-let raise_back_invariant () = raise (Bug "Fdeque: |back| = 0, |front| >= 2")
+
+let[@cold] raise_front_invariant () =
+  raise_s [%sexp "BUG: Fdeque: |front| = 0, |back| >= 2"]
+;;
+
+let[@cold] raise_back_invariant () =
+  raise_s [%sexp "BUG: Fdeque: |back| = 0, |front| >= 2"]
+;;
 
 let peek_front_exn t =
   match t.front with

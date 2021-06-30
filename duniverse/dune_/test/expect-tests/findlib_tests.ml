@@ -1,4 +1,4 @@
-open Dune
+open Dune_rules
 open Import
 open Dune_tests_common
 
@@ -13,7 +13,6 @@ let print_pkg ppf pkg =
   Format.fprintf ppf "<package:%s>" (Lib_name.to_string name)
 
 let findlib =
-  let cwd = Path.of_filename_relative_to_initial_cwd (Sys.getcwd ()) in
   let lib_config : Lib_config.t =
     { has_native = true
     ; ext_lib = ".a"
@@ -27,12 +26,13 @@ let findlib =
     ; stdlib_dir = Path.root
     ; ccomp_type = Other "gcc"
     ; profile = Profile.Dev
-    ; ocaml_version = "4.02.3"
+    ; ocaml_version_string = "4.02.3"
+    ; ocaml_version = Ocaml_version.make (4, 2, 3)
+    ; instrument_with = []
+    ; context_name = Context_name.of_string "default"
     }
   in
-  Findlib.create ~stdlib_dir:cwd ~paths:[ db_path ]
-    ~version:(Ocaml_version.make (4, 02, 3))
-    ~lib_config
+  Findlib.create ~paths:[ db_path ] ~lib_config
 
 let%expect_test _ =
   let pkg =
@@ -45,7 +45,7 @@ let%expect_test _ =
   let requires = Lib_info.requires info in
   let dyn = Dyn.Encoder.list Lib_dep.to_dyn requires in
   let pp = Dyn.pp dyn in
-  Format.printf "%a@." Pp.render_ignore_tags pp;
+  Format.printf "%a@." Pp.to_fmt pp;
   [%expect {|[ "baz" ]|}]
 
 (* Meta parsing/simplification *)

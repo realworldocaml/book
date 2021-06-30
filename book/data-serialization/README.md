@@ -653,9 +653,9 @@ Uncaught exception:
   (Of_sexp_error foo_broken_example.scm:2:4
    "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 
-Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 742, characters 4-56
+Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 815, characters 32-84
 Called from file "read_foo_better_errors.ml", line 10, characters 10-68
-Called from file "duniverse/base/src/exn.ml", line 102, characters 6-10
+Called from file "duniverse/base/src/exn.ml", line 111, characters 6-10
 [1]
 ```
 

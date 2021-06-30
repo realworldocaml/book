@@ -1,8 +1,6 @@
-#use "topfind";;
 #require "base";;
-#require "ocaml-migrate-parsetree";;
 
-open Base
+open Stdppx
 open Ppxlib
 
 
@@ -16,7 +14,7 @@ let lint = object
     match td.ptype_kind with
     | Ptype_record lds ->
       if Poly.(<>)
-           (List.sort lds ~compare:(fun a b -> String.compare a.pld_name.txt b.pld_name.txt))
+           (List.sort lds ~cmp:(fun a b -> String.compare a.pld_name.txt b.pld_name.txt))
            lds
       then
         Driver.Lint_error.of_string { td.ptype_loc with loc_ghost = true }

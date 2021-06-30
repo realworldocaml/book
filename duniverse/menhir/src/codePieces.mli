@@ -22,12 +22,6 @@ open Grammar
 
 (* Naming conventions. *)
 
-(* The variable that holds the environment. This is a parameter to all
-   functions. We do not make it a global variable because we wish to
-   preserve re-entrancy. *)
-
-val env : string
-
 (* A variable used to hold a semantic value. *)
 
 val semv : string
@@ -49,6 +43,8 @@ val token: string
 val beforeendp: string
 val startp: string
 val endp: string
+val startpos: string array -> int -> string
+val endpos: string array -> int -> string
 
 (* ------------------------------------------------------------------------ *)
 
@@ -70,35 +66,18 @@ val semvtypetok : Terminal.t -> typ list
 
 val semvtype : Symbol.t -> typ list
 
-(* [symvalt] returns the empty list if the symbol at hand carries no
-   semantic value and the singleton list [[f t]] if it carries a
-   semantic value of type [t]. *)
+(* [has_semv symbol] indicates whether [symbol] carries a semantic value. *)
 
-val symvalt : Symbol.t -> (typ -> 'a) -> 'a list
-
-(* [symval symbol x] returns either the empty list or the singleton
-   list [[x]], depending on whether [symbol] carries a semantic
-   value. *)
-
-val symval : Symbol.t -> 'a -> 'a list
-
-(* [tokval] is a version of [symval], specialized for terminal symbols. *)
-
-val tokval : Terminal.t -> 'a -> 'a list
+val has_semv : Symbol.t -> bool
 
 (* ------------------------------------------------------------------------ *)
 
 (* Patterns for tokens. *)
 
-(* [tokpat tok] is a pattern that matches the token [tok], without binding
-   its semantic value. *)
+(* [tokpat tok pat] is a pattern that matches the token [tok] and binds
+   its semantic value (if it has one) to the pattern [pat]. *)
 
-val tokpat:  Terminal.t -> pattern
-
-(* [tokpatv tok] is a pattern that matches the token [tok], and binds
-   its semantic value, if it has one, to the variable [semv]. *)
-
-val tokpatv: Terminal.t -> pattern
+val tokpat:  Terminal.t -> pattern -> pattern
 
 (* [tokspat toks] is a pattern that matches any token in the set [toks],
    without binding its semantic value. *)

@@ -86,7 +86,7 @@ module type Invariant = sig
           { foo : Foo.t;
             bar : Bar.t;
           }
-        [@@deriving_inline fields][@@@end]
+        [@@deriving fields]
 
         let invariant t : unit =
           Invariant.invariant [%here] t [%sexp_of: t] (fun () ->

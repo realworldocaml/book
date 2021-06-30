@@ -72,7 +72,7 @@ let terminal (t : Terminal.t) : terminal_def =
   }
 
 let nonterminal (nt : Nonterminal.t) : nonterminal_def =
-  let is_start = Nonterminal.is_start nt in
+  let is_start = Nonterminal.is_internal_start nt in
   {
     n_kind = if is_start then `START else `REGULAR;
     n_name = Nonterminal.print false nt;

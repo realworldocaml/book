@@ -26,15 +26,15 @@ Test that we ignore or consider whitespace as directed.
 
 Expect that we ignore whitespace changes.
 
-  $ patdiff.exe -default prev next
+  $ patdiff -default prev next
 
 Expect no spurious diffs.
 
-  $ patdiff.exe -default next next -keep-whitespace
+  $ patdiff -default next next -keep-whitespace
 
 Expect whitespace changes should be detected.
 
-  $ patdiff.exe -default prev next -keep-whitespace | visible_colors
+  $ patdiff -default prev next -keep-whitespace | visible_colors
   (fg:red)------ (+bold)prev
   (fg:green)++++++ (+bold)next
   (fg:black)@|(+bold)-1,1 +1,17(off) ============================================================
@@ -68,7 +68,7 @@ Note that some whitespace changes are still ignored, just not those involving su
   > EOF
 
 
-  $ patdiff.exe -default prev next
+  $ patdiff -default prev next
 
 Create some python files with the .py extension
   $ cat - > prev.py <<EOF
@@ -78,7 +78,7 @@ Create some python files with the .py extension
   > if True:
   >   print("hello")
   > EOF
-  $ patdiff.exe prev.py next.py | visible_colors
+  $ patdiff prev.py next.py | visible_colors
   (fg:red)------ (+bold)prev.py
   (fg:green)++++++ (+bold)next.py
   (fg:black)@|(+bold)-1,1 +1,2(off) ============================================================
@@ -95,7 +95,7 @@ Create some python files that get detected with the shebang
   > if True:
   >   print("hello")
   > EOF
-  $ patdiff.exe prev next | visible_colors
+  $ patdiff prev next | visible_colors
   (fg:red)------ (+bold)prev
   (fg:green)++++++ (+bold)next
   (fg:black)@|(+bold)-1,2 +1,3(off) ============================================================

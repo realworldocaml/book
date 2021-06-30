@@ -3,19 +3,18 @@
 open! Import
 
 (** An alias for the type of characters. *)
-type t = char [@@deriving_inline enumerate, hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val all : t list
-    val hash_fold_t :
-      Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-    include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-  end[@@ocaml.doc "@inline"]
+type t = char [@@deriving_inline enumerate, sexp, sexp_grammar]
+
+val all : t list
+
+include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 include Identifiable.S with type t := t
+include Invariant.S with type t := t
 module O : Comparisons.Infix with type t := t
 
 (** Returns the ASCII code of the argument. *)
@@ -70,3 +69,18 @@ val get_digit_exn : t -> int
 
 val min_value : t
 val max_value : t
+
+(** [Caseless] compares and hashes characters ignoring case, so that for example
+    [Caseless.equal 'A' 'a'] and [Caseless.('a' < 'B')] are [true]. *)
+module Caseless : sig
+  type nonrec t = t [@@deriving_inline hash, sexp]
+
+  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+  [@@@end]
+
+  include Comparable.S with type t := t
+end

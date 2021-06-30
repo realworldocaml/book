@@ -13,10 +13,12 @@ include (
   with type ('a, 'b, 'c, 'd, 'e, 'f) format6 := ('a, 'b, 'c, 'd, 'e, 'f) format6
   (* These modules are redefined in Base *)
   with module Array := Shadow_stdlib.Array
+  with module Atomic := Shadow_stdlib.Atomic
   with module Bool := Shadow_stdlib.Bool
   with module Buffer := Shadow_stdlib.Buffer
   with module Bytes := Shadow_stdlib.Bytes
   with module Char := Shadow_stdlib.Char
+  with module Either := Shadow_stdlib.Either
   with module Float := Shadow_stdlib.Float
   with module Hashtbl := Shadow_stdlib.Hashtbl
   with module Int := Shadow_stdlib.Int
@@ -100,6 +102,8 @@ module Caml = struct
   module Result = Caml.Result (** @canonical Caml.Result *)
 
   module Scanf = Caml.Scanf (** @canonical Caml.Scanf *)
+
+  module Seq = Caml.Seq (** @canonical Caml.Seq *)
 
   module Set = Caml.MoreLabels.Set (** @canonical Caml.MoreLabels.Set *)
 

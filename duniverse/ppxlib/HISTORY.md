@@ -1,6 +1,7 @@
 # History
 
-This repository is the merge of several ppx-related repositories, namely:
+This repository was originally a merge of several ppx-related
+repositories, namely:
 
 - [ppx_ast](https://github.com/janestreet/ppx_ast);
 - [ppx_core](https://github.com/janestreet/ppx_core);
@@ -10,9 +11,10 @@ This repository is the merge of several ppx-related repositories, namely:
 - [ppx_traverse_builtins](https://github.com/janestreet/ppx_traverse_builtins);
 - [ppx_type_conv](https://github.com/janestreet/ppx_type_conv).
 
-Future development will happen only in this repository, and the aforementioned
-ones will only contain synonym definitions to provide backward compatibility.
-The structure of this repository is as follows:
+Since this merge, development has been happening only in this
+repository and the aforementioned ones only contain synonym
+definitions to provide backward compatibility.  The structure of this
+repository is as follows:
 
 - `ast/` contains the `ppxlib.ast` library, that replaces `ppx_ast`;
 - `src/` contains the `ppxlib` library, that replaces `ppx_core`,
@@ -172,7 +174,7 @@ depends on a few extra `.cma`'s by adding a few lines into your `_tags` file
     <regression/test*.*>: ppx(./pp_foo.native --as-ppx)
     <regression/test*.*>: depends_on_foo
     
-and specifing dependencies in your `myocamlbuild.ml` file using
+and specifying dependencies in your `myocamlbuild.ml` file using
 
     dep ["compile";"depends_on_foo"] ["ppx_foo.cmxa"; "pp_foo.native"]
 
@@ -419,7 +421,7 @@ For instance:
 [%expr x + 1]
 ```
 
-is a value of type `Ppxlib_ast.Ast.expression`, represention the OCaml
+is a value of type `Ppxlib_ast.Ast.expression`, representing the OCaml
 expression `x + 1`.
 
 `Ppxlib_metaquot` is similar to [ppx_tools.metaquot](https://github.com/ocaml-ppx/ppx_tools),

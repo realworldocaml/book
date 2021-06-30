@@ -1,15 +1,10 @@
 {
 open Result
 open Astring
-open Migrate_ast
 
 type token = [ `Block of Block.t | `Section of int * string | `Text of string ]
 
-let line_ref = ref 1
-
-let newline lexbuf =
-  Lexing.new_line lexbuf;
-  incr line_ref
+let newline lexbuf = Lexing.new_line lexbuf
 
 let labels l =
   match Label.of_string l with
@@ -48,15 +43,13 @@ rule text section = parse
                 | "..." -> `Ellipsis
                 | _ -> `Output x) e
         in
-        let file = lexbuf.Lexing.lex_start_p.Lexing.pos_fname in
-        let column = lexbuf.Lexing.lex_start_p.Lexing.pos_cnum in
         newline lexbuf;
-        let line = !line_ref in
         List.iter (fun _ -> newline lexbuf) contents;
+        let loc = Location.curr lexbuf in
         newline lexbuf;
         let block =
           match
-            Block.mk ~file ~line ~column ~section ~header ~contents ~labels
+            Block.mk ~loc ~section ~header ~contents ~labels
               ~legacy_labels ~errors
           with
           | Ok block -> block
@@ -68,6 +61,16 @@ rule text section = parse
            newline lexbuf;
            List.iter (fun _ -> newline lexbuf) errors;
            newline lexbuf);
+        `Block block :: text section lexbuf }
+  | "<!--" ws* "$MDX" ws* ([^' ' '\n']* as label_cmt) ws* "-->" ws* eol
+      { let labels = labels label_cmt in
+        newline lexbuf;
+        let loc = Location.curr lexbuf in
+        let block =
+          match Block.mk_include ~loc ~section ~labels with
+          | Ok block -> block
+          | Error (`Msg msg) -> failwith msg
+        in
         `Block block :: text section lexbuf }
   | ([^'\n']* as str) eol
       { newline lexbuf;
@@ -92,14 +95,12 @@ and cram_text section = parse
         let contents = first_line :: contents in
         let labels = [] in
         let legacy_labels = false in
-        let file = lexbuf.Lexing.lex_start_p.Lexing.pos_fname in
-        let column = lexbuf.Lexing.lex_start_p.Lexing.pos_cnum in
-        let line = !line_ref in
+        let loc = Location.curr lexbuf in
         List.iter (fun _ -> newline lexbuf) contents;
         let rest = cram_text section lexbuf in
         let block =
           match
-            Block.mk ~file ~line ~column ~section ~header ~contents ~labels
+            Block.mk ~loc ~section ~header ~contents ~labels
               ~legacy_labels ~errors:[]
           with
           | Ok block -> block
@@ -116,15 +117,13 @@ and cram_text section = parse
           | Error (`Msg msg) -> failwith msg
         in
         let legacy_labels = false in
-        let file = lexbuf.Lexing.lex_start_p.Lexing.pos_fname in
-        let column = lexbuf.Lexing.lex_start_p.Lexing.pos_cnum in
         newline lexbuf;
-        let line = !line_ref in
+        let loc = Location.curr lexbuf in
         List.iter (fun _ -> newline lexbuf) contents;
         let rest = cram_text section lexbuf in
         let block =
           match
-            Block.mk ~file ~line ~column ~section ~header ~contents ~labels
+            Block.mk ~loc ~section ~header ~contents ~labels
               ~legacy_labels ~errors:[]
           with
           | Ok block -> block
@@ -150,13 +149,13 @@ and cram_block = parse
     | Failure e ->
       let loc = Location.curr lexbuf in
       let msg =
-        Format.asprintf "%a: invalid code block: %s" Location.print_loc loc e
+        Format.asprintf "%a: invalid code block: %s" Stable_printer.Location.print_loc loc e
       in
       Util.Result.errorf "%s" msg
     | exn ->
       let loc = Location.curr lexbuf in
       let msg =
-        Format.asprintf "%a: %s" Location.print_loc loc (Printexc.to_string exn)
+        Format.asprintf "%a: %s" Stable_printer.Location.print_loc loc (Printexc.to_string exn)
       in
       Util.Result.errorf "%s" msg
 
@@ -167,13 +166,13 @@ let cram_token lexbuf =
     | Failure e ->
       let loc = Location.curr lexbuf in
       let msg =
-        Format.asprintf "%a: invalid code block: %s" Location.print_loc loc e
+        Format.asprintf "%a: invalid code block: %s" Stable_printer.Location.print_loc loc e
       in
       Util.Result.errorf "%s" msg
     | exn ->
       let loc = Location.curr lexbuf in
       let msg =
-        Format.asprintf "%a: %s" Location.print_loc loc (Printexc.to_string exn)
+        Format.asprintf "%a: %s" Stable_printer.Location.print_loc loc (Printexc.to_string exn)
       in
       Util.Result.errorf "%s" msg
 }

@@ -1,0 +1,32 @@
+(executable
+ (name pp)
+ (public_name ocaml-syntax-shims)
+ (libraries compiler-libs.common))
+
+(ocamllex let_trail)
+
+(rule
+ (with-stdout-to
+  impl
+  (run ocaml %{dep:select-impl} %{ocaml_version})))
+
+(rule
+ (with-stdout-to
+  shims
+  (run ocaml %{dep:select-shims} %{ocaml_version})))
+
+(rule
+ (copy# pp.%{read:impl}.ml pp.ml))
+
+(rule
+ (copy# shims.%{read:shims}.ml shims.ml))
+
+(rule
+ (with-stdout-to
+  pp.nop.ml
+  (echo "")))
+
+(rule
+ (with-stdout-to
+  shims.nop.ml
+  (echo "")))

@@ -1,0 +1,23 @@
+(* Testing top-level alerts from .ml and .mli files.
+
+   We refer to [.x] from each module rather than simply opening it so that the modules
+   must be non-empty. Empty modules are ignored by some ppx transformations that might
+   otherwise interfere with alerts and other similar attributes. *)
+
+let _ = Ppx_jane_test_alert_in_ml.x
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert implementation): module Ppx_jane_test_alert_in_ml
+This structure contains an alert.
+|}]
+
+let _ = Ppx_jane_test_alert_in_mli.x
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert interface): module Ppx_jane_test_alert_in_mli
+This signature contains an alert.
+|}]

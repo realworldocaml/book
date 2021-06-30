@@ -7,4 +7,4 @@
  (preprocess
   (action
    (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file})))
- (libraries cli mdx.top))
+ (libraries cli mdx.test))

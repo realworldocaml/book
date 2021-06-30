@@ -50,12 +50,13 @@ end
 let with_return = With_return.with_return
 
 exception Duplicate [@@deriving_inline sexp]
+
 let () =
-  Ppx_sexp_conv_lib.Conv.Exn_converter.add
-    ([%extension_constructor Duplicate])
-    (function
-      | Duplicate -> Ppx_sexp_conv_lib.Sexp.Atom "src/map.ml.Duplicate"
-      | _ -> assert false)
+  Ppx_sexp_conv_lib.Conv.Exn_converter.add [%extension_constructor Duplicate] (function
+    | Duplicate -> Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Duplicate"
+    | _ -> assert false)
+;;
+
 [@@@end]
 
 module Tree0 = struct
@@ -231,6 +232,7 @@ module Tree0 = struct
       | Add_exn
       | Set
   end
+
 
   let rec find_and_add_or_set
             t
@@ -540,24 +542,29 @@ module Tree0 = struct
   ;;
 
   exception Map_min_elt_exn_of_empty_map [@@deriving_inline sexp]
+
   let () =
     Ppx_sexp_conv_lib.Conv.Exn_converter.add
-      ([%extension_constructor Map_min_elt_exn_of_empty_map])
+      [%extension_constructor Map_min_elt_exn_of_empty_map]
       (function
         | Map_min_elt_exn_of_empty_map ->
-          Ppx_sexp_conv_lib.Sexp.Atom
-            "src/map.ml.Tree0.Map_min_elt_exn_of_empty_map"
+          Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Tree0.Map_min_elt_exn_of_empty_map"
         | _ -> assert false)
+  ;;
+
   [@@@end]
+
   exception Map_max_elt_exn_of_empty_map [@@deriving_inline sexp]
+
   let () =
     Ppx_sexp_conv_lib.Conv.Exn_converter.add
-      ([%extension_constructor Map_max_elt_exn_of_empty_map])
+      [%extension_constructor Map_max_elt_exn_of_empty_map]
       (function
         | Map_max_elt_exn_of_empty_map ->
-          Ppx_sexp_conv_lib.Sexp.Atom
-            "src/map.ml.Tree0.Map_max_elt_exn_of_empty_map"
+          Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Tree0.Map_max_elt_exn_of_empty_map"
         | _ -> assert false)
+  ;;
+
   [@@@end]
 
   let min_elt_exn t =
@@ -844,6 +851,7 @@ module Tree0 = struct
       if f key then set ~length ~key ~data accu ~compare_key else accu, length)
   ;;
 
+
   let filter t ~f ~compare_key =
     fold ~init:(Empty, 0) t ~f:(fun ~key ~data (accu, length) ->
       if f data then set ~length ~key ~data accu ~compare_key else accu, length)
@@ -873,11 +881,11 @@ module Tree0 = struct
       t
       ~init:((Empty, 0), (Empty, 0))
       ~f:(fun ~key ~data (pair1, pair2) ->
-        match f ~key ~data with
-        | `Fst x ->
+        match (f ~key ~data : _ Either.t) with
+        | First x ->
           let t, length = pair1 in
           set t ~key ~data:x ~compare_key ~length, pair2
-        | `Snd y ->
+        | Second y ->
           let t, length = pair2 in
           pair1, set t ~key ~data:y ~compare_key ~length)
   ;;
@@ -888,12 +896,12 @@ module Tree0 = struct
 
   let partitioni_tf t ~f ~compare_key =
     partition_mapi t ~compare_key ~f:(fun ~key ~data ->
-      if f ~key ~data then `Fst data else `Snd data)
+      if f ~key ~data then First data else Second data)
   ;;
 
   let partition_tf t ~f ~compare_key =
     partition_mapi t ~compare_key ~f:(fun ~key:_ ~data ->
-      if f data then `Fst data else `Snd data)
+      if f data then First data else Second data)
   ;;
 
   module Enum = struct
@@ -1572,6 +1580,13 @@ module Tree0 = struct
     let f ~key ~data acc = Sexp.List [ sexp_of_key key; sexp_of_value data ] :: acc in
     Sexp.List (fold_right ~f t ~init:[])
   ;;
+
+  let combine_errors t ~compare_key ~sexp_of_key =
+    let oks, (error_tree, _) = partition_map t ~compare_key ~f:Result.to_either in
+    if is_empty error_tree
+    then Ok oks
+    else Or_error.error_s (sexp_of_t sexp_of_key Error.sexp_of_t error_tree)
+  ;;
 end
 
 type ('k, 'v, 'comparator) t =
@@ -1587,6 +1602,7 @@ type ('k, 'v, 'comparator) t =
 type ('k, 'v, 'comparator) tree = ('k, 'v) Tree0.t
 
 let compare_key t = t.comparator.Comparator.compare
+
 
 let like { tree = _; length = _; comparator } (tree, length) =
   { tree; length; comparator }
@@ -1718,6 +1734,15 @@ module Accessors = struct
     like2 t (Tree0.partition_tf t.tree ~f ~compare_key:(compare_key t))
   ;;
 
+  let combine_errors t =
+    Or_error.map
+      ~f:(like t)
+      (Tree0.combine_errors
+         t.tree
+         ~compare_key:(compare_key t)
+         ~sexp_of_key:t.comparator.sexp_of_t)
+  ;;
+
   let compare_direct compare_data t1 t2 =
     Tree0.compare (compare_key t1) compare_data t1.tree t2.tree
   ;;
@@ -1730,6 +1755,7 @@ module Accessors = struct
   let data t = Tree0.data t.tree
   let to_alist ?key_order t = Tree0.to_alist ?key_order t.tree
   let validate ~name f t = Validate.alist ~name f (to_alist t)
+  let validatei ~name f t = Validate.list ~name:(Fn.compose name fst) f (to_alist t)
 
   let symmetric_diff t1 t2 ~data_equal =
     Tree0.symmetric_diff t1.tree t2.tree ~compare_key:(compare_key t1) ~data_equal
@@ -2063,6 +2089,15 @@ module Tree = struct
     a, b
   ;;
 
+  let combine_errors ~comparator t =
+    Or_error.map
+      ~f:fst
+      (Tree0.combine_errors
+         t
+         ~compare_key:comparator.Comparator.compare
+         ~sexp_of_key:comparator.Comparator.sexp_of_t)
+  ;;
+
   let compare_direct ~comparator compare_data t1 t2 =
     Tree0.compare comparator.Comparator.compare compare_data t1 t2
   ;;
@@ -2075,6 +2110,7 @@ module Tree = struct
   let data t = Tree0.data t
   let to_alist ?key_order t = Tree0.to_alist ?key_order t
   let validate ~name f t = Validate.alist ~name f (to_alist t)
+  let validatei ~name f t = Validate.list ~name:(Fn.compose name fst) f (to_alist t)
 
   let symmetric_diff ~comparator t1 t2 ~data_equal =
     Tree0.symmetric_diff t1 t2 ~compare_key:comparator.Comparator.compare ~data_equal
@@ -2368,17 +2404,17 @@ end
 
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
-  include
-    sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
-  include
-    sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-    end[@@ocaml.doc "@inline"]
+
+  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
   [@@@end]
 
   include Comparator.S with type t := t
@@ -2399,6 +2435,18 @@ let m__t_of_sexp
       sexp
   =
   Using_comparator.t_of_sexp_direct ~comparator:K.comparator K.t_of_sexp v_of_sexp sexp
+;;
+
+let m__t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t =
+  Inline
+    (Explicit_bind
+       ( [ "'k"; "'v" ]
+       , Apply
+           ( Grammar list_sexp_grammar
+           , [ Apply
+                 ( Grammar Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.tuple2_sexp_grammar
+                 , [ Explicit_var 0; Explicit_var 1 ] )
+             ] ) ))
 ;;
 
 let compare_m__t (module K : Compare_m) compare_v t1 t2 = compare_direct compare_v t1 t2

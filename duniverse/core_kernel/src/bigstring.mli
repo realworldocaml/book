@@ -25,7 +25,7 @@ include Hexdump.S with type t := t
     the pressure in the garbage collector to be more agressive will increase.
     @return a new bigstring having [length].
     Content is undefined. *)
-val create : ?max_mem_waiting_gc:Byte_units.t -> int -> t
+val create : ?max_mem_waiting_gc:Byte_units0.t -> int -> t
 
 (** [sub_shared ?pos ?len bstr] @return the sub-bigstring in [bstr]
     that starts at position [pos] and has length [len].  The sub-bigstring

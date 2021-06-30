@@ -1,0 +1,17 @@
+(copy_files# ../ec/native/*.c)
+
+(rule
+ (deps ../ec/cflags_optimized.sexp ../src/native/mirage_crypto.h
+   ../src/native/bitfn.h Makefile p224_stubs.c np224_stubs.c p256_stubs.c
+   np256_stubs.c p384_stubs.c np384_stubs.c p521_stubs.c np521_stubs.c
+   curve25519_stubs.c)
+ (targets libmirage_crypto_ec_freestanding_stubs.a)
+ (action
+  (no-infer
+   (progn
+    (run %{make})))))
+
+(install
+ (package mirage-crypto-ec)
+ (section lib)
+ (files libmirage_crypto_ec_freestanding_stubs.a))

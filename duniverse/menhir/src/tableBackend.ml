@@ -200,9 +200,8 @@ let reducecellcasts prod i symbol casts =
 let endpos_of_top_stack_cell =
   ERecordAccess(EVar stack, fendp)
 
-(* This is the body of the [reduce] function associated with
-   production [prod]. It assumes that the variables [env] and [stack]
-   have been bound. *)
+(* This is the body of the [reduce] function associated with production
+   [prod]. It assumes that the variable [stack] is bound. *)
 
 let reducebody prod =
 
@@ -284,7 +283,11 @@ let reducebody prod =
     )
   )
 
+(* This is the body of the semantic action associated with production
+   [prod]. It takes just one parameter, namely the environment [env]. *)
+
 let semantic_action prod =
+  let env = prefix "env" in
   EFun (
     [ PVar env ],
 
@@ -684,9 +687,24 @@ let token2value =
 
 (* ------------------------------------------------------------------------ *)
 
-(* The client APIs invoke the interpreter with an appropriate start state.
-   The monolithic API calls [entry] (see [Engine]), while the incremental
-   API calls [start]. *)
+(* The client APIs invoke the interpreter with an appropriate start state. The
+   monolithic API uses the function [entry], which performs the entire parsing
+   process, while the incremental API relies on the function [start], which
+   returns just an initial checkpoint. Both functions are defined in
+   [lib/Engine.ml]. *)
+
+(* The function [entry] takes a [strategy] parameter, whose value is fixed at
+   compile time, based on [Settings.strategy]. For users of the incremental
+   API, the value of [Settings.strategy] is irrelevant; the functions [resume]
+   and [loop] offered by the incremental API take a [strategy] parameter at
+   runtime. *)
+
+let strategy =
+  match Settings.strategy with
+  | `Legacy ->
+      EData ("`Legacy", [])
+  | `Simplified ->
+      EData ("`Simplified", [])
 
 (* An entry point to the monolithic API. *)
 
@@ -701,6 +719,7 @@ let monolithic_entry_point state nt t =
         EMagic (
           EApp (
             EVar entry, [
+              strategy;
               EIntConst (Lr1.number state);
               EVar lexer;
               EVar lexbuf
@@ -818,14 +837,14 @@ let terminal () =
     EFun ([ PVar t ],
       EMatch (EVar t,
         Terminal.mapx (fun tok ->
-          { branchpat = pint (Terminal.t2i tok);
-            branchbody = xsymbol (Symbol.T tok) }
+          branch
+            (pint (Terminal.t2i tok))
+            (xsymbol (Symbol.T tok))
         ) @ [
-          { branchpat = PWildcard;
-            branchbody =
-              EComment ("This terminal symbol does not exist.",
-                EApp (EVar "assert", [ efalse ])
-              ) }
+          branch
+            PWildcard
+            (EComment ("This terminal symbol does not exist.",
+                       EApp (EVar "assert", [ efalse ])))
         ]
       )
     )
@@ -844,14 +863,15 @@ let nonterminal () =
     EFun ([ PVar nt ],
       EMatch (EVar nt,
         Nonterminal.foldx (fun nt branches ->
-          { branchpat = pint (Nonterminal.n2i nt);
-            branchbody = xsymbol (Symbol.N nt) } :: branches
+          branch
+            (pint (Nonterminal.n2i nt))
+            (xsymbol (Symbol.N nt))
+          :: branches
         ) [
-          { branchpat = PWildcard;
-            branchbody =
-              EComment ("This nonterminal symbol does not exist.",
-                EApp (EVar "assert", [ efalse ])
-              ) }
+          branch
+            PWildcard
+            (EComment ("This nonterminal symbol does not exist.",
+                       EApp (EVar "assert", [ efalse ])))
         ]
       )
     )
@@ -1036,7 +1056,7 @@ let program =
       SIModuleDef (ti, MApp (MVar make_engine, MVar et)) ::
       SIInclude (MVar ti) ::
 
-      listiflazy Settings.inspection (fun () ->
+      ifnlazy Settings.inspection (fun () ->
 
         (* Define the internal sub-module [symbols], which contains type
            definitions. Then, include this sub-module. This sub-module is used

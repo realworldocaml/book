@@ -1534,10 +1534,11 @@ class virtual type_decl = object (self)
   method type_decl_param_name name = name
 
   method type_decl_param param =
-    let desc, var = param in
+    let open TypeDecl in
+    let {desc; variance; injectivity} = param in
     let desc' = self#type_decl_param_desc desc in
-    let var' = option_map self#type_decl_variance var in
-      if desc != desc' || var != var' then (desc', var')
+    let var' = option_map self#type_decl_variance variance in
+      if desc != desc' || variance != var' then {desc=desc'; variance=var'; injectivity}
       else param
 
   method type_decl_equation eq =

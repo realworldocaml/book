@@ -3,15 +3,12 @@
 
 open! Import
 
-type t = string [@@deriving_inline hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val hash_fold_t :
-      Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-    include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-  end[@@ocaml.doc "@inline"]
+type t = string [@@deriving_inline sexp, sexp_grammar]
+
+include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 val sub : (t, t) Blit.sub
@@ -19,6 +16,7 @@ val subo : (t, t) Blit.subo
 
 include Container.S0 with type t := t with type elt = char
 include Identifiable.S with type t := t
+include Invariant.S with type t := t
 
 (** Maximum length of a string. *)
 val max_length : int
@@ -81,29 +79,32 @@ val uncapitalize : t -> t
 *)
 
 (** [Caseless] compares and hashes strings ignoring case, so that for example
-    [Caseless.equal "OCaml" "ocaml"] and [Caseless.("apple" < "Banana")] are [true], and
-    [Caseless.Map], [Caseless.Table] lookup and [Caseless.Set] membership is
-    case-insensitive.
+    [Caseless.equal "OCaml" "ocaml"] and [Caseless.("apple" < "Banana")] are [true].
 
     [Caseless] also provides case-insensitive [is_suffix] and [is_prefix] functions, so
     that for example [Caseless.is_suffix "OCaml" ~suffix:"AmL"] and [Caseless.is_prefix
     "OCaml" ~prefix:"oc"] are [true]. *)
 module Caseless : sig
   type nonrec t = t [@@deriving_inline hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val hash_fold_t :
-        Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-      val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-    end[@@ocaml.doc "@inline"]
+
+  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
   [@@@end]
 
   include Comparable.S with type t := t
 
   val is_suffix : t -> suffix:t -> bool
   val is_prefix : t -> prefix:t -> bool
+  val is_substring : t -> substring:t -> bool
+  val is_substring_at : t -> pos:int -> substring:t -> bool
+  val substr_index : ?pos:int -> t -> pattern:t -> int option
+  val substr_index_exn : ?pos:int -> t -> pattern:t -> int
+  val substr_index_all : t -> may_overlap:bool -> pattern:t -> int list
+  val substr_replace_first : ?pos:int -> t -> pattern:t -> with_:t -> t
+  val substr_replace_all : t -> pattern:t -> with_:t -> t
 end
 
 (** [index_exn] and [index_from_exn] raise [Caml.Not_found] or [Not_found_s] when [char]
@@ -130,14 +131,20 @@ val rindex_from_exn : t -> int -> char -> int
     searched pattern once and then use it many times without further allocations. *)
 module Search_pattern : sig
   type t [@@deriving_inline sexp_of]
-  include
-    sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 
   (** [create pattern] preprocesses [pattern] as per KMP, building an [int array] of
       length [length pattern].  All inputs are valid. *)
-  val create : string -> t
+  val create : ?case_sensitive:bool (** default = true *) -> string -> t
+
+  (** [pattern t] returns the string pattern used to create [t]. *)
+  val pattern : t -> string
+
+  (** [case_sensitive t] returns whether [t] matches strings case-sensitively. *)
+  val case_sensitive : t -> bool
 
   (** [matches pat str] returns true if [str] matches [pat] *)
   val matches : t -> string -> bool
@@ -168,6 +175,29 @@ module Search_pattern : sig
   val replace_first : ?pos:int -> t -> in_:string -> with_:string -> string
 
   val replace_all : t -> in_:string -> with_:string -> string
+
+  (**/**)
+
+  (*_ See the Jane Street Style Guide for an explanation of [Private] submodules:
+
+    https://opensource.janestreet.com/standards/#private-submodules *)
+  module Private : sig
+    type public = t
+
+    type t =
+      { pattern : string
+      ; case_sensitive : bool
+      ; kmp_array : int array
+      }
+    [@@deriving_inline equal, sexp_of]
+
+    val equal : t -> t -> bool
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
+    [@@@end]
+
+    val representation : public -> t
+  end
 end
 
 (** Substring search and replace convenience functions.  They call [Search_pattern.create]
@@ -301,6 +331,20 @@ val chop_prefix_exn : t -> prefix:t -> t
 
 val chop_suffix : t -> suffix:t -> t option
 val chop_prefix : t -> prefix:t -> t option
+
+(** [chop_suffix_if_exists s ~suffix] returns [s] without the trailing [suffix], or just
+    [s] if [suffix] isn't a suffix of [s].
+
+    Equivalent to [chop_suffix s ~suffix |> Option.value ~default:s], but avoids
+    allocating the intermediate option. *)
+val chop_suffix_if_exists : t -> suffix:t -> t
+
+(** [chop_prefix_if_exists s ~prefix] returns [s] without the leading [prefix], or just
+    [s] if [prefix] isn't a prefix of [s].
+
+    Equivalent to [chop_prefix s ~prefix |> Option.value ~default:s], but avoids
+    allocating the intermediate option. *)
+val chop_prefix_if_exists : t -> prefix:t -> t
 
 (** [suffix s n] returns the longest suffix of [s] of length less than or equal to [n]. *)
 val suffix : t -> int -> t

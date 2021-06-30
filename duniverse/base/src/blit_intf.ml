@@ -69,6 +69,17 @@ module type S_distinct = sig
   val subo : (src, dst) subo
 end
 
+module type S1_distinct = sig
+  type 'a src
+  type 'a dst
+
+  val blit : (_ src, _ dst) blit
+  val blito : (_ src, _ dst) blito
+  val unsafe_blit : (_ src, _ dst) blit
+  val sub : (_ src, _ dst) sub
+  val subo : (_ src, _ dst) subo
+end
+
 module type S_to_string = sig
   type t
 
@@ -108,6 +119,7 @@ module type Blit = sig
   module type S = S
   module type S1 = S1
   module type S_distinct = S_distinct
+  module type S1_distinct = S1_distinct
   module type S_to_string = S_to_string
   module type Sequence = Sequence
   module type Sequence1 = Sequence1

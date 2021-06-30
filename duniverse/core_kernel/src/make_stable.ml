@@ -24,7 +24,7 @@ module Of_stable_format = struct
 
       include T2
       include Sexpable.Of_sexpable.V1 (Stable_format) (T2)
-      include Binable.Of_binable.V1 (Stable_format) (T2)
+      include Binable.Of_binable.V1 [@alert "-legacy"] (Stable_format) (T2)
     end
 
     include T1
@@ -53,7 +53,7 @@ module Of_stable_format1 = struct
 
     include T
     include Sexpable.Of_sexpable1.V1 (Stable_format) (T)
-    include Binable.Of_binable1.V1 (Stable_format) (T)
+    include Binable.Of_binable1.V1 [@alert "-legacy"] (Stable_format) (T)
   end
 end
 
@@ -78,6 +78,6 @@ module Of_stable_format2 = struct
 
     include T
     include Sexpable.Of_sexpable2.V1 (Stable_format) (T)
-    include Binable.Of_binable2.V1 (Stable_format) (T)
+    include Binable.Of_binable2.V1 [@alert "-legacy"] (Stable_format) (T)
   end
 end

@@ -11,11 +11,9 @@ open! Import
 
 (** See [Base.Array] for comments. *)
 type 'a t [@@deriving_inline sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
 [@@@end]
 
 val invariant : _ t -> unit
@@ -40,6 +38,10 @@ val unsafe_set_omit_phys_equal_check : 'a t -> int -> 'a -> unit
 val map : 'a t -> f:('a -> 'b) -> 'b t
 val iter : 'a t -> f:('a -> unit) -> unit
 
+(** Like {!iter}, but the function is applied to the index of the element as first
+    argument, and the element itself as second argument. *)
+val iteri : 'a t -> f:(int -> 'a -> unit) -> unit
+
 (** [of_array] and [to_array] return fresh arrays with the same contents rather than
     returning a reference to the underlying array. *)
 val of_array : 'a array -> 'a t
@@ -51,11 +53,6 @@ val to_list : 'a t -> 'a list
 include Blit.S1 with type 'a t := 'a t
 
 val copy : 'a t -> 'a t
-
-(** [unsafe_truncate t ~len] shortens [t]'s length to [len].  It is an error if [len <= 0]
-    or [len > length t].  It's unsafe to truncate in the middle of iteration. *)
-val unsafe_truncate : _ t -> len:int -> unit
-[@@deprecated "[since 2019-07] It will be removed in the future"]
 
 (** {2 Extra lowlevel and unsafe functions} *)
 

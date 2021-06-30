@@ -68,9 +68,11 @@ let hash_state_t ~loc =
   [%type: Ppx_hash_lib.Std.Hash.state]
 
 let hash_fold_type ~loc ty =
+  let loc = { loc with loc_ghost = true } in
   [%type: [%t hash_state_t ~loc] -> [%t ty] -> [%t hash_state_t ~loc]]
 
 let hash_type ~loc ty =
+  let loc = { loc with loc_ghost = true } in
   [%type: [%t ty] -> Ppx_hash_lib.Std.Hash.hash_value]
 
 (* [expr] is an expression that doesn't use the [hsv] variable.
@@ -213,7 +215,7 @@ let hash_ignore ~loc value =
     (Hsv_expr.identity ~loc)
 
 let rec hash_applied ty value =
-  let loc = ty.ptyp_loc in
+  let loc = { ty.ptyp_loc with loc_ghost = true } in
   match ty.ptyp_desc with
   | Ptyp_constr (name, ta) ->
     let args = List.map ta ~f:(hash_fold_of_ty_fun ~type_constraint:false) in
@@ -317,7 +319,7 @@ and hash_sum ~loc cds value =
   Hsv_expr.pexp_match ~loc value (branches_of_sum cds)
 
 and hash_fold_of_ty ty value =
-  let loc = ty.ptyp_loc in
+  let loc = { ty.ptyp_loc with loc_ghost = true } in
   if core_type_is_ignored ty then
     hash_ignore ~loc value
   else
@@ -338,7 +340,7 @@ and hash_fold_of_ty ty value =
       Location.raise_errorf ~loc "ppx_hash: unsupported type: %s" s
 
 and hash_fold_of_ty_fun ~type_constraint ty =
-  let loc = ty.ptyp_loc in
+  let loc = { ty.ptyp_loc with loc_ghost = true } in
   let arg = "arg" in
   let maybe_constrained_arg =
     if type_constraint then
@@ -410,7 +412,7 @@ let recognize_simple_type ty = match ty.ptyp_desc with
   | _ -> None
 
 let hash_of_ty_fun ~special_case_simple_types ~type_constraint ty =
-  let loc = ty.ptyp_loc in
+  let loc = { ty.ptyp_loc with loc_ghost = true } in
   let arg = "arg" in
   let maybe_constrained_arg =
     if type_constraint then
@@ -463,7 +465,7 @@ let hash_structure_item_of_td td =
     ]
 
 let hash_fold_structure_item_of_td td ~rec_flag =
-  let loc = td.ptype_loc in
+  let loc = { td.ptype_loc with loc_ghost = true } in
   let arg = "arg" in
   let body =
     let v      = evar ~loc arg in
@@ -548,9 +550,9 @@ let str_type_decl ~loc ~path:_ (rec_flag, tds) =
     let rely_on_hash_fold_t, use_rhs =
       List.partition_map hash_bindings ~f:(function
         | `uses_hash_fold_t_being_defined, binding ->
-          `Fst binding
+          First binding
         | `uses_rhs, binding ->
-          `Snd binding)
+          Second binding)
     in
     pstr_value ~loc Nonrecursive (hash_fold_bindings @ use_rhs) @
     pstr_value ~loc Nonrecursive rely_on_hash_fold_t

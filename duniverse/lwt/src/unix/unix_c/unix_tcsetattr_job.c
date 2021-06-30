@@ -34,8 +34,12 @@ static void worker_tcsetattr(struct job_tcsetattr *job)
         job->result = result;
         job->error_code = errno;
     } else {
-        decode_terminal_status(&termios, &(job->termios[0]));
-        job->result = tcsetattr(job->fd, job->when, &termios);
+        int result_decode = decode_terminal_status(&termios, &(job->termios[0]));
+        if (result_decode != 0) {
+            job->result = -1;
+        } else {
+            job->result = tcsetattr(job->fd, job->when, &termios);
+        }
         job->error_code = errno;
     }
 }

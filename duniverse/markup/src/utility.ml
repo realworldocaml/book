@@ -238,7 +238,7 @@ let rec trim_string_list trim = function
 let trim signals =
   let signals = normalize_text signals in
 
-  let signals_and_flow : ('signal * bool) Kstream.t =
+  let signals_and_flow =
     Kstream.transform begin fun phrasing_nesting_level signal _throw k ->
       match signal with
       | `Start_element (name, _) ->
@@ -337,6 +337,11 @@ let pretty_print signals =
         list
           [`Text [indent indentation]]
           (phrasing indentation 0) throw e k
+
+      | `Doctype _ ->
+        list
+          [signal; `Text ["\n"]]
+          (flow indentation) throw e k
 
       | _ ->
         list

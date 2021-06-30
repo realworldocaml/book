@@ -8,6 +8,7 @@ module Stable = struct
 
     let map = Base.Lazy.map
     let compare = Base.Lazy.compare
+    let t_sexp_grammar = lazy_t_sexp_grammar
   end
 end
 

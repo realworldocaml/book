@@ -1,3 +1,7 @@
+## v0.14.1
+
+- Upgrade to ppxlib 0.14.0
+
 ## v0.13.1
 
 - Honor the `inline_tests` Dune variable so that inline tests are

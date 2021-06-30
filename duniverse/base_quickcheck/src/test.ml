@@ -75,7 +75,7 @@ let shrink_error ~shrinker ~config ~f input error =
       (match Sequence.next alternates with
        | None -> input, error
        | Some (alternate, alternates) ->
-         (match Or_error.try_with_join (fun () -> f alternate) with
+         (match f alternate with
           | Ok () -> loop ~shrink_count ~alternates input error
           | Error error ->
             let alternates = Shrinker.shrink shrinker alternate in
@@ -96,19 +96,15 @@ let input_sequence ~config ~examples ~generator =
 
 let with_sample ~f ?(config = default_config) ?(examples = []) generator =
   let sequence = input_sequence ~config ~examples ~generator in
-  Or_error.try_with_join (fun () -> f sequence)
+  f sequence
 ;;
 
-let run (type a) ~f ?(config = default_config) ?(examples = []) m =
+let result (type a) ~f ?(config = default_config) ?(examples = []) m =
   let (module M : S with type t = a) = m in
   with_sample M.quickcheck_generator ~config ~examples ~f:(fun sequence ->
     match
       Sequence.fold_result sequence ~init:() ~f:(fun () input ->
-        match
-          Or_error.try_with_join
-            ~backtrace:(Backtrace.Exn.am_recording ())
-            (fun () -> f input)
-        with
+        match f input with
         | Ok () -> Ok ()
         | Error error -> Error (input, error))
     with
@@ -116,9 +112,18 @@ let run (type a) ~f ?(config = default_config) ?(examples = []) m =
     | Error (input, error) ->
       let shrinker = M.quickcheck_shrinker in
       let input, error = shrink_error ~shrinker ~config ~f input error in
-      Or_error.error_s
-        [%message
-          "Base_quickcheck.Test.run: test failed" (input : M.t) (error : Error.t)])
+      Error (input, error))
+;;
+
+let run (type a) ~f ?config ?examples (module M : S with type t = a) =
+  let f x =
+    Or_error.try_with_join ~backtrace:(Backtrace.Exn.am_recording ()) (fun () -> f x)
+  in
+  match result ~f ?config ?examples (module M) with
+  | Ok () -> Ok ()
+  | Error (input, error) ->
+    Or_error.error_s
+      [%message "Base_quickcheck.Test.run: test failed" (input : M.t) (error : Error.t)]
 ;;
 
 let with_sample_exn ~f ?config ?examples generator =

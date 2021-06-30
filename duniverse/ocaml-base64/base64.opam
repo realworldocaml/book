@@ -1,4 +1,4 @@
-version: "3.4.0"
+version: "3.5.0"
 opam-version: "2.0"
 maintainer: "mirageos-devel@lists.xenproject.org"
 authors: [ "Thomas Gazagnaire"
@@ -16,16 +16,14 @@ binary data in an ASCII string format by translating it into a radix-64
 representation.  It is specified in RFC 4648.
 """
 depends: [
-  "ocaml" {>="4.03.0"}
-  "base-bytes"
-  "dune-configurator"
+  "ocaml" {>= "4.03.0"}
   "dune" {>= "2.0"}
   "bos" {with-test}
   "rresult" {with-test}
   "alcotest" {with-test}
 ]
 build: [
-  ["dune" "subst"]
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "runtest" "-p" name] {with-test}
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

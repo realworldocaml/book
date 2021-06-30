@@ -77,7 +77,7 @@ module Accessors = struct
 
   let exists t ~f = Hashtbl.existsi t ~f:(fun ~key ~data:() -> f key)
   let for_all t ~f = not (Hashtbl.existsi t ~f:(fun ~key ~data:() -> not (f key)))
-  let equal t1 t2 = Hashtbl.equal t1 t2 (fun () () -> true)
+  let equal t1 t2 = Hashtbl.equal (fun () () -> true) t1 t2
   let copy t = Hashtbl.copy t
   let filter t ~f = Hashtbl.filteri t ~f:(fun ~key ~data:() -> f key)
   let union t1 t2 = Hashtbl.merge t1 t2 ~f:(fun ~key:_ _ -> Some ())
@@ -177,17 +177,17 @@ end
 
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
-  include
-    sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
-  include
-    sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-    end[@@ocaml.doc "@inline"]
+
+  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
   [@@@end]
 
   include Hashtbl_intf.Key.S with type t := t

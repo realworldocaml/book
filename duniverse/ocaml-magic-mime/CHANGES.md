@@ -1,3 +1,10 @@
+v1.1.3 2021-01-04
+-----------------
+
+* Fix build system for cross-compilation (@TheLortex, #19).
+* Fix README (@seliopou, #18).
+* Fix opam metadata (@CraigFe, #17).
+
 v1.1.2 2019-08-12
 -----------------
 

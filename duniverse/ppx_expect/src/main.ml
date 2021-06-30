@@ -1,29 +1,23 @@
-open Expect_test_common.Std
+open Expect_test_common
 open Base
 open Ppxlib
 open Ast_builder.Default
 
-let lifter ~loc =
-  object
-    inherit [expression] Lifter.lift
-
-    inherit Ppxlib_metaquot_lifters.expression_lifters loc
-
-    method filename file_name =
-      eapply
-        ~loc
-        (evar ~loc "Expect_test_common.Std.File.Name.of_string")
-        [ estring ~loc (File.Name.to_string file_name) ]
-  end
-;;
-
-let lift_location ~loc of_loc = (lifter ~loc)#location of_loc
-
-let lift_expectation ~loc expect =
-  let exp = (lifter ~loc)#raw expect in
-  (* the constraint is added in order to avoid warnings if the code
-     is compiled with -principal. *)
-  [%expr ([%e exp] : string Expect_test_common.Std.Expectation.t)]
+let lift_location
+      ~loc
+      ({ filename; line_number; line_start; start_pos; end_pos } : File.Location.t)
+  =
+  Merlin_helpers.hide_expression
+    [%expr
+      ({ filename =
+           Expect_test_common.File.Name.of_string
+             [%e estring ~loc (File.Name.to_string filename)]
+       ; line_number = [%e eint ~loc line_number]
+       ; line_start = [%e eint ~loc line_start]
+       ; start_pos = [%e eint ~loc start_pos]
+       ; end_pos = [%e eint ~loc end_pos]
+       }
+       : Expect_test_common.File.Location.t)]
 ;;
 
 let eoption ~loc x =
@@ -33,6 +27,26 @@ let eoption ~loc x =
 ;;
 
 let estring_option ~loc x = eoption ~loc (Option.map x ~f:(estring ~loc))
+
+let lift_expectation
+      ~loc
+      ({ tag; body; extid_location; body_location } : _ Expectation.t)
+  =
+  Merlin_helpers.hide_expression
+    [%expr
+      ({ tag = [%e estring_option ~loc tag]
+       ; body =
+           [%e
+             match body with
+             | Exact string -> [%expr Exact [%e estring ~loc string]]
+             | Output -> [%expr Output]
+             | Pretty string -> [%expr Pretty [%e estring ~loc string]]
+             | Unreachable -> [%expr Unreachable]]
+       ; extid_location = [%e lift_location ~loc extid_location]
+       ; body_location = [%e lift_location ~loc body_location]
+       }
+       : string Expect_test_common.Expectation.t)]
+;;
 
 (* Grab a list of all the output expressions *)
 let collect_expectations =
@@ -52,7 +66,7 @@ let replace_expects =
   object
     inherit Ast_traverse.map as super
 
-    method! expression ({ pexp_attributes; pexp_loc; _ } as expr) =
+    method! expression ({ pexp_attributes; pexp_loc = loc; _ } as expr) =
       match Expect_extension.match_expectation expr with
       | None -> super#expression expr
       | Some ext ->
@@ -61,7 +75,6 @@ let replace_expects =
           | Exact _ | Pretty _ | Unreachable -> "Expect_test_collector.save_output"
           | Output -> "Expect_test_collector.save_and_return_output"
         in
-        let loc = { pexp_loc with loc_end = pexp_loc.loc_start } in
         let expr =
           [%expr [%e evar ~loc f_var] [%e lift_location ~loc ext.extid_location]]
         in
@@ -96,7 +109,7 @@ let rewrite_test_body ~descr ~tags ~uncaught_exn pstr_loc body =
   [%expr
     let module Expect_test_collector = Expect_test_collector.Make (Expect_test_config) in
     Expect_test_collector.run
-      ~file_digest:(Expect_test_common.Std.File.Digest.of_string [%e estring ~loc hash])
+      ~file_digest:(Expect_test_common.File.Digest.of_string [%e estring ~loc hash])
       ~location:[%e lift_location ~loc (Ppx_expect_payload.transl_loc pstr_loc)]
       ~absolute_filename:[%e estring ~loc absolute_filename]
       ~description:[%e estring_option ~loc descr]

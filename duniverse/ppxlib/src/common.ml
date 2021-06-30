@@ -64,13 +64,13 @@ class type_is_recursive rec_flag tds = object(self)
 
   val type_names : string list = List.map tds ~f:(fun td -> td.ptype_name.txt)
 
-  method return_true () = Exn.raise_without_backtrace Type_is_recursive
+  method return_true () = raise_notrace Type_is_recursive
 
   method! core_type ctype =
     match ctype.ptyp_desc with
     | Ptyp_arrow _ -> ()
     | Ptyp_constr ({ txt = Longident.Lident id; _ }, _)
-      when List.mem ~equal:String.equal type_names id ->
+      when List.mem ~set:type_names id ->
       self#return_true ()
     | _ -> super#core_type ctype
 
