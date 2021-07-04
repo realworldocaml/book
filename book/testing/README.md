@@ -1,12 +1,12 @@
 # Testing
 
-Testing is not the best-loved part of programming. Writing tests can
-be paintstaking and dreary work, and it can feel like a distraction
-from the core work of creating new features.  At first blush, OCaml's
-type-system makes testing seem even less appealing, since the type
-system's ability to squash many kinds of bugs at compile time catches
-lots of mistakes that you would otherwise need to write tests to
-protect against.
+Testing is not the best-loved part of programming. Writing tests is an
+exacting and sometimes dreary job, and it can feel like a distraction
+from the task of building our your code's functionality.  At first
+blush, OCaml's type-system makes testing seem even less appealing,
+since the type system's ability to squash many kinds of bugs at
+compile time catches lots of mistakes that you would otherwise need to
+write tests to protect against.
 
 But make no mistake, clever types notwithstanding, testing is
 essential for developing and evolving reliable software systems.  And
@@ -31,10 +31,10 @@ Here are some of the properties that characterize well-written tests
 in a good testing environment.
 
 - **Easy to write and run**. Tests should require a minimum of
-  boilerplate to create and to hook into your process.  Ideally, you
-  should set things up so that tests are run automatically on every
-  proposed change, preventing people from accidentally breaking the
-  build.
+  boilerplate to create and to hook into your development process.
+  Ideally, you should set things up so that tests are run
+  automatically on every proposed change, preventing people from
+  accidentally breaking the build.
 - **Easy to update**. Tests that are hard to adjust in the face of
   code changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -214,16 +214,15 @@ such cases are very much the exception.
 ##### Why can't inline tests go in executables?
 
 We've only talked about putting tests into libraries. What about
-executables? After all, you want to test the logic of your
-command-line tools as well.  It turns out you can't do this directly,
-because Dune doesn't support the `inline_tests` declaration in source
-files that are directly part of an executable.
+executables? It turns out you can't do this directly, because Dune
+doesn't support the `inline_tests` declaration in source files that
+are directly part of an executable.
 
 There's a good reason for this: the `ppx_inline_test` test runner
 needs to instantiate the modules that contain the tests. If those
 modules have toplevel side-effects, that's a recipe for disaster,
 since you don't want those top-level effects to be triggered by the
-test framework without your say-so.
+test framework.
 
 So, how do we test code that's part of an executable? The solution is
 to break up your program in to two pieces: a directory containing a
@@ -253,15 +252,15 @@ far.  In this example, we'll check an obvious-seeming invariant
 connecting three operations:
 
 - `Int.sign`, which computes a `Sign.t` representing the sign of an
-integer, either `Positive`, `Negative`, or `Zero`
+  integer, either `Positive`, `Negative`, or `Zero`
 - `Int.neg`, which negates a number
 - `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
   `Negative` and vice-versa.
 
-The invariant is simply that the sign of the negation of an integer
-`x` is the flip of the sign of `x`.
+The invariant we want to check is that the sign of the negation of any
+integer `x` is the flip of the sign of `x`.
 
-Here's one way of implementing this test as a property test.
+Here's a simple implementation of this test.
 
 ```ocaml file=examples/correct/manual_property_test/test.ml
 open! Base
@@ -286,13 +285,12 @@ distribution to use for selecting examples.  This may seem like an
 unimportant question, but when it comes to testing, not all
 probability distributions are created equal.
 
-In fact, the choice we made, which was to pick integers uniformly and
+Indeed, the choice we made, which was to pick integers uniformly and
 at random from the full set of integers, is problematic, since it
 picks interesting special cases, like zero and one, with the same
 probability as everything else.  Given the number of integers, the
-chance of testing any of those special cases is rather low.  This
-accords poorly with the intuition that one should make sure to test
-corner cases.
+chance of testing any of those special cases is rather low, which
+seems like a problem.
 
 This is a place where `Quickcheck` can help.  `Quickcheck` is a
 library to help automate the construction of testing
@@ -314,13 +312,12 @@ let%test_unit "negation flips the sign" =
           (Sign.flip (Int.sign x)))
 ```
 
-Note that we didn't explictly state how many examples should be
+Note that we didn't explicitly state how many examples should be
 tested. Quickcheck has a built in default which can be overridden by
 way of an optional argument.
 
-In any case, running the test uncovers the fact that the property
-we've been testing doesn't actually hold on all outputs, as you can
-see below.
+Running the test uncovers the fact that the property we've been
+testing doesn't actually hold on all outputs, as you can see below.
 
 ```sh dir=examples/erroneous/quickcheck_property_test
   $ dune runtest
@@ -335,7 +332,7 @@ see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -448,7 +445,7 @@ particular variant.
 
 ```ocaml env=main
 # type shape =
-    | Circle of { radius: float } [@quickcheck.weight 0.2]
+    | Circle of { radius: float } [@quickcheck.weight 0.5]
     | Rect of { height: float; width: float }
     | Poly of (float * float) list
   [@@deriving quickcheck]
@@ -461,7 +458,9 @@ val quickcheck_observer_shape : shape Base_quickcheck.Observer.t = <abstr>
 val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
 ```
 
-Note that the default weight on each case is `1`.
+Note that the default weight on each case is `1`, so now `Circle` will
+be generated with probability `0.5 / 2.5` or `0.2`, instead of the
+1/3rd probability that it would have natively.
 
 ### More control with let-syntax
 
