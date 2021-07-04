@@ -232,6 +232,253 @@ the library, and is responsible for launching the code.
 
 :::
 
+## Expect Tests
+
+While property-based tests are very useful, they're not always what
+you want.  Sometimes, instead of writing down properties, you want
+tests that capture and make visible the behavior of your code under
+specified, concrete scenarios, and which warn you when that captured
+behavior changes.  *Expect tests* provide a way of doing just that.
+
+### Basic mechanics
+
+With expect tests, your source file specifies both the code to be
+executed and the expected output.  Upon running an expect test, any
+discrepancy between the expected output and what was actually
+generated is reported as a test failure.
+
+Here's a simple example of a test written in this style.  While the
+test generates output (though a call to `print_endline`), that output
+isn't captured in the source, at least, not yet.
+
+```ocaml file=examples/erroneous/trivial_expect_test/test.ml
+open! Base
+open! Stdio
+
+let%expect_test "trivial" =
+  print_endline "Hello World!"
+```
+
+If we run the test, we'll be presented with a diff between what we
+wrote, and a *corrected* version of the source file that now has an
+`[%expect]` clause containing the output.
+
+```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
+  $ dune runtest
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 5, characters 0-1:
+   |open! Base
+   |open! Stdio
+   |
+   |let%expect_test "trivial" =
+  -|  print_endline "Hello World!"
+  +|  print_endline "Hello World!";
+  +|  [%expect {| Hello World! |}]
+  [1]
+```
+
+The expect test runner also creates a version of the file with the
+captured output, with `.corrected` appended to the end of the
+filename.  If this new output looks correct, we can *promote* it by
+copying the corrected file it over the original source.  The `dune
+promote` command does just this, leaving our source as follows.
+
+```ocaml file=examples/correct/trivial_expect_test_fixed/test.ml
+open! Base
+open! Stdio
+
+let%expect_test "trivial" =
+  print_endline "Hello World!";
+  [%expect {| Hello World! |}]
+```
+
+Now, if we run the test again, we'll see that it passes.
+
+```sh dir=examples/correct/trivial_expect_test_fixed
+  $ dune runtest
+```
+
+We only have one expect block in this example, but the system supports
+having multiple expect blocks, as you can see below.
+
+```ocaml file=examples/correct/multi_block_expect_test/test.ml
+open! Base
+open! Stdio
+
+let%expect_test "multi-block" =
+  print_endline "Hello";
+  [%expect{| Hello |}];
+  print_endline "World!";
+  [%expect{| World! |}]
+```
+
+
+### What are expect tests good for?
+
+It's not obvious why one would want to use expect tests in the first
+place. Why should this:
+
+```ocaml file=examples/correct/simple_expect_test/test.ml
+open! Base
+open! Stdio
+
+let%expect_test _ =
+  print_s [%sexp (List.rev [3;2;1] : int list)];
+  [%expect {| (1 2 3) |}]
+```
+
+be preferable to this?
+
+```ocaml file=examples/correct/simple_inline_test/test.ml
+open! Base
+
+let%test "rev" =
+  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
+```
+
+Indeed, for examples like this, expect tests aren't really better.
+Simple example-based tests like the one above are a great solution
+when it's easy and convenient to write out specific examples in full.
+And property tests are your best bet when you have a clear set of
+predicates that you want to test, and examples can be naturally
+generated at random.
+
+Where expect tests shine is where you want to capture some aspect of
+the behavior of your system that's hard to capture in either
+predicates or hand-written examples.  Instead, expect tests give you a
+way to visualize the behavior of your code, and then to be notified
+whenever that visualization changes.
+
+This is more useful than it might seem at first.  One common use-case
+of expect tests is simply to capture the behavior of code where you
+don't necessarily have a concise specification of how the code should
+behave, and you just want to generate some examples and look at the
+output to make sure it makes sense to the human eye.
+
+### An example: web-scraping
+
+A routine programming task which often suffers from a lack of a clear
+specification is web-scraping.  The goal is to extract some useful
+information from an arbitrary web page.
+
+Here's some code that attempts to just that.  The following function
+uses the `lambdasoup` package to traverse some HTML and spit out a set
+of strings.  The goal of this function is to produce the set of
+hosts that show up in the href of links within the document.
+
+```ocaml file=examples/erroneous/soup_test/test.ml,part=0
+open! Base
+open! Stdio
+
+let get_href_hosts soup =
+  Soup.select "a[href]" soup
+  |> Soup.to_list
+  |> List.map ~f:(Soup.R.attribute "href")
+  |> Set.of_list (module String)
+```
+
+We can then try this out by adding an expect test that runs this code
+on some sample data.
+
+```ocaml file=examples/erroneous/soup_test/test.ml,part=1
+let%expect_test _ =
+  let example_html = {|
+    <html>
+      Some random <b>text</b> with a
+      <a href="http://ocaml.org/base">link</a>.
+      And here's another
+      <a href="http://github.com/ocaml/dune">link</a>.
+      And here is <a>link</a> with no href.
+    </html>|}
+  in
+  let soup = Soup.parse example_html in
+  let hrefs = get_href_hosts soup in
+  print_s [%sexp (hrefs : Set.M(String).t)]
+```
+
+If we run the test, we'll see that the output isn't exactly what was
+intended.
+
+```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
+  $ dune runtest
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 24, characters 0-1:
+   |  |> List.map ~f:(Soup.R.attribute "href")
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+  -|  print_s [%sexp (hrefs : Set.M(String).t)]
+  +|  print_s [%sexp (hrefs : Set.M(String).t)];
+  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  [1]
+```
+
+The problem here is that we failed to extract the host from the URI
+string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
+of simple `github.com`.  We can fix that by using the `uri` library to
+parse the string and extract the host.  Here's the modified code.
+
+```ocaml file=examples/erroneous/soup_test_half_fixed/test.ml,part=0
+let get_href_hosts soup =
+  Soup.select "a[href]" soup
+  |> Soup.to_list
+  |> List.map ~f:(Soup.R.attribute "href")
+  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
+  |> Set.of_list (module String)
+```
+
+And if we run the test again, we'll see that the output is now as it
+should be.
+
+```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
+  $ dune runtest
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 26, characters 0-1:
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+   |  print_s [%sexp (hrefs : Set.M(String).t)];
+  -|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  +|  [%expect {| (github.com ocaml.org) |}]
+  [1]
+```
+
+
+(UNFINISHED)
+
 ## Property testing with Quickcheck
 
 The tests we've discussed so far have been quite simple, amounting to
@@ -511,253 +758,6 @@ used `weighted_union` to pick a different distribution.
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
-
-## Expect Tests
-
-While property-based tests are very useful, they're not always what
-you want.  Sometimes, instead of writing down properties, you want
-tests that capture and make visible the behavior of your code under
-specified, concrete scenarios, and which warn you when that captured
-behavior changes.  *Expect tests* provide a way of doing just that.
-
-### Basic mechanics
-
-With expect tests, your source file specifies both the code to be
-executed and the expected output.  Upon running an expect test, any
-discrepancy between the expected output and what was actually
-generated is reported as a test failure.
-
-Here's a simple example of a test written in this style.  While the
-test generates output (though a call to `print_endline`), that output
-isn't captured in the source, at least, not yet.
-
-```ocaml file=examples/erroneous/trivial_expect_test/test.ml
-open! Base
-open! Stdio
-
-let%expect_test "trivial" =
-  print_endline "Hello World!"
-```
-
-If we run the test, we'll be presented with a diff between what we
-wrote, and a *corrected* version of the source file that now has an
-`[%expect]` clause containing the output.
-
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 5, characters 0-1:
-   |open! Base
-   |open! Stdio
-   |
-   |let%expect_test "trivial" =
-  -|  print_endline "Hello World!"
-  +|  print_endline "Hello World!";
-  +|  [%expect {| Hello World! |}]
-  [1]
-```
-
-The expect test runner also creates a version of the file with the
-captured output, with `.corrected` appended to the end of the
-filename.  If this new output looks correct, we can *promote* it by
-copying the corrected file it over the original source.  The `dune
-promote` command does just this, leaving our source as follows.
-
-```ocaml file=examples/correct/trivial_expect_test_fixed/test.ml
-open! Base
-open! Stdio
-
-let%expect_test "trivial" =
-  print_endline "Hello World!";
-  [%expect {| Hello World! |}]
-```
-
-Now, if we run the test again, we'll see that it passes.
-
-```sh dir=examples/correct/trivial_expect_test_fixed
-  $ dune runtest
-```
-
-We only have one expect block in this example, but the system supports
-having multiple expect blocks, as you can see below.
-
-```ocaml file=examples/correct/multi_block_expect_test/test.ml
-open! Base
-open! Stdio
-
-let%expect_test "multi-block" =
-  print_endline "Hello";
-  [%expect{| Hello |}];
-  print_endline "World!";
-  [%expect{| World! |}]
-```
-
-
-### What are expect tests good for?
-
-It's not obvious why one would want to use expect tests in the first
-place. Why should this:
-
-```ocaml file=examples/correct/simple_expect_test/test.ml
-open! Base
-open! Stdio
-
-let%expect_test _ =
-  print_s [%sexp (List.rev [3;2;1] : int list)];
-  [%expect {| (1 2 3) |}]
-```
-
-be preferable to this?
-
-```ocaml file=examples/correct/simple_inline_test/test.ml
-open! Base
-
-let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
-```
-
-Indeed, for examples like this, expect tests aren't really better.
-Simple example-based tests like the one above are a great solution
-when it's easy and convenient to write out specific examples in full.
-And property tests are your best bet when you have a clear set of
-predicates that you want to test, and examples can be naturally
-generated at random.
-
-Where expect tests shine is where you want to capture some aspect of
-the behavior of your system that's hard to capture in either
-predicates or hand-written examples.  Instead, expect tests give you a
-way to visualize the behavior of your code, and then to be notified
-whenever that visualization changes.
-
-This is more useful than it might seem at first.  One common use-case
-of expect tests is simply to capture the behavior of code where you
-don't necessarily have a concise specification of how the code should
-behave, and you just want to generate some examples and look at the
-output to make sure it makes sense to the human eye.
-
-### An example: web-scraping
-
-A routine programming task which often suffers from a lack of a clear
-specification is web-scraping.  The goal is to extract some useful
-information from an arbitrary web page.
-
-Here's some code that attempts to just that.  The following function
-uses the `lambdasoup` package to traverse some HTML and spit out a set
-of strings.  The goal of this function is to produce the set of
-hosts that show up in the href of links within the document.
-
-```ocaml file=examples/erroneous/soup_test/test.ml,part=0
-open! Base
-open! Stdio
-
-let get_href_hosts soup =
-  Soup.select "a[href]" soup
-  |> Soup.to_list
-  |> List.map ~f:(Soup.R.attribute "href")
-  |> Set.of_list (module String)
-```
-
-We can then try this out by adding an expect test that runs this code
-on some sample data.
-
-```ocaml file=examples/erroneous/soup_test/test.ml,part=1
-let%expect_test _ =
-  let example_html = {|
-    <html>
-      Some random <b>text</b> with a
-      <a href="http://ocaml.org/base">link</a>.
-      And here's another
-      <a href="http://github.com/ocaml/dune">link</a>.
-      And here is <a>link</a> with no href.
-    </html>|}
-  in
-  let soup = Soup.parse example_html in
-  let hrefs = get_href_hosts soup in
-  print_s [%sexp (hrefs : Set.M(String).t)]
-```
-
-If we run the test, we'll see that the output isn't exactly what was
-intended.
-
-```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 24, characters 0-1:
-   |  |> List.map ~f:(Soup.R.attribute "href")
-   |  |> Set.of_list (module String)
-   |
-   |[@@@part "1"] ;;
-   |let%expect_test _ =
-   |  let example_html = {|
-   |    <html>
-   |      Some random <b>text</b> with a
-   |      <a href="http://ocaml.org/base">link</a>.
-   |      And here's another
-   |      <a href="http://github.com/ocaml/dune">link</a>.
-   |      And here is <a>link</a> with no href.
-   |    </html>|}
-   |  in
-   |  let soup = Soup.parse example_html in
-   |  let hrefs = get_href_hosts soup in
-  -|  print_s [%sexp (hrefs : Set.M(String).t)]
-  +|  print_s [%sexp (hrefs : Set.M(String).t)];
-  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
-  [1]
-```
-
-The problem here is that we failed to extract the host from the URI
-string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
-of simple `github.com`.  We can fix that by using the `uri` library to
-parse the string and extract the host.  Here's the modified code.
-
-```ocaml file=examples/erroneous/soup_test_half_fixed/test.ml,part=0
-let get_href_hosts soup =
-  Soup.select "a[href]" soup
-  |> Soup.to_list
-  |> List.map ~f:(Soup.R.attribute "href")
-  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
-  |> Set.of_list (module String)
-```
-
-And if we run the test again, we'll see that the output is now as it
-should be.
-
-```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 26, characters 0-1:
-   |  |> Set.of_list (module String)
-   |
-   |[@@@part "1"] ;;
-   |let%expect_test _ =
-   |  let example_html = {|
-   |    <html>
-   |      Some random <b>text</b> with a
-   |      <a href="http://ocaml.org/base">link</a>.
-   |      And here's another
-   |      <a href="http://github.com/ocaml/dune">link</a>.
-   |      And here is <a>link</a> with no href.
-   |    </html>|}
-   |  in
-   |  let soup = Soup.parse example_html in
-   |  let hrefs = get_href_hosts soup in
-   |  print_s [%sexp (hrefs : Set.M(String).t)];
-  -|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
-  +|  [%expect {| (github.com ocaml.org) |}]
-  [1]
-```
-
-
-(UNFINISHED)
 
 ## Ideas for extending this chapter
 
