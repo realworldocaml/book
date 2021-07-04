@@ -1,22 +1,28 @@
 ; PDF Generation
 
 (rule
-  (targets inputs.tex)
-  (deps ../book/toc.scm)
+  (targets book.md)
+  (deps ../book/toc.scm (alias ../book/latex))
   (action (run rwo-build build inputs -o . -repo-root ..)))
 
 (rule
  (alias pdf)
- (targets book.pdf)
- (deps
-  (alias ../book/latex)
-  (:x ../book/book.tex)
-  inputs.tex)
+ (targets book.tex)
+ (deps book.md ../book/book.yml ../book/latex-template.tex)
  (action
   (progn
-   (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
-   (system "makeindex book.idx")
-   (system "pdflatex -interaction=nonstopmode %{x}"))))
+   (system "pandoc --top-level-division=part --metadata-file=../book/book.yml --template ../book/latex-template.tex --listings -o book.tex -t latex -s book.md"))))
+
+(rule
+ (alias pdf)
+ (targets book.pdf)
+ (deps book.tex)
+ (action
+   (progn
+     (system "xelatex book.tex")
+     (system "makeindex book.idx")
+     (system "xelatex book.tex")
+  )))
 
 ; Website Generation
 
