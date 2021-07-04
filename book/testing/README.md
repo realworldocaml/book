@@ -234,11 +234,11 @@ the library, and is responsible for launching the code.
 
 ## Expect Tests
 
-While property-based tests are very useful, they're not always what
-you want.  Sometimes, instead of writing down properties, you want
-tests that capture and make visible the behavior of your code under
-specified, concrete scenarios, and which warn you when that captured
-behavior changes.  *Expect tests* provide a way of doing just that.
+The tests we've shown so far have been mostly about checking for some
+specific properties in a given scenario.  Sometimes, though, instead
+of checking a property, what you really want to do is to run your code
+in some concrete scenario, and then capture and make visible your
+code's behavior.  *Expect tests* provide a way of doing just that.
 
 ### Basic mechanics
 
@@ -302,7 +302,7 @@ Now, if we run the test again, we'll see that it passes.
 ```
 
 We only have one expect block in this example, but the system supports
-having multiple expect blocks, as you can see below.
+having multiple expect blocks:
 
 ```ocaml file=examples/correct/multi_block_expect_test/test.ml
 open! Base
@@ -340,17 +340,17 @@ let%test "rev" =
 ```
 
 Indeed, for examples like this, expect tests aren't really better.
-Simple example-based tests like the one above are a great solution
-when it's easy and convenient to write out specific examples in full.
-And property tests are your best bet when you have a clear set of
-predicates that you want to test, and examples can be naturally
-generated at random.
+Simple example-based tests like the one above work fine when it's easy
+and convenient to write out specific examples in full.  And, as we'll
+discuss later in the chapter, /property tests/ are your best bet when
+you have a clear set of predicates that you want to test, and examples
+can be naturally generated at random.
 
 Where expect tests shine is where you want to capture some aspect of
-the behavior of your system that's hard to capture in either
-predicates or hand-written examples.  Instead, expect tests give you a
-way to visualize the behavior of your code, and then to be notified
-whenever that visualization changes.
+the behavior of your system that's hard to capture in predicates or
+explicit examples.  Instead, expect tests give you a way to visualize
+the behavior of your code, and then to be notified whenever that
+visualization changes.
 
 This is more useful than it might seem at first.  One common use-case
 of expect tests is simply to capture the behavior of code where you
@@ -362,12 +362,12 @@ output to make sure it makes sense to the human eye.
 
 A routine programming task which often suffers from a lack of a clear
 specification is web-scraping.  The goal is to extract some useful
-information from an arbitrary web page.
+information from some web page.
 
-Here's some code that attempts to just that.  The following function
-uses the `lambdasoup` package to traverse some HTML and spit out a set
-of strings.  The goal of this function is to produce the set of
-hosts that show up in the href of links within the document.
+Here's some code that attempts to just that, using the `lambdasoup`
+package to traverse the HTML and spit out some data embedded within
+it.  In particular, the function aims to produce the set of hosts that
+show up in links within the document.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=0
 open! Base
@@ -380,8 +380,7 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
-We can then try this out by adding an expect test that runs this code
-on some sample data.
+We can then try this with an expect test.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
@@ -433,8 +432,8 @@ intended.
 
 The problem here is that we failed to extract the host from the URI
 string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
-of simple `github.com`.  We can fix that by using the `uri` library to
-parse the string and extract the host.  Here's the modified code.
+of `github.com`.  We can fix that by using the `uri` library to parse
+the string and extract the host.  Here's the modified code.
 
 ```ocaml file=examples/erroneous/soup_test_half_fixed/test.ml,part=0
 let get_href_hosts soup =
@@ -476,8 +475,12 @@ should be.
   [1]
 ```
 
+### An example: rate limiting
 
-(UNFINISHED)
+### An example: behavior tracing
+
+
+
 
 ## Property testing with Quickcheck
 
