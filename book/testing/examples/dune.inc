@@ -60,6 +60,23 @@
  (deps (alias multi_block_expect_test)))
 
 (rule
+ (alias rate_limiter_corrected)
+ (deps
+  (source_tree ./correct/rate_limiter_corrected)
+  (package core)
+  (package base)
+  (package bin_prot)
+  (package ppx_jane)
+  (package stdio)
+  (package core))
+ (action
+  (system "dune build @all @runtest --root ./correct/rate_limiter_corrected")))
+
+(alias
+ (name runtest)
+ (deps (alias rate_limiter_corrected)))
+
+(rule
  (alias simple_expect_test)
  (deps
   (source_tree ./correct/simple_expect_test)

@@ -477,6 +477,16 @@ should be.
 
 ### An example: rate limiting
 
+Expect tests are a good way to explore the behavior of a system with
+complex behavior.  Here's a deceptively simple example: a rate
+limiter.  There are lots of cases where it's useful to have some kind
+of bound on how quickly a system emits does something, and the
+following `mli` shows a simple interface for a library for capturing
+the logic of a rate limiter.
+
+```ocaml dir=examples/correct/rate_limiter_corrected/rate_limiter.mli
+```
+
 ### An example: behavior tracing
 
 
