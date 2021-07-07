@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
           - ubuntu-latest
         ocaml-compiler:
           - 4.10.2
@@ -31,9 +30,7 @@ jobs:
 
       - run: opam install -y dune
 
-      - run: opam pin add -n rwo . --locked
-
-      - run: opam depext rwo
+      - run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata
 
       - run: opam exec -- dune build
 
