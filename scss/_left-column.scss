@@ -1,0 +1,49 @@
+.left-column
+{
+	position: absolute;
+	padding-bottom: $column-gutter*2;
+	
+	&.top
+	{
+		top: 0;
+	}
+	
+	&.bottom
+	{
+		bottom: 0;
+	}
+	
+	&.true-fixed
+	{
+		position: fixed;
+		top: 0;
+		height: 100%;
+	}
+	
+	overflow-y: scroll;
+	font-weight: normal;
+	
+	.to-chapter
+	{
+		display: block;
+		padding: 0.875rem 1rem;
+		border: 1px solid $primary-color;
+		border-radius: $global-radius;
+		transition: background 0.2s;
+		
+		small
+		{
+			display: block;
+		}
+		
+		h5
+		{
+			margin: 0;
+		}
+		
+		&:hover
+		{
+			background: lighten($primary-color, 40);
+		}
+	}
+}

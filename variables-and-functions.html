@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variables and Functions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variables-and-functions">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variables and Functions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variables-and-functions">
 <h1>Variables and Functions</h1>
 <p>Variables and functions are fundamental ideas that show up in virtually all programming languages. OCaml has a different take on these concepts than most languages you’re likely to have encountered, so this chapter will cover OCaml’s approach to variables and functions in some detail, starting with the basics of how to define a variable, and ending with the intricacies of functions with labeled and optional arguments.</p>
 <p>Don’t be discouraged if you find yourself overwhelmed by some of the details, especially toward the end of the chapter. The concepts here are important, but if they don’t connect for you on your first read, you should return to this chapter after you’ve gotten a better sense of the rest of the language.</p>
@@ -87,12 +87,12 @@ area_of_ring 1. 3.;;
 </div>
 <p>Here, we redefined <code>pi</code> to be zero after the definition of <code>area_of_circle</code>. You might think that this would mean that the result of the computation would now be zero, but in fact, the behavior of the function is unchanged. That’s because the original definition of <code>pi</code> wasn’t changed; it was just shadowed, which means that any subsequent reference to <code>pi</code> would see the new definition of <code>pi</code> as <code>0</code>, but earlier references would still see the old one. But there is no later use of <code>pi</code>, so the binding of <code>pi</code> to <code>0.</code> made no difference at all. This explains the warning produced by the toplevel telling us that there is an unused variable.</p>
 <p>In OCaml, <code>let</code> bindings are immutable. There are many kinds of mutable values in OCaml, which we’ll discuss in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, but there are no mutable variables.</p>
-<section data-type="note" class="level5" id="why-dont-variables-vary">
-<h5>Why Don’t Variables Vary?</h5>
+<div data-type="note">
+<h5 id="why-dont-variables-vary">Why Don’t Variables Vary?</h5>
 <p>One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn’t the whole point of a variable that it can vary?<a data-secondary="immutability of" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
 <p>The answer to this is that variables in OCaml (and generally in functional languages) are really more like variables in an equation than a variable in an imperative language. If you think about the mathematical identity <code>x(y + z) = xy + xz</code>, there’s no notion of mutating the variables <code>x</code>, <code>y</code>, and <code>z</code>. They vary in the sense that you can instantiate this equation with different numbers for those variables, and it still holds.</p>
 <p>The same is true in a functional language. A function can be applied to different inputs, and thus its variables will take on different values, even without mutation.</p>
-</section>
+</div>
 <section class="level3" id="pattern-matching-and-let">
 <h3>Pattern Matching and let</h3>
 <p>Another useful feature of <code>let</code> bindings is that they support the use of <em>patterns</em> on the left-hand side. Consider the following code, which uses <code>List.unzip</code>, a function for converting a list of pairs into a pair of lists.<a data-secondary="and let" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
@@ -184,8 +184,8 @@ plusone 3;;
 </code></pre>
 </div>
 <p>This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.</p>
-<section data-type="note" class="level5" id="let-and-fun">
-<h5>let and fun</h5>
+<div data-type="note">
+<h5 id="let-and-fun">let and fun</h5>
 <p>Functions and <code>let</code> bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
@@ -195,7 +195,7 @@ let x = 7 in x + 1;;
 </code></pre>
 </div>
 <p>This connection is important, and will come up more when programming in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 15, Concurrent Programming With Async</a>.</p>
-</section>
+</div>
 </section>
 <section class="level3" id="multi-argument-functions">
 <h3>Multiargument functions</h3>
@@ -833,4 +833,4 @@ prepend_pound "a BASH comment" ~sep:"--- ";;
 </section>
 </section>
 </section>
-</article></div><a href="lists-and-patterns.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 03</small>Lists and Patterns</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="lists-and-patterns.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 03</small>Lists and Patterns</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

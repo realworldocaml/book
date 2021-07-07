@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Data Serialization with S-Expressions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="data-serialization-with-s-expressions">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Data Serialization with S-Expressions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="data-serialization-with-s-expressions">
 <h1>Data Serialization with S-Expressions</h1>
 <p>S-expressions are nested parenthetical expressions whose atomic values are strings. They were first popularized by the Lisp programming language in the 1960s. They have remained one of the simplest and most effective ways to encode structured data in a human-readable and editable form. <a data-secondary="s-expressions" data-primary="serialization formats" data-type="indexterm">&nbsp;</a> <a data-secondary="uses for" data-primary="s-expressions" data-type="indexterm">&nbsp;</a> <a data-secondary="with s-expressions" data-primary="data serialization" data-type="indexterm">&nbsp;</a></p>
 <p>An example s-expression might look like this.</p>
@@ -74,8 +74,8 @@ List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 &gt;(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="more-on-top-level-printing">
-<h5>More on Top-Level Printing</h5>
+<div data-type="note">
+<h5 id="more-on-top-level-printing">More on Top-Level Printing</h5>
 <p>The values of the s-expressions that we created were printed properly as s-expressions in the toplevel, instead of as the tree of <code>Atom</code> and <code>List</code> variants that they’re actually made of. <a data-primary="top-level printers" data-type="indexterm">&nbsp;</a></p>
 <p>This is due to OCaml’s facility for installing custom <em>top-level printers</em> that can rewrite some values into more top-level-friendly equivalents. They are generally installed as <code>ocamlfind</code> packages ending in <code>top</code>:</p>
 <div class="highlight">
@@ -103,7 +103,7 @@ List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 </code></pre>
 </div>
 <p>The <code>core.top</code> package (which you should have loaded by default in your <code>.ocamlinit</code> file) loads in printers for the Core extensions already, so you don’t need to do anything special to use the s-expression printer.</p>
-</section>
+</div>
 <section class="level3" id="generating-s-expressions-from-ocaml-types">
 <h3>Generating S-Expressions from OCaml Types</h3>
 <p>But what if you want a function to convert a brand new type to an s-expression? You can of course write it yourself manually. Here’s an example: <a data-secondary="generating from OCaml types" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
@@ -164,8 +164,8 @@ List.iter l ~f:(fun x -&gt;
 </div>
 <p>The declaration <code>[%sexp_of: int * string]</code> simply gets expanded to the sexp converter for the type <code>int * string</code>. This is useful whenever you need a sexp converter for an anonymous type.</p>
 <p>The syntax extensions bundled with Core almost all have the same basic structure: they autogenerate code based on type definitions, implementing functionality that you could in theory have implemented by hand, but with far less programmer effort.</p>
-<section data-type="note" class="level5" id="syntax-extensions-and-ppx">
-<h5>Syntax Extensions and PPX</h5>
+<div data-type="note">
+<h5 id="syntax-extensions-and-ppx">Syntax Extensions and PPX</h5>
 <p>OCaml doesn’t directly support deriving s-expression converters from type definitions. Instead, it provides a mechanism called <em>PPX</em> which allows you to add to the compilation pipeline code for transforming OCaml programs at the syntactic level, via the <code>-ppx</code> compiler flag.</p>
 <p>PPXs operate on OCaml’s <em>abstract syntax tree</em>, or AST, which is a data type that represents the syntax of a well-formed OCaml program. Annotations like <code>[%sexp_of: int]</code> or <code>[@@deriving sexp]</code> are part of special extensions to the syntax, called <em>extension points</em>, which were added to the language to give a place to put information that would be consumed by syntax extensions like <code>ppx_sexp_conv</code>. <a data-primary="PPX syntax extensions" data-type="indexterm">&nbsp;</a><a data-primary="syntax extension with PPX" data-type="indexterm">&nbsp;</a></p>
 <p><code>ppx_sexp_conv</code> is part of a family of syntax extensions, including <code>ppx_compare</code>, described in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 13, Maps And Hash Tables</a>, and <code>ppx_fields</code>, described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>, that generate code based on type declarations. <a data-primary="Type_conv library" data-type="indexterm">&nbsp;</a><a data-secondary="Type_conv library and" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
@@ -176,7 +176,7 @@ List.iter l ~f:(fun x -&gt;
   (preprocess (pps ppx_sexp_conv))
 )</code></pre>
 </div>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="the-sexp-format">
@@ -441,9 +441,9 @@ dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
 &gt;  (Of_sexp_error foo_broken_example.scm:2:4
 &gt;   "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 &gt;
-&gt;Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 742, characters 4-56
+&gt;Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 815, characters 32-84
 &gt;Called from file "read_foo_better_errors.ml", line 10, characters 10-68
-&gt;Called from file "duniverse/base/src/exn.ml", line 102, characters 6-10
+&gt;Called from file "duniverse/base/src/exn.ml", line 111, characters 6-10
 [1]</code></pre>
 </div>
 <p>In the preceding error, <code>foo_broken_example.scm:2:5</code> tells us that the error occurred in the file <code>"foo_broken_example.scm"</code> on line 2, character 5. This is a much better start for figuring out what went wrong. The ability to find the precise location of the error depends on the sexp converter reporting errors using the function <code>of_sexp_error</code>. This is already done by converters generated by Sexplib, but you should make sure to do the same when you write custom converters.</p>
@@ -653,4 +653,4 @@ sexp_of_http_server_config
 </section>
 </section>
 </section>
-</article></div><a href="foreign-function-interface.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 19</small>Foreign Function Interface</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="foreign-function-interface.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 19</small>Foreign Function Interface</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

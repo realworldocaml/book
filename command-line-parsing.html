@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Command-Line Parsing - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="command-line-parsing">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Command-Line Parsing - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="command-line-parsing">
 <h1>Command-Line Parsing</h1>
 <p>Many of the OCaml programs that you’ll write will end up as binaries that need to be run from a command prompt. Any nontrivial command line should support a collection of basic features:</p>
 <ul>
@@ -775,11 +775,11 @@ $ ./cal_add_sub_days.native &lt;tab&gt;
 add      diff     help     version</code></pre>
 </div>
 <p>Command completion support works for flags and grouped commands and is very useful when building larger command-line interfaces. Don’t forget to install the shell fragment into your global <em class="filename">bash_completion.d</em> directory if you want it to be loaded in all of your login shells. <a data-primary="completion handlers" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-a-generic-completion-handler">
-<h5>Installing a Generic Completion Handler</h5>
+<div data-type="note">
+<h5 id="installing-a-generic-completion-handler">Installing a Generic Completion Handler</h5>
 <p>Sadly, <code>bash</code> doesn’t support installing a generic handler for all Command-based applications. This means you have to install the completion script for every application, but you should be able to automate this in the build and packaging system for your application.</p>
 <p>It will help to check out how other applications install tab-completion scripts and follow their lead, as the details are very OS-specific.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="alternative-command-line-parsers">
@@ -798,4 +798,4 @@ add      diff     help     version</code></pre>
 </dl>
 </section>
 </section>
-</article></div><a href="concurrent-programming.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 15</small>Concurrent Programming with Async</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="concurrent-programming.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 15</small>Concurrent Programming with Async</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

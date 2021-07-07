@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variants - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variants">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variants - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variants">
 <h1>Variants</h1>
 <p>Variant types are one of the most useful features of OCaml and also one of the most unusual. They let you represent data that may take on multiple different forms, where each form is marked by an explicit tag. As we’ll see, when combined with pattern matching, variants give you a powerful way of representing complex data and of organizing the case-analysis on that information. <a data-secondary="usefulness of" data-primary="variant types" data-type="indexterm">&nbsp;</a> <a data-secondary="variant types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
 <p>The basic syntax of a variant type declaration is as follows: <a data-secondary="basic syntax of" data-primary="variant types" data-type="indexterm">&nbsp;</a></p>
@@ -109,8 +109,8 @@ color_print (Gray 4) "A muted gray...";;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<section data-type="note" class="level5 allow_break" id="variants-tuples-and-parens">
-<h5>Variants, tuples and parens</h5>
+<div data-type="note" class="allow_break">
+<h5 id="variants-tuples-and-parens">Variants, tuples and parens</h5>
 <p>Variants with multiple arguments look an awful lot like tuples. Consider the following example of a value of the type <code>color</code> we defined earlier.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">RGB (200,0,200);;
@@ -164,7 +164,7 @@ let to_tuple (Untupled (x,y)) = (x,y);;
 </code></pre>
 </div>
 <p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html">Chapter 20, Memory Representation of Values</a>.</p>
-</section>
+</div>
 <section class="level2" id="catch-all-cases-and-refactoring">
 <h2>Catch-All Cases and Refactoring</h2>
 <p>OCaml’s type system can act as a refactoring tool, warning you of places where your code needs to be updated to match an interface change. This is particularly valuable in the context of variants. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="refactoring" data-type="indexterm">&nbsp;</a> <a data-primary="exhaustion checks" data-type="indexterm">&nbsp;</a></p>
@@ -636,8 +636,8 @@ match is_positive x with Error _ -&gt; false | Ok b -&gt; b)
 </code></pre>
 </div>
 <p>Here, the inferred type states that the tags can be no more than <code>`Float</code>, <code>`Int</code>, and <code>`Not_a_number</code>, and must contain at least <code>`Float</code> and <code>`Int</code>. As you can already start to see, polymorphic variants can lead to fairly complex inferred types.</p>
-<section data-type="note" class="level5 allow_break" id="polymorphic-variants-and-catch-all-cases">
-<h5>Polymorphic Variants and Catch-all Cases</h5>
+<div data-type="note" class="allow_break">
+<h5 id="polymorphic-variants-and-catch-all-cases">Polymorphic Variants and Catch-all Cases</h5>
 <p>As we saw with the definition of <code>is_positive</code>, a <code>match</code> statement can lead to the inference of an upper bound on a variant type, limiting the possible tags to those that can be handled by the match. If we add a catch-all case to our <code>match</code> statement, we end up with a type with a lower bound. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="catch-all cases" data-type="indexterm">&nbsp;</a> <a data-secondary="and catch-all cases" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive_permissive = function
@@ -660,7 +660,7 @@ is_positive_permissive (`Ratio (3,4));;
 </code></pre>
 </div>
 <p>With ordinary variants, such a typo would have been caught as an unknown tag. As a general matter, one should be wary about mixing catch-all cases and polymorphic variants.</p>
-</section>
+</div>
 <section class="level3" id="example-terminal-colors-redux">
 <h3>Example: Terminal Colors Redux</h3>
 <p>To see how to use polymorphic variants in practice, we’ll return to terminal colors. Imagine that we have a new terminal type that adds yet more colors, say, by adding an alpha channel so you can specify translucent colors. We could model this extended set of colors as follows, using an ordinary variant: <a data-secondary="vs.&nbsp;ordinary variants" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
@@ -867,4 +867,4 @@ let extended_color_to_int = function
 </section>
 </section>
 </section>
-</article></div><a href="error-handling.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 07</small>Error Handling</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="error-handling.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 07</small>Error Handling</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

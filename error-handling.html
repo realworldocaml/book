@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Error Handling - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="error-handling">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Error Handling - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="error-handling">
 <h1>Error Handling</h1>
 <p>Nobody likes dealing with errors. It’s tedious, it’s easy to get wrong, and it’s usually just not as fun as thinking about how your program is going to succeed. But error handling is important, and however much you don’t like thinking about it, having your software fail due to poor error handling is worse.</p>
 <p>Thankfully, OCaml has powerful tools for handling errors reliably and with a minimum of pain. In this chapter we’ll discuss some of the different approaches in OCaml to handling errors, and give some advice on how to design interfaces that make error handling easier.</p>
@@ -169,8 +169,8 @@ custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 </code></pre>
 </div>
 <p>This use of <code>bind</code> isn’t really materially better than the one we started with, and indeed, for small examples like this, direct matching of options is generally better than using <code>bind</code>. But for large, complex examples with many stages of error handling, the <code>bind</code> idiom becomes clearer and easier to manage.</p>
-<section data-type="note" class="level5" id="monads-and-let_syntax">
-<h5>Monads and <code>Let_syntax</code></h5>
+<div data-type="note">
+<h5 id="monads-and-let_syntax">Monads and <code>Let_syntax</code></h5>
 <p>We can make this look a little bit more ordinary by using a syntax extension that’s designed specifically for monadic binds, called <code>Let_syntax</code>. Here’s what the above example looks like using this extension.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
@@ -188,7 +188,7 @@ let compute_bounds ~compare list =
 <p>Note that we needed a <code>#require</code> statement to enable the extension.</p>
 <p>To understand what’s going on here, you need to know that <code>let%bind x = some_expr in some_other_expr</code> is rewritten into <code>some_expr &gt;&gt;= fun x -&gt; some_other_expr</code>.</p>
 <p>The advantage of <code>Let_syntax</code> is that it makes monadic bind look more like a regular let-binding. This works nicely because you can think of the monadic bind in this case as a special form of let binding that has some built-in error handling semantics.</p>
-</section>
+</div>
 <p>There are other useful idioms encoded in the functions in <code>Option</code>. One example is <code>Option.both</code>, which takes two optional values and produces a new optional pair that is <code>None</code> if either of its arguments are <code>None</code>. Using <code>Option.both</code>, we can make <code>compute_bounds</code> even shorter:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let compute_bounds ~compare list =
@@ -276,8 +276,8 @@ find_exn alist "c";;
 </div>
 <p><code>forever</code> doesn’t return a value for a different reason: it’s an infinite loop.</p>
 <p>This all matters because it means that the return type of <code>raise</code> can be whatever it needs to be to fit into the context it is called in. Thus, the type system will let us throw an exception anywhere in a program. <a data-primary="sexp declaration" data-type="indexterm">&nbsp;</a><a data-secondary="textual representation of" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5 allow_break" id="declaring-exceptions-using-deriving-sexp">
-<h5>Declaring Exceptions Using <code>[@@deriving sexp]</code></h5>
+<div data-type="note" class="allow_break">
+<h5 id="declaring-exceptions-using-deriving-sexp">Declaring Exceptions Using <code>[@@deriving sexp]</code></h5>
 <p>OCaml can’t always generate a useful textual representation of an exception. For example:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a bounds = { lower: 'a; upper: 'a };;
@@ -302,7 +302,7 @@ Crossed_bounds { lower=10; upper=0 };;
 </div>
 <p>The period in front of <code>Crossed_bounds</code> is there because the representation generated by <code>[@@deriving sexp]</code> includes the full module path of the module where the exception in question is defined. In this case, the string <code>//toplevel//</code> is used to indicate that this was declared at the utop prompt, rather than in a module.</p>
 <p>This is all part of the support for s-expressions provided by the Sexplib library and syntax extension, which is described in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 18, Data Serialization With S-Expressions</a>.</p>
-</section>
+</div>
 <section class="level3" id="helper-functions-for-throwing-exceptions">
 <h3>Helper Functions for Throwing Exceptions</h3>
 <p>Base provides a number of helper functions to simplify the task of throwing exceptions. The simplest one is <code>failwith</code>, which could be defined as follows: <a data-secondary="helper functions for" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception helper functions" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
@@ -627,4 +627,4 @@ Or_error.ok_exn (find ["a",1; "b",2] "c");;
 <p>In short, for errors that are a foreseeable and ordinary part of the execution of your production code and that are not omnipresent, error-aware return types are typically the right solution.</p>
 </section>
 </section>
-</article></div><a href="imperative-programming.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 08</small>Imperative Programming</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="imperative-programming.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 08</small>Imperative Programming</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Handling JSON Data - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="handling-json-data">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Handling JSON Data - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="handling-json-data">
 <h1>Handling JSON Data</h1>
 <p>Data serialization, i.e., converting data to and from a sequence of bytes that’s suitable for writing to disk or sending across the network, is an important and common programming task. You often have to match someone else’s data format (such as XML), sometimes you need a highly efficient format, and other times you want something that is easy for humans to edit. To this end, OCaml libraries provide several techniques for data serialization depending on what your problem is. <a data-secondary="basics of" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a id="SERjson" data-secondary="JSON" data-primary="serialization formats" data-type="indexterm">&nbsp;</a><a id="DATjson" data-secondary="with JSON" data-primary="data serialization" data-type="indexterm">&nbsp;</a></p>
 <p>We’ll start by using the popular and simple JSON data format and then look at other serialization formats later in the book. This chapter introduces you to a couple of new techniques that glue together the basic ideas from Part I of the book by using:</p>
@@ -27,10 +27,10 @@
 <p>The outermost JSON value is usually a record (delimited by the curly braces) and contains an unordered set of key/value pairs. The keys must be strings, but values can be any JSON type. In the preceding example, <code>tags</code> is a string list, while the <code>authors</code> field contains a list of records. Unlike OCaml lists, JSON lists can contain multiple different JSON types within a single list.</p>
 <p>This free-form nature of JSON types is both a blessing and a curse. It’s very easy to generate JSON values, but code that parses them also has to handle subtle variations in how the values are represented. For example, what if the preceding <code>pages</code> value is actually represented as a string value of " <code>450</code>" instead of an integer? <a data-secondary="benefits and drawbacks of" data-primary="JSON data" data-type="indexterm">&nbsp;</a></p>
 <p>Our first task is to parse the JSON into a more structured OCaml type so that we can use static typing more effectively. When manipulating JSON in Python or Ruby, you might write unit tests to check that you have handled unusual inputs. The OCaml model prefers compile-time static checking as well as unit tests. For example, using pattern matching can warn you if you’ve not checked that a value can be <code>Null</code> as well as contain an actual value. <a data-secondary="installation of" data-primary="Yojson library" data-type="indexterm">&nbsp;</a><a data-primary="static checking" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static checking" data-type="indexterm">&nbsp;</a><a data-primary="unit tests" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-the-yojson-library">
-<h5>Installing the Yojson Library</h5>
+<div data-type="note">
+<h5 id="installing-the-yojson-library">Installing the Yojson Library</h5>
 <p>There are several JSON libraries available for OCaml. For this chapter, we’ve picked the <a href="https://github.com/mjambon/yojson">Yojson</a> library by Martin Jambon. It’s easiest to install via OPAM by running <code>opam install yojson</code>. See <a href="install.html">the installation instructions</a> if you haven’t already got opam. Once installed, you can open it in the <code>utop</code> toplevel by:</p>
-</section>
+</div>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core_kernel;;
 #require "yojson";;
@@ -157,8 +157,8 @@ let () =
 </code></pre>
 </div>
 <p>This code introduces the <code>Yojson.Basic.Util</code> module, which contains <em>combinator</em> functions that let you easily map a JSON object into a more strongly typed OCaml value. <a data-secondary="functional combinators" data-primary="combinators" data-type="indexterm">&nbsp;</a><a data-primary="functional combinators" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="functional-combinators">
-<h5>Functional Combinators</h5>
+<div data-type="note">
+<h5 id="functional-combinators">Functional Combinators</h5>
 <p>Combinators are a design pattern that crops up quite often in functional programming. John Hughes defines them as “a function which builds program fragments from program fragments.” In a functional language, this generally means higher-order functions that combine other functions to apply useful transformations over values.</p>
 <p>You’ve already run across several of these in the <code>List</code> module:</p>
 <div class="highlight">
@@ -170,7 +170,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <pre><code class="language-ocaml">val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit</code></pre>
 </div>
 <p><code>iter</code> is a more specialized combinator that is only useful when writing imperative code. The input function is applied to every value, but no result is supplied. The function must instead apply some side effect such as changing a mutable record field or printing to the standard output.</p>
-</section>
+</div>
 <p><code>Yojson</code> provides several combinators in the <code>Yojson.Basic.Util</code> module, some of which are listed in <a data-type="xref" href="json.html#table15_1">Table15_1</a>. <a data-secondary="in Yojson library" data-primary="combinators" data-type="indexterm">&nbsp;</a><a data-secondary="combinators in" data-primary="Yojson library" data-type="indexterm">&nbsp;</a></p>
 <div data-type="table" id="table15_1">
 <table>
@@ -300,8 +300,8 @@ Yojson.Basic.pretty_to_channel stdout person;;
 </code></pre>
 </div>
 <p>In this case, there are no problems. Our <code>person</code> value has an inferred type that is a valid subtype of <code>json</code>, and so the conversion to a string just works without us ever having to explicitly specify a type for <code>person</code>. Type inference lets you write more succinct code without sacrificing runtime reliability, as all the uses of polymorphic variants are still checked at compile time. <a data-secondary="type errors" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="type checking" data-type="indexterm">&nbsp;</a><a data-secondary="type checking and" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a><a data-secondary="benefits of" data-primary="type inference" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="polymorphic-variants-and-easier-type-checking">
-<h5>Polymorphic Variants and Easier Type Checking</h5>
+<div data-type="note">
+<h5 id="polymorphic-variants-and-easier-type-checking">Polymorphic Variants and Easier Type Checking</h5>
 <p>One difficulty you will encounter is that type errors involving polymorphic variants can be quite verbose. For example, suppose you build an <code>Assoc</code> and mistakenly include a single value instead of a list of keys:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let person = `Assoc ("name", `String "Anil");;
@@ -327,7 +327,7 @@ Yojson.Basic.pretty_to_string person;;
 </div>
 <p>We’ve annotated <code>person</code> as being of type <code>Yojson.Basic.t</code>, and as a result, the compiler spots that the argument to the <code>Assoc</code> variant has the incorrect type. This illustrates the strengths and weaknesses of polymorphic variants: they’re lightweight and flexible, but the error messages can be quite confusing. However, a bit of careful manual type annotation makes tracking down such issues much easier.</p>
 <p>We’ll discuss more techniques like this that help you interpret type errors more easily in <a data-type="xref" href="compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking">Chapter 22, The Compiler Frontend Parsing And Type Checking</a>.</p>
-</section>
+</div>
 </section>
 <section class="level2" id="using-non-standard-json-extensions">
 <h2>Using Nonstandard JSON Extensions</h2>
@@ -381,10 +381,10 @@ Yojson.Basic.pretty_to_string person;;
 <h2>Automatically Mapping JSON to OCaml Types</h2>
 <p>The combinators described previously make it easy to write functions that extract fields from JSON records, but the process is still pretty manual. When you implement larger specifications, it’s much easier to generate the mappings from JSON schemas to OCaml values more mechanically than writing conversion functions individually. <a id="MAPjson" data-secondary="of JSON to OCaml types" data-primary="mapping" data-type="indexterm">&nbsp;</a><a id="JSONautomap" data-secondary="automatic mapping of" data-primary="JSON data" data-type="indexterm">&nbsp;</a></p>
 <p>We’ll cover an alternative JSON processing method that is better for larger-scale JSON handling now, using the <a href="http://mjambon.com/atd-biniou-intro.html">OCaml</a> tool. This will introduce our first <em>Domain Specific Language</em> that compiles JSON specifications into OCaml modules, which are then used throughout your application. <a data-secondary="installation of" data-primary="ATDgen Library" data-type="indexterm">&nbsp;</a><a data-primary="Domain Specific Language" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-the-atdgen-library-and-tool">
-<h5>Installing the ATDgen Library and Tool</h5>
+<div data-type="note">
+<h5 id="installing-the-atdgen-library-and-tool">Installing the ATDgen Library and Tool</h5>
 <p>ATDgen installs some OCaml libraries that interface with Yojson, and also a command-line tool that generates code. It can all be installed via OPAM:</p>
-</section>
+</div>
 <div class="highlight">
 <pre><code class="language-clike">$ opam install atdgen
 $ atdgen -version
@@ -624,4 +624,4 @@ dune exec -- ./github_org_info.exe janestreet
 </section>
 </section>
 </section>
-</article></div><a href="parsing-with-ocamllex-and-menhir.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 17</small>Parsing with OCamllex and Menhir</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="parsing-with-ocamllex-and-menhir.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 17</small>Parsing with OCamllex and Menhir</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

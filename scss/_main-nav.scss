@@ -1,0 +1,40 @@
+.title-bar
+{
+	position: relative;
+	z-index: 10;
+	background: url('../images/plain-bg.jpg') no-repeat, #424b50 url('../images/bg.jpg') repeat;
+	background-size: auto 100%, auto;
+	margin-bottom: $column-gutter/2;
+	border-bottom: 3px solid $primary-color;
+	
+	@include grid-row;
+	
+	.title
+	{
+		@include grid-column(12, $float: none);
+		margin: $column-gutter/2 0;
+	}
+	
+@media #{$large}
+{
+	background: url('../images/book-cover.jpg') no-repeat, #424b50 url('../images/bg.jpg') repeat;
+	background-size: auto 100%, auto;
+	
+	.title
+	{
+		@include grid-column(8, $offset: 1.5);
+		max-width: 54rem;
+		//margin: $column-gutter*1.5 0;
+	}
+}
+
+@media #{$xlarge-up}
+{
+	.title
+	{
+		margin-left: 32rem !important;
+		padding: 0 $column-gutter;
+	}
+}
+
+}

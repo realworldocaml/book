@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Foreign Function Interface - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="foreign-function-interface">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Foreign Function Interface - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="foreign-function-interface">
 <h1>Foreign Function Interface</h1>
 <p>OCaml has several options available to interact with non-OCaml code. The compiler can link with external system libraries via C code and also can produce standalone native object files that can be embedded within other non-OCaml applications.<a data-secondary="language interfaces" data-primary="programming" data-type="indexterm">&nbsp;</a><a data-secondary="basics of" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a><a id="INTERffi" data-secondary="foreign function interface (FFI)" data-primary="interfaces" data-type="indexterm">&nbsp;</a></p>
 <p>The mechanism by which code in one programming language can invoke routines in a different programming language is called a <em>foreign function interface</em>. This chapter will:</p>
@@ -9,11 +9,11 @@
 </ul>
 <p>The simplest foreign function interface in OCaml doesn’t even require you to write any C code at all! The Ctypes library lets you define the C interface in pure OCaml, and the library then takes care of loading the C symbols and invoking the foreign function call.<a data-primary="libffi library" data-type="indexterm">&nbsp;</a><a data-primary="Ncurses terminal toolkit" data-type="indexterm">&nbsp;</a><a data-secondary="installation of" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s dive straight into a realistic example to show you how the library looks. We’ll create a binding to the Ncurses terminal toolkit, as it’s widely available on most systems and doesn’t have any complex dependencies.</p>
-<section data-type="note" class="level2" id="installing-the-ctypes-library">
-<h2>Installing the Ctypes Library</h2>
+<div data-type="note">
+<h2 id="installing-the-ctypes-library">Installing the Ctypes Library</h2>
 <p>If you want to use Ctypes interactively, you’ll also need to install the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a> library as a prerequisite to using Ctypes. It’s a fairly popular library and should be available in your OS package manager. Try <code>opam depext -ui ctypes-foreign</code>.</p>
 <p>Once that’s done, Ctypes is available via OPAM as usual:</p>
-</section>
+</div>
 <div class="highlight">
 <pre><code class="language-clike">$ brew install libffi     # for MacOS X users
 $ opam install ctypes ctypes-foreign
@@ -335,12 +335,12 @@ val char_ptr_of_string : string -&gt; char ptr</code></pre>
 <div class="highlight">
 <pre><code class="language-ocaml">val string    : string.typ</code></pre>
 </div>
-<section data-type="note" class="level4" id="ocaml-strings-versus-c-character-buffers">
-<h4>OCaml Strings Versus C Character Buffers</h4>
+<div data-type="note">
+<h4 id="ocaml-strings-versus-c-character-buffers">OCaml Strings Versus C Character Buffers</h4>
 <p>Although OCaml strings may look like C character buffers from an interface perspective, they’re very different in terms of their memory representations.</p>
 <p>OCaml strings are stored in the OCaml heap with a header that explicitly defines their length. C buffers are also fixed-length, but by convention, a C string is terminated by a null (a <code>\0</code> byte) character. The C string functions calculate their length by scanning the buffer until the first null character is encountered.</p>
 <p>This means that you need to be careful that OCaml strings that you pass to C functions don’t contain any null values, since the first occurrence of a null character will be treated as the end of the C string. Ctypes also defaults to a <em>copying</em> interface for strings, which means that you shouldn’t use them when you want the library to mutate the buffer in-place. In that situation, use the Ctypes <code>Bigarray</code> support to pass memory by reference instead.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="structs-and-unions">
@@ -491,8 +491,8 @@ let () =
 &gt;Tue Mar  6 13:27:51 2018
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="why-do-we-need-to-use-returning">
-<h5>Why Do We Need to Use returning?</h5>
+<div data-type="note">
+<h5 id="why-do-we-need-to-use-returning">Why Do We Need to Use returning?</h5>
 <p>The alert reader may be curious about why all these function definitions have to be terminated by <code>returning</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* correct types *)
@@ -537,7 +537,7 @@ function_t *f = curried_C(3); f(4);</code></pre>
 </div>
 <p>The OCaml type of <code>uncurried_C</code> when bound by Ctypes is <code>int -&gt; int -&gt; int</code>: a two-argument function. The OCaml type of <code>curried_C</code> when bound by <code>ctypes</code> is <code>int -&gt; (int -&gt; int)</code>: a one-argument function that returns a one-argument function.</p>
 <p>In OCaml, of course, these types are absolutely equivalent. Since the OCaml types are the same but the C semantics are quite different, we need some kind of marker to distinguish the cases. This is the purpose of <code>returning</code> in function definitions.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level3" id="defining-arrays">
@@ -560,8 +560,8 @@ end</code></pre>
 <p>The array functions are similar to those in the standard library <code>Array</code> module except that they operate on arrays stored using the flat C representation rather than the OCaml representation described in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 20, Memory Representation Of Values</a>.</p>
 <p>As with standard OCaml arrays, the conversion between arrays and lists requires copying the values, which can be expensive for large data structures. Notice that you can also convert an array into a <code>ptr</code> pointer to the head of the underlying buffer, which can be useful if you need to pass the pointer and size arguments separately to a C function.</p>
 <p>Unions in C are named structures that can be mapped onto the same underlying memory. They are also fully supported in Ctypes, but we won’t go into more detail here. <a data-secondary="controlling pointers" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operators controlling" data-primary="pointers" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="pointer-operators-for-dereferencing-and-arithmetic">
-<h5>Pointer Operators for Dereferencing and Arithmetic</h5>
+<div data-type="note">
+<h5 id="pointer-operators-for-dereferencing-and-arithmetic">Pointer Operators for Dereferencing and Arithmetic</h5>
 <p>Ctypes defines a number of operators that let you manipulate pointers and arrays just as you would in C. The Ctypes equivalents do have the benefit of being more strongly typed, of course (see <a data-type="xref" href="foreign-function-interface.html#Table19sub1">Table19sub1</a>).</p>
 <div data-type="table" id="Table19sub1">
 <table>
@@ -597,7 +597,7 @@ end</code></pre>
 </table>
 </div>
 <p>There are also other useful nonoperator functions available (see the Ctypes documentation), such as pointer differencing and comparison.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="passing-functions-to-c">
@@ -721,14 +721,14 @@ val sort_stdin : unit -&gt; unit</code></pre>
 </div>
 <p>The <code>qsort'</code> wrapper function has a much more canonical OCaml interface than the raw binding. It accepts a comparator function and a Ctypes array, and returns the same Ctypes array. It’s not strictly required that it returns the array, since it modifies it in-place, but it makes it easier to chain the function using the <code>|&gt;</code> operator (as <code>sort_stdin</code> does in the example).</p>
 <p>Using <code>qsort'</code> to sort arrays is straightforward. Our example code reads the standard input as a list, converts it to a C array, passes it through qsort, and outputs the result to the standard output. Again, remember to not confuse the <code>Ctypes.Array</code> module with the <code>Core.Array</code> module: the former is in scope since we opened <code>Ctypes</code> at the start of the file.<a data-secondary="and allocated Ctypes" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="lifetime of allocated Ctypes" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a><a data-secondary="of allocated Ctypes" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="lifetime-of-allocated-ctypes">
-<h5>Lifetime of Allocated Ctypes</h5>
+<div data-type="note">
+<h5 id="lifetime-of-allocated-ctypes">Lifetime of Allocated Ctypes</h5>
 <p>Values allocated via Ctypes (i.e., using <code>allocate</code>, <code>Array.make</code>, and so on) will not be garbage-collected as long as they are reachable from OCaml values. The system memory they occupy is freed when they do become unreachable, via a finalizer function registered with the garbage collector (GC).</p>
 <p>The definition of reachability for Ctypes values is a little different from conventional OCaml values, though. The allocation functions return an OCaml-managed pointer to the value, and as long as some derivative pointer is still reachable by the GC, the value won’t be collected.</p>
 <p>“Derivative” means a pointer that’s computed from the original pointer via arithmetic, so a reachable reference to an array element or a structure field protects the whole object from collection.</p>
 <p>A corollary of the preceding rule is that pointers written into the C heap don’t have any effect on reachability. For example, if you have a C-managed array of pointers to structs, then you’ll need some additional way of keeping the structs themselves around to protect them from collection. You could achieve this via a global array of values on the OCaml side that would keep them live until they’re no longer needed.</p>
 <p>Functions passed to C have similar considerations regarding lifetime. On the OCaml side, functions created at runtime may be collected when they become unreachable. As we’ve seen, OCaml functions passed to C are converted to function pointers, and function pointers written into the C heap have no effect on the reachability of the OCaml functions they reference. With <code>qsort</code> things are straightforward, since the comparison function is only used during the call to <code>qsort</code> itself. However, other C libraries may store function pointers in global variables or elsewhere, in which case you’ll need to take care that the OCaml functions you pass to them aren’t prematurely garbage-collected.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="learning-more-about-c-bindings">
@@ -756,4 +756,4 @@ val sort_stdin : unit -&gt; unit</code></pre>
 </section>
 </section>
 </section>
-</article></div><a href="runtime-memory-layout.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 20</small>Memory Representation of Values</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="runtime-memory-layout.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 20</small>Memory Representation of Values</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

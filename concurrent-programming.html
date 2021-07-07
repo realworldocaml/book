@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Concurrent Programming with Async - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="concurrent-programming-with-async">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Concurrent Programming with Async - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="concurrent-programming-with-async">
 <h1>Concurrent Programming with Async</h1>
 <p>The logic of building programs that interact with the outside world is often dominated by waiting; waiting for the click of a mouse, or for data to be fetched from disk, or for space to be available on an outgoing network buffer. Even mildly sophisticated interactive applications are typically <em>concurrent</em>, needing to wait for multiple different events at the same time, responding immediately to whatever happens first. <a data-secondary="concurrent programming for" data-primary="interactive input" data-type="indexterm">&nbsp;</a><a data-primary="concurrent programming" data-type="indexterm">&nbsp;</a><a data-secondary="concurrent programming with Async" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
 <p>One approach to concurrency is to use preemptive system threads, which is the dominant approach in languages like Java or C#. In this model, each task that may require simultaneous waiting is given an operating system thread of its own so it can block without stopping the entire program. <a data-secondary="preemptive vs.&nbsp;single-threaded programs" data-primary="threads" data-type="indexterm">&nbsp;</a></p>
@@ -135,8 +135,8 @@ count_lines "/etc/hosts";;
 </code></pre>
 </div>
 <p>Note that <code>count_lines</code> returns a deferred, but <code>utop</code> waits for that deferred to become determined, and shows us the contents of the deferred instead.</p>
-<section data-type="note" class="level5" id="using-let_syntax-with-async">
-<h5>Using <code>Let_syntax</code> with Async</h5>
+<div data-type="note">
+<h5 id="using-let_syntax-with-async">Using <code>Let_syntax</code> with Async</h5>
 <p>As was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>, there is a special syntax designed for working with monads, which we can enable by enabling <code>ppx_let</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
@@ -163,7 +163,7 @@ count_lines "/etc/hosts";;
 <p>The difference here is just syntactic, with these examples compiling down to the same thing as the corresponding examples written using infix operators. What’s nice about <code>Let_syntax</code> is that it highlights the analogy between monadic bind and OCaml’s built-in let-binding, thereby making your code more uniform and more readable.</p>
 <p><code>Let_syntax</code> works for any monad, and you decide which monad is in use by opening the appropriate <code>Let_syntax</code> module. Opening <code>Async</code> also implicitly opens <code>Deferred.Let_syntax</code>, but in some contexts you may want to do that explicitly.</p>
 <p>To keep things simple, we’ll use the infix notation for map and bind for the remainder of the chapter. But once you get comfortable with Async and monadic programming, we recommend using <code>Let_syntax</code>.</p>
-</section>
+</div>
 <section class="level3" id="ivars-and-upon">
 <h3>Ivars and Upon</h3>
 <p>Deferreds are usually built using combinations of <code>bind</code>, <code>map</code> and <code>return</code>, but sometimes you want to construct a deferred where you can programmatically decide when it gets filled in. This can be done using an <em>ivar</em>. (The term ivar dates back to a language called Concurrent ML that was developed by John Reppy in the early ’90s. The “i” in ivar stands for incremental.) <a data-primary="ivars" data-type="indexterm">&nbsp;</a><a data-secondary="ivars" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
@@ -230,8 +230,8 @@ end
 </code></pre>
 </div>
 <p>This code isn’t particularly long, but it is subtle. In particular, note how the queue of thunks is used to ensure that the enqueued actions are run in the order they were scheduled, even if the thunks scheduled by <code>upon</code> are run out of order. This kind of subtlety is typical of code that involves ivars and <code>upon</code>, and because of this, you should stick to the simpler map/bind/return style of working with deferreds when you can.<a data-startref="ALbas" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="understanding-bind-in-terms-of-ivars-and-upon">
-<h5>Understanding <code>bind</code> in terms of ivars and <code>upon</code></h5>
+<div data-type="note">
+<h5 id="understanding-bind-in-terms-of-ivars-and-upon">Understanding <code>bind</code> in terms of ivars and <code>upon</code></h5>
 <p>Here’s roughly what happens when you write <code>let d' = Deferred.bind d ~f</code>.</p>
 <ul>
 <li><p>A new ivar <code>i</code> is created to hold the final result of the computation. The corresponding deferred is returned</p></li>
@@ -252,7 +252,7 @@ end
 </code></pre>
 </div>
 <p>Async’s real implementation has more optimizations and is therefore more complicated. But the above implementation is still a useful first-order mental model for how bind works under the covers. And it’s another good example of how <code>upon</code> and ivars can useful for building concurrency primitives.</p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="examples-an-echo-server">
@@ -277,12 +277,12 @@ let rec copy_blocks buffer r w =
 </div>
 <p>Bind is used in the code to sequence the operations: first, we call <code>Reader.read</code> to get a block of input. Then, when that’s complete and if a new block was returned, we write that block to the writer. Finally, we wait until the writer’s buffers are flushed, waiting on the deferred returned by <code>Writer.flushed</code>, at which point we recurse. If we hit an end-of-file condition, the loop is ended. The deferred returned by a call to <code>copy_blocks</code> becomes determined only once the end-of-file condition is hit. <a data-primary="end-of-file condition" data-type="indexterm">&nbsp;</a></p>
 <p>One important aspect of how <code>copy_blocks</code> is written is that it provides <em>pushback</em>, which is to say that if the process can’t make progress writing, it will stop reading. If you don’t implement pushback in your servers, then anything that prevents you from writing (e.g., a client that is unable to keep up) will cause your program to allocate unbounded amounts of memory, as it keeps track of all the data it intends to write but hasn’t been able to yet.</p>
-<section data-type="note" class="level5" id="tail-calls-and-chains-of-deferreds">
-<h5>Tail-calls and chains of deferreds</h5>
+<div data-type="note">
+<h5 id="tail-calls-and-chains-of-deferreds">Tail-calls and chains of deferreds</h5>
 <p>There’s another memory problem you might be concerned about, which is the allocation of deferreds. If you think about the execution of <code>copy_blocks</code>, you’ll see it’s creating a chain of deferreds, two per time through the loop. The length of this chain is unbounded, and so, naively, you’d think this would take up an unbounded amount of memory as the echo process continues.</p>
 <p>Happily, it turns out that this is a special case that Async knows how to optimize. In particular, the whole chain of deferreds should become determined precisely when the final deferred in the chain is determined, in this case, when the <code>Eof</code> condition is hit. Because of this, we could safely replace all of these deferreds with a single deferred. Async does just this, and so there’s no memory leak after all.</p>
 <p>This is essentially a form of tail-call optimization, lifted to the Async monad. Indeed, you can tell that the bind in question doesn’t lead to a memory leak in more or less the same way you can tell that the tail recursion optimization should apply, which is that the bind that creates the deferred is in tail-position. In other words, nothing is done to that deferred once it’s created; it’s simply returned as is. <a data-primary="tail calls" data-type="indexterm">&nbsp;</a></p>
-</section>
+</div>
 <p><code>copy_blocks</code> provides the logic for handling a client connection, but we still need to set up a server to receive such connections and dispatch to <code>copy_blocks</code>. For this, we’ll use Async’s <code>Tcp</code> module, which has a collection of utilities for creating TCP clients and servers: <a data-secondary="servers" data-primary="TCP clients" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">(** Starts a TCP server, which listens on the specified port, invoking
@@ -319,8 +319,8 @@ echo "It repeats whatever I write" | nc 127.0.0.1 8765
 killall echo.exe
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="functions-that-never-return">
-<h5>Functions that Never Return</h5>
+<div data-type="note">
+<h5 id="functions-that-never-return">Functions that Never Return</h5>
 <p>You might wonder what’s going on with the call to <code>never_returns</code>. <code>never_returns</code> is an idiom that comes from Core that is used to mark functions that don’t return. Typically, a function that doesn’t return is inferred as having return type <code>'a</code>: <a data-primary="Scheduler.go" data-type="indexterm">&nbsp;</a><a data-primary="loop_forever" data-type="indexterm">&nbsp;</a><a data-primary="never_returns" data-type="indexterm">&nbsp;</a><a data-secondary="non-returning" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () = loop_forever ();;
@@ -371,7 +371,7 @@ let do_stuff n =
 </code></pre>
 </div>
 <p>Thus, we got the compilation to go through by explicitly marking in the source that the call to <code>loop_forever</code> never returns.</p>
-</section>
+</div>
 <section class="level3" id="improving-the-echo-server">
 <h3>Improving the Echo Server</h3>
 <p>Let’s try to go a little bit farther with our echo server by walking through a few improvements. In particular, we will:</p>
@@ -663,8 +663,8 @@ handle_error ();;
 </code></pre>
 </div>
 <p><code>try_with f</code> takes as its argument a deferred-returning thunk <code>f</code> and returns a deferred that becomes determined either as <code>Ok</code> of whatever <code>f</code> returned, or <code>Error exn</code> if <code>f</code> threw an exception before its return value became determined.</p>
-<section data-type="note" class="level5" id="monitors">
-<h5>Monitors</h5>
+<div data-type="note">
+<h5 id="monitors">Monitors</h5>
 <p><code>try_with</code> is a useful tool for handling exceptions in Async, but it’s not the whole story. All of Async’s exception-handling mechanisms, <code>try_with</code> included, are built on top of Async’s system of <em>monitors</em>, which are inspired by the error-handling mechanism in Erlang of the same name. Monitors are fairly low-level and are only occasionally used directly, but it’s nonetheless worth understanding how they work. <a data-primary="monitors" data-type="indexterm">&nbsp;</a></p>
 <p>In Async, a monitor is a context that determines what to do when there is an unhandled exception. Every Async job runs within the context of some monitor, which, when the job is running, is referred to as the current monitor. When a new Async job is scheduled, say, using <code>bind</code> or <code>map</code>, it inherits the current monitor of the job that spawned it.</p>
 <p>Monitors are arranged in a tree—when a new monitor is created (say, using <code>Monitor.create</code>), it is a child of the current monitor. You can explicitly run jobs within a monitor using <code>within</code>, which takes a thunk that returns a nondeferred value, or <code>within'</code>, which takes a thunk that returns a deferred. Here’s an example:</p>
@@ -747,7 +747,7 @@ Deferred.any [ after (Time.Span.of_sec 0.5)
 </code></pre>
 </div>
 <p>In practice, you should rarely use monitors directly, and instead use functions like <code>try_with</code> and <code>Monitor.protect</code> that are built on top of monitors. One example of a library that uses monitors directly is <code>Tcp.Server.create</code>, which tracks both exceptions thrown by the logic that handles the network connection and by the callback for responding to an individual request, in either case responding to an exception by closing the connection. It is for building this kind of custom error handling that monitors can be helpful.</p>
-</section>
+</div>
 <section class="level3" id="example-handling-exceptions-with-duckduckgo">
 <h3>Example: Handling Exceptions with DuckDuckGo</h3>
 <p>Let’s now go back and improve the exception handling of our DuckDuckGo client. In particular, we’ll change it so that any query that fails is reported without preventing other queries from completing. <a data-secondary="search engine example" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception handling in" data-primary="DuckDuckGo search engine" data-type="indexterm">&nbsp;</a></p>
@@ -1034,4 +1034,4 @@ log_delays (fun () -&gt; In_thread.run noalloc_busy_loop);;
 </section>
 </section>
 </section>
-</article></div><a href="json.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 16</small>Handling JSON Data</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="json.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 16</small>Handling JSON Data</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

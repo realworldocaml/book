@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Lists and Patterns - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="lists-and-patterns">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Lists and Patterns - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="lists-and-patterns">
 <h1>Lists and Patterns</h1>
 <p>This chapter will focus on two common elements of programming in OCaml: lists and pattern matching. Both of these were discussed in <a data-type="xref" href="guided-tour.html#a-guided-tour">Chapter 1, A Guided Tour</a>, but we’ll go into more depth here, presenting the two topics together and using one to help illustrate the other.</p>
 <section class="level2" id="list-basics">
@@ -251,7 +251,7 @@ open Core_bench;;
 <p>The <code>_exn</code> is there because the function throws an exception if the lists are of mismatched length:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-&gt;Exception: (Invalid_argument "length mismatch in map2_exn: 3 &lt;&gt; 4 ")
+&gt;Exception: (Invalid_argument "length mismatch in map2_exn: 3 &lt;&gt; 4")
 </code></pre>
 </div>
 <p><code>List.fold</code> is the most complicated of the three, taking three arguments: a list to process, an initial accumulator value, and a function for updating the accumulator. <code>List.fold</code> walks over the list from left to right, updating the accumulator at each step and returning the final value of the accumulator when it’s done. You can see some of this by looking at the type-signature for <code>fold</code>:<a data-secondary="List.fold" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
@@ -299,8 +299,8 @@ render_separator [3;6;2];;
 </code></pre>
 </div>
 <p>Note that we make the line of dashes two larger than the provided width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="performance-of-string.concat-and">
-<h5>Performance of String.concat and ^</h5>
+<div data-type="note">
+<h5 id="performance-of-string.concat-and">Performance of String.concat and ^</h5>
 <p>In the preceding code we’ve concatenated strings two different ways: <code>String.concat</code>, which operates on lists of strings; and <code>^</code>, which is a pairwise operator. You should avoid <code>^</code> for joining long numbers of strings, since it allocates a new string every time it runs. Thus, the following code</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
@@ -314,7 +314,7 @@ render_separator [3;6;2];;
 </code></pre>
 </div>
 <p>allocates one string of size 7, as well as a list of length 7. At these small sizes, the differences don’t amount to much, but for assembling large strings, it can be a serious performance issue.</p>
-</section>
+</div>
 <p>Now we need code for rendering a row with data in it. We’ll first write a function called <code>pad</code>, for padding out a string to a specified length plus one blank space on both sides:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let pad s length =
@@ -568,8 +568,8 @@ length [1;2;3;4];;
 &gt;val destutter : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="polymorphic-compare">
-<h5>Polymorphic Compare</h5>
+<div data-type="note">
+<h5 id="polymorphic-compare">Polymorphic Compare</h5>
 <p>You might have noticed that <code>destutter</code> is specialized to lists of integers. That’s because <code>Base</code>’s default equality operator is specialized to integers, as you can see if you try to apply it to values of a different type.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"foo" = "bar";;
@@ -625,7 +625,7 @@ destutter ["one";"two";"two";"two";"three"];;
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 </code></pre>
 </div>
-</section>
+</div>
 <p>Note that <code>when</code> clauses have some downsides. As we noted earlier, the static checks associated with pattern matches rely on the fact that patterns are restricted in what they can express. Once we add the ability to add an arbitrary condition to a pattern, something is lost. In particular, the ability of the compiler to determine if a match is exhaustive, or if some case is redundant, is compromised.</p>
 <p>Consider the following function, which takes a list of optional values, and returns the number of those values that are <code>Some</code>. Because this implementation uses <code>when</code> clauses, the compiler can’t tell that the code is exhaustive:</p>
 <div class="highlight">
@@ -692,4 +692,4 @@ destutter ["one";"two";"two";"two";"three"];;
 </div>
 </section>
 </section>
-</article></div><a href="files-modules-and-programs.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 04</small>Files, Modules, and Programs</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="files-modules-and-programs.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 04</small>Files, Modules, and Programs</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

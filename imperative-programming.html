@@ -1,4 +1,4 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Imperative Programming - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="imperative-programming-1">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Imperative Programming - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="imperative-programming-1">
 <h1>Imperative Programming</h1>
 <p>Most of the code shown so far in this book, and indeed, most OCaml code in general, is <em>pure</em>. Pure code works without mutating the program’s internal state, performing I/O, reading the clock, or in any other way interacting with changeable parts of the world. Thus, a pure function behaves like a mathematical function, always returning the same results when given the same inputs, and never affecting the world except insofar as it returns the value of its computation. <em>Imperative</em> code, on the other hand, operates by side effects that modify a program’s internal state or interact with the outside world. An imperative function has a new effect, and potentially returns different results, every time it’s called. <a data-secondary="benefits of" data-primary="imperative programming" data-type="indexterm">&nbsp;</a><a data-primary="pure code" data-type="indexterm">&nbsp;</a><a data-secondary="immutable vs. imperative" data-primary="programming" data-type="indexterm">&nbsp;</a><a id="PROGimper" data-secondary="imperative programming" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
 <p>Pure code is the default in OCaml, and for good reason—it’s generally easier to reason about, less error prone and more composable. But imperative code is of fundamental importance to any practical programming language, because real-world tasks require that you interact with the outside world, which is by its nature imperative. Imperative programming can also be important for performance. While pure code is quite efficient in OCaml, there are many algorithms that can only be implemented efficiently using imperative techniques.</p>
@@ -340,8 +340,8 @@ let next elt = elt.next
 let prev elt = elt.prev</code></pre>
 </div>
 <p>These all follow relatively straightforwardly from our type definitions.</p>
-<section data-type="note" class="level5" id="cyclic-data-structures">
-<h5>Cyclic Data Structures</h5>
+<div data-type="note">
+<h5 id="cyclic-data-structures">Cyclic Data Structures</h5>
 <p>Doubly linked lists are a cyclic data structure, meaning that it is possible to follow a nontrivial sequence of pointers that closes in on itself. In general, building cyclic data structures requires the use of side effects. This is done by constructing the data elements first, and then adding cycles using assignment afterward. <a data-primary="let rec" data-type="indexterm">&nbsp;</a><a data-secondary="cyclic" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-primary="cyclic data structures" data-type="indexterm">&nbsp;</a></p>
 <p>There is an exception to this, though: you can construct fixed-size cyclic data structures using <code>let rec</code>:</p>
 <div class="highlight">
@@ -350,7 +350,7 @@ let prev elt = elt.prev</code></pre>
 </code></pre>
 </div>
 <p>This approach is quite limited, however. General-purpose cyclic data structures require mutation.</p>
-</section>
+</div>
 <section class="level3" id="modifying-the-list">
 <h3>Modifying the List</h3>
 <p>Now, we’ll start considering operations that mutate the list, starting with <code>insert_first</code>, which inserts an element at the front of the list: <a data-secondary="inserting in lists" data-primary="elements" data-type="indexterm">&nbsp;</a></p>
@@ -698,8 +698,8 @@ end
 &gt;- : int = 2
 </code></pre>
 </div>
-<section data-type="note" class="level5 allow_break" id="limitations-of-let-rec">
-<h5>Limitations of let rec</h5>
+<div data-type="note" class="allow_break">
+<h5 id="limitations-of-let-rec">Limitations of let rec</h5>
 <p>You might wonder why we didn’t tie the recursive knot in <code>memo_rec</code> using <code>let rec</code>, as we did for <code>make_rec</code> earlier. Here’s code that tries to do just that: <a data-primary="let rec" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let memo_rec m f_norec =
@@ -742,7 +742,7 @@ time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40);;
 </code></pre>
 </div>
 <p>Laziness is more constrained than explicit mutation, and so in some cases can lead to code whose behavior is easier to think about. <a data-startref="BEmem" data-type="indexterm">&nbsp;</a></p>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="input-and-output">
@@ -816,8 +816,8 @@ The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</code></pre>
 &gt;         int
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="understanding-format-strings">
-<h5>Understanding Format Strings</h5>
+<div data-type="note">
+<h5 id="understanding-format-strings">Understanding Format Strings</h5>
 <p>The format strings used by <code>printf</code> turn out to be quite different from ordinary strings. This difference ties to the fact that OCaml format strings, unlike their equivalent in C, are type-safe. In particular, the compiler checks that the types referred to by the format string match the types of the rest of the arguments passed to <code>printf</code>.</p>
 <p>To check this, OCaml needs to analyze the contents of the format string at compile time, which means the format string needs to be available as a string literal at compile time. Indeed, if you try to pass an ordinary string to <code>printf</code>, the compiler will complain:</p>
 <div class="highlight">
@@ -851,7 +851,7 @@ let fmt : ('a, 'b, 'c) format =
 </code></pre>
 </div>
 <p>If this looks different from everything else you’ve seen so far, that’s because it is. This is really a special case in the type system. Most of the time, you don’t need to know about this special handling of format strings—you can just use <code>printf</code> and not worry about the details. But it’s useful to keep the broad outlines of the story in the back of your head.</p>
-</section>
+</div>
 <p>Now let’s see how we can rewrite our time conversion program to be a little more concise using <code>printf</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
@@ -1249,4 +1249,4 @@ end
 <p>The scope and sophistication of the material here is an indication of the importance of OCaml’s imperative features. The fact that OCaml defaults to immutability shouldn’t obscure the fact that imperative programming is a fundamental part of building any serious application, and that if you want to be an effective OCaml programmer, you need to understand OCaml’s approach to imperative programming.</p>
 </section>
 </section>
-</article></div><a href="functors.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 09</small>Functors</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="functors.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 09</small>Functors</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
