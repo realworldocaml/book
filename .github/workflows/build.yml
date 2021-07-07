@@ -15,7 +15,6 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          - windows-latest
         ocaml-compiler:
           - 4.10.2
 
@@ -31,6 +30,10 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
       - run: opam install -y dune
+
+      - run: opam pin add -n rwo . --locked
+
+      - run: opam depext rwo
 
       - run: opam exec -- dune build
 
