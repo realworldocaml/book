@@ -30,7 +30,7 @@ jobs:
 
       - run: opam install -y dune
 
-      - run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata
+      - run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata pandoc texlive-full
 
       - run: opam exec -- dune build
 
