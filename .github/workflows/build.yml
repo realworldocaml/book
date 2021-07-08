@@ -35,7 +35,7 @@ jobs:
 
       - name: Install macOS system packages
         if: runner.os == 'macOS'
-        run: brew install gmp libffi pcre pkg-config
+        run: brew install gmp libffi pcre pkg-config pandoc
 
       - name: Retrieve cache
         uses: actions/cache@v2
