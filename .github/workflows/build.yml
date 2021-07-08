@@ -28,21 +28,28 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-      - run: opam install -y dune
+      - name: System Packages
+        run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata pandoc
 
-      - run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata pandoc
+      - name: Install Dune
+        run: opam install -y dune
 
-      - name: cache
+      - name: Cache
         uses: actions/cache@v2
         with:
           path: |
             _build
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
+          key: dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
+          restore-keys: |
+            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
+            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}
 
-      - run: opam exec -- dune build @site
+      - name: Build Book
+        run: opam exec -- dune build @site
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/default/static
+
