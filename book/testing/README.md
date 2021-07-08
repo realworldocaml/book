@@ -484,7 +484,7 @@ of bound on how quickly a system emits does something, and the
 following `mli` shows a simple interface for a library for capturing
 the logic of a rate limiter.
 
-```ocaml dir=examples/correct/rate_limiter_corrected/rate_limiter.mli
+```ocaml file=examples/correct/rate_limiter_corrected/rate_limiter.mli
 ```
 
 ### An example: behavior tracing
