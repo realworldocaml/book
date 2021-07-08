@@ -56,10 +56,12 @@ jobs:
       - name: Build HTML book
         run: opam exec -- dune build @site
 
+      - name: Run promotion tests
+        run: opam exec -- dune runtest
+
       - name: Deploy site
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/default/static
-
