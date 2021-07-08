@@ -36,6 +36,7 @@ depends: [
   "conf-libpcre" {= "1"}
   "conf-ncurses" {= "1"}
   "conf-pkg-config" {= "2"}
+  "conf-tzdata" {= "1"}
   "core" {= "v0.14.1"}
   "core_bench" {= "v0.14.0"}
   "core_kernel" {= "v0.14.1"}
@@ -220,9 +221,10 @@ depexts: [
   ["pkgconfig"] {os-distribution = "centos" & os-version <= "7"}
   ["pkgconfig"] {os-distribution = "rhel" & os-version <= "7"}
   ["system:pkgconf"] {os = "win32" & os-distribution = "cygwinports"}
+  ["timezone"] {os-family = "suse"}
   ["tzdata"] {os-distribution = "alpine"}
-  ["tzdata"] {os-distribution = "debian"}
-  ["tzdata"] {os-distribution = "ubuntu"}
+  ["tzdata"] {os-family = "debian"}
+  ["tzdata"] {os-family = "fedora"}
 ]
 pin-depends: [
   [
