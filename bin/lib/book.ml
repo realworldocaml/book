@@ -41,7 +41,7 @@ let title_bar,title_bar_frontpage =
   in
   let h1 = h1 [`Data "Real World OCaml"] in
   let h4 = h4 [`Data "Functional programming for the masses"] in
-  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (in progress)"] in
+  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (published in Q4 2021)"] in
   let title_bar =
     div ~a:["class","title-bar"] [
       div ~a:["class","title"] [h1; h5; nav]
@@ -61,7 +61,6 @@ let footer_item : Html.item =
     "http://twitter.com/realworldocaml", "@realworldocaml";
     "http://twitter.com/yminsky", "@yminsky";
     "http://twitter.com/avsm", "@avsm";
-    "https://plus.google.com/111219778721183890368", "+hickey";
     "https://github.com/realworldocaml", "GitHub";
     "http://www.goodreads.com/book/show/16087552-real-world-ocaml", "goodreads";
   ]
@@ -71,8 +70,7 @@ let footer_item : Html.item =
   footer [
     div ~a:["class","content"] [
       links;
-      p [`Data "Copyright 2012-2014 \
-         Jason Hickey, Anil Madhavapeddy and Yaron Minsky."];
+      p [`Data "Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky."];
     ]
   ]
 

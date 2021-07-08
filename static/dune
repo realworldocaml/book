@@ -22,7 +22,8 @@
 
 (alias
   (name site)
-  (deps css/app.css
+  (deps CNAME
+        css/app.css
         css/prism.css
         images/anil.jpg
         images/bg.jpg
