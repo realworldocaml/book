@@ -477,20 +477,66 @@ should be.
 
 ### An example: rate limiting
 
-Expect tests are a good way to explore the behavior of a system with
-complex behavior.  Here's a deceptively simple example: a rate
-limiter.  There are lots of cases where it's useful to have some kind
-of bound on how quickly a system emits does something, and the
-following `mli` shows a simple interface for a library for capturing
-the logic of a rate limiter.
+Expect tests can be used to examine the dynamic behavior of a system.
+Here's a deceptively simple example: a rate limiter.  There are lots
+of cases where it's useful to bound on how quickly a system takes a
+certain action, and the following `mli` is the interface provides an
+abstraction that captures the logic of a rolling-window based rate
+limiter.
 
 ```ocaml file=examples/correct/rate_limiter_corrected/rate_limiter.mli
+open! Core
+
+(** An object for bounding the rate of consumption of some resource by a bound
+    over a rolling window. *)
+
+type t
+
+val create : now:Time_ns.t -> period:Time_ns.Span.t -> rate:int -> t
+val maybe_consume : t -> now:Time_ns.t -> [ `Consumed | `No_capacity ]
 ```
 
-### An example: behavior tracing
+Instead of looking at the implementation, let's focus on how to test
+this module.  We'll do that by running through some examples that
+demonstrate how the rate limiter works, but the first step is to write
+some helper functions that will make the tests proper shorter and
+easier to read.
 
+```ocaml file=examples/correct/rate_limiter_corrected/test.ml,part=1
+open! Core
 
+let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
+let limiter () =
+  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:5
+
+let consume lim offset =
+  let result =
+    Rate_limiter.maybe_consume
+      lim
+      ~now:(Time_ns.add start_time (Time_ns.Span.of_sec offset))
+  in
+  printf
+    "%4.2f: %s\n"
+    offset
+    (match result with
+    | `Consumed -> "C"
+    | `No_capacity -> "N")
+```
+
+Here, we define three values: `start_time`, which is just a point in
+time at which to begin our examples; `limiter`, which is a function
+for constructing a fresh `Limiter.t` object, with some reasonable
+defaults; and `consume`, which takes a limiter and an offset in
+seconds from the start-time, which operates on the limiter as if a
+consumption event happened.
+
+Notably, `consume` doesn't just update the limiter, it also prints out
+a marker of the result, i.e., whether the consumption succeeded or
+failed.
+
+```ocaml file=examples/erroneous/rate_limiter_incomplete/test.ml,part=1
+```
 
 ## Property testing with Quickcheck
 

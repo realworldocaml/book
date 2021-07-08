@@ -30,23 +30,10 @@ let%expect_test _ =
   for _ = 1 to 10 do
     consume 0.
   done;
-  [%expect
-    {|
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C |}];
+  [%expect {| |}];
   (* Wait until a half-second has elapsed, try again *)
   consume 0.5;
-  [%expect {| 0.01: C |}];
+  [%expect {| |}];
   (* Wait for a full second, try again *)
   consume 1.;
-  [%expect {| 0.01: C |}]
+  [%expect {|  |}]
