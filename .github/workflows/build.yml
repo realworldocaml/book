@@ -47,7 +47,7 @@ jobs:
           key: dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
           restore-keys: |
             dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
-            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}
+            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-
 
       - name: Install Dune
         if: steps.cache.outputs.cache-hit != 'true'
