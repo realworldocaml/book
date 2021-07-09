@@ -25,15 +25,19 @@ let consume lim offset =
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 10 times in a row, without advancing the clock.  The
-     first five should succeed. *)
+  (* Consume 3 times in a row, without advancing the clock.  The
+     first two should succeed. *)
   for _ = 1 to 3 do
     consume 0.
   done;
-  [%expect {| |}];
+  [%expect
+    {|
+    0.00: C
+    0.00: C
+    0.00: C |}];
   (* Wait until a half-second has elapsed, try again *)
   consume 0.5;
-  [%expect {| |}];
+  [%expect {| 0.50: C |}];
   (* Wait until a full second has elapsed, try again *)
   consume 1.;
-  [%expect {|  |}]
+  [%expect {| 1.00: C |}]

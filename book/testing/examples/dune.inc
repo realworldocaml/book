@@ -60,9 +60,9 @@
  (deps (alias multi_block_expect_test)))
 
 (rule
- (alias rate_limiter_corrected)
+ (alias rate_limiter_fixed)
  (deps
-  (source_tree ./correct/rate_limiter_corrected)
+  (source_tree ./correct/rate_limiter_fixed)
   (package core)
   (package base)
   (package bin_prot)
@@ -70,11 +70,28 @@
   (package stdio)
   (package core))
  (action
-  (system "dune build @all @runtest --root ./correct/rate_limiter_corrected")))
+  (system "dune build @all @runtest --root ./correct/rate_limiter_fixed")))
 
 (alias
  (name runtest)
- (deps (alias rate_limiter_corrected)))
+ (deps (alias rate_limiter_fixed)))
+
+(rule
+ (alias rate_limiter_show_bug)
+ (deps
+  (source_tree ./correct/rate_limiter_show_bug)
+  (package core)
+  (package base)
+  (package bin_prot)
+  (package ppx_jane)
+  (package stdio)
+  (package core))
+ (action
+  (system "dune build @all @runtest --root ./correct/rate_limiter_show_bug")))
+
+(alias
+ (name runtest)
+ (deps (alias rate_limiter_show_bug)))
 
 (rule
  (alias simple_expect_test)

@@ -4,7 +4,7 @@ open! Core
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
 let limiter () =
-  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:5
+  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:2
 
 let consume lim offset =
   let result =
@@ -25,28 +25,19 @@ let consume lim offset =
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 10 times in a row, without advancing the clock.  The
-     first five should succeed. *)
-  for _ = 1 to 10 do
+  (* Consume 3 times in a row, without advancing the clock.  The
+     first two should succeed. *)
+  for _ = 1 to 3 do
     consume 0.
   done;
   [%expect
     {|
     0.00: C
     0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C
-    0.00: C |}];
+    0.00: N |}];
   (* Wait until a half-second has elapsed, try again *)
   consume 0.5;
-  [%expect {| 0.01: C |}];
-  (* Wait for a full second, try again *)
+  [%expect {| 0.50: N |}];
+  (* Wait until a full second has elapsed, try again *)
   consume 1.;
-  [%expect {| 0.01: C |}]
+  [%expect {| 1.00: C |}]

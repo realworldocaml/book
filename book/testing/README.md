@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -484,7 +484,7 @@ certain action, and the following `mli` is the interface provides an
 abstraction that captures the logic of a rolling-window based rate
 limiter.
 
-```ocaml file=examples/correct/rate_limiter_corrected/rate_limiter.mli
+```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open! Core
 
 (** An object for bounding the rate of consumption of some resource by a bound
@@ -502,13 +502,13 @@ demonstrate how the rate limiter works, but the first step is to write
 some helper functions that will make the tests proper shorter and
 easier to read.
 
-```ocaml file=examples/correct/rate_limiter_corrected/test.ml,part=1
+```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
 open! Core
 
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
 let limiter () =
-  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:5
+  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:2
 
 let consume lim offset =
   let result =
@@ -535,7 +535,133 @@ Notably, `consume` doesn't just update the limiter, it also prints out
 a marker of the result, i.e., whether the consumption succeeded or
 failed.
 
-```ocaml file=examples/erroneous/rate_limiter_incomplete/test.ml,part=1
+```ocaml file=examples/erroneous/rate_limiter_incomplete/test.ml,part=2
+let%expect_test _ =
+  let lim = limiter () in
+  let consume offset = consume lim offset in
+  (* Consume 10 times in a row, without advancing the clock.  The
+     first five should succeed. *)
+  for _ = 1 to 3 do
+    consume 0.
+  done;
+  [%expect {| |}];
+  (* Wait until a half-second has elapsed, try again *)
+  consume 0.5;
+  [%expect {| |}];
+  (* Wait until a full second has elapsed, try again *)
+  consume 1.;
+  [%expect {|  |}]
+```
+
+Now, we can run the tests and promote the results to see what the
+trace looks like.
+
+```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE
+  $ dune runtest
+       patdiff (internal) (exit 1)
+  (cd _build/default && /home/yminsky/Documents/code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 33, characters 0-1:
+   |    offset
+   |    (match result with
+   |    | `Consumed -> "C"
+   |    | `No_capacity -> "N")
+   |
+   |
+   |[@@@part "2"];;
+   |
+   |let%expect_test _ =
+   |  let lim = limiter () in
+   |  let consume offset = consume lim offset in
+   |  (* Consume 10 times in a row, without advancing the clock.  The
+   |     first five should succeed. *)
+   |  for _ = 1 to 3 do
+   |    consume 0.
+   |  done;
+  -|  [%expect {| |}];
+  +|  [%expect {|
+  +|    0.00: C
+  +|    0.00: C
+  +|    0.00: C |}];
+   |  (* Wait until a half-second has elapsed, try again *)
+   |  consume 0.5;
+  -|  [%expect {| |}];
+  +|  [%expect {| 0.50: C |}];
+   |  (* Wait until a full second has elapsed, try again *)
+   |  consume 1.;
+  -|  [%expect {|  |}]
+  +|  [%expect {| 1.00: C |}]
+  [1]
+```
+
+After that, we can call `dune promote`, after which our test file will
+look like this:
+
+```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=2
+let%expect_test _ =
+  let lim = limiter () in
+  let consume offset = consume lim offset in
+  (* Consume 3 times in a row, without advancing the clock.  The
+     first two should succeed. *)
+  for _ = 1 to 3 do
+    consume 0.
+  done;
+  [%expect
+    {|
+    0.00: C
+    0.00: C
+    0.00: C |}];
+  (* Wait until a half-second has elapsed, try again *)
+  consume 0.5;
+  [%expect {| 0.50: C |}];
+  (* Wait until a full second has elapsed, try again *)
+  consume 1.;
+  [%expect {| 1.00: C |}]
+```
+
+The above, however, is not what we expected! In particular, all of our
+calls to `consume` succeeded, despite the 5-per-second rate limit.
+That's because there was a bug in our implementation.  In particular,
+we have a queue of times where consume events occurred, and we use
+this function to draing the queue.
+
+```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.ml,part=1
+let rec drain_old_events t =
+  match Queue.peek t.events with
+  | None -> ()
+  | Some time ->
+    if Time_ns.Span.( < ) (Time_ns.diff t.now time) t.period
+    then (
+      ignore (Queue.dequeue_exn t.events : Time_ns.t);
+      drain_old_events t)
+```
+
+But that's wrong! In particular, the comparison goes the wrong way: we
+should discard events that are older than the limit-period, not
+younger.  If we fix that, we'll see that the trace behaves as we'd
+expect.
+
+```ocaml file=examples/correct/rate_limiter_fixed/test.ml,part=2
+let%expect_test _ =
+  let lim = limiter () in
+  let consume offset = consume lim offset in
+  (* Consume 3 times in a row, without advancing the clock.  The
+     first two should succeed. *)
+  for _ = 1 to 3 do
+    consume 0.
+  done;
+  [%expect
+    {|
+    0.00: C
+    0.00: C
+    0.00: N |}];
+  (* Wait until a half-second has elapsed, try again *)
+  consume 0.5;
+  [%expect {| 0.50: N |}];
+  (* Wait until a full second has elapsed, try again *)
+  consume 1.;
+  [%expect {| 1.00: C |}]
 ```
 
 ## Property testing with Quickcheck
@@ -638,7 +764,7 @@ testing doesn't actually hold on all outputs, as you can see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
