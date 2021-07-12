@@ -828,7 +828,7 @@ $ dune exec -- ./query_handler_loader.exe
 
 Any attempt to use an inactive query handler will fail:
 
-```sh skip
+```
 >>> (ls .)
 Could not find matching handler: ls
 ```
@@ -837,7 +837,7 @@ But, we can load the `ls` handler with a config of our choice, at which point
 it will be available for use. And once we unload it, it will be unavailable
 yet again and could be reloaded with a different config:
 
-```sh skip
+```
 >>> (loader (load ls /var))
 ()
 >>> (ls .)
@@ -852,7 +852,7 @@ Could not find matching handler: ls
 Notably, the loader can't be loaded (since it's not on the list of known
 handlers) and can't be unloaded either:
 
-```sh skip
+```
 >>> (loader (unload loader))
 It's unwise to unload yourself
 ```
