@@ -2,7 +2,7 @@
 <h1>First-Class Modules</h1>
 <p>You can think of OCaml as being broken up into two parts: a core language that is concerned with values and types, and a module language that is concerned with modules and module signatures. These sublanguages are stratified, in that modules can contain types and values, but ordinary values can’t contain modules or module types. That means you can’t do things like define a variable whose value is a module, or a function that takes a module as an argument. <a id="MODfirst" data-secondary="first-class modules" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
 <p>OCaml provides a way around this stratification in the form of <em>first-class modules</em>. First-class modules are ordinary values that can be created from and converted back to regular modules. <a id="FCMwork" data-secondary="working with" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
-<p>First-class modules are a sophisticated technique, and you’ll need to get comfortable with some advanced aspects of the language to use them effectively. But it’s worth learning, because letting modules into the core language is quite powerful, increasing the range of what you can express and making it easier to build flexible and modular <span class="keep-together">systems</span>.</p>
+<p>First-class modules are a sophisticated technique, and you’ll need to get comfortable with some advanced aspects of the language to use them effectively. But it’s worth learning, because letting modules into the core language is quite powerful, increasing the range of what you can express and making it easier to build flexible and modular systems.</p>
 <section class="level2" id="working-with-first-class-modules">
 <h2>Working with First-Class Modules</h2>
 <p>We’ll start out by covering the basic mechanics of first-class modules by working through some toy examples. We’ll get to more realistic examples in the next section.</p>
@@ -499,7 +499,7 @@ let rec cli dispatch_table =
 </div>
 <p>Here’s an example of a session with this program:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec ./query_handler.exe
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./query_handler.exe
 &gt;&gt;&gt;&gt; (unique ())
 &gt;0
 &gt;&gt;&gt;&gt; (unique ())
@@ -519,7 +519,7 @@ let rec cli dispatch_table =
 <p>We’ll do this by creating a query handler whose job is to control the set of active query handlers. The module in question will be called <code>Loader</code>, and its configuration is a list of known <code>Query_handler</code> modules. Here are the basic types:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Loader = struct
-  type config = (module Query_handler) list sexp_opaque
+  type config = (module Query_handler) list [@sexp.opaque]
   [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
@@ -564,7 +564,7 @@ let rec cli dispatch_table =
 <pre><code class="language-ocaml">let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
       Or_error.error "Handler not active" handler_name String.sexp_of_t
-    else if handler_name = name then
+    else if String.(=) handler_name name then
       Or_error.error_string "It's unwise to unload yourself"
     else (
       Hashtbl.remove t.active handler_name;
@@ -610,23 +610,14 @@ end</code></pre>
     ~key:Loader.name ~data:loader_instance;
   cli loader.Loader.active</code></pre>
 </div>
-<p>Now build this into a command-line interface to experiment with it:</p>
-<div class="highlight">
-<pre><code class="language-scheme">(executable
-  (name       query_handler_loader)
-  (libraries  core core_kernel ppx_sexp_conv)
-  (preprocess (pps ppx_sexp_conv)))</code></pre>
-</div>
-<div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash"></code></pre>
-</div>
 <p>The resulting command-line interface behaves much as you’d expect, starting out with no query handlers available but giving you the ability to load and unload them. Here’s an example of it in action. As you can see, we start out with <code>loader</code> itself as the only active handler:</p>
 <div class="highlight">
-<pre><code class="language-clike">$ ./query_handler_loader.byte
-&gt;&gt;&gt; (loader known_services)
-(ls unique)
-&gt;&gt;&gt; (loader active_services)
-(loader)</code></pre>
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./query_handler_loader.exe
+&gt;&gt;&gt;&gt; (loader known_services)
+&gt;(ls unique)
+&gt;&gt;&gt;&gt; (loader active_services)
+&gt;(loader)
+</code></pre>
 </div>
 <p>Any attempt to use an inactive query handler will fail:</p>
 <div class="highlight">
@@ -637,12 +628,12 @@ Could not find matching handler: ls</code></pre>
 <div class="highlight">
 <pre><code class="language-clike">&gt;&gt;&gt; (loader (load ls /var))
 ()
-&gt;&gt;&gt; (ls /var)
+&gt;&gt;&gt; (ls .)
 (agentx at audit backups db empty folders jabberd lib log mail msgs named
  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
 &gt;&gt;&gt; (loader (unload ls))
 ()
-&gt;&gt;&gt; (ls /var)
+&gt;&gt;&gt; (ls .)
 Could not find matching handler: ls</code></pre>
 </div>
 <p>Notably, the loader can’t be loaded (since it’s not on the list of known handlers) and can’t be unloaded either:</p>
@@ -650,7 +641,7 @@ Could not find matching handler: ls</code></pre>
 <pre><code class="language-clike">&gt;&gt;&gt; (loader (unload loader))
 It's unwise to unload yourself</code></pre>
 </div>
-<p>Although we won’t describe the details here, we can push this dynamism yet further using OCaml’s dynamic linking facilities, which allow you to compile and link in new code to a running program. This can be automated using libraries like <code>ocaml_plugin</code>, which can be installed via OPAM, and which takes care of much of the workflow around setting up dynamic linking. <a data-startref="FCMquery" data-type="indexterm">&nbsp;</a></p>
+<p>Although we won’t describe the details here, we can push this dynamism yet further using OCaml’s dynamic linking facilities, which allow you to compile and link in new code to a running program. This can be automated using libraries like <code>ocaml_plugin</code>, which can be installed via OPAM, and which takes care of much of the workflow around setting up dynamic linking.</p>
 </section>
 </section>
 <section class="level2" id="living-without-first-class-modules">
