@@ -598,8 +598,7 @@ test looking like this:
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 3 times in a row, without advancing the clock.  The
-     first two should succeed. *)
+  (* Exhaust the rate limit, without advancing the clock. *)
   for _ = 1 to 3 do
     consume 0.
   done;
@@ -617,10 +616,10 @@ let%expect_test _ =
 ```
 
 The above, however, is not the expected outcome! In particular, all of
-our calls to `consume` succeeded, despite the 2-per-second rate limit.
-That's because there was a bug in our implementation.  In particular,
-we have a queue of times where consume events occurred, and we use
-this function to draing the queue.
+our calls to `consume` succeeded, despite us trying to violate the
+2-per-second rate limit.  That's because there was a bug in our
+implementation.  The implementation has a queue of times where consume
+events occurred, and we use this function to drain the queue.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.ml,part=1
 let rec drain_old_events t =
@@ -633,17 +632,15 @@ let rec drain_old_events t =
       drain_old_events t)
 ```
 
-But this code has a bug. In particular, the comparison goes the wrong
-way: we should discard events that are older than the limit-period,
-not younger.  If we fix that, we'll see that the trace behaves as we'd
-expect.
+But the comparison goes the wrong way: we should discard events that
+are older than the limit-period, not younger.  If we fix that, we'll
+see that the trace behaves as we'd expect.
 
 ```ocaml file=examples/correct/rate_limiter_fixed/test.ml,part=2
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 3 times in a row, without advancing the clock.  The
-     first two should succeed. *)
+  (* Exhaust the rate limit, without advancing the clock. *)
   for _ = 1 to 3 do
     consume 0.
   done;
