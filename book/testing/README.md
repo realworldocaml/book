@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -659,12 +659,14 @@ let%expect_test _ =
 
 ### End-to-end tests
 
-One of the nice properties of the testing done in the previous example
-is that the tests were entirely deterministic, and didn't depend on
-the system or any system resources.
+The expect tests we've seen so far have been self-contained, not doing
+any IO or interacting with system resources.  As a result, these tests
+are fast to run and entirely deterministic.
 
-That's a great ideal, but it's not always achievable, and sometimes,
-you want to write tests.
+That's a great ideal, but it's not always achievable, especially when
+you want to run more end-to-end tests of your program.  But expect
+tests are still a useful tool for such tests.
+
 
 
 ## Property testing with Quickcheck
@@ -767,7 +769,7 @@ testing doesn't actually hold on all outputs, as you can see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
