@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -234,11 +234,10 @@ the library, and is responsible for launching the code.
 
 ## Expect Tests
 
-The tests we've shown so far have been mostly about checking for some
-specific properties in a given scenario.  Sometimes, though, instead
-of checking a property, what you really want to do is to run your code
-in some concrete scenario, and then capture and make visible your
-code's behavior.  *Expect tests* provide a way of doing just that.
+The tests we've shown so far have been mostly about checking some
+specific properties in a given scenario.  Sometimes, though, what you
+want is not to test this or that property, but to capture and make
+visible your code's behavior.  *Expect tests* let you do just that.
 
 ### Basic mechanics
 
@@ -342,32 +341,27 @@ let%test "rev" =
 Indeed, for examples like this, expect tests aren't really better.
 Simple example-based tests like the one above work fine when it's easy
 and convenient to write out specific examples in full.  And, as we'll
-discuss later in the chapter, /property tests/ are your best bet when
+discuss later in the chapter, *property tests* are your best bet when
 you have a clear set of predicates that you want to test, and examples
 can be naturally generated at random.
 
-Where expect tests shine is where you want to capture some aspect of
-the behavior of your system that's hard to capture in predicates or
-explicit examples.  Instead, expect tests give you a way to visualize
-the behavior of your code, and then to be notified whenever that
-visualization changes.
+Where expect tests shine is where you want to make visible some aspect
+of thebehavior of your system that's hard to capture in a predicate.
+This is more useful than it might seem at first.  Let's consider a few
+different example use-cases to see why.
 
-This is more useful than it might seem at first.  One common use-case
-of expect tests is simply to capture the behavior of code where you
-don't necessarily have a concise specification of how the code should
-behave, and you just want to generate some examples and look at the
-output to make sure it makes sense to the human eye.
+### Exploratory programming
 
-### An example: web-scraping
+Expect tests can be especially helpful when you're in exploration
+mode, and have no clear specification in advance.  A routine
+programming task of this type is web-scraping.  The goal is to extract
+some useful information from a web page, and figuring out the right
+way to do so often involves trial and error.
 
-A routine programming task which often suffers from a lack of a clear
-specification is web-scraping.  The goal is to extract some useful
-information from some web page.
-
-Here's some code that attempts to just that, using the `lambdasoup`
-package to traverse the HTML and spit out some data embedded within
-it.  In particular, the function aims to produce the set of hosts that
-show up in links within the document.
+Here's some code that does this kind of data extraction, using the
+`lambdasoup` package to traverse a chunk of HTML and spit out some
+data embedded within it.  In particular, the function aims to produce
+the set of hosts that show up in links within the document.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=0
 open! Base
@@ -380,7 +374,8 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
-We can then try this with an expect test.
+We can use an expect test to demonstrate what this function does on an
+example page.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
@@ -475,14 +470,13 @@ should be.
   [1]
 ```
 
-### An example: rate limiting
+### Visualizing complex behavior
 
 Expect tests can be used to examine the dynamic behavior of a system.
-Here's a deceptively simple example: a rate limiter.  There are lots
-of cases where it's useful to bound on how quickly a system takes a
-certain action, and the following `mli` is the interface provides an
-abstraction that captures the logic of a rolling-window based rate
-limiter.
+Here's a deceptively simple example: a rate limiter.  A rate limiter
+is logic for limiting the rate at which a system consumes a particular
+resource.  The following `mli` is an interface for the core of a
+simple rolling-window-style rate limiter.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open! Core
@@ -496,11 +490,9 @@ val create : now:Time_ns.t -> period:Time_ns.Span.t -> rate:int -> t
 val maybe_consume : t -> now:Time_ns.t -> [ `Consumed | `No_capacity ]
 ```
 
-Instead of looking at the implementation, let's focus on how to test
-this module.  We'll do that by running through some examples that
-demonstrate how the rate limiter works, but the first step is to write
-some helper functions that will make the tests proper shorter and
-easier to read.
+We now want to demonstrate the behavior of the system by running
+through some examples.  The first step is to write some helper
+functions that will make the examples themselves shorter and easier to read.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
 open! Core
@@ -534,6 +526,11 @@ consumption event happened.
 Notably, `consume` doesn't just update the limiter, it also prints out
 a marker of the result, i.e., whether the consumption succeeded or
 failed.
+
+Now we can use these helpers to see how the rate limiter would behave
+in a simple scenario.  First, we're going to try to consume three
+times at time zero; then we're going to wait a half-second and consume
+again, and then we'll wait one more half-second, and try again.
 
 ```ocaml file=examples/erroneous/rate_limiter_incomplete/test.ml,part=2
 let%expect_test _ =
@@ -620,8 +617,8 @@ let%expect_test _ =
   [%expect {| 1.00: C |}]
 ```
 
-The above, however, is not what we expected! In particular, all of our
-calls to `consume` succeeded, despite the 5-per-second rate limit.
+The above, however, is not the expected outcome! In particular, all of
+our calls to `consume` succeeded, despite the 2-per-second rate limit.
 That's because there was a bug in our implementation.  In particular,
 we have a queue of times where consume events occurred, and we use
 this function to draing the queue.
@@ -637,9 +634,9 @@ let rec drain_old_events t =
       drain_old_events t)
 ```
 
-But that's wrong! In particular, the comparison goes the wrong way: we
-should discard events that are older than the limit-period, not
-younger.  If we fix that, we'll see that the trace behaves as we'd
+But this code has a bug. In particular, the comparison goes the wrong
+way: we should discard events that are older than the limit-period,
+not younger.  If we fix that, we'll see that the trace behaves as we'd
 expect.
 
 ```ocaml file=examples/correct/rate_limiter_fixed/test.ml,part=2
@@ -663,6 +660,16 @@ let%expect_test _ =
   consume 1.;
   [%expect {| 1.00: C |}]
 ```
+
+### End-to-end tests
+
+One of the nice properties of the testing done in the previous example
+is that the tests were entirely deterministic, and didn't depend on
+the system or any system resources.
+
+That's a great ideal, but it's not always achievable, and sometimes,
+you want to write tests.
+
 
 ## Property testing with Quickcheck
 
@@ -764,7 +771,7 @@ testing doesn't actually hold on all outputs, as you can see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
