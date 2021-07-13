@@ -42,7 +42,7 @@ module List_dir = struct
 
   (** [is_abs p] Returns true if [p] is an absolute path  *)
   let is_abs p =
-    String.length p > 0 && p.[0] = '/'
+    String.length p > 0 && Char.(=) p.[0] '/'
 
   let name = "ls"
   let create cwd = { cwd }
@@ -120,7 +120,7 @@ let list_dir_instance = build_instance (module List_dir)  "/var";;
 
 [@@@part "1"];;
 module Loader = struct
-  type config = (module Query_handler) list sexp_opaque
+  type config = (module Query_handler) list [@sexp.opaque]
   [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
@@ -164,7 +164,7 @@ let load t handler_name config =
 let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
       Or_error.error "Handler not active" handler_name String.sexp_of_t
-    else if handler_name = name then
+    else if String.(=) handler_name name then
       Or_error.error_string "It's unwise to unload yourself"
     else (
       Hashtbl.remove t.active handler_name;

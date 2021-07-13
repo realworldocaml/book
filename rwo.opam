@@ -18,6 +18,7 @@ depends: [
   "cmdliner"
   "cohttp-async"
   "conf-ncurses"
+  "conf-tzdata"
   "core"
   "core_bench"
   "ctypes"
@@ -51,8 +52,3 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/realworldocaml/book.git"
-depexts: [
-  ["tzdata"] {os-distribution = "ubuntu"}
-  ["tzdata"] {os-distribution = "debian"}
-  ["tzdata"] {os-distribution = "alpine"}
-]

@@ -1,0 +1,68 @@
+name: Main workflow
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Prime the caches every Monday
+    - cron: 0 1 * * MON
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        ocaml-compiler:
+          - 4.10.2
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Install Linux system packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get -y update && sudo apt-get -y install libffi-dev libgmp-dev libpcre3-dev ncurses-dev pkg-config tzdata pandoc
+
+      - name: Install macOS system packages
+        if: runner.os == 'macOS'
+        run: brew install gmp libffi pcre pkg-config pandoc
+
+      - name: Retrieve cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            _build
+            ~/.opam
+          key: dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
+          restore-keys: |
+            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-${{ github.sha }}
+            dune-${{ runner.os }}-${{ matrix.ocaml-compiler }}-
+
+      - name: Install Dune
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: opam install -y "dune>=2.9.0"
+
+      - name: Build HTML book
+        if: runner.os == 'Linux'
+        run: opam exec -- dune build @site
+
+      - name: Run promotion tests
+        run: opam exec -- dune runtest
+
+      - name: Deploy site
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/default/static
