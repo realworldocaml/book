@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -475,8 +475,8 @@ should be.
 Expect tests can be used to examine the dynamic behavior of a system.
 Here's a deceptively simple example: a rate limiter.  A rate limiter
 is logic for limiting the rate at which a system consumes a particular
-resource.  The following `mli` is an interface for the core of a
-simple rolling-window-style rate limiter.
+resource.  The following `mli` describes a library that specifies the
+logic of a simple rolling-window-style rate limiter.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open! Core
@@ -490,9 +490,9 @@ val create : now:Time_ns.t -> period:Time_ns.Span.t -> rate:int -> t
 val maybe_consume : t -> now:Time_ns.t -> [ `Consumed | `No_capacity ]
 ```
 
-We now want to demonstrate the behavior of the system by running
-through some examples.  The first step is to write some helper
-functions that will make the examples themselves shorter and easier to read.
+We can demonstrate the behavior of the system by running through some
+examples.  The first step is to write some helper functions that will
+make the examples themselves shorter and easier to read.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
 open! Core
@@ -536,8 +536,7 @@ again, and then we'll wait one more half-second, and try again.
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 10 times in a row, without advancing the clock.  The
-     first five should succeed. *)
+  (* Exhaust the rate limit, without advancing the clock. *)
   for _ = 1 to 3 do
     consume 0.
   done;
@@ -550,8 +549,8 @@ let%expect_test _ =
   [%expect {|  |}]
 ```
 
-Now, we can run the tests and promote the results to see what the
-trace looks like.
+Running the tests will produce a corrected file that includes the
+execution traces.
 
 ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE
   $ dune runtest
@@ -559,7 +558,8 @@ trace looks like.
   (cd _build/default && /home/yminsky/Documents/code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
   ------ test.ml
   ++++++ test.ml.corrected
-  File "test.ml", line 33, characters 0-1:
+  File "test.ml", line 32, characters 0-1:
+   |    "%4.2f: %s\n"
    |    offset
    |    (match result with
    |    | `Consumed -> "C"
@@ -571,8 +571,7 @@ trace looks like.
    |let%expect_test _ =
    |  let lim = limiter () in
    |  let consume offset = consume lim offset in
-   |  (* Consume 10 times in a row, without advancing the clock.  The
-   |     first five should succeed. *)
+   |  (* Exhaust the rate limit, without advancing the clock. *)
    |  for _ = 1 to 3 do
    |    consume 0.
    |  done;
@@ -592,8 +591,8 @@ trace looks like.
   [1]
 ```
 
-After that, we can call `dune promote`, after which our test file will
-look like this:
+Running `dune promote` will accept the corrected file, leaving our
+test looking like this:
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=2
 let%expect_test _ =
@@ -771,7 +770,7 @@ testing doesn't actually hold on all outputs, as you can see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```

@@ -25,8 +25,7 @@ let consume lim offset =
 let%expect_test _ =
   let lim = limiter () in
   let consume offset = consume lim offset in
-  (* Consume 3 times in a row, without advancing the clock.  The
-     first two should succeed. *)
+  (* Exhaust the rate limit, without advancing the clock. *)
   for _ = 1 to 3 do
     consume 0.
   done;
