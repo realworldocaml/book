@@ -1063,7 +1063,7 @@ interfaces. Here are some of the guidelines that they use.
   be called `t`.
 
 - *Put `t` first*. If you have a module `M` whose primary type is `M.t`, the
-  functions in `M` that take a value of `M.t` should take it as their first
+  functions in `M` that take a value of type `M.t` should take it as their first
   argument.
 
 - Functions that routinely throw an exception should end in `_exn`.
