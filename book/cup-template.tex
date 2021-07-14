@@ -1,0 +1,236 @@
+% EngDguide.tex
+% for the suite of standard Cambridge designs
+% 2021/07/01, v1.30
+\NeedsTeXFormat{LaTeX2e}[1996/06/01]
+\documentclass[multi]{EngD}
+
+\reinstaterules
+% \documentclass[multi]{EngD} % multi-contributor option
+% \documentclass[prodtf]{EngD}% if you have helvetica neue condensed fonts
+\usepackage[rightcaption,raggedright]{sidecap}% for side captions
+\usepackage{framed}         % for floatingboxes
+\usepackage{soul}           % for letterspacing in theorem-style headings
+% for the Harvard author-date referencing system %%throw this away
+% \usepackage[agsm]{harvard}
+\usepackage{natbib}
+\usepackage{crop}
+% if you are using either vancouver.bst or IEEEtran.bst and wish to remove
+% square braces in the reference list, uncomment the line below
+% \removesquarebraces
+\usepackage[chapter]{algorithm}
+\usepackage{algorithmic}
+\usepackage[figuresright]{rotating}
+\usepackage{floatpag}
+
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage[hidelinks]{hyperref}}
+
+\rotfloatpagestyle{empty}
+\usepackage[bottom]{footmisc}
+\usepackage{amsmath}% if you are using this package,
+                      % it must be loaded before amsthm.sty
+\usepackage{amsthm}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{graphicx}
+
+\usepackage{csquotes}
+
+
+$if(listings)$
+\usepackage{listings,lstautogobble}
+\newcommand{\passthrough}[1]{#1}
+\lstset{defaultdialect=[5.3]Lua}
+\lstset{defaultdialect=[x86masm]Assembler}
+\lstset{
+  autogobble,
+  columns=fullflexible,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  escapeinside={(*@}{@*)},
+  commentstyle=\color{greencomments},
+  keywordstyle=\color{bluekeywords},
+  stringstyle=\color{redstrings},
+  numberstyle=\color{graynumbers},
+  basicstyle=\ttfamily\footnotesize,
+  frame=l,
+  rulecolor=\color{orangerule},
+  framesep=10pt,
+  xleftmargin=10pt,
+  tabsize=4,
+  captionpos=b,
+  literate=
+  {á}{{\'a}}1
+  {é}{{\'e}}1
+  {ô}{{\^o}}1
+  {┌}{\textSFi}1%
+  {┐}{\textSFiii}1%
+  {└}{\textSFii}1%
+  {┘}{\textSFiv}1%
+  {┬}{\textSFvi}1%
+  {┴}{\textSFvii}1%
+  {├}{\textSFviii}{1}%
+  {┤}{\textSFix}{1}%
+  {─}{\textSFx}1%
+  {—}{\textSFx}1%
+  {│}{\textSFxi}1%
+  {┼}{\textSFv}1%
+}
+\definecolor{bluekeywords}{rgb}{0.0, 0.0, 0.4 }
+\definecolor{greencomments}{rgb}{0, 0.4, 0}
+\definecolor{redstrings}{rgb}{0.4, 0.0, 0.0}
+\definecolor{graynumbers}{rgb}{0.50, 0.50, 0.50}
+\definecolor{orangerule}{rgb}{1,0.84,.69}
+
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = bluekeywords, %Colour for external hyperlinks
+  linkcolor    = bluekeywords, %Colour of internal links
+  citecolor   = red %Colour of citations
+}
+
+
+$endif$
+
+\usepackage{longtable,booktabs,graphicx,fancyvrb,iftex,upquote,microtype,setspace}
+
+% indexes
+% uncomment the relevant set of commands
+% for a single index
+\usepackage{makeidx}
+\makeindex
+% times font (used to produce EngDguide.pdf)
+% this package must be loaded after amsthm.sty
+% for multiple indexes using multind.sty
+%\usepackage{multind}
+%\ProvidesPackage{multind}
+%\makeindex{authors}
+%\makeindex{subject}
+% for multiple indexes using index.sty
+% \usepackage{index}
+% \newindex{aut}{adx}{and}{Author index}
+% \makeindex
+%\usepackage{glossaries}
+%\makeglossaries
+%\input glossaries.tex
+\newcommand\cambridge{EngD}
+% see chapter 3 for details
+\theoremstyle{plain}% default
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem*{corollary*}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]
+\newtheorem{notation}[remark]{Notation}
+\newtheorem*{case}{Case}
+\hyphenation{line-break line-breaks docu-ment triangle cambridge amsthdoc
+    cambridgemods baseline-skip author authors cambridgestyle en-vir-on-ment polar}
+\setcounter{tocdepth}{2}% the toc normally lists sections;
+% for the purposes of this document, this has been extended to subsections
+\makeatletter
+\def\TeX{TeX}
+\renewcommand{\LaTeX}{La\TeX}
+\renewcommand{\LaTeXe}{La\TeX2e}
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \includeonly{chap2}
+\raggedbottom
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\frontmatter
+\begin{halftitlepage}
+
+$if(title)$
+\halftitle{$title$}
+$endif$
+$if(subtitle)$
+\halfsubtitle{$subtitle$}
+$endif$
+%\vskip\baselineskip
+\halftitleblurb{Functional Programming for the Masses.}
+%\vskip\baselineskip
+\halftitleauthor{Yaron Minsky and Anil Madhavapeddy}.
+\end{halftitlepage}
+\cleardoublepage
+\begin{titlepage}
+\fmtitle{$title$}
+\fmsubtitle{$subtitle$}
+\fmtitleauthor{Yaron Minsky}
+\fmtitleaffil{Jane Street}
+\fmtitleauthor{Anil Madhavapeddy}
+\fmtitleaffil{University of Cambridge}
+%\cuplogo
+\end{titlepage}
+\begin{copyrightpage}
+%\copyrightlogo\par\vskip\baselineskip
+\end{copyrightpage}
+\begin{dedication}
+For\\
+Alpha and Beta
+\end{dedication}
+\tocmax{2.10}{2.8.8}{}
+\tableofcontents
+\listoffigures
+\listoftables
+\listoffloatingboxes
+%  \listofcontributors
+%\chapter*{List of Contributors}
+%\begin{contriblist}
+%  \contributor{Magn\’us M\’ar Magn\’usson
+%
+%
+%
+%
+%\contributor{David Tranah
+%\affiliation{International Glaciological Society,
+%Scott Polar Research Institute,
+%Lensfield Road, Cambridge CB2 1ER}}
+%
+%
+%
+%\end{contriblist}
+%\affiliation{Cambridge University Press,
+%  The Edinburgh Building, Shaftesbury Road,
+%  Cambridge CB2 8RU}}
+\cleardoublepage
+%\include{EngD_preface}
+\mainmatter
+$body$
+\backmatter
+% if you only have one appendix, use \oneappendix instead of \appendix
+\oneappendix
+\endappendix
+% insert a blank line to the toc list
+\addtocontents{toc}{\vspace{\baselineskip}}
+\theendnotes
+% bibliography style files
+% \bibliographystyle{vancouver}% uncomment for vancouver style
+% \bibliographystyle{IEEEtran} % uncomment for IEEE style
+%   \bibliographystyle{cambridgeauthordate}  %% already called in chapter 5
+% \renewcommand{\refname}{Bibliography}% if you prefer this heading
+\bookreferences
+%\bibliography{percolation}\label{reflist}
+\cleardoublepage
+% indexes
+% for a single index
+\printindex
+% for multiple indexes using multind.sty
+%\printindex{authors}{Author index}
+%\printindex{subject}{Subject index}
+%\printglossaries
+% for multiple indexes using index.sty
+% \printindex[aut]
+% \printindex
+\end{document}
+\endinput

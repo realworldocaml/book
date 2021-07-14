@@ -5,13 +5,15 @@
   (deps ../book/toc.scm (alias ../book/latex))
   (action (run rwo-build build inputs -o . -repo-root ..)))
 
+(copy_files ../book/EngD.cls)
+
 (rule
  (alias pdf)
  (targets book.tex)
- (deps book.md ../book/book.yml ../book/latex-template.tex)
+ (deps book.md EngD.cls ../book/book.yml ../book/cup-template.tex)
  (action
   (progn
-   (system "pandoc --top-level-division=part --metadata-file=../book/book.yml --template ../book/latex-template.tex --listings -o book.tex -t latex -s book.md"))))
+   (system "pandoc --top-level-division=part --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf)

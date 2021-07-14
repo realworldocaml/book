@@ -13,6 +13,7 @@ $if(CJKmainfont)$
 \PassOptionsToPackage{space}{xeCJK}
 $endif$
 %
+
 \documentclass[
 $if(fontsize)$
   $fontsize$,
@@ -36,6 +37,15 @@ $for(classoption)$
   $classoption$$sep$,
 $endfor$
 ]{$documentclass$}
+
+\usepackage[rightcaption,raggedright]{sidecap}% for side captions
+\usepackage{framed}         % for floatingboxes
+\usepackage{soul}           % for letterspacing in theorem-style headings
+\usepackage[agsm]{harvard}
+\usepackage[figuresright]{rotating}
+\usepackage{floatpag}
+
+\rotfloatpagestyle{empty}
 $if(title)$
 \title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
 $endif$

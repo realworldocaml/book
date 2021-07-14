@@ -1,13 +1,12 @@
 ---
 title: Real World OCaml
 subtitle: Version 2 (draft)
-documentclass: book
+documentclass: EngD
+classoption:
+- multi
 colorlinks: true
 lang: en-GB
 papersize: a4
-mainfont: Palatino
-sansfont: Helvetica
-monofont: Menlo
 links-as-notes: false
 numbersections: true
 csquotes: true
