@@ -291,22 +291,14 @@ changing a mutable record field or printing to the standard output.
 
 :::
 
-`Yojson` provides several combinators in the `Yojson.Basic.Util` module, some
-of which are listed in [Table15_1](json.html#table15_1){data-type=xref}.
+`Yojson` provides several combinators in the `Yojson.Basic.Util` module
+to manipulate values:
 [combinators/in Yojson library]{.idx}[Yojson library/combinators in]{.idx}
 
-::: {#table15_1 data-type=table}
-Function | Type | Purpose
----------|------|--------
-member | `string -> json -> json` | Select a named field from a JSON record.
-to_string | `json -> string` | Convert a JSON value into an OCaml `string`. Raises an exception if this is impossible.
-to_int | `json -> int` | Convert a JSON value into an OCaml `int`. Raises an exception if this is impossible.
-filter_string | `json list -> string list` | Filter valid strings from a list of JSON fields, and return them as an OCaml list of strings.
-
-Table:  Yojson combinators
-:::
-
-
+- `val member : string -> json -> json` selects a named field from a JSON record.
+- `val to_string : json -> string` converts a JSON value into an OCaml `string`. It raises an exception if this is impossible.
+- `val to_int : json -> int` converts a JSON value into an `int`. It raises an exception if this is impossible.
+- `val filter_string : json list -> string list` filters valid strings from a list of JSON fields, and return them as an OCaml `string list`.
 
 We'll go through each of these uses one by one now. The following examples
 also use the `|>` pipe-forward operator that we explained in

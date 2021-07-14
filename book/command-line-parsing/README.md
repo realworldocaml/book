@@ -661,23 +661,14 @@ $ dune exec -- ./md5.exe -s "ocaml rocks"
 The `-s` flag in our specification requires a `string` argument and isn't
 optional. The Command parser outputs an error message if the flag isn't
 supplied, as with the anonymous arguments in earlier examples.
-[Table14 2](command-line-parsing.html#table14-2){data-type=xref} contains
-a list of some of the functions that you can wrap flags in to control how
-they are parsed. [flag functions]{.idx}
+There are a number of other functions that you can wrap flags in to control how
+they are parsed: [flag functions]{.idx}
 
-::: {#table14-2 data-type=table}
-Flag function | OCaml type
---------------|-----------
-`required` *arg* | *arg* and error if not present
-`optional` *arg* | *arg* `option`
-`optional_with_default` *val* *arg* | *arg* with default *val* if not present
-`listed` *arg* | *arg* `list`, flag may appear multiple times
-`no_arg` | `bool` that is true if flag is present
-
-Table:  Flag functions
-:::
-
-
+- `required *arg*` will return `*arg*` and error if not present
+- `optional *arg*` with return `*arg* option`
+- `optional_with_default *val* *arg*` will return `*arg*` with default `*val*` if not present
+- `listed *arg*` will return `*arg* list` (this flag may appear multiple times)
+- `no_arg` will return a  `bool` that is true if the flag is present
 
 The flags affect the type of the callback function in exactly the same way as
 anonymous arguments do. This lets you change the specification and ensure
