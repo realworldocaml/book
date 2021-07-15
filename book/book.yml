@@ -17,5 +17,11 @@ lot: true
 author:
 - Yaron Minsky
 - Anil Madhavapeddy
+pandoc-latex-environment:
+  noteblock: [note]
+  tipblock: [tip]
+  warningblock: [warning]
+  cautionblock: [caution]
+  importantblock: [important]
 ---
 

@@ -18,7 +18,7 @@
 (rule
  (alias pdf-wip)
  (targets book.pdf)
- (deps book.tex)
+ (deps book.tex (alias site-wip-content))
  (action
    (progn
      (system "xelatex book.tex")
@@ -29,7 +29,7 @@
 ; Website Generation
 
 (alias
-  (name site-wip)
+  (name site-wip-content)
   (deps css/app.css
         css/prism.css
         images/anil.jpg
@@ -67,7 +67,7 @@
 (rule
  (alias site-wip)
  (targets index.html)
- (deps (alias ../book/html) ../book/index.html ../book/toc.scm)
+ (deps (alias ../book/html) ../book/index.html ../book/toc.scm (alias site-wip-content))
  (action (run rwo-build build index -include-wip -o . -repo-root ..)))
 
 (rule
