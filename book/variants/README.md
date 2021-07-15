@@ -157,7 +157,6 @@ A muted gray...
 - : unit = ()
 ```
 
-::: {.allow_break data-type=note}
 ##### Variants, tuples and parens
 
 Variants with multiple arguments look an awful lot like tuples.
@@ -237,8 +236,6 @@ tuple. You can learn more about OCaml's memory representation in
 [Memory Representation of
 Values](runtime-memory-layout.html){data-type=xref}.
 
-
-:::
 
 ## Catch-All Cases and Refactoring
 

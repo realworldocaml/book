@@ -567,34 +567,26 @@ val ( *** ) : float -> float -> float = <fun>
 
 The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.
-[Table2_1](variables-and-functions.html#table2_1){data-type=xref} breaks
-the different operators and other syntactic forms into groups from highest to
+The list below breaks the different operators and other syntactic forms into groups from highest to
 lowest precedence, explaining how each behaves syntactically. We write
 `!`... to indicate the class of operators beginning with `!`.
 
-::: {#table2_1 data-type=table}
-Operator prefix | Associativity
-----------------|--------------
-`!`..., `?`..., `~`... | Prefix
-`.`, `.(`, `.[` | -
-function application, constructor, `assert`, `lazy` | Left associative
-`-`, `-.` | Prefix
-`**`..., `lsl`, `lsr`, `asr` | Right associative
-`*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
-`+`..., `-`... | Left associative
-`::` | Right associative
-`@`..., `^`... | Right associative
-`=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
-`&`, `&&` | Right associative
-`or`, `||` | Right associative
-`,` | -
-`<-`, `:=` | Right associative
-`if` | -
-`;` | Right associative
-
-Table:  Precedence and associativity
-:::
-
+-  `!`..., `?`..., `~`... (Prefix)
+- `.`, `.(`, `.[` | -
+- function application, constructor, `assert`, `lazy` | Left associative
+- `-`, `-.` | Prefix
+- `**`..., `lsl`, `lsr`, `asr` | Right associative
+- `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
+- `+`..., `-`... | Left associative
+- `::` | Right associative
+- `@`..., `^`... | Right associative
+- `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
+- `&`, `&&` | Right associative
+- `or`, `||` | Right associative
+- `,` | -
+- `<-`, `:=` | Right associative
+- `if` | -
+- `;` | Right associative
 
 
 There's one important special case: `-` and `-.`, which are the integer and

@@ -852,7 +852,6 @@ check on whether the first two elements are equal:
 val destutter : int list -> int list = <fun>
 ```
 
-::: {data-type=note}
 ##### Polymorphic Compare
 
 You might have noticed that `destutter` is specialized to lists of integers.
@@ -949,8 +948,6 @@ opening the module again.
 ```ocaml env=main
 # open Base
 ```
-
-:::
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
 checks associated with pattern matches rely on the fact that patterns are
