@@ -42,9 +42,9 @@ let x = { foo = 13; bar = 14 } ;;
 <h2>Blocks and Values</h2>
 <p>An OCaml <em>block</em> is the basic unit of allocation on the heap. A block consists of a one-word header (either 32 or 64 bits depending on the CPU architecture) followed by variable-length data that is either opaque bytes or an array of <em>fields</em>. The header has a multipurpose tag byte that defines whether to interpret the subsequent data as opaque bytes or OCaml fields. <a data-secondary="blocks and values" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <p>The GC never inspects opaque bytes. If the tag indicates an array of OCaml fields are present, their contents are all treated as more valid OCaml values. The GC always inspects fields and follows them as part of the collection process described earlier. <a data-secondary="opaque bytes and" data-primary="garbage collection" data-type="indexterm">&nbsp;</a><a data-primary="opaque bytes" data-type="indexterm">&nbsp;</a></p>
-<figure style="float: 0">
-<img src="images/memory-repr/block.png">
-</figure>
+<p><br>
+<img alt="Memory representation of a block" title="Memory representation of a block" src="images/memory-repr/block.png"><br>
+</p>
 <p>The <code>size</code> field records the length of the block in memory words. This is 22 bits on 32-bit platforms, which is the reason OCaml strings are limited to 16 MB on that architecture. If you need bigger strings, either switch to a 64-bit host, or use the <code>Bigarray</code> module.</p>
 <p>The 2-bit <code>color</code> field is used by the GC to keep track of its state during mark-and-sweep collection. We’ll come back to this field in <a data-type="xref" href="garbage-collector.html#understanding-the-garbage-collector">Chapter 21, Understanding The Garbage Collector</a>. This tag isn’t exposed to OCaml source code in any case.</p>
 <p>A block’s tag byte is multipurpose, and indicates whether the data array represents opaque bytes or fields. If a block’s tag is greater than or equal to <code>No_scan_tag</code> (251), then the block’s data are all opaque bytes, and are not scanned by the collector. The most common such block is the <code>string</code> type, which we describe in more detail later in this chapter.</p>
@@ -70,9 +70,9 @@ let x = { foo = 13; bar = 14 } ;;
 </section>
 <section class="level2" id="tuples-records-and-arrays">
 <h2>Tuples, Records, and Arrays</h2>
-<figure style="float: 0">
-<img src="images/memory-repr/tuple_layout.png">
-</figure>
+<p><br>
+<img title="Tuple Layout" src="images/memory-repr/tuple_layout.png"><br>
+</p>
 <p>Tuples, records, and arrays are all represented identically at runtime as a block with tag <code>0</code>. Tuples and records have constant sizes determined at compile time, whereas arrays can be of variable length. While arrays are restricted to containing a single type of element in the OCaml type system, this is not required by the memory representation. <a data-secondary="memory representation of" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="memory representation of" data-primary="records" data-type="indexterm">&nbsp;</a><a data-primary="tuples" data-type="indexterm">&nbsp;</a><a data-secondary="tuples, records, and arrays" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <p>You can check the difference between a block and a direct integer yourself using the <code>Obj</code> module, which exposes the internal representation of values to OCaml code:</p>
 <div class="highlight">
@@ -94,9 +94,9 @@ Obj.double_tag ;;
 </code></pre>
 </div>
 <p>Since each floating-point value is boxed in a separate memory block, it can be inefficient to handle large arrays of floats in comparison to unboxed integers. OCaml therefore special-cases records or arrays that contain <em>only</em><code>float</code> types. These are stored in a block that contains the floats packed directly in the data section, with <code>Double_array_tag</code> set to signal to the collector that the contents are not OCaml values.</p>
-<figure style="float: 0">
-<img src="images/memory-repr/float_array_layout.png">
-</figure>
+<p><br>
+<img title="Float array layout" src="images/memory-repr/float_array_layout.png"><br>
+</p>
 <p>First, let’s check that float arrays do in fact have a different tag number from normal floating-point values:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.double_tag ;;
@@ -181,9 +181,9 @@ Btype.hash_variant "Foo" ;;
 <section class="level2" id="string-values">
 <h2>String Values</h2>
 <p>Strings are standard OCaml blocks with the header size defining the size of the string in machine words. The <code>String_tag</code> (252) is higher than the <code>No_scan_tag</code>, indicating that the contents of the block are opaque to the collector. The block contents are the contents of the string, with padding bytes to align the block on a word boundary. <a data-secondary="memory representation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-secondary="string values" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
-<figure style="float: 0">
-<img src="images/memory-repr/string_block.png">
-</figure>
+<p><br>
+<img title="String block layout" src="images/memory-repr/string_block.png"><br>
+</p>
 <p>On a 32-bit machine, the padding is calculated based on the modulo of the string length and word size to ensure the result is word-aligned. A 64-bit machine extends the potential padding up to 7 bytes instead of 3. Given a string length modulo 4:</p>
 <ul>
 <li><code>0</code> has padding <code>00 00 00 03</code></li>
@@ -192,9 +192,9 @@ Btype.hash_variant "Foo" ;;
 <li><code>3</code> has padding <code>00</code></li>
 </ul>
 <p>This string representation is a clever way to ensure that the contents are always zero-terminated by the padding word and to still compute its length efficiently without scanning the whole string. The following formula is used:</p>
-<figure style="float: 0">
-<img src="images/memory-repr/string_size_calc.png">
-</figure>
+<p><br>
+<img title="String size calculation" src="images/memory-repr/string_size_calc.png"><br>
+</p>
 <p>The guaranteed <code>NULL</code> termination comes in handy when passing a string to C, but is not relied upon to compute the length from OCaml code. OCaml strings can thus contain <code>NULL</code> bytes at any point within the string.</p>
 <p>Care should be taken that any C library functions that receive these buffers can also cope with arbitrary bytes within the buffer contents and are not expecting C strings. For instance, the C <code>memcopy</code> or <code>memmove</code> standard library functions can operate on arbitrary data, but <code>strlen</code> or <code>strcpy</code> both require a <code>NULL</code>-terminated buffer, and neither has a mechanism for encoding a <code>NULL</code> value within its contents.</p>
 </section>
@@ -228,7 +228,7 @@ Btype.hash_variant "Foo" ;;
 <dd>The <code>Bigstring</code> module provides a <code>String</code>-like interface that uses <code>Bigarray</code> internally. The <code>Bigbuffer</code> collects these into extensible string buffers that can operate entirely on external system memory.
 </dd>
 </dl>
-<p>The <a href="http://mmottl.github.io/lacaml/">Lacaml</a> library isn’t part of Core but provides the recommended interfaces to the widely used BLAS and LAPACK mathematical Fortran libraries. These allow developers to write high-performance numerical code for applications that require linear algebra. It supports large vectors and matrices, but with static typing safety of OCaml to make it easier to write safe algorithms. <a data-startref="MAPocaml" data-type="indexterm">&nbsp;</a><a data-startref="VALmemory" data-type="indexterm">&nbsp;</a></p>
+<p>The <a href="http://mmottl.github.io/lacaml/">Lacaml</a> library isn’t part of Core but provides the recommended interfaces to the widely used BLAS and LAPACK mathematical Fortran libraries. These allow developers to write high-performance numerical code for applications that require linear algebra. It supports large vectors and matrices, but with static typing safety of OCaml to make it easier to write safe algorithms.</p>
 </section>
 </section>
 </section>

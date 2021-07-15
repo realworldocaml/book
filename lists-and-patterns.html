@@ -29,9 +29,9 @@
 </code></pre>
 </div>
 <p>The way in which the <code>::</code> operator attaches elements to the front of a list reflects the fact that OCaml’s lists are in fact singly linked lists. The figure below is a rough graphical representation of how the list <code>1 :: 2 :: 3 :: []</code> is laid out as a data structure. The final arrow (from the box containing <code>3</code>) points to the empty list.<a data-secondary="structure of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
-<figure style="float: 0">
-<img src="images/lists-and-patterns/lists_layout.png">
-</figure>
+<p><br>
+<img title="Lists layout" src="images/lists-and-patterns/lists_layout.png"><br>
+</p>
 <p>Each <code>::</code> essentially adds a new block to the proceding picture. Such a block contains two things: a reference to the data in that list element, and a reference to the remainder of the list. This is why <code>::</code> can extend a list without modifying it; extension allocates a new list element but does not change any of the existing ones, as you can see:<a data-secondary="extension of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let l = 1 :: 2 :: 3 :: [] ;;

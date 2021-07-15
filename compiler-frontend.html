@@ -14,9 +14,9 @@
 <p>The OCaml tools accept textual source code as input, using the filename extensions <code>.ml</code> and <code>.mli</code> for modules and signatures, respectively. We explained the basics of the build process in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, so we’ll assume you’ve built a few OCaml programs already by this point.<a data-secondary="overview of" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
 <p>Each source file represents a <em>compilation unit</em> that is built separately. The compiler generates intermediate files with different filename extensions to use as it advances through the compilation stages. The linker takes a collection of compiled units and produces a standalone executable or library archive that can be reused by other applications.<a data-primary="compilation units" data-type="indexterm">&nbsp;</a></p>
 <p>The overall compilation pipeline looks like this: <a data-secondary="diagram of" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
-<figure style="float: 0">
-<img src="images/front-end/pipeline.png">
-</figure>
+<p><br>
+<img title="Compilation pipeline" src="images/front-end/pipeline.png"><br>
+</p>
 <p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends that reuse the early stages of compilation but produce very different final outputs. The <em>bytecode</em> can be run by a portable interpreter and can even be transformed into JavaScript (via <a href="http://ocsigen.org/js_of_ocaml">js_of_ocaml</a>) or C source code (via <a href="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</a>). The <em>native code</em> compiler generates specialized executable binaries suitable for high-performance applications.<a data-secondary="compiler source code" data-primary="compilation process" data-type="indexterm">&nbsp;</a><a data-secondary="bytecode vs.&nbsp;native code" data-primary="code compilers" data-type="indexterm">&nbsp;</a></p>
 <div data-type="note">
 <h5 id="obtaining-the-compiler-source-code">Obtaining the Compiler Source Code</h5>

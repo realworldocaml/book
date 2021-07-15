@@ -31,9 +31,9 @@
 <section class="level3" id="allocating-on-the-minor-heap">
 <h3>Allocating on the Minor Heap</h3>
 <p>The minor heap is a contiguous chunk of virtual memory that is usually a few megabytes in size so that it can be scanned quickly. <a data-secondary="allocating on" data-primary="minor heaps" data-type="indexterm">&nbsp;</a></p>
-<figure style="float: 0">
-<img src="images/gc/minor_heap.png">
-</figure>
+<p><br>
+<img title="Minor GC heap" src="images/gc/minor_heap.png"><br>
+</p>
 <p>The runtime stores the boundaries of the minor heap in two pointers that delimit the start and end of the heap region (<code>caml_young_start</code> and <code>caml_young_end</code>, but we will drop the <code>caml_young</code> prefix for brevity). The <code>base</code> is the memory address returned by the system <code>malloc</code>, and <code>start</code> is aligned against the next nearest word boundary from <code>base</code> to make it easier to store OCaml values.</p>
 <p>In a fresh minor heap, the <code>limit</code> equals the <code>start</code>, and the current <code>ptr</code> will equal the <code>end</code>. <code>ptr</code> decreases as blocks are allocated until it reaches <code>limit</code>, at which point a minor garbage collection is triggered.</p>
 <p>Allocating a block in the minor heap just requires <code>ptr</code> to be decremented by the size of the block (including the header) and a check that it’s not less than <code>limit</code>. If there isn’t enough space left for the block without decrementing past <code>limit</code>, a minor garbage collection is triggered. This is a very fast check (with no branching) on most CPU architectures.</p>

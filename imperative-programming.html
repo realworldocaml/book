@@ -524,13 +524,13 @@ edit_distance "OCaml" "ocaml" ;;
 </code></pre>
 </div>
 <p>The thing to note is that if you call <code>edit_distance "OCaml" "ocaml"</code>, then that will in turn dispatch the following calls:</p>
-<figure style="float: 0">
-<img src="images/imperative-programming/edit_distance.png">
-</figure>
+<p><br>
+<img title="Edit distance" src="images/imperative-programming/edit_distance.png"><br>
+</p>
 <p>And these calls will in turn dispatch other calls:</p>
-<figure style="float: 0">
-<img src="images/imperative-programming/edit_distance2.png">
-</figure>
+<p><br>
+<img title="Edit distance two" src="images/imperative-programming/edit_distance2.png"><br>
+</p>
 <p>As you can see, some of these calls are repeats. For example, there are two different calls to <code>edit_distance "OCam" "oca"</code>. The number of redundant calls grows exponentially with the size of the strings, meaning that our implementation of <code>edit_distance</code> is brutally slow for large strings. We can see this by writing a small timing function, using Core’s <code>Time</code> module.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let time f =
