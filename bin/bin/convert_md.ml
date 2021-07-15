@@ -21,7 +21,7 @@ let pp_output ppf = function
  let pp_line ppf l = Fmt.pf ppf "%a\n" pp_html l
 
  let pp_toplevel ppf (t:Mdx.Toplevel.t) =
-  let cmds = match t.command with [c] -> [c ^ ";;"] | l -> l @ [";;"] in
+  let cmds = match t.command with [c] -> [c ^ " ;;"] | l -> l @ [";;"] in
   Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_output) t.output
 
 let pp_toplevel_block (b: Mdx.Block.t) ppf =
@@ -35,6 +35,23 @@ let pp_toplevel_block (b: Mdx.Block.t) ppf =
 
 let pp_contents (t:Mdx.Block.t) ppf =
   Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
+
+let pp_markdown_output ppf = function
+  |`Output s -> Fmt.pf ppf "%s\n" s
+  |`Ellipsis -> Fmt.pf ppf "...\n"
+
+let pp_markdown_toplevel ppf (t:Mdx.Toplevel.t) =
+  let cmds = match t.command with [c] -> ["# " ^ c ^ " ;;"] | l -> l @ [";;"] in
+  Fmt.pf ppf "%a\n%a" (Fmt.(list ~sep:(unit "\n") string)) cmds (pp_list pp_markdown_output) t.output
+
+let pp_markdown_toplevel_block (b: Mdx.Block.t) ppf =
+  let ts =
+    Mdx.Toplevel.of_lines
+      ~syntax:Normal
+      ~loc:b.loc
+      b.contents
+  in
+  pp_list pp_markdown_toplevel ppf ts
 
 let pp_cram ppf (t:Mdx.Cram.t) =
   let pp_exit ppf = match t.exit_code with
@@ -92,6 +109,23 @@ let pp_block_latex ppf (b:Mdx.Block.t) =
   in
   let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
   let lang = match lang with
+    | None   -> "shell"
+    | Some l -> l
+  in
+  Fmt.pf ppf "```%s\n%t\n```"
+    lang pp_code
+
+let pp_block_md ppf (b:Mdx.Block.t) =
+  let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
+  let lang, pp_code = match b.value with
+    | Toplevel _ -> Some "ocaml", (pp_markdown_toplevel_block b)
+    | Include {file_kind = Fk_ocaml _; _}
+    | OCaml _ -> Some "ocaml", pp_code
+    | Cram _ -> Some "bash", pp_code
+    | Include {file_kind = Fk_other {header}; _}
+    | Raw {header} -> Option.map header_to_string header, pp_code
+  in
+  let lang = match lang with
     | None   -> "clike"
     | Some l -> l
   in
@@ -99,6 +133,9 @@ let pp_block_latex ppf (b:Mdx.Block.t) =
     lang pp_code
 
 let pp_text_html ppf l =
+  List.iter (Fmt.pf ppf "%s\n") (List.rev l)
+
+let pp_text_md ppf l =
   List.iter (Fmt.pf ppf "%s\n") (List.rev l)
 
 open Astring
@@ -126,6 +163,7 @@ let pp_text_latex ppf l =
             |> String.fold_left escape_latex []
             |> List.rev
             |> String.concat
+            |> Base.String.map ~f:(function '/' -> '!' | x -> x)
             |> Fmt.strf "\\index{%s}"
           in
           let e = String.sub ~start:(i + 7) t |> String.Sub.to_string in
@@ -138,11 +176,13 @@ let pp_text_latex ppf l =
 
 type outputs =
     Html
+  | Markdown
   | Latex
 
 let get_output_infos = function
   | Html -> pp_block_html, pp_text_html, "-t html"
   | Latex -> pp_block_latex, pp_text_latex,  "-t latex --listings"
+  | Markdown -> pp_block_md, pp_text_latex, "-t markdown"
 
 let run (`File file) (`Output output) output_type =
   let (pp_block, pp_text, out_args) = get_output_infos output_type in
@@ -155,10 +195,14 @@ let run (`File file) (`Output output) output_type =
     let tmp = Filename.temp_file "ocaml-mdx" "pandoc" in
     let oc = open_out tmp in
     let ppf = Format.formatter_of_out_channel oc in
+    let boost_section (i,t) =
+      match output_type with
+      | Markdown -> i+1, t (* for top-level-division=part in pandoc *)
+      | _ -> i, t in
     let f acc t =
       match t with
         | Mdx.Section s ->
-          Fmt.pf ppf "%a%a" pp_text acc pp_section s;
+          Fmt.pf ppf "%a%a" pp_text acc pp_section (boost_section s);
           []
         | Text t        -> t::acc
         | Block b ->
@@ -192,8 +236,8 @@ let output =
     Arg.(value & opt (some string) None & info ["o";"output"] ~doc ~docv:"FILE")
 
 let out_type =
-  let doc = "Output type: html or latex. Default is html" in
-  Arg.(value & opt (enum ["html", Html; "latex", Latex]) Html & info ["t";"type"] ~doc ~docv:"TYPE")
+  let doc = "Output type: html, md or latex. Default is html" in
+  Arg.(value & opt (enum ["html", Html; "latex", Latex; "md", Markdown]) Html & info ["t";"type"] ~doc ~docv:"TYPE")
 
 let main =
   let doc = "Pre-process markdown files to produce OCaml code." in

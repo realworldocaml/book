@@ -201,29 +201,19 @@ not scanned by the collector. The most common such block is the `string`
 type, which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static
-OCaml type. All OCaml types are distilled down into `values`, and summarized
-in
-[Table20 1_ocaml](runtime-memory-layout.html#table20-1_ocaml){data-type=xref}.<a data-type="indexterm" data-startref="blck">&nbsp;</a>
+OCaml type. All OCaml types are distilled down into `values`, and summarized below.
 
-::: {#table20-1_ocaml data-type=table}
-OCaml value | Representation
-------------|---------------
-`int` or `char` | Directly as a value, shifted left by 1 bit, with the least significant bit set to 1.
-`unit`, `[]`, `false` | As OCaml `int` 0.
-`true` | As OCaml `int` 1.
-`Foo | Bar` | As ascending OCaml `int`s, starting from 0.
-`Foo | Bar of int` | Variants with parameters are boxed, while variants with no parameters are unboxed.
-Polymorphic variants | Variable space usage depending on the number of parameters.
-Floating-point number | As a block with a single field containing the double-precision float.
-String | Word-aligned byte arrays with an explicit length.
-`[1; 2; 3]` | As `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
-Tuples, records, and arrays | An array of values. Arrays can be variable size, but tuples and records are fixed-size.
-Records or arrays, all float | Special tag for unboxed arrays of floats, or records that only have `float` fields.
-
-Table:  OCaml values
-:::
-
-
+- `int` or `char` are stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1.
+- `unit`, `[]`, `false` are all stored as OCaml `int` 0.
+- `true` is stored as OCaml `int` 1.
+- `Foo | Bar` variants are stored as ascending OCaml `int`s, starting from 0.
+- `Foo | Bar of int` variants with parameters are boxed, while variants with no parameters are unboxed.
+- Polymorphic variants take up variable space usage depending on the number of parameters.
+- Floating-point numbers are stored as a block with a single field containing the double-precision float.
+- Strings are word-aligned byte arrays with an explicit length.
+- `[1; 2; 3]` lists are stored as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
+- Tuples, records, and arrays are stored as a C array of values. Arrays can be variable size, but tuples and records are fixed-size.
+- Records or arrays that are all float use a special tag for unboxed arrays of floats, or records that only have `float` fields.
 
 ### Integers, Characters, and Other Basic Types
 
@@ -482,21 +472,13 @@ of]{.idx}[runtime memory representation/string values]{.idx}
 
 On a 32-bit machine, the padding is calculated based on the modulo of the
 string length and word size to ensure the result is word-aligned. A 64-bit
-machine extends the potential padding up to 7 bytes instead of 3 (see
-[Chapter_20_table](runtime-memory-layout.html#chapter_20_table){data-type=xref}).
+machine extends the potential padding up to 7 bytes instead of 3.
+Given a string length modulo 4:
 
-::: {#chapter_20_table data-type=table}
-String length mod 4 | Padding
---------------------|--------
-0 | `00 00 00 03`
-1 | `00 00 02`
-2 | `00 01`
-3 | `00`
-
-Table:  String length and padding
-:::
-
-
+- `0` has padding `00 00 00 03`
+- `1` has padding `00 00 02`
+- `2` has padding `00 01`
+- `3` has padding `00`
 
 This string representation is a clever way to ensure that the contents are
 always zero-terminated by the padding word and to still compute its length
