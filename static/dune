@@ -18,7 +18,7 @@
 (rule
  (alias pdf)
  (targets book.pdf)
- (deps book.tex)
+ (deps book.tex (alias site-content))
  (action
    (progn
      (system "xelatex book.tex")
@@ -29,7 +29,7 @@
 ; Website Generation
 
 (alias
-  (name site)
+  (name site-content)
   (deps CNAME
         css/app.css
         css/prism.css
@@ -68,7 +68,7 @@
 (rule
  (alias site)
  (targets index.html)
- (deps (alias ../book/html) ../book/index.html ../book/toc.scm)
+ (deps (alias ../book/html) ../book/index.html ../book/toc.scm (alias site-content))
  (action (run rwo-build build index -o . -repo-root ..)))
 
 (rule

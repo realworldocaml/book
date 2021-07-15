@@ -50,10 +50,9 @@ archive that can be reused by other applications.[compilation units]{.idx}
 The overall compilation pipeline looks like this: [compilation
 process/diagram of]{.idx}
 
-<figure style="float: 0">
-  <img src="images/front-end/pipeline.png"/>
-</figure>
-
+\
+![](images/front-end/pipeline.png "Compilation pipeline")
+\
 
 Notice that the pipeline branches toward the end. OCaml has multiple compiler
 backends that reuse the early stages of compilation but produce very

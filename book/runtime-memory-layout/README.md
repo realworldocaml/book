@@ -179,10 +179,9 @@ values. The GC always inspects fields and follows them as part of the
 collection process described earlier. [garbage collection/opaque bytes
 and]{.idx}[opaque bytes]{.idx}
 
-<figure style="float: 0">
-  <img src="images/memory-repr/block.png"/>
-</figure>
-
+\
+ ![Memory representation of a block](images/memory-repr/block.png "Memory representation of a block")
+\
 
 The `size` field records the length of the block in memory words. This is 22
 bits on 32-bit platforms, which is the reason OCaml strings are limited to 16
@@ -234,9 +233,9 @@ integers.
 
 ## Tuples, Records, and Arrays
 
-<figure style="float: 0">
-  <img src="images/memory-repr/tuple_layout.png"/>
-</figure>
+\
+![](images/memory-repr/tuple_layout.png "Tuple Layout")
+\
 
 
 Tuples, records, and arrays are all represented identically at runtime as a
@@ -285,10 +284,10 @@ integers. OCaml therefore special-cases records or arrays that contain
 packed directly in the data section, with `Double_array_tag` set to signal to
 the collector that the contents are not OCaml values.
 
-<figure style="float: 0">
-  <img src="images/memory-repr/float_array_layout.png"/>
-</figure>
 
+\
+![](images/memory-repr/float_array_layout.png "Float array layout")
+\
 
 First, let's check that float arrays do in fact have a different tag number
 from normal floating-point values:
@@ -465,10 +464,9 @@ collector. The block contents are the contents of the string, with padding
 bytes to align the block on a word boundary. [strings/memory representation
 of]{.idx}[runtime memory representation/string values]{.idx}
 
-<figure style="float: 0">
-  <img src="images/memory-repr/string_block.png"/>
-</figure>
-
+\
+![](images/memory-repr/string_block.png "String block layout")
+\
 
 On a 32-bit machine, the padding is calculated based on the modulo of the
 string length and word size to ensure the result is word-aligned. A 64-bit
@@ -484,10 +482,9 @@ This string representation is a clever way to ensure that the contents are
 always zero-terminated by the padding word and to still compute its length
 efficiently without scanning the whole string. The following formula is used:
 
-<figure style="float: 0">
-  <img src="images/memory-repr/string_size_calc.png"/>
-</figure>
-
+\
+![](images/memory-repr/string_size_calc.png "String size calculation")
+\
 
 The guaranteed `NULL` termination comes in handy when passing a string to C,
 but is not relied upon to compute the length from OCaml code. OCaml strings
@@ -570,4 +567,3 @@ mathematical Fortran libraries. These allow developers to write
 high-performance numerical code for applications that require linear algebra.
 It supports large vectors and matrices, but with static typing safety of
 OCaml to make it easier to write safe algorithms.
-<a data-type="indexterm" data-startref="MAPocaml">&nbsp;</a><a data-type="indexterm" data-startref="VALmemory">&nbsp;</a>

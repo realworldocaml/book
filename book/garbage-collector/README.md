@@ -106,10 +106,9 @@ The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly. [minor heaps/allocating
 on]{.idx}
 
-<figure style="float: 0">
-  <img src="images/gc/minor_heap.png"/>
-</figure>
-
+\
+![](images/gc/minor_heap.png "Minor GC heap")
+\
 
 The runtime stores the boundaries of the minor heap in two pointers that
 delimit the start and end of the heap region (`caml_young_start` and

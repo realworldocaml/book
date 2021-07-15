@@ -48,10 +48,9 @@ figure below is a rough graphical representation of how the list
 `1 :: 2 :: 3 :: []` is laid out as a data structure. The final arrow (from
 the box containing `3`) points to the empty list.[lists/structure of]{.idx}
 
-<figure style="float: 0">
-  <img src="images/lists-and-patterns/lists_layout.png"/>
-</figure>
-
+\
+![](images/lists-and-patterns/lists_layout.png "Lists layout")
+\
 
 Each `::` essentially adds a new block to the proceding picture. Such a block
 contains two things: a reference to the data in that list element, and a
