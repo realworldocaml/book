@@ -71,8 +71,8 @@ let find t key =
 </dl>
 <p>Another important piece of imperative syntax shows up in <code>find</code>: we write <code>array.(index)</code> to grab a value from an array. <code>find</code> also uses <code>List.find_map</code>, which you can see the type of by typing it into the toplevel:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-List.find_map;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
+List.find_map ;;
 &gt;- : 'a list -&gt; f:('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
 </code></pre>
 </div>
@@ -185,7 +185,7 @@ let () = &lt;expr2&gt; in
 <p>Variables in OCaml are never mutable—they can refer to mutable data, but what the variable points to can’t be changed. Sometimes, though, you want to do exactly what you would do with a mutable variable in another language: define a single, mutable value. In OCaml this is typically achieved using a <code>ref</code>, which is essentially a container with a single mutable polymorphic field. <a data-primary="ref cells" data-type="indexterm">&nbsp;</a></p>
 <p>The definition for the <code>ref</code> type is as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a ref = { mutable contents : 'a };;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a ref = { mutable contents : 'a } ;;
 &gt;type 'a ref = { mutable contents : 'a; }
 </code></pre>
 </div>
@@ -203,23 +203,23 @@ let () = &lt;expr2&gt; in
 </dl>
 <p>You can see these in action:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = ref 1;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = ref 1 ;;
 &gt;val x : int ref = {Base.Ref.contents = 1}
-!x;;
+!x ;;
 &gt;- : int = 1
-x := !x + 1;;
+x := !x + 1 ;;
 &gt;- : unit = ()
-!x;;
+!x ;;
 &gt;- : int = 2
 </code></pre>
 </div>
 <p>The preceding are just ordinary OCaml functions, which could be defined as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ref x = { contents = x };;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ref x = { contents = x } ;;
 &gt;val ref : 'a -&gt; 'a ref = &lt;fun&gt;
-let (!) r = r.contents;;
+let (!) r = r.contents ;;
 &gt;val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;
-let (:=) r x = r.contents &lt;- x;;
+let (:=) r x = r.contents &lt;- x ;;
 &gt;val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -235,8 +235,8 @@ let (:=) r x = r.contents &lt;- x;;
 <p>OCaml provides support for traditional imperative looping constructs, in particular, <code>for</code> and <code>while</code> loops. Neither of these constructs is strictly necessary, since they can be simulated with recursive functions. Nonetheless, explicit <code>for</code> and <code>while</code> loops are both more concise and more idiomatic when programming imperatively. <a data-primary="looping constructs" data-type="indexterm">&nbsp;</a><a data-primary="while loops" data-type="indexterm">&nbsp;</a><a data-primary="for loops" data-type="indexterm">&nbsp;</a></p>
 <p>The <code>for</code> loop is the simpler of the two. Indeed, we’ve already seen the <code>for</code> loop in action—the <code>iter</code> function in <code>Dictionary</code> is built using it. Here’s a simple example of <code>for</code>. Note that we open the <code>Stdio</code> library to get access to the <code>printf</code> function.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
-for i = 0 to 3 do printf "i = %d\n" i done;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio ;;
+for i = 0 to 3 do printf "i = %d\n" i done ;;
 &gt;i = 0
 &gt;i = 1
 &gt;i = 2
@@ -246,7 +246,7 @@ for i = 0 to 3 do printf "i = %d\n" i done;;
 </div>
 <p>As you can see, the upper and lower bounds are inclusive. We can also use <code>downto</code> to iterate in the other direction:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 3 downto 0 do printf "i = %d\n" i done;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 3 downto 0 do printf "i = %d\n" i done ;;
 &gt;i = 3
 &gt;i = 2
 &gt;i = 1
@@ -272,11 +272,11 @@ for i = 0 to 3 do printf "i = %d\n" i done;;
   done
 ;;
 &gt;val rev_inplace : 'a array -&gt; unit = &lt;fun&gt;
-let nums = [|1;2;3;4;5|];;
+let nums = [|1;2;3;4;5|] ;;
 &gt;val nums : int array = [|1; 2; 3; 4; 5|]
-rev_inplace nums;;
+rev_inplace nums ;;
 &gt;- : unit = ()
-nums;;
+nums ;;
 &gt;- : int array = [|5; 4; 3; 2; 1|]
 </code></pre>
 </div>
@@ -345,7 +345,7 @@ let prev elt = elt.prev</code></pre>
 <p>Doubly linked lists are a cyclic data structure, meaning that it is possible to follow a nontrivial sequence of pointers that closes in on itself. In general, building cyclic data structures requires the use of side effects. This is done by constructing the data elements first, and then adding cycles using assignment afterward. <a data-primary="let rec" data-type="indexterm">&nbsp;</a><a data-secondary="cyclic" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-primary="cyclic data structures" data-type="indexterm">&nbsp;</a></p>
 <p>There is an exception to this, though: you can construct fixed-size cyclic data structures using <code>let rec</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec endless_loop = 1 :: 2 :: 3 :: endless_loop ;;
 &gt;val endless_loop : int list = [1; 2; 3; &lt;cycle&gt;]
 </code></pre>
 </div>
@@ -424,12 +424,12 @@ let find_el t ~f =
 <p>There are many instances where you basically want to program in a pure style, but you want to make limited use of side effects to improve the performance of your code. Such side effects are sometimes called <em>benign effects</em>, and they are a useful way of leveraging OCaml’s imperative features while still maintaining most of the benefits of pure programming. <a data-primary="lazy keyword" data-type="indexterm">&nbsp;</a><a data-primary="side effects" data-type="indexterm">&nbsp;</a><a data-primary="laziness" data-type="indexterm">&nbsp;</a><a data-secondary="laziness" data-primary="benign effects" data-type="indexterm">&nbsp;</a><a data-secondary="benign effects and" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
 <p>One of the simplest benign effects is <em>laziness</em>. A lazy value is one that is not computed until it is actually needed. In OCaml, lazy values are created using the <code>lazy</code> keyword, which can be used to convert any expression of type <code>s</code> into a lazy value of type <code>s Lazy.t</code>. The evaluation of that expression is delayed until forced with <code>Lazy.force</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let v = lazy (print_endline "performing lazy computation"; Float.sqrt 16.);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let v = lazy (print_endline "performing lazy computation"; Float.sqrt 16.) ;;
 &gt;val v : float lazy_t = &lt;lazy&gt;
-Lazy.force v;;
+Lazy.force v ;;
 &gt;performing lazy computation
 &gt;- : float = 4.
-Lazy.force v;;
+Lazy.force v ;;
 &gt;- : float = 4.
 </code></pre>
 </div>
@@ -447,7 +447,7 @@ Lazy.force v;;
 <p>A <code>lazy_state</code> represents the possible states of a lazy value. A lazy value is <code>Delayed</code> before it has been run, where <code>Delayed</code> holds a function for computing the value in question. A lazy value is in the <code>Value</code> state when it has been forced and the computation ended normally. The <code>Exn</code> case is for when the lazy value has been forced, but the computation ended with an exception. A lazy value is simply a <code>ref</code> containing a <code>lazy_state</code>, where the <code>ref</code> makes it possible to change from being in the <code>Delayed</code> state to being in the <code>Value</code> or <code>Exn</code> states.</p>
 <p>We can create a lazy value from a thunk, i.e., a function that takes a unit argument. Wrapping an expression in a thunk is another way to suspend the computation of an expression: <a data-primary="thunks" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_lazy f = ref (Delayed f);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_lazy f = ref (Delayed f) ;;
 &gt;val create_lazy : (unit -&gt; 'a) -&gt; 'a lazy_state ref = &lt;fun&gt;
 let v =
   create_lazy (fun () -&gt;
@@ -476,10 +476,10 @@ print_endline "performing lazy computation"; Float.sqrt 16.)
 </div>
 <p>Which we can use in the same way we used <code>Lazy.force</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">force v;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">force v ;;
 &gt;performing lazy computation
 &gt;- : float = 4.
-force v;;
+force v ;;
 &gt;- : float = 4.
 </code></pre>
 </div>
@@ -519,7 +519,7 @@ force v;;
       ]
 ;;
 &gt;val edit_distance : string -&gt; string -&gt; int = &lt;fun&gt;
-edit_distance "OCaml" "ocaml";;
+edit_distance "OCaml" "ocaml" ;;
 &gt;- : int = 2
 </code></pre>
 </div>
@@ -546,10 +546,10 @@ edit_distance "OCaml" "ocaml";;
 </div>
 <p>And now we can use this to try out some examples:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance "OCaml" "ocaml");;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance "OCaml" "ocaml") ;;
 &gt;Time: 0.655651092529 ms
 &gt;- : int = 2
-time (fun () -&gt; edit_distance "OCaml 4.09" "ocaml 4.09");;
+time (fun () -&gt; edit_distance "OCaml 4.09" "ocaml 4.09") ;;
 &gt;Time: 2541.6533947 ms
 &gt;- : int = 2
 </code></pre>
@@ -566,10 +566,10 @@ if i &lt;= 1 then i else fib (i - 1) + fib (i - 2)
 </div>
 <p>This is, however, exponentially slow, for the same reason that <code>edit_distance</code> was slow: we end up making many redundant calls to <code>fib</code>. It shows up quite dramatically in the performance:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; fib 20);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; fib 20) ;;
 &gt;Time: 1.14369392395 ms
 &gt;- : int = 6765
-time (fun () -&gt; fib 40);;
+time (fun () -&gt; fib 40) ;;
 &gt;Time: 14752.7184486 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -577,12 +577,12 @@ time (fun () -&gt; fib 40);;
 <p>As you can see, <code>fib 40</code> takes thousands of times longer to compute than <code>fib 20</code>.</p>
 <p>So, how can we use memoization to make this faster? The tricky bit is that we need to insert the memoization before the recursive calls within <code>fib</code>. We can’t just define <code>fib</code> in the ordinary way and memoize it after the fact and expect the first call to <code>fib</code> to be improved.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memoize (module Int) fib;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memoize (module Int) fib ;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-time (fun () -&gt; fib 40);;
+time (fun () -&gt; fib 40) ;;
 &gt;Time: 18174.5970249 ms
 &gt;- : int = 102334155
-time (fun () -&gt; fib 40);;
+time (fun () -&gt; fib 40) ;;
 &gt;Time: 0.00524520874023 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -598,9 +598,9 @@ time (fun () -&gt; fib 40);;
 </div>
 <p>We can now turn this back into an ordinary Fibonacci function by tying the recursive knot:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec fib i = fib_norec fib i;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec fib i = fib_norec fib i ;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-fib 20;;
+fib 20 ;;
 &gt;- : int = 6765
 </code></pre>
 </div>
@@ -611,9 +611,9 @@ fib 20;;
   f
 ;;
 &gt;val make_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
-let fib = make_rec fib_norec;;
+let fib = make_rec fib_norec ;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-fib 20;;
+fib 20 ;;
 &gt;- : int = 6765
 </code></pre>
 </div>
@@ -634,9 +634,9 @@ fib 20;;
 <p>We’re using the reference here as a way of tying the recursive knot without using a <code>let rec</code>, which for reasons we’ll describe later wouldn’t work here.</p>
 <p>Using <code>memo_rec</code>, we can now build an efficient version of <code>fib</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memo_rec (module Int) fib_norec;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memo_rec (module Int) fib_norec ;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-time (fun () -&gt; fib 40);;
+time (fun () -&gt; fib 40) ;;
 &gt;Time: 0.121355056763 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -655,7 +655,7 @@ if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2))
 <p>But memoization is a good approach for optimizing <code>edit_distance</code>, and we can apply the same approach we used on <code>fib</code> here. We will need to change <code>edit_distance</code> to take a pair of strings as a single argument, since <code>memo_rec</code> only works on single-argument functions. (We can always recover the original interface with a wrapper function.) With just that change and the addition of the <code>memo_rec</code> call, we can get a memoized version of <code>edit_distance</code>. The memoization key is going to be a pair of strings, so we need to get our hands on a module with the necessary functionality for building a hash-table in <code>Base</code>.</p>
 <p>Writing hash-functions and equality tests and the like by hand can be tedious and error prone, so instead we’ll use a few different syntax extensions for deriving the necessary functionality automatically. By enabling <code>ppx_jane</code>, we pull in a collection of such derivers, three of which we use in defining <code>String_pair</code> below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane" ;;
 module String_pair = struct
   type t = string * string [@@deriving sexp_of, hash, compare]
 end
@@ -693,7 +693,7 @@ end
 </div>
 <p>This new version of <code>edit_distance</code> is much more efficient than the one we started with; the following call is many thousands of times faster than it was without memoization.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance ("OCaml 4.09","ocaml 4.09"));;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance ("OCaml 4.09","ocaml 4.09")) ;;
 &gt;Time: 0.964403152466 ms
 &gt;- : int = 2
 </code></pre>
@@ -718,13 +718,13 @@ end
 <p>To avoid such impossible cases, the compiler only allows three possible constructs to show up on the righthand side of a <code>let rec</code>: a function definition, a constructor, or the lazy keyword. This excludes some reasonable things, like our definition of <code>memo_rec</code>, but it also blocks things that don’t make sense, like our definition of <code>x</code>.</p>
 <p>It’s worth noting that these restrictions don’t show up in a lazy language like Haskell. Indeed, we can make something like our definition of <code>x</code> work if we use OCaml’s laziness:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec x = lazy (force x + 1);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec x = lazy (force x + 1) ;;
 &gt;val x : int lazy_t = &lt;lazy&gt;
 </code></pre>
 </div>
 <p>Of course, actually trying to compute this will fail. OCaml’s <code>lazy</code> throws an exception when a lazy value tries to force itself as part of its own evaluation.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">force x;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">force x ;;
 &gt;Exception: Lazy.Undefined
 </code></pre>
 </div>
@@ -736,7 +736,7 @@ end
 ;;
 &gt;val lazy_memo_rec : 'a Hashtbl.Key.t -&gt; (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b =
 &gt;  &lt;fun&gt;
-time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40);;
+time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40) ;;
 &gt;Time: 0.181913375854 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -810,7 +810,7 @@ The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</code></pre>
 </div>
 <p>Unlike C’s <code>printf</code>, the <code>printf</code> in OCaml is type-safe. In particular, if we provide an argument whose type doesn’t match what’s presented in the format string, we’ll get a type error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">printf "An integer: %i\n" 4.5;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">printf "An integer: %i\n" 4.5 ;;
 &gt;Line 1, characters 27-30:
 &gt;Error: This expression has type float but an expression was expected of type
 &gt;         int
@@ -821,9 +821,9 @@ The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</code></pre>
 <p>The format strings used by <code>printf</code> turn out to be quite different from ordinary strings. This difference ties to the fact that OCaml format strings, unlike their equivalent in C, are type-safe. In particular, the compiler checks that the types referred to by the format string match the types of the rest of the arguments passed to <code>printf</code>.</p>
 <p>To check this, OCaml needs to analyze the contents of the format string at compile time, which means the format string needs to be available as a string literal at compile time. Indeed, if you try to pass an ordinary string to <code>printf</code>, the compiler will complain:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fmt = "%i is an integer\n";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fmt = "%i is an integer\n" ;;
 &gt;val fmt : string = "%i is an integer\n"
-printf fmt 3;;
+printf fmt 3 ;;
 &gt;Line 1, characters 8-11:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         ('a -&gt; 'b, out_channel, unit) format =
@@ -832,7 +832,7 @@ printf fmt 3;;
 </div>
 <p>If OCaml infers that a given string literal is a format string, then it parses it at compile time as such, choosing its type in accordance with the formatting directives it finds. Thus, if we add a type annotation indicating that the string we’re defining is actually a format string, it will be interpreted as such. (Here, we open the CamlinternalFormatBasics so that the representation of the format string that’s printed out won’t fill the whole page.)</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open CamlinternalFormatBasics;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open CamlinternalFormatBasics ;;
 let fmt : ('a, 'b, 'c) format =
 "%i is an integer\n"
 ;;
@@ -845,7 +845,7 @@ let fmt : ('a, 'b, 'c) format =
 </div>
 <p>And accordingly, we can pass it to <code>printf</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">printf fmt 3;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">printf fmt 3 ;;
 &gt;3 is an integer
 &gt;- : unit = ()
 </code></pre>
@@ -899,16 +899,16 @@ let sum_file filename =
   sum
 ;;
 &gt;val sum_file : string -&gt; int = &lt;fun&gt;
-create_number_file "numbers.txt" [1;2;3;4;5];;
+create_number_file "numbers.txt" [1;2;3;4;5] ;;
 &gt;- : unit = ()
-sum_file "numbers.txt";;
+sum_file "numbers.txt" ;;
 &gt;- : int = 15
 </code></pre>
 </div>
 <p>For both of these functions, we followed the same basic sequence: we first create the channel, then use the channel, and finally close the channel. The closing of the channel is important, since without it, we won’t release resources associated with the file back to the operating system.</p>
 <p>One problem with the preceding code is that if it throws an exception in the middle of its work, it won’t actually close the file. If we try to read a file that doesn’t actually contain numbers, we’ll see such an error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sum_file "/etc/hosts";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sum_file "/etc/hosts" ;;
 &gt;Exception:
 &gt;(Failure
 &gt;  "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
@@ -916,9 +916,9 @@ sum_file "numbers.txt";;
 </div>
 <p>And if we do this over and over in a loop, we’ll eventually run out of file descriptors:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done ;;
 &gt;- : unit = ()
-sum_file "numbers.txt";;
+sum_file "numbers.txt" ;;
 &gt;Error: I/O error: ...: Too many open files
 </code></pre>
 </div>
@@ -937,9 +937,9 @@ sum_file "numbers.txt";;
 </div>
 <p>And now, the file descriptor leak is gone:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -&gt; () done;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -&gt; () done ;;
 &gt;- : unit = ()
-sum_file "numbers.txt";;
+sum_file "numbers.txt" ;;
 &gt;- : int = 15
 </code></pre>
 </div>
@@ -1038,11 +1038,11 @@ List.exists ~f:(fun x -&gt; Float.O.(Lazy.force x &lt; 0.)) [x;y;z]
 <p><code>remember</code> is not a terribly useful function, but it raises an interesting question: what is its type?</p>
 <p>On its first call, <code>remember</code> returns the same value it’s passed, which means its input type and return type should match. Accordingly, <code>remember</code> should have type <code>t -&gt; t</code> for some type <code>t</code>. There’s nothing about <code>remember</code> that ties the choice of <code>t</code> to any particular type, so you might expect OCaml to generalize, replacing <code>t</code> with a polymorphic type variable. It’s this kind of generalization that gives us polymorphic types in the first place. The identity function, as an example, gets a polymorphic type in this way:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let identity x = x;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let identity x = x ;;
 &gt;val identity : 'a -&gt; 'a = &lt;fun&gt;
-identity 3;;
+identity 3 ;;
 &gt;- : int = 3
-identity "five";;
+identity "five" ;;
 &gt;- : string = "five"
 </code></pre>
 </div>
@@ -1054,11 +1054,11 @@ identity "five";;
 <p>The underscore in the type variable <code>'_weak1</code> tells us that the variable is only <em>weakly polymorphic</em>, which is to say that it can be used with any <em>single</em> type. That makes sense because, unlike <code>identity</code>, <code>remember</code> always returns the value it was passed on its first invocation, which means its return value must always have the same type. <a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
 <p>OCaml will convert a weakly polymorphic variable to a concrete type as soon as it gets a clue as to what concrete type it is to be used as:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remember_three () = remember 3;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remember_three () = remember 3 ;;
 &gt;val remember_three : unit -&gt; int = &lt;fun&gt;
-remember;;
+remember ;;
 &gt;- : int -&gt; int = &lt;fun&gt;
-remember "avocado";;
+remember "avocado" ;;
 &gt;Line 1, characters 10-19:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
@@ -1077,20 +1077,20 @@ remember "avocado";;
 </ul>
 <p>Thus, the following expression is a simple value, and as a result, the types of values contained within it are allowed to be polymorphic:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; [x;x]);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; [x;x]) ;;
 &gt;- : 'a -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>But, if we write down an expression that isn’t a simple value by the preceding definition, we’ll get different results.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity (fun x -&gt; [x;x]);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity (fun x -&gt; [x;x]) ;;
 &gt;- : '_weak2 -&gt; '_weak2 list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>In principle, it would be safe to infer a fully polymorphic variable here, but because OCaml’s type system doesn’t distinguish between pure and impure functions, it can’t separate those two cases.</p>
 <p>The value restriction doesn’t require that there is no mutable state, only that there is no <em>persistent</em> mutable state that could share values between uses of the same function. Thus, a function that produces a fresh reference every time it’s called can have a fully polymorphic type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let f () = ref None;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let f () = ref None ;;
 &gt;val f : unit -&gt; 'a option ref = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1101,21 +1101,21 @@ remember "avocado";;
 <p>Most of the time, when the value restriction kicks in, it’s for a good reason, i.e., it’s because the value in question can actually only safely be used with a single type. But sometimes, the value restriction kicks in when you don’t want it. The most common such case is partially applied functions. A partially applied function, like any function application, is not a simple value, and as such, functions created by partial application are sometimes less general than you might expect. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
 <p>Consider the <code>List.init</code> function, which is used for creating lists where each element is created by calling a function on the index of that element:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.init;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.init ;;
 &gt;- : int -&gt; f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;
-List.init 10 ~f:Int.to_string;;
+List.init 10 ~f:Int.to_string ;;
 &gt;- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 </code></pre>
 </div>
 <p>Imagine we wanted to create a specialized version of <code>List.init</code> that always created lists of length 10. We could do that using partial application, as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_init_10 = List.init 10;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_init_10 = List.init 10 ;;
 &gt;val list_init_10 : f:(int -&gt; '_weak3) -&gt; '_weak3 list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>As you can see, we now infer a weakly polymorphic type for the resulting function. That’s because there’s nothing that guarantees that <code>List.init</code> isn’t creating a persistent <code>ref</code> somewhere inside of it that would be shared across multiple calls to <code>list_init_10</code>. We can eliminate this possibility, and at the same time get the compiler to infer a polymorphic type, by avoiding partial application:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_init_10 ~f = List.init 10 ~f;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_init_10 ~f = List.init 10 ~f ;;
 &gt;val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1127,21 +1127,21 @@ List.init 10 ~f:Int.to_string;;
 <p>But OCaml actually has a relaxed version of the value restriction that can make use of type information to allow polymorphic types for things that are not simple values.</p>
 <p>For example, we saw that a function application, even a simple application of the identity function, is not a simple value and thus can turn a polymorphic value into a weakly polymorphic one:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity (fun x -&gt; [x;x]);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity (fun x -&gt; [x;x]) ;;
 &gt;- : '_weak4 -&gt; '_weak4 list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>But that’s not always the case. When the type of the returned value is immutable, then OCaml can typically infer a fully polymorphic type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity [];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity [] ;;
 &gt;- : 'a list = []
 </code></pre>
 </div>
 <p>On the other hand, if the returned type is mutable, then the result will be weakly polymorphic:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[||];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[||] ;;
 &gt;- : 'a array = [||]
-identity [||];;
+identity [||] ;;
 &gt;- : '_weak5 array = [||]
 </code></pre>
 </div>
@@ -1184,9 +1184,9 @@ end
 </div>
 <p>The details of the implementation don’t matter so much, but it’s important to note that a <code>Concat_list.t</code> is unquestionably an immutable value. However, when it comes to the value restriction, OCaml treats it as if it were mutable:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Concat_list.empty;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Concat_list.empty ;;
 &gt;- : 'a Concat_list.t = &lt;abstr&gt;
-identity Concat_list.empty;;
+identity Concat_list.empty ;;
 &gt;- : '_weak6 Concat_list.t = &lt;abstr&gt;
 </code></pre>
 </div>
@@ -1230,7 +1230,7 @@ end
 </div>
 <p>Now, we can apply the identity function to <code>Concat_list.empty</code> without losing any polymorphism:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity Concat_list.empty;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">identity Concat_list.empty ;;
 &gt;- : 'a Concat_list.t = &lt;abstr&gt;
 </code></pre>
 </div>

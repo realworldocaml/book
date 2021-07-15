@@ -43,15 +43,15 @@
 <p>The default minor heap size in OCaml is normally 2 MB on 64-bit platforms, but this is increased to 8 MB if you use Core (which generally prefers default settings that improve performance, but at the cost of a bigger memory profile). This setting can be overridden via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started by calling the <code>Gc.set</code> function:</p>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core_kernel;;
-let c = Gc.get ();;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core_kernel ;;
+let c = Gc.get () ;;
 &gt;val c : Core_kernel.Gc.control =
 &gt;  {Core_kernel.Gc.Control.minor_heap_size = 262144;
 &gt;   major_heap_increment = 15; space_overhead = 80; verbose = 0;
 &gt;   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
 &gt;   window_size = 1; custom_major_ratio = 44; custom_minor_ratio = 100;
 &gt;   custom_minor_max_size = 8192}
-Gc.tune ~minor_heap_size:(262144 * 2) ();;
+Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
@@ -84,7 +84,7 @@ Gc.tune ~minor_heap_size:(262144 * 2) ();;
 <p>If you anticipate allocating some large OCaml values or many small values in one go, then setting the heap increment to a larger value will improve performance by reducing the amount of heap resizing required in order to satisfy the allocation requests. A small increment may result in lots of smaller heap chunks spread across different regions of virtual memory that require more housekeeping in the OCaml runtime to keep track of them:</p>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~major_heap_increment:(1000448 * 4) ();;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
@@ -155,9 +155,9 @@ Gc.tune ~minor_heap_size:(262144 * 2) ();;
 <p>You can trigger a single slice of the major GC via the <code>major_slice</code> call. This performs a minor collection first, and then a single slice. The size of the slice is normally automatically computed by the GC to an appropriate value and returns this value so that you can modify it in future calls if necessary:</p>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.major_slice 0;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.major_slice 0 ;;
 &gt;- : int = 0
-Gc.full_major ();;
+Gc.full_major () ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
@@ -173,7 +173,7 @@ Gc.full_major ();;
 <p>A value of <code>0</code> triggers a compaction after every major garbage collection cycle, whereas the maximum value of <code>1000000</code> disables heap compaction completely. The default settings should be fine unless you have unusual allocation patterns that are causing a higher-than-usual rate of compactions:</p>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~max_overhead:0 ();;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~max_overhead:0 () ;;
 &gt;- : unit = ()
 </code></pre>
 </div>

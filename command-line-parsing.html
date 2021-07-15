@@ -51,16 +51,16 @@ let do_hash file =
 <p>The <code>summary</code> argument is a one-line description which goes at the top of the help screen, while the (optional) <code>readme</code> argument is for providing a more detailed description that will be provided on demand.</p>
 <p>The final argument is the most interesting one, which is the parameter parser. This will be easier to understand if we first learn a bit more about the type signatures of the various components we’ve been using. Let’s do that by recreating some of this code in the toplevel.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let filename_param = Command.Param.(anon ("filename" %: string));;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let filename_param = Command.Param.(anon ("filename" %: string)) ;;
 &gt;val filename_param : string Command.Spec.param = &lt;abstr&gt;
 </code></pre>
 </div>
 <p>The type parameter of <code>filename_param</code> is there to indicate the type of the value returned by the parser; in this case, <code>string</code>.</p>
 <p>But <code>Command.basic</code> requires a parameter parser that returns a value of type <code>unit -&gt; unit</code>. We can see that by using <code>#show</code> to explore the types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.basic;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.basic ;;
 &gt;val basic : unit Command.basic_command
-#show Command.basic_command;;
+#show Command.basic_command ;;
 &gt;type nonrec 'result basic_command =
 &gt;    summary:string -&gt;
 &gt;    ?readme:(unit -&gt; string) -&gt;
@@ -71,7 +71,7 @@ let do_hash file =
 <p>It makes sense that <code>Command.basic</code> wants a parser that returns a function; after all, in the end, it needs a function it can run that constitutes the execution of the program. But how do we get such a parser, given the parser we have returns just a filename?</p>
 <p>The answer is to use a <code>map</code> function to change the value returned by the parser. As you can see below, the type of <code>Command.Param.map</code> is very similar to the code of <code>List.map</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.map;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.map ;;
 &gt;val map : 'a Command.Spec.param -&gt; f:('a -&gt; 'b) -&gt; 'b Command.Spec.param
 </code></pre>
 </div>
@@ -148,7 +148,7 @@ let () =
 <h3>Multi-argument commands</h3>
 <p>All the examples thus far have involved a single argument, but we can of course create multi-argument commands as well. We can make a parser for multiple arguments by binding together simpler parsers, using the function <code>Command.Param.both</code>. Here is its type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.both;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.both ;;
 &gt;val both :
 &gt;  'a Command.Spec.param -&gt;
 &gt;  'b Command.Spec.param -&gt; ('a * 'b) Command.Spec.param
@@ -468,40 +468,14 @@ dune exec -- ./md5.exe -s "ocaml rocks"
 &gt;5a118fe92ac3b6c7854c595ecf6419cb
 </code></pre>
 </div>
-<p>The <code>-s</code> flag in our specification requires a <code>string</code> argument and isn’t optional. The Command parser outputs an error message if the flag isn’t supplied, as with the anonymous arguments in earlier examples. <a data-type="xref" href="command-line-parsing.html#table14-2">Table14 2</a> contains a list of some of the functions that you can wrap flags in to control how they are parsed. <a data-primary="flag functions" data-type="indexterm">&nbsp;</a></p>
-<div data-type="table" id="table14-2">
-<table>
-<caption>Flag functions</caption>
-<thead>
-<tr class="header">
-<th>Flag function</th>
-<th>OCaml type</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>required</code> <em>arg</em></td>
-<td><em>arg</em> and error if not present</td>
-</tr>
-<tr class="even">
-<td><code>optional</code> <em>arg</em></td>
-<td><em>arg</em> <code>option</code></td>
-</tr>
-<tr class="odd">
-<td><code>optional_with_default</code> <em>val</em> <em>arg</em></td>
-<td><em>arg</em> with default <em>val</em> if not present</td>
-</tr>
-<tr class="even">
-<td><code>listed</code> <em>arg</em></td>
-<td><em>arg</em> <code>list</code>, flag may appear multiple times</td>
-</tr>
-<tr class="odd">
-<td><code>no_arg</code></td>
-<td><code>bool</code> that is true if flag is present</td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>The <code>-s</code> flag in our specification requires a <code>string</code> argument and isn’t optional. The Command parser outputs an error message if the flag isn’t supplied, as with the anonymous arguments in earlier examples. There are a number of other functions that you can wrap flags in to control how they are parsed: <a data-primary="flag functions" data-type="indexterm">&nbsp;</a></p>
+<ul>
+<li><code>required *arg*</code> will return <code>*arg*</code> and error if not present</li>
+<li><code>optional *arg*</code> with return <code>*arg* option</code></li>
+<li><code>optional_with_default *val* *arg*</code> will return <code>*arg*</code> with default <code>*val*</code> if not present</li>
+<li><code>listed *arg*</code> will return <code>*arg* list</code> (this flag may appear multiple times)</li>
+<li><code>no_arg</code> will return a <code>bool</code> that is true if the flag is present</li>
+</ul>
 <p>The flags affect the type of the callback function in exactly the same way as anonymous arguments do. This lets you change the specification and ensure that all the callback functions are updated appropriately, without runtime errors.</p>
 </section>
 <section class="level2" id="grouping-sub-commands-together">
@@ -517,7 +491,7 @@ $ opam install core --verbose</code></pre>
 <p>The <code>config</code>, <code>remote</code>, and <code>install</code> keywords form a logical grouping of commands that factor out a set of flags and arguments. This lets you prevent flags that are specific to a particular subcommand from leaking into the general configuration space. <a data-primary="install keyword" data-type="indexterm">&nbsp;</a><a data-primary="remote keyword" data-type="indexterm">&nbsp;</a></p>
 <p>This usually only becomes a concern when your application organically grows features. Luckily, it’s simple to extend your application to do this in Command: just use <code>Command.group</code>, which lets you merge a collection of <code>Command.t</code>’s into one. <a data-primary="Command.group" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.group;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.group ;;
 &gt;- : summary:string -&gt;
 &gt;    ?readme:(unit -&gt; string) -&gt;
 &gt;    ?preserve_subcommand_order:unit -&gt;

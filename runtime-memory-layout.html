@@ -14,9 +14,9 @@
 <h2>OCaml Blocks and Values</h2>
 <p>A running OCaml program uses blocks of memory (i.e., contiguous sequences of words in RAM) to represent values such as tuples, records, closures, or arrays. An OCaml program implicitly allocates a block of memory when such a value is created: <a id="blck" data-primary="blocks (of memory)" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: int };;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: int } ;;
 &gt;type t = { foo : int; bar : int; }
-let x = { foo = 13; bar = 14 };;
+let x = { foo = 13; bar = 14 } ;;
 &gt;val x : t = {foo = 13; bar = 14}
 </code></pre>
 </div>
@@ -48,68 +48,20 @@ let x = { foo = 13; bar = 14 };;
 <p>The <code>size</code> field records the length of the block in memory words. This is 22 bits on 32-bit platforms, which is the reason OCaml strings are limited to 16 MB on that architecture. If you need bigger strings, either switch to a 64-bit host, or use the <code>Bigarray</code> module.</p>
 <p>The 2-bit <code>color</code> field is used by the GC to keep track of its state during mark-and-sweep collection. We’ll come back to this field in <a data-type="xref" href="garbage-collector.html#understanding-the-garbage-collector">Chapter 21, Understanding The Garbage Collector</a>. This tag isn’t exposed to OCaml source code in any case.</p>
 <p>A block’s tag byte is multipurpose, and indicates whether the data array represents opaque bytes or fields. If a block’s tag is greater than or equal to <code>No_scan_tag</code> (251), then the block’s data are all opaque bytes, and are not scanned by the collector. The most common such block is the <code>string</code> type, which we describe in more detail later in this chapter.</p>
-<p>The exact representation of values inside a block depends on their static OCaml type. All OCaml types are distilled down into <code>values</code>, and summarized in <a data-type="xref" href="runtime-memory-layout.html#table20-1_ocaml">Table20 1_ocaml</a>.<a data-startref="blck" data-type="indexterm">&nbsp;</a></p>
-<div data-type="table" id="table20-1_ocaml">
-<table>
-<caption>OCaml values</caption>
-<colgroup>
-<col style="width: 44%">
-<col style="width: 55%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>OCaml value</th>
-<th>Representation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>int</code> or <code>char</code></td>
-<td>Directly as a value, shifted left by 1 bit, with the least significant bit set to 1.</td>
-</tr>
-<tr class="even">
-<td><code>unit</code>, <code>[]</code>, <code>false</code></td>
-<td>As OCaml <code>int</code> 0.</td>
-</tr>
-<tr class="odd">
-<td><code>true</code></td>
-<td>As OCaml <code>int</code> 1.</td>
-</tr>
-<tr class="even">
-<td><code>Foo | Bar</code></td>
-<td>As ascending OCaml <code>int</code>s, starting from 0.</td>
-</tr>
-<tr class="odd">
-<td><code>Foo | Bar of int</code></td>
-<td>Variants with parameters are boxed, while variants with no parameters are unboxed.</td>
-</tr>
-<tr class="even">
-<td>Polymorphic variants</td>
-<td>Variable space usage depending on the number of parameters.</td>
-</tr>
-<tr class="odd">
-<td>Floating-point number</td>
-<td>As a block with a single field containing the double-precision float.</td>
-</tr>
-<tr class="even">
-<td>String</td>
-<td>Word-aligned byte arrays with an explicit length.</td>
-</tr>
-<tr class="odd">
-<td><code>[1; 2; 3]</code></td>
-<td>As <code>1::2::3::[]</code> where <code>[]</code> is an int, and <code>h::t</code> a block with tag 0 and two parameters.</td>
-</tr>
-<tr class="even">
-<td>Tuples, records, and arrays</td>
-<td>An array of values. Arrays can be variable size, but tuples and records are fixed-size.</td>
-</tr>
-<tr class="odd">
-<td>Records or arrays, all float</td>
-<td>Special tag for unboxed arrays of floats, or records that only have <code>float</code> fields.</td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>The exact representation of values inside a block depends on their static OCaml type. All OCaml types are distilled down into <code>values</code>, and summarized below.</p>
+<ul>
+<li><code>int</code> or <code>char</code> are stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1.</li>
+<li><code>unit</code>, <code>[]</code>, <code>false</code> are all stored as OCaml <code>int</code> 0.</li>
+<li><code>true</code> is stored as OCaml <code>int</code> 1.</li>
+<li><code>Foo | Bar</code> variants are stored as ascending OCaml <code>int</code>s, starting from 0.</li>
+<li><code>Foo | Bar of int</code> variants with parameters are boxed, while variants with no parameters are unboxed.</li>
+<li>Polymorphic variants take up variable space usage depending on the number of parameters.</li>
+<li>Floating-point numbers are stored as a block with a single field containing the double-precision float.</li>
+<li>Strings are word-aligned byte arrays with an explicit length.</li>
+<li><code>[1; 2; 3]</code> lists are stored as <code>1::2::3::[]</code> where <code>[]</code> is an int, and <code>h::t</code> a block with tag 0 and two parameters.</li>
+<li>Tuples, records, and arrays are stored as a C array of values. Arrays can be variable size, but tuples and records are fixed-size.</li>
+<li>Records or arrays that are all float use a special tag for unboxed arrays of floats, or records that only have <code>float</code> fields.</li>
+</ul>
 <section class="level3" id="integers-characters-and-other-basic-types">
 <h3>Integers, Characters, and Other Basic Types</h3>
 <p>Many basic types are efficiently stored as unboxed integers at runtime. The native <code>int</code> type is the most obvious, although it drops a single bit of precision due to the tag bit. Other atomic types such as <code>unit</code> and the empty list <code>[]</code> value are stored as constant integers. Boolean values have a value of <code>1</code> and <code>0</code> for <code>true</code> and <code>false</code>, respectively. <a data-primary="integers" data-type="indexterm">&nbsp;</a><a data-primary="unboxed integers" data-type="indexterm">&nbsp;</a></p>
@@ -124,9 +76,9 @@ let x = { foo = 13; bar = 14 };;
 <p>Tuples, records, and arrays are all represented identically at runtime as a block with tag <code>0</code>. Tuples and records have constant sizes determined at compile time, whereas arrays can be of variable length. While arrays are restricted to containing a single type of element in the OCaml type system, this is not required by the memory representation. <a data-secondary="memory representation of" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="memory representation of" data-primary="records" data-type="indexterm">&nbsp;</a><a data-primary="tuples" data-type="indexterm">&nbsp;</a><a data-secondary="tuples, records, and arrays" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <p>You can check the difference between a block and a direct integer yourself using the <code>Obj</code> module, which exposes the internal representation of values to OCaml code:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.is_block (Obj.repr (1,2,3));;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.is_block (Obj.repr (1,2,3)) ;;
 &gt;- : bool = true
-Obj.is_block (Obj.repr 1);;
+Obj.is_block (Obj.repr 1) ;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -135,9 +87,9 @@ Obj.is_block (Obj.repr 1);;
 <h3>Floating-Point Numbers and Arrays</h3>
 <p>Floating-point numbers in OCaml are always stored as full, double-precision values. Individual floating-point values are stored as a block with a single field that contains the number. This block has the <code>Double_tag</code> set, which signals to the collector that the floating-point value is not to be scanned: <a data-primary="floating-point values" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr 1.0);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr 1.0) ;;
 &gt;- : int = 253
-Obj.double_tag;;
+Obj.double_tag ;;
 &gt;- : int = 253
 </code></pre>
 </div>
@@ -147,21 +99,21 @@ Obj.double_tag;;
 </figure>
 <p>First, let’s check that float arrays do in fact have a different tag number from normal floating-point values:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.double_tag;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.double_tag ;;
 &gt;- : int = 253
-Obj.double_array_tag;;
+Obj.double_array_tag ;;
 &gt;- : int = 254
 </code></pre>
 </div>
 <p>This tells us that float arrays have a tag value of 254. Now let’s test some sample values using the <code>Obj.tag</code> function to check that the allocated block has the expected runtime tag, and also use <code>Obj.double_field</code> to retrieve a float from within the block:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;
 &gt;- : int = 254
-Obj.tag (Obj.repr (1.0, 2.0, 3.0) );;
+Obj.tag (Obj.repr (1.0, 2.0, 3.0) ) ;;
 &gt;- : int = 0
-Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1;;
+Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;
 &gt;- : float = 2.2
-Obj.double_field (Obj.repr 1.234) 0;;
+Obj.double_field (Obj.repr 1.234) 0 ;;
 &gt;- : float = 1.234
 </code></pre>
 </div>
@@ -173,30 +125,30 @@ Obj.double_field (Obj.repr 1.234) 0;;
 <h2>Variants and Lists</h2>
 <p>Basic variant types with no extra parameters for any of their branches are simply stored as an OCaml integer, starting with <code>0</code> for the first option and in ascending order: <a data-secondary="memory representation of" data-primary="variant types" data-type="indexterm">&nbsp;</a><a data-secondary="memory representation of" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="variants and lists" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange | Pear;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange | Pear ;;
 &gt;type t = Apple | Orange | Pear
-((Obj.magic (Obj.repr Apple)) : int);;
+((Obj.magic (Obj.repr Apple)) : int) ;;
 &gt;- : int = 0
-((Obj.magic (Obj.repr Pear)) : int);;
+((Obj.magic (Obj.repr Pear)) : int) ;;
 &gt;- : int = 2
-Obj.is_block (Obj.repr Apple);;
+Obj.is_block (Obj.repr Apple) ;;
 &gt;- : bool = false
 </code></pre>
 </div>
 <p><code>Obj.magic</code> unsafely forces a type cast between any two OCaml types; in this example, the <code>int</code> type hint retrieves the runtime integer value. The <code>Obj.is_block</code> confirms that the value isn’t a more complex block, but just an OCaml <code>int</code>.</p>
 <p>Variants that have parameters are a little more complex. They are stored as blocks, with the value <em>tags</em> ascending from 0 (counting from leftmost variants with parameters). The parameters are stored as words in the block:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange of int | Pear of string | Kiwi;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange of int | Pear of string | Kiwi ;;
 &gt;type t = Apple | Orange of int | Pear of string | Kiwi
-Obj.is_block (Obj.repr (Orange 1234));;
+Obj.is_block (Obj.repr (Orange 1234)) ;;
 &gt;- : bool = true
-Obj.tag (Obj.repr (Orange 1234));;
+Obj.tag (Obj.repr (Orange 1234)) ;;
 &gt;- : int = 0
-Obj.tag (Obj.repr (Pear "xyz"));;
+Obj.tag (Obj.repr (Pear "xyz")) ;;
 &gt;- : int = 1
-(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int);;
+(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;;
 &gt;- : int = 1234
-(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string);;
+(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;
 &gt;- : string = "xyz"
 </code></pre>
 </div>
@@ -214,10 +166,10 @@ Obj.tag (Obj.repr (Pear "xyz"));;
 <p>Polymorphic variants are more flexible than normal variants when writing code but are slightly less efficient at runtime. This is because there isn’t as much static compile-time information available to optimize their memory layout. <a data-secondary="memory representation of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphic variants" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <p>A polymorphic variant without any parameters is stored as an unboxed integer and so only takes up one word of memory, just like a normal variant. This integer value is determined by applying a hash function to the <em>name</em> of the variant. The hash function is exposed via the <code>compiler-libs</code> package that reveals some of the internals of the OCaml compiler:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ocaml-compiler-libs.common";;
-Btype.hash_variant "Foo";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ocaml-compiler-libs.common" ;;
+Btype.hash_variant "Foo" ;;
 &gt;- : int = 3505894
-(Obj.magic (Obj.repr `Foo) : int);;
+(Obj.magic (Obj.repr `Foo) : int) ;;
 &gt;- : int = 3505894
 </code></pre>
 </div>
@@ -232,36 +184,13 @@ Btype.hash_variant "Foo";;
 <figure style="float: 0">
 <img src="images/memory-repr/string_block.png">
 </figure>
-<p>On a 32-bit machine, the padding is calculated based on the modulo of the string length and word size to ensure the result is word-aligned. A 64-bit machine extends the potential padding up to 7 bytes instead of 3 (see <a data-type="xref" href="runtime-memory-layout.html#chapter_20_table">Chapter_20_table</a>).</p>
-<div data-type="table" id="chapter_20_table">
-<table>
-<caption>String length and padding</caption>
-<thead>
-<tr class="header">
-<th>String length mod 4</th>
-<th>Padding</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0</td>
-<td><code>00 00 00 03</code></td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td><code>00 00 02</code></td>
-</tr>
-<tr class="odd">
-<td>2</td>
-<td><code>00 01</code></td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td><code>00</code></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>On a 32-bit machine, the padding is calculated based on the modulo of the string length and word size to ensure the result is word-aligned. A 64-bit machine extends the potential padding up to 7 bytes instead of 3. Given a string length modulo 4:</p>
+<ul>
+<li><code>0</code> has padding <code>00 00 00 03</code></li>
+<li><code>1</code> has padding <code>00 00 02</code></li>
+<li><code>2</code> has padding <code>00 01</code></li>
+<li><code>3</code> has padding <code>00</code></li>
+</ul>
 <p>This string representation is a clever way to ensure that the contents are always zero-terminated by the padding word and to still compute its length efficiently without scanning the whole string. The following formula is used:</p>
 <figure style="float: 0">
 <img src="images/memory-repr/string_size_calc.png">

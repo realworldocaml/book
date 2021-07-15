@@ -2,7 +2,7 @@
 <h1>Maps and Hash Tables</h1>
 <p>Lots of programming problems require dealing with data organized as key/value pairs. Maybe the simplest way of representing such data in OCaml is an <em>association list</em>, which is simply a list of pairs of keys and values. For example, you could represent a mapping between the 10 digits and their English names as follows: <a data-secondary="value pairs" data-primary="key" data-type="indexterm">&nbsp;</a><a data-secondary="key/value pairs" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-secondary="association lists" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="association lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
 let digit_alist =
   [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
   ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
@@ -14,11 +14,11 @@ let digit_alist =
 </div>
 <p>We can use functions from the <code>List.Assoc</code> module to manipulate this data:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.Assoc.find ~equal:Int.equal digit_alist 6;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.Assoc.find ~equal:Int.equal digit_alist 6 ;;
 &gt;- : string option = Some "six"
-List.Assoc.find ~equal:Int.equal digit_alist 22;;
+List.Assoc.find ~equal:Int.equal digit_alist 22 ;;
 &gt;- : string option = None
-List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch";;
+List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch" ;;
 &gt;- : (int, string) Base.List.Assoc.t =
 &gt;[(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
 &gt; (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
@@ -73,7 +73,7 @@ let touch t s =
 <h3>Sets</h3>
 <p>In addition to maps, <code>Base</code> also provides a set data type that’s designed along similar lines. In some sense, sets are little more than maps where you ignore the data. But while you could encode sets in terms of maps, it’s more natural, and more efficient, to use <code>Base</code>’s specialized set type. Here’s a simple example. <a data-primary="set types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Set.of_list (module Int) [1;2;3] |&gt; Set.to_list;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Set.of_list (module Int) [1;2;3] |&gt; Set.to_list ;;
 &gt;- : int list = [1; 2; 3]
 Set.union
   (Set.of_list (module Int) [1;2;3;2])
@@ -89,22 +89,22 @@ Set.union
 <h3>Modules and Comparators</h3>
 <p>It’s easy enough to create a map or set based on a type represented by a module in <code>Base</code>. Here, we’ll create a map from digits to their English names, based on <code>digit_alist</code>, which was defined earlier in the chapter.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let digit_map = Map.of_alist_exn (module Int) digit_alist;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let digit_map = Map.of_alist_exn (module Int) digit_alist ;;
 &gt;val digit_map : (int, string, Int.comparator_witness) Map.t = &lt;abstr&gt;
-Map.find digit_map 3;;
+Map.find digit_map 3 ;;
 &gt;- : string option = Some "three"
 </code></pre>
 </div>
 <p>The function <code>Map.of_alist_exn</code> constructs a map from a provided association list, throwing an exception if a key is used more than once. Let’s take a look at the type signature of <code>Map.of_alist_exn</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.of_alist_exn;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.of_alist_exn ;;
 &gt;- : ('a, 'cmp) Map.comparator -&gt; ('a * 'b) list -&gt; ('a, 'b, 'cmp) Map.t =
 &gt;&lt;fun&gt;
 </code></pre>
 </div>
 <p>The type <code>Map.comparator</code> is actually an alias for a first-class module type, representing any module that matches the signature <code>Comparator.S</code>, shown below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Base.Comparator.S;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Base.Comparator.S ;;
 &gt;module type S =
 &gt;  sig
 &gt;    type t
@@ -139,7 +139,7 @@ end
 </div>
 <p>This module has the basic functionality we need, but doesn’t satisfy the <code>Comparator.S</code> interface, so we can’t use it for creating a map, as you can see.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.empty (module Book);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.empty (module Book) ;;
 &gt;Line 1, characters 19-23:
 &gt;Error: Signature mismatch:
 &gt;       ...
@@ -263,18 +263,18 @@ end
 <p>The comparator witness looks a little surprising at first, and it may not be obvious why it’s there in the first place. The purpose of the witness is to identify the comparison function being used. This is important because some of the operations on maps and sets, in particular those that combine multiple maps or sets together, depend for their correctness on the fact that the different maps are using the same comparison function.</p>
 <p>Consider, for example, <code>Map.symmetric_diff</code>, which computes the difference between two maps.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0] ;;
 &gt;val left : (string, int, String.comparator_witness) Map.t = &lt;abstr&gt;
-let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0];;
+let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0] ;;
 &gt;val right : (string, int, String.comparator_witness) Map.t = &lt;abstr&gt;
-Map.symmetric_diff ~data_equal:Int.equal left right |&gt; Sequence.to_list;;
+Map.symmetric_diff ~data_equal:Int.equal left right |&gt; Sequence.to_list ;;
 &gt;- : (string, int) Map.Symmetric_diff_element.t list =
 &gt;[("bar", `Left 3); ("foo", `Unequal (1, 0))]
 </code></pre>
 </div>
 <p>The type of <code>Map.symmetric_diff</code>, which follows, requires that the two maps it compares have the same comparator type, and therefore the same comparison function.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff ;;
 &gt;- : ('k, 'v, 'cmp) Map.t -&gt;
 &gt;    ('k, 'v, 'cmp) Map.t -&gt;
 &gt;    data_equal:('v -&gt; 'v -&gt; bool) -&gt;
@@ -315,25 +315,25 @@ end
 </div>
 <p>As you can see in the following, both <code>Reverse</code> and <code>String</code> can be used to create maps with a key type of <code>string</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let alist = ["foo", 0; "snoo", 3];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let alist = ["foo", 0; "snoo", 3] ;;
 &gt;val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
-let ord_map = Map.of_alist_exn (module String) alist;;
+let ord_map = Map.of_alist_exn (module String) alist ;;
 &gt;val ord_map : (string, int, String.comparator_witness) Map.t = &lt;abstr&gt;
-let rev_map = Map.of_alist_exn (module Reverse) alist;;
+let rev_map = Map.of_alist_exn (module Reverse) alist ;;
 &gt;val rev_map : (string, int, Reverse.comparator_witness) Map.t = &lt;abstr&gt;
 </code></pre>
 </div>
 <p><code>Map.min_elt</code> returns the key and value for the smallest key in the map, which confirms that these two maps do indeed use different comparison functions.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.min_elt ord_map;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.min_elt ord_map ;;
 &gt;- : (string * int) option = Some ("foo", 0)
-Map.min_elt rev_map;;
+Map.min_elt rev_map ;;
 &gt;- : (string * int) option = Some ("snoo", 3)
 </code></pre>
 </div>
 <p>As such, running <code>Map.symmetric_diff</code> on these maps doesn’t make any sense. Happily, the type system will give us a compile-time error if we try, instead of throwing an error at run time, or worse, silently returning the wrong result.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff ord_map rev_map;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff ord_map rev_map ;;
 &gt;Line 1, characters 28-35:
 &gt;Error: This expression has type
 &gt;         (string, int, Reverse.comparator_witness) Map.t
@@ -348,7 +348,7 @@ Map.min_elt rev_map;;
 <h3>The Polymorphic Comparator</h3>
 <p>We don’t need to generate specialized comparators for every type we want to build a map on. We can instead build a map based on OCaml’s built-in polymorphic comparison function, which was discussed in <a data-type="xref" href="lists-and-patterns.html#lists-and-patterns">Chapter 3, Lists And Patterns</a>. <code>Base</code> currently doesn’t have a convenient function for minting maps based on polymorphic compare, but <code>Core_kernel</code> does, as we can see below. <a data-secondary="polymorphic comparison in" data-primary="maps" data-type="indexterm">&nbsp;</a><a data-primary="polymorphic comparisons" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Poly.of_alist_exn digit_alist;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Poly.of_alist_exn digit_alist ;;
 &gt;- : (int, string) Map.Poly.t = &lt;abstr&gt;
 </code></pre>
 </div>
@@ -374,22 +374,22 @@ Map.min_elt rev_map;;
 <p>This is convenient because it provides a comparison function that works for most OCaml values and largely behaves as you would expect. For example, on <code>int</code>s and <code>float</code>s, it acts as you would expect a numeric comparison function to act, and for simple containers like strings and lists and arrays, it operates as a lexicographic comparison. Except for values from outside of the OCaml heap and functions, it works on almost every OCaml type.</p>
 <p>But sometimes, a structural comparison is not what you want. Maps are actually a fine example of this. Consider the following two maps.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"] ;;
 &gt;val m1 : (int, string, Int.comparator_witness) Map.t = &lt;abstr&gt;
-let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"];;
+let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"] ;;
 &gt;val m2 : (int, string, Int.comparator_witness) Map.t = &lt;abstr&gt;
 </code></pre>
 </div>
 <p>Logically, these two sets should be equal, and that’s the result that you get if you call <code>Map.equal</code> on them:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.equal String.equal m1 m2;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.equal String.equal m1 m2 ;;
 &gt;- : bool = true
 </code></pre>
 </div>
 <p>But because the elements were added in different orders, the layout of the trees underlying the sets will be different. As such, a structural comparison function will conclude that they’re different.</p>
 <p>Let’s see what happens if we use polymorphic compare to test for equality. <code>Base</code> hides polymorphic comparison by defaults, but it is available by opening the <code>Poly</code> module, at which point <code>=</code> is bound to polymorphic equality. Comparing the maps directly will fail at runtime because the comparators stored within the sets contain function values:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(m1 = m2);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(m1 = m2) ;;
 &gt;Exception: (Invalid_argument "compare: functional value")
 </code></pre>
 </div>
@@ -445,7 +445,7 @@ end
 </div>
 <p>Much of the code here is devoted to creating a comparison function and s-expression converter for the type <code>Book.t</code>. But if we have the <code>ppx_sexp_conv</code> and <code>ppx_compare</code> syntax extensions enabled (both of which come with the omnibus <code>ppx_jane</code> package), then we can request that default implementations of these functions be created, as follows.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane" ;;
 module Book = struct
   module T = struct
     type t = { title: string; isbn: string }
@@ -479,29 +479,29 @@ end
 <p>The <code>=</code> structural equality operator recursively inspects each field in the two values and tests them individually for equality. Crucially, if your data structure is cyclical (that is, a value recursively points back to another field within the same structure), the <code>=</code> operator will never terminate, and your program will hang! You therefore must use the physical equality operator or write a custom comparison function when comparing cyclic values.</p>
 <p>It’s quite easy to mix up the use of <code>=</code> and <code>==</code>, so Core_kernel discourages the use of <code>==</code> and provides the more explicit <code>phys_equal</code> function instead. You’ll see a warning if you use <code>==</code> anywhere in code that opens <code>Core_kernel</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-1 == 2;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
+1 == 2 ;;
 &gt;Line 1, characters 3-5:
 &gt;Alert deprecated: Base.==
 &gt;[2016-09] this element comes from the stdlib distributed with OCaml.
 &gt;Use [phys_equal] instead.
 &gt;- : bool = false
-phys_equal 1 2;;
+phys_equal 1 2 ;;
 &gt;- : bool = false
 </code></pre>
 </div>
 <p>If you feel like hanging your OCaml interpreter, you can verify what happens with recursive values and structural equality for yourself:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 };;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 &gt;type t1 = { foo1 : int; bar1 : t2; }
 &gt;and t2 = { foo2 : int; bar2 : t1; }
-let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
+let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 } ;;
 &gt;&lt;lots of text&gt;
-v1 == v1;;
+v1 == v1 ;;
 &gt;- : bool = true
-phys_equal v1 v1;;
+phys_equal v1 v1 ;;
 &gt;- : bool = true
-v1 = v1;;
+v1 = v1 ;;
 &gt;&lt;press ^Z and kill the process now&gt;
 </code></pre>
 </div>
@@ -534,9 +534,9 @@ v1 = v1;;
 </div>
 <p>Here, we use a functor, <code>Map.M</code>, to define the type we need. While this looks different than the ordinary type signature, the meaning of the type is the same, as we can see below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let m = Map.singleton (module String) "one" 1;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let m = Map.singleton (module String) "one" 1 ;;
 &gt;val m : (string, int, String.comparator_witness) Map.t = &lt;abstr&gt;
-(m : int Map.M(String).t);;
+(m : int Map.M(String).t) ;;
 &gt;- : int Base.Map.M(Base.String).t = &lt;abstr&gt;
 </code></pre>
 </div>
@@ -546,7 +546,7 @@ v1 = v1;;
 <h3>Trees</h3>
 <p>As we’ve discussed, maps carry within them the comparator that they were created with. Sometimes, for space efficiency reasons, you want a version of the map data structure that doesn’t include the comparator. You can get such a representation with <code>Map.Using_comparator.to_tree</code>, which returns just the tree underlying the map, without the comparator. <a data-secondary="Map.to_tree" data-primary="Map module" data-type="indexterm">&nbsp;</a><a data-secondary="tree structure" data-primary="maps" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ord_tree = Map.Using_comparator.to_tree ord_map;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ord_tree = Map.Using_comparator.to_tree ord_map ;;
 &gt;val ord_tree :
 &gt;  (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
 &gt;  &lt;abstr&gt;
@@ -555,13 +555,13 @@ v1 = v1;;
 <p>Even though the tree doesn’t physically include a comparator, it does include the comparator in its type. This is what is known as a <em>phantom type</em>, because it reflects something about the logic of the value in question, even though it doesn’t correspond to any values directly represented in the underlying physical structure of the value.</p>
 <p>Since the comparator isn’t included in the tree, we need to provide the comparator explicitly when we, say, search for a key, as shown below:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Using_comparator.Tree.find ~comparator:String.comparator ord_tree "snoo";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Using_comparator.Tree.find ~comparator:String.comparator ord_tree "snoo" ;;
 &gt;- : int option = Some 3
 </code></pre>
 </div>
 <p>The algorithm of <code>Map.Tree.find</code> depends on the fact that it’s using the same comparator when looking up a value as you were when you stored it. That’s the invariant that the phantom type is there to enforce. As you can see in the following example, using the wrong comparator will lead to a type error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo" ;;
 &gt;Line 1, characters 63-71:
 &gt;Error: This expression has type
 &gt;         (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
@@ -586,17 +586,17 @@ v1 = v1;;
 </div>
 <p>We create a hashtable in a way that’s similar to how we create maps, by providing a first-class module from which the required operations for building a hashtable can be obtained.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.create (module String);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.create (module String) ;;
 &gt;val table : (string, '_weak1) Hashtbl.Poly.t = &lt;abstr&gt;
-Hashtbl.set table ~key:"three" ~data:3;;
+Hashtbl.set table ~key:"three" ~data:3 ;;
 &gt;- : unit = ()
-Hashtbl.find table "three";;
+Hashtbl.find table "three" ;;
 &gt;- : int option = Some 3
 </code></pre>
 </div>
 <p>As with maps, most modules in Base are ready to be used for this purpose, but if you want to create a hash table from one of your own types, you need to do some work to prepare it. In order for a module to be suitable for passing to <code>Hashtbl.create</code>, it has to match the following interface.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Core.Hashtbl_intf.Key;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Core.Hashtbl_intf.Key ;;
 &gt;module type Key =
 &gt;  sig
 &gt;    type t
@@ -622,17 +622,17 @@ end
 &gt;    val hash_fold_t : Hash.state -&gt; t -&gt; Hash.state
 &gt;    val hash : t -&gt; int
 &gt;  end
-let table = Hashtbl.create (module Book);;
+let table = Hashtbl.create (module Book) ;;
 &gt;val table : (Book.t, '_weak2) Hashtbl.Poly.t = &lt;abstr&gt;
 </code></pre>
 </div>
 <p>You can also create a hashtable based on OCaml’s polymorphic hash and comparison functions.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.Poly.create ();;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.Poly.create () ;;
 &gt;val table : ('_weak3, '_weak4) Hashtbl.Poly.t = &lt;abstr&gt;
-Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
+Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!" ;;
 &gt;- : unit = ()
-Hashtbl.find table ("foo",3,[1;2;3]);;
+Hashtbl.find table ("foo",3,[1;2;3]) ;;
 &gt;- : string option = Some "random data!"
 </code></pre>
 </div>
@@ -643,25 +643,25 @@ Hashtbl.find table ("foo",3,[1;2;3]);;
 <p>But there’s another problem with polymorphic hash, which is that it is prone to creating hash collisions. OCaml’s polymorphic hash function works by walking over the data structure it’s given using a breadth-first traversal that is bounded in the number of nodes it’s willing to traverse. By default, that bound is set at 10 “meaningful” nodes. <a data-secondary="polymorphic hash function" data-primary="hash tables" data-type="indexterm">&nbsp;</a></p>
 <p>The bound on the traversal means that the hash function may ignore part of the data structure, and this can lead to pathological <span class="keep-together">cases</span> where every value you store has the same hash value. We’ll demonstrate this below, using the function <code>List.range</code> to allocate lists of integers of different length:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Hashtbl.Poly.hashable.hash (List.range 0 9);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Hashtbl.Poly.hashable.hash (List.range 0 9) ;;
 &gt;- : int = 209331808
-Hashtbl.Poly.hashable.hash (List.range 0 10);;
+Hashtbl.Poly.hashable.hash (List.range 0 10) ;;
 &gt;- : int = 182325193
-Hashtbl.Poly.hashable.hash (List.range 0 11);;
+Hashtbl.Poly.hashable.hash (List.range 0 11) ;;
 &gt;- : int = 182325193
-Hashtbl.Poly.hashable.hash (List.range 0 100);;
+Hashtbl.Poly.hashable.hash (List.range 0 100) ;;
 &gt;- : int = 182325193
 </code></pre>
 </div>
 <p>As you can see, the hash function stops after the first 10 elements. The same can happen with any large data structure, including records and arrays. When building hash functions over large custom data structures, it is generally a good idea to write one’s own hash function, or to use the ones provided by <code>[@@deriving]</code>, which don’t have this problem, as you can see below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[%hash: int list] (List.range 0 9);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[%hash: int list] (List.range 0 9) ;;
 &gt;- : int = 999007935
-[%hash: int list] (List.range 0 10);;
+[%hash: int list] (List.range 0 10) ;;
 &gt;- : int = 195154657
-[%hash: int list] (List.range 0 11);;
+[%hash: int list] (List.range 0 11) ;;
 &gt;- : int = 527899773
-[%hash: int list] (List.range 0 100);;
+[%hash: int list] (List.range 0 100) ;;
 &gt;- : int = 594983280
 </code></pre>
 </div>

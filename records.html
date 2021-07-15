@@ -21,7 +21,7 @@ type service_info =
 </div>
 <p>We can construct a <code>service_info</code> just as easily as we declared its type. The following function tries to construct such a record given as input a line from <code>/etc/services</code> file. To do this, we’ll use <code>Re</code>, a regular expression engine for OCaml. If you don’t know how regular expressions work, you can just think of them as a simple pattern language you can use for parsing a string.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "re";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "re" ;;
 let service_info_of_string line =
   let matches =
     let pat = "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)" in
@@ -37,14 +37,14 @@ let service_info_of_string line =
 </div>
 <p>We can construct a concrete record by calling the function on a line from the file.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol" ;;
 &gt;val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 </code></pre>
 </div>
 <p>You might wonder how the compiler inferred that our function returns a value of type <code>service_info</code>. In this case, the compiler bases its inference on the field names used in constructing the record. That inference is most straightforward when each field name belongs to only one record type. We’ll discuss later in the chapter what happens when field names are shared across different record types.</p>
 <p>Once we have a record value in hand, we can extract elements from the record field using dot notation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ssh.port;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ssh.port ;;
 &gt;- : int = 22
 </code></pre>
 </div>
@@ -79,7 +79,7 @@ let service_info_of_string line =
 </div>
 <p>The polymorphism lets us use the same function when parsing a different format, like this function for parsing a file containing an integer on every line.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">parse_lines Int.of_string "1\n10\n100\n1000";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">parse_lines Int.of_string "1\n10\n100\n1000" ;;
 &gt;- : int with_line_num list =
 &gt;[{item = 1; line_num = 1}; {item = 10; line_num = 2};
 &gt; {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
@@ -93,7 +93,7 @@ let service_info_of_string line =
   sprintf "%s %i/%s" name port prot
 ;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
-service_info_to_string ssh;;
+service_info_to_string ssh ;;
 &gt;- : string = "ssh 22/udp"
 </code></pre>
 </div>
@@ -111,7 +111,7 @@ service_info_to_string ssh;;
 <p>The code for <code>service_info_to_string</code> would continue to compile without change. But in this case, we should probably update the code so that the generated string includes the comment if it’s there. It would be nice if the type system would warn us that we should consider updating the function.</p>
 <p>Happily, OCaml offers an optional warning for missing fields in record patterns. With that warning turned on (which you can do in the toplevel by typing <code>#warnings "+9"</code>), the compiler will indeed warn us.<a data-secondary="compiler warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="warning enable/disable" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9" ;;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
 ;;
@@ -235,25 +235,25 @@ type logon =
 </div>
 <p>Reusing field names can lead to some ambiguity. For example, if we want to write a function to grab the <code>session_id</code> from a record, what type will it have?</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_session_id t = t.session_id;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_session_id t = t.session_id ;;
 &gt;val get_session_id : logon -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
 <p>In this case, OCaml just picks the most recent definition of that record field. We can force OCaml to assume we’re dealing with a different type (say, a <code>heartbeat</code>) using a type annotation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_heartbeat_session_id (t:heartbeat) = t.session_id ;;
 &gt;val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
 <p>While it’s possible to resolve ambiguous field names using type annotations, the ambiguity can be a bit confusing. Consider the following functions for grabbing the session ID and status from a heartbeat:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let status_and_session t = (t.status_message, t.session_id);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let status_and_session t = (t.status_message, t.session_id) ;;
 &gt;val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;
-let session_and_status t = (t.session_id, t.status_message);;
+let session_and_status t = (t.session_id, t.status_message) ;;
 &gt;Line 1, characters 45-59:
 &gt;Error: This expression has type logon
 &gt;       The field status_message does not belong to type logon
-let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+let session_and_status (t:heartbeat) = (t.session_id, t.status_message) ;;
 &gt;val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -326,7 +326,7 @@ end</code></pre>
 </div>
 <p>When using dot notation for accessing record fields, we can qualify the field by the module as well.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_important t = t.Log_entry.important;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_important t = t.Log_entry.important ;;
 &gt;val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -342,7 +342,7 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 ;;
 &gt;val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
-let is_important (t:Log_entry.t) = t.important;;
+let is_important (t:Log_entry.t) = t.important ;;
 &gt;val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -452,7 +452,7 @@ let is_important (t:Log_entry.t) = t.important;;
 <p>The <code>[@@deriving fields]</code> annotation at the end of the declaration of a record type will cause the extension to be applied to a given type declaration. We need to enable the extension explicitly,</p>
 
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
 </code></pre>
 </div>
 <p>at which point, we can define <code>Logon</code> as follows:</p>
@@ -520,14 +520,14 @@ end
 </dl>
 <p>A <code>Field.t</code> has two type parameters: the first for the type of the record, and the second for the type of the field in question. Thus, the type of <code>Logon.Fields.session_id</code> is <code>(Logon.t, string) Field.t</code>, whereas the type of <code>Logon.Fields.time</code> is <code>(Logon.t, Time.t) Field.t</code>. Thus, if you call <code>Field.get</code> on <code>Logon.Fields.user</code>, you’ll get a function for extracting the <code>user</code> field from a <code>Logon.t</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get Logon.Fields.user;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get Logon.Fields.user ;;
 &gt;- : Logon.t -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
 <p>Thus, the first parameter of the <code>Field.t</code> corresponds to the record you pass to <code>get</code>, and the second parameter corresponds to the value contained in the field, which is also the return type of <code>get</code>.</p>
 <p>The type of <code>Field.get</code> is a little more complicated than you might naively expect from the preceding one:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get ;;
 &gt;- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -555,16 +555,16 @@ end
 &gt;val logon : Logon.t =
 &gt;  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
 &gt;   user = "yminsky"; credentials = "Xy2d9W"}
-show_field Logon.Fields.user Fn.id logon;;
+show_field Logon.Fields.user Fn.id logon ;;
 &gt;- : string = "user: yminsky"
-show_field Logon.Fields.time Time_ns.to_string logon;;
+show_field Logon.Fields.time Time_ns.to_string logon ;;
 &gt;- : string = "time: 2017-07-21 15:11:45.000000000Z"
 </code></pre>
 </div>
 <p>As a side note, the preceding example is our first use of the <code>Fn</code> module (short for “function”), which provides a collection of useful primitives for dealing with functions. <code>Fn.id</code> is the identity function.</p>
 <p><code>fieldslib</code> also provides higher-level operators, like <code>Fields.fold</code> and <code>Fields.iter</code>, which let you walk over the fields of a record. So, for example, in the case of <code>Logon.t</code>, the field iterator has the following type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Logon.Fields.iter;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Logon.Fields.iter ;;
 &gt;- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)
 &gt;                Field.t_with_perm -&gt; unit) -&gt;
 &gt;    time:(([&lt; `Read | `Set_and_create ], Logon.t, Time_ns.t)
@@ -591,7 +591,7 @@ show_field Logon.Fields.time Time_ns.to_string logon;;
     ~credentials:(print Fn.id)
 ;;
 &gt;val print_logon : Logon.t -&gt; unit = &lt;fun&gt;
-print_logon logon;;
+print_logon logon ;;
 &gt;session_id: 26685
 &gt;time: 2017-07-21 15:11:45.000000000Z
 &gt;user: yminsky

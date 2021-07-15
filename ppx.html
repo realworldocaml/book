@@ -46,12 +46,12 @@ end
 </div>
 <p>In this example, the <code>@@deprecated</code> annotation is only attached to the <code>Planets</code> module, and the human-readable argument string redirects developers to the newer code. Now if we try to use the value that has been marked as deprecated, the compiler will issue a warning.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto ;;
 &gt;Line 1, characters 25-38:
 &gt;Alert deprecated: module Planets
 &gt;Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
 &gt;val is_pluto_a_planet : bool = true
-let is_pluto_a_planet = Planets2016.pluto;;
+let is_pluto_a_planet = Planets2016.pluto ;;
 &gt;val is_pluto_a_planet : bool = false
 </code></pre>
 </div>

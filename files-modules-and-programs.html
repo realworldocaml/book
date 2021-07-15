@@ -7,15 +7,15 @@
 <p>We’ll start with an example: a utility that reads lines from <code>stdin</code>, computes a frequency count of the lines, and prints out the ten most frequent lines. We’ll start with a simple implementation, which we’ll save as the file <em>freq.ml</em>. <a id="FILEsnglprog" data-secondary="single-file programs" data-primary="files" data-type="indexterm">&nbsp;</a><a id="Psingfil" data-secondary="single-file programs" data-primary="programs" data-type="indexterm">&nbsp;</a></p>
 <p>This implementation will use two functions from the <code>List.Assoc</code> module, which provides utility functions for interacting with <em>association lists</em>, <em>i.e.</em>, lists of key/value pairs. In particular, we use the function <code>List.Assoc.find</code>, which looks up a key in an association list; and <code>List.Assoc.add</code>, which adds a new binding to an association list, as shown here: <a data-secondary="List.Assoc.add" data-primary="List.Assoc module" data-type="indexterm">&nbsp;</a><a data-secondary="List.Assoc.find" data-primary="List.Assoc module" data-type="indexterm">&nbsp;</a><a data-secondary="adding new bindings in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="finding key associations in" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-let assoc = [("one", 1); ("two",2); ("three",3)];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
+let assoc = [("one", 1); ("two",2); ("three",3)] ;;
 &gt;val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
-List.Assoc.find ~equal:String.equal assoc "two";;
+List.Assoc.find ~equal:String.equal assoc "two" ;;
 &gt;- : int option = Some 2
-List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
+List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *) ;;
 &gt;- : (string, int) Base.List.Assoc.t =
 &gt;[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
+List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *) ;;
 &gt;- : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 </code></pre>
 </div>
@@ -359,14 +359,14 @@ let sessions_have_same_user s1 s2 =
 <p>Most of the time, you refer to values and types within a module by using the module name as an explicit qualifier. For example, you write <code>List.map</code> to refer to the <code>map</code> function in the <code>List</code> module. Sometimes, though, you want to be able to refer to the contents of a module without this explicit qualification. That’s what the <code>open</code> statement is for. <a data-secondary="open modules and" data-primary="identifiers" data-type="indexterm">&nbsp;</a><a data-secondary="opening" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
 <p>We’ve encountered <code>open</code> already, specifically where we’ve written <code>open Base</code> to get access to the standard definitions in the <code>Base</code> library. In general, opening a module adds the contents of that module to the environment that the compiler looks at to find the definition of various identifiers. Here’s an example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-module M = struct let foo = 3 end;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
+module M = struct let foo = 3 end ;;
 &gt;module M : sig val foo : int end
-foo;;
+foo ;;
 &gt;Line 1, characters 1-4:
 &gt;Error: Unbound value foo
-open M;;
-foo;;
+open M ;;
+foo ;;
 &gt;- : int = 3
 </code></pre>
 </div>
@@ -447,7 +447,7 @@ end
 &gt;    val create : int -&gt; int -&gt; t
 &gt;    val contains : t -&gt; int -&gt; bool
 &gt;  end
-Extended_interval.contains (Extended_interval.create 3 10) 4;;
+Extended_interval.contains (Extended_interval.create 3 10) 4 ;;
 &gt;- : bool = true
 </code></pre>
 </div>
@@ -464,7 +464,7 @@ end
 ;;
 &gt;module Extended_interval :
 &gt;  sig val contains : Extended_interval.t -&gt; int -&gt; bool end
-Extended_interval.contains (Extended_interval.create 3 10) 4;;
+Extended_interval.contains (Extended_interval.create 3 10) 4 ;;
 &gt;Line 1, characters 29-53:
 &gt;Error: Unbound value Extended_interval.create
 </code></pre>

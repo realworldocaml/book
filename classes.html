@@ -5,7 +5,7 @@
 <h2>OCaml Classes</h2>
 <p>In OCaml, class definitions must be defined as toplevel statements in a module. The syntax for a class definition uses the keyword <code>class</code>: <a data-secondary="basic syntax for" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
 class istack = object
   val mutable v = [0; 2]
 
@@ -31,19 +31,19 @@ end
 <p>The <code>class istack : object ... end</code> result shows that we have created a class <code>istack</code> with <em>class type</em> <code>object ... end</code>. Like module types, class types are completely separate from regular OCaml types (e.g., <code>int</code>, <code>string</code>, and <code>list</code>) and, in particular, should not be confused with object types (e.g., <code>&lt; get : int; .. &gt;</code>). The class type describes the class itself rather than the objects that the class creates. This particular class type specifies that the <code>istack</code> class defines a mutable field <code>v</code>, a method <code>pop</code> that returns an <code>int option</code>, and a method <code>push</code> with type <code>int -&gt; unit</code>.</p>
 <p>To produce an object, classes are instantiated with the keyword <code>new</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new istack;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new istack ;;
 &gt;val s : istack = &lt;obj&gt;
-s#pop;;
+s#pop ;;
 &gt;- : int option = Some 0
-s#push 5;;
+s#push 5 ;;
 &gt;- : unit = ()
-s#pop;;
+s#pop ;;
 &gt;- : int option = Some 5
 </code></pre>
 </div>
 <p>You may have noticed that the object <code>s</code> has been given the type <code>istack</code>. But wait, we’ve stressed <em>classes are not types</em>, so what’s up with that? In fact, what we’ve said is entirely true: classes and class names <em>are not</em> types. However, for convenience, the definition of the class <code>istack</code> also defines an object type <code>istack</code> with the same methods as the class. This type definition is equivalent to:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type istack = &lt; pop: int option; push: int -&gt; unit &gt;;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type istack = &lt; pop: int option; push: int -&gt; unit &gt; ;;
 &gt;type istack = &lt; pop : int option; push : int -&gt; unit &gt;
 </code></pre>
 </div>
@@ -135,7 +135,7 @@ class Iterator {
 <p>OCaml supports both styles. In fact, OCaml is more flexible than these approaches because an object type can be implemented by any object with the appropriate methods; it does not have to be specified by the object’s class <em>a priori</em>. We’ll leave abstract classes for later. Let’s demonstrate the technique using object types.</p>
 <p>First, we’ll define an object type <code>iterator</code> that specifies the methods in an iterator:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt; ;;
 &gt;type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;
 </code></pre>
 </div>
@@ -198,23 +198,23 @@ end
 </div>
 <p>Now we can build a new stack, push some values to it, and iterate over them:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new stack [];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new stack [] ;;
 &gt;val s : '_weak1 stack = &lt;obj&gt;
-s#push 5;;
+s#push 5 ;;
 &gt;- : unit = ()
-s#push 4;;
+s#push 4 ;;
 &gt;- : unit = ()
-let it = s#iterator;;
+let it = s#iterator ;;
 &gt;val it : int iterator = &lt;obj&gt;
-it#get;;
+it#get ;;
 &gt;- : int = 4
-it#next;;
+it#next ;;
 &gt;- : unit = ()
-it#get;;
+it#get ;;
 &gt;- : int = 5
-it#next;;
+it#next ;;
 &gt;- : unit = ()
-it#has_value;;
+it#has_value ;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -531,17 +531,17 @@ end
 <p>Note how we can use the type annotation <code>(self: 'self)</code> to obtain the type of the current object.</p>
 <p>We can now test different object instances for equality by using the <code>equals</code> binary method:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(new square 5)#equals (new square 5);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(new square 5)#equals (new square 5) ;;
 &gt;- : bool = true
-(new circle 10)#equals (new circle 7);;
+(new circle 10)#equals (new circle 7) ;;
 &gt;- : bool = false
 </code></pre>
 </div>
 <p>This works, but there is a problem lurking here. The method <code>equals</code> takes an object of the exact type <code>square</code> or <code>circle</code>. Because of this, we can’t define a common base class <code>shape</code> that also includes an equality method:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; equals : shape -&gt; bool; area : float &gt;;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; equals : shape -&gt; bool; area : float &gt; ;;
 &gt;type shape = &lt; area : float; equals : shape -&gt; bool &gt;
-(new square 5 :&gt; shape);;
+(new square 5 :&gt; shape) ;;
 &gt;Line 1, characters 1-24:
 &gt;Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int &gt;
 &gt;       is not a subtype of shape = &lt; area : float; equals : shape -&gt; bool &gt;
@@ -757,7 +757,7 @@ end</code></pre>
 end
 ;;
 &gt;class obj : int -&gt; object val field : int end
-let o = new obj 3;;
+let o = new obj 3 ;;
 &gt;Creating obj 3
 &gt;Initializing field
 &gt;val o : obj = &lt;obj&gt;
