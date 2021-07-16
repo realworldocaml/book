@@ -1,0 +1,5 @@
+(executable
+  (public_name pandoc-rwo)
+  (name pandoc_rwo)
+  (libraries yojson)
+)
