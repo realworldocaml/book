@@ -109,8 +109,8 @@ color_print (Gray 4) "A muted gray..." ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<div data-type="note" class="allow_break">
-<h5 id="variants-tuples-and-parens">Variants, tuples and parens</h5>
+<section class="level5" id="variants-tuples-and-parens">
+<h5>Variants, tuples and parens</h5>
 <p>Variants with multiple arguments look an awful lot like tuples. Consider the following example of a value of the type <code>color</code> we defined earlier.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">RGB (200,0,200) ;;
@@ -164,7 +164,7 @@ let to_tuple (Untupled (x,y)) = (x,y) ;;
 </code></pre>
 </div>
 <p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html">Chapter 20, Memory Representation of Values</a>.</p>
-</div>
+</section>
 <section class="level2" id="catch-all-cases-and-refactoring">
 <h2>Catch-All Cases and Refactoring</h2>
 <p>OCaml’s type system can act as a refactoring tool, warning you of places where your code needs to be updated to match an interface change. This is particularly valuable in the context of variants. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="refactoring" data-type="indexterm">&nbsp;</a> <a data-primary="exhaustion checks" data-type="indexterm">&nbsp;</a></p>

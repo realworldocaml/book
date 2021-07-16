@@ -115,37 +115,13 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <section class="level3" id="marking-and-scanning-the-heap">
 <h3>Marking and Scanning the Heap</h3>
 <p>The marking process can take a long time to run over the complete major heap and has to pause the main application while it’s active. It therefore runs incrementally by marking the heap in <em>slices</em>. Each value in the heap has a 2-bit <em>color</em> field in its header that is used to store information about whether the value has been marked so that the GC can resume easily between slices. <a data-secondary="marking and scanning" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
-<table>
-<caption>Tag color statuses</caption>
-<thead>
-<tr class="header">
-<th>Tag color</th>
-<th>Block status</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Blue</td>
-<td>On the free list and not currently in use</td>
-</tr>
-<tr class="even">
-<td>White (during marking)</td>
-<td>Not reached yet, but possibly reachable</td>
-</tr>
-<tr class="odd">
-<td>White (during sweeping)</td>
-<td>Unreachable and can be freed</td>
-</tr>
-<tr class="even">
-<td>Gray</td>
-<td>Reachable, but its fields have not been scanned</td>
-</tr>
-<tr class="odd">
-<td>Black</td>
-<td>Reachable, and its fields have been scanned</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li>Blue: On the free list and not currently in use</li>
+<li>White (during marking): Not reached yet, but possibly reachable</li>
+<li>White (during sweeping): Unreachable and can be freed</li>
+<li>Gray: Reachable, but its fields have not been scanned</li>
+<li>Black: Reachable, and its fields have been scanned</li>
+</ul>
 <p>The color tags in the value headers store most of the state of the marking process, allowing it to be paused and resumed later. The GC and application alternate between marking a slice of the major heap and actually getting on with executing the program logic. The OCaml runtime calculates a sensible value for the size of each major heap slice based on the rate of allocation and available memory.</p>
 <p>The marking process starts with a set of <em>root</em> values that are always live (such as the application stack). All values on the heap are initially marked as white values that are possibly reachable but haven’t been scanned yet. It recursively follows all the fields in the roots via a depth-first search, and pushes newly encountered white blocks onto an intermediate stack of <em>gray values</em> while it follows their fields. When a gray value’s fields have all been followed, it is popped off the stack and colored black. <a data-primary="root values" data-type="indexterm">&nbsp;</a><a data-primary="gray values" data-type="indexterm">&nbsp;</a></p>
 <p>This process is repeated until the gray value stack is empty and there are no further values to mark. There’s one important edge case in this process, though. The gray value stack can only grow to a certain size, after which the GC can no longer recurse into intermediate values since it has nowhere to store them while it follows their fields. If this happens, the heap is marked as <em>impure</em> and a more expensive check is initiated once the existing gray values have been processed. <a data-primary="impure heaps" data-type="indexterm">&nbsp;</a></p>

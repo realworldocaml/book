@@ -568,8 +568,8 @@ length [1;2;3;4] ;;
 &gt;val destutter : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
-<div data-type="note">
-<h5 id="polymorphic-compare">Polymorphic Compare</h5>
+<section class="level5" id="polymorphic-compare">
+<h5>Polymorphic Compare</h5>
 <p>You might have noticed that <code>destutter</code> is specialized to lists of integers. That’s because <code>Base</code>’s default equality operator is specialized to integers, as you can see if you try to apply it to values of a different type.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"foo" = "bar" ;;
@@ -624,7 +624,6 @@ destutter ["one";"two";"two";"two";"three"] ;;
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
 </code></pre>
-</div>
 </div>
 <p>Note that <code>when</code> clauses have some downsides. As we noted earlier, the static checks associated with pattern matches rely on the fact that patterns are restricted in what they can express. Once we add the ability to add an arbitrary condition to a pattern, something is lost. In particular, the ability of the compiler to determine if a match is exhaustive, or if some case is redundant, is compromised.</p>
 <p>Consider the following function, which takes a list of optional values, and returns the number of those values that are <code>Some</code>. Because this implementation uses <code>when</code> clauses, the compiler can’t tell that the code is exhaustive:</p>
@@ -690,6 +689,7 @@ destutter ["one";"two";"two";"two";"three"] ;;
 &gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
+</section>
 </section>
 </section>
 </article></div><a href="files-modules-and-programs.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 04</small>Files, Modules, and Programs</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
