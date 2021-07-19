@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -153,10 +153,10 @@ Here's what it looks like when we run the test.
   File "test.ml", line 3, characters 0-71: rev threw
   (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -667,6 +667,93 @@ That's a great ideal, but it's not always achievable, especially when
 you want to run more end-to-end tests of your program.  But expect
 tests are still a useful tool for such tests.
 
+We'll start by creating a new test directory with a dune file next to
+our echo-server implementation.
+
+```scheme file=examples/erroneous/echo_test_original/test/dune
+(library
+ (name echo_test)
+ (libraries core async)
+ (preprocess (pps ppx_jane))
+ (inline_tests (deps ../bin/echo.exe)))
+```
+
+The important line is the last one, where in the `inline_tests`
+declaration, we highlight that these tests depend on the echo-server
+binary.  Without this, the test we write won't build or have access to
+that binary.
+
+The first step is to write some helpers: first, something for
+launching the echo server.  In this test, we'll pass the `-uppercase`
+flag so we can test the echo server's ability to uppercase the text it
+is sent.
+
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=launch
+let launch ~port =
+  Process.create_exn
+    ~prog:"../bin/echo.exe"
+    ~args:["-port";Int.to_string port;"-uppercase"]
+    ()
+```
+
+Then, we'll need something to connect to the echo server,
+
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=connect
+let connect ~port =
+  let%map (_sock,r,w) =
+    Tcp.connect
+      (Tcp.Where_to_connect.of_host_and_port {host="localhost";port})
+  in
+  (r,w)
+```
+
+And something to send data to it.
+
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=senddata
+let send_data r w text =
+  Writer.write w text;
+  let%bind () = Writer.flushed w in
+  let%bind line = Reader.read_line r in
+  (match line with
+   | `Eof -> print_endline "EOF"
+   | `Ok line -> print_endline line);
+  return ()
+```
+
+Finally, we'll need a function to kill the echo server at the end of
+the test, so we don't leave stray echo servers floating around.
+
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=cleanup
+let cleanup process =
+  let () = Process.send_signal process Signal.kill in
+  let%bind (_ : Unix.Exit_or_signal.t) = Process.wait process in
+  return ()
+```
+
+Now, we can write a test that launches the server, connects to it over
+TCP, and then sends some data and displays the results.  We put in
+some expect blocks, but don't fill them in yet.
+
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=test
+let%expect_test "test uppercase echo" =
+  let port = 8081 in
+  let%bind process  = launch ~port in
+  Monitor.protect (fun () ->
+      let%bind (r,w) = connect ~port in
+      let%bind () = send_data r w "one two three\n" in
+      let%bind () = [%expect] in
+      let%bind () = send_data r w "one 2 three\n" in
+      let%bind () = [%expect] in
+      return ())
+    ~finally:(fun () -> cleanup process)
+```
+
+Now that the test itself is written, we can run it.
+
+```sh dir=examples/erroneous/echo_test_original/test
+  $ dune runtest
+```
+
 
 
 ## Property testing with Quickcheck
@@ -763,13 +850,13 @@ testing doesn't actually hold on all outputs, as you can see below.
     (error
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
          (Neg vs Pos (Loc test.ml:7:19)))
-         "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
+         "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+        \nCalled from file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
         \n"))).
-    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+
   FAILED 1 / 1 tests
   [1]
 ```
