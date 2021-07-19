@@ -667,6 +667,10 @@ That's a great ideal, but it's not always achievable, especially when
 you want to run more end-to-end tests of your program.  But expect
 tests are still a useful tool for such tests.
 
+To see how such tests can be build, we'll write some tests for the
+echo server we developed in [Concurrent Programming with
+Async](concurrent-programming.html#examples-an-echo-server){data-type=xref}.
+
 We'll start by creating a new test directory with a dune file next to
 our echo-server implementation.
 
@@ -679,65 +683,44 @@ our echo-server implementation.
 ```
 
 The important line is the last one, where in the `inline_tests`
-declaration, we highlight that these tests depend on the echo-server
-binary.  Without this, the test we write won't build or have access to
-that binary.
+declaration, we declare a dependency on the echo-server binary.
 
-The first step is to write some helpers: first, something for
-launching the echo server.  In this test, we'll pass the `-uppercase`
-flag so we can test the echo server's ability to uppercase the text it
-is sent.
+That done, our next step is to write some helper functions.  We won't
+show the implementation, but here's the signature for our `Helpers`
+module.  Note that there's an argument in the `launch` function that
+lets you enable the feature in the echo server that causes it to
+uppercase the text it receives.
 
-```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=launch
-let launch ~port =
-  Process.create_exn
-    ~prog:"../bin/echo.exe"
-    ~args:["-port";Int.to_string port;"-uppercase"]
-    ()
+```ocaml file=examples/erroneous/echo_test_original/test/helpers.mli
+open! Core
+open! Async
+
+(** Launches the echo server *)
+val launch : port:int -> uppercase:bool -> Process.t Deferred.t
+
+(** Connects to the echo server, returning a reader and writer for
+   communicating with the server. *)
+val connect : port:int -> (Reader.t * Writer.t) Deferred.t
+
+(** Sends data to the server, printing out the result  *)
+val send_data : Reader.t -> Writer.t -> string -> unit Deferred.t
+
+(** Kills the echo server, and waits until it exits  *)
+val cleanup : Process.t -> unit Deferred.t
 ```
 
-Then, we'll need something to connect to the echo server,
+With the above, we can now write a test that launches the server,
+connects to it over TCP, and then sends some data and displays the
+results.
 
-```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=connect
-let connect ~port =
-  let%map (_sock,r,w) =
-    Tcp.connect
-      (Tcp.Where_to_connect.of_host_and_port {host="localhost";port})
-  in
-  (r,w)
-```
+```ocaml file=examples/erroneous/echo_test_original/test/test.ml
+open! Core
+open! Async
+open Helpers
 
-And something to send data to it.
-
-```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=senddata
-let send_data r w text =
-  Writer.write w text;
-  let%bind () = Writer.flushed w in
-  let%bind line = Reader.read_line r in
-  (match line with
-   | `Eof -> print_endline "EOF"
-   | `Ok line -> print_endline line);
-  return ()
-```
-
-Finally, we'll need a function to kill the echo server at the end of
-the test, so we don't leave stray echo servers floating around.
-
-```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=cleanup
-let cleanup process =
-  let () = Process.send_signal process Signal.kill in
-  let%bind (_ : Unix.Exit_or_signal.t) = Process.wait process in
-  return ()
-```
-
-Now, we can write a test that launches the server, connects to it over
-TCP, and then sends some data and displays the results.  We put in
-some expect blocks, but don't fill them in yet.
-
-```ocaml file=examples/erroneous/echo_test_original/test/test.ml,part=test
 let%expect_test "test uppercase echo" =
   let port = 8081 in
-  let%bind process  = launch ~port in
+  let%bind process  = launch ~port ~uppercase:true in
   Monitor.protect (fun () ->
       let%bind (r,w) = connect ~port in
       let%bind () = send_data r w "one two three\n" in
@@ -748,10 +731,46 @@ let%expect_test "test uppercase echo" =
     ~finally:(fun () -> cleanup process)
 ```
 
-Now that the test itself is written, we can run it.
+Note that we put in some expect annotations where we want to see data,
+but we haven't filled them in.  We can now run the test to see the
+results.
 
-```sh dir=examples/erroneous/echo_test_original/test
+```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE
   $ dune runtest
+  Entering directory '/home/yminsky/Documents/code/rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+       patdiff (internal) (exit 1)
+  (cd _build/default && /home/yminsky/Documents/code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
+  ------ test/test.ml
+  ++++++ test/test.ml.corrected
+  File "test/test.ml", line 11, characters 0-1:
+   |open! Core
+   |open! Async
+   |open Helpers
+   |
+   |let%expect_test "test uppercase echo" =
+   |  let port = 8081 in
+   |  let%bind process  = launch ~port ~uppercase:true in
+   |  Monitor.protect (fun () ->
+   |      let%bind (r,w) = connect ~port in
+   |      let%bind () = send_data r w "one two three\n" in
+  -|      let%bind () = [%expect] in
+  +|      let%bind () = [%expect.unreachable] in
+   |      let%bind () = send_data r w "one 2 three\n" in
+  -|      let%bind () = [%expect] in
+  +|      let%bind () = [%expect.unreachable] in
+   |      return ())
+   |    ~finally:(fun () -> cleanup process)
+  +|[@@expect.uncaught_exn {|
+  +|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
+  +|     This is strongly discouraged as backtraces are fragile.
+  +|     Please change this test to not include a backtrace. *)
+  +|
+  +|  (monitor.ml.Error
+  +|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
+  +|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
+  +|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
+  +|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
+  [1]
 ```
 
 

@@ -1,45 +1,10 @@
-(* $MDX part-begin=launch *)
 open! Core
 open! Async
+open Helpers
 
-let launch ~port =
-  Process.create_exn
-    ~prog:"../bin/echo.exe"
-    ~args:["-port";Int.to_string port;"-uppercase"]
-    ()
-(* $MDX part-end *)
-
-(* $MDX part-begin=connect *)
-let connect ~port =
-  let%map (_sock,r,w) =
-    Tcp.connect
-      (Tcp.Where_to_connect.of_host_and_port {host="localhost";port})
-  in
-  (r,w)
-(* $MDX part-end *)
-
-(* $MDX part-begin=senddata *)
-let send_data r w text =
-  Writer.write w text;
-  let%bind () = Writer.flushed w in
-  let%bind line = Reader.read_line r in
-  (match line with
-   | `Eof -> print_endline "EOF"
-   | `Ok line -> print_endline line);
-  return ()
-(* $MDX part-end *)
-
-(* $MDX part-begin=cleanup *)
-let cleanup process =
-  let () = Process.send_signal process Signal.kill in
-  let%bind (_ : Unix.Exit_or_signal.t) = Process.wait process in
-  return ()
-(* $MDX part-end *)
-
-(* $MDX part-begin=test *)
 let%expect_test "test uppercase echo" =
   let port = 8081 in
-  let%bind process  = launch ~port in
+  let%bind process  = launch ~port ~uppercase:true in
   Monitor.protect (fun () ->
       let%bind (r,w) = connect ~port in
       let%bind () = send_data r w "one two three\n" in
@@ -48,4 +13,3 @@ let%expect_test "test uppercase echo" =
       let%bind () = [%expect] in
       return ())
     ~finally:(fun () -> cleanup process)
-(* $MDX part-end *)
