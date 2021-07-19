@@ -1,0 +1,7 @@
+(library
+ (name echo_test)
+ (libraries core async expect_test_helpers_async expect_test_helpers_core)
+ (preprocess
+  (pps ppx_jane))
+ (inline_tests (deps ../bin/echo.exe))
+ )
