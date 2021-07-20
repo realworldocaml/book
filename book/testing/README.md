@@ -732,8 +732,8 @@ let%expect_test "test uppercase echo" =
 ```
 
 Note that we put in some expect annotations where we want to see data,
-but we haven't filled them in.  We can now run the test to see the
-results.
+but we haven't filled them in.  We can now run the test to see what
+happens.  The results, however, are not what we hoped for.
 
 ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE
   $ dune runtest
@@ -773,7 +773,43 @@ results.
   [1]
 ```
 
+What went wrong here? The issue is that the connect function fails,
+because it takes a bit of time for the echo server to start up.  We
+can fix this by adding a one second delay, via a call to Async's
+`Clock.after` function, after which, the tests pass, and the result is
+what we'd expect.
 
+```ocaml file=examples/correct/echo_test_delay/test/test.ml
+open! Core
+open! Async
+open Helpers
+
+let%expect_test "test uppercase echo" =
+  let port = 8081 in
+  let%bind process  = launch ~port ~uppercase:true in
+  Monitor.protect (fun () ->
+      let%bind () = Clock.after (Time.Span.of_sec 1.) in
+      let%bind (r,w) = connect ~port in
+      let%bind () = send_data r w "one two three\n" in
+      let%bind () = [%expect{| ONE TWO THREE |}] in
+      let%bind () = send_data r w "one 2 three\n" in
+      let%bind () = [%expect{| ONE 2 THREE |}] in
+      return ())
+    ~finally:(fun () -> cleanup process)
+```
+
+That said, this solution should make you a little uncomfortable.
+First, this forced delay means our tests are going to be slow, and
+maybe unnecessarily so.  Why did we choose to wait a second, and not a
+half a second, or two seconds?  The time we wait is some balance
+between reducing the scope for failure versus preserving performance
+of the test.
+
+We can improve on this by removing the `Clock.after` call, and instead
+adding a retry loop to the test.
+
+```ocaml file=examples/correct/echo_test_reconnect/test/helpers.ml,part=connect
+```
 
 ## Property testing with Quickcheck
 

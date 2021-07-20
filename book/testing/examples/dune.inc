@@ -30,6 +30,34 @@
  (deps (alias bigger_quickcheck_test_with_ppx)))
 
 (rule
+ (alias echo_test_delay)
+ (deps
+  (source_tree ./correct/echo_test_delay)
+  (package core)
+  (package async)
+  (package ppx_jane))
+ (action
+  (system "dune build @all @runtest --root ./correct/echo_test_delay")))
+
+(alias
+ (name runtest)
+ (deps (alias echo_test_delay)))
+
+(rule
+ (alias echo_test_reconnect)
+ (deps
+  (source_tree ./correct/echo_test_reconnect)
+  (package core)
+  (package async)
+  (package ppx_jane))
+ (action
+  (system "dune build @all @runtest --root ./correct/echo_test_reconnect")))
+
+(alias
+ (name runtest)
+ (deps (alias echo_test_reconnect)))
+
+(rule
  (alias manual_property_test)
  (deps
   (source_tree ./correct/manual_property_test)
