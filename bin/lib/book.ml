@@ -261,19 +261,18 @@ let make_simple_page file =
 
 let make_tex_inputs_page ?(repo_root=".") ~include_wip () : string Deferred.t =
   Toc.Repr.get ~repo_root ~include_wip () >>| fun l ->
-  let to_input s = [Tex.input (repo_root / "book" / s ^ ".tex"); Tex.newpage] in
-  let to_tex t : Tex.t list =
+  let to_input s = In_channel.read_all (repo_root / "book" / s ^ ".md") in
+  let to_tex t =
       match t with
       | `part (part: Toc.Repr.part) ->
         let names = List.map part.chapters ~f:(fun c -> c.name) in
-        [Tex.part part.title]::(List.map ~f:to_input names)
+        ("# " ^ part.title ^ "\n") :: (List.map ~f:to_input names)
       | `chapter (c : Toc.Repr.chapter) ->
         [to_input c.name]
   in
-  List.map ~f:to_tex l
-  |> List.join
-  |> List.map ~f:Tex.to_string
-  |> String.concat ~sep:"\n"
+  List.map ~f:to_tex l |>
+  List.join |>
+  String.concat ~sep:"\n"
 
 (******************************************************************************)
 (* Main Functions                                                             *)
@@ -332,7 +331,7 @@ let make ?(repo_root=".") ?(include_wip=false) ~out_dir = function
     Writer.save out_file ~contents
   )
   | `Latex -> (
-    let base = "inputs.tex" in
+    let base = "book.md" in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     make_tex_inputs_page ~include_wip ~repo_root () >>= fun contents ->

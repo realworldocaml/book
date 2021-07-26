@@ -106,10 +106,9 @@ The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly. [minor heaps/allocating
 on]{.idx}
 
-<figure style="float: 0">
-  <img src="images/gc/minor_heap.png"/>
-</figure>
-
+\
+![](images/gc/minor_heap.png "Minor GC heap")
+\
 
 The runtime stores the boundaries of the minor heap in two pointers that
 delimit the start and end of the heap region (`caml_young_start` and
@@ -324,16 +323,11 @@ incrementally by marking the heap in *slices*. Each value in the heap has a
 whether the value has been marked so that the GC can resume easily between
 slices. [major heaps/marking and scanning]{.idx}
 
-Tag color | Block status
-----------|-------------
-Blue | On the free list and not currently in use
-White (during marking) | Not reached yet, but possibly reachable
-White (during sweeping) | Unreachable and can be freed
-Gray | Reachable, but its fields have not been scanned
-Black | Reachable, and its fields have been scanned
-
-Table:  Tag color statuses
-
+- Blue:  On the free list and not currently in use
+- White (during marking): Not reached yet, but possibly reachable
+- White (during sweeping): Unreachable and can be freed
+- Gray: Reachable, but its fields have not been scanned
+- Black:  Reachable, and its fields have been scanned
 
 The color tags in the value headers store most of the state of the marking
 process, allowing it to be paused and resumed later. The GC and application

@@ -9,8 +9,8 @@ influencing the way you design software even when you're not using them.
 
 We wrote this book because we believe in the importance of programming
 languages, and that OCaml in particular is an important language to learn.
-The three of us have been using OCaml in our academic and professional lives
-for over 15 years, and in that time we've come to see it as a secret weapon
+Both of us have been using OCaml in our academic and professional lives
+for over 20 years, and in that time we've come to see it as a secret weapon
 for building complex software systems. This book aims to make this secret
 weapon available to a wider audience, by providing a clear guide to what you
 need to know to use OCaml effectively in the real world.
@@ -58,7 +58,7 @@ when they do arrive there, like first-class functions in C# or parametric
 polymorphism in Java, it's typically in a limited and awkward form. The only
 languages that completely embody these ideas are
 *statically typed, functional programming languages* like OCaml, F#, Haskell,
-Scala, and Standard ML.[OCaml/benefits of]{.idx}
+Scala, Rust and Standard ML.[OCaml/benefits of]{.idx}
 
 Among this worthy set of languages, OCaml stands apart because it manages to
 provide a great deal of power while remaining highly pragmatic. The compiler
@@ -87,13 +87,13 @@ later at Cambridge). ML was turned into a compiler in order to make it easier
 to use LCF on different machines, and it was gradually turned into a
 full-fledged system of its own by the 1980s.
 
-The first implementation of Caml appeared in 1987. It was created by
-Ascánder Suárez and later continued by Pierre Weis and Michel Mauny. In
-1990, Xavier Leroy and Damien Doligez built a new implementation called Caml
-Light that was based on a bytecode interpreter with a fast, sequential
-garbage collector. Over the next few years useful libraries appeared, such as
-Michel Mauny's syntax manipulation tools, and this helped promote the use of
-Caml in education and research teams.
+The first implementation of Caml appeared in 1987. It was created by Ascánder
+Suárez (as part of the Formel project at INRIA headed by Gérard Huet) and later
+continued by Pierre Weis and Michel Mauny. In 1990, Xavier Leroy and Damien
+Doligez built a new implementation called Caml Light that was based on a
+bytecode interpreter with a fast, sequential garbage collector. Over the next
+few years useful libraries appeared, such as Michel Mauny's syntax manipulation
+tools, and this helped promote the use of Caml in education and research teams.
 
 Xavier Leroy continued extending Caml Light with new features, which resulted
 in the 1995 release of Caml Special Light. This improved the executable
@@ -110,13 +110,16 @@ such as C++ or Java. In 2000, Jacques Garrigue extended OCaml with several
 new features such as polymorphic methods, variants, and labeled and optional
 arguments.
 
-The last decade has seen OCaml attract a significant user base, and language
-improvements have been steadily added to support the growing commercial and
-academic <span class="keep-together">codebases</span>. First-class modules,
-Generalized Algebraic Data Types (GADTs), and dynamic linking have improved
-the flexibility of the language. There is also fast native code support for
-x86_64, ARM, PowerPC, and Sparc, making OCaml a good choice for systems where
-resource usage, predictability, and performance all matter.
+The last two decades has seen OCaml attract a significant user base, and
+language improvements have been steadily added to support the growing
+commercial and academic <span class="keep-together">codebases</span>.  By 2012,
+the OCaml 4.0 release had added Generalised Algebraic Data Types (GADTs) and
+first-class modules to increase the flexibility of the language. Since then,
+OCaml has had a steady yearly release cadence, and OCaml 5.0 with multicore
+support is around the corner in 2022.  There is also fast native code support
+for the latest CPU architectures such as x86_64, ARM, RISC-V and PowerPC,
+making OCaml a good choice for systems where resource usage, predictability,
+and performance all matter.
 
 ### The `Base` Standard Library {#the-core-standard-library}
 
@@ -134,13 +137,13 @@ libraries from being written to supplement the compiler-supplied standard
 library. `Base` is an example of such a library, and it's the standard
 library we'll use through most of this book. [Base standard library]{.idx}
 
-Jane Street, a company that has been using OCaml for more than 15 years,
+Jane Street, a company that has been using OCaml for more than 20 years,
 developed the code in `Base` for its own internal use, but from the start
 designed it with an eye toward being a general-purpose standard library. Like
 the OCaml language itself, `Base` is engineered with correctness,
 reliability, and performance in mind. It's also designed to be easy to
 install and highly portable. As such, it works on every platform OCaml does,
-including UNIX, Mac, Windows, and JavaScript.
+including UNIX, macOS, Windows, and JavaScript.
 
 `Base` is distributed with a set of syntax extensions that provide useful new
 functionality to OCaml, and there are additional libraries that are designed
@@ -160,11 +163,13 @@ libraries and tools. We'll introduce some of these libraries in the course of
 the examples presented in the book.[OCaml/third-party libraries for]{.idx}
 
 The installation and management of these third-party libraries is made much
-easier via a package management tool known as [opam](http://opam.ocaml.org/).
+easier via a package management tool known as [opam](https://opam.ocaml.org/).
 We'll explain more about opam as the book unfolds, but it forms the basis of
-the Platform, which is a set of tools and libraries that, along with the
-OCaml compiler, lets you build real-world applications quickly and
-effectively.
+the OCaml Platform, which is a set of tools and libraries that, along with the
+OCaml compiler, lets you build real-world applications quickly and effectively.
+Constituent tools of the OCaml Platform include the [dune](https://dune.build)
+build system and a language server to integrate with popular editors such as
+Visual Studio Code (or Emacs or Vim).
 
 We'll also use opam for installing the `utop` command-line interface. This is
 a modern interactive tool that supports command history, macro expansion,
@@ -238,11 +243,11 @@ on how to set it up and what packages to install can be found at
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
 `Core` requires a UNIX based operating system, and so only works on systems
-like Mac OS X, Linux, FreeBSD, and OpenBSD. Core includes a portable subset
-called `Core_kernel` which works anywhere OCaml is, and in particular works
-on Windows and Javascript. The examples in Part I of the book will only use
-`Core_kernel` and other highly portable libraries.[OCaml/operating system
-support]{.idx}
+like macOS, Linux, FreeBSD, and OpenBSD or the Windows Subsystem for Linux
+(WSL).  Core includes a portable subset called `Core_kernel` which works
+anywhere OCaml is, and in particular works on Windows and JavaScript. The
+examples in Part I of the book will only use `Core_kernel` and other highly
+portable libraries.[OCaml/operating system support]{.idx}
 
 This book is not intended as a reference manual.  We aim to teach you
 about the language as well as the libraries, tools, and techniques
@@ -269,6 +274,10 @@ class="hyperlink">https://github.com/realworldocaml/book</em>](https://github.co
 We would especially like to thank the following individuals for improving
 *Real World OCaml*:
 
+- Jason Hickey was our co-author on the first edition of this book,
+  and is instrumental to the structure and content that formed the basis
+  of this revised edition.
+
 - Leo White contributed greatly to the content and examples in
   [Objects](objects.html#objects){data-type=xref} and
   [Classes](classes.html#classes){data-type=xref}.
@@ -287,11 +296,12 @@ We would especially like to thank the following individuals for improving
   for the changes that he pushed through to make `utop` work better in the
   context of the book.
 
-- Ashish Agarwal and Christoph Troestler worked on improving the book's
-  toolchain. This allowed us to update the book to track changes to OCaml and
-  various libraries and tools. Ashish also developed a new and improved
-  version of the book's website.
+- Ashish Agarwal, Christoph Troestler, Thomas Gazagnaire, Etienne Millon,
+  Nathan Rebours, Charles-Edouard Lecat, Jules Aguillon, Rudi Grinberg, Sonja
+  Heinze and Frederic Bour worked on improving the book's toolchain. This allowed
+  us to update the book to track changes to OCaml and various libraries and
+  tools.  Ashish also developed a new and improved version of the book's website.
 
-- The many people who collectively submitted over 2400 comments to online
+- The many people who collectively submitted over 3500 comments to online
   drafts of this book, through whose efforts countless errors were found and
   fixed.

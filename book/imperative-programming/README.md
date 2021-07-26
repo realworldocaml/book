@@ -906,17 +906,15 @@ val edit_distance : string -> string -> int = <fun>
 The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
 then that will in turn dispatch the following calls:
 
-<figure style="float: 0">
-  <img src="images/imperative-programming/edit_distance.png"/>
-</figure>
-
+\
+![](images/imperative-programming/edit_distance.png "Edit distance")
+\
 
 And these calls will in turn dispatch other calls:
 
-<figure style="float: 0">
-  <img src="images/imperative-programming/edit_distance2.png"/>
-</figure>
-
+\
+![](images/imperative-programming/edit_distance2.png "Edit distance two")
+\
 
 As you can see, some of these calls are repeats. For example, there
 are two different calls to `edit_distance "OCam" "oca"`. The number of
