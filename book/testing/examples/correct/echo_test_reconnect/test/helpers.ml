@@ -7,7 +7,7 @@ let launch ~port ~uppercase =
     ~args:(["-port";Int.to_string port] @ if uppercase then ["-uppercase"] else [])
     ()
 
-(* $MDX part-begin="connect" *)
+(* $MDX part-begin=connect *)
 let rec connect ~port =
   match%bind
     Monitor.try_with

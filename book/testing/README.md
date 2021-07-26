@@ -338,15 +338,15 @@ let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
 ```
 
-Indeed, for examples like this, expect tests aren't really better.
-Simple example-based tests like the one above work fine when it's easy
-and convenient to write out specific examples in full.  And, as we'll
+Indeed, for examples like this, expect tests aren't better: simple
+example-based tests like the one above work fine when it's easy and
+convenient to write out specific examples in full.  And, as we'll
 discuss later in the chapter, *property tests* are your best bet when
 you have a clear set of predicates that you want to test, and examples
 can be naturally generated at random.
 
 Where expect tests shine is where you want to make visible some aspect
-of thebehavior of your system that's hard to capture in a predicate.
+of the behavior of your system that's hard to capture in a predicate.
 This is more useful than it might seem at first.  Let's consider a few
 different example use-cases to see why.
 
@@ -361,7 +361,7 @@ way to do so often involves trial and error.
 Here's some code that does this kind of data extraction, using the
 `lambdasoup` package to traverse a chunk of HTML and spit out some
 data embedded within it.  In particular, the function aims to produce
-the set of hosts that show up in links within the document.
+the set of hosts that show up in links within a document.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=0
 open! Base
@@ -470,19 +470,20 @@ should be.
   [1]
 ```
 
+One nice aspect of this exploratory workflow is that once you've
+gotten things working, you can leave the examples you used to develop
+the code as permanent tests.
+
 ### Visualizing complex behavior
 
 Expect tests can be used to examine the dynamic behavior of a system.
-Here's a deceptively simple example: a rate limiter.  A rate limiter
-is logic for limiting the rate at which a system consumes a particular
-resource.  The following `mli` describes a library that specifies the
-logic of a simple rolling-window-style rate limiter.
+Let's walk through a simple example: a rate limiter.  The job of a
+rate limiter is to bound the rate at which a system consumes a
+particular resource.  The following is the `mli` for a library that
+specifies the logic of a simple rolling-window-style rate limiter.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open! Core
-
-(** An object for bounding the rate of consumption of some resource by a bound
-    over a rolling window. *)
 
 type t
 
@@ -491,8 +492,8 @@ val maybe_consume : t -> now:Time_ns.t -> [ `Consumed | `No_capacity ]
 ```
 
 We can demonstrate the behavior of the system by running through some
-examples.  The first step is to write some helper functions that will
-make the examples themselves shorter and easier to read.
+examples.  First, we'll write some helper functions to make the
+examples shorter and easier to read.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
 open! Core
@@ -519,9 +520,7 @@ let consume lim offset =
 Here, we define three values: `start_time`, which is just a point in
 time at which to begin our examples; `limiter`, which is a function
 for constructing a fresh `Limiter.t` object, with some reasonable
-defaults; and `consume`, which takes a limiter and an offset in
-seconds from the start-time, which operates on the limiter as if a
-consumption event happened.
+defaults; and `consume`, which attempts to consume a resource.
 
 Notably, `consume` doesn't just update the limiter, it also prints out
 a marker of the result, i.e., whether the consumption succeeded or
@@ -616,7 +615,7 @@ let%expect_test _ =
 ```
 
 The above, however, is not the expected outcome! In particular, all of
-our calls to `consume` succeeded, despite us trying to violate the
+our calls to `consume` succeeded, despite us violating the
 2-per-second rate limit.  That's because there was a bug in our
 implementation.  The implementation has a queue of times where consume
 events occurred, and we use this function to drain the queue.
@@ -656,6 +655,12 @@ let%expect_test _ =
   consume 1.;
   [%expect {| 1.00: C |}]
 ```
+
+One of the things that makes this test readable is that we went to
+some trouble to make the example concise. Some of this was about
+creating some simple helpers, and some of it was about having a
+concise and noise-free format for the data captured by the expect
+blocks.
 
 ### End-to-end tests
 
@@ -733,7 +738,7 @@ let%expect_test "test uppercase echo" =
 
 Note that we put in some expect annotations where we want to see data,
 but we haven't filled them in.  We can now run the test to see what
-happens.  The results, however, are not what we hoped for.
+happens.  The results, however, are not what you might hope for.
 
 ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE
   $ dune runtest
@@ -773,11 +778,11 @@ happens.  The results, however, are not what we hoped for.
   [1]
 ```
 
-What went wrong here? The issue is that the connect function fails,
-because it takes a bit of time for the echo server to start up.  We
-can fix this by adding a one second delay, via a call to Async's
-`Clock.after` function, after which, the tests pass, and the result is
-what we'd expect.
+What went wrong here? The issue is that the connect fails, because at
+the time of the connection, the echo server hasn't finished setting up
+the server.  We can fix this by adding a one second delay before
+connecting, using Async's `Clock.after`.  With this change, the test
+now passes, with the expected results.
 
 ```ocaml file=examples/correct/echo_test_delay/test/test.ml
 open! Core
@@ -798,27 +803,69 @@ let%expect_test "test uppercase echo" =
     ~finally:(fun () -> cleanup process)
 ```
 
-That said, this solution should make you a little uncomfortable.
-First, this forced delay means our tests are going to be slow, and
-maybe unnecessarily so.  Why did we choose to wait a second, and not a
-half a second, or two seconds?  The time we wait is some balance
-between reducing the scope for failure versus preserving performance
-of the test.
+We fixed the problem, but solution should make you uncomfortable.  For
+one thing, why is one second the right timeout, rather than a half a
+second, or ten?  The time we wait is some balance between reducing the
+likelihood of a non-deterministic failure versus preserving
+performance of the test, which is a bit of an awkward tradeoff to have
+to meke.
 
 We can improve on this by removing the `Clock.after` call, and instead
-adding a retry loop to the test.
+adding a retry loop to the `connect` test helper
 
 ```ocaml file=examples/correct/echo_test_reconnect/test/helpers.ml,part=connect
+let rec connect ~port =
+  match%bind
+    Monitor.try_with
+      (fun () ->
+         Tcp.connect
+           (Tcp.Where_to_connect.of_host_and_port {host="localhost";port}))
+  with
+  | Ok (_,r,w) -> return (r,w)
+  | Error _ ->
+    let%bind () = Clock.after (Time.Span.of_sec 0.01) in
+    connect ~port
 ```
+
+There's still a timeout in this code, in that we wait a bit before
+retrying.  But that timeout is quite aggressive, so you never waste
+more than 10 milliseconds waiting unnecessarily.  That means tests
+will typically run fast, but if they do run slowly (maybe because your
+machine is heavily loaded during a big build), the test will still
+pass.
+
+The lesson here is that keeping tests deterministic in the context of
+running programs doing real I/O gets messy fast.  When possible, you
+should write your code in a way that allows most of it to be tested
+without having to connect to real running servers.  But when you do
+need to do it, you can still use expect tests for this purpose.
+
+### How to make a good expect tests
+
+Taken together, these examples suggest some guidelines for building
+good expect tests:
+
+- **Write helper functions** to help you set up your test scenarios
+  more concisely.
+
+- **Write custom pretty-printers** that surface just the information
+  that you need to see in the test. This makes your tests easier to
+  read, and also minimizes unnecessary churn when details that are
+  irrelevant to your test change.
+
+- **Aim for determinism**, ideally by organizing your code so you can
+  put it through its paces without directly interacting with the
+  outside world, which is generally the source of non-determinism.
+  But if you must, be careful to avoid timeouts and other stopgaps
+  that will fall apart under performance pressure.
 
 ## Property testing with Quickcheck
 
-The tests we've discussed so far have been quite simple, amounting to
-little more than individual examples paired with assertions checking
-that the example in question worked as expected.  *Property testing*
-is a useful extension of this approach, which lets you explore a much
-larger portion of your code's behavior with only a small amount of
-extra code.
+Many tests amount to little more than individual examples decorated
+with simple assertions to check this or that property.  *Property
+testing* is a useful extension of this approach, which lets you
+explore a much larger portion of your code's behavior with only a
+small amount of extra code.
 
 The basic idea is simple enough. A property test requires two things:
 a function that takes an example input and checks that a given
@@ -1090,21 +1137,3 @@ used `weighted_union` to pick a different distribution.
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
-
-## Ideas for extending this chapter
-
-- More realistic examples of expect tests.  This is tricky, because
-  natural examples are often kind of long.
-- Test the boolean simplifier, maybe the one in blang?
-- Show an example of HTML-scraping?
-- Use expect_test_helpers to do shell commands.
--
-- Maybe a tic-tac-toe game?
-- How to use randomness in a non-random way?
-- Is it worth talking about the technique of capturing random
-  examples, and then printing out changes to those examples?
-- Talk about how to write things so they're more testable. Determinism
-  is a big deal here.  Should we show off the
-  state-machine-with-events style?
-- Talk about using Synchronous_time_source, for Async applications?
-- Give examples of ways of making expect tests with pretty output?
