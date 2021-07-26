@@ -2,7 +2,7 @@
 
 Testing is not the best-loved part of programming. Writing tests is an
 exacting and sometimes dreary job, and it can feel like a distraction
-from the task of building our your code's functionality.  At first
+from the task of building out your code's functionality.  At first
 blush, OCaml's type-system makes testing seem even less appealing,
 since the type system's ability to squash many kinds of bugs at
 compile time catches lots of mistakes that you would otherwise need to
