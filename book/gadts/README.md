@@ -81,7 +81,7 @@ val expr : Simple_lang.expr =
   Simple_lang.Plus (Simple_lang.Value (Simple_lang.Bool true),
    Simple_lang.Value (Simple_lang.Bool false))
 # let x = Simple_lang.eval expr
-Exception: (Failure "Ill-typed expression").
+Exception: (Failure "Ill-typed expression")
 ```
 
 We can make this better, by use of another technique called phantom
@@ -186,7 +186,7 @@ dynamic failure that we didn't expect.
 # let expr = Phantom_lang.(eq (bool true) (bool false))
 val expr : bool Phantom_lang.expr = <abstr>
 # let x = Phantom_lang.bool_eval expr
-Exception: (Failure "Ill-typed expression").
+Exception: (Failure "Ill-typed expression")
 ```
 
 ## Trying to do a better job with ordinary variants
