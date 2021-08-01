@@ -779,7 +779,7 @@ let apply f_opt x =
   | None -> None
   | Some f -> Some (f x)
 
-(* The remainder of the list module *)
+(* The remainder of the option module *)
 include Option
 ```
 
