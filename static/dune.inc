@@ -139,6 +139,12 @@
 
 (rule
  (alias site)
+ (target testing.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/testing.html})))
+
+(rule
+ (alias site)
  (target variables-and-functions.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/variables-and-functions.html})))
