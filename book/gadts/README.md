@@ -1,56 +1,66 @@
 # GADTs
 
-GADTs are an increasingly common, and still somewhat mysterious corner
-of the OCaml type system. This tutorial is meant to demystify them a
-little.
+GADTs, short for Generalized Algebraic Data Types, are a more powerful
+version of the variants we saw in
+[Variants](variants.html){data-type=xref}.  GADTs are a powerful
+feature in OCaml, and they can help you get more precise types that
+make your code simpler and more concise.  At the same time, GADTs are
+harder to use and less intuitive than ordinary variants, and you
+should avoid them when they don't provide a lot of value.
 
-This document introduces GADTs through a classic use-case: building
-DSLs that can encode their type constraints in terms of the OCaml type
-system.  I'll leave it to a later tutorial to discuss some of the ways
-that we tend to use GADTs in our codebase, but this should give a
-taste of what GADTs are, and why they're an effective tool.
+That said, when you find the right use-case, GADTs can be really
+transformative. (SAY MORE examples like: little languages, more
+precise state machine, typed fields, performance optimizations.)
+
+GADTs provide two extra features above and beyond ordinary variants:
+
+- They let you learn more type information when you descend into a
+  case of a pattern match
+- They provide a form of *existential types*, which you can think of
+  as a form of data-hiding, similar to what you find in
+  object-oriented languages.
+
+These benefits are a little hard to explain without examples, so
+instead of explaining them from the beginning, we'll instead show how
+GADTs can be useful in some concrete examples, and explain how GADTs
+work in that context.
 
 ## A little language
 
-Let's start by showing off a little programming language implemented
-in a simple style.  First, here's a signature for our language:
+We'll start off by showing how to express a simple expression language
+using ordinary variants, similar to the boolean expression language
+described in
+[Variants](variants.html#variants-and-recursive-data-structures){data-type=xref}.
+The big difference here is that this language will allow us to mix
+arithemtic and boolean expression.
+
+Let's start by writing out the type representing expressions.  We
+declare two types here: `value`, which represents a primitive value in
+the language (i.e., an `int` or a `bool`), and `expr`, which
+represents the full set of possible expressions.
 
 ```ocaml env=main
 open! Base
 
-module type Simple_lang = sig
-  type value =
-    | Int of int
-    | Bool of bool
+type value =
+  | Int of int
+  | Bool of bool
 
-  type expr =
-    | Value of value
-    | Eq of expr * expr
-    | Plus of expr * expr
-    | If of expr * expr * expr
-
-  val eval : expr -> value
-end
+type expr =
+  | Value of value
+  | Eq of expr * expr
+  | Plus of expr * expr
+  | If of expr * expr * expr
 ```
 
-This is easy enough to implement as well, though the implementation is
-a little ugly:
+Now, we can write a recursive evaluator in a pretty straight-ahead
+style.
 
 ```ocaml env=main
-let ill_typed () = failwith "Ill-typed expression"
-
-module Simple_lang : Simple_lang = struct
-  type value =
-    | Int of int
-    | Bool of bool
-
-  type expr =
-    | Value of value
-    | Eq of expr * expr
-    | Plus of expr * expr
-    | If of expr * expr * expr
-
-  let rec eval = function
+# let ill_typed () = failwith "Ill-typed expression"
+val ill_typed : unit -> 'a = <fun>
+# let rec eval expr =
+    match expr with
     | Value v -> v
     | If (c, t, e) ->
       (match eval c with
@@ -64,74 +74,65 @@ module Simple_lang : Simple_lang = struct
       (match eval x, eval y with
        | Bool _, _ | _, Bool _ -> ill_typed ()
        | Int f1, Int f2 -> Int (f1 + f2))
-end
+val eval : expr -> value = <fun>
 ```
 
-The implementation is ugly mostly because it has a lot of dynamic
-checks that are required for what are effectively type errors. And
-indeed, it's totally possible to construct an ill-typed expression, so
-these dynamic checks are actually necessary.
-
-Here, you can see what happens when we construct and then evaluate an
-ill-typed expression in the DSL.
+This implementation is a bit ugly because it has a lot of dynamic
+checks to detect what are effectively type errors.  And indeed, it's
+totally possible to pass an ill-typed expression, so these dynamic
+checks are quite necessary, as you can see below.
 
 ```ocaml env=main
-# let expr = Simple_lang.(Plus (Value (Bool true), Value (Bool false)))
-val expr : Simple_lang.expr =
-  Simple_lang.Plus (Simple_lang.Value (Simple_lang.Bool true),
-   Simple_lang.Value (Simple_lang.Bool false))
-# let x = Simple_lang.eval expr
+# eval (Plus (Value (Int 3), Value (Bool false)))
 Exception: (Failure "Ill-typed expression")
 ```
 
-We can make this better, by use of another technique called phantom
-types.
+This is not just a problem for the implementation that needs to detect
+these type errors: it's also a problem for users, since it's all too
+easy for them to create ill-typed expressions.
 
-### Better type safety with phantom types
+Before getting in to GADTs, let's see how much progress we can make
+without them, first, by making the language type-safe for users.
 
-[*Phantom types*](./phantom-types.mlt) aren't a language feature so much
-as a programming technique.  Maybe a slightly better name is *phantom
-type parameters*. A phantom type parameter is a type parameter that
-shows up on the left-hand-side of the definition of a type, but not
-the right, e.g.:
+### Making the language type-safe
 
-```ocaml env=main
-type _ foo = int
-```
-
-Since the phantom parameter isn't tied to the implementation of the
-type, it's free, and can be constrained for whatever purpose the
-designer of the interface through which `foo` is exposed wants.
-
-Let's apply this to our little language. First, we can write down the
-desired signature of our module:
+Let's consider what a type-safe version of this API might look like.
+We'll need a type for expressions that has a type parameter, to
+distinguish integer expressions from booleain expressions.  That
+expression might look something like this:
 
 ```ocaml env=main
-module type Phantom_lang = sig
-  type 'a expr
+module type Typesafe_lang_sig = sig
+  type 'a t
 
-  val int : int -> int expr
-  val bool : bool -> bool expr
-  val if_ : bool expr -> 'a expr -> 'a expr -> 'a expr
-  val eq : 'a expr -> 'a expr -> bool expr
-  val plus : int expr -> int expr -> int expr
-  val int_eval : int expr -> int
-  val bool_eval : bool expr -> bool
+  (** functions for constructing expressions *)
+
+  val int : int -> int t
+  val bool : bool -> bool t
+  val if_ : bool t -> 'a t -> 'a t -> 'a t
+  val eq : _ t -> _ t -> bool t
+  val plus : int t -> int t -> int t
+
+  (** Evaluation functions *)
+
+  val int_eval : int t -> int
+  val bool_eval : bool t -> bool
 end
 ```
 
-The parameter of the `expr` type is, as we'll see when we look at the
-implementation in a moment, a phantom.  The constraints on
-constructing ill-typed expressions here come from the way we've
-written the signature. Let's write an implementation that matches this
-signature:
+The oddity here is that we have two evaluation functions: one for
+evaluating integer expressions, and one for evaluating bool
+expressions.  Ideally, you'd like a single eval function with the type
+`'a t -> 'a`.  But as we'll see, we don't have a good way of
+implementing a function with this type without GADts.
+
+The constraints on constructing ill-typed expressions here come from
+the way we've written the signature.  Let's write an implementation
+that matches this signature.
 
 ```ocaml env=main
-module Phantom_lang : Phantom_lang = struct
-  (* Here is where the phantom type parameter is added *)
-  type _ expr = Simple_lang.expr
-
-  open Simple_lang
+module Typesafe_lang : Typesafe_lang_sig = struct
+  type 'a t = expr
 
   let int x = Value (Int x)
   let bool x = Value (Bool x)
@@ -151,17 +152,52 @@ module Phantom_lang : Phantom_lang = struct
 end
 ```
 
-Now, if we want to use this version of our language, we'll discover
-that we can no longer express the ill-typed expression we had trouble
-with before:
+With this language, we'll discover that we can no longer express the
+ill-typed expression we had trouble with before.
 
 ```ocaml env=main
-# let expr = Phantom_lang.(plus (bool true) (bool false))
-Line 1, characters 31-42:
-Error: This expression has type bool expr
-       but an expression was expected of type int expr
+# let expr = Typesafe_lang.(plus (int 3) (bool false))
+Line 1, characters 40-52:
+Error: This expression has type bool t but an expression was expected of type
+         int t
        Type bool is not compatible with type int
 ```
+
+So, what happened here? How did we add the type-safety we wanted?  The
+fundamental trick is to add what's called a *phantom type*.
+Specifically, the definition `type 'a t = expr` is where the phantom
+type comes in.  In particular, the type parameter `'a` is the phantom,
+because it doesn't show up in the body of the definition of `t`.
+
+Because the type parameter is unused, it's free to take on any value
+you want, and that's why the resulting code is able to fit the
+signature `Typesafe_lang_sig`.  So, the constraints that prevent us
+from constructing ill-typed expressions, really come from the
+signature, not the implementation.
+
+Indeed, the way it's written, there's a bug in the signature! The
+signature of `eq` is:
+
+```ocaml skip
+val eq : _ t -> _ t -> bool t
+```
+
+but should have been:
+
+```ocaml skip
+val eq : 'a t -> 'a t -> bool t
+```
+
+As a result, it turns out we can still create an ill-typed expression,
+which will then cause the evaluator to fail at runtime.
+
+```ocaml env=main
+# let expr = Typesafe_lang.(eq (int 3) (bool false))
+val expr : bool Typesafe_lang.t = <abstr>
+# Typesafe_lang.bool_eval expr
+Exception: (Failure "Ill-typed expression")
+```
+
 
 This is an improvement at the API level, but the implementation is if
 anything worse.  We still have all of the messiness of the old
@@ -184,9 +220,11 @@ dynamic failure that we didn't expect.
 
 ```ocaml env=main
 # let expr = Phantom_lang.(eq (bool true) (bool false))
-val expr : bool Phantom_lang.expr = <abstr>
+Line 1, characters 12-24:
+Error: Unbound module Phantom_lang
 # let x = Phantom_lang.bool_eval expr
-Exception: (Failure "Ill-typed expression")
+Line 1, characters 9-31:
+Error: Unbound module Phantom_lang
 ```
 
 ## Trying to do a better job with ordinary variants
@@ -404,3 +442,21 @@ with time.
 I hope to follow this up with a tutorial that covers a bit more of the
 practical side of GADTs, focusing on the places where we've found
 GADTs to be especially helpful.
+
+
+
+## Detritus
+
+Aren't a language feature so much
+as a programming technique.  Maybe a slightly better name is *phantom
+type parameters*. A phantom type parameter is a type parameter that
+shows up on the left-hand-side of the definition of a type, but not
+the right, e.g.:
+
+```ocaml env=main
+type _ foo = int
+```
+
+Since the phantom parameter isn't tied to the implementation of the
+type, it's free, and can be constrained for whatever purpose the
+designer of the interface through which `foo` is exposed wants.
