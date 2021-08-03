@@ -191,6 +191,16 @@
 
 (rule
  (alias html)
+ (target platform.html)
+ (action (run rwo-convert_md  %{dep:platform/README.md} -t html -o %{target})))
+
+(rule
+ (alias latex)
+ (target platform.md)
+ (action (run rwo-convert_md  %{dep:platform/README.md} -t md -o %{target})))
+
+(rule
+ (alias html)
  (target ppx.html)
  (action (run rwo-convert_md  %{dep:ppx/README.md} -t html -o %{target})))
 

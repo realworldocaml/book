@@ -115,6 +115,12 @@
 
 (rule
  (alias site-wip)
+ (target platform.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/platform.html})))
+
+(rule
+ (alias site-wip)
  (target ppx.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/ppx.html})))
