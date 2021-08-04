@@ -479,7 +479,7 @@ let apply f_opt x =
   | None -&gt; None
   | Some f -&gt; Some (f x)
 
-(* The remainder of the list module *)
+(* The remainder of the option module *)
 include Option</code></pre>
 </div>
 <p>Now, how do we write an interface for this new module? It turns out that <code>include</code> works on signatures as well, so we can pull essentially the same trick to write our <code>mli</code>. The only issue is that we need to get our hands on the signature for the <code>Option</code> module. This can be done using <code>module type of</code>, which computes a signature from a module:</p>
