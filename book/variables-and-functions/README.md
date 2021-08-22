@@ -820,7 +820,7 @@ Labeled arguments are useful in a few different cases:
 val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
 ```
 
-The signature makes it hard to divine the meaning of those two arguments.
+The signature makes it hard to discern the meaning of those two arguments.
   but with labeled arguments, we can make the intent immediately clear.
 
 ```ocaml skip
