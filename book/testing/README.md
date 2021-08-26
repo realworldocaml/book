@@ -553,7 +553,7 @@ execution traces.
 
 <!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
 
-```sh
+```
   $ dune runtest
   ------ test.ml
   ++++++ test.ml.corrected
@@ -742,7 +742,7 @@ happens.  The results, however, are not what you might hope for.
 
 <!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
 
-```sh
+```
   $ dune runtest
   ------ test/test.ml
   ++++++ test/test.ml.corrected
