@@ -551,10 +551,10 @@ let%expect_test _ =
 Running the tests will produce a corrected file that includes the
 execution traces.
 
-```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE
+<!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
+
+```sh
   $ dune runtest
-       patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/Documents/code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
   ------ test.ml
   ++++++ test.ml.corrected
   File "test.ml", line 32, characters 0-1:
@@ -740,11 +740,10 @@ Note that we put in some expect annotations where we want to see data,
 but we haven't filled them in.  We can now run the test to see what
 happens.  The results, however, are not what you might hope for.
 
-```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE
+<!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
+
+```sh
   $ dune runtest
-  Entering directory '/home/yminsky/Documents/code/rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
-       patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/Documents/code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
   ------ test/test.ml
   ++++++ test/test.ml.corrected
   File "test/test.ml", line 11, characters 0-1:
