@@ -1,0 +1,12 @@
+; Define a library named `hello` for our project.
+; The library does not have any dependency, so only the standard library
+; will be available in the modules of the `lib/` directory.
+;
+; Note that when a module with the same name as the library is defined,
+; it will be used as the top-level of our library. If it's not the case,
+; all of the modules in the directory will be exposed in a generated top-level.
+
+(library
+ (name hello)
+ (public_name hello)
+ (libraries))
