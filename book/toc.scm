@@ -22,7 +22,7 @@
    (maps-and-hashtables
     command-line-parsing
     concurrent-programming
-    (wip testing)
+    testing
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
