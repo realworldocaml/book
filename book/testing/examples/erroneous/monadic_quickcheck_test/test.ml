@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 let%test_unit "List.rev_append is List.append of List.rev" =
   let gen_list = List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value) in

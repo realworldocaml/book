@@ -83,7 +83,7 @@ Once installed, you can open it in the `utop` toplevel by:
 :::
 
 ```ocaml env=install
-# open Core_kernel
+# open Core
 # #require "yojson"
 # open Yojson
 ```

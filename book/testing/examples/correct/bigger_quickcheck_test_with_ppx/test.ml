@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test

@@ -920,13 +920,13 @@ seems like a problem.
 This is a place where `Quickcheck` can help.  `Quickcheck` is a
 library to help automate the construction of testing
 distributions. Let's try rewriting the above example using it.  Note
-that we open `Core_kernel` here because `Core_kernel` has nicely
-integrated support for `Quickcheck`, with helper functions already
-integrated into most common modules.  There's also a standalone
-`Base_quickcheck` library that can be used without `Core_kernel`.
+that we open `Core` here because `Core` has nicely integrated support
+for `Quickcheck`, with helper functions already integrated into most
+common modules.  There's also a standalone `Base_quickcheck` library
+that can be used without `Core`.
 
 ```ocaml file=examples/erroneous/quickcheck_property_test/test.ml
-open Core_kernel
+open Core
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
@@ -997,7 +997,7 @@ distribution for generating pairs of lists of integers.  The following
 example shows how that can be done using Quickcheck's combinators.
 
 ```ocaml file=examples/correct/bigger_quickcheck_test/test.ml
-open Core_kernel
+open Core
 
 let gen_int_list_pair =
   let int_list_gen =
@@ -1033,7 +1033,7 @@ creation of the generator given just the type declaration.  We can use
 that to simplify our code, as shown below.
 
 ```ocaml file=examples/correct/bigger_quickcheck_test_with_ppx/test.ml
-open Core_kernel
+open Core
 
 let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test

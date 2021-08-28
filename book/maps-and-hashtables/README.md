@@ -660,10 +660,10 @@ field within the same structure), the `=` operator will never terminate, and
 your program will hang! You therefore must use the physical equality operator
 or write a custom comparison function when comparing cyclic values.
 
-It's quite easy to mix up the use of `=` and `==`, so Core_kernel discourages
-the use of `==` and provides the more explicit `phys_equal` function instead.
-You'll see a warning if you use `==` anywhere in code that opens
-`Core_kernel`:
+It's quite easy to mix up the use of `=` and `==`, so `Base`
+discourages the use of `==` and provides the more explicit
+`phys_equal` function instead.  You'll see a warning if you use `==`
+anywhere in code that opens `Base`:
 
 ```ocaml env=core_phys_equal
 # open Base
