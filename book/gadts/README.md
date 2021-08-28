@@ -219,7 +219,7 @@ type-level guarantee of when it's handling a bool expression versus an
 int expression, so it can't safely give results where the type of the
 result varies based on the result of the expression.
 
-### Trying to do a better job with ordinary variants
+### Trying to do better with ordinary variants
 
 To see why we need GADTs, let's see what would happen if instead of
 using phantom types, we tried to encode the typing rules we want for
@@ -271,15 +271,16 @@ Also, some things that shouldn't typecheck do, like this example.
 - : int value = Bool 3
 ```
 
-### GADTs to the rescue
-
 The problem here is that the way we want to use the type parameter
 isn't supported by ordinary variants. In particular, we want the type
 parameter to be populated in different ways in the different tags.
 And that's one of the features that GADTs provide.
 
-Here, let's write out the type signature for a GADT type that
-correctly enforces our desired typing rules:
+### GADTs to the rescue
+
+Now we're ready write our first GADT. Here's a new version of our
+`value` and `expr` types that correctly encode our desired typing
+rules.
 
 ```ocaml env=main
 type _ value =
@@ -294,26 +295,24 @@ type _ expr =
 ```
 
 The syntax here is requires some decoding. The colon to the right of
-the tag si what tells you that this is a GADT.  To the right of the
+the tag is what tells you that this is a GADT.  To the right of the
 colon, you'll see what looks like an ordinary function signature, and
-you can almost think of it that way. You can almost think of it as the
-type signature for that particular constructor: the left-hand side of
-the arrow says the types of the arguments to the constructor, and the
-right hand side tells you the type of the value that you get back.
+you can almost think of it that way; specifically, as the type
+signature for that particular constructor. The left-hand side of the
+arrow states the types of the arguments to the constructor, and the
+right hand side determines the type of the constructed value.
 
-But to be clear, when defining the GADT `expr`, the right-hand side is
-always of type `expr`; but the type parameter of `expr` can be
-different in each case, and importantly, can depend both on the
-constructor (e.g., the `Eq` constructor always corresponds to a `bool
-expr`) and on the type of the arguments (e.g., the type of expression
-produced by the `If` constructor depends on the type of the
-expressions that form the then and else clauses.)
+Note that in the definition of each constructor in a GADT, the
+right-hand side is always the same type as the overall GADT; but the
+type parameter can be different in each case, and importantly, can
+depend both on the constructor and on the type of the arguments.  `Eq`
+is an example where the type parameter is determined entirely by the
+constructor: it always corresponds to a `bool expr`.  `If` is an
+example where the type parameter depends on the arguments to the
+constructor, in particular the type parameter of the `If` is the type
+parameter of the then and else clauses.
 
-This lets us express things like the fact that an `Int` instance of
-`value` can only contain values of type `int`, but that a `Value`
-instance of `expr` can contain either an `int` or `bool`.
-
-With these type definitions, we can try some of our earlier examples.
+Now let's construct some simple examples.
 
 ```ocaml env=main
 # Int 3
@@ -332,12 +331,12 @@ Error: This expression has type bool value
 ```
 
 What we see here is that the type-safety rules we previously enforced
-with signature-level restrictions on phantom types are here directly
-encoded in the definition of the expression types.
+with signature-level restrictions on phantom types are now directly
+encoded in the definition of the expression type.
 
 These type-safety rules apply not just when constructing an
-expression, but also when desconstructiong one, which means we can
-write a nice and simple evaluator that doesn't need any type-safety
+expression, but also when deconstructing one, which means we can write
+a simpler and more concise evaluator that doesn't need any type-safety
 checks.
 
 ```ocaml env=main
@@ -357,8 +356,8 @@ val eval : 'a expr -> 'a = <fun>
 to those shortly.)
 
 Note that the type of the eval function is exactly the polymorphic one
-that we wanted, as opposed to the phantom type case, where we had two
-different versions of `eval`, one for int, and one for bool.
+that we wanted, as opposed to the phantom-type version, where we had
+two different versions of `eval`, one for int, and one for bool.
 
 ### Type annotations and locally abstract types
 
@@ -408,10 +407,14 @@ Error: This expression has type a expr but an expression was expected of type
 This is a pretty confusing and unhelpful error message. The real
 problem is that `eval` is trying to use *polymorphic recursion*, which
 is to say that it's a recursive function that tries to call itself at
-a different type. In particular, the calls to `eval` within `eval` can
-be for expressions of different type.  Polymorphic recursion in OCaml
-can be enabled with a type annotation that makes the type explicitly
-polymorphic, which is how we got to this form:
+a different type. In particular, `eval` will want to call itself on
+various sub-expressions, and those sub-expressions can have different
+types, e.g., the condition of an `If` is of type `bool`, even if the
+overall `If` expression is of type `int`.
+
+Polymorphic recursion in OCaml can be enabled with a type annotation
+that makes the type explicitly polymorphic, which is how we got to
+this form:
 
 
 ```ocaml env=main
@@ -423,7 +426,13 @@ polymorphic, which is how we got to this form:
 val eval : 'a expr -> 'a = <fun>
 ```
 
+## Heterogenous containers
 
+
+
+## Specializing functions
+
+## Controlling memory layout
 
 
 ## Ideas
