@@ -216,7 +216,7 @@ create_comparable Float.compare ;;
 <section class="level2" id="example-a-query-handling-framework">
 <h2>Example: A Query-Handling Framework</h2>
 <p>Now let’s look at first-class modules in the context of a more complete and realistic example. In particular, we’re going to show to implement a system for responding to user-generated queries.</p>
-<p>This system will use <em>s-expressions</em> for formatting queries and responses, as well as the configuration for the query handler. S-expressions are a simple, flexible, and human-readable serialization format commonly used in <code>Base</code> and related libraries. For now, it’s enough to think of them as balanced parenthetical expressions whose atomic values are strings, e.g., <code>(this (is an) (s expression))</code>. S-expressions are covered in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 18, Data Serialization With S Expressions</a>. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>This system will use <em>s-expressions</em> for formatting queries and responses, as well as the configuration for the query handler. S-expressions are a simple, flexible, and human-readable serialization format commonly used in <code>Base</code> and related libraries. For now, it’s enough to think of them as balanced parenthetical expressions whose atomic values are strings, e.g., <code>(this (is an) (s expression))</code>. S-expressions are covered in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a>. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <p>The following signature for a module that implements a system for responding to user-generated queries. Here, we use Base’s <code>Sexp</code> module for handling s-expressions. <a data-secondary="and first-class modules" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane" ;;
@@ -580,7 +580,7 @@ let rec cli dispatch_table =
     | Active_services
   [@@deriving sexp]</code></pre>
 </div>
-<p>The <code>eval</code> function itself is fairly straightforward, dispatching to the appropriate functions to respond to each type of query. Note that we write <code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to autogenerate a function for converting a list of strings to an s-expression, as described in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 18, Data Serialization With S Expressions</a>.</p>
+<p>The <code>eval</code> function itself is fairly straightforward, dispatching to the appropriate functions to respond to each type of query. Note that we write <code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to autogenerate a function for converting a list of strings to an s-expression, as described in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a>.</p>
 <p>This function ends the definition of the <code>Loader</code> module:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let eval t sexp =

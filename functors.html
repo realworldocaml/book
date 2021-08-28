@@ -547,7 +547,7 @@ Core_kernel.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp ;;
 &gt;- : some_type = (44, ["five"; "six"])
 </code></pre>
 </div>
-<p>We’ll discuss s-expressions and Sexplib in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 18, Data Serialization With S Expressions</a>, but for now, let’s see what happens if we attach the <code>[@@deriving sexp]</code> declaration to the definition of <code>t</code> within the functor:</p>
+<p>We’ll discuss s-expressions and Sexplib in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a>, but for now, let’s see what happens if we attach the <code>[@@deriving sexp]</code> declaration to the definition of <code>t</code> within the functor:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
