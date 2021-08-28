@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Query_handler_core
 
 [@@@part "1"];;

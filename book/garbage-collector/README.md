@@ -147,13 +147,13 @@ the `Gc.set` function:
 :::
 
 ```ocaml env=tune
-# open Core_kernel
+# open Core
 # let c = Gc.get ()
 val c : Core_kernel.Gc.control =
-  {Core_kernel.Gc.Control.minor_heap_size = 262144;
-   major_heap_increment = 15; space_overhead = 80; verbose = 0;
-   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
-   window_size = 1; custom_major_ratio = 44; custom_minor_ratio = 100;
+  {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
+   space_overhead = 80; verbose = 0; max_overhead = 500;
+   stack_limit = 1048576; allocation_policy = 0; window_size = 1;
+   custom_major_ratio = 44; custom_minor_ratio = 100;
    custom_minor_max_size = 8192}
 # Gc.tune ~minor_heap_size:(262144 * 2) ()
 - : unit = ()
@@ -529,7 +529,7 @@ garbage collection behavior:
 
 ```sh dir=examples/barrier_bench
 $ dune build barrier_bench.exe
-$ dune exec -- ./barrier_bench.exe -help
+$ dune exec -- ./barrier_bench.exe -help | head -13
 Benchmark for mutable, immutable
 
   barrier_bench.exe [COLUMN ...]
@@ -543,7 +543,6 @@ Columns that can be specified are:
 	speedup    - Relative execution cost as a speedup.
 	samples    - Number of samples collected for profiling.
 
-...
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation

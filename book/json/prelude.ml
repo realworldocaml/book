@@ -1,6 +1,6 @@
 #require "core,core.top,yojson";;
 
-open Core_kernel;;
+open Core;;
 
 let () = Printexc.record_backtrace false
 

@@ -60,7 +60,7 @@ converting s-expressions to and from strings. Let's rewrite our example
 s-expression in terms of this type:
 
 ```ocaml env=print_sexp
-# open Core_kernel
+# open Core
 # Sexp.List [
     Sexp.Atom "this";
     Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];

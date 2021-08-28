@@ -17,34 +17,32 @@ Before going any further, make sure you've followed the steps in [the
 installation page](install.html).
 
 ::: {data-type=note}
-##### `Base`, `Core` and `Core_kernel`
+##### `Base` and `Core`
 
-`Base` is one of a family of three standard library replacements, each with
-different use-cases, each building on the last. Here's a quick summary.
+`Base` comes along with another, yet more extensive standard library
+replacement, called `Core`.  We're going to mostly stick to `Base`,
+but it's worth understanding the differences between these libraries.
 
-- *`Base`* is designed to provide the fundamentals needed from a standard
-  library. It has a variety of basic efficient data structures like
-  hash-tables, sets and sequences. It also defines the basic idioms for error
-  handling and serialization, and contains well organized APIs for every
-  basic data type from integers to lazy values. This comes along with a
-  minimum of external dependencies, so `Base` just takes seconds to build and
-  install. It's also portable, running on every platform that OCaml does,
-  including Windows and JavaScript.
+- *`Base`* is designed to be lightweight, portable, and stable, while
+  providing all of the fundamentals you need from a standard library.
+  It comes with a minimum of external dependencies, so `Base` just
+  takes seconds to build and install.
 
-- *`Core_kernel`* extends `Base` with many new data structures, like
-  heaps, types to represent times and time-zones, support for
-  efficient binary serializers, and other capabilities. It's still
-  portable, but has many more dependencies, takes longer to build, and
-  will add more to the size of your executables.
+- *`Core`* extends `Base` in a number of ways: it adds new data
+  structures, like heaps, hash-sets, and functional queues; it
+  provides types to represent times and time-zones; well-integrated
+  support for efficient binary serializers; and much more.  At the
+  same time, it has many more dependencies, and so takes longer to
+  build, and will add more to the size of your executables.
 
-- *`Core`* is the most full-featured, extending `Core_kernel` with support
-  for a variety of UNIX APIs, but only works on UNIX-like OSs, including
-  Linux and macOS.
+As of this writing, the stable release of `Core` is less portable than
+`Base`, running only on UNIX-like systems.  For that reason, there's
+yet a third library, `Core_kernel`, which is a portable subset of
+`Core`. That said, the latest development version removes
+`Core_kernel`, and makes `Core` itself portable.  The stable release
+should have `Core_kernel` removed by early 2022, so we won't use
+`Core_kernel` in this text.
 
-We use `Base` in this section, but you should check out `Core` and
-`Core_kernel`, depending on your requirements. We'll discuss some of the
-additional functionality provided by `Core` and `Core_kernel` later in the
-book.
 :::
 
 
@@ -53,8 +51,7 @@ you can try out the examples as you read through the chapter.
 
 ## OCaml as a Calculator
 
-Our first step is to open `Base`: [OCaml/numerical calculations
-in]{.idx}[numerical calculations]{.idx}[Core standard library/opening]{.idx}
+Our first step is to open `Base`:
 
 ```ocaml env=main
 # open Base

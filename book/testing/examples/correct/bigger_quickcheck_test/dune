@@ -1,6 +1,6 @@
 (library
  (name foo)
- (libraries base stdio core_kernel)
+ (libraries base stdio core)
  (preprocess
   (pps ppx_jane))
  (inline_tests))

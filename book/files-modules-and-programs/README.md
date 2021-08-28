@@ -420,9 +420,9 @@ With this implementation, the build now succeeds!
 $ dune build freq.exe
 ```
 
-Now we can turn to optimizing the implementation of `Counter`. Here's an
-alternate and far more efficient implementation, based on the `Map` data
-structure in `Core_kernel`.
+Now we can turn to optimizing the implementation of `Counter`. Here's
+an alternate and far more efficient implementation, based on `Base`'s
+`Map` data structure.
 
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
@@ -567,7 +567,7 @@ lightweight way:
 
 ```ocaml file=examples/erroneous/session_info/session_info.ml
 open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t
