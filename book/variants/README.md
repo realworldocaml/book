@@ -362,7 +362,7 @@ can achieve with this by reiterating the `Log_entry` message type that
 was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
-module Time_ns = Core_kernel.Time_ns
+module Time_ns = Core.Time_ns
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -810,7 +810,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a
-toy. There's a module very much in this spirit in `Core_kernel` called
+toy. There's a module very much in this spirit in `Core` called
 `Blang` (short for "Boolean language"), and it gets a lot of practical
 use in a variety of applications.  The simplification algorithm in
 particular is useful when you want to use it to specialize the

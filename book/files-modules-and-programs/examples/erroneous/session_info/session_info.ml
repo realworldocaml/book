@@ -1,5 +1,5 @@
 open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t

@@ -1020,7 +1020,7 @@ creating a generator for pairs from two generators for the constituent
 types.
 
 ```ocaml env=main
-# open Core_kernel
+# open Core
 # Quickcheck.Generator.both
 - : 'a Base_quickcheck.Generator.t ->
     'b Base_quickcheck.Generator.t -> ('a * 'b) Base_quickcheck.Generator.t

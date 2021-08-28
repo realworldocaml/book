@@ -625,7 +625,7 @@ interface:
       | None -> `Stop
       | Some line ->
         match Or_error.try_with (fun () ->
-          Core_kernel.Sexp.of_string line)
+          Core.Sexp.of_string line)
         with
         | Error e -> `Continue (Error.to_string_hum e)
         | Ok (Sexp.Atom "quit") -> `Stop

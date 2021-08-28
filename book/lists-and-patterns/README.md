@@ -1024,7 +1024,7 @@ should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer than
 necessary; even worse, it is not tail recursive. In real life, you would
-probably just use the `List.count` function from `Core_kernel`:
+probably just use the `List.count` function:
 
 ```ocaml env=main
 # let count_some l = List.count ~f:Option.is_some l

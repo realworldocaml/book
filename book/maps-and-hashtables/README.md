@@ -453,12 +453,11 @@ Error: This expression has type
 
 ### The Polymorphic Comparator
 
-We don't need to generate specialized comparators for every type we want to
-build a map on. We can instead build a map based on OCaml's built-in
-polymorphic comparison function, which was discussed in
-[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}.
-`Base` currently doesn't have a convenient function for minting maps based on
-polymorphic compare, but `Core_kernel` does, as we can see below.
+We don't need to generate specialized comparators for every type we
+want to build a map on. We can instead build a map based on OCaml's
+built-in polymorphic comparison function, which was discussed in
+[Lists And Patterns
+](lists-and-patterns.html#lists-and-patterns){data-type=xref}.
 [maps/polymorphic comparison in]{.idx}[polymorphic comparisons]{.idx}
 
 ```ocaml env=main
@@ -466,9 +465,9 @@ polymorphic compare, but `Core_kernel` does, as we can see below.
 - : (int, string) Map.Poly.t = <abstr>
 ```
 
-Note that maps based on the polymorphic comparator have different comparator
-witnesses than those based on the type-specific comparison function. Thus,
-the compiler rejects the following:
+Note that maps based on the polymorphic comparator have different
+comparator witnesses than those based on the type-specific comparison
+function. Thus, the compiler rejects the following:
 
 ```ocaml env=main
 # Map.symmetric_diff

@@ -567,7 +567,7 @@ lightweight way:
 
 ```ocaml file=examples/erroneous/session_info/session_info.ml
 open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t
