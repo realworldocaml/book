@@ -543,7 +543,7 @@ Int_interval.is_empty (Int_interval.Interval (4,3)) ;;
 &gt;val sexp_of_some_type : some_type -&gt; Sexp.t = &lt;fun&gt;
 sexp_of_some_type (33, ["one"; "two"]) ;;
 &gt;- : Sexp.t = (33 (one two))
-Core_kernel.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp ;;
+Core.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp ;;
 &gt;- : some_type = (44, ["five"; "six"])
 </code></pre>
 </div>
@@ -604,7 +604,7 @@ end</code></pre>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Interval_intf_with_sexp = sig
   include Interval_intf
-  include Core_kernel.Sexpable with type t := t
+  include Core.Sexpable with type t := t
 end
 ;;
 &gt;module type Interval_intf_with_sexp =
@@ -625,7 +625,7 @@ end
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Interval_intf_with_sexp = sig
   type t
   include Interval_intf with type t := t
-  include Core_kernel.Sexpable      with type t := t
+  include Core.Sexpable      with type t := t
 end
 ;;
 &gt;module type Interval_intf_with_sexp =
@@ -646,7 +646,7 @@ end
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
-    include Core_kernel.Sexpable with type t := t
+    include Core.Sexpable with type t := t
   end)
   : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
 = struct

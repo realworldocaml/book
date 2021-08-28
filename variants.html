@@ -243,7 +243,7 @@ let to_tuple (Untupled (x,y)) = (x,y) ;;
 <p>The term <em>algebraic data types</em> is often used to describe a collection of types that includes variants, records, and tuples. Algebraic data types act as a peculiarly useful and powerful language for describing data. At the heart of their utility is the fact that they combine two different kinds of types: <em>product types</em>, like tuples and records, which combine multiple different types together and are mathematically similar to Cartesian products; and <em>sum types</em>, like variants, which let you combine multiple different possibilities into one type, and are mathematically similar to disjoint unions. <a data-primary="sum types" data-type="indexterm">&nbsp;</a> <a data-primary="product types" data-type="indexterm">&nbsp;</a> <a data-primary="algebraic data types" data-type="indexterm">&nbsp;</a> <a data-secondary="and records" data-primary="variants" data-type="indexterm">&nbsp;</a></p>
 <p>Algebraic data types gain much of their power from the ability to construct layered combinations of sums and products. Let’s see what we can achieve with this by reiterating the <code>Log_entry</code> message type that was described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">module Time_ns = Core_kernel.Time_ns
+<pre><code class="language-ocaml">module Time_ns = Core.Time_ns
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -569,7 +569,7 @@ Not (Not (Base "it's raining"))]))
 &gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The example of a Boolean expression language is more than a toy. There’s a module very much in this spirit in <code>Core_kernel</code> called <code>Blang</code> (short for “Boolean language”), and it gets a lot of practical use in a variety of applications. The simplification algorithm in particular is useful when you want to use it to specialize the evaluation of expressions for which the evaluation of some of the base predicates is already known.</p>
+<p>The example of a Boolean expression language is more than a toy. There’s a module very much in this spirit in <code>Core</code> called <code>Blang</code> (short for “Boolean language”), and it gets a lot of practical use in a variety of applications. The simplification algorithm in particular is useful when you want to use it to specialize the evaluation of expressions for which the evaluation of some of the base predicates is already known.</p>
 <p>More generally, using variants to build recursive data structures is a common technique, and shows up everywhere from designing little languages to building complex data structures.</p>
 </section>
 <section class="level2" id="polymorphic-variants">

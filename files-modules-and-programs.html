@@ -234,7 +234,7 @@ let () =
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
 </code></pre>
 </div>
-<p>Now we can turn to optimizing the implementation of <code>Counter</code>. Here’s an alternate and far more efficient implementation, based on the <code>Map</code> data structure in <code>Core_kernel</code>.</p>
+<p>Now we can turn to optimizing the implementation of <code>Counter</code>. Here’s an alternate and far more efficient implementation, based on <code>Base</code>’s <code>Map</code> data structure.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 
@@ -315,7 +315,7 @@ end</code></pre>
 <p>We could have written this slightly differently, by giving the signature its own top-level <code>module type</code> declaration, making it possible to create multiple distinct types with the same underlying implementation in a lightweight way:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t

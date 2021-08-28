@@ -267,7 +267,7 @@ end
 &gt;val sexp_of_u : u -&gt; Sexp.t = &lt;fun&gt;
 sexp_of_u {a=3;b=7.} ;;
 &gt;- : Sexp.t = ((a 3) (b 7))
-u_of_sexp (Core_kernel.Sexp.of_string "((a 43) (b 3.4))") ;;
+u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))") ;;
 &gt;- : u = {a = 43; b = 3.4}
 </code></pre>
 </div>
@@ -472,7 +472,7 @@ let rec cli dispatch_table =
     | None -&gt; `Stop
     | Some line -&gt;
       match Or_error.try_with (fun () -&gt;
-        Core_kernel.Sexp.of_string line)
+        Core.Sexp.of_string line)
       with
       | Error e -&gt; `Continue (Error.to_string_hum e)
       | Ok (Sexp.Atom "quit") -&gt; `Stop

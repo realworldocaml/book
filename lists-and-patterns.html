@@ -683,7 +683,7 @@ destutter ["one";"two";"two";"two";"three"] ;;
 </code></pre>
 </div>
 <p>The takeaway from all of this is although <code>when</code> clauses can be useful, we should prefer patterns wherever they are sufficient.</p>
-<p>As a side note, the above implementation of <code>count_some</code> is longer than necessary; even worse, it is not tail recursive. In real life, you would probably just use the <code>List.count</code> function from <code>Core_kernel</code>:</p>
+<p>As a side note, the above implementation of <code>count_some</code> is longer than necessary; even worse, it is not tail recursive. In real life, you would probably just use the <code>List.count</code> function:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_some l = List.count ~f:Option.is_some l ;;
 &gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;

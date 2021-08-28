@@ -589,9 +589,9 @@ let%test_unit "negation flips the sign" =
 </div>
 <p>One choice we had to make in our implementation is which probability distribution to use for selecting examples. This may seem like an unimportant question, but when it comes to testing, not all probability distributions are created equal.</p>
 <p>Indeed, the choice we made, which was to pick integers uniformly and at random from the full set of integers, is problematic, since it picks interesting special cases, like zero and one, with the same probability as everything else. Given the number of integers, the chance of testing any of those special cases is rather low, which seems like a problem.</p>
-<p>This is a place where <code>Quickcheck</code> can help. <code>Quickcheck</code> is a library to help automate the construction of testing distributions. Let’s try rewriting the above example using it. Note that we open <code>Core_kernel</code> here because <code>Core_kernel</code> has nicely integrated support for <code>Quickcheck</code>, with helper functions already integrated into most common modules. There’s also a standalone <code>Base_quickcheck</code> library that can be used without <code>Core_kernel</code>.</p>
+<p>This is a place where <code>Quickcheck</code> can help. <code>Quickcheck</code> is a library to help automate the construction of testing distributions. Let’s try rewriting the above example using it. Note that we open <code>Core</code> here because <code>Core</code> has nicely integrated support for <code>Quickcheck</code>, with helper functions already integrated into most common modules. There’s also a standalone <code>Base_quickcheck</code> library that can be used without <code>Core</code>.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open Core_kernel
+<pre><code class="language-ocaml">open Core
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
@@ -639,7 +639,7 @@ Int.max_value ;;
 <h3>Handling complex types</h3>
 <p>Tests can’t subsist on simple atomic types alone, which is why you’ll often want to build probability distributions over more complex types. Here’s a simple example, where we want to test the behavior of <code>List.rev_append</code>. For this test, we’re going to use a probability distribution for generating pairs of lists of integers. The following example shows how that can be done using Quickcheck’s combinators.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open Core_kernel
+<pre><code class="language-ocaml">open Core
 
 let gen_int_list_pair =
   let int_list_gen =
@@ -658,7 +658,7 @@ let%test_unit "List.rev_append is List.append of List.rev" =
 </div>
 <p>Here, we made use of <code>Quickcheck.Generator.both</code>, which is useful for creating a generator for pairs from two generators for the constituent types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core_kernel ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
 Quickcheck.Generator.both ;;
 &gt;- : 'a Base_quickcheck.Generator.t -&gt;
 &gt;    'b Base_quickcheck.Generator.t -&gt; ('a * 'b) Base_quickcheck.Generator.t
@@ -667,7 +667,7 @@ Quickcheck.Generator.both ;;
 </div>
 <p>The declaration of the generator is pretty simple, but it’s also tedious. Happily, Quickcheck ships with a PPX that can automate creation of the generator given just the type declaration. We can use that to simplify our code, as shown below.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open Core_kernel
+<pre><code class="language-ocaml">open Core
 
 let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test

@@ -26,7 +26,7 @@ end</code></pre>
 </div>
 <p>An s-expression can be thought of as a tree where each node contains a list of its children, and where the leaves of the tree are strings. Core provides good support for s-expressions in its <code>Sexp</code> module, including functions for converting s-expressions to and from strings. Let’s rewrite our example s-expression in terms of this type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core_kernel ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
 Sexp.List [
   Sexp.Atom "this";
   Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];

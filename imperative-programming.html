@@ -284,7 +284,7 @@ nums ;;
 </section>
 <section class="level2" id="example-doubly-linked-lists">
 <h2>Example: Doubly Linked Lists</h2>
-<p>Another common imperative data structure is the doubly linked list. Doubly linked lists can be traversed in both directions, and elements can be added and removed from the list in constant time. Core_kernel defines a doubly linked list (the module is called <code>Doubly_linked</code>), but we’ll define our own linked list library as an illustration. <a data-secondary="doubly-linked lists" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="doubly-linked lists" data-type="indexterm">&nbsp;</a><a id="IPdoublink" data-secondary="doubly-linked lists" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+<p>Another common imperative data structure is the doubly linked list. Doubly linked lists can be traversed in both directions, and elements can be added and removed from the list in constant time. Core defines a doubly linked list (the module is called <code>Doubly_linked</code>), but we’ll define our own linked list library as an illustration. <a data-secondary="doubly-linked lists" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="doubly-linked lists" data-type="indexterm">&nbsp;</a><a id="IPdoublink" data-secondary="doubly-linked lists" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s the <code>mli</code> of the module we’ll build:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* file: dlist.mli *)
@@ -393,7 +393,7 @@ let prev elt = elt.prev</code></pre>
 </div>
 <p>Note that the preceding code is careful to change the <code>prev</code> pointer of the following element and the <code>next</code> pointer of the previous element, if they exist. If there’s no previous element, then the list pointer itself is updated. In any case, the next and previous pointers of the element itself are set to <code>None</code>.</p>
 <p>These functions are more fragile than they may seem. In particular, misuse of the interface may lead to corrupted data. For example, double-removing an element will cause the main list reference to be set to <code>None</code>, thus emptying the list. Similar problems arise from removing an element from a list it doesn’t belong to.</p>
-<p>This shouldn’t be a big surprise. Complex imperative data structures can be quite tricky, considerably trickier than their pure equivalents. The issues described previously can be dealt with by more careful error detection, and such error correction is taken care of in modules like Core_kernel’s <code>Doubly_linked</code>. You should use imperative data structures from a well-designed library when you can. And when you can’t, you should make sure to put great care into your error handling. <a data-secondary="drawbacks of" data-primary="imperative programming" data-type="indexterm">&nbsp;</a><a data-primary="Doubly-linked module" data-type="indexterm">&nbsp;</a><a data-secondary="and imperative data structures" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
+<p>This shouldn’t be a big surprise. Complex imperative data structures can be quite tricky, considerably trickier than their pure equivalents. The issues described previously can be dealt with by more careful error detection, and such error correction is taken care of in modules like Core’s <code>Doubly_linked</code>. You should use imperative data structures from a well-designed library when you can. And when you can’t, you should make sure to put great care into your error handling. <a data-secondary="drawbacks of" data-primary="imperative programming" data-type="indexterm">&nbsp;</a><a data-primary="Doubly-linked module" data-type="indexterm">&nbsp;</a><a data-secondary="and imperative data structures" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
 </section>
 <section class="level3" id="iteration-functions">
 <h3>Iteration Functions</h3>
@@ -416,7 +416,7 @@ let find_el t ~f =
   in
   loop !t</code></pre>
 </div>
-<p>This completes our implementation, but there’s still considerably more work to be done to make a really usable doubly linked list. As mentioned earlier, you’re probably better off using something like Core_kernel’s <code>Doubly_linked</code> module that has a more complete interface and has more of the tricky corner cases worked out. Nonetheless, this example should serve to demonstrate some of the techniques you can use to build nontrivial imperative data structure in OCaml, as well as some of the pitfalls.<a data-startref="IPdoublink" data-type="indexterm">&nbsp;</a></p>
+<p>This completes our implementation, but there’s still considerably more work to be done to make a really usable doubly linked list. As mentioned earlier, you’re probably better off using something like Core <code>Doubly_linked</code> module that has a more complete interface and has more of the tricky corner cases worked out. Nonetheless, this example should serve to demonstrate some of the techniques you can use to build nontrivial imperative data structure in OCaml, as well as some of the pitfalls.<a data-startref="IPdoublink" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 <section class="level2" id="laziness-and-other-benign-effects">

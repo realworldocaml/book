@@ -4,19 +4,18 @@
 <p>Throughout the book we’re going to use <code>Base</code>, a more full-featured and capable replacement for OCaml’s standard library. We’ll also use <code>utop</code>, a shell that lets you type in expressions and evaluate them interactively. <code>utop</code> is an easier-to-use version of OCaml’s standard toplevel (which you can start by typing <em>ocaml</em> at the command line). These instructions will assume you’re using <code>utop</code>, but the ordinary toplevel should mostly work fine.</p>
 <p>Before going any further, make sure you’ve followed the steps in <a href="install.html">the installation page</a>.</p>
 <div data-type="note">
-<h5 id="base-core-and-core_kernel"><code>Base</code>, <code>Core</code> and <code>Core_kernel</code></h5>
-<p><code>Base</code> is one of a family of three standard library replacements, each with different use-cases, each building on the last. Here’s a quick summary.</p>
+<h5 id="base-and-core"><code>Base</code> and <code>Core</code></h5>
+<p><code>Base</code> comes along with another, yet more extensive standard library replacement, called <code>Core</code>. We’re going to mostly stick to <code>Base</code>, but it’s worth understanding the differences between these libraries.</p>
 <ul>
-<li><p><em><code>Base</code></em> is designed to provide the fundamentals needed from a standard library. It has a variety of basic efficient data structures like hash-tables, sets and sequences. It also defines the basic idioms for error handling and serialization, and contains well organized APIs for every basic data type from integers to lazy values. This comes along with a minimum of external dependencies, so <code>Base</code> just takes seconds to build and install. It’s also portable, running on every platform that OCaml does, including Windows and JavaScript.</p></li>
-<li><p><em><code>Core_kernel</code></em> extends <code>Base</code> with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It’s still portable, but has many more dependencies, takes longer to build, and will add more to the size of your executables.</p></li>
-<li><p><em><code>Core</code></em> is the most full-featured, extending <code>Core_kernel</code> with support for a variety of UNIX APIs, but only works on UNIX-like OSs, including Linux and macOS.</p></li>
+<li><p><em><code>Base</code></em> is designed to be lightweight, portable, and stable, while providing all of the fundamentals you need from a standard library. It comes with a minimum of external dependencies, so <code>Base</code> just takes seconds to build and install.</p></li>
+<li><p><em><code>Core</code></em> extends <code>Base</code> in a number of ways: it adds new data structures, like heaps, hash-sets, and functional queues; it provides types to represent times and time-zones; well-integrated support for efficient binary serializers; and much more. At the same time, it has many more dependencies, and so takes longer to build, and will add more to the size of your executables.</p></li>
 </ul>
-<p>We use <code>Base</code> in this section, but you should check out <code>Core</code> and <code>Core_kernel</code>, depending on your requirements. We’ll discuss some of the additional functionality provided by <code>Core</code> and <code>Core_kernel</code> later in the book.</p>
+<p>As of this writing, the stable release of <code>Core</code> is less portable than <code>Base</code>, running only on UNIX-like systems. For that reason, there’s yet a third library, <code>Core_kernel</code>, which is a portable subset of <code>Core</code>. That said, the latest development version removes <code>Core_kernel</code>, and makes <code>Core</code> itself portable. The stable release should have <code>Core_kernel</code> removed by early 2022, so we won’t use <code>Core_kernel</code> in this text.</p>
 </div>
 <p>Before getting started, make sure you have a working OCaml installation so you can try out the examples as you read through the chapter.</p>
 <section class="level2" id="ocaml-as-a-calculator">
 <h2>OCaml as a Calculator</h2>
-<p>Our first step is to open <code>Base</code>: <a data-secondary="numerical calculations in" data-primary="OCaml" data-type="indexterm">&nbsp;</a><a data-primary="numerical calculations" data-type="indexterm">&nbsp;</a><a data-secondary="opening" data-primary="Core standard library" data-type="indexterm">&nbsp;</a></p>
+<p>Our first step is to open <code>Base</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
 </code></pre>

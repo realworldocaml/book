@@ -346,7 +346,7 @@ Map.min_elt rev_map ;;
 </section>
 <section class="level3" id="the-polymorphic-comparator">
 <h3>The Polymorphic Comparator</h3>
-<p>We don’t need to generate specialized comparators for every type we want to build a map on. We can instead build a map based on OCaml’s built-in polymorphic comparison function, which was discussed in <a data-type="xref" href="lists-and-patterns.html#lists-and-patterns">Chapter 3, Lists And Patterns</a>. <code>Base</code> currently doesn’t have a convenient function for minting maps based on polymorphic compare, but <code>Core_kernel</code> does, as we can see below. <a data-secondary="polymorphic comparison in" data-primary="maps" data-type="indexterm">&nbsp;</a><a data-primary="polymorphic comparisons" data-type="indexterm">&nbsp;</a></p>
+<p>We don’t need to generate specialized comparators for every type we want to build a map on. We can instead build a map based on OCaml’s built-in polymorphic comparison function, which was discussed in <a data-type="xref" href="lists-and-patterns.html#lists-and-patterns">Chapter 3, Lists And Patterns</a>. <a data-secondary="polymorphic comparison in" data-primary="maps" data-type="indexterm">&nbsp;</a><a data-primary="polymorphic comparisons" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.Poly.of_alist_exn digit_alist ;;
 &gt;- : (int, string) Map.Poly.t = &lt;abstr&gt;
@@ -477,7 +477,7 @@ end
 <p>If you come from a C/C++ background, you’ll probably reflexively use <code>==</code> to test two values for equality. In OCaml, the <code>==</code> operator tests for <em>physical</em> equality, while the <code>=</code> operator tests for <em>structural</em> equality.</p>
 <p>The physical equality test will match if two data structures have precisely the same pointer in memory. Two data structures that have identical contents but are constructed separately will not match using <code>==</code>.</p>
 <p>The <code>=</code> structural equality operator recursively inspects each field in the two values and tests them individually for equality. Crucially, if your data structure is cyclical (that is, a value recursively points back to another field within the same structure), the <code>=</code> operator will never terminate, and your program will hang! You therefore must use the physical equality operator or write a custom comparison function when comparing cyclic values.</p>
-<p>It’s quite easy to mix up the use of <code>=</code> and <code>==</code>, so Core_kernel discourages the use of <code>==</code> and provides the more explicit <code>phys_equal</code> function instead. You’ll see a warning if you use <code>==</code> anywhere in code that opens <code>Core_kernel</code>:</p>
+<p>It’s quite easy to mix up the use of <code>=</code> and <code>==</code>, so <code>Base</code> discourages the use of <code>==</code> and provides the more explicit <code>phys_equal</code> function instead. You’ll see a warning if you use <code>==</code> anywhere in code that opens <code>Base</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base ;;
 1 == 2 ;;
