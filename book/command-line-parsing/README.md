@@ -419,8 +419,8 @@ For usage information, run
 
 One downside of the above approach is that we've lost some of the
 benefits of `Filename.arg_type`, in particular, its support for
-autocomplete.  Wen can preserve this by instead using `Arg_type.map`
-to add the extra check for a regular file, without losing the
+autocomplete.  We can preserve this by instead using `Arg_type.map` to
+add the extra check for a regular file, without losing the
 autocompletion support.
 
 ```ocaml file=examples/correct/md5_with_better_custom_arg/md5.ml,part=1
