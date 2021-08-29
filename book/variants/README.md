@@ -69,7 +69,7 @@ because the compiler would have warned us if we'd missed one:
 # let incomplete_color_to_int = function
     | Black -> 0 | Red -> 1 | White -> 7
 Lines 1-2, characters 31-41:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 (Green|Yellow|Blue|Magenta|Cyan)
 val incomplete_color_to_int : basic_color -> int = <fun>
@@ -286,7 +286,7 @@ problem, which is that we haven't handled the new `Bold` tag:
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i
 Lines 1-4, characters 20-24:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
 val color_to_int : color -> int = <fun>

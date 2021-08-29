@@ -653,9 +653,9 @@ Uncaught exception:
   (Of_sexp_error foo_broken_example.scm:2:4
    "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 
-Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 815, characters 32-84
-Called from file "read_foo_better_errors.ml", line 10, characters 10-68
-Called from file "duniverse/base/src/exn.ml", line 111, characters 6-10
+Raised at Sexplib__Pre_sexp.raise_conv_exn in file "duniverse/sexplib/src/pre_sexp.ml", line 815, characters 32-84
+Called from Dune__exe__Read_foo_better_errors.run in file "read_foo_better_errors.ml", line 10, characters 10-68
+Called from Base__Exn.handle_uncaught_aux in file "duniverse/base/src/exn.ml", line 111, characters 6-10
 [1]
 ```
 
