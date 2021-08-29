@@ -458,3 +458,5 @@ type _ foo = int
 Since the phantom parameter isn't tied to the implementation of the
 type, it's free, and can be constrained for whatever purpose the
 designer of the interface through which `foo` is exposed wants.
+
+1 2 3
