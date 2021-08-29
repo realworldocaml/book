@@ -115,7 +115,7 @@ we'll see an error when we run it.
 ```sh dir=examples/erroneous/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -957,7 +957,7 @@ testing doesn't actually hold on all outputs, as you can see below.
     Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -1136,3 +1136,60 @@ used `weighted_union` to pick a different distribution.
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
+
+## Other testing tools
+
+The testing tools we've described in this chapter cover a lot of
+ground, but there are other tools that are worth knowing about.
+
+### Other tools to do (mostly) the same things
+
+Here are some notable tools that do more or less the same things as
+the testing tools we've featured in this chapter.
+
+- [Alcotest](https://github.com/mirage/alcotest), which is another
+  system for registering and running tests.
+- [qcheck](https://github.com/c-cube/qcheck), an alternative
+  implementation of quickcheck.
+- [Dune's cram tests
+  ](https://dune.readthedocs.io/en/stable/tests.html#cram-tests),
+  which are expect-like tests that are written in a shell-like syntax.
+  These are great for testing command-line utilities, and are inspired
+  by Mercurial's testing framework.
+
+Which of these you might end up preferring is to some degree a matter
+of taste.
+
+### Fuzzing
+
+There's one other kind of testing tool that we haven't covered in this
+chapter, but is worth knowing about: *instrumentation-guided fuzzing*.
+You can think of this as another take on property testing, with a very
+different approach to generating random examples.
+
+Traditional fuzzing just throws randomly mutated data at a program,
+and looks for some indication of failure, often simply the program
+crashing with a segfault.  This kind of fuzzing has been surprisingly
+effective at finding bugs, especially security bugs, in production
+software.  But blind randomization is still quite limited in terms of
+how much program behavior it can effectively explore.
+
+Instrumentation-guided fuzzing improves on this by instrumenting the
+program, and then using that instrumentation to guide the
+randomization in the direction of more code coverage.  By far the most
+successful tool in this space is [American Fuzzy Lop
+](https://github.com/google/AFL), or AFL, and OCaml has support for
+the necessary instrumentation.
+
+AFL can have eerily good results, and can with no guidance do things
+like constructing nearly-parseable text when fuzzing a parser, just by
+iteratively randomzing inputs in the direction of more coverage of the
+program being exercised.
+
+If you're interested in AFL, there are some related tools worth
+knowing about.
+
+- [Crowbar](https://github.com/stedolan/crowbar) is a quickcheck-style
+  library for writing down properties to be tested by AFL.
+- [Bun](https://github.com/ocurrent/bun) is a library for integrating
+  AFL in to your continuous-integration pipeline.
