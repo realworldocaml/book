@@ -444,7 +444,9 @@ Why?
 
 ```sh dir=examples/correct/md5_with_better_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-12545f2cf40cf5c68a53198963831e70
+         ppx md5.pp.ml (exit 127)
+(cd _build/default && .ppx/57ef275c515ec1fe105f6ff0979f5a61/ppx.exe -o md5.pp.ml --impl md5.ml -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
+[1]
 $ dune exec -- ./md5.exe /dev/null
 Error parsing command line:
 
