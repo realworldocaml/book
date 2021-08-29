@@ -2,6 +2,7 @@ opam-version: "2.0"
 synopsis: "opam-monorepo generated lockfile"
 maintainer: "opam-monorepo"
 depends: [
+  "alcotest" {= "1.4.0"}
   "angstrom" {= "0.15.0"}
   "asn1-combinators" {= "0.2.6"}
   "astring" {= "0.8.5+dune"}
@@ -84,11 +85,12 @@ depends: [
   "mmap" {= "1.1.0"}
   "mtime" {= "1.2.0+dune"}
   "num" {= "1.3+dune"}
-  "ocaml" {= "4.10.2"}
-  "ocaml-base-compiler" {= "4.10.2"}
+  "ocaml" {= "4.12.0"}
+  "ocaml-base-compiler" {= "4.12.0"}
   "ocaml-compiler-libs" {= "v0.12.3"}
-  "ocaml-config" {= "1"}
+  "ocaml-config" {= "2"}
   "ocaml-migrate-parsetree" {= "2.2.0"}
+  "ocaml-options-vanilla" {= "1"}
   "ocaml-print-intf" {= "1.2.0"}
   "ocaml-syntax-shims" {= "1.0.0"}
   "ocaml-version" {= "3.2.0"}
@@ -100,7 +102,7 @@ depends: [
   "patdiff" {= "v0.14.0"}
   "patience_diff" {= "v0.14.0"}
   "pbkdf" {= "1.2.0"}
-  "pcre" {= "7.4.6"}
+  "pcre" {= "7.5.0"}
   "ppx_assert" {= "v0.14.0"}
   "ppx_base" {= "v0.14.0"}
   "ppx_bench" {= "v0.14.1"}
@@ -156,6 +158,7 @@ depends: [
   "uchar" {= "0.0.2+dune"}
   "uri" {= "4.2.0"}
   "uri-sexp" {= "4.2.0"}
+  "uuidm" {= "0.9.7+dune"}
   "uutf" {= "1.0.2+dune"}
   "variantslib" {= "v0.14.0"}
   "x509" {= "0.14.1"}
@@ -228,6 +231,10 @@ depexts: [
   ["tzdata"] {os-family = "fedora"}
 ]
 pin-depends: [
+  [
+    "alcotest.1.4.0"
+    "https://github.com/mirage/alcotest/releases/download/1.4.0/alcotest-mirage-1.4.0.tbz"
+  ]
   [
     "angstrom.0.15.0"
     "https://github.com/inhabitedtype/angstrom/archive/0.15.0.tar.gz"
@@ -554,8 +561,8 @@ pin-depends: [
     "https://github.com/abeaumont/ocaml-pbkdf/archive/1.2.0.tar.gz"
   ]
   [
-    "pcre.7.4.6"
-    "https://github.com/mmottl/pcre-ocaml/releases/download/7.4.6/pcre-7.4.6.tbz"
+    "pcre.7.5.0"
+    "https://github.com/mmottl/pcre-ocaml/releases/download/7.5.0/pcre-7.5.0.tbz"
   ]
   [
     "ppx_assert.v0.14.0"
@@ -775,6 +782,10 @@ pin-depends: [
     "https://github.com/mirage/ocaml-uri/releases/download/v4.2.0/uri-v4.2.0.tbz"
   ]
   [
+    "uuidm.0.9.7+dune"
+    "https://github.com/dune-universe/uuidm/archive/v0.9.7+dune.tar.gz"
+  ]
+  [
     "uutf.1.0.2+dune"
     "https://github.com/dune-universe/uutf/archive/v1.0.2+dune.tar.gz"
   ]
@@ -961,6 +972,13 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/dune-universe/uuidm/archive/v0.9.7+dune.tar.gz"
+    "uuidm"
+    [
+      "sha256=dcd5b3d52c5e64cfc96107603242c15820c37f12f8566f1ba233d4bd9c5c84eb"
+    ]
+  ]
+  [
     "https://github.com/dune-universe/uutf/archive/v1.0.2+dune.tar.gz"
     "uutf"
     [
@@ -1121,6 +1139,14 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/mirage/alcotest/releases/download/1.4.0/alcotest-mirage-1.4.0.tbz"
+    "alcotest"
+    [
+      "sha256=b1aaccfb2d651c902592c04953e2619169c91f797cf4f04a7dda2cab09b93ec1"
+      "sha512=8a13d5d4c8c77f115903e6b8e58160c6e6ec27870440bd38a674e9406f57f1eff299e65f006fd77728015d1a8f0ae30a714fe47e035824950a71ebfdff2cf3c9"
+    ]
+  ]
+  [
     "https://github.com/mirage/bigarray-compat/archive/v1.0.0.tar.gz"
     "bigarray-compat"
     [
@@ -1246,11 +1272,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/mmottl/pcre-ocaml/releases/download/7.4.6/pcre-7.4.6.tbz"
+    "https://github.com/mmottl/pcre-ocaml/releases/download/7.5.0/pcre-7.5.0.tbz"
     "pcre-ocaml"
     [
-      "sha256=ca3f02ede75740d9461098ed6abcd39c904b3d551f54e06eb17df6a232a0529d"
-      "sha512=a356c78dc19d3b3741d1fa0277c4fb0cb545f12499165526fae80a0ff8a7b1f1e6e5e916b16f8336bcec3661de811686b814fe4afc677965fec7a63d4fc53b1f"
+      "sha256=671142f40b6d86171cbc067253faadf903019161d57488bd0fb6c5456c2cbd1a"
+      "sha512=be60f13ddb6bbfe20e30ca5d92434d85e1d1371479e1e2c725588af83fcc9366ed0435021b6a800c20336ac521f2134c767420136438684656a44ac1f9924be4"
     ]
   ]
   [
