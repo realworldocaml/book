@@ -109,7 +109,7 @@ let extract_code_blocks ~(location : Lexing.position) ~docstring =
           | `Return blocks -> acc blocks
           | `See (_, _, blocks) -> acc blocks
           | `Before (_, blocks) -> acc blocks
-          | _ -> [] )
+          | _ -> [])
       | `Heading _ -> [])
     parsed.value
   |> List.concat

@@ -534,8 +534,8 @@ val to_list : ('a, sync) stream -> 'a list
 (** {2 Utility} *)
 
 val content : ([< signal ], 's) stream -> (signal, 's) stream
-(** Converts a {!signal} stream into a {!content_signal} stream by filtering out
-    all signals besides [`Start_element], [`End_element], and [`Text]. *)
+(** Filters out all signals besides [`Start_element], [`End_element], and
+    [`Text]. *)
 
 val tree :
   ?text:(string list -> 'a) ->

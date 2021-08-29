@@ -210,8 +210,8 @@ let v = function
   | `SHA384 | `SHA512 -> 1024 / 8
 
 let fill ~data ~out =
-  let len = Cstruct.len out
-  and l = Cstruct.len data
+  let len = Cstruct.length out
+  and l = Cstruct.length data
   in
   let rec c off =
     if off < len then begin
@@ -222,7 +222,7 @@ let fill ~data ~out =
   c 0
 
 let fill_or_empty size data =
-  let l = Cstruct.len data in
+  let l = Cstruct.length data in
   if l = 0 then data
   else
     let len = size * ((l + size - 1) / size) in
@@ -250,8 +250,8 @@ let pbes algorithm purpose password salt iterations n =
       let b = Cstruct.create v in
       fill ~data:!ai ~out:b;
       (* 6C *)
-      let i' = Cstruct.create (Cstruct.len i) in
-      for j = 0 to pred (Cstruct.len i / v) do
+      let i' = Cstruct.create (Cstruct.length i) in
+      for j = 0 to pred (Cstruct.length i / v) do
         let c = ref 1 in
         for k = pred v downto 0 do
           let idx = j * v + k in
@@ -270,7 +270,7 @@ let pbes algorithm purpose password salt iterations n =
    (and rc4 being a stream cipher has no padding!) *)
 let unpad x =
   (* TODO can there be bad padding in this scheme? *)
-  let l = Cstruct.len x in
+  let l = Cstruct.length x in
   if l > 0 then
     let amount = Cstruct.get_uint8 x (pred l) in
     let split_point = if l > amount then l - amount else l in
@@ -284,7 +284,7 @@ let unpad x =
     x
 
 let pad bs x =
-  let l = Cstruct.len x in
+  let l = Cstruct.length x in
   let to_pad = bs - (l mod bs) in
   let amount = Cstruct.create to_pad in
   Cstruct.memset amount to_pad;

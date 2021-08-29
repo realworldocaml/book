@@ -20,7 +20,7 @@ module Pps_and_flags = struct
             | None ->
               User_error.raise ~loc
                 [ Pp.text "No variables allowed in ppx library names" ]
-            | Some txt -> Left (loc, Lib_name.parse_string_exn (loc, txt)) ))
+            | Some txt -> Left (loc, Lib_name.parse_string_exn (loc, txt))))
     in
     let all_flags = more_flags @ Option.value flags ~default:[] in
     if syntax_version < (1, 10) then
@@ -55,7 +55,7 @@ module Pps = struct
         List.compare flags1 flags2 ~compare:String_with_vars.compare_no_loc
       with
       | (Lt | Gt) as t -> t
-      | Eq -> List.compare pps1 pps2 ~compare:compare_pps )
+      | Eq -> List.compare pps1 pps2 ~compare:compare_pps)
 end
 
 type 'a t =
@@ -73,11 +73,20 @@ let filter_map t ~f =
   match t with
   | Pps t ->
     let pps = List.filter_map t.pps ~f in
+    let pps, flags = List.split pps in
     if pps = [] then
       No_preprocessing
     else
-      Pps { t with pps }
+      Pps { t with pps; flags = t.flags @ List.flatten flags }
   | (No_preprocessing | Action _ | Future_syntax _) as t -> t
+
+let fold t ~init ~f =
+  match t with
+  | Pps t -> List.fold_left t.pps ~init ~f
+  | No_preprocessing
+  | Action _
+  | Future_syntax _ ->
+    init
 
 module Without_instrumentation = struct
   type t = Loc.t * Lib_name.t
@@ -88,7 +97,11 @@ end
 module With_instrumentation = struct
   type t =
     | Ordinary of Without_instrumentation.t
-    | Instrumentation_backend of (Loc.t * Lib_name.t)
+    | Instrumentation_backend of
+        { libname : Loc.t * Lib_name.t
+        ; deps : Dep_conf.t list
+        ; flags : String_with_vars.t list
+        }
 end
 
 let decode =
@@ -151,7 +164,7 @@ let remove_future_syntax (t : 'a t) ~(for_ : Pp_flag_consumer.t) v :
         ( loc
         , Run
             ( String_with_vars.make_var loc "bin" ~payload:"ocaml-syntax-shims"
-            , ( match for_ with
+            , (match for_ with
               | Compiler -> [ String_with_vars.make_text loc "-dump-ast" ]
               | Merlin ->
                 (* We generate a text file instead of AST. That gives you less
@@ -164,7 +177,7 @@ let remove_future_syntax (t : 'a t) ~(for_ : Pp_flag_consumer.t) v :
 
                    Hopefully this will be fixed in merlin before that becomes a
                    necessity. *)
-                [] )
+                [])
               @ [ String_with_vars.make_var loc "input-file" ] ) )
 
 module Per_module = struct
@@ -197,18 +210,23 @@ module Per_module = struct
     else
       No_preprocessing
 
-  let add_instrumentation t ~loc ~flags:flags' libname =
+  let add_instrumentation t ~loc ~flags ~deps libname =
     Per_module.map t ~f:(fun pp ->
         match pp with
         | No_preprocessing ->
-          let pps = [ With_instrumentation.Instrumentation_backend libname ] in
-          let staged = false in
-          Pps { loc; pps; flags = flags'; staged }
-        | Pps { loc; pps; flags; staged } ->
           let pps =
-            With_instrumentation.Instrumentation_backend libname :: pps
+            [ With_instrumentation.Instrumentation_backend
+                { libname; deps; flags }
+            ]
           in
-          Pps { loc; pps; flags = flags @ flags'; staged }
+          Pps { loc; pps; flags = []; staged = false }
+        | Pps ({ pps; _ } as t) ->
+          let pps =
+            With_instrumentation.Instrumentation_backend
+              { libname; deps; flags }
+            :: pps
+          in
+          Pps { t with pps }
         | Action (loc, _)
         | Future_syntax loc ->
           User_error.raise ~loc
@@ -219,16 +237,32 @@ module Per_module = struct
 
   let without_instrumentation t =
     let f = function
-      | With_instrumentation.Ordinary libname -> Some libname
+      | With_instrumentation.Ordinary libname -> Some (libname, [])
       | With_instrumentation.Instrumentation_backend _ -> None
     in
     Per_module.map t ~f:(filter_map ~f)
 
   let with_instrumentation t ~instrumentation_backend =
     let f = function
-      | With_instrumentation.Ordinary libname -> Some libname
-      | With_instrumentation.Instrumentation_backend libname ->
-        instrumentation_backend libname
+      | With_instrumentation.Ordinary libname -> Some (libname, [])
+      | With_instrumentation.Instrumentation_backend { libname; flags; _ } -> (
+        match instrumentation_backend libname with
+        | None -> None
+        | Some backend -> Some (backend, flags))
     in
     Per_module.map t ~f:(filter_map ~f)
+
+  let instrumentation_deps t ~instrumentation_backend =
+    let f = function
+      | With_instrumentation.Ordinary _ -> []
+      | With_instrumentation.Instrumentation_backend
+          { libname; deps; flags = _ } -> (
+        match instrumentation_backend libname with
+        | Some _ -> deps
+        | None -> [])
+    in
+    Per_module.fold t ~init:[] ~f:(fun t init ->
+        let f acc t = f t :: acc in
+        fold t ~init ~f)
+    |> List.rev |> List.flatten
 end

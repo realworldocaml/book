@@ -68,3 +68,14 @@ function bigstringaf_memcmp_string(ba, ba_off, str, str_off, len) {
   }
   return 0;
 }
+
+//Provides: bigstringaf_memchr
+//Requires: caml_ba_get_1
+function bigstringaf_memchr(ba, ba_off, chr, len) {
+  for (var i = 0; i < len; i++) {
+    if (caml_ba_get_1(ba, ba_off + i) == chr) {
+      return (ba_off + i);
+    }
+  }
+  return -1;
+}

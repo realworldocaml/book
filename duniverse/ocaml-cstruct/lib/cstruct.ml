@@ -53,6 +53,7 @@ let err fmt =
 let err_of_bigarray t = err "Cstruct.of_bigarray off=%d len=%d" t
 let err_sub t = err "Cstruct.sub: %a off=%d len=%d" pp_t t
 let err_shift t = err "Cstruct.shift %a %d" pp_t t
+let err_shiftv n = err "Cstruct.shiftv short by %d" n
 let err_set_len t = err "Cstruct.set_len %a %d" pp_t t
 let err_add_len t = err "Cstruct.add_len %a %d" pp_t t
 let err_copy t = err "Cstruct.copy %a off=%d len=%d" pp_t t
@@ -176,6 +177,18 @@ let shift t amount =
   if amount < 0 || amount > t.len || not (check_bounds t (off+len)) then
     err_shift t amount
   else { t with off; len }
+
+let rec skip_empty = function
+  | t :: ts when t.len = 0 -> skip_empty ts
+  | x -> x
+
+let rec shiftv ts = function
+  | 0 -> skip_empty ts
+  | n ->
+    match ts with
+    | [] -> err_shiftv n
+    | t :: ts when n >= t.len -> shiftv ts (n - t.len)
+    | t :: ts -> shift t n :: ts
 
 let set_len t len =
   if len < 0 || not (check_bounds t (t.off+len)) then err_set_len t len

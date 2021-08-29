@@ -6,6 +6,7 @@ type dir = {
   expected_file : string;
   options : string list;
   dir_name : string;
+  enabled_if : string list option;
 }
 
 type generator = {

@@ -74,7 +74,7 @@ let parse_attr line =
       let payload = Re.Group.get g 3 in
       match name with
       | "part" -> Some (Part_begin (Attr, { indent; payload }))
-      | _ -> None )
+      | _ -> None)
   | None -> None
 
 let parse_cmt line =
@@ -93,7 +93,7 @@ let parse_cmt line =
                  '(* $MDX part-end *)' instead."
           | _ ->
               Util.Result.errorf "'%s' is not a valid ocaml delimiter for mdx."
-                line ) )
+                line))
   | None -> Ok None
 
 let parse line =

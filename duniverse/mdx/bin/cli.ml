@@ -95,6 +95,12 @@ let prelude_str =
     (fun x -> `Prelude_str x)
     Arg.(value & opt_all string [] & info [ "prelude-str" ] ~doc ~docv:"STR")
 
+let directories =
+  let doc = "A list of directories to load for the #directory directive." in
+  named
+    (fun x -> `Directories x)
+    Arg.(value & opt_all string [] & info [ "directory" ] ~doc ~docv:"STR")
+
 let root =
   let doc = "The directory to run the tests from." in
   named

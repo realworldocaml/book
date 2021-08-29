@@ -425,3 +425,5 @@ let ecdsa_sig =
 
 let ecdsa_sig_of_cstruct, ecdsa_sig_to_cstruct =
   projections_of Asn.der ecdsa_sig
+
+let pp fmt x = Fmt.string fmt (to_string x)

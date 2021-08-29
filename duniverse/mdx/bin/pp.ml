@@ -34,7 +34,7 @@ let run (`Setup ()) (`File file) (`Section section) =
     | None -> t
     | Some s -> (
         let re = Re.Perl.compile_pat s in
-        match Mdx.filter_section re t with None -> [] | Some t -> t )
+        match Mdx.filter_section re t with None -> [] | Some t -> t)
   in
   match t with
   | [] -> 1
@@ -56,7 +56,7 @@ let run (`Setup ()) (`File file) (`Section section) =
                     let line = b.loc.loc_start.pos_lnum + !rvpad in
                     Fmt.pr "%a\n%a\n" Mdx.Block.pp_line_directive (file, line)
                       pp_lines contents
-                | _ -> () ))
+                | _ -> ()))
         t;
       0
 

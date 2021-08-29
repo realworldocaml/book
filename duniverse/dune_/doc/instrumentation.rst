@@ -23,7 +23,8 @@ executable stanza:
    (library
     (name ...)
     (instrumentation
-     (backend <name> <args>)))
+     (backend <name> <args>)
+     <optional-fields>))
 
 The backend ``<name>`` can be passed arguments using ``<args>``.
 
@@ -49,6 +50,13 @@ rewriter to the list of ``ppx`` rewriters.
 At the moment, it is not possible to instrument code that is preprocessed via an
 action preprocessors. As these preprocessors are quite rare nowadays, there is
 no plan to add support for them in the future.
+
+``<optional-fields>`` are:
+
+- ``(deps <deps-conf list>)`` specifies extra dependencies of the
+  instrumentation, for instance if it reads a generated file. The dependencies
+  are only applied if the instrumentation is actually enabled. The specification
+  of dependencies is described in the :ref:`deps-field` section.
 
 Enabling/disabling instrumentation
 ==================================
@@ -79,14 +87,14 @@ To enable an instrumentation backend globally, you can type in your
 
 .. code:: scheme
 
-   (lang dune 2.8)
+   (lang dune 2.9)
    (instrument_with bisect_ppx)
 
 or for each context individually:
 
 .. code:: scheme
 
-   (lang dune 2.8)
+   (lang dune 2.9)
    (context default)
    (context (default (name coverage) (instrument_with bisect_ppx)))
    (context (default (name profiling) (instrument_with landmarks)))

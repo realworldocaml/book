@@ -9,10 +9,27 @@
 
 #include <errno.h>
 
+#if defined(__APPLE__)
+
+CAMLprim value spawn_is_osx()
+{
+  return Val_true;
+}
+
+#else
+
+CAMLprim value spawn_is_osx()
+{
+  return Val_false;
+}
+
+#endif
+
 #if !defined(_WIN32)
 
 #include <assert.h>
 #include <string.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -143,7 +160,7 @@ static void subprocess_failure(int failure_fd,
 {
   struct subprocess_failure failure;
   sigset_t sigset;
-  size_t ignored;
+  ssize_t written;
 
   CASSERT(sizeof(failure) < PIPE_BUF)
 
@@ -156,9 +173,12 @@ static void subprocess_failure(int failure_fd,
   pthread_sigmask(SIG_SETMASK, &sigset, NULL);
 
   /* Write is atomic as buffer is smaller than PIPE_BUF
-     (required by POSIX.1-2001, as claimed in [man 7 pipe]) */
-  /* We bind the result to silence the unused result warning */
-  ignored = write(failure_fd, &failure, sizeof(failure));
+     (required by POSIX.1-2001, as claimed in [man 7 pipe]).
+
+     We only store the result of [write] to avoid a warning.
+ */
+  written = write(failure_fd, &failure, sizeof(failure));
+  (void)written;
   _exit(127);
 }
 
@@ -461,28 +481,43 @@ CAMLprim value spawn_unix(value v_env,
   CAMLreturn(Val_int(ret));
 }
 
-CAMLprim value spawn_windows(value __attribute__((unused)) v_env,
-                             value __attribute__((unused)) v_cwd,
-                             value __attribute__((unused)) v_prog,
-                             value __attribute__((unused)) v_cmdline,
-                             value __attribute__((unused)) v_stdin,
-                             value __attribute__((unused)) v_stdout,
-                             value __attribute__((unused)) v_stderr)
+CAMLprim value spawn_windows(value v_env,
+                             value v_cwd,
+                             value v_prog,
+                             value v_cmdline,
+                             value v_stdin,
+                             value v_stdout,
+                             value v_stderr)
 {
+  (void)v_env;
+  (void)v_cwd;
+  (void)v_prog;
+  (void)v_cmdline;
+  (void)v_stdin;
+  (void)v_stdout;
+  (void)v_stderr;
   unix_error(ENOSYS, "spawn_windows", Nothing);
 }
 
 #else
 
-CAMLprim value spawn_unix(value __attribute__((unused)) v_env,
-                          value __attribute__((unused)) v_cwd,
-                          value __attribute__((unused)) v_prog,
-                          value __attribute__((unused)) v_argv,
-                          value __attribute__((unused)) v_stdin,
-                          value __attribute__((unused)) v_stdout,
-                          value __attribute__((unused)) v_stderr,
-                          value __attribute__((unused)) v_use_vfork)
+CAMLprim value spawn_unix(value v_env,
+                          value v_cwd,
+                          value v_prog,
+                          value v_argv,
+                          value v_stdin,
+                          value v_stdout,
+                          value v_stderr,
+                          value v_use_vfork)
 {
+  (void)v_env;
+  (void)v_cwd;
+  (void)v_prog;
+  (void)v_argv;
+  (void)v_stdin;
+  (void)v_stdout;
+  (void)v_stderr;
+  (void)v_use_vfork;
   unix_error(ENOSYS, "spawn_unix", Nothing);
 }
 
@@ -527,12 +562,12 @@ CAMLprim value spawn_windows(value v_env,
   }
 
   if (!CreateProcess(String_val(v_prog),
-                     String_val(v_cmdline),
+                     Bytes_val(v_cmdline),
                      NULL,
                      NULL,
                      TRUE,
                      0,
-                     Is_block(v_env) ? String_val(Field(v_env, 0)) : NULL,
+                     Is_block(v_env) ? Bytes_val(Field(v_env, 0)) : NULL,
                      Is_block(v_cwd) ? String_val(Field(v_cwd, 0)) : NULL,
                      &si,
                      &pi)) {

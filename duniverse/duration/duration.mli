@@ -3,28 +3,37 @@
     A duration is represented in nanoseconds as an unsigned 64 bit integer.
     This has a range of up to 584 years, or 213503 days, or 5124095 hours, or
     307445734 minutes, or 18446744073 seconds, or 18446744073709 milliseconds,
-    or 18446744073709549 milliseconds.
+    or 18446744073709549 microseconds.
 
     All functions converting to [t] raise [Invalid_argument] on out of bound
     or negative input.
 
-    {e 0.1.3 - {{:https://github.com/hannesm/duration }homepage}}
+    {e 0.2.0 - {{:https://github.com/hannesm/duration }homepage}}
 *)
 
 (** The type for a duration, exposed as an int64 to provide interoperability. *)
 type t = int64
 
-(** [pp ppf t] prints the duration. *)
+(** [pp ppf t] prints the duration in a concise way. *)
 val pp : Format.formatter -> t -> unit
 
 (** [of_us us] are the microseconds in nanoseconds. *)
 val of_us : int -> t
 
+(** [of_us_64 us] are the microseconds in nanoseconds. *)
+val of_us_64 : int64 -> t
+
 (** [of_ms ms] are the milliseconds in nanoseconds. *)
 val of_ms : int -> t
 
+(** [of_ms_64 ms] are the milliseconds in nanoseconds. *)
+val of_ms_64 : int64 -> t
+
 (** [of_sec s] are the seconds in nanoseconds. *)
 val of_sec : int -> t
+
+(** [of_sec_64 s] are the seconds in nanoseconds. *)
+val of_sec_64 : int64 -> t
 
 (** [of_min m] are the minutes in nanoseconds. *)
 val of_min : int -> t
@@ -45,11 +54,20 @@ val of_f : float -> t
 (** [to_us t] are the microseconds of [t]. *)
 val to_us : t -> int
 
+(** [to_us_64 t] are the microseconds of [t]. *)
+val to_us_64 : t -> int64
+
 (** [to_ms t] are the milliseconds of [t]. *)
 val to_ms : t -> int
 
+(** [to_ms_64 t] are the milliseconds of [t]. *)
+val to_ms_64 : t -> int64
+
 (** [to_sec t] are the seconds of [t]. *)
 val to_sec : t -> int
+
+(** [to_sec_64 t] are the seconds of [t]. *)
+val to_sec_64 : t -> int64
 
 (** [to_min t] are the minutes of [t]. *)
 val to_min : t -> int

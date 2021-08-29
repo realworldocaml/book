@@ -1,7 +1,9 @@
 (library
  (name microtime)
  (modules microtime)
- (c_names microtime))
+ (foreign_stubs
+  (language c)
+  (names microtime)))
 
 (executable
  (name attack)

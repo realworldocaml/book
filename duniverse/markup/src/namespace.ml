@@ -23,6 +23,8 @@ struct
   let parse qualified_name =
     try
       let colon_index = String.index qualified_name ':' in
+      if colon_index = 0 then
+        raise Not_found;
       let prefix = String.sub qualified_name 0 colon_index in
       let suffix =
         String.sub qualified_name

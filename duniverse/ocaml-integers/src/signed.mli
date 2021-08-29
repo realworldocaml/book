@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2013 Jeremy Yallop.
+ * Copyright (c) 2021 Nomadic Labs
  *
  * This file is distributed under the terms of the MIT License.
  * See the file LICENSE for details.

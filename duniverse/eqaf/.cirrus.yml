@@ -1,0 +1,13 @@
+freebsd_instance:
+  image_family: freebsd-12-1
+
+freebsd_task:
+  env:
+    matrix:
+      - OCAML_VERSION: 4.10.1
+      - OCAML_VERSION: 4.11.1
+  pkg_install_script: pkg install -y ocaml-opam gmp gmake pkgconf bash
+  ocaml_script: opam init -a --comp=$OCAML_VERSION
+  dependencies_script: eval `opam env` && opam install -y --deps-only .
+  build_script: eval `opam env` && dune build @install
+  test_script: eval `opam env` && opam install -y -t --deps-only . && dune build @runtest

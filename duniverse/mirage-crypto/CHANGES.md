@@ -1,3 +1,22 @@
+## v0.10.3 (2021-07-24)
+
+- support for s390x (#129 by @edelsohn)
+- mirage-crypto: add Hash.hmac_feed, analogous to Hash.feed (#130 by @reynir)
+- use --std=c11 in C flags, as required by upcoming OCaml multicore (#133 by
+  @hannesm, review by @Engil)
+- update fiat-crypto generated code (now emitting __inline__ attribute)
+  (#132 by @hannesm)
+
+## v0.10.2 (2021-06-07)
+
+- mirage-crypto-ec: dune C stubs compilation rules: explicitely declare the
+  include directory instead of listing it as a flag, so that the dependency
+  is correctly tracked (#122 by @TheLortex)
+- mirage-crypto: compatibility with gcc11 (-Warray-parameters warning)
+  (reported in #124 by @TheLortex, fixed in #125 by @hannesm)
+- support for 64 bit RISC-V (#127 by @edwintorok)
+- Fixed esy cross-compile CI (#126 by @EduardoRFS)
+
 ## v0.10.1 (2021-04-25)
 
 - mirage-crypto-ec: make inversion run in constant time (#121 by @dfaranha)

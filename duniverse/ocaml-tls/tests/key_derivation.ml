@@ -422,7 +422,7 @@ let processed_payload () =
   let nonce = Tls.Crypto.aead_nonce write_handshake_iv 0L in
   let key = Mirage_crypto.Cipher_block.AES.GCM.of_secret write_handshake_key in
   let adata = Tls.Writer.assemble_hdr `TLS_1_2 (Tls.Packet.APPLICATION_DATA, Cstruct.empty) in
-  Cstruct.BE.set_uint16 adata 3 (17 + Cstruct.len server_payload) ;
+  Cstruct.BE.set_uint16 adata 3 (17 + Cstruct.length server_payload) ;
   let res =
     Mirage_crypto.Cipher_block.AES.GCM.authenticate_encrypt ~key ~adata ~nonce buf
   in

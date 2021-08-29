@@ -436,7 +436,7 @@ let closing : type u s. (u, s) state -> char -> s -> s =
   fun state _char stack ->
   if state.depth > 0
   then (
-    let stack =
+    let stack : s =
       match state.kind with
       | Positions ->
         (* Note we store end positions as inclusive in [Positions.t], so we use [delta:0],
@@ -477,7 +477,7 @@ let eps_push_atom : type u s. (u, s) epsilon_action =
   fun state stack ->
   let str = Buffer.contents state.atom_buffer in
   Buffer.clear state.atom_buffer;
-  let stack =
+  let stack : s =
     match state.kind with
     | Positions ->
       if is_not_ignoring state then add_non_quoted_atom_pos state ~atom:str;
@@ -505,7 +505,7 @@ let push_quoted_atom : type u s. (u, s) action =
   fun state _char stack ->
   let str = Buffer.contents state.atom_buffer in
   Buffer.clear state.atom_buffer;
-  let stack =
+  let stack : s =
     match state.kind with
     | Positions ->
       if is_not_ignoring state then add_pos state ~delta:0;

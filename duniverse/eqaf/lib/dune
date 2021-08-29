@@ -1,18 +1,19 @@
 (library
  (name eqaf)
  (public_name eqaf)
- (modules eqaf))
+ (modules unsafe eqaf))
+
+(rule
+ (copy %{read:../config/which-unsafe-file} unsafe.ml))
 
 (library
  (name eqaf_bigstring)
- (optional)
  (public_name eqaf.bigstring)
  (modules eqaf_bigstring)
- (libraries eqaf bigarray-compat))
+ (libraries eqaf))
 
 (library
  (name eqaf_cstruct)
- (optional)
  (public_name eqaf.cstruct)
  (modules eqaf_cstruct)
  (libraries cstruct eqaf.bigstring))

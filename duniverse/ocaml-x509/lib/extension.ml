@@ -103,6 +103,33 @@ type reason = [
   | `AA_compromise
 ]
 
+let reason_to_int = function
+  | `Unspecified -> 0
+  | `Key_compromise -> 1
+  | `CA_compromise -> 2
+  | `Affiliation_changed -> 3
+  | `Superseded -> 4
+  | `Cessation_of_operation -> 5
+  | `Certificate_hold -> 6
+  (* 7 is not used *)
+  | `Remove_from_CRL -> 8
+  | `Privilege_withdrawn -> 9
+  | `AA_compromise -> 10
+
+let reason_of_int = function
+  |  0 -> `Unspecified
+  |  1 -> `Key_compromise
+  |  2 -> `CA_compromise
+  |  3 -> `Affiliation_changed
+  |  4 -> `Superseded
+  |  5 -> `Cessation_of_operation
+  |  6 -> `Certificate_hold
+  (* 7 is not used *)
+  |  8 -> `Remove_from_CRL
+  |  9 -> `Privilege_withdrawn
+  |  10 -> `AA_compromise
+  | x -> Asn.S.parse_error "Unknown reason %d" x
+
 let pp_reason ppf r =
   Fmt.string ppf (match r with
       | `Unspecified -> "unspecified"
@@ -465,6 +492,9 @@ module Asn = struct
     ; 7, `Privilege_withdrawn
     ; 8, `AA_compromise
     ]
+
+  let reason_enumerated : reason Asn.t =
+    enumerated reason_of_int reason_to_int
 
   let distribution_point_name =
     map (function | `C1 s -> `Full s | `C2 s -> `Relative s)

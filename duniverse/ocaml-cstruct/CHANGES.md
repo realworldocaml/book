@@ -1,3 +1,16 @@
+v6.0.1 2020-06-25
+-----------------
+
+**breaking changes**
+- `Cstruct.len` is deprecated, it will be deleted at the next
+  release. You should use `Cstruct.length` instead.
+  (@dinosaure, @hannesm, #284)
+
+- Remove color from ppx's binary to replicate diff of errors in
+  any contexts (@dinosaure, @sternenseemann, #285)
+- Add `shiftv` (@talex5, @avsm, @dinosaure, #287)
+- Use `Bytes_val` if available (@hannesm, @avsm, @dinosaure, #286) 
+
 v6.0.0 2020-09-10
 -----------------
 

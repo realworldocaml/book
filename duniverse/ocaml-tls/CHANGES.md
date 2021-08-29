@@ -1,3 +1,17 @@
+## v0.14.0 (2021-08-02)
+
+* Breaking: peer_name (in config and epoch data, also own_name) is now a
+  [`host] Domain_name.t instead of a string. (#434 #438 @torinnd @hannesm)
+* Add a X509_async module (#435 @torinnd)
+* Client and server constructor log messages are on the debug level (#436
+  reported by @talex5, fix by @hannesm)
+* Adapt to cstruct 6.0.0 API (Cstruct.len is deprecated) #439 @hannesm
+
+## v0.13.2 (2021-06-04)
+
+* New package tls-async that provides an effectful layer of TLS using async.
+  (#432, @torinnd, @dinosaure, @kit-ty-kate, reviews by @hannesm @avsm @seliopou)
+
 ## v0.13.1 (2021-04-22)
 
 * Breaking: use deriving sexp_of instead of sexp. Constructing a state from

@@ -707,9 +707,10 @@ let load_input_run_as_ppx fn =
         ~loc:(Location.in_file fn)
         "Expected a binary AST as input"
   | Error (System_error (error, _)) | Error (Source_parse_error (error, _)) ->
-      Location.in_file fn
-      |> Location.Error.update_loc error
-      |> Location.Error.raise
+      let open Location.Error in
+      Location.set_filename (get_location error) fn
+      |> update_loc error
+      |> raise
 ;;
 
 let load_source_file fn =
@@ -918,9 +919,10 @@ let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode ~embed_er
     | Error (error, input_version) when embed_errors ->
         (input_name, input_version, error_to_extension error ~kind)
     | Error (error, _) ->
-        Location.in_file fn
-        |> Location.Error.update_loc error
-        |> Location.Error.raise
+        let open Location.Error in
+        Location.set_filename (get_location error) fn
+        |> update_loc error
+        |> raise
   in
   Option.iter !output_metadata_filename ~f:(fun fn ->
     let metadata = File_property.dump_and_reset_all () in

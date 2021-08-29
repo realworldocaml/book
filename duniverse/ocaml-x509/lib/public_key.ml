@@ -108,7 +108,7 @@ let hashed hash data =
   match data with
   | `Message msg -> Ok (Mirage_crypto.Hash.digest hash msg)
   | `Digest d ->
-    let n = Cstruct.len d and m = Mirage_crypto.Hash.digest_size hash in
+    let n = Cstruct.length d and m = Mirage_crypto.Hash.digest_size hash in
     if n = m then Ok d else Error (`Msg "digested data of invalid size")
 
 let verify hash ?scheme ~signature key data =

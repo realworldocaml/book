@@ -16,7 +16,7 @@
 
 open Cmdliner
 
-let cmds = [ Test.cmd; Pp.cmd; Rule.cmd; Deps.cmd ]
+let cmds = [ Test.cmd; Pp.cmd; Rule.cmd; Deps.cmd; Dune_gen.cmd ]
 
 let main (`Setup ()) = `Help (`Pager, None)
 
@@ -25,7 +25,7 @@ let main =
   let exits = Term.default_exits in
   let man = [] in
   ( Term.(ret (const main $ Cli.setup)),
-    Term.info "ocaml-mdx" ~version:"1.8.1" ~doc ~exits ~man )
+    Term.info "ocaml-mdx" ~version:"1.10.1" ~doc ~exits ~man )
 
 let main () = Term.(exit_status @@ eval_choice main cmds)
 

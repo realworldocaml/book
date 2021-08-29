@@ -63,7 +63,7 @@ let libs_and_ppx_under_dir sctx ~db ~dir =
                 | Normal -> (lib :: acc, pps)
               else
                 (acc, pps)
-              (* external lib with a name matching our private name *) )
+              (* external lib with a name matching our private name *))
           | _ -> (acc, pps))))
   |> Option.value ~default:([], [])
 
@@ -84,7 +84,7 @@ let setup sctx ~dir =
   let preprocessing =
     Preprocessing.make sctx ~dir ~expander ~scope ~dep_kind:Required
       ~lib_name:None ~lint:Dune_file.Lint.no_lint ~preprocess
-      ~preprocessor_deps:[]
+      ~preprocessor_deps:[] ~instrumentation_deps:[]
   in
   let source = source ~dir in
   let obj_dir = Toplevel.Source.obj_dir source in

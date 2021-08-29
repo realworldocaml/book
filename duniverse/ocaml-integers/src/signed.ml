@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2013 Jeremy Yallop.
+ * Copyright (c) 2021 Nomadic Labs
  *
  * This file is distributed under the terms of the MIT License.
  * See the file LICENSE for details.
@@ -63,6 +64,8 @@ struct
   let (asr) = shift_right
 end
 
+external format_int : string -> int -> string = "caml_format_int"
+
 module Int =
 struct
   module Basics =
@@ -84,7 +87,9 @@ struct
     let of_int x = x
     let to_int x = x
     let of_string = int_of_string
+    let of_string_opt s = try Some (of_string s) with Failure _ -> None
     let to_string = string_of_int
+    let to_hexstring = format_int "%x"
     let zero = 0
     let one = 1
     let minus_one = -1
@@ -105,12 +110,16 @@ struct
   let abs = Pervasives.abs
   let neg x = -x
   let pp fmt n = Format.fprintf fmt "%d" n
+  let pp_hex fmt n = Format.fprintf fmt "%x" n
 end
 
 module Int32 = 
 struct
+  [@@@ocaml.warning "-32"]
   (* Int32.equal was introduced in OCaml 4.03.0 *)
-  let equal (x:int32) (y:int32) = x = y [@@ocaml.warning "-32"]
+  let equal  (x:int32) (y:int32) = x = y
+  (* Int32.of_string_opt was introduced in OCaml 4.5b0.0 *)
+  let of_string_opt s = try Some (Int32.of_string s) with Failure _ -> None
   include Int32
   module Infix = MakeInfix(Int32)
   let of_nativeint = Nativeint.to_int32
@@ -120,12 +129,17 @@ struct
   let max = Pervasives.max
   let min = Pervasives.min
   let pp fmt n = Format.fprintf fmt "%ld" n
+  let pp_hex fmt n = Format.fprintf fmt "%lx" n
+  let to_hexstring n = Format.asprintf "%lx" n
 end
 
 module Int64 = 
 struct
+  [@@@ocaml.warning "-32"]
   (* Int64.equal was introduced in OCaml 4.03.0 *)
-  let equal (x:int64) (y:int64) = x = y [@@ocaml.warning "-32"]
+  let equal (x:int64) (y:int64) = x = y
+  (* Int32.of_string_opt was introduced in OCaml 4.5b0.0 *)
+  let of_string_opt s = try Some (Int64.of_string s) with Failure _ -> None
   include Int64
   module Infix = MakeInfix(Int64)
   let of_int64 x = x
@@ -133,6 +147,8 @@ struct
   let max = Pervasives.max
   let min = Pervasives.min
   let pp fmt n = Format.fprintf fmt "%Ld" n
+  let pp_hex fmt n = Format.fprintf fmt "%Lx" n
+  let to_hexstring n = Format.asprintf "%Lx" n
 end
 
 (* C guarantees that sizeof(t) == sizeof(unsigned t) *)

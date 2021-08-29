@@ -46,6 +46,11 @@ char *lwt_unix_strdup(char *string);
 /* Raise [Lwt_unix.Not_available]. */
 void lwt_unix_not_available(char const *feature) Noreturn;
 
+#define LWT_NOT_AVAILABLE_BYTE(prim)             \
+    CAMLprim value lwt_##prim(value *a1, int a2) \
+    {                                            \
+        lwt_unix_not_available(#prim);           \
+    }
 #define LWT_NOT_AVAILABLE1(prim) \
     CAMLprim value lwt_##prim(value a1) { lwt_unix_not_available(#prim); }
 #define LWT_NOT_AVAILABLE2(prim)                  \

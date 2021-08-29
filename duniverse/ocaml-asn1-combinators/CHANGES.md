@@ -1,3 +1,7 @@
+## v0.2.6 (2021-08-04)
+* Use Cstruct.length instead of Cstruct.len, drop OCaml <4.08 support,
+  remove bigarray-compat and stdlib-shims dependencies (#37 by @hannesm)
+
 ## v0.2.5 (2021-03-05)
 * Fix an integer overflow in the length field on 32 bit architectures
   (#36 by @hannesm)

@@ -1,4 +1,4 @@
-version: "4.0.0"
+version: "4.0.1"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -19,6 +19,7 @@ depends: [
   "conduit" {=version}
   "async" {>= "v0.10.0"}
   "ipaddr" {>= "3.0.0"}
+  "ipaddr-sexp" {>= "4.0.0"}
 ]
 depopts: ["async_ssl"]
 conflicts: [

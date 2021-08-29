@@ -7,13 +7,13 @@ let cdiv (x : int) (y : int) =
 
 let left_pad_dh group msg =
   let bytes = cdiv (Mirage_crypto_pk.Dh.modulus_size group) 8 in
-  let padding = Cstruct.create (bytes - Cstruct.len msg) in
+  let padding = Cstruct.create (bytes - Cstruct.length msg) in
   padding <+> msg
 
 let not_all_zero = function
   | Error _ as e -> e
   | Ok cs ->
-    let all_zero = Cstruct.create (Cstruct.len cs) in
+    let all_zero = Cstruct.create (Cstruct.length cs) in
     if Cstruct.equal all_zero cs then
       Error (`Fatal `InvalidDH)
     else
@@ -26,7 +26,7 @@ let dh_shared secret share =
      | `Finite_field secret ->
        let group = secret.Mirage_crypto_pk.Dh.group in
        let bits = Mirage_crypto_pk.Dh.modulus_size group in
-       if Cstruct.len share = cdiv bits 8 then
+       if Cstruct.length share = cdiv bits 8 then
          begin match Mirage_crypto_pk.Dh.shared secret share with
            | None -> Error (`Fatal `InvalidDH)
            | Some shared -> Ok (left_pad_dh group shared)
@@ -91,11 +91,11 @@ let hkdflabel label context length =
   and label =
     let lbl = Cstruct.of_string ("tls13 " ^ label) in
     let l = Cstruct.create 1 in
-    Cstruct.set_uint8 l 0 (Cstruct.len lbl) ;
+    Cstruct.set_uint8 l 0 (Cstruct.length lbl) ;
     l <+> lbl
   and context =
     let l = Cstruct.create 1 in
-    Cstruct.set_uint8 l 0 (Cstruct.len context) ;
+    Cstruct.set_uint8 l 0 (Cstruct.length context) ;
     l <+> context
   in
   let lbl = len <+> label <+> context in

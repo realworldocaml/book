@@ -31,7 +31,7 @@
     functional matter ({!Engine}, this module), and effectful parts:
     {!Tls_lwt} and {!Tls_mirage}.
 
-    {e v0.13.1 - {{:https://github.com/mirleft/ocaml-tls }homepage}} *)
+    {e v0.14.0 - {{:https://github.com/mirleft/ocaml-tls }homepage}} *)
 
 
 (** {1 Abstract state type} *)

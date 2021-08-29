@@ -30,7 +30,7 @@ val run_exn :
   root:string option ->
   force_output:bool ->
   output:[ `File of string | `Stdout ] option ->
-  dirs:string list ->
+  directives:Mdx_top.directive list ->
   packages:string list ->
   predicates:string list ->
   int

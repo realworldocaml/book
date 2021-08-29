@@ -30,10 +30,10 @@ let serve_ssl alpn_protocols port callback =
 
   let handle ep channels addr =
     let alpn = match ep with
-      | `Ok data -> (match data.Tls.Core.alpn_protocol with
+      | Ok data -> (match data.Tls.Core.alpn_protocol with
           | Some a -> a
-          | None   -> "no alpn")
-      | `Error   -> "no session"
+          | None -> "no alpn")
+      | Error () -> "no session"
     in
     async @@ fun () ->
     Lwt.catch (fun () -> callback alpn channels addr >>= fun () -> yap ~tag "<- handler done")

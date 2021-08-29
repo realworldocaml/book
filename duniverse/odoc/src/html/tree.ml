@@ -284,7 +284,7 @@ let page_creator ?kind ?(theme_uri = Relative "./") ~path header_docs content =
       Html.link ~rel:[`Stylesheet] ~href:odoc_css_uri () ;
       Html.meta ~a:[ Html.a_charset "utf-8" ] () ;
       Html.meta ~a:[ Html.a_name "generator";
-                     Html.a_content "odoc 1.5.2" ] ();
+                     Html.a_content "odoc 1.5.3" ] ();
       Html.meta ~a:[ Html.a_name "viewport";
                   Html.a_content "width=device-width,initial-scale=1.0"; ] ();
       Html.script ~a:[Html.a_src highlight_js_uri] (Html.txt "");

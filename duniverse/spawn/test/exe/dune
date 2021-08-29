@@ -1,1 +1,2 @@
-(executable (name hello))
+(executables
+ (names hello list_files))

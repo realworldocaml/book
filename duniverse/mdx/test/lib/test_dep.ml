@@ -29,7 +29,7 @@ let test_of_block =
             ~contents:[] ~legacy_labels:false ~errors:[]
         with
         | Ok block -> block
-        | Error _ -> assert false )
+        | Error _ -> assert false)
     | Error _ -> assert false
   in
   [

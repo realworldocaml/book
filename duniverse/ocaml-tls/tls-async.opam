@@ -1,0 +1,35 @@
+version: "0.14.0"
+opam-version: "2.0"
+homepage:     "https://github.com/mirleft/ocaml-tls"
+dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
+bug-reports:  "https://github.com/mirleft/ocaml-tls/issues"
+doc:          "https://mirleft.github.io/ocaml-tls/doc"
+author:       ["David Kaloper <david@numm.org>" "Hannes Mehnert <hannes@mehnert.org>" "Eric Ebinger <github@eric.theebingers.com>" "Calascibetta Romain <romain.calascibetta@gmail.com>"]
+maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.org>"]
+license:      "BSD-2-Clause"
+
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune" {>= "1.0"}
+  "tls" {= version}
+  "x509" {>= "0.13.0"}
+  "ptime" {>= "0.8.1"}
+  "async" {>= "v0.14"}
+  "async_find" {>= "v0.14"}
+  "async_unix" {>= "v0.14"}
+  "core" {>= "v0.14"}
+  "cstruct-async"
+  "ppx_jane" {>= "v0.14"}
+  "mirage-crypto-rng-async"
+]
+tags: [ "org:mirage"]
+synopsis: "Transport Layer Security purely in OCaml, Async layer"
+description: """
+Tls-async provides Async-friendly tls bindings
+"""
