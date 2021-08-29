@@ -749,5 +749,31 @@ let%test_unit "List.rev_append is List.append of List.rev" =
 <p>The full API for building generators is beyond the scope of this chapter, but it’s worth digging in to the API docs if you want more control over the distribution of your test examples.</p>
 </section>
 </section>
+<section class="level2" id="other-testing-tools">
+<h2>Other testing tools</h2>
+<p>The testing tools we’ve described in this chapter cover a lot of ground, but there are other tools that are worth knowing about.</p>
+<section class="level3" id="other-tools-to-do-mostly-the-same-things">
+<h3>Other tools to do (mostly) the same things</h3>
+<p>Here are some notable tools that do more or less the same things as the testing tools we’ve featured in this chapter.</p>
+<ul>
+<li><a href="https://github.com/mirage/alcotest">Alcotest</a>, which is another system for registering and running tests.</li>
+<li><a href="https://github.com/c-cube/qcheck">qcheck</a>, an alternative implementation of quickcheck.</li>
+<li><a href="https://dune.readthedocs.io/en/stable/tests.html#cram-tests">Dune’s cram tests</a>, which are expect-like tests that are written in a shell-like syntax. These are great for testing command-line utilities, and are inspired by Mercurial’s testing framework.</li>
+</ul>
+<p>Which of these you might end up preferring is to some degree a matter of taste.</p>
+</section>
+<section class="level3" id="fuzzing">
+<h3>Fuzzing</h3>
+<p>There’s one other kind of testing tool that we haven’t covered in this chapter, but is worth knowing about: <em>instrumentation-guided fuzzing</em>. You can think of this as another take on property testing, with a very different approach to generating random examples.</p>
+<p>Traditional fuzzing just throws randomly mutated data at a program, and looks for some indication of failure, often simply the program crashing with a segfault. This kind of fuzzing has been surprisingly effective at finding bugs, especially security bugs, in production software. But blind randomization is still quite limited in terms of how much program behavior it can effectively explore.</p>
+<p>Instrumentation-guided fuzzing improves on this by instrumenting the program, and then using that instrumentation to guide the randomization in the direction of more code coverage. By far the most successful tool in this space is <a href="https://github.com/google/AFL">American Fuzzy Lop</a>, or AFL, and OCaml has support for the necessary instrumentation.</p>
+<p>AFL can have eerily good results, and can with no guidance do things like constructing nearly-parseable text when fuzzing a parser, just by iteratively randomzing inputs in the direction of more coverage of the program being exercised.</p>
+<p>If you’re interested in AFL, there are some related tools worth knowing about.</p>
+<ul>
+<li><a href="https://github.com/stedolan/crowbar">Crowbar</a> is a quickcheck-style library for writing down properties to be tested by AFL.</li>
+<li><a href="https://github.com/ocurrent/bun">Bun</a> is a library for integrating AFL in to your continuous-integration pipeline.</li>
+</ul>
+</section>
+</section>
 </section>
 </article></div><a href="json.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 17</small>Handling JSON Data</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
