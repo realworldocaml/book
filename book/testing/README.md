@@ -952,7 +952,6 @@ testing doesn't actually hold on all outputs, as you can see below.
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
          (Neg vs Pos (Loc test.ml:7:19)))
          "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from Foo__Test.(fun) in file \"test.ml\", line 7, characters 19-25\
         \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
         \n"))).
     Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
