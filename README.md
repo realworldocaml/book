@@ -176,24 +176,46 @@ Each example must explicitly define its external dependencies in a
 (packages base core)
 ```
 
-## Upgrading or adding dependencies
+## Dependencies
 
-RWO's dependencies are vendored using `duniverse`. If you want to
-upgrade them to their latest availbale opam version you can run:
+RWO's dependencies are managed using the `opam-monorepo` plugin. The dependencies are expressed
+in the `rwo.opam` opam file as they would be for any project. The plugin is used to generate a
+`rwo.opam.locked` lockfile from this deps specification using the `opam monorepo lock`
+command. Running `opam monorepo pull` will then fetch the sources locally into the `duniverse/`
+folder so that rwo and its dependencies can all be built together in a single dune-workspace.
 
+You can install it by running:
 ```
-make duniverse-upgrade
+opam install opam-monorepo
 ```
 
-Additionally, if you're working on the book and need a new package
-vendored, you can simply add it to the `$DEPS` variable in the
-`Makefile` and run the above command again.
-
-It's possible that after upgrading you get some errors because
-vendored dependencies use jbuild files instead of dune files and
-compatibility with those has been dropped in dune 2. You can upgrade
-those using the following command:
-
+Before running `opam-monorepo lock` it's important to have the proper opam configuration.
+We need to both add the `opam-overlays` repo which contains dune port of some of our dependencies.
+We also use a pinned version of ctypes until the dune-port is stable. To set these up, you can run:
 ```
-dune upgrade --root duniverse/<package_name>.<version>
+opam repository add dune-opam-overlays git+https://github.com/dune-universe/opam-overlays.git
+opam pin add ctypes.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
+opam pin add ctypes-foreign.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
+opam pin add tls.0.12.1 git+https://github.com/mirleft/ocaml-tls.git#v0.12.1
 ```
+
+### Upgrading or adding dependencies
+
+Before upgrading or adding any dependency, you should make sure they are up-to-date according to the
+`rwo.opam` file by running:
+```
+opam monorepo lock
+opam monorepo pull
+```
+and committing the resulting `duniverse/` and `rwo.opam.locked` if they changed. This preliminary
+step will help distinguish how new dependency specifications actually impact the lockfile and
+duniverse by splitting out the unrelated updates.
+
+Once the above is done, you can modify the `dune-project` package definition by adding a new dependency
+or modifying the bounds on an existing one. Then run:
+```
+dune build rwo.opam
+opam monorepo lock
+opam monorepo pull
+```
+to update the opam file, the lockfile and the duniverse folder.

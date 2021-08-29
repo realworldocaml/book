@@ -1,0 +1,4 @@
+(executables
+  (names discover)
+  (libraries dune.configurator)
+)

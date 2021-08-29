@@ -1,0 +1,71 @@
+(library
+ (name test_common)
+ (libraries mirage-crypto oUnit)
+ (modules test_common)
+ (optional))
+
+(test
+ (name test_symmetric_runner)
+ (libraries test_common mirage-crypto oUnit)
+ (package mirage-crypto)
+ (modules test_base test_cipher test_hash test_hmac test_symmetric_runner))
+
+(library
+ (name test_common_random)
+ (libraries randomconv mirage-crypto-rng)
+ (modules test_common_random)
+ (optional))
+
+(test
+ (name test_random_runner)
+ (libraries test_common test_common_random mirage-crypto mirage-crypto-rng
+   mirage-crypto-rng.unix oUnit)
+ (package mirage-crypto-rng)
+ (modules test_random_runner))
+
+(test
+ (name test_pk_runner)
+ (libraries test_common test_common_random mirage-crypto-pk
+   mirage-crypto-rng.unix oUnit)
+ (package mirage-crypto-pk)
+ (modules test_numeric test_dh test_dsa test_rsa test_pk_runner))
+
+(test
+ (name test_entropy_collection)
+ (modules test_entropy_collection)
+ (package mirage-crypto-rng-mirage)
+ (libraries mirage-crypto-rng-mirage mirage-unix mirage-time-unix
+   mirage-clock-unix duration))
+
+(test
+ (name test_entropy_collection_async)
+ (modules test_entropy_collection_async)
+ (package mirage-crypto-rng-async)
+ (libraries mirage-crypto-rng-async))
+
+(test
+ (name test_entropy)
+ (modules test_entropy)
+ (package mirage-crypto-rng)
+ (libraries mirage-crypto-rng))
+
+(test
+ (name test_ec)
+ (modules test_ec)
+ (libraries alcotest mirage-crypto mirage-crypto-ec mirage-crypto-rng.unix
+   hex)
+ (package mirage-crypto-ec))
+
+(test
+ (name test_ec_wycheproof)
+ (modules test_ec_wycheproof)
+ (deps ecdh_secp224r1_test.json ecdsa_secp224r1_sha224_test.json
+   ecdsa_secp224r1_sha256_test.json ecdsa_secp224r1_sha512_test.json
+   ecdh_secp256r1_test.json ecdsa_secp256r1_sha256_test.json
+   ecdsa_secp256r1_sha512_test.json ecdh_secp384r1_test.json
+   ecdsa_secp384r1_sha384_test.json ecdsa_secp384r1_sha512_test.json
+   ecdh_secp521r1_test.json ecdsa_secp521r1_sha512_test.json
+   x25519_test.json eddsa_test.json)
+ (libraries alcotest mirage-crypto-ec wycheproof asn1-combinators
+   mirage-crypto-pk mirage-crypto)
+ (package mirage-crypto-ec))

@@ -1,0 +1,14 @@
+(ocamllex extract_obj)
+
+(library
+ (name configurator)
+ (public_name dune-configurator)
+ (private_modules import dune_lang ocaml_config)
+ (libraries unix csexp result)
+ (flags
+  (:standard
+   -safe-string
+   (:include flags/flags.sexp)))
+ (special_builtin_support
+  (configurator
+   (api_version 1))))

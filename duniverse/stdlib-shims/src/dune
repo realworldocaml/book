@@ -1,0 +1,93 @@
+(* -*- tuareg -*- *)
+
+open StdLabels
+open Jbuild_plugin.V1
+
+let version = Scanf.sscanf ocaml_version "%u.%u" (fun a b -> (a, b))
+
+let modules_in_4_02 =
+  [ "Arg"
+  ; "Array"
+  ; "ArrayLabels"
+  ; "Buffer"
+  ; "Bytes"
+  ; "BytesLabels"
+  ; "Callback"
+  ; "Char"
+  ; "Complex"
+  ; "Digest"
+  ; "Filename"
+  ; "Format"
+  ; "Gc"
+  ; "Genlex"
+  ; "Hashtbl"
+  ; "Int32"
+  ; "Int64"
+  ; "Lazy"
+  ; "Lexing"
+  ; "List"
+  ; "ListLabels"
+  ; "Map"
+  ; "Marshal"
+  ; "MoreLabels"
+  ; "Nativeint"
+  ; "Obj"
+  ; "Oo"
+  ; "Parsing"
+  ; "Pervasives"
+  ; "Printexc"
+  ; "Printf"
+  ; "Queue"
+  ; "Random"
+  ; "Scanf"
+  ; "Set"
+  ; "Stack"
+  ; "StdLabels"
+  ; "Stream"
+  ; "String"
+  ; "StringLabels"
+  ; "Sys"
+  ; "Weak"
+  ]
+
+let missing_modules =
+  if version < (4, 07) then
+    ["Stdlib"]
+  else if version < (4, 11) then
+    (* For OCaml 4.07-4.10 incl. this solves the problem of being unable to
+       generate empty .cmxa files on MSVC by duplicating the Pervasives module
+       (and updating its deprecation warning not to refer to this library! *)
+    ["Pervasives"]
+  else
+    []
+
+let available_modules =
+  if version > (4, 02) then
+    "Uchar" :: modules_in_4_02
+  else
+    modules_in_4_02
+
+let longest_module_name =
+  List.fold_left available_modules ~init:0
+    ~f:(fun acc m -> max acc (String.length m))
+
+let () =
+  Printf.ksprintf send {|
+(library
+ (wrapped false)
+ (name stdlib_shims)
+ (modules %s)
+ (public_name stdlib-shims))
+
+(rule
+ (with-stdout-to stdlib.ml
+  (echo "\
+%s
+
+include Pervasives
+")))
+|}
+    (String.concat ~sep:" " missing_modules)
+    (List.map available_modules
+       ~f:(fun m -> Printf.sprintf "module %-*s = %s" longest_module_name m m)
+     |> String.concat ~sep:"\n")

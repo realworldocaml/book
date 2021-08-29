@@ -1,0 +1,14 @@
+{
+  "name": "bisect_ppx-test",
+  "dependencies": {
+    "bisect_ppx": "file:package",
+    "bs-platform": "^8.4.2",
+    "esy": "^0.6.7"
+  },
+  "scripts": {
+    "build": "bsb -make-world",
+    "instrument": "BISECT_ENABLE=yes bsb -make-world",
+    "execute": "node ./lib/js/hello.js",
+    "clean": "bsb -clean-world"
+  }
+}

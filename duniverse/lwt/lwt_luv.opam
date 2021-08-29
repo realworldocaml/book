@@ -1,0 +1,30 @@
+opam-version: "2.0"
+
+synopsis: "Libuv engine for Lwt"
+
+version: "1.0.0"
+license: "MIT"
+homepage: "https://github.com/ocsigen/lwt"
+doc: "https://ocsigen.org/lwt"
+bug-reports: "https://github.com/ocsigen/lwt/issues"
+
+maintainer: [
+  "Anton Bachin <antonbachin@yahoo.com>"
+  "Ulrik Strid <ulrik.strid@outlook.com>"
+]
+dev-repo: "git+https://github.com/ocsigen/lwt.git"
+
+depends: [
+  "lwt"
+  "dune" {>= "1.8.0"}
+  "ocaml" {>= "4.02.0"}
+  "luv"
+  "result" # result is needed as long as Lwt supports OCaml 4.02.
+
+  # Until https://github.com/aantron/bisect_ppx/pull/327.
+  # "bisect_ppx" {dev & >= "2.0.0"}
+]
+
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]

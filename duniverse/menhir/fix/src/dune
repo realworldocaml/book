@@ -1,0 +1,5 @@
+(library
+  (name vendored_fix)
+  (public_name vendored_fix)
+  (synopsis "An on-demand, incremental fixed point computation algorithm")
+)

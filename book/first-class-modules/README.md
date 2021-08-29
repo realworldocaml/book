@@ -18,8 +18,7 @@ First-class modules are a sophisticated technique, and you'll need to
 get comfortable with some advanced aspects of the language to use them
 effectively. But it's worth learning, because letting modules into the
 core language is quite powerful, increasing the range of what you can
-express and making it easier to build flexible and modular <span
-class="keep-together">systems</span>.
+express and making it easier to build flexible and modular systems.
 
 ## Working with First-Class Modules
 
@@ -381,7 +380,7 @@ val u_of_sexp : Sexp.t -> u = <fun>
 val sexp_of_u : u -> Sexp.t = <fun>
 # sexp_of_u {a=3;b=7.}
 - : Sexp.t = ((a 3) (b 7))
-# u_of_sexp (Core_kernel.Sexp.of_string "((a 43) (b 3.4))")
+# u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))")
 - : u = {a = 43; b = 3.4}
 ```
 
@@ -626,7 +625,7 @@ interface:
       | None -> `Stop
       | Some line ->
         match Or_error.try_with (fun () ->
-          Core_kernel.Sexp.of_string line)
+          Core.Sexp.of_string line)
         with
         | Error e -> `Continue (Error.to_string_hum e)
         | Ok (Sexp.Atom "quit") -> `Stop
@@ -649,7 +648,7 @@ We can most effectively run this command-line interface from a standalone
 program, which we can do by putting the above code in a file along with
 following command to launch the interface:
 
-```ocaml file=examples/query_handler_loader/query_handler.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler.ml,part=1
 let () =
   cli (build_dispatch_table [unique_instance; list_dir_instance])
 ```
@@ -657,7 +656,7 @@ let () =
 Here's an example of a session with this program:
 
 ```sh skip
-$ dune exec ./query_handler.exe
+$ dune exec -- ./query_handler.exe
 >>> (unique ())
 0
 >>> (unique ())
@@ -682,9 +681,9 @@ active query handlers. The module in question will be called `Loader`, and
 its configuration is a list of known `Query_handler` modules. Here are the
 basic types:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=1
 module Loader = struct
-  type config = (module Query_handler) list sexp_opaque
+  type config = (module Query_handler) list [@sexp.opaque]
   [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
@@ -704,7 +703,7 @@ Next, we'll need a function for creating a `Loader.t`. This function requires
 the list of known query handler modules. Note that the table of active
 modules starts out as empty:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=2
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=2
 let create known_list =
     let active = String.Table.create () in
     let known  = String.Table.create () in
@@ -721,7 +720,7 @@ configuration for instantiating that handler in the form of an s-expression.
 These are used for creating a first-class module of type
 `(module Query_handler_instance)`, which is then added to the active table:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=3
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=3
 let load t handler_name config =
     if Hashtbl.mem t.active handler_name then
       Or_error.error "Can't re-register an active handler"
@@ -745,11 +744,11 @@ Since the `load` function will refuse to `load` an already active handler, we
 also need the ability to unload a handler. Note that the handler explicitly
 refuses to unload itself:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=4
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=4
 let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
       Or_error.error "Handler not active" handler_name String.sexp_of_t
-    else if handler_name = name then
+    else if String.(=) handler_name name then
       Or_error.error_string "It's unwise to unload yourself"
     else (
       Hashtbl.remove t.active handler_name;
@@ -762,7 +761,7 @@ query <span class="keep-together">interface</span> presented to the user.
 We'll do this by creating a variant type, and using the s-expression
 converter generated for that type to parse the query from the user:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=5
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=5
 type request =
     | Load of string * Sexp.t
     | Unload of string
@@ -779,7 +778,7 @@ strings to an s-expression, as described in
 
 This function ends the definition of the `Loader` module:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=6
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=6
 let eval t sexp =
     match Or_error.try_with (fun () -> request_of_sexp sexp) with
     | Error _ as err -> err
@@ -799,7 +798,7 @@ first create an instance of the loader query handler and then add that
 instance to the loader's active table. We can then just launch the
 command-line interface, passing it the active table:
 
-```ocaml file=examples/query_handler_loader/query_handler_loader.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler_loader.ml,part=1
 let () =
   let loader = Loader.create [(module Unique); (module List_dir)] in
   let loader_instance =
@@ -813,27 +812,14 @@ let () =
   cli loader.Loader.active
 ```
 
-Now build this into a command-line interface to experiment with it:
+The resulting command-line interface behaves much as you'd expect,
+starting out with no query handlers available but giving you the
+ability to load and unload them. Here's an example of it in action. As
+you can see, we start out with `loader` itself as the only active
+handler:
 
-```scheme
-(executable
-  (name       query_handler_loader)
-  (libraries  core core_kernel ppx_sexp_conv)
-  (preprocess (pps ppx_sexp_conv)))
-```
-
-
-
-```sh dir=examples/query_handler_loader
-```
-
-The resulting command-line interface behaves much as you'd expect, starting
-out with no query handlers available but giving you the ability to load and
-unload them. Here's an example of it in action. As you can see, we start out
-with `loader` itself as the only active handler:
-
-```
-$ ./query_handler_loader.byte
+```sh skip
+$ dune exec -- ./query_handler_loader.exe
 >>> (loader known_services)
 (ls unique)
 >>> (loader active_services)
@@ -854,12 +840,12 @@ yet again and could be reloaded with a different config:
 ```
 >>> (loader (load ls /var))
 ()
->>> (ls /var)
+>>> (ls .)
 (agentx at audit backups db empty folders jabberd lib log mail msgs named
  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
 >>> (loader (unload ls))
 ()
->>> (ls /var)
+>>> (ls .)
 Could not find matching handler: ls
 ```
 
@@ -876,15 +862,15 @@ further using OCaml's dynamic linking facilities, which allow you to compile
 and link in new code to a running program. This can be automated using
 libraries like `ocaml_plugin`, which can be installed via OPAM, and which
 takes care of much of the workflow around setting up dynamic linking.
-<a data-type="indexterm" data-startref="FCMquery">&nbsp;</a>
 
 
 ## Living Without First-Class Modules
 
-It's worth noting that most designs that can be done with first-class modules
-can be simulated without them, with some level of awkwardness. For example,
-we could rewrite our query handler example without first-class modules using
-the following types:[first-class modules/alternatives to]{.idx}
+It's worth noting that most designs that can be done with first-class
+modules can be simulated without them, with some level of
+awkwardness. For example, we could rewrite our query handler example
+without first-class modules using the following types:[first-class
+modules/alternatives to]{.idx}
 
 ```ocaml env=query_handler
 # type query_handler_instance = { name : string

@@ -1,0 +1,10 @@
+(executables
+ (libraries lwt_ssl ssl conduit-lwt-unix lwt_log)
+ (names cdtest cdtest_tls exit_test))
+
+(rule
+ (alias runtest)
+ (deps ./cdtest.exe ./cdtest_tls.exe ./exit_test.exe)
+ (package conduit-lwt-unix)
+ (action
+  (run echo skip)))

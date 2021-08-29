@@ -1,0 +1,6 @@
+(library (name async_kernel) (public_name async_kernel)
+ (libraries core_kernel core_kernel.moption core_kernel.pairing_heap
+  core_kernel.sexp_hidden_in_test core_kernel.thread_pool_cpu_affinity
+  core_kernel.thread_safe_queue core_kernel.timing_wheel
+  core_kernel.tuple_pool)
+ (preprocess (pps ppx_jane -annotated-ignores -check-doc-comments)))

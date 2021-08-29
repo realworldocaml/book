@@ -1,27 +1,35 @@
 ; PDF Generation
 
 (rule
-  (targets inputs.tex)
-  (deps ../book/toc.scm)
+  (targets book.md)
+  (deps ../book/toc.scm (alias ../book/latex))
   (action (run rwo-build build inputs -include-wip -o . -repo-root ..)))
+
+(copy_files ../book/EngD.cls)
+
+(rule
+ (alias pdf-wip)
+ (targets book.tex)
+ (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls ../book/book.yml ../book/cup-template.tex)
+ (action
+  (progn
+   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf-wip)
  (targets book.pdf)
- (deps
-  (alias ../book/latex)
-  (:x ../book/book.tex)
-  inputs.tex)
+ (deps book.tex (alias site-wip-content))
  (action
-  (progn
-   (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
-   (system "makeindex book.idx")
-   (system "pdflatex -interaction=nonstopmode %{x}"))))
+   (progn
+     (system "xelatex book.tex")
+     (system "makeindex book.idx")
+     (system "xelatex book.tex")
+  )))
 
 ; Website Generation
 
 (alias
-  (name site-wip)
+  (name site-wip-content)
   (deps css/app.css
         css/prism.css
         images/anil.jpg
@@ -59,7 +67,7 @@
 (rule
  (alias site-wip)
  (targets index.html)
- (deps (alias ../book/html) ../book/index.html ../book/toc.scm)
+ (deps (alias ../book/html) ../book/index.html ../book/toc.scm (alias site-wip-content))
  (action (run rwo-build build index -include-wip -o . -repo-root ..)))
 
 (rule

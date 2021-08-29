@@ -1,5 +1,0 @@
-(library
-  (name fix)
-  (public_name fix)
-  (synopsis "An on-demand, incremental fixed point computation algorithm")
-)

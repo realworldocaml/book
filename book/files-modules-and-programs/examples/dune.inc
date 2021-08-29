@@ -5,7 +5,7 @@
   (source_tree ./correct/abstract-username)
   (package base))
  (action
-  (run dune build @all @runtest --root ./correct/abstract-username)))
+  (system "dune build @all @runtest --root ./correct/abstract-username")))
 
 (alias
  (name runtest)
@@ -17,7 +17,7 @@
   (source_tree ./correct/ext-option)
   (package base))
  (action
-  (run dune build @all @runtest --root ./correct/ext-option)))
+  (system "dune build @all @runtest --root ./correct/ext-option")))
 
 (alias
  (name runtest)
@@ -30,7 +30,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-dune)))
+  (system "dune build @all @runtest --root ./correct/freq-dune")))
 
 (alias
  (name runtest)
@@ -43,7 +43,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-fast)))
+  (system "dune build @all @runtest --root ./correct/freq-fast")))
 
 (alias
  (name runtest)
@@ -56,7 +56,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-median)))
+  (system "dune build @all @runtest --root ./correct/freq-median")))
 
 (alias
  (name runtest)
@@ -69,7 +69,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-with-counter)))
+  (system "dune build @all @runtest --root ./correct/freq-with-counter")))
 
 (alias
  (name runtest)
@@ -82,7 +82,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-with-sig)))
+  (system "dune build @all @runtest --root ./correct/freq-with-sig")))
 
 (alias
  (name runtest)
@@ -95,7 +95,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-with-sig-abstract-fixed)))
+  (system "dune build @all @runtest --root ./correct/freq-with-sig-abstract-fixed")))
 
 (alias
  (name runtest)

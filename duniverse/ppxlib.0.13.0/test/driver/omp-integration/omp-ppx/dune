@@ -1,5 +1,0 @@
-(library
- (name ppxlib_driver_omp_test_ppx)
- (kind ppx_rewriter)
- (flags (:standard -safe-string))
- (libraries ocaml-migrate-parsetree))

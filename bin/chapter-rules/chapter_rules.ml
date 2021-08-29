@@ -13,8 +13,8 @@ let print_rules dir_name =
 
 (rule
  (alias latex)
- (target %s.tex)
- (action (run rwo-convert_md  %%{dep:%s/README.md} -t latex -o %%{target})))
+ (target %s.md)
+ (action (run rwo-convert_md  %%{dep:%s/README.md} -t md -o %%{target})))
 |}
     dir_name
     dir_name

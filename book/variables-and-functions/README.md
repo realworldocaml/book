@@ -435,7 +435,7 @@ A function is *recursive* if it refers to itself in its definition. Recursion
 is important in any programming language, but is particularly important in
 functional languages, because it is the way that you build looping
 constructs. (As will be discussed in more detail in
-[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 OCaml also supports imperative looping constructs like `for` and `while`, but
 these are only useful when using OCaml's imperative features.)[recursive
 functions/definition of]{.idx}[functions/recursive functions]{.idx}
@@ -567,34 +567,26 @@ val ( *** ) : float -> float -> float = <fun>
 
 The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.
-[Table2_1](variables-and-functions.html#table2_1){data-type=xref} breaks
-the different operators and other syntactic forms into groups from highest to
+The list below breaks the different operators and other syntactic forms into groups from highest to
 lowest precedence, explaining how each behaves syntactically. We write
 `!`... to indicate the class of operators beginning with `!`.
 
-::: {#table2_1 data-type=table}
-Operator prefix | Associativity
-----------------|--------------
-`!`..., `?`..., `~`... | Prefix
-`.`, `.(`, `.[` | -
-function application, constructor, `assert`, `lazy` | Left associative
-`-`, `-.` | Prefix
-`**`..., `lsl`, `lsr`, `asr` | Right associative
-`*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
-`+`..., `-`... | Left associative
-`::` | Right associative
-`@`..., `^`... | Right associative
-`=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
-`&`, `&&` | Right associative
-`or`, `||` | Right associative
-`,` | -
-`<-`, `:=` | Right associative
-`if` | -
-`;` | Right associative
-
-Table:  Precedence and associativity
-:::
-
+-  `!`..., `?`..., `~`... (Prefix)
+- `.`, `.(`, `.[` | -
+- function application, constructor, `assert`, `lazy` | Left associative
+- `-`, `-.` | Prefix
+- `**`..., `lsl`, `lsr`, `asr` | Right associative
+- `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
+- `+`..., `-`... | Left associative
+- `::` | Right associative
+- `@`..., `^`... | Right associative
+- `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
+- `&`, `&&` | Right associative
+- `or`, `||` | Right associative
+- `,` | -
+- `<-`, `:=` | Right associative
+- `if` | -
+- `;` | Right associative
 
 
 There's one important special case: `-` and `-.`, which are the integer and

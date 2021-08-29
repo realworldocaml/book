@@ -1,6 +1,0 @@
-(library
- (name cache)
- (public_name dune-private-libs.cache)
- (synopsis "[Internal] Dune binary artifact cache protocol")
- (preprocess future_syntax)
- (libraries stdune threads.posix xdg dune_lang dune_util dune_csexp))

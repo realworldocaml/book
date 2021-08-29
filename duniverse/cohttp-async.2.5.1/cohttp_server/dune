@@ -1,4 +1,0 @@
-(library
-  (name       cohttp_server)
-  (wrapped   false)
-  (libraries cohttp))

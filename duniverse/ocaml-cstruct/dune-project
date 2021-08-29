@@ -1,0 +1,6 @@
+(lang dune 2.0)
+
+(allow_approximate_merlin)
+
+(name cstruct)
+(version v6.0.0)

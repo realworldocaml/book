@@ -498,7 +498,7 @@ respectively.
 Another common imperative data structure is the doubly linked
 list. Doubly linked lists can be traversed in both directions, and
 elements can be added and removed from the list in constant
-time. Core_kernel defines a doubly linked list (the module is called
+time. Core defines a doubly linked list (the module is called
 `Doubly_linked`), but we'll define our own linked list library as an
 illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
 lists]{.idx}[imperative programming/doubly-linked lists]{.idx
@@ -674,7 +674,7 @@ This shouldn't be a big surprise. Complex imperative data structures
 can be quite tricky, considerably trickier than their pure
 equivalents. The issues described previously can be dealt with by more
 careful error detection, and such error correction is taken care of in
-modules like Core_kernel's `Doubly_linked`. You should use imperative
+modules like Core's `Doubly_linked`. You should use imperative
 data structures from a well-designed library when you can. And when
 you can't, you should make sure to put great care into your error
 handling. [imperative programming/drawbacks of]{.idx}[Doubly-linked
@@ -716,7 +716,7 @@ let find_el t ~f =
 This completes our implementation, but there's still considerably more
 work to be done to make a really usable doubly linked list. As
 mentioned earlier, you're probably better off using something like
-Core_kernel's `Doubly_linked` module that has a more complete
+Core `Doubly_linked` module that has a more complete
 interface and has more of the tricky corner cases worked
 out. Nonetheless, this example should serve to demonstrate some of the
 techniques you can use to build nontrivial imperative data structure
@@ -906,17 +906,15 @@ val edit_distance : string -> string -> int = <fun>
 The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
 then that will in turn dispatch the following calls:
 
-<figure style="float: 0">
-  <img src="images/imperative-programming/edit_distance.png"/>
-</figure>
-
+\
+![](images/imperative-programming/edit_distance.png "Edit distance")
+\
 
 And these calls will in turn dispatch other calls:
 
-<figure style="float: 0">
-  <img src="images/imperative-programming/edit_distance2.png"/>
-</figure>
-
+\
+![](images/imperative-programming/edit_distance2.png "Edit distance two")
+\
 
 As you can see, some of these calls are repeats. For example, there
 are two different calls to `edit_distance "OCam" "oca"`. The number of

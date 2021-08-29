@@ -41,7 +41,7 @@ let title_bar,title_bar_frontpage =
   in
   let h1 = h1 [`Data "Real World OCaml"] in
   let h4 = h4 [`Data "Functional programming for the masses"] in
-  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (in progress)"] in
+  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (published in Q4 2021)"] in
   let title_bar =
     div ~a:["class","title-bar"] [
       div ~a:["class","title"] [h1; h5; nav]
@@ -61,7 +61,6 @@ let footer_item : Html.item =
     "http://twitter.com/realworldocaml", "@realworldocaml";
     "http://twitter.com/yminsky", "@yminsky";
     "http://twitter.com/avsm", "@avsm";
-    "https://plus.google.com/111219778721183890368", "+hickey";
     "https://github.com/realworldocaml", "GitHub";
     "http://www.goodreads.com/book/show/16087552-real-world-ocaml", "goodreads";
   ]
@@ -71,8 +70,7 @@ let footer_item : Html.item =
   footer [
     div ~a:["class","content"] [
       links;
-      p [`Data "Copyright 2012-2014 \
-         Jason Hickey, Anil Madhavapeddy and Yaron Minsky."];
+      p [`Data "Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky."];
     ]
   ]
 
@@ -179,7 +177,7 @@ let make_frontpage ?(repo_root=".") ~include_wip () : Html.t Deferred.t =
   in
   let file = repo_root/"book"/"index.html" in
   (
-    Toc.get ~repo_root () >>| function
+    Toc.get ~repo_root ~include_wip () >>| function
     | [a;b;c;d] -> a,b,c,d
     | _ -> failwith "frontpage design expects exactly 3 parts"
   ) >>= fun (prologue,part1,part2,part3) ->
@@ -262,26 +260,19 @@ let make_simple_page file =
   return (main_template ~title_bar:title_bar ~content ())
 
 let make_tex_inputs_page ?(repo_root=".") ~include_wip () : string Deferred.t =
-  Toc.Repr.get ~repo_root () >>| fun l ->
-  let to_input s = [Tex.input (repo_root / "book" / s ^ ".tex"); Tex.newpage] in
-  let to_tex t : Tex.t list =
+  Toc.Repr.get ~repo_root ~include_wip () >>| fun l ->
+  let to_input s = In_channel.read_all (repo_root / "book" / s ^ ".md") in
+  let to_tex t =
       match t with
       | `part (part: Toc.Repr.part) ->
-        let chapters =
-          if include_wip then
-            part.chapters
-          else
-            List.filter part.chapters ~f:(fun c -> not c.wip)
-        in
-        let names = List.map chapters ~f:(fun c -> c.name) in
-        [Tex.part part.title]::(List.map ~f:to_input names)
+        let names = List.map part.chapters ~f:(fun c -> c.name) in
+        ("# " ^ part.title ^ "\n") :: (List.map ~f:to_input names)
       | `chapter (c : Toc.Repr.chapter) ->
-        if c.wip then [] else [to_input c.name]
+        [to_input c.name]
   in
-  List.map ~f:to_tex l
-  |> List.join
-  |> List.map ~f:Tex.to_string
-  |> String.concat ~sep:"\n"
+  List.map ~f:to_tex l |>
+  List.join |>
+  String.concat ~sep:"\n"
 
 (******************************************************************************)
 (* Main Functions                                                             *)
@@ -316,7 +307,7 @@ let make ?(repo_root=".") ?(include_wip=false) ~out_dir = function
     let base = Filename.basename in_file in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    Toc.get_chapters ~include_wip:true ~repo_root () >>= fun chapters ->
+    Toc.get_chapters ~include_wip ~repo_root () >>= fun chapters ->
     make_chapter_page chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
@@ -340,7 +331,7 @@ let make ?(repo_root=".") ?(include_wip=false) ~out_dir = function
     Writer.save out_file ~contents
   )
   | `Latex -> (
-    let base = "inputs.tex" in
+    let base = "book.md" in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     make_tex_inputs_page ~include_wip ~repo_root () >>= fun contents ->

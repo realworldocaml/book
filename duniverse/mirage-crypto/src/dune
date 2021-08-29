@@ -1,0 +1,31 @@
+(library
+ (name mirage_crypto)
+ (public_name mirage-crypto)
+ (libraries cstruct eqaf.cstruct)
+ (private_modules aead chacha20 ccm cipher_block cipher_stream hash native
+   poly1305 uncommon)
+ (foreign_stubs
+  (language c)
+  (names detect_cpu_features misc misc_sse md5 sha1 sha256 sha512 hash_stubs
+    aes_generic aes_aesni ghash_generic ghash_pclmul ghash_ctmul des_generic
+    chacha poly1305-donna entropy_cpu_stubs)
+  (flags
+   (:standard)
+   (:include cflags_optimized.sexp)))
+ (foreign_stubs
+  (language c)
+  (names chacha_generic)
+  (flags
+   (:standard)
+   (:include cflags.sexp))))
+
+(env
+ (dev
+  (c_flags (-Werror))))
+
+(include_subdirs unqualified)
+
+(rule
+ (targets cflags.sexp cflags_optimized.sexp)
+ (action
+  (run ../config/cfg.exe)))

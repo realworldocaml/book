@@ -1,3 +1,0 @@
-(library (name unpack_buffer_test)
- (libraries expect_test_helpers_kernel unpack_buffer)
- (preprocess (pps ppx_jane)))

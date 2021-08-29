@@ -1,0 +1,21 @@
+---
+title: Real World OCaml
+subtitle: Version 2 (draft)
+documentclass: EngD
+classoption:
+- multi
+colorlinks: true
+lang: en-GB
+papersize: a4
+links-as-notes: false
+numbersections: true
+csquotes: true
+has-frontmatter: true
+toc: true
+lof: true
+lot: true
+author:
+- Yaron Minsky
+- Anil Madhavapeddy
+---
+

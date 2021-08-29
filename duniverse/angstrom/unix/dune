@@ -1,0 +1,4 @@
+(library
+ (name angstrom_unix)
+ (public_name angstrom-unix)
+ (libraries angstrom unix))

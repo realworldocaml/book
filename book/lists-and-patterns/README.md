@@ -48,10 +48,9 @@ figure below is a rough graphical representation of how the list
 `1 :: 2 :: 3 :: []` is laid out as a data structure. The final arrow (from
 the box containing `3`) points to the empty list.[lists/structure of]{.idx}
 
-<figure style="float: 0">
-  <img src="images/lists-and-patterns/lists_layout.png"/>
-</figure>
-
+\
+![](images/lists-and-patterns/lists_layout.png "Lists layout")
+\
 
 Each `::` essentially adds a new block to the proceding picture. Such a block
 contains two things: a reference to the data in that list element, and a
@@ -381,7 +380,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0]
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ")
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4")
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a
@@ -523,10 +522,11 @@ val render_table : string list -> string list list -> string = <fun>
 
 ### More Useful List Functions
 
-The previous example we worked through touched on only three of the functions
-in `List`. We won't cover the entire interface (for that you should look at
-the [online docs](http://realworldocaml.org/doc)), but a few more functions
-are useful enough to mention here.
+The previous example touched on only three of the functions in
+`List`. We won't cover the entire interface (for that you should look
+at the [online docs](
+https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html)),
+but a few more functions are useful enough to mention here.
 
 #### Combining list elements with List.reduce
 
@@ -579,10 +579,11 @@ passed to `List.filter_map` returns an optional value, and `List.filter_map`
 drops all elements for which `None` is returned.
 
 Here's an example. The following function computes a list of file extensions
-from a list of files, piping the results through `List.dedup` to remove
-duplicates. Note that this example uses `String.rsplit2` from the String
-module to split a string on the rightmost appearance of a given
-character:[lists/duplicate removal]{.idx}[duplicates, removing]{.idx}
+from a list of files, piping the results through `List.dedup_and_sort` to
+return the list with duplicates removed and in sorted order. Note that this
+example uses `String.rsplit2` from the String module to split a string on the
+rightmost appearance of a given character:[lists/duplicate
+removal]{.idx}[duplicates, removing]{.idx}
 
 ```ocaml env=main
 # let extensions filenames =
@@ -851,7 +852,6 @@ check on whether the first two elements are equal:
 val destutter : int list -> int list = <fun>
 ```
 
-::: {data-type=note}
 ##### Polymorphic Compare
 
 You might have noticed that `destutter` is specialized to lists of integers.
@@ -933,8 +933,8 @@ corresponds to the expected numerical comparison functions. For strings, it's
 a lexicographic comparison.
 
 That said, experienced OCaml developers typically avoid polymorphic
-comparison. That's surprising, given how obviously useful is, but there's a
-good reason. While it's very convenient, in some cases, the type oblivious
+comparison. That's surprising, given how obviously useful it is, but there's
+a good reason. While it's very convenient, in some cases, the type oblivious
 nature of polymorphic compare means that it does something that doesn't make
 sense for the particular type of values you're dealing with. This can lead to
 surprising and hard to resolve bugs in your code. It's for this reason that
@@ -948,8 +948,6 @@ opening the module again.
 ```ocaml env=main
 # open Base
 ```
-
-:::
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
 checks associated with pattern matches rely on the fact that patterns are
@@ -1026,7 +1024,7 @@ should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer than
 necessary; even worse, it is not tail recursive. In real life, you would
-probably just use the `List.count` function from `Core_kernel`:
+probably just use the `List.count` function:
 
 ```ocaml env=main
 # let count_some l = List.count ~f:Option.is_some l

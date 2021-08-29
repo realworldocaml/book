@@ -1,0 +1,6 @@
+(executables
+ (public_names raiser pp)
+ (libraries ppxlib))
+
+(cram
+ (deps %{bin:raiser} %{bin:pp}))

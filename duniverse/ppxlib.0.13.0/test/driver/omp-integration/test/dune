@@ -1,4 +1,0 @@
-(test
- (name test)
- (flags (:standard -safe-string))
- (preprocess (pps ppxlib_driver_omp_test_ppx ppxlib_ppx)))

@@ -1,7 +1,0 @@
-(library
- (name jbuild_support)
- (libraries stdune dune_lang)
- (synopsis "Internal Dune library, do not use!")
- (preprocess future_syntax))
-
-(ocamllex lexer)

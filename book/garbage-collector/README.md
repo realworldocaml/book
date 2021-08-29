@@ -106,10 +106,9 @@ The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly. [minor heaps/allocating
 on]{.idx}
 
-<figure style="float: 0">
-  <img src="images/gc/minor_heap.png"/>
-</figure>
-
+\
+![](images/gc/minor_heap.png "Minor GC heap")
+\
 
 The runtime stores the boundaries of the minor heap in two pointers that
 delimit the start and end of the heap region (`caml_young_start` and
@@ -148,13 +147,13 @@ the `Gc.set` function:
 :::
 
 ```ocaml env=tune
-# open Core_kernel
+# open Core
 # let c = Gc.get ()
 val c : Core_kernel.Gc.control =
-  {Core_kernel.Gc.Control.minor_heap_size = 262144;
-   major_heap_increment = 15; space_overhead = 80; verbose = 0;
-   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
-   window_size = 1; custom_major_ratio = 44; custom_minor_ratio = 100;
+  {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
+   space_overhead = 80; verbose = 0; max_overhead = 500;
+   stack_limit = 1048576; allocation_policy = 0; window_size = 1;
+   custom_major_ratio = 44; custom_minor_ratio = 100;
    custom_minor_max_size = 8192}
 # Gc.tune ~minor_heap_size:(262144 * 2) ()
 - : unit = ()
@@ -324,16 +323,11 @@ incrementally by marking the heap in *slices*. Each value in the heap has a
 whether the value has been marked so that the GC can resume easily between
 slices. [major heaps/marking and scanning]{.idx}
 
-Tag color | Block status
-----------|-------------
-Blue | On the free list and not currently in use
-White (during marking) | Not reached yet, but possibly reachable
-White (during sweeping) | Unreachable and can be freed
-Gray | Reachable, but its fields have not been scanned
-Black | Reachable, and its fields have been scanned
-
-Table:  Tag color statuses
-
+- Blue:  On the free list and not currently in use
+- White (during marking): Not reached yet, but possibly reachable
+- White (during sweeping): Unreachable and can be freed
+- Gray: Reachable, but its fields have not been scanned
+- Black:  Reachable, and its fields have been scanned
 
 The color tags in the value headers store most of the state of the marking
 process, allowing it to be paused and resumed later. The GC and application
@@ -535,7 +529,7 @@ garbage collection behavior:
 
 ```sh dir=examples/barrier_bench
 $ dune build barrier_bench.exe
-$ dune exec -- ./barrier_bench.exe -help
+$ dune exec -- ./barrier_bench.exe -help | head -13
 Benchmark for mutable, immutable
 
   barrier_bench.exe [COLUMN ...]
@@ -549,7 +543,6 @@ Columns that can be specified are:
 	speedup    - Relative execution cost as a speedup.
 	samples    - Number of samples collected for profiling.
 
-...
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation

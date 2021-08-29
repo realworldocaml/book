@@ -1,0 +1,13 @@
+(library
+ (name empty_rewriter)
+ (modules empty_rewriter)
+ (kind ppx_rewriter)
+ (libraries ppxlib))
+
+(test
+ (name test)
+ (modules test)
+ (flags
+  (:standard -safe-string))
+ (preprocess
+  (pps empty_rewriter)))

@@ -7,7 +7,7 @@
   (package core)
   (package ppx_jane))
  (action
-  (run dune build @all @runtest --root ./correct/dictionary)))
+  (system "dune build @all @runtest --root ./correct/dictionary")))
 
 (alias
  (name runtest)
@@ -19,7 +19,7 @@
   (source_tree ./correct/dlist)
   (package base))
  (action
-  (run dune build @all @runtest --root ./correct/dlist)))
+  (system "dune build @all @runtest --root ./correct/dlist")))
 
 (alias
  (name runtest)
@@ -31,7 +31,7 @@
   (source_tree ./correct/time_converter)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/time_converter)))
+  (system "dune build @all @runtest --root ./correct/time_converter")))
 
 (alias
  (name runtest)
@@ -43,7 +43,7 @@
   (source_tree ./correct/time_converter2)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/time_converter2)))
+  (system "dune build @all @runtest --root ./correct/time_converter2")))
 
 (alias
  (name runtest)

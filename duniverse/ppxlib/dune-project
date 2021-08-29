@@ -1,0 +1,41 @@
+(lang dune 2.7)
+(name ppxlib)
+(version 0.22.0)
+(using cinaps 1.0)
+(allow_approximate_merlin)
+(formatting (enabled_for dune))
+(cram enable)
+(generate_opam_files true)
+
+(source (github ocaml-ppx/ppxlib))
+(license MIT)
+(authors "Jane Street Group, LLC <opensource@janestreet.com>")
+(maintainers "opensource@janestreet.com")
+(documentation "https://ocaml-ppx.github.io/ppxlib/")
+
+(package
+ (name ppxlib)
+ (depends
+  (ocaml (and (>= 4.04.1) (< 4.13)))
+  (ocaml-compiler-libs (>= v0.11.0))
+  (ocaml-migrate-parsetree (>= 2.1.0))
+  (ppx_derivers (>= 1.0))
+  sexplib0
+  stdlib-shims
+  (ocamlfind :with-test)
+  (re (and :with-test (>= 1.9.0)))
+  (cinaps (and :with-test (>= v0.12.1)))
+  (base :with-test)
+  (stdio :with-test))
+ (synopsis "Standard library for ppx rewriters")
+ (description "Ppxlib is the standard library for ppx rewriters and other programs
+that manipulate the in-memory reprensation of OCaml programs, a.k.a
+the \"Parsetree\".
+
+It also comes bundled with two ppx rewriters that are commonly used to
+write tools that manipulate and/or generate Parsetree values;
+`ppxlib.metaquot` which allows to construct Parsetree values using the
+OCaml syntax directly and `ppxlib.traverse` which provides various
+ways of automatically traversing values of a given type, in particular
+allowing to inject a complex structured value into generated code.
+"))

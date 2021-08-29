@@ -1,0 +1,9 @@
+(executable
+ (name test)
+ (libraries markup ounit2 test_support)
+ (flags (:standard -w +A-44-48)))
+
+(rule
+ (alias runtest)
+ (package markup)
+ (action (run %{exe:test.exe} -runner sequential)))

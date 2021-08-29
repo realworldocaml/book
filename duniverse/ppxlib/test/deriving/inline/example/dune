@@ -1,0 +1,8 @@
+(library
+ (name ppx_deriving_example)
+ (preprocess
+  (pps ppx_foo_deriver)))
+
+(alias
+ (name runtest)
+ (deps ppx_deriving_example.cma))

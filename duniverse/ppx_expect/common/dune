@@ -1,0 +1,4 @@
+(library (name expect_test_common) (public_name ppx_expect.common)
+ (synopsis "Shared parts for ppx_expect") (libraries base)
+ (preprocess no_preprocessing)
+ (lint (pps ppx_base ppx_base_lint -apply=js_style,base_lint,type_conv)))

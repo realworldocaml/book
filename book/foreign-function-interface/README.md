@@ -872,32 +872,19 @@ memory. They are also fully supported in Ctypes, but we won't go into more
 detail here. [operators/controlling pointers]{.idx}[pointers/operators
 controlling]{.idx}
 
-::: {data-type=note}
 ##### Pointer Operators for Dereferencing and Arithmetic
 
 Ctypes defines a number of operators that let you manipulate pointers and
 arrays just as you would in C. The Ctypes equivalents do have the benefit of
-being more strongly typed, of course (see
-[Table19sub1](foreign-function-interface.html#Table19sub1){data-type=xref}).
+being more strongly typed, of course.
 
-::: {#Table19sub1 data-type=table}
-Operator | Purpose
----------|--------
-`!@ p` | Dereference the pointer `p`.
-`p <-@ v` | Write the value `v` to the address `p`.
-`p +@ n` | If `p` points to an array element, then compute the address of the `n`th next element.
-`p -@ n` | If `p` points to an array element, then compute the address of the `n`th previous element.
-
-Table:  Operators for manipulating pointers and arrays
-:::
-
-
+- `!@ p` will dereference the pointer `p`.
+- `p <-@ v` will write the value `v` to the address `p`.
+- `p +@ n` computes the address of the `n`th next element, if `p` points to an array element.
+- `p -@ n` computes the address of the `n`th previous element, if `p` points to an array element.
 
 There are also other useful nonoperator functions available (see the Ctypes
 documentation), such as pointer differencing and comparison.
-
-:::
-
 
 ## Passing Functions to C
 

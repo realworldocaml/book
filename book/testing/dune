@@ -3,7 +3,7 @@
  (packages
   base
   base_quickcheck
-  core_kernel
+  core
   lambdasoup
   mdx
   patdiff

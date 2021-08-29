@@ -1,0 +1,8 @@
+(library (name parsexp) (public_name parsexp) (libraries sexplib0 base.caml)
+ (preprocess no_preprocessing)
+ (lint
+  (pps ppx_js_style -check-doc-comments ppx_compare ppx_sexp_conv
+   -type-conv-keep-w32=impl -apply=js_style,type_conv)))
+
+(rule (targets bytes0.ml) (deps (:first_dep gen/gen_bytes0.exe))
+ (action (bash "./%{first_dep} > %{targets}")))

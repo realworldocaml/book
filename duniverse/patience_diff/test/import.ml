@@ -1,0 +1,2 @@
+include Expect_test_helpers_core
+include Patience_diff_lib

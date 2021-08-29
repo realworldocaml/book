@@ -115,7 +115,7 @@ We don't need to provide the module again for functions like `Map.find` or
 function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
-`Base` are. Later in the chapter, we'll show how you can set up a module your
+`Base` are. Later in the chapter, we'll show how you can set up a module of your
 own so it can be used in this way.
 
 ### Sets
@@ -219,10 +219,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 
@@ -453,12 +453,11 @@ Error: This expression has type
 
 ### The Polymorphic Comparator
 
-We don't need to generate specialized comparators for every type we want to
-build a map on. We can instead build a map based on OCaml's built-in
-polymorphic comparison function, which was discussed in
-[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}.
-`Base` currently doesn't have a convenient function for minting maps based on
-polymorphic compare, but `Core_kernel` does, as we can see below.
+We don't need to generate specialized comparators for every type we
+want to build a map on. We can instead build a map based on OCaml's
+built-in polymorphic comparison function, which was discussed in
+[Lists And Patterns
+](lists-and-patterns.html#lists-and-patterns){data-type=xref}.
 [maps/polymorphic comparison in]{.idx}[polymorphic comparisons]{.idx}
 
 ```ocaml env=main
@@ -466,9 +465,9 @@ polymorphic compare, but `Core_kernel` does, as we can see below.
 - : (int, string) Map.Poly.t = <abstr>
 ```
 
-Note that maps based on the polymorphic comparator have different comparator
-witnesses than those based on the type-specific comparison function. Thus,
-the compiler rejects the following:
+Note that maps based on the polymorphic comparator have different
+comparator witnesses than those based on the type-specific comparison
+function. Thus, the compiler rejects the following:
 
 ```ocaml env=main
 # Map.symmetric_diff
@@ -660,10 +659,10 @@ field within the same structure), the `=` operator will never terminate, and
 your program will hang! You therefore must use the physical equality operator
 or write a custom comparison function when comparing cyclic values.
 
-It's quite easy to mix up the use of `=` and `==`, so Core_kernel discourages
-the use of `==` and provides the more explicit `phys_equal` function instead.
-You'll see a warning if you use `==` anywhere in code that opens
-`Core_kernel`:
+It's quite easy to mix up the use of `=` and `==`, so `Base`
+discourages the use of `==` and provides the more explicit
+`phys_equal` function instead.  You'll see a warning if you use `==`
+anywhere in code that opens `Base`:
 
 ```ocaml env=core_phys_equal
 # open Base
@@ -681,16 +680,16 @@ If you feel like hanging your OCaml interpreter, you can verify what happens
 with recursive values and structural equality for yourself:
 
 ```ocaml skip
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
+# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 }
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 } ;;
+# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 }
 <lots of text>
-# v1 == v1;;
+# v1 == v1
 - : bool = true
-# phys_equal v1 v1;;
+# phys_equal v1 v1
 - : bool = true
-# v1 = v1 ;;
+# v1 = v1
 <press ^Z and kill the process now>
 ```
 
@@ -794,7 +793,7 @@ Error: This expression has type
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
-[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
 module. We'll cover this material more briefly than we did with maps because
 many of the concepts are shared. [hash tables/basics of]{.idx}

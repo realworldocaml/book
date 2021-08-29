@@ -1,0 +1,14 @@
+(library
+ (name tyxml_jsx)
+ (public_name tyxml-jsx)
+ (libraries tyxml-syntax
+            ppxlib
+ )
+ (kind ppx_rewriter)
+ (preprocess (pps ppxlib.metaquot))
+ (flags (:standard
+         -safe-string
+         -open Ppxlib
+         -w "-9"
+ ))
+)

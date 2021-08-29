@@ -1,9 +1,0 @@
-(executable
- (name test)
- (libraries markup oUnit test_support)
- (flags (:standard -w +A-44-48)))
-
-(alias
- (name runtest)
- (package markup)
- (action (run %{exe:test.exe} -runner sequential)))

@@ -57,9 +57,10 @@ let build_chapter : Command.t =
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
       and file = Params.file
+      and include_wip = Params.include_wip
       in
       fun () ->
-        Book.make ~repo_root ~out_dir (`Chapter file) ]
+        Book.make ~repo_root ~include_wip ~out_dir (`Chapter file) ]
 
 let build_frontpage : Command.t =
   Command.async ~summary:"build frontpage"

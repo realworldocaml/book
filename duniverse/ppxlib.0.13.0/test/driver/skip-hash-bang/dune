@@ -1,4 +1,0 @@
-(test
- (name test)
- (flags (:standard -safe-string))
- (preprocess (pps ppxlib.runner)))

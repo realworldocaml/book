@@ -1,0 +1,12 @@
+type raw_json <ocaml module="Yojson.Safe" t="json"> = abstract
+  (* uses type Yojson.Safe.t,
+     with the functions Yojson.Safe.write_json
+     and Yojson.Safe.read_json *)
+
+type obj_list = obj list
+
+type obj = {
+  ?label: string option;
+  ?labels: string list option;
+  value: raw_json
+}

@@ -1,0 +1,3 @@
+(library (name ppx_base_lint) (kind ppx_rewriter)
+ (libraries compiler-libs.common base ppxlib ppx_cold ppx_js_style)
+ (preprocess no_preprocessing))

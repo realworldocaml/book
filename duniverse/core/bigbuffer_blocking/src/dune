@@ -1,0 +1,2 @@
+(library (name bigbuffer_blocking) (public_name core.bigbuffer_blocking)
+ (libraries bigstring_unix core) (preprocess (pps ppx_jane)))

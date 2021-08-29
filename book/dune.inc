@@ -6,8 +6,8 @@
 
 (rule
  (alias latex)
- (target classes.tex)
- (action (run rwo-convert_md  %{dep:classes/README.md} -t latex -o %{target})))
+ (target classes.md)
+ (action (run rwo-convert_md  %{dep:classes/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -16,8 +16,8 @@
 
 (rule
  (alias latex)
- (target command-line-parsing.tex)
- (action (run rwo-convert_md  %{dep:command-line-parsing/README.md} -t latex -o %{target})))
+ (target command-line-parsing.md)
+ (action (run rwo-convert_md  %{dep:command-line-parsing/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -26,8 +26,8 @@
 
 (rule
  (alias latex)
- (target compiler-backend.tex)
- (action (run rwo-convert_md  %{dep:compiler-backend/README.md} -t latex -o %{target})))
+ (target compiler-backend.md)
+ (action (run rwo-convert_md  %{dep:compiler-backend/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -36,8 +36,8 @@
 
 (rule
  (alias latex)
- (target compiler-frontend.tex)
- (action (run rwo-convert_md  %{dep:compiler-frontend/README.md} -t latex -o %{target})))
+ (target compiler-frontend.md)
+ (action (run rwo-convert_md  %{dep:compiler-frontend/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -46,8 +46,8 @@
 
 (rule
  (alias latex)
- (target concurrent-programming.tex)
- (action (run rwo-convert_md  %{dep:concurrent-programming/README.md} -t latex -o %{target})))
+ (target concurrent-programming.md)
+ (action (run rwo-convert_md  %{dep:concurrent-programming/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -56,8 +56,8 @@
 
 (rule
  (alias latex)
- (target data-serialization.tex)
- (action (run rwo-convert_md  %{dep:data-serialization/README.md} -t latex -o %{target})))
+ (target data-serialization.md)
+ (action (run rwo-convert_md  %{dep:data-serialization/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -66,8 +66,8 @@
 
 (rule
  (alias latex)
- (target error-handling.tex)
- (action (run rwo-convert_md  %{dep:error-handling/README.md} -t latex -o %{target})))
+ (target error-handling.md)
+ (action (run rwo-convert_md  %{dep:error-handling/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -76,8 +76,8 @@
 
 (rule
  (alias latex)
- (target files-modules-and-programs.tex)
- (action (run rwo-convert_md  %{dep:files-modules-and-programs/README.md} -t latex -o %{target})))
+ (target files-modules-and-programs.md)
+ (action (run rwo-convert_md  %{dep:files-modules-and-programs/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -86,8 +86,8 @@
 
 (rule
  (alias latex)
- (target first-class-modules.tex)
- (action (run rwo-convert_md  %{dep:first-class-modules/README.md} -t latex -o %{target})))
+ (target first-class-modules.md)
+ (action (run rwo-convert_md  %{dep:first-class-modules/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -96,8 +96,8 @@
 
 (rule
  (alias latex)
- (target foreign-function-interface.tex)
- (action (run rwo-convert_md  %{dep:foreign-function-interface/README.md} -t latex -o %{target})))
+ (target foreign-function-interface.md)
+ (action (run rwo-convert_md  %{dep:foreign-function-interface/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -106,8 +106,8 @@
 
 (rule
  (alias latex)
- (target functors.tex)
- (action (run rwo-convert_md  %{dep:functors/README.md} -t latex -o %{target})))
+ (target functors.md)
+ (action (run rwo-convert_md  %{dep:functors/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -116,8 +116,8 @@
 
 (rule
  (alias latex)
- (target garbage-collector.tex)
- (action (run rwo-convert_md  %{dep:garbage-collector/README.md} -t latex -o %{target})))
+ (target garbage-collector.md)
+ (action (run rwo-convert_md  %{dep:garbage-collector/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -126,8 +126,8 @@
 
 (rule
  (alias latex)
- (target guided-tour.tex)
- (action (run rwo-convert_md  %{dep:guided-tour/README.md} -t latex -o %{target})))
+ (target guided-tour.md)
+ (action (run rwo-convert_md  %{dep:guided-tour/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -136,8 +136,8 @@
 
 (rule
  (alias latex)
- (target imperative-programming.tex)
- (action (run rwo-convert_md  %{dep:imperative-programming/README.md} -t latex -o %{target})))
+ (target imperative-programming.md)
+ (action (run rwo-convert_md  %{dep:imperative-programming/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -146,8 +146,8 @@
 
 (rule
  (alias latex)
- (target json.tex)
- (action (run rwo-convert_md  %{dep:json/README.md} -t latex -o %{target})))
+ (target json.md)
+ (action (run rwo-convert_md  %{dep:json/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -156,8 +156,8 @@
 
 (rule
  (alias latex)
- (target lists-and-patterns.tex)
- (action (run rwo-convert_md  %{dep:lists-and-patterns/README.md} -t latex -o %{target})))
+ (target lists-and-patterns.md)
+ (action (run rwo-convert_md  %{dep:lists-and-patterns/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -166,8 +166,8 @@
 
 (rule
  (alias latex)
- (target maps-and-hashtables.tex)
- (action (run rwo-convert_md  %{dep:maps-and-hashtables/README.md} -t latex -o %{target})))
+ (target maps-and-hashtables.md)
+ (action (run rwo-convert_md  %{dep:maps-and-hashtables/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -176,8 +176,8 @@
 
 (rule
  (alias latex)
- (target objects.tex)
- (action (run rwo-convert_md  %{dep:objects/README.md} -t latex -o %{target})))
+ (target objects.md)
+ (action (run rwo-convert_md  %{dep:objects/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -186,8 +186,8 @@
 
 (rule
  (alias latex)
- (target parsing-with-ocamllex-and-menhir.tex)
- (action (run rwo-convert_md  %{dep:parsing-with-ocamllex-and-menhir/README.md} -t latex -o %{target})))
+ (target parsing-with-ocamllex-and-menhir.md)
+ (action (run rwo-convert_md  %{dep:parsing-with-ocamllex-and-menhir/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -196,8 +196,8 @@
 
 (rule
  (alias latex)
- (target ppx.tex)
- (action (run rwo-convert_md  %{dep:ppx/README.md} -t latex -o %{target})))
+ (target ppx.md)
+ (action (run rwo-convert_md  %{dep:ppx/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -206,8 +206,8 @@
 
 (rule
  (alias latex)
- (target prologue.tex)
- (action (run rwo-convert_md  %{dep:prologue/README.md} -t latex -o %{target})))
+ (target prologue.md)
+ (action (run rwo-convert_md  %{dep:prologue/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -216,8 +216,8 @@
 
 (rule
  (alias latex)
- (target records.tex)
- (action (run rwo-convert_md  %{dep:records/README.md} -t latex -o %{target})))
+ (target records.md)
+ (action (run rwo-convert_md  %{dep:records/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -226,8 +226,8 @@
 
 (rule
  (alias latex)
- (target runtime-memory-layout.tex)
- (action (run rwo-convert_md  %{dep:runtime-memory-layout/README.md} -t latex -o %{target})))
+ (target runtime-memory-layout.md)
+ (action (run rwo-convert_md  %{dep:runtime-memory-layout/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -236,8 +236,8 @@
 
 (rule
  (alias latex)
- (target testing.tex)
- (action (run rwo-convert_md  %{dep:testing/README.md} -t latex -o %{target})))
+ (target testing.md)
+ (action (run rwo-convert_md  %{dep:testing/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -246,8 +246,8 @@
 
 (rule
  (alias latex)
- (target variables-and-functions.tex)
- (action (run rwo-convert_md  %{dep:variables-and-functions/README.md} -t latex -o %{target})))
+ (target variables-and-functions.md)
+ (action (run rwo-convert_md  %{dep:variables-and-functions/README.md} -t md -o %{target})))
 
 (rule
  (alias html)
@@ -256,5 +256,5 @@
 
 (rule
  (alias latex)
- (target variants.tex)
- (action (run rwo-convert_md  %{dep:variants/README.md} -t latex -o %{target})))
+ (target variants.md)
+ (action (run rwo-convert_md  %{dep:variants/README.md} -t md -o %{target})))

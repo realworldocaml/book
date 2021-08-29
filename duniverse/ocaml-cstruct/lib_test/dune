@@ -1,0 +1,21 @@
+(executable
+ (libraries cstruct bigarray alcotest cstruct-sexp)
+ (modules bounds tests)
+ (name tests))
+
+(executable
+ (libraries cstruct alcotest)
+ (modules parse)
+ (name parse))
+
+(rule
+ (alias runtest)
+ (package cstruct-sexp)
+ (action
+  (run ./tests.exe -e)))
+
+(rule
+ (alias runtest)
+ (package cstruct)
+ (action
+  (run ./parse.exe -e)))

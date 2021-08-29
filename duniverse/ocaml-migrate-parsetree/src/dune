@@ -1,0 +1,13 @@
+(library
+ (name migrate_parsetree)
+ (public_name ocaml-migrate-parsetree)
+ (libraries compiler-libs.common)
+ (preprocess (action (run %{exe:../tools/pp.exe} %{read:ast-version} %{input-file}))))
+
+(rule
+ (targets ast-version)
+ (action  (run %{ocaml} %{dep:config/gen.ml} %{ocaml_version})))
+
+(cinaps
+ (files *.ml *.mli)
+ (libraries cinaps_helpers))

@@ -1,9 +1,0 @@
-(rule
- (alias runtest)
- (deps
-  (package dune)
-  (package dune-build-info))
- (action
-  (progn
-   (run dune-cram run %{dep:run.t})
-   (diff? run.t run.t.corrected))))

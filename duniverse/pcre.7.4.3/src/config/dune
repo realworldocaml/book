@@ -1,4 +1,0 @@
-(executables
-  (names discover)
-  (libraries base dune.configurator)
-)

@@ -5,7 +5,7 @@
   (source_tree ./correct/int_interval_manual_sexp)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/int_interval_manual_sexp)))
+  (system "dune build @all @runtest --root ./correct/int_interval_manual_sexp")))
 
 (alias
  (name runtest)
@@ -17,7 +17,7 @@
   (source_tree ./correct/int_interval_nosexp)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/int_interval_nosexp)))
+  (system "dune build @all @runtest --root ./correct/int_interval_nosexp")))
 
 (alias
  (name runtest)
@@ -29,7 +29,7 @@
   (source_tree ./correct/int_interval_sexp_override)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/int_interval_sexp_override)))
+  (system "dune build @all @runtest --root ./correct/int_interval_sexp_override")))
 
 (alias
  (name runtest)
@@ -42,7 +42,7 @@
   (package core)
   (package sexplib))
  (action
-  (run dune build @all @runtest --root ./correct/read_foo)))
+  (system "dune build @all @runtest --root ./correct/read_foo")))
 
 (alias
  (name runtest)
@@ -55,7 +55,7 @@
   (package core)
   (package sexplib))
  (action
-  (run dune build @all @runtest --root ./correct/read_foo_better_errors)))
+  (system "dune build @all @runtest --root ./correct/read_foo_better_errors")))
 
 (alias
  (name runtest)
@@ -67,7 +67,7 @@
   (source_tree ./correct/sexp)
   (package base))
  (action
-  (run dune build @all @runtest --root ./correct/sexp)))
+  (system "dune build @all @runtest --root ./correct/sexp")))
 
 (alias
  (name runtest)
@@ -80,7 +80,7 @@
   (package core)
   (package sexplib))
  (action
-  (run dune build @all @runtest --root ./correct/test_interval)))
+  (system "dune build @all @runtest --root ./correct/test_interval")))
 
 (alias
  (name runtest)

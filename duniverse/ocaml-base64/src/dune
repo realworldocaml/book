@@ -1,0 +1,14 @@
+(library
+ (name base64)
+ (modules unsafe base64)
+ (public_name base64)
+ (libraries bytes))
+
+(rule
+ (copy %{read:../config/which-unsafe-file} unsafe.ml))
+
+(library
+ (name base64_rfc2045)
+ (modules base64_rfc2045)
+ (public_name base64.rfc2045)
+ (libraries bytes))

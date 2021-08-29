@@ -1,0 +1,15 @@
+(library
+ (name tyxml_ppx)
+ (public_name tyxml-ppx.internal)
+ (libraries re.str
+            markup
+            tyxml-syntax
+            ppxlib
+ )
+ (preprocess (pps ppxlib.metaquot))
+ (flags (:standard
+         -safe-string
+         -open Ppxlib
+         -w "-9"
+ ))
+)

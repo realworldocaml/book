@@ -1,9 +1,4 @@
 (mdx
  (files README.md)
- (packages
-  core
-  mdx
-  ppx_jane)
+ (packages core mdx ppx_jane)
  (preludes prelude.ml))
-
-(data_only_dirs examples)

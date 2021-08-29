@@ -124,7 +124,7 @@ $ ocamlfind ocamlopt -linkpkg -package base -package stdio freq.ml -o freq
 ```
 
 This uses `ocamlfind`, a tool which itself invokes other parts of the
-OCaml toolchain (in this case, `ocamlc`) with the appropriate flags to
+OCaml toolchain (in this case, `ocamlopt`) with the appropriate flags to
 link in particular libraries and packages. Here, `-package base` is
 asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
 ocamlfind to link in the packages as is necessary for building an
@@ -420,9 +420,9 @@ With this implementation, the build now succeeds!
 $ dune build freq.exe
 ```
 
-Now we can turn to optimizing the implementation of `Counter`. Here's an
-alternate and far more efficient implementation, based on the `Map` data
-structure in `Core_kernel`.
+Now we can turn to optimizing the implementation of `Counter`. Here's
+an alternate and far more efficient implementation, based on `Base`'s
+`Map` data structure.
 
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
@@ -567,7 +567,7 @@ lightweight way:
 
 ```ocaml file=examples/erroneous/session_info/session_info.ml
 open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t
@@ -779,7 +779,7 @@ let apply f_opt x =
   | None -> None
   | Some f -> Some (f x)
 
-(* The remainder of the list module *)
+(* The remainder of the option module *)
 include Option
 ```
 
@@ -1063,7 +1063,7 @@ interfaces. Here are some of the guidelines that they use.
   be called `t`.
 
 - *Put `t` first*. If you have a module `M` whose primary type is `M.t`, the
-  functions in `M` that take a value of `M.t` should take it as their first
+  functions in `M` that take a value of type `M.t` should take it as their first
   argument.
 
 - Functions that routinely throw an exception should end in `_exn`.

@@ -1,3 +1,0 @@
-(library (name protocol_version_header_test)
- (libraries core_kernel expect_test_helpers_kernel protocol_version_header)
- (preprocess (pps ppx_jane)))

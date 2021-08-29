@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# Designed for the Travis CI build environment. See .travis.yml
-
-set -ex
-
-docker pull ocaml/opam2:ubuntu-18.04

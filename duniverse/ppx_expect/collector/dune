@@ -1,0 +1,8 @@
+(library (name expect_test_collector) (public_name ppx_expect.collector)
+ (synopsis "Runtime library for ppx_expect")
+ (libraries expect_test_common expect_test_config_types
+  ppx_inline_test.runtime-lib)
+ (c_names expect_test_collector_stubs)
+ (js_of_ocaml (javascript_files runtime.js)) (preprocess no_preprocessing))
+
+(ocamllex check_backtraces)

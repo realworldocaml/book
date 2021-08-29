@@ -1,8 +1,0 @@
-(library
- (name dune_lang)
- (public_name dune-private-libs.dune-lang)
- (synopsis "[Internal] S-expression library")
- (libraries stdune)
- (preprocess future_syntax))
-
-(ocamllex lexer versioned_file_first_line)

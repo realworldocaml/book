@@ -1,0 +1,11 @@
+(executable
+ (libraries async conduit-async)
+ (name ssl_echo))
+
+(rule
+ (alias runtest)
+ (deps
+  (:echo ./ssl_echo.exe))
+ (package conduit-async)
+ (action
+  (run echo skip)))

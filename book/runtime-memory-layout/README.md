@@ -101,12 +101,17 @@ job, but at the expense of an extra level of indirection to access the data
 within the boxed value. [garbage collection/and boxed values]{.idx}[boxing
 (of values)]{.idx}[values/boxing of]{.idx}
 
-OCaml values don't all have to be boxed at runtime. Instead, values use a
-single tag bit per word to distinguish integers and pointers at runtime. The
-value is an integer if the lowest bit of the block word is nonzero, and a
-pointer if the lowest bit of the block word is zero. Several OCaml types map
-onto this integer representation, including `bool`, `int`, the empty list,
-`unit`, and variants without constructors.
+OCaml values don't all have to be boxed at runtime. Instead, values
+use a single tag bit per word to distinguish integers and pointers at
+runtime. The value is an integer if the lowest bit of the block word
+is nonzero, and a pointer if the lowest bit of the block word is
+zero. Several OCaml types map onto this integer representation,
+including `bool`, `int`, the empty list, and `unit`.  Some types, like
+variants, sometimes use this integer representation and sometimes
+don't.  In particular, for variants, constant constructors, i.e.,
+constructors with no arguments like `None`, are represented as
+integers, but constructors like `Some` that carry associated values
+are boxed.
 
 This representation means that integers are unboxed runtime values in OCaml
 so that they can be stored directly without having to allocate a wrapper
@@ -174,10 +179,9 @@ values. The GC always inspects fields and follows them as part of the
 collection process described earlier. [garbage collection/opaque bytes
 and]{.idx}[opaque bytes]{.idx}
 
-<figure style="float: 0">
-  <img src="images/memory-repr/block.png"/>
-</figure>
-
+\
+ ![Memory representation of a block](images/memory-repr/block.png "Memory representation of a block")
+\
 
 The `size` field records the length of the block in memory words. This is 22
 bits on 32-bit platforms, which is the reason OCaml strings are limited to 16
@@ -196,29 +200,19 @@ not scanned by the collector. The most common such block is the `string`
 type, which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static
-OCaml type. All OCaml types are distilled down into `values`, and summarized
-in
-[Table20 1_ocaml](runtime-memory-layout.html#table20-1_ocaml){data-type=xref}.<a data-type="indexterm" data-startref="blck">&nbsp;</a>
+OCaml type. All OCaml types are distilled down into `values`, and summarized below.
 
-::: {#table20-1_ocaml data-type=table}
-OCaml value | Representation
-------------|---------------
-`int` or `char` | Directly as a value, shifted left by 1 bit, with the least significant bit set to 1.
-`unit`, `[]`, `false` | As OCaml `int` 0.
-`true` | As OCaml `int` 1.
-`Foo | Bar` | As ascending OCaml `int`s, starting from 0.
-`Foo | Bar of int` | Variants with parameters are boxed, while variants with no parameters are unboxed.
-Polymorphic variants | Variable space usage depending on the number of parameters.
-Floating-point number | As a block with a single field containing the double-precision float.
-String | Word-aligned byte arrays with an explicit length.
-`[1; 2; 3]` | As `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
-Tuples, records, and arrays | An array of values. Arrays can be variable size, but tuples and records are fixed-size.
-Records or arrays, all float | Special tag for unboxed arrays of floats, or records that only have `float` fields.
-
-Table:  OCaml values
-:::
-
-
+- `int` or `char` are stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1.
+- `unit`, `[]`, `false` are all stored as OCaml `int` 0.
+- `true` is stored as OCaml `int` 1.
+- `Foo | Bar` variants are stored as ascending OCaml `int`s, starting from 0.
+- `Foo | Bar of int` variants with parameters are boxed, while variants with no parameters are unboxed.
+- Polymorphic variants take up variable space usage depending on the number of parameters.
+- Floating-point numbers are stored as a block with a single field containing the double-precision float.
+- Strings are word-aligned byte arrays with an explicit length.
+- `[1; 2; 3]` lists are stored as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
+- Tuples, records, and arrays are stored as a C array of values. Arrays can be variable size, but tuples and records are fixed-size.
+- Records or arrays that are all float use a special tag for unboxed arrays of floats, or records that only have `float` fields.
 
 ### Integers, Characters, and Other Basic Types
 
@@ -239,9 +233,9 @@ integers.
 
 ## Tuples, Records, and Arrays
 
-<figure style="float: 0">
-  <img src="images/memory-repr/tuple_layout.png"/>
-</figure>
+\
+![](images/memory-repr/tuple_layout.png "Tuple Layout")
+\
 
 
 Tuples, records, and arrays are all represented identically at runtime as a
@@ -290,10 +284,10 @@ integers. OCaml therefore special-cases records or arrays that contain
 packed directly in the data section, with `Double_array_tag` set to signal to
 the collector that the contents are not OCaml values.
 
-<figure style="float: 0">
-  <img src="images/memory-repr/float_array_layout.png"/>
-</figure>
 
+\
+![](images/memory-repr/float_array_layout.png "Float array layout")
+\
 
 First, let's check that float arrays do in fact have a different tag number
 from normal floating-point values:
@@ -470,37 +464,27 @@ collector. The block contents are the contents of the string, with padding
 bytes to align the block on a word boundary. [strings/memory representation
 of]{.idx}[runtime memory representation/string values]{.idx}
 
-<figure style="float: 0">
-  <img src="images/memory-repr/string_block.png"/>
-</figure>
-
+\
+![](images/memory-repr/string_block.png "String block layout")
+\
 
 On a 32-bit machine, the padding is calculated based on the modulo of the
 string length and word size to ensure the result is word-aligned. A 64-bit
-machine extends the potential padding up to 7 bytes instead of 3 (see
-[Chapter_20_table](runtime-memory-layout.html#chapter_20_table){data-type=xref}).
+machine extends the potential padding up to 7 bytes instead of 3.
+Given a string length modulo 4:
 
-::: {#chapter_20_table data-type=table}
-String length mod 4 | Padding
---------------------|--------
-0 | `00 00 00 03`
-1 | `00 00 02`
-2 | `00 01`
-3 | `00`
-
-Table:  String length and padding
-:::
-
-
+- `0` has padding `00 00 00 03`
+- `1` has padding `00 00 02`
+- `2` has padding `00 01`
+- `3` has padding `00`
 
 This string representation is a clever way to ensure that the contents are
 always zero-terminated by the padding word and to still compute its length
 efficiently without scanning the whole string. The following formula is used:
 
-<figure style="float: 0">
-  <img src="images/memory-repr/string_size_calc.png"/>
-</figure>
-
+\
+![](images/memory-repr/string_size_calc.png "String size calculation")
+\
 
 The guaranteed `NULL` termination comes in handy when passing a string to C,
 but is not relied upon to compute the length from OCaml code. OCaml strings
@@ -583,4 +567,3 @@ mathematical Fortran libraries. These allow developers to write
 high-performance numerical code for applications that require linear algebra.
 It supports large vectors and matrices, but with static typing safety of
 OCaml to make it easier to write safe algorithms.
-<a data-type="indexterm" data-startref="MAPocaml">&nbsp;</a><a data-type="indexterm" data-startref="VALmemory">&nbsp;</a>

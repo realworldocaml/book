@@ -1,0 +1,3 @@
+(executable
+ (name benchmarks)
+ (libraries base64 core_bench))

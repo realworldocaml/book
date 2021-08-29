@@ -1,4 +1,0 @@
-(library
-  (name      cohttp_test)
-  (wrapped   false)
-  (libraries cohttp oUnit))

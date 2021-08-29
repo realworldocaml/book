@@ -1,0 +1,20 @@
+# This is the list of modules that must go into MenhirLib.
+# They must be listed in dependency order, as this list is
+# used to construct menhirLib.ml at installation time.
+General
+Convert
+IncrementalEngine
+EngineTypes
+Engine
+ErrorReports
+LexerUtil
+Printers
+InfiniteArray
+PackedIntArray
+RowDisplacement
+LinearizedArray
+TableFormat
+InspectionTableFormat
+InspectionTableInterpreter
+TableInterpreter
+StaticVersion

@@ -1,4 +1,0 @@
-(library
- (name      cohttp_lwt_unix_test)
- (wrapped   false)
- (libraries cohttp-lwt-unix cohttp_test oUnit))

@@ -157,7 +157,6 @@ A muted gray...
 - : unit = ()
 ```
 
-::: {.allow_break data-type=note}
 ##### Variants, tuples and parens
 
 Variants with multiple arguments look an awful lot like tuples.
@@ -237,8 +236,6 @@ tuple. You can learn more about OCaml's memory representation in
 [Memory Representation of
 Values](runtime-memory-layout.html){data-type=xref}.
 
-
-:::
 
 ## Catch-All Cases and Refactoring
 
@@ -365,7 +362,7 @@ can achieve with this by reiterating the `Log_entry` message type that
 was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
-module Time_ns = Core_kernel.Time_ns
+module Time_ns = Core.Time_ns
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -701,7 +698,7 @@ which is capable of evaluating a base predicate.
 
 Another useful operation on expressions is *simplification*, which is
 the process of taking a boolean expression and reducing it to an
-equivalent one that is smaller.  First, we'll bulid a few simplifying
+equivalent one that is smaller.  First, we'll build a few simplifying
 construction functions that mirror the tags of an `expr`.
 
 The `and_` function below does a few things:
@@ -813,7 +810,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a
-toy. There's a module very much in this spirit in `Core_kernel` called
+toy. There's a module very much in this spirit in `Core` called
 `Blang` (short for "Boolean language"), and it gets a lot of practical
 use in a variety of applications.  The simplification algorithm in
 particular is useful when you want to use it to specialize the

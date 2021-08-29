@@ -1,0 +1,4 @@
+(library (name ppx_sexp_conv_test)
+ (libraries base expect_test_helpers_core sexplib) (flags :standard -w -30)
+ (preprocess
+  (pps ppxlib ppx_sexp_conv ppx_compare ppx_here ppx_inline_test ppx_expect)))

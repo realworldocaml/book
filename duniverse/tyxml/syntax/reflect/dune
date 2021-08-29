@@ -1,0 +1,10 @@
+(executable
+ (name reflect)
+ (libraries ppxlib)
+ (preprocess (pps ppxlib.metaquot))
+ (flags (:standard
+         -safe-string
+         -open Ppxlib
+         -w "-9"
+ ))
+)

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 let gen_int_list_pair =
   let int_list_gen =

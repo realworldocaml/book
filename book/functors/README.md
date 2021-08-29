@@ -579,7 +579,9 @@ substitution]{.idx}[interval computation/destructive substitution]{.idx}
 <Module_type> with type <type> := <type'>
 ```
 
-The following shows how we could use this with `Make_interval`:
+This looks just like a sharing constraint, except that we use `:=`
+instead of `=`.  The following shows how we could use this with
+`Make_interval`.
 
 ```ocaml env=main
 # module type Int_interval_intf =
@@ -716,7 +718,7 @@ val some_type_of_sexp : Sexp.t -> some_type = <fun>
 val sexp_of_some_type : some_type -> Sexp.t = <fun>
 # sexp_of_some_type (33, ["one"; "two"])
 - : Sexp.t = (33 (one two))
-# Core_kernel.Sexp.of_string "(44 (five six))" |> some_type_of_sexp
+# Core.Sexp.of_string "(44 (five six))" |> some_type_of_sexp
 - : some_type = (44, ["five"; "six"])
 ```
 
@@ -794,7 +796,7 @@ other:
 ```ocaml env=main
 # module type Interval_intf_with_sexp = sig
     include Interval_intf
-    include Core_kernel.Sexpable with type t := t
+    include Core.Sexpable with type t := t
   end
 module type Interval_intf_with_sexp =
   sig
@@ -819,7 +821,7 @@ signatures are being handled equivalently:
 # module type Interval_intf_with_sexp = sig
     type t
     include Interval_intf with type t := t
-    include Core_kernel.Sexpable      with type t := t
+    include Core.Sexpable      with type t := t
   end
 module type Interval_intf_with_sexp =
   sig
@@ -842,7 +844,7 @@ maintained when reading in from an s-expression:
 # module Make_interval(Endpoint : sig
       type t
       include Comparable with type t := t
-      include Core_kernel.Sexpable with type t := t
+      include Core.Sexpable with type t := t
     end)
     : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
   = struct

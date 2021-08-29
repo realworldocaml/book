@@ -1,0 +1,3 @@
+(library (name core_kernel_test)
+ (libraries base_test_helpers core_kernel expect_test_helpers_core fheap)
+ (preprocessor_deps ../../src/config.h) (preprocess (pps ppx_jane)))

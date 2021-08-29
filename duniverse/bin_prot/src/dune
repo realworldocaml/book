@@ -1,0 +1,5 @@
+(library (name bin_prot)
+ (libraries bigarray bin_shape_lib base.md5 base base.caml)
+ (public_name bin_prot) (c_names blit_stubs)
+ (preprocess (pps ppx_sexp_conv ppx_compare ppx_optcomp))
+ (js_of_ocaml (javascript_files runtime.js)))

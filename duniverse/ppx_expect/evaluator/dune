@@ -1,0 +1,4 @@
+(library (name ppx_expect_evaluator) (public_name ppx_expect.evaluator)
+ (libraries base stdio expect_test_common expect_test_collector
+  expect_test_matcher ppxlib.print_diff)
+ (preprocess no_preprocessing) (library_flags -linkall))

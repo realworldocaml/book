@@ -1,6 +1,0 @@
-*.install
-_build
-.*.swp
-.merlin
-_opam
-.DS_Store

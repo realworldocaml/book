@@ -1,0 +1,18 @@
+(library
+ (name register_print_ctxt)
+ (modules register_print_ctxt)
+ (kind ppx_rewriter)
+ (libraries ppxlib))
+
+(executable
+ (public_name standalone_print_ctxt)
+ (modules standalone_print_ctxt)
+ (libraries ppxlib register_print_ctxt))
+
+(executable
+ (public_name map_structure_print_ctxt)
+ (modules map_structure_print_ctxt)
+ (libraries ppxlib register_print_ctxt))
+
+(cram
+ (deps %{bin:standalone_print_ctxt} %{bin:map_structure_print_ctxt}))

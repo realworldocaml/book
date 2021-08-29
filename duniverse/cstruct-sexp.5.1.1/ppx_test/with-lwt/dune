@@ -1,4 +1,0 @@
-(executables
- (names ppx_cstruct_and_lwt)
- (preprocess (pps lwt_ppx ppx_cstruct))
- (libraries cstruct lwt lwt.unix))

@@ -1,0 +1,94 @@
+------ test_regular_variants.ml
+++++++ test_polymorphic_variants.ml
+@|============================================================
+-|    | A
+-|    | B
++|    [ `A
++|    | `B
++|    ]
+@|============================================================
+-|      ; ggid          = "\239\242\007o\016\222\178\133\218\153\146w\129\255\167\208"
++|      ; ggid          = "\133a\241\019; \198\184U\181\220#\191\190\200\b"
+@|============================================================
+-|                , Variant { ignore_capitalization = true; alts = [ "A", []; "B", [] ] } )
+-|            )
++|                , Variant { ignore_capitalization = false; alts = [ "A", []; "B", [] ] }
++|                ) )
+@|============================================================
+-|      ; origin         = "test_regular_variants.ml.Nullary"
++|      ; origin         = "test_polymorphic_variants.ml.Nullary"
+@|============================================================
+-|      | A of int * int
+-|      | B of string
++|      [ `A of int * int
++|      | `B of string
++|      ]
+@|============================================================
+-|  type t = With_sexp.t =
+-|    | A of int * int
+-|    | B of string
++|  type t =
++|    [ `A of int * int
++|    | `B of string
++|    ]
+@|============================================================
+-|      ; ggid          = "B\127\229(\029\022\255\"\167ab\178F\134\201\234"
++|      ; ggid          = "\196t P\169\167\173C\251\132\141N\003n \132"
+@|============================================================
+-|                { ignore_capitalization = true
++|                { ignore_capitalization = false
+@|============================================================
+-|                    [ "A", [ One (Implicit_var 0); One (Implicit_var 0) ]
++|                    [ "A", [ One (List [ One (Implicit_var 0); One (Implicit_var 0) ]) ]
+@|============================================================
+-|      ; origin         = "test_regular_variants.ml.With_arguments"
++|      ; origin         = "test_polymorphic_variants.ml.With_arguments"
+@|============================================================
+-|    print_s (With_sexp.sexp_of_t (A (1, 2)));
+-|    print_s (With_sexp.sexp_of_t (B "foo"));
++|    print_s (With_sexp.sexp_of_t (`A (1, 2)));
++|    print_s (With_sexp.sexp_of_t (`B "foo"));
+@|============================================================
+-|      (A 1 2)
++|      (A (1 2))
+@|============================================================
+-|      | Int           of int
+-|      | List          of int list
+-|      | Sexp_dot_list of int list [@sexp.list]
+-|      | Sexp_list     of int sexp_list [@warning "-3"]
++|      [ `Int           of int
++|      | `List          of int list
++|      | `Sexp_dot_list of int list [@sexp.list]
++|      | `Sexp_list     of int sexp_list [@warning "-3"]
++|      ]
+@|============================================================
+-|  type t = With_sexp.t =
+-|    | Int           of int
+-|    | List          of int list
+-|    | Sexp_dot_list of int list [@sexp.list]
+-|    | Sexp_list     of int sexp_list [@warning "-3"]
++|  type t =
++|    [ `Int           of int
++|    | `List          of int list
++|    | `Sexp_dot_list of int list [@sexp.list]
++|    | `Sexp_list     of int sexp_list [@warning "-3"]
++|    ]
+@|============================================================
+-|      ; ggid          = "\219\014J\247\148Iq\193\248\rk\216J\012\200\152"
++|      ; ggid          = "\221\2240I,\229H~\212(;\201\127\159rK"
+@|============================================================
+-|                { ignore_capitalization = true
++|                { ignore_capitalization = false
+@|============================================================
+-|      ; origin         = "test_regular_variants.ml.Sexp_list"
++|      ; origin         = "test_polymorphic_variants.ml.Sexp_list"
+@|============================================================
+-|    print_s (With_sexp.sexp_of_t (Int 1));
++|    print_s (With_sexp.sexp_of_t (`Int 1));
+@|============================================================
+-|      print_s (With_sexp.sexp_of_t (List          l ));
+-|      print_s (With_sexp.sexp_of_t (Sexp_dot_list l ));
+-|      print_s (With_sexp.sexp_of_t (Sexp_list     l)));
++|      print_s (With_sexp.sexp_of_t (`List          l ));
++|      print_s (With_sexp.sexp_of_t (`Sexp_dot_list l ));
++|      print_s (With_sexp.sexp_of_t (`Sexp_list     l)));

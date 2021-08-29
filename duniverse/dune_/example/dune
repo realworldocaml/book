@@ -1,0 +1,5 @@
+(data_only_dirs sample-projects)
+
+(cram
+ (deps
+  (package dune)))
