@@ -1,8 +1,8 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Objects - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="objects">
 <h1>Objects</h1>
 <p>We’ve already seen several tools that OCaml provides for organizing programs, particularly modules. In addition, OCaml also supports object-oriented programming. There are objects, classes, and their associated types. In this chapter, we’ll introduce you to OCaml objects and subtyping. In the next chapter, <a data-type="xref" href="classes.html#classes">Chapter 12, Classes</a>, we’ll introduce you to classes and inheritance. <a data-secondary="in object-oriented programming" data-primary="objects" data-type="indexterm">&nbsp;</a><a data-primary="object-oriented programming (OOP)" data-type="indexterm">&nbsp;</a><a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="what-is-object-oriented-programming">What Is Object-Oriented Programming?</h5>
+<section data-type="note" class="level5" id="what-is-object-oriented-programming">
+<h5>What Is Object-Oriented Programming?</h5>
 <p>Object-oriented programming (often shortened to OOP) is a programming style that encapsulates computation and data within logical <em>objects</em>. Each object contains some data stored in <em>fields</em> and has <em>method</em> functions that can be invoked against the data within the object (also called “sending a message” to the object). The code definition behind an object is called a <em>class</em>, and objects are constructed from a class definition by calling a constructor with the data that the object will use to build itself.</p>
 <p>There are five fundamental properties that differentiate OOP from other styles:</p>
 <dl>
@@ -23,7 +23,7 @@
 </dd>
 </dl>
 <p>Almost every notable modern programming language has been influenced by OOP, and you’ll have run across these terms if you’ve ever used C++, Java, C#, Ruby, Python, or JavaScript.</p>
-</div>
+</section>
 <section class="level2" id="ocaml-objects">
 <h2>OCaml Objects</h2>
 <p>If you already know about object-oriented programming in a language like Java or <span class="keep-together">C++,</span> the OCaml object system may come as a surprise. Foremost is the complete separation of objects and their types from the class system. In a language like Java, a class name is also used as the type of objects created by instantiating it, and the relationships between these object types correspond to inheritance. For example, if we implement a class <code>Deque</code> in Java by inheriting from a class <code>Stack</code>, we would be allowed to pass a deque anywhere a stack is expected. <a data-secondary="in OCaml" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
@@ -127,8 +127,8 @@ area_closed sq ;;
 &gt;       The second object type has no method name
 </code></pre>
 </div>
-<div data-type="note">
-<h5 id="elisions-are-polymorphic">Elisions Are Polymorphic</h5>
+<section data-type="note" class="level5" id="elisions-are-polymorphic">
+<h5>Elisions Are Polymorphic</h5>
 <p>The <code>..</code> in an open object type is an elision, standing for “possibly more methods.” It may not be apparent from the syntax, but an elided object type is actually polymorphic. For example, if we try to write a type definition, we get an “unbound type variable” error: <a data-secondary="row polymorphism" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="row polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="ellipses (..)" data-type="indexterm">&nbsp;</a><a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt; ;;
@@ -139,7 +139,7 @@ area_closed sq ;;
 </div>
 <p>This is because <code>..</code> is really a special kind of type variable called a <em>row variable</em>.</p>
 <p>This kind of typing scheme using row variables is called <em>row polymorphism</em>. Row polymorphism is also used in polymorphic variant types, and there is a close relationship between objects and polymorphic variants: objects are to records what polymorphic variants are to ordinary variants.</p>
-</div>
+</section>
 <p>An object of type <code>&lt; pop : int option; .. &gt;</code> can be any object with a method <code>pop : int option</code>; it doesn’t matter how it is implemented. When the method <code>#pop</code> is invoked, the actual method that is run is determined by the object. Consider the following function.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop ;;
@@ -295,8 +295,8 @@ let items = [ (coin :&gt; item) ; (map :&gt; item) ] ;;
 &gt;val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
-<div data-type="note">
-<h5 id="polymorphic-variant-subtyping">Polymorphic Variant Subtyping</h5>
+<section data-type="note" class="level5" id="polymorphic-variant-subtyping">
+<h5>Polymorphic Variant Subtyping</h5>
 <p>Subtyping can also be used to coerce a polymorphic variant into a larger polymorphic variant type. A polymorphic variant type <em>A</em> is a subtype of <em>B</em>, if the tags of <em>A</em> are a subset of the tags of <em>B</em>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type num = [ `Int of int | `Float of float ] ;;
@@ -309,7 +309,7 @@ let c : const = (n :&gt; const) ;;
 &gt;val c : const = `Int 3
 </code></pre>
 </div>
-</div>
+</section>
 </section>
 <section class="level3" id="variance">
 <h3>Variance</h3>
@@ -345,8 +345,8 @@ let square_to_string: square -&gt; string =
 </code></pre>
 </div>
 <p>We say that <code>'a -&gt; string</code> is <em>contravariant</em> in <code>'a</code>. In general, function types are contravariant in their arguments and covariant in their results. <a data-primary="contravariance" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="variance-annotations">Variance Annotations</h5>
+<section data-type="note" class="level5" id="variance-annotations">
+<h5>Variance Annotations</h5>
 <p>OCaml works out the variance of a type using that type’s definition. Consider the following simple immutable <code>Either</code> type.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Either = struct
@@ -424,7 +424,7 @@ end = Either
 &gt;- : (shape, 'a) Var_either.t = &lt;abstr&gt;
 </code></pre>
 </div>
-</div>
+</section>
 <p>For a more concrete example of variance, let’s create some stacks containing shapes by applying our <code>stack</code> function to some squares and some circles:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt; ;;
@@ -613,10 +613,10 @@ shape_ref := (circle 20 :&gt; shape) ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<div data-type="note">
-<h5 id="production-note">Production Note</h5>
+<section data-type="note" class="level5" id="production-note">
+<h5>Production Note</h5>
 <p>This chapter contains significant contributions from Leo White.</p>
-</div>
+</section>
 </section>
 </section>
 </section>

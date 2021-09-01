@@ -77,9 +77,9 @@ let%test_unit "rev" =
 &gt;File "test.ml", line 3, characters 0-71: rev threw
 &gt;(duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
 &gt;  ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-&gt;  Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
-&gt;  Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-&gt;  Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+&gt;  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+&gt;  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+&gt;  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
 &gt;
 &gt;FAILED 1 / 1 tests
 [1]</code></pre>
@@ -97,12 +97,12 @@ let%test_unit "rev" =
 <li><p><strong>Testing mindset</strong>. Writing tests on the inside of your libraries lets you write tests against any part of your implementation, rather than just the exposed API. This freedom is useful, but can also put you in the wrong testing mindset. Testing that’s phrased in terms of the public API often does a better job of testing what’s fundamental about your code, and will better survive refactoring of the implementation. Also, the discipline of keeping tests outside of requires you to write code that can be tested that way, which pushes towards better designs.</p></li>
 </ul>
 <p>For all of these reasons, our recommendation is to put the bulk of your tests in test-only libraries created for that purpose. There are some legitimate reasons to want to put some test directly in your production library, e.g., when you need access to some functionality to do the test that’s important but is really awkward to expose. But such cases are very much the exception.</p>
-<div data-type="note">
-<h5 id="why-cant-inline-tests-go-in-executables">Why can’t inline tests go in executables?</h5>
+<section data-type="note" class="level5" id="why-cant-inline-tests-go-in-executables">
+<h5>Why can’t inline tests go in executables?</h5>
 <p>We’ve only talked about putting tests into libraries. What about executables? It turns out you can’t do this directly, because Dune doesn’t support the <code>inline_tests</code> declaration in source files that are directly part of an executable.</p>
 <p>There’s a good reason for this: the <code>ppx_inline_test</code> test runner needs to instantiate the modules that contain the tests. If those modules have toplevel side-effects, that’s a recipe for disaster, since you don’t want those top-level effects to be triggered by the test framework.</p>
 <p>So, how do we test code that’s part of an executable? The solution is to break up your program in to two pieces: a directory containing a library that contains the logic of your program, but no dangerous top-level effects; and a directory for the executable that links in the library, and is responsible for launching the code.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="expect-tests">
@@ -610,12 +610,12 @@ let%test_unit "negation flips the sign" =
 &gt;  (error
 &gt;    ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
 &gt;       (Neg vs Pos (Loc test.ml:7:19)))
-&gt;       "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-&gt;      \nCalled from file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
+&gt;       "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+&gt;      \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
 &gt;      \n"))).
-&gt;  Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
-&gt;  Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-&gt;  Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+&gt;  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+&gt;  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+&gt;  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
 &gt;
 &gt;FAILED 1 / 1 tests
 [1]</code></pre>

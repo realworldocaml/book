@@ -116,7 +116,7 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
   sprintf "%s %i/%s" name port prot
 ;;
 &gt;Line 1, characters 28-82:
-&gt;Warning 9: the following labels are not bound in this record pattern:
+&gt;Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
 &gt;comment
 &gt;Either bind these labels explicitly or add '; _' to the pattern.
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
@@ -131,12 +131,12 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 </code></pre>
 </div>
 <p>It’s a good idea to enable the warning for incomplete record matches and to explicitly disable it with an <code>_</code> where necessary.</p>
-<div data-type="note">
-<h5 id="compiler-warnings">Compiler Warnings</h5>
+<section data-type="note" class="level5" id="compiler-warnings">
+<h5>Compiler Warnings</h5>
 <p>The OCaml compiler is packed full of useful warnings that can be enabled and disabled separately. These are documented in the compiler itself, so we could have found out about warning 9 as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocaml -warn-help | egrep '\b9\b'
-&gt;  9 Missing fields in a record pattern.
+&gt;  9 [missing-record-field-pattern] Missing fields in a record pattern.
 &gt;  R Alias for warning 9.
 </code></pre>
 </div>
@@ -144,7 +144,7 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 <p>The warnings used for building the examples in this book are specified with the following flag: <code>-w @A-4-33-40-41-42-43-34-44</code>.</p>
 <p>The syntax of <code>-w</code> can be found by running <code>ocaml -help</code>, but this particular invocation turns on all warnings as errors, disabling only the numbers listed explicitly after the <code>A</code>.</p>
 <p>Treating warnings as errors (i.e., making OCaml fail to compile any code that triggers a warning) is good practice, since without it, warnings are too often ignored during development. When preparing a package for distribution, however, this is a bad idea, since the list of warnings may grow from one release of the compiler to another, and so this may lead your package to fail to compile on newer compiler releases.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="field-punning">
 <h2>Field Punning</h2>

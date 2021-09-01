@@ -23,7 +23,7 @@ let b = Sys.get_argv (); ()
 end
 ;;
 &gt;Line 4, characters 11-26:
-&gt;Warning 10: this expression should have type unit.
+&gt;Warning 10 [non-unit-statement]: this expression should have type unit.
 &gt;module Abc : sig val a : unit val b : unit end
 </code></pre>
 </div>
@@ -68,7 +68,7 @@ let exit_with = function
 | Error _ -&gt; 100
 ;;
 &gt;Line 2, characters 11-23:
-&gt;Warning 52: Code should not depend on the actual values of
+&gt;Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 &gt;this constructor's arguments. They are only for information
 &gt;and may change in future versions. (See manual section 9.5)
 &gt;val exit_with : program_result -&gt; int = &lt;fun&gt;

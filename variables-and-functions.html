@@ -81,18 +81,18 @@ area_of_ring 1. 3. ;;
   area_of_circle outer_radius -. area_of_circle inner_radius
 ;;
 &gt;Line 4, characters 9-11:
-&gt;Warning 26: unused variable pi.
+&gt;Warning 26 [unused-var]: unused variable pi.
 &gt;val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
 <p>Here, we redefined <code>pi</code> to be zero after the definition of <code>area_of_circle</code>. You might think that this would mean that the result of the computation would now be zero, but in fact, the behavior of the function is unchanged. That’s because the original definition of <code>pi</code> wasn’t changed; it was just shadowed, which means that any subsequent reference to <code>pi</code> would see the new definition of <code>pi</code> as <code>0</code>, but earlier references would still see the old one. But there is no later use of <code>pi</code>, so the binding of <code>pi</code> to <code>0.</code> made no difference at all. This explains the warning produced by the toplevel telling us that there is an unused variable.</p>
 <p>In OCaml, <code>let</code> bindings are immutable. There are many kinds of mutable values in OCaml, which we’ll discuss in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, but there are no mutable variables.</p>
-<div data-type="note">
-<h5 id="why-dont-variables-vary">Why Don’t Variables Vary?</h5>
+<section data-type="note" class="level5" id="why-dont-variables-vary">
+<h5>Why Don’t Variables Vary?</h5>
 <p>One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn’t the whole point of a variable that it can vary?<a data-secondary="immutability of" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
 <p>The answer to this is that variables in OCaml (and generally in functional languages) are really more like variables in an equation than a variable in an imperative language. If you think about the mathematical identity <code>x(y + z) = xy + xz</code>, there’s no notion of mutating the variables <code>x</code>, <code>y</code>, and <code>z</code>. They vary in the sense that you can instantiate this equation with different numbers for those variables, and it still holds.</p>
 <p>The same is true in a functional language. A function can be applied to different inputs, and thus its variables will take on different values, even without mutation.</p>
-</div>
+</section>
 <section class="level3" id="pattern-matching-and-let">
 <h3>Pattern Matching and let</h3>
 <p>Another useful feature of <code>let</code> bindings is that they support the use of <em>patterns</em> on the left-hand side. Consider the following code, which uses <code>List.unzip</code>, a function for converting a list of pairs into a pair of lists.<a data-secondary="and let" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
@@ -110,7 +110,7 @@ area_of_ring 1. 3. ;;
   String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
 &gt;Lines 2-3, characters 5-60:
-&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;[]
 &gt;val upcase_first_entry : string -&gt; string = &lt;fun&gt;
@@ -184,8 +184,8 @@ plusone 3 ;;
 </code></pre>
 </div>
 <p>This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.</p>
-<div data-type="note">
-<h5 id="let-and-fun">let and fun</h5>
+<section data-type="note" class="level5" id="let-and-fun">
+<h5>let and fun</h5>
 <p>Functions and <code>let</code> bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7 ;;
@@ -195,7 +195,7 @@ let x = 7 in x + 1 ;;
 </code></pre>
 </div>
 <p>This connection is important, and will come up more when programming in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 15, Concurrent Programming With Async</a>.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="multi-argument-functions">
 <h3>Multiargument functions</h3>
@@ -358,6 +358,9 @@ List.map ~f:((+) 3) [4;5;6] ;;
 &gt;- : int = 3
 Int.max 3 -4 ;;
 &gt;Line 1, characters 1-10:
+&gt;Warning 5 [ignored-partial-application]: this function application is partial,
+&gt;maybe some arguments are missing.
+&gt;Line 1, characters 1-10:
 &gt;Error: This expression has type int -&gt; int
 &gt;       but an expression was expected of type int
 </code></pre>
@@ -365,6 +368,9 @@ Int.max 3 -4 ;;
 <p>Here, OCaml is interpreting the second expression as equivalent to.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Int.max 3) - 4 ;;
+&gt;Line 1, characters 1-12:
+&gt;Warning 5 [ignored-partial-application]: this function application is partial,
+&gt;maybe some arguments are missing.
 &gt;Line 1, characters 1-12:
 &gt;Error: This expression has type int -&gt; int
 &gt;       but an expression was expected of type int
@@ -759,7 +765,7 @@ prepend_pound "a BASH comment" ~sep:"--- " ;;
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x y ?(sep="") = x ^ sep ^ y ;;
 &gt;Line 1, characters 18-24:
-&gt;Warning 16: this optional argument cannot be erased.
+&gt;Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
 &gt;val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>

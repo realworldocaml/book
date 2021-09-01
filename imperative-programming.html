@@ -340,8 +340,8 @@ let next elt = elt.next
 let prev elt = elt.prev</code></pre>
 </div>
 <p>These all follow relatively straightforwardly from our type definitions.</p>
-<div data-type="note">
-<h5 id="cyclic-data-structures">Cyclic Data Structures</h5>
+<section data-type="note" class="level5" id="cyclic-data-structures">
+<h5>Cyclic Data Structures</h5>
 <p>Doubly linked lists are a cyclic data structure, meaning that it is possible to follow a nontrivial sequence of pointers that closes in on itself. In general, building cyclic data structures requires the use of side effects. This is done by constructing the data elements first, and then adding cycles using assignment afterward. <a data-primary="let rec" data-type="indexterm">&nbsp;</a><a data-secondary="cyclic" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-primary="cyclic data structures" data-type="indexterm">&nbsp;</a></p>
 <p>There is an exception to this, though: you can construct fixed-size cyclic data structures using <code>let rec</code>:</p>
 <div class="highlight">
@@ -350,7 +350,7 @@ let prev elt = elt.prev</code></pre>
 </code></pre>
 </div>
 <p>This approach is quite limited, however. General-purpose cyclic data structures require mutation.</p>
-</div>
+</section>
 <section class="level3" id="modifying-the-list">
 <h3>Modifying the List</h3>
 <p>Now, we’ll start considering operations that mutate the list, starting with <code>insert_first</code>, which inserts an element at the front of the list: <a data-secondary="inserting in lists" data-primary="elements" data-type="indexterm">&nbsp;</a></p>
@@ -698,8 +698,8 @@ end
 &gt;- : int = 2
 </code></pre>
 </div>
-<div data-type="note" class="allow_break">
-<h5 id="limitations-of-let-rec">Limitations of let rec</h5>
+<section data-type="note" class="level5 allow_break" id="limitations-of-let-rec">
+<h5>Limitations of let rec</h5>
 <p>You might wonder why we didn’t tie the recursive knot in <code>memo_rec</code> using <code>let rec</code>, as we did for <code>make_rec</code> earlier. Here’s code that tries to do just that: <a data-primary="let rec" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let memo_rec m f_norec =
@@ -742,7 +742,7 @@ time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40) ;;
 </code></pre>
 </div>
 <p>Laziness is more constrained than explicit mutation, and so in some cases can lead to code whose behavior is easier to think about. <a data-startref="BEmem" data-type="indexterm">&nbsp;</a></p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="input-and-output">
@@ -816,8 +816,8 @@ The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</code></pre>
 &gt;         int
 </code></pre>
 </div>
-<div data-type="note">
-<h5 id="understanding-format-strings">Understanding Format Strings</h5>
+<section data-type="note" class="level5" id="understanding-format-strings">
+<h5>Understanding Format Strings</h5>
 <p>The format strings used by <code>printf</code> turn out to be quite different from ordinary strings. This difference ties to the fact that OCaml format strings, unlike their equivalent in C, are type-safe. In particular, the compiler checks that the types referred to by the format string match the types of the rest of the arguments passed to <code>printf</code>.</p>
 <p>To check this, OCaml needs to analyze the contents of the format string at compile time, which means the format string needs to be available as a string literal at compile time. Indeed, if you try to pass an ordinary string to <code>printf</code>, the compiler will complain:</p>
 <div class="highlight">
@@ -851,7 +851,7 @@ let fmt : ('a, 'b, 'c) format =
 </code></pre>
 </div>
 <p>If this looks different from everything else you’ve seen so far, that’s because it is. This is really a special case in the type system. Most of the time, you don’t need to know about this special handling of format strings—you can just use <code>printf</code> and not worry about the details. But it’s useful to keep the broad outlines of the story in the back of your head.</p>
-</div>
+</section>
 <p>Now let’s see how we can rewrite our time conversion program to be a little more concise using <code>printf</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core

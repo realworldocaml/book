@@ -42,7 +42,7 @@ List.map ~f:basic_color_to_int [Blue;Red] ;;
   | Black -&gt; 0 | Red -&gt; 1 | White -&gt; 7
 ;;
 &gt;Lines 1-2, characters 31-41:
-&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;(Green|Yellow|Blue|Magenta|Cyan)
 &gt;val incomplete_color_to_int : basic_color -&gt; int = &lt;fun&gt;
@@ -198,7 +198,7 @@ let to_tuple (Untupled (x,y)) = (x,y) ;;
   | Gray i -&gt; 232 + i
 ;;
 &gt;Lines 1-4, characters 20-24:
-&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;Bold _
 &gt;val color_to_int : color -&gt; int = &lt;fun&gt;
@@ -636,8 +636,8 @@ match is_positive x with Error _ -&gt; false | Ok b -&gt; b)
 </code></pre>
 </div>
 <p>Here, the inferred type states that the tags can be no more than <code>`Float</code>, <code>`Int</code>, and <code>`Not_a_number</code>, and must contain at least <code>`Float</code> and <code>`Int</code>. As you can already start to see, polymorphic variants can lead to fairly complex inferred types.</p>
-<div data-type="note" class="allow_break">
-<h5 id="polymorphic-variants-and-catch-all-cases">Polymorphic Variants and Catch-all Cases</h5>
+<section data-type="note" class="level5 allow_break" id="polymorphic-variants-and-catch-all-cases">
+<h5>Polymorphic Variants and Catch-all Cases</h5>
 <p>As we saw with the definition of <code>is_positive</code>, a <code>match</code> statement can lead to the inference of an upper bound on a variant type, limiting the possible tags to those that can be handled by the match. If we add a catch-all case to our <code>match</code> statement, we end up with a type with a lower bound. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="catch-all cases" data-type="indexterm">&nbsp;</a> <a data-secondary="and catch-all cases" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive_permissive = function
@@ -660,7 +660,7 @@ is_positive_permissive (`Ratio (3,4)) ;;
 </code></pre>
 </div>
 <p>With ordinary variants, such a typo would have been caught as an unknown tag. As a general matter, one should be wary about mixing catch-all cases and polymorphic variants.</p>
-</div>
+</section>
 <section class="level3" id="example-terminal-colors-redux">
 <h3>Example: Terminal Colors Redux</h3>
 <p>To see how to use polymorphic variants in practice, we’ll return to terminal colors. Imagine that we have a new terminal type that adds yet more colors, say, by adding an alpha channel so you can specify translucent colors. We could model this extended set of colors as follows, using an ordinary variant: <a data-secondary="vs.&nbsp;ordinary variants" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>

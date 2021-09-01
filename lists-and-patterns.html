@@ -70,7 +70,7 @@ sum [] ;;
   | hd :: tl -&gt; hd :: drop_value tl to_drop
 ;;
 &gt;Line 5, characters 7-15:
-&gt;Warning 11: this match case is unused.
+&gt;Warning 11 [redundant-case]: this match case is unused.
 &gt;val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -203,7 +203,7 @@ open Core_bench ;;
   | 0  :: tl -&gt; drop_zero tl
 ;;
 &gt;Lines 2-4, characters 5-31:
-&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;1::_
 &gt;val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
@@ -299,8 +299,8 @@ render_separator [3;6;2] ;;
 </code></pre>
 </div>
 <p>Note that we make the line of dashes two larger than the provided width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="performance-of-string.concat-and">Performance of String.concat and ^</h5>
+<section data-type="note" class="level5" id="performance-of-string.concat-and">
+<h5>Performance of String.concat and ^</h5>
 <p>In the preceding code we’ve concatenated strings two different ways: <code>String.concat</code>, which operates on lists of strings; and <code>^</code>, which is a pairwise operator. You should avoid <code>^</code> for joining long numbers of strings, since it allocates a new string every time it runs. Thus, the following code</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "." ;;
@@ -314,7 +314,7 @@ render_separator [3;6;2] ;;
 </code></pre>
 </div>
 <p>allocates one string of size 7, as well as a list of length 7. At these small sizes, the differences don’t amount to much, but for assembling large strings, it can be a serious performance issue.</p>
-</div>
+</section>
 <p>Now we need code for rendering a row with data in it. We’ll first write a function called <code>pad</code>, for padding out a string to a specified length plus one blank space on both sides:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let pad s length =
@@ -635,7 +635,7 @@ destutter ["one";"two";"two";"two";"three"] ;;
   | x :: tl when Option.is_some x -&gt; 1 + count_some tl
 ;;
 &gt;Lines 2-5, characters 5-57:
-&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;_::_
 &gt;(However, some guarded clause may match this value.)

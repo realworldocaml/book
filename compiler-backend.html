@@ -30,14 +30,14 @@ let test v =
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_monomorphic_large.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_monomorphic_large!
 &gt;  (let
-&gt;    (test/85 =
-&gt;       (function v/87 : int
-&gt;         (switch* v/87
+&gt;    (test/86 =
+&gt;       (function v/88 : int
+&gt;         (switch* v/88
 &gt;          case int 0: 100
 &gt;          case int 1: 101
 &gt;          case int 2: 102
 &gt;          case int 3: 103)))
-&gt;    (makeblock 0 test/85)))
+&gt;    (makeblock 0 test/86)))
 </code></pre>
 </div>
 <p>It’s not important to understand every detail of this internal form, and it is explicitly undocumented since it can change across compiler revisions. Despite these caveats, some interesting points emerge from reading it:</p>
@@ -59,8 +59,8 @@ let test v =
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_monomorphic_small.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_monomorphic_small!
-&gt;  (let (test/83 = (function v/85 : int (if v/85 101 100)))
-&gt;    (makeblock 0 test/83)))
+&gt;  (let (test/84 = (function v/86 : int (if v/86 101 100)))
+&gt;    (makeblock 0 test/84)))
 </code></pre>
 </div>
 <p>The compiler emits simpler conditional jumps rather than setting up a jump table, since it statically determines that the range of possible variants is small enough. Finally, let’s look at the same code, but with polymorphic variants instead of normal variants:</p>
@@ -78,22 +78,22 @@ let test v =
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_polymorphic.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_polymorphic!
 &gt;  (let
-&gt;    (test/80 =
-&gt;       (function v/82 : int
-&gt;         (if (!= v/82 3306965)
-&gt;           (if (&gt;= v/82 482771474) (if (&gt;= v/82 884917024) 100 102)
-&gt;             (if (&gt;= v/82 3457716) 104 103))
+&gt;    (test/81 =
+&gt;       (function v/83 : int
+&gt;         (if (!= v/83 3306965)
+&gt;           (if (&gt;= v/83 482771474) (if (&gt;= v/83 884917024) 100 102)
+&gt;             (if (&gt;= v/83 3457716) 104 103))
 &gt;           101)))
-&gt;    (makeblock 0 test/80)))
+&gt;    (makeblock 0 test/81)))
 </code></pre>
 </div>
 <p>We mentioned in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a> that pattern matching over polymorphic variants is slightly less efficient, and it should be clearer why this is the case now. Polymorphic variants have a runtime value that’s calculated by hashing the variant name, and so the compiler can’t use a jump table as it does for normal variants. Instead, it creates a decision tree that compares the hash values against the input variable in as few comparisons as possible. <a data-secondary="fundamental algorithms in" data-primary="pattern matching" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="learning-more-about-pattern-matching-compilation">Learning More About Pattern Matching Compilation</h5>
+<section data-type="note" class="level5" id="learning-more-about-pattern-matching-compilation">
+<h5>Learning More About Pattern Matching Compilation</h5>
 <p>Pattern matching is an important part of OCaml programming. You’ll often encounter deeply nested pattern matches over complex data structures in real code. A good paper that describes the fundamental algorithms implemented in OCaml is <a href="http://dl.acm.org/citation.cfm?id=507641">“Optimizing pattern matching”</a> by Fabrice Le Fessant and Luc Maranget.</p>
 <p>The paper describes the backtracking algorithm used in classical pattern matching compilation, and also several OCaml-specific optimizations, such as the use of exhaustiveness information and control flow optimizations via static exceptions.</p>
 <p>It’s not essential that you understand all of this just to use pattern matching, of course, but it’ll give you insight as to why pattern matching is such a lightweight language construct to use in OCaml code.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="benchmarking-pattern-matching">
 <h3>Benchmarking Pattern Matching</h3>
@@ -216,12 +216,12 @@ let () =
 </div>
 <p>The preceding bytecode has been simplified from the lambda form into a set of simple instructions that are executed serially by the interpreter.</p>
 <p>There are around 140 instructions in total, but most are just minor variants of commonly encountered operations (e.g., function application at a specific arity). You can find full details <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>. <a data-secondary="instruction set for" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="where-did-the-bytecode-instruction-set-come-from">Where Did the Bytecode Instruction Set Come From?</h5>
+<section data-type="note" class="level5" id="where-did-the-bytecode-instruction-set-come-from">
+<h5>Where Did the Bytecode Instruction Set Come From?</h5>
 <p>The bytecode interpreter is much slower than compiled native code, but is still remarkably performant for an interpreter without a JIT compiler. Its efficiency can be traced back to Xavier Leroy’s ground-breaking work in 1990, <a href="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">“The ZINC experiment: An Economical Implementation of the ML Language”.</a></p>
 <p>This paper laid the theoretical basis for the implementation of an instruction set for a strictly evaluated functional language such as OCaml. The bytecode interpreter in modern OCaml is still based on the ZINC model. The native code compiler uses a different model since it uses CPU registers for function calls instead of always passing arguments on the stack, as the bytecode interpreter does.</p>
 <p>Understanding the reasoning behind the different implementations of the bytecode interpreter and the native compiler is a very useful exercise for any budding language hacker.</p>
-</div>
+</section>
 <section class="level3" id="compiling-and-linking-bytecode">
 <h3>Compiling and Linking Bytecode</h3>
 <p>The <code>ocamlc</code> command compiles individual <code>ml</code> files into bytecode files that have a <code>cmo</code> extension. The compiled bytecode files are matched with the associated <code>cmi</code> interface, which contains the type signature exported to other compilation units. <a data-secondary="compiling and linking code" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a></p>
@@ -452,12 +452,12 @@ let () =
 <section class="level4" id="interactive-breakpoints-with-the-gnu-debugger">
 <h4>Interactive breakpoints with the GNU debugger</h4>
 <p>Let’s see name mangling in action with some interactive debugging using GNU <code>gdb</code>. <a data-primary="GNU debugger" data-type="indexterm">&nbsp;</a></p>
-<div data-type="warning">
-<h5 id="beware-gdb-on-mac-os-x">Beware gdb on Mac OS X</h5>
+<section data-type="warning" class="level5" id="beware-gdb-on-mac-os-x">
+<h5>Beware gdb on Mac OS X</h5>
 <p>The examples here assume that you are running <code>gdb</code> on either Linux or FreeBSD. Mac OS X 10.8 does have <code>gdb</code> installed, but it’s a rather quirky experience that doesn’t reliably interpret the debugging information contained in the native binaries. This can result in function names showing up as raw symbols such as <code>.L101</code> instead of their more human-readable form.</p>
 <p>For OCaml 4.1, we’d recommend you do native code debugging on an alternate platform such as Linux, or manually look at the assembly code output to map the symbol names onto their precise OCaml functions.</p>
 <p>MacOS 10.9 removes <code>gdb</code> entirely and uses the lldb debugger from the LLVM project by default. Many of the guidelines here still apply since the debug information embedded in the binary output can be interpreted by lldb (or any other DWARF-aware debugger), but the command-line interfaces to lldb is different from <code>gdb</code>. Refer to the lldb manual for more information.</p>
-</div>
+</section>
 <p>Let’s write a mutually recursive function that selects alternating values from a list. This isn’t tail-recursive, so our stack size will grow as we single-step through the execution:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
@@ -601,8 +601,8 @@ Estimated testing time 20s (change using -quota SECS).
 </div>
 <p>This trace broadly reflects the results of the benchmark itself. The mutable benchmark consists of the combination of the call to <code>test_mutable</code> and the <code>caml_modify</code> write barrier function in the runtime. This adds up to slightly over half the execution time of the application.</p>
 <p>Perf has a growing collection of other commands that let you archive these runs and compare them against each other. You can read more on the <a href="http://perf.wiki.kernel.org">home page</a>. <a data-primary="frame pointers" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="using-the-frame-pointer-to-get-more-accurate-traces">Using the Frame Pointer to Get More Accurate Traces</h5>
+<section data-type="note" class="level5" id="using-the-frame-pointer-to-get-more-accurate-traces">
+<h5>Using the Frame Pointer to Get More Accurate Traces</h5>
 <p>Although Perf doesn’t require adding in explicit probes to the binary, it does need to understand how to unwind function calls so that the kernel can accurately record the function backtrace for every event.</p>
 <p>OCaml stack frames are too complex for Perf to understand directly, and so it needs the compiler to fall back to using the same conventions as C for function calls. On 64-bit Intel systems, this means that a special register known as the <em>frame pointer</em> is used to record function call history.</p>
 <p>Using the frame pointer in this fashion means a slowdown (typically around 3-5%) since it’s no longer available for general-purpose use. OCaml 4.1 thus makes the frame pointer an optional feature that can be used to improve the resolution of Perf traces.</p>
@@ -612,7 +612,7 @@ Estimated testing time 20s (change using -quota SECS).
 </code></pre>
 </div>
 <p>Using the frame pointer changes the OCaml calling convention, but OPAM takes care of recompiling all your libraries with the new interface. You can read more about this on the OCamlPro <a href="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</a>.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level3" id="embedding-native-code-in-c">
@@ -631,11 +631,11 @@ hello embedded world 2
 After calling OCaml</code></pre>
 </div>
 <p>The <code>embed_native.o</code> is a standalone object file that has no further references to OCaml code beyond the runtime library, just as with the bytecode runtime. Do remember that the link order of the libraries is significant in modern GNU toolchains (especially as used in Ubuntu 11.10 and later) that resolve symbols from left to right in a single pass.<a data-secondary="activating debug runtime" data-primary="debugging" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="activating-the-debug-runtime">Activating the Debug Runtime</h5>
+<section data-type="note" class="level5" id="activating-the-debug-runtime">
+<h5>Activating the Debug Runtime</h5>
 <p>Despite your best efforts, it is easy to introduce a bug into some components, such as C bindings, that causes heap invariants to be violated. OCaml includes a <code>libasmrund.a</code> variant of the runtime library which is compiled with extra debugging checks that perform extra memory integrity checks during every garbage collection cycle. Running these extra checks will abort the program nearer the point of corruption and help isolate the bug in the C code.</p>
 <p>To use the debug library, just link your program with the <code>-runtime-variant d</code> flag:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 &gt;+ clang -arch x86_64 -Wno-trigraphs -c -o 'hello.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlasm9b916c.s'

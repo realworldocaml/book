@@ -18,11 +18,11 @@
 </ul>
 <p>A typical functional programming style means that young blocks tend to die young and old blocks tend to stay around for longer than young ones. This is often referred to as the <em>generational hypothesis</em>. <a data-primary="generational hypothesis" data-type="indexterm">&nbsp;</a></p>
 <p>OCaml uses different memory layouts and garbage-collection algorithms for the major and minor heaps to account for this generational difference. We’ll explain how they differ in more detail next. <a data-primary="OCAMLRUNPARAM" data-type="indexterm">&nbsp;</a><a data-primary="Gc module" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="the-gc-module-and-ocamlrunparam">The Gc Module and OCAMLRUNPARAM</h5>
+<section data-type="note" class="level5" id="the-gc-module-and-ocamlrunparam">
+<h5>The Gc Module and OCAMLRUNPARAM</h5>
 <p>OCaml provides several mechanisms to query and alter the behavior of the runtime system. The <code>Gc</code> module provides this functionality from within OCaml code, and we’ll frequently refer to it in the rest of the chapter. As with several other standard library modules, Core alters the <code>Gc</code> interface from the standard OCaml library. We’ll assume that you’ve opened <code>Core</code> in our explanations.</p>
 <p>You can also control the behavior of OCaml programs by setting the <code>OCAMLRUNPARAM</code> environment variable before launching your application. This lets you set GC parameters without recompiling, for example to benchmark the effects of different settings. The format of <code>OCAMLRUNPARAM</code> is documented in the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html">OCaml manual</a>.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="the-fast-minor-heap">
 <h2>The Fast Minor Heap</h2>
@@ -38,10 +38,10 @@
 <p>In a fresh minor heap, the <code>limit</code> equals the <code>start</code>, and the current <code>ptr</code> will equal the <code>end</code>. <code>ptr</code> decreases as blocks are allocated until it reaches <code>limit</code>, at which point a minor garbage collection is triggered.</p>
 <p>Allocating a block in the minor heap just requires <code>ptr</code> to be decremented by the size of the block (including the header) and a check that it’s not less than <code>limit</code>. If there isn’t enough space left for the block without decrementing past <code>limit</code>, a minor garbage collection is triggered. This is a very fast check (with no branching) on most CPU architectures.</p>
 <p>You may wonder why <code>limit</code> is required at all, since it always seems to equal <code>start</code>. It’s because the easiest way for the runtime to schedule a minor heap collection is by setting <code>limit</code> to equal <code>end</code>. The next allocation will never have enough space after this is done and will always trigger a garbage collection. There are various internal reasons for such early collections, such as handling pending UNIX signals, and they don’t ordinarily matter for application code. <a data-secondary="setting size of" data-primary="minor heaps" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="setting-the-size-of-the-minor-heap">Setting the Size of the Minor Heap</h5>
+<section data-type="note" class="level5" id="setting-the-size-of-the-minor-heap">
+<h5>Setting the Size of the Minor Heap</h5>
 <p>The default minor heap size in OCaml is normally 2 MB on 64-bit platforms, but this is increased to 8 MB if you use Core (which generally prefers default settings that improve performance, but at the cost of a bigger memory profile). This setting can be overridden via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started by calling the <code>Gc.set</code> function:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
 let c = Gc.get () ;;
@@ -78,11 +78,11 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <li><p>A link to the next heap chunk in the list</p></li>
 </ul>
 <p>Each chunk’s data area starts on a page boundary, and its size is a multiple of the page size (4 KB). It contains a contiguous sequence of heap blocks that can be as small as one or two 4 KB pages, but are usually allocated in 1 MB chunks (or 512 KB on 32-bit architectures). <a data-secondary="controlling growth of" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="controlling-major-heap-growth">Controlling Major Heap Growth</h5>
+<section data-type="note" class="level5" id="controlling-major-heap-growth">
+<h5>Controlling Major Heap Growth</h5>
 <p>The <code>Gc</code> module uses the <code>major_heap_increment</code> value to control the major heap growth. This defines the number of words to add to the major heap per expansion and is the only memory allocation operation that the operating system observes from the OCaml runtime after initial startup (since the minor is fixed in size).</p>
 <p>If you anticipate allocating some large OCaml values or many small values in one go, then setting the heap increment to a larger value will improve performance by reducing the amount of heap resizing required in order to satisfy the allocation requests. A small increment may result in lots of smaller heap chunks spread across different regions of virtual memory that require more housekeeping in the OCaml runtime to keep track of them:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 &gt;- : unit = ()
@@ -105,11 +105,11 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <p>If your program allocates values of many varied sizes, you may sometimes find that your free list becomes fragmented. In this situation, the GC is forced to perform an expensive compaction despite there being free chunks, since none of the chunks alone are big enough to satisfy the request.</p>
 <p>First-fit allocation focuses on reducing memory fragmentation (and hence the number of compactions), but at the expense of slower memory allocation. Every allocation scans the free list from the beginning for a suitable free chunk, instead of reusing the most recent heap chunk as the next-fit allocator does. <a data-secondary="reducing fragmentation of" data-primary="memory" data-type="indexterm">&nbsp;</a></p>
 <p>For some workloads that need more real-time behavior under load, the reduction in the frequency of heap compaction will outweigh the extra allocation cost.</p>
-<div data-type="note">
-<h5 id="controlling-the-heap-allocation-policy">Controlling the Heap Allocation Policy</h5>
+<section data-type="note" class="level5" id="controlling-the-heap-allocation-policy">
+<h5>Controlling the Heap Allocation Policy</h5>
 <p>You can set the heap allocation policy via the <code>Gc.allocation_policy</code> field. A value of <code>0</code> (the default) sets it to next-fit, and <code>1</code> to the first-fit allocator.</p>
 <p>The same behavior can be controlled at runtime by setting <code>a=0</code> or <code>a=1</code> in <code>OCAMLRUNPARAM</code>.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level3" id="marking-and-scanning-the-heap">
@@ -126,10 +126,10 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <p>The marking process starts with a set of <em>root</em> values that are always live (such as the application stack). All values on the heap are initially marked as white values that are possibly reachable but haven’t been scanned yet. It recursively follows all the fields in the roots via a depth-first search, and pushes newly encountered white blocks onto an intermediate stack of <em>gray values</em> while it follows their fields. When a gray value’s fields have all been followed, it is popped off the stack and colored black. <a data-primary="root values" data-type="indexterm">&nbsp;</a><a data-primary="gray values" data-type="indexterm">&nbsp;</a></p>
 <p>This process is repeated until the gray value stack is empty and there are no further values to mark. There’s one important edge case in this process, though. The gray value stack can only grow to a certain size, after which the GC can no longer recurse into intermediate values since it has nowhere to store them while it follows their fields. If this happens, the heap is marked as <em>impure</em> and a more expensive check is initiated once the existing gray values have been processed. <a data-primary="impure heaps" data-type="indexterm">&nbsp;</a></p>
 <p>To mark an impure heap, the GC first marks it as pure and walks through the entire heap block-by-block in increasing order of memory address. If it finds a gray block, it adds it to the gray list and recursively marks it using the usual strategy for a pure heap. Once the scan of the complete heap is finished, the mark phase checks again whether the heap has again become impure and repeats the scan until it is pure again. These full-heap scans will continue until a successful scan completes without overflowing the gray list. <a data-secondary="controlling collections" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="controlling-major-heap-collections">Controlling Major Heap Collections</h4>
+<section data-type="note" class="level4" id="controlling-major-heap-collections">
+<h4>Controlling Major Heap Collections</h4>
 <p>You can trigger a single slice of the major GC via the <code>major_slice</code> call. This performs a minor collection first, and then a single slice. The size of the slice is normally automatically computed by the GC to an appropriate value and returns this value so that you can modify it in future calls if necessary:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.major_slice 0 ;;
 &gt;- : int = 0
@@ -143,11 +143,11 @@ Gc.full_major () ;;
 <h3>Heap Compaction</h3>
 <p>After a certain number of major GC cycles have completed, the heap may begin to be fragmented due to values being deallocated out of order from how they were allocated. This makes it harder for the GC to find a contiguous block of memory for fresh allocations, which in turn would require the heap to be grown unnecessarily. <a data-secondary="reducing fragmentation of" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-primary="compaction" data-type="indexterm">&nbsp;</a><a data-secondary="heap compaction" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
 <p>The heap compaction cycle avoids this by relocating all the values in the major heap into a fresh heap that places them all contiguously in memory again. A naive implementation of the algorithm would require extra memory to store the new heap, but OCaml performs the compaction in place within the existing heap.</p>
-<div data-type="note">
-<h4 id="controlling-frequency-of-compactions">Controlling Frequency of Compactions</h4>
+<section data-type="note" class="level4" id="controlling-frequency-of-compactions">
+<h4>Controlling Frequency of Compactions</h4>
 <p>The <code>max_overhead</code> setting in the <code>Gc</code> module defines the connection between free memory and allocated memory after which compaction is activated.</p>
 <p>A value of <code>0</code> triggers a compaction after every major garbage collection cycle, whereas the maximum value of <code>1000000</code> disables heap compaction completely. The default settings should be fine unless you have unusual allocation patterns that are causing a higher-than-usual rate of compactions:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~max_overhead:0 () ;;
 &gt;- : unit = ()
@@ -240,12 +240,12 @@ dune exec -- ./barrier_bench.exe -help | head -13
 <section class="level2" id="attaching-finalizer-functions-to-values">
 <h2>Attaching Finalizer Functions to Values</h2>
 <p>OCaml’s automatic memory management guarantees that a value will eventually be freed when it’s no longer in use, either via the GC sweeping it or the program terminating. It’s sometimes useful to run extra code just before a value is freed by the GC, for example, to check that a file descriptor has been closed, or that a log message is recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in grabage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h3 id="what-values-can-be-finalized">What Values Can Be Finalized?</h3>
+<section data-type="note" class="level3" id="what-values-can-be-finalized">
+<h3>What Values Can Be Finalized?</h3>
 <p>Various values cannot have finalizers attached since they aren’t heap-allocated. Some examples of values that are not heap-allocated are integers, constant constructors, Booleans, the empty array, the empty list, and the unit value. The exact list of what is heap-allocated or not is implementation-dependent, which is why Core provides the <code>Heap_block</code> module to explicitly check before attaching the finalizer.</p>
 <p>Some constant values can be heap-allocated but never deallocated during the lifetime of the program, for example, a list of integer constants. <code>Heap_block</code> explicitly checks to see if the value is in the major or minor heap, and rejects most constant values. Compiler optimizations may also duplicate some immutable values such as floating-point values in arrays. These may be finalized while another <span class="keep-together">duplicate</span> copy is being used by the program.</p>
 <p>For this reason, attach finalizers only to values that you are explicitly sure are heap-allocated and aren’t immutable. A common use is to attach them to file descriptors to ensure they are closed. However, the finalizer normally shouldn’t be the primary way of closing the file descriptor, since it depends on the GC running in order to collect the value. For a busy system, you can easily run out of a scarce resource such as file descriptors before the GC catches up.</p>
-</div>
+</section>
 <p>Core provides a <code>Heap_block</code> module that dynamically checks if a given value is suitable for finalizing. This block is then passed to Async’s <code>Gc.add_finalizer</code> function that schedules the finalizer safely with respect to all the other concurrent program threads. <a data-secondary="Heap_block module" data-primary="heaps" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s explore this with a small example that finalizes values of different types, some of which are heap-allocated and others which are compile-time constants:</p>
 <div class="highlight">

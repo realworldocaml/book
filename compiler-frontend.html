@@ -18,8 +18,8 @@
 <img title="Compilation pipeline" src="images/front-end/pipeline.png"><br>
 </p>
 <p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends that reuse the early stages of compilation but produce very different final outputs. The <em>bytecode</em> can be run by a portable interpreter and can even be transformed into JavaScript (via <a href="http://ocsigen.org/js_of_ocaml">js_of_ocaml</a>) or C source code (via <a href="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</a>). The <em>native code</em> compiler generates specialized executable binaries suitable for high-performance applications.<a data-secondary="compiler source code" data-primary="compilation process" data-type="indexterm">&nbsp;</a><a data-secondary="bytecode vs.&nbsp;native code" data-primary="code compilers" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="obtaining-the-compiler-source-code">Obtaining the Compiler Source Code</h5>
+<section data-type="note" class="level5" id="obtaining-the-compiler-source-code">
+<h5>Obtaining the Compiler Source Code</h5>
 <p>Although it’s not necessary to understand the examples, you may find it useful to have a copy of the OCaml source tree checked out while you read through this chapter. The source code is available from multiple places:</p>
 <ul>
 <li><p>Stable releases as <em class="filename">zip</em> and <em class="filename">tar</em> archives from the <a href="http://ocaml.org/docs/install.html">OCaml download site</a></p></li>
@@ -73,7 +73,7 @@
 <dd>Regression tests for the core compiler.
 </dd>
 </dl>
-</div>
+</section>
 <p>We’ll go through each of the compilation stages now and explain how they will be useful to you during day-to-day OCaml development.</p>
 </section>
 <section class="level2" id="parsing-source-code">
@@ -212,15 +212,15 @@ $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc</code></pre>
 </div>
 <p>You should now have HTML files inside the <em class="filename">html/</em> directory and also be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite a few comment formats and options to control the output for the various backends. Refer to the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml manual</a> for the complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML generators" data-type="indexterm">&nbsp;</a><a data-startref="SCpras" data-type="indexterm">&nbsp;</a><a data-startref="PARSsource" data-type="indexterm">&nbsp;</a><a data-startref="CPpars" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="using-custom-ocamldoc-generators">Using Custom ocamldoc Generators</h5>
+<section data-type="note" class="level5" id="using-custom-ocamldoc-generators">
+<h5>Using Custom ocamldoc Generators</h5>
 <p>The default HTML output stylesheets from <code>ocamldoc</code> are pretty spartan and distinctly Web 1.0. The tool supports plugging in custom documentation generators, and there are several available that provide prettier or more detailed output:</p>
 <ul>
 <li><p><a href="http://argot.x9c.fr/">Argot</a> is an enhanced HTML generator that supports code folding and searching by name or type definition.</p></li>
 <li><p><a href="https://gitorious.org/ocamldoc-generators/ocamldoc-generators">ocamldoc generators</a> add support for Bibtex references within comments and generating literate documentation that embeds the code alongside the comments.</p></li>
-<li>JSON output is available via a custom <a href="https://github.com/xen-org/ocamldoc-json">generator</a> in Xen.</li>
+<li><p>JSON output is available via a custom <a href="https://github.com/xen-org/ocamldoc-json">generator</a> in Xen.</p></li>
 </ul>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="static-type-checking">
@@ -277,13 +277,13 @@ let v = Foo</code></pre>
 &gt;         Actual declaration
 [2]</code></pre>
 </div>
-<div data-type="note" class="allow_break">
-<h5 id="which-comes-first-the-ml-or-the-mli">Which Comes First: The ml or the mli?</h5>
+<section data-type="note" class="level5 allow_break" id="which-comes-first-the-ml-or-the-mli">
+<h5>Which Comes First: The ml or the mli?</h5>
 <p>There are two schools of thought on which order OCaml code should be written in. It’s very easy to begin writing code by starting with an <code>ml</code> file and using the type inference to guide you as you build up your functions. The <code>mli</code> file can then be generated as described, and the exported functions documented.<a data-secondary="order of code" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-primary="mli files" data-type="indexterm">&nbsp;</a><a data-secondary="mli files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="ml files" data-type="indexterm">&nbsp;</a><a data-secondary="ml files" data-primary="files" data-type="indexterm">&nbsp;</a></p>
 <p>If you’re writing code that spans multiple files, it’s sometimes easier to start by writing all the <code>mli</code> signatures and checking that they type-check against one another. Once the signatures are in place, you can write the implementations with the confidence that they’ll all glue together correctly, with no cyclic dependencies among the modules.</p>
 <p>As with any such stylistic debate, you should experiment with which system works best for you. Everyone agrees on one thing though: no matter in what order you write them, production code should always explicitly define an <code>mli</code> file for every <code>ml</code> file in the project. It’s also perfectly fine to have an <code>mli</code> file without a corresponding <code>ml</code> file if you’re only declaring signatures (such as module types).</p>
 <p>Signature files provide a place to write succinct documentation and to abstract internal details that shouldn’t be exported. Maintaining separate signature files also speeds up incremental compilation in larger code bases, since recompiling a <code>mli</code> signature is much faster than a full compilation of the implementation to native code.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="type-inference-1">
 <h3>Type Inference</h3>
@@ -416,7 +416,7 @@ let f x =
 &gt;File "non_principal.ml", line 6, characters 4-7:
 &gt;6 |   x.foo
 &gt;        ^^^
-&gt;Warning 18: this type-based field disambiguation is not principal.
+&gt;Warning 18 [not-principal]: this type-based field disambiguation is not principal.
 &gt;type s = { foo : int; bar : unit; }
 &gt;type t = { foo : int; }
 &gt;val f : s -&gt; int
@@ -459,7 +459,7 @@ dune build non_principal.exe
 &gt;File "non_principal.ml", line 6, characters 4-7:
 &gt;6 |   x.foo
 &gt;        ^^^
-&gt;Error (warning 18): this type-based field disambiguation is not principal.
+&gt;Error (warning 18 [not-principal]): this type-based field disambiguation is not principal.
 [1]</code></pre>
 </div>
 <p>Ideally, all code should systematically use <code>-principal</code>. It reduces variance in type inference and enforces the notion of a single known type. However, there are drawbacks to this mode: type inference is slower, and the <code>cmi</code> files become larger. This is generally only a problem if you extensively use objects, which usually have larger type signatures to cover all their methods.</p>
@@ -496,8 +496,8 @@ end</code></pre>
 <p>The type checker resolves such module references into concrete structures and signatures in order to unify types across module boundaries. It does this by searching a list of directories for a compiled interface file matching that module’s name. For example, it will look for <code>alice.cmi</code> and <code>bob.cmi</code> on the search path and use the first ones it encounters as the interfaces for <code>Alice</code> and <code>Bob</code>.</p>
 <p>The module search path is set by adding <code>-I</code> flags to the compiler command line with the directory containing the <code>cmi</code> files as the argument. Manually specifying these flags gets complex when you have lots of libraries, and is the reason why the OCamlfind frontend to the compiler exists. OCamlfind automates the process of turning third-party package names and build descriptions into command-line flags that are passed to the compiler command line.</p>
 <p>By default, only the current directory and the OCaml standard library will be searched for <code>cmi</code> files. The <code>Pervasives</code> module from the standard library will also be opened by default in every compilation unit. The standard library location is obtained by running <code>ocamlc -where</code> and can be overridden by setting the <code>CAMLLIB</code> environment variable. Needless to say, don’t override the default path unless you have a good reason to (such as setting up a cross-compilation environment). <a data-primary="cmi files" data-type="indexterm">&nbsp;</a><a data-secondary="cmi files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlogjinfo" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h5 id="inspecting-compilation-units-with-ocamlobjinfo">Inspecting Compilation Units with ocamlobjinfo</h5>
+<section data-type="note" class="level5" id="inspecting-compilation-units-with-ocamlobjinfo">
+<h5>Inspecting Compilation Units with ocamlobjinfo</h5>
 <p>For separate compilation to be sound, we need to ensure that all the <code>cmi</code> files used to type-check a module are the same across compilation runs. If they vary, this raises the possibility of two modules checking different type signatures for a common module with the same name. This in turn lets the program completely violate the static type system and can lead to memory corruption and crashes.</p>
 <p>OCaml guards against this by recording a MD5 checksum in every <code>cmi</code>. Let’s examine our earlier <code>typedef.ml</code> more closely:</p>
 <div class="highlight">
@@ -521,7 +521,7 @@ Error: The files /home/build/bar.cmi
        over interface Map</code></pre>
 </div>
 <p>This hash check is very conservative, but ensures that separate compilation remains type-safe all the way up to the final link phase. Your build system should ensure that you never see the preceding error messages, but if you do run into it, just clean out your intermediate files and recompile from scratch.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level3" id="packing-modules-together">
@@ -571,12 +571,12 @@ ocamlobjinfo _build/test.cmi
 &gt;   79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
 </code></pre>
 </div>
-<div data-type="warning">
-<h4 id="packing-and-search-paths">Packing and Search Paths</h4>
+<section data-type="warning" class="level4" id="packing-and-search-paths">
+<h4>Packing and Search Paths</h4>
 <p>One very common build error that happens with packing is confusion resulting from building the packed <code>cmi</code> in the same directory as the submodules. When you add this directory to your module search path, the submodules are also visible. If you forget to include the top-level prefix (e.g., <code>X.A</code>) and instead use a submodule directly (<code>A</code>), then this will compile and link fine.</p>
 <p>However, the types of <code>A</code> and <code>X.A</code> are <em>not</em> automatically equivalent so the type checker will complain if you attempt to mix and match the packed and unpacked versions of the library.</p>
 <p>This mostly only happens with unit tests, since they are built at the same time as the library. You can avoid it by being aware of the need to open the packed module from the test, or only using the library after it has been installed (and hence not exposing the intermediate compiled modules).</p>
-</div>
+</section>
 </section>
 <section class="level3" id="shorter-module-paths-in-type-errors">
 <h3>Shorter Module Paths in Type Errors</h3>
@@ -692,7 +692,7 @@ let v = Foo</code></pre>
 &gt;  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
 &gt;    Tstr_type Rec
 &gt;    [
-&gt;      type_declaration t/80 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+&gt;      type_declaration t/81 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
 &gt;        ptype_params =
 &gt;          []
 &gt;        ptype_cstrs =
@@ -701,11 +701,11 @@ let v = Foo</code></pre>
 &gt;          Ttype_variant
 &gt;            [
 &gt;              (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-&gt;                Foo/81
+&gt;                Foo/82
 &gt;                []
 &gt;                None
 &gt;              (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-&gt;                Bar/82
+&gt;                Bar/83
 &gt;                []
 &gt;                None
 &gt;            ]
@@ -718,7 +718,7 @@ let v = Foo</code></pre>
 &gt;    [
 &gt;      &lt;def&gt;
 &gt;        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-&gt;          Tpat_var "v/83"
+&gt;          Tpat_var "v/84"
 &gt;        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
 &gt;          Texp_construct "Foo"
 &gt;          []

@@ -171,8 +171,8 @@ bump_list float_bumper [1.5;2.5;3.5] ;;
 </code></pre>
 </div>
 <p>Polymorphic first-class modules are important because they allow you to connect the types associated with a first-class module to the types of other values you’re working with.</p>
-<div data-type="note">
-<h5 id="more-on-locally-abstract-types">More on Locally Abstract Types</h5>
+<section data-type="note" class="level5" id="more-on-locally-abstract-types">
+<h5>More on Locally Abstract Types</h5>
 <p>One of the key properties of locally abstract types is that they’re dealt with as abstract types in the function they’re defined within, but are polymorphic from the outside. Consider the following example: <a data-secondary="in locally abstract types" data-primary="polymorphism" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let wrap_in_list (type a) (x:a) = [x] ;;
@@ -211,7 +211,7 @@ create_comparable Float.compare ;;
 </div>
 <p>Here, what we effectively do is capture a polymorphic type and export it as a concrete type within a module.</p>
 <p>This technique is useful beyond first-class modules. For example, we can use the same approach to construct a local module to be fed to a functor. <a data-startref="FCMwork" data-type="indexterm">&nbsp;</a></p>
-</div>
+</section>
 </section>
 <section class="level2" id="example-a-query-handling-framework">
 <h2>Example: A Query-Handling Framework</h2>
