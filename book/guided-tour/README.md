@@ -486,11 +486,32 @@ at the values we need with a minimum of fuss:
 val distance : float * float -> float * float -> float = <fun>
 ```
 
-The `**.` operator used above is for raising a floating-point number to a
-power.
+The `**.` operator used above is for raising a floating-point number
+to a power.
 
 This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
+
+::: {data-type=note}
+##### Operators in `Base` and the stdlib
+
+OCaml's standard library and `Base` mostly use the same operators for
+the same things, but there are some differences.  For example, in
+`Base`, `**.` is float exponentiation, and `**` is integer
+exponentiation, whereas in the standard library, `**` is float
+exponentiation, and integer exponentiation isn't exposed as an
+operator.
+
+`Base` does what it does to be consistent with other numerical
+operators like `*.` and `*`, where the period at the end is used to
+mark the floating-point versions.
+
+In general, `Base` is not shy about presenting different APIs than
+OCaml's stdandard library when it's done in the service of consistency
+and clarity.
+
+:::
+
 
 ### Lists
 
