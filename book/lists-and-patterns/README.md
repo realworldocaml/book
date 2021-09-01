@@ -560,7 +560,7 @@ Now we can see `reduce` in action:
 
 #### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map}
 
-Very often when processing lists, you wants to restrict your attention to a
+Very often when processing lists, you want to restrict your attention to a
 subset of the values on your list. The `List.filter` function is one way of
 doing that:[lists/filtering values in]{.idx}[values/filtering with
 List.filter]{.idx}[List module/List.filter]{.idx}
