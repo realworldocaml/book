@@ -1,6 +1,5 @@
-version: "0.7"
+version: "0.8"
 opam-version: "2.0"
-name:         "eqaf"
 maintainer:   [ "Romain Calascibetta <romain.calascibetta@gmail.com>" ]
 authors:      [ "Romain Calascibetta <romain.calascibetta@gmail.com>" ]
 homepage:     "https://github.com/mirage/eqaf"
@@ -14,24 +13,16 @@ This package provides an equal function on string in constant-time to avoid timi
 """
 
 build: [
-  [ "dune" "subst" ] {pinned}
+  [ "dune" "subst" ] {dev}
   [ "dune" "build" "-p" name "-j" jobs ]
   [ "dune" "runtest" "-p" name "-j" "1" "--no-buffer" "--verbose" ] {with-test}
 ]
 
 depends: [
-  "ocaml"          {>= "4.03.0"}
-  "dune"
+  "ocaml"          {>= "4.07.0"}
+  "dune"           {>= "2.0"}
+  "cstruct"        {>= "1.1.0"}
   "base64"         {with-test}
   "alcotest"       {with-test}
   "crowbar"        {with-test}
-]
-
-depopts: [
-  "cstruct"
-  "bigarray-compat"
-]
-
-conflicts: [
-  "cstruct" {< "4.0.0"}
 ]

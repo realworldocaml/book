@@ -714,7 +714,7 @@ $ ocamlc -i -principal non_principal.ml
 File "non_principal.ml", line 6, characters 4-7:
 6 |   x.foo
         ^^^
-Warning 18: this type-based field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based field disambiguation is not principal.
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
 val f : s -> int
@@ -772,7 +772,7 @@ $ dune build non_principal.exe
 File "non_principal.ml", line 6, characters 4-7:
 6 |   x.foo
         ^^^
-Error (warning 18): this type-based field disambiguation is not principal.
+Error (warning 18 [not-principal]): this type-based field disambiguation is not principal.
 [1]
 ```
 
@@ -1206,7 +1206,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Tstr_type Rec
     [
-      type_declaration t/80 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+      type_declaration t/81 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
         ptype_params =
           []
         ptype_cstrs =
@@ -1215,11 +1215,11 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
           Ttype_variant
             [
               (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-                Foo/81
+                Foo/82
                 []
                 None
               (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-                Bar/82
+                Bar/83
                 []
                 None
             ]
@@ -1232,7 +1232,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
     [
       <def>
         pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Tpat_var "v/83"
+          Tpat_var "v/84"
         expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
           Texp_construct "Foo"
           []

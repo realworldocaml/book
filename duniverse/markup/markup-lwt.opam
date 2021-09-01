@@ -2,7 +2,6 @@ opam-version: "2.0"
 
 synopsis: "Adapter between Markup.ml and Lwt"
 
-version: "dev"
 license: "MIT"
 homepage: "https://github.com/aantron/markup.ml"
 doc: "http://aantron.github.io/markup.ml"

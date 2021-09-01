@@ -153,6 +153,13 @@ val shift : 'a t -> int -> 'a t
 
     @raise Invalid_argument if the offset exceeds [t] length. *)
 
+val shiftv: 'a t list -> int -> 'a t list
+(** [shiftv ts n] is [ts] without the first [n] bytes.
+    It has the property that [equal (concat (shiftv ts n)) (shift (concat ts) n)].
+    This operation is fairly fast, as it will share the tail of the list.
+    The first item in the returned list is never an empty cstruct,
+    so you'll get [[]] if and only if [lenv ts = n]. *)
+
 val split : ?start:int -> 'a t -> int -> 'a t * 'a t
 (** [split ~start t len] returns two proxies extracted from [t]. The first
     starts at offset [start] (default [0]), and is of length [len]. The second

@@ -1,4 +1,4 @@
-version: "1.5.2"
+version: "1.5.3"
 opam-version: "2.0"
 
 homepage: "http://github.com/ocaml/odoc"
@@ -13,7 +13,7 @@ authors: [
   "Anton Bachin <antonbachin@yahoo.com>"
   "Jon Ludlam <jon@recoil.org>"
 ]
-maintainer: "Anton Bachin <antonbachin@yahoo.com>"
+maintainer: "Jon Ludlam <jon@recoil.org>"
 dev-repo: "git+https://github.com/ocaml/odoc.git"
 
 synopsis: "OCaml documentation generator"
@@ -32,10 +32,10 @@ depends: [
   "result"
   "tyxml" {>= "4.3.0"}
 
-  "alcotest" {dev & >= "0.8.3"}
-  "markup" {dev & >= "1.0.0"}
+  "alcotest" {dev & >= "0.8.3" & with-test}
+  "markup" {dev & >= "1.0.0" & with-test}
   "ocamlfind" {dev}
-  "sexplib" {dev & >= "113.33.00"}
+  "sexplib" {dev & >= "113.33.00" & with-test}
 
   "bisect_ppx" {with-test & >= "1.3.0"}
 ]

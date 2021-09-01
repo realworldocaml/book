@@ -1,4 +1,4 @@
-version: "5.0.1"
+version: "5.1.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
@@ -16,7 +16,7 @@ depends: [
 ]
 conflicts: [ "ipaddr" {< "3.0.0"} ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

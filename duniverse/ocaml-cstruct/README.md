@@ -1,6 +1,6 @@
 Cstruct -- access C-like structures directly from OCaml
 -------------------------------------------------------
-v6.0.0
+v6.0.1
 
 Cstruct is a library and syntax extension to make it easier to access C-like
 structures directly from OCaml.  It supports both reading and writing to these

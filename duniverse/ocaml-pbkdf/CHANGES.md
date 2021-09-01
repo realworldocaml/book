@@ -1,3 +1,7 @@
+# 1.2.0 (2020-08-03)
+
+* Upgrade to Cstruct 6.0.0
+
 # 1.1.0 (2020-03-31)
 
 * Port to mirage-crypto (thanks to @hannesm)

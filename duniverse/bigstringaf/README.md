@@ -8,7 +8,7 @@ Bigstrings and other string-like types.
 
 So here they are. Go crazy.
 
-[![Build Status](https://travis-ci.org/inhabitedtype/bigstringaf.svg?branch=master)](https://travis-ci.org/inhabitedtype/bigstringaf)
+[![Build Status](https://github.com/inhabitedtype/bigstringaf/workflows/build/badge.svg)](https://github.com/inhabitedtype/bigstringaf/actions?query=workflow%3A%22build%22)
 
 ## Installation
 

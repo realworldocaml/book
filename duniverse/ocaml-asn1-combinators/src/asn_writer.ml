@@ -2,7 +2,7 @@
    See LICENSE.md. *)
 
 let cs_lex_compare cs1 cs2 =
-  let (s1, s2) = Cstruct.(len cs1, len cs2) in
+  let (s1, s2) = Cstruct.(length cs1, length cs2) in
   let rec go i lim =
     if i = lim then
       compare s1 s2
@@ -42,7 +42,7 @@ let of_string str =
   (n, fun off cs -> Cstruct.blit_from_string str 0 cs off n)
 
 let of_cstruct cs' =
-  let n = Cstruct.len cs' in
+  let n = Cstruct.length cs' in
   (n, fun off cs -> Cstruct.blit cs' 0 cs off n)
 
 let of_byte b = (1, fun off cs -> Cstruct.set_uint8 cs off b)

@@ -23,10 +23,10 @@ let serve_ssl port callback =
 
   let handle ep channels addr =
     let host = match ep with
-      | `Ok data -> ( match data.Tls.Core.own_name with
-          | Some n -> n
-          | None   -> "no name" )
-      | `Error   -> "no session"
+      | Ok data -> ( match data.Tls.Core.own_name with
+          | Some n -> Domain_name.to_string n
+          | None -> "no name" )
+      | Error () -> "no session"
     in
     async @@ fun () ->
     Lwt.catch (fun () -> callback host channels addr >>= fun () -> yap ~tag "<- handler done")

@@ -1,16 +1,21 @@
 (rule
  (targets clock.ml clock_stubs.c clock.sexp)
- (deps (:select select/select.ml)
-       clock_linux.ml
-       clock_linux_stubs.c
-       clock_windows.ml
-       clock_windows_stubs.c
-       clock_mach.ml
-       clock_mach_stubs.c)
- (action (run %{ocaml} %{select} --system %{ocaml-config:system} -o clock)))
+ (deps
+  (:select select/select.ml)
+  clock_linux.ml
+  clock_linux_stubs.c
+  clock_windows.ml
+  clock_windows_stubs.c
+  clock_mach.ml
+  clock_mach_stubs.c)
+ (action
+  (run %{ocaml} %{select} --system %{ocaml-config:system} -o clock)))
 
 (library
  (name clock)
  (modules clock)
- (c_names clock_stubs)
- (c_flags (:include clock.sexp)))
+ (foreign_stubs
+  (language c)
+  (names clock_stubs)
+  (flags
+   (:include clock.sexp))))

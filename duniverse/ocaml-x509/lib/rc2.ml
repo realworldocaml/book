@@ -33,7 +33,7 @@ let tm effective =
 (* L[i] is the i-th byte of the key; K[i] is the i-th 16-bit-word of the key *)
 let key_expansion effective key =
   (* result is a 128 byte key, where we need the words.. *)
-  let t = Cstruct.len key in
+  let t = Cstruct.length key in
   let l = Array.init 128 (fun idx -> if idx < t then Cstruct.get_uint8 key idx else 0) in
   let t8, tm = tm effective in
   for i = t to 127 do
@@ -165,7 +165,7 @@ let decrypt_one ~key ~data ?(off = 0) dst =
 let decrypt_cbc ?(effective = 128) ~key ~iv data =
   let block = 8 in
   let key = key_expansion effective key in
-  let l = Cstruct.len data in
+  let l = Cstruct.length data in
   let dst = Cstruct.create l in
   for i = 0 to pred ((l + pred block) / block) do
     decrypt_one ~key ~data ~off:(i * block) dst

@@ -21,7 +21,7 @@ let mmap fd = Bigarray.(
 let bench_certs filename =
   let cs = mmap Unix.(openfile filename [O_RDONLY] 0) in
   let rec bench n cs =
-    if Cstruct.len cs = 0 then n else
+    if Cstruct.length cs = 0 then n else
       match Asn.decode X509.cert_ber cs with
       | Ok (_, cs) -> bench (succ n) cs
       | Error e -> invalid_arg (Format.asprintf "%a" Asn.pp_error e) in

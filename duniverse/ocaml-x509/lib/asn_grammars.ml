@@ -4,7 +4,7 @@ let def' x = fun y -> if y = x then None else Some y
 let decode codec cs =
   let open Rresult.R.Infix in
   Asn.decode codec cs >>= fun (a, cs) ->
-  if Cstruct.len cs = 0 then Ok a else Error (`Parse "Leftover")
+  if Cstruct.length cs = 0 then Ok a else Error (`Parse "Leftover")
 
 let projections_of encoding asn =
   let c = Asn.codec encoding asn in (decode c, Asn.encode c)

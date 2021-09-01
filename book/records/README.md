@@ -196,7 +196,7 @@ warnings]{.idx}[records/missing field warnings]{.idx}
 # let service_info_to_string { service_name = name; port = port; protocol = prot  } =
     sprintf "%s %i/%s" name port prot
 Line 1, characters 28-82:
-Warning 9: the following labels are not bound in this record pattern:
+Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
 comment
 Either bind these labels explicitly or add '; _' to the pattern.
 val service_info_to_string : service_info -> string = <fun>
@@ -224,7 +224,7 @@ itself, so we could have found out about warning 9 as follows:
 
 ```sh
 $ ocaml -warn-help | egrep '\b9\b'
-  9 Missing fields in a record pattern.
+  9 [missing-record-field-pattern] Missing fields in a record pattern.
   R Alias for warning 9.
 ```
 

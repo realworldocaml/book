@@ -31,7 +31,7 @@ are being resolved to.
 
 ### Further Informartion
 
-* **API Docs:** http://docs.mirage.io/
+* **API Docs:** https://mirage.github.io/ocaml-conduit/
 * **WWW:** https://github.com/mirage/ocaml-conduit
 * **E-mail:** <mirageos-devel@lists.xenproject.org>
 * **Bugs:** https://github.com/mirage/ocaml-conduit/issues

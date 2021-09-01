@@ -22,6 +22,18 @@
 
 #include "ocaml_integers.h"
 
+static int parse_digit(char c)
+{
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  else if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+  else if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+  else
+    return -1;
+}
+
 #define Uint_custom_val(SIZE, V) Uint_custom_val_(SIZE, V)
 #define Uint_custom_val_(SIZE, V) \
   (*(uint ## SIZE ## _t *)(Data_custom_val(V)))
@@ -36,6 +48,56 @@
     return integers_copy_uint ## SIZE(Uint_custom_val(SIZE, a)               \
                                  OP Uint_custom_val(SIZE, b));             \
   }
+
+#define UINT_OF_STRING(BITS, COPY)                                           \
+  value integers_uint ## BITS ## _of_string(value a)                         \
+  {                                                                          \
+    TYPE(BITS) u, max_prefix;                                                \
+    const char *pos = String_val(a);                                         \
+    int base = 10, d;                                                        \
+                                                                             \
+    /* Strip a leading + sign, if given */                                   \
+    if (*pos == '+') pos++;                                                  \
+    if (*pos == '0') {                                                       \
+      switch (pos[1]) {                                                      \
+        case 'x': case 'X':                                                  \
+          base = 16; pos += 2; break;                                        \
+        case 'o': case 'O':                                                  \
+          base = 8; pos += 2; break;                                         \
+        case 'b': case 'B':                                                  \
+          base = 2; pos += 2; break;                                         \
+        case 'u': case 'U': /* Unsigned prefix. No-op for unsigned types */  \
+          pos += 2; break;                                                   \
+      }                                                                      \
+    }                                                                        \
+                                                                             \
+    max_prefix = ((TYPE(BITS)) -1) / base;                                   \
+                                                                             \
+    d = parse_digit(*pos);                                                   \
+    if (d < 0 || d >= base) {                                                \
+      caml_failwith("UInt"#BITS".of_string");                                \
+    }                                                                        \
+    u = (TYPE(BITS)) d;                                                      \
+    pos++;                                                                   \
+                                                                             \
+    for (;; pos++) {                                                         \
+      if (*pos == '_') continue;                                             \
+      d = parse_digit(*pos);                                                 \
+      /* Halt if the digit isn't valid (or this is the string terminator) */ \
+      if (d < 0 || d >= base) break;                                         \
+      /* Check that we can add another digit */                              \
+      if (u > max_prefix) break;                                             \
+      u = d + u * base;                                                      \
+      /* Check for overflow */                                               \
+      if (u < (TYPE(BITS)) d) break;                                         \
+    }                                                                        \
+                                                                             \
+    if (pos != String_val(a) + caml_string_length(a)){                       \
+      caml_failwith("UInt"#BITS".of_string");                                \
+    }                                                                        \
+                                                                             \
+    return COPY(u);                                                          \
+  }                                                                          \
 
 #define UINT_DEFS(BITS, BYTES)                                               \
   static int uint ## BITS ## _cmp(value v1, value v2)                        \
@@ -146,21 +208,24 @@
   }                                                                          \
                                                                              \
   /* of_string : string -> t */                                              \
-  value integers_uint ## BITS ## _of_string(value a)                         \
-  {                                                                          \
-    TYPE(BITS) u;                                                            \
-    if (sscanf(String_val(a), "%" SCNu ## BITS , &u) != 1)                   \
-      caml_failwith("int_of_string");                                        \
-    else                                                                     \
-      return integers_copy_uint ## BITS (u);                                 \
-  }                                                                          \
+  UINT_OF_STRING(BITS, integers_copy_uint ## BITS)                           \
                                                                              \
   /* to_string : t -> string */                                              \
   value integers_uint ## BITS ## _to_string(value a)                         \
   {                                                                          \
     char buf[BUF_SIZE(TYPE(BITS))];                                          \
     if (sprintf(buf, "%" PRIu ## BITS , Uint_custom_val(BITS, a)) < 0)       \
-      caml_failwith("string_of_int");                                        \
+      caml_failwith("UInt ## BITS ## .to_string");                           \
+    else                                                                     \
+      return caml_copy_string(buf);                                          \
+  }                                                                          \
+                                                                             \
+  /* to_hexstring : t -> string */                                           \
+  value integers_uint ## BITS ## _to_hexstring(value a)                      \
+  {                                                                          \
+    char buf[BUF_SIZE(TYPE(BITS))];                                          \
+    if (sprintf(buf, "%" PRIx ## BITS , Uint_custom_val(BITS, a)) < 0)       \
+      caml_failwith("UInt ## BITS ## .to_hexstring");                        \
     else                                                                     \
       return caml_copy_string(buf);                                          \
   }                                                                          \
@@ -173,21 +238,24 @@
 
 #define UINT_SMALL_DEFS(BITS, BYTES)                                         \
   /* of_string : string -> t */                                              \
-  value integers_uint ## BITS ## _of_string(value a)                         \
-  {                                                                          \
-    TYPE(BITS) u;                                                            \
-    if (sscanf(String_val(a), "%" SCNu ## BITS , &u) != 1)                   \
-      caml_failwith("int_of_string");                                        \
-    else                                                                     \
-      return Integers_val_uint ## BITS(u);                                   \
-  }                                                                          \
+  UINT_OF_STRING(BITS, Integers_val_uint ## BITS)                            \
                                                                              \
   /* to_string : t -> string */                                              \
   value integers_uint ## BITS ## _to_string(value a)                         \
   {                                                                          \
     char buf[BUF_SIZE(TYPE(BITS))];                                          \
     if (sprintf(buf, "%" PRIu ## BITS , Uint ## BITS ##_val(a)) < 0)         \
-      caml_failwith("string_of_int");                                        \
+      caml_failwith("UInt ## BITS ## .to_string");                           \
+    else                                                                     \
+      return caml_copy_string(buf);                                          \
+  }                                                                          \
+                                                                             \
+  /* to_hexstring : t -> string */                                           \
+  value integers_uint ## BITS ## _to_hexstring(value a)                      \
+  {                                                                          \
+    char buf[BUF_SIZE(TYPE(BITS))];                                          \
+    if (sprintf(buf, "%" PRIx ## BITS , Uint ## BITS ##_val(a)) < 0)         \
+      caml_failwith("UInt ## BITS ## .to_hexstring");                        \
     else                                                                     \
       return caml_copy_string(buf);                                          \
   }                                                                          \

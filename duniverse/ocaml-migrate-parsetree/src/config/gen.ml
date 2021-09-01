@@ -21,6 +21,7 @@ let () =
      | (4, 10) -> "410"
      | (4, 11) -> "411"
      | (4, 12) -> "412"
+     | (4, 13) -> "413"
      | _ ->
        Printf.eprintf "Unknown OCaml version %s\n" ocaml_version_str;
        exit 1)

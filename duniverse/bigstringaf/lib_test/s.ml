@@ -36,3 +36,7 @@ module type Memcmp = sig
   val memcmp : Bigstringaf.t -> int -> Bigstringaf.t -> int -> int -> int
   val memcmp_string : Bigstringaf.t -> int -> String.t -> int -> int -> int
 end
+
+module type Memchr = sig
+  val memchr : Bigstringaf.t -> int -> char -> int -> int
+end

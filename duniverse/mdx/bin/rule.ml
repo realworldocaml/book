@@ -70,12 +70,11 @@ let pp_rules ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~locks fmt
     and ml_files = List.map2 (fun name p -> `Named (name, p)) var_names ml_files
     and dirs = List.map (fun p -> `Source_tree p) dirs
     and prelude = List.map (fun p -> `Path p) prelude_files in
-    (`Named ("x", md_file) :: packages) @ ml_files @ dirs @ prelude
+    `Named ("x", md_file) :: packages @ ml_files @ dirs @ prelude
   in
   let actions arg =
-    `Run (("ocaml-mdx" :: "test" :: options) @ arg @ root @ [ "%{x}" ])
-    :: `Diff_corrected "x"
-    :: List.map (fun v -> `Diff_corrected v) var_names
+    `Run ("ocaml-mdx" :: "test" :: options @ arg @ root @ [ "%{x}" ])
+    :: `Diff_corrected "x" :: List.map (fun v -> `Diff_corrected v) var_names
   in
   let pp fmt name arg =
     Fmt.pf fmt

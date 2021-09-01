@@ -4,5 +4,6 @@
  (kind ppx_rewriter)
  (wrapped false)
  (ppx_runtime_libraries cstruct stdlib-shims)
- (preprocess (pps ppxlib.metaquot))
+ (preprocess
+  (pps ppxlib.metaquot))
  (libraries sexplib ppxlib bigarray stdlib-shims))

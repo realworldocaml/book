@@ -112,7 +112,7 @@ type psk_identity = (Cstruct_sexp.t * int32) * Cstruct_sexp.t [@@deriving sexp_o
 
 let binders_len psks =
   let binder_len (_, binder) =
-    Cstruct.len binder + 1 (* binder len *)
+    Cstruct.length binder + 1 (* binder len *)
   in
   2 (* binder len *) + List.fold_left (+) 0 (List.map binder_len psks)
 
@@ -239,8 +239,13 @@ let pk_matches_sa pk sa =
   | `P521 _, `ECDSA_SECP521R1_SHA512 -> true
   | _ -> false
 
+module Peer_name = struct
+  type t = [ `host ] Domain_name.t
+  let sexp_of_t t = Sexplib.Sexp.Atom (Domain_name.to_string t)
+end
+
 type client_extension = [
-  | `Hostname of string
+  | `Hostname of Peer_name.t
   | `MaxFragmentLength of max_fragment_length
   | `SupportedGroups of Packet.named_group list
   | `SecureRenegotiation of Cstruct_sexp.t
@@ -403,13 +408,13 @@ type epoch_data = {
   peer_random            : Cstruct_sexp.t ;
   peer_certificate_chain : Cert.t list ;
   peer_certificate       : Cert.t option ;
-  peer_name              : string option ;
+  peer_name              : Peer_name.t option ;
   trust_anchor           : Cert.t option ;
   received_certificates  : Cert.t list ;
   own_random             : Cstruct_sexp.t ;
   own_certificate        : Cert.t list ;
   own_private_key        : Priv.t option ;
-  own_name               : string option ;
+  own_name               : Peer_name.t option ;
   master_secret          : master_secret ;
   session_id             : SessionID.t ;
   extended_ms            : bool ;

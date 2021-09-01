@@ -75,12 +75,12 @@ module Parse_parts = struct
                 | Part_begin (syntax, { indent; payload }) -> (
                     match syntax with
                     | Attr -> Compat_attr (payload, indent)
-                    | Cmt -> Part_begin (payload, indent) )
-                | Part_end -> Part_end )
-            | None -> Normal line )
+                    | Cmt -> Part_begin (payload, indent))
+                | Part_end -> Part_end)
+            | None -> Normal line)
         | Error (`Msg msg) ->
             Fmt.epr "Warning: %s\n" msg;
-            Normal line )
+            Normal line)
 
   let input_line_err i =
     match input_line i with
@@ -135,7 +135,7 @@ let find file ~part =
   | Some part -> (
       match List.find_opt (fun p -> String.equal (Part.name p) part) file with
       | Some p -> Some [ Part.body p ]
-      | None -> None )
+      | None -> None)
   | None ->
       List.fold_left (fun acc p -> Part.body p :: acc) [] file |> List.rev
       |> fun x -> Some x

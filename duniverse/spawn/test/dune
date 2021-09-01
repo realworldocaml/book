@@ -1,5 +1,12 @@
 (library
  (name spawn_test)
  (libraries unix spawn)
- (inline_tests (deps exe/hello.exe))
- (preprocess (pps ppx_expect)))
+ (enabled_if
+  (>= %{ocaml_version} 4.04))
+ (inline_tests
+  (deps
+   exe/hello.exe
+   exe/list_files.exe
+   (sandbox always)))
+ (preprocess
+  (pps ppx_expect)))

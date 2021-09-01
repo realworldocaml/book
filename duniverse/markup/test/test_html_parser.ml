@@ -282,6 +282,161 @@ let tests = [
         1, 27, S  `End_element;
         1, 27, S  `End_element]);
 
+  ("html.parser.p.autoclose" >:: fun _ ->
+    expect
+      ("<p><address></address><p><article></article><p><aside></aside>\n" ^
+       "<p><blockquote></blockquote><p><center></center>\n" ^
+       "<p><details></details><p><dialog></dialog><p><dir></dir>\n" ^
+       "<p><div></div><p><dl></dl><p><fieldset></fieldset>\n" ^
+       "<p><figcaption></figcaption><p><figure></figure>\n" ^
+       "<p><footer></footer><p><header></header><p><hgroup></hgroup>\n" ^
+       "<p><main></main><p><nav></nav><p><ol></ol><p><p></p>\n" ^
+       "<p><section></section><p><summary></summary><p><ul></ul>\n" ^
+       "<p><h1></h1><p><h2></h2><p><h3></h3><p><h4></h4><p><h5></h5>\n" ^
+       "<p><h6></h6>")
+      [ 1,  1, S (start_element "html");
+        1,  1, S (start_element "head");
+        1,  1, S  `End_element;
+        1,  1, S (start_element "body");
+        1,  1, S (start_element "p");
+        1,  4, S  `End_element;
+        1,  4, S (start_element "address");
+        1, 13, S  `End_element;
+        1, 23, S (start_element "p");
+        1, 26, S  `End_element;
+        1, 26, S (start_element "article");
+        1, 35, S  `End_element;
+        1, 45, S (start_element "p");
+        1, 48, S  `End_element;
+        1, 48, S (start_element "aside");
+        1, 55, S  `End_element;
+        1, 63, S (`Text ["\n"]);
+        2,  1, S (start_element "p");
+        2,  4, S  `End_element;
+        2,  4, S (start_element "blockquote");
+        2, 16, S  `End_element;
+        2, 29, S (start_element "p");
+        2, 32, S  `End_element;
+        2, 32, S (start_element "center");
+        2, 40, S  `End_element;
+        2, 49, S (`Text ["\n"]);
+        3,  1, S (start_element "p");
+        3,  4, S  `End_element;
+        3,  4, S (start_element "details");
+        3, 13, S  `End_element;
+        3, 23, S (start_element "p");
+        3, 26, S  `End_element;
+        3, 26, S (start_element "dialog");
+        3, 34, S  `End_element;
+        3, 43, S (start_element "p");
+        3, 46, S  `End_element;
+        3, 46, S (start_element "dir");
+        3, 51, S  `End_element;
+        3, 57, S (`Text ["\n"]);
+        4,  1, S (start_element "p");
+        4,  4, S  `End_element;
+        4,  4, S (start_element "div");
+        4,  9, S  `End_element;
+        4, 15, S (start_element "p");
+        4, 18, S  `End_element;
+        4, 18, S (start_element "dl");
+        4, 22, S  `End_element;
+        4, 27, S (start_element "p");
+        4, 30, S  `End_element;
+        4, 30, S (start_element "fieldset");
+        4, 40, S  `End_element;
+        4, 51, S (`Text ["\n"]);
+        5,  1, S (start_element "p");
+        5,  4, S  `End_element;
+        5,  4, S (start_element "figcaption");
+        5, 16, S  `End_element;
+        5, 29, S (start_element "p");
+        5, 32, S  `End_element;
+        5, 32, S (start_element "figure");
+        5, 40, S  `End_element;
+        5, 49, S (`Text ["\n"]);
+        6,  1, S (start_element "p");
+        6,  4, S  `End_element;
+        6,  4, S (start_element "footer");
+        6, 12, S  `End_element;
+        6, 21, S (start_element "p");
+        6, 24, S  `End_element;
+        6, 24, S (start_element "header");
+        6, 32, S  `End_element;
+        6, 41, S (start_element "p");
+        6, 44, S  `End_element;
+        6, 44, S (start_element "hgroup");
+        6, 52, S  `End_element;
+        6, 61, S (`Text ["\n"]);
+        7,  1, S (start_element "p");
+        7,  4, S  `End_element;
+        7,  4, S (start_element "main");
+        7, 10, S  `End_element;
+        7, 17, S (start_element "p");
+        7, 20, S  `End_element;
+        7, 20, S (start_element "nav");
+        7, 25, S  `End_element;
+        7, 31, S (start_element "p");
+        7, 34, S  `End_element;
+        7, 34, S (start_element "ol");
+        7, 38, S  `End_element;
+        7, 43, S (start_element "p");
+        7, 46, S  `End_element;
+        7, 46, S (start_element "p");
+        7, 49, S  `End_element;
+        7, 53, S (`Text ["\n"]);
+        8,  1, S (start_element "p");
+        8,  4, S  `End_element;
+        8,  4, S (start_element "section");
+        8, 13, S  `End_element;
+        8, 23, S (start_element "p");
+        8, 26, S  `End_element;
+        8, 26, S (start_element "summary");
+        8, 35, S  `End_element;
+        8, 45, S (start_element "p");
+        8, 48, S  `End_element;
+        8, 48, S (start_element "ul");
+        8, 52, S  `End_element;
+        8, 57, S (`Text ["\n"]);
+        9,  1, S (start_element "p");
+        9,  4, S  `End_element;
+        9,  4, S (start_element "h1");
+        9,  8, S  `End_element;
+        9, 13, S (start_element "p");
+        9, 16, S  `End_element;
+        9, 16, S (start_element "h2");
+        9, 20, S  `End_element;
+        9, 25, S (start_element "p");
+        9, 28, S  `End_element;
+        9, 28, S (start_element "h3");
+        9, 32, S  `End_element;
+        9, 37, S (start_element "p");
+        9, 40, S  `End_element;
+        9, 40, S (start_element "h4");
+        9, 44, S  `End_element;
+        9, 49, S (start_element "p");
+        9, 52, S  `End_element;
+        9, 52, S (start_element "h5");
+        9, 56, S  `End_element;
+        9, 61, S (`Text ["\n"]);
+       10,  1, S (start_element "p");
+       10,  4, S  `End_element;
+       10,  4, S (start_element "h6");
+       10,  8, S  `End_element;
+       10, 13, S  `End_element;
+       10, 13, S  `End_element]);
+
+  ("html.parser.attributes" >:: fun _ ->
+    expect "<div :class='foo'></div>"
+      [ 1,  1, S (start_element "html");
+        1,  1, S (start_element "head");
+        1,  1, S  `End_element;
+        1,  1, S (start_element "body");
+        1,  1, S (`Start_element ((html_ns, "div"), [(("", ":class"), "foo")]));
+        1, 19, S  `End_element;
+        1, 25, S  `End_element;
+        1, 25, S  `End_element]);
+
   ("html.parser.links" >:: fun _ ->
     expect
       {|<a href="foo.com?bar=on&acte=123">foo</a>|}
@@ -289,9 +444,10 @@ let tests = [
         1,  1, S (start_element "head");
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
-        1, 1, S (`Start_element ((html_ns, "a"), [(("", "href"), "foo.com?bar=on&acte=123")]));
-        1,  35, S (`Text ["foo"]);
-        1,  38, S  `End_element;
+        1,  1, S (`Start_element ((html_ns, "a"),
+          [(("", "href"), "foo.com?bar=on&acte=123")]));
+        1, 35, S (`Text ["foo"]);
+        1, 38, S  `End_element;
         1, 42, S  `End_element;
         1, 42, S  `End_element];
 
@@ -301,9 +457,10 @@ let tests = [
         1,  1, S (start_element "head");
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
-        1, 1, S (`Start_element ((html_ns, "a"), [(("", "href"), "foo.com?bar=on&image=on")]));
-        1,  35, S (`Text ["foo"]);
-        1,  38, S  `End_element;
+        1,  1, S (`Start_element ((html_ns, "a"),
+          [(("", "href"), "foo.com?bar=on&image=on")]));
+        1, 35, S (`Text ["foo"]);
+        1, 38, S  `End_element;
         1, 42, S  `End_element;
         1, 42, S  `End_element];
 
@@ -313,28 +470,42 @@ let tests = [
         1,  1, S (start_element "head");
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
-        1, 1, S (`Start_element ((html_ns, "a"), [(("", "href"), "foo.com?bar=onℑ")]));
-        1,  33, S (`Text ["foo"]);
-        1,  36, S  `End_element;
+        1,  1, S (`Start_element ((html_ns, "a"),
+          [(("", "href"), "foo.com?bar=onℑ")]));
+        1, 33, S (`Text ["foo"]);
+        1, 36, S  `End_element;
         1, 40, S  `End_element;
         1, 40, S  `End_element]);
 
   ("html.parser.headings" >:: fun _ ->
-    expect "<p><h1><h2>foo</h2>"
+    expect "<h1><h2><h3><h4><h5><h6><h1>foo</h1>"
       [ 1,  1, S (start_element "html");
         1,  1, S (start_element "head");
         1,  1, S  `End_element;
         1,  1, S (start_element "body");
-        1,  1, S (start_element "p");
-        1,  4, S  `End_element;
-        1,  4, S (start_element "h1");
-        1,  8, E (`Misnested_tag ("h2", "h1", []));
-        1,  8, S  `End_element;
-        1,  8, S (start_element "h2");
-        1, 12, S (`Text ["foo"]);
-        1, 15, S  `End_element;
-        1, 20, S  `End_element;
-        1, 20, S  `End_element]);
+        1,  1, S (start_element "h1");
+        1,  5, E (`Misnested_tag ("h2", "h1", []));
+        1,  5, S  `End_element;
+        1,  5, S (start_element "h2");
+        1,  9, E (`Misnested_tag ("h3", "h2", []));
+        1,  9, S  `End_element;
+        1,  9, S (start_element "h3");
+        1, 13, E (`Misnested_tag ("h4", "h3", []));
+        1, 13, S  `End_element;
+        1, 13, S (start_element "h4");
+        1, 17, E (`Misnested_tag ("h5", "h4", []));
+        1, 17, S  `End_element;
+        1, 17, S (start_element "h5");
+        1, 21, E (`Misnested_tag ("h6", "h5", []));
+        1, 21, S  `End_element;
+        1, 21, S (start_element "h6");
+        1, 25, E (`Misnested_tag ("h1", "h6", []));
+        1, 25, S  `End_element;
+        1, 25, S (start_element "h1");
+        1, 29, S (`Text ["foo"]);
+        1, 32, S  `End_element;
+        1, 37, S  `End_element;
+        1, 37, S  `End_element]);
 
   ("html.parser.pre" >:: fun _ ->
     expect "<p><pre>foo</pre>"
@@ -362,6 +533,18 @@ let tests = [
         3,  4, S  `End_element;
         3, 10, S  `End_element;
         3, 10, S  `End_element]);
+
+  ("html.parser.listing.leading-newline" >:: fun _ ->
+    expect "<listing>\n\nfoo</listing>"
+      [ 1,  1, S (start_element "html");
+        1,  1, S (start_element "head");
+        1,  1, S  `End_element;
+        1,  1, S (start_element "body");
+        1,  1, S (start_element "listing");
+        2,  1, S (`Text ["\nfoo"]);
+        3,  4, S  `End_element;
+        3, 14, S  `End_element;
+        3, 14, S  `End_element]);
 
   ("html.parser.textarea" >:: fun _ ->
     expect "<textarea>foo</p></textarea>"

@@ -1,8 +1,15 @@
 (executable
  (name check)
+ (modules check linear_algebra benchmark fmt unsafe)
  (libraries eqaf base64 clock))
 
-(alias
- (name runtest)
- (deps (:check check.exe))
- (action (run %{check})))
+(rule
+ (copy %{read:../config/which-unsafe-file} unsafe.ml))
+
+(rule
+ (alias runbench)
+ (package eqaf)
+ (deps
+  (:check check.exe))
+ (action
+  (run %{check})))

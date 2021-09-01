@@ -1,3 +1,9 @@
+v1.2.0 2021-07-13
+-----------------
+
+* Sync MIME types with latest from Apache (#22 @avsm)
+* Add `mjs` mapping to application/javascript manually (@avsm, request from @glondu)
+
 v1.1.3 2021-01-04
 -----------------
 

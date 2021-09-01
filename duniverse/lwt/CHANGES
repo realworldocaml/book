@@ -1,3 +1,10 @@
+===== 5.4.2 =====
+
+====== Bugs fixed ======
+
+  * Fix compilation on Windows by providing missing dummy stubs (#868, Andreas Hauptmann, Antonin Décimo).
+
+
 ===== 5.4.1 =====
 
 ====== Bugs fixed ======

@@ -1,6 +1,6 @@
 ## Duration - conversions to various time units
 
-0.1.3
+0.2.0
 
 A duration is represented in nanoseconds as an unsigned 64 bit integer.  This
 has a range of up to 584 years.  Functions provided check the input and raise

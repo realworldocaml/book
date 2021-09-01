@@ -110,7 +110,7 @@ immediately warn you that something is wrong:
     | to_drop :: tl -> drop_value tl to_drop
     | hd :: tl -> hd :: drop_value tl to_drop
 Line 5, characters 7-15:
-Warning 11: this match case is unused.
+Warning 11 [redundant-case]: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
 
@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     | [] -> []
     | 0  :: tl -> drop_zero tl
 Lines 2-4, characters 5-31:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
 val drop_zero : int list -> 'a list = <fun>
@@ -968,7 +968,7 @@ exhaustive:
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
 Lines 2-5, characters 5-57:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_
 (However, some guarded clause may match this value.)

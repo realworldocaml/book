@@ -1,3 +1,8 @@
+## v5.1.0 (2021-06-08)
+
+* Reject octal notation in IPv4 (cve-2021-29921, #104, @jsachs)
+* CI fixes, upgrade to ocamlformat 0.18 (@hannesm)
+
 ## v5.0.1 (2020-09-30)
 
 * Fix V4.Prefix.broadcast and last with /32 prefixes (#102 @verbosemode)

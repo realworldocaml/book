@@ -3,7 +3,7 @@
 
 let pp_hex_cs ppf =
   let pp ppf cs =
-    for i = 0 to Cstruct.len cs - 1 do
+    for i = 0 to Cstruct.length cs - 1 do
       Format.fprintf ppf "%02x@ " (Cstruct.get_uint8 cs i)
     done in
   Format.fprintf ppf "@[%a@]" pp

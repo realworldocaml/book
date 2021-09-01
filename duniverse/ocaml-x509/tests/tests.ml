@@ -5,6 +5,7 @@ let suites =
     "Revoke", Revoke.revoke_tests ;
     "CRL", Crltests.crl_tests ;
     "PKCS12", Pkcs12.tests ;
+    "OCSP", Ocsp.tests ;
   ]
 
 

@@ -427,7 +427,7 @@ let good_dh_param_parser xs _ =
   let buf = list_to_cstruct xs in
   match Reader.parse_dh_parameters buf with
   | Error _        -> assert_failure "dh params parser broken"
-  | Ok (_, _, rst) -> assert_equal 0 (Cstruct.len rst)
+  | Ok (_, _, rst) -> assert_equal 0 (Cstruct.length rst)
 
 let good_dh_params_tests =
   List.mapi
@@ -438,12 +438,12 @@ let bad_dh_param_parser buf _ =
   match Reader.parse_dh_parameters buf with
   | Error _ -> ()
   | Ok (_, _, rst) ->
-      if Cstruct.len rst == 0 then
+      if Cstruct.length rst = 0 then
         assert_failure "dh params parser broken"
 
 let bad_dh_params_tests =
   let param = list_to_cstruct (List.hd good_dhparams) in
-  let l = Cstruct.len param in
+  let l = Cstruct.length param in
   let bad_params =
     [
       param <+> Cstruct.create 1 ;
@@ -460,7 +460,7 @@ let bad_dh_params_tests =
     ]
   in
   let lastparam = list_to_cstruct (List.nth good_dhparams 5) in
-  let l = Cstruct.len lastparam in
+  let l = Cstruct.length lastparam in
   let more_bad =
     [
       Cstruct.sub lastparam 0 130 <+> list_to_cstruct [0 ; 5 ; 1] <+> Cstruct.sub lastparam 130 (l - 130) ;
@@ -588,7 +588,7 @@ let good_digitally_signed_1_2_tests =
 
 let bad_dss_1_2 =
   let ds = list_to_cstruct (List.hd good_digitally_signed_1_2) in
-  let l = Cstruct.len ds in
+  let l = Cstruct.length ds in
   [
     Cstruct.sub ds 2 20 ;
     Cstruct.sub ds 0 20 ;
@@ -632,7 +632,7 @@ let good_digitally_signed_tests =
 
 let bad_dss =
   let ds = Cstruct.shift (list_to_cstruct (List.hd good_digitally_signed_1_2)) 2 in
-  let l = Cstruct.len ds in
+  let l = Cstruct.length ds in
   [
     list_to_cstruct [0xff ; 0xff] <+> ds ;
     list_to_cstruct [0xff ; 0xff] <+> Cstruct.shift ds 2 ;
@@ -1212,9 +1212,9 @@ let good_client_hellos =
           ([1; 0; 0; 40; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 0] , ch ) ;
 
           (* some hostname *)
-          ([1; 0; 0; 52; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 12; 0; 0; 0; 8; 0; 6; 0; 0; 3; 102; 111; 111] , { ch with extensions = [`Hostname "foo"] } ) ;
+          ([1; 0; 0; 52; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 12; 0; 0; 0; 8; 0; 6; 0; 0; 3; 102; 111; 111] , { ch with extensions = [make_hostname_ext "foo"] } ) ;
           (* some other hostname *)
-          ([1; 0; 0; 59; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 19; 0; 0; 0; 15; 0; 13; 0; 0; 10; 102; 111; 111; 98; 97; 114; 46; 99; 111; 109] , { ch with extensions = [`Hostname "foobar.com"] } ) ;
+          ([1; 0; 0; 59; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 19; 0; 0; 0; 15; 0; 13; 0; 0; 10; 102; 111; 111; 98; 97; 114; 46; 99; 111; 109] , { ch with extensions = [make_hostname_ext "foobar.com"] } ) ;
 
           (* max fragment length *)
           ([1; 0; 0; 45; 3; 3] @ rand @ [(* session id *) 0; (* cipher *) 0; 0; (* comp *) 0; (* exts *) 0; 5; 0; 1; 0; 1; 3] , { ch with extensions = [`MaxFragmentLength Packet.TWO_11] } ) ;
@@ -1317,16 +1317,16 @@ let good_client_hellos =
 
 
           ( [ 0x01; (* client hello *)
-              0x00; 0x00; 0x72; (* length *)
+              0x00; 0x00; 0x74; (* length *)
               0x03; 0x04; (* version *)
               0xf1; 0xb2; 0x50; 0x16; 0x4b; 0x77; 0x50; 0xb3; 0xdc; 0xcb; 0x1c; 0x6a; 0xae; 0x1a; 0x94; 0x87;
               0xc4; 0x17; 0xbb; 0xa4; 0xf7; 0x92; 0xf8; 0x16; 0x56; 0x12; 0x03; 0x38; 0x1e; 0xe5; 0xc1; 0xae; (* client random *)
               0x00; (* session id *)
               0x00; 0x10; 0x00; 0x35; 0x00; 0x39; 0x00; 0x2f; 0x00; 0x33; 0x00; 0x16; 0x00; 0x0a; 0x00; 0x05; 0x00; 0x04; (* ciphersuites *)
               0x01; 0x00; (* compression *)
-              0x00; 0x39; (* extensions *)
+              0x00; 0x3b; (* extensions *)
               0xff; 0x01; 0x00; 0x01; 0x00; (* secure reneg *)
-              0x00; 0x00; 0x00; 0x0e; 0x00; 0x0c; 0x00; 0x00; 0x09; 0x31; 0x32; 0x37; 0x2e; 0x30; 0x2e; 0x30; 0x2e; 0x31; (* SNI 127.0.0.1 *)
+              0x00; 0x00; 0x00; 0x10; 0x00; 0x0e; 0x00; 0x00; 0x0b; 0x65; 0x78; 0x61; 0x6d; 0x70; 0x6c; 0x65; 0x2e; 0x63; 0x6f; 0x6d; (* SNI example.com *)
               0x00; 0x0d; 0x00; 0x0c; 0x00; 0x0a; 0x06; 0x01; 0x05; 0x01; 0x04; 0x01; 0x02; 0x01; 0x01; 0x01; (* SignatureAlgorithms *)
               0x00; 0x10; 0x00; 0x0e; 0x00; 0x0c; (* ALPN *)
               0x02; 0x68; 0x32;
@@ -1336,7 +1336,7 @@ let good_client_hellos =
                       client_random = list_to_cstruct [ 0xf1; 0xb2; 0x50; 0x16; 0x4b; 0x77; 0x50; 0xb3; 0xdc; 0xcb; 0x1c; 0x6a; 0xae; 0x1a; 0x94; 0x87; 0xc4; 0x17; 0xbb; 0xa4; 0xf7; 0x92; 0xf8; 0x16; 0x56; 0x12; 0x03; 0x38; 0x1e; 0xe5; 0xc1; 0xae ] ;
                       ciphersuites = Packet.([TLS_RSA_WITH_AES_256_CBC_SHA ; TLS_DHE_RSA_WITH_AES_256_CBC_SHA ; TLS_RSA_WITH_AES_128_CBC_SHA ; TLS_DHE_RSA_WITH_AES_128_CBC_SHA ; TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA ; TLS_RSA_WITH_3DES_EDE_CBC_SHA]) ;
                       extensions = [ `SecureRenegotiation (Cstruct.create 0) ;
-                                     `Hostname "127.0.0.1" ;
+                                     make_hostname_ext "example.com" ;
                                      `SignatureAlgorithms
                                        [`RSA_PKCS1_SHA512 ;
                                         `RSA_PKCS1_SHA384 ;

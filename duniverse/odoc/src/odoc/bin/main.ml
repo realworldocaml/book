@@ -433,7 +433,7 @@ let () =
         (String.concat ~sep:", " available_subcommands)
     in
     Term.(const print_default $ const ()),
-    Term.info ~version:"1.5.2" "odoc"
+    Term.info ~version:"1.5.3" "odoc"
   in
   match Term.eval_choice ~err:Format.err_formatter default subcommands with
   | `Error _ ->

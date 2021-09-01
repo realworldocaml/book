@@ -42,7 +42,7 @@ compiler warning.
   let b = Sys.get_argv (); ()
   end
 Line 4, characters 11-26:
-Warning 10: this expression should have type unit.
+Warning 10 [non-unit-statement]: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
 
@@ -99,7 +99,7 @@ type program_result = Error of string | Exit_code of int
   | Exit_code code -> code
   | Error _ -> 100
 Line 2, characters 11-23:
-Warning 52: Code should not depend on the actual values of
+Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 this constructor's arguments. They are only for information
 and may change in future versions. (See manual section 9.5)
 val exit_with : program_result -> int = <fun>

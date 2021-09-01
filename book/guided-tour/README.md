@@ -636,7 +636,7 @@ matching]{.idx}
 # let my_favorite_language (my_favorite :: the_rest) =
     my_favorite
 Lines 1-2, characters 26-16:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
 val my_favorite_language : 'a list -> 'a = <fun>
@@ -758,7 +758,7 @@ for removing sequential duplicates:
       let new_tl = remove_sequential_duplicates (second :: tl) in
       if first = second then new_tl else first :: new_tl
 Lines 2-6, characters 5-57:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
 val remove_sequential_duplicates : int list -> int list = <fun>

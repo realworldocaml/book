@@ -16,7 +16,7 @@
 
 open Or_error
 
-(** Produces .odoc files out of .cm{i,t,ti} or .mld files. *)
+(** Produces .odoc files out of .cm\{i,t,ti\} or .mld files. *)
 
 val cmti :
   env:Env.builder -> package:Odoc_model.Root.Package.t -> hidden:bool ->

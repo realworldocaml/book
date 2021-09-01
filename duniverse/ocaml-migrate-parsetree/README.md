@@ -4,13 +4,13 @@ Convert OCaml parsetrees between different major versions
 This library converts between parsetrees of different OCaml versions.
 
 Supported versions are 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09,
-4.10, and 4.11. For each version, there is a snapshot of the parsetree
-and conversion functions to the next and/or previous version.
+4.10, 4.11, 4.12 and 4.13. For each version, there is a snapshot of the
+parsetree and conversion functions to the next and/or previous version.
 
 ## Asts
 
 ```ocaml
-module Ast_{402,403,404,405,406,407,408,409,410,411} : sig
+module Ast_{402,403,404,405,406,407,408,409,410,411,412,413} : sig
 
   (* Version specific copy of AST *)
   module Asttypes

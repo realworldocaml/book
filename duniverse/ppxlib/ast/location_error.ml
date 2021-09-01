@@ -123,3 +123,11 @@ let update_loc_new error loc =
 let update_loc error loc =
   (*IF_NOT_AT_LEAST 408 update_loc_old error loc*)
   (*IF_AT_LEAST 408 update_loc_new error loc*)
+
+let _get_location_old { loc; _ } = loc
+
+let _get_location_new { main; _ } = main.loc
+
+let get_location error =
+  (*IF_NOT_AT_LEAST 408 _get_location_old error *)
+  (*IF_AT_LEAST 408 _get_location_new error *)

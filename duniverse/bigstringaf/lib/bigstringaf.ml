@@ -34,6 +34,9 @@ external unsafe_memcmp : t -> int -> t -> int -> int -> int =
 external unsafe_memcmp_string : t -> int -> string -> int -> int -> int =
   "bigstringaf_memcmp_string" [@@noalloc]
 
+external unsafe_memchr : t -> int -> char -> int -> int =
+  "bigstringaf_memchr" [@@noalloc]
+
 let sub t ~off ~len =
   BA1.sub t off len
 
@@ -189,6 +192,13 @@ let memcmp_string buf1 buf1_off buf2 buf2_off len =
   unsafe_memcmp_string buf1 buf1_off buf2 buf2_off len
 ;;
 
+let memchr buf buf_off chr len =
+  let buf_len = length buf in
+  if len < 0
+  then invalid_bounds "memchr" buf_len buf_off len;
+  if buf_off < 0 || buf_len - buf_off < len
+  then invalid_bounds "memchr" buf_len buf_off len;
+  unsafe_memchr buf buf_off chr len
 
 (* Safe operations *)
 

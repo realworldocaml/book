@@ -1,4 +1,4 @@
-let std_flags = ["--std=c99"; "-Wall"; "-Wextra"; "-Wpedantic"; "-O3"]
+let std_flags = ["--std=c11"; "-Wall"; "-Wextra"; "-Wpedantic"; "-O3"]
 
 let () =
   let c = Configurator.V1.create "mirage-crypto" in

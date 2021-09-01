@@ -31,7 +31,7 @@ module Unix : sig
 
   (** [client_of_fd client ~host fd] is [t], after client-side
       TLS handshake of [fd] using [client] configuration and [host]. *)
-  val client_of_fd : Tls.Config.client -> ?host:string -> Lwt_unix.file_descr -> t Lwt.t
+  val client_of_fd : Tls.Config.client -> ?host:[ `host ] Domain_name.t -> Lwt_unix.file_descr -> t Lwt.t
 
   (** [accept server fd] is [t, sockaddr], after accepting a
       client on [fd] and upgrading to a TLS connection. *)

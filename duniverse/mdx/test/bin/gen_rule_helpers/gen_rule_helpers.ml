@@ -44,12 +44,15 @@ let cwd_test_file_t = "test-case.t"
 
 let cwd_test_file_mli = "test-case.mli"
 
+let cwd_enabled_if_file = "test-case.enabled-if"
+
 type dir = {
   test_file : string;
   target_file : string;
   expected_file : string;
   options : string list;
   dir_name : string;
+  enabled_if : string list option;
 }
 
 let test_file ~dir_name files =
@@ -86,15 +89,25 @@ let dir dir_name =
   let options_file = Filename.concat dir_name cwd_options_file in
   let options_file_exists = Sys.file_exists options_file in
   let options = if options_file_exists then read_file options_file else [] in
-  { test_file; target_file; expected_file; options; dir_name }
+  let enabled_if_file = Filename.concat dir_name cwd_enabled_if_file in
+  let enabled_if_file_exists = Sys.file_exists enabled_if_file in
+  let enabled_if =
+    if enabled_if_file_exists then Some (read_file enabled_if_file) else None
+  in
+  { test_file; target_file; expected_file; options; dir_name; enabled_if }
+
+let enabled_if = function
+  | None -> ""
+  | Some lines -> Format.asprintf "\n (enabled_if %a)" pp_string_list lines
 
 let pr_runtest_alias dir =
   Fmt.pr {|
 (rule
- (alias runtest)
+ (alias runtest)%s
  (action (diff %s/%s %s)))
-|} dir.dir_name
-    dir.expected_file dir.target_file
+|}
+    (enabled_if dir.enabled_if)
+    dir.dir_name dir.expected_file dir.target_file
 
 let pr_rule ~pp_action dir =
   Fmt.pr

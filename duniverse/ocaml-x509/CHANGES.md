@@ -1,3 +1,13 @@
+## v0.14.1 (2021-08-04)
+
+* Use Cstruct.length instead of deprecated Cstruct.len, bump minimum cstruct
+  to 6.0.0 (#151 by @hannesm)
+
+## v0.14.0 (2021-06-17)
+
+* FEATURE support Online Certificate Status Protocol (OCSP, RFC 6960)
+  (#148 @NightBlues, #149 @hannesm)
+
 ## v0.13.0 (2021-04-22)
 
 * FEATURE support for RFC 5915 "BEGIN EC PRIVATE KEY" pem encoded private keys

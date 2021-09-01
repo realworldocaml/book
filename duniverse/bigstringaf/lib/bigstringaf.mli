@@ -164,6 +164,12 @@ val blit_to_bytes : t -> src_off:int -> Bytes.t -> dst_off:int -> len:int -> uni
 val memcmp        : t -> int -> t      -> int -> int -> int
 val memcmp_string : t -> int -> string -> int -> int -> int
 
+(** {3 [memchr]}
+
+    Search for a byte using [memchr], returning [-1] if the byte is not found.
+    Performing bounds checking before the C call. *)
+
+val memchr : t -> int -> char -> int -> int
 
 (** {2 Memory-unsafe Operations}
 
@@ -267,3 +273,10 @@ val unsafe_blit_to_bytes : t -> src_off:int -> Bytes.t -> dst_off:int -> len:int
 
 val unsafe_memcmp        : t -> int -> t      -> int -> int -> int
 val unsafe_memcmp_string : t -> int -> string -> int -> int -> int
+
+(** {3 [memchr]}
+
+    Search for a byte using [memchr], returning [-1] if the byte is not found.
+    It does not check bounds before the C call. *)
+
+val unsafe_memchr : t -> int -> char -> int -> int

@@ -386,9 +386,9 @@ $ dune build freq.exe
 File "freq.ml", line 5, characters 53-66:
 5 |   In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
                                                          ^^^^^^^^^^^^^
-Error: This expression has type Counter.t -> Base.string -> Counter.t
+Error: This expression has type Counter.t -> Export.string -> Counter.t
        but an expression was expected of type
-         'a list -> Base.string -> 'a list
+         'a list -> Export.string -> 'a list
        Type Counter.t is not compatible with type 'a list
 [1]
 ```
@@ -953,7 +953,7 @@ $ dune build freq.exe
 File "counter.ml", line 18, characters 18-31:
 18 | let singleton l = Counter.touch Counter.empty
                        ^^^^^^^^^^^^^
-Error: The module Counter is an alias for module Dune__exe__Counter, which is missing
+Error: The module Counter is an alias for module Dune__exe__Counter, which is the current compilation unit
 [1]
 ```
 

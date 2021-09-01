@@ -1,4 +1,4 @@
-version: "6.0.0"
+version: "6.0.1"
 opam-version: "2.0"
 maintainer:   "anil@recoil.org"
 authors:      ["Anil Madhavapeddy" "Richard Mortier" "Thomas Gazagnaire"
@@ -21,6 +21,7 @@ depends: [
   "dune" {>= "2.0.0"}
   "bigarray-compat"
   "alcotest" {with-test}
+  ("crowbar" {with-test} | "ocaml" {with-test & < "4.08"})
 ]
 conflicts: [ "js_of_ocaml" {<"3.5.0"} ]
 synopsis: "Access C-like structures directly from OCaml"

@@ -423,6 +423,34 @@ module Test_v4 = struct
       (Ipaddr.V4.of_string_exn "169.254.169.254")
       (last (of_string_exn "169.254.169.254/32"))
 
+  let test_reject_octal () =
+    let bad_addrs =
+      [
+        error "010.8.8.8" "octal notation disallowed";
+        error "8.010.8.8" "octal notation disallowed";
+        error "8.8.010.8" "octal notation disallowed";
+        error "8.8.8.010" "octal notation disallowed";
+      ]
+    in
+    List.iter
+      (fun (addr, exn) ->
+        assert_raises ~msg:addr exn (fun () -> V4.of_string_exn addr))
+      bad_addrs
+
+  let test_reject_prefix_octal () =
+    let bad_addrs =
+      [
+        error "010.8.8.8/32" "octal notation disallowed";
+        error "8.010.8.8/32" "octal notation disallowed";
+        error "8.8.010.8/32" "octal notation disallowed";
+        error "8.8.8.010/32" "octal notation disallowed";
+      ]
+    in
+    List.iter
+      (fun (addr, exn) ->
+        assert_raises ~msg:addr exn (fun () -> V4.Prefix.of_string_exn addr))
+      bad_addrs
+
   let suite =
     "Test V4"
     >::: [
@@ -451,6 +479,8 @@ module Test_v4 = struct
            "prefix_mem" >:: test_prefix_mem;
            "succ_pred" >:: test_succ_pred;
            "prefix_first_last" >:: test_prefix_first_last;
+           "reject_octal" >:: test_reject_octal;
+           "reject_prefix_octal" >:: test_reject_prefix_octal;
          ]
 end
 

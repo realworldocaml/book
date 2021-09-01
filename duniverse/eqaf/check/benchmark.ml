@@ -43,11 +43,11 @@ let run t =
     (* Fmt.pr "\r%a" print (current_idx, samples) ; *)
     (* if current_run = 0 then stabilize_garbage_collector () ; *)
 
-    let time_0 = Clock.tick () in
+    let time_0 = Clock.now () in
 
     runnable fn current_run ;
 
-    let time_1 = Clock.tick () in
+    let time_1 = Clock.now () in
 
     m.((current_idx * 2) + 0) <- float_of_int current_run ;
     m.((current_idx * 2) + 1) <- Int64.to_float (Int64.sub time_1 time_0) ;

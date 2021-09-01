@@ -16,7 +16,7 @@
 
 open Or_error
 
-let magic = "odoc-1.5.2"
+let magic = "odoc-1.5.3"
 
 let load file ic =
   let m = really_input_string ic (String.length magic) in

@@ -13,7 +13,7 @@ uninstall:
 reinstall: uninstall reinstall
 
 all-supported-ocaml-versions:
-	dune build @install @runtest --workspace jbuild-workspace.dev
+	dune build @install @runtest --workspace dune-workspace.dev
 
 clean:
 	dune clean
@@ -23,5 +23,8 @@ test:
 
 promote:
 	dune promote
+
+fmt:
+	dune build @fmt --auto-promote
 
 .PHONY: default install uninstall reinstall clean test

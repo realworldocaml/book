@@ -178,10 +178,7 @@ let create subject ?digest ?(extensions = Ext.empty) (key : Private_key.t) =
   let info_cs = Asn.request_info_to_cs info in
   let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
   Private_key.sign hash ~scheme key (`Message info_cs) >>| fun signature ->
-  let signature_algorithm =
-    let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
-    Algorithm.of_signature_algorithm scheme hash
-  in
+  let signature_algorithm = Algorithm.of_signature_algorithm scheme hash in
   let asn = { info ; signature_algorithm ; signature } in
   let raw = Asn.signing_request_to_cs asn in
   { asn ; raw }

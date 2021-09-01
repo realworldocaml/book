@@ -7,7 +7,7 @@ let output_stanzas name =
   (action
     (progn
       (with-stderr-to %%{targets}
-        (run ./pp.exe --impl %%{input}))
+        (run ./pp.exe -no-color --impl %%{input}))
       (bash "sed -i.bak '1d' %%{targets}"))))
 (rule
   (alias runtest)

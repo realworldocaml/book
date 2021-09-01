@@ -612,11 +612,23 @@ external float_of_string : string -> float = "caml_float_of_string"
 
 (** {6 Pair operations} *)
 
+[%%if flambda_backend]
+
+(** Return the first component of a pair. *)
+external fst : 'a * 'b -> 'a = "%field0_immut"
+
+(** Return the second component of a pair. *)
+external snd : 'a * 'b -> 'b = "%field1_immut"
+
+[%%else]
+
 (** Return the first component of a pair. *)
 external fst : 'a * 'b -> 'a = "%field0"
 
 (** Return the second component of a pair. *)
 external snd : 'a * 'b -> 'b = "%field1"
+
+[%%endif]
 
 (** {6 List operations}
 

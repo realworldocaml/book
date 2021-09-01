@@ -1,0 +1,7 @@
+(executable
+ (name config))
+
+(rule
+ (with-stdout-to
+  which-unsafe-file
+  (run ./config.exe)))

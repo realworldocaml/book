@@ -153,9 +153,9 @@ Here's what it looks like when we run the test.
   File "test.ml", line 3, characters 0-71: rev threw
   (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
@@ -951,12 +951,12 @@ testing doesn't actually hold on all outputs, as you can see below.
     (error
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
          (Neg vs Pos (Loc test.ml:7:19)))
-         "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
+         "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+        \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
         \n"))).
-    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
