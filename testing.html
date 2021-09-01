@@ -336,40 +336,40 @@ let consume lim offset =
 <p>Running the tests will produce a corrected file that includes the execution traces.</p>
 
 <div class="highlight">
-<pre><code class="language-clike">  $ dune runtest
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 32, characters 0-1:
-   |    "%4.2f: %s\n"
-   |    offset
-   |    (match result with
-   |    | `Consumed -&gt; "C"
-   |    | `No_capacity -&gt; "N")
-   |
-   |
-   |[@@@part "2"];;
-   |
-   |let%expect_test _ =
-   |  let lim = limiter () in
-   |  let consume offset = consume lim offset in
-   |  (* Exhaust the rate limit, without advancing the clock. *)
-   |  for _ = 1 to 3 do
-   |    consume 0.
-   |  done;
-  -|  [%expect {| |}];
-  +|  [%expect {|
-  +|    0.00: C
-  +|    0.00: C
-  +|    0.00: C |}];
-   |  (* Wait until a half-second has elapsed, try again *)
-   |  consume 0.5;
-  -|  [%expect {| |}];
-  +|  [%expect {| 0.50: C |}];
-   |  (* Wait until a full second has elapsed, try again *)
-   |  consume 1.;
-  -|  [%expect {|  |}]
-  +|  [%expect {| 1.00: C |}]
-  [1]</code></pre>
+<pre><code class="language-clike">$ dune runtest
+------ test.ml
+++++++ test.ml.corrected
+File "test.ml", line 32, characters 0-1:
+ |    "%4.2f: %s\n"
+ |    offset
+ |    (match result with
+ |    | `Consumed -&gt; "C"
+ |    | `No_capacity -&gt; "N")
+ |
+ |
+ |[@@@part "2"];;
+ |
+ |let%expect_test _ =
+ |  let lim = limiter () in
+ |  let consume offset = consume lim offset in
+ |  (* Exhaust the rate limit, without advancing the clock. *)
+ |  for _ = 1 to 3 do
+ |    consume 0.
+ |  done;
+-|  [%expect {| |}];
++|  [%expect {|
++|    0.00: C
++|    0.00: C
++|    0.00: C |}];
+ |  (* Wait until a half-second has elapsed, try again *)
+ |  consume 0.5;
+-|  [%expect {| |}];
++|  [%expect {| 0.50: C |}];
+ |  (* Wait until a full second has elapsed, try again *)
+ |  consume 1.;
+-|  [%expect {|  |}]
++|  [%expect {| 1.00: C |}]
+[1]</code></pre>
 </div>
 <p>Running <code>dune promote</code> will accept the corrected file, leaving our test looking like this:</p>
 <div class="highlight">
@@ -479,38 +479,38 @@ let%expect_test "test uppercase echo" =
 <p>Note that we put in some expect annotations where we want to see data, but we haven’t filled them in. We can now run the test to see what happens. The results, however, are not what you might hope for.</p>
 
 <div class="highlight">
-<pre><code class="language-clike">  $ dune runtest
-  ------ test/test.ml
-  ++++++ test/test.ml.corrected
-  File "test/test.ml", line 11, characters 0-1:
-   |open! Core
-   |open! Async
-   |open Helpers
-   |
-   |let%expect_test "test uppercase echo" =
-   |  let port = 8081 in
-   |  let%bind process  = launch ~port ~uppercase:true in
-   |  Monitor.protect (fun () -&gt;
-   |      let%bind (r,w) = connect ~port in
-   |      let%bind () = send_data r w "one two three\n" in
-  -|      let%bind () = [%expect] in
-  +|      let%bind () = [%expect.unreachable] in
-   |      let%bind () = send_data r w "one 2 three\n" in
-  -|      let%bind () = [%expect] in
-  +|      let%bind () = [%expect.unreachable] in
-   |      return ())
-   |    ~finally:(fun () -&gt; cleanup process)
-  +|[@@expect.uncaught_exn {|
-  +|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
-  +|     This is strongly discouraged as backtraces are fragile.
-  +|     Please change this test to not include a backtrace. *)
-  +|
-  +|  (monitor.ml.Error
-  +|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
-  +|    ("&lt;backtrace elided in test&gt;" "Caught by monitor Tcp.close_sock_on_error"))
-  +|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
-  +|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
-  [1]</code></pre>
+<pre><code class="language-clike">$ dune runtest
+------ test/test.ml
+++++++ test/test.ml.corrected
+File "test/test.ml", line 11, characters 0-1:
+ |open! Core
+ |open! Async
+ |open Helpers
+ |
+ |let%expect_test "test uppercase echo" =
+ |  let port = 8081 in
+ |  let%bind process  = launch ~port ~uppercase:true in
+ |  Monitor.protect (fun () -&gt;
+ |      let%bind (r,w) = connect ~port in
+ |      let%bind () = send_data r w "one two three\n" in
+-|      let%bind () = [%expect] in
++|      let%bind () = [%expect.unreachable] in
+ |      let%bind () = send_data r w "one 2 three\n" in
+-|      let%bind () = [%expect] in
++|      let%bind () = [%expect.unreachable] in
+ |      return ())
+ |    ~finally:(fun () -&gt; cleanup process)
++|[@@expect.uncaught_exn {|
++|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
++|     This is strongly discouraged as backtraces are fragile.
++|     Please change this test to not include a backtrace. *)
++|
++|  (monitor.ml.Error
++|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
++|    ("&lt;backtrace elided in test&gt;" "Caught by monitor Tcp.close_sock_on_error"))
++|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
++|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
+[1]</code></pre>
 </div>
 <p>What went wrong here? The issue is that the connect fails, because at the time of the connection, the echo server hasn’t finished setting up the server. We can fix this by adding a one second delay before connecting, using Async’s <code>Clock.after</code>. With this change, the test now passes, with the expected results.</p>
 <div class="highlight">
