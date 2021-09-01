@@ -373,7 +373,7 @@ List.reduce ~f:(+) [] ;;
 </section>
 <section class="level4" id="filtering-with-list.filter-and-list.filter_map">
 <h4>Filtering with List.filter and List.filter_map</h4>
-<p>Very often when processing lists, you wants to restrict your attention to a subset of the values on your list. The <code>List.filter</code> function is one way of doing that:<a data-secondary="filtering values in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="filtering with List.filter" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="List.filter" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<p>Very often when processing lists, you want to restrict your attention to a subset of the values on your list. The <code>List.filter</code> function is one way of doing that:<a data-secondary="filtering values in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="filtering with List.filter" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="List.filter" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.filter ~f:(fun x -&gt; x % 2 = 0) [1;2;3;4;5] ;;
 &gt;- : int list = [2; 4]
