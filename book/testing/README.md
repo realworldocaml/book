@@ -97,7 +97,7 @@ with the instantiation of the module, but are instead registered for
 running via the test runner.
 
 ```sh dir=examples/correct/simple_inline_test
-  $ dune runtest
+$ dune runtest
 ```
 
 No output is generated because the test passed successfully.
@@ -113,11 +113,11 @@ let%test "rev" =
 we'll see an error when we run it.
 
 ```sh dir=examples/erroneous/broken_inline_test
-  $ dune runtest
-  File "test.ml", line 3, characters 0-66: rev is false.
-  
-  FAILED 1 / 1 tests
-  [1]
+$ dune runtest
+File "test.ml", line 3, characters 0-66: rev is false.
+
+FAILED 1 / 1 tests
+[1]
 ```
 
 ### More readable errors with `test_eq`
@@ -149,16 +149,16 @@ let%test_unit "rev" =
 Here's what it looks like when we run the test.
 
 ```sh dir=examples/erroneous/test_eq-inline_test
-  $ dune runtest
-  File "test.ml", line 3, characters 0-71: rev threw
-  (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
-    ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
-  FAILED 1 / 1 tests
-  [1]
+$ dune runtest
+File "test.ml", line 3, characters 0-71: rev threw
+(duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
+  ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
+  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+
+FAILED 1 / 1 tests
+[1]
 ```
 
 As you can see, the data that caused the comparison to fail is printed
@@ -263,20 +263,20 @@ wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 5, characters 0-1:
-   |open! Base
-   |open! Stdio
-   |
-   |let%expect_test "trivial" =
-  -|  print_endline "Hello World!"
-  +|  print_endline "Hello World!";
-  +|  [%expect {| Hello World! |}]
-  [1]
+$ dune runtest
+     patdiff (internal) (exit 1)
+...
+------ test.ml
+++++++ test.ml.corrected
+File "test.ml", line 5, characters 0-1:
+ |open! Base
+ |open! Stdio
+ |
+ |let%expect_test "trivial" =
+-|  print_endline "Hello World!"
++|  print_endline "Hello World!";
++|  [%expect {| Hello World! |}]
+[1]
 ```
 
 The expect test runner also creates a version of the file with the
@@ -297,7 +297,7 @@ let%expect_test "trivial" =
 Now, if we run the test again, we'll see that it passes.
 
 ```sh dir=examples/correct/trivial_expect_test_fixed
-  $ dune runtest
+$ dune runtest
 ```
 
 We only have one expect block in this example, but the system supports
@@ -397,32 +397,32 @@ If we run the test, we'll see that the output isn't exactly what was
 intended.
 
 ```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 24, characters 0-1:
-   |  |> List.map ~f:(Soup.R.attribute "href")
-   |  |> Set.of_list (module String)
-   |
-   |[@@@part "1"] ;;
-   |let%expect_test _ =
-   |  let example_html = {|
-   |    <html>
-   |      Some random <b>text</b> with a
-   |      <a href="http://ocaml.org/base">link</a>.
-   |      And here's another
-   |      <a href="http://github.com/ocaml/dune">link</a>.
-   |      And here is <a>link</a> with no href.
-   |    </html>|}
-   |  in
-   |  let soup = Soup.parse example_html in
-   |  let hrefs = get_href_hosts soup in
-  -|  print_s [%sexp (hrefs : Set.M(String).t)]
-  +|  print_s [%sexp (hrefs : Set.M(String).t)];
-  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
-  [1]
+$ dune runtest
+     patdiff (internal) (exit 1)
+...
+------ test.ml
+++++++ test.ml.corrected
+File "test.ml", line 24, characters 0-1:
+ |  |> List.map ~f:(Soup.R.attribute "href")
+ |  |> Set.of_list (module String)
+ |
+ |[@@@part "1"] ;;
+ |let%expect_test _ =
+ |  let example_html = {|
+ |    <html>
+ |      Some random <b>text</b> with a
+ |      <a href="http://ocaml.org/base">link</a>.
+ |      And here's another
+ |      <a href="http://github.com/ocaml/dune">link</a>.
+ |      And here is <a>link</a> with no href.
+ |    </html>|}
+ |  in
+ |  let soup = Soup.parse example_html in
+ |  let hrefs = get_href_hosts soup in
+-|  print_s [%sexp (hrefs : Set.M(String).t)]
++|  print_s [%sexp (hrefs : Set.M(String).t)];
++|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+[1]
 ```
 
 The problem here is that we failed to extract the host from the URI
@@ -443,31 +443,31 @@ And if we run the test again, we'll see that the output is now as it
 should be.
 
 ```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
-  $ dune runtest
-       patdiff (internal) (exit 1)
-  ...
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 26, characters 0-1:
-   |  |> Set.of_list (module String)
-   |
-   |[@@@part "1"] ;;
-   |let%expect_test _ =
-   |  let example_html = {|
-   |    <html>
-   |      Some random <b>text</b> with a
-   |      <a href="http://ocaml.org/base">link</a>.
-   |      And here's another
-   |      <a href="http://github.com/ocaml/dune">link</a>.
-   |      And here is <a>link</a> with no href.
-   |    </html>|}
-   |  in
-   |  let soup = Soup.parse example_html in
-   |  let hrefs = get_href_hosts soup in
-   |  print_s [%sexp (hrefs : Set.M(String).t)];
-  -|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
-  +|  [%expect {| (github.com ocaml.org) |}]
-  [1]
+$ dune runtest
+     patdiff (internal) (exit 1)
+...
+------ test.ml
+++++++ test.ml.corrected
+File "test.ml", line 26, characters 0-1:
+ |  |> Set.of_list (module String)
+ |
+ |[@@@part "1"] ;;
+ |let%expect_test _ =
+ |  let example_html = {|
+ |    <html>
+ |      Some random <b>text</b> with a
+ |      <a href="http://ocaml.org/base">link</a>.
+ |      And here's another
+ |      <a href="http://github.com/ocaml/dune">link</a>.
+ |      And here is <a>link</a> with no href.
+ |    </html>|}
+ |  in
+ |  let soup = Soup.parse example_html in
+ |  let hrefs = get_href_hosts soup in
+ |  print_s [%sexp (hrefs : Set.M(String).t)];
+-|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
++|  [%expect {| (github.com ocaml.org) |}]
+[1]
 ```
 
 One nice aspect of this exploratory workflow is that once you've
@@ -554,40 +554,40 @@ execution traces.
 <!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
 
 ```
-  $ dune runtest
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 32, characters 0-1:
-   |    "%4.2f: %s\n"
-   |    offset
-   |    (match result with
-   |    | `Consumed -> "C"
-   |    | `No_capacity -> "N")
-   |
-   |
-   |[@@@part "2"];;
-   |
-   |let%expect_test _ =
-   |  let lim = limiter () in
-   |  let consume offset = consume lim offset in
-   |  (* Exhaust the rate limit, without advancing the clock. *)
-   |  for _ = 1 to 3 do
-   |    consume 0.
-   |  done;
-  -|  [%expect {| |}];
-  +|  [%expect {|
-  +|    0.00: C
-  +|    0.00: C
-  +|    0.00: C |}];
-   |  (* Wait until a half-second has elapsed, try again *)
-   |  consume 0.5;
-  -|  [%expect {| |}];
-  +|  [%expect {| 0.50: C |}];
-   |  (* Wait until a full second has elapsed, try again *)
-   |  consume 1.;
-  -|  [%expect {|  |}]
-  +|  [%expect {| 1.00: C |}]
-  [1]
+$ dune runtest
+------ test.ml
+++++++ test.ml.corrected
+File "test.ml", line 32, characters 0-1:
+ |    "%4.2f: %s\n"
+ |    offset
+ |    (match result with
+ |    | `Consumed -> "C"
+ |    | `No_capacity -> "N")
+ |
+ |
+ |[@@@part "2"];;
+ |
+ |let%expect_test _ =
+ |  let lim = limiter () in
+ |  let consume offset = consume lim offset in
+ |  (* Exhaust the rate limit, without advancing the clock. *)
+ |  for _ = 1 to 3 do
+ |    consume 0.
+ |  done;
+-|  [%expect {| |}];
++|  [%expect {|
++|    0.00: C
++|    0.00: C
++|    0.00: C |}];
+ |  (* Wait until a half-second has elapsed, try again *)
+ |  consume 0.5;
+-|  [%expect {| |}];
++|  [%expect {| 0.50: C |}];
+ |  (* Wait until a full second has elapsed, try again *)
+ |  consume 1.;
+-|  [%expect {|  |}]
++|  [%expect {| 1.00: C |}]
+[1]
 ```
 
 Running `dune promote` will accept the corrected file, leaving our
@@ -743,38 +743,38 @@ happens.  The results, however, are not what you might hope for.
 <!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
 
 ```
-  $ dune runtest
-  ------ test/test.ml
-  ++++++ test/test.ml.corrected
-  File "test/test.ml", line 11, characters 0-1:
-   |open! Core
-   |open! Async
-   |open Helpers
-   |
-   |let%expect_test "test uppercase echo" =
-   |  let port = 8081 in
-   |  let%bind process  = launch ~port ~uppercase:true in
-   |  Monitor.protect (fun () ->
-   |      let%bind (r,w) = connect ~port in
-   |      let%bind () = send_data r w "one two three\n" in
-  -|      let%bind () = [%expect] in
-  +|      let%bind () = [%expect.unreachable] in
-   |      let%bind () = send_data r w "one 2 three\n" in
-  -|      let%bind () = [%expect] in
-  +|      let%bind () = [%expect.unreachable] in
-   |      return ())
-   |    ~finally:(fun () -> cleanup process)
-  +|[@@expect.uncaught_exn {|
-  +|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
-  +|     This is strongly discouraged as backtraces are fragile.
-  +|     Please change this test to not include a backtrace. *)
-  +|
-  +|  (monitor.ml.Error
-  +|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
-  +|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
-  +|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
-  +|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
-  [1]
+$ dune runtest
+------ test/test.ml
+++++++ test/test.ml.corrected
+File "test/test.ml", line 11, characters 0-1:
+ |open! Core
+ |open! Async
+ |open Helpers
+ |
+ |let%expect_test "test uppercase echo" =
+ |  let port = 8081 in
+ |  let%bind process  = launch ~port ~uppercase:true in
+ |  Monitor.protect (fun () ->
+ |      let%bind (r,w) = connect ~port in
+ |      let%bind () = send_data r w "one two three\n" in
+-|      let%bind () = [%expect] in
++|      let%bind () = [%expect.unreachable] in
+ |      let%bind () = send_data r w "one 2 three\n" in
+-|      let%bind () = [%expect] in
++|      let%bind () = [%expect.unreachable] in
+ |      return ())
+ |    ~finally:(fun () -> cleanup process)
++|[@@expect.uncaught_exn {|
++|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
++|     This is strongly discouraged as backtraces are fragile.
++|     Please change this test to not include a backtrace. *)
++|
++|  (monitor.ml.Error
++|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
++|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
++|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
++|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
+[1]
 ```
 
 What went wrong here? The issue is that the connect fails, because at
@@ -902,7 +902,7 @@ let%test_unit "negation flips the sign" =
 As you might expect, the test passes.
 
 ```sh dir=examples/correct/manual_property_test
-  $ dune runtest
+$ dune runtest
 ```
 
 One choice we had to make in our implementation is which probability
@@ -945,21 +945,21 @@ Running the test uncovers the fact that the property we've been
 testing doesn't actually hold on all outputs, as you can see below.
 
 ```sh dir=examples/erroneous/quickcheck_property_test
-  $ dune runtest
-  File "test.ml", line 3, characters 0-244: negation flips the sign threw
-  ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
-    (error
-      ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
-         (Neg vs Pos (Loc test.ml:7:19)))
-         "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
-        \n"))).
-    Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-    Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-    Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
-  
-  FAILED 1 / 1 tests
-  [1]
+$ dune runtest
+File "test.ml", line 3, characters 0-244: negation flips the sign threw
+("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
+  (error
+    ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
+       (Neg vs Pos (Loc test.ml:7:19)))
+       "Raised at Ppx_assert_lib__Runtime.failwith in file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+      \nCalled from Base__Or_error.try_with in file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
+      \n"))).
+  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
+  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+
+FAILED 1 / 1 tests
+[1]
 ```
 
 The example that triggers the exception is `-4611686018427387904`,
