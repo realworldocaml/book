@@ -1041,11 +1041,11 @@ scope should be short, whereas names that have a large scope, like the
 name of a function in a module interface, should be longer and more
 explicit.
 
-There is of course a tradeoff here, in that making your APIs more explicit
-tends to make them more verbose as well. Another useful rule of thumb is that
-more rarely used names should be longer and more explicit, since the cost of
-concision and the benefit of explicitness become more important the more
-often a name is used.
+There is of course a tradeoff here, in that making your APIs more
+explicit tends to make them more verbose as well. Another useful rule
+of thumb is that more rarely used names should be longer and more
+explicit, since the cost of verbosity goes down and the benefit of
+explicitness goes up the less often a name is used.
 
 ### Create Uniform Interfaces {#create-uniform-intefaces}
 
