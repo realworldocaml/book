@@ -117,46 +117,48 @@ without first opening the `Result` module.
 `Result.t` gives you complete freedom to choose the type of value you use to
 represent errors, but it's often useful to standardize on an error type.
 Among other things, this makes it easier to write utility functions to
-automate common error handling patterns.[Error.t type]{.idx}
+automate common error handling patterns.
+[Error.t type]{.idx}
 
-But which type to choose? Is it better to represent errors as strings? Some
-more structured representation like XML? Or something else entirely?
+But which type to choose? Is it better to represent errors as strings?
+Some more structured representation like XML? Or something else
+entirely?
 
-Base's answer to this question is the `Error.t` type, which tries to forge a
-good compromise between efficiency, convenience, and control over the
-presentation of errors.
-
-It might not be obvious at first why efficiency is an issue at all. But
-generating error messages is an expensive business. An ASCII representation
-of a value can be quite time-consuming to construct, particularly if it
-includes expensive-to-convert numerical data.
-
-`Error` gets around this issue through laziness. In particular, an `Error.t`
-allows you to put off generation of the error string until and unless you
-need it, which means a lot of the time you never have to construct it at all.
-You can of course construct an error directly from a string:
+Base's answer to this question is the `Error.t` type.  You can, for
+example, construct one from a string.
 
 ```ocaml env=main
 # Error.of_string "something went wrong"
 - : Error.t = something went wrong
 ```
 
-But you can also construct an `Error.t` from a *thunk*, i.e., a function that
-takes a single argument of type `unit`:[thunks]{.idx}
+An `'Or_error.t` is simply a `Result.t` with the error case
+specialized to the `Error.t` type.  Here's an example.
 
 ```ocaml env=main
-# Error.of_thunk (fun () ->
-  Printf.sprintf "something went wrong: %f" 32.3343)
-- : Error.t = something went wrong: 32.334300
+# Error (Error.of_string "failed!")
+- : ('a, Error.t) result = Error failed!
 ```
 
-In this case, we can benefit from the laziness of `Error`, since the thunk
-won't be called unless the `Error.t` is converted to a string.
+An the `Or_error` module provides a bunch of useful operators for
+constructing errors.  For example, `Or_error.try_with` can be used for
+catching exceptions from a computation.
 
-The most common way to create `Error.t`s is using *s-expressions*. An
-s-expression is a balanced parenthetical expression where the leaves of the
-expressions are strings. Here's a simple example: [s-expressions/example
-of]{.idx}
+```ocaml env=main
+# let float_of_string s =
+    Or_error.try_with (fun () -> Float.of_string s)
+val float_of_string : string -> float Or_error.t = <fun>
+# float_of_string "3.34"
+- : float Or_error.t = Base__.Result.Ok 3.34
+# float_of_string "a.bc"
+- : float Or_error.t =
+Base__.Result.Error (Invalid_argument "Float.of_string a.bc")
+```
+
+Perhaps the most common way to create `Error.t`s is using
+*s-expressions*. An s-expression is a balanced parenthetical
+expression where the leaves of the expressions are strings. Here's a
+simple example: [s-expressions/example of]{.idx}
 
 ```
 (This (is an) (s expression))
@@ -164,42 +166,28 @@ of]{.idx}
 
 S-expressions are supported by the Sexplib package that is distributed with
 Base and is the most common serialization format used in Base. Indeed, most
-types in Base come with built-in s-expression converters. [Sexplib
-package/sexp converter]{.idx}
+types in Base come with built-in s-expression converters.
+[Sexplib package/sexp converter]{.idx}
 
 ```ocaml env=main
-# Error.create "Unexpected character" 'z' Char.sexp_of_t
-- : Error.t = ("Unexpected character" z)
+# Error.create "Unexpected character" 'c' Char.sexp_of_t
+- : Error.t = ("Unexpected character" c)
 ```
-
-Note that the character isn't actually serialized into an s-expression until
-the error is printed out.
 
 We're not restricted to doing this kind of error reporting with
 built-in types. This will be discussed in more detail in [Data
-Serialization With S
-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
-but Sexplib comes with a language extension that can autogenerate sexp
-converters for newly generated types.  We can enable it explicitly in
-the toplevel with a `#require` statement.
+Serialization With S-Expressions
+](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
+but Sexplib comes with a syntax extension that can autogenerate sexp
+converters for specific types.  We can enable it explicitly in the
+toplevel with a `#require` statement.
 
 <!-- FIXME: we should use ppx_sexp_value instead of ppx_jane, but that -->
 <!-- doesn't work here for some reason. -->
 ```ocaml env=main
 # #require "ppx_jane"
-# let custom_to_sexp = [%sexp_of: float * string list * int]
-val custom_to_sexp : float * string list * int -> Sexp.t = <fun>
-# custom_to_sexp (3.5, ["a";"b";"c"], 6034)
-- : Sexp.t = (3.5 (a b c) 6034)
-```
-
-We can use this same idiom for generating an error:
-
-```ocaml env=main
-# Error.create "Something went terribly wrong"
-    (3.5, ["a";"b";"c"], 6034)
-    [%sexp_of: float * string list * int]
-- : Error.t = ("Something went terribly wrong" (3.5 (a b c) 6034))
+# Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)]
+- : Error.t = ("List is too long" (1 2 3))
 ```
 
 `Error` also supports operations for transforming errors. For example, it's
@@ -217,8 +205,22 @@ roles:[Error.of_list]{.idx}[Error.tag]{.idx}[errors/transformation of]{.idx}
 ("over the weekend" "Your tires were slashed" "Your windshield was smashed")
 ```
 
-The type `'a Or_error.t` is just a shorthand for `('a,Error.t) Result.t`, and
-it is, after `option`, the most common way of returning errors in Base.
+A very common way of generating errors is the `%message` syntax
+extension, which provides a compact syntax for providing a string
+describing the error, along with further values represented as
+s-expressions.  Here's an example.
+
+```ocaml env=main
+# let a = "foo" and b = ("foo",[3;4])
+val a : string = "foo"
+val b : string * int list = ("foo", [3; 4])
+# Or_error.error_s
+    [%message "Something went wrong" (a:string) (b: string * int list)]
+- : 'a Or_error.t =
+Base__.Result.Error ("Something went wrong" (a foo) (b (foo (3 4))))
+```
+
+This is the most common idiom for generating `Error.t`'s.
 
 ### `bind` and Other Error Handling Idioms
 
