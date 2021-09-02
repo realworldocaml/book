@@ -175,12 +175,12 @@ types in Base come with built-in s-expression converters.
 ```
 
 We're not restricted to doing this kind of error reporting with
-built-in types. This will be discussed in more detail in [Data
-Serialization With S-Expressions
+built-in types. As we'll discuss in more detail in [Data Serialization
+With S-Expressions
 ](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
-but Sexplib comes with a syntax extension that can autogenerate sexp
-converters for specific types.  We can enable it explicitly in the
-toplevel with a `#require` statement.
+Sexplib comes with a syntax extension that can autogenerate sexp
+converters for specific types.  We can enable it in the toplevel with
+a `#require` statement.
 
 <!-- FIXME: we should use ppx_sexp_value instead of ppx_jane, but that -->
 <!-- doesn't work here for some reason. -->
