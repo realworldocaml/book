@@ -68,54 +68,50 @@ end</code></pre>
 </section>
 <section class="level3" id="error-and-or_error">
 <h3>Error and Or_error</h3>
-<p><code>Result.t</code> gives you complete freedom to choose the type of value you use to represent errors, but it’s often useful to standardize on an error type. Among other things, this makes it easier to write utility functions to automate common error handling patterns.<a data-primary="Error.t type" data-type="indexterm">&nbsp;</a></p>
+<p><code>Result.t</code> gives you complete freedom to choose the type of value you use to represent errors, but it’s often useful to standardize on an error type. Among other things, this makes it easier to write utility functions to automate common error handling patterns. <a data-primary="Error.t type" data-type="indexterm">&nbsp;</a></p>
 <p>But which type to choose? Is it better to represent errors as strings? Some more structured representation like XML? Or something else entirely?</p>
-<p>Base’s answer to this question is the <code>Error.t</code> type, which tries to forge a good compromise between efficiency, convenience, and control over the presentation of errors.</p>
-<p>It might not be obvious at first why efficiency is an issue at all. But generating error messages is an expensive business. An ASCII representation of a value can be quite time-consuming to construct, particularly if it includes expensive-to-convert numerical data.</p>
-<p><code>Error</code> gets around this issue through laziness. In particular, an <code>Error.t</code> allows you to put off generation of the error string until and unless you need it, which means a lot of the time you never have to construct it at all. You can of course construct an error directly from a string:</p>
+<p>Base’s answer to this question is the <code>Error.t</code> type. You can, for example, construct one from a string.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.of_string "something went wrong" ;;
 &gt;- : Error.t = something went wrong
 </code></pre>
 </div>
-<p>But you can also construct an <code>Error.t</code> from a <em>thunk</em>, i.e., a function that takes a single argument of type <code>unit</code>:<a data-primary="thunks" data-type="indexterm">&nbsp;</a></p>
+<p>An <code>'Or_error.t</code> is simply a <code>Result.t</code> with the error case specialized to the <code>Error.t</code> type. Here’s an example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.of_thunk (fun () -&gt;
-Printf.sprintf "something went wrong: %f" 32.3343)
-;;
-&gt;- : Error.t = something went wrong: 32.334300
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error (Error.of_string "failed!") ;;
+&gt;- : ('a, Error.t) result = Error failed!
 </code></pre>
 </div>
-<p>In this case, we can benefit from the laziness of <code>Error</code>, since the thunk won’t be called unless the <code>Error.t</code> is converted to a string.</p>
-<p>The most common way to create <code>Error.t</code>s is using <em>s-expressions</em>. An s-expression is a balanced parenthetical expression where the leaves of the expressions are strings. Here’s a simple example: <a data-secondary="example of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>An the <code>Or_error</code> module provides a bunch of useful operators for constructing errors. For example, <code>Or_error.try_with</code> can be used for catching exceptions from a computation.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let float_of_string s =
+  Or_error.try_with (fun () -&gt; Float.of_string s)
+;;
+&gt;val float_of_string : string -&gt; float Or_error.t = &lt;fun&gt;
+float_of_string "3.34" ;;
+&gt;- : float Or_error.t = Base__.Result.Ok 3.34
+float_of_string "a.bc" ;;
+&gt;- : float Or_error.t =
+&gt;Base__.Result.Error (Invalid_argument "Float.of_string a.bc")
+</code></pre>
+</div>
+<p>Perhaps the most common way to create <code>Error.t</code>s is using <em>s-expressions</em>. An s-expression is a balanced parenthetical expression where the leaves of the expressions are strings. Here’s a simple example: <a data-secondary="example of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">(This (is an) (s expression))</code></pre>
 </div>
 <p>S-expressions are supported by the Sexplib package that is distributed with Base and is the most common serialization format used in Base. Indeed, most types in Base come with built-in s-expression converters. <a data-secondary="sexp converter" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Unexpected character" 'z' Char.sexp_of_t ;;
-&gt;- : Error.t = ("Unexpected character" z)
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Unexpected character" 'c' Char.sexp_of_t ;;
+&gt;- : Error.t = ("Unexpected character" c)
 </code></pre>
 </div>
-<p>Note that the character isn’t actually serialized into an s-expression until the error is printed out.</p>
-<p>We’re not restricted to doing this kind of error reporting with built-in types. This will be discussed in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a>, but Sexplib comes with a language extension that can autogenerate sexp converters for newly generated types. We can enable it explicitly in the toplevel with a <code>#require</code> statement.</p>
+<p>We’re not restricted to doing this kind of error reporting with built-in types. As we’ll discuss in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S-Expressions</a>, Sexplib comes with a syntax extension that can autogenerate sexp converters for specific types. We can enable it in the toplevel with a <code>#require</code> statement.</p>
 
 
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane" ;;
-let custom_to_sexp = [%sexp_of: float * string list * int] ;;
-&gt;val custom_to_sexp : float * string list * int -&gt; Sexp.t = &lt;fun&gt;
-custom_to_sexp (3.5, ["a";"b";"c"], 6034) ;;
-&gt;- : Sexp.t = (3.5 (a b c) 6034)
-</code></pre>
-</div>
-<p>We can use this same idiom for generating an error:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Something went terribly wrong"
-  (3.5, ["a";"b";"c"], 6034)
-  [%sexp_of: float * string list * int]
-;;
-&gt;- : Error.t = ("Something went terribly wrong" (3.5 (a b c) 6034))
+Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)] ;;
+&gt;- : Error.t = ("List is too long" (1 2 3))
 </code></pre>
 </div>
 <p><code>Error</code> also supports operations for transforming errors. For example, it’s often useful to augment an error with information about the context of the error or to combine multiple errors together. <code>Error.tag</code> and <code>Error.of_list</code> fulfill these roles:<a data-primary="Error.of_list" data-type="indexterm">&nbsp;</a><a data-primary="Error.tag" data-type="indexterm">&nbsp;</a><a data-secondary="transformation of" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
@@ -129,7 +125,19 @@ custom_to_sexp (3.5, ["a";"b";"c"], 6034) ;;
 &gt;("over the weekend" "Your tires were slashed" "Your windshield was smashed")
 </code></pre>
 </div>
-<p>The type <code>'a Or_error.t</code> is just a shorthand for <code>('a,Error.t) Result.t</code>, and it is, after <code>option</code>, the most common way of returning errors in Base.</p>
+<p>A very common way of generating errors is the <code>%message</code> syntax extension, which provides a compact syntax for providing a string describing the error, along with further values represented as s-expressions. Here’s an example.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a = "foo" and b = ("foo",[3;4]) ;;
+&gt;val a : string = "foo"
+&gt;val b : string * int list = ("foo", [3; 4])
+Or_error.error_s
+  [%message "Something went wrong" (a:string) (b: string * int list)]
+;;
+&gt;- : 'a Or_error.t =
+&gt;Base__.Result.Error ("Something went wrong" (a foo) (b (foo (3 4))))
+</code></pre>
+</div>
+<p>This is the most common idiom for generating <code>Error.t</code>’s.</p>
 </section>
 <section class="level3" id="bind-and-other-error-handling-idioms">
 <h3><code>bind</code> and Other Error Handling Idioms</h3>
