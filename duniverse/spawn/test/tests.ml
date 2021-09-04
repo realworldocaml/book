@@ -1,62 +1,92 @@
 let show_raise f =
-  try
-    ignore (f () : int)
-  with exn ->
-    Printf.printf "raised %s" (Printexc.to_string exn)
+  try ignore (f () : int) with
+  | exn ->
+    let s =
+      match exn with
+      | Unix.Unix_error _ ->
+        (* For compat with Windows *)
+        "Unix.Unix_error _"
+      | exn -> Printexc.to_string exn
+    in
+    Printf.printf "raised %s" s
 
 let%expect_test "non-existing program" =
-  show_raise (fun () ->
-    Spawn.spawn () ~prog:"/doesnt-exist" ~argv:["blah"]);
+  show_raise (fun () -> Spawn.spawn () ~prog:"/doesnt-exist" ~argv:[ "blah" ]);
   [%expect {|
-    raised Unix.Unix_error(Unix.ENOENT, "execve", "/doesnt-exist")
+    raised Unix.Unix_error _
   |}]
 
 let%expect_test "non-existing dir" =
   show_raise (fun () ->
-    Spawn.spawn () ~prog:"/bin/true" ~argv:["true"]
-      ~cwd:(Path "/doesnt-exist"));
+      Spawn.spawn () ~prog:"/bin/true" ~argv:[ "true" ]
+        ~cwd:(Path "/doesnt-exist"));
   [%expect {|
-    raised Unix.Unix_error(Unix.ENOENT, "chdir", "/doesnt-exist")
+    raised Unix.Unix_error _
   |}]
 
 let wait pid =
   match snd (Unix.waitpid [] pid) with
-  | WEXITED   0 -> ()
-  | WEXITED   n -> Printf.ksprintf failwith "exited with code %d" n
+  | WEXITED 0 -> ()
+  | WEXITED n -> Printf.ksprintf failwith "exited with code %d" n
   | WSIGNALED n -> Printf.ksprintf failwith "got signal %d" n
-  | WSTOPPED  _ -> assert false
+  | WSTOPPED _ -> assert false
+
+let list_files = Filename.concat (Sys.getcwd ()) "exe/list_files.exe"
+
+let () =
+  Unix.mkdir "sub" 0o777;
+  close_out (open_out "sub/foo");
+  close_out (open_out "sub/bar")
+
+let%expect_test "cwd:Path" =
+  wait
+    (Spawn.spawn () ~prog:list_files ~argv:[ "list_files.exe" ]
+       ~cwd:(Path "sub"));
+  [%expect {|
+    bar
+    foo
+  |}]
 
 let%expect_test "cwd:Fd" =
-  if Sys.win32 then
-    print_string "/tmp"
-  else begin
-    let fd = Unix.openfile "/tmp" [O_RDONLY] 0 in
-    wait (Spawn.spawn () ~prog:"/bin/pwd" ~argv:["pwd"] ~cwd:(Fd fd));
-    Unix.close fd
-  end;
+  (if Sys.win32 then
+    print_endline "bar\nfoo"
+  else
+    let fd = Unix.openfile "sub" [ O_RDONLY ] 0 in
+    wait
+      (Spawn.spawn () ~prog:list_files ~argv:[ "list_files.exe" ] ~cwd:(Fd fd));
+    Unix.close fd);
   [%expect {|
-    /tmp
+    bar
+    foo
   |}]
 
 let%expect_test "cwd:Fd (invalid)" =
   show_raise (fun () ->
-    if Sys.win32 then
-      raise (Unix.Unix_error(ENOTDIR, "fchdir", ""))
-    else
-      Spawn.spawn () ~prog:"/bin/pwd" ~argv:["pwd"] ~cwd:(Fd Unix.stdin));
+      if Sys.win32 then
+        raise (Unix.Unix_error (ENOTDIR, "fchdir", ""))
+      else
+        Spawn.spawn () ~prog:"/bin/pwd" ~argv:[ "pwd" ] ~cwd:(Fd Unix.stdin));
   [%expect {|
-    raised Unix.Unix_error(Unix.ENOTDIR, "fchdir", "")
+    raised Unix.Unix_error _
   |}]
 
-
 module Program_lookup = struct
-  let path_sep = if Sys.win32 then ';'    else ':'
-  let exe_ext  = if Sys.win32 then ".exe" else ""
+  let path_sep =
+    if Sys.win32 then
+      ';'
+    else
+      ':'
+
+  let exe_ext =
+    if Sys.win32 then
+      ".exe"
+    else
+      ""
 
   let split_path s =
     let rec loop i j =
       if j = String.length s then
-        [String.sub s i (j - i)]
+        [ String.sub s i (j - i) ]
       else if s.[j] = path_sep then
         String.sub s i (j - i) :: loop (j + 1) (j + 1)
       else
@@ -83,24 +113,27 @@ module Program_lookup = struct
 end
 
 let%expect_test "inheriting stdout with close-on-exec set" =
-  (* CR-soon jdimino for jdimino: the test itself seems to pass,
-     however there seem to be another issue related to ppx_expect and
-     Windows. *)
+  (* CR-soon jdimino for jdimino: the test itself seems to pass, however there
+     seem to be another issue related to ppx_expect and Windows. *)
   if Sys.win32 then
     print_string "hello world"
-  else begin
+  else (
     Unix.set_close_on_exec Unix.stdout;
     let shell, arg =
       if Sys.win32 then
-        "cmd", "/c"
+        ("cmd", "/c")
       else
-        "sh", "-c"
+        ("sh", "-c")
     in
     let prog = Program_lookup.find_prog shell in
-    wait (Spawn.spawn () ~prog ~argv:[shell; arg; {|echo "hello world"|}]);
-  end;
+    wait (Spawn.spawn () ~prog ~argv:[ shell; arg; {|echo "hello world"|} ])
+  );
   [%expect {| hello world |}]
 
 let%expect_test "prog relative to cwd" =
-  wait (Spawn.spawn () ~prog:"./hello.exe" ~argv:["hello"] ~cwd:(Path "exe"));
+  if Sys.win32 then
+    print_string "Hello, world!"
+  else
+    wait
+      (Spawn.spawn () ~prog:"./hello.exe" ~argv:[ "hello" ] ~cwd:(Path "exe"));
   [%expect {| Hello, world! |}]

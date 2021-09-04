@@ -1,6 +1,4 @@
-version: "1.1.0"
 opam-version: "2.0"
-name: "pbkdf"
 synopsis: "Password based key derivation functions (PBKDF) from PKCS#5"
 description: """
 An implementation of PBKDF 1 and 2 as defined by [PKCS#5](https://tools.ietf.org/html/rfc2898) using
@@ -15,7 +13,8 @@ dev-repo: "git+https://github.com/abeaumont/ocaml-pbkdf.git"
 doc: "https://abeaumont.github.io/ocaml-pbkdf/"
 depends: [
   "ocaml" {>= "4.07.0"}
-  "dune"
+  "dune" {>= "1.8.0"}
+  "cstruct" {>= "6.0.0"}
   "mirage-crypto"
   "alcotest" {with-test & >= "0.8.1"}
 ]

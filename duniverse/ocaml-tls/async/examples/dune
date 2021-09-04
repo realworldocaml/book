@@ -1,0 +1,11 @@
+(executable
+  (name    test_client)
+  (modules test_client)
+  (preprocess (pps ppx_jane))
+  (libraries async core tls-async))
+
+(executable
+  (name    test_server)
+  (modules test_server)
+  (preprocess (pps ppx_jane))
+  (libraries async core tls-async))

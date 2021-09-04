@@ -25,7 +25,7 @@ let assemble_hdr version (content_type, payload) =
   let buf = create 5 in
   set_uint8 buf 0 (content_type_to_int content_type);
   assemble_protocol_version_int (shift buf 1) version;
-  BE.set_uint16 buf 3 (len payload);
+  BE.set_uint16 buf 3 (length payload);
   buf <+> payload
 
 type len = One | Two | Three
@@ -35,15 +35,15 @@ let assemble_list ?none_if_empty lenb f elements =
     match lenb with
     | One   ->
        let l = create 1 in
-       set_uint8 l 0 (len body) ;
+       set_uint8 l 0 (length body) ;
        l
     | Two   ->
        let l = create 2 in
-       BE.set_uint16 l 0 (len body) ;
+       BE.set_uint16 l 0 (length body) ;
        l
     | Three ->
        let l = create 3 in
-       set_uint24_len l (len body) ;
+       set_uint24_len l (length body) ;
        l
   in
   let b es = Cstruct.concat (List.map f es) in
@@ -58,7 +58,7 @@ let assemble_list ?none_if_empty lenb f elements =
   | None   -> full elements
 
 let assemble_certificate c =
-  let length = len c in
+  let length = length c in
   let buf = create 3 in
   set_uint24_len buf length;
   buf <+> c
@@ -87,6 +87,7 @@ let assemble_ciphersuite c =
   assemble_any_ciphersuite acs
 
 let assemble_hostname host =
+  let host = Domain_name.to_string host in
   (* 8 bit hostname type; 16 bit length; value *)
   let vallength = String.length host in
   let buf = create 3 in
@@ -116,7 +117,7 @@ let assemble_certificate_types ts =
 let assemble_cas cas =
   let ass x =
     let buf = create 2 in
-    BE.set_uint16 buf 0 (len x) ;
+    BE.set_uint16 buf 0 (length x) ;
     buf <+> x
   in
   assemble_list Two ass cas
@@ -143,19 +144,19 @@ let assemble_supported_groups groups =
 let assemble_keyshare_entry (ng, ks) =
   let g = assemble_named_group ng in
   let l = create 2 in
-  BE.set_uint16 l 0 (len ks) ;
+  BE.set_uint16 l 0 (length ks) ;
   g <+> l <+> ks
 
 let assemble_psk_id (id, age) =
   let id_len = create 2 in
-  BE.set_uint16 id_len 0 (len id) ;
+  BE.set_uint16 id_len 0 (length id) ;
   let age_buf = create 4 in
   BE.set_uint32 age_buf 0 age ;
   id_len <+> id <+> age_buf
 
 let assemble_binder b =
   let b_len = create 1 in
-  set_uint8 b_len 0 (len b) ;
+  set_uint8 b_len 0 (length b) ;
   b_len <+> b
 
 let assemble_client_psks psks =
@@ -178,7 +179,7 @@ let assemble_supported_versions vs =
 let assemble_extension = function
   | `SecureRenegotiation x ->
      let buf = create 1 in
-     set_uint8 buf 0 (len x);
+     set_uint8 buf 0 (length x);
      (buf <+> x, RENEGOTIATION_INFO)
   | `ExtendedMasterSecret -> (create 0, EXTENDED_MASTER_SECRET)
   | `ECPointFormats ->
@@ -190,7 +191,7 @@ let assemble_extension = function
 
 let assemble_cookie c =
   let l = create 2 in
-  BE.set_uint16 l 0 (len c) ;
+  BE.set_uint16 l 0 (length c) ;
   l <+> c
 
 let assemble_psk_key_exchange_mode mode =
@@ -204,7 +205,7 @@ let assemble_psk_key_exchange_modes modes =
 let assemble_ext (pay, typ) =
   let buf = Cstruct.create 4 in
   BE.set_uint16 buf 0 (extension_type_to_int typ);
-  BE.set_uint16 buf 2 (len pay);
+  BE.set_uint16 buf 2 (length pay);
   buf <+> pay
 
 let assemble_extensions ?none_if_empty assemble_e es =
@@ -213,7 +214,7 @@ let assemble_extensions ?none_if_empty assemble_e es =
 let assemble_ca ca =
   let lenbuf = create 2 in
   let data = X509.Distinguished_name.encode_der ca in
-  BE.set_uint16 lenbuf 0 (len data) ;
+  BE.set_uint16 lenbuf 0 (length data) ;
   lenbuf <+> data
 
 let assemble_certificate_authorities cas =
@@ -229,7 +230,7 @@ let assemble_certificate_request_extension e =
 
 let assemble_certificate_request_1_3 ?(context = Cstruct.empty) exts =
   let clen = create 1 in
-  set_uint8 clen 0 (len context) ;
+  set_uint8 clen 0 (length context) ;
   let exts = assemble_extensions assemble_certificate_request_extension exts in
   clen <+> context <+> exts
 
@@ -302,14 +303,14 @@ let assemble_certs_exts cs =
 
 let assemble_certificates_1_3 context certs =
   let l = create 1 in
-  set_uint8 l 0 (len context) ;
+  set_uint8 l 0 (length context) ;
   l <+> context <+> assemble_certs_exts (List.map (fun c -> c, []) certs)
 
 let assemble_sid sid =
   let buf = create 1 in
   match sid with
   | None   -> buf
-  | Some s -> set_uint8 buf 0 (len s); buf <+> s
+  | Some s -> set_uint8 buf 0 (length s); buf <+> s
 
 let assemble_client_hello (cl : client_hello) : Cstruct.t =
   let version = match cl.client_version with
@@ -344,22 +345,22 @@ let assemble_client_hello (cl : client_hello) : Cstruct.t =
     if List.exists (function `PreSharedKeys _ -> true | _ -> false) cl.extensions then
       Cstruct.empty
     else
-      let buflen = len bbuf + len extensions + 4 (* see above, header *) in
+      let buflen = length bbuf + length extensions + 4 (* see above, header *) in
       if buflen >= 256 && buflen <= 511 then
-        match len extensions with
+        match length extensions with
         | 0 -> (* need to construct a 2 byte extension length as well *)
           let l = 512 (* desired length *) - 2 (* extension length *) - 4 (* padding extension header *) - buflen in
           let l = max l 0 in (* negative size is not good *)
           let padding = assemble_client_extension (`Padding l) in
           let extension_length = create 2 in
-          BE.set_uint16 extension_length 0 (len padding);
+          BE.set_uint16 extension_length 0 (length padding);
           extension_length <+> padding
         | _ ->
           let l = 512 - 4 (* padding extension header *) - buflen in
           let l = max l 0 in
           let padding = assemble_client_extension (`Padding l) in
           (* extensions include the 16 bit extension length field *)
-          let elen = len extensions + len padding - 2 (* the 16 bit length field *) in
+          let elen = length extensions + length padding - 2 (* the 16 bit length field *) in
           BE.set_uint16 extensions 0 elen;
           padding
       else
@@ -381,7 +382,7 @@ let assemble_server_hello (sh : server_hello) : Cstruct.t =
   v <+> sh.server_random <+> sid <+> cs <+> cm <+> extensions
 
 let assemble_dh_parameters p =
-  let plen, glen, yslen = (len p.dh_p, len p.dh_g, len p.dh_Ys) in
+  let plen, glen, yslen = (length p.dh_p, length p.dh_g, length p.dh_Ys) in
   let buf = create (2 + 2 + 2 + plen + glen + yslen) in
   BE.set_uint16  buf  0 plen;
   blit p.dh_p  0 buf  2 plen;
@@ -395,12 +396,12 @@ let assemble_ec_parameters named_curve point =
   let hdr = create 4 in
   set_uint8 hdr 0 (ec_curve_type_to_int NAMED_CURVE);
   BE.set_uint16 hdr 1 (named_group_to_int (group_to_named_group named_curve));
-  set_uint8 hdr 3 (len point);
+  set_uint8 hdr 3 (length point);
   hdr <+> point
 
 let assemble_digitally_signed signature =
   let lenbuf = create 2 in
-  BE.set_uint16 lenbuf 0 (len signature);
+  BE.set_uint16 lenbuf 0 (length signature);
   lenbuf <+> signature
 
 let assemble_digitally_signed_1_2 sigalg signature =
@@ -419,21 +420,21 @@ let assemble_session_ticket (se : session_ticket) =
   let buf = create 9 in
   BE.set_uint32 buf 0 se.lifetime ;
   BE.set_uint32 buf 4 se.age_add ;
-  set_uint8 buf 8 (len se.nonce) ;
+  set_uint8 buf 8 (length se.nonce) ;
   let ticketlen = create 2 in
-  BE.set_uint16 ticketlen 0 (len se.ticket) ;
+  BE.set_uint16 ticketlen 0 (length se.ticket) ;
   let exts = assemble_extensions assemble_session_ticket_extension se.extensions in
   buf <+> se.nonce <+> ticketlen <+> se.ticket <+> exts
 
 let assemble_client_dh_key_exchange kex =
-  let len = len kex in
+  let len = length kex in
   let buf = create (len + 2) in
   BE.set_uint16 buf 0 len;
   blit kex 0 buf 2 len;
   buf
 
 let assemble_client_ec_key_exchange kex =
-  let len = len kex in
+  let len = length kex in
   let buf = create (len + 1) in
   set_uint8 buf 0 len;
   blit kex 0 buf 1 len;
@@ -490,7 +491,7 @@ let assemble_handshake hs =
       (cs, KEY_UPDATE)
     | EndOfEarlyData -> (create 0, END_OF_EARLY_DATA)
   in
-  let pay_len = len payload in
+  let pay_len = length payload in
   let buf = assemble_hs payload_type pay_len in
   buf <+> payload
 

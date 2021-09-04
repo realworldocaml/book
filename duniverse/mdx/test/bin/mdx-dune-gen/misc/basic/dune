@@ -1,0 +1,12 @@
+(rule
+ (target dune_gen.ml)
+ (action
+  (with-stdout-to
+   %{target}
+   (run ocaml-mdx dune-gen --prelude %{dep:prelude.ml} --prelude
+     %{dep:prelude2.ml}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff %{dep:dune.gen.expected} %{dep:dune_gen.ml})))

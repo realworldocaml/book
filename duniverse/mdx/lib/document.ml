@@ -27,7 +27,7 @@ let pp_line ?syntax ppf (l : line) =
   | Text s -> (
       match syntax with
       | Some Mli -> Fmt.pf ppf "%s" s
-      | _ -> Fmt.pf ppf "%s\n" s )
+      | _ -> Fmt.pf ppf "%s\n" s)
 
 let pp ?syntax ppf t =
   Fmt.pf ppf "%a\n" Fmt.(list ~sep:(unit "\n") (pp_line ?syntax)) t
@@ -41,6 +41,6 @@ let envs t =
       | Block b -> (
           match b.value with
           | OCaml { env; _ } | Toplevel { env; _ } -> Ocaml_env.Set.add env acc
-          | Raw _ | Cram _ | Include _ -> acc )
+          | Raw _ | Cram _ | Include _ -> acc)
       | Section _ | Text _ -> acc)
     Ocaml_env.Set.empty t

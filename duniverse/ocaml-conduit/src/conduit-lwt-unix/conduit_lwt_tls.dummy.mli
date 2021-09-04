@@ -30,7 +30,7 @@ module Client : sig
     ?src:Lwt_unix.sockaddr ->
     ?certificates:'a ->
     authenticator:X509.authenticator ->
-    string ->
+    [ `host ] Domain_name.t ->
     Lwt_unix.sockaddr ->
     (Lwt_unix.file_descr * Lwt_io.input_channel * Lwt_io.output_channel) Lwt.t
 end

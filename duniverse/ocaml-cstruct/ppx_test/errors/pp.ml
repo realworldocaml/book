@@ -7,4 +7,5 @@ let () = at_exit (fun () -> sys_exit 0)
 let () = Clflags.(error_style := Some Short)
 #endif
 
+let () = Clflags.(color := Some Never)
 let () = Ppxlib.Driver.standalone ()

@@ -81,6 +81,16 @@ let () =
         check (Cstruct.len sub = max (Cstruct.len base - off) 0);
       | exception Invalid_argument _ -> check (off < 0 || off > Cstruct.len base)
     );
+  add_test ~name:"shiftv" [list cstruct; int] (fun ts n ->
+      match Cstruct.shiftv ts n with
+      | exception Invalid_argument _ -> check (n < 0 || n > Cstruct.lenv ts)
+      | ts' ->
+        assert (Cstruct.equal (Cstruct.concat ts') (Cstruct.shift (Cstruct.concat ts) n));
+        assert ((Cstruct.lenv ts = n) = (ts' = []));
+        match ts' with
+        | hd :: _ -> assert (not (Cstruct.is_empty hd))
+        | [] -> ()
+    );
   add_test ~name:"copy" [cstruct; int; int] (fun base off len ->
       match Cstruct.copy base off len with
       | x ->

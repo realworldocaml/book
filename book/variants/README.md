@@ -69,7 +69,7 @@ because the compiler would have warned us if we'd missed one:
 # let incomplete_color_to_int = function
     | Black -> 0 | Red -> 1 | White -> 7
 Lines 1-2, characters 31-41:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 (Green|Yellow|Blue|Magenta|Cyan)
 val incomplete_color_to_int : basic_color -> int = <fun>
@@ -286,7 +286,7 @@ problem, which is that we haven't handled the new `Bold` tag:
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i
 Lines 1-4, characters 20-24:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
 val color_to_int : color -> int = <fun>
@@ -362,7 +362,7 @@ can achieve with this by reiterating the `Log_entry` message type that
 was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
-module Time_ns = Core_kernel.Time_ns
+module Time_ns = Core.Time_ns
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -810,7 +810,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a
-toy. There's a module very much in this spirit in `Core_kernel` called
+toy. There's a module very much in this spirit in `Core` called
 `Blang` (short for "Boolean language"), and it gets a lot of practical
 use in a variety of applications.  The simplification algorithm in
 particular is useful when you want to use it to specialize the

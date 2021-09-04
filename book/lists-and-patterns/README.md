@@ -110,7 +110,7 @@ immediately warn you that something is wrong:
     | to_drop :: tl -> drop_value tl to_drop
     | hd :: tl -> hd :: drop_value tl to_drop
 Line 5, characters 7-15:
-Warning 11: this match case is unused.
+Warning 11 [redundant-case]: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
 
@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     | [] -> []
     | 0  :: tl -> drop_zero tl
 Lines 2-4, characters 5-31:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
 val drop_zero : int list -> 'a list = <fun>
@@ -560,7 +560,7 @@ Now we can see `reduce` in action:
 
 #### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map}
 
-Very often when processing lists, you wants to restrict your attention to a
+Very often when processing lists, you want to restrict your attention to a
 subset of the values on your list. The `List.filter` function is one way of
 doing that:[lists/filtering values in]{.idx}[values/filtering with
 List.filter]{.idx}[List module/List.filter]{.idx}
@@ -968,7 +968,7 @@ exhaustive:
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
 Lines 2-5, characters 5-57:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_
 (However, some guarded clause may match this value.)
@@ -1024,7 +1024,7 @@ should prefer patterns wherever they are sufficient.
 
 As a side note, the above implementation of `count_some` is longer than
 necessary; even worse, it is not tail recursive. In real life, you would
-probably just use the `List.count` function from `Core_kernel`:
+probably just use the `List.count` function:
 
 ```ocaml env=main
 # let count_some l = List.count ~f:Option.is_some l

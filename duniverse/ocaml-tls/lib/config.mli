@@ -33,7 +33,7 @@ type config = private {
   signature_algorithms : signature_algorithm list ; (** ordered list of supported signature algorithms (regarding preference) *)
   use_reneg : bool ; (** endpoint should accept renegotiation requests *)
   authenticator : X509.Authenticator.t option ; (** optional X509 authenticator *)
-  peer_name : string option ; (** optional name of other endpoint (used for SNI RFC4366) *)
+  peer_name : [ `host ] Domain_name.t option ; (** optional name of other endpoint (used for SNI RFC4366) *)
   own_certificates : own_cert ; (** optional default certificate chain and other certificate chains *)
   acceptable_cas : X509.Distinguished_name.t list ; (** ordered list of acceptable certificate authorities *)
   session_cache : session_cache ;
@@ -61,7 +61,7 @@ type server [@@deriving sexp]
     @raise Invalid_argument if the configuration is invalid *)
 val client :
   authenticator : X509.Authenticator.t ->
-  ?peer_name : string ->
+  ?peer_name : [ `host ] Domain_name.t ->
   ?ciphers : Ciphersuite.ciphersuite list ->
   ?version : tls_version * tls_version ->
   ?signature_algorithms : signature_algorithm list ->
@@ -93,7 +93,7 @@ val server :
   unit -> server
 
 (** [peer client name] is [client] with [name] as [peer_name] *)
-val peer : client -> string -> client
+val peer : client -> [ `host ] Domain_name.t -> client
 
 (** {1 Note on ALPN protocol selection}
 

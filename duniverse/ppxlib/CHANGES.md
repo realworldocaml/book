@@ -1,3 +1,13 @@
+0.22.2 (23/06/2021)
+-------------------
+
+- Make ppxlib compatible with 4.13 compiler (#260, @kit-ty-kate)
+
+0.22.1 (10/06/2021)
+-------------------
+
+- Fix location in parse error reporting (#257, @pitag-ha)
+
 0.22.0 (04/02/2021)
 -------------------
 

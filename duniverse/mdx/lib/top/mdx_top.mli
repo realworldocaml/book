@@ -22,11 +22,15 @@ open Result
 type t
 (** The type for configuration values. *)
 
+type directive =
+  | Directory of string
+  | Load of string  (** The type for toplevel directives *)
+
 val init :
   verbose:bool ->
   silent:bool ->
   verbose_findlib:bool ->
-  dirs:string list ->
+  directives:directive list ->
   packages:string list ->
   predicates:string list ->
   unit ->

@@ -30,6 +30,34 @@
  (deps (alias bigger_quickcheck_test_with_ppx)))
 
 (rule
+ (alias echo_test_delay)
+ (deps
+  (source_tree ./correct/echo_test_delay)
+  (package core)
+  (package async)
+  (package ppx_jane))
+ (action
+  (system "dune build @all @runtest --root ./correct/echo_test_delay")))
+
+(alias
+ (name runtest)
+ (deps (alias echo_test_delay)))
+
+(rule
+ (alias echo_test_reconnect)
+ (deps
+  (source_tree ./correct/echo_test_reconnect)
+  (package core)
+  (package async)
+  (package ppx_jane))
+ (action
+  (system "dune build @all @runtest --root ./correct/echo_test_reconnect")))
+
+(alias
+ (name runtest)
+ (deps (alias echo_test_reconnect)))
+
+(rule
  (alias manual_property_test)
  (deps
   (source_tree ./correct/manual_property_test)
@@ -58,6 +86,40 @@
 (alias
  (name runtest)
  (deps (alias multi_block_expect_test)))
+
+(rule
+ (alias rate_limiter_fixed)
+ (deps
+  (source_tree ./correct/rate_limiter_fixed)
+  (package core)
+  (package base)
+  (package bin_prot)
+  (package ppx_jane)
+  (package stdio)
+  (package core))
+ (action
+  (system "dune build @all @runtest --root ./correct/rate_limiter_fixed")))
+
+(alias
+ (name runtest)
+ (deps (alias rate_limiter_fixed)))
+
+(rule
+ (alias rate_limiter_show_bug)
+ (deps
+  (source_tree ./correct/rate_limiter_show_bug)
+  (package core)
+  (package base)
+  (package bin_prot)
+  (package ppx_jane)
+  (package stdio)
+  (package core))
+ (action
+  (system "dune build @all @runtest --root ./correct/rate_limiter_show_bug")))
+
+(alias
+ (name runtest)
+ (deps (alias rate_limiter_show_bug)))
 
 (rule
  (alias simple_expect_test)

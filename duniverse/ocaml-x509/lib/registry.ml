@@ -272,6 +272,16 @@ module Cert_extn = struct
   and freshest_crl                  = ce <| 46
   and inhibit_any_policy            = ce <| 54
 
+  (* https://tools.ietf.org/html/rfc5280#section-4.2.2.1 *)
+  module Private_internet_extensions = struct
+    let pe = pkix <| 1
+    let authority_info_access = pe <| 1
+    let ad = pkix <| 48
+    let ad_ca_issuer = ad <| 2
+    let ad_ocsp = ad <| 1
+    let ad_ocsp_basic = ad_ocsp <| 1
+  end
+
   module Extended_usage = struct
     let any              = extended_key_usage <| 0
     let key_purpose      = pkix <| 3

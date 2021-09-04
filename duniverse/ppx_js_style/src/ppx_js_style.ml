@@ -484,10 +484,10 @@ let () =
      did up to now) had no incidence.
      We want to enable the warning here. For some reason one can't just enable
      a warning programatically, one has to call [parse_options]... *)
-  Ocaml_common.Warnings.parse_options false "+50"
+  ignore (Ocaml_common.Warnings.parse_options false "+50")
 
 let () =
-  let disable_w50 () = Ocaml_common.Warnings.parse_options false "-50" in
+  let disable_w50 () = ignore (Ocaml_common.Warnings.parse_options false "-50") in
   Driver.add_arg "-dont-check-doc-comments-attachment" (Unit disable_w50)
     ~doc:" ignore warning 50 on the file."
 ;;

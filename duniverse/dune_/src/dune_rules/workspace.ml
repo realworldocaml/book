@@ -51,6 +51,7 @@ module Context = struct
       ; fdo_target_exe : Path.t option
       ; dynamically_linked_foreign_archives : bool
       ; instrument_with : Lib_name.t list
+      ; merlin : bool
       }
 
     let to_dyn = Dyn.Encoder.opaque
@@ -67,6 +68,7 @@ module Context = struct
         ; fdo_target_exe
         ; dynamically_linked_foreign_archives
         ; instrument_with
+        ; merlin
         } t =
       Profile.equal profile t.profile
       && List.equal Target.equal targets t.targets
@@ -81,6 +83,7 @@ module Context = struct
       && Bool.equal dynamically_linked_foreign_archives
            t.dynamically_linked_foreign_archives
       && List.equal Lib_name.equal instrument_with t.instrument_with
+      && Bool.equal merlin t.merlin
 
     let fdo_suffix t =
       match t.fdo_target_exe with
@@ -135,12 +138,13 @@ module Context = struct
               ]
         in
         field "paths" ~default:[]
-          ( Dune_lang.Syntax.since Stanza.syntax (1, 12)
-          >>> map ~f (repeat (pair (located string) Ordered_set_lang.decode)) )
+          (Dune_lang.Syntax.since Stanza.syntax (1, 12)
+          >>> map ~f (repeat (pair (located string) Ordered_set_lang.decode)))
       and+ instrument_with =
         field ~default:instrument_with "instrument_with"
           (Dune_lang.Syntax.since syntax (2, 7) >>> repeat Lib_name.decode)
-      and+ loc = loc in
+      and+ loc = loc
+      and+ merlin = field_b "merlin" in
       Option.iter host_context ~f:(fun _ ->
           match targets with
           | [ Target.Native ] -> ()
@@ -161,6 +165,7 @@ module Context = struct
       ; fdo_target_exe
       ; dynamically_linked_foreign_archives
       ; instrument_with
+      ; merlin
       }
   end
 
@@ -169,29 +174,25 @@ module Context = struct
       { base : Common.t
       ; switch : string
       ; root : string option
-      ; merlin : bool
       }
 
-    let to_dyn { base; switch; root; merlin } =
+    let to_dyn { base; switch; root } =
       let open Dyn.Encoder in
       record
         [ ("base", Common.to_dyn base)
         ; ("switch", string switch)
         ; ("root", option string root)
-        ; ("merlin", bool merlin)
         ]
 
-    let equal { base; switch; root; merlin } t =
+    let equal { base; switch; root } t =
       Common.equal base t.base
       && String.equal switch t.switch
       && Option.equal String.equal root t.root
-      && Bool.equal merlin t.merlin
 
     let t ~profile ~instrument_with ~x =
       let+ loc_switch, switch = field "switch" (located string)
       and+ name = field_o "name" Context_name.decode
       and+ root = field_o "root" string
-      and+ merlin = field_b "merlin"
       and+ base = Common.t ~profile ~instrument_with in
       let name =
         match name with
@@ -206,10 +207,10 @@ module Context = struct
               ; Pp.text
                   "Please specify a context name manually with the (name ..) \
                    field"
-              ] )
+              ])
       in
       let base = { base with targets = Target.add base.targets x; name } in
-      { base; switch; root; merlin }
+      { base; switch; root }
   end
 
   module Default = struct
@@ -288,9 +289,10 @@ module Context = struct
   let all_names t =
     let n = name t in
     n
-    :: List.filter_map (targets t) ~f:(function
-         | Native -> None
-         | Named s -> Some (Context_name.target n ~toolchain:s))
+    ::
+    List.filter_map (targets t) ~f:(function
+      | Native -> None
+      | Named s -> Some (Context_name.target n ~toolchain:s))
 
   let default ?x ?profile ?instrument_with () =
     Default
@@ -305,6 +307,7 @@ module Context = struct
       ; fdo_target_exe = None
       ; dynamically_linked_foreign_archives = true
       ; instrument_with = Option.value instrument_with ~default:[]
+      ; merlin = false
       }
 end
 
@@ -417,10 +420,13 @@ let t ?x ?profile:cmdline_profile ?instrument_with:cmdline_instrument_with () =
           Context_name.Set.union !defined_names
             (Context_name.Set.of_list (Context.all_names ctx));
         match (ctx, acc) with
-        | Opam { merlin = true; _ }, Some _ ->
+        | Opam { base = { merlin = true; _ }; _ }, Some _
+        | Default { merlin = true; _ }, Some _ ->
           User_error.raise ~loc:(Context.loc ctx)
             [ Pp.text "you can only have one context for merlin" ]
-        | Opam { merlin = true; _ }, None -> Some name
+        | Opam { base = { merlin = true; _ }; _ }, None
+        | Default { merlin = true; _ }, None ->
+          Some name
         | _ -> acc)
   in
   let contexts =

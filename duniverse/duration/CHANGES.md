@@ -1,3 +1,10 @@
+## 0.2.0 (2021-08-04)
+
+* 32 bit compatibility:
+  * Provide of_us_64, of_ms_64, of_sec_64 that take an int64 as input
+  * Provide to_us_64, to_ms_64, to_sec_64 that produce an int64 as output
+* Revise Duration.pp to print in a more concise way
+
 ## 0.1.3 (2019-10-26)
 
 * Duration.pp: don't emit trailing space

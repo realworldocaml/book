@@ -165,17 +165,20 @@ module Releases = struct
   let v4_13_0 = of_string_exn "4.13.0"
   let v4_13 = v4_13_0
 
+  let v4_14_0 = of_string_exn "4.14.0"
+  let v4_14 = v4_14_0
+
   let all_patches = [
     v4_00_1; v4_01_0; v4_02_0; v4_02_1; v4_02_2;
     v4_02_3; v4_03_0; v4_04_0; v4_04_1; v4_04_2;
     v4_05_0; v4_06_0; v4_06_1; v4_07_0; v4_07_1;
     v4_08_0; v4_08_1; v4_09_0; v4_09_1; v4_10_0;
     v4_10_1; v4_10_2; v4_11_0; v4_11_1; v4_11_2;
-    v4_12_0; v4_13_0 ]
+    v4_12_0; v4_13_0; v4_14_0 ]
 
   let all = [ v4_00; v4_01; v4_02; v4_03; v4_04;
               v4_05; v4_06; v4_07; v4_08; v4_09;
-              v4_10; v4_11; v4_12; v4_13 ]
+              v4_10; v4_11; v4_12; v4_13; v4_14 ]
 
   let unreleased_betas = []
 
@@ -183,7 +186,7 @@ module Releases = struct
 
   let latest = v4_12
 
-  let dev = [ v4_13 ]
+  let dev = [ v4_13; v4_14 ]
 
   let trunk =
     match dev with
@@ -199,8 +202,8 @@ module Releases = struct
   let recent_with_dev = List.concat [recent; dev]
 end
 
-type arch = [ `I386 | `X86_64 | `Aarch64 | `Ppc64le | `Aarch32 ]
-let arches = [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32 ]
+type arch = [ `I386 | `X86_64 | `Aarch64 | `Ppc64le | `Aarch32 | `S390x ]
+let arches = [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
 
 let arch_is_32bit = function `I386 | `Aarch32 -> true |_ -> false
 
@@ -210,6 +213,7 @@ let string_of_arch = function
   | `X86_64 -> "amd64"
   | `Ppc64le -> "ppc64le"
   | `I386 -> "i386"
+  | `S390x -> "s390x"
 
 let arch_of_string = function
   | "arm64" | "aarch64" -> Ok `Aarch64
@@ -217,6 +221,7 @@ let arch_of_string = function
   | "i386"  | "i686" | "686" | "386" -> Ok `I386
   | "arm32" | "arm32v7" | "aarch32" -> Ok `Aarch32
   | "ppc64le" -> Ok `Ppc64le
+  | "s390x" -> Ok `S390x
   | arch -> Error (`Msg ("Unknown architecture " ^ arch))
 
 let arch_of_string_exn a =
@@ -230,6 +235,7 @@ let to_opam_arch = function
   | `Ppc64le -> "ppc64"
   | `Aarch32 -> "arm32"
   | `Aarch64 -> "arm64"
+  | `S390x -> "s390x"
 
 let of_opam_arch = function
   | "x86_32" -> Some `I386
@@ -237,6 +243,7 @@ let of_opam_arch = function
   | "ppc64" -> Some `Ppc64le
   | "arm32" -> Some `Aarch32
   | "arm64" -> Some `Aarch64
+  | "s390x" -> Some `S390x
   | _ -> None
 
 let to_docker_arch = function
@@ -245,6 +252,7 @@ let to_docker_arch = function
    | `Ppc64le -> "ppc64le"
    | `Aarch32 -> "arm"
    | `Aarch64 -> "arm64"
+   | `S390x -> "s390x"
 
 let of_docker_arch = function
   | "386" -> Some `I386
@@ -252,6 +260,7 @@ let of_docker_arch = function
   | "ppc64le" -> Some `Ppc64le
   | "arm" -> Some `Aarch32
   | "arm64" -> Some `Aarch64
+  | "s390x" -> Some `S390x
   | _ -> None
 
 module Since = struct
@@ -259,11 +268,12 @@ module Since = struct
 
   let arch (a:arch) =
     match a with
-    | `I386 -> Releases.v4_06_0 (* TODO can be earlier *)
+    | `I386 -> Releases.v4_06_0 (* can be earlier, but no demand *)
     | `Aarch32 -> Releases.v4_06_0
     | `Aarch64 -> Releases.v4_05_0
     | `Ppc64le -> Releases.v4_06_0
-    | `X86_64 -> Releases.v4_00_0 (* TODO obviously earlier *)
+    | `S390x -> Releases.v4_10_0 (* can be earlier, but not enough build resources *)
+    | `X86_64 -> Releases.v4_00_0 (* can be earlier, but no demand for earlier versions *)
 
   let autoconf = Releases.v4_08_0
 
@@ -291,6 +301,12 @@ module Has = struct
     match compare Since.options_packages v with
     |(-1) | 0 -> true
     |_ -> false
+
+  let multicore v =
+    match v.major, v.minor with
+    | 4, 10 -> true
+    | 4, 12 -> true
+    | _ -> false
 end
 
 module Configure_options = struct
@@ -298,19 +314,29 @@ module Configure_options = struct
       `Afl
     | `Default_unsafe_string
     | `Disable_flat_float_array
+    | `Domains
+    | `Effects
     | `Flambda
     | `Force_safe_string
     | `Frame_pointer
-    | `No_naked_pointers ]
+    | `Multicore
+    | `Multicore_no_effect_syntax
+    | `No_naked_pointers
+    | `No_naked_pointers_checker ]
 
   let to_description (t:o) =
     match t with
     | `Afl -> "AFL (fuzzing) support"
     | `Flambda -> "flambda inlining"
     | `Default_unsafe_string -> "default to unsafe strings"
+    | `Domains -> "experimental multicore parallelism"
+    | `Effects -> "experimental multicore parallelism and effects-based concurrency"
     | `Force_safe_string -> "force safe string mode"
     | `Frame_pointer -> "frame pointer"
+    | `Multicore -> "experimental multicore parallelism"
+    | `Multicore_no_effect_syntax -> "experimental multicore with syntax matching vanilla OCaml"
     | `No_naked_pointers -> "forbid unboxed pointers"
+    | `No_naked_pointers_checker -> "enable the naked pointers checker"
     | `Disable_flat_float_array -> "disable float array unboxing"
 
   let to_string t =
@@ -318,26 +344,39 @@ module Configure_options = struct
     | `Afl -> "afl"
     | `Flambda -> "flambda"
     | `Default_unsafe_string -> "default-unsafe-string"
+    | `Domains -> "domains"
+    | `Effects -> "effects"
     | `Force_safe_string -> "force-safe-string"
     | `Frame_pointer -> "fp"
+    | `Multicore -> "multicore"
+    | `Multicore_no_effect_syntax -> "no-effect-syntax"
     | `No_naked_pointers -> "nnp"
+    | `No_naked_pointers_checker -> "nnpchecker"
     | `Disable_flat_float_array -> "no-flat-float-array"
 
   let of_string = function
     | "afl" -> Some `Afl
     | "flambda" -> Some `Flambda
     | "default-unsafe-string" -> Some `Default_unsafe_string
+    | "domains" -> Some `Domains
+    | "effects" -> Some `Effects
     | "force-safe-string" -> Some `Force_safe_string
     | "fp" -> Some `Frame_pointer
+    | "multicore" -> Some `Multicore
+    | "no-effect-syntax" -> Some `Multicore_no_effect_syntax
     | "nnp" -> Some `No_naked_pointers
+    | "nnpchecker" -> Some `No_naked_pointers_checker
     | "no-flat-float-array" -> Some `Disable_flat_float_array
     | _ -> None
 
   let compare_pre_options a b =
-    (* For backwards compat reasons, fp always comes first. *)
+    (* For backwards compat reasons, multicore and fp always comes first. *)
     match a,b with
     | `Frame_pointer, `Frame_pointer -> 0
+    | `Multicore, `Multicore -> 0
+    | `Multicore, _ -> (-1)
     | `Frame_pointer, _ -> (-1)
+    | _, `Multicore -> 1
     | _, `Frame_pointer -> 1
     | a, b -> Stdlib.compare a b
 
@@ -371,6 +410,11 @@ module Configure_options = struct
       | _, Error b -> Error b
       | Error a, _-> Error a) (Ok [])
 
+  let of_t_exn t =
+    match of_t t with
+    | Ok v -> v
+    | Error (`Msg m) -> raise (Failure m)
+
   let to_configure_flag t o =
     if Has.autoconf t then
       match o with
@@ -379,7 +423,9 @@ module Configure_options = struct
       | `Default_unsafe_string -> "--enable-default-unsafe-string"
       | `Force_safe_string -> "--force-safe-string"
       | `Frame_pointer -> "--enable-frame-pointers"
+      | `Multicore | `Domains | `Effects | `Multicore_no_effect_syntax -> ""
       | `No_naked_pointers -> "--disable-naked-pointers"
+      | `No_naked_pointers_checker -> "--enable-naked-pointers-checker"
       | `Disable_flat_float_array -> "--disable-flat-float-array"
     else
       match o with
@@ -389,6 +435,11 @@ module Configure_options = struct
       | `Force_safe_string -> "-force-safe-string"
       | `Frame_pointer -> "-with-frame-pointer"
       | _ -> ""
+
+  let is_multicore t =
+    of_t_exn t |>
+    List.exists (function |`Multicore |`Domains -> true |_ -> false)
+
 end
 
 module Sources = struct
@@ -404,7 +455,7 @@ let trunk_variants (arch:arch) =
   let base = [[]; [`No_naked_pointers]; [`Afl]; [`Flambda]; [`Disable_flat_float_array]] in
   let arch_opts =
     match arch with
-    |`X86_64 -> [[`Frame_pointer]; [`Frame_pointer;`Flambda]]
+    |`X86_64 -> [[`Frame_pointer]; [`Frame_pointer;`Flambda]; [`No_naked_pointers_checker]]
     |_ -> []
   in
   List.map (Configure_options.to_t Sources.trunk) (base @ arch_opts)
@@ -419,6 +470,20 @@ let compiler_variants arch ({major; minor; _} as t) =
       (* No variants for OCaml < 4.00 *)
       if version < (4, 00) then []
       else
+        (* multicore options for OCaml = 4.10 on x86_64 *)
+        let variants =
+          match (arch, version) with
+          | (`X86_64, (4, 12)) ->
+            [`Domains ] :: [`Domains; `Effects] :: variants
+          | _ ->
+            variants
+        in
+        (* +nnpchecker for OCaml 4.12+ on x86_64 *)
+        let variants =
+          if arch = `X86_64 && version >= (4, 12) then
+            [`No_naked_pointers_checker] :: variants
+          else
+            variants in
         (* +nnp for OCaml 4.12+ *)
         let variants =
           if version >= (4, 12) then
@@ -460,6 +525,7 @@ let compiler_variants arch ({major; minor; _} as t) =
 module Opam = struct
 
   module V2 = struct
+
     let package t =
       match t.extra with
       | Some extra when Releases.is_dev t ->
@@ -472,8 +538,11 @@ module Opam = struct
           in
             ("ocaml-variants", version)
       | Some _ ->
-          let t =
-            if Has.options_packages t then
+         let t =
+            (* multicore fork packages are at the lowest patch version *)
+            if Configure_options.is_multicore t then
+              with_patch t (Some 0)
+            else if Has.options_packages t then
               with_variant t (Some "options")
             else
               t
@@ -483,7 +552,7 @@ module Opam = struct
       | None -> ("ocaml-base-compiler", to_string t)
 
     let additional_packages t =
-      if Has.options_packages t then
+      if Has.options_packages t && not (Configure_options.is_multicore t) then
         match Configure_options.of_t t with
         | Ok []
         | Error _ -> []

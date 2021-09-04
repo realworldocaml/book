@@ -4,7 +4,7 @@
   (:x README.md)
   (package base)
   (package base_quickcheck)
-  (package core_kernel)
+  (package core)
   (package lambdasoup)
   (package mdx)
   (package ppx_jane)

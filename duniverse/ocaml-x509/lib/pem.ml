@@ -4,14 +4,14 @@ module Cs = struct
   open Cstruct
 
   let begins_with cs target =
-    let l1 = len cs and l2 = len target in
+    let l1 = length cs and l2 = length target in
     l1 >= l2 && equal (sub cs 0 l2) target
 
   let ends_with cs target =
-    let l1 = len cs and l2 = len target in
+    let l1 = length cs and l2 = length target in
     l1 >= l2 && equal (sub cs (l1 - l2) l2) target
 
-  let null cs = len cs = 0
+  let null cs = length cs = 0
 
   let open_begin = of_string "-----BEGIN "
   and open_end   = of_string "-----END "
@@ -23,9 +23,9 @@ module Cs = struct
     else if get_char cs 0 = '#' then
       `Empty
     else if begins_with cs open_begin && ends_with cs close then
-      `Begin (to_string @@ sub cs 11 (len cs - 16))
+      `Begin (to_string @@ sub cs 11 (length cs - 16))
     else if begins_with cs open_end && ends_with cs close then
-      `End (to_string @@ sub cs 9 (len cs - 14))
+      `End (to_string @@ sub cs 9 (length cs - 14))
     else
       `Data cs
 
@@ -69,7 +69,7 @@ module Cs = struct
 
   let unparse ~tag value =
     let rec split_at_64 acc = function
-      | x when len x <= 64 -> List.rev (x :: acc)
+      | x when length x <= 64 -> List.rev (x :: acc)
       | x -> let here, rest = split x 64 in
         split_at_64 (here :: acc) rest
     in

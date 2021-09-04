@@ -1,2 +1,36 @@
-(lang dune 1.3)
+(lang dune 2.5)
 (name spawn)
+(version v0.14.0)
+
+(generate_opam_files true)
+
+(maintainers opensource@janestreet.com)
+(source (github janestreet/spawn))
+(documentation https://janestreet.github.io/spawn/)
+(authors  "Jane Street Group, LLC <opensource@janestreet.com>")
+(license MIT)
+
+(package
+ (name spawn)
+ (depends
+  (ppx_expect :with-test)
+  (ocaml (>= 4.02.3)))
+ (synopsis "Spawning sub-processes")
+ (description "\
+Spawn is a small library exposing only one functionality: spawning sub-process.
+
+It has three main goals:
+
+1. provide missing features of Unix.create_process such as providing a
+working directory
+
+2. provide better errors when a system call fails in the
+sub-process. For instance if a command is not found, you get a proper
+[Unix.Unix_error] exception
+
+3. improve performances by using vfork when available. It is often
+claimed that nowadays fork is as fast as vfork, however in practice
+fork takes time proportional to the process memory while vfork is
+constant time. In application using a lot of memory, vfork can be
+thousands of times faster than fork.
+"))

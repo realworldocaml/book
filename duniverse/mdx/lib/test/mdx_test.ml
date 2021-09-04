@@ -59,7 +59,7 @@ let with_dir root f =
         r
       with e ->
         Sys.chdir old_d;
-        raise e )
+        raise e)
 
 let get_env unset_variables =
   let env = Array.to_list (Unix.environment ()) in
@@ -89,7 +89,7 @@ let root_dir ?root ?block () =
   | Some { dir = Some d; loc = { loc_start = { pos_fname; _ }; _ }; _ } -> (
       match root with
       | Some r -> Some (r / d)
-      | None -> Some (Filename.dirname pos_fname / d) )
+      | None -> Some (Filename.dirname pos_fname / d))
   | None -> root
 
 let resolve_root file dir root =
@@ -154,10 +154,16 @@ let eval_ocaml ~block ?syntax ?root c ppf cmd errors =
     (* [eval_ocaml] only called on OCaml blocks *)
     | _ -> assert false
   in
-  match eval_test ?root ~block c cmd with
-  | Ok _ -> Block.pp ?syntax ppf (update ~errors:[] block)
-  | Error lines ->
-      let errors =
+  let contains_warnings = String.is_infix ~affix:"Warning" in
+  let lines =
+    match eval_test ?root ~block c cmd with
+    | Ok lines -> List.filter contains_warnings lines
+    | Error lines -> lines
+  in
+  let errors =
+    match lines with
+    | [] -> []
+    | lines ->
         let lines = split_lines lines in
         let output = List.map output_from_line lines in
         if Output.equal output errors then errors
@@ -167,8 +173,8 @@ let eval_ocaml ~block ?syntax ?root c ppf cmd errors =
               | `Ellipsis -> `Ellipsis
               | `Output x -> `Output (ansi_color_strip x))
             (Output.merge output errors)
-      in
-      Block.pp ?syntax ppf (update ~errors block)
+  in
+  Block.pp ?syntax ppf (update ~errors block)
 
 let lines = function Ok x | Error x -> x
 
@@ -211,7 +217,7 @@ let read_parts file =
     | parts ->
         let f = { first = parts; current = parts } in
         Hashtbl.add files file f;
-        f )
+        f)
 
 let read_part file part =
   let parts = read_parts file in
@@ -268,13 +274,13 @@ let preludes ~prelude ~prelude_str =
 
 let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
     ~verbose_findlib ~prelude ~prelude_str ~file ~section ~root ~force_output
-    ~output ~dirs ~packages ~predicates =
+    ~output ~directives ~packages ~predicates =
   Printexc.record_backtrace record_backtrace;
   let syntax =
     match syntax with Some syntax -> Some syntax | None -> Syntax.infer ~file
   in
   let c =
-    Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib ~dirs
+    Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib ~directives
       ~packages ~predicates ()
   in
   let preludes = preludes ~prelude ~prelude_str in
@@ -356,16 +362,16 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
         | Block t -> (
             List.iter (fun (k, v) -> Unix.putenv k v) (Block.set_variables t);
             try test_block ~ppf ~temp_file t
-            with Failure msg -> raise (Test_block_failure (t, msg)) ))
+            with Failure msg -> raise (Test_block_failure (t, msg))))
       items;
     Format.pp_print_flush ppf ();
     Buffer.contents buf
   in
-  ( match output with
+  (match output with
   | Some `Stdout -> Mdx.run_to_stdout ?syntax ~f:gen_corrected file
   | Some (`File outfile) ->
       Mdx.run_to_file ?syntax ~outfile ~f:gen_corrected file
-  | None -> Mdx.run ?syntax ~force_output ~f:gen_corrected file )
+  | None -> Mdx.run ?syntax ~force_output ~f:gen_corrected file)
   >>! fun () ->
   Hashtbl.iter (write_parts ~force_output) files;
   0

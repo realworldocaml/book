@@ -10,8 +10,8 @@ let echo_client host port =
     Tls.Config.(client ~authenticator ~alpn_protocols:["http/1.1"; "h2"] ())
     (host, port) >>= fun t ->
   match Tls_lwt.Unix.epoch t with
-  | `Error -> printl "Error"
-  | `Ok epoch -> (
+  | Error () -> printl "Error"
+  | Ok epoch -> (
     match epoch.Tls.Core.alpn_protocol with
       | None -> printl "No protocol selected"
       | Some protocol -> printl ("Selected protocol: " ^ protocol)

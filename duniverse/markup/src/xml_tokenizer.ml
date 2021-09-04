@@ -97,7 +97,10 @@ let tokenize report resolve_reference (input, get_location) =
                   (Printf.sprintf "&#%s%s;" reference_prefix s, "reference",
                    "number out of range")) !throw unresolved
 
-              | Some n -> k (char n)
+              | Some n ->
+                let utf_8_encoded = Buffer.create 8 in
+                add_utf_8 utf_8_encoded n;
+                k (Buffer.contents utf_8_encoded)
               end
 
           | _, c when filter c ->

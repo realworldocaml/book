@@ -386,9 +386,9 @@ $ dune build freq.exe
 File "freq.ml", line 5, characters 53-66:
 5 |   In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
                                                          ^^^^^^^^^^^^^
-Error: This expression has type Counter.t -> Base.string -> Counter.t
+Error: This expression has type Counter.t -> Export.string -> Counter.t
        but an expression was expected of type
-         'a list -> Base.string -> 'a list
+         'a list -> Export.string -> 'a list
        Type Counter.t is not compatible with type 'a list
 [1]
 ```
@@ -420,9 +420,9 @@ With this implementation, the build now succeeds!
 $ dune build freq.exe
 ```
 
-Now we can turn to optimizing the implementation of `Counter`. Here's an
-alternate and far more efficient implementation, based on the `Map` data
-structure in `Core_kernel`.
+Now we can turn to optimizing the implementation of `Counter`. Here's
+an alternate and far more efficient implementation, based on `Base`'s
+`Map` data structure.
 
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
@@ -567,7 +567,7 @@ lightweight way:
 
 ```ocaml file=examples/erroneous/session_info/session_info.ml
 open Base
-module Time = Core_kernel.Time
+module Time = Core.Time
 
 module type ID = sig
   type t
@@ -779,7 +779,7 @@ let apply f_opt x =
   | None -> None
   | Some f -> Some (f x)
 
-(* The remainder of the list module *)
+(* The remainder of the option module *)
 include Option
 ```
 
@@ -953,7 +953,7 @@ $ dune build freq.exe
 File "counter.ml", line 18, characters 18-31:
 18 | let singleton l = Counter.touch Counter.empty
                        ^^^^^^^^^^^^^
-Error: The module Counter is an alias for module Dune__exe__Counter, which is missing
+Error: The module Counter is an alias for module Dune__exe__Counter, which is the current compilation unit
 [1]
 ```
 
@@ -1041,11 +1041,11 @@ scope should be short, whereas names that have a large scope, like the
 name of a function in a module interface, should be longer and more
 explicit.
 
-There is of course a tradeoff here, in that making your APIs more explicit
-tends to make them more verbose as well. Another useful rule of thumb is that
-more rarely used names should be longer and more explicit, since the cost of
-concision and the benefit of explicitness become more important the more
-often a name is used.
+There is of course a tradeoff here, in that making your APIs more
+explicit tends to make them more verbose as well. Another useful rule
+of thumb is that more rarely used names should be longer and more
+explicit, since the cost of verbosity goes down and the benefit of
+explicitness goes up the less often a name is used.
 
 ### Create Uniform Interfaces {#create-uniform-intefaces}
 

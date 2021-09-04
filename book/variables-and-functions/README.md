@@ -127,7 +127,7 @@ would work if we had instead written this purposefully confusing bit of code:
     let pi = 0. in
     area_of_circle outer_radius -. area_of_circle inner_radius
 Line 4, characters 9-11:
-Warning 26: unused variable pi.
+Warning 26 [unused-var]: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 ```
 
@@ -200,7 +200,7 @@ patterns]{.idx}
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
 Lines 2-3, characters 5-60:
-Warning 8: this pattern-matching is not exhaustive.
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
 val upcase_first_entry : string -> string = <fun>
@@ -604,6 +604,9 @@ operators]{.idx}[negation operators]{.idx}
 - : int = 3
 # Int.max 3 -4
 Line 1, characters 1-10:
+Warning 5 [ignored-partial-application]: this function application is partial,
+maybe some arguments are missing.
+Line 1, characters 1-10:
 Error: This expression has type int -> int
        but an expression was expected of type int
 ```
@@ -612,6 +615,9 @@ Here, OCaml is interpreting the second expression as equivalent to.
 
 ```ocaml env=main
 # (Int.max 3) - 4
+Line 1, characters 1-12:
+Warning 5 [ignored-partial-application]: this function application is partial,
+maybe some arguments are missing.
 Line 1, characters 1-12:
 Error: This expression has type int -> int
        but an expression was expected of type int
@@ -1201,7 +1207,7 @@ can't be erased at all, which leads to a compiler warning.
 ```ocaml env=main
 # let concat x y ?(sep="") = x ^ sep ^ y
 Line 1, characters 18-24:
-Warning 16: this optional argument cannot be erased.
+Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
 ```
 

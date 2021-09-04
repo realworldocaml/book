@@ -262,6 +262,15 @@ let connect_with_tls_native ~ctx (`Hostname hostname, `IP ip, `Port port) =
       Conduit_lwt_tls.X509.private_of_pems ~cert ~priv_key
       >|= fun certificate -> Some (`Single certificate))
   >>= fun certificates ->
+  let hostname =
+    try Domain_name.(host_exn (of_string_exn hostname))
+    with Invalid_argument msg ->
+      let s =
+        Printf.sprintf "couldn't convert %s to a [`host] Domain_name.t: %s"
+          hostname msg
+      in
+      invalid_arg s
+  in
   Conduit_lwt_tls.Client.connect ?src:ctx.src ?certificates
     ~authenticator:ctx.tls_authenticator hostname sa
   >|= fun (fd, ic, oc) ->

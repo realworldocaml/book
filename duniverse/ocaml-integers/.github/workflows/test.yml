@@ -1,0 +1,60 @@
+name: Main workflow
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Prime the caches every Monday
+    - cron: 0 1 * * MON
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ocaml-compiler: 4.03.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.04.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.05.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.06.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.07.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.08.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.09.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.10.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.11.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.12.x
+          - os: windows-latest
+            ocaml-compiler: 4.11.x
+          - os: windows-latest
+            ocaml-compiler: 4.12.x
+          - os: macos-latest
+            ocaml-compiler: 4.11.1
+          - os: macos-latest
+            ocaml-compiler: 4.12.x
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - run: opam install . --deps-only --with-test
+
+      - run: opam exec -- dune build
+
+      - run: opam exec -- dune runtest

@@ -1,6 +1,6 @@
 {
   "name": "odoc",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "The OCaml/Reason Documentation Generator",
   "repository": "https://github.com/ocaml/odoc",
   "authors": [

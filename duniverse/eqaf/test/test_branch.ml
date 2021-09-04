@@ -30,14 +30,14 @@ let[@inline always] select_int choose_b a b =
   logical_or (logical_and a (logical_not mask)) (logical_and b mask)
 
 let one_if_not_zero_ops =
-  let _ = one_if_not_zero 0xdeadbeef in
+  let _ = one_if_not_zero 0x7eadbeef in
   Format.printf "[one_if_not_zero]:             %d operation(s).\n%!" !operation ;
   !operation
 
 let () = operation := 0
 
 let zero_if_not_zero_ops =
-  let _ = zero_if_not_zero 0xdeadbeef in
+  let _ = zero_if_not_zero 0x7eadbeef in
   Format.printf "[zero_if_not_zero]:            %d operation(s).\n%!" !operation ;
   !operation
 
@@ -92,10 +92,10 @@ let fdiv a b = a /. b
 
 let () =
   let t0 = time () in
-  let _  = one_if_not_zero 0xdeadbeef in
+  let _  = one_if_not_zero 0x7eadbeef in
   let t1 = time () in
   let v0 = Int64.(floor (fdiv (to_float (sub t1 t0)) 1000000000.)) in
-  Format.printf "[one_if_not_zero 0xdeadbeef]:  %fs.\n%!" v0 ;
+  Format.printf "[one_if_not_zero 0x7eadbeef]:  %fs.\n%!" v0 ;
   let t0 = time () in
   let _  = one_if_not_zero 0x0 in
   let t1 = time () in
@@ -108,10 +108,10 @@ let () =
 
 let () =
   let t0 = time () in
-  let _  = zero_if_not_zero 0xdeadbeef in
+  let _  = zero_if_not_zero 0x7eadbeef in
   let t1 = time () in
   let v0 = Int64.(floor (fdiv (to_float (sub t1 t0)) 1000000000.)) in
-  Format.printf "[zero_if_not_zero 0xdeadbeef]: %fs.\n%!" v0 ;
+  Format.printf "[zero_if_not_zero 0x7eadbeef]: %fs.\n%!" v0 ;
   let t0 = time () in
   let _  = zero_if_not_zero 0x0 in
   let t1 = time () in

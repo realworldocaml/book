@@ -1,4 +1,4 @@
-version: "4.0.0"
+version: "4.0.1"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -26,7 +26,7 @@ depends: [
 ]
 depopts: ["tls" "lwt_ssl" "launchd"]
 conflicts: [
-  "tls" {< "0.13.0"}
+  "tls" {< "0.14.0"}
   "ssl" {< "0.5.9"}
 ]
 build: [

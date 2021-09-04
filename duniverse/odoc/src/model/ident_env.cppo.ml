@@ -244,6 +244,10 @@ let add_signature_tree_item parent item env =
         (fun decl env -> add_type parent decl.typ_id (TypeName.of_ident decl.typ_id) env)
         ts env
 #endif
+#if OCAML_VERSION >= (4,13,0)
+    | Tsig_modtypesubst mtd ->
+      add_module_type parent mtd.mtd_id (ModuleTypeName.of_ident mtd.mtd_id) env
+#endif
     | Tsig_value _ | Tsig_typext _
     | Tsig_exception _ | Tsig_open _
     | Tsig_attribute _ -> env

@@ -386,3 +386,10 @@ let top_directive_require pkg =
 #else  
   Parsetree.Ptop_dir ("require", Pdir_string pkg)
 #endif
+
+let ctype_is_equal =
+#if OCAML_VERSION >= (4, 13, 0)
+  Ctype.is_equal
+#else
+  Ctype.equal
+#endif

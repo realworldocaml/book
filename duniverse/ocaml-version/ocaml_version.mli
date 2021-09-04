@@ -74,9 +74,9 @@ val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
     These definitions cover the CPU architectures that OCaml
     runs and is supported on. *)
 
-type arch = [ `I386 | `X86_64 | `Aarch64 | `Aarch32 | `Ppc64le ]
+type arch = [ `I386 | `X86_64 | `Aarch64 | `Aarch32 | `Ppc64le | `S390x ]
 (** Type of CPU architectures.
-    TODO: This is currently an incomplete list, and lists just
+    This is currently an incomplete list, and lists just
     those used by the opam test systems. Contributions welcome
     to complete it. *)
 
@@ -296,11 +296,17 @@ module Releases : sig
   val v4_11 : t
   (** Latest release in the 4.11.x series *)
 
+  val v4_12_0 : t
+  (** Version 4.12.0 *)
+
   val v4_12 : t
   (** Latest release in the 4.12.x series *)
 
   val v4_13 : t
   (** Latest release in the 4.13.x series *)
+
+  val v4_14 : t
+  (** Latest release in the 4.14.x series *)
 
   val all_patches : t list
   (** [all_patches] is an enumeration of all OCaml releases, including every patch release.
@@ -381,19 +387,36 @@ module Has : sig
   val options_packages : t -> bool
   (** [options_packages t] will return true if the release [t] uses [ocaml-option-*]
       packages in opam-repository, rather than +variant packages *)
+
+  val multicore : t -> bool
+  (** [multicore t] will return true if the release [t] has a multicore OCaml fork
+      available for it.  This requires the [https://github.com/ocaml-multicore/multicore-opam]
+      opam switch to be added before the package is available.
+
+      Note that the multicore variants changed between 4.10 and 4.12, and this
+      function returns true for any of them. *)
 end
 
 (** Configuration parameters that affect the behaviour of OCaml at compiler-build-time. *)
 module Configure_options : sig
-
+  (*
+   The variants for multicore changed between 4.10 and 4.12.
+   Multicore and Multicore_no_effect_syntax are used with 4.10 (+multicore and +multicore+no-effect-syntax).
+   Domains and Effects are used with 4.12 (+domains and +domains+effects).
+  *)
   type o =
     [ `Afl
     | `Default_unsafe_string
     | `Disable_flat_float_array
+    | `Domains
+    | `Effects
     | `Flambda
     | `Force_safe_string
     | `Frame_pointer
-    | `No_naked_pointers ]
+    | `Multicore
+    | `Multicore_no_effect_syntax
+    | `No_naked_pointers
+    | `No_naked_pointers_checker ]
 
   (** Configuration options available at compiler build time. *)
 
@@ -425,6 +448,8 @@ module Configure_options : sig
   val equal : t -> o -> o -> bool
   (** [equal t a b] will return {!true} if [a=b] for a given OCaml version [t]. *)
 
+  val is_multicore : t -> bool
+  (** [is_multicore t] is {!true} if this version is a multicore-capable release. *)
 end
 
 val compiler_variants : arch -> t -> t list
@@ -447,7 +472,7 @@ module Opam : sig
 
     val additional_packages : t -> string list
     (** [additional_packages t] returns the list of opam packages which need to
-        be installed in addition to the {!package}[ t]. *)
+        be installed in addition to the {!package} [t]. *)
 
     val name : t -> string
     (** [name t] returns the opam2 package for that compiler version. *)

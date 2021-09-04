@@ -1,5 +1,5 @@
 #require "base";;
-#require "core_kernel";;
+#require "core";;
 #require "ppx_jane";;
 #require "base_quickcheck";;
 #require "lambdasoup";;

@@ -105,3 +105,6 @@ val top_directive_name : Parsetree.toplevel_phrase -> string option
 
 val top_directive_require : string -> Parsetree.toplevel_phrase
 (** [top_directive require "pkg"] builds the AST for [#require "pkg"] *)
+
+val ctype_is_equal :
+  Env.t -> bool -> Types.type_expr list -> Types.type_expr list -> bool

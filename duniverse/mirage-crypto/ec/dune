@@ -6,8 +6,9 @@
   (language c)
   (names p224_stubs np224_stubs p256_stubs np256_stubs p384_stubs np384_stubs
     p521_stubs np521_stubs curve25519_stubs)
+  (include_dirs ../src/native)
   (flags
-   (:standard -I../src/native -DNDEBUG)
+   (:standard -DNDEBUG)
    (:include cflags_optimized.sexp))))
 
 (env

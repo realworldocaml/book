@@ -81,7 +81,7 @@ type common_session_data = {
   received_certificates  : Cert.t list ;
   own_certificate        : Cert.t list ;
   own_private_key        : Priv.t option ;
-  own_name               : string option ;
+  own_name               : Peer_name.t option ;
   client_auth            : bool ;
   master_secret          : master_secret ;
   alpn_protocol          : string option ; (* selected alpn protocol after handshake *)

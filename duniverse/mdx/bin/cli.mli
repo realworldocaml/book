@@ -22,6 +22,8 @@ val prelude : [> `Prelude of string list ] t
 
 val prelude_str : [> `Prelude_str of string list ] t
 
+val directories : [> `Directories of string list ] t
+
 val root : [> `Root of string option ] t
 
 val force_output : [> `Force_output of bool ] t

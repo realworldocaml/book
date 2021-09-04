@@ -69,3 +69,6 @@ let assert_server_extension_equal a b =
 
 let cs_mmap file =
   Unix_cstruct.of_fd Unix.(openfile file [O_RDONLY] 0)
+
+let make_hostname_ext h =
+  (`Hostname (Domain_name.of_string_exn h |> Domain_name.host_exn))

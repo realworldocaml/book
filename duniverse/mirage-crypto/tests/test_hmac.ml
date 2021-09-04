@@ -221,10 +221,28 @@ let test hash i ((key, data), result) _ =
 let test_hmac name id =
   List.mapi (fun i args -> "HMAC " ^ name ^ " " ^ string_of_int i >:: test id i args)
 
+let test_feed hash i ((key, data), result) _ =
+  let (module H) = Hash.module_of hash in
+  let empty = H.hmac_empty ~key in
+  let computed = H.hmac_get (H.hmac_feed empty data) in
+  if i == 4 (* truncated thingy *) then
+    assert_cs_equal result Cstruct.(sub computed 0 (len result))
+  else
+    assert_cs_equal result computed
+
+let test_feed_hmac name id =
+  List.mapi (fun i args -> "HMAC feed " ^ name ^ " " ^ string_of_int i >:: test_feed id i args)
+
 let suite =
   test_hmac "MD5" `MD5 (List.combine md5_inputs md5_results) @
   test_hmac "SHA1" `SHA1 (List.combine sha1_inputs sha1_results) @
   test_hmac "SHA224" `SHA224 (List.combine sha2_inputs sha224_results) @
   test_hmac "SHA256" `SHA256 (List.combine sha2_inputs sha256_results) @
   test_hmac "SHA384" `SHA384 (List.combine sha2_inputs sha384_results) @
-  test_hmac "SHA512" `SHA512 (List.combine sha2_inputs sha512_results)
+  test_hmac "SHA512" `SHA512 (List.combine sha2_inputs sha512_results) @
+  test_feed_hmac "MD5" `MD5 (List.combine md5_inputs md5_results) @
+  test_feed_hmac "SHA1" `SHA1 (List.combine sha1_inputs sha1_results) @
+  test_feed_hmac "SHA224" `SHA224 (List.combine sha2_inputs sha224_results) @
+  test_feed_hmac "SHA256" `SHA256 (List.combine sha2_inputs sha256_results) @
+  test_feed_hmac "SHA384" `SHA384 (List.combine sha2_inputs sha384_results) @
+  test_feed_hmac "SHA512" `SHA512 (List.combine sha2_inputs sha512_results)

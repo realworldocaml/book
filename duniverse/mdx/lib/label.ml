@@ -67,7 +67,7 @@ module Relation = struct
           let op = of_string (Re.Group.get g 2) in
           let value = Re.Group.get g 3 in
           (label, Some (op, value))
-        with Not_found -> (s, None) )
+        with Not_found -> (s, None))
 end
 
 type non_det = Nd_output | Nd_command
@@ -171,7 +171,7 @@ let interpret label value =
       | Some (Relation.Eq, v) ->
           let allowed_values = [ "<none>"; {|"command"|}; {|"output"|} ] in
           invalid_value ~label ~allowed_values v
-      | Some _ -> non_eq_op ~label )
+      | Some _ -> non_eq_op ~label)
   | "dir" -> requires_eq_value ~label ~value (fun x -> Dir x)
   | "source-tree" -> requires_eq_value ~label ~value (fun x -> Source_tree x)
   | "file" -> requires_eq_value ~label ~value (fun x -> File x)
@@ -199,4 +199,4 @@ let of_string s =
       let split = String.split_on_char ',' s in
       match List.fold_left f (Ok []) split with
       | Ok labels -> Ok (List.rev labels)
-      | Error msgs -> Error (List.rev msgs) )
+      | Error msgs -> Error (List.rev msgs))

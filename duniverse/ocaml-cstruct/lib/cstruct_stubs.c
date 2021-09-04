@@ -23,10 +23,14 @@
 #include <caml/alloc.h>
 #include <caml/bigarray.h>
 
+#ifndef Bytes_val
+#define Bytes_val String_val
+#endif
+
 CAMLprim value
 caml_blit_bigstring_to_string(value val_buf1, value val_ofs1, value val_buf2, value val_ofs2, value val_len)
 {
-  memcpy(String_val(val_buf2) + Long_val(val_ofs2),
+  memcpy(Bytes_val(val_buf2) + Long_val(val_ofs2),
          (char*)Caml_ba_data_val(val_buf1) + Long_val(val_ofs1),
          Long_val(val_len));
   return Val_unit;

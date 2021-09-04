@@ -12,7 +12,7 @@ contents of all configuration files read by Dune and looks like:
 
 .. code:: scheme
 
-   (lang dune 2.8)
+   (lang dune 2.9)
 
 Additionally, they can contains the following stanzas.
 
@@ -189,6 +189,8 @@ where ``<setting>`` is one of:
 
 - ``(enabled_for <languages>)`` can be used to restrict the languages that are
   considered for formatting.
+
+.. _generate_opam_files:
 
 generate_opam_files
 -------------------
@@ -1628,7 +1630,7 @@ The supported Coq language versions are:
 
 - ``0.1``: basic Coq theory support,
 - ``0.2``: support for the ``theories`` field, and composition of theories in the same scope,
-- ``0.3``: support for ``(mode native)``, requires Coq >= 8.10.
+- ``0.3``: support for ``(mode native)``, requires Coq >= 8.10 (and dune >= 2.9 for Coq >= 8.14).
 
 Guarantees with respect to stability are not provided yet,
 however, as implementation of features progresses, we hope to reach
@@ -1819,6 +1821,15 @@ Where ``<optional-fields>`` are:
   See `MDX's documentation <https://github.com/realworldocaml/mdx>`__ for more
   details on preludes.
 
+- ``(enabled_if <blang expression>)`` is the same as the corresponding field of
+  `library`_.
+
+- ``(package <package>)`` specifies which package to attach this stanza to
+  (similarly to when ``(package)`` is attached to a ``(rule)`` stanza. When
+  ``-p`` is passed, ``(mdx)`` stanzas with an other package will be ignored.
+  Note that this is feature is completely separate from ``(packages)``, which
+  specifies some dependencies.
+
 .. _plugin:
 
 plugin (since 2.8)
@@ -1933,7 +1944,7 @@ a typical ``dune-workspace`` file looks like:
 
 .. code:: scheme
 
-    (lang dune 2.8)
+    (lang dune 2.9)
     (context (opam (switch 4.07.1)))
     (context (opam (switch 4.08.1)))
     (context (opam (switch 4.11.1)))
@@ -1945,7 +1956,7 @@ containing exactly:
 
 .. code:: scheme
 
-    (lang dune 2.8)
+    (lang dune 2.9)
     (context default)
 
 This allows you to use an empty ``dune-workspace`` file to mark the root of your

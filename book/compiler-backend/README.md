@@ -58,14 +58,14 @@ The lambda output for this code looks like this:
 $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
-    (test/85 =
-       (function v/87 : int
-         (switch* v/87
+    (test/86 =
+       (function v/88 : int
+         (switch* v/88
           case int 0: 100
           case int 1: 101
           case int 2: 102
           case int 3: 103)))
-    (makeblock 0 test/85)))
+    (makeblock 0 test/86)))
 ```
 
 It's not important to understand every detail of this internal form, and it
@@ -108,8 +108,8 @@ The lambda output for this code is now quite different:
 ```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
-  (let (test/83 = (function v/85 : int (if v/85 101 100)))
-    (makeblock 0 test/83)))
+  (let (test/84 = (function v/86 : int (if v/86 101 100)))
+    (makeblock 0 test/84)))
 ```
 
 The compiler emits simpler conditional jumps rather than setting up a jump
@@ -134,13 +134,13 @@ polymorphic variants:
 $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
-    (test/80 =
-       (function v/82 : int
-         (if (!= v/82 3306965)
-           (if (>= v/82 482771474) (if (>= v/82 884917024) 100 102)
-             (if (>= v/82 3457716) 104 103))
+    (test/81 =
+       (function v/83 : int
+         (if (!= v/83 3306965)
+           (if (>= v/83 482771474) (if (>= v/83 884917024) 100 102)
+             (if (>= v/83 3457716) 104 103))
            101)))
-    (makeblock 0 test/80)))
+    (makeblock 0 test/81)))
 ```
 
 We mentioned in [Variants](variants.html#variants){data-type=xref} that

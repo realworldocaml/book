@@ -27,7 +27,7 @@ module Lwt_cs = struct
   and read  = naked ~name:"Tls_lwt.read"  Lwt_bytes.read
 
   let rec write_full fd = function
-    | cs when Cstruct.len cs = 0 -> return_unit
+    | cs when Cstruct.length cs = 0 -> return_unit
     | cs -> write fd cs >>= o (write_full fd) (Cstruct.shift cs)
 end
 
@@ -92,8 +92,8 @@ module Unix = struct
 
     let writeout res =
       let open Cstruct in
-      let rlen = len res in
-      let n    = min (len buf) rlen in
+      let rlen = length res in
+      let n    = min (length buf) rlen in
       blit res 0 buf 0 n ;
       t.linger <-
         (if n < rlen then Some (sub res n (rlen - n)) else None) ;
@@ -211,7 +211,10 @@ module Unix = struct
   let connect conf (host, port) =
     resolve host (string_of_int port) >>= fun addr ->
     let fd = Lwt_unix.(socket (Unix.domain_of_sockaddr addr) SOCK_STREAM 0) in
-    Lwt.catch (fun () -> Lwt_unix.connect fd addr >>= fun () -> client_of_fd conf ~host fd)
+    Lwt.catch (fun () -> 
+      (* A different exception could be raised here. [Invalid_argument] is a bit generic. *)
+      let host = Domain_name.of_string_exn host |> Domain_name.host_exn in
+      Lwt_unix.connect fd addr >>= fun () -> client_of_fd conf ~host fd)
       (fun exn -> safely (Lwt_unix.close fd) >>= fun () -> fail exn)
 
   let read_bytes t bs off len =

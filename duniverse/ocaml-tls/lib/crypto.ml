@@ -73,7 +73,7 @@ let sequence_buf seq =
 
 let aead_nonce nonce seq =
   let s =
-    let l = Cstruct.len nonce in
+    let l = Cstruct.length nonce in
     let s = sequence_buf seq in
     let pad = Cstruct.create (l - 8) in
     pad <+> s
@@ -114,7 +114,7 @@ let cbc_pad block data =
   let open Cstruct in
 
   (* 1 is the padding length, encoded as 8 bit at the end of the fragment *)
-  let len = 1 + len data in
+  let len = 1 + length data in
   (* we might want to add additional blocks of padding *)
   let padding_length = block - (len mod block) in
   (* 1 is again padding length field *)
@@ -126,7 +126,7 @@ let cbc_pad block data =
 let cbc_unpad data =
   let open Cstruct in
 
-  let len = len data in
+  let len = length data in
   let padlen = get_uint8 data (pred len) in
   let (res, pad) = split data (len - padlen - 1) in
 

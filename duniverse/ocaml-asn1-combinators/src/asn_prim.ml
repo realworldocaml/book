@@ -4,7 +4,6 @@
 open Asn_core
 
 module Writer = Asn_writer
-module Bigarray = Bigarray_compat
 
 module type Prim = sig
   type t
@@ -171,7 +170,7 @@ module Octets : Prim_s with type t = Cstruct.t = struct
 
   let concat = Cstruct.concat
 
-  let length = Cstruct.len
+  let length = Cstruct.length
 
 end
 
@@ -188,21 +187,21 @@ struct
   type t = int * Cstruct.t
 
   let of_cstruct cs =
-    let n = Cstruct.len cs in
+    let n = Cstruct.length cs in
     if n = 0 then parse_error "BITS" else
     let unused = Cstruct.get_uint8 cs 0 in
     if n = 1 && unused > 0 || unused > 7 then parse_error "BITS" else
     unused, Octets.of_cstruct (Cstruct.shift cs 1)
 
   let to_writer (unused, cs) =
-    let size = Cstruct.len cs in
+    let size = Cstruct.length cs in
     let write off cs' =
       Cstruct.set_uint8 cs' off unused;
       Cstruct.blit cs 0 cs' (off + 1) size in
     Writer.immediate (size + 1) write
 
   let to_array (unused, cs) =
-    Array.init (Cstruct.len cs * 8 - unused) @@ fun i ->
+    Array.init (Cstruct.length cs * 8 - unused) @@ fun i ->
       let byte = (Cstruct.get_uint8 cs (i / 8)) lsl (i mod 8) in
       byte land 0x80 = 0x80
 
@@ -237,7 +236,7 @@ struct
       go css in
     (unused, Cstruct.concat css')
 
-  and length (unused, cs) = Cstruct.len cs - unused
+  and length (unused, cs) = Cstruct.length cs - unused
 
 end
 
@@ -268,7 +267,7 @@ module OID = struct
       0 -> []
     | n -> let (c, i') = int_chain cs i n in
            c :: components cs i' (n + i - i') in
-    match Cstruct.len cs with
+    match Cstruct.length cs with
       0 -> parse_error "OID: 0 length"
     | n ->
         let (b1, i) = int_chain cs 0 n in

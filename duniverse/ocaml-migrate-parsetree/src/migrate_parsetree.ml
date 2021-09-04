@@ -37,6 +37,7 @@ module Ast_409 = Ast_409
 module Ast_410 = Ast_410
 module Ast_411 = Ast_411
 module Ast_412 = Ast_412
+module Ast_413 = Ast_413
 (*$*)
 
 (* Manual migration between versions *)
@@ -64,6 +65,8 @@ module Migrate_410_411 = Migrate_410_411
 module Migrate_411_410 = Migrate_411_410
 module Migrate_411_412 = Migrate_411_412
 module Migrate_412_411 = Migrate_412_411
+module Migrate_412_413 = Migrate_412_413
+module Migrate_413_412 = Migrate_413_412
 (*$*)
 
 (* Aliases for compiler-libs modules that might be shadowed *)

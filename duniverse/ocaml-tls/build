@@ -1,0 +1,8 @@
+#!/bin/sh
+
+function has { opam config var "${1}:installed"; }
+
+topkg build -- \
+  --with-lwt $(has 'lwt') \
+  --with-mirage $(has 'mirage-types') \
+  $@

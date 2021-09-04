@@ -236,18 +236,19 @@ personal experience to construct scalable, robust software systems.
 *Real World OCaml* uses some tools that we've developed while writing this
 book. Some of these resulted in improvements to the OCaml compiler, which
 means that you will need to ensure that you have an up-to-date development
-environment (using the 4.10.0 version of the compiler). The installation
+environment (using the 4.12.0 version of the compiler). The installation
 process is largely automated through the opam package manager. Instructions
 on how to set it up and what packages to install can be found at
 [the installation page](install.html).[installation
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
-`Core` requires a UNIX based operating system, and so only works on systems
-like macOS, Linux, FreeBSD, and OpenBSD or the Windows Subsystem for Linux
-(WSL).  Core includes a portable subset called `Core_kernel` which works
-anywhere OCaml is, and in particular works on Windows and JavaScript. The
-examples in Part I of the book will only use `Core_kernel` and other highly
-portable libraries.[OCaml/operating system support]{.idx}
+`Core` currently requires a UNIX based operating system, and so only
+works on systems like macOS, Linux, FreeBSD, and OpenBSD or the
+Windows Subsystem for Linux (WSL).  `Core` is an extension of `Base`
+which works anywhere OCaml does, and in particular works on Windows
+and JavaScript. The examples in Part I of the book will for the most
+part use only `Base` and other highly portable
+libraries.[OCaml/operating system support]{.idx}
 
 This book is not intended as a reference manual.  We aim to teach you
 about the language as well as the libraries, tools, and techniques

@@ -82,6 +82,10 @@ let bad_char i s =
   let msg = Printf.sprintf "invalid character '%c' at %d" s.[i] i in
   Parse_error (msg, s)
 
+let octal_notation s =
+  let msg = Printf.sprintf "octal notation disallowed" in
+  Parse_error (msg, s)
+
 let is_number base n = n >= 0 && n < base
 
 let parse_int base s i =
@@ -112,6 +116,11 @@ let expect_char s i c =
   else raise (need_more s)
 
 let expect_end s i = if String.length s <= !i then () else raise (bad_char !i s)
+
+let reject_octal s i =
+  if !i + 1 < String.length s then
+    if s.[!i] == '0' && is_number 10 (int_of_char s.[!i + 1]) then
+      raise (octal_notation s)
 
 let hex_char_of_int = function
   | 0 -> '0'
@@ -147,12 +156,16 @@ module V4 = struct
   (* parsing *)
 
   let parse_dotted_quad s i =
+    reject_octal s i;
     let a = parse_dec_int s i in
     expect_char s i '.';
+    reject_octal s i;
     let b = parse_dec_int s i in
     expect_char s i '.';
+    reject_octal s i;
     let c = parse_dec_int s i in
     expect_char s i '.';
+    reject_octal s i;
     let d = parse_dec_int s i in
     let valid a = a land 0xff <> a in
     if valid a then raise (Parse_error ("first octet out of bounds", s))

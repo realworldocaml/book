@@ -1,3 +1,10 @@
+1.5.3
+-----
+
+Additions
+
+- Compatibility with OCaml 4.13 (#699, @octachron)
+
 1.5.2
 -----
 
