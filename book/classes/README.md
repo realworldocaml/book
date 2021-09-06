@@ -734,7 +734,7 @@ when applied to objects:
 ```ocaml env=binary
 # Poly.(=)
     (object method area = 5 end)
-  (object method area = 5 end)
+    (object method area = 5 end)
 - : bool = false
 ```
 
@@ -751,7 +751,7 @@ comparison based on the representation type: [representation types]{.idx}
 ```ocaml env=binary
 # type shape_repr =
     | Square of int
-  | Circle of int
+    | Circle of int
 type shape_repr = Square of int | Circle of int
 # type shape =
   < repr : shape_repr; equals : shape -> bool; area : float >
@@ -760,7 +760,10 @@ type shape = < area : float; equals : shape -> bool; repr : shape_repr >
     method width = w
     method area = Float.of_int (self#width * self#width)
     method repr = Square self#width
-    method equals (other : shape) = Poly.(=) other#repr self#repr
+    method equals (other : shape) =
+       match (self#repr, other#repr) with
+       | Square x, Square x' -> Int.(=) x x'
+       | _ -> false
   end
 class square :
   int ->
@@ -797,16 +800,57 @@ end = struct
 end
 ```
 
-Note that this solution prevents us from adding new kinds of shapes without
-adding new constructors to the `shape_repr` type, which is quite restrictive.
-The objects created by these classes are also in one-to-one correspondence
-with members of the representation type, making the objects seem somewhat
+Note that this solution prevents us from adding new kinds of shapes
+without adding new constructors to the `shape_repr` type, which is
+quite restrictive.  We can fix this, however, by using OCaml's
+rarely-used but still useful *extensible variants*.  [extensible
+variants]{.idx}
+
+Extensible variants let you separate the definition of a variant type
+from the definition of its constructors. The resulting type is by
+definition open, in the sense that new variants can always be added.
+As a result, the compiler can't check whether pattern matching on such
+a variant is exhaustive. Happily, exhaustivity is not what we need
+here.
+
+Here's how we'd rewrite the above example with extensible variants.
+
+```ocaml env=binary
+# type shape_repr = ..
+type shape_repr = ..
+# type shape =
+  < repr : shape_repr; equals : shape -> bool; area : float >
+type shape = < area : float; equals : shape -> bool; repr : shape_repr >
+# type shape_repr += Square of int
+type shape_repr += Square of int
+# class square w = object(self)
+    method width = w
+    method area = Float.of_int (self#width * self#width)
+    method repr = Square self#width
+    method equals (other : shape) =
+       match (self#repr, other#repr) with
+       | Square x, Square x' -> Int.(=) x x'
+       | _ -> false
+  end
+class square :
+  int ->
+  object
+    method area : float
+    method equals : shape -> bool
+    method repr : shape_repr
+    method width : int
+  end
+```
+
+One oddity of the representation type approach is that the objects
+created by these classes are in one-to-one correspondence with members
+of the representation type, making the objects seem somewhat
 redundant.
 
-However, equality is quite an extreme instance of a binary method: it needs
-access to all the information of the other object. Many other binary methods
-need only partial information about the object. For instance, a method that
-compares shapes by their sizes:
+But equality is an extreme instance of a binary method: it needs
+access to all the information of the other object.  Many other binary
+methods need only partial information about the object.  For instance,
+a method that compares shapes by their sizes:
 
 ```ocaml skip
 class square w = object(self)
