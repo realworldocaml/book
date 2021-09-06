@@ -1,7 +1,8 @@
 open StdLabels
 
 let units fn =
-  (* The cma format is documented in typing/cmo_format.mli in the compiler sources *)
+  (* The cma format is documented in typing/cmo_format.mli in the compiler
+     sources *)
   let ic = open_in_bin fn in
   let len_magic_number = String.length Config.cma_magic_number in
   let magic_number = really_input_string ic len_magic_number in

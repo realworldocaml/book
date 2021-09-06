@@ -1,0 +1,4 @@
+(tests
+ (names test)
+ (package alcotest-lwt)
+ (libraries alcotest alcotest-lwt lwt lwt.unix))

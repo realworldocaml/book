@@ -87,7 +87,7 @@ depends: [
   "num" {= "1.3+dune"}
   "ocaml" {= "4.12.0"}
   "ocaml-base-compiler" {= "4.12.0"}
-  "ocaml-compiler-libs" {= "v0.12.3"}
+  "ocaml-compiler-libs" {= "v0.12.4"}
   "ocaml-config" {= "2"}
   "ocaml-migrate-parsetree" {= "2.2.0"}
   "ocaml-options-vanilla" {= "1"}
@@ -509,8 +509,8 @@ pin-depends: [
     "https://github.com/dune-universe/num/archive/v1.3+dune-2.tar.gz"
   ]
   [
-    "ocaml-compiler-libs.v0.12.3"
-    "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.3/ocaml-compiler-libs-v0.12.3.tbz"
+    "ocaml-compiler-libs.v0.12.4"
+    "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.4/ocaml-compiler-libs-v0.12.4.tbz"
   ]
   [
     "ocaml-migrate-parsetree.2.2.0"
@@ -1048,11 +1048,11 @@ x-opam-monorepo-duniverse-dirs: [
     ["md5=ede2f6d22eaa8320f88bac67d41b5cff"]
   ]
   [
-    "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.3/ocaml-compiler-libs-v0.12.3.tbz"
+    "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.4/ocaml-compiler-libs-v0.12.4.tbz"
     "ocaml-compiler-libs"
     [
-      "sha256=a8403531439c14bbda2d504ef93610fd29a8e9520fc700f21889d893a513e3c9"
-      "sha512=0bb03b38e93bab3274a8ade38d017808110bc02f2181a594d8775c68fdd465733393f0451dbbf8860e6b50b56c45671d2182637c0840d1d6574803ec18673972"
+      "sha256=4ec9c9ec35cc45c18c7a143761154ef1d7663036a29297f80381f47981a07760"
+      "sha512=978dba8dfa61f98fa24fda7a9c26c2e837081f37d1685fe636dc19cfc3278a940cf01a10293504b185c406706bc1008bc54313d50f023bcdea6d5ac6c0788b35"
     ]
   ]
   [

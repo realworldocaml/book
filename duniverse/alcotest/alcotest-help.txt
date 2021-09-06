@@ -1,0 +1,73 @@
+NAME
+       simple.exe - Run all the tests.
+
+SYNOPSIS
+       simple.exe COMMAND ...
+
+COMMANDS
+       list
+           List all available tests.
+
+       test
+           Run a subset of the tests.
+
+OPTIONS
+       --bail (absent ALCOTEST_BAIL env)
+           Stop running tests after the first failure.
+
+       -c, --compact (absent ALCOTEST_COMPACT env)
+           Compact the output of the tests.
+
+       --color=WHEN (absent ALCOTEST_COLOR env)
+           Colorize the output. WHEN must be one of `auto', `always' or
+           `never'. Defaults to `always' when running inside Dune, otherwise
+           defaults to `auto'.
+
+       -e, --show-errors (absent ALCOTEST_SHOW_ERRORS env)
+           Display the test errors.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of `auto',
+           `pager', `groff' or `plain'. With `auto', the format is `pager` or
+           `plain' whenever the TERM env var is `dumb' or undefined.
+
+       --json
+           Display JSON for the results, to be used by a script.
+
+       -o DIR (absent=<build-context>/_build/_tests/)
+           Where to store the log files of the tests.
+
+       -q, --quick-tests (absent ALCOTEST_QUICK_TESTS env)
+           Run only the quick tests.
+
+       --tail-errors=N (absent ALCOTEST_TAIL_ERRORS env)
+           Show only the last N lines of output in case of an error.
+
+       -v, --verbose (absent ALCOTEST_VERBOSE env)
+           Display the test outputs. WARNING: when using this option the
+           output logs will not be available for further inspection.
+
+ENVIRONMENT
+       These environment variables affect the execution of simple.exe:
+
+       ALCOTEST_BAIL
+           See option --bail.
+
+       ALCOTEST_COLOR
+           See option --color.
+
+       ALCOTEST_COMPACT
+           See option --compact.
+
+       ALCOTEST_QUICK_TESTS
+           See option --quick-tests.
+
+       ALCOTEST_SHOW_ERRORS
+           See option --show-errors.
+
+       ALCOTEST_TAIL_ERRORS
+           See option --tail-errors.
+
+       ALCOTEST_VERBOSE
+           See option --verbose.
+

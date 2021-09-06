@@ -1,0 +1,10 @@
+Testing `test/e2e/alcotest/passing/quick_only_regex.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          test-a          0   Quick & passes filter.
+  [SKIP]        test-a          1   Slow & passes filter.
+  [SKIP]        test-b          0   Slow & fails filter.
+  [SKIP]        test-b          1   Quick & fails filter.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 1 test run.
