@@ -1,5 +1,17 @@
 
 (rule
+ (alias hello-world)
+ (deps
+  (source_tree ./correct/hello-world)
+  (package alcotest))
+ (action
+  (system "dune build @all @runtest --root ./correct/hello-world")))
+
+(alias
+ (name runtest)
+ (deps (alias hello-world)))
+
+(rule
  (alias opam-spin-hello)
  (deps
   (source_tree ./correct/opam-spin-hello))
