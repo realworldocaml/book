@@ -343,7 +343,7 @@ end</code></pre>
 <pre><code class="language-ocaml">module AbstractStack : sig
    type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
 
-   val make : unit -&gt; 'a t
+   val make : 'a list -&gt; 'a t
 end = Stack</code></pre>
 </div>
 <p>The abstract signature is simple because we ignore the classes. But what if we want to include them in the signature so that other modules can inherit from the class definitions? For this, we need to specify types for the classes, called <em>class types</em>.</p>
@@ -359,7 +359,7 @@ end = Stack</code></pre>
     method push : 'a -&gt; unit
   end
 
-  val make : unit -&gt; 'a t
+  val make : 'a list -&gt; 'a t
 end = Stack</code></pre>
 </div>
 <p>In this signature, we’ve chosen to make everything visible. The class type for <code>stack</code> specifies the types of the field <code>v</code>, as well as the types of each of the methods.</p>
@@ -556,7 +556,7 @@ end
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(=)
   (object method area = 5 end)
-(object method area = 5 end)
+  (object method area = 5 end)
 ;;
 &gt;- : bool = false
 </code></pre>
@@ -566,7 +566,7 @@ end
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr =
   | Square of int
-| Circle of int
+  | Circle of int
 ;;
 &gt;type shape_repr = Square of int | Circle of int
 type shape =
@@ -577,7 +577,10 @@ class square w = object(self)
   method width = w
   method area = Float.of_int (self#width * self#width)
   method repr = Square self#width
-  method equals (other : shape) = Poly.(=) other#repr self#repr
+  method equals (other : shape) =
+     match (self#repr, other#repr) with
+     | Square x, Square x' -&gt; Int.(=) x x'
+     | _ -&gt; false
 end
 ;;
 &gt;class square :
@@ -611,8 +614,40 @@ end = struct
   ...
 end</code></pre>
 </div>
-<p>Note that this solution prevents us from adding new kinds of shapes without adding new constructors to the <code>shape_repr</code> type, which is quite restrictive. The objects created by these classes are also in one-to-one correspondence with members of the representation type, making the objects seem somewhat redundant.</p>
-<p>However, equality is quite an extreme instance of a binary method: it needs access to all the information of the other object. Many other binary methods need only partial information about the object. For instance, a method that compares shapes by their sizes:</p>
+<p>Note that this solution prevents us from adding new kinds of shapes without adding new constructors to the <code>shape_repr</code> type, which is quite restrictive. We can fix this, however, by using OCaml’s rarely-used but still useful <em>extensible variants</em>. <a data-primary="extensible variants" data-type="indexterm">&nbsp;</a></p>
+<p>Extensible variants let you separate the definition of a variant type from the definition of its constructors. The resulting type is by definition open, in the sense that new variants can always be added. As a result, the compiler can’t check whether pattern matching on such a variant is exhaustive. Happily, exhaustivity is not what we need here.</p>
+<p>Here’s how we’d rewrite the above example with extensible variants.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr = .. ;;
+&gt;type shape_repr = ..
+type shape =
+&lt; repr : shape_repr; equals : shape -&gt; bool; area : float &gt;
+;;
+&gt;type shape = &lt; area : float; equals : shape -&gt; bool; repr : shape_repr &gt;
+type shape_repr += Square of int ;;
+&gt;type shape_repr += Square of int
+class square w = object(self)
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method repr = Square self#width
+  method equals (other : shape) =
+     match (self#repr, other#repr) with
+     | Square x, Square x' -&gt; Int.(=) x x'
+     | _ -&gt; false
+end
+;;
+&gt;class square :
+&gt;  int -&gt;
+&gt;  object
+&gt;    method area : float
+&gt;    method equals : shape -&gt; bool
+&gt;    method repr : shape_repr
+&gt;    method width : int
+&gt;  end
+</code></pre>
+</div>
+<p>One oddity of the representation type approach is that the objects created by these classes are in one-to-one correspondence with members of the representation type, making the objects seem somewhat redundant.</p>
+<p>But equality is an extreme instance of a binary method: it needs access to all the information of the other object. Many other binary methods need only partial information about the object. For instance, a method that compares shapes by their sizes:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">class square w = object(self)
   method width = w
