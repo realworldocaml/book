@@ -440,7 +440,7 @@ signature would completely hide the class definitions:
 module AbstractStack : sig
    type 'a t = < pop: 'a option; push: 'a -> unit >
 
-   val make : unit -> 'a t
+   val make : 'a list -> 'a t
 end = Stack
 ```
 
@@ -466,7 +466,7 @@ module VisibleStack : sig
     method push : 'a -> unit
   end
 
-  val make : unit -> 'a t
+  val make : 'a list -> 'a t
 end = Stack
 ```
 
