@@ -164,14 +164,18 @@ $ eval $(opam env)
 If you prefer not to modify your shell configuration, then you can also invoke
 the build commands via `opam exec` to modify the path for the subcommand. This is
 exactly what the various targets in the `Makefile` do.
-The build tool of choice for new projects in OCaml is the `dune` build system.  Let's check that it's available for you in your environment.
+
+## The dune build system
+
+Now that we've got our basic package management environment setup, we'll look at how to build our code.
+We've already had a glimpse of the `dune` build tool back in [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.  Let's check that it's available in your environment after the opam invocations above:
 
 ```sh dir=examples/correct/hello-world,unset-INSIDE_DUNE
 $ dune --version
 2.9.0
 ```
 
-The dune build system is driven by a set of `dune` files present in the project directories which define the structure of the various OCaml modules.  The root directory of a project has a `dune-project` file that defines the project metadata.
+The root directory of an OCaml project built by dune has a `dune-project` file that defines the project metadata.
 
 ```scheme
 (lang dune 2.0)
@@ -179,9 +183,10 @@ The dune build system is driven by a set of `dune` files present in the project 
 
 The line above is the version of the syntax used in your build files, and not
 the actual version of the Dune binary.  One of the nicest features of dune is that
-it is forwards-compatible with older metadata --- by defining the version of
-the dune language that you are using, _future_ versions of dune will do their
-best to emulate the current behaviour until you chose to upgrade your project.
+it is forwards-compatible with older metadata. By defining the version of
+the dune language that you are currently using, _future_ versions of dune will do their best to emulate the current behaviour until you chose to upgrade your project.
+
+After the version information above, the `dune-project` file defines other useful project metadata.
 
 ```scheme
 (name hello)
@@ -192,6 +197,58 @@ best to emulate the current behaviour until you chose to upgrade your project.
 (maintainers "Your name")
 (generate_opam_files true)
 ```
+
+The fields here should look familiar -- they were also present in the `hello.opam` file above.  That's because dune can generate the opam packaging metadata files for you and avoid duplication.  Go ahead and edit the metadata above, and then build the project with:
+
+```
+dune build
+```
+
+The build command will update the `hello.opam` file in your source tree as well,
+keeping it in sync with your changes.
+
+### Structure of an OCaml project
+
+Back in [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+we looked at what a simple program with a couple of OCaml modules looks like. Let's now look at the full set of files in our hello-world application to examine a more realistic project structure.
+
+```
+├── LICENSE
+├── Makefile
+├── README.md
+├── bin
+│   ├── dune
+│   ├── main.ml
+│   └── main.mli
+├── dune
+├── dune-project
+├── hello.opam
+├── lib
+│   ├── dune
+│   ├── hello.ml
+│   └── hello.mli
+└── test
+    ├── dune
+    └── hello_test.ml
+```
+
+The three elements of this project are:
+
+- a `lib/` directory that builds an OCaml library.
+- a `test/` directory that defines unit tests for the library.
+- a `bin/` directory that uses the OCaml library to build a standalone application which can be executed from the command-line.
+
+The first step in a typical project is to define an OCaml library which contains the business logic of your application.  Our simple hello-world defines just the `Hello` module, but it is common to have multiple modules per library. The build system is driven by a set of `dune` files present in each project directory, and so the `lib/dune` file is where our library definition is found:
+
+```scheme
+(library
+ (name hello)
+ (public_name hello)
+ (libraries))
+```
+
+The `(name)` field defines the project-internal name for the compiled library, and the `(public_name)` field is what it will be called when installed system-wide. The choice of `(name)` defines the toplevel module exposed by this library, and every other module in the library will be exposed as a "wrapped" submodule. For example, if we added a file called `world.ml` into this directory, the resulting module would be found in `Hello.World`. While private library names must adhere to OCaml's module naming convention, it's common practise to use dashes and dots in public library names.
+
 
 ## Setting up an integrated development environment
 
