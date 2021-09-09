@@ -232,13 +232,21 @@ we looked at what a simple program with a couple of OCaml modules looks like. Le
     └── hello_test.ml
 ```
 
-The three elements of this project are:
+There are three layers of names used in an OCaml project:
 
-- a `lib/` directory that builds an OCaml library.
+- the individual `ml` and `mli` files each define an *OCaml module*, named after the file. This is what you refer to when writing OCaml code that uses other libraries -- for example, `Hello` is the module defined in our project.
+- one or more OCaml modules can be gathered together into an *ocamlfind library*, providing a convenient way to package up some dependencies with a single name -- in this case, the `hello` library. Although this example contains just the single `Hello` module , it is common to have multiple modules per library.
+- a set of ocamlfind libraries, binaries and application data can all be gathered together into an *opam package*, in this case `hello.opam`. This is what is installed when you eventually publish the package and another user types in `opam install hello`.
+
+It is important to understand the difference between modules, ocamlfind libraries and opam packages, as you will use each of these at different points of your OCaml coding journey.  In order to keep things tidy, we typically structure our project into subdirectories that contain the modules for a particular library or binary, with each directory containing a `dune` file with build instructions.  In our hello world example, we have:
+
+- a `lib/` directory that builds a `hello` ocamlfind library.
 - a `test/` directory that defines unit tests for the library.
-- a `bin/` directory that uses the OCaml library to build a standalone application which can be executed from the command-line.
+- a `bin/` directory that uses the `hello` library to build a standalone application that can be executed from the command-line.
 
-The first step in a typical project is to define an OCaml library which contains the business logic of your application.  Our simple hello-world defines just the `Hello` module, but it is common to have multiple modules per library. The build system is driven by a set of `dune` files present in each project directory, and so the `lib/dune` file is where our library definition is found:
+### Defining ocamlfind libraries
+
+A project usually puts the business logic of the application into a library rather than directly into an executable binary, since this makes writing tests and documentation easier in addition to improving reusability.  Let's look at `lib/dune` in more detail:
 
 ```scheme
 (library
@@ -247,12 +255,15 @@ The first step in a typical project is to define an OCaml library which contains
  (libraries))
 ```
 
-The `(name)` field defines the project-internal name for the compiled library, and the `(public_name)` field is what it will be called when installed system-wide. The choice of `(name)` defines the toplevel module exposed by this library, and every other module in the library will be exposed as a "wrapped" submodule. For example, if we added a file called `world.ml` into this directory, the resulting module would be found in `Hello.World`. While private library names must adhere to OCaml's module naming convention, it's common practise to use dashes and dots in public library names.
+The `(name)` field defines the project-internal name for the compiled library, and the `(public_name)` field is what it will be called when installed system-wide. The choice of `(name)` defines the toplevel module exposed by this library, and every other module in the library will be exposed as a "wrapped" submodule of that toplevel module. In our example project `hello.ml` is exported as the `Hello` module since it's the project name, but if we added a file called `world.ml` into this directory the resulting module would be found in `Hello.World`. While private library names must adhere to OCaml's module naming convention, it's common practise to use dashes and dots in public library names.
 
+### Writing test cases for a library
+
+### Building an executable program
 
 ## Setting up an integrated development environment
 
-Visual Studio Code
+The first port of call 
 
 ## Setting up continuous integration
 
