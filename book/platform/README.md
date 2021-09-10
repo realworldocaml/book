@@ -259,13 +259,89 @@ The `(name)` field defines the project-internal name for the compiled library, a
 
 ### Writing test cases for a library
 
+The `(libraries)` field in the `hello` dune file is empty since this is a standalone library. Our next step is to define a test case in `tests/dune` for our library.
+
+```scheme
+(test
+ (name hello_test)
+ (libraries alcotest hello))
+```
+
+The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `tests/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the 
+locally defined `hello` library.  Once you run the tests, you can find the built artefacts in `_build/default/tests/` in your project checkout.  You can read more about how to define realistic test cases later in [Testing](testing.html){data-type=xref}.
+
 ### Building an executable program
+
+Finally, we want to actually use our hello world from the command-line. This is defined in `bin/dune` in a very similar fashion to test cases.
+
+```scheme
+(executable
+ (name main)
+ (public_name hello)
+ (libraries hello))
+```
+
+Much like libraries, the `(name)` field here has to adhere to OCaml module naming conventions, and the `public_name` field represents the binary name that is installed onto the system and just needs to be a valid Unix or Windows filename.
+
+You can build and execute the command locally using `dune exec` and the public name of the executable:
+
+```sh dir=examples/correct/hello-world
+$ dune exec -- hello
+Hello world!
+```
 
 ## Setting up an integrated development environment
 
-The first port of call 
+Now that we've become familiar with the basic structure of the OCaml project, it's time to setup a development environment. An IDE is particularly useful for OCaml development due to the extra information you can gain from the static type information present in the codebase.  A good IDE will provide you with the facilities to browse interface documentation, see inferred types for code, and to jump to the definitions of external modules.
 
-## Setting up continuous integration
+### Using Visual Studio Code
+
+The recommended IDE for newcomers to OCaml is [Visual Studio Code](https://code.visualstudio.com/), using the [OCaml Platform plugin](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).  The plugin uses the Language Server Protocol to communicate with your opam and dune build environment, and you can install the OCaml server via opam:
+
+```
+opam install ocaml-lsp-server
+```
+
+### Browsing interface documentation
+
+The OCaml LSP server understands how to interface with dune and examine the built artefacts, so opening your local project in VS Code is sufficient to activate all the features.  Try navigating over to `bin/main.ml`, where you will see the invocation to the `hello` library.
+
+<!-- $MDX file=examples/correct/hello-world/bin/main.ml -->
+```
+let () =
+  let greeting = Hello.greet "world" in
+  print_endline greeting
+```
+
+If you hover your mouse over the `Hello.greet` function, you should see some documentation pop up about the function and its arguments.  This information comes from the _docstrings_ written into the `hello.mli` interface file in the library.
+
+<!-- $DISABLEDMDX file=examples/correct/hello-world/lib/hello.mli -->
+```
+(** This is a docstring, as it starts with "(**", as opposed to normal comments
+    that start with "(*".
+
+    The top-most docstring of the module should contain a description of the
+    module, what it does, how to use it, etc.
+
+    The function-specific documentation located below the function signatures. *)
+
+val greet : string -> string
+(** This is the docstring for the [greet] function.
+
+    A typical documentation for this function would be:
+
+    Returns a greeting message.
+
+    {4 Examples}
+
+    {[ print_endline @@ greet "Jane" ]} *)
+```
+
+## Publishing your code online
+
+### Pushing to GitHub
+
+### Setting up Continuous Integration
 
 GitHub Actions
 - Use setup-ocaml
