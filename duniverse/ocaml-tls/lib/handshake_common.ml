@@ -26,17 +26,8 @@ let empty = function [] -> true | _ -> false
 let change_cipher_spec =
   (Packet.CHANGE_CIPHER_SPEC, Writer.assemble_change_cipher_spec)
 
-let host_name_opt = function
-  | None   -> None
-  | Some x -> match Domain_name.of_string x with
-    | Error _ -> None
-    | Ok domain -> match Domain_name.host domain with
-      | Error _ -> None
-      | Ok host -> Some host
-
 let hostname (h : client_hello) : [ `host ] Domain_name.t option =
-  host_name_opt
-    (map_find ~f:(function `Hostname s -> Some s | _ -> None) h.extensions)
+  map_find ~f:(function `Hostname s -> Some s | _ -> None) h.extensions
 
 let groups (h : client_hello) =
   match map_find ~f:(function `SupportedGroups g -> Some g | _ -> None) h.extensions with

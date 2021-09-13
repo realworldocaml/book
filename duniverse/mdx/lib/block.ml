@@ -179,7 +179,7 @@ let pp_header ?syntax ppf t =
           Fmt.pf ppf "<-- non-deterministic output\n"
       | [ Non_det (Some Nd_command) ] ->
           Fmt.pf ppf "<-- non-deterministic command\n"
-      | _ -> failwith "cannot happen: checked during parsing" )
+      | _ -> failwith "cannot happen: checked during parsing")
   | Some Syntax.Mli -> ()
   | _ ->
       if t.legacy_labels then
@@ -362,7 +362,7 @@ let mk_ocaml ~config ~contents ~errors =
       match guess_ocaml_kind contents with
       | `Code -> Ok (OCaml { env = Ocaml_env.mk env; non_det; errors })
       | `Toplevel ->
-          Util.Result.errorf "toplevel syntax is not allowed in OCaml blocks." )
+          Util.Result.errorf "toplevel syntax is not allowed in OCaml blocks.")
   | { file_inc = Some _; _ } -> label_not_allowed ~label:"file" ~kind
   | { part = Some _; _ } -> label_not_allowed ~label:"part" ~kind
 
@@ -374,9 +374,9 @@ let mk_cram ?language ~config ~header ~errors () =
       let language =
         Util.Option.value language
           ~default:
-            ( match header with
+            (match header with
             | Some (Header.Shell language) -> language
-            | _ -> `Sh )
+            | _ -> `Sh)
       in
       Cram { language; non_det }
   | { file_inc = Some _; _ } -> label_not_allowed ~label:"file" ~kind
@@ -392,7 +392,7 @@ let mk_toplevel ~config ~contents ~errors =
           Util.Result.errorf "invalid toplevel syntax in toplevel blocks."
       | `Toplevel ->
           check_no_errors errors >>| fun () ->
-          Toplevel { env = Ocaml_env.mk env; non_det } )
+          Toplevel { env = Ocaml_env.mk env; non_det })
   | { file_inc = Some _; _ } -> label_not_allowed ~label:"file" ~kind
   | { part = Some _; _ } -> label_not_allowed ~label:"part" ~kind
 
@@ -410,8 +410,8 @@ let mk_include ~config ~header ~errors =
           | None ->
               let file_kind = Fk_other { header } in
               Ok (Include { file_included; file_kind })
-          | Some _ -> label_not_allowed ~label:"part" ~kind:"non-OCaml include"
-          ) )
+          | Some _ -> label_not_allowed ~label:"part" ~kind:"non-OCaml include")
+      )
   | { file_inc = None; _ } -> label_required ~label:"file" ~kind
   | { non_det = Some _; _ } ->
       label_not_allowed ~label:"non-deterministic" ~kind
@@ -427,23 +427,23 @@ let infer_block ~config ~header ~contents ~errors =
       | Some Header.OCaml -> (
           match guess_ocaml_kind contents with
           | `Code -> mk_ocaml ~config ~contents ~errors
-          | `Toplevel -> mk_toplevel ~config ~contents ~errors )
+          | `Toplevel -> mk_toplevel ~config ~contents ~errors)
       | _ ->
           check_not_set "`part` label requires a `file` label." part
           >>= fun () ->
-          check_no_errors errors >>| fun () -> Raw { header } )
+          check_no_errors errors >>| fun () -> Raw { header })
 
 let mk ~loc ~section ~labels ~legacy_labels ~header ~contents ~errors =
   let block_kind =
     get_label (function Block_kind x -> Some x | _ -> None) labels
   in
   let config = get_block_config labels in
-  ( match block_kind with
+  (match block_kind with
   | Some OCaml -> mk_ocaml ~config ~contents ~errors
   | Some Cram -> mk_cram ~config ~header ~errors ()
   | Some Toplevel -> mk_toplevel ~config ~contents ~errors
   | Some Include -> mk_include ~config ~header ~errors
-  | None -> infer_block ~config ~header ~contents ~errors )
+  | None -> infer_block ~config ~header ~contents ~errors)
   >>= fun value ->
   version_enabled config.version >>| fun version_enabled ->
   {
@@ -476,7 +476,7 @@ let is_active ?section:s t =
     | Some p -> (
         match t.section with
         | Some s -> Re.execp (Re.Perl.compile_pat p) (snd s)
-        | None -> Re.execp (Re.Perl.compile_pat p) "" )
+        | None -> Re.execp (Re.Perl.compile_pat p) "")
     | None -> true
   in
   active && t.version_enabled && not t.skip

@@ -64,7 +64,7 @@ extern void mc_des(unsigned char *, unsigned char *);
 #ifdef D2_DES
 
 #define desDkey(a,b)	mc_des2key((a),(b))
-extern void mc_des2key(unsigned char *, short);
+extern void mc_des2key(unsigned char [16], short);
 /*		      hexkey[16]     MODE
  * Sets the internal key registerS according to the hexadecimal
  * keyS contained in the 16 bytes of hexkey, according to the DES,
@@ -123,7 +123,7 @@ extern void mc_cp2key(unsigned long *);
 #define useDkey(a)	mc_use3key((a))
 #define cpDkey(a)	mc_cp3key((a))
 
-extern void mc_des3key(unsigned char *, short);
+extern void mc_des3key(unsigned char [24], short);
 /*		      hexkey[24]     MODE
  * Sets the internal key registerS according to the hexadecimal
  * keyS contained in the 24 bytes of hexkey, according to the DES,

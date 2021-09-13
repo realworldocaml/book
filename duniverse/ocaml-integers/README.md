@@ -46,11 +46,17 @@ The `ocaml-integers` library provides a number of 8-, 16-, 32- and 64-bit signed
    - : int = 1000
    ```
 
-[![Travis build Status](https://travis-ci.org/ocamllabs/ocaml-integers.svg?branch=master)](https://travis-ci.org/ocamllabs/ocaml-integers) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/4l1vout6fl581hgq?svg=true)](https://ci.appveyor.com/project/yallop/ocaml-integers/branch/master) 
+### Using `integers` with js_of_ocaml
+
+The [`integers_stubs_js`][integers_stubs_js] package provides JavaScript stubs that make it possible to use this library with [`js_of_ocaml`][js_of_ocaml]
 
 [API documentation][doc]
+
+[![Main workflow](https://github.com/ocamllabs/ocaml-integers/actions/workflows/test.yml/badge.svg)](https://github.com/ocamllabs/ocaml-integers/actions/workflows/test.yml)
 
 [int32]: http://caml.inria.fr/pub/docs/manual-ocaml/libref/Int32.html
 [int64]: http://caml.inria.fr/pub/docs/manual-ocaml/libref/Int64.html
 [nativeint]: http://caml.inria.fr/pub/docs/manual-ocaml/libref/Nativeint.html
 [doc]: https://ocamllabs.github.io/ocaml-integers/api.docdir/
+[integers_stubs_js]: https://github.com/o1-labs/integers_stubs_js
+[js_of_ocaml]: https://github.com/ocsigen/js_of_ocaml

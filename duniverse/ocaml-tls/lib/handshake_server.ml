@@ -34,7 +34,7 @@ let answer_client_finished state (session : session_data) client_fin raw log =
   let fin = Finished server in
   let fin_raw = Writer.assemble_handshake fin in
   (* we really do not want to have any leftover handshake fragments *)
-  guard (Cstruct.len state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+  guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
   let session = { session with renegotiation = (client, server) }
   and machina = Server Established
   in
@@ -48,7 +48,7 @@ let answer_client_finished_resume state (session : session_data) server_verify c
   in
   guard (Cstruct.equal client_verify client_fin) (`Fatal `BadFinished) >>= fun () ->
   (* we really do not want to have any leftover handshake fragments *)
-  guard (Cstruct.len state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+  guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
   let session = { session with renegotiation = (client_verify, server_verify) }
   and machina = Server Established
   in
@@ -119,7 +119,7 @@ let answer_client_key_exchange_RSA state (session : session_data) kex raw log =
        configuration option to disable the check.  Note that if the check
        fails, the PreMasterSecret SHOULD be randomized as described below *)
     (* we do not provide an option to disable the version checking (yet!) *)
-    match Cstruct.len k == 48, Reader.parse_any_version k with
+    match Cstruct.length k = 48, Reader.parse_any_version k with
     | true, Ok c_ver when c_ver = session.client_version -> k
     | _ -> other
   in
@@ -200,7 +200,7 @@ let server_hello config (client_hello : client_hello) (session : session_data) v
       | _, `TLS_1_3 -> Packet.downgrade11
       | _ -> Cstruct.create 0
     in
-    let rst = Mirage_crypto_rng.generate (32 - Cstruct.len suffix) in
+    let rst = Mirage_crypto_rng.generate (32 - Cstruct.length suffix) in
     rst <+> suffix
   and secren = match reneg with
     | None            -> `SecureRenegotiation (Cstruct.create 0)
@@ -210,7 +210,7 @@ let server_hello config (client_hello : client_hello) (session : session_data) v
     else
       []
   and session_id =
-    match Cstruct.len session.session_id with
+    match Cstruct.length session.session_id with
     | 0 -> Mirage_crypto_rng.generate 32
     | _ -> session.session_id
   and alpn =
@@ -296,7 +296,6 @@ let answer_client_hello_common state reneg ch raw =
 
     alpn_protocol config ch >>| fun alpn_protocol ->
 
-    let own_name = match host with None -> None | Some h -> Some (Domain_name.to_string h) in
     let group =
       if Ciphersuite.ecdhe cipher then
         ecc_group
@@ -311,7 +310,7 @@ let answer_client_hello_common state reneg ch raw =
         client_random    = ch.client_random ;
         own_certificate  = chain ;
         own_private_key  = priv ;
-        own_name         = own_name ;
+        own_name         = host ;
         alpn_protocol    = alpn_protocol
       } in
       { session with
@@ -461,7 +460,7 @@ let answer_client_hello state (ch : client_hello) raw =
   let ensure_reneg ciphers their_data  =
     let reneg_cs = List.mem Packet.TLS_EMPTY_RENEGOTIATION_INFO_SCSV ciphers in
     match reneg_cs, their_data with
-    | _, Some x -> guard (Cstruct.len x = 0) (`Fatal `InvalidRenegotiation)
+    | _, Some x -> guard (Cstruct.length x = 0) (`Fatal `InvalidRenegotiation)
     | true, _ -> Ok ()
     | _ -> Error (`Fatal `NoSecureRenegotiation)
 
@@ -492,7 +491,7 @@ let answer_client_hello state (ch : client_hello) raw =
     let version = state_version state in
     let sh, session = server_hello state.config ch session version None in
     (* we really do not want to have any leftover handshake fragments *)
-    guard (Cstruct.len state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+    guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
     let client_ctx, server_ctx =
       Handshake_crypto.initialise_crypto_ctx version session
     in
@@ -572,7 +571,7 @@ let answer_client_hello_reneg state (ch : client_hello) raw =
 let handle_change_cipher_spec ss state packet =
   match Reader.parse_change_cipher_spec packet, ss with
   | Ok (), AwaitClientChangeCipherSpec (session, server_ctx, client_ctx, log) ->
-     guard (Cstruct.len state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty)
+     guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty)
      >>= fun () ->
      let ccs = change_cipher_spec in
      let machina = AwaitClientFinished (session, log)
@@ -583,7 +582,7 @@ let handle_change_cipher_spec ss state packet =
      Ok ({ state with machina = Server machina },
              [`Record ccs; `Change_enc server_ctx; `Change_dec client_ctx])
   | Ok (), AwaitClientChangeCipherSpecResume (session, client_ctx, server_verify, log) ->
-     guard (Cstruct.len state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+     guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
      let machina = AwaitClientFinishedResume (session, server_verify, log)
      in
      Tracing.cs ~tag:"change-cipher-spec-in" packet ;

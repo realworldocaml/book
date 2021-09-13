@@ -1,3 +1,49 @@
+2.9.0 (29/06/2021)
+------------------
+
+- Add `(enabled_if ...)` to `(mdx ...)` (#4434, @emillon)
+
+- Add support for instrumentation dependencies (#4210, fixes #3983, @nojb)
+
+- Add the possibility to use `locks` with the cram tests stanza (#4480, @voodoos)
+
+- Allow to set up merlin in a variant of the default context
+  (#4145, @TheLortex, @voodoos)
+
+- Add `(package ...)` to `(mdx ...)` (#4691, fixes #3756, @emillon)
+
+- Handle renaming of `coq.kernel` library to `coq-core.kernel` in Coq 8.14 (#4713, @proux01)
+
+- Fix generation of merlin configuration when using `(include_subdirs
+  unqualified)` on Windows (#4745, @nojb)
+
+- Fix bug for the install of Coq native files when using `(include_subdirs qualified)`
+  (#4753, @ejgallego)
+
+- Allow users to specify install target directories for `doc` and
+  `etc` sections. We add new options `--docdir` and `--etcdir` to both
+  Dune's configure and `dune install` command. (#4744, fixes #4723,
+  @ejgallego, thanks to @JasonGross for reporting this issue)
+
+- Fix issue where Dune would ignore `(env ... (coq (flags ...)))`
+  declarations appearing in `dune` files (#4749, fixes #4566, @ejgallego @rgrinberg)
+
+- Disable some warnings on Coq 8.14 and `(lang coq (>= 0.3))` due to
+  the rework of the Coq "native" compilation system (#4760, @ejgallego)
+
+- Fix a bug where instrumentation flags would be added even if the
+  instrumentatation was disabled (@nojb, #4770)
+
+- Fix #4682: option `-p` takes now precedence on environement variable
+  `DUNE_PROFILE` (#4730, #4774, @bobot, reported by @dra27 #4632)
+
+- Fix installation with opam of package with dune sites. The `.install` file is
+  now produced by a local `dune install` during the build phase (#4730, #4645,
+  @bobot, reported by @kit-ty-kate #4198)
+
+- Fix multiple issues in the sites feature (#4730, #4645 @bobot, reported by @Lelio-Brun
+  #4219, by @Kakadu #4325, by @toots #4415)
+
 2.8.5 (28/03/2021)
 ------------------
 
@@ -53,6 +99,8 @@
 
 - Do not pass include directories containing native objects when compiling
   bytecode (#4200, @nojb)
+
+- Allow `%{version:pkg}` to work for external packages (#4104, @kit-ty-kate)
 
 2.8.2 (21/01/2021)
 ------------------

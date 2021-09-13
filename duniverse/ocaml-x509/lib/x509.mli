@@ -49,7 +49,7 @@
    extension is marked as critical in a certificate, but not handled, the
    validation will fail.
 
-    {e v0.13.0 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
+    {e v0.14.1 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
 
 open Rresult
 
@@ -920,7 +920,7 @@ module CRL : sig
     | `Next_update_scheduled of Distinguished_name.t * Ptime.t * Ptime.t
   ]
 
-  (** [pp_validation_error ppf vere] pretty-prints the CRL verification error
+  (** [pp_verification_error ppf vere] pretty-prints the CRL verification error
       [vere] on [ppf]. *)
   val pp_verification_error : verification_error Fmt.t
 
@@ -1031,4 +1031,168 @@ module PKCS12 : sig
     ?iterations:int ->
     string -> Certificate.t list -> Private_key.t ->
     t
+end
+
+
+(** OCSP (Online Certificate Status Protocol) as described in
+    {{:https://tools.ietf.org/html/rfc6960}RFC 6960}. *)
+module OCSP : sig
+
+  (** type for CertID to distinguish requested certs *)
+  type cert_id
+
+  (** [create_cert_id issuer serial] creates cert_id for this serial *)
+  val create_cert_id : ?hash:Mirage_crypto.Hash.hash -> Certificate.t -> Z.t ->
+    cert_id
+
+  (** [cert_id_serial certid] is serial number of this certid *)
+  val cert_id_serial : cert_id -> Z.t
+
+  (** [pp_cert_id ppf cert_id] pretty prints cert_id *)
+  val pp_cert_id : cert_id Fmt.t
+
+  (** Module for encoding and decoding OCSP requests. *)
+  module Request : sig
+
+    (** type for Request *)
+    type t
+
+    (** [pp ppf request] pretty prints request *)
+    val pp : t Fmt.t
+
+    (** [create ~certs ~digest ~requestor_name ~key certids] creates request
+        for given [certids] and, if [key] is provided, signs it using [digest].
+        [requestorName] may be used by responder to distinguish requesters.
+        [certs] may be used by responder to check requestor authority. *)
+    val create : ?certs:Certificate.t list -> ?digest:Mirage_crypto.Hash.hash ->
+      ?requestor_name:General_name.b -> ?key:Private_key.t -> cert_id list ->
+      (t, [> R.msg ]) result
+
+    (** [validate request key] validates the signature of [request]
+        with the pulic [key]. *)
+    val validate : t -> ?allowed_hashes:Mirage_crypto.Hash.hash list ->
+      Public_key.t ->
+      (unit, [> Validation.signature_error | `No_signature ]) result
+
+    (** [requestor_name request] is requestorName from this request *)
+    val requestor_name : t -> General_name.b option
+
+    (** [cert_ids request] is cert ids from this request *)
+    val cert_ids : t -> cert_id list
+
+    (** [decode_der buffer] decodes request in buffer *)
+    val decode_der : Cstruct.t -> (t, Asn.error) result
+
+    (** [encode_der request] encodes request into buffer *)
+    val encode_der : t -> Cstruct.t
+  end
+
+  (** Module for encoding and decoding OCSP responses. *)
+  module Response : sig
+
+    (** type for OCSPResponseStatus *)
+    type status = [
+      | `InternalError
+      | `MalformedRequest
+      | `SigRequired
+      | `Successful
+      | `TryLater
+      | `Unauthorized
+    ]
+
+    (** [pp_status ppf status] pretty prints status *)
+    val pp_status : status Fmt.t
+
+    (** type for CertStatus *)
+    type cert_status = [
+      | `Good
+      | `Revoked of Ptime.t * Extension.reason option
+      | `Unknown
+    ]
+
+    (** [pp_cert_status ppf status] pretty prints cert status *)
+    val pp_cert_status : cert_status Fmt.t
+
+    (** type for SingleResponse *)
+    type single_response
+
+    (** [create_single_response ~next_update ~single_extension cert_id
+        cert_status this_update] creates response info for one cert,
+        [this_update] should be current time. *)
+    val create_single_response : ?next_update:Ptime.t ->
+      ?single_extensions:Extension.t -> cert_id -> cert_status -> Ptime.t ->
+      single_response
+
+    (** [pp_single_response ppf response] pretty prints single [response] *)
+    val pp_single_response : single_response Fmt.t
+
+    (** [single_response_cert_id response] is cert_id in this single [response] *)
+    val single_response_cert_id : single_response -> cert_id
+
+    (** [single_response_cert_id response] is cert_status in this single
+        [response] *)
+    val single_response_status : single_response -> cert_status
+
+    (** type for ResponderID *)
+    type responder_id = [
+      | `ByKey of Cstruct.t
+      | `ByName of Distinguished_name.t
+    ]
+
+    (** [create_responder_id pubkey] creates responderID identified by this key.
+        Note: Cstruct here contains SHA1 hash of public key, not itself. *)
+    val create_responder_id : Public_key.t -> responder_id
+
+    (** [pp_responder_id ppf responderID] pretty prints [responderID] *)
+    val pp_responder_id : responder_id Fmt.t
+
+    (** type for OCSPResponse *)
+    type t
+
+    (** [create_success ~digest ~certs ~response_extensions priv_key
+        responderID producedAt responses] creates response and signs it with
+        [priv_key]. [producedAt] should be current timestamp. *)
+    val create_success :
+      ?digest:Mirage_crypto.Hash.hash ->
+      ?certs:Certificate.t list ->
+      ?response_extensions:Extension.t ->
+      Private_key.t ->
+      responder_id ->
+      Ptime.t ->
+      single_response list -> (t, [> R.msg ]) result
+
+    (** [create status] creates error response. Successful status is not
+        allowed here because it requires responseBytes. *)
+    val create : [
+        | `MalformedRequest
+        | `InternalError
+        | `TryLater
+        | `SigRequired
+        | `Unauthorized
+      ] -> t
+
+    (** [pp ppf response] pretty prints response *)
+    val pp : t Fmt.t
+
+    (** [status response] is response status *)
+    val status : t -> status
+
+    (** [responder_id request] is responder id from response *)
+    val responder_id : t -> (responder_id, [> R.msg ]) result
+
+    (** [responses response] is a list of responses (status per certificate). *)
+    val responses : t -> (single_response list, [> R.msg ]) result
+
+    (** [decode_der buffer] decodes response in buffer *)
+    val decode_der : Cstruct.t -> (t, Asn.error) result
+
+    (** [encode_der request] encodes response into buffer *)
+    val encode_der : t -> Cstruct.t
+
+    (** [validate response key] validates the signature of [response]
+        with the pulic [key]. *)
+    val validate : t -> ?allowed_hashes:Mirage_crypto.Hash.hash list ->
+      ?now:Ptime.t -> Public_key.t ->
+      (unit, [> Validation.signature_error | `No_signature | `Time_invalid ]) result
+  end
 end

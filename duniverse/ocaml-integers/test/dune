@@ -1,0 +1,5 @@
+(tests
+  (package integers)
+  (libraries integers)
+  (names hexprinting uint64conversions uint32conversions))
+

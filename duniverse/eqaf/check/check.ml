@@ -40,6 +40,16 @@ let random length =
 let hash_eq_0 = random 4096
 let hash_eq_1 = Bytes.to_string (Bytes.of_string hash_eq_0)
 let chr_into_hash_eq_0 = hash_eq_0.[Random.int 4096]
+let int32_into_hash_eq_0 =
+  Unsafe.get_int32_ne (Bytes.of_string hash_eq_0) (Random.int (4096-4))
+let int32_into_hash_eq_1 =
+  Unsafe.get_int32_ne (Bytes.of_string hash_eq_1) (Random.int (4096-4))
+let int14_into_hash_eq_0 =
+  Unsafe.get_int32_ne (Bytes.of_string hash_eq_0) (Random.int (4096-4))
+  |> (Int32.logand 0xfffl)
+let int14_into_hash_eq_1 =
+  Unsafe.get_int32_ne (Bytes.of_string hash_eq_1) (Random.int (4096-4))
+  |> (Int32.logand 0xfffl)
 
 let () = assert (hash_eq_0 != hash_eq_1)
 let () = assert (hash_eq_0 = hash_eq_1)
@@ -107,9 +117,11 @@ let test_ccea fn_0 fn_1 =
     Fmt.epr "B²: %s.\n%!" err1 ;
     exit exit_failure
 
-let ccea ~name_of_fns_0 ~name_of_fns_1 fns_0 fns_1 =
+let ccea ~reset ~switch ~name_of_fns_0 ~name_of_fns_1 fns_0 fns_1 =
   Fmt.pr "> Start to test %s (B¹).\n%!" name_of_fns_0 ;
+  reset () ;
   let eqaf = test_ccea (fst fns_0) (snd fns_0) in
+  switch () ;
   Fmt.pr "> Start to test %s (B²).\n%!" name_of_fns_1 ;
   let stdlib = test_ccea (fst fns_1) (snd fns_1) in
   match eqaf, stdlib with
@@ -127,9 +139,11 @@ let ccea ~name_of_fns_0 ~name_of_fns_1 fns_0 fns_1 =
     Fmt.epr "B²> %s.\n%!" err1 ;
     Error ()
 
-let spss ~name_of_fns_0 ~name_of_fns_1 fns_0 fns_1 =
+let spss ~reset ~switch ~name_of_fns_0 ~name_of_fns_1 fns_0 fns_1 =
   Fmt.pr "> Start to test %s (B¹).\n%!" name_of_fns_0 ;
+  reset () ;
   let eqaf = test_spss (fst fns_0) (snd fns_0) in
+  switch () ;
   Fmt.pr "> Start to test %s (B²).\n%!" name_of_fns_1 ;
   let stdlib = test_spss (fst fns_1) (snd fns_1) in
 
@@ -245,6 +259,9 @@ module Make (Check : sig
     val eqaf_name : string
     val stdlib_name : string
 
+    val reset : unit -> unit
+    val switch : unit -> unit
+
     val eqaf_true : unit -> ret
     val eqaf_false : unit -> ret
 
@@ -256,6 +273,7 @@ module Make (Check : sig
   let last_chance () =
     let open Benchmark in
     match ccea
+            ~reset:Check.reset ~switch:Check.switch
             ~name_of_fns_0:eqaf_name
             ~name_of_fns_1:stdlib_name
             (V eqaf_true, V eqaf_false)
@@ -269,6 +287,7 @@ module Make (Check : sig
   let test () =
     let open Benchmark in
     match spss
+            ~reset:Check.reset ~switch:Check.switch
             ~name_of_fns_0:eqaf_name
             ~name_of_fns_1:stdlib_name
             (V eqaf_true, V eqaf_false)
@@ -289,6 +308,8 @@ module Equal = Make(struct
   let eqaf_name = "Eqaf.equal"
   let stdlib_name = "String.equal"
 
+  let reset = ignore and switch = ignore
+
   let stdlib_true () = String.equal hash_eq_0 hash_eq_1
   let stdlib_false () = String.equal hash_neq_0 hash_neq_1
   
@@ -301,6 +322,8 @@ module Compare = Make(struct
 
   let eqaf_name = "Eqaf.compare"
   let stdlib_name = "String.compare"
+
+  let reset = ignore and switch = ignore
 
   let stdlib_true () = String.compare hash_eq_0 hash_eq_1
   let stdlib_false () = String.compare hash_neq_0 hash_neq_1
@@ -315,13 +338,105 @@ module Exists = Make(struct
   let eqaf_name = "Eqaf.exists_uint8"
   let stdlib_name = "String.contains"
 
+  let constant = ref (Char.code chr_into_hash_eq_0)
+  let reset () = constant := Char.code chr_into_hash_eq_0
+  let switch () = constant := Char.code random_chr
+
   let stdlib_true () = String.contains hash_eq_0 chr_into_hash_eq_0
   let stdlib_false () = String.contains hash_neq_0 random_chr
 
-  let f (v : int) = v = Char.code chr_into_hash_eq_0
+  let f (v : int) = v = !constant
   let eqaf_true () = Eqaf.exists_uint8 ~f hash_eq_0
-  let f (v : int) = v = Char.code random_chr
   let eqaf_false () = Eqaf.exists_uint8 ~f hash_neq_0
+end)
+
+module Find = Make(struct
+  type ret = int
+
+  let eqaf_name = "Eqaf.find_uint8"
+  let stdlib_name = "String.index"
+
+  let switch () = ()
+  let reset () = ()
+
+  let stdlib_true () = String.index hash_eq_0 chr_into_hash_eq_0
+  let stdlib_false () = try String.index hash_neq_0 random_chr with Not_found -> (-1)
+
+  let f_hash_eq_0 (v : int) = v = Char.code chr_into_hash_eq_0
+  let f_random (v : int) = v = Char.code random_chr
+  let eqaf_true () = Eqaf.find_uint8 ~f:f_hash_eq_0 hash_eq_0
+  let eqaf_false () = Eqaf.find_uint8 ~f:f_random hash_neq_0
+end)
+
+module Divmod32 = Make(struct
+  type ret = int32 * int32
+
+  let eqaf_name = "Eqaf.divmod"
+  let stdlib_name = "Int32.unsigned_div,Int32.unsigned_rem"
+
+
+  let switch () = ()
+  let reset () = ()
+
+  (* These are here for compat with OCaml <= 4.09
+     from >= they can be replaced by
+     Int32.unsigned_div
+     Int32.unsigned_rem
+  *)
+  let int32_div_unsigned n d =
+    let sub,min_int = Int32.(sub,min_int)in
+    let int32_unsigned_compare n m =
+        Int32.compare (sub n min_int) (sub m min_int)
+    in
+    if d < 0_l then
+      if int32_unsigned_compare n d < 0 then 0_l else 1_l
+    else
+      let q =
+        let open Int32 in
+        shift_left (Int32.div (Int32.shift_right_logical n 1) d) 1 in
+      let r = sub n (Int32.mul q d) in
+      if int32_unsigned_compare r d >= 0 then Int32.succ q else q
+  let int32_rem_unsigned n d =
+    Int32.sub n (Int32.mul (int32_div_unsigned n d) d)
+
+  (* TODO *)
+  let stdlib_true () =
+    let x, m = int32_into_hash_eq_0, int14_into_hash_eq_0 in
+    int32_div_unsigned x m,
+    int32_rem_unsigned x m
+  let stdlib_false () =
+    let x, m = int32_into_hash_eq_1, int14_into_hash_eq_1 in
+    int32_div_unsigned x m,
+    int32_rem_unsigned x m
+
+  let eqaf_true () =
+    Eqaf.divmod ~x:int32_into_hash_eq_0 ~m:int14_into_hash_eq_0
+  let eqaf_false () =
+    Eqaf.divmod ~x:int32_into_hash_eq_1 ~m:int14_into_hash_eq_1
+end)
+
+module Ascii_int32 = Make(struct
+  type ret = string
+
+  let eqaf_name = "Eqaf.ascii_of_int32"
+  let stdlib_name = "Int32.to_string"
+
+
+  let switch () = ()
+  let reset () = ()
+
+  (* TODO setting 0x8000 bit ensures five digits.
+     We need a constant amount of digits to specify ~digits because
+     we don't have a [Int32.to_string] that left-pads.
+     Maybe we can use [Format.sprintf] ?
+  *)
+  let true_int = Int32.logand 0x8000l int14_into_hash_eq_0
+  let false_int = Int32.logand 0x8000l int14_into_hash_eq_1
+  let stdlib_true () = Int32.to_string true_int
+  let stdlib_false () = Int32.to_string false_int
+
+  let eqaf_true () = Eqaf.ascii_of_int32 ~digits:5 true_int
+  let eqaf_false () = Eqaf.ascii_of_int32 ~digits:5 false_int
 end)
 
 let limit = 20
@@ -339,6 +454,14 @@ let () =
     if tried > 20 then invalid_arg "Too many tried for Eqaf.exists" ;
     let res = Exists.test () in
     if res = exit_success then tried else _2 (succ tried) in
+  let rec _3 tried =
+    if tried > 20 then invalid_arg "Too many tried for Eqaf.find_uint8" ;
+    let res = Find.test () in
+    if res = exit_success then tried else _3 (succ tried) in
+  let rec _4 tried =
+    if tried > 20 then invalid_arg "Too many tried for Eqaf.divmod" ;
+    let res = Divmod32.test () in
+    if res = exit_success then tried else _4 (succ tried) in
 
   let _0 = _0 1 in
   Fmt.pr "%d trial(s) for Eqaf.equal.\n%!" _0 ;
@@ -346,5 +469,9 @@ let () =
   Fmt.pr "%d trial(s) for Eqaf.compare.\n%!" _1 ;
   let _2 = _2 1 in
   Fmt.pr "%d trial(s) for Eqaf.exists.\n%!" _2 ;
+  let _3 = _3 1 in
+  Fmt.pr "%d trial(s) for Eqaf.find_uint8.\n%!" _3 ;
+  let _4 = _4 1 in
+  Fmt.pr "%d trial(s) for Eqaf.divmod.\n%!" _3 ;
 
   exit exit_success

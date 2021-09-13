@@ -12,8 +12,8 @@ end
 
 let clone_cs cs =
   let open Cstruct in
-  let ds = create_unsafe (len cs) in
-  blit cs 0 ds 0 (len cs); cs
+  let ds = create_unsafe (length cs) in
+  blit cs 0 ds 0 (length cs); cs
 
 type cls = [ `Universal | `Application | `Private ]
 
@@ -76,7 +76,7 @@ and bit_string_cs =
   let f = function
   | 0, cs -> cs
   | clip, cs ->
-      let n = Cstruct.len cs in
+      let n = Cstruct.length cs in
       let last = Cstruct.get_uint8 cs (n - 1) in
       let cs = clone_cs cs
       and last = last land (lnot (1 lsl clip - 1)) in

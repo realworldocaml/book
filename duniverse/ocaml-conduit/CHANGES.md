@@ -1,3 +1,10 @@
+## v4.0.1 (2021-08-06)
+
+* Add missing `ipaddr-sexp` dependency on conduit-async (#385, @anmonteiro)
+* Update the link of the documentation (959f57a & #398, reported by @misterfish, @zshipko, @dinosaure)
+* Gitignore `opam/` even if it is a symlink (#394, @CraigFe, @avsm)
+* Adapt `conduit-lwt-unix` to `tls.0.14.0` (#396, @hannesm, @dinosaure)
+
 ## v4.0.0 (2021-04-15)
 
 * conduit-mirage: replace the alias `X509_lwt.priv` by

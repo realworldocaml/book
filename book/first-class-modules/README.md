@@ -380,7 +380,7 @@ val u_of_sexp : Sexp.t -> u = <fun>
 val sexp_of_u : u -> Sexp.t = <fun>
 # sexp_of_u {a=3;b=7.}
 - : Sexp.t = ((a 3) (b 7))
-# u_of_sexp (Core_kernel.Sexp.of_string "((a 43) (b 3.4))")
+# u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))")
 - : u = {a = 43; b = 3.4}
 ```
 
@@ -625,7 +625,7 @@ interface:
       | None -> `Stop
       | Some line ->
         match Or_error.try_with (fun () ->
-          Core_kernel.Sexp.of_string line)
+          Core.Sexp.of_string line)
         with
         | Error e -> `Continue (Error.to_string_hum e)
         | Ok (Sexp.Atom "quit") -> `Stop

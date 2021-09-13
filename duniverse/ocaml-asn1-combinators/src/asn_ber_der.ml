@@ -123,7 +123,7 @@ module R = struct
 
     let split_off cs off n =
       let k = off + n in
-      Cstruct.(sub cs off n, sub cs k (len cs - k))
+      Cstruct.(sub cs off n, sub cs k (length cs - k))
 
     let rec children cfg eof acc cs =
       if eof cs then (List.rev acc, cs) else

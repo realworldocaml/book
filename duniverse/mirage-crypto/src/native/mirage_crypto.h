@@ -47,9 +47,9 @@ extern struct _mc_cpu_features mc_detected_cpu_features;
 
 #endif /* __mc_ACCELERATE__ */
 
-#if defined (__x86_64__) || defined (__aarch64__) || defined (__powerpc64__)
+#if defined (__x86_64__) || defined (__aarch64__) || defined (__powerpc64__) || (64 == __riscv_xlen) || defined (__s390x__)
 #define ARCH_64BIT
-#elif defined (__i386__) || defined (__arm__)
+#elif defined (__i386__) || defined (__arm__) || (32 == __riscv_xlen)
 #define ARCH_32BIT
 #else
 #error "unsupported platform"

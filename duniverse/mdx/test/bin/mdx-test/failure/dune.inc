@@ -49,6 +49,7 @@
 
 (rule
  (alias runtest)
+ (enabled_if (<> %{os_type} Win32))
  (action (diff in-toplevel/test-case.md.expected in-toplevel.actual)))
 
 (rule
@@ -101,6 +102,7 @@
 
 (rule
  (alias runtest)
+ (enabled_if (<> %{os_type} Win32))
  (action (diff ml-file-not-found/test-case.md.expected ml-file-not-found.actual)))
 
 (rule
@@ -114,6 +116,7 @@
 
 (rule
  (alias runtest)
+ (enabled_if (<> %{os_type} Win32))
  (action (diff part-not-ended/test-case.md.expected part-not-ended.actual)))
 
 (rule
@@ -127,6 +130,7 @@
 
 (rule
  (alias runtest)
+ (enabled_if (<> %{os_type} Win32))
  (action (diff part-not-found/test-case.md.expected part-not-found.actual)))
 
 (rule
@@ -140,6 +144,7 @@
 
 (rule
  (alias runtest)
+ (enabled_if (<> %{os_type} Win32))
  (action (diff part-not-opened/test-case.md.expected part-not-opened.actual)))
 
 (rule

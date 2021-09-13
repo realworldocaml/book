@@ -81,7 +81,7 @@ let gen_rules sctx t ~dir ~scope =
     Preprocessing.make sctx ~dir ~expander ~dep_kind:Required
       ~lint:(Preprocess.Per_module.no_preprocessing ())
       ~preprocess:t.preprocess ~preprocessor_deps:t.preprocessor_deps
-      ~lib_name:None ~scope
+      ~instrumentation_deps:[] ~lib_name:None ~scope
   in
   let modules =
     Modules.singleton_exe module_
@@ -113,11 +113,11 @@ let gen_rules sctx t ~dir ~scope =
     let+ () = Build.path cinaps_exe in
     A.chdir (Path.build dir)
       (A.progn
-         ( A.run (Ok cinaps_exe) [ "-diff-cmd"; "-" ]
-         :: List.map cinapsed_files ~f:(fun fn ->
-                A.diff ~optional:true (Path.build fn)
-                  (Path.Build.extend_basename fn ~suffix:".cinaps-corrected"))
-         ))
+         (A.run (Ok cinaps_exe) [ "-diff-cmd"; "-" ]
+          ::
+          List.map cinapsed_files ~f:(fun fn ->
+              A.diff ~optional:true (Path.build fn)
+                (Path.Build.extend_basename fn ~suffix:".cinaps-corrected"))))
   in
   let cinaps_alias = alias ~dir in
   Super_context.add_alias_action sctx ~dir ~loc:(Some loc) ~stamp:name

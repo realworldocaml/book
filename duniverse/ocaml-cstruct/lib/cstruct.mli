@@ -337,7 +337,7 @@ val blit_to_string: t -> int -> bytes -> int -> int -> unit
 val memset: t -> int -> unit
 (** [memset t x] sets all the bytes of [t] to [x land 0xff]. *)
 
-val len: t -> int
+val len: t -> int [@@deprecated "len is deprecated, you should use length instead."]
 (** Returns the length of the current cstruct view.  Note that this
     length is potentially smaller than the actual size of the underlying
     buffer, as the [sub] or [set_len] functions can construct a smaller view. *)
@@ -488,6 +488,13 @@ val fillv: src:t list -> dst:t -> int * t list
 (** [fillv ~src ~dst] copies from [src] to [dst] until [src] is exhausted or [dst] is full.
     Returns the number of bytes copied and the remaining data from [src], if any.
     This is useful if you want buffer data into fixed-sized chunks. *)
+
+val shiftv: t list -> int -> t list
+(** [shiftv ts n] is [ts] without the first [n] bytes.
+    It has the property that [equal (concat (shiftv ts n)) (shift (concat ts) n)].
+    This operation is fairly fast, as it will share the tail of the list.
+    The first item in the returned list is never an empty cstruct,
+    so you'll get [[]] if and only if [lenv ts = n]. *)
 
 (** {2 Iterations} *)
 

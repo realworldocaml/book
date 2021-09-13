@@ -24,7 +24,7 @@ module Location = struct
     let capitalize s =
       if !first then (
         first := false;
-        String.capitalize_ascii s )
+        String.capitalize_ascii s)
       else s
     in
     let comma () = if !first then () else Format.fprintf ppf ", " in

@@ -65,3 +65,9 @@ Error: This expression has type string but an expression was expected of type
 # raise Not_found
 Exception: Not_found.
 ```
+
+```ocaml
+# print_endline "first"; failwith "second"
+first
+Exception: Failure "second".
+```

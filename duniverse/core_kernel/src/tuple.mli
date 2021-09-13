@@ -26,8 +26,17 @@ module T2 : sig
     -> ('a, 'b) t
     -> bool
 
+  [%%if flambda_backend]
+
+  external get1 : ('a, _) t -> 'a = "%field0_immut"
+  external get2 : (_, 'a) t -> 'a = "%field1_immut"
+
+  [%%else]
+
   external get1 : ('a, _) t -> 'a = "%field0"
   external get2 : (_, 'a) t -> 'a = "%field1"
+
+  [%%endif]
 
   val map1 : f:('a -> 'c) -> ('a, 'b) t -> ('c, 'b) t
   [@@deprecated "[since 2015-12] use map_fst"]
@@ -65,8 +74,18 @@ module T3 : sig
     -> ('a, 'b, 'c) t
     -> int
 
+  [%%if flambda_backend]
+
+  external get1 : ('a, _, _) t -> 'a = "%field0_immut"
+  external get2 : (_, 'a, _) t -> 'a = "%field1_immut"
+
+  [%%else]
+
   external get1 : ('a, _, _) t -> 'a = "%field0"
   external get2 : (_, 'a, _) t -> 'a = "%field1"
+
+  [%%endif]
+
   val get3 : (_, _, 'a) t -> 'a
 
   val map1 : f:('a -> 'd) -> ('a, 'b, 'c) t -> ('d, 'b, 'c) t

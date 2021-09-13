@@ -21,6 +21,15 @@ let in_file name =
   ; loc_ghost = true
   }
 
+let set_filename loc fn =
+  let loc_start =
+    {loc.loc_start with pos_fname = fn}
+  in
+  let loc_end =
+    {loc.loc_end with pos_fname = fn}
+  in
+  {loc with loc_start; loc_end}
+
 let none = in_file "_none_"
 
 let init lexbuf fname =

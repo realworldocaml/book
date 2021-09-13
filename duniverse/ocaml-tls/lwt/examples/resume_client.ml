@@ -11,8 +11,8 @@ let http_client ?ca ?fp hostname port =
   let cs = Cstruct.create 4 in
   Tls_lwt.Unix.read t cs >>= fun _len ->
   let cached_session = match Tls_lwt.Unix.epoch t with
-    | `Ok e -> e
-    | `Error -> invalid_arg "error retrieving epoch"
+    | Ok e -> e
+    | Error () -> invalid_arg "error retrieving epoch"
   in
   Printf.printf "cached session: %s\n" (Sexplib.Sexp.to_string_hum (Tls.Core.sexp_of_epoch_data cached_session)) ;
   Tls_lwt.Unix.close t >>= fun () ->

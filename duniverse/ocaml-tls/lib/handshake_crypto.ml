@@ -5,7 +5,7 @@ open State
 let (<+>) = Cstruct.append
 
 let halve secret =
-  let size = Cstruct.len secret in
+  let size = Cstruct.length secret in
   let half = size - size / 2 in
   Cstruct.(sub secret 0 half, sub secret (size - half) half)
 

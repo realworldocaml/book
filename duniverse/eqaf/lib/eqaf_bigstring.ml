@@ -1,7 +1,7 @@
-type bigstring = (char, Bigarray_compat.int8_unsigned_elt, Bigarray_compat.c_layout) Bigarray_compat.Array1.t
+type bigstring = (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-let length x = Bigarray_compat.Array1.dim x [@@inline]
-let get x i = Bigarray_compat.Array1.unsafe_get x i |> Char.code [@@inline]
+let length x = Bigarray.Array1.dim x [@@inline]
+let get x i = Bigarray.Array1.unsafe_get x i |> Char.code [@@inline]
 external unsafe_get_int16 : bigstring -> int -> int = "%caml_bigstring_get16u" [@@noalloc]
 let get16 x i = unsafe_get_int16 x i [@@inline]
 

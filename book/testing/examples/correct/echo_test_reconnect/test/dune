@@ -1,0 +1,5 @@
+(library
+ (name echo_test)
+ (libraries core async)
+ (preprocess (pps ppx_jane))
+ (inline_tests (deps ../bin/echo.exe)))

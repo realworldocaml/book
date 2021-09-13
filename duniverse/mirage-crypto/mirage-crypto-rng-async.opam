@@ -1,4 +1,4 @@
-version: "0.10.1"
+version: "0.10.3"
 opam-version: "2.0"
 homepage:     "https://github.com/mirage/mirage-crypto"
 dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
@@ -17,7 +17,7 @@ depends: [
   "ocaml" {>= "4.08.0"}
   "dune" {>= "2.6"}
   "dune-configurator" {>= "2.0.0"}
-  "async"
+  "async" {>= "v0.14"}
   "logs"
   "mirage-crypto" {=version}
   "mirage-crypto-rng" {=version}

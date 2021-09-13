@@ -1,5 +1,6 @@
-(lang dune 1.11)
+(lang dune 2.3)
 (name ocaml-migrate-parsetree)
-(version v2.1.0)
+(version v2.2.0)
+(formatting disabled)
 (allow_approximate_merlin)
 (using cinaps 1.0)

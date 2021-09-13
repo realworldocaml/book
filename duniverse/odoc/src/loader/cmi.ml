@@ -215,9 +215,18 @@ let mark_type ty =
           List.iter (fun t -> add_alias t) tyl;
           loop visited ty
       | Tunivar name -> reserve_name name
+#if OCAML_VERSION>=(4,13,0)
+      | Tpackage(_,tyl) ->
+          List.iter (fun (_,x) -> loop visited x) tyl
+#else
       | Tpackage(_, _, tyl) ->
           List.iter (loop visited) tyl
+#endif
+#if OCAML_VERSION<(4,13,0)
       | Tsubst ty -> loop visited ty
+#else
+      | Tsubst (ty,_) -> loop visited ty
+#endif
       | Tlink _ -> assert false
   in
   loop [] ty
@@ -240,12 +249,20 @@ let mark_type_parameter param =
   mark_type param;
   if aliasable param then use_alias (Btype.proxy param)
 
+#if OCAML_VERSION<(4,13,0)
+let tsubst x = Tsubst x
+let tvar_none ty = ty.desc <- Tvar None
+#else
+let tsubst x = Tsubst(x,None)
+let tvar_none ty = Types.Private_type_expr.set_desc ty (Tvar None)
+#endif
+
 let prepare_type_parameters params manifest =
   let params =
     List.fold_left
       (fun params param ->
         let param = Btype.repr param in
-        if List.memq param params then Btype.newgenty (Tsubst param) :: params
+        if List.memq param params then Btype.newgenty (tsubst param) :: params
         else param :: params)
       [] params
   in
@@ -255,7 +272,7 @@ let prepare_type_parameters params manifest =
         let vars = Ctype.free_variables ty in
           List.iter
             (function {desc = Tvar (Some "_"); _} as ty ->
-              if List.memq ty vars then ty.desc <- Tvar None
+              if List.memq ty vars then tvar_none ty
                     | _ -> ())
             params
     | None -> ()
@@ -274,7 +291,11 @@ let mark_constructor_args =
 
 let mark_type_kind = function
   | Type_abstract -> ()
+#if OCAML_VERSION >= (4,13,0)
+  | Type_variant (cds,_) ->
+#else
   | Type_variant cds ->
+#endif
       List.iter
         (fun cd ->
            mark_constructor_args cd.cd_args;
@@ -393,19 +414,28 @@ let rec read_type_expr env typ =
             remove_names tyl;
             Poly(vars, typ)
       | Tunivar _ -> Var (name_of_type typ)
+#if OCAML_VERSION>=(4,13,0)
+      | Tpackage(p,eqs) ->
+#else
       | Tpackage(p, frags, tyl) ->
+        let eqs = List.combine frags tyl in
+#endif
           let open TypeExpr.Package in
           let path = Env.Path.read_module_type env p in
           let substitutions =
-            List.map2
-              (fun frag typ ->
+            List.map
+              (fun (frag,typ) ->
                  let frag = Env.Fragment.read_type frag in
                  let typ = read_type_expr env typ in
                    (frag, typ))
-              frags tyl
+              eqs
           in
-            Package {path; substitutions}
+          Package {path; substitutions}
+#if OCAML_VERSION<(4,13,0)
       | Tsubst typ -> read_type_expr env typ
+#else
+      | Tsubst (typ,_) -> read_type_expr env typ
+#endif
       | Tlink _ -> assert false
     in
       match alias with
@@ -572,7 +602,11 @@ let read_constructor_declaration env parent cd =
 let read_type_kind env parent =
   let open TypeDecl.Representation in function
     | Type_abstract -> None
-    | Type_variant cstrs ->
+#if OCAML_VERSION >= (4,13,0)
+  | Type_variant (cstrs,_) ->
+#else
+  | Type_variant cstrs ->
+#endif
         let cstrs =
           List.map (read_constructor_declaration env parent) cstrs
         in
@@ -634,7 +668,11 @@ let read_type_declaration env parent id decl =
         decl.type_manifest = None || decl.type_private = Private
     | Type_record _ ->
         decl.type_private = Private
-    | Type_variant tll ->
+#if OCAML_VERSION >= (4,13,0)
+  | Type_variant (tll,_) ->
+#else
+  | Type_variant tll ->
+#endif
         decl.type_private = Private ||
         List.exists (fun cd -> cd.cd_res <> None) tll
     | Type_open ->

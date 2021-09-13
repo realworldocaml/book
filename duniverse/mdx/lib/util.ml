@@ -94,7 +94,7 @@ module List = struct
   let find_map f l =
     let rec aux = function
       | [] -> None
-      | h :: t -> ( match f h with Some x -> Some x | None -> aux t )
+      | h :: t -> ( match f h with Some x -> Some x | None -> aux t)
     in
     aux l
 end

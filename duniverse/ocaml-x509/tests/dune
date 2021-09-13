@@ -1,4 +1,4 @@
 (test
  (name tests)
- (deps (source_tree regression) (source_tree testcertificates) (source_tree crl) (source_tree csr) (source_tree pkcs12))
+ (deps (source_tree regression) (source_tree testcertificates) (source_tree crl) (source_tree csr) (source_tree pkcs12) (source_tree ocsp))
  (libraries x509 alcotest cstruct-unix ptime.clock.os mirage-crypto-pk mirage-crypto-ec mirage-crypto-rng.unix))

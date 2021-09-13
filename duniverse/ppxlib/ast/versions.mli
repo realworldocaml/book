@@ -126,6 +126,7 @@ module OCaml_409 : OCaml_version with module Ast = Migrate_parsetree.Ast_409
 module OCaml_410 : OCaml_version with module Ast = Migrate_parsetree.Ast_410
 module OCaml_411 : OCaml_version with module Ast = Migrate_parsetree.Ast_411
 module OCaml_412 : OCaml_version with module Ast = Migrate_parsetree.Ast_412
+module OCaml_413 : OCaml_version with module Ast = Migrate_parsetree.Ast_413
 (*$*)
 
 (* An alias to the current compiler version *)

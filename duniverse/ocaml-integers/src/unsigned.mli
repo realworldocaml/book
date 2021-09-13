@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2013 Jeremy Yallop.
+ * Copyright (c) 2021 Nomadic Labs
  *
  * This file is distributed under the terms of the MIT License.
  * See the file LICENSE for details.
@@ -94,11 +95,14 @@ module type S = sig
 
   val of_string : string -> t
   (** Convert the given string to an unsigned integer.  Raise {!Failure}
-      ["int_of_string"] if the given string is not a valid representation of
-      an unsigned integer. *)
+      if the given string is not a valid representation of an unsigned
+      integer. *)
 
   val to_string : t -> string
   (** Return the string representation of its argument. *)
+
+  val to_hexstring : t -> string
+  (** Return the hexadecimal string representation of its argument. *)
 
   val zero : t
   (** The integer 0. *)
@@ -128,8 +132,15 @@ module type S = sig
   val min : t -> t -> t
   (** [min x y] is the lesser of [x] and [y] *)
 
+  val of_string_opt : string -> t option
+  (** Convert the given string to an unsigned integer. Returns [None] if the
+      given string is not a valid representation of an unsigned integer. *)
+
   val pp : Format.formatter -> t -> unit
   (** Output the result of {!to_string} on a formatter. *)
+
+  val pp_hex : Format.formatter -> t -> unit
+  (** Output the result of {!to_hexstring} on a formatter. *)
 
   module Infix : Infix with type t := t
 end
@@ -147,14 +158,53 @@ module UInt16 : S with type t = private int
 module UInt32 : sig
   include S
   val of_int32 : int32 -> t
+  (** Convert the given 32-bit signed integer to an unsigned 32-bit integer.
+
+      If the signed integer fits within the unsigned range (in other words, if
+      the signed integer is positive) then the numerical values represented by
+      the signed and unsigned integers are the same.
+
+      Whether the signed integer fits or not, the function [of_int32] is always
+      the inverse of the function {!to_int32}. In other words,
+      [to_int32 (of_int32 x) = x] holds for all [x : int32]. *)
+
   val to_int32 : t -> int32
+  (** Convert the given 32-bit unsigned integer to a signed 32-bit integer.
+
+      If the unsigned integer fits within the signed range (in other words, if
+      the unsigned integer is less than {!Int32.max_int}) then the numerical
+      values represented by unsigned and signed integers are the same.
+
+      Whether the unsigned integer fits or not, the function [to_int32] is
+      always the inverse of the function {!of_int32}. In other words,
+      [of_int32 (to_int32 x) = x] holds for all [x : t]. *)
 end
 (** Unsigned 32-bit integer type and operations. *)
 
 module UInt64 : sig
   include S
+
   val of_int64 : int64 -> t
+  (** Convert the given 64-bit signed integer to an unsigned 64-bit integer.
+
+      If the signed integer fits within the unsigned range (in other words, if
+      the signed integer is positive) then the numerical values represented by
+      the signed and unsigned integers are the same.
+
+      Whether the signed integer fits or not, the function [of_int64] is always
+      the inverse of the function {!to_int64}. In other words,
+      [to_int64 (of_int64 x) = x] holds for all [x : int64]. *)
+
   val to_int64 : t -> int64
+  (** Convert the given 64-bit unsigned integer to a signed 64-bit integer.
+
+      If the unsigned integer fits within the signed range (in other words, if
+      the unsigned integer is less than {!Int64.max_int}) then the numerical
+      values represented by unsigned and signed integers are the same.
+
+      Whether the unsigned integer fits or not, the function [to_int64] is
+      always the inverse of the function {!of_int64}. In other words,
+      [of_int64 (to_int64 x) = x] holds for all [x : t]. *)
 
   val of_uint32 : UInt32.t -> t
   (** Convert the given 32-bit unsigned integer to a 64-bit unsigned

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]

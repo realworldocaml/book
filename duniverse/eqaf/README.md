@@ -1,31 +1,143 @@
 # Eq(af) - Constant time equal function
 
-From some crypto libraries like [digestif][digestif], it needed to have a
-constant time equal function to avoid timing attacks. To avoid replication of
-code and ensure maintainability of this kind of function, we decide to provide a
-little package which implements `equal` function on `string`.
+This library implements various *constant time* algorithms,
+first and foremost the `Eqaf.equal` equality testing function for `string`.
+
+While the test suite has a number of external dependencies, the library itself
+does not have any dependencies besides the OCaml standard library.
+This should make `eqaf` small, self-contained, and easy to integrate in your
+code.
+
+The "constant time" provided by this library is *constant* in the sense that
+the time required to execute the functions does not depend on the *values* of
+the operands. The purpose is to help programmer shield their code from
+timing-based side-channel attacks where an adversary tries to measure execution
+time to learn about the contents of the operands. They are *not* necessarily
+"constant time" in the sense that each invocation takes exactly the same amount
+of microseconds.
+
+Constant time implementations are beneficial in many different applications;
+cryptographic libraries like [digestif](https://github.com/mirage/digestif),
+but also practial code that deal with sensitive information (like passwords)
+benefit from constant time execution in select situations.
+A practical example of where this matters is the
+[Lucky Thirteen attack](https://en.wikipedia.org/wiki/Lucky_Thirteen_attack)
+against the TLS protocol, where a short-circuiting comparison compromised
+the message encryption layer in many vulnerable implementations.
+
+You can generate and view the documentation in a browser with:
+```shell
+dune build @doc
+xdg-open ./_build/default/_doc/_html/index.html
+```
+
+# Contents
+
+We found that we often had to duplicate the constant time `equal` function, and
+to avoid replication of code and ensure maintainability of the implementation,
+we decided to provide a little package which implements the `equal`
+function on `string`. Since then, we have added a number of other useful
+constant time implementations:
+
+- `compare_be` and `compare_le`: can be used to compare integers (or actual
+  strings) of any size in either big-endian or little-endian representation.
+  Regular string comparison (e.g. `String.compare`) is usually
+  *short-circuiting*, which results in an adversary being able to learn the
+  contents of compared strings by timing repeated executions.
+  If the lengths do not match, the semantics for `compare_be` follow those
+  of `String.compare`, and `compare_le` those of `String.compare (reverse str)`.
+  - The `compare_be_with_len` and `compare_le_with_len` are similar,
+    but does a constant time comparison of the lengths of the two
+    strings and the `~len` parameter. If the lengths do not match,
+    an exception is thrown (which leaks the fact that the lengths did not
+    match, but not the lengths or the contents of the input operands).
+
+- `exists_uint8 : ?off -> f:(int -> bool) -> string -> bool`:
+  implements the equivalent of `List.exists` on `string`, but executing in
+  constant time with respect to the contents of the string and `?off`.
+  The user provides a callback function that is given each byte as an integer,
+  and is responsible for ensuring this function also operates in constant time.
+
+- `find_uint8`: similar to `exists_uint8`, but implementing the
+  functionality of `List.find`: It returns the string index of the first match.
+
+- `divmod`: constant time division and modulo operations.
+  The execution time of both operations in normal implementations are
+  notoriously dependent on the operands. The `eqaf` implementation uses an
+  algorithm ported from `SUPERCOP`.
+
+- `ascii_of_int32 : digits:int -> int32 -> string`:
+  Turns the `int32` argument into a fixed-width (of length `= digits`)
+  left-padded string containing the decimal representation,
+  ex: `ascii_of_int32 ~digits:4 123l` is `"0123"`.
+  Usually programming languages provide similar functionality
+  (ex: `Int32.to_string`), but are vulnerable to timing attacks  since they
+  rely on division. This implementation is similar, but uses `Eqaf.divmod` to
+  mitigate side channels.
+
+- `lowercase_ascii` and `uppercase_ascii` implement functionality equivalent to
+  the identically named functions in `Stdlib.String` module, but without
+  introducing a timing side channel.
+
+- `hex_of_string`: constant-time hex encoding.
+  Normally hex encoding is implemented with either a table lookup or
+  processor branches, both of which introduce side channels for an adversary to
+  learn about the contents of the string being encoded.
+  That can be a problem if an adversary can repeatedly trigger encoding of
+  sensitive values in your application and measure the response time.
+
+- `string_of_hex`: constant-time hex decoding.
+  Inverse of `hex_of_string`, but with support for decoding uppercase and
+  lowercase letters alike.
 
 This package, if `cstruct` or `base-bigarray` is available, will make this
 `equal` function for them too (as `eqaf.cstruct` and `eqaf.bigarray`).
 
+A number of low-level primitives used by `Eqaf` are also exposed to enable you
+to construct your own constant time implementations:
+
+- `zero_if_not_zero : int -> int`:
+  `(if n <> 0 then 0 else 1)`, or `!n` in the C programming language.
+- `one_if_not_zero : int -> int`:
+  `(if n <> 0 then 1 else 0)`, or `!!n` in the C programming language.
+  - `bool_of_int : int -> bool`, like `one_if_not_zero` but cast to `bool`
+  - `int_of_bool : bool -> int`, inverse of `bool_of_int`
+- `select_int : int -> int -> int -> int`:
+  `select_int choose_b a b` is a constant time utility for branching,
+  but always executing all the branches (to ensure constant time operation):
+  ```ocaml
+  let select_int choose_b a b = if choose_b = 0 then a else b
+  ```
+- `select_a_if_in_range : ~low:int -> ~high:int -> n:int -> int -> int -> int`
+  Similar to `select_int`, but checking for inclusion in a range rather than
+  testing for zero - a CT version of:
+  ```ocaml
+  let select_a_if_in_range ~low ~high ~n a b =
+    if low <= n && n <= high
+    then a
+    else b
+  ```
+
 ## Check tool
 
-The main purpose of `eqaf` is to test the constant time execution of the equal
-function. About that, the distribution provide a `check` tool which will compute
-several times how many times we need to execute the equal function on different
-inputs and equal inputs.
+To ensure correctness,  `eqaf` ships with a test suite to measure the functions
+and comparing results both to the `Stdlib` implementations and to executions of
+the same function with similar length/size input.
+The goal is to try to spot implementation weaknesses that rely on the *values*
+of the function operands.
 
-Then, by a linear regression, we compare results and expect that we did not have
-any difference: the regression coefficient should be close to `0.0`.
+The check tool will first attempt to calculate how many executions are
+required to get statistically sound numbers (sorting out random jitter from
+external factors like other programs executing on the computer).
+
+Then, using linear regression, we compare the results and verify that we did
+not spot differences: the regression coefficient should be close to `0.0`.
 
 You can test `eqaf` with this:
 
 ```sh
 $ dune exec check/check.exe
 ```
-
-This tool does not have any dependencies to be sure that `eqaf** is
-self-contained.
 
 ### Q/A
 

@@ -233,6 +233,19 @@ let memcmp_string m () =
   ()
 ;;
 
+let memchr m () =
+  let module Memchr = (val m : S.Memchr) in
+  let open Memchr in
+  let string = "hello world foo bar baz" in
+  let buffer = Bigstringaf.of_string ~off:0 ~len:(String.length string) string in
+  let buffer_len = Bigstringaf.length buffer in
+  Alcotest.(check int) "memchr starting at offset 0" (String.index_from string 0 ' ')
+    (memchr buffer 0 ' ' buffer_len);
+  Alcotest.(check int) "memchr with an offset" (String.index_from string 7 ' ')
+    (memchr buffer 7 ' ' (buffer_len - 7));
+  Alcotest.(check int) "memchr char not found" (-1)
+    (memchr buffer 0 'Z' buffer_len)
+
 let negative_bounds_check () =
   let open Bigstringaf in
   let buf = Bigstringaf.empty in
@@ -293,6 +306,7 @@ let safe_operations =
   let module Setters : S.Setters = Bigstringaf in
   let module Blit    : S.Blit    = Bigstringaf in
   let module Memcmp  : S.Memcmp  = Bigstringaf in
+  let module Memchr  : S.Memchr  = Bigstringaf in
   [ "index out of bounds", `Quick, index_out_of_bounds
   ; "getters"            , `Quick, getters         (module Getters)
   ; "setters"            , `Quick, setters         (module Setters)
@@ -302,6 +316,7 @@ let safe_operations =
   ; "memcmp"             , `Quick, memcmp          (module Memcmp)
   ; "memcmp_string"      , `Quick, memcmp_string   (module Memcmp)
   ; "negative length"    , `Quick, negative_bounds_check
+  ; "memchr"             , `Quick, memchr          (module Memchr)
   ]
 
 let unsafe_operations =
@@ -348,6 +363,11 @@ let unsafe_operations =
     let memcmp = unsafe_memcmp
     let memcmp_string = unsafe_memcmp_string
   end in
+  let module Memchr : S.Memchr = struct
+    open Bigstringaf
+
+    let memchr = unsafe_memchr
+  end in
   [ "getters"        , `Quick, getters         (module Getters)
   ; "setters"        , `Quick, setters         (module Setters)
   ; "blit"           , `Quick, blit            (module Blit)
@@ -355,6 +375,7 @@ let unsafe_operations =
   ; "blit_from_bytes", `Quick, blit_from_bytes (module Blit)
   ; "memcmp"         , `Quick, memcmp          (module Memcmp)
   ; "memcmp_string"  , `Quick, memcmp_string   (module Memcmp)
+  ; "memchr"         , `Quick, memchr          (module Memchr)
   ]
 
 let () =

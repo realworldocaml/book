@@ -1,8 +1,8 @@
-version: "5.0.1"
+version: "5.1.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
-synopsis: "A library for manipulation of IP address representations usnig sexp"
+synopsis: "A library for manipulation of IP address representations using sexp"
 description: """
 Sexp convertions for ipaddr
 """
@@ -19,9 +19,10 @@ depends: [
   "ipaddr-cstruct" {with-test & = version}
   "ounit" {with-test}
   "ppx_sexp_conv" {>= "v0.9.0"}
+  "sexplib0"
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

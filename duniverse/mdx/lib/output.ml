@@ -48,8 +48,8 @@ let equal a b =
   let rec aux x y =
     match (x, y) with
     | [], [] | [ `Ellipsis ], _ | _, [ `Ellipsis ] -> true
-    | (`Ellipsis :: a as x), (_ :: b as y) | (_ :: b as y), (`Ellipsis :: a as x)
-      ->
+    | (`Ellipsis :: a as x), (_ :: b as y)
+    | (_ :: b as y), (`Ellipsis :: a as x) ->
         aux x b
         || (* n+ matches: skip y's head *)
         aux a y

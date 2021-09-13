@@ -1,4 +1,4 @@
-version: "6.0.0"
+version: "6.0.1"
 opam-version: "2.0"
 maintainer:   "anil@recoil.org"
 authors:      ["Anil Madhavapeddy" "Richard Mortier" "Thomas Gazagnaire"
@@ -28,6 +28,8 @@ depends: [
   "cppo" {with-test}
   "cstruct-unix" {with-test & =version}
   "stdlib-shims"
+  "ocaml-migrate-parsetree" {>= "2.1.0" & with-test}
+  "lwt_ppx" {>= "2.0.2" & with-test}
 ]
 synopsis: "Access C-like structures directly from OCaml"
 description: """

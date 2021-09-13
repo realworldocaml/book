@@ -1,3 +1,14 @@
+## v3.2.0 (2021-07-27)
+
+* Add support for S390x big-endian architectures (@avsm)
+* Add 4.14.0 entry (@avsm)
+* Add support for naked pointers checker option and add it to
+  the 4.12+ variants (@kit-ty-kate @dra27 @avsm)
+* Add a domains and effects variants for the experimental
+  forks in 4.10 and 4.12, to aid in CI. (@avsm @ewanmellor)
+* Do not advertise a 4.10 multicore as 4.12 is the preferred
+  compiler now for that (@avsm)
+
 ## v3.1.0 (2021-02-25)
 
 * Add OCaml 4.11.2 and 4.12.0 (@smorimoto @kit-ty-kate)

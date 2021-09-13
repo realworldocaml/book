@@ -54,7 +54,7 @@ let parse_version = catch parse_version_exn
 let parse_any_version = catch parse_any_version_exn
 
 let parse_record buf =
-  if len buf < 5 then
+  if length buf < 5 then
     Ok (`Fragment buf)
   else
     let typ = get_uint8 buf 0
@@ -66,7 +66,7 @@ let parse_record buf =
          2 ^ 14 + 1024 for TLSCompressed
          2 ^ 14 for TLSPlaintext *)
       Error (Overflow x)
-    | x when 5 + x > len buf -> Ok (`Fragment buf)
+    | x when 5 + x > length buf -> Ok (`Fragment buf)
     | x ->
       match
         tls_any_version_of_pair version,
@@ -117,7 +117,7 @@ let validate_alert (lvl, typ) =
   | lvl, typ -> (lvl, typ)
 
 let parse_alert = catch @@ fun buf ->
-  if len buf <> 2 then
+  if length buf <> 2 then
     raise_trailing_bytes "after alert"
   else
     let level = get_uint8 buf 0 in
@@ -128,7 +128,7 @@ let parse_alert = catch @@ fun buf ->
       | _                    -> raise_unknown @@ "alert level " ^ string_of_int level
 
 let parse_change_cipher_spec buf =
-  match len buf, get_uint8 buf 0 with
+  match length buf, get_uint8 buf 0 with
   | 1, 1 -> Ok ()
   | _    -> Error (Unknown "bad change cipher spec message")
 
@@ -140,7 +140,7 @@ let rec parse_count_list parsef buf acc = function
      | None     , buf' -> parse_count_list parsef buf'          acc  (pred n)
 
 let rec parse_list parsef buf acc =
-  match len buf with
+  match length buf with
   | 0 -> List.rev acc
   | _ ->
      match parsef buf with
@@ -174,7 +174,7 @@ let parse_ciphersuite buf =
                        | Some cs' -> (Some cs', buf')
 
 let parse_hostnames buf =
-  match len buf with
+  match length buf with
   | 0 -> []
   | n ->
      let parsef buf =
@@ -193,7 +193,7 @@ let parse_hostnames buf =
        parse_list parsef (sub buf 2 list_length) []
 
 let parse_fragment_length buf =
-  if len buf <> 1 then
+  if length buf <> 1 then
     raise_trailing_bytes "fragment length"
   else
     int_to_max_fragment_length (get_uint8 buf 0)
@@ -223,7 +223,7 @@ let parse_supported_groups buf =
     raise_wrong_length "elliptic curve list"
   else
     let cs, rt = parse_count_list parse_named_group (shift buf 2) [] (count / 2) in
-    if len rt <> 0 then
+    if length rt <> 0 then
       raise_trailing_bytes "elliptic curves"
     else
       cs
@@ -248,11 +248,11 @@ let parse_alpn_protocol raw =
   (Some protocol, shift raw (1 + length))
 
 let parse_alpn_protocols buf =
-  let length = BE.get_uint16 buf 0 in
-  if len buf <> length + 2 then
+  let len = BE.get_uint16 buf 0 in
+  if length buf <> len + 2 then
     raise_trailing_bytes "alpn"
   else
-    parse_list parse_alpn_protocol (sub buf 2 length) []
+    parse_list parse_alpn_protocol (sub buf 2 len) []
 
 let parse_ec_point_format buf =
   (* this is deprecated, we only check that uncompressed (typ 0) is present *)
@@ -270,18 +270,18 @@ let parse_extension buf = function
       | None     -> raise_unknown "maximum fragment length")
   | RENEGOTIATION_INFO ->
        let len' = get_uint8 buf 0 in
-       if len buf <> len' + 1 then
+       if length buf <> len' + 1 then
          raise_trailing_bytes "renegotiation"
        else
          `SecureRenegotiation (sub buf 1 len')
   | EXTENDED_MASTER_SECRET ->
-      if len buf > 0 then
+      if length buf > 0 then
          raise_trailing_bytes "extended master secret"
       else
         `ExtendedMasterSecret
   | EC_POINT_FORMATS ->
     let formats, rt = parse_ec_point_formats buf in
-    if len rt <> 0 then
+    if length rt <> 0 then
       raise_trailing_bytes "ec point formats"
     else if List.mem true formats then
       `ECPointFormats
@@ -318,7 +318,7 @@ let parse_client_presharedkeys buf =
   let binders_len = BE.get_uint16 buf (id_len + 2) in
   let binders = parse_list parse_binder (sub buf (4 + id_len) binders_len) [] in
   let id_binder = List.combine identities binders in
-  if len buf <> 4 + binders_len + id_len then
+  if length buf <> 4 + binders_len + id_len then
     raise_trailing_bytes "psk"
   else
     id_binder
@@ -342,29 +342,37 @@ let parse_ext raw =
   (etype, length, sub raw 4 length)
 
 let parse_client_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data =
     match int_to_extension_type etype with
     | Some SERVER_NAME ->
        (match parse_hostnames buf with
-        | [name] -> `Hostname name
-        | _      -> raise_unknown "bad server name indication (multiple names)")
+       | [name] ->
+         (match Domain_name.of_string name with
+         | Error (`Msg err) ->
+           raise_unknown ("unable to canonicalize " ^ name ^ "into a domain name: " ^ err)
+         | Ok domain_name ->
+           (match Domain_name.host domain_name with
+           | Error (`Msg err) ->
+             raise_unknown ("unable to build a hostname from " ^ name ^ ": " ^ err)
+           | Ok hostname -> `Hostname hostname))
+       | _      -> raise_unknown "bad server name indication (multiple names)")
     | Some SUPPORTED_GROUPS ->
        let gs = parse_supported_groups buf in
        `SupportedGroups gs
     | Some PADDING ->
        let rec check = function
-         | 0 -> `Padding length
+         | 0 -> `Padding len
          | n -> let idx = pred n in
                 if get_uint8 buf idx <> 0 then
                   raise_unknown "bad padding in padding extension"
                 else
                   check idx
        in
-       check length
+       check len
     | Some SIGNATURE_ALGORITHMS ->
        let algos, rt = parse_signature_algorithms buf in
-       if len rt <> 0 then
+       if length rt <> 0 then
          raise_trailing_bytes "signature algorithms"
        else
          `SignatureAlgorithms algos
@@ -373,7 +381,7 @@ let parse_client_extension raw =
       `ALPN protocols
     | Some KEY_SHARE ->
        let ll = BE.get_uint16 buf 0 in
-       if ll + 2 <> len buf then
+       if ll + 2 <> length buf then
          raise_unknown "bad key share extension"
        else
          let shares = parse_list parse_keyshare_entry (sub buf 2 ll) [] in
@@ -382,40 +390,40 @@ let parse_client_extension raw =
       let ids = parse_client_presharedkeys buf in
       `PreSharedKeys ids
     | Some EARLY_DATA ->
-      if len buf <> 0 then
+      if length buf <> 0 then
         raise_trailing_bytes "early data"
       else
         `EarlyDataIndication
     | Some SUPPORTED_VERSIONS ->
       let versions, rt = parse_supported_versions buf in
-      if len rt <> 0 then
+      if length rt <> 0 then
         raise_trailing_bytes "supported versions"
       else
         `SupportedVersions versions
     | Some POST_HANDSHAKE_AUTH ->
-      if len buf = 0 then
+      if length buf = 0 then
         `PostHandshakeAuthentication
       else
         raise_unknown "non-empty post handshake authentication"
     | Some COOKIE ->
       let c, rt = parse_cookie buf in
-      if len rt <> 0 then
+      if length rt <> 0 then
         raise_trailing_bytes "cookie"
       else
         `Cookie c
     | Some PSK_KEY_EXCHANGE_MODES ->
       let modes, rt = parse_psk_key_exchange_modes buf in
-      if len rt <> 0 then
+      if length rt <> 0 then
         raise_trailing_bytes "psk key exchange modes"
       else
         `PskKeyExchangeModes modes
     | Some x -> parse_extension buf x
     | None -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_server_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data =
     match int_to_extension_type etype with
     | Some SERVER_NAME ->
@@ -424,14 +432,14 @@ let parse_server_extension raw =
         | _      -> raise_unknown "bad server name indication (multiple names)")
     | Some KEY_SHARE ->
        (match parse_keyshare_entry buf with
-        | _, xs when len xs <> 0 -> raise_trailing_bytes "server keyshare"
+        | _, xs when length xs <> 0 -> raise_trailing_bytes "server keyshare"
         | None, _ -> raise_unknown "keyshare entry"
         | Some (g, ks), _ ->
           match named_group_to_group g with
           | Some g -> `KeyShare (g, ks)
           | None -> raise_unknown "keyshare entry")
     | Some PRE_SHARED_KEY ->
-      if len buf <> 2 then
+      if length buf <> 2 then
         raise_trailing_bytes "server pre_shared_key"
       else
         `PreSharedKey (BE.get_uint16 buf 0)
@@ -447,10 +455,10 @@ let parse_server_extension raw =
     | Some x -> parse_extension buf x
     | None -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_encrypted_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data =
     match int_to_extension_type etype with
     | Some SERVER_NAME ->
@@ -466,23 +474,23 @@ let parse_encrypted_extension raw =
        | [protocol] -> `ALPN protocol
        | _ -> raise_unknown "bad ALPN (none or multiple names)")
     | Some EARLY_DATA ->
-       if len buf <> 0 then
+       if length buf <> 0 then
          raise_trailing_bytes "server early_data"
        else
          `EarlyDataIndication
     | Some x -> raise_unknown ("bad encrypted extension " ^ (extension_type_to_string x)) (* TODO maybe unknown instead? *)
     | None -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_retry_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data =
     match int_to_extension_type etype with
     | Some KEY_SHARE ->
       begin
         let group, rt = parse_group buf in
-        if len rt <> 0 then
+        if length rt <> 0 then
           raise_trailing_bytes "key share"
         else
           match group with
@@ -494,20 +502,20 @@ let parse_retry_extension raw =
       `SelectedVersion version
     | Some COOKIE ->
       let c, rt = parse_cookie buf in
-       if len rt <> 0 then
+       if length rt <> 0 then
          raise_trailing_bytes "cookie"
        else
          `Cookie c
     | _ -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_extensions parse_ext buf =
-  let length = BE.get_uint16 buf 0 in
-  if len buf <> length + 2 then
+  let len = BE.get_uint16 buf 0 in
+  if length buf <> len + 2 then
     raise_trailing_bytes "extensions"
   else
-    parse_list parse_ext (sub buf 2 length) []
+    parse_list parse_ext (sub buf 2 len) []
 
 let parse_client_hello buf =
   let client_version = parse_any_version_exn buf in
@@ -517,7 +525,7 @@ let parse_client_hello buf =
   let ciphersuites, rt = parse_any_ciphersuites (shift buf (35 + slen)) in
   let _, rt' = parse_compression_methods rt in
   let extensions =
-    if len rt' == 0 then [] else parse_extensions parse_client_extension rt'
+    if length rt' = 0 then [] else parse_extensions parse_client_extension rt'
   in
   (* TLS 1.3 mandates PreSharedKeys to be the last extension *)
   (if List.exists (function `PreSharedKeys _ -> true | _ -> false) extensions then
@@ -547,7 +555,7 @@ let parse_server_hello buf =
     | None -> raise_unknown "unsupported ciphersuite in hello retry request"
     | Some ciphersuite ->
       let extensions =
-        if len rt' == 0 then [] else parse_extensions parse_retry_extension rt'
+        if length rt' = 0 then [] else parse_extensions parse_retry_extension rt'
       in
       let retry_version =
         match Utils.map_find ~f:(function `SelectedVersion v -> Some v | _ -> None) extensions with
@@ -562,7 +570,7 @@ let parse_server_hello buf =
       HelloRetryRequest { retry_version ; sessionid ; ciphersuite ; selected_group ; extensions }
   end else begin
     let extensions =
-      if len rt' == 0 then [] else parse_extensions parse_server_extension rt'
+      if length rt' = 0 then [] else parse_extensions parse_server_extension rt'
     in
     let server_version =
       match Utils.map_find ~f:(function `SelectedVersion v -> Some v | _ -> None) extensions with
@@ -577,11 +585,11 @@ let parse_certificates_exn buf =
     let len = get_uint24_len buf in
     (Some (sub buf 3 len), shift buf (len + 3))
   in
-  let length = get_uint24_len buf in
-  if len buf <> length + 3 then
+  let len = get_uint24_len buf in
+  if length buf <> len + 3 then
     raise_trailing_bytes "certificates"
   else
-    parse_list parsef (sub buf 3 length) []
+    parse_list parsef (sub buf 3 len) []
 
 let parse_certificates = catch @@ parse_certificates_exn
 
@@ -600,8 +608,8 @@ let parse_certificate_ext_1_3_exn buf =
   (Some (cert, exts), rest)
 
 let parse_certificate_ext_list_1_3_exn buf =
-  let length = get_uint24_len buf in
-  if len buf <> length + 3 then
+  let len = get_uint24_len buf in
+  if length buf <> len + 3 then
     raise_trailing_bytes "certificates"
   else
     parse_list parse_certificate_ext_1_3_exn (shift buf 3) []
@@ -635,7 +643,7 @@ let parse_cas buf =
 let parse_certificate_request_exn buf =
   let certificate_types, buf' = parse_certificate_types buf in
   let certificate_authorities, buf' = parse_cas buf' in
-  if len buf' <> 0 then
+  if length buf' <> 0 then
     raise_trailing_bytes "certificate request"
   else
     (certificate_types, certificate_authorities)
@@ -647,7 +655,7 @@ let parse_certificate_request_1_2_exn buf =
   let certificate_types, buf' = parse_certificate_types buf in
   let sigs, buf' = parse_signature_algorithms buf' in
   let cas, buf' = parse_cas buf' in
-  if len buf' <> 0 then
+  if length buf' <> 0 then
     raise_trailing_bytes "certificate request"
   else
     (certificate_types, sigs, cas)
@@ -656,17 +664,17 @@ let parse_certificate_request_1_2 =
   catch parse_certificate_request_1_2_exn
 
 let parse_certificate_request_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data = match int_to_extension_type etype with
     | Some SIGNATURE_ALGORITHMS ->
       let algos, rt = parse_signature_algorithms buf in
-      if len rt <> 0 then
+      if length rt <> 0 then
         raise_trailing_bytes "signature algorithms"
       else
         `SignatureAlgorithms algos
     | Some CERTIFICATE_AUTHORITIES ->
       let cas, rt = parse_cas buf in
-      if len rt <> 0 then
+      if length rt <> 0 then
         raise_trailing_bytes "certificate authorities"
       else
         let cas = List.fold_left (fun cas buf ->
@@ -678,7 +686,7 @@ let parse_certificate_request_extension raw =
         `CertificateAuthorities (List.rev cas)
     | _ -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_certificate_request_1_3_exn buf =
   let contextlen = get_uint8 buf 0 in
@@ -725,7 +733,7 @@ let parse_ec_parameters = catch @@ fun raw ->
 
 let parse_digitally_signed_exn buf =
   let siglen = BE.get_uint16 buf 0 in
-  if len buf <> siglen + 2 then
+  if length buf <> siglen + 2 then
     raise_trailing_bytes "digitally signed"
   else
     sub buf 2 siglen
@@ -741,17 +749,17 @@ let parse_digitally_signed_1_2 = catch @@ fun buf ->
   | None -> raise_unknown "hash or signature algorithm"
 
 let parse_session_ticket_extension raw =
-  let etype, length, buf = parse_ext raw in
+  let etype, len, buf = parse_ext raw in
   let data = match int_to_extension_type etype with
     | Some EARLY_DATA ->
-      if len buf <> 4 then
+      if length buf <> 4 then
         raise_unknown "bad early_data extension in session ticket"
       else
         let size = BE.get_uint32 buf 0 in
         `EarlyDataIndication size
     | _ -> `UnknownExtension (etype, buf)
   in
-  (Some data, shift raw (4 + length))
+  (Some data, shift raw (4 + len))
 
 let parse_session_ticket buf =
   let lifetime = BE.get_uint32 buf 0
@@ -765,25 +773,25 @@ let parse_session_ticket buf =
   { lifetime ; age_add ; nonce ; ticket ; extensions }
 
 let parse_client_dh_key_exchange_exn buf =
-  let length = BE.get_uint16 buf 0 in
-  if len buf <> length + 2 then
+  let len = BE.get_uint16 buf 0 in
+  if length buf <> len + 2 then
     raise_trailing_bytes "client key exchange"
   else
-    sub buf 2 length
+    sub buf 2 len
 
 let parse_client_dh_key_exchange = catch parse_client_dh_key_exchange_exn
 
 let parse_client_ec_key_exchange_exn buf =
-  let length = get_uint8 buf 0 in
-  if len buf <> length + 1 then
+  let len = get_uint8 buf 0 in
+  if length buf <> len + 1 then
     raise_trailing_bytes "client key exchange"
   else
-    sub buf 1 length
+    sub buf 1 len
 
 let parse_client_ec_key_exchange = catch parse_client_ec_key_exchange_exn
 
 let parse_keyupdate buf =
-  if len buf <> 1 then
+  if length buf <> 1 then
     raise_trailing_bytes "key update"
   else
     match int_to_key_update_request_type (get_uint8 buf 0) with
@@ -791,12 +799,12 @@ let parse_keyupdate buf =
     | None -> raise_unknown "key update content"
 
 let parse_handshake_frame buf =
-  if len buf < 4 then
+  if length buf < 4 then
     (None, buf)
   else
     let l = get_uint24_len (shift buf 1) in
     let hslen = l + 4 in
-    if len buf >= hslen then
+    if length buf >= hslen then
       let hs, rest = split buf hslen in
       (Some hs, rest)
     else
@@ -805,21 +813,21 @@ let parse_handshake_frame buf =
 let parse_handshake = catch @@ fun buf ->
   let typ = get_uint8 buf 0 in
   let handshake_type = int_to_handshake_type typ in
-  let length = get_uint24_len (shift buf 1) in
-  if len buf <> length + 4 then
+  let len = get_uint24_len (shift buf 1) in
+  if length buf <> len + 4 then
     raise_trailing_bytes "handshake"
   else
-    let payload = sub buf 4 length in
+    let payload = sub buf 4 len in
     match handshake_type with
     | Some HELLO_REQUEST ->
-      if len payload = 0 then HelloRequest else raise_trailing_bytes "hello request"
+      if length payload = 0 then HelloRequest else raise_trailing_bytes "hello request"
     | Some CLIENT_HELLO -> parse_client_hello payload
     | Some SERVER_HELLO -> parse_server_hello payload
     | Some CERTIFICATE -> Certificate payload
     | Some CERTIFICATE_VERIFY -> CertificateVerify payload
     | Some SERVER_KEY_EXCHANGE -> ServerKeyExchange payload
     | Some SERVER_HELLO_DONE ->
-      if len payload = 0 then ServerHelloDone else raise_trailing_bytes "server hello done"
+      if length payload = 0 then ServerHelloDone else raise_trailing_bytes "server hello done"
     | Some CERTIFICATE_REQUEST -> CertificateRequest payload
     | Some CLIENT_KEY_EXCHANGE -> ClientKeyExchange payload
     | Some FINISHED -> Finished payload

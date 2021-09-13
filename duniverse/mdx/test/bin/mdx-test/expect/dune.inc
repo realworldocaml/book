@@ -514,3 +514,15 @@
 (rule
  (alias runtest)
  (action (diff trailing-whitespaces/test-case.md.expected trailing-whitespaces.actual)))
+
+(rule
+ (target warnings.actual)
+ (deps (package mdx) (source_tree warnings))
+ (action
+  (with-stdout-to %{target}
+   (chdir warnings
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(rule
+ (alias runtest)
+ (action (diff warnings/test-case.md warnings.actual)))

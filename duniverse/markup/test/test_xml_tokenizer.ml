@@ -311,7 +311,11 @@ let tests = [
   ("xml.tokenizer.reference" >:: fun _ ->
     expect "foo&lt;bar&gt;&amp;&quot;&apos;baz&#48;&#x31;quux"
       [ 1,  1, S (`Chars ["foo<bar>&\"'baz01quux"]);
-        1, 50, S  `EOF]);
+        1, 50, S  `EOF];
+
+    expect "&#955;"
+      [ 1,  1, S (`Chars ["λ"]);
+        1,  7, S  `EOF]);
 
   ("xml.tokenizer.bad-reference" >:: fun _ ->
     expect "&"
