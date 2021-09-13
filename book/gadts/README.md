@@ -1,25 +1,29 @@
 # GADTs
 
-GADTs, short for Generalized Algebraic Data Types, are a more powerful
-version of the variants we saw in
-[Variants](variants.html){data-type=xref}.  GADTs are a powerful
-feature in OCaml, and they can help you get more precise types that
-make your code simpler and more concise.  At the same time, GADTs are
-harder to use and less intuitive than ordinary variants, and you
-should only use them when it's a big win.
+GADTs, short for Generalized Algebraic Data Types, are an extension of
+the variants we saw in [Variants](variants.html){data-type=xref}, and
+they can help you create precise types that are more precise and
+thereby help you make your code safer, more concise, and more
+efficient.
 
-That said, when you find the right use-case, GADTs can be really
-transformative, and this chapter, will cover some examples to
+At the same time, GADTs are an advanced feature of OCaml, and their
+power comes at a distinct cost.  GADTs are harder to use and less
+intuitive than ordinary variants, and it can sometimes be a bit of a
+puzzle to figure out how to use them effectively. All of which is to
+say that you should only use a GADT when it makes a big qualitative
+improvement to your design.
+
+But don't get me wrong, for the the right use-case, GADTs can be
+really transformative, and this chapter will cover some examples to
 demnostrate the range of use-cases that GADTs support.
 
 At their heart, GADTs provide two extra features above and beyond
 ordinary variants:
 
-- They let you learn more type information when you descend into a
-  case of a pattern match
+- They let the compiler learn more type information when you descend
+  into a case of a pattern match.
 - They provide a form of *existential types*, which you can think of
-  as a form of data-hiding, similar to what you find in
-  object-oriented languages.
+  as a flexible and dynamic kind of data-hiding.
 
 It's a little hard to understand these features without working
 through some examples, so we'll do that next.
@@ -426,16 +430,147 @@ this form:
 val eval : 'a expr -> 'a = <fun>
 ```
 
-## Heterogenous containers
+## When are GADTs useful?
+
+The example of a typed language is pretty much the standard example
+people give of GADTs, and it's a fine example as far as it goes. But
+GADTs are useful far beyond the realm of designing languages, and it's
+worth discussing some of the use-cases where it can be effective.
+
+### Varying your return type
+
+Sometimes, you want to write a single function that returns different
+types in different situations.  In some sense, we do this all the
+time.  After all, polymorphic functions often have a return type that
+depends on the types of the values they're fed.
+
+```ocaml env=main
+# List.find ~f:(fun x -> x > 3) [1;3;5;2]
+- : int option = Some 5
+# List.find ~f:(Char.is_uppercase) ['a';'B';'C']
+- : char option = Some 'B'
+```
+
+But there are distinct limits to how far you can take this approach.
+For example, what if we wanted to create a version of `find` that is
+configurable in terms of how it handles the case of not finding an
+item.  There are three different behaviors you might want: you could
+throw an exception, you could return `None`, or you could fill it in
+with a default.  Let's see what happens if we try to write a find
+function that does this without GADTs.
+
+First, we can create a variant type that represents the three possible
+behaviors.
+
+```ocaml env=main
+module If_not_found = struct
+  type 'a t =
+    | Raise
+    | Return_none
+    | Default_to of 'a
+end
+```
+
+Now, how would we write such a function?  Here's one version:
+
+```ocaml env=main
+# let rec flexible_find list ~f (if_not_found : _ If_not_found.t) =
+    match list with
+    | hd :: tl -> if f hd then Some hd else flexible_find ~f tl if_not_found
+    | [] ->
+      (match if_not_found with
+      | Raise -> failwith "Element not found"
+      | Return_none -> None
+      | Default_to x -> Some x)
+val flexible_find :
+  'a list -> f:('a -> bool) -> 'a If_not_found.t -> 'a option = <fun>
+```
+
+And this kind of does what we want.
+
+```ocaml env=main
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
+- : int option = None
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10)
+- : int option = Some 10
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise
+Exception: (Failure "Element not found")
+# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise
+- : int option = Some 20
+```
+
+The problem is that `flexible_find` always returns an option, even
+when it's passed `Raise` or `Default_to`, which guarantee that the
+`None` case is never used.
+
+If we want to do better, and to have the return type vary based on the
+mode in which the function is being used, we're going to need a GADT,
+and that GADT is going to need two type parameters: one for the type
+of the list element, and one for the return type of the function.
+Here's one way of doing that.
+
+```ocaml env=main
+module If_not_found = struct
+  type (_, _) t =
+    | Return_none : ('a, 'a option) t
+    | Raise : ('a, 'a) t
+    | Default_to : 'a -> ('a, 'a) t
+end
+```
+
+The second type parameter is the one that is for the return value of
+`flexible_find`, and as you can see, `Raise` and `Default_to` both
+have the same element type and return type, but `Return_none` has an
+optional element as the return type.
+
+Here's a definition of `flexible_find`:
+
+```ocaml env=main
+# let rec flexible_find : type a b. f:(a -> bool) -> a list -> (a, b) If_not_found.t -> b =
+   fun ~f list if_not_found ->
+    match list with
+    | [] ->
+      (match if_not_found with
+      | Raise -> failwith "No matching item found"
+      | Return_none -> None
+      | Default_to x -> x)
+    | thing :: rest ->
+      if f thing
+      then (
+        match if_not_found with
+        | Default_to _ -> thing
+        | Raise -> thing
+        | Return_none -> Some thing)
+      else flexible_find ~f rest if_not_found
+val flexible_find :
+  f:('a -> bool) -> 'a list -> ('a, 'b) If_not_found.t -> 'b = <fun>
+```
+
+As you can see, the type signature now allows the return value to vary
+according to `If_not_found.t`, and indeed the functions works as you
+might expect.
+
+```ocaml env=main
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
+- : int option = Base.Option.None
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10)
+- : int = 10
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise
+Exception: (Failure "No matching item found")
+# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise
+- : int = 20
+```
 
 
 
-## Specializing functions
+### Type-sensitive options
 
-## Controlling memory layout
+### Heterogenous containers
+
+### Controlling memory layout
 
 
-## Ideas
+### Ideas
 
 - Changing the return value of a function
 - Controlling memory layout / zero-copy networking. Maybe too
