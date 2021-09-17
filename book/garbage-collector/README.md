@@ -218,7 +218,7 @@ contains OCaml heap chunks. A heap chunk header contains:
 - A link to the next heap chunk in the list
 
 - A pointer to the start and end of the range of blocks that may contain
-  unmarked fields and need to be redarkened. Only used after mark stack
+  unexamined fields and need to be scanned later. Only used after mark stack
   overflow.
 
 Each chunk's data area starts on a page boundary, and its size is a multiple
@@ -353,12 +353,8 @@ values to mark. There's one important edge case in this process, though. The
 mark stack can only grow to a certain size, after which the GC can no longer
 recurse into intermediate values since it has nowhere to store them while it
 follows their fields. This is known as mark stack *overflow* and a process
-called _pruning_ begins.
-
-During a prune the mark stack is scanned and using the address of each block
-the corresponding heap chunk is retrieved. The start and end redarkening ranges
-in the heap chunk's header are updated, if necessary, to include the address.
-This process is continued until the mark stack is empty.
+called _pruning_ begins. Pruning empties the mark stack entirely, summarising
+the addresses of each block as start and end ranges in each heap chunk header.
 
 Later in the marking process when the mark stack is empty it is replenished by
 *redarkening* the heap. This starts at the first heap chunk (by address) that
