@@ -217,6 +217,10 @@ contains OCaml heap chunks. A heap chunk header contains:
 
 - A link to the next heap chunk in the list
 
+- A pointer to the start and end of the range of blocks that may contain
+  unmarked fields and need to be redarkened. Only used after mark stack
+  overflow.
+
 Each chunk's data area starts on a page boundary, and its size is a multiple
 of the page size (4 KB). It contains a contiguous sequence of heap blocks
 that can be as small as one or two 4 KB pages, but are usually allocated in 1
@@ -326,41 +330,42 @@ slices. [major heaps/marking and scanning]{.idx}
 - Blue:  On the free list and not currently in use
 - White (during marking): Not reached yet, but possibly reachable
 - White (during sweeping): Unreachable and can be freed
-- Gray: Reachable, but its fields have not been scanned
 - Black:  Reachable, and its fields have been scanned
 
 The color tags in the value headers store most of the state of the marking
-process, allowing it to be paused and resumed later. The GC and application
-alternate between marking a slice of the major heap and actually getting on
-with executing the program logic. The OCaml runtime calculates a sensible
-value for the size of each major heap slice based on the rate of allocation
-and available memory.
+process, allowing it to be paused and resumed later. On allocation, all heap
+values are initially given the color white indicating they are possibly
+reachable but haven't been scanned yet. The GC and application alternate
+between marking a slice of the major heap and actually getting on with
+executing the program logic. The OCaml runtime calculates a sensible value
+for the size of each major heap slice based on the rate of allocation and
+available memory.
 
 The marking process starts with a set of *root* values that are always live
-(such as the application stack). All values on the heap are initially marked
-as white values that are possibly reachable but haven't been scanned yet. It
-recursively follows all the fields in the roots via a depth-first search, and
-pushes newly encountered white blocks onto an intermediate stack of
-*gray values* while it follows their fields. When a gray value's fields have
-all been followed, it is popped off the stack and colored black. [root
-values]{.idx}[gray values]{.idx}
+(such as the application stack and globals). These root values have their
+color set to black and are pushed on to a specialized data structure known as
+the _mark_ stack. Marking proceeds by popping a value from the stack and
+examining its fields. Any fields containing white-colored blocks are changed
+to black and pushed onto the mark stack.
 
-This process is repeated until the gray value stack is empty and there are no
-further values to mark. There's one important edge case in this process,
-though. The gray value stack can only grow to a certain size, after which the
-GC can no longer recurse into intermediate values since it has nowhere to
-store them while it follows their fields. If this happens, the heap is marked
-as *impure* and a more expensive check is initiated once the existing gray
-values have been processed. [impure heaps]{.idx}
+This process is repeated until the mark stack is empty and there are no further
+values to mark. There's one important edge case in this process, though. The
+mark stack can only grow to a certain size, after which the GC can no longer
+recurse into intermediate values since it has nowhere to store them while it
+follows their fields. This is known as mark stack *overflow* and a process
+called _pruning_ begins.
 
-To mark an impure heap, the GC first marks it as pure and walks through the
-entire heap block-by-block in increasing order of memory address. If it finds
-a gray block, it adds it to the gray list and recursively marks it using the
-usual strategy for a pure heap. Once the scan of the complete heap is
-finished, the mark phase checks again whether the heap has again become
-impure and repeats the scan until it is pure again. These full-heap scans
-will continue until a successful scan completes without overflowing the gray
-list. [major heaps/controlling collections]{.idx}
+During a prune the mark stack is scanned and using the address of each block
+the corresponding heap chunk is retrieved. The start and end redarkening ranges
+in the heap chunk's header are updated, if necessary, to include the address.
+This process is continued until the mark stack is empty.
+
+Later in the marking process when the mark stack is empty it is replenished by
+*redarkening* the heap. This starts at the first heap chunk (by address) that
+has blocks needing redarkening (i.e were removed from the mark stack during
+ a prune) and entries from the redarkening range are added to the mark stack
+ until it is a quarter full. The emptying and replenishing cycle continues
+until there are no heap chunks with ranges left to redarken.
 
 ::: {data-type=note}
 #### Controlling Major Heap Collections
