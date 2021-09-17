@@ -127,13 +127,27 @@ than `limit`. If there isn't enough space left for the block without
 decrementing past `limit`, a minor garbage collection is triggered. This is a
 very fast check (with no branching) on most CPU architectures.
 
+#### Understanding allocation
+
 You may wonder why `limit` is required at all, since it always seems to equal
 `start`. It's because the easiest way for the runtime to schedule a minor
 heap collection is by setting `limit` to equal `end`. The next allocation
 will never have enough space after this is done and will always trigger a
 garbage collection. There are various internal reasons for such early
 collections, such as handling pending UNIX signals, and they don't ordinarily
-matter for application code. [minor heaps/setting size of]{.idx}
+matter for application code.
+
+It is possible to write loops or recurse in a way that may take a long time
+to do an allocation - if at all. To ensure that UNIX signals and other
+internal bookkeeping that require interrupting the running OCaml program 
+still happen the compiler introduces *poll points* in to generated native code.
+
+These poll points check `ptr` against `limit` and developers should expect
+them to be placed at the start of every function and the back edge of loops.
+The compiler includes a dataflow pass that removes all but the minimum set
+of points necessary to ensure these checks happen in a bounded amount of time.
+
+[minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
 ##### Setting the Size of the Minor Heap
