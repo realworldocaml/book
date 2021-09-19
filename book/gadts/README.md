@@ -373,14 +373,14 @@ Note that the type of the eval function is exactly the polymorphic one
 that we wanted, as opposed to the phantom-type version, where we had
 two different versions of `eval`, one for int, and one for bool.
 
-### Type annotations and locally abstract types
+### GADTs, locally abstract types, and polymorphic recursion
 
 The above example lets us see some of the downsides of GADTs, which is
 that code using them needs extra type annotations. Look at what
 happens if we write the definition of `value` without the annotation:
 
 ```ocaml env=main
-# let value = function
+# let eval_value = function
     | Int x -> x
     | Bool x -> x
 Line 3, characters 7-13:
@@ -393,22 +393,23 @@ The issue here is that OCaml by default isn't willing to instantiate
 ordinary type variables in different ways in the body of the same
 function, which is what is required here. We can fix that by adding a
 *locally abstract type*, which doesn't have that restriction.
+[locally abstract types]{.idx}
 
 ```ocaml env=main
-# let value (type a) (v : a value) : a =
+# let eval_value (type a) (v : a value) : a =
     match v with
     | Int x -> x
     | Bool x -> x
-val value : 'a value -> 'a = <fun>
+val eval_value : 'a value -> 'a = <fun>
 ```
 
-Note that this isn't quite the annotation we wrote earlier.  That's because
-this trick doesn't work with `eval`, as you can see below.
+Note that this isn't quite the annotation we wrote earlier.  That's
+because this trick doesn't work with `eval`, as you can see below.
 
 ```ocaml env=main
 # let rec eval (type a) (e : a expr) : a =
     match e with
-    | Value v -> value v
+    | Value v -> eval_value v
     | If (c, t, e) -> if eval c then eval t else eval e
     | Eq (x, y) -> eval x = eval y
     | Plus (x, y) -> eval x + eval y
@@ -418,41 +419,66 @@ Error: This expression has type a expr but an expression was expected of type
        The type constructor a would escape its scope
 ```
 
-This is a pretty confusing and unhelpful error message. The real
-problem is that `eval` is recursive, and inference of GADTs doesn't
-play well with recusrive calls.
+This is a pretty unhelpful error message. The problem is that `eval`
+is recursive, and inference of GADTs doesn't play well with recursive
+calls.
 
-The following syntax does what we want.
+The problem here is actually that the type-checker is trying to merge
+the locally abstract type `a` into the type of the recursive function
+`eval`, and merging it into the outer scope within which `eval` is
+defined is the way in which `a` is escaping its scope.
+
+We can fix this by explicitly marking `eval` as polymorphic, which
+OCaml has a handy type annotation for.
+
+```ocaml env=main
+# let rec eval : 'a. 'a expr -> 'a =
+    fun (type a) (x : a expr) ->
+     match x with
+     | Value v -> eval_value v
+     | If (c, t, e) -> if eval c then eval t else eval e
+     | Eq (x, y) -> eval x = eval y
+     | Plus (x, y) -> eval x + eval y
+val eval : 'a expr -> 'a = <fun>
+```
+
+This works because, because the fact that `eval` is explicitly
+polymorphic means the type of `eval` isn't specialized to `a`, and so
+`a` doesn't escape its scope.
+
+It's also helpful here because `eval` itself is an example of
+*polymorphic recursion*, which is to say that `eval` needs to call
+itself at multiple different types, to accommodate the fact that, for
+example, the condition of an `If` is of type `bool`, even if the
+overall `If` expression is of type `int`.  [polymorphic
+recursion]{.idx}
+
+As such, `eval` needs to see itself as polymorphic.  This kind of
+polymorphism is basically impossible to infer automatically, which is
+a second reason we need to annotate `eval`'s polymorphism explicitly.
+
+The above syntax is a bit verbose, so OCaml has the following
+syntactic sugar to combine the polymorphism annotation and the
+creation of the locally abstract types.
 
 ```ocaml env=main
 # let rec eval : type a. a expr -> a = function
-    | Value v -> value v
+    | Value v -> eval_value v
     | If (c, t, e) -> if eval c then eval t else eval e
     | Eq (x, y) -> eval x = eval y
     | Plus (x, y) -> eval x + eval y
 val eval : 'a expr -> 'a = <fun>
 ```
 
-In addition to minting a new locally abstract type `a`, the above
-syntax also allows for the function `eval` to use *polymorphic
-recursion*.  Polymorphic recursion comes up when a recursive function
-wants to call itself at a different type from the one it was called
-with.  That happens here, since `eval` will call itself on
-sub-expressions of different types, e.g., the condition of an `If` is
-of type `bool`, even if the overall `If` expression is of type `int`.
-
-That said, the above form is the right one to pick when you write any
-recursive function that makes use of GADTs, whether it uses
-polymorphic recursion or not.  BUT WHY?
-
-
+This type of annotation is the right one to pick when you write any
+recursive function that makes use of GADTs.
 
 ## When are GADTs useful?
 
-The example of a typed language is pretty much the standard example
-people give of GADTs, and it's a fine example as far as it goes. But
-GADTs are useful far beyond the realm of designing languages, and it's
-worth discussing some of the use-cases where it can be effective.
+The typed language we showed above is a fine example as far as it
+goes. But GADTs are useful far beyond the realm of designing little
+languages.  In this section, we'll go over some broader examples of
+where GADTs can be usefully applied.
 
 ### Varying your return type
 
@@ -486,11 +512,14 @@ arguments passed to it in less constrained ways.
 For a concrete example, let's say we wanted to create a version of
 `find` that is configurable in terms of how it handles the case of not
 finding an item.  There are three different behaviors you might want:
-you could throw an exception, you could return `None`, or you could
-return a default value.
 
-Let's try to write sucha function without GADTs.  First, we create a
-variant type that represents the three possible behaviors.
+- you could throw an exception,
+- you could return `None`,
+- or you could return a default value.
+
+Let's try to write a function that exhibits these behaviors without a
+GADT.  First, we create a variant type that represents the three
+possible behaviors.
 
 ```ocaml env=main
 module If_not_found = struct
@@ -533,25 +562,24 @@ The problem is that `flexible_find` always returns an option, even
 when it's passed `Raise` or `Default_to`, which guarantee that the
 `None` case is never used.
 
-If we want to do better, and to have the return type vary based on the
-mode in which the function is being used, we're going to need a GADT.
-That GADT is going to need two type parameters: one for the type of
-the list element, and one for the return type of the function.  Here's
-one way of doing that.
+If we want to do better, we're going to have to turn `If_not_found.t`
+into a GADT, in particular, a GADT with two type parameters: one for
+the type of the list element, and one for the return type of the
+function.
 
 ```ocaml env=main
 module If_not_found = struct
   type (_, _) t =
-    | Return_none : ('a, 'a option) t
     | Raise : ('a, 'a) t
+    | Return_none : ('a, 'a option) t
     | Default_to : 'a -> ('a, 'a) t
 end
 ```
 
-The second type parameter is the one that is for the return value of
-`flexible_find`, and as you can see, `Raise` and `Default_to` both
-have the same element type and return type, but `Return_none` has an
-optional element as the return type.
+The first type parameter is for the element, and the second is for the
+return type. As you can see, `Raise` and `Default_to` both have the
+same element type and return type, but `Return_none` provides an
+optional return value.
 
 Here's a definition of `flexible_find` that takes advantage of this
 GADT.
@@ -563,15 +591,15 @@ GADT.
     match list with
     | [] ->
       (match if_not_found with
-      | Return_none -> None
       | Raise -> failwith "No matching item found"
+      | Return_none -> None
       | Default_to x -> x)
     | hd :: tl ->
       if f hd
       then (
         match if_not_found with
-        | Return_none -> Some hd
         | Raise -> hd
+        | Return_none -> Some hd
         | Default_to _ -> hd)
       else flexible_find ~f tl if_not_found
 val flexible_find :
@@ -580,7 +608,7 @@ val flexible_find :
 
 As you can see from the signature of `flexible_find` we now allows the
 return value to vary according to `If_not_found.t`, and indeed the
-functions works as you might expect.
+functions works as you might hope, with no unnecessary options.
 
 ```ocaml env=main
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
@@ -593,22 +621,15 @@ Exception: (Failure "No matching item found")
 - : int = 20
 ```
 
+### Narrowing the possibilities
 
-::: {data-type=note}
-##### GADTs and polymorphic recursion
+Another good use-case for GADTs is to narrow the set of possible
+states for a given data-type in different circumstances.
 
-The first thing you might notice is that we used a somewhat unusual
-type annotation. This type annotation does two things: it introduces
-two locally abstract types, `a` and `b`; and it marks the functions in
-question as capable of polymorphic recursion.
+For example, imagine that we're building some system for processing
+user-requests, and that user-requests need to go through several
+information-gathering steps in order to be validated.
 
-This style of annotation is the right one to pick when you're writing
-a recursive function, as we are here.
-:::
-
-
-
-### Type-sensitive options
 
 ### Heterogenous containers
 
