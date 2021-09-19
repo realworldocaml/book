@@ -67,14 +67,14 @@ freshly built version of the book.
 
 It is possible to mark a chapter as WIP so that it won't be included in the main
 website or PDF.  To do so, you can wrap your chapter in a
-`(wip <chapter-folder)` in the table of content file, `book/toc.scm`, e.g.:
+`(wip <chapter-folder>)` in the table of content file, `book/toc.scm`, e.g.:
 
 You can run `dune build @site-wip` or `dune build @pdf-wip` to generate the
 website or PDF versions of the book including all WIP chapters. You can find
 them respectivey in `_build/default/static-wip/index.html` and
 `_build/default/static-wip/book.pdf`.
 
-Once the chapter is ready, you can simply replace `(wip <chapter-folder)` with
+Once the chapter is ready, you can simply replace `(wip <chapter-folder>)` with
 `<chapter-folder>` in `book/toc.scm`.
 
 ### Testing the code examples
