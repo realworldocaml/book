@@ -640,7 +640,8 @@ things: we need to translate that user-name into a numeric user-id,
 and we need to fetch permissions for the service in question; once we
 have both, we can check if the user-id is in fact permitted to log on.
 
-Without GADTs, we might model this as follows.
+Without GADTs, we might model the state of a single logon request as
+follows.
 
 ```ocaml env=main
 type logon_request =
@@ -670,28 +671,27 @@ The idea with this function is to only call it once the data is
 complete, i.e., when the `user_id` and `permissions` fields have been
 filled in, which is why it errors out if the data is incomplete.  In a
 simple case like this, the kind of dynamic check here isn't too
-bad. But in a larger and more complex case, it can be error prone.
+bad. But in a larger and more complex case, it can be quite error
+prone.
 
 We can tighten up the type discipline here by minting types that
 represent the different states of being complete and incomplete, and
 minting a GADT-based option-like type whose behavior depends on
 whether it is complete or incomplete.
 
-### A completion-sensitive option type
+#### A completion-sensitive option type
 
 Before minting the option type, we'll need types to represent the
 states of being complete and incomplete. We'll define these as empty
 variant types, which is a way of minting an *uninhabited type*, i.e.,
-a type that has no elements.
+a type that has no associated values.
 
 ```ocaml env=main
 type incomplete = |
 type complete = |
 ```
 
-We make these uninhabited because we're never going to need to
-construct a value of these types; we're going to use them as markers
-of different states our logon request can be in.
+Since these are just ways of marking the states, we
 
 Now we can mint our new completeness-sensitive option type. Note the
 two type variables; the first indicates the type of the contents of
@@ -707,21 +707,25 @@ end
 ```
 
 One thing that's a little odd here is that we haven't used `complete`
-here explicitly.  The point is that a `Coption` that's `incomplete`
-can be `None` or `Some`, and a `Coption` that's any other distinct
-type can only be `Some`.  So, we can write a function that consumes
-incomplete `Coption`s as follows.
+here explicitly.  However, a `Coption` that's `incomplete` can be
+`None` or `Some`, and a `Coption` that's any other distinct type can
+only be `Some`.  Accordingly, a `Coption` that's `complete` (and
+therefore not `incomplete`) can only be a `Some`.
+
+This is easier to understand with some examples.  Consider the
+following function for getting the value out of a `Coption`, returning
+a default value if `None` is found.
 
 ```ocaml env=main
 # let get ~default (o : (_,_) Coption.t) =
      match o with
-     | None -> default
      | Some x -> x
+     | None -> default
 val get : default:'a -> ('a, incomplete) Coption.t -> 'a = <fun>
 ```
 
-Note that the `incomplet` type was inferred here.  if we annotate the
-type as `complete`, the code no longer compiles.
+Note that the `incomplete` type was inferred here.  If we annotate the
+`Coption` as `complete`, the code no longer compiles.
 
 ```ocaml env=main
 # let get ~default (o : (_,complete) Coption.t) =
@@ -735,7 +739,7 @@ Error: This pattern matches values of type ('a, incomplete) Coption.t
        Type incomplete is not compatible with type complete
 ```
 
-We can fix this by just deleting the `None` branch (and the now
+We can make this compile by deleting the `None` branch (and the now
 useless `default` argument).
 
 ```ocaml env=main
@@ -752,8 +756,10 @@ We could write this more simply as:
 val get : ('a, complete) Coption.t -> 'a = <fun>
 ```
 
-Let's see what our `logon_request` looks like using `Coption` for the
-optional fields.
+#### A completion-sensitive request type
+
+Here's how we can use `Coption` to define a completion-sensitive
+version of `logon_request`.
 
 ```ocaml env=main
 type 'c logon_request =
@@ -763,7 +769,7 @@ type 'c logon_request =
   }
 ```
 
-We can write functions for filling in the `user_id` and `permissions`
+As before, it's easy to fill in the `user_id` and `permissions`
 fields.
 
 ```ocaml env=main
@@ -776,9 +782,9 @@ val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
   <fun>
 ```
 
-Note that these functions don't change the request from being
-incomplete to being complete.  To do that, we need to write a function
-that explicitly tests for completeness.
+Note that filling in the fields doesn't change a request from
+incomplete to complete.  To do that, we need to explicitly test for
+completeness.
 
 ```ocaml env=main
 # let check_completeness request =
@@ -813,7 +819,6 @@ on a complete login request.
 val authorized : complete logon_request -> bool = <fun>
 ```
 
-
 ### Heterogenous containers
 
 ### Controlling memory layout
@@ -825,6 +830,47 @@ val authorized : complete logon_request -> bool = <fun>
 - Controlling memory layout / zero-copy networking. Maybe too
   advanced?
 - Heterogenous containers (i.e., existentials)
+
+## Limitations of pattern matching
+
+A few things.
+
+Limitations on or-patterns.
+
+You can't do this:
+
+```ocaml env=main
+# type _ ty =
+    | I1 : int ty
+    | I2 : int ty
+    | B1 : bool ty
+    | B2 : bool ty
+type _ ty = I1 : int ty | I2 : int ty | B1 : bool ty | B2 : bool ty
+# let foo (type a) (ty : a ty) (x : a) =
+    match ty with
+    | I1 | I2 -> Int.sexp_of_t x
+    | B1 | B2 -> Bool.sexp_of_t x
+Line 3, characters 32-33:
+Error: This expression has type a but an expression was expected of type int
+```
+
+But you can do this:
+
+```ocaml env=main
+# let foo (type a) (ty : a ty) (x : a) =
+    match ty with
+    | I1 -> Int.sexp_of_t x
+    | I2 -> Int.sexp_of_t x
+    | B1 -> Bool.sexp_of_t x
+    | B2 -> Bool.sexp_of_t x
+val foo : 'a ty -> 'a -> Sexp.t = <fun>
+```
+
+So, that's weird.
+
+Also, derivers don't always work! So, you typically don't have
+`t_of_sexp` with GADTs, since the result type would need to be wrapped
+in an existential type.
 
 
 ## Detritus
