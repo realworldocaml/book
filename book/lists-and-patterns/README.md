@@ -69,10 +69,11 @@ val m : int list = [0; 1; 2; 3]
 
 ## Using Patterns to Extract Data from a List
 
-We can read data out of a list using a `match` statement. Here's a simple
-example of a recursive function that computes the sum of all elements of a
-list:[match statements]{.idx}[pattern matching/extracting data
-with]{.idx #PATMAT}[lists/extracting data from]{.idx}
+We can read data out of a list using a `match` expression. Here's a
+simple example of a recursive function that computes the sum of all
+elements of a list:[match expressions]{.idx}[pattern
+matching/extracting data with]{.idx #PATMAT}[lists/extracting data
+from]{.idx}
 
 ```ocaml env=main
 # let rec sum l =
@@ -89,19 +90,21 @@ val sum : int list -> int = <fun>
 This code follows the convention of using `hd` to represent the first element
 (or head) of the list, and `tl` to represent the remainder (or tail).
 
-The `match` statement in `sum` is really doing two things: first, it's acting
-as a case-analysis tool, breaking down the possibilities into a
-pattern-indexed list of cases. Second, it lets you name substructures within
-the data structure being matched. In this case, the variables `hd` and
-`tl` are bound by the pattern that defines the second case of the match
-statement. Variables that are bound in this way can be used in the expression
-to the right of the arrow for the pattern in question.
+The `match` expression in `sum` is really doing two things: first,
+it's acting as a case-analysis tool, breaking down the possibilities
+into a pattern-indexed list of cases. Second, it lets you name
+substructures within the data structure being matched. In this case,
+the variables `hd` and `tl` are bound by the pattern that defines the
+second case of the match expression. Variables that are bound in this
+way can be used in the expression to the right of the arrow for the
+pattern in question.
 
-The fact that `match` statements can be used to bind new variables can be a
-source of confusion. To see how, imagine we wanted to write a function that
-filtered out from a list all elements equal to a particular value. You might
-be tempted to write that code as follows, but when you do, the compiler will
-immediately warn you that something is wrong:
+The fact that `match` expressions can be used to bind new variables
+can be a source of confusion. To see how, imagine we wanted to write a
+function that filtered out from a list all elements equal to a
+particular value. You might be tempted to write that code as follows,
+but when you do, the compiler will immediately warn you that something
+is wrong:
 
 ```ocaml env=main
 # let rec drop_value l to_drop =
@@ -134,8 +137,8 @@ case is unused because it is essentially the same pattern as we had in the
 second case.
 
 A better way to write this code is not to use pattern matching for
-determining whether the first element is equal to `to_drop`, but to instead
-use an ordinary `if` statement:
+determining whether the first element is equal to `to_drop`, but to
+instead use an ordinary `if` expression:
 
 ```ocaml env=main
 # let rec drop_value l to_drop =
@@ -173,12 +176,13 @@ in the `drop_zero` example, but that's where they stop. A pattern can check
 if a list has two elements, but it can't check if the first two elements are
 equal to each other.[data structures/pattern matching and]{.idx}
 
-You can think of patterns as a specialized sublanguage that can express a
-limited (though still quite rich) set of conditions. The fact that the
-pattern language is limited turns out to be a good thing, making it possible
-to build better support for patterns in the compiler. In particular, both the
-efficiency of `match` statements and the ability of the compiler to detect
-errors in matches depend on the constrained nature of patterns.
+You can think of patterns as a specialized sublanguage that can
+express a limited (though still quite rich) set of conditions. The
+fact that the pattern language is limited turns out to be a good
+thing, making it possible to build better support for patterns in the
+compiler. In particular, both the efficiency of `match` expressions
+and the ability of the compiler to detect errors in matches depend on
+the constrained nature of patterns.
 
 ### Performance
 
@@ -188,9 +192,9 @@ were guarded by arbitrary code, that would be the case. But OCaml is often
 able to generate machine code that jumps directly to the matched case based
 on an efficiently chosen set of runtime checks.
 
-As an example, consider the following rather silly functions for incrementing
-an integer by one. The first is implemented with a `match` statement, and the
-second with a sequence of `if` statements:
+As an example, consider the following rather silly functions for
+incrementing an integer by one. The first is implemented with a
+`match` expression, and the second with a sequence of `if` expressions:
 
 ```ocaml env=main
 # let plus_one_match x =
@@ -242,11 +246,11 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 - : unit = ()
 ```
 
-Here's another, less artificial example. We can rewrite the `sum` function we
-described earlier in the chapter using an `if` statement rather than a match.
-We can then use the functions `is_empty`, `hd_exn`, and `tl_exn` from the
-`List` module to deconstruct the list, allowing us to implement the entire
-function without pattern matching:
+Here's another, less artificial example. We can rewrite the `sum`
+function we described earlier in the chapter using an `if` expression
+rather than a match.  We can then use the functions `is_empty`,
+`hd_exn`, and `tl_exn` from the `List` module to deconstruct the list,
+allowing us to implement the entire function without pattern matching:
 
 ```ocaml env=main
 # let rec sum_if l =
@@ -272,28 +276,28 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 - : unit = ()
 ```
 
-In this case, the `match`-based implementation is many times faster than the
-`if`-based implementation. The difference comes because we need to
-effectively do the same work multiple times, since each function we call has
-to reexamine the first element of the list to determine whether or not it's
-the empty cell. With a `match` statement, this work happens exactly once per
-list element.
+In this case, the `match`-based implementation is many times faster
+than the `if`-based implementation. The difference comes because we
+need to effectively do the same work multiple times, since each
+function we call has to reexamine the first element of the list to
+determine whether or not it's the empty cell. With a `match`
+expression, this work happens exactly once per list element.
 
 This is a more general phenomena: pattern matching is very efficient, and
 pattern matching code is usually a win over what you might write by hand.
 
 ### Detecting Errors
 
-The error-detecting capabilities of `match` statements are if anything more
-important than their performance. We've already seen one example of OCaml's
-ability to find problems in a pattern match: in our broken implementation of
-`drop_value`, OCaml warned us that the final case was redundant. There are no
-algorithms for determining if a predicate written in a general-purpose
-language is redundant, but it can be solved reliably in the context of
-patterns.[match statements]{.idx}[errors/detecting with match
-statements]{.idx}
+The error-detecting capabilities of `match` expressions are if
+anything more important than their performance. We've already seen one
+example of OCaml's ability to find problems in a pattern match: in our
+broken implementation of `drop_value`, OCaml warned us that the final
+case was redundant. There are no algorithms for determining if a
+predicate written in a general-purpose language is redundant, but it
+can be solved reliably in the context of patterns.[match
+expressions]{.idx}[errors/detecting with match expressions]{.idx}
 
-OCaml also checks `match` statements for exhaustiveness. Consider what
+OCaml also checks `match` expressions for exhaustiveness. Consider what
 happens if we modify `drop_zero` by deleting the handler for one of the
 cases. As you can see, the compiler will produce a warning that we've missed
 a case, along with an example of an unmatched pattern:
