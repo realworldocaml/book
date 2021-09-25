@@ -704,14 +704,18 @@ type ('a, _) coption =
   | Present : 'a -> ('a, _) coption
 ```
 
+We use `Absent` and `Present` rather than `Some` or `None` to make the
+code less confusing when both `option` and `coption` are used
+together.
+
 One thing that's a little odd here is that we haven't used `complete`
-here explicitly.  However, a `Coption` that's `incomplete` can be
-`None` or `Some`, and a `Coption` that's any other distinct type can
-only be `Some`.  Accordingly, a `Coption` that's `complete` (and
-therefore not `incomplete`) can only be a `Some`.
+here explicitly.  However, a `coption` that's `incomplete` can be
+`Absent` or `Present`, and a `coption` that's any other distinct type
+can only be `Present`.  Accordingly, a `coption` that's `complete`
+(and therefore not `incomplete`) can only be a `Present`.
 
 This is easier to understand with some examples.  Consider the
-following function for getting the value out of a `Coption`, returning
+following function for getting the value out of a `coption`, returning
 a default value if `None` is found.
 
 ```ocaml env=main
@@ -723,7 +727,7 @@ val get : default:'a -> ('a, incomplete) coption -> 'a = <fun>
 ```
 
 Note that the `incomplete` type was inferred here.  If we annotate the
-`Coption` as `complete`, the code no longer compiles.
+`coption` as `complete`, the code no longer compiles.
 
 ```ocaml env=main
 # let get ~default (o : (_,complete) coption) =
