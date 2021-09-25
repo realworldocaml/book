@@ -1055,9 +1055,9 @@ In `utop`, the exception thrown by `maybe_raise ()` terminates the evaluation
 of just that expression, but in a standalone program, an uncaught exception
 would bring down the entire process.
 
-So, how could we capture and handle such an exception? You might try to do
-this using OCaml's built-in `try/with` statement, but as you can see that
-doesn't quite do the trick:
+So, how could we capture and handle such an exception? You might try
+to do this using OCaml's built-in `try/with` expression, but as you
+can see that doesn't quite do the trick:
 
 ```ocaml env=main
 # let handle_error () =

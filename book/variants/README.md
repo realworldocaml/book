@@ -925,14 +925,13 @@ polymorphic variants can lead to fairly complex inferred types.
 ::: {.allow_break data-type=note}
 ##### Polymorphic Variants and Catch-all Cases
 
-As we saw with the definition of `is_positive`, a `match` statement
+As we saw with the definition of `is_positive`, a `match` expression
 can lead to the inference of an upper bound on a variant type,
 limiting the possible tags to those that can be handled by the match.
-If we add a catch-all case to our `match` statement, we end up with a
-type with a lower bound.
-[pattern matching/catch-all cases]{.idx}
-[catch-all cases]{.idx}
-[polymorphic variant types/and catch-all cases]{.idx}
+If we add a catch-all case to our `match` expression, we end up with a
+type with a lower bound.  [pattern matching/catch-all cases]{.idx}
+[catch-all cases]{.idx} [polymorphic variant types/and catch-all
+cases]{.idx}
 
 ```ocaml env=main
 # let is_positive_permissive = function

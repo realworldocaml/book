@@ -57,7 +57,7 @@ val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
 
-The `match` statement is used to handle the error cases, propagating a
+The `match` expression is used to handle the error cases, propagating a
 `None` in `hd` or `last` into the return value of `compute_bounds`.
 
 On the other hand, in the `find_mismatches` that follows, errors encountered
@@ -564,8 +564,8 @@ recover from an exception. This is achieved through the use of
 *exception handlers*.[exceptions/exception handlers]{.idx}[error
 handling/exception handlers]{.idx}
 
-In OCaml, an exception handler is declared using a `try`/`with` statement.
-Here's the basic syntax.
+In OCaml, an exception handler is declared using a `try`/`with`
+expression.  Here's the basic syntax.
 
 ```
 try <expr> with
@@ -578,11 +578,11 @@ A `try/with` clause first evaluates its body, *`expr`*. If no exception is
 thrown, then the result of evaluating the body is what the entire `try/with`
 clause evaluates to.
 
-But if the evaluation of the body throws an exception, then the exception
-will be fed to the pattern-match statements following the `with`. If the
-exception matches a pattern, then we consider the exception caught, and the
-`try/with` clause evaluates to the expression on the righthand side of the
-matching pattern.
+But if the evaluation of the body throws an exception, then the
+exception will be fed to the pattern-match clauses following the
+`with`. If the exception matches a pattern, then we consider the
+exception caught, and the `try/with` clause evaluates to the
+expression on the righthand side of the matching pattern.
 
 Otherwise, the original exception continues up the stack of function calls,
 to be handled by the next outer exception handler. If the exception is never
@@ -705,10 +705,11 @@ val lookup_weight :
   <fun>
 ```
 
-This nesting of a `try` within a `match` statement is both awkward and
-involves some unnecessary computation (in particular, the allocation of the
-option). Happily, OCaml allows for exceptions to be caught by match
-statements directly, which lets you write this more concisely as follows.
+This nesting of a `try` within a `match` expression is both awkward
+and involves some unnecessary computation (in particular, the
+allocation of the option). Happily, OCaml allows for exceptions to be
+caught by match expressions directly, which lets you write this more
+concisely as follows.
 
 ```ocaml env=main
 # let lookup_weight ~compute_weight alist key =

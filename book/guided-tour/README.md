@@ -275,8 +275,8 @@ available type information about the components of that expression.
 As an example, let's walk through the process of inferring the type of
 `sum_if_true`:
 
-1. OCaml requires that both branches of an `if` statement have the same type,
-   so the expression
+1. OCaml requires that both branches of an `if` expression have the
+   same type, so the expression
 
    `if test first then first else 0`
 
@@ -290,8 +290,8 @@ As an example, let's walk through the process of inferring the type of
 2. `test` is passed `first` as an argument. Since `first` has type `int`, the
    input type of `test` must be `int`.
 
-3. `test first` is used as the condition in an `if` statement, so the return
-   type of `test` must be `bool`.
+3. `test first` is used as the condition in an `if` expression, so the
+   return type of `test` must be `bool`.
 
 4. The fact that `+` returns `int` implies that the return value of
    `sum_if_true` must be int.
@@ -684,11 +684,11 @@ on empty ones:
 Exception: "Match_failure //toplevel//:1:26"
 ```
 
-You can avoid these warnings, and more importantly make sure that your code
-actually handles all of the possible cases, by using a `match` statement
-instead.
+You can avoid these warnings, and more importantly make sure that your
+code actually handles all of the possible cases, by using a `match`
+expression instead.
 
-A `match` statement is a kind of juiced-up version of the `switch` statement
+A `match` expression is a kind of juiced-up version of the `switch` statement
 found in C and Java. It essentially lets you list a sequence of patterns,
 separated by pipe characters. (The one before the first case is optional.)
 The compiler then dispatches to the code following the first matching
@@ -842,8 +842,8 @@ Line 1, characters 1-2:
 Error: Unbound value z
 ```
 
-We can also have multiple `let` statements in a row, each one adding a new
-variable binding to what came before:
+We can also have multiple `let` bindings in a row, each one adding a
+new variable binding to what came before:
 
 ```ocaml env=main
 # let x = 7 in

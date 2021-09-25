@@ -256,12 +256,13 @@ prog:
   ;
 ```
 
-The syntax for this is reminiscent of an OCaml `match` statement. The pipes
-separate the individual productions, and the curly braces contain a
-*semantic action*: OCaml code that generates the OCaml value corresponding to
-the production in question. Semantic actions are arbitrary OCaml expressions
-that are evaluated during parsing to produce values that are attached to the
-non-terminal in the rule. [semantic actions]{.idx}[curly braces ({ })]{.idx}
+The syntax for this is reminiscent of an OCaml `match` expression. The
+pipes separate the individual productions, and the curly braces
+contain a *semantic action*: OCaml code that generates the OCaml value
+corresponding to the production in question. Semantic actions are
+arbitrary OCaml expressions that are evaluated during parsing to
+produce values that are attached to the non-terminal in the
+rule. [semantic actions]{.idx}[curly braces ({ })]{.idx}
 
 We have two cases for `prog`: either there's an `EOF`, which means the text
 is empty, and so there's no JSON value to read, we return the OCaml value
