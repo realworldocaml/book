@@ -631,7 +631,7 @@ maybe_raise () ;;
 </code></pre>
 </div>
 <p>In <code>utop</code>, the exception thrown by <code>maybe_raise ()</code> terminates the evaluation of just that expression, but in a standalone program, an uncaught exception would bring down the entire process.</p>
-<p>So, how could we capture and handle such an exception? You might try to do this using OCaml’s built-in <code>try/with</code> statement, but as you can see that doesn’t quite do the trick:</p>
+<p>So, how could we capture and handle such an exception? You might try to do this using OCaml’s built-in <code>try/with</code> expression, but as you can see that doesn’t quite do the trick:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_error () =
   try

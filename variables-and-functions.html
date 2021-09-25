@@ -124,7 +124,7 @@ upcase_first_entry "" ;;
 &gt;- : string = ""
 </code></pre>
 </div>
-<p>But the compiler doesn’t know this, and so it emits the warning. It’s generally better to use a <code>match</code> statement to handle such cases explicitly.</p>
+<p>But the compiler doesn’t know this, and so it emits the warning. It’s generally better to use a <code>match</code> expression to handle such cases explicitly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let upcase_first_entry line =
   match String.split ~on:',' line with

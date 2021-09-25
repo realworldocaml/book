@@ -33,7 +33,7 @@ List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 10) ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>The <code>match</code> statement is used to handle the error cases, propagating a <code>None</code> in <code>hd</code> or <code>last</code> into the return value of <code>compute_bounds</code>.</p>
+<p>The <code>match</code> expression is used to handle the error cases, propagating a <code>None</code> in <code>hd</code> or <code>last</code> into the return value of <code>compute_bounds</code>.</p>
 <p>On the other hand, in the <code>find_mismatches</code> that follows, errors encountered during the computation do not propagate to the return value of the function. <code>find_mismatches</code> takes two hash tables as arguments and searches for keys that have different data in one table than in the other. As such, the failure to find a key in one table isn’t a failure of any sort:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find_mismatches table1 table2 =
@@ -363,7 +363,7 @@ merge_lists [1;2;3] [-1] ~f:(+) ;;
 <section class="level3" id="exception-handlers">
 <h3>Exception Handlers</h3>
 <p>So far, we’ve only seen exceptions fully terminate the execution of a computation. But often, we want a program to be able to respond to and recover from an exception. This is achieved through the use of <em>exception handlers</em>.<a data-secondary="exception handlers" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception handlers" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
-<p>In OCaml, an exception handler is declared using a <code>try</code>/<code>with</code> statement. Here’s the basic syntax.</p>
+<p>In OCaml, an exception handler is declared using a <code>try</code>/<code>with</code> expression. Here’s the basic syntax.</p>
 <div class="highlight">
 <pre><code class="language-clike">try &lt;expr&gt; with
 | &lt;pat1&gt; -&gt; &lt;expr1&gt;
@@ -371,7 +371,7 @@ merge_lists [1;2;3] [-1] ~f:(+) ;;
 ...</code></pre>
 </div>
 <p>A <code>try/with</code> clause first evaluates its body, <em><code>expr</code></em>. If no exception is thrown, then the result of evaluating the body is what the entire <code>try/with</code> clause evaluates to.</p>
-<p>But if the evaluation of the body throws an exception, then the exception will be fed to the pattern-match statements following the <code>with</code>. If the exception matches a pattern, then we consider the exception caught, and the <code>try/with</code> clause evaluates to the expression on the righthand side of the matching pattern.</p>
+<p>But if the evaluation of the body throws an exception, then the exception will be fed to the pattern-match clauses following the <code>with</code>. If the exception matches a pattern, then we consider the exception caught, and the <code>try/with</code> clause evaluates to the expression on the righthand side of the matching pattern.</p>
 <p>Otherwise, the original exception continues up the stack of function calls, to be handled by the next outer exception handler. If the exception is never caught, it terminates the program.</p>
 </section>
 <section class="level3" id="cleaning-up-in-the-presence-of-exceptions">
@@ -456,7 +456,7 @@ let load filename =
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>This nesting of a <code>try</code> within a <code>match</code> statement is both awkward and involves some unnecessary computation (in particular, the allocation of the option). Happily, OCaml allows for exceptions to be caught by match statements directly, which lets you write this more concisely as follows.</p>
+<p>This nesting of a <code>try</code> within a <code>match</code> expression is both awkward and involves some unnecessary computation (in particular, the allocation of the option). Happily, OCaml allows for exceptions to be caught by match expressions directly, which lets you write this more concisely as follows.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let lookup_weight ~compute_weight alist key =
   match find_exn alist key with

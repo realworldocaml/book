@@ -45,7 +45,7 @@ l ;;
 </section>
 <section class="level2" id="using-patterns-to-extract-data-from-a-list">
 <h2>Using Patterns to Extract Data from a List</h2>
-<p>We can read data out of a list using a <code>match</code> statement. Here’s a simple example of a recursive function that computes the sum of all elements of a list:<a data-primary="match statements" data-type="indexterm">&nbsp;</a><a id="PATMAT" data-secondary="extracting data with" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="extracting data from" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<p>We can read data out of a list using a <code>match</code> expression. Here’s a simple example of a recursive function that computes the sum of all elements of a list:<a data-primary="match expressions" data-type="indexterm">&nbsp;</a><a id="PATMAT" data-secondary="extracting data with" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="extracting data from" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec sum l =
   match l with
@@ -60,8 +60,8 @@ sum [] ;;
 </code></pre>
 </div>
 <p>This code follows the convention of using <code>hd</code> to represent the first element (or head) of the list, and <code>tl</code> to represent the remainder (or tail).</p>
-<p>The <code>match</code> statement in <code>sum</code> is really doing two things: first, it’s acting as a case-analysis tool, breaking down the possibilities into a pattern-indexed list of cases. Second, it lets you name substructures within the data structure being matched. In this case, the variables <code>hd</code> and <code>tl</code> are bound by the pattern that defines the second case of the match statement. Variables that are bound in this way can be used in the expression to the right of the arrow for the pattern in question.</p>
-<p>The fact that <code>match</code> statements can be used to bind new variables can be a source of confusion. To see how, imagine we wanted to write a function that filtered out from a list all elements equal to a particular value. You might be tempted to write that code as follows, but when you do, the compiler will immediately warn you that something is wrong:</p>
+<p>The <code>match</code> expression in <code>sum</code> is really doing two things: first, it’s acting as a case-analysis tool, breaking down the possibilities into a pattern-indexed list of cases. Second, it lets you name substructures within the data structure being matched. In this case, the variables <code>hd</code> and <code>tl</code> are bound by the pattern that defines the second case of the match expression. Variables that are bound in this way can be used in the expression to the right of the arrow for the pattern in question.</p>
+<p>The fact that <code>match</code> expressions can be used to bind new variables can be a source of confusion. To see how, imagine we wanted to write a function that filtered out from a list all elements equal to a particular value. You might be tempted to write that code as follows, but when you do, the compiler will immediately warn you that something is wrong:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_value l to_drop =
   match l with
@@ -82,7 +82,7 @@ sum [] ;;
 </div>
 <p>So, what’s going on?</p>
 <p>The key observation is that the appearance of <code>to_drop</code> in the second case doesn’t imply a check that the first element is equal to the value <code>to_drop</code> that was passed in as an argument to <code>drop_value</code>. Instead, it just causes a new variable <code>to_drop</code> to be bound to whatever happens to be in the first element of the list, shadowing the earlier definition of <code>to_drop</code>. The third case is unused because it is essentially the same pattern as we had in the second case.</p>
-<p>A better way to write this code is not to use pattern matching for determining whether the first element is equal to <code>to_drop</code>, but to instead use an ordinary <code>if</code> statement:</p>
+<p>A better way to write this code is not to use pattern matching for determining whether the first element is equal to <code>to_drop</code>, but to instead use an ordinary <code>if</code> expression:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_value l to_drop =
   match l with
@@ -113,11 +113,11 @@ drop_zero [1;2;0;3] ;;
 <section class="level2" id="limitations-and-blessings-of-pattern-matching">
 <h2>Limitations (and Blessings) of Pattern Matching</h2>
 <p>The preceding example highlights an important fact about patterns, which is that they can’t be used to express arbitrary conditions. Patterns can characterize the layout of a data structure and can even include literals, as in the <code>drop_zero</code> example, but that’s where they stop. A pattern can check if a list has two elements, but it can’t check if the first two elements are equal to each other.<a data-secondary="pattern matching and" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
-<p>You can think of patterns as a specialized sublanguage that can express a limited (though still quite rich) set of conditions. The fact that the pattern language is limited turns out to be a good thing, making it possible to build better support for patterns in the compiler. In particular, both the efficiency of <code>match</code> statements and the ability of the compiler to detect errors in matches depend on the constrained nature of patterns.</p>
+<p>You can think of patterns as a specialized sublanguage that can express a limited (though still quite rich) set of conditions. The fact that the pattern language is limited turns out to be a good thing, making it possible to build better support for patterns in the compiler. In particular, both the efficiency of <code>match</code> expressions and the ability of the compiler to detect errors in matches depend on the constrained nature of patterns.</p>
 <section class="level3" id="performance">
 <h3>Performance</h3>
 <p>Naively, you might think that it would be necessary to check each case in a <code>match</code> in sequence to figure out which one fires. If the cases of a match were guarded by arbitrary code, that would be the case. But OCaml is often able to generate machine code that jumps directly to the matched case based on an efficiently chosen set of runtime checks.</p>
-<p>As an example, consider the following rather silly functions for incrementing an integer by one. The first is implemented with a <code>match</code> statement, and the second with a sequence of <code>if</code> statements:</p>
+<p>As an example, consider the following rather silly functions for incrementing an integer by one. The first is implemented with a <code>match</code> expression, and the second with a sequence of <code>if</code> expressions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plus_one_match x =
   match x with
@@ -163,7 +163,7 @@ open Core_bench ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>Here’s another, less artificial example. We can rewrite the <code>sum</code> function we described earlier in the chapter using an <code>if</code> statement rather than a match. We can then use the functions <code>is_empty</code>, <code>hd_exn</code>, and <code>tl_exn</code> from the <code>List</code> module to deconstruct the list, allowing us to implement the entire function without pattern matching:</p>
+<p>Here’s another, less artificial example. We can rewrite the <code>sum</code> function we described earlier in the chapter using an <code>if</code> expression rather than a match. We can then use the functions <code>is_empty</code>, <code>hd_exn</code>, and <code>tl_exn</code> from the <code>List</code> module to deconstruct the list, allowing us to implement the entire function without pattern matching:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec sum_if l =
   if List.is_empty l then 0
@@ -189,13 +189,13 @@ open Core_bench ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>In this case, the <code>match</code>-based implementation is many times faster than the <code>if</code>-based implementation. The difference comes because we need to effectively do the same work multiple times, since each function we call has to reexamine the first element of the list to determine whether or not it’s the empty cell. With a <code>match</code> statement, this work happens exactly once per list element.</p>
+<p>In this case, the <code>match</code>-based implementation is many times faster than the <code>if</code>-based implementation. The difference comes because we need to effectively do the same work multiple times, since each function we call has to reexamine the first element of the list to determine whether or not it’s the empty cell. With a <code>match</code> expression, this work happens exactly once per list element.</p>
 <p>This is a more general phenomena: pattern matching is very efficient, and pattern matching code is usually a win over what you might write by hand.</p>
 </section>
 <section class="level3" id="detecting-errors">
 <h3>Detecting Errors</h3>
-<p>The error-detecting capabilities of <code>match</code> statements are if anything more important than their performance. We’ve already seen one example of OCaml’s ability to find problems in a pattern match: in our broken implementation of <code>drop_value</code>, OCaml warned us that the final case was redundant. There are no algorithms for determining if a predicate written in a general-purpose language is redundant, but it can be solved reliably in the context of patterns.<a data-primary="match statements" data-type="indexterm">&nbsp;</a><a data-secondary="detecting with match statements" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
-<p>OCaml also checks <code>match</code> statements for exhaustiveness. Consider what happens if we modify <code>drop_zero</code> by deleting the handler for one of the cases. As you can see, the compiler will produce a warning that we’ve missed a case, along with an example of an unmatched pattern:</p>
+<p>The error-detecting capabilities of <code>match</code> expressions are if anything more important than their performance. We’ve already seen one example of OCaml’s ability to find problems in a pattern match: in our broken implementation of <code>drop_value</code>, OCaml warned us that the final case was redundant. There are no algorithms for determining if a predicate written in a general-purpose language is redundant, but it can be solved reliably in the context of patterns.<a data-primary="match expressions" data-type="indexterm">&nbsp;</a><a data-secondary="detecting with match expressions" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml also checks <code>match</code> expressions for exhaustiveness. Consider what happens if we modify <code>drop_zero</code> by deleting the handler for one of the cases. As you can see, the compiler will produce a warning that we’ve missed a case, along with an example of an unmatched pattern:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_zero l =
   match l with

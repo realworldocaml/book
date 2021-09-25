@@ -147,13 +147,13 @@ sum_if_true even 2 4 ;;
 <p>OCaml determines the type of an expression using a technique called <em>type inference</em>, by which the type of an expression is inferred from the available type information about the components of that expression.</p>
 <p>As an example, let’s walk through the process of inferring the type of <code>sum_if_true</code>:</p>
 <ol type="1">
-<li><p>OCaml requires that both branches of an <code>if</code> statement have the same type, so the expression</p>
+<li><p>OCaml requires that both branches of an <code>if</code> expression have the same type, so the expression</p>
 <p><code>if test first then first else 0</code></p>
 <p>requires that <code>first</code> must be the same type as <code>0</code>, and so <code>first</code> must be of type <code>int</code>. Similarly, from</p>
 <p><code>if test second then second else 0</code></p>
 <p>we can infer that <code>second</code> has type <code>int</code>.</p></li>
 <li><p><code>test</code> is passed <code>first</code> as an argument. Since <code>first</code> has type <code>int</code>, the input type of <code>test</code> must be <code>int</code>.</p></li>
-<li><p><code>test first</code> is used as the condition in an <code>if</code> statement, so the return type of <code>test</code> must be <code>bool</code>.</p></li>
+<li><p><code>test first</code> is used as the condition in an <code>if</code> expression, so the return type of <code>test</code> must be <code>bool</code>.</p></li>
 <li><p>The fact that <code>+</code> returns <code>int</code> implies that the return value of <code>sum_if_true</code> must be int.</p></li>
 </ol>
 <p>Together, that nails down the types of all the variables, which determines the overall type of <code>sum_if_true</code>.</p>
@@ -391,8 +391,8 @@ my_favorite_language [] ;;
 &gt;Exception: "Match_failure //toplevel//:1:26"
 </code></pre>
 </div>
-<p>You can avoid these warnings, and more importantly make sure that your code actually handles all of the possible cases, by using a <code>match</code> statement instead.</p>
-<p>A <code>match</code> statement is a kind of juiced-up version of the <code>switch</code> statement found in C and Java. It essentially lets you list a sequence of patterns, separated by pipe characters. (The one before the first case is optional.) The compiler then dispatches to the code following the first matching pattern. As we’ve already seen, the pattern can mint new variables that correspond to parts of the value being matched.</p>
+<p>You can avoid these warnings, and more importantly make sure that your code actually handles all of the possible cases, by using a <code>match</code> expression instead.</p>
+<p>A <code>match</code> expression is a kind of juiced-up version of the <code>switch</code> statement found in C and Java. It essentially lets you list a sequence of patterns, separated by pipe characters. (The one before the first case is optional.) The compiler then dispatches to the code following the first matching pattern. As we’ve already seen, the pattern can mint new variables that correspond to parts of the value being matched.</p>
 <p>Here’s a new version of <code>my_favorite_language</code> that uses <code>match</code> and doesn’t trigger a compiler warning:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let my_favorite_language languages =
@@ -488,7 +488,7 @@ z + z
 &gt;Error: Unbound value z
 </code></pre>
 </div>
-<p>We can also have multiple <code>let</code> statements in a row, each one adding a new variable binding to what came before:</p>
+<p>We can also have multiple <code>let</code> bindings in a row, each one adding a new variable binding to what came before:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 7 in
 let y = x * x in
