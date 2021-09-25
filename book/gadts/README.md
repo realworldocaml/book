@@ -419,14 +419,14 @@ Error: This expression has type a expr but an expression was expected of type
        The type constructor a would escape its scope
 ```
 
-This is a pretty unhelpful error message. The problem is that `eval`
-is recursive, and inference of GADTs doesn't play well with recursive
-calls.
+This is a pretty unhelpful error message, but the basic problem is
+that `eval` is recursive, and inference of GADTs doesn't play well
+with recursive calls.
 
-The problem here is actually that the type-checker is trying to merge
-the locally abstract type `a` into the type of the recursive function
-`eval`, and merging it into the outer scope within which `eval` is
-defined is the way in which `a` is escaping its scope.
+More specifically, the issue is that the type-checker is trying to
+merge the locally abstract type `a` into the type of the recursive
+function `eval`, and merging it into the outer scope within which
+`eval` is defined is the way in which `a` is escaping its scope.
 
 We can fix this by explicitly marking `eval` as polymorphic, which
 OCaml has a handy type annotation for.
@@ -513,13 +513,13 @@ For a concrete example, let's say we wanted to create a version of
 `find` that is configurable in terms of how it handles the case of not
 finding an item.  There are three different behaviors you might want:
 
-- you could throw an exception,
-- you could return `None`,
-- or you could return a default value.
+- Throw an exception.
+- Return `None`.
+- Return a default value.
 
-Let's try to write a function that exhibits these behaviors without a
-GADT.  First, we create a variant type that represents the three
-possible behaviors.
+Let's try to write a function that exhibits these behaviors without
+using GADTs.  First, we'll create a variant type that represents the
+three possible behaviors.
 
 ```ocaml env=main
 module If_not_found = struct
@@ -530,7 +530,8 @@ module If_not_found = struct
 end
 ```
 
-Here's one way we could write such a function.
+Now, we can write `flexible_find` which takes a `If_not_found.t` as a
+parameter, and varies its behavior accordingly.
 
 ```ocaml env=main
 # let rec flexible_find list ~f (if_not_found : _ If_not_found.t) =
@@ -545,7 +546,7 @@ val flexible_find :
   'a list -> f:('a -> bool) -> 'a If_not_found.t -> 'a option = <fun>
 ```
 
-And this almost does what we want:
+And here's how it works.
 
 ```ocaml env=main
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
@@ -558,14 +559,15 @@ Exception: (Failure "Element not found")
 - : int option = Some 20
 ```
 
-The problem is that `flexible_find` always returns an option, even
-when it's passed `Raise` or `Default_to`, which guarantee that the
-`None` case is never used.
+This mostly does what we want, but the problems is that
+`flexible_find` always returns an option, even when it's passed
+`Raise` or `Default_to`, which guarantee that the `None` case is never
+used.
 
-If we want to do better, we're going to have to turn `If_not_found.t`
-into a GADT, in particular, a GADT with two type parameters: one for
-the type of the list element, and one for the return type of the
-function.
+If we want to vary the type according to which mode we're operating
+in, we're going to have to turn `If_not_found.t` into a GADT, in
+particular, a GADT with two type parameters: one for the type of the
+list element, and one for the return type of the function.
 
 ```ocaml env=main
 module If_not_found = struct
@@ -626,9 +628,35 @@ Exception: (Failure "No matching item found")
 Another good use-case for GADTs is to narrow the set of possible
 states for a given data-type in different circumstances.
 
-For example, imagine that we're building some system for processing
-user-requests, and that user-requests need to go through several
-information-gathering steps in order to be validated.
+This can be useful when you're managing complex state transitions,
+where the data available is different at different stages.  Let's
+consider a simple example, where we're writing code to handle a logon
+request from a user, where we want to check if the user in question is
+authorized to logon.
+
+We'll assume that the user logging in is authenticated as a particular
+user-name, but that in order to authenticate, we need to do two
+things: we need to translate that user-name into a numeric user-id,
+and we need to fetch permissions for the service in question; once we
+have both, we can check if the user-id is in fact permitted to log on.
+
+Without GADTs, we might model this as follows.
+
+
+```ocaml env=main
+module Logon_request = struct
+  type t =
+    { request_time : Time_ns.t
+    ; user_name : User_name.t
+    ; user_id : User_id.t option
+    ; permissions : Permissions.t option
+    }
+end
+```
+
+Then, we could write functions for filling in information as it comes
+in, specifically the `user_id` and `permissions`, as well as write a
+function for testing whether the
 
 
 ### Heterogenous containers
