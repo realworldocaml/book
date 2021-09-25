@@ -501,7 +501,7 @@ types.
 # List.find ~f:(fun x -> x > 3) [1;3;5;2]
 - : int option = Some 5
 # List.find ~f:(Char.is_uppercase) ['a';'B';'C']
-- : char option = Some 'B'
+- : char option = Some B
 ```
 
 But this approach is limited to simple dependencies between input and
@@ -642,21 +642,176 @@ have both, we can check if the user-id is in fact permitted to log on.
 
 Without GADTs, we might model this as follows.
 
+```ocaml env=main
+type logon_request =
+  { user_name : User_name.t
+  ; user_id : User_id.t option
+  ; permissions : Permissions.t option
+  }
+```
+
+Here, `User_name.t` represents a textual name, `User_id.t` represents
+an integer identifier associated with a user, and a `Permissions.t`
+lets you determine which `User_id.t`'s are authorized to log in.
+
+Here's how we might write a function for testing whether a given
+request is authorized.
 
 ```ocaml env=main
-module Logon_request = struct
-  type t =
-    { request_time : Time_ns.t
-    ; user_name : User_name.t
-    ; user_id : User_id.t option
-    ; permissions : Permissions.t option
-    }
+# let authorized request =
+    match request.user_id, request.permissions with
+    | None, _ | _, None -> failwith "Can't check authorization: data incomplete"
+    | Some user_id, Some permissions ->
+      Permissions.check permissions user_id
+val authorized : logon_request -> bool = <fun>
+```
+
+The idea with this function is to only call it once the data is
+complete, i.e., when the `user_id` and `permissions` fields have been
+filled in, which is why it errors out if the data is incomplete.  In a
+simple case like this, the kind of dynamic check here isn't too
+bad. But in a larger and more complex case, it can be error prone.
+
+We can tighten up the type discipline here by minting types that
+represent the different states of being complete and incomplete, and
+minting a GADT-based option-like type whose behavior depends on
+whether it is complete or incomplete.
+
+### A completion-sensitive option type
+
+Before minting the option type, we'll need types to represent the
+states of being complete and incomplete. We'll define these as empty
+variant types, which is a way of minting an *uninhabited type*, i.e.,
+a type that has no elements.
+
+```ocaml env=main
+type incomplete = |
+type complete = |
+```
+
+We make these uninhabited because we're never going to need to
+construct a value of these types; we're going to use them as markers
+of different states our logon request can be in.
+
+Now we can mint our new completeness-sensitive option type. Note the
+two type variables; the first indicates the type of the contents of
+the option, and the second indicates whether this is being used in an
+incomplete state.
+
+```ocaml env=main
+module Coption = struct
+  type ('a, _) t =
+    | None : (_, incomplete) t
+    | Some : 'a -> ('a, _) t
 end
 ```
 
-Then, we could write functions for filling in information as it comes
-in, specifically the `user_id` and `permissions`, as well as write a
-function for testing whether the
+One thing that's a little odd here is that we haven't used `complete`
+here explicitly.  The point is that a `Coption` that's `incomplete`
+can be `None` or `Some`, and a `Coption` that's any other distinct
+type can only be `Some`.  So, we can write a function that consumes
+incomplete `Coption`s as follows.
+
+```ocaml env=main
+# let get ~default (o : (_,_) Coption.t) =
+     match o with
+     | None -> default
+     | Some x -> x
+val get : default:'a -> ('a, incomplete) Coption.t -> 'a = <fun>
+```
+
+Note that the `incomplet` type was inferred here.  if we annotate the
+type as `complete`, the code no longer compiles.
+
+```ocaml env=main
+# let get ~default (o : (_,complete) Coption.t) =
+    match o with
+    | None -> default
+    | Some x -> x
+Line 3, characters 7-11:
+Error: This pattern matches values of type ('a, incomplete) Coption.t
+       but a pattern was expected which matches values of type
+         ('a, complete) Coption.t
+       Type incomplete is not compatible with type complete
+```
+
+We can fix this by just deleting the `None` branch (and the now
+useless `default` argument).
+
+```ocaml env=main
+# let get (o : (_,complete) Coption.t) =
+    match o with
+    | Some x -> x
+val get : ('a, complete) Coption.t -> 'a = <fun>
+```
+
+We could write this more simply as:
+
+```ocaml env=main
+# let get (Some x : (_,complete) Coption.t) = x
+val get : ('a, complete) Coption.t -> 'a = <fun>
+```
+
+Let's see what our `logon_request` looks like using `Coption` for the
+optional fields.
+
+```ocaml env=main
+type 'c logon_request =
+  { user_name : User_name.t
+  ; user_id : (User_id.t, 'c) Coption.t
+  ; permissions : (Permissions.t, 'c) Coption.t
+  }
+```
+
+We can write functions for filling in the `user_id` and `permissions`
+fields.
+
+```ocaml env=main
+# let set_user_id request user_id =
+    { request with user_id = Some user_id }
+val set_user_id : 'a logon_request -> User_id.t -> 'a logon_request = <fun>
+# let set_permissions request permissions =
+    { request with permissions = Some permissions }
+val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
+  <fun>
+```
+
+Note that these functions don't change the request from being
+incomplete to being complete.  To do that, we need to write a function
+that explicitly tests for completeness.
+
+```ocaml env=main
+# let check_completeness request =
+    match request.user_id, request.permissions with
+    | None, _ | _, None -> None
+    | (Some _ as user_id), (Some _ as permissions) ->
+      Some { request with user_id; permissions }
+val check_completeness : incomplete logon_request -> 'a logon_request option =
+  <fun>
+```
+
+Rather than leaving the result as polymorphic, it's a little clearer
+if we add a type annotation.
+
+```ocaml env=main
+# let check_completeness request : complete logon_request option =
+    match request.user_id, request.permissions with
+    | None, _ | _, None -> None
+    | (Some _ as user_id), (Some _ as permissions) ->
+      Some { request with user_id; permissions }
+val check_completeness :
+  incomplete logon_request -> complete logon_request option = <fun>
+```
+
+And we can write an authorization checker that works unconditionally
+on a complete login request.
+
+```ocaml env=main
+# let authorized (request : complete logon_request) =
+    let { user_id = Some user_id; permissions = Some permissions; _ } = request in
+    Permissions.check permissions user_id
+val authorized : complete logon_request -> bool = <fun>
+```
 
 
 ### Heterogenous containers

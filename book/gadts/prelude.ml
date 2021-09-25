@@ -1,4 +1,5 @@
 #require "base";;
+#require "core.top";;
 
 let () = Printexc.record_backtrace false
 
@@ -12,8 +13,8 @@ end = struct type t = unit end
 
 module Permissions : sig
   type t
-  val logon : t -> User_id.t -> bool
+  val check : t -> User_id.t -> bool
 end = struct
   type t = unit
-  let logon _ _ = false
+  let check _ _ = false
 end
