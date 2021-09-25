@@ -217,7 +217,8 @@ returns a list with at least one element, even when given the empty string.
 ```
 
 But the compiler doesn't know this, and so it emits the warning. It's
-generally better to use a `match` statement to handle such cases explicitly.
+generally better to use a `match` expression to handle such cases
+explicitly.
 
 ```ocaml env=main
 # let upcase_first_entry line =
