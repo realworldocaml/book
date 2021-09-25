@@ -501,7 +501,7 @@ types.
 # List.find ~f:(fun x -> x > 3) [1;3;5;2]
 - : int option = Some 5
 # List.find ~f:(Char.is_uppercase) ['a';'B';'C']
-- : char option = Some B
+- : char option = Some 'B'
 ```
 
 But this approach is limited to simple dependencies between input and
@@ -818,6 +818,76 @@ on a complete login request.
     Permissions.check permissions user_id
 val authorized : complete logon_request -> bool = <fun>
 ```
+
+#### Other ways of narrowing
+
+OCaml can do more than eliminate incompatible cases from a GADT.
+Here's an example. The following is an error-senstive variant of
+`List.map`, which takes a function `f` that returns a `Result.t`, as
+described in [Error
+Handling](error-handling.html#encoding-errors-with-result){data-type=xref}.
+If `f` ever returns an `Error`, then the entire computation returns an
+`Error`. Otherwise the entire transformed list is returned.
+
+```ocaml env=main
+# let map_or_error ~f list =
+    let rec loop list acc =
+       match list with
+       | [] -> Ok (List.rev acc)
+       | hd :: tl ->
+         match f hd with
+         | Ok x -> loop tl (x :: acc)
+         | Error err -> Error err
+    in
+    loop list []
+val map_or_error :
+  f:('a -> ('b, 'c) result) -> 'a list -> ('b list, 'c) result = <fun>
+```
+
+Here's an example of how it works:
+
+```ocaml env=main
+# let half_if_even x =
+    if x % 2 = 0 then Ok (x / 2) else Error "odd element"
+val half_if_even : int -> (int, string) result = <fun>
+# map_or_error ~f:half_if_even [2;3;4;5;6]
+- : (int list, string) result = Error "odd element"
+# map_or_error ~f:half_if_even [2;4;6]
+- : (int list, string) result = Ok [1; 2; 3]
+```
+
+Now, what happens if we use `map_or_error` for a transformation that
+can't fail at all?
+
+```ocaml env=main
+# map_or_error ~f:(fun x -> Ok (x * 2)) [1;2;3]
+- : (int list, 'a) result = Ok [2; 4; 6]
+```
+
+Now, in practice, `map_or_error` can only return `Ok`, since the
+function it is passed can only return `Ok`. But by default OCaml won't
+take advantage of that.
+
+```ocaml env=main
+# let Ok x = map_or_error ~f:(fun x -> Ok (x * 2)) [1;2;3]
+Line 1, characters 5-9:
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Error _
+val x : int list = [2; 4; 6]
+```
+
+But there is a way of making OCaml understand this, if we make it
+clear at the type level that the `Error` case can't arise. We can do
+that by using an uninhabited type, i.e., a type with no values, like
+the ones we discussed earlier in the chapter. `Base` already provides
+such a type, called `Nothing.t`.
+
+```ocaml env=main
+# let Ok x = map_or_error ~f:(fun x -> (Ok (x * 2) : (_,Nothing.t) Result.t)) [1;2;3]
+val x : int list = [2; 4; 6]
+```
+
 
 ### Heterogenous containers
 
