@@ -501,7 +501,7 @@ types.
 # List.find ~f:(fun x -> x > 3) [1;3;5;2]
 - : int option = Some 5
 # List.find ~f:(Char.is_uppercase) ['a';'B';'C']
-- : char option = Some 'B'
+- : char option = Some B
 ```
 
 But this approach is limited to simple dependencies between input and
