@@ -699,11 +699,9 @@ the option, and the second indicates whether this is being used in an
 incomplete state.
 
 ```ocaml env=main
-module Coption = struct
-  type ('a, _) t =
-    | None : (_, incomplete) t
-    | Some : 'a -> ('a, _) t
-end
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -> ('a, _) coption
 ```
 
 One thing that's a little odd here is that we haven't used `complete`
@@ -717,25 +715,25 @@ following function for getting the value out of a `Coption`, returning
 a default value if `None` is found.
 
 ```ocaml env=main
-# let get ~default (o : (_,_) Coption.t) =
+# let get ~default o =
      match o with
-     | Some x -> x
-     | None -> default
-val get : default:'a -> ('a, incomplete) Coption.t -> 'a = <fun>
+     | Present x -> x
+     | Absent -> default
+val get : default:'a -> ('a, incomplete) coption -> 'a = <fun>
 ```
 
 Note that the `incomplete` type was inferred here.  If we annotate the
 `Coption` as `complete`, the code no longer compiles.
 
 ```ocaml env=main
-# let get ~default (o : (_,complete) Coption.t) =
+# let get ~default (o : (_,complete) coption) =
     match o with
-    | None -> default
-    | Some x -> x
-Line 3, characters 7-11:
-Error: This pattern matches values of type ('a, incomplete) Coption.t
+    | Absent -> default
+    | Present x -> x
+Line 3, characters 7-13:
+Error: This pattern matches values of type ('a, incomplete) coption
        but a pattern was expected which matches values of type
-         ('a, complete) Coption.t
+         ('a, complete) coption
        Type incomplete is not compatible with type complete
 ```
 
@@ -743,29 +741,29 @@ We can make this compile by deleting the `None` branch (and the now
 useless `default` argument).
 
 ```ocaml env=main
-# let get (o : (_,complete) Coption.t) =
+# let get (o : (_,complete) coption) =
     match o with
-    | Some x -> x
-val get : ('a, complete) Coption.t -> 'a = <fun>
+    | Present x -> x
+val get : ('a, complete) coption -> 'a = <fun>
 ```
 
 We could write this more simply as:
 
 ```ocaml env=main
-# let get (Some x : (_,complete) Coption.t) = x
-val get : ('a, complete) Coption.t -> 'a = <fun>
+# let get (Present x : (_,complete) coption) = x
+val get : ('a, complete) coption -> 'a = <fun>
 ```
 
 #### A completion-sensitive request type
 
-Here's how we can use `Coption` to define a completion-sensitive
+Here's how we can use `coption` to define a completion-sensitive
 version of `logon_request`.
 
 ```ocaml env=main
 type 'c logon_request =
   { user_name : User_name.t
-  ; user_id : (User_id.t, 'c) Coption.t
-  ; permissions : (Permissions.t, 'c) Coption.t
+  ; user_id : (User_id.t, 'c) coption
+  ; permissions : (Permissions.t, 'c) coption
   }
 ```
 
@@ -774,10 +772,10 @@ fields.
 
 ```ocaml env=main
 # let set_user_id request user_id =
-    { request with user_id = Some user_id }
+    { request with user_id = Present user_id }
 val set_user_id : 'a logon_request -> User_id.t -> 'a logon_request = <fun>
 # let set_permissions request permissions =
-    { request with permissions = Some permissions }
+    { request with permissions = Present permissions }
 val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
   <fun>
 ```
@@ -789,8 +787,8 @@ completeness.
 ```ocaml env=main
 # let check_completeness request =
     match request.user_id, request.permissions with
-    | None, _ | _, None -> None
-    | (Some _ as user_id), (Some _ as permissions) ->
+    | Absent, _ | _, Absent -> None
+    | (Present _ as user_id), (Present _ as permissions) ->
       Some { request with user_id; permissions }
 val check_completeness : incomplete logon_request -> 'a logon_request option =
   <fun>
@@ -802,8 +800,8 @@ if we add a type annotation.
 ```ocaml env=main
 # let check_completeness request : complete logon_request option =
     match request.user_id, request.permissions with
-    | None, _ | _, None -> None
-    | (Some _ as user_id), (Some _ as permissions) ->
+    | Absent, _ | _, Absent -> None
+    | (Present _ as user_id), (Present _ as permissions) ->
       Some { request with user_id; permissions }
 val check_completeness :
   incomplete logon_request -> complete logon_request option = <fun>
@@ -814,7 +812,7 @@ on a complete login request.
 
 ```ocaml env=main
 # let authorized (request : complete logon_request) =
-    let { user_id = Some user_id; permissions = Some permissions; _ } = request in
+    let { user_id = Present user_id; permissions = Present permissions; _ } = request in
     Permissions.check permissions user_id
 val authorized : complete logon_request -> bool = <fun>
 ```
