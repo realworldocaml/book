@@ -1,0 +1,30 @@
+Testing `test/e2e/alcotest/passing/check_basic.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          reflexive basic              0   unit.
+  [OK]          reflexive basic              1   bool.
+  [OK]          reflexive basic              2   int.
+  [OK]          reflexive basic              3   int32.
+  [OK]          reflexive basic              4   int64.
+  [OK]          reflexive basic              5   float.
+  [OK]          reflexive basic              6   char.
+  [OK]          reflexive basic              7   string.
+  [OK]          reflexive basic              8   bytes.
+  [OK]          reflexive composite          0   empty list.
+  [OK]          reflexive composite          1   non-empty list.
+  [OK]          reflexive composite          2   empty array.
+  [OK]          reflexive composite          3   non-empty array.
+  [OK]          reflexive composite          4   option some.
+  [OK]          reflexive composite          5   option none.
+  [OK]          reflexive composite          6   result ok.
+  [OK]          reflexive composite          7   result error.
+  [OK]          reflexive composite          8   pair.
+  [OK]          reflexive composite          9   triple.
+  [OK]          negation                     0   checked exceptions.
+  [OK]          negation                     1   negated testables.
+  [OK]          fuzzy equality               0   float thresholds.
+  [OK]          fuzzy equality               1   sorted list.
+  [OK]          labeled check                0   passing.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 24 tests run.

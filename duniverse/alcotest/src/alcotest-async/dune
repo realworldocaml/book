@@ -1,0 +1,5 @@
+(library
+ (name alcotest_async)
+ (public_name alcotest-async)
+ (libraries alcotest.engine alcotest async_kernel async_unix base core
+   core_kernel))

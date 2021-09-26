@@ -25,7 +25,7 @@ let main =
   let exits = Term.default_exits in
   let man = [] in
   ( Term.(ret (const main $ Cli.setup)),
-    Term.info "ocaml-mdx" ~version:"1.10.1" ~doc ~exits ~man )
+    Term.info "ocaml-mdx" ~version:"1.11.0" ~doc ~exits ~man )
 
 let main () = Term.(exit_status @@ eval_choice main cmds)
 

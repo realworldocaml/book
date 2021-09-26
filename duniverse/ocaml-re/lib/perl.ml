@@ -26,6 +26,7 @@ exception Parse_error
 exception Not_supported
 
 let posix_class_of_string = function
+  | "alpha"  -> Re.alpha
   | "alnum"  -> Re.alnum
   | "ascii"  -> Re.ascii
   | "blank"  -> Re.blank
@@ -42,11 +43,11 @@ let posix_class_of_string = function
   | class_   -> invalid_arg ("Invalid pcre class: " ^ class_)
 
 let posix_class_strings =
-  [ "alnum" ; "ascii" ; "blank"
-  ; "cntrl" ; "digit" ; "lower"
-  ; "print" ; "space" ; "upper"
-  ; "word"  ; "punct" ; "graph"
-  ; "xdigit" ]
+  [ "alpha" ; "alnum" ; "ascii"
+  ; "blank" ; "cntrl" ; "digit"
+  ; "lower" ; "print" ; "space"
+  ; "upper" ; "word"  ; "punct"
+  ; "graph" ; "xdigit" ]
 
 let parse multiline dollar_endonly dotall ungreedy s =
   let i = ref 0 in

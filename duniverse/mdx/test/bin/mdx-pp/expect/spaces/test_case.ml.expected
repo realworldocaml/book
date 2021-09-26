@@ -9,9 +9,8 @@ let x =
 #15 "test-case.md"
   let x = 1
   
-  in x
+  in x;;
 #21 "test-case.md"
-  3
+  3;;
 #25 "test-case.md"
-  Printf.printf "foo\n\nbar\n"
-;;
+  Printf.printf "foo\n\nbar\n";;

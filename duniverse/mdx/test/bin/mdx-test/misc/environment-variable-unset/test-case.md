@@ -7,5 +7,5 @@ Environment variables can be unset in an shell and bash blocks.
 
 ```sh unset-VAR
   $ echo $VAR
-  
+
 ```

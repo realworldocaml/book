@@ -115,7 +115,7 @@ let run_cram_tests ?syntax t ?root ppf temp_file pad tests =
           | `Ellipsis -> Output.pp ~pad ppf `Ellipsis
           | `Output line ->
               let line = ansi_color_strip line in
-              Output.pp ~pad ppf (`Output line))
+              Output.pp ?syntax ~pad ppf (`Output line))
         output;
       Cram.pp_exit_code ~pad ppf n)
     tests;
@@ -287,7 +287,7 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
 
   let test_block ~ppf ~temp_file t =
     let print_block () = Block.pp ?syntax ppf t in
-    if Block.is_active ?section t then
+    if Block.is_active ?section t then (
       match Block.value t with
       | Raw _ -> print_block ()
       | Include { file_included; file_kind = Fk_ocaml { part_included } } ->
@@ -317,30 +317,31 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
             ~det:(fun () ->
               run_cram_tests ?syntax t ?root ppf temp_file pad tests)
       | Toplevel { non_det; env } ->
-          let tests =
+          let phrases =
             let syntax = Util.Option.value syntax ~default:Normal in
             Toplevel.of_lines ~syntax ~loc:t.loc t.contents
           in
+          Deprecated.Missing_double_semicolon.check_block phrases;
           with_non_det non_deterministic non_det ~command:print_block
             ~output:(fun () ->
               assert (syntax <> Some Cram);
               print_block ();
               List.iter
-                (fun (test : Toplevel.t) ->
+                (fun (phrase : Toplevel.t) ->
                   match
                     Mdx_top.in_env env (fun () ->
-                        eval_test ~block:t ?root c test.command)
+                        eval_test ~block:t ?root c phrase.command)
                   with
                   | Ok _ -> ()
                   | Error e ->
                       let output = List.map (fun l -> `Output l) e in
-                      if Output.equal test.output output then ()
-                      else err_eval ~cmd:test.command e)
-                tests)
+                      if Output.equal phrase.output output then ()
+                      else err_eval ~cmd:phrase.command e)
+                phrases)
             ~det:(fun () ->
               assert (syntax <> Some Cram);
               Mdx_top.in_env env (fun () ->
-                  run_toplevel_tests ?syntax ?root c ppf tests t))
+                  run_toplevel_tests ?syntax ?root c ppf phrases t)))
     else print_block ()
   in
   let gen_corrected file_contents items =
@@ -364,6 +365,7 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
             try test_block ~ppf ~temp_file t
             with Failure msg -> raise (Test_block_failure (t, msg))))
       items;
+    Deprecated.Missing_double_semicolon.report ~filename:file;
     Format.pp_print_flush ppf ();
     Buffer.contents buf
   in

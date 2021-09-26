@@ -63,6 +63,6 @@ let trust =
 
 let cmd =
   Term.(const jump $ setup_log $ port $ host $ trust),
-  Term.info "server" ~version:"0.14.0"
+  Term.info "server" ~version:"0.14.1"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

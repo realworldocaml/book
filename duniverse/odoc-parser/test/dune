@@ -1,0 +1,8 @@
+(library
+ (name odoc_parser_test)
+ (inline_tests)
+ (enabled_if
+  (>= %{ocaml_version} 4.04.1))
+ (preprocess
+  (pps ppx_expect))
+ (libraries sexplib0 odoc-parser))

@@ -1,0 +1,9 @@
+Testing `test/e2e/alcotest/passing/assert_not_printed.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          alpha          0   0.
+  [OK]          alpha          1   1.
+  [OK]          beta           0   2.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 3 tests run.

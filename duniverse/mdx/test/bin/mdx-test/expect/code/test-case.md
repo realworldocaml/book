@@ -11,9 +11,9 @@ let () = Printf.printf "n: %d\n%!" (f 42)
 Yo!
 
 ```ocaml
-# let x = 3
+# let x = 3;;
 val x : int = 3
-# type t = int
+# type t = int;;
 type t = int
 ```
 
@@ -22,12 +22,12 @@ class istack = object end
 ```
 
 ```ocaml
-# module type Foo = sig type t end
+# module type Foo = sig type t end;;
 module type Foo = sig type t end
 ```
 
 
 ```ocaml skip
-# Pipe.f ()
+# Pipe.f ();;
 - : unit
 ```

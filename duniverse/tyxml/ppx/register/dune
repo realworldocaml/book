@@ -1,6 +1,0 @@
-(library
- (name tyxml_ppx_register)
- (public_name tyxml-ppx)
- (libraries tyxml-ppx.internal ppxlib)
- (kind ppx_rewriter)
-)

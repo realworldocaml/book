@@ -1,3 +1,0 @@
-((output (((f.ml (1 0) (2 14)) (code_block  "(* foo *)\
-                                           \nlet bar = ()"))))
- (warnings ()))

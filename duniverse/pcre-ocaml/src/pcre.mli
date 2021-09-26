@@ -22,7 +22,7 @@
 
 (** Perl Compatibility Regular Expressions for OCaml
 
-    {e 7.4.6 - {{:https://mmottl.github.io/pcre-ocaml}homepage}}
+    {e 7.5.0 - {{:https://mmottl.github.io/pcre-ocaml}homepage}}
 *)
 
 
@@ -231,21 +231,24 @@ val maketables : unit -> chtables
 
 val regexp :
   ?study : bool ->
+  ?jit_compile : bool ->
   ?limit : int ->
   ?limit_recursion : int ->
   ?iflags : icflag ->
   ?flags : cflag list ->
   ?chtables : chtables ->
   string -> regexp
-(** [regexp ?study ?limit ?limit_recursion ?iflags ?flags ?chtables pattern]
-    compiles [pattern] with [flags] when given, with [iflags] otherwise, and
-    with char tables [chtables]. If [study] is true, then the resulting regular
-    expression will be studied. If [limit] is specified, this sets a limit to
-    the amount of recursion and backtracking (only lower than the builtin
-    default!). If this limit is exceeded, [MatchLimit] will be raised during
-    matching.
+(** [regexp ?jit_compile ?study ?limit ?limit_recursion ?iflags ?flags
+    ?chtables pattern] compiles [pattern] with [flags] when given, with
+    [iflags] otherwise, and with char tables [chtables].  If [study] is true,
+    then the resulting regular expression will be studied.  If [jit_compile]
+    is true, studying will also perform JIT-compilation of the pattern.
+    [If [limit] is specified, this sets a limit to the amount of recursion
+    and backtracking (only lower than the builtin default!).  If this limit
+    is exceeded, [MatchLimit] will be raised during matching.
 
     @param study default = true
+    @param jit_compile default = false
     @param limit default = no extra limit other than default
     @param limit_recursion default = no extra limit_recursion other than default
     @param iflags default = no extra flags
@@ -261,6 +264,7 @@ val regexp :
 
 val regexp_or :
   ?study : bool ->
+  ?jit_compile : bool ->
   ?limit : int ->
   ?limit_recursion : int ->
   ?iflags : icflag ->
@@ -269,7 +273,8 @@ val regexp_or :
   string list -> regexp
 (** [regexp_or ?study ?limit ?limit_recursion ?iflags ?flags ?chtables patterns]
     like {!regexp}, but combines [patterns] as alternatives (or-patterns) into
-    one regular expression. *)
+    one regular expression.
+*)
 
 val quote : string -> string
 (** [quote str] @return the quoted string of [str]. *)

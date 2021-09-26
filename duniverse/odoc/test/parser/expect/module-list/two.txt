@@ -1,3 +1,0 @@
-((output
-  (((f.ml (1 0) (1 18)) (modules ((root Foo unknown) (root Bar unknown))))))
- (warnings ()))

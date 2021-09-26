@@ -1,7 +1,7 @@
-(lang dune 2.2)
+(lang dune 2.7)
 
 (name mdx)
-(version 1.10.1)
+(version 1.11.0)
 
 (source
  (github realworldocaml/mdx))
@@ -36,6 +36,6 @@
   result
   (ocaml-version
    (>= 2.3.0))
-  (odoc (>= 1.4.1))
+  (odoc-parser (>= 0.9.0))
   (lwt :with-test)
   (alcotest :with-test)))

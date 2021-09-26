@@ -1,0 +1,21 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+
+(include dune.inc)
+
+(rule
+ (targets dune.gen)
+ (deps
+  (source_tree .))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ../../gen_dune_rules.exe --package "alcotest-lwt" --libraries
+     "alcotest-lwt lwt lwt.unix"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dune.inc dune.gen)))

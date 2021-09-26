@@ -24,14 +24,14 @@ let try_with_result fn a =
 
 module V4 = struct
   let of_cstruct_exn cs =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     if len < 4 then raise (need_more (Cstruct.to_string cs));
     Ipaddr.V4.of_int32 (Cstruct.BE.get_uint32 cs 0)
 
   let of_cstruct cs = try_with_result of_cstruct_exn cs
 
   let write_cstruct_exn i cs =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     if len < 4 then raise (need_more (Cstruct.to_string cs));
     Cstruct.BE.set_uint32 cs 0 (Ipaddr.V4.to_int32 i)
 
@@ -45,7 +45,7 @@ module V6 = struct
   open Ipaddr.V6
 
   let of_cstruct_exn cs =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     if len < 16 then raise (need_more (Cstruct.to_string cs));
     let hihi = Cstruct.BE.get_uint32 cs 0 in
     let hilo = Cstruct.BE.get_uint32 cs 4 in
@@ -56,7 +56,7 @@ module V6 = struct
   let of_cstruct cs = try_with_result of_cstruct_exn cs
 
   let write_cstruct_exn i cs =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     if len < 16 then raise (need_more (Cstruct.to_string cs));
     let a, b, c, d = to_int32 i in
     Cstruct.BE.set_uint32 cs 0 a;

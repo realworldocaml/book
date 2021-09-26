@@ -3,19 +3,17 @@
 
    https://github.com/ocaml/ocaml/pull/1010
 
-   It's going to be hard to do this for compiler-libs as it is a big breaking change. So
-   we expect the gen.ml file in Base to go soon and this file to stay for longer.
-*)
+   It's going to be hard to do this for compiler-libs as it is a big breaking
+   change. So we expect the gen.ml file in Base to go soon and this file to stay
+   for longer. *)
 
 open StdLabels
 
 let () =
   let archive_fn, oc =
     match Sys.argv with
-    | [|_; "-archive"; archive_fn; "-o"; fn|] ->
-      (archive_fn, open_out fn)
-    | _ ->
-      failwith "bad command line arguments"
+    | [| _; "-archive"; archive_fn; "-o"; fn |] -> (archive_fn, open_out fn)
+    | _ -> failwith "bad command line arguments"
   in
 
   let units = Read_cma.units archive_fn in
@@ -25,6 +23,6 @@ let () =
   pr "";
   let max_len =
     List.fold_left units ~init:0 ~f:(fun acc unit ->
-      max acc (String.length unit))
+        max acc (String.length unit))
   in
-  List.iter units ~f:(fun u -> pr "module %-*s = %s" max_len u u);
+  List.iter units ~f:(fun u -> pr "module %-*s = %s" max_len u u)

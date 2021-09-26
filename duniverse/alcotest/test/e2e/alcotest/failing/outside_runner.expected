@@ -1,0 +1,8 @@
+ASSERT Passing assertion
+ASSERT Failing assertion
+Fatal error: exception Alcotest assertion failure
+FAIL Failing assertion
+
+   Expected: `1'
+   Received: `2'
+

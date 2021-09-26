@@ -5,10 +5,10 @@ Environment variables can be loeaded in ocaml blocks
 Environment variables can be loaded in an ocaml block environment.
 
 ```ocaml set-FOO=bar,set-BAR=foo
-  # print_endline (Sys.getenv "FOO")
+  # print_endline (Sys.getenv "FOO");;
   bar
   - : unit = ()
-  # print_endline (Sys.getenv "BAR")
+  # print_endline (Sys.getenv "BAR");;
   foo
   - : unit = ()
 ```
@@ -16,7 +16,7 @@ Environment variables can be loaded in an ocaml block environment.
 And the variable stays available in subsequent blocks.
 
 ```ocaml
-  # print_endline (Sys.getenv "FOO")
+  # print_endline (Sys.getenv "FOO");;
   bar
   - : unit = ()
 ```

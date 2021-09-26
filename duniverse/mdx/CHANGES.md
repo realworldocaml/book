@@ -1,3 +1,24 @@
+### 1.11.0
+
+#### Added
+
+#### Changed
+
+- Use odoc-parser.0.9.0 (#333, @julow)
+
+#### Deprecated
+
+- Add a deprecation warning for toplevel blocks that are not terminated with `;;` (#342, @Leonidas-from-XIV)
+
+#### Fixed
+
+- Fix accidental redirect of stderr to stdout (#343, @Leonidas-from-XIV)
+- Remove trailing whitespaces that were added to indent empty lines (#341, @gpetiot)
+
+#### Removed
+
+#### Security
+
 ### 1.10.1
 
 #### Added

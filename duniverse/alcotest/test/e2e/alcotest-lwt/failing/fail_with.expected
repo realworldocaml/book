@@ -1,0 +1,16 @@
+Testing `test/e2e/alcotest-lwt/failing/fail_with.ml'.
+This run has ID `<uuid>'.
+
+> [FAIL]        all          0   one.
+  [OK]          all          1   two.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        all          0   one.                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+[failure] should fail
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/all.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run.

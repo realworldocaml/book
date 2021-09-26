@@ -1,0 +1,13 @@
+(rule
+ (target test-case.actual)
+ (deps
+  (package mdx))
+ (action
+  (with-outputs-to
+   %{target}
+   (run %{bin:ocaml-mdx} test %{dep:test-case.md}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff test-case.expected test-case.actual)))

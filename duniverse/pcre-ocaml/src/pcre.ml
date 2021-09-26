@@ -242,7 +242,7 @@ type chtables
 external maketables : unit -> chtables = "pcre_maketables_stub"
 
 (*  Internal use only! *)
-external pcre_study : regexp -> unit = "pcre_study_stub"
+external pcre_study : regexp -> jit_compile : bool -> unit = "pcre_study_stub"
 
 external compile : (icflag  [@untagged]) -> chtables option -> string -> regexp
   = "pcre_compile_stub_bc" "pcre_compile_stub"
@@ -265,14 +265,16 @@ external set_imp_match_limit_recursion : regexp -> (int [@untagged]) -> regexp
   [@@noalloc]
 
 let regexp
-      ?(study = true) ?limit ?limit_recursion
+      ?(study = true)
+      ?(jit_compile = false)
+      ?limit ?limit_recursion
       ?(iflags = 0) ?flags ?chtables pat =
   let rex =
     match flags with
     | Some flag_list -> compile (cflags flag_list) chtables pat
     | _ -> compile iflags chtables pat
   in
-  if study then pcre_study rex;
+  if study then pcre_study ~jit_compile rex;
   let rex =
     match limit with
     | None -> rex
@@ -283,7 +285,8 @@ let regexp
   | Some lim -> set_imp_match_limit_recursion rex lim
 
 let regexp_or
-      ?study ?limit ?limit_recursion ?(iflags = 0) ?flags ?chtables pats =
+      ?study ?jit_compile ?limit ?limit_recursion ?(iflags = 0)
+      ?flags ?chtables pats =
   let check pat =
     try ignore (regexp ~study:false ~iflags ?flags ?chtables pat)
     with Error error -> raise (Regexp_or (pat, error))
@@ -293,7 +296,8 @@ let regexp_or
     let cnv pat = "(?:" ^ pat ^ ")" in
     String.concat "|" (List.rev (List.rev_map cnv pats))
   in
-  regexp ?study ?limit ?limit_recursion ~iflags ?flags ?chtables big_pat
+  regexp ?study ?jit_compile ?limit ?limit_recursion ~iflags ?flags ?chtables
+    big_pat
 
 let bytes_unsafe_blit_string str str_ofs bts bts_ofs len =
   let str_bts = Bytes.unsafe_of_string str in
@@ -324,7 +328,7 @@ let quote s =
 (* Matching of patterns and subpattern extraction *)
 
 (* Default regular expression when none is provided by the user *)
-let def_rex = regexp "\\s+"
+let def_rex = regexp ~jit_compile:true "\\s+"
 
 type substrings = string * int array
 

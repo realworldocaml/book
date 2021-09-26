@@ -31,7 +31,7 @@ val fact : int -> int = <fun>
 # print_string "foo \
   \" \
   toto\
-  \ bar\""
+  \ bar\"";;
 foo " toto bar"
 - : unit = ()
 ```
