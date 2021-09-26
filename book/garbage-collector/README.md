@@ -151,8 +151,8 @@ the `Gc.set` function:
 # let c = Gc.get ()
 val c : Core_kernel.Gc.control =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
-   space_overhead = 80; verbose = 0; max_overhead = 500;
-   stack_limit = 1048576; allocation_policy = 0; window_size = 1;
+   space_overhead = 120; verbose = 0; max_overhead = 500;
+   stack_limit = 1048576; allocation_policy = 2; window_size = 1;
    custom_major_ratio = 44; custom_minor_ratio = 100;
    custom_minor_max_size = 8192}
 # Gc.tune ~minor_heap_size:(262144 * 2) ()
