@@ -88,7 +88,9 @@ entirely possible to create an ill-typed expression, so these dynamic
 checks are necessary, as you can see below.
 
 ```ocaml env=main
-# let i x = Value (Int x) and b x = Value (Bool x) and (+:) x y = Plus (x,y)
+# let i x = Value (Int x)
+  and b x = Value (Bool x)
+  and (+:) x y = Plus (x,y)
 val i : int -> expr = <fun>
 val b : bool -> expr = <fun>
 val ( +: ) : expr -> expr -> expr = <fun>
@@ -251,7 +253,9 @@ This looks sort of promising at first, but it doesn't quite do what we
 want.  Let's experiment a little with it:
 
 ```ocaml env=main
-# let i x = Value (Int x) and b x = Value (Bool x) and (+:) x y = Plus (x,y)
+# let i x = Value (Int x)
+  and b x = Value (Bool x)
+  and (+:) x y = Plus (x,y)
 val i : 'a -> 'a expr = <fun>
 val b : 'a -> 'a expr = <fun>
 val ( +: ) : 'a expr -> 'a expr -> 'a expr = <fun>
@@ -328,7 +332,9 @@ parameter of the then and else clauses.
 Now let's construct some simple examples.
 
 ```ocaml env=main
-# let i x = Value (Int x) and b x = Value (Bool x) and (+:) x y = Plus (x,y)
+# let i x = Value (Int x)
+  and b x = Value (Bool x)
+  and (+:) x y = Plus (x,y)
 val i : int -> int expr = <fun>
 val b : bool -> bool expr = <fun>
 val ( +: ) : int expr -> int expr -> int expr = <fun>
@@ -625,20 +631,20 @@ Exception: (Failure "No matching item found")
 
 ### Narrowing the possibilities
 
-Another good use-case for GADTs is to narrow the set of possible
-states for a given data-type in different circumstances.
+Another use-case for GADTs is to narrow the set of possible states for
+a given data-type in different circumstances.
 
-This can be useful when you're managing complex state transitions,
-where the data available is different at different stages.  Let's
+One context where this can be useful is when managing complex
+application state, where the available data changes over time. Let's
 consider a simple example, where we're writing code to handle a logon
-request from a user, where we want to check if the user in question is
+request from a user, and we want to check if the user in question is
 authorized to logon.
 
 We'll assume that the user logging in is authenticated as a particular
-user-name, but that in order to authenticate, we need to do two
-things: we need to translate that user-name into a numeric user-id,
-and we need to fetch permissions for the service in question; once we
-have both, we can check if the user-id is in fact permitted to log on.
+name, but that in order to authenticate, we need to do two things: to
+translate that user-name into a numeric user-id, and to fetch
+permissions for the service in question; once we have both, we can
+check if the user-id is permitted to log on.
 
 Without GADTs, we might model the state of a single logon request as
 follows.
@@ -661,40 +667,61 @@ request is authorized.
 ```ocaml env=main
 # let authorized request =
     match request.user_id, request.permissions with
-    | None, _ | _, None -> failwith "Can't check authorization: data incomplete"
+    | None, _ | _, None -> Error "Can't check authorization: data incomplete"
     | Some user_id, Some permissions ->
-      Permissions.check permissions user_id
-val authorized : logon_request -> bool = <fun>
+      Ok (Permissions.check permissions user_id)
+val authorized : logon_request -> (bool, string) result = <fun>
 ```
 
 The idea with this function is to only call it once the data is
 complete, i.e., when the `user_id` and `permissions` fields have been
-filled in, which is why it errors out if the data is incomplete.  In a
-simple case like this, the kind of dynamic check here isn't too
-bad. But in a larger and more complex case, it can be quite error
-prone.
+filled in, which is why it errors out if the data is incomplete.
 
-We can tighten up the type discipline here by minting types that
-represent the different states of being complete and incomplete, and
-minting a GADT-based option-like type whose behavior depends on
-whether it is complete or incomplete.
+This error-handling isn't really problematic in a simple case like
+this. But in a real system, your code can get more complicated in
+multiple ways, e.g.,
+
+- more fields to manage, including more optional fields,
+- more operations that depend on these optional fields,
+- multiple requests to be handled in parallel, each of which might be
+  in a different state of completion.
+
+As this kind of complexity creeps in, it can be useful to be able to
+track the state of a given request at the type level, and to use that
+to narrow the set of states a given request can be in, thereby
+removing some extra case analysis and error handling, which can both
+reduce the complexity of the code and remove opportunities for
+mistakes.
+
+One way of doing this is to mint different types to represent
+different states of the request, e.g., one type for an incomplete
+request where various fields are optional, and a different type where
+all of the data is mandatory.
+
+While this works, it can be awkward and verbose. With GADTs, we can
+track the state of the request in a type parameter, and have that
+parameter be used to narrow the set of available cases, without
+duplicating the type.
 
 #### A completion-sensitive option type
 
-Before minting the option type, we'll need types to represent the
-states of being complete and incomplete. We'll define these as empty
-variant types, which is a way of minting an *uninhabited type*, i.e.,
-a type that has no associated values.
+We'll start by creating an option type that is sensitive to whether
+our request is in a complete or incomplete state.
+
+To do that, we'll need to mint types to represent the states of being
+complete and incomplete. We'll define these as empty variant types,
+which is a way of minting an *uninhabited type*, i.e., a type that has
+no associated values. These types might as well be uninhabited, since
+we're just using these types as abstract markers of different states,
+and so will never need to construct a value.
 
 ```ocaml env=main
 type incomplete = |
 type complete = |
 ```
 
-Since these are just ways of marking the states, we
-
 Now we can mint our new completeness-sensitive option type. Note the
-two type variables; the first indicates the type of the contents of
+two type variables: the first indicates the type of the contents of
 the option, and the second indicates whether this is being used in an
 incomplete state.
 
@@ -708,15 +735,16 @@ We use `Absent` and `Present` rather than `Some` or `None` to make the
 code less confusing when both `option` and `coption` are used
 together.
 
-One thing that's a little odd here is that we haven't used `complete`
-here explicitly.  However, a `coption` that's `incomplete` can be
-`Absent` or `Present`, and a `coption` that's any other distinct type
-can only be `Present`.  Accordingly, a `coption` that's `complete`
-(and therefore not `incomplete`) can only be a `Present`.
+You might notice that we haven't used `complete` here explicitly.
+Instead, what we've done is to ensure that a `coption` that's
+`incomplete` can be `Absent` or `Present`, and a `coption` that's any
+other distinct type can only be `Present`. Accordingly, a `coption`
+that's `complete` (and therefore not `incomplete`) can only be a
+`Present`.
 
-This is easier to understand with some examples.  Consider the
+This is easier to understand with some examples. Consider the
 following function for getting the value out of a `coption`, returning
-a default value if `None` is found.
+a default value if `Absent` is found.
 
 ```ocaml env=main
 # let get ~default o =
@@ -758,10 +786,13 @@ We could write this more simply as:
 val get : ('a, complete) coption -> 'a = <fun>
 ```
 
+As we can see, when the `coption` is known to be `complete`, the
+pattern matching is narrowed to just the `Present` case.
+
 #### A completion-sensitive request type
 
-Here's how we can use `coption` to define a completion-sensitive
-version of `logon_request`.
+We can use `coption` to define a completion-sensitive version of
+`logon_request`.
 
 ```ocaml env=main
 type 'c logon_request =
@@ -771,21 +802,23 @@ type 'c logon_request =
   }
 ```
 
+There's a single type parameter for the `logon_request` that marks
+whether it's `complete`, at which point, both the `user_id` and
+`permissions` fields will be `complete` as well.
+
 As before, it's easy to fill in the `user_id` and `permissions`
 fields.
 
 ```ocaml env=main
-# let set_user_id request user_id =
-    { request with user_id = Present user_id }
+# let set_user_id request x = { request with user_id = Present x }
 val set_user_id : 'a logon_request -> User_id.t -> 'a logon_request = <fun>
-# let set_permissions request permissions =
-    { request with permissions = Present permissions }
+# let set_permissions request x = { request with permissions = Present x }
 val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
   <fun>
 ```
 
-Note that filling in the fields doesn't change a request from
-incomplete to complete.  To do that, we need to explicitly test for
+Note that filling in the fields doesn't automatically mark a request
+as `complete`. To do that, we need to explicitly test for
 completeness.
 
 ```ocaml env=main
@@ -811,8 +844,8 @@ val check_completeness :
   incomplete logon_request -> complete logon_request option = <fun>
 ```
 
-And we can write an authorization checker that works unconditionally
-on a complete login request.
+Finally, we can write an authorization checker that works
+unconditionally on a complete login request.
 
 ```ocaml env=main
 # let authorized (request : complete logon_request) =
@@ -820,6 +853,13 @@ on a complete login request.
     Permissions.check permissions user_id
 val authorized : complete logon_request -> bool = <fun>
 ```
+
+After all that work, the result may seem a bit underwhelming, and
+indeed, most of the time, this kind of narrowing isn't worth the
+complexity of setting it up. But for a sufficiently complex state
+machine, cutting down on the possibilities that your code needs to
+contemplate can make a big difference to the comprehensibility and
+correctness of the result.
 
 #### Other ways of narrowing
 
@@ -889,7 +929,6 @@ such a type, called `Nothing.t`.
 # let Ok x = map_or_error ~f:(fun x -> (Ok (x * 2) : (_,Nothing.t) Result.t)) [1;2;3]
 val x : int list = [2; 4; 6]
 ```
-
 
 ### Heterogenous containers
 
