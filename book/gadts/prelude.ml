@@ -1,6 +1,8 @@
-#require "base,core.top";;
+#require "base,core.top,async";;
 
 let () = Printexc.record_backtrace false
+
+let handle_state_changes _ _ = Async.Deferred.return ()
 
 module User_id : sig
   type t

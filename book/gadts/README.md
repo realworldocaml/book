@@ -45,7 +45,7 @@ primitive value in the language (i.e., an `int` or a `bool`), and
 `expr`, which represents the full set of possible expressions.
 
 ```ocaml env=main
-open! Base
+open Base
 
 type value =
   | Int of int
@@ -849,6 +849,19 @@ unconditionally on a complete login request.
 
 ```ocaml env=main
 # let authorized (request : complete logon_request) =
+    match request with
+    | { user_id = Present user_id; permissions = Present permissions; _}  ->
+      Ok (Permissions.check permissions user_id)
+    | _ -> Error "whoops"
+Line 5, characters 7-8:
+Warning 56 [unreachable-case]: this match case is unreachable.
+Consider replacing it with a refutation case '<pat> -> .'
+val authorized : complete logon_request -> (bool, string) result = <fun>
+```
+
+
+```ocaml env=main
+# let authorized (request : complete logon_request) =
     let { user_id = Present user_id; permissions = Present permissions; _ } = request in
     Permissions.check permissions user_id
 val authorized : complete logon_request -> bool = <fun>
@@ -863,72 +876,151 @@ correctness of the result.
 
 #### Other ways of narrowing
 
-OCaml can do more than eliminate incompatible cases from a GADT.
-Here's an example. The following is an error-senstive variant of
-`List.map`, which takes a function `f` that returns a `Result.t`, as
-described in [Error
+The above example might lead you to think that narrowing of pattern
+matches is something that can only happen with GADTs, but that's not
+quite right. OCaml can eliminate impossible cases from ordinary
+variants too, but to do so, it needs to be that the case in question
+is impossible from a type level.
+
+One way to do this is via an uninhabitable type, like the ones we
+discussed earlier in the chapter. We can declare our own uninhabitable
+type:
+
+```ocaml env=main
+# type nothing = |
+type nothing = |
+```
+
+But `Base` already has a standard uninhabited type, `Nothing.t`.
+
+So, how does an uninhabited type help? Well, consider the `Result.t`
+type, discussed in as described in [Error
 Handling](error-handling.html#encoding-errors-with-result){data-type=xref}.
-If `f` ever returns an `Error`, then the entire computation returns an
-`Error`. Otherwise the entire transformed list is returned.
+Normally, to match a `Result.t`, you need to handle both the `Ok` and
+`Error` cases.
+
 
 ```ocaml env=main
-# let map_or_error ~f list =
-    let rec loop list acc =
-       match list with
-       | [] -> Ok (List.rev acc)
-       | hd :: tl ->
-         match f hd with
-         | Ok x -> loop tl (x :: acc)
-         | Error err -> Error err
-    in
-    loop list []
-val map_or_error :
-  f:('a -> ('b, 'c) result) -> 'a list -> ('b list, 'c) result = <fun>
+# open Stdio
+# let print_result (x : (int,string) Result.t) =
+    match x with
+    | Ok x -> printf "%d\n" x
+    | Error x -> printf "ERROR: %s\n" x
+val print_result : (int, string) result -> unit = <fun>
 ```
 
-Here's an example of how it works:
+But if the `Error` case contains an uninhabitable, well, that case
+becomes impossible, and OCaml will tell you as much.
 
 ```ocaml env=main
-# let half_if_even x =
-    if x % 2 = 0 then Ok (x / 2) else Error "odd element"
-val half_if_even : int -> (int, string) result = <fun>
-# map_or_error ~f:half_if_even [2;3;4;5;6]
-- : (int list, string) result = Error "odd element"
-# map_or_error ~f:half_if_even [2;4;6]
-- : (int list, string) result = Ok [1; 2; 3]
+# let print_result (x : (int, Nothing.t) Result.t) =
+    match x with
+    | Ok x -> printf "%d\n" x
+    | Error _ -> printf "ERROR\n"
+Line 4, characters 7-14:
+Warning 56 [unreachable-case]: this match case is unreachable.
+Consider replacing it with a refutation case '<pat> -> .'
+val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
-Now, what happens if we use `map_or_error` for a transformation that
-can't fail at all?
+We can follow the advice above, and add a so-called *refutation case*.
+[refutation case]{.idx}
 
 ```ocaml env=main
-# map_or_error ~f:(fun x -> Ok (x * 2)) [1;2;3]
-- : (int list, 'a) result = Ok [2; 4; 6]
+# let print_result (x : (int, Nothing.t) Result.t) =
+    match x with
+    | Ok x -> printf "%d\n" x
+    | Error _ -> .
+val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
-Now, in practice, `map_or_error` can only return `Ok`, since the
-function it is passed can only return `Ok`. But by default OCaml won't
-take advantage of that.
+The period in the final case tells the compiler that we believe this
+case can never be reached, and OCaml will verify that it's true. In
+some simple cases, however, the compiler will automatically add the
+refutation case for you, in particular when there is just one variant.
 
 ```ocaml env=main
-# let Ok x = map_or_error ~f:(fun x -> Ok (x * 2)) [1;2;3]
-Line 1, characters 5-9:
-Warning 8 [partial-match]: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-Error _
-val x : int list = [2; 4; 6]
+# let print_result (x : (int, Nothing.t) Result.t) =
+    match x with
+    | Ok x -> printf "%d\n" x
+val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
-But there is a way of making OCaml understand this, if we make it
-clear at the type level that the `Error` case can't arise. We can do
-that by using an uninhabited type, i.e., a type with no values, like
-the ones we discussed earlier in the chapter. `Base` already provides
-such a type, called `Nothing.t`.
+One real-world case where this becomes useful is when you're using a
+highly configurable library that supports multiple different modes of
+use, not all of which are necessarily needed for any given
+application. One example of this comes from `Async`'s RPC (remote
+procedure-call) library. Async RPCs support a particular flavor of
+interaction called a `State_rpc`. Such an RPC is parameterized by four types:
 
-```ocaml env=main
-# let Ok x = map_or_error ~f:(fun x -> (Ok (x * 2) : (_,Nothing.t) Result.t)) [1;2;3]
-val x : int list = [2; 4; 6]
+- A type for the initial client request
+- A type for the initial snapshot returned by the server
+- A type for a sequence of updates to that snapshot
+- A type for an error to terminate the interaction.
+
+Now, imagine you want to use this type, but there's no need for the
+final error type. We can go ahead and instantiate the RPC using the
+type `unit` for the error type.
+
+```ocaml env=async
+# open Core
+# open Async
+# #require "ppx_jane"
+# let rpc =
+    Rpc.State_rpc.create
+      ~name:"int-map"
+      ~version:1
+      ~bin_query:[%bin_type_class: unit]
+      ~bin_state:[%bin_type_class: int Map.M(String).t]
+      ~bin_update:[%bin_type_class: int Map.M(String).t]
+      ~bin_error:[%bin_type_class: unit]
+      ()
+val rpc :
+  (unit, (string, int, String.comparator_witness) Map.t,
+   (string, int, String.comparator_witness) Map.t, unit)
+  Rpc.State_rpc.t = <abstr>
 ```
+
+When you write code to dispatch the RPC, you still have to handle the
+error case, even though it isn't supposed to happen.
+
+```ocaml env=async
+# let dispatch conn =
+    match%bind Rpc.State_rpc.dispatch rpc conn () >>| ok_exn with
+    | Ok (initial_state, updates, _) -> handle_state_changes initial_state updates
+    | Error () -> failwith "this is not supposed to happen"
+val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
+```
+
+An alternative approach is to use an uninhabited type for the error:
+
+```ocaml env=async
+# let rpc =
+    Rpc.State_rpc.create
+      ~name:"foo"
+      ~version:1
+      ~bin_query:[%bin_type_class: unit]
+      ~bin_state:[%bin_type_class: int Map.M(String).t]
+      ~bin_update:[%bin_type_class: int Map.M(String).t]
+      ~bin_error:[%bin_type_class: Nothing.t]
+      ()
+val rpc :
+  (unit, (string, int, String.comparator_witness) Map.t,
+   (string, int, String.comparator_witness) Map.t, never_returns)
+  Rpc.State_rpc.t = <abstr>
+```
+
+Now, our dispatch function needs only deal with the `Ok` case.
+
+```ocaml env=async
+# let dispatch conn =
+    match%bind Rpc.State_rpc.dispatch rpc conn () >>| ok_exn with
+    | Ok (initial_state, updates, _) -> handle_state_changes initial_state updates
+val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
+```
+
+As you can see, narrowing can show up when using code that isn't
+designed with narrowing in mind, and without any GADTs at all.
 
 ### Heterogenous containers
 
