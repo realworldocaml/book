@@ -15,7 +15,7 @@ Let's start by creating a sample OCaml project and navigating around it.  opam
 provides a project generator known as `spin` that can be used to create various
 types of projects.
 
-```sh dir=examples/correct/opam-spin-ls
+```sh dir=examples/correct/opam-spin-ls,skip
 $ opam spin ls
 
   bin
@@ -45,7 +45,7 @@ hello world project.
 TODO need a way to stop spin from running the opam install commands
  -->
 
-```
+```sh skip
 $ opam spin hello hello-world -vvv
 
 🏗️  Creating a new project from hello in hello-world
@@ -199,7 +199,7 @@ The OCaml LSP server understands how to interface with dune and examine the buil
 let () =
   let greeting = Hello.greet "world" in
   print_endline greeting
-``` 
+```
 
 First perform a build of the project to generate the type annotation files. Then hover your mouse over the `Hello.greet` function -- you should see some documentation pop up about the function and its arguments.  This information comes from the _docstrings_ written into the `hello.mli` interface file in the library.
 
