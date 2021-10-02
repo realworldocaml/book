@@ -1,4 +1,4 @@
-version: "1.9.0"
+version: "1.10.3"
 opam-version: "2.0"
 
 maintainer: "rudi.grinberg@gmail.com"
@@ -22,7 +22,7 @@ build: [
 
 depends: [
   "ocaml" {>= "4.02"}
-  "dune" {build}
+  "dune" {>= "2.0"}
   "ounit" {with-test}
   "seq"
 ]

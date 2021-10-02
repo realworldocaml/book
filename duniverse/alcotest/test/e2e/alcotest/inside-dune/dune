@@ -1,0 +1,26 @@
+(executable
+ (name test_color)
+ (libraries alcotest))
+
+;; Run `test_color` with `--color=auto`
+
+(rule
+ (target color-overridden.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   ;; `--color=auto` passed → output should _not_ be colored due to Dune's buffering
+   (run %{dep:test_color.exe} --color=auto))))
+
+(rule
+ (target color-overridden.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:color-overridden.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff color-overridden.expected color-overridden.processed)))

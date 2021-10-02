@@ -1,4 +1,4 @@
-version: "3.2.0"
+version: "3.3.0"
 opam-version: "2.0"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 authors: "Anil Madhavapeddy <anil@recoil.org>"
@@ -9,11 +9,11 @@ doc: "https://ocurrent.github.io/ocaml-version/doc"
 bug-reports: "https://github.com/ocurrent/ocaml-version/issues"
 depends: [
   "ocaml" {>= "4.07.0"}
-  "dune"
+  "dune" {>= "1.0"}
   "alcotest" {with-test}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
 ]
 dev-repo: "git+https://github.com/ocurrent/ocaml-version.git"

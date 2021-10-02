@@ -169,8 +169,10 @@ let () =
     in
 
     let linux =
+      let system = C.ocaml_config_var_exn c "system" in
       (* Possible values for this field: linux, linux_elf, linux_eabi, ... *)
-      String.is_prefix (C.ocaml_config_var_exn c "system") ~prefix:"linux"
+      String.is_prefix system ~prefix:"linux" ||
+      String.equal system "elf"
     in
 
     let simple_vars =

@@ -1,3 +1,7 @@
+## v3.3.0 (2021-09-24)
+
+* Add 4.13.0 and 4.12.1 entries (@Octachron)
+
 ## v3.2.0 (2021-07-27)
 
 * Add support for S390x big-endian architectures (@avsm)

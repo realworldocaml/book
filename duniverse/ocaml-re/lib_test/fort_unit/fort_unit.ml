@@ -49,6 +49,8 @@ let expect_eq_bool ?msg f x g y =
   expect_equal_app ?msg ~printer:string_of_bool f x g y
 let expect_eq_str ?msg f x g y =
   expect_equal_app ?msg ~printer:str_printer f x g y
+let expect_eq_str_opt ?msg f x g y =
+  expect_equal_app ?msg ~printer:(opt_printer str_printer) f x g y
 let expect_eq_ofs ?msg f x g y =
   expect_equal_app ?msg ~printer:ofs_printer f x g y
 let expect_eq_arr_str ?msg f x g y =

@@ -30,6 +30,11 @@ let test t i =
     let idx = t.marks.(2 * i) in
     idx <> -1
 
+let get_opt t i =
+  if test t i
+  then Some (get t i)
+  else None
+
 let dummy_offset = (-1, -1)
 
 let all_offset t =

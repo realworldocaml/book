@@ -17,7 +17,7 @@ let add_extension tbl s =
 let semver_re = Str.regexp "\
 \\([0-9]+\\)\
 \\.\\([0-9]+\\)\
-\\.\\([0-9]+\\)\
+\\(\\.\\([0-9]+\\)\\)?\
 \\([~-]\\([^+]*\\)\\)?\
 \\(\\+\\(.*\\)\\)?\
 \r?$"
@@ -28,9 +28,9 @@ let parse_semver s =
   else
     let major = Str.matched_group 1 s in
     let minor = Str.matched_group 2 s in
-    let patch = Str.matched_group 3 s in
-    let prerelease = try Some (Str.matched_group 5 s) with Not_found -> None in
-    let build = try Some (Str.matched_group 7 s) with Not_found -> None in
+    let patch = try (Str.matched_group 4 s) with Not_found -> "0" in
+    let prerelease = try Some (Str.matched_group 6 s) with Not_found -> None in
+    let build = try Some (Str.matched_group 8 s) with Not_found -> None in
     Some (major, minor, patch, prerelease, build)
 
 let define var s =

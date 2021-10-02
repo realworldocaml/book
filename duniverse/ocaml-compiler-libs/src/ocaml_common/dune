@@ -10,5 +10,9 @@
  (deps
   (:first_dep ../gen/gen.exe))
  (action
-  (run %{first_dep} -archive %{ocaml_where}/compiler-libs/ocamlcommon.cma -o
-    %{targets})))
+  (run
+   %{first_dep}
+   -archive
+   %{ocaml_where}/compiler-libs/ocamlcommon.cma
+   -o
+   %{targets})))

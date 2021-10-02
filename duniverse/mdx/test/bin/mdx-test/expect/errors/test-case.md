@@ -31,7 +31,7 @@ Hi!
 
 ```ocaml version=4.02
 # let x =
-  1 + "42"
+  1 + "42";;
 Characters 14-18:
 Error: This expression has type bytes but an expression was expected of type
          int
@@ -39,7 +39,7 @@ Error: This expression has type bytes but an expression was expected of type
 
 ```ocaml version=4.06
 # let x =
-  1 + "42"
+  1 + "42";;
 Characters 14-18:
 Error: This expression has type string but an expression was expected of type
          int
@@ -47,7 +47,7 @@ Error: This expression has type string but an expression was expected of type
 
 ```ocaml version=4.07
 # let x =
-  1 + "42"
+  1 + "42";;
 Characters 14-18:
 Error: This expression has type string but an expression was expected of type
          int
@@ -55,19 +55,19 @@ Error: This expression has type string but an expression was expected of type
 
 ```ocaml version>=4.08
 # let x =
-  1 + "42"
+  1 + "42";;
 Line 2, characters 7-11:
 Error: This expression has type string but an expression was expected of type
          int
 ```
 
 ```ocaml non-deterministic=output
-# raise Not_found
+# raise Not_found;;
 Exception: Not_found.
 ```
 
 ```ocaml
-# print_endline "first"; failwith "second"
+# print_endline "first"; failwith "second";;
 first
 Exception: Failure "second".
 ```

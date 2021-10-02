@@ -1,3 +1,9 @@
+## v5.2.0 (2021-09-11)
+
+* Use Cstruct.length instead of deprecated Cstruct.len (#106, @hannesm)
+* Provide instantiated functors Set, Map, V4.Set, V4.Map, V6.Set, V6.Map
+  (#106, @hannesm)
+
 ## v5.1.0 (2021-06-08)
 
 * Reject octal notation in IPv4 (cve-2021-29921, #104, @jsachs)

@@ -282,21 +282,22 @@ module Test_v4 = struct
       ships
 
   let test_map () =
-    let module M = Map.Make (V4) in
-    let m = M.add (V4.of_string_exn "1.0.0.1") "min" M.empty in
-    let m = M.add (V4.of_string_exn "254.254.254.254") "the greatest host" m in
-    let m = M.add (V4.of_string_exn "1.0.0.1") "the least host" m in
-    assert_equal ~msg:"size" (M.cardinal m) 2;
-    let min_key, min_val = M.min_binding m in
+    let m = V4.Map.add (V4.of_string_exn "1.0.0.1") "min" V4.Map.empty in
+    let m =
+      V4.Map.add (V4.of_string_exn "254.254.254.254") "the greatest host" m
+    in
+    let m = V4.Map.add (V4.of_string_exn "1.0.0.1") "the least host" m in
+    assert_equal ~msg:"size" (V4.Map.cardinal m) 2;
+    let min_key, min_val = V4.Map.min_binding m in
     assert_equal
       ~msg:("min is '" ^ min_val ^ "'")
       (min_key, min_val)
       (V4.of_string_exn "1.0.0.1", "the least host");
-    assert_equal ~msg:"max" (M.max_binding m)
+    assert_equal ~msg:"max" (V4.Map.max_binding m)
       (V4.of_string_exn "254.254.254.254", "the greatest host")
 
   let test_prefix_map () =
-    let module M = Map.Make (V4.Prefix) in
+    let module M = Stdlib.Map.Make (V4.Prefix) in
     let of_string s = s |> V4.Prefix.of_string_exn |> V4.Prefix.prefix in
     let m = M.add (of_string "0.0.0.0/0") "everyone" M.empty in
     let m = M.add (of_string "192.0.0.0/1") "weirdos" m in
@@ -791,22 +792,21 @@ module Test_v6 = struct
       ships
 
   let test_map () =
-    let module M = Map.Make (V6) in
     let maxs = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
-    let m = M.add (V6.of_string_exn "::0:0") "min" M.empty in
-    let m = M.add (V6.of_string_exn maxs) "the greatest host" m in
-    let m = M.add (V6.of_string_exn "::") "the least host" m in
-    assert_equal ~msg:"size" (M.cardinal m) 2;
-    let min_key, min_val = M.min_binding m in
+    let m = V6.Map.add (V6.of_string_exn "::0:0") "min" V6.Map.empty in
+    let m = V6.Map.add (V6.of_string_exn maxs) "the greatest host" m in
+    let m = V6.Map.add (V6.of_string_exn "::") "the least host" m in
+    assert_equal ~msg:"size" (V6.Map.cardinal m) 2;
+    let min_key, min_val = V6.Map.min_binding m in
     assert_equal
       ~msg:("min is '" ^ min_val ^ "'")
       (min_key, min_val)
       (V6.of_string_exn "::0:0:0", "the least host");
-    assert_equal ~msg:"max" (M.max_binding m)
+    assert_equal ~msg:"max" (V6.Map.max_binding m)
       (V6.of_string_exn maxs, "the greatest host")
 
   let test_prefix_map () =
-    let module M = Map.Make (V6.Prefix) in
+    let module M = Stdlib.Map.Make (V6.Prefix) in
     let of_string s = s |> V6.Prefix.of_string_exn |> V6.Prefix.prefix in
     let m = M.add (of_string "::ffff:0.0.0.0/0") "everyone" M.empty in
     let m = M.add (of_string "::ffff:192.0.0.0/1") "weirdos" m in
@@ -981,22 +981,21 @@ let test_string_raw_rt_bad () =
     addrs
 
 let test_map () =
-  let module M = Map.Make (Ipaddr) in
   let maxv6 = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff" in
   let maxv4 = "254.254.254.254" in
-  let m = M.add (of_string_exn maxv4) "the greatest host v4" M.empty in
-  let m = M.add (of_string_exn "::0:0") "minv6" m in
-  let m = M.add (of_string_exn maxv6) "the greatest host v6" m in
-  let m = M.add (of_string_exn "::") "the least host v6" m in
-  let m = M.add (of_string_exn "1.0.0.1") "minv4" m in
-  let m = M.add (of_string_exn "1.0.0.1") "the least host v4" m in
-  assert_equal ~msg:"size" (M.cardinal m) 4;
-  let min_key, min_val = M.min_binding m in
+  let m = Map.add (of_string_exn maxv4) "the greatest host v4" Map.empty in
+  let m = Map.add (of_string_exn "::0:0") "minv6" m in
+  let m = Map.add (of_string_exn maxv6) "the greatest host v6" m in
+  let m = Map.add (of_string_exn "::") "the least host v6" m in
+  let m = Map.add (of_string_exn "1.0.0.1") "minv4" m in
+  let m = Map.add (of_string_exn "1.0.0.1") "the least host v4" m in
+  assert_equal ~msg:"size" (Map.cardinal m) 4;
+  let min_key, min_val = Map.min_binding m in
   assert_equal
     ~msg:("min is '" ^ min_val ^ "'")
     (min_key, min_val)
     (of_string_exn "1.0.0.1", "the least host v4");
-  assert_equal ~msg:"max" (M.max_binding m)
+  assert_equal ~msg:"max" (Map.max_binding m)
     (of_string_exn maxv6, "the greatest host v6")
 
 let test_prefix_mem () =

@@ -82,7 +82,7 @@ let cmd =
       $ Cli.record_backtrace $ Cli.syntax $ Cli.silent $ Cli.verbose_findlib
       $ Cli.prelude $ Cli.prelude_str $ Cli.file $ Cli.section $ Cli.root
       $ Cli.force_output $ Cli.output),
-    Term.info "ocaml-mdx-test" ~version:"1.10.1" ~doc ~exits ~man )
+    Term.info "ocaml-mdx-test" ~version:"1.11.0" ~doc ~exits ~man )
 
 let main () = Term.(exit_status @@ eval cmd)
 

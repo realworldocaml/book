@@ -1,0 +1,4 @@
+(library
+ (name alcotest_lwt)
+ (public_name alcotest-lwt)
+ (libraries logs lwt lwt.unix fmt alcotest.engine alcotest))

@@ -9,18 +9,18 @@ let f x =
 And
 
 ```ocaml version=4.02
-# let f x = x + 1
+# let f x = x + 1;;
 val f : int -> int = <fun>
 # let f y =
-  y^"foo"
+  y^"foo";;
 val f : bytes -> bytes = <fun>
 ```
 
 ```ocaml version>=4.06
-# let f x = x + 1
+# let f x = x + 1;;
 val f : int -> int = <fun>
 # let f y =
-  y^"foo"
+  y^"foo";;
 val f : string -> string = <fun>
 ```
 
@@ -30,7 +30,7 @@ And
 # let f x = function
   | 0 -> 1
   | n ->
-  n + "foo"
+  n + "foo";;
 Characters 45-50:
 Error: This expression has type bytes but an expression was expected of type
          int
@@ -40,7 +40,7 @@ Error: This expression has type bytes but an expression was expected of type
 # let f x = function
   | 0 -> 1
   | n ->
-  n + "foo"
+  n + "foo";;
 Characters 45-50:
 Error: This expression has type string but an expression was expected of type
          int
@@ -50,7 +50,7 @@ Error: This expression has type string but an expression was expected of type
 # let f x = function
   | 0 -> 1
   | n ->
-  n + "foo"
+  n + "foo";;
 Characters 45-50:
 Error: This expression has type string but an expression was expected of type
          int
@@ -60,7 +60,7 @@ Error: This expression has type string but an expression was expected of type
 # let f x = function
   | 0 -> 1
   | n ->
-  n + "foo"
+  n + "foo";;
 Line 4, characters 7-12:
 Error: This expression has type string but an expression was expected of type
          int

@@ -1,0 +1,10 @@
+(executable
+ (name bad)
+ (libraries alcotest astring))
+
+; This fails at runtime, so just build the executable
+
+(alias
+ (name runtest)
+ (package alcotest)
+ (deps bad.exe))

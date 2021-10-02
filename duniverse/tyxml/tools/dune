@@ -1,4 +1,0 @@
-(executable
- (name autoname)
- (modules autoname)
- (libraries tyxml-syntax))

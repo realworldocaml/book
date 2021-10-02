@@ -1,0 +1,22 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+
+(include dune.inc)
+
+(rule
+ (targets dune.gen)
+ (deps
+  (source_tree .))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ../../gen_dune_rules.exe --package "alcotest" --libraries
+     "alcotest.engine"))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff dune.inc dune.gen)))
