@@ -19,14 +19,14 @@
 (part
  ((title "Tools and Techniques")
   (chapters
-   ((wip platform)
-    maps-and-hashtables
+   (maps-and-hashtables
     command-line-parsing
     concurrent-programming
     testing
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
+    (wip platform)
     ))))
 
 (part
