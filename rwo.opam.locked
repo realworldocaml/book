@@ -41,7 +41,7 @@ depends: [
   "core" {= "v0.14.1"}
   "core_bench" {= "v0.14.0"}
   "core_kernel" {= "v0.14.2"}
-  "cppo" {= "1.6.7"}
+  "cppo" {= "1.6.8"}
   "csexp" {= "1.5.1"}
   "cstruct" {= "6.0.1"}
   "cstruct-sexp" {= "6.0.1"}
@@ -85,15 +85,15 @@ depends: [
   "mmap" {= "1.1.0"}
   "mtime" {= "1.2.0+dune"}
   "num" {= "1.3+dune"}
-  "ocaml" {= "4.12.1"}
-  "ocaml-base-compiler" {= "4.12.1"}
+  "ocaml" {= "4.13.0"}
+  "ocaml-base-compiler" {= "4.13.0"}
   "ocaml-compiler-libs" {= "v0.12.4"}
   "ocaml-config" {= "2"}
   "ocaml-migrate-parsetree" {= "2.2.0"}
   "ocaml-options-vanilla" {= "1"}
   "ocaml-print-intf" {= "1.2.0"}
   "ocaml-syntax-shims" {= "1.0.0"}
-  "ocaml-version" {= "3.2.0"}
+  "ocaml-version" {= "3.3.0"}
   "ocamlfind" {= "1.8.1+dune"}
   "ocplib-endian" {= "1.1"}
   "octavius" {= "1.2.2"}
@@ -165,7 +165,6 @@ depends: [
   "zarith" {= "1.9.1+dune"}
 ]
 depexts: [
-  ["devel/pkgconf"] {os = "openbsd"}
   ["gmp"] {os = "freebsd"}
   ["gmp"] {os = "openbsd"}
   ["gmp"] {os = "macos" & os-distribution = "homebrew"}
@@ -211,6 +210,7 @@ depexts: [
   ["pkg-config"] {os-family = "debian"}
   ["pkg-config"] {os = "macos" & os-distribution = "homebrew"}
   ["pkgconf"] {os = "freebsd"}
+  ["pkgconf"] {os = "openbsd"}
   ["pkgconf"] {os-distribution = "alpine"}
   ["pkgconf"] {os-distribution = "arch"}
   ["pkgconf-pkg-config"] {os-distribution = "fedora"}
@@ -345,8 +345,8 @@ pin-depends: [
     "https://github.com/janestreet/core_kernel/archive/v0.14.2.tar.gz"
   ]
   [
-    "cppo.1.6.7"
-    "https://github.com/ocaml-community/cppo/releases/download/v1.6.7/cppo-v1.6.7.tbz"
+    "cppo.1.6.8"
+    "https://github.com/ocaml-community/cppo/archive/v1.6.8.tar.gz"
   ]
   [
     "csexp.1.5.1"
@@ -524,8 +524,8 @@ pin-depends: [
     "https://github.com/ocaml-ppx/ocaml-syntax-shims/releases/download/1.0.0/ocaml-syntax-shims-1.0.0.tbz"
   ]
   [
-    "ocaml-version.3.2.0"
-    "https://github.com/ocurrent/ocaml-version/releases/download/v3.2.0/ocaml-version-v3.2.0.tbz"
+    "ocaml-version.3.3.0"
+    "https://github.com/ocurrent/ocaml-version/releases/download/v3.3.0/ocaml-version-v3.3.0.tbz"
   ]
   [
     "ocamlfind.1.8.1+dune"
@@ -1280,11 +1280,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocaml-community/cppo/releases/download/v1.6.7/cppo-v1.6.7.tbz"
+    "https://github.com/ocaml-community/cppo/archive/v1.6.8.tar.gz"
     "cppo"
     [
-      "sha256=db553e3e6c206df09b1858c3aef5e21e56564d593642a3c78bcedb6af36f529d"
-      "sha512=9722b50fd23aaccf86816313333a3bf8fc7c6b4ef06b153e5e1e1aaf14670cf51a4aac52fb1b4a0e5531699c4047a1eff6c24c969f7e5063e78096c2195b5819"
+      "md5=fed401197d86f9089e89f6cbdf1d660d"
+      "sha512=069bbe0ef09c03b0dc4b5795f909c3ef872fe99c6f1e6704a0fa97594b1570b3579226ec67fe11d696ccc349a4585055bbaf07c65eff423aa45af28abf38c858"
     ]
   ]
   [
@@ -1380,11 +1380,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocurrent/ocaml-version/releases/download/v3.2.0/ocaml-version-v3.2.0.tbz"
+    "https://github.com/ocurrent/ocaml-version/releases/download/v3.3.0/ocaml-version-v3.3.0.tbz"
     "ocaml-version"
     [
-      "sha256=a643dd6ef10676855916a1d45c69070587088673da00a2867a52251390bb7461"
-      "sha512=85e104d347c52e3be00e4e4d675e99dc43bf57aebd08c9934e70608a2657bfa5be1d8c9aa897dac4ce6e2da9175d3ac0eb22baa2851f4edc88063fede6b9b650"
+      "sha256=36d0e8d73e5ea1aec1e3f2ce23bd1c1370f4182a2361b6b65390252046c4262d"
+      "sha512=593419ac45eee1fda403bb80d77378bc8e7c6a9def98be33d6409243468e0e9736f7c990e94301cede156144d6ab38e71827fbaca889eac4b4a1c99ca87a551f"
     ]
   ]
   [

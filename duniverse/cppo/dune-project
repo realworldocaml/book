@@ -1,3 +1,2 @@
 (lang dune 1.0)
 (name cppo)
-(version v1.6.7)

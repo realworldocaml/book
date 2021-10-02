@@ -28,3 +28,5 @@ patch: X_PATCH
 #else
   #error ""
 #endif
+
+Coq: COQ_VERSION
