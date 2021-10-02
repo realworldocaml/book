@@ -56,13 +56,18 @@
 
 /* Error codes as defined for pcre 7.9, undefined in pcre 4.5 */
 #ifndef PCRE_ERROR_PARTIAL
-#define PCRE_ERROR_PARTIAL        (-12)
+# define PCRE_ERROR_PARTIAL        (-12)
 #endif
 #ifndef PCRE_ERROR_BADPARTIAL
-#define PCRE_ERROR_BADPARTIAL     (-13)
+# define PCRE_ERROR_BADPARTIAL     (-13)
 #endif
 #ifndef PCRE_ERROR_RECURSIONLIMIT
-#define PCRE_ERROR_RECURSIONLIMIT (-21)
+# define PCRE_ERROR_RECURSIONLIMIT (-21)
+#endif
+
+/* Make sure to define JIT-compilation flag appropriately if unsupported */
+#ifndef PCRE_STUDY_JIT_COMPILE
+# define PCRE_STUDY_JIT_COMPILE 0
 #endif
 
 typedef const unsigned char *chartables;  /* Type of chartable sets */
@@ -86,8 +91,6 @@ static value var_Char;         /* Variant [`Char char] */
 static value var_Not_studied;  /* Variant [`Not_studied] */
 static value var_Studied;      /* Variant [`Studied] */
 static value var_Optimal;      /* Variant [`Optimal] */
-
-static value None = Val_int(0);
 
 /* Data associated with OCaml values of PCRE regular expression */
 struct pcre_ocaml_regexp { pcre *rex; pcre_extra *extra; int studied; };
@@ -321,8 +324,7 @@ CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
 
   /* If v_tables = [None], then pointer to tables is NULL, otherwise
      set it to the appropriate value */
-  chartables tables =
-    (v_tables == None) ? NULL : get_tables(Field(v_tables, 0));
+  chartables tables = Is_none(v_tables) ? NULL : get_tables(Field(v_tables, 0));
 
   /* Compiles the pattern */
   pcre *regexp = pcre_compile(String_val(v_pat), v_opt, &error,
@@ -354,12 +356,13 @@ CAMLprim value pcre_compile_stub_bc(value v_opt, value v_tables, value v_pat)
 
 
 /* Studies a regexp */
-CAMLprim value pcre_study_stub(value v_rex)
+CAMLprim value pcre_study_stub(value v_rex, value v_jit_compile)
 {
   /* If it has not yet been studied */
   if (! get_studied(v_rex)) {
     const char *error = NULL;
-    pcre_extra *extra = pcre_study(get_rex(v_rex), 0, &error);
+    int flags = Bool_val(v_jit_compile) ? PCRE_STUDY_JIT_COMPILE : 0;
+    pcre_extra *extra = pcre_study(get_rex(v_rex), flags, &error);
     if (error != NULL) caml_invalid_argument((char *) error);
     set_extra(v_rex, extra);
     set_studied(v_rex, 1);
@@ -372,28 +375,28 @@ CAMLprim value pcre_study_stub(value v_rex)
 CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
 {
   pcre_extra *extra = get_extra(v_rex);
-  if (extra == NULL) return None;
+  if (extra == NULL) return Val_none;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) {
     value v_lim = Val_int(extra->match_limit_recursion);
     value v_res = caml_alloc_small(1, 0);
     Field(v_res, 0) = v_lim;
     return v_res;
   }
-  return None;
+  return Val_none;
 }
 
 /* Gets the match limit of a regular expression if it exists */
 CAMLprim value pcre_get_match_limit_stub(value v_rex)
 {
   pcre_extra *extra = get_extra(v_rex);
-  if (extra == NULL) return None;
+  if (extra == NULL) return Val_none;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT) {
     value v_lim = Val_int(extra->match_limit);
     value v_res = caml_alloc_small(1, 0);
     Field(v_res, 0) = v_lim;
     return v_res;
   }
-  return None;
+  return Val_none;
 }
 
 
@@ -501,48 +504,25 @@ CAMLprim value pcre_firstbyte_stub(value v_rex)
 
 CAMLprim value pcre_firsttable_stub(value v_rex)
 {
+  CAMLparam1(v_rex);
   const unsigned char *ftable;
-
-  int ret =
-    pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTTABLE, (void *) &ftable);
-
+  int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTTABLE, (void *) &ftable);
   if (ret != 0) raise_internal_error("pcre_firsttable_stub");
-
-  if (ftable == NULL) return None;
-  else {
-    value v_res, v_res_str;
-
-    Begin_roots1(v_rex);
-      v_res_str = caml_alloc_initialized_string(32, (char *) ftable);
-    End_roots();
-
-    Begin_roots1(v_res_str);
-      /* Allocates [Some string] from firsttable */
-      v_res = caml_alloc_small(1, 0);
-    End_roots();
-
-    Field(v_res, 0) = v_res_str;
-
-    return v_res;
-  }
+  CAMLreturn(
+    (ftable == NULL)
+    ? Val_none
+    : caml_alloc_some(caml_alloc_initialized_string(32, (char *) ftable)));
 }
 
 CAMLprim value pcre_lastliteral_stub(value v_rex)
 {
   int lastliteral;
-  const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_LASTLITERAL,
-                                        &lastliteral);
-
+  const int ret =
+    pcre_fullinfo_stub(v_rex, PCRE_INFO_LASTLITERAL, &lastliteral);
   if (ret != 0) raise_internal_error("pcre_lastliteral_stub");
-
-  if (lastliteral == -1) return None;
+  if (lastliteral == -1) return Val_none;
   if (lastliteral < 0) raise_internal_error("pcre_lastliteral_stub");
-  else {
-    /* Allocates [Some char] */
-    value v_res = caml_alloc_small(1, 0);
-    Field(v_res, 0) = Val_int(lastliteral);
-    return v_res;
-  }
+  else return caml_alloc_some(Val_int(lastliteral));
 }
 
 CAMLprim value pcre_study_stat_stub(value v_rex)
@@ -627,7 +607,7 @@ CAMLprim value pcre_exec_stub0(
     const int opt = v_opt;  /* Runtime options */
 
     /* Special case when no callout functions specified */
-    if (v_maybe_cof == None) {
+    if (Is_none(v_maybe_cof)) {
       int *ovec = (int *) &Field(v_ovec, 0);
 
       /* Performs the match */
@@ -812,7 +792,7 @@ CAMLprim value pcre_get_stringnumber_stub_bc(value v_rex, value v_name)
 /* Returns array of names of named substrings in a regexp */
 CAMLprim value pcre_names_stub(value v_rex)
 {
-  CAMLparam0();
+  CAMLparam1(v_rex);
   CAMLlocal1(v_res);
   int name_count;
   int entry_size;

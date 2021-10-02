@@ -1,0 +1,6 @@
+(library
+ (public_name alcotest)
+ (libraries alcotest.engine astring fmt fmt.tty)
+ (foreign_stubs
+  (language c)
+  (names alcotest_stubs)))

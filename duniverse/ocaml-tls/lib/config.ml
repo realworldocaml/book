@@ -463,11 +463,6 @@ let validate_server config =
           (rsa_cert && keytype = `RSA) || (ec_cert && keytype = `EC))
       config.ciphers
   in
-  let signature_algorithms =
-    let pk = List.map snd certificate_chains in
-    List.filter (fun sa -> List.exists (fun p -> pk_matches_sa p sa) pk)
-      config.signature_algorithms
-  in
   ( match config.own_certificates with
     | `Multiple cs
     | `Multiple_default (_, cs) ->
@@ -488,7 +483,30 @@ let validate_server config =
       in
       PK.iter (fun _ chains -> non_overlapping chains) pk
     | _ -> () );
-  { config with ciphers ; signature_algorithms }
+  { config with ciphers }
+
+let validate_keys_sig_algs config =
+  let _, v_max = config.protocol_versions in
+  if v_max = `TLS_1_2 || v_max = `TLS_1_3 then
+    let certificate_chains =
+      match config.own_certificates with
+      | `Single c                 -> [c]
+      | `Multiple cs              -> cs
+      | `Multiple_default (c, cs) -> c :: cs
+      | `None                     -> invalid "no server certificate provided"
+    in
+    let server_keys =
+      List.map (function
+          | (s::_,_) -> X509.Certificate.public_key s
+          | _ -> invalid "empty certificate chain")
+        certificate_chains
+    in
+    if not
+        (List.for_all (fun cert ->
+             List.exists (pk_matches_sa cert) config.signature_algorithms)
+            server_keys)
+    then
+      invalid "certificate provided which does not allow any signature algorithm"
 
 type client = config [@@deriving sexp_of]
 type server = config [@@deriving sexp_of]
@@ -555,6 +573,7 @@ let server
     } in
   let config = validate_server config in
   let config = validate_common config in
+  validate_keys_sig_algs config;
   Log.debug (fun m -> m "server with %s"
                 (Sexplib.Sexp.to_string_hum (sexp_of_config config)));
   config

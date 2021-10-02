@@ -3,7 +3,7 @@
 ; When changing the version, don't forget to regenerate *.opam files
 ; by running [dune build].
 (name dune)
-(version 2.9.0)
+(version 2.9.1)
 
 (generate_opam_files true)
 

@@ -16,3 +16,9 @@
 
 val warn : ?replacement:string -> string -> since:string -> unit
 (** Emits a warning on the standard error. *)
+
+module Missing_double_semicolon : sig
+  val check_block : Toplevel.t list -> unit
+
+  val report : filename:string -> unit
+end

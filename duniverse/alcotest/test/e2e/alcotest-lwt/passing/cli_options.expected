@@ -1,0 +1,8 @@
+Testing `Results should be in JSON, since --json is passed'.
+This run has ID `<uuid>'.
+
+{
+  "success": 1,
+  "failures": 0,
+  "time": <test-duration>
+}

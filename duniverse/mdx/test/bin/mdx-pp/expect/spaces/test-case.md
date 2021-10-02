@@ -14,15 +14,15 @@ let x =
 
 # let x = 1
 
-  in x
+  in x;;
 - : int = 1
 
 
-# 3
+# 3;;
 - : int = 3
 
 
-# Printf.printf "foo\n\nbar\n"
+# Printf.printf "foo\n\nbar\n";;
 foo
 
 bar

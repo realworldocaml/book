@@ -1,0 +1,13 @@
+Testing `test/e2e/alcotest/passing/verbose_newlines.ml'.
+This run has ID `<uuid>'.
+
+Print inside alpha  [OK]          alpha          0   0 newlines.
+Print inside beta
+  [OK]          beta           0   1 newline.
+Print inside gamma
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.  [OK]          gamma          0   1 newline + long line.
+Print inside delta
+ASSERT Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.
+  [OK]          delta          0   1 newline + long check.
+
+Test Successful in <test-duration>s. 4 tests run.

@@ -1,0 +1,10 @@
+; Note: We disable warning 18 here to support compiler versions < 4.03
+; See https://caml.inria.fr/mantis/view.php?id=7135 for details
+
+(env
+ (dev
+  (flags
+   (:standard -g -w -18-53)))
+ (release
+  (flags
+   (:standard -g -w -18-53))))

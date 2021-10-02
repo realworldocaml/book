@@ -11,7 +11,7 @@ homepage: "https://github.com/realworldocaml/book"
 bug-reports: "https://github.com/realworldocaml/book/issues"
 depends: [
   "dune" {>= "2.4"}
-  "ocaml" {>= "4.12.0" & < "4.13.0"}
+  "ocaml" {>= "4.13.0" & < "4.14.0"}
   "alcotest"
   "async"
   "atdgen"

@@ -1,3 +1,0 @@
-((output
-  (((f.ml (1 0) (1 1)) (paragraph (((f.ml (1 0) (1 1)) (word "\206")))))))
- (warnings ()))

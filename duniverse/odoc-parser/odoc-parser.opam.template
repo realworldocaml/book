@@ -1,0 +1,25 @@
+# This template exists because without it dune pop is dependencies and build rules
+# involving odoc. Since odoc depends on this package, this doesn't work.
+doc: "https://ocaml-doc.github.io/odoc-parser/"
+depends: [
+  "dune" {>= "2.8"}
+  "ocaml" {>= "4.02.0"}
+  "astring"
+  "result"
+  "ppx_expect" {with-test}
+  ("ocaml" {< "4.04.1" & with-test} | "sexplib0" {with-test})
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+  ]
+]
+

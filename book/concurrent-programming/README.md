@@ -134,7 +134,7 @@ uppercase version of its contents.
 ```ocaml env=main
 # let uppercase_file filename =
     Deferred.bind (Reader.file_contents filename)
-      (fun text ->
+      ~f:(fun text ->
          Writer.save filename ~contents:(String.uppercase text))
 val uppercase_file : string -> unit Deferred.t = <fun>
 # uppercase_file "test.txt"

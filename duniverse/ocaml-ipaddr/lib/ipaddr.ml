@@ -451,6 +451,18 @@ module V4 = struct
   let is_multicast i = Prefix.(mem i multicast)
 
   let is_private i = scope i <> Global
+
+  module Set = Set.Make (struct
+    type nonrec t = t
+
+    let compare (a : t) (b : t) = compare a b
+  end)
+
+  module Map = Map.Make (struct
+    type nonrec t = t
+
+    let compare (a : t) (b : t) = compare a b
+  end)
 end
 
 module B128 = struct
@@ -992,6 +1004,18 @@ module V6 = struct
   let is_multicast i = Prefix.(mem i multicast)
 
   let is_private i = scope i <> Global
+
+  module Set = Set.Make (struct
+    type nonrec t = t
+
+    let compare (a : t) (b : t) = compare a b
+  end)
+
+  module Map = Map.Make (struct
+    type nonrec t = t
+
+    let compare (a : t) (b : t) = compare a b
+  end)
 end
 
 type ('v4, 'v6) v4v6 = V4 of 'v4 | V6 of 'v6
@@ -1004,6 +1028,18 @@ let compare a b =
   | V6 a, V6 b -> V6.compare a b
   | V4 _, V6 _ -> -1
   | V6 _, V4 _ -> 1
+
+module Set = Set.Make (struct
+  type nonrec t = t
+
+  let compare (a : t) (b : t) = compare a b
+end)
+
+module Map = Map.Make (struct
+  type nonrec t = t
+
+  let compare (a : t) (b : t) = compare a b
+end)
 
 let to_string = function V4 x -> V4.to_string x | V6 x -> V6.to_string x
 

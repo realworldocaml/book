@@ -9,3 +9,13 @@ val x : int = 13
 $ echo "bob  "
 bob  
 ```
+
+Also, it should be valid to terminate phrases that end with `;;` but have
+trailing whitespace:
+
+```ocaml
+# let terminated_with_space = 42;; 
+val terminated_with_space : int = 42
+# let terminated_with_tab = 42;;	
+val terminated_with_tab : int = 42
+```

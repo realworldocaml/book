@@ -15,7 +15,7 @@ $ echo $RANDOM
 ```
 
 ```ocaml non-deterministic=output
-# Random.self_init (); Random.int 42
+# Random.self_init (); Random.int 42;;
 0
 ```
 
@@ -26,7 +26,7 @@ $ touch hello-world
 ```
 
 ```ocaml
-# Sys.file_exists "hello-world"
+# Sys.file_exists "hello-world";;
 - : bool = true
 ```
 
@@ -45,8 +45,8 @@ $ touch bar
 
 
 ```ocaml
-# Sys.file_exists "toto"
+# Sys.file_exists "toto";;
 - : bool = false
-# Sys.file_exists "bar"
+# Sys.file_exists "bar";;
 - : bool = true
 ```
