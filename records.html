@@ -252,7 +252,7 @@ type logon =
 let session_and_status t = (t.session_id, t.status_message) ;;
 &gt;Line 1, characters 45-59:
 &gt;Error: This expression has type logon
-&gt;       The field status_message does not belong to type logon
+&gt;       There is no field status_message within type logon
 let session_and_status (t:heartbeat) = (t.session_id, t.status_message) ;;
 &gt;val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
 </code></pre>

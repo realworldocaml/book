@@ -134,7 +134,7 @@ area_closed sq ;;
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt; ;;
 &gt;Line 1, characters 1-33:
 &gt;Error: A type variable is unbound in this type declaration.
-&gt;In type &lt; width : Base.int; .. &gt; as 'a the variable 'a is unbound
+&gt;       In type &lt; width : Base.int; .. &gt; as 'a the variable 'a is unbound
 </code></pre>
 </div>
 <p>This is because <code>..</code> is really a special kind of type variable called a <em>row variable</em>.</p>

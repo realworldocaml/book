@@ -61,7 +61,7 @@ Deferred.peek contents ;;
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_file filename =
   Deferred.bind (Reader.file_contents filename)
-    (fun text -&gt;
+    ~f:(fun text -&gt;
        Writer.save filename ~contents:(String.uppercase text))
 ;;
 &gt;val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;

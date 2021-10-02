@@ -119,7 +119,7 @@ Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)] ;;
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
                    Error.of_string "Your windshield was smashed" ])
-  "over the weekend"
+  ~tag:"over the weekend"
 ;;
 &gt;- : Error.t =
 &gt;("over the weekend" "Your tires were slashed" "Your windshield was smashed")
@@ -155,8 +155,8 @@ Or_error.error_s
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let compute_bounds ~compare list =
   let sorted = List.sort ~compare list in
-  Option.bind (List.hd sorted) (fun first -&gt;
-    Option.bind (List.last sorted) (fun last -&gt;
+  Option.bind (List.hd sorted) ~f:(fun first -&gt;
+    Option.bind (List.last sorted) ~f:(fun last -&gt;
       Some (first,last)))
 ;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
