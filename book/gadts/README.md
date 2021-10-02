@@ -962,6 +962,7 @@ Now, imagine you want to use this type, but there's no need for the
 final error type. We can go ahead and instantiate the RPC using the
 type `unit` for the error type.
 
+
 ```ocaml env=async
 # open Core
 # open Async
@@ -979,6 +980,15 @@ val rpc :
   (unit, (string, int, String.comparator_witness) Map.t,
    (string, int, String.comparator_witness) Map.t, unit)
   Rpc.State_rpc.t = <abstr>
+```
+
+```ocaml env=main
+# type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
+type stringable = S : { value : 'a; to_string : 'a -> string; } -> stringable
+# let get_value (S (type a) s) = s.value
+Line 1, characters 27-28:
+Error: Existential types introduced in a constructor pattern
+       must be bound by a type constraint on the argument.
 ```
 
 When you write code to dispatch the RPC, you still have to handle the
@@ -1108,10 +1118,11 @@ Error: This expression has type $S_'a but an expression was expected of type
 ```
 
 This error message is a bit confusing, but it's worth spending a
-moment to decode it. The `$S_'a` represents some type variable `'a`
-that's bound within the scope of the construct `S` within which it's
-bound. Returning a value of that type from the function would cause
-this type to escape it's scope.
+moment to decode it. `$S_'a` represents a type variable that's bound
+within the scope of the construct `S`. That's the type of `s.value`,
+and returning that type would cause the type to escape it's scope.
+
+
 
 
 ### Free your monad
@@ -1182,3 +1193,4 @@ type, it's free, and can be constrained for whatever purpose the
 designer of the interface through which `foo` is exposed wants.
 
 1 2 3
+
