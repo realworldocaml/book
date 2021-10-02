@@ -19,7 +19,8 @@
 (part
  ((title "Tools and Techniques")
   (chapters
-   (maps-and-hashtables
+   ((wip platform)
+    maps-and-hashtables
     command-line-parsing
     concurrent-programming
     testing

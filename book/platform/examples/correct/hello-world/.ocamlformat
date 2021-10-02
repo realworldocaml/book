@@ -1,0 +1,9 @@
+# Pin the version of ocamlformat. The formatting will fail if a version other than 0.18.0 is used.
+# This ensures that the formatting does not depend on the specific version of ocamlformat developers use.
+version = 0.18.0
+# The conventional profile is fairly standard, but you can also try `sparse` or `janestreet`.
+profile = conventional
+# Format the code source found in docstrings
+parse-docstrings = true
+# Insert break lines for docstring that are longer than 80 characters.
+wrap-comments = true

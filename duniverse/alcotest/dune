@@ -1,0 +1,21 @@
+(rule
+ (with-stdout-to
+  alcotest-help.txt.actual
+  (run examples/simple.exe --help=plain)))
+
+(rule
+ (target alcotest-help.txt.processed)
+ (deps
+  (:strip-randomness test/e2e/strip_randomness.exe))
+ (action
+  (with-outputs-to
+   %{target}
+   (run %{strip-randomness} %{dep:alcotest-help.txt.actual}))))
+
+(rule
+ ;; Ideally, this would be attached to [runtest], but currently the manpage
+ ;; fails to render properly on Windows due to a Cmdliner bug: any '\\'
+ ;; characters in default values will be interpreted as (broken) escapes.
+ (alias generatehelp)
+ (action
+  (diff alcotest-help.txt alcotest-help.txt.processed)))

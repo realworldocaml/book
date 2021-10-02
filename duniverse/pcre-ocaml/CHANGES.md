@@ -1,3 +1,11 @@
+### 7.5.0 (2021-07-22)
+
+  * Added support for JIT-compilation of patterns, which can greatly improve
+    matching performance for most patterns.  Users need to explicitly add
+    the `jit_compile` flag to request JIT-compilation when creating regular
+    expressions.
+
+
 ### 7.4.6 (2020-08-04)
 
   * Removed mistakenly kept base library configuration dependency.

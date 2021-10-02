@@ -1,0 +1,4 @@
+(library
+ (name alcotest_engine)
+ (public_name alcotest.engine)
+ (libraries fmt astring cmdliner fmt.cli uuidm re stdlib-shims uutf))

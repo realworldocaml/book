@@ -1,0 +1,4 @@
+Invalid request (no tests to run, filter skipped everything)!
+Testing `test/e2e/alcotest/failing/filter_all_tests.ml'.
+This run has ID `<uuid>'.
+

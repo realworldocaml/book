@@ -1,0 +1,9 @@
+(executable
+ (name gen_dune_rules)
+ (libraries cmdliner fmt)
+ (modules gen_dune_rules))
+
+(executable
+ (name strip_randomness)
+ (libraries unix re)
+ (modules strip_randomness))
