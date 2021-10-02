@@ -386,19 +386,88 @@ The `opam-dune-lint` plugin will check that the ocamlfind libraries and opam pac
 in your dune files match up, and offer to fix them up if it spots a mismatch. `opam lint`
 runs additional checks on the opam files within your project.
 
-## Publishing your code online
-
-### Pushing to GitHub
-
 ### Setting up Continuous Integration
 
-GitHub Actions
-- Use setup-ocaml
+Once you have your project metadata defined, it's a good time to begin hosting it online.
+Two of the most popular platforms for this are [GitHub](https://github.com) and [GitLab](https://gitlab.com).
+The remainder of this chapter will assume you are using GitHub for simplicity, although you are
+encouraged to check out the alternatives to find the best solution for your own needs.
 
+When you create a GitHub repository and push your code to it, you can also add an OCaml GitHub Action
+that will install the OCaml Platform tools and run your code across various architectures and
+operating systems.  You can find the full documentation online at the [GitHub Setup OCaml](https://github.com/marketplace/actions/set-up-ocaml) marketplace.  Configuring an action is as simple as adding a
+`.github/workflows/test.yml` file to your project that looks something like this:
 
-A note on production binaries using DUNE_RELEASE
+```yaml
+name: Hello world workflow
+on:
+  pull_request:
+  push:
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        ocaml-compiler:
+          - 4.13.x
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+      - run: opam install . --deps-only --with-test
+      - run: opam exec -- dune build
+      - run: opam exec -- dune runtest
+```
 
-- edit note: “The warnings used for building” should now mention the dune ones not the core build ones
-- result.t is meant to address this deficiency” -> talk about `results instead
+This workflow file will run your project on OCaml installations on Windows, macOS and Linux, using the latest patch release of OCaml 4.13.  Notice that it also runs the test cases you have defined earlier on all those different operating systems as well.  You can do an awful lot of customisation of these continuous integration workflows, so refer to the online documentation for more options.
+
+### Releasing your code into the opam repository
+
+Once your continuous integration is passing, you are all set to try to tag a release of your project and share it with other users!  The OCaml Platform supplies a convenient tool called `dune-release` which automates much of this process for you.
+
+```skip
+$ opam install dune-release
+```
+
+The first thing you need to do is to create a `CHANGES.md` file in your project in Markdown format, which contains a header per version.  This is typically a succinct summary of the changes between versions that can be read by users.  For our first release, we might have:
+
+```
+## v1.0.0
+
+- Initial public release of our glorious hello world
+  project (@avsm)
+- Added test cases for making sure we do in fact hello world.
+```
+
+Commit this file to your repository in the root. Before you proceed with a release, you need to make sure that all of your local changes have been pushed to the remote GitHub repository, and that your working tree is clean.  You can do this by using git:
+
+```
+$ git clean -dxf
+$ git diff
+```
+
+This will remove any untracked files from the local checkout (such as the `_build` directory) and check that tracked files are unmodified.  We should now be ready to perform the release!  First create a git tag to mark this release:
+
+```skip
+$ dune-release tag
+```
+
+This will parse your `CHANGES.md` file and figure out the latest version, and create a local git tag in your repository after prompting you. Once that succeeds, you can start the release process via:
+
+```skip
+$ dune-release
+```
+
+This will begin an interactive session where you will need to enter some GitHub authentication details (via creating a personal access token).  Once that is completed, the tool will run all local tests, generate documentation and upload it to your GitHub pages branch for that project, and finally offer to open a pull request to the central opam-repository.  Recall that the central opam package set is all just a normal git repository, and so your opam file will be added to that and your GitHub account will create a PR.
+
+At this point, you can sit back and relax while the central opam repository test system runs your package through a battery of installations (including on exotic architectures you might not access to, such as S390X mainframes or 32-bit ARMv7).  If there is a problem detected, some friendly maintainers from the OCaml community will comment on the pull request and guide you through how to address it.  You can simply delete the git tag and re-run the release process until the package is merged.  Once it is merged, you can navigate to the <ocaml.org> site and view it online in an hour or so.  It will also be available in the central repository for other users to install.
+
 
 
