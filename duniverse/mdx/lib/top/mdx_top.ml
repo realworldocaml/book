@@ -22,7 +22,7 @@ type directive = Directory of string | Load of string
 
 let redirect ~f =
   let stdout_backup = Unix.dup Unix.stdout in
-  let stderr_backup = Unix.dup Unix.stdout in
+  let stderr_backup = Unix.dup Unix.stderr in
   let filename = Filename.temp_file "ocaml-mdx" "stdout" in
   let fd_out =
     Unix.openfile filename Unix.[ O_WRONLY; O_CREAT; O_TRUNC ] 0o600

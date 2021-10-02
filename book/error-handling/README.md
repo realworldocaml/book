@@ -200,7 +200,7 @@ roles:[Error.of_list]{.idx}[Error.tag]{.idx}[errors/transformation of]{.idx}
 # Error.tag
     (Error.of_list [ Error.of_string "Your tires were slashed";
                      Error.of_string "Your windshield was smashed" ])
-    "over the weekend"
+    ~tag:"over the weekend"
 - : Error.t =
 ("over the weekend" "Your tires were slashed" "Your windshield was smashed")
 ```
@@ -249,8 +249,8 @@ produce an error terminates the computation. Here's a rewrite of
 ```ocaml env=main
 # let compute_bounds ~compare list =
     let sorted = List.sort ~compare list in
-    Option.bind (List.hd sorted) (fun first ->
-      Option.bind (List.last sorted) (fun last ->
+    Option.bind (List.hd sorted) ~f:(fun first ->
+      Option.bind (List.last sorted) ~f:(fun last ->
         Some (first,last)))
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>

@@ -1,3 +1,0 @@
-((output (((f.ml (1 0) (3 6)) (verbatim  "foo\
-                                        \n\
-                                        \nbar")))) (warnings ()))

@@ -1,0 +1,22 @@
+{
+  "name": "odoc-parser",
+  "version": "0.9.0",
+  "description": "A parser for odoc markup",
+  "repository": "https://github.com/ocaml-doc/odoc-parser",
+  "authors": [
+    "Anton Bachin <antonbachin@yahoo.com>"
+  ],
+  "esy": {
+    "build": "dune build -p odoc-parser",
+    "buildsInSource": "_build"
+  },
+  "dependencies": {
+    "@opam/astring": "^0.8.3",
+    "@opam/dune": "^2.8.5",
+    "@opam/result": "*",
+    "@opam/ppx_expect": "*",
+    "ocaml": "^4.02.3"
+  },
+  "license": "ISC",
+  "private": false
+}

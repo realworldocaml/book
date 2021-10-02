@@ -18,7 +18,7 @@
 
 (** A library for manipulation of IP address representations.
 
-    {e v5.1.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
+    {e v5.2.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
 
 exception Parse_error of string * string
 (** [Parse_error (err,packet)] is raised when parsing of the IP address syntax
@@ -309,6 +309,10 @@ module V4 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
+
+  module Set : Set.S with type elt := t
+
+  module Map : Map.S with type key := t
 end
 
 (** A collection of functions for IPv6 addresses. *)
@@ -576,6 +580,10 @@ module V6 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
+
+  module Set : Set.S with type elt := t
+
+  module Map : Map.S with type key := t
 end
 
 (** Type of either an IPv4 value or an IPv6 value *)
@@ -726,3 +734,7 @@ module Prefix : sig
 end
 
 include Map.OrderedType with type t := t
+
+module Set : Set.S with type elt := t
+
+module Map : Map.S with type key := t

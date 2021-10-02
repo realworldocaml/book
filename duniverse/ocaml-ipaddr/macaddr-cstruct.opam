@@ -1,4 +1,4 @@
-version: "5.1.0"
+version: "5.2.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
@@ -12,7 +12,7 @@ depends: [
   "ocaml" {>= "4.04.0"}
   "dune" {>= "1.9.0"}
   "macaddr" {= version}
-  "cstruct"
+  "cstruct" {>= "6.0.0"}
 ]
 build: [
   ["dune" "subst"] {dev}

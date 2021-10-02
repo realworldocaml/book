@@ -14,7 +14,7 @@ functionality:
 - Test compiler versions for a particular feature (e.g. the `bytes` type)
 - [opam](https://opam.ocaml.org) compiler switch enumeration.
 
-Browse the [API documentation](http://anil-code.recoil.org/ocaml-version/ocaml-version/Ocaml_version/index.html) for more
+Browse the [API documentation](https://ocurrent.github.io/ocaml-version/doc) for more
 details.
 
 ### Further information

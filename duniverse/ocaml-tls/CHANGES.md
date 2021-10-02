@@ -1,3 +1,11 @@
+## v0.14.1 (2021-09-13)
+
+* Bugfix: do not filter signature_algorithms based on server certificate. Since
+  signature_algorithms is also used for client authentication (as
+  SignatureAlgorithms extension in CertificateVerify), previously the client
+  needed the same key type as the server.
+  Discovered in https://github.com/roburio/albatross/commit/df434da0e531e1b0c8091a0fc82e8b37ed319e7a
+
 ## v0.14.0 (2021-08-02)
 
 * Breaking: peer_name (in config and epoch data, also own_name) is now a

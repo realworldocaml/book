@@ -1,5 +1,5 @@
-open Core.Std
-open Core_bench.Std
+open Core
+open Core_bench
 
 module Http = struct
   open Re
@@ -63,7 +63,7 @@ let tex_ignore_re =
       match String.strip s with
       | "" -> None
       | s -> Some s)
-  |> List.map ~f:Re_glob.glob
+  |> List.map ~f:Re.Glob.glob
   |> Re.alt
 
 let tex_ignore_filesnames = In_channel.read_lines "benchmarks/files"
@@ -82,7 +82,7 @@ let media_type_re =
 
 (* Taken from https://github.com/rgrinberg/ocaml-uri/blob/903ef1010f9808d6f3f6d9c1fe4b4eabbd76082d/lib/uri.ml*)
 let uri_reference =
-  Re_posix.re "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+  Re.Posix.re "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
 
 let uris =
   [ "https://google.com"
@@ -120,8 +120,8 @@ let rec read_all_http pos re reqs =
 
 let rec drain_gen gen =
   match gen () with
-  | None -> ()
-  | Some _ -> drain_gen gen
+  | Seq.Nil -> ()
+  | Cons (_, tail) -> drain_gen tail
 
 let benchmarks =
   let benches =
@@ -150,7 +150,7 @@ let benchmarks =
           )
       ; Test.create ~name:"all_gen group" (fun () ->
             http_requests
-            |> Re.all_gen requests_g
+            |> Re.Seq.all requests_g
             |> drain_gen
           )
       ] |> Test.create_group ~name:"auto" in

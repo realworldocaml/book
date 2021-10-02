@@ -50,6 +50,14 @@ let _ =
     expect_eq_str not_found ()   (Group.get m) 4;
   );
 
+  expect_pass "Group.get_opt" (fun () ->
+    expect_eq_str_opt id (Some "ab") (Group.get_opt m) 0;
+    expect_eq_str_opt id (Some "a")  (Group.get_opt m) 1;
+    expect_eq_str_opt id None        (Group.get_opt m) 2;
+    expect_eq_str_opt id (Some "b")  (Group.get_opt m) 3;
+    expect_eq_str_opt id None        (Group.get_opt m) 4;
+  );
+
   expect_pass "Group.offset" (fun () ->
     expect_eq_ofs id        (0,2) (Group.offset m) 0;
     expect_eq_ofs id        (0,1) (Group.offset m) 1;

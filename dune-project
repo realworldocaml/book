@@ -18,7 +18,7 @@
  (description "Scripts and sources to compile the Real World OCaml
 second edition book. See https://realworldocaml.org/")
  (depends
-  (ocaml (and (>= 4.12.0) (< 4.13.0)))
+  (ocaml (and (>= 4.13.0) (< 4.14.0)))
   alcotest
   async
   atdgen

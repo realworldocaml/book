@@ -1,0 +1,27 @@
+{0 Contributing}
+
+{1 Building and testing}
+
+[odoc-parser] uses {{: https://dune.build/} dune} to build and run tests. We use
+inline expect tests with {{: https://github.com/janestreet/ppx_expect} ppx_expect} -
+see the {{:https://github.com/ocaml-doc/odoc-parser/blob/main/test/test.ml}test file}.
+
+We require that the parser builds and tests pass on all versions of the OCaml
+compiler from 4.02.3 onwards. This is tested on each pull request by
+{{: https://github.com/ocurrent/ocaml-ci} ocaml-ci}.
+
+Build the project using
+
+{[
+$ dune build
+]}
+
+and test using
+
+{[
+$ dune runtest
+]}
+
+if the code has changed and the tests require updating, use [dune promote].
+
+

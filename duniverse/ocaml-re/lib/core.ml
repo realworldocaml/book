@@ -1177,23 +1177,22 @@ let witness t =
     | End_of_str -> "" in
   witness (handle_case false t)
 
-type 'a seq = 'a Seq.t
 module Seq = Rseq
 module List = Rlist
 module Group = Group
 
 (** {2 Deprecated functions} *)
 
+let split_full_seq = Seq.split_full
+let split_seq = Seq.split
+let matches_seq = Seq.matches
+let all_seq = Seq.all
+
 type 'a gen        = 'a Gen.gen
 let all_gen        = Gen.all
 let matches_gen    = Gen.matches
 let split_gen      = Gen.split
 let split_full_gen = Gen.split_full
-
-let all_seq        = Seq.all
-let matches_seq    = Seq.matches
-let split_seq      = Seq.split
-let split_full_seq = Seq.split_full
 
 
 type substrings = Group.t

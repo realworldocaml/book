@@ -1,7 +1,7 @@
 open Stdune
 open Import
 
-(** A string that is "2.9.0" but not expanded by [dune subst] *)
+(** A string that is "2.9.1" but not expanded by [dune subst] *)
 let literal_version = "%%" ^ "VERSION%%"
 
 let doc = "Substitute watermarks in source files."

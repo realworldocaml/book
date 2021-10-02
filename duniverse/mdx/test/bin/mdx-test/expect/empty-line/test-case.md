@@ -1,8 +1,8 @@
 Testing empty line output
 
 ```ocaml
-# print_newline ()
+# print_newline ();;
 - : unit = ()
-# print_endline ""
+# print_endline "";;
 - : unit = ()
 ```

@@ -1,3 +1,32 @@
+1.10.3 (13-Sep-2021)
+--------------------
+
+* Glob: change optional argument `?backslash_escapes` to `?match_backslashes`.
+  The interpretation of backslashes in the glob pattern remains unchanged with
+  the new option, but forward slashes match backslashes when activated (#199)
+
+1.10.2 (09-Sep-2021)
+--------------------
+
+* Fix missing aliases introduced in 1.10.1
+
+1.10.1 (08-Sep-2021)
+--------------------
+
+* Glob: add optional argument `?backslash_escapes` to control interpretation of
+  backslashes (useful under Windows) (#197, #198)
+
+* Restore accidentally deleted `*_seq` deprecated aliases.
+
+1.10.0 (25-Aug-2021)
+--------------------
+
+* Add the `[:alpha:]` character class in `Re.Perl` (#169)
+* Double asterisk (`**`) in `Re.Glob` (#172)
+  Like `*` but also match `/` characters when `pathname` is set.
+* Double asterisk should match 0 or more directories unless in trailing
+  position. (#192, fixes #185)
+
 1.9.0 (05-Apr-2019)
 -------------------
 

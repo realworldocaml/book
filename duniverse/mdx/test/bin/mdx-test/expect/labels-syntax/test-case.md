@@ -6,10 +6,10 @@ Environment variables can be loaded in an ocaml block environment.
 
 <!-- $MDX set-FOO=bar,set-BAR=foo -->
 ```ocaml
-  # print_endline (Sys.getenv "FOO")
+  # print_endline (Sys.getenv "FOO");;
   bar
   - : unit = ()
-  # print_endline (Sys.getenv "BAR")
+  # print_endline (Sys.getenv "BAR");;
   foo
   - : unit = ()
 ```
