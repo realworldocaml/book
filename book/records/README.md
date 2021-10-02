@@ -395,7 +395,7 @@ val status_and_session : heartbeat -> string * string = <fun>
 # let session_and_status t = (t.session_id, t.status_message)
 Line 1, characters 45-59:
 Error: This expression has type logon
-       There is no field status_message within type logon
+       The field status_message does not belong to type logon
 # let session_and_status (t:heartbeat) = (t.session_id, t.status_message)
 val session_and_status : heartbeat -> string * string = <fun>
 ```

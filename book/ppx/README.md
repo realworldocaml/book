@@ -101,7 +101,7 @@ type program_result = Error of string | Exit_code of int
 Line 2, characters 11-23:
 Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 this constructor's arguments. They are only for information
-and may change in future versions. (See manual section 11.5)
+and may change in future versions. (See manual section 9.5)
 val exit_with : program_result -> int = <fun>
 ```
 

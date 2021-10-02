@@ -213,7 +213,7 @@ variables]{.idx}
 # type square = < width : int; ..>
 Line 1, characters 1-33:
 Error: A type variable is unbound in this type declaration.
-       In type < width : Base.int; .. > as 'a the variable 'a is unbound
+In type < width : Base.int; .. > as 'a the variable 'a is unbound
 ```
 
 This is because `..` is really a special kind of type variable called a
