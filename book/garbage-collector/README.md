@@ -127,13 +127,27 @@ than `limit`. If there isn't enough space left for the block without
 decrementing past `limit`, a minor garbage collection is triggered. This is a
 very fast check (with no branching) on most CPU architectures.
 
+#### Understanding allocation
+
 You may wonder why `limit` is required at all, since it always seems to equal
 `start`. It's because the easiest way for the runtime to schedule a minor
 heap collection is by setting `limit` to equal `end`. The next allocation
 will never have enough space after this is done and will always trigger a
 garbage collection. There are various internal reasons for such early
 collections, such as handling pending UNIX signals, and they don't ordinarily
-matter for application code. [minor heaps/setting size of]{.idx}
+matter for application code.
+
+It is possible to write loops or recurse in a way that may take a long time
+to do an allocation - if at all. To ensure that UNIX signals and other
+internal bookkeeping that require interrupting the running OCaml program 
+still happen the compiler introduces *poll points* in to generated native code.
+
+These poll points check `ptr` against `limit` and developers should expect
+them to be placed at the start of every function and the back edge of loops.
+The compiler includes a dataflow pass that removes all but the minimum set
+of points necessary to ensure these checks happen in a bounded amount of time.
+
+[minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
 ##### Setting the Size of the Minor Heap
@@ -216,6 +230,10 @@ contains OCaml heap chunks. A heap chunk header contains:
   blocks to defragment the heap
 
 - A link to the next heap chunk in the list
+
+- A pointer to the start and end of the range of blocks that may contain
+  unexamined fields and need to be scanned later. Only used after mark stack
+  overflow.
 
 Each chunk's data area starts on a page boundary, and its size is a multiple
 of the page size (4 KB). It contains a contiguous sequence of heap blocks
@@ -326,41 +344,38 @@ slices. [major heaps/marking and scanning]{.idx}
 - Blue:  On the free list and not currently in use
 - White (during marking): Not reached yet, but possibly reachable
 - White (during sweeping): Unreachable and can be freed
-- Gray: Reachable, but its fields have not been scanned
 - Black:  Reachable, and its fields have been scanned
 
 The color tags in the value headers store most of the state of the marking
-process, allowing it to be paused and resumed later. The GC and application
-alternate between marking a slice of the major heap and actually getting on
-with executing the program logic. The OCaml runtime calculates a sensible
-value for the size of each major heap slice based on the rate of allocation
-and available memory.
+process, allowing it to be paused and resumed later. On allocation, all heap
+values are initially given the color white indicating they are possibly
+reachable but haven't been scanned yet. The GC and application alternate
+between marking a slice of the major heap and actually getting on with
+executing the program logic. The OCaml runtime calculates a sensible value
+for the size of each major heap slice based on the rate of allocation and
+available memory.
 
 The marking process starts with a set of *root* values that are always live
-(such as the application stack). All values on the heap are initially marked
-as white values that are possibly reachable but haven't been scanned yet. It
-recursively follows all the fields in the roots via a depth-first search, and
-pushes newly encountered white blocks onto an intermediate stack of
-*gray values* while it follows their fields. When a gray value's fields have
-all been followed, it is popped off the stack and colored black. [root
-values]{.idx}[gray values]{.idx}
+(such as the application stack and globals). These root values have their
+color set to black and are pushed on to a specialized data structure known as
+the _mark_ stack. Marking proceeds by popping a value from the stack and
+examining its fields. Any fields containing white-colored blocks are changed
+to black and pushed onto the mark stack.
 
-This process is repeated until the gray value stack is empty and there are no
-further values to mark. There's one important edge case in this process,
-though. The gray value stack can only grow to a certain size, after which the
-GC can no longer recurse into intermediate values since it has nowhere to
-store them while it follows their fields. If this happens, the heap is marked
-as *impure* and a more expensive check is initiated once the existing gray
-values have been processed. [impure heaps]{.idx}
+This process is repeated until the mark stack is empty and there are no further
+values to mark. There's one important edge case in this process, though. The
+mark stack can only grow to a certain size, after which the GC can no longer
+recurse into intermediate values since it has nowhere to store them while it
+follows their fields. This is known as mark stack *overflow* and a process
+called _pruning_ begins. Pruning empties the mark stack entirely, summarising
+the addresses of each block as start and end ranges in each heap chunk header.
 
-To mark an impure heap, the GC first marks it as pure and walks through the
-entire heap block-by-block in increasing order of memory address. If it finds
-a gray block, it adds it to the gray list and recursively marks it using the
-usual strategy for a pure heap. Once the scan of the complete heap is
-finished, the mark phase checks again whether the heap has again become
-impure and repeats the scan until it is pure again. These full-heap scans
-will continue until a successful scan completes without overflowing the gray
-list. [major heaps/controlling collections]{.idx}
+Later in the marking process when the mark stack is empty it is replenished by
+*redarkening* the heap. This starts at the first heap chunk (by address) that
+has blocks needing redarkening (i.e were removed from the mark stack during
+ a prune) and entries from the redarkening range are added to the mark stack
+ until it is a quarter full. The emptying and replenishing cycle continues
+until there are no heap chunks with ranges left to redarken.
 
 ::: {data-type=note}
 #### Controlling Major Heap Collections
