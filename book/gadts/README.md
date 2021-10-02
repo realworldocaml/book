@@ -1022,17 +1022,100 @@ val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 As you can see, narrowing can show up when using code that isn't
 designed with narrowing in mind, and without any GADTs at all.
 
-### Heterogenous containers
+### Capturing the unknown
 
-### Controlling memory layout
+Code that that works with unknown types is routine in OCaml, and comes
+up in the simplest of examples:
+
+```ocaml env=main
+# let tuple x y = (x,y)
+val tuple : 'a -> 'b -> 'a * 'b = <fun>
+```
+
+The type variables `'a` and `'b` indicate that there are two unknown
+types here, and these type variables are *universally quantified*.
+Which is to say, the type of `tuple` is: *for all* types `a` and `b`,
+`a -> b -> a * b`.
+
+And indeed, we can restrict the type of `tuple` to any `'a` and `'b`
+we want.
+
+```ocaml env=main
+# (tuple : int -> float -> int * float)
+- : int -> float -> int * float = <fun>
+# (tuple : string -> string * string -> string * (string * string))
+- : string -> string * string -> string * (string * string) = <fun>
+```
+
+Sometimes, however, we want to take about type variables which are
+*existentially quantified*, meaning that instead of being compatible
+with all types, we only know that there exists some type which matches
+that variable.
+
+GADTs provide one natural way of encoding such type variables. Here's
+a simple example.
+
+```ocaml env=main
+type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
+```
+
+This type packes together a value of some arbitrary type, along with a
+function for converting values of that type to strings. Note that we
+can use the in-line record syntax with GADTs much as we would with
+ordinary variants.
+
+Syntactically, we know that `'a` is existentially quantified because
+it shows up on the left-hand side of the arrow, but not on the right,
+meaning it isn't represented in a type parameter for `stringable`
+itself. Essentially, the existentially quantified type is bound within
+the definition of `stringable`.
+
+We can write a print function for `stringable`s:
+
+```ocaml env=main
+# let print (S s) = print_endline (s.to_string s.value)
+val print : stringable -> unit = <fun>
+```
+
+And we can use this function on a collection of `stringable`s of
+different underlying types.
+
+```ocaml env=main
+# List.iter ~f:print
+   (let s value to_string = S { to_string; value } in
+    [ s 100 Int.to_string
+    ; s 12.3 Float.to_string
+    ; s "foo" F.id
+    ])
+Line 5, characters 15-19:
+Error: Unbound module F
+```
+
+What is it that lets us take all of these values of different types
+together and operate on them uniformly, even put them in to the same
+list? The key is that the type variable is bound within the type
+`stringable`, and can't escape that scope.
+
+That puts some limitations in place. In particular, you can't grab a
+value and just return it, since that would cause just such an escape.
+
+```ocaml env=main
+# let get_value (S s) = s.value
+Line 1, characters 23-30:
+Error: This expression has type $S_'a but an expression was expected of type
+         'a
+       The type constructor $S_'a would escape its scope
+```
+
+This error message is a bit confusing, but it's worth spending a
+moment to decode it. The `$S_'a` represents some type variable `'a`
+that's bound within the scope of the construct `S` within which it's
+bound. Returning a value of that type from the function would cause
+this type to escape it's scope.
 
 
-### Ideas
+### Free your monad
 
-- Changing the return value of a function
-- Controlling memory layout / zero-copy networking. Maybe too
-  advanced?
-- Heterogenous containers (i.e., existentials)
 
 ## Limitations of pattern matching
 
@@ -1074,6 +1157,12 @@ So, that's weird.
 Also, derivers don't always work! So, you typically don't have
 `t_of_sexp` with GADTs, since the result type would need to be wrapped
 in an existential type.
+
+### Ideas
+
+- Controlling memory layout / zero-copy networking. Maybe too
+  advanced?
+- Free monads and the like
 
 
 ## Detritus
