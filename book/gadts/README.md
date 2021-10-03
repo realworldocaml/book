@@ -962,15 +962,6 @@ Now, imagine you want to use this type, but there's no need for the
 final error type. We can go ahead and instantiate the RPC using the
 type `unit` for the error type.
 
-```ocaml env=main
-# type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
-type stringable = S : { value : 'a; to_string : 'a -> string; } -> stringable
-# let get_value (S (type a) s) = s.value
-Line 1, characters 27-28:
-Error: Existential types introduced in a constructor pattern
-       must be bound by a type constraint on the argument.
-```
-
 
 ```ocaml env=async
 # open Core
@@ -1112,17 +1103,18 @@ That puts some limitations in place. In particular, you can't grab a
 value and just return it, since that would cause just such an escape.
 
 ```ocaml env=main
-# let get_value (S s) = s.value
-Line 1, characters 23-30:
-Error: This expression has type $S_'a but an expression was expected of type
-         'a
-       The type constructor $S_'a would escape its scope
+# let get_value (Stringable s) = s.value
+Line 1, characters 32-39:
+Error: This expression has type $Stringable_'a
+       but an expression was expected of type 'a
+       The type constructor $Stringable_'a would escape its scope
 ```
 
 This error message is a bit confusing, but it's worth spending a
-moment to decode it. `$S_'a` represents a type variable that's bound
-within the scope of the construct `S`. That's the type of `s.value`,
-and returning that type would cause the type to escape it's scope.
+moment to decode it. `$Stringable_'a` represents a type variable
+that's bound within the scope of the constructor `Stringable`. That's
+the type of `s.value`, and returning that type would cause the type to
+escape it's scope.
 
 
 
