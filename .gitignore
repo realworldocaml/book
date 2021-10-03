@@ -2,11 +2,6 @@ _build
 _opam
 .depend
 .merlin
-site
 .*.swp
 *~
-*.install
-*.byte
-*.orig
-a.out
-*.native
+.vscode/
