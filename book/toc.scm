@@ -35,5 +35,4 @@
     runtime-memory-layout
     garbage-collector
     compiler-frontend
-    ppx
     compiler-backend))))

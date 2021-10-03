@@ -115,12 +115,6 @@
 
 (rule
  (alias site)
- (target ppx.html)
- (deps (alias ../book/html) ../book/toc.scm)
- (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/ppx.html})))
-
-(rule
- (alias site)
  (target prologue.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/prologue.html})))
