@@ -962,6 +962,15 @@ Now, imagine you want to use this type, but there's no need for the
 final error type. We can go ahead and instantiate the RPC using the
 type `unit` for the error type.
 
+```ocaml env=main
+# type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
+type stringable = S : { value : 'a; to_string : 'a -> string; } -> stringable
+# let get_value (S (type a) s) = s.value
+Line 1, characters 27-28:
+Error: Existential types introduced in a constructor pattern
+       must be bound by a type constraint on the argument.
+```
+
 
 ```ocaml env=async
 # open Core
@@ -980,15 +989,6 @@ val rpc :
   (unit, (string, int, String.comparator_witness) Map.t,
    (string, int, String.comparator_witness) Map.t, unit)
   Rpc.State_rpc.t = <abstr>
-```
-
-```ocaml env=main
-# type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
-type stringable = S : { value : 'a; to_string : 'a -> string; } -> stringable
-# let get_value (S (type a) s) = s.value
-Line 1, characters 27-28:
-Error: Existential types introduced in a constructor pattern
-       must be bound by a type constraint on the argument.
 ```
 
 When you write code to dispatch the RPC, you still have to handle the
