@@ -27,23 +27,32 @@
 </ul>
 <p>The source tree is split up into subdirectories. The core compiler consists of:</p>
 <dl>
-<dt><code>config/</code></dt>
-<dd>Configuration directives to tailor OCaml for your operating system and architecture.
+<dt><code>asmcomp/</code></dt>
+<dd>Native-code compiler that converts OCaml into high performance native code executables.
 </dd>
 <dt><code>bytecomp/</code></dt>
 <dd>Bytecode compiler that converts OCaml into an interpreted executable format.
 </dd>
-<dt><code>asmcomp/</code></dt>
-<dd>Native-code compiler that converts OCaml into high performance native code executables.
+<dt><code>driver/</code></dt>
+<dd>Command-line interfaces for the compiler tools.
+</dd>
+<dt><code>file_formats/</code></dt>
+<dd>Serialiser and deserialisers for on-disk files used by the compiler driver.
+</dd>
+<dt><code>lambda/</code></dt>
+<dd>The lambda conversion pass.
+</dd>
+<dt><code>middle_end/</code></dt>
+<dd>The clambda, closure and flambda passes.
 </dd>
 <dt><code>parsing/</code></dt>
 <dd>The OCaml lexer, parser, and libraries for manipulating them.
 </dd>
+<dt><code>runtime/</code></dt>
+<dd>The runtime library with the garbage collector.
+</dd>
 <dt><code>typing/</code></dt>
 <dd>The static type checking implementation and type definitions.
-</dd>
-<dt><code>driver/</code></dt>
-<dd>Command-line interfaces for the compiler tools.
 </dd>
 </dl>
 <p>A number of tools and scripts are also built alongside the core compiler:</p>
@@ -54,14 +63,8 @@
 <dt><code>toplevel/</code></dt>
 <dd>Interactive top-level console.
 </dd>
-<dt><code>emacs/</code></dt>
-<dd>A <em>caml-mode</em> for the Emacs editor.
-</dd>
 <dt><code>stdlib/</code></dt>
 <dd>The compiler standard library, including the <code>Pervasives</code> module.
-</dd>
-<dt><code>ocamlbuild/</code></dt>
-<dd>Build system that automates common OCaml compilation modes.
 </dd>
 <dt><code>otherlibs/</code></dt>
 <dd>Optional libraries such as the Unix and graphics modules.
@@ -174,13 +177,13 @@ let () =
 &gt;  ()
 </code></pre>
 </div>
-<p>The <code>ocp-indent</code> <a href="https://github.com/OCamlPro/ocp-indent">homepage</a> documents how to integrate it with your favorite editor. All the Core libraries are formatted using it to ensure consistency, and it’s a good idea to do this before publishing your own source code online.</p>
+<p>The <code>ocp-indent</code> <a href="https://github.com/OCamlPro/ocp-indent">homepage</a> documents how to integrate it with your favorite editor. All the Core libraries are formatted using it to ensure consistency, and it’s a good idea to do this before publishing your own source code online. For larger projects, you can use <code>ocamlformat</code> to format whole files as described earlier in <a data-type="xref" href="platform.html#autoformatting-your-source-code.html">Chapter 20, OCaml Platform</a>.</p>
 </section>
 <section class="level3" id="generating-documentation-from-interfaces">
 <h3>Generating Documentation from Interfaces</h3>
 <p>Whitespace and source code comments are removed during parsing and aren’t significant in determining the semantics of the program. However, other tools in the OCaml distribution can interpret comments for their own ends. <a data-secondary="ocamldoc" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="generating documentation from" data-primary="interfaces" data-type="indexterm">&nbsp;</a><a data-primary="documentation, generating from interfaces" data-type="indexterm">&nbsp;</a></p>
-<p>The <code>ocamldoc</code> tool uses specially formatted comments in the source code to generate documentation bundles. These comments are combined with the function definitions and signatures, and output as structured documentation in a variety of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even module dependency graphs that can be viewed using <a href="http://www.graphviz.org">Graphviz</a>.</p>
-<p>Here’s a sample of some source code that’s been annotated with <code>ocamldoc</code> comments:</p>
+<p>OCaml uses specially formatted comments in the source code to generate documentation bundles. These comments are combined with the function definitions and signatures, and output as structured documentation in a variety of formats. Tools such as <code>odoc</code> and <code>ocamldoc</code> can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even module dependency graphs that can be viewed using <a href="http://www.graphviz.org">Graphviz</a>.</p>
+<p>Here’s a sample of some source code that’s been annotated with docstring comments:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(** example.ml: The first special comment of the file is the comment
     associated with the whole module. *)
@@ -203,8 +206,8 @@ let what_is_the_weather_in location =
   | `New_york   -&gt; Rain 20
   | `California -&gt; Sun</code></pre>
 </div>
-<p>The <code>ocamldoc</code> comments are distinguished by beginning with the double asterisk. There are formatting conventions for the contents of the comment to mark metadata. For instance, the <code>@tag</code> fields mark specific properties such as the author of that section of code.</p>
-<p>Try compiling the HTML documentation and UNIX man pages by running <code>ocamldoc</code> over the source file:</p>
+<p>The docstrings are distinguished by beginning with the double asterisk. There are formatting conventions for the contents of the comment to mark metadata. For instance, the <code>@tag</code> fields mark specific properties such as the author of that section of code.</p>
+<p>There are two main tools used to manipulate docstring comments: the <code>ocamldoc</code> tool that is supplied with the compiler, and the <code>odoc</code> tool that is developed outside the compiler but is intended to the be long-term replacement. Try compiling the HTML documentation and UNIX man pages by running <code>ocamldoc</code> over the source file:</p>
 <div class="highlight">
 <pre><code class="language-clike">$ mkdir -p html man/man3
 $ ocamldoc -html -d html doc.ml
@@ -212,15 +215,102 @@ $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc</code></pre>
 </div>
 <p>You should now have HTML files inside the <em class="filename">html/</em> directory and also be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite a few comment formats and options to control the output for the various backends. Refer to the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml manual</a> for the complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML generators" data-type="indexterm">&nbsp;</a><a data-startref="SCpras" data-type="indexterm">&nbsp;</a><a data-startref="PARSsource" data-type="indexterm">&nbsp;</a><a data-startref="CPpars" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="using-custom-ocamldoc-generators">
-<h5>Using Custom ocamldoc Generators</h5>
-<p>The default HTML output stylesheets from <code>ocamldoc</code> are pretty spartan and distinctly Web 1.0. The tool supports plugging in custom documentation generators, and there are several available that provide prettier or more detailed output:</p>
-<ul>
-<li><p><a href="http://argot.x9c.fr/">Argot</a> is an enhanced HTML generator that supports code folding and searching by name or type definition.</p></li>
-<li><p><a href="https://gitorious.org/ocamldoc-generators/ocamldoc-generators">ocamldoc generators</a> add support for Bibtex references within comments and generating literate documentation that embeds the code alongside the comments.</p></li>
-<li><p>JSON output is available via a custom <a href="https://github.com/xen-org/ocamldoc-json">generator</a> in Xen.</p></li>
-</ul>
+<p>You can also use <code>odoc</code> to generate complete snapshots of your project via integration with dune, as described earlier in <a data-type="xref" href="platform.html#browsing-interface-documentation.html">Chapter 20, OCaml Platform</a>.</p>
 </section>
+</section>
+<section class="level2" id="preprocessing-with-ppx">
+<h2>Preprocessing with ppx</h2>
+<p>One powerful feature in OCaml is a facility to extend the standard language via <em>extension points</em>. These represent placeholders in the OCaml syntax tree and are ignored by the standard compiler tooling, beyond being delimited and stored in the abstract syntax tree alongside the normal parsed source code. They are intended to be expanded by external tools that select extension nodes that can interpret them. The external tools can choose to generate further OCaml code by transforming the input syntax tree, thus forming the basis of an extensible preprocessor for the language.</p>
+<p>There are two primary forms of extension points in OCaml: <em>attributes</em> and <em>extension nodes</em>. Let’s first run through some examples of what they look like, and then see how to use them in your own code.</p>
+<section class="level3" id="extension-attributes">
+<h3>Extension Attributes</h3>
+<p>Attributes supply additional information that is attached to a node in the OCaml syntax tree, and subsequently interpreted and expanded by external tools.</p>
+<p>The basic form of an attribute is the <code>[@ ... ]</code> syntax. The number of <code>@</code> symbols defines which part of the syntax tree the attribute is bound to:</p>
+<ul>
+<li>a single <code>[@</code> binds to expressions and individual type definitions.</li>
+<li>a double <code>[@@</code> binds to blocks of code, such as module definitions, type declarations or class fields.</li>
+<li>a triple <code>[@@@</code> appears as a standalone entry in a module implementation or signature, and are not tied to any specific source code node.</li>
+</ul>
+<p>The OCaml compiler has some useful builtin attributes that we can use to illustrate their use without requiring any external tools. Let’s first look at the use of the standalone attribute <code>@@@warning</code> to toggle an OCaml compiler warning.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Abc = struct
+
+[@@@warning "+10"]
+let a = Sys.get_argv (); ()
+
+[@@@warning "-10"]
+let b = Sys.get_argv (); ()
+end
+;;
+&gt;Line 4, characters 11-26:
+&gt;Warning 10 [non-unit-statement]: this expression should have type unit.
+&gt;module Abc : sig val a : unit val b : unit end
+</code></pre>
+</div>
+<p>The warning number in our example is taken from the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/native.html">compiler manual page</a>. In this case, warning 10 emits a message if the expression in a sequence doesn’t have type <code>unit</code>. The <code>@@@warning</code> nodes in the module implementation cause the compiler to change its behaviour within the scope of that structure only.</p>
+<p>An annotation can also be more narrowly attached to a block of code. For example, a module implementation can be annotated with <code>@@deprecated</code> to indicate that it should not be used in new code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Planets = struct
+  let earth = true
+  let pluto = true
+end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+;;
+&gt;module Planets : sig val earth : bool val pluto : bool end
+module Planets2016 = struct
+  let earth = true
+  let pluto = false
+end
+;;
+&gt;module Planets2016 : sig val earth : bool val pluto : bool end
+</code></pre>
+</div>
+<p>In this example, the <code>@@deprecated</code> annotation is only attached to the <code>Planets</code> module, and the human-readable argument string redirects developers to the newer code. Now if we try to use the value that has been marked as deprecated, the compiler will issue a warning.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto ;;
+&gt;Line 1, characters 25-38:
+&gt;Alert deprecated: module Planets
+&gt;Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
+&gt;val is_pluto_a_planet : bool = true
+let is_pluto_a_planet = Planets2016.pluto ;;
+&gt;val is_pluto_a_planet : bool = false
+</code></pre>
+</div>
+<p>Finally, an attribute can also be attached to an individual expression. In the next example, the <code>@warn_on_literal_pattern</code> attribute indicates that the argument to the type constructor should not be pattern matched upon with a constant literal.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type program_result =
+| Error of string [@warn_on_literal_pattern]
+| Exit_code of int
+;;
+&gt;type program_result = Error of string | Exit_code of int
+let exit_with = function
+| Error "It blew up" -&gt; 1
+| Exit_code code -&gt; code
+| Error _ -&gt; 100
+;;
+&gt;Line 2, characters 11-23:
+&gt;Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
+&gt;this constructor's arguments. They are only for information
+&gt;and may change in future versions. (See manual section 11.5)
+&gt;val exit_with : program_result -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+</section>
+<section class="level3" id="commonly-used-extension-attributes">
+<h3>Commonly used extension attributes</h3>
+<p>We have already used extension points in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a> to generate boilerplate code for handling s-expressions. These are introduced by a third-party library using the <code>(preprocess)</code> directive in a dune file, for example:</p>
+<div class="highlight">
+<pre><code class="language-clike">(library
+ (name hello_world)
+ (libraries core)
+ (preprocess (pps ppx_jane))</code></pre>
+</div>
+<p>This allows you to take advantage of a community of syntax augmentation. There are also a number of builtin attributes in the core OCaml compiler. Some are performance oriented and give directives to the compiler, whereas others will activate usage warnings. The full list is available in the <a href="https://ocaml.org/manual/attributes.html">attributes section</a> of the OCaml manual.</p>
+</section>
+<section class="level3" id="extension-nodes">
+<h3>Extension Nodes</h3>
+<p>While extension points are useful for annotating existing source code, we also need a mechanism to store generic placeholders within the OCaml AST for code generation. OCaml provides this facility via the <em>extension node</em> syntax.</p>
+<p>The general syntax for an extension node is <code>[%id expr]</code>, where <code>id</code> is an identifier for a particular extension node rewriter and <code>expr</code> is the payload for the rewriter to parse. An infix form is also available when the payload is of the same kind of syntax. For example <code>let%foo bar = 1</code> is equivalent to <code>[%foo let bar = 1]</code>.</p>
+<p>We’ve already seen extension nodes in use via the Core syntax extensions earlier in the book, where they act as syntactic sugar for error handling (<code>let%bind</code>), for command-line parsing (<code>let%map</code>) or inline testing (<code>let%expect_test</code>). Extension nodes are introduced via dune rules in the same fashion as extension attributes, via the <code>(preprocess)</code> attribute.</p>
 </section>
 </section>
 <section class="level2" id="static-type-checking">
@@ -250,7 +340,10 @@ let v = Foo</code></pre>
 </div>
 <p>Now run the compiler with the <code>-i</code> flag to infer the type signature for that file. This runs the type checker but doesn’t compile the code any further after displaying the interface to the standard output:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash"></code></pre>
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -i typedef.ml
+&gt;type t = Foo | Bar
+&gt;val v : t
+</code></pre>
 </div>
 <p>The output is the default signature for the module that represents the input file. It’s often useful to redirect this output to an <code>mli</code> file to give you a starting signature to edit the external interface without having to type it all in by hand.</p>
 <p>The compiler stores a compiled version of the interface as a <code>cmi</code> file. This interface is either obtained from compiling an <code>mli</code> signature file for a module, or by the inferred type if there is only an <code>ml</code> implementation present.</p>
@@ -524,59 +617,74 @@ Error: The files /home/build/bar.cmi
 </section>
 </section>
 </section>
-<section class="level3" id="packing-modules-together">
-<h3>Packing Modules Together</h3>
+<section class="level3" id="wrapping-libraries-with-module-aliases">
+<h3>Wrapping libraries with module aliases</h3>
 <p>The module-to-file mapping described so far rigidly enforces a 1:1 mapping between a top-level module and a file. It’s often convenient to split larger modules into separate files to make editing easier, but still compile them all into a single OCaml module. <a data-secondary="packing together" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
-<p>The <code>-pack</code> compiler option accepts a list of compiled object files ( <code>.cmo</code> in bytecode and <code>.cmx</code> for native code) and their associated <code>.cmi</code> compiled interfaces, and combines them into a single module that contains them as submodules of the output. Packing thus generates an entirely new <code>.cmo</code> (or <code>.cmx</code> file) and <code>.cmi</code> that includes the input modules.</p>
-<p>Packing for native code introduces an additional requirement: the modules that are intended to be packed must be compiled with the <code>-for-pack</code> argument that specifies the eventual name of the pack. The easiest way to handle packing is to let <code>ocamlbuild</code> figure out the command-line arguments for you, so let’s try that out next with a simple example.</p>
-<p>First, create a couple of toy modules called <code>A.ml</code> and <code>B.ml</code> that contain a single value. You will also need a <code>_tags</code> file that adds the <code>-for-pack</code> option for the <code>cmx</code> files (but careful to exclude the pack target itself). Finally, the <code>X.mlpack</code> file contains the list of modules that are intended to be packed under module <code>X</code>. There are special rules in <code>ocamlbuild</code> that tell it how to map <code>%.mlpack</code> files to the packed <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p>
+<p>Dune provides a very convenient way of doing this for libraries via automatically generating a toplevel <em>module alias</em> file that places all the files in a given library as submodules within the toplevel module for that library. This is known as <em>wrapping</em> the library, and works as follows.</p>
+<p>Let’s define a simple library with two files <code>a.ml</code> and <code>b.ml</code> that each define a single value.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat A.ml
-&gt;let v = "hello"
-cat B.ml
-&gt;let w = 42
-cat _tags
-&gt;&lt;*.cmx&gt; and not "X.cmx": for-pack(X)
-cat X.mlpack
-&gt;A
-&gt;B
+<pre><code class="language-ocaml">let v = "hello"</code></pre>
+</div>
+<div class="highlight">
+<pre><code class="language-ocaml">let w = 42</code></pre>
+</div>
+<p>The dune file defines a library called <code>hello</code> that includes these two modules.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(library
+  (name hello)
+  (modules a b))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))</code></pre>
+</div>
+<p>If we now build this library, we can look at how dune assembles the modules into a <code>Hello</code> library.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build
+cat _build/default/hello.ml-gen
+&gt;(** @canonical Hello.A *)
+&gt;module A = Hello__A
+&gt;
+&gt;
+&gt;(** @canonical Hello.B *)
+&gt;module B = Hello__B
 </code></pre>
 </div>
-<p>You can now run <em>corebuild</em> to build the <code>X.cmx</code> file directly, but let’s create a new module to link against <code>X</code> to complete the example:</p>
+<p>Dune has generated a <code>hello.ml</code> file which forms the toplevel module exposed by the library. It has also renamed the individual modules into internal mangled names such as <code>Hello__A</code>, and assigned those internal modules as aliases within the generated <code>hello.ml</code> file. This then allows a user of this library to access the values as <code>Hello.A</code>. For example, our test executable contains this:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">let v = X.A.v
-let w = X.B.w</code></pre>
+<pre><code class="language-ocaml">let v = Hello.A.v
+let w = Hello.B.w</code></pre>
 </div>
-<p>You can now compile this test module and see that its inferred interface is the result of using the packed contents of <code>X</code>. We further verify this by examining the imported interfaces in <code>Test</code> and confirming that neither <code>A</code> nor <code>B</code> are mentioned in there and that only the packed <code>X</code> module is used:</p>
+<p>One nice aspect about this module alias scheme is that a single toplevel module provides a central place to write documentation about how to use all the submodules exposed by the library. We can manually add a <code>hello.ml</code> and <code>hello.mli</code> to our library that does exactly this. First add the <code>hello</code> module to the dune file:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">corebuild test.inferred.mli test.cmi
-&gt;ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules test.ml &gt; test.ml.depends
-&gt;ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules A.ml &gt; A.ml.depends
-&gt;ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules B.ml &gt; B.ml.depends
-&gt;ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o A.cmo A.ml
-&gt;ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o B.cmo B.ml
-&gt;ocamlfind ocamlc -pack -g -bin-annot A.cmo B.cmo -o X.cmo
-&gt;ocamlfind ocamlc -i -thread -short-paths -package core -ppx 'ppx-jane -as-ppx' test.ml &gt; test.inferred.mli
-&gt;ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o test.cmo test.ml
-cat _build/test.inferred.mli
-&gt;val v : string
-&gt;val w : int
-ocamlobjinfo _build/test.cmi
-&gt;File _build/test.cmi
-&gt;Unit name: Test
-&gt;Interfaces imported:
-&gt;   7b1e33d4304b9f8a8e844081c001ef22    Test
-&gt;   27a343af5f1904230d1edc24926fde0e    X
-&gt;   9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
-&gt;   79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
-</code></pre>
+<pre><code class="language-ocaml">(library
+  (name hello)
+  (modules a b hello))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))</code></pre>
 </div>
-<section data-type="warning" class="level4" id="packing-and-search-paths">
-<h4>Packing and Search Paths</h4>
-<p>One very common build error that happens with packing is confusion resulting from building the packed <code>cmi</code> in the same directory as the submodules. When you add this directory to your module search path, the submodules are also visible. If you forget to include the top-level prefix (e.g., <code>X.A</code>) and instead use a submodule directly (<code>A</code>), then this will compile and link fine.</p>
-<p>However, the types of <code>A</code> and <code>X.A</code> are <em>not</em> automatically equivalent so the type checker will complain if you attempt to mix and match the packed and unpacked versions of the library.</p>
-<p>This mostly only happens with unit tests, since they are built at the same time as the library. You can avoid it by being aware of the need to open the packed module from the test, or only using the library after it has been installed (and hence not exposing the intermediate compiled modules).</p>
-</section>
+<p>Then the <code>hello.ml</code> file contains the module aliases (and any other code you might want to add to the toplevel module).</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module A = A
+module B = B</code></pre>
+</div>
+<p>Finally, the <code>hello.mli</code> interface file can reference all the submodules and include documentation strings:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(** Documentation for module A *)
+module A : sig
+  (** [v] is Hello *)
+  val v : string
+end
+
+(** Documentation for module B *)
+module B : sig
+  (** [w] is 42 *)
+  val w : int
+end</code></pre>
+</div>
+<p>If you want to disable this behaviour of dune and deliberately include multiple toplevel modules, you can add <code>(wrapped false)</code> to your libraries stanza. However, this is discouraged in general due to the increased likelyhood of linking clashes when you have a lot of library dependencies, since every module that is linked into an executable must have a unique name in OCaml.</p>
 </section>
 <section class="level3" id="shorter-module-paths-in-type-errors">
 <h3>Shorter Module Paths in Type Errors</h3>
@@ -613,27 +721,7 @@ Error: This expression has type string but an expression was expected of type
 <h2>The Typed Syntax Tree</h2>
 <p>When the type checking process has successfully completed, it is combined with the AST to form a <em>typed abstract syntax tree</em>. This contains precise location information for every token in the input file, and decorates each token with concrete type information.<a data-primary="cmti files" data-type="indexterm">&nbsp;</a><a data-primary="cmt files" data-type="indexterm">&nbsp;</a><a data-secondary="cmtii files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="cmt files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="AST (abstract syntax-tree)" data-type="indexterm">&nbsp;</a><a id="typesyntree" data-primary="typed syntax tree" data-type="indexterm">&nbsp;</a><a id="CPtypsyn" data-secondary="typed syntax tree" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
 <p>The compiler can output this as compiled <code>cmt</code> and <code>cmti</code> files that contain the typed AST for the implementation and signatures of a compilation unit. This is activated by passing the <code>-bin-annot</code> flag to the compiler.</p>
-<p>The <code>cmt</code> files are particularly useful for IDE tools to match up OCaml source code at a specific location to the inferred or external types.</p>
-<section class="level3" id="using-ocp-index-for-auto-completion">
-<h3>Using ocp-index for Autocompletion</h3>
-<p>One such command-line tool to display autocompletion information in your editor is <code>ocp-index</code>. Install it via OPAM as follows:<a data-primary="autocompletion" data-type="indexterm">&nbsp;</a><a data-primary="ocp-index" data-type="indexterm">&nbsp;</a></p>
-<div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam install ocp-index
-ocp-index
-</code></pre>
-</div>
-<p>Let’s refer back to our Ncurses binding example from the beginning of <a data-type="xref" href="foreign-function-interface.html#foreign-function-interface">Chapter 20, Foreign Function Interface</a>. This module defined bindings for the Ncurses library. First, compile the interfaces with <code>-bin-annot</code> so that we can obtain the <code>cmt</code> and <code>cmti</code> files, and then run <code>ocp-index</code> in completion mode:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">(cd ffi/ncurses &amp;&amp; corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
-&gt;ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli &gt; ncurses.mli.depends
-&gt;ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
-ocp-index complete -I ffi Ncur
-ocp-index complete -I ffi Ncurses.a
-ocp-index complete -I ffi Ncurses.
-</code></pre>
-</div>
-<p>You need to pass <code>ocp-index</code> a set of directories to search for <code>cmt</code> files in, and a fragment of text to autocomplete. As you can imagine, autocompletion is invaluable on larger codebases. See the <a href="https://github.com/ocamlpro/ocp-index"><em>ocp-index</em></a> home page for more information on how to integrate it with your favorite editor.</p>
-</section>
+<p>The <code>cmt</code> files are particularly useful for IDE tools to match up OCaml source code at a specific location to the inferred or external types. For example, the <code>merlin</code> and <code>ocaml-lsp-server</code> opam packages both use this information to provide you with tooltips and docstrings within your editor, as described earlier in <a data-type="xref" href="platform.html#using-visual-studio-code.html">Chapter 20, OCaml Platform</a>.</p>
 <section class="level3" id="examining-the-typed-syntax-tree-directly">
 <h3>Examining the Typed Syntax Tree Directly</h3>
 <p>The compiler has a couple of advanced flags that can dump the raw output of the internal AST representation. You can’t depend on these flags to give the same output across compiler revisions, but they are a useful learning tool.<a data-primary="flags" data-type="indexterm">&nbsp;</a></p>
@@ -727,9 +815,9 @@ let v = Foo</code></pre>
 </code></pre>
 </div>
 <p>The typed AST is more explicit than the untyped syntax tree. For instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>). <a data-startref="typesyntree" data-type="indexterm">&nbsp;</a><a data-startref="CPtypsyn" data-type="indexterm">&nbsp;</a></p>
-<p>You’ll rarely need to look at this raw output from the compiler unless you’re building IDE tools such as <code>ocp-index</code>, or are hacking on extensions to the core compiler itself. However, it’s useful to know that this intermediate form exists before we delve further into the code generation process next, in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 25, The Compiler Backend Byte Code And Native Code</a>.</p>
-<p>There are several new integrated tools emerging that combine these typed AST files with common editors such as Emacs or Vim. The best of these is <a href="https://github.com/def-lkb/merlin">Merlin</a>, which adds value and module autocompletion, displays inferred types and can build and display errors directly from within your editor. There are instructions available on its homepage for configuring Merlin with your favorite editor.</p>
+<p>You’ll rarely need to look at this raw output from the compiler unless you’re building IDE tools, or are hacking on extensions to the core compiler itself. However, it’s useful to know that this intermediate form exists before we delve further into the code generation process next, in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 25, The Compiler Backend Byte Code And Native Code</a>.</p>
+<p>There are several new integrated tools emerging that combine these typed AST files with common editors such as Emacs or Vim. The best of these is <a href="https://github.com/def-lkb/merlin">Merlin</a>, which adds value and module autocompletion, displays inferred types and can build and display errors directly from within your editor. There are instructions available on its homepage for configuring Merlin with your favorite editor, or its bigger sibling <code>ocaml-lsp-server</code> is described earlier in <a data-type="xref" href="platform.html#using-visual-studio-code.html">Chapter 20, platform.html</a>.</p>
 </section>
 </section>
 </section>
-</article></div><a href="ppx.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 24</small>Preprocessing with ppx</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="compiler-backend.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 25</small>The Compiler Backend: Bytecode and Native code</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

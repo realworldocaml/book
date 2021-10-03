@@ -183,7 +183,7 @@ val touch : t -&gt; string -&gt; t
 val to_list : t -&gt; (string * int) list</code></pre>
 </div>
 <p>Note that we needed to add <code>empty</code> and <code>to_list</code> to <code>Counter</code>, since otherwise there would be no way to create a <code>Counter.t</code> or get data out of one.</p>
-<p>We also used this opportunity to document the module. The <code>mli</code> file is the place where you specify your module’s interface, and as such is a natural place to put documentation. We started our comments with a double asterisk to cause them to be picked up by the <code>odoc</code> tool when generating API documentation. We’ll discuss <code>odoc</code> more in <a data-type="xref" href="compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking">Chapter 23, The Compiler Frontend Parsing And Type Checking</a>.</p>
+<p>We also used this opportunity to document the module. The <code>mli</code> file is the place where you specify your module’s interface, and as such is a natural place to put documentation. We started our comments with a double asterisk to cause them to be picked up by the <code>odoc</code> tool when generating API documentation. We’ll discuss <code>odoc</code> more in <a data-type="xref" href="compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking">Chapter 24, The Compiler Frontend Parsing And Type Checking</a>.</p>
 <p>Here’s a rewrite of <code>counter.ml</code> to match the new <code>counter.mli</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base

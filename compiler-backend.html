@@ -10,7 +10,7 @@
 <section class="level2" id="the-untyped-lambda-form">
 <h2>The Untyped Lambda Form</h2>
 <p>The first code generation phase eliminates all the static type information into a simpler intermediate <em>lambda form</em>. The lambda form discards higher-level constructs such as modules and objects and replaces them with simpler values such as records and function pointers. Pattern matches are also analyzed and compiled into highly optimized automata.<a data-secondary="basics of" data-primary="lambda form code" data-type="indexterm">&nbsp;</a><a id="CPuntype" data-secondary="untyped lambda form" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
-<p>The lambda form is the key stage that discards the OCaml type information and maps the source code to the runtime memory model described in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 21, Memory Representation Of Values</a>. This stage also performs some optimizations, most notably converting pattern-match statements into more optimized but low-level statements.</p>
+<p>The lambda form is the key stage that discards the OCaml type information and maps the source code to the runtime memory model described in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 22, Memory Representation Of Values</a>. This stage also performs some optimizations, most notably converting pattern-match statements into more optimized but low-level statements.</p>
 <section class="level3" id="pattern-matching-optimization">
 <h3>Pattern Matching Optimization</h3>
 <p>The compiler dumps the lambda form in an s-expression syntax if you add the <span class="keep-together">-dlambda</span> directive to the command line. Let’s use this to learn more about how the OCaml pattern-matching engine works by building three different pattern matches and comparing their lambda forms.<a data-secondary="optimization in lambda form code" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching optimization" data-primary="lambda form code" data-type="indexterm">&nbsp;</a></p>
@@ -42,7 +42,7 @@ let test v =
 </div>
 <p>It’s not important to understand every detail of this internal form, and it is explicitly undocumented since it can change across compiler revisions. Despite these caveats, some interesting points emerge from reading it:</p>
 <ul>
-<li><p>There are no mention of modules or types any more. Global values are created via <code>setglobal</code>, and OCaml values are constructed by <code>makeblock</code>. The blocks are the runtime values you should remember from <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 21, Memory Representation Of Values</a>.</p></li>
+<li><p>There are no mention of modules or types any more. Global values are created via <code>setglobal</code>, and OCaml values are constructed by <code>makeblock</code>. The blocks are the runtime values you should remember from <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 22, Memory Representation Of Values</a>.</p></li>
 <li><p>The pattern match has turned into a switch case that jumps to the right case depending on the header tag of <code>v</code>. Recall that variants without parameters are stored in memory as integers in the order which they appear. The pattern-matching engine knows this and has transformed the pattern into an efficient jump table.</p></li>
 <li><p>Values are addressed by a unique name that distinguishes shadowed values by appending a number (e.g., <code>v/1014</code>). The type safety checks in the earlier phase ensure that these low-level accesses never violate runtime memory safety, so this layer doesn’t do any dynamic checks. Unwise use of unsafe features such as the <code>Obj.magic</code> module can still easily induce crashes at this level.</p></li>
 </ul>
@@ -324,11 +324,12 @@ After calling OCaml</code></pre>
 <pre><code class="language-ocaml">let cmp (a:int) (b:int) =
   if a &gt; b then a else b</code></pre>
 </div>
-<p>Now compile this into assembly and read the resulting <code>compare_mono.S</code> file. This file extension may be lowercase on some platforms such as Linux:</p>
+<p>Now compile this into assembly and read the resulting <code>compare_mono.S</code> file.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash"></code></pre>
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlopt -S compare_mono.ml
+</code></pre>
 </div>
-<p>If you’ve never seen assembly language before, then the contents may be rather scary. While you’ll need to learn x86 assembly to fully understand it, we’ll try to give you some basic instructions to spot patterns in this section. The excerpt of the implementation of the <code>cmp</code> function can be found below:</p>
+<p>This file extension may be lowercase on some platforms such as Linux. If you’ve never seen assembly language before, then the contents may be rather scary. While you’ll need to learn x86 assembly to fully understand it, we’ll try to give you some basic instructions to spot patterns in this section. The excerpt of the implementation of the <code>cmp</code> function can be found below:</p>
 <div class="highlight">
 <pre><code class="language-clike">_camlCompare_mono__cmp_1008:
         .cfi_startproc
@@ -452,12 +453,6 @@ let () =
 <section class="level4" id="interactive-breakpoints-with-the-gnu-debugger">
 <h4>Interactive breakpoints with the GNU debugger</h4>
 <p>Let’s see name mangling in action with some interactive debugging using GNU <code>gdb</code>. <a data-primary="GNU debugger" data-type="indexterm">&nbsp;</a></p>
-<section data-type="warning" class="level5" id="beware-gdb-on-mac-os-x">
-<h5>Beware gdb on Mac OS X</h5>
-<p>The examples here assume that you are running <code>gdb</code> on either Linux or FreeBSD. Mac OS X 10.8 does have <code>gdb</code> installed, but it’s a rather quirky experience that doesn’t reliably interpret the debugging information contained in the native binaries. This can result in function names showing up as raw symbols such as <code>.L101</code> instead of their more human-readable form.</p>
-<p>For OCaml 4.1, we’d recommend you do native code debugging on an alternate platform such as Linux, or manually look at the assembly code output to map the symbol names onto their precise OCaml functions.</p>
-<p>MacOS 10.9 removes <code>gdb</code> entirely and uses the lldb debugger from the LLVM project by default. Many of the guidelines here still apply since the debug information embedded in the binary output can be interpreted by lldb (or any other DWARF-aware debugger), but the command-line interfaces to lldb is different from <code>gdb</code>. Refer to the lldb manual for more information.</p>
-</section>
 <p>Let’s write a mutually recursive function that selects alternating values from a list. This isn’t tail-recursive, so our stack size will grow as we single-step through the execution:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
@@ -603,15 +598,13 @@ Estimated testing time 20s (change using -quota SECS).
 <p>Perf has a growing collection of other commands that let you archive these runs and compare them against each other. You can read more on the <a href="http://perf.wiki.kernel.org">home page</a>. <a data-primary="frame pointers" data-type="indexterm">&nbsp;</a></p>
 <section data-type="note" class="level5" id="using-the-frame-pointer-to-get-more-accurate-traces">
 <h5>Using the Frame Pointer to Get More Accurate Traces</h5>
-<p>Although Perf doesn’t require adding in explicit probes to the binary, it does need to understand how to unwind function calls so that the kernel can accurately record the function backtrace for every event.</p>
-<p>OCaml stack frames are too complex for Perf to understand directly, and so it needs the compiler to fall back to using the same conventions as C for function calls. On 64-bit Intel systems, this means that a special register known as the <em>frame pointer</em> is used to record function call history.</p>
-<p>Using the frame pointer in this fashion means a slowdown (typically around 3-5%) since it’s no longer available for general-purpose use. OCaml 4.1 thus makes the frame pointer an optional feature that can be used to improve the resolution of Perf traces.</p>
-<p>OPAM provides a compiler switch that compiles OCaml with the frame pointer activated:</p>
+<p>Although Perf doesn’t require adding in explicit probes to the binary, it does need to understand how to unwind function calls so that the kernel can accurately record the function backtrace for every event. Since Linux 3.9 the kernel has had support for using DWARF debug information to parse the program stack, which is emitted when the <code>-g</code> flag is passed to the OCaml compiler. For even more accurate stack parsing, we need the compiler to fall back to using the same conventions as C for function calls. On 64-bit Intel systems, this means that a special register known as the <em>frame pointer</em> is used to record function call history. Using the frame pointer in this fashion means a slowdown (typically around 3-5%) since it’s no longer available for general-purpose use.</p>
+<p>OCaml thus makes the frame pointer an optional feature that can be used to improve the resolution of Perf traces. opam provides a compiler switch that compiles OCaml with the frame pointer activated:</p>
 <div class="highlight">
-<pre><code class="language-clike">$ opam switch 4.01.0+fp
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam switch create 4.13+fp ocaml-variants.4.13.0+options ocaml-option-fp
 </code></pre>
 </div>
-<p>Using the frame pointer changes the OCaml calling convention, but OPAM takes care of recompiling all your libraries with the new interface. You can read more about this on the OCamlPro <a href="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</a>.</p>
+<p>Using the frame pointer changes the OCaml calling convention, but opam takes care of recompiling all your libraries with the new interface.</p>
 </section>
 </section>
 </section>
@@ -653,7 +646,6 @@ After calling OCaml</code></pre>
 &gt;Hello OCaml World!
 </code></pre>
 </div>
-<p>If you get an error that <code>libasmrund.a</code> is not found, it’s probably because you’re using OCaml 4.00 and not 4.01. It’s only installed by default in the very latest version, which you should be using via the <code>4.01.0</code> OPAM switch. <a data-startref="CPfast" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 <section class="level2" id="summarizing-the-file-extensions">
