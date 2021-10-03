@@ -1,0 +1,80 @@
+%% ----------------------------------------------------------- [ Begin Package ]
+% Copyright 2016 - Jan de Muijnck-Hughes
+%
+% This work may be distributed and/or modified under the  conditions
+% of the LaTeX Project Public License, either version 1.3c of this
+% license or (at your option) any later version.
+%
+% The latest version of this license can be found at:
+%    http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Jan de Muijnck-Hughes
+%
+% This work consists of the file: colour-blind.sty
+% ---------------------------------------------------------------------- [ EOH ]
+\ProvidesPackage{colour-blind}
+%
+% A LaTeX style file providing a 'hopefully' colour blind friendly colour palette.
+%
+% The palette comes from:
+%     http://www.somersault1824.com/wp-content/uploads/2015/02/color-blindness-palette.png
+%
+% Which is derived itself from:
+%     http://mkweb.bcgsc.ca/colorblind/
+%
+% ------------------------------------------------------------------ [ Imports ]
+\RequirePackage{etoolbox}
+\RequirePackage{xcolor}
+
+% ------------------------------------------------------- [ Colour Definitions ]
+
+\definecolor{cb-black}      {RGB}{  0,   0,   0}
+\definecolor{cb-blue-green} {RGB}{  0,  073,  073}
+\definecolor{cb-green-sea}  {RGB}{  0, 146, 146}
+\definecolor{cb-rose}       {RGB}{255, 109, 182}
+\definecolor{cb-salmon-pink}{RGB}{255, 182, 119}
+\definecolor{cb-purple}     {RGB}{ 73,   0, 146}
+\definecolor{cb-blue}       {RGB}{ 0, 109, 219}
+\definecolor{cb-lilac}      {RGB}{182, 109, 255}
+\definecolor{cb-blue-sky}   {RGB}{109, 182, 255}
+\definecolor{cb-blue-light} {RGB}{182, 219, 255}
+\definecolor{cb-burgundy}   {RGB}{146,   0,   0}
+\definecolor{cb-brown}      {RGB}{146,  73,   0}
+\definecolor{cb-clay}       {RGB}{219, 209,   0}
+\definecolor{cb-green-lime} {RGB}{ 36, 255,  36}
+\definecolor{cb-yellow}     {RGB}{255, 255, 109}
+
+% -------------------------------------------------------------- [ Usage Macro ]
+
+\newcommand{\cbBlack}      [1]{\textcolor{cb-black}      {#1}}
+\newcommand{\cbBlueGreen}  [1]{\textcolor{cb-blue-green} {#1}}
+\newcommand{\cbGreenSea}   [1]{\textcolor{cb-green-sea}  {#1}}
+\newcommand{\cbRose}       [1]{\textcolor{cb-rose}       {#1}}
+\newcommand{\cbSalmonPink} [1]{\textcolor{cb-salmon-pink}{#1}}
+\newcommand{\cbPurple}     [1]{\textcolor{cb-purple}     {#1}}
+\newcommand{\cbBlue}       [1]{\textcolor{cb-blue}       {#1}}
+\newcommand{\cbLilac}      [1]{\textcolor{cb-lilac}      {#1}}
+\newcommand{\cbBlueSky}    [1]{\textcolor{cb-blue-sky}   {#1}}
+\newcommand{\cbBlueLight}  [1]{\textcolor{cb-blue-light} {#1}}
+\newcommand{\cbBurgundy}   [1]{\textcolor{cb-burgundy}   {#1}}
+\newcommand{\cbBrown}      [1]{\textcolor{cb-brown}      {#1}}
+\newcommand{\cbClay}       [1]{\textcolor{cb-clay}       {#1}}
+\newcommand{\cbGreenLime}  [1]{\textcolor{cb-green-lime} {#1}}
+\newcommand{\cbYellow}     [1]{\textcolor{cb-yellow}     {#1}}
+
+% --------------------------------------------------- [ For code highlighting. ]
+
+\newcommand{\ColourBlindData}    [1]{\textcolor{cb-burgundy}{#1}}
+\newcommand{\ColourBlindType}    [1]{\textcolor{cb-blue}{#1}}
+\newcommand{\ColourBlindBound}   [1]{\textcolor{cb-rose}{#1}}
+\newcommand{\ColourBlindFunction}[1]{\textcolor{cb-green-sea}{#1}}
+\newcommand{\ColourBlindKeyword} [1]{{\underline{#1}}}
+\newcommand{\ColourBlindImplicit}[1]{{\itshape \IdrisBound{#1}}}
+\newcommand{\ColourBlindComment} [1]{{\itshape\textcolor{cb-clay}{#1}}}
+
+\endinput
+% ---------------------------------------------------------------------- [ EOF ]

@@ -51,6 +51,7 @@
 \usepackage{csquotes}
 
 
+\usepackage{colour-blind}
 \usepackage[most]{tcolorbox}
 
 %textmarker style from colorbox doc
@@ -63,14 +64,14 @@
 
 % define new colorboxes
 \newtcolorbox{hintBox}{textmarker,
-    borderline west={6pt}{0pt}{yellow},
-    colback=yellow!10!white}
+    borderline west={6pt}{0pt}{cb-yellow},
+    colback=cb-yellow!10!white}
 \newtcolorbox{warningBox}{textmarker,
-    borderline west={6pt}{0pt}{red},
-    colback=red!10!white}
+    borderline west={6pt}{0pt}{cb-salmon-pink},
+    colback=cb-salmon-pink!10!white}
 \newtcolorbox{noteBox}{textmarker,
-    borderline west={6pt}{0pt}{green},
-    colback=green!10!white}
+    borderline west={6pt}{0pt}{cb-blue-light},
+    colback=cb-blue-light!10!white}
 
 $if(listings)$
 \usepackage{listings,lstautogobble}
@@ -86,10 +87,10 @@ $if(listings)$
   showstringspaces=false,
   breakatwhitespace=true,
   escapeinside={(*@}{@*)},
-  commentstyle=\color{greencomments},
-  keywordstyle=\color{bluekeywords},
-  stringstyle=\color{redstrings},
-  numberstyle=\color{graynumbers},
+  commentstyle=\color{cb-brown},
+  keywordstyle=\color{cb-blue-green},
+  stringstyle=\color{cb-purple},
+  numberstyle=\color{cb-burgundy},
   basicstyle=\ttfamily\small,
   frame=l,
   rulecolor=\color{white},
@@ -121,9 +122,9 @@ $if(listings)$
 
 \hypersetup{
   colorlinks   = true, %Colours links instead of ugly boxes
-  urlcolor     = bluekeywords, %Colour for external hyperlinks
-  linkcolor    = bluekeywords, %Colour of internal links
-  citecolor   = red %Colour of citations
+  urlcolor     = cb-black, %Colour for external hyperlinks
+  linkcolor    = cb-black, %Colour of internal links
+  citecolor   = cb-black %Colour of citations
 }
 
 
