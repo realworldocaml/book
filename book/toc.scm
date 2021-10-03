@@ -27,7 +27,7 @@
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
-    (wip platform)
+    platform
     ))))
 
 (part
@@ -37,5 +37,4 @@
     runtime-memory-layout
     garbage-collector
     compiler-frontend
-    ppx
     compiler-backend))))
