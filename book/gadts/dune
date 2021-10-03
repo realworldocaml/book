@@ -1,0 +1,6 @@
+(mdx
+ (files README.md)
+ (packages
+  base
+  mdx)
+ (preludes prelude.ml))

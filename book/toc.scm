@@ -13,6 +13,7 @@
     imperative-programming
     functors
     first-class-modules
+    (wip gadts)
     objects
     classes))))
 
@@ -26,6 +27,7 @@
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
+    (wip platform)
     ))))
 
 (part

@@ -67,6 +67,12 @@
 
 (rule
  (alias site-wip)
+ (target gadts.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/gadts.html})))
+
+(rule
+ (alias site-wip)
  (target garbage-collector.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/garbage-collector.html})))
@@ -112,6 +118,12 @@
  (target parsing-with-ocamllex-and-menhir.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/parsing-with-ocamllex-and-menhir.html})))
+
+(rule
+ (alias site-wip)
+ (target platform.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. -include-wip %{dep:../book/platform.html})))
 
 (rule
  (alias site-wip)
