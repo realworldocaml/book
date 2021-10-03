@@ -590,11 +590,12 @@ let cmp (a:int) (b:int) =
 ```
 
 Now compile this into assembly and read the resulting `compare_mono.S` file.
-This file extension may be lowercase on some platforms such as Linux:
 
-```sh dir=examples/back-end
+```sh dir=examples/back-end,skip
+$ ocamlopt -S compare_mono.ml
 ```
 
+This file extension may be lowercase on some platforms such as Linux.
 If you've never seen assembly language before, then the contents may be
 rather scary. While you'll need to learn x86 assembly to fully understand it,
 we'll try to give you some basic instructions to spot patterns in this
@@ -795,27 +796,6 @@ source code to let-bind the anonymous function to a variable name.
 
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}
-
-::: {data-type=warning}
-##### Beware gdb on Mac OS X
-
-The examples here assume that you are running `gdb` on either Linux or
-FreeBSD. Mac OS X 10.8 does have `gdb` installed, but it's a rather quirky
-experience that doesn't reliably interpret the debugging information
-contained in the native binaries. This can result in function names showing
-up as raw symbols such as `.L101` instead of their more human-readable form.
-
-For OCaml 4.1, we'd recommend you do native code debugging on an alternate
-platform such as Linux, or manually look at the assembly code output to map
-the symbol names onto their precise OCaml functions.
-
-MacOS 10.9 removes `gdb` entirely and uses the lldb debugger from the LLVM
-project by default. Many of the guidelines here still apply since the debug
-information embedded in the binary output can be interpreted by lldb (or any
-other DWARF-aware debugger), but the command-line interfaces to lldb is
-different from `gdb`. Refer to the lldb manual for more information.
-:::
-
 
 Let's write a mutually recursive function that selects alternating values
 from a list. This isn't tail-recursive, so our stack size will grow as we
@@ -1040,24 +1020,20 @@ OCaml stack frames are too complex for Perf to understand directly, and so it
 needs the compiler to fall back to using the same conventions as C for
 function calls. On 64-bit Intel systems, this means that a special register
 known as the *frame pointer* is used to record function call history.
-
 Using the frame pointer in this fashion means a slowdown (typically around
-3-5%) since it's no longer available for general-purpose use. OCaml 4.1 thus
+3-5%) since it's no longer available for general-purpose use. OCaml thus
 makes the frame pointer an optional feature that can be used to improve the
 resolution of Perf traces.
 
-OPAM provides a compiler switch that compiles OCaml with the frame pointer
+opam provides a compiler switch that compiles OCaml with the frame pointer
 activated:
 
+```sh skip
+$ opam switch 4.13.0+fp
 ```
-$ opam switch 4.01.0+fp
 
-```
-
-Using the frame pointer changes the OCaml calling convention, but OPAM takes
-care of recompiling all your libraries with the new interface. You can read
-more about this on the OCamlPro
-[ blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
+Using the frame pointer changes the OCaml calling convention, but opam takes
+care of recompiling all your libraries with the new interface.
 
 :::
 
@@ -1125,12 +1101,6 @@ Initial allocation policy: 0
 Initial smoothing window: 1
 Hello OCaml World!
 ```
-
-If you get an error that `libasmrund.a` is not found, it's probably because
-you're using OCaml 4.00 and not 4.01. It's only installed by default in the
-very latest version, which you should be using via the `4.01.0` OPAM switch.
-<a data-type="indexterm" data-startref="CPfast">&nbsp;</a>
-
 
 ## Summarizing the File Extensions
 
