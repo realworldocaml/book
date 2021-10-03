@@ -568,6 +568,9 @@ file. This runs the type checker but doesn't compile the code any further
 after displaying the interface to the standard output:
 
 ```sh dir=examples/front-end
+$ ocamlc -i typedef.ml
+type t = Foo | Bar
+val v : t
 ```
 
 The output is the default signature for the module that represents the input
@@ -1068,101 +1071,113 @@ scratch.
 :::
 
 
-### Packing Modules Together
+### Wrapping libraries with module aliases
 
 The module-to-file mapping described so far rigidly enforces a 1:1 mapping
 between a top-level module and a file. It's often convenient to split larger
 modules into separate files to make editing easier, but still compile them
 all into a single OCaml module. [modules/packing together]{.idx}
 
-The `-pack` compiler option accepts a list of compiled object files (
-`.cmo` in bytecode and `.cmx` for native code) and their associated `.cmi`
-compiled interfaces, and combines them into a single module that contains
-them as submodules of the output. Packing thus generates an entirely new
-`.cmo` (or `.cmx` file) and `.cmi` that includes the input modules.
+Dune provides a very convenient way of doing this for libraries via
+automatically generating a toplevel _module alias_ file that places all the
+files in a given library as submodules within the toplevel module for
+that library. This is known as _wrapping_ the library, and works as follows.
 
-Packing for native code introduces an additional requirement: the modules
-that are intended to be packed must be compiled with the `-for-pack` argument
-that specifies the eventual name of the pack. The easiest way to handle
-packing is to let `ocamlbuild` figure out the command-line arguments for you,
-so let's try that out next with a simple example.
+Let's define a simple library with two files `a.ml` and `b.ml` that each define
+a single value.
 
-First, create a couple of toy modules called `A.ml` and `B.ml` that contain a
-single value. You will also need a `_tags` file that adds the `-for-pack`
-option for the `cmx` files (but careful to exclude the pack target itself).
-Finally, the `X.mlpack` file contains the list of modules that are intended
-to be packed under module `X`. There are special rules in `ocamlbuild` that
-tell it how to map `%.mlpack` files to the packed `%.cmx` or `%.cmo`
-equivalent:
+```ocaml file=examples/packing/a.ml
+let v = "hello"
+```
+
+```ocaml file=examples/packing/b.ml
+let w = 42
+```
+
+The dune file defines a library called `hello` that includes these two modules.
+
+```ocaml file=examples/packing/dune
+(library
+  (name hello)
+  (modules a b))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))
+```
+
+If we now build this library, we can look at how dune assembles the modules
+into a `Hello` library.
 
 ```sh dir=examples/packing
-$ cat A.ml
-let v = "hello"
-$ cat B.ml
-let w = 42
-$ cat _tags
-<*.cmx> and not "X.cmx": for-pack(X)
-$ cat X.mlpack
-A
-B
+$ dune build
+$ cat _build/default/hello.ml-gen
+(** @canonical Hello.A *)
+module A = Hello__A
+
+
+(** @canonical Hello.B *)
+module B = Hello__B
 ```
 
-You can now run *corebuild* to build the `X.cmx` file directly, but let's
-create a new module to link against `X` to complete the example:
+Dune has generated a `hello.ml` file which forms the toplevel module exposed
+by the library. It has also renamed the individual modules into internal
+mangled names such as `Hello__A`, and assigned those internal modules as
+aliases within the generated `hello.ml` file.  This then allows a user
+of this library to access the values as `Hello.A`.  For example, our test
+executable contains this:
 
 ```ocaml file=examples/packing/test.ml
-let v = X.A.v
-let w = X.B.w
+let v = Hello.A.v
+let w = Hello.B.w
 ```
 
-You can now compile this test module and see that its inferred interface is
-the result of using the packed contents of `X`. We further verify this by
-examining the imported interfaces in `Test` and confirming that neither
-`A` nor `B` are mentioned in there and that only the packed `X` module is
-used:
+One nice aspect about this module alias scheme is that a single toplevel
+module provides a central place to write documentation about how to use
+all the submodules exposed by the library.  We can manually add a `hello.ml`
+and `hello.mli` to our library that does exactly this.  First add the
+`hello` module to the dune file:
 
-```sh dir=examples/packing,non-deterministic
-$ corebuild test.inferred.mli test.cmi
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules test.ml > test.ml.depends
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules A.ml > A.ml.depends
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules B.ml > B.ml.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o A.cmo A.ml
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o B.cmo B.ml
-ocamlfind ocamlc -pack -g -bin-annot A.cmo B.cmo -o X.cmo
-ocamlfind ocamlc -i -thread -short-paths -package core -ppx 'ppx-jane -as-ppx' test.ml > test.inferred.mli
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package core -ppx 'ppx-jane -as-ppx' -o test.cmo test.ml
-$ cat _build/test.inferred.mli
-val v : string
-val w : int
-$ ocamlobjinfo _build/test.cmi
-File _build/test.cmi
-Unit name: Test
-Interfaces imported:
-	7b1e33d4304b9f8a8e844081c001ef22	Test
-	27a343af5f1904230d1edc24926fde0e	X
-	9b04ecdc97e5102c1d342892ef7ad9a2	Pervasives
-	79ae8c0eb753af6b441fe05456c7970b	CamlinternalFormatBasics
+```ocaml file=examples/packing-with-doc/dune
+(library
+  (name hello)
+  (modules a b hello))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))
 ```
 
-::: {data-type=warning}
-#### Packing and Search Paths
+Then the `hello.ml` file contains the module aliases (and any other code
+you might want to add to the toplevel module).
 
-One very common build error that happens with packing is confusion resulting
-from building the packed `cmi` in the same directory as the submodules. When
-you add this directory to your module search path, the submodules are also
-visible. If you forget to include the top-level prefix (e.g., `X.A`) and
-instead use a submodule directly (`A`), then this will compile and link fine.
+```ocaml file=examples/packing-with-doc/hello.ml
+module A = A
+module B = B
+```
 
-However, the types of `A` and `X.A` are *not* automatically equivalent so the
-type checker will complain if you attempt to mix and match the packed and
-unpacked versions of the library.
+Finally, the `hello.mli` interface file can reference all the submodules
+and include documentation strings:
 
-This mostly only happens with unit tests, since they are built at the same
-time as the library. You can avoid it by being aware of the need to open the
-packed module from the test, or only using the library after it has been
-installed (and hence not exposing the intermediate compiled modules).
-:::
+```ocaml file=examples/packing-with-doc/hello.mli
+(** Documentation for module A *)
+module A : sig
+  (** [v] is Hello *)
+  val v : string
+end
 
+(** Documentation for module B *)
+module B : sig
+  (** [w] is 42 *)
+  val w : int
+end
+```
+
+If you want to disable this behaviour of dune and deliberately include
+multiple toplevel modules, you can add `(wrapped false)` to your libraries
+stanza. However, this is discouraged in general due to the increased likelyhood
+of linking clashes when you have a lot of library dependencies, since every
+module that is linked into an executable must have a unique name in OCaml.
 
 ### Shorter Module Paths in Type Errors
 
@@ -1239,38 +1254,9 @@ This is activated by passing the `-bin-annot` flag to the compiler.
 
 The `cmt` files are particularly useful for IDE tools to match up OCaml
 source code at a specific location to the inferred or external types.
-
-### Using ocp-index for Autocompletion {#using-ocp-index-for-auto-completion}
-
-One such command-line tool to display autocompletion information in your
-editor is `ocp-index`. Install it via OPAM as
-follows:[autocompletion]{.idx}[ocp-index]{.idx}
-
-```sh skip
-$ opam install ocp-index
-$ ocp-index
-```
-
-Let's refer back to our Ncurses binding example from the beginning of
-[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
-This module defined bindings for the Ncurses library. First, compile the
-interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
-files, and then run `ocp-index` in completion mode:
-
-```sh dir=examples,source-tree=examples/ffi,skip
-$ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
-ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
-$ ocp-index complete -I ffi Ncur
-$ ocp-index complete -I ffi Ncurses.a
-$ ocp-index complete -I ffi Ncurses.
-```
-
-You need to pass `ocp-index` a set of directories to search for `cmt` files
-in, and a fragment of text to autocomplete. As you can imagine,
-autocompletion is invaluable on larger codebases. See the
-[*ocp-index*](https://github.com/ocamlpro/ocp-index) home page for more
-information on how to integrate it with your favorite editor.
+For example, the `merlin` and `ocaml-lsp-server` opam packages both use
+this information to provide you with tooltips and docstrings within your
+editor, as described earlier in [OCaml Platform](platform.html#using-visual-studio-code.html){data-type=xref}.
 
 ### Examining the Typed Syntax Tree Directly
 
@@ -1388,7 +1374,7 @@ the type declaration has been given a unique name (`t/1008`), as has the
 <a data-type="indexterm" data-startref="typesyntree">&nbsp;</a><a data-type="indexterm" data-startref="CPtypsyn">&nbsp;</a>
 
 You'll rarely need to look at this raw output from the compiler unless you're
-building IDE tools such as `ocp-index`, or are hacking on extensions to the
+building IDE tools, or are hacking on extensions to the
 core compiler itself. However, it's useful to know that this intermediate
 form exists before we delve further into the code generation process next, in
 [The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
@@ -1398,4 +1384,5 @@ files with common editors such as Emacs or Vim. The best of these is
 [Merlin](https://github.com/def-lkb/merlin), which adds value and module
 autocompletion, displays inferred types and can build and display errors
 directly from within your editor. There are instructions available on its
-homepage for configuring Merlin with your favorite editor.
+homepage for configuring Merlin with your favorite editor, or its bigger
+sibling `ocaml-lsp-server` is described earlier in [platform.html](platform.html#using-visual-studio-code.html){data-type=xref}.
