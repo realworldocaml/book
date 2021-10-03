@@ -27,7 +27,7 @@
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
-    (wip platform)
+    platform
     ))))
 
 (part

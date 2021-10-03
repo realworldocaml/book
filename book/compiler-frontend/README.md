@@ -287,7 +287,7 @@ how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.  For larger projects, you
 can use `ocamlformat` to format whole files as described earlier in
-TODO.
+[OCaml Platform](platform.html#autoformatting-your-source-code.html){data-type=xref}.
 
 ### Generating Documentation from Interfaces
 
@@ -297,14 +297,15 @@ in the OCaml distribution can interpret comments for their own ends. [OCaml
 toolchain/ocamldoc]{.idx}[interfaces/generating documentation
 from]{.idx}[documentation, generating from interfaces]{.idx}
 
-The `ocamldoc` tool uses specially formatted comments in the source code to
+OCaml uses specially formatted comments in the source code to
 generate documentation bundles. These comments are combined with the function
 definitions and signatures, and output as structured documentation in a
-variety of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX
+variety of formats. Tools such as `odoc` and `ocamldoc` can generate
+HTML pages, LaTeX and PDF documents, UNIX
 manual pages, and even module dependency graphs that can be viewed using
 [Graphviz](http://www.graphviz.org).
 
-Here's a sample of some source code that's been annotated with `ocamldoc`
+Here's a sample of some source code that's been annotated with docstring
 comments:
 
 ```ocaml file=examples/front-end/doc.ml
@@ -330,11 +331,14 @@ let what_is_the_weather_in location =
   | `California -> Sun
 ```
 
-The `ocamldoc` comments are distinguished by beginning with the double
+The docstrings are distinguished by beginning with the double
 asterisk. There are formatting conventions for the contents of the comment to
 mark metadata. For instance, the `@tag` fields mark specific properties such
 as the author of that section of code.
 
+There are two main tools used to manipulate docstring comments: the `ocamldoc`
+tool that is supplied with the compiler, and the `odoc` tool that is developed
+outside the compiler but is intended to the be long-term replacement.
 Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
 over the source file:
 
@@ -354,6 +358,9 @@ for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
 for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
 HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
+
+You can also use `odoc` to generate complete snapshots of your project via
+integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation.html){data-type=xref}.
 
 ## Preprocessing with ppx
 

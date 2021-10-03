@@ -115,6 +115,12 @@
 
 (rule
  (alias site)
+ (target platform.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/platform.html})))
+
+(rule
+ (alias site)
  (target prologue.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/prologue.html})))
