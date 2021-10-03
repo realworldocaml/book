@@ -481,9 +481,9 @@ recursive function that makes use of GADTs.
 
 ## When are GADTs useful?
 
-The typed language we showed above is a fine example as far as it
-goes. But GADTs are useful far beyond the realm of designing little
-languages.  In this section, we'll go over some broader examples of
+The typed language we showed above is a perfectly reasonable example,
+but it might give you an overly narrow sense of where GADTs show up.
+In this section, we'll try to give you a sampling of other places
 where GADTs can be usefully applied.
 
 ### Varying your return type
@@ -1111,10 +1111,15 @@ Error: This expression has type $Stringable_'a
 ```
 
 This error message is a bit confusing, but it's worth spending a
-moment to decode it. `$Stringable_'a` represents a type variable
-that's bound within the scope of the constructor `Stringable`. That's
-the type of `s.value`, and returning that type would cause the type to
-escape it's scope.
+moment to decode it, and the meaning of the type variable
+`$Stringable_'a` in particular. You can think of this as three parts:
+
+- The `$` marks this as type variable as an existential.
+- `Stringable` is the name of the constructor that this variable came
+  from.
+- `'a` is the name of the type variable from inside that constructor.
+
+
 
 
 
