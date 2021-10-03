@@ -1066,7 +1066,8 @@ GADTs provide one natural way of encoding such type variables. Here's
 a simple example.
 
 ```ocaml env=main
-type stringable = S : { value: 'a; to_string: 'a -> string } -> stringable
+type stringable =
+  Stringable : { value: 'a; to_string: 'a -> string } -> stringable
 ```
 
 This type packes together a value of some arbitrary type, along with a
@@ -1083,7 +1084,8 @@ the definition of `stringable`.
 We can write a print function for `stringable`s:
 
 ```ocaml env=main
-# let print (S s) = print_endline (s.to_string s.value)
+# let print (Stringable s) =
+    print_endline (s.to_string s.value)
 val print : stringable -> unit = <fun>
 ```
 
@@ -1092,7 +1094,7 @@ different underlying types.
 
 ```ocaml env=main
 # List.iter ~f:print
-   (let s value to_string = S { to_string; value } in
+   (let s value to_string = Stringable { to_string; value } in
     [ s 100 Int.to_string
     ; s 12.3 Float.to_string
     ; s "foo" F.id
