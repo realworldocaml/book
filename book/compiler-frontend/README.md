@@ -1086,11 +1086,11 @@ that library. This is known as _wrapping_ the library, and works as follows.
 Let's define a simple library with two files `a.ml` and `b.ml` that each define
 a single value.
 
-```ocaml file=examples/packing/a.ml
+```ocaml file=examples/packing/A.ml
 let v = "hello"
 ```
 
-```ocaml file=examples/packing/b.ml
+```ocaml file=examples/packing/B.ml
 let w = 42
 ```
 
