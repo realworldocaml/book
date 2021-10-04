@@ -302,7 +302,7 @@ allocations. Allocations for these sizes can be serviced from their segregated
 free lists or, if they are empty, from the next size with a space.
 
 The second strategy, for larger allocations, is the use of a specialized data
-structure known as a Splay Tree for the free list. This is a type of search
+structure known as a _splay tree_ for the free list. This is a type of search
 tree that adapts to recent access patterns. For our use this means that the
 most commonly requested allocation sizes are the quickest to access.
 
