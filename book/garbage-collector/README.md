@@ -139,7 +139,7 @@ matter for application code.
 
 It is possible to write loops or recurse in a way that may take a long time
 to do an allocation - if at all. To ensure that UNIX signals and other
-internal bookkeeping that require interrupting the running OCaml program 
+internal bookkeeping that require interrupting the running OCaml program
 still happen the compiler introduces *poll points* in to generated native code.
 
 These poll points check `ptr` against `limit` and developers should expect
@@ -287,8 +287,33 @@ allocation strategies]{.idx}
 
 The free list of blocks is always checked first when allocating a new block
 in the major heap. The default free list search is called
-*next-fit allocation*, with an alternative *first-fit* algorithm also
-available. [first-fit allocation]{.idx}[next-fit allocation]{.idx}
+*best-fit allocation*, with alternatives *next-fit* and *first-fit* algorithms
+also available.
+[best-fit allocation]{.idx}[first-fit allocation]{.idx}[next-fit allocation]{.idx}
+
+#### Best-fit allocation
+
+The best-fit allocator is a combination of two strategies. The first,
+size-segregated free lists, is based on the observation that nearly all
+major heap allocations in OCaml are small (consider list elements and tuples
+which are only a couple of machine words). Best fit keeps separate free lists
+for sizes up to and including 16 words which gives a fast path for most
+allocations. Allocations for these sizes can be serviced from their segregated
+free lists or, if they are empty, from the next size with a space.
+
+The second strategy, for larger allocations, is the use of a specialized data
+structure known as a Splay Tree for the free list. This is a type of search
+tree that adapts to recent access patterns. For our use this means that the
+most commonly requested allocation sizes are the quickest to access.
+
+Small allocations, when there are no larger sizes available in the segregated
+free lists, and large allocations greater than sixteen words are serviced from
+the main free list. The free list is queried for the smallest block that is
+at least as large as the allocation requested.
+
+Best fit allocation is the default allocation mechanism. It represents a good
+trade-off between the allocation cost (in terms of CPU work) and heap
+fragmentation.
 
 #### Next-fit allocation
 
@@ -297,10 +322,12 @@ most recently used to satisfy a request. When a new request comes in, the
 allocator searches from the next block to the end of the free list, and then
 from the beginning of the free list up to that block.
 
-Next-fit allocation is the default allocation strategy. It's quite a cheap
+Next-fit allocation is quite a cheap
 allocation mechanism, since the same heap chunk can be reused across
 allocation requests until it runs out. This in turn means that there is good
-memory locality to use CPU caches better.
+memory locality to use CPU caches better. The big downside of next-fit is
+that since most allocations are small, large blocks at the start of the
+free list become heavily fragmented.
 
 #### First-fit allocation
 
