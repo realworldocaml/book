@@ -101,11 +101,18 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <section class="level3" id="memory-allocation-strategies">
 <h3>Memory Allocation Strategies</h3>
 <p>The major heap does its best to manage memory allocation as efficiently as possible and relies on heap compaction to ensure that memory stays contiguous and unfragmented. The default allocation policy normally works fine for most applications, but it’s worth bearing in mind that there are other options, too. <a data-secondary="major heap allocation strategies" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="memory allocation strategies" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
-<p>The free list of blocks is always checked first when allocating a new block in the major heap. The default free list search is called <em>next-fit allocation</em>, with an alternative <em>first-fit</em> algorithm also available. <a data-primary="first-fit allocation" data-type="indexterm">&nbsp;</a><a data-primary="next-fit allocation" data-type="indexterm">&nbsp;</a></p>
+<p>The free list of blocks is always checked first when allocating a new block in the major heap. The default free list search is called <em>best-fit allocation</em>, with alternatives <em>next-fit</em> and <em>first-fit</em> algorithms also available. <a data-primary="best-fit allocation" data-type="indexterm">&nbsp;</a><a data-primary="first-fit allocation" data-type="indexterm">&nbsp;</a><a data-primary="next-fit allocation" data-type="indexterm">&nbsp;</a></p>
+<section class="level4" id="best-fit-allocation">
+<h4>Best-fit allocation</h4>
+<p>The best-fit allocator is a combination of two strategies. The first, size-segregated free lists, is based on the observation that nearly all major heap allocations in OCaml are small (consider list elements and tuples which are only a couple of machine words). Best fit keeps separate free lists for sizes up to and including 16 words which gives a fast path for most allocations. Allocations for these sizes can be serviced from their segregated free lists or, if they are empty, from the next size with a space.</p>
+<p>The second strategy, for larger allocations, is the use of a specialized data structure known as a <em>splay tree</em> for the free list. This is a type of search tree that adapts to recent access patterns. For our use this means that the most commonly requested allocation sizes are the quickest to access.</p>
+<p>Small allocations, when there are no larger sizes available in the segregated free lists, and large allocations greater than sixteen words are serviced from the main free list. The free list is queried for the smallest block that is at least as large as the allocation requested.</p>
+<p>Best-fit allocation is the default allocation mechanism. It represents a good trade-off between the allocation cost (in terms of CPU work) and heap fragmentation.</p>
+</section>
 <section class="level4" id="next-fit-allocation">
 <h4>Next-fit allocation</h4>
 <p>Next-fit allocation keeps a pointer to the block in the free list that was most recently used to satisfy a request. When a new request comes in, the allocator searches from the next block to the end of the free list, and then from the beginning of the free list up to that block.</p>
-<p>Next-fit allocation is the default allocation strategy. It’s quite a cheap allocation mechanism, since the same heap chunk can be reused across allocation requests until it runs out. This in turn means that there is good memory locality to use CPU caches better.</p>
+<p>Next-fit allocation is quite a cheap allocation mechanism, since the same heap chunk can be reused across allocation requests until it runs out. This in turn means that there is good memory locality to use CPU caches better. The big downside of next-fit is that since most allocations are small, large blocks at the start of the free list become heavily fragmented.</p>
 </section>
 <section class="level4" id="first-fit-allocation">
 <h4>First-fit allocation</h4>
