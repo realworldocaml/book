@@ -311,7 +311,7 @@ free lists, and large allocations greater than sixteen words are serviced from
 the main free list. The free list is queried for the smallest block that is
 at least as large as the allocation requested.
 
-Best fit allocation is the default allocation mechanism. It represents a good
+Best-fit allocation is the default allocation mechanism. It represents a good
 trade-off between the allocation cost (in terms of CPU work) and heap
 fragmentation.
 
