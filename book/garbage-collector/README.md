@@ -350,11 +350,11 @@ allocation cost.
 ##### Controlling the Heap Allocation Policy
 
 You can set the heap allocation policy via the `Gc.allocation_policy` field.
-A value of `0` (the default) sets it to next-fit, and `1` to the first-fit
-allocator.
+A value of `0` sets it to next-fit, `1` to first-fit, and `2` (the default)
+to the best-fit allocator.
 
-The same behavior can be controlled at runtime by setting `a=0` or `a=1` in
-`OCAMLRUNPARAM`.
+The same behavior can be controlled at runtime by setting `a=0`, `a=1` or
+`a=2` in `OCAMLRUNPARAM`.
 :::
 
 
