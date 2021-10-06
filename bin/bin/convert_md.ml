@@ -37,7 +37,7 @@ let pp_contents (t:Mdx.Block.t) ppf =
   Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
 
 let pp_markdown_output ppf = function
-  |`Output s -> Fmt.pf ppf "%s\n" s
+  |`Output s -> Fmt.pf ppf "((:%s::)\n" s
   |`Ellipsis -> Fmt.pf ppf "...\n"
 
 let pp_markdown_toplevel ppf (t:Mdx.Toplevel.t) =
