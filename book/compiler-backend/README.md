@@ -1031,7 +1031,7 @@ opam provides a compiler switch that compiles OCaml with the frame pointer
 activated:
 
 ```sh skip
-$ opam switch create 4.13+fp ocaml-variants.4.13.0+options ocaml-option-fp
+$ opam switch create 4.13+fp ocaml-variants.4.13.1+options ocaml-option-fp
 ```
 
 Using the frame pointer changes the OCaml calling convention, but opam takes
