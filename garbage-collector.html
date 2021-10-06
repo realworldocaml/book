@@ -121,8 +121,8 @@ Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 <p>For some workloads that need more real-time behavior under load, the reduction in the frequency of heap compaction will outweigh the extra allocation cost.</p>
 <section data-type="note" class="level5" id="controlling-the-heap-allocation-policy">
 <h5>Controlling the Heap Allocation Policy</h5>
-<p>You can set the heap allocation policy via the <code>Gc.allocation_policy</code> field. A value of <code>0</code> (the default) sets it to next-fit, and <code>1</code> to the first-fit allocator.</p>
-<p>The same behavior can be controlled at runtime by setting <code>a=0</code> or <code>a=1</code> in <code>OCAMLRUNPARAM</code>.</p>
+<p>You can set the heap allocation policy via the <code>Gc.allocation_policy</code> field. A value of <code>0</code> sets it to next-fit, <code>1</code> to first-fit, and <code>2</code> (the default) to the best-fit allocator.</p>
+<p>The same behavior can be controlled at runtime by setting <code>a=0</code>, <code>a=1</code> or <code>a=2</code> in <code>OCAMLRUNPARAM</code>.</p>
 </section>
 </section>
 </section>
