@@ -601,7 +601,7 @@ Estimated testing time 20s (change using -quota SECS).
 <p>Although Perf doesn’t require adding in explicit probes to the binary, it does need to understand how to unwind function calls so that the kernel can accurately record the function backtrace for every event. Since Linux 3.9 the kernel has had support for using DWARF debug information to parse the program stack, which is emitted when the <code>-g</code> flag is passed to the OCaml compiler. For even more accurate stack parsing, we need the compiler to fall back to using the same conventions as C for function calls. On 64-bit Intel systems, this means that a special register known as the <em>frame pointer</em> is used to record function call history. Using the frame pointer in this fashion means a slowdown (typically around 3-5%) since it’s no longer available for general-purpose use.</p>
 <p>OCaml thus makes the frame pointer an optional feature that can be used to improve the resolution of Perf traces. opam provides a compiler switch that compiles OCaml with the frame pointer activated:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam switch create 4.13+fp ocaml-variants.4.13.0+options ocaml-option-fp
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam switch create 4.13+fp ocaml-variants.4.13.1+options ocaml-option-fp
 </code></pre>
 </div>
 <p>Using the frame pointer changes the OCaml calling convention, but opam takes care of recompiling all your libraries with the new interface.</p>
