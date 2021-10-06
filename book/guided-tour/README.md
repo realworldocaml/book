@@ -507,7 +507,7 @@ operators like `*.` and `*`, where the period at the end is used to
 mark the floating-point versions.
 
 In general, `Base` is not shy about presenting different APIs than
-OCaml's stdandard library when it's done in the service of consistency
+OCaml's standard library when it's done in the service of consistency
 and clarity.
 
 :::
