@@ -86,14 +86,13 @@ $if(listings)$
   breaklines=true,
   showstringspaces=false,
   breakatwhitespace=true,
-  escapeinside={(*@}{@*)},
   commentstyle=\color{cb-black},
   keywordstyle=\color{cb-black},
   stringstyle=\color{cb-black},
   numberstyle=\color{cb-black},
   basicstyle=\ttfamily\small,
   frame=l,
-  rulecolor=\color{cb-brown},
+  rulecolor=\color{gray},
   framesep=10pt,
   xleftmargin=10pt,
   tabsize=4,
@@ -115,10 +114,30 @@ $if(listings)$
   {│}{\textSFxi}1%
   {┼}{\textSFv}1%
 }
+
+\lstdefinelanguage[Objective]{Caml}[light]{Caml}
+  {deletekeywords={not,prefix,value,where},%
+   morekeywords={assert,asr,class,closed,constraint,external,false,%
+      functor,include,inherit,land,lazy,lor,lsl,lsr,lxor,method,mod,%
+      module,new,open,parser,private,sig,struct,true,val,virtual,when,%
+      object,ref},% TH
+  }%
+\lstdefinelanguage[light]{Caml}
+  {morekeywords={and,as,begin,do,done,downto,else,end,exception,for,%
+      fun,function,if,in,let,match,mutable,not,of,or,prefix,rec,then,%
+      to,try,type,value,where,while,with},%
+   sensitive,%
+   morecomment=[n]{(*}{*)},%
+   morestring=[b]",%
+   moredelim=[is][\itshape\color{dgray}]{((:}{::)},
+   moredirectives={open,close,include}%
+  }[keywords,comments,strings,directives]%
+
+
 \definecolor{bluekeywords}{rgb}{0.0, 0.0, 0.5 }
 \definecolor{greencomments}{rgb}{0, 0.5, 0}
 \definecolor{redstrings}{rgb}{0.5, 0.0, 0.0}
-\definecolor{graynumbers}{rgb}{0.50, 0.50, 0.50}
+\definecolor{dgray}{rgb}{0.30, 0.30, 0.30}
 
 \hypersetup{
   colorlinks   = true, %Colours links instead of ugly boxes
