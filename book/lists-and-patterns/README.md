@@ -793,10 +793,11 @@ Now that we know more about how lists and patterns work, let's consider how
 we can improve on an example from
 [Recursive List Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
 the function `destutter`, which removes sequential duplicates from a list.
-Here's the implementation that was described earlier:[destutter
-function]{.idx}[pattern matching/terser and faster
-patterns]{.idx #PTTRNMAT}[lists/duplicate removal]{.idx}[duplicates,
-removing]{.idx}
+Here's the implementation that was described earlier:
+[destutter function]{.idx}
+[pattern matching/terser and faster patterns]{.idx}
+[lists/duplicate removal]{.idx}
+[duplicates, removing]{.idx}
 
 ```ocaml env=main
 # let rec destutter list =
@@ -917,7 +918,7 @@ into the runtime to a low level. These comparisons are polymorphic on the
 basis of ignoring almost everything about the types of the values that are
 being compared, paying attention only to the structure of the values as
 they're laid out in memory. (You can learn more about this structure in
-[Memory Representation of Values](runtime-memory-layout.html){data-type=xref}.)
+[Memory Representation of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
 
 Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.

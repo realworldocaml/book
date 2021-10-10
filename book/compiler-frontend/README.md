@@ -1256,7 +1256,7 @@ The `cmt` files are particularly useful for IDE tools to match up OCaml
 source code at a specific location to the inferred or external types.
 For example, the `merlin` and `ocaml-lsp-server` opam packages both use
 this information to provide you with tooltips and docstrings within your
-editor, as described earlier in [OCaml Platform](platform.html#using-visual-studio-code.html){data-type=xref}.
+editor, as described earlier in [OCaml Platform](platform.html#using-visual-studio-code){data-type=xref}.
 
 ### Examining the Typed Syntax Tree Directly
 
