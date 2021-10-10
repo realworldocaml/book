@@ -1048,10 +1048,9 @@ we want.
 - : string -> string * string -> string * (string * string) = <fun>
 ```
 
-Sometimes, however, we want to take about type variables which are
-*existentially quantified*, meaning that instead of being compatible
-with all types, we only know that there exists some type which matches
-that variable.
+Sometimes, however, we want to type variables that are *existentially
+quantified*, meaning that instead of being compatible with all types,
+the type represents a particular but unknown type.
 
 GADTs provide one natural way of encoding such type variables. Here's
 a simple example.
@@ -1062,17 +1061,15 @@ type stringable =
 ```
 
 This type packes together a value of some arbitrary type, along with a
-function for converting values of that type to strings. Note that we
-can use the in-line record syntax with GADTs much as we would with
-ordinary variants.
+function for converting values of that type to strings.
 
-Syntactically, we know that `'a` is existentially quantified because
-it shows up on the left-hand side of the arrow, but not on the right,
-meaning it isn't represented in a type parameter for `stringable`
-itself. Essentially, the existentially quantified type is bound within
-the definition of `stringable`.
+We can tell that `'a` is existentially quantified because it shows up
+on the left-hand side of the arrow but not on the right, so the `'a`
+that shows up internally doesn't appear in a type parameter for
+`stringable` itself. Essentially, the existentially quantified type is
+bound within the definition of `stringable`.
 
-We can write a print function for `stringable`s:
+This function can print an arbitrary `stringable`:
 
 ```ocaml env=main
 # let print (Stringable s) =
@@ -1084,23 +1081,27 @@ And we can use this function on a collection of `stringable`s of
 different underlying types.
 
 ```ocaml env=main
-# List.iter ~f:print
-   (let s value to_string = Stringable { to_string; value } in
-    [ s 100 Int.to_string
-    ; s 12.3 Float.to_string
-    ; s "foo" F.id
-    ])
-Line 5, characters 15-19:
-Error: Unbound module F
+# let values =
+    (let s value to_string = Stringable { to_string; value } in
+      [ s 100 Int.to_string
+      ; s 12.3 Float.to_string
+      ; s "foo" Fn.id
+      ])
+val values : stringable list =
+  [Stringable {value = <poly>; to_string = <fun>};
+   Stringable {value = <poly>; to_string = <fun>};
+   Stringable {value = <poly>; to_string = <fun>}]
+# List.iter ~f:print values
+100
+12.3
+foo
+- : unit = ()
 ```
 
-What is it that lets us take all of these values of different types
-together and operate on them uniformly, even put them in to the same
-list? The key is that the type variable is bound within the type
-`stringable`, and can't escape that scope.
-
-That puts some limitations in place. In particular, you can't grab a
-value and just return it, since that would cause just such an escape.
+The thing that lets this all work is that the type of the underlying
+object is existentially bound within the type `stringable`.
+Importantly, this type can't escape the scope of `stringable`. This
+means you can't grab a value and just return it.
 
 ```ocaml env=main
 # let get_value (Stringable s) = s.value
