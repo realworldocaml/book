@@ -219,7 +219,7 @@ r#pop ;;
 </section>
 <section class="level2" id="subtyping">
 <h2>Subtyping</h2>
-<p>Subtyping is a central concept in object-oriented programming. It governs when an object with one type <em>A</em> can be used in an expression that expects an object of another type <em>B</em>. When this is true, we say that <em>A</em> is a <em>subtype</em> of <em>B</em>. More concretely, subtyping restricts when the coercion operator <code>e :&gt; t</code> can be applied. This coercion works only if the type of <code>e</code> is a subtype of <code>t</code>. <a data-secondary="basics of" data-primary="subtyping" data-type="indexterm">&nbsp;</a><a id="OBsub" data-secondary="subtyping and" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p>Subtyping is a central concept in object-oriented programming. It governs when an object with one type <em>A</em> can be used in an expression that expects an object of another type <em>B</em>. When this is true, we say that <em>A</em> is a <em>subtype</em> of <em>B</em>. More concretely, subtyping restricts when the coercion operator <code>e :&gt; t</code> can be applied. This coercion works only if the type of <code>e</code> is a subtype of <code>t</code>. <a data-secondary="basics of" data-primary="subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="subtyping and" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 <section class="level3" id="width-subtyping">
 <h3>Width Subtyping</h3>
 <p>To explore this, let’s define some simple object types for geometric shapes. The generic type <code>shape</code> just has a method to compute the area. <a data-primary="width subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="width subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
@@ -313,7 +313,7 @@ let c : const = (n :&gt; const) ;;
 </section>
 <section class="level3" id="variance">
 <h3>Variance</h3>
-<p>What about types built from object types? If a <code>square</code> is a <code>shape</code>, we expect a <code>square list</code> to be a <code>shape list</code>. OCaml does indeed allow such coercions:<a id="var" data-primary="variance" data-type="indexterm">&nbsp;</a><a id="SUBvar" data-secondary="variance and" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
+<p>What about types built from object types? If a <code>square</code> is a <code>shape</code>, we expect a <code>square list</code> to be a <code>shape list</code>. OCaml does indeed allow such coercions:<a data-primary="variance" data-type="indexterm">&nbsp;</a><a data-secondary="variance and" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares: square list = [ square 10; square 20 ] ;;
 &gt;val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]

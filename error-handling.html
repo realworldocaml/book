@@ -2,7 +2,7 @@
 <h1>Error Handling</h1>
 <p>Nobody likes dealing with errors. It’s tedious, it’s easy to get wrong, and it’s usually just not as fun as thinking about how your program is going to succeed. But error handling is important, and however much you don’t like thinking about it, having your software fail due to poor error handling is worse.</p>
 <p>Thankfully, OCaml has powerful tools for handling errors reliably and with a minimum of pain. In this chapter we’ll discuss some of the different approaches in OCaml to handling errors, and give some advice on how to design interfaces that make error handling easier.</p>
-<p>We’ll start by describing the two basic approaches for reporting errors in OCaml: error-aware return types and exceptions. <a id="erraware" data-primary="error-aware return types" data-type="indexterm">&nbsp;</a><a id="EHeraware" data-secondary="error-aware return types" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll start by describing the two basic approaches for reporting errors in OCaml: error-aware return types and exceptions. <a data-primary="error-aware return types" data-type="indexterm">&nbsp;</a><a data-secondary="error-aware return types" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
 <section class="level2" id="error-aware-return-types">
 <h2>Error-Aware Return Types</h2>
 <p>The best way in OCaml to signal an error is to include that error in your return value. Consider the type of the <code>find</code> function in the <code>List</code> module:</p>

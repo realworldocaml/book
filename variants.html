@@ -163,7 +163,7 @@ let to_tuple (Untupled (x,y)) = (x,y) ;;
 &gt;val to_tuple : untupled -&gt; int * int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html">Chapter 22, Memory Representation of Values</a>.</p>
+<p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 22, Memory Representation of Values</a>.</p>
 </section>
 <section class="level2" id="catch-all-cases-and-refactoring">
 <h2>Catch-All Cases and Refactoring</h2>

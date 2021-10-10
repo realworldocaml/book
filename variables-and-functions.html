@@ -288,7 +288,7 @@ List.map ~f:is_odd [0;1;2;3;4;5] ;;
 </section>
 <section class="level3" id="prefix-and-infix-operators">
 <h3>Prefix and Infix Operators</h3>
-<p>So far, we’ve seen examples of functions used in both prefix and infix style.<a data-secondary="prefix and infix operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="infix operators" data-type="indexterm">&nbsp;</a><a data-primary="prefix operators" data-type="indexterm">&nbsp;</a><a id="FNCprf" data-secondary="prefix and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>So far, we’ve seen examples of functions used in both prefix and infix style.<a data-secondary="prefix and infix operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="infix operators" data-type="indexterm">&nbsp;</a><a data-primary="prefix operators" data-type="indexterm">&nbsp;</a><a data-secondary="prefix and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 4  (* prefix *) ;;
 &gt;- : int = 4
@@ -591,7 +591,7 @@ apply_to_tuple divide (3,4) ;;
 </section>
 <section class="level3" id="optional-arguments">
 <h3>Optional Arguments</h3>
-<p>An optional argument is like a labeled argument that the caller can choose whether or not to provide. Optional arguments are passed in using the same syntax as labeled arguments, and, like labeled arguments, can be provided in any order.<a id="ARGopt" data-secondary="optional arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a id="FNCopt" data-secondary="optional arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>An optional argument is like a labeled argument that the caller can choose whether or not to provide. Optional arguments are passed in using the same syntax as labeled arguments, and, like labeled arguments, can be provided in any order.<a data-secondary="optional arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="optional arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s an example of a string concatenation function with an optional separator. This function uses the <code>^</code> operator for pairwise string concatenation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?sep x y =

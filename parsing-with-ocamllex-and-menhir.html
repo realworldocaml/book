@@ -101,7 +101,7 @@ and print_list outc arr =
 </section>
 <section class="level2" id="defining-a-parser">
 <h2>Defining a Parser</h2>
-<p>A parser-specification file has suffix <code>.mly</code> and contains two sections that are broken up by separator lines consisting of the characters <code>%%</code> on a line by themselves. The first section of the file is for declarations, including token and type specifications, precedence directives, and other output directives; and the second section is for specifying the grammar of the language to be parsed. <a data-secondary="mly files" data-primary="files" data-type="indexterm">&nbsp;</a><a id="PARSparsdef" data-secondary="parser definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<p>A parser-specification file has suffix <code>.mly</code> and contains two sections that are broken up by separator lines consisting of the characters <code>%%</code> on a line by themselves. The first section of the file is for declarations, including token and type specifications, precedence directives, and other output directives; and the second section is for specifying the grammar of the language to be parsed. <a data-secondary="mly files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="parser definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
 <p>We’ll start by declaring the list of tokens. A token is declared using the syntax <code>%token &lt;</code><em><code>type</code></em><code>&gt;</code><em><code>uid</code></em>, where the <em><code>&lt;type&gt;</code></em> is optional and <em><code>uid</code></em> is a capitalized identifier. For JSON, we need tokens for numbers, strings, identifiers, and punctuation: <a data-primary="tokens, declaration of" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">%token &lt;int&gt; INT
@@ -221,7 +221,7 @@ obj_field:
 list_fields:
     vl = separated_list(COMMA, value)         { vl } ;</code></pre>
 </div>
-<p>We can invoke <code>menhir</code> by using <code>corebuild</code> with the <code>-use-menhir</code> flag. This tells the build system to switch to using <code>menhir</code> instead of <code>ocamlyacc</code> to handle files with the <code>.mly</code> suffix: <a data-primary-sortas="use" data-primary="-use-menhir flag" data-type="indexterm">&nbsp;</a><a data-secondary="invoking" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a><a data-startref="PARSparsdef" data-type="indexterm">&nbsp;</a></p>
+<p>We can invoke <code>menhir</code> by using <code>corebuild</code> with the <code>-use-menhir</code> flag. This tells the build system to switch to using <code>menhir</code> instead of <code>ocamlyacc</code> to handle files with the <code>.mly</code> suffix: <a data-primary="-use-menhir flag" data-type="indexterm">&nbsp;</a><a data-secondary="invoking" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-scheme">(rule
  (targets short_parser.mli short_parser.ml)
@@ -235,7 +235,7 @@ list_fields:
 </section>
 <section class="level2" id="defining-a-lexer">
 <h2>Defining a Lexer</h2>
-<p>Now we can define a lexer, using <code>ocamllex</code>, to convert our input text into a stream of tokens. The specification of the lexer is placed in a file with an <code>.mll</code> suffix. <a data-secondary="specification of" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="mll files" data-type="indexterm">&nbsp;</a><a data-secondary="mll files" data-primary="files" data-type="indexterm">&nbsp;</a><a id="PARlex" data-secondary="lexer definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<p>Now we can define a lexer, using <code>ocamllex</code>, to convert our input text into a stream of tokens. The specification of the lexer is placed in a file with an <code>.mll</code> suffix. <a data-secondary="specification of" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="mll files" data-type="indexterm">&nbsp;</a><a data-secondary="mll files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="lexer definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
 <section class="level3" id="ocaml-prelude">
 <h3>OCaml Prelude</h3>
 <p>Let’s walk through the definition of a lexer section by section. The first section is an optional chunk of OCaml code that is bounded by a pair of curly braces: <a data-secondary="optional OCaml code for" data-primary="lexers" data-type="indexterm">&nbsp;</a></p>
