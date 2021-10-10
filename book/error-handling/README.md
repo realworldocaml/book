@@ -13,8 +13,8 @@ interfaces that make error handling easier.
 
 We'll start by describing the two basic approaches for reporting errors in
 OCaml: error-aware return types and exceptions. [error-aware return
-types]{.idx #erraware}[error handling/error-aware return
-types]{.idx #EHeraware}
+types]{.idx}[error handling/error-aware return
+types]{.idx}
 
 ## Error-Aware Return Types
 

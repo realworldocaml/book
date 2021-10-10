@@ -143,8 +143,7 @@ in
 [Parsing With Ocamllex And Menhir](parsing-with-ocamllex-and-menhir.html#parsing-with-ocamllex-and-menhir){data-type=xref}.
 The lexer and parser rules can be found in the `parsing` directory in the
 source distribution.[AST (abstract syntax-tree)]{.idx}[source code/parsing
-of]{.idx #SCpras}[parsing/of source code]{.idx #PARSsource}[compilation
-process/parsing source code]{.idx #CPpars}
+of]{.idx}[parsing/of source code]{.idx}[compilation process/parsing source code]{.idx}
 
 ### Syntax Errors
 
@@ -522,7 +521,7 @@ consists of three distinct steps that happen simultaneously:[explicit
 subtyping]{.idx}[automatic type inference]{.idx}[subtyping/in static type
 checking]{.idx}[modules/in static type checking]{.idx}[type inference/in
 static type checking]{.idx}[compilation process/static type
-checking]{.idx #CPstatictype}
+checking]{.idx}
 
 automatic type inference
 : An algorithm that calculates types for a module without requiring manual
@@ -1245,8 +1244,8 @@ with the AST to form a *typed abstract syntax tree*. This contains precise
 location information for every token in the input file, and decorates each
 token with concrete type information.[cmti files]{.idx}[cmt
 files]{.idx}[files/cmtii files]{.idx}[files/cmt files]{.idx}[AST (abstract
-syntax-tree)]{.idx}[typed syntax tree]{.idx #typesyntree}[compilation
-process/typed syntax tree]{.idx #CPtypsyn}
+syntax-tree)]{.idx}[typed syntax tree]{.idx}[compilation
+process/typed syntax tree]{.idx}
 
 The compiler can output this as compiled `cmt` and `cmti` files that contain
 the typed AST for the implementation and signatures of a compilation unit.

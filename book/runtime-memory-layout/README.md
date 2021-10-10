@@ -9,7 +9,7 @@ moving parts before you can get it right. You first need to know the mapping
 between OCaml types and their runtime memory representation. You also need to
 ensure that your code is interfacing correctly with OCaml runtime's memory
 management. [runtime memory representation/importance of]{.idx}[values/memory
-representation of]{.idx #VALmemory}
+representation of]{.idx}
 
 However, knowledge of the OCaml internals is useful beyond just writing
 foreign function interfaces. As you build and maintain more complex OCaml
@@ -47,8 +47,7 @@ method call, where the runtime must look up the concrete instance of the
 object and dispatch the method call. Those languages amortize some of the
 cost via "Just-in-Time" dynamic patching, but OCaml prefers runtime
 simplicity instead. ["Just-in-Time" dynamic
-patching]{.idx data-primary-sortas=Just}[dynamic type
-checking]{.idx}[compile-time static checking]{.idx}
+patching]{.idx}[dynamic type checking]{.idx}[compile-time static checking]{.idx}
 
 We'll explain this compilation pipeline in more detail in
 [The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}
@@ -61,14 +60,14 @@ This chapter covers the precise mapping from OCaml types to runtime values
 and walks you through them via the toplevel. We'll cover how these values are
 managed by the runtime later on in
 [Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
-[mapping/of OCaml types to runtime values]{.idx #MAPocaml}
+[mapping/of OCaml types to runtime values]{.idx}
 
 ## OCaml Blocks and Values
 
 A running OCaml program uses blocks of memory (i.e., contiguous sequences of
 words in RAM) to represent values such as tuples, records, closures, or
 arrays. An OCaml program implicitly allocates a block of memory when such a
-value is created: [blocks (of memory)]{.idx #blck}
+value is created: [blocks (of memory)]{.idx}
 
 ```ocaml env=simple_record
 # type t = { foo: int; bar: int }

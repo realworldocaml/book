@@ -5,7 +5,7 @@ compiler can link with external system libraries via C code and also can
 produce standalone native object files that can be embedded within other
 non-OCaml applications.[programming/language interfaces]{.idx}[foreign
 function interface (FFI)/basics of]{.idx}[interfaces/foreign function
-interface (FFI)]{.idx #INTERffi}
+interface (FFI)]{.idx}
 
 The mechanism by which code in one programming language can invoke routines
 in a different programming language is called a *foreign function interface*.
@@ -56,7 +56,7 @@ provides it as the `libncurses5-dev` package.
 Ncurses is a library to help build terminal-independent text interfaces in a
 reasonably efficient way. It's used in console mail clients like Mutt and
 Pine, and console web browsers such as Lynx.[foreign function interface
-(FFI)/terminal interface example]{.idx #FFItermint}
+(FFI)/terminal interface example]{.idx}
 
 The full C interface is quite large and is explained in the online
 [documentation](http://www.gnu.org/software/ncurses/). We'll just use the

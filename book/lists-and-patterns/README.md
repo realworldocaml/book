@@ -72,7 +72,7 @@ val m : int list = [0; 1; 2; 3]
 We can read data out of a list using a `match` expression. Here's a
 simple example of a recursive function that computes the sum of all
 elements of a list:[match expressions]{.idx}[pattern
-matching/extracting data with]{.idx #PATMAT}[lists/extracting data
+matching/extracting data with]{.idx}[lists/extracting data
 from]{.idx}
 
 ```ocaml env=main
@@ -330,7 +330,7 @@ matching and recursive functions. In real life, you're usually better off
 using the `List` module, which is full of reusable functions that abstract
 out common patterns for computing with lists.[tables, creating with List
 module]{.idx}[List module/creating tables with]{.idx}[lists/List
-module]{.idx #Llistmod}
+module]{.idx}
 
 Let's work through a concrete example. We'll write a function `render_table`
 that, given a list of column headers and a list of rows, prints them out in a
