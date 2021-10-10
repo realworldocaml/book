@@ -109,7 +109,7 @@ takes a first-class module as an argument. The point of the first class
 module is to provide the comparison function that is required for building
 the map, along with an s-expression converter for generating useful error
 messages (we'll talk more about s-expressions in
-[Data Serialization with S-Expressions](data-serialization.html){data-type=xref}).
+[Data Serialization with S-Expressions](data-serialization.html#data-serializtion-with-s-expressions){data-type=xref}).
 We don't need to provide the module again for functions like `Map.find` or
 `Map.add`, because the map itself contains a reference to the comparison
 function it uses.

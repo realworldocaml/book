@@ -498,7 +498,7 @@ definition that extends and supersedes an existing one by shadowing it.
 So far, we've seen examples of functions used in both prefix and infix
 style.[operators/prefix and infix operators]{.idx}[infix
 operators]{.idx}[prefix operators]{.idx}[functions/prefix and infix
-operators]{.idx #FNCprf}
+operators]{.idx}
 
 ```ocaml env=main
 # Int.max 3 4  (* prefix *)
@@ -940,8 +940,8 @@ care to be consistent in your ordering of labeled arguments.
 An optional argument is like a labeled argument that the caller can choose
 whether or not to provide. Optional arguments are passed in using the same
 syntax as labeled arguments, and, like labeled arguments, can be provided in
-any order.[arguments/optional arguments]{.idx #ARGopt}[functions/optional
-arguments]{.idx #FNCopt}
+any order.[arguments/optional arguments]{.idx}[functions/optional
+arguments]{.idx}
 
 Here's an example of a string concatenation function with an optional
 separator. This function uses the `^` operator for pairwise string

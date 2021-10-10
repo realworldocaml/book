@@ -1,7 +1,7 @@
 # GADTs
 
 GADTs, short for Generalized Algebraic Data Types, are an extension of
-the variants we saw in [Variants](variants.html){data-type=xref}, and
+the variants we saw in [Variants](variants.html#variants){data-type=xref}, and
 they can help you create precise types that are more precise and
 thereby help you make your code safer, more concise, and more
 efficient.

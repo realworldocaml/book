@@ -143,8 +143,7 @@ in
 [Parsing With Ocamllex And Menhir](parsing-with-ocamllex-and-menhir.html#parsing-with-ocamllex-and-menhir){data-type=xref}.
 The lexer and parser rules can be found in the `parsing` directory in the
 source distribution.[AST (abstract syntax-tree)]{.idx}[source code/parsing
-of]{.idx #SCpras}[parsing/of source code]{.idx #PARSsource}[compilation
-process/parsing source code]{.idx #CPpars}
+of]{.idx}[parsing/of source code]{.idx}[compilation process/parsing source code]{.idx}
 
 ### Syntax Errors
 
@@ -287,7 +286,7 @@ how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.  For larger projects, you
 can use `ocamlformat` to format whole files as described earlier in
-[OCaml Platform](platform.html#autoformatting-your-source-code.html){data-type=xref}.
+[OCaml Platform](platform.html#autoformatting-your-source-code){data-type=xref}.
 
 ### Generating Documentation from Interfaces
 
@@ -360,7 +359,7 @@ HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
 
 You can also use `odoc` to generate complete snapshots of your project via
-integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation.html){data-type=xref}.
+integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
 
 ## Preprocessing with ppx
 
@@ -522,7 +521,7 @@ consists of three distinct steps that happen simultaneously:[explicit
 subtyping]{.idx}[automatic type inference]{.idx}[subtyping/in static type
 checking]{.idx}[modules/in static type checking]{.idx}[type inference/in
 static type checking]{.idx}[compilation process/static type
-checking]{.idx #CPstatictype}
+checking]{.idx}
 
 automatic type inference
 : An algorithm that calculates types for a module without requiring manual
@@ -1245,8 +1244,8 @@ with the AST to form a *typed abstract syntax tree*. This contains precise
 location information for every token in the input file, and decorates each
 token with concrete type information.[cmti files]{.idx}[cmt
 files]{.idx}[files/cmtii files]{.idx}[files/cmt files]{.idx}[AST (abstract
-syntax-tree)]{.idx}[typed syntax tree]{.idx #typesyntree}[compilation
-process/typed syntax tree]{.idx #CPtypsyn}
+syntax-tree)]{.idx}[typed syntax tree]{.idx}[compilation
+process/typed syntax tree]{.idx}
 
 The compiler can output this as compiled `cmt` and `cmti` files that contain
 the typed AST for the implementation and signatures of a compilation unit.
@@ -1256,7 +1255,7 @@ The `cmt` files are particularly useful for IDE tools to match up OCaml
 source code at a specific location to the inferred or external types.
 For example, the `merlin` and `ocaml-lsp-server` opam packages both use
 this information to provide you with tooltips and docstrings within your
-editor, as described earlier in [OCaml Platform](platform.html#using-visual-studio-code.html){data-type=xref}.
+editor, as described earlier in [OCaml Platform](platform.html#using-visual-studio-code){data-type=xref}.
 
 ### Examining the Typed Syntax Tree Directly
 
@@ -1385,4 +1384,4 @@ files with common editors such as Emacs or Vim. The best of these is
 autocompletion, displays inferred types and can build and display errors
 directly from within your editor. There are instructions available on its
 homepage for configuring Merlin with your favorite editor, or its bigger
-sibling `ocaml-lsp-server` is described earlier in [platform.html](platform.html#using-visual-studio-code.html){data-type=xref}.
+sibling `ocaml-lsp-server` is described earlier in [OCaml Platform](platform.html#using-visual-studio-code){data-type=xref}.

@@ -188,7 +188,7 @@ memory. The runtime system maintains a free-list data structure that indexes
 all the free memory that it has allocated, and uses it to satisfy allocation
 requests for OCaml blocks. [garbage collection/mark and sweep
 collection]{.idx}[mark and sweep garbage collection]{.idx}[major
-heaps/garbage collection in]{.idx}[heaps/major heaps]{.idx #Hmh}[garbage
+heaps/garbage collection in]{.idx}[heaps/major heaps]{.idx}[garbage
 collection/of longer-lived values]{.idx}
 
 The major heap is typically much larger than the minor heap and can scale to

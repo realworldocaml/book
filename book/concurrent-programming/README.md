@@ -433,8 +433,8 @@ primitives.
 Now that we have the basics of Async under our belt, let's look at a small
 standalone Async program. In particular, we'll write an echo server,
 *i.e.*, a program that accepts connections from clients and spits back
-whatever is sent to it.[echo servers]{.idx #echo}[Async library/echo server
-example]{.idx #ALecho}
+whatever is sent to it.[echo servers]{.idx}[Async library/echo server
+example]{.idx}
 
 The first step is to create a function that can copy data from an input to an
 output. Here, we'll use Async's `Reader` and `Writer` modules, which provide
@@ -790,7 +790,7 @@ Our code is going to rely on a number of other libraries, all of which can be
 installed using opam. Refer to
 [the installation instructions](install.html) if you need
 help on the installation. Here's the list of libraries we'll need:[Async
-library/DuckDuckGo searching example]{.idx #ALduckduck}
+library/DuckDuckGo searching example]{.idx}
 
 `textwrap`
 : A library for wrapping long lines. We'll use this for printing out our
@@ -1027,7 +1027,7 @@ exception handling in OCaml in
 we'll see, exception handling in a concurrent program presents some
 new challenges.  [exceptions/in concurrent
 programming]{.idx}[concurrent programming]{.idx}[Async
-library/exception handling in]{.idx #ALexcept}
+library/exception handling in]{.idx}
 
 Let's get a better sense of how exceptions work in Async by creating
 an asynchronous computation that (sometimes) fails with an
@@ -1526,7 +1526,7 @@ chapter why Async is generally a better choice than system threads, but even
 if you mostly use Async, OCaml's system threads are sometimes necessary, and
 it's worth understanding them. [parallelism]{.idx}[kernel-level
 threads]{.idx}[threads/kernel-level threads]{.idx}[system
-threads]{.idx #systhrd}[Async library/system threads and]{.idx #ALsysthr}
+threads]{.idx}[Async library/system threads and]{.idx}
 
 The most surprising aspect of OCaml's system threads is that they don't
 afford you any access to physical parallelism. That's because OCaml's runtime

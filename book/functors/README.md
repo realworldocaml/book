@@ -135,7 +135,7 @@ Let's see how to use functors to build a generic interval library that
 can be used with any type that supports a total ordering on the
 underlying set over which you want to build intervals. [interval
 computation/generic library for]{.idx}[functors/interval computation
-with]{.idx #FUNCTinterv}
+with]{.idx}
 
 First we'll define a module type that captures the information we'll
 need about the endpoints of the intervals. This interface, which we'll

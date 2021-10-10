@@ -21,7 +21,7 @@ higher-level constructs such as modules and objects and replaces them with
 simpler values such as records and function pointers. Pattern matches are
 also analyzed and compiled into highly optimized automata.[lambda form
 code/basics of]{.idx}[compilation process/untyped lambda
-form]{.idx #CPuntype}
+form]{.idx}
 
 The lambda form is the key stage that discards the OCaml type information and
 maps the source code to the runtime memory model described in
@@ -278,7 +278,7 @@ executable code. The OCaml toolchain branches into two separate compilers at
 this point. We'll describe the bytecode compiler first, which consists of two
 pieces: [OCaml toolchain/ocamlrun]{.idx}[OCaml
 toolchain/ocamlc]{.idx}[bytecode compiler/tools used]{.idx}[compilation
-process/portable bytecode]{.idx #CPportbyte}
+process/portable bytecode]{.idx}
 
 `ocamlc`
 : Compiles files into a bytecode that is a close mapping to the lambda form
@@ -532,7 +532,7 @@ compatibility with the bytecode runtime, so the same code should run
 identically when compiled with either toolchain. [cmi files]{.idx}[files/cmi
 files]{.idx}[cmx files]{.idx}[files/cmx files]{.idx}[o files]{.idx}[files/o
 files]{.idx}[OCaml toolchain/ocamlopt]{.idx}[native-code compiler/benefits
-of]{.idx}[compilation process/fast native code]{.idx #CPfast}
+of]{.idx}[compilation process/fast native code]{.idx}
 
 The `ocamlopt` command is the frontend to the native code compiler and has a
 very similar interface to `ocamlc`. It also accepts `ml` and `mli` files, but
