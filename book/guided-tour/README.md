@@ -507,7 +507,7 @@ operators like `*.` and `*`, where the period at the end is used to
 mark the floating-point versions.
 
 In general, `Base` is not shy about presenting different APIs than
-OCaml's stdandard library when it's done in the service of consistency
+OCaml's standard library when it's done in the service of consistency
 and clarity.
 
 :::
@@ -517,7 +517,7 @@ and clarity.
 
 Where tuples let you combine a fixed number of items, potentially of
 different types, lists let you hold any number of items of the same type.
-Consider the following example:[data structures/lists]{.idx #DSlists}
+Consider the following example:[data structures/lists]{.idx}
 
 ```ocaml env=main
 # let languages = ["OCaml";"Perl";"C"]

@@ -308,6 +308,9 @@ module Releases : sig
   val v4_13_0 : t
   (** Version 4.13.0 *)
 
+  val v4_13_1 : t
+  (** Version 4.13.1 *)
+
   val v4_13 : t
   (** Latest release in the 4.13.x series *)
 

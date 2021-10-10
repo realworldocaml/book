@@ -72,7 +72,7 @@ val m : int list = [0; 1; 2; 3]
 We can read data out of a list using a `match` expression. Here's a
 simple example of a recursive function that computes the sum of all
 elements of a list:[match expressions]{.idx}[pattern
-matching/extracting data with]{.idx #PATMAT}[lists/extracting data
+matching/extracting data with]{.idx}[lists/extracting data
 from]{.idx}
 
 ```ocaml env=main
@@ -330,7 +330,7 @@ matching and recursive functions. In real life, you're usually better off
 using the `List` module, which is full of reusable functions that abstract
 out common patterns for computing with lists.[tables, creating with List
 module]{.idx}[List module/creating tables with]{.idx}[lists/List
-module]{.idx #Llistmod}
+module]{.idx}
 
 Let's work through a concrete example. We'll write a function `render_table`
 that, given a list of column headers and a list of rows, prints them out in a
@@ -793,10 +793,11 @@ Now that we know more about how lists and patterns work, let's consider how
 we can improve on an example from
 [Recursive List Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
 the function `destutter`, which removes sequential duplicates from a list.
-Here's the implementation that was described earlier:[destutter
-function]{.idx}[pattern matching/terser and faster
-patterns]{.idx #PTTRNMAT}[lists/duplicate removal]{.idx}[duplicates,
-removing]{.idx}
+Here's the implementation that was described earlier:
+[destutter function]{.idx}
+[pattern matching/terser and faster patterns]{.idx}
+[lists/duplicate removal]{.idx}
+[duplicates, removing]{.idx}
 
 ```ocaml env=main
 # let rec destutter list =
@@ -917,7 +918,7 @@ into the runtime to a low level. These comparisons are polymorphic on the
 basis of ignoring almost everything about the types of the values that are
 being compared, paying attention only to the structure of the values as
 they're laid out in memory. (You can learn more about this structure in
-[Memory Representation of Values](runtime-memory-layout.html){data-type=xref}.)
+[Memory Representation of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
 
 Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.

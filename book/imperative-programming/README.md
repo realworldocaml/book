@@ -13,7 +13,7 @@ outside world. An imperative function has a new effect, and
 potentially returns different results, every time it's
 called. [imperative programming/benefits of]{.idx}[pure
 code]{.idx}[programming/immutable vs.
-imperative]{.idx}[programming/imperative programming]{.idx #PROGimper}
+imperative]{.idx}[programming/imperative programming]{.idx}
 
 Pure code is the default in OCaml, and for good reason—it's generally
 easier to reason about, less error prone and more composable. But
@@ -831,7 +831,7 @@ Another benign effect is *memoization*. A memoized function remembers
 the result of previous invocations of the function so that they can be
 returned without further computation when the same arguments are
 presented again.  [memoization/of function]{.idx}[benign
-effects/memoization]{.idx #BEmem}
+effects/memoization]{.idx}
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
@@ -1248,7 +1248,7 @@ also operations that interact with the world outside of your program. An
 important example of this kind of interaction is I/O, i.e., operations for
 reading or writing data to things like files, terminal input and output, and
 network sockets. [I/O (input/output) operations/terminal
-I/O]{.idx}[imperative programming/input and output]{.idx #IPinpout}
+I/O]{.idx}[imperative programming/input and output]{.idx}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
@@ -1691,8 +1691,8 @@ subexpressions, you should express them as a series of `let` bindings.
 ## Side Effects and Weak Polymorphism
 
 Consider the following simple, imperative function: [polymorphism/weak
-polymorphism]{.idx}[weak polymorphism]{.idx}[side effects]{.idx}[ imperative
-programming/side effects/weak polymorphism ]{.idx #IPsideweak}
+polymorphism]{.idx}[weak polymorphism]{.idx}[side effects]{.idx}[imperative
+programming/side effects/weak polymorphism ]{.idx}
 
 ```ocaml env=main
 # let remember =

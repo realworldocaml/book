@@ -1,6 +1,6 @@
 (library
   (name hello)
-  (modules a b))
+  (modules a b hello))
 (executable
   (name test)
   (libraries hello)

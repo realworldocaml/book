@@ -372,7 +372,7 @@ object of another type *B*. When this is true, we say that *A* is a *subtype*
 of *B*. More concretely, subtyping restricts when the coercion operator
 `e :> t` can be applied. This coercion works only if the type of `e` is a
 subtype of `t`. [subtyping/basics of]{.idx}[objects/subtyping
-and]{.idx #OBsub}
+and]{.idx}
 
 ### Width Subtyping
 
@@ -495,8 +495,8 @@ val c : const = `Int 3
 
 What about types built from object types? If a `square` is a `shape`,
 we expect a `square list` to be a `shape list`. OCaml does indeed
-allow such coercions:[variance]{.idx #var}[subtyping/variance
-and]{.idx #SUBvar}
+allow such coercions:[variance]{.idx}[subtyping/variance
+and]{.idx}
 
 ```ocaml env=subtyping
 # let squares: square list = [ square 10; square 20 ]

@@ -6,11 +6,12 @@
   (action (run rwo-build build inputs -o . -repo-root ..)))
 
 (copy_files ../book/EngD.cls)
+(copy_files ../book/colour-blind.sty)
 
 (rule
  (alias pdf)
  (targets book.tex)
- (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls ../book/book.yml ../book/cup-template.tex)
+ (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
  (action
   (progn
    (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
@@ -23,6 +24,7 @@
    (progn
      (system "xelatex book.tex")
      (system "makeindex book.idx")
+     (system "xelatex book.tex")
      (system "xelatex book.tex")
   )))
 
