@@ -1,10 +1,10 @@
 # GADTs
 
 GADTs, short for Generalized Algebraic Data Types, are an extension of
-the variants we saw in [Variants](variants.html#variants){data-type=xref}, and
-they can help you create precise types that are more precise and
-thereby help you make your code safer, more concise, and more
-efficient.
+the variants we saw in
+[Variants](variants.html#variants){data-type=xref}. They provide more
+precise types that you can use to make your code safer, more concise,
+and more efficient.
 
 At the same time, GADTs are an advanced feature of OCaml, and their
 power comes at a distinct cost.  GADTs are harder to use and less
@@ -15,34 +15,33 @@ improvement to your design.
 
 But don't get me wrong, for the the right use-case, GADTs can be
 really transformative, and this chapter will cover some examples to
-demnostrate the range of use-cases that GADTs support.
+demonstrate  the range of use-cases that GADTs support.
 
 At their heart, GADTs provide two extra features above and beyond
 ordinary variants:
 
 - They let the compiler learn more type information when you descend
   into a case of a pattern match.
-- They provide a form of *existential types*, which you can think of
-  as a flexible and dynamic kind of data-hiding.
+- They provide a form of *existential types*, which is a form of
+  data-hiding.
 
 It's a little hard to understand these features without working
 through some examples, so we'll do that next.
 
 ## A little language
 
-One classic use-case for GADTs is to use it for making it easier to
-write simple typed expression languages, similar to the boolean
-expression language described in
+One classic use-case for GADTs for writing simple typed expression
+languages, similar to the boolean expression language described in
 [Variants](variants.html#variants-and-recursive-data-structures){data-type=xref}.
-The difference is that this language will allow us to mix arithemtic
-and boolean expression, and which means that we have to deal with the
-possibility of ill-typed expressions, e.g., one that adds a bool and
-an int.
+In this section, we'll create a slightly richer language that lets us
+mix arithmetic and boolean expressions. This means that we have to
+deal with the possibility of ill-typed expressions, e.g., an
+expression that adds a `bool` and an `int`.
 
-Let's start by writing out an ordinary variant for the expression
-type.  We declare two types here: `value`, which represents a
-primitive value in the language (i.e., an `int` or a `bool`), and
-`expr`, which represents the full set of possible expressions.
+Let's first try to do this with an ordinary variant. We'll declare two
+types here: `value`, which represents a primitive value in the
+language (i.e., an `int` or a `bool`), and `expr`, which represents
+the full set of possible expressions.
 
 ```ocaml env=main
 open Base
@@ -83,9 +82,9 @@ val eval : expr -> value = <fun>
 ```
 
 This implementation is a bit ugly because it has a lot of dynamic
-checks to detect what are effectively type errors.  Indeed, it's
-entirely possible to create an ill-typed expression, so these dynamic
-checks are necessary, as you can see below.
+checks to detect what are effectively type errors. Indeed, it's
+entirely possible to create an ill-typed expression which will trip
+these checks.
 
 ```ocaml env=main
 # let i x = Value (Int x)
@@ -98,19 +97,16 @@ val ( +: ) : expr -> expr -> expr = <fun>
 Exception: Ill_typed.
 ```
 
-This is not just a problem for the implementation that needs to detect
-these type errors: it's also a problem for users, since it's all too
-easy to create ill-typed expressions by mistake.
-
-Before seeing how GADTs can help here, let's see how much progress we
-can make without them.
+This possibility of ill-typed expressions doesn't just complicate the
+implementation: it's also a problem for users, since it's all too easy
+to create ill-typed expressions by mistake.
 
 ### Making the language type-safe
 
 Let's consider what a type-safe version of this API might look like.
 To even express the type constraints, we'll need expressions to have a
-type parameter to distinguish integer expressions from booleain
-expressions.  Given such a paramter, the signature for such a language
+type parameter to distinguish integer expressions from boolean
+expressions. Given such a parameter, the signature for such a language
 might look like this.
 
 ```ocaml env=main
@@ -1099,9 +1095,10 @@ foo
 ```
 
 The thing that lets this all work is that the type of the underlying
-object is existentially bound within the type `stringable`.
-Importantly, this type can't escape the scope of `stringable`. This
-means you can't grab a value and just return it.
+object is existentially bound within the type `stringable`. As such,
+the type of the underlying values can't escape the scope of
+`stringable`, which means that a function that tries to do that won't
+type-check.
 
 ```ocaml env=main
 # let get_value (Stringable s) = s.value
@@ -1111,11 +1108,11 @@ Error: This expression has type $Stringable_'a
        The type constructor $Stringable_'a would escape its scope
 ```
 
-This error message is a bit confusing, but it's worth spending a
-moment to decode it, and the meaning of the type variable
-`$Stringable_'a` in particular. You can think of this as three parts:
+It's worth spending a moment to decode this error message, and the
+meaning of the type variable `$Stringable_'a` in particular. You can
+think of this variable as having three parts:
 
-- The `$` marks this as type variable as an existential.
+- The `$` marks the variable as an existential.
 - `Stringable` is the name of the constructor that this variable came
   from.
 - `'a` is the name of the type variable from inside that constructor.
