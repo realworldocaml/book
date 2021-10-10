@@ -3,7 +3,7 @@ let () =
   let j = Yojson.Basic.from_channel stdin in
   let p = Pandoc.of_json j in
   let tex_block f  = Printf.ksprintf (fun b -> Pandoc.RawBlock ("tex", b)) f in
-  let f = function
+  let block = function
     | Pandoc.Div ((i,c,attr),b) as d -> begin
        List.assoc_opt "data-type" attr |> function
        | Some note ->
@@ -14,6 +14,16 @@ let () =
        | None -> Some [d]
     end 
     | _ -> None in
-  let p = Pandoc.map ~block:f p in
+  let inline = function
+    (* handle xrefs like [Foo](bar.html#label){data-type="xref"} *)
+    | Pandoc.Link ((_i,_c,attr),_body,(url,_title)) as l -> begin
+      List.assoc_opt "data-type" attr |> function
+      | Some "xref" -> (* this is a cross-reference *)
+          let url = Scanf.sscanf url "%s@#%s" (fun _ t -> t) in
+          Some [Pandoc.RawInline("latex", (Printf.sprintf "\\autoref{%s} (\\nameref{%s})" url url))]
+      | Some _ | None -> Some [l]
+    end
+    | n -> Some [n] in
+  let p = Pandoc.map ~block ~inline p in
   let s = Yojson.Basic.pretty_to_string (Pandoc.to_json p) in
   print_endline s

@@ -287,7 +287,7 @@ how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.  For larger projects, you
 can use `ocamlformat` to format whole files as described earlier in
-[OCaml Platform](platform.html#autoformatting-your-source-code.html){data-type=xref}.
+[OCaml Platform](platform.html#autoformatting-your-source-code){data-type=xref}.
 
 ### Generating Documentation from Interfaces
 
@@ -360,7 +360,7 @@ HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
 
 You can also use `odoc` to generate complete snapshots of your project via
-integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation.html){data-type=xref}.
+integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
 
 ## Preprocessing with ppx
 
@@ -1385,4 +1385,4 @@ files with common editors such as Emacs or Vim. The best of these is
 autocompletion, displays inferred types and can build and display errors
 directly from within your editor. There are instructions available on its
 homepage for configuring Merlin with your favorite editor, or its bigger
-sibling `ocaml-lsp-server` is described earlier in [platform.html](platform.html#using-visual-studio-code.html){data-type=xref}.
+sibling `ocaml-lsp-server` is described earlier in [OCaml Platform](platform.html#using-visual-studio-code){data-type=xref}.
