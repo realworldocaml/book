@@ -541,7 +541,6 @@ We say that `'a -> string` is *contravariant* in `'a`. In general,
 function types are contravariant in their arguments and covariant in
 their results.  [contravariance]{.idx}
 
-::: {data-type=note}
 ##### Variance Annotations
 
 OCaml works out the variance of a type using that type's definition.
@@ -628,8 +627,6 @@ As you can see, this now allows the coercion once again.
 # (Var_either.left (square 40) :> (shape, _) Var_either.t)
 - : (shape, 'a) Var_either.t = <abstr>
 ```
-
-:::
 
 For a more concrete example of variance, let's create some stacks
 containing shapes by applying our `stack` function to some squares and
