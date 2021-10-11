@@ -535,7 +535,7 @@ ratio ~num ~denom
 </div>
 <p>This improves the readability of both the signature and of client code that makes use of <code>substring</code> and makes it harder to accidentally swap the position and the length.</p>
 <ul>
-<li>When you want flexibility on the order in which arguments are passed. Consider a function like <code>List.iter</code>, which takes two arguments. a function and a list of elements to call that function on. A common pattern is to partially apply <code>List.iter</code> by giving it just the function, as in the following example from earlier in the chapter.</li>
+<li>When you want flexibility on the order in which arguments are passed. Consider a function like <code>List.iter</code> which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply <code>List.iter</code> by giving it just the function, as in the following example from earlier in the chapter.</li>
 </ul>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">String.split ~on:':' path
