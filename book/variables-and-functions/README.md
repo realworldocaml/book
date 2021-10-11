@@ -861,7 +861,7 @@ This improves the readability of both the signature and of client code that
   position and the length.
 
 - When you want flexibility on the order in which arguments are passed.
-  Consider a function like `List.iter`, which takes two arguments. a function
+  Consider a function like `List.iter` which takes two arguments: a function
   and a list of elements to call that function on. A common pattern is to
   partially apply `List.iter` by giving it just the function, as in the
   following example from earlier in the chapter.
