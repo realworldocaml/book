@@ -270,7 +270,7 @@ as function pointers to C code, as well as struct and union definitions.
 
 We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
-examples.<a data-type="indexterm" data-startref="FFItermint">&nbsp;</a>
+examples.
 
 ## Basic Scalar C Types
 
@@ -1176,4 +1176,4 @@ them directly from C.
 The details of using Cstubs are available in the online
 [documentation](https://ocamllabs.github.io/ocaml-ctypes), along with
 instructions on integration with `autoconf` platform portability
-instructions.<a data-type="indexterm" data-startref="INTERffi">&nbsp;</a>
+instructions.

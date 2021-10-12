@@ -919,8 +919,7 @@ reasonably terse and easy to generate and maintain. It can also be useful for
 backwards compatibility: if you add a new field to your config record, but
 you make that field optional, then you should still be able to parse older
 version of your config.
-<a data-type="indexterm" data-startref="SERFORMsexp">&nbsp;</a>[files/config
-files]{.idx}[config file formats]{.idx}
+[files/config files]{.idx}[config file formats]{.idx}
 
 The exact attribute you use depends on the comparison functions available
 over the type that you wish to drop:

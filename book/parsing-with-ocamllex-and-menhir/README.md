@@ -631,7 +631,7 @@ flexibility and complexity:
   use of Uutf in your own libraries.
 
 All of these libraries are available via OPAM under their respective
-names.<a data-type="indexterm" data-startref="PARlex">&nbsp;</a>
+names.
 :::
 
 
