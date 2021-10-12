@@ -214,7 +214,7 @@ $ ocamldoc -html -d html doc.ml
 $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc</code></pre>
 </div>
-<p>You should now have HTML files inside the <em class="filename">html/</em> directory and also be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite a few comment formats and options to control the output for the various backends. Refer to the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml manual</a> for the complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML generators" data-type="indexterm">&nbsp;</a><a data-startref="SCpras" data-type="indexterm">&nbsp;</a><a data-startref="PARSsource" data-type="indexterm">&nbsp;</a><a data-startref="CPpars" data-type="indexterm">&nbsp;</a></p>
+<p>You should now have HTML files inside the <em class="filename">html/</em> directory and also be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite a few comment formats and options to control the output for the various backends. Refer to the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml manual</a> for the complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML generators" data-type="indexterm">&nbsp;</a></p>
 <p>You can also use <code>odoc</code> to generate complete snapshots of your project via integration with dune, as described earlier in <a data-type="xref" href="platform.html#browsing-interface-documentation">Chapter 20, OCaml Platform</a>.</p>
 </section>
 </section>
@@ -714,7 +714,7 @@ Error: This expression has type string but an expression was expected of type
          'a list</code></pre>
 </div>
 <p>The <code>utop</code> enhanced toplevel activates short paths by default, which is why we have not had to do this before in our interactive examples. However, the compiler doesn’t default to the short path heuristic, since there are some situations where the type aliasing information is useful to know, and it would be lost in the error if the shortest module path is always picked.</p>
-<p>You’ll need to choose for yourself if you prefer short paths or the default behavior in your own projects, and pass the <code>-short-paths</code> flag to the compiler if you need it.<a data-startref="CPstatictype" data-type="indexterm">&nbsp;</a></p>
+<p>You’ll need to choose for yourself if you prefer short paths or the default behavior in your own projects, and pass the <code>-short-paths</code> flag to the compiler if you need</p>
 </section>
 </section>
 <section class="level2" id="the-typed-syntax-tree">
@@ -814,7 +814,7 @@ let v = Foo</code></pre>
 &gt;]
 </code></pre>
 </div>
-<p>The typed AST is more explicit than the untyped syntax tree. For instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>). <a data-startref="typesyntree" data-type="indexterm">&nbsp;</a><a data-startref="CPtypsyn" data-type="indexterm">&nbsp;</a></p>
+<p>The typed AST is more explicit than the untyped syntax tree. For instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>).</p>
 <p>You’ll rarely need to look at this raw output from the compiler unless you’re building IDE tools, or are hacking on extensions to the core compiler itself. However, it’s useful to know that this intermediate form exists before we delve further into the code generation process next, in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 25, The Compiler Backend Byte Code And Native Code</a>.</p>
 <p>There are several new integrated tools emerging that combine these typed AST files with common editors such as Emacs or Vim. The best of these is <a href="https://github.com/def-lkb/merlin">Merlin</a>, which adds value and module autocompletion, displays inferred types and can build and display errors directly from within your editor. There are instructions available on its homepage for configuring Merlin with your favorite editor, or its bigger sibling <code>ocaml-lsp-server</code> is described earlier in <a data-type="xref" href="platform.html#using-visual-studio-code">Chapter 20, OCaml Platform</a>.</p>
 </section>

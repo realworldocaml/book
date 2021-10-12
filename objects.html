@@ -486,7 +486,7 @@ shape readonly_stack)]
 &gt;- : float = 7280.
 </code></pre>
 </div>
-<p>Aspects of this section may seem fairly complicated, but it should be pointed out that this typing <em>works</em>, and in the end, the type annotations are fairly minor. In most typed object-oriented languages, these coercions would simply not be possible. For example, in C++, a STL type <code>list&lt;T&gt;</code> is invariant in <code>T</code>, so it is simply not possible to use <code>list&lt;square&gt;</code> where <code>list&lt;shape&gt;</code> is expected (at least safely). The situation is similar in Java, although Java has an escape hatch that allows the program to fall back to dynamic typing. The situation in OCaml is much better: it works, it is statically checked, and the annotations are pretty simple.<a data-startref="var" data-type="indexterm">&nbsp;</a><a data-startref="SUBvar" data-type="indexterm">&nbsp;</a></p>
+<p>Aspects of this section may seem fairly complicated, but it should be pointed out that this typing <em>works</em>, and in the end, the type annotations are fairly minor. In most typed object-oriented languages, these coercions would simply not be possible. For example, in C++, a STL type <code>list&lt;T&gt;</code> is invariant in <code>T</code>, so it is simply not possible to use <code>list&lt;square&gt;</code> where <code>list&lt;shape&gt;</code> is expected (at least safely). The situation is similar in Java, although Java has an escape hatch that allows the program to fall back to dynamic typing. The situation in OCaml is much better: it works, it is statically checked, and the annotations are pretty simple.<a data-secondary="coercions" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 <section class="level3" id="narrowing">
@@ -603,7 +603,7 @@ shape_ref := circle 20 ;;
 &gt;       The second object type has no method radius
 </code></pre>
 </div>
-<p>In both these cases we must use subtyping:<a data-startref="OBsub" data-type="indexterm">&nbsp;</a></p>
+<p>In both these cases we must use subtyping:<a data-secondary="subtyping" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)] ;;
 &gt;val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]

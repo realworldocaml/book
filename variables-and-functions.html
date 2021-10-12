@@ -444,7 +444,7 @@ String.split ~on:':' path
 </code></pre>
 </div>
 <p>The type error is a little bewildering at first glance. What’s going on is that, because <code>^&gt;</code> is right associative, the operator is trying to feed the value <code>List.dedup_and_sort ~compare:String.compare</code> to the function <code>List.iter ~f:print_endline</code>. But <code>List.iter ~f:print_endline</code> expects a list of strings as its input, not a function.</p>
-<p>The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.<a data-startref="FNCprf" data-type="indexterm">&nbsp;</a></p>
+<p>The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.</p>
 </section>
 <section class="level3" id="declaring-functions-with-function">
 <h3>Declaring Functions with <code>function</code></h3>
@@ -775,7 +775,7 @@ prepend_pound "a BASH comment" ~sep:"--- " ;;
 &gt;- : ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As you can see, OCaml’s support for labeled and optional arguments is not without its complexities. But don’t let these complexities obscure the usefulness of these features. Labels and optional arguments are very effective tools for making your APIs both more convenient and safer, and it’s worth the effort of learning how to use them effectively.<a data-startref="ARGopt" data-type="indexterm">&nbsp;</a><a data-startref="FNCopt" data-type="indexterm">&nbsp;</a></p>
+<p>As you can see, OCaml’s support for labeled and optional arguments is not without its complexities. But don’t let these complexities obscure the usefulness of these features. Labels and optional arguments are very effective tools for making your APIs both more convenient and safer, and it’s worth the effort of learning how to use them effectively.</p>
 </section>
 </section>
 </section>

@@ -229,7 +229,7 @@ end
 &gt;module Delayer : Delayer_intf
 </code></pre>
 </div>
-<p>This code isn’t particularly long, but it is subtle. In particular, note how the queue of thunks is used to ensure that the enqueued actions are run in the order they were scheduled, even if the thunks scheduled by <code>upon</code> are run out of order. This kind of subtlety is typical of code that involves ivars and <code>upon</code>, and because of this, you should stick to the simpler map/bind/return style of working with deferreds when you can.<a data-startref="ALbas" data-type="indexterm">&nbsp;</a></p>
+<p>This code isn’t particularly long, but it is subtle. In particular, note how the queue of thunks is used to ensure that the enqueued actions are run in the order they were scheduled, even if the thunks scheduled by <code>upon</code> are run out of order. This kind of subtlety is typical of code that involves ivars and <code>upon</code>, and because of this, you should stick to the simpler map/bind/return style of working with deferreds when you can.</p>
 <section data-type="note" class="level5" id="understanding-bind-in-terms-of-ivars-and-upon">
 <h5>Understanding <code>bind</code> in terms of ivars and <code>upon</code></h5>
 <p>Here’s roughly what happens when you write <code>let d' = Deferred.bind d ~f</code>.</p>
@@ -455,7 +455,7 @@ write_complete ;;
 &gt;= &lt;fun&gt;
 </code></pre>
 </div>
-<p>This differs from the ordinary <code>Command.basic</code> call in that the main function must return a <code>Deferred.t</code>, and that the running of the command (using <code>Command.run</code>) automatically starts the Async scheduler, without requiring an explicit call to <code>Scheduler.go</code>.<a data-startref="echo" data-type="indexterm">&nbsp;</a><a data-startref="ALecho" data-type="indexterm">&nbsp;</a></p>
+<p>This differs from the ordinary <code>Command.basic</code> call in that the main function must return a <code>Deferred.t</code>, and that the running of the command (using <code>Command.run</code>) automatically starts the Async scheduler, without requiring an explicit call to <code>Scheduler.go</code>.<a data-secondary="running async commands" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 <section class="level2" id="example-searching-definitions-with-duckduckgo">
@@ -582,7 +582,7 @@ let search_and_print words =
       fun () -&gt; search_and_print words)
   |&gt; Command.run</code></pre>
 </div>
-<p>And that’s all we need for a simple but usable definition searcher:<a data-startref="ALduckduck" data-type="indexterm">&nbsp;</a></p>
+<p>And that’s all we need for a simple but usable definition searcher:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 &gt;Concurrent Programming
@@ -816,7 +816,7 @@ let print_result (word, definition) =
 </code></pre>
 </div>
 <p>Now, only the query that went to <code>localhost</code> failed.</p>
-<p>Note that in this code, we’re relying on the fact that <code>Cohttp_async.Client.get</code> will clean up after itself after an exception, in particular by closing its file descriptors. If you need to implement such functionality directly, you may want to use the <code>Monitor.protect</code> call, which is analogous to the <code>protect</code> call described in <a data-type="xref" href="error-handling.html#cleaning-up-in-the-presence-of-exceptions">Chapter 7, Cleaning Up In The Presence Of Exceptions</a>.<a data-startref="ALexcept" data-type="indexterm">&nbsp;</a></p>
+<p>Note that in this code, we’re relying on the fact that <code>Cohttp_async.Client.get</code> will clean up after itself after an exception, in particular by closing its file descriptors. If you need to implement such functionality directly, you may want to use the <code>Monitor.protect</code> call, which is analogous to the <code>protect</code> call described in <a data-type="xref" href="error-handling.html#cleaning-up-in-the-presence-of-exceptions">Chapter 7, Cleaning Up In The Presence Of Exceptions</a>.</p>
 </section>
 </section>
 <section class="level2" id="timeouts-cancellation-and-choices">
@@ -1030,7 +1030,7 @@ log_delays (fun () -&gt; In_thread.run noalloc_busy_loop) ;;
 <li><p>There is no shared mutable state between the various threads involved.</p></li>
 <li><p>The computations executed by <code>In_thread.run</code> do not make any calls to the Async library.</p></li>
 </ul>
-<p>It is possible to safely use threads in ways that violate these constraints. In particular, foreign threads can acquire the Async lock using calls from the <code>Thread_safe</code> module in Async, and thereby run Async computations safely. This is a very flexible way of connecting threads to the Async world, but it’s a complex use case that is beyond the scope of this chapter. <a data-startref="systhrd" data-type="indexterm">&nbsp;</a><a data-startref="ALsysthr" data-type="indexterm">&nbsp;</a></p>
+<p>It is possible to safely use threads in ways that violate these constraints. In particular, foreign threads can acquire the Async lock using calls from the <code>Thread_safe</code> module in Async, and thereby run Async computations safely. This is a very flexible way of connecting threads to the Async world, but it’s a complex use case that is beyond the scope of this chapter. <a data-primary="system threads" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 </section>

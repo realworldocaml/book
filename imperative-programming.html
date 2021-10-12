@@ -135,7 +135,7 @@ let () = &lt;expr2&gt; in
 &lt;exprN&gt;</code></pre>
 </div>
 <p>When a sequence expression <code>expr1; expr2</code> is evaluated, <code>expr1</code> is evaluated first, and then <code>expr2</code>. The expression <code>expr1</code> should have type <code>unit</code> (though this is a warning rather than a hard restriction. The <code>-strict-sequence</code> compiler flag makes this a hard restriction, which is generally a good idea), and the value of <code>expr2</code> is returned as the value of the entire sequence. For example, the sequence <code>print_string "hello world"; 1 + 2</code> first prints the string <code>"hello world"</code>, then returns the integer <code>3</code>.</p>
-<p>Note also that we do all of the side-effecting operations at the very end of each function. This is good practice because it minimizes the chance that such operations will be interrupted with an exception, leaving the data structure in an inconsistent state. <a data-startref="DICTimper" data-type="indexterm">&nbsp;</a><a data-startref="IPimpdict" data-type="indexterm">&nbsp;</a></p>
+<p>Note also that we do all of the side-effecting operations at the very end of each function. This is good practice because it minimizes the chance that such operations will be interrupted with an exception, leaving the data structure in an inconsistent state.<a data-secondary="imperative" data-primary="side effects" data-type="indexterm">&nbsp;</a></p>
 </section>
 <section class="level2" id="primitive-mutable-data">
 <h2>Primitive Mutable Data</h2>
@@ -416,7 +416,7 @@ let find_el t ~f =
   in
   loop !t</code></pre>
 </div>
-<p>This completes our implementation, but there’s still considerably more work to be done to make a really usable doubly linked list. As mentioned earlier, you’re probably better off using something like Core <code>Doubly_linked</code> module that has a more complete interface and has more of the tricky corner cases worked out. Nonetheless, this example should serve to demonstrate some of the techniques you can use to build nontrivial imperative data structure in OCaml, as well as some of the pitfalls.<a data-startref="IPdoublink" data-type="indexterm">&nbsp;</a></p>
+<p>This completes our implementation, but there’s still considerably more work to be done to make a really usable doubly linked list. As mentioned earlier, you’re probably better off using something like Core <code>Doubly_linked</code> module that has a more complete interface and has more of the tricky corner cases worked out. Nonetheless, this example should serve to demonstrate some of the techniques you can use to build nontrivial imperative data structure in OCaml, as well as some of the pitfalls.</p>
 </section>
 </section>
 <section class="level2" id="laziness-and-other-benign-effects">
@@ -741,7 +741,7 @@ time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40) ;;
 &gt;- : int = 102334155
 </code></pre>
 </div>
-<p>Laziness is more constrained than explicit mutation, and so in some cases can lead to code whose behavior is easier to think about. <a data-startref="BEmem" data-type="indexterm">&nbsp;</a></p>
+<p>Laziness is more constrained than explicit mutation, and so in some cases can lead to code whose behavior is easier to think about. <a data-secondary="let rec" data-primary="limitations" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 </section>
@@ -964,7 +964,7 @@ sum_file "numbers.txt" ;;
 &gt;val sum_file : string -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is just a taste of the functionality of <code>In_channel</code> and <code>Out_channel</code>. To get a fuller understanding, you should review the API documentation for those modules.<a data-startref="IPinpout" data-type="indexterm">&nbsp;</a></p>
+<p>This is just a taste of the functionality of <code>In_channel</code> and <code>Out_channel</code>. To get a fuller understanding, you should review the API documentation for those modules.</p>
 </section>
 </section>
 <section class="level2" id="order-of-evaluation">

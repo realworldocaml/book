@@ -167,7 +167,7 @@ let () =
 </code></pre>
 </div>
 <p>These results confirm the performance hypothesis that we obtained earlier by inspecting the lambda code. The shortest running time comes from the small conditional pattern match, and polymorphic variant pattern matching is the slowest. There isn’t a hugely significant difference in these examples, but you can use the same techniques to peer into the innards of your own source code and narrow down any performance hotspots.</p>
-<p>The lambda form is primarily a stepping stone to the bytecode executable format that we’ll cover next. It’s often easier to look at the textual output from this stage than to wade through the native assembly code from compiled executables.<a data-startref="CPuntype" data-type="indexterm">&nbsp;</a></p>
+<p>The lambda form is primarily a stepping stone to the bytecode executable format that we’ll cover next. It’s often easier to look at the textual output from this stage than to wade through the native assembly code from compiled executables.</p>
 </section>
 </section>
 <section class="level2" id="generating-portable-bytecode">
@@ -297,7 +297,7 @@ After calling OCaml</code></pre>
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
 </code></pre>
 </div>
-<p>Embedding OCaml code like this lets you write OCaml that interfaces with any environment that works with a C compiler. You can even cross back from the C code into OCaml by using the <code>Callback</code> module to register named entry points in the OCaml code. This is explained in detail in the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">interfacing with C</a> section of the OCaml manual. <a data-startref="CPportbyte" data-type="indexterm">&nbsp;</a></p>
+<p>Embedding OCaml code like this lets you write OCaml that interfaces with any environment that works with a C compiler. You can even cross back from the C code into OCaml by using the <code>Callback</code> module to register named entry points in the OCaml code. This is explained in detail in the <a href="https://ocaml.org/manual/intfc.html">interfacing with C</a> section of the OCaml manual.</p>
 </section>
 </section>
 <section class="level2" id="compiling-fast-native-code">

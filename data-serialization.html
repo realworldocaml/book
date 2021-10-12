@@ -641,7 +641,7 @@ sexp_of_http_server_config
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
 </code></pre>
 </div>
-<p>This can be very useful in designing config file formats that are both reasonably terse and easy to generate and maintain. It can also be useful for backwards compatibility: if you add a new field to your config record, but you make that field optional, then you should still be able to parse older version of your config. <a data-startref="SERFORMsexp" data-type="indexterm">&nbsp;</a><a data-secondary="config files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="config file formats" data-type="indexterm">&nbsp;</a></p>
+<p>This can be very useful in designing config file formats that are both reasonably terse and easy to generate and maintain. It can also be useful for backwards compatibility: if you add a new field to your config record, but you make that field optional, then you should still be able to parse older version of your config. <a data-secondary="config files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="config file formats" data-type="indexterm">&nbsp;</a></p>
 <p>The exact attribute you use depends on the comparison functions available over the type that you wish to drop:</p>
 <ul>
 <li><code>[@sexp_drop_default.compare]</code> if the type supports <code>[%compare]</code></li>

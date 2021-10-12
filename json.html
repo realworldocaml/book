@@ -227,7 +227,7 @@ let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option ;;
 </code></pre>
 </div>
 <p>This style of programming, which omits variable names and chains functions together, is known as <em>point-free programming</em>. It’s a succinct style but shouldn’t be overused due to the increased difficulty of debugging intermediate values. If an explicit <span class="keep-together">name</span> is assigned to each stage of the transformations, debuggers in particular have an easier time making the program flow simpler to represent to the programmer.</p>
-<p>This technique of using statically typed parsing functions is very powerful in combination with the OCaml type system. Many errors that don’t make sense at runtime (for example, mixing up lists and objects) will be caught statically via a type error. <a data-startref="JSONselval" data-type="indexterm">&nbsp;</a><a data-startref="VALjson" data-type="indexterm">&nbsp;</a></p>
+<p>This technique of using statically typed parsing functions is very powerful in combination with the OCaml type system. Many errors that don’t make sense at runtime (for example, mixing up lists and objects) will be caught statically via a type error.</p>
 </section>
 <section class="level2" id="constructing-json-values">
 <h2>Constructing JSON Values</h2>
@@ -586,7 +586,7 @@ dune exec -- ./github_org_info.exe janestreet
 </code></pre>
 </div>
 <p>The JSON returned from the <code>janestreet</code> query is missing an organization name, but this is explicitly reflected in the OCaml type, since the ATD spec marked <code>name</code> as an optional field. Our OCaml code explicitly handles this case and doesn’t have to worry about null-pointer exceptions. Similarly, the JSON integer for the <code>id</code> is mapped into a native OCaml integer via the ATD conversion.</p>
-<p>While this tool is obviously quite simple, the ability to specify optional and default fields is very powerful. Take a look at the full ATD specification for the GitHub API in the <a href="http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a> repository online, which has lots of quirks typical in real-world web APIs. <a data-startref="MAPjson" data-type="indexterm">&nbsp;</a><a data-startref="JSONautomap" data-type="indexterm">&nbsp;</a><a data-startref="SERjson" data-type="indexterm">&nbsp;</a><a data-startref="DATjson" data-type="indexterm">&nbsp;</a></p>
+<p>While this tool is obviously quite simple, the ability to specify optional and default fields is very powerful. Take a look at the full ATD specification for the GitHub API in the <a href="http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a> repository online, which has lots of quirks typical in real-world web APIs.</p>
 <p>Our example shells out to <code>curl</code> on the command line to obtain the JSON, which is rather inefficient. We’ll explain how to integrate the HTTP fetch directly into your OCaml application in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 15, Concurrent Programming With Async</a>.</p>
 </section>
 </section>

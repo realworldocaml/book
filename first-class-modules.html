@@ -210,7 +210,7 @@ create_comparable Float.compare ;;
 </code></pre>
 </div>
 <p>Here, what we effectively do is capture a polymorphic type and export it as a concrete type within a module.</p>
-<p>This technique is useful beyond first-class modules. For example, we can use the same approach to construct a local module to be fed to a functor. <a data-startref="FCMwork" data-type="indexterm">&nbsp;</a></p>
+<p>This technique is useful beyond first-class modules. For example, we can use the same approach to construct a local module to be fed to a functor.</p>
 </section>
 </section>
 <section class="level2" id="example-a-query-handling-framework">
@@ -672,7 +672,7 @@ type query_handler = Sexp.t -&gt; query_handler_instance ;;
 &gt;val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
 </code></pre>
 </div>
-<p>For an example on this scale, the preceding approach is completely reasonable, and first-class modules are not really necessary. But the more functionality you need to hide away behind a set of closures, and the more complicated the relationships between the different types in question, the more awkward this approach becomes, and the better it is to use first-class modules. <a data-startref="MODfirst" data-type="indexterm">&nbsp;</a></p>
+<p>For an example on this scale, the preceding approach is completely reasonable, and first-class modules are not really necessary. But the more functionality you need to hide away behind a set of closures, and the more complicated the relationships between the different types in question, the more awkward this approach becomes, and the better it is to use first-class modules.</p>
 </section>
 </section>
 </article></div><a href="objects.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 11</small>Objects</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
