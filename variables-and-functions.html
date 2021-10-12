@@ -334,24 +334,80 @@ List.map ~f:((+) 3) [4;5;6] ;;
 </code></pre>
 </div>
 <p>The syntactic role of an operator is typically determined by its first character or two, though there are a few exceptions. The list below breaks the different operators and other syntactic forms into groups from highest to lowest precedence, explaining how each behaves syntactically. We write <code>!</code>… to indicate the class of operators beginning with <code>!</code>.</p>
-<ul>
-<li><code>!</code>…, <code>?</code>…, <code>~</code>… (Prefix)</li>
-<li><code>.</code>, <code>.(</code>, <code>.[</code> | -</li>
-<li>function application, constructor, <code>assert</code>, <code>lazy</code> | Left associative</li>
-<li><code>-</code>, <code>-.</code> | Prefix</li>
-<li><code>**</code>…, <code>lsl</code>, <code>lsr</code>, <code>asr</code> | Right associative</li>
-<li><code>*</code>…, <code>/</code>…, <code>%</code>…, <code>mod</code>, <code>land</code>, <code>lor</code>, <code>lxor</code> | Left associative</li>
-<li><code>+</code>…, <code>-</code>… | Left associative</li>
-<li><code>::</code> | Right associative</li>
-<li><code>@</code>…, <code>^</code>… | Right associative</li>
-<li><code>=</code>…, <code>&lt;</code>…, <code>&gt;</code>…, <code>|</code>…, <code>&amp;</code>…, <code>$</code>… | Left associative</li>
-<li><code>&amp;</code>, <code>&amp;&amp;</code> | Right associative</li>
-<li><code>or</code>, <code>||</code> | Right associative</li>
-<li><code>,</code> | -</li>
-<li><code>&lt;-</code>, <code>:=</code> | Right associative</li>
-<li><code>if</code> | -</li>
-<li><code>;</code> | Right associative</li>
-</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Syntax</th>
+<th>Associativity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>!</code>…, <code>?</code>…, <code>~</code>…</td>
+<td>Prefix</td>
+</tr>
+<tr class="even">
+<td><code>.</code>, <code>.(</code>, <code>.[</code></td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>function application, constructor, <code>assert</code>, <code>lazy</code></td>
+<td>Left associative</td>
+</tr>
+<tr class="even">
+<td><code>-</code>, <code>-.</code></td>
+<td>Prefix</td>
+</tr>
+<tr class="odd">
+<td><code>**</code>…, <code>lsl</code>, <code>lsr</code>, <code>asr</code></td>
+<td>Right associative</td>
+</tr>
+<tr class="even">
+<td><code>*</code>…, <code>/</code>…, <code>%</code>…, <code>mod</code>, <code>land</code>, <code>lor</code>, <code>lxor</code></td>
+<td>Left associative</td>
+</tr>
+<tr class="odd">
+<td><code>+</code>…, <code>-</code>…</td>
+<td>Left associative</td>
+</tr>
+<tr class="even">
+<td><code>::</code></td>
+<td>Right associative</td>
+</tr>
+<tr class="odd">
+<td><code>@</code>…, <code>^</code>…</td>
+<td>Right associative</td>
+</tr>
+<tr class="even">
+<td><code>=</code>…, <code>&lt;</code>…, <code>&gt;</code>…, <code>|</code>…, <code>&amp;</code>…, <code>$</code>…</td>
+<td>Left associative</td>
+</tr>
+<tr class="odd">
+<td><code>&amp;</code>, <code>&amp;&amp;</code></td>
+<td>Right associative</td>
+</tr>
+<tr class="even">
+<td><code>or</code>, <code>||</code></td>
+<td>Right associative</td>
+</tr>
+<tr class="odd">
+<td><code>,</code></td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><code>&lt;-</code>, <code>:=</code></td>
+<td>Right associative</td>
+</tr>
+<tr class="odd">
+<td><code>if</code></td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><code>;</code></td>
+<td>Right associative</td>
+</tr>
+</tbody>
+</table>
 <p>There’s one important special case: <code>-</code> and <code>-.</code>, which are the integer and floating-point subtraction operators, and can act as both prefix operators (for negation) and infix operators (for subtraction). So, both <code>-x</code> and <code>x - y</code> are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code.<a data-secondary="negation operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 (-4) ;;
