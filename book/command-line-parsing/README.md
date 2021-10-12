@@ -997,16 +997,16 @@ binary is called `md5` in the current directory:
 
 ```sh dir=examples/correct/md5_with_flags,non-deterministic=output
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
-function _jsautocom_16984 {
+function _jsautocom_32087 {
   export COMP_CWORD
   COMP_WORDS[0]=./md5.exe
   if type readarray > /dev/null
   then readarray -t COMPREPLY < <("${COMP_WORDS[@]}")
   else IFS="
-" read -d "\0" -A COMPREPLY < <("${COMP_WORDS[@]}")
+" read -d "" -A COMPREPLY < <("${COMP_WORDS[@]}")
   fi
 }
-complete -F _jsautocom_16984 ./md5.exe
+complete -F _jsautocom_32087 ./md5.exe
 ```
 
 Recall that we used the `Arg_type.file` to specify the argument type. This

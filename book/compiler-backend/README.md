@@ -246,15 +246,14 @@ default, and you'll see the results summarized in a neat table:
 
 
 ```sh dir=examples/back-end/bench_patterns,non-deterministic=command
-$ dune build bench_patterns.exe
-$ ./_build/default/bench_patterns.exe -ascii -quota 0.25
-Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
+$ dune exec -- ./bench_patterns.exe -ascii -quota 0.25
+Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
 
   Name                         Time/Run   Percentage
  ---------------------------- ---------- ------------
-  Polymorphic pattern           24.93ns       89.45%
-  Monomorphic larger pattern    27.88ns      100.00%
-  Monomorphic small pattern     10.84ns       38.90%
+  Polymorphic pattern           15.72ns      100.00%
+  Monomorphic larger pattern     9.41ns       59.89%
+  Monomorphic small pattern      8.73ns       55.56%
 
 ```
 
@@ -694,14 +693,13 @@ open Core
 open Core_bench
 
 let polymorphic_compare () =
-  let cmp a b = if a > b then a else b in
+  let cmp a b = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
 
 let monomorphic_compare () =
-  let cmp (a:int) (b:int) =
-    if a > b then a else b in
+  let cmp (a:int) (b:int) = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
@@ -728,23 +726,35 @@ Running this shows quite a significant runtime difference between the two:
 
 
 ```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
-$ dune build bench_poly_and_mono.exe
-$ ./_build/default/bench_poly_and_mono.exe -ascii -quota 1
-Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+$ dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
+Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
-  Name                        Time/Run   Percentage
- ------------------------ ------------- ------------
-  Polymorphic comparison   18_402.43ns      100.00%
-  Monomorphic comparison      734.22ns        3.99%
+  Name                       Time/Run   Percentage
+ ------------------------ ------------ ------------
+  Polymorphic comparison   6_856.10ns      100.00%
+  Monomorphic comparison     753.02ns       10.98%
 
 ```
 
-We see that the polymorphic comparison is close to 20 times slower! These
+We see that the polymorphic comparison is close to 10 times slower! These
 results shouldn't be taken too seriously, as this is a very narrow test that,
 like all such microbenchmarks, isn't representative of more complex
 codebases. However, if you're building numerical code that runs many
 iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
+
+::: {data-type=note}
+##### Accessing Stdlib modules from within Core
+
+In the benchmark above comparing polymorphic and monomorphic comparison,
+you may have noticed that we prepended the comparison functions with `Stdlib`.
+This is because the Core module explicitly redefines the `>` and `<` and `=`
+operators to be specialised for operating over `int` types, as explained in
+[Maps and Hashtables](maps-and-hashtables.html#the-polymorphic-comparator){data-type=xref}.
+You can always recover any of the OCaml standard library functions by accessing
+them through the `Stdlib` module, as we did in our benchmark.
+
+:::
 
 
 ### Debugging Native Code Binaries
@@ -1095,11 +1105,11 @@ $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words
-Initial major heap size: 3840k bytes
-Initial space overhead: 80%
+Initial major heap size: 992k bytes
+Initial space overhead: 120%
 Initial max overhead: 500%
 Initial heap increment: 15%
-Initial allocation policy: 0
+Initial allocation policy: 2
 Initial smoothing window: 1
 Hello OCaml World!
 ```
