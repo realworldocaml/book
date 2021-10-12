@@ -217,21 +217,19 @@ let () =
   (libraries core core_bench))</code></pre>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build barrier_bench.exe
-dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
-&gt;Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
+&gt;Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 &gt;
 &gt;  Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
 &gt; ----------- ---------- --------- ---------- ---------- ------------
-&gt;  mutable       8.98ms    2.00Mw     20.36w     20.36w      100.00%
-&gt;  immutable     5.66ms    5.00Mw                             63.08%
+&gt;  mutable       5.10ms    2.00Mw     20.61w     20.61w      100.00%
+&gt;  immutable     4.63ms    5.00Mw      0.28w      0.28w       90.88%
 </code></pre>
 </div>
-<p>There is a stark space/time trade-off here. The mutable version takes significantly longer to complete than the immutable one but allocates many fewer minor-heap words than the immutable version. Minor allocation in OCaml is very fast, and so it is often better to use immutable data structures in preference to the more conventional mutable versions. On the other hand, if you only rarely mutate a value, it can be faster to take the write-barrier hit and not allocate at all.</p>
+<p>There is a space/time trade-off here. The mutable version takes longer to complete than the immutable one but allocates many fewer minor-heap words than the immutable version. Minor allocation in OCaml is very fast, and so it is often better to use immutable data structures in preference to the more conventional mutable versions. On the other hand, if you only rarely mutate a value, it can be faster to take the write-barrier hit and not allocate at all.</p>
 <p>The only way to know for sure is to benchmark your program under real-world scenarios using <code>Core_bench</code> and experiment with the trade-offs. The command-line benchmark binaries have a number of useful options that affect garbage collection behavior:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build barrier_bench.exe
-dune exec -- ./barrier_bench.exe -help | head -13
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./barrier_bench.exe -help | head -13
 &gt;Benchmark for mutable, immutable
 &gt;
 &gt;  barrier_bench.exe [COLUMN ...]
@@ -253,8 +251,8 @@ dune exec -- ./barrier_bench.exe -help | head -13
 <section class="level2" id="attaching-finalizer-functions-to-values">
 <h2>Attaching Finalizer Functions to Values</h2>
 <p>OCaml’s automatic memory management guarantees that a value will eventually be freed when it’s no longer in use, either via the GC sweeping it or the program terminating. It’s sometimes useful to run extra code just before a value is freed by the GC, for example, to check that a file descriptor has been closed, or that a log message is recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in grabage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level3" id="what-values-can-be-finalized">
-<h3>What Values Can Be Finalized?</h3>
+<section data-type="note" class="level5" id="what-values-can-be-finalized">
+<h5>What Values Can Be Finalized?</h5>
 <p>Various values cannot have finalizers attached since they aren’t heap-allocated. Some examples of values that are not heap-allocated are integers, constant constructors, Booleans, the empty array, the empty list, and the unit value. The exact list of what is heap-allocated or not is implementation-dependent, which is why Core provides the <code>Heap_block</code> module to explicitly check before attaching the finalizer.</p>
 <p>Some constant values can be heap-allocated but never deallocated during the lifetime of the program, for example, a list of integer constants. <code>Heap_block</code> explicitly checks to see if the value is in the major or minor heap, and rejects most constant values. Compiler optimizations may also duplicate some immutable values such as floating-point values in arrays. These may be finalized while another <span class="keep-together">duplicate</span> copy is being used by the program.</p>
 <p>For this reason, attach finalizers only to values that you are explicitly sure are heap-allocated and aren’t immutable. A common use is to attach them to file descriptors to ensure they are closed. However, the finalizer normally shouldn’t be the primary way of closing the file descriptor, since it depends on the GC running in order to collect the value. For a busy system, you can easily run out of a scarce resource such as file descriptors before the GC catches up.</p>

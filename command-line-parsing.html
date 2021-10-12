@@ -725,16 +725,16 @@ let add =
 <p>For example, let’s try it on our MD5 example from earlier, assuming that the binary is called <code>md5</code> in the current directory:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
-&gt;function _jsautocom_16984 {
+&gt;function _jsautocom_32087 {
 &gt;  export COMP_CWORD
 &gt;  COMP_WORDS[0]=./md5.exe
 &gt;  if type readarray &gt; /dev/null
 &gt;  then readarray -t COMPREPLY &lt; &lt;("${COMP_WORDS[@]}")
 &gt;  else IFS="
-&gt;" read -d "\0" -A COMPREPLY &lt; &lt;("${COMP_WORDS[@]}")
+&gt;" read -d "" -A COMPREPLY &lt; &lt;("${COMP_WORDS[@]}")
 &gt;  fi
 &gt;}
-&gt;complete -F _jsautocom_16984 ./md5.exe
+&gt;complete -F _jsautocom_32087 ./md5.exe
 </code></pre>
 </div>
 <p>Recall that we used the <code>Arg_type.file</code> to specify the argument type. This also supplies the completion logic so that you can just press Tab to complete files in your current directory.</p>

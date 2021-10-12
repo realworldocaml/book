@@ -156,15 +156,14 @@ let () =
   (libraries core_bench))</code></pre>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build bench_patterns.exe
-./_build/default/bench_patterns.exe -ascii -quota 0.25
-&gt;Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./bench_patterns.exe -ascii -quota 0.25
+&gt;Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
 &gt;
 &gt;  Name                         Time/Run   Percentage
 &gt; ---------------------------- ---------- ------------
-&gt;  Polymorphic pattern           24.93ns       89.45%
-&gt;  Monomorphic larger pattern    27.88ns      100.00%
-&gt;  Monomorphic small pattern     10.84ns       38.90%
+&gt;  Polymorphic pattern           15.72ns      100.00%
+&gt;  Monomorphic larger pattern     9.41ns       59.89%
+&gt;  Monomorphic small pattern      8.73ns       55.56%
 </code></pre>
 </div>
 <p>These results confirm the performance hypothesis that we obtained earlier by inspecting the lambda code. The shortest running time comes from the small conditional pattern match, and polymorphic variant pattern matching is the slowest. There isn’t a hugely significant difference in these examples, but you can use the same techniques to peer into the innards of your own source code and narrow down any performance hotspots.</p>
@@ -392,14 +391,13 @@ After calling OCaml</code></pre>
 open Core_bench
 
 let polymorphic_compare () =
-  let cmp a b = if a &gt; b then a else b in
+  let cmp a b = Stdlib.(if a &gt; b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
 
 let monomorphic_compare () =
-  let cmp (a:int) (b:int) =
-    if a &gt; b then a else b in
+  let cmp (a:int) (b:int) = Stdlib.(if a &gt; b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
@@ -421,17 +419,20 @@ let () =
   (libraries core_bench))</code></pre>
 </div>
 <div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build bench_poly_and_mono.exe
-./_build/default/bench_poly_and_mono.exe -ascii -quota 1
-&gt;Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
+&gt;Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 &gt;
-&gt;  Name                        Time/Run   Percentage
-&gt; ------------------------ ------------- ------------
-&gt;  Polymorphic comparison   18_402.43ns      100.00%
-&gt;  Monomorphic comparison      734.22ns        3.99%
+&gt;  Name                       Time/Run   Percentage
+&gt; ------------------------ ------------ ------------
+&gt;  Polymorphic comparison   6_856.10ns      100.00%
+&gt;  Monomorphic comparison     753.02ns       10.98%
 </code></pre>
 </div>
-<p>We see that the polymorphic comparison is close to 20 times slower! These results shouldn’t be taken too seriously, as this is a very narrow test that, like all such microbenchmarks, isn’t representative of more complex codebases. However, if you’re building numerical code that runs many iterations in a tight inner loop, it’s worth manually peering at the produced assembly code to see if you can hand-optimize it.</p>
+<p>We see that the polymorphic comparison is close to 10 times slower! These results shouldn’t be taken too seriously, as this is a very narrow test that, like all such microbenchmarks, isn’t representative of more complex codebases. However, if you’re building numerical code that runs many iterations in a tight inner loop, it’s worth manually peering at the produced assembly code to see if you can hand-optimize it.</p>
+<section data-type="note" class="level5" id="accessing-stdlib-modules-from-within-core">
+<h5>Accessing Stdlib modules from within Core</h5>
+<p>In the benchmark above comparing polymorphic and monomorphic comparison, you may have noticed that we prepended the comparison functions with <code>Stdlib</code>. This is because the Core module explicitly redefines the <code>&gt;</code> and <code>&lt;</code> and <code>=</code> operators to be specialised for operating over <code>int</code> types, as explained in <a data-type="xref" href="maps-and-hashtables.html#the-polymorphic-comparator">Chapter 13, Maps and Hashtables</a>. You can always recover any of the OCaml standard library functions by accessing them through the <code>Stdlib</code> module, as we did in our benchmark.</p>
+</section>
 </section>
 </section>
 <section class="level3" id="debugging-native-code-binaries">
@@ -637,11 +638,11 @@ After calling OCaml</code></pre>
 ./hello.native
 &gt;### OCaml runtime: debug mode ###
 &gt;Initial minor heap size: 256k words
-&gt;Initial major heap size: 3840k bytes
-&gt;Initial space overhead: 80%
+&gt;Initial major heap size: 992k bytes
+&gt;Initial space overhead: 120%
 &gt;Initial max overhead: 500%
 &gt;Initial heap increment: 15%
-&gt;Initial allocation policy: 0
+&gt;Initial allocation policy: 2
 &gt;Initial smoothing window: 1
 &gt;Hello OCaml World!
 </code></pre>

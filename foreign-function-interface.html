@@ -422,14 +422,14 @@ let timezone : timezone structure typ = structure "timezone" ;;
   ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Caml.Pervasives.(float secs +. float usecs /. 1000000.0)
+  Stdlib.(float secs +. float usecs /. 1000000.0)
 ;;
 &gt;val gettimeofday' : unit -&gt; float = &lt;fun&gt;
 gettimeofday' () ;;
-&gt;- : float = 1516746708.884176
+&gt;- : float = 1633964254.067426
 </code></pre>
 </div>
-<p>You need to be a little careful not to get all the open modules mixed up here. Both <code>Pervasives</code> and <code>Ctypes</code> define different <code>float</code> functions. The <code>Ctypes</code> module we opened up earlier overrides the <code>Pervasives</code> definition. As seen previously though, you just need to locally open <code>Pervasives</code> again to bring the usual <code>float</code> function back in scope.</p>
+<p>You need to be a little careful not to get all the open modules mixed up here. Both <code>Stdlib</code> and <code>Ctypes</code> define different <code>float</code> functions. The <code>Ctypes</code> module we opened up earlier overrides the <code>Pervasives</code> definition. As seen previously though, you just need to locally open <code>Pervasives</code> again to bring the usual <code>float</code> function back in scope.</p>
 <section class="level4" id="recap-a-time-printing-command">
 <h4>Recap: A time-printing command</h4>
 <p>We built up a lot of bindings in the previous section, so let’s recap them with a complete example that ties it together with a command-line frontend: <a data-secondary="time-printing command" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
@@ -462,7 +462,7 @@ let gettimeofday' () =
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1_000_000.)
+  Stdlib.(float secs +. float usecs /. 1_000_000.)
 
 let float_time () = printf "%f%!\n" (gettimeofday' ())
 
@@ -486,9 +486,9 @@ let () =
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build datetime.exe
 ./_build/default/datetime.exe
-&gt;1520339271.364367
+&gt;1633964258.014484
 ./_build/default/datetime.exe -a
-&gt;Tue Mar  6 13:27:51 2018
+&gt;Mon Oct 11 15:57:38 2021
 </code></pre>
 </div>
 <section data-type="note" class="level5" id="why-do-we-need-to-use-returning">
