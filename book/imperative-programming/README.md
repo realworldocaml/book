@@ -260,8 +260,7 @@ then returns the integer `3`.
 Note also that we do all of the side-effecting operations at the very end of
 each function. This is good practice because it minimizes the chance that
 such operations will be interrupted with an exception, leaving the data
-structure in an inconsistent state.
-<a data-type="indexterm" data-startref="DICTimper">&nbsp;</a><a data-type="indexterm" data-startref="IPimpdict">&nbsp;</a>
+structure in an inconsistent state.[side effects/imperative]{.idx}
 
 ## Primitive Mutable Data
 
@@ -720,9 +719,7 @@ Core `Doubly_linked` module that has a more complete
 interface and has more of the tricky corner cases worked
 out. Nonetheless, this example should serve to demonstrate some of the
 techniques you can use to build nontrivial imperative data structure
-in OCaml, as well as some of the pitfalls.<a data-type="indexterm"
-data-startref="IPdoublink">&nbsp;</a>
-
+in OCaml, as well as some of the pitfalls.
 
 ## Laziness and Other Benign Effects
 
@@ -1233,7 +1230,7 @@ Time: 0.181913375854 ms
 
 Laziness is more constrained than explicit mutation, and so in some cases can
 lead to code whose behavior is easier to think about.
-<a data-type="indexterm" data-startref="BEmem">&nbsp;</a>
+[limitations/let rec]{.idx}
 :::
 
 
@@ -1601,7 +1598,7 @@ val sum_file : string -> int = <fun>
 
 This is just a taste of the functionality of `In_channel` and `Out_channel`.
 To get a fuller understanding, you should review the API documentation for
-those modules.<a data-type="indexterm" data-startref="IPinpout">&nbsp;</a>
+those modules.
 
 
 ## Order of Evaluation

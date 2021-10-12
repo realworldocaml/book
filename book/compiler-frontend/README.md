@@ -356,7 +356,7 @@ options to control the output for the various backends. Refer to the
 for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
 for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
 HTML generator]{.idx}[HTML
-generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
+generators]{.idx}
 
 You can also use `odoc` to generate complete snapshots of your project via
 integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
@@ -1234,7 +1234,6 @@ would be lost in the error if the shortest module path is always picked.
 You'll need to choose for yourself if you prefer short paths or the default
 behavior in your own projects, and pass the `-short-paths` flag to the
 compiler if you need
-it.<a data-type="indexterm" data-startref="CPstatictype">&nbsp;</a>
 
 
 ## The Typed Syntax Tree
@@ -1370,7 +1369,6 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
 The typed AST is more explicit than the untyped syntax tree. For instance,
 the type declaration has been given a unique name (`t/1008`), as has the
 `v` value (`v/1011`).
-<a data-type="indexterm" data-startref="typesyntree">&nbsp;</a><a data-type="indexterm" data-startref="CPtypsyn">&nbsp;</a>
 
 You'll rarely need to look at this raw output from the compiler unless you're
 building IDE tools, or are hacking on extensions to the

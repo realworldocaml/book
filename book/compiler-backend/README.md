@@ -267,7 +267,7 @@ code and narrow down any performance hotspots.
 The lambda form is primarily a stepping stone to the bytecode executable
 format that we'll cover next. It's often easier to look at the textual output
 from this stage than to wade through the native assembly code from compiled
-executables.<a data-type="indexterm" data-startref="CPuntype">&nbsp;</a>
+executables.
 
 
 ## Generating Portable Bytecode
@@ -516,10 +516,8 @@ Embedding OCaml code like this lets you write OCaml that interfaces with any
 environment that works with a C compiler. You can even cross back from the C
 code into OCaml by using the `Callback` module to register named entry points
 in the OCaml code. This is explained in detail in the
-[ interfacing with C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149)
+[interfacing with C](https://ocaml.org/manual/intfc.html)
 section of the OCaml manual.
-<a data-type="indexterm" data-startref="CPportbyte">&nbsp;</a>
-
 
 ## Compiling Fast Native Code
 

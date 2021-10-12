@@ -719,9 +719,7 @@ to use `list<square>` where `list<shape>` is expected (at least
 safely). The situation is similar in Java, although Java has an escape
 hatch that allows the program to fall back to dynamic typing. The
 situation in OCaml is much better: it works, it is statically checked,
-and the annotations are pretty simple.<a data-type="indexterm"
-data-startref="var">&nbsp;</a><a data-type="indexterm"
-data-startref="SUBvar">&nbsp;</a>
+and the annotations are pretty simple.[objects/coercions]{.idx}
 
 ### Narrowing
 
@@ -895,7 +893,7 @@ Error: This expression has type < area : float; radius : int >
 ```
 
 In both these cases we must use
-subtyping:<a data-type="indexterm" data-startref="OBsub">&nbsp;</a>
+subtyping:[objects/subtyping]{.idx}
 
 ```ocaml env=row_polymorphism
 # let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)]

@@ -587,9 +587,6 @@ The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
 of a long-running application without you having to actually wait that long
 to re-create the behavior in a performance unit test.
-<a data-type="indexterm" data-startref="Hmh">&nbsp;</a>
-
-
 
 ## Attaching Finalizer Functions to Values
 

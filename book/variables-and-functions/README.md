@@ -722,7 +722,7 @@ of strings as its input, not a function.
 
 The type error aside, this example highlights the importance of choosing the
 operator you use with care, particularly with respect to
-associativity.<a data-type="indexterm" data-startref="FNCprf">&nbsp;</a>
+associativity.
 
 ### Declaring Functions with `function`
 
@@ -1226,4 +1226,4 @@ without its complexities. But don't let these complexities obscure the
 usefulness of these features. Labels and optional arguments are very
 effective tools for making your APIs both more convenient and safer, and it's
 worth the effort of learning how to use them
-effectively.<a data-type="indexterm" data-startref="ARGopt">&nbsp;</a><a data-type="indexterm" data-startref="FNCopt">&nbsp;</a>
+effectively.

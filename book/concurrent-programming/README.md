@@ -385,8 +385,7 @@ actions are run in the order they were scheduled, even if the thunks
 scheduled by `upon` are run out of order. This kind of subtlety is
 typical of code that involves ivars and `upon`, and because of this,
 you should stick to the simpler map/bind/return style of working with
-deferreds when you can.<a data-type="indexterm"
-data-startref="ALbas">&nbsp;</a>
+deferreds when you can.
 
 ::: {data-type=note}
 ##### Understanding `bind` in terms of ivars and `upon`
@@ -775,7 +774,7 @@ This differs from the ordinary `Command.basic` call in that the main function
 must return a `Deferred.t`, and that the running of the command (using
 `Command.run`) automatically starts the Async scheduler, without requiring an
 explicit call to
-`Scheduler.go`.<a data-type="indexterm" data-startref="echo">&nbsp;</a><a data-type="indexterm" data-startref="ALecho">&nbsp;</a>
+`Scheduler.go`.[command-line parsing/running async commands]{.idx}
 
 
 ## Example: Searching Definitions with DuckDuckGo
@@ -988,7 +987,7 @@ let () =
 ```
 
 And that's all we need for a simple but usable definition
-searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
+searcher:
 
 ```sh dir=examples/correct/search,require-package=textwrap,require-package=yojson,non-deterministic
 $ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
@@ -1344,7 +1343,7 @@ Note that in this code, we're relying on the fact that
 particular by closing its file descriptors. If you need to implement such
 functionality directly, you may want to use the `Monitor.protect` call, which
 is analogous to the `protect` call described in
-[Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.<a data-type="indexterm" data-startref="ALexcept">&nbsp;</a>
+[Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.
 
 
 ## Timeouts, Cancellation, and Choices
@@ -1703,4 +1702,4 @@ In particular, foreign threads can acquire the Async lock using calls from
 the `Thread_safe` module in Async, and thereby run Async computations safely.
 This is a very flexible way of connecting threads to the Async world, but
 it's a complex use case that is beyond the scope of this chapter.
-<a data-type="indexterm" data-startref="systhrd">&nbsp;</a><a data-type="indexterm" data-startref="ALsysthr">&nbsp;</a>
+[system threads]{.idx}

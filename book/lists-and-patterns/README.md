@@ -320,7 +320,7 @@ they become yet more valuable as you get to more complicated examples,
 especially those involving user-defined types. In addition to catching
 outright errors, they act as a sort of refactoring tool, guiding you to the
 locations where you need to adapt your code to deal with changing
-types.<a data-type="indexterm" data-startref="PATMAT">&nbsp;</a>
+types.
 
 
 ## Using the List Module Effectively
