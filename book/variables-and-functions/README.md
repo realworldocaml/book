@@ -572,22 +572,24 @@ The list below breaks the different operators and other syntactic forms into gro
 lowest precedence, explaining how each behaves syntactically. We write
 `!`... to indicate the class of operators beginning with `!`.
 
--  `!`..., `?`..., `~`... (Prefix)
-- `.`, `.(`, `.[` | -
-- function application, constructor, `assert`, `lazy` | Left associative
-- `-`, `-.` | Prefix
-- `**`..., `lsl`, `lsr`, `asr` | Right associative
-- `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
-- `+`..., `-`... | Left associative
-- `::` | Right associative
-- `@`..., `^`... | Right associative
-- `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
-- `&`, `&&` | Right associative
-- `or`, `||` | Right associative
-- `,` | -
-- `<-`, `:=` | Right associative
-- `if` | -
-- `;` | Right associative
+| Syntax | Associativity |
+|--------+---------------|
+|  `!`..., `?`..., `~`... | Prefix |
+| `.`, `.(`, `.[` | - |
+| function application, constructor, `assert`, `lazy` | Left associative |
+| `-`, `-.` | Prefix |
+| `**`..., `lsl`, `lsr`, `asr` | Right associative |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |
+| `+`..., `-`... | Left associative |
+| `::` | Right associative |
+| `@`..., `^`... | Right associative |
+| `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative |
+| `&`, `&&` | Right associative |
+| `or`, `||` | Right associative |
+| `,` | - |
+| `<-`, `:=` | Right associative |
+| `if` | - |
+| `;` | Right associative |
 
 
 There's one important special case: `-` and `-.`, which are the integer and
