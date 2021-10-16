@@ -951,7 +951,7 @@ concatenation.
 
 ```ocaml env=main
 # let concat ?sep x y =
-    let sep = match sep with None -> "" | Some x -> x in
+    let sep = match sep with None -> "" | Some s -> s in
     x ^ sep ^ y
 val concat : ?sep:string -> string -> string -> string = <fun>
 # concat "foo" "bar"             (* without the optional argument *)
