@@ -572,22 +572,24 @@ The list below breaks the different operators and other syntactic forms into gro
 lowest precedence, explaining how each behaves syntactically. We write
 `!`... to indicate the class of operators beginning with `!`.
 
--  `!`..., `?`..., `~`... (Prefix)
-- `.`, `.(`, `.[` | -
-- function application, constructor, `assert`, `lazy` | Left associative
-- `-`, `-.` | Prefix
-- `**`..., `lsl`, `lsr`, `asr` | Right associative
-- `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative
-- `+`..., `-`... | Left associative
-- `::` | Right associative
-- `@`..., `^`... | Right associative
-- `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative
-- `&`, `&&` | Right associative
-- `or`, `||` | Right associative
-- `,` | -
-- `<-`, `:=` | Right associative
-- `if` | -
-- `;` | Right associative
+| Syntax | Associativity |
+|--------+---------------|
+|  `!`..., `?`..., `~`... | Prefix |
+| `.`, `.(`, `.[` | - |
+| function application, constructor, `assert`, `lazy` | Left associative |
+| `-`, `-.` | Prefix |
+| `**`..., `lsl`, `lsr`, `asr` | Right associative |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |
+| `+`..., `-`... | Left associative |
+| `::` | Right associative |
+| `@`..., `^`... | Right associative |
+| `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative |
+| `&`, `&&` | Right associative |
+| `or`, `||` | Right associative |
+| `,` | - |
+| `<-`, `:=` | Right associative |
+| `if` | - |
+| `;` | Right associative |
 
 
 There's one important special case: `-` and `-.`, which are the integer and
@@ -722,7 +724,7 @@ of strings as its input, not a function.
 
 The type error aside, this example highlights the importance of choosing the
 operator you use with care, particularly with respect to
-associativity.<a data-type="indexterm" data-startref="FNCprf">&nbsp;</a>
+associativity.
 
 ### Declaring Functions with `function`
 
@@ -861,7 +863,7 @@ This improves the readability of both the signature and of client code that
   position and the length.
 
 - When you want flexibility on the order in which arguments are passed.
-  Consider a function like `List.iter`, which takes two arguments. a function
+  Consider a function like `List.iter` which takes two arguments: a function
   and a list of elements to call that function on. A common pattern is to
   partially apply `List.iter` by giving it just the function, as in the
   following example from earlier in the chapter.
@@ -1226,4 +1228,4 @@ without its complexities. But don't let these complexities obscure the
 usefulness of these features. Labels and optional arguments are very
 effective tools for making your APIs both more convenient and safer, and it's
 worth the effort of learning how to use them
-effectively.<a data-type="indexterm" data-startref="ARGopt">&nbsp;</a><a data-type="indexterm" data-startref="FNCopt">&nbsp;</a>
+effectively.

@@ -393,7 +393,6 @@ This technique of using statically typed parsing functions is very powerful
 in combination with the OCaml type system. Many errors that don't make sense
 at runtime (for example, mixing up lists and objects) will be caught
 statically via a type error.
-<a data-type="indexterm" data-startref="JSONselval">&nbsp;</a><a data-type="indexterm" data-startref="VALjson">&nbsp;</a>
 
 ## Constructing JSON Values
 
@@ -951,7 +950,6 @@ and default fields is very powerful. Take a look at the full ATD
 specification for the GitHub API in the
 [`ocaml-github`](http://github.com/avsm/ocaml-github) repository online,
 which has lots of quirks typical in real-world web APIs.
-<a data-type="indexterm" data-startref="MAPjson">&nbsp;</a><a data-type="indexterm" data-startref="JSONautomap">&nbsp;</a><a data-type="indexterm" data-startref="SERjson">&nbsp;</a><a data-type="indexterm" data-startref="DATjson">&nbsp;</a>
 
 Our example shells out to `curl` on the command line to obtain the JSON,
 which is rather inefficient. We'll explain how to integrate the HTTP fetch

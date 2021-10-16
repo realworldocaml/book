@@ -26,7 +26,7 @@ let gettimeofday' () =
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1_000_000.)
+  Stdlib.(float secs +. float usecs /. 1_000_000.)
 
 let float_time () = printf "%f%!\n" (gettimeofday' ())
 

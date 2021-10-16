@@ -298,7 +298,6 @@ concrete type within a module.
 
 This technique is useful beyond first-class modules. For example, we can use
 the same approach to construct a local module to be fed to a functor.
-<a data-type="indexterm" data-startref="FCMwork">&nbsp;</a>
 :::
 
 
@@ -903,4 +902,4 @@ reasonable, and first-class modules are not really necessary. But the more
 functionality you need to hide away behind a set of closures, and the more
 complicated the relationships between the different types in question, the
 more awkward this approach becomes, and the better it is to use first-class
-modules. <a data-type="indexterm" data-startref="MODfirst">&nbsp;</a>
+modules.

@@ -542,22 +542,19 @@ garbage collection occurring:
   (libraries core core_bench))
 ```
 
-
-
 ```sh dir=examples/barrier_bench,non-deterministic=command,require-package=core_bench
-$ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
-Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
  ----------- ---------- --------- ---------- ---------- ------------
-  mutable       8.98ms    2.00Mw     20.36w     20.36w      100.00%
-  immutable     5.66ms    5.00Mw                             63.08%
+  mutable       5.10ms    2.00Mw     20.61w     20.61w      100.00%
+  immutable     4.63ms    5.00Mw      0.28w      0.28w       90.88%
 
 ```
 
-There is a stark space/time trade-off here. The mutable version takes
-significantly longer to complete than the immutable one but allocates many
+There is a space/time trade-off here. The mutable version takes
+longer to complete than the immutable one but allocates many
 fewer minor-heap words than the immutable version. Minor allocation in OCaml
 is very fast, and so it is often better to use immutable data structures in
 preference to the more conventional mutable versions. On the other hand, if
@@ -570,7 +567,6 @@ command-line benchmark binaries have a number of useful options that affect
 garbage collection behavior:
 
 ```sh dir=examples/barrier_bench
-$ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -help | head -13
 Benchmark for mutable, immutable
 
@@ -591,9 +587,6 @@ The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
 of a long-running application without you having to actually wait that long
 to re-create the behavior in a performance unit test.
-<a data-type="indexterm" data-startref="Hmh">&nbsp;</a>
-
-
 
 ## Attaching Finalizer Functions to Values
 
@@ -606,7 +599,7 @@ for]{.idx}[finalizers/in grabage collection]{.idx}[garbage
 collection/finalizer functions]{.idx}
 
 ::: {data-type=note}
-### What Values Can Be Finalized?
+##### What Values Can Be Finalized?
 
 Various values cannot have finalizers attached since they aren't
 heap-allocated. Some examples of values that are not heap-allocated are

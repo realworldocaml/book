@@ -270,7 +270,7 @@ as function pointers to C code, as well as struct and union definitions.
 
 We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
-examples.<a data-type="indexterm" data-startref="FFItermint">&nbsp;</a>
+examples.
 
 ## Basic Scalar C Types
 
@@ -673,14 +673,14 @@ structure:
     ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
     let secs = Signed.Long.(to_int (getf tv tv_sec)) in
     let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-    Caml.Pervasives.(float secs +. float usecs /. 1000000.0)
+    Stdlib.(float secs +. float usecs /. 1000000.0)
 val gettimeofday' : unit -> float = <fun>
 # gettimeofday' ()
-- : float = 1516746708.884176
+- : float = 1633964254.067426
 ```
 
 You need to be a little careful not to get all the open modules mixed up
-here. Both `Pervasives` and `Ctypes` define different `float` functions. The
+here. Both `Stdlib` and `Ctypes` define different `float` functions. The
 `Ctypes` module we opened up earlier overrides the `Pervasives` definition.
 As seen previously though, you just need to locally open `Pervasives` again
 to bring the usual `float` function back in scope.
@@ -720,7 +720,7 @@ let gettimeofday' () =
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1_000_000.)
+  Stdlib.(float secs +. float usecs /. 1_000_000.)
 
 let float_time () = printf "%f%!\n" (gettimeofday' ())
 
@@ -749,9 +749,9 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```sh dir=examples/ffi/datetime,non-deterministic=output
 $ dune build datetime.exe
 $ ./_build/default/datetime.exe
-1520339271.364367
+1633964258.014484
 $ ./_build/default/datetime.exe -a
-Tue Mar  6 13:27:51 2018
+Mon Oct 11 15:57:38 2021
 ```
 
 ::: {data-type=note}
@@ -1176,4 +1176,4 @@ them directly from C.
 The details of using Cstubs are available in the online
 [documentation](https://ocamllabs.github.io/ocaml-ctypes), along with
 instructions on integration with `autoconf` platform portability
-instructions.<a data-type="indexterm" data-startref="INTERffi">&nbsp;</a>
+instructions.

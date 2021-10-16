@@ -813,9 +813,7 @@ In the last few examples, our list processing code involved a lot of
 recursive functions. In practice, this isn't usually necessary. Most of the
 time, you'll find yourself happy to use the iteration functions found in the
 `List` module. But it's good to know how to use recursion for when you need
-to iterate in a new way.
-<a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
-
+to iterate in a new way.[lists/recursion]{.idx}
 
 ::: {data-type=note}
 ##### Nesting lets with let and in
