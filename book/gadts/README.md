@@ -7,13 +7,13 @@ precise types that you can use to make your code safer, more concise,
 and more efficient.
 
 At the same time, GADTs are an advanced feature of OCaml, and their
-power comes at a distinct cost.  GADTs are harder to use and less
+power comes at a distinct cost. GADTs are harder to use and less
 intuitive than ordinary variants, and it can sometimes be a bit of a
 puzzle to figure out how to use them effectively. All of which is to
 say that you should only use a GADT when it makes a big qualitative
 improvement to your design.
 
-But don't get me wrong, for the the right use-case, GADTs can be
+But don't get me wrong, for the right use-case, GADTs can be
 really transformative, and this chapter will cover some examples to
 demonstrate  the range of use-cases that GADTs support.
 
@@ -103,11 +103,11 @@ to create ill-typed expressions by mistake.
 
 ### Making the language type-safe
 
-Let's consider what a type-safe version of this API might look like.
-To even express the type constraints, we'll need expressions to have a
-type parameter to distinguish integer expressions from boolean
-expressions. Given such a parameter, the signature for such a language
-might look like this.
+Let's consider what a type-safe version of this API might look like in
+the absence of GADTs. To even express the type constraints, we'll need
+expressions to have a type parameter to distinguish integer
+expressions from boolean expressions. Given such a parameter, the
+signature for such a language might look like this.
 
 ```ocaml env=main
 module type Typesafe_lang_sig = sig
@@ -137,8 +137,8 @@ val eval : 'a t -> 'a
 ```
 
 But as we'll see, we're not going to be able to implement that, at
-least, not yet. So for now, we're stuck with two different evaluators,
-one for each type of expression.
+least, not without using GADTs. So for now, we're stuck with two
+different evaluators, one for each type of expression.
 
 Now let's write an implementation that matches this signature.
 
