@@ -1125,7 +1125,7 @@ think of this variable as having three parts:
 ### Free your monad
 
 
-## Limitations of pattern matching
+## Limitations of GADTs
 
 A few things.
 
