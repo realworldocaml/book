@@ -651,7 +651,7 @@ apply_to_tuple divide (3,4) ;;
 <p>Here’s an example of a string concatenation function with an optional separator. This function uses the <code>^</code> operator for pairwise string concatenation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?sep x y =
-  let sep = match sep with None -&gt; "" | Some x -&gt; x in
+  let sep = match sep with None -&gt; "" | Some s -&gt; s in
   x ^ sep ^ y
 ;;
 &gt;val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
