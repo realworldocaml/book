@@ -111,6 +111,16 @@
 
 (rule
  (alias html)
+ (target gadts.html)
+ (action (run rwo-convert_md  %{dep:gadts/README.md} -t html -o %{target})))
+
+(rule
+ (alias latex)
+ (target gadts.md)
+ (action (run rwo-convert_md  %{dep:gadts/README.md} -t md -o %{target})))
+
+(rule
+ (alias html)
  (target garbage-collector.html)
  (action (run rwo-convert_md  %{dep:garbage-collector/README.md} -t html -o %{target})))
 
@@ -191,13 +201,13 @@
 
 (rule
  (alias html)
- (target ppx.html)
- (action (run rwo-convert_md  %{dep:ppx/README.md} -t html -o %{target})))
+ (target platform.html)
+ (action (run rwo-convert_md  %{dep:platform/README.md} -t html -o %{target})))
 
 (rule
  (alias latex)
- (target ppx.md)
- (action (run rwo-convert_md  %{dep:ppx/README.md} -t md -o %{target})))
+ (target platform.md)
+ (action (run rwo-convert_md  %{dep:platform/README.md} -t md -o %{target})))
 
 (rule
  (alias html)

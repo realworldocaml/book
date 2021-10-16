@@ -372,7 +372,7 @@ object of another type *B*. When this is true, we say that *A* is a *subtype*
 of *B*. More concretely, subtyping restricts when the coercion operator
 `e :> t` can be applied. This coercion works only if the type of `e` is a
 subtype of `t`. [subtyping/basics of]{.idx}[objects/subtyping
-and]{.idx #OBsub}
+and]{.idx}
 
 ### Width Subtyping
 
@@ -495,8 +495,8 @@ val c : const = `Int 3
 
 What about types built from object types? If a `square` is a `shape`,
 we expect a `square list` to be a `shape list`. OCaml does indeed
-allow such coercions:[variance]{.idx #var}[subtyping/variance
-and]{.idx #SUBvar}
+allow such coercions:[variance]{.idx}[subtyping/variance
+and]{.idx}
 
 ```ocaml env=subtyping
 # let squares: square list = [ square 10; square 20 ]
@@ -541,7 +541,6 @@ We say that `'a -> string` is *contravariant* in `'a`. In general,
 function types are contravariant in their arguments and covariant in
 their results.  [contravariance]{.idx}
 
-::: {data-type=note}
 ##### Variance Annotations
 
 OCaml works out the variance of a type using that type's definition.
@@ -628,8 +627,6 @@ As you can see, this now allows the coercion once again.
 # (Var_either.left (square 40) :> (shape, _) Var_either.t)
 - : (shape, 'a) Var_either.t = <abstr>
 ```
-
-:::
 
 For a more concrete example of variance, let's create some stacks
 containing shapes by applying our `stack` function to some squares and
@@ -722,9 +719,7 @@ to use `list<square>` where `list<shape>` is expected (at least
 safely). The situation is similar in Java, although Java has an escape
 hatch that allows the program to fall back to dynamic typing. The
 situation in OCaml is much better: it works, it is statically checked,
-and the annotations are pretty simple.<a data-type="indexterm"
-data-startref="var">&nbsp;</a><a data-type="indexterm"
-data-startref="SUBvar">&nbsp;</a>
+and the annotations are pretty simple.[objects/coercions]{.idx}
 
 ### Narrowing
 
@@ -898,7 +893,7 @@ Error: This expression has type < area : float; radius : int >
 ```
 
 In both these cases we must use
-subtyping:<a data-type="indexterm" data-startref="OBsub">&nbsp;</a>
+subtyping:[objects/subtyping]{.idx}
 
 ```ocaml env=row_polymorphism
 # let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)]

@@ -7,7 +7,7 @@ data format (such as XML), sometimes you need a highly efficient format, and
 other times you want something that is easy for humans to edit. To this end,
 OCaml libraries provide several techniques for data serialization depending
 on what your problem is. [JSON data/basics of]{.idx}[serialization
-formats/JSON]{.idx #SERjson}[data serialization/with JSON]{.idx #DATjson}
+formats/JSON]{.idx}[data serialization/with JSON]{.idx}
 
 We'll start by using the popular and simple JSON data format and then look at
 other serialization formats later in the book. This chapter introduces you to
@@ -200,8 +200,8 @@ actually resulted in the same OCaml data structure.
 
 Now that we've figured out how to parse the example JSON into an OCaml value,
 let's manipulate it from OCaml code and extract specific fields:
-[values/selecting from JSON structures]{.idx #VALjson}[JSON data/selecting
-values from]{.idx #JSONselval}
+[values/selecting from JSON structures]{.idx}[JSON data/selecting
+values from]{.idx}
 
 ```ocaml file=examples/parse_book/parse_book.ml
 open Core
@@ -393,7 +393,6 @@ This technique of using statically typed parsing functions is very powerful
 in combination with the OCaml type system. Many errors that don't make sense
 at runtime (for example, mixing up lists and objects) will be caught
 statically via a type error.
-<a data-type="indexterm" data-startref="JSONselval">&nbsp;</a><a data-type="indexterm" data-startref="VALjson">&nbsp;</a>
 
 ## Constructing JSON Values
 
@@ -583,7 +582,7 @@ extract fields from JSON records, but the process is still pretty manual.
 When you implement larger specifications, it's much easier to generate the
 mappings from JSON schemas to OCaml values more mechanically than writing
 conversion functions individually. [mapping/of JSON to OCaml
-types]{.idx #MAPjson}[JSON data/automatic mapping of]{.idx #JSONautomap}
+types]{.idx}[JSON data/automatic mapping of]{.idx}
 
 We'll cover an alternative JSON processing method that is better for
 larger-scale JSON handling now, using the
@@ -748,9 +747,8 @@ This is pretty convenient! We've now written a single ATD file, and all the
 OCaml boilerplate to convert between JSON and a strongly typed record has
 been generated for us. You can control various aspects of the serializer by
 passing flags to `atdgen`. The important ones for JSON are:
-[-j-defaults]{.idx data-primary-sortas=j-defaults}[-j-custom-fields
-FUNCTION]{.idx data-primary-sortas=j-custom}[-j-std
-flag]{.idx data-primary-sortas=j-std}[flags]{.idx}
+[-j-defaults]{.idx}[-j-custom-fields
+FUNCTION]{.idx}[-j-std flag]{.idx}[flags]{.idx}
 
 `-j-std`
 : Converts tuples and variants into standard JSON and refuse to print NaN and
@@ -952,7 +950,6 @@ and default fields is very powerful. Take a look at the full ATD
 specification for the GitHub API in the
 [`ocaml-github`](http://github.com/avsm/ocaml-github) repository online,
 which has lots of quirks typical in real-world web APIs.
-<a data-type="indexterm" data-startref="MAPjson">&nbsp;</a><a data-type="indexterm" data-startref="JSONautomap">&nbsp;</a><a data-type="indexterm" data-startref="SERjson">&nbsp;</a><a data-type="indexterm" data-startref="DATjson">&nbsp;</a>
 
 Our example shells out to `curl` on the command line to obtain the JSON,
 which is rather inefficient. We'll explain how to integrate the HTTP fetch

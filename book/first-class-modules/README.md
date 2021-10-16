@@ -7,12 +7,12 @@ sublanguages are stratified, in that modules can contain types and
 values, but ordinary values can't contain modules or module
 types. That means you can't do things like define a variable whose
 value is a module, or a function that takes a module as an
-argument. [modules/first-class modules]{.idx #MODfirst}
+argument. [modules/first-class modules]{.idx}
 
 OCaml provides a way around this stratification in the form of
 *first-class modules*. First-class modules are ordinary values that
 can be created from and converted back to regular
-modules. [first-class modules/working with]{.idx #FCMwork}
+modules. [first-class modules/working with]{.idx}
 
 First-class modules are a sophisticated technique, and you'll need to
 get comfortable with some advanced aspects of the language to use them
@@ -298,7 +298,6 @@ concrete type within a module.
 
 This technique is useful beyond first-class modules. For example, we can use
 the same approach to construct a local module to be fed to a functor.
-<a data-type="indexterm" data-startref="FCMwork">&nbsp;</a>
 :::
 
 
@@ -903,4 +902,4 @@ reasonable, and first-class modules are not really necessary. But the more
 functionality you need to hide away behind a set of closures, and the more
 complicated the relationships between the different types in question, the
 more awkward this approach becomes, and the better it is to use first-class
-modules. <a data-type="indexterm" data-startref="MODfirst">&nbsp;</a>
+modules.

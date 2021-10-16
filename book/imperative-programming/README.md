@@ -13,7 +13,7 @@ outside world. An imperative function has a new effect, and
 potentially returns different results, every time it's
 called. [imperative programming/benefits of]{.idx}[pure
 code]{.idx}[programming/immutable vs.
-imperative]{.idx}[programming/imperative programming]{.idx #PROGimper}
+imperative]{.idx}[programming/imperative programming]{.idx}
 
 Pure code is the default in OCaml, and for good reason—it's generally
 easier to reason about, less error prone and more composable. But
@@ -260,8 +260,7 @@ then returns the integer `3`.
 Note also that we do all of the side-effecting operations at the very end of
 each function. This is good practice because it minimizes the chance that
 such operations will be interrupted with an exception, leaving the data
-structure in an inconsistent state.
-<a data-type="indexterm" data-startref="DICTimper">&nbsp;</a><a data-type="indexterm" data-startref="IPimpdict">&nbsp;</a>
+structure in an inconsistent state.[side effects/imperative]{.idx}
 
 ## Primitive Mutable Data
 
@@ -720,9 +719,7 @@ Core `Doubly_linked` module that has a more complete
 interface and has more of the tricky corner cases worked
 out. Nonetheless, this example should serve to demonstrate some of the
 techniques you can use to build nontrivial imperative data structure
-in OCaml, as well as some of the pitfalls.<a data-type="indexterm"
-data-startref="IPdoublink">&nbsp;</a>
-
+in OCaml, as well as some of the pitfalls.
 
 ## Laziness and Other Benign Effects
 
@@ -831,7 +828,7 @@ Another benign effect is *memoization*. A memoized function remembers
 the result of previous invocations of the function so that they can be
 returned without further computation when the same arguments are
 presented again.  [memoization/of function]{.idx}[benign
-effects/memoization]{.idx #BEmem}
+effects/memoization]{.idx}
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
@@ -1233,7 +1230,7 @@ Time: 0.181913375854 ms
 
 Laziness is more constrained than explicit mutation, and so in some cases can
 lead to code whose behavior is easier to think about.
-<a data-type="indexterm" data-startref="BEmem">&nbsp;</a>
+[limitations/let rec]{.idx}
 :::
 
 
@@ -1248,7 +1245,7 @@ also operations that interact with the world outside of your program. An
 important example of this kind of interaction is I/O, i.e., operations for
 reading or writing data to things like files, terminal input and output, and
 network sockets. [I/O (input/output) operations/terminal
-I/O]{.idx}[imperative programming/input and output]{.idx #IPinpout}
+I/O]{.idx}[imperative programming/input and output]{.idx}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
@@ -1601,7 +1598,7 @@ val sum_file : string -> int = <fun>
 
 This is just a taste of the functionality of `In_channel` and `Out_channel`.
 To get a fuller understanding, you should review the API documentation for
-those modules.<a data-type="indexterm" data-startref="IPinpout">&nbsp;</a>
+those modules.
 
 
 ## Order of Evaluation
@@ -1691,8 +1688,8 @@ subexpressions, you should express them as a series of `let` bindings.
 ## Side Effects and Weak Polymorphism
 
 Consider the following simple, imperative function: [polymorphism/weak
-polymorphism]{.idx}[weak polymorphism]{.idx}[side effects]{.idx}[ imperative
-programming/side effects/weak polymorphism ]{.idx #IPsideweak}
+polymorphism]{.idx}[weak polymorphism]{.idx}[side effects]{.idx}[imperative
+programming/side effects/weak polymorphism ]{.idx}
 
 ```ocaml env=main
 # let remember =

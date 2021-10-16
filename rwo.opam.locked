@@ -85,15 +85,15 @@ depends: [
   "mmap" {= "1.1.0"}
   "mtime" {= "1.2.0+dune"}
   "num" {= "1.3+dune"}
-  "ocaml" {= "4.13.0"}
-  "ocaml-base-compiler" {= "4.13.0"}
+  "ocaml" {= "4.13.1"}
+  "ocaml-base-compiler" {= "4.13.1"}
   "ocaml-compiler-libs" {= "v0.12.4"}
   "ocaml-config" {= "2"}
   "ocaml-migrate-parsetree" {= "2.2.0"}
   "ocaml-options-vanilla" {= "1"}
   "ocaml-print-intf" {= "1.2.0"}
   "ocaml-syntax-shims" {= "1.0.0"}
-  "ocaml-version" {= "3.3.0"}
+  "ocaml-version" {= "3.4.0"}
   "ocamlfind" {= "1.8.1+dune"}
   "ocplib-endian" {= "1.1"}
   "octavius" {= "1.2.2"}
@@ -524,8 +524,8 @@ pin-depends: [
     "https://github.com/ocaml-ppx/ocaml-syntax-shims/releases/download/1.0.0/ocaml-syntax-shims-1.0.0.tbz"
   ]
   [
-    "ocaml-version.3.3.0"
-    "https://github.com/ocurrent/ocaml-version/releases/download/v3.3.0/ocaml-version-v3.3.0.tbz"
+    "ocaml-version.3.4.0"
+    "https://github.com/ocurrent/ocaml-version/releases/download/v3.4.0/ocaml-version-v3.4.0.tbz"
   ]
   [
     "ocamlfind.1.8.1+dune"
@@ -1380,11 +1380,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocurrent/ocaml-version/releases/download/v3.3.0/ocaml-version-v3.3.0.tbz"
+    "https://github.com/ocurrent/ocaml-version/releases/download/v3.4.0/ocaml-version-v3.4.0.tbz"
     "ocaml-version"
     [
-      "sha256=36d0e8d73e5ea1aec1e3f2ce23bd1c1370f4182a2361b6b65390252046c4262d"
-      "sha512=593419ac45eee1fda403bb80d77378bc8e7c6a9def98be33d6409243468e0e9736f7c990e94301cede156144d6ab38e71827fbaca889eac4b4a1c99ca87a551f"
+      "sha256=d8c1beb5e8d8ebb7710b5f434ce66a3ec8b752b1e4d6ba87c4fe27452bdb8a25"
+      "sha512=215e5b0c4ea5fa5461cdc0fc81fbd84a2a319a246a19504d0a0abc8c891e252a9e41644356150a1dc25d56b3f7e084db7a0b15becab4e1339992e645fc3d8ef1"
     ]
   ]
   [

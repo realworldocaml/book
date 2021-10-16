@@ -1,0 +1,7 @@
+(library
+  (name hello)
+  (modules a b hello))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))

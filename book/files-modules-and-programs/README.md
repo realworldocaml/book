@@ -16,7 +16,7 @@ We'll start with an example: a utility that reads lines from `stdin`,
 computes a frequency count of the lines, and prints out the ten most frequent
 lines. We'll start with a simple implementation, which we'll save as the file
 *freq.ml*. [files/single-file
-programs]{.idx #FILEsnglprog}[programs/single-file programs]{.idx #Psingfil}
+programs]{.idx}[programs/single-file programs]{.idx}
 
 This implementation will use two functions from the `List.Assoc` module,
 which provides utility functions for interacting with *association lists*,
@@ -128,7 +128,7 @@ OCaml toolchain (in this case, `ocamlopt`) with the appropriate flags to
 link in particular libraries and packages. Here, `-package base` is
 asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
 ocamlfind to link in the packages as is necessary for building an
-executable. [-linkpkg]{.idx data-primary-sortas=linkpkg}
+executable. [-linkpkg]{.idx}
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for this task

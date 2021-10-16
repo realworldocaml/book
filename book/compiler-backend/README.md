@@ -21,7 +21,7 @@ higher-level constructs such as modules and objects and replaces them with
 simpler values such as records and function pointers. Pattern matches are
 also analyzed and compiled into highly optimized automata.[lambda form
 code/basics of]{.idx}[compilation process/untyped lambda
-form]{.idx #CPuntype}
+form]{.idx}
 
 The lambda form is the key stage that discards the OCaml type information and
 maps the source code to the runtime memory model described in
@@ -246,15 +246,14 @@ default, and you'll see the results summarized in a neat table:
 
 
 ```sh dir=examples/back-end/bench_patterns,non-deterministic=command
-$ dune build bench_patterns.exe
-$ ./_build/default/bench_patterns.exe -ascii -quota 0.25
-Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
+$ dune exec -- ./bench_patterns.exe -ascii -quota 0.25
+Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
 
   Name                         Time/Run   Percentage
  ---------------------------- ---------- ------------
-  Polymorphic pattern           24.93ns       89.45%
-  Monomorphic larger pattern    27.88ns      100.00%
-  Monomorphic small pattern     10.84ns       38.90%
+  Polymorphic pattern           15.72ns      100.00%
+  Monomorphic larger pattern     9.41ns       59.89%
+  Monomorphic small pattern      8.73ns       55.56%
 
 ```
 
@@ -268,7 +267,7 @@ code and narrow down any performance hotspots.
 The lambda form is primarily a stepping stone to the bytecode executable
 format that we'll cover next. It's often easier to look at the textual output
 from this stage than to wade through the native assembly code from compiled
-executables.<a data-type="indexterm" data-startref="CPuntype">&nbsp;</a>
+executables.
 
 
 ## Generating Portable Bytecode
@@ -278,7 +277,7 @@ executable code. The OCaml toolchain branches into two separate compilers at
 this point. We'll describe the bytecode compiler first, which consists of two
 pieces: [OCaml toolchain/ocamlrun]{.idx}[OCaml
 toolchain/ocamlc]{.idx}[bytecode compiler/tools used]{.idx}[compilation
-process/portable bytecode]{.idx #CPportbyte}
+process/portable bytecode]{.idx}
 
 `ocamlc`
 : Compiles files into a bytecode that is a close mapping to the lambda form
@@ -517,10 +516,8 @@ Embedding OCaml code like this lets you write OCaml that interfaces with any
 environment that works with a C compiler. You can even cross back from the C
 code into OCaml by using the `Callback` module to register named entry points
 in the OCaml code. This is explained in detail in the
-[ interfacing with C](http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149)
+[interfacing with C](https://ocaml.org/manual/intfc.html)
 section of the OCaml manual.
-<a data-type="indexterm" data-startref="CPportbyte">&nbsp;</a>
-
 
 ## Compiling Fast Native Code
 
@@ -532,7 +529,7 @@ compatibility with the bytecode runtime, so the same code should run
 identically when compiled with either toolchain. [cmi files]{.idx}[files/cmi
 files]{.idx}[cmx files]{.idx}[files/cmx files]{.idx}[o files]{.idx}[files/o
 files]{.idx}[OCaml toolchain/ocamlopt]{.idx}[native-code compiler/benefits
-of]{.idx}[compilation process/fast native code]{.idx #CPfast}
+of]{.idx}[compilation process/fast native code]{.idx}
 
 The `ocamlopt` command is the frontend to the native code compiler and has a
 very similar interface to `ocamlc`. It also accepts `ml` and `mli` files, but
@@ -590,11 +587,12 @@ let cmp (a:int) (b:int) =
 ```
 
 Now compile this into assembly and read the resulting `compare_mono.S` file.
-This file extension may be lowercase on some platforms such as Linux:
 
-```sh dir=examples/back-end
+```sh dir=examples/back-end,skip
+$ ocamlopt -S compare_mono.ml
 ```
 
+This file extension may be lowercase on some platforms such as Linux.
 If you've never seen assembly language before, then the contents may be
 rather scary. While you'll need to learn x86 assembly to fully understand it,
 we'll try to give you some basic instructions to spot patterns in this
@@ -693,14 +691,13 @@ open Core
 open Core_bench
 
 let polymorphic_compare () =
-  let cmp a b = if a > b then a else b in
+  let cmp a b = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
 
 let monomorphic_compare () =
-  let cmp (a:int) (b:int) =
-    if a > b then a else b in
+  let cmp (a:int) (b:int) = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
@@ -727,23 +724,35 @@ Running this shows quite a significant runtime difference between the two:
 
 
 ```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
-$ dune build bench_poly_and_mono.exe
-$ ./_build/default/bench_poly_and_mono.exe -ascii -quota 1
-Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+$ dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
+Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
-  Name                        Time/Run   Percentage
- ------------------------ ------------- ------------
-  Polymorphic comparison   18_402.43ns      100.00%
-  Monomorphic comparison      734.22ns        3.99%
+  Name                       Time/Run   Percentage
+ ------------------------ ------------ ------------
+  Polymorphic comparison   6_856.10ns      100.00%
+  Monomorphic comparison     753.02ns       10.98%
 
 ```
 
-We see that the polymorphic comparison is close to 20 times slower! These
+We see that the polymorphic comparison is close to 10 times slower! These
 results shouldn't be taken too seriously, as this is a very narrow test that,
 like all such microbenchmarks, isn't representative of more complex
 codebases. However, if you're building numerical code that runs many
 iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
+
+::: {data-type=note}
+##### Accessing Stdlib modules from within Core
+
+In the benchmark above comparing polymorphic and monomorphic comparison,
+you may have noticed that we prepended the comparison functions with `Stdlib`.
+This is because the Core module explicitly redefines the `>` and `<` and `=`
+operators to be specialised for operating over `int` types, as explained in
+[Maps and Hashtables](maps-and-hashtables.html#the-polymorphic-comparator){data-type=xref}.
+You can always recover any of the OCaml standard library functions by accessing
+them through the `Stdlib` module, as we did in our benchmark.
+
+:::
 
 
 ### Debugging Native Code Binaries
@@ -795,27 +804,6 @@ source code to let-bind the anonymous function to a variable name.
 
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}
-
-::: {data-type=warning}
-##### Beware gdb on Mac OS X
-
-The examples here assume that you are running `gdb` on either Linux or
-FreeBSD. Mac OS X 10.8 does have `gdb` installed, but it's a rather quirky
-experience that doesn't reliably interpret the debugging information
-contained in the native binaries. This can result in function names showing
-up as raw symbols such as `.L101` instead of their more human-readable form.
-
-For OCaml 4.1, we'd recommend you do native code debugging on an alternate
-platform such as Linux, or manually look at the assembly code output to map
-the symbol names onto their precise OCaml functions.
-
-MacOS 10.9 removes `gdb` entirely and uses the lldb debugger from the LLVM
-project by default. Many of the guidelines here still apply since the debug
-information embedded in the binary output can be interpreted by lldb (or any
-other DWARF-aware debugger), but the command-line interfaces to lldb is
-different from `gdb`. Refer to the lldb manual for more information.
-:::
-
 
 Let's write a mutually recursive function that selects alternating values
 from a list. This isn't tail-recursive, so our stack size will grow as we
@@ -1035,29 +1023,27 @@ runs and compare them against each other. You can read more on the
 Although Perf doesn't require adding in explicit probes to the binary, it
 does need to understand how to unwind function calls so that the kernel can
 accurately record the function backtrace for every event.
-
-OCaml stack frames are too complex for Perf to understand directly, and so it
-needs the compiler to fall back to using the same conventions as C for
+Since Linux 3.9 the kernel has had support for using DWARF debug information
+to parse the program stack, which is emitted when the `-g` flag is passed
+to the OCaml compiler.  For even more accurate stack parsing, we need
+the compiler to fall back to using the same conventions as C for
 function calls. On 64-bit Intel systems, this means that a special register
 known as the *frame pointer* is used to record function call history.
-
 Using the frame pointer in this fashion means a slowdown (typically around
-3-5%) since it's no longer available for general-purpose use. OCaml 4.1 thus
+3-5%) since it's no longer available for general-purpose use.
+
+OCaml thus
 makes the frame pointer an optional feature that can be used to improve the
 resolution of Perf traces.
-
-OPAM provides a compiler switch that compiles OCaml with the frame pointer
+opam provides a compiler switch that compiles OCaml with the frame pointer
 activated:
 
+```sh skip
+$ opam switch create 4.13+fp ocaml-variants.4.13.1+options ocaml-option-fp
 ```
-$ opam switch 4.01.0+fp
 
-```
-
-Using the frame pointer changes the OCaml calling convention, but OPAM takes
-care of recompiling all your libraries with the new interface. You can read
-more about this on the OCamlPro
-[ blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
+Using the frame pointer changes the OCaml calling convention, but opam takes
+care of recompiling all your libraries with the new interface.
 
 :::
 
@@ -1117,20 +1103,14 @@ $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words
-Initial major heap size: 3840k bytes
-Initial space overhead: 80%
+Initial major heap size: 992k bytes
+Initial space overhead: 120%
 Initial max overhead: 500%
 Initial heap increment: 15%
-Initial allocation policy: 0
+Initial allocation policy: 2
 Initial smoothing window: 1
 Hello OCaml World!
 ```
-
-If you get an error that `libasmrund.a` is not found, it's probably because
-you're using OCaml 4.00 and not 4.01. It's only installed by default in the
-very latest version, which you should be using via the `4.01.0` OPAM switch.
-<a data-type="indexterm" data-startref="CPfast">&nbsp;</a>
-
 
 ## Summarizing the File Extensions
 

@@ -13,8 +13,8 @@ interfaces that make error handling easier.
 
 We'll start by describing the two basic approaches for reporting errors in
 OCaml: error-aware return types and exceptions. [error-aware return
-types]{.idx #erraware}[error handling/error-aware return
-types]{.idx #EHeraware}
+types]{.idx}[error handling/error-aware return
+types]{.idx}
 
 ## Error-Aware Return Types
 
@@ -332,7 +332,7 @@ These error-handling functions are valuable because they let you express your
 error handling both explicitly and concisely. We've only discussed these
 functions in the context of the `Option` module, but more functionality of
 this kind can be found in the `Result` and `Or_error`
-modules.<a data-type="indexterm" data-startref="erraware">&nbsp;</a><a data-type="indexterm" data-startref="EHeraware">&nbsp;</a>
+modules.[error handling/option types]{.idx}[
 
 
 ## Exceptions

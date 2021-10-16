@@ -186,7 +186,7 @@ by themselves. The first section of the file is for declarations, including
 token and type specifications, precedence directives, and other output
 directives; and the second section is for specifying the grammar of the
 language to be parsed. [files/mly files]{.idx}[parsing/parser
-definition]{.idx #PARSparsdef}
+definition]{.idx}
 
 We'll start by declaring the list of tokens. A token is declared using the
 syntax `%token <`*`type`*`>`*`uid`*, where the *`<type>`* is optional and
@@ -396,9 +396,7 @@ list_fields:
 
 We can invoke `menhir` by using `corebuild` with the `-use-menhir` flag. This
 tells the build system to switch to using `menhir` instead of `ocamlyacc` to
-handle files with the `.mly` suffix: [-use-menhir
-flag]{.idx data-primary-sortas=use}[Menhir parser
-generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&nbsp;</a>
+handle files with the `.mly` suffix: [-use-menhir flag]{.idx}[Menhir parser generator/invoking]{.idx}
 
 ```scheme file=examples/parsing/dune
 (rule
@@ -418,7 +416,7 @@ Now we can define a lexer, using `ocamllex`, to convert our input text into a
 stream of tokens. The specification of the lexer is placed in a file with an
 `.mll` suffix. [lexers/specification of]{.idx}[OCaml
 toolchain/ocamllex]{.idx}[mll files]{.idx}[files/mll
-files]{.idx}[parsing/lexer definition]{.idx #PARlex}
+files]{.idx}[parsing/lexer definition]{.idx}
 
 ### OCaml Prelude
 
@@ -633,7 +631,7 @@ flexibility and complexity:
   use of Uutf in your own libraries.
 
 All of these libraries are available via OPAM under their respective
-names.<a data-type="indexterm" data-startref="PARlex">&nbsp;</a>
+names.
 :::
 
 

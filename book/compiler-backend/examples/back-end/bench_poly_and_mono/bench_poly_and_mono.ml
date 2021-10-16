@@ -2,14 +2,13 @@ open Core
 open Core_bench
 
 let polymorphic_compare () =
-  let cmp a b = if a > b then a else b in
+  let cmp a b = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done
 
 let monomorphic_compare () =
-  let cmp (a:int) (b:int) =
-    if a > b then a else b in
+  let cmp (a:int) (b:int) = Stdlib.(if a > b then a else b) in
   for i = 0 to 1000 do
     ignore(cmp 0 i)
   done

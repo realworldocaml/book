@@ -236,7 +236,7 @@ personal experience to construct scalable, robust software systems.
 *Real World OCaml* uses some tools that we've developed while writing this
 book. Some of these resulted in improvements to the OCaml compiler, which
 means that you will need to ensure that you have an up-to-date development
-environment (using the 4.13.0 version of the compiler). The installation
+environment (using the 4.13.1 version of the compiler). The installation
 process is largely automated through the opam package manager. Instructions
 on how to set it up and what packages to install can be found at
 [the installation page](install.html).[installation
@@ -291,11 +291,17 @@ We would especially like to thank the following individuals for improving
   [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
   and
   [Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+  Sadiq Jaffer subsequently refreshed the garbage collector chapter to reflect
+  the latest changes in OCaml 4.13.
 
 - Jérémie Dimino, the author of `utop`, the interactive command-line
   interface that is used throughout this book. We're particularly grateful
   for the changes that he pushed through to make `utop` work better in the
   context of the book.
+
+- Thomas Gazagnaire, Thibaut Mattio, David Allsopp and Jonathan Ludlam
+  contributed to the OCaml Platform chapter, including fixes to core tools
+  to better aid new user installation.
 
 - Ashish Agarwal, Christoph Troestler, Thomas Gazagnaire, Etienne Millon,
   Nathan Rebours, Charles-Edouard Lecat, Jules Aguillon, Rudi Grinberg, Sonja
@@ -303,6 +309,6 @@ We would especially like to thank the following individuals for improving
   us to update the book to track changes to OCaml and various libraries and
   tools.  Ashish also developed a new and improved version of the book's website.
 
-- The many people who collectively submitted over 3500 comments to online
+- The many people who collectively submitted over 4000 comments to online
   drafts of this book, through whose efforts countless errors were found and
   fixed.

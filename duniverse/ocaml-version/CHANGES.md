@@ -1,3 +1,7 @@
+## v3.4.0 (2021-10-05)
+
+* Add 4.13.1 entry (@Octachron #42)
+
 ## v3.3.0 (2021-09-24)
 
 * Add 4.13.0 and 4.12.1 entries (@Octachron)

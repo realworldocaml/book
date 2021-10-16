@@ -1,4 +1,3 @@
-(*TODO: Check contents*)
 let concat_and_print x y =
   let v = x ^ y in
   print_endline v;

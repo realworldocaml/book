@@ -127,13 +127,27 @@ than `limit`. If there isn't enough space left for the block without
 decrementing past `limit`, a minor garbage collection is triggered. This is a
 very fast check (with no branching) on most CPU architectures.
 
+#### Understanding allocation
+
 You may wonder why `limit` is required at all, since it always seems to equal
 `start`. It's because the easiest way for the runtime to schedule a minor
 heap collection is by setting `limit` to equal `end`. The next allocation
 will never have enough space after this is done and will always trigger a
 garbage collection. There are various internal reasons for such early
 collections, such as handling pending UNIX signals, and they don't ordinarily
-matter for application code. [minor heaps/setting size of]{.idx}
+matter for application code.
+
+It is possible to write loops or recurse in a way that may take a long time
+to do an allocation - if at all. To ensure that UNIX signals and other
+internal bookkeeping that require interrupting the running OCaml program
+still happen the compiler introduces *poll points* in to generated native code.
+
+These poll points check `ptr` against `limit` and developers should expect
+them to be placed at the start of every function and the back edge of loops.
+The compiler includes a dataflow pass that removes all but the minimum set
+of points necessary to ensure these checks happen in a bounded amount of time.
+
+[minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
 ##### Setting the Size of the Minor Heap
@@ -174,7 +188,7 @@ memory. The runtime system maintains a free-list data structure that indexes
 all the free memory that it has allocated, and uses it to satisfy allocation
 requests for OCaml blocks. [garbage collection/mark and sweep
 collection]{.idx}[mark and sweep garbage collection]{.idx}[major
-heaps/garbage collection in]{.idx}[heaps/major heaps]{.idx #Hmh}[garbage
+heaps/garbage collection in]{.idx}[heaps/major heaps]{.idx}[garbage
 collection/of longer-lived values]{.idx}
 
 The major heap is typically much larger than the minor heap and can scale to
@@ -216,6 +230,10 @@ contains OCaml heap chunks. A heap chunk header contains:
   blocks to defragment the heap
 
 - A link to the next heap chunk in the list
+
+- A pointer to the start and end of the range of blocks that may contain
+  unexamined fields and need to be scanned later. Only used after mark stack
+  overflow.
 
 Each chunk's data area starts on a page boundary, and its size is a multiple
 of the page size (4 KB). It contains a contiguous sequence of heap blocks
@@ -269,8 +287,33 @@ allocation strategies]{.idx}
 
 The free list of blocks is always checked first when allocating a new block
 in the major heap. The default free list search is called
-*next-fit allocation*, with an alternative *first-fit* algorithm also
-available. [first-fit allocation]{.idx}[next-fit allocation]{.idx}
+*best-fit allocation*, with alternatives *next-fit* and *first-fit* algorithms
+also available.
+[best-fit allocation]{.idx}[first-fit allocation]{.idx}[next-fit allocation]{.idx}
+
+#### Best-fit allocation
+
+The best-fit allocator is a combination of two strategies. The first,
+size-segregated free lists, is based on the observation that nearly all
+major heap allocations in OCaml are small (consider list elements and tuples
+which are only a couple of machine words). Best fit keeps separate free lists
+for sizes up to and including 16 words which gives a fast path for most
+allocations. Allocations for these sizes can be serviced from their segregated
+free lists or, if they are empty, from the next size with a space.
+
+The second strategy, for larger allocations, is the use of a specialized data
+structure known as a _splay tree_ for the free list. This is a type of search
+tree that adapts to recent access patterns. For our use this means that the
+most commonly requested allocation sizes are the quickest to access.
+
+Small allocations, when there are no larger sizes available in the segregated
+free lists, and large allocations greater than sixteen words are serviced from
+the main free list. The free list is queried for the smallest block that is
+at least as large as the allocation requested.
+
+Best-fit allocation is the default allocation mechanism. It represents a good
+trade-off between the allocation cost (in terms of CPU work) and heap
+fragmentation.
 
 #### Next-fit allocation
 
@@ -279,10 +322,12 @@ most recently used to satisfy a request. When a new request comes in, the
 allocator searches from the next block to the end of the free list, and then
 from the beginning of the free list up to that block.
 
-Next-fit allocation is the default allocation strategy. It's quite a cheap
+Next-fit allocation is quite a cheap
 allocation mechanism, since the same heap chunk can be reused across
 allocation requests until it runs out. This in turn means that there is good
-memory locality to use CPU caches better.
+memory locality to use CPU caches better. The big downside of next-fit is
+that since most allocations are small, large blocks at the start of the
+free list become heavily fragmented.
 
 #### First-fit allocation
 
@@ -305,11 +350,11 @@ allocation cost.
 ##### Controlling the Heap Allocation Policy
 
 You can set the heap allocation policy via the `Gc.allocation_policy` field.
-A value of `0` (the default) sets it to next-fit, and `1` to the first-fit
-allocator.
+A value of `0` sets it to next-fit, `1` to first-fit, and `2` (the default)
+to the best-fit allocator.
 
-The same behavior can be controlled at runtime by setting `a=0` or `a=1` in
-`OCAMLRUNPARAM`.
+The same behavior can be controlled at runtime by setting `a=0`, `a=1` or
+`a=2` in `OCAMLRUNPARAM`.
 :::
 
 
@@ -326,41 +371,38 @@ slices. [major heaps/marking and scanning]{.idx}
 - Blue:  On the free list and not currently in use
 - White (during marking): Not reached yet, but possibly reachable
 - White (during sweeping): Unreachable and can be freed
-- Gray: Reachable, but its fields have not been scanned
 - Black:  Reachable, and its fields have been scanned
 
 The color tags in the value headers store most of the state of the marking
-process, allowing it to be paused and resumed later. The GC and application
-alternate between marking a slice of the major heap and actually getting on
-with executing the program logic. The OCaml runtime calculates a sensible
-value for the size of each major heap slice based on the rate of allocation
-and available memory.
+process, allowing it to be paused and resumed later. On allocation, all heap
+values are initially given the color white indicating they are possibly
+reachable but haven't been scanned yet. The GC and application alternate
+between marking a slice of the major heap and actually getting on with
+executing the program logic. The OCaml runtime calculates a sensible value
+for the size of each major heap slice based on the rate of allocation and
+available memory.
 
 The marking process starts with a set of *root* values that are always live
-(such as the application stack). All values on the heap are initially marked
-as white values that are possibly reachable but haven't been scanned yet. It
-recursively follows all the fields in the roots via a depth-first search, and
-pushes newly encountered white blocks onto an intermediate stack of
-*gray values* while it follows their fields. When a gray value's fields have
-all been followed, it is popped off the stack and colored black. [root
-values]{.idx}[gray values]{.idx}
+(such as the application stack and globals). These root values have their
+color set to black and are pushed on to a specialized data structure known as
+the _mark_ stack. Marking proceeds by popping a value from the stack and
+examining its fields. Any fields containing white-colored blocks are changed
+to black and pushed onto the mark stack.
 
-This process is repeated until the gray value stack is empty and there are no
-further values to mark. There's one important edge case in this process,
-though. The gray value stack can only grow to a certain size, after which the
-GC can no longer recurse into intermediate values since it has nowhere to
-store them while it follows their fields. If this happens, the heap is marked
-as *impure* and a more expensive check is initiated once the existing gray
-values have been processed. [impure heaps]{.idx}
+This process is repeated until the mark stack is empty and there are no further
+values to mark. There's one important edge case in this process, though. The
+mark stack can only grow to a certain size, after which the GC can no longer
+recurse into intermediate values since it has nowhere to store them while it
+follows their fields. This is known as mark stack *overflow* and a process
+called _pruning_ begins. Pruning empties the mark stack entirely, summarising
+the addresses of each block as start and end ranges in each heap chunk header.
 
-To mark an impure heap, the GC first marks it as pure and walks through the
-entire heap block-by-block in increasing order of memory address. If it finds
-a gray block, it adds it to the gray list and recursively marks it using the
-usual strategy for a pure heap. Once the scan of the complete heap is
-finished, the mark phase checks again whether the heap has again become
-impure and repeats the scan until it is pure again. These full-heap scans
-will continue until a successful scan completes without overflowing the gray
-list. [major heaps/controlling collections]{.idx}
+Later in the marking process when the mark stack is empty it is replenished by
+*redarkening* the heap. This starts at the first heap chunk (by address) that
+has blocks needing redarkening (i.e were removed from the mark stack during
+ a prune) and entries from the redarkening range are added to the mark stack
+ until it is a quarter full. The emptying and replenishing cycle continues
+until there are no heap chunks with ranges left to redarken.
 
 ::: {data-type=note}
 #### Controlling Major Heap Collections
@@ -500,22 +542,19 @@ garbage collection occurring:
   (libraries core core_bench))
 ```
 
-
-
 ```sh dir=examples/barrier_bench,non-deterministic=command,require-package=core_bench
-$ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
-Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
+Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
  ----------- ---------- --------- ---------- ---------- ------------
-  mutable       8.98ms    2.00Mw     20.36w     20.36w      100.00%
-  immutable     5.66ms    5.00Mw                             63.08%
+  mutable       5.10ms    2.00Mw     20.61w     20.61w      100.00%
+  immutable     4.63ms    5.00Mw      0.28w      0.28w       90.88%
 
 ```
 
-There is a stark space/time trade-off here. The mutable version takes
-significantly longer to complete than the immutable one but allocates many
+There is a space/time trade-off here. The mutable version takes
+longer to complete than the immutable one but allocates many
 fewer minor-heap words than the immutable version. Minor allocation in OCaml
 is very fast, and so it is often better to use immutable data structures in
 preference to the more conventional mutable versions. On the other hand, if
@@ -528,7 +567,6 @@ command-line benchmark binaries have a number of useful options that affect
 garbage collection behavior:
 
 ```sh dir=examples/barrier_bench
-$ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -help | head -13
 Benchmark for mutable, immutable
 
@@ -549,9 +587,6 @@ The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
 of a long-running application without you having to actually wait that long
 to re-create the behavior in a performance unit test.
-<a data-type="indexterm" data-startref="Hmh">&nbsp;</a>
-
-
 
 ## Attaching Finalizer Functions to Values
 
@@ -564,7 +599,7 @@ for]{.idx}[finalizers/in grabage collection]{.idx}[garbage
 collection/finalizer functions]{.idx}
 
 ::: {data-type=note}
-### What Values Can Be Finalized?
+##### What Values Can Be Finalized?
 
 Various values cannot have finalizers attached since they aren't
 heap-allocated. Some examples of values that are not heap-allocated are

@@ -13,6 +13,7 @@
     imperative-programming
     functors
     first-class-modules
+    (wip gadts)
     objects
     classes))))
 
@@ -26,6 +27,7 @@
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
+    platform
     ))))
 
 (part
@@ -35,5 +37,4 @@
     runtime-memory-layout
     garbage-collector
     compiler-frontend
-    ppx
     compiler-backend))))

@@ -115,9 +115,9 @@
 
 (rule
  (alias site)
- (target ppx.html)
+ (target platform.html)
  (deps (alias ../book/html) ../book/toc.scm)
- (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/ppx.html})))
+ (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/platform.html})))
 
 (rule
  (alias site)

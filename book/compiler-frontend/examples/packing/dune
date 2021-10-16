@@ -1,1 +1,7 @@
-(executable (name test))
+(library
+  (name hello)
+  (modules a b))
+(executable
+  (name test)
+  (libraries hello)
+  (modules test))
