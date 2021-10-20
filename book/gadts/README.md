@@ -1117,13 +1117,78 @@ think of this variable as having three parts:
   from.
 - `'a` is the name of the type variable from inside that constructor.
 
+### (TODO)
+
+Let's delve in to a more realistic example of how to use existentially
+quantified types. Let's say we wanted to build a library for putting
+together *pipelines*, which is to say, sequences of steps, where each
+step consumes the data output by the last step. Such pipelines can be
+useful for automating various systems-management tasks, in much the
+same way that shell piplines in Bash are useful.
+
+The signature for such a pipeline might look like this:
+
+```ocaml env=main
+module type Pipeline = sig
+  type 'a t
+
+  (** The empty pipeline *)
+  val empty : 'a t
+
+  (** Operator to build up actions into a pipeline *)
+  val ( @> ) : ('a -> 'b) -> 'b t -> 'a t
+
+  (** Executes a pipeline *)
+  val run : 'a t -> 'a -> unit
+end
+```
+
+This API lets you first build up a pipeline, and then later, execute
+it against different inputs.
+
+This API is pretty straightforward to implement. Here, we'll represent
+a pipeline simply as a function.
+
+```ocaml env=main
+# module Simple_pipeline : Pipeline = struct
+    type 'a t = 'a -> unit
+
+    let empty _ = ()
+    let ( @> ) f p = (fun input -> p (f input))
+    let run p input = p input
+  end
+module Simple_pipeline : Pipeline
+```
+
+```ocaml env=main
+# let p =
+    let open Simple_pipeline in
+    (fun dir -> Core.Sys.readdir dir)
+    @> (fun dirs -> List.filter (Array.to_list dirs) ~f:Core.Sys.is_file_exn)
+    @> (fun files -> List.iter files ~f:print_endline)
+    @> empty
+val p : string Simple_pipeline.t = <abstr>
+```
+
+```ocaml env=main
+# Simple_pipeline.run p "."
+prelude.ml
+dune
+README.md
+- : unit = ()
+```
+
+But this isn't really buying us anything over writing the
+straight-line code. After all, we could just have written:
 
 
-
-
-
-### Free your monad
-
+```ocaml env=main
+# let p dir =
+    let dirs = Core.Sys.readdir dir in
+    let files = List.filter (Array.to_list dirs) ~f:Core.Sys.is_file_exn in
+    List.iter files ~f:print_endline
+# p "."
+```
 
 ## Limitations of GADTs
 
