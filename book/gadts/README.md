@@ -1122,9 +1122,30 @@ think of this variable as having three parts:
 Let's delve in to a more realistic example of how to use existentially
 quantified types. Let's say we wanted to build a library for putting
 together *pipelines*, which is to say, sequences of steps, where each
-step consumes the data output by the last step. Such pipelines can be
-useful for automating various systems-management tasks, in much the
-same way that shell piplines in Bash are useful.
+step consumes the data output by the last step, and the overall
+computation returns the final result.
+
+Now in some sense, we already have nice ways of constructing pipelines.
+The `|>` operator in particular is useful for writing this kind of code.
+
+```ocaml env=main
+# let p dir =
+    Core.Sys.readdir dir
+    |> Array.to_list
+    (* |> List.filter ~f:Core.Sys.is_file_exn *)
+    |> List.iter ~f:print_endline
+val p : string -> unit = <fun>
+# p "."
+prelude.ml
+.mdx
+dune
+README.md
+- : unit = ()
+```
+
+Such pipelines can be useful for
+automating various systems-management tasks, in much the same way that
+shell piplines in Bash are useful.
 
 The signature for such a pipeline might look like this:
 
@@ -1139,7 +1160,7 @@ module type Pipeline = sig
   val ( @> ) : ('a -> 'b) -> 'b t -> 'a t
 
   (** Executes a pipeline *)
-  val run : 'a t -> 'a -> unit
+  val exec : 'a t -> 'a -> unit
 end
 ```
 
@@ -1155,7 +1176,7 @@ a pipeline simply as a function.
 
     let empty _ = ()
     let ( @> ) f p = (fun input -> p (f input))
-    let run p input = p input
+    let exec p input = p input
   end
 module Simple_pipeline : Pipeline
 ```
@@ -1172,10 +1193,8 @@ val p : string Simple_pipeline.t = <abstr>
 
 ```ocaml env=main
 # Simple_pipeline.run p "."
-prelude.ml
-dune
-README.md
-- : unit = ()
+Line 1, characters 1-20:
+Error: Unbound value Simple_pipeline.run
 ```
 
 But this isn't really buying us anything over writing the
@@ -1187,7 +1206,12 @@ straight-line code. After all, we could just have written:
     let dirs = Core.Sys.readdir dir in
     let files = List.filter (Array.to_list dirs) ~f:Core.Sys.is_file_exn in
     List.iter files ~f:print_endline
+val p : string -> unit = <fun>
 # p "."
+prelude.ml
+dune
+README.md
+- : unit = ()
 ```
 
 ## Limitations of GADTs
