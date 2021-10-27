@@ -140,7 +140,7 @@ specialized to the `Error.t` type.  Here's an example.
 - : ('a, Error.t) result = Error failed!
 ```
 
-An the `Or_error` module provides a bunch of useful operators for
+And the `Or_error` module provides a bunch of useful operators for
 constructing errors.  For example, `Or_error.try_with` can be used for
 catching exceptions from a computation.
 
