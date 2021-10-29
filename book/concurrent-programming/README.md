@@ -1071,9 +1071,11 @@ val handle_error : unit -> string Deferred.t = <fun>
 Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
-This didn't work because `try/with` only captures exceptions that are thrown
-in the code directly executed within it, while `maybe_raise` schedules an
-Async job to run in the future, and it's that job that throws an exception.
+This didn't work because `try/with` only captures exceptions that are
+thrown in the code running within it, while `maybe_raise` schedules an
+Async job to run in the future (after the exception handling block has
+been exited) and when that job that eventually throws an exception it
+is not running with an active exception handler anymore.
 
 We can capture this kind of asynchronous error using the `try_with` function
 provided by Async: [exceptions/asynchronous errors]{.idx}
