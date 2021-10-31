@@ -646,7 +646,7 @@ handle_error () ;;
 &gt;Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 </code></pre>
 </div>
-<p>This didn’t work because <code>try/with</code> only captures exceptions that are thrown in the code directly executed within it, while <code>maybe_raise</code> schedules an Async job to run in the future, and it’s that job that throws an exception.</p>
+<p>This didn’t work because <code>try/with</code> only captures exceptions that are thrown by the code executed synchronously within it, while <code>maybe_raise</code> schedules an Async job that will throw an exception in the future, after the <code>try/with</code> expression has exited.</p>
 <p>We can capture this kind of asynchronous error using the <code>try_with</code> function provided by Async: <a data-secondary="asynchronous errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_error () =
