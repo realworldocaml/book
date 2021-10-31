@@ -1108,21 +1108,23 @@ think of this variable as having three parts:
 - `'a` is the name of the type variable from inside that constructor.
 
 
-### Abstracting machines
+### Abstracting computational machines
 
-A common idiom in a functional language is to use combinators for
-building together useful bits of logic out of smaller pieces.  Let's
-consider one simple example of this: building a pipeline.
+A common idiom in OCaml is to create functions, sometimes called
+combinators, for building up a computational machines out of small
+components.  Let's walk through a simple example of such a system, and
+show how GADTs can help.
 
-In this context, a pipeline is just a sequence of operations, each
-stage consumes the output of the previous stage, maybe does some set
-of side effects, and then produces output for the next stage.
-This is analogous to a shell pipeline, and is useful for all sorts of
-system automation tasks.
+In this example, we'll consider the construction of *pipelines*, where
+a pipeline is a sequence of operations arranged in linear sequence,
+where each step consumes the output of the previous step, potentially
+does some side effects, and exports information that can be consumed
+by the next step.  This is analogous to a shell pipeline, and is
+useful for all sorts of system automation tasks.
 
-Now, it's not totally obvious why you need any special infrastructure
-for this. After all, OCaml comes with a perfectly serviceable pipeline
-operator for functions, so we can write something like this:
+It's not totally obvious why we need anything new here. After all,
+OCaml comes with a perfectly serviceable pipeline operator for
+functions, as can be seen below.
 
 ```ocaml
 # let extract_first_lines dir ~output =
