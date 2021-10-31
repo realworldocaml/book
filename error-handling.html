@@ -82,7 +82,7 @@ end</code></pre>
 &gt;- : ('a, Error.t) result = Error failed!
 </code></pre>
 </div>
-<p>An the <code>Or_error</code> module provides a bunch of useful operators for constructing errors. For example, <code>Or_error.try_with</code> can be used for catching exceptions from a computation.</p>
+<p>And the <code>Or_error</code> module provides a bunch of useful operators for constructing errors. For example, <code>Or_error.try_with</code> can be used for catching exceptions from a computation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let float_of_string s =
   Or_error.try_with (fun () -&gt; Float.of_string s)
