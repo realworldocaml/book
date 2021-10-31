@@ -737,7 +737,7 @@ One of the simplest benign effects is *laziness*. A lazy value is one
 that is not computed until it is actually needed. In OCaml, lazy
 values are created using the `lazy` keyword, which can be used to
 convert any expression of type `s` into a lazy value of type `s
-Lazy.t`. The evaluation of that expression is delayed until forced
+lazy_t`. The evaluation of that expression is delayed until forced
 with `Lazy.force`:
 
 ```ocaml env=main
