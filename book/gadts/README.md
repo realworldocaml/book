@@ -815,7 +815,8 @@ val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
 
 Note that filling in the fields doesn't automatically mark a request
 as `complete`. To do that, we need to explicitly test for
-completeness.
+completeness, and then construct a version of the record with just the
+completed fields filled in.
 
 ```ocaml env=main
 # let check_completeness request =
@@ -827,8 +828,10 @@ val check_completeness : incomplete logon_request -> 'a logon_request option =
   <fun>
 ```
 
-Rather than leaving the result as polymorphic, it's a little clearer
-if we add a type annotation.
+Note that the result is polymorphic, meaning it can return a logon
+request of any kind, which includes the possibility of returning a
+complete request.  In practice, the function type is easier to
+understand if we constrain
 
 ```ocaml env=main
 # let check_completeness request : complete logon_request option =
@@ -842,19 +845,6 @@ val check_completeness :
 
 Finally, we can write an authorization checker that works
 unconditionally on a complete login request.
-
-```ocaml env=main
-# let authorized (request : complete logon_request) =
-    match request with
-    | { user_id = Present user_id; permissions = Present permissions; _}  ->
-      Ok (Permissions.check permissions user_id)
-    | _ -> Error "whoops"
-Line 5, characters 7-8:
-Warning 56 [unreachable-case]: this match case is unreachable.
-Consider replacing it with a refutation case '<pat> -> .'
-val authorized : complete logon_request -> (bool, string) result = <fun>
-```
-
 
 ```ocaml env=main
 # let authorized (request : complete logon_request) =
@@ -1117,6 +1107,33 @@ think of this variable as having three parts:
   from.
 - `'a` is the name of the type variable from inside that constructor.
 
+
+### Abstracting machines
+
+A common idiom in a functional language is to use combinators for
+building together useful bits of logic out of smaller pieces.  Let's
+consider one simple example of this: building a pipeline.
+
+In this context, a pipeline is just a sequence of operations, each
+stage consumes the output of the previous stage, maybe does some set
+of side effects, and then produces output for the next stage.
+This is analogous to a shell pipeline, and is useful for all sorts of
+system automation tasks.
+
+Now, it's not totally obvious why you need any special infrastructure
+for this. After all, OCaml comes with a perfectly serviceable pipeline
+operator for functions, so we can write something like this:
+
+```ocaml
+# let extract_first_lines dir ~output =
+    Sys.ls_dir dir
+    |> List.filter ~f:Sys.is_file_exn
+    |> List.map ~f:(fun file_name ->
+         In_channel.with_file file_name ~f:(fun inc ->
+             file_name, In_channel.input_line_exn inc))
+# extract_first_lines "."
+```
+
 ### (TODO)
 
 Let's delve in to a more realistic example of how to use existentially
@@ -1279,4 +1296,3 @@ type, it's free, and can be constrained for whatever purpose the
 designer of the interface through which `foo` is exposed wants.
 
 1 2 3
-
