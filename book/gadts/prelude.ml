@@ -29,8 +29,9 @@ let create_files dir files =
         Out_channel.write_all (dir ^/ name) ~data))
 
 let () =
-  create_files "bar"
-    [ "a", "this is a file\nwith multiple lines"
-    ; "b", "this is a file with just one line"
-    ; "c", "This is also a file\nwith mutliple\n lines\n"
+  create_files "src"
+    [ "server.ml", "open Core\nopen! Async\type t ="
+    ; "server.mli", ""
+    ; "parser.ml", "open Base\n\ntype t ="
+    ; "dune", "(library\n (name foo)"
     ]

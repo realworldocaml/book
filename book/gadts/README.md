@@ -1110,30 +1110,137 @@ think of this variable as having three parts:
 
 ### Abstracting computational machines
 
-A common idiom in OCaml is to create functions, sometimes called
-combinators, for building up a computational machines out of small
-components.  Let's walk through a simple example of such a system, and
-show how GADTs can help.
+A common idiom in OCaml is to combine small components into larger
+computational machines, using a collection of component-combining
+functions, or *combinators*.
 
-In this example, we'll consider the construction of *pipelines*, where
-a pipeline is a sequence of operations arranged in linear sequence,
-where each step consumes the output of the previous step, potentially
-does some side effects, and exports information that can be consumed
-by the next step.  This is analogous to a shell pipeline, and is
-useful for all sorts of system automation tasks.
+GADTs can be helpful for writing such combinators.  To see how, let's
+consider a simple example, which is a system for building *pipelines*.
+A pipeline is a sequence of operations, where each step consumes the
+output of the previous step, potentially does some side effects, and
+exports information that can be consumed by the next step.  This is
+analogous to a shell pipeline, and is useful for all sorts of system
+automation tasks.
 
-It's not totally obvious why we need anything new here. After all,
-OCaml comes with a perfectly serviceable pipeline operator for
-functions, as can be seen below.
+But, can't we write pipelines already? After all, OCaml comes with a
+perfectly serviceable pipeline operator for functions, as in the
+following example:
 
-```ocaml
-# let extract_first_lines dir ~output =
-    Sys.ls_dir dir
+```ocaml env=main
+# open Core
+# let size_of_files () =
+    Sys.ls_dir "."
     |> List.filter ~f:Sys.is_file_exn
-    |> List.map ~f:(fun file_name ->
-         In_channel.with_file file_name ~f:(fun inc ->
-             file_name, In_channel.input_line_exn inc))
-# extract_first_lines "."
+    |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+    |> List.sum (module Int) ~f:Int64.to_int_exn
+val size_of_files : unit -> int = <fun>
+```
+
+The reason to want a custom pipeline type is that it lets you build
+various services on top of those pipelines.  Some example of things
+you might want to add on top of a pipeline type:
+
+- Profiling, so that when you run a pipeline, you get a
+  report of how long each step of the pipeline took.
+- Control over execution, like allowing users to pause the pipeline
+  mid-execution, and restart it later.
+- Custom error handling, so, for example, you could build a pipeline
+  that kept track of where it failed, and offered the possibility of
+  restarting it.
+
+Here's a signature for a bare-bones pipeline, without any of
+these extra services.
+
+```ocaml env=main
+module type Basic_pipeline = sig
+  type ('input,'output) t
+
+  val empty : ('a,'a) t
+  val exec : ('a,'b) t -> 'a -> 'b
+  val ( @> ) : ('a -> 'b) -> ('b,'c) t -> ('a,'c) t
+end
+```
+
+Now, we can implement such a pipeline easily enough, no GADTs required.
+
+```ocaml env=main
+# module Basic_pipeline : Basic_pipeline = struct
+    type ('input, 'output) t = 'input -> 'output
+
+    let empty = Fn.id
+    let exec t input = t input
+
+    let ( @> ) f t input =
+      let output = f input in
+      exec t output
+  end
+module Basic_pipeline : Basic_pipeline
+```
+
+And we can build a pipeline analogous to the one we built above:
+
+```ocaml env=main
+# let size_of_files =
+    Basic_pipeline.(
+      (fun () -> Sys.ls_dir ".")
+      @> List.filter ~f:Sys.is_file_exn
+      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+      @> List.sum (module Int) ~f:Int64.to_int_exn
+      @> empty)
+val size_of_files : (unit, int) Basic_pipeline.t = <abstr>
+```
+
+But this pipeline isn't really any better than the one we started
+with.  All our implementation does is step-by-step build up the same
+kind of function that we got by using the `|>` operator.
+
+To get a version of the pipeline where we have various kinds of extra
+services of the kinds we described above, we could just start building
+these services concretely into the pipeline value that we generate.
+
+But GADTs give us a better, simpler approach.  Instead of concretely
+building the machine that executes a pipeline, we can use GADTs to
+more abstractly represent the pipeline we want, and then build the
+extra services we want on top of this more abstract representation.
+
+Here's what this kind of more abstract pipeline type might look like.
+
+```ocaml env=main
+type (_, _) pipeline =
+  | Step : ('a -> 'b) * ('b, 'c) pipeline -> ('a, 'c) pipeline
+  | Empty : ('a, 'a) pipeline
+```
+
+Here, the variants really just represent the two building blocks of a
+pipeline: `Step` corresponds to the `@>` operator, and `Empty`
+corresponds to the `empty` pipeline.
+
+```ocaml env=main
+# let ( @> ) f pipeline = Step (f,pipeline)
+val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
+# let empty = Empty
+val empty : ('a, 'a) pipeline = Empty
+```
+
+It's now easy to write functions that use this pipeline. For example,
+we can do a no-frills function for executing a pipeline:
+
+```ocaml env=main
+# let rec exec : type a b. (a, b) pipeline -> a -> b =
+   fun pipeline input ->
+    match pipeline with
+    | Empty -> input
+    | Step (f, tail) -> exec tail (f input)
+val exec : ('a, 'b) pipeline -> 'a -> 'b = <fun>
+```
+
+But we can also do some more interesting things. For example, we can
+compute the length of a pipeline:
+
+```ocaml env=main
+# let rec length : type a b. (a,b) pipeline -> int =
+    function Empty -> 0 | Step (_,tail) -> 1 + length tail
+val length : ('a, 'b) pipeline -> int = <fun>
 ```
 
 ### (TODO)
@@ -1155,10 +1262,11 @@ The `|>` operator in particular is useful for writing this kind of code.
     |> List.iter ~f:print_endline
 val p : string -> unit = <fun>
 # p "."
-prelude.ml
-.mdx
 dune
+.mdx
+prelude.ml
 README.md
+src
 - : unit = ()
 ```
 
@@ -1227,8 +1335,8 @@ straight-line code. After all, we could just have written:
     List.iter files ~f:print_endline
 val p : string -> unit = <fun>
 # p "."
-prelude.ml
 dune
+prelude.ml
 README.md
 - : unit = ()
 ```
