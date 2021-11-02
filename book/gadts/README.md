@@ -1342,15 +1342,15 @@ Error: This expression has type a but an expression was expected of type
 
 Note that or-patterns do sometimes work, but only when you don't make
 use of the type information that is discovered during the pattern
-match.  Here's an example of a not-very-useful function that actually
-compiles with an or-pattern.
+match.  Here's an example of a function that actually compiles with an
+or-pattern.
 
 ```ocaml env=main
-# let nonsense (type a) (kind : a Source_kind.t) =
+# let requires_io (type a) (kind : a Source_kind.t) =
     match kind with
-    | Filename | Raw_data -> 1
-    | Host_and_port -> 2
-val nonsense : 'a Source_kind.t -> int = <fun>
+    | Filename | Host_and_port -> true
+    | Raw_data -> false
+val requires_io : 'a Source_kind.t -> bool = <fun>
 ```
 
 In any case, the lack of or-patterns is annoying, but it's not a big
