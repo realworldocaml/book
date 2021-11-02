@@ -1115,15 +1115,14 @@ computational machines, using a collection of component-combining
 functions, or *combinators*.
 
 GADTs can be helpful for writing such combinators.  To see how, let's
-consider a simple example: a system for building *pipelines*.  A
-pipeline is a sequence of operations, where each step consumes the
-output of the previous step, potentially does some side effects, and
-exports information that can be consumed by the next step.  This is
-analogous to a shell pipeline, and is useful for all sorts of system
-automation tasks.
+consider an example: *pipelines*.  Here, a pipeline is a sequence of
+steps where each step consumes the output of the previous step,
+potentially does some side effects, and returns a value to be passed
+to the next step.  This is analogous to a shell pipeline, and is
+useful for all sorts of system automation tasks.
 
 But, can't we write pipelines already? After all, OCaml comes with a
-perfectly serviceable pipeline operator for functions:
+perfectly serviceable pipeline operator:
 
 ```ocaml env=main
 # open Core
@@ -1136,10 +1135,8 @@ val size_of_files : unit -> int = <fun>
 ```
 
 This works well enough, but the advantage of a custom pipeline type is
-that it lets you build various extra services beyond simple execution
-of the pipeline.
-
-Here are some examples of extra services you might want to provide:
+that it lets you build extra services beyond simple execution of the
+pipeline, e.g.:
 
 - Profiling, so that when you run a pipeline, you get a
   report of how long each step of the pipeline took.
@@ -1149,36 +1146,54 @@ Here are some examples of extra services you might want to provide:
   that kept track of where it failed, and offered the possibility of
   restarting it.
 
-Here's a signature for a bare-bones pipeline, without any of
-these extra services.
+The type signature of such a pipeline type might look something like
+this:
 
 ```ocaml env=main
-module type Basic_pipeline = sig
+module type Pipeline = sig
   type ('input,'output) t
 
-  val empty : ('a,'a) t
-  val exec : ('a,'b) t -> 'a -> 'b
   val ( @> ) : ('a -> 'b) -> ('b,'c) t -> ('a,'c) t
+  val empty : ('a,'a) t
 end
 ```
 
-Now, we can implement such a pipeline easily enough, no GADTs required.
+Here, the type `('a,'b) t` represents a pipeline that consumes values
+of type `'a` and emits values of type `'b`.  The operator `@>` lets
+you add a step to a pipeline by providing a function to prepend on to
+an existing pipeline, and `empty` gives you an empty pipeline, which
+can be used to seed the pipeline.
+
+These types are enough for building up pipelines, but we still need
+some way of executing them. If all we want is the ability to do a
+simple, no-frills execution of a pipeline, we might define our
+pipeline as follows.
 
 ```ocaml env=main
-# module Basic_pipeline : Basic_pipeline = struct
+# module Basic_pipeline : sig
+     include Pipeline
+     val exec : ('a,'b) t -> 'a -> 'b
+   end= struct
     type ('input, 'output) t = 'input -> 'output
 
     let empty = Fn.id
+
     let exec t input = t input
 
     let ( @> ) f t input =
       let output = f input in
       exec t output
   end
-module Basic_pipeline : Basic_pipeline
+module Basic_pipeline :
+  sig
+    type ('input, 'output) t
+    val ( @> ) : ('a -> 'b) -> ('b, 'c) t -> ('a, 'c) t
+    val empty : ('a, 'a) t
+    val exec : ('a, 'b) t -> 'a -> 'b
+  end
 ```
 
-And we can build a pipeline analogous to the one we built above:
+This type is sufficient to build and execute a simple pipeline.
 
 ```ocaml env=main
 # let size_of_files =
@@ -1191,20 +1206,23 @@ And we can build a pipeline analogous to the one we built above:
 val size_of_files : (unit, int) Basic_pipeline.t = <abstr>
 ```
 
-But this pipeline isn't really any better than the one we started
-with.  All our implementation does is step-by-step build up the same
-kind of function that we got by using the `|>` operator.
+But this way of implementing a pipeline doesn't give us a way of
+adding any of the services we discussed.  All we're really doing is
+step-by-step building up the same kind of function that we could have
+gotten using the `|>` operator.
 
-To get a version of the pipeline where we have various kinds of extra
-services of the kinds we described above, we could just start building
-these services concretely into the pipeline value that we generate.
+We could add such services by enhancing the pipeline type, providing
+it with extra runtime structures that let us provide whatever services
+we want to add.  But this approach can be awkward, since it requires
+us to pre-commit to whatever services we're going to support, and to
+embed all of them in to the pipeline value.
 
-But GADTs give us a better, simpler approach.  Instead of concretely
-building the machine that executes a pipeline, we can use GADTs to
-more abstractly represent the pipeline we want, and then build the
-extra services we want on top of this more abstract representation.
+GADTs provide a better, simpler approach.  Instead of concretely
+building a machine for executing a pipeline, we can use GADTs to
+abstractly represent the pipeline we want, and then build the
+functionality we need on top of that representation.
 
-Here's what this kind of more abstract pipeline type might look like.
+Here's that that more abstract representation might look like.
 
 ```ocaml env=main
 type (_, _) pipeline =
@@ -1214,7 +1232,7 @@ type (_, _) pipeline =
 
 Here, the variants really just represent the two building blocks of a
 pipeline: `Step` corresponds to the `@>` operator, and `Empty`
-corresponds to the `empty` pipeline.
+corresponds to the `empty` pipeline, as you can see below.
 
 ```ocaml env=main
 # let ( @> ) f pipeline = Step (f,pipeline)
@@ -1223,8 +1241,8 @@ val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
 val empty : ('a, 'a) pipeline = Empty
 ```
 
-It's now easy to write functions that use this pipeline. For example,
-we can do a no-frills function for executing a pipeline:
+With that in hand, we can do a no-frills pipeline execution easily
+enough.
 
 ```ocaml env=main
 # let rec exec : type a b. (a, b) pipeline -> a -> b =
@@ -1235,18 +1253,9 @@ we can do a no-frills function for executing a pipeline:
 val exec : ('a, 'b) pipeline -> 'a -> 'b = <fun>
 ```
 
-But we can also do some more interesting things. For example, we can
-compute the length of a pipeline:
-
-```ocaml env=main
-# let rec length : type a b. (a,b) pipeline -> int =
-    function Empty -> 0 | Step (_,tail) -> 1 + length tail
-val length : ('a, 'b) pipeline -> int = <fun>
-```
-
-Here's a more complicated example, where we execute a profile while
-keeping track of how long each step of a pipeline took, returning the
-elapsed times for each step as a simple form of profile.
+But we can also do more interesting things. For example, here's a
+function that executes a pipeline and produces a profile showing how
+long each step of a pipeline took.
 
 ```ocaml env=main
 # let exec_with_profile pipeline input =
@@ -1269,8 +1278,21 @@ val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
   <fun>
 ```
 
+The more abstract GADT approach for creating a little combinator
+library like this has several advantages over having combinators that
+build a more concrete computational machine:
 
+- The core types are simpler, since they are typically built out of
+  GADT constructors that are simple reflections the types of the base
+  combinators.
 
+- The design is more modular, since your core types don't need to
+  contemplate every possible use you want to make of them.
+
+- The code tends to be more efficient, since the more concrete
+  approach typically involves allocating closures to wrap up the
+  necessary functionality, and closures are more heavyweight than GADT
+  constructors.
 
 ## Limitations of GADTs
 
