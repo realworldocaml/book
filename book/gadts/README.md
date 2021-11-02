@@ -1296,66 +1296,70 @@ build a more concrete computational machine:
 
 ## Limitations of GADTs
 
-A few things.
+GADTs are useful, but they have some sharp corners.
 
-Limitations on or-patterns.
+### Or-patterns
 
-You can't do this:
-
-```ocaml env=main
-# type _ ty =
-    | I1 : int ty
-    | I2 : int ty
-    | B1 : bool ty
-    | B2 : bool ty
-type _ ty = I1 : int ty | I2 : int ty | B1 : bool ty | B2 : bool ty
-# let foo (type a) (ty : a ty) (x : a) =
-    match ty with
-    | I1 | I2 -> Int.sexp_of_t x
-    | B1 | B2 -> Bool.sexp_of_t x
-Line 3, characters 32-33:
-Error: This expression has type a but an expression was expected of type int
-```
-
-But you can do this:
+One annoyance of
+working GADTs is that GADTs often don't work well with or-patterns.
+Consider the following type that represents various ways we might use
+for obtaining some piece of data.
 
 ```ocaml env=main
-# let foo (type a) (ty : a ty) (x : a) =
-    match ty with
-    | I1 -> Int.sexp_of_t x
-    | I2 -> Int.sexp_of_t x
-    | B1 -> Bool.sexp_of_t x
-    | B2 -> Bool.sexp_of_t x
-val foo : 'a ty -> 'a -> Sexp.t = <fun>
+module Source_kind = struct
+  type _ t =
+    | Filename : string t
+    | Host_and_port : Host_and_port.t t
+    | Raw_data : string t
+end
 ```
 
-So, that's weird.
+We can write a function that takes a `Source_kind.t` and the
+corresponding source, and prints it out.
+
+```ocaml env=main
+# let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
+    match kind with
+    | Filename -> String.sexp_of_t source
+    | Host_and_port -> Host_and_port.sexp_of_t source
+    | Raw_data -> String.sexp_of_t source
+val source_to_sexp : 'a Source_kind.t -> 'a -> Sexp.t = <fun>
+```
+
+But, observing that the right hand side of `Raw_data` and `Filename`
+are the same, you might try to merge those cases together with an
+or-pattern.  Unfortunately, that doesn't work.
+
+```ocaml env=main
+# let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
+    match kind with
+    | Filename | Raw_data -> String.sexp_of_t source
+    | Host_and_port -> Host_and_port.sexp_of_t source
+Line 3, characters 47-53:
+Error: This expression has type a but an expression was expected of type
+         string
+```
+
+Note that or-patterns do sometimes work, but only when you don't make
+use of the type information that is discovered during the pattern
+match.  Here's an example of a not-very-useful function that actually
+compiles with an or-pattern.
+
+```ocaml env=main
+# let nonsense (type a) (kind : a Source_kind.t) =
+    match kind with
+    | Filename | Raw_data -> 1
+    | Host_and_port -> 2
+val nonsense : 'a Source_kind.t -> int = <fun>
+```
+
+In any case, the lack of or-patterns is annoying, but it's not a big
+deal, since you can minimize the code duplication by pulling out most
+of the content of the duplicated right-hand sides into functions that
+can be called in each of the duplicated cases.
+
+### Deriving serializers
 
 Also, derivers don't always work! So, you typically don't have
 `t_of_sexp` with GADTs, since the result type would need to be wrapped
 in an existential type.
-
-### Ideas
-
-- Controlling memory layout / zero-copy networking. Maybe too
-  advanced?
-- Free monads and the like
-
-
-## Detritus
-
-Aren't a language feature so much
-as a programming technique.  Maybe a slightly better name is *phantom
-type parameters*. A phantom type parameter is a type parameter that
-shows up on the left-hand-side of the definition of a type, but not
-the right, e.g.:
-
-```ocaml env=main
-type _ foo = int
-```
-
-Since the phantom parameter isn't tied to the implementation of the
-type, it's free, and can be constrained for whatever purpose the
-designer of the interface through which `foo` is exposed wants.
-
-1 2 3
