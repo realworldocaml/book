@@ -1115,16 +1115,15 @@ computational machines, using a collection of component-combining
 functions, or *combinators*.
 
 GADTs can be helpful for writing such combinators.  To see how, let's
-consider a simple example, which is a system for building *pipelines*.
-A pipeline is a sequence of operations, where each step consumes the
+consider a simple example: a system for building *pipelines*.  A
+pipeline is a sequence of operations, where each step consumes the
 output of the previous step, potentially does some side effects, and
 exports information that can be consumed by the next step.  This is
 analogous to a shell pipeline, and is useful for all sorts of system
 automation tasks.
 
 But, can't we write pipelines already? After all, OCaml comes with a
-perfectly serviceable pipeline operator for functions, as in the
-following example:
+perfectly serviceable pipeline operator for functions:
 
 ```ocaml env=main
 # open Core
@@ -1136,9 +1135,11 @@ following example:
 val size_of_files : unit -> int = <fun>
 ```
 
-The reason to want a custom pipeline type is that it lets you build
-various services on top of those pipelines.  Some example of things
-you might want to add on top of a pipeline type:
+This works well enough, but the advantage of a custom pipeline type is
+that it lets you build various extra services beyond simple execution
+of the pipeline.
+
+Here are some examples of extra services you might want to provide:
 
 - Profiling, so that when you run a pipeline, you get a
   report of how long each step of the pipeline took.
@@ -1243,103 +1244,33 @@ compute the length of a pipeline:
 val length : ('a, 'b) pipeline -> int = <fun>
 ```
 
-### (TODO)
-
-Let's delve in to a more realistic example of how to use existentially
-quantified types. Let's say we wanted to build a library for putting
-together *pipelines*, which is to say, sequences of steps, where each
-step consumes the data output by the last step, and the overall
-computation returns the final result.
-
-Now in some sense, we already have nice ways of constructing pipelines.
-The `|>` operator in particular is useful for writing this kind of code.
+Here's a more complicated example, where we execute a profile while
+keeping track of how long each step of a pipeline took, returning the
+elapsed times for each step as a simple form of profile.
 
 ```ocaml env=main
-# let p dir =
-    Core.Sys.readdir dir
-    |> Array.to_list
-    (* |> List.filter ~f:Core.Sys.is_file_exn *)
-    |> List.iter ~f:print_endline
-val p : string -> unit = <fun>
-# p "."
-dune
-.mdx
-prelude.ml
-README.md
-src
-- : unit = ()
+# let exec_with_profile pipeline input =
+    let rec loop
+        : type a b.
+          (a, b) pipeline -> a -> Time_ns.Span.t list -> b * Time_ns.Span.t list
+      =
+     fun pipeline input rev_profile ->
+      match pipeline with
+      | Empty -> input, rev_profile
+      | Step (f, tail) ->
+        let start = Time_ns.now () in
+        let output = f input in
+        let elapsed = Time_ns.diff (Time_ns.now ()) start in
+        loop tail output (elapsed :: rev_profile)
+    in
+    let output, rev_profile = loop pipeline input [] in
+    output, List.rev rev_profile
+val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
+  <fun>
 ```
 
-Such pipelines can be useful for
-automating various systems-management tasks, in much the same way that
-shell piplines in Bash are useful.
-
-The signature for such a pipeline might look like this:
-
-```ocaml env=main
-module type Pipeline = sig
-  type 'a t
-
-  (** The empty pipeline *)
-  val empty : 'a t
-
-  (** Operator to build up actions into a pipeline *)
-  val ( @> ) : ('a -> 'b) -> 'b t -> 'a t
-
-  (** Executes a pipeline *)
-  val exec : 'a t -> 'a -> unit
-end
-```
-
-This API lets you first build up a pipeline, and then later, execute
-it against different inputs.
-
-This API is pretty straightforward to implement. Here, we'll represent
-a pipeline simply as a function.
-
-```ocaml env=main
-# module Simple_pipeline : Pipeline = struct
-    type 'a t = 'a -> unit
-
-    let empty _ = ()
-    let ( @> ) f p = (fun input -> p (f input))
-    let exec p input = p input
-  end
-module Simple_pipeline : Pipeline
-```
-
-```ocaml env=main
-# let p =
-    let open Simple_pipeline in
-    (fun dir -> Core.Sys.readdir dir)
-    @> (fun dirs -> List.filter (Array.to_list dirs) ~f:Core.Sys.is_file_exn)
-    @> (fun files -> List.iter files ~f:print_endline)
-    @> empty
-val p : string Simple_pipeline.t = <abstr>
-```
-
-```ocaml env=main
-# Simple_pipeline.run p "."
-Line 1, characters 1-20:
-Error: Unbound value Simple_pipeline.run
-```
-
-But this isn't really buying us anything over writing the
-straight-line code. After all, we could just have written:
 
 
-```ocaml env=main
-# let p dir =
-    let dirs = Core.Sys.readdir dir in
-    let files = List.filter (Array.to_list dirs) ~f:Core.Sys.is_file_exn in
-    List.iter files ~f:print_endline
-val p : string -> unit = <fun>
-# p "."
-dune
-prelude.ml
-README.md
-- : unit = ()
-```
 
 ## Limitations of GADTs
 
