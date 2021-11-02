@@ -1126,7 +1126,7 @@ perfectly serviceable pipeline operator:
 
 ```ocaml env=main
 # open Core
-# let size_of_files () =
+# let sum_file_sizes () =
     Sys.ls_dir "."
     |> List.filter ~f:Sys.is_file_exn
     |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
@@ -1164,10 +1164,28 @@ you add a step to a pipeline by providing a function to prepend on to
 an existing pipeline, and `empty` gives you an empty pipeline, which
 can be used to seed the pipeline.
 
-These types are enough for building up pipelines, but we still need
-some way of executing them. If all we want is the ability to do a
-simple, no-frills execution of a pipeline, we might define our
-pipeline as follows.
+We can use a functor to show how we could use this API for building a
+pipeline like our earlier example using `|>`.
+
+```ocaml env=main
+# module Example_pipeline (Pipeline : Pipeline) = struct
+    open Pipeline
+    let sum_file_sizes =
+      (fun () -> Sys.ls_dir ".")
+      @> List.filter ~f:Sys.is_file_exn
+      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+      @> List.sum (module Int) ~f:Int64.to_int_exn
+      @> empty
+  end
+module Example_pipeline :
+  functor (Pipeline : Pipeline) ->
+    sig val sum_file_sizes : (unit, int) Pipeline.t end
+```
+
+If all we want is a pipeline capable of a no-frills execution, we can
+define our pipeline itself as a simple function, the `@>` operator as
+function composition.  Then executing the pipeline is just function
+application.
 
 ```ocaml env=main
 # module Basic_pipeline : sig
@@ -1178,11 +1196,10 @@ pipeline as follows.
 
     let empty = Fn.id
 
-    let exec t input = t input
-
     let ( @> ) f t input =
-      let output = f input in
-      exec t output
+      t (f input)
+
+    let exec t input = t input
   end
 module Basic_pipeline :
   sig
@@ -1193,36 +1210,24 @@ module Basic_pipeline :
   end
 ```
 
-This type is sufficient to build and execute a simple pipeline.
+But this way of implementing a pipeline doesn't give us any of the
+extra services we discussed.  All we're really doing is step-by-step
+building up the same kind of function that we could have gotten using
+the `|>` operator.
 
-```ocaml env=main
-# let size_of_files =
-    Basic_pipeline.(
-      (fun () -> Sys.ls_dir ".")
-      @> List.filter ~f:Sys.is_file_exn
-      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
-      @> List.sum (module Int) ~f:Int64.to_int_exn
-      @> empty)
-val size_of_files : (unit, int) Basic_pipeline.t = <abstr>
-```
+If we wanted to add the kinds of services we discussed above, we would
+do so by enhancing the pipeline type, e.g., providing it with extra
+runtime structures to track profiles, or handle exceptions.  But this
+approach is awkward, since it requires us to pre-commit to whatever
+services we're going to support, and to embed all of them in to our
+representation of a pipeline.
 
-But this way of implementing a pipeline doesn't give us a way of
-adding any of the services we discussed.  All we're really doing is
-step-by-step building up the same kind of function that we could have
-gotten using the `|>` operator.
+GADTs provide a simpler approach.  Instead of concretely building a
+machine for executing a pipeline, we can use GADTs to abstractly
+represent the pipeline we want, and then build the functionality we
+want on top of that representation.
 
-We could add such services by enhancing the pipeline type, providing
-it with extra runtime structures that let us provide whatever services
-we want to add.  But this approach can be awkward, since it requires
-us to pre-commit to whatever services we're going to support, and to
-embed all of them in to the pipeline value.
-
-GADTs provide a better, simpler approach.  Instead of concretely
-building a machine for executing a pipeline, we can use GADTs to
-abstractly represent the pipeline we want, and then build the
-functionality we need on top of that representation.
-
-Here's that that more abstract representation might look like.
+Here's what such a representation might look like.
 
 ```ocaml env=main
 type (_, _) pipeline =
