@@ -1131,7 +1131,7 @@ perfectly serviceable pipeline operator:
     |> List.filter ~f:Sys.is_file_exn
     |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
     |> List.sum (module Int) ~f:Int64.to_int_exn
-val size_of_files : unit -> int = <fun>
+val sum_file_sizes : unit -> int = <fun>
 ```
 
 This works well enough, but the advantage of a custom pipeline type is
@@ -1365,6 +1365,112 @@ can be called in each of the duplicated cases.
 
 ### Deriving serializers
 
-Also, derivers don't always work! So, you typically don't have
-`t_of_sexp` with GADTs, since the result type would need to be wrapped
-in an existential type.
+As will be discussed in detail in [Data Serialization With
+S-Expressions ](data-serialization.html){data-type=xref},
+s-expressions are a convenient data format for representing structured
+data.  Rather than write the serializers and deserializers by hand, we
+typically use `ppx_sexp_value`, which is a syntax extension which
+auto-generates these functions for a given type, based on that type's
+definition.
+
+Here's an example:
+
+```ocaml env=main
+# type position = { x: float; y: float } [@@deriving sexp]
+type position = { x : float; y : float; }
+val position_of_sexp : Sexp.t -> position = <fun>
+val sexp_of_position : position -> Sexp.t = <fun>
+# sexp_of_position { x = 3.5; y = -2. }
+- : Sexp.t = ((x 3.5) (y -2))
+# position_of_sexp (Sexp.of_string "((x 72) (y 1.2))")
+- : position = {x = 72.; y = 1.2}
+```
+
+While `[@@deriving sexp]` works with most types, it doesn't always
+work with GADTs.
+
+```ocaml env=main
+# type _ number_kind =
+    | Int : int number_kind
+    | Float : float number_kind
+  [@@deriving sexp]
+Lines 1-4, characters 1-20:
+Error: This expression has type int number_kind
+       but an expression was expected of type v_x__001_ number_kind
+       Type int is not compatible with type v_x__001_
+```
+
+The error message is pretty awful, but if you stop and think about it,
+it's not too surprising that we ran into trouble here.  What should
+the type of `number_kind_of_sexp` be anyway?  When parsing `"Int"`,
+the returned type would have to be `int number_kind`, and when parsing
+`"Float"`, the type would have to be `float number_kind`.  That kind
+of dependency between the value of an argument and the type of the
+returned value is just not expressible in OCaml's type system.
+
+This argument doesn't stop us from serializing, and indeed,
+`[@@deriving sexp_of]`, which only creates the serializer, works just
+fine.
+
+```ocaml env=main
+# type _ number_kind =
+   | Int : int number_kind
+   | Float : float number_kind
+  [@@deriving sexp_of]
+type _ number_kind = Int : int number_kind | Float : float number_kind
+val sexp_of_number_kind :
+  ('v_x__001_ -> Sexp.t) -> 'v_x__001_ number_kind -> Sexp.t = <fun>
+# sexp_of_number_kind Int.sexp_of_t Int
+- : Sexp.t = Int
+```
+
+It is possible to build a deserializer for `number_kind`, but it's a
+tricky.  First, we'll need a type that packs up a `number_kind` while
+hiding its type parameter.  This is going to be the value we return
+from our parser.
+
+```ocaml env=main
+type packed_number_kind = P : _ number_kind -> packed_number_kind
+```
+
+Next, we'll need to create a non-GADT version of our type, for which
+we'll derive a deserializer.
+
+```ocaml env=main
+type simple_number_kind = Int | Float [@@deriving of_sexp]
+```
+
+Then, we write a function for converting from our non-GADT type to the
+packed variety.
+
+```ocaml env=main
+# let simple_number_kind_to_packed_number_kind kind :
+    packed_number_kind
+    =
+    match kind with
+    | Int -> P Int
+    | Float -> P Float
+val simple_number_kind_to_packed_number_kind :
+  simple_number_kind -> packed_number_kind = <fun>
+```
+
+Finally, we combine our generated sexp-converter with our conversion
+type to produce the final deserialization function.
+
+```ocaml env=main
+# let number_kind_of_sexp sexp =
+    simple_number_kind_of_sexp sexp
+    |> simple_number_kind_to_packed_number_kind
+val number_kind_of_sexp : Sexp.t -> packed_number_kind = <fun>
+```
+
+And here's that function in action.
+
+```ocaml env=main
+# List.map ~f:number_kind_of_sexp
+    [ Sexp.of_string "Float"; Sexp.of_string "Int" ]
+- : packed_number_kind list = [P Float; P Int]
+```
+
+While all of this is doable, it's definitely awkward, and requires
+some unpleasant code-duplication.
