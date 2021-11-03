@@ -547,7 +547,7 @@ Core.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp ;;
 &gt;- : some_type = (44, ["five"; "six"])
 </code></pre>
 </div>
-<p>We’ll discuss s-expressions and Sexplib in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 19, Data Serialization With S Expressions</a>, but for now, let’s see what happens if we attach the <code>[@@deriving sexp]</code> declaration to the definition of <code>t</code> within the functor:</p>
+<p>We’ll discuss s-expressions and Sexplib in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S Expressions</a>, but for now, let’s see what happens if we attach the <code>[@@deriving sexp]</code> declaration to the definition of <code>t</code> within the functor:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
@@ -845,7 +845,7 @@ include Foldable.Extend(Fqueue)</code></pre>
 <dd>Adds support for hashing-based data structures including hash tables, hash sets, and hash heaps.
 </dd>
 <dt><code>Monad.Make</code></dt>
-<dd>For so-called monadic libraries, like those discussed in Chapters <a data-xrefstyle="select:   labelnumber" data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a> and <a data-xrefstyle="select:   labelnumber" data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 15, Concurrent Programming With Async</a>. Here, the functor is used to provide a collection of standard helper functions based on the <code>bind</code> and <code>return</code> operators.
+<dd>For so-called monadic libraries, like those discussed in Chapters <a data-xrefstyle="select:   labelnumber" data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a> and <a data-xrefstyle="select:   labelnumber" data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>. Here, the functor is used to provide a collection of standard helper functions based on the <code>bind</code> and <code>return</code> operators.
 </dd>
 </dl>
 <p>These functors come in handy when you want to add the same kind of functionality that is commonly available in <code>Base</code> to your own types.</p>

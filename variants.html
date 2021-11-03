@@ -163,7 +163,7 @@ let to_tuple (Untupled (x,y)) = (x,y) ;;
 &gt;val to_tuple : untupled -&gt; int * int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 22, Memory Representation of Values</a>.</p>
+<p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 23, Memory Representation of Values</a>.</p>
 </section>
 <section class="level2" id="catch-all-cases-and-refactoring">
 <h2>Catch-All Cases and Refactoring</h2>
@@ -863,7 +863,7 @@ let extended_color_to_int = function
 </dl>
 <p>All that said, polymorphic variants are still a useful and powerful feature, but it’s worth understanding their limitations and how to use them sensibly and modestly.</p>
 <p>Probably the safest and most common use case for polymorphic variants is where ordinary variants would be sufficient but are syntactically too heavyweight. For example, you often want to create a variant type for encoding the inputs or outputs to a function, where it’s not worth declaring a separate type for it. Polymorphic variants are very useful here, and as long as there are type annotations that constrain these to have explicit, exact types, this tends to work well.</p>
-<p>Variants are most problematic exactly where you take full advantage of their power; in particular, when you take advantage of the ability of polymorphic variant types to overlap in the tags they support. This ties into OCaml’s support for subtyping. As we’ll discuss further when we cover objects in <a data-type="xref" href="objects.html#objects">Chapter 11, Objects</a>, subtyping brings in a lot of complexity, and most of the time, that’s complexity you want to avoid.</p>
+<p>Variants are most problematic exactly where you take full advantage of their power; in particular, when you take advantage of the ability of polymorphic variant types to overlap in the tags they support. This ties into OCaml’s support for subtyping. As we’ll discuss further when we cover objects in <a data-type="xref" href="objects.html#objects">Chapter 12, Objects</a>, subtyping brings in a lot of complexity, and most of the time, that’s complexity you want to avoid.</p>
 </section>
 </section>
 </section>
