@@ -67,6 +67,12 @@
 
 (rule
  (alias site)
+ (target gadts.html)
+ (deps (alias ../book/html) ../book/toc.scm)
+ (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/gadts.html})))
+
+(rule
+ (alias site)
  (target garbage-collector.html)
  (deps (alias ../book/html) ../book/toc.scm)
  (action (run rwo-build build chapter -o . -repo-root .. %{dep:../book/garbage-collector.html})))

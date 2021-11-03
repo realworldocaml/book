@@ -13,7 +13,7 @@
     imperative-programming
     functors
     first-class-modules
-    (wip gadts)
+    gadts
     objects
     classes))))
 
