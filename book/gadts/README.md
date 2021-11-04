@@ -13,17 +13,17 @@ puzzle to figure out how to use them effectively. All of which is to
 say that you should only use a GADT when it makes a big qualitative
 improvement to your design.
 
-But don't get me wrong, for the right use-case, GADTs can be
-really transformative, and this chapter will cover some examples to
-demonstrate  the range of use-cases that GADTs support.
+But don't get me wrong, for the right use-case, GADTs can be really
+transformative, and this chapter will walk through several examples
+that demonstrate some of the range of use-cases that GADTs support.
 
 At their heart, GADTs provide two extra features above and beyond
 ordinary variants:
 
 - They let the compiler learn more type information when you descend
   into a case of a pattern match.
-- They provide a form of *existential types*, which is a form of
-  data-hiding.
+- They make it easy to use *existential types*, which let you work
+  with data of a specific but unknown type.
 
 It's a little hard to understand these features without working
 through some examples, so we'll do that next.
