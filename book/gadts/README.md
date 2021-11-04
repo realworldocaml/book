@@ -257,7 +257,7 @@ want.  Let's experiment a little.
 # let i x = Value (Int x)
   and b x = Value (Bool x)
   and (+:) x y = Plus (x,y)
-pval i : 'a -> 'a expr = <fun>
+val i : 'a -> 'a expr = <fun>
 val b : 'a -> 'a expr = <fun>
 val ( +: ) : 'a expr -> 'a expr -> 'a expr = <fun>
 # i 3
