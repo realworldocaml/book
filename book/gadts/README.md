@@ -1046,7 +1046,7 @@ type stringable =
   Stringable : { value: 'a; to_string: 'a -> string } -> stringable
 ```
 
-This type packes together a value of some arbitrary type, along with a
+This type packs together a value of some arbitrary type, along with a
 function for converting values of that type to strings.
 
 We can tell that `'a` is existentially quantified because it shows up
