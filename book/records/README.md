@@ -526,8 +526,8 @@ val is_important : Log_entry.t -> bool = <fun>
 ```
 
 This feature of the language, known by the somewhat imposing name of
-*type-directed constructor disambiguation*, applies to variant
-constructors as well as record fields, as we'll see in
+*type-directed constructor disambiguation*, applies to variant tags as
+well as record fields, as we'll see in
 [Variants](variants.html#variants){data-type=xref}.
 
 For functions defined within the module where a given record is

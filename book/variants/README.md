@@ -5,9 +5,8 @@ one of the most unusual. They let you represent data that may take on
 multiple different forms, where each form is marked by an explicit
 tag. As we'll see, when combined with pattern matching, variants give
 you a powerful way of representing complex data and of organizing the
-case-analysis on that information.
-[variant types/usefulness of]{.idx}
-[datatypes/variant types]{.idx}
+case-analysis on that information.  [variant types/usefulness
+of]{.idx} [datatypes/variant types]{.idx}
 
 The basic syntax of a variant type declaration is as follows: [variant
 types/basic syntax of]{.idx}
@@ -20,8 +19,9 @@ type <variant> =
 ```
 
 Each row essentially represents a case of the variant. Each case has
-an associated tag and may optionally have a sequence of fields, where
-each field has a specified type.
+an associated tag (also called a *constructor*, since you use it to
+constructing a value) and may optionally have a sequence of fields,
+where each field has a specified type.
 
 Let's consider a concrete example of how variants can be useful.  Most
 UNIX-like operating systems support terminals as a fundamental,
