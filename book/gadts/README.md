@@ -247,7 +247,7 @@ type 'a expr =
   | Value of 'a value
   | Eq of 'a expr * 'a expr
   | Plus of 'a expr * 'a expr
-  | If of 'a expr * 'a expr * 'a expr
+  | If of bool expr * 'a expr * 'a expr
 ```
 
 This looks sort of promising at first, but it doesn't quite do what we
