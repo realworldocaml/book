@@ -724,7 +724,7 @@ let rpc =
 <pre><code class="language-ocaml">type stringable =
   Stringable : { value: 'a; to_string: 'a -&gt; string } -&gt; stringable</code></pre>
 </div>
-<p>This type packes together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
+<p>This type packs together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
 <p>We can tell that <code>'a</code> is existentially quantified because it shows up on the left-hand side of the arrow but not on the right, so the <code>'a</code> that shows up internally doesn’t appear in a type parameter for <code>stringable</code> itself. Essentially, the existentially quantified type is bound within the definition of <code>stringable</code>.</p>
 <p>This function can print an arbitrary <code>stringable</code>:</p>
 <div class="highlight">
