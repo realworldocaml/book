@@ -1,5 +1,3 @@
-(data_only_dirs pipeline-example)
-
 (mdx
  (files README.md)
  (packages
