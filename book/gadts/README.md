@@ -1477,4 +1477,4 @@ And here's that function in action.
 ```
 
 While all of this is doable, it's definitely awkward, and requires
-some unpleasant code-duplication.
+some unpleasant code duplication.
