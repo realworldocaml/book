@@ -275,8 +275,8 @@ expression, which means that some things we want to be able to say
 don't type-check.
 
 ```ocaml env=main
-# If (b true, i 3, i 4)
-Line 1, characters 13-16:
+# If (Eq (i 3, i 4), i 0, i 1)
+Line 1, characters 9-12:
 Error: This expression has type int expr
        but an expression was expected of type bool expr
        Type int is not compatible with type bool
