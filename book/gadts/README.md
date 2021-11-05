@@ -13,17 +13,17 @@ puzzle to figure out how to use them effectively. All of which is to
 say that you should only use a GADT when it makes a big qualitative
 improvement to your design.
 
-But don't get me wrong, for the right use-case, GADTs can be
-really transformative, and this chapter will cover some examples to
-demonstrate  the range of use-cases that GADTs support.
+But don't get me wrong, for the right use-case, GADTs can be really
+transformative, and this chapter will walk through several examples
+that demonstrate some of the range of use-cases that GADTs support.
 
 At their heart, GADTs provide two extra features above and beyond
 ordinary variants:
 
 - They let the compiler learn more type information when you descend
   into a case of a pattern match.
-- They provide a form of *existential types*, which is a form of
-  data-hiding.
+- They make it easy to use *existential types*, which let you work
+  with data of a specific but unknown type.
 
 It's a little hard to understand these features without working
 through some examples, so we'll do that next.
@@ -58,11 +58,17 @@ type expr =
 ```
 
 Now, we can write a recursive evaluator in a pretty straight-ahead
-style.
+style.  First, we'll declare an exception that can be thrown when we
+hit an ill-typed expression, e.g., when encoutering an expression that
+tries to add a bool and an int.
 
 ```ocaml env=main
-# exception Ill_typed
 exception Ill_typed
+```
+
+With that in hand, we can write the evaluator itself.
+
+```ocaml env=main
 # let rec eval expr =
     match expr with
     | Value v -> v
@@ -82,9 +88,8 @@ val eval : expr -> value = <fun>
 ```
 
 This implementation is a bit ugly because it has a lot of dynamic
-checks to detect what are effectively type errors. Indeed, it's
-entirely possible to create an ill-typed expression which will trip
-these checks.
+checks to detect type errors. Indeed, it's entirely possible to create
+an ill-typed expression which will trip these checks.
 
 ```ocaml env=main
 # let i x = Value (Int x)
@@ -164,8 +169,8 @@ module Typesafe_lang : Typesafe_lang_sig = struct
 end
 ```
 
-As you can see, the ill-typed expression we had trouble with before no
-longer type-checks.
+As you can see, the ill-typed expression we had trouble with before
+can't be constructed, because it's rejected by OCaml's type-system.
 
 ```ocaml env=main
 # let expr = Typesafe_lang.(plus (int 3) (bool false))
@@ -198,8 +203,8 @@ with all of it's dynamic checking for type errors.  But we've had to
 write yet more wrapper code to make this work.
 
 Also, the phantom-type discipline is quite error prone.  You might
-have missed the fact that I put the wrong type on the `eq` function
-above.
+have missed the fact that the type on the `eq` function above is
+wrong!
 
 ```ocaml env=main
 # Typesafe_lang.eq
@@ -218,9 +223,9 @@ Exception: Ill_typed.
 ```
 
 This highlights why we still need the dynamic checks in the
-implementation: the types within the implementation simply don't rule
-out ill-typed expressions. The same fact explains why we needed two
-different `eval` functions: the eval function doesn't have any
+implementation: the types within the implementation don't necessarily
+rule out ill-typed expressions. The same fact explains why we needed
+two different `eval` functions: the eval function doesn't have any
 type-level guarantee of when it's handling a bool expression versus an
 int expression, so it can't safely give results where the type of the
 result varies based on the result of the expression.
@@ -231,7 +236,7 @@ To see why we need GADTs, let's see what would happen if instead of
 using phantom types, we tried to encode the typing rules we want for
 our DSL directly into the definition of the expression type.  In
 particular, we'll put an ordinary type parameter on our `expr` type,
-and try to encode the type of the overall expression with that.
+in order to represent the type of the overall expression.
 
 ```ocaml env=main
 type 'a value =
@@ -246,7 +251,7 @@ type 'a expr =
 ```
 
 This looks sort of promising at first, but it doesn't quite do what we
-want.  Let's experiment a little with it:
+want.  Let's experiment a little.
 
 ```ocaml env=main
 # let i x = Value (Int x)
@@ -277,7 +282,7 @@ Error: This expression has type int expr
        Type int is not compatible with type bool
 ```
 
-Also, some things that shouldn't typecheck do, like this example.
+Also, some things that shouldn't typecheck do.
 
 ```ocaml env=main
 # b 3
@@ -286,8 +291,9 @@ Also, some things that shouldn't typecheck do, like this example.
 
 The problem here is that the way we want to use the type parameter
 isn't supported by ordinary variants. In particular, we want the type
-parameter to be populated in different ways in the different tags.
-And that's one of the features that GADTs provide.
+parameter to be populated in different ways in the different tags, and
+to depend in non-trivial ways on the types of the data associated with
+each tag.
 
 ### GADTs to the rescue
 
@@ -308,24 +314,24 @@ type _ expr =
 ```
 
 The syntax here is requires some decoding. The colon to the right of
-the tag is what tells you that this is a GADT.  To the right of the
+each tag is what tells you that this is a GADT.  To the right of the
 colon, you'll see what looks like an ordinary function signature, and
 you can almost think of it that way; specifically, as the type
-signature for that particular constructor. The left-hand side of the
-arrow states the types of the arguments to the constructor, and the
+signature for that particular tag. The left-hand side of the
+arrow states the types of the arguments to the tag, and the
 right hand side determines the type of the constructed value.
 
-Note that in the definition of each constructor in a GADT, the
-right-hand side is always the same type as the overall GADT; but the
-type parameter can be different in each case, and importantly, can
-depend both on the constructor and on the type of the arguments.  `Eq`
-is an example where the type parameter is determined entirely by the
-constructor: it always corresponds to a `bool expr`.  `If` is an
-example where the type parameter depends on the arguments to the
-constructor, in particular the type parameter of the `If` is the type
-parameter of the then and else clauses.
+Note that in the definition of each tag in a GADT, the right-hand side
+is an instance of the type as the overall GADT, though the type
+parameter can be in different in each case, and importantly, can
+depend both on the tag and on the type of the arguments.  `Eq` is an
+example where the type parameter is determined entirely by the tag: it
+always corresponds to a `bool expr`.  `If` is an example where the
+type parameter depends on the arguments to the tag, in particular the
+type parameter of the `If` is the type parameter of the then and else
+clauses.
 
-Now let's construct some simple examples.
+Let's try some simple examples.
 
 ```ocaml env=main
 # let i x = Value (Int x)
@@ -377,7 +383,7 @@ two different versions of `eval`, one for int, and one for bool.
 
 ### GADTs, locally abstract types, and polymorphic recursion
 
-The above example lets us see some of the downsides of GADTs, which is
+The above example lets us see one of the downsides of GADTs, which is
 that code using them needs extra type annotations. Look at what
 happens if we write the definition of `value` without the annotation:
 
@@ -444,9 +450,8 @@ OCaml has a handy type annotation for.
 val eval : 'a expr -> 'a = <fun>
 ```
 
-This works because, because the fact that `eval` is explicitly
-polymorphic means the type of `eval` isn't specialized to `a`, and so
-`a` doesn't escape its scope.
+This works because by marking `eval` as polymorphic, the type of
+`eval` isn't specialized to `a`, and so `a` doesn't escape its scope.
 
 It's also helpful here because `eval` itself is an example of
 *polymorphic recursion*, which is to say that `eval` needs to call
@@ -685,9 +690,8 @@ multiple ways, e.g.,
 As this kind of complexity creeps in, it can be useful to be able to
 track the state of a given request at the type level, and to use that
 to narrow the set of states a given request can be in, thereby
-removing some extra case analysis and error handling, which can both
-reduce the complexity of the code and remove opportunities for
-mistakes.
+removing some extra case analysis and error handling, which can reduce
+the complexity of the code and remove opportunities for mistakes.
 
 One way of doing this is to mint different types to represent
 different states of the request, e.g., one type for an incomplete
@@ -707,9 +711,9 @@ our request is in a complete or incomplete state.
 To do that, we'll need to mint types to represent the states of being
 complete and incomplete. We'll define these as empty variant types,
 which is a way of minting an *uninhabited type*, i.e., a type that has
-no associated values. These types might as well be uninhabited, since
-we're just using these types as abstract markers of different states,
-and so will never need to construct a value.
+no associated values. These types don't really need associated values,
+since we're just using them as abstract markers of different
+states. We're never going to construct an example.
 
 ```ocaml env=main
 type incomplete = |
@@ -1103,9 +1107,9 @@ meaning of the type variable `$Stringable_'a` in particular. You can
 think of this variable as having three parts:
 
 - The `$` marks the variable as an existential.
-- `Stringable` is the name of the constructor that this variable came
+- `Stringable` is the name of the GADT tag that this variable came
   from.
-- `'a` is the name of the type variable from inside that constructor.
+- `'a` is the name of the type variable from inside that tag.
 
 
 ### Abstracting computational machines
@@ -1288,7 +1292,7 @@ library like this has several advantages over having combinators that
 build a more concrete computational machine:
 
 - The core types are simpler, since they are typically built out of
-  GADT constructors that are simple reflections the types of the base
+  GADT tags that are simple reflections the types of the base
   combinators.
 
 - The design is more modular, since your core types don't need to
@@ -1297,7 +1301,7 @@ build a more concrete computational machine:
 - The code tends to be more efficient, since the more concrete
   approach typically involves allocating closures to wrap up the
   necessary functionality, and closures are more heavyweight than GADT
-  constructors.
+  tags.
 
 ## Limitations of GADTs
 
@@ -1473,4 +1477,4 @@ And here's that function in action.
 ```
 
 While all of this is doable, it's definitely awkward, and requires
-some unpleasant code-duplication.
+some unpleasant code duplication.
