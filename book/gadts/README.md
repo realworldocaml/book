@@ -706,26 +706,22 @@ duplicating the type.
 #### A completion-sensitive option type
 
 We'll start by creating an option type that is sensitive to whether
-our request is in a complete or incomplete state.
-
-To do that, we'll need to mint types to represent the states of being
-complete and incomplete.
+our request is in a complete or incomplete state.  To do that, we'll
+mint types to represent the states of being complete and incomplete.
 
 ```ocaml env=main
 type incomplete = Incomplete
 type complete = Complete
 ```
 
-Note that the details of the types here don't really matter, since
-we're never instantiating these types. Rather, we're just using them
-as markers of different states. The only thing that does matter is
-that the types are obviously different, which is why in this case
-we've picked variants with distinct constructor names.
+The definition of the types doesn't really matter, since we're never
+instantiating these types, just using them as markers of different
+states. All that matters is that the types are distinct.
 
-Now we can mint our new completeness-sensitive option type. Note the
-two type variables: the first indicates the type of the contents of
-the option, and the second indicates whether this is being used in an
-incomplete state.
+That in hand, we can mint a completeness-sensitive option type. Note
+the two type variables: the first indicates the type of the contents
+of the option, and the second indicates whether this is being used in
+an incomplete state.
 
 ```ocaml env=main
 type ('a, _) coption =
@@ -738,11 +734,9 @@ code less confusing when both `option` and `coption` are used
 together.
 
 You might notice that we haven't used `complete` here explicitly.
-Instead, what we've done is to ensure that a `coption` that's
-`incomplete` can be `Absent` or `Present`, and a `coption` that's any
-other distinct type can only be `Present`. Accordingly, a `coption`
-that's `complete` (and therefore not `incomplete`) can only be a
-`Present`.
+Instead, what we've done is to ensure that only an `incomplete
+coption` can be `Absent`.  Accordingly, a `coption` that's `complete`
+(and therefore not `incomplete`) can only be `Present`.
 
 This is easier to understand with some examples. Consider the
 following function for getting the value out of a `coption`, returning
