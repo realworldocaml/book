@@ -862,8 +862,7 @@ machine, cutting down on the possibilities that your code needs to
 contemplate can make a big difference to the comprehensibility and
 correctness of the result.
 
-::: {data-type=note}
-##### Abstraction and distinctness of types
+#### Type distinctness and abstraction
 
 In the example in this section, we used two types, `complete` and
 `incomplete` to mark different states, and we defined those types so
@@ -1001,8 +1000,10 @@ end = struct
 end
 ```
 
-:::
-
+All of which is to say: when creating types to act as abstract markers
+for the type parameter of a GADT, you should chose definitions that
+make the distinctness of those types clear, and you should expose
+those definitions in your mlis.
 
 #### Other ways of narrowing
 
