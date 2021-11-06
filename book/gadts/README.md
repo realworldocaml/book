@@ -322,8 +322,8 @@ arrow states the types of the arguments to the tag, and the
 right hand side determines the type of the constructed value.
 
 Note that in the definition of each tag in a GADT, the right-hand side
-is an instance of the type as the overall GADT, though the type
-parameter can be in different in each case, and importantly, can
+is an instance of the same type as the overall GADT, though the type
+parameter can be different in each case, and importantly, can
 depend both on the tag and on the type of the arguments.  `Eq` is an
 example where the type parameter is determined entirely by the tag: it
 always corresponds to a `bool expr`.  `If` is an example where the
