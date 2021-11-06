@@ -1006,15 +1006,14 @@ end
 
 #### Other ways of narrowing
 
-The above example might lead you to think that narrowing of pattern
-matches is something that can only happen with GADTs, but that's not
-quite right. OCaml can eliminate impossible cases from ordinary
-variants too, but to do so, it needs to be that the case in question
-is impossible from a type level.
+You migth think that narrowing of pattern matches is something that
+can only happen with GADTs, but OCaml can eliminate impossible cases
+from ordinary variants too.  But as with GADTs, you can eliminate a
+case when you can demonstrate that it's impossible at the type level.
 
-One way to do this is via an uninhabitable type, like the ones we
-discussed earlier in the chapter. We can declare our own uninhabitable
-type:
+One way to do this is via an *uninhabitable type*, which is a type
+that has no values.  You can declare such a value by creating a
+variant type with no constructors.
 
 ```ocaml env=main
 # type nothing = |
@@ -1039,8 +1038,8 @@ Normally, to match a `Result.t`, you need to handle both the `Ok` and
 val print_result : (int, string) result -> unit = <fun>
 ```
 
-But if the `Error` case contains an uninhabitable, well, that case
-becomes impossible, and OCaml will tell you as much.
+But if the `Error` case contains an uninhabitable type, well, that
+case can never be instantiated, and OCaml will tell you as much.
 
 ```ocaml env=main
 # let print_result (x : (int, Nothing.t) Result.t) =
@@ -1067,7 +1066,7 @@ val print_result : (int, Nothing.t) result -> unit = <fun>
 The period in the final case tells the compiler that we believe this
 case can never be reached, and OCaml will verify that it's true. In
 some simple cases, however, the compiler will automatically add the
-refutation case for you, in particular when there is just one variant.
+refutation case for you, so you don't need to write it out explicitly.
 
 ```ocaml env=main
 # let print_result (x : (int, Nothing.t) Result.t) =
@@ -1081,39 +1080,36 @@ highly configurable library that supports multiple different modes of
 use, not all of which are necessarily needed for any given
 application. One example of this comes from `Async`'s RPC (remote
 procedure-call) library. Async RPCs support a particular flavor of
-interaction called a `State_rpc`. Such an RPC is parameterized by four types:
+interaction called a `State_rpc`. Such an RPC is parameterized by four
+types, for four different kinds of data:
 
-- A type for the initial client request
-- A type for the initial snapshot returned by the server
-- A type for a sequence of updates to that snapshot
-- A type for an error to terminate the interaction.
+- The initial client request
+- The initial snapshot returned by the server
+- The sequence of updates to that snapshot
+- An error to terminate the stream.
 
-Now, imagine you want to use this type, but there's no need for the
-final error type. We can go ahead and instantiate the RPC using the
-type `unit` for the error type.
+Now, imagine you want to use a `State_rpc`, but there's no need for
+the final error type.  We could just instantiate the `State_rpc` using
+the type `unit` for the error type.
 
 
 ```ocaml env=async
-# open Core
-# open Async
-# #require "ppx_jane"
-# let rpc =
-    Rpc.State_rpc.create
-      ~name:"int-map"
-      ~version:1
-      ~bin_query:[%bin_type_class: unit]
-      ~bin_state:[%bin_type_class: int Map.M(String).t]
-      ~bin_update:[%bin_type_class: int Map.M(String).t]
-      ~bin_error:[%bin_type_class: unit]
-      ()
-val rpc :
-  (unit, (string, int, String.comparator_witness) Map.t,
-   (string, int, String.comparator_witness) Map.t, unit)
-  Rpc.State_rpc.t = <abstr>
+open Core
+open Async
+#require "ppx_jane"
+let rpc =
+  Rpc.State_rpc.create
+    ~name:"int-map"
+    ~version:1
+    ~bin_query:[%bin_type_class: unit]
+    ~bin_state:[%bin_type_class: int Map.M(String).t]
+    ~bin_update:[%bin_type_class: int Map.M(String).t]
+    ~bin_error:[%bin_type_class: unit]
+    ()
 ```
 
-When you write code to dispatch the RPC, you still have to handle the
-error case, even though it isn't supposed to happen.
+With this approach, when you write code to dispatch the RPC, you still
+have to handle the error case, even though we don't intend to use it.
 
 ```ocaml env=async
 # let dispatch conn =
@@ -1126,19 +1122,15 @@ val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 An alternative approach is to use an uninhabited type for the error:
 
 ```ocaml env=async
-# let rpc =
-    Rpc.State_rpc.create
-      ~name:"foo"
-      ~version:1
-      ~bin_query:[%bin_type_class: unit]
-      ~bin_state:[%bin_type_class: int Map.M(String).t]
-      ~bin_update:[%bin_type_class: int Map.M(String).t]
-      ~bin_error:[%bin_type_class: Nothing.t]
-      ()
-val rpc :
-  (unit, (string, int, String.comparator_witness) Map.t,
-   (string, int, String.comparator_witness) Map.t, never_returns)
-  Rpc.State_rpc.t = <abstr>
+let rpc =
+  Rpc.State_rpc.create
+    ~name:"foo"
+    ~version:1
+    ~bin_query:[%bin_type_class: unit]
+    ~bin_state:[%bin_type_class: int Map.M(String).t]
+    ~bin_update:[%bin_type_class: int Map.M(String).t]
+    ~bin_error:[%bin_type_class: Nothing.t]
+    ()
 ```
 
 Now, our dispatch function needs only deal with the `Ok` case.
@@ -1150,9 +1142,8 @@ Now, our dispatch function needs only deal with the `Ok` case.
 val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 ```
 
-As you can see, narrowing can show up when using code that isn't
-designed with narrowing in mind, and without any GADTs at all.
-
+What's nice about this example is that it shows that narrowing can be
+applied to code that isn't designed with narrowing in mind.
 
 ### Capturing the unknown
 
