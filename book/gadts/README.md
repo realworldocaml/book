@@ -993,33 +993,20 @@ definitively different, which would be the case if we defined them as
 variants with different names, as we did in our example.
 
 The reason for this is that types that are appear to be different in
-an interface may in actual fact be the same, as shown by the following.
+an interface may in actual fact be the same, as shown by the
+following.
 
 ```ocaml env=main
 module M : sig
   type incomplete = Z
-  type complete = incomplete = Z
+  type complete = Z
 end = struct
   type incomplete = Z
-  type complete = Z
+  type complete = incomplete = Z
 end
 ```
-```mdx-error
-Lines 4-7, characters 9-6:
-Error: Signature mismatch:
-       Modules do not match:
-         sig type incomplete = Z type complete = Z end
-       is not included in
-         sig type incomplete = Z type complete = incomplete = Z end
-       Type declarations do not match:
-         type complete = Z
-       is not included in
-         type complete = incomplete = Z
-```
-
 
 :::
-
 
 
 #### Other ways of narrowing
