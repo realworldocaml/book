@@ -208,7 +208,7 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -&gt; 'a expr</code></pre>
 </div>
 <p>The syntax here requires some decoding. The colon to the right of each tag is what tells you that this is a GADT. To the right of the colon, you’ll see what looks like an ordinary function signature, and you can almost think of it that way; specifically, as the type signature for that particular tag. The left-hand side of the arrow states the types of the arguments to the tag, and the right hand side determines the type of the constructed value.</p>
-<p>Note that in the definition of each tag in a GADT, the right-hand side is an instance of the same type as the overall GADT, though the type parameter can be different in each case, and importantly, can depend both on the tag and on the type of the arguments. <code>Eq</code> is an example where the type parameter is determined entirely by the tag: it always corresponds to a <code>bool expr</code>. <code>If</code> is an example where the type parameter depends on the arguments to the tag, in particular the type parameter of the <code>If</code> is the type parameter of the then and else clauses.</p>
+<p>Note that in the definition of each tag in a GADT, the right-hand side is an instance of the type as the overall GADT, though the type parameter can be in different in each case, and importantly, can depend both on the tag and on the type of the arguments. <code>Eq</code> is an example where the type parameter is determined entirely by the tag: it always corresponds to a <code>bool expr</code>. <code>If</code> is an example where the type parameter depends on the arguments to the tag, in particular the type parameter of the <code>If</code> is the type parameter of the then and else clauses.</p>
 <p>Let’s try some simple examples.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
@@ -325,10 +325,10 @@ let rec eval : type a. a expr -&gt; a = function
 </section>
 <section class="level2" id="when-are-gadts-useful">
 <h2>When are GADTs useful?</h2>
-<p>The typed language we showed above is a perfectly reasonable example, but it might give you an overly narrow sense of where GADTs show up. In this section, we’ll try to give you a sampling of other places where GADTs can be usefully applied.</p>
+<p>The typed language we showed above is a perfectly reasonable example, but GADTs are useful for a lot more than designing little languages. In this section, we’ll try to give you a broader sampling of the kinds of things you can do with GADTs.</p>
 <section class="level3" id="varying-your-return-type">
 <h3>Varying your return type</h3>
-<p>Sometimes, you want to write a single function that returns different types in different situations. In some sense, we do this all the time. After all, polymorphic functions can have return types that depend on the types of the values they’re fed. <code>List.find</code> is a good example. The signature indicates that the type of the result varies with the type of the input list.</p>
+<p>Sometimes, you want to write a single function that can effectively vary its type based on the arguments it is passed. In some sense, we do this all the time. After all, polymorphic functions can have return types that depend on the types of the values they’re fed. <code>List.find</code> is a fine example. The signature indicates that the type of the result varies with the type of the input list.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ;;
 &gt;- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
@@ -470,20 +470,20 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 <p>While this works, it can be awkward and verbose. With GADTs, we can track the state of the request in a type parameter, and have that parameter be used to narrow the set of available cases, without duplicating the type.</p>
 <section class="level4" id="a-completion-sensitive-option-type">
 <h4>A completion-sensitive option type</h4>
-<p>We’ll start by creating an option type that is sensitive to whether our request is in a complete or incomplete state.</p>
-<p>To do that, we’ll need to mint types to represent the states of being complete and incomplete. We’ll define these as empty variant types, which is a way of minting an <em>uninhabited type</em>, i.e., a type that has no associated values. These types don’t really need associated values, since we’re just using them as abstract markers of different states. We’re never going to construct an example.</p>
+<p>We’ll start by creating an option type that is sensitive to whether our request is in a complete or incomplete state. To do that, we’ll mint types to represent the states of being complete and incomplete.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">type incomplete = |
-type complete = |</code></pre>
+<pre><code class="language-ocaml">type incomplete = Incomplete
+type complete = Complete</code></pre>
 </div>
-<p>Now we can mint our new completeness-sensitive option type. Note the two type variables: the first indicates the type of the contents of the option, and the second indicates whether this is being used in an incomplete state.</p>
+<p>The definition of the types doesn’t really matter, since we’re never instantiating these types, just using them as markers of different states. All that matters is that the types are distinct.</p>
+<p>Now we can mint a completeness-sensitive option type. Note the two type variables: the first indicates the type of the contents of the option, and the second indicates whether this is being used in an incomplete state.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type ('a, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -&gt; ('a, _) coption</code></pre>
 </div>
 <p>We use <code>Absent</code> and <code>Present</code> rather than <code>Some</code> or <code>None</code> to make the code less confusing when both <code>option</code> and <code>coption</code> are used together.</p>
-<p>You might notice that we haven’t used <code>complete</code> here explicitly. Instead, what we’ve done is to ensure that a <code>coption</code> that’s <code>incomplete</code> can be <code>Absent</code> or <code>Present</code>, and a <code>coption</code> that’s any other distinct type can only be <code>Present</code>. Accordingly, a <code>coption</code> that’s <code>complete</code> (and therefore not <code>incomplete</code>) can only be a <code>Present</code>.</p>
+<p>You might notice that we haven’t used <code>complete</code> here explicitly. Instead, what we’ve done is to ensure that only an <code>incomplete coption</code> can be <code>Absent</code>. Accordingly, a <code>coption</code> that’s <code>complete</code> (and therefore not <code>incomplete</code>) can only be <code>Present</code>.</p>
 <p>This is easier to understand with some examples. Consider the following function for getting the value out of a <code>coption</code>, returning a default value if <code>Absent</code> is found.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get ~default o =
@@ -580,10 +580,118 @@ let set_permissions request x = { request with permissions = Present x } ;;
 </div>
 <p>After all that work, the result may seem a bit underwhelming, and indeed, most of the time, this kind of narrowing isn’t worth the complexity of setting it up. But for a sufficiently complex state machine, cutting down on the possibilities that your code needs to contemplate can make a big difference to the comprehensibility and correctness of the result.</p>
 </section>
+<section class="level4" id="type-distinctness-and-abstraction">
+<h4>Type distinctness and abstraction</h4>
+<p>In the example in this section, we used two types, <code>complete</code> and <code>incomplete</code> to mark different states, and we defined those types so as to be in some sense obviously different.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type incomplete = Incomplete
+type complete = Complete</code></pre>
+</div>
+<p>This isn’t strictly necessary. Here’s another way of defining these types that makes them less obviously distinct.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type incomplete = Z
+type complete = Z</code></pre>
+</div>
+<p>OCaml’s variant types are nominal, so <code>complete</code> and <code>incomplete</code> are distinct types, despite having variants of the same name, as you can see when we try to put instances of each type in the same list.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i = (Z : incomplete) and c = (Z : complete) ;;
+&gt;val i : incomplete = Z
+&gt;val c : complete = Z
+[i; c] ;;
+&gt;Line 1, characters 5-6:
+&gt;Error: This expression has type complete
+&gt;       but an expression was expected of type incomplete
+</code></pre>
+</div>
+<p>As a result, we can narrow a pattern match using these types as indices, much as we did earlier. First, we set up the <code>coption</code> type:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -&gt; ('a, _) coption</code></pre>
+</div>
+<p>Then, we write a function that requires the <code>coption</code> to be complete, and accordingly, need only contemplate the <code>Present</code> case.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
+  match coption with
+  | Present x -&gt; x
+;;
+&gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
+</code></pre>
+</div>
+<p>An easy-to-miss issue here is that the way we expose these types through an interface can cause OCaml to lose track of the distinctness of the types in question. Consider this version, where we entirely hide the definition of <code>complete</code> and <code>incomplete</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module M : sig
+  type incomplete
+  type complete
+end = struct
+  type incomplete = Z
+  type complete = Z
+end
+include M
+
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -&gt; ('a, _) coption</code></pre>
+</div>
+<p>Now, the <code>assume_complete</code> function we wrote is no longer found to be exhaustive.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
+  match coption with
+  | Present x -&gt; x
+;;
+&gt;Lines 2-3, characters 5-21:
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;Absent
+&gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
+</code></pre>
+</div>
+<p>That’s because by leaving the types abstract, we’ve entirely hidden the underlying types, leaving the typesystem with no evidence that the types are distinct.</p>
+<p>Let’s see what happens if we expose the implementation of these types.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module M : sig
+  type incomplete = Z
+  type complete = Z
+end = struct
+  type incomplete = Z
+  type complete = Z
+end
+include M
+
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -&gt; ('a, _) coption</code></pre>
+</div>
+<p>Unfortunately, the result is still not exhaustive.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
+  match coption with
+  | Present x -&gt; x
+;;
+&gt;Lines 2-3, characters 5-21:
+&gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;Absent
+&gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
+</code></pre>
+</div>
+<p>In order to be exhaustive, we need the types that are exposed to be definitively different, which would be the case if we defined them as variants with different names, as we did in our example.</p>
+<p>The reason for this is that types that are appear to be different in an interface may in actual fact be the same, as shown by the following.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module M : sig
+  type incomplete = Z
+  type complete = Z
+end = struct
+  type incomplete = Z
+  type complete = incomplete = Z
+end</code></pre>
+</div>
+<p>All of which is to say: when creating types to act as abstract markers for the type parameter of a GADT, you should chose definitions that make the distinctness of those types clear, and you should expose those definitions in your mlis.</p>
+</section>
 <section class="level4" id="other-ways-of-narrowing">
 <h4>Other ways of narrowing</h4>
-<p>The above example might lead you to think that narrowing of pattern matches is something that can only happen with GADTs, but that’s not quite right. OCaml can eliminate impossible cases from ordinary variants too, but to do so, it needs to be that the case in question is impossible from a type level.</p>
-<p>One way to do this is via an uninhabitable type, like the ones we discussed earlier in the chapter. We can declare our own uninhabitable type:</p>
+<p>You migth think that narrowing of pattern matches is something that can only happen with GADTs, but OCaml can eliminate impossible cases from ordinary variants too. But as with GADTs, you can eliminate a case when you can demonstrate that it’s impossible at the type level.</p>
+<p>One way to do this is via an <em>uninhabitable type</em>, which is a type that has no values. You can declare such a value by creating a variant type with no constructors.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type nothing = | ;;
 &gt;type nothing = |
@@ -601,7 +709,7 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, string) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>But if the <code>Error</code> case contains an uninhabitable, well, that case becomes impossible, and OCaml will tell you as much.</p>
+<p>But if the <code>Error</code> case contains an uninhabitable type, well, that case can never be instantiated, and OCaml will tell you as much.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -624,7 +732,7 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The period in the final case tells the compiler that we believe this case can never be reached, and OCaml will verify that it’s true. In some simple cases, however, the compiler will automatically add the refutation case for you, in particular when there is just one variant.</p>
+<p>The period in the final case tells the compiler that we believe this case can never be reached, and OCaml will verify that it’s true. In some simple cases, however, the compiler will automatically add the refutation case for you, so you don’t need to write it out explicitly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -633,18 +741,17 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>One real-world case where this becomes useful is when you’re using a highly configurable library that supports multiple different modes of use, not all of which are necessarily needed for any given application. One example of this comes from <code>Async</code>’s RPC (remote procedure-call) library. Async RPCs support a particular flavor of interaction called a <code>State_rpc</code>. Such an RPC is parameterized by four types:</p>
+<p>One real-world case where this becomes useful is when you’re using a highly configurable library that supports multiple different modes of use, not all of which are necessarily needed for any given application. One example of this comes from <code>Async</code>’s RPC (remote procedure-call) library. Async RPCs support a particular flavor of interaction called a <code>State_rpc</code>. Such an RPC is parameterized by four types, for four different kinds of data:</p>
 <ul>
-<li>A type for the initial client request</li>
-<li>A type for the initial snapshot returned by the server</li>
-<li>A type for a sequence of updates to that snapshot</li>
-<li>A type for an error to terminate the interaction.</li>
+<li>The initial client request</li>
+<li>The initial snapshot returned by the server</li>
+<li>The sequence of updates to that snapshot</li>
+<li>An error to terminate the stream.</li>
 </ul>
-<p>Now, imagine you want to use this type, but there’s no need for the final error type. We can go ahead and instantiate the RPC using the type <code>unit</code> for the error type.</p>
+<p>Now, imagine you want to use a <code>State_rpc</code>, but there’s no need for the final error type. We could just instantiate the <code>State_rpc</code> using the type <code>unit</code> for the error type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
-open Async ;;
-#require "ppx_jane" ;;
+<pre><code class="language-ocaml">open Core
+open Async
 let rpc =
   Rpc.State_rpc.create
     ~name:"int-map"
@@ -653,15 +760,9 @@ let rpc =
     ~bin_state:[%bin_type_class: int Map.M(String).t]
     ~bin_update:[%bin_type_class: int Map.M(String).t]
     ~bin_error:[%bin_type_class: unit]
-    ()
-;;
-&gt;val rpc :
-&gt;  (unit, (string, int, String.comparator_witness) Map.t,
-&gt;   (string, int, String.comparator_witness) Map.t, unit)
-&gt;  Rpc.State_rpc.t = &lt;abstr&gt;
-</code></pre>
+    ()</code></pre>
 </div>
-<p>When you write code to dispatch the RPC, you still have to handle the error case, even though it isn’t supposed to happen.</p>
+<p>With this approach, when you write code to dispatch the RPC, you still have to handle the error case, even though we don’t intend to use it.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
@@ -673,7 +774,7 @@ let rpc =
 </div>
 <p>An alternative approach is to use an uninhabited type for the error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rpc =
+<pre><code class="language-ocaml">let rpc =
   Rpc.State_rpc.create
     ~name:"foo"
     ~version:1
@@ -681,13 +782,7 @@ let rpc =
     ~bin_state:[%bin_type_class: int Map.M(String).t]
     ~bin_update:[%bin_type_class: int Map.M(String).t]
     ~bin_error:[%bin_type_class: Nothing.t]
-    ()
-;;
-&gt;val rpc :
-&gt;  (unit, (string, int, String.comparator_witness) Map.t,
-&gt;   (string, int, String.comparator_witness) Map.t, never_returns)
-&gt;  Rpc.State_rpc.t = &lt;abstr&gt;
-</code></pre>
+    ()</code></pre>
 </div>
 <p>Now, our dispatch function needs only deal with the <code>Ok</code> case.</p>
 <div class="highlight">
@@ -698,7 +793,7 @@ let rpc =
 &gt;val dispatch : Rpc.Connection.t -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As you can see, narrowing can show up when using code that isn’t designed with narrowing in mind, and without any GADTs at all.</p>
+<p>What’s nice about this example is that it shows that narrowing can be applied to code that isn’t designed with narrowing in mind.</p>
 </section>
 </section>
 <section class="level3" id="capturing-the-unknown">
