@@ -719,10 +719,10 @@ The definition of the types doesn't really matter, since we're never
 instantiating these types, just using them as markers of different
 states. All that matters is that the types are distinct.
 
-That in hand, we can mint a completeness-sensitive option type. Note
-the two type variables: the first indicates the type of the contents
-of the option, and the second indicates whether this is being used in
-an incomplete state.
+Now we can mint a completeness-sensitive option type. Note the two
+type variables: the first indicates the type of the contents of the
+option, and the second indicates whether this is being used in an
+incomplete state.
 
 ```ocaml env=main
 type ('a, _) coption =
