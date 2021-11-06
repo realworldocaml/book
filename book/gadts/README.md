@@ -1097,7 +1097,6 @@ the type `unit` for the error type.
 ```ocaml env=async
 open Core
 open Async
-#require "ppx_jane"
 let rpc =
   Rpc.State_rpc.create
     ~name:"int-map"
