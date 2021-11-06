@@ -630,7 +630,6 @@ Exception: (Failure "No matching item found")
 - : int = 20
 ```
 
-
 ### Capturing the unknown
 
 Code that that works with unknown types is routine in OCaml, and comes
@@ -681,7 +680,7 @@ This function can print an arbitrary `stringable`:
 
 ```ocaml env=main
 # let print (Stringable s) =
-    print_endline (s.to_string s.value)
+    Stdio.print_endline (s.to_string s.value)
 val print : stringable -> unit = <fun>
 ```
 
@@ -746,7 +745,7 @@ useful for all sorts of system automation tasks.
 But, can't we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:
 
-```ocaml env=main
+```ocaml env=abstracting
 # open Core
 # let sum_file_sizes () =
     Sys.ls_dir "."
@@ -771,7 +770,7 @@ pipeline, e.g.:
 The type signature of such a pipeline type might look something like
 this:
 
-```ocaml env=main
+```ocaml env=abstracting
 module type Pipeline = sig
   type ('input,'output) t
 
@@ -789,7 +788,7 @@ can be used to seed the pipeline.
 We can use a functor to show how we could use this API for building a
 pipeline like our earlier example using `|>`.
 
-```ocaml env=main
+```ocaml env=abstracting
 # module Example_pipeline (Pipeline : Pipeline) = struct
     open Pipeline
     let sum_file_sizes =
@@ -809,7 +808,7 @@ define our pipeline itself as a simple function, the `@>` operator as
 function composition.  Then executing the pipeline is just function
 application.
 
-```ocaml env=main
+```ocaml env=abstracting
 # module Basic_pipeline : sig
      include Pipeline
      val exec : ('a,'b) t -> 'a -> 'b
@@ -851,7 +850,7 @@ want on top of that representation.
 
 Here's what such a representation might look like.
 
-```ocaml env=main
+```ocaml env=abstracting
 type (_, _) pipeline =
   | Step : ('a -> 'b) * ('b, 'c) pipeline -> ('a, 'c) pipeline
   | Empty : ('a, 'a) pipeline
@@ -861,7 +860,7 @@ Here, the variants really just represent the two building blocks of a
 pipeline: `Step` corresponds to the `@>` operator, and `Empty`
 corresponds to the `empty` pipeline, as you can see below.
 
-```ocaml env=main
+```ocaml env=abstracting
 # let ( @> ) f pipeline = Step (f,pipeline)
 val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
 # let empty = Empty
@@ -871,7 +870,7 @@ val empty : ('a, 'a) pipeline = Empty
 With that in hand, we can do a no-frills pipeline execution easily
 enough.
 
-```ocaml env=main
+```ocaml env=abstracting
 # let rec exec : type a b. (a, b) pipeline -> a -> b =
    fun pipeline input ->
     match pipeline with
@@ -884,7 +883,7 @@ But we can also do more interesting things. For example, here's a
 function that executes a pipeline and produces a profile showing how
 long each step of a pipeline took.
 
-```ocaml env=main
+```ocaml env=abstracting
 # let exec_with_profile pipeline input =
     let rec loop
         : type a b.
@@ -1447,6 +1446,7 @@ Consider the following type that represents various ways we might use
 for obtaining some piece of data.
 
 ```ocaml env=main
+open Core
 module Source_kind = struct
   type _ t =
     | Filename : string t
