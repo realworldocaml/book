@@ -483,18 +483,18 @@ recursive function that makes use of GADTs.
 ## When are GADTs useful?
 
 The typed language we showed above is a perfectly reasonable example,
-but it might give you an overly narrow sense of where GADTs show up.
-In this section, we'll try to give you a sampling of other places
-where GADTs can be usefully applied.
+but GADTs are useful for a lot more than designing little languages.
+In this section, we'll try to give you a broader sampling of the kinds
+of things you can do with GADTs.
 
 ### Varying your return type
 
-Sometimes, you want to write a single function that returns different
-types in different situations.  In some sense, we do this all the
-time.  After all, polymorphic functions can have return types that
-depend on the types of the values they're fed.  `List.find` is a good
-example.  The signature indicates that the type of the result varies
-with the type of the input list.
+Sometimes, you want to write a single function that can effectively
+vary its type based on the arguments it is passed.  In some sense, we
+do this all the time.  After all, polymorphic functions can have
+return types that depend on the types of the values they're fed.
+`List.find` is a fine example.  The signature indicates that the type
+of the result varies with the type of the input list.
 
 ```ocaml env=main
 # List.find
@@ -709,16 +709,18 @@ We'll start by creating an option type that is sensitive to whether
 our request is in a complete or incomplete state.
 
 To do that, we'll need to mint types to represent the states of being
-complete and incomplete. We'll define these as empty variant types,
-which is a way of minting an *uninhabited type*, i.e., a type that has
-no associated values. These types don't really need associated values,
-since we're just using them as abstract markers of different
-states. We're never going to construct an example.
+complete and incomplete.
 
 ```ocaml env=main
-type incomplete = |
-type complete = |
+type incomplete = Incomplete
+type complete = Complete
 ```
+
+Note that the details of the types here don't really matter, since
+we're never instantiating these types. Rather, we're just using them
+as markers of different states. The only thing that does matter is
+that the types are obviously different, which is why in this case
+we've picked variants with distinct constructor names.
 
 Now we can mint our new completeness-sensitive option type. Note the
 two type variables: the first indicates the type of the contents of
@@ -788,6 +790,7 @@ val get : ('a, complete) coption -> 'a = <fun>
 
 As we can see, when the `coption` is known to be `complete`, the
 pattern matching is narrowed to just the `Present` case.
+
 
 #### A completion-sensitive request type
 
@@ -863,6 +866,161 @@ complexity of setting it up. But for a sufficiently complex state
 machine, cutting down on the possibilities that your code needs to
 contemplate can make a big difference to the comprehensibility and
 correctness of the result.
+
+::: {data-type=note}
+##### Abstraction and distinctness of types
+
+In the example in this section, we used two types, `complete` and
+`incomplete` to mark different states, and we defined those types so
+as to be in some sense obviously different.
+
+```ocaml env=main
+type incomplete = Incomplete
+type complete = Complete
+```
+
+This isn't strictly necessary.  Here's another way of defining these
+types that makes them less obviously distinct.
+
+```ocaml env=main
+type incomplete = Z
+type complete = Z
+```
+
+OCaml's variant types are nominal, so `complete` and `incomplete` are
+distinct types, despite having variants of the same name, as you can
+see when we try to put instances of each type in the same list.
+
+```ocaml env=main
+# let i = (Z : incomplete) and c = (Z : complete)
+val i : incomplete = Z
+val c : complete = Z
+# [i; c]
+Line 1, characters 5-6:
+Error: This expression has type complete
+       but an expression was expected of type incomplete
+```
+
+As a result, we can narrow a pattern match using these types as
+indices, much as we did earlier.  First, we set up the `coption` type:
+
+```ocaml env=main
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -> ('a, _) coption
+```
+
+Then, we write a function that requires the `coption` to be complete,
+and accordingly, need only contemplate the `Present` case.
+
+```ocaml env=main
+# let assume_complete (coption : (_,complete) coption) =
+    match coption with
+    | Present x -> x
+val assume_complete : ('a, complete) coption -> 'a = <fun>
+```
+
+An easy-to-miss issue here is that the way we expose these types
+through an interface can cause OCaml to lose track of the distinctness
+of the types in question.  Consider this version, where we entirely
+hide the definition of `complete` and `incomplete`.
+
+```ocaml env=main
+module M : sig
+  type incomplete
+  type complete
+end = struct
+  type incomplete = Z
+  type complete = Z
+end
+include M
+
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -> ('a, _) coption
+```
+
+Now, the `assume_complete` function we wrote is no longer found to be
+exhaustive.
+
+```ocaml env=main
+# let assume_complete (coption : (_,complete) coption) =
+    match coption with
+    | Present x -> x
+Lines 2-3, characters 5-21:
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Absent
+val assume_complete : ('a, complete) coption -> 'a = <fun>
+```
+
+That's because by leaving the types abstract, we've entirely hidden
+the underlying types, leaving the typesystem with no evidence that the
+types are distinct.
+
+Let's see what happens if we expose the implementation of these types.
+
+```ocaml env=main
+module M : sig
+  type incomplete = Z
+  type complete = Z
+end = struct
+  type incomplete = Z
+  type complete = Z
+end
+include M
+
+type ('a, _) coption =
+  | Absent : (_, incomplete) coption
+  | Present : 'a -> ('a, _) coption
+```
+
+Unfortunately, the result is still not exhaustive.
+
+```ocaml env=main
+# let assume_complete (coption : (_,complete) coption) =
+    match coption with
+    | Present x -> x
+Lines 2-3, characters 5-21:
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+Absent
+val assume_complete : ('a, complete) coption -> 'a = <fun>
+```
+
+In order to be exhaustive, we need the types that are exposed to be
+definitively different, which would be the case if we defined them as
+variants with different names, as we did in our example.
+
+The reason for this is that types that are appear to be different in
+an interface may in actual fact be the same, as shown by the following.
+
+```ocaml env=main
+module M : sig
+  type incomplete = Z
+  type complete = incomplete = Z
+end = struct
+  type incomplete = Z
+  type complete = Z
+end
+```
+```mdx-error
+Lines 4-7, characters 9-6:
+Error: Signature mismatch:
+       Modules do not match:
+         sig type incomplete = Z type complete = Z end
+       is not included in
+         sig type incomplete = Z type complete = incomplete = Z end
+       Type declarations do not match:
+         type complete = Z
+       is not included in
+         type complete = incomplete = Z
+```
+
+
+:::
+
+
 
 #### Other ways of narrowing
 
