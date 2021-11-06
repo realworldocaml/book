@@ -313,7 +313,7 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -> 'a expr
 ```
 
-The syntax here is requires some decoding. The colon to the right of
+The syntax here requires some decoding. The colon to the right of
 each tag is what tells you that this is a GADT.  To the right of the
 colon, you'll see what looks like an ordinary function signature, and
 you can almost think of it that way; specifically, as the type
@@ -668,7 +668,7 @@ type stringable =
   Stringable : { value: 'a; to_string: 'a -> string } -> stringable
 ```
 
-This type packes together a value of some arbitrary type, along with a
+This type packs together a value of some arbitrary type, along with a
 function for converting values of that type to strings.
 
 We can tell that `'a` is existentially quantified because it shows up
