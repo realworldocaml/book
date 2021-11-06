@@ -313,7 +313,7 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -> 'a expr
 ```
 
-The syntax here is requires some decoding. The colon to the right of
+The syntax here requires some decoding. The colon to the right of
 each tag is what tells you that this is a GADT.  To the right of the
 colon, you'll see what looks like an ordinary function signature, and
 you can almost think of it that way; specifically, as the type
@@ -322,8 +322,8 @@ arrow states the types of the arguments to the tag, and the
 right hand side determines the type of the constructed value.
 
 Note that in the definition of each tag in a GADT, the right-hand side
-is an instance of the type as the overall GADT, though the type
-parameter can be in different in each case, and importantly, can
+is an instance of the same type as the overall GADT, though the type
+parameter can be different in each case, and importantly, can
 depend both on the tag and on the type of the arguments.  `Eq` is an
 example where the type parameter is determined entirely by the tag: it
 always corresponds to a `bool expr`.  `If` is an example where the
@@ -1189,7 +1189,7 @@ type stringable =
   Stringable : { value: 'a; to_string: 'a -> string } -> stringable
 ```
 
-This type packes together a value of some arbitrary type, along with a
+This type packs together a value of some arbitrary type, along with a
 function for converting values of that type to strings.
 
 We can tell that `'a` is existentially quantified because it shows up
