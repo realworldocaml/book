@@ -313,7 +313,7 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -> 'a expr
 ```
 
-The syntax here is requires some decoding. The colon to the right of
+The syntax here requires some decoding. The colon to the right of
 each tag is what tells you that this is a GADT.  To the right of the
 colon, you'll see what looks like an ordinary function signature, and
 you can almost think of it that way; specifically, as the type
