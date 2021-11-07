@@ -13,9 +13,9 @@ puzzle to figure out how to use them effectively. All of which is to
 say that you should only use a GADT when it makes a big qualitative
 improvement to your design.
 
-But don't get me wrong, for the right use-case, GADTs can be really
-transformative, and this chapter will walk through several examples
-that demonstrate some of the range of use-cases that GADTs support.
+That said, for the right use-case, GADTs can be really transformative,
+and this chapter will walk through several examples that demonstrate
+some of the range of use-cases that GADTs support.
 
 At their heart, GADTs provide two extra features above and beyond
 ordinary variants:
@@ -30,8 +30,8 @@ through some examples, so we'll do that next.
 
 ## A little language
 
-One classic use-case for GADTs for writing typed expression languages,
-similar to the boolean expression language described in
+One classic use-case for GADTs is for writing typed expression
+languages, similar to the boolean expression language described in
 [Variants](variants.html#variants-and-recursive-data-structures){data-type=xref}.
 In this section, we'll create a slightly richer language that lets us
 mix arithmetic and boolean expressions. This means that we have to
@@ -57,10 +57,10 @@ type expr =
   | If of expr * expr * expr
 ```
 
-Now, we can write a recursive evaluator in a pretty straight-ahead
-style.  First, we'll declare an exception that can be thrown when we
-hit an ill-typed expression, e.g., when encoutering an expression that
-tries to add a bool and an int.
+We can write a recursive evaluator for this type in a pretty
+straight-ahead style.  First, we'll declare an exception that can be
+thrown when we hit an ill-typed expression, e.g., when encoutering an
+expression that tries to add a bool and an int.
 
 ```ocaml env=main
 exception Ill_typed
@@ -183,6 +183,7 @@ Error: This expression has type bool t but an expression was expected of type
 So, what happened here? How did we add the type-safety we wanted?  The
 fundamental trick is to add what's called a *phantom type*.
 In this definition:
+[phantom types]{.idx}
 
 ```ocaml skip
 type 'a t = expr
@@ -211,9 +212,10 @@ wrong!
 - : 'a Typesafe_lang.t -> 'a Typesafe_lang.t -> bool Typesafe_lang.t = <fun>
 ```
 
-It looks like it's polymorphic over the type of expressions, but
-actually it only works on integers. And, as a result, we can trigger a
-dynamic failure that we didn't expect.
+It looks like it's polymorphic over the type of expressions, but the
+evaluator only supports checking equality on integers.  As a result,
+we can still construct an ill-typed expression, phantom-types
+notwithstanding.
 
 ```ocaml env=main
 # let expr = Typesafe_lang.(eq (bool true) (bool false))
@@ -225,10 +227,10 @@ Exception: Ill_typed.
 This highlights why we still need the dynamic checks in the
 implementation: the types within the implementation don't necessarily
 rule out ill-typed expressions. The same fact explains why we needed
-two different `eval` functions: the eval function doesn't have any
-type-level guarantee of when it's handling a bool expression versus an
-int expression, so it can't safely give results where the type of the
-result varies based on the result of the expression.
+two different `eval` functions: the implementation of eval doesn't
+have any type-level guarantee of when it's handling a bool expression
+versus an int expression, so it can't safely give results where the
+type of the result varies based on the result of the expression.
 
 ### Trying to do better with ordinary variants
 
@@ -271,8 +273,7 @@ val ( +: ) : 'a expr -> 'a expr -> 'a expr = <fun>
 So far so good. But if you think about it for a minute, you'll realize
 this doesn't actually do what we want.  For one thing, the type of the
 outer expression is always just equal to the type of the inner
-expression, which means that some things we want to be able to say
-don't type-check.
+expression, which means that some things that should type-check don't.
 
 ```ocaml env=main
 # If (Eq (i 3, i 4), i 0, i 1)
@@ -293,7 +294,7 @@ The problem here is that the way we want to use the type parameter
 isn't supported by ordinary variants. In particular, we want the type
 parameter to be populated in different ways in the different tags, and
 to depend in non-trivial ways on the types of the data associated with
-each tag.
+each tag.  That's where GADTs can help.
 
 ### GADTs to the rescue
 
@@ -490,11 +491,11 @@ of things you can do with GADTs.
 ### Varying your return type
 
 Sometimes, you want to write a single function that can effectively
-vary its type based on the arguments it is passed.  In some sense, we
-do this all the time.  After all, polymorphic functions can have
-return types that depend on the types of the values they're fed.
-`List.find` is a fine example.  The signature indicates that the type
-of the result varies with the type of the input list.
+have different types in different circumstances.  In some sense, this
+is totally ordinary.  After all, OCaml's polymorphism means that
+values can take on different types in different contexts.  `List.find`
+is a fine example.  The signature indicates that the type of the
+result varies with the type of the input list.
 
 ```ocaml env=main
 # List.find
@@ -511,12 +512,11 @@ types.
 - : char option = Some B
 ```
 
-But this approach is limited to simple dependencies between input and
-output types that correspond concretely to how data flows through your
-code.  Sometimes you want a function's return value to depend on the
-arguments passed to it in less constrained ways.
+But this approach is limited to simple dependencies between types that
+correspond to how data flows through your code.  Sometimes you want
+types to vary in a more flexible way.
 
-For a concrete example, let's say we wanted to create a version of
+To make this concrete, let's say we wanted to create a version of
 `find` that is configurable in terms of how it handles the case of not
 finding an item.  There are three different behaviors you might want:
 
@@ -676,29 +676,29 @@ that shows up internally doesn't appear in a type parameter for
 `stringable` itself. Essentially, the existentially quantified type is
 bound within the definition of `stringable`.
 
-This function can print an arbitrary `stringable`:
+The following function can print an arbitrary `stringable`:
 
 ```ocaml env=main
-# let print (Stringable s) =
+# let print_stringable (Stringable s) =
     Stdio.print_endline (s.to_string s.value)
-val print : stringable -> unit = <fun>
+val print_stringable : stringable -> unit = <fun>
 ```
 
-And we can use this function on a collection of `stringable`s of
+And we can use `print_stringable` on a collection of `stringable`s of
 different underlying types.
 
 ```ocaml env=main
-# let values =
+# let stringables =
     (let s value to_string = Stringable { to_string; value } in
       [ s 100 Int.to_string
       ; s 12.3 Float.to_string
       ; s "foo" Fn.id
       ])
-val values : stringable list =
+val stringables : stringable list =
   [Stringable {value = <poly>; to_string = <fun>};
    Stringable {value = <poly>; to_string = <fun>};
    Stringable {value = <poly>; to_string = <fun>}]
-# List.iter ~f:print values
+# List.iter ~f:print_stringable stringables
 100
 12.3
 foo
@@ -809,26 +809,19 @@ function composition.  Then executing the pipeline is just function
 application.
 
 ```ocaml env=abstracting
-# module Basic_pipeline : sig
-     include Pipeline
-     val exec : ('a,'b) t -> 'a -> 'b
-   end= struct
-    type ('input, 'output) t = 'input -> 'output
+module Basic_pipeline : sig
+   include Pipeline
+   val exec : ('a,'b) t -> 'a -> 'b
+ end= struct
+  type ('input, 'output) t = 'input -> 'output
 
-    let empty = Fn.id
+  let empty = Fn.id
 
-    let ( @> ) f t input =
-      t (f input)
+  let ( @> ) f t input =
+    t (f input)
 
-    let exec t input = t input
-  end
-module Basic_pipeline :
-  sig
-    type ('input, 'output) t
-    val ( @> ) : ('a -> 'b) -> ('b, 'c) t -> ('a, 'c) t
-    val empty : ('a, 'a) t
-    val exec : ('a, 'b) t -> 'a -> 'b
-  end
+  let exec t input = t input
+end
 ```
 
 But this way of implementing a pipeline doesn't give us any of the
@@ -840,8 +833,8 @@ If we wanted to add the kinds of services we discussed above, we would
 do so by enhancing the pipeline type, e.g., providing it with extra
 runtime structures to track profiles, or handle exceptions.  But this
 approach is awkward, since it requires us to pre-commit to whatever
-services we're going to support, and to embed all of them in to our
-representation of a pipeline.
+services we're going to support, and to embed all of them in our
+pipeline representation.
 
 GADTs provide a simpler approach.  Instead of concretely building a
 machine for executing a pipeline, we can use GADTs to abstractly
@@ -907,6 +900,7 @@ val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
 The more abstract GADT approach for creating a little combinator
 library like this has several advantages over having combinators that
 build a more concrete computational machine:
+[combinators, implementing with GADTs]{.idx}
 
 - The core types are simpler, since they are typically built out of
   GADT tags that are just reflections the types of the base
@@ -1055,7 +1049,7 @@ Error: This pattern matches values of type ('a, incomplete) coption
        Type incomplete is not compatible with type complete
 ```
 
-We can make this compile by deleting the `None` branch (and the now
+We can make this compile by deleting the `Absent` branch (and the now
 useless `default` argument).
 
 ```ocaml env=main
@@ -1122,7 +1116,8 @@ val check_completeness : incomplete logon_request -> 'a logon_request option =
 Note that the result is polymorphic, meaning it can return a logon
 request of any kind, which includes the possibility of returning a
 complete request.  In practice, the function type is easier to
-understand if we constrain
+understand if we constrain the return value to explicitly return a
+`complete` request.
 
 ```ocaml env=main
 # let check_completeness request : complete logon_request option =
@@ -1273,11 +1268,11 @@ val assume_complete : ('a, complete) coption -> 'a = <fun>
 
 In order to be exhaustive, we need the types that are exposed to be
 definitively different, which would be the case if we defined them as
-variants with different names, as we did in our example.
+variants with differently named tags, as we did originally.
 
-The reason for this is that types that are appear to be different in
-an interface may in actual fact be the same, as shown by the
-following.
+The reason for this is that types that appear to be different in an
+interface may turn out to be the same in the implementation, as we can
+see below.
 
 ```ocaml env=main
 module M : sig
@@ -1296,21 +1291,21 @@ those definitions in your mlis.
 
 #### Other ways of narrowing
 
-You migth think that narrowing of pattern matches is something that
-can only happen with GADTs, but OCaml can eliminate impossible cases
-from ordinary variants too.  But as with GADTs, you can eliminate a
-case when you can demonstrate that it's impossible at the type level.
+Thus far, we've only seen narrowing in the context of GADTs, but OCaml
+can eliminate impossible cases from ordinary variants too.  As with
+GADTs, to eliminate a case you need to demonstrate that the case in
+question is impossible at the type level.
 
-One way to do this is via an *uninhabitable type*, which is a type
-that has no values.  You can declare such a value by creating a
-variant type with no constructors.
+One way to do this is via an *uninhabited type*, which is a type that
+has no associated values.  You can declare such a value by creating a
+variant with no tags.  [uninhabited types]{.idx}
 
 ```ocaml env=main
-# type nothing = |
 type nothing = |
 ```
 
-But `Base` already has a standard uninhabited type, `Nothing.t`.
+This turn out to be useful enough that `Base` has a standard
+uninhabited type, `Nothing.t`.  [Nothing.t]{.idx}
 
 So, how does an uninhabited type help? Well, consider the `Result.t`
 type, discussed in as described in [Error
@@ -1365,23 +1360,22 @@ refutation case for you, so you don't need to write it out explicitly.
 val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
-One real-world case where this becomes useful is when you're using a
-highly configurable library that supports multiple different modes of
-use, not all of which are necessarily needed for any given
-application. One example of this comes from `Async`'s RPC (remote
-procedure-call) library. Async RPCs support a particular flavor of
-interaction called a `State_rpc`. Such an RPC is parameterized by four
-types, for four different kinds of data:
+Narrowing with uninhabitable types can be useful when using a highly
+configurable library that supports multiple different modes of use,
+not all of which are necessarily needed for a given application. One
+example of this comes from `Async`'s RPC (remote procedure-call)
+library. Async RPCs support a particular flavor of interaction called
+a `State_rpc`. Such an RPC is parameterized by four types, for four
+different kinds of data: [Async_rpc]{.idx} [State_rpc]{.idx}
 
-- The initial client request
-- The initial snapshot returned by the server
-- The sequence of updates to that snapshot
-- An error to terminate the stream.
+- `query`, for the initial client request,
+- `state`, for the initial snapshot returned by the server,
+- `update`, for the sequence of updates to that snapshot, and
+- `error`, for an error to terminate the stream.
 
-Now, imagine you want to use a `State_rpc`, but there's no need for
-the final error type.  We could just instantiate the `State_rpc` using
-the type `unit` for the error type.
-
+Now, imagine you want to use a `State_rpc` in a context where you
+don't need to terminate the stream with a custom error.  We could just
+instantiate the `State_rpc` using the type `unit` for the error type.
 
 ```ocaml env=async
 open Core
@@ -1397,8 +1391,8 @@ let rpc =
     ()
 ```
 
-With this approach, when you write code to dispatch the RPC, you still
-have to handle the error case, even though we don't intend to use it.
+But with this approach, you still have to handle the error case when
+writing code to dispatch the RPC.
 
 ```ocaml env=async
 # let dispatch conn =
@@ -1422,7 +1416,8 @@ let rpc =
     ()
 ```
 
-Now, our dispatch function needs only deal with the `Ok` case.
+Now, we've essentially banned the use of the `error` type, and as a
+result, our dispatch function needs only deal with the `Ok` case.
 
 ```ocaml env=async
 # let dispatch conn =
@@ -1436,14 +1431,17 @@ applied to code that isn't designed with narrowing in mind.
 
 ## Limitations of GADTs
 
-GADTs are useful, but they have some sharp corners.
+Hopefully, we've demonstrated the utility of GADTs, while at the same
+time showing some of the attendant complexities.  In this final
+section, we're going to highlight some remaining difficulties with
+using GADTs that you may run in to, as well as how to work around
+them.
 
 ### Or-patterns
 
-One annoyance of
-working GADTs is that GADTs often don't work well with or-patterns.
-Consider the following type that represents various ways we might use
-for obtaining some piece of data.
+GADTs don't work well with or-patterns.  Consider the following type
+that represents various ways we might use for obtaining some piece of
+data.  [or-patterns]{.idx}
 
 ```ocaml env=main
 open Core
@@ -1481,10 +1479,9 @@ Error: This expression has type a but an expression was expected of type
          string
 ```
 
-Note that or-patterns do sometimes work, but only when you don't make
-use of the type information that is discovered during the pattern
-match.  Here's an example of a function that actually compiles with an
-or-pattern.
+Or-patterns do sometimes work, but only when you don't make use of the
+type information that is discovered during the pattern match.  Here's
+an example of a function that uses or-patterns successfully.
 
 ```ocaml env=main
 # let requires_io (type a) (kind : a Source_kind.t) =
@@ -1495,14 +1492,14 @@ val requires_io : 'a Source_kind.t -> bool = <fun>
 ```
 
 In any case, the lack of or-patterns is annoying, but it's not a big
-deal, since you can minimize the code duplication by pulling out most
-of the content of the duplicated right-hand sides into functions that
-can be called in each of the duplicated cases.
+deal, since you can reduce the code duplication by pulling out most of
+the content of the duplicated right-hand sides into functions that can
+be called in each of the duplicated cases.
 
 ### Deriving serializers
 
-As will be discussed in detail in [Data Serialization With
-S-Expressions ](data-serialization.html){data-type=xref},
+As will be discussed in more detail in [Data Serialization With
+S-Expressions](data-serialization.html){data-type=xref},
 s-expressions are a convenient data format for representing structured
 data.  Rather than write the serializers and deserializers by hand, we
 typically use `ppx_sexp_value`, which is a syntax extension which
@@ -1560,7 +1557,7 @@ val sexp_of_number_kind :
 - : Sexp.t = Int
 ```
 
-It is possible to build a deserializer for `number_kind`, but it's a
+It is possible to build a deserializer for `number_kind`, but it's
 tricky.  First, we'll need a type that packs up a `number_kind` while
 hiding its type parameter.  This is going to be the value we return
 from our parser.
