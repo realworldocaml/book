@@ -2,7 +2,7 @@
 <h1>GADTs</h1>
 <p>GADTs, short for Generalized Algebraic Data Types, are an extension of the variants we saw in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>. They provide more precise types that you can use to make your code safer, more concise, and more efficient.</p>
 <p>At the same time, GADTs are an advanced feature of OCaml, and their power comes at a distinct cost. GADTs are harder to use and less intuitive than ordinary variants, and it can sometimes be a bit of a puzzle to figure out how to use them effectively. All of which is to say that you should only use a GADT when it makes a big qualitative improvement to your design.</p>
-<p>But don’t get me wrong, for the right use-case, GADTs can be really transformative, and this chapter will walk through several examples that demonstrate some of the range of use-cases that GADTs support.</p>
+<p>That said, for the right use-case, GADTs can be really transformative, and this chapter will walk through several examples that demonstrate some of the range of use-cases that GADTs support.</p>
 <p>At their heart, GADTs provide two extra features above and beyond ordinary variants:</p>
 <ul>
 <li>They let the compiler learn more type information when you descend into a case of a pattern match.</li>
@@ -11,7 +11,7 @@
 <p>It’s a little hard to understand these features without working through some examples, so we’ll do that next.</p>
 <section class="level2" id="a-little-language">
 <h2>A little language</h2>
-<p>One classic use-case for GADTs for writing simple typed expression languages, similar to the boolean expression language described in <a data-type="xref" href="variants.html#variants-and-recursive-data-structures">Chapter 6, Variants</a>. In this section, we’ll create a slightly richer language that lets us mix arithmetic and boolean expressions. This means that we have to deal with the possibility of ill-typed expressions, e.g., an expression that adds a <code>bool</code> and an <code>int</code>.</p>
+<p>One classic use-case for GADTs is for writing typed expression languages, similar to the boolean expression language described in <a data-type="xref" href="variants.html#variants-and-recursive-data-structures">Chapter 6, Variants</a>. In this section, we’ll create a slightly richer language that lets us mix arithmetic and boolean expressions. This means that we have to deal with the possibility of ill-typed expressions, e.g., an expression that adds a <code>bool</code> and an <code>int</code>.</p>
 <p>Let’s first try to do this with an ordinary variant. We’ll declare two types here: <code>value</code>, which represents a primitive value in the language (i.e., an <code>int</code> or a <code>bool</code>), and <code>expr</code>, which represents the full set of possible expressions.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
@@ -26,7 +26,7 @@ type expr =
   | Plus of expr * expr
   | If of expr * expr * expr</code></pre>
 </div>
-<p>Now, we can write a recursive evaluator in a pretty straight-ahead style. First, we’ll declare an exception that can be thrown when we hit an ill-typed expression, e.g., when encoutering an expression that tries to add a bool and an int.</p>
+<p>We can write a recursive evaluator for this type in a pretty straight-ahead style. First, we’ll declare an exception that can be thrown when we hit an ill-typed expression, e.g., when encoutering an expression that tries to add a bool and an int.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">exception Ill_typed</code></pre>
 </div>
@@ -122,7 +122,7 @@ end</code></pre>
 &gt;       Type bool is not compatible with type int
 </code></pre>
 </div>
-<p>So, what happened here? How did we add the type-safety we wanted? The fundamental trick is to add what’s called a <em>phantom type</em>. In this definition:</p>
+<p>So, what happened here? How did we add the type-safety we wanted? The fundamental trick is to add what’s called a <em>phantom type</em>. In this definition: <a data-primary="phantom types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type 'a t = expr</code></pre>
 </div>
@@ -135,7 +135,7 @@ end</code></pre>
 &gt;- : 'a Typesafe_lang.t -&gt; 'a Typesafe_lang.t -&gt; bool Typesafe_lang.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It looks like it’s polymorphic over the type of expressions, but actually it only works on integers. And, as a result, we can trigger a dynamic failure that we didn’t expect.</p>
+<p>It looks like it’s polymorphic over the type of expressions, but the evaluator only supports checking equality on integers. As a result, we can still construct an ill-typed expression, phantom-types notwithstanding.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(eq (bool true) (bool false)) ;;
 &gt;val expr : bool Typesafe_lang.t = &lt;abstr&gt;
@@ -143,7 +143,7 @@ Typesafe_lang.bool_eval expr ;;
 &gt;Exception: Ill_typed.
 </code></pre>
 </div>
-<p>This highlights why we still need the dynamic checks in the implementation: the types within the implementation don’t necessarily rule out ill-typed expressions. The same fact explains why we needed two different <code>eval</code> functions: the eval function doesn’t have any type-level guarantee of when it’s handling a bool expression versus an int expression, so it can’t safely give results where the type of the result varies based on the result of the expression.</p>
+<p>This highlights why we still need the dynamic checks in the implementation: the types within the implementation don’t necessarily rule out ill-typed expressions. The same fact explains why we needed two different <code>eval</code> functions: the implementation of eval doesn’t have any type-level guarantee of when it’s handling a bool expression versus an int expression, so it can’t safely give results where the type of the result varies based on the result of the expression.</p>
 </section>
 <section class="level3" id="trying-to-do-better-with-ordinary-variants">
 <h3>Trying to do better with ordinary variants</h3>
@@ -176,7 +176,7 @@ i 3 +: i 4 ;;
 &gt;- : int expr = Plus (Value (Int 3), Value (Int 4))
 </code></pre>
 </div>
-<p>So far so good. But if you think about it for a minute, you’ll realize this doesn’t actually do what we want. For one thing, the type of the outer expression is always just equal to the type of the inner expression, which means that some things we want to be able to say don’t type-check.</p>
+<p>So far so good. But if you think about it for a minute, you’ll realize this doesn’t actually do what we want. For one thing, the type of the outer expression is always just equal to the type of the inner expression, which means that some things that should type-check don’t.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">If (Eq (i 3, i 4), i 0, i 1) ;;
 &gt;Line 1, characters 9-12:
@@ -191,7 +191,7 @@ i 3 +: i 4 ;;
 &gt;- : int expr = Value (Bool 3)
 </code></pre>
 </div>
-<p>The problem here is that the way we want to use the type parameter isn’t supported by ordinary variants. In particular, we want the type parameter to be populated in different ways in the different tags, and to depend in non-trivial ways on the types of the data associated with each tag.</p>
+<p>The problem here is that the way we want to use the type parameter isn’t supported by ordinary variants. In particular, we want the type parameter to be populated in different ways in the different tags, and to depend in non-trivial ways on the types of the data associated with each tag. That’s where GADTs can help.</p>
 </section>
 <section class="level3" id="gadts-to-the-rescue">
 <h3>GADTs to the rescue</h3>
@@ -209,7 +209,7 @@ type _ expr =
 </div>
 <p>The syntax here requires some decoding. The colon to the right of each tag is what tells you that this is a GADT. To the right of the colon, you’ll see what looks like an ordinary function signature, and you can almost think of it that way; specifically, as the type signature for that particular tag. The left-hand side of the arrow states the types of the arguments to the tag, and the right hand side determines the type of the constructed value.</p>
 <p>Note that in the definition of each tag in a GADT, the right-hand side is an instance of the type as the overall GADT, though the type parameter can be in different in each case, and importantly, can depend both on the tag and on the type of the arguments. <code>Eq</code> is an example where the type parameter is determined entirely by the tag: it always corresponds to a <code>bool expr</code>. <code>If</code> is an example where the type parameter depends on the arguments to the tag, in particular the type parameter of the <code>If</code> is the type parameter of the then and else clauses.</p>
-<p>Let’s try some simple examples.</p>
+<p>Let’s try some examples.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
@@ -328,7 +328,7 @@ let rec eval : type a. a expr -&gt; a = function
 <p>The typed language we showed above is a perfectly reasonable example, but GADTs are useful for a lot more than designing little languages. In this section, we’ll try to give you a broader sampling of the kinds of things you can do with GADTs.</p>
 <section class="level3" id="varying-your-return-type">
 <h3>Varying your return type</h3>
-<p>Sometimes, you want to write a single function that can effectively vary its type based on the arguments it is passed. In some sense, we do this all the time. After all, polymorphic functions can have return types that depend on the types of the values they’re fed. <code>List.find</code> is a fine example. The signature indicates that the type of the result varies with the type of the input list.</p>
+<p>Sometimes, you want to write a single function that can effectively have different types in different circumstances. In some sense, this is totally ordinary. After all, OCaml’s polymorphism means that values can take on different types in different contexts. <code>List.find</code> is a fine example. The signature indicates that the type of the result varies with the type of the input list.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ;;
 &gt;- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
@@ -342,8 +342,8 @@ List.find ~f:(Char.is_uppercase) ['a';'B';'C'] ;;
 &gt;- : char option = Some B
 </code></pre>
 </div>
-<p>But this approach is limited to simple dependencies between input and output types that correspond concretely to how data flows through your code. Sometimes you want a function’s return value to depend on the arguments passed to it in less constrained ways.</p>
-<p>For a concrete example, let’s say we wanted to create a version of <code>find</code> that is configurable in terms of how it handles the case of not finding an item. There are three different behaviors you might want:</p>
+<p>But this approach is limited to simple dependencies between types that correspond to how data flows through your code. Sometimes you want types to vary in a more flexible way.</p>
+<p>To make this concrete, let’s say we wanted to create a version of <code>find</code> that is configurable in terms of how it handles the case of not finding an item. There are three different behaviors you might want:</p>
 <ul>
 <li>Throw an exception.</li>
 <li>Return <code>None</code>.</li>
@@ -458,28 +458,28 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 </div>
 <p>This type packs together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
 <p>We can tell that <code>'a</code> is existentially quantified because it shows up on the left-hand side of the arrow but not on the right, so the <code>'a</code> that shows up internally doesn’t appear in a type parameter for <code>stringable</code> itself. Essentially, the existentially quantified type is bound within the definition of <code>stringable</code>.</p>
-<p>This function can print an arbitrary <code>stringable</code>:</p>
+<p>The following function can print an arbitrary <code>stringable</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print (Stringable s) =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_stringable (Stringable s) =
   Stdio.print_endline (s.to_string s.value)
 ;;
-&gt;val print : stringable -&gt; unit = &lt;fun&gt;
+&gt;val print_stringable : stringable -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>And we can use this function on a collection of <code>stringable</code>s of different underlying types.</p>
+<p>And we can use <code>print_stringable</code> on a collection of <code>stringable</code>s of different underlying types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let values =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let stringables =
   (let s value to_string = Stringable { to_string; value } in
     [ s 100 Int.to_string
     ; s 12.3 Float.to_string
     ; s "foo" Fn.id
     ])
 ;;
-&gt;val values : stringable list =
+&gt;val stringables : stringable list =
 &gt;  [Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
 &gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
 &gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;}]
-List.iter ~f:print values ;;
+List.iter ~f:print_stringable stringables ;;
 &gt;100
 &gt;12.3
 &gt;foo
@@ -518,7 +518,7 @@ let sum_file_sizes () =
 &gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This works well enough, but the advantage of a custom pipeline type is that it lets you build extra services beyond simple execution of the pipeline, e.g.:</p>
+<p>This works well enough, but the advantage of a custom pipeline type is that it lets you build extra services beyond basic execution of the pipeline, e.g.:</p>
 <ul>
 <li>Profiling, so that when you run a pipeline, you get a report of how long each step of the pipeline took.</li>
 <li>Control over execution, like allowing users to pause the pipeline mid-execution, and restart it later.</li>
@@ -553,7 +553,7 @@ end
 </div>
 <p>If all we want is a pipeline capable of a no-frills execution, we can define our pipeline itself as a simple function, the <code>@&gt;</code> operator as function composition. Then executing the pipeline is just function application.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Basic_pipeline : sig
+<pre><code class="language-ocaml">module Basic_pipeline : sig
    include Pipeline
    val exec : ('a,'b) t -&gt; 'a -&gt; 'b
  end= struct
@@ -565,19 +565,10 @@ end
     t (f input)
 
   let exec t input = t input
-end
-;;
-&gt;module Basic_pipeline :
-&gt;  sig
-&gt;    type ('input, 'output) t
-&gt;    val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) t -&gt; ('a, 'c) t
-&gt;    val empty : ('a, 'a) t
-&gt;    val exec : ('a, 'b) t -&gt; 'a -&gt; 'b
-&gt;  end
-</code></pre>
+end</code></pre>
 </div>
 <p>But this way of implementing a pipeline doesn’t give us any of the extra services we discussed. All we’re really doing is step-by-step building up the same kind of function that we could have gotten using the <code>|&gt;</code> operator.</p>
-<p>If we wanted to add the kinds of services we discussed above, we would do so by enhancing the pipeline type, e.g., providing it with extra runtime structures to track profiles, or handle exceptions. But this approach is awkward, since it requires us to pre-commit to whatever services we’re going to support, and to embed all of them in to our representation of a pipeline.</p>
+<p>If we wanted to add the kinds of services we discussed above, we would do so by enhancing the pipeline type, e.g., providing it with extra runtime structures to track profiles, or handle exceptions. But this approach is awkward, since it requires us to pre-commit to whatever services we’re going to support, and to embed all of them in our pipeline representation.</p>
 <p>GADTs provide a simpler approach. Instead of concretely building a machine for executing a pipeline, we can use GADTs to abstractly represent the pipeline we want, and then build the functionality we want on top of that representation.</p>
 <p>Here’s what such a representation might look like.</p>
 <div class="highlight">
@@ -627,9 +618,9 @@ let empty = Empty ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>The more abstract GADT approach for creating a little combinator library like this has several advantages over having combinators that build a more concrete computational machine:</p>
+<p>The more abstract GADT approach for creating a little combinator library like this has several advantages over having combinators that build a more concrete computational machine: <a data-primary="combinators, implementing with GADTs" data-type="indexterm">&nbsp;</a></p>
 <ul>
-<li><p>The core types are simpler, since they are typically built out of GADT tags that are simple reflections the types of the base combinators.</p></li>
+<li><p>The core types are simpler, since they are typically built out of GADT tags that are just reflections the types of the base combinators.</p></li>
 <li><p>The design is more modular, since your core types don’t need to contemplate every possible use you want to make of them.</p></li>
 <li><p>The code tends to be more efficient, since the more concrete approach typically involves allocating closures to wrap up the necessary functionality, and closures are more heavyweight than GADT tags.</p></li>
 </ul>
@@ -709,7 +700,7 @@ type complete = Complete</code></pre>
 &gt;       Type incomplete is not compatible with type complete
 </code></pre>
 </div>
-<p>We can make this compile by deleting the <code>None</code> branch (and the now useless <code>default</code> argument).</p>
+<p>We can make this compile by deleting the <code>Absent</code> branch (and the now useless <code>default</code> argument).</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get (o : (_,complete) coption) =
   match o with
@@ -758,7 +749,7 @@ let set_permissions request x = { request with permissions = Present x } ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that the result is polymorphic, meaning it can return a logon request of any kind, which includes the possibility of returning a complete request. In practice, the function type is easier to understand if we constrain</p>
+<p>Note that the result is polymorphic, meaning it can return a logon request of any kind, which includes the possibility of returning a complete request. In practice, the function type is easier to understand if we constrain the return value to explicitly return a <code>complete</code> request.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let check_completeness request : complete logon_request option =
   match request.user_id, request.permissions with
@@ -876,8 +867,8 @@ type ('a, _) coption =
 &gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In order to be exhaustive, we need the types that are exposed to be definitively different, which would be the case if we defined them as variants with different names, as we did in our example.</p>
-<p>The reason for this is that types that are appear to be different in an interface may in actual fact be the same, as shown by the following.</p>
+<p>In order to be exhaustive, we need the types that are exposed to be definitively different, which would be the case if we defined them as variants with differently named tags, as we did originally.</p>
+<p>The reason for this is that types that appear to be different in an interface may turn out to be the same in the implementation, as we can see below.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module M : sig
   type incomplete = Z
@@ -889,16 +880,14 @@ end</code></pre>
 </div>
 <p>All of which is to say: when creating types to act as abstract markers for the type parameter of a GADT, you should chose definitions that make the distinctness of those types clear, and you should expose those definitions in your mlis.</p>
 </section>
-<section class="level4" id="other-ways-of-narrowing">
-<h4>Other ways of narrowing</h4>
-<p>You migth think that narrowing of pattern matches is something that can only happen with GADTs, but OCaml can eliminate impossible cases from ordinary variants too. But as with GADTs, you can eliminate a case when you can demonstrate that it’s impossible at the type level.</p>
-<p>One way to do this is via an <em>uninhabitable type</em>, which is a type that has no values. You can declare such a value by creating a variant type with no constructors.</p>
+<section class="level4" id="narrowing-without-gadts">
+<h4>Narrowing without GADTs</h4>
+<p>Thus far, we’ve only seen narrowing in the context of GADTs, but OCaml can eliminate impossible cases from ordinary variants too. As with GADTs, to eliminate a case you need to demonstrate that the case in question is impossible at the type level.</p>
+<p>One way to do this is via an <em>uninhabited type</em>, which is a type that has no associated values. You can declare such a value by creating a variant with no tags. <a data-primary="uninhabited types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type nothing = | ;;
-&gt;type nothing = |
-</code></pre>
+<pre><code class="language-ocaml">type nothing = |</code></pre>
 </div>
-<p>But <code>Base</code> already has a standard uninhabited type, <code>Nothing.t</code>.</p>
+<p>This turn out to be useful enough that <code>Base</code> has a standard uninhabited type, <code>Nothing.t</code>. <a data-primary="Nothing.t" data-type="indexterm">&nbsp;</a></p>
 <p>So, how does an uninhabited type help? Well, consider the <code>Result.t</code> type, discussed in as described in <a data-type="xref" href="error-handling.html#encoding-errors-with-result">Chapter 7, Error Handling</a>. Normally, to match a <code>Result.t</code>, you need to handle both the <code>Ok</code> and <code>Error</code> cases.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio ;;
@@ -933,7 +922,7 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The period in the final case tells the compiler that we believe this case can never be reached, and OCaml will verify that it’s true. In some simple cases, however, the compiler will automatically add the refutation case for you, so you don’t need to write it out explicitly.</p>
+<p>The period in the final case tells the compiler that we believe this case can never be reached, and OCaml will verify that it’s true. In some simple cases, however, the compiler can automatically add the refutation case for you, so you don’t need to write it out explicitly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -942,14 +931,14 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>One real-world case where this becomes useful is when you’re using a highly configurable library that supports multiple different modes of use, not all of which are necessarily needed for any given application. One example of this comes from <code>Async</code>’s RPC (remote procedure-call) library. Async RPCs support a particular flavor of interaction called a <code>State_rpc</code>. Such an RPC is parameterized by four types, for four different kinds of data:</p>
+<p>Narrowing with uninhabitable types can be useful when using a highly configurable library that supports multiple different modes of use, not all of which are necessarily needed for a given application. One example of this comes from <code>Async</code>’s RPC (remote procedure-call) library. Async RPCs support a particular flavor of interaction called a <code>State_rpc</code>. Such an RPC is parameterized by four types, for four different kinds of data: <a data-primary="Async_rpc" data-type="indexterm">&nbsp;</a> <a data-primary="State_rpc" data-type="indexterm">&nbsp;</a></p>
 <ul>
-<li>The initial client request</li>
-<li>The initial snapshot returned by the server</li>
-<li>The sequence of updates to that snapshot</li>
-<li>An error to terminate the stream.</li>
+<li><code>query</code>, for the initial client request,</li>
+<li><code>state</code>, for the initial snapshot returned by the server,</li>
+<li><code>update</code>, for the sequence of updates to that snapshot, and</li>
+<li><code>error</code>, for an error to terminate the stream.</li>
 </ul>
-<p>Now, imagine you want to use a <code>State_rpc</code>, but there’s no need for the final error type. We could just instantiate the <code>State_rpc</code> using the type <code>unit</code> for the error type.</p>
+<p>Now, imagine you want to use a <code>State_rpc</code> in a context where you don’t need to terminate the stream with a custom error. We could just instantiate the <code>State_rpc</code> using the type <code>unit</code> for the error type.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 open Async
@@ -963,7 +952,7 @@ let rpc =
     ~bin_error:[%bin_type_class: unit]
     ()</code></pre>
 </div>
-<p>With this approach, when you write code to dispatch the RPC, you still have to handle the error case, even though we don’t intend to use it.</p>
+<p>But with this approach, you still have to handle the error case when writing code to dispatch the RPC.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
@@ -985,7 +974,7 @@ let rpc =
     ~bin_error:[%bin_type_class: Nothing.t]
     ()</code></pre>
 </div>
-<p>Now, our dispatch function needs only deal with the <code>Ok</code> case.</p>
+<p>Now, we’ve essentially banned the use of the <code>error</code> type, and as a result, our dispatch function needs only deal with the <code>Ok</code> case.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
@@ -1000,10 +989,10 @@ let rpc =
 </section>
 <section class="level2" id="limitations-of-gadts">
 <h2>Limitations of GADTs</h2>
-<p>GADTs are useful, but they have some sharp corners.</p>
+<p>Hopefully, we’ve demonstrated the utility of GADTs, while at the same time showing some of the attendant complexities. In this final section, we’re going to highlight some remaining difficulties with using GADTs that you may run in to, as well as how to work around them.</p>
 <section class="level3" id="or-patterns">
 <h3>Or-patterns</h3>
-<p>One annoyance of working GADTs is that GADTs often don’t work well with or-patterns. Consider the following type that represents various ways we might use for obtaining some piece of data.</p>
+<p>GADTs don’t work well with or-patterns. Consider the following type that represents various ways we might use for obtaining some piece of data. <a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 module Source_kind = struct
@@ -1036,7 +1025,7 @@ end</code></pre>
 &gt;         string
 </code></pre>
 </div>
-<p>Note that or-patterns do sometimes work, but only when you don’t make use of the type information that is discovered during the pattern match. Here’s an example of a function that actually compiles with an or-pattern.</p>
+<p>Or-patterns do sometimes work, but only when you don’t make use of the type information that is discovered during the pattern match. Here’s an example of a function that uses or-patterns successfully.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let requires_io (type a) (kind : a Source_kind.t) =
   match kind with
@@ -1046,11 +1035,11 @@ end</code></pre>
 &gt;val requires_io : 'a Source_kind.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In any case, the lack of or-patterns is annoying, but it’s not a big deal, since you can minimize the code duplication by pulling out most of the content of the duplicated right-hand sides into functions that can be called in each of the duplicated cases.</p>
+<p>In any case, the lack of or-patterns is annoying, but it’s not a big deal, since you can reduce the code duplication by pulling out most of the content of the duplicated right-hand sides into functions that can be called in each of the duplicated cases.</p>
 </section>
 <section class="level3" id="deriving-serializers">
 <h3>Deriving serializers</h3>
-<p>As will be discussed in detail in <a data-type="xref" href="data-serialization.html">Chapter 20, Data Serialization With S-Expressions</a>, s-expressions are a convenient data format for representing structured data. Rather than write the serializers and deserializers by hand, we typically use <code>ppx_sexp_value</code>, which is a syntax extension which auto-generates these functions for a given type, based on that type’s definition.</p>
+<p>As will be discussed in more detail in <a data-type="xref" href="data-serialization.html">Chapter 20, Data Serialization With S-Expressions</a>, s-expressions are a convenient data format for representing structured data. Rather than write the serializers and deserializers by hand, we typically use <code>ppx_sexp_value</code>, which is a syntax extension which auto-generates these functions for a given type, based on that type’s definition.</p>
 <p>Here’s an example:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type position = { x: float; y: float } [@@deriving sexp] ;;
@@ -1091,7 +1080,7 @@ sexp_of_number_kind Int.sexp_of_t Int ;;
 &gt;- : Sexp.t = Int
 </code></pre>
 </div>
-<p>It is possible to build a deserializer for <code>number_kind</code>, but it’s a tricky. First, we’ll need a type that packs up a <code>number_kind</code> while hiding its type parameter. This is going to be the value we return from our parser.</p>
+<p>It is possible to build a deserializer for <code>number_kind</code>, but it’s tricky. First, we’ll need a type that packs up a <code>number_kind</code> while hiding its type parameter. This is going to be the value we return from our parser.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type packed_number_kind = P : _ number_kind -&gt; packed_number_kind</code></pre>
 </div>
