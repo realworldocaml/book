@@ -433,6 +433,207 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 </code></pre>
 </div>
 </section>
+<section class="level3" id="capturing-the-unknown">
+<h3>Capturing the unknown</h3>
+<p>Code that that works with unknown types is routine in OCaml, and comes up in the simplest of examples:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y) ;;
+&gt;val tuple : 'a -&gt; 'b -&gt; 'a * 'b = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The type variables <code>'a</code> and <code>'b</code> indicate that there are two unknown types here, and these type variables are <em>universally quantified</em>. Which is to say, the type of <code>tuple</code> is: <em>for all</em> types <code>a</code> and <code>b</code>, <code>a -&gt; b -&gt; a * b</code>.</p>
+<p>And indeed, we can restrict the type of <code>tuple</code> to any <code>'a</code> and <code>'b</code> we want.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(tuple : int -&gt; float -&gt; int * float) ;;
+&gt;- : int -&gt; float -&gt; int * float = &lt;fun&gt;
+(tuple : string -&gt; string * string -&gt; string * (string * string)) ;;
+&gt;- : string -&gt; string * string -&gt; string * (string * string) = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Sometimes, however, we want to type variables that are <em>existentially quantified</em>, meaning that instead of being compatible with all types, the type represents a particular but unknown type.</p>
+<p>GADTs provide one natural way of encoding such type variables. Here’s a simple example.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type stringable =
+  Stringable : { value: 'a; to_string: 'a -&gt; string } -&gt; stringable</code></pre>
+</div>
+<p>This type packs together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
+<p>We can tell that <code>'a</code> is existentially quantified because it shows up on the left-hand side of the arrow but not on the right, so the <code>'a</code> that shows up internally doesn’t appear in a type parameter for <code>stringable</code> itself. Essentially, the existentially quantified type is bound within the definition of <code>stringable</code>.</p>
+<p>This function can print an arbitrary <code>stringable</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print (Stringable s) =
+  Stdio.print_endline (s.to_string s.value)
+;;
+&gt;val print : stringable -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>And we can use this function on a collection of <code>stringable</code>s of different underlying types.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let values =
+  (let s value to_string = Stringable { to_string; value } in
+    [ s 100 Int.to_string
+    ; s 12.3 Float.to_string
+    ; s "foo" Fn.id
+    ])
+;;
+&gt;val values : stringable list =
+&gt;  [Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
+&gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
+&gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;}]
+List.iter ~f:print values ;;
+&gt;100
+&gt;12.3
+&gt;foo
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>The thing that lets this all work is that the type of the underlying object is existentially bound within the type <code>stringable</code>. As such, the type of the underlying values can’t escape the scope of <code>stringable</code>, which means that a function that tries to do that won’t type-check.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_value (Stringable s) = s.value ;;
+&gt;Line 1, characters 32-39:
+&gt;Error: This expression has type $Stringable_'a
+&gt;       but an expression was expected of type 'a
+&gt;       The type constructor $Stringable_'a would escape its scope
+</code></pre>
+</div>
+<p>It’s worth spending a moment to decode this error message, and the meaning of the type variable <code>$Stringable_'a</code> in particular. You can think of this variable as having three parts:</p>
+<ul>
+<li>The <code>$</code> marks the variable as an existential.</li>
+<li><code>Stringable</code> is the name of the GADT tag that this variable came from.</li>
+<li><code>'a</code> is the name of the type variable from inside that tag.</li>
+</ul>
+</section>
+<section class="level3" id="abstracting-computational-machines">
+<h3>Abstracting computational machines</h3>
+<p>A common idiom in OCaml is to combine small components into larger computational machines, using a collection of component-combining functions, or <em>combinators</em>.</p>
+<p>GADTs can be helpful for writing such combinators. To see how, let’s consider an example: <em>pipelines</em>. Here, a pipeline is a sequence of steps where each step consumes the output of the previous step, potentially does some side effects, and returns a value to be passed to the next step. This is analogous to a shell pipeline, and is useful for all sorts of system automation tasks.</p>
+<p>But, can’t we write pipelines already? After all, OCaml comes with a perfectly serviceable pipeline operator:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
+let sum_file_sizes () =
+  Sys.ls_dir "."
+  |&gt; List.filter ~f:Sys.is_file_exn
+  |&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
+  |&gt; List.sum (module Int) ~f:Int64.to_int_exn
+;;
+&gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>This works well enough, but the advantage of a custom pipeline type is that it lets you build extra services beyond simple execution of the pipeline, e.g.:</p>
+<ul>
+<li>Profiling, so that when you run a pipeline, you get a report of how long each step of the pipeline took.</li>
+<li>Control over execution, like allowing users to pause the pipeline mid-execution, and restart it later.</li>
+<li>Custom error handling, so, for example, you could build a pipeline that kept track of where it failed, and offered the possibility of restarting it.</li>
+</ul>
+<p>The type signature of such a pipeline type might look something like this:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module type Pipeline = sig
+  type ('input,'output) t
+
+  val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b,'c) t -&gt; ('a,'c) t
+  val empty : ('a,'a) t
+end</code></pre>
+</div>
+<p>Here, the type <code>('a,'b) t</code> represents a pipeline that consumes values of type <code>'a</code> and emits values of type <code>'b</code>. The operator <code>@&gt;</code> lets you add a step to a pipeline by providing a function to prepend on to an existing pipeline, and <code>empty</code> gives you an empty pipeline, which can be used to seed the pipeline.</p>
+<p>We can use a functor to show how we could use this API for building a pipeline like our earlier example using <code>|&gt;</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Example_pipeline (Pipeline : Pipeline) = struct
+  open Pipeline
+  let sum_file_sizes =
+    (fun () -&gt; Sys.ls_dir ".")
+    @&gt; List.filter ~f:Sys.is_file_exn
+    @&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
+    @&gt; List.sum (module Int) ~f:Int64.to_int_exn
+    @&gt; empty
+end
+;;
+&gt;module Example_pipeline :
+&gt;  functor (Pipeline : Pipeline) -&gt;
+&gt;    sig val sum_file_sizes : (unit, int) Pipeline.t end
+</code></pre>
+</div>
+<p>If all we want is a pipeline capable of a no-frills execution, we can define our pipeline itself as a simple function, the <code>@&gt;</code> operator as function composition. Then executing the pipeline is just function application.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Basic_pipeline : sig
+   include Pipeline
+   val exec : ('a,'b) t -&gt; 'a -&gt; 'b
+ end= struct
+  type ('input, 'output) t = 'input -&gt; 'output
+
+  let empty = Fn.id
+
+  let ( @&gt; ) f t input =
+    t (f input)
+
+  let exec t input = t input
+end
+;;
+&gt;module Basic_pipeline :
+&gt;  sig
+&gt;    type ('input, 'output) t
+&gt;    val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) t -&gt; ('a, 'c) t
+&gt;    val empty : ('a, 'a) t
+&gt;    val exec : ('a, 'b) t -&gt; 'a -&gt; 'b
+&gt;  end
+</code></pre>
+</div>
+<p>But this way of implementing a pipeline doesn’t give us any of the extra services we discussed. All we’re really doing is step-by-step building up the same kind of function that we could have gotten using the <code>|&gt;</code> operator.</p>
+<p>If we wanted to add the kinds of services we discussed above, we would do so by enhancing the pipeline type, e.g., providing it with extra runtime structures to track profiles, or handle exceptions. But this approach is awkward, since it requires us to pre-commit to whatever services we’re going to support, and to embed all of them in to our representation of a pipeline.</p>
+<p>GADTs provide a simpler approach. Instead of concretely building a machine for executing a pipeline, we can use GADTs to abstractly represent the pipeline we want, and then build the functionality we want on top of that representation.</p>
+<p>Here’s what such a representation might look like.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type (_, _) pipeline =
+  | Step : ('a -&gt; 'b) * ('b, 'c) pipeline -&gt; ('a, 'c) pipeline
+  | Empty : ('a, 'a) pipeline</code></pre>
+</div>
+<p>Here, the variants really just represent the two building blocks of a pipeline: <code>Step</code> corresponds to the <code>@&gt;</code> operator, and <code>Empty</code> corresponds to the <code>empty</code> pipeline, as you can see below.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( @&gt; ) f pipeline = Step (f,pipeline) ;;
+&gt;val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) pipeline -&gt; ('a, 'c) pipeline = &lt;fun&gt;
+let empty = Empty ;;
+&gt;val empty : ('a, 'a) pipeline = Empty
+</code></pre>
+</div>
+<p>With that in hand, we can do a no-frills pipeline execution easily enough.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec exec : type a b. (a, b) pipeline -&gt; a -&gt; b =
+ fun pipeline input -&gt;
+  match pipeline with
+  | Empty -&gt; input
+  | Step (f, tail) -&gt; exec tail (f input)
+;;
+&gt;val exec : ('a, 'b) pipeline -&gt; 'a -&gt; 'b = &lt;fun&gt;
+</code></pre>
+</div>
+<p>But we can also do more interesting things. For example, here’s a function that executes a pipeline and produces a profile showing how long each step of a pipeline took.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exec_with_profile pipeline input =
+  let rec loop
+      : type a b.
+        (a, b) pipeline -&gt; a -&gt; Time_ns.Span.t list -&gt; b * Time_ns.Span.t list
+    =
+   fun pipeline input rev_profile -&gt;
+    match pipeline with
+    | Empty -&gt; input, rev_profile
+    | Step (f, tail) -&gt;
+      let start = Time_ns.now () in
+      let output = f input in
+      let elapsed = Time_ns.diff (Time_ns.now ()) start in
+      loop tail output (elapsed :: rev_profile)
+  in
+  let output, rev_profile = loop pipeline input [] in
+  output, List.rev rev_profile
+;;
+&gt;val exec_with_profile : ('a, 'b) pipeline -&gt; 'a -&gt; 'b * Time_ns.Span.t list =
+&gt;  &lt;fun&gt;
+</code></pre>
+</div>
+<p>The more abstract GADT approach for creating a little combinator library like this has several advantages over having combinators that build a more concrete computational machine:</p>
+<ul>
+<li><p>The core types are simpler, since they are typically built out of GADT tags that are simple reflections the types of the base combinators.</p></li>
+<li><p>The design is more modular, since your core types don’t need to contemplate every possible use you want to make of them.</p></li>
+<li><p>The code tends to be more efficient, since the more concrete approach typically involves allocating closures to wrap up the necessary functionality, and closures are more heavyweight than GADT tags.</p></li>
+</ul>
+</section>
 <section class="level3" id="narrowing-the-possibilities">
 <h3>Narrowing the possibilities</h3>
 <p>Another use-case for GADTs is to narrow the set of possible states for a given data-type in different circumstances.</p>
@@ -796,207 +997,6 @@ let rpc =
 <p>What’s nice about this example is that it shows that narrowing can be applied to code that isn’t designed with narrowing in mind.</p>
 </section>
 </section>
-<section class="level3" id="capturing-the-unknown">
-<h3>Capturing the unknown</h3>
-<p>Code that that works with unknown types is routine in OCaml, and comes up in the simplest of examples:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y) ;;
-&gt;val tuple : 'a -&gt; 'b -&gt; 'a * 'b = &lt;fun&gt;
-</code></pre>
-</div>
-<p>The type variables <code>'a</code> and <code>'b</code> indicate that there are two unknown types here, and these type variables are <em>universally quantified</em>. Which is to say, the type of <code>tuple</code> is: <em>for all</em> types <code>a</code> and <code>b</code>, <code>a -&gt; b -&gt; a * b</code>.</p>
-<p>And indeed, we can restrict the type of <code>tuple</code> to any <code>'a</code> and <code>'b</code> we want.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(tuple : int -&gt; float -&gt; int * float) ;;
-&gt;- : int -&gt; float -&gt; int * float = &lt;fun&gt;
-(tuple : string -&gt; string * string -&gt; string * (string * string)) ;;
-&gt;- : string -&gt; string * string -&gt; string * (string * string) = &lt;fun&gt;
-</code></pre>
-</div>
-<p>Sometimes, however, we want to type variables that are <em>existentially quantified</em>, meaning that instead of being compatible with all types, the type represents a particular but unknown type.</p>
-<p>GADTs provide one natural way of encoding such type variables. Here’s a simple example.</p>
-<div class="highlight">
-<pre><code class="language-ocaml">type stringable =
-  Stringable : { value: 'a; to_string: 'a -&gt; string } -&gt; stringable</code></pre>
-</div>
-<p>This type packs together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
-<p>We can tell that <code>'a</code> is existentially quantified because it shows up on the left-hand side of the arrow but not on the right, so the <code>'a</code> that shows up internally doesn’t appear in a type parameter for <code>stringable</code> itself. Essentially, the existentially quantified type is bound within the definition of <code>stringable</code>.</p>
-<p>This function can print an arbitrary <code>stringable</code>:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print (Stringable s) =
-  print_endline (s.to_string s.value)
-;;
-&gt;val print : stringable -&gt; unit = &lt;fun&gt;
-</code></pre>
-</div>
-<p>And we can use this function on a collection of <code>stringable</code>s of different underlying types.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let values =
-  (let s value to_string = Stringable { to_string; value } in
-    [ s 100 Int.to_string
-    ; s 12.3 Float.to_string
-    ; s "foo" Fn.id
-    ])
-;;
-&gt;val values : stringable list =
-&gt;  [Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
-&gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
-&gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;}]
-List.iter ~f:print values ;;
-&gt;100
-&gt;12.3
-&gt;foo
-&gt;- : unit = ()
-</code></pre>
-</div>
-<p>The thing that lets this all work is that the type of the underlying object is existentially bound within the type <code>stringable</code>. As such, the type of the underlying values can’t escape the scope of <code>stringable</code>, which means that a function that tries to do that won’t type-check.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_value (Stringable s) = s.value ;;
-&gt;Line 1, characters 32-39:
-&gt;Error: This expression has type $Stringable_'a
-&gt;       but an expression was expected of type 'a
-&gt;       The type constructor $Stringable_'a would escape its scope
-</code></pre>
-</div>
-<p>It’s worth spending a moment to decode this error message, and the meaning of the type variable <code>$Stringable_'a</code> in particular. You can think of this variable as having three parts:</p>
-<ul>
-<li>The <code>$</code> marks the variable as an existential.</li>
-<li><code>Stringable</code> is the name of the GADT tag that this variable came from.</li>
-<li><code>'a</code> is the name of the type variable from inside that tag.</li>
-</ul>
-</section>
-<section class="level3" id="abstracting-computational-machines">
-<h3>Abstracting computational machines</h3>
-<p>A common idiom in OCaml is to combine small components into larger computational machines, using a collection of component-combining functions, or <em>combinators</em>.</p>
-<p>GADTs can be helpful for writing such combinators. To see how, let’s consider an example: <em>pipelines</em>. Here, a pipeline is a sequence of steps where each step consumes the output of the previous step, potentially does some side effects, and returns a value to be passed to the next step. This is analogous to a shell pipeline, and is useful for all sorts of system automation tasks.</p>
-<p>But, can’t we write pipelines already? After all, OCaml comes with a perfectly serviceable pipeline operator:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
-let sum_file_sizes () =
-  Sys.ls_dir "."
-  |&gt; List.filter ~f:Sys.is_file_exn
-  |&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
-  |&gt; List.sum (module Int) ~f:Int64.to_int_exn
-;;
-&gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
-</code></pre>
-</div>
-<p>This works well enough, but the advantage of a custom pipeline type is that it lets you build extra services beyond simple execution of the pipeline, e.g.:</p>
-<ul>
-<li>Profiling, so that when you run a pipeline, you get a report of how long each step of the pipeline took.</li>
-<li>Control over execution, like allowing users to pause the pipeline mid-execution, and restart it later.</li>
-<li>Custom error handling, so, for example, you could build a pipeline that kept track of where it failed, and offered the possibility of restarting it.</li>
-</ul>
-<p>The type signature of such a pipeline type might look something like this:</p>
-<div class="highlight">
-<pre><code class="language-ocaml">module type Pipeline = sig
-  type ('input,'output) t
-
-  val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b,'c) t -&gt; ('a,'c) t
-  val empty : ('a,'a) t
-end</code></pre>
-</div>
-<p>Here, the type <code>('a,'b) t</code> represents a pipeline that consumes values of type <code>'a</code> and emits values of type <code>'b</code>. The operator <code>@&gt;</code> lets you add a step to a pipeline by providing a function to prepend on to an existing pipeline, and <code>empty</code> gives you an empty pipeline, which can be used to seed the pipeline.</p>
-<p>We can use a functor to show how we could use this API for building a pipeline like our earlier example using <code>|&gt;</code>.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Example_pipeline (Pipeline : Pipeline) = struct
-  open Pipeline
-  let sum_file_sizes =
-    (fun () -&gt; Sys.ls_dir ".")
-    @&gt; List.filter ~f:Sys.is_file_exn
-    @&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
-    @&gt; List.sum (module Int) ~f:Int64.to_int_exn
-    @&gt; empty
-end
-;;
-&gt;module Example_pipeline :
-&gt;  functor (Pipeline : Pipeline) -&gt;
-&gt;    sig val sum_file_sizes : (unit, int) Pipeline.t end
-</code></pre>
-</div>
-<p>If all we want is a pipeline capable of a no-frills execution, we can define our pipeline itself as a simple function, the <code>@&gt;</code> operator as function composition. Then executing the pipeline is just function application.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Basic_pipeline : sig
-   include Pipeline
-   val exec : ('a,'b) t -&gt; 'a -&gt; 'b
- end= struct
-  type ('input, 'output) t = 'input -&gt; 'output
-
-  let empty = Fn.id
-
-  let ( @&gt; ) f t input =
-    t (f input)
-
-  let exec t input = t input
-end
-;;
-&gt;module Basic_pipeline :
-&gt;  sig
-&gt;    type ('input, 'output) t
-&gt;    val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) t -&gt; ('a, 'c) t
-&gt;    val empty : ('a, 'a) t
-&gt;    val exec : ('a, 'b) t -&gt; 'a -&gt; 'b
-&gt;  end
-</code></pre>
-</div>
-<p>But this way of implementing a pipeline doesn’t give us any of the extra services we discussed. All we’re really doing is step-by-step building up the same kind of function that we could have gotten using the <code>|&gt;</code> operator.</p>
-<p>If we wanted to add the kinds of services we discussed above, we would do so by enhancing the pipeline type, e.g., providing it with extra runtime structures to track profiles, or handle exceptions. But this approach is awkward, since it requires us to pre-commit to whatever services we’re going to support, and to embed all of them in to our representation of a pipeline.</p>
-<p>GADTs provide a simpler approach. Instead of concretely building a machine for executing a pipeline, we can use GADTs to abstractly represent the pipeline we want, and then build the functionality we want on top of that representation.</p>
-<p>Here’s what such a representation might look like.</p>
-<div class="highlight">
-<pre><code class="language-ocaml">type (_, _) pipeline =
-  | Step : ('a -&gt; 'b) * ('b, 'c) pipeline -&gt; ('a, 'c) pipeline
-  | Empty : ('a, 'a) pipeline</code></pre>
-</div>
-<p>Here, the variants really just represent the two building blocks of a pipeline: <code>Step</code> corresponds to the <code>@&gt;</code> operator, and <code>Empty</code> corresponds to the <code>empty</code> pipeline, as you can see below.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( @&gt; ) f pipeline = Step (f,pipeline) ;;
-&gt;val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) pipeline -&gt; ('a, 'c) pipeline = &lt;fun&gt;
-let empty = Empty ;;
-&gt;val empty : ('a, 'a) pipeline = Empty
-</code></pre>
-</div>
-<p>With that in hand, we can do a no-frills pipeline execution easily enough.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec exec : type a b. (a, b) pipeline -&gt; a -&gt; b =
- fun pipeline input -&gt;
-  match pipeline with
-  | Empty -&gt; input
-  | Step (f, tail) -&gt; exec tail (f input)
-;;
-&gt;val exec : ('a, 'b) pipeline -&gt; 'a -&gt; 'b = &lt;fun&gt;
-</code></pre>
-</div>
-<p>But we can also do more interesting things. For example, here’s a function that executes a pipeline and produces a profile showing how long each step of a pipeline took.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exec_with_profile pipeline input =
-  let rec loop
-      : type a b.
-        (a, b) pipeline -&gt; a -&gt; Time_ns.Span.t list -&gt; b * Time_ns.Span.t list
-    =
-   fun pipeline input rev_profile -&gt;
-    match pipeline with
-    | Empty -&gt; input, rev_profile
-    | Step (f, tail) -&gt;
-      let start = Time_ns.now () in
-      let output = f input in
-      let elapsed = Time_ns.diff (Time_ns.now ()) start in
-      loop tail output (elapsed :: rev_profile)
-  in
-  let output, rev_profile = loop pipeline input [] in
-  output, List.rev rev_profile
-;;
-&gt;val exec_with_profile : ('a, 'b) pipeline -&gt; 'a -&gt; 'b * Time_ns.Span.t list =
-&gt;  &lt;fun&gt;
-</code></pre>
-</div>
-<p>The more abstract GADT approach for creating a little combinator library like this has several advantages over having combinators that build a more concrete computational machine:</p>
-<ul>
-<li><p>The core types are simpler, since they are typically built out of GADT tags that are simple reflections the types of the base combinators.</p></li>
-<li><p>The design is more modular, since your core types don’t need to contemplate every possible use you want to make of them.</p></li>
-<li><p>The code tends to be more efficient, since the more concrete approach typically involves allocating closures to wrap up the necessary functionality, and closures are more heavyweight than GADT tags.</p></li>
-</ul>
-</section>
 </section>
 <section class="level2" id="limitations-of-gadts">
 <h2>Limitations of GADTs</h2>
@@ -1005,7 +1005,8 @@ let empty = Empty ;;
 <h3>Or-patterns</h3>
 <p>One annoyance of working GADTs is that GADTs often don’t work well with or-patterns. Consider the following type that represents various ways we might use for obtaining some piece of data.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">module Source_kind = struct
+<pre><code class="language-ocaml">open Core
+module Source_kind = struct
   type _ t =
     | Filename : string t
     | Host_and_port : Host_and_port.t t
