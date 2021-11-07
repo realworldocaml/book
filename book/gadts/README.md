@@ -630,6 +630,295 @@ Exception: (Failure "No matching item found")
 - : int = 20
 ```
 
+### Capturing the unknown
+
+Code that that works with unknown types is routine in OCaml, and comes
+up in the simplest of examples:
+
+```ocaml env=main
+# let tuple x y = (x,y)
+val tuple : 'a -> 'b -> 'a * 'b = <fun>
+```
+
+The type variables `'a` and `'b` indicate that there are two unknown
+types here, and these type variables are *universally quantified*.
+Which is to say, the type of `tuple` is: *for all* types `a` and `b`,
+`a -> b -> a * b`.
+
+And indeed, we can restrict the type of `tuple` to any `'a` and `'b`
+we want.
+
+```ocaml env=main
+# (tuple : int -> float -> int * float)
+- : int -> float -> int * float = <fun>
+# (tuple : string -> string * string -> string * (string * string))
+- : string -> string * string -> string * (string * string) = <fun>
+```
+
+Sometimes, however, we want to type variables that are *existentially
+quantified*, meaning that instead of being compatible with all types,
+the type represents a particular but unknown type.
+
+GADTs provide one natural way of encoding such type variables. Here's
+a simple example.
+
+```ocaml env=main
+type stringable =
+  Stringable : { value: 'a; to_string: 'a -> string } -> stringable
+```
+
+This type packs together a value of some arbitrary type, along with a
+function for converting values of that type to strings.
+
+We can tell that `'a` is existentially quantified because it shows up
+on the left-hand side of the arrow but not on the right, so the `'a`
+that shows up internally doesn't appear in a type parameter for
+`stringable` itself. Essentially, the existentially quantified type is
+bound within the definition of `stringable`.
+
+This function can print an arbitrary `stringable`:
+
+```ocaml env=main
+# let print (Stringable s) =
+    Stdio.print_endline (s.to_string s.value)
+val print : stringable -> unit = <fun>
+```
+
+And we can use this function on a collection of `stringable`s of
+different underlying types.
+
+```ocaml env=main
+# let values =
+    (let s value to_string = Stringable { to_string; value } in
+      [ s 100 Int.to_string
+      ; s 12.3 Float.to_string
+      ; s "foo" Fn.id
+      ])
+val values : stringable list =
+  [Stringable {value = <poly>; to_string = <fun>};
+   Stringable {value = <poly>; to_string = <fun>};
+   Stringable {value = <poly>; to_string = <fun>}]
+# List.iter ~f:print values
+100
+12.3
+foo
+- : unit = ()
+```
+
+The thing that lets this all work is that the type of the underlying
+object is existentially bound within the type `stringable`. As such,
+the type of the underlying values can't escape the scope of
+`stringable`, which means that a function that tries to do that won't
+type-check.
+
+```ocaml env=main
+# let get_value (Stringable s) = s.value
+Line 1, characters 32-39:
+Error: This expression has type $Stringable_'a
+       but an expression was expected of type 'a
+       The type constructor $Stringable_'a would escape its scope
+```
+
+It's worth spending a moment to decode this error message, and the
+meaning of the type variable `$Stringable_'a` in particular. You can
+think of this variable as having three parts:
+
+- The `$` marks the variable as an existential.
+- `Stringable` is the name of the GADT tag that this variable came
+  from.
+- `'a` is the name of the type variable from inside that tag.
+
+
+### Abstracting computational machines
+
+A common idiom in OCaml is to combine small components into larger
+computational machines, using a collection of component-combining
+functions, or *combinators*.
+
+GADTs can be helpful for writing such combinators.  To see how, let's
+consider an example: *pipelines*.  Here, a pipeline is a sequence of
+steps where each step consumes the output of the previous step,
+potentially does some side effects, and returns a value to be passed
+to the next step.  This is analogous to a shell pipeline, and is
+useful for all sorts of system automation tasks.
+
+But, can't we write pipelines already? After all, OCaml comes with a
+perfectly serviceable pipeline operator:
+
+```ocaml env=abstracting
+# open Core
+# let sum_file_sizes () =
+    Sys.ls_dir "."
+    |> List.filter ~f:Sys.is_file_exn
+    |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+    |> List.sum (module Int) ~f:Int64.to_int_exn
+val sum_file_sizes : unit -> int = <fun>
+```
+
+This works well enough, but the advantage of a custom pipeline type is
+that it lets you build extra services beyond simple execution of the
+pipeline, e.g.:
+
+- Profiling, so that when you run a pipeline, you get a
+  report of how long each step of the pipeline took.
+- Control over execution, like allowing users to pause the pipeline
+  mid-execution, and restart it later.
+- Custom error handling, so, for example, you could build a pipeline
+  that kept track of where it failed, and offered the possibility of
+  restarting it.
+
+The type signature of such a pipeline type might look something like
+this:
+
+```ocaml env=abstracting
+module type Pipeline = sig
+  type ('input,'output) t
+
+  val ( @> ) : ('a -> 'b) -> ('b,'c) t -> ('a,'c) t
+  val empty : ('a,'a) t
+end
+```
+
+Here, the type `('a,'b) t` represents a pipeline that consumes values
+of type `'a` and emits values of type `'b`.  The operator `@>` lets
+you add a step to a pipeline by providing a function to prepend on to
+an existing pipeline, and `empty` gives you an empty pipeline, which
+can be used to seed the pipeline.
+
+We can use a functor to show how we could use this API for building a
+pipeline like our earlier example using `|>`.
+
+```ocaml env=abstracting
+# module Example_pipeline (Pipeline : Pipeline) = struct
+    open Pipeline
+    let sum_file_sizes =
+      (fun () -> Sys.ls_dir ".")
+      @> List.filter ~f:Sys.is_file_exn
+      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+      @> List.sum (module Int) ~f:Int64.to_int_exn
+      @> empty
+  end
+module Example_pipeline :
+  functor (Pipeline : Pipeline) ->
+    sig val sum_file_sizes : (unit, int) Pipeline.t end
+```
+
+If all we want is a pipeline capable of a no-frills execution, we can
+define our pipeline itself as a simple function, the `@>` operator as
+function composition.  Then executing the pipeline is just function
+application.
+
+```ocaml env=abstracting
+# module Basic_pipeline : sig
+     include Pipeline
+     val exec : ('a,'b) t -> 'a -> 'b
+   end= struct
+    type ('input, 'output) t = 'input -> 'output
+
+    let empty = Fn.id
+
+    let ( @> ) f t input =
+      t (f input)
+
+    let exec t input = t input
+  end
+module Basic_pipeline :
+  sig
+    type ('input, 'output) t
+    val ( @> ) : ('a -> 'b) -> ('b, 'c) t -> ('a, 'c) t
+    val empty : ('a, 'a) t
+    val exec : ('a, 'b) t -> 'a -> 'b
+  end
+```
+
+But this way of implementing a pipeline doesn't give us any of the
+extra services we discussed.  All we're really doing is step-by-step
+building up the same kind of function that we could have gotten using
+the `|>` operator.
+
+If we wanted to add the kinds of services we discussed above, we would
+do so by enhancing the pipeline type, e.g., providing it with extra
+runtime structures to track profiles, or handle exceptions.  But this
+approach is awkward, since it requires us to pre-commit to whatever
+services we're going to support, and to embed all of them in to our
+representation of a pipeline.
+
+GADTs provide a simpler approach.  Instead of concretely building a
+machine for executing a pipeline, we can use GADTs to abstractly
+represent the pipeline we want, and then build the functionality we
+want on top of that representation.
+
+Here's what such a representation might look like.
+
+```ocaml env=abstracting
+type (_, _) pipeline =
+  | Step : ('a -> 'b) * ('b, 'c) pipeline -> ('a, 'c) pipeline
+  | Empty : ('a, 'a) pipeline
+```
+
+Here, the variants really just represent the two building blocks of a
+pipeline: `Step` corresponds to the `@>` operator, and `Empty`
+corresponds to the `empty` pipeline, as you can see below.
+
+```ocaml env=abstracting
+# let ( @> ) f pipeline = Step (f,pipeline)
+val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
+# let empty = Empty
+val empty : ('a, 'a) pipeline = Empty
+```
+
+With that in hand, we can do a no-frills pipeline execution easily
+enough.
+
+```ocaml env=abstracting
+# let rec exec : type a b. (a, b) pipeline -> a -> b =
+   fun pipeline input ->
+    match pipeline with
+    | Empty -> input
+    | Step (f, tail) -> exec tail (f input)
+val exec : ('a, 'b) pipeline -> 'a -> 'b = <fun>
+```
+
+But we can also do more interesting things. For example, here's a
+function that executes a pipeline and produces a profile showing how
+long each step of a pipeline took.
+
+```ocaml env=abstracting
+# let exec_with_profile pipeline input =
+    let rec loop
+        : type a b.
+          (a, b) pipeline -> a -> Time_ns.Span.t list -> b * Time_ns.Span.t list
+      =
+     fun pipeline input rev_profile ->
+      match pipeline with
+      | Empty -> input, rev_profile
+      | Step (f, tail) ->
+        let start = Time_ns.now () in
+        let output = f input in
+        let elapsed = Time_ns.diff (Time_ns.now ()) start in
+        loop tail output (elapsed :: rev_profile)
+    in
+    let output, rev_profile = loop pipeline input [] in
+    output, List.rev rev_profile
+val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
+  <fun>
+```
+
+The more abstract GADT approach for creating a little combinator
+library like this has several advantages over having combinators that
+build a more concrete computational machine:
+
+- The core types are simpler, since they are typically built out of
+  GADT tags that are simple reflections the types of the base
+  combinators.
+
+- The design is more modular, since your core types don't need to
+  contemplate every possible use you want to make of them.
+
+- The code tends to be more efficient, since the more concrete
+  approach typically involves allocating closures to wrap up the
+  necessary functionality, and closures are more heavyweight than GADT
+  tags.
 
 ### Narrowing the possibilities
 
@@ -1145,296 +1434,6 @@ val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 What's nice about this example is that it shows that narrowing can be
 applied to code that isn't designed with narrowing in mind.
 
-### Capturing the unknown
-
-Code that that works with unknown types is routine in OCaml, and comes
-up in the simplest of examples:
-
-```ocaml env=main
-# let tuple x y = (x,y)
-val tuple : 'a -> 'b -> 'a * 'b = <fun>
-```
-
-The type variables `'a` and `'b` indicate that there are two unknown
-types here, and these type variables are *universally quantified*.
-Which is to say, the type of `tuple` is: *for all* types `a` and `b`,
-`a -> b -> a * b`.
-
-And indeed, we can restrict the type of `tuple` to any `'a` and `'b`
-we want.
-
-```ocaml env=main
-# (tuple : int -> float -> int * float)
-- : int -> float -> int * float = <fun>
-# (tuple : string -> string * string -> string * (string * string))
-- : string -> string * string -> string * (string * string) = <fun>
-```
-
-Sometimes, however, we want to type variables that are *existentially
-quantified*, meaning that instead of being compatible with all types,
-the type represents a particular but unknown type.
-
-GADTs provide one natural way of encoding such type variables. Here's
-a simple example.
-
-```ocaml env=main
-type stringable =
-  Stringable : { value: 'a; to_string: 'a -> string } -> stringable
-```
-
-This type packs together a value of some arbitrary type, along with a
-function for converting values of that type to strings.
-
-We can tell that `'a` is existentially quantified because it shows up
-on the left-hand side of the arrow but not on the right, so the `'a`
-that shows up internally doesn't appear in a type parameter for
-`stringable` itself. Essentially, the existentially quantified type is
-bound within the definition of `stringable`.
-
-This function can print an arbitrary `stringable`:
-
-```ocaml env=main
-# let print (Stringable s) =
-    print_endline (s.to_string s.value)
-val print : stringable -> unit = <fun>
-```
-
-And we can use this function on a collection of `stringable`s of
-different underlying types.
-
-```ocaml env=main
-# let values =
-    (let s value to_string = Stringable { to_string; value } in
-      [ s 100 Int.to_string
-      ; s 12.3 Float.to_string
-      ; s "foo" Fn.id
-      ])
-val values : stringable list =
-  [Stringable {value = <poly>; to_string = <fun>};
-   Stringable {value = <poly>; to_string = <fun>};
-   Stringable {value = <poly>; to_string = <fun>}]
-# List.iter ~f:print values
-100
-12.3
-foo
-- : unit = ()
-```
-
-The thing that lets this all work is that the type of the underlying
-object is existentially bound within the type `stringable`. As such,
-the type of the underlying values can't escape the scope of
-`stringable`, which means that a function that tries to do that won't
-type-check.
-
-```ocaml env=main
-# let get_value (Stringable s) = s.value
-Line 1, characters 32-39:
-Error: This expression has type $Stringable_'a
-       but an expression was expected of type 'a
-       The type constructor $Stringable_'a would escape its scope
-```
-
-It's worth spending a moment to decode this error message, and the
-meaning of the type variable `$Stringable_'a` in particular. You can
-think of this variable as having three parts:
-
-- The `$` marks the variable as an existential.
-- `Stringable` is the name of the GADT tag that this variable came
-  from.
-- `'a` is the name of the type variable from inside that tag.
-
-
-### Abstracting computational machines
-
-A common idiom in OCaml is to combine small components into larger
-computational machines, using a collection of component-combining
-functions, or *combinators*.
-
-GADTs can be helpful for writing such combinators.  To see how, let's
-consider an example: *pipelines*.  Here, a pipeline is a sequence of
-steps where each step consumes the output of the previous step,
-potentially does some side effects, and returns a value to be passed
-to the next step.  This is analogous to a shell pipeline, and is
-useful for all sorts of system automation tasks.
-
-But, can't we write pipelines already? After all, OCaml comes with a
-perfectly serviceable pipeline operator:
-
-```ocaml env=main
-# open Core
-# let sum_file_sizes () =
-    Sys.ls_dir "."
-    |> List.filter ~f:Sys.is_file_exn
-    |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
-    |> List.sum (module Int) ~f:Int64.to_int_exn
-val sum_file_sizes : unit -> int = <fun>
-```
-
-This works well enough, but the advantage of a custom pipeline type is
-that it lets you build extra services beyond simple execution of the
-pipeline, e.g.:
-
-- Profiling, so that when you run a pipeline, you get a
-  report of how long each step of the pipeline took.
-- Control over execution, like allowing users to pause the pipeline
-  mid-execution, and restart it later.
-- Custom error handling, so, for example, you could build a pipeline
-  that kept track of where it failed, and offered the possibility of
-  restarting it.
-
-The type signature of such a pipeline type might look something like
-this:
-
-```ocaml env=main
-module type Pipeline = sig
-  type ('input,'output) t
-
-  val ( @> ) : ('a -> 'b) -> ('b,'c) t -> ('a,'c) t
-  val empty : ('a,'a) t
-end
-```
-
-Here, the type `('a,'b) t` represents a pipeline that consumes values
-of type `'a` and emits values of type `'b`.  The operator `@>` lets
-you add a step to a pipeline by providing a function to prepend on to
-an existing pipeline, and `empty` gives you an empty pipeline, which
-can be used to seed the pipeline.
-
-We can use a functor to show how we could use this API for building a
-pipeline like our earlier example using `|>`.
-
-```ocaml env=main
-# module Example_pipeline (Pipeline : Pipeline) = struct
-    open Pipeline
-    let sum_file_sizes =
-      (fun () -> Sys.ls_dir ".")
-      @> List.filter ~f:Sys.is_file_exn
-      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
-      @> List.sum (module Int) ~f:Int64.to_int_exn
-      @> empty
-  end
-module Example_pipeline :
-  functor (Pipeline : Pipeline) ->
-    sig val sum_file_sizes : (unit, int) Pipeline.t end
-```
-
-If all we want is a pipeline capable of a no-frills execution, we can
-define our pipeline itself as a simple function, the `@>` operator as
-function composition.  Then executing the pipeline is just function
-application.
-
-```ocaml env=main
-# module Basic_pipeline : sig
-     include Pipeline
-     val exec : ('a,'b) t -> 'a -> 'b
-   end= struct
-    type ('input, 'output) t = 'input -> 'output
-
-    let empty = Fn.id
-
-    let ( @> ) f t input =
-      t (f input)
-
-    let exec t input = t input
-  end
-module Basic_pipeline :
-  sig
-    type ('input, 'output) t
-    val ( @> ) : ('a -> 'b) -> ('b, 'c) t -> ('a, 'c) t
-    val empty : ('a, 'a) t
-    val exec : ('a, 'b) t -> 'a -> 'b
-  end
-```
-
-But this way of implementing a pipeline doesn't give us any of the
-extra services we discussed.  All we're really doing is step-by-step
-building up the same kind of function that we could have gotten using
-the `|>` operator.
-
-If we wanted to add the kinds of services we discussed above, we would
-do so by enhancing the pipeline type, e.g., providing it with extra
-runtime structures to track profiles, or handle exceptions.  But this
-approach is awkward, since it requires us to pre-commit to whatever
-services we're going to support, and to embed all of them in to our
-representation of a pipeline.
-
-GADTs provide a simpler approach.  Instead of concretely building a
-machine for executing a pipeline, we can use GADTs to abstractly
-represent the pipeline we want, and then build the functionality we
-want on top of that representation.
-
-Here's what such a representation might look like.
-
-```ocaml env=main
-type (_, _) pipeline =
-  | Step : ('a -> 'b) * ('b, 'c) pipeline -> ('a, 'c) pipeline
-  | Empty : ('a, 'a) pipeline
-```
-
-Here, the variants really just represent the two building blocks of a
-pipeline: `Step` corresponds to the `@>` operator, and `Empty`
-corresponds to the `empty` pipeline, as you can see below.
-
-```ocaml env=main
-# let ( @> ) f pipeline = Step (f,pipeline)
-val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
-# let empty = Empty
-val empty : ('a, 'a) pipeline = Empty
-```
-
-With that in hand, we can do a no-frills pipeline execution easily
-enough.
-
-```ocaml env=main
-# let rec exec : type a b. (a, b) pipeline -> a -> b =
-   fun pipeline input ->
-    match pipeline with
-    | Empty -> input
-    | Step (f, tail) -> exec tail (f input)
-val exec : ('a, 'b) pipeline -> 'a -> 'b = <fun>
-```
-
-But we can also do more interesting things. For example, here's a
-function that executes a pipeline and produces a profile showing how
-long each step of a pipeline took.
-
-```ocaml env=main
-# let exec_with_profile pipeline input =
-    let rec loop
-        : type a b.
-          (a, b) pipeline -> a -> Time_ns.Span.t list -> b * Time_ns.Span.t list
-      =
-     fun pipeline input rev_profile ->
-      match pipeline with
-      | Empty -> input, rev_profile
-      | Step (f, tail) ->
-        let start = Time_ns.now () in
-        let output = f input in
-        let elapsed = Time_ns.diff (Time_ns.now ()) start in
-        loop tail output (elapsed :: rev_profile)
-    in
-    let output, rev_profile = loop pipeline input [] in
-    output, List.rev rev_profile
-val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
-  <fun>
-```
-
-The more abstract GADT approach for creating a little combinator
-library like this has several advantages over having combinators that
-build a more concrete computational machine:
-
-- The core types are simpler, since they are typically built out of
-  GADT tags that are simple reflections the types of the base
-  combinators.
-
-- The design is more modular, since your core types don't need to
-  contemplate every possible use you want to make of them.
-
-- The code tends to be more efficient, since the more concrete
-  approach typically involves allocating closures to wrap up the
-  necessary functionality, and closures are more heavyweight than GADT
-  tags.
-
 ## Limitations of GADTs
 
 GADTs are useful, but they have some sharp corners.
@@ -1447,6 +1446,7 @@ Consider the following type that represents various ways we might use
 for obtaining some piece of data.
 
 ```ocaml env=main
+open Core
 module Source_kind = struct
   type _ t =
     | Filename : string t
