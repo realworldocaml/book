@@ -1289,7 +1289,7 @@ for the type parameter of a GADT, you should chose definitions that
 make the distinctness of those types clear, and you should expose
 those definitions in your mlis.
 
-#### Other ways of narrowing
+#### Narrowing without GADTs
 
 Thus far, we've only seen narrowing in the context of GADTs, but OCaml
 can eliminate impossible cases from ordinary variants too.  As with
