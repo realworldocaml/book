@@ -30,8 +30,8 @@ through some examples, so we'll do that next.
 
 ## A little language
 
-One classic use-case for GADTs for writing simple typed expression
-languages, similar to the boolean expression language described in
+One classic use-case for GADTs for writing typed expression languages,
+similar to the boolean expression language described in
 [Variants](variants.html#variants-and-recursive-data-structures){data-type=xref}.
 In this section, we'll create a slightly richer language that lets us
 mix arithmetic and boolean expressions. This means that we have to
@@ -331,7 +331,7 @@ type parameter depends on the arguments to the tag, in particular the
 type parameter of the `If` is the type parameter of the then and else
 clauses.
 
-Let's try some simple examples.
+Let's try some examples.
 
 ```ocaml env=main
 # let i x = Value (Int x)
@@ -756,7 +756,7 @@ val sum_file_sizes : unit -> int = <fun>
 ```
 
 This works well enough, but the advantage of a custom pipeline type is
-that it lets you build extra services beyond simple execution of the
+that it lets you build extra services beyond basic execution of the
 pipeline, e.g.:
 
 - Profiling, so that when you run a pipeline, you get a
@@ -909,7 +909,7 @@ library like this has several advantages over having combinators that
 build a more concrete computational machine:
 
 - The core types are simpler, since they are typically built out of
-  GADT tags that are simple reflections the types of the base
+  GADT tags that are just reflections the types of the base
   combinators.
 
 - The design is more modular, since your core types don't need to
@@ -1355,7 +1355,7 @@ val print_result : (int, Nothing.t) result -> unit = <fun>
 
 The period in the final case tells the compiler that we believe this
 case can never be reached, and OCaml will verify that it's true. In
-some simple cases, however, the compiler will automatically add the
+some simple cases, however, the compiler can automatically add the
 refutation case for you, so you don't need to write it out explicitly.
 
 ```ocaml env=main
