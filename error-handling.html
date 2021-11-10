@@ -76,7 +76,7 @@ end</code></pre>
 &gt;- : Error.t = something went wrong
 </code></pre>
 </div>
-<p>An <code>'Or_error.t</code> is simply a <code>Result.t</code> with the error case specialized to the <code>Error.t</code> type. Here’s an example.</p>
+<p>An <code>Or_error.t</code> is simply a <code>Result.t</code> with the error case specialized to the <code>Error.t</code> type. Here’s an example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error (Error.of_string "failed!") ;;
 &gt;- : ('a, Error.t) result = Error failed!
