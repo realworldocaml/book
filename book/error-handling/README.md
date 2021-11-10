@@ -132,7 +132,7 @@ example, construct one from a string.
 - : Error.t = something went wrong
 ```
 
-An `'Or_error.t` is simply a `Result.t` with the error case
+An `Or_error.t` is simply a `Result.t` with the error case
 specialized to the `Error.t` type.  Here's an example.
 
 ```ocaml env=main
