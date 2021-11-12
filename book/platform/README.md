@@ -1,19 +1,20 @@
 # The OCaml Platform
 
-So far in the book, we've gone through a number of techniques you can use to build real OCaml programs.
-We'll now wrap up this part by examining the tools you can use for editing,
-compiling, testing, documenting and publishing your own projects.
+So far in the book, we've gone through a number of techniques you can
+use to build real OCaml programs.  We'll now wrap up this part by
+examining the tools you can use for editing, compiling, testing,
+documenting, and publishing your own projects.
 
-The OCaml community has adopted a platform of modern tools to specify your project
-metadata and interface it with IDEs such as Visual Studio Code, to generate API
-documentation, and also to adopt modern software engineering practises such as
-continuous integration (CI) and testing.
+The OCaml community has adopted a platform of modern tools to specify
+your project metadata and interface it with IDEs such as Visual Studio
+Code, to generate API documentation, and also to adopt modern software
+engineering practises such as continuous integration (CI) and testing.
 
 ## A Hello World OCaml Project
 
-Let's start by creating a sample OCaml project and navigating around it.  opam
-provides a project generator known as `spin` that can be used to create various
-types of projects.
+Let's start by creating a sample OCaml project and navigating around
+it.  opam provides a project generator known as `spin` that can be
+used to create various types of projects.
 
 ```sh dir=examples/correct/opam-spin-ls,skip
 $ opam spin ls
@@ -38,8 +39,12 @@ $ opam spin ls
 
 ```
 
+<!-- TODO yminsky: This is a little confusing. What is hello, and -->
+<!-- hello-world here?  If "hello" is a type of spin, why didn't -->
+<!-- it show up when you typed `opam spin ls`?  -->
+
 Before we dive into any of these, we'll generate a tutorial using Spin's built-in
-hello world project. 
+hello world project.
 
 <!-- ```sh dir=examples/correct/opam-spin-hello
 TODO need a way to stop spin from running the opam install commands
@@ -65,7 +70,7 @@ $ make deps
 ```
 
 This will invoke the opam CLI to install the project dependencies and some useful
-tools.  opam doesn't require any special user permissions and stores all of the 
+tools.  opam doesn't require any special user permissions and stores all of the
 files it installs in `~/.opam` (for global installations) and `_opam` in the
 working directory for the project-local installations.  You can use `opam env`
 to add the right directories to your local shell path:
@@ -153,7 +158,7 @@ The `(libraries)` field in the `hello` dune file is empty since this is a standa
  (libraries alcotest hello))
 ```
 
-The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `tests/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the 
+The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `tests/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the
 locally defined `hello` library.  Once you run the tests, you can find the built artefacts in `_build/default/tests/` in your project checkout.  You can use all the tests you learnt about in [Testing](testing.html#testing){data-type=xref} here, including inline tests.
 
 ### Building an executable program
@@ -373,7 +378,7 @@ compatible with your current project.  When you add a dependency, you can theref
 lower and upper version bounds as required by your use of that package.  The `with-test` and
 `with-doc` are further constraints that only add those dependencies for test and documentation
 generation respectively.
- 
+
 Once you've defined your opam and dune dependencies, you can run various lint commands to
 check that your metadata is consistent.
 
@@ -468,6 +473,3 @@ $ dune-release
 This will begin an interactive session where you will need to enter some GitHub authentication details (via creating a personal access token).  Once that is completed, the tool will run all local tests, generate documentation and upload it to your GitHub pages branch for that project, and finally offer to open a pull request to the central opam-repository.  Recall that the central opam package set is all just a normal git repository, and so your opam file will be added to that and your GitHub account will create a PR.
 
 At this point, you can sit back and relax while the central opam repository test system runs your package through a battery of installations (including on exotic architectures you might not access to, such as S390X mainframes or 32-bit ARMv7).  If there is a problem detected, some friendly maintainers from the OCaml community will comment on the pull request and guide you through how to address it.  You can simply delete the git tag and re-run the release process until the package is merged.  Once it is merged, you can navigate to the <ocaml.org> site and view it online in an hour or so.  It will also be available in the central repository for other users to install.
-
-
-
