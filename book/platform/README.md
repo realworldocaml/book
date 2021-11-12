@@ -59,10 +59,16 @@ Done!
 🎁  Installing packages globally. This might take a couple minutes.
 ```
 
-Spin will create a `hello-world` directory and populate it with a skeleton
-OCaml project.  This sample project has all the metadata required for us to learn more
-about the opam package manager and the dune build tool that we've used earlier in the book.
-First use opam to install the dependencies required for our hello world project.
+<!-- TODO yminsky: Do we really want to be recommending opam-spin? It -->
+<!-- installs things in the global switch, which isn't really what one -->
+<!-- should want, right? Is there no more lockfile-style workflow we -->
+<!-- can encourage? -->
+
+Spin will create a `hello-world` directory and populate it with a
+skeleton OCaml project.  This sample project has all the metadata
+required for us to learn more about the opam package manager and the
+dune build tool that we've used earlier in the book.  First use opam
+to install the dependencies required for our hello world project.
 
 <!-- ```sh dir=examples/correct/hello-world -->
 ```
