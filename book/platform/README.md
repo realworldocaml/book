@@ -64,6 +64,16 @@ Done!
 <!-- should want, right? Is there no more lockfile-style workflow we -->
 <!-- can encourage? -->
 
+
+<!-- TODO yminsky: When I try to run this, I get a build error:
+
+File "test/hello_test.ml", line 1:
+Error (warning 70 [missing-mli]): Cannot find interface file.
+
+    The test directory is missing hello_test.mli.  Touching the file
+    is enough to fix the build.
+-->
+
 Spin will create a `hello-world` directory and populate it with a
 skeleton OCaml project.  This sample project has all the metadata
 required for us to learn more about the opam package manager and the
@@ -75,11 +85,12 @@ to install the dependencies required for our hello world project.
 $ make deps
 ```
 
-This will invoke the opam CLI to install the project dependencies and some useful
-tools.  opam doesn't require any special user permissions and stores all of the
-files it installs in `~/.opam` (for global installations) and `_opam` in the
-working directory for the project-local installations.  You can use `opam env`
-to add the right directories to your local shell path:
+This will invoke the opam CLI to install the project dependencies and
+some useful tools.  opam doesn't require any special user permissions
+and stores all of the files it installs in `~/.opam` (for global
+installations) and `_opam` in the working directory for the
+project-local installations.  You can use `opam env` to add the right
+directories to your local shell path:
 
 ```
 $ eval $(opam env)
