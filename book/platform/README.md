@@ -96,14 +96,19 @@ directories to your local shell path:
 $ eval $(opam env)
 ```
 
-If you prefer not to modify your shell configuration, then you can also invoke
-the build commands via `opam exec` to modify the path for the subcommand. This is
-exactly what the various targets in the `Makefile` do.
+If you prefer not to modify your shell configuration, then you can
+also invoke the build commands via `opam exec` to modify the path for
+the subcommand. This is exactly what the various targets in the
+`Makefile` do.
 
 ### Structure of an OCaml project
 
-Back in [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
-we looked at what a simple program with a couple of OCaml modules looks like. Let's now look at the full set of files in our `hello-world` application to examine a more realistic project structure.
+Back in [Files Modules And Programs
+](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+we looked at what a simple program with a couple of OCaml modules
+looks like. Let's now look at the full set of files in our
+`hello-world` application to examine a more realistic project
+structure.
 
 ```
 ├── .gitignore
@@ -129,32 +134,59 @@ we looked at what a simple program with a couple of OCaml modules looks like. Le
 Some of the files here may be familiar to you from using other programming
 languages:
 
-- the `Makefile` contains targets for common actions such as `all`, `build`, `test`
-  or `clean`.  It's useful to read through this to see which underlying OCaml tools
-  are being invoked.
-- the `LICENSE` defines the terms under which your code is made available, and
-  defaults to the permissive ISC license.
-- a `README.md` is a Markdown-formatted introduction to your library or application.
-- the `.gitignore` file contains the patterns for generated files from the OCaml
-  tools so that they can be ignored by the Git version control software.
-  If you're not familiar with using Git, look over one of the tutorials
-  one such as GitHub's [git hello world](https://guides.github.com/activities/hello-world/).
+- the `Makefile` contains targets for common actions such as `all`,
+  `build`, `test` or `clean`.  It's useful to read through this to see
+  which underlying OCaml tools are being invoked.
+- the `LICENSE` defines the terms under which your code is made
+  available, and defaults to the permissive ISC license.
+- a `README.md` is a Markdown-formatted introduction to your library
+  or application.
+- the `.gitignore` file contains the patterns for generated files from
+  the OCaml tools so that they can be ignored by the Git version
+  control software.  If you're not familiar with using Git, look over
+  one of the tutorials one such as GitHub's [git hello
+  world](https://guides.github.com/activities/hello-world/).
 
-The remainder of the files are either source code or metadata files. There are three layers of names used in every OCaml project:
+The remainder of the files are either source code or metadata
+files. There are three layers of names used in every OCaml project:
 
-- **OCaml modules:** the individual `ml` and `mli` files each define an *OCaml module*, named after the file. Modules names are what you refer to when writing OCaml code -- for example, `Hello` is the module defined in our project.
-- **ocamlfind libraries:** one or more OCaml modules can be gathered together into an *ocamlfind library*, providing a convenient way to package up some dependencies with a single name -- in this case, the `hello` library. Although this example contains just the single `Hello` module , it is common to have multiple modules per library. You can query the installed libraries via `ocamlfind list` at your command prompt.
-- **opam packages:** a set of ocamlfind libraries, binaries and application data can all be gathered together into an *opam package*, in this case `hello.opam`. This is what is installed when you eventually publish the package and another user types in `opam install hello`.
+- **OCaml modules:** the individual `ml` and `mli` files each define
+  an *OCaml module*, named after the file. Modules names are what you
+  refer to when writing OCaml code -- for example, `Hello` is the
+  module defined in our project.
+- **ocamlfind libraries:** one or more OCaml modules can be gathered
+  together into an *ocamlfind library*, providing a convenient way to
+  package up some dependencies with a single name -- in this case, the
+  `hello` library. Although this example contains just the single
+  `Hello` module , it is common to have multiple modules per
+  library. You can query the installed libraries via `ocamlfind list`
+  at your command prompt.
+- **opam packages:** a set of ocamlfind libraries, binaries and
+  application data can all be gathered together into an *opam
+  package*, in this case `hello.opam`. This is what is installed when
+  you eventually publish the package and another user types in `opam
+  install hello`.
 
-It is important to understand the difference between modules, ocamlfind libraries and opam packages, as you will use each of these at different points of your OCaml coding journey.  The root of a project is marked by a `dune-project` file (more on that later). We typically structure our project into subdirectories that contain the modules for a particular library or binary, with each directory containing a separate `dune` file with build instructions.  In our hello world example, we have:
+It is important to understand the difference between modules,
+ocamlfind libraries and opam packages, as you will use each of these
+at different points of your OCaml coding journey.  The root of a
+project is marked by a `dune-project` file (more on that later). We
+typically structure our project into subdirectories that contain the
+modules for a particular library or binary, with each directory
+containing a separate `dune` file with build instructions.  In our
+hello world example, we have:
 
 - a `lib/` directory that builds a `hello` ocamlfind library.
 - a `test/` directory that defines unit tests for the library.
-- a `bin/` directory that uses the `hello` library to build a standalone application that can be executed from the command-line.
+- a `bin/` directory that uses the `hello` library to build a
+  standalone application that can be executed from the command-line.
 
 ### Defining ocamlfind libraries
 
-A project usually puts the business logic of the application into a library rather than directly into an executable binary, since this makes writing tests and documentation easier in addition to improving reusability.  Let's look at `lib/dune` in more detail:
+A project usually puts the business logic of the application into a
+library rather than directly into an executable binary, since this
+makes writing tests and documentation easier in addition to improving
+reusability.  Let's look at `lib/dune` in more detail:
 
 ```scheme
 (library
@@ -163,11 +195,23 @@ A project usually puts the business logic of the application into a library rath
  (libraries))
 ```
 
-The `(name)` field defines the project-internal name for the compiled library, and the `(public_name)` field is what it will be called when installed system-wide. The choice of `(name)` defines the toplevel module exposed by this library, and every other module in the library will be exposed as a "wrapped" submodule of that toplevel module. In our example project `hello.ml` is exported as the `Hello` module since it's the project name, but if we added a file called `world.ml` into this directory the resulting module would be found in `Hello.World`. While private library names must adhere to OCaml's module naming convention, it's common practise to use dashes and dots in public library names.
+The `(name)` field defines the project-internal name for the compiled
+library, and the `(public_name)` field is what it will be called when
+installed system-wide. The choice of `(name)` defines the toplevel
+module exposed by this library, and every other module in the library
+will be exposed as a "wrapped" submodule of that toplevel module. In
+our example project `hello.ml` is exported as the `Hello` module since
+it's the project name, but if we added a file called `world.ml` into
+this directory the resulting module would be found in
+`Hello.World`. While private library names must adhere to OCaml's
+module naming convention, it's common practise to use dashes and dots
+in public library names.
 
 ### Writing test cases for a library
 
-The `(libraries)` field in the `hello` dune file is empty since this is a standalone library. Our next step is to define a test case in `tests/dune` for our library.
+The `(libraries)` field in the `hello` dune file is empty since this
+is a standalone library. Our next step is to define a test case in
+`tests/dune` for our library.
 
 ```scheme
 (test
@@ -175,12 +219,21 @@ The `(libraries)` field in the `hello` dune file is empty since this is a standa
  (libraries alcotest hello))
 ```
 
-The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `tests/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the
-locally defined `hello` library.  Once you run the tests, you can find the built artefacts in `_build/default/tests/` in your project checkout.  You can use all the tests you learnt about in [Testing](testing.html#testing){data-type=xref} here, including inline tests.
+The `(test)` field builds an executable binary that is run when you
+invoke `dune runtest`.  In this case, it uses the
+`tests/hello_test.ml` module to define the test cases and depends on
+the external `alcotest` library _and_ the locally defined `hello`
+library.  Once you run the tests, you can find the built artefacts in
+`_build/default/tests/` in your project checkout.  You can use all the
+tests you learnt about in
+[Testing](testing.html#testing){data-type=xref} here, including inline
+tests.
 
 ### Building an executable program
 
-Finally, we want to actually use our hello world from the command-line. This is defined in `bin/dune` in a very similar fashion to test cases.
+Finally, we want to actually use our hello world from the
+command-line. This is defined in `bin/dune` in a very similar fashion
+to test cases.
 
 ```scheme
 (executable
@@ -189,9 +242,13 @@ Finally, we want to actually use our hello world from the command-line. This is 
  (libraries hello))
 ```
 
-Much like libraries, the `(name)` field here has to adhere to OCaml module naming conventions, and the `public_name` field represents the binary name that is installed onto the system and just needs to be a valid Unix or Windows filename.
+Much like libraries, the `(name)` field here has to adhere to OCaml
+module naming conventions, and the `public_name` field represents the
+binary name that is installed onto the system and just needs to be a
+valid Unix or Windows filename.
 
-You can build and execute the command locally using `dune exec` and the public name of the executable:
+You can build and execute the command locally using `dune exec` and
+the public name of the executable:
 
 ```sh dir=examples/correct/hello-world
 $ dune exec -- hello
@@ -200,21 +257,38 @@ Hello world!
 
 ## Setting up an integrated development environment
 
-Now that we've seen the basic structure of the OCaml project, it's time to setup an integrated development environment. An IDE is particularly useful for use with OCaml due to the extra information you gain from the static type information present in the codebase. A good IDE will provide you with the facilities to browse interface documentation, see inferred types for code, and to jump to the definitions of external modules.
+Now that we've seen the basic structure of the OCaml project, it's
+time to setup an integrated development environment. An IDE is
+particularly useful for use with OCaml due to the extra information
+you gain from the static type information present in the codebase. A
+good IDE will provide you with the facilities to browse interface
+documentation, see inferred types for code, and to jump to the
+definitions of external modules.
 
 ### Using Visual Studio Code
 
-The recommended IDE for newcomers to OCaml is [Visual Studio Code](https://code.visualstudio.com) using the [OCaml Platform plugin](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).  The plugin uses the Language Server Protocol to communicate with your opam and dune environment. All you need to do is to install the OCaml LSP server via opam:
+The recommended IDE for newcomers to OCaml is [Visual Studio
+Code](https://code.visualstudio.com) using the [OCaml Platform
+plugin](https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform).
+The plugin uses the Language Server Protocol to communicate with your
+opam and dune environment. All you need to do is to install the OCaml
+LSP server via opam:
 
 ```
 opam install ocaml-lsp-server
 ```
 
-Once installed, the VSCode OCaml plugin will ask you which opam sandbox to use. Just the default one should be sufficient get you going with building and browsing your interfaces.
+Once installed, the VSCode OCaml plugin will ask you which opam
+sandbox to use. Just the default one should be sufficient get you
+going with building and browsing your interfaces.
 
 ### Browsing interface documentation
 
-The OCaml LSP server understands how to interface with dune and examine the built artefacts, so opening your local project in VS Code is sufficient to activate all the features.  Try navigating over to `bin/main.ml`, where you will see the invocation to the `hello` library.
+The OCaml LSP server understands how to interface with dune and
+examine the built artefacts, so opening your local project in VS Code
+is sufficient to activate all the features.  Try navigating over to
+`bin/main.ml`, where you will see the invocation to the `hello`
+library.
 
 <!-- $MDX file=examples/correct/hello-world/bin/main.ml -->
 ```
