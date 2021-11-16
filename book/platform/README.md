@@ -201,6 +201,11 @@ reusability.  Let's look at `lib/dune` in more detail:
  (libraries))
 ```
 
+<!-- CR yminsky: Why do name and public_name both exist? I guess name
+ is the name of the wrapped library, and public_name is the ocamlfind
+ level name?  If it has dashes and dots in it, I guess it can't be an
+ actual module name.  Anyway, I remain a bit confused.  -->
+
 The `(name)` field defines the project-internal name for the compiled
 library, and the `(public_name)` field is what it will be called when
 installed system-wide. The choice of `(name)` defines the toplevel
