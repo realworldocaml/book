@@ -218,6 +218,10 @@ this directory the resulting module would be found in
 module naming convention, it's common practise to use dashes and dots
 in public library names.
 
+<!-- Why does one use dashes and dots in the public names? To indicate -->
+<!-- what? -->
+
+
 ### Writing test cases for a library
 
 The `(libraries)` field in the `hello` dune file is empty since this
