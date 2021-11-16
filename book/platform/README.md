@@ -304,6 +304,12 @@ going with building and browsing your interfaces.
 ### Browsing interface documentation
 
 The OCaml LSP server understands how to interface with dune and
+<!-- I assume we're mostly sticking to American English, so it should -->
+<!-- be artifacts, not artefacts.  Also, do you really mean "built -->
+<!-- artifacts"? I would have thought it would be "build artifacts". -->
+<!-- Also, more substantively, is it actually build artifacts you -->
+<!-- examine in vscode? I think you mostly examine the source, not the -->
+<!-- build artifacts...-->
 examine the built artefacts, so opening your local project in VS Code
 is sufficient to activate all the features.  Try navigating over to
 `bin/main.ml`, where you will see the invocation to the `hello`
