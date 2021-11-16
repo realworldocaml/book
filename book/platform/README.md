@@ -322,7 +322,11 @@ let () =
   print_endline greeting
 ```
 
-First perform a build of the project to generate the type annotation files. Then hover your mouse over the `Hello.greet` function -- you should see some documentation pop up about the function and its arguments.  This information comes from the _docstrings_ written into the `hello.mli` interface file in the library.
+First perform a build of the project to generate the type annotation
+files. Then hover your mouse over the `Hello.greet` function -- you
+should see some documentation pop up about the function and its
+arguments.  This information comes from the _docstrings_ written into
+the `hello.mli` interface file in the library.
 
 <!-- $DISABLEDMDX file=examples/correct/hello-world/lib/hello.mli -->
 ```
@@ -346,7 +350,13 @@ val greet : string -> string
     {[ print_endline @@ greet "Jane" ]} *)
 ```
 
-Documentation strings are parsed by the [odoc](https://github.com/ocaml/odoc) tool generate HTML and PDF documentation from a collection of opam packages.  If you intend your code to be used by anyone else (or indeed, by yourself a few months later) you should take the time to annotate your OCaml signature files with documentation.  An easy way to preview the HTML documentation is to build it locally with dune:
+Documentation strings are parsed by the
+[odoc](https://github.com/ocaml/odoc) tool generate HTML and PDF
+documentation from a collection of opam packages.  If you intend your
+code to be used by anyone else (or indeed, by yourself a few months
+later) you should take the time to annotate your OCaml signature files
+with documentation.  An easy way to preview the HTML documentation is
+to build it locally with dune:
 
 ```skip
 $ opam install odoc
