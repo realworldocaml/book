@@ -307,6 +307,10 @@ to test cases.
  (libraries hello))
 ```
 
+<!-- TODO yminsky: maybe worth saying that there has to be an ml file
+for the corresponding name, and that only that executable and the
+modules it depends on will be linked in to the executable. -->
+
 Much like libraries, the `(name)` field here has to adhere to OCaml
 module naming conventions, and the `public_name` field represents the
 binary name that is installed onto the system and just needs to be a
