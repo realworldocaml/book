@@ -167,12 +167,6 @@ files. There are three layers of names used in every OCaml project:
   you eventually publish the package and another user types in `opam
   install hello`.
 
-<!-- I wonder if we should try to explain why all these names -->
-<!-- exist. It feels unnecessarily complicated: why are ocamlfind -->
-<!-- libraries and opam packages different scopes. Is there a good -->
-<!-- reason? If so, should it be explained?  -->
-
-
 It is important to understand the difference between modules,
 ocamlfind libraries and opam packages, as you will use each of these
 at different points of your OCaml coding journey.  The root of a
