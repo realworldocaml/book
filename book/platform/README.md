@@ -243,7 +243,7 @@ reusability.  Let's look at `lib/dune` in more detail:
  (libraries))
 ```
 
-<!-- CR yminsky: I feel like the drafting here is a little confusing,
+<!-- TODO yminsky: I feel like the drafting here is a little confusing,
 in particular, I don't think "internal" and "system-wide" really
 captures what's going on.
 
@@ -254,9 +254,9 @@ and the `name` field determines the name of that module.  In our
 example project `hello.ml` is exported as the `Hello` module since
 it's the project name, but if we added a file called `world.ml` into
 this directory the resulting module would be found in `Hello.World`.
-The `public_name`, on the other hand, determines the ocamlfind name
-for the library, which is what you use when requesting to link a given
-library be linked in, via the `libraries` field in your dune file.
+The `public_name`, on the other hand, determines the name for the
+library, which is what you use when requesting to link a given library
+be linked in, via the `libraries` field in your dune file.
 
 -->
 
@@ -288,9 +288,9 @@ The `(test)` field builds an executable binary that is run when you
 invoke `dune runtest`.  In this case, it uses the
 `tests/hello_test.ml` module to define the test cases and depends on
 the external `alcotest` library _and_ the locally defined `hello`
-library.  Once you run the tests, you can find the built artefacts in
-`_build/default/tests/` in your project checkout.  You can use all the
-tests you learnt about in
+library.  Once you run the tests, you can find the built
+<!-- TODO yminsky: artifacts --> artefacts in `_build/default/tests/` in
+your project checkout.  You can use all the tests you learnt about in
 [Testing](testing.html#testing){data-type=xref} here, including inline
 tests.
 
