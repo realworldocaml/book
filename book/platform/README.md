@@ -274,9 +274,7 @@ in public library names.
 
 ### Writing test cases for a library
 
-The `(libraries)` field in the `hello` dune file is empty since this
-is a standalone library. Our next step is to define a test case in
-`tests/dune` for our library.
+The `(libraries)` field in the `hello` dune file is empty since this is a standalone library. Our next step is to define a test case in `test/dune` for our library.
 
 ```scheme
 (test
@@ -284,15 +282,8 @@ is a standalone library. Our next step is to define a test case in
  (libraries alcotest hello))
 ```
 
-The `(test)` field builds an executable binary that is run when you
-invoke `dune runtest`.  In this case, it uses the
-`tests/hello_test.ml` module to define the test cases and depends on
-the external `alcotest` library _and_ the locally defined `hello`
-library.  Once you run the tests, you can find the built
-<!-- TODO yminsky: artifacts --> artefacts in `_build/default/tests/` in
-your project checkout.  You can use all the tests you learnt about in
-[Testing](testing.html#testing){data-type=xref} here, including inline
-tests.
+The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `test/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the 
+locally defined `hello` library.  Once you run the tests, you can find the built artefacts in `_build/default/test/` in your project checkout.  You can use all the tests you learnt about in [Testing](testing.html#testing){data-type=xref} here, including inline tests.
 
 ### Building an executable program
 
