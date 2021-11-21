@@ -104,13 +104,13 @@
 </section>
 <section class="level3" id="writing-test-cases-for-a-library">
 <h3>Writing test cases for a library</h3>
-<p>The <code>(libraries)</code> field in the <code>hello</code> dune file is empty since this is a standalone library. Our next step is to define a test case in <code>tests/dune</code> for our library.</p>
+<p>The <code>(libraries)</code> field in the <code>hello</code> dune file is empty since this is a standalone library. Our next step is to define a test case in <code>test/dune</code> for our library.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(test
  (name hello_test)
  (libraries alcotest hello))</code></pre>
 </div>
-<p>The <code>(test)</code> field builds an executable binary that is run when you invoke <code>dune runtest</code>. In this case, it uses the <code>tests/hello_test.ml</code> module to define the test cases and depends on the external <code>alcotest</code> library <em>and</em> the locally defined <code>hello</code> library. Once you run the tests, you can find the built artefacts in <code>_build/default/tests/</code> in your project checkout. You can use all the tests you learnt about in <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a> here, including inline tests.</p>
+<p>The <code>(test)</code> field builds an executable binary that is run when you invoke <code>dune runtest</code>. In this case, it uses the <code>test/hello_test.ml</code> module to define the test cases and depends on the external <code>alcotest</code> library <em>and</em> the locally defined <code>hello</code> library. Once you run the tests, you can find the built artefacts in <code>_build/default/test/</code> in your project checkout. You can use all the tests you learnt about in <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a> here, including inline tests.</p>
 </section>
 <section class="level3" id="building-an-executable-program">
 <h3>Building an executable program</h3>
