@@ -391,6 +391,8 @@ val greet : string -> string
     {[ print_endline @@ greet "Jane" ]} *)
 ```
 
+<!-- TODO yminsky: The sentence below doesn't quite parse. -->
+
 Documentation strings are parsed by the
 [odoc](https://github.com/ocaml/odoc) tool generate HTML and PDF
 documentation from a collection of opam packages.  If you intend your
@@ -404,7 +406,8 @@ $ opam install odoc
 $ dune build @doc
 ```
 
-This will leave the HTML files in `_build/default/_doc/_html`, which you can view normally with a webbrowser.
+This will leave the HTML files in `_build/default/_doc/_html`, which
+you can view normally with a web browser.
 
 ### Autoformatting your source code
 
