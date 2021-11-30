@@ -282,7 +282,7 @@ The `(libraries)` field in the `hello` dune file is empty since this is a standa
  (libraries alcotest hello))
 ```
 
-The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `test/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the 
+The `(test)` field builds an executable binary that is run when you invoke `dune runtest`.  In this case, it uses the `test/hello_test.ml` module to define the test cases and depends on the external `alcotest` library _and_ the
 locally defined `hello` library.  Once you run the tests, you can find the built artefacts in `_build/default/test/` in your project checkout.  You can use all the tests you learnt about in [Testing](testing.html#testing){data-type=xref} here, including inline tests.
 
 ### Building an executable program
@@ -412,6 +412,14 @@ you can view normally with a web browser.
 ### Autoformatting your source code
 
 As you develop more OCaml code, you'll find it convenient to have it formatted to a common style.  The `ocamlformat` tool can help you do this easily from within VSCode.
+
+<!-- TODO yminsky: what's the pattern here? Does ocamlformat support -->
+<!-- multiple versions of its formatting logic concurrently?  If I -->
+<!-- have multiple codebases with the same opam switch but different -->
+<!-- desired ocamlformat versions, am I screwed?  Or do you install -->
+<!-- multiple parallel ocamlformats?  If one ocamlformat supports -->
+<!-- multiple versions, shouldn't we just install the latest -->
+<!-- ocamlformat, rather than install 0.19.0 in particular?    -->
 
 ```skip
 $ echo 'version=0.19.0' > .ocamlformat
