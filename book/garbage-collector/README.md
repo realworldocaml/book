@@ -542,7 +542,7 @@ garbage collection occurring:
   (libraries core core_bench))
 ```
 
-```sh dir=examples/barrier_bench,non-deterministic=command,require-package=core_bench
+```sh dir=examples/barrier_bench,non-deterministic=command
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
@@ -682,7 +682,7 @@ Building and running this should show the following output:
 
 
 
-```sh dir=examples/finalizer,require-package=async
+```sh dir=examples/finalizer
 $ dune build finalizer.exe
 $ dune exec -- ./finalizer.exe
        immediate int: FAIL
