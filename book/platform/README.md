@@ -1,8 +1,9 @@
 # The OCaml Platform
 
-So far in the book, we've gone through a number of techniques you can use to build real OCaml programs.
-We'll now wrap up this part by examining the tools you can use for editing,
-compiling, testing, documenting and publishing your own projects.
+So far in the book, we've gone through a number of techniques you can
+use to build real OCaml programs.  We'll now wrap up this part by
+examining the tools you can use for editing, compiling, testing,
+documenting and publishing your own projects.
 
 The OCaml community has adopted a platform of modern tools to specify your project
 metadata and interface it with IDEs such as Visual Studio Code, to generate API
