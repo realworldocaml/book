@@ -5,16 +5,16 @@ use to build real OCaml programs.  We'll now wrap up this part by
 examining the tools you can use for editing, compiling, testing,
 documenting and publishing your own projects.
 
-The OCaml community has adopted a platform of modern tools to specify your project
-metadata and interface it with IDEs such as Visual Studio Code, to generate API
-documentation, and also to adopt modern software engineering practises such as
-continuous integration (CI) and testing.
+The OCaml community has adopted a platform of modern tools to specify
+your project metadata and interface it with IDEs such as Visual Studio
+Code, to generate API documentation, and also to adopt modern software
+engineering practises such as continuous integration (CI) and testing.
 
 ## A Hello World OCaml Project
 
-Let's start by creating a sample OCaml project and navigating around it.  opam
-provides a project generator known as `spin` that can be used to create various
-types of projects.
+Let's start by creating a sample OCaml project and navigating around
+it.  opam provides a project generator known as `spin` that can be
+used to create various types of projects.
 
 ```sh dir=examples/correct/opam-spin-ls,skip
 $ opam spin ls
@@ -39,8 +39,8 @@ $ opam spin ls
 
 ```
 
-Before we dive into any of these, we'll generate a tutorial using Spin's built-in
-hello world project.
+Before we dive into any of these, we'll generate a tutorial using
+Spin's built-in hello world project.
 
 <!-- ```sh dir=examples/correct/opam-spin-hello
 TODO need a way to stop spin from running the opam install commands
