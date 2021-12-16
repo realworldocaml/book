@@ -120,7 +120,8 @@ languages:
   which underlying OCaml tools are being invoked.
 - the `LICENSE` defines the terms under which your code is made
   available, and defaults to the permissive ISC license.
-- a `README.md` is a Markdown-formatted introduction to your library or application.
+- a `README.md` is a Markdown-formatted introduction to your library
+  or application.
 - the `.gitignore` file contains the patterns for generated files from
   the OCaml tools so that they can be ignored by the Git version
   control software.  If you're not familiar with using Git, look over
@@ -322,7 +323,9 @@ you can view normally with a webbrowser.
 
 ### Autoformatting your source code
 
-As you develop more OCaml code, you'll find it convenient to have it formatted to a common style.  The `ocamlformat` tool can help you do this easily from within VSCode.
+As you develop more OCaml code, you'll find it convenient to have it
+formatted to a common style.  The `ocamlformat` tool can help you do
+this easily from within VSCode.
 
 ```skip
 $ echo 'version=0.19.0' > .ocamlformat
