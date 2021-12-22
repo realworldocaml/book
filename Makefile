@@ -22,9 +22,6 @@ clean:
 docker:
 	docker build -t ocaml/rwo .
 
-duniverse-init:
-	$(DUNIVERSE) init
 
-duniverse-upgrade: duniverse-init
-	rm -rf duniverse/
-	$(DUNIVERSE) pull
+server:
+	cohttp-server-lwt _build/default/static-wip
