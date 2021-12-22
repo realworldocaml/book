@@ -13,6 +13,15 @@ essential for developing and evolving reliable software systems.  And
 OCaml's type system, viewed properly, is an aid to testing, not a
 reason to avoid it.
 
+<!-- TODO avsm: this intro, while accurate, is a little down on -->
+<!-- testing!  Is it useful to also contextualise _what_ tests -->
+<!-- are compared to what the reader has learnt in previous chapters. -->
+<!-- For example, we've learnt how to build separate sig/impl files -->
+<!-- and to use functors to parameterise modular code, and the previous -->
+<!-- chapter is the networking one.  Perhaps note that unit tests are a -->
+<!-- really convenient way to run this modular logic in a non-interactive -->
+<!-- deterministic fashion? -->
+
 The goal of this chapter is to teach you more about how to write
 effective tests in OCaml, and to teach you some of the best tools for
 the job.  Tooling is especially important in the context of testing
@@ -72,6 +81,12 @@ set of preprocessors.  (`ppx_jane` bundles together `ppx_inline_test`
 with a collection of other useful preprocessors.)  Here's the
 resulting `dune` file.
 
+<!-- TODO avsm: we've used ppx_jane a couple of times so far, -->
+<!-- but we're only really using one of the preprocessors here. -->
+<!-- Would it be better to be explicit about which ones we're -->
+<!-- pulling in, and then suggest ppx_jane as a convenience for -->
+<!-- those readers that don't care? -->
+
 ```scheme file=examples/correct/simple_inline_test/dune
 (library
  (name foo)
@@ -119,6 +134,7 @@ File "test.ml", line 3, characters 0-66: rev is false.
 FAILED 1 / 1 tests
 [1]
 ```
+
 
 ### More readable errors with `test_eq`
 
@@ -250,6 +266,9 @@ Here's a simple example of a test written in this style.  While the
 test generates output (though a call to `print_endline`), that output
 isn't captured in the source, at least, not yet.
 
+<!-- TODO avsm: what's with open! used in this chapter. -->
+<!-- Rest of book uses `open` -->
+
 ```ocaml file=examples/erroneous/trivial_expect_test/test.ml
 open! Base
 open! Stdio
@@ -261,6 +280,8 @@ let%expect_test "trivial" =
 If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
+
+<!-- TODO avsm: mention in a info box to install patdiff? -->
 
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
 $ dune runtest
@@ -376,6 +397,8 @@ let get_href_hosts soup =
 
 We can use an expect test to demonstrate what this function does on an
 example page.
+
+<!-- TODO avsm: is this first use of {| syntax in book? Not explained. -->
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
@@ -631,6 +654,9 @@ let rec drain_old_events t =
       drain_old_events t)
 ```
 
+<!-- TODO avsm: that operator for Time_ns.Span is pretty awkward. -->
+<!-- Time_ns.(Span.((diff t.now time) < t.period)) isnt much better. -->
+
 But the comparison goes the wrong way: we should discard events that
 are older than the limit-period, not younger.  If we fix that, we'll
 see that the trace behaves as we'd expect.
@@ -672,10 +698,13 @@ That's a great ideal, but it's not always achievable, especially when
 you want to run more end-to-end tests of your program.  But expect
 tests are still a useful tool for such tests.
 
-To see how such tests can be build, we'll write some tests for the
+To see how such tests can be built, we'll write some tests for the
 echo server we developed in [Concurrent Programming with
 Async](concurrent-programming.html#examples-an-echo-server){data-type=xref}.
 
+<!-- TODO avsm: mention `dune runtest --force` to rerun -->
+<!-- a test if it hasn't changed? Useful for network tests.-->
+ 
 We'll start by creating a new test directory with a dune file next to
 our echo-server implementation.
 
@@ -987,6 +1016,10 @@ for the negation of `min_value` to be equal to itself.
 Quickcheck's insistence on tracking and testing special cases is what
 allowed it to find this error.
 
+<!-- TODO avsm: could you expand on this a little? You mention the -->
+<!-- probability distribution above is special, so does QC combine -->
+<!-- a random distribution with special edge values always included? -->
+
 ### Handling complex types
 
 Tests can't subsist on simple atomic types alone, which is why you'll
@@ -1136,6 +1169,7 @@ used `weighted_union` to pick a different distribution.
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
+<!-- TODO avsm: could be optimistic and link to v3.ocaml.org docs -->
 
 ## Other testing tools
 
