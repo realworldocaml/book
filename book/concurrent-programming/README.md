@@ -989,7 +989,7 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:
 
-```sh dir=examples/correct/search,require-package=textwrap,require-package=yojson,non-deterministic
+```sh dir=examples/correct/search,non-deterministic
 $ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
