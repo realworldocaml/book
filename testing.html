@@ -2,6 +2,14 @@
 <h1>Testing</h1>
 <p>Testing is not the best-loved part of programming. Writing tests is an exacting and sometimes dreary job, and it can feel like a distraction from the task of building out your code’s functionality. At first blush, OCaml’s type-system makes testing seem even less appealing, since the type system’s ability to squash many kinds of bugs at compile time catches lots of mistakes that you would otherwise need to write tests to protect against.</p>
 <p>But make no mistake, clever types notwithstanding, testing is essential for developing and evolving reliable software systems. And OCaml’s type system, viewed properly, is an aid to testing, not a reason to avoid it.</p>
+
+
+
+
+
+
+
+
 <p>The goal of this chapter is to teach you more about how to write effective tests in OCaml, and to teach you some of the best tools for the job. Tooling is especially important in the context of testing because one of the things that prevents people from doing as much testing as they should is the sheer tedium of it. But with the right tools in hand, writing tests can be lightweight and fun. And when testing is fun, a lot more testing gets done.</p>
 <p>Before talking about the testing tools that are available in OCaml, let’s discuss at a high level what we want out of our tests and our testing tools.</p>
 <section class="level2" id="what-makes-for-good-tests">
@@ -26,6 +34,11 @@
 <li>enable <code>ppx_inline_test</code> as a preprocessor.</li>
 </ul>
 <p>The first of these is achieved by adding an <code>(inline_tests)</code> declaration, and the second is achieved by adding <code>ppx_jane</code> to the set of preprocessors. (<code>ppx_jane</code> bundles together <code>ppx_inline_test</code> with a collection of other useful preprocessors.) Here’s the resulting <code>dune</code> file.</p>
+
+
+
+
+
 <div class="highlight">
 <pre><code class="language-scheme">(library
  (name foo)
@@ -112,6 +125,8 @@ let%test_unit "rev" =
 <h3>Basic mechanics</h3>
 <p>With expect tests, your source file specifies both the code to be executed and the expected output. Upon running an expect test, any discrepancy between the expected output and what was actually generated is reported as a test failure.</p>
 <p>Here’s a simple example of a test written in this style. While the test generates output (though a call to <code>print_endline</code>), that output isn’t captured in the source, at least, not yet.</p>
+
+
 <div class="highlight">
 <pre><code class="language-ocaml">open! Base
 open! Stdio
@@ -120,6 +135,7 @@ let%expect_test "trivial" =
   print_endline "Hello World!"</code></pre>
 </div>
 <p>If we run the test, we’ll be presented with a diff between what we wrote, and a <em>corrected</em> version of the source file that now has an <code>[%expect]</code> clause containing the output.</p>
+
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
 &gt;     patdiff (internal) (exit 1)
@@ -198,6 +214,7 @@ let get_href_hosts soup =
   |&gt; Set.of_list (module String)</code></pre>
 </div>
 <p>We can use an expect test to demonstrate what this function does on an example page.</p>
+
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test _ =
   let example_html = {|
@@ -403,6 +420,8 @@ File "test.ml", line 32, characters 0-1:
       ignore (Queue.dequeue_exn t.events : Time_ns.t);
       drain_old_events t)</code></pre>
 </div>
+
+
 <p>But the comparison goes the wrong way: we should discard events that are older than the limit-period, not younger. If we fix that, we’ll see that the trace behaves as we’d expect.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test _ =
@@ -430,7 +449,9 @@ File "test.ml", line 32, characters 0-1:
 <h3>End-to-end tests</h3>
 <p>The expect tests we’ve seen so far have been self-contained, not doing any IO or interacting with system resources. As a result, these tests are fast to run and entirely deterministic.</p>
 <p>That’s a great ideal, but it’s not always achievable, especially when you want to run more end-to-end tests of your program. But expect tests are still a useful tool for such tests.</p>
-<p>To see how such tests can be build, we’ll write some tests for the echo server we developed in <a data-type="xref" href="concurrent-programming.html#examples-an-echo-server">Chapter 16, Concurrent Programming with Async</a>.</p>
+<p>To see how such tests can be built, we’ll write some tests for the echo server we developed in <a data-type="xref" href="concurrent-programming.html#examples-an-echo-server">Chapter 16, Concurrent Programming with Async</a>.</p>
+
+
 <p>We’ll start by creating a new test directory with a dune file next to our echo-server implementation.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(library
@@ -635,6 +656,9 @@ Int.max_value ;;
 </code></pre>
 </div>
 <p>Quickcheck’s insistence on tracking and testing special cases is what allowed it to find this error.</p>
+
+
+
 <section class="level3" id="handling-complex-types">
 <h3>Handling complex types</h3>
 <p>Tests can’t subsist on simple atomic types alone, which is why you’ll often want to build probability distributions over more complex types. Here’s a simple example, where we want to test the behavior of <code>List.rev_append</code>. For this test, we’re going to use a probability distribution for generating pairs of lists of integers. The following example shows how that can be done using Quickcheck’s combinators.</p>
@@ -746,7 +770,7 @@ let%test_unit "List.rev_append is List.append of List.rev" =
 </code></pre>
 </div>
 <p>Throughout this function we’re making choices about the probability distribution. For example, the use of the <code>union</code> operator means that circles, rectangles and polygons will be equally likely. We could have used <code>weighted_union</code> to pick a different distribution.</p>
-<p>The full API for building generators is beyond the scope of this chapter, but it’s worth digging in to the API docs if you want more control over the distribution of your test examples.</p>
+<p>The full API for building generators is beyond the scope of this chapter, but it’s worth digging in to the API docs if you want more control over the distribution of your test examples. </p>
 </section>
 </section>
 <section class="level2" id="other-testing-tools">
