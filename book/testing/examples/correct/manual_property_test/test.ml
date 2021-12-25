@@ -1,4 +1,4 @@
-open! Base
+open Base
 
 let%test_unit "negation flips the sign" =
   for _ = 0 to 100_000 do

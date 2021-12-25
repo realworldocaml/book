@@ -86,7 +86,7 @@ demonstrate this by creating a file called `test.ml`, containing one
 test.
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
@@ -105,7 +105,7 @@ No output is generated because the test passed successfully.
 But if we break the test,
 
 ```ocaml file=examples/erroneous/broken_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
@@ -160,7 +160,7 @@ it's a little more concise, mostly because this is a more concise way
 to express the comparison function.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
-open! Base
+open Base
 
 let%test_unit "rev" =
   [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]
@@ -275,7 +275,7 @@ isn't captured in the source, at least, not yet.
 
 ```ocaml file=examples/erroneous/trivial_expect_test/test.ml
 open! Base
-open! Stdio
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!"
@@ -290,12 +290,12 @@ wrote, and a *corrected* version of the source file that now has an
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
 $ dune runtest
      patdiff (internal) (exit 1)
-...
+(cd _build/default && /home/yminsky/Code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 5, characters 0-1:
  |open! Base
- |open! Stdio
+ |open Stdio
  |
  |let%expect_test "trivial" =
 -|  print_endline "Hello World!"
@@ -311,8 +311,8 @@ copying the corrected file it over the original source.  The `dune
 promote` command does just this, leaving our source as follows.
 
 ```ocaml file=examples/correct/trivial_expect_test_fixed/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!";
@@ -329,8 +329,8 @@ We only have one expect block in this example, but the system supports
 having multiple expect blocks:
 
 ```ocaml file=examples/correct/multi_block_expect_test/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
@@ -346,8 +346,8 @@ It's not obvious why one would want to use expect tests in the first
 place. Why should this:
 
 ```ocaml file=examples/correct/simple_expect_test/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test _ =
   print_s [%sexp (List.rev [3;2;1] : int list)];
@@ -357,7 +357,7 @@ let%expect_test _ =
 be preferable to this?
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
@@ -389,8 +389,8 @@ data embedded within it.  In particular, the function aims to produce
 the set of hosts that show up in links within a document.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=0
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let get_href_hosts soup =
   Soup.select "a[href]" soup
@@ -510,7 +510,7 @@ particular resource.  The following is the `mli` for a library that
 specifies the logic of a simple rolling-window-style rate limiter.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
-open! Core
+open Core
 
 type t
 
@@ -523,7 +523,7 @@ examples.  First, we'll write some helper functions to make the
 examples shorter and easier to read.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
-open! Core
+open Core
 
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
@@ -730,8 +730,8 @@ lets you enable the feature in the echo server that causes it to
 uppercase the text it receives.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/helpers.mli
-open! Core
-open! Async
+open Core
+open Async
 
 (** Launches the echo server *)
 val launch : port:int -> uppercase:bool -> Process.t Deferred.t
@@ -752,8 +752,8 @@ connects to it over TCP, and then sends some data and displays the
 results.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/test.ml
-open! Core
-open! Async
+open Core
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -818,7 +818,7 @@ now passes, with the expected results.
 
 ```ocaml file=examples/correct/echo_test_delay/test/test.ml
 open! Core
-open! Async
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -921,7 +921,7 @@ integer `x` is the flip of the sign of `x`.
 Here's a simple implementation of this test.
 
 ```ocaml file=examples/correct/manual_property_test/test.ml
-open! Base
+open Base
 
 let%test_unit "negation flips the sign" =
   for _ = 0 to 100_000 do

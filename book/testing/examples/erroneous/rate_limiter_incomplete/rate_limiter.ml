@@ -1,4 +1,4 @@
-open! Core
+open Core
 
 type t =
   { events : Time_ns.t Queue.t

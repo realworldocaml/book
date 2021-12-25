@@ -1,5 +1,5 @@
-open! Core
-open! Async
+open Core
+open Async
 
 (** Launches the echo server *)
 val launch : port:int -> uppercase:bool -> Process.t Deferred.t
