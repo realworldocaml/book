@@ -270,9 +270,6 @@ Here's a simple example of a test written in this style.  While the
 test generates output (though a call to `print_endline`), that output
 isn't captured in the source, at least, not yet.
 
-<!-- TODO avsm: what's with open! used in this chapter. -->
-<!-- Rest of book uses `open` -->
-
 ```ocaml file=examples/erroneous/trivial_expect_test/test.ml
 open! Base
 open Stdio
@@ -281,16 +278,33 @@ let%expect_test "trivial" =
   print_endline "Hello World!"
 ```
 
+::: {data-type=note}
+##### `open` and `open!`
+
+In this example, we use `open!` instead of `open` because we happen
+not to be usinging any values from `Base`, and so the compiler will
+warn us about an unused open.
+
+But because `Base` is effectively our standard library, we want to
+keep it open anyway, since we want any new code we write to find
+`Base`'s libraries, not the ordinary OCaml standard library.  The
+exclamation point at the end of `open` suppresses that warning.
+
+:::
+
+
 If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
-<!-- TODO avsm: mention in a info box to install patdiff? -->
+Note that Dune will use the `patdiff` tool if it's available, which
+generates easier-to-read diffs.  You can install `patdiff` with
+`opam`.
 
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
+```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE,non-deterministic
 $ dune runtest
      patdiff (internal) (exit 1)
-(cd _build/default && /home/yminsky/Code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 5, characters 0-1:
@@ -418,6 +432,21 @@ let%expect_test _ =
   let soup = Soup.parse example_html in
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)]
+```
+
+::: {data-type=note}
+##### Quoted s strings
+
+The example above used a new syntax for string literals, called
+*quoted strings*.  Here's an example.
+
+```ocaml env=main
+# {|This is a a quoted string|}
+```
+
+The advantage of this syntax is that it allows the content to be
+written without the usual escaping required for ordinary string literals.
+
 ```
 
 If we run the test, we'll see that the output isn't exactly what was
@@ -580,8 +609,10 @@ execution traces.
 
 <!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
 
-```
+```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE,non-deterministic
 $ dune runtest
+     patdiff (internal) (exit 1)
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 32, characters 0-1:
@@ -730,7 +761,7 @@ lets you enable the feature in the echo server that causes it to
 uppercase the text it receives.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/helpers.mli
-open Core
+open! Core
 open Async
 
 (** Launches the echo server *)
@@ -752,7 +783,7 @@ connects to it over TCP, and then sends some data and displays the
 results.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/test.ml
-open Core
+open! Core
 open Async
 open Helpers
 
@@ -775,13 +806,16 @@ happens.  The results, however, are not what you might hope for.
 
 <!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
 
-```
+```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE,non-deterministic
 $ dune runtest
+Entering directory 'rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+     patdiff (internal) (exit 1)
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
 ------ test/test.ml
 ++++++ test/test.ml.corrected
 File "test/test.ml", line 11, characters 0-1:
  |open! Core
- |open! Async
+ |open Async
  |open Helpers
  |
  |let%expect_test "test uppercase echo" =
@@ -805,8 +839,8 @@ File "test/test.ml", line 11, characters 0-1:
 +|  (monitor.ml.Error
 +|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
 +|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
-+|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
-+|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
++|  Raised at Base__Result.ok_exn in file "duniverse/base/src/result.ml", line 201, characters 17-26
++|  Called from Expect_test_collector.Make.Instance.exec in file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
 [1]
 ```
 

@@ -1,4 +1,4 @@
-open Core
+open! Core
 open Async
 
 (** Launches the echo server *)
