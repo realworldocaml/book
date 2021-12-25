@@ -75,18 +75,12 @@ set of preprocessors.  (`ppx_jane` bundles together `ppx_inline_test`
 with a collection of other useful preprocessors.)  Here's the
 resulting `dune` file.
 
-<!-- TODO avsm: we've used ppx_jane a couple of times so far, -->
-<!-- but we're only really using one of the preprocessors here. -->
-<!-- Would it be better to be explicit about which ones we're -->
-<!-- pulling in, and then suggest ppx_jane as a convenience for -->
-<!-- those readers that don't care? -->
-
 ```scheme file=examples/correct/simple_inline_test/dune
 (library
  (name foo)
  (libraries base stdio)
  (inline_tests)
- (preprocess (pps ppx_jane)))
+ (preprocess (pps ppx_inline_test)))
 ```
 
 With this done, any module in this library can host a test. We'll
@@ -145,9 +139,26 @@ returns a bool.  We're also going to use the `[%test_eq]` syntax,
 which, given a type, generates code to test for equality and throw a
 meaningful exception if the arguments are unequal.
 
-Here's what our new test looks like. You'll notice that it's a little
-more concise, mostly because this is a more concise way to express the
-comparison function.
+To use `[%test_eq]`, we're going to need to add the `ppx_assert`
+syntax extension, so we'll need to adjust our `dune` file
+appropiately.
+
+```scheme file=examples/erroneous/test_eq-inline_test/dune
+(library
+ (name foo)
+ (libraries base stdio)
+ (preprocess
+  (pps ppx_inline_test ppx_assert))
+ (inline_tests))
+```
+
+Rather than add extensions one by one as we find more uses, we'll just
+use `ppx_jane` throughout the rest of this chapter.  But it is
+possible to use just the ones you need.
+
+In any case, here's what our new test looks like. You'll notice that
+it's a little more concise, mostly because this is a more concise way
+to express the comparison function.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
 open! Base
