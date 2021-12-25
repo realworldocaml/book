@@ -70,10 +70,8 @@ To use inline tests in a library, we need to do two things:
 - enable `ppx_inline_test` as a preprocessor.
 
 The first of these is achieved by adding an `(inline_tests)`
-declaration, and the second is achieved by adding `ppx_jane` to the
-set of preprocessors.  (`ppx_jane` bundles together `ppx_inline_test`
-with a collection of other useful preprocessors.)  Here's the
-resulting `dune` file.
+declaration, and the second is achieved by adding `ppx_inline_test` to
+the set of preprocessors.  Here's the resulting `dune` file.
 
 ```scheme file=examples/correct/simple_inline_test/dune
 (library
@@ -153,8 +151,9 @@ appropiately.
 ```
 
 Rather than add extensions one by one as we find more uses, we'll just
-use `ppx_jane` throughout the rest of this chapter.  But it is
-possible to use just the ones you need.
+use `ppx_jane` throughout the rest of this chapter, which bundles
+together `ppx_inline_test` along with a collection of other useful
+preprocessors.
 
 In any case, here's what our new test looks like. You'll notice that
 it's a little more concise, mostly because this is a more concise way
