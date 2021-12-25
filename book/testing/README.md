@@ -1,26 +1,20 @@
 # Testing
 
-Testing is not the best-loved part of programming. Writing tests is an
-exacting and sometimes dreary job, and it can feel like a distraction
-from the task of building out your code's functionality.  At first
-blush, OCaml's type-system makes testing seem even less appealing,
-since the type system's ability to squash many kinds of bugs at
-compile time catches lots of mistakes that you would otherwise need to
-write tests to protect against.
+Testing is a foundational part of building reliable and maintainable
+software.  OCaml's type system is surprisingly good at catching bugs,
+but in the end, it's far from a complete story.  Tests remain an
+essential tool for verifying that your code behaves as you expect and
+preventing regressions as your code evolves.
 
-But make no mistake, clever types notwithstanding, testing is
-essential for developing and evolving reliable software systems.  And
-OCaml's type system, viewed properly, is an aid to testing, not a
-reason to avoid it.
-
-<!-- TODO avsm: this intro, while accurate, is a little down on -->
-<!-- testing!  Is it useful to also contextualise _what_ tests -->
-<!-- are compared to what the reader has learnt in previous chapters. -->
-<!-- For example, we've learnt how to build separate sig/impl files -->
-<!-- and to use functors to parameterise modular code, and the previous -->
-<!-- chapter is the networking one.  Perhaps note that unit tests are a -->
-<!-- really convenient way to run this modular logic in a non-interactive -->
-<!-- deterministic fashion? -->
+People sometimes think of types and tests as competing ways of
+increasing assurance, but in reality, the two approaches work best
+together.  Types obviate the need for writing many tests that you'd
+need in an untyped context, and having rich and expressive types of
+the kind you have in OCaml increases that advantage.  And while
+type-safe code can easily be wrong, types have a way of increasing the
+rigidity of your code, in a way that makes it snap into place with
+fewer tests than you might expect.  All in, tests magnify the power of
+the tests you write.
 
 The goal of this chapter is to teach you more about how to write
 effective tests in OCaml, and to teach you some of the best tools for
@@ -704,7 +698,7 @@ Async](concurrent-programming.html#examples-an-echo-server){data-type=xref}.
 
 <!-- TODO avsm: mention `dune runtest --force` to rerun -->
 <!-- a test if it hasn't changed? Useful for network tests.-->
- 
+
 We'll start by creating a new test directory with a dune file next to
 our echo-server implementation.
 
