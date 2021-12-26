@@ -435,7 +435,7 @@ let%expect_test _ =
 ```
 
 ::: {data-type=note}
-##### Quoted s strings
+##### Quoted strings
 
 The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.
