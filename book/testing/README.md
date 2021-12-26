@@ -441,11 +441,32 @@ The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.
 
 ```ocaml env=main
-# {|This is a a quoted string|}
+# {|This is a quoted string|}
 ```
 
 The advantage of this syntax is that it allows the content to be
-written without the usual escaping required for ordinary string literals.
+written without the usual escaping required for ordinary string
+literals.  Consider the following examples.
+
+```ocaml env=main
+# {|This is a literal quote: "|}
+# "This is a literal quote \""
+```
+
+If you want to have a literal `|}` inside your quoted string, you can
+do so without escaping: you just add an identifier to the string
+delimiter, so the delimiter doesn't show up in your text.
+
+```ocaml env=main
+# {xxx|This is how you write a {|quoted string|}|xxx}
+```
+
+Quoted strings are especially useful when you want to include a raw
+chunk of text from some outside source, which happens frequently in
+tests.
+
+:::
+
 
 ```
 
@@ -850,7 +871,9 @@ the server.  We can fix this by adding a one second delay before
 connecting, using Async's `Clock.after`.  With this change, the test
 now passes, with the expected results.
 
-```ocaml file=examples/correct/echo_test_delay/test/test.ml
+<!-- ocaml file=examples/correct/echo_test_delay/test/test.ml -->
+
+```
 open! Core
 open Async
 open Helpers
