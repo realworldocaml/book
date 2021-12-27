@@ -148,31 +148,6 @@ languages:
   world](https://guides.github.com/activities/hello-world/).
 
 The remainder of the files are either source code or metadata
-files. There are three layers of names used in every OCaml project:
-
-- **OCaml modules:** the individual `ml` and `mli` files each define
-  an *OCaml module*, named after the file. Modules names are what you
-  refer to when writing OCaml code -- for example, `Hello` is the
-  module defined in our project.
-- **ocamlfind libraries:** one or more OCaml modules can be gathered
-  together into an *ocamlfind library*, providing a convenient way to
-  package up some dependencies with a single name -- in this case, the
-  `hello` library. Although this example contains just the single
-  `Hello` module , it is common to have multiple modules per
-  library. You can query the installed libraries via `ocamlfind list`
-  at your command prompt.
-- **opam packages:** a set of ocamlfind libraries, binaries and
-  application data can all be gathered together into an *opam
-  package*, in this case `hello.opam`. This is what is installed when
-  you eventually publish the package and another user types in `opam
-  install hello`.
-
-<!-- I wonder if we can explain this better. Here's an attempt.
-Part of my goal here is to name concepts in a way that doesn't depend
-on the specific tools (dune, ocamlfind, opam), and instead based on the
-underlying concept (module, library, package).
-
-The remainder of the files are either source code or metadata
 files.
 
 There are three kinds of names that come up in OCaml projects:
@@ -185,8 +160,8 @@ There are three kinds of names that come up in OCaml projects:
   together into a *library*, providing a convenient way to package up
   some dependencies with a single name -- in this case, the `hello`
   library. Although this example contains just the single `Hello`
-  module , it is common to have multiple modules per library.  You
-  refer to library names in a dune file when deciding what libraries
+  module, it is common to have multiple modules per library.  You
+  refer to library names in a `dune` file when deciding what libraries
   to link in, and you can query the installed libraries via `ocamlfind
   list` at your command prompt.
 - **package names:** a set of libraries, binaries and application data
@@ -210,16 +185,13 @@ distinct as well:
 - Package names might differ from library names if a package combines
   multiple libraries and/or binaries together.
 
- -->
-
-It is important to understand the difference between modules,
-ocamlfind libraries and opam packages, as you will use each of these
-at different points of your OCaml coding journey.  The root of a
-project is marked by a `dune-project` file (more on that later). We
-typically structure our project into subdirectories that contain the
-modules for a particular library or binary, with each directory
-containing a separate `dune` file with build instructions.  In our
-hello world example, we have:
+It is important to understand the difference between modules, libraries and
+packages, as you will use each of these at different points of your OCaml
+coding journey.  The root of a project is marked by a `dune-project` file
+(more on that later). We typically structure our project into subdirectories that
+contain the modules for a particular library or binary, with each directory
+containing a separate `dune` file with build instructions.  In our hello world
+example, we have:
 
 - a `lib/` directory that builds a `hello` ocamlfind library.
 - a `test/` directory that defines unit tests for the library.
@@ -240,12 +212,6 @@ reusability.  Let's look at `lib/dune` in more detail:
  (libraries))
 ```
 
-<!-- TODO yminsky: I feel like the drafting here is a little confusing,
-in particular, I don't think "internal" and "system-wide" really
-captures what's going on.
-
-Here's some alternate language to consider:
-
 By default, dune exposes libraries as *wrapped* under a single module,
 and the `name` field determines the name of that module.  In our
 example project `hello.ml` is exported as the `Hello` module since
@@ -255,19 +221,9 @@ The `public_name`, on the other hand, determines the name for the
 library, which is what you use when requesting to link a given library
 be linked in, via the `libraries` field in your dune file.
 
--->
-
-The `(name)` field defines the project-internal name for the compiled
-library, and the `(public_name)` field is what it will be called when
-installed system-wide. The choice of `(name)` defines the toplevel
-module exposed by this library, and every other module in the library
-will be exposed as a "wrapped" submodule of that toplevel module. In
-our example project `hello.ml` is exported as the `Hello` module since
-it's the project name, but if we added a file called `world.ml` into
-this directory the resulting module would be found in
-`Hello.World`. While private library names must adhere to OCaml's
-module naming convention, it's common practise to use dashes and dots
-in public library names.
+While the library names must adhere to OCaml's module naming
+conventions, it's common practise to use dashes and dots in public
+library names.
 
 ### Writing test cases for a library
 
@@ -350,16 +306,10 @@ going with building and browsing your interfaces.
 ### Browsing interface documentation
 
 The OCaml LSP server understands how to interface with dune and
-<!-- I assume we're mostly sticking to American English, so it should -->
-<!-- be artifacts, not artefacts.  Also, do you really mean "built -->
-<!-- artifacts"? I would have thought it would be "build artifacts". -->
-<!-- Also, more substantively, is it actually build artifacts you -->
-<!-- examine in vscode? I think you mostly examine the source, not the -->
-<!-- build artifacts...-->
-examine the built artefacts, so opening your local project in VS Code
-is sufficient to activate all the features.  Try navigating over to
-`bin/main.ml`, where you will see the invocation to the `hello`
-library.
+examine the build artifacts (such as the typed `.cmt` interface files), so
+opening your local project in VS Code is sufficient to activate all the
+features.  Try navigating over to `bin/main.ml`, where you will see the
+invocation to the `hello` library.
 
 <!-- $MDX file=examples/correct/hello-world/bin/main.ml -->
 ```
@@ -396,9 +346,8 @@ val greet : string -> string
     {[ print_endline @@ greet "Jane" ]} *)
 ```
 
-<!-- TODO yminsky: The sentence below doesn't quite parse. -->
 Documentation strings are parsed by the
-[odoc](https://github.com/ocaml/odoc) tool generate HTML and PDF
+[odoc](https://github.com/ocaml/odoc) tool to generate HTML and PDF
 documentation from a collection of opam packages.  If you intend your
 code to be used by anyone else (or indeed, by yourself a few months
 later) you should take the time to annotate your OCaml signature files
