@@ -42,6 +42,10 @@ $ opam spin ls
 Before we dive into any of these, we'll generate a tutorial using
 Spin's built-in hello world project.
 
+<!-- TODO yminsky: This is a little confusing. What is hello, and -->
+<!-- hello-world here?  If "hello" is a type of spin, why didn't -->
+<!-- it show up when you typed `opam spin ls`?  -->
+
 <!-- ```sh dir=examples/correct/opam-spin-hello
 TODO need a way to stop spin from running the opam install commands
  -->
@@ -54,6 +58,21 @@ Done!
 
 🎁  Installing packages globally. This might take a couple minutes.
 ```
+
+<!-- TODO yminsky: Do we really want to be recommending opam-spin? It -->
+<!-- installs things in the global switch, which isn't really what one -->
+<!-- should want, right? Is there no more lockfile-style workflow we -->
+<!-- can encourage? -->
+
+
+<!-- TODO yminsky: When I try to run this, I get a build error:
+
+File "test/hello_test.ml", line 1:
+Error (warning 70 [missing-mli]): Cannot find interface file.
+
+    The test directory is missing hello_test.mli.  Touching the file
+    is enough to fix the build.
+-->
 
 Spin will create a `hello-world` directory and populate it with a
 skeleton OCaml project.  This sample project has all the metadata
@@ -148,6 +167,51 @@ files. There are three layers of names used in every OCaml project:
   you eventually publish the package and another user types in `opam
   install hello`.
 
+<!-- I wonder if we can explain this better. Here's an attempt.
+Part of my goal here is to name concepts in a way that doesn't depend
+on the specific tools (dune, ocamlfind, opam), and instead based on the
+underlying concept (module, library, package).
+
+The remainder of the files are either source code or metadata
+files.
+
+There are three kinds of names that come up in OCaml projects:
+
+- **module names:** Individual `ml` and `mli` files each define
+  modules, named after the file. Modules names are what you refer to
+  when writing OCaml code -- for example, `Hello` is the module
+  defined in our project.
+- **library names:** one or more OCaml modules can be gathered
+  together into a *library*, providing a convenient way to package up
+  some dependencies with a single name -- in this case, the `hello`
+  library. Although this example contains just the single `Hello`
+  module , it is common to have multiple modules per library.  You
+  refer to library names in a dune file when deciding what libraries
+  to link in, and you can query the installed libraries via `ocamlfind
+  list` at your command prompt.
+- **package names:** a set of libraries, binaries and application data
+  can all be gathered together into a *package*.  This is what is
+  installed when you eventually publish the package and another user
+  types in `opam install hello`.  In our case, `hello.opam` contains
+  the specification of the package.
+
+Much of the time, the module, library, and package names are all the
+same.  By default, dune wraps up multi-module library under a single
+module name, and that same module name can often be used for the
+library and the package.  But there are reasons for these names to be
+distinct as well:
+
+- Some libraries are exposed as multiple top-level modules, which
+  means you need to pick a different name for referring to that
+  collection of modules.
+- Even when the library has a single top-level module, you might want
+  the library name to be different from the module name to avoid name
+  clashes at the library level.
+- Package names might differ from library names if a package combines
+  multiple libraries and/or binaries together.
+
+ -->
+
 It is important to understand the difference between modules,
 ocamlfind libraries and opam packages, as you will use each of these
 at different points of your OCaml coding journey.  The root of a
@@ -175,6 +239,23 @@ reusability.  Let's look at `lib/dune` in more detail:
  (public_name hello)
  (libraries))
 ```
+
+<!-- TODO yminsky: I feel like the drafting here is a little confusing,
+in particular, I don't think "internal" and "system-wide" really
+captures what's going on.
+
+Here's some alternate language to consider:
+
+By default, dune exposes libraries as *wrapped* under a single module,
+and the `name` field determines the name of that module.  In our
+example project `hello.ml` is exported as the `Hello` module since
+it's the project name, but if we added a file called `world.ml` into
+this directory the resulting module would be found in `Hello.World`.
+The `public_name`, on the other hand, determines the name for the
+library, which is what you use when requesting to link a given library
+be linked in, via the `libraries` field in your dune file.
+
+-->
 
 The `(name)` field defines the project-internal name for the compiled
 library, and the `(public_name)` field is what it will be called when
@@ -222,6 +303,10 @@ to test cases.
  (libraries hello))
 ```
 
+<!-- TODO yminsky: maybe worth saying that there has to be an ml file
+for the corresponding name, and that only that executable and the
+modules it depends on will be linked in to the executable. -->
+
 Much like libraries, the `(name)` field here has to adhere to OCaml
 module naming conventions, and the `public_name` field represents the
 binary name that is installed onto the system and just needs to be a
@@ -265,6 +350,12 @@ going with building and browsing your interfaces.
 ### Browsing interface documentation
 
 The OCaml LSP server understands how to interface with dune and
+<!-- I assume we're mostly sticking to American English, so it should -->
+<!-- be artifacts, not artefacts.  Also, do you really mean "built -->
+<!-- artifacts"? I would have thought it would be "build artifacts". -->
+<!-- Also, more substantively, is it actually build artifacts you -->
+<!-- examine in vscode? I think you mostly examine the source, not the -->
+<!-- build artifacts...-->
 examine the built artefacts, so opening your local project in VS Code
 is sufficient to activate all the features.  Try navigating over to
 `bin/main.ml`, where you will see the invocation to the `hello`
@@ -305,6 +396,7 @@ val greet : string -> string
     {[ print_endline @@ greet "Jane" ]} *)
 ```
 
+<!-- TODO yminsky: The sentence below doesn't quite parse. -->
 Documentation strings are parsed by the
 [odoc](https://github.com/ocaml/odoc) tool generate HTML and PDF
 documentation from a collection of opam packages.  If you intend your
@@ -326,6 +418,14 @@ you can view normally with a webbrowser.
 As you develop more OCaml code, you'll find it convenient to have it
 formatted to a common style.  The `ocamlformat` tool can help you do
 this easily from within VSCode.
+
+<!-- TODO yminsky: what's the pattern here? Does ocamlformat support -->
+<!-- multiple versions of its formatting logic concurrently?  If I -->
+<!-- have multiple codebases with the same opam switch but different -->
+<!-- desired ocamlformat versions, am I screwed?  Or do you install -->
+<!-- multiple parallel ocamlformats?  If one ocamlformat supports -->
+<!-- multiple versions, shouldn't we just install the latest -->
+<!-- ocamlformat, rather than install 0.19.0 in particular?    -->
 
 ```skip
 $ echo 'version=0.19.0' > .ocamlformat
