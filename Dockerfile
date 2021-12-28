@@ -1,5 +1,5 @@
 FROM ocaml/opam:ubuntu
-RUN sudo apt-get update && sudo apt-get -y install python-pygments tzdata
+RUN sudo apt-get update && sudo apt-get -y install python3-pygments tzdata
 ENV OPAMYES=1
 WORKDIR /home/opam/src
 
@@ -23,8 +23,8 @@ WORKDIR /tmp
 RUN sudo apt-get update && sudo apt-get -y install texlive-full
 WORKDIR /home/opam/src
 
-# compile the project
-COPY . /home/opam/src/
-RUN sudo chown -R opam /home/opam/src
-RUN opam exec -- make
-RUN opam exec -- make test
+## compile the project
+#COPY . /home/opam/src/
+#RUN sudo chown -R opam /home/opam/src
+#RUN opam exec -- make generate
+#RUN opam exec -- make test
