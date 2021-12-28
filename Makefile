@@ -9,6 +9,7 @@ all:
 
 generate:
 	@dune build @site @pdf
+	cd /data/_build/default/static ; pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --listings -o book.epub -t epub -s book.md
 	@echo The site and the pdf have been generated in _build/default/static/
 
 test:
