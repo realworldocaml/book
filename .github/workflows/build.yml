@@ -27,6 +27,14 @@ jobs:
       - name: Install pandoc
         run: brew install pandoc
 
+      - name: Install Calibre
+        if: runner.os == 'Linux'
+        run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+      - name: Install LaTeX dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get -y install texlive-xetex texlive-science texlive-fonts-extra
+
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
         with:
@@ -37,9 +45,9 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: opam install dune>=2.9.0
 
-      - name: Build HTML book
+      - name: Build HTML and PDF book
         if: runner.os == 'Linux'
-        run: opam exec -- dune build @site
+        run: opam exec -- dune build @site @pdf
 
       - name: Run promotion tests
         run: opam exec -- dune runtest
@@ -50,3 +58,41 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/default/static
+
+      - name: Upload artifacts (html, pdf, md, tex)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: static
+          path: ./_build/default/static
+
+      - name: Upload PDF artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: book.pdf
+          path: ./_build/default/static/book.pdf
+
+      - name: Convert to EPUB
+        if: runner.os == 'Linux'
+        working-directory: ./_build/default/static
+        run: pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --listings -o book.epub -t epub -s book.md
+
+      - name: Upload EPUB artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: book.epub
+          path: ./_build/default/static/book.epub
+
+      - name: Convert to MOBI
+        if: runner.os == 'Linux'
+        working-directory: ./_build/default/static
+        run: ebook-convert book.epub book.mobi
+
+      - name: Upload MOBI artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: book.mobi
+          path: ./_build/default/static/book.mobi
