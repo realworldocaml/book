@@ -11,10 +11,10 @@
 (rule
  (alias pdf-wip)
  (targets book.tex)
- (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
+ (deps ../bin/pandoc-rwo/pandoc_rwo_tex.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
  (action
   (progn
-   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
+   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo_tex.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf-wip)
