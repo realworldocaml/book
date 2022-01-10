@@ -45,9 +45,9 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: opam install dune>=2.9.0
 
-      - name: Build HTML and PDF book
+      - name: Build book
         if: runner.os == 'Linux'
-        run: opam exec -- dune build @site @pdf
+        run: opam exec -- dune build
 
       - name: Run promotion tests
         run: opam exec -- dune runtest
@@ -76,7 +76,7 @@ jobs:
       - name: Convert to EPUB
         if: runner.os == 'Linux'
         working-directory: ./_build/default/static
-        run: pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --listings -o book.epub -t epub -s book.md
+        run: pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo_epub.exe --metadata-file=../book/book.yml --listings -o book.epub -t epub -s book.md
 
       - name: Upload EPUB artifact
         if: runner.os == 'Linux'
