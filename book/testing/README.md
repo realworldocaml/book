@@ -301,10 +301,10 @@ Note that Dune will use the `patdiff` tool if it's available, which
 generates easier-to-read diffs.  You can install `patdiff` with
 `opam`.
 
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE,non-deterministic
+```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
 $ dune runtest
      patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+(cd _build/default && /home/yminsky/Code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 5, characters 0-1:
@@ -442,6 +442,7 @@ The example above used a new syntax for string literals, called
 
 ```ocaml env=main
 # {|This is a quoted string|}
+- : string = "This is a quoted string"
 ```
 
 The advantage of this syntax is that it allows the content to be
@@ -450,7 +451,9 @@ literals.  Consider the following examples.
 
 ```ocaml env=main
 # {|This is a literal quote: "|}
+- : string = "This is a literal quote: \""
 # "This is a literal quote \""
+- : string = "This is a literal quote \""
 ```
 
 If you want to have a literal `|}` inside your quoted string, you can
@@ -459,6 +462,7 @@ delimiter, so the delimiter doesn't show up in your text.
 
 ```ocaml env=main
 # {xxx|This is how you write a {|quoted string|}|xxx}
+- : string = "This is how you write a {|quoted string|}"
 ```
 
 Quoted strings are especially useful when you want to include a raw
@@ -473,7 +477,7 @@ tests.
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
+```sh dir=examples/erroneous/soup_test
 $ dune runtest
      patdiff (internal) (exit 1)
 ...
@@ -630,10 +634,10 @@ execution traces.
 
 <!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
 
-```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE,non-deterministic
+```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE
 $ dune runtest
      patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+(cd _build/default && /home/yminsky/Code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 32, characters 0-1:
@@ -827,11 +831,11 @@ happens.  The results, however, are not what you might hope for.
 
 <!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
 
-```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE,non-deterministic
+```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE
 $ dune runtest
-Entering directory 'rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+Entering directory '/home/yminsky/Code/rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
      patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
+(cd _build/default && /home/yminsky/Code/rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
 ------ test/test.ml
 ++++++ test/test.ml.corrected
 File "test/test.ml", line 11, characters 0-1:
