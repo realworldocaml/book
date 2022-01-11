@@ -472,12 +472,12 @@ tests.
 :::
 
 
-```
+
 
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/erroneous/soup_test
+```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
 $ dune runtest
      patdiff (internal) (exit 1)
 ...
