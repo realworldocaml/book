@@ -1,37 +1,17 @@
 # Testing
 
 Testing is a foundational part of building reliable and maintainable
-software.  OCaml's type system is surprisingly good at catching bugs,
-but in the end, it's far from a complete story.  Tests remain an
-essential tool for verifying that your code behaves as you expect and
-preventing regressions as your code evolves.
+software.  The goal of this chapter is to teach you how to write
+effective tests in OCaml, and to show off some tools that can help.
+Tooling is especially important in the context of testing because one
+of the things that prevents people from doing as much testing as they
+should is the tedium of it.  But with the right tools in hand, writing
+tests can be lightweight and fun.
 
-People sometimes think of types and tests as competing ways of
-increasing assurance, but in reality, the two approaches work best
-together.  Types obviate the need for writing many tests that you'd
-need in an untyped context, and having rich and expressive types of
-the kind you have in OCaml increases that advantage.  And while
-type-safe code can easily be wrong, types have a way of increasing the
-rigidity of your code, in a way that makes it snap into place with
-fewer tests than you might expect.  All in, tests magnify the power of
-the tests you write.
+Before discussing the available tools, it's worth pausing to consider
+what constitutes a good set of tests in the first place.
 
-The goal of this chapter is to teach you more about how to write
-effective tests in OCaml, and to teach you some of the best tools for
-the job.  Tooling is especially important in the context of testing
-because one of the things that prevents people from doing as much
-testing as they should is the sheer tedium of it.  But with the right
-tools in hand, writing tests can be lightweight and fun.  And when
-testing is fun, a lot more testing gets done.
-
-Before talking about the testing tools that are available in OCaml,
-let's discuss at a high level what we want out of our tests and our
-testing tools.
-
-## What makes for good tests?
-
-Here are some of the properties that characterize well-written tests
-in a good testing environment.
+In particular, good tests should be:
 
 - **Easy to write and run**. Tests should require a minimum of
   boilerplate to create and to hook into your development process.

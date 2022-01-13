@@ -1008,7 +1008,7 @@ option, and the second indicates whether this is being used in an
 incomplete state.
 
 ```ocaml env=main
-type (_, _) coption =
+type ('a, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -> ('a, _) coption
 ```
