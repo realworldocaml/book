@@ -384,6 +384,7 @@ area.  [width subtyping]{.idx}[subtyping/width subtyping]{.idx}
 # type shape = < area : float >
 type shape = < area : float >
 ```
+
 Now let's add a type representing a specific kind of shape, as well as
 a function for creating objects of that type.
 
