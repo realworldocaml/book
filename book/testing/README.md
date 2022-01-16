@@ -13,7 +13,7 @@ Before discussing concrete tools, it's worth pausing to consider what
 we want out of our tests and testing infrastructure in the first
 place.
 
-Here are some goals to keep in mind.  Tests should be:
+Ideally, tests should be:
 
 - **Easy to write and run**. Tests should require a minimum of
   boilerplate to create and to hook into your development process.
@@ -36,8 +36,8 @@ properties.  But the tools you choose can help or hinder on all these
 fronts.
 
 As we go through the rest of this chapter and introduce you to some of
-the available tooling, you should be able to see how each tool can
-help advance these goals.
+the available tooling, you should be able to see how each tool helps
+advance these goals.
 
 ## Inline tests
 
