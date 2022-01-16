@@ -269,8 +269,8 @@ us about an unused open.
 
 But because `Base` is effectively our standard library, we want to
 keep it open anyway, since we want any new code we write to find
-`Base`'s libraries, not the ordinary OCaml standard library.  The
-exclamation point at the end of `open` suppresses that warning.
+`Base`'s modules rather than those from the ordinary standard library.
+The exclamation point at the end of `open` suppresses that warning.
 
 :::
 
