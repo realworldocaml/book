@@ -1,17 +1,19 @@
 # Testing
 
-Testing is a foundational part of building reliable and maintainable
-software.  The goal of this chapter is to teach you how to write
-effective tests in OCaml, and to show off some tools that can help.
-Tooling is especially important in the context of testing because one
-of the things that prevents people from doing as much testing as they
-should is the tedium of it.  But with the right tools in hand, writing
-tests can be lightweight and fun.
+The goal of this chapter is to teach you how to write effective tests
+in OCaml, and to show off some tools that can help.  Tooling is
+especially important in the context of testing because one of the
+things that prevents people from doing as much testing as they should
+is the tedium of it.  But with the right tools in hand, writing tests
+can be lightweight and fun, and you'll find yourself writing a lot
+more tests, improving the reliability and flexibility of your code
+along the way.
 
-Before discussing the available tools, it's worth pausing to consider
-what constitutes a good set of tests in the first place.
+Before discussing concrete tools, it's worth pausing to consider what
+we want out of our tests and testing infrastructure in the first
+place.
 
-In particular, good tests should be:
+Here are some goals to keep in mind.  Tests should be:
 
 - **Easy to write and run**. Tests should require a minimum of
   boilerplate to create and to hook into your development process.
@@ -119,7 +121,7 @@ meaningful exception if the arguments are unequal.
 
 To use `[%test_eq]`, we're going to need to add the `ppx_assert`
 syntax extension, so we'll need to adjust our `dune` file
-appropiately.
+appropriately.
 
 ```scheme file=examples/erroneous/test_eq-inline_test/dune
 (library
@@ -262,8 +264,8 @@ let%expect_test "trivial" =
 ##### `open` and `open!`
 
 In this example, we use `open!` instead of `open` because we happen
-not to be usinging any values from `Base`, and so the compiler will
-warn us about an unused open.
+not to be using any values from `Base`, and so the compiler will warn
+us about an unused open.
 
 But because `Base` is effectively our standard library, we want to
 keep it open anyway, since we want any new code we write to find
@@ -880,8 +882,8 @@ We fixed the problem, but solution should make you uncomfortable.  For
 one thing, why is one second the right timeout, rather than a half a
 second, or ten?  The time we wait is some balance between reducing the
 likelihood of a non-deterministic failure versus preserving
-performance of the test, which is a bit of an awkward tradeoff to have
-to meke.
+performance of the test, which is a bit of an awkward trade-off to have
+to make.
 
 We can improve on this by removing the `Clock.after` call, and instead
 adding a retry loop to the `connect` test helper
@@ -954,7 +956,7 @@ connecting three operations:
   integer, either `Positive`, `Negative`, or `Zero`
 - `Int.neg`, which negates a number
 - `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
-  `Negative` and vice-versa.
+  `Negative` and vice versa.
 
 The invariant we want to check is that the sign of the negation of any
 integer `x` is the flip of the sign of `x`.
@@ -1262,7 +1264,7 @@ the necessary instrumentation.
 
 AFL can have eerily good results, and can with no guidance do things
 like constructing nearly-parseable text when fuzzing a parser, just by
-iteratively randomzing inputs in the direction of more coverage of the
+iteratively randomizing inputs in the direction of more coverage of the
 program being exercised.
 
 If you're interested in AFL, there are some related tools worth
