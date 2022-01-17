@@ -819,6 +819,11 @@ Then, by opening `Import`, we can shadow `Base`'s `Option` module with
 our extension.
 
 ```ocaml file=examples/correct/ext-option/use_import.ml
+open Base
+open Import
+
+let lookup_and_apply map key x =
+  Option.apply (Map.find map key) x
 ```
 
 
