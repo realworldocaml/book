@@ -146,9 +146,8 @@ use `ppx_jane` throughout the rest of this chapter, which bundles
 together `ppx_inline_test` along with a collection of other useful
 preprocessors.
 
-In any case, here's what our new test looks like. You'll notice that
-it's a little more concise, mostly because this is a more concise way
-to express the comparison function.
+Here's what our new test looks like. You'll notice that it's a little
+more concise this way.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
 open Base
@@ -280,6 +279,10 @@ But because `Base` is effectively our standard library, we want to
 keep it open anyway, since we want any new code we write to find
 `Base`'s modules rather than those from the ordinary standard library.
 The exclamation point at the end of `open` suppresses that warning.
+
+A sensible idiom is to always use `open!` when opening a library like
+`Base`, so that you don't have to choose when to use the `!`, and when
+not to.
 
 :::
 
