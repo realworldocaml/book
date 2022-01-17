@@ -806,17 +806,21 @@ to replace a function in `Option` with a new function of the same name, the
 declaration of that function in the `ml` would have to come after the
 `include Option` declaration.
 
-We can now use `Ext_option` as a replacement for `Option`. If we want to use
-`Ext_option` in preference to `Option` in our project, we can create a file of
-common definitions:
+We can now use `Ext_option` as a replacement for `Option`. If we want
+to use `Ext_option` in preference to `Option` in our project, we can
+create a file of common definitions, which in this case we'll call
+`import.ml`.
 
-```ocaml file=examples/correct/ext-option/common.ml
+```ocaml file=examples/correct/ext-option/import.ml
 module Option = Ext_option
 ```
 
-And if we then put `open Common` after `open Base` at the top of each file in
-our project, then references to `Option` will automatically go to `Ext_option`
-instead.
+Then, by opening `Import`, we can shadow `Base`'s `Option` module with
+our extension.
+
+```ocaml file=examples/correct/ext-option/use_import.ml
+```
+
 
 ## Common Errors with Modules
 
