@@ -5,13 +5,22 @@ in OCaml, and to show off some tools that can help.  Tooling is
 especially important in the context of testing because one of the
 things that prevents people from doing as much testing as they should
 is the tedium of it.  But with the right tools in hand, writing tests
-can be lightweight and fun, and you'll find yourself writing a lot
-more tests, improving the reliability and flexibility of your code
-along the way.
+can be lightweight and fun.
 
-Before discussing concrete tools, it's worth pausing to consider what
-we want out of our tests and testing infrastructure in the first
-place.
+And that's important, because when testing is fun, you'll do more of
+it, and thorough testing is an essential element of building reliable
+and evolvable software.  People sometimes imagine that tests are less
+important in a language like OCaml with a rich and expressive
+type-system, but in some sense the opposite is true.  Really, types
+help you get more value out of your testing effort, both because they
+prevent you from needing to test all sorts of trivial properties that
+are automatically enforced by the type system, and because the
+rigidity of types mean that your code often has a kind of
+snap-together quality, where a relatively small number of tests can do
+an outsize amount to ensure that your code is behaving as expected.
+
+Before we start introducing testing tools, it's worth pausing to
+consider what we want out of our tests in the first place.
 
 Ideally, tests should be:
 
