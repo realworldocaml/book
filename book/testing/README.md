@@ -446,22 +446,26 @@ literals.  Consider the following examples.
 ```ocaml env=main
 # {|This is a literal quote: "|}
 - : string = "This is a literal quote: \""
-# "This is a literal quote \""
-- : string = "This is a literal quote \""
 ```
 
-If you want to have a literal `|}` inside your quoted string, you can
-do so without escaping: you just add an identifier to the string
-delimiter, so the delimiter doesn't show up in your text.
+As you can see, we didn't need to escape the included quote, though
+the version of the string echoed back by the toplevel uses the
+ordinary string literal syntax, and so that does include the escape.
+
+Quoted strings are especially useful when writing strings containing
+text from another language, like HTML.  With quoted strings, you can
+just paste in a snippet of some other source language, and it should
+work unmodified.
+
+The one tricky corner is if you need to include a literal `|}` inside
+your quoted string.  The trick is that you can change the delimiter
+for the quoted string by adding an arbitrary identifier, thereby
+ensuring that the delimiter won't show up in the body of the string.
 
 ```ocaml env=main
 # {xxx|This is how you write a {|quoted string|}|xxx}
 - : string = "This is how you write a {|quoted string|}"
 ```
-
-Quoted strings are especially useful when you want to include a raw
-chunk of text from some outside source, which happens frequently in
-tests.
 
 :::
 
