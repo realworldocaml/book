@@ -1,20 +1,9 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Testing - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="testing">
 <h1>Testing</h1>
-<p>Testing is not the best-loved part of programming. Writing tests is an exacting and sometimes dreary job, and it can feel like a distraction from the task of building out your code’s functionality. At first blush, OCaml’s type-system makes testing seem even less appealing, since the type system’s ability to squash many kinds of bugs at compile time catches lots of mistakes that you would otherwise need to write tests to protect against.</p>
-<p>But make no mistake, clever types notwithstanding, testing is essential for developing and evolving reliable software systems. And OCaml’s type system, viewed properly, is an aid to testing, not a reason to avoid it.</p>
-
-
-
-
-
-
-
-
-<p>The goal of this chapter is to teach you more about how to write effective tests in OCaml, and to teach you some of the best tools for the job. Tooling is especially important in the context of testing because one of the things that prevents people from doing as much testing as they should is the sheer tedium of it. But with the right tools in hand, writing tests can be lightweight and fun. And when testing is fun, a lot more testing gets done.</p>
-<p>Before talking about the testing tools that are available in OCaml, let’s discuss at a high level what we want out of our tests and our testing tools.</p>
-<section class="level2" id="what-makes-for-good-tests">
-<h2>What makes for good tests?</h2>
-<p>Here are some of the properties that characterize well-written tests in a good testing environment.</p>
+<p>The goal of this chapter is to teach you how to write effective tests in OCaml, and to show off some tools that can help. Tooling is especially important in the context of testing because one of the things that prevents people from doing as much testing as they should is the tedium of it. But with the right tools in hand, writing tests can be lightweight and fun.</p>
+<p>And that’s important, because when testing is fun, you’ll do more of it, and thorough testing is an essential element of building reliable and evolvable software. People sometimes imagine that tests are less important in a language like OCaml with a rich and expressive type-system, but in some sense the opposite is true. Really, types help you get more value out of your testing effort, both because they prevent you from needing to test all sorts of trivial properties that are automatically enforced by the type system, and because the rigidity of types mean that your code often has a kind of snap-together quality, where a relatively small number of tests can do an outsize amount to ensure that your code is behaving as expected.</p>
+<p>Before we start introducing testing tools, it’s worth pausing to consider what we want out of our tests in the first place.</p>
+<p>Ideally, tests should be:</p>
 <ul>
 <li><strong>Easy to write and run</strong>. Tests should require a minimum of boilerplate to create and to hook into your development process. Ideally, you should set things up so that tests are run automatically on every proposed change, preventing people from accidentally breaking the build.</li>
 <li><strong>Easy to update</strong>. Tests that are hard to adjust in the face of code changes can become their own form of technical debt.</li>
@@ -23,8 +12,7 @@
 <li><strong>Understandable</strong>. Good tests should be easy to read, and their failures should be localized and specific, so it’s easy to find and fix the problem flagged by a failing test.</li>
 </ul>
 <p>No testing framework can ensure that your tests satisfy these properties. But the tools you choose can help or hinder on all these fronts.</p>
-<p>As we go through the rest of this chapter and introduce you to some of the available tooling, you should be able to see how each tool can help advance these goals.</p>
-</section>
+<p>As we go through the rest of this chapter and introduce you to some of the available tooling, you should be able to see how each tool helps advance these goals.</p>
 <section class="level2" id="inline-tests">
 <h2>Inline tests</h2>
 <p>The first step towards a good testing environment is making it easy to set up and and run a test. To that end, we’ll show you how to write tests with <code>ppx_inline_test</code>, which lets you add tests to any module in a library with a specially annotated <code>let</code> binding.</p>
@@ -33,22 +21,17 @@
 <li>Tell Dune to expect inline tests to show up in the library, and</li>
 <li>enable <code>ppx_inline_test</code> as a preprocessor.</li>
 </ul>
-<p>The first of these is achieved by adding an <code>(inline_tests)</code> declaration, and the second is achieved by adding <code>ppx_jane</code> to the set of preprocessors. (<code>ppx_jane</code> bundles together <code>ppx_inline_test</code> with a collection of other useful preprocessors.) Here’s the resulting <code>dune</code> file.</p>
-
-
-
-
-
+<p>The first of these is achieved by adding an <code>(inline_tests)</code> declaration, and the second is achieved by adding <code>ppx_inline_test</code> to the set of preprocessors. Here’s the resulting <code>dune</code> file.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(library
  (name foo)
  (libraries base stdio)
  (inline_tests)
- (preprocess (pps ppx_jane)))</code></pre>
+ (preprocess (pps ppx_inline_test)))</code></pre>
 </div>
 <p>With this done, any module in this library can host a test. We’ll demonstrate this by creating a file called <code>test.ml</code>, containing one test.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
+<pre><code class="language-ocaml">open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]</code></pre>
@@ -60,7 +43,7 @@ let%test "rev" =
 </div>
 <p>No output is generated because the test passed successfully. But if we break the test,</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
+<pre><code class="language-ocaml">open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [3;2;1]</code></pre>
@@ -77,9 +60,19 @@ let%test "rev" =
 <h3>More readable errors with <code>test_eq</code></h3>
 <p>One problem with the test output we just saw is that it doesn’t show the data associated with the failed test, thus making it harder to diagnose and fix the problem when it occurs. We can fix this if we signal a test failure by throwing an exception, rather than by returning false. That exception can then be used to report the details of what went wrong.</p>
 <p>To do this, we’ll change our test declaration to use <code>let%test_unit</code> instead of <code>let%test</code>, so that the test no longer expects a body that returns a bool. We’re also going to use the <code>[%test_eq]</code> syntax, which, given a type, generates code to test for equality and throw a meaningful exception if the arguments are unequal.</p>
-<p>Here’s what our new test looks like. You’ll notice that it’s a little more concise, mostly because this is a more concise way to express the comparison function.</p>
+<p>To use <code>[%test_eq]</code>, we’re going to need to add the <code>ppx_assert</code> syntax extension, so we’ll need to adjust our <code>dune</code> file appropriately.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
+<pre><code class="language-scheme">(library
+ (name foo)
+ (libraries base stdio)
+ (preprocess
+  (pps ppx_inline_test ppx_assert))
+ (inline_tests))</code></pre>
+</div>
+<p>Rather than add extensions one by one as we find more uses, we’ll just use <code>ppx_jane</code> throughout the rest of this chapter, which bundles together <code>ppx_inline_test</code> along with a collection of other useful preprocessors.</p>
+<p>Here’s what our new test looks like. You’ll notice that it’s a little more concise this way.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
 
 let%test_unit "rev" =
   [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]</code></pre>
@@ -125,26 +118,30 @@ let%test_unit "rev" =
 <h3>Basic mechanics</h3>
 <p>With expect tests, your source file specifies both the code to be executed and the expected output. Upon running an expect test, any discrepancy between the expected output and what was actually generated is reported as a test failure.</p>
 <p>Here’s a simple example of a test written in this style. While the test generates output (though a call to <code>print_endline</code>), that output isn’t captured in the source, at least, not yet.</p>
-
-
 <div class="highlight">
 <pre><code class="language-ocaml">open! Base
-open! Stdio
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!"</code></pre>
 </div>
+<section data-type="note" class="level5" id="open-and-open">
+<h5><code>open</code> and <code>open!</code></h5>
+<p>In this example, we use <code>open!</code> instead of <code>open</code> because we happen not to be using any values from <code>Base</code>, and so the compiler will warn us about an unused open.</p>
+<p>But because <code>Base</code> is effectively our standard library, we want to keep it open anyway, since we want any new code we write to find <code>Base</code>’s modules rather than those from the ordinary standard library. The exclamation point at the end of <code>open</code> suppresses that warning.</p>
+<p>A sensible idiom is to always use <code>open!</code> when opening a library like <code>Base</code>, so that you don’t have to choose when to use the <code>!</code>, and when not to.</p>
+</section>
 <p>If we run the test, we’ll be presented with a diff between what we wrote, and a <em>corrected</em> version of the source file that now has an <code>[%expect]</code> clause containing the output.</p>
-
+<p>Note that Dune will use the <code>patdiff</code> tool if it’s available, which generates easier-to-read diffs. You can install <code>patdiff</code> with <code>opam</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
 &gt;     patdiff (internal) (exit 1)
-...
+&gt;(cd _build/default &amp;&amp; rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 &gt;------ test.ml
 &gt;++++++ test.ml.corrected
 &gt;File "test.ml", line 5, characters 0-1:
 &gt; |open! Base
-&gt; |open! Stdio
+&gt; |open Stdio
 &gt; |
 &gt; |let%expect_test "trivial" =
 &gt;-|  print_endline "Hello World!"
@@ -154,8 +151,8 @@ let%expect_test "trivial" =
 </div>
 <p>The expect test runner also creates a version of the file with the captured output, with <code>.corrected</code> appended to the end of the filename. If this new output looks correct, we can <em>promote</em> it by copying the corrected file it over the original source. The <code>dune promote</code> command does just this, leaving our source as follows.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
-open! Stdio
+<pre><code class="language-ocaml">open Base
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!";
@@ -168,8 +165,8 @@ let%expect_test "trivial" =
 </div>
 <p>We only have one expect block in this example, but the system supports having multiple expect blocks:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
-open! Stdio
+<pre><code class="language-ocaml">open Base
+open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
@@ -182,8 +179,8 @@ let%expect_test "multi-block" =
 <h3>What are expect tests good for?</h3>
 <p>It’s not obvious why one would want to use expect tests in the first place. Why should this:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
-open! Stdio
+<pre><code class="language-ocaml">open Base
+open Stdio
 
 let%expect_test _ =
   print_s [%sexp (List.rev [3;2;1] : int list)];
@@ -191,7 +188,7 @@ let%expect_test _ =
 </div>
 <p>be preferable to this?</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
+<pre><code class="language-ocaml">open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]</code></pre>
@@ -204,8 +201,8 @@ let%test "rev" =
 <p>Expect tests can be especially helpful when you’re in exploration mode, and have no clear specification in advance. A routine programming task of this type is web-scraping. The goal is to extract some useful information from a web page, and figuring out the right way to do so often involves trial and error.</p>
 <p>Here’s some code that does this kind of data extraction, using the <code>lambdasoup</code> package to traverse a chunk of HTML and spit out some data embedded within it. In particular, the function aims to produce the set of hosts that show up in links within a document.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
-open! Stdio
+<pre><code class="language-ocaml">open Base
+open Stdio
 
 let get_href_hosts soup =
   Soup.select "a[href]" soup
@@ -230,6 +227,29 @@ let get_href_hosts soup =
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)]</code></pre>
 </div>
+<section data-type="note" class="level5" id="quoted-strings">
+<h5>Quoted strings</h5>
+<p>The example above used a new syntax for string literals, called <em>quoted strings</em>. Here’s an example.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a quoted string|} ;;
+&gt;- : string = "This is a quoted string"
+</code></pre>
+</div>
+<p>The advantage of this syntax is that it allows the content to be written without the usual escaping required for ordinary string literals. Consider the following examples.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a literal quote: "|} ;;
+&gt;- : string = "This is a literal quote: \""
+</code></pre>
+</div>
+<p>As you can see, we didn’t need to escape the included quote, though the version of the string echoed back by the toplevel uses the ordinary string literal syntax, and so that does include the escape.</p>
+<p>Quoted strings are especially useful when writing strings containing text from another language, like HTML. With quoted strings, you can just paste in a snippet of some other source language, and it should work unmodified.</p>
+<p>The one tricky corner is if you need to include a literal <code>|}</code> inside your quoted string. The trick is that you can change the delimiter for the quoted string by adding an arbitrary identifier, thereby ensuring that the delimiter won’t show up in the body of the string.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{xxx|This is how you write a {|quoted string|}|xxx} ;;
+&gt;- : string = "This is how you write a {|quoted string|}"
+</code></pre>
+</div>
+</section>
 <p>If we run the test, we’ll see that the output isn’t exactly what was intended.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
@@ -302,7 +322,7 @@ let get_href_hosts soup =
 <h3>Visualizing complex behavior</h3>
 <p>Expect tests can be used to examine the dynamic behavior of a system. Let’s walk through a simple example: a rate limiter. The job of a rate limiter is to bound the rate at which a system consumes a particular resource. The following is the <code>mli</code> for a library that specifies the logic of a simple rolling-window-style rate limiter.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Core
+<pre><code class="language-ocaml">open Core
 
 type t
 
@@ -311,7 +331,7 @@ val maybe_consume : t -&gt; now:Time_ns.t -&gt; [ `Consumed | `No_capacity ]</co
 </div>
 <p>We can demonstrate the behavior of the system by running through some examples. First, we’ll write some helper functions to make the examples shorter and easier to read.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Core
+<pre><code class="language-ocaml">open Core
 
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
@@ -353,39 +373,41 @@ let consume lim offset =
 <p>Running the tests will produce a corrected file that includes the execution traces.</p>
 
 <div class="highlight">
-<pre><code class="language-clike">$ dune runtest
------- test.ml
-++++++ test.ml.corrected
-File "test.ml", line 32, characters 0-1:
- |    "%4.2f: %s\n"
- |    offset
- |    (match result with
- |    | `Consumed -&gt; "C"
- |    | `No_capacity -&gt; "N")
- |
- |
- |[@@@part "2"];;
- |
- |let%expect_test _ =
- |  let lim = limiter () in
- |  let consume offset = consume lim offset in
- |  (* Exhaust the rate limit, without advancing the clock. *)
- |  for _ = 1 to 3 do
- |    consume 0.
- |  done;
--|  [%expect {| |}];
-+|  [%expect {|
-+|    0.00: C
-+|    0.00: C
-+|    0.00: C |}];
- |  (* Wait until a half-second has elapsed, try again *)
- |  consume 0.5;
--|  [%expect {| |}];
-+|  [%expect {| 0.50: C |}];
- |  (* Wait until a full second has elapsed, try again *)
- |  consume 1.;
--|  [%expect {|  |}]
-+|  [%expect {| 1.00: C |}]
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
+&gt;     patdiff (internal) (exit 1)
+&gt;(cd _build/default &amp;&amp; rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+&gt;------ test.ml
+&gt;++++++ test.ml.corrected
+&gt;File "test.ml", line 32, characters 0-1:
+&gt; |    "%4.2f: %s\n"
+&gt; |    offset
+&gt; |    (match result with
+&gt; |    | `Consumed -&gt; "C"
+&gt; |    | `No_capacity -&gt; "N")
+&gt; |
+&gt; |
+&gt; |[@@@part "2"];;
+&gt; |
+&gt; |let%expect_test _ =
+&gt; |  let lim = limiter () in
+&gt; |  let consume offset = consume lim offset in
+&gt; |  (* Exhaust the rate limit, without advancing the clock. *)
+&gt; |  for _ = 1 to 3 do
+&gt; |    consume 0.
+&gt; |  done;
+&gt;-|  [%expect {| |}];
+&gt;+|  [%expect {|
+&gt;+|    0.00: C
+&gt;+|    0.00: C
+&gt;+|    0.00: C |}];
+&gt; |  (* Wait until a half-second has elapsed, try again *)
+&gt; |  consume 0.5;
+&gt;-|  [%expect {| |}];
+&gt;+|  [%expect {| 0.50: C |}];
+&gt; |  (* Wait until a full second has elapsed, try again *)
+&gt; |  consume 1.;
+&gt;-|  [%expect {|  |}]
+&gt;+|  [%expect {| 1.00: C |}]
 [1]</code></pre>
 </div>
 <p>Running <code>dune promote</code> will accept the corrected file, leaving our test looking like this:</p>
@@ -464,7 +486,7 @@ File "test.ml", line 32, characters 0-1:
 <p>That done, our next step is to write some helper functions. We won’t show the implementation, but here’s the signature for our <code>Helpers</code> module. Note that there’s an argument in the <code>launch</code> function that lets you enable the feature in the echo server that causes it to uppercase the text it receives.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open! Core
-open! Async
+open Async
 
 (** Launches the echo server *)
 val launch : port:int -&gt; uppercase:bool -&gt; Process.t Deferred.t
@@ -482,7 +504,7 @@ val cleanup : Process.t -&gt; unit Deferred.t</code></pre>
 <p>With the above, we can now write a test that launches the server, connects to it over TCP, and then sends some data and displays the results.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open! Core
-open! Async
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -500,43 +522,47 @@ let%expect_test "test uppercase echo" =
 <p>Note that we put in some expect annotations where we want to see data, but we haven’t filled them in. We can now run the test to see what happens. The results, however, are not what you might hope for.</p>
 
 <div class="highlight">
-<pre><code class="language-clike">$ dune runtest
------- test/test.ml
-++++++ test/test.ml.corrected
-File "test/test.ml", line 11, characters 0-1:
- |open! Core
- |open! Async
- |open Helpers
- |
- |let%expect_test "test uppercase echo" =
- |  let port = 8081 in
- |  let%bind process  = launch ~port ~uppercase:true in
- |  Monitor.protect (fun () -&gt;
- |      let%bind (r,w) = connect ~port in
- |      let%bind () = send_data r w "one two three\n" in
--|      let%bind () = [%expect] in
-+|      let%bind () = [%expect.unreachable] in
- |      let%bind () = send_data r w "one 2 three\n" in
--|      let%bind () = [%expect] in
-+|      let%bind () = [%expect.unreachable] in
- |      return ())
- |    ~finally:(fun () -&gt; cleanup process)
-+|[@@expect.uncaught_exn {|
-+|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
-+|     This is strongly discouraged as backtraces are fragile.
-+|     Please change this test to not include a backtrace. *)
-+|
-+|  (monitor.ml.Error
-+|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
-+|    ("&lt;backtrace elided in test&gt;" "Caught by monitor Tcp.close_sock_on_error"))
-+|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
-+|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
+&gt;Entering directory 'rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+&gt;     patdiff (internal) (exit 1)
+&gt;(cd _build/default &amp;&amp; rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
+&gt;------ test/test.ml
+&gt;++++++ test/test.ml.corrected
+&gt;File "test/test.ml", line 11, characters 0-1:
+&gt; |open! Core
+&gt; |open Async
+&gt; |open Helpers
+&gt; |
+&gt; |let%expect_test "test uppercase echo" =
+&gt; |  let port = 8081 in
+&gt; |  let%bind process  = launch ~port ~uppercase:true in
+&gt; |  Monitor.protect (fun () -&gt;
+&gt; |      let%bind (r,w) = connect ~port in
+&gt; |      let%bind () = send_data r w "one two three\n" in
+&gt;-|      let%bind () = [%expect] in
+&gt;+|      let%bind () = [%expect.unreachable] in
+&gt; |      let%bind () = send_data r w "one 2 three\n" in
+&gt;-|      let%bind () = [%expect] in
+&gt;+|      let%bind () = [%expect.unreachable] in
+&gt; |      return ())
+&gt; |    ~finally:(fun () -&gt; cleanup process)
+&gt;+|[@@expect.uncaught_exn {|
+&gt;+|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
+&gt;+|     This is strongly discouraged as backtraces are fragile.
+&gt;+|     Please change this test to not include a backtrace. *)
+&gt;+|
+&gt;+|  (monitor.ml.Error
+&gt;+|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
+&gt;+|    ("&lt;backtrace elided in test&gt;" "Caught by monitor Tcp.close_sock_on_error"))
+&gt;+|  Raised at Base__Result.ok_exn in file "duniverse/base/src/result.ml", line 201, characters 17-26
+&gt;+|  Called from Expect_test_collector.Make.Instance.exec in file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
 [1]</code></pre>
 </div>
 <p>What went wrong here? The issue is that the connect fails, because at the time of the connection, the echo server hasn’t finished setting up the server. We can fix this by adding a one second delay before connecting, using Async’s <code>Clock.after</code>. With this change, the test now passes, with the expected results.</p>
+
 <div class="highlight">
-<pre><code class="language-ocaml">open! Core
-open! Async
+<pre><code class="language-clike">open! Core
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -552,7 +578,7 @@ let%expect_test "test uppercase echo" =
       return ())
     ~finally:(fun () -&gt; cleanup process)</code></pre>
 </div>
-<p>We fixed the problem, but solution should make you uncomfortable. For one thing, why is one second the right timeout, rather than a half a second, or ten? The time we wait is some balance between reducing the likelihood of a non-deterministic failure versus preserving performance of the test, which is a bit of an awkward tradeoff to have to meke.</p>
+<p>We fixed the problem, but solution should make you uncomfortable. For one thing, why is one second the right timeout, rather than a half a second, or ten? The time we wait is some balance between reducing the likelihood of a non-deterministic failure versus preserving performance of the test, which is a bit of an awkward trade-off to have to make.</p>
 <p>We can improve on this by removing the <code>Clock.after</code> call, and instead adding a retry loop to the <code>connect</code> test helper</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let rec connect ~port =
@@ -588,12 +614,12 @@ let%expect_test "test uppercase echo" =
 <ul>
 <li><code>Int.sign</code>, which computes a <code>Sign.t</code> representing the sign of an integer, either <code>Positive</code>, <code>Negative</code>, or <code>Zero</code></li>
 <li><code>Int.neg</code>, which negates a number</li>
-<li><code>Sign.flip</code>, which, flips a <code>Sign.t</code>, i.e., mapping <code>Positive</code> to <code>Negative</code> and vice-versa.</li>
+<li><code>Sign.flip</code>, which, flips a <code>Sign.t</code>, i.e., mapping <code>Positive</code> to <code>Negative</code> and vice versa.</li>
 </ul>
 <p>The invariant we want to check is that the sign of the negation of any integer <code>x</code> is the flip of the sign of <code>x</code>.</p>
 <p>Here’s a simple implementation of this test.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open! Base
+<pre><code class="language-ocaml">open Base
 
 let%test_unit "negation flips the sign" =
   for _ = 0 to 100_000 do
@@ -791,7 +817,7 @@ let%test_unit "List.rev_append is List.append of List.rev" =
 <p>There’s one other kind of testing tool that we haven’t covered in this chapter, but is worth knowing about: <em>instrumentation-guided fuzzing</em>. You can think of this as another take on property testing, with a very different approach to generating random examples.</p>
 <p>Traditional fuzzing just throws randomly mutated data at a program, and looks for some indication of failure, often simply the program crashing with a segfault. This kind of fuzzing has been surprisingly effective at finding bugs, especially security bugs, in production software. But blind randomization is still quite limited in terms of how much program behavior it can effectively explore.</p>
 <p>Instrumentation-guided fuzzing improves on this by instrumenting the program, and then using that instrumentation to guide the randomization in the direction of more code coverage. By far the most successful tool in this space is <a href="https://github.com/google/AFL">American Fuzzy Lop</a>, or AFL, and OCaml has support for the necessary instrumentation.</p>
-<p>AFL can have eerily good results, and can with no guidance do things like constructing nearly-parseable text when fuzzing a parser, just by iteratively randomzing inputs in the direction of more coverage of the program being exercised.</p>
+<p>AFL can have eerily good results, and can with no guidance do things like constructing nearly-parseable text when fuzzing a parser, just by iteratively randomizing inputs in the direction of more coverage of the program being exercised.</p>
 <p>If you’re interested in AFL, there are some related tools worth knowing about.</p>
 <ul>
 <li><a href="https://github.com/stedolan/crowbar">Crowbar</a> is a quickcheck-style library for writing down properties to be tested by AFL.</li>
