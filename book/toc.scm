@@ -11,9 +11,9 @@
     variants
     error-handling
     imperative-programming
+    gadts
     functors
     first-class-modules
-    gadts
     objects
     classes))))
 
