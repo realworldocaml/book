@@ -493,11 +493,18 @@ include (module type of Option)
 val apply : ('a -&gt; 'b) t -&gt; 'a -&gt; 'b t</code></pre>
 </div>
 <p>Note that the order of declarations in the <code>mli</code> does not need to match the order of declarations in the <code>ml</code>. The order of declarations in the <code>ml</code> mostly matters insofar as it affects which values are shadowed. If we wanted to replace a function in <code>Option</code> with a new function of the same name, the declaration of that function in the <code>ml</code> would have to come after the <code>include Option</code> declaration.</p>
-<p>We can now use <code>Ext_option</code> as a replacement for <code>Option</code>. If we want to use <code>Ext_option</code> in preference to <code>Option</code> in our project, we can create a file of common definitions:</p>
+<p>We can now use <code>Ext_option</code> as a replacement for <code>Option</code>. If we want to use <code>Ext_option</code> in preference to <code>Option</code> in our project, we can create a file of common definitions, which in this case we’ll call <code>import.ml</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Option = Ext_option</code></pre>
 </div>
-<p>And if we then put <code>open Common</code> after <code>open Base</code> at the top of each file in our project, then references to <code>Option</code> will automatically go to <code>Ext_option</code> instead.</p>
+<p>Then, by opening <code>Import</code>, we can shadow <code>Base</code>’s <code>Option</code> module with our extension.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Import
+
+let lookup_and_apply map key x =
+  Option.apply (Map.find map key) x</code></pre>
+</div>
 </section>
 <section class="level2" id="common-errors-with-modules">
 <h2>Common Errors with Modules</h2>
