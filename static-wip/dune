@@ -7,14 +7,15 @@
 
 (copy_files ../book/EngD.cls)
 (copy_files ../book/colour-blind.sty)
+(copy_files ../book/cup-template.tex)
 
 (rule
  (alias pdf-wip)
  (targets book.tex)
- (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
+ (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls colour-blind.sty ../book/book.yml cup-template.tex)
  (action
   (progn
-   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
+   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf-wip)
@@ -27,6 +28,13 @@
      (system "xelatex book.tex")
      (system "xelatex book.tex")
   )))
+
+(rule
+  (alias textar-wip)
+  (targets book-wip.tgz)
+  (deps book.tex cup-template.tex colour-blind.sty EngD.cls (alias site-wip-content))
+  (action
+    (system "tar -zcvf book-wip.tgz cup-template.tex book.tex colour-blind.sty EngD.cls images/front-end/pipeline.png images/gc/minor_heap.png images/imperative-programming/edit_distance.png images/imperative-programming/edit_distance2.png images/lists-and-patterns/lists_layout.png images/memory-repr/block.png images/memory-repr/float_array_layout.png images/memory-repr/string_block.png images/memory-repr/string_size_calc.png images/memory-repr/tuple_layout.png")))
 
 ; Website Generation
 
