@@ -1,5 +1,5 @@
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 [@@@part "0"] ;;
 let get_href_hosts soup =

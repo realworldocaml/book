@@ -2,5 +2,5 @@
  (name foo)
  (libraries base stdio)
  (preprocess
-  (pps ppx_jane))
+  (pps ppx_inline_test ppx_assert))
  (inline_tests))
