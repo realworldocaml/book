@@ -1,4 +1,4 @@
-open! Core
+open Core
 
 (** An object for bounding the rate of consumption of some resource by a bound
     over a rolling window. *)

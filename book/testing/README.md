@@ -1,43 +1,28 @@
 # Testing
 
-Testing is not the best-loved part of programming. Writing tests is an
-exacting and sometimes dreary job, and it can feel like a distraction
-from the task of building out your code's functionality.  At first
-blush, OCaml's type-system makes testing seem even less appealing,
-since the type system's ability to squash many kinds of bugs at
-compile time catches lots of mistakes that you would otherwise need to
-write tests to protect against.
+The goal of this chapter is to teach you how to write effective tests
+in OCaml, and to show off some tools that can help.  Tooling is
+especially important in the context of testing because one of the
+things that prevents people from doing as much testing as they should
+is the tedium of it.  But with the right tools in hand, writing tests
+can be lightweight and fun.
 
-But make no mistake, clever types notwithstanding, testing is
-essential for developing and evolving reliable software systems.  And
-OCaml's type system, viewed properly, is an aid to testing, not a
-reason to avoid it.
+And that's important, because when testing is fun, you'll do more of
+it, and thorough testing is an essential element of building reliable
+and evolvable software.  People sometimes imagine that tests are less
+important in a language like OCaml with a rich and expressive
+type-system, but in some sense the opposite is true.  Really, types
+help you get more value out of your testing effort, both because they
+prevent you from needing to test all sorts of trivial properties that
+are automatically enforced by the type system, and because the
+rigidity of types mean that your code often has a kind of
+snap-together quality, where a relatively small number of tests can do
+an outsize amount to ensure that your code is behaving as expected.
 
-<!-- TODO avsm: this intro, while accurate, is a little down on -->
-<!-- testing!  Is it useful to also contextualise _what_ tests -->
-<!-- are compared to what the reader has learnt in previous chapters. -->
-<!-- For example, we've learnt how to build separate sig/impl files -->
-<!-- and to use functors to parameterise modular code, and the previous -->
-<!-- chapter is the networking one.  Perhaps note that unit tests are a -->
-<!-- really convenient way to run this modular logic in a non-interactive -->
-<!-- deterministic fashion? -->
+Before we start introducing testing tools, it's worth pausing to
+consider what we want out of our tests in the first place.
 
-The goal of this chapter is to teach you more about how to write
-effective tests in OCaml, and to teach you some of the best tools for
-the job.  Tooling is especially important in the context of testing
-because one of the things that prevents people from doing as much
-testing as they should is the sheer tedium of it.  But with the right
-tools in hand, writing tests can be lightweight and fun.  And when
-testing is fun, a lot more testing gets done.
-
-Before talking about the testing tools that are available in OCaml,
-let's discuss at a high level what we want out of our tests and our
-testing tools.
-
-## What makes for good tests?
-
-Here are some of the properties that characterize well-written tests
-in a good testing environment.
+Ideally, tests should be:
 
 - **Easy to write and run**. Tests should require a minimum of
   boilerplate to create and to hook into your development process.
@@ -60,8 +45,8 @@ properties.  But the tools you choose can help or hinder on all these
 fronts.
 
 As we go through the rest of this chapter and introduce you to some of
-the available tooling, you should be able to see how each tool can
-help advance these goals.
+the available tooling, you should be able to see how each tool helps
+advance these goals.
 
 ## Inline tests
 
@@ -76,23 +61,15 @@ To use inline tests in a library, we need to do two things:
 - enable `ppx_inline_test` as a preprocessor.
 
 The first of these is achieved by adding an `(inline_tests)`
-declaration, and the second is achieved by adding `ppx_jane` to the
-set of preprocessors.  (`ppx_jane` bundles together `ppx_inline_test`
-with a collection of other useful preprocessors.)  Here's the
-resulting `dune` file.
-
-<!-- TODO avsm: we've used ppx_jane a couple of times so far, -->
-<!-- but we're only really using one of the preprocessors here. -->
-<!-- Would it be better to be explicit about which ones we're -->
-<!-- pulling in, and then suggest ppx_jane as a convenience for -->
-<!-- those readers that don't care? -->
+declaration, and the second is achieved by adding `ppx_inline_test` to
+the set of preprocessors.  Here's the resulting `dune` file.
 
 ```scheme file=examples/correct/simple_inline_test/dune
 (library
  (name foo)
  (libraries base stdio)
  (inline_tests)
- (preprocess (pps ppx_jane)))
+ (preprocess (pps ppx_inline_test)))
 ```
 
 With this done, any module in this library can host a test. We'll
@@ -100,7 +77,7 @@ demonstrate this by creating a file called `test.ml`, containing one
 test.
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
@@ -119,7 +96,7 @@ No output is generated because the test passed successfully.
 But if we break the test,
 
 ```ocaml file=examples/erroneous/broken_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
@@ -151,12 +128,29 @@ returns a bool.  We're also going to use the `[%test_eq]` syntax,
 which, given a type, generates code to test for equality and throw a
 meaningful exception if the arguments are unequal.
 
+To use `[%test_eq]`, we're going to need to add the `ppx_assert`
+syntax extension, so we'll need to adjust our `dune` file
+appropriately.
+
+```scheme file=examples/erroneous/test_eq-inline_test/dune
+(library
+ (name foo)
+ (libraries base stdio)
+ (preprocess
+  (pps ppx_inline_test ppx_assert))
+ (inline_tests))
+```
+
+Rather than add extensions one by one as we find more uses, we'll just
+use `ppx_jane` throughout the rest of this chapter, which bundles
+together `ppx_inline_test` along with a collection of other useful
+preprocessors.
+
 Here's what our new test looks like. You'll notice that it's a little
-more concise, mostly because this is a more concise way to express the
-comparison function.
+more concise this way.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
-open! Base
+open Base
 
 let%test_unit "rev" =
   [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]
@@ -266,32 +260,50 @@ Here's a simple example of a test written in this style.  While the
 test generates output (though a call to `print_endline`), that output
 isn't captured in the source, at least, not yet.
 
-<!-- TODO avsm: what's with open! used in this chapter. -->
-<!-- Rest of book uses `open` -->
-
 ```ocaml file=examples/erroneous/trivial_expect_test/test.ml
 open! Base
-open! Stdio
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!"
 ```
 
+::: {data-type=note}
+##### `open` and `open!`
+
+In this example, we use `open!` instead of `open` because we happen
+not to be using any values from `Base`, and so the compiler will warn
+us about an unused open.
+
+But because `Base` is effectively our standard library, we want to
+keep it open anyway, since we want any new code we write to find
+`Base`'s modules rather than those from the ordinary standard library.
+The exclamation point at the end of `open` suppresses that warning.
+
+A sensible idiom is to always use `open!` when opening a library like
+`Base`, so that you don't have to choose when to use the `!`, and when
+not to.
+
+:::
+
+
 If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
-<!-- TODO avsm: mention in a info box to install patdiff? -->
+Note that Dune will use the `patdiff` tool if it's available, which
+generates easier-to-read diffs.  You can install `patdiff` with
+`opam`.
 
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
+```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
      patdiff (internal) (exit 1)
-...
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 5, characters 0-1:
  |open! Base
- |open! Stdio
+ |open Stdio
  |
  |let%expect_test "trivial" =
 -|  print_endline "Hello World!"
@@ -307,8 +319,8 @@ copying the corrected file it over the original source.  The `dune
 promote` command does just this, leaving our source as follows.
 
 ```ocaml file=examples/correct/trivial_expect_test_fixed/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test "trivial" =
   print_endline "Hello World!";
@@ -325,8 +337,8 @@ We only have one expect block in this example, but the system supports
 having multiple expect blocks:
 
 ```ocaml file=examples/correct/multi_block_expect_test/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
@@ -342,8 +354,8 @@ It's not obvious why one would want to use expect tests in the first
 place. Why should this:
 
 ```ocaml file=examples/correct/simple_expect_test/test.ml
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test _ =
   print_s [%sexp (List.rev [3;2;1] : int list)];
@@ -353,7 +365,7 @@ let%expect_test _ =
 be preferable to this?
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
-open! Base
+open Base
 
 let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
@@ -385,8 +397,8 @@ data embedded within it.  In particular, the function aims to produce
 the set of hosts that show up in links within a document.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=0
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let get_href_hosts soup =
   Soup.select "a[href]" soup
@@ -415,6 +427,50 @@ let%expect_test _ =
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)]
 ```
+
+::: {data-type=note}
+##### Quoted strings
+
+The example above used a new syntax for string literals, called
+*quoted strings*.  Here's an example.
+
+```ocaml env=main
+# {|This is a quoted string|}
+- : string = "This is a quoted string"
+```
+
+The advantage of this syntax is that it allows the content to be
+written without the usual escaping required for ordinary string
+literals.  Consider the following examples.
+
+```ocaml env=main
+# {|This is a literal quote: "|}
+- : string = "This is a literal quote: \""
+```
+
+As you can see, we didn't need to escape the included quote, though
+the version of the string echoed back by the toplevel uses the
+ordinary string literal syntax, and so that does include the escape.
+
+Quoted strings are especially useful when writing strings containing
+text from another language, like HTML.  With quoted strings, you can
+just paste in a snippet of some other source language, and it should
+work unmodified.
+
+The one tricky corner is if you need to include a literal `|}` inside
+your quoted string.  The trick is that you can change the delimiter
+for the quoted string by adding an arbitrary identifier, thereby
+ensuring that the delimiter won't show up in the body of the string.
+
+```ocaml env=main
+# {xxx|This is how you write a {|quoted string|}|xxx}
+- : string = "This is how you write a {|quoted string|}"
+```
+
+:::
+
+
+
 
 If we run the test, we'll see that the output isn't exactly what was
 intended.
@@ -506,7 +562,7 @@ particular resource.  The following is the `mli` for a library that
 specifies the logic of a simple rolling-window-style rate limiter.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
-open! Core
+open Core
 
 type t
 
@@ -519,7 +575,7 @@ examples.  First, we'll write some helper functions to make the
 examples shorter and easier to read.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
-open! Core
+open Core
 
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
@@ -576,8 +632,10 @@ execution traces.
 
 <!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
 
-```
+```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
+     patdiff (internal) (exit 1)
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
 ------ test.ml
 ++++++ test.ml.corrected
 File "test.ml", line 32, characters 0-1:
@@ -704,7 +762,7 @@ Async](concurrent-programming.html#examples-an-echo-server){data-type=xref}.
 
 <!-- TODO avsm: mention `dune runtest --force` to rerun -->
 <!-- a test if it hasn't changed? Useful for network tests.-->
- 
+
 We'll start by creating a new test directory with a dune file next to
 our echo-server implementation.
 
@@ -727,7 +785,7 @@ uppercase the text it receives.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/helpers.mli
 open! Core
-open! Async
+open Async
 
 (** Launches the echo server *)
 val launch : port:int -> uppercase:bool -> Process.t Deferred.t
@@ -749,7 +807,7 @@ results.
 
 ```ocaml file=examples/erroneous/echo_test_original/test/test.ml
 open! Core
-open! Async
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -771,13 +829,16 @@ happens.  The results, however, are not what you might hope for.
 
 <!-- ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE -->
 
-```
+```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
+Entering directory 'rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+     patdiff (internal) (exit 1)
+(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
 ------ test/test.ml
 ++++++ test/test.ml.corrected
 File "test/test.ml", line 11, characters 0-1:
  |open! Core
- |open! Async
+ |open Async
  |open Helpers
  |
  |let%expect_test "test uppercase echo" =
@@ -801,8 +862,8 @@ File "test/test.ml", line 11, characters 0-1:
 +|  (monitor.ml.Error
 +|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
 +|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
-+|  Raised at file "duniverse/base/src/result.ml", line 201, characters 17-26
-+|  Called from file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
++|  Raised at Base__Result.ok_exn in file "duniverse/base/src/result.ml", line 201, characters 17-26
++|  Called from Expect_test_collector.Make.Instance.exec in file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
 [1]
 ```
 
@@ -812,9 +873,11 @@ the server.  We can fix this by adding a one second delay before
 connecting, using Async's `Clock.after`.  With this change, the test
 now passes, with the expected results.
 
-```ocaml file=examples/correct/echo_test_delay/test/test.ml
+<!-- ocaml file=examples/correct/echo_test_delay/test/test.ml -->
+
+```
 open! Core
-open! Async
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =
@@ -835,8 +898,8 @@ We fixed the problem, but solution should make you uncomfortable.  For
 one thing, why is one second the right timeout, rather than a half a
 second, or ten?  The time we wait is some balance between reducing the
 likelihood of a non-deterministic failure versus preserving
-performance of the test, which is a bit of an awkward tradeoff to have
-to meke.
+performance of the test, which is a bit of an awkward trade-off to have
+to make.
 
 We can improve on this by removing the `Clock.after` call, and instead
 adding a retry loop to the `connect` test helper
@@ -909,7 +972,7 @@ connecting three operations:
   integer, either `Positive`, `Negative`, or `Zero`
 - `Int.neg`, which negates a number
 - `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
-  `Negative` and vice-versa.
+  `Negative` and vice versa.
 
 The invariant we want to check is that the sign of the negation of any
 integer `x` is the flip of the sign of `x`.
@@ -917,7 +980,7 @@ integer `x` is the flip of the sign of `x`.
 Here's a simple implementation of this test.
 
 ```ocaml file=examples/correct/manual_property_test/test.ml
-open! Base
+open Base
 
 let%test_unit "negation flips the sign" =
   for _ = 0 to 100_000 do
@@ -1217,7 +1280,7 @@ the necessary instrumentation.
 
 AFL can have eerily good results, and can with no guidance do things
 like constructing nearly-parseable text when fuzzing a parser, just by
-iteratively randomzing inputs in the direction of more coverage of the
+iteratively randomizing inputs in the direction of more coverage of the
 program being exercised.
 
 If you're interested in AFL, there are some related tools worth

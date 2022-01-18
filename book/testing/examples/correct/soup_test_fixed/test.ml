@@ -1,5 +1,5 @@
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let get_href_hosts soup =
   Soup.select "a[href]" soup
