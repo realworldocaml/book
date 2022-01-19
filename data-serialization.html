@@ -5,7 +5,7 @@
 <div class="highlight">
 <pre><code class="language-clike">(this (is an) (s expression))</code></pre>
 </div>
-<p>S-expressions play a major role in Core, effectively acting as the default serialization format. Indeed, we’ve encountered s-expressions multiple times already, including in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, <a data-type="xref" href="functors.html#functors">Chapter 9, Functors</a>, and <a data-type="xref" href="first-class-modules.html#first-class-modules">Chapter 10, First Class Modules</a>.</p>
+<p>S-expressions play a major role in Core, effectively acting as the default serialization format. Indeed, we’ve encountered s-expressions multiple times already, including in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>, and <a data-type="xref" href="first-class-modules.html#first-class-modules">Chapter 11, First Class Modules</a>.</p>
 <p>This chapter will go into s-expressions in more depth. In particular, we’ll discuss:</p>
 <ul>
 <li><p>The details of the s-expression format, including how to parse it while generating good error messages for debugging malformed inputs</p></li>
@@ -244,7 +244,7 @@ ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t))
 </section>
 <section class="level2" id="preserving-invariants">
 <h2>Preserving Invariants</h2>
-<p>One of the most important bits of sexp-related functionality is the autogeneration of converters for new types via <code>ppx_sexp_conv</code>. We’ve seen a bit of how this works already, but let’s walk through a complete example. Here’s the contents of a file <code>int_interval.ml</code>, which is a simple library for representing integer intervals, similar to the one described in <a data-type="xref" href="functors.html#functors">Chapter 9, Functors</a>. <a data-secondary="preserving invariants in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>One of the most important bits of sexp-related functionality is the autogeneration of converters for new types via <code>ppx_sexp_conv</code>. We’ve seen a bit of how this works already, but let’s walk through a complete example. Here’s the contents of a file <code>int_interval.ml</code>, which is a simple library for representing integer intervals, similar to the one described in <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>. <a data-secondary="preserving invariants in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* Module for representing closed integer intervals *)
 open Core

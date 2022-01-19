@@ -1,18 +1,40 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>GADTs - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="gadts">
 <h1>GADTs</h1>
-<p>GADTs, short for Generalized Algebraic Data Types, are an extension of the variants we saw in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>. They provide more precise types that you can use to make your code safer, more concise, and more efficient.</p>
-<p>At the same time, GADTs are an advanced feature of OCaml, and their power comes at a distinct cost. GADTs are harder to use and less intuitive than ordinary variants, and it can sometimes be a bit of a puzzle to figure out how to use them effectively. All of which is to say that you should only use a GADT when it makes a big qualitative improvement to your design.</p>
-<p>That said, for the right use-case, GADTs can be really transformative, and this chapter will walk through several examples that demonstrate some of the range of use-cases that GADTs support.</p>
-<p>At their heart, GADTs provide two extra features above and beyond ordinary variants:</p>
+<p>GADTs, short for Generalized Algebraic Data Types, are an extension
+of the variants we saw in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>. They provide more precise types that you
+can use to make your code safer, more concise, and more efficient.</p>
+<p>At the same time, GADTs are an advanced feature of OCaml, and their
+power comes at a distinct cost. GADTs are harder to use and less
+intuitive than ordinary variants, and it can sometimes be a bit of a
+puzzle to figure out how to use them effectively. All of which is to say
+that you should only use a GADT when it makes a big qualitative
+improvement to your design.</p>
+<p>That said, for the right use-case, GADTs can be really
+transformative, and this chapter will walk through several examples that
+demonstrate some of the range of use-cases that GADTs support.</p>
+<p>At their heart, GADTs provide two extra features above and beyond
+ordinary variants:</p>
 <ul>
-<li>They let the compiler learn more type information when you descend into a case of a pattern match.</li>
-<li>They make it easy to use <em>existential types</em>, which let you work with data of a specific but unknown type.</li>
+<li>They let the compiler learn more type information when you descend
+into a case of a pattern match.</li>
+<li>They make it easy to use <em>existential types</em>, which let you
+work with data of a specific but unknown type.</li>
 </ul>
-<p>It’s a little hard to understand these features without working through some examples, so we’ll do that next.</p>
+<p>It’s a little hard to understand these features without working
+through some examples, so we’ll do that next.</p>
 <section class="level2" id="a-little-language">
 <h2>A little language</h2>
-<p>One classic use-case for GADTs is for writing typed expression languages, similar to the boolean expression language described in <a data-type="xref" href="variants.html#variants-and-recursive-data-structures">Chapter 6, Variants</a>. In this section, we’ll create a slightly richer language that lets us mix arithmetic and boolean expressions. This means that we have to deal with the possibility of ill-typed expressions, e.g., an expression that adds a <code>bool</code> and an <code>int</code>.</p>
-<p>Let’s first try to do this with an ordinary variant. We’ll declare two types here: <code>value</code>, which represents a primitive value in the language (i.e., an <code>int</code> or a <code>bool</code>), and <code>expr</code>, which represents the full set of possible expressions.</p>
+<p>One classic use-case for GADTs is for writing typed expression
+languages, similar to the boolean expression language described in <a data-type="xref" href="variants.html#variants-and-recursive-data-structures">Chapter 6, Variants</a>. In this section, we’ll create a slightly
+richer language that lets us mix arithmetic and boolean expressions.
+This means that we have to deal with the possibility of ill-typed
+expressions, e.g., an expression that adds a <code>bool</code> and an
+<code>int</code>.</p>
+<p>Let’s first try to do this with an ordinary variant. We’ll declare
+two types here: <code>value</code>, which represents a primitive value
+in the language (i.e., an <code>int</code> or a <code>bool</code>), and
+<code>expr</code>, which represents the full set of possible
+expressions.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 
@@ -26,7 +48,10 @@ type expr =
   | Plus of expr * expr
   | If of expr * expr * expr</code></pre>
 </div>
-<p>We can write a recursive evaluator for this type in a pretty straight-ahead style. First, we’ll declare an exception that can be thrown when we hit an ill-typed expression, e.g., when encoutering an expression that tries to add a bool and an int.</p>
+<p>We can write a recursive evaluator for this type in a pretty
+straight-ahead style. First, we’ll declare an exception that can be
+thrown when we hit an ill-typed expression, e.g., when encoutering an
+expression that tries to add a bool and an int.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">exception Ill_typed</code></pre>
 </div>
@@ -51,7 +76,9 @@ type expr =
 &gt;val eval : expr -&gt; value = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This implementation is a bit ugly because it has a lot of dynamic checks to detect type errors. Indeed, it’s entirely possible to create an ill-typed expression which will trip these checks.</p>
+<p>This implementation is a bit ugly because it has a lot of dynamic
+checks to detect type errors. Indeed, it’s entirely possible to create
+an ill-typed expression which will trip these checks.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
@@ -64,10 +91,16 @@ eval (i 3 +: b false) ;;
 &gt;Exception: Ill_typed.
 </code></pre>
 </div>
-<p>This possibility of ill-typed expressions doesn’t just complicate the implementation: it’s also a problem for users, since it’s all too easy to create ill-typed expressions by mistake.</p>
+<p>This possibility of ill-typed expressions doesn’t just complicate the
+implementation: it’s also a problem for users, since it’s all too easy
+to create ill-typed expressions by mistake.</p>
 <section class="level3" id="making-the-language-type-safe">
 <h3>Making the language type-safe</h3>
-<p>Let’s consider what a type-safe version of this API might look like in the absence of GADTs. To even express the type constraints, we’ll need expressions to have a type parameter to distinguish integer expressions from boolean expressions. Given such a parameter, the signature for such a language might look like this.</p>
+<p>Let’s consider what a type-safe version of this API might look like
+in the absence of GADTs. To even express the type constraints, we’ll
+need expressions to have a type parameter to distinguish integer
+expressions from boolean expressions. Given such a parameter, the
+signature for such a language might look like this.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module type Typesafe_lang_sig = sig
   type 'a t
@@ -86,11 +119,15 @@ eval (i 3 +: b false) ;;
   val bool_eval : bool t -&gt; bool
 end</code></pre>
 </div>
-<p>There’s one surprising bit in this signature, which is the evaluation functions. You might expect there to be a single evaluation function, with this signature.</p>
+<p>There’s one surprising bit in this signature, which is the evaluation
+functions. You might expect there to be a single evaluation function,
+with this signature.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val eval : 'a t -&gt; 'a</code></pre>
 </div>
-<p>But as we’ll see, we’re not going to be able to implement that, at least, not without using GADTs. So for now, we’re stuck with two different evaluators, one for each type of expression.</p>
+<p>But as we’ll see, we’re not going to be able to implement that, at
+least, not without using GADTs. So for now, we’re stuck with two
+different evaluators, one for each type of expression.</p>
 <p>Now let’s write an implementation that matches this signature.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Typesafe_lang : Typesafe_lang_sig = struct
@@ -113,7 +150,8 @@ end</code></pre>
     | Int _ -&gt; raise Ill_typed
 end</code></pre>
 </div>
-<p>As you can see, the ill-typed expression we had trouble with before can’t be constructed, because it’s rejected by OCaml’s type-system.</p>
+<p>As you can see, the ill-typed expression we had trouble with before
+can’t be constructed, because it’s rejected by OCaml’s type-system.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(plus (int 3) (bool false)) ;;
 &gt;Line 1, characters 40-52:
@@ -122,20 +160,35 @@ end</code></pre>
 &gt;       Type bool is not compatible with type int
 </code></pre>
 </div>
-<p>So, what happened here? How did we add the type-safety we wanted? The fundamental trick is to add what’s called a <em>phantom type</em>. In this definition: <a data-primary="phantom types" data-type="indexterm">&nbsp;</a></p>
+<p>So, what happened here? How did we add the type-safety we wanted? The
+fundamental trick is to add what’s called a <em>phantom type</em>. In
+this definition: <a data-primary="phantom types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type 'a t = expr</code></pre>
 </div>
-<p>the type parameter <code>'a</code> is the phantom type, since it doesn’t show up in the body of the definition of <code>t</code>.</p>
-<p>Because the type parameter is unused, it’s free to take on any value, and that’s why the resulting code is able to fit the signature <code>Typesafe_lang_sig</code>. As such, the constraints that prevent us from constructing ill-typed expressions come from the signature, not the implementation.</p>
-<p>This all amounts to an improvement in terms of the API, but the implementation is if anything worse. We still have the same evaluator with all of it’s dynamic checking for type errors. But we’ve had to write yet more wrapper code to make this work.</p>
-<p>Also, the phantom-type discipline is quite error prone. You might have missed the fact that the type on the <code>eq</code> function above is wrong!</p>
+<p>the type parameter <code>'a</code> is the phantom type, since it
+doesn’t show up in the body of the definition of <code>t</code>.</p>
+<p>Because the type parameter is unused, it’s free to take on any value,
+and that’s why the resulting code is able to fit the signature
+<code>Typesafe_lang_sig</code>. As such, the constraints that prevent us
+from constructing ill-typed expressions come from the signature, not the
+implementation.</p>
+<p>This all amounts to an improvement in terms of the API, but the
+implementation is if anything worse. We still have the same evaluator
+with all of it’s dynamic checking for type errors. But we’ve had to
+write yet more wrapper code to make this work.</p>
+<p>Also, the phantom-type discipline is quite error prone. You might
+have missed the fact that the type on the <code>eq</code> function above
+is wrong!</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Typesafe_lang.eq ;;
 &gt;- : 'a Typesafe_lang.t -&gt; 'a Typesafe_lang.t -&gt; bool Typesafe_lang.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It looks like it’s polymorphic over the type of expressions, but the evaluator only supports checking equality on integers. As a result, we can still construct an ill-typed expression, phantom-types notwithstanding.</p>
+<p>It looks like it’s polymorphic over the type of expressions, but the
+evaluator only supports checking equality on integers. As a result, we
+can still construct an ill-typed expression, phantom-types
+notwithstanding.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(eq (bool true) (bool false)) ;;
 &gt;val expr : bool Typesafe_lang.t = &lt;abstr&gt;
@@ -143,11 +196,22 @@ Typesafe_lang.bool_eval expr ;;
 &gt;Exception: Ill_typed.
 </code></pre>
 </div>
-<p>This highlights why we still need the dynamic checks in the implementation: the types within the implementation don’t necessarily rule out ill-typed expressions. The same fact explains why we needed two different <code>eval</code> functions: the implementation of eval doesn’t have any type-level guarantee of when it’s handling a bool expression versus an int expression, so it can’t safely give results where the type of the result varies based on the result of the expression.</p>
+<p>This highlights why we still need the dynamic checks in the
+implementation: the types within the implementation don’t necessarily
+rule out ill-typed expressions. The same fact explains why we needed two
+different <code>eval</code> functions: the implementation of eval
+doesn’t have any type-level guarantee of when it’s handling a bool
+expression versus an int expression, so it can’t safely give results
+where the type of the result varies based on the result of the
+expression.</p>
 </section>
 <section class="level3" id="trying-to-do-better-with-ordinary-variants">
 <h3>Trying to do better with ordinary variants</h3>
-<p>To see why we need GADTs, let’s see what would happen if instead of using phantom types, we tried to encode the typing rules we want for our DSL directly into the definition of the expression type. In particular, we’ll put an ordinary type parameter on our <code>expr</code> type, in order to represent the type of the overall expression.</p>
+<p>To see why we need GADTs, let’s see what would happen if instead of
+using phantom types, we tried to encode the typing rules we want for our
+DSL directly into the definition of the expression type. In particular,
+we’ll put an ordinary type parameter on our <code>expr</code> type, in
+order to represent the type of the overall expression.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type 'a value =
   | Int of 'a
@@ -159,7 +223,8 @@ type 'a expr =
   | Plus of 'a expr * 'a expr
   | If of bool expr * 'a expr * 'a expr</code></pre>
 </div>
-<p>This looks sort of promising at first, but it doesn’t quite do what we want. Let’s experiment a little.</p>
+<p>This looks sort of promising at first, but it doesn’t quite do what
+we want. Let’s experiment a little.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
@@ -176,7 +241,11 @@ i 3 +: i 4 ;;
 &gt;- : int expr = Plus (Value (Int 3), Value (Int 4))
 </code></pre>
 </div>
-<p>So far so good. But if you think about it for a minute, you’ll realize this doesn’t actually do what we want. For one thing, the type of the outer expression is always just equal to the type of the inner expression, which means that some things that should type-check don’t.</p>
+<p>So far so good. But if you think about it for a minute, you’ll
+realize this doesn’t actually do what we want. For one thing, the type
+of the outer expression is always just equal to the type of the inner
+expression, which means that some things that should type-check
+don’t.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">If (Eq (i 3, i 4), i 0, i 1) ;;
 &gt;Line 1, characters 9-12:
@@ -191,11 +260,17 @@ i 3 +: i 4 ;;
 &gt;- : int expr = Value (Bool 3)
 </code></pre>
 </div>
-<p>The problem here is that the way we want to use the type parameter isn’t supported by ordinary variants. In particular, we want the type parameter to be populated in different ways in the different tags, and to depend in non-trivial ways on the types of the data associated with each tag. That’s where GADTs can help.</p>
+<p>The problem here is that the way we want to use the type parameter
+isn’t supported by ordinary variants. In particular, we want the type
+parameter to be populated in different ways in the different tags, and
+to depend in non-trivial ways on the types of the data associated with
+each tag. That’s where GADTs can help.</p>
 </section>
 <section class="level3" id="gadts-to-the-rescue">
 <h3>GADTs to the rescue</h3>
-<p>Now we’re ready write our first GADT. Here’s a new version of our <code>value</code> and <code>expr</code> types that correctly encode our desired typing rules.</p>
+<p>Now we’re ready write our first GADT. Here’s a new version of our
+<code>value</code> and <code>expr</code> types that correctly encode our
+desired typing rules.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type _ value =
   | Int : int -&gt; int value
@@ -207,8 +282,22 @@ type _ expr =
   | Plus : int expr * int expr -&gt; int expr
   | If : bool expr * 'a expr * 'a expr -&gt; 'a expr</code></pre>
 </div>
-<p>The syntax here requires some decoding. The colon to the right of each tag is what tells you that this is a GADT. To the right of the colon, you’ll see what looks like an ordinary function signature, and you can almost think of it that way; specifically, as the type signature for that particular tag. The left-hand side of the arrow states the types of the arguments to the tag, and the right hand side determines the type of the constructed value.</p>
-<p>Note that in the definition of each tag in a GADT, the right-hand side is an instance of the type as the overall GADT, though the type parameter can be in different in each case, and importantly, can depend both on the tag and on the type of the arguments. <code>Eq</code> is an example where the type parameter is determined entirely by the tag: it always corresponds to a <code>bool expr</code>. <code>If</code> is an example where the type parameter depends on the arguments to the tag, in particular the type parameter of the <code>If</code> is the type parameter of the then and else clauses.</p>
+<p>The syntax here requires some decoding. The colon to the right of
+each tag is what tells you that this is a GADT. To the right of the
+colon, you’ll see what looks like an ordinary function signature, and
+you can almost think of it that way; specifically, as the type signature
+for that particular tag. The left-hand side of the arrow states the
+types of the arguments to the tag, and the right hand side determines
+the type of the constructed value.</p>
+<p>Note that in the definition of each tag in a GADT, the right-hand
+side is an instance of the type as the overall GADT, though the type
+parameter can be in different in each case, and importantly, can depend
+both on the tag and on the type of the arguments. <code>Eq</code> is an
+example where the type parameter is determined entirely by the tag: it
+always corresponds to a <code>bool expr</code>. <code>If</code> is an
+example where the type parameter depends on the arguments to the tag, in
+particular the type parameter of the <code>If</code> is the type
+parameter of the then and else clauses.</p>
 <p>Let’s try some examples.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
@@ -233,8 +322,13 @@ i 3 +: b false ;;
 &gt;       Type bool is not compatible with type int
 </code></pre>
 </div>
-<p>What we see here is that the type-safety rules we previously enforced with signature-level restrictions on phantom types are now directly encoded in the definition of the expression type.</p>
-<p>These type-safety rules apply not just when constructing an expression, but also when deconstructing one, which means we can write a simpler and more concise evaluator that doesn’t need any type-safety checks.</p>
+<p>What we see here is that the type-safety rules we previously enforced
+with signature-level restrictions on phantom types are now directly
+encoded in the definition of the expression type.</p>
+<p>These type-safety rules apply not just when constructing an
+expression, but also when deconstructing one, which means we can write a
+simpler and more concise evaluator that doesn’t need any type-safety
+checks.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value : type a. a value -&gt; a = function
   | Int x -&gt; x
@@ -250,11 +344,17 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that the type of the eval function is exactly the polymorphic one that we wanted, as opposed to the phantom-type version, where we had two different versions of <code>eval</code>, one for int, and one for bool.</p>
+<p>Note that the type of the eval function is exactly the polymorphic
+one that we wanted, as opposed to the phantom-type version, where we had
+two different versions of <code>eval</code>, one for int, and one for
+bool.</p>
 </section>
 <section class="level3" id="gadts-locally-abstract-types-and-polymorphic-recursion">
 <h3>GADTs, locally abstract types, and polymorphic recursion</h3>
-<p>The above example lets us see one of the downsides of GADTs, which is that code using them needs extra type annotations. Look at what happens if we write the definition of <code>value</code> without the annotation:</p>
+<p>The above example lets us see one of the downsides of GADTs, which is
+that code using them needs extra type annotations. Look at what happens
+if we write the definition of <code>value</code> without the
+annotation:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value = function
   | Int x -&gt; x
@@ -266,7 +366,11 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;       Type bool is not compatible with type int
 </code></pre>
 </div>
-<p>The issue here is that OCaml by default isn’t willing to instantiate ordinary type variables in different ways in the body of the same function, which is what is required here. We can fix that by adding a <em>locally abstract type</em>, which doesn’t have that restriction. <a data-primary="locally abstract types" data-type="indexterm">&nbsp;</a></p>
+<p>The issue here is that OCaml by default isn’t willing to instantiate
+ordinary type variables in different ways in the body of the same
+function, which is what is required here. We can fix that by adding a
+<em>locally abstract type</em>, which doesn’t have that restriction.
+<a data-primary="locally abstract types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value (type a) (v : a value) : a =
   match v with
@@ -276,7 +380,9 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;val eval_value : 'a value -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that this isn’t quite the annotation we wrote earlier. That’s because this trick doesn’t work with <code>eval</code>, as you can see below.</p>
+<p>Note that this isn’t quite the annotation we wrote earlier. That’s
+because this trick doesn’t work with <code>eval</code>, as you can see
+below.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec eval (type a) (e : a expr) : a =
   match e with
@@ -291,9 +397,16 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;       The type constructor a would escape its scope
 </code></pre>
 </div>
-<p>This is a pretty unhelpful error message, but the basic problem is that <code>eval</code> is recursive, and inference of GADTs doesn’t play well with recursive calls.</p>
-<p>More specifically, the issue is that the type-checker is trying to merge the locally abstract type <code>a</code> into the type of the recursive function <code>eval</code>, and merging it into the outer scope within which <code>eval</code> is defined is the way in which <code>a</code> is escaping its scope.</p>
-<p>We can fix this by explicitly marking <code>eval</code> as polymorphic, which OCaml has a handy type annotation for.</p>
+<p>This is a pretty unhelpful error message, but the basic problem is
+that <code>eval</code> is recursive, and inference of GADTs doesn’t play
+well with recursive calls.</p>
+<p>More specifically, the issue is that the type-checker is trying to
+merge the locally abstract type <code>a</code> into the type of the
+recursive function <code>eval</code>, and merging it into the outer
+scope within which <code>eval</code> is defined is the way in which
+<code>a</code> is escaping its scope.</p>
+<p>We can fix this by explicitly marking <code>eval</code> as
+polymorphic, which OCaml has a handy type annotation for.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec eval : 'a. 'a expr -&gt; 'a =
   fun (type a) (x : a expr) -&gt;
@@ -306,10 +419,22 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This works because by marking <code>eval</code> as polymorphic, the type of <code>eval</code> isn’t specialized to <code>a</code>, and so <code>a</code> doesn’t escape its scope.</p>
-<p>It’s also helpful here because <code>eval</code> itself is an example of <em>polymorphic recursion</em>, which is to say that <code>eval</code> needs to call itself at multiple different types, to accommodate the fact that, for example, the condition of an <code>If</code> is of type <code>bool</code>, even if the overall <code>If</code> expression is of type <code>int</code>. <a data-primary="polymorphic recursion" data-type="indexterm">&nbsp;</a></p>
-<p>As such, <code>eval</code> needs to see itself as polymorphic. This kind of polymorphism is basically impossible to infer automatically, which is a second reason we need to annotate <code>eval</code>’s polymorphism explicitly.</p>
-<p>The above syntax is a bit verbose, so OCaml has the following syntactic sugar to combine the polymorphism annotation and the creation of the locally abstract types.</p>
+<p>This works because by marking <code>eval</code> as polymorphic, the
+type of <code>eval</code> isn’t specialized to <code>a</code>, and so
+<code>a</code> doesn’t escape its scope.</p>
+<p>It’s also helpful here because <code>eval</code> itself is an example
+of <em>polymorphic recursion</em>, which is to say that
+<code>eval</code> needs to call itself at multiple different types, to
+accommodate the fact that, for example, the condition of an
+<code>If</code> is of type <code>bool</code>, even if the overall
+<code>If</code> expression is of type <code>int</code>. <a data-primary="polymorphic recursion" data-type="indexterm">&nbsp;</a></p>
+<p>As such, <code>eval</code> needs to see itself as polymorphic. This
+kind of polymorphism is basically impossible to infer automatically,
+which is a second reason we need to annotate <code>eval</code>’s
+polymorphism explicitly.</p>
+<p>The above syntax is a bit verbose, so OCaml has the following
+syntactic sugar to combine the polymorphism annotation and the creation
+of the locally abstract types.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec eval : type a. a expr -&gt; a = function
   | Value v -&gt; eval_value v
@@ -320,21 +445,31 @@ let rec eval : type a. a expr -&gt; a = function
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This type of annotation is the right one to pick when you write any recursive function that makes use of GADTs.</p>
+<p>This type of annotation is the right one to pick when you write any
+recursive function that makes use of GADTs.</p>
 </section>
 </section>
 <section class="level2" id="when-are-gadts-useful">
 <h2>When are GADTs useful?</h2>
-<p>The typed language we showed above is a perfectly reasonable example, but GADTs are useful for a lot more than designing little languages. In this section, we’ll try to give you a broader sampling of the kinds of things you can do with GADTs.</p>
+<p>The typed language we showed above is a perfectly reasonable example,
+but GADTs are useful for a lot more than designing little languages. In
+this section, we’ll try to give you a broader sampling of the kinds of
+things you can do with GADTs.</p>
 <section class="level3" id="varying-your-return-type">
 <h3>Varying your return type</h3>
-<p>Sometimes, you want to write a single function that can effectively have different types in different circumstances. In some sense, this is totally ordinary. After all, OCaml’s polymorphism means that values can take on different types in different contexts. <code>List.find</code> is a fine example. The signature indicates that the type of the result varies with the type of the input list.</p>
+<p>Sometimes, you want to write a single function that can effectively
+have different types in different circumstances. In some sense, this is
+totally ordinary. After all, OCaml’s polymorphism means that values can
+take on different types in different contexts. <code>List.find</code> is
+a fine example. The signature indicates that the type of the result
+varies with the type of the input list.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ;;
 &gt;- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
 </code></pre>
 </div>
-<p>And of course you can use <code>List.find</code> to produce values of different types.</p>
+<p>And of course you can use <code>List.find</code> to produce values of
+different types.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ~f:(fun x -&gt; x &gt; 3) [1;3;5;2] ;;
 &gt;- : int option = Some 5
@@ -342,14 +477,21 @@ List.find ~f:(Char.is_uppercase) ['a';'B';'C'] ;;
 &gt;- : char option = Some B
 </code></pre>
 </div>
-<p>But this approach is limited to simple dependencies between types that correspond to how data flows through your code. Sometimes you want types to vary in a more flexible way.</p>
-<p>To make this concrete, let’s say we wanted to create a version of <code>find</code> that is configurable in terms of how it handles the case of not finding an item. There are three different behaviors you might want:</p>
+<p>But this approach is limited to simple dependencies between types
+that correspond to how data flows through your code. Sometimes you want
+types to vary in a more flexible way.</p>
+<p>To make this concrete, let’s say we wanted to create a version of
+<code>find</code> that is configurable in terms of how it handles the
+case of not finding an item. There are three different behaviors you
+might want:</p>
 <ul>
 <li>Throw an exception.</li>
 <li>Return <code>None</code>.</li>
 <li>Return a default value.</li>
 </ul>
-<p>Let’s try to write a function that exhibits these behaviors without using GADTs. First, we’ll create a variant type that represents the three possible behaviors.</p>
+<p>Let’s try to write a function that exhibits these behaviors without
+using GADTs. First, we’ll create a variant type that represents the
+three possible behaviors.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module If_not_found = struct
   type 'a t =
@@ -358,7 +500,9 @@ List.find ~f:(Char.is_uppercase) ['a';'B';'C'] ;;
     | Default_to of 'a
 end</code></pre>
 </div>
-<p>Now, we can write <code>flexible_find</code> which takes a <code>If_not_found.t</code> as a parameter, and varies its behavior accordingly.</p>
+<p>Now, we can write <code>flexible_find</code> which takes a
+<code>If_not_found.t</code> as a parameter, and varies its behavior
+accordingly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec flexible_find list ~f (if_not_found : _ If_not_found.t) =
   match list with
@@ -385,8 +529,14 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 &gt;- : int option = Some 20
 </code></pre>
 </div>
-<p>This mostly does what we want, but the problems is that <code>flexible_find</code> always returns an option, even when it’s passed <code>Raise</code> or <code>Default_to</code>, which guarantee that the <code>None</code> case is never used.</p>
-<p>If we want to vary the type according to which mode we’re operating in, we’re going to have to turn <code>If_not_found.t</code> into a GADT, in particular, a GADT with two type parameters: one for the type of the list element, and one for the return type of the function.</p>
+<p>This mostly does what we want, but the problems is that
+<code>flexible_find</code> always returns an option, even when it’s
+passed <code>Raise</code> or <code>Default_to</code>, which guarantee
+that the <code>None</code> case is never used.</p>
+<p>If we want to vary the type according to which mode we’re operating
+in, we’re going to have to turn <code>If_not_found.t</code> into a GADT,
+in particular, a GADT with two type parameters: one for the type of the
+list element, and one for the return type of the function.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module If_not_found = struct
   type (_, _) t =
@@ -395,8 +545,12 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
     | Default_to : 'a -&gt; ('a, 'a) t
 end</code></pre>
 </div>
-<p>The first type parameter is for the element, and the second is for the return type. As you can see, <code>Raise</code> and <code>Default_to</code> both have the same element type and return type, but <code>Return_none</code> provides an optional return value.</p>
-<p>Here’s a definition of <code>flexible_find</code> that takes advantage of this GADT.</p>
+<p>The first type parameter is for the element, and the second is for
+the return type. As you can see, <code>Raise</code> and
+<code>Default_to</code> both have the same element type and return type,
+but <code>Return_none</code> provides an optional return value.</p>
+<p>Here’s a definition of <code>flexible_find</code> that takes
+advantage of this GADT.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec flexible_find
  : type a b. f:(a -&gt; bool) -&gt; a list -&gt; (a, b) If_not_found.t -&gt; b =
@@ -420,7 +574,10 @@ end</code></pre>
 &gt;  f:('a -&gt; bool) -&gt; 'a list -&gt; ('a, 'b) If_not_found.t -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As you can see from the signature of <code>flexible_find</code> we now allows the return value to vary according to <code>If_not_found.t</code>, and indeed the functions works as you might hope, with no unnecessary options.</p>
+<p>As you can see from the signature of <code>flexible_find</code> we
+now allows the return value to vary according to
+<code>If_not_found.t</code>, and indeed the functions works as you might
+hope, with no unnecessary options.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Return_none ;;
 &gt;- : int option = Base.Option.None
@@ -435,14 +592,20 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 </section>
 <section class="level3" id="capturing-the-unknown">
 <h3>Capturing the unknown</h3>
-<p>Code that that works with unknown types is routine in OCaml, and comes up in the simplest of examples:</p>
+<p>Code that that works with unknown types is routine in OCaml, and
+comes up in the simplest of examples:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y) ;;
 &gt;val tuple : 'a -&gt; 'b -&gt; 'a * 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The type variables <code>'a</code> and <code>'b</code> indicate that there are two unknown types here, and these type variables are <em>universally quantified</em>. Which is to say, the type of <code>tuple</code> is: <em>for all</em> types <code>a</code> and <code>b</code>, <code>a -&gt; b -&gt; a * b</code>.</p>
-<p>And indeed, we can restrict the type of <code>tuple</code> to any <code>'a</code> and <code>'b</code> we want.</p>
+<p>The type variables <code>'a</code> and <code>'b</code> indicate that
+there are two unknown types here, and these type variables are
+<em>universally quantified</em>. Which is to say, the type of
+<code>tuple</code> is: <em>for all</em> types <code>a</code> and
+<code>b</code>, <code>a -&gt; b -&gt; a * b</code>.</p>
+<p>And indeed, we can restrict the type of <code>tuple</code> to any
+<code>'a</code> and <code>'b</code> we want.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(tuple : int -&gt; float -&gt; int * float) ;;
 &gt;- : int -&gt; float -&gt; int * float = &lt;fun&gt;
@@ -450,15 +613,26 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 &gt;- : string -&gt; string * string -&gt; string * (string * string) = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Sometimes, however, we want to type variables that are <em>existentially quantified</em>, meaning that instead of being compatible with all types, the type represents a particular but unknown type.</p>
-<p>GADTs provide one natural way of encoding such type variables. Here’s a simple example.</p>
+<p>Sometimes, however, we want to type variables that are
+<em>existentially quantified</em>, meaning that instead of being
+compatible with all types, the type represents a particular but unknown
+type.</p>
+<p>GADTs provide one natural way of encoding such type variables. Here’s
+a simple example.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type stringable =
   Stringable : { value: 'a; to_string: 'a -&gt; string } -&gt; stringable</code></pre>
 </div>
-<p>This type packs together a value of some arbitrary type, along with a function for converting values of that type to strings.</p>
-<p>We can tell that <code>'a</code> is existentially quantified because it shows up on the left-hand side of the arrow but not on the right, so the <code>'a</code> that shows up internally doesn’t appear in a type parameter for <code>stringable</code> itself. Essentially, the existentially quantified type is bound within the definition of <code>stringable</code>.</p>
-<p>The following function can print an arbitrary <code>stringable</code>:</p>
+<p>This type packs together a value of some arbitrary type, along with a
+function for converting values of that type to strings.</p>
+<p>We can tell that <code>'a</code> is existentially quantified because
+it shows up on the left-hand side of the arrow but not on the right, so
+the <code>'a</code> that shows up internally doesn’t appear in a type
+parameter for <code>stringable</code> itself. Essentially, the
+existentially quantified type is bound within the definition of
+<code>stringable</code>.</p>
+<p>The following function can print an arbitrary
+<code>stringable</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_stringable (Stringable s) =
   Stdio.print_endline (s.to_string s.value)
@@ -466,7 +640,8 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 &gt;val print_stringable : stringable -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>And we can use <code>print_stringable</code> on a collection of <code>stringable</code>s of different underlying types.</p>
+<p>And we can use <code>print_stringable</code> on a collection of
+<code>stringable</code>s of different underlying types.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let stringables =
   (let s value to_string = Stringable { to_string; value } in
@@ -486,7 +661,11 @@ List.iter ~f:print_stringable stringables ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>The thing that lets this all work is that the type of the underlying object is existentially bound within the type <code>stringable</code>. As such, the type of the underlying values can’t escape the scope of <code>stringable</code>, which means that a function that tries to do that won’t type-check.</p>
+<p>The thing that lets this all work is that the type of the underlying
+object is existentially bound within the type <code>stringable</code>.
+As such, the type of the underlying values can’t escape the scope of
+<code>stringable</code>, which means that a function that tries to do
+that won’t type-check.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_value (Stringable s) = s.value ;;
 &gt;Line 1, characters 32-39:
@@ -495,18 +674,30 @@ List.iter ~f:print_stringable stringables ;;
 &gt;       The type constructor $Stringable_'a would escape its scope
 </code></pre>
 </div>
-<p>It’s worth spending a moment to decode this error message, and the meaning of the type variable <code>$Stringable_'a</code> in particular. You can think of this variable as having three parts:</p>
+<p>It’s worth spending a moment to decode this error message, and the
+meaning of the type variable <code>$Stringable_'a</code> in particular.
+You can think of this variable as having three parts:</p>
 <ul>
 <li>The <code>$</code> marks the variable as an existential.</li>
-<li><code>Stringable</code> is the name of the GADT tag that this variable came from.</li>
-<li><code>'a</code> is the name of the type variable from inside that tag.</li>
+<li><code>Stringable</code> is the name of the GADT tag that this
+variable came from.</li>
+<li><code>'a</code> is the name of the type variable from inside that
+tag.</li>
 </ul>
 </section>
 <section class="level3" id="abstracting-computational-machines">
 <h3>Abstracting computational machines</h3>
-<p>A common idiom in OCaml is to combine small components into larger computational machines, using a collection of component-combining functions, or <em>combinators</em>.</p>
-<p>GADTs can be helpful for writing such combinators. To see how, let’s consider an example: <em>pipelines</em>. Here, a pipeline is a sequence of steps where each step consumes the output of the previous step, potentially does some side effects, and returns a value to be passed to the next step. This is analogous to a shell pipeline, and is useful for all sorts of system automation tasks.</p>
-<p>But, can’t we write pipelines already? After all, OCaml comes with a perfectly serviceable pipeline operator:</p>
+<p>A common idiom in OCaml is to combine small components into larger
+computational machines, using a collection of component-combining
+functions, or <em>combinators</em>.</p>
+<p>GADTs can be helpful for writing such combinators. To see how, let’s
+consider an example: <em>pipelines</em>. Here, a pipeline is a sequence
+of steps where each step consumes the output of the previous step,
+potentially does some side effects, and returns a value to be passed to
+the next step. This is analogous to a shell pipeline, and is useful for
+all sorts of system automation tasks.</p>
+<p>But, can’t we write pipelines already? After all, OCaml comes with a
+perfectly serviceable pipeline operator:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
 let sum_file_sizes () =
@@ -518,13 +709,20 @@ let sum_file_sizes () =
 &gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This works well enough, but the advantage of a custom pipeline type is that it lets you build extra services beyond basic execution of the pipeline, e.g.:</p>
+<p>This works well enough, but the advantage of a custom pipeline type
+is that it lets you build extra services beyond basic execution of the
+pipeline, e.g.:</p>
 <ul>
-<li>Profiling, so that when you run a pipeline, you get a report of how long each step of the pipeline took.</li>
-<li>Control over execution, like allowing users to pause the pipeline mid-execution, and restart it later.</li>
-<li>Custom error handling, so, for example, you could build a pipeline that kept track of where it failed, and offered the possibility of restarting it.</li>
+<li>Profiling, so that when you run a pipeline, you get a report of how
+long each step of the pipeline took.</li>
+<li>Control over execution, like allowing users to pause the pipeline
+mid-execution, and restart it later.</li>
+<li>Custom error handling, so, for example, you could build a pipeline
+that kept track of where it failed, and offered the possibility of
+restarting it.</li>
 </ul>
-<p>The type signature of such a pipeline type might look something like this:</p>
+<p>The type signature of such a pipeline type might look something like
+this:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module type Pipeline = sig
   type ('input,'output) t
@@ -533,8 +731,16 @@ let sum_file_sizes () =
   val empty : ('a,'a) t
 end</code></pre>
 </div>
-<p>Here, the type <code>('a,'b) t</code> represents a pipeline that consumes values of type <code>'a</code> and emits values of type <code>'b</code>. The operator <code>@&gt;</code> lets you add a step to a pipeline by providing a function to prepend on to an existing pipeline, and <code>empty</code> gives you an empty pipeline, which can be used to seed the pipeline.</p>
-<p>We can use a functor to show how we could use this API for building a pipeline like our earlier example using <code>|&gt;</code>.</p>
+<p>Here, the type <code>('a,'b) t</code> represents a pipeline that
+consumes values of type <code>'a</code> and emits values of type
+<code>'b</code>. The operator <code>@&gt;</code> lets you add a step to
+a pipeline by providing a function to prepend on to an existing
+pipeline, and <code>empty</code> gives you an empty pipeline, which can
+be used to seed the pipeline.</p>
+<p>The following shows how we could use this API for building a pipeline
+like our earlier example using <code>|&gt;</code>. Here, we’re using a
+<em>functor</em>, which we’ll see in more detail in <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>, as a way to
+write code using a given API before we’ve implemented it.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Example_pipeline (Pipeline : Pipeline) = struct
   open Pipeline
@@ -551,7 +757,10 @@ end
 &gt;    sig val sum_file_sizes : (unit, int) Pipeline.t end
 </code></pre>
 </div>
-<p>If all we want is a pipeline capable of a no-frills execution, we can define our pipeline itself as a simple function, the <code>@&gt;</code> operator as function composition. Then executing the pipeline is just function application.</p>
+<p>If all we want is a pipeline capable of a no-frills execution, we can
+define our pipeline itself as a simple function, the <code>@&gt;</code>
+operator as function composition. Then executing the pipeline is just
+function application.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Basic_pipeline : sig
    include Pipeline
@@ -567,16 +776,29 @@ end
   let exec t input = t input
 end</code></pre>
 </div>
-<p>But this way of implementing a pipeline doesn’t give us any of the extra services we discussed. All we’re really doing is step-by-step building up the same kind of function that we could have gotten using the <code>|&gt;</code> operator.</p>
-<p>If we wanted to add the kinds of services we discussed above, we would do so by enhancing the pipeline type, e.g., providing it with extra runtime structures to track profiles, or handle exceptions. But this approach is awkward, since it requires us to pre-commit to whatever services we’re going to support, and to embed all of them in our pipeline representation.</p>
-<p>GADTs provide a simpler approach. Instead of concretely building a machine for executing a pipeline, we can use GADTs to abstractly represent the pipeline we want, and then build the functionality we want on top of that representation.</p>
+<p>But this way of implementing a pipeline doesn’t give us any of the
+extra services we discussed. All we’re really doing is step-by-step
+building up the same kind of function that we could have gotten using
+the <code>|&gt;</code> operator.</p>
+<p>We could get a more poweful pipeline by simply enhancing the pipeline
+type, providing it with extra runtime structures to track profiles, or
+handle exceptions. But this approach is awkward, since it requires us to
+pre-commit to whatever services we’re going to support, and to embed all
+of them in our pipeline representation.</p>
+<p>GADTs provide a simpler approach. Instead of concretely building a
+machine for executing a pipeline, we can use GADTs to abstractly
+represent the pipeline we want, and then build the functionality we want
+on top of that representation.</p>
 <p>Here’s what such a representation might look like.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type (_, _) pipeline =
   | Step : ('a -&gt; 'b) * ('b, 'c) pipeline -&gt; ('a, 'c) pipeline
   | Empty : ('a, 'a) pipeline</code></pre>
 </div>
-<p>Here, the variants really just represent the two building blocks of a pipeline: <code>Step</code> corresponds to the <code>@&gt;</code> operator, and <code>Empty</code> corresponds to the <code>empty</code> pipeline, as you can see below.</p>
+<p>Here, the variants really just represent the two building blocks of a
+pipeline: <code>Step</code> corresponds to the <code>@&gt;</code>
+operator, and <code>Empty</code> corresponds to the <code>empty</code>
+pipeline, as you can see below.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( @&gt; ) f pipeline = Step (f,pipeline) ;;
 &gt;val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) pipeline -&gt; ('a, 'c) pipeline = &lt;fun&gt;
@@ -584,7 +806,8 @@ let empty = Empty ;;
 &gt;val empty : ('a, 'a) pipeline = Empty
 </code></pre>
 </div>
-<p>With that in hand, we can do a no-frills pipeline execution easily enough.</p>
+<p>With that in hand, we can do a no-frills pipeline execution easily
+enough.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec exec : type a b. (a, b) pipeline -&gt; a -&gt; b =
  fun pipeline input -&gt;
@@ -595,7 +818,9 @@ let empty = Empty ;;
 &gt;val exec : ('a, 'b) pipeline -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>But we can also do more interesting things. For example, here’s a function that executes a pipeline and produces a profile showing how long each step of a pipeline took.</p>
+<p>But we can also do more interesting things. For example, here’s a
+function that executes a pipeline and produces a profile showing how
+long each step of a pipeline took.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exec_with_profile pipeline input =
   let rec loop
@@ -618,19 +843,37 @@ let empty = Empty ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>The more abstract GADT approach for creating a little combinator library like this has several advantages over having combinators that build a more concrete computational machine: <a data-primary="combinators, implementing with GADTs" data-type="indexterm">&nbsp;</a></p>
+<p>The more abstract GADT approach for creating a little combinator
+library like this has several advantages over having combinators that
+build a more concrete computational machine: <a data-primary="combinators, implementing with GADTs" data-type="indexterm">&nbsp;</a></p>
 <ul>
-<li><p>The core types are simpler, since they are typically built out of GADT tags that are just reflections the types of the base combinators.</p></li>
-<li><p>The design is more modular, since your core types don’t need to contemplate every possible use you want to make of them.</p></li>
-<li><p>The code tends to be more efficient, since the more concrete approach typically involves allocating closures to wrap up the necessary functionality, and closures are more heavyweight than GADT tags.</p></li>
+<li><p>The core types are simpler, since they are typically built out of
+GADT tags that are just reflections the types of the base
+combinators.</p></li>
+<li><p>The design is more modular, since your core types don’t need to
+contemplate every possible use you want to make of them.</p></li>
+<li><p>The code tends to be more efficient, since the more concrete
+approach typically involves allocating closures to wrap up the necessary
+functionality, and closures are more heavyweight than GADT
+tags.</p></li>
 </ul>
 </section>
 <section class="level3" id="narrowing-the-possibilities">
 <h3>Narrowing the possibilities</h3>
-<p>Another use-case for GADTs is to narrow the set of possible states for a given data-type in different circumstances.</p>
-<p>One context where this can be useful is when managing complex application state, where the available data changes over time. Let’s consider a simple example, where we’re writing code to handle a logon request from a user, and we want to check if the user in question is authorized to logon.</p>
-<p>We’ll assume that the user logging in is authenticated as a particular name, but that in order to authenticate, we need to do two things: to translate that user-name into a numeric user-id, and to fetch permissions for the service in question; once we have both, we can check if the user-id is permitted to log on.</p>
-<p>Without GADTs, we might model the state of a single logon request as follows.</p>
+<p>Another use-case for GADTs is to narrow the set of possible states
+for a given data-type in different circumstances.</p>
+<p>One context where this can be useful is when managing complex
+application state, where the available data changes over time. Let’s
+consider a simple example, where we’re writing code to handle a logon
+request from a user, and we want to check if the user in question is
+authorized to logon.</p>
+<p>We’ll assume that the user logging in is authenticated as a
+particular name, but that in order to authenticate, we need to do two
+things: to translate that user-name into a numeric user-id, and to fetch
+permissions for the service in question; once we have both, we can check
+if the user-id is permitted to log on.</p>
+<p>Without GADTs, we might model the state of a single logon request as
+follows.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type logon_request =
   { user_name : User_name.t
@@ -638,8 +881,12 @@ let empty = Empty ;;
   ; permissions : Permissions.t option
   }</code></pre>
 </div>
-<p>Here, <code>User_name.t</code> represents a textual name, <code>User_id.t</code> represents an integer identifier associated with a user, and a <code>Permissions.t</code> lets you determine which <code>User_id.t</code>’s are authorized to log in.</p>
-<p>Here’s how we might write a function for testing whether a given request is authorized.</p>
+<p>Here, <code>User_name.t</code> represents a textual name,
+<code>User_id.t</code> represents an integer identifier associated with
+a user, and a <code>Permissions.t</code> lets you determine which
+<code>User_id.t</code>’s are authorized to log in.</p>
+<p>Here’s how we might write a function for testing whether a given
+request is authorized.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let authorized request =
   match request.user_id, request.permissions with
@@ -650,33 +897,65 @@ let empty = Empty ;;
 &gt;val authorized : logon_request -&gt; (bool, string) result = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The idea with this function is to only call it once the data is complete, i.e., when the <code>user_id</code> and <code>permissions</code> fields have been filled in, which is why it errors out if the data is incomplete.</p>
-<p>This error-handling isn’t really problematic in a simple case like this. But in a real system, your code can get more complicated in multiple ways, e.g.,</p>
+<p>The idea with this function is to only call it once the data is
+complete, i.e., when the <code>user_id</code> and
+<code>permissions</code> fields have been filled in, which is why it
+errors out if the data is incomplete.</p>
+<p>This error-handling isn’t really problematic in a simple case like
+this. But in a real system, your code can get more complicated in
+multiple ways, e.g.,</p>
 <ul>
 <li>more fields to manage, including more optional fields,</li>
 <li>more operations that depend on these optional fields,</li>
-<li>multiple requests to be handled in parallel, each of which might be in a different state of completion.</li>
+<li>multiple requests to be handled in parallel, each of which might be
+in a different state of completion.</li>
 </ul>
-<p>As this kind of complexity creeps in, it can be useful to be able to track the state of a given request at the type level, and to use that to narrow the set of states a given request can be in, thereby removing some extra case analysis and error handling, which can reduce the complexity of the code and remove opportunities for mistakes.</p>
-<p>One way of doing this is to mint different types to represent different states of the request, e.g., one type for an incomplete request where various fields are optional, and a different type where all of the data is mandatory.</p>
-<p>While this works, it can be awkward and verbose. With GADTs, we can track the state of the request in a type parameter, and have that parameter be used to narrow the set of available cases, without duplicating the type.</p>
+<p>As this kind of complexity creeps in, it can be useful to be able to
+track the state of a given request at the type level, and to use that to
+narrow the set of states a given request can be in, thereby removing
+some extra case analysis and error handling, which can reduce the
+complexity of the code and remove opportunities for mistakes.</p>
+<p>One way of doing this is to mint different types to represent
+different states of the request, e.g., one type for an incomplete
+request where various fields are optional, and a different type where
+all of the data is mandatory.</p>
+<p>While this works, it can be awkward and verbose. With GADTs, we can
+track the state of the request in a type parameter, and have that
+parameter be used to narrow the set of available cases, without
+duplicating the type.</p>
 <section class="level4" id="a-completion-sensitive-option-type">
 <h4>A completion-sensitive option type</h4>
-<p>We’ll start by creating an option type that is sensitive to whether our request is in a complete or incomplete state. To do that, we’ll mint types to represent the states of being complete and incomplete.</p>
+<p>We’ll start by creating an option type that is sensitive to whether
+our request is in a complete or incomplete state. To do that, we’ll mint
+types to represent the states of being complete and incomplete.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type incomplete = Incomplete
 type complete = Complete</code></pre>
 </div>
-<p>The definition of the types doesn’t really matter, since we’re never instantiating these types, just using them as markers of different states. All that matters is that the types are distinct.</p>
-<p>Now we can mint a completeness-sensitive option type. Note the two type variables: the first indicates the type of the contents of the option, and the second indicates whether this is being used in an incomplete state.</p>
+<p>The definition of the types doesn’t really matter, since we’re never
+instantiating these types, just using them as markers of different
+states. All that matters is that the types are distinct.</p>
+<p>Now we can mint a completeness-sensitive option type. Note the two
+type variables: the first indicates the type of the contents of the
+option, and the second indicates whether this is being used in an
+incomplete state.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type ('a, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -&gt; ('a, _) coption</code></pre>
 </div>
-<p>We use <code>Absent</code> and <code>Present</code> rather than <code>Some</code> or <code>None</code> to make the code less confusing when both <code>option</code> and <code>coption</code> are used together.</p>
-<p>You might notice that we haven’t used <code>complete</code> here explicitly. Instead, what we’ve done is to ensure that only an <code>incomplete coption</code> can be <code>Absent</code>. Accordingly, a <code>coption</code> that’s <code>complete</code> (and therefore not <code>incomplete</code>) can only be <code>Present</code>.</p>
-<p>This is easier to understand with some examples. Consider the following function for getting the value out of a <code>coption</code>, returning a default value if <code>Absent</code> is found.</p>
+<p>We use <code>Absent</code> and <code>Present</code> rather than
+<code>Some</code> or <code>None</code> to make the code less confusing
+when both <code>option</code> and <code>coption</code> are used
+together.</p>
+<p>You might notice that we haven’t used <code>complete</code> here
+explicitly. Instead, what we’ve done is to ensure that only an
+<code>incomplete coption</code> can be <code>Absent</code>. Accordingly,
+a <code>coption</code> that’s <code>complete</code> (and therefore not
+<code>incomplete</code>) can only be <code>Present</code>.</p>
+<p>This is easier to understand with some examples. Consider the
+following function for getting the value out of a <code>coption</code>,
+returning a default value if <code>Absent</code> is found.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get ~default o =
    match o with
@@ -686,7 +965,9 @@ type complete = Complete</code></pre>
 &gt;val get : default:'a -&gt; ('a, incomplete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that the <code>incomplete</code> type was inferred here. If we annotate the <code>coption</code> as <code>complete</code>, the code no longer compiles.</p>
+<p>Note that the <code>incomplete</code> type was inferred here. If we
+annotate the <code>coption</code> as <code>complete</code>, the code no
+longer compiles.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get ~default (o : (_,complete) coption) =
   match o with
@@ -700,7 +981,8 @@ type complete = Complete</code></pre>
 &gt;       Type incomplete is not compatible with type complete
 </code></pre>
 </div>
-<p>We can make this compile by deleting the <code>Absent</code> branch (and the now useless <code>default</code> argument).</p>
+<p>We can make this compile by deleting the <code>Absent</code> branch
+(and the now useless <code>default</code> argument).</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get (o : (_,complete) coption) =
   match o with
@@ -715,11 +997,14 @@ type complete = Complete</code></pre>
 &gt;val get : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As we can see, when the <code>coption</code> is known to be <code>complete</code>, the pattern matching is narrowed to just the <code>Present</code> case.</p>
+<p>As we can see, when the <code>coption</code> is known to be
+<code>complete</code>, the pattern matching is narrowed to just the
+<code>Present</code> case.</p>
 </section>
 <section class="level4" id="a-completion-sensitive-request-type">
 <h4>A completion-sensitive request type</h4>
-<p>We can use <code>coption</code> to define a completion-sensitive version of <code>logon_request</code>.</p>
+<p>We can use <code>coption</code> to define a completion-sensitive
+version of <code>logon_request</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type 'c logon_request =
   { user_name : User_name.t
@@ -727,8 +1012,12 @@ type complete = Complete</code></pre>
   ; permissions : (Permissions.t, 'c) coption
   }</code></pre>
 </div>
-<p>There’s a single type parameter for the <code>logon_request</code> that marks whether it’s <code>complete</code>, at which point, both the <code>user_id</code> and <code>permissions</code> fields will be <code>complete</code> as well.</p>
-<p>As before, it’s easy to fill in the <code>user_id</code> and <code>permissions</code> fields.</p>
+<p>There’s a single type parameter for the <code>logon_request</code>
+that marks whether it’s <code>complete</code>, at which point, both the
+<code>user_id</code> and <code>permissions</code> fields will be
+<code>complete</code> as well.</p>
+<p>As before, it’s easy to fill in the <code>user_id</code> and
+<code>permissions</code> fields.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let set_user_id request x = { request with user_id = Present x } ;;
 &gt;val set_user_id : 'a logon_request -&gt; User_id.t -&gt; 'a logon_request = &lt;fun&gt;
@@ -737,7 +1026,10 @@ let set_permissions request x = { request with permissions = Present x } ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that filling in the fields doesn’t automatically mark a request as <code>complete</code>. To do that, we need to explicitly test for completeness, and then construct a version of the record with just the completed fields filled in.</p>
+<p>Note that filling in the fields doesn’t automatically mark a request
+as <code>complete</code>. To do that, we need to explicitly test for
+completeness, and then construct a version of the record with just the
+completed fields filled in.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let check_completeness request =
   match request.user_id, request.permissions with
@@ -749,7 +1041,11 @@ let set_permissions request x = { request with permissions = Present x } ;;
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that the result is polymorphic, meaning it can return a logon request of any kind, which includes the possibility of returning a complete request. In practice, the function type is easier to understand if we constrain the return value to explicitly return a <code>complete</code> request.</p>
+<p>Note that the result is polymorphic, meaning it can return a logon
+request of any kind, which includes the possibility of returning a
+complete request. In practice, the function type is easier to understand
+if we constrain the return value to explicitly return a
+<code>complete</code> request.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let check_completeness request : complete logon_request option =
   match request.user_id, request.permissions with
@@ -761,7 +1057,8 @@ let set_permissions request x = { request with permissions = Present x } ;;
 &gt;  incomplete logon_request -&gt; complete logon_request option = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Finally, we can write an authorization checker that works unconditionally on a complete login request.</p>
+<p>Finally, we can write an authorization checker that works
+unconditionally on a complete login request.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let authorized (request : complete logon_request) =
   let { user_id = Present user_id; permissions = Present permissions; _ } = request in
@@ -770,21 +1067,33 @@ let set_permissions request x = { request with permissions = Present x } ;;
 &gt;val authorized : complete logon_request -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>After all that work, the result may seem a bit underwhelming, and indeed, most of the time, this kind of narrowing isn’t worth the complexity of setting it up. But for a sufficiently complex state machine, cutting down on the possibilities that your code needs to contemplate can make a big difference to the comprehensibility and correctness of the result.</p>
+<p>After all that work, the result may seem a bit underwhelming, and
+indeed, most of the time, this kind of narrowing isn’t worth the
+complexity of setting it up. But for a sufficiently complex state
+machine, cutting down on the possibilities that your code needs to
+contemplate can make a big difference to the comprehensibility and
+correctness of the result.</p>
 </section>
 <section class="level4" id="type-distinctness-and-abstraction">
 <h4>Type distinctness and abstraction</h4>
-<p>In the example in this section, we used two types, <code>complete</code> and <code>incomplete</code> to mark different states, and we defined those types so as to be in some sense obviously different.</p>
+<p>In the example in this section, we used two types,
+<code>complete</code> and <code>incomplete</code> to mark different
+states, and we defined those types so as to be in some sense obviously
+different.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type incomplete = Incomplete
 type complete = Complete</code></pre>
 </div>
-<p>This isn’t strictly necessary. Here’s another way of defining these types that makes them less obviously distinct.</p>
+<p>This isn’t strictly necessary. Here’s another way of defining these
+types that makes them less obviously distinct.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type incomplete = Z
 type complete = Z</code></pre>
 </div>
-<p>OCaml’s variant types are nominal, so <code>complete</code> and <code>incomplete</code> are distinct types, despite having variants of the same name, as you can see when we try to put instances of each type in the same list.</p>
+<p>OCaml’s variant types are nominal, so <code>complete</code> and
+<code>incomplete</code> are distinct types, despite having variants of
+the same name, as you can see when we try to put instances of each type
+in the same list.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i = (Z : incomplete) and c = (Z : complete) ;;
 &gt;val i : incomplete = Z
@@ -795,13 +1104,17 @@ type complete = Z</code></pre>
 &gt;       but an expression was expected of type incomplete
 </code></pre>
 </div>
-<p>As a result, we can narrow a pattern match using these types as indices, much as we did earlier. First, we set up the <code>coption</code> type:</p>
+<p>As a result, we can narrow a pattern match using these types as
+indices, much as we did earlier. First, we set up the
+<code>coption</code> type:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type ('a, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -&gt; ('a, _) coption</code></pre>
 </div>
-<p>Then, we write a function that requires the <code>coption</code> to be complete, and accordingly, need only contemplate the <code>Present</code> case.</p>
+<p>Then, we write a function that requires the <code>coption</code> to
+be complete, and accordingly, need only contemplate the
+<code>Present</code> case.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
   match coption with
@@ -810,7 +1123,10 @@ type complete = Z</code></pre>
 &gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>An easy-to-miss issue here is that the way we expose these types through an interface can cause OCaml to lose track of the distinctness of the types in question. Consider this version, where we entirely hide the definition of <code>complete</code> and <code>incomplete</code>.</p>
+<p>An easy-to-miss issue here is that the way we expose these types
+through an interface can cause OCaml to lose track of the distinctness
+of the types in question. Consider this version, where we entirely hide
+the definition of <code>complete</code> and <code>incomplete</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module M : sig
   type incomplete
@@ -825,7 +1141,8 @@ type ('a, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -&gt; ('a, _) coption</code></pre>
 </div>
-<p>Now, the <code>assume_complete</code> function we wrote is no longer found to be exhaustive.</p>
+<p>Now, the <code>assume_complete</code> function we wrote is no longer
+found to be exhaustive.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
   match coption with
@@ -838,8 +1155,11 @@ type ('a, _) coption =
 &gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>That’s because by leaving the types abstract, we’ve entirely hidden the underlying types, leaving the typesystem with no evidence that the types are distinct.</p>
-<p>Let’s see what happens if we expose the implementation of these types.</p>
+<p>That’s because by leaving the types abstract, we’ve entirely hidden
+the underlying types, leaving the typesystem with no evidence that the
+types are distinct.</p>
+<p>Let’s see what happens if we expose the implementation of these
+types.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module M : sig
   type incomplete = Z
@@ -867,8 +1187,12 @@ type ('a, _) coption =
 &gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In order to be exhaustive, we need the types that are exposed to be definitively different, which would be the case if we defined them as variants with differently named tags, as we did originally.</p>
-<p>The reason for this is that types that appear to be different in an interface may turn out to be the same in the implementation, as we can see below.</p>
+<p>In order to be exhaustive, we need the types that are exposed to be
+definitively different, which would be the case if we defined them as
+variants with differently named tags, as we did originally.</p>
+<p>The reason for this is that types that appear to be different in an
+interface may turn out to be the same in the implementation, as we can
+see below.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module M : sig
   type incomplete = Z
@@ -878,17 +1202,30 @@ end = struct
   type complete = incomplete = Z
 end</code></pre>
 </div>
-<p>All of which is to say: when creating types to act as abstract markers for the type parameter of a GADT, you should chose definitions that make the distinctness of those types clear, and you should expose those definitions in your mlis.</p>
+<p>All of which is to say: when creating types to act as abstract
+markers for the type parameter of a GADT, you should chose definitions
+that make the distinctness of those types clear, and you should expose
+those definitions in your mlis.</p>
 </section>
 <section class="level4" id="narrowing-without-gadts">
 <h4>Narrowing without GADTs</h4>
-<p>Thus far, we’ve only seen narrowing in the context of GADTs, but OCaml can eliminate impossible cases from ordinary variants too. As with GADTs, to eliminate a case you need to demonstrate that the case in question is impossible at the type level.</p>
-<p>One way to do this is via an <em>uninhabited type</em>, which is a type that has no associated values. You can declare such a value by creating a variant with no tags. <a data-primary="uninhabited types" data-type="indexterm">&nbsp;</a></p>
+<p>Thus far, we’ve only seen narrowing in the context of GADTs, but
+OCaml can eliminate impossible cases from ordinary variants too. As with
+GADTs, to eliminate a case you need to demonstrate that the case in
+question is impossible at the type level.</p>
+<p>One way to do this is via an <em>uninhabited type</em>, which is a
+type that has no associated values. You can declare such a value by
+creating a variant with no tags. <a data-primary="uninhabited
+types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type nothing = |</code></pre>
 </div>
-<p>This turn out to be useful enough that <code>Base</code> has a standard uninhabited type, <code>Nothing.t</code>. <a data-primary="Nothing.t" data-type="indexterm">&nbsp;</a></p>
-<p>So, how does an uninhabited type help? Well, consider the <code>Result.t</code> type, discussed in as described in <a data-type="xref" href="error-handling.html#encoding-errors-with-result">Chapter 7, Error Handling</a>. Normally, to match a <code>Result.t</code>, you need to handle both the <code>Ok</code> and <code>Error</code> cases.</p>
+<p>This turn out to be useful enough that <code>Base</code> has a
+standard uninhabited type, <code>Nothing.t</code>. <a data-primary="Nothing.t" data-type="indexterm">&nbsp;</a></p>
+<p>So, how does an uninhabited type help? Well, consider the
+<code>Result.t</code> type, discussed in as described in <a data-type="xref" href="error-handling.html#encoding-errors-with-result">Chapter 7, Error Handling</a>. Normally, to match a
+<code>Result.t</code>, you need to handle both the <code>Ok</code> and
+<code>Error</code> cases.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio ;;
 let print_result (x : (int,string) Result.t) =
@@ -899,7 +1236,9 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, string) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>But if the <code>Error</code> case contains an uninhabitable type, well, that case can never be instantiated, and OCaml will tell you as much.</p>
+<p>But if the <code>Error</code> case contains an uninhabitable type,
+well, that case can never be instantiated, and OCaml will tell you as
+much.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -912,7 +1251,8 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can follow the advice above, and add a so-called <em>refutation case</em>. <a data-primary="refutation case" data-type="indexterm">&nbsp;</a></p>
+<p>We can follow the advice above, and add a so-called <em>refutation
+case</em>. <a data-primary="refutation case" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -922,7 +1262,10 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The period in the final case tells the compiler that we believe this case can never be reached, and OCaml will verify that it’s true. In some simple cases, however, the compiler can automatically add the refutation case for you, so you don’t need to write it out explicitly.</p>
+<p>The period in the final case tells the compiler that we believe this
+case can never be reached, and OCaml will verify that it’s true. In some
+simple cases, however, the compiler can automatically add the refutation
+case for you, so you don’t need to write it out explicitly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
@@ -931,14 +1274,25 @@ let print_result (x : (int,string) Result.t) =
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Narrowing with uninhabitable types can be useful when using a highly configurable library that supports multiple different modes of use, not all of which are necessarily needed for a given application. One example of this comes from <code>Async</code>’s RPC (remote procedure-call) library. Async RPCs support a particular flavor of interaction called a <code>State_rpc</code>. Such an RPC is parameterized by four types, for four different kinds of data: <a data-primary="Async_rpc" data-type="indexterm">&nbsp;</a> <a data-primary="State_rpc" data-type="indexterm">&nbsp;</a></p>
+<p>Narrowing with uninhabitable types can be useful when using a highly
+configurable library that supports multiple different modes of use, not
+all of which are necessarily needed for a given application. One example
+of this comes from <code>Async</code>’s RPC (remote procedure-call)
+library. Async RPCs support a particular flavor of interaction called a
+<code>State_rpc</code>. Such an RPC is parameterized by four types, for
+four different kinds of data: <a data-primary="Async_rpc" data-type="indexterm">&nbsp;</a> <a data-primary="State_rpc" data-type="indexterm">&nbsp;</a></p>
 <ul>
 <li><code>query</code>, for the initial client request,</li>
-<li><code>state</code>, for the initial snapshot returned by the server,</li>
-<li><code>update</code>, for the sequence of updates to that snapshot, and</li>
+<li><code>state</code>, for the initial snapshot returned by the
+server,</li>
+<li><code>update</code>, for the sequence of updates to that snapshot,
+and</li>
 <li><code>error</code>, for an error to terminate the stream.</li>
 </ul>
-<p>Now, imagine you want to use a <code>State_rpc</code> in a context where you don’t need to terminate the stream with a custom error. We could just instantiate the <code>State_rpc</code> using the type <code>unit</code> for the error type.</p>
+<p>Now, imagine you want to use a <code>State_rpc</code> in a context
+where you don’t need to terminate the stream with a custom error. We
+could just instantiate the <code>State_rpc</code> using the type
+<code>unit</code> for the error type.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 open Async
@@ -952,7 +1306,8 @@ let rpc =
     ~bin_error:[%bin_type_class: unit]
     ()</code></pre>
 </div>
-<p>But with this approach, you still have to handle the error case when writing code to dispatch the RPC.</p>
+<p>But with this approach, you still have to handle the error case when
+writing code to dispatch the RPC.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
@@ -962,7 +1317,8 @@ let rpc =
 &gt;val dispatch : Rpc.Connection.t -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>An alternative approach is to use an uninhabited type for the error:</p>
+<p>An alternative approach is to use an uninhabited type for the
+error:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let rpc =
   Rpc.State_rpc.create
@@ -974,7 +1330,9 @@ let rpc =
     ~bin_error:[%bin_type_class: Nothing.t]
     ()</code></pre>
 </div>
-<p>Now, we’ve essentially banned the use of the <code>error</code> type, and as a result, our dispatch function needs only deal with the <code>Ok</code> case.</p>
+<p>Now, we’ve essentially banned the use of the <code>error</code> type,
+and as a result, our dispatch function needs only deal with the
+<code>Ok</code> case.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
@@ -983,16 +1341,22 @@ let rpc =
 &gt;val dispatch : Rpc.Connection.t -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>What’s nice about this example is that it shows that narrowing can be applied to code that isn’t designed with narrowing in mind.</p>
+<p>What’s nice about this example is that it shows that narrowing can be
+applied to code that isn’t designed with narrowing in mind.</p>
 </section>
 </section>
 </section>
 <section class="level2" id="limitations-of-gadts">
 <h2>Limitations of GADTs</h2>
-<p>Hopefully, we’ve demonstrated the utility of GADTs, while at the same time showing some of the attendant complexities. In this final section, we’re going to highlight some remaining difficulties with using GADTs that you may run in to, as well as how to work around them.</p>
+<p>Hopefully, we’ve demonstrated the utility of GADTs, while at the same
+time showing some of the attendant complexities. In this final section,
+we’re going to highlight some remaining difficulties with using GADTs
+that you may run in to, as well as how to work around them.</p>
 <section class="level3" id="or-patterns">
 <h3>Or-patterns</h3>
-<p>GADTs don’t work well with or-patterns. Consider the following type that represents various ways we might use for obtaining some piece of data. <a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
+<p>GADTs don’t work well with or-patterns. Consider the following type
+that represents various ways we might use for obtaining some piece of
+data. <a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 module Source_kind = struct
@@ -1002,7 +1366,8 @@ module Source_kind = struct
     | Raw_data : string t
 end</code></pre>
 </div>
-<p>We can write a function that takes a <code>Source_kind.t</code> and the corresponding source, and prints it out.</p>
+<p>We can write a function that takes a <code>Source_kind.t</code> and
+the corresponding source, and prints it out.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
   match kind with
@@ -1013,7 +1378,9 @@ end</code></pre>
 &gt;val source_to_sexp : 'a Source_kind.t -&gt; 'a -&gt; Sexp.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>But, observing that the right hand side of <code>Raw_data</code> and <code>Filename</code> are the same, you might try to merge those cases together with an or-pattern. Unfortunately, that doesn’t work.</p>
+<p>But, observing that the right hand side of <code>Raw_data</code> and
+<code>Filename</code> are the same, you might try to merge those cases
+together with an or-pattern. Unfortunately, that doesn’t work.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
   match kind with
@@ -1025,7 +1392,9 @@ end</code></pre>
 &gt;         string
 </code></pre>
 </div>
-<p>Or-patterns do sometimes work, but only when you don’t make use of the type information that is discovered during the pattern match. Here’s an example of a function that uses or-patterns successfully.</p>
+<p>Or-patterns do sometimes work, but only when you don’t make use of
+the type information that is discovered during the pattern match. Here’s
+an example of a function that uses or-patterns successfully.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let requires_io (type a) (kind : a Source_kind.t) =
   match kind with
@@ -1035,11 +1404,19 @@ end</code></pre>
 &gt;val requires_io : 'a Source_kind.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In any case, the lack of or-patterns is annoying, but it’s not a big deal, since you can reduce the code duplication by pulling out most of the content of the duplicated right-hand sides into functions that can be called in each of the duplicated cases.</p>
+<p>In any case, the lack of or-patterns is annoying, but it’s not a big
+deal, since you can reduce the code duplication by pulling out most of
+the content of the duplicated right-hand sides into functions that can
+be called in each of the duplicated cases.</p>
 </section>
 <section class="level3" id="deriving-serializers">
 <h3>Deriving serializers</h3>
-<p>As will be discussed in more detail in <a data-type="xref" href="data-serialization.html">Chapter 20, Data Serialization With S-Expressions</a>, s-expressions are a convenient data format for representing structured data. Rather than write the serializers and deserializers by hand, we typically use <code>ppx_sexp_value</code>, which is a syntax extension which auto-generates these functions for a given type, based on that type’s definition.</p>
+<p>As will be discussed in more detail in <a data-type="xref" href="data-serialization.html">Chapter 20, Data Serialization With
+S-Expressions</a>, s-expressions are a convenient data format for
+representing structured data. Rather than write the serializers and
+deserializers by hand, we typically use <code>ppx_sexp_value</code>,
+which is a syntax extension which auto-generates these functions for a
+given type, based on that type’s definition.</p>
 <p>Here’s an example:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type position = { x: float; y: float } [@@deriving sexp] ;;
@@ -1052,7 +1429,8 @@ position_of_sexp (Sexp.of_string "((x 72) (y 1.2))") ;;
 &gt;- : position = {x = 72.; y = 1.2}
 </code></pre>
 </div>
-<p>While <code>[@@deriving sexp]</code> works with most types, it doesn’t always work with GADTs.</p>
+<p>While <code>[@@deriving sexp]</code> works with most types, it
+doesn’t always work with GADTs.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type _ number_kind =
   | Int : int number_kind
@@ -1065,8 +1443,17 @@ position_of_sexp (Sexp.of_string "((x 72) (y 1.2))") ;;
 &gt;       Type int is not compatible with type v_x__001_
 </code></pre>
 </div>
-<p>The error message is pretty awful, but if you stop and think about it, it’s not too surprising that we ran into trouble here. What should the type of <code>number_kind_of_sexp</code> be anyway? When parsing <code>"Int"</code>, the returned type would have to be <code>int number_kind</code>, and when parsing <code>"Float"</code>, the type would have to be <code>float number_kind</code>. That kind of dependency between the value of an argument and the type of the returned value is just not expressible in OCaml’s type system.</p>
-<p>This argument doesn’t stop us from serializing, and indeed, <code>[@@deriving sexp_of]</code>, which only creates the serializer, works just fine.</p>
+<p>The error message is pretty awful, but if you stop and think about
+it, it’s not too surprising that we ran into trouble here. What should
+the type of <code>number_kind_of_sexp</code> be anyway? When parsing
+<code>"Int"</code>, the returned type would have to be <code>int
+number_kind</code>, and when parsing <code>"Float"</code>, the type
+would have to be <code>float number_kind</code>. That kind of dependency
+between the value of an argument and the type of the returned value is
+just not expressible in OCaml’s type system.</p>
+<p>This argument doesn’t stop us from serializing, and indeed,
+<code>[@@deriving sexp_of]</code>, which only creates the serializer,
+works just fine.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type _ number_kind =
  | Int : int number_kind
@@ -1080,15 +1467,20 @@ sexp_of_number_kind Int.sexp_of_t Int ;;
 &gt;- : Sexp.t = Int
 </code></pre>
 </div>
-<p>It is possible to build a deserializer for <code>number_kind</code>, but it’s tricky. First, we’ll need a type that packs up a <code>number_kind</code> while hiding its type parameter. This is going to be the value we return from our parser.</p>
+<p>It is possible to build a deserializer for <code>number_kind</code>,
+but it’s tricky. First, we’ll need a type that packs up a
+<code>number_kind</code> while hiding its type parameter. This is going
+to be the value we return from our parser.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type packed_number_kind = P : _ number_kind -&gt; packed_number_kind</code></pre>
 </div>
-<p>Next, we’ll need to create a non-GADT version of our type, for which we’ll derive a deserializer.</p>
+<p>Next, we’ll need to create a non-GADT version of our type, for which
+we’ll derive a deserializer.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type simple_number_kind = Int | Float [@@deriving of_sexp]</code></pre>
 </div>
-<p>Then, we write a function for converting from our non-GADT type to the packed variety.</p>
+<p>Then, we write a function for converting from our non-GADT type to
+the packed variety.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let simple_number_kind_to_packed_number_kind kind :
   packed_number_kind
@@ -1101,7 +1493,8 @@ sexp_of_number_kind Int.sexp_of_t Int ;;
 &gt;  simple_number_kind -&gt; packed_number_kind = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Finally, we combine our generated sexp-converter with our conversion type to produce the final deserialization function.</p>
+<p>Finally, we combine our generated sexp-converter with our conversion
+type to produce the final deserialization function.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let number_kind_of_sexp sexp =
   simple_number_kind_of_sexp sexp
@@ -1118,8 +1511,9 @@ sexp_of_number_kind Int.sexp_of_t Int ;;
 &gt;- : packed_number_kind list = [P Float; P Int]
 </code></pre>
 </div>
-<p>While all of this is doable, it’s definitely awkward, and requires some unpleasant code duplication.</p>
+<p>While all of this is doable, it’s definitely awkward, and requires
+some unpleasant code duplication.</p>
 </section>
 </section>
 </section>
-</article></div><a href="objects.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 12</small>Objects</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="functors.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 10</small>Functors</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
