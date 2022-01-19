@@ -1,5 +1,5 @@
 open! Core
-open! Async
+open Async
 open Helpers
 
 let%expect_test "test uppercase echo" =

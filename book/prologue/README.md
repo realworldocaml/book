@@ -187,14 +187,14 @@ concepts we cover will be new, including traditional functional-programming
 techniques like higher-order functions and immutable data types, as well as
 aspects of OCaml's powerful type and module systems.
 
-If you already know OCaml, this book may surprise you. Core redefines most of
-the standard namespace to make better use of the OCaml module system and
-expose a number of powerful, reusable data structures by default. Older OCaml
-code will still interoperate with Core, but you may need to adapt it for
-maximal benefit. All the new code that we write uses Core, and we believe the
-Core model is worth learning; it's been successfully used on large,
-multimillion-line codebases and removes a big barrier to building
-sophisticated applications in OCaml.
+If you already know OCaml, this book may surprise you. Base redefines
+most of the standard namespace to make better use of the OCaml module
+system and expose a number of powerful, reusable data structures by
+default. Older OCaml code will still interoperate with Base, but you
+may need to adapt it for maximal benefit. All the new code that we
+write uses Base, and we believe the Base model is worth learning; it's
+been successfully used on large, multimillion-line codebases and
+removes a big barrier to building sophisticated applications in OCaml.
 
 Code that uses only the traditional compiler standard library will always
 exist, but there are other online resources for learning how that works.
@@ -233,22 +233,24 @@ personal experience to construct scalable, robust software systems.
 
 ### Installation Instructions
 
-*Real World OCaml* uses some tools that we've developed while writing this
-book. Some of these resulted in improvements to the OCaml compiler, which
-means that you will need to ensure that you have an up-to-date development
-environment (using the 4.13.1 version of the compiler). The installation
-process is largely automated through the opam package manager. Instructions
-on how to set it up and what packages to install can be found at
-[the installation page](install.html).[installation
+*Real World OCaml* uses some tools that we've developed while writing
+this book. Some of these resulted in improvements to the OCaml
+compiler, which means that you will need to ensure that you have an
+up-to-date development environment (using the 4.13.1 version of the
+compiler). The installation process is largely automated through the
+opam package manager. Instructions on how to set it up and what
+packages to install can be found at [the installation
+page](install.html).[installation
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
-`Core` currently requires a UNIX based operating system, and so only
-works on systems like macOS, Linux, FreeBSD, and OpenBSD or the
-Windows Subsystem for Linux (WSL).  `Core` is an extension of `Base`
-which works anywhere OCaml does, and in particular works on Windows
-and JavaScript. The examples in Part I of the book will for the most
-part use only `Base` and other highly portable
-libraries.[OCaml/operating system support]{.idx}
+Some of the libraries we use, notably `Base`, work anywhere OCaml
+does, and in particular work on Windows and JavaScript.  The examples
+in Part I of the book will for the most part will stick to such highly
+portable libraries.[OCaml/operating system support]{.idx} Some of the
+libraries used, however, require a UNIX based operating system, and so
+only work on systems like macOS, Linux, FreeBSD, OpenBSD, and the
+Windows Subsystem for Linux (WSL).  `Core` and `Async` are a notable
+examples here.
 
 This book is not intended as a reference manual.  We aim to teach you
 about the language as well as the libraries, tools, and techniques
@@ -286,13 +288,14 @@ We would especially like to thank the following individuals for improving
 - Jeremy Yallop authored and documented the Ctypes library described in
   [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 
-- Stephen Weeks is responsible for much of the modular architecture behind
-  Core, and his extensive notes formed the basis of
-  [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
-  and
-  [Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
-  Sadiq Jaffer subsequently refreshed the garbage collector chapter to reflect
-  the latest changes in OCaml 4.13.
+- Stephen Weeks is responsible for much of the modular architecture
+  behind Base and Core, and his extensive notes formed the basis of
+  [Memory Representation Of
+  Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
+  and [Understanding The Garbage
+  Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+  Sadiq Jaffer subsequently refreshed the garbage collector chapter to
+  reflect the latest changes in OCaml 4.13.
 
 - Jérémie Dimino, the author of `utop`, the interactive command-line
   interface that is used throughout this book. We're particularly grateful

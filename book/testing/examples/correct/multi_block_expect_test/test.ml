@@ -1,5 +1,5 @@
-open! Base
-open! Stdio
+open Base
+open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
