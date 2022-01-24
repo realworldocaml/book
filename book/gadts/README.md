@@ -314,13 +314,13 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -> 'a expr
 ```
 
-The syntax here requires some decoding. The colon to the right of
-each tag is what tells you that this is a GADT.  To the right of the
-colon, you'll see what looks like an ordinary function signature, and
-you can almost think of it that way; specifically, as the type
-signature for that particular tag. The left-hand side of the
-arrow states the types of the arguments to the tag, and the
-right hand side determines the type of the constructed value.
+The syntax here requires some decoding. The colon to the right of each
+tag is what tells you that this is a GADT.  To the right of the colon,
+you'll see what looks like an ordinary, single-argument function
+signature, and you can almost think of it that way; specifically, as
+the type signature for that particular tag. The left-hand side of the
+arrow states the types of the arguments to the tag, and the right hand
+side determines the type of the constructed value.
 
 Note that in the definition of each tag in a GADT, the right-hand side
 is an instance of the type as the overall GADT, though the type
@@ -1010,7 +1010,7 @@ option, and the second indicates whether this is being used in an
 incomplete state.
 
 ```ocaml env=main
-type ('a, _) coption =
+type (_, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -> ('a, _) coption
 ```
