@@ -785,8 +785,11 @@ you add a step to a pipeline by providing a function to prepend on to
 an existing pipeline, and `empty` gives you an empty pipeline, which
 can be used to seed the pipeline.
 
-We can use a functor to show how we could use this API for building a
-pipeline like our earlier example using `|>`.
+The following shows how we could use this API for building a pipeline
+like our earlier example using `|>`.  Here, we're using a *functor*,
+which we'll see in more detail in
+[Functors](functors.html#functors){data-type=xref}, as a way to write
+code using a given API before we've implemented it.
 
 ```ocaml env=abstracting
 # module Example_pipeline (Pipeline : Pipeline) = struct
@@ -829,12 +832,11 @@ extra services we discussed.  All we're really doing is step-by-step
 building up the same kind of function that we could have gotten using
 the `|>` operator.
 
-If we wanted to add the kinds of services we discussed above, we would
-do so by enhancing the pipeline type, e.g., providing it with extra
-runtime structures to track profiles, or handle exceptions.  But this
-approach is awkward, since it requires us to pre-commit to whatever
-services we're going to support, and to embed all of them in our
-pipeline representation.
+We could get a more poweful pipeline by simply enhancing the pipeline
+type, providing it with extra runtime structures to track profiles, or
+handle exceptions.  But this approach is awkward, since it requires us
+to pre-commit to whatever services we're going to support, and to
+embed all of them in our pipeline representation.
 
 GADTs provide a simpler approach.  Instead of concretely building a
 machine for executing a pipeline, we can use GADTs to abstractly
