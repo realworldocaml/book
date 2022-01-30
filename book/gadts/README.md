@@ -314,13 +314,13 @@ type _ expr =
   | If : bool expr * 'a expr * 'a expr -> 'a expr
 ```
 
-The syntax here requires some decoding. The colon to the right of
-each tag is what tells you that this is a GADT.  To the right of the
-colon, you'll see what looks like an ordinary function signature, and
-you can almost think of it that way; specifically, as the type
-signature for that particular tag. The left-hand side of the
-arrow states the types of the arguments to the tag, and the
-right hand side determines the type of the constructed value.
+The syntax here requires some decoding. The colon to the right of each
+tag is what tells you that this is a GADT.  To the right of the colon,
+you'll see what looks like an ordinary, single-argument function
+signature, and you can almost think of it that way; specifically, as
+the type signature for that particular tag. The left-hand side of the
+arrow states the types of the arguments to the tag, and the right hand
+side determines the type of the constructed value.
 
 Note that in the definition of each tag in a GADT, the right-hand side
 is an instance of the type as the overall GADT, though the type
@@ -785,8 +785,11 @@ you add a step to a pipeline by providing a function to prepend on to
 an existing pipeline, and `empty` gives you an empty pipeline, which
 can be used to seed the pipeline.
 
-We can use a functor to show how we could use this API for building a
-pipeline like our earlier example using `|>`.
+The following shows how we could use this API for building a pipeline
+like our earlier example using `|>`.  Here, we're using a *functor*,
+which we'll see in more detail in
+[Functors](functors.html#functors){data-type=xref}, as a way to write
+code using a given API before we've implemented it.
 
 ```ocaml env=abstracting
 # module Example_pipeline (Pipeline : Pipeline) = struct
@@ -829,12 +832,11 @@ extra services we discussed.  All we're really doing is step-by-step
 building up the same kind of function that we could have gotten using
 the `|>` operator.
 
-If we wanted to add the kinds of services we discussed above, we would
-do so by enhancing the pipeline type, e.g., providing it with extra
-runtime structures to track profiles, or handle exceptions.  But this
-approach is awkward, since it requires us to pre-commit to whatever
-services we're going to support, and to embed all of them in our
-pipeline representation.
+We could get a more poweful pipeline by simply enhancing the pipeline
+type, providing it with extra runtime structures to track profiles, or
+handle exceptions.  But this approach is awkward, since it requires us
+to pre-commit to whatever services we're going to support, and to
+embed all of them in our pipeline representation.
 
 GADTs provide a simpler approach.  Instead of concretely building a
 machine for executing a pipeline, we can use GADTs to abstractly
@@ -1008,7 +1010,7 @@ option, and the second indicates whether this is being used in an
 incomplete state.
 
 ```ocaml env=main
-type ('a, _) coption =
+type (_, _) coption =
   | Absent : (_, incomplete) coption
   | Present : 'a -> ('a, _) coption
 ```
