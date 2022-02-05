@@ -258,6 +258,13 @@ OCamlfind package:
 
 ```sh dir=examples/ffi/hello
 $ dune build hello.exe
+    ocamlopt hello.exe (exit 2)
+(cd _build/default && /home/yminsky/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -cclib -lncurses -g -o hello.exe /home/yminsky/.opam/default/lib/ocaml/unix.cmxa -I /home/yminsky/.opam/default/lib/ocaml /home/yminsky/.opam/default/lib/ocaml/bigarray.cmxa -I /home/yminsky/.opam/default/lib/ocaml /home/yminsky/Code/rwo/_build/install/default/lib/integers/integers.cmxa -I /home/yminsky/Code/rwo/_build/install/default/lib/integers /home/yminsky/Code/rwo/_build/install/default/lib/bisect_ppx/common/bisect_common.cmxa /home/yminsky/Code/rwo/_build/install/default/lib/bisect_ppx/runtime/bisect.cmxa /home/yminsky/Code/rwo/_build/install/default/lib/ctypes/ctypes.cmxa -I /home/yminsky/Code/rwo/_build/install/default/lib/ctypes /home/yminsky/Code/rwo/_build/install/default/lib/ctypes-foreign/base/ctypes_foreign_base.cmxa -I /home/yminsky/Code/rwo/_build/install/default/lib/ctypes-foreign/base /home/yminsky/.opam/default/lib/ocaml/threads/threads.cmxa -I /home/yminsky/.opam/default/lib/ocaml /home/yminsky/Code/rwo/_build/install/default/lib/ctypes-foreign/threaded/ctypes_foreign_threaded.cmxa -I /home/yminsky/Code/rwo/_build/install/default/lib/ctypes-foreign/threaded .hello.eobjs/native/dune__exe.cmx .hello.eobjs/native/dune__exe__Ncurses.cmx .hello.eobjs/native/dune__exe__Hello.cmx)
+/usr/bin/ld: cannot find -lncurses
+collect2: error: ld returned 1 exit status
+File "caml_startup", line 1:
+Error: Error during linking (exit code 1)
+[1]
 ```
 
 Running `./hello.native` should now display a Hello World in your terminal!
