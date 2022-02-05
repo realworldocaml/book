@@ -6,8 +6,9 @@ examining the tools you can use for editing, compiling, testing,
 documenting and publishing your own projects.
 
 The OCaml community has adopted a platform of modern tools to interface
-it with IDEs such as Visual Studio Code.  You just need to specify
-your project metadata and the tools can generate API documentation and
+it with IDEs such as Visual Studio Code.  All you need to do is to specify
+your project metadata (for example, library dependencies and compiler
+versions), and the OCaml Platform tools can generate API documentation and
 also implement adopt modern software engineering practises such as continuous
 integration (CI) and unit or fuzz testing.
 
@@ -19,15 +20,34 @@ that is suitable to get us started.
 
 
 ```sh dir=examples/correct/hello,skip
-$ dune init proj hello --libs cohttp-async --ppx ppx_inline_test --inline-tests
+$ dune init proj hello --ppx ppx_inline_test --inline-tests
 Success: initialized project component named hello
 ```
 
 Dune will create a `hello/` directory and populate it with a
 skeleton OCaml project.  This sample project has all the metadata
 required for us to learn more about the opam package manager and the
-dune build tool that we've used earlier in the book.  First use opam
-to install the dependencies required for our hello world project.
+dune build tool that we've used earlier in the book.
+
+At this point, we need to use opam to setup our development environment.
+You've almost certainly done this already at this point in the book, but
+in case you've skipped straight to this chapter we will first initialise
+opam's global state.
+
+```
+$ opam init
+```
+
+By default, opam doesn't require any special user permissions and stores
+all of the files it installs in `~/.opam` (such as the current build of
+the OCaml compiler if you didn't have one pre-installed when you initialised
+opam).  You can run `opam switch` to see all the different sandboxed
+environments you have available, and `opam switch create` will let you
+construct new ones.
+
+It is possible to create a "local switch" that stores all the dependencies
+within the current project working directory.  Let's do this for our hello
+world project next:
 
 <!-- ```sh dir=examples/correct/hello-->
 ```
@@ -36,95 +56,172 @@ $ opam switch create .
 ```
 
 This will invoke opam to install the project libraries (in this case,
-`cohttp-async` and its dependencies).pam doesn't require any special user permissions
-and stores all of the files it installs in `~/.opam` (for global
-installations) and `_opam` in the working directory for the
-project-local installations.  You can use `opam env` to add the right
-directories to your local shell path:
+just dune as we didn't specify any more when initialising the project).
+All of the files from a local switch will be present under `_opam/`
+in the working directory.
+You can use `opam env` to add the right directories to your local shell path
+so that you can invoke locally installed tools:
 
 ```
 $ eval $(opam env)
 ```
 
 If you prefer not to modify your shell configuration, then you can
-also invoke the build commands via `opam exec` to modify the path for
-the subcommand. This is exactly what the various targets in the
-`Makefile` do.
+also invoke commands via `opam exec` to modify the path for
+the subcommand specified in the remainder of the command line.
 
 ### Structure of an OCaml project
 
 Back in [Files Modules And
 Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 we looked at what a simple program with a couple of OCaml modules
-looks like. Let's now look at the full set of files in our
-`hello-world` application to examine a more realistic project
-structure.
+looks like. Let's now look at the set of files in our
+`hello/` application to examine a fuller project structure.
 
 ```
-├── .gitignore
-├── LICENSE
-├── Makefile
-├── README.md
 ├── bin
 │   ├── dune
-│   ├── main.ml
-│   └── main.mli
-├── dune
+│   └── main.ml
 ├── dune-project
 ├── hello.opam
 ├── lib
-│   ├── dune
-│   ├── hello.ml
-│   └── hello.mli
+│   └── dune
 └── test
     ├── dune
-    └── hello_test.ml
+    └── hello.ml
 ```
 
-Some of the files here may be familiar to you from using other programming
-languages:
+#### Module Names
 
-- the `Makefile` contains targets for common actions such as `all`,
-  `build`, `test` or `clean`.  It's useful to read through this to see
-  which underlying OCaml tools are being invoked.
-- the `LICENSE` defines the terms under which your code is made
-  available, and defaults to the permissive ISC license.
-- a `README.md` is a Markdown-formatted introduction to your library
-  or application.
-- the `.gitignore` file contains the patterns for generated files from
-  the OCaml tools so that they can be ignored by the Git version
-  control software.  If you're not familiar with using Git, look over
-  one of the tutorials one such as GitHub's [git hello
-  world](https://guides.github.com/activities/hello-world/).
+There are three kinds of names that come up in OCaml projects.
+Individual `ml` and `mli` files each define OCaml modules, named after
+the file. Modules names are what you refer to when writing OCaml code.
 
-The remainder of the files are either source code or metadata
-files.
+Let's create a `Msg` module in our skeleton project inside `lib/`.
 
-There are three kinds of names that come up in OCaml projects:
+```
+$ echo 'let greeting = "Hello World"' > lib/msg.ml
+$ echo 'val greeting : string' > lib/msg.mli
+```
 
-- **module names:** Individual `ml` and `mli` files each define
-  modules, named after the file. Modules names are what you refer to
-  when writing OCaml code -- for example, `Hello` is the module
-  defined in our project.
-- **library names:** one or more OCaml modules can be gathered
-  together into a *library*, providing a convenient way to package up
-  some dependencies with a single name -- in this case, the `hello`
-  library. Although this example contains just the single `Hello`
-  module, it is common to have multiple modules per library.  You
-  refer to library names in a `dune` file when deciding what libraries
-  to link in, and you can query the installed libraries via `ocamlfind
-  list` at your command prompt.
-- **package names:** a set of libraries, binaries and application data
-  can all be gathered together into a *package*.  This is what is
-  installed when you eventually publish the package and another user
-  types in `opam install hello`.  In our case, `hello.opam` contains
-  the specification of the package.
+#### Library Names
+
+
+One or more OCaml modules can be gathered together into a *library*,
+providing a convenient way to package up multiple dependencies with a
+single name. A project usually puts the business logic of the application
+into a library rather than directly into an executable binary, since
+this makes writing tests and documentation easier in addition to
+improving reusability.  Let's look at `lib/dune` in more detail:
+
+```
+(library
+ (inline_tests)
+ (name hello)
+ (preprocess
+  (pps ppx_inline_test)))
+```
+
+By default, dune exposes libraries as *wrapped* under a single module,
+and the `name` field determines the name of that module.  In our
+example project `msg.ml` is defined in `lib/dune` which defines a `hello`
+library. Thus, users of our newly defined module can access it as
+`Hello.Msg`. 
+
+Although our example library only currently contains a single `Msg` module,
+it is common to have multiple modules per library. Other modules within
+the `hello` library can simply refer to `Msg`. You must refer to library names
+in a `dune` file when deciding what libraries to link in, and never individual
+module names.  You can query the installed libraries in your current switch
+via `ocamlfind list` at your command prompt, after running
+`opam install ocamlfind` to install it if necessary.
+
+If there's a `public_name` field present in the `dune` library definition,
+this determines the publically exposed name for the library, which is what
+you use via the `libraries` field in the dune file.  Without a public name,
+the defined library is local to the current dune project only.
+The `(libraries)` field in the `lib/dune` file is empty since this
+is a trivial standalone library.
+
+### Writing test cases for a library
+
+Our next step is to define a test case in `test/dune` for our library.
+We can define inline tests within our library as we did earlier in the
+[Testing](testing.html#testing){data-type=xref} chapter:
+
+<!-- $MDX file=examples/correct/hello/lib/msg.ml -->
+```
+```
+
+We can also define more elaborate executable tests inside the `test/`
+directory as well. The `(test)` dune field builds an executable binary
+that is run when you invoke `dune runtest` (along with any inline tests
+defined within libraries).  In our project, the `test/hello.ml`
+module defines the executable test cases. We'll also add a dependency
+on our locally defined `hello` library so that we can access it.
+
+<!-- $MDX file=examples/correct/hello/test/dune -->
+```scheme
+```
+
+Once you run the tests, you can find the built artefacts in
+`_build/default/test/` in your project checkout.
+
+### Building an executable program
+
+Finally, we want to actually use our hello world from the
+command-line. This is defined in `bin/dune` in a very similar fashion
+to test cases.
+
+```scheme
+(executable
+ (public_name hello)
+ (name main)
+ (libraries hello)))
+```
+
+There has to be a `bin/hello.ml` alongside the `bin/dune` file
+that represents the entry module for the executable. Only that
+module and the modules and libraries it depends on will be linked
+into the executable. Much like libraries, the `(name)` field
+here has to adhere to OCaml module naming conventions, and the
+`public_name` field represents the binary name that is installed
+onto the system and just needs to be a valid Unix or Windows filename.
+
+Now try modifying `bin/main.ml` to refer to our  `Hello.Msg` module:
+
+```
+let () = print_endline Hello.Msg.greeting
+```
+
+You can build and execute the command locally using `dune exec` and
+the local name of the executable.
+You can also find the built executable in `_build/default/bin/main.exe`.
+
+
+```sh dir=examples/correct/hello
+$ dune exec -- bin/main.exe
+Hello World
+```
+
+You can also refer to the public name of the executable if its
+more convenient.
+
+```sh dir=examples/correct/hello
+$ dune exec -- hello
+Hello world!
+```
+
+#### Package Names
+
+A set of libraries, binaries and application data can all be gathered
+together into a *package*.  This is what is installed when you eventually
+publish the package and another user types in `opam install hello`.
+In our project, `hello.opam` contains the specification of the package.
 
 Much of the time, the module, library, and package names are all the
-same.  By default, dune wraps up multi-module library under a single
-module name, and that same module name can often be used for the
-library and the package.  But there are reasons for these names to be
-distinct as well:
+same.  The same name can often be used for the library and the package.
+But there are reasons for these names to be distinct as well:
 
 - Some libraries are exposed as multiple top-level modules, which
   means you need to pick a different name for referring to that
@@ -140,91 +237,15 @@ packages, as you will use each of these at different points of your OCaml
 coding journey.  The root of a project is marked by a `dune-project` file
 (more on that later). We typically structure our project into subdirectories that
 contain the modules for a particular library or binary, with each directory
-containing a separate `dune` file with build instructions.  In our hello world
-example, we have:
+containing a separate `dune` file with build instructions.  In our example
+project, we have:
 
-- a `lib/` directory that builds a `hello` ocamlfind library.
+- a `lib/` directory that builds a `hello` library.
 - a `test/` directory that defines unit tests for the library.
 - a `bin/` directory that uses the `hello` library to build a
   standalone application that can be executed from the command-line.
 
-### Defining ocamlfind libraries
 
-A project usually puts the business logic of the application into a
-library rather than directly into an executable binary, since this
-makes writing tests and documentation easier in addition to improving
-reusability.  Let's look at `lib/dune` in more detail:
-
-```scheme
-(library
- (name hello)
- (public_name hello)
- (libraries))
-```
-
-By default, dune exposes libraries as *wrapped* under a single module,
-and the `name` field determines the name of that module.  In our
-example project `hello.ml` is exported as the `Hello` module since
-it's the project name, but if we added a file called `world.ml` into
-this directory the resulting module would be found in `Hello.World`.
-The `public_name`, on the other hand, determines the name for the
-library, which is what you use when requesting to link a given library
-be linked in, via the `libraries` field in your dune file.
-
-While the library names must adhere to OCaml's module naming
-conventions, it's common practise to use dashes and dots in public
-library names.
-
-### Writing test cases for a library
-
-The `(libraries)` field in the `hello` dune file is empty since this
-is a standalone library. Our next step is to define a test case in
-`test/dune` for our library.
-
-```scheme
-(test
- (name hello_test)
- (libraries alcotest hello))
-```
-
-The `(test)` field builds an executable binary that is run when you
-invoke `dune runtest`.  In this case, it uses the `test/hello_test.ml`
-module to define the test cases and depends on the external `alcotest`
-library _and_ the locally defined `hello` library.  Once you run the
-tests, you can find the built artefacts in `_build/default/test/` in
-your project checkout.  You can use all the tests you learnt about in
-[Testing](testing.html#testing){data-type=xref} here, including inline
-tests.
-
-### Building an executable program
-
-Finally, we want to actually use our hello world from the
-command-line. This is defined in `bin/dune` in a very similar fashion
-to test cases.
-
-```scheme
-(executable
- (name main)
- (public_name hello)
- (libraries hello))
-```
-
-<!-- TODO yminsky: maybe worth saying that there has to be an ml file
-for the corresponding name, and that only that executable and the
-modules it depends on will be linked in to the executable. -->
-
-Much like libraries, the `(name)` field here has to adhere to OCaml
-module naming conventions, and the `public_name` field represents the
-binary name that is installed onto the system and just needs to be a
-valid Unix or Windows filename.
-
-You can build and execute the command locally using `dune exec` and
-the public name of the executable:
-
-```sh dir=examples/correct/hello
-$ dune exec -- hello
-Hello world!
-```
 
 ## Setting up an integrated development environment
 
@@ -553,6 +574,25 @@ Windows, macOS and Linux, using the latest patch release of OCaml
 earlier on all those different operating systems as well.  You can do
 an awful lot of customisation of these continuous integration
 workflows, so refer to the online documentation for more options.
+
+### Conventions
+
+There are a few other files you may also want to add to a project
+to match common conventions:
+
+- the `Makefile` contains targets for common actions such as `all`,
+  `build`, `test` or `clean`.  It's useful to read through this to see
+  which underlying OCaml tools are being invoked.
+- the `LICENSE` defines the terms under which your code is made
+  available, and defaults to the permissive ISC license.
+- a `README.md` is a Markdown-formatted introduction to your library
+  or application.
+- the `.gitignore` file contains the patterns for generated files from
+  the OCaml tools so that they can be ignored by the Git version
+  control software.  If you're not familiar with using Git, look over
+  one of the tutorials one such as GitHub's [git hello
+  world](https://guides.github.com/activities/hello-world/).
+
 
 ### Releasing your code into the opam repository
 
