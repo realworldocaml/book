@@ -45,7 +45,7 @@ opam).  You can run `opam switch` to see all the different sandboxed
 environments you have available, and `opam switch create` will let you
 construct new ones.
 
-It is possible to create a "local switch" that stores all the dependencies
+It is also possible to create a "local switch" that stores all the dependencies
 within the current project working directory.  Let's do this for our hello
 world project next:
 
@@ -91,11 +91,13 @@ looks like. Let's now look at the set of files in our
     └── hello.ml
 ```
 
-#### Module Names
+There are three kinds of names that come up in OCaml projects which we'll look
+at next: modules, libraries and packages.
 
-There are three kinds of names that come up in OCaml projects.
-Individual `ml` and `mli` files each define OCaml modules, named after
-the file. Modules names are what you refer to when writing OCaml code.
+### Defining module names
+
+Individual `ml` and `mli` files each define OCaml modules, named after the file
+and capitalised. Modules names are the only name you refer to within OCaml code.
 
 Let's create a `Msg` module in our skeleton project inside `lib/`.
 
@@ -104,8 +106,10 @@ $ echo 'let greeting = "Hello World"' > lib/msg.ml
 $ echo 'val greeting : string' > lib/msg.mli
 ```
 
-#### Library Names
+A valid OCaml module name cannot contain dashes or other special
+characters other than underscores.
 
+### Defining libraries as collections of modules
 
 One or more OCaml modules can be gathered together into a *library*,
 providing a convenient way to package up multiple dependencies with a
@@ -143,7 +147,7 @@ the defined library is local to the current dune project only.
 The `(libraries)` field in the `lib/dune` file is empty since this
 is a trivial standalone library.
 
-### Writing test cases for a library
+#### Writing test cases for a library
 
 Our next step is to define a test case in `test/dune` for our library.
 We can define inline tests within our library as we did earlier in the
@@ -151,6 +155,12 @@ We can define inline tests within our library as we did earlier in the
 
 <!-- $MDX file=examples/correct/hello/lib/msg.ml -->
 ```
+open Base
+
+let greeting = "Hello World"
+
+let%test "size" =
+  String.length greeting = 11
 ```
 
 We can also define more elaborate executable tests inside the `test/`
@@ -162,12 +172,15 @@ on our locally defined `hello` library so that we can access it.
 
 <!-- $MDX file=examples/correct/hello/test/dune -->
 ```scheme
+(test
+ (name hello)
+ (libraries hello))
 ```
 
-Once you run the tests, you can find the built artefacts in
-`_build/default/test/` in your project checkout.
+Once you run the tests via `dune runtest`, you can find the built
+artefacts in `_build/default/test/` in your project checkout.
 
-### Building an executable program
+#### Building an executable program
 
 Finally, we want to actually use our hello world from the
 command-line. This is defined in `bin/dune` in a very similar fashion
@@ -209,10 +222,10 @@ more convenient.
 
 ```sh dir=examples/correct/hello
 $ dune exec -- hello
-Hello world!
+Hello World
 ```
 
-#### Package Names
+### Defining packages from libraries and executables
 
 A set of libraries, binaries and application data can all be gathered
 together into a *package*.  This is what is installed when you eventually
@@ -234,18 +247,17 @@ But there are reasons for these names to be distinct as well:
 
 It is important to understand the difference between modules, libraries and
 packages, as you will use each of these at different points of your OCaml
-coding journey.  The root of a project is marked by a `dune-project` file
-(more on that later). We typically structure our project into subdirectories that
-contain the modules for a particular library or binary, with each directory
-containing a separate `dune` file with build instructions.  In our example
-project, we have:
+coding journey.  The root of a single project is marked by a `dune-project` file
+(more on that later). In order to keep the file layout clean, we typically
+structure our project into subdirectories that contain the modules for a
+particular library or binary, with each directory containing a separate
+`dune` file with build instructions.  That's why in our example project,
+we have:
 
 - a `lib/` directory that builds a `hello` library.
 - a `test/` directory that defines unit tests for the library.
 - a `bin/` directory that uses the `hello` library to build a
   standalone application that can be executed from the command-line.
-
-
 
 ## Setting up an integrated development environment
 
@@ -271,7 +283,7 @@ opam install ocaml-lsp-server
 ```
 
 Once installed, the VSCode OCaml plugin will ask you which opam
-sandbox to use. Just the default one should be sufficient get you
+switch to use. Just the default one should be sufficient get you
 going with building and browsing your interfaces.
 
 ### Browsing interface documentation
@@ -282,31 +294,31 @@ opening your local project in VS Code is sufficient to activate all the
 features.  Try navigating over to `bin/main.ml`, where you will see the
 invocation to the `hello` library.
 
-<!-- $MDX file=examples/correct/hello-world/bin/main.ml -->
+<!-- $MDX file=examples/correct/hello/bin/main.ml -->
 ```
-let () =
-  let greeting = Hello.greet "world" in
-  print_endline greeting
+let () = print_endline Hello.Msg.greeting
 ```
 
 First perform a build of the project to generate the type annotation
-files. Then hover your mouse over the `Hello.greet` function -- you
+files. Then hover your mouse over the `Hello.Msg.greeting` function -- you
 should see some documentation pop up about the function and its
 arguments.  This information comes from the _docstrings_ written into
-the `hello.mli` interface file in the library.
+the `msg.mli` interface file in the `hello` library.
 
-<!-- $DISABLEDMDX file=examples/correct/hello-world/lib/hello.mli -->
+Modiy th
+<!-- $MDX file=examples/correct/hello/lib/msg.mli -->
 ```
 (** This is a docstring, as it starts with "(**", as opposed to normal comments
-    that start with "(*".
+    that start with a single star.
 
     The top-most docstring of the module should contain a description of the
     module, what it does, how to use it, etc.
 
     The function-specific documentation located below the function signatures. *)
 
-val greet : string -> string
-(** This is the docstring for the [greet] function.
+val greeting : string
+
+(** This is the docstring for the [greeting] function.
 
     A typical documentation for this function would be:
 
@@ -314,7 +326,7 @@ val greet : string -> string
 
     {4 Examples}
 
-    {[ print_endline @@ greet "Jane" ]} *)
+    {[ print_endline greeting ]} *)
 ```
 
 Documentation strings are parsed by the
@@ -388,39 +400,9 @@ package can define dependencies on other opam packages, and includes
 build and testing directions for your project. The `hello.opam` file
 in our sample project is quite easy to read:
 
-<!-- $MDX file=examples/correct/hello-world/hello.opam -->
+<!-- $MDX file=examples/correct/hello/hello.opam -->
 ```
-# This file is generated by dune, edit dune-project instead
-opam-version: "2.0"
-synopsis: "A short description of the project"
-description: "A short description of the project"
-maintainer: ["Your name"]
-authors: ["Your name"]
-license: "ISC"
-homepage: "https://github.com/username/hello"
-doc: "https://username.github.io/hello/"
-bug-reports: "https://github.com/username/hello/issues"
-depends: [
-  "ocaml" {>= "4.08.0"}
-  "dune"
-  "alcotest" {with-test}
-  "odoc" {with-doc}
-]
-build: [
-  ["dune" "subst"] {pinned}
-  [
-    "dune"
-    "build"
-    "-p"
-    name
-    "-j"
-    jobs
-    "@install"
-    "@runtest" {with-test}
-    "@doc" {with-doc}
-  ]
-]
-dev-repo: "git+https://github.com/username/hello.git"
+
 ```
 
 The fields in here all represent project metadata ranging from textual
