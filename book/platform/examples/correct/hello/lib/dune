@@ -1,6 +1,5 @@
 (library
  (inline_tests)
  (name hello)
- (libraries cohttp-async)
  (preprocess
   (pps ppx_inline_test)))

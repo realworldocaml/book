@@ -5,88 +5,38 @@ use to build real OCaml programs.  We'll now wrap up this part by
 examining the tools you can use for editing, compiling, testing,
 documenting and publishing your own projects.
 
-The OCaml community has adopted a platform of modern tools to specify
-your project metadata and interface it with IDEs such as Visual Studio
-Code, to generate API documentation, and also to adopt modern software
-engineering practises such as continuous integration (CI) and testing.
+The OCaml community has adopted a platform of modern tools to interface
+it with IDEs such as Visual Studio Code.  You just need to specify
+your project metadata and the tools can generate API documentation and
+also implement adopt modern software engineering practises such as continuous
+integration (CI) and unit or fuzz testing.
 
 ## A Hello World OCaml Project
 
 Let's start by creating a sample OCaml project and navigating around
-it.  opam provides a project generator known as `spin` that can be
-used to create various types of projects.
+it.  Dune has a basic built-in command to initialise a project template
+that is suitable to get us started.
 
-```sh dir=examples/correct/opam-spin-ls,skip
-$ opam spin ls
 
-  bin
-    Native project containing a binary
-
-  c-bindings
-    Bindings to a C library
-
-  cli
-    Command Line Interface releasable on Opam
-
-  js
-    Javascript application with Js_of_ocaml
-
-  lib
-    Library releasable on Opam
-
-  ppx
-    PPX library
-
+```sh dir=examples/correct/hello,skip
+$ dune init proj hello --libs cohttp-async --ppx ppx_inline_test --inline-tests
+Success: initialized project component named hello
 ```
 
-Before we dive into any of these, we'll generate a tutorial using
-Spin's built-in hello world project.
-
-<!-- TODO yminsky: This is a little confusing. What is hello, and -->
-<!-- hello-world here?  If "hello" is a type of spin, why didn't -->
-<!-- it show up when you typed `opam spin ls`?  -->
-
-<!-- ```sh dir=examples/correct/opam-spin-hello
-TODO need a way to stop spin from running the opam install commands
- -->
-
-```sh skip
-$ opam spin hello hello-world -vvv
-
-🏗️  Creating a new project from hello in hello-world
-Done!
-
-🎁  Installing packages globally. This might take a couple minutes.
-```
-
-<!-- TODO yminsky: Do we really want to be recommending opam-spin? It -->
-<!-- installs things in the global switch, which isn't really what one -->
-<!-- should want, right? Is there no more lockfile-style workflow we -->
-<!-- can encourage? -->
-
-
-<!-- TODO yminsky: When I try to run this, I get a build error:
-
-File "test/hello_test.ml", line 1:
-Error (warning 70 [missing-mli]): Cannot find interface file.
-
-    The test directory is missing hello_test.mli.  Touching the file
-    is enough to fix the build.
--->
-
-Spin will create a `hello-world` directory and populate it with a
+Dune will create a `hello/` directory and populate it with a
 skeleton OCaml project.  This sample project has all the metadata
 required for us to learn more about the opam package manager and the
 dune build tool that we've used earlier in the book.  First use opam
 to install the dependencies required for our hello world project.
 
-<!-- ```sh dir=examples/correct/hello-world -->
+<!-- ```sh dir=examples/correct/hello-->
 ```
-$ make deps
+$ cd hello
+$ opam switch create .
 ```
 
-This will invoke the opam CLI to install the project dependencies and
-some useful tools.  opam doesn't require any special user permissions
+This will invoke opam to install the project libraries (in this case,
+`cohttp-async` and its dependencies).pam doesn't require any special user permissions
 and stores all of the files it installs in `~/.opam` (for global
 installations) and `_opam` in the working directory for the
 project-local installations.  You can use `opam env` to add the right
@@ -271,7 +221,7 @@ valid Unix or Windows filename.
 You can build and execute the command locally using `dune exec` and
 the public name of the executable:
 
-```sh dir=examples/correct/hello-world
+```sh dir=examples/correct/hello
 $ dune exec -- hello
 Hello world!
 ```
