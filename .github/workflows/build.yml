@@ -13,10 +13,10 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-20.04
           # - macos-latest
         ocaml-compiler:
-          - 4.13.0
+          - 4.13.1
 
     runs-on: ${{ matrix.os }}
 
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install pandoc
-        run: brew install pandoc
+        run: brew install pandoc@2.16.2
 
       - name: Install Calibre
         if: runner.os == 'Linux'
