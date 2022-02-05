@@ -1,4 +1,4 @@
-(lang dune 2.9)
+(lang dune 2.5)
 (name spawn)
 (version v0.14.0)
 

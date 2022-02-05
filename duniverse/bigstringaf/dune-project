@@ -1,2 +1,2 @@
-(lang dune 2.9)
+(lang dune 2.6)
 (name bigstringaf)

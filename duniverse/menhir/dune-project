@@ -1,4 +1,4 @@
-(lang dune 2.9)
+(lang dune 2.0)
 (name menhir)
 (using menhir 2.0)
 (version 20210419)
