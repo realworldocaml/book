@@ -1,2 +1,17 @@
 (lang dune 2.9)
 (name hello)
+(documentation "https://username.github.io/hello/")
+(source (github username/hello))
+(license ISC)
+(authors "Your name")
+(maintainers "Your name")
+(generate_opam_files true)
+
+(package
+ (name hello)
+ (synopsis "A short description of the project")
+ (description "A short description of the project")
+ (depends
+  (ocaml (>= 4.08.0))
+  (odoc :with-doc)))
+
