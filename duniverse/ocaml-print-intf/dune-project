@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.9)
 (generate_opam_files true)
 (name ocaml-print-intf)
 (version v1.2.0)

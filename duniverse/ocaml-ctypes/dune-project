@@ -1,4 +1,4 @@
-(lang dune 2.6)
+(lang dune 2.9)
 (name ctypes)
 (formatting (enabled_for dune))
 

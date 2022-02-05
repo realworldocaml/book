@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.9)
 ; The line above is the version of the syntax, not the actual version of the Dune binary
 ; used. All of the Dune version after 2.0 will be retro-compatible.
 

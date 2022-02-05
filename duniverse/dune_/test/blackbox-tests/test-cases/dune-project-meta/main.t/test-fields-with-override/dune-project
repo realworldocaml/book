@@ -1,4 +1,4 @@
-(lang dune 2.5)
+(lang dune 2.9)
 (name foo)
 (version 1.0.0)
 (source (github mirage/ocaml-cohttp))

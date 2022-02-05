@@ -1,4 +1,4 @@
-(lang dune 1.9)
+(lang dune 2.9)
 (name ipaddr)
 (version v5.2.0)
 (allow_approximate_merlin)

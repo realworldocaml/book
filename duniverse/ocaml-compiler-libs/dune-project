@@ -1,4 +1,4 @@
-(lang dune 2.8)
+(lang dune 2.9)
 
 (name ocaml-compiler-libs)
 (version v0.12.4)
