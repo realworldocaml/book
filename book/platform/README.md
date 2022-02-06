@@ -230,7 +230,7 @@ the local name of the executable.
 You can also find the built executable in `_build/default/bin/main.exe`.
 
 
-```sh dir=examples/correct/hello
+```sh dir=examples/correct/hello,skip
 $ dune build
 $ dune exec -- bin/main.exe
 Hello World
@@ -239,7 +239,7 @@ Hello World
 You can also refer to the public name of the executable if its
 more convenient.
 
-```sh dir=examples/correct/hello
+```sh dir=examples/correct/hello,skip
 $ dune exec -- hello
 Hello World
 ```
