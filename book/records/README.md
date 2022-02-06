@@ -47,7 +47,7 @@ expressions work, you can just think of them as a simple pattern
 language you can use for parsing a string.
 
 ```ocaml env=main
-# #require "re"
+# #require "re";;
 # let service_info_of_string line =
     let matches =
       let pat = "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)" in
@@ -56,7 +56,7 @@ language you can use for parsing a string.
     { service_name = Re.Group.get matches 1;
       port = Int.of_string (Re.Group.get matches 2);
       protocol = Re.Group.get matches 3;
-    }
+    };;
 val service_info_of_string : string -> service_info = <fun>
 ```
 
@@ -64,7 +64,7 @@ We can construct a concrete record by calling the function on a line
 from the file.
 
 ```ocaml env=main
-# let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol"
+# let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol";;
 val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 ```
 
@@ -79,7 +79,7 @@ Once we have a record value in hand, we can extract elements from the
 record field using dot notation:
 
 ```ocaml env=main
-# ssh.port
+# ssh.port;;
 - : int = 22
 ```
 
@@ -103,7 +103,7 @@ individual line.
     List.mapi lines ~f:(fun line_num line ->
       { item = parse line;
         line_num = line_num + 1;
-      })
+      });;
 val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>
 ```
 
@@ -114,7 +114,7 @@ We can then use this function for parsing a snippet of a real
 # parse_lines service_info_of_string
     "rtmp              1/ddp     # Routing Table Maintenance Protocol
      tcpmux            1/udp     # TCP Port Service Multiplexer
-     tcpmux            1/tcp     # TCP Port Service Multiplexer"
+     tcpmux            1/tcp     # TCP Port Service Multiplexer";;
 - : service_info with_line_num list =
 [{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
  {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
@@ -126,7 +126,7 @@ different format, like this function for parsing a file containing an
 integer on every line.
 
 ```ocaml env=main
-# parse_lines Int.of_string "1\n10\n100\n1000"
+# parse_lines Int.of_string "1\n10\n100\n1000";;
 - : int with_line_num list =
 [{item = 1; line_num = 1}; {item = 10; line_num = 2};
  {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
@@ -141,9 +141,9 @@ in]{.idx}
 
 ```ocaml env=main
 # let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-    sprintf "%s %i/%s" name port prot
+    sprintf "%s %i/%s" name port prot;;
 val service_info_to_string : service_info -> string = <fun>
-# service_info_to_string ssh
+# service_info_to_string ssh;;
 - : string = "ssh 22/udp"
 ```
 
@@ -192,9 +192,9 @@ enable/disable]{.idx}[errors/missing field
 warnings]{.idx}[records/missing field warnings]{.idx}
 
 ```ocaml env=main
-# #warnings "+9"
+# #warnings "+9";;
 # let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-    sprintf "%s %i/%s" name port prot
+    sprintf "%s %i/%s" name port prot;;
 Line 1, characters 28-82:
 Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
 comment
@@ -208,7 +208,7 @@ adding an underscore to the pattern:
 
 ```ocaml env=main
 # let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
-    sprintf "%s %i/%s" name port prot
+    sprintf "%s %i/%s" name port prot;;
 val service_info_to_string : service_info -> string = <fun>
 ```
 
@@ -264,7 +264,7 @@ punning*:[fields/field punning]{.idx}[records/field punning in]{.idx}
     let base = sprintf "%s %i/%s" service_name port protocol in
     match comment with
     | None -> base
-    | Some text -> base ^ " #" ^ text
+    | Some text -> base ^ " #" ^ text;;
 val service_info_to_string : service_info -> string = <fun>
 ```
 
@@ -287,7 +287,7 @@ following updated version of
     let service_name = Re.Group.get matches 1 in
     let port = Int.of_string (Re.Group.get matches 2) in
     let protocol = Re.Group.get matches 3 in
-    { service_name; port; protocol; comment }
+    { service_name; port; protocol; comment };;
 val service_info_of_string : string -> service_info = <fun>
 ```
 
@@ -300,7 +300,7 @@ punning]{.idx}[records/label punning in]{.idx}
 
 ```ocaml env=main
 # let create_service_info ~service_name ~port ~protocol ~comment =
-    { service_name; port; protocol; comment }
+    { service_name; port; protocol; comment };;
 val create_service_info :
   service_name:string ->
   port:int -> protocol:string -> comment:string option -> service_info =
@@ -318,7 +318,7 @@ punning:
       port = port;
       protocol = protocol;
       comment = comment;
-    }
+    };;
 val create_service_info :
   service_name:string ->
   port:int -> protocol:string -> comment:string option -> service_info =
@@ -371,7 +371,7 @@ want to write a function to grab the `session_id` from a record, what
 type will it have?
 
 ```ocaml env=main
-# let get_session_id t = t.session_id
+# let get_session_id t = t.session_id;;
 val get_session_id : logon -> string = <fun>
 ```
 
@@ -380,7 +380,7 @@ record field. We can force OCaml to assume we're dealing with a
 different type (say, a `heartbeat`) using a type annotation:
 
 ```ocaml env=main
-# let get_heartbeat_session_id (t:heartbeat) = t.session_id
+# let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
 val get_heartbeat_session_id : heartbeat -> string = <fun>
 ```
 
@@ -390,13 +390,13 @@ following functions for grabbing the session ID and status from a
 heartbeat:
 
 ```ocaml env=main
-# let status_and_session t = (t.status_message, t.session_id)
+# let status_and_session t = (t.status_message, t.session_id);;
 val status_and_session : heartbeat -> string * string = <fun>
-# let session_and_status t = (t.session_id, t.status_message)
+# let session_and_status t = (t.session_id, t.status_message);;
 Line 1, characters 45-59:
 Error: This expression has type logon
        There is no field status_message within type logon
-# let session_and_status (t:heartbeat) = (t.session_id, t.status_message)
+# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
 val session_and_status : heartbeat -> string * string = <fun>
 ```
 
@@ -450,7 +450,7 @@ Now, our log-entry-creation function can be rendered as follows:
       Log_entry.session_id;
       Log_entry.important;
       Log_entry.message
-    }
+    };;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
@@ -465,7 +465,7 @@ field name:
 ```ocaml env=main
 # let create_log_entry ~session_id ~important message =
     { Log_entry.
-      time = Time_ns.now (); session_id; important; message }
+      time = Time_ns.now (); session_id; important; message };;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
@@ -476,7 +476,7 @@ to make the example even more concise.
 
 ```ocaml env=main
 # let create_log_entry ~session_id ~important message : Log_entry.t =
-    { time = Time_ns.now (); session_id; important; message }
+    { time = Time_ns.now (); session_id; important; message };;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
@@ -486,7 +486,7 @@ approaches when pattern matching:
 
 ```ocaml env=main
 # let message_to_string { Log_entry.important; message; _ } =
-    if important then String.uppercase message else message
+    if important then String.uppercase message else message;;
 val message_to_string : Log_entry.t -> string = <fun>
 ```
 
@@ -494,7 +494,7 @@ When using dot notation for accessing record fields, we can qualify
 the field by the module as well.
 
 ```ocaml env=main
-# let is_important t = t.Log_entry.important
+# let is_important t = t.Log_entry.important;;
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
@@ -515,13 +515,13 @@ annotations and removing the module qualifications.
 
 ```ocaml env=main
 # let create_log_entry ~session_id ~important message : Log_entry.t =
-    { time = Time_ns.now (); session_id; important; message }
+    { time = Time_ns.now (); session_id; important; message };;
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 # let message_to_string ({ important; message; _ } : Log_entry.t) =
-    if important then String.uppercase message else message
+    if important then String.uppercase message else message;;
 val message_to_string : Log_entry.t -> string = <fun>
-# let is_important (t:Log_entry.t) = t.important
+# let is_important (t:Log_entry.t) = t.important;;
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
@@ -563,7 +563,7 @@ new heartbeat arrives as follows.
       user = t.user;
       credentials = t.credentials;
       last_heartbeat_time = hb.Heartbeat.time;
-  }
+  };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
@@ -586,7 +586,7 @@ Given this, we can rewrite `register_heartbeat` more concisely:
 
 ```ocaml env=main
 # let register_heartbeat t hb =
-  { t with last_heartbeat_time = hb.Heartbeat.time }
+  { t with last_heartbeat_time = hb.Heartbeat.time };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
@@ -620,7 +620,7 @@ follows:
 # let register_heartbeat t hb =
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
-  }
+  };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
@@ -649,7 +649,7 @@ follows:
 ```ocaml env=main
 # let register_heartbeat t hb =
     t.last_heartbeat_time   <- hb.Heartbeat.time;
-    t.last_heartbeat_status <- hb.Heartbeat.status_message
+    t.last_heartbeat_status <- hb.Heartbeat.status_message;;
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
 
@@ -671,7 +671,7 @@ fields]{.idx}[records/first-class fields in]{.idx}
 ```ocaml env=main
 # let get_users logons =
     List.dedup_and_sort ~compare:String.compare
-  (List.map logons ~f:(fun x -> x.Logon.user))
+  (List.map logons ~f:(fun x -> x.Logon.user));;
 val get_users : Logon.t list -> string list = <fun>
 ```
 
@@ -702,7 +702,7 @@ at which point, we can define `Logon` as follows:
         credentials: string;
       }
     [@@deriving fields]
-  end
+  end;;
 module Logon :
   sig
     type t = {
@@ -740,7 +740,7 @@ extract the user field from a logon message:
 ```ocaml env=main
 # let get_users logons =
     List.dedup_and_sort ~compare:String.compare
-  (List.map logons ~f:Logon.user)
+  (List.map logons ~f:Logon.user);;
 val get_users : Logon.t list -> string list = <fun>
 ```
 
@@ -773,7 +773,7 @@ Field.t`. Thus, if you call `Field.get` on `Logon.Fields.user`, you'll
 get a function for extracting the `user` field from a `Logon.t`:
 
 ```ocaml env=main
-# Field.get Logon.Fields.user
+# Field.get Logon.Fields.user;;
 - : Logon.t -> string = <fun>
 ```
 
@@ -785,7 +785,7 @@ The type of `Field.get` is a little more complicated than you might
 naively expect from the preceding one:
 
 ```ocaml env=main
-# Field.get
+# Field.get;;
 - : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
 ```
 
@@ -802,7 +802,7 @@ function for displaying a record field:
 # let show_field field to_string record =
     let name = Field.name field in
     let field_string = to_string (Field.get field record) in
-    name ^ ": " ^ field_string
+    name ^ ": " ^ field_string;;
 val show_field :
   ('a, 'b, 'c) Field.t_with_perm -> ('c -> string) -> 'b -> string = <fun>
 ```
@@ -839,7 +839,7 @@ for example, in the case of `Logon.t`, the field iterator has the
 following type:
 
 ```ocaml env=main
-# Logon.Fields.iter
+# Logon.Fields.iter;;
 - : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
                 Field.t_with_perm -> unit) ->
     time:(([< `Read | `Set_and_create ], Logon.t, Time_ns.t)

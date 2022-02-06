@@ -151,8 +151,8 @@ write `array.(index)` to grab a value from an array. `find` also uses
 toplevel:
 
 ```ocaml env=main
-# open Base
-# List.find_map
+# open Base;;
+# List.find_map;;
 - : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
 ```
 
@@ -362,7 +362,7 @@ field. [ref cells]{.idx}
 The definition for the `ref` type is as follows:
 
 ```ocaml env=custom_ref
-# type 'a ref = { mutable contents : 'a }
+# type 'a ref = { mutable contents : 'a };;
 type 'a ref = { mutable contents : 'a; }
 ```
 
@@ -381,13 +381,13 @@ The standard library defines the following operators for working with `ref`s.
 You can see these in action:
 
 ```ocaml env=main
-# let x = ref 1
+# let x = ref 1;;
 val x : int ref = {Base.Ref.contents = 1}
-# !x
+# !x;;
 - : int = 1
-# x := !x + 1
+# x := !x + 1;;
 - : unit = ()
-# !x
+# !x;;
 - : int = 2
 ```
 
@@ -395,11 +395,11 @@ The preceding are just ordinary OCaml functions, which could be defined as
 follows:
 
 ```ocaml env=custom_ref
-# let ref x = { contents = x }
+# let ref x = { contents = x };;
 val ref : 'a -> 'a ref = <fun>
-# let (!) r = r.contents
+# let (!) r = r.contents;;
 val ( ! ) : 'a ref -> 'a = <fun>
-# let (:=) r x = r.contents <- x
+# let (:=) r x = r.contents <- x;;
 val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
@@ -435,8 +435,8 @@ using it.  Here's a simple example of `for`.  Note that we open the
 
 
 ```ocaml env=main
-# open Stdio
-# for i = 0 to 3 do printf "i = %d\n" i done
+# open Stdio;;
+# for i = 0 to 3 do printf "i = %d\n" i done;;
 i = 0
 i = 1
 i = 2
@@ -448,7 +448,7 @@ As you can see, the upper and lower bounds are inclusive. We can also use
 `downto` to iterate in the other direction:
 
 ```ocaml env=main
-# for i = 3 downto 0 do printf "i = %d\n" i done
+# for i = 3 downto 0 do printf "i = %d\n" i done;;
 i = 3
 i = 2
 i = 1
@@ -478,13 +478,13 @@ function for reversing an array in place:
       (* bump the indices *)
       Int.incr i;
       Int.decr j
-    done
+    done;;
 val rev_inplace : 'a array -> unit = <fun>
-# let nums = [|1;2;3;4;5|]
+# let nums = [|1;2;3;4;5|];;
 val nums : int array = [|1; 2; 3; 4; 5|]
-# rev_inplace nums
+# rev_inplace nums;;
 - : unit = ()
-# nums
+# nums;;
 - : int array = [|5; 4; 3; 2; 1|]
 ```
 
@@ -591,7 +591,7 @@ There is an exception to this, though: you can construct fixed-size cyclic
 data structures using `let rec`:
 
 ```ocaml env=main
-# let rec endless_loop = 1 :: 2 :: 3 :: endless_loop
+# let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
 val endless_loop : int list = [1; 2; 3; <cycle>]
 ```
 
@@ -741,12 +741,12 @@ lazy_t`. The evaluation of that expression is delayed until forced
 with `Lazy.force`:
 
 ```ocaml env=main
-# let v = lazy (print_endline "performing lazy computation"; Float.sqrt 16.)
+# let v = lazy (print_endline "performing lazy computation"; Float.sqrt 16.);;
 val v : float lazy_t = <lazy>
-# Lazy.force v
+# Lazy.force v;;
 performing lazy computation
 - : float = 4.
-# Lazy.force v
+# Lazy.force v;;
 - : float = 4.
 ```
 
@@ -761,7 +761,7 @@ represent a lazy value:
 # type 'a lazy_state =
     | Delayed of (unit -> 'a)
     | Value of 'a
-    | Exn of exn
+    | Exn of exn;;
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
@@ -780,11 +780,11 @@ unit argument. Wrapping an expression in a thunk is another way to
 suspend the computation of an expression: [thunks]{.idx}
 
 ```ocaml env=custom_lazy
-# let create_lazy f = ref (Delayed f)
+# let create_lazy f = ref (Delayed f);;
 val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
 # let v =
     create_lazy (fun () ->
-  print_endline "performing lazy computation"; Float.sqrt 16.)
+  print_endline "performing lazy computation"; Float.sqrt 16.);;
 val v : float lazy_state ref = {contents = Delayed <fun>}
 ```
 
@@ -803,17 +803,17 @@ does just that.
         x
       with exn ->
         v := Exn exn;
-        raise exn
+        raise exn;;
 val force : 'a lazy_state ref -> 'a = <fun>
 ```
 
 Which we can use in the same way we used `Lazy.force`:
 
 ```ocaml env=custom_lazy
-# force v
+# force v;;
 performing lazy computation
 - : float = 4.
-# force v
+# force v;;
 - : float = 4.
 ```
 
@@ -845,7 +845,7 @@ Modules](first-class-modules.html#First-Class-Modules).
 # let memoize m f =
     let memo_table = Hashtbl.create m in
     (fun x ->
-       Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
+       Hashtbl.find_or_add memo_table x ~default:(fun () -> f x));;
 val memoize : 'a Hashtbl.Key.t -> ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
@@ -894,9 +894,9 @@ should pay attention to the structure of the recursive calls:
         [ edit_distance s' t  + 1
         ; edit_distance s  t' + 1
         ; edit_distance s' t' + cost_to_drop_both
-        ]
+        ];;
 val edit_distance : string -> string -> int = <fun>
-# edit_distance "OCaml" "ocaml"
+# edit_distance "OCaml" "ocaml";;
 - : int = 2
 ```
 
@@ -927,7 +927,7 @@ using Core's `Time` module.
     let x = f () in
     let stop = Time.now () in
     printf "Time: %F ms\n" (Time.diff stop start |> Time.Span.to_ms);
-    x
+    x;;
 val time : (unit -> 'a) -> 'a = <fun>
 ```
 
@@ -962,7 +962,7 @@ follows:
 
 ```ocaml env=main
 # let rec fib i =
-  if i <= 1 then i else fib (i - 1) + fib (i - 2)
+  if i <= 1 then i else fib (i - 1) + fib (i - 2);;
 val fib : int -> int = <fun>
 ```
 
@@ -1007,7 +1007,7 @@ lieu of the usual recursive call.
 ```ocaml env=main
 # let fib_norec fib i =
     if i <= 1 then i
-    else fib (i - 1) + fib (i - 2)
+    else fib (i - 1) + fib (i - 2);;
 val fib_norec : (int -> int) -> int -> int = <fun>
 ```
 
@@ -1015,9 +1015,9 @@ We can now turn this back into an ordinary Fibonacci function by tying
 the recursive knot:
 
 ```ocaml env=main
-# let rec fib i = fib_norec fib i
+# let rec fib i = fib_norec fib i;;
 val fib : int -> int = <fun>
-# fib 20
+# fib 20;;
 - : int = 6765
 ```
 
@@ -1027,11 +1027,11 @@ that can tie the recursive knot for any function of this form:
 ```ocaml env=main
 # let make_rec f_norec =
     let rec f x = f_norec f x in
-    f
+    f;;
 val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# let fib = make_rec fib_norec
+# let fib = make_rec fib_norec;;
 val fib : int -> int = <fun>
-# fib 20
+# fib 20;;
 - : int = 6765
 ```
 
@@ -1052,7 +1052,7 @@ knot. We'll call that function `memo_rec`:
     let fref = ref (fun _ -> assert false) in
     let f = memoize m (fun x -> f_norec !fref x) in
     fref := f;
-    f x
+    f x;;
 val memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
   <fun>
 ```
@@ -1088,7 +1088,7 @@ look like it's little more than a special form of `let rec`:
 
 ```ocaml env=main
 # let fib = memo_rec (module Int) (fun fib i ->
-  if i <= 1 then 1 else fib (i - 1) + fib (i - 2))
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 val fib : int -> int = <fun>
 ```
 
@@ -1114,10 +1114,10 @@ enabling `ppx_jane`, we pull in a collection of such derivers, three
 of which we use in defining `String_pair` below.
 
 ```ocaml env=main
-# #require "ppx_jane"
+# #require "ppx_jane";;
 # module String_pair = struct
     type t = string * string [@@deriving sexp_of, hash, compare]
-  end
+  end;;
 module String_pair :
   sig
     type t = string * string
@@ -1146,7 +1146,7 @@ With that in hand, we can define our optimized form of
            [ edit_distance (s',t ) + 1
            ; edit_distance (s ,t') + 1
            ; edit_distance (s',t') + cost_to_drop_both
-  ])
+  ]);;
 val edit_distance : String_pair.t -> int = <fun>
 ```
 
@@ -1170,7 +1170,7 @@ just that: [let rec]{.idx}
 ```ocaml env=main
 # let memo_rec m f_norec =
     let rec f = memoize m (fun x -> f_norec f x) in
-    f
+    f;;
 Line 2, characters 17-49:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
@@ -1200,7 +1200,7 @@ like Haskell. Indeed, we can make something like our definition of `x` work
 if we use OCaml's laziness:
 
 ```ocaml env=main
-# let rec x = lazy (force x + 1)
+# let rec x = lazy (force x + 1);;
 val x : int lazy_t = <lazy>
 ```
 
@@ -1209,7 +1209,7 @@ an exception when a lazy value tries to force itself as part of its own
 evaluation.
 
 ```ocaml env=main
-# force x
+# force x;;
 Exception: Lazy.Undefined
 ```
 
@@ -1362,7 +1362,7 @@ function]{.idx}[I/O (input/output) operations/formatted output]{.idx}
 ```ocaml env=main
 # printf
     "%i is an integer, %F is a float, \"%s\" is a string\n"
-  3 4.5 "five"
+  3 4.5 "five";;
 3 is an integer, 4.5 is a float, "five" is a string
 - : unit = ()
 ```
@@ -1372,7 +1372,7 @@ particular, if we provide an argument whose type doesn't match what's
 presented in the format string, we'll get a type error:
 
 ```ocaml env=main
-# printf "An integer: %i\n" 4.5
+# printf "An integer: %i\n" 4.5;;
 Line 1, characters 27-30:
 Error: This expression has type float but an expression was expected of type
          int
@@ -1394,13 +1394,13 @@ available as a string literal at compile time. Indeed, if you try to
 pass an ordinary string to `printf`, the compiler will complain:
 
 ```ocaml env=main
-# let fmt = "%i is an integer\n"
+# let fmt = "%i is an integer\n";;
 val fmt : string = "%i is an integer\n"
-# printf fmt 3
+# printf fmt 3;;
 Line 1, characters 8-11:
 Error: This expression has type string but an expression was expected of type
-         ('a -> 'b, out_channel, unit) format =
-           ('a -> 'b, out_channel, unit, unit, unit, unit) format6
+         ('a -> 'b, Stdio.Out_channel.t, unit) format =
+           ('a -> 'b, Stdio.Out_channel.t, unit, unit, unit, unit) format6
 ```
 
 If OCaml infers that a given string literal is a format string, then it
@@ -1412,9 +1412,9 @@ representation of the format string that's printed out won't fill the whole
 page.)
 
 ```ocaml env=main
-# open CamlinternalFormatBasics
+# open CamlinternalFormatBasics;;
 # let fmt : ('a, 'b, 'c) format =
-  "%i is an integer\n"
+  "%i is an integer\n";;
 val fmt : (int -> 'c, 'b, 'c) format =
   Format
    (Int (Int_i, No_padding, No_precision,
@@ -1425,7 +1425,7 @@ val fmt : (int -> 'c, 'b, 'c) format =
 And accordingly, we can pass it to `printf`:
 
 ```ocaml env=main
-# printf fmt 3
+# printf fmt 3;;
 3 is an integer
 - : unit = ()
 ```
@@ -1496,18 +1496,18 @@ operations/file I/O]{.idx}
 # let create_number_file filename numbers =
     let outc = Out_channel.create filename in
     List.iter numbers ~f:(fun x -> Out_channel.fprintf outc "%d\n" x);
-    Out_channel.close outc
+    Out_channel.close outc;;
 val create_number_file : string -> int list -> unit = <fun>
 # let sum_file filename =
     let file = In_channel.create filename in
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     let sum = List.fold ~init:0 ~f:(+) numbers in
     In_channel.close file;
-    sum
+    sum;;
 val sum_file : string -> int = <fun>
-# create_number_file "numbers.txt" [1;2;3;4;5]
+# create_number_file "numbers.txt" [1;2;3;4;5];;
 - : unit = ()
-# sum_file "numbers.txt"
+# sum_file "numbers.txt";;
 - : int = 15
 ```
 
@@ -1551,16 +1551,16 @@ follows:
     Exn.protect ~f:(fun () ->
       let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
       List.fold ~init:0 ~f:(+) numbers)
-      ~finally:(fun () -> In_channel.close file)
+      ~finally:(fun () -> In_channel.close file);;
 val sum_file : string -> int = <fun>
 ```
 
 And now, the file descriptor leak is gone:
 
 ```ocaml env=main
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -> () done
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -> () done;;
 - : unit = ()
-# sum_file "numbers.txt"
+# sum_file "numbers.txt";;
 - : int = 15
 ```
 
@@ -1579,7 +1579,7 @@ this function, as shown here:
 # let sum_file filename =
     In_channel.with_file filename ~f:(fun file ->
       let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
-      List.fold ~init:0 ~f:(+) numbers)
+      List.fold ~init:0 ~f:(+) numbers);;
 val sum_file : string -> int = <fun>
 ```
 
@@ -1592,7 +1592,7 @@ efficient to process a line at a time. You can use the
 # let sum_file filename =
     In_channel.with_file filename ~f:(fun file ->
       In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
-        sum + Int.of_string line))
+        sum + Int.of_string line));;
 val sum_file : string -> int = <fun>
 ```
 
@@ -1622,7 +1622,7 @@ snippet of code would answer that question:
 # let x = Float.sin 120. in
   let y = Float.sin 75.  in
   let z = Float.sin 128. in
-  List.exists ~f:(fun x -> Float.O.(x < 0.)) [x;y;z]
+  List.exists ~f:(fun x -> Float.O.(x < 0.)) [x;y;z];;
 - : bool = true
 ```
 
@@ -1637,7 +1637,7 @@ original computation so that `sin 128.` won't ever be computed:
 # let x = lazy (Float.sin 120.) in
   let y = lazy (Float.sin 75.)  in
   let z = lazy (Float.sin 128.) in
-  List.exists ~f:(fun x -> Float.O.(Lazy.force x < 0.)) [x;y;z]
+  List.exists ~f:(fun x -> Float.O.(Lazy.force x < 0.)) [x;y;z];;
 - : bool = true
 ```
 
@@ -1647,7 +1647,7 @@ We can confirm that fact by a few well-placed `printf`s:
 # let x = lazy (printf "1\n"; Float.sin 120.) in
   let y = lazy (printf "2\n"; Float.sin 75.)  in
   let z = lazy (printf "3\n"; Float.sin 128.) in
-  List.exists ~f:(fun x -> Float.O.(Lazy.force x < 0.)) [x;y;z]
+  List.exists ~f:(fun x -> Float.O.(Lazy.force x < 0.)) [x;y;z];;
 1
 2
 - : bool = true
@@ -1673,7 +1673,7 @@ Consider the following example:
 # List.exists ~f:(fun x -> Float.O.(x < 0.))
     [ (printf "1\n"; Float.sin 120.);
       (printf "2\n"; Float.sin 75.);
-      (printf "3\n"; Float.sin 128.); ]
+      (printf "3\n"; Float.sin 128.); ];;
 3
 2
 1
@@ -1697,7 +1697,7 @@ programming/side effects/weak polymorphism ]{.idx}
     (fun x ->
        match !cache with
        | Some y -> y
-       | None -> cache := Some x; x)
+       | None -> cache := Some x; x);;
 val remember : '_weak1 -> '_weak1 = <fun>
 ```
 
@@ -1717,11 +1717,11 @@ generalization that gives us polymorphic types in the first place. The
 identity function, as an example, gets a polymorphic type in this way:
 
 ```ocaml env=main
-# let identity x = x
+# let identity x = x;;
 val identity : 'a -> 'a = <fun>
-# identity 3
+# identity 3;;
 - : int = 3
-# identity "five"
+# identity "five";;
 - : string = "five"
 ```
 
@@ -1747,11 +1747,11 @@ OCaml will convert a weakly polymorphic variable to a concrete type as soon
 as it gets a clue as to what concrete type it is to be used as:
 
 ```ocaml env=main
-# let remember_three () = remember 3
+# let remember_three () = remember 3;;
 val remember_three : unit -> int = <fun>
-# remember
+# remember;;
 - : int -> int = <fun>
-# remember "avocado"
+# remember "avocado";;
 Line 1, characters 10-19:
 Error: This expression has type string but an expression was expected of type
          int
@@ -1789,7 +1789,7 @@ Thus, the following expression is a simple value, and as a result, the
 types of values contained within it are allowed to be polymorphic:
 
 ```ocaml env=main
-# (fun x -> [x;x])
+# (fun x -> [x;x]);;
 - : 'a -> 'a list = <fun>
 ```
 
@@ -1797,7 +1797,7 @@ But, if we write down an expression that isn't a simple value by the
 preceding definition, we'll get different results.
 
 ```ocaml env=main
-# identity (fun x -> [x;x])
+# identity (fun x -> [x;x]);;
 - : '_weak2 -> '_weak2 list = <fun>
 ```
 
@@ -1812,7 +1812,7 @@ produces a fresh reference every time it's called can have a fully
 polymorphic type:
 
 ```ocaml env=main
-# let f () = ref None
+# let f () = ref None;;
 val f : unit -> 'a option ref = <fun>
 ```
 
@@ -1835,9 +1835,9 @@ where each element is created by calling a function on the index of
 that element:
 
 ```ocaml env=main
-# List.init
+# List.init;;
 - : int -> f:(int -> 'a) -> 'a list = <fun>
-# List.init 10 ~f:Int.to_string
+# List.init 10 ~f:Int.to_string;;
 - : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 ```
 
@@ -1846,7 +1846,7 @@ always created lists of length 10. We could do that using partial
 application, as follows:
 
 ```ocaml env=main
-# let list_init_10 = List.init 10
+# let list_init_10 = List.init 10;;
 val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>
 ```
 
@@ -1858,7 +1858,7 @@ can eliminate this possibility, and at the same time get the compiler
 to infer a polymorphic type, by avoiding partial application:
 
 ```ocaml env=main
-# let list_init_10 ~f = List.init 10 ~f
+# let list_init_10 ~f = List.init 10 ~f;;
 val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
 ```
 
@@ -1881,7 +1881,7 @@ application of the identity function, is not a simple value and thus
 can turn a polymorphic value into a weakly polymorphic one:
 
 ```ocaml env=main
-# identity (fun x -> [x;x])
+# identity (fun x -> [x;x]);;
 - : '_weak4 -> '_weak4 list = <fun>
 ```
 
@@ -1889,7 +1889,7 @@ But that's not always the case. When the type of the returned value is
 immutable, then OCaml can typically infer a fully polymorphic type:
 
 ```ocaml env=main
-# identity []
+# identity [];;
 - : 'a list = []
 ```
 
@@ -1897,9 +1897,9 @@ On the other hand, if the returned type is mutable, then the result will be
 weakly polymorphic:
 
 ```ocaml env=main
-# [||]
+# [||];;
 - : 'a array = [||]
-# identity [||]
+# identity [||];;
 - : '_weak5 array = [||]
 ```
 
@@ -1931,7 +1931,7 @@ supports constant-time concatenation:
     let to_list t =
       to_list_with_tail t []
 
-  end
+  end;;
 module Concat_list :
   sig
     type 'a t
@@ -1948,9 +1948,9 @@ immutable value. However, when it comes to the value restriction,
 OCaml treats it as if it were mutable:
 
 ```ocaml env=main
-# Concat_list.empty
+# Concat_list.empty;;
 - : 'a Concat_list.t = <abstr>
-# identity Concat_list.empty
+# identity Concat_list.empty;;
 - : '_weak6 Concat_list.t = <abstr>
 ```
 
@@ -1994,7 +1994,7 @@ expressions of this type that are not simple values:
     let to_list t =
       to_list_with_tail t []
 
-  end
+  end;;
 module Concat_list :
   sig
     type +'a t
@@ -2009,7 +2009,7 @@ Now, we can apply the identity function to `Concat_list.empty` without
 losing any polymorphism:
 
 ```ocaml env=main
-# identity Concat_list.empty
+# identity Concat_list.empty;;
 - : 'a Concat_list.t = <abstr>
 ```
 

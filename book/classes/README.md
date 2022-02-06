@@ -14,7 +14,7 @@ module. The syntax for a class definition uses the keyword `class`:
 [classes/basic syntax for]{.idx}
 
 ```ocaml env=istack
-# open Base
+# open Base;;
 # class istack = object
     val mutable v = [0; 2]
 
@@ -27,7 +27,7 @@ module. The syntax for a class definition uses the keyword `class`:
 
     method push hd =
       v <- hd :: v
-  end
+  end;;
 class istack :
   object
     val mutable v : int list
@@ -48,13 +48,13 @@ an `int option`, and a method `push` with type `int -> unit`.
 To produce an object, classes are instantiated with the keyword `new`:
 
 ```ocaml env=istack
-# let s = new istack
+# let s = new istack;;
 val s : istack = <obj>
-# s#pop
+# s#pop;;
 - : int option = Some 0
-# s#push 5
+# s#push 5;;
 - : unit = ()
-# s#pop
+# s#pop;;
 - : int option = Some 5
 ```
 
@@ -66,7 +66,7 @@ defines an object type `istack` with the same methods as the class. This type
 definition is equivalent to:
 
 ```ocaml env=istack
-# type istack = < pop: int option; push: int -> unit >
+# type istack = < pop: int option; push: int -> unit >;;
 type istack = < pop : int option; push : int -> unit >
 ```
 
@@ -99,7 +99,7 @@ parameter `init` for the initial contents of the stack:
 
     method push hd =
       v <- hd :: v
-  end
+  end;;
 class ['a] stack :
   'a list ->
   object
@@ -130,7 +130,7 @@ be "too polymorphic": `init` could have some type `'b list`:
 
     method push hd =
       v <- hd :: v
-  end
+  end;;
 Lines 1-13, characters 1-6:
 Error: Some type variables are unbound in this type:
          class ['a] stack :
@@ -199,7 +199,7 @@ First, we'll define an object type `iterator` that specifies the methods in
 an iterator:
 
 ```ocaml env=iter
-# type 'a iterator = < get : 'a; has_value : bool; next : unit >
+# type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 type 'a iterator = < get : 'a; has_value : bool; next : unit >
 ```
 
@@ -221,7 +221,7 @@ over the contents of our stack:
       match current with
       | hd :: tl -> current <- tl
       | [] -> raise (Invalid_argument "no value")
-  end
+  end;;
 class ['a] list_iterator :
   'a list ->
   object
@@ -252,7 +252,7 @@ contents of the stack:
 
     method iterator : 'a iterator =
       new list_iterator v
-  end
+  end;;
 class ['a] stack :
   'a list ->
   object
@@ -266,23 +266,23 @@ class ['a] stack :
 Now we can build a new stack, push some values to it, and iterate over them:
 
 ```ocaml env=iter
-# let s = new stack []
+# let s = new stack [];;
 val s : '_weak1 stack = <obj>
-# s#push 5
+# s#push 5;;
 - : unit = ()
-# s#push 4
+# s#push 4;;
 - : unit = ()
-# let it = s#iterator
+# let it = s#iterator;;
 val it : int iterator = <obj>
-# it#get
+# it#get;;
 - : int = 4
-# it#next
+# it#next;;
 - : unit = ()
-# it#get
+# it#get;;
 - : int = 5
-# it#next
+# it#next;;
 - : unit = ()
-# it#has_value
+# it#has_value;;
 - : bool = false
 ```
 
@@ -309,7 +309,7 @@ stack: [functional iterators]{.idx}
 
     method iter f =
       List.iter ~f v
-  end
+  end;;
 class ['a] stack :
   'a list ->
   object
@@ -345,7 +345,7 @@ the following example:
 
     method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
       (fun f init -> List.fold ~f ~init v)
-  end
+  end;;
 class ['a] stack :
   'a list ->
   object
@@ -374,7 +374,7 @@ adds a new method `print` that prints all the strings on the stack:
 
     method print =
       List.iter ~f:Stdio.print_endline v
-  end
+  end;;
 class sstack :
   string list ->
   object
@@ -395,7 +395,7 @@ pushed onto the stack:
 
     method push hd =
       super#push (hd * 2)
-  end
+  end;;
 class double_stack :
   int list ->
   object
@@ -667,7 +667,7 @@ methods]{.idx}[classes/binary methods for]{.idx}[binary methods]{.idx}
     method width = w
     method area = Float.of_int (self#width * self#width)
     method equals (other : 'self) = other#width = self#width
-  end
+  end;;
 class square :
   int ->
   object ('a)
@@ -679,7 +679,7 @@ class square :
     method radius = r
     method area = 3.14 *. (Float.of_int self#radius) **. 2.0
     method equals (other : 'self) = other#radius = self#radius
-  end
+  end;;
 class circle :
   int ->
   object ('a)
@@ -696,9 +696,9 @@ We can now test different object instances for equality by using the
 `equals` binary method:
 
 ```ocaml env=binary
-# (new square 5)#equals (new square 5)
+# (new square 5)#equals (new square 5);;
 - : bool = true
-# (new circle 10)#equals (new circle 7)
+# (new circle 10)#equals (new circle 7);;
 - : bool = false
 ```
 
@@ -707,9 +707,9 @@ object of the exact type `square` or `circle`. Because of this, we can't
 define a common base class `shape` that also includes an equality method:
 
 ```ocaml env=binary
-# type shape = < equals : shape -> bool; area : float >
+# type shape = < equals : shape -> bool; area : float >;;
 type shape = < area : float; equals : shape -> bool >
-# (new square 5 :> shape)
+# (new square 5 :> shape);;
 Line 1, characters 1-24:
 Error: Type square = < area : float; equals : square -> bool; width : int >
        is not a subtype of shape = < area : float; equals : shape -> bool >
@@ -734,7 +734,7 @@ when applied to objects:
 ```ocaml env=binary
 # Poly.(=)
     (object method area = 5 end)
-    (object method area = 5 end)
+    (object method area = 5 end);;
 - : bool = false
 ```
 
@@ -751,10 +751,10 @@ comparison based on the representation type: [representation types]{.idx}
 ```ocaml env=binary
 # type shape_repr =
     | Square of int
-    | Circle of int
+    | Circle of int;;
 type shape_repr = Square of int | Circle of int
 # type shape =
-  < repr : shape_repr; equals : shape -> bool; area : float >
+  < repr : shape_repr; equals : shape -> bool; area : float >;;
 type shape = < area : float; equals : shape -> bool; repr : shape_repr >
 # class square w = object(self)
     method width = w
@@ -764,7 +764,7 @@ type shape = < area : float; equals : shape -> bool; repr : shape_repr >
        match (self#repr, other#repr) with
        | Square x, Square x' -> Int.(=) x x'
        | _ -> false
-  end
+  end;;
 class square :
   int ->
   object
@@ -816,12 +816,12 @@ here.
 Here's how we'd rewrite the above example with extensible variants.
 
 ```ocaml env=binary
-# type shape_repr = ..
+# type shape_repr = ..;;
 type shape_repr = ..
 # type shape =
-  < repr : shape_repr; equals : shape -> bool; area : float >
+  < repr : shape_repr; equals : shape -> bool; area : float >;;
 type shape = < area : float; equals : shape -> bool; repr : shape_repr >
-# type shape_repr += Square of int
+# type shape_repr += Square of int;;
 type shape_repr += Square of int
 # class square w = object(self)
     method width = w
@@ -831,7 +831,7 @@ type shape_repr += Square of int
        match (self#repr, other#repr) with
        | Square x, Square x' -> Int.(=) x x'
        | _ -> false
-  end
+  end;;
 class square :
   int ->
   object
@@ -1040,9 +1040,9 @@ them before the object expression or in the initial value of a field:
     let () = Stdio.printf "Creating obj %d\n" x in
     object
       val field = Stdio.printf "Initializing field\n"; x
-  end
+  end;;
 class obj : int -> object val field : int end
-# let o = new obj 3
+# let o = new obj 3;;
 Creating obj 3
 Initializing field
 val o : obj = <obj>

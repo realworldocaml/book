@@ -47,12 +47,12 @@ of]{.idx}
 Recall how I/O is typically done in Core. Here's a simple example.
 
 ```ocaml env=main
-# open Core
-# In_channel.read_all
+# open Core;;
+# In_channel.read_all;;
 - : string -> string = <fun>
-# Out_channel.write_all "test.txt" ~data:"This is only a test."
+# Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 - : unit = ()
-# In_channel.read_all "test.txt"
+# In_channel.read_all "test.txt";;
 - : string = "This is only a test."
 ```
 
@@ -68,9 +68,9 @@ in with the result. As an example, consider the signature of the Async
 equivalent of `In_channel.read_all`. [Deferred.t]{.idx}
 
 ```ocaml env=main
-# #require "async"
-# open Async
-# Reader.file_contents
+# #require "async";;
+# open Async;;
+# Reader.file_contents;;
 - : string -> string Deferred.t = <fun>
 ```
 
@@ -84,9 +84,9 @@ will initially be empty, as you can see by calling `Deferred.peek`.
 [Deferred.peek]{.idx}
 
 ```ocaml env=main
-# let contents = Reader.file_contents "test.txt"
+# let contents = Reader.file_contents "test.txt";;
 val contents : string Deferred.t = <abstr>
-# Deferred.peek contents
+# Deferred.peek contents;;
 - : string option = None
 ```
 
@@ -100,7 +100,7 @@ will make sure the scheduler is running and block until the deferred is
 determined. Thus, we can write:
 
 ```ocaml env=main
-# contents
+# contents;;
 - : string = "This is only a test."
 ```
 
@@ -111,7 +111,7 @@ contained within that deferred.
 If we peek again, we'll see that the value of `contents` has been filled in.
 
 ```ocaml env=main
-# Deferred.peek contents
+# Deferred.peek contents;;
 - : string option = Some "This is only a test."
 ```
 
@@ -120,7 +120,7 @@ deferred computation to finish, which we do using `Deferred.bind`. Here's the
 type-signature of `bind`.
 
 ```ocaml env=main
-# Deferred.bind
+# Deferred.bind;;
 - : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
 ```
 
@@ -135,11 +135,11 @@ uppercase version of its contents.
 # let uppercase_file filename =
     Deferred.bind (Reader.file_contents filename)
       ~f:(fun text ->
-         Writer.save filename ~contents:(String.uppercase text))
+         Writer.save filename ~contents:(String.uppercase text));;
 val uppercase_file : string -> unit Deferred.t = <fun>
-# uppercase_file "test.txt"
+# uppercase_file "test.txt";;
 - : unit = ()
-# Reader.file_contents "test.txt"
+# Reader.file_contents "test.txt";;
 - : string = "THIS IS ONLY A TEST."
 ```
 
@@ -155,7 +155,7 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 # let uppercase_file filename =
     Reader.file_contents filename
     >>= fun text ->
-    Writer.save filename ~contents:(String.uppercase text)
+    Writer.save filename ~contents:(String.uppercase text);;
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
@@ -171,7 +171,7 @@ a function that counts the number of lines in a file:
 # let count_lines filename =
     Reader.file_contents filename
     >>= fun text ->
-    List.length (String.split text ~on:'\n')
+    List.length (String.split text ~on:'\n');;
 Line 4, characters 5-45:
 Error: This expression has type int but an expression was expected of type
          'a Deferred.t
@@ -185,11 +185,11 @@ Async that takes an ordinary value and wraps it up in a deferred.
 [return function]{.idx}
 
 ```ocaml env=main
-# return
+# return;;
 - : 'a -> 'a Deferred.t = <fun>
-# let three = return 3
+# let three = return 3;;
 val three : int Deferred.t = <abstr>
-# three
+# three;;
 - : int = 3
 ```
 
@@ -199,7 +199,7 @@ Using `return`, we can make `count_lines` compile:
 # let count_lines filename =
     Reader.file_contents filename
     >>= fun text ->
-    return (List.length (String.split text ~on:'\n'))
+    return (List.length (String.split text ~on:'\n'));;
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
@@ -214,7 +214,7 @@ there is a standard shortcut for it called `Deferred.map`, which has the
 following signature:
 
 ```ocaml env=main
-# Deferred.map
+# Deferred.map;;
 - : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
 ```
 
@@ -244,7 +244,7 @@ there is a special syntax designed for working with monads, which we
 can enable by enabling `ppx_let`.
 
 ```ocaml env=main
-# #require "ppx_let"
+# #require "ppx_let";;
 ```
 
 Here's what the `bind`-using version of `count_lines` looks like using
@@ -253,7 +253,7 @@ that syntax.
 ```ocaml env=main
 # let count_lines filename =
     let%bind text = Reader.file_contents filename in
-    return (List.length (String.split text ~on:'\n'))
+    return (List.length (String.split text ~on:'\n'));;
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
@@ -262,7 +262,7 @@ And here's the `map`-based version of `count_lines`.
 ```ocaml env=main
 # let count_lines filename =
     let%map text = Reader.file_contents filename in
-    List.length (String.split text ~on:'\n')
+    List.length (String.split text ~on:'\n');;
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
@@ -299,16 +299,16 @@ ivar, thus causing the corresponding deferred to become determined, using
 `Ivar.fill`. These operations are illustrated below:
 
 ```ocaml env=main
-# let ivar = Ivar.create ()
+# let ivar = Ivar.create ();;
 val ivar : '_weak1 Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
-# let def = Ivar.read ivar
+# let def = Ivar.read ivar;;
 val def : '_weak2 Deferred.t = <abstr>
-# Deferred.peek def
+# Deferred.peek def;;
 - : '_weak3 option = None
-# Ivar.fill ivar "Hello"
+# Ivar.fill ivar "Hello";;
 - : unit = ()
-# Deferred.peek def
+# Deferred.peek def;;
 - : string option = Some "Hello"
 ```
 
@@ -327,7 +327,7 @@ Here's a signature that captures this idea:
     type t
     val create : Time.Span.t -> t
     val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
-  end
+  end;;
 module type Delayer_intf =
   sig
     type t
@@ -344,7 +344,7 @@ we'll use an operator called `upon`, which has the following signature:
 [thunks]{.idx}
 
 ```ocaml env=main
-# upon
+# upon;;
 - : 'a Deferred.t -> ('a -> unit) -> unit = <fun>
 ```
 
@@ -375,7 +375,7 @@ which becomes determined after that time span elapses:
         let job = Queue.dequeue_exn t.jobs in
         job ());
       Ivar.read ivar
-  end
+  end;;
 module Delayer : Delayer_intf
 ```
 
@@ -413,7 +413,7 @@ That sounds like a lot, but we can implement this relatively concisely.
 # let my_bind d ~f =
     let i = Ivar.create () in
     upon d (fun x -> upon (f x) (fun y -> Ivar.fill i y));
-    Ivar.read i
+    Ivar.read i;;
 val my_bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t =
   <fun>
 ```
@@ -582,9 +582,9 @@ inferred as having return type `'a`:
 [Scheduler.go]{.idx}[loop_forever]{.idx}[never_returns]{.idx}[functions/non-returning]{.idx}
 
 ```ocaml env=main
-# let rec loop_forever () = loop_forever ()
+# let rec loop_forever () = loop_forever ();;
 val loop_forever : unit -> 'a = <fun>
-# let always_fail () = assert false
+# let always_fail () = assert false;;
 val always_fail : unit -> 'a = <fun>
 ```
 
@@ -595,7 +595,7 @@ return `unit`. The type-checker won't necessarily complain in such a case:
 # let do_stuff n =
     let x = 3 in
     if n > 0 then loop_forever ();
-    x + n
+    x + n;;
 val do_stuff : int -> int = <fun>
 ```
 
@@ -605,7 +605,7 @@ and so we use the type system to make it more explicit by giving it a return
 type of `never_returns`. Let's do the same trick with `loop_forever`:
 
 ```ocaml env=main
-# let rec loop_forever () : never_returns = loop_forever ()
+# let rec loop_forever () : never_returns = loop_forever ();;
 val loop_forever : unit -> never_returns = <fun>
 ```
 
@@ -618,7 +618,7 @@ function, we'll get a helpful type error:
 # let do_stuff n =
     let x = 3 in
     if n > 0 then loop_forever ();
-    x + n
+    x + n;;
 Line 3, characters 19-34:
 Error: This expression has type never_returns
        but an expression was expected of type unit
@@ -628,12 +628,12 @@ Error: This expression has type never_returns
 We can resolve the error by calling the function `never_returns`:
 
 ```ocaml env=main
-# never_returns
+# never_returns;;
 - : never_returns -> 'a = <fun>
 # let do_stuff n =
     let x = 3 in
     if n > 0 then never_returns (loop_forever ());
-    x + n
+    x + n;;
 val do_stuff : int -> int = <fun>
 ```
 
@@ -701,7 +701,7 @@ important part of Async, so it's worth discussing them in some detail.
 Pipes are created in connected read/write pairs:
 
 ```ocaml env=main
-# let (r,w) = Pipe.create ()
+# let (r,w) = Pipe.create ();;
 val r : '_weak4 Pipe.Reader.t = <abstr>
 val w : '_weak4 Pipe.Writer.t = <abstr>
 ```
@@ -723,14 +723,14 @@ The deferred returned by write completes on its own once the value written
 into the pipe has been read out:
 
 ```ocaml env=main
-# let (r,w) = Pipe.create ()
+# let (r,w) = Pipe.create ();;
 val r : '_weak5 Pipe.Reader.t = <abstr>
 val w : '_weak5 Pipe.Writer.t = <abstr>
-# let write_complete = Pipe.write w "Hello World!"
+# let write_complete = Pipe.write w "Hello World!";;
 val write_complete : unit Deferred.t = <abstr>
-# Pipe.read r
+# Pipe.read r;;
 - : [ `Eof | `Ok of string ] = `Ok "Hello World!"
-# write_complete
+# write_complete;;
 - : unit = ()
 ```
 
@@ -740,7 +740,7 @@ functions provided for pipes in the `Pipe` module. In particular, we're using
 moves it to a writer-pipe. Here's the type of `Pipe.transfer`:
 
 ```ocaml env=main
-# Pipe.transfer
+# Pipe.transfer;;
 - : 'a Pipe.Reader.t -> 'b Pipe.Writer.t -> f:('a -> 'b) -> unit Deferred.t =
 <fun>
 ```
@@ -764,7 +764,7 @@ Opening `Async`, shadows the `Command` module with an extended version that
 contains the `async` call:
 
 ```ocaml env=main
-# Command.async_spec
+# Command.async_spec;;
 - : ('a, unit Deferred.t) Async.Command.basic_spec_command
     Command.with_options
 = <fun>
@@ -885,8 +885,8 @@ To better understand what's going on, it's useful to look at the type for
 `Cohttp_async.Client.get`, which we can do in `utop`:
 
 ```ocaml env=main
-# #require "cohttp-async"
-# Cohttp_async.Client.get
+# #require "cohttp-async";;
+# Cohttp_async.Client.get;;
 - : ?interrupt:unit Deferred.t ->
     ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
     ?headers:Cohttp.Header.t ->
@@ -943,7 +943,7 @@ We used `List.map` to call `get_definition` on each word, and `Deferred.all`
 to wait for all the results. Here's the type of `Deferred.all`:
 
 ```ocaml env=main
-# Deferred.all
+# Deferred.all;;
 - : 'a Deferred.t list -> 'a list Deferred.t = <fun>
 ```
 
@@ -971,7 +971,7 @@ becomes determined when every deferred on the input list is determined. We
 can see the type of this function in `utop`:
 
 ```ocaml env=main
-# Deferred.all_unit
+# Deferred.all_unit;;
 - : unit Deferred.t list -> unit Deferred.t = <fun>
 ```
 
@@ -1042,11 +1042,11 @@ the two behaviors on subsequent calls:
       should_fail := not will_fail;
       after (Time.Span.of_sec 0.5)
       >>= fun () ->
-      if will_fail then raise Exit else return ()
+      if will_fail then raise Exit else return ();;
 val maybe_raise : unit -> unit Deferred.t = <fun>
-# maybe_raise ()
+# maybe_raise ();;
 - : unit = ()
-# maybe_raise ()
+# maybe_raise ();;
 Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
@@ -1063,11 +1063,11 @@ can see that doesn't quite do the trick:
     try
       maybe_raise ()
       >>| fun () -> "success"
-    with _ -> return "failure"
+    with _ -> return "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
-# handle_error ()
+# handle_error ();;
 - : string = "success"
-# handle_error ()
+# handle_error ();;
 Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
@@ -1084,11 +1084,11 @@ provided by Async: [exceptions/asynchronous errors]{.idx}
     try_with (fun () -> maybe_raise ())
     >>| function
     | Ok ()   -> "success"
-    | Error _ -> "failure"
+    | Error _ -> "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
-# handle_error ()
+# handle_error ();;
 - : string = "success"
-# handle_error ()
+# handle_error ();;
 - : string = "failure"
 ```
 
@@ -1123,11 +1123,11 @@ Here's an example:
 ```ocaml env=main
 # let blow_up () =
     let monitor = Monitor.create ~name:"blow up monitor" () in
-    within' ~monitor maybe_raise
+    within' ~monitor maybe_raise;;
 val blow_up : unit -> unit Deferred.t = <fun>
-# blow_up ()
+# blow_up ();;
 - : unit = ()
-# blow_up ()
+# blow_up ();;
 Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor"))
 ```
 
@@ -1152,7 +1152,7 @@ captures and ignores errors in the processes it spawns.
       ~f:(fun _exn -> printf "an error happened\n");
     within' ~monitor (fun () ->
       after (Time.Span.of_sec 0.25)
-      >>= fun () -> failwith "Kaboom!")
+      >>= fun () -> failwith "Kaboom!");;
 val swallow_error : unit -> 'a Deferred.t = <fun>
 ```
 
@@ -1167,7 +1167,7 @@ assuming any of its arguments becomes determined.
 
 ```ocaml env=main
 # Deferred.any [ after (Time.Span.of_sec 0.5)
-               ; swallow_error () ]
+               ; swallow_error () ];;
 an error happened
 - : unit = ()
 ```
@@ -1181,7 +1181,7 @@ parent and handles others. Exceptions are sent to the parent using
 monitor, which is the parent of the newly created monitor.
 
 ```ocaml env=main
-# exception Ignore_me
+# exception Ignore_me;;
 exception Ignore_me
 # let swallow_some_errors exn_to_raise =
     let child_monitor  = Monitor.create  () in
@@ -1194,7 +1194,7 @@ exception Ignore_me
         | _ -> Monitor.send_exn parent_monitor error);
     within' ~monitor:child_monitor (fun () ->
       after (Time.Span.of_sec 0.25)
-      >>= fun () -> raise exn_to_raise)
+      >>= fun () -> raise exn_to_raise);;
 val swallow_some_errors : exn -> 'a Deferred.t = <fun>
 ```
 
@@ -1221,7 +1221,7 @@ computation will finish when the timeout expires.
 
 ```ocaml env=main
 # Deferred.any [ after (Time.Span.of_sec 0.5)
-               ; swallow_some_errors Ignore_me ]
+               ; swallow_some_errors Ignore_me ];;
 ignoring exn
 - : unit = ()
 ```
@@ -1363,9 +1363,9 @@ library/timeouts and cancellations]{.idx}
 ```ocaml env=main
 # let string_and_float = Deferred.both
                            (after (sec 0.5)  >>| fun () -> "A")
-  (after (sec 0.25) >>| fun () -> 32.33)
+  (after (sec 0.25) >>| fun () -> 32.33);;
 val string_and_float : (string * float) Deferred.t = <abstr>
-# string_and_float
+# string_and_float;;
 - : string * float = ("A", 32.33)
 ```
 
@@ -1380,7 +1380,7 @@ list is determined.
   [ (after (sec 0.5) >>| fun () -> "half a second")
   ; (after (sec 1.0) >>| fun () -> "one second")
   ; (after (sec 4.0) >>| fun () -> "four seconds")
-  ]
+  ];;
 - : string = "half a second"
 ```
 
@@ -1458,9 +1458,9 @@ with a function that is called if and only if that deferred is chosen. Here's
 the type signature of `choice` and `choose`:
 
 ```ocaml env=main
-# choice
+# choice;;
 - : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.choice = <fun>
-# choose
+# choose;;
 - : 'a Deferred.choice list -> 'a Deferred.t = <fun>
 ```
 
@@ -1563,9 +1563,9 @@ doing just this, `In_thread.run` being the simplest. We can simply write:
 [In_thread module]{.idx}
 
 ```ocaml env=main
-# let def = In_thread.run (fun () -> List.range 1 10)
+# let def = In_thread.run (fun () -> List.range 1 10);;
 val def : int list Deferred.t = <abstr>
-# def
+# def;;
 - : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
 ```
 
@@ -1593,7 +1593,7 @@ prints out one last timestamp:
     printf "\nFinished at: ";
     print_time ();
     printf "\n";
-    Writer.flushed (force Writer.stdout);
+    Writer.flushed (force Writer.stdout);;
 val log_delays : (unit -> unit Deferred.t) -> unit Deferred.t = <fun>
 ```
 

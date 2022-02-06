@@ -161,15 +161,15 @@ the `Gc.set` function:
 :::
 
 ```ocaml env=tune
-# open Core
-# let c = Gc.get ()
+# open Core;;
+# let c = Gc.get ();;
 val c : Core_kernel.Gc.control =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
    space_overhead = 120; verbose = 0; max_overhead = 500;
    stack_limit = 1048576; allocation_policy = 2; window_size = 1;
    custom_major_ratio = 44; custom_minor_ratio = 100;
    custom_minor_max_size = 8192}
-# Gc.tune ~minor_heap_size:(262144 * 2) ()
+# Gc.tune ~minor_heap_size:(262144 * 2) ();;
 - : unit = ()
 ```
 
@@ -259,7 +259,7 @@ require more housekeeping in the OCaml runtime to keep track of them:
 :::
 
 ```ocaml env=tune
-# Gc.tune ~major_heap_increment:(1000448 * 4) ()
+# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
 - : unit = ()
 ```
 
@@ -415,9 +415,9 @@ necessary:
 :::
 
 ```ocaml env=tune
-# Gc.major_slice 0
+# Gc.major_slice 0;;
 - : int = 0
-# Gc.full_major ()
+# Gc.full_major ();;
 - : unit = ()
 ```
 
@@ -457,7 +457,7 @@ allocation patterns that are causing a higher-than-usual rate of compactions:
 :::
 
 ```ocaml env=tune
-# Gc.tune ~max_overhead:0 ()
+# Gc.tune ~max_overhead:0 ();;
 - : unit = ()
 ```
 

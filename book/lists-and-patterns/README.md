@@ -13,8 +13,8 @@ As we've seen, OCaml lists can be generated using a bracket-and-semicolon
 notation:[lists/generation of]{.idx}
 
 ```ocaml env=main
-# open Base
-# [1;2;3]
+# open Base;;
+# [1;2;3];;
 - : int list = [1; 2; 3]
 ```
 
@@ -22,9 +22,9 @@ And they can also be generated using the equivalent `::`
 notation:[operators/: : operator]{.idx}[lists/operator : :]{.idx}
 
 ```ocaml env=main
-# 1 :: (2 :: (3 :: []))
+# 1 :: (2 :: (3 :: []));;
 - : int list = [1; 2; 3]
-# 1 :: 2 :: 3 :: []
+# 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
 ```
 
@@ -34,11 +34,11 @@ terminate a list. Note that the empty list is polymorphic, meaning it can be
 used with elements of any type, as you can see here:
 
 ```ocaml env=main
-# let empty = []
+# let empty = [];;
 val empty : 'a list = []
-# 3 :: empty
+# 3 :: empty;;
 - : int list = [3]
-# "three" :: empty
+# "three" :: empty;;
 - : string list = ["three"]
 ```
 
@@ -59,11 +59,11 @@ without modifying it; extension allocates a new list element but does not
 change any of the existing ones, as you can see:[lists/extension of]{.idx}
 
 ```ocaml env=main
-# let l = 1 :: 2 :: 3 :: []
+# let l = 1 :: 2 :: 3 :: [];;
 val l : int list = [1; 2; 3]
-# let m = 0 :: l
+# let m = 0 :: l;;
 val m : int list = [0; 1; 2; 3]
-# l
+# l;;
 - : int list = [1; 2; 3]
 ```
 
@@ -79,11 +79,11 @@ from]{.idx}
 # let rec sum l =
     match l with
     | [] -> 0
-    | hd :: tl -> hd + sum tl
+    | hd :: tl -> hd + sum tl;;
 val sum : int list -> int = <fun>
-# sum [1;2;3]
+# sum [1;2;3];;
 - : int = 6
-# sum []
+# sum [];;
 - : int = 0
 ```
 
@@ -111,7 +111,7 @@ is wrong:
     match l with
     | [] -> []
     | to_drop :: tl -> drop_value tl to_drop
-    | hd :: tl -> hd :: drop_value tl to_drop
+    | hd :: tl -> hd :: drop_value tl to_drop;;
 Line 5, characters 7-15:
 Warning 11 [redundant-case]: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
@@ -122,7 +122,7 @@ elements of the list rather than just those equal to the provided value, as
 you can see here:
 
 ```ocaml env=main
-# drop_value [1;2;3] 2
+# drop_value [1;2;3] 2;;
 - : int list = []
 ```
 
@@ -146,9 +146,9 @@ instead use an ordinary `if` expression:
     | [] -> []
     | hd :: tl ->
       let new_tl = drop_value tl to_drop in
-      if hd = to_drop then new_tl else hd :: new_tl
+      if hd = to_drop then new_tl else hd :: new_tl;;
 val drop_value : int list -> int -> int list = <fun>
-# drop_value [1;2;3] 2
+# drop_value [1;2;3] 2;;
 - : int list = [1; 3]
 ```
 
@@ -161,9 +161,9 @@ of `drop_value`:
     match l with
     | [] -> []
     | 0  :: tl -> drop_zero tl
-    | hd :: tl -> hd :: drop_zero tl
+    | hd :: tl -> hd :: drop_zero tl;;
 val drop_zero : int list -> int list = <fun>
-# drop_zero [1;2;0;3]
+# drop_zero [1;2;0;3];;
 - : int list = [1; 2; 3]
 ```
 
@@ -205,7 +205,7 @@ incrementing an integer by one. The first is implemented with a
     | 3 -> 4
     | 4 -> 5
     | 5 -> 6
-    | _ -> x + 1
+    | _ -> x + 1;;
 val plus_one_match : int -> int = <fun>
 # let plus_one_if x =
     if      x = 0 then 1
@@ -214,7 +214,7 @@ val plus_one_match : int -> int = <fun>
     else if x = 3 then 4
     else if x = 4 then 5
     else if x = 5 then 6
-    else x + 1
+    else x + 1;;
 val plus_one_if : int -> int = <fun>
 ```
 
@@ -255,7 +255,7 @@ allowing us to implement the entire function without pattern matching:
 ```ocaml env=main
 # let rec sum_if l =
     if List.is_empty l then 0
-    else List.hd_exn l + sum_if (List.tl_exn l)
+    else List.hd_exn l + sum_if (List.tl_exn l);;
 val sum_if : int list -> int = <fun>
 ```
 
@@ -306,7 +306,7 @@ a case, along with an example of an unmatched pattern:
 # let rec drop_zero l =
     match l with
     | [] -> []
-    | 0  :: tl -> drop_zero tl
+    | 0  :: tl -> drop_zero tl;;
 Lines 2-4, characters 5-31:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -366,7 +366,7 @@ transforming elements of that list, and returns a new list with the
 transformed elements. Thus, we can write:[List module/List.map]{.idx}
 
 ```ocaml env=main
-# List.map ~f:String.length ["Hello"; "World!"]
+# List.map ~f:String.length ["Hello"; "World!"];;
 - : int list = [5; 6]
 ```
 
@@ -375,7 +375,7 @@ a function for combining them. Thus, we might write:[List
 module/List.map2_exn]{.idx}
 
 ```ocaml env=main
-# List.map2_exn ~f:Int.max [1;2;3] [3;2;1]
+# List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 - : int list = [3; 2; 3]
 ```
 
@@ -383,7 +383,7 @@ The `_exn` is there because the function throws an exception if the lists are
 of mismatched length:
 
 ```ocaml env=main
-# List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0]
+# List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
 Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4")
 ```
 
@@ -395,14 +395,14 @@ when it's done. You can see some of this by looking at the type-signature for
 `fold`:[List module/List.fold]{.idx}
 
 ```ocaml env=main
-# List.fold
+# List.fold;;
 - : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum = <fun>
 ```
 
 We can use `List.fold` for something as simple as summing up a list:
 
 ```ocaml env=main
-# List.fold ~init:0 ~f:(+) [1;2;3;4]
+# List.fold ~init:0 ~f:(+) [1;2;3;4];;
 - : int = 10
 ```
 
@@ -412,7 +412,7 @@ can for example use `fold` to reverse a list, in which case the accumulator
 is itself a list:
 
 ```ocaml env=main
-# List.fold ~init:[] ~f:(fun acc hd -> hd :: acc) [1;2;3;4]
+# List.fold ~init:[] ~f:(fun acc hd -> hd :: acc) [1;2;3;4];;
 - : int list = [4; 3; 2; 1]
 ```
 
@@ -425,7 +425,7 @@ widths:
     List.fold rows
       ~init:(lengths header)
       ~f:(fun acc row ->
-          List.map2_exn ~f:Int.max acc (lengths row))
+          List.map2_exn ~f:Int.max acc (lengths row));;
 val max_widths : string list -> string list list -> int list = <fun>
 ```
 
@@ -449,9 +449,9 @@ on the outside:
     let pieces = List.map widths
         ~f:(fun w -> String.make (w + 2) '-')
     in
-    "|" ^ String.concat ~sep:"+" pieces ^ "|"
+    "|" ^ String.concat ~sep:"+" pieces ^ "|";;
 val render_separator : int list -> string = <fun>
-# render_separator [3;6;2]
+# render_separator [3;6;2];;
 - : string = "|-----+--------+----|"
 ```
 
@@ -468,14 +468,14 @@ pairwise operator. You should avoid `^` for joining long numbers of strings,
 since it allocates a new string every time it runs. Thus, the following code
 
 ```ocaml env=main
-# let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
+# let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 val s : string = "......."
 ```
 
 will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code
 
 ```ocaml env=main
-# let s = String.concat [".";".";".";".";".";".";"."]
+# let s = String.concat [".";".";".";".";".";".";"."];;
 val s : string = "......."
 ```
 
@@ -491,9 +491,9 @@ one blank space on both sides:[strings/padding of]{.idx}
 
 ```ocaml env=main
 # let pad s length =
-    " " ^ s ^ String.make (length - String.length s + 1) ' '
+    " " ^ s ^ String.make (length - String.length s + 1) ' ';;
 val pad : string -> int -> string = <fun>
-# pad "hello" 10
+# pad "hello" 10;;
 - : string = " hello      "
 ```
 
@@ -504,9 +504,9 @@ list of widths:
 ```ocaml env=main
 # let render_row row widths =
     let padded = List.map2_exn row widths ~f:pad in
-    "|" ^ String.concat ~sep:"|" padded ^ "|"
+    "|" ^ String.concat ~sep:"|" padded ^ "|";;
 val render_row : string list -> int list -> string = <fun>
-# render_row ["Hello";"World"] [10;15]
+# render_row ["Hello";"World"] [10;15];;
 - : string = "| Hello      | World           |"
 ```
 
@@ -520,7 +520,7 @@ table:
       (render_row header widths
        :: render_separator widths
        :: List.map rows ~f:(fun row -> render_row row widths)
-      )
+      );;
 val render_table : string list -> string list list -> string = <fun>
 ```
 
@@ -546,7 +546,7 @@ in]{.idx}
 Here's the type signature:
 
 ```ocaml env=main
-# List.reduce
+# List.reduce;;
 - : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
 ```
 
@@ -556,9 +556,9 @@ empty.
 Now we can see `reduce` in action:
 
 ```ocaml env=main
-# List.reduce ~f:(+) [1;2;3;4;5]
+# List.reduce ~f:(+) [1;2;3;4;5];;
 - : int option = Some 15
-# List.reduce ~f:(+) []
+# List.reduce ~f:(+) [];;
 - : int option = None
 ```
 
@@ -570,7 +570,7 @@ doing that:[lists/filtering values in]{.idx}[values/filtering with
 List.filter]{.idx}[List module/List.filter]{.idx}
 
 ```ocaml env=main
-# List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5]
+# List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
 - : int list = [2; 4]
 ```
 
@@ -596,9 +596,9 @@ removal]{.idx}[duplicates, removing]{.idx}
         | None  | Some ("",_) -> None
         | Some (_,ext) ->
           Some ext)
-    |> List.dedup_and_sort ~compare:String.compare
+    |> List.dedup_and_sort ~compare:String.compare;;
 val extensions : string list -> string list = <fun>
-# extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]
+# extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
 - : string list = ["c"; "ml"; "mli"]
 ```
 
@@ -622,10 +622,10 @@ module/List.partition_tf]{.idx}
 # let is_ocaml_source s =
     match String.rsplit2 s ~on:'.' with
     | Some (_,("ml"|"mli")) -> true
-    | _ -> false
+    | _ -> false;;
 val is_ocaml_source : string -> bool = <fun>
 # let (ml_files,other_files) =
-  List.partition_tf ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]  ~f:is_ocaml_source
+  List.partition_tf ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]  ~f:is_ocaml_source;;
 val ml_files : string list = ["foo.ml"; "bar.ml"; "bar.mli"]
 val other_files : string list = ["foo.c"]
 ```
@@ -638,21 +638,21 @@ actually comes with a few different ways of doing this. There's
 [lists/combining]{.idx}[List module/List.append]{.idx}
 
 ```ocaml env=main
-# List.append [1;2;3] [4;5;6]
+# List.append [1;2;3] [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
 There's also `@`, an operator equivalent of `List.append`.
 
 ```ocaml env=main
-# [1;2;3] @ [4;5;6]
+# [1;2;3] @ [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
 In addition, there is `List.concat`, for concatenating a list of lists:
 
 ```ocaml env=main
-# List.concat [[1;2];[3;4;5];[6];[]]
+# List.concat [[1;2];[3;4;5];[6];[]];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
@@ -661,7 +661,7 @@ recursive listing of a directory tree.
 
 ```ocaml env=main
 # module Sys = Core.Sys
-  module Filename = Core.Filename
+  module Filename = Core.Filename;;
 module Sys = Core.Sys
 module Filename = Core.Filename
 # let rec ls_rec s =
@@ -670,7 +670,7 @@ module Filename = Core.Filename
     else
       Sys.ls_dir s
       |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
-      |> List.concat
+      |> List.concat;;
 val ls_rec : string -> string list = <fun>
 ```
 
@@ -687,7 +687,7 @@ efficient operation:
     then [s]
     else
       Sys.ls_dir s
-      |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub))
+      |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub));;
 val ls_rec : string -> string list = <fun>
 ```
 
@@ -702,9 +702,9 @@ recursion]{.idx}[recursion/tail recursion]{.idx}
 ```ocaml env=main
 # let rec length = function
     | [] -> 0
-    | _ :: tl -> 1 + length tl
+    | _ :: tl -> 1 + length tl;;
 val length : 'a list -> int = <fun>
-# length [1;2;3]
+# length [1;2;3];;
 - : int = 3
 ```
 
@@ -712,11 +712,11 @@ This looks simple enough, but you'll discover that this implementation runs
 into problems on very large lists, as we'll show in the following code:
 
 ```ocaml env=main
-# let make_list n = List.init n ~f:(fun x -> x)
+# let make_list n = List.init n ~f:(fun x -> x);;
 val make_list : int -> int list = <fun>
-# length (make_list 10)
+# length (make_list 10);;
 - : int = 10
-# length (make_list 10_000_000)
+# length (make_list 10_000_000);;
 Stack overflow during evaluation (looping recursion?).
 ```
 
@@ -742,11 +742,11 @@ implementation:
 # let rec length_plus_n l n =
     match l with
     | [] -> n
-    | _ :: tl -> length_plus_n tl (n + 1)
+    | _ :: tl -> length_plus_n tl (n + 1);;
 val length_plus_n : 'a list -> int -> int = <fun>
-# let length l = length_plus_n l 0
+# let length l = length_plus_n l 0;;
 val length : 'a list -> int = <fun>
-# length [1;2;3;4]
+# length [1;2;3;4];;
 - : int = 4
 ```
 
@@ -767,7 +767,7 @@ recursive, and as a result, `length` can take a long list as input without
 blowing the stack:[tail calls]{.idx}
 
 ```ocaml env=main
-# length (make_list 10_000_000)
+# length (make_list 10_000_000);;
 - : int = 10000000
 ```
 
@@ -806,7 +806,7 @@ Here's the implementation that was described earlier:
     | [hd] -> [hd]
     | hd :: hd' :: tl ->
       if hd = hd' then destutter (hd' :: tl)
-      else hd :: destutter (hd' :: tl)
+      else hd :: destutter (hd' :: tl);;
 val destutter : int list -> int list = <fun>
 ```
 
@@ -828,7 +828,7 @@ keyword]{.idx}
     | [_] as l -> l
     | hd :: (hd' :: _ as tl) ->
       if hd = hd' then destutter tl
-      else hd :: destutter tl
+      else hd :: destutter tl;;
 val destutter : int list -> int list = <fun>
 ```
 
@@ -840,7 +840,7 @@ an *or pattern*:
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) ->
       if hd = hd' then destutter tl
-      else hd :: destutter tl
+      else hd :: destutter tl;;
 val destutter : int list -> int list = <fun>
 ```
 
@@ -853,7 +853,7 @@ check on whether the first two elements are equal:
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl
+    | hd :: tl -> hd :: destutter tl;;
 val destutter : int list -> int list = <fun>
 ```
 
@@ -864,7 +864,7 @@ That's because `Base`'s default equality operator is specialized to integers,
 as you can see if you try to apply it to values of a different type.
 
 ```ocaml env=main
-# "foo" = "bar"
+# "foo" = "bar";;
 Line 1, characters 1-6:
 Error: This expression has type string but an expression was expected of type
          int
@@ -874,12 +874,12 @@ OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
 
 ```ocaml env=main
-# open Base.Poly
-# "foo" = "bar"
+# open Base.Poly;;
+# "foo" = "bar";;
 - : bool = false
-# 3 = 4
+# 3 = 4;;
 - : bool = false
-# [1;2;3] = [1;2;3]
+# [1;2;3] = [1;2;3];;
 - : bool = true
 ```
 
@@ -887,7 +887,7 @@ Indeed, if we look at the type of the equality operator, we'll see that it is
 polymorphic.
 
 ```ocaml env=main
-# (=)
+# (=);;
 - : 'a -> 'a -> bool = <fun>
 ```
 
@@ -898,11 +898,11 @@ gets a polymorphic type, and can now be used on inputs of different types.
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl
+    | hd :: tl -> hd :: destutter tl;;
 val destutter : 'a list -> 'a list = <fun>
-# destutter [1;2;2;3;4;3;3]
+# destutter [1;2;2;3;4;3;3];;
 - : int list = [1; 2; 3; 4; 3]
-# destutter ["one";"two";"two";"two";"three"]
+# destutter ["one";"two";"two";"two";"three"];;
 - : string list = ["one"; "two"; "three"]
 ```
 
@@ -924,7 +924,7 @@ Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.
 
 ```ocaml env=main
-# (fun x -> x + 1) = (fun x -> x + 1)
+# (fun x -> x + 1) = (fun x -> x + 1);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
@@ -951,7 +951,7 @@ But in any case, you can restore the default behavior of `Base` by
 opening the module again.
 
 ```ocaml env=main
-# open Base
+# open Base;;
 ```
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
@@ -971,7 +971,7 @@ exhaustive:
     match list with
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
-    | x :: tl when Option.is_some x -> 1 + count_some tl
+    | x :: tl when Option.is_some x -> 1 + count_some tl;;
 Lines 2-5, characters 5-57:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -983,7 +983,7 @@ val count_some : 'a option list -> int = <fun>
 Despite the warning, the function does work fine:
 
 ```ocaml env=main
-# count_some [Some 3; None; Some 4]
+# count_some [Some 3; None; Some 4];;
 - : int = 2
 ```
 
@@ -997,7 +997,7 @@ redundancy.
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
-    | x :: tl -> -1 (* unreachable *)
+    | x :: tl -> -1 (* unreachable *);;
 val count_some : 'a option list -> int = <fun>
 ```
 
@@ -1008,7 +1008,7 @@ Probably a better approach is to simply drop the second `when` clause:
     match list with
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
-    | _ :: tl -> 1 + count_some tl
+    | _ :: tl -> 1 + count_some tl;;
 val count_some : 'a option list -> int = <fun>
 ```
 
@@ -1020,7 +1020,7 @@ solution, where the meaning of each pattern is clearer on its own:
     match list with
     | [] -> 0
     | None   :: tl -> count_some tl
-    | Some _ :: tl -> 1 + count_some tl
+    | Some _ :: tl -> 1 + count_some tl;;
 val count_some : 'a option list -> int = <fun>
 ```
 
@@ -1032,6 +1032,6 @@ necessary; even worse, it is not tail recursive. In real life, you would
 probably just use the `List.count` function:
 
 ```ocaml env=main
-# let count_some l = List.count ~f:Option.is_some l
+# let count_some l = List.count ~f:Option.is_some l;;
 val count_some : 'a option list -> int = <fun>
 ```

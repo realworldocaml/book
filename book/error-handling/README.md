@@ -22,8 +22,8 @@ The best way in OCaml to signal an error is to include that error in your
 return value. Consider the type of the `find` function in the `List` module:
 
 ```ocaml env=main
-# open Base
-# List.find
+# open Base;;
+# List.find;;
 - : 'a list -> f:('a -> bool) -> 'a option = <fun>
 ```
 
@@ -31,9 +31,9 @@ The option in the return type indicates that the function may not succeed in
 finding a suitable element:
 
 ```ocaml env=main
-# List.find [1;2;3] ~f:(fun x -> x >= 2)
+# List.find [1;2;3] ~f:(fun x -> x >= 2);;
 - : int option = Some 2
-# List.find [1;2;3] ~f:(fun x -> x >= 10)
+# List.find [1;2;3] ~f:(fun x -> x >= 10);;
 - : int option = None
 ```
 
@@ -52,7 +52,7 @@ to extract the largest and smallest element of the list:
     let sorted = List.sort ~compare list in
     match List.hd sorted, List.last sorted with
     | None,_ | _, None -> None
-    | Some x, Some y -> Some (x,y)
+    | Some x, Some y -> Some (x,y);;
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
@@ -72,7 +72,7 @@ to find a key in one table isn't a failure of any sort:
       match Hashtbl.find table2 key with
       | Some data' when data' <> data -> key :: mismatches
       | _ -> mismatches
-    )
+    );;
 val find_mismatches :
   ('a, int) Hashtbl.Poly.t -> ('a, int) Hashtbl.Poly.t -> 'a list = <fun>
 ```
@@ -106,7 +106,7 @@ constructors `Ok` and `Error` are available at the toplevel. As such, we can
 write:
 
 ```ocaml env=main
-# [ Ok 3; Error "abject failure"; Ok 4 ]
+# [ Ok 3; Error "abject failure"; Ok 4 ];;
 - : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
 ```
 
@@ -128,7 +128,7 @@ Base's answer to this question is the `Error.t` type.  You can, for
 example, construct one from a string.
 
 ```ocaml env=main
-# Error.of_string "something went wrong"
+# Error.of_string "something went wrong";;
 - : Error.t = something went wrong
 ```
 
@@ -136,7 +136,7 @@ An `Or_error.t` is simply a `Result.t` with the error case
 specialized to the `Error.t` type.  Here's an example.
 
 ```ocaml env=main
-# Error (Error.of_string "failed!")
+# Error (Error.of_string "failed!");;
 - : ('a, Error.t) result = Error failed!
 ```
 
@@ -146,11 +146,11 @@ catching exceptions from a computation.
 
 ```ocaml env=main
 # let float_of_string s =
-    Or_error.try_with (fun () -> Float.of_string s)
+    Or_error.try_with (fun () -> Float.of_string s);;
 val float_of_string : string -> float Or_error.t = <fun>
-# float_of_string "3.34"
+# float_of_string "3.34";;
 - : float Or_error.t = Base__.Result.Ok 3.34
-# float_of_string "a.bc"
+# float_of_string "a.bc";;
 - : float Or_error.t =
 Base__.Result.Error (Invalid_argument "Float.of_string a.bc")
 ```
@@ -170,7 +170,7 @@ types in Base come with built-in s-expression converters.
 [Sexplib package/sexp converter]{.idx}
 
 ```ocaml env=main
-# Error.create "Unexpected character" 'c' Char.sexp_of_t
+# Error.create "Unexpected character" 'c' Char.sexp_of_t;;
 - : Error.t = ("Unexpected character" c)
 ```
 
@@ -185,8 +185,8 @@ a `#require` statement.
 <!-- FIXME: we should use ppx_sexp_value instead of ppx_jane, but that -->
 <!-- doesn't work here for some reason. -->
 ```ocaml env=main
-# #require "ppx_jane"
-# Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)]
+# #require "ppx_jane";;
+# Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)];;
 - : Error.t = ("List is too long" (1 2 3))
 ```
 
@@ -200,7 +200,7 @@ roles:[Error.of_list]{.idx}[Error.tag]{.idx}[errors/transformation of]{.idx}
 # Error.tag
     (Error.of_list [ Error.of_string "Your tires were slashed";
                      Error.of_string "Your windshield was smashed" ])
-    ~tag:"over the weekend"
+    ~tag:"over the weekend";;
 - : Error.t =
 ("over the weekend" "Your tires were slashed" "Your windshield was smashed")
 ```
@@ -211,11 +211,11 @@ describing the error, along with further values represented as
 s-expressions.  Here's an example.
 
 ```ocaml env=main
-# let a = "foo" and b = ("foo",[3;4])
+# let a = "foo" and b = ("foo",[3;4]);;
 val a : string = "foo"
 val b : string * int list = ("foo", [3; 4])
 # Or_error.error_s
-    [%message "Something went wrong" (a:string) (b: string * int list)]
+    [%message "Something went wrong" (a:string) (b: string * int list)];;
 - : 'a Or_error.t =
 Base__.Result.Error ("Something went wrong" (a foo) (b (foo (3 4))))
 ```
@@ -236,7 +236,7 @@ function]{.idx}
 # let bind option f =
     match option with
     | None -> None
-    | Some x -> f x
+    | Some x -> f x;;
 val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
 ```
 
@@ -251,7 +251,7 @@ produce an error terminates the computation. Here's a rewrite of
     let sorted = List.sort ~compare list in
     Option.bind (List.hd sorted) ~f:(fun first ->
       Option.bind (List.last sorted) ~f:(fun last ->
-        Some (first,last)))
+        Some (first,last)));;
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
@@ -271,7 +271,7 @@ Async](concurrent-programming.html#concurrent-programming-with-async){data-type=
     let sorted = List.sort ~compare list in
     List.hd sorted   >>= fun first ->
     List.last sorted >>= fun last  ->
-    Some (first,last)
+    Some (first,last);;
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
@@ -291,13 +291,13 @@ extension that's designed specifically for monadic binds, called
 extension.
 
 ```ocaml env=main
-# #require "ppx_let"
+# #require "ppx_let";;
 # let compute_bounds ~compare list =
     let open Option.Let_syntax in
     let sorted = List.sort ~compare list in
     let%bind first = List.hd sorted in
     let%bind last  = List.last sorted in
-    Some (first,last)
+    Some (first,last);;
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
@@ -323,7 +323,7 @@ optional pair that is `None` if either of its arguments are `None`. Using
 ```ocaml env=main
 # let compute_bounds ~compare list =
     let sorted = List.sort ~compare list in
-    Option.both (List.hd sorted) (List.last sorted)
+    Option.both (List.hd sorted) (List.last sorted);;
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
@@ -347,7 +347,7 @@ handling/exceptions]{.idx}
 You can trigger an exception by, for example, dividing an integer by zero:
 
 ```ocaml env=main
-# 3 / 0
+# 3 / 0;;
 Exception: Division_by_zero.
 ```
 
@@ -355,7 +355,7 @@ And an exception can terminate a computation even if it happens nested
 somewhere deep within it:
 
 ```ocaml env=main
-# List.map ~f:(fun x -> 100 / x) [1;3;0;4]
+# List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
 Exception: Division_by_zero.
 ```
 
@@ -364,7 +364,7 @@ If we put a `printf` in the middle of the computation, we can see that
 end of the list:
 
 ```ocaml env=main
-# List.map ~f:(fun x -> Stdio.printf "%d\n%!" x; 100 / x) [1;3;0;4]
+# List.map ~f:(fun x -> Stdio.printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 1
 3
 0
@@ -375,9 +375,9 @@ In addition to built-in exceptions like `Divide_by_zero`, OCaml lets you
 define your own:
 
 ```ocaml env=main
-# exception Key_not_found of string
+# exception Key_not_found of string;;
 exception Key_not_found of string
-# raise (Key_not_found "a")
+# raise (Key_not_found "a");;
 Exception: Key_not_found("a").
 ```
 
@@ -385,11 +385,11 @@ Exceptions are ordinary values and can be manipulated just like other OCaml
 values:
 
 ```ocaml env=main
-# let exceptions = [ Division_by_zero; Key_not_found "b" ]
+# let exceptions = [ Division_by_zero; Key_not_found "b" ];;
 val exceptions : exn list = [Division_by_zero; Key_not_found("b")]
 # List.filter exceptions  ~f:(function
     | Key_not_found _ -> true
-    | _ -> false)
+    | _ -> false);;
 - : exn list = [Key_not_found("b")]
 ```
 
@@ -409,13 +409,13 @@ signal an error:
 ```ocaml env=main
 # let rec find_exn alist key = match alist with
     | [] -> raise (Key_not_found key)
-    | (key',data) :: tl -> if String.(=) key key' then data else find_exn tl key
+    | (key',data) :: tl -> if String.(=) key key' then data else find_exn tl key;;
 val find_exn : (string * 'a) list -> string -> 'a = <fun>
-# let alist = [("a",1); ("b",2)]
+# let alist = [("a",1); ("b",2)];;
 val alist : (string * int) list = [("a", 1); ("b", 2)]
-# find_exn alist "a"
+# find_exn alist "a";;
 - : int = 1
-# find_exn alist "c"
+# find_exn alist "c";;
 Exception: Key_not_found("c").
 ```
 
@@ -427,7 +427,7 @@ In the preceding example, `raise` throws the exception, thus terminating the
 computation. The type of raise is a bit surprising when you first see it:
 
 ```ocaml env=main
-# raise
+# raise;;
 - : exn -> 'a = <fun>
 ```
 
@@ -439,7 +439,7 @@ terminate by throwing exceptions. Here's another example of a function that
 doesn't return a value:
 
 ```ocaml env=main
-# let rec forever () = forever ()
+# let rec forever () = forever ();;
 val forever : unit -> 'a = <fun>
 ```
 
@@ -458,11 +458,11 @@ OCaml can't always generate a useful textual representation of an exception.
 For example:
 
 ```ocaml env=main
-# type 'a bounds = { lower: 'a; upper: 'a }
+# type 'a bounds = { lower: 'a; upper: 'a };;
 type 'a bounds = { lower : 'a; upper : 'a; }
-# exception Crossed_bounds of int bounds
+# exception Crossed_bounds of int bounds;;
 exception Crossed_bounds of int bounds
-# Crossed_bounds { lower=10; upper=0 }
+# Crossed_bounds { lower=10; upper=0 };;
 - : exn = Crossed_bounds(_)
 ```
 
@@ -470,13 +470,13 @@ But if we declare the exception (and the types it depends on) using
 `[@@deriving sexp]`, we'll get something with more information:
 
 ```ocaml env=main
-# type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp]
+# type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
 type 'a bounds = { lower : 'a; upper : 'a; }
 val bounds_of_sexp : (Sexp.t -> 'a) -> Sexp.t -> 'a bounds = <fun>
 val sexp_of_bounds : ('a -> Sexp.t) -> 'a bounds -> Sexp.t = <fun>
-# exception Crossed_bounds of int bounds [@@deriving sexp]
+# exception Crossed_bounds of int bounds [@@deriving sexp];;
 exception Crossed_bounds of int bounds
-# Crossed_bounds { lower=10; upper=0 }
+# Crossed_bounds { lower=10; upper=0 };;
 - : exn = (//toplevel//.Crossed_bounds ((lower 10) (upper 0)))
 ```
 
@@ -500,7 +500,7 @@ follows: [exceptions/helper functions for]{.idx}[error handling/exception
 helper functions]{.idx}
 
 ```ocaml env=main
-# let failwith msg = raise (Failure msg)
+# let failwith msg = raise (Failure msg);;
 val failwith : string -> 'a = <fun>
 ```
 
@@ -522,12 +522,12 @@ together two lists:[assert directive]{.idx}
         | x::xs, y::ys -> f x y :: loop xs ys
         | _ -> assert false
       in
-      Some (loop xs ys)
+      Some (loop xs ys);;
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
   <fun>
-# merge_lists [1;2;3] [-1;1;2] ~f:(+)
+# merge_lists [1;2;3] [-1;1;2] ~f:(+);;
 - : int list option = Some [0; 3; 5]
-# merge_lists [1;2;3] [-1;1] ~f:(+)
+# merge_lists [1;2;3] [-1;1] ~f:(+);;
 - : int list option = None
 ```
 
@@ -547,9 +547,9 @@ the `assert`:
       | x::xs, y::ys -> f x y :: loop xs ys
       | _ -> assert false
     in
-    loop xs ys
+    loop xs ys;;
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
-# merge_lists [1;2;3] [-1] ~f:(+)
+# merge_lists [1;2;3] [-1] ~f:(+);;
 Exception: "Assert_failure //toplevel//:6:14"
 ```
 
@@ -599,16 +599,16 @@ access to routines for reading from files. [exceptions/exception clean
 up]{.idx}[error handling/exception clean up]{.idx}
 
 ```ocaml env=main
-# open Stdio
+# open Stdio;;
 # let parse_line line =
     String.split_on_chars ~on:[','] line
-    |> List.map ~f:Float.of_string
+    |> List.map ~f:Float.of_string;;
 val parse_line : string -> float list = <fun>
 # let load filename =
     let inc = In_channel.create filename in
     let data = In_channel.input_lines inc |> List.map ~f:parse_line in
     In_channel.close inc;
-    data
+    data;;
 val load : string -> float list list = <fun>
 ```
 
@@ -630,7 +630,7 @@ our `load` function:
     let inc = In_channel.create filename in
     Exn.protect
       ~f:(fun () -> In_channel.input_lines inc |> List.map ~f:parse_line)
-      ~finally:(fun () -> In_channel.close inc)
+      ~finally:(fun () -> In_channel.close inc);;
 val load : string -> float list list = <fun>
 ```
 
@@ -640,7 +640,7 @@ This is a common enough problem that `In_channel` has a function called
 ```ocaml env=main
 # let load filename =
     In_channel.with_file filename ~f:(fun inc ->
-      In_channel.input_lines inc |> List.map ~f:parse_line)
+      In_channel.input_lines inc |> List.map ~f:parse_line);;
 val load : string -> float list list = <fun>
 ```
 
@@ -663,7 +663,7 @@ detection]{.idx}
       let data = find_exn alist key in
       compute_weight data
     with
-    Key_not_found _ -> 0.
+    Key_not_found _ -> 0.;;
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -681,7 +681,7 @@ happens to be `Key_not_found`, then that's not what will happen:
 
 ```ocaml env=main
 # lookup_weight ~compute_weight:(fun _ -> raise (Key_not_found "foo"))
-  ["a",3; "b",4] "a"
+  ["a",3; "b",4] "a";;
 - : float = 0.
 ```
 
@@ -699,7 +699,7 @@ clear what part of the code failed:
       with _ -> None
     with
     | None -> 0.
-    | Some data -> compute_weight data
+    | Some data -> compute_weight data;;
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -715,7 +715,7 @@ concisely as follows.
 # let lookup_weight ~compute_weight alist key =
     match find_exn alist key with
     | exception _ -> 0.
-    | data -> compute_weight data
+    | data -> compute_weight data;;
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -731,7 +731,7 @@ exception-free function from Base, `List.Assoc.find`, instead:
 # let lookup_weight ~compute_weight alist key =
     match List.Assoc.find ~equal:String.equal alist key with
     | None -> 0.
-    | Some data -> compute_weight data
+    | Some data -> compute_weight data;;
 val lookup_weight :
   compute_weight:('a -> float) ->
   (string, 'a) Base.List.Assoc.t -> string -> float = <fun>
@@ -911,11 +911,11 @@ exceptions and error-aware types]{.idx}
 
 ```ocaml env=main
 # let find alist key =
-  Option.try_with (fun () -> find_exn alist key)
+  Option.try_with (fun () -> find_exn alist key);;
 val find : (string * 'a) list -> string -> 'a option = <fun>
-# find ["a",1; "b",2] "c"
+# find ["a",1; "b",2] "c";;
 - : int option = Base.Option.None
-# find ["a",1; "b",2] "b"
+# find ["a",1; "b",2] "b";;
 - : int option = Base.Option.Some 2
 ```
 
@@ -924,18 +924,18 @@ write:
 
 ```ocaml env=main
 # let find alist key =
-  Or_error.try_with (fun () -> find_exn alist key)
+  Or_error.try_with (fun () -> find_exn alist key);;
 val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
-# find ["a",1; "b",2] "c"
+# find ["a",1; "b",2] "c";;
 - : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
 And then we can reraise that exception:
 
 ```ocaml env=main
-# Or_error.ok_exn (find ["a",1; "b",2] "b")
+# Or_error.ok_exn (find ["a",1; "b",2] "b");;
 - : int = 2
-# Or_error.ok_exn (find ["a",1; "b",2] "c")
+# Or_error.ok_exn (find ["a",1; "b",2] "c");;
 Exception: Key_not_found("c").
 ```
 

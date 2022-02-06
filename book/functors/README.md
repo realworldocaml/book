@@ -48,8 +48,8 @@ First, let's define a signature for a module that contains a single
 value of type `int`:
 
 ```ocaml env=main
-# open Base
-# module type X_int = sig val x : int end
+# open Base;;
+# module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 ```
 
@@ -60,7 +60,7 @@ functor:
 ```ocaml env=main
 # module Increment (M : X_int) : X_int = struct
     let x = M.x + 1
-  end
+  end;;
 module Increment : functor (M : X_int) -> X_int
 ```
 
@@ -78,7 +78,7 @@ output of the functor:
 ```ocaml env=main
 # module Increment (M : X_int) = struct
     let x = M.x + 1
-  end
+  end;;
 module Increment : functor (M : X_int) -> sig val x : int end
 ```
 
@@ -89,11 +89,11 @@ out explicitly, rather than being a reference to the named signature
 We can use `Increment` to define new modules:
 
 ```ocaml env=main
-# module Three = struct let x = 3 end
+# module Three = struct let x = 3 end;;
 module Three : sig val x : int end
-# module Four = Increment(Three)
+# module Four = Increment(Three);;
 module Four : sig val x : int end
-# Four.x - Three.x
+# Four.x - Three.x;;
 - : int = 1
 ```
 
@@ -109,9 +109,9 @@ example:
 # module Three_and_more = struct
     let x = 3
     let y = "three"
-  end
+  end;;
 module Three_and_more : sig val x : int val y : string end
-# module Four = Increment(Three_and_more)
+# module Four = Increment(Three_and_more);;
 module Four : sig val x : int end
 ```
 
@@ -146,7 +146,7 @@ the type of the values to be compared:
 # module type Comparable = sig
     type t
     val compare : t -> t -> int
-  end
+  end;;
 module type Comparable = sig type t val compare : t -> t -> int end
 ```
 
@@ -208,7 +208,7 @@ number of useful primitives for interacting with intervals:
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
 
-  end
+  end;;
 module Make_interval :
   functor (Endpoint : Comparable) ->
     sig
@@ -229,7 +229,7 @@ call the functor, we provide the functor input as an anonymous module:
     Make_interval(struct
       type t = int
       let compare = Int.compare
-  end)
+  end);;
 module Int_interval :
   sig
     type t = Interval of int * int | Empty
@@ -246,7 +246,7 @@ module to feed to the functor. In this case, we can directly use the
 `Int` or `String` modules provided by `Base`:
 
 ```ocaml env=main
-# module Int_interval = Make_interval(Int)
+# module Int_interval = Make_interval(Int);;
 module Int_interval :
   sig
     type t = Make_interval(Base.Int).t = Interval of int * int | Empty
@@ -255,7 +255,7 @@ module Int_interval :
     val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
-# module String_interval = Make_interval(String)
+# module String_interval = Make_interval(String);;
 module String_interval :
   sig
     type t =
@@ -279,11 +279,11 @@ We can use the newly defined `Int_interval` module like any ordinary
 module:
 
 ```ocaml env=main
-# let i1 = Int_interval.create 3 8
+# let i1 = Int_interval.create 3 8;;
 val i1 : Int_interval.t = Int_interval.Interval (3, 8)
-# let i2 = Int_interval.create 4 10
+# let i2 = Int_interval.create 4 10;;
 val i2 : Int_interval.t = Int_interval.Interval (4, 10)
-# Int_interval.intersect i1 i2
+# Int_interval.intersect i1 i2;;
 - : Int_interval.t = Int_interval.Interval (4, 8)
 ```
 
@@ -297,7 +297,7 @@ follows:[interval computation/comparison function for]{.idx}
     Make_interval(struct
       type t = int
       let compare x y = Int.compare y x
-  end)
+  end);;
 module Rev_int_interval :
   sig
     type t = Interval of int * int | Empty
@@ -312,9 +312,9 @@ The behavior of `Rev_int_interval` is of course different from
 `Int_interval`:
 
 ```ocaml env=main
-# let interval = Int_interval.create 4 3
+# let interval = Int_interval.create 4 3;;
 val interval : Int_interval.t = Int_interval.Empty
-# let rev_interval = Rev_int_interval.create 4 3
+# let rev_interval = Rev_int_interval.create 4 3;;
 val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
 ```
 
@@ -323,7 +323,7 @@ Importantly, `Rev_int_interval.t` is a different type than
 same. Indeed, the type system will prevent us from confusing them.
 
 ```ocaml env=main
-# Int_interval.contains rev_interval 3
+# Int_interval.contains rev_interval 3;;
 Line 1, characters 23-35:
 Error: This expression has type Rev_int_interval.t
        but an expression was expected of type Int_interval.t
@@ -344,10 +344,10 @@ computation/abstract functor for]{.idx}
 
 ```ocaml env=main
 # Int_interval.is_empty (* going through create *)
-  (Int_interval.create 4 3)
+  (Int_interval.create 4 3);;
 - : bool = true
 # Int_interval.is_empty (* bypassing create *)
-  (Int_interval.Interval (4,3))
+  (Int_interval.Interval (4,3));;
 - : bool = false
 ```
 
@@ -363,7 +363,7 @@ we can use for that purpose:
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
-  end
+  end;;
 module type Interval_intf =
   sig
     type t
@@ -418,7 +418,7 @@ definition of `Make_interval`. Notice that we added the type
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
 
-  end
+  end;;
 module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 ```
 
@@ -430,7 +430,7 @@ means that we can't even construct an interval anymore: [sharing
 constraint]{.idx}
 
 ```ocaml env=main
-# module Int_interval = Make_interval(Int)
+# module Int_interval = Make_interval(Int);;
 module Int_interval :
   sig
     type t = Make_interval(Base.Int).t
@@ -440,7 +440,7 @@ module Int_interval :
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
   end
-# Int_interval.create 3 4
+# Int_interval.create 3 4;;
 Line 1, characters 21-22:
 Error: This expression has type int but an expression was expected of type
          Int_interval.endpoint
@@ -471,7 +471,7 @@ We can use a sharing constraint to create a specialized version of
 
 ```ocaml env=main
 # module type Int_interval_intf =
-  Interval_intf with type endpoint = int
+  Interval_intf with type endpoint = int;;
 module type Int_interval_intf =
   sig
     type t
@@ -530,7 +530,7 @@ the functor argument. We can do this as follows:
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
 
-  end
+  end;;
 module Make_interval :
   functor (Endpoint : Comparable) ->
     sig
@@ -548,7 +548,7 @@ equal to `Endpoint.t`. As a result of that type equality, we can again do
 things that require that `endpoint` be exposed, like constructing intervals:
 
 ```ocaml env=main
-# module Int_interval = Make_interval(Int)
+# module Int_interval = Make_interval(Int);;
 module Int_interval :
   sig
     type t = Make_interval(Base.Int).t
@@ -558,9 +558,9 @@ module Int_interval :
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
   end
-# let i = Int_interval.create 3 4
+# let i = Int_interval.create 3 4;;
 val i : Int_interval.t = <abstr>
-# Int_interval.contains i 5
+# Int_interval.contains i 5;;
 - : bool = false
 ```
 
@@ -585,7 +585,7 @@ instead of `=`.  The following shows how we could use this with
 
 ```ocaml env=main
 # module type Int_interval_intf =
-  Interval_intf with type endpoint := int
+  Interval_intf with type endpoint := int;;
 module type Int_interval_intf =
   sig
     type t
@@ -638,7 +638,7 @@ a functor:
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
 
-  end
+  end;;
 module Make_interval :
   functor (Endpoint : Comparable) ->
     sig
@@ -656,7 +656,7 @@ type of the endpoint is exposed; so we can create values of type
 constructors and thereby violating the invariants of the module:
 
 ```ocaml env=main
-# module Int_interval = Make_interval(Int)
+# module Int_interval = Make_interval(Int);;
 module Int_interval :
   sig
     type t = Make_interval(Base.Int).t
@@ -666,9 +666,9 @@ module Int_interval :
     val intersect : t -> t -> t
   end
 # Int_interval.is_empty
-  (Int_interval.create 3 4)
+  (Int_interval.create 3 4);;
 - : bool = false
-# Int_interval.is_empty (Int_interval.Interval (4,3))
+# Int_interval.is_empty (Int_interval.Interval (4,3));;
 Line 1, characters 24-45:
 Error: Unbound constructor Int_interval.Interval
 ```
@@ -694,7 +694,7 @@ computation/multiple interfaces and]{.idx}
 
 ```ocaml env=main
 # Sexp.List [ Sexp.Atom "This"; Sexp.Atom "is"
-  ; Sexp.List [Sexp.Atom "an"; Sexp.Atom "s-expression"]]
+  ; Sexp.List [Sexp.Atom "an"; Sexp.Atom "s-expression"]];;
 - : Sexp.t = (This is (an s-expression))
 ```
 
@@ -705,20 +705,20 @@ for any type annotated with `[@@deriving sexp]`.  We can enable
 enabling `ppx_jane`:
 
 ```ocaml env=main
-# #require "ppx_jane"
+# #require "ppx_jane";;
 ```
 
 Now, we can use the deriving annotation to create sexp-converters for
 a given type.
 
 ```ocaml env=main
-# type some_type = int * string list [@@deriving sexp]
+# type some_type = int * string list [@@deriving sexp];;
 type some_type = int * string list
 val some_type_of_sexp : Sexp.t -> some_type = <fun>
 val sexp_of_some_type : some_type -> Sexp.t = <fun>
-# sexp_of_some_type (33, ["one"; "two"])
+# sexp_of_some_type (33, ["one"; "two"]);;
 - : Sexp.t = (33 (one two))
-# Core.Sexp.of_string "(44 (five six))" |> some_type_of_sexp
+# Core.Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 - : some_type = (44, ["five"; "six"])
 ```
 
@@ -764,7 +764,7 @@ declaration to the definition of `t` within the functor:
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
 
-  end
+  end;;
 Line 4, characters 28-38:
 Error: Unbound value Endpoint.t_of_sexp
 ```
@@ -797,7 +797,7 @@ other:
 # module type Interval_intf_with_sexp = sig
     include Interval_intf
     include Core.Sexpable with type t := t
-  end
+  end;;
 module type Interval_intf_with_sexp =
   sig
     type t
@@ -822,7 +822,7 @@ signatures are being handled equivalently:
     type t
     include Interval_intf with type t := t
     include Core.Sexpable      with type t := t
-  end
+  end;;
 module type Interval_intf_with_sexp =
   sig
     type t
@@ -888,7 +888,7 @@ maintained when reading in from an s-expression:
       | Empty, _ | _, Empty -> Empty
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
-  end
+  end;;
 module Make_interval :
   functor
     (Endpoint : sig
@@ -912,7 +912,7 @@ module Make_interval :
 And now, we can use that sexp converter in the ordinary way:
 
 ```ocaml env=main
-# module Int_interval = Make_interval(Int)
+# module Int_interval = Make_interval(Int);;
 module Int_interval :
   sig
     type t = Make_interval(Base.Int).t
@@ -923,9 +923,9 @@ module Int_interval :
     val t_of_sexp : Sexp.t -> t
     val sexp_of_t : t -> Sexp.t
   end
-# Int_interval.sexp_of_t (Int_interval.create 3 4)
+# Int_interval.sexp_of_t (Int_interval.create 3 4);;
 - : Sexp.t = (Interval 3 4)
-# Int_interval.sexp_of_t (Int_interval.create 4 3)
+# Int_interval.sexp_of_t (Int_interval.create 4 3);;
 - : Sexp.t = Empty
 ```
 

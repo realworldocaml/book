@@ -107,7 +107,7 @@ the type signatures of the various components we've been using. Let's do that
 by recreating some of this code in the toplevel.
 
 ```ocaml env=main
-# let filename_param = Command.Param.(anon ("filename" %: string))
+# let filename_param = Command.Param.(anon ("filename" %: string));;
 val filename_param : string Command.Spec.param = <abstr>
 ```
 
@@ -118,9 +118,9 @@ But `Command.basic` requires a parameter parser that returns a value of type
 `unit -> unit`. We can see that by using `#show` to explore the types.
 
 ```ocaml env=main
-# #show Command.basic
+# #show Command.basic;;
 val basic : unit Command.basic_command
-# #show Command.basic_command
+# #show Command.basic_command;;
 type nonrec 'result basic_command =
     summary:string ->
     ?readme:(unit -> string) ->
@@ -140,7 +140,7 @@ parser. As you can see below, the type of `Command.Param.map` is very similar
 to the code of `List.map`.
 
 ```ocaml env=main
-# #show Command.Param.map
+# #show Command.Param.map;;
 val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param
 ```
 
@@ -244,7 +244,7 @@ multiple arguments by binding together simpler parsers, using the function
 `Command.Param.both`. Here is its type.
 
 ```ocaml env=main
-# #show Command.Param.both
+# #show Command.Param.both;;
 val both :
   'a Command.Spec.param ->
   'b Command.Spec.param -> ('a * 'b) Command.Spec.param
@@ -707,7 +707,7 @@ Command: just use `Command.group`, which lets you merge a collection of
 `Command.t`'s into one. [Command.group]{.idx}
 
 ```ocaml env=main
-# Command.group
+# Command.group;;
 - : summary:string ->
     ?readme:(unit -> string) ->
     ?preserve_subcommand_order:unit ->

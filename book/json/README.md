@@ -83,9 +83,9 @@ Once installed, you can open it in the `utop` toplevel by:
 :::
 
 ```ocaml env=install
-# open Core
-# #require "yojson"
-# open Yojson
+# open Core;;
+# #require "yojson";;
+# open Yojson;;
 ```
 
 ## Parsing JSON with Yojson
@@ -313,8 +313,8 @@ functions]{.idx}[member function]{.idx}
 Let's start with selecting a single `title` field from the record:
 
 ```ocaml env=parse_book
-# open Yojson.Basic.Util
-# let title = json |> member "title" |> to_string
+# open Yojson.Basic.Util;;
+# let title = json |> member "title" |> to_string;;
 val title : string = "Real World OCaml"
 ```
 
@@ -327,9 +327,9 @@ provides a convenient way to chain these operations
 <span class="keep-together">together</span>:
 
 ```ocaml env=parse_book
-# let tags = json |> member "tags" |> to_list |> filter_string
+# let tags = json |> member "tags" |> to_list |> filter_string;;
 val tags : string list = ["functional programming"; "ocaml"; "algorithms"]
-# let pages = json |> member "pages" |> to_int
+# let pages = json |> member "pages" |> to_int;;
 val pages : int = 450
 ```
 
@@ -342,9 +342,9 @@ values that cannot be converted to a `string` will be skipped from the output
 of `filter_string`:
 
 ```ocaml env=parse_book
-# let is_online = json |> member "is_online" |> to_bool_option
+# let is_online = json |> member "is_online" |> to_bool_option;;
 val is_online : bool option = Some true
-# let is_translated = json |> member "is_translated" |> to_bool_option
+# let is_translated = json |> member "is_translated" |> to_bool_option;;
 val is_translated : bool option = None
 ```
 
@@ -355,7 +355,7 @@ our example JSON, only `is_online` is present and `is_translated` will be
 `None`:
 
 ```ocaml env=parse_book
-# let authors = json |> member "authors" |> to_list
+# let authors = json |> member "authors" |> to_list;;
 val authors : Yojson.Basic.t list =
   [`Assoc
      [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
@@ -376,7 +376,7 @@ operator:
 ```ocaml env=parse_book
 # let names =
     json |> member "authors" |> to_list
-  |> List.map ~f:(fun json -> member "name" json |> to_string)
+  |> List.map ~f:(fun json -> member "name" json |> to_string);;
 val names : string list =
   ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]
 ```
@@ -419,7 +419,7 @@ pretty-printing functions in the `Yojson.Basic` module to display JSON
 output:
 
 ```ocaml env=build_json
-# let person = `Assoc [ ("name", `String "Anil") ]
+# let person = `Assoc [ ("name", `String "Anil") ];;
 val person : [> `Assoc of (string * [> `String of string ]) list ] =
   `Assoc [("name", `String "Anil")]
 ```
@@ -436,7 +436,7 @@ without knowledge of the other possible allowed variants in JSON records that
 you haven't used yet (e.g. `Int` or `Null`):
 
 ```ocaml env=build_json
-# Yojson.Basic.pretty_to_string
+# Yojson.Basic.pretty_to_string;;
 - : ?std:bool -> Yojson.Basic.t -> string = <fun>
 ```
 
@@ -446,9 +446,9 @@ an argument of type `Yojson.Basic.t`. When `person` is applied to
 against the structure of the `json` type to ensure that they're compatible:
 
 ```ocaml env=build_json
-# Yojson.Basic.pretty_to_string person
+# Yojson.Basic.pretty_to_string person;;
 - : string = "{ \"name\": \"Anil\" }"
-# Yojson.Basic.pretty_to_channel stdout person
+# Yojson.Basic.pretty_to_channel stdout person;;
 { "name": "Anil" }
 - : unit = ()
 ```
@@ -469,10 +469,10 @@ variants can be quite verbose. For example, suppose you build an `Assoc` and
 mistakenly include a single value instead of a list of keys:
 
 ```ocaml env=build_json
-# let person = `Assoc ("name", `String "Anil")
+# let person = `Assoc ("name", `String "Anil");;
 val person : [> `Assoc of string * [> `String of string ] ] =
   `Assoc ("name", `String "Anil")
-# Yojson.Basic.pretty_to_string person
+# Yojson.Basic.pretty_to_string person;;
 Line 1, characters 31-37:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
@@ -487,7 +487,7 @@ about your intentions:
 
 ```ocaml env=build_json
 # let (person : Yojson.Basic.t) =
-  `Assoc ("name", `String "Anil")
+  `Assoc ("name", `String "Anil");;
 Line 2, characters 10-34:
 Error: This expression has type 'a * 'b
        but an expression was expected of type (string * Yojson.Basic.t) list
