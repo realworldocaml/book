@@ -9,13 +9,12 @@ homepage: "https://github.com/username/hello"
 doc: "https://username.github.io/hello/"
 bug-reports: "https://github.com/username/hello/issues"
 depends: [
+  "dune" {>= "2.9"}
   "ocaml" {>= "4.08.0"}
-  "dune"
-  "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
@@ -23,9 +22,11 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/username/hello.git"
