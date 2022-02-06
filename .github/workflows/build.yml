@@ -16,7 +16,7 @@ jobs:
           - ubuntu-latest
           # - macos-latest
         ocaml-compiler:
-          - 4.13.0
+          - 4.13.1
 
     runs-on: ${{ matrix.os }}
 

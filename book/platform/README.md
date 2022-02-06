@@ -70,6 +70,24 @@ If you prefer not to modify your shell configuration, then you can
 also invoke commands via `opam exec` to modify the path for
 the subcommand specified in the remainder of the command line.
 
+::: {data-type=note}
+When you want to select a particular version of the OCaml compiler,
+you can use `opam switch list-available` to get a set of versions.
+You'll notice that there are three different OCaml compiler packages:
+
+- `ocaml-system` detects a pre-existing version of the OCaml compiler
+  on your machine, and installs a wrapper package of that particular
+  version. This is a fast operation since nothing needs to be compiled.
+- `ocaml-base-compiler` builds a switch-local copy of that version
+  from scratch.  It can take a little longer than `ocaml-system`,
+  but you have much more flexibility since you depend on your OS
+  packages less.
+- `ocaml-variants` is used when you need a custom configuration option
+  to the compiler, such as `flambda`.  In this case, you can also install
+  `ocaml-options-*` packages alongside `ocaml-variants` to activate
+  those variations.
+:::
+
 ### Structure of an OCaml project
 
 Back in [Files Modules And
