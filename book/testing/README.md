@@ -435,7 +435,7 @@ The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.
 
 ```ocaml env=main
-# {|This is a quoted string|}
+# {|This is a quoted string|};;
 - : string = "This is a quoted string"
 ```
 
@@ -444,7 +444,7 @@ written without the usual escaping required for ordinary string
 literals.  Consider the following examples.
 
 ```ocaml env=main
-# {|This is a literal quote: "|}
+# {|This is a literal quote: "|};;
 - : string = "This is a literal quote: \""
 ```
 
@@ -463,7 +463,7 @@ for the quoted string by adding an arbitrary identifier, thereby
 ensuring that the delimiter won't show up in the body of the string.
 
 ```ocaml env=main
-# {xxx|This is how you write a {|quoted string|}|xxx}
+# {xxx|This is how you write a {|quoted string|}|xxx};;
 - : string = "This is how you write a {|quoted string|}"
 ```
 
@@ -1061,9 +1061,9 @@ been obvious, which is that the largest int, `Int.max_value`, is
 smaller in absolute value than `Int.max_value`.
 
 ```ocaml env=main
-# Int.min_value
+# Int.min_value;;
 - : int = -4611686018427387904
-# Int.max_value
+# Int.max_value;;
 - : int = 4611686018427387903
 ```
 
@@ -1072,7 +1072,7 @@ It turns out that the standard behavior here (not just for OCaml) is
 for the negation of `min_value` to be equal to itself.
 
 ```ocaml env=main
-# Int.neg Int.min_value
+# Int.neg Int.min_value;;
 - : int = -4611686018427387904
 ```
 
@@ -1116,8 +1116,8 @@ creating a generator for pairs from two generators for the constituent
 types.
 
 ```ocaml env=main
-# open Core
-# Quickcheck.Generator.both
+# open Core;;
+# Quickcheck.Generator.both;;
 - : 'a Base_quickcheck.Generator.t ->
     'b Base_quickcheck.Generator.t -> ('a * 'b) Base_quickcheck.Generator.t
 = <fun>
@@ -1149,7 +1149,7 @@ Here's a simple example.
     | Circle of { radius: float }
     | Rect of { height: float; width: float }
     | Poly of (float * float) list
-  [@@deriving quickcheck]
+  [@@deriving quickcheck];;
 type shape =
     Circle of { radius : float; }
   | Rect of { height : float; width : float; }
@@ -1169,7 +1169,7 @@ particular variant.
     | Circle of { radius: float } [@quickcheck.weight 0.5]
     | Rect of { height: float; width: float }
     | Poly of (float * float) list
-  [@@deriving quickcheck]
+  [@@deriving quickcheck];;
 type shape =
     Circle of { radius : float; }
   | Rect of { height : float; width : float; }
@@ -1220,7 +1220,7 @@ height, and width of the shape in question can't be negative.
       in
       Poly points
     in
-    G.union [circle; rect; poly]
+    G.union [circle; rect; poly];;
 val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 ```
 

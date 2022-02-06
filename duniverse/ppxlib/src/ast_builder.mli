@@ -2,25 +2,26 @@
 
 open! Import
 
-(** This module is similar to the [Ast_helper] module distributed with OCaml but uses
-    different conventions.
+(** This module is similar to the [Ast_helper] module distributed with OCaml but
+    uses different conventions.
 
     {3 Locations}
 
-    [Ast_helper] uses a global variable for the default locations, we found that to it
-    makes it quite easy to mess up locations. Instead this modules forces you to provide a
-    location argument.
+    [Ast_helper] uses a global variable for the default locations, we found that
+    to it makes it quite easy to mess up locations. Instead this modules forces
+    you to provide a location argument.
 
-    For building fragment using the same location everywhere, a functor is provided.
+    For building fragment using the same location everywhere, a functor is
+    provided.
 
     {3 Naming}
 
-    The names match the [Parsetree] names closely, which makes it easy to build AST
-    fragments by just knowing the [Parsetree].
+    The names match the [Parsetree] names closely, which makes it easy to build
+    AST fragments by just knowing the [Parsetree].
 
-    For types of the form a wrapper record with a [_desc] field, helpers are generated for
-    each constructor constructing the record directly. For instance for the type
-    [Parsetree.expression]:
+    For types of the form a wrapper record with a [_desc] field, helpers are
+    generated for each constructor constructing the record directly. For
+    instance for the type [Parsetree.expression]:
 
     {[
       type expression =
@@ -45,7 +46,8 @@ open! Import
       ...
     ]}
 
-    For other record types, such as type_declaration, we have the following helper:
+    For other record types, such as type_declaration, we have the following
+    helper:
 
     {[
       type type_declaration =
@@ -71,27 +73,30 @@ open! Import
         -> type_declaration
     ]}
 
-    Attributes are always set to the empty list. If you want to set them you have to
-    override the field with the [{ e with pexp_attributes = ... }] notation.
-*)
+    Attributes are always set to the empty list. If you want to set them you
+    have to override the field with the [{ e with pexp_attributes = ... }]
+    notation. *)
 
-
-(** Helpers taking a [~loc] argument. This module is meant to be opened or aliased. *)
+(** Helpers taking a [~loc] argument. This module is meant to be opened or
+    aliased. *)
 module Default : sig
-  module Located : Ast_builder_intf.Located
-    with type 'a with_loc := 'a Ast_builder_intf.with_location
+  module Located :
+    Ast_builder_intf.Located
+      with type 'a with_loc := 'a Ast_builder_intf.with_location
 
   include module type of Ast_builder_generated.M
 
-  include Ast_builder_intf.Additional_helpers
-    with type 'a with_loc := 'a Ast_builder_intf.with_location
+  include
+    Ast_builder_intf.Additional_helpers
+      with type 'a with_loc := 'a Ast_builder_intf.with_location
 end
 
 module type Loc = Ast_builder_intf.Loc
-module type S   = Ast_builder_intf.S
+
+module type S = Ast_builder_intf.S
 
 (** Build Ast helpers with the location argument factorized. *)
-module Make(Loc : Loc) : S
+module Make (Loc : Loc) : S
 
-(** Functional version of [Make]. *)
 val make : Location.t -> (module S)
+(** Functional version of [Make]. *)

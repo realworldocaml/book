@@ -1,0 +1,72 @@
+Testing `test/e2e/alcotest/failing/check_located.ml'.
+This run has ID `<uuid>'.
+
+ASSERT Expected failure
+  [FAIL]        check                 0   here.
+ASSERT Expected failure
+  [FAIL]        check                 1   pos.
+ASSERT Expected failure
+  [FAIL]        check_raises          0   here.
+ASSERT Expected failure
+  [FAIL]        check_raises          1   pos.
+ASSERT Expected failure
+  [FAIL]        fail                  0   here.
+ASSERT Expected failure
+  [FAIL]        fail                  1   pos.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        check                 0   here.                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
+FAIL Expected failure
+
+   Expected: `true'
+   Received: `false'
+
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        check                 1   pos.                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
+FAIL Expected failure
+
+   Expected: `true'
+   Received: `false'
+
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        check_raises          0   here.                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
+FAIL Expected failure: expecting Failure(""), got nothing.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        check_raises          1   pos.                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
+FAIL Expected failure: expecting Failure(""), got nothing.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        fail                  0   here.                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
+FAIL Expected failure
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        fail                  1   pos.                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
+FAIL Expected failure
+ ──────────────────────────────────────────────────────────────────────────────
+
+6 failures! in <test-duration>s. 6 tests run.

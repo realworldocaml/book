@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -15,186 +12,74 @@
     in each of the automaton's states. *)
 
 open Grammar
-module C = Conflict (* artificial dependency; ensures that [Conflict] runs first *)
-
-let stack_symbols =
-  let module SS = StackSymbols.Run() in
-  SS.stack_symbols
-
-let stack_height (node : Lr1.node) : int =
-  Array.length (stack_symbols node)
 
 (* ------------------------------------------------------------------------ *)
-(* Above, we have computed a prefix of the stack at every state. We have
-   computed the length of this prefix and the symbols that are held in
-   this prefix of the stack. Now, compute which states may be held in this
-   prefix. *)
+(* This artificial dependency ensures that Freeze runs before we execute
+   the costly analyses that follow. *)
 
-(* In order to compute this information, we perform an analysis of the
-   automaton, via a least fixed fixed point computation. *)
+module F = Freeze
 
-(* It is worth noting that it would be possible to use an analysis based on a
-   least fixed point computation to discover at the same time the length of
-   the stack prefix, the symbols that it contains, and the states that it may
-   contain. This alternate approach, which was used until 2012/08/25, would
-   lead us to discovering a richer invariant, that is, potentially longer
-   prefixes. This extra information, however, was useless; computing it was a
-   waste of time. Hence, as of 2012/08/25, the height of the stack prefix and
-   the symbols that it contains are predicted (see above), and the least fixed
-   point computation is used only to populate these prefixes of predictable
-   length with state information. As of 2021/03/03, the submodule [Long] at
-   the end of this file computes this richer invariant. (However, it computes
-   symbols only, not sets of states.) *)
+(* ------------------------------------------------------------------------ *)
 
-(* By the way, this least fixed point analysis remains the most costly
-   computation throughout this module. *)
+(* The known suffix of the stack at every state, a sequence of symbols, has
+   already been computed by [StackSymbolsShort]. It is the short invariant. *)
 
-(* Our keys are the nodes of the LR(1) automaton. *)
+(* Now, compute which states may be held in the known suffix of the stack. *)
 
-module Key = struct
-  type t = Lr1.node
-  let n = Lr1.n
-  let encode = Lr1.number
-end
+(* This computation may be required for one of two reasons:
 
-module KeyMap =
-  Fix.Glue.InjectMinimalImperativeMaps
-    (Fix.Glue.ArraysAsImperativeMaps(Key))
-    (Key)
+   1. When [--represent-states] is false (which is the default), we need
+      this information in order to compute which states must be represented.
+      More precisely, we use [StackStates.Short] while deciding which states
+      must be represented, and after these decisions have been made, we use
+      [StackStates.Long] to decide where to truncate the stack in the long
+      invariant.
 
-(* Vectors of sets of states. *)
+   2. When [--coq] is true, this information is needed by the Coq back-end,
+      which passes it on to the Coq validator.
 
-module StateSetVector = struct
+   For large automata, this computation can be somewhat costly; e.g., about
+   1.5 seconds for cca_cpp, a 10,000-state automaton. So, if possible, we
+   skip it. In particular, because [--table] implies [--represent-states],
+   this computation is skipped in [--table] mode.
 
-  type property =
-    Lr1.NodeSet.t array
+   Skipping this computation is a bit fragile / risky / inelegant, but it
+   should be entirely internal to this module. In the definition of the
+   type [cell], we use an [option] type in order to try and detect attempts
+   to use a piece of information that has not been computed. *)
 
-  let bottom height =
-    Array.make height Lr1.NodeSet.empty
+let short_states_needed =
+  (not Settings.represent_states) || Settings.coq
 
-  let empty =
-    [||]
+module StackStatesShort = struct
 
-  let leq_join v1 v2 =
-    let n = Array.length v1 in
-    (* Because all heights are known ahead of time, we are able (and careful)
-       to compare only vectors of equal length. *)
-    assert (n = Array.length v2);
-    let v = Array.init n (fun i -> Lr1.NodeSet.leq_join v1.(i) v2.(i)) in
-    if Misc.array_for_all2 (==) v2 v then v2 else v
+  open StackStates
 
-  let push v x =
-    (* Push [x] onto the right end of [v]. *)
-    let n = Array.length v in
-    Array.init (n+1) (fun i -> if i < n then v.(i) else x)
-
-  let truncate k v =
-    (* Keep a suffix of length [k] of [v]. *)
-    let n = Array.length v in
-    Array.sub v (n-k) k
-
-  let print v =
-    if Array.length v = 0 then
-      "epsilon"
-    else
-      Misc.separated_list_to_string Lr1.NodeSet.print "; " (Array.to_list v)
-
-  let iter =
-    Array.iter
-
-  let get =
-    (* The index 0 corresponds to the cell that lies deepest in the stack. *)
-    Array.get
-
-end
-
-open StateSetVector
-
-(* Define the data flow graph. *)
-
-module G = struct
-
-  type variable = Lr1.node
-
-  type property = StateSetVector.property
-
-  (* At each start state of the automaton, the stack is empty. *)
-
-  let foreach_root contribute =
-    Lr1.entry |> ProductionMap.iter (fun _prod root ->
-      assert (stack_height root = 0);
-      contribute root empty
-    )
-
-  (* The edges of the data flow graph are the transitions of the automaton. *)
-
-  let foreach_successor source stack contribute =
-    Lr1.transitions source |> SymbolMap.iter (fun _symbol target ->
-      (* The contribution of [source], through this edge, to [target], is the
-         stack at [source], extended with a new cell for this transition, and
-         truncated to the stack height at [target], so as to avoid obtaining a
-         vector that is longer than expected/necessary. *)
-      let cell = Lr1.NodeSet.singleton source
-      and height = stack_height target in
-      contribute target (truncate height (push stack cell))
+  include
+    (val
+      if short_states_needed then
+        (module Run(StackSymbolsShort) : STACK_STATES)
+      else
+        (module Dummy(StackSymbolsShort) : STACK_STATES)
     )
 
 end
 
-(* Compute the least fixed point. *)
-
-let stack_states : Lr1.node -> property option =
-  let module F = Fix.DataFlow.Run(KeyMap)(StateSetVector)(G) in
-  F.solution
-
-(* If every state is reachable, then the least fixed point must be non-[None]
-   everywhere, so we may view it as a function that produces a vector of sets
-   of states. *)
-
-let stack_states (node : Lr1.node) : property =
-  match stack_states node with
-  | None ->
-      (* apparently this node is unreachable *)
-      assert false
-  | Some v ->
-      v
-
 (* ------------------------------------------------------------------------ *)
-(* From the above information, deduce, for each production, the states that
-   may appear in the stack when this production is reduced. *)
 
-(* We are careful to produce a vector of states whose length is exactly that
-   of the production [prod]. *)
+(* [handler state] determines whether the state [state] can handle the
+   token [error], that is, whether it has either an outgoing transition
+   or a reduction on [error]. *)
 
-let production_states : Production.index -> property =
-  Production.tabulate (fun prod ->
-    let sites = Lr1.production_where prod in
-    let height = Production.length prod in
-    Lr1.NodeSet.fold (fun node accu ->
-      leq_join (truncate height (stack_states node)) accu
-    ) sites (bottom height)
-  )
+let handler state =
+  SymbolMap.mem (Symbol.T Terminal.error) (Lr1.transitions state) ||
+  TerminalMap.mem Terminal.error (Lr1.reductions state)
 
-(* ------------------------------------------------------------------------ *)
-(* If requested, print the information that has been computed above. *)
+(* [handlers state] determines whether a least one state in the set [states]
+   can handle the token [error]. *)
 
-let () =
-  Error.logC 3 (fun f ->
-    Lr1.iter (fun node ->
-      Printf.fprintf f "stack(%s) = %s\n"
-        (Lr1.print node)
-        (print (stack_states node))
-    )
-  )
-
-let () =
-  Error.logC 3 (fun f ->
-    Production.iterx (fun prod ->
-      Printf.fprintf f "stack when reducing %s = %s\n"
-        (Production.print prod)
-        (print (production_states prod))
-    )
-  )
+let handlers states =
+  Lr1.NodeSet.exists handler states
 
 (* ------------------------------------------------------------------------ *)
 (* We now determine which states must be represented, that is,
@@ -205,14 +90,31 @@ let () =
    being taken, are conceivable, but quite tricky, and probably not
    worth the trouble.
 
-   (1) If two states are liable to appear within a single stack cell,
-   then one is represented if and only if the other is
-   represented. This ensures that the structure of stacks is known
-   everywhere and that we can propose types for stacks.
+   The conditions listed here are designed to allow the code back-end
+   to perform a case analysis on a state, when needed. Thus, it is
+   necessary to have detailed knowledge of the code back-end in order
+   to understand why these conditions are necessary and sufficient.
+   This is not ideal, but the alternative (which would be to generate
+   code first and deduce, by analysis of the code, which states must
+   be represented) would be complex as well.
 
-   (2) If a state [s] has an outgoing transition along nonterminal
+   (1) If two states are liable to appear within a single stack cell,
+   then one is represented if and only if the other is represented.
+   This ensures that the structure of stacks is known everywhere and
+   that we can propose types for stacks.
+
+   (2a) If a state [s] has an outgoing transition along nonterminal
    symbol [nt], and if the [goto] table for symbol [nt] has more than
-   one target, then state [s] is represented.
+   one target, then state [s] is represented. (When the [goto] table
+   has only one target, this means that all [goto] transitions labeled
+   [nt] lead to the same state, so the [goto] function can jump to
+   this state without performing a case analysis.)
+
+   (2b) If a state [s] has an outgoing transition labeled [nt], and if
+   one of the productions associated with [nt] is non-epsilon and needs
+   [beforeendp], then [s] must be represented. This caters for the (rare)
+   situation where the new code back-end must perform a case analysis of
+   the current state in order to peek at the top stack cell.
 
    (3) If a stack cell contains more than one state and if at least
    one of these states is able to handle the [error] token, then these
@@ -223,6 +125,13 @@ let () =
    (that is, the state that initiated the recognition of this
    production) is represented. (Indeed, it will be passed as an
    argument to [errorcase].) *)
+
+module RepresentedStates () : sig
+  val represented : Lr1.node -> bool
+end = struct
+
+let () =
+  assert short_states_needed
 
 (* Data. *)
 
@@ -244,8 +153,8 @@ let represents states =
 
 (* Enforce condition (1) above. *)
 
-let share (v : property) =
-  StateSetVector.iter (fun states ->
+let share (v : StackStatesShort.property) =
+  Array.iter (fun states ->
     let dummy = UnionFind.fresh false in
     Lr1.NodeSet.iter (fun state ->
       UnionFind.union dummy (represented state)
@@ -254,47 +163,44 @@ let share (v : property) =
 
 let () =
   Lr1.iter (fun node ->
-    share (stack_states node)
+    share (StackStatesShort.stack_states node)
   );
   Production.iter (fun prod ->
-    share (production_states prod)
+    share (StackStatesShort.production_states prod)
   )
 
-(* Enforce condition (2) above. *)
+(* Enforce condition (2a) above. *)
 
 let () =
   Nonterminal.iter (fun nt ->
-    let count =
-      Lr1.targets (fun count _ _ ->
-        count + 1
-      ) 0 (Symbol.N nt)
-    in
-    if count > 1 then
+    let symbol = Symbol.N nt in
+    if Lr1.ntargets symbol > 1 then
       Lr1.targets (fun () sources _ ->
         List.iter represent sources
-      ) () (Symbol.N nt)
+      ) () symbol
+  )
+
+(* Enforce condition (2b) above. *)
+
+let () =
+  Production.iterx (fun prod ->
+    let n = Production.length prod in
+    if n > 0 && Action.has_beforeend (Production.action prod) then
+      let nt = Production.nt prod in
+      let symbol = Symbol.N nt in
+      Lr1.targets (fun () sources _ ->
+        sources |> List.iter (fun source ->
+          represent source
+        )
+      ) () symbol
   )
 
 (* Enforce condition (3) above. *)
 
-let handler state =
-  try
-    let _ = SymbolMap.find (Symbol.T Terminal.error) (Lr1.transitions state) in
-    true
-  with Not_found ->
-    try
-      let _ = TerminalMap.lookup Terminal.error (Lr1.reductions state) in
-      true
-    with Not_found ->
-      false
-
-let handlers states =
-  Lr1.NodeSet.exists handler states
-
 let () =
   Lr1.iter (fun node ->
-    let v = stack_states node in
-    StateSetVector.iter (fun states ->
+    let v = StackStatesShort.stack_states node in
+    Array.iter (fun states ->
       if Lr1.NodeSet.cardinal states >= 2 && handlers states then
         represents states
     ) v
@@ -310,20 +216,14 @@ let () =
       if length = 0 then
         Lr1.NodeSet.iter represent sites
       else
-        let states = StateSetVector.get (production_states prod) 0 in
+        let states = (StackStatesShort.production_states prod).(0) in
         represents states
   )
 
-(* Define accessors. *)
+(* Define an accessor. *)
 
 let represented state =
   UnionFind.get (represented state)
-
-let representeds states =
-  if Lr1.NodeSet.is_empty states then
-    assert false
-  else
-    represented (Lr1.NodeSet.choose states)
 
 (* Statistics. *)
 
@@ -347,144 +247,43 @@ let () =
     )
   )
 
-(* ------------------------------------------------------------------------ *)
-(* Accessors for information about the stack. *)
+let () =
+  Time.tick "Computing which states must be represented"
 
-(* We describe a stack prefix as a list of cells, where each cell is a pair
-   of a symbol and a set of states. The top of the stack is the head of the
-   list. *)
+end (* RepresentedStates *)
 
-type cell =
-    Symbol.t * Lr1.NodeSet.t
+(* If [--represent-states] is passed on the command line, then every state is
+   represented, and the above computation is skipped. *)
 
-type word =
-    cell list
+let always _ =
+  true
 
-(* This auxiliary function converts a stack-as-an-array (top of stack
-   at the right end) to a stack-as-a-list (top of stack at list head). *)
+let represented : Lr1.node -> bool =
+  if Settings.represent_states then
+    always
+  else
+    let module RS = RepresentedStates() in
+    RS.represented
 
-let _convert a =
-  let n = Array.length a in
-  let rec loop i accu =
-    if i = n then accu else loop (i + 1) (a.(i) :: accu)
-  in
-  loop 0 []
+let representeds states =
+  Settings.represent_states ||
+  if Lr1.NodeSet.is_empty states then
+    false
+  else
+    represented (Lr1.NodeSet.choose states)
 
-(* This auxiliary function converts a pair of stacks-as-arrays to a
-   stack-as-a-list-of-pairs. *)
-
-let convert2 a b =
-  let n = Array.length a in
-  assert (n = Array.length b);
-  let rec loop i accu =
-    if i = n then accu else loop (i + 1) ((a.(i), b.(i)) :: accu)
-  in
-  loop 0 []
-
-(* [stack s] describes the stack when the automaton is in state [s]. *)
-
-let stack node : word =
-  convert2 (stack_symbols node) (stack_states node)
-
-(* [prodstack prod] describes the stack when production [prod] is about to be
-   reduced. *)
-
-let prodstack prod : word =
-  convert2 (Production.rhs prod) (production_states prod)
-
-(* [gotostack nt] is the structure of the stack when a shift
-   transition over nonterminal [nt] is about to be taken. It
-   consists of just one cell. *)
-
-let gotostack : Nonterminal.t -> word =
-  Nonterminal.tabulate (fun nt ->
-    let sources =
-      Lr1.targets (fun accu sources _ ->
-        List.fold_right Lr1.NodeSet.add sources accu
-      ) Lr1.NodeSet.empty (Symbol.N nt)
-    in
-    [ Symbol.N nt, sources ]
-  )
-
-let fold f accu w =
-  List.fold_right (fun (symbol, states) accu ->
-    f accu (representeds states) symbol states
-  ) w accu
-
-let fold_top f accu w =
-  match w with
-  | [] ->
-      accu
-  | (symbol, states) :: _ ->
-      f (representeds states) symbol
-
-(* ------------------------------------------------------------------------ *)
-(* Explain how the stack should be deconstructed when an error is found.
-
-   We sometimes have a choice as to how many stack cells should be popped.
-   Indeed, several cells in the known suffix of the stack may physically hold
-   a state. If neither of these states handles errors, then we could jump to
-   either. (Indeed, if we jump to one that's nearer, it will in turn pop
-   further stack cells and jump to one that's farther.) In the interest of
-   code size, we should pop as few stack cells as possible. So, we jump to the
-   topmost represented state in the known suffix. *)
-
-type state =
-  | Represented
-  | UnRepresented of Lr1.node
-
-type instruction =
-  | Die
-  | DownTo of word * state
-
-let rewind node : instruction =
-  let w = stack node in
-
-  let rec rewind w =
-    match w with
-    | [] ->
-
-        (* I believe that every stack description either is definite
-           (that is, ends with [TailEmpty]) or contains at least one
-           represented state. Thus, if we find an empty [w], this
-           means that the stack is definitely empty. *)
-
-        Die
-
-    | ((_, states) as cell) :: w ->
-
-        if representeds states then
-
-          (* Here is a represented state. We will pop this
-             cell and no more. *)
-
-          DownTo ([ cell ], Represented)
-
-        else if handlers states then begin
-
-          (* Here is an unrepresented state that can handle
-             errors. The cell must hold a singleton set of states, so
-             we know which state to jump to, even though it isn't
-             represented. *)
-
-          assert (Lr1.NodeSet.cardinal states = 1);
-          let state = Lr1.NodeSet.choose states in
-          DownTo ([ cell ], UnRepresented state)
-
-        end
-        else
-
-          (* Here is an unrepresented state that does not handle
-             errors. Pop this cell and look further. *)
-
-          match rewind w with
-          | Die ->
-              Die
-          | DownTo (w, st) ->
-              DownTo (cell :: w, st)
-
-  in
-  rewind w
+let representedo ostates =
+  match ostates with
+  | Some states ->
+      representeds states
+  | None ->
+      (* If this set of states is missing, then [short_states_needed] must
+         be false, which implies that [--represent-states] must be true,
+         which implies that every state is represented, so the correct
+         result is [true]. *)
+      assert (not short_states_needed);
+      assert Settings.represent_states;
+      true
 
 (* ------------------------------------------------------------------------ *)
 
@@ -546,9 +345,11 @@ end
    right-hand side (if there is one) must do so as well. That is, unless the
    right-hand side is empty. *)
 
-(* 2015/11/11. When a production [prod] is reduced, the top stack cell may be
-   consulted for its end position. This implies that this cell must exist
-   and must store an end position! Now, when does this happen?
+(* 2015/11/11. When a production [prod] is reduced, the cell that lies at
+   the top of the stack (after the cells that correspond to the production's
+   right-hand side have been popped, and before a new cell is pushed onto the
+   stack) may be consulted for its end position. This implies that this cell
+   must exist and must store an end position! Now, when does this happen?
 
    1- This happens if [prod] is an epsilon production and the left-hand symbol
       of the production, [nt prod], keeps track of its start or end position.
@@ -571,38 +372,78 @@ end
    property -- in particular, I would like to keep track of no positions at all,
    if the user doesn't use any position keyword. But I am suffering. *)
 
+(* If [--represent-positions] is passed on the command line, then this
+   computation is skipped and every position is tracked. *)
+
+module TrackPositions () : sig
+  val track_startp: Symbol.t -> bool
+  val track_endp: Symbol.t -> bool
+end = struct
+
 module F =
   FixSolver.Make(M)(Fix.Prop.Boolean)
 
 let () =
 
-  (* We gather the constraints explained above in two loops. The first loop
-     looks at every (non-start) production [prod]. The second loop looks at
-     every (non-initial) state [s]. *)
+  (* We gather the constraints explained above in a loop over every
+     (non-start) production [prod]. *)
 
-  Production.iterx (fun prod ->
+  Production.iterx begin fun prod ->
 
     let nt, rhs = Production.def prod
     and ids = Production.identifiers prod
     and action = Production.action prod in
     let length = Array.length rhs in
 
-    if length > 0 then begin
+    if length = 0 then begin
+
+      (* An epsilon production. *)
+
+      (* Condition (1) in the long comment above (2015/11/11). If [prod] is an
+         epsilon production, and if it can be reduced in a state [s] whose
+         incoming symbol is [sym], then emit the following constraint: if the
+         left-hand side [nt] keeps track of its start or end position, then
+         [sym] must keep track of its end position. *)
+
+      Lr1.production_where prod |> Lr1.NodeSet.iter begin fun s ->
+        Lr1.incoming_symbol s |> Option.iter begin fun sym ->
+          F.record_VarVar (Symbol.N nt, WhereStart) (sym, WhereEnd);
+          F.record_VarVar (Symbol.N nt, WhereEnd)   (sym, WhereEnd)
+        end
+      end
+
+    end
+    else begin
+
+      (* A non-epsilon production. *)
+
       (* If [nt] keeps track of its start position, then the first symbol
          in the right-hand side must do so as well. *)
       F.record_VarVar (Symbol.N nt, WhereStart) (rhs.(0), WhereStart);
       (* If [nt] keeps track of its end position, then the last symbol
          in the right-hand side must do so as well. *)
       F.record_VarVar (Symbol.N nt, WhereEnd) (rhs.(length - 1), WhereEnd)
+
     end;
+
+    (* Examine the production's position keywords. *)
 
     KeywordSet.iter (function
       | SyntaxError ->
           ()
       | Position (Before, _, _) ->
-          (* Doing nothing here because [$endpos($0)] is dealt with in
-             the second loop. *)
-          ()
+          (* Condition (2) in the long comment above (2015/11/11). This condition
+             was incorrectly implemented until 2021/10/12, because of a confusion
+             between the state where the production is reduced and the state that
+             carries the outgoing edge labeled [nt]. The condition is as follows:
+             if [prod] refers to [$endpos($0)], if the state [s] carries an
+             outgoing transition labeled [nt], and if the incoming symbol of [s]
+             is [sym], then [sym] must keep track of its end position. *)
+          Lr1.all_sources (Symbol.N nt) |> Lr1.NodeSet.iter begin fun s ->
+            Lr1.incoming_symbol s |> Option.iter begin fun sym ->
+              F.record_ConVar true (sym, WhereEnd)
+            end
+          end
       | Position (Left, _, _) ->
           (* [$startpos] and [$endpos] have been expanded away. *)
           assert false
@@ -622,33 +463,7 @@ let () =
           ) ids
     ) (Action.keywords action)
 
-  ); (* end of loop on productions *)
-
-  Lr1.iterx (fun s ->
-    (* Let [sym] be the incoming symbol of state [s]. *)
-    let sym = Option.force (Lr1.incoming_symbol s) in
-
-    (* Condition (1) in the long comment above (2015/11/11). If an epsilon
-       production [prod] can be reduced in state [s], if its left-hand side
-       [nt] keeps track of its start or end position, then [sym] must keep
-       track of its end position. *)
-    TerminalMap.iter (fun _ prods ->
-      let prod = Misc.single prods in
-      let nt, rhs = Production.def prod in
-      let length = Array.length rhs in
-      if length = 0 then begin
-        F.record_VarVar (Symbol.N nt, WhereStart) (sym, WhereEnd);
-        F.record_VarVar (Symbol.N nt, WhereEnd) (sym, WhereEnd)
-      end
-    ) (Lr1.reductions s);
-
-    (* Condition (2) in the long comment above (2015/11/11). If a production
-       can be reduced in state [s] and mentions [$endpos($0)], then [sym]
-       must keep track of its end position. *)
-    if Lr1.has_beforeend s then
-      F.record_ConVar true (sym, WhereEnd)
-
-  )
+  end (* end of loop on productions *)
 
 let track : variable -> bool option =
   let module S = F.Solve() in
@@ -657,19 +472,15 @@ let track : variable -> bool option =
 let track : variable -> bool =
   fun x -> Option.value (track x) ~default:false
 
-let startp symbol =
+let track_startp symbol =
   track (symbol, WhereStart)
 
-let endp symbol =
+let track_endp symbol =
   track (symbol, WhereEnd)
-
-let for_every_symbol (f : Symbol.t -> unit) : unit =
-  Terminal.iter (fun t -> f (Symbol.T t));
-  Nonterminal.iter (fun nt -> f (Symbol.N nt))
 
 let sum_over_every_symbol (f : Symbol.t -> bool) : int =
   let c = ref 0 in
-  for_every_symbol (fun sym -> if f sym then c := !c + 1);
+  Symbol.iter (fun sym -> if f sym then c := !c + 1);
   !c
 
 let () =
@@ -677,8 +488,278 @@ let () =
     Printf.fprintf f
       "%d out of %d symbols keep track of their start position.\n\
        %d out of %d symbols keep track of their end position.\n"
-        (sum_over_every_symbol startp) (Terminal.n + Nonterminal.n)
-        (sum_over_every_symbol endp) (Terminal.n + Nonterminal.n))
+        (sum_over_every_symbol track_startp) (Terminal.n + Nonterminal.n)
+        (sum_over_every_symbol track_endp) (Terminal.n + Nonterminal.n))
+
+let () =
+  Time.tick "Computing which positions must be tracked"
+
+end (* TrackPositions *)
+
+let track_startp, track_endp =
+  if Settings.represent_positions then
+    always, always
+  else
+    let module T = TrackPositions() in
+    T.track_startp, T.track_endp
+
+(* ------------------------------------------------------------------------ *)
+(* Constructors and accessors for information about the stack. *)
+
+(* Types. *)
+
+type cell = {
+  symbol: Symbol.t;
+  ostates: Lr1.NodeSet.t option;
+  (* If [short_states_needed] is false and if this cell is part of the short
+     invariant, then [ostates] is [None]. *)
+  holds_semv: bool;
+  holds_state: bool;
+  holds_startp: bool;
+  holds_endp: bool;
+}
+
+type word =
+  cell array
+
+(* Constructors. *)
+
+(* If [--represent-values] is passed on the command line, then every semantic
+   value is stored. *)
+
+let has_semv symbol =
+  Settings.represent_values ||
+  match symbol with
+  | Symbol.N _nt ->
+      true
+  | Symbol.T tok ->
+      match Terminal.ocamltype tok with
+      | None ->
+          (* Token has unit type and is omitted in stack cell. *)
+          false
+      | Some _ocamltype ->
+          true
+
+let cell symbol ostates =
+  let holds_semv = has_semv symbol in
+  let holds_state = representedo ostates in
+  let holds_startp, holds_endp = track_startp symbol, track_endp symbol in
+  { symbol; ostates; holds_semv; holds_state; holds_startp; holds_endp }
+
+(* Accessors. *)
+
+let symbol cell =
+  cell.symbol
+
+let states cell =
+  match cell.ostates with
+  | Some states ->
+      states
+  | None ->
+      (* Someone wants a piece of information that we have not computed.
+         This should not happen. *)
+      assert false
+
+let holds_semv cell =
+  cell.holds_semv
+
+let holds_state cell =
+  cell.holds_state
+
+let holds_startp cell =
+  cell.holds_startp
+
+let holds_endp cell =
+  cell.holds_endp
+
+let present cell =
+  cell.holds_state || cell.holds_semv || cell.holds_startp || cell.holds_endp
+
+let similar cell1 cell2 =
+  Symbol.equal cell1.symbol cell2.symbol &&
+  cell1.holds_state = cell2.holds_state
+    (* The fields [holds_semv], [holds_startp] and [holds_endp]
+       do not need to be compared, because they are determined
+       by the field [symbol]. The field [ostates] does not need
+       to be compared because it does not influence the layout
+       of the cell; comparing the field [holds_state] suffices. *)
+
+let meet w1 w2 =
+  let n1, n2 = Array.length w1, Array.length w2 in
+  let n = min n1 n2 in
+  let suffix1, suffix2 = MArray.suffix w1 n, MArray.suffix w2 n in
+  if MArray.for_all2 similar suffix1 suffix2 then
+    (* [w1] and [w2] agree on their common suffix. The meet is
+       then the longest of the two words. (We could compute the
+       intersection of the [ostates] fields, but we assume that
+       the caller is not interested in this information.) *)
+    Some (if n1 < n2 then w2 else w1)
+  else
+    (* [w1] and [w2] disagree on their common suffix. This implies
+        that their meet is bottom. *)
+    None
+
+let push, pop, top, suffix, filter =
+  MArray.(push, pop, last, suffix, filter)
+
+let get, length, fold_left, append, to_list =
+  Array.(get, length, fold_left, append, to_list)
+
+let split w k =
+  if k = 0 then
+    (* A fast path for the most common case. *)
+    w, [||]
+  else
+    let n = Array.length w in
+    assert (0 <= k && k <= n);
+    let lower = Array.sub w 0 (n - k) in
+    let upper = MArray.suffix w k in
+    lower, upper
+
+let print w =
+  w
+  |> Array.map symbol
+  |> Symbol.printa false
+
+(* ------------------------------------------------------------------------ *)
+
+(* Publish the short invariant. *)
+
+module type STACK = sig
+
+  (**[stack s] is the known suffix of the stack at state [s]. *)
+  val stack: Lr1.node -> word
+
+  (**[prodstack prod] is the known suffix of the stack at a state where
+     production [prod] can be reduced. In the short invariant, the length of
+     this suffix is [Production.length prod]. In the long invariant, its
+     length can be greater. If there are no states where [prod] can be
+     reduced, then every cell contains an empty set of states. *)
+  val prodstack: Production.index -> word
+
+  (**[gotostack nt] is the known suffix of the stack at a state where an
+     edge labeled [nt] has just been followed. In the short invariant, the
+     length of this suffix is [1]: indeed, it consists of just one cell,
+     associated with the symbol [nt]. In the long invariant, its length can
+     be greater. *)
+  val gotostack: Nonterminal.t -> word
+
+end
+
+(* Suppose we have a function [symbols] that maps things to vectors of
+   symbols and a function [states] that maps things to vectors of sets of
+   states. Then, we want to construct and tabulate a function that maps
+   things to vectors of cells. *)
+
+let publish (long : bool) tabulate symbols states =
+  tabulate (fun thing ->
+    let symbols, states = symbols thing, states thing in
+    assert (Array.length symbols >= Array.length states);
+    (* We allow [states] to be shorter than [symbols]. This is required in the
+       computation of the long invariant, where [validate] can reject sets of
+       states that are not equi-represented. In that case, we truncate
+       [symbols] to match [states]. *)
+    let k = Array.length states in
+    let symbols = MArray.truncate k symbols in
+    Array.init k (fun i ->
+      let ostates =
+        if long || short_states_needed then Some states.(i) else None
+      in
+      cell symbols.(i) ostates
+    )
+  )
+
+module Short = struct
+
+  let long = false
+
+  let stack : Lr1.node -> word =
+    publish long Lr1.tabulate
+      StackSymbolsShort.stack_symbols
+      StackStatesShort.stack_states
+
+  let prodstack : Production.index -> word =
+    publish long Production.tabulate
+      StackSymbolsShort.production_symbols
+      StackStatesShort.production_states
+
+  let gotostack : Nonterminal.t -> word =
+    publish long Nonterminal.tabulate
+      StackSymbolsShort.goto_symbols
+      StackStatesShort.goto_states
+
+end
+
+let () =
+  Time.tick "Publishing the invariant (short)"
+
+(* ------------------------------------------------------------------------ *)
+(* Explain how the stack should be deconstructed when an error is found.
+
+   We sometimes have a choice as to how many stack cells should be popped.
+   Indeed, several cells in the known suffix of the stack may physically hold
+   a state. If neither of these states handles errors, then we could jump to
+   either. (Indeed, if we jump to one that's nearer, it will in turn pop
+   further stack cells and jump to one that's farther.) In the interest of
+   code size, we should pop as few stack cells as possible. So, we jump to the
+   topmost represented state in the known suffix. *)
+
+type state =
+  | Represented
+  | UnRepresented of Lr1.node
+
+type instruction =
+  | Die
+  | DownTo of word * state
+
+let rewind node : instruction =
+  let w = Short.stack node in
+
+  let rec rewind w =
+    if Array.length w = 0 then
+
+      (* I believe that every stack either is definitely empty or contains
+         at least one represented state. Thus, if we find an empty [w], this
+         means that the stack is definitely empty. *)
+
+      Die
+
+    else
+      let { ostates; _ } as cell = MArray.last w in
+      let w = MArray.pop w in
+
+      if representedo ostates then
+
+        (* Here is a represented state. We will pop this
+           cell and no more. *)
+
+        DownTo ([| cell |], Represented)
+
+      else let states = Option.force ostates in if handlers states then begin
+
+        (* Here is an unrepresented state that can handle
+           errors. The cell must hold a singleton set of states, so
+           we know which state to jump to, even though it isn't
+           represented. *)
+
+        assert (Lr1.NodeSet.cardinal states = 1);
+        let state = Lr1.NodeSet.choose states in
+        DownTo ([| cell |], UnRepresented state)
+
+      end
+      else
+
+        (* Here is an unrepresented state that does not handle
+           errors. Pop this cell and look further. *)
+
+        match rewind w with
+        | Die ->
+            Die
+        | DownTo (w, st) ->
+            DownTo (MArray.push w cell, st)
+
+  in
+  rewind w
 
 (* ------------------------------------------------------------------------- *)
 (* Miscellaneous. *)
@@ -704,7 +785,7 @@ let universal symbol =
    new version of the code below relies on the same approximation, but uses
    two successive loops instead of two nested loops. *)
 
-let errorpeekers =
+let errorpeekers = lazy (
   (* First compute a set of symbols [nt]... *)
   let nts : SymbolSet.t =
     Lr1.fold (fun nts node ->
@@ -719,141 +800,222 @@ let errorpeekers =
   in
   (* ... then compute the set of all target states of all transitions
      labeled by some symbol in the set [nt]. *)
-  SymbolSet.fold (fun nt errorpeekers ->
-    Lr1.targets (fun errorpeekers _ target ->
-      Lr1.NodeSet.add target errorpeekers
-    ) errorpeekers nt
-  ) nts Lr1.NodeSet.empty
+  let errorpeekers =
+    SymbolSet.fold (fun nt errorpeekers ->
+      Lr1.NodeSet.union errorpeekers (Lr1.all_targets nt)
+    ) nts Lr1.NodeSet.empty
+  in
+  (* Done. *)
+  Time.tick "Computing errorpeekers";
+  errorpeekers
+)
 
 let errorpeeker node =
-  Lr1.NodeSet.mem node errorpeekers
+  Lr1.NodeSet.mem node (Lazy.force errorpeekers)
 
 (* ------------------------------------------------------------------------ *)
 
-let () =
-  Time.tick "Constructing the invariant"
+(* Compute and publish the long invariant. *)
 
-(* ------------------------------------------------------------------------ *)
+(* Fortunately, all of the building blocks are at hand, so this is easy. *)
 
-(* The submodule [Long] computes the known suffix of the stack in each state,
-   as a vector of symbols, and it computes a suffix that is as long as
-   possible, in contrast with the above code, which computes a suffix whose
-   length is predicted by the function [stack_height]. *)
+(* A caveat: it is not obvious that the sets of states computed here are
+   equi-represented. (A set is equi-represented if all of its elements are
+   represented *or* all of its elements are unrepresented.) Yet, we need
+   this property, otherwise the long invariant cannot be safely translated
+   to an OCaml GADT.
 
-module Long = struct
+   One might think that this property is likely true, because every set of
+   states that appears somewhere in the long invariant must also appear
+   somewhere in the short invariant, and we know that every set of states in
+   the short invariant is equi-represented, because we have explicitly
+   imposed this requirement. However, this is *incorrect*: testing shows
+   that not every set of states in the long invariant is equi-represented.
 
-let debug = true
+   To work around this problem, we truncate the long invariant so as to
+   forget about any stack cells that are not equi-represented. *)
 
-(* Vectors of symbols. *)
+module Long () = struct
 
-module SymbolVector = struct
+  (* Compute. *)
 
-  (* As in the right-hand side of a production, the top of the stack
-     is the right end of the array. *)
+  module StackSymbolsLong =
+    StackSymbols.Long()
 
-  type property =
-    Symbol.t array
+  module StackStatesLong =
+    StackStates.Run(StackSymbolsLong)
 
-  let empty =
-    [||]
+  (* Validate. *)
 
-  let truncate k v =
-    (* Keep a suffix of length [k] of [v]. *)
-    let n = Array.length v in
-    Array.sub v (n-k) k
+  let unrepresented node =
+    not (represented node)
 
-  (* Given two arrays [v1] and [v2] of lengths [n1] and [n2], the function
-     call [lcs v1 v2 n1 n2 (min n1 n2) 0] computes the greatest [k] such that
-     [truncate k v1] and [truncate k v2] are equal. *)
+  let equi_represented nodes =
+    Lr1.NodeSet.for_all represented nodes ||
+    Lr1.NodeSet.for_all unrepresented nodes
 
-  let rec lcs v1 v2 n1 n2 n k =
-    (* [n] is [min n1 n2]. *)
-    if k = n || v1.(n1 - 1 - k) <> v2.(n2 - 1 - k) then k
-    else lcs v1 v2 n1 n2 n (k + 1)
+  let validate states =
+    MArray.greatest_suffix_forall equi_represented states
 
-  let leq_join v1 v2 =
-    let n1 = Array.length v1
-    and n2 = Array.length v2 in
-    let n = min n1 n2 in
-    let k = lcs v1 v2 n1 n2 n 0 in
-    if debug then assert (truncate k v1 = truncate k v2);
-    if k = n2 then v2
-    else if k = n1 then v1
-    else truncate k v1
-
-  let push v x =
-    (* Push [x] onto the right end of [v]. *)
-    let n = Array.length v in
-    Array.init (n+1) (fun i -> if i < n then v.(i) else x)
-
-  let print v =
-    if Array.length v = 0 then
-      "epsilon"
+  let validate states =
+    if Settings.represent_states then
+      (* If every state must be represented, then every set of states is
+         equi-represented, so validation always succeeds. *)
+      states
     else
-      Misc.separated_list_to_string Symbol.print "; " (Array.to_list v)
+      validate states
+
+  let stack_states s =
+    validate @@ StackStatesLong.stack_states s
+
+  let production_states prod =
+    validate @@ StackStatesLong.production_states prod
+
+  let goto_states nt =
+    validate @@ StackStatesLong.goto_states nt
+
+  (* Publish. *)
+
+  let long = true
+
+  let stack : Lr1.node -> word =
+    publish long Lr1.tabulate
+      StackSymbolsLong.stack_symbols
+      stack_states
+
+  let prodstack : Production.index -> word =
+    publish long Production.tabulate
+      StackSymbolsLong.production_symbols
+      production_states
+
+  let gotostack : Nonterminal.t -> word =
+    publish long Nonterminal.tabulate
+      StackSymbolsLong.goto_symbols
+      goto_states
+
+  let () =
+    Time.tick "Publishing the invariant (long)"
+
+end (* Long *)
+
+(* ------------------------------------------------------------------------ *)
+
+(* Compute which entry states can reach each [run], [reduce], and [goto]
+   function. *)
+
+(* This information is computed only on demand. *)
+
+(* This information is used in the new code back-end to determine in which
+   states we have static knowledge of the final result type of the parser,
+   ['final]. This information can be built into the GADT that describes the
+   states, and this in turn can be used to perform certain optimizations (such
+   as removing case analyses that have only one branch) while preserving the
+   well-typedness of the OCaml code. *)
+
+(* This information is computed via a forward data flow analysis. *)
+
+(* The join semi-lattice of properties is as follows. *)
+
+module P = struct
+
+  (* [SingleOrigin s] means that we are reachable via a single entry state
+     [s]. [Top] means that we are reachable via multiple entry states. *)
+  type property =
+    | SingleOrigin of Nonterminal.t
+    | Top
+
+  let leq_join p1 p2 =
+    match p1, p2 with
+    | _, Top
+    | Top, _ ->
+        Top
+    | SingleOrigin start1, SingleOrigin start2 ->
+        if Nonterminal.equal start1 start2 then p2 else Top
 
 end
 
-open SymbolVector
-
-(* Define the data flow graph. *)
+(* The call graph of the [run], [reduce] and [goto] functions. *)
 
 module G = struct
 
-  type variable = Lr1.node
+  include P
 
-  type property = SymbolVector.property
+  type variable =
+    | Run of Lr1.node
+    | Reduce of Production.index
+    | Goto of Nonterminal.t
 
-  (* At each start state of the automaton, the stack is empty. *)
+  type t = variable
 
-  let foreach_root contribute =
-    Lr1.entry |> ProductionMap.iter (fun _prod root ->
-      assert (stack_height root = 0);
-      contribute root empty
+  let foreach_root yield =
+    (* The entry points are the [run] functions associated with each of
+       the entry states. *)
+    Lr1.entry |> ProductionMap.iter (fun prod node ->
+      let nt = Option.force (Production.classify prod) in
+      yield (Run node) (SingleOrigin nt)
     )
 
-  (* The edges of the data flow graph are the transitions of the automaton. *)
-
-  let foreach_successor source stack contribute =
-    Lr1.transitions source |> SymbolMap.iter (fun symbol target ->
-      (* The contribution of [source], through this edge, to [target], is the
-         stack at [source], extended with a new cell for this transition. *)
-      contribute target (push stack symbol)
-    )
+  let foreach_successor v origin yield =
+    match v with
+    | Run node ->
+        (* For each transition from [node] to [node'], the function [run node]
+           calls the function [run node']. In the case of [goto] transitions,
+           this is not a direct call (it goes through [reduce] and [goto]
+           functions), but it is nevertheless accounted for here. *)
+        Lr1.transitions node |> SymbolMap.iter begin fun _label node' ->
+          yield (Run node') origin
+        end;
+        Lr1.reductions node |> TerminalMap.iter begin fun _tok prods ->
+          let prod = Misc.single prods in
+          yield (Reduce prod) origin
+        end
+    | Reduce prod ->
+        (* A [reduce] function ends with a call to a [goto] function. *)
+        let nt = Production.nt prod in
+        yield (Goto nt) origin
+    | Goto _nt ->
+        (* A [goto] function appears to make no calls. The calls that it
+           makes have already been accounted for above. *)
+        ()
 
 end
 
-(* Compute the least fixed point. *)
+(* Run the analysis on demand. *)
 
-let stack : Lr1.node -> property option =
-  let module F = Fix.DataFlow.Run(KeyMap)(SymbolVector)(G) in
-  F.solution
-
-(* If every state is reachable, then the least fixed point must be non-[None]
-   everywhere, so we may view it as a function that produces a vector of
-   symbols. *)
-
-let stack (node : Lr1.node) : property =
-  match stack node with
-  | None ->
-      (* apparently this node is unreachable *)
-      assert false
-  | Some v ->
-      v
-
-(* ------------------------------------------------------------------------ *)
-(* If requested, print the information that has been computed above. *)
-
-let () =
-  Error.logC 3 (fun f ->
-    Lr1.iter (fun node ->
-      Printf.fprintf f "longstack(%s) = %s\n"
-        (Lr1.print node)
-        (print (stack node))
-    )
+let solution : (G.variable -> P.property option) Lazy.t =
+  lazy (
+    let module D = Fix.DataFlow.ForType(G)(P)(G) in
+    Time.tick "Computing origins";
+    D.solution
   )
 
-end (* module Long *)
+(* Convert a [property option] to something clearer for the end user. *)
 
-let () =
-  Time.tick "Constructing the long invariant"
+module Origin = struct
+
+  type origin =
+    | Dead
+    | SingleOrigin of Nonterminal.t
+    | MultipleOrigins
+
+  let convert op =
+    match op with
+    | None ->
+        Dead
+    | Some (P.SingleOrigin nt) ->
+        SingleOrigin nt
+    | Some (P.Top) ->
+        MultipleOrigins
+
+  (* Publish the data. *)
+
+  let run node =
+    convert (Lazy.force solution (G.Run node))
+
+  let reduce prod =
+    convert (Lazy.force solution (G.Reduce prod))
+
+  let goto nt =
+    convert (Lazy.force solution (G.Goto nt))
+
+end (* Origin *)

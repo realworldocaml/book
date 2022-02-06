@@ -73,3 +73,15 @@ end
 module ForHashedType
   (T : HashedType)
      = Make(Memoize.ForHashedType(T))
+
+(* Hash-consing is a situation where a weak hash table can be used. Indeed, a
+   hash-consing service based on a weak hash table can forget about a datum
+   only if the user himself has forgotten about it. Thus, at different points
+   in time, a datum *can* receive distinct IDs; but the user *can never* catch
+   us red-handed, that is, can never at a given instant hold two pieces of
+   data that are logically equal yet have distinct IDs. Thus, our
+   constant-time implementation of [equal] remains correct. *)
+
+module ForHashedTypeWeak
+  (T : HashedType)
+     = Make(Memoize.Make(Glue.WeakHashTablesAsImperativeMaps(T)))

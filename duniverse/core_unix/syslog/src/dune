@@ -1,0 +1,2 @@
+(library (name core_unix_syslog) (public_name core_unix.syslog)
+  (libraries core.syslog) (preprocess no_preprocessing))

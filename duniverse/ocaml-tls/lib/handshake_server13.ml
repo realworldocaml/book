@@ -6,35 +6,44 @@ open Handshake_common
 
 open Handshake_crypto13
 
-open Rresult.R.Infix
-
 let answer_client_hello ~hrr state ch raw =
-  (match client_hello_valid `TLS_1_3 ch with
-   | Error e -> Error (`Fatal (`InvalidClientHello e))
-   | Ok () -> Ok () ) >>= fun () ->
-  (if hrr && List.mem `EarlyDataIndication ch.extensions then
-     Error (`Fatal (`InvalidClientHello `Has0rttAfterHRR))
-   else
-     Ok ()) >>= fun () ->
+  let* () =
+    Result.map_error
+      (fun e -> `Fatal (`InvalidClientHello e))
+      (client_hello_valid `TLS_1_3 ch)
+  in
+  let* () =
+    guard (not (hrr && List.mem `EarlyDataIndication ch.extensions))
+      (`Fatal (`InvalidClientHello `Has0rttAfterHRR))
+  in
   Tracing.sexpf ~tag:"version" ~f:sexp_of_tls_version `TLS_1_3 ;
 
   let ciphers =
     filter_map ~f:Ciphersuite.any_ciphersuite_to_ciphersuite13 ch.ciphersuites
   in
 
-  ( match map_find ~f:(function `SupportedGroups gs -> Some gs | _ -> None) ch.extensions with
-    | None -> Error (`Fatal (`InvalidClientHello `NoSupportedGroupExtension))
-    | Some gs -> Ok (filter_map ~f:Core.named_group_to_group gs )) >>= fun groups ->
+  let* groups =
+    let* gs =
+      Option.to_result
+        ~none:(`Fatal (`InvalidClientHello `NoSupportedGroupExtension))
+        (map_find ~f:(function `SupportedGroups gs -> Some gs | _ -> None) ch.extensions)
+    in
+    Ok (filter_map ~f:Core.named_group_to_group gs)
+  in
 
-  ( match map_find ~f:(function `KeyShare ks -> Some ks | _ -> None) ch.extensions with
-    | None -> Error (`Fatal (`InvalidClientHello `NoKeyShareExtension))
-    | Some ks ->
-      List.fold_left (fun acc (g, ks) ->
-          acc >>| fun acc ->
-          match Core.named_group_to_group g with
-          | None -> acc
-          | Some g -> ((g, ks) :: acc))
-        (Ok []) ks ) >>= fun keyshares ->
+  let* keyshares =
+    let* ks =
+      Option.to_result
+        ~none:(`Fatal (`InvalidClientHello `NoKeyShareExtension))
+        (map_find ~f:(function `KeyShare ks -> Some ks | _ -> None) ch.extensions)
+    in
+    List.fold_left (fun acc (g, ks) ->
+        let* acc = acc in
+        match Core.named_group_to_group g with
+        | None -> Ok acc
+        | Some g -> Ok ((g, ks) :: acc))
+      (Ok []) ks
+  in
 
   let base_server_hello ?epoch cipher extensions =
     let ciphersuite = (cipher :> Ciphersuite.ciphersuite) in
@@ -98,17 +107,21 @@ let answer_client_hello ~hrr state ch raw =
     | _, Some keyshare ->
       (* DHE - full handshake *)
 
-      (if hrr then
-         match map_find ~f:(function `Cookie c -> Some c | _ -> None) ch.extensions with
-         | None -> Error (`Fatal (`InvalidClientHello `NoCookie))
-         | Some c ->
-           (* log is: 254 00 00 length c :: HRR *)
-           let hash_hdr = Writer.assemble_message_hash (Cstruct.length c) in
-           let hrr = { retry_version = `TLS_1_3 ; ciphersuite = cipher ; sessionid = ch.sessionid ; selected_group = group ; extensions = [ `Cookie c ]} in
-           let hs_buf = Writer.assemble_handshake (HelloRetryRequest hrr) in
-           Ok (Cstruct.concat [ hash_hdr ; c ; hs_buf ])
-       else
-         Ok Cstruct.empty) >>= fun log ->
+      let* log =
+        if hrr then
+          let* c =
+            Option.to_result
+              ~none:(`Fatal (`InvalidClientHello `NoCookie))
+              (map_find ~f:(function `Cookie c -> Some c | _ -> None) ch.extensions)
+          in
+          (* log is: 254 00 00 length c :: HRR *)
+          let hash_hdr = Writer.assemble_message_hash (Cstruct.length c) in
+          let hrr = { retry_version = `TLS_1_3 ; ciphersuite = cipher ; sessionid = ch.sessionid ; selected_group = group ; extensions = [ `Cookie c ]} in
+          let hs_buf = Writer.assemble_handshake (HelloRetryRequest hrr) in
+          Ok (Cstruct.concat [ hash_hdr ; c ; hs_buf ])
+        else
+          Ok Cstruct.empty
+      in
 
       let hostname = hostname ch in
       let hlen = Mirage_crypto.Hash.digest_size (Ciphersuite.hash13 cipher) in
@@ -200,7 +213,7 @@ let answer_client_hello ~hrr state ch raw =
       let _, early_traffic_ctx = Handshake_crypto13.early_traffic early_secret raw in
 
       let secret, public = Handshake_crypto13.dh_gen_key group in
-      Handshake_crypto13.dh_shared secret keyshare >>= fun es ->
+      let* es = Handshake_crypto13.dh_shared secret keyshare in
       let hs_secret = Handshake_crypto13.derive early_secret es in
       Tracing.cs ~tag:"hs secret" hs_secret.secret ;
 
@@ -211,16 +224,21 @@ let answer_client_hello ~hrr state ch raw =
       let log = log <+> raw <+> sh_raw in
       let server_hs_secret, server_ctx, client_hs_secret, client_ctx = hs_ctx hs_secret log in
 
-      ( match map_find ~f:(function `SignatureAlgorithms sa -> Some sa | _ -> None) ch.extensions with
-            | None -> Error (`Fatal (`InvalidClientHello `NoSignatureAlgorithmsExtension))
-            | Some sa -> Ok sa ) >>= fun sigalgs ->
+      let* sigalgs =
+        Option.to_result
+          ~none:(`Fatal (`InvalidClientHello `NoSignatureAlgorithmsExtension))
+          (map_find ~f:(function `SignatureAlgorithms sa -> Some sa | _ -> None) ch.extensions)
+      in
       (* TODO respect certificate_signature_algs if present *)
 
       let f = supports_key_usage ~not_present:true `Digital_signature in
-      (agreed_cert ~f ~signature_algorithms:sigalgs config.Config.own_certificates hostname >>= function
-        | (c::cs, priv) -> Ok (c::cs, priv)
-        | _ -> Error (`Fatal `InvalidSession)) >>= fun (chain, priv) ->
-      alpn_protocol config ch >>= fun alpn_protocol ->
+      let* chain, priv =
+        let* r = agreed_cert ~f ~signature_algorithms:sigalgs config.Config.own_certificates hostname in
+        match r with
+        | c::cs, priv -> Ok (c::cs, priv)
+        | _ -> Error (`Fatal `InvalidSession)
+      in
+      let* alpn_protocol = alpn_protocol config ch in
       let session =
         let common_session_data13 = { session.common_session_data13 with
                                       own_name = hostname ; own_certificate = chain ;
@@ -241,7 +259,7 @@ let answer_client_hello ~hrr state ch raw =
       Tracing.sexpf ~tag:"handshake-out" ~f:sexp_of_tls_handshake ee ;
       let log = Cstruct.append log ee_raw in
 
-      begin
+      let* c_out, log, session' =
         if session.resumed then
           Ok ([], log, session)
         else
@@ -270,14 +288,17 @@ let answer_client_hello ~hrr state ch raw =
           let log = log <+> cert_raw in
 
           let tbs = Mirage_crypto.Hash.digest (Ciphersuite.hash13 cipher) log in
-          signature `TLS_1_3 ~context_string:"TLS 1.3, server CertificateVerify"
-            tbs (Some sigalgs) config.Config.signature_algorithms priv >>| fun signed ->
+          let* signed =
+            signature `TLS_1_3
+              ~context_string:"TLS 1.3, server CertificateVerify"
+              tbs (Some sigalgs) config.Config.signature_algorithms priv
+          in
           let cv = CertificateVerify signed in
           let cv_raw = Writer.assemble_handshake cv in
           Tracing.sexpf ~tag:"handshake-out" ~f:sexp_of_tls_handshake cv ;
           let log = log <+> cv_raw in
-          (out @ [cert_raw; cv_raw], log, session)
-      end >>= fun (c_out, log, session') ->
+          Ok (out @ [cert_raw; cv_raw], log, session)
+      in
 
       let master_secret = Handshake_crypto13.derive hs_secret (Cstruct.create hlen) in
       Tracing.cs ~tag:"master-secret" master_secret.secret ;
@@ -294,7 +315,10 @@ let answer_client_hello ~hrr state ch raw =
       in
       let session' = { session' with server_app_secret ; client_app_secret } in
 
-      guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+      let* () =
+        guard (Cstruct.length state.hs_fragment = 0)
+          (`Fatal `HandshakeFragmentsNotEmpty)
+      in
 
       (* send sessionticket early *)
       (* TODO track the nonce across handshakes / newsessionticket messages (i.e. after post-handshake auth) - needs to be unique! *)
@@ -334,24 +358,24 @@ let answer_client_hello ~hrr state ch raw =
            `TLS13 session :: state.session)
       in
       let early_data_left = if List.mem `EarlyDataIndication ch.extensions then config.Config.zero_rtt else 0l in
-      ({ state with machina = Server13 st ; session ; early_data_left },
-       `Record (Packet.HANDSHAKE, sh_raw) ::
-       (match ch.sessionid with
-        | Some _ when not hrr -> [`Record change_cipher_spec]
-        | _ -> []) @
-       [ `Change_enc server_ctx ;
-         `Change_dec (if can_use_early_data then early_traffic_ctx else client_ctx) ;
-         `Record (Packet.HANDSHAKE, ee_raw) ] @
-       List.map (fun data -> `Record (Packet.HANDSHAKE, data)) c_out @
-       [ `Record (Packet.HANDSHAKE, fin_raw) ;
-         `Change_enc server_app_ctx ] @
-       List.map (fun data -> `Record (Packet.HANDSHAKE, data)) st_raw)
+      Ok ({ state with machina = Server13 st ; session ; early_data_left },
+          `Record (Packet.HANDSHAKE, sh_raw) ::
+          (match ch.sessionid with
+           | Some _ when not hrr -> [`Record change_cipher_spec]
+           | _ -> []) @
+          [ `Change_enc server_ctx ;
+            `Change_dec (if can_use_early_data then early_traffic_ctx else client_ctx) ;
+            `Record (Packet.HANDSHAKE, ee_raw) ] @
+          List.map (fun data -> `Record (Packet.HANDSHAKE, data)) c_out @
+          [ `Record (Packet.HANDSHAKE, fin_raw) ;
+            `Change_enc server_app_ctx ] @
+          List.map (fun data -> `Record (Packet.HANDSHAKE, data)) st_raw)
 
 let answer_client_certificate state cert (sd : session_data13) client_fini dec_ctx st raw log =
-  match Reader.parse_certificates_1_3 cert, state.config.Config.authenticator with
-  | Error re, _ -> Error (`Fatal (`ReaderError re))
-  | Ok (_, []), None -> Error (`Fatal `InvalidSession) (* TODO this cannot happen *)
-  | Ok (_ctx, []), Some auth ->
+  let* c = map_reader_error (Reader.parse_certificates_1_3 cert) in
+  match c, state.config.Config.authenticator with
+  | (_, []), None -> Error (`Fatal `InvalidSession) (* TODO this cannot happen *)
+  | (_ctx, []), Some auth ->
     begin match auth ~host:None [] with
       | Ok anchor ->
         let trust_anchor = match anchor with
@@ -364,11 +388,13 @@ let answer_client_certificate state cert (sd : session_data13) client_fini dec_c
         Ok ({ state with machina = Server13 st ; session = `TLS13 sd :: state.session }, [])
       | Error e -> Error (`Error (`AuthenticationFailure e))
     end
-  | Ok (_ctx, cert_exts), auth ->
+  | (_ctx, cert_exts), auth ->
     (* TODO what to do with ctx? send through authenticator? *)
     (* TODO what to do with extensions? *)
     let certs = List.map fst cert_exts in
-    validate_chain auth certs None >>| fun (peer_certificate, received_certificates, peer_certificate_chain, trust_anchor) ->
+    let* peer_certificate, received_certificates, peer_certificate_chain, trust_anchor =
+      validate_chain auth certs state.config.Config.ip None
+    in
     let sd' = let common_session_data13 = {
         sd.common_session_data13 with
         received_certificates ;
@@ -379,24 +405,29 @@ let answer_client_certificate state cert (sd : session_data13) client_fini dec_c
       { sd with common_session_data13 }
     in
     let st = AwaitClientCertificateVerify13 (sd', client_fini, dec_ctx, st, log <+> raw) in
-    ({ state with machina = Server13 st }, [])
+    Ok ({ state with machina = Server13 st }, [])
 
 let answer_client_certificate_verify state cv (sd : session_data13) client_fini dec_ctx st raw log =
   let tbs = Mirage_crypto.Hash.digest (Ciphersuite.hash13 sd.ciphersuite13) log in
-  verify_digitally_signed `TLS_1_3
-    ~context_string:"TLS 1.3, client CertificateVerify"
-    state.config.Config.signature_algorithms cv tbs
-    sd.common_session_data13.peer_certificate >>| fun () ->
+  let* () =
+    verify_digitally_signed `TLS_1_3
+      ~context_string:"TLS 1.3, client CertificateVerify"
+      state.config.Config.signature_algorithms cv tbs
+      sd.common_session_data13.peer_certificate
+  in
   let st = AwaitClientFinished13 (client_fini, dec_ctx, st, log <+> raw) in
-  ({ state with machina = Server13 st ; session = `TLS13 sd :: state.session }, [])
+  Ok ({ state with machina = Server13 st ; session = `TLS13 sd :: state.session }, [])
 
 let answer_client_finished state fin client_fini dec_ctx st raw log =
   match state.session with
   | `TLS13 session :: rest ->
     let hash = Ciphersuite.hash13 session.ciphersuite13 in
     let data = finished hash client_fini log in
-    guard (Cstruct.equal data fin) (`Fatal `BadFinished) >>= fun () ->
-    guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>| fun () ->
+    let* () = guard (Cstruct.equal data fin) (`Fatal `BadFinished) in
+    let* () =
+      guard (Cstruct.length state.hs_fragment = 0)
+        (`Fatal `HandshakeFragmentsNotEmpty)
+    in
     let session' = match st, state.config.Config.ticket_cache with
       | None, _ | _, None -> session
       | Some st, Some cache ->
@@ -410,7 +441,7 @@ let answer_client_finished state fin client_fini dec_ctx st raw log =
         session
     in
     let state' = { state with machina = Server13 Established13 ; session = `TLS13 session' :: rest } in
-    (state', [ `Change_dec dec_ctx ])
+    Ok (state', [ `Change_dec dec_ctx ])
   | _ -> Error (`Fatal `InvalidSession)
 
 let handle_end_of_early_data state cf hs_ctx cc st buf log =
@@ -425,7 +456,10 @@ let handle_end_of_early_data state cf hs_ctx cc st buf log =
 let handle_key_update state req =
   match state.session with
   | `TLS13 session :: _ ->
-    guard (Cstruct.length state.hs_fragment = 0) (`Fatal `HandshakeFragmentsNotEmpty) >>= fun () ->
+    let* () =
+      guard (Cstruct.length state.hs_fragment = 0)
+        (`Fatal `HandshakeFragmentsNotEmpty)
+    in
     let client_app_secret, client_ctx =
       app_secret_n_1 session.master_secret session.client_app_secret
     in
@@ -448,21 +482,19 @@ let handle_key_update state req =
 
 let handle_handshake cs hs buf =
   let open Reader in
-  match parse_handshake buf with
-  | Ok handshake ->
-     Tracing.sexpf ~tag:"handshake-in" ~f:sexp_of_tls_handshake handshake;
-     (match cs, handshake with
-      | AwaitClientHelloHRR13, ClientHello ch ->
-        answer_client_hello ~hrr:true hs ch buf
-      | AwaitClientCertificate13 (sd, cf, cc, st, log), Certificate cert ->
-        answer_client_certificate hs cert sd cf cc st buf log
-      | AwaitClientCertificateVerify13 (sd, cf, cc, st, log), CertificateVerify cv ->
-        answer_client_certificate_verify hs cv sd cf cc st buf log
-      | AwaitClientFinished13 (cf, cc, st, log), Finished x ->
-        answer_client_finished hs x cf cc st buf log
-      | AwaitEndOfEarlyData13 (cf, hs_c, cc, st, log), EndOfEarlyData ->
-        handle_end_of_early_data hs cf hs_c cc st buf log
-      | Established13, KeyUpdate req ->
-        handle_key_update hs req
-      | _, hs -> Error (`Fatal (`UnexpectedHandshake hs)) )
-  | Error re -> Error (`Fatal (`ReaderError re))
+  let* handshake = map_reader_error (parse_handshake buf) in
+  Tracing.sexpf ~tag:"handshake-in" ~f:sexp_of_tls_handshake handshake;
+  match cs, handshake with
+  | AwaitClientHelloHRR13, ClientHello ch ->
+    answer_client_hello ~hrr:true hs ch buf
+  | AwaitClientCertificate13 (sd, cf, cc, st, log), Certificate cert ->
+    answer_client_certificate hs cert sd cf cc st buf log
+  | AwaitClientCertificateVerify13 (sd, cf, cc, st, log), CertificateVerify cv ->
+    answer_client_certificate_verify hs cv sd cf cc st buf log
+  | AwaitClientFinished13 (cf, cc, st, log), Finished x ->
+    answer_client_finished hs x cf cc st buf log
+  | AwaitEndOfEarlyData13 (cf, hs_c, cc, st, log), EndOfEarlyData ->
+    handle_end_of_early_data hs cf hs_c cc st buf log
+  | Established13, KeyUpdate req ->
+    handle_key_update hs req
+  | _, hs -> Error (`Fatal (`UnexpectedHandshake hs))

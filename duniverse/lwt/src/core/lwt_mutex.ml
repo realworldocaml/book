@@ -14,7 +14,7 @@ module Lwt_sequence = Lwt_sequence
 
 open Lwt.Infix
 
-type t = { mutable locked : bool; mutable waiters : unit Lwt.u Lwt_sequence.t  }
+type t = { mutable locked : bool; waiters : unit Lwt.u Lwt_sequence.t  }
 
 let create () = { locked = false; waiters = Lwt_sequence.create () }
 

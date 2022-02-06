@@ -1,23 +1,43 @@
 (* (c) 2017 Hannes Mehnert, all rights reserved *)
 
-open Astring
-
 type 'a s = string array
 
 let root = Array.make 0 ""
 
+let [@inline always] is_letter = function
+  | 'a'..'z' | 'A'..'Z' -> true
+  | _ -> false
+
+let [@inline always] is_ldh = function
+  | '0'..'9' | 'a'..'z' | 'A'..'Z' | '-' -> true
+  | _ -> false
+
+(* from OCaml 4.13 bytes.ml *)
+let for_all p s =
+  let n = String.length s in
+  let rec loop i =
+    if i = n then true
+    else if p (String.unsafe_get s i) then loop (succ i)
+    else false in
+  loop 0
+
+let exists p s =
+  let n = String.length s in
+  let rec loop i =
+    if i = n then false
+    else if p (String.unsafe_get s i) then true
+    else loop (succ i) in
+  loop 0
+
 let [@inline always] check_host_label s =
   String.get s 0 <> '-' && (* leading may not be '-' *)
-  String.for_all (function
-      | 'a'..'z' | 'A'..'Z' | '0'..'9' | '-' -> true
-      | _ -> false)
-    s (* only LDH (letters, digits, hyphen)! *)
+  for_all is_ldh s (* only LDH (letters, digits, hyphen)! *)
 
 let host_exn t =
   (* TLD should not be all-numeric! *)
   if
     (if Array.length t > 0 then
-       String.exists Char.Ascii.is_letter (Array.get t 0)
+       exists is_letter (Array.get t 0)
      else true) &&
     Array.for_all check_host_label t
   then
@@ -30,27 +50,18 @@ let host t =
   | Invalid_argument e -> Error (`Msg e)
 
 let check_service_label s =
-  match String.cut ~sep:"_" s with
-  | None -> false
-  | Some (empty, srv) ->
-    if String.length empty > 0 then
-      false
-    else
-      let slen = String.length srv in
-      if slen > 0 && slen <= 15 then
-        (* service must be LDH,
-           hyphen _not_ at begin nor end, no hyphen following a hyphen
-           1-15 characters *)
-        let v, _ = String.fold_left (fun (valid, h) c ->
-            let h' = c = '-' in
-            let v = Char.Ascii.(is_letter c || is_digit c) || h' in
-            let hh = not (h && h') in
-            (v && valid && hh, h'))
-            (true, false) srv
-        in
-        v && String.get srv 0 <> '-' && String.get srv (pred slen) <> '-'
-      else
-        false
+  if String.length s > 0 && String.unsafe_get s 0 = '_' then
+    let srv = String.sub s 1 (String.length s - 1) in
+    let slen = String.length srv in
+    (* service label: 1-15 characters; LDH; hyphen _not_ at begin nor end; no hyphen following a hyphen *)
+    slen > 0 && slen <= 15 &&
+    for_all is_ldh srv &&
+    String.unsafe_get srv 0 <> '-' &&
+    String.unsafe_get srv (slen - 1) <> '-' &&
+    List.for_all (fun l -> l <> "")
+      (String.split_on_char '-' srv)
+  else
+    false
 
 let [@inline always] is_proto s =
   s = "_tcp" || s = "_udp" || s = "_sctp"
@@ -157,15 +168,15 @@ let of_strings_exn xs =
   in
   let t = Array.of_list labels in
   if check t then t
-  else invalid_arg "invalid host name"
+  else invalid_arg "invalid domain name"
 
 let of_strings xs =
   try Ok (of_strings_exn xs) with
   | Invalid_argument e -> Error (`Msg e)
 
-let of_string s = of_strings (String.cuts ~sep:"." s)
+let of_string s = of_strings (String.split_on_char '.' s)
 
-let of_string_exn s = of_strings_exn (String.cuts ~sep:"." s)
+let of_string_exn s = of_strings_exn (String.split_on_char '.' s)
 
 let of_array a = a
 
@@ -175,32 +186,29 @@ let to_strings ?(trailing = false) dn =
   let labels = Array.to_list dn in
   List.rev (if trailing then "" :: labels else labels)
 
-let to_string ?trailing dn = String.concat ~sep:"." (to_strings ?trailing dn)
+let to_string ?trailing dn = String.concat "." (to_strings ?trailing dn)
 
 let canonical t =
   let str = to_string t in
-  of_string_exn (String.Ascii.lowercase str)
+  of_string_exn (String.lowercase_ascii str)
 
-(*BISECT-IGNORE-BEGIN*)
-let pp ppf xs = Fmt.string ppf (to_string xs)
-(*BISECT-IGNORE-END*)
+let pp ppf xs = Format.pp_print_string ppf (to_string xs)
 
 let compare_label a b =
-  String.compare (String.Ascii.lowercase a) (String.Ascii.lowercase b)
+  String.compare (String.lowercase_ascii a) (String.lowercase_ascii b)
 
 let compare_domain cmp_sub a b =
-  let la = Array.length a in
-  match compare la (Array.length b) with
-  | 0 ->
-    let rec cmp idx =
-      if idx = la then 0
-      else
-        match cmp_sub (Array.get a idx) (Array.get b idx) with
-        | 0 -> cmp (succ idx)
-        | x -> x
-    in
-    cmp 0
-  | x -> x
+  let al = Array.length a and bl = Array.length b in
+  let rec cmp idx =
+    if al = bl && al = idx then 0
+    else if al = idx then -1
+    else if bl = idx then 1
+    else
+      match cmp_sub (Array.get a idx) (Array.get b idx) with
+      | 0 -> cmp (succ idx)
+      | x -> x
+  in
+  cmp 0
 
 let compare = compare_domain compare_label
 

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -166,11 +163,26 @@ let choose s =
       else
         A.choose lo
 
-let compare =
-  compare (* this is [Generic.compare] *)
+let compare s1 s2 =
+  if s1 == s2 then 0
+  else match s1, s2 with
+  | E  , E   -> 0
+  | D _, E   -> 1
+  | E  , D _ -> -1
+  | D (hi1, lo1), D (hi2, lo2) ->
+    begin match A.compare hi1 hi2 with
+      | 0 -> A.compare lo1 lo2
+      | n -> n
+    end
 
 let equal s1 s2 =
-  s1 = s2
+  (s1 == s2) ||
+  match s1, s2 with
+  | E , E -> true
+  | D _, E | E , D _ -> false
+  | D (hi1, lo1), D (hi2, lo2) ->
+    A.equal hi1 hi2 &&
+    A.equal lo1 lo2
 
 let disjoint s1 s2 =
   match s1, s2 with
@@ -179,3 +191,50 @@ let disjoint s1 s2 =
       true
   | D (hi1, lo1), D (hi2, lo2) ->
       A.disjoint hi1 hi2 && A.disjoint lo1 lo2
+
+let quick_subset s1 s2 =
+  match s1, s2 with
+  | E, _ | _, E -> false
+  | D (hi1, lo1), D (hi2, lo2) ->
+    A.quick_subset lo1 lo2 ||
+    A.quick_subset hi1 hi2
+
+let compare_minimum s1 s2 =
+  match s1, s2 with
+  | E, E -> 0
+  | E, _ -> -1
+  | _, E -> 1
+  | D (hi1, lo1), D (hi2, lo2) ->
+    match A.is_empty lo1, A.is_empty lo2 with
+    | true , true  -> A.compare_minimum hi1 hi2
+    | false, false -> A.compare_minimum lo1 lo2
+    | true , false -> 1
+    | false, true  -> -1
+
+let sorted_union xs =
+  List.fold_left union empty xs
+
+let extract_unique_prefix s1 s2 =
+  match s1, s2 with
+  | E, _ -> E, E
+  | _, E -> invalid_arg "extract_unique_prefix: r < l"
+  | D (hi1, lo1), D (hi2, lo2) ->
+    if A.is_empty lo2 then
+      let p, r = A.extract_unique_prefix hi1 hi2 in
+      (construct p lo1, construct r A.empty)
+    else if A.is_empty lo1 then
+      invalid_arg "extract_unique_prefix: r < l"
+    else
+      let p, r = A.extract_unique_prefix lo1 lo2 in
+      (construct A.empty p, construct hi1 r)
+
+let extract_shared_prefix s1 s2 =
+  match s1, s2 with
+  | _, E | E, _ -> E, (s1, s2)
+  | D (hi1, lo1), D (hi2, lo2) ->
+    if A.equal lo1 lo2 then
+      let hi, (hi1, hi2) = A.extract_shared_prefix hi1 hi2 in
+      (construct hi lo1, (construct hi1 A.empty, construct hi2 A.empty))
+    else
+      let lo, (lo1, lo2) = A.extract_shared_prefix lo1 lo2 in
+      (construct A.empty lo, (construct hi1 lo1, construct hi2 lo2))

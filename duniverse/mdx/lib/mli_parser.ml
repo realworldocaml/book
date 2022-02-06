@@ -1,7 +1,14 @@
-open! Compat
-
 module Code_block = struct
-  type t = { location : Odoc_parser.Loc.span; contents : string }
+  type metadata = {
+    language_tag : string Odoc_parser.Loc.with_location;
+    labels : string Odoc_parser.Loc.with_location option;
+  }
+
+  type t = {
+    location : Odoc_parser.Loc.span;
+    metadata : metadata option;
+    contents : string;
+  }
 end
 
 let drop_last lst =
@@ -51,8 +58,14 @@ let extract_code_blocks ~(location : Lexing.position) ~docstring =
     List.map
       (fun block ->
         match Odoc_parser.Loc.value block with
-        | `Code_block (_metadata, { Odoc_parser.Loc.value = contents; _ }) ->
-            [ { Code_block.location = block.location; contents } ]
+        | `Code_block (metadata, { Odoc_parser.Loc.value = contents; _ }) ->
+            let metadata =
+              Option.map
+                (fun (language_tag, labels) ->
+                  Code_block.{ language_tag; labels })
+                metadata
+            in
+            [ { Code_block.location = block.location; metadata; contents } ]
         | `List (_, _, lists) -> List.map acc lists |> List.concat
         | _ -> [])
       blocks
@@ -118,6 +131,53 @@ let docstring_code_blocks str =
     (docstrings (Lexing.from_string str))
   |> List.concat
 
+let make_block ~loc code_block =
+  let handle_header = function
+    | Some Code_block.{ language_tag; labels } -> (
+        let header =
+          Block.Header.of_string (Odoc_parser.Loc.value language_tag)
+        in
+        match labels with
+        | None -> Ok (header, [])
+        | Some labels -> (
+            let labels = Odoc_parser.Loc.value labels |> String.trim in
+            match Label.of_string labels with
+            | Ok labels -> Ok (header, labels)
+            | Error msgs -> Error (List.hd msgs)
+            (* TODO: Report precise location *)))
+    | None ->
+        (* If not specified, blocks are run as ocaml blocks *)
+        Ok (Some OCaml, [])
+  in
+  match handle_header code_block.Code_block.metadata with
+  | Error _ as e -> e
+  | Ok (header, labels) ->
+      let contents = String.split_on_char '\n' code_block.contents in
+      Block.mk ~loc ~section:None ~labels ~header ~contents ~legacy_labels:false
+        ~errors:[]
+
+let code_block_markup code_block =
+  let open Document in
+  let opening =
+    match code_block.Code_block.metadata with
+    | Some { language_tag; labels } ->
+        let labels =
+          match labels with
+          | Some s -> [ Text " "; Text (Odoc_parser.Loc.value s) ]
+          | None -> []
+        in
+        [ Text "{@"; Text (Odoc_parser.Loc.value language_tag) ]
+        @ labels @ [ Text "[" ]
+    | None -> [ Text "{[" ]
+  in
+  let hpad =
+    let has_several_lines = String.contains code_block.contents '\n' in
+    let column = code_block.location.start.column in
+    if not has_several_lines then ""
+    else Astring.String.v ~len:column (fun _ -> ' ')
+  in
+  (opening, [ Text (hpad ^ "]}") ])
+
 let parse_mli file_contents =
   (* Find the locations of the code blocks within [file_contents], then slice it up into
      [Text] and [Block] parts by using the starts and ends of those blocks as
@@ -132,22 +192,15 @@ let parse_mli file_contents =
           Document.Text
             (slice lines ~start:!cursor ~end_:code_block.location.start)
         in
-        let column = code_block.location.start.column in
-        let contents = Compat.String.split_on_char '\n' code_block.contents in
         let block =
-          match
-            Block.mk ~loc ~section:None ~labels:[] ~header:(Some OCaml)
-              ~contents ~legacy_labels:false ~errors:[]
-          with
+          match make_block ~loc code_block with
           | Ok block -> Document.Block block
-          | Error _ -> failwith "Error creating block"
+          | Error (`Msg msg) ->
+              failwith (Fmt.str "Error creating block: %s" msg)
         in
-        let hpad =
-          if List.length contents = 1 then ""
-          else Astring.String.v ~len:column (fun _ -> ' ')
-        in
+        let opening, closing = code_block_markup code_block in
         cursor := code_block.location.end_;
-        [ pre_text; Text "{["; block; Text (hpad ^ "]}") ])
+        [ pre_text ] @ opening @ [ block ] @ closing)
       code_blocks
     |> List.concat
   in
@@ -162,7 +215,7 @@ let parse_mli file_contents =
   in
   if eof_is_beyond_location !cursor then
     let remainder = slice lines ~start:!cursor ~end_:eof in
-    if not (Compat.String.equal remainder "") then tokens @ [ Text remainder ]
+    if not (String.equal remainder "") then tokens @ [ Text remainder ]
     else tokens
   else tokens
 

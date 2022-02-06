@@ -1,6 +1,6 @@
 (executables
  (names pp)
- (libraries compiler-libs.common compiler-libs.bytecomp supported_version)
+ (libraries supported_version)
  (flags :standard -w -3))
 
 (ocamllex pp_rewrite)

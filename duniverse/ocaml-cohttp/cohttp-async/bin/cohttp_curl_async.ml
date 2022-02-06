@@ -19,10 +19,7 @@ open Async_kernel
 open Cohttp_async
 
 let show_headers h =
-  Cohttp.Header.iter
-    (fun k v ->
-      List.iter v ~f:(fun v_i -> Logs.info (fun m -> m "%s: %s%!" k v_i)))
-    h
+  Cohttp.Header.iter (fun k v -> Logs.info (fun m -> m "%s: %s%!" k v)) h
 
 let make_net_req uri meth' body () =
   let meth = Cohttp.Code.method_of_string meth' in
@@ -52,4 +49,4 @@ let _ =
            (optional_with_default "" string)
            ~doc:" Data to send when using POST")
     make_net_req
-  |> run
+  |> Command_unix.run

@@ -3,6 +3,6 @@
   "namespace": "Bisect",
   "sources": [
     "src/common",
-    "src/runtime/bucklescript"
+    "src/runtime/js"
   ]
 }

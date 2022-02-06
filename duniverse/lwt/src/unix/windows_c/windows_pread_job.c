@@ -47,7 +47,12 @@ static value result_pread(struct job_pread *job)
 {
     value result;
     DWORD error = job->error_code;
-    if (error) {
+    if (error == ERROR_BROKEN_PIPE) {
+        /* The write handle for an anonymous pipe has been closed. We match the
+           Unix behavior, and treat this as a zero-read instead of a Unix_error.
+           See OCaml PR #4790. */
+        job->result = 0;
+    } else if (error) {
         caml_remove_generational_global_root(&job->string);
         lwt_unix_free_job(&job->job);
         win32_maperr(error);

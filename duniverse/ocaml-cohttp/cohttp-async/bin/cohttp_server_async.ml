@@ -126,7 +126,7 @@ let start_server docroot port index cert_file key_file verbose () =
 
 let () =
   let open Async_command in
-  run
+  Command_unix.run
   @@ async_spec ~summary:"Serve the local directory contents via HTTP or HTTPS"
        Spec.(
          empty

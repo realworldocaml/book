@@ -5,6 +5,10 @@ let map_option f = function
   | None -> None
   | Some v -> Some (f v)
 
+let unwrap_option = function
+  | None -> failwith "trying to unwrap a None"
+  | Some v -> v
+
 let page : string -> string =
   let table = Hashtbl.create 7 in
 
@@ -339,6 +343,12 @@ let suites = [
         parse "<p id='first' class=''><p id='second' class='foo bar  baz'>" in
       assert_equal (soup $ "#first" |> classes) [];
       assert_equal (soup $ "#second" |> classes) ["foo"; "bar"; "baz"]);
+
+    ("matches-selector" >:: fun _ ->
+      let soup = parse "<div> <p id='foo'>bar</p> </div>" in
+      let elem = select_one "div p#foo" soup |> unwrap_option in
+      assert_bool "element matches selector" (matches_selector soup "div p#foo" elem)
+    );
 
     ("fold_attributes" >:: fun _ ->
       let s =
@@ -1058,7 +1068,16 @@ let suites = [
 
       assert_equal
         ("<!DOCTYPE html><html></html>" |> parse $ "html" |> to_string)
-        "<html><head></head><body></body></html>");
+        "<html><head></head><body></body></html>";
+
+      let xhtml =
+        {|<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" |} ^
+        {|"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">|}
+      in
+
+      assert_equal
+        (Printf.sprintf "%s<html></html>" xhtml |> parse |> to_string)
+        (Printf.sprintf "%s<html><head></head><body></body></html>" xhtml));
 
     ("R.select_one" >:: fun _ ->
       assert_equal (parse "<p>" |> R.select_one "p" |> name) "p");

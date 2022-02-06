@@ -2,7 +2,7 @@
  (libraries caml) (preprocess no_preprocessing))
 
 (rule (targets shadow_stdlib.mli)
- (deps (:first_dep ../gen/gen.exe) ../../compiler-stdlib/src/caml.cma)
+ (deps ../../compiler-stdlib/src/caml.cma)
  (action
-  (run %{first_dep} -caml-cmi ../../compiler-stdlib/src/.caml.objs/caml.cmi
+  (run ../gen/gen.exe -caml-cmi ../../compiler-stdlib/src/.caml.objs/caml.cmi
    ../../compiler-stdlib/src/.caml.objs/byte/caml.cmi -o %{targets})))

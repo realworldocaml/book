@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Astring
@@ -24,11 +23,11 @@ let create ?(path = true) ?(mode = 0o755) dir =
       else R.error_msgf "create directory %a: %a: %s"
              Fpath.pp dir Fpath.pp d (uerror e)
   in
-  exists dir >>= function
-  | true -> Ok false
+  Bos_os_path.exists dir >>= function
+  | true -> must_exist dir >>= fun _ -> Ok false
   | false ->
       match path with
-      | false -> mkdir dir mode >>= fun () -> Ok false
+      | false -> mkdir dir mode >>= fun () -> Ok true
       | true ->
           let rec dirs_to_create p acc = exists p >>= function
           | true -> Ok acc
@@ -174,7 +173,7 @@ let default_tmp = Bos_os_tmp.default_dir
 let set_default_tmp = Bos_os_tmp.set_default_dir
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

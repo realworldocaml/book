@@ -54,12 +54,16 @@ val blit : t -> int -> t -> int -> int -> unit
   (** [blit buf1 ofs1 buf2 ofs2 len] copies [len] bytes from [buf1]
       starting at offset [ofs1] to [buf2] starting at offset [ofs2]. *)
 
+val blit_from_string : string -> int -> t -> int -> int -> unit
+  (** Same as {!blit} but the first buffer is a [String.t] instead of a byte
+      array. *)
+
 val blit_from_bytes : bytes -> int -> t -> int -> int -> unit
-  (** Same as {!blit} but the first buffer is a string instead of a byte
+  (** Same as {!blit} but the first buffer is a [Bytes.t] instead of a byte
       array. *)
 
 val blit_to_bytes : t -> int -> bytes -> int -> int -> unit
-  (** Same as {!blit} but the second buffer is a string instead of a byte
+  (** Same as {!blit} but the second buffer is a [Bytes.t] instead of a byte
       array. *)
 
 val unsafe_blit : t -> int -> t -> int -> int -> unit
@@ -67,6 +71,9 @@ val unsafe_blit : t -> int -> t -> int -> int -> unit
 
 val unsafe_blit_from_bytes : bytes -> int -> t -> int -> int -> unit
   (** Same as {!Lwt_bytes.blit_from_bytes} but without bounds checking. *)
+
+val unsafe_blit_from_string : string -> int -> t -> int -> int -> unit
+(** Same as {!Lwt_bytes.blit_from_string} but without bounds checking. *)
 
 val unsafe_blit_to_bytes : t -> int -> bytes -> int -> int -> unit
   (** Same as {!Lwt_bytes.blit_to_bytes} but without bounds checking. *)
@@ -97,7 +104,7 @@ external unsafe_fill : t -> int -> int -> char -> unit = "lwt_unix_fill_bytes" "
 (** {2 IOs} *)
 
 (** The following functions behave similarly to the ones in {!Lwt_unix}, except
-    they use byte arrays instead of strings, and they never perform extra copies
+    they use byte arrays instead of [Bytes.t], and they never perform extra copies
     of the data. *)
 
 val read : Lwt_unix.file_descr -> t -> int -> int -> int Lwt.t

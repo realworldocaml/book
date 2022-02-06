@@ -403,7 +403,7 @@ compiler warning.
 
   [@@@warning "-10"]
   let b = Sys.get_argv (); ()
-  end
+  end;;
 Line 4, characters 11-26:
 Warning 10 [non-unit-statement]: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
@@ -423,12 +423,12 @@ should not be used in new code:
 # module Planets = struct
     let earth = true
     let pluto = true
-  end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+  end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."];;
 module Planets : sig val earth : bool val pluto : bool end
 # module Planets2016 = struct
     let earth = true
     let pluto = false
-  end
+  end;;
 module Planets2016 : sig val earth : bool val pluto : bool end
 ```
 
@@ -438,12 +438,12 @@ to the newer code.  Now if we try to use the value that has been marked as
 deprecated, the compiler will issue a warning.
 
 ```ocaml env=main
-# let is_pluto_a_planet = Planets.pluto
+# let is_pluto_a_planet = Planets.pluto;;
 Line 1, characters 25-38:
 Alert deprecated: module Planets
 Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
 val is_pluto_a_planet : bool = true
-# let is_pluto_a_planet = Planets2016.pluto
+# let is_pluto_a_planet = Planets2016.pluto;;
 val is_pluto_a_planet : bool = false
 ```
 
@@ -455,12 +455,12 @@ constant literal.
 ```ocaml env=main
 # type program_result =
   | Error of string [@warn_on_literal_pattern]
-  | Exit_code of int
+  | Exit_code of int;;
 type program_result = Error of string | Exit_code of int
 # let exit_with = function
   | Error "It blew up" -> 1
   | Exit_code code -> code
-  | Error _ -> 100
+  | Error _ -> 100;;
 Line 2, characters 11-23:
 Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 this constructor's arguments. They are only for information

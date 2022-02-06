@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -116,6 +113,7 @@ module T = struct
   open MenhirLib.EngineTypes
 
   exception Error
+  exception Abort
 
   (* By convention, a semantic action returns a new stack. It does not
      affect [env]. *)
@@ -139,7 +137,7 @@ module T = struct
         Array.make n CstError (* dummy *)
       and startp =
         ref Lexing.dummy_pos
-      and endp=
+      and endp =
         ref Lexing.dummy_pos
       and current =
         ref env.current
@@ -182,6 +180,15 @@ module T = struct
       done;
 
       (* Done popping. *)
+
+      (* As a special case, under the simplified strategy, if the production
+         that we are reducing involves the [error] token, then we assume that
+         the semantic action aborts the parser. We might otherwise enter an
+         infinite loop. *)
+
+      if Settings.strategy = `Simplified
+      && not (Production.error_free prod) then
+        raise Abort;
 
       (* Construct and push a new stack cell. The associated semantic
          value is a new concrete syntax tree. *)
@@ -270,7 +277,7 @@ let interpret nt log lexer lexbuf =
 
   try
     Some (E.entry strategy (Lr1.entry_of_nt nt) lexer lexbuf)
-  with T.Error ->
+  with T.Error | T.Abort ->
     None
 
 (* ------------------------------------------------------------------------ *)

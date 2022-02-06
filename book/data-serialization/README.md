@@ -60,12 +60,12 @@ converting s-expressions to and from strings. Let's rewrite our example
 s-expression in terms of this type:
 
 ```ocaml env=print_sexp
-# open Core
+# open Core;;
 # Sexp.List [
     Sexp.Atom "this";
     Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
     Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
-  ]
+  ];;
 - : Sexp.t = (this (is an) (s expression))
 ```
 
@@ -74,9 +74,9 @@ toplevel. This pretty printer is based on the functions in `Sexp` for
 converting s-expressions to and from strings: [pretty printers]{.idx}
 
 ```ocaml env=sexp_printer
-# Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"])
+# Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);;
 - : string = "(1 2)"
-# Sexp.of_string ("(1 2 (3 4))")
+# Sexp.of_string ("(1 2 (3 4))");;
 - : Sexp.t = (1 2 (3 4))
 ```
 
@@ -86,11 +86,11 @@ conversion functions defined in the respective modules for integers, strings,
 and exceptions:
 
 ```ocaml env=to_from_sexp
-# Int.sexp_of_t 3
+# Int.sexp_of_t 3;;
 - : Sexp.t = 3
-# String.sexp_of_t "hello"
+# String.sexp_of_t "hello";;
 - : Sexp.t = hello
-# Exn.sexp_of_t (Invalid_argument "foo")
+# Exn.sexp_of_t (Invalid_argument "foo");;
 - : Sexp.t = (Invalid_argument foo)
 ```
 
@@ -98,9 +98,9 @@ It's also possible to convert more complex types such as lists or
 arrays that are polymorphic across the types that they can contain:
 
 ```ocaml env=to_from_sexp
-# List.sexp_of_t
+# List.sexp_of_t;;
 - : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>
-# List.sexp_of_t Int.sexp_of_t [1; 2; 3]
+# List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 - : Sexp.t = (1 2 3)
 ```
 
@@ -117,11 +117,11 @@ an s-expression that doesn't match the structure of the OCaml type in
 question.
 
 ```ocaml env=to_from_sexp
-# List.t_of_sexp
+# List.t_of_sexp;;
 - : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>
-# List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)")
+# List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 - : int list = [1; 2; 3]
-# List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)")
+# List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 Exception:
 (Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 ```
@@ -178,14 +178,14 @@ s-expression? You can of course write it yourself manually. Here's an
 example: [s-expressions/generating from OCaml types]{.idx}
 
 ```ocaml env=manually_making_sexp
-# type t = { foo: int; bar: float }
+# type t = { foo: int; bar: float };;
 type t = { foo : int; bar : float; }
 # let sexp_of_t t =
     let a x = Sexp.Atom x and l x = Sexp.List x in
     l [ l [a "foo"; Int.sexp_of_t t.foo  ];
-  l [a "bar"; Float.sexp_of_t t.bar]; ]
+  l [a "bar"; Float.sexp_of_t t.bar]; ];;
 val sexp_of_t : t -> Sexp.t = <fun>
-# sexp_of_t { foo = 3; bar = -5.5 }
+# sexp_of_t { foo = 3; bar = -5.5 };;
 - : Sexp.t = ((foo 3) (bar -5.5))
 ```
 
@@ -205,17 +205,17 @@ larger collection of useful extensions that includes `ppx_sexp_conv`.
 Sexplib package]{.idx}
 
 ```ocaml env=auto_making_sexp
-# #require "ppx_jane"
+# #require "ppx_jane";;
 ```
 
 And now we can use the extension as follows.
 
 ```ocaml env=auto_making_sexp
-# type t = { foo: int; bar: float } [@@deriving sexp]
+# type t = { foo: int; bar: float } [@@deriving sexp];;
 type t = { foo : int; bar : float; }
 val t_of_sexp : Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexp.t = <fun>
-# t_of_sexp (Sexp.of_string "((bar 35) (foo 3))")
+# t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
 - : t = {foo = 3; bar = 35.}
 ```
 
@@ -226,13 +226,13 @@ discussed in
 improve the ability of Core to generate a useful string representation:
 
 ```ocaml env=auto_making_sexp
-# exception Bad_message of string list
+# exception Bad_message of string list;;
 exception Bad_message of string list
-# Exn.to_string (Bad_message ["1";"2";"3"])
+# Exn.to_string (Bad_message ["1";"2";"3"]);;
 - : string = "(\"Bad_message(_)\")"
-# exception Good_message of string list [@@deriving sexp]
+# exception Good_message of string list [@@deriving sexp];;
 exception Good_message of string list
-# Exn.to_string (Good_message ["1";"2";"3"])
+# Exn.to_string (Good_message ["1";"2";"3"]);;
 - : string = "(//toplevel//.Good_message (1 2 3))"
 ```
 
@@ -241,12 +241,12 @@ converter. The following syntax lets you create one inline, as part of a
 larger expression:
 
 ```ocaml env=inline_sexp
-# let l = [(1,"one"); (2,"two")]
+# let l = [(1,"one"); (2,"two")];;
 val l : (int * string) list = [(1, "one"); (2, "two")]
 # List.iter l ~f:(fun x ->
     [%sexp_of: int * string ] x
     |> Sexp.to_string
-  |> print_endline)
+  |> print_endline);;
 (1 one)
 (2 two)
 - : unit = ()
@@ -320,7 +320,7 @@ can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
 ```ocaml env=example_load,dir=examples/sexps
-# Sexp.load_sexp "example.scm"
+# Sexp.load_sexp "example.scm";;
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
 
@@ -354,7 +354,7 @@ The following example shows all of these in action:
 Again, loading the file as an s-expression drops the comments:
 
 ```ocaml env=example_load,dir=examples/sexps
-# Sexp.load_sexp "comment_heavy.scm"
+# Sexp.load_sexp "comment_heavy.scm";;
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
 
@@ -364,7 +364,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 
 ```ocaml env=example_load,dir=examples/sexps
 # Exn.handle_uncaught ~exit:false (fun () ->
-  ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t))
+  ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t));;
 Uncaught exception:
 
   (Sexplib.Sexp.Parse_error
@@ -695,9 +695,9 @@ sexp converter defined. Here, if we define a type without a sexp converter
 and then try to use another type with a sexp converter, we'll error out:
 
 ```ocaml env=sexp_opaque
-# type no_converter = int * int
+# type no_converter = int * int;;
 type no_converter = int * int
-# type t = { a: no_converter; b: string } [@@deriving sexp]
+# type t = { a: no_converter; b: string } [@@deriving sexp];;
 Line 1, characters 15-27:
 Error: Unbound value no_converter_of_sexp
 ```
@@ -706,7 +706,7 @@ But with `[@sexp.opaque]`, we can embed our opaque `no_converter` type within
 the other data structure without an error.
 
 ```ocaml env=sexp_opaque
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp]
+# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
 type t = { a : no_converter; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexp.t = <fun>
@@ -716,7 +716,7 @@ And if we now convert a value of this type to an s-expression, we'll see the
 contents of field `a` marked as opaque:
 
 ```ocaml env=sexp_opaque
-# sexp_of_t { a = (3,4); b = "foo" }
+# sexp_of_t { a = (3,4); b = "foo" };;
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
 
@@ -724,7 +724,7 @@ Note that the `t_of_sexp` function for an opaque type is generated, but will
 fail at runtime if it is used:
 
 ```ocaml env=sexp_opaque
-# t_of_sexp (Sexp.of_string "((a whatever) (b foo))")
+# t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
 Exception:
 (Of_sexp_error "opaque_of_sexp: cannot convert opaque values"
   (invalid_sexp whatever))
@@ -737,11 +737,11 @@ record containing a `no_converter list`, the `t_of_sexp` function would still
 succeed when the list is empty:
 
 ```ocaml env=sexp_opaque
-# type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp]
+# type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp];;
 type t = { a : no_converter list; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexp.t = <fun>
-# t_of_sexp (Sexp.of_string "((a ()) (b foo))")
+# t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
 - : t = {a = []; b = "foo"}
 ```
 
@@ -750,10 +750,10 @@ this by annotating the type with `[@@deriving sexp_of]` or
 `[@@deriving of_sexp]` instead of `[@@deriving sexp]`:
 
 ```ocaml env=sexp_opaque
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of]
+# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of];;
 type t = { a : no_converter; b : string; }
 val sexp_of_t : t -> Sexp.t = <fun>
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving of_sexp]
+# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving of_sexp];;
 type t = { a : no_converter; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
 ```
@@ -767,12 +767,12 @@ package/sexp_list]{.idx}
 ```ocaml env=sexp_list
 # type compatible_versions =
     | Specific of string list
-  | All [@@deriving sexp]
+  | All [@@deriving sexp];;
 type compatible_versions = Specific of string list | All
 val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
 val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
 # sexp_of_compatible_versions
-  (Specific ["3.12.0"; "3.12.1"; "3.13.0"])
+  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 ```
 
@@ -783,12 +783,12 @@ declaration with `string list [@sexp.list]` to give us this alternate syntax:
 ```ocaml env=sexp_list
 # type compatible_versions =
     | Specific of string list [@sexp.list]
-  | All [@@deriving sexp]
+  | All [@@deriving sexp];;
 type compatible_versions = Specific of string list | All
 val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
 val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
 # sexp_of_compatible_versions
-  (Specific ["3.12.0"; "3.12.1"; "3.13.0"])
+  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 ```
 
@@ -801,13 +801,13 @@ containing an option would be rendered accordingly. For example: [Sexplib
 package/sexp_option]{.idx}
 
 ```ocaml env=sexp_option
-# type t = { a: int option; b: string } [@@deriving sexp]
+# type t = { a: int option; b: string } [@@deriving sexp];;
 type t = { a : int option; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexp.t = <fun>
-# sexp_of_t { a = None; b = "hello" }
+# sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((a ()) (b hello))
-# sexp_of_t { a = Some 3; b = "hello" }
+# sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a (3)) (b hello))
 ```
 
@@ -816,13 +816,13 @@ omitted from the record entirely? In that case, we can mark it with
 `[@sexp.option]`:
 
 ```ocaml env=sexp_option
-# type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp]
+# type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp];;
 type t = { a : int option; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
 val sexp_of_t : t -> Sexp.t = <fun>
-# sexp_of_t { a = Some 3; b = "hello" }
+# sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a 3) (b hello))
-# sexp_of_t { a = None; b = "hello" }
+# sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((b hello))
 ```
 
@@ -842,7 +842,7 @@ simple web server:
     web_root: string;
     port: int;
     addr: string;
-  } [@@deriving sexp]
+  } [@@deriving sexp];;
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
@@ -857,7 +857,7 @@ localhost. We can do this as follows:
     web_root: string;
     port: int [@default 80];
     addr: string [@default "localhost"];
-  } [@@deriving sexp]
+  } [@@deriving sexp];;
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
@@ -868,7 +868,7 @@ we'll see that the other values are filled in with the desired defaults:
 
 ```ocaml env=sexp_default
 # let cfg = http_server_config_of_sexp
-  (Sexp.of_string "((web_root /var/www/html))")
+  (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 ```
@@ -878,7 +878,7 @@ that all of the fields are present, even though they're not strictly
 necessary:
 
 ```ocaml env=sexp_default
-# sexp_of_http_server_config cfg
+# sexp_of_http_server_config cfg;;
 - : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
 ```
 
@@ -890,15 +890,15 @@ the `sexp_drop_default` directive:
     web_root: string;
     port: int [@default 80] [@sexp_drop_default.equal];
     addr: string [@default "localhost"] [@sexp_drop_default.equal];
-  } [@@deriving sexp]
+  } [@@deriving sexp];;
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 # let cfg = http_server_config_of_sexp
-  (Sexp.of_string "((web_root /var/www/html))")
+  (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
-# sexp_of_http_server_config cfg
+# sexp_of_http_server_config cfg;;
 - : Sexp.t = ((web_root /var/www/html))
 ```
 
@@ -907,10 +907,10 @@ omitted from the s-expression. On the other hand, if we convert a config with
 other values, then those values will be included in the s-expression:
 
 ```ocaml env=sexp_default
-# sexp_of_http_server_config { cfg with port = 8080 }
+# sexp_of_http_server_config { cfg with port = 8080 };;
 - : Sexp.t = ((web_root /var/www/html) (port 8080))
 # sexp_of_http_server_config
-  { cfg with port = 8080; addr = "192.168.0.1" }
+  { cfg with port = 8080; addr = "192.168.0.1" };;
 - : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
 ```
 

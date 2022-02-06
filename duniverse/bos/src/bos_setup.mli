@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2016 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2016 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Quick setup for simple programs.
@@ -12,9 +11,7 @@ open Bos_setup
 ]}
     in a module is sufficient to bring {!Rresult}, {!Astring} and
     {!Bos} in scope. See also how to use this for
-    {{!interpreted}interpreted programs}.
-
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {{!interpreted}interpreted programs}. *)
 
 (** {1:interpreted Interpreted programs}
 
@@ -33,15 +30,13 @@ correctly issue [M-x merlin-use bos.setup] in [emacs] or
 (** {1 Results} *)
 
 (** The type for results. *)
-type ('a, 'b) result = ('a, 'b) Rresult.result = Ok of 'a | Error of 'b
-
-open Result
+type ('a, 'b) result = ('a, 'b) Stdlib.result = Ok of 'a | Error of 'b
 
 val ( >>= ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
-(** [(>>=)] is {!R.( >>= )}. *)
+(** [(>>=)] is {!R.(>>=)}. *)
 
 val ( >>| ) : ('a, 'b) result -> ('a -> 'c) -> ('c, 'b) result
-(** [(>>|)] is {!R.( >>| )}. *)
+(** [(>>|)] is {!R.(>>|)}. *)
 
 module R : sig
   include module type of struct include Rresult.R end
@@ -49,7 +44,7 @@ end
 
 (** {1 Astring} *)
 
-val strf : ('a, Format.formatter, unit, string) Pervasives.format4 -> 'a
+val strf : ('a, Format.formatter, unit, string) Stdlib.format4 -> 'a
 (** [strf] is {!Astring.strf}. *)
 
 val (^) : string -> string -> string
@@ -92,7 +87,7 @@ module Logs : sig
 end
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2016 Daniel C. Bünzli
+   Copyright (c) 2016 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

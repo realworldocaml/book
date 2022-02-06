@@ -1,9 +1,10 @@
 let def  x = function None -> x | Some y -> y
 let def' x = fun y -> if y = x then None else Some y
 
+let ( let* ) = Result.bind
+
 let decode codec cs =
-  let open Rresult.R.Infix in
-  Asn.decode codec cs >>= fun (a, cs) ->
+  let* a, cs = Asn.decode codec cs in
   if Cstruct.length cs = 0 then Ok a else Error (`Parse "Leftover")
 
 let projections_of encoding asn =
@@ -40,7 +41,7 @@ let project_exn asn =
     | Error err -> Asn.S.error err in
   (dec, Asn.encode c)
 
-let err_to_msg f = Rresult.R.reword_error (function `Parse msg -> `Msg msg) f
+let err_to_msg f = Result.map_error (function `Parse msg -> `Msg msg) f
 
 (* specified in RFC 5280 4.1.2.5.2 - "MUST NOT include fractional seconds" *)
 let generalized_time_no_frac_s =

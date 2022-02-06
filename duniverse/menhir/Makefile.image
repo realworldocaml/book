@@ -1,0 +1,21 @@
+# This is the name of dune's build directory.
+
+BUILD := _build/default
+
+# This definition computes the image of the current directory
+# inside dune's _build directory.
+
+IMAGE := $(shell \
+	    prefix=""; suffix=""; \
+	    while ! [ -f dune-project ]; do \
+	      prefix="../$$prefix"; \
+	      suffix="/$$(basename $$(pwd))$$suffix"; \
+	      cd ..; \
+	    done; \
+	    echo "$${prefix}$(BUILD)$${suffix}")
+
+# This entry prints the value of $(IMAGE).
+
+.PHONY: image
+image:
+	@ echo $(IMAGE)

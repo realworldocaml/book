@@ -1,4 +1,4 @@
-open Rresult
+let ( let* ) = Result.bind
 
 module Cs = struct
   open Cstruct
@@ -57,8 +57,8 @@ module Cs = struct
 
     let rec block acc = function
       | `Begin t :: tail ->
-        accumulate t [] tail >>= fun (body, tail) ->
-        R.open_error_msg (Base64.decode (Cstruct.to_string body)) >>= fun data ->
+        let* body, tail = accumulate t [] tail in
+        let* data = Base64.decode (Cstruct.to_string body) in
         block ((t, Cstruct.of_string data) :: acc) tail
       | _::xs -> block acc xs
       | []    -> Ok (List.rev acc)
@@ -95,8 +95,9 @@ let exactly_one ~what = function
 
 let foldM f data =
   let wrap acc data =
-    acc >>= fun datas' ->
-    f data >>| fun data ->
-    data :: datas'
+    let* datas' = acc in
+    let* data = f data in
+    Ok (data :: datas')
   in
-  List.fold_left wrap (Ok []) data >>| List.rev
+  let* res = List.fold_left wrap (Ok []) data in
+  Ok (List.rev res)

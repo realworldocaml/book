@@ -1,0 +1,10 @@
+Testing `test/e2e/alcotest/passing/basic.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          test-a          0   First test case.
+  [OK]          test-a          1   Second test case.
+  [OK]          test-b          0   Third test case.
+  [OK]          test-c          0   Fourth test case.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 4 tests run.

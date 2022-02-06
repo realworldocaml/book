@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Compat
 open Result
 
 module Relation = struct
@@ -85,7 +84,6 @@ type t =
   | Skip
   | Non_det of non_det option
   | Version of Relation.t * Ocaml_version.t
-  | Require_package of string
   | Set of string * string
   | Unset of string
   | Block_kind of block_kind
@@ -108,7 +106,6 @@ let pp ppf = function
   | Non_det (Some Nd_command) -> Fmt.string ppf "non-deterministic=command"
   | Version (op, v) ->
       Fmt.pf ppf "version%a%a" Relation.pp op Ocaml_version.pp v
-  | Require_package p -> Fmt.pf ppf "require-package=%s" p
   | Set (v, x) -> Fmt.pf ppf "set-%s=%s" v x
   | Unset x -> Fmt.pf ppf "unset-%s" x
   | Block_kind bk -> pp_block_kind ppf bk
@@ -177,8 +174,6 @@ let interpret label value =
   | "file" -> requires_eq_value ~label ~value (fun x -> File x)
   | "part" -> requires_eq_value ~label ~value (fun x -> Part x)
   | "env" -> requires_eq_value ~label ~value (fun x -> Env x)
-  | "require-package" ->
-      requires_eq_value ~label ~value (fun x -> Require_package x)
   | l when is_prefix ~prefix:"set-" l ->
       requires_eq_value ~label ~value (fun x ->
           Set (split_prefix ~prefix:"set-" l, x))

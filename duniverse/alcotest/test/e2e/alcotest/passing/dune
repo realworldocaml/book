@@ -12,8 +12,13 @@
  (action
   (with-stdout-to
    %{targets}
-   (run ../../gen_dune_rules.exe --package "alcotest" --libraries
-     "alcotest.engine"))))
+   (run
+    ../../gen_dune_rules.exe
+    --package
+    "alcotest"
+    --libraries
+    "alcotest.engine"
+    --js))))
 
 (rule
  (alias runtest)

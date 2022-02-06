@@ -17,7 +17,5 @@
 type t = File of string | Dir of string
 
 val of_block : Block.t -> t option
-
 val of_lines : Document.line list -> t list
-
 val to_sexp : t -> Util.Sexp.t

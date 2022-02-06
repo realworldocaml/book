@@ -55,14 +55,19 @@ let float eps =
   in
   testable Fmt.float same
 
-let char = testable Fmt.char ( = )
-let string = testable Fmt.string ( = )
+let char =
+  let pp_char ppf x = Fmt.pf ppf "%C" x in
+  testable pp_char ( = )
+
+let string =
+  let pp_string ppf x = Fmt.pf ppf "%S" x in
+  testable pp_string ( = )
 
 let bytes =
   testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
 
 let bool = testable Fmt.bool ( = )
-let unit = testable (Fmt.unit "()") ( = )
+let unit = testable (Fmt.any "()") ( = )
 
 let list e =
   let rec eq l1 l2 =
@@ -197,7 +202,8 @@ let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
              ++ cut
              ++ pp_expected
              ++ cut
-             ++ pp_actual)))
+             ++ pp_actual)
+           ++ cut))
 
 let check' ?here ?pos t ~msg ~expected ~actual =
   check ?here ?pos t msg expected actual
@@ -207,7 +213,7 @@ let fail ?here ?pos msg =
   check_err (fun ppf () ->
       Fmt.pf ppf "%t%a %s" (pp_location ?here ?pos) Pp.tag `Fail msg)
 
-let failf ?here ?pos fmt = Fmt.kstrf (fun msg -> fail ?here ?pos msg) fmt
+let failf ?here ?pos fmt = Fmt.kstr (fun msg -> fail ?here ?pos msg) fmt
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -49,6 +46,11 @@ val incoming_edges: node -> node list
 
 val outgoing_edges: node -> node SymbolMap.t
 val outgoing_symbols: node -> Symbol.t list
+
+(* Maps whose keys are nodes. *)
+
+module ImperativeNodeMap :
+  Fix.MINIMAL_IMPERATIVE_MAPS with type key = node
 
 (* ------------------------------------------------------------------------ *)
 (* Help for building the LR(1) automaton. *)

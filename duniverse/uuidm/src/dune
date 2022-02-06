@@ -1,4 +1,0 @@
-(library
- (name uuidm)
- (public_name uuidm)
- (wrapped false))

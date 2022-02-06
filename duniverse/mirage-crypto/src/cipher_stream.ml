@@ -15,7 +15,7 @@ module ARC4 = struct
   type result = { message : Cstruct.t ; key : key }
 
   let of_secret cs =
-    let len = Cstruct.len cs in
+    let len = Cstruct.length cs in
     if len < 1 || len > 256 then invalid_arg "ARC4.of_secret: key size %d" len;
     let s = Array.init 256 (fun x -> x) in
     let rec loop j = function
@@ -32,7 +32,7 @@ module ARC4 = struct
 
   let encrypt ~key:(i, j, s') cs =
     let s   = Array.copy s'
-    and len = Cstruct.len cs in
+    and len = Cstruct.length cs in
     let res = Cstruct.create len in
     let rec mix i j = function
       | n when n = len -> (i, j, s)

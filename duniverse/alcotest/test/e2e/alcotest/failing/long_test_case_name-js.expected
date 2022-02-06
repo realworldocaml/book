@@ -1,0 +1,16 @@
+Testing `test/e2e/alcotest/failing/long_test_case_name.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          test-a          0   Passing.
+> [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur a...
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetu...  │
+└──────────────────────────────────────────────────────────────────────────────┘
+ASSERT Failed
+FAIL Failed
+Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run.

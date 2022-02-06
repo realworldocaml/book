@@ -30,17 +30,17 @@ In that light, consider the following signature of a module with a
 single integer variable:
 
 ```ocaml env=main
-# open Base
-# module type X_int = sig val x : int end
+# open Base;;
+# module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
 ```
 
 We can also create a module that matches this signature:
 
 ```ocaml env=main
-# module Three : X_int = struct let x = 3 end
+# module Three : X_int = struct let x = 3 end;;
 module Three : X_int
-# Three.x
+# Three.x;;
 - : int = 3
 ```
 
@@ -55,7 +55,7 @@ keyword]{.idx}
 We can convert `Three` into a first-class module as follows:
 
 ```ocaml env=main
-# let three = (module Three : X_int)
+# let three = (module Three : X_int);;
 val three : (module X_int) = <module>
 ```
 
@@ -63,16 +63,16 @@ The module type doesn't need to be part of the construction of a first-class
 module if it can be inferred. Thus, we can write:
 
 ```ocaml env=main
-# module Four = struct let x = 4 end
+# module Four = struct let x = 4 end;;
 module Four : sig val x : int end
-# let numbers = [ three; (module Four) ]
+# let numbers = [ three; (module Four) ];;
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
 We can also create a first-class module from an anonymous module:
 
 ```ocaml env=main
-# let numbers = [three; (module struct let x = 4 end)]
+# let numbers = [three; (module struct let x = 4 end)];;
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
@@ -87,9 +87,9 @@ this syntax:
 Here's an example:
 
 ```ocaml env=main
-# module New_three = (val three : X_int)
+# module New_three = (val three : X_int);;
 module New_three : X_int
-# New_three.x
+# New_three.x;;
 - : int = 3
 ```
 
@@ -101,12 +101,12 @@ of two `(module X_int)`:
 ```ocaml env=main
 # let to_int m =
     let module M = (val m : X_int) in
-    M.x
+    M.x;;
 val to_int : (module X_int) -> int = <fun>
 # let plus m1 m2 =
     (module struct
       let x = to_int m1 + to_int m2
-    end : X_int)
+    end : X_int);;
 val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 ```
 
@@ -115,9 +115,9 @@ With these functions in hand, we can now work with values of type
 and simplicity of the core <span class="keep-together">language</span>:
 
 ```ocaml env=main
-# let six = plus three three
+# let six = plus three three;;
 val six : (module X_int) = <module>
-# to_int (List.fold ~init:six ~f:plus [three;three])
+# to_int (List.fold ~init:six ~f:plus [three;three]);;
 - : int = 12
 ```
 
@@ -127,7 +127,7 @@ module within a pattern match. Thus, we can rewrite the `to_int` function as
 follows:
 
 ```ocaml env=main
-# let to_int (module M : X_int) = M.x
+# let to_int (module M : X_int) = M.x;;
 val to_int : (module X_int) -> int = <fun>
 ```
 
@@ -140,7 +140,7 @@ new one:
 # module type Bumpable = sig
     type t
     val bump : t -> t
-  end
+  end;;
 module type Bumpable = sig type t val bump : t -> t end
 ```
 
@@ -151,19 +151,19 @@ types:
 # module Int_bumper = struct
     type t = int
     let bump n = n + 1
-  end
+  end;;
 module Int_bumper : sig type t = int val bump : t -> t end
 # module Float_bumper = struct
     type t = float
     let bump n = n +. 1.
-  end
+  end;;
 module Float_bumper : sig type t = float val bump : t -> t end
 ```
 
 And we can convert these to first-class modules:
 
 ```ocaml env=main
-# let int_bumper = (module Int_bumper : Bumpable)
+# let int_bumper = (module Int_bumper : Bumpable);;
 val int_bumper : (module Bumpable) = <module>
 ```
 
@@ -173,7 +173,7 @@ is `int`.
 
 ```ocaml env=main
 # let (module Bumper) = int_bumper in
-  Bumper.bump 3
+  Bumper.bump 3;;
 Line 2, characters 15-16:
 Error: This expression has type int but an expression was expected of type
          Bumper.t
@@ -185,9 +185,9 @@ To make `int_bumper` usable, we need to expose that the type
 `float_bumper`.
 
 ```ocaml env=main
-# let int_bumper = (module Int_bumper : Bumpable with type t = int)
+# let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 val int_bumper : (module Bumpable with type t = int) = <module>
-# let float_bumper = (module Float_bumper : Bumpable with type t = float)
+# let float_bumper = (module Float_bumper : Bumpable with type t = float);;
 val float_bumper : (module Bumpable with type t = float) = <module>
 ```
 
@@ -197,10 +197,10 @@ now use these first-class modules on values of the matching type:
 
 ```ocaml env=main
 # let (module Bumper) = int_bumper in
-  Bumper.bump 3
+  Bumper.bump 3;;
 - : int = 4
 # let (module Bumper) = float_bumper in
-  Bumper.bump 3.5
+  Bumper.bump 3.5;;
 - : float = 4.5
 ```
 
@@ -216,7 +216,7 @@ modules]{.idx}[first-class modules/polymorphism in]{.idx}
         (module Bumper : Bumpable with type t = a)
         (l: a list)
     =
-    List.map ~f:Bumper.bump l
+    List.map ~f:Bumper.bump l;;
 val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
   <fun>
 ```
@@ -234,9 +234,9 @@ The resulting function is polymorphic in both the type of the list element
 and the type `Bumpable.t`. We can see this function in action:
 
 ```ocaml env=main
-# bump_list int_bumper [1;2;3]
+# bump_list int_bumper [1;2;3];;
 - : int list = [2; 3; 4]
-# bump_list float_bumper [1.5;2.5;3.5]
+# bump_list float_bumper [1.5;2.5;3.5];;
 - : float list = [2.5; 3.5; 4.5]
 ```
 
@@ -253,7 +253,7 @@ polymorphic from the outside. Consider the following example:
 [polymorphism/in locally abstract types]{.idx}
 
 ```ocaml env=main
-# let wrap_in_list (type a) (x:a) = [x]
+# let wrap_in_list (type a) (x:a) = [x];;
 val wrap_in_list : 'a -> 'a list = <fun>
 ```
 
@@ -265,7 +265,7 @@ If, on the other hand, we try to use the type `a` as equivalent to some
 concrete type, say, `int`, then the compiler will complain:
 
 ```ocaml env=main
-# let double_int (type a) (x:a) = x + x
+# let double_int (type a) (x:a) = x + x;;
 Line 1, characters 33-34:
 Error: This expression has type a but an expression was expected of type int
 ```
@@ -278,18 +278,18 @@ new first-class module:
 # module type Comparable = sig
     type t
     val compare : t -> t -> int
-  end
+  end;;
 module type Comparable = sig type t val compare : t -> t -> int end
 # let create_comparable (type a) compare =
     (module struct
       type t = a
       let compare = compare
-    end : Comparable with type t = a)
+    end : Comparable with type t = a);;
 val create_comparable :
   ('a -> 'a -> int) -> (module Comparable with type t = 'a) = <fun>
-# create_comparable Int.compare
+# create_comparable Int.compare;;
 - : (module Comparable with type t = int) = <module>
-# create_comparable Float.compare
+# create_comparable Float.compare;;
 - : (module Comparable with type t = float) = <module>
 ```
 
@@ -323,7 +323,7 @@ module for handling s-expressions.
 [query-handlers/and first-class modules]{.idx}
 
 ```ocaml env=query_handler
-# #require "ppx_jane"
+# #require "ppx_jane";;
 # module type Query_handler = sig
 
     (** Configuration for a query handler *)
@@ -344,7 +344,7 @@ module for handling s-expressions.
     (** Evaluate a given query, where both input and output are
         s-expressions *)
     val eval : t -> Sexp.t -> Sexp.t Or_error.t
-  end
+  end;;
 module type Query_handler =
   sig
     type config
@@ -365,7 +365,7 @@ s-expression converters based on their type definition.  We'll enable
 family of syntax extensions.
 
 ```ocaml env=query_handler
-# #require "ppx_jane"
+# #require "ppx_jane";;
 ```
 
 Here's an example of the extension in action.  Note that we need the
@@ -373,13 +373,13 @@ annotation `[@@deriving sexp]` to kick off the generation of the
 converters.
 
 ```ocaml env=query_handler
-# type u = { a: int; b: float } [@@deriving sexp]
+# type u = { a: int; b: float } [@@deriving sexp];;
 type u = { a : int; b : float; }
 val u_of_sexp : Sexp.t -> u = <fun>
 val sexp_of_u : u -> Sexp.t = <fun>
-# sexp_of_u {a=3;b=7.}
+# sexp_of_u {a=3;b=7.};;
 - : Sexp.t = ((a 3) (b 7))
-# u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))")
+# u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))");;
 - : u = {a = 43; b = 3.4}
 ```
 
@@ -387,7 +387,7 @@ Notably, the same annotations can be attached within a signature to
 add the appropriate type signature.
 
 ```ocaml env=query_handler
-# module type M = sig type t [@@deriving sexp] end
+# module type M = sig type t [@@deriving sexp] end;;
 module type M =
   sig type t val t_of_sexp : Sexp.t -> t val sexp_of_t : t -> Sexp.t end
 ```
@@ -416,7 +416,7 @@ just the trivial s-expression `()`, otherwise known as `Sexp.unit`:
         let response = Ok (Int.sexp_of_t t.next_id) in
         t.next_id <- t.next_id + 1;
         response
-  end
+  end;;
 module Unique :
   sig
     type config = int
@@ -433,11 +433,11 @@ We can use this module to create an instance of the `Unique` query handler
 and interact with it directly:
 
 ```ocaml env=query_handler
-# let unique = Unique.create 0
+# let unique = Unique.create 0;;
 val unique : Unique.t = {Unique.next_id = 0}
-# Unique.eval unique (Sexp.List [])
+# Unique.eval unique (Sexp.List []);;
 - : (Sexp.t, Error.t) result = Ok 0
-# Unique.eval unique (Sexp.List [])
+# Unique.eval unique (Sexp.List []);;
 - : (Sexp.t, Error.t) result = Ok 1
 ```
 
@@ -466,7 +466,7 @@ within:
           else Core.Filename.concat t.cwd dir
         in
         Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
-  end
+  end;;
 module List_dir :
   sig
     type config = string
@@ -508,7 +508,7 @@ instantiated query handler:[query-handlers/dispatching to multiple]{.idx}
 # module type Query_handler_instance = sig
     module Query_handler : Query_handler
     val this : Query_handler.t
-  end
+  end;;
 module type Query_handler_instance =
   sig module Query_handler : Query_handler val this : Query_handler.t end
 ```
@@ -524,7 +524,7 @@ We can create an instance as follows:
     (module struct
       module Query_handler = Unique
       let this = Unique.create 0
-  end : Query_handler_instance)
+  end : Query_handler_instance);;
 val unique_instance : (module Query_handler_instance) = <module>
 ```
 
@@ -541,7 +541,7 @@ making use of a locally abstract type:
     (module struct
       module Query_handler = Q
       let this = Q.create config
-    end : Query_handler_instance)
+    end : Query_handler_instance);;
 val build_instance :
   (module Query_handler with type config = 'a) ->
   'a -> (module Query_handler_instance) = <fun>
@@ -550,9 +550,9 @@ val build_instance :
 Using `build_instance`, constructing a new instance becomes a one-liner:
 
 ```ocaml env=query_handler
-# let unique_instance = build_instance (module Unique) 0
+# let unique_instance = build_instance (module Unique) 0;;
 val unique_instance : (module Query_handler_instance) = <module>
-# let list_dir_instance = build_instance (module List_dir)  "/var"
+# let list_dir_instance = build_instance (module List_dir)  "/var";;
 val list_dir_instance : (module Query_handler_instance) = <module>
 ```
 
@@ -575,7 +575,7 @@ instances and constructs a dispatch table from it:
     List.iter handlers
       ~f:(fun ((module I : Query_handler_instance) as instance) ->
         Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
-    table
+    table;;
 val build_dispatch_table :
   (module Query_handler_instance) list ->
   (string, (module Query_handler_instance)) Hashtbl.Poly.t = <fun>
@@ -595,7 +595,7 @@ Now, we need a function that dispatches to a handler using a dispatch table:
         I.Query_handler.eval I.this query
       end
     | _ ->
-      Or_error.error_string "malformed query"
+      Or_error.error_string "malformed query";;
 val dispatch :
   (string, (module Query_handler_instance)) Hashtbl.Poly.t ->
   Sexp.t -> Sexp.t Or_error.t = <fun>
@@ -616,7 +616,7 @@ Now let's turn this into a complete, running example by adding a command-line
 interface:
 
 ```ocaml env=query_handler
-# open Stdio
+# open Stdio;;
 # let rec cli dispatch_table =
     printf ">>> %!";
     let result =
@@ -638,7 +638,7 @@ interface:
     | `Stop -> ()
     | `Continue msg ->
       printf "%s\n%!" msg;
-      cli dispatch_table
+      cli dispatch_table;;
 val cli : (string, (module Query_handler_instance)) Hashtbl.Poly.t -> unit =
   <fun>
 ```
@@ -874,12 +874,12 @@ modules/alternatives to]{.idx}
 ```ocaml env=query_handler
 # type query_handler_instance = { name : string
                                 ; eval : Sexp.t -> Sexp.t Or_error.t
-  }
+  };;
 type query_handler_instance = {
   name : string;
   eval : Sexp.t -> Sexp.t Or_error.t;
 }
-# type query_handler = Sexp.t -> query_handler_instance
+# type query_handler = Sexp.t -> query_handler_instance;;
 type query_handler = Sexp.t -> query_handler_instance
 ```
 
@@ -893,7 +893,7 @@ query handler into this framework as follows:
     let unique = Unique.create config in
     { name = Unique.name
     ; eval = (fun config -> Unique.eval unique config)
-    }
+    };;
 val unique_handler : Sexp.t -> query_handler_instance = <fun>
 ```
 

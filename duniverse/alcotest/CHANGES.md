@@ -1,3 +1,45 @@
+### 1.5.0 (2021-10-09)
+
+- Make Alcotest compatible with `js_of_ocaml.3.11.0`. Users can depend on the
+  new virtual `alcotest-js` Opam library to pick up the right `js_of_ocaml`
+  version automatically. (#326 #328, @hhugo @smorimoto)
+
+- Record exception backtraces during test suite runs by default. This behaviour
+  can be disabled by passing `~record_backtrace:false` to `Alcotest.run`. (#317,
+  @CraigFe)
+
+- Generate shorter unique identifiers for test runs (8-character alphanumeric,
+  rather than a full 128-bit UUID). (#304, @CraigFe)
+
+- Change `Alcotest.{char,string}` pretty-printers to use OCaml syntax on
+  assertion failures (i.e. wrap with quotes and escape control characters).
+  (#318, @CraigFe)
+
+- Fix process for getting the width of attached terminals on MacOS.
+  Previously, a terminal width of 80 columns was assumed. (#325, @CraigFe)
+
+- Fix parsing of test filter ranges to allow '-' separators (e.g. `test alpha
+  1-4`), as advertised in the manpage. The previously-used '..' separator is
+  also supported. (#312, @CraigFe)
+
+- Introduce an `Alcotest.V1` module that aliases the existing `Alcotest` API and
+  provides a stability guarantee over major version changes. Similar versioned
+  aliases also exist for the backends: `Alcotest_{async,lwt}.V1`. (#306,
+  @CraigFe)
+
+- Change the `~filter` argument to `Alcotest.run` to be a predicate over tests.
+  (#305, @CraigFe)
+
+- Renamed / removed some less frequently used modules used by the test backends:
+  - `Alcotest.Unix` -> `Alcotest.Unix_platform`
+  - `Alcotest_engine.{Cli,Core,Test}` -> `Alcotest_engine.V1.{Cli,Core,Test}`
+  - `Alcotest.{Cli,Core}` are now gone. Use `Alcotest_engine.V1.{Cli,Core}.Make
+    (Alcotest.Unix_platform)` instead.
+  (#306 #309, @CraigFe)
+
+- Avoid exporting `list_tests` in the main test APIs (`Alcotest{,_lwt,_async}`).
+  Use `Alcotest_engine` directly if you want this function. (#310, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be

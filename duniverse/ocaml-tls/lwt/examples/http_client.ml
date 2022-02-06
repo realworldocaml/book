@@ -4,7 +4,7 @@ open Ex_common
 
 let http_client ?ca ?fp hostname port =
   let port          = int_of_string port in
-  auth ~hostname ?ca ?fp () >>= fun authenticator ->
+  auth ?ca ?fp () >>= fun authenticator ->
   Tls_lwt.connect_ext
     (Tls.Config.client ~authenticator ())
     (hostname, port) >>= fun (ic, oc) ->

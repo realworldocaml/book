@@ -112,21 +112,22 @@ end
 (** {1 Concrete frontend instances} *)
 
 (*$foreach_version (fun n _ ->
-    printf "module OCaml_%d : OCaml_version with module Ast = Migrate_parsetree.Ast_%d\n"
+    printf "module OCaml_%d : OCaml_version with module Ast = Astlib.Ast_%d\n"
       n n
   )*)
-module OCaml_402 : OCaml_version with module Ast = Migrate_parsetree.Ast_402
-module OCaml_403 : OCaml_version with module Ast = Migrate_parsetree.Ast_403
-module OCaml_404 : OCaml_version with module Ast = Migrate_parsetree.Ast_404
-module OCaml_405 : OCaml_version with module Ast = Migrate_parsetree.Ast_405
-module OCaml_406 : OCaml_version with module Ast = Migrate_parsetree.Ast_406
-module OCaml_407 : OCaml_version with module Ast = Migrate_parsetree.Ast_407
-module OCaml_408 : OCaml_version with module Ast = Migrate_parsetree.Ast_408
-module OCaml_409 : OCaml_version with module Ast = Migrate_parsetree.Ast_409
-module OCaml_410 : OCaml_version with module Ast = Migrate_parsetree.Ast_410
-module OCaml_411 : OCaml_version with module Ast = Migrate_parsetree.Ast_411
-module OCaml_412 : OCaml_version with module Ast = Migrate_parsetree.Ast_412
-module OCaml_413 : OCaml_version with module Ast = Migrate_parsetree.Ast_413
+module OCaml_402 : OCaml_version with module Ast = Astlib.Ast_402
+module OCaml_403 : OCaml_version with module Ast = Astlib.Ast_403
+module OCaml_404 : OCaml_version with module Ast = Astlib.Ast_404
+module OCaml_405 : OCaml_version with module Ast = Astlib.Ast_405
+module OCaml_406 : OCaml_version with module Ast = Astlib.Ast_406
+module OCaml_407 : OCaml_version with module Ast = Astlib.Ast_407
+module OCaml_408 : OCaml_version with module Ast = Astlib.Ast_408
+module OCaml_409 : OCaml_version with module Ast = Astlib.Ast_409
+module OCaml_410 : OCaml_version with module Ast = Astlib.Ast_410
+module OCaml_411 : OCaml_version with module Ast = Astlib.Ast_411
+module OCaml_412 : OCaml_version with module Ast = Astlib.Ast_412
+module OCaml_413 : OCaml_version with module Ast = Astlib.Ast_413
+module OCaml_414 : OCaml_version with module Ast = Astlib.Ast_414
 (*$*)
 
 (* An alias to the current compiler version *)

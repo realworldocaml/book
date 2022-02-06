@@ -70,9 +70,9 @@ arrays. An OCaml program implicitly allocates a block of memory when such a
 value is created: [blocks (of memory)]{.idx}
 
 ```ocaml env=simple_record
-# type t = { foo: int; bar: int }
+# type t = { foo: int; bar: int };;
 type t = { foo : int; bar : int; }
-# let x = { foo = 13; bar = 14 }
+# let x = { foo = 13; bar = 14 };;
 val x : t = {foo = 13; bar = 14}
 ```
 
@@ -251,9 +251,9 @@ using the `Obj` module, which exposes the internal representation of values
 to OCaml code:
 
 ```ocaml env=reprs
-# Obj.is_block (Obj.repr (1,2,3))
+# Obj.is_block (Obj.repr (1,2,3));;
 - : bool = true
-# Obj.is_block (Obj.repr 1)
+# Obj.is_block (Obj.repr 1);;
 - : bool = false
 ```
 
@@ -270,9 +270,9 @@ signals to the collector that the floating-point value is not to be scanned:
 [floating-point values]{.idx}
 
 ```ocaml env=reprs
-# Obj.tag (Obj.repr 1.0)
+# Obj.tag (Obj.repr 1.0);;
 - : int = 253
-# Obj.double_tag
+# Obj.double_tag;;
 - : int = 253
 ```
 
@@ -292,9 +292,9 @@ First, let's check that float arrays do in fact have a different tag number
 from normal floating-point values:
 
 ```ocaml env=reprs
-# Obj.double_tag
+# Obj.double_tag;;
 - : int = 253
-# Obj.double_array_tag
+# Obj.double_array_tag;;
 - : int = 254
 ```
 
@@ -304,13 +304,13 @@ has the expected runtime tag, and also use `Obj.double_field` to retrieve a
 float from within the block:
 
 ```ocaml env=reprs
-# Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |])
+# Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]);;
 - : int = 254
-# Obj.tag (Obj.repr (1.0, 2.0, 3.0) )
+# Obj.tag (Obj.repr (1.0, 2.0, 3.0) );;
 - : int = 0
-# Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1
+# Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1;;
 - : float = 2.2
-# Obj.double_field (Obj.repr 1.234) 0
+# Obj.double_field (Obj.repr 1.234) 0;;
 - : float = 1.234
 ```
 
@@ -332,13 +332,13 @@ of]{.idx}[lists/memory representation of]{.idx}[runtime memory
 representation/variants and lists]{.idx}
 
 ```ocaml env=reprs
-# type t = Apple | Orange | Pear
+# type t = Apple | Orange | Pear;;
 type t = Apple | Orange | Pear
-# ((Obj.magic (Obj.repr Apple)) : int)
+# ((Obj.magic (Obj.repr Apple)) : int);;
 - : int = 0
-# ((Obj.magic (Obj.repr Pear)) : int)
+# ((Obj.magic (Obj.repr Pear)) : int);;
 - : int = 2
-# Obj.is_block (Obj.repr Apple)
+# Obj.is_block (Obj.repr Apple);;
 - : bool = false
 ```
 
@@ -353,17 +353,17 @@ leftmost variants with parameters). The parameters are stored as words in the
 block:
 
 ```ocaml env=reprs
-# type t = Apple | Orange of int | Pear of string | Kiwi
+# type t = Apple | Orange of int | Pear of string | Kiwi;;
 type t = Apple | Orange of int | Pear of string | Kiwi
-# Obj.is_block (Obj.repr (Orange 1234))
+# Obj.is_block (Obj.repr (Orange 1234));;
 - : bool = true
-# Obj.tag (Obj.repr (Orange 1234))
+# Obj.tag (Obj.repr (Orange 1234));;
 - : int = 0
-# Obj.tag (Obj.repr (Pear "xyz"))
+# Obj.tag (Obj.repr (Pear "xyz"));;
 - : int = 1
-# (Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int)
+# (Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int);;
 - : int = 1234
-# (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string)
+# (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string);;
 - : string = "xyz"
 ```
 
@@ -418,10 +418,10 @@ variant. The hash function is exposed via the `compiler-libs` package that
 reveals some of the internals of the OCaml compiler:
 
 ```ocaml env=reprs
-# #require "ocaml-compiler-libs.common"
-# Btype.hash_variant "Foo"
+# #require "ocaml-compiler-libs.common";;
+# Btype.hash_variant "Foo";;
 - : int = 3505894
-# (Obj.magic (Obj.repr `Foo) : int)
+# (Obj.magic (Obj.repr `Foo) : int);;
 - : int = 3505894
 ```
 

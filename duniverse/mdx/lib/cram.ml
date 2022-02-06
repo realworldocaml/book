@@ -17,11 +17,15 @@
 let src = Logs.Src.create "ocaml-mdx"
 
 module Log = (val Logs.src_log src : Logs.LOG)
-
 open Astring
 open Misc
 
-type t = { command : string list; output : Output.t list; exit_code : int }
+type t = {
+  command : string list;
+  output : Output.t list;
+  exit_code : int;
+  vpad : int;
+}
 
 let dump_line ppf = function
   | #Output.t as o -> Output.dump ppf o
@@ -38,10 +42,20 @@ let dump ppf (t : t) =
     Fmt.(Dump.list Output.dump)
     t.output t.exit_code
 
+let pp_vpad ppf t =
+  let rec loop = function
+    | 0 -> ()
+    | n ->
+        Fmt.pf ppf "\n";
+        loop (Int.pred n)
+  in
+  loop t.vpad
+
 let pp_command ?(pad = 0) ppf (t : t) =
   match t.command with
   | [] -> ()
   | l ->
+      pp_vpad ppf t;
       let sep ppf () = Fmt.pf ppf "\\\n%a> " pp_pad pad in
       Fmt.pf ppf "%a$ %a\n" pp_pad pad Fmt.(list ~sep string) l
 
@@ -53,7 +67,7 @@ let pp ?pad ppf (t : t) =
   pp_lines (Output.pp ?pad) ppf t.output;
   pp_exit_code ?pad ppf t.exit_code
 
-let pad_of_lines = function
+let hpad_of_lines = function
   | [] -> 0
   | h :: _ ->
       let i = ref 0 in
@@ -62,22 +76,29 @@ let pad_of_lines = function
       done;
       !i
 
-let of_lines t =
-  let pad = pad_of_lines t in
+let of_lines ~syntax ~(loc : Location.t) t =
+  let pos = loc.loc_start in
+  let hpad =
+    match syntax with Syntax.Mli -> pos.pos_cnum + 2 | _ -> hpad_of_lines t
+  in
   let unpad line =
-    if String.is_empty line then line
-    else if String.length line < pad then
-      Fmt.failwith "invalid padding: %S" line
-    else String.with_index_range line ~first:pad
+    match syntax with
+    | Syntax.Mli -> String.trim line
+    | _ ->
+        if String.is_empty line then line
+        else if String.length line < hpad then
+          Fmt.failwith "invalid padding: %S" line
+        else String.with_index_range line ~first:hpad
   in
   let lines = List.map unpad t in
   let lines =
     Lexer_cram.token (Lexing.from_string (String.concat ~sep:"\n" lines))
   in
+  let vpad = match syntax with Syntax.Mli -> 1 | _ -> 0 in
   Log.debug (fun l ->
-      l "Cram.of_lines (pad=%d) %a" pad Fmt.(Dump.list dump_line) lines);
+      l "Cram.of_lines (pad=%d) %a" hpad Fmt.(Dump.list dump_line) lines);
   let mk command output exit_code =
-    { command; output = List.rev output; exit_code }
+    { command; output = List.rev output; exit_code; vpad }
   in
   let rec command_cont acc = function
     | `Command_cont c :: t -> command_cont (c :: acc) t
@@ -102,8 +123,8 @@ let of_lines t =
   match lines with
   | `Command_first cmd :: t ->
       let cmd, t = command_cont [ cmd ] t in
-      (pad, aux cmd [] [] t)
-  | `Command cmd :: t -> (pad, aux [ cmd ] [] [] t)
+      (hpad, aux cmd [] [] t)
+  | `Command cmd :: t -> (hpad, aux [ cmd ] [] [] t)
   | [] -> (0, [])
   | `Output line :: _ ->
       if String.length line > 0 && line.[0] = '$' then

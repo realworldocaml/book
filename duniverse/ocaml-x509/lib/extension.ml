@@ -55,7 +55,7 @@ type authority_key_id = Cstruct.t option * General_name.t * Z.t option
 
 let pp_authority_key_id ppf (id, issuer, serial) =
   Fmt.pf ppf "identifier %a@ issuer %a@ serial %s@ "
-    Fmt.(option ~none:(unit "none") Cstruct.hexdump_pp) id
+    Fmt.(option ~none:(any "none") Cstruct.hexdump_pp) id
     General_name.pp issuer
     (match serial with None -> "none" | Some x -> Z.to_string x)
 
@@ -78,11 +78,11 @@ type name_constraint = (General_name.b * int * int option) list
 let pp_name_constraints ppf (permitted, excluded) =
   let pp_one ppf (General_name.B (k, base), min, max) =
     Fmt.pf ppf "base %a min %u max %a"
-      (General_name.pp_k k) base min Fmt.(option ~none:(unit "none") int) max
+      (General_name.pp_k k) base min Fmt.(option ~none:(any "none") int) max
   in
   Fmt.pf ppf "permitted %a@ excluded %a"
-    Fmt.(list ~sep:(unit ", ") pp_one) permitted
-    Fmt.(list ~sep:(unit ", ") pp_one) excluded
+    Fmt.(list ~sep:(any ", ") pp_one) permitted
+    Fmt.(list ~sep:(any ", ") pp_one) excluded
 
 type policy = [ `Any | `Something of Asn.oid ]
 
@@ -158,15 +158,15 @@ type distribution_point =
 
 let pp_distribution_point ppf (name, reasons, issuer) =
   Fmt.pf ppf "name %a reason %a issuer %a"
-    Fmt.(option ~none:(unit "none") pp_distribution_point_name) name
-    Fmt.(option ~none:(unit "none") (list ~sep:(unit ", ") pp_reason)) reasons
-    Fmt.(option ~none:(unit "none") General_name.pp) issuer
+    Fmt.(option ~none:(any "none") pp_distribution_point_name) name
+    Fmt.(option ~none:(any "none") (list ~sep:(any ", ") pp_reason)) reasons
+    Fmt.(option ~none:(any "none") General_name.pp) issuer
 
 let pp_issuing_distribution_point ppf (name, onlyuser, onlyca, onlysome, indirectcrl, onlyattributes) =
   Fmt.pf ppf "name %a only user certs %B only CA certs %B only reasons %a indirectcrl %B only attribute certs %B"
-    Fmt.(option ~none:(unit "none") pp_distribution_point_name) name
+    Fmt.(option ~none:(any "none") pp_distribution_point_name) name
     onlyuser onlyca
-    Fmt.(option ~none:(unit "no") (list ~sep:(unit ", ") pp_reason)) onlysome
+    Fmt.(option ~none:(any "no") (list ~sep:(any ", ") pp_reason)) onlysome
     indirectcrl onlyattributes
 
 type 'a extension = bool * 'a
@@ -209,13 +209,13 @@ let pp_one : type a. a k -> Format.formatter -> a -> unit = fun k ppf v ->
       General_name.pp alt
   | Key_usage, (crit, ku) ->
     Fmt.pf ppf "%skeyUsage %a" (c_to_str crit)
-      Fmt.(list ~sep:(unit ", ") pp_key_usage) ku
+      Fmt.(list ~sep:(any ", ") pp_key_usage) ku
   | Ext_key_usage, (crit, eku) ->
     Fmt.pf ppf "%sextendedKeyUsage %a" (c_to_str crit)
-      Fmt.(list ~sep:(unit ", ") pp_extended_key_usage) eku
+      Fmt.(list ~sep:(any ", ") pp_extended_key_usage) eku
   | Basic_constraints, (crit, (ca, depth)) ->
     Fmt.pf ppf "%sbasicConstraints CA %B depth %a" (c_to_str crit) ca
-      Fmt.(option ~none:(unit "none") int) depth
+      Fmt.(option ~none:(any "none") int) depth
   | CRL_number, (crit, i) ->
     Fmt.pf ppf "%scRLNumber %u" (c_to_str crit) i
   | Delta_CRL_indicator, (crit, indicator) ->
@@ -227,13 +227,13 @@ let pp_one : type a. a k -> Format.formatter -> a -> unit = fun k ppf v ->
     Fmt.pf ppf "%snameConstraints %a" (c_to_str crit) pp_name_constraints ncs
   | CRL_distribution_points, (crit, points) ->
     Fmt.pf ppf "%scRLDistributionPoints %a" (c_to_str crit)
-      Fmt.(list ~sep:(unit "; ") pp_distribution_point) points
+      Fmt.(list ~sep:(any "; ") pp_distribution_point) points
   | Issuing_distribution_point, (crit, point) ->
     Fmt.pf ppf "%sissuingDistributionPoint %a" (c_to_str crit)
       pp_issuing_distribution_point point
   | Freshest_CRL, (crit, points) ->
     Fmt.pf ppf "%sfreshestCRL %a" (c_to_str crit)
-      Fmt.(list ~sep:(unit "; ") pp_distribution_point) points
+      Fmt.(list ~sep:(any "; ") pp_distribution_point) points
   | Reason, (crit, reason) ->
     Fmt.pf ppf "%sreason %a" (c_to_str crit) pp_reason reason
   | Invalidity_date, (crit, date) ->
@@ -243,7 +243,7 @@ let pp_one : type a. a k -> Format.formatter -> a -> unit = fun k ppf v ->
     Fmt.pf ppf "%scertificateIssuer %a" (c_to_str crit) General_name.pp name
   | Policies, (crit, pols) ->
     Fmt.pf ppf "%spolicies %a" (c_to_str crit)
-      Fmt.(list ~sep:(unit "; ") pp_policy) pols
+      Fmt.(list ~sep:(any "; ") pp_policy) pols
   | Unsupported oid, (crit, cs) ->
     Fmt.pf ppf "%sunsupported %a: %a" (c_to_str crit) Asn.OID.pp oid
       Cstruct.hexdump_pp cs
@@ -342,6 +342,28 @@ let hostnames exts =
           Host.Set.empty xs
       in
       if Host.Set.is_empty names then None else Some names
+
+let ips exts =
+  match find Subject_alt_name exts with
+  | None -> None
+  | Some (_, names) ->
+    match General_name.find IP names with
+    | None -> None
+    | Some xs ->
+      let ips =
+        List.fold_left (fun acc ip ->
+          let ip = Cstruct.to_string ip in
+          match
+            match String.length ip with
+            | 4 -> Result.map (fun ip -> Ipaddr.V4 ip) (Ipaddr.V4.of_octets ip)
+            | 16 -> Result.map (fun ip -> Ipaddr.V6 ip) (Ipaddr.V6.of_octets ip)
+            | _ -> Error (`Msg "unknown IP address kind")
+          with
+          | Ok ip -> Ipaddr.Set.add ip acc
+          | Error _ -> acc)
+        Ipaddr.Set.empty xs
+      in
+      if Ipaddr.Set.is_empty ips then None else Some ips
 
 module Asn = struct
   open Asn.S

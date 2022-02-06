@@ -105,7 +105,7 @@ let md5_inputs =
     List.mapi (fun i x ->
       if i == 3 || i == 5 || i == 6 then
         x
-      else Cstruct.(sub x 0 (min (len x) 16)))
+      else Cstruct.(sub x 0 (min (length x) 16)))
     k in
   List.combine keys d
 
@@ -214,7 +214,7 @@ let sha512_results = [
 let test hash i ((key, data), result) _ =
   let computed = Hash.mac hash ~key:key data in
   if i == 4 (* truncated thingy *) then
-    assert_cs_equal result Cstruct.(sub computed 0 (len result))
+    assert_cs_equal result Cstruct.(sub computed 0 (length result))
   else
     assert_cs_equal result computed
 
@@ -226,7 +226,7 @@ let test_feed hash i ((key, data), result) _ =
   let empty = H.hmac_empty ~key in
   let computed = H.hmac_get (H.hmac_feed empty data) in
   if i == 4 (* truncated thingy *) then
-    assert_cs_equal result Cstruct.(sub computed 0 (len result))
+    assert_cs_equal result Cstruct.(sub computed 0 (length result))
   else
     assert_cs_equal result computed
 

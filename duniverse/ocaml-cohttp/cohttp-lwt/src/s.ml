@@ -57,6 +57,17 @@ module type Client = sig
       interface rather than invoke this function directly. See {!head}, {!get}
       and {!post} for some examples.
 
+      To avoid leaks, the body needs to be consumed, using the functions
+      provided in the {!Body} module and, if not necessary, should be explicitly
+      drained calling {!Body.drain_body}. Leaks are logged as debug messages by
+      the client, these can be enabled activating the debug logging. For
+      example, this can be done as follows in [cohttp-lwt-unix]
+
+      {[
+        Cohttp_lwt_unix.Debug.activate_debug ();
+        Logs.set_level (Some Logs.Warning)
+      ]}
+
       Depending on [ctx], the library is able to send a simple HTTP request or
       an encrypted one with a secured protocol (such as TLS). Depending on how
       conduit is configured, [ctx] might initiate a secured connection with TLS

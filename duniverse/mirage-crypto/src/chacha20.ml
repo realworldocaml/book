@@ -20,7 +20,7 @@ let init ctr ~key ~nonce =
   and inc64 b = set_ctr64 b (Int64.add (Cstruct.LE.get_uint64 b ctr_off) 1L)
   in
   let s, key, init_ctr, nonce_off, inc =
-    match Cstruct.len key, Cstruct.len nonce, Int64.shift_right ctr 32 = 0L with
+    match Cstruct.length key, Cstruct.length nonce, Int64.shift_right ctr 32 = 0L with
     | 32, 12, true ->
       let ctr = Int64.to_int32 ctr in
       "expand 32-byte k", key, (fun b -> set_ctr32 b ctr), 52, inc32
@@ -39,12 +39,12 @@ let init ctr ~key ~nonce =
   Cstruct.blit_from_string s 0 state 0 16 ;
   Cstruct.blit key 0 state 16 32 ;
   init_ctr state ;
-  Cstruct.blit nonce 0 state nonce_off (Cstruct.len nonce) ;
+  Cstruct.blit nonce 0 state nonce_off (Cstruct.length nonce) ;
   state, inc
 
 let crypt ~key ~nonce ?(ctr = 0L) data =
   let state, inc = init ctr ~key ~nonce in
-  let l = Cstruct.len data in
+  let l = Cstruct.length data in
   let block_count = l // block in
   let len = block * block_count in
   let last_len =
@@ -72,12 +72,12 @@ let generate_poly1305_key ~key ~nonce =
 
 let mac ~key ~adata ciphertext =
   let pad16 b =
-    let len = Cstruct.len b mod 16 in
+    let len = Cstruct.length b mod 16 in
     if len = 0 then Cstruct.empty else Cstruct.create (16 - len)
   and len =
     let data = Cstruct.create 16 in
-    Cstruct.LE.set_uint64 data 0 (Int64.of_int (Cstruct.len adata));
-    Cstruct.LE.set_uint64 data 8 (Int64.of_int (Cstruct.len ciphertext));
+    Cstruct.LE.set_uint64 data 0 (Int64.of_int (Cstruct.length adata));
+    Cstruct.LE.set_uint64 data 8 (Int64.of_int (Cstruct.length ciphertext));
     data
   in
   let ctx = P.empty ~key in
@@ -95,10 +95,10 @@ let authenticate_encrypt ~key ~nonce ?(adata = Cstruct.empty) data =
   Cstruct.append ciphertext mac
 
 let authenticate_decrypt ~key ~nonce ?(adata = Cstruct.empty) data =
-  if Cstruct.len data < P.mac_size then
+  if Cstruct.length data < P.mac_size then
     None
   else
-    let cipher, tag = Cstruct.split data (Cstruct.len data - P.mac_size) in
+    let cipher, tag = Cstruct.split data (Cstruct.length data - P.mac_size) in
     let poly1305_key = generate_poly1305_key ~key ~nonce in
     let ctag = mac ~key:poly1305_key ~adata cipher in
     let plain = crypt ~key ~nonce ~ctr:1L cipher in

@@ -1,18 +1,19 @@
 # Ppxlib - Meta-programming for OCaml
 
-[![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor]
+[![ocaml-ci status][ocaml-ci-img]][ocaml-ci] [![AppVeyor status][appveyor-img]][appveyor]
 
-[travis]:         https://travis-ci.org/ocaml-ppx/ppxlib
-[travis-img]:     https://travis-ci.org/ocaml-ppx/ppxlib.svg?branch=master
-[appveyor]:       https://ci.appveyor.com/project/diml/ppxlib/branch/master
+[ocaml-ci]: https://ci.ocamllabs.io/github/ocaml-ppx/ppxlib
+[ocaml-ci-img]: https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Focaml-ppx%2Fppxlib%2Fmain&logo=ocaml
+[appveyor]:       https://ci.appveyor.com/project/diml/ppxlib/branch/main
 [appveyor-img]:   https://ci.appveyor.com/api/projects/status/bogbsm33uvh083jx?svg=true
 
 [User manual][man]
+[API documentation][api-doc]
 
 # Overview
 
 Ppxlib is the standard library for ppx rewriters and other programs
-that manipulate the in-memory reprensation of OCaml programs, a.k.a
+that manipulate the in-memory representation of OCaml programs, a.k.a
 the "Parsetree".
 
 It also comes bundled with two ppx rewriters that are commonly used to
@@ -41,4 +42,5 @@ that were developed at Jane Street. See [the history](HISTORY.md) for
 more details.
 
 [man]:           http://ppxlib.readthedocs.io/
+[api-doc]: https://ocaml-ppx.github.io/ppxlib/index.html
 [future-of-ppx]: https://discuss.ocaml.org/t/the-future-of-ppx/3766

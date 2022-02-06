@@ -1,4 +1,4 @@
-let magic_length = String.length Ocaml_common.Config.ast_impl_magic_number
+let magic_length = String.length Astlib.Config.ast_impl_magic_number
 
 let buf = Bytes.create magic_length
 

@@ -20,12 +20,20 @@ let pp_error fmt e =
 
 exception Message_too_long
 
+let bit_at buf i =
+  let byte_num = i / 8 in
+  let bit_num = i mod 8 in
+  let byte = Cstruct.get_uint8 buf byte_num in
+  byte land (1 lsl bit_num) <> 0
+
 module type Dh = sig
   type secret
 
-  val secret_of_cs : Cstruct.t -> (secret * Cstruct.t, error) result
+  val secret_of_cs : ?compress:bool -> Cstruct.t ->
+    (secret * Cstruct.t, error) result
 
-  val gen_key : ?g:Mirage_crypto_rng.g -> unit -> secret * Cstruct.t
+  val gen_key : ?compress:bool -> ?g:Mirage_crypto_rng.g -> unit ->
+    secret * Cstruct.t
 
   val key_exchange : secret -> Cstruct.t -> (Cstruct.t, error) result
 end
@@ -41,7 +49,7 @@ module type Dsa = sig
 
   val pub_of_cstruct : Cstruct.t -> (pub, error) result
 
-  val pub_to_cstruct : pub -> Cstruct.t
+  val pub_to_cstruct : ?compress:bool -> pub -> Cstruct.t
 
   val pub_of_priv : priv -> pub
 
@@ -56,7 +64,6 @@ module type Dsa = sig
     val generate : key:priv -> Cstruct.t -> Cstruct.t
   end
 end
-
 module type Dh_dsa = sig
   module Dh : Dh
   module Dsa : Dsa
@@ -69,6 +76,7 @@ module type Parameters = sig
   val g_y : Cstruct.t
   val p : Cstruct.t
   val n : Cstruct.t
+  val pident: Cstruct.t
   val byte_length : int
   val fe_length : int
   val first_byte_bits : int option
@@ -134,7 +142,7 @@ module Make_field_element (P : Parameters) (F : Foreign) : Field_element = struc
   let copy dst src = Bigarray.Array1.blit src dst
 
   let checked_buffer cs =
-    assert (Cstruct.len cs = P.byte_length);
+    assert (Cstruct.length cs = P.byte_length);
     Cstruct.to_bigarray cs
 
   let from_bytes fe cs =
@@ -172,7 +180,7 @@ module type Point = sig
 
   val of_cstruct : Cstruct.t -> (point, error) result
 
-  val to_cstruct : point -> Cstruct.t
+  val to_cstruct : compress:bool -> point -> Cstruct.t
 
   val to_affine_raw : point -> (field_element * field_element) option
 
@@ -232,20 +240,6 @@ module Make_point (P : Parameters) (F : Foreign) : Point = struct
       else Error `Not_on_curve
     | _ -> Error `Invalid_range
 
-  let of_cstruct cs =
-    let len = P.byte_length in
-    if Cstruct.len cs = 0 then
-      Error `Invalid_format
-    else
-      match Cstruct.get_uint8 cs 0 with
-      | 0x00 when Cstruct.len cs = 1 -> Ok (at_infinity ())
-      | 0x04 when Cstruct.len cs = 1 + len + len ->
-        let x = Cstruct.sub cs 1 len in
-        let y = Cstruct.sub cs (1 + len) len in
-        validate_finite_point ~x ~y
-      | 0x00 | 0x04 -> Error `Invalid_length
-      | _ -> Error `Invalid_format
-
   let to_affine_raw p =
     if is_infinity p then
       None
@@ -276,14 +270,26 @@ module Make_point (P : Parameters) (F : Foreign) : Point = struct
       Fe.to_bytes out_y y;
       Some (out_x, out_y)
 
-  let to_cstruct p =
-    match to_affine p with
-    | None -> Cstruct.create 1
-    | Some (x, y) ->
-      let four = Cstruct.create 1 in
-      Cstruct.set_uint8 four 0 4;
-      let rev_x = Cstruct.rev x and rev_y = Cstruct.rev y in
-      Cstruct.concat [ four; rev_x; rev_y ]
+  let to_cstruct ~compress p =
+    let buf =
+      match to_affine p with
+      | None -> Cstruct.create 1
+      | Some (x, y) ->
+        let four = Cstruct.create 1 in
+        Cstruct.set_uint8 four 0 4;
+        let rev_x = Cstruct.rev x and rev_y = Cstruct.rev y in
+        Cstruct.concat [ four; rev_x; rev_y ]
+    in
+    if compress then
+      let out = Cstruct.create (P.byte_length + 1) in
+      let ident =
+        2 + (Cstruct.get_uint8 buf ((P.byte_length * 2) - 1)) land 1
+      in
+      Cstruct.blit buf 1 out 1 P.byte_length;
+      Cstruct.set_uint8 out 0 ident;
+      out
+    else
+      buf
 
   let double p =
     let out = { f_x = Fe.create (); f_y = Fe.create (); f_z = Fe.create () } in
@@ -309,6 +315,96 @@ module Make_point (P : Parameters) (F : Foreign) : Point = struct
       f_y = Fe.select bit ~then_:then_.f_y ~else_:else_.f_y;
       f_z = Fe.select bit ~then_:then_.f_z ~else_:else_.f_z;
     }
+
+  let pow =
+    let mult a b =
+      let r = Fe.create () in
+      Fe.mul r a b;
+      r
+    in
+    let sqr x =
+      let r = Fe.create () in
+      Fe.sqr r x;
+      r
+    in
+    fun x exp ->
+    let r0 = ref (Fe.one ()) in
+    let r1 =  ref x in
+    for i = P.byte_length * 8 - 1 downto 0 do
+      let bit = bit_at exp i in
+      let multiplied = mult !r0 !r1 in
+      let r0_sqr = sqr !r0 in
+      let r1_sqr = sqr !r1 in
+      r0 := Fe.select bit ~then_:multiplied ~else_:r0_sqr;
+      r1 := Fe.select bit ~then_:r1_sqr ~else_:multiplied;
+    done;
+    !r0
+
+  let decompress =
+  (* When p = 4*k+3, as is the case of NIST-P256, there is an efficient square
+     root algorithm to recover the y, as follows:
+
+    Given the compact representation of Q as x,
+     y2 = x^3 + a*x + b
+     y' = y2^((p+1)/4)
+     y = min(y',p-y')
+     Q=(x,y) is the canonical representation of the point
+  *)
+    let pident = P.pident (* (Params.p + 1) / 4*) in
+    let a = Fe.from_be_cstruct P.a in
+    let b = Fe.from_be_cstruct P.b in
+    let p = Fe.from_be_cstruct P.p in
+    fun pk_cstruct ->
+      let x = Fe.from_be_cstruct (Cstruct.sub pk_cstruct 1 P.byte_length) in
+      let x3 = Fe.create () in
+      let ax = Fe.create () in
+      let sum = Fe.create () in
+      Fe.mul x3 x x;
+      Fe.mul x3 x3 x; (* x3 *)
+      Fe.mul ax a x;  (* ax *)
+      Fe.add sum x3 ax;
+      Fe.add sum sum b; (* y^2 *)
+      let y = pow sum pident in (* https://tools.ietf.org/id/draft-jivsov-ecc-compact-00.xml#sqrt point 4.3*)
+      let y' = Fe.create () in
+      Fe.sub y' p y;
+      let y_struct = Cstruct.create (P.byte_length) in
+      Fe.from_montgomery y;
+      Fe.to_bytes y_struct y; (* number must not be in montgomery domain*)
+      let y_struct = Cstruct.rev y_struct in
+      let y_struct2 = Cstruct.create (P.byte_length) in
+      Fe.from_montgomery y';
+      Fe.to_bytes y_struct2 y';(* number must not be in montgomery domain*)
+      let y_struct2 = Cstruct.rev y_struct2 in
+      let ident = Cstruct.get_uint8 pk_cstruct 0 in
+      let signY =
+        2 + (Cstruct.get_uint8 y_struct (P.byte_length - 2)) land 1
+      in
+      let res = if Int.equal signY ident then y_struct else y_struct2 in
+      let out = Cstruct.create ((P.byte_length * 2) + 1) in
+      Cstruct.set_uint8 out 0 4;
+      Cstruct.blit pk_cstruct 1 out 1 P.byte_length;
+      Cstruct.blit res 0 out (P.byte_length + 1) P.byte_length;
+      out
+
+  let of_cstruct cs =
+    let len = P.byte_length in
+    if Cstruct.length cs = 0 then
+      Error `Invalid_format
+    else
+      let of_cs cs =
+        let x = Cstruct.sub cs 1 len in
+        let y = Cstruct.sub cs (1 + len) len in
+        validate_finite_point ~x ~y
+      in
+      match Cstruct.get_uint8 cs 0 with
+      | 0x00 when Cstruct.length cs = 1 -> Ok (at_infinity ())
+      | 0x02 | 0x03 when Cstruct.length P.pident > 0 ->
+        let decompressed = decompress cs in
+        of_cs decompressed
+      | 0x04 when Cstruct.length cs = 1 + len + len ->
+        of_cs cs
+      | 0x00 | 0x04 -> Error `Invalid_length
+      | _ -> Error `Invalid_format
 end
 
 module type Scalar = sig
@@ -340,17 +436,11 @@ module Make_scalar (Param : Parameters) (P : Point) : Scalar = struct
 
   let to_cstruct (Scalar cs) = Cstruct.rev cs
 
-  let bit_at (Scalar s) i =
-    let byte_num = i / 8 in
-    let bit_num = i mod 8 in
-    let byte = Cstruct.get_uint8 s byte_num in
-    byte land (1 lsl bit_num) <> 0
-
-  let scalar_mult d p =
+  let scalar_mult (Scalar s) p =
     let r0 = ref (P.at_infinity ()) in
     let r1 = ref p in
     for i = Param.byte_length * 8 - 1 downto 0 do
-      let bit = bit_at d i in
+      let bit = bit_at s i in
       let sum = P.add !r0 !r1 in
       let r0_double = P.double !r0 in
       let r1_double = P.double !r1 in
@@ -371,13 +461,13 @@ module Make_dh (Param : Parameters) (P : Point) (S : Scalar) : Dh = struct
 
   type secret = scalar
 
-  let share private_key =
+  let share ?(compress = false) private_key =
     let public_key = S.scalar_mult private_key P.params_g in
-    point_to_cs public_key
+    point_to_cs ~compress public_key
 
-  let secret_of_cs s =
+  let secret_of_cs ?compress s =
     match S.of_cstruct s with
-    | Ok p -> Ok (p, share p)
+    | Ok p -> Ok (p, share ?compress p)
     | Error _ as e -> e
 
   let rec generate_private_key ?g () =
@@ -386,9 +476,9 @@ module Make_dh (Param : Parameters) (P : Point) (S : Scalar) : Dh = struct
     | Ok secret -> secret
     | Error _ -> generate_private_key ?g ()
 
-  let gen_key ?g () =
+  let gen_key ?compress ?g () =
     let private_key = generate_private_key ?g () in
-    (private_key, share private_key)
+    (private_key, share ?compress private_key)
 
   let key_exchange secret received =
     match point_of_cs received with
@@ -407,7 +497,7 @@ module type Foreign_n = sig
   val to_montgomery : field_element -> field_element -> unit
 end
 
-module Make_dsa (Param : Parameters) (F : Foreign_n) (P : Point) (S : Scalar) (H : Mirage_crypto.Hash.S) : Dsa = struct
+module Make_dsa (Param : Parameters) (F : Foreign_n) (P : Point) (S : Scalar) (H : Mirage_crypto.Hash.S) = struct
   let create () = Cstruct.to_bigarray (Cstruct.create Param.fe_length)
 
   type priv = scalar
@@ -417,7 +507,7 @@ module Make_dsa (Param : Parameters) (F : Foreign_n) (P : Point) (S : Scalar) (H
   let priv_to_cstruct = S.to_cstruct
 
   let padded msg =
-    let l = Cstruct.len msg in
+    let l = Cstruct.length msg in
     let bl = Param.byte_length in
     let first_byte_ok () =
       match Param.first_byte_bits with
@@ -470,7 +560,7 @@ module Make_dsa (Param : Parameters) (F : Foreign_n) (P : Point) (S : Scalar) (H
 
   let pub_of_cstruct = P.of_cstruct
 
-  let pub_to_cstruct = P.to_cstruct
+  let pub_to_cstruct ?(compress = false) pk = P.to_cstruct ~compress pk
 
   let generate ?g () =
     (* FIPS 186-4 B 4.2 *)
@@ -593,6 +683,7 @@ module P224 : Dh_dsa = struct
     let g_y = Cstruct.of_hex "BD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34"
     let p = Cstruct.of_hex "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001"
     let n = Cstruct.of_hex "FFFFFFFFFFFFFFFFFFFFFFFFFFFF16A2E0B8F03E13DD29455C5C2A3D"
+    let pident = Cstruct.empty
     let byte_length = 28
     let fe_length = if Sys.word_size == 64 then 32 else 28 (* TODO: is this congruent with C code? *)
     let first_byte_bits = None
@@ -633,7 +724,7 @@ module P224 : Dh_dsa = struct
   module Dsa = Make_dsa(Params)(Foreign_n)(P)(S)(Mirage_crypto.Hash.SHA256)
 end
 
-module P256 : Dh_dsa = struct
+module P256 : Dh_dsa  = struct
   module Params = struct
     let a = Cstruct.of_hex "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC"
     let b = Cstruct.of_hex "5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B"
@@ -643,6 +734,7 @@ module P256 : Dh_dsa = struct
       Cstruct.of_hex "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5"
     let p = Cstruct.of_hex "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF"
     let n = Cstruct.of_hex "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
+    let pident = Cstruct.of_hex "3FFFFFFFC0000000400000000000000000000000400000000000000000000000" |> Cstruct.rev (* (Params.p + 1) / 4*)
     let byte_length = 32
     let fe_length = 32
     let first_byte_bits = None
@@ -693,6 +785,7 @@ module P384 : Dh_dsa = struct
       Cstruct.of_hex "3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f"
     let p = Cstruct.of_hex "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF"
     let n = Cstruct.of_hex "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973"
+    let pident = Cstruct.of_hex "3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFC00000000000000040000000" |> Cstruct.rev (* (Params.p + 1) / 4*)
     let byte_length = 48
     let fe_length = 48
     let first_byte_bits = None
@@ -743,6 +836,7 @@ module P521 : Dh_dsa = struct
       Cstruct.of_hex "011839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650"
     let p = Cstruct.of_hex "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     let n = Cstruct.of_hex "01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA51868783BF2F966B7FCC0148F709A5D03BB5C9B8899C47AEBB6FB71E91386409"
+    let pident = Cstruct.of_hex "017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" |> Cstruct.rev
     let byte_length = 66
     let fe_length = if Sys.word_size == 64 then 72 else 68  (* TODO: is this congruent with C code? *)
     let first_byte_bits = Some 0x01
@@ -804,12 +898,12 @@ module X25519 = struct
 
   let public priv = scalar_mult priv basepoint
 
-  let gen_key ?g () =
+  let gen_key ?compress:_ ?g () =
     let secret = Mirage_crypto_rng.generate ?g key_len in
     secret, public secret
 
-  let secret_of_cs s =
-    if Cstruct.len s = key_len then
+  let secret_of_cs ?compress:_ s =
+    if Cstruct.length s = key_len then
       Ok (s, public s)
     else
       Error `Invalid_length
@@ -819,7 +913,7 @@ module X25519 = struct
     fun cs -> Cstruct.equal zero cs
 
   let key_exchange secret public =
-    if Cstruct.len public = key_len then
+    if Cstruct.length public = key_len then
       let res = scalar_mult secret public in
       if is_zero res then Error `Low_order else Ok res
     else
@@ -857,12 +951,12 @@ module Ed25519 = struct
   let pub_of_priv secret = fst (public secret)
 
   let priv_of_cstruct cs =
-    if Cstruct.len cs = key_len then Ok cs else Error `Invalid_length
+    if Cstruct.length cs = key_len then Ok cs else Error `Invalid_length
 
   let priv_to_cstruct priv = priv
 
   let pub_of_cstruct cs =
-    if Cstruct.len cs = key_len then
+    if Cstruct.length cs = key_len then
       let cs_copy = Cstruct.create key_len in
       Cstruct.blit cs 0 cs_copy 0 key_len;
       if pub_ok cs_copy.Cstruct.buffer then
@@ -893,7 +987,7 @@ module Ed25519 = struct
 
   let verify ~key signature ~msg =
     (* section 5.1.7 *)
-    if Cstruct.len signature = 2 * key_len then
+    if Cstruct.length signature = 2 * key_len then
       let r, s = Cstruct.split signature key_len in
       let s_smaller_l =
         (* check s within 0 <= s < L *)

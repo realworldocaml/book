@@ -27,10 +27,12 @@ module Glue           = Glue
 module Memoize        = Memoize
 module Numbering      = Numbering
 module GraphNumbering = GraphNumbering
+module Indexing       = Indexing
 module Tabulate       = Tabulate
 module Gensym         = Gensym
 module HashCons       = HashCons
 module DataFlow       = DataFlow
+module CompactQueue   = CompactQueue
 
 module Prop = struct
 

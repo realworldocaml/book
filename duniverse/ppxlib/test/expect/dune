@@ -11,6 +11,7 @@
   ppxlib.metaquot
   ppxlib.traverse
   findlib.top
+  ppxlib_ast
   ;; We don't actually use findlib.dynload, however it is a
   ;; special library that causes to record the various
   ;; libraries statically linked in with findlib so that

@@ -137,3 +137,9 @@ let%expect_test "prog relative to cwd" =
     wait
       (Spawn.spawn () ~prog:"./hello.exe" ~argv:[ "hello" ] ~cwd:(Path "exe"));
   [%expect {| Hello, world! |}]
+
+let%expect_test "pgid tests" =
+  wait
+    (Spawn.spawn ~setpgid:Spawn.Pgid.new_process_group ()
+       ~prog:"pgid_test/checkpgid.exe" ~argv:[]);
+  [%expect {||}]

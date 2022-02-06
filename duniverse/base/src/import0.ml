@@ -109,7 +109,7 @@ module Caml = struct
 
   module Stack = Caml.Stack (** @canonical Caml.Stack *)
 
-  module Stream = Caml.Stream (** @canonical Caml.Stream *)
+  module Stream = Caml.Stream [@ocaml.warning "-3"] (** @canonical Caml.Stream *)
 
   module String = Caml.StdLabels.String (** @canonical Caml.StdLabels.String *)
 

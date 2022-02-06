@@ -1,8 +1,7 @@
 (library
   (name domain_name)
   (public_name domain-name)
-  (modules domain_name)
-  (libraries fmt astring))
+  (modules domain_name))
 
 (test
   (name tests)

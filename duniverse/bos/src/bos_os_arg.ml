@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Astring
@@ -27,7 +26,7 @@ let err_unknown_opt ppf l =
 
 let err_too_many ppf l =
   Fmt.pf ppf "too many arguments, don't know what to do with %a"
-    Fmt.(list ~sep:(Fmt.unit ",@ ") (quote Fmt.string)) l
+    Fmt.(list ~sep:(Fmt.any ",@ ") (quote Fmt.string)) l
 
 (* Executable name. *)
 
@@ -180,10 +179,10 @@ let pp_opt_docs ppf opt_docs =
     let names = List.sort compare o.names in
     match o.kind with
     | Flag _ ->
-        Fmt.(list ~sep:(unit ",@ ") pp_name) ppf names;
+        Fmt.(list ~sep:(any ",@ ") pp_name) ppf names;
         pp_absent ppf "" o.env
     | Opt (_, var, absent) ->
-        Fmt.(list ~sep:(unit ",@ ") (pp_opt var)) ppf names;
+        Fmt.(list ~sep:(any ",@ ") (pp_opt var)) ppf names;
         let absent = strf "@[<h>%a@]" absent () in
         pp_absent ppf absent o.env;
   in
@@ -343,14 +342,14 @@ let get_pp_usage ~pos = function
 | Some u -> Fmt.(const string) u
 | None ->
     fun ppf () ->
-      Fmt.pf ppf "[%a]..." Fmt.(styled_unit `Underline "OPTION") ();
-      if pos then Fmt.pf ppf " %a..." Fmt.(styled_unit `Underline "ARG") ()
+      Fmt.pf ppf "[%a]..." Fmt.(styled `Underline (any "OPTION")) ();
+      if pos then Fmt.pf ppf " %a..." Fmt.(styled `Underline (any "ARG")) ()
 
 let pp_usage ppf usage = Fmt.pf ppf "Usage: %s %a@." exec usage ()
 let pp_usage_try_help ppf usage =
   pp_usage ppf usage;
   Fmt.pf ppf "Try %a for more information@."
-    (quote Fmt.(suffix (unit " --help") string)) exec;
+    (quote Fmt.(string ++ (any " --help"))) exec;
   ()
 
 let parse_error ~usage msg =
@@ -479,7 +478,7 @@ let parse_split ?(sep = ",") s parse =
 
 let list ?sep c =
   let parse s = parse_split ?sep s c.parse in
-  let print = Fmt.list ~sep:(Fmt.unit ",") c.print in
+  let print = Fmt.list ~sep:(Fmt.any ",") c.print in
   conv ~docv:(strf "LIST %s" c.docv) parse print
 
 let array ?sep c =
@@ -487,7 +486,7 @@ let array ?sep c =
   | Error _ as e -> e
   | Ok l -> Ok (Array.of_list l)
   in
-  let print = Fmt.array ~sep:(Fmt.unit ",") c.print in
+  let print = Fmt.array ~sep:(Fmt.any ",") c.print in
   conv ~docv:(strf "ARRAY %s" c.docv) parse print
 
 let pair ?(sep = ",") l r =
@@ -502,7 +501,7 @@ let pair ?(sep = ",") l r =
   conv ~docv:(strf "%s%s%s" l.docv sep r.docv) parse print
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

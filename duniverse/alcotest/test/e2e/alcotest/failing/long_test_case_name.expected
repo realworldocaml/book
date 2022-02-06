@@ -9,6 +9,7 @@ This run has ID `<uuid>'.
 └──────────────────────────────────────────────────────────────────────────────┘
 ASSERT Failed
 FAIL Failed
+<stacktrace>
 
 Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────

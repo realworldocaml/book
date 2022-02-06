@@ -1,4 +1,4 @@
-version: "0.14.1"
+version: "0.15.2"
 opam-version: "2.0"
 homepage:     "https://github.com/mirleft/ocaml-tls"
 dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
@@ -19,7 +19,7 @@ depends: [
   "dune" {>= "1.0"}
   "tls" {= version}
   "x509" {>= "0.13.0"}
-  "fmt"
+  "fmt" {>= "0.8.7"}
   "lwt" {>= "3.0.0"}
   "mirage-flow" {>= "2.0.0"}
   "mirage-kv" {>= "3.0.0"}

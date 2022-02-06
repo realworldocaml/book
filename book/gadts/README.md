@@ -83,7 +83,7 @@ With that in hand, we can write the evaluator itself.
     | Plus (x, y) ->
       (match eval x, eval y with
        | Bool _, _ | _, Bool _ -> raise Ill_typed
-       | Int f1, Int f2 -> Int (f1 + f2))
+       | Int f1, Int f2 -> Int (f1 + f2));;
 val eval : expr -> value = <fun>
 ```
 
@@ -94,11 +94,11 @@ an ill-typed expression which will trip these checks.
 ```ocaml env=main
 # let i x = Value (Int x)
   and b x = Value (Bool x)
-  and (+:) x y = Plus (x,y)
+  and (+:) x y = Plus (x,y);;
 val i : int -> expr = <fun>
 val b : bool -> expr = <fun>
 val ( +: ) : expr -> expr -> expr = <fun>
-# eval (i 3 +: b false)
+# eval (i 3 +: b false);;
 Exception: Ill_typed.
 ```
 
@@ -173,7 +173,7 @@ As you can see, the ill-typed expression we had trouble with before
 can't be constructed, because it's rejected by OCaml's type-system.
 
 ```ocaml env=main
-# let expr = Typesafe_lang.(plus (int 3) (bool false))
+# let expr = Typesafe_lang.(plus (int 3) (bool false));;
 Line 1, characters 40-52:
 Error: This expression has type bool t but an expression was expected of type
          int t
@@ -208,7 +208,7 @@ have missed the fact that the type on the `eq` function above is
 wrong!
 
 ```ocaml env=main
-# Typesafe_lang.eq
+# Typesafe_lang.eq;;
 - : 'a Typesafe_lang.t -> 'a Typesafe_lang.t -> bool Typesafe_lang.t = <fun>
 ```
 
@@ -218,9 +218,9 @@ we can still construct an ill-typed expression, phantom-types
 notwithstanding.
 
 ```ocaml env=main
-# let expr = Typesafe_lang.(eq (bool true) (bool false))
+# let expr = Typesafe_lang.(eq (bool true) (bool false));;
 val expr : bool Typesafe_lang.t = <abstr>
-# Typesafe_lang.bool_eval expr
+# Typesafe_lang.bool_eval expr;;
 Exception: Ill_typed.
 ```
 
@@ -258,15 +258,15 @@ want.  Let's experiment a little.
 ```ocaml env=main
 # let i x = Value (Int x)
   and b x = Value (Bool x)
-  and (+:) x y = Plus (x,y)
+  and (+:) x y = Plus (x,y);;
 val i : 'a -> 'a expr = <fun>
 val b : 'a -> 'a expr = <fun>
 val ( +: ) : 'a expr -> 'a expr -> 'a expr = <fun>
-# i 3
+# i 3;;
 - : int expr = Value (Int 3)
-# b false
+# b false;;
 - : bool expr = Value (Bool false)
-# i 3 +: i 4
+# i 3 +: i 4;;
 - : int expr = Plus (Value (Int 3), Value (Int 4))
 ```
 
@@ -276,7 +276,7 @@ outer expression is always just equal to the type of the inner
 expression, which means that some things that should type-check don't.
 
 ```ocaml env=main
-# If (Eq (i 3, i 4), i 0, i 1)
+# If (Eq (i 3, i 4), i 0, i 1);;
 Line 1, characters 9-12:
 Error: This expression has type int expr
        but an expression was expected of type bool expr
@@ -286,7 +286,7 @@ Error: This expression has type int expr
 Also, some things that shouldn't typecheck do.
 
 ```ocaml env=main
-# b 3
+# b 3;;
 - : int expr = Value (Bool 3)
 ```
 
@@ -337,19 +337,19 @@ Let's try some examples.
 ```ocaml env=main
 # let i x = Value (Int x)
   and b x = Value (Bool x)
-  and (+:) x y = Plus (x,y)
+  and (+:) x y = Plus (x,y);;
 val i : int -> int expr = <fun>
 val b : bool -> bool expr = <fun>
 val ( +: ) : int expr -> int expr -> int expr = <fun>
-# i 3
+# i 3;;
 - : int expr = Value (Int 3)
-# b 3
+# b 3;;
 Line 1, characters 3-4:
 Error: This expression has type int but an expression was expected of type
          bool
-# i 3 +: i 6
+# i 3 +: i 6;;
 - : int expr = Plus (Value (Int 3), Value (Int 6))
-# i 3 +: b false
+# i 3 +: b false;;
 Line 1, characters 8-15:
 Error: This expression has type bool expr
        but an expression was expected of type int expr
@@ -368,13 +368,13 @@ checks.
 ```ocaml env=main
 # let eval_value : type a. a value -> a = function
     | Int x -> x
-    | Bool x -> x
+    | Bool x -> x;;
 val eval_value : 'a value -> 'a = <fun>
 # let rec eval : type a. a expr -> a = function
     | Value v -> eval_value v
     | If (c, t, e) -> if eval c then eval t else eval e
     | Eq (x, y) -> eval x = eval y
-    | Plus (x, y) -> eval x + eval y
+    | Plus (x, y) -> eval x + eval y;;
 val eval : 'a expr -> 'a = <fun>
 ```
 
@@ -391,7 +391,7 @@ happens if we write the definition of `value` without the annotation:
 ```ocaml env=main
 # let eval_value = function
     | Int x -> x
-    | Bool x -> x
+    | Bool x -> x;;
 Line 3, characters 7-13:
 Error: This pattern matches values of type bool value
        but a pattern was expected which matches values of type int value
@@ -408,7 +408,7 @@ function, which is what is required here. We can fix that by adding a
 # let eval_value (type a) (v : a value) : a =
     match v with
     | Int x -> x
-    | Bool x -> x
+    | Bool x -> x;;
 val eval_value : 'a value -> 'a = <fun>
 ```
 
@@ -421,7 +421,7 @@ because this trick doesn't work with `eval`, as you can see below.
     | Value v -> eval_value v
     | If (c, t, e) -> if eval c then eval t else eval e
     | Eq (x, y) -> eval x = eval y
-    | Plus (x, y) -> eval x + eval y
+    | Plus (x, y) -> eval x + eval y;;
 Line 4, characters 43-44:
 Error: This expression has type a expr but an expression was expected of type
          bool expr
@@ -447,7 +447,7 @@ OCaml has a handy type annotation for.
      | Value v -> eval_value v
      | If (c, t, e) -> if eval c then eval t else eval e
      | Eq (x, y) -> eval x = eval y
-     | Plus (x, y) -> eval x + eval y
+     | Plus (x, y) -> eval x + eval y;;
 val eval : 'a expr -> 'a = <fun>
 ```
 
@@ -474,7 +474,7 @@ creation of the locally abstract types.
     | Value v -> eval_value v
     | If (c, t, e) -> if eval c then eval t else eval e
     | Eq (x, y) -> eval x = eval y
-    | Plus (x, y) -> eval x + eval y
+    | Plus (x, y) -> eval x + eval y;;
 val eval : 'a expr -> 'a = <fun>
 ```
 
@@ -498,7 +498,7 @@ is a fine example.  The signature indicates that the type of the
 result varies with the type of the input list.
 
 ```ocaml env=main
-# List.find
+# List.find;;
 - : 'a list -> f:('a -> bool) -> 'a option = <fun>
 ```
 
@@ -506,9 +506,9 @@ And of course you can use `List.find` to produce values of different
 types.
 
 ```ocaml env=main
-# List.find ~f:(fun x -> x > 3) [1;3;5;2]
+# List.find ~f:(fun x -> x > 3) [1;3;5;2];;
 - : int option = Some 5
-# List.find ~f:(Char.is_uppercase) ['a';'B';'C']
+# List.find ~f:(Char.is_uppercase) ['a';'B';'C'];;
 - : char option = Some B
 ```
 
@@ -548,7 +548,7 @@ parameter, and varies its behavior accordingly.
       (match if_not_found with
       | Raise -> failwith "Element not found"
       | Return_none -> None
-      | Default_to x -> Some x)
+      | Default_to x -> Some x);;
 val flexible_find :
   'a list -> f:('a -> bool) -> 'a If_not_found.t -> 'a option = <fun>
 ```
@@ -556,13 +556,13 @@ val flexible_find :
 And here's how it works.
 
 ```ocaml env=main
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none;;
 - : int option = None
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10)
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int option = Some 10
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
 Exception: (Failure "Element not found")
-# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise
+# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int option = Some 20
 ```
 
@@ -610,7 +610,7 @@ GADT.
         | Raise -> hd
         | Return_none -> Some hd
         | Default_to _ -> hd)
-      else flexible_find ~f tl if_not_found
+      else flexible_find ~f tl if_not_found;;
 val flexible_find :
   f:('a -> bool) -> 'a list -> ('a, 'b) If_not_found.t -> 'b = <fun>
 ```
@@ -620,13 +620,13 @@ return value to vary according to `If_not_found.t`, and indeed the
 functions works as you might hope, with no unnecessary options.
 
 ```ocaml env=main
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none;;
 - : int option = Base.Option.None
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10)
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int = 10
-# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise
+# flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
 Exception: (Failure "No matching item found")
-# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise
+# flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int = 20
 ```
 
@@ -636,7 +636,7 @@ Code that that works with unknown types is routine in OCaml, and comes
 up in the simplest of examples:
 
 ```ocaml env=main
-# let tuple x y = (x,y)
+# let tuple x y = (x,y);;
 val tuple : 'a -> 'b -> 'a * 'b = <fun>
 ```
 
@@ -649,9 +649,9 @@ And indeed, we can restrict the type of `tuple` to any `'a` and `'b`
 we want.
 
 ```ocaml env=main
-# (tuple : int -> float -> int * float)
+# (tuple : int -> float -> int * float);;
 - : int -> float -> int * float = <fun>
-# (tuple : string -> string * string -> string * (string * string))
+# (tuple : string -> string * string -> string * (string * string));;
 - : string -> string * string -> string * (string * string) = <fun>
 ```
 
@@ -680,7 +680,7 @@ The following function can print an arbitrary `stringable`:
 
 ```ocaml env=main
 # let print_stringable (Stringable s) =
-    Stdio.print_endline (s.to_string s.value)
+    Stdio.print_endline (s.to_string s.value);;
 val print_stringable : stringable -> unit = <fun>
 ```
 
@@ -693,12 +693,12 @@ different underlying types.
       [ s 100 Int.to_string
       ; s 12.3 Float.to_string
       ; s "foo" Fn.id
-      ])
+      ]);;
 val stringables : stringable list =
   [Stringable {value = <poly>; to_string = <fun>};
    Stringable {value = <poly>; to_string = <fun>};
    Stringable {value = <poly>; to_string = <fun>}]
-# List.iter ~f:print_stringable stringables
+# List.iter ~f:print_stringable stringables;;
 100
 12.3
 foo
@@ -712,7 +712,7 @@ the type of the underlying values can't escape the scope of
 type-check.
 
 ```ocaml env=main
-# let get_value (Stringable s) = s.value
+# let get_value (Stringable s) = s.value;;
 Line 1, characters 32-39:
 Error: This expression has type $Stringable_'a
        but an expression was expected of type 'a
@@ -746,12 +746,12 @@ But, can't we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:
 
 ```ocaml env=abstracting
-# open Core
+# open Core;;
 # let sum_file_sizes () =
     Sys.ls_dir "."
     |> List.filter ~f:Sys.is_file_exn
     |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
-    |> List.sum (module Int) ~f:Int64.to_int_exn
+    |> List.sum (module Int) ~f:Int64.to_int_exn;;
 val sum_file_sizes : unit -> int = <fun>
 ```
 
@@ -800,7 +800,7 @@ code using a given API before we've implemented it.
       @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
       @> List.sum (module Int) ~f:Int64.to_int_exn
       @> empty
-  end
+  end;;
 module Example_pipeline :
   functor (Pipeline : Pipeline) ->
     sig val sum_file_sizes : (unit, int) Pipeline.t end
@@ -856,9 +856,9 @@ pipeline: `Step` corresponds to the `@>` operator, and `Empty`
 corresponds to the `empty` pipeline, as you can see below.
 
 ```ocaml env=abstracting
-# let ( @> ) f pipeline = Step (f,pipeline)
+# let ( @> ) f pipeline = Step (f,pipeline);;
 val ( @> ) : ('a -> 'b) -> ('b, 'c) pipeline -> ('a, 'c) pipeline = <fun>
-# let empty = Empty
+# let empty = Empty;;
 val empty : ('a, 'a) pipeline = Empty
 ```
 
@@ -870,7 +870,7 @@ enough.
    fun pipeline input ->
     match pipeline with
     | Empty -> input
-    | Step (f, tail) -> exec tail (f input)
+    | Step (f, tail) -> exec tail (f input);;
 val exec : ('a, 'b) pipeline -> 'a -> 'b = <fun>
 ```
 
@@ -894,7 +894,7 @@ long each step of a pipeline took.
         loop tail output (elapsed :: rev_profile)
     in
     let output, rev_profile = loop pipeline input [] in
-    output, List.rev rev_profile
+    output, List.rev rev_profile;;
 val exec_with_profile : ('a, 'b) pipeline -> 'a -> 'b * Time_ns.Span.t list =
   <fun>
 ```
@@ -956,7 +956,7 @@ request is authorized.
     match request.user_id, request.permissions with
     | None, _ | _, None -> Error "Can't check authorization: data incomplete"
     | Some user_id, Some permissions ->
-      Ok (Permissions.check permissions user_id)
+      Ok (Permissions.check permissions user_id);;
 val authorized : logon_request -> (bool, string) result = <fun>
 ```
 
@@ -1032,7 +1032,7 @@ a default value if `Absent` is found.
 # let get ~default o =
      match o with
      | Present x -> x
-     | Absent -> default
+     | Absent -> default;;
 val get : default:'a -> ('a, incomplete) coption -> 'a = <fun>
 ```
 
@@ -1043,7 +1043,7 @@ Note that the `incomplete` type was inferred here.  If we annotate the
 # let get ~default (o : (_,complete) coption) =
     match o with
     | Absent -> default
-    | Present x -> x
+    | Present x -> x;;
 Line 3, characters 7-13:
 Error: This pattern matches values of type ('a, incomplete) coption
        but a pattern was expected which matches values of type
@@ -1057,14 +1057,14 @@ useless `default` argument).
 ```ocaml env=main
 # let get (o : (_,complete) coption) =
     match o with
-    | Present x -> x
+    | Present x -> x;;
 val get : ('a, complete) coption -> 'a = <fun>
 ```
 
 We could write this more simply as:
 
 ```ocaml env=main
-# let get (Present x : (_,complete) coption) = x
+# let get (Present x : (_,complete) coption) = x;;
 val get : ('a, complete) coption -> 'a = <fun>
 ```
 
@@ -1093,9 +1093,9 @@ As before, it's easy to fill in the `user_id` and `permissions`
 fields.
 
 ```ocaml env=main
-# let set_user_id request x = { request with user_id = Present x }
+# let set_user_id request x = { request with user_id = Present x };;
 val set_user_id : 'a logon_request -> User_id.t -> 'a logon_request = <fun>
-# let set_permissions request x = { request with permissions = Present x }
+# let set_permissions request x = { request with permissions = Present x };;
 val set_permissions : 'a logon_request -> Permissions.t -> 'a logon_request =
   <fun>
 ```
@@ -1110,7 +1110,7 @@ completed fields filled in.
     match request.user_id, request.permissions with
     | Absent, _ | _, Absent -> None
     | (Present _ as user_id), (Present _ as permissions) ->
-      Some { request with user_id; permissions }
+      Some { request with user_id; permissions };;
 val check_completeness : incomplete logon_request -> 'a logon_request option =
   <fun>
 ```
@@ -1126,7 +1126,7 @@ understand if we constrain the return value to explicitly return a
     match request.user_id, request.permissions with
     | Absent, _ | _, Absent -> None
     | (Present _ as user_id), (Present _ as permissions) ->
-      Some { request with user_id; permissions }
+      Some { request with user_id; permissions };;
 val check_completeness :
   incomplete logon_request -> complete logon_request option = <fun>
 ```
@@ -1137,7 +1137,7 @@ unconditionally on a complete login request.
 ```ocaml env=main
 # let authorized (request : complete logon_request) =
     let { user_id = Present user_id; permissions = Present permissions; _ } = request in
-    Permissions.check permissions user_id
+    Permissions.check permissions user_id;;
 val authorized : complete logon_request -> bool = <fun>
 ```
 
@@ -1172,10 +1172,10 @@ distinct types, despite having variants of the same name, as you can
 see when we try to put instances of each type in the same list.
 
 ```ocaml env=main
-# let i = (Z : incomplete) and c = (Z : complete)
+# let i = (Z : incomplete) and c = (Z : complete);;
 val i : incomplete = Z
 val c : complete = Z
-# [i; c]
+# [i; c];;
 Line 1, characters 5-6:
 Error: This expression has type complete
        but an expression was expected of type incomplete
@@ -1196,7 +1196,7 @@ and accordingly, need only contemplate the `Present` case.
 ```ocaml env=main
 # let assume_complete (coption : (_,complete) coption) =
     match coption with
-    | Present x -> x
+    | Present x -> x;;
 val assume_complete : ('a, complete) coption -> 'a = <fun>
 ```
 
@@ -1226,7 +1226,7 @@ exhaustive.
 ```ocaml env=main
 # let assume_complete (coption : (_,complete) coption) =
     match coption with
-    | Present x -> x
+    | Present x -> x;;
 Lines 2-3, characters 5-21:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -1260,7 +1260,7 @@ Unfortunately, the result is still not exhaustive.
 ```ocaml env=main
 # let assume_complete (coption : (_,complete) coption) =
     match coption with
-    | Present x -> x
+    | Present x -> x;;
 Lines 2-3, characters 5-21:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -1317,11 +1317,11 @@ Normally, to match a `Result.t`, you need to handle both the `Ok` and
 
 
 ```ocaml env=main
-# open Stdio
+# open Stdio;;
 # let print_result (x : (int,string) Result.t) =
     match x with
     | Ok x -> printf "%d\n" x
-    | Error x -> printf "ERROR: %s\n" x
+    | Error x -> printf "ERROR: %s\n" x;;
 val print_result : (int, string) result -> unit = <fun>
 ```
 
@@ -1332,7 +1332,7 @@ case can never be instantiated, and OCaml will tell you as much.
 # let print_result (x : (int, Nothing.t) Result.t) =
     match x with
     | Ok x -> printf "%d\n" x
-    | Error _ -> printf "ERROR\n"
+    | Error _ -> printf "ERROR\n";;
 Line 4, characters 7-14:
 Warning 56 [unreachable-case]: this match case is unreachable.
 Consider replacing it with a refutation case '<pat> -> .'
@@ -1346,7 +1346,7 @@ We can follow the advice above, and add a so-called *refutation case*.
 # let print_result (x : (int, Nothing.t) Result.t) =
     match x with
     | Ok x -> printf "%d\n" x
-    | Error _ -> .
+    | Error _ -> .;;
 val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
@@ -1358,7 +1358,7 @@ refutation case for you, so you don't need to write it out explicitly.
 ```ocaml env=main
 # let print_result (x : (int, Nothing.t) Result.t) =
     match x with
-    | Ok x -> printf "%d\n" x
+    | Ok x -> printf "%d\n" x;;
 val print_result : (int, Nothing.t) result -> unit = <fun>
 ```
 
@@ -1400,7 +1400,7 @@ writing code to dispatch the RPC.
 # let dispatch conn =
     match%bind Rpc.State_rpc.dispatch rpc conn () >>| ok_exn with
     | Ok (initial_state, updates, _) -> handle_state_changes initial_state updates
-    | Error () -> failwith "this is not supposed to happen"
+    | Error () -> failwith "this is not supposed to happen";;
 val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 ```
 
@@ -1424,7 +1424,7 @@ result, our dispatch function needs only deal with the `Ok` case.
 ```ocaml env=async
 # let dispatch conn =
     match%bind Rpc.State_rpc.dispatch rpc conn () >>| ok_exn with
-    | Ok (initial_state, updates, _) -> handle_state_changes initial_state updates
+    | Ok (initial_state, updates, _) -> handle_state_changes initial_state updates;;
 val dispatch : Rpc.Connection.t -> unit Deferred.t = <fun>
 ```
 
@@ -1463,7 +1463,7 @@ corresponding source, and prints it out.
     match kind with
     | Filename -> String.sexp_of_t source
     | Host_and_port -> Host_and_port.sexp_of_t source
-    | Raw_data -> String.sexp_of_t source
+    | Raw_data -> String.sexp_of_t source;;
 val source_to_sexp : 'a Source_kind.t -> 'a -> Sexp.t = <fun>
 ```
 
@@ -1475,7 +1475,7 @@ or-pattern.  Unfortunately, that doesn't work.
 # let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
     match kind with
     | Filename | Raw_data -> String.sexp_of_t source
-    | Host_and_port -> Host_and_port.sexp_of_t source
+    | Host_and_port -> Host_and_port.sexp_of_t source;;
 Line 3, characters 47-53:
 Error: This expression has type a but an expression was expected of type
          string
@@ -1489,7 +1489,7 @@ an example of a function that uses or-patterns successfully.
 # let requires_io (type a) (kind : a Source_kind.t) =
     match kind with
     | Filename | Host_and_port -> true
-    | Raw_data -> false
+    | Raw_data -> false;;
 val requires_io : 'a Source_kind.t -> bool = <fun>
 ```
 
@@ -1511,13 +1511,13 @@ definition.
 Here's an example:
 
 ```ocaml env=main
-# type position = { x: float; y: float } [@@deriving sexp]
+# type position = { x: float; y: float } [@@deriving sexp];;
 type position = { x : float; y : float; }
 val position_of_sexp : Sexp.t -> position = <fun>
 val sexp_of_position : position -> Sexp.t = <fun>
-# sexp_of_position { x = 3.5; y = -2. }
+# sexp_of_position { x = 3.5; y = -2. };;
 - : Sexp.t = ((x 3.5) (y -2))
-# position_of_sexp (Sexp.of_string "((x 72) (y 1.2))")
+# position_of_sexp (Sexp.of_string "((x 72) (y 1.2))");;
 - : position = {x = 72.; y = 1.2}
 ```
 
@@ -1528,11 +1528,11 @@ work with GADTs.
 # type _ number_kind =
     | Int : int number_kind
     | Float : float number_kind
-  [@@deriving sexp]
+  [@@deriving sexp];;
 Lines 1-4, characters 1-20:
 Error: This expression has type int number_kind
-       but an expression was expected of type v_x__001_ number_kind
-       Type int is not compatible with type v_x__001_
+       but an expression was expected of type a__001_ number_kind
+       Type int is not compatible with type a__001_
 ```
 
 The error message is pretty awful, but if you stop and think about it,
@@ -1551,11 +1551,11 @@ fine.
 # type _ number_kind =
    | Int : int number_kind
    | Float : float number_kind
-  [@@deriving sexp_of]
+  [@@deriving sexp_of];;
 type _ number_kind = Int : int number_kind | Float : float number_kind
 val sexp_of_number_kind :
-  ('v_x__001_ -> Sexp.t) -> 'v_x__001_ number_kind -> Sexp.t = <fun>
-# sexp_of_number_kind Int.sexp_of_t Int
+  ('a__001_ -> Sexp.t) -> 'a__001_ number_kind -> Sexp.t = <fun>
+# sexp_of_number_kind Int.sexp_of_t Int;;
 - : Sexp.t = Int
 ```
 
@@ -1584,7 +1584,7 @@ packed variety.
     =
     match kind with
     | Int -> P Int
-    | Float -> P Float
+    | Float -> P Float;;
 val simple_number_kind_to_packed_number_kind :
   simple_number_kind -> packed_number_kind = <fun>
 ```
@@ -1595,7 +1595,7 @@ type to produce the final deserialization function.
 ```ocaml env=main
 # let number_kind_of_sexp sexp =
     simple_number_kind_of_sexp sexp
-    |> simple_number_kind_to_packed_number_kind
+    |> simple_number_kind_to_packed_number_kind;;
 val number_kind_of_sexp : Sexp.t -> packed_number_kind = <fun>
 ```
 
@@ -1603,7 +1603,7 @@ And here's that function in action.
 
 ```ocaml env=main
 # List.map ~f:number_kind_of_sexp
-    [ Sexp.of_string "Float"; Sexp.of_string "Int" ]
+    [ Sexp.of_string "Float"; Sexp.of_string "Int" ];;
 - : packed_number_kind list = [P Float; P Int]
 ```
 

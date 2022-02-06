@@ -14,11 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-module Tester = Alcotest_engine.Cli.Make (Alcotest.Unix) (Lwt)
-include Tester
-
-let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
-
 let run_test fn args =
   let async_ex, async_waker = Lwt.wait () in
   let handle_exn ex =
@@ -28,4 +23,12 @@ let run_test fn args =
   Lwt.async_exception_hook := handle_exn;
   Lwt_switch.with_switch (fun sw -> Lwt.pick [ fn sw args; async_ex ])
 
-let test_case n s f = test_case n s (run_test f)
+module V1 = struct
+  module Tester = Alcotest_engine.V1.Cli.Make (Alcotest.Unix_platform) (Lwt)
+  include Tester
+
+  let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
+  let test_case n s f = test_case n s (run_test f)
+end
+
+include V1

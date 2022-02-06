@@ -298,8 +298,8 @@ let () =
     underlying I/O operations complete.
 
     In case your callback is just using the CPU for a really long time, you can
-    insert a few calls to {!Lwt_main.yield} into it, and resume your computation
-    in callbacks of [yield]. This is basically the same as
+    insert a few calls to {!Lwt.pause} into it, and resume your computation
+    in callbacks of [pause]. This is basically the same as
     {!Lwt_unix.sleep}[ 0.] – it's a promise that will be resolved by
     {!Lwt_main.run} {e after} any other I/O resolutions that are already in its
     queue.
@@ -417,7 +417,7 @@ val wakeup_later : 'a u -> 'a -> unit
     triggers callbacks attached to the promise.
 
     If the promise is not pending, [Lwt.wakeup_later] raises
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#VALinvalid_arg}
+    {{: https://ocaml.org/api/Stdlib.html#VALinvalid_arg}
     [Invalid_argument]}, unless the promise is {{: #VALcancel} canceled}. If the
     promise is canceled, [Lwt.wakeup_later] has no effect.
 
@@ -1587,7 +1587,7 @@ type +'a Lwt.result =
     type ['a], or rejected with an exception.
 
     This corresponds to the cases of a
-    [('a, exn)]{{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#TYPEresult}[Stdlib.result]}:
+    [('a, exn)]{{: https://ocaml.org/api/Stdlib.html#TYPEresult}[Stdlib.result]}:
     fulfilled corresponds to [Ok of 'a], and rejected corresponds to
     [Error of exn].
 
@@ -1792,7 +1792,7 @@ val make_value : 'a -> 'a result
   [@@ocaml.deprecated
     " Use Result.Ok, which is the same as Ok since OCaml 4.03."]
 (** [Lwt.make_value v] is equivalent to
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#TYPEresult}
+    {{: https://ocaml.org/api/Stdlib.html#TYPEresult}
     [Ok v]} since OCaml 4.03. If you need compatibility with OCaml 4.02, use
     [Result.Ok] and depend on opam package
     {{: https://opam.ocaml.org/packages/result/} [result]}. *)
@@ -1801,7 +1801,7 @@ val make_error : exn -> _ result
   [@@ocaml.deprecated
     " Use Result.Error, which is the same as Error since OCaml 4.03."]
 (** [Lwt.make_error exn] is equivalent to
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#TYPEresult}
+    {{: https://ocaml.org/api/Stdlib.html#TYPEresult}
     [Error exn]} since OCaml 4.03. If you need compatibility with OCaml 4.02,
     use [Result.Error] and depend on opam package
     {{: https://opam.ocaml.org/packages/result/} [result]}. *)
@@ -1927,7 +1927,7 @@ val register_pause_notifier : (int -> unit) -> unit
 
 val abandon_paused : unit -> unit
 (** Causes promises created with {!Lwt.pause} to remain forever pending. See
-    {!Lwt_main.abandon_yielded_and_paused}.
+    {!Lwt_main.abandon_yielded_and_paused} before {!Lwt_main.yield} is phased out.
 
     This function is intended for internal use by Lwt. *)
 

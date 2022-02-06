@@ -16,7 +16,12 @@
 
 (** Cram tests *)
 
-type t = { command : string list; output : Output.t list; exit_code : int }
+type t = {
+  command : string list;
+  output : Output.t list;
+  exit_code : int;
+  vpad : int;
+}
 (** The type for cram tests. *)
 
 (** {2 Accessors} *)
@@ -34,7 +39,7 @@ val command_line : t -> string
 
 (** {2 Parser} *)
 
-val of_lines : string list -> int * t list
+val of_lines : syntax:Syntax.t -> loc:Location.t -> string list -> int * t list
 (** [of_lines l] parses the commands [l]. It returns the optional
    whitespace padding. *)
 

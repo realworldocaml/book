@@ -158,6 +158,9 @@ end
 module HashTablesAsImperativeMaps (H : HashedType) =
   Adapt(Hashtbl.Make(H))
 
+module WeakHashTablesAsImperativeMaps (H : HashedType) =
+  Adapt(Ephemeron.K1.Make(H))
+
 module MinimalSemiLattice (P : SEMI_LATTICE) = struct
 
   type property =

@@ -19,14 +19,33 @@
       print_endline (String.concat " " [the; last; phrase])
     ]}
 
-    {[
+    With the optional header:
+
+    {@ocaml[
       # List.map (fun x -> x * x) [(1 + 9); 2; 3];;
       - : int list = [100; 4; 9]
       # List.map (fun x -> x * x) [1; 2; 3];;
       - : int list = [1; 4; 9]
     ]}
+
+    A shell block:
+
+    {@sh set-FOO=Hello,set-BAR=Bash[
+      $ echo $FOO $BAR
+      Hello Bash
+    ]}
+
+    A block that doesn't run:
+
+    {@text[
+      # 1
+      = 2 ?
+    ]}
 *)
 val foo : string
 
-(** {[1 + 1 = 3]} *)
+(** {@ocaml[1 + 1 = 3]} *)
 val bar : string
+
+(** {@ocaml skip[1 + 1 = 3]} *)
+val baz : string

@@ -1,5 +1,5 @@
 (executable
- (name report)
+ (name main)
  (public_name bisect-ppx-report)
  (package bisect_ppx)
  (libraries bisect_ppx.common cmdliner unix))

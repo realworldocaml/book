@@ -1,3 +1,22 @@
+2.9.3 (26/01/2022)
+------------------
+
+- Disable warning for deprecated Toploop functions used in dune files written in
+  OCaml syntax. Restores 4.02 compatibility. (#5381, @nojb)
+
+2.9.2 (23/01/2022)
+------------------
+
+- Fix missing -linkall flag when linking library dune-sites.plugin
+  ( #4348, @kakadu, @bobot, reported by @kakadu)
+
+- No longer reference deprecated Toploop functions when using dune files in
+  OCaml syntax. (#4834, fixes #4830, @nojb)
+
+- Use the stag format API to be compatible with OCaml 5.0 (#5351, @emillon).
+
+- Fix post-processing of dune-package (fix #4389, @strub)
+
 2.9.1 (07/09/2021)
 ------------------
 

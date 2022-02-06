@@ -1,21 +1,43 @@
 open Mirage_crypto.Uncommon
-open Sexplib.Conv
-open Rresult
+open Sexplib0.Sexp_conv
 
 open Common
 
 exception Invalid_key
 
 type group = {
-  p  : Z_sexp.t        ;  (* The prime modulus *)
-  gg : Z_sexp.t        ;  (* Group generator *)
-  q  : Z_sexp.t option ;  (* `gg`'s order, maybe *)
-} [@@deriving sexp]
+  p  : Z.t        ;  (* The prime modulus *)
+  gg : Z.t        ;  (* Group generator *)
+  q  : Z.t option ;  (* `gg`'s order, maybe *)
+}
+
+let sexp_of_group g =
+  Sexplib0.Sexp.List
+    [
+      sexp_of_pair sexp_of_string sexp_of_z ("p", g.p) ;
+      sexp_of_pair sexp_of_string sexp_of_z ("gg", g.gg) ;
+      sexp_of_pair sexp_of_string (sexp_of_option sexp_of_z) ("q", g.q)
+    ]
+
+let group_of_sexp = function
+  | Sexplib0.Sexp.List [ p ; gg ; q ] as s ->
+    let p_str, p = pair_of_sexp string_of_sexp z_of_sexp p in
+    let gg_str, gg = pair_of_sexp string_of_sexp z_of_sexp gg in
+    let q_str, q = pair_of_sexp string_of_sexp (option_of_sexp z_of_sexp) q in
+    if p_str = "p" && gg_str = "gg" && q_str = "q" then
+      { p ; gg ; q }
+    else
+      raise (Of_sexp_error (Failure "expected p, gg, and q", s))
+  | s -> raise (Of_sexp_error (Failure "expected a list with 3 elements", s))
 
 let group ~p ~gg ?q () =
-  guard (Z.(p > zero && is_odd p) && Z_extra.pseudoprime p)
-    (`Msg "invalid prime") >>= fun () ->
-  guard Z.(one < gg && gg < p) (`Msg "invalid generator") >>= fun () ->
+  let* () =
+    guard (Z.(p > zero && is_odd p) && Z_extra.pseudoprime p)
+      (`Msg "invalid prime")
+  in
+  let* () =
+    guard Z.(one < gg && gg < p) (`Msg "invalid generator")
+  in
   Ok { p ; gg ; q }
 
 let group_of_sexp s =
@@ -24,7 +46,24 @@ let group_of_sexp s =
   | Error (`Msg m) -> invalid_arg "bad group: %s" m
   | Ok g -> g
 
-type secret = { group : group ; x : Z_sexp.t } [@@deriving sexp]
+type secret = { group : group ; x : Z.t }
+
+let sexp_of_secret s =
+  Sexplib0.Sexp.List
+    [
+      sexp_of_pair sexp_of_string sexp_of_group ("group", s.group) ;
+      sexp_of_pair sexp_of_string sexp_of_z ("x", s.x) ;
+    ]
+
+let secret_of_sexp = function
+  | Sexplib0.Sexp.List [ group ; x ] as s ->
+    let group_str, group = pair_of_sexp string_of_sexp group_of_sexp group in
+    let x_str, x = pair_of_sexp string_of_sexp z_of_sexp x in
+    if group_str = "group" && x_str = "x" then
+      { group ; x }
+    else
+      raise (Of_sexp_error (Failure "expected group and x", s))
+  | s -> raise (Of_sexp_error (Failure "expected a list with 2 elements", s))
 
 let secret_of_sexp sexp =
   let s = secret_of_sexp sexp in

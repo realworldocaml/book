@@ -1,0 +1,15 @@
+(rule
+ (target test-case.actual)
+ (deps
+  (package mdx))
+ (action
+  (with-outputs-to
+   %{target}
+   (run %{bin:ocaml-mdx} test --output=- %{dep:test-case.md}))))
+
+(rule
+ (alias runtest)
+ (deps test-case.expected test-case.actual)
+ (action
+  ;; this uses `run diff` deliberately to not allow promotion
+  (run diff test-case.expected test-case.actual)))

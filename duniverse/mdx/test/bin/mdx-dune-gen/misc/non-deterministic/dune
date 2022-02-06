@@ -1,0 +1,41 @@
+(rule
+ (with-stdout-to
+  dune_gen.ml
+  (run ocaml-mdx dune-gen)))
+
+(executable
+ (name dune_gen)
+ (modules dune_gen)
+ (modes byte)
+ (libraries mdx.test))
+
+(rule
+ (with-stdout-to
+  dune-mdx-nondeterministic.deterministic
+  (run ./dune_gen.exe %{dep:dune-mdx-nondeterministic})))
+
+(rule
+ (setenv
+  MDX_RUN_NON_DETERMINISTIC
+  1
+  (with-stdout-to
+   dune-mdx-nondeterministic.nondeterministic
+   (run ./dune_gen.exe %{dep:dune-mdx-nondeterministic}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dune-mdx-nondeterministic.expected
+    dune-mdx-nondeterministic.deterministic)))
+
+;; make sure the non-deterministic is different from the deterministic
+
+(executable
+ (name different)
+ (modules different))
+
+(rule
+ (alias runtest)
+ (action
+  (run ./different.exe %{dep:dune-mdx-nondeterministic.expected}
+    %{dep:dune-mdx-nondeterministic.nondeterministic})))

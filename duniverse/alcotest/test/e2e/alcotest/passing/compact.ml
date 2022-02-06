@@ -1,4 +1,4 @@
-open Alcotest_engine.Private.Utils
+open Alcotest_stdlib_ext
 
 let () =
   let open Alcotest in

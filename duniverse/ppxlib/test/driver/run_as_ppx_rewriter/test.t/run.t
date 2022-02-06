@@ -9,13 +9,13 @@ The registered rewriters get applied when using `run_as_ppx_rewriter` as entry p
   > let () = [%print_hi]
   > let () = [%print_bye]
   > EOF
-  $ ocaml -ppx 'print_greetings' file.ml
+  $ ocaml -ppx '../print_greetings.exe' file.ml
   hi
   bye
 
 The driver's `shared_args` are taken into account, such as `-apply`...
 
-  $ ocaml -ppx 'print_greetings -apply print_hi' file.ml
+  $ ocaml -ppx '../print_greetings.exe -apply print_hi' file.ml
   hi
   File "./file.ml", line 2, characters 11-20:
   Error: Uninterpreted extension 'print_bye'.
@@ -24,7 +24,7 @@ The driver's `shared_args` are taken into account, such as `-apply`...
 ... and `-check`
 
   $ echo "[@@@attr non_registered_attr]" > attribute_file.ml
-  $ ocaml -ppx 'print_greetings -check' attribute_file.ml
+  $ ocaml -ppx '../print_greetings.exe -check' attribute_file.ml
   File "./attribute_file.ml", line 1, characters 4-8:
   Error: Attribute `attr' was not used
   [2]
@@ -33,22 +33,22 @@ The driver's `shared_args` are taken into account, such as `-apply`...
 If a non-compatible file gets fed, the file name is reported correctly
 
   $ touch no_binary_ast.ml
-  $ print_greetings no_binary_ast.ml some_output
+  $ ../print_greetings.exe no_binary_ast.ml some_output
   File "no_binary_ast.ml", line 1:
   Error: Expected a binary AST as input
   [1]
 
 The only possible usage is [extra_args] <infile> <outfile>...
 
-  $ print_greetings some_input
+  $ ../print_greetings.exe some_input
   Usage: print_greetings.exe [extra_args] <infile> <outfile>
   [2]
 
 ...in particular the order between the flags and the input/output matters.
 
   $ touch some_output
-  $ print_greetings some_input some_output -check
-  print_greetings: anonymous arguments not accepted.
+  $ ../print_greetings.exe some_input some_output -check
+  ../print_greetings.exe: anonymous arguments not accepted.
   print_greetings.exe [extra_args] <infile> <outfile>
     -loc-filename <string>      File name to use in locations
     -reserve-namespace <string> Mark the given namespace as reserved
@@ -69,7 +69,7 @@ The only possible usage is [extra_args] <infile> <outfile>...
 
 The only exception is consulting help
 
-  $ print_greetings -help
+  $ ../print_greetings.exe -help
   print_greetings.exe [extra_args] <infile> <outfile>
     -loc-filename <string>      File name to use in locations
     -reserve-namespace <string> Mark the given namespace as reserved
@@ -90,8 +90,8 @@ The only exception is consulting help
 Binary AST's of any by ppxlib supported OCaml version are supported.
 The version is preserved.
 
-  $ cat 406_binary_ast | print_magic_number
+  $ cat 406_binary_ast | ../print_magic_number.exe
   Magic number: Caml1999N022
 
-  $ print_greetings 406_binary_ast /dev/stdout | print_magic_number
+  $ ../print_greetings.exe 406_binary_ast /dev/stdout | ../print_magic_number.exe
   Magic number: Caml1999N022

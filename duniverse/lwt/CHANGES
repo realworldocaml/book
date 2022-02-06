@@ -1,3 +1,56 @@
+===== 5.5.0 =====
+
+====== Deprecations ======
+
+  * Lwt_main.yield and Lwt_unix.yield are deprecated in favor of the generic Lwt.pause, and Lwt_unix.auto_yield is deprecated in favor of the new Lwt_unix.auto_pause. Currently, Lwt_main.run resolves paused promises more frequently than yielded promises; the difference is unintended but existing applications could unintentionally depend on it. (#855, #858, Favonia)
+
+====== Fixes ======
+
+  * Use is_blocking in dup and dup2 to fix ENOTSOCK on Windows. (#869, Antonin Décimo)
+
+  * Lwt_unix.lstat was incorrectly calling Unix.stat on Win32. Fixes the behavior of Lwt_io.with_temp_dir following symlinks to directories on Win32. (#883, Antonin Décimo)
+
+  * Support deleting symlinks on Windows during cleanup of Lwt_io.with_temp_dir. (#886, Antonin Décimo)
+
+  * Lwt_react.S.l[2-6]_s used polymorphic equality which could cause errors when handling functional values. (#893, Jérôme Vouillon)
+
+  * On Windows, treat ERROR_BROKEN_PIPE on read as zero-read instead of error. See OCaml PR #4790. (#898, Antonin Décimo)
+
+  * Fix compilation under MSVC by replacing Noreturn with CAMLnoreturn. (#880, #887, Nicolás Ojeda Bär)
+
+====== Additions ======
+
+  * Lwt_bytes.blit_from_string: string complement of Lwt_bytes.blit. (#882, Hugo Heuzard)
+
+  * Lwt_seq: a Seq-like data-structure with Lwt delayed nodes. (#836, #842, Zach Shipko)
+
+  * Lwt_unix.auto_pause: the replacement of Lwt_unix.auto_yield that uses Lwt.pause instead of Lwt_unix.yield. (#855, #858, Favonia)
+
+  * Lwt_stream.return, Lwt_stream.return_lwt: singleton stream constructors. (#864, Boning Dong)
+
+  * Add ?to_dir param from Unix.symlink to Lwt_unix.symlink wrapper. (#884, Antonin Décimo)
+
+  * Lwt_stream.of_lwt_seq to convert an Lwt-sequence into an Lwt-stream. (#873)
+
+  * Support IPv6 (always) and PF_UNIX (with OCaml >= 4.14) socketpair on Windows. (#870, #876, Antonin Décimo, David Allsopp)
+
+  * In the Lwt_unix module, add `?cloexec:bool` optional arguments to functions that create file descriptors (`dup`, `dup2`, `pipe`, `pipe_in`, `pipe_out`, `socket`, `socketpair`, `accept`, `accept_n`). The `?cloexec` argument is simply forwarded to the wrapped Unix function (with OCaml >= 4.05, see PR ocaml/ocaml#650), or emulated as best-effort with `Unix.set_close_on_exec` on older OCaml versions. (#327, #847, #872, #901, Antonin Décimo)
+
+  * Lwt_domain: helpers for using domainslib from Lwt. (#860, Sudha Parimala)
+
+====== Misc ======
+
+  * Code quality improvement: remove an unneeded Obj.magic. (#844, Benoit Montagu)
+
+  * On Windows, use the Unicode API in C stubs and functions introduced in OCaml 4.06 to handle Unicode strings. Raise the minimum requirement to OCaml 4.06 (on Windows only). (#843, #903, Antonin Décimo)
+
+  * More complete coverage in the CI. (#890, #894, #896, Sora Morimoto)
+
+  * Code quality improvement: use exception pattern instead of try-with. (#895, Antonin Décimo)
+
+  * Code quality improvement: fix warnings on 4.13. (#899)
+
+
 ===== 5.4.2 =====
 
 ====== Bugs fixed ======
@@ -15,6 +68,13 @@
 
   * Handle ECONNABORTED in Lwt_io.establish_server* (#829, #830, Reynir Björnsson, Hannes Mehnert).
 
+
+
+====== Bugfixes ======
+
+  * Fix Lwt_fmt.stderr to actually point to stderr (#852, #850, Volker Diels-Grabsch).
+
+  * Lwt_io.establish_server* handles ECONNABORTED (#829, #830, Reynir Björnsson)
 
 
 ===== 5.4.0 (2020-12-16) =====

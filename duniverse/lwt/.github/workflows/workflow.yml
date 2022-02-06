@@ -1,0 +1,148 @@
+name: Main workflow
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Prime the caches every Monday
+    - cron: 0 1 * * MON
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml-compiler:
+          - 4.04.x
+          - 4.05.x
+          - 4.06.x
+          - 4.07.x
+          - 4.08.x
+          - 4.09.x
+          - 4.10.x
+          - 4.11.x
+          - 4.12.x
+          - 4.13.x
+        libev:
+          - true
+          - false
+        ppx:
+          - true
+        domain:
+          - false
+        local-packages:
+          - |
+            *.opam
+            !lwt_domain.opam
+        include:
+          - os: ubuntu-latest
+            ocaml-compiler: ocaml-variants.4.13.1+options,ocaml-option-flambda,ocaml-option-musl,ocaml-option-static
+            libev: false
+            ppx: true
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+          - os: ubuntu-latest
+            ocaml-compiler: ocaml-variants.4.12.0+domains
+            libev: false
+            ppx: true
+            domain: true
+            local-packages: "*.opam"
+          - os: macos-latest
+            ocaml-compiler: 4.13.x
+            libev: true
+            ppx: true
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+          - os: windows-latest
+            ocaml-compiler: 4.13.x
+            libev: false
+            ppx: true
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+          - os: ubuntu-latest
+            ocaml-compiler: 4.02.x
+            libev: true
+            ppx: false
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+              !lwt_ppx.opam
+          - os: ubuntu-latest
+            ocaml-compiler: 4.03.x
+            libev: true
+            ppx: false
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+              !lwt_ppx.opam
+          - os: macos-latest
+            ocaml-compiler: 4.02.x
+            libev: true
+            ppx: false
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+              !lwt_ppx.opam
+          - os: windows-latest
+            ocaml-compiler: 4.06.x
+            libev: false
+            ppx: false
+            domain: false
+            local-packages: |
+              *.opam
+              !lwt_domain.opam
+              !lwt_ppx.opam
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          opam-depext-flags: --with-test
+          opam-local-packages: ${{ matrix.local-packages }}
+
+      - run: opam depext conf-libev --install
+        if: ${{ matrix.libev == true }}
+
+      - run: opam install lwt_luv lwt_react lwt --deps-only --with-test
+
+      - run: opam install lwt_ppx --deps-only --with-test
+        if: ${{ matrix.ppx == true }}
+
+      - run: opam install lwt_domain --deps-only --with-test
+        if: ${{ matrix.domain == true }}
+
+      - run: opam exec -- dune build --only-packages lwt_luv,lwt_react,lwt
+
+      - run: opam exec -- dune build --only-packages lwt_ppx
+        if: ${{ matrix.ppx == true }}
+
+      - run: opam exec -- dune build --only-packages lwt_domain
+        if: ${{ matrix.domain == true }}
+
+      - run: opam exec -- dune runtest --only-packages lwt_luv,lwt_react,lwt
+
+      - run: opam exec -- dune runtest --only-packages lwt_ppx
+        if: ${{ matrix.ppx == true }}
+
+      - run: opam exec -- dune runtest --only-packages lwt_domain
+        if: ${{ matrix.domain == true }}
+
+      - run: opam exec -- make ppx_let-test-deps ppx_let-test
+        if: ${{ matrix.ppx == true }}

@@ -10,7 +10,8 @@ This run has ID `<uuid>'.
 │ [FAIL]        failing          0   b.                                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] Expected failure
-
+          <stacktrace>
+          
 Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 

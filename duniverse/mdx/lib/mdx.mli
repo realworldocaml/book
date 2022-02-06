@@ -29,7 +29,6 @@ module Cram = Cram
 module Deprecated = Deprecated
 module Document = Document
 module Toplevel = Toplevel
-module Library = Library
 module Ocaml_delimiter = Ocaml_delimiter
 module Part = Part
 module Block = Block
@@ -42,7 +41,6 @@ module Label = Label
 module Dep = Dep
 module Ocaml_env = Ocaml_env
 module Stable_printer = Stable_printer
-
 include module type of Document
 
 val dump : line list Fmt.t

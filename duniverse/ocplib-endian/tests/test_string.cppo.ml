@@ -1,6 +1,9 @@
 open EndianString
 [@@@warning "-52"]
 
+(* Allow testing deprecated string_set functions *)
+[@@@warning "-3"]
+
 let to_t = Bytes.unsafe_to_string
 (* do not allocate to avoid breaking tests *)
 

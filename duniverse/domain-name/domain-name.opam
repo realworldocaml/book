@@ -1,4 +1,4 @@
-version: "0.3.0"
+version: "0.4.0"
 opam-version: "2.0"
 maintainer: "Hannes Mehnert <hannes@mehnert.org>"
 authors: "Hannes Mehnert <hannes@mehnert.org>"
@@ -8,13 +8,11 @@ doc: "https://hannesm.github.io/domain-name/doc"
 bug-reports: "https://github.com/hannesm/domain-name/issues"
 depends: [
   "ocaml" {>= "4.04.2"}
-  "dune" {build}
-  "fmt"
-  "astring"
+  "dune"
   "alcotest" {with-test}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

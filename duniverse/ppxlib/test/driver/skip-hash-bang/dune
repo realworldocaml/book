@@ -4,10 +4,8 @@
  (kind ppx_rewriter)
  (libraries ppxlib))
 
-(test
- (name test)
- (modules test)
- (flags
-  (:standard -safe-string))
+(tests
+ (names test test2)
+ (modules test test2)
  (preprocess
   (pps empty_rewriter)))

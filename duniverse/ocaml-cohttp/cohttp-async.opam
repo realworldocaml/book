@@ -1,4 +1,4 @@
-version: "4.0.0"
+version: "5.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -25,14 +25,15 @@ doc: "https://mirage.github.io/ocaml-cohttp/"
 bug-reports: "https://github.com/mirage/ocaml-cohttp/issues"
 depends: [
   "ocaml" {>= "4.08"}
-  "dune" {>= "1.1.0"}
+  "dune" {>= "2.0"}
   "async_kernel" {>= "v0.14.0"}
   "async_unix" {>= "v0.14.0"}
   "async" {>= "v0.14.0"}
   "base" {>= "v0.11.0"}
   "core" {with-test}
-  "cohttp" {=version}
-  "conduit-async" {>="1.2.0" & <"3.0.0"}
+  "core_unix" {>= "v0.14.0"}
+  "cohttp" {= version}
+  "conduit-async" {>= "1.2.0"}
   "magic-mime"
   "mirage-crypto" {with-test}
   "logs"
@@ -45,8 +46,9 @@ depends: [
   "ipaddr"
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
+available: arch != "s390x"
 dev-repo: "git+https://github.com/mirage/ocaml-cohttp.git"

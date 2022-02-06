@@ -1,0 +1,40 @@
+# Files that are preprocessed with pp_rewrite contain invalid syntax
+# and therefore must be excluded from the ocamlformat parsing
+astlib/location.ml
+astlib/longident.ml
+astlib/astlib.ml
+astlib/ast_402.ml
+astlib/ast_403.ml
+astlib/ast_404.ml
+astlib/ast_405.ml
+astlib/ast_406.ml
+astlib/ast_407.ml
+astlib/ast_408.ml
+astlib/ast_409.ml
+astlib/ast_410.ml
+astlib/ast_411.ml
+astlib/ast_412.ml
+astlib/ast_413.ml
+astlib/ast_414.ml
+
+# Files that use cinaps to generate bode blocks from other code blocks work well,
+# but files that inject freely formatted code via cinaps must be excluded
+ast/versions.ml
+ast/versions.mli
+
+# Currently our expect-test lexer is too strict for our expect tests to
+# work well with ocamlformat
+test/base/test.ml
+test/code_path/test.ml
+test/deriving/test.ml
+test/driver/attributes/test.ml
+test/driver/instrument/test.ml
+test/driver/non-compressible-suffix/test.ml
+test/driver/transformations/test.ml
+test/expansion_inside_payloads/test.ml
+test/extensions_and_deriving/test.ml
+test/location/exception/test.ml
+test/ppx_import_support/test.ml
+test/quoter/test.ml
+test/traverse/test.ml
+test/type_is_recursive/test.ml

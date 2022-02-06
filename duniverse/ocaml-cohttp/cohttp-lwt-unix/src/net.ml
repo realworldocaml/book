@@ -23,12 +23,15 @@ module IO = Io
 type ctx = { ctx : Conduit_lwt_unix.ctx; resolver : Resolver_lwt.t }
 [@@deriving sexp_of]
 
-let init ?(ctx = Conduit_lwt_unix.default_ctx)
+let init ?(ctx = Lazy.force Conduit_lwt_unix.default_ctx)
     ?(resolver = Resolver_lwt_unix.system) () =
   { ctx; resolver }
 
 let default_ctx =
-  { resolver = Resolver_lwt_unix.system; ctx = Conduit_lwt_unix.default_ctx }
+  {
+    resolver = Resolver_lwt_unix.system;
+    ctx = Lazy.force Conduit_lwt_unix.default_ctx;
+  }
 
 let connect_uri ~ctx:{ ctx; resolver } uri =
   Resolver_lwt.resolve_uri ~uri resolver >>= fun endp ->

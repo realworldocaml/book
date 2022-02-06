@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -101,6 +98,15 @@ and datadef = {
        [None] if this is an ordinary ADT. *)
     datatypeparams: typ list option;
 
+    (* A comment about this data constructor. *)
+    comment: string option;
+
+    (* An optional [@@unboxed] attribute. This attribute can be used only
+       if there is a single data constructor and it carries a single field.
+       This attribute is recognized by OCaml 4.04 and ignored by earlier
+       versions of OCaml. *)
+    unboxed: bool;
+
   }
 
 and typ =
@@ -120,10 +126,20 @@ and typ =
   (* Arrow type. *)
   | TypArrow of typ * typ
 
+  (* Type sharing construct. *)
+  | TypAs of typ * string
+
 and typescheme = {
 
   (* Universal quantifiers, without leading quotes. *)
   quantifiers: string list;
+
+  (* Whether the quantifiers are locally abstract. An OCaml locally abstract
+     type is bound by [type a] and referred to as [a]. Such a reference is
+     internally represented as a [TypApp] node. An ordinary type variable is
+     bound by ['a] and referred to as ['a]. Such a reference is internally
+     represented as a [TypVar] node. *)
+  locally_abstract: bool;
 
   (* Body. *)
   body: typ;
@@ -165,6 +181,12 @@ and expr =
   | EMatch of expr * branch list
   | EIfThen of expr * expr
   | EIfThenElse of expr * expr * expr
+
+  (* An expression that claims to be dead code. *)
+  | EDead
+
+  (* A divergent expression. *)
+  | EBottom
 
   (* Raising exceptions. *)
   | ERaise of expr
@@ -269,6 +291,8 @@ and structure_item =
   | SIInclude of modexpr
     (* Comment. *)
   | SIComment of string
+    (* Toplevel attribute. *)
+  | SIAttribute of (* attribute: *) string * (* payload: *) string
 
 (* A type of parameters, with injections both into patterns (formal parameters)
    and into expressions (actual parameters). *)

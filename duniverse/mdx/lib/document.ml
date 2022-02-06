@@ -15,9 +15,7 @@
  *)
 
 type syntax = Syntax.t = Normal | Cram | Mli
-
 type line = Section of (int * string) | Text of string | Block of Block.t
-
 type t = line list
 
 let pp_line ?syntax ppf (l : line) =
@@ -30,7 +28,7 @@ let pp_line ?syntax ppf (l : line) =
       | _ -> Fmt.pf ppf "%s\n" s)
 
 let pp ?syntax ppf t =
-  Fmt.pf ppf "%a\n" Fmt.(list ~sep:(unit "\n") (pp_line ?syntax)) t
+  Fmt.pf ppf "%a\n" Fmt.(list ~sep:(any "\n") (pp_line ?syntax)) t
 
 let to_string = Fmt.to_to_string pp
 

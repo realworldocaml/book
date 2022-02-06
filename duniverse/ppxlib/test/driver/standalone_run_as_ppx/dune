@@ -1,6 +1,6 @@
 (executable
- (public_name print_stuff)
+ (name print_stuff)
  (libraries ppxlib))
 
 (cram
- (deps %{bin:print_stuff}))
+ (deps print_stuff.exe))

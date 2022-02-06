@@ -5,6 +5,14 @@ open Sexplib.Conv
 open Packet
 open Ciphersuite
 
+let (<+>) = Cstruct.append
+
+let ( let* ) = Result.bind
+
+let guard p e = if p then Ok () else Error e
+
+let map_reader_error r = Result.map_error (fun re -> `Fatal (`ReaderError re)) r
+
 type tls13 = [ `TLS_1_3 ] [@@deriving sexp_of]
 
 type tls_before_13 = [

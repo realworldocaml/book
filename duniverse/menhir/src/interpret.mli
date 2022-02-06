@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -27,13 +24,6 @@ open Grammar
 
 val print_messages_item:
   Nonterminal.t * Terminal.t list * ReferenceInterpreter.target -> unit
-
-(* [print_sentence (nto, terminals)] prints a sentence (given by an
-   optional start symbol and a sequence of terminal symbols) as a
-   space-separated list of symbolic token names. *)
-
-val print_sentence:
-  Nonterminal.t option * Terminal.t list -> string
 
 (* [stream] turns a finite list of terminals into a stream of terminals,
    represented as a pair of a lexer and a lexing buffer, so as to be usable

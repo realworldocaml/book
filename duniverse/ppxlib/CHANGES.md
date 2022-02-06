@@ -1,3 +1,76 @@
+0.24.0 (08/12/2021)
+-------------------
+
+- Add support for OCaml 4.14 (#304, @kit-ty-kate)
+
+- Expand nodes before applying derivers or other inline attributes based
+  transformation, allowing better interactions between extensions and
+  derivers (#279, #297, @NathanReb)
+
+- Add support for registering ppx_import as a pseudo context-free rule (#271, @NathanReb)
+
+- Add `input_name` to the `Expansion_context.Extension` and `Expansion_context.Deriver` modules (#284, @tatchi)
+
+- Improve `gen_symbol` to strip previous unique suffix before adding a new one (#285, @ceastlund)
+
+- Improve `name_type_params_in_td` to use prefixes `a`, `b`, ... instead of `v_x`. (#285, @ceastlund)
+
+- Fix a bug in `type_is_recursive` and `really_recursive` where they would
+  consider a type declaration recursive if the type appeared inside an attribute
+  payload (#299, @NathanReb)
+
+0.23.0 (31/08/2021)
+-------------------
+
+- Drop `Parser` from the API (#263, @pitag-ha)
+
+- `Location`: add `set_filename` and `Error.get_location` (#247, @pitag-ha)
+
+- Drop dependency on OMP2 (#187, @pitag-ha)
+
+- Make OMP1 a conflict (#255, @kit-ty-kate)
+
+- Drop `Syntaxerr` from the public API. Doesn't affect any user in the
+  [ppx universe](https://github.com/ocaml-ppx/ppx_universe) (#244, @pitag-ha)
+
+- Add a lower-bound constraint for Sexplib0 (#240, @pitag-ha)
+
+- Fix bug due to which unwanted public binaries got installed when installing
+  ppxlib (#223, @pitag-ha)
+
+- Add `Keyword.is_keyword` to check if a string is an OCaml keyword
+  (#227, @pitag-ha)
+
+- Remove `Lexer.keyword_table`: use `Keyword.is_keyword` instead
+  (#227, @pitag-ha)
+
+- Remove `Lexer` from the API: it was the same as the compiler-libs
+  `Lexer` (#228, @pitag-ha)
+
+- Remove the modules `Ast_magic`, `Compiler_version`, `Js`, `Find_version`,
+  `Convert`, `Extra_warnings`, `Location_error`, `Select_ast` and
+  `Import_for_core` from the API: they are meant for internal use and
+  aren't used by any current downstream user in the
+  [ppx universe](https://github.com/ocaml-ppx/ppx_universe) (#230, @pitag-ha)
+
+- Remove compiler specific helper functions from `Location`. They aren't used
+  by any current downstream user in the
+  [ppx universe](https://github.com/ocaml-ppx/ppx_universe) (#238, @pitag-ha)
+
+- Allow "%a" when using Location.Error.createf (#239, @mlasson)
+
+- Fix in `Location`: make `raise_errorf` exception equivalent to exception
+  `Error` (#242, @pitag-ha)
+
+- Fix in `Pprintast`: correctly pretty print local type substitutions, e.g.
+  type t := ... (#261, @matthewelse)
+
+- Add `Ast_pattern.esequence`, for matching on any number of sequenced
+  expressions e.g. `do_a (); do_b (); ...`. (#264, @matthewelse)
+
+- Expose a part of `Ast_io` in order to allow reading AST values from binary
+ files (#270, @arozovyk)
+
 0.22.2 (23/06/2021)
 -------------------
 
@@ -7,6 +80,11 @@
 -------------------
 
 - Fix location in parse error reporting (#257, @pitag-ha)
+
+0.21.1 (09/06/2021)
+-------------------
+
+- Fix location in parse error reporting (#256, @pitag-ha)
 
 0.22.0 (04/02/2021)
 -------------------

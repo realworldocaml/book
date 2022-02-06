@@ -43,9 +43,9 @@ As we show below, the variant tags introduced by the definition of
 `basic_color` can be used for constructing values of that type.
 
 ```ocaml env=main
-# Cyan
+# Cyan;;
 - : basic_color = Cyan
-# [Blue; Magenta; Red]
+# [Blue; Magenta; Red];;
 - : basic_color list = [Blue; Magenta; Red]
 ```
 
@@ -56,9 +56,9 @@ colors to the terminal.
 ```ocaml env=main
 # let basic_color_to_int = function
     | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
-    | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7
+    | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7;;
 val basic_color_to_int : basic_color -> int = <fun>
-# List.map ~f:basic_color_to_int [Blue;Red]
+# List.map ~f:basic_color_to_int [Blue;Red];;
 - : int list = [4; 1]
 ```
 
@@ -67,7 +67,7 @@ because the compiler would have warned us if we'd missed one:
 
 ```ocaml env=main
 # let incomplete_color_to_int = function
-    | Black -> 0 | Red -> 1 | White -> 7
+    | Black -> 0 | Red -> 1 | White -> 7;;
 Lines 1-2, characters 31-41:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -80,11 +80,11 @@ to change the color of a given string displayed in a terminal.
 
 ```ocaml env=main
 # let color_by_number number text =
-  Printf.sprintf "\027[38;5;%dm%s\027[0m" number text
+  Printf.sprintf "\027[38;5;%dm%s\027[0m" number text;;
 val color_by_number : int -> string -> string = <fun>
-# let blue = color_by_number (basic_color_to_int Blue) "Blue"
+# let blue = color_by_number (basic_color_to_int Blue) "Blue";;
 val blue : string = "\027[38;5;4mBlue\027[0m"
-# printf "Hello %s World!\n" blue
+# printf "Hello %s World!\n" blue;;
 Hello Blue World!
 - : unit = ()
 ```
@@ -124,7 +124,7 @@ As before, we can use these introduced tags to construct values of our
 newly defined type.
 
 ```ocaml env=main
-# [RGB (250,70,70); Basic (Green, Regular)]
+# [RGB (250,70,70); Basic (Green, Regular)];;
 - : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
 
@@ -139,7 +139,7 @@ the data associated with each tag:
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i
+    | Gray i -> 232 + i;;
 val color_to_int : color -> int = <fun>
 ```
 
@@ -147,12 +147,12 @@ Now, we can print text using the full set of available colors:
 
 ```ocaml env=main
 # let color_print color s =
-  printf "%s\n" (color_by_number (color_to_int color) s)
+  printf "%s\n" (color_by_number (color_to_int color) s);;
 val color_print : color -> string -> unit = <fun>
-# color_print (Basic (Red,Bold)) "A bold red!"
+# color_print (Basic (Red,Bold)) "A bold red!";;
 A bold red!
 - : unit = ()
-# color_print (Gray 4) "A muted gray..."
+# color_print (Gray 4) "A muted gray...";;
 A muted gray...
 - : unit = ()
 ```
@@ -164,7 +164,7 @@ Consider the following example of a value of the type `color` we
 defined earlier.
 
 ```ocaml env=main
-# RGB (200,0,200)
+# RGB (200,0,200);;
 - : color = RGB (200, 0, 200)
 ```
 
@@ -174,9 +174,9 @@ see if we create a tuple first and then place it inside the `RGB`
 constructor.
 
 ```ocaml env=main
-# let purple = (200,0,200)
+# let purple = (200,0,200);;
 val purple : int * int * int = (200, 0, 200)
-# RGB purple
+# RGB purple;;
 Line 1, characters 1-11:
 Error: The constructor RGB expects 3 argument(s),
        but is applied here to 1 argument(s)
@@ -186,7 +186,7 @@ We can also create variants that explicitly contain tuples, like this
 one.
 
 ```ocaml env=main
-# type tupled = Tupled of (int * int)
+# type tupled = Tupled of (int * int);;
 type tupled = Tupled of (int * int)
 ```
 
@@ -195,9 +195,9 @@ the extra set of parens around the arguments. But having defined it
 this way, we can now take the tuple in and out freely.
 
 ```ocaml env=main
-# let of_tuple x = Tupled x
+# let of_tuple x = Tupled x;;
 val of_tuple : int * int -> tupled = <fun>
-# let to_tuple (Tupled x) = x
+# let to_tuple (Tupled x) = x;;
 val to_tuple : tupled -> int * int = <fun>
 ```
 
@@ -205,13 +205,13 @@ If, on the other hand, we define a variant without the parens, then we
 get the same behavior we got with the `RGB` constructor.
 
 ```ocaml env=main
-# type untupled = Untupled of int * int
+# type untupled = Untupled of int * int;;
 type untupled = Untupled of int * int
-# let of_tuple x = Untupled x
+# let of_tuple x = Untupled x;;
 Line 1, characters 18-28:
 Error: The constructor Untupled expects 2 argument(s),
        but is applied here to 1 argument(s)
-# let to_tuple (Untupled x) = x
+# let to_tuple (Untupled x) = x;;
 Line 1, characters 14-26:
 Error: The constructor Untupled expects 2 argument(s),
        but is applied here to 1 argument(s)
@@ -222,9 +222,9 @@ type, we can achieve more or less the same ends by explicitly
 deconstructing and reconstructing the data we need.
 
 ```ocaml env=main
-# let of_tuple (x,y) = Untupled (x,y)
+# let of_tuple (x,y) = Untupled (x,y);;
 val of_tuple : int * int -> untupled = <fun>
-# let to_tuple (Untupled (x,y)) = (x,y)
+# let to_tuple (Untupled (x,y)) = (x,y);;
 val to_tuple : untupled -> int * int = <fun>
 ```
 
@@ -270,7 +270,7 @@ discrepancy:
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i
+    | Gray i -> 232 + i;;
 Line 2, characters 13-33:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
@@ -284,7 +284,7 @@ problem, which is that we haven't handled the new `Bold` tag:
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i
+    | Gray i -> 232 + i;;
 Lines 1-4, characters 20-24:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -299,7 +299,7 @@ Fixing this now leads us to the correct implementation:
     | Basic basic_color -> basic_color_to_int basic_color
     | Bold  basic_color -> 8 + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i
+    | Gray i -> 232 + i;;
 val color_to_int : color -> int = <fun>
 ```
 
@@ -322,7 +322,7 @@ follows.
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
-    | _ -> basic_color_to_int White
+    | _ -> basic_color_to_int White;;
 val oldschool_color_to_int : color -> int = <fun>
 ```
 
@@ -332,7 +332,7 @@ this.
 ```ocaml env=main
 # let oldschool_color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
-    | _ -> basic_color_to_int White
+    | _ -> basic_color_to_int White;;
 val oldschool_color_to_int : color -> int = <fun>
 ```
 
@@ -451,7 +451,7 @@ Here's the concrete code:
             else acc
         )
     in
-    List.rev user_messages
+    List.rev user_messages;;
 val messages_for_user : string -> client_message list -> client_message list =
   <fun>
 ```
@@ -531,7 +531,7 @@ qualify them explicitly.
             else acc
         )
     in
-    List.rev user_messages
+    List.rev user_messages;;
 val messages_for_user :
   string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
@@ -551,7 +551,7 @@ types, we could write a dispatch function as follows:
     match details with
     | Log_entry m -> handle_log_entry server_state (common,m)
     | Logon     m -> handle_logon     server_state (common,m)
-    | Heartbeat m -> handle_heartbeat server_state (common,m)
+    | Heartbeat m -> handle_heartbeat server_state (common,m);;
 val handle_message : server_state -> Common.t * details -> unit = <fun>
 ```
 
@@ -590,7 +590,7 @@ essentially the same way we did before.
             else acc
         )
     in
-    List.rev user_messages
+    List.rev user_messages;;
 val messages_for_user :
   string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
@@ -607,7 +607,7 @@ below, OCaml will reject code that tries to do so.
 ```ocaml env=main
 # let get_logon_contents = function
     | Logon m -> Some m
-    | _ -> None
+    | _ -> None;;
 Line 2, characters 23-24:
 Error: This form is not allowed as the type of the inlined record could escape.
 ```
@@ -660,11 +660,11 @@ Using the preceding code, we can construct a simple expression with
 `mail_predicate` as its base predicate:
 
 ```ocaml env=main
-# let test field contains = Base { field; contains }
+# let test field contains = Base { field; contains };;
 val test : mail_field -> string -> mail_predicate expr = <fun>
 # And [ Or [ test To "doligez"; test CC "doligez" ];
         test Subject "runtime";
-      ]
+      ];;
 - : mail_predicate expr =
 And
  [Or
@@ -686,7 +686,7 @@ able to evaluate them. Here's a function for doing just that:
     | Const bool  -> bool
     | And   exprs -> List.for_all exprs ~f:eval'
     | Or    exprs -> List.exists  exprs ~f:eval'
-    | Not   expr  -> not (eval' expr)
+    | Not   expr  -> not (eval' expr);;
 val eval : 'a expr -> ('a -> bool) -> bool = <fun>
 ```
 
@@ -719,7 +719,7 @@ The code is below.
       match List.filter l ~f:(function Const true -> false | _ -> true) with
       | [] -> Const true
       | [ x ] -> x
-      | l -> And l
+      | l -> And l;;
 val and_ : 'a expr list -> 'a expr = <fun>
 ```
 
@@ -734,7 +734,7 @@ role of `true` and `false`.
       match List.filter l ~f:(function Const false -> false | _ -> true) with
       | [] -> Const false
       | [x] -> x
-      | l -> Or l
+      | l -> Or l;;
 val or_ : 'a expr list -> 'a expr = <fun>
 ```
 
@@ -744,7 +744,7 @@ ordinary boolean negation function to them.
 ```ocaml env=main
 # let not_ = function
     | Const b -> Const (not b)
-    | e -> Not e
+    | e -> Not e;;
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
@@ -758,7 +758,7 @@ entire expression.
     | Base _ | Const _ as x -> x
     | And l -> and_ (List.map ~f:simplify l)
     | Or l  -> or_  (List.map ~f:simplify l)
-    | Not e -> not_ (simplify e)
+    | Not e -> not_ (simplify e);;
 val simplify : 'a expr -> 'a expr = <fun>
 ```
 
@@ -767,7 +767,7 @@ it does at simplifying it.
 
 ```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
-  Base "it's raining"]))
+  Base "it's raining"]));;
 - : string expr = Not (Base "it's raining")
 ```
 
@@ -780,7 +780,7 @@ what happens if we add a double negation in.
 
 ```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
-  Not (Not (Base "it's raining"))]))
+  Not (Not (Base "it's raining"))]));;
 - : string expr = Not (Not (Not (Base "it's raining")))
 ```
 
@@ -794,7 +794,7 @@ more obvious:
 ```ocaml env=main
 # let not_ = function
     | Const b -> Const (not b)
-    | (Base _ | And _ | Or _ | Not _) as e -> Not e
+    | (Base _ | And _ | Or _ | Not _) as e -> Not e;;
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
@@ -805,7 +805,7 @@ negation:
 # let not_ = function
     | Const b -> Const (not b)
     | Not e -> e
-    | (Base _ | And _ | Or _ ) as e -> Not e
+    | (Base _ | And _ | Or _ ) as e -> Not e;;
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
@@ -835,13 +835,13 @@ variants by the leading backtick. And unlike ordinary variants,
 polymorphic variants can be used without an explicit type declaration:
 
 ```ocaml env=main
-# let three = `Int 3
+# let three = `Int 3;;
 val three : [> `Int of int ] = `Int 3
-# let four = `Float 4.
+# let four = `Float 4.;;
 val four : [> `Float of float ] = `Float 4.
-# let nan = `Not_a_number
+# let nan = `Not_a_number;;
 val nan : [> `Not_a_number ] = `Not_a_number
-# [three; four; nan]
+# [three; four; nan];;
 - : [> `Float of float | `Int of int | `Not_a_number ] list =
 [`Int 3; `Float 4.; `Not_a_number]
 ```
@@ -857,9 +857,9 @@ The type system will complain if it sees incompatible uses of the same
 tag:
 
 ```ocaml env=main
-# let five = `Int "five"
+# let five = `Int "five";;
 val five : [> `Int of string ] = `Int "five"
-# [three; four; five]
+# [three; four; five];;
 Line 1, characters 15-19:
 Error: This expression has type [> `Int of string ]
        but an expression was expected of type
@@ -880,7 +880,7 @@ OCaml will in some cases infer a variant type with `<`, to indicate
 ```ocaml env=main
 # let is_positive = function
     | `Int   x -> x > 0
-    | `Float x -> Float.(x > 0.)
+    | `Float x -> Float.(x > 0.);;
 val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
 ```
 
@@ -894,7 +894,7 @@ upper and a lower bound, we end up with an *exact* polymorphic variant
 type, which has neither marker. For example:
 
 ```ocaml env=main
-# let exact = List.filter ~f:is_positive [three;four]
+# let exact = List.filter ~f:is_positive [three;four];;
 val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
 ```
 
@@ -907,12 +907,12 @@ example come from the `Result.t` type from `Base`.
 # let is_positive = function
     | `Int   x -> Ok (x > 0)
     | `Float x -> Ok Float.(x > 0.)
-    | `Not_a_number -> Error "not a number"
+    | `Not_a_number -> Error "not a number";;
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
   <fun>
 # List.filter [three; four] ~f:(fun x ->
-  match is_positive x with Error _ -> false | Ok b -> b)
+  match is_positive x with Error _ -> false | Ok b -> b);;
 - : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
 [`Int 3; `Float 4.]
 ```
@@ -937,12 +937,12 @@ cases]{.idx}
 # let is_positive_permissive = function
     | `Int   x -> Ok Int.(x > 0)
     | `Float x -> Ok Float.(x > 0.)
-    | _ -> Error "Unknown number type"
+    | _ -> Error "Unknown number type";;
 val is_positive_permissive :
   [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
-# is_positive_permissive (`Int 0)
+# is_positive_permissive (`Int 0);;
 - : (bool, string) result = Ok false
-# is_positive_permissive (`Ratio (3,4))
+# is_positive_permissive (`Ratio (3,4));;
 - : (bool, string) result = Error "Unknown number type"
 ```
 
@@ -954,7 +954,7 @@ that uses `is_positive_permissive` passes in `Float` misspelled as
 `Floot`, the erroneous code will compile without complaint.
 
 ```ocaml env=main
-# is_positive_permissive (`Floot 3.5)
+# is_positive_permissive (`Floot 3.5);;
 - : (bool, string) result = Error "Unknown number type"
 ```
 
@@ -988,7 +988,7 @@ function as follows.
 ```ocaml env=main
 # let extended_color_to_int = function
     | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
+    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color;;
 Line 3, characters 59-64:
 Error: This expression has type extended_color
        but an expression was expected of type color
@@ -1007,7 +1007,7 @@ polymorphic variants.  The translation here is pretty straightforward:
 ```ocaml env=main
 # let basic_color_to_int = function
     | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
-    | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+    | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7;;
 val basic_color_to_int :
   [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
   int = <fun>
@@ -1016,7 +1016,7 @@ val basic_color_to_int :
       let base = match weight with `Bold -> 8 | `Regular -> 0 in
       base + basic_color_to_int basic_color
     | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | `Gray i -> 232 + i
+    | `Gray i -> 232 + i;;
 val color_to_int :
   [< `Basic of
        [< `Black
@@ -1043,7 +1043,7 @@ code, the type of the variable `color` includes only the tags `` `Basic``,
 ```ocaml env=main
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+    | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color;;
 val extended_color_to_int :
   [< `Basic of
        [< `Black
@@ -1068,7 +1068,7 @@ the cases, the type is no longer narrowed, and so compilation fails:
 ```ocaml env=main
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | color -> color_to_int color
+    | color -> color_to_int color;;
 Line 3, characters 29-34:
 Error: This expression has type [> `RGBA of int * int * int * int ]
        but an expression was expected of type

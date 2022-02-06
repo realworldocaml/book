@@ -1,0 +1,14 @@
+`;;` is not mandatory at the end of toplevel phrases but will be inserted
+automatically in the corrected file. Also, a warning will be emitted.
+
+```ocaml
+# let x = 3;;
+val x : int = 3
+# let f = function
+  | 0 -> 1
+  | n -> n-1;;
+val f : int -> int = <fun>
+```
+Warning: OCaml toplevel block without trailing ;; detected in file 'test-case.md'.
+Non-semicolon terminated phrases are deprecated.
+In MDX 3.0 support for toplevel blocks without ;; will be removed.

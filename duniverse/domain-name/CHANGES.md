@@ -1,3 +1,11 @@
+## v0.4.0 (2022-01-07)
+
+* compare: conform to canonical DNS name order (RFC 4034, Section 6.1)
+
+## v0.3.1 (2021-10-27)
+
+* remove fmt and astring dependency
+
 ## v0.3.0 (2019-07-08)
 
 * all optional ?back arguments are now ?rev

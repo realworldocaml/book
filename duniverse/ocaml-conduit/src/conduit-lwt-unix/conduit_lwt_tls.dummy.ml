@@ -3,7 +3,7 @@ module X509 = struct
 
   type authenticator = unit
 
-  let default_authenticator = ()
+  let default_authenticator = lazy ()
 end
 
 module Client = struct

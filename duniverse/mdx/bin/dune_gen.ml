@@ -32,8 +32,13 @@ let run (`Setup ()) (`Prelude prelude) (`Directories dirs) =
   line "    ]";
   line "  in";
   line "  let predicates = Predicate.[ byte; toploop ] in";
+  line "  let non_deterministic =";
+  line "    match Sys.getenv_opt \"MDX_RUN_NON_DETERMINISTIC\" with";
+  line "    | Some _ -> true";
+  line "    | None -> false";
+  line "  in";
   line "  run_exn ~packages ~predicates ~prelude_str:[]";
-  line "    ~non_deterministic:false";
+  line "    ~non_deterministic";
   line "    ~silent_eval:false ~record_backtrace:false";
   line "    ~syntax:None ~silent:false";
   line "    ~verbose_findlib:false ~section:None";

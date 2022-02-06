@@ -49,7 +49,7 @@ let perform () =
     let client =
       `TLS (`Hostname "", `IP Ipaddr.(V6 V6.localhost), `Port port)
     in
-    Conduit_lwt_unix.(connect ~ctx:default_ctx client)
+    Conduit_lwt_unix.(connect ~ctx:(Lazy.force default_ctx) client)
     >>= fun (_flow, ic, oc) ->
     Lwt_log.notice "Connected!" >>= fun () ->
     Lwt_io.write oc "hello" >>= fun () ->

@@ -1,5 +1,3 @@
-open Compat
-
 type t = Normal | Cram | Mli
 
 let pp fs = function

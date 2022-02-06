@@ -22,7 +22,7 @@ and phrase acc buf = parse
         for _ = 1 to (String.length nl) do
           newline lexbuf
         done;
-        let nl = Compat.List.init (String.length nl) (fun _ -> "") in
+        let nl = List.init (String.length nl) (fun _ -> "") in
         phrase (nl @ Buffer.contents buf :: acc) (Buffer.create 8) lexbuf }
   | eol      { newline lexbuf; List.rev (Buffer.contents buf :: acc) }
   | ";;" eol { newline lexbuf; List.rev ((Buffer.contents buf ^ ";;") :: acc) }

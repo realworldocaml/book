@@ -92,7 +92,7 @@ let aes_ctr_cases =
     let dec = decrypt ~key ~ctr enc in
     assert_cs_equal ~msg:"cipher" out enc;
     assert_cs_equal ~msg:"plain" nist_sp_800_38a dec;
-    let blocks = Cstruct.len nist_sp_800_38a / block_size in
+    let blocks = Cstruct.length nist_sp_800_38a / block_size in
     assert_equal ~msg:"counters" ctr1 (add_ctr ctr (Int64.of_int blocks))
   in
   [ case ~key:  "2b7e1516 28aed2a6 abf71588 09cf4f3c"

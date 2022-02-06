@@ -1,15 +1,13 @@
-(****************************************************************************)
-(*                                                                          *)
-(*                                   Menhir                                 *)
-(*                                                                          *)
-(*           Jacques-Henri Jourdan, CNRS, LRI, Université Paris Sud         *)
-(*                                                                          *)
-(*  Copyright Inria. All rights reserved. This file is distributed under    *)
-(*  the terms of the GNU Lesser General Public License as published by the  *)
-(*  Free Software Foundation, either version 3 of the License, or (at your  *)
-(*  option) any later version, as described in the file LICENSE.            *)
-(*                                                                          *)
-(****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                   Menhir                                   *)
+(*                                                                            *)
+(*  Copyright Inria and CNRS. All rights reserved. This file is distributed   *)
+(*  under the terms of the GNU Lesser General Public License as published by  *)
+(*  the Free Software Foundation, either version 3 of the License, or (at     *)
+(*  your option) any later version, as described in the file LICENSE.         *)
+(*                                                                            *)
+(******************************************************************************)
 
 From Coq Require Import ZArith List Relations RelationClasses.
 Import ListNotations.
@@ -37,7 +35,7 @@ Qed.
 Definition comparableLt {A:Type} (C: Comparable A) : relation A :=
   fun x y => compare x y = Lt.
 
-Instance ComparableLtStrictOrder {A:Type} (C: Comparable A) :
+Global Instance ComparableLtStrictOrder {A:Type} (C: Comparable A) :
   StrictOrder (comparableLt C).
 Proof.
 apply Build_StrictOrder.
@@ -53,7 +51,7 @@ apply compare_trans.
 Qed.
 
 (** nat is comparable. **)
-Program Instance natComparable : Comparable nat :=
+Global Program Instance natComparable : Comparable nat :=
   { compare := Nat.compare }.
 Next Obligation.
 symmetry.
@@ -79,7 +77,7 @@ apply (gt_trans _ _ _ H H0).
 Qed.
 
 (** A pair of comparable is comparable. **)
-Program Instance PairComparable {A:Type} (CA:Comparable A) {B:Type} (CB:Comparable B) :
+Global Program Instance PairComparable {A:Type} (CA:Comparable A) {B:Type} (CB:Comparable B) :
   Comparable (A*B) :=
   { compare := fun x y =>
       let (xa, xb) := x in let (ya, yb) := y in
@@ -134,10 +132,10 @@ destruct H.
 rewrite compare_refl; intuition.
 Qed.
 
-Instance NComparableLeibnizEq : ComparableLeibnizEq natComparable := Nat.compare_eq.
+Global Instance NComparableLeibnizEq : ComparableLeibnizEq natComparable := Nat.compare_eq.
 
 (** A pair of ComparableLeibnizEq is ComparableLeibnizEq **)
-Instance PairComparableLeibnizEq
+Global Instance PairComparableLeibnizEq
   {A:Type} {CA:Comparable A} (UA:ComparableLeibnizEq CA)
   {B:Type} {CB:Comparable B} (UB:ComparableLeibnizEq CB) :
     ComparableLeibnizEq (PairComparable CA CB).
@@ -174,7 +172,7 @@ Class Numbered (A:Type) := {
   inj_bound_spec : forall x, (inj x < Pos.succ inj_bound)%positive
 }.
 
-Program Instance NumberedAlphabet {A:Type} (N:Numbered A) : Alphabet A :=
+Global Program Instance NumberedAlphabet {A:Type} (N:Numbered A) : Alphabet A :=
   { AlphabetComparable := {| compare := fun x y => Pos.compare (inj x) (inj y) |};
     AlphabetFinite :=
       {| all_list := fst (Pos.iter
@@ -224,7 +222,7 @@ Import OrderedType.
 
 Module Type ComparableM.
   Parameter t : Type.
-  Declare Instance tComparable : Comparable t.
+  Global Declare Instance tComparable : Comparable t.
 End ComparableM.
 
 Module OrderedTypeAlt_from_ComparableM (C:ComparableM) <: OrderedTypeAlt.

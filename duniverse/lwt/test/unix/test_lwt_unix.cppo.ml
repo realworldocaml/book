@@ -1173,6 +1173,82 @@ let pread_tests ~blocking =
       Lwt.return_true);
 ]
 
+let dup_tests ~blocking =
+  let test_file = test_filename "test_dup" in
+  let file_contents = "01234567890123456789" in
+  let len = String.length file_contents in
+  let buf = Bytes.make len '\x00' in
+  let blocking_string =
+    if blocking then
+      " blocking"
+    else
+      " nonblocking"
+  in
+  [
+  test ~sequential:true ("dup on socket" ^ blocking_string)
+    (fun () ->
+      let s1, s2 =
+        if Sys.win32 then Lwt_unix.socketpair Unix.PF_INET6 Unix.SOCK_STREAM 0
+        else Lwt_unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0
+      in
+      if not blocking then Lwt_unix.set_blocking ~set_flags:false s1 false;
+      let s1' = Lwt_unix.dup s1 in
+      Lwt_unix.blocking s1
+      >>= fun s1_is_blocking ->
+      Lwt_unix.blocking s1'
+      >>= fun s1'_is_blocking ->
+      assert(s1_is_blocking = s1'_is_blocking);
+      Lwt_unix.write_string s1 file_contents 0 len
+      >>= fun n ->
+      assert(n = len);
+      Lwt_unix.read s2 buf 0 len
+      >>= fun n ->
+      assert(n = len);
+      let read = Bytes.to_string buf in
+      assert(read = file_contents);
+      Lwt_unix.write_string s1' file_contents 0 len
+      >>= fun n ->
+      assert(n = len);
+      Lwt_unix.read s2 buf 0 len
+      >>= fun n ->
+      assert(n = len);
+      let read = Bytes.to_string buf in
+      assert(read = file_contents);
+      Lwt_list.iter_p Lwt_unix.close [s1; s1'; s2] >>= fun () ->
+      Lwt.return_true);
+
+    test ~sequential:true ("dup on file" ^ blocking_string)
+    (fun () ->
+      Lwt_unix.openfile test_file [O_RDWR; O_TRUNC; O_CREAT] 0o666
+      >>= fun fd ->
+      if not blocking then Lwt_unix.set_blocking ~set_flags:false fd false;
+      let fd' = Lwt_unix.dup fd in
+      Lwt_unix.blocking fd
+      >>= fun fd_is_blocking ->
+      Lwt_unix.blocking fd'
+      >>= fun fd'_is_blocking ->
+      assert(fd_is_blocking = fd'_is_blocking);
+      Lwt_unix.write_string fd file_contents 0 len
+      >>= fun n ->
+      assert(n = len);
+      Lwt_unix.lseek fd 0 Lwt_unix.SEEK_SET >>= fun _pos ->
+      let buf = Bytes.make (String.length file_contents) '\x00' in
+      Lwt_unix.read fd buf 0 (String.length file_contents) >>= fun n ->
+      assert(n = (String.length file_contents));
+      let read = Bytes.to_string buf in
+      assert (read = file_contents);
+      Lwt_unix.write_string fd' file_contents 0 len
+      >>= fun n ->
+      assert(n = len);
+      Lwt_unix.lseek fd' 0 Lwt_unix.SEEK_SET >>= fun _pos ->
+      let buf = Bytes.make (String.length file_contents) '\x00' in
+      Lwt_unix.read fd' buf 0 (String.length file_contents) >>= fun n ->
+      assert(n = (String.length file_contents));
+      let read = Bytes.to_string buf in
+      assert (read = file_contents);
+      Lwt.return_true);
+]
+
 let suite =
   suite "lwt_unix"
     (wait_tests @
@@ -1188,5 +1264,7 @@ let suite =
      lwt_preemptive_tests @
      lwt_user_tests @
      pread_tests ~blocking:true @
-     pread_tests ~blocking:false
+     pread_tests ~blocking:false @
+     dup_tests ~blocking:true @
+     dup_tests ~blocking:false
     )

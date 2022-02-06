@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -100,7 +97,9 @@ let startnt t =
 
 let print item =
   let _, nt, rhs, pos, _ = def item in
-  Printf.sprintf "%s -> %s" (Nonterminal.print false nt) (Symbol.printaod 0 pos rhs)
+  Printf.sprintf "%s -> %s"
+    (Nonterminal.print false nt)
+    (Symbol.printaod 0 pos false rhs)
 
 (* Classifying items. *)
 

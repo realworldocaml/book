@@ -28,6 +28,7 @@ module Make
     (R : Mirage_random.S)
     (T : Mirage_time.S)
     (C : Mirage_clock.MCLOCK)
+    (P : Mirage_clock.PCLOCK)
     (S : Mirage_stack.V4V6) =
 struct
   include Resolver_lwt
@@ -92,7 +93,7 @@ struct
         (Uri.to_string uri) remote_name;
       Lwt.return (`Vchan_domain_socket (remote_name, service.Resolver.name))
 
-  module DNS = Dns_client_mirage.Make (R) (T) (C) (S)
+  module DNS = Dns_client_mirage.Make (R) (T) (C) (P) (S)
 
   let dns_stub_resolver dns service uri : Conduit.endp Lwt.t =
     let hostn = get_host uri in
@@ -110,12 +111,10 @@ struct
     | Error (`Msg err) -> `Unknown ("name resolution failed: " ^ err)
     | Ok addr -> `TCP (Ipaddr.V4 addr, port)
 
-  let register ?ns ?(ns_port = 53) s res =
+  let register ?nameservers s res =
     (* DNS stub resolver *)
-    let nameserver =
-      match ns with None -> None | Some ip -> Some (`TCP, (ip, ns_port))
-    in
-    let dns = DNS.create ?nameserver s in
+    let nameservers = Option.map (fun ns -> (`Tcp, ns)) nameservers in
+    let dns = DNS.create ?nameservers s in
     let f = dns_stub_resolver dns in
     Resolver_lwt.add_rewrite ~host:"" ~f res;
     let service = Resolver_lwt.(service res ++ static_service) in
@@ -124,9 +123,9 @@ struct
     let vchan_res = vchan_resolver ~tld:vchan_tld in
     Resolver_lwt.add_rewrite ~host:vchan_tld ~f:vchan_res res
 
-  let v ?ns ?ns_port stack =
+  let v ?nameservers stack =
     let res = Resolver_lwt.init () in
-    register ?ns ?ns_port stack res;
+    register ?nameservers stack res;
     res
 
   type t = Resolver_lwt.t

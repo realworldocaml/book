@@ -1,4 +1,4 @@
-open Rresult.R.Infix
+let ( let* ) = Result.bind
 
 let sha2 = [ `SHA256 ; `SHA384 ; `SHA512 ]
 let all_hashes = [ `MD5 ; `SHA1 ; `SHA224 ] @ sha2
@@ -37,6 +37,10 @@ let maybe_validate_hostname cert = function
   | None   -> true
   | Some x -> Certificate.supports_hostname cert x
 
+let maybe_validate_ip cert = function
+  | None -> true
+  | Some ip -> Certificate.supports_ip cert ip
+
 let issuer_matches_subject
     { Certificate.asn = parent ; _ } { Certificate.asn = cert ; _ } =
   Distinguished_name.equal parent.tbs_cert.subject cert.tbs_cert.issuer
@@ -53,9 +57,10 @@ let validate_raw_signature subject allowed_hashes msg sig_alg signature pk =
     else if not (Key_type.supports_signature_scheme (Public_key.key_type pk) scheme) then
       Error (`Unsupported_keytype (subject, pk))
     else
-      Rresult.R.reword_error
-        (function `Msg m -> `Bad_signature (subject, m))
-        (Public_key.verify siga ~scheme ~signature pk (`Message msg)) >>= fun () ->
+      let* () =
+        Result.map_error (function `Msg m -> `Bad_signature (subject, m))
+          (Public_key.verify siga ~scheme ~signature pk (`Message msg))
+      in
       if not (List.mem siga sha2) then
         Log.warn (fun m -> m "%a signature uses %a, a weak hash algorithm"
                      Distinguished_name.pp subject Certificate.pp_hash siga);
@@ -231,10 +236,11 @@ let pp_ca_error ppf = function
   | `CACertificateExpired (c, now) ->
     let pp_pt = Ptime.pp_human ~tz_offset_s:0 () in
     Fmt.pf ppf "CA certificate %a: expired (now %a)" Certificate.pp c
-      Fmt.(option ~none:(unit "no timestamp provided") pp_pt) now
+      Fmt.(option ~none:(any "no timestamp provided") pp_pt) now
 
 type leaf_validation_error = [
   | `LeafCertificateExpired of Certificate.t * Ptime.t option
+  | `LeafInvalidIP of Certificate.t * Ipaddr.t option
   | `LeafInvalidName of Certificate.t * [`host] Domain_name.t option
   | `LeafInvalidVersion of Certificate.t
   | `LeafInvalidExtensions of Certificate.t
@@ -244,10 +250,14 @@ let pp_leaf_validation_error ppf = function
   | `LeafCertificateExpired (c, now) ->
     let pp_pt = Ptime.pp_human ~tz_offset_s:0 () in
     Fmt.pf ppf "leaf certificate %a expired (now %a)" Certificate.pp c
-      Fmt.(option ~none:(unit "no timestamp provided") pp_pt) now
+      Fmt.(option ~none:(any "no timestamp provided") pp_pt) now
+  | `LeafInvalidIP (c, ip) ->
+    Fmt.pf ppf "leaf certificate %a does not contain the IP %a (IPs present: %a)"
+      Certificate.pp c Fmt.(option ~none:(any "none") Ipaddr.pp) ip
+      Fmt.(list ~sep:(any ", ") Ipaddr.pp) (Certificate.ips c |> Ipaddr.Set.elements)
   | `LeafInvalidName (c, n) ->
     Fmt.pf ppf "leaf certificate %a does not contain the name %a"
-      Certificate.pp c Fmt.(option ~none:(unit "none") Domain_name.pp) n
+      Certificate.pp c Fmt.(option ~none:(any "none") Domain_name.pp) n
   | `LeafInvalidVersion c ->
     Fmt.pf ppf "leaf certificate %a: version 3 is required for extensions" Certificate.pp c
   | `LeafInvalidExtensions c ->
@@ -271,7 +281,7 @@ let pp_chain_validation_error ppf = function
   | `IntermediateCertificateExpired (c, now) ->
     let pp_pt = Ptime.pp_human ~tz_offset_s:0 () in
     Fmt.pf ppf "intermediate certificate %a expired (now %a)" Certificate.pp c
-      Fmt.(option ~none:(unit "no timestamp provided") pp_pt) now
+      Fmt.(option ~none:(any "no timestamp provided") pp_pt) now
   | `IntermediateInvalidVersion c ->
     Fmt.pf ppf "intermediate certificate %a: version 3 is required for extensions"
       Certificate.pp c
@@ -302,20 +312,12 @@ let pp_chain_error ppf = function
   | #chain_validation_error as c -> pp_chain_validation_error ppf c
 
 type fingerprint_validation_error = [
-  | `ServerNameNotPresent of Certificate.t * [`host] Domain_name.t
-  | `NameNotInList of Certificate.t
   | `InvalidFingerprint of Certificate.t * Cstruct.t * Cstruct.t
 ]
 
 let pp_fingerprint_validation_error ppf = function
-  | `ServerNameNotPresent (c, n) ->
-    Fmt.pf ppf "server name %a was matched in the fingerprint list, but does not occur in certificate %a"
-      Domain_name.pp n Certificate.pp c
-  | `NameNotInList c ->
-    Fmt.pf ppf "certificate common name %a is not present in the fingerprint list"
-      Certificate.pp c
   | `InvalidFingerprint (c, c_fp, fp) ->
-    Fmt.pf ppf "fingerprint for %a (which is %a) does not match, expected %a"
+    Fmt.pf ppf "fingerprint for %a (computed %a) does not match, expected %a"
       Certificate.pp c Cstruct.hexdump_pp c_fp Cstruct.hexdump_pp fp
 
 type validation_error = [
@@ -368,18 +370,20 @@ let is_ca_cert_valid allowed_hashes now cert =
 let valid_ca ?(allowed_hashes = all_hashes) ?time cacert =
   is_ca_cert_valid allowed_hashes time cacert
 
-let is_server_cert_valid host now cert =
+let is_server_cert_valid ip host now cert =
   match
     validate_time now cert,
+    maybe_validate_ip cert ip,
     maybe_validate_hostname cert host,
     version_matches_extensions cert,
     validate_server_extensions cert
   with
-  | (true, true, true, true) -> Ok ()
-  | (false, _, _, _)         -> Error (`LeafCertificateExpired (cert, now))
-  | (_, false, _, _)         -> Error (`LeafInvalidName (cert, host))
-  | (_, _, false, _)         -> Error (`LeafInvalidVersion cert)
-  | (_, _, _, false)         -> Error (`LeafInvalidExtensions cert)
+  | (true, true, true, true, true) -> Ok ()
+  | (false, _, _, _, _)         -> Error (`LeafCertificateExpired (cert, now))
+  | (_, false, _, _, _)         -> Error (`LeafInvalidIP (cert, ip))
+  | (_, _, false, _, _)         -> Error (`LeafInvalidName (cert, host))
+  | (_, _, _, false, _)         -> Error (`LeafInvalidVersion cert)
+  | (_, _, _, _, false)         -> Error (`LeafInvalidExtensions cert)
 
 let signs hash pathlen trusted cert =
   match
@@ -406,9 +410,9 @@ let rec validate_anchors revoked hash pathlen cert = function
 let verify_single_chain now ?(revoked = fun ~issuer:_ ~cert:_ -> false) hash anchors chain =
   let rec climb pathlen = function
     | cert :: issuer :: certs ->
-      is_cert_valid now issuer >>= fun () ->
-      (if revoked ~issuer ~cert then Error (`Revoked cert) else Ok ()) >>= fun () ->
-      signs hash pathlen issuer cert >>= fun () ->
+      let* () = is_cert_valid now issuer in
+      let* () = if revoked ~issuer ~cert then Error (`Revoked cert) else Ok () in
+      let* () = signs hash pathlen issuer cert in
       climb (succ pathlen) (issuer :: certs)
     | [c] ->
       let anchors = issuer anchors c in
@@ -417,12 +421,12 @@ let verify_single_chain now ?(revoked = fun ~issuer:_ ~cert:_ -> false) hash anc
   in
   climb 0 chain
 
-let verify_chain ~host ~time ?revoked ?(allowed_hashes = sha2) ~anchors = function
+let verify_chain ?ip ~host ~time ?revoked ?(allowed_hashes = sha2) ~anchors = function
   | [] -> Error `EmptyCertificateChain
   | server :: certs ->
     let now = time () in
     let anchors = List.filter (validate_time now) anchors in
-    is_server_cert_valid host now server >>= fun () ->
+    let* () = is_server_cert_valid ip host now server in
     verify_single_chain now ?revoked allowed_hashes anchors (server :: certs)
 
 let rec any_m e f = function
@@ -431,12 +435,12 @@ let rec any_m e f = function
     | Ok ta -> Ok (Some (c, ta))
     | Error _ -> any_m e f cs
 
-let verify_chain_of_trust ~host ~time ?revoked ?(allowed_hashes = sha2) ~anchors = function
+let verify_chain_of_trust ?ip ~host ~time ?revoked ?(allowed_hashes = sha2) ~anchors = function
   | [] -> Error `EmptyCertificateChain
   | server :: certs ->
     let now = time () in
     (* verify server! *)
-    is_server_cert_valid host now server >>= fun () ->
+    let* () = is_server_cert_valid ip host now server in
     (* build all paths *)
     let paths = build_paths server certs
     and anchors = List.filter (validate_time now) anchors
@@ -446,43 +450,35 @@ let verify_chain_of_trust ~host ~time ?revoked ?(allowed_hashes = sha2) ~anchors
 
 let valid_cas ?(allowed_hashes = all_hashes) ?time cas =
   List.filter (fun cert ->
-      Rresult.R.is_ok (is_ca_cert_valid allowed_hashes time cert))
+      Result.is_ok (is_ca_cert_valid allowed_hashes time cert))
     cas
 
-let fingerprint_verification host now fingerprints fp = function
+let fingerprint_verification ?ip host now fingerprint fp = function
   | [] -> Error `EmptyCertificateChain
   | server::_ ->
-    let verify_fingerprint server fingerprints =
-      let fingerprint = fp server in
-      let fp_matches (_, fp') = Cstruct.equal fp' fingerprint in
-      if List.exists fp_matches fingerprints then
-        let name, _ = List.find fp_matches fingerprints in
-        if maybe_validate_hostname server (Some name) then
-          Ok None
-        else
-          Error (`ServerNameNotPresent (server, name))
-      else
-        let name_matches (n, _) = Certificate.supports_hostname server n in
-        if List.exists name_matches fingerprints then
-          let (_, fp) = List.find name_matches fingerprints in
-          Error (`InvalidFingerprint (server, fingerprint, fp))
-        else
-          Error (`NameNotInList server)
-    in
-    match validate_time now server, maybe_validate_hostname server host with
-    | true , true  -> verify_fingerprint server fingerprints
-    | false, _     -> Error (`LeafCertificateExpired (server, now))
-    | _    , false -> Error (`LeafInvalidName (server, host))
+    let computed_fingerprint = fp server in
+    if Cstruct.equal computed_fingerprint fingerprint then
+      match
+        validate_time now server,
+        maybe_validate_hostname server host,
+        maybe_validate_ip server ip
+      with
+      | true , true , true  -> Ok None
+      | false, _    , _     -> Error (`LeafCertificateExpired (server, now))
+      | _    , false, _     -> Error (`LeafInvalidName (server, host))
+      | _    , _    , false -> Error (`LeafInvalidIP (server, ip))
+    else
+      Error (`InvalidFingerprint (server, computed_fingerprint, fingerprint))
 
-let trust_key_fingerprint ~host ~time ~hash ~fingerprints =
+let trust_key_fingerprint ?ip ~host ~time ~hash ~fingerprint =
   let now = time () in
   let fp cert = Public_key.fingerprint ~hash (Certificate.public_key cert) in
-  fingerprint_verification host now fingerprints fp
+  fingerprint_verification ?ip host now fingerprint fp
 
-let trust_cert_fingerprint ~host ~time ~hash ~fingerprints =
+let trust_cert_fingerprint ?ip ~host ~time ~hash ~fingerprint =
   let now = time () in
   let fp = Certificate.fingerprint hash in
-  fingerprint_verification host now fingerprints fp
+  fingerprint_verification ?ip host now fingerprint fp
 
 (* RFC5246 says 'root certificate authority MAY be omitted' *)
 

@@ -1,4 +1,5 @@
 _build
 .merlin
-fix.install
+*.install
 *~
+dune-workspace.versions

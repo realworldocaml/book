@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -221,7 +218,7 @@ let define_positions (name : string array) nprefix ncallee : sw * sw * sw =
          $endpos. *)
       Before, WhereEnd
 
-    (* Note that, to contrary to intuition perhaps, we do NOT have that
+    (* Note that, contrary to intuition perhaps, we do NOT have that
        if the prefix is empty, then the start position of the inner
        production is the start production of the outer production.
        This is true only if the inner production is non-epsilon. *)

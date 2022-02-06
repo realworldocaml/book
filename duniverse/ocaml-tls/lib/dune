@@ -1,5 +1,5 @@
 (library
  (name tls)
  (public_name tls)
- (libraries cstruct cstruct-sexp logs hkdf mirage-crypto mirage-crypto-rng mirage-crypto-pk x509 sexplib domain-name fmt mirage-crypto-ec rresult)
+ (libraries cstruct cstruct-sexp logs hkdf mirage-crypto mirage-crypto-rng mirage-crypto-pk x509 sexplib domain-name fmt mirage-crypto-ec ipaddr ipaddr-sexp)
  (preprocess (pps ppx_sexp_conv ppx_cstruct)))

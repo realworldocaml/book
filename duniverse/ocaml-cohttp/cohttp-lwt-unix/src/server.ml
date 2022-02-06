@@ -2,7 +2,8 @@ module Server_core = Cohttp_lwt.Make_server (Io)
 include Server_core
 open Lwt.Infix
 
-let src = Logs.Src.create "cohttp.lwt.server" ~doc:"Cohttp Lwt server module"
+let src =
+  Logs.Src.create "cohttp.lwt.server" ~doc:"Cohttp Lwt Unix server module"
 
 module Log = (val Logs.src_log src : Logs.LOG)
 

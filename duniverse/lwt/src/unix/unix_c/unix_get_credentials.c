@@ -77,7 +77,7 @@ CAMLprim value lwt_unix_get_credentials(value fd)
 
        See
 
-         https://caml.inria.fr/mantis/view.php?id=5934
+         https://github.com/ocaml/ocaml/issues/5934
          ocaml/ocaml@24c118d7b63cdab58ed9bad28e2d337e9d1d30ba */
     Store_field(res, 0, Val_int(-1));
 

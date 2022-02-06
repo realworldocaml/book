@@ -4,79 +4,85 @@
 
 
 
-(** This module provides type definitions, and functions used by the
-    various parts of Bisect. *)
+(** This module provides type definitions and functions that are shared between
+    more than one part of Bisect, namely:
+
+    - the instrumenter (PPX)
+    - the native runtime ([Bisect.Runtime] in [src/runtime/native/])
+    - the ReScript runtime ([Bisect.Runtime] in [src/runtime/js/])
+    - the reporter ([bisect-ppx-report]) *)
 
 
-type point_definition = {
-    offset : int; (** Point offset, relative to file beginning. *)
-    identifier : int; (** Point identifier, unique in file. *)
-  }
-(** The type of point definitions, that is places of interest in the
-    source code. *)
 
-(** {1 Utility functions} *)
+(** {1 Types}
 
-val try_out_channel : bool -> string -> (out_channel -> 'a) -> 'a
-(** [try_out_channel bin filename f] opens an output channel for the file given
-    at [filename], and then runs [f]. When [f] returns or raises an exception,
-    the channel is closed. If [bin] is [true], the channel is opened in binary
-    mode. Otherwise, it is opened in text mode. *)
+    Types representing accumulated visit counts. This data is written to
+    [bisect*.coverage] files when an instrumented binary exits.
+
+    The two types in this section, {!instrumented_file} and {!coverage}, and the
+    value {!coverage_file_identifier}, are the only items shared with the
+    reporter. Otherwise, the reporter is self-contained. *)
+
+type instrumented_file = {
+  filename : string; (** Source file name. *)
+  points : int array; (** Byte offsets of the points placed in the file. *)
+  counts : int array; (** Visitation counts, one for each point. *)
+}
+(** Data gathered for a single source file. *)
+
+type coverage = (string, instrumented_file) Hashtbl.t
+(** A binary instrumented with Bisect, when run, produces coverage statistics
+    for each of its source files. The runtime and reporter both index the
+    statistics by source file name. *)
+
+val coverage_file_identifier : string
+(** A string written at the beginning of each [bisect*.coverage] files. Provides
+    a sanity check for the reporter that it is reading a [bisect*.coverage]
+    file, and the file format version. *)
 
 
-(** {1 I/O functions} *)
 
-exception Invalid_file of string * string
-(** Exception to be raised when a read file does not conform to the
-    Bisect format. The parameter is the name of the incriminated file
-    and the reason of the error. *)
-
-val write_runtime_data : out_channel -> unit
-(** [write_runtime_data o] writes the current runtime data to the output
-    channel [oc] using the Bisect file format. The runtime data list
-    encodes a map (through an association list) from files to arrays of
-    integers (the value at index {i i} being the number of times point
-    {i i} has been visited). The arrays are paired with point definition
-    lists, giving the location of each point in the file.
-
-    Raises [Sys_error] if an i/o error occurs. *)
-
-val runtime_data_to_string : unit -> string option
-(** Same as {!write_runtime_data}, but accumulates output in a string
-    instead. *)
-
-val random_filename : string -> string
-(** Returns a random filename, with the given prefix. *)
-
-val write_points : point_definition list -> string
-(** [write_points pts] converts the point definitions [pts] to a string. The
-    string is a binary byte sequence; it is not meant to be legible. *)
-
-val read_runtime_data : string -> (string * (int array * string)) list
-(** [read_runtime_data f] reads the runtime data from file [f].
-
-    Raises [Sys_error] if an i/o error occurs. May also raise
-    [Invalid_file], [Unsupported_version], or [Modified_file]. *)
-
-val read_points : string -> point_definition list
-(** [read_points s] reads point definitions from the string [s]. *)
-
-val reset_counters : unit -> unit
-(** Clears accumulated coverage statistics. *)
+(** {1 Initialization} *)
 
 val register_file :
-  string -> point_count:int -> point_definitions:string ->
-    [`Staged of (int -> unit)]
-(** [register_file file ~point_count ~point_definitions] indicates that the file
-    [file] is part of the application that has been instrumented.
-    [point_definitions] is a serialized [Common.point_definition list] giving
-    the locations of all points in the file. The returned callback is used to
-    increment visitation counts. *)
+  filename:string -> points:int array -> [`Visit of (int -> unit)]
+(** Each source file is instrumented to call {!Bisect.Runtime.register_file} at
+    run time, during program initialization. {!Bisect.Runtime.register_file}
+    eventually forwards to this function, {!Biesct_common.register_file}. This
+    function allocates the visit count array, with one array cell for each
+    point, and registers the array for later writing to [bisect*.coverage]
+    files.
+
+    - [~filename] is the name of the source file.
+    - [~points] is the list of byte offsets of the instrumentation points placed
+      in the source file.
+
+    The return value is the function that is called by each instrumentation
+    point to increment its own visit count. The instrumentation point passes its
+    own index to the function. *)
 
 
 
-val bisect_file : string option ref
-(** Default value for [BISECT_FILE]. *)
+(** {1 [.coverage] output} *)
 
-val bisect_silent : string option ref
-(** Default value for [BISECT_SILENT]. *)
+val write_runtime_coverage : coverage -> out_channel -> unit
+(** Writes the [coverage] to the given output channel. *)
+
+val write_runtime_data : out_channel -> unit
+(** Writes the current accumulated coverage data (of type {!coverage}) to the
+    given output channel. *)
+
+val runtime_data_to_string : unit -> string option
+(** Same as {!write_runtime_data}, but writes the output to a string instead.
+
+    [None] is returned if there are no source files registered. This can occur
+    when the runtime gets linked into a binary, but no files had been
+    instrumented, because instrumentation was turned off. This combination
+    normally shouldn't happen, but it can occur depending on the quality of the
+    integration between the build system and Bisect. *)
+
+val reset_counters : unit -> unit
+(** Clears accumulated visit counts. All array cells are set to zero. *)
+
+val random_filename : prefix:string -> string
+(** Returns a random filename with the given prefix. *)

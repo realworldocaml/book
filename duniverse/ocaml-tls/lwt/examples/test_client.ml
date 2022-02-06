@@ -45,6 +45,6 @@ open Cmdliner
 
 let cmd =
   Term.(ret (const jump $ setup_log)),
-  Term.info "test_client" ~version:"0.14.1"
+  Term.info "test_client" ~version:"0.15.2"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

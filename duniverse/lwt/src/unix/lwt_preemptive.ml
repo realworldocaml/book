@@ -232,7 +232,7 @@ let job_notification =
    function is called. See:
    https://github.com/ocsigen/lwt/issues/218
    https://github.com/ocsigen/lwt/pull/219
-   http://caml.inria.fr/mantis/view.php?id=7158 *)
+   https://github.com/ocaml/ocaml/issues/7158 *)
 let run_in_main f =
   let cell = CELL.make () in
   (* Create the job. *)

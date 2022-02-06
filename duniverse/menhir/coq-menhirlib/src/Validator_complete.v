@@ -1,15 +1,13 @@
-(****************************************************************************)
-(*                                                                          *)
-(*                                   Menhir                                 *)
-(*                                                                          *)
-(*           Jacques-Henri Jourdan, CNRS, LRI, Université Paris Sud         *)
-(*                                                                          *)
-(*  Copyright Inria. All rights reserved. This file is distributed under    *)
-(*  the terms of the GNU Lesser General Public License as published by the  *)
-(*  Free Software Foundation, either version 3 of the License, or (at your  *)
-(*  option) any later version, as described in the file LICENSE.            *)
-(*                                                                          *)
-(****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                   Menhir                                   *)
+(*                                                                            *)
+(*  Copyright Inria and CNRS. All rights reserved. This file is distributed   *)
+(*  under the terms of the GNU Lesser General Public License as published by  *)
+(*  the Free Software Foundation, either version 3 of the License, or (at     *)
+(*  your option) any later version, as described in the file LICENSE.         *)
+(*                                                                            *)
+(******************************************************************************)
 
 From Coq Require Import List Syntax Derive.
 From Coq.ssr Require Import ssreflect.
@@ -22,12 +20,12 @@ Module Make(Import A:Automaton.T).
 (** We instantiate some sets/map. **)
 Module TerminalComparableM <: ComparableM.
   Definition t := terminal.
-  Instance tComparable : Comparable t := _.
+  Global Instance tComparable : Comparable t := _.
 End TerminalComparableM.
 Module TerminalOrderedType := OrderedType_from_ComparableM TerminalComparableM.
 Module StateProdPosComparableM <: ComparableM.
   Definition t := (state*production*nat)%type.
-  Instance tComparable : Comparable t := _.
+  Global Instance tComparable : Comparable t := _.
 End StateProdPosComparableM.
 Module StateProdPosOrderedType :=
   OrderedType_from_ComparableM StateProdPosComparableM.
@@ -117,7 +115,7 @@ Definition forallb_items items_map (P:state -> production -> nat -> TerminalSet.
 
 (** Typeclass instances for synthetizing the validator. *)
 
-Instance is_validator_subset S1 S2 :
+Global Instance is_validator_subset S1 S2 :
   IsValidator (TerminalSet.Subset S1 S2) (TerminalSet.subset S1 S2).
 Proof. intros ?. by apply TerminalSet.subset_2. Qed.
 
@@ -150,7 +148,7 @@ Global Hint Extern 2 (IsValidator (state_has_future _ _ _ _) _) =>
   validator.
 
   This instance is used for [non_terminal_closed]. *)
-Instance is_validator_forall_lookahead_set lset P b:
+Global Instance is_validator_forall_lookahead_set lset P b:
   (forall lookahead, TerminalSet.In lookahead lset -> IsValidator (P lookahead) b) ->
   IsValidator (forall lookahead, TerminalSet.In lookahead lset -> P lookahead) b.
 Proof. unfold IsValidator. firstorder. Qed.
@@ -247,7 +245,7 @@ Global Hint Extern 0 (IsValidator
   : typeclass_instances.
 
 (* Used in [start_future] only. *)
-Instance is_validator_forall_state_has_future im st prod :
+Global Instance is_validator_forall_state_has_future im st prod :
   IsItemsMap im ->
   IsValidator
     (forall look, state_has_future st prod (rev' (prod_rhs_rev prod)) look)

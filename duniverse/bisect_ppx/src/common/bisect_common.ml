@@ -4,226 +4,102 @@
 
 
 
-type point_definition = {
-    offset : int;
-    identifier : int;
-  }
+(* Basic types and file [bisect*.coverage] file identifier. Shared with the
+   reporter. *)
 
-(* Utility functions *)
+type instrumented_file = {
+  filename : string;
+  points : int array;
+  counts : int array;
+}
 
-let try_finally x f h =
-  let res =
-    try
-      f x
-    with e ->
-      (try h x with _ -> ());
-      raise e in
-  (try h x with _ -> ());
-  res
+type coverage = (string, instrumented_file) Hashtbl.t
 
-let try_in_channel bin x f =
-  let open_ch = if bin then open_in_bin else open_in in
-  try_finally (open_ch x) f (close_in_noerr)
-
-let try_out_channel bin x f =
-  let open_ch = if bin then open_out_bin else open_out in
-  try_finally (open_ch x) f (close_out_noerr)
+let coverage_file_identifier = "BISECT-COVERAGE-4"
 
 
-(* I/O functions *)
 
-(* filename + reason *)
-exception Invalid_file of string * string
+(* Output functions for the [bisect*.coverage] file format. *)
 
-let magic_number_rtd = "BISECTOUT3"
+let write_int formatter i =
+  Format.fprintf formatter " %i" i
 
-module Writer :
-sig
-  type 'a t
+let write_string formatter s =
+  Format.fprintf formatter " %i %s" (String.length s) s
 
-  val int : int t
-  val string : string t
-  val pair : 'a t -> 'b t -> ('a * 'b) t
-  val array : 'a t -> 'a array t
+let write_array write_element formatter a =
+  Format.fprintf formatter " %i" (Array.length a);
+  Array.iter (write_element formatter) a
 
-  val write : 'a t -> 'a -> string
-end =
-struct
-  type 'a t = Buffer.t -> 'a -> unit
+let write_list write_element formatter l =
+  Format.fprintf formatter " %i" (List.length l);
+  List.iter (write_element formatter) l
 
-  let w =
-    Printf.bprintf
+let write_instrumented_file formatter {filename; points; counts} =
+  write_string formatter filename;
+  write_array write_int formatter points;
+  write_array write_int formatter counts
 
-  let int b i =
-    w b " %i" i
+let write_coverage formatter coverage =
+  Format.fprintf formatter "%s" coverage_file_identifier;
+  write_list write_instrumented_file formatter coverage;
+  Format.pp_print_flush formatter ()
 
-  let string b s =
-    w b " %i %s" (String.length s) s
 
-  let pair left right b (l, r) =
-    left b l;
-    right b r
 
-  let array element b a =
-    w b " %i" (Array.length a);
-    Array.iter (element b) a
+(* Accumulated visit counts. This is used only by the native and ReScript
+   runtimes. It is idly linked as part of this module into the PPX and reporter,
+   as well, but not used by them. *)
 
-  let write writer v =
-    let b = Buffer.create 4096 in
-    Buffer.add_string b magic_number_rtd;
-    writer b v;
-    Buffer.contents b
-end
-
-module Reader :
-sig
-  type 'a t
-
-  val int : int t
-  val string : string t
-  val pair : 'a t -> 'b t -> ('a * 'b) t
-  val array : 'a t -> 'a array t
-
-  val read : 'a t -> filename:string -> 'a
-end =
-struct
-  type 'a t = Buffer.t -> in_channel -> 'a
-
-  let junk c =
-    try ignore (input_char c)
-    with End_of_file -> ()
-
-  let int b c =
-    Buffer.clear b;
-    let rec loop () =
-      match input_char c with
-      | exception End_of_file -> ()
-      | ' ' -> ()
-      | c -> Buffer.add_char b c; loop ()
-    in
-    loop ();
-    int_of_string (Buffer.contents b)
-
-  let string b c =
-    let length = int b c in
-    let s = really_input_string c length in
-    junk c;
-    s
-
-  let pair left right b c =
-    let l = left b c in
-    let r = right b c in
-    l, r
-
-  let array element b c =
-    let length = int b c in
-    Array.init length (fun _index -> element b c)
-
-  let read reader ~filename =
-    try_in_channel true filename begin fun c ->
-      let magic_number_in_file =
-        try really_input_string c (String.length magic_number_rtd)
-        with End_of_file ->
-          raise
-            (Invalid_file
-              (filename, "unexpected end of file while reading magic number"))
-      in
-      if magic_number_in_file <> magic_number_rtd then
-        raise (Invalid_file (filename, "bad magic number"));
-
-      junk c;
-
-      let b = Buffer.create 4096 in
-      try reader b c
-      with e ->
-        raise
-          (Invalid_file
-            (filename, "exception reading data: " ^ Printexc.to_string e))
-    end
-end
-
-let table : (string, int array * string) Hashtbl.t Lazy.t =
+let coverage : coverage Lazy.t =
   lazy (Hashtbl.create 17)
 
+let register_file ~filename ~points =
+  let counts = Array.make (Array.length points) 0 in
+  let coverage = Lazy.force coverage in
+  if not (Hashtbl.mem coverage filename) then
+    Hashtbl.add coverage filename {filename; points; counts};
+  `Visit (fun index ->
+    let current_count = counts.(index) in
+    if current_count < max_int then
+      counts.(index) <- current_count + 1)
+
+let flatten_coverage coverage =
+  Hashtbl.fold (fun _ file acc -> file::acc) coverage []
+
+let flatten_data () =
+  flatten_coverage (Lazy.force coverage)
+
 let reset_counters () =
-  Lazy.force table
-  |> Hashtbl.iter begin fun _ (point_state, _) ->
-    match Array.length point_state with
+  Lazy.force coverage
+  |> Hashtbl.iter begin fun _ {counts; _} ->
+    match Array.length counts with
     | 0 -> ()
-    | n -> Array.fill point_state 0 (n - 1) 0
+    | n -> Array.fill counts 0 (n - 1) 0
   end
 
+
+
+(** Helpers for serializing the coverage data in {!coverage}. *)
+
 let runtime_data_to_string () =
-  let data = Hashtbl.fold (fun k v acc -> (k, v)::acc) (Lazy.force table) [] in
-  match data with
+  match flatten_data () with
   | [] ->
     None
-  | _ ->
-    Array.of_list data
-    |> Writer.(write (array (pair string (pair (array int) string))))
-    |> fun s -> Some s
+  | data ->
+    let buffer = Buffer.create 4096 in
+    write_coverage (Format.formatter_of_buffer buffer) data;
+    Some (Buffer.contents buffer)
+
+let write_runtime_coverage coverage channel =
+  write_coverage (Format.formatter_of_out_channel channel) (flatten_coverage coverage)
 
 let write_runtime_data channel =
-  let data =
-    match runtime_data_to_string () with
-    | Some s -> s
-    | None -> Writer.(write (array int)) [||]
-  in
-  output_string channel data
+  write_coverage (Format.formatter_of_out_channel channel) (flatten_data ())
 
 let prng =
   Random.State.make_self_init () [@coverage off]
 
-let random_filename base_name =
+let random_filename ~prefix =
   Printf.sprintf "%s%09d.coverage"
-    base_name (abs (Random.State.int prng 1000000000))
-
-let write_points points =
-  let points_array = Array.of_list points in
-  Array.sort compare points_array;
-  Marshal.to_string points_array []
-
-let get_relative_path file =
-  if Filename.is_relative file then
-    file
-  else
-    let cwd = Sys.getcwd () in
-    let cwd_end = String.length cwd in
-    let sep_length = String.length Filename.dir_sep in
-    let sep_end = sep_length + cwd_end in
-    try
-      if String.sub file 0 cwd_end = cwd &&
-          String.sub file cwd_end sep_length = Filename.dir_sep then
-        String.sub file sep_end (String.length file - sep_end)
-      else
-        file
-    with Invalid_argument _ ->
-      file
-
-let read_runtime_data filename =
-  Reader.(read (array (pair string (pair (array int) string)))) ~filename
-  |> Array.to_list
-  |> List.map (fun (file, data) -> get_relative_path file, data)
-
-let read_points s =
-  let points_array : point_definition array = Marshal.from_string s 0 in
-  Array.sort compare points_array;
-  Array.to_list points_array
-
-let register_file file ~point_count ~point_definitions =
-  let point_state = Array.make point_count 0 in
-  let table = Lazy.force table in
-  if not (Hashtbl.mem table file) then
-    Hashtbl.add table file (point_state, point_definitions);
-  `Staged (fun point_index ->
-    let current_count = point_state.(point_index) in
-    point_state.(point_index) <-
-      if current_count < max_int then
-        current_count + 1
-      else
-        current_count)
-
-
-
-let bisect_file = ref None
-let bisect_silent = ref None
+    prefix (abs (Random.State.int prng 1000000000))

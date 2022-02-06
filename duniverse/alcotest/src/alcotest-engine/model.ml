@@ -1,34 +1,12 @@
-open Utils
+open! Import
 
 type speed_level = [ `Quick | `Slow ]
-
-(** Given a UTF-8 encoded string, escape any characters not considered
-    "filesystem safe" as their [U+XXXX] notation form. *)
-let escape str =
-  let add_codepoint buf uchar =
-    Uchar.to_int uchar |> Fmt.str "U+%04X" |> Buffer.add_string buf
-  in
-  let buf = Buffer.create (String.length str * 2) in
-  let get_normalized_char _ _ u =
-    match u with
-    | `Uchar u ->
-        if Uchar.is_char u then
-          match Uchar.to_char u with
-          | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ' | '.') as c
-            ->
-              Buffer.add_char buf c
-          | _ -> add_codepoint buf u
-        else add_codepoint buf u
-    | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
-  in
-  Uutf.String.fold_utf_8 get_normalized_char () str;
-  Buffer.contents buf
 
 module Test_name : sig
   type t
 
   val v : name:string -> index:int -> t
-  val name : t -> string
+  val name : t -> Safe_string.t
   val index : t -> int
 
   val pp : t Fmt.t
@@ -43,24 +21,27 @@ module Test_name : sig
   val compare : t -> t -> int
   (** Order lexicographically by name, then by index. *)
 end = struct
-  type t = { name : string; file : string; index : int }
+  type t = { name : Safe_string.t; file : string; index : int }
 
   let index { index; _ } = index
 
   let v ~name ~index =
+    let name = Safe_string.v name in
     let file =
-      let name = name |> escape |> function "" -> "" | n -> n ^ "." in
+      let name =
+        match Safe_string.to_string name with "" -> "" | n -> n ^ "."
+      in
       Fmt.str "%s%03d.output" name index
     in
     { name; file; index }
 
-  let pp = Fmt.using (fun { name; _ } -> name) Fmt.string
+  let pp = Fmt.using (fun { name; _ } -> name) Safe_string.pp
   let name { name; _ } = name
   let file { file; _ } = file
-  let length = name >> Uutf.String.fold_utf_8 (fun a _ _ -> a + 1) 0
+  let length = name >> Safe_string.length
 
   let compare t t' =
-    match String.compare t.name t'.name with
+    match Safe_string.compare t.name t'.name with
     | 0 -> (compare : int -> int -> int) t.index t'.index
     | n -> n
 end
@@ -81,11 +62,12 @@ end
 
 module Suite (M : Monad.S) : sig
   type 'a t
+  type 'a test_fn = [ `Skip | `Run of 'a -> Run_result.t M.t ]
 
   type 'a test_case = {
     name : Test_name.t;
     speed_level : speed_level;
-    fn : 'a -> Run_result.t M.t;
+    fn : 'a test_fn;
   }
 
   val v : name:string -> (_ t, [> `Empty_name ]) result
@@ -100,7 +82,7 @@ module Suite (M : Monad.S) : sig
 
   val add :
     'a t ->
-    Test_name.t * string * speed_level * ('a -> Run_result.t M.t) ->
+    Test_name.t * string * speed_level * 'a test_fn ->
     ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
@@ -108,15 +90,16 @@ module Suite (M : Monad.S) : sig
 end = struct
   module String_set = Set.Make (String)
 
+  type 'a test_fn = [ `Skip | `Run of 'a -> Run_result.t M.t ]
+
   type 'a test_case = {
     name : Test_name.t;
     speed_level : speed_level;
-    fn : 'a -> Run_result.t M.t;
+    fn : 'a test_fn;
   }
 
   type 'a t = {
-    escaped_name : string;
-    pp_name : unit Fmt.t;
+    name : Safe_string.t;
     tests : 'a test_case list;
     (* caches computed from the library values. *)
     filepaths : String_set.t;
@@ -127,15 +110,14 @@ end = struct
     match String.length name with
     | 0 -> Error `Empty_name
     | _ ->
-        let escaped_name = escape name in
-        let pp_name = Fmt.(const string) name in
+        let name = Safe_string.v name in
         let tests = [] in
         let filepaths = String_set.empty in
         let doc = Hashtbl.create 0 in
-        Ok { escaped_name; pp_name; tests; filepaths; doc }
+        Ok { name; tests; filepaths; doc }
 
-  let name { escaped_name; _ } = escaped_name
-  let pp_name ppf { pp_name; _ } = pp_name ppf ()
+  let name { name; _ } = Safe_string.to_string name
+  let pp_name ppf { name; _ } = Safe_string.pp ppf name
 
   let check_path_is_unique t tname =
     match String_set.mem (Test_name.file tname) t.filepaths with

@@ -1,0 +1,78 @@
+name: "Build"
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build: # Check build on various OSes
+
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          # - windows-latest Windows doesn't work yet
+        ocaml-version:
+          # Don't include every versions. OCaml-CI already covers that
+          - 4.11.1
+        include:
+          - os: ubuntu-latest # Enable coverage only on a single build
+            send-coverage: true
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Clone the project
+      - uses: actions/checkout@v2
+
+      # Setup
+      - name: Setup OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+          opam-local-packages: |
+            odoc-parser.opam
+
+      - name: Install dependencies
+        run: opam install -y --deps-only -t ./odoc-parser.opam
+
+      - name: dune runtest
+        run: opam exec -- dune runtest
+
+  esy: # Check build using esy
+
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Setup
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: Install esy
+        run: npm --global install esy
+
+      # Cache
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            ~/.esy
+          key: ${{ matrix.os }}-esy
+
+      - name: Install dependencies # Solve every time (fast)
+        run: esy install --verbose
+
+      - name: Build odoc-parser and run tests
+        run: esy dune runtest

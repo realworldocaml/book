@@ -163,7 +163,7 @@ Test with an opam like installation
   $ test -e a/a.install
   [1]
 
-  $ dune install -p a --create-install-files a 2> /dev/null
+  $ dune install -p a --create-install-files a 2>&1 | sed -e "/^Copying/d"
 
   $ grep "_destdir" a/a.install -c
   7
@@ -179,9 +179,12 @@ Build everything
 Test with a normal installation
 --------------------------------
 
-  $ dune install --prefix _install 2> /dev/null
+  $ dune install --prefix _install 2>&1 | sed -e "/^Installing/d"
 
 Once installed, we have the sites information:
+
+  $ grep share/a _install/lib/a/dune-package
+    $TESTCASE_ROOT/_install/share/a))
 
   $ OCAMLPATH=_install/lib:$OCAMLPATH _install/bin/c
   run a
@@ -198,7 +201,7 @@ Once installed, we have the sites information:
 Test with a relocatable installation
 --------------------------------
 
-  $ dune install --prefix _install_relocatable --relocatable 2> /dev/null
+  $ dune install --prefix _install_relocatable --relocatable 2>&1 | sed -e "/^Installing/d"
 
 Once installed, we have the sites information:
 
@@ -335,7 +338,8 @@ Test compiling an external plugin
   info.txt is found: true
   run c: registered:e,b.
 
-  $ OCAMLPATH=$(pwd)/_install/lib:$OCAMLPATH dune install --root=e --prefix $(pwd)/_install 2> /dev/null
+  $ OCAMLPATH=$(pwd)/_install/lib:$OCAMLPATH dune install --root=e --prefix $(pwd)/_install 2>&1 | sed -e "/^Installing/d"
+  Entering directory 'e'
 
   $ OCAMLPATH=_install/lib:$OCAMLPATH _install/bin/c
   run a

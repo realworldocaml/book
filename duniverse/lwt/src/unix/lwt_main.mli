@@ -42,18 +42,26 @@ let () = Lwt_main.run (main ())
       It is not safe to call [Lwt_main.run] in a function registered with
       [Pervasives.at_exit], use {!Lwt_main.at_exit} instead. *)
 
-val yield : unit -> unit Lwt.t
+val yield : unit -> unit Lwt.t [@@deprecated "Use Lwt.pause instead"]
   (** [yield ()] is a pending promise that is fulfilled after Lwt finishes
       calling all currently ready callbacks, i.e. it is fulfilled on the next
       “tick.”
 
-      [yield] is similar to {!Lwt.pause} and it exists for historical reason.
-      Prefer [pause] in order to stay compatible with other execution
-      environments such as js_of_ocaml. *)
+      [yield] is now deprecated in favor of the more general {!Lwt.pause}
+      in order to avoid discrepancies in resolution (see below) and stay
+      compatible with other execution environments such as js_of_ocaml.
+
+      Currently, paused promises are resolved more frequently than yielded promises.
+      The difference is unintended but existing applications could depend on it.
+      Unifying the two pools of promises into one in the future would eliminate
+      possible discrepancies and simplify the code. *)
 
 val abandon_yielded_and_paused : unit -> unit
 (** Causes promises created with {!Lwt.pause} and {!Lwt_main.yield} to remain
     forever pending.
+
+    [yield] is now deprecated in favor of the more general {!Lwt.pause}.
+    Once [yield] is phased out, this function will be deprecated as well.
 
     This is meant for use with {!Lwt.fork}, as a way to "abandon" more promise
     chains that are pending in your process. *)

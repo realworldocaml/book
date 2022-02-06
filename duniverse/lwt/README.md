@@ -1,11 +1,13 @@
-# Lwt &nbsp;&nbsp; [![version][version]][releases] [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor]
+# Lwt
 
-[version]:      https://img.shields.io/badge/version-5.3.0-blue.svg
-[releases]:     https://github.com/ocsigen/lwt/releases
-[travis]:       https://travis-ci.org/ocsigen/lwt/branches
-[travis-img]:   https://img.shields.io/travis/ocsigen/lwt/master.svg?label=travis
-[appveyor]:     https://ci.appveyor.com/project/aantron/lwt/branch/master
-[appveyor-img]: https://img.shields.io/appveyor/ci/aantron/lwt/master.svg?label=appveyor
+[![version][version]][releases] [![GitHub Actions status][github-actions-img]][github-actions]
+
+[version]:            https://img.shields.io/github/release/ocsigen/lwt
+[releases]:           https://github.com/ocsigen/lwt/releases
+[github-actions]:     https://github.com/ocsigen/lwt/actions
+[github-actions-img]: https://github.com/ocsigen/lwt/actions/workflows/workflow.yml/badge.svg?branch=master
+[appveyor]:           https://ci.appveyor.com/project/aantron/lwt/branch/master
+[appveyor-img]:       https://img.shields.io/appveyor/ci/aantron/lwt/master.svg?label=appveyor
 
 Lwt is a concurrent programming library for OCaml. It provides a single data
 type: the *promise*, which is a value that will become determined in the future.
@@ -76,16 +78,16 @@ In Lwt,
 - There are also some other helpers, such as [`Lwt_react`][react] for reactive
   programming. See the table of contents on the linked manual pages!
 
-[core]: https://ocsigen.org/lwt/dev/api/Lwt
-[cond]: https://ocsigen.org/lwt/dev/api/Lwt_condition
-[mutex]: https://ocsigen.org/lwt/dev/api/Lwt_mutex
-[mvar]: https://ocsigen.org/lwt/dev/api/Lwt_mvar
-[unix]: https://ocsigen.org/lwt/dev/api/Lwt_unix
-[io]: https://ocsigen.org/lwt/dev/api/Lwt_io
-[process]: https://ocsigen.org/lwt/dev/api/Lwt_process
-[preemptive]: https://ocsigen.org/lwt/dev/api/Lwt_preemptive
-[ppx]: https://ocsigen.org/lwt/dev/api/Ppx_lwt
-[react]: https://ocsigen.org/lwt/dev/api/Lwt_react
+[core]: https://ocsigen.org/lwt/latest/api/Lwt
+[cond]: https://ocsigen.org/lwt/latest/api/Lwt_condition
+[mutex]: https://ocsigen.org/lwt/latest/api/Lwt_mutex
+[mvar]: https://ocsigen.org/lwt/latest/api/Lwt_mvar
+[unix]: https://ocsigen.org/lwt/latest/api/Lwt_unix
+[io]: https://ocsigen.org/lwt/latest/api/Lwt_io
+[process]: https://ocsigen.org/lwt/latest/api/Lwt_process
+[preemptive]: https://ocsigen.org/lwt/latest/api/Lwt_preemptive
+[ppx]: https://ocsigen.org/lwt/latest/api/Ppx_lwt
+[react]: https://ocsigen.org/lwt/latest/api/Lwt_react
 
 
 <br/>

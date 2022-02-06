@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -21,19 +18,19 @@ module Make (Default : sig
 
 end) = struct
 
-let dump_node out print_stack_symbols node =
+let dump_node out stack_symbols node =
 
   (* Print the state number. *)
 
   fprintf out "State %d:\n"
     (Lr1.number node);
 
-  (* Print the known prefix of the stack. *)
+  (* Print the known suffix of the stack. *)
 
   fprintf out
     "## Known stack suffix:\n\
      ##%s\n"
-    (print_stack_symbols node);
+    (StackSymbols.print_symbols (stack_symbols node));
 
   (* Print the items. *)
 
@@ -45,7 +42,7 @@ let dump_node out print_stack_symbols node =
   fprintf out "## Transitions:\n";
   SymbolMap.iter (fun symbol node ->
     fprintf out "-- On %s shift to state %d\n"
-      (Symbol.print symbol) (Lr1.number node)
+      (Symbol.print false symbol) (Lr1.number node)
   ) (Lr1.transitions node);
 
   (* Print the reductions. *)
@@ -113,9 +110,10 @@ let dump_node out print_stack_symbols node =
   fprintf out "\n"
 
 let dump filename =
-  let module SS = StackSymbols.Run() in
+  (* Do not use StackSymbolsShort here! *)
+  let module SS = StackSymbols.Short() in
   let out = open_out filename in
-  Lr1.iter (dump_node out SS.print_stack_symbols);
+  Lr1.iter (dump_node out SS.stack_symbols);
   close_out out;
   Time.tick "Dumping the LR(1) automaton"
 

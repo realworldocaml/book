@@ -84,12 +84,16 @@ end
 
 let get_char (s:bigstring) off =
   Array1.get s off
+  [@@ocaml.inline]
 let set_char (s:bigstring) off v =
   Array1.set s off v
+  [@@ocaml.inline]
 let unsafe_get_char (s:bigstring) off =
   Array1.unsafe_get s off
+  [@@ocaml.inline]
 let unsafe_set_char (s:bigstring) off v =
   Array1.unsafe_set s off v
+  [@@ocaml.inline]
 
 #include "common.ml"
 
