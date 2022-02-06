@@ -48,7 +48,7 @@ depends: [
   "cstruct" {= "6.0.1"}
   "cstruct-sexp" {= "6.0.1"}
   "ctypes" {= "0.17.1+dune"}
-  "ctypes-foreign" {= "0.18.0"}
+  "ctypes-foreign" {= "0.17.1+dune"}
   "domain-name" {= "0.4.0"}
   "dune" {= "2.9.3"}
   "dune-build-info" {= "2.9.3"}
@@ -367,7 +367,7 @@ pin-depends: [
   ]
   [
     "ctypes.0.17.1+dune"
-    "git+https://github.com/avsm/ocaml-ctypes.git#f72d4cedc8530e8694046064ee1bb05d8dc05fb9"
+    "git+https://github.com/dune-universe/ocaml-ctypes.git#a186a0dd10b7a04ce8eec5c6b63b1d6865eaa21e"
   ]
   [
     "domain-name.0.4.0"
@@ -835,7 +835,7 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "git+https://github.com/avsm/ocaml-ctypes.git#f72d4cedc8530e8694046064ee1bb05d8dc05fb9"
+    "git+https://github.com/dune-universe/ocaml-ctypes.git#a186a0dd10b7a04ce8eec5c6b63b1d6865eaa21e"
     "ocaml-ctypes"
   ]
   [
