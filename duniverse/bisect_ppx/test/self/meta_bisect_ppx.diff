@@ -1,15 +1,13 @@
 diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_common.ml
 --- src/common/bisect_common.ml
 +++ _self/meta_bisect_ppx/src/common/bisect_common.ml
-@@ -175,7 +175,7 @@
+@@ -95,5 +95,5 @@
    Random.State.make_self_init () [@coverage off]
  
- let random_filename base_name =
+ let random_filename ~prefix =
 -  Printf.sprintf "%s%09d.coverage"
 +  Printf.sprintf "%s%09d.meta"
-     base_name (abs (Random.State.int prng 1000000000))
- 
- let write_points points =
+     prefix (abs (Random.State.int prng 1000000000))
 diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 --- src/common/dune
 +++ _self/meta_bisect_ppx/src/common/dune
@@ -44,42 +42,37 @@ diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
 diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
 --- src/ppx/instrument.ml
 +++ _self/meta_bisect_ppx/src/ppx/instrument.ml
-@@ -45,7 +45,7 @@
- module Cl = Ppxlib.Ast_helper.Cl
- module Cf = Ppxlib.Ast_helper.Cf
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- 
- 
-@@ -969,7 +969,7 @@
+@@ -986,7 +986,7 @@
            let ___bisect_visit___ =
-             let point_definitions = [%e points_data] in
-             let `Staged cb =
+             let points = [%e points_data] in
+             let `Visit visit =
 -              Bisect.Runtime.register_file
 +              Meta_bisect.Runtime.register_file
                  ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
-                 [%e file] ~point_count:[%e point_count] ~point_definitions
+                 ~filename:[%e filename] ~points
              in
-diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
---- src/ppx/register.ml
-+++ _self/meta_bisect_ppx/src/ppx/register.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- let conditional = ref false
- 
+diff -ru src/report/cobertura.ml _self/meta_bisect_ppx/src/report/cobertura.ml
+--- src/report/cobertura.ml
++++ _self/meta_bisect_ppx/src/report/cobertura.ml
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
+diff -ru src/report/coveralls.ml _self/meta_bisect_ppx/src/report/coveralls.ml
+--- src/report/coveralls.ml
++++ _self/meta_bisect_ppx/src/report/coveralls.ml
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
 diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/meta_bisect_ppx/src/report/dune
 @@ -1,8 +1,8 @@
  (executable
-  (name report)
+  (name main)
 - (public_name bisect-ppx-report)
 - (package bisect_ppx)
 - (libraries bisect_ppx.common cmdliner unix))
@@ -89,42 +82,38 @@ diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
  
  (rule
   (targets assets.ml)
-diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
---- src/report/report.ml
-+++ _self/meta_bisect_ppx/src/report/report.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- module Arguments :
- sig
-diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
---- src/report/report_coveralls.ml
-+++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- let file_json verbose indent in_file resolver visited points =
-   verbose (Printf.sprintf "Processing file '%s'..." in_file);
-diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.ml
---- src/report/report_html.ml
-+++ _self/meta_bisect_ppx/src/report/report_html.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- type theme = [
-   | `Light
+diff -ru src/report/html.ml _self/meta_bisect_ppx/src/report/html.ml
+--- src/report/html.ml
++++ _self/meta_bisect_ppx/src/report/html.ml
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
+diff -ru src/report/input.ml _self/meta_bisect_ppx/src/report/input.ml
+--- src/report/input.ml
++++ _self/meta_bisect_ppx/src/report/input.ml
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
+diff -ru src/report/input.mli _self/meta_bisect_ppx/src/report/input.mli
+--- src/report/input.mli
++++ _self/meta_bisect_ppx/src/report/input.mli
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
+diff -ru src/report/text.ml _self/meta_bisect_ppx/src/report/text.ml
+--- src/report/text.ml
++++ _self/meta_bisect_ppx/src/report/text.ml
+@@ -1,3 +1,4 @@
++module Bisect_common = Meta_bisect_common
+ (* This file is part of Bisect_ppx, released under the MIT license. See
+    LICENSE.md for details, or visit
+    https://github.com/aantron/bisect_ppx/blob/master/LICENSE.md. *)
 diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
 +++ _self/meta_bisect_ppx/src/runtime/native/dune
@@ -163,8 +152,8 @@ diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/
 +  scan (Sys.getcwd ())
 +
  let file_channel () =
--  let base_name = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
-+  let base_name = base_name () in
+-  let prefix = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
++  let prefix = base_name () in
    let rec create_file () =
-     let filename = Common.random_filename base_name in
+     let filename = Common.random_filename ~prefix in
      try

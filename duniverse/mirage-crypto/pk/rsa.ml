@@ -1,6 +1,5 @@
 open Mirage_crypto.Uncommon
-open Sexplib.Conv
-open Rresult
+open Sexplib0.Sexp_conv
 
 open Common
 
@@ -34,7 +33,16 @@ let digest_or ~hash =
 
 exception Insufficient_key
 
-type pub = { e : Z_sexp.t ; n : Z_sexp.t } [@@deriving sexp]
+type pub = { e : Z.t ; n : Z.t }
+
+let sexp_of_pub { e ; n } =
+  sexp_of_list (sexp_of_pair sexp_of_string sexp_of_z)
+    [ "e", e ; "n" , n ]
+
+let pub_of_sexp s =
+  match list_of_sexp (pair_of_sexp string_of_sexp z_of_sexp) s with
+  | [ "e", e ; "n", n ] -> { e ; n }
+  | _ -> raise (Of_sexp_error (Failure "expected e and n", s))
 
 (* due to PKCS1 *)
 let minimum_octets = 12
@@ -48,9 +56,11 @@ let pub ~e ~n =
      but we validate to ensure our usage of powm_sec does not lead to
      exceptions, and we avoid tiny public keys where PKCS1 / PSS would lead to
      infinite loops or not work due to insufficient space for the header. *)
-  guard Z.(n > zero && is_odd n && numbits n >= minimum_bits)
-    (`Msg "invalid modulus") >>= fun () ->
-  guard Z.(one < e && e < n) (`Msg "invalid exponent") >>= fun () ->
+  let* () =
+    guard Z.(n > zero && is_odd n && numbits n >= minimum_bits)
+      (`Msg "invalid modulus")
+  in
+  let* () = guard Z.(one < e && e < n) (`Msg "invalid exponent") in
   (* NOTE that we could check for e being odd, or a prime, or 2^16+1, but
           these are not requirements, neither for RSA nor for powm_sec *)
   Ok { e ; n }
@@ -62,37 +72,52 @@ let pub_of_sexp s =
   | Error (`Msg m) -> failwith "bad public key: %s" m
 
 type priv = {
-  e : Z_sexp.t ; d : Z_sexp.t ; n  : Z_sexp.t ;
-  p : Z_sexp.t ; q : Z_sexp.t ; dp : Z_sexp.t ; dq : Z_sexp.t ; q' : Z_sexp.t
-} [@@deriving sexp]
+  e : Z.t ; d : Z.t ; n  : Z.t ;
+  p : Z.t ; q : Z.t ; dp : Z.t ; dq : Z.t ; q' : Z.t
+}
+
+let sexp_of_priv { e ; d ; n ; p ; q ; dp ; dq ; q' } =
+  sexp_of_list (sexp_of_pair sexp_of_string sexp_of_z)
+    [ "e", e; "d", d; "n", n; "p", p; "q", q; "dp", dp; "dq", dq; "q'", q' ]
+
+let priv_of_sexp s =
+  match list_of_sexp (pair_of_sexp string_of_sexp z_of_sexp) s with
+  | [ "e", e; "d", d; "n", n; "p", p; "q", q; "dp", dp; "dq", dq; "q'", q' ] ->
+    { e ; d ; n ; p ; q ; dp ; dq ; q' }
+  | _ ->
+    raise (Of_sexp_error (Failure "expected e, d, n, p, q, dp, dq, and q'", s))
 
 let valid_prime name p =
   guard Z.(p > zero && is_odd p && Z_extra.pseudoprime p)
-    (R.msgf "invalid prime %s" name)
+    (`Msg ("invalid prime " ^ name))
 
 let rprime a b = Z.(gcd a b = one)
 
 let valid_e ~e ~p ~q =
-  guard (rprime e (Z.pred p) && rprime e (Z.pred q))
-    (`Msg "e is not coprime of p and q") >>= fun () ->
+  let* () =
+    guard (rprime e (Z.pred p) && rprime e (Z.pred q))
+      (`Msg "e is not coprime of p and q")
+  in
   guard (Z_extra.pseudoprime e) (`Msg "exponent e is not a pseudoprime")
 
 let priv ~e ~d ~n ~p ~q ~dp ~dq ~q' =
-  pub ~e ~n >>= fun _pub ->
-  valid_prime "p" p >>= fun () ->
-  valid_prime "q" q >>= fun () ->
-  guard (p <> q) (`Msg "p and q are the same number") >>= fun () ->
-  valid_e ~e ~p ~q >>= fun () ->
+  let* _ = pub ~e ~n in
+  let* () = valid_prime "p" p in
+  let* () = valid_prime "q" q in
+  let* () = guard (p <> q) (`Msg "p and q are the same number") in
+  let* () = valid_e ~e ~p ~q in
   (* p and q are prime, and not equal -> multiplicative inverse exists *)
-  guard Z.(q' = invert q p) (`Msg "q' <> q ^ -1 mod p") >>= fun () ->
-  guard Z.(n = p * q) (`Msg "modulus is not the product of p and q") >>= fun () ->
-  guard Z.(one < d && d < n) (`Msg "invalid private exponent") >>= fun () ->
-  guard Z.(dp = d mod (pred p)) (`Msg "dp <> d mod (p - 1)") >>= fun () ->
-  guard Z.(dq = d mod (pred q)) (`Msg "dq <> d mod (q - 1)") >>= fun () ->
+  let* () = guard Z.(q' = invert q p) (`Msg "q' <> q ^ -1 mod p") in
+  let* () = guard Z.(n = p * q) (`Msg "modulus is not the product of p and q") in
+  let* () = guard Z.(one < d && d < n) (`Msg "invalid private exponent") in
+  let* () = guard Z.(dp = d mod (pred p)) (`Msg "dp <> d mod (p - 1)") in
+  let* () = guard Z.(dq = d mod (pred q)) (`Msg "dq <> d mod (q - 1)") in
   (* e has been checked (valid_e) to be coprime to p-1 and q-1 ->
      muliplicative inverse exists *)
-  guard Z.(one = d * e mod (lcm (pred p) (pred q)))
-    (`Msg "1 <> d * e mod lcm (p - 1) (q - 1)") >>= fun () ->
+  let* () =
+    guard Z.(one = d * e mod (lcm (pred p) (pred q)))
+      (`Msg "1 <> d * e mod lcm (p - 1) (q - 1)")
+  in
   Ok { e ; d ; n ; p ; q ; dp ; dq ; q' }
 
 let priv_of_sexp s =
@@ -102,12 +127,12 @@ let priv_of_sexp s =
   | Ok p -> p
 
 let priv_of_primes ~e ~p ~q =
-  valid_prime "p" p >>= fun () ->
-  valid_prime "q" q >>= fun () ->
-  guard (p <> q) (`Msg "p and q are the same prime") >>= fun () ->
-  valid_e ~e ~p ~q >>= fun () ->
-  let n  = Z.(p * q) in
-  pub ~e ~n >>= fun _pub ->
+  let* () = valid_prime "p" p in
+  let* () = valid_prime "q" q in
+  let* () = guard (p <> q) (`Msg "p and q are the same prime") in
+  let* () = valid_e ~e ~p ~q in
+  let n = Z.(p * q) in
+  let* _ = pub ~e ~n in
   (* valid_e checks e coprime to p-1 and q-1, a multiplicative inverse exists *)
   let d = Z.(invert e (lcm (pred p) (pred q))) in
   let dp = Z.(d mod (pred p))
@@ -121,8 +146,8 @@ let priv_of_primes ~e ~p ~q =
 
 (* Handbook of applied cryptography, 8.2.2 (i). *)
 let priv_of_exp ?g ?(attempts=100) ~e ~d ~n () =
-  pub ~e ~n >>= fun _ ->
-  guard Z.(one < d && d < n) (`Msg "invalid private exponent") >>= fun () ->
+  let* _ = pub ~e ~n in
+  let* () = guard Z.(one < d && d < n) (`Msg "invalid private exponent") in
   let rec doit ~attempts =
     let factor s t =
       let rec go ax = function
@@ -137,9 +162,10 @@ let priv_of_exp ?g ?(attempts=100) ~e ~d ~n () =
       Option.map Z.(gcd n &. pred) (go Z.(powm (Z_extra.gen ?g n) t n) s)
     in
     if attempts > 0 then
-      Z_extra.strip_factor ~f:two Z.(e * d |> pred) >>= function
-      | (0, _) -> R.error_msgf "invalid factor 0"
-      | (s, t) -> match factor s t with
+      let* s, t = Z_extra.strip_factor ~f:two Z.(e * d |> pred) in
+      match s with
+      | 0 -> Error (`Msg "invalid factor 0")
+      | _ -> match factor s t with
         | None -> doit ~attempts:(attempts - 1)
         | Some p ->
           let q = Z.(div n p) in
@@ -235,7 +261,7 @@ module PKCS1 = struct
     go Mirage_crypto_rng.(generate ?g k) 0 0
 
   let pad ~mark ~padding k msg =
-    let pad = padding (k - len msg - 3 |> imax min_pad) in
+    let pad = padding (k - length msg - 3 |> imax min_pad) in
     cat [ bx00 ; b mark ; pad ; bx00 ; msg ]
 
   let unpad ~mark ~is_pad cs =
@@ -246,7 +272,7 @@ module PKCS1 = struct
     and c3 = get_uint8 cs i = 0x00
     and c4 = min_pad <= i - 2 in
     if c1 && c2 && c3 && c4 then
-      Some (sub cs (i + 1) (len cs - i - 1))
+      Some (sub cs (i + 1) (length cs - i - 1))
     else None
 
   let pad_01    =
@@ -264,10 +290,10 @@ module PKCS1 = struct
   let padded pad transform keybits msg =
     let n = keybits // 8 in
     let p = pad n msg in
-    if len p = n then transform p else raise Insufficient_key
+    if length p = n then transform p else raise Insufficient_key
 
   let unpadded unpad transform keybits msg =
-    if len msg = keybits // 8 then
+    if length msg = keybits // 8 then
       try unpad (transform msg) with Insufficient_key -> None
     else None
 
@@ -311,7 +337,7 @@ module PKCS1 = struct
       ~default:false
 
   let min_key hash =
-    (len (asn_of_hash hash) + Hash.digest_size hash + min_pad + 2) * 8 + 1
+    (length (asn_of_hash hash) + Hash.digest_size hash + min_pad + 2) * 8 + 1
 end
 
 module MGF1 (H : Hash.S) = struct
@@ -329,7 +355,7 @@ module MGF1 (H : Hash.S) = struct
              go (h :: acc) Int32.(succ c) (pred n) in
     go [] 0l (len // H.digest_size)
 
-  let mask ~seed cs = Cs.xor (mgf ~seed (Cstruct.len cs)) cs
+  let mask ~seed cs = Cs.xor (mgf ~seed (Cstruct.length cs)) cs
 end
 
 module OAEP (H : Hash.S) = struct
@@ -344,7 +370,7 @@ module OAEP (H : Hash.S) = struct
 
   let eme_oaep_encode ?g ?(label = Cstruct.empty) k msg =
     let seed  = Mirage_crypto_rng.generate ?g hlen
-    and pad   = Cstruct.create (max_msg_bytes k - len msg) in
+    and pad   = Cstruct.create (max_msg_bytes k - length msg) in
     let db    = cat [ H.digest label ; pad ; bx01 ; msg ] in
     let mdb   = MGF.mask ~seed db in
     let mseed = MGF.mask ~seed:mdb seed in
@@ -361,12 +387,12 @@ module OAEP (H : Hash.S) = struct
 
   let encrypt ?g ?label ~key msg =
     let k = pub_bits key // 8 in
-    if len msg > max_msg_bytes k then raise Insufficient_key
+    if length msg > max_msg_bytes k then raise Insufficient_key
     else encrypt ~key @@ eme_oaep_encode ?g ?label k msg
 
   let decrypt ?(crt_hardening = false) ?mask ?label ~key em =
     let k = priv_bits key // 8 in
-    if len em <> k || max_msg_bytes k < 0 then None else
+    if length em <> k || max_msg_bytes k < 0 then None else
       try eme_oaep_decode ?label @@ decrypt ~crt_hardening ?mask ~key em
       with Insufficient_key -> None
 
@@ -407,7 +433,7 @@ module PSS (H: Hash.S) = struct
     let (mdb, h, bxx) = Cs.split3 em (em.len - hlen - 1) hlen in
     let db   = MGF.mask ~seed:h mdb in
     set_uint8 db 0 (get_uint8 db 0 land b0mask emlen) ;
-    let salt = shift db (len db - slen) in
+    let salt = shift db (length db - slen) in
     let h'   = digest ~salt msg
     and i    = ct_find_uint8 ~default:0 ~f:((<>) 0x00) db in
     let c1 = lnot (b0mask emlen) land get_uint8 mdb 0 = 0x00
@@ -429,7 +455,7 @@ module PSS (H: Hash.S) = struct
 
   let verify ?(slen = hlen) ~key ~signature msg =
     let b = pub_bits key
-    and s = len signature in
+    and s = length signature in
     s = b // 8 && sufficient_key ~slen b && try
       let em = encrypt ~key signature in
       emsa_pss_verify (imax 0 slen) (b - 1) (shift em (s - (b - 1) // 8)) msg

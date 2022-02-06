@@ -1,0 +1,2 @@
+(library (name core_unix_uuid_unix) (public_name core_unix.uuid_unix)
+  (libraries core.uuid) (preprocess no_preprocessing))

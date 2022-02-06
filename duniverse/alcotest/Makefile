@@ -4,7 +4,10 @@ all:
 	dune build
 
 test:
-	dune runtest
+	dune build @runtest
+
+test-js:
+	dune build @runtest-js
 
 clean:
 	dune clean

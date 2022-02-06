@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -102,6 +99,10 @@ module Nonterminal = struct
   type t = int
 
   let n2i i = i
+  let i2n i = i
+
+  let equal (nt1 : t) (nt2 : t) =
+    nt1 = nt2
 
   let compare = (-)
 
@@ -182,6 +183,15 @@ module Nonterminal = struct
         (* Every start symbol has a type. *)
         assert false
 
+  let symbols_without_ocamltype () =
+    foldx (fun nt accu ->
+      match ocamltype nt with
+      | Some _ ->
+          accu
+      | None ->
+          nt :: accu
+    ) []
+
   let tabulate f =
     Array.get (Array.init n f)
 
@@ -219,6 +229,20 @@ module Terminal = struct
 
   let equal (tok1 : t) (tok2 : t) =
     tok1 = tok2
+
+  (* 2021/11/23 If a token is named [Error], warn. This is undesirable,
+     as it creates a collision in the public interface of the generated
+     parser between the token [Error] and the exception [Error]. OCaml
+     itself may warn about this collision. *)
+  let () =
+    if verbose then try
+      let properties = StringMap.find "Error" grammar.tokens in
+      if properties.tk_is_declared then
+        let pos = properties.tk_position in
+        Error.grammar_warning [pos]
+          "please do not name a terminal symbol Error."
+    with Not_found ->
+      ()
 
   (* Determine how many terminals we have and build mappings
      both ways between names and indices. A new terminal "#"
@@ -358,6 +382,15 @@ module Terminal = struct
       let lexbuf = Lexing.from_string qid in
       Misc.with_buffer 8 (fun b -> Lexer.decode_string b lexbuf)
   )
+
+  let print_concrete t =
+  match unquoted_alias t with
+  | Some alias ->
+      alias
+  | None ->
+      (* An alias is missing. Use the abstract name of the terminal
+         instead. This is a best effort. *)
+      print t
 
   (* If a token named [EOF] exists, then it is assumed to represent
      ocamllex's [eof] pattern. *)
@@ -530,6 +563,10 @@ module Symbol = struct
     | [], _ :: _ ->
         false
 
+  let iter f =
+    Terminal.iter (fun t -> f (T t));
+    Nonterminal.iter (fun nt -> f (N nt))
+
   let non_error sym =
     match sym with
     | T tok ->
@@ -537,9 +574,9 @@ module Symbol = struct
     | N _ ->
         true
 
-  let print = function
+  let print normalize = function
     | N nt ->
-        Nonterminal.print false nt
+        Nonterminal.print normalize nt
     | T tok ->
         Terminal.print tok
 
@@ -557,7 +594,7 @@ module Symbol = struct
   let buffer =
     Buffer.create 1024
 
-  let printaod offset dot symbols =
+  let printaod offset dot normalize symbols =
     let length = Array.length symbols in
     let first = ref true in
     let separate () =
@@ -571,21 +608,22 @@ module Symbol = struct
       end;
       if i < length then begin
         separate();
-        Printf.bprintf buffer "%s" (print symbols.(i))
+        Printf.bprintf buffer "%s" (print normalize symbols.(i))
       end
     done;
     let s = Buffer.contents buffer in
     Buffer.clear buffer;
     s
 
-  let printao offset symbols =
-    printaod offset (-1) symbols
+  let printao offset normalize symbols =
+    printaod offset (-1) normalize symbols
 
-  let printa symbols =
-    printao 0 symbols
+  let printa normalize symbols =
+    printao 0 normalize symbols
 
   let printl symbols =
-    printa (Array.of_list symbols)
+    let normalize = false in
+    printa normalize (Array.of_list symbols)
 
   let lookup name =
     try
@@ -763,7 +801,7 @@ module Production = struct
       production_level.(k) <- branch.branch_production_level;
       prec_decl.(k) <- branch.branch_prec_annotation;
       positions.(k) <- [ branch.branch_position ];
-      if not (Misc.array_for_all Symbol.non_error rhs) then
+      if not (MArray.for_all Symbol.non_error rhs) then
         grammar_uses_error_token := true;
       k+1
     ) k branches in
@@ -846,7 +884,7 @@ module Production = struct
       assert false (* [nt] is not a start symbol *)
 
   let error_free prod =
-    Misc.array_for_all Symbol.non_error (rhs prod)
+    MArray.for_all Symbol.non_error (rhs prod)
 
   (* Iteration. *)
 
@@ -883,9 +921,12 @@ module Production = struct
     let nt, rhs = table.(prod) in
     if Array.length rhs = 0 then
       (* Avoid producing a trailing space. *)
-      Printf.sprintf "%s ->" (Nonterminal.print false nt)
+      Printf.sprintf "%s ->"
+        (Nonterminal.print false nt)
     else
-      Printf.sprintf "%s -> %s" (Nonterminal.print false nt) (Symbol.printao 0 rhs)
+      Printf.sprintf "%s -> %s"
+        (Nonterminal.print false nt)
+        (Symbol.printao 0 false rhs)
 
   let describe gerund prod =
     match classify prod with
@@ -1025,6 +1066,10 @@ module GenericAnalysis
 
     (* An analysis is specified by the following functions. *)
 
+    (* [shortcut] can be used to map a nonterminal symbol to a property.
+       In that case, the definition of this nonterminal symbol is ignored. *)
+    val shortcut: Nonterminal.t -> property option
+
     (* [terminal] maps a terminal symbol to a property. *)
     val terminal: Terminal.t -> property
 
@@ -1047,6 +1092,10 @@ module GenericAnalysis
     (* [epsilon] abstracts the empty sequence. It should be a neutral element
        for [conjunction]. *)
     val epsilon: property
+
+    (* The Boolean flag [ignore_error_productions] indicates whether the
+       productions that mention the [error] token should be ignored. *)
+    val ignore_error_productions: bool
 
   end)
 : sig
@@ -1086,6 +1135,7 @@ end = struct
   (* Analysis of (a suffix of) a production [prod], starting at index [i]. *)
 
   let production prod i get : property =
+    assert (not S.ignore_error_productions || Production.error_free prod);
     let rhs = Production.rhs prod in
     let n = Array.length rhs in
     (* Conjunction over all symbols in the right-hand side. This can be viewed
@@ -1108,12 +1158,19 @@ end = struct
      as a disjunction of conjunctions of symbols. *)
 
   let nonterminal nt get : property =
-    (* Disjunction over all productions for this nonterminal symbol. *)
-    Production.foldnt_lazy nt (fun prod rest ->
-      S.disjunction
-        (production prod 0 get)
-        rest
-    ) P.bottom
+    match S.shortcut nt with
+    | Some p ->
+        p
+    | None ->
+        (* Disjunction over all productions for this nonterminal symbol. *)
+        Production.foldnt_lazy nt (fun prod rest ->
+          if S.ignore_error_productions && not (Production.error_free prod) then
+            rest()
+          else
+            S.disjunction
+              (production prod 0 get)
+              rest
+        ) P.bottom
 
   (* The least fixed point is taken as follows. Note that it is computed
      on demand, as [lfp] is called by the user. *)
@@ -1137,16 +1194,18 @@ end = struct
 end
 
 (* ------------------------------------------------------------------------ *)
-(* Compute which nonterminals are nonempty, that is, recognize a
-   nonempty language. Also, compute which nonterminals are
-   nullable. The two computations are almost identical. The only
-   difference is in the base case: a single terminal symbol is not
-   nullable, but is nonempty. *)
+
+(* Compute which nonterminal symbols are nonempty, that is, which symbols
+   generate a nonempty language. Also, compute which nonterminal symbols are
+   nullable. The two computations are almost identical. The only difference is
+   in the base case: a single terminal symbol is not nullable, but is
+   nonempty. *)
 
 module NONEMPTY =
   GenericAnalysis
     (Fix.Prop.Boolean)
     (struct
+      let shortcut _nt = None
       (* A terminal symbol is nonempty. *)
       let terminal _ = true
       (* An alternative is nonempty if at least one branch is nonempty. *)
@@ -1156,12 +1215,14 @@ module NONEMPTY =
       (* The sequence epsilon is nonempty. It generates the singleton
          language {epsilon}. *)
       let epsilon = true
+      let ignore_error_productions = false
      end)
 
 module NULLABLE =
   GenericAnalysis
     (Fix.Prop.Boolean)
     (struct
+      let shortcut _nt = None
       (* A terminal symbol is not nullable. *)
       let terminal _ = false
       (* An alternative is nullable if at least one branch is nullable. *)
@@ -1170,6 +1231,7 @@ module NULLABLE =
       let conjunction _ p q = p && q()
       (* The sequence epsilon is nullable. *)
       let epsilon = true
+      let ignore_error_productions = false
      end)
 
 (* ------------------------------------------------------------------------ *)
@@ -1179,6 +1241,7 @@ module FIRST =
   GenericAnalysis
     (TerminalSet)
     (struct
+      let shortcut _nt = None
       (* A terminal symbol has a singleton FIRST set. *)
       let terminal = TerminalSet.singleton
       (* The FIRST set of an alternative is the union of the FIRST sets. *)
@@ -1193,13 +1256,17 @@ module FIRST =
           p
       (* The FIRST set of the empty sequence is empty. *)
       let epsilon = TerminalSet.empty
+      let ignore_error_productions = false
      end)
 
 (* ------------------------------------------------------------------------ *)
 (* For every nonterminal symbol [nt], compute a word of minimal length
-   generated by [nt]. This analysis subsumes [NONEMPTY] and [NULLABLE].
-   Indeed, [nt] produces a nonempty language if only if the minimal length is
-   finite; [nt] is nullable if only if the minimal length is zero. *)
+   generated by [nt]. *)
+
+(* In principle, this analysis subsumes [NONEMPTY] and [NULLABLE]. Indeed,
+   [nt] produces a nonempty language if only if the minimal length is finite;
+   [nt] is nullable if only if the minimal length is zero. Be careful, though:
+   [MINIMAL] analyzes a grammar where error productions are ignored. *)
 
 (* This analysis is in principle more costly than [NONEMPTY] and [NULLABLE],
    so it is performed only on demand. In practice, it seems to be very cheap:
@@ -1213,6 +1280,7 @@ module MINIMAL =
       type property = Terminal.t t
      end)
     (struct
+      let shortcut _nt = None
       open CompletedNatWitness
       (* A terminal symbol has length 1. *)
       let terminal = singleton
@@ -1222,6 +1290,137 @@ module MINIMAL =
       let conjunction _ = add_lazy
       (* The epsilon sequence has length 0. *)
       let epsilon = epsilon
+      (* The productions that contain [error] are ignored. *)
+      let ignore_error_productions = true
+     end)
+
+(* ------------------------------------------------------------------------ *)
+
+(* For every nonterminal symbol [nt], we wish to compute the maximum length of
+   a word generated by [nt]. This length can be either finite or [infty]. *)
+
+(* We assume that every symbol generates a nonempty language. This removes the
+   need to watch out for productions whose right hand side is empty (which we
+   would have to ignore). A similar assumption is made in the computation of
+   FIRST sets above. *)
+
+(* We need to determine which symbols generate a nonempty word, that is, a
+   word of length at least 1. We might tempted to deduce this information from
+   the FIRST sets (indeed, a symbol generates a nonempty word if and only if
+   its FIRST set is nonempty), but this does not work because (here) we want
+   to ignore error productions. *)
+
+module GENERATES_NONEMPTY_WORD =
+  GenericAnalysis
+    (Fix.Prop.Boolean)
+    (struct
+      let shortcut _nt = None
+      (* A terminal symbol generates a nonempty word. *)
+      let terminal _tok = true
+      (* An alternative generates a nonempty word if at least one branch
+         generates a nonempty word. *)
+      let disjunction p q = p || q()
+      (* A sequence generates a nonempty word if at least one side generates
+         a nonempty word. (We assume both languages are nonempty.) *)
+      let conjunction _ p q = p || q()
+      (* [epsilon] fails to generate a nonempty word. *)
+      let epsilon = false
+      (* The productions that contain [error] are ignored. *)
+      let ignore_error_productions = true
+     end)
+
+let generates_nonempty_word symbol : bool =
+  GENERATES_NONEMPTY_WORD.symbol symbol
+
+(* Then, we construct the reference graph of the grammar. The vertices of
+   this graph are the nonterminal symbols, and, if there is a production
+   [A -> alpha B gamma], then there is an edge from A to B. With each such
+   edge, we associate a Boolean label, which is [true] if [alpha . gamma]
+   generates a nonempty word. *)
+
+module G = struct
+  type node = Nonterminal.t
+  let n = Nonterminal.n
+  let index nt = nt
+  let iter = Nonterminal.iter
+  let labeled_successors yield nt =
+    Production.iternt nt (fun prod ->
+      let rhs = Production.rhs prod in
+      rhs |> Array.iteri (fun i symbol ->
+        match symbol with
+        | Symbol.T _   -> ()
+        | Symbol.N nt' ->
+            (* There is an edge from [nt] to [nt'], whose Boolean label [gnw]
+               is obtained by computing whether the right-hand side, deprived
+               of [nt'], can generate a nonempty word. *)
+            let gnw =
+              MArray.existsi (fun j symbol ->
+                i <> j && generates_nonempty_word symbol
+              ) rhs
+            in
+            yield gnw nt'
+      )
+    )
+  let successors yield nt =
+    labeled_successors (fun _gnw nt' -> yield nt') nt
+end
+
+(* We now compute the strongly connected components of the reference graph
+   described above. If a component contains an edge labeled [true], then every
+   nonterminal symbol in this component can generate words of unbounded
+   length. Mark these symbols in an array [unbounded]. (This computation is
+   performed only when needed.) *)
+
+let unbounded : bool array Lazy.t =
+  lazy begin
+    let unbounded = Array.make Nonterminal.n false in
+    let module T = Tarjan.Run(G) in
+    (* For each edge of [nt] to [nt'] labeled [gnw], *)
+    G.iter begin fun nt ->
+      nt |> G.labeled_successors begin fun gnw nt' ->
+        (* If [gnw] is set and if [nt] and [nt'] lie in the same component, *)
+        if gnw && T.representative nt = T.representative nt' then begin
+          (* Then mark every symbol in this component as unbounded. *)
+          T.scc (T.representative nt) |> List.iter begin fun nt ->
+            unbounded.(nt) <- true
+          end
+        end
+      end
+    end;
+    unbounded
+  end
+
+let unbounded nt : bool =
+  (Lazy.force unbounded).(nt)
+
+(* We can finally perform a least fixed point computation, in the lattice
+   [NatMaxInfinity], to find out what is the maximum length of a word
+   generated by each nonterminal symbol. Such a computation normally would not
+   terminate, as the lattice has unbounded height: a cycle of strictly
+   positive weight in the grammar will cause an endless climb. However, we
+   have just identified the symbols that participate in these cycles: they are
+   the symbols [nt] such that [unbounded nt] is [true]. We use the [shortcut]
+   function to set these symbols directly to [infinity]. The cycles that may
+   remain in the grammar must have zero weight and cannot cause divergence.
+   The fixed point computation must therefore terminate and yield the desired
+   information. *)
+
+module MAXIMAL =
+  GenericAnalysis
+    (NatInfinityMax)
+    (struct
+      open NatInfinityMax
+      let shortcut nt = if unbounded nt then Some infinity else None
+      (* A terminal symbol has length 1. *)
+      let terminal _tok = finite 1
+      (* The length of an alternative is the maximum length of any branch. *)
+      let disjunction = max_lazy
+      (* The length of a sequence is the sum of the lengths of the members. *)
+      let conjunction _ = add_lazy
+      (* The epsilon sequence has length 0. *)
+      let epsilon = bottom
+      (* The productions that contain [error] are ignored. *)
+      let ignore_error_productions = true
      end)
 
 (* ------------------------------------------------------------------------ *)
@@ -1274,7 +1473,12 @@ let () =
         Printf.fprintf f "minimal(%s) = %s\n"
           (Nonterminal.print false nt)
           (CompletedNatWitness.print Terminal.print (MINIMAL.nonterminal nt))
-      done
+      done;
+      for nt = Nonterminal.start to Nonterminal.n - 1 do
+        Printf.fprintf f "maximal(%s) = %s\n"
+          (Nonterminal.print false nt)
+          (NatInfinityMax.print (MAXIMAL.nonterminal nt))
+      done;
   )
 
 let () =
@@ -1582,6 +1786,13 @@ module Analysis = struct
     assert (0 <= i && i <= Production.length prod);
     CompletedNatWitness.to_int (MINIMAL.production prod i)
 
+  let maximal nt =
+    NatInfinityMax.to_int (MAXIMAL.nonterminal nt)
+
+  let maximal_prod prod i =
+    assert (0 <= i && i <= Production.length prod);
+    NatInfinityMax.to_int (MAXIMAL.production prod i)
+
 end
 
 (* ------------------------------------------------------------------------ *)
@@ -1760,6 +1971,45 @@ module OnErrorReduce = struct
     | Ic ->
         (* We could issue a warning or an information message in these cases. *)
         false
+
+end
+
+(* ------------------------------------------------------------------------ *)
+(* Facilities for printing sentences. *)
+
+module Sentence = struct
+
+  type sentence =
+    Nonterminal.t option * Terminal.t list
+
+  open Printf
+
+  let print_abstract (nto, terminals) : string =
+    Misc.with_buffer 128 (fun b ->
+      Option.iter (fun nt ->
+        bprintf b "%s: " (Nonterminal.print false nt)
+      ) nto;
+      let separator = Misc.once "" " " in
+      List.iter (fun t ->
+        bprintf b "%s%s" (separator()) (Terminal.print t)
+      ) terminals;
+      bprintf b "\n";
+    )
+
+  let print_concrete (_nto, terminals) : string =
+    Misc.with_buffer 128 (fun b ->
+      let separator = Misc.once "" " " in
+      List.iter (fun t ->
+        bprintf b "%s%s" (separator()) (Terminal.print_concrete t)
+      ) terminals
+    )
+
+  let print style sentence =
+    match style with
+    | `Abstract ->
+        print_abstract sentence
+    | `Concrete ->
+        print_concrete sentence
 
 end
 

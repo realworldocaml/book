@@ -2,6 +2,10 @@
 build :
 	dune build -p bisect_ppx
 
+.PHONY : watch
+watch :
+	dune build -p bisect_ppx -w
+
 TEST := @runtest
 
 .PHONY : test
@@ -18,7 +22,7 @@ SELF_COVERAGE := _self
 clean :
 	dune clean
 	make clean-usage
-	make -C test/bucklescript clean
+	make -C test/js clean
 	rm -rf $(SELF_COVERAGE)
 
 INSTALLED_ENVIRONMENT := \
@@ -99,8 +103,8 @@ self-coverage-diff :
 
 EXPECTED_FILES := \
   --expect bisect_ppx/src/ \
-  --do-not-expect bisect_ppx/src/ppx/bucklescript/ \
-  --do-not-expect bisect_ppx/src/runtime/bucklescript/
+  --do-not-expect bisect_ppx/src/ppx/js/ \
+  --do-not-expect bisect_ppx/src/runtime/js/
 
 .PHONY : self-coverage-test
 self-coverage-test :
@@ -111,8 +115,8 @@ self-coverage-test :
 	rm -rf _coverage
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
-	    html -o ../_coverage bisect*.meta $(EXPECTED_FILES)
+	    html -o ../_coverage bisect*.meta $(EXPECTED_FILES) --verbose
 	cd $(SELF_COVERAGE) && \
 	  _build/install/default/bin/meta-bisect-ppx-report \
-	    summary bisect*.meta
+	    summary bisect*.meta --verbose
 	@echo See _coverage/index.html

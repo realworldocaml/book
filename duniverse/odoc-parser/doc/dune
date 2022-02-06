@@ -6,25 +6,38 @@
 
 (rule
  (target odoc_parser__Loc.odoc)
- (deps (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Loc.cmti) odoc_parser__.odoc)
+ (deps
+  (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Loc.cmti)
+  odoc_parser__.odoc)
  (action
   (run odoc compile -o %{target} -I . %{cmti})))
 
 (rule
  (target odoc_parser__Warning.odoc)
- (deps (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Warning.cmt) odoc_parser__.odoc odoc_parser__Loc.odoc)
+ (deps
+  (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Warning.cmt)
+  odoc_parser__.odoc
+  odoc_parser__Loc.odoc)
  (action
   (run odoc compile -o %{target} -I . %{cmti})))
 
 (rule
  (target odoc_parser__Ast.odoc)
- (deps (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Ast.cmt) odoc_parser__.odoc odoc_parser__Loc.odoc)
+ (deps
+  (:cmti ../src/.odoc_parser.objs/byte/odoc_parser__Ast.cmt)
+  odoc_parser__.odoc
+  odoc_parser__Loc.odoc)
  (action
   (run odoc compile -o %{target} -I . %{cmti})))
 
 (rule
  (target odoc_parser.odoc)
- (deps (:cmti ../src/.odoc_parser.objs/byte/odoc_parser.cmti) odoc_parser__.odoc odoc_parser__Loc.odoc odoc_parser__Warning.odoc odoc_parser__Ast.odoc)
+ (deps
+  (:cmti ../src/.odoc_parser.objs/byte/odoc_parser.cmti)
+  odoc_parser__.odoc
+  odoc_parser__Loc.odoc
+  odoc_parser__Warning.odoc
+  odoc_parser__Ast.odoc)
  (action
   (run odoc compile -o %{target} -I . %{cmti})))
 
@@ -43,21 +56,25 @@
 (rule
  (alias docgen)
  (target odoc_parser.odocl)
- (deps (:odoc odoc_parser.odoc))
+ (deps
+  (:odoc odoc_parser.odoc))
  (action
   (run odoc link -o %{target} -I . %{odoc})))
 
 (rule
  (alias docgen)
  (target page-index.odocl)
- (deps odoc_parser.odocl page-contributing.odoc (:odoc page-index.odoc))
+ (deps
+  odoc_parser.odocl
+  page-contributing.odoc
+  (:odoc page-index.odoc))
  (action
   (run odoc link -o %{target} -I . %{odoc})))
 
 (rule
  (alias docgen)
  (target page-contributing.odocl)
- (deps (:odoc page-contributing.odoc))
+ (deps
+  (:odoc page-contributing.odoc))
  (action
   (run odoc link -o %{target} -I . %{odoc})))
-

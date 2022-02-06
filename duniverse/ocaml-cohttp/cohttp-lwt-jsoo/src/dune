@@ -4,4 +4,4 @@
  (synopsis "XHR/Lwt based http client")
  (preprocess
   (pps js_of_ocaml-ppx))
- (libraries js_of_ocaml cohttp-lwt))
+ (libraries js_of_ocaml cohttp-lwt logs))

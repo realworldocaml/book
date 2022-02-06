@@ -1,3 +1,14 @@
+v0.8.10 2021-10-04 Zagreb
+-------------------------
+
+* Require OCaml >= 4.08. This drops the dependency on the 
+  `stdlib-shims` and `seq` packages.
+* Add the `[@@ocaml.deprecated]` annotation to deprecated 
+  functions. Thanks to Antonin Décimo for the patch.
+
+v0.8.9 2020-09-23 Zagreb
+------------------------
+
 * Fix `Dump.{iter_bindings,hashtbl}` which since 0.8.7 no longer 
   prints seperators. Thanks to Edwin Török for the patch.
 * Open the result of `Fmt.error_msg` to make it easier

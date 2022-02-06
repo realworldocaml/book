@@ -14,6 +14,11 @@
  *
   }}}*)
 
+(** The [Io] module contains the IO implementation for [cohttp-lwt-unix].
+
+    The {!Logs} source name for this module logger is ["cohttp.lwt.io"]. Refer
+    to the {!Debug} module for further details.*)
+
 include
   Cohttp_lwt.S.IO
     with type ic = Lwt_io.input_channel

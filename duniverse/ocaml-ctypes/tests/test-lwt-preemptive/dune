@@ -42,6 +42,6 @@
  (name test_lwt_jobs)
  (modules test_lwt_jobs)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign
    test_lwt_preemptive_stubs test_functions test_lwt_preemptive_bindings
    tests_common))

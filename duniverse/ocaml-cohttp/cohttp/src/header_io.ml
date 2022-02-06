@@ -25,18 +25,14 @@ module Make (IO : S.IO) = struct
   open IO
   module Transfer_IO = Transfer_io.Make (IO)
 
-  let rev _k v = List.rev v
-
   let parse ic =
     (* consume also trailing "^\r\n$" line *)
     let rec parse_headers' headers =
       read_line ic >>= function
-      | Some "" | None -> return (Header.map rev headers)
+      | Some "" | None -> return headers
       | Some line -> (
           match split_header line with
-          | [ hd; tl ] ->
-              let header = String.lowercase_ascii hd in
-              parse_headers' (Header.add headers header tl)
+          | [ hd; tl ] -> parse_headers' (Header.add headers hd tl)
           | _ -> return headers)
     in
     parse_headers' (Header.init ())

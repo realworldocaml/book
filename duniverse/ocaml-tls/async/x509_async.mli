@@ -29,9 +29,16 @@ module Authenticator : sig
 
     (** The fingerprint can be collected from a browser or by invoking an openssl command
         like 'openssl x509 -in <pem_file> -noout -fingerprint -sha256' *)
-    val cert_fingerprints
+    val cert_fingerprint
       :  Mirage_crypto.Hash.hash
-      -> ([ `host ] Domain_name.t * string) list
+      -> string
+      -> t
+
+    (** The fingerprint can be collected from a browser or by invoking an openssl command
+        like 'openssl x509 -in <pem_file> -noout -pubkey | openssl pkey -pubin -outform DER | openssl dgst -sha256' *)
+    val key_fingerprint
+      :  Mirage_crypto.Hash.hash
+      -> string
       -> t
 
     (** Async programs often don't use [Ptime_clock], so this is provided as a convenience

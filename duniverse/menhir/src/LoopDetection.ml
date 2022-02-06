@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -171,8 +168,8 @@ let fail prod =
      that begins with the nonterminal symbol %s.\n\
      This implies that the grammar is not LR(k) for any k."
     (Production.print prod)
-    (Symbol.print rhs.(0))
-    (Symbol.print (Symbol.N nt))
+    (Symbol.print false rhs.(0))
+    (Symbol.print false (Symbol.N nt))
       (* Furthermore, this creates a shift/reduce conflict, which (if resolved
          in favor of reduction) can cause the parser to diverge. *)
 

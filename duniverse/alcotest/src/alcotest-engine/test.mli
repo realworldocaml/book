@@ -35,7 +35,7 @@ type 'a testable = (module TESTABLE with type t = 'a)
 (** The type for testable values. *)
 
 val testable : 'a Fmt.t -> ('a -> 'a -> bool) -> 'a testable
-(** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
+(** [testable pp eq] is a new {!type-testable} with the pretty-printer [pp] and
     equality [eq]. *)
 
 val pp : 'a testable -> 'a Fmt.t
@@ -95,7 +95,7 @@ val triple :
 
 val of_pp : 'a Fmt.t -> 'a testable
 (** [of_pp pp] tests values which can be printed using [pp] and compared using
-    {!Pervasives.compare} *)
+    {!Stdlib.compare} *)
 
 val pass : 'a testable
 (** [pass] tests values of any type and always succeeds. *)

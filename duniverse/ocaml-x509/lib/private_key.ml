@@ -1,3 +1,5 @@
+let ( let* ) = Result.bind
+
 type ecdsa = [
   | `P224 of Mirage_crypto_ec.P224.Dsa.priv
   | `P256 of Mirage_crypto_ec.P256.Dsa.priv
@@ -33,16 +35,44 @@ let generate ?seed ?(bits = 4096) typ =
   | `P521 -> `P521 (fst (Mirage_crypto_ec.P521.Dsa.generate ?g ()))
 
 let of_cstruct data =
-  let open Rresult.R.Infix in
   let open Mirage_crypto_ec in
-  let ec_err x = Rresult.R.error_to_msg ~pp_error:Mirage_crypto_ec.pp_error x in
+  let ec_err e =
+    Result.map_error
+      (fun e -> `Msg (Fmt.to_to_string Mirage_crypto_ec.pp_error e))
+      e
+  in
   function
   | `RSA -> Error (`Msg "cannot decode an RSA key")
-  | `ED25519 -> ec_err (Ed25519.priv_of_cstruct data) >>| fun k -> `ED25519 k
-  | `P224 -> ec_err (P224.Dsa.priv_of_cstruct data) >>| fun k -> `P224 k
-  | `P256 -> ec_err (P256.Dsa.priv_of_cstruct data) >>| fun k -> `P256 k
-  | `P384 -> ec_err (P384.Dsa.priv_of_cstruct data) >>| fun k -> `P384 k
-  | `P521 -> ec_err (P521.Dsa.priv_of_cstruct data) >>| fun k -> `P521 k
+  | `ED25519 ->
+    let* k = ec_err (Ed25519.priv_of_cstruct data) in
+    Ok (`ED25519 k)
+  | `P224 ->
+    let* k = ec_err (P224.Dsa.priv_of_cstruct data) in
+    Ok (`P224 k)
+  | `P256 ->
+    let* k = ec_err (P256.Dsa.priv_of_cstruct data) in
+    Ok (`P256 k)
+  | `P384 ->
+    let* k = ec_err (P384.Dsa.priv_of_cstruct data) in
+    Ok (`P384 k)
+  | `P521 ->
+    let* k = ec_err (P521.Dsa.priv_of_cstruct data) in
+    Ok (`P521 k)
+
+let of_string ?seed_or_data ?bits typ data =
+  match seed_or_data with
+  | None ->
+    begin match typ with
+      | `RSA -> Ok (generate ~seed:(Cstruct.of_string data) ?bits `RSA)
+      | _ ->
+        let* data = Base64.decode data in
+        of_cstruct (Cstruct.of_string data) typ
+    end
+  | Some `Seed ->
+    Ok (generate ~seed:(Cstruct.of_string data) ?bits typ)
+  | Some `Data ->
+    let* data = Base64.decode data in
+    of_cstruct (Cstruct.of_string data) typ
 
 let public = function
   | `RSA priv -> `RSA (Mirage_crypto_pk.Rsa.pub_of_priv priv)
@@ -54,7 +84,6 @@ let public = function
 
 let sign hash ?scheme key data =
   let open Mirage_crypto_ec in
-  let open Rresult.R.Infix in
   let hashed () = Public_key.hashed hash data
   and ecdsa_to_cs s = Algorithm.ecdsa_sig_to_cstruct s
   in
@@ -64,21 +93,23 @@ let sign hash ?scheme key data =
     | `RSA key, `RSA_PSS ->
       let module H = (val (Mirage_crypto.Hash.module_of hash)) in
       let module PSS = Mirage_crypto_pk.Rsa.PSS(H) in
-      hashed () >>| fun d -> PSS.sign ~key (`Digest d)
+      let* d = hashed () in
+      Ok (PSS.sign ~key (`Digest d))
     | `RSA key, `RSA_PKCS1 ->
-      hashed () >>| fun d -> Mirage_crypto_pk.Rsa.PKCS1.sign ~key ~hash (`Digest d)
+      let* d = hashed () in
+      Ok (Mirage_crypto_pk.Rsa.PKCS1.sign ~key ~hash (`Digest d))
     | `ED25519 key, `ED25519 ->
       begin match data with
         | `Message m -> Ok (Ed25519.sign ~key m)
         | `Digest _ -> Error (`Msg "Ed25519 only suitable with raw message")
       end
     | #ecdsa as key, `ECDSA ->
-      hashed () >>| fun d ->
-      ecdsa_to_cs (match key with
+      let* d = hashed () in
+      Ok (ecdsa_to_cs (match key with
           | `P224 key -> P224.Dsa.sign ~key d
           | `P256 key -> P256.Dsa.sign ~key d
           | `P384 key -> P384.Dsa.sign ~key d
-          | `P521 key -> P521.Dsa.sign ~key d)
+          | `P521 key -> P521.Dsa.sign ~key d))
     | _ -> Error (`Msg "invalid key and signature scheme combination")
   with
   | Mirage_crypto_pk.Rsa.Insufficient_key ->
@@ -165,26 +196,23 @@ module Asn = struct
 
   let reparse_ec_private curve priv =
     let open Mirage_crypto_ec in
-    let open Rresult.R.Infix in
     match curve with
-    | `SECP224R1 -> P224.Dsa.priv_of_cstruct priv >>| fun p -> `P224 p
-    | `SECP256R1 -> P256.Dsa.priv_of_cstruct priv >>| fun p -> `P256 p
-    | `SECP384R1 -> P384.Dsa.priv_of_cstruct priv >>| fun p -> `P384 p
-    | `SECP521R1 -> P521.Dsa.priv_of_cstruct priv >>| fun p -> `P521 p
+    | `SECP224R1 -> let* p = P224.Dsa.priv_of_cstruct priv in Ok (`P224 p)
+    | `SECP256R1 -> let* p = P256.Dsa.priv_of_cstruct priv in Ok (`P256 p)
+    | `SECP384R1 -> let* p = P384.Dsa.priv_of_cstruct priv in Ok (`P384 p)
+    | `SECP521R1 -> let* p = P521.Dsa.priv_of_cstruct priv in Ok (`P521 p)
 
   (* external use (result) *)
   let ec_priv_of_cs =
-    let open Rresult.R.Infix in
     let dec, _ = Asn_grammars.projections_of Asn.der ec_private_key in
     fun cs ->
-      dec cs >>= fun (priv, curve, _pub) ->
+      let* priv, curve, _pub = dec cs in
       match curve with
       | None -> Error (`Parse "no curve provided")
       | Some c ->
-        Rresult.R.(reword_error
-                     (function `Msg e -> `Parse e)
-                     (error_to_msg ~pp_error:Mirage_crypto_ec.pp_error
-                        (reparse_ec_private c priv)))
+        Result.map_error
+          (fun e -> `Parse (Fmt.to_to_string Mirage_crypto_ec.pp_error e))
+          (reparse_ec_private c priv)
 
   let ec_of_cs ?curve cs =
     let (priv, named_curve, _pub) = ec_of_cs cs in
@@ -242,8 +270,7 @@ let decode_der cs =
 let encode_der = Asn.private_to_cstruct
 
 let decode_pem cs =
-  let open Rresult.R.Infix in
-  Pem.parse cs >>= fun data ->
+  let* data = Pem.parse cs in
   let rsa_p (t, _) = String.equal "RSA PRIVATE KEY" t
   and ec_p (t, _) = String.equal "EC PRIVATE KEY" t
   and pk_p (t, _) = String.equal "PRIVATE KEY" t
@@ -252,13 +279,19 @@ let decode_pem cs =
   and ec, _ = List.partition ec_p data
   and p, _ = List.partition pk_p data
   in
-  Pem.foldM (fun (_, k) ->
-      Asn_grammars.err_to_msg (Asn.rsa_private_of_cstruct k) >>| fun k ->
-      `RSA k) r >>= fun k ->
-  Pem.foldM (fun (_, k) ->
-      Asn_grammars.err_to_msg (Asn.ec_priv_of_cs k)) ec >>= fun k' ->
-  Pem.foldM (fun (_, k) ->
-      Asn_grammars.err_to_msg (Asn.private_of_cstruct k)) p >>= fun k'' ->
+  let* k =
+    Pem.foldM (fun (_, k) ->
+        let* k = Asn_grammars.err_to_msg (Asn.rsa_private_of_cstruct k) in
+        Ok (`RSA k)) r
+  in
+  let* k' =
+    Pem.foldM (fun (_, k) ->
+        Asn_grammars.err_to_msg (Asn.ec_priv_of_cs k)) ec
+  in
+  let* k'' =
+    Pem.foldM (fun (_, k) ->
+        Asn_grammars.err_to_msg (Asn.private_of_cstruct k)) p
+  in
   Pem.exactly_one ~what:"private key" (k @ k' @ k'')
 
 let encode_pem p =

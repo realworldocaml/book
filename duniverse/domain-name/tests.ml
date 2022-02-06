@@ -1,5 +1,12 @@
 let n_of_s = Domain_name.of_string_exn
 
+let raw =
+  let module M = struct
+    type t = [ `raw ] Domain_name.t
+    let pp = Domain_name.pp
+    let equal = Domain_name.equal ~case_sensitive:false
+  end in (module M: Alcotest.TESTABLE with type t = M.t)
+
 let host =
   let module M = struct
     type t = [ `host ] Domain_name.t
@@ -247,6 +254,23 @@ let get_and_count_and_find_label () =
   Alcotest.(check (option int) "find_label ~back:true www.www.www 'www' is 2"
               (Some 2) Domain_name.(find_label ~rev:true n' (equal_label "www")))
 
+let test_compare_canonical () =
+  (* from RFC 4034, 6.1 *)
+  let names = List.map n_of_s [
+    "example" ;
+    "a.example" ;
+    "yljkjljk.a.example" ;
+    "Z.a.example" ;
+    "zABC.a.EXAMPLE" ;
+    "z.example" ;
+    "\001.z.example" ;
+    "*.z.example" ;
+    "\200.z.example"
+  ] in
+  let sorted_names = List.sort Domain_name.compare names in
+  Alcotest.(check (list raw) "compare fulfills canonical form and order"
+              names sorted_names)
+
 let tests = [
   "basic predicates", `Quick, basic_preds ;
   "basic name stuff", `Quick, basic_name ;
@@ -255,6 +279,7 @@ let tests = [
   "fqdn around", `Quick, fqdn_around ;
   "drop labels", `Quick, drop_labels ;
   "get and count and find labels", `Quick, get_and_count_and_find_label ;
+  "sorting", `Quick, test_compare_canonical ;
 ]
 
 let suites = [

@@ -71,7 +71,7 @@ let random preferred =
 
 let write_header source data =
   Cstruct.set_uint8 data 0 source;
-  Cstruct.set_uint8 data 1 (Cstruct.len data - 2)
+  Cstruct.set_uint8 data 1 (Cstruct.length data - 2)
 
 let header source data =
   let hdr = Cstruct.create 2 in

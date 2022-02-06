@@ -8,10 +8,9 @@ let file_contents file =
 
 let load_all_in_directory ~directory ~f =
   let open Deferred.Or_error.Let_syntax in
-  let options = Async_find.Options.ignore_errors in
-  let%bind files = Async_find.find_all ~options directory |> Deferred.ok in
-  Deferred.Or_error.List.map files ~f:(fun (file, (_ : Unix.Stats.t)) ->
-    let%bind contents = file_contents file in
+  let%bind files = Deferred.Or_error.try_with (fun () -> Sys.ls_dir directory) in
+  Deferred.Or_error.List.map files ~f:(fun file ->
+    let%bind contents = file_contents (directory ^/ file) in
     f ~contents)
 ;;
 
@@ -94,8 +93,8 @@ module Authenticator = struct
 
     type t =
       | Chain_of_trust of Chain_of_trust.t
-      | Cert_fingerprints of
-          Mirage_crypto.Hash.hash * ([ `host ] Domain_name.t * string) list
+      | Cert_fingerprint of Mirage_crypto.Hash.hash * string
+      | Key_fingerprint of Mirage_crypto.Hash.hash * string
 
     let ca_file ?allowed_hashes ?crls filename () =
       let trust_anchors = `File filename in
@@ -107,7 +106,9 @@ module Authenticator = struct
       Chain_of_trust { trust_anchors; allowed_hashes; crls }
     ;;
 
-    let cert_fingerprints hash fingerprints = Cert_fingerprints (hash, fingerprints)
+    let cert_fingerprint hash fingerprint = Cert_fingerprint (hash, fingerprint)
+
+    let key_fingerprint hash fingerprint = Key_fingerprint (hash, fingerprint)
 
     let cleanup_fingerprint fingerprint =
       let known_delimiters = [ ':'; ' ' ] in
@@ -129,11 +130,14 @@ module Authenticator = struct
       X509.Authenticator.chain_of_trust ?allowed_hashes ?crls ~time cas
     ;;
 
-    let cert_fingerprint ~time hash fingerprints =
-      let fingerprints =
-        List.map fingerprints ~f:(Tuple.T2.map_snd ~f:cleanup_fingerprint)
-      in
-      X509.Authenticator.server_cert_fingerprint ~time ~hash ~fingerprints
+    let of_cert_fingerprint ~time hash fingerprint =
+      let fingerprint = cleanup_fingerprint fingerprint in
+      X509.Authenticator.server_cert_fingerprint ~time ~hash ~fingerprint
+    ;;
+
+    let of_key_fingerprint ~time hash fingerprint =
+      let fingerprint = cleanup_fingerprint fingerprint in
+      X509.Authenticator.server_key_fingerprint ~time ~hash ~fingerprint
     ;;
 
     let time = Fn.compose Ptime.of_float_s Unix.gettimeofday
@@ -141,8 +145,10 @@ module Authenticator = struct
     let to_authenticator ~time param =
       match param with
       | Chain_of_trust chain_of_trust -> of_cas ~time chain_of_trust
-      | Cert_fingerprints (hash, fingerprints) ->
-        cert_fingerprint ~time hash fingerprints |> Deferred.Or_error.return
+      | Cert_fingerprint (hash, fingerprint) ->
+        of_cert_fingerprint ~time hash fingerprint |> Deferred.Or_error.return
+      | Key_fingerprint (hash, fingerprint) ->
+        of_key_fingerprint ~time hash fingerprint |> Deferred.Or_error.return
     ;;
   end
 end

@@ -1,0 +1,27 @@
+name: Crypto
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-compiler: ["4.12.0", "4.11.2", "4.10.2", "4.09.1", "4.08.1"]
+        operating-system: [windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          opam-local-packages: |
+            *.opam
+            !mirage-crypto-rng-async.opam
+          ocaml-compiler: ${{ matrix.ocaml-version }}

@@ -1,14 +1,4 @@
-val try_finally : always:(unit -> unit) -> (unit -> 'a) -> 'a
-
-val map_error_loc :
-  f:(Location.t -> Location.t) -> Location.error -> Location.error
-
-val error_of_exn : exn -> Location.error option
-
-val get_id_in_path : Path.t -> Ident.t
-
 val lookup_type : Longident.t -> Env.t -> Path.t
-
 val lookup_value : Longident.t -> Env.t -> Path.t * Types.value_description
 
 val find_value :
@@ -35,31 +25,6 @@ val find_class_type :
 val type_structure :
   Env.t -> Parsetree.structure -> Location.t -> Typedtree.structure * Env.t
 
-val sig_value : Ident.t -> Types.value_description -> Types.signature_item
-
-val sig_type : Ident.t -> Types.type_declaration -> Types.signature_item
-
-val sig_typext : Ident.t -> Types.extension_constructor -> Types.signature_item
-
-val sig_module : Ident.t -> Types.module_declaration -> Types.signature_item
-
-val mty_path : Types.module_type -> Path.t option
-
-val sig_modtype : Ident.t -> Types.modtype_declaration -> Types.signature_item
-
-val sig_class : Ident.t -> Types.class_declaration -> Types.signature_item
-
-val sig_class_type :
-  Ident.t -> Types.class_type_declaration -> Types.signature_item
-
-val add_directive :
-  name:string ->
-  doc:string ->
-  [ `Bool of bool -> unit
-  | `Show_prim of
-    Env.t -> Location.t -> Ident.t -> Longident.t -> Types.signature ] ->
-  unit
-
 val extension_constructor :
   ext_type_path:Path.t ->
   ext_type_params:Types.type_expr list ->
@@ -69,16 +34,6 @@ val extension_constructor :
   ext_loc:Location.t ->
   ext_attributes:Parsetree.attributes ->
   Types.extension_constructor
-
-val is_predef_or_global : Ident.t -> bool
-
-val map_sig_attributes :
-  f:(Parsetree.attributes -> Parsetree.attributes) ->
-  Types.signature ->
-  Types.signature
-
-val attribute :
-  name:string Location.loc -> payload:Parsetree.payload -> Parsetree.attribute
 
 val match_env :
   value:(Env.summary -> Ident.t -> 'a) ->
@@ -99,12 +54,8 @@ val match_env :
   Env.summary ->
   'a
 
-val top_directive_name : Parsetree.toplevel_phrase -> string option
-(** Returns the name of the toplevel directive or [None] if the given phrase
-    is not a directive *)
-
-val top_directive_require : string -> Parsetree.toplevel_phrase
-(** [top_directive require "pkg"] builds the AST for [#require "pkg"] *)
-
 val ctype_is_equal :
   Env.t -> bool -> Types.type_expr list -> Types.type_expr list -> bool
+
+val ctype_expand_head_and_get_desc : Env.t -> Types.type_expr -> Types.type_desc
+val ctype_get_desc : Types.type_expr -> Types.type_desc

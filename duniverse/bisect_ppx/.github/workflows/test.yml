@@ -1,0 +1,121 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  rescript:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-18.04
+        - macos-10.15
+        # Build binaries on older systems to require lower versions of libc and
+        # other system libraries.
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm install esy
+    - run: echo PATH=$(pwd)/node_modules/.bin:$PATH >> $GITHUB_ENV
+    - run: make -C test/js full-test
+    - if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: bash ./test/ci/binaries.sh
+
+  opam:
+    if: ${{github.ref != 'refs/heads/binaries'}}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        ocaml:
+        - 4.13.1
+        - 4.12.1
+        - 4.11.2
+        - 4.10.2
+        - 4.09.1
+        - 4.08.1
+        - 4.07.1
+        - 4.06.1
+        - 4.05.0
+        - 4.04.2
+        include:
+        - os: macos-latest
+          ocaml: 4.12.1
+          # ocamlformat 0.16.0, used in testing, doesn't support OCaml 4.13, and
+          # we are using a Linux binary of it. So, hold the Mac build back to
+          # 4.12 for now, and install ocamlformat from opam on Mac.
+        - os: windows-latest
+          ocaml: 4.12.1
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: avsm/setup-ocaml@v2
+      with:
+        ocaml-compiler: ${{matrix.ocaml}}
+
+    - name: Install opam dependencies
+      run: opam install --deps-only --yes .
+
+    - name: Install ocamlformat (Linux)
+      if: ${{runner.os == 'Linux'}}
+      run: |
+        wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
+        sudo mv ocamlformat /usr/local/bin/ocamlformat
+        sudo chmod a+x /usr/local/bin/ocamlformat
+    - name: Install ocamlformat (non-Linux)
+      if: ${{runner.os != 'Linux'}}
+      run: opam install ocamlformat.0.16.0 --yes
+
+    - name: Install coreutils (Mac)
+      if: ${{runner.os == 'macOS'}}
+      run: brew install coreutils
+
+    - name: Version feedback
+      run: |
+        opam --version
+        opam exec -- ocaml -version
+        opam exec -- ocamlformat --version
+        truncate --version
+
+    - name: Build
+      run: opam exec -- make build
+
+    - name: Test
+      if: ${{runner.os != 'Windows'}}
+      run: |
+        case `opam exec -- ocamlc -version` in
+          "4.07.1") TEST_ALIAS=@compatible;;
+          "4.06.1") TEST_ALIAS=@compatible;;
+          "4.05.0") TEST_ALIAS=@compatible;;
+          "4.04.2") TEST_ALIAS=@compatible;;
+          *) TEST_ALIAS=@runtest;;
+        esac
+        unset GITHUB_ACTIONS
+        unset GITHUB_RUN_NUMBER
+        opam exec -- make test TEST=$TEST_ALIAS
+
+    # Reason requires OCaml <= 4.12.
+    - name: Usage test
+      if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+      run: |
+        opam install reason js_of_ocaml --yes
+        opam exec -- make clean-usage usage
+
+    - name: Submit self-coverage to Coveralls
+      if: ${{matrix.ocaml == '4.12.1' && runner.os == 'Linux'}}
+      continue-on-error: true
+      env:
+        COVERALLS_REPO_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        PULL_REQUEST_NUMBER: ${{github.event.number}}
+      run: |
+        (unset GITHUB_ACTIONS && unset GITHUB_RUN_NUMBER && \
+         unset COVERALLS_REPO_TOKEN && unset PULL_REQUEST_NUMBER && \
+          opam exec -- make clean self-coverage)
+        (cd _self && \
+          _build/install/default/bin/meta-bisect-ppx-report \
+            send-to Coveralls bisect*.meta)

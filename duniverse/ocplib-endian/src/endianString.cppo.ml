@@ -52,36 +52,47 @@ module type EndianStringSig = sig
       [Int64.float_of_bits (get_int64 buff i)] *)
 
   val set_char : Bytes.t -> int -> char -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_char instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_char}. *)
 
   val set_int8 : Bytes.t -> int -> int -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_int8 instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_int8}. *)
 
   val set_int16 : Bytes.t -> int -> int -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_int16 instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_int16}. *)
 
   val set_int32 : Bytes.t -> int -> int32 -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_int13 instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_int32}. *)
 
   val set_int64 : Bytes.t -> int -> int64 -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_int64 instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_int64}. *)
 
   val set_float : Bytes.t -> int -> float -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_float instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_float}. *)
 
   val set_double : Bytes.t -> int -> float -> unit
+    [@@ocaml.deprecated "Use EndianBytes.set_double instead."]
   (** @deprecated This is a deprecated alias of {!endianBytes.set_double}. *)
 
 end
 
 let get_char (s:string) off =
   String.get s off
+  [@@ocaml.inline]
 let set_char (s:Bytes.t) off v =
   Bytes.set s off v
+  [@@ocaml.inline]
 let unsafe_get_char (s:string) off =
   String.unsafe_get s off
+  [@@ocaml.inline]
 let unsafe_set_char (s:Bytes.t) off v =
   Bytes.unsafe_set s off v
+  [@@ocaml.inline]
 
 #include "common.ml"
 

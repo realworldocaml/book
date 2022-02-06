@@ -1,6 +1,5 @@
-# Lambda Soup &nbsp; [![version][version]][releases] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Lambda Soup &nbsp; [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
-[version]:     https://img.shields.io/badge/version-0.7.2-blue.svg
 [travis]:      https://travis-ci.org/aantron/lambdasoup/branches
 [travis-img]:  https://img.shields.io/travis/aantron/lambdasoup/master.svg
 [coveralls]:     https://coveralls.io/github/aantron/lambdasoup?branch=master
@@ -122,7 +121,6 @@ November 2015.
 [tests]:        https://github.com/aantron/lambdasoup/blob/master/test/test.ml
 [contributing]: https://github.com/aantron/lambdasoup/blob/master/docs/CONTRIBUTING.md
 [email]:        mailto:antonbachin@yahoo.com
-[releases]:     https://github.com/aantron/lambdasoup/releases
 [extracss]:     http://aantron.github.io/lambdasoup#VALselect
 [traversals]:   http://aantron.github.io/lambdasoup#2_Elementarytraversals
 [combinators]:  http://aantron.github.io/lambdasoup#2_Combinators

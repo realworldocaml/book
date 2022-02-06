@@ -20,7 +20,7 @@ diff -ru src/report/dune _self/bisect_ppx/src/report/dune
 --- src/report/dune
 +++ _self/bisect_ppx/src/report/dune
 @@ -2,6 +2,7 @@
-  (name report)
+  (name main)
   (public_name bisect-ppx-report)
   (package bisect_ppx)
 + (instrumentation (backend meta_bisect_ppx))

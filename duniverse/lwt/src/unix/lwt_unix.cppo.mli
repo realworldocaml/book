@@ -51,16 +51,18 @@ val sleep : float -> unit Lwt.t
   (** [sleep d] is a promise that remains in a pending state for [d] seconds
       and after which it is resolved with value [()]. *)
 
-val yield : unit -> unit Lwt.t
+val yield : unit -> unit Lwt.t [@@deprecated "Use Lwt.pause instead"]
   (** [yield ()] is a promise in a pending state. It resumes itself as soon as
       possible and resolves with value [()]. *)
 
-val auto_yield : float -> (unit -> unit Lwt.t)
-  (** [auto_yield timeout] returns a function [f], and [f ()] has the following
+val auto_yield : float -> (unit -> unit Lwt.t) [@@deprecated "Use Lwt.auto_pause instead"]
+
+val auto_pause : float -> (unit -> unit Lwt.t)
+  (** [auto_pause timeout] returns a function [f], and [f ()] has the following
       behavior:
 
       - If it has been more than [timeout] seconds since the last time [f ()]
-        behaved like {!Lwt_unix.yield}, [f ()] calls {!Lwt_unix.yield}.
+        behaved like {!Lwt.pause}, [f ()] calls {!Lwt.pause}.
       - Otherwise, if it has been less than [timeout] seconds, [f ()] behaves
         like {!Lwt.return_unit}, i.e. it does not yield. *)
 
@@ -217,7 +219,7 @@ val wait : unit -> (int * process_status) Lwt.t
 
 val waitpid : wait_flag list -> int -> (int * process_status) Lwt.t
 (** A promise-returning analog to
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALwaitpid}
+    {{: https://ocaml.org/api/Unix.html#VALwaitpid}
     [Unix.waitpid]}. This call is non-blocking on Unix-like systems, but is
     always blocking on Windows. *)
 
@@ -562,14 +564,14 @@ val file_exists : string -> bool Lwt.t
   (** [file_exists name] tests if a file named [name] exists.
 
       Note that [file_exists] behaves similarly to
-      {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Sys.html#VALfile_exists}
+      {{:https://ocaml.org/api/Sys.html#VALfile_exists}
       [Sys.file_exists]}:
 
       - "file" is interpreted as "directory entry" in this context
 
       - [file_exists name] will return [false] in
         circumstances that would make {!stat} raise a
-        {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#EXCEPTIONUnix_error}
+        {{:https://ocaml.org/api/Unix.html#EXCEPTIONUnix_error}
         [Unix.Unix_error]} exception.
      *)
 
@@ -579,7 +581,7 @@ val utimes : string -> float -> float -> unit Lwt.t
     to [mtime]. To set both to the current time, call [utimes path 0. 0.].
 
     This function corresponds to
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALutimes}
+    {{:https://ocaml.org/api/Unix.html#VALutimes}
     [Unix.utimes]}. See also
     {{:http://man7.org/linux/man-pages/man3/utimes.3p.html} [utimes(3p)]}.
 
@@ -630,14 +632,14 @@ module LargeFile : sig
     (** [file_exists name] tests if a file named [name] exists.
 
         Note that [file_exists] behaves similarly to
-        {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Sys.html#VALfile_exists}
+        {{:https://ocaml.org/api/Sys.html#VALfile_exists}
         [Sys.file_exists]}:
 
         - "file" is interpreted as "directory entry" in this context
 
         - [file_exists name] will return [false] in
           circumstances that would make {!stat} raise a
-          {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#EXCEPTIONUnix_error}
+          {{:https://ocaml.org/api/Unix.html#EXCEPTIONUnix_error}
           [Unix.Unix_error]} exception.
      *)
 end
@@ -679,10 +681,12 @@ val access : string -> access_permission list -> unit Lwt.t
 
 (** {2 Operations on file descriptors} *)
 
-val dup : file_descr -> file_descr
+val dup : ?cloexec:bool ->
+          file_descr -> file_descr
   (** Wrapper for [Unix.dup] *)
 
-val dup2 : file_descr -> file_descr -> unit
+val dup2 : ?cloexec:bool ->
+           file_descr -> file_descr -> unit
   (** Wrapper for [Unix.dup2] *)
 
 val set_close_on_exec : file_descr -> unit
@@ -715,14 +719,14 @@ type dir_handle = Unix.dir_handle
 val opendir : string -> dir_handle Lwt.t
 (** Opens a directory for listing. Directories opened with this function must be
     explicitly closed with {!closedir}. This is a cooperative analog of
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALopendir}
+    {{:https://ocaml.org/api/Unix.html#VALopendir}
     [Unix.opendir]}. *)
 
 val readdir : dir_handle -> string Lwt.t
 (** Reads the next directory entry from the given directory. Special entries
     such as [.] and [..] are included. If all entries have been read, raises
     [End_of_file]. This is a cooperative analog of
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALreaddir}
+    {{:https://ocaml.org/api/Unix.html#VALreaddir}
     [Unix.readdir]}. *)
 
 val readdir_n : dir_handle -> int -> string array Lwt.t
@@ -735,12 +739,12 @@ val readdir_n : dir_handle -> int -> string array Lwt.t
 val rewinddir : dir_handle -> unit Lwt.t
 (** Resets the given directory handle, so that directory listing can be
     restarted. Cooperative analog of
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALrewinddir}
+    {{:https://ocaml.org/api/Unix.html#VALrewinddir}
     [Unix.rewinddir]}. *)
 
 val closedir : dir_handle -> unit Lwt.t
 (** Closes a directory handle. Cooperative analog of
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALclosedir}
+    {{:https://ocaml.org/api/Unix.html#VALclosedir}
     [Unix.closedir]}. *)
 
 val files_of_directory : string -> string Lwt_stream.t
@@ -749,17 +753,20 @@ val files_of_directory : string -> string Lwt_stream.t
 
 (** {2 Pipes and redirections} *)
 
-val pipe : unit -> file_descr * file_descr
+val pipe : ?cloexec:bool ->
+           unit -> file_descr * file_descr
   (** [pipe ()] creates pipe using [Unix.pipe] and returns two lwt {b
       file descriptor}s created from unix {b file_descriptor} *)
 
-val pipe_in : unit -> file_descr * Unix.file_descr
+val pipe_in : ?cloexec:bool ->
+              unit -> file_descr * Unix.file_descr
   (** [pipe_in ()] is the same as {!pipe} but maps only the unix {b
       file descriptor} for reading into a lwt one. The second is not
       put into non-blocking mode. You usually want to use this before
       forking to receive data from the child process. *)
 
-val pipe_out : unit -> Unix.file_descr * file_descr
+val pipe_out : ?cloexec:bool ->
+               unit -> Unix.file_descr * file_descr
   (** [pipe_out ()] is the inverse of {!pipe_in}. You usually want to
       use this before forking to send data to the child process *)
 
@@ -768,7 +775,7 @@ val mkfifo : string -> file_perm -> unit Lwt.t
 
 (** {2 Symbolic links} *)
 
-val symlink : string -> string -> unit Lwt.t
+val symlink : ?to_dir:bool -> string -> string -> unit Lwt.t
   (** Wrapper for [Unix.symlink] *)
 
 val readlink : string -> string Lwt.t
@@ -872,16 +879,18 @@ type socket_type =
 
 type sockaddr = Unix.sockaddr = ADDR_UNIX of string | ADDR_INET of inet_addr * int
 
-val socket : socket_domain -> socket_type -> int -> file_descr
+val socket : ?cloexec:bool ->
+             socket_domain -> socket_type -> int -> file_descr
   (** [socket domain type proto] is the same as [Unix.socket] but maps
       the result into a lwt {b file descriptor} *)
 
-val socketpair : socket_domain -> socket_type -> int -> file_descr * file_descr
+val socketpair : ?cloexec:bool ->
+                 socket_domain -> socket_type -> int -> file_descr * file_descr
   (** Wrapper for [Unix.socketpair] *)
 
 val bind : file_descr -> sockaddr -> unit Lwt.t
 (** Binds an address to the given socket. This is the cooperative analog of
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALbind}
+    {{:https://ocaml.org/api/Unix.html#VALbind}
     [Unix.bind]}. See also
     {{:http://man7.org/linux/man-pages/man3/bind.3p.html} [bind(3p)]}.
 
@@ -890,10 +899,12 @@ val bind : file_descr -> sockaddr -> unit Lwt.t
 val listen : file_descr -> int -> unit
   (** Wrapper for [Unix.listen] *)
 
-val accept : file_descr -> (file_descr * sockaddr) Lwt.t
+val accept : ?cloexec:bool ->
+             file_descr -> (file_descr * sockaddr) Lwt.t
   (** Wrapper for [Unix.accept] *)
 
-val accept_n : file_descr -> int -> ((file_descr * sockaddr) list * exn option) Lwt.t
+val accept_n : ?cloexec:bool ->
+               file_descr -> int -> ((file_descr * sockaddr) list * exn option) Lwt.t
   (** [accept_n fd count] accepts up to [count] connections at one time.
 
       - if no connection is available right now, it returns a sleeping
@@ -1461,7 +1472,7 @@ val execute_job :
     thread. The following functions allow to use this pipe. *)
 
 val make_notification : ?once : bool -> (unit -> unit) -> int
-  (** [new_notifier ?once f] registers a new notifier. It returns the
+  (** [make_notification ?once f] registers a new notifier. It returns the
       id of the notifier. Each time a notification with this id is
       received, [f] is called.
 

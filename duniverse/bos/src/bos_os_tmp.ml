@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Astring
@@ -14,8 +13,8 @@ let default_dir_init =
     | None -> absent
     | Some v ->
         match Fpath.of_string v with
-        | Result.Error _ -> absent (* FIXME log something ? *)
-        | Result.Ok v -> v
+        | Error _ -> absent (* FIXME log something ? *)
+        | Ok v -> v
   in
   if Sys.os_type = "Win32" then from_env "TEMP" ~absent:Fpath.(v "./") else
   from_env "TMPDIR" ~absent:(Fpath.v "/tmp")
@@ -31,7 +30,7 @@ let rand_path dir pat =
   Fpath.(dir / strf pat (strf "%06x" rand))
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

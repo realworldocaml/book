@@ -2,17 +2,13 @@ exception Test_block_failure of Mdx.Block.t * string
 
 module Package : sig
   val unix : string
-
   val findlib_top : string
-
   val findlib_internal : string
-
   val compilerlibs_toplevel : string
 end
 
 module Predicate : sig
   val byte : string
-
   val toploop : string
 end
 

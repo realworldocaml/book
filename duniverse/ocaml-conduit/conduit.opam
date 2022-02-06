@@ -1,4 +1,4 @@
-version: "4.0.1"
+version: "5.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -11,7 +11,7 @@ doc: "https://mirage.github.io/ocaml-conduit/"
 bug-reports: "https://github.com/mirage/ocaml-conduit/issues"
 depends: [
   "ocaml" {>= "4.03.0"}
-  "dune"
+  "dune" {>= "2.0"}
   "ppx_sexp_conv" {>="v0.13.0"}
   "sexplib"
   "astring"
@@ -21,7 +21,7 @@ depends: [
   "ipaddr-sexp"
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
 ]
 dev-repo: "git+https://github.com/mirage/ocaml-conduit.git"

@@ -17,6 +17,7 @@
   (ocaml (>= 4.02.3))
   integers
   dune-configurator
+  bigarray-compat
   (bisect_ppx (>= 2.0.0))
   (ounit :with-test))
  (synopsis "Combinators for binding to C libraries without writing any C")

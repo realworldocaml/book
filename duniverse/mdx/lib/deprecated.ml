@@ -27,17 +27,22 @@ let warn ?replacement s ~since =
 module Missing_double_semicolon = struct
   let missing_semicolon = ref false
 
-  let check_toplevel : Toplevel.t -> unit =
-   fun toplevel ->
-    match List.rev toplevel.command with
-    | cmd :: _ ->
-        let ends_with_semi =
-          cmd |> Astring.String.trim |> Astring.String.is_suffix ~affix:";;"
-        in
-        if not ends_with_semi then missing_semicolon := true
-    | [] -> ()
+  let ends_with_semi cmd =
+    cmd |> Astring.String.trim |> Astring.String.is_suffix ~affix:";;"
 
-  let check_block block = List.iter check_toplevel block
+  let fix_toplevel : Toplevel.t -> Toplevel.t =
+   fun toplevel ->
+    let rec fix_command = function
+      | [] -> []
+      | [ cmd ] when not @@ ends_with_semi cmd ->
+          missing_semicolon := true;
+          [ Printf.sprintf "%s;;" cmd ]
+      | [ cmd ] -> [ cmd ]
+      | x :: xs -> x :: fix_command xs
+    in
+    { toplevel with command = fix_command toplevel.command }
+
+  let fix block = List.map fix_toplevel block
 
   let report ~filename =
     if !missing_semicolon then
@@ -45,9 +50,6 @@ module Missing_double_semicolon = struct
         "Warning: OCaml toplevel block without trailing ;; detected in file \
          '%s'.\n\
          Non-semicolon terminated phrases are deprecated.\n\
-         MDX 2.0 will accept them as input but will output them with ;; \
-         appended.\n\
-         In MDX 3.0 support for toplevel blocks without ;; will be removed \
-         completely.\n"
+         In MDX 3.0 support for toplevel blocks without ;; will be removed.\n"
         filename
 end

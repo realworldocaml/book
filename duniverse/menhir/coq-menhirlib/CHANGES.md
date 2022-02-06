@@ -1,5 +1,11 @@
 # Changes
 
+## 2021/09/28
+
+* Change `Instance` to `Global Instance` in the library and in the
+  Coq files produced by `menhir --coq`
+  so as to avoid warnings with Coq 8.14.
+
 ## 2021/04/19
 
 * The types returned by the parsing functions, `parse_result` and

@@ -30,12 +30,12 @@ module Cs = struct
     ( blit cs 0 cs' 0 len ; cs' )
 
   let xor_into src dst n =
-    if n > imin (len src) (len dst) then
+    if n > imin (length src) (length dst) then
       invalid_arg "Uncommon.Cs.xor_into: buffers to small (need %d)" n
     else Native.xor_into src.buffer src.off dst.buffer dst.off n
 
   let xor cs1 cs2 =
-    let len = imin (len cs1) (len cs2) in
+    let len = imin (length cs1) (length cs2) in
     let cs  = clone ~len cs2 in
     ( xor_into cs1 cs len ; cs )
 
@@ -43,7 +43,7 @@ module Cs = struct
 
   let set_msb bits cs =
     if bits > 0 then
-      let n = len cs in
+      let n = length cs in
       let rec go width = function
         | i when i = n     -> ()
         | i when width < 8 ->
@@ -54,17 +54,17 @@ module Cs = struct
 
   let split3 cs l1 l2 =
     let l12 = l1 + l2 in
-    (sub cs 0 l1, sub cs l1 l2, sub cs l12 (len cs - l12))
+    (sub cs 0 l1, sub cs l1 l2, sub cs l12 (length cs - l12))
 
   let rpad cs size x =
-    let l = len cs and cs' = Cstruct.create_unsafe size in
+    let l = length cs and cs' = Cstruct.create_unsafe size in
     if size < l then invalid_arg "Uncommon.Cs.rpad: size < len";
     blit cs 0 cs' 0 l ;
     memset (sub cs' l (size - l)) x ;
     cs'
 
   let lpad cs size x =
-    let l = len cs and cs' = Cstruct.create_unsafe size in
+    let l = length cs and cs' = Cstruct.create_unsafe size in
     if size < l then invalid_arg "Uncommon.Cs.lpad: size < len";
     blit cs 0 cs' (size - l) l ;
     memset (sub cs' 0 (size - l)) x ;

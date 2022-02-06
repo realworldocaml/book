@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -170,6 +167,20 @@ let enable_read_reply filename =
 let code_inlining =
   ref true
 
+let represent_positions =
+  ref false
+
+let represent_states =
+  ref false
+
+let represent_values =
+  ref false
+
+let represent_everything () =
+  represent_positions := true;
+  represent_states := true;
+  represent_values := true
+
 let comment =
   ref false
 
@@ -252,6 +263,27 @@ let ignore_all_unused_precedence_levels =
 let list_errors =
   ref false
 
+type list_errors_algorithm = [
+  | `Fast
+  | `Classic
+  | `Validate
+]
+
+let list_errors_algorithm =
+  ref `Fast
+
+let set_list_errors_algorithm (algorithm: string) : unit =
+  let algorithm = match algorithm with
+    | "fast"     -> `Fast
+    | "classic"  -> `Classic
+    | "validate" -> `Validate
+    | algorithm ->
+      eprintf "Error: --list-errors-algorithm should be followed with \
+               fast | classic | validate (got %S).\n" algorithm;
+      exit 1
+  in
+  list_errors_algorithm := algorithm
+
 let compile_errors =
   ref None
 
@@ -304,6 +336,24 @@ let dollars =
 let require_aliases =
   ref false
 
+let random_sentence_symbol =
+  ref None
+
+let random_sentence_goal =
+  ref 0
+
+let random_sentence_style =
+  ref `Abstract
+
+let random_sentence_abstract symbol =
+  random_sentence_symbol := Some symbol;
+  random_sentence_style := `Abstract
+
+let random_sentence_concrete symbol =
+  random_sentence_symbol := Some symbol;
+  random_sentence_style := `Concrete;
+  require_aliases := true
+
 let strategy =
   ref `Legacy
 
@@ -318,6 +368,9 @@ let set_strategy = function
 
 (* When new command line options are added, please update both the manual
    in [doc/manual.tex] and the man page in [doc/menhir.1]. *)
+
+(* Please note that there is a very short length limit on the explanations
+   here, since the output of [menhir -help] must fit in 80 columns. *)
 
 let options = Arg.align [
   "--automaton-graph", Arg.Set automaton_graph, " (undocumented)";
@@ -352,6 +405,7 @@ let options = Arg.align [
   "--interpret-error", Arg.Set interpret_error, " Interpret an error sentence";
   "--lalr", Arg.Unit (fun () -> construction_mode := ModeLALR), " Construct an LALR(1) automaton";
   "--list-errors", Arg.Set list_errors, " Produce a list of erroneous inputs";
+  "--list-errors-algorithm", Arg.String set_list_errors_algorithm, " (undocumented)";
   "--log-automaton", Arg.Set_int logA, "<level> Log information about the automaton";
   "--log-code", Arg.Set_int logC, "<level> Log information about the generated code";
   "--log-grammar", Arg.Set_int logG, "<level> Log information about the grammar";
@@ -373,8 +427,17 @@ let options = Arg.align [
   "--only-preprocess-uu", Arg.Unit (fun () -> preprocess_mode := PMOnlyPreprocess (PrintUnitActions true)),
                           " Print grammar with unit actions & tokens";
   "--only-tokens", Arg.Unit tokentypeonly, " Generate token type definition only, no code";
+  "--random-seed", Arg.Int Random.init, "<seed> Set the random seed";
+  "--random-self-init", Arg.Unit Random.self_init, " Pick a random seed in a system-dependent way";
+  "--random-sentence-length", Arg.Set_int random_sentence_goal, "<length> Set the goal length for a random sentence";
+  "--random-sentence", Arg.String random_sentence_abstract, "<sym> Generate a random valid sentence";
+  "--random-sentence-concrete", Arg.String random_sentence_concrete, "<sym> Generate a random valid sentence";
   "--raw-depend", Arg.Unit enable_raw_depend, " Invoke ocamldep and echo its raw output";
   "--reference-graph", Arg.Set reference_graph, " (undocumented)";
+  "--represent-states", Arg.Set represent_states, " (undocumented)";
+  "--represent-positions", Arg.Set represent_positions, " (undocumented)";
+  "--represent-values", Arg.Set represent_values, " (undocumented)";
+  "--represent-everything", Arg.Unit represent_everything, " (undocumented)";
   "--require-aliases", Arg.Set require_aliases, " Check that every token has a token alias";
   "--stdlib", Arg.String ignore, "<directory> Ignored (deprecated)";
   "--strategy", Arg.String set_strategy, "<strategy> Choose an error-handling strategy";
@@ -589,6 +652,9 @@ let ignore_all_unused_precedence_levels =
 let list_errors =
   !list_errors
 
+let list_errors_algorithm : list_errors_algorithm =
+  !list_errors_algorithm
+
 let compile_errors =
   !compile_errors
 
@@ -637,6 +703,15 @@ let dollars =
 let require_aliases =
   !require_aliases
 
+let random_sentence =
+  match !random_sentence_symbol with
+  | None ->
+      None
+  | Some nt ->
+      let goal = !random_sentence_goal
+      and style = !random_sentence_style in
+      Some (nt, goal, style)
+
 let strategy =
   !strategy
 
@@ -665,3 +740,20 @@ let infer =
       IMNone
   | _ ->
       infer
+
+(* [--table] or [--coq] implies [--represent-everything]. Indeed, only the
+   code back-ends need clever computations of which states, values, and
+   positions are represented as part of stack cells. *)
+
+let () =
+  if table || coq then
+    represent_everything()
+
+let represent_positions =
+  !represent_positions
+
+let represent_states =
+  !represent_states
+
+let represent_values =
+  !represent_values

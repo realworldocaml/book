@@ -44,9 +44,6 @@ module Endpoint (P : Mirage_clock.PCLOCK) : sig
       {{:https://github.com/mirage/ca-certs-nss} trust anchors extracted from
       Mozilla's NSS}. *)
 
-  val ok_authenticator : X509.Authenticator.t
-  (** [ok_authenticator] is the validator which accepts all certificates. *)
-
   val client :
     ?tls_authenticator:X509.Authenticator.t -> Conduit.endp -> client Lwt.t
   (** [client] resolves a conduit endpoint into a client configuration.
@@ -58,8 +55,7 @@ module Endpoint (P : Mirage_clock.PCLOCK) : sig
     ?tls_authenticator:X509.Authenticator.t -> Conduit.endp -> server Lwt.t
   (** [server] resolves a confuit endpoint into a server configuration.
 
-      The certificate is validated using [tls_authenticator]. By default, it is
-      [ok_authenticator]. *)
+      Clent certificates are validated using [tls_authenticator]. *)
 end
 
 module type S = sig

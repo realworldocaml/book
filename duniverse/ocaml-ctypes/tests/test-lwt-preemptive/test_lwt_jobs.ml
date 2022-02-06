@@ -25,7 +25,7 @@ let test_sqrt _ =
  *)
 let test_object_lifetime _ =
   let call = 
-    let open Bigarray in 
+    let open Bigarray_compat in 
     let b = Array1.create int32 c_layout 3 in
     begin
       b.{0} <- 1l;

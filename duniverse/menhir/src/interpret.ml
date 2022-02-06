@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -54,30 +51,6 @@ type run = {
   (* A message. *)
   message: message;
 }
-
-(* --------------------------------------------------------------------------- *)
-
-(* Display and debugging. *)
-
-let print_sentence (nto, terminals) : string =
-  Misc.with_buffer 128 (fun b ->
-    Option.iter (fun nt ->
-      bprintf b "%s: " (Nonterminal.print false nt)
-    ) nto;
-    let separator = Misc.once "" " " in
-    List.iter (fun t ->
-      bprintf b "%s%s" (separator()) (Terminal.print t)
-    ) terminals;
-    bprintf b "\n";
-  )
-
-let print_concrete_sentence (_nto, terminals) : string =
-  Misc.with_buffer 128 (fun b ->
-    let separator = Misc.once "" " " in
-    List.iter (fun t ->
-      bprintf b "%s%s" (separator()) (Option.force (Terminal.unquoted_alias t))
-    ) terminals
-  )
 
 (* --------------------------------------------------------------------------- *)
 
@@ -223,12 +196,6 @@ let interpret_error_aux log poss ((_, terminals) as sentence) fail succeed =
 let default_message =
   "<YOUR SYNTAX ERROR MESSAGE HERE>\n"
 
-(* This is needed in the following function. If [print_messages_auto] is never
-   called, then we end up needlessly performing this analysis. Fortunately, it
-   is extremely cheap. *)
-
-module SS = StackSymbols.Run()
-
 (* [print_messages_auto (nt, sentence, target)] displays the sentence
    defined by [nt] and [sentence], leading to the state [target]. It
    then displays a bunch of auto-generated comments. *)
@@ -236,7 +203,7 @@ module SS = StackSymbols.Run()
 let print_messages_auto (nt, sentence, target) : unit =
 
   (* Print the sentence. *)
-  print_string (print_sentence (Some nt, sentence));
+  print_string (Sentence.print `Abstract (Some nt, sentence));
 
   (* If a token alias has been defined for every terminal symbol, then
      we can convert this sentence into concrete syntax. Do so. We make
@@ -250,7 +217,7 @@ let print_messages_auto (nt, sentence, target) : unit =
     printf
       "##\n\
        ## Concrete syntax: %s\n"
-      (print_concrete_sentence (Some nt, sentence))
+      (Sentence.print `Concrete (Some nt, sentence))
   ;
 
   (* Show which state this sentence leads to. *)
@@ -271,7 +238,7 @@ let print_messages_auto (nt, sentence, target) : unit =
     "## The known suffix of the stack is as follows:\n\
      ##%s\n\
      ##\n"
-    (SS.print_stack_symbols s')
+    (StackSymbols.print_symbols (StackSymbolsShort.stack_symbols s'))
   ;
 
   (* If interpreting this sentence causes spurious reductions (that is,
@@ -1195,7 +1162,7 @@ let () =
     (* Echo. *)
     List.iter (or_comment_iter (fun run ->
       List.iter (or_comment_iter (fun ((_, sentence), _target) ->
-        print_string (print_sentence sentence)
+        print_string (Sentence.print `Abstract sentence)
       )) run.elements
     )) runs;
 
@@ -1215,11 +1182,11 @@ let () =
     (* Echo. *)
     List.iter (or_comment_iter (fun run ->
       List.iter (or_comment_iter (fun ((_, sentence), _target) ->
-        print_string (print_sentence sentence);
+        print_string (Sentence.print `Abstract sentence);
         if Terminal.every_token_has_an_alias then
           printf
             "## Concrete syntax: %s\n"
-            (print_concrete_sentence sentence)
+            (Sentence.print `Concrete sentence)
       )) run.elements
     )) runs;
 

@@ -1,3 +1,4 @@
+version: "1.1.0"
 opam-version: "2.0"
 maintainer: "Lucas Pluvinage <lucas.pluvinage@gmail.com>"
 authors: [ "Lucas Pluvinage <lucas.pluvinage@gmail.com>" ]
@@ -10,10 +11,9 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml" {>= "4.03.0"}
-  "dune" {build & >= "1.0"}
+  "ocaml" {>= "4.02.3"}
+  "dune" {>= "1.0"}
 ]
 synopsis:
   "Compatibility library to use Stdlib.Bigarray when possible"
 name: "bigarray-compat"
-version: "1.0.0"

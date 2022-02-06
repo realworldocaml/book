@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -1001,6 +998,20 @@ module Domain = struct
     with NotSubset ->
       false
 
+  let quick_subset _ =
+    failwith "Patricia.quick_subset: not implemented"
+
+  let compare_minimum _ =
+    failwith "Patricia.compare_minimum: not implemented"
+
+  let extract_unique_prefix _ =
+    failwith "Patricia.extract_unique_prefix: not implemented"
+
+  let extract_shared_prefix _ =
+    failwith "Patricia.extract_shared_prefix: not implemented"
+
+  let sorted_union _ =
+    failwith "Patricia.sorted_union: not implemented"
 end
 
 (*i --------------------------------------------------------------------------------------------------------------- i*)
@@ -1077,7 +1088,6 @@ end
           else
 
             s
-
 end
 
 (*i --------------------------------------------------------------------------------------------------------------- i*)

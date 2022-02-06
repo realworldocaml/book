@@ -1,4 +1,4 @@
-version: "0.14.1"
+version: "0.15.2"
 opam-version: "2.0"
 homepage:     "https://github.com/mirleft/ocaml-tls"
 dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
@@ -21,7 +21,6 @@ depends: [
   "x509" {>= "0.14.0"}
   "ptime" {>= "0.8.1"}
   "async" {>= "v0.14"}
-  "async_find" {>= "v0.14"}
   "async_unix" {>= "v0.14"}
   "core" {>= "v0.14"}
   "cstruct-async"

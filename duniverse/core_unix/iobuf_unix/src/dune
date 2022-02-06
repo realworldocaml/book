@@ -1,0 +1,2 @@
+(library (name core_unix_iobuf_unix) (public_name core_unix.iobuf_unix)
+  (libraries core.iobuf_unix) (preprocess no_preprocessing))

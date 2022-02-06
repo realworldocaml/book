@@ -218,7 +218,7 @@ module X509 (KV : Mirage_kv.RO) (C: Mirage_clock.PCLOCK) = struct
 
   let err_fail pp = function
     | Ok x -> return x
-    | Error e -> Fmt.kstrf fail_with "%a" pp e
+    | Error e -> Fmt.kstr fail_with "%a" pp e
 
   let pp_msg ppf = function `Msg m -> Fmt.string ppf m
 

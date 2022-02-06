@@ -80,12 +80,16 @@ end
 
 let get_char (s:Bytes.t) off =
   Bytes.get s off
+  [@@ocaml.inline]
 let set_char (s:Bytes.t) off v =
   Bytes.set s off v
+  [@@ocaml.inline]
 let unsafe_get_char (s:Bytes.t) off =
   Bytes.unsafe_get s off
+  [@@ocaml.inline]
 let unsafe_set_char (s:Bytes.t) off v =
   Bytes.unsafe_set s off v
+  [@@ocaml.inline]
 
 #include "common.ml"
 

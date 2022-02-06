@@ -1,0 +1,20 @@
+Testing `assert-and-verbose'.
+This run has ID `<uuid>'.
+
+ASSERT alpha-0 check
+alpha-0 standard out
+  [OK]          alpha          0   check → stdout.
+
+alpha-1 standard out
+ASSERT alpha-1 check
+  [OK]          alpha          1   stdout → check.
+ASSERT alpha-2 check
+alpha-2 standard error
+  [OK]          alpha          2   check → stderr.
+
+beta-0 standard out
+ASSERT beta-0 check
+beta-0 standard error
+  [OK]          beta           0   stdout → check → stderr.
+
+Test Successful in <test-duration>s. 4 tests run.

@@ -105,6 +105,13 @@ void lwt_unix_not_available(char const *feature) {
    | Operation on bigarrays                                          |
    +-----------------------------------------------------------------+ */
 
+/* Needed while Lwt supports OCaml < 4.06. */
+#ifdef Bytes_val
+#define Lwt_bytes_val(v) Bytes_val(v)
+#else
+#define Lwt_bytes_val(v) String_val(v)
+#endif
+
 CAMLprim value lwt_unix_blit(value val_buf1, value val_ofs1, value val_buf2,
                              value val_ofs2, value val_len) {
   memmove((char *)Caml_ba_data_val(val_buf2) + Long_val(val_ofs2),
@@ -117,16 +124,18 @@ CAMLprim value lwt_unix_blit_from_bytes(value val_buf1, value val_ofs1,
                                         value val_buf2, value val_ofs2,
                                         value val_len) {
   memcpy((char *)Caml_ba_data_val(val_buf2) + Long_val(val_ofs2),
+         Lwt_bytes_val(val_buf1) + Long_val(val_ofs1), Long_val(val_len));
+  return Val_unit;
+}
+
+CAMLprim value lwt_unix_blit_from_string(value val_buf1, value val_ofs1,
+                                        value val_buf2, value val_ofs2,
+                                        value val_len) {
+  memcpy((char *)Caml_ba_data_val(val_buf2) + Long_val(val_ofs2),
          String_val(val_buf1) + Long_val(val_ofs1), Long_val(val_len));
   return Val_unit;
 }
 
-/* Needed while Lwt supports OCaml < 4.06. */
-#ifdef Bytes_val
-#define Lwt_bytes_val(v) Bytes_val(v)
-#else
-#define Lwt_bytes_val(v) String_val(v)
-#endif
 
 CAMLprim value lwt_unix_blit_to_bytes(value val_buf1, value val_ofs1,
                                       value val_buf2, value val_ofs2,
@@ -337,12 +346,16 @@ static void lwt_unix_socketpair(int domain, int type, int protocol,
                                 SOCKET sockets[2]) {
   union {
     struct sockaddr_in inaddr;
+    struct sockaddr_in6 inaddr6;
     struct sockaddr addr;
   } a;
   SOCKET listener;
-  int addrlen = sizeof(a.inaddr);
+  int addrlen;
   int reuse = 1;
   DWORD err;
+
+  if (domain != PF_INET && domain != PF_INET6)
+    unix_error(ENOPROTOOPT, "socketpair", Nothing);
 
   sockets[0] = INVALID_SOCKET;
   sockets[1] = INVALID_SOCKET;
@@ -351,28 +364,41 @@ static void lwt_unix_socketpair(int domain, int type, int protocol,
   if (listener == INVALID_SOCKET) goto failure;
 
   memset(&a, 0, sizeof(a));
-  a.inaddr.sin_family = domain;
-  a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  a.inaddr.sin_port = 0;
+  if (domain == PF_INET) {
+    a.inaddr.sin_family = domain;
+    a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    a.inaddr.sin_port = 0;
+  } else {
+    a.inaddr6.sin6_family = domain;
+    a.inaddr6.sin6_addr = in6addr_loopback;
+    a.inaddr6.sin6_port = 0;
+  }
 
   if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse,
                  sizeof(reuse)) == -1)
     goto failure;
 
-  if (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR) goto failure;
+  addrlen = domain == PF_INET ? sizeof(a.inaddr) : sizeof(a.inaddr6);
+  if (bind(listener, &a.addr, addrlen) == SOCKET_ERROR) goto failure;
 
   memset(&a, 0, sizeof(a));
   if (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR) goto failure;
 
-  a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  a.inaddr.sin_family = AF_INET;
+  if (domain == PF_INET) {
+    a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    a.inaddr.sin_family = AF_INET;
+  } else {
+    a.inaddr6.sin6_addr = in6addr_loopback;
+    a.inaddr6.sin6_family = AF_INET6;
+  }
 
   if (listen(listener, 1) == SOCKET_ERROR) goto failure;
 
   sockets[0] = socket(domain, type, protocol);
   if (sockets[0] == INVALID_SOCKET) goto failure;
 
-  if (connect(sockets[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
+  addrlen = domain == PF_INET ? sizeof(a.inaddr) : sizeof(a.inaddr6);
+  if (connect(sockets[0], &a.addr, addrlen) == SOCKET_ERROR)
     goto failure;
 
   sockets[1] = accept(listener, NULL, NULL);
@@ -390,7 +416,7 @@ failure:
   uerror("socketpair", Nothing);
 }
 
-static int socket_domain_table[] = {PF_UNIX, PF_INET};
+static int socket_domain_table[] = {PF_UNIX, PF_INET, PF_INET6};
 
 static int socket_type_table[] = {SOCK_STREAM, SOCK_DGRAM, SOCK_RAW,
                                   SOCK_SEQPACKET};

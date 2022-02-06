@@ -2,13 +2,13 @@
     only shown when standard output is a TTY). *)
 
 module Platform (M : Alcotest_engine.Monad.S) = struct
-  include Alcotest.Unix (M)
+  include Alcotest.Unix_platform (M)
 
   let stdout_isatty () = true
 end
 
 module Alcotest =
-  Alcotest_engine.Core.Make (Platform) (Alcotest_engine.Monad.Identity)
+  Alcotest_engine.V1.Core.Make (Platform) (Alcotest_engine.Monad.Identity)
 
 let () =
   let open Alcotest in

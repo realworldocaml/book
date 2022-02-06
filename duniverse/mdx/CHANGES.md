@@ -1,3 +1,37 @@
+### 2.1.0
+
+#### Added
+
+- Add support for adding language tags and metadata labels in `mli` files.
+  (#339, #357, @julow, @Leonidas-from-XIV)
+- Add support for running non-deterministic tests in `dune` MDX 0.2 stanza by
+  setting the `MDX_RUN_NON_DETERMINISTIC` environment variable. (#365,
+  #366, @Leonidas-from-XIV)
+
+### 2.0.0
+
+#### Added
+
+- Add trailing `;;` to the output of toplevel phrases that were missing it.
+  (#346, @Leonidas-from-XIV)
+- Make MDX compatible with OCaml 4.14 (#356, @NathanReb)
+
+#### Fixed
+
+- Use the same output as the normal toplevel. Mdx used to carry an unsafe patch
+  to work around a bug fixed in OCaml 4.06 and that patch would change the
+  printed types in some corner cases. (#322, @emillon)
+
+#### Removed
+
+- Dropped compatibility with older OCaml versions. The minimal supported range
+  is 4.08 to 4.13 now (#345, @Leonidas-from-XIV)
+- Do not install deprecated `mdx` binary anymore (#274, @gpetiot)
+- Remove deprecated `rule` command (#312, @gpetiot)
+- Remove support for `require-package` label, use the `mdx` stanza in dune
+  instead. This label was only used for the `rule` command and can now be
+  safely removed. (#363, @Leonidas-from-XIV)
+
 ### 1.11.0
 
 #### Added

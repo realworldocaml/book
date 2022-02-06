@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -402,9 +399,7 @@ and production_aux
         the error to be reported in the source file. *)
 
       (* Build the tuple as an IL expression. *)
-      let evar x = IL.EVar x in
-      let evars xs = List.map evar xs in
-      let tuple = CodeBits.etuple (evars (tuple context)) in
+      let tuple = CodeBits.(etuple (evars (tuple context))) in
       (* Build an application of [id] to this tuple. *)
       (* We abuse the abstract syntax of IL and build an application node,
          regardless of whether [id] is a (possibly qualified) value, a (possibly

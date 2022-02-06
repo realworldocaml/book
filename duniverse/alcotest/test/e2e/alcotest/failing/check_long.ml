@@ -1,6 +1,6 @@
-(** These tests check the wrapping behaviour of [Alcotest.check]'s emitted diff. *)
+open Alcotest_stdlib_ext
 
-open Alcotest_engine.Private.Utils
+(** These tests check the wrapping behaviour of [Alcotest.check]'s emitted diff. *)
 
 let id_case typ typ_str v1 v2 =
   Alcotest.test_case typ_str `Quick (fun () -> Alcotest.check typ typ_str v1 v2)

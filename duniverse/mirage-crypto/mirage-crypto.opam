@@ -1,4 +1,4 @@
-version: "0.10.3"
+version: "0.10.5"
 opam-version: "2.0"
 homepage:     "https://github.com/mirage/mirage-crypto"
 dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
@@ -19,9 +19,8 @@ depends: [
   "dune" {>= "2.6"}
   "dune-configurator" {>= "2.0.0"}
   "ounit" {with-test}
-  "cstruct" {>="3.2.0"}
-  "eqaf" {>= "0.7"}
-  "bigarray-compat" # required to get eqaf.cstruct
+  "cstruct" {>="6.0.0"}
+  "eqaf" {>= "0.8"}
 ]
 depopts: [
   "ocaml-freestanding"

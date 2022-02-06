@@ -1,4 +1,4 @@
-version: "0.10.3"
+version: "0.10.5"
 opam-version: "2.0"
 synopsis: "Elliptic Curve Cryptography with primitives taken from Fiat"
 description: """
@@ -29,7 +29,7 @@ depends: [
   "conf-pkg-config" {build}
   "dune" {>= "2.6"}
   "ocaml" {>= "4.08.0"}
-  "cstruct" {>= "3.5.0"}
+  "cstruct" {>= "6.0.0"}
   "dune-configurator"
   "eqaf" {>= "0.7"}
   "mirage-crypto" {=version}

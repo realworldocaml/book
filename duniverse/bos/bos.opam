@@ -1,12 +1,11 @@
+version: "0.2.1+dune"
 opam-version: "2.0"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
-homepage: "http://erratique.ch/software/bos"
-doc: "http://erratique.ch/software/bos/doc"
 dev-repo: "git+https://github.com/dune-universe/bos.git"
-bug-reports: "https://github.com/dbuenzli/bos/issues"
 tags: [ "os" "system" "cli" "command" "file" "path" "log" "unix" "org:erratique" ]
 license: "ISC"
+build: [[ "dune" "build" "-p" name ]]
 depends: [
   "dune"
   "ocaml" {>= "4.01.0"}
@@ -35,8 +34,7 @@ distributed under the ISC license.
 [astring]: http://erratique.ch/software/astring
 [fmt]: http://erratique.ch/software/fmt
 [fpath]: http://erratique.ch/software/fpath
-[logs]: http://erratique.ch/software/logs"""
-build: [[ "dune" "build" "-p" name ]]
-url {
-  src: "git://github.com/dune-universe/bos.git#duniverse-v0.2.0"
-}
+[logs]: http://erratique.ch/software/logs
+
+Home page: http://erratique.ch/software/bos  
+Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`"""

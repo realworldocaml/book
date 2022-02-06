@@ -1,3 +1,15 @@
+v0.2.1 2021-10-04 Zagreb
+------------------------
+
+- Require OCaml >= 4.08.
+- `OS.Dir.create` fix function result on existing files. It returned
+  non-sensical results. The function now errors as it should
+  be. Thanks to Léo Andrès for the report.
+- `OS.Dir.create` fix function returning `false` instead of 
+  `true` when the directory is created with `~path:false`.
+  Thanks to Léo Andrès for the report and patch.
+- `OS.File.read` support for reading character devices and named
+  pipes. Thanks to Rizo Isrof for the patch.
 
 v0.2.0 2017-12-27 La Forclaz (VS)
 ---------------------------------

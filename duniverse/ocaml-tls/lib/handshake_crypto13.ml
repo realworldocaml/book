@@ -1,4 +1,4 @@
-let (<+>) = Cstruct.append
+open Core
 
 let cdiv (x : int) (y : int) =
   if x > 0 && y > 0 then (x + y - 1) / y
@@ -10,49 +10,37 @@ let left_pad_dh group msg =
   let padding = Cstruct.create (bytes - Cstruct.length msg) in
   padding <+> msg
 
-let not_all_zero = function
-  | Error _ as e -> e
-  | Ok cs ->
-    let all_zero = Cstruct.create (Cstruct.length cs) in
-    if Cstruct.equal all_zero cs then
-      Error (`Fatal `InvalidDH)
-    else
-      Ok cs
+let not_all_zero r =
+  let* cs = r in
+  let all_zero = Cstruct.create (Cstruct.length cs) in
+  if Cstruct.equal all_zero cs then
+    Error (`Fatal `InvalidDH)
+  else
+    Ok cs
 
 let dh_shared secret share =
   (* RFC 8556, Section 7.4.1 - we need zero-padding on the left *)
+  let map_ecdh_error = Result.map_error (fun e -> `Fatal (`BadECDH e)) in
+  let open Mirage_crypto_ec in
   not_all_zero
     (match secret with
      | `Finite_field secret ->
        let group = secret.Mirage_crypto_pk.Dh.group in
        let bits = Mirage_crypto_pk.Dh.modulus_size group in
-       if Cstruct.length share = cdiv bits 8 then
-         begin match Mirage_crypto_pk.Dh.shared secret share with
-           | None -> Error (`Fatal `InvalidDH)
-           | Some shared -> Ok (left_pad_dh group shared)
-         end
-       else (* truncated share, better reject this *)
-         Error (`Fatal `InvalidDH)
-     | `P256 priv ->
-       begin match Mirage_crypto_ec.P256.Dh.key_exchange priv share with
-         | Error e -> Error (`Fatal (`BadECDH e))
-         | Ok shared -> Ok shared
-       end
-     | `P384 priv ->
-       begin match Mirage_crypto_ec.P384.Dh.key_exchange priv share with
-         | Error e -> Error (`Fatal (`BadECDH e))
-         | Ok shared -> Ok shared
-       end
-     | `P521 priv ->
-       begin match Mirage_crypto_ec.P521.Dh.key_exchange priv share with
-         | Error e -> Error (`Fatal (`BadECDH e))
-         | Ok shared -> Ok shared
-       end
-     | `X25519 priv ->
-       begin match Mirage_crypto_ec.X25519.key_exchange priv share with
-         | Error e -> Error (`Fatal (`BadECDH e))
-         | Ok shared -> Ok shared
-       end)
+       let* () =
+         (* truncated share, better reject this *)
+         guard (Cstruct.length share = cdiv bits 8) (`Fatal `InvalidDH)
+       in
+       let* shared =
+         Option.to_result
+           ~none:(`Fatal `InvalidDH)
+           (Mirage_crypto_pk.Dh.shared secret share)
+       in
+       Ok (left_pad_dh group shared)
+     | `P256 priv -> map_ecdh_error (P256.Dh.key_exchange priv share)
+     | `P384 priv -> map_ecdh_error (P384.Dh.key_exchange priv share)
+     | `P521 priv -> map_ecdh_error (P521.Dh.key_exchange priv share)
+     | `X25519 priv -> map_ecdh_error (X25519.key_exchange priv share))
 
 let dh_gen_key group =
   (* RFC 8556, Section 4.2.8.1 - we need zero-padding on the left *)

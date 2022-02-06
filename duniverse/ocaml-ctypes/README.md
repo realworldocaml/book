@@ -2,7 +2,7 @@ ctypes is a library for binding to C libraries using pure OCaml.  The primary ai
 
 The core of ctypes is a set of combinators for describing the structure of C types -- numeric types, arrays, pointers, structs, unions and functions.  You can use these combinators to describe the types of the functions that you want to call, then bind directly to those functions -- all without writing or generating any C!
 
-[![Travis build Status](https://travis-ci.org/ocamllabs/ocaml-ctypes.svg?branch=master)](https://travis-ci.org/ocamllabs/ocaml-ctypes) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/n5geenq8sinlptfv/branch/master?svg=true)](https://ci.appveyor.com/project/yallop/ocaml-ctypes/branch/master) ![GitHub Actions status](https://github.com/ocamllabs/ocaml-ctypes/workflows/Ctypes/badge.svg)
+![GitHub Actions status](https://github.com/ocamllabs/ocaml-ctypes/workflows/Ctypes/badge.svg)
 
 ## Usage
 
@@ -42,7 +42,7 @@ The documentation and source distribution contain more complex examples, involvi
 
 ## Links
 
-* [Chapter 19: Foreign Function Interface][rwo-19] of [Real World OCaml][rwo] describes ctypes
+* [Chapter 19: Foreign Function Interface][rwo-ffi] of [Real World OCaml][rwo] describes ctypes
 * [Modular Foreign Function Bindings][mirage-blogpost] introduces ctypes in the context of the [Mirage][mirage] library operating system
 * [Tutorial][tutorial]
 * [API documentation][apidoc]
@@ -52,14 +52,14 @@ The documentation and source distribution contain more complex examples, involvi
 * [A modular foreign function interface][scp-extended] is a research paper (extending an [earlier paper][flops-paper]) that presents the design of ctypes
 * [FAQ][faq]
 
-[rwo-19]: https://realworldocaml.org/v1/en/html/foreign-function-interface.html
+[rwo-ffi]: https://dev.realworldocaml.org/foreign-function-interface.html
 [rwo]: http://realworldocaml.org/
-[mirage-blogpost]: http://openmirage.org/blog/modular-foreign-function-bindings
+[mirage-blogpost]: https://mirage.io/blog/modular-foreign-function-bindings
 [tutorial]: https://github.com/ocamllabs/ocaml-ctypes/wiki/ctypes-tutorial
-[apidoc]: http://ocamllabs.github.io/ocaml-ctypes
+[apidoc]: https://docs.ocaml.pro/docs/LIBRARY.ctypes@ctypes.0.17.1/index.html
 [mailing-list]: http://lists.ocaml.org/listinfo/ctypes
 [faq]: https://github.com/ocamllabs/ocaml-ctypes/wiki/FAQ
-[mirage]: http://openmirage.org
+[mirage]: https://mirage.io/
 [sjb-cstubs-post]: http://simonjbeaumont.com/posts/ocaml-ctypes/
 [cstubs]: https://github.com/ocamllabs/ocaml-ctypes/blob/master/src/cstubs/cstubs.mli
 [orbitz-cstubs_structs]: https://github.com/ocamllabs/ocaml-ctypes/blob/master/examples/cstubs_structs/README.md

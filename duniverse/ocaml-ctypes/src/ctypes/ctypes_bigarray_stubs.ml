@@ -20,36 +20,36 @@ type _ kind =
   | Kind_complex64 : Complex.t kind
   | Kind_char : char kind
 
-let kind : type a b. (a, b) Bigarray.kind -> a kind = function
-  | Bigarray.Float32 -> Kind_float32
-  | Bigarray.Float64 -> Kind_float64
-  | Bigarray.Int8_signed -> Kind_int8_signed
-  | Bigarray.Int8_unsigned -> Kind_int8_unsigned
-  | Bigarray.Int16_signed -> Kind_int16_signed
-  | Bigarray.Int16_unsigned -> Kind_int16_unsigned
-  | Bigarray.Int32 -> Kind_int32
-  | Bigarray.Int64 -> Kind_int64
-  | Bigarray.Int -> Kind_int
-  | Bigarray.Nativeint -> Kind_nativeint
-  | Bigarray.Complex32 -> Kind_complex32
-  | Bigarray.Complex64 -> Kind_complex64
-  | Bigarray.Char -> Kind_char
+let kind : type a b. (a, b) Bigarray_compat.kind -> a kind = function
+  | Bigarray_compat.Float32 -> Kind_float32
+  | Bigarray_compat.Float64 -> Kind_float64
+  | Bigarray_compat.Int8_signed -> Kind_int8_signed
+  | Bigarray_compat.Int8_unsigned -> Kind_int8_unsigned
+  | Bigarray_compat.Int16_signed -> Kind_int16_signed
+  | Bigarray_compat.Int16_unsigned -> Kind_int16_unsigned
+  | Bigarray_compat.Int32 -> Kind_int32
+  | Bigarray_compat.Int64 -> Kind_int64
+  | Bigarray_compat.Int -> Kind_int
+  | Bigarray_compat.Nativeint -> Kind_nativeint
+  | Bigarray_compat.Complex32 -> Kind_complex32
+  | Bigarray_compat.Complex64 -> Kind_complex64
+  | Bigarray_compat.Char -> Kind_char
 
 external address : 'b -> Ctypes_ptr.voidp
   = "ctypes_bigarray_address"
 
 external view : 'a kind -> dims:int array -> _ Ctypes_ptr.Fat.t ->
-  'l Bigarray.layout -> ('a, 'b, 'l) Bigarray.Genarray.t
+  'l Bigarray_compat.layout -> ('a, 'b, 'l) Bigarray_compat.Genarray.t
   = "ctypes_bigarray_view"
 
 external view1 : 'a kind -> dims:int array -> _ Ctypes_ptr.Fat.t ->
-  'l Bigarray.layout -> ('a, 'b, 'l) Bigarray.Array1.t
+  'l Bigarray_compat.layout -> ('a, 'b, 'l) Bigarray_compat.Array1.t
   = "ctypes_bigarray_view"
 
 external view2 : 'a kind -> dims:int array -> _ Ctypes_ptr.Fat.t ->
-  'l Bigarray.layout -> ('a, 'b, 'l) Bigarray.Array2.t
+  'l Bigarray_compat.layout -> ('a, 'b, 'l) Bigarray_compat.Array2.t
   = "ctypes_bigarray_view"
 
 external view3 : 'a kind -> dims:int array -> _ Ctypes_ptr.Fat.t ->
-  'l Bigarray.layout -> ('a, 'b, 'l) Bigarray.Array3.t
+  'l Bigarray_compat.layout -> ('a, 'b, 'l) Bigarray_compat.Array3.t
   = "ctypes_bigarray_view"

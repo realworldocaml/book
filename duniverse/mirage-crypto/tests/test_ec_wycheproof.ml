@@ -19,7 +19,7 @@ let parse_asn1 curve s =
   match Asn.decode (Asn.codec Asn.ber term) cs with
   | Error _ -> Error "ASN1 parse error"
   | Ok (((oid1, oid2), data), rest) ->
-      if Cstruct.len rest <> 0 then Error "ASN1 leftover"
+      if Cstruct.length rest <> 0 then Error "ASN1 leftover"
       else if not (Asn.OID.equal oid1 ec_public_key) then
         Error "ASN1: wrong oid 1"
       else if not (Asn.OID.equal oid2 prime_oid) then Error "ASN1: wrong oid 2"
@@ -38,7 +38,7 @@ let to_string_result ~pp_error = function
       Error msg
 
 let pad ~total_len cs =
-  match total_len - Cstruct.len cs with
+  match total_len - Cstruct.length cs with
   | 0 -> Ok cs
   | n when n < 0 ->
     let is_zero = ref true in
@@ -117,11 +117,19 @@ let interpret_invalid_test curve { public; private_ } () =
 type strategy = Test of test | Invalid_test of invalid_test | Skip
 
 let make_ecdh_test curve (test : ecdh_test) =
-  let ignored_flags = [ "CompressedPoint"; "UnnamedCurve" ] in
+  let ignored_flags = ["UnnamedCurve"] in
+  let curve_compression_test curve =
+    let curves = ["secp256r1"; "secp384r1"; "secp521r1"] in
+    test.tcId = 2 && List.exists (fun x -> String.equal x curve) curves
+  in
   match test.result with
   | _ when has_ignored_flag test ~ignored_flags -> Ok Skip
   | Invalid ->
       Ok (Invalid_test { public = test.public; private_ = test.private_ })
+  | Acceptable when curve_compression_test curve ->
+    parse_point curve test.public >>= fun public_key ->
+    parse_secret curve test.private_ >>= fun raw_private_key ->
+    Ok (Test { public_key; raw_private_key; expected = test.shared })
   | Acceptable -> Ok Skip
   | Valid ->
     parse_point curve test.public >>= fun public_key ->
@@ -152,7 +160,7 @@ let parse_sig cs =
   match Asn.(decode (codec der asn) cs) with
   | Error _ -> Error "ASN1 parse error"
   | Ok ((r, s), rest) ->
-    if Cstruct.len rest <> 0 then Error "ASN1 leftover"
+    if Cstruct.length rest <> 0 then Error "ASN1 leftover"
     else if Z.sign r < 0 || Z.sign s < 0 then
       Error "r and s must be >= 0"
     else
@@ -163,7 +171,7 @@ let make_ecdsa_test curve key hash (tst : dsa_test) =
   let size = len curve in
   let msg =
     let h = Mirage_crypto.Hash.digest hash (Cstruct.of_string tst.msg) in
-    Cstruct.sub h 0 (min size (Cstruct.len h))
+    Cstruct.sub h 0 (min size (Cstruct.length h))
   in
   let verified (r,s) =
     match curve with

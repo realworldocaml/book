@@ -1,5 +1,3 @@
-open Rresult
-
 type revoked_cert = {
   serial : Z.t ;
   date : Ptime.t ;
@@ -99,9 +97,11 @@ type t = {
 
 let guard p e = if p then Ok () else Error e
 
+let ( let* ) = Result.bind
+
 let decode_der raw =
-  Asn_grammars.err_to_msg (Asn.crl_of_cstruct raw) >>| fun asn ->
-  { raw ; asn }
+  let* asn = Asn_grammars.err_to_msg (Asn.crl_of_cstruct raw) in
+  Ok { raw ; asn }
 
 let encode_der { raw ; _ } = raw
 
@@ -152,20 +152,25 @@ let pp_verification_error ppf = function
       (Ptime.pp_human ~tz_offset_s:0 ()) now
 
 let verify ({ asn ; _ } as crl) ?allowed_hashes ?time cert =
-  let open Rresult.R.Infix in
   let subj = Certificate.subject cert in
-  guard
-    (Distinguished_name.equal asn.tbs_crl.issuer subj)
-    (`Issuer_subject_mismatch (asn.tbs_crl.issuer, subj)) >>= fun () ->
-  (match time with
-   | None -> Ok ()
-   | Some x ->
-     guard (Ptime.is_later ~than:asn.tbs_crl.this_update x)
-       (`Not_yet_valid (subj, x, asn.tbs_crl.this_update)) >>= fun () ->
-     match asn.tbs_crl.next_update with
-     | None -> Ok ()
-     | Some y -> guard (Ptime.is_earlier ~than:y x)
-                   (`Next_update_scheduled (subj, x, y))) >>= fun () ->
+  let* () =
+    guard
+      (Distinguished_name.equal asn.tbs_crl.issuer subj)
+      (`Issuer_subject_mismatch (asn.tbs_crl.issuer, subj))
+  in
+  let* () =
+    match time with
+    | None -> Ok ()
+    | Some x ->
+      let* () =
+        guard (Ptime.is_later ~than:asn.tbs_crl.this_update x)
+          (`Not_yet_valid (subj, x, asn.tbs_crl.this_update))
+      in
+      match asn.tbs_crl.next_update with
+      | None -> Ok ()
+      | Some y -> guard (Ptime.is_earlier ~than:y x)
+                    (`Next_update_scheduled (subj, x, y))
+  in
   validate ?allowed_hashes crl (Certificate.public_key cert)
 
 let reason (revoked : revoked_cert) =
@@ -197,16 +202,15 @@ let is_revoked ?allowed_hashes ~issuer:super ~cert (crls : t list) =
     crls
 
 let sign_tbs (tbs : tBS_CRL) key =
-  let open Rresult.R.Infix in
   let tbs_raw = Asn.tbs_CRL_to_cstruct tbs in
   match Algorithm.to_signature_algorithm tbs.signature with
   | None -> Error (`Msg "couldn't parse signature algorithm")
   | Some (_, hash) ->
     let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
-    Private_key.sign hash ~scheme key (`Message tbs_raw) >>| fun signature_val ->
+    let* signature_val = Private_key.sign hash ~scheme key (`Message tbs_raw) in
     let asn = { tbs_crl = tbs ; signature_algo = tbs.signature ; signature_val } in
     let raw = Asn.crl_to_cstruct asn in
-    { asn ; raw }
+    Ok { asn ; raw }
 
 let revoke
     ?digest

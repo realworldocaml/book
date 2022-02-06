@@ -1,0 +1,24 @@
+# Dune output.
+_build
+*.install
+*.merlin
+
+# Editor config
+.vscode
+
+# Bisect_ppx output.
+_coverage/
+
+# For local experiments.
+scratch/
+
+# opam v2
+_opam/
+
+# Esy outputs
+_release
+_esy
+
+# Generated docs
+docs/
+

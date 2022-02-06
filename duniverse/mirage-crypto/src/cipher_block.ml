@@ -267,11 +267,11 @@ module Modes = struct
       C.encrypt ~key ~blocks:1 z128.buffer z128.off h.buffer h.off;
       { key ; hkey = GHASH.derive h }
 
-    let bits64 cs = Int64.of_int (len cs * 8)
+    let bits64 cs = Int64.of_int (length cs * 8)
     let pack64s = let _cs = create_unsafe 16 in fun a b ->
                     BE.set_uint64 _cs 0 a; BE.set_uint64 _cs 8 b; _cs
 
-    let counter ~hkey nonce = match len nonce with
+    let counter ~hkey nonce = match length nonce with
       | 0 -> invalid_arg "GCM: invalid nonce of length 0"
       | 12 -> let (w1, w2) = BE.get_uint64 nonce 0, BE.get_uint32 nonce 8 in
               (w1, Int64.(shift_left (of_int32 w2) 32 |> add 1L))
@@ -291,11 +291,11 @@ module Modes = struct
 
     let authenticate_decrypt ~key:{ key; hkey } ~nonce ?adata cdata =
       let ctr  = counter ~hkey nonce in
-      if Cstruct.len cdata < tag_size then
+      if Cstruct.length cdata < tag_size then
         None
       else
         let cipher, tag_data =
-          Cstruct.split cdata (Cstruct.len cdata - tag_size)
+          Cstruct.split cdata (Cstruct.length cdata - tag_size)
         in
         let data = CTR.(encrypt ~key ~ctr:(add_ctr ctr 1L) cipher) in
         let ctag = tag ~key ~hkey ~ctr ?adata cipher in

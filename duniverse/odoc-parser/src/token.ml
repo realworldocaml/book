@@ -62,7 +62,8 @@ type t =
   | `Begin_link_with_replacement_text of string
   | (* Leaf block element markup. *)
     `Code_block of
-    string Loc.with_location option * string Loc.with_location
+    (string Loc.with_location * string Loc.with_location option) option
+    * string Loc.with_location
   | `Verbatim of string
   | `Modules of string
   | (* List markup. *)

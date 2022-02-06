@@ -1,0 +1,2 @@
+(library (name command_unix) (public_name core_unix.command_unix)
+  (libraries core) (preprocess no_preprocessing))

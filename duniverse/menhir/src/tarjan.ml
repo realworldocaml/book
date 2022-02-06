@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -122,7 +119,9 @@ end) = struct
       dx.number <- !counter;
       dx.low <- !counter
 
-  (* This reference will hold a list of all representative nodes. *)
+  (* This reference will hold a list of all representative nodes.
+     The components that have been identified last appear at the
+     head of the list. *)
 
   let representatives =
     ref []
@@ -206,8 +205,7 @@ end) = struct
     end
   )
 
-  (* There only remains to make our results accessible to the
-     outside. *)
+  (* There only remains to make our results accessible to the outside. *)
 
   let representative x =
     (table x).representative
@@ -215,13 +213,24 @@ end) = struct
   let scc x =
     (table x).scc
 
-  let iter action =
-    List.iter (fun x ->
+  let representatives =
+    Array.of_list !representatives
+
+  (* The array [representatives] contains a representative for each component.
+     The components that have been identified last appear first in this array.
+     A component is identified only after its successors have been identified;
+     therefore, this array is naturally in topological order. *)
+
+  let yield action x =
       let data = table x in
       assert (data.representative == x); (* a sanity check *)
-      assert (data.scc <> []); (* a sanity check *)
+      assert (data.scc <> []);           (* a sanity check *)
       action x data.scc
-    ) !representatives
+
+  let iter action =
+    Array.iter (yield action) representatives
+
+  let rev_topological_iter action =
+    MArray.iter_rev (yield action) representatives
 
 end
-

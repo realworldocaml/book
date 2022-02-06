@@ -7,8 +7,16 @@
 
 #if defined(LWT_ON_WINDOWS)
 
+#define CAML_NAME_SPACE
+#include <caml/version.h>
+#if OCAML_VERSION < 41300
+#define CAML_INTERNALS
+#endif
+#include <caml/memory.h>
 #include <caml/mlvalues.h>
+#include <caml/misc.h>
 #include <caml/unixsupport.h>
+#include <caml/osdeps.h>
 
 #include "lwt_unix.h"
 
@@ -40,23 +48,29 @@ static value result_system(struct job_system *job)
 
 CAMLprim value lwt_unix_system_job(value cmdline)
 {
+    CAMLparam1(cmdline);
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
+    DWORD flags = CREATE_UNICODE_ENVIRONMENT;
+    BOOL ret;
+
+    char_os *cmdlines = caml_stat_strdup_to_os(String_val(cmdline));
 
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
     si.cb = sizeof(si);
-    /* The cast to LPSTR below is only legitimate because we are calling
-       CreateProcessA. See https://github.com/ocsigen/lwt/pull/790. */
-    if (!CreateProcess(NULL, (LPSTR)String_val(cmdline), NULL, NULL, TRUE, 0,
-                       NULL, NULL, &si, &pi)) {
+
+    ret = CreateProcess(NULL, cmdlines, NULL, NULL, TRUE, flags,
+                        NULL, NULL, &si, &pi);
+    caml_stat_free(cmdlines);
+    if (!ret) {
         win32_maperr(GetLastError());
         uerror("CreateProcess", Nothing);
     } else {
         LWT_UNIX_INIT_JOB(job, system, 0);
         CloseHandle(pi.hThread);
         job->handle = pi.hProcess;
-        return lwt_unix_alloc_job(&(job->job));
+        CAMLreturn(lwt_unix_alloc_job(&(job->job)));
     }
 }
 #endif

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -27,6 +24,9 @@ let pvarlocated id =
   else
     PVarLocated id
 
+let tname name =
+  TypApp (name, [])
+
 (* Tuples. *)
 
 let etuple = function
@@ -45,50 +45,30 @@ let ptuple = function
   | ps ->
       PTuple ps
 
-(* A list subject to a condition. *)
-
-let ifn condition xs =
-  if condition then
-    xs
-  else
-    []
-
-let if1 condition x =
-  if condition then
-    [ x ]
-  else
-    []
-
-let ifnlazy condition xs =
-  if condition then
-    xs()
-  else
-    []
-
 (* The unit type. *)
 
 let tunit =
-  TypApp ("unit", [])
+  tname "unit"
 
 (* The Boolean type. *)
 
 let tbool =
-  TypApp ("bool", [])
+  tname "bool"
 
 (* The integer type. *)
 
 let tint =
-  TypApp ("int", [])
+  tname "int"
 
 (* The string type. *)
 
 let tstring =
-  TypApp ("string", [])
+  tname "string"
 
 (* The exception type. *)
 
 let texn =
-  TypApp ("exn", [])
+  tname "exn"
 
 (* The type of pairs. *)
 
@@ -98,7 +78,7 @@ let tpair typ1 typ2 =
 (* The type of lexer positions. *)
 
 let tposition =
-  TypApp ("Lexing.position", [])
+  tname "Lexing.position"
 
 (* The type of the $loc and $sloc keywords. *)
 
@@ -110,12 +90,12 @@ let tlocation =
 (* The type of lexer buffers. *)
 
 let tlexbuf =
-  TypApp ("Lexing.lexbuf", [])
+  tname "Lexing.lexbuf"
 
 (* The type of untyped semantic values. *)
 
 let tobj =
-  TypApp ("Obj.t", [])
+  tname "Obj.t"
 
 (* Building a type variable. *)
 
@@ -127,8 +107,16 @@ let tvar x : typ =
 let scheme qs t =
   {
     quantifiers = qs;
-    body = t
+    body = t;
+    locally_abstract = false
   }
+
+let local_scheme qs t =
+    {
+      quantifiers = qs;
+      body = t;
+      locally_abstract = true;
+    }
 
 (* Building a type scheme with no quantifiers out of a type. *)
 
@@ -137,8 +125,17 @@ let type2scheme t =
 
 (* Constraining an expression to have a (monomorphic) type. *)
 
-let annotate e t =
-  EAnnot (e, type2scheme t)
+(* The transformations that we perform on the fly are intended to improve
+   readability. *)
+
+let rec annotate e t =
+  match e with
+  | EComment (c, e) ->
+      EComment (c, annotate e t)
+  | ELet (bs, e) ->
+      ELet (bs, annotate e t)
+  | _ ->
+      EAnnot (e, type2scheme t)
 
 let pat2var = function
   | PVar x ->
@@ -163,7 +160,7 @@ let rec simplify = function
 
 (* Building a [let] construct, with on-the-fly simplification. *)
 
-let blet (bindings, body) =
+let rec blet (bindings, body) =
   let bindings = simplify bindings in
   match bindings, body with
   | [], _ ->
@@ -171,6 +168,9 @@ let blet (bindings, body) =
   | [ PVar x1, e ], EVar x2 when x1 = x2 ->
       (* Reduce [let x = e in x] to just [e]. *)
       e
+  | (PUnit, EUnit) :: bindings, _ ->
+      (* Reduce [let () = () in e] to just [e]. *)
+      blet (bindings, body)
   | _, _ ->
       ELet (bindings, body)
 
@@ -201,11 +201,18 @@ let eletand (bindings, body) =
 let eraisenotfound =
   ERaise (EData ("Not_found", []))
 
+let eassert e =
+  EApp (EVar "assert", [ e ])
+
 (* [bottom] is an expression that has every type. Its semantics is
    irrelevant. *)
 
+(* We used to use [raise Not_found], but this causes a problem in Facebook's
+   Infer project, where this triggers a deprecation warning. So, we define
+   a divergent function insteead. *)
+
 let bottom =
-  eraisenotfound
+  EBottom
 
 (* Boolean constants. *)
 
@@ -254,6 +261,27 @@ let arrowif flag typ body : typ =
 let marrow typs body : typ =
   List.fold_right arrow typs body
 
+(* Tracing. *)
+
+let eprintf format args =
+  EApp (
+    EVar "Printf.eprintf",
+    (EStringConst (format ^ "\n%!")) ::
+    args
+  )
+
+let trace (format : string) (args : expr list) : (pattern * expr) list =
+  if Settings.trace then
+    [ PUnit, eprintf format args ]
+  else
+    []
+
+let tracecomment (comment : string) (body : expr) : expr =
+  if Settings.trace then
+    blet (trace comment [], body)
+  else
+    EComment (comment, body)
+
 (* ------------------------------------------------------------------------ *)
 (* Here is a bunch of naming conventions. Our names are chosen to minimize
    the likelihood that a name in a semantic action is captured. In other
@@ -266,18 +294,21 @@ let prefix name =
   if Settings.noprefix then
     name
   else
+    (* This prefix must begin with an underscore. *)
     "_menhir_" ^ name
 
 let dataprefix name =
   if Settings.noprefix then
     name
   else
+    (* This prefix must begin with a capital letter. *)
     "Menhir" ^ name
 
 let tvprefix name =
   if Settings.noprefix then
     name
   else
+    (* This prefix must begin with an ordinary letter (not an underscore). *)
     "ttv_" ^ name
 
 (* ------------------------------------------------------------------------ *)
@@ -323,3 +354,27 @@ let field modifiable name t =
 
 let branch branchpat branchbody =
   { branchpat; branchbody }
+
+let evar s =
+  EVar s
+
+let evars xs =
+  List.map evar xs
+
+let pvar x =
+  PVar x
+
+let pvars xs =
+  List.map pvar xs
+
+let def f body =
+  { valpublic = false; valpat = PVar f; valval = body }
+
+let defpublic f body =
+  { valpublic = true; valpat = PVar f; valval = body }
+
+let valdef def =
+  SIValDefs (false, [ def ])
+
+let valdefs defs =
+  List.map valdef defs

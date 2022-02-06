@@ -1,6 +1,6 @@
 ## Domain-name - [RFC 1035](https://tools.ietf.org/html/rfc1035) Internet domain names
 
-v0.3.0
+v0.4.0
 
 A domain name is a sequence of labels separated by dots, such as `foo.example`.
 Each label may contain any bytes. The length of each label may not exceed 63

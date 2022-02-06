@@ -1,4 +1,4 @@
-true : bin_annot, safe_string, package(seq), package(stdlib-shims)
+true : bin_annot, safe_string
 <_b0> : -traverse
 <src> : include
 <src/fmt_tty*> : package(unix)

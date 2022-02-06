@@ -6,6 +6,10 @@ module Make (IO : S.IO) (Net : S.Net with module IO = IO) = struct
   module Response = Make.Response (IO)
   module Request = Make.Request (IO)
 
+  let src = Logs.Src.create "cohttp.lwt.client" ~doc:"Cohttp Lwt client"
+
+  module Log = (val Logs.src_log src : Logs.LOG)
+
   type ctx = Net.ctx
 
   let read_body ~closefn ic res =
@@ -25,7 +29,11 @@ module Make (IO : S.IO) (Net : S.Net with module IO = IO) = struct
         Gc.finalise_last
           (fun () ->
             if not !closed then
-              prerr_endline "Cohttp_lwt: body not consumed - leaking stream!")
+              Log.warn (fun m ->
+                  m
+                    "Body not consumed, leaking stream! Refer to \
+                     https://github.com/mirage/ocaml-cohttp/issues/730 for \
+                     additional details"))
           stream;
         body
     | `No ->

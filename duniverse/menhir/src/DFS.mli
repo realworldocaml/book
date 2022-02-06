@@ -1,19 +1,16 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
 (* A generic implementation of depth-first search. *)
 
-(* The graph [G] must be equipped with ways of iterating over the outoing
+(* The graph [G] must be equipped with ways of iterating over the outgoing
    edges of a node and over the root notes. Edges can be labeled. If no labels
    are needed, then the type [label] should be defined as [unit]. *)
 

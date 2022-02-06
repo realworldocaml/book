@@ -1,0 +1,2 @@
+(library (name core_unix_squeue) (public_name core_unix.squeue)
+  (libraries core.squeue) (preprocess no_preprocessing))

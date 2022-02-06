@@ -2,7 +2,7 @@ open! Core
 open! Async
 open Deferred.Or_error.Let_syntax
 
-let config = Tls.Config.client ~authenticator:(fun ~host:_ _ -> Ok None) ()
+let config = Tls.Config.client ~authenticator:(fun ?ip:_ ~host:_ _ -> Ok None) ()
 
 let test_client () =
   let host = "127.0.0.1" in

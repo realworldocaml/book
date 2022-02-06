@@ -32,7 +32,7 @@
 
     For background on writing C stubs in OCaml, see
 
-      http://caml.inria.fr/pub/docs/manual-ocaml/intfc.html
+      https://ocaml.org/manual/intfc.html
 
 
     Each Lwt stub for a blocking C call defines a *job* for the Lwt worker
@@ -190,7 +190,7 @@ static value result_getcwd(struct job_getcwd *job)
        For jobs that return integers or other kinds of values, it is necessary
        to use the various `Int_val`, `Long_val` macros, etc. See
 
-         http://caml.inria.fr/pub/docs/manual-ocaml/intfc.html#sec415 */
+         https://ocaml.org/manual/intfc.html#s:c-ops-on-values */
     value result = caml_copy_string(job->result);
 
     /* Have to free the job manually! */

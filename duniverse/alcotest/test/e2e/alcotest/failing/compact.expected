@@ -7,7 +7,8 @@ This run has ID `<uuid>'.
 │ [FAIL]        alpha          2   3.                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] Error
-
+          <stacktrace>
+          
 Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha.002.output'.
  ──────────────────────────────────────────────────────────────────────────────
 

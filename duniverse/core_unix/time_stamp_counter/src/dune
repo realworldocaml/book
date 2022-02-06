@@ -1,0 +1,2 @@
+(library (name core_unix_time_stamp_counter) (public_name core_unix.time_stamp_counter)
+  (libraries core.time_stamp_counter) (preprocess no_preprocessing))

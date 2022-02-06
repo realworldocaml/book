@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -60,7 +57,9 @@ let tokentypedef grammar =
           List.map (fun (tok, typo) -> {
             dataname = tok;
             datavalparams = (match typo with None -> [] | Some t -> [ TypTextual t ]);
-            datatypeparams = None
+            datatypeparams = None;
+            comment = None;
+            unboxed = false;
           }) (typed_tokens grammar)
         )
 
@@ -118,13 +117,17 @@ let tokengadtdef grammar =
           {
             dataname = ttokengadtdata "error";
             datavalparams = [];
-            datatypeparams = Some [ tunit ]
+            datatypeparams = Some [ tunit ];
               (* the [error] token has a semantic value of type [unit] *)
+            comment = None;
+            unboxed = false;
           } ::
           List.map (fun (token, typo) -> {
             dataname = ttokengadtdata token;
             datavalparams = [];
-            datatypeparams = Some [ match typo with None -> tunit | Some t -> TypTextual t ]
+            datatypeparams = Some [ match typo with None -> tunit | Some t -> TypTextual t ];
+            comment = None;
+            unboxed = false;
           }) (typed_tokens grammar)
         )
 
@@ -160,7 +163,7 @@ let produce_tokentypes grammar =
 
       let i =
         tokentypedef grammar @
-        ifnlazy Settings.inspection (fun () ->
+        MList.ifnlazy Settings.inspection (fun () ->
           tokengadtdef grammar
         )
       in
@@ -210,4 +213,3 @@ let tokendata =
 
 let tokengadtdata token =
   tokenprefix (ttokengadtdata token)
-

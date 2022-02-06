@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Rresult
@@ -23,7 +22,7 @@ let dom p =
   List.fold_left add String.Set.empty p
 
 let equal p p' = p = p'
-let compare p p' = Pervasives.compare p p'
+let compare p p' = Stdlib.compare p p'
 
 type parse_state = S_lit | S_dollar | S_var
 
@@ -191,7 +190,7 @@ let matches p s = (match_pat ~env:None 0 s p) <> None
 let query ?(init = String.Map.empty) p s = match_pat ~env:(Some init) 0 s p
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

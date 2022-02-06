@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "Promises and event-driven I/O"
 
-version: "5.4.2"
+version: "5.5.0"
 license: "MIT"
 homepage: "https://github.com/ocsigen/lwt"
 doc: "https://ocsigen.org/lwt"
@@ -22,11 +22,11 @@ depends: [
   "cppo" {build & >= "1.1.0"}
   "dune" {>= "1.8.0"}
   "dune-configurator"
-  "mmap" {>= "1.1.0"} # mmap is needed as long as Lwt supports OCaml < 4.06.0.
-  "ocaml" {>= "4.02.0"}
+  "mmap" {>= "1.1.0" & "os" != "win32"} # mmap is needed as long as Lwt supports OCaml < 4.06.0.
+  "ocaml" {>= "4.02.0" & "os" != "win32 " | >= "4.06.0"}
   ("ocaml" {>= "4.08.0"} | "ocaml-syntax-shims")
   "ocplib-endian"
-  "result" # result is needed as long as Lwt supports OCaml 4.02.
+  "result" {os != "win32"} # result is needed as long as Lwt supports OCaml 4.02.
   "seq" # seq is needed as long as Lwt supports OCaml < 4.07.0.
 
   # Until https://github.com/aantron/bisect_ppx/pull/327.

@@ -1,0 +1,17 @@
+Testing `test/e2e/alcotest/failing/bail.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          passing          0   a.
+> [FAIL]        failing          0   b.
+
+  ... with 1 subsequent test skipped.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        failing          0   b.                                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+[failure] Expected failure
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run.

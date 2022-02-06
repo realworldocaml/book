@@ -28,12 +28,12 @@ let bigarray_kind_sizeof k = Ctypes_primitives.sizeof (prim_of_kind k)
 let bigarray_kind_alignment k = Ctypes_primitives.alignment (prim_of_kind k)
 
 type (_, _, _) dims =
-| DimsGen : int array -> ('a, ('a, _, 'l) Bigarray.Genarray.t, 'l) dims
-| Dims1 : int -> ('a, ('a, _, 'l) Bigarray.Array1.t, 'l) dims
-| Dims2 : int * int -> ('a, ('a, _, 'l) Bigarray.Array2.t, 'l) dims
-| Dims3 : int * int * int -> ('a, ('a, _, 'l) Bigarray.Array3.t, 'l) dims
+| DimsGen : int array -> ('a, ('a, _, 'l) Bigarray_compat.Genarray.t, 'l) dims
+| Dims1 : int -> ('a, ('a, _, 'l) Bigarray_compat.Array1.t, 'l) dims
+| Dims2 : int * int -> ('a, ('a, _, 'l) Bigarray_compat.Array2.t, 'l) dims
+| Dims3 : int * int * int -> ('a, ('a, _, 'l) Bigarray_compat.Array3.t, 'l) dims
 
-type ('a, 'b, 'l) t = ('a, 'b, 'l) dims * 'a kind * 'l Bigarray.layout
+type ('a, 'b, 'l) t = ('a, 'b, 'l) dims * 'a kind * 'l Bigarray_compat.layout
 
 let elements : type a b l. (b, a, l) dims -> int = function
   | DimsGen ds -> Array.fold_left ( * ) 1 ds
@@ -105,10 +105,10 @@ let kind_type_names : type a. a kind -> _ = function
     (`Ident ["char"],
      `Ident ["Bigarray"; "int8_unsigned_elt"])
 
-let layout_path : type a. a Bigarray.layout -> string list =
+let layout_path : type a. a Bigarray_compat.layout -> string list =
   function
-  | Bigarray.C_layout -> ["Bigarray"; "c_layout"]
-  | Bigarray.Fortran_layout -> ["Bigarray"; "fortran_layout"]
+  | Bigarray_compat.C_layout -> ["Bigarray"; "c_layout"]
+  | Bigarray_compat.Fortran_layout -> ["Bigarray"; "fortran_layout"]
 
 let type_expression : type a b l. (a, b, l) t -> _ =
   fun (t, ck, l) ->

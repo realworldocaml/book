@@ -37,13 +37,9 @@ let get_files dir =
   read_dir dir |> List.filter is_file
 
 let cwd_options_file = "test-case.opts"
-
 let cwd_test_file_md = "test-case.md"
-
 let cwd_test_file_t = "test-case.t"
-
 let cwd_test_file_mli = "test-case.mli"
-
 let cwd_enabled_if_file = "test-case.enabled-if"
 
 type dir = {

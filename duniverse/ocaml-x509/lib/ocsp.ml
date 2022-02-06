@@ -58,7 +58,7 @@ module Asn_common = struct
       (required ~label:"serialNumber" integer)
 end
 
-
+let ( let* ) = Result.bind
 
 module Request = struct
   (*
@@ -242,9 +242,8 @@ module Request = struct
   end
 
   let decode_der raw =
-    let open Rresult.R.Infix in
-    Asn.ocsp_request_of_cstruct raw >>| fun asn ->
-    { asn ; raw }
+    let* asn = Asn.ocsp_request_of_cstruct raw in
+    Ok { asn ; raw }
 
   let encode_der { raw ; _ } = raw
 
@@ -256,19 +255,20 @@ module Request = struct
       requestExtensions=None;
     }
     in
-    let open Rresult.R.Infix in
-    (match key with
-     | None -> Ok None
-     | Some key ->
-       let digest = Signing_request.default_digest digest key in
-       let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
-       let signatureAlgorithm = Algorithm.of_signature_algorithm scheme digest in
-       let tbs_der = Asn.tbs_request_to_cs tbsRequest in
-       Private_key.sign digest ~scheme key (`Message tbs_der) >>| fun signature ->
-       Some { signature ; signatureAlgorithm ; certs; }) >>| fun optionalSignature ->
+    let* optionalSignature =
+      match key with
+      | None -> Ok None
+      | Some key ->
+        let digest = Signing_request.default_digest digest key in
+        let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+        let signatureAlgorithm = Algorithm.of_signature_algorithm scheme digest in
+        let tbs_der = Asn.tbs_request_to_cs tbsRequest in
+        let* signature = Private_key.sign digest ~scheme key (`Message tbs_der) in
+        Ok (Some { signature ; signatureAlgorithm ; certs; })
+    in
     let asn = { tbsRequest ; optionalSignature } in
     let raw = Asn.ocsp_request_to_cstruct asn in
-    { raw ; asn }
+    Ok { raw ; asn }
 
   let validate { asn ; raw } ?(allowed_hashes = Validation.sha2) pub =
     match asn.optionalSignature with
@@ -652,19 +652,19 @@ module Response = struct
       responseExtensions;
     } in
     let resp_der = Asn.response_data_to_cs tbsResponseData in
-    let open Rresult.R.Infix in
-    Private_key.sign digest ~scheme key (`Message resp_der) >>| fun signature ->
-    {tbsResponseData;signatureAlgorithm;signature;certs;}
+    let* signature = Private_key.sign digest ~scheme key (`Message resp_der) in
+    Ok { tbsResponseData ; signatureAlgorithm ; signature;certs }
 
   let create_success ?digest ?certs ?response_extensions
       private_key responderID producedAt responses =
-    let open Rresult.R.Infix in
-    create_basic_ocsp_response
-      ?digest ?certs ?response_extensions private_key
-      responderID producedAt responses >>| fun response ->
+    let* response =
+      create_basic_ocsp_response
+        ?digest ?certs ?response_extensions private_key
+        responderID producedAt responses
+    in
     let raw_resp = Asn.basic_ocsp_response_to_cs response in
     let responseBytes = Some (Asn.ocsp_basic_oid, response, raw_resp) in
-    {responseStatus=`Successful; responseBytes}
+    Ok { responseStatus = `Successful ; responseBytes }
 
   let create status =
     let status = match status with
@@ -685,9 +685,10 @@ module Response = struct
         let cn = "OCSP" in
         [ Distinguished_name.(Relative_distinguished_name.singleton (CN cn)) ]
       in
-      let open Rresult.R.Infix in
-      Validation.validate_raw_signature dn allowed_hashes resp_der
-        response.signatureAlgorithm response.signature pub >>= fun () ->
+      let* () =
+        Validation.validate_raw_signature dn allowed_hashes resp_der
+          response.signatureAlgorithm response.signature pub
+      in
       match now with
       | None -> Ok ()
       | Some now ->

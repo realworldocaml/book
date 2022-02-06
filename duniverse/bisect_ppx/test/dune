@@ -1,1 +1,1 @@
-(dirs (:standard \ bucklescript))
+(dirs (:standard \ js))

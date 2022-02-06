@@ -30,7 +30,7 @@ type 'a t
    does not require a trailing dot.
 
 
-    {e v0.3.0 - {{:https://github.com/hannesm/domain-name }homepage}} *)
+    {e v0.4.0 - {{:https://github.com/hannesm/domain-name }homepage}} *)
 
 (** {2 Constructor} *)
 
@@ -165,7 +165,8 @@ val equal : ?case_sensitive:bool -> 'a t -> 'b t -> bool
 
 val compare : 'a t -> 'b t -> int
 (** [compare t t'] compares the domain names [t] and [t'] using a case
-    insensitive string comparison. *)
+    insensitive string comparison. This conforms to the canonical DNS name
+    order, as described in RFC 4034, Section 6.1. *)
 
 val equal_label : ?case_sensitive:bool -> string -> string -> bool
 (** [equal_label ~case_sensitive a b] is [true] if [a] and [b] are equal
@@ -234,7 +235,7 @@ val to_strings : ?trailing:bool -> 'a t -> string list
 
 (** {2 Pretty printer} *)
 
-val pp : 'a t Fmt.t
+val pp : Format.formatter -> 'a t -> unit
 (** [pp ppf t] pretty prints the domain name [t] on [ppf]. *)
 
 (**/**)

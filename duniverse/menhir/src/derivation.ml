@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -125,7 +122,7 @@ let rec print_blank k =
   end
 
 let print_symbol symbol =
-  let word = Symbol.print symbol in
+  let word = Symbol.print false symbol in
   Buffer.add_string buffer word;
   Buffer.add_char buffer ' ';
   String.length word + 1
@@ -324,4 +321,3 @@ let factor forests =
       assert false (* parameter [forests] was an empty map *)
   | Some (context, residuals) ->
       context, residuals
-

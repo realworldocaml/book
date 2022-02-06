@@ -1,11 +1,18 @@
 (library
  (name ppxlib)
  (public_name ppxlib)
- (libraries ocaml-compiler-libs.common compiler-libs.common
-   ocaml-compiler-libs.shadow ppxlib_ast ppxlib_print_diff ppx_derivers
-   ppxlib_traverse_builtins stdppx)
+ (libraries
+  (re_export ppxlib_ast)
+  ocaml-compiler-libs.shadow
+  astlib
+  ppxlib_print_diff
+  ppx_derivers
+  ppxlib_traverse_builtins
+  stdppx
+  stdlib-shims
+  sexplib0)
  (flags
-  (:standard -open Ocaml_shadow -safe-string))
+  (:standard -safe-string))
  (ppx.driver
   (main Ppxlib.Driver.standalone)
   (flags
@@ -29,11 +36,4 @@
  (action
   (run ./gen/gen_ast_builder.exe %{lib:ppxlib.ast:ast.ml})))
 
-;; This is to make the code compatible with different versions of
-;; OCaml
-
-(rule
- (targets compiler_specifics.ml)
- (deps gen-compiler_specifics)
- (action
-  (run %{ocaml} %{deps} %{ocaml_version} %{targets})))
+(ocamllex skip_hash_bang)

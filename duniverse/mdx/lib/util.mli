@@ -22,7 +22,6 @@ module Result : sig
       ('a, 'err) result -> ('a -> ('b, 'err) result) -> ('b, 'err) result
 
     val ( >>| ) : ('a, 'err) result -> ('a -> 'b) -> ('b, 'err) result
-
     val ( >>! ) : ('a, [ `Msg of string ]) result -> ('a -> int) -> int
   end
 
@@ -46,7 +45,6 @@ end
 
 module Option : sig
   val is_some : 'a option -> bool
-
   val value : default:'a -> 'a option -> 'a
 end
 

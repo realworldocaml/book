@@ -1,0 +1,15 @@
+{0 Bos {%html: <span class="version">v0.2.1+dune</span>%}}
+
+Bos provides support for basic and robust interaction with the
+operating system in OCaml. It has functions to access the process
+environment, parse command line arguments, interact with the file
+system and run command line programs.
+
+Bos works equally well on POSIX and Windows operating systems.
+
+{1:api API}
+
+{!modules:
+Bos
+Bos_setup
+}

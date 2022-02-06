@@ -1,5 +1,28 @@
 # CHANGES
 
+## 2021/11/25
+
+* The new module `CompactQueue` offers a minimalist mutable FIFO queue. It is
+  comparable with OCaml's `Queue` module. In comparison with `Queue`, it uses
+  a more compact internal representation: elements are stored contiguously in
+  a circular array. This has a positive impact on performance: both time and
+  memory consumption are reduced. This data structure is optimized for maximum
+  throughput. (Contributed by Frédéric Bour, reviewed by François Pottier.)
+
+* The new functor `DataFlow.ForCustomMaps` offers a forward data flow analysis
+  that is tuned for greater performance. (Contributed by Frédéric Bour,
+  reviewed by François Pottier.)
+
+* The new module `Indexing` offers a safe API for manipulating indices into
+  fixed-size arrays. This API involves some dynamic checks as well as static
+  type checks, thereby (hopefully) greatly reducing the risk of confusion in
+  code that uses many arrays and many indices into these arrays. (Contributed
+  by Frédéric Bour, reviewed by François Pottier.)
+
+* In `DataFlow`, allow the function `foreach_root`
+  (which is part of the signature `DATA_FLOW_GRAPH`)
+  to call `contribute x _` several times at a single root `x`.
+
 ## 2020/11/20
 
 * New module `DataFlow`, which performs a forward data flow analysis over a

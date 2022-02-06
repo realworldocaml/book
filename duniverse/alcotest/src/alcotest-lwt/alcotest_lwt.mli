@@ -18,13 +18,4 @@
     returns a promise that runs the tests when scheduled, catching any
     asynchronous exceptions thrown by the tests. *)
 
-include Alcotest_engine.Cli.S with type return = unit Lwt.t
-
-val test_case :
-  string ->
-  Alcotest.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a test_case
-
-val test_case_sync :
-  string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+include Alcotest_lwt_intf.Alcotest_lwt

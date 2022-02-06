@@ -4,10 +4,6 @@ open State
 
 open Mirage_crypto
 
-open Rresult.R.Infix
-
-let guard p e = if p then Ok () else Error e
-
 let src = Logs.Src.create "handshake" ~doc:"TLS handshake"
 module Log = (val Logs.src_log src : Logs.LOG)
 
@@ -51,9 +47,10 @@ let agreed_cert certs ?f ?signature_algorithms hostname =
   let match_host ?default host certs =
      match find_matching host certs with
      | Some x -> Ok x
-     | None   -> match default with
-       | Some c -> Ok c
-       | None   -> Error (`Error (`NoMatchingCertificateFound (Domain_name.to_string host)))
+     | None   ->
+       Option.to_result
+         ~none:(`Error (`NoMatchingCertificateFound (Domain_name.to_string host)))
+         default
   in
   let filter = function
     | ([], _) -> false (* cannot happen, TODO: adapt types to avoid this case *)
@@ -338,8 +335,6 @@ let server_hello_valid (sh : server_hello) =
       - EC stuff must be present if EC ciphersuite chosen
    *)
 
-let (<+>) = Cstruct.append
-
 let to_sign_1_3 context_string =
   (* input is prepended by 64 * 0x20 (to avoid cross-version attacks) *)
   (* input for signature now contains also a context string *)
@@ -356,7 +351,8 @@ let to_sign_1_3 context_string =
 let signature version ?context_string data client_sig_algs signature_algorithms (private_key : X509.Private_key.t) =
   match version with
   | `TLS_1_0 | `TLS_1_1 ->
-    begin match private_key with
+    let* signed =
+      match private_key with
       | `RSA key ->
         begin try
             let data = Hash.MD5.digest data <+> Hash.SHA1.digest data in
@@ -366,112 +362,122 @@ let signature version ?context_string data client_sig_algs signature_algorithms 
         end
       | k ->
         (* not passing ~scheme: only non-RSA keys sig scheme is trivial *)
-        Rresult.R.reword_error
+        Result.map_error
           (function `Msg m -> `Fatal (`SigningFailed m))
           (X509.Private_key.sign `SHA1 k (`Message data))
-    end >>| fun signed ->
-    Writer.assemble_digitally_signed signed
+    in
+    Ok (Writer.assemble_digitally_signed signed)
   | `TLS_1_2 ->
-    (match client_sig_algs with
-     | None ->
-       Ok (match private_key with
-           | `RSA _ -> `RSA_PKCS1_SHA1
-           | `ED25519 _ -> `ED25519
-           | _ -> `ECDSA_SECP256R1_SHA1)
-     | Some client_algos ->
-       match first_match client_algos (List.filter (pk_matches_sa private_key) signature_algorithms) with
-       | None -> Error (`Error (`NoConfiguredSignatureAlgorithm client_algos))
-       | Some sig_alg -> Ok sig_alg) >>= fun sig_alg ->
+    let* sig_alg =
+      match client_sig_algs with
+      | None ->
+        Ok (match private_key with
+            | `RSA _ -> `RSA_PKCS1_SHA1
+            | `ED25519 _ -> `ED25519
+            | _ -> `ECDSA_SECP256R1_SHA1)
+      | Some client_algos ->
+        Option.to_result
+          ~none:(`Error (`NoConfiguredSignatureAlgorithm client_algos))
+          (first_match client_algos (List.filter (pk_matches_sa private_key) signature_algorithms))
+    in
     let scheme = signature_scheme_of_signature_algorithm sig_alg
     and hash = hash_of_signature_algorithm sig_alg
     in
-    Rresult.R.reword_error (function `Msg m -> `Fatal (`SigningFailed m))
-      (X509.Private_key.sign hash ~scheme private_key (`Message data)) >>| fun signature ->
-    Writer.assemble_digitally_signed_1_2 sig_alg signature
+    let* signature =
+      Result.map_error (function `Msg m -> `Fatal (`SigningFailed m))
+        (X509.Private_key.sign hash ~scheme private_key (`Message data))
+    in
+    Ok (Writer.assemble_digitally_signed_1_2 sig_alg signature)
   | `TLS_1_3 ->
     let to_sign =
       let prefix = to_sign_1_3 context_string in
       prefix <+> data
     in
-    (match client_sig_algs with
-     | None -> Error (`Error (`NoConfiguredSignatureAlgorithm []))
-     (* 8446 4.2.3 "client MUST send signatureAlgorithms" *)
-     | Some client_algos ->
-       let sa = List.filter tls13_sigalg signature_algorithms in
-       let sa = List.filter (pk_matches_sa private_key) sa in
-       match first_match client_algos sa with
-       | None -> Error (`Error (`NoConfiguredSignatureAlgorithm client_algos))
-       | Some sig_alg -> Ok sig_alg) >>= fun sig_alg ->
+    let* sig_alg =
+      let* client_algos =
+        (* 8446 4.2.3 "client MUST send signatureAlgorithms" *)
+        Option.to_result
+          ~none:(`Error (`NoConfiguredSignatureAlgorithm []))
+          client_sig_algs
+      in
+      let sa = List.filter tls13_sigalg signature_algorithms in
+      let sa = List.filter (pk_matches_sa private_key) sa in
+      Option.to_result
+        ~none:(`Error (`NoConfiguredSignatureAlgorithm client_algos))
+        (first_match client_algos sa)
+    in
     let scheme = signature_scheme_of_signature_algorithm sig_alg
     and hash = hash_of_signature_algorithm sig_alg
     in
-    Rresult.R.reword_error (function `Msg m -> `Fatal (`SigningFailed m))
-      (X509.Private_key.sign hash ~scheme private_key (`Message to_sign)) >>| fun signature ->
-    Writer.assemble_digitally_signed_1_2 sig_alg signature
+    let* signature =
+      Result.map_error (function `Msg m -> `Fatal (`SigningFailed m))
+        (X509.Private_key.sign hash ~scheme private_key (`Message to_sign))
+    in
+    Ok (Writer.assemble_digitally_signed_1_2 sig_alg signature)
 
 let peer_key = function
   | None -> Error (`Fatal `NoCertificateReceived)
   | Some cert -> Ok (X509.Certificate.public_key cert)
 
 let verify_digitally_signed version ?context_string sig_algs data signature_data certificate =
-  peer_key certificate >>= fun pubkey ->
+  let* pubkey = peer_key certificate in
   match version with
   | `TLS_1_0 | `TLS_1_1 ->
-    ( match Reader.parse_digitally_signed data with
-      | Ok signature ->
-         begin match pubkey with
-           | `RSA key ->
-             begin
-               match Mirage_crypto_pk.Rsa.PKCS1.sig_decode ~key signature with
-               | Some raw ->
-                 let computed =
-                   Hash.(MD5.digest signature_data <+> SHA1.digest signature_data)
-                 in
-                 guard (Cstruct.equal raw computed)
-                   (`Fatal (`SignatureVerificationFailed "RSA PKCS1 raw <> computed"))
-               | None ->
-                 let msg = "couldn't decode PKCS1" in
-                 Error (`Fatal (`SignatureVerificationFailed msg))
-             end
-           | key ->
-             Rresult.R.reword_error
-               (function `Msg m -> `Fatal (`SignatureVerificationFailed m))
-               (X509.Public_key.verify `SHA1 ~signature key (`Message signature_data))
-         end
-      | Error re -> Error (`Fatal (`ReaderError re)) )
-  | `TLS_1_2 ->
-     ( match Reader.parse_digitally_signed_1_2 data with
-       | Ok (sig_alg, signature) ->
-         guard (List.mem sig_alg sig_algs)
-           (`Error (`NoConfiguredSignatureAlgorithm sig_algs)) >>= fun () ->
-         let hash = hash_of_signature_algorithm sig_alg
-         and scheme = signature_scheme_of_signature_algorithm sig_alg
-         in
-         Rresult.R.reword_error
-           (function `Msg m -> `Fatal (`SignatureVerificationFailed m))
-           (X509.Public_key.verify hash ~scheme ~signature pubkey (`Message signature_data))
-       | Error re -> Error (`Fatal (`ReaderError re)) )
-  | `TLS_1_3 ->
-    ( match Reader.parse_digitally_signed_1_2 data with
-      | Ok (sig_alg, signature) ->
-        guard (List.mem sig_alg sig_algs)
-          (`Error (`NoConfiguredSignatureAlgorithm sig_algs)) >>= fun () ->
-        let hash = hash_of_signature_algorithm sig_alg
-        and scheme = signature_scheme_of_signature_algorithm sig_alg
-        and data =
-          let prefix = to_sign_1_3 context_string in
-          prefix <+> signature_data
+    let* signature = map_reader_error (Reader.parse_digitally_signed data) in
+    begin match pubkey with
+      | `RSA key ->
+        let* raw =
+          Option.to_result
+            ~none:(`Fatal (`SignatureVerificationFailed "couldn't decode PKCS1"))
+            (Mirage_crypto_pk.Rsa.PKCS1.sig_decode ~key signature)
         in
-        Rresult.R.reword_error
+        let computed =
+          Hash.(MD5.digest signature_data <+> SHA1.digest signature_data)
+        in
+        guard (Cstruct.equal raw computed)
+          (`Fatal (`SignatureVerificationFailed "RSA PKCS1 raw <> computed"))
+      | key ->
+        Result.map_error
           (function `Msg m -> `Fatal (`SignatureVerificationFailed m))
-          (X509.Public_key.verify hash ~scheme ~signature pubkey (`Message data))
-      | Error re -> Error (`Fatal (`ReaderError re)))
+          (X509.Public_key.verify `SHA1 ~signature key (`Message signature_data))
+    end
+  | `TLS_1_2 ->
+    let* sig_alg, signature =
+      map_reader_error (Reader.parse_digitally_signed_1_2 data)
+    in
+    let* () =
+      guard (List.mem sig_alg sig_algs)
+        (`Error (`NoConfiguredSignatureAlgorithm sig_algs))
+    in
+    let hash = hash_of_signature_algorithm sig_alg
+    and scheme = signature_scheme_of_signature_algorithm sig_alg
+    in
+    Result.map_error
+      (function `Msg m -> `Fatal (`SignatureVerificationFailed m))
+      (X509.Public_key.verify hash ~scheme ~signature pubkey (`Message signature_data))
+  | `TLS_1_3 ->
+    let* sig_alg, signature =
+      map_reader_error (Reader.parse_digitally_signed_1_2 data)
+    in
+    let* () =
+      guard (List.mem sig_alg sig_algs)
+        (`Error (`NoConfiguredSignatureAlgorithm sig_algs))
+    in
+    let hash = hash_of_signature_algorithm sig_alg
+    and scheme = signature_scheme_of_signature_algorithm sig_alg
+    and data =
+      let prefix = to_sign_1_3 context_string in
+      prefix <+> signature_data
+    in
+    Result.map_error
+      (function `Msg m -> `Fatal (`SignatureVerificationFailed m))
+      (X509.Public_key.verify hash ~scheme ~signature pubkey (`Message data))
 
-let validate_chain authenticator certificates hostname =
+let validate_chain authenticator certificates ip hostname =
   let authenticate authenticator host certificates =
-    match authenticator ~host certificates with
-    | Error err  -> Error (`Error (`AuthenticationFailure err))
-    | Ok anchor -> Ok anchor
+    Result.map_error
+      (fun err -> `Error (`AuthenticationFailure err))
+      (authenticator ?ip ~host certificates)
 
   and key_size min cs =
     let check c =
@@ -483,17 +489,26 @@ let validate_chain authenticator certificates hostname =
 
   and parse_certificates certs =
     let certificates =
-      let f cs = match X509.Certificate.decode_der cs with Ok c -> Some c | _ -> None in
+      let f cs =
+        match X509.Certificate.decode_der cs with
+        | Ok c -> Some c
+        | Error `Msg msg ->
+          Log.warn (fun m -> m "cannot decode certificate %s:@.%a" msg
+                       Cstruct.hexdump_pp cs);
+          None
+      in
       filter_map ~f certs
     in
-    guard (List.length certs = List.length certificates) (`Fatal `BadCertificateChain) >>| fun () ->
-    certificates
-
+    let* () =
+      guard (List.length certs = List.length certificates)
+        (`Fatal `BadCertificateChain)
+    in
+    Ok certificates
   in
 
   (* RFC5246: must be x509v3, take signaturealgorithms into account! *)
   (* RFC2246/4346: is generally x509v3, signing algorithm for certificate _must_ be same as algorithm for certificate key *)
-  parse_certificates certificates >>= fun certs ->
+  let* certs = parse_certificates certificates in
   let server = match certs with
     | s::_ -> Some s
     | [] -> None
@@ -501,18 +516,19 @@ let validate_chain authenticator certificates hostname =
   match authenticator with
   | None -> Ok (server, certs, [], None)
   | Some authenticator ->
-    authenticate authenticator hostname certs >>= fun anchor ->
-    key_size Config.min_rsa_key_size certs >>| fun () ->
-    Utils.option
-      (server, certs, [], None)
-      (fun (chain, anchor) -> (server, certs, chain, Some anchor))
-      anchor
+    let* anchor = authenticate authenticator hostname certs in
+    let* () = key_size Config.min_rsa_key_size certs in
+    Ok (Utils.option
+          (server, certs, [], None)
+          (fun (chain, anchor) -> (server, certs, chain, Some anchor))
+          anchor)
 
 let output_key_update ~request state =
   let hs = state.handshake in
   match hs.session with
   | `TLS13 session :: _ ->
-    begin match hs.machina with
+    let* session', encryptor =
+      match hs.machina with
       | Client13 Established13 ->
         let client_app_secret, client_ctx =
           Handshake_crypto13.app_secret_n_1
@@ -526,7 +542,7 @@ let output_key_update ~request state =
         in
         Ok ({ session with server_app_secret }, server_ctx)
       | _ -> Error (`Fatal `InvalidSession)
-    end >>| fun (session', encryptor) ->
+    in
     let handshake = { hs with session = `TLS13 session' :: hs.session } in
     let ku =
       let p =
@@ -535,6 +551,6 @@ let output_key_update ~request state =
       KeyUpdate p
     in
     let out = Writer.assemble_handshake ku in
-    { state with encryptor = Some encryptor ; handshake },
-    (Packet.HANDSHAKE, out)
+    Ok ({ state with encryptor = Some encryptor ; handshake },
+        (Packet.HANDSHAKE, out))
   | _ -> Error (`Fatal `InvalidSession)

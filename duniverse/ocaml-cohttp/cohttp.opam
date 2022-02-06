@@ -1,4 +1,4 @@
-version: "4.0.0"
+version: "5.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -34,7 +34,7 @@ doc: "https://mirage.github.io/ocaml-cohttp/"
 bug-reports: "https://github.com/mirage/ocaml-cohttp/issues"
 depends: [
   "ocaml" {>= "4.08"}
-  "dune" {>= "2.0.0"}
+  "dune" {>= "2.0"}
   "re" {>= "1.9.0"}
   "uri" {>= "2.0.0"}
   "uri-sexp"
@@ -45,9 +45,10 @@ depends: [
   "fmt" {with-test}
   "jsonm" {build}
   "alcotest" {with-test}
+  "crowbar" {with-test}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

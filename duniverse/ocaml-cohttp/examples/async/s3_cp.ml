@@ -236,7 +236,7 @@ module Auth = struct
     let hashed_req = digest canonical_request in
     Printf.sprintf "AWS4-HMAC-SHA256\n%s\n%s\n%s" time_str scope_str hashed_req
 
-  let make_signing_key ?date ~region ~service ~secret_access_key =
+  let make_signing_key ?date ~region ~service ~secret_access_key () =
     let mac k v =
       Mirage_crypto.Hash.(mac `SHA256 ~key:k (Cstruct.of_string v))
     in
@@ -267,6 +267,7 @@ module Auth = struct
     in
     let signing_key =
       make_signing_key ~date ~region ~service ~secret_access_key:aws_secret_key
+        ()
     in
     let creds =
       Printf.sprintf "%s/%s/%s/%s/aws4_request" aws_access_key

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -60,6 +57,15 @@ let equal equal o1 o2 =
   | Some _, None ->
       false
 
+let sub sub o1 o2 =
+  match o1, o2 with
+  | None, _ ->
+      true
+  | Some _, None ->
+      false
+  | Some x1, Some x2 ->
+      sub x1 x2
+
 let hash hash = function
   | Some x ->
       hash x
@@ -72,3 +78,17 @@ let value o ~default =
       x
   | None ->
       default
+
+let split o =
+  match o with
+  | None ->
+      None, None
+  | Some (x, x') ->
+      Some x, Some x'
+
+let elements o =
+  match o with
+  | None ->
+      []
+  | Some x ->
+      [x]

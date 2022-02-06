@@ -1,25 +1,34 @@
 open Mirage_crypto.Uncommon
-open Sexplib.Conv
-open Rresult
+open Sexplib0.Sexp_conv
 
 open Common
 
-type pub = { p : Z_sexp.t ; q : Z_sexp.t ; gg : Z_sexp.t ; y : Z_sexp.t }
-[@@deriving sexp]
+type pub = { p : Z.t ; q : Z.t ; gg : Z.t ; y : Z.t }
+
+let sexp_of_pub { p ; q ; gg ; y } =
+  sexp_of_list (sexp_of_pair sexp_of_string sexp_of_z)
+    [ "p", p; "q", q; "gg", gg; "y", y ]
+
+let pub_of_sexp s =
+  match list_of_sexp (pair_of_sexp string_of_sexp z_of_sexp) s with
+  | [ "p", p; "q", q; "gg", gg; "y", y ] -> { p ; q ; gg ; y }
+  | _ -> raise (Of_sexp_error (Failure "expected p, q, gg, and y'", s))
 
 let pub ?(fips = false) ~p ~q ~gg ~y () =
-  guard Z.(one < gg && gg < p) (`Msg "bad generator") >>= fun () ->
-  guard (Z_extra.pseudoprime q) (`Msg "q is not prime") >>= fun () ->
-  guard (Z.is_odd p && Z_extra.pseudoprime p) (`Msg "p is not prime") >>= fun () ->
-  guard Z.(zero < y && y < p) (`Msg "y not in 0..p-1") >>= fun () ->
-  guard (q < p) (`Msg "q is not smaller than p") >>= fun () ->
-  guard Z.(zero = (pred p) mod q) (`Msg "p - 1 mod q <> 0") >>= fun () ->
-  (if fips then
-     match Z.numbits p, Z.numbits q with
-     | 1024, 160 | 2048, 224 | 2048, 256 | 3072, 256 -> Ok ()
-     | _ -> Error (`Msg "bit length of p or q not FIPS specified")
-   else
-     Ok ()) >>= fun () ->
+  let* () = guard Z.(one < gg && gg < p) (`Msg "bad generator") in
+  let* () = guard (Z_extra.pseudoprime q) (`Msg "q is not prime") in
+  let* () = guard (Z.is_odd p && Z_extra.pseudoprime p) (`Msg "p is not prime") in
+  let* () = guard Z.(zero < y && y < p) (`Msg "y not in 0..p-1") in
+  let* () = guard (q < p) (`Msg "q is not smaller than p") in
+  let* () = guard Z.(zero = (pred p) mod q) (`Msg "p - 1 mod q <> 0") in
+  let* () =
+    if fips then
+      match Z.numbits p, Z.numbits q with
+      | 1024, 160 | 2048, 224 | 2048, 256 | 3072, 256 -> Ok ()
+      | _ -> Error (`Msg "bit length of p or q not FIPS specified")
+    else
+      Ok ()
+  in
   Ok { p ; q ; gg ; y }
 
 let pub_of_sexp s =
@@ -29,13 +38,21 @@ let pub_of_sexp s =
   | Error (`Msg m) -> invalid_arg "bad public %s" m
 
 type priv =
-  { p : Z_sexp.t ; q : Z_sexp.t ; gg : Z_sexp.t ; x : Z_sexp.t ; y : Z_sexp.t }
-[@@deriving sexp]
+  { p : Z.t ; q : Z.t ; gg : Z.t ; x : Z.t ; y : Z.t }
+
+let sexp_of_priv { p ; q ; gg ; x ; y } =
+  sexp_of_list (sexp_of_pair sexp_of_string sexp_of_z)
+    [ "p", p; "q", q; "gg", gg; "x", x; "y", y ]
+
+let priv_of_sexp s =
+  match list_of_sexp (pair_of_sexp string_of_sexp z_of_sexp) s with
+  | [ "p", p; "q", q; "gg", gg; "x", x; "y", y ] -> { p ; q ; gg ; x ; y }
+  | _ -> raise (Of_sexp_error (Failure "expected p, q, gg, x, and y'", s))
 
 let priv ?fips ~p ~q ~gg ~x ~y () =
-  pub ?fips ~p ~q ~gg ~y () >>= fun _ ->
-  guard Z.(zero < x && x < q) (`Msg "x not in 1..q-1") >>= fun () ->
-  guard Z.(y = powm gg x p) (`Msg "y <> g ^ x mod p") >>= fun () ->
+  let* _ = pub ?fips ~p ~q ~gg ~y () in
+  let* () = guard Z.(zero < x && x < q) (`Msg "x not in 1..q-1") in
+  let* () = guard Z.(y = powm gg x p) (`Msg "y <> g ^ x mod p") in
   Ok { p ; q ; gg ; x ; y }
 
 let priv_of_sexp s =
@@ -160,6 +177,6 @@ let verify ~(key : pub) (r, s) digest =
 
 let massage ~key:({ q; _ }: pub) digest =
   let bits = Z.numbits q in
-  if bits >= Cstruct.len digest * 8 then digest else
+  if bits >= Cstruct.length digest * 8 then digest else
     let cs = Z_extra.(to_cstruct_be Z.(of_cstruct_be digest mod q)) in
     Cs.(cs lsl ((8 - bits mod 8) mod 8))

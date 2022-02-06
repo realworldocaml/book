@@ -1,15 +1,13 @@
-(****************************************************************************)
-(*                                                                          *)
-(*                                   Menhir                                 *)
-(*                                                                          *)
-(*           Jacques-Henri Jourdan, CNRS, LRI, Université Paris Sud         *)
-(*                                                                          *)
-(*  Copyright Inria. All rights reserved. This file is distributed under    *)
-(*  the terms of the GNU Lesser General Public License as published by the  *)
-(*  Free Software Foundation, either version 3 of the License, or (at your  *)
-(*  option) any later version, as described in the file LICENSE.            *)
-(*                                                                          *)
-(****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                   Menhir                                   *)
+(*                                                                            *)
+(*  Copyright Inria and CNRS. All rights reserved. This file is distributed   *)
+(*  under the terms of the GNU Lesser General Public License as published by  *)
+(*  the Free Software Foundation, either version 3 of the License, or (at     *)
+(*  your option) any later version, as described in the file LICENSE.         *)
+(*                                                                            *)
+(******************************************************************************)
 
 Require Grammar.
 Require Export Alphabet.
@@ -23,10 +21,10 @@ Module Type AutInit.
 
   (** The set of non initial state is considered as an alphabet. **)
   Parameter noninitstate : Type.
-  Declare Instance NonInitStateAlph : Alphabet noninitstate.
+  Global Declare Instance NonInitStateAlph : Alphabet noninitstate.
 
   Parameter initstate : Type.
-  Declare Instance InitStateAlph : Alphabet initstate.
+  Global Declare Instance InitStateAlph : Alphabet initstate.
 
   (** When we are at this state, we know that this symbol is the top of the
      stack. **)
@@ -41,7 +39,7 @@ Module Types(Import Init:AutInit).
     | Init: initstate -> state
     | Ninit: noninitstate -> state.
 
-  Program Instance StateAlph : Alphabet state :=
+  Global Program Instance StateAlph : Alphabet state :=
     { AlphabetComparable := {| compare := fun x y =>
         match x, y return comparison with
           | Init _, Ninit _ => Lt

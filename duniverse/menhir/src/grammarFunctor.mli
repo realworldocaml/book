@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -41,6 +38,7 @@ module Nonterminal : sig
 
   (* Comparison. *)
 
+  val equal: t -> t -> bool
   val compare: t -> t -> int
 
   (* The number of nonterminals. This includes the extra nonterminals
@@ -57,6 +55,8 @@ module Nonterminal : sig
 
   val n2i: t -> int
 
+  val i2n: int -> t (* unsafe! *)
+
   (* This produces a string representation of a nonterminal. It should
      in principle never be applied to one of the internally generated
      nonterminals, as we do not wish users to become aware of the
@@ -71,10 +71,11 @@ module Nonterminal : sig
 
   val print: bool -> t -> string
 
-  (* This is the OCaml type associated with a nonterminal
-     symbol. It is known only if a %type declaration was provided.
-     This function is not applicable to the internally generated
-     nonterminals. *)
+  (* This is the OCaml type associated with a nonterminal symbol. It is known
+     only if a %type declaration was provided. (When --infer is used, the
+     result of the type inference process is used to augment the grammar with
+     %type declarations.) This function is not applicable to the internally
+     generated nonterminals. *)
 
   val ocamltype: t -> Stretch.ocamltype option
 
@@ -82,6 +83,11 @@ module Nonterminal : sig
      a simplified version of [ocamltype] for start symbols. *)
 
   val ocamltype_of_start_symbol: t -> Stretch.ocamltype
+
+  (* [symbols_without_ocamltype()] returns a list of the nonterminal symbols
+     that do not have a known OCaml type. *)
+
+  val symbols_without_ocamltype: unit -> t list
 
   (* Creation of a table indexed by nonterminals. *)
 
@@ -168,6 +174,10 @@ module Terminal : sig
   (* This produces a string representation of a terminal. *)
 
   val print: t -> string
+
+  (**[print_concrete t] prints the terminal symbol [t] under a concrete form,
+     by relying on the token alias that has been declared for this symbol. *)
+  val print_concrete: t -> string
 
   (* This is the OCaml type associated with a terminal
      symbol. It is known only if the %token declaration was
@@ -318,23 +328,34 @@ module Symbol : sig
 
   val equal: t -> t -> bool
   val lequal: t list -> t list -> bool
+  val compare: t -> t -> int
+
+  (* Iteration. *)
+
+  val iter: (t -> unit) -> unit
 
   (* [non_error] returns [true] if its argument is not the [error] token. *)
 
   val non_error: t -> bool
 
-  (* These produce a string representation of a symbol, of a list of
-     symbols, or of an array of symbols. The symbols are simply listed
-     one after the other and separated with spaces. [printao] prints
-     an array of symbols, starting at a particular offset. [printaod]
-     is analogous, but can also print a single dot at a particular
-     position between two symbols. *)
+  (* [print] produces a string representation of a symbol.
 
-  val print: t -> string
-  val printl: t list -> string
-  val printa: t array -> string
-  val printao: int -> t array -> string
-  val printaod: int -> int -> t array -> string
+     [printa] prints an array of symbols. The symbols are listed one after
+     the other and separated with spaces.
+
+     [printao o] prints an array of symbols, starting at offset [o].
+
+     [printaod o d] prints an array of symbols, starting at offset [o],
+     and prints a single dot at offset [d], between two symbols.
+
+     In each of these functions, the Boolean parameter [normalize] has the
+     same effect as in [Nonterminal.print]. If it is [true], parentheses
+     and commas are replaced with underscores. *)
+
+  val print:                  bool -> t       -> string
+  val printa:                 bool -> t array -> string
+  val printao:         int -> bool -> t array -> string
+  val printaod: int -> int -> bool -> t array -> string
 
 end
 
@@ -572,15 +593,31 @@ module Analysis : sig
 
   val attributes: Syntax.attributes
 
-  (* [minimal nt] is the minimal size of a sentence generated by the
-     nonterminal symbol [nt]. If this symbol generates an empty
-     language, then [minimal nt] is [max_int].
-
-     [minimal_prod prod i] is the minimal size of a sentence generated
-     by the suffix of the production [prod] defined by the offset [i]. *)
-
+  (**[minimal nt] is the minimal size of a sentence generated by the
+     nonterminal symbol [nt]. If this symbol generates an empty language,
+     then [minimal nt] is [max_int]. Any productions whose right-hand side
+     mentions the [error] token are ignored in this computation. *)
   val minimal: Nonterminal.t -> int
+
+  (**[minimal_prod prod i] is the minimal size of a sentence generated by
+     the suffix of the production [prod] defined by the offset [i]. Any
+     productions whose right-hand side mentions the [error] token are
+     ignored in this computation. *)
   val minimal_prod: Production.index -> int -> int
+
+  (**[maximal nt] is the maximal size of a sentence generated by the
+     nonterminal symbol [nt]. An unbounded maximal size is represented by
+     the special value [max_int]. This analysis is carried out under the
+     assumption that every symbol generates a nonempty language. Any
+     productions whose right-hand side mentions the [error] token are
+     ignored in this computation. *)
+  val maximal: Nonterminal.t -> int
+
+  (**[maximal_prod prod i] is the maximal size of a sentence generated by
+     the suffix of the production [prod] defined by the offset [i]. Any
+     productions whose right-hand side mentions the [error] token are
+     ignored in this computation. *)
+  val maximal_prod: Production.index -> int -> int
 
 end
 
@@ -652,6 +689,26 @@ module OnErrorReduce : sig
      This is a partial order; two productions may be incomparable. *)
 
   val preferable: Production.index -> Production.index -> bool
+
+end
+
+(* ------------------------------------------------------------------------ *)
+(* Sentences. *)
+
+module Sentence : sig
+
+  (**A sentence is a pair of an optional start symbol and a sequence of
+     terminal symbols. Our convention is the start symbol can be omitted if
+     this is unambiguous, that is, if the grammar has exactly one start
+     symbol. *)
+  type sentence =
+    Nonterminal.t option * Terminal.t list
+
+  (**[print style sentence] prints a sentence as a space-separated list of
+     symbolic token names. The [style] parameter indicates whether the
+     sentence should be displayed in concrete syntax; if it is [`Concrete],
+     then every token must have a token alias. *)
+  val print: [`Abstract | `Concrete] -> sentence -> string
 
 end
 

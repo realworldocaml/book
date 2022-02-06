@@ -38,7 +38,12 @@ CAMLprim value lwt_unix_pread(value fd, value buf, value vfile_offset,
                           &overlapped))
                 err = GetLastError();
         }
-        if (err) {
+        if (err == ERROR_BROKEN_PIPE) {
+            /* The write handle for an anonymous pipe has been closed. We match
+               the Unix behavior, and treat this as a zero-read instead of a
+               Unix_error. See OCaml PR #4790. */
+            numwritten = 0;
+        } else if (err) {
             win32_maperr(err);
             uerror("pread", Nothing);
         }

@@ -15,7 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Mdx.Compat
 open Compat_top
 
 type directive = Directory of string | Load of string
@@ -39,9 +38,9 @@ let redirect ~f =
     read_up_to := pos;
     Buffer.add_channel buf ic len
   in
-  try_finally
+  Fun.protect
     (fun () -> f ~capture)
-    ~always:(fun () ->
+    ~finally:(fun () ->
       close_in_noerr ic;
       Unix.close fd_out;
       Unix.dup2 stdout_backup Unix.stdout;
@@ -79,6 +78,10 @@ module Lexbuf = struct
     | Parser.SEMISEMI -> lexbuf.Lexing.lex_last_action
     | _ -> assert false
 
+  let map_error_loc ~f (error : Location.error) =
+    let f_msg (msg : Location.msg) = { msg with loc = f msg.loc } in
+    { error with main = f_msg error.main; sub = List.map f_msg error.sub }
+
   let shift_location_error start =
     map_error_loc ~f:(shift_toplevel_location ~start)
 
@@ -103,8 +106,13 @@ module Phrase = struct
   }
 
   let result t = t.parsed
-
   let start t = t.startpos
+
+  let error_of_exn exn =
+    match Location.error_of_exn exn with
+    | None -> None
+    | Some `Already_displayed -> None
+    | Some (`Ok error) -> Some error
 
   let parse lines =
     let contents = String.concat "\n" lines in
@@ -144,6 +152,13 @@ module Phrase = struct
     let lines = if ends_by_semi_semi lines then lines else lines @ [ ";;" ] in
     match parse lines with exception End_of_file -> None | t -> Some t
 
+  (** Returns the name of the toplevel directive or [None] if the given phrase
+    is not a directive *)
+  let top_directive_name (toplevel_phrase : Parsetree.toplevel_phrase) =
+    match toplevel_phrase with
+    | Ptop_def _ -> None
+    | Ptop_dir { pdir_name = { txt; _ }; _ } -> Some txt
+
   let is_findlib_directive =
     let findlib_directive = function
       | "require" | "use" | "camlp4o" | "camlp4r" | "thread" -> true
@@ -151,7 +166,7 @@ module Phrase = struct
     in
     function
     | { parsed = Ok toplevel_phrase; _ } -> (
-        match Compat_top.top_directive_name toplevel_phrase with
+        match top_directive_name toplevel_phrase with
         | Some dir -> findlib_directive dir
         | None -> false)
     | _ -> false
@@ -208,10 +223,15 @@ module Rewrite = struct
   let normalize_type_path env path =
     match Env.find_type path env with
     | { Types.type_manifest = Some ty; _ } -> (
-        match Ctype.expand_head env ty with
-        | { Types.desc = Types.Tconstr (path, _, _); _ } -> path
+        match Compat_top.ctype_expand_head_and_get_desc env ty with
+        | Types.Tconstr (path, _, _) -> path
         | _ -> path)
     | _ -> path
+
+  let rec get_id_in_path = function
+    | Path.Pident id -> id
+    | Path.Pdot (p, _) -> get_id_in_path p
+    | Path.Papply (_, p) -> get_id_in_path p
 
   let is_persistent_value env longident =
     let is_persistent_path p = Ident.persistent (get_id_in_path p) in
@@ -238,7 +258,7 @@ module Rewrite = struct
     match (pstr_item.Parsetree.pstr_desc, tstr_item.Typedtree.str_desc) with
     | ( Parsetree.Pstr_eval (e, _),
         Typedtree.Tstr_eval ({ Typedtree.exp_type = typ; _ }, _) ) -> (
-        match (Ctype.repr typ).Types.desc with
+        match Compat_top.ctype_get_desc typ with
         | Types.Tconstr (path, _, _) -> apply ts env pstr_item path e
         | _ -> pstr_item)
     | _ -> pstr_item
@@ -272,9 +292,19 @@ module Rewrite = struct
           Ptop_def pstr)
     | _ -> phrase
 
+  (** [top_directive require "pkg"] builds the AST for [#require "pkg"] *)
+  let top_directive_require pkg =
+    Parsetree.Ptop_dir
+      {
+        pdir_name = { txt = "require"; loc = Location.none };
+        pdir_arg =
+          Some { pdira_desc = Pdir_string pkg; pdira_loc = Location.none };
+        pdir_loc = Location.none;
+      }
+
   let preload verbose ppf =
     let require pkg =
-      let p = Compat_top.top_directive_require pkg in
+      let p = top_directive_require pkg in
       let _ = Toploop.execute_phrase verbose ppf p in
       ()
     in
@@ -335,7 +365,7 @@ let protect_vars =
   fun vars ~f ->
     let backup = List.map (fun (V (r, _)) -> V (r, !r)) vars in
     set_vars vars;
-    try_finally f ~always:(fun () -> set_vars backup)
+    Fun.protect f ~finally:(fun () -> set_vars backup)
 
 let capture_compiler_stuff ppf ~f =
   protect_vars [ V (Location.formatter_for_warnings, ppf) ] ~f
@@ -352,7 +382,6 @@ let trim_line str =
     else String.sub str trim_from (trim_to - trim_from)
 
 let rtrim l = List.rev (ltrim (List.rev l))
-
 let trim l = ltrim (rtrim (List.map trim_line l))
 
 let cut_into_sentences l =
@@ -429,11 +458,48 @@ let eval t cmd =
           |> List.concat
           |> fun x -> if !errors then Result.Error x else Result.Ok x))
 
+let add_directive ~name ~doc kind =
+  let directive =
+    match kind with
+    | `Bool f -> Toploop.Directive_bool f
+    | `Show_prim to_sig ->
+        let show_prim to_sig lid =
+          let env = !Toploop.toplevel_env in
+          let loc = Location.none in
+          try
+            let s =
+              match lid with
+              | Longident.Lident s -> s
+              | Longident.Ldot (_, s) -> s
+              | Longident.Lapply _ ->
+                  Format.printf "Invalid path %a@." Printtyp.longident lid;
+                  raise Exit
+            in
+            let id = Ident.create_persistent s in
+            let sg = to_sig env loc id lid in
+            Printtyp.wrap_printing_env ~error:false env (fun () ->
+                Format.printf "@[%a@]@." Printtyp.signature sg)
+          with
+          | Not_found -> Format.printf "@[Unknown element.@]@."
+          | Exit -> ()
+        in
+        Toploop.Directive_ident (show_prim to_sig)
+  in
+  Toploop.add_directive name directive { section = "Environment queries"; doc }
+
 let all_show_funs = ref []
 
 let reg_show_prim name to_sig doc =
   all_show_funs := to_sig :: !all_show_funs;
   add_directive ~name ~doc (`Show_prim to_sig)
+
+let sig_value id desc = Types.Sig_value (id, desc, Exported)
+let sig_type id desc = Types.Sig_type (id, desc, Trec_not, Exported)
+let sig_typext id ext = Types.Sig_typext (id, ext, Text_exception, Exported)
+let sig_module id md = Types.Sig_module (id, Mp_present, md, Trec_not, Exported)
+let sig_modtype id desc = Types.Sig_modtype (id, desc, Exported)
+let sig_class id desc = Types.Sig_class (id, desc, Trec_not, Exported)
+let sig_class_type id desc = Types.Sig_class_type (id, desc, Trec_not, Exported)
 
 let show_val () =
   reg_show_prim "show_val"
@@ -469,6 +535,31 @@ let show_exception () =
       in
       [ sig_typext id ext ])
     "Print the signature of the corresponding exception."
+
+let mty_path =
+  let open Types in
+  function
+  | Mty_alias path -> Some path
+  | Mty_ident _ | Mty_signature _ | Mty_functor _ -> None
+
+let map_sig_attributes ~f =
+  let open Types in
+  List.map (function
+    | Sig_module (id, mp, md, rs, visibility) ->
+        Sig_module
+          ( id,
+            mp,
+            { md with md_attributes = f md.md_attributes },
+            rs,
+            visibility )
+    | item -> item)
+
+let attribute ~name ~payload =
+  {
+    Parsetree.attr_name = name;
+    attr_payload = payload;
+    attr_loc = Location.none;
+  }
 
 let show_module () =
   let open Types in
@@ -537,35 +628,6 @@ let verbose t =
 let silent t =
   add_directive ~name:"silent" ~doc:"Be silent" (`Bool (fun x -> t.silent <- x))
 
-(* BLACK MAGIC: patch field of a module at runtime *)
-let monkey_patch (type a) (m : a) (type b) (prj : unit -> b) (v : b) =
-  let m = Obj.repr m in
-  let v = Obj.repr v in
-  let v' = Obj.repr (prj ()) in
-  if v' == v then ()
-  else
-    try
-      for i = 0 to Obj.size m - 1 do
-        if Obj.field m i == v' then (
-          Obj.set_field m i v;
-          if Obj.repr (prj ()) == v then raise Exit;
-          Obj.set_field m i v')
-      done;
-      invalid_arg "monkey_patch: field not found"
-    with Exit -> ()
-
-let patch_env () =
-  let module M = struct
-    module type T = module type of Env
-
-    let field () = Env.without_cmis
-
-    let replacement f x = f x
-
-    let () = monkey_patch (module Env : T) field replacement
-  end in
-  ()
-
 let protect f arg =
   try
     let _ = f arg in
@@ -604,7 +666,6 @@ let init ~verbose:v ~silent:s ~verbose_findlib ~directives ~packages ~predicates
   Mdx.Compat.init_path ();
   Toploop.toplevel_env := Compmisc.initial_env ();
   Sys.interactive := false;
-  patch_env ();
   List.iter
     (function
       | Directory path -> Topdirs.dir_directory path
@@ -632,6 +693,7 @@ let init ~verbose:v ~silent:s ~verbose_findlib ~directives ~packages ~predicates
   t
 
 let envs = Hashtbl.create 8
+let is_predef_or_global id = Ident.is_predef id || Ident.global id
 
 let rec save_summary acc s =
   let default_case summary = save_summary acc summary in
@@ -658,7 +720,6 @@ let rec save_summary acc s =
     ~value_unbound:default_case ~module_unbound:default_case
 
 let default_env = ref (Compmisc.initial_env ())
-
 let first_call = ref true
 
 let env_deps env =

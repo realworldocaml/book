@@ -108,6 +108,7 @@ output line 99
 output line 100
 ASSERT Logs above should be 101 lines long.
 FAIL Logs above should be 101 lines long.
+<stacktrace>
 
 Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────

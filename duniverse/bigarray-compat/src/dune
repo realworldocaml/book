@@ -24,7 +24,7 @@ end
 
 let ocaml_version = V1.ocaml_version |> parse
 
-let has_bigarray_in_stdlib = major ocaml_version >= 4 && minor ocaml_version >= 7
+let has_bigarray_in_stdlib = (major ocaml_version, minor ocaml_version) >= (4, 7)
 let base_dune = "(library (name bigarray_compat) (public_name bigarray-compat) (modules bigarray_compat) (wrapped false)"
 
 let dune_file_stdlib = base_dune^") (rule (targets bigarray_compat.ml) (action (copy bigarray_stdlib.ml bigarray_compat.ml)))"

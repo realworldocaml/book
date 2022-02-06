@@ -9,7 +9,8 @@ This run has ID `<uuid>'.
 │ [FAIL]        test-a          1   Failing.                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 [invalid] Failing test
-
+          <stacktrace>
+          
 Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────
 

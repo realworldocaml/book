@@ -15,7 +15,6 @@
  *)
 
 open Mdx
-open Compat
 open Result
 open Astring
 open Mdx.Util.Result.Infix
@@ -128,9 +127,9 @@ let eval_test ?block ?root c cmd =
 
 let err_eval ~cmd lines =
   Fmt.epr "Got an error while evaluating:\n---\n%a\n---\n%a\n%!"
-    Fmt.(list ~sep:(unit "\n") string)
+    Fmt.(list ~sep:(any "\n") string)
     cmd
-    Fmt.(list ~sep:(unit "\n") string)
+    Fmt.(list ~sep:(any "\n") string)
     lines;
   exit 1
 
@@ -198,7 +197,7 @@ let run_toplevel_tests ?syntax ?root c ppf tests t =
               Output.pp ~pad ppf (`Output line))
         output)
     tests;
-  match syntax with Some Syntax.Mli -> () | _ -> Block.pp_footer ?syntax ppf t
+  Block.pp_footer ?syntax ppf t
 
 type file = { first : Mdx.Part.file; current : Mdx.Part.file }
 
@@ -287,7 +286,7 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
 
   let test_block ~ppf ~temp_file t =
     let print_block () = Block.pp ?syntax ppf t in
-    if Block.is_active ?section t then (
+    if Block.is_active ?section t then
       match Block.value t with
       | Raw _ -> print_block ()
       | Include { file_included; file_kind = Fk_ocaml { part_included } } ->
@@ -306,7 +305,11 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
           with_non_det non_deterministic non_det ~command:print_block
             ~output:det ~det
       | Cram { language = _; non_det } ->
-          let pad, tests = Cram.of_lines t.contents in
+          let pad, tests =
+            Cram.of_lines
+              ~syntax:(Option.value ~default:Normal syntax)
+              ~loc:t.loc t.contents
+          in
           with_non_det non_deterministic non_det ~command:print_block
             ~output:(fun () ->
               print_block ();
@@ -321,7 +324,7 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
             let syntax = Util.Option.value syntax ~default:Normal in
             Toplevel.of_lines ~syntax ~loc:t.loc t.contents
           in
-          Deprecated.Missing_double_semicolon.check_block phrases;
+          let phrases = Deprecated.Missing_double_semicolon.fix phrases in
           with_non_det non_deterministic non_det ~command:print_block
             ~output:(fun () ->
               assert (syntax <> Some Cram);
@@ -341,7 +344,7 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
             ~det:(fun () ->
               assert (syntax <> Some Cram);
               Mdx_top.in_env env (fun () ->
-                  run_toplevel_tests ?syntax ?root c ppf phrases t)))
+                  run_toplevel_tests ?syntax ?root c ppf phrases t))
     else print_block ()
   in
   let gen_corrected file_contents items =
@@ -380,16 +383,12 @@ let run_exn ~non_deterministic ~silent_eval ~record_backtrace ~syntax ~silent
 
 module Package = struct
   let unix = "unix"
-
   let findlib_top = "findlib.top"
-
   let findlib_internal = "findlib.internal"
-
   let compilerlibs_toplevel = "compiler-libs.toplevel"
 end
 
 module Predicate = struct
   let byte = "byte"
-
   let toploop = "toploop"
 end

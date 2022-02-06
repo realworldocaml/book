@@ -1,0 +1,8 @@
+Testing `test/e2e/alcotest/passing/and_exit_false.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          test-a          0   Test case.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 1 test run.
+ Program execution continued!

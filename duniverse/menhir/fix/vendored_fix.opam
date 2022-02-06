@@ -7,11 +7,12 @@ authors: [
 homepage: "https://gitlab.inria.fr/fpottier/fix"
 dev-repo: "git+https://gitlab.inria.fr/fpottier/fix.git"
 bug-reports: "francois.pottier@inria.fr"
+license: "LGPL-2.0-only"
 build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml" { >= "4.02.3" }
+  "ocaml" { >= "4.03" }
   "dune" { >= "1.3" }
 ]
 synopsis: "Facilities for memoization and fixed points"

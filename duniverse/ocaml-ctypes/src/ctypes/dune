@@ -7,7 +7,7 @@
  (name ctypes)
  (public_name ctypes)
  (wrapped false)
- (libraries bigarray bytes integers)
+ (libraries bytes integers bigarray-compat)
  (modules_without_implementation ctypes_types)
  (preprocess
   (pps bisect_ppx --conditional))

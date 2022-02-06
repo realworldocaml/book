@@ -1,3 +1,11 @@
+1.2
+---
+
+* Fix for js-of-ocaml (@hhugo)
+* Bump minimal OCaml version to 4.03.0
+* Add [@@ocaml.inline] annotations where relevant
+* Add [@@ocaml.deprecated] annotations on EndianString.set_* functions
+
 1.1
 ---
 

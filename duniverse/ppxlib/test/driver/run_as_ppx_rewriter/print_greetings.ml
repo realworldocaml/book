@@ -12,7 +12,7 @@ let bye_rule =
   Extension.declare "print_bye" Extension.Context.expression
     Ast_pattern.(pstr nil)
     expand
-    |> Context_free.Rule.extension
+  |> Context_free.Rule.extension
 
 (* the two rules need to be registered separately in order to test the `-apply` flag in run.t *)
 let () = Driver.register_transformation ~rules:[ hi_rule ] "print_hi"

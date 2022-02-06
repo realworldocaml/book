@@ -22,11 +22,12 @@ let allowed_hashes = [ `SHA1 ; `SHA256 ; `SHA384 ; `SHA512 ]
 
 let one f () =
   with_loaded_files f ~f:(fun cert crl ->
-      let open Rresult.R.Infix in
-      Certificate.decode_pem cert >>= fun cert ->
+      let ( let* ) = Result.bind in
+      let* cert = Certificate.decode_pem cert in
       let pubkey = Certificate.public_key cert in
-      CRL.decode_der crl >>= fun crl ->
-      Rresult.R.error_to_msg ~pp_error:Validation.pp_signature_error
+      let* crl = CRL.decode_der crl in
+      Result.map_error
+        (fun e -> `Msg (Fmt.to_to_string Validation.pp_signature_error e))
         (CRL.validate crl ~allowed_hashes pubkey))
 
 let crl_tests = [

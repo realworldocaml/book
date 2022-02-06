@@ -1,6 +1,5 @@
 open! Ppxlib
 open Ast_builder.Default
-open! Ast_helper
 
 (** {2 Convenient stuff} *)
 
@@ -22,7 +21,9 @@ let add_wildcard_case cases =
     List.exists is_catchall cases
   in
   if not has_wildcard
-  then cases @ (let loc = Location.none in [Exp.case [%pat? exn] [%expr Lwt.fail exn]])
+  then cases
+       @ (let loc = Location.none in
+          [case ~lhs:[%pat? exn] ~guard:None ~rhs:[%expr Lwt.fail exn]])
   else cases
 
 (** {3 Internal names} *)
@@ -30,6 +31,8 @@ let add_wildcard_case cases =
 let lwt_prefix = "__ppx_lwt_"
 
 (** {2 Here we go!} *)
+
+let default_loc = ref Location.none
 
 let sequence   = ref true
 let strict_seq = ref true
@@ -110,7 +113,8 @@ let lwt_expression mapper exp attributes ext_loc =
   (* [let%lwt $p$ = $e$ in $e'$] ≡ [Lwt.bind $e$ (fun $p$ -> $e'$)] *)
   | Pexp_let (Nonrecursive, vbl , e) ->
     let new_exp =
-      Exp.let_
+      pexp_let
+        ~loc:!default_loc
         Nonrecursive
         (gen_bindings vbl)
         (gen_binds exp.pexp_loc vbl e)
@@ -142,12 +146,12 @@ let lwt_expression mapper exp attributes ext_loc =
       match exns with
       | [] ->
         let loc = !default_loc in
-        [%expr Lwt.bind [%e e] [%e Exp.function_ cases]]
+        [%expr Lwt.bind [%e e] [%e pexp_function ~loc cases]]
       | _  ->
         let loc = !default_loc in
         [%expr Lwt.try_bind (fun () -> [%e e])
-                                   [%e Exp.function_ cases]
-                                   [%e Exp.function_ exns]]
+                                   [%e pexp_function ~loc cases]
+                                   [%e pexp_function ~loc exns]]
     in
     Some (mapper#expression { new_exp with pexp_attributes })
 
@@ -222,7 +226,7 @@ let lwt_expression mapper exp attributes ext_loc =
           Lwt.backtrace_catch
             (fun exn -> try Reraise.reraise exn with exn -> exn)
             (fun () -> [%e expr])
-            [%e Exp.function_ cases]
+            [%e pexp_function ~loc cases]
         ]
     in
     Some (mapper#expression { new_exp with pexp_attributes })
@@ -241,13 +245,13 @@ let lwt_expression mapper exp attributes ext_loc =
     let cases =
       let loc = !default_loc in
       [
-        Exp.case [%pat? true] e1 ;
-        Exp.case [%pat? false] e2 ;
+        case ~lhs:[%pat? true] ~guard:None ~rhs:e1 ;
+        case ~lhs:[%pat? false] ~guard:None ~rhs:e2 ;
       ]
     in
     let new_exp =
       let loc = !default_loc in
-      [%expr Lwt.bind [%e cond] [%e Exp.function_ cases]]
+      [%expr Lwt.bind [%e cond] [%e pexp_function ~loc cases]]
     in
     Some (mapper#expression { new_exp with pexp_attributes })
 
@@ -270,7 +274,7 @@ class mapper = object (self)
 
         let warn_if condition message structure =
           if condition then
-            (Str.attribute ~loc (attribute_of_warning loc message))::structure
+            (pstr_attribute ~loc (attribute_of_warning loc message))::structure
           else
             structure
         in

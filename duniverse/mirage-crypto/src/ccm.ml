@@ -27,11 +27,11 @@ let format nonce adata q t (* mac len *) =
   (* assume t is valid mac size *)
   (* n + q = 15 *)
   (* a < 2 ^ 64 *)
-  let n = Cstruct.len nonce in
+  let n = Cstruct.length nonce in
   let small_q = 15 - n in
   (* first byte (flags): *)
   (* reserved | adata | (t - 2) / 2 | q - 1 *)
-  let b6 = if Cstruct.len adata = 0 then 0 else 1 in
+  let b6 = if Cstruct.length adata = 0 then 0 else 1 in
   let flag = flags b6 ((t - 2) / 2) (small_q - 1) in
   (* first octet block:
      0          : flags
@@ -41,12 +41,12 @@ let format nonce adata q t (* mac len *) =
   flag <+> nonce <+> qblock
 
 let pad_block b =
-  let size = Cstruct.len b in
+  let size = Cstruct.length b in
   Cs.rpad b (size // block_size * block_size) 0
 
 let gen_adata a =
   let lbuf =
-    match Cstruct.len a with
+    match Cstruct.length a with
     | x when x < (1 lsl 16 - 1 lsl 8) ->
        let buf = Cstruct.create 2 in
        Cstruct.BE.set_uint16 buf 0 x ;
@@ -63,7 +63,7 @@ let gen_adata a =
   pad_block (lbuf <+> a)
 
 let gen_ctr_prefix nonce =
-  let n = Cstruct.len nonce in
+  let n = Cstruct.length nonce in
   let small_q = 15 - n in
   let flag = flags 0 0 (small_q - 1) in
   (flag <+> nonce, succ n, small_q)
@@ -73,13 +73,13 @@ let gen_ctr nonce i =
   pre <+> encode_len q i
 
 let prepare_header nonce adata plen tlen =
-  let ada = if Cstruct.len adata = 0 then Cstruct.empty else gen_adata adata in
+  let ada = if Cstruct.length adata = 0 then Cstruct.empty else gen_adata adata in
   format nonce adata plen tlen <+> ada
 
 type mode = Encrypt | Decrypt
 
 let crypto_core ~cipher ~mode ~key ~nonce ~maclen ~adata data =
-  let datalen = Cstruct.len data in
+  let datalen = Cstruct.length data in
   let cbcheader = prepare_header nonce adata datalen maclen in
   let target = Cstruct.create datalen in
 
@@ -97,7 +97,7 @@ let crypto_core ~cipher ~mode ~key ~nonce ~maclen ~adata data =
 
   let cbcprep =
     let rec doit iv block =
-      match Cstruct.len block with
+      match Cstruct.length block with
       | 0 -> iv
       | _ ->
          cbc iv block ;
@@ -113,7 +113,7 @@ let crypto_core ~cipher ~mode ~key ~nonce ~maclen ~adata data =
       | Encrypt -> src
       | Decrypt -> target
     in
-    match Cstruct.len src with
+    match Cstruct.length src with
     | 0 -> iv
     | x when x < block_size ->
        let ctrbl = pad_block target in
@@ -139,10 +139,10 @@ let crypto_core ~cipher ~mode ~key ~nonce ~maclen ~adata data =
 let crypto_t t nonce cipher key =
   let ctr = gen_ctr nonce 0 in
   cipher ~key ctr ctr ;
-  Cs.xor_into ctr t (Cstruct.len t)
+  Cs.xor_into ctr t (Cstruct.length t)
 
 let valid_nonce nonce =
-  let nsize = Cstruct.len nonce in
+  let nsize = Cstruct.length nonce in
   if nsize < 7 || nsize > 13 then
     invalid_arg "CCM: nonce length not between 7 and 13: %d" nsize
 
@@ -154,10 +154,10 @@ let generation_encryption ~cipher ~key ~nonce ~maclen ~adata data =
 
 let decryption_verification ~cipher ~key ~nonce ~maclen ~adata data =
   valid_nonce nonce;
-  if Cstruct.len data < maclen then
+  if Cstruct.length data < maclen then
     None
   else
-    let pclen = Cstruct.len data - maclen in
+    let pclen = Cstruct.length data - maclen in
     let cdata, t = crypto_core ~cipher ~mode:Decrypt ~key ~nonce ~maclen ~adata (Cstruct.sub data 0 pclen) in
     let t' = Cs.clone (Cstruct.sub data pclen maclen) in
     crypto_t t' nonce cipher key ;

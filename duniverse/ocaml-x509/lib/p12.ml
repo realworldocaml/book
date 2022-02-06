@@ -290,6 +290,8 @@ let pad bs x =
   Cstruct.memset amount to_pad;
   Cstruct.append x amount
 
+let ( let* ) = Result.bind
+
 (* there are 3 possibilities to encrypt / decrypt things:
    - PKCS12 KDF (see above), with RC2/RC4/DES
    - PKCS5 v1 (PBES, PBKDF1) -- not (yet?) supported
@@ -297,53 +299,61 @@ let pad bs x =
 *)
 let pkcs12_decrypt algo password data =
   let open Algorithm in
-  let open Rresult.R.Infix in
   let hash = `SHA1 in
-  (match algo with
-   | SHA_RC4_128 (s, i) -> Ok (s, i, 16, 0)
-   | SHA_RC4_40 (s, i) -> Ok (s, i, 5, 0)
-   | SHA_3DES_CBC (s, i) -> Ok (s, i, 24, 8)
-   | SHA_2DES_CBC (s, i) -> Ok (s, i, 16, 8) (* TODO 2des -> 3des keys (if relevant)*)
-   | SHA_RC2_128_CBC (s, i) -> Ok (s, i, 16, 8)
-   | SHA_RC2_40_CBC (s, i) -> Ok (s, i, 5, 8)
-   | _ -> Error (`Msg "unsupported algorithm")) >>= fun (salt, count, key_len, iv_len) ->
+  let* salt, count, key_len, iv_len =
+    match algo with
+    | SHA_RC4_128 (s, i) -> Ok (s, i, 16, 0)
+    | SHA_RC4_40 (s, i) -> Ok (s, i, 5, 0)
+    | SHA_3DES_CBC (s, i) -> Ok (s, i, 24, 8)
+    | SHA_2DES_CBC (s, i) -> Ok (s, i, 16, 8) (* TODO 2des -> 3des keys (if relevant)*)
+    | SHA_RC2_128_CBC (s, i) -> Ok (s, i, 16, 8)
+    | SHA_RC2_40_CBC (s, i) -> Ok (s, i, 5, 8)
+    | _ -> Error (`Msg "unsupported algorithm")
+  in
   let key = pbes hash `Encryption password salt count key_len
   and iv = pbes hash `Iv password salt count iv_len
   in
-  (match algo with
-   | SHA_RC2_40_CBC _ | SHA_RC2_128_CBC _ ->
-     Ok (Rc2.decrypt_cbc ~effective:(key_len * 8) ~key ~iv data)
-   | SHA_RC4_40 _ | SHA_RC4_128 _ ->
-     let open Mirage_crypto.Cipher_stream in
-     let key = ARC4.of_secret key in
-     let { ARC4.message ; _ } = ARC4.decrypt ~key data in
-     Ok message
-   | SHA_3DES_CBC _ ->
-     let open Mirage_crypto.Cipher_block in
-     let key = DES.CBC.of_secret key in
-     Ok (DES.CBC.decrypt ~key ~iv data)
-   | _ -> Error (`Msg "encryption algorithm not supported")) >>| fun data ->
-  unpad data
+  let* data =
+    match algo with
+    | SHA_RC2_40_CBC _ | SHA_RC2_128_CBC _ ->
+      Ok (Rc2.decrypt_cbc ~effective:(key_len * 8) ~key ~iv data)
+    | SHA_RC4_40 _ | SHA_RC4_128 _ ->
+      let open Mirage_crypto.Cipher_stream in
+      let key = ARC4.of_secret key in
+      let { ARC4.message ; _ } = ARC4.decrypt ~key data in
+      Ok message
+    | SHA_3DES_CBC _ ->
+      let open Mirage_crypto.Cipher_block in
+      let key = DES.CBC.of_secret key in
+      Ok (DES.CBC.decrypt ~key ~iv data)
+    | _ -> Error (`Msg "encryption algorithm not supported")
+  in
+  Ok (unpad data)
 
 let pkcs5_2_decrypt kdf enc password data =
-  let open Rresult.R.Infix in
-  (match enc with
-   | Algorithm.AES128_CBC iv -> Ok (16l, iv)
-   | Algorithm.AES192_CBC iv -> Ok (24l, iv)
-   | Algorithm.AES256_CBC iv -> Ok (32l, iv)
-   | _ -> Error (`Msg "unsupported encryption algorithm")) >>= fun (dk_len, iv) ->
-  (match kdf with
-   | Algorithm.PBKDF2 (salt, iterations, _ (* todo handle keylength *), prf) ->
-     (match Algorithm.to_hmac prf with
-      | Some prf -> Ok prf
-      | None -> Error (`Msg "unsupported PRF")) >>| fun prf ->
-     (salt, iterations, prf)
-   | _ -> Error (`Msg "expected kdf being pbkdf2")) >>| fun (salt, count, prf) ->
+  let* dk_len, iv =
+    match enc with
+    | Algorithm.AES128_CBC iv -> Ok (16l, iv)
+    | Algorithm.AES192_CBC iv -> Ok (24l, iv)
+    | Algorithm.AES256_CBC iv -> Ok (32l, iv)
+    | _ -> Error (`Msg "unsupported encryption algorithm")
+  in
+  let* salt, count, prf =
+    match kdf with
+    | Algorithm.PBKDF2 (salt, iterations, _ (* todo handle keylength *), prf) ->
+      let* prf =
+        match Algorithm.to_hmac prf with
+        | Some prf -> Ok prf
+        | None -> Error (`Msg "unsupported PRF")
+      in
+      Ok (salt, iterations, prf)
+    | _ -> Error (`Msg "expected kdf being pbkdf2")
+  in
   let password = Cstruct.of_string password in
   let key = Pbkdf.pbkdf2 ~prf ~password ~salt ~count ~dk_len in
   let key = Mirage_crypto.Cipher_block.AES.CBC.of_secret key in
   let msg = Mirage_crypto.Cipher_block.AES.CBC.decrypt ~key ~iv data in
-  unpad msg
+  Ok (unpad msg)
 
 let pkcs5_2_encrypt (mac : [ `SHA1 | `SHA224 | `SHA256 | `SHA384 | `SHA512 ]) count algo password data =
   let bs = Mirage_crypto.Cipher_block.AES.CBC.block_size in
@@ -380,36 +390,41 @@ let password_decrypt password (algo, data) =
   | Some data -> decrypt algo password data
 
 let verify password (data, ((algorithm, digest), salt, iterations)) =
-  let open Rresult.R.Infix in
-  (match Algorithm.to_hash algorithm with
-   | Some hash -> Ok hash
-   | None -> Error (`Msg "unsupported hash algorithm")) >>= fun hash ->
+  let* hash =
+    Option.to_result
+      ~none:(`Msg "unsupported hash algorithm")
+      (Algorithm.to_hash algorithm)
+  in
   let key =
     pbes hash `Hmac password salt iterations (Mirage_crypto.Hash.digest_size hash)
   in
   let computed = Mirage_crypto.Hash.mac hash ~key data in
   if Cstruct.equal computed digest then begin
-    Asn_grammars.err_to_msg (Asn.auth_safe_of_cs data) >>= fun content ->
-    List.fold_left (fun acc c ->
-        acc >>= fun acc ->
-        match c with
-        | `Data data -> Ok (data :: acc)
-        | `Encrypted data ->
-          password_decrypt password data >>| fun data ->
-          (data :: acc))
-      (Ok []) content >>= fun safe_contents ->
+    let* content = Asn_grammars.err_to_msg (Asn.auth_safe_of_cs data) in
+    let* safe_contents =
+      List.fold_left (fun acc c ->
+          let* acc = acc in
+          match c with
+          | `Data data -> Ok (data :: acc)
+          | `Encrypted data ->
+            let* data = password_decrypt password data in
+            Ok (data :: acc))
+        (Ok []) content
+    in
     List.fold_left (fun acc cs ->
-        acc >>= fun acc ->
-        Asn_grammars.err_to_msg (Asn.safe_contents_of_cs cs) >>= fun bags ->
+        let* acc = acc in
+        let* bags = Asn_grammars.err_to_msg (Asn.safe_contents_of_cs cs) in
         List.fold_left (fun acc bag ->
-            acc >>= fun acc ->
+            let* acc = acc in
             match bag with
             | `Certificate c, _ -> Ok (`Certificate c :: acc)
             | `Crl c, _ -> Ok (`Crl c :: acc)
             | `Private_key p, _ -> Ok (`Private_key p :: acc)
             | `Encrypted_private_key (algo, enc_data), _ ->
-              decrypt algo password enc_data >>= fun data ->
-              Asn_grammars.err_to_msg (Private_key.Asn.private_of_cstruct data) >>= fun p ->
+              let* data = decrypt algo password enc_data in
+              let* p =
+                Asn_grammars.err_to_msg (Private_key.Asn.private_of_cstruct data)
+              in
               Ok (`Decrypted_private_key p :: acc))
           (Ok acc) bags)
       (Ok []) safe_contents

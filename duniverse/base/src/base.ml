@@ -47,6 +47,7 @@ include (
   with module Either := Shadow_stdlib.Either
   with module Float := Shadow_stdlib.Float
   with module Hashtbl := Shadow_stdlib.Hashtbl
+  with module In_channel := Shadow_stdlib.In_channel
   with module Int := Shadow_stdlib.Int
   with module Int32 := Shadow_stdlib.Int32
   with module Int64 := Shadow_stdlib.Int64
@@ -55,6 +56,7 @@ include (
   with module Map := Shadow_stdlib.Map
   with module Nativeint := Shadow_stdlib.Nativeint
   with module Option := Shadow_stdlib.Option
+  with module Out_channel := Shadow_stdlib.Out_channel
   with module Printf := Shadow_stdlib.Printf
   with module Queue := Shadow_stdlib.Queue
   with module Random := Shadow_stdlib.Random

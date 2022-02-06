@@ -18,7 +18,7 @@ module Set = struct
     end)
 
   let pp ppf s =
-    Fmt.(list ~sep:(unit ", ") pp) ppf (elements s)
+    Fmt.(list ~sep:(any ", ") pp) ppf (elements s)
 end
 
 let is_wildcard name =

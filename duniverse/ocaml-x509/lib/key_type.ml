@@ -10,8 +10,8 @@ let of_string s =
   match List.assoc_opt (String.lowercase_ascii s) strings with
   | Some kt -> Ok kt
   | None ->
-    Rresult.R.error_msgf "unkown key type %s, supported are %a"
-      s Fmt.(list ~sep:(unit ", ") string) (List.map fst strings)
+    Error (`Msg (Fmt.str "unkown key type %s, supported are %a"
+                   s Fmt.(list ~sep:(any ", ") string) (List.map fst strings)))
 
 let pp ppf t = Fmt.string ppf (to_string t)
 

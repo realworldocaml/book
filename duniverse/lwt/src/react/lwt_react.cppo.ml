@@ -455,19 +455,21 @@ module S = struct
     map_s ?eq f s1
 
   let l2_s ?eq f s1 s2 =
-    map_s ?eq (fun (x1, x2) -> f x1 x2) (l2 (fun x1 x2 -> (x1, x2)) s1 s2)
+    (* Some details about the use of [fun _ _ -> false] on
+       https://github.com/ocsigen/lwt/pull/893#pullrequestreview-783083496 *)
+    map_s ?eq (fun (x1, x2) -> f x1 x2) (l2 ~eq:(fun _ _ -> false) (fun x1 x2 -> (x1, x2)) s1 s2)
 
   let l3_s ?eq f s1 s2 s3 =
-    map_s ?eq (fun (x1, x2, x3) -> f x1 x2 x3) (l3 (fun x1 x2 x3-> (x1, x2, x3)) s1 s2 s3)
+    map_s ?eq (fun (x1, x2, x3) -> f x1 x2 x3) (l3 ~eq:(fun _ _ -> false) (fun x1 x2 x3-> (x1, x2, x3)) s1 s2 s3)
 
   let l4_s ?eq f s1 s2 s3 s4 =
-    map_s ?eq (fun (x1, x2, x3, x4) -> f x1 x2 x3 x4) (l4 (fun x1 x2 x3 x4-> (x1, x2, x3, x4)) s1 s2 s3 s4)
+    map_s ?eq (fun (x1, x2, x3, x4) -> f x1 x2 x3 x4) (l4 ~eq:(fun _ _ -> false) (fun x1 x2 x3 x4-> (x1, x2, x3, x4)) s1 s2 s3 s4)
 
   let l5_s ?eq f s1 s2 s3 s4 s5 =
-    map_s ?eq (fun (x1, x2, x3, x4, x5) -> f x1 x2 x3 x4 x5) (l5 (fun x1 x2 x3 x4 x5-> (x1, x2, x3, x4, x5)) s1 s2 s3 s4 s5)
+    map_s ?eq (fun (x1, x2, x3, x4, x5) -> f x1 x2 x3 x4 x5) (l5 ~eq:(fun _ _ -> false) (fun x1 x2 x3 x4 x5-> (x1, x2, x3, x4, x5)) s1 s2 s3 s4 s5)
 
   let l6_s ?eq f s1 s2 s3 s4 s5 s6 =
-    map_s ?eq (fun (x1, x2, x3, x4, x5, x6) -> f x1 x2 x3 x4 x5 x6) (l6 (fun x1 x2 x3 x4 x5 x6-> (x1, x2, x3, x4, x5, x6)) s1 s2 s3 s4 s5 s6)
+    map_s ?eq (fun (x1, x2, x3, x4, x5, x6) -> f x1 x2 x3 x4 x5 x6) (l6 ~eq:(fun _ _ -> false) (fun x1 x2 x3 x4 x5 x6-> (x1, x2, x3, x4, x5, x6)) s1 s2 s3 s4 s5 s6)
 
   (* +---------------------------------------------------------------+
      | Monadic interface                                             |

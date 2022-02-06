@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -15,6 +12,14 @@ open Grammar
 
 module InfiniteArray =
   MenhirLib.InfiniteArray
+
+(* ------------------------------------------------------------------------ *)
+
+(* Make sure that the middle-end runs before the automaton is constructed. *)
+
+let () =
+  let module M = Middle.Run() in
+  ()
 
 (* ------------------------------------------------------------------------ *)
 
@@ -272,6 +277,9 @@ let predecessors : node list array Lazy.t =
 
 let incoming_edges (c : node) : node list =
   (Lazy.force predecessors).(c)
+
+module ImperativeNodeMap =
+  Fix.Glue.ArraysAsImperativeMaps(struct let n = n end)
 
 (* ------------------------------------------------------------------------ *)
 (* Help for building the LR(1) automaton. *)
@@ -645,20 +653,10 @@ let error_compatible  (k1, toksr1) (k2, toksr2) =
 
 let union (k1, toksr1) ((k2, toksr2) as s2) =
   assert (k1 = k2);
-  let k = k1 in
-  let toksr =
-    Array.init (Array.length toksr1) (fun i ->
-      TerminalSet.union toksr1.(i) toksr2.(i)
-    ) in
+  let toksr = MArray.leq_join TerminalSet.union toksr1 toksr2 in
   (* If the fresh array [toksr] has the same content as [toksr2],
-     then we must return the state [s2], unchanged. We could be
-     even more ambitious and try to not even allocate the array
-     [toksr] in that case, but that seems more trouble than it
-     is worth. *)
-  if Misc.array_for_all2 (==) toksr2 toksr then
-    s2
-  else
-    k, toksr
+     then we must return the state [s2], unchanged. *)
+  if toksr2 == toksr then s2 else (k1, toksr)
 
 (* Restriction of a state to a set of tokens of interest. Every
    lookahead set is intersected with that set. *)

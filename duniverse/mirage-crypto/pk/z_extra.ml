@@ -25,8 +25,8 @@ let of_cstruct_be ?bits cs =
       Z.(of_int x asr b' + acc lsl b)
     | _              -> acc in
   loop Z.zero 0 @@ match bits with
-  | None   -> Cstruct.len cs * 8
-  | Some b -> imin b (Cstruct.len cs * 8)
+  | None   -> Cstruct.length cs * 8
+  | Some b -> imin b (Cstruct.length cs * 8)
 
 let byte1 = Z.of_int64 0xffL
 and byte2 = Z.of_int64 0xffffL
@@ -49,7 +49,7 @@ let into_cstruct_be n cs =
     | 0 -> set_uint8 cs 0 Z.(to_int (n land byte1)) ;
     | _ -> ()
   in
-  write n (len cs - 1)
+  write n (length cs - 1)
 
 let to_cstruct_be ?size n =
   let cs = Cstruct.create_unsafe @@ match size with
@@ -80,7 +80,7 @@ let strip_factor ~f x =
   if Z.(~$2) <= f then
     go 0 x
   else
-    Rresult.R.error_msgf "factor_count: f: %a" Z.pp_print f
+    Error (`Msg ("factor_count: f: " ^ Z.to_string f))
 
 let gen ?g n =
   if n < Z.one then invalid_arg "Rng.gen: non-positive: %a" Z.pp_print n;

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -179,7 +176,7 @@ let silently_solved =
    [Raw.transitions]. This means that, once an edge has been removed, it can
    no longer be followed. *)
 
-module ForwardEdges = struct
+module RawForwardEdges = struct
   type node = Raw.node
   type label = Symbol.t
   let foreach_outgoing_edge node f =
@@ -385,7 +382,7 @@ let () =
     let traverse = traverse
     let discover = discover
   end in
-  let module R = DFS.Run(ForwardEdges)(M)(D) in
+  let module R = DFS.Run(RawForwardEdges)(M)(D) in
   ()
 
 let () =
@@ -466,6 +463,10 @@ let () =
 let number node =
   node
 
+let of_number node =
+  assert (node < n);
+  node
+
 let print node =
   Printf.sprintf "%d" (number node)
 
@@ -487,13 +488,6 @@ let reductions node =
 
 let predecessors node =
   predecessors.(raw node)
-
-module BackwardEdges = struct
-  type nonrec node = node
-  type label = unit
-  let foreach_outgoing_edge node f =
-    List.iter (fun node -> f () node) (predecessors node)
-end
 
 let conflict_tokens node =
   _conflict_tokens.(raw node)
@@ -523,6 +517,24 @@ let is_start node =
       true
   | Some _ ->
       false
+
+(* -------------------------------------------------------------------------- *)
+
+(* Graph views. *)
+
+module ForwardEdges = struct
+  type nonrec node = node
+  type label = Symbol.t
+  let foreach_outgoing_edge node f =
+    SymbolMap.iter f (transitions node)
+end
+
+module BackwardEdges = struct
+  type nonrec node = node
+  type label = unit (* could be changed to [Symbol.t option] if needed *)
+  let foreach_outgoing_edge node f =
+    List.iter (fun node -> f () node) (predecessors node)
+end
 
 (* -------------------------------------------------------------------------- *)
 
@@ -612,6 +624,18 @@ let targets f accu symbol =
     f accu (predecessors target) target
   ) accu targets
 
+let ntargets symbol =
+  targets (fun count _ _ -> count + 1) 0 symbol
+
+exception FoundSingleTarget of node
+
+let single_target symbol =
+  try
+    targets (fun () _ target -> raise (FoundSingleTarget target)) () symbol;
+    assert false
+  with FoundSingleTarget target ->
+    target
+
 (* -------------------------------------------------------------------------- *)
 
 (* Converting a start node into the single item that it contains. *)
@@ -622,21 +646,6 @@ let start2item node =
   let items : Item.Set.t = Lr0.items core in
   assert (Item.Set.cardinal items = 1);
   Item.Set.choose items
-
-(* -------------------------------------------------------------------------- *)
-(* [has_beforeend s] tests whether the state [s] can reduce a production
-   whose semantic action uses [$endpos($0)]. Note that [$startpos] and
-   [$endpos] have been expanded away already, so we need not worry about
-   the fact that (in an epsilon production) they expand to [$endpos($0)]. *)
-
-let has_beforeend node =
-  TerminalMap.fold (fun _ prods accu ->
-    accu ||
-    let prod = Misc.single prods in
-    not (Production.is_start prod) &&
-    let action = Production.action prod in
-    Action.has_beforeend action
-  ) (reductions node) false
 
 (* -------------------------------------------------------------------------- *)
 (* Computing which terminal symbols a state is willing to act upon.
@@ -732,6 +741,19 @@ end
 
 module NodeMap =
   Map.Make(Node)
+
+module ImperativeNodeMap =
+  Fix.Glue.ArraysAsImperativeMaps(struct let n = n end)
+
+let all_sources symbol =
+  targets (fun accu sources _target ->
+    List.fold_left (fun accu source -> NodeSet.add source accu) accu sources
+  ) NodeSet.empty symbol
+
+let all_targets symbol =
+  targets (fun accu _sources target ->
+    NodeSet.add target accu
+  ) NodeSet.empty symbol
 
 (* -------------------------------------------------------------------------- *)
 

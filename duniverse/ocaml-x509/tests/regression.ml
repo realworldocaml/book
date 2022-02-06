@@ -254,6 +254,17 @@ let p256_key () =
     Alcotest.failf "private P256 key %s decoding error %s" file msg
   | Ok _ -> ()
 
+let ip_address () =
+  let c = cert "1.1.1.1" in
+  let ta = cert "digicert" in
+  match
+    Validation.verify_chain ~ip:(Ipaddr.of_string_exn "1.1.1.1")
+      ~host:None ~time:(fun () -> None) ~anchors:[ta] [c]
+  with
+  | Ok _ -> ()
+  | Error ce -> Alcotest.failf "validation of IP address failed: %a"
+                  Validation.pp_chain_error ce
+
 let regression_tests = [
   "RSA: key too small (jc_jc)", `Quick, test_jc_jc ;
   "jc_ca", `Quick, test_jc_ca_fail ;
@@ -274,6 +285,7 @@ let regression_tests = [
   "ed25519 certificate", `Quick, ed25519_cert ;
   "p384 certificate", `Quick, le_p384_root ;
   "p256 key", `Quick, p256_key ;
+  "ip_address", `Quick, ip_address ;
 ]
 
 let host_set_test =
@@ -285,7 +297,7 @@ let host_set_test =
           (match typ with `Strict -> "" | `Wildcard -> "*.")
           Domain_name.pp name
       in
-      Fmt.(list ~sep:(unit ", ") pp_one) ppf (Host.Set.elements hs)
+      Fmt.(list ~sep:(any ", ") pp_one) ppf (Host.Set.elements hs)
     let equal = Host.Set.equal
   end in (module M: Alcotest.TESTABLE with type t = M.t)
 
