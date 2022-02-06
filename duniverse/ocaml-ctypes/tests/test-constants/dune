@@ -42,5 +42,5 @@
  (name test_constants)
  (package ctypes-foreign)
  (modules test_constants)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign test_constants_stubs
-   test_functions test_constants_bindings tests_common))
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_constants_stubs test_functions test_constants_bindings tests_common))

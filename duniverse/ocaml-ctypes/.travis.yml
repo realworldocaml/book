@@ -1,0 +1,51 @@
+language: c
+sudo: required
+services:
+  - docker
+script:
+    bash -ex .travis-ci.sh
+dist:
+  - bionic
+arch:
+  - amd64
+  - arm64
+  - ppc64le
+env:
+  - OCAML_VERSION=4.02.3
+  - OCAML_VERSION=4.03.0
+  - OCAML_VERSION=4.04.2
+  - OCAML_VERSION=4.05.0
+  - OCAML_VERSION=4.06.1
+  - OCAML_VERSION=4.07.1
+  - OCAML_VERSION=4.08.1
+  - OCAML_VERSION=4.09.1
+  - OCAML_VERSION=4.10.0
+matrix:
+  allow_failures:
+    - env: OCAML_VERSION=4.04.0+32bit ANDROID=true
+  exclude:
+    - os: osx
+      env: OCAML_VERSION=4.02.3 ARM=true
+    - os: osx
+      env: OCAML_VERSION=4.02.3 COVERAGE=true
+    - os: osx
+      env: OCAML_VERSION=4.04.0+flambda
+    - os: osx
+      env: OCAML_VERSION=4.04.0+32bit ANDROID=true
+    - os: osx
+      env: OCAML_VERSION=4.05.0
+    - os: osx
+      env: OCAML_VERSION=4.06.0
+    - os: osx
+      env: OCAML_VERSION=4.03.0
+    - os: osx
+      env: OCAML_VERSION=4.08.0
+    - os: osx
+      env: OCAML_VERSION=4.09.0
+    - os: osx
+      env: OCAML_VERSION=4.10.0
+before_install:
+  - if [ "${ARM}z" = "truez" ]; then
+      sudo apt-get update && sudo apt-get install --yes qemu-user-static;
+      docker pull yallop/ocaml-ctypes-qemu-arm-base;
+    fi

@@ -78,7 +78,7 @@ value ctypes_dlopen(value filename, value flag)
   int cflag = Int_val(flag);
 
   void *handle = dlopen(cfilename, cflag);
-  CAMLreturn (handle != NULL ? Val_some(caml_copy_nativeint((intptr_t)handle)) : Val_none);
+  CAMLreturn (handle != NULL ? Val_some((value)handle) : Val_none);
 }
 
 /* ctypes_dlsym : ?handle:library -> symbol:string -> cvalue option */
@@ -88,7 +88,7 @@ value ctypes_dlsym(value handle_option, value symbol)
 
   void *handle = handle_option == Val_none
     ? RTLD_DEFAULT
-    : (void *)Nativeint_val(Some_val(handle_option));
+    : (void *)Some_val(handle_option);
 
   const char *s = String_val(symbol);
   void *result = dlsym(handle, s);
@@ -101,7 +101,7 @@ value ctypes_dlsym(value handle_option, value symbol)
 /* ctypes_dlclose : handle:library -> int */
 value ctypes_dlclose(value handle)
 {
-  return Val_long(dlclose((void *)Nativeint_val(handle)));
+  return Val_long(dlclose((void *)handle));
 }
 
 /* ctypes_dlerror : unit -> string option */

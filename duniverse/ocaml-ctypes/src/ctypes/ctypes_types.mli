@@ -224,27 +224,27 @@ sig
 
   val bigarray :
     < element: 'a;
-      layout: Bigarray_compat.c_layout;
+      layout: Bigarray.c_layout;
       ba_repr: 'b;
       dims: 'dims;
       bigarray: 'bigarray;
       carray: _ > Ctypes_static.bigarray_class ->
-     'dims -> ('a, 'b) Bigarray_compat.kind -> 'bigarray typ
+     'dims -> ('a, 'b) Bigarray.kind -> 'bigarray typ
   (** Construct a sized C-layout bigarray type representation from a bigarray
-      class, the dimensions, and the {!Bigarray_compat.kind}. *)
+      class, the dimensions, and the {!Bigarray.kind}. *)
 
   val fortran_bigarray :
     < element: 'a;
-      layout: Bigarray_compat.fortran_layout;
+      layout: Bigarray.fortran_layout;
       ba_repr: 'b;
       dims: 'dims;
       bigarray: 'bigarray;
       carray: _ > Ctypes_static.bigarray_class ->
-     'dims -> ('a, 'b) Bigarray_compat.kind -> 'bigarray typ
+     'dims -> ('a, 'b) Bigarray.kind -> 'bigarray typ
   (** Construct a sized Fortran-layout bigarray type representation from a
-      bigarray class, the dimensions, and the {!Bigarray_compat.kind}. *)
+      bigarray class, the dimensions, and the {!Bigarray.kind}. *)
 
-  val typ_of_bigarray_kind : ('a, 'b) Bigarray_compat.kind -> 'a typ
+  val typ_of_bigarray_kind : ('a, 'b) Bigarray.kind -> 'a typ
   (** [typ_of_bigarray_kind k] is the type corresponding to the Bigarray kind
       [k]. *)
 

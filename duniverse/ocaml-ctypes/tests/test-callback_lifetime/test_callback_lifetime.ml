@@ -107,24 +107,22 @@ struct
     let closure x y = x * y in
 
     (* First, the naive implementation.  This should fail, because arg is
-       collected before ret is called. Here and below, Sys.opaque_identity prevents the
-       optimizer from moving any part of the closure creation across the call to
-       Gc.full_major. *)
-    let ret = Sys.opaque_identity (Naive.make ~arg:(closure (int_of_string "3"))) in
+       collected before ret is called. *)
+    let ret = Naive.make ~arg:(closure (int_of_string "3")) in
     Gc.full_major ();
     assert_raises CallToExpiredClosure
       (fun () -> Naive.get ret 5);
 
     (* Now a more careful implementation.  This succeeds, because we keep a
        reference to arg around with the reference to ret *)
-    let ret = Sys.opaque_identity (Better.make ~arg:(closure (int_of_string "3"))) in
+    let ret = Better.make ~arg:(closure (int_of_string "3")) in
     Gc.full_major ();
     assert_equal 15 (Better.get ret 5);
     let _ = Ctypes_memory_stubs.use_value ret in
 
     (* However, even with the careful implementation things can go wrong if we
        keep a reference to ret beyond the lifetime of the pair. *)
-    let ret = Sys.opaque_identity (Better.get (Better.make ~arg:(closure (int_of_string "3")))) in
+    let ret = Better.get (Better.make ~arg:(closure (int_of_string "3"))) in
     Gc.full_major ();
     assert_raises CallToExpiredClosure
       (fun () -> ret 5);

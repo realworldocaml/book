@@ -1,5 +1,5 @@
 (test
  (name test_coercions)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign test_coercionss_stubs
-   test_coercionss_bindings tests_common))
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_coercionss_stubs test_coercionss_bindings tests_common))

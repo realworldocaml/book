@@ -188,7 +188,7 @@ struct
   let length { alength } = alength
   let from_ptr astart alength = { astart; alength }
 
-  let fill { alength; astart = CPointer p } v =
+  let fill ({ alength; astart = (CPointer p as _astart) } as _arr) v =
     let size = sizeof (Fat.reftype p) in
     let w = write (Fat.reftype p) v in
     for i = 0 to alength - 1 do
@@ -291,7 +291,7 @@ let getf s field = !@(s @. field)
 
 let addr { structured } = structured
 
-open Bigarray_compat
+open Bigarray
 
 let _bigarray_start kind ba =
   let raw_address = Ctypes_bigarray.unsafe_address ba in

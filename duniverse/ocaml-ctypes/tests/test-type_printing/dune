@@ -42,5 +42,6 @@
  (name test_type_printing)
  (modules test_type_printing)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign test_type_printing_stubs
-   test_functions test_type_printing_bindings tests_common))
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_type_printing_stubs test_functions test_type_printing_bindings
+   tests_common))
