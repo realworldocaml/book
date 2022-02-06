@@ -2,7 +2,7 @@ let pp_section ppf (n, title) =
   let pp_n ppf () = Fmt.string ppf (String.make n '#') in
   Fmt.pf ppf "%a %s\n" pp_n () title
 
-let pp_list pp = Fmt.(list ~sep:(unit "") pp)
+let pp_list pp = Fmt.(list ~sep:(any "") pp)
 
 let pp_html ppf s =
   let add = function
@@ -34,7 +34,7 @@ let pp_toplevel_block (b: Mdx.Block.t) ppf =
   pp_list pp_toplevel ppf ts
 
 let pp_contents (t:Mdx.Block.t) ppf =
-  Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
+  Fmt.(list ~sep:(any "\n") pp_html) ppf t.contents
 
 let pp_markdown_output ppf = function
   |`Output s -> Fmt.pf ppf "((:%s::)\n" s
@@ -42,7 +42,7 @@ let pp_markdown_output ppf = function
 
 let pp_markdown_toplevel ppf (t:Mdx.Toplevel.t) =
   let cmds = match t.command with [c] -> ["# " ^ c ^ " ;;"] | l -> l @ [";;"] in
-  Fmt.pf ppf "%a\n%a" (Fmt.(list ~sep:(unit "\n") string)) cmds (pp_list pp_markdown_output) t.output
+  Fmt.pf ppf "%a\n%a" (Fmt.(list ~sep:(any "\n") string)) cmds (pp_list pp_markdown_output) t.output
 
 let pp_markdown_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
@@ -63,9 +63,9 @@ let pp_cram ppf (t:Mdx.Cram.t) =
     (pp_list pp_output) t.output pp_exit
 
 let pp_cram_block content ppf =
-  pp_list pp_cram ppf (snd (Mdx.Cram.of_lines content))
+  pp_list pp_cram ppf (snd (Mdx.Cram.of_lines ~syntax:Mdx.Syntax.Normal ~loc:Location.none content))
 
-let header_to_string = Fmt.strf "%a" Mdx.Block.Header.pp 
+let header_to_string = Fmt.str "%a" Mdx.Block.Header.pp 
 
 let pp_block_html ppf (b:Mdx.Block.t) =
   let lang, pp_code, attrs = match b.value with
@@ -93,7 +93,7 @@ let pp_block_html ppf (b:Mdx.Block.t) =
   in
   let pp_attrs ppf () = match attrs with
     | [] -> ()
-    | _  -> Fmt.pf ppf " %a" Fmt.(list ~sep:(unit " ") pp_attr) attrs
+    | _  -> Fmt.pf ppf " %a" Fmt.(list ~sep:(any " ") pp_attr) attrs
   in
   Fmt.pf ppf "<div class=\"highlight\"><pre%a><code%a>%t</code></pre></div>"
     pp_attrs () pp_lang () pp_code
@@ -107,7 +107,7 @@ let pp_block_latex ppf (b:Mdx.Block.t) =
     | Include {file_kind = Fk_other {header}; _}
     | Raw {header} -> Option.map header_to_string header
   in
-  let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
+  let pp_code = (fun ppf -> Fmt.(list ~sep:(any "\n") string) ppf b.contents) in
   let lang = match lang with
     | None   -> "shell"
     | Some l -> l
@@ -116,7 +116,7 @@ let pp_block_latex ppf (b:Mdx.Block.t) =
     lang pp_code
 
 let pp_block_md ppf (b:Mdx.Block.t) =
-  let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
+  let pp_code = (fun ppf -> Fmt.(list ~sep:(any "\n") string) ppf b.contents) in
   let lang, pp_code = match b.value with
     | Toplevel _ -> Some "ocaml", (pp_markdown_toplevel_block b)
     | Include {file_kind = Fk_ocaml _; _}
@@ -164,7 +164,7 @@ let pp_text_latex ppf l =
             |> List.rev
             |> String.concat
             |> Base.String.map ~f:(function '/' -> '!' | x -> x)
-            |> Fmt.strf "\\index{%s}"
+            |> Fmt.str "\\index{%s}"
           in
           let e = String.sub ~start:(i + 7) t |> String.Sub.to_string in
           f b (m::e::acc)
@@ -213,7 +213,7 @@ let run (`File file) (`Output output) output_type =
     close_out oc;
     let output = match output with None -> "-" | Some o -> o in
     Fmt.pr "Generating %s...\n%!" output;
-    Fmt.kstrf
+    Fmt.kstr
       Sys.command
       "pandoc \
       \  --section-divs \
