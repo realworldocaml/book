@@ -71,7 +71,7 @@ expression that tries to add a bool and an int.</p>
   | Plus (x, y) -&gt;
     (match eval x, eval y with
      | Bool _, _ | _, Bool _ -&gt; raise Ill_typed
-     | Int f1, Int f2 -&gt; Int (f1 + f2))
+     | Int f1, Int f2 -&gt; Int (f1 + f2));;
 ;;
 &gt;val eval : expr -&gt; value = &lt;fun&gt;
 </code></pre>
@@ -82,12 +82,12 @@ an ill-typed expression which will trip these checks.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
-and (+:) x y = Plus (x,y)
+and (+:) x y = Plus (x,y);;
 ;;
 &gt;val i : int -&gt; expr = &lt;fun&gt;
 &gt;val b : bool -&gt; expr = &lt;fun&gt;
 &gt;val ( +: ) : expr -&gt; expr -&gt; expr = &lt;fun&gt;
-eval (i 3 +: b false) ;;
+eval (i 3 +: b false);; ;;
 &gt;Exception: Ill_typed.
 </code></pre>
 </div>
@@ -153,7 +153,7 @@ end</code></pre>
 <p>As you can see, the ill-typed expression we had trouble with before
 can’t be constructed, because it’s rejected by OCaml’s type-system.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(plus (int 3) (bool false)) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(plus (int 3) (bool false));; ;;
 &gt;Line 1, characters 40-52:
 &gt;Error: This expression has type bool t but an expression was expected of type
 &gt;         int t
@@ -181,7 +181,7 @@ write yet more wrapper code to make this work.</p>
 have missed the fact that the type on the <code>eq</code> function above
 is wrong!</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Typesafe_lang.eq ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Typesafe_lang.eq;; ;;
 &gt;- : 'a Typesafe_lang.t -&gt; 'a Typesafe_lang.t -&gt; bool Typesafe_lang.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -190,9 +190,9 @@ evaluator only supports checking equality on integers. As a result, we
 can still construct an ill-typed expression, phantom-types
 notwithstanding.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(eq (bool true) (bool false)) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let expr = Typesafe_lang.(eq (bool true) (bool false));; ;;
 &gt;val expr : bool Typesafe_lang.t = &lt;abstr&gt;
-Typesafe_lang.bool_eval expr ;;
+Typesafe_lang.bool_eval expr;; ;;
 &gt;Exception: Ill_typed.
 </code></pre>
 </div>
@@ -228,16 +228,16 @@ we want. Let’s experiment a little.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
-and (+:) x y = Plus (x,y)
+and (+:) x y = Plus (x,y);;
 ;;
 &gt;val i : 'a -&gt; 'a expr = &lt;fun&gt;
 &gt;val b : 'a -&gt; 'a expr = &lt;fun&gt;
 &gt;val ( +: ) : 'a expr -&gt; 'a expr -&gt; 'a expr = &lt;fun&gt;
-i 3 ;;
+i 3;; ;;
 &gt;- : int expr = Value (Int 3)
-b false ;;
+b false;; ;;
 &gt;- : bool expr = Value (Bool false)
-i 3 +: i 4 ;;
+i 3 +: i 4;; ;;
 &gt;- : int expr = Plus (Value (Int 3), Value (Int 4))
 </code></pre>
 </div>
@@ -247,7 +247,7 @@ of the outer expression is always just equal to the type of the inner
 expression, which means that some things that should type-check
 don’t.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">If (Eq (i 3, i 4), i 0, i 1) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">If (Eq (i 3, i 4), i 0, i 1);; ;;
 &gt;Line 1, characters 9-12:
 &gt;Error: This expression has type int expr
 &gt;       but an expression was expected of type bool expr
@@ -256,7 +256,7 @@ don’t.</p>
 </div>
 <p>Also, some things that shouldn’t typecheck do.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">b 3 ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">b 3;; ;;
 &gt;- : int expr = Value (Bool 3)
 </code></pre>
 </div>
@@ -302,20 +302,20 @@ parameter of the then and else clauses.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i x = Value (Int x)
 and b x = Value (Bool x)
-and (+:) x y = Plus (x,y)
+and (+:) x y = Plus (x,y);;
 ;;
 &gt;val i : int -&gt; int expr = &lt;fun&gt;
 &gt;val b : bool -&gt; bool expr = &lt;fun&gt;
 &gt;val ( +: ) : int expr -&gt; int expr -&gt; int expr = &lt;fun&gt;
-i 3 ;;
+i 3;; ;;
 &gt;- : int expr = Value (Int 3)
-b 3 ;;
+b 3;; ;;
 &gt;Line 1, characters 3-4:
 &gt;Error: This expression has type int but an expression was expected of type
 &gt;         bool
-i 3 +: i 6 ;;
+i 3 +: i 6;; ;;
 &gt;- : int expr = Plus (Value (Int 3), Value (Int 6))
-i 3 +: b false ;;
+i 3 +: b false;; ;;
 &gt;Line 1, characters 8-15:
 &gt;Error: This expression has type bool expr
 &gt;       but an expression was expected of type int expr
@@ -332,14 +332,14 @@ checks.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value : type a. a value -&gt; a = function
   | Int x -&gt; x
-  | Bool x -&gt; x
+  | Bool x -&gt; x;;
 ;;
 &gt;val eval_value : 'a value -&gt; 'a = &lt;fun&gt;
 let rec eval : type a. a expr -&gt; a = function
   | Value v -&gt; eval_value v
   | If (c, t, e) -&gt; if eval c then eval t else eval e
   | Eq (x, y) -&gt; eval x = eval y
-  | Plus (x, y) -&gt; eval x + eval y
+  | Plus (x, y) -&gt; eval x + eval y;;
 ;;
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -358,7 +358,7 @@ annotation:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value = function
   | Int x -&gt; x
-  | Bool x -&gt; x
+  | Bool x -&gt; x;;
 ;;
 &gt;Line 3, characters 7-13:
 &gt;Error: This pattern matches values of type bool value
@@ -375,7 +375,7 @@ function, which is what is required here. We can fix that by adding a
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let eval_value (type a) (v : a value) : a =
   match v with
   | Int x -&gt; x
-  | Bool x -&gt; x
+  | Bool x -&gt; x;;
 ;;
 &gt;val eval_value : 'a value -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -389,7 +389,7 @@ below.</p>
   | Value v -&gt; eval_value v
   | If (c, t, e) -&gt; if eval c then eval t else eval e
   | Eq (x, y) -&gt; eval x = eval y
-  | Plus (x, y) -&gt; eval x + eval y
+  | Plus (x, y) -&gt; eval x + eval y;;
 ;;
 &gt;Line 4, characters 43-44:
 &gt;Error: This expression has type a expr but an expression was expected of type
@@ -414,7 +414,7 @@ polymorphic, which OCaml has a handy type annotation for.</p>
    | Value v -&gt; eval_value v
    | If (c, t, e) -&gt; if eval c then eval t else eval e
    | Eq (x, y) -&gt; eval x = eval y
-   | Plus (x, y) -&gt; eval x + eval y
+   | Plus (x, y) -&gt; eval x + eval y;;
 ;;
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -440,7 +440,7 @@ of the locally abstract types.</p>
   | Value v -&gt; eval_value v
   | If (c, t, e) -&gt; if eval c then eval t else eval e
   | Eq (x, y) -&gt; eval x = eval y
-  | Plus (x, y) -&gt; eval x + eval y
+  | Plus (x, y) -&gt; eval x + eval y;;
 ;;
 &gt;val eval : 'a expr -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -464,16 +464,16 @@ take on different types in different contexts. <code>List.find</code> is
 a fine example. The signature indicates that the type of the result
 varies with the type of the input list.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find;; ;;
 &gt;- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
 </code></pre>
 </div>
 <p>And of course you can use <code>List.find</code> to produce values of
 different types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ~f:(fun x -&gt; x &gt; 3) [1;3;5;2] ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ~f:(fun x -&gt; x &gt; 3) [1;3;5;2];; ;;
 &gt;- : int option = Some 5
-List.find ~f:(Char.is_uppercase) ['a';'B';'C'] ;;
+List.find ~f:(Char.is_uppercase) ['a';'B';'C'];; ;;
 &gt;- : char option = Some B
 </code></pre>
 </div>
@@ -511,7 +511,7 @@ accordingly.</p>
     (match if_not_found with
     | Raise -&gt; failwith "Element not found"
     | Return_none -&gt; None
-    | Default_to x -&gt; Some x)
+    | Default_to x -&gt; Some x);;
 ;;
 &gt;val flexible_find :
 &gt;  'a list -&gt; f:('a -&gt; bool) -&gt; 'a If_not_found.t -&gt; 'a option = &lt;fun&gt;
@@ -519,13 +519,13 @@ accordingly.</p>
 </div>
 <p>And here’s how it works.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Return_none ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Return_none;; ;;
 &gt;- : int option = None
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10) ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10);; ;;
 &gt;- : int option = Some 10
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise;; ;;
 &gt;Exception: (Failure "Element not found")
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;; ;;
 &gt;- : int option = Some 20
 </code></pre>
 </div>
@@ -568,7 +568,7 @@ advantage of this GADT.</p>
       | Raise -&gt; hd
       | Return_none -&gt; Some hd
       | Default_to _ -&gt; hd)
-    else flexible_find ~f tl if_not_found
+    else flexible_find ~f tl if_not_found;;
 ;;
 &gt;val flexible_find :
 &gt;  f:('a -&gt; bool) -&gt; 'a list -&gt; ('a, 'b) If_not_found.t -&gt; 'b = &lt;fun&gt;
@@ -579,13 +579,13 @@ now allows the return value to vary according to
 <code>If_not_found.t</code>, and indeed the functions works as you might
 hope, with no unnecessary options.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Return_none ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Return_none;; ;;
 &gt;- : int option = Base.Option.None
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10) ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10);; ;;
 &gt;- : int = 10
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise;; ;;
 &gt;Exception: (Failure "No matching item found")
-flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
+flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;; ;;
 &gt;- : int = 20
 </code></pre>
 </div>
@@ -595,7 +595,7 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise ;;
 <p>Code that that works with unknown types is routine in OCaml, and
 comes up in the simplest of examples:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y);; ;;
 &gt;val tuple : 'a -&gt; 'b -&gt; 'a * 'b = &lt;fun&gt;
 </code></pre>
 </div>
@@ -607,9 +607,9 @@ there are two unknown types here, and these type variables are
 <p>And indeed, we can restrict the type of <code>tuple</code> to any
 <code>'a</code> and <code>'b</code> we want.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(tuple : int -&gt; float -&gt; int * float) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(tuple : int -&gt; float -&gt; int * float);; ;;
 &gt;- : int -&gt; float -&gt; int * float = &lt;fun&gt;
-(tuple : string -&gt; string * string -&gt; string * (string * string)) ;;
+(tuple : string -&gt; string * string -&gt; string * (string * string));; ;;
 &gt;- : string -&gt; string * string -&gt; string * (string * string) = &lt;fun&gt;
 </code></pre>
 </div>
@@ -635,7 +635,7 @@ existentially quantified type is bound within the definition of
 <code>stringable</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_stringable (Stringable s) =
-  Stdio.print_endline (s.to_string s.value)
+  Stdio.print_endline (s.to_string s.value);;
 ;;
 &gt;val print_stringable : stringable -&gt; unit = &lt;fun&gt;
 </code></pre>
@@ -648,13 +648,13 @@ existentially quantified type is bound within the definition of
     [ s 100 Int.to_string
     ; s 12.3 Float.to_string
     ; s "foo" Fn.id
-    ])
+    ]);;
 ;;
 &gt;val stringables : stringable list =
 &gt;  [Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
 &gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;};
 &gt;   Stringable {value = &lt;poly&gt;; to_string = &lt;fun&gt;}]
-List.iter ~f:print_stringable stringables ;;
+List.iter ~f:print_stringable stringables;; ;;
 &gt;100
 &gt;12.3
 &gt;foo
@@ -667,7 +667,7 @@ As such, the type of the underlying values can’t escape the scope of
 <code>stringable</code>, which means that a function that tries to do
 that won’t type-check.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_value (Stringable s) = s.value ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_value (Stringable s) = s.value;; ;;
 &gt;Line 1, characters 32-39:
 &gt;Error: This expression has type $Stringable_'a
 &gt;       but an expression was expected of type 'a
@@ -699,12 +699,12 @@ all sorts of system automation tasks.</p>
 <p>But, can’t we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;; ;;
 let sum_file_sizes () =
   Sys.ls_dir "."
   |&gt; List.filter ~f:Sys.is_file_exn
   |&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
-  |&gt; List.sum (module Int) ~f:Int64.to_int_exn
+  |&gt; List.sum (module Int) ~f:Int64.to_int_exn;;
 ;;
 &gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
 </code></pre>
@@ -750,7 +750,7 @@ write code using a given API before we’ve implemented it.</p>
     @&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
     @&gt; List.sum (module Int) ~f:Int64.to_int_exn
     @&gt; empty
-end
+end;;
 ;;
 &gt;module Example_pipeline :
 &gt;  functor (Pipeline : Pipeline) -&gt;
@@ -800,9 +800,9 @@ pipeline: <code>Step</code> corresponds to the <code>@&gt;</code>
 operator, and <code>Empty</code> corresponds to the <code>empty</code>
 pipeline, as you can see below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( @&gt; ) f pipeline = Step (f,pipeline) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( @&gt; ) f pipeline = Step (f,pipeline);; ;;
 &gt;val ( @&gt; ) : ('a -&gt; 'b) -&gt; ('b, 'c) pipeline -&gt; ('a, 'c) pipeline = &lt;fun&gt;
-let empty = Empty ;;
+let empty = Empty;; ;;
 &gt;val empty : ('a, 'a) pipeline = Empty
 </code></pre>
 </div>
@@ -813,7 +813,7 @@ enough.</p>
  fun pipeline input -&gt;
   match pipeline with
   | Empty -&gt; input
-  | Step (f, tail) -&gt; exec tail (f input)
+  | Step (f, tail) -&gt; exec tail (f input);;
 ;;
 &gt;val exec : ('a, 'b) pipeline -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </code></pre>
@@ -837,7 +837,7 @@ long each step of a pipeline took.</p>
       loop tail output (elapsed :: rev_profile)
   in
   let output, rev_profile = loop pipeline input [] in
-  output, List.rev rev_profile
+  output, List.rev rev_profile;;
 ;;
 &gt;val exec_with_profile : ('a, 'b) pipeline -&gt; 'a -&gt; 'b * Time_ns.Span.t list =
 &gt;  &lt;fun&gt;
@@ -892,7 +892,7 @@ request is authorized.</p>
   match request.user_id, request.permissions with
   | None, _ | _, None -&gt; Error "Can't check authorization: data incomplete"
   | Some user_id, Some permissions -&gt;
-    Ok (Permissions.check permissions user_id)
+    Ok (Permissions.check permissions user_id);;
 ;;
 &gt;val authorized : logon_request -&gt; (bool, string) result = &lt;fun&gt;
 </code></pre>
@@ -960,7 +960,7 @@ returning a default value if <code>Absent</code> is found.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get ~default o =
    match o with
    | Present x -&gt; x
-   | Absent -&gt; default
+   | Absent -&gt; default;;
 ;;
 &gt;val get : default:'a -&gt; ('a, incomplete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -972,7 +972,7 @@ longer compiles.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get ~default (o : (_,complete) coption) =
   match o with
   | Absent -&gt; default
-  | Present x -&gt; x
+  | Present x -&gt; x;;
 ;;
 &gt;Line 3, characters 7-13:
 &gt;Error: This pattern matches values of type ('a, incomplete) coption
@@ -986,14 +986,14 @@ longer compiles.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get (o : (_,complete) coption) =
   match o with
-  | Present x -&gt; x
+  | Present x -&gt; x;;
 ;;
 &gt;val get : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We could write this more simply as:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get (Present x : (_,complete) coption) = x ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get (Present x : (_,complete) coption) = x;; ;;
 &gt;val get : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1019,9 +1019,9 @@ that marks whether it’s <code>complete</code>, at which point, both the
 <p>As before, it’s easy to fill in the <code>user_id</code> and
 <code>permissions</code> fields.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let set_user_id request x = { request with user_id = Present x } ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let set_user_id request x = { request with user_id = Present x };; ;;
 &gt;val set_user_id : 'a logon_request -&gt; User_id.t -&gt; 'a logon_request = &lt;fun&gt;
-let set_permissions request x = { request with permissions = Present x } ;;
+let set_permissions request x = { request with permissions = Present x };; ;;
 &gt;val set_permissions : 'a logon_request -&gt; Permissions.t -&gt; 'a logon_request =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -1035,7 +1035,7 @@ completed fields filled in.</p>
   match request.user_id, request.permissions with
   | Absent, _ | _, Absent -&gt; None
   | (Present _ as user_id), (Present _ as permissions) -&gt;
-    Some { request with user_id; permissions }
+    Some { request with user_id; permissions };;
 ;;
 &gt;val check_completeness : incomplete logon_request -&gt; 'a logon_request option =
 &gt;  &lt;fun&gt;
@@ -1051,7 +1051,7 @@ if we constrain the return value to explicitly return a
   match request.user_id, request.permissions with
   | Absent, _ | _, Absent -&gt; None
   | (Present _ as user_id), (Present _ as permissions) -&gt;
-    Some { request with user_id; permissions }
+    Some { request with user_id; permissions };;
 ;;
 &gt;val check_completeness :
 &gt;  incomplete logon_request -&gt; complete logon_request option = &lt;fun&gt;
@@ -1062,7 +1062,7 @@ unconditionally on a complete login request.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let authorized (request : complete logon_request) =
   let { user_id = Present user_id; permissions = Present permissions; _ } = request in
-  Permissions.check permissions user_id
+  Permissions.check permissions user_id;;
 ;;
 &gt;val authorized : complete logon_request -&gt; bool = &lt;fun&gt;
 </code></pre>
@@ -1095,10 +1095,10 @@ type complete = Z</code></pre>
 the same name, as you can see when we try to put instances of each type
 in the same list.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i = (Z : incomplete) and c = (Z : complete) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i = (Z : incomplete) and c = (Z : complete);; ;;
 &gt;val i : incomplete = Z
 &gt;val c : complete = Z
-[i; c] ;;
+[i; c];; ;;
 &gt;Line 1, characters 5-6:
 &gt;Error: This expression has type complete
 &gt;       but an expression was expected of type incomplete
@@ -1118,7 +1118,7 @@ be complete, and accordingly, need only contemplate the
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
   match coption with
-  | Present x -&gt; x
+  | Present x -&gt; x;;
 ;;
 &gt;val assume_complete : ('a, complete) coption -&gt; 'a = &lt;fun&gt;
 </code></pre>
@@ -1146,7 +1146,7 @@ found to be exhaustive.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
   match coption with
-  | Present x -&gt; x
+  | Present x -&gt; x;;
 ;;
 &gt;Lines 2-3, characters 5-21:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
@@ -1178,7 +1178,7 @@ type ('a, _) coption =
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let assume_complete (coption : (_,complete) coption) =
   match coption with
-  | Present x -&gt; x
+  | Present x -&gt; x;;
 ;;
 &gt;Lines 2-3, characters 5-21:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
@@ -1227,11 +1227,11 @@ standard uninhabited type, <code>Nothing.t</code>. <a data-primary="Nothing.t" d
 <code>Result.t</code>, you need to handle both the <code>Ok</code> and
 <code>Error</code> cases.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;; ;;
 let print_result (x : (int,string) Result.t) =
   match x with
   | Ok x -&gt; printf "%d\n" x
-  | Error x -&gt; printf "ERROR: %s\n" x
+  | Error x -&gt; printf "ERROR: %s\n" x;;
 ;;
 &gt;val print_result : (int, string) result -&gt; unit = &lt;fun&gt;
 </code></pre>
@@ -1243,7 +1243,7 @@ much.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
   | Ok x -&gt; printf "%d\n" x
-  | Error _ -&gt; printf "ERROR\n"
+  | Error _ -&gt; printf "ERROR\n";;
 ;;
 &gt;Line 4, characters 7-14:
 &gt;Warning 56 [unreachable-case]: this match case is unreachable.
@@ -1257,7 +1257,7 @@ case</em>. <a data-primary="refutation case" data-type="indexterm">&nbsp;</a></p
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
   | Ok x -&gt; printf "%d\n" x
-  | Error _ -&gt; .
+  | Error _ -&gt; .;;
 ;;
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
@@ -1269,7 +1269,7 @@ case for you, so you don’t need to write it out explicitly.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_result (x : (int, Nothing.t) Result.t) =
   match x with
-  | Ok x -&gt; printf "%d\n" x
+  | Ok x -&gt; printf "%d\n" x;;
 ;;
 &gt;val print_result : (int, Nothing.t) result -&gt; unit = &lt;fun&gt;
 </code></pre>
@@ -1312,7 +1312,7 @@ writing code to dispatch the RPC.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
   | Ok (initial_state, updates, _) -&gt; handle_state_changes initial_state updates
-  | Error () -&gt; failwith "this is not supposed to happen"
+  | Error () -&gt; failwith "this is not supposed to happen";;
 ;;
 &gt;val dispatch : Rpc.Connection.t -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
@@ -1336,7 +1336,7 @@ and as a result, our dispatch function needs only deal with the
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch conn =
   match%bind Rpc.State_rpc.dispatch rpc conn () &gt;&gt;| ok_exn with
-  | Ok (initial_state, updates, _) -&gt; handle_state_changes initial_state updates
+  | Ok (initial_state, updates, _) -&gt; handle_state_changes initial_state updates;;
 ;;
 &gt;val dispatch : Rpc.Connection.t -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
@@ -1373,7 +1373,7 @@ the corresponding source, and prints it out.</p>
   match kind with
   | Filename -&gt; String.sexp_of_t source
   | Host_and_port -&gt; Host_and_port.sexp_of_t source
-  | Raw_data -&gt; String.sexp_of_t source
+  | Raw_data -&gt; String.sexp_of_t source;;
 ;;
 &gt;val source_to_sexp : 'a Source_kind.t -&gt; 'a -&gt; Sexp.t = &lt;fun&gt;
 </code></pre>
@@ -1385,7 +1385,7 @@ together with an or-pattern. Unfortunately, that doesn’t work.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let source_to_sexp (type a) (kind : a Source_kind.t) (source : a) =
   match kind with
   | Filename | Raw_data -&gt; String.sexp_of_t source
-  | Host_and_port -&gt; Host_and_port.sexp_of_t source
+  | Host_and_port -&gt; Host_and_port.sexp_of_t source;;
 ;;
 &gt;Line 3, characters 47-53:
 &gt;Error: This expression has type a but an expression was expected of type
@@ -1399,7 +1399,7 @@ an example of a function that uses or-patterns successfully.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let requires_io (type a) (kind : a Source_kind.t) =
   match kind with
   | Filename | Host_and_port -&gt; true
-  | Raw_data -&gt; false
+  | Raw_data -&gt; false;;
 ;;
 &gt;val requires_io : 'a Source_kind.t -&gt; bool = &lt;fun&gt;
 </code></pre>
@@ -1419,13 +1419,13 @@ which is a syntax extension which auto-generates these functions for a
 given type, based on that type’s definition.</p>
 <p>Here’s an example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type position = { x: float; y: float } [@@deriving sexp] ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type position = { x: float; y: float } [@@deriving sexp];; ;;
 &gt;type position = { x : float; y : float; }
 &gt;val position_of_sexp : Sexp.t -&gt; position = &lt;fun&gt;
 &gt;val sexp_of_position : position -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_position { x = 3.5; y = -2. } ;;
+sexp_of_position { x = 3.5; y = -2. };; ;;
 &gt;- : Sexp.t = ((x 3.5) (y -2))
-position_of_sexp (Sexp.of_string "((x 72) (y 1.2))") ;;
+position_of_sexp (Sexp.of_string "((x 72) (y 1.2))");; ;;
 &gt;- : position = {x = 72.; y = 1.2}
 </code></pre>
 </div>
@@ -1435,22 +1435,22 @@ doesn’t always work with GADTs.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type _ number_kind =
   | Int : int number_kind
   | Float : float number_kind
-[@@deriving sexp]
+[@@deriving sexp];;
 ;;
 &gt;Lines 1-4, characters 1-20:
 &gt;Error: This expression has type int number_kind
-&gt;       but an expression was expected of type v_x__001_ number_kind
-&gt;       Type int is not compatible with type v_x__001_
+&gt;       but an expression was expected of type a__001_ number_kind
+&gt;       Type int is not compatible with type a__001_
 </code></pre>
 </div>
 <p>The error message is pretty awful, but if you stop and think about
 it, it’s not too surprising that we ran into trouble here. What should
 the type of <code>number_kind_of_sexp</code> be anyway? When parsing
-<code>"Int"</code>, the returned type would have to be <code>int
-number_kind</code>, and when parsing <code>"Float"</code>, the type
-would have to be <code>float number_kind</code>. That kind of dependency
-between the value of an argument and the type of the returned value is
-just not expressible in OCaml’s type system.</p>
+<code>"Int"</code>, the returned type would have to be
+<code>int number_kind</code>, and when parsing <code>"Float"</code>, the
+type would have to be <code>float number_kind</code>. That kind of
+dependency between the value of an argument and the type of the returned
+value is just not expressible in OCaml’s type system.</p>
 <p>This argument doesn’t stop us from serializing, and indeed,
 <code>[@@deriving sexp_of]</code>, which only creates the serializer,
 works just fine.</p>
@@ -1458,12 +1458,12 @@ works just fine.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type _ number_kind =
  | Int : int number_kind
  | Float : float number_kind
-[@@deriving sexp_of]
+[@@deriving sexp_of];;
 ;;
 &gt;type _ number_kind = Int : int number_kind | Float : float number_kind
 &gt;val sexp_of_number_kind :
-&gt;  ('v_x__001_ -&gt; Sexp.t) -&gt; 'v_x__001_ number_kind -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_number_kind Int.sexp_of_t Int ;;
+&gt;  ('a__001_ -&gt; Sexp.t) -&gt; 'a__001_ number_kind -&gt; Sexp.t = &lt;fun&gt;
+sexp_of_number_kind Int.sexp_of_t Int;; ;;
 &gt;- : Sexp.t = Int
 </code></pre>
 </div>
@@ -1487,7 +1487,7 @@ the packed variety.</p>
   =
   match kind with
   | Int -&gt; P Int
-  | Float -&gt; P Float
+  | Float -&gt; P Float;;
 ;;
 &gt;val simple_number_kind_to_packed_number_kind :
 &gt;  simple_number_kind -&gt; packed_number_kind = &lt;fun&gt;
@@ -1498,7 +1498,7 @@ type to produce the final deserialization function.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let number_kind_of_sexp sexp =
   simple_number_kind_of_sexp sexp
-  |&gt; simple_number_kind_to_packed_number_kind
+  |&gt; simple_number_kind_to_packed_number_kind;;
 ;;
 &gt;val number_kind_of_sexp : Sexp.t -&gt; packed_number_kind = &lt;fun&gt;
 </code></pre>
@@ -1506,7 +1506,7 @@ type to produce the final deserialization function.</p>
 <p>And here’s that function in action.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:number_kind_of_sexp
-  [ Sexp.of_string "Float"; Sexp.of_string "Int" ]
+  [ Sexp.of_string "Float"; Sexp.of_string "Int" ];;
 ;;
 &gt;- : packed_number_kind list = [P Float; P Int]
 </code></pre>

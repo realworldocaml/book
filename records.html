@@ -1,7 +1,14 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Records - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="records">
 <h1>Records</h1>
-<p>One of OCaml’s best features is its concise and expressive system for declaring new data types. <em>Records</em> are a key element of that system. We discussed records briefly in <a data-type="xref" href="guided-tour.html#a-guided-tour">Chapter 1, A Guided Tour</a>, but this chapter will go into more depth, covering more of the technical details, as well as providing advice on how to use records effectively in your software designs.</p>
-<p>A record represents a collection of values stored together as one, where each component is identified by a different field name. The basic syntax for a record type declaration is as follows: <a data-secondary="basic syntax for" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>One of OCaml’s best features is its concise and expressive system for
+declaring new data types. <em>Records</em> are a key element of that
+system. We discussed records briefly in <a data-type="xref" href="guided-tour.html#a-guided-tour">Chapter 1, A Guided
+Tour</a>, but this chapter will go into more depth, covering more of the
+technical details, as well as providing advice on how to use records
+effectively in your software designs.</p>
+<p>A record represents a collection of values stored together as one,
+where each component is identified by a different field name. The basic
+syntax for a record type declaration is as follows: <a data-secondary="basic syntax for" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">type &lt;record-name&gt; =
     { &lt;field&gt; : &lt;type&gt;;
@@ -10,7 +17,13 @@
     }</code></pre>
 </div>
 <p>Note that record field names must start with a lowercase letter.</p>
-<p>Here’s a simple example: a <code>service_info</code> record that represents an entry from the <code>/etc/services</code> file on a typical Unix system. That file is used for keeping track of the well-known port and protocol name for protocols such as FTP or SSH. Note that we’re going to open <code>Core</code> in this example rather than <code>Base</code>, since we’re using the Unix API, which you need <code>Core</code> for.</p>
+<p>Here’s a simple example: a <code>service_info</code> record that
+represents an entry from the <code>/etc/services</code> file on a
+typical Unix system. That file is used for keeping track of the
+well-known port and protocol name for protocols such as FTP or SSH. Note
+that we’re going to open <code>Core</code> in this example rather than
+<code>Base</code>, since we’re using the Unix API, which you need
+<code>Core</code> for.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 type service_info =
@@ -19,9 +32,14 @@ type service_info =
     protocol     : string;
   }</code></pre>
 </div>
-<p>We can construct a <code>service_info</code> just as easily as we declared its type. The following function tries to construct such a record given as input a line from <code>/etc/services</code> file. To do this, we’ll use <code>Re</code>, a regular expression engine for OCaml. If you don’t know how regular expressions work, you can just think of them as a simple pattern language you can use for parsing a string.</p>
+<p>We can construct a <code>service_info</code> just as easily as we
+declared its type. The following function tries to construct such a
+record given as input a line from <code>/etc/services</code> file. To do
+this, we’ll use <code>Re</code>, a regular expression engine for OCaml.
+If you don’t know how regular expressions work, you can just think of
+them as a simple pattern language you can use for parsing a string.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "re" ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "re";; ;;
 let service_info_of_string line =
   let matches =
     let pat = "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)" in
@@ -30,46 +48,60 @@ let service_info_of_string line =
   { service_name = Re.Group.get matches 1;
     port = Int.of_string (Re.Group.get matches 2);
     protocol = Re.Group.get matches 3;
-  }
+  };;
 ;;
 &gt;val service_info_of_string : string -&gt; service_info = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can construct a concrete record by calling the function on a line from the file.</p>
+<p>We can construct a concrete record by calling the function on a line
+from the file.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol" ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol";; ;;
 &gt;val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 </code></pre>
 </div>
-<p>You might wonder how the compiler inferred that our function returns a value of type <code>service_info</code>. In this case, the compiler bases its inference on the field names used in constructing the record. That inference is most straightforward when each field name belongs to only one record type. We’ll discuss later in the chapter what happens when field names are shared across different record types.</p>
-<p>Once we have a record value in hand, we can extract elements from the record field using dot notation:</p>
+<p>You might wonder how the compiler inferred that our function returns
+a value of type <code>service_info</code>. In this case, the compiler
+bases its inference on the field names used in constructing the record.
+That inference is most straightforward when each field name belongs to
+only one record type. We’ll discuss later in the chapter what happens
+when field names are shared across different record types.</p>
+<p>Once we have a record value in hand, we can extract elements from the
+record field using dot notation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ssh.port ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ssh.port;; ;;
 &gt;- : int = 22
 </code></pre>
 </div>
-<p>When declaring an OCaml type, you always have the option of parameterizing it by a polymorphic type. Records are no different in this regard. As an example, here’s a type that represents an arbitrary item tagged with a line number.</p>
+<p>When declaring an OCaml type, you always have the option of
+parameterizing it by a polymorphic type. Records are no different in
+this regard. As an example, here’s a type that represents an arbitrary
+item tagged with a line number.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type 'a with_line_num = { item: 'a; line_num: int }</code></pre>
 </div>
-<p>We can then write polymorphic functions that operate over this parameterized type. For example, this function takes a file and parses it as a series of lines, using the provided function for parsing each individual line.</p>
+<p>We can then write polymorphic functions that operate over this
+parameterized type. For example, this function takes a file and parses
+it as a series of lines, using the provided function for parsing each
+individual line.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let parse_lines parse file_contents =
   let lines = String.split ~on:'\n' file_contents in
   List.mapi lines ~f:(fun line_num line -&gt;
     { item = parse line;
       line_num = line_num + 1;
-    })
+    });;
 ;;
 &gt;val parse_lines : (string -&gt; 'a) -&gt; string -&gt; 'a with_line_num list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can then use this function for parsing a snippet of a real <code>/etc/services</code> file.</p>
+<p>We can then use this function for parsing a snippet of a real
+<code>/etc/services</code> file.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">parse_lines service_info_of_string
   "rtmp              1/ddp     # Routing Table Maintenance Protocol
    tcpmux            1/udp     # TCP Port Service Multiplexer
-   tcpmux            1/tcp     # TCP Port Service Multiplexer"
+   tcpmux            1/tcp     # TCP Port Service Multiplexer";;
 ;;
 &gt;- : service_info with_line_num list =
 &gt;[{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
@@ -77,9 +109,11 @@ let service_info_of_string line =
 &gt; {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
 </code></pre>
 </div>
-<p>The polymorphism lets us use the same function when parsing a different format, like this function for parsing a file containing an integer on every line.</p>
+<p>The polymorphism lets us use the same function when parsing a
+different format, like this function for parsing a file containing an
+integer on every line.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">parse_lines Int.of_string "1\n10\n100\n1000" ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">parse_lines Int.of_string "1\n10\n100\n1000";; ;;
 &gt;- : int with_line_num list =
 &gt;[{item = 1; line_num = 1}; {item = 10; line_num = 2};
 &gt; {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
@@ -87,19 +121,35 @@ let service_info_of_string line =
 </div>
 <section class="level2" id="patterns-and-exhaustiveness">
 <h2>Patterns and Exhaustiveness</h2>
-<p>Another way of getting information out of a record is by using a pattern match, as shown in the following function.<a data-secondary="and exhaustiveness" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="patterns and exhaustiveness in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>Another way of getting information out of a record is by using a
+pattern match, as shown in the following function.<a data-secondary="and exhaustiveness" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="patterns and exhaustiveness in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-  sprintf "%s %i/%s" name port prot
+  sprintf "%s %i/%s" name port prot;;
 ;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
-service_info_to_string ssh ;;
+service_info_to_string ssh;; ;;
 &gt;- : string = "ssh 22/udp"
 </code></pre>
 </div>
-<p>Note that the pattern we used had only a single case, rather than using several cases separated by <code>|</code>’s. We needed only one pattern because record patterns are <em>irrefutable</em>, meaning that a record pattern match will never fail at runtime. That’s because the set of fields available in a record is always the same. In general, patterns for types with a fixed structure, like records and tuples, are irrefutable, unlike types with variable structures like lists and variants.<a data-primary="irrefutable patterns" data-type="indexterm">&nbsp;</a><a data-secondary="fixed vs.&nbsp;variable structure of" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
-<p>Another important characteristic of record patterns is that they don’t need to be complete; a pattern can mention only a subset of the fields in the record. This can be convenient, but it can also be error prone. In particular, this means that when new fields are added to the record, code that should be updated to react to the presence of those new fields will not be flagged by the compiler.</p>
-<p>As an example, imagine that we wanted to change our <code>service_info</code> record so that it preserves comments. We can do this by providing a new definition of <code>service_info</code> that includes a <code>comment</code> field:</p>
+<p>Note that the pattern we used had only a single case, rather than
+using several cases separated by <code>|</code>’s. We needed only one
+pattern because record patterns are <em>irrefutable</em>, meaning that a
+record pattern match will never fail at runtime. That’s because the set
+of fields available in a record is always the same. In general, patterns
+for types with a fixed structure, like records and tuples, are
+irrefutable, unlike types with variable structures like lists and
+variants.<a data-primary="irrefutable patterns" data-type="indexterm">&nbsp;</a><a data-secondary="fixed vs.&nbsp;variable structure of" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
+<p>Another important characteristic of record patterns is that they
+don’t need to be complete; a pattern can mention only a subset of the
+fields in the record. This can be convenient, but it can also be error
+prone. In particular, this means that when new fields are added to the
+record, code that should be updated to react to the presence of those
+new fields will not be flagged by the compiler.</p>
+<p>As an example, imagine that we wanted to change our
+<code>service_info</code> record so that it preserves comments. We can
+do this by providing a new definition of <code>service_info</code> that
+includes a <code>comment</code> field:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type service_info =
   { service_name : string;
@@ -108,12 +158,19 @@ service_info_to_string ssh ;;
     comment      : string option;
   }</code></pre>
 </div>
-<p>The code for <code>service_info_to_string</code> would continue to compile without change. But in this case, we should probably update the code so that the generated string includes the comment if it’s there. It would be nice if the type system would warn us that we should consider updating the function.</p>
-<p>Happily, OCaml offers an optional warning for missing fields in record patterns. With that warning turned on (which you can do in the toplevel by typing <code>#warnings "+9"</code>), the compiler will indeed warn us.<a data-secondary="compiler warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="warning enable/disable" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>The code for <code>service_info_to_string</code> would continue to
+compile without change. But in this case, we should probably update the
+code so that the generated string includes the comment if it’s there. It
+would be nice if the type system would warn us that we should consider
+updating the function.</p>
+<p>Happily, OCaml offers an optional warning for missing fields in
+record patterns. With that warning turned on (which you can do in the
+toplevel by typing <code>#warnings "+9"</code>), the compiler will
+indeed warn us.<a data-secondary="compiler warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="warning enable/disable" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9" ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9";; ;;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-  sprintf "%s %i/%s" name port prot
+  sprintf "%s %i/%s" name port prot;;
 ;;
 &gt;Line 1, characters 28-82:
 &gt;Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
@@ -122,44 +179,69 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can disable the warning for a given pattern by explicitly acknowledging that we are ignoring extra fields. This is done by adding an underscore to the pattern:</p>
+<p>We can disable the warning for a given pattern by explicitly
+acknowledging that we are ignoring extra fields. This is done by adding
+an underscore to the pattern:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
-  sprintf "%s %i/%s" name port prot
+  sprintf "%s %i/%s" name port prot;;
 ;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It’s a good idea to enable the warning for incomplete record matches and to explicitly disable it with an <code>_</code> where necessary.</p>
+<p>It’s a good idea to enable the warning for incomplete record matches
+and to explicitly disable it with an <code>_</code> where necessary.</p>
 <section data-type="note" class="level5" id="compiler-warnings">
 <h5>Compiler Warnings</h5>
-<p>The OCaml compiler is packed full of useful warnings that can be enabled and disabled separately. These are documented in the compiler itself, so we could have found out about warning 9 as follows:</p>
+<p>The OCaml compiler is packed full of useful warnings that can be
+enabled and disabled separately. These are documented in the compiler
+itself, so we could have found out about warning 9 as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocaml -warn-help | egrep '\b9\b'
 &gt;  9 [missing-record-field-pattern] Missing fields in a record pattern.
 &gt;  R Alias for warning 9.
 </code></pre>
 </div>
-<p>You can think of OCaml’s warnings as a powerful set of optional static analysis tools. They’re enormously helpful in catching all sorts of bugs, and you should enable them in your build environment. You don’t typically enable all warnings, but the defaults that ship with the compiler are pretty good.</p>
-<p>The warnings used for building the examples in this book are specified with the following flag: <code>-w @A-4-33-40-41-42-43-34-44</code>.</p>
-<p>The syntax of <code>-w</code> can be found by running <code>ocaml -help</code>, but this particular invocation turns on all warnings as errors, disabling only the numbers listed explicitly after the <code>A</code>.</p>
-<p>Treating warnings as errors (i.e., making OCaml fail to compile any code that triggers a warning) is good practice, since without it, warnings are too often ignored during development. When preparing a package for distribution, however, this is a bad idea, since the list of warnings may grow from one release of the compiler to another, and so this may lead your package to fail to compile on newer compiler releases.</p>
+<p>You can think of OCaml’s warnings as a powerful set of optional
+static analysis tools. They’re enormously helpful in catching all sorts
+of bugs, and you should enable them in your build environment. You don’t
+typically enable all warnings, but the defaults that ship with the
+compiler are pretty good.</p>
+<p>The warnings used for building the examples in this book are
+specified with the following flag:
+<code>-w @A-4-33-40-41-42-43-34-44</code>.</p>
+<p>The syntax of <code>-w</code> can be found by running
+<code>ocaml -help</code>, but this particular invocation turns on all
+warnings as errors, disabling only the numbers listed explicitly after
+the <code>A</code>.</p>
+<p>Treating warnings as errors (i.e., making OCaml fail to compile any
+code that triggers a warning) is good practice, since without it,
+warnings are too often ignored during development. When preparing a
+package for distribution, however, this is a bad idea, since the list of
+warnings may grow from one release of the compiler to another, and so
+this may lead your package to fail to compile on newer compiler
+releases.</p>
 </section>
 </section>
 <section class="level2" id="field-punning">
 <h2>Field Punning</h2>
-<p>When the name of a variable coincides with the name of a record field, OCaml provides some handy syntactic shortcuts. For example, the pattern in the following function binds all of the fields in question to variables of the same name. This is called <em>field punning</em>:<a data-secondary="field punning" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="field punning in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>When the name of a variable coincides with the name of a record
+field, OCaml provides some handy syntactic shortcuts. For example, the
+pattern in the following function binds all of the fields in question to
+variables of the same name. This is called <em>field punning</em>:<a data-secondary="field punning" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="field
+punning in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string { service_name; port; protocol; comment } =
   let base = sprintf "%s %i/%s" service_name port protocol in
   match comment with
   | None -&gt; base
-  | Some text -&gt; base ^ " #" ^ text
+  | Some text -&gt; base ^ " #" ^ text;;
 ;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Field punning can also be used to construct a record. Consider the following updated version of <code>service_info_of_string</code>.<a data-secondary="construction of" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>Field punning can also be used to construct a record. Consider the
+following updated version of <code>service_info_of_string</code>.<a data-secondary="construction of" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_of_string line =
   (* first, split off any comment *)
@@ -175,15 +257,20 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
   let service_name = Re.Group.get matches 1 in
   let port = Int.of_string (Re.Group.get matches 2) in
   let protocol = Re.Group.get matches 3 in
-  { service_name; port; protocol; comment }
+  { service_name; port; protocol; comment };;
 ;;
 &gt;val service_info_of_string : string -&gt; service_info = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In the preceding code, we defined variables corresponding to the record fields first, and then the record declaration itself simply listed the fields that needed to be included. You can take advantage of both field punning and label punning when writing a function for constructing a record from labeled arguments:<a data-primary="label punning" data-type="indexterm">&nbsp;</a><a data-secondary="label punning in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>In the preceding code, we defined variables corresponding to the
+record fields first, and then the record declaration itself simply
+listed the fields that needed to be included. You can take advantage of
+both field punning and label punning when writing a function for
+constructing a record from labeled arguments:<a data-primary="label
+punning" data-type="indexterm">&nbsp;</a><a data-secondary="label punning in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_service_info ~service_name ~port ~protocol ~comment =
-  { service_name; port; protocol; comment }
+  { service_name; port; protocol; comment };;
 ;;
 &gt;val create_service_info :
 &gt;  service_name:string -&gt;
@@ -191,7 +278,8 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is considerably more concise than what you would get without punning:</p>
+<p>This is considerably more concise than what you would get without
+punning:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_service_info
       ~service_name:service_name ~port:port
@@ -200,7 +288,7 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
     port = port;
     protocol = protocol;
     comment = comment;
-  }
+  };;
 ;;
 &gt;val create_service_info :
 &gt;  service_name:string -&gt;
@@ -208,12 +296,26 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>Together, field and label punning encourage a style where you propagate the same names throughout your codebase. This is generally good practice, since it encourages consistent naming, which makes it easier to navigate the source.</p>
+<p>Together, field and label punning encourage a style where you
+propagate the same names throughout your codebase. This is generally
+good practice, since it encourages consistent naming, which makes it
+easier to navigate the source.</p>
 </section>
 <section class="level2" id="reusing-field-names">
 <h2>Reusing Field Names</h2>
-<p>Defining records with the same field names can be problematic. As a simple example, let’s consider a collection of types representing the protocol of a logging server.<a data-secondary="reusing field names" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="reusing field names" data-primary="records" data-type="indexterm">&nbsp;</a></p>
-<p>We’ll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry to the server; the <code>logon</code> message is sent when initiating a connection and includes the identity of the user connecting and credentials used for authentication; and the <code>heartbeat</code> message is periodically sent by the client to demonstrate to the server that the client is alive and connected. All of these messages include a session ID and the time the message was generated.</p>
+<p>Defining records with the same field names can be problematic. As a
+simple example, let’s consider a collection of types representing the
+protocol of a logging server.<a data-secondary="reusing field
+names" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="reusing field names" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll describe three message types: <code>log_entry</code>,
+<code>heartbeat</code>, and <code>logon</code>. The
+<code>log_entry</code> message is used to deliver a log entry to the
+server; the <code>logon</code> message is sent when initiating a
+connection and includes the identity of the user connecting and
+credentials used for authentication; and the <code>heartbeat</code>
+message is periodically sent by the client to demonstrate to the server
+that the client is alive and connected. All of these messages include a
+session ID and the time the message was generated.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type log_entry =
   { session_id: string;
@@ -233,32 +335,54 @@ type logon =
     credentials: string;
   }</code></pre>
 </div>
-<p>Reusing field names can lead to some ambiguity. For example, if we want to write a function to grab the <code>session_id</code> from a record, what type will it have?</p>
+<p>Reusing field names can lead to some ambiguity. For example, if we
+want to write a function to grab the <code>session_id</code> from a
+record, what type will it have?</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_session_id t = t.session_id ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_session_id t = t.session_id;; ;;
 &gt;val get_session_id : logon -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In this case, OCaml just picks the most recent definition of that record field. We can force OCaml to assume we’re dealing with a different type (say, a <code>heartbeat</code>) using a type annotation:</p>
+<p>In this case, OCaml just picks the most recent definition of that
+record field. We can force OCaml to assume we’re dealing with a
+different type (say, a <code>heartbeat</code>) using a type
+annotation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_heartbeat_session_id (t:heartbeat) = t.session_id ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_heartbeat_session_id (t:heartbeat) = t.session_id;; ;;
 &gt;val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>While it’s possible to resolve ambiguous field names using type annotations, the ambiguity can be a bit confusing. Consider the following functions for grabbing the session ID and status from a heartbeat:</p>
+<p>While it’s possible to resolve ambiguous field names using type
+annotations, the ambiguity can be a bit confusing. Consider the
+following functions for grabbing the session ID and status from a
+heartbeat:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let status_and_session t = (t.status_message, t.session_id) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let status_and_session t = (t.status_message, t.session_id);; ;;
 &gt;val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;
-let session_and_status t = (t.session_id, t.status_message) ;;
+let session_and_status t = (t.session_id, t.status_message);; ;;
 &gt;Line 1, characters 45-59:
 &gt;Error: This expression has type logon
 &gt;       There is no field status_message within type logon
-let session_and_status (t:heartbeat) = (t.session_id, t.status_message) ;;
+let session_and_status (t:heartbeat) = (t.session_id, t.status_message);; ;;
 &gt;val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Why did the first definition succeed without a type annotation and the second one fail? The difference is that in the first case, the type-checker considered the <code>status_message</code> field first and thus concluded that the record was a <code>heartbeat</code>. When the order was switched, the <code>session_id</code> field was considered first, and so that drove the type to be considered to be a <code>logon</code>, at which point <code>t.status_message</code> no longer made sense.</p>
-<p>We can avoid this ambiguity altogether, either by using nonoverlapping field names or by putting different record types in different modules. Indeed, packing types into modules is a broadly useful idiom (and one used quite extensively by <code>Core</code>), providing for each type a namespace within which to put related values. When using this style, it is standard practice to name the type associated with the module <code>t</code>. Using this style we would write:</p>
+<p>Why did the first definition succeed without a type annotation and
+the second one fail? The difference is that in the first case, the
+type-checker considered the <code>status_message</code> field first and
+thus concluded that the record was a <code>heartbeat</code>. When the
+order was switched, the <code>session_id</code> field was considered
+first, and so that drove the type to be considered to be a
+<code>logon</code>, at which point <code>t.status_message</code> no
+longer made sense.</p>
+<p>We can avoid this ambiguity altogether, either by using
+nonoverlapping field names or by putting different record types in
+different modules. Indeed, packing types into modules is a broadly
+useful idiom (and one used quite extensively by <code>Core</code>),
+providing for each type a namespace within which to put related values.
+When using this style, it is standard practice to name the type
+associated with the module <code>t</code>. Using this style we would
+write:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Log_entry = struct
   type t =
@@ -291,67 +415,95 @@ end</code></pre>
     Log_entry.session_id;
     Log_entry.important;
     Log_entry.message
-  }
+  };;
 ;;
 &gt;val create_log_entry :
 &gt;  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The module name <code>Log_entry</code> is required to qualify the fields, because this function is outside of the <code>Log_entry</code> module where the record was defined. OCaml only requires the module qualification for one record field, however, so we can write this more concisely. Note that we are allowed to insert whitespace between the module path and the field name:</p>
+<p>The module name <code>Log_entry</code> is required to qualify the
+fields, because this function is outside of the <code>Log_entry</code>
+module where the record was defined. OCaml only requires the module
+qualification for one record field, however, so we can write this more
+concisely. Note that we are allowed to insert whitespace between the
+module path and the field name:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_log_entry ~session_id ~important message =
   { Log_entry.
-    time = Time_ns.now (); session_id; important; message }
+    time = Time_ns.now (); session_id; important; message };;
 ;;
 &gt;val create_log_entry :
 &gt;  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Earlier, we saw that you could help OCaml understand which record field was intended by adding a type annotation. We can use that here to make the example even more concise.</p>
+<p>Earlier, we saw that you could help OCaml understand which record
+field was intended by adding a type annotation. We can use that here to
+make the example even more concise.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_log_entry ~session_id ~important message : Log_entry.t =
-  { time = Time_ns.now (); session_id; important; message }
+  { time = Time_ns.now (); session_id; important; message };;
 ;;
 &gt;val create_log_entry :
 &gt;  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is not restricted to constructing a record; we can use the same approaches when pattern matching:</p>
+<p>This is not restricted to constructing a record; we can use the same
+approaches when pattern matching:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let message_to_string { Log_entry.important; message; _ } =
-  if important then String.uppercase message else message
+  if important then String.uppercase message else message;;
 ;;
 &gt;val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>When using dot notation for accessing record fields, we can qualify the field by the module as well.</p>
+<p>When using dot notation for accessing record fields, we can qualify
+the field by the module as well.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_important t = t.Log_entry.important ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_important t = t.Log_entry.important;; ;;
 &gt;val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The syntax here is a little surprising when you first encounter it. The thing to keep in mind is that the dot is being used in two ways: the first dot is a record field access, with everything to the right of the dot being interpreted as a field name; the second dot is accessing the contents of a module, referring to the record field <code>important</code> from within the module <code>Log_entry</code>. The fact that <code>Log_entry</code> is capitalized and so can’t be a field name is what disambiguates the two uses.</p>
-<p>Qualifying a record field by the module it comes from can be awkward. Happily, OCaml doesn’t require that the record field be qualified if it can otherwise infer the type of the record in question. In particular, we can rewrite the above declarations by adding type annotations and removing the module qualifications.</p>
+<p>The syntax here is a little surprising when you first encounter it.
+The thing to keep in mind is that the dot is being used in two ways: the
+first dot is a record field access, with everything to the right of the
+dot being interpreted as a field name; the second dot is accessing the
+contents of a module, referring to the record field
+<code>important</code> from within the module <code>Log_entry</code>.
+The fact that <code>Log_entry</code> is capitalized and so can’t be a
+field name is what disambiguates the two uses.</p>
+<p>Qualifying a record field by the module it comes from can be awkward.
+Happily, OCaml doesn’t require that the record field be qualified if it
+can otherwise infer the type of the record in question. In particular,
+we can rewrite the above declarations by adding type annotations and
+removing the module qualifications.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_log_entry ~session_id ~important message : Log_entry.t =
-  { time = Time_ns.now (); session_id; important; message }
+  { time = Time_ns.now (); session_id; important; message };;
 ;;
 &gt;val create_log_entry :
 &gt;  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
 let message_to_string ({ important; message; _ } : Log_entry.t) =
-  if important then String.uppercase message else message
+  if important then String.uppercase message else message;;
 ;;
 &gt;val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
-let is_important (t:Log_entry.t) = t.important ;;
+let is_important (t:Log_entry.t) = t.important;; ;;
 &gt;val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This feature of the language, known by the somewhat imposing name of <em>type-directed constructor disambiguation</em>, applies to variant tags as well as record fields, as we’ll see in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>.</p>
-<p>For functions defined within the module where a given record is defined, the module qualification goes away entirely.</p>
+<p>This feature of the language, known by the somewhat imposing name of
+<em>type-directed constructor disambiguation</em>, applies to variant
+tags as well as record fields, as we’ll see in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>.</p>
+<p>For functions defined within the module where a given record is
+defined, the module qualification goes away entirely.</p>
 </section>
 <section class="level2" id="functional-updates">
 <h2>Functional Updates</h2>
-<p>Fairly often, you will find yourself wanting to create a new record that differs from an existing record in only a subset of the fields. For example, imagine our logging server had a record type for representing the state of a given client, including when the last heartbeat was received from that client. <a data-primary="functional updates" data-type="indexterm">&nbsp;</a> <a data-secondary="functional updates to" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>Fairly often, you will find yourself wanting to create a new record
+that differs from an existing record in only a subset of the fields. For
+example, imagine our logging server had a record type for representing
+the state of a given client, including when the last heartbeat was
+received from that client. <a data-primary="functional updates" data-type="indexterm">&nbsp;</a>
+<a data-secondary="functional updates to" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
   { addr: Unix.Inet_addr.t;
@@ -361,7 +513,8 @@ let is_important (t:Log_entry.t) = t.important ;;
     last_heartbeat_time: Time_ns.t;
 }</code></pre>
 </div>
-<p>We could define a function for updating the client information when a new heartbeat arrives as follows.</p>
+<p>We could define a function for updating the client information when a
+new heartbeat arrives as follows.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
   { addr = t.addr;
@@ -369,28 +522,40 @@ let is_important (t:Log_entry.t) = t.important ;;
     user = t.user;
     credentials = t.credentials;
     last_heartbeat_time = hb.Heartbeat.time;
-}
+};;
 ;;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is fairly verbose, given that there’s only one field that we actually want to change, and all the others are just being copied over from <code>t</code>. We can use OCaml’s <em>functional update</em> syntax to do this more tersely. The syntax of a functional update is as follows:</p>
+<p>This is fairly verbose, given that there’s only one field that we
+actually want to change, and all the others are just being copied over
+from <code>t</code>. We can use OCaml’s <em>functional update</em>
+syntax to do this more tersely. The syntax of a functional update is as
+follows:</p>
 <div class="highlight">
 <pre><code class="language-clike">{ &lt;record&gt; with &lt;field&gt; = &lt;value&gt;;
       &lt;field&gt; = &lt;value&gt;;
       ...
 }</code></pre>
 </div>
-<p>The purpose of the functional update is to create a new record based on an existing one, with a set of field changes layered on top.</p>
-<p>Given this, we can rewrite <code>register_heartbeat</code> more concisely:</p>
+<p>The purpose of the functional update is to create a new record based
+on an existing one, with a set of field changes layered on top.</p>
+<p>Given this, we can rewrite <code>register_heartbeat</code> more
+concisely:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
-{ t with last_heartbeat_time = hb.Heartbeat.time }
+{ t with last_heartbeat_time = hb.Heartbeat.time };;
 ;;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Functional updates make your code independent of the identity of the fields in the record that are not changing. This is often what you want, but it has downsides as well. In particular, if you change the definition of your record to have more fields, the type system will not prompt you to reconsider whether your code needs to change to accommodate the new fields. Consider what happens if we decided to add a field for the status message received on the last heartbeat:</p>
+<p>Functional updates make your code independent of the identity of the
+fields in the record that are not changing. This is often what you want,
+but it has downsides as well. In particular, if you change the
+definition of your record to have more fields, the type system will not
+prompt you to reconsider whether your code needs to change to
+accommodate the new fields. Consider what happens if we decided to add a
+field for the status message received on the last heartbeat:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
   { addr: Unix.Inet_addr.t;
@@ -401,12 +566,17 @@ let is_important (t:Log_entry.t) = t.important ;;
     last_heartbeat_status: string;
 }</code></pre>
 </div>
-<p>The original implementation of <code>register_heartbeat</code> would now be invalid, and thus the compiler would effectively warn us to think about how to handle this new field. But the version using a functional update continues to compile as is, even though it incorrectly ignores the new field. The correct thing to do would be to update the code as follows:</p>
+<p>The original implementation of <code>register_heartbeat</code> would
+now be invalid, and thus the compiler would effectively warn us to think
+about how to handle this new field. But the version using a functional
+update continues to compile as is, even though it incorrectly ignores
+the new field. The correct thing to do would be to update the code as
+follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
-}
+};;
 ;;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
@@ -414,7 +584,10 @@ let is_important (t:Log_entry.t) = t.important ;;
 </section>
 <section class="level2" id="mutable-fields">
 <h2>Mutable Fields</h2>
-<p>Like most OCaml values, records are immutable by default. You can, however, declare individual record fields as mutable. In the following code, we’ve made the last two fields of <code>client_info</code> mutable:<a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a><a data-secondary="mutable fields in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>Like most OCaml values, records are immutable by default. You can,
+however, declare individual record fields as mutable. In the following
+code, we’ve made the last two fields of <code>client_info</code>
+mutable:<a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a><a data-secondary="mutable fields in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
   { addr: Unix.Inet_addr.t;
@@ -425,31 +598,48 @@ let is_important (t:Log_entry.t) = t.important ;;
     mutable last_heartbeat_status: string;
 }</code></pre>
 </div>
-<p>The <code>&lt;-</code> operator is used for setting a mutable field. The side-effecting version of <code>register_heartbeat</code> would be written as follows:</p>
+<p>The <code>&lt;-</code> operator is used for setting a mutable field.
+The side-effecting version of <code>register_heartbeat</code> would be
+written as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
   t.last_heartbeat_time   &lt;- hb.Heartbeat.time;
-  t.last_heartbeat_status &lt;- hb.Heartbeat.status_message
+  t.last_heartbeat_status &lt;- hb.Heartbeat.status_message;;
 ;;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that mutable assignment, and thus the <code>&lt;-</code> operator, is not needed for initialization because all fields of a record, including mutable ones, are specified when the record is created.</p>
-<p>OCaml’s policy of immutable-by-default is a good one, but imperative programming is an important part of programming in OCaml. We go into more depth about how (and when) to use OCaml’s imperative features in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>.</p>
+<p>Note that mutable assignment, and thus the <code>&lt;-</code>
+operator, is not needed for initialization because all fields of a
+record, including mutable ones, are specified when the record is
+created.</p>
+<p>OCaml’s policy of immutable-by-default is a good one, but imperative
+programming is an important part of programming in OCaml. We go into
+more depth about how (and when) to use OCaml’s imperative features in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>.</p>
 </section>
 <section class="level2" id="first-class-fields">
 <h2>First-Class Fields</h2>
-<p>Consider the following function for extracting the usernames from a list of <code>Logon</code> messages:<a data-secondary="first-class fields" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-primary="first-class fields" data-type="indexterm">&nbsp;</a><a data-secondary="first-class fields in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+<p>Consider the following function for extracting the usernames from a
+list of <code>Logon</code> messages:<a data-secondary="first-class
+fields" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-primary="first-class fields" data-type="indexterm">&nbsp;</a><a data-secondary="first-class fields in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_users logons =
   List.dedup_and_sort ~compare:String.compare
-(List.map logons ~f:(fun x -&gt; x.Logon.user))
+(List.map logons ~f:(fun x -&gt; x.Logon.user));;
 ;;
 &gt;val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Here, we wrote a small function <code>(fun x -&gt; x.Logon.user)</code> to access the <code>user</code> field. This kind of accessor function is a common enough pattern that it would be convenient to generate it automatically. The <code>ppx_fields_conv</code> syntax extension that ships with <code>Core</code> does just that.<a data-primary="record field accessor functions" data-type="indexterm">&nbsp;</a></p>
-<p>The <code>[@@deriving fields]</code> annotation at the end of the declaration of a record type will cause the extension to be applied to a given type declaration. We need to enable the extension explicitly,</p>
+<p>Here, we wrote a small function
+<code>(fun x -&gt; x.Logon.user)</code> to access the <code>user</code>
+field. This kind of accessor function is a common enough pattern that it
+would be convenient to generate it automatically. The
+<code>ppx_fields_conv</code> syntax extension that ships with
+<code>Core</code> does just that.<a data-primary="record field accessor
+functions" data-type="indexterm">&nbsp;</a></p>
+<p>The <code>[@@deriving fields]</code> annotation at the end of the
+declaration of a record type will cause the extension to be applied to a
+given type declaration. We need to enable the extension explicitly,</p>
 
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
@@ -465,7 +655,7 @@ let is_important (t:Log_entry.t) = t.important ;;
       credentials: string;
     }
   [@@deriving fields]
-end
+end;;
 ;;
 &gt;module Logon :
 &gt;  sig
@@ -493,57 +683,94 @@ end
 &gt;  end
 </code></pre>
 </div>
-<p>Note that this will generate <em>a lot</em> of output because <code>fieldslib</code> generates a large collection of helper functions for working with record fields. We’ll only discuss a few of these; you can learn about the remainder from the documentation that comes with <code>fieldslib</code>.</p>
-<p>One of the functions we obtain is <code>Logon.user</code>, which we can use to extract the user field from a logon message:</p>
+<p>Note that this will generate <em>a lot</em> of output because
+<code>fieldslib</code> generates a large collection of helper functions
+for working with record fields. We’ll only discuss a few of these; you
+can learn about the remainder from the documentation that comes with
+<code>fieldslib</code>.</p>
+<p>One of the functions we obtain is <code>Logon.user</code>, which we
+can use to extract the user field from a logon message:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_users logons =
   List.dedup_and_sort ~compare:String.compare
-(List.map logons ~f:Logon.user)
+(List.map logons ~f:Logon.user);;
 ;;
 &gt;val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In addition to generating field accessor functions, <code>fieldslib</code> also creates a submodule called <code>Fields</code> that contains a first-class representative of each field, in the form of a value of type <code>Field.t</code>. The <code>Field</code> module provides the following functions:<a data-secondary="Field.setter" data-primary="Field module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.fset" data-primary="Field module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.get" data-primary="Field module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.name" data-primary="Field module" data-type="indexterm">&nbsp;</a><a data-primary="fieldslib" data-type="indexterm">&nbsp;</a></p>
+<p>In addition to generating field accessor functions,
+<code>fieldslib</code> also creates a submodule called
+<code>Fields</code> that contains a first-class representative of each
+field, in the form of a value of type <code>Field.t</code>. The
+<code>Field</code> module provides the following functions:<a data-secondary="Field.setter" data-primary="Field module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.fset" data-primary="Field
+module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.get" data-primary="Field
+module" data-type="indexterm">&nbsp;</a><a data-secondary="Field.name" data-primary="Field
+module" data-type="indexterm">&nbsp;</a><a data-primary="fieldslib" data-type="indexterm">&nbsp;</a></p>
 <dl>
 <dt><code>Field.name</code></dt>
-<dd>Returns the name of a field
+<dd>
+Returns the name of a field
 </dd>
 <dt><code>Field.get</code></dt>
-<dd>Returns the content of a field
+<dd>
+Returns the content of a field
 </dd>
 <dt><code>Field.fset</code></dt>
-<dd>Does a functional update of a field
+<dd>
+Does a functional update of a field
 </dd>
 <dt><code>Field.setter</code></dt>
-<dd>Returns <code>None</code> if the field is not mutable or <code>Some f</code> if it is, where <code>f</code> is a function for mutating that field
+<dd>
+Returns <code>None</code> if the field is not mutable or
+<code>Some f</code> if it is, where <code>f</code> is a function for
+mutating that field
 </dd>
 </dl>
-<p>A <code>Field.t</code> has two type parameters: the first for the type of the record, and the second for the type of the field in question. Thus, the type of <code>Logon.Fields.session_id</code> is <code>(Logon.t, string) Field.t</code>, whereas the type of <code>Logon.Fields.time</code> is <code>(Logon.t, Time.t) Field.t</code>. Thus, if you call <code>Field.get</code> on <code>Logon.Fields.user</code>, you’ll get a function for extracting the <code>user</code> field from a <code>Logon.t</code>:</p>
+<p>A <code>Field.t</code> has two type parameters: the first for the
+type of the record, and the second for the type of the field in
+question. Thus, the type of <code>Logon.Fields.session_id</code> is
+<code>(Logon.t, string) Field.t</code>, whereas the type of
+<code>Logon.Fields.time</code> is
+<code>(Logon.t, Time.t) Field.t</code>. Thus, if you call
+<code>Field.get</code> on <code>Logon.Fields.user</code>, you’ll get a
+function for extracting the <code>user</code> field from a
+<code>Logon.t</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get Logon.Fields.user ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get Logon.Fields.user;; ;;
 &gt;- : Logon.t -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Thus, the first parameter of the <code>Field.t</code> corresponds to the record you pass to <code>get</code>, and the second parameter corresponds to the value contained in the field, which is also the return type of <code>get</code>.</p>
-<p>The type of <code>Field.get</code> is a little more complicated than you might naively expect from the preceding one:</p>
+<p>Thus, the first parameter of the <code>Field.t</code> corresponds to
+the record you pass to <code>get</code>, and the second parameter
+corresponds to the value contained in the field, which is also the
+return type of <code>get</code>.</p>
+<p>The type of <code>Field.get</code> is a little more complicated than
+you might naively expect from the preceding one:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Field.get;; ;;
 &gt;- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The type is <code>Field.t_with_perm</code> rather than <code>Field.t</code> because fields have a notion of access control that comes up in some special cases where we expose the ability to read a field from a record, but not the ability to create new records, and so we can’t expose functional updates.</p>
-<p>We can use first-class fields to do things like write a generic function for displaying a record field:</p>
+<p>The type is <code>Field.t_with_perm</code> rather than
+<code>Field.t</code> because fields have a notion of access control that
+comes up in some special cases where we expose the ability to read a
+field from a record, but not the ability to create new records, and so
+we can’t expose functional updates.</p>
+<p>We can use first-class fields to do things like write a generic
+function for displaying a record field:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let show_field field to_string record =
   let name = Field.name field in
   let field_string = to_string (Field.get field record) in
-  name ^ ": " ^ field_string
+  name ^ ": " ^ field_string;;
 ;;
 &gt;val show_field :
 &gt;  ('a, 'b, 'c) Field.t_with_perm -&gt; ('c -&gt; string) -&gt; 'b -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This takes three arguments: the <code>Field.t</code>, a function for converting the contents of the field in question to a string, and a record from which the field can be grabbed.</p>
+<p>This takes three arguments: the <code>Field.t</code>, a function for
+converting the contents of the field in question to a string, and a
+record from which the field can be grabbed.</p>
 <p>Here’s an example of <code>show_field</code> in action:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let logon = { Logon.
@@ -561,10 +788,16 @@ show_field Logon.Fields.time Time_ns.to_string logon ;;
 &gt;- : string = "time: 2017-07-21 15:11:45.000000000Z"
 </code></pre>
 </div>
-<p>As a side note, the preceding example is our first use of the <code>Fn</code> module (short for “function”), which provides a collection of useful primitives for dealing with functions. <code>Fn.id</code> is the identity function.</p>
-<p><code>fieldslib</code> also provides higher-level operators, like <code>Fields.fold</code> and <code>Fields.iter</code>, which let you walk over the fields of a record. So, for example, in the case of <code>Logon.t</code>, the field iterator has the following type:</p>
+<p>As a side note, the preceding example is our first use of the
+<code>Fn</code> module (short for “function”), which provides a
+collection of useful primitives for dealing with functions.
+<code>Fn.id</code> is the identity function.</p>
+<p><code>fieldslib</code> also provides higher-level operators, like
+<code>Fields.fold</code> and <code>Fields.iter</code>, which let you
+walk over the fields of a record. So, for example, in the case of
+<code>Logon.t</code>, the field iterator has the following type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Logon.Fields.iter ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Logon.Fields.iter;; ;;
 &gt;- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)
 &gt;                Field.t_with_perm -&gt; unit) -&gt;
 &gt;    time:(([&lt; `Read | `Set_and_create ], Logon.t, Time_ns.t)
@@ -577,8 +810,16 @@ show_field Logon.Fields.time Time_ns.to_string logon ;;
 &gt;= &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is a bit daunting to look at, largely because of the access control markers, but the structure is actually pretty simple. Each labeled argument is a function that takes a first-class field of the necessary type as an argument. Note that <code>iter</code> passes each of these callbacks the <code>Field.t</code>, not the contents of the specific record field. The contents of the field, though, can be looked up using the combination of the record and the <code>Field.t</code>.</p>
-<p>Now, let’s use <code>Logon.Fields.iter</code> and <code>show_field</code> to print out all the fields of a <code>Logon</code> record:</p>
+<p>This is a bit daunting to look at, largely because of the access
+control markers, but the structure is actually pretty simple. Each
+labeled argument is a function that takes a first-class field of the
+necessary type as an argument. Note that <code>iter</code> passes each
+of these callbacks the <code>Field.t</code>, not the contents of the
+specific record field. The contents of the field, though, can be looked
+up using the combination of the record and the <code>Field.t</code>.</p>
+<p>Now, let’s use <code>Logon.Fields.iter</code> and
+<code>show_field</code> to print out all the fields of a
+<code>Logon</code> record:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_logon logon =
   let print to_string field =
@@ -599,8 +840,17 @@ print_logon logon ;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>One nice side effect of this approach is that it helps you adapt your code when the fields of a record change. If you were to add a field to <code>Logon.t</code>, the type of <code>Logon.Fields.iter</code> would change along with it, acquiring a new argument. Any code using <code>Logon.Fields.iter</code> won’t compile until it’s fixed to take this new argument into account.</p>
-<p>Field iterators are useful for a variety of record-related tasks, from building record-validation functions to scaffolding the definition of a web form from a record type. Such applications can benefit from the guarantee that all fields of the record type in question have been considered.</p>
+<p>One nice side effect of this approach is that it helps you adapt your
+code when the fields of a record change. If you were to add a field to
+<code>Logon.t</code>, the type of <code>Logon.Fields.iter</code> would
+change along with it, acquiring a new argument. Any code using
+<code>Logon.Fields.iter</code> won’t compile until it’s fixed to take
+this new argument into account.</p>
+<p>Field iterators are useful for a variety of record-related tasks,
+from building record-validation functions to scaffolding the definition
+of a web form from a record type. Such applications can benefit from the
+guarantee that all fields of the record type in question have been
+considered.</p>
 </section>
 </section>
 </article></div><a href="variants.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 06</small>Variants</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
