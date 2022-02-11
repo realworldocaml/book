@@ -26,15 +26,15 @@ module" data-type="indexterm">&nbsp;</a><a data-secondary="List.Assoc.find" data
 module" data-type="indexterm">&nbsp;</a><a data-secondary="adding new bindings
 in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="finding key associations in" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-let assoc = [("one", 1); ("two",2); ("three",3)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+let assoc = [("one", 1); ("two",2); ("three",3)];;
 &gt;val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
-List.Assoc.find ~equal:String.equal assoc "two";; ;;
+List.Assoc.find ~equal:String.equal assoc "two";;
 &gt;- : int option = Some 2
-List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);; ;;
+List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
 &gt;- : (string, int) Base.List.Assoc.t =
 &gt;[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);; ;;
+List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
 &gt;- : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 </code></pre>
 </div>
@@ -576,14 +576,14 @@ in the <code>Base</code> library. In general, opening a module adds the
 contents of that module to the environment that the compiler looks at to
 find the definition of various identifiers. Here’s an example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-module M = struct let foo = 3 end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+module M = struct let foo = 3 end;;
 &gt;module M : sig val foo : int end
-foo;; ;;
+foo;;
 &gt;Line 1, characters 1-4:
 &gt;Error: Unbound value foo
-open M;; ;;
-foo;; ;;
+open M;;
+foo;;
 &gt;- : int = 3
 </code></pre>
 </div>
@@ -609,7 +609,6 @@ write:</p></li>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
   let open Int64 in
   (x + y) / of_int 2;;
-;;
 &gt;val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
 </code></pre>
 </div>
@@ -621,7 +620,6 @@ expressions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
   Int64.((x + y) / of_int 2);;
-;;
 &gt;val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
 </code></pre>
 </div>
@@ -667,7 +665,6 @@ to modules" data-primary="identifiers" data-type="indexterm">&nbsp;</a></p>
   let create low high =
     if high &lt; low then Empty else Interval (low,high)
 end;;
-;;
 &gt;module Interval :
 &gt;  sig type t = Interval of int * int | Empty val create : int -&gt; int -&gt; t end
 </code></pre>
@@ -683,14 +680,13 @@ extended version of the <code>Interval</code> module:</p>
     | Empty -&gt; false
     | Interval (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
 end;;
-;;
 &gt;module Extended_interval :
 &gt;  sig
 &gt;    type t = Interval.t = Interval of int * int | Empty
 &gt;    val create : int -&gt; int -&gt; t
 &gt;    val contains : t -&gt; int -&gt; bool
 &gt;  end
-Extended_interval.contains (Extended_interval.create 3 10) 4;; ;;
+Extended_interval.contains (Extended_interval.create 3 10) 4;;
 &gt;- : bool = true
 </code></pre>
 </div>
@@ -707,10 +703,9 @@ gotten a quite different result:</p>
     | Empty -&gt; false
     | Interval (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
 end;;
-;;
 &gt;module Extended_interval :
 &gt;  sig val contains : Extended_interval.t -&gt; int -&gt; bool end
-Extended_interval.contains (Extended_interval.create 3 10) 4;; ;;
+Extended_interval.contains (Extended_interval.create 3 10) 4;;
 &gt;Line 1, characters 29-53:
 &gt;Error: Unbound value Extended_interval.create
 </code></pre>

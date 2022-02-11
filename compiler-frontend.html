@@ -397,7 +397,6 @@ let a = Sys.get_argv (); ()
 [@@@warning "-10"]
 let b = Sys.get_argv (); ()
 end;;
-;;
 &gt;Line 4, characters 11-26:
 &gt;Warning 10 [non-unit-statement]: this expression should have type unit.
 &gt;module Abc : sig val a : unit val b : unit end
@@ -418,13 +417,11 @@ code:</p>
   let earth = true
   let pluto = true
 end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."];;
-;;
 &gt;module Planets : sig val earth : bool val pluto : bool end
 module Planets2016 = struct
   let earth = true
   let pluto = false
 end;;
-;;
 &gt;module Planets2016 : sig val earth : bool val pluto : bool end
 </code></pre>
 </div>
@@ -434,12 +431,12 @@ argument string redirects developers to the newer code. Now if we try to
 use the value that has been marked as deprecated, the compiler will
 issue a warning.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto;;
 &gt;Line 1, characters 25-38:
 &gt;Alert deprecated: module Planets
 &gt;Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
 &gt;val is_pluto_a_planet : bool = true
-let is_pluto_a_planet = Planets2016.pluto;; ;;
+let is_pluto_a_planet = Planets2016.pluto;;
 &gt;val is_pluto_a_planet : bool = false
 </code></pre>
 </div>
@@ -452,13 +449,11 @@ a constant literal.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type program_result =
 | Error of string [@warn_on_literal_pattern]
 | Exit_code of int;;
-;;
 &gt;type program_result = Error of string | Exit_code of int
 let exit_with = function
 | Error "It blew up" -&gt; 1
 | Exit_code code -&gt; code
 | Error _ -&gt; 100;;
-;;
 &gt;Line 2, characters 11-23:
 &gt;Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 &gt;this constructor's arguments. They are only for information

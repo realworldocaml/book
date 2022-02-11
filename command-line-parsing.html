@@ -103,7 +103,7 @@ bit more about the type signatures of the various components we’ve been
 using. Let’s do that by recreating some of this code in the
 toplevel.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let filename_param = Command.Param.(anon ("filename" %: string));; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let filename_param = Command.Param.(anon ("filename" %: string));;
 &gt;val filename_param : string Command.Spec.param = &lt;abstr&gt;
 </code></pre>
 </div>
@@ -114,9 +114,9 @@ indicate the type of the value returned by the parser; in this case,
 returns a value of type <code>unit -&gt; unit</code>. We can see that by
 using <code>#show</code> to explore the types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.basic;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.basic;;
 &gt;val basic : unit Command.basic_command
-#show Command.basic_command;; ;;
+#show Command.basic_command;;
 &gt;type nonrec 'result basic_command =
 &gt;    summary:string -&gt;
 &gt;    ?readme:(unit -&gt; string) -&gt;
@@ -135,7 +135,7 @@ returned by the parser. As you can see below, the type of
 <code>Command.Param.map</code> is very similar to the code of
 <code>List.map</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.map;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.map;;
 &gt;val map : 'a Command.Spec.param -&gt; f:('a -&gt; 'b) -&gt; 'b Command.Spec.param
 </code></pre>
 </div>
@@ -232,7 +232,7 @@ of course create multi-argument commands as well. We can make a parser
 for multiple arguments by binding together simpler parsers, using the
 function <code>Command.Param.both</code>. Here is its type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.both;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.both;;
 &gt;val both :
 &gt;  'a Command.Spec.param -&gt;
 &gt;  'b Command.Spec.param -&gt; ('a * 'b) Command.Spec.param
@@ -678,7 +678,7 @@ grows features. Luckily, it’s simple to extend your application to do
 this in Command: just use <code>Command.group</code>, which lets you
 merge a collection of <code>Command.t</code>’s into one. <a data-primary="Command.group" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.group;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.group;;
 &gt;- : summary:string -&gt;
 &gt;    ?readme:(unit -&gt; string) -&gt;
 &gt;    ?preserve_subcommand_order:unit -&gt;

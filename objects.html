@@ -78,7 +78,7 @@ have <em>object types</em>, and if you want to use objects, you aren’t
 required to use classes at all. Here’s an example of a simple
 object:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 let s = object
   val mutable v = [0; 2]
 
@@ -92,7 +92,6 @@ let s = object
   method push hd =
     v &lt;- hd :: v
 end;;
-;;
 &gt;val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
 </code></pre>
 </div>
@@ -106,11 +105,11 @@ Fields, like <code>v</code>, are not part of the public interface of an
 object. All interaction with an object is through its methods. The
 syntax for a method invocation uses the <code>#</code> character:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">s#pop;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">s#pop;;
 &gt;- : int option = Some 0
-s#push 4;; ;;
+s#push 4;;
 &gt;- : unit = ()
-s#pop;; ;;
+s#pop;;
 &gt;- : int option = Some 4
 </code></pre>
 </div>
@@ -135,11 +134,10 @@ value and returns an object:</p>
   method push hd =
     v &lt;- hd :: v
 end;;
-;;
 &gt;val stack : 'a list -&gt; &lt; pop : 'a option; push : 'a -&gt; unit &gt; = &lt;fun&gt;
-let s = stack [3; 2; 1];; ;;
+let s = stack [3; 2; 1];;
 &gt;val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
-s#pop;; ;;
+s#pop;;
 &gt;- : int option = Some 3
 </code></pre>
 </div>
@@ -154,11 +152,11 @@ returned object now use the polymorphic type <code>'a</code>. When
 <p>Like polymorphic variants, methods can be used without an explicit
 type declaration: <a data-secondary="in objects" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphism of" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area sq = sq#width * sq#width;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area sq = sq#width * sq#width;;
 &gt;val area : &lt; width : int; .. &gt; -&gt; int = &lt;fun&gt;
-let minimize sq : unit = sq#resize 1;; ;;
+let minimize sq : unit = sq#resize 1;;
 &gt;val minimize : &lt; resize : int -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
-let limit sq = if (area sq) &gt; 100 then minimize sq;; ;;
+let limit sq = if (area sq) &gt; 100 then minimize sq;;
 &gt;val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -170,7 +168,6 @@ same method:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let toggle sq b : unit =
   if b then sq#resize `Fullscreen
 else minimize sq;;
-;;
 &gt;Line 3, characters 17-19:
 &gt;Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;
 &gt;       but an expression was expected of type &lt; resize : int -&gt; unit; .. &gt;
@@ -185,15 +182,14 @@ as well. Such object types are said to be <em>open</em>. <a data-primary="open o
 <p>We can manually <em>close</em> an object type using a type
 annotation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area_closed (sq: &lt; width : int &gt;) = sq#width * sq#width;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area_closed (sq: &lt; width : int &gt;) = sq#width * sq#width;;
 &gt;val area_closed : &lt; width : int &gt; -&gt; int = &lt;fun&gt;
 let sq = object
   method width = 30
   method name = "sq"
 end;;
-;;
 &gt;val sq : &lt; name : string; width : int &gt; = &lt;obj&gt;
-area_closed sq;; ;;
+area_closed sq;;
 &gt;Line 1, characters 13-15:
 &gt;Error: This expression has type &lt; name : string; width : int &gt;
 &gt;       but an expression was expected of type &lt; width : int &gt;
@@ -208,7 +204,7 @@ an elided object type is actually polymorphic. For example, if we try to
 write a type definition, we get an “unbound type variable” error: <a data-secondary="row polymorphism" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="row
 polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="ellipses (..)" data-type="indexterm">&nbsp;</a><a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt;;;
 &gt;Line 1, characters 1-33:
 &gt;Error: A type variable is unbound in this type declaration.
 &gt;       In type &lt; width : Base.int; .. &gt; as 'a the variable 'a is unbound
@@ -228,14 +224,14 @@ matter how it is implemented. When the method <code>#pop</code> is
 invoked, the actual method that is run is determined by the object.
 Consider the following function.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop;;
 &gt;val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We can run it on the stack type we defined above, which is based on
 linked lists.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (stack [5;4;3;2;1]);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (stack [5;4;3;2;1]);;
 &gt;Popped: 5
 &gt;- : unit = ()
 </code></pre>
@@ -247,14 +243,13 @@ stacks, using Base’s array-based <code>Stack</code> module.</p>
   val stack = Stack.of_list l
   method pop = Stack.pop stack
 end;;
-;;
 &gt;val array_stack : 'a list -&gt; &lt; pop : 'a option &gt; = &lt;fun&gt;
 </code></pre>
 </div>
 <p>And <code>print_pop</code> will work just as well on this kind of
 stack object, despite having a completely different implementation.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (array_stack [5;4;3;2;1]);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (array_stack [5;4;3;2;1]);;
 &gt;Popped: 5
 &gt;- : unit = ()
 </code></pre>
@@ -281,7 +276,6 @@ objects:</p>
   method push hd =
     {&lt; v = hd :: v &gt;}
 end;;
-;;
 &gt;val imm_stack :
 &gt;  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;
 </code></pre>
@@ -293,14 +287,14 @@ specified fields updated. In other words, the <code>push hd</code>
 method produces a copy of the object, with <code>v</code> replaced by
 <code>hd :: v</code>. The original object is not modified:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = imm_stack [3; 2; 1];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = imm_stack [3; 2; 1];;
 &gt;val s : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
-let r = s#push 4;; ;;
+let r = s#push 4;;
 &gt;val r : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
-s#pop;; ;;
+s#pop;;
 &gt;- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
 &gt;Some (3, &lt;obj&gt;)
-r#pop;; ;;
+r#pop;;
 &gt;- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
 &gt;Some (4, &lt;obj&gt;)
 </code></pre>
@@ -364,20 +358,19 @@ type of <code>e</code> is a subtype of <code>t</code>. <a data-secondary="basics
 shapes. The generic type <code>shape</code> just has a method to compute
 the area. <a data-primary="width subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="width subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; area : float &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; area : float &gt;;;
 &gt;type shape = &lt; area : float &gt;
 </code></pre>
 </div>
 <p>Now let’s add a type representing a specific kind of shape, as well
 as a function for creating objects of that type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; area : float; width : int &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; area : float; width : int &gt;;;
 &gt;type square = &lt; area : float; width : int &gt;
 let square w = object
   method area = Float.of_int (w * w)
   method width = w
 end;;
-;;
 &gt;val square : int -&gt; &lt; area : float; width : int &gt; = &lt;fun&gt;
 </code></pre>
 </div>
@@ -387,12 +380,12 @@ we expect a <code>square</code> to be a <code>shape</code>, and it is.
 Note, however, that the coercion <code>:&gt;</code> must be
 explicit:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(square 10 : shape);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(square 10 : shape);;
 &gt;Line 1, characters 2-11:
 &gt;Error: This expression has type &lt; area : float; width : int &gt;
 &gt;       but an expression was expected of type shape
 &gt;       The second object type has no method width
-(square 10 :&gt; shape);; ;;
+(square 10 :&gt; shape);;
 &gt;- : shape = &lt;obj&gt;
 </code></pre>
 </div>
@@ -412,13 +405,12 @@ subtype of <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a subtype
 of <code>t2</code>. <a data-primary="depth subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="depth subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
 <p>First, let’s add a new shape type, <code>circle</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type circle = &lt; area : float; radius : int &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type circle = &lt; area : float; radius : int &gt;;;
 &gt;type circle = &lt; area : float; radius : int &gt;
 let circle r = object
   method area = 3.14 *. (Float.of_int r) **. 2.0
   method radius = r
 end;;
-;;
 &gt;val circle : int -&gt; &lt; area : float; radius : int &gt; = &lt;fun&gt;
 </code></pre>
 </div>
@@ -430,7 +422,6 @@ end;;
   method shape = circle 5
   method color = "silver"
 end;;
-;;
 &gt;val coin : &lt; color : string; shape : &lt; area : float; radius : int &gt; &gt; = &lt;obj&gt;
 </code></pre>
 </div>
@@ -439,7 +430,6 @@ end;;
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let map = object
   method shape = square 10
 end;;
-;;
 &gt;val map : &lt; shape : &lt; area : float; width : int &gt; &gt; = &lt;obj&gt;
 </code></pre>
 </div>
@@ -447,9 +437,9 @@ end;;
 subtype of the <code>shape</code> type, so they can both be coerced into
 the object type <code>&lt; shape : shape &gt;</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type item = &lt; shape : shape &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type item = &lt; shape : shape &gt;;;
 &gt;type item = &lt; shape : shape &gt;
-let items = [ (coin :&gt; item) ; (map :&gt; item) ];; ;;
+let items = [ (coin :&gt; item) ; (map :&gt; item) ];;
 &gt;val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
@@ -460,13 +450,13 @@ larger polymorphic variant type. A polymorphic variant type <em>A</em>
 is a subtype of <em>B</em>, if the tags of <em>A</em> are a subset of
 the tags of <em>B</em>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type num = [ `Int of int | `Float of float ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type num = [ `Int of int | `Float of float ];;
 &gt;type num = [ `Float of float | `Int of int ]
-type const = [ num | `String of string ];; ;;
+type const = [ num | `String of string ];;
 &gt;type const = [ `Float of float | `Int of int | `String of string ]
-let n : num = `Int 3;; ;;
+let n : num = `Int 3;;
 &gt;val n : num = `Int 3
-let c : const = (n :&gt; const);; ;;
+let c : const = (n :&gt; const);;
 &gt;val c : const = `Int 3
 </code></pre>
 </div>
@@ -479,9 +469,9 @@ a <code>shape</code>, we expect a <code>square list</code> to be a
 <code>shape list</code>. OCaml does indeed allow such coercions:<a data-primary="variance" data-type="indexterm">&nbsp;</a><a data-secondary="variance
 and" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares: square list = [ square 10; square 20 ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares: square list = [ square 10; square 20 ];;
 &gt;val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]
-let shapes: shape list = (squares :&gt; shape list);; ;;
+let shapes: shape list = (squares :&gt; shape list);;
 &gt;val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
@@ -491,9 +481,9 @@ because it would allow you to store nonsquare shapes into what should be
 an array of squares. OCaml recognizes this and does not allow the
 coercion:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square_array: square array = [| square 10; square 20 |];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square_array: square array = [| square 10; square 20 |];;
 &gt;val square_array : square array = [|&lt;obj&gt;; &lt;obj&gt;|]
-let shape_array: shape array = (square_array :&gt; shape array);; ;;
+let shape_array: shape array = (square_array :&gt; shape array);;
 &gt;Line 1, characters 32-61:
 &gt;Error: Type square array is not a subtype of shape array
 &gt;       The second object type has no method width
@@ -512,11 +502,9 @@ be a <code>square</code> and would not know what to do with a
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let shape_to_string: shape -&gt; string =
   fun s -&gt; Printf.sprintf "Shape(%F)" s#area;;
-;;
 &gt;val shape_to_string : shape -&gt; string = &lt;fun&gt;
 let square_to_string: square -&gt; string =
   (shape_to_string :&gt; square -&gt; string);;
-;;
 &gt;val square_to_string : square -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -535,7 +523,6 @@ Consider the following simple immutable <code>Either</code> type.</p>
   let left x = Left x
   let right x = Right x
 end;;
-;;
 &gt;module Either :
 &gt;  sig
 &gt;    type ('a, 'b) t = Left of 'a | Right of 'b
@@ -547,10 +534,10 @@ end;;
 <p>By looking at what coercions are allowed, we can see that the type
 parameters of the immutable <code>Either</code> type are covariant.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left_square = Either.left (square 40);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left_square = Either.left (square 40);;
 &gt;val left_square : (&lt; area : float; width : int &gt;, 'a) Either.t =
 &gt;  Either.Left &lt;obj&gt;
-(left_square :&gt; (shape,_) Either.t);; ;;
+(left_square :&gt; (shape,_) Either.t);;
 &gt;- : (shape, 'a) Either.t = Either.Left &lt;obj&gt;
 </code></pre>
 </div>
@@ -562,7 +549,6 @@ signature.</p>
   val left: 'a -&gt; ('a, 'b) t
   val right: 'b -&gt; ('a, 'b) t
 end = Either;;
-;;
 &gt;module Abs_either :
 &gt;  sig
 &gt;    type ('a, 'b) t
@@ -574,7 +560,7 @@ end = Either;;
 <p>In this case, OCaml is forced to assume that the type is
 invariant.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Abs_either.left (square 40) :&gt; (shape, _) Abs_either.t);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Abs_either.left (square 40) :&gt; (shape, _) Abs_either.t);;
 &gt;Line 1, characters 2-29:
 &gt;Error: This expression cannot be coerced to type (shape, 'b) Abs_either.t;
 &gt;       it has type (&lt; area : float; width : int &gt;, 'a) Abs_either.t
@@ -593,7 +579,6 @@ parameters in the signature: <code>+</code> for covariance or
   val left: 'a -&gt; ('a, 'b) t
   val right: 'b -&gt; ('a, 'b) t
 end = Either;;
-;;
 &gt;module Var_either :
 &gt;  sig
 &gt;    type (+'a, +'b) t
@@ -604,7 +589,7 @@ end = Either;;
 </div>
 <p>As you can see, this now allows the coercion once again.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Var_either.left (square 40) :&gt; (shape, _) Var_either.t);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Var_either.left (square 40) :&gt; (shape, _) Var_either.t);;
 &gt;- : (shape, 'a) Var_either.t = &lt;abstr&gt;
 </code></pre>
 </div>
@@ -612,11 +597,11 @@ end = Either;;
 containing shapes by applying our <code>stack</code> function to some
 squares and some circles:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;;;
 &gt;type 'a stack = &lt; pop : 'a option; push : 'a -&gt; unit &gt;
-let square_stack: square stack = stack [square 30; square 10];; ;;
+let square_stack: square stack = stack [square 30; square 10];;
 &gt;val square_stack : square stack = &lt;obj&gt;
-let circle_stack: circle stack = stack [circle 20; circle 40];; ;;
+let circle_stack: circle stack = stack [circle 20; circle 40];;
 &gt;val circle_stack : circle stack = &lt;obj&gt;
 </code></pre>
 </div>
@@ -633,14 +618,13 @@ found the total area of their shapes, we might try:</p>
     loop acc
   in
 List.fold ~init:0.0 ~f:stack_area shape_stacks;;
-;;
 &gt;val total_area : shape stack list -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
 <p>However, when we try to apply this function to our objects, we get an
 error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];;
 &gt;Line 1, characters 13-42:
 &gt;Error: Type square stack = &lt; pop : square option; push : square -&gt; unit &gt;
 &gt;       is not a subtype of
@@ -671,7 +655,7 @@ indicates we are not going to be using the <code>push</code> method. We
 define a type <code>readonly_stack</code> and confirm that we can coerce
 the list of <code>stack</code>s to it:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a readonly_stack = &lt; pop : 'a option &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a readonly_stack = &lt; pop : 'a option &gt;;;
 &gt;type 'a readonly_stack = &lt; pop : 'a option &gt;
 let total_area (shape_stacks: shape readonly_stack list) =
   let stack_area acc st =
@@ -683,11 +667,9 @@ let total_area (shape_stacks: shape readonly_stack list) =
     loop acc
   in
 List.fold ~init:0.0 ~f:stack_area shape_stacks;;
-;;
 &gt;val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
 total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt;
 shape readonly_stack)];;
-;;
 &gt;- : float = 7280.
 </code></pre>
 </div>
@@ -762,12 +744,11 @@ the circles have the same radius:</p>
 also not obvious that object-oriented programming is well-suited for
 this situation. Pattern matching seems like a better fit:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = Circle of { radius : int } | Line of { length: int };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = Circle of { radius : int } | Line of { length: int };;
 &gt;type shape = Circle of { radius : int; } | Line of { length : int; }
 let is_barbell = function
 | [Circle {radius=r1}; Line _; Circle {radius=r2}] when r1 = r2 -&gt; true
 | _ -&gt; false;;
-;;
 &gt;val is_barbell : shape list -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -782,7 +763,6 @@ and line = &lt; variant : repr; length : int &gt;
 and repr =
  | Circle of circle
  | Line of line;;
-;;
 &gt;type shape = &lt; variant : repr &gt;
 &gt;and circle = &lt; radius : int; variant : repr &gt;
 &gt;and line = &lt; length : int; variant : repr &gt;
@@ -793,7 +773,6 @@ let is_barbell = function
     | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -&gt; true
     | _ -&gt; false)
 | _ -&gt; false;;
-;;
 &gt;val is_barbell : &lt; variant : repr; .. &gt; list -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -814,7 +793,6 @@ polymorphism" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remove_large l =
 List.filter ~f:(fun s -&gt; Float.(s#area &lt;= 100.)) l;;
-;;
 &gt;val remove_large : (&lt; area : float; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -823,9 +801,8 @@ of its argument, preserving any additional methods that it may have:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares : &lt; area : float; width : int &gt; list =
 [square 5; square 15; square 10];;
-;;
 &gt;val squares : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;; &lt;obj&gt;]
-remove_large squares;; ;;
+remove_large squares;;
 &gt;- : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
@@ -835,9 +812,8 @@ object is only known to have an <code>area</code> method:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remove_large (l: &lt; area : float &gt; list) =
 List.filter ~f:(fun s -&gt; Float.(s#area &lt;= 100.)) l;;
-;;
 &gt;val remove_large : &lt; area : float &gt; list -&gt; &lt; area : float &gt; list = &lt;fun&gt;
-remove_large (squares :&gt; &lt; area : float &gt; list );; ;;
+remove_large (squares :&gt; &lt; area : float &gt; list );;
 &gt;- : &lt; area : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
@@ -846,7 +822,7 @@ polymorphism. In particular, row polymorphism cannot be used to place
 different types of object in the same container. For example, lists of
 heterogeneous elements cannot be created using row polymorphism:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30];;
 &gt;Line 1, characters 50-59:
 &gt;Error: This expression has type &lt; area : float; radius : int &gt;
 &gt;       but an expression was expected of type &lt; area : float; width : int &gt;
@@ -856,10 +832,10 @@ heterogeneous elements cannot be created using row polymorphism:</p>
 <p>Similarly, we cannot use row polymorphism to store different types of
 object in the same reference:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let shape_ref: &lt; area: float; ..&gt; ref = ref (square 40);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let shape_ref: &lt; area: float; ..&gt; ref = ref (square 40);;
 &gt;val shape_ref : &lt; area : float; width : int &gt; ref =
 &gt;  {Base.Ref.contents = &lt;obj&gt;}
-shape_ref := circle 20;; ;;
+shape_ref := circle 20;;
 &gt;Line 1, characters 14-23:
 &gt;Error: This expression has type &lt; area : float; radius : int &gt;
 &gt;       but an expression was expected of type &lt; area : float; width : int &gt;
@@ -868,11 +844,11 @@ shape_ref := circle 20;; ;;
 </div>
 <p>In both these cases we must use subtyping:<a data-secondary="subtyping" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];;
 &gt;val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]
-let shape_ref: shape ref = ref (square 40 :&gt; shape);; ;;
+let shape_ref: shape ref = ref (square 40 :&gt; shape);;
 &gt;val shape_ref : shape ref = {Base.Ref.contents = &lt;obj&gt;}
-shape_ref := (circle 20 :&gt; shape);; ;;
+shape_ref := (circle 20 :&gt; shape);;
 &gt;- : unit = ()
 </code></pre>
 </div>

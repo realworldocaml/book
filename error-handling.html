@@ -18,17 +18,17 @@ handling" data-type="indexterm">&nbsp;</a></p>
 your return value. Consider the type of the <code>find</code> function
 in the <code>List</code> module:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-List.find;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+List.find;;
 &gt;- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
 </code></pre>
 </div>
 <p>The option in the return type indicates that the function may not
 succeed in finding a suitable element:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 2);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 2);;
 &gt;- : int option = Some 2
-List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 10);; ;;
+List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 10);;
 &gt;- : int option = None
 </code></pre>
 </div>
@@ -47,7 +47,6 @@ the largest and smallest element of the list:</p>
   match List.hd sorted, List.last sorted with
   | None,_ | _, None -&gt; None
   | Some x, Some y -&gt; Some (x,y);;
-;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -68,7 +67,6 @@ table isn’t a failure of any sort:</p>
     | Some data' when data' &lt;&gt; data -&gt; key :: mismatches
     | _ -&gt; mismatches
   );;
-;;
 &gt;val find_mismatches :
 &gt;  ('a, int) Hashtbl.Poly.t -&gt; ('a, int) Hashtbl.Poly.t -&gt; 'a list = &lt;fun&gt;
 </code></pre>
@@ -98,7 +96,7 @@ ability to store other information in the error case. Like
 <code>Ok</code> and <code>Error</code> are available at the toplevel. As
 such, we can write:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[ Ok 3; Error "abject failure"; Ok 4 ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[ Ok 3; Error "abject failure"; Ok 4 ];;
 &gt;- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
 </code></pre>
 </div>
@@ -117,7 +115,7 @@ entirely?</p>
 <p>Base’s answer to this question is the <code>Error.t</code> type. You
 can, for example, construct one from a string.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.of_string "something went wrong";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.of_string "something went wrong";;
 &gt;- : Error.t = something went wrong
 </code></pre>
 </div>
@@ -125,7 +123,7 @@ can, for example, construct one from a string.</p>
 error case specialized to the <code>Error.t</code> type. Here’s an
 example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error (Error.of_string "failed!");; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error (Error.of_string "failed!");;
 &gt;- : ('a, Error.t) result = Error failed!
 </code></pre>
 </div>
@@ -136,11 +134,10 @@ a computation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let float_of_string s =
   Or_error.try_with (fun () -&gt; Float.of_string s);;
-;;
 &gt;val float_of_string : string -&gt; float Or_error.t = &lt;fun&gt;
-float_of_string "3.34";; ;;
+float_of_string "3.34";;
 &gt;- : float Or_error.t = Base__.Result.Ok 3.34
-float_of_string "a.bc";; ;;
+float_of_string "a.bc";;
 &gt;- : float Or_error.t =
 &gt;Base__.Result.Error (Invalid_argument "Float.of_string a.bc")
 </code></pre>
@@ -157,7 +154,7 @@ distributed with Base and is the most common serialization format used
 in Base. Indeed, most types in Base come with built-in s-expression
 converters. <a data-secondary="sexp converter" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Unexpected character" 'c' Char.sexp_of_t;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Unexpected character" 'c' Char.sexp_of_t;;
 &gt;- : Error.t = ("Unexpected character" c)
 </code></pre>
 </div>
@@ -169,8 +166,8 @@ specific types. We can enable it in the toplevel with a
 
 
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
-Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
+Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)];;
 &gt;- : Error.t = ("List is too long" (1 2 3))
 </code></pre>
 </div>
@@ -185,7 +182,6 @@ of" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
   (Error.of_list [ Error.of_string "Your tires were slashed";
                    Error.of_string "Your windshield was smashed" ])
   ~tag:"over the weekend";;
-;;
 &gt;- : Error.t =
 &gt;("over the weekend" "Your tires were slashed" "Your windshield was smashed")
 </code></pre>
@@ -195,12 +191,11 @@ syntax extension, which provides a compact syntax for providing a string
 describing the error, along with further values represented as
 s-expressions. Here’s an example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a = "foo" and b = ("foo",[3;4]);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a = "foo" and b = ("foo",[3;4]);;
 &gt;val a : string = "foo"
 &gt;val b : string * int list = ("foo", [3; 4])
 Or_error.error_s
   [%message "Something went wrong" (a:string) (b: string * int list)];;
-;;
 &gt;- : 'a Or_error.t =
 &gt;Base__.Result.Error ("Something went wrong" (a foo) (b (foo (3 4))))
 </code></pre>
@@ -223,7 +218,6 @@ function" data-type="indexterm">&nbsp;</a></p>
   match option with
   | None -&gt; None
   | Some x -&gt; f x;;
-;;
 &gt;val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
 </code></pre>
 </div>
@@ -240,7 +234,6 @@ error terminates the computation. Here’s a rewrite of
   Option.bind (List.hd sorted) ~f:(fun first -&gt;
     Option.bind (List.last sorted) ~f:(fun last -&gt;
       Some (first,last)));;
-;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -259,7 +252,6 @@ of a subinterface called <code>Monad</code>, which we’ll see again in <a data-
   List.hd sorted   &gt;&gt;= fun first -&gt;
   List.last sorted &gt;&gt;= fun last  -&gt;
   Some (first,last);;
-;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -276,14 +268,13 @@ extension that’s designed specifically for monadic binds, called
 <code>Let_syntax</code>. Here’s what the above example looks like using
 this extension.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
 let compute_bounds ~compare list =
   let open Option.Let_syntax in
   let sorted = List.sort ~compare list in
   let%bind first = List.hd sorted in
   let%bind last  = List.last sorted in
   Some (first,last);;
-;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -308,7 +299,6 @@ even shorter:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let compute_bounds ~compare list =
   let sorted = List.sort ~compare list in
   Option.both (List.hd sorted) (List.last sorted);;
-;;
 &gt;val compute_bounds : compare:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -331,14 +321,14 @@ of" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary=
 <p>You can trigger an exception by, for example, dividing an integer by
 zero:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">3 / 0;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">3 / 0;;
 &gt;Exception: Division_by_zero.
 </code></pre>
 </div>
 <p>And an exception can terminate a computation even if it happens
 nested somewhere deep within it:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;
 &gt;Exception: Division_by_zero.
 </code></pre>
 </div>
@@ -346,7 +336,7 @@ nested somewhere deep within it:</p>
 can see that <code>List.map</code> is interrupted partway through its
 execution, never getting to the end of the list:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; Stdio.printf "%d\n%!" x; 100 / x) [1;3;0;4];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; Stdio.printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 &gt;1
 &gt;3
 &gt;0
@@ -356,21 +346,20 @@ execution, never getting to the end of the list:</p>
 <p>In addition to built-in exceptions like <code>Divide_by_zero</code>,
 OCaml lets you define your own:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Key_not_found of string;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Key_not_found of string;;
 &gt;exception Key_not_found of string
-raise (Key_not_found "a");; ;;
+raise (Key_not_found "a");;
 &gt;Exception: Key_not_found("a").
 </code></pre>
 </div>
 <p>Exceptions are ordinary values and can be manipulated just like other
 OCaml values:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exceptions = [ Division_by_zero; Key_not_found "b" ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exceptions = [ Division_by_zero; Key_not_found "b" ];;
 &gt;val exceptions : exn list = [Division_by_zero; Key_not_found("b")]
 List.filter exceptions  ~f:(function
   | Key_not_found _ -&gt; true
   | _ -&gt; false);;
-;;
 &gt;- : exn list = [Key_not_found("b")]
 </code></pre>
 </div>
@@ -390,13 +379,12 @@ we defined above to signal an error:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec find_exn alist key = match alist with
   | [] -&gt; raise (Key_not_found key)
   | (key',data) :: tl -&gt; if String.(=) key key' then data else find_exn tl key;;
-;;
 &gt;val find_exn : (string * 'a) list -&gt; string -&gt; 'a = &lt;fun&gt;
-let alist = [("a",1); ("b",2)];; ;;
+let alist = [("a",1); ("b",2)];;
 &gt;val alist : (string * int) list = [("a", 1); ("b", 2)]
-find_exn alist "a";; ;;
+find_exn alist "a";;
 &gt;- : int = 1
-find_exn alist "c";; ;;
+find_exn alist "c";;
 &gt;Exception: Key_not_found("c").
 </code></pre>
 </div>
@@ -408,7 +396,7 @@ for" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="f
 thus terminating the computation. The type of raise is a bit surprising
 when you first see it:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">raise;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">raise;;
 &gt;- : exn -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -420,7 +408,7 @@ returns at all. This behavior isn’t restricted to functions like
 <code>raise</code> that terminate by throwing exceptions. Here’s another
 example of a function that doesn’t return a value:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec forever () = forever ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec forever () = forever ();;
 &gt;val forever : unit -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -437,11 +425,11 @@ of" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
 <p>OCaml can’t always generate a useful textual representation of an
 exception. For example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a bounds = { lower: 'a; upper: 'a };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a bounds = { lower: 'a; upper: 'a };;
 &gt;type 'a bounds = { lower : 'a; upper : 'a; }
-exception Crossed_bounds of int bounds;; ;;
+exception Crossed_bounds of int bounds;;
 &gt;exception Crossed_bounds of int bounds
-Crossed_bounds { lower=10; upper=0 };; ;;
+Crossed_bounds { lower=10; upper=0 };;
 &gt;- : exn = Crossed_bounds(_)
 </code></pre>
 </div>
@@ -449,13 +437,13 @@ Crossed_bounds { lower=10; upper=0 };; ;;
 <code>[@@deriving sexp]</code>, we’ll get something with more
 information:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
 &gt;type 'a bounds = { lower : 'a; upper : 'a; }
 &gt;val bounds_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a bounds = &lt;fun&gt;
 &gt;val sexp_of_bounds : ('a -&gt; Sexp.t) -&gt; 'a bounds -&gt; Sexp.t = &lt;fun&gt;
-exception Crossed_bounds of int bounds [@@deriving sexp];; ;;
+exception Crossed_bounds of int bounds [@@deriving sexp];;
 &gt;exception Crossed_bounds of int bounds
-Crossed_bounds { lower=10; upper=0 };; ;;
+Crossed_bounds { lower=10; upper=0 };;
 &gt;- : exn = (//toplevel//.Crossed_bounds ((lower 10) (upper 0)))
 </code></pre>
 </div>
@@ -477,7 +465,7 @@ could be defined as follows: <a data-secondary="helper
 functions for" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception helper
 functions" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let failwith msg = raise (Failure msg);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let failwith msg = raise (Failure msg);;
 &gt;val failwith : string -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -500,12 +488,11 @@ lists:<a data-primary="assert directive" data-type="indexterm">&nbsp;</a></p>
       | _ -&gt; assert false
     in
     Some (loop xs ys);;
-;;
 &gt;val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list option =
 &gt;  &lt;fun&gt;
-merge_lists [1;2;3] [-1;1;2] ~f:(+);; ;;
+merge_lists [1;2;3] [-1;1;2] ~f:(+);;
 &gt;- : int list option = Some [0; 3; 5]
-merge_lists [1;2;3] [-1;1] ~f:(+);; ;;
+merge_lists [1;2;3] [-1;1] ~f:(+);;
 &gt;- : int list option = None
 </code></pre>
 </div>
@@ -525,9 +512,8 @@ this test, then we can trigger the <code>assert</code>:</p>
     | _ -&gt; assert false
   in
   loop xs ys;;
-;;
 &gt;val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list = &lt;fun&gt;
-merge_lists [1;2;3] [-1] ~f:(+);; ;;
+merge_lists [1;2;3] [-1] ~f:(+);;
 &gt;Exception: "Assert_failure //toplevel//:6:14"
 </code></pre>
 </div>
@@ -577,18 +563,16 @@ routines for reading from files. <a data-secondary="exception
 clean up" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception clean
 up" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
 let parse_line line =
   String.split_on_chars ~on:[','] line
   |&gt; List.map ~f:Float.of_string;;
-;;
 &gt;val parse_line : string -&gt; float list = &lt;fun&gt;
 let load filename =
   let inc = In_channel.create filename in
   let data = In_channel.input_lines inc |&gt; List.map ~f:parse_line in
   In_channel.close inc;
   data;;
-;;
 &gt;val load : string -&gt; float list list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -610,7 +594,6 @@ used to fix our <code>load</code> function:</p>
   Exn.protect
     ~f:(fun () -&gt; In_channel.input_lines inc |&gt; List.map ~f:parse_line)
     ~finally:(fun () -&gt; In_channel.close inc);;
-;;
 &gt;val load : string -&gt; float list list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -620,7 +603,6 @@ function called <code>with_file</code> that automates this pattern:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let load filename =
   In_channel.with_file filename ~f:(fun inc -&gt;
     In_channel.input_lines inc |&gt; List.map ~f:parse_line);;
-;;
 &gt;val load : string -&gt; float list list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -644,7 +626,6 @@ handling" data-type="indexterm">&nbsp;</a></p>
     compute_weight data
   with
   Key_not_found _ -&gt; 0.;;
-;;
 &gt;val lookup_weight :
 &gt;  compute_weight:('a -&gt; float) -&gt; (string * 'a) list -&gt; string -&gt; float =
 &gt;  &lt;fun&gt;
@@ -663,7 +644,6 @@ exception on, but if the exception happens to be
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">lookup_weight ~compute_weight:(fun _ -&gt; raise (Key_not_found "foo"))
 ["a",3; "b",4] "a";;
-;;
 &gt;- : float = 0.
 </code></pre>
 </div>
@@ -681,7 +661,6 @@ it’s very clear what part of the code failed:</p>
   with
   | None -&gt; 0.
   | Some data -&gt; compute_weight data;;
-;;
 &gt;val lookup_weight :
 &gt;  compute_weight:('a -&gt; float) -&gt; (string * 'a) list -&gt; string -&gt; float =
 &gt;  &lt;fun&gt;
@@ -697,7 +676,6 @@ write this more concisely as follows.</p>
   match find_exn alist key with
   | exception _ -&gt; 0.
   | data -&gt; compute_weight data;;
-;;
 &gt;val lookup_weight :
 &gt;  compute_weight:('a -&gt; float) -&gt; (string * 'a) list -&gt; string -&gt; float =
 &gt;  &lt;fun&gt;
@@ -713,7 +691,6 @@ using the exception-free function from Base,
   match List.Assoc.find ~equal:String.equal alist key with
   | None -&gt; 0.
   | Some data -&gt; compute_weight data;;
-;;
 &gt;val lookup_weight :
 &gt;  compute_weight:('a -&gt; float) -&gt;
 &gt;  (string, 'a) Base.List.Assoc.t -&gt; string -&gt; float = &lt;fun&gt;
@@ -881,11 +858,10 @@ handling" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find alist key =
 Option.try_with (fun () -&gt; find_exn alist key);;
-;;
 &gt;val find : (string * 'a) list -&gt; string -&gt; 'a option = &lt;fun&gt;
-find ["a",1; "b",2] "c";; ;;
+find ["a",1; "b",2] "c";;
 &gt;- : int option = Base.Option.None
-find ["a",1; "b",2] "b";; ;;
+find ["a",1; "b",2] "b";;
 &gt;- : int option = Base.Option.Some 2
 </code></pre>
 </div>
@@ -894,17 +870,16 @@ find ["a",1; "b",2] "b";; ;;
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find alist key =
 Or_error.try_with (fun () -&gt; find_exn alist key);;
-;;
 &gt;val find : (string * 'a) list -&gt; string -&gt; 'a Or_error.t = &lt;fun&gt;
-find ["a",1; "b",2] "c";; ;;
+find ["a",1; "b",2] "c";;
 &gt;- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 </code></pre>
 </div>
 <p>And then we can reraise that exception:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Or_error.ok_exn (find ["a",1; "b",2] "b");; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Or_error.ok_exn (find ["a",1; "b",2] "b");;
 &gt;- : int = 2
-Or_error.ok_exn (find ["a",1; "b",2] "c");; ;;
+Or_error.ok_exn (find ["a",1; "b",2] "c");;
 &gt;Exception: Key_not_found("c").
 </code></pre>
 </div>

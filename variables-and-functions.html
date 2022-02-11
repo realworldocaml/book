@@ -34,12 +34,12 @@ the remainder of that module.<a data-secondary="scope
 of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-secondary="scope of" data-primary="bindings" data-type="indexterm">&nbsp;</a><a data-primary="scope" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s a simple example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-let x = 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+let x = 3;;
 &gt;val x : int = 3
-let y = 4;; ;;
+let y = 4;;
 &gt;val y : int = 4
-let z = x + y;; ;;
+let z = x + y;;
 &gt;val z : int = 7
 </code></pre>
 </div>
@@ -54,12 +54,11 @@ syntax.</p>
 whatever value was produced by the evaluation of
 <em><code>expr1</code></em>. Here’s how it looks in practice.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";;
 &gt;val languages : string = "OCaml,Perl,C++,C"
 let dashed_languages =
   let language_list = String.split languages ~on:',' in
   String.concat ~sep:"-" language_list;;
-;;
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
@@ -67,7 +66,7 @@ let dashed_languages =
 expression <code>String.concat ~sep:"-" language_list</code> and is not
 available at the toplevel, as we can see if we try to access it now.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">language_list;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">language_list;;
 &gt;Line 1, characters 1-14:
 &gt;Error: Unbound value language_list
 </code></pre>
@@ -76,12 +75,11 @@ available at the toplevel, as we can see if we try to access it now.</p>
 hide, the definition from an outer scope. So, for example, we could have
 written the <code>dashed_languages</code> example as follows. <a data-secondary="shadowing of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-primary="shadowing" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";;
 &gt;val languages : string = "OCaml,Perl,C++,C"
 let dashed_languages =
   let languages = String.split languages ~on:',' in
   String.concat ~sep:"-" languages;;
-;;
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
@@ -92,7 +90,7 @@ definition of <code>dashed_languages</code> is complete, the inner scope
 has closed and the original definition of languages is still
 available.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;;
 &gt;- : string = "OCaml,Perl,C++,C"
 </code></pre>
 </div>
@@ -106,9 +104,8 @@ binding" data-type="indexterm">&nbsp;</a></p>
   let pi = Float.pi in
   let area_of_circle r = pi *. r *. r in
   area_of_circle outer_radius -. area_of_circle inner_radius;;
-;;
 &gt;val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
-area_of_ring 1. 3.;; ;;
+area_of_ring 1. 3.;;
 &gt;- : float = 25.132741228718345
 </code></pre>
 </div>
@@ -122,7 +119,6 @@ purposefully confusing bit of code:</p>
   let area_of_circle r = pi *. r *. r in
   let pi = 0. in
   area_of_circle outer_radius -. area_of_circle inner_radius;;
-;;
 &gt;Line 4, characters 9-11:
 &gt;Warning 26 [unused-var]: unused variable pi.
 &gt;val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
@@ -168,7 +164,7 @@ converting a list of pairs into a pair of lists.<a data-secondary="and let" data
 syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern
 matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 &gt;val ints : int list = [1; 2; 3]
 &gt;val strings : string list = ["one"; "two"; "three"]
 </code></pre>
@@ -190,7 +186,6 @@ patterns" data-type="indexterm">&nbsp;</a></p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let upcase_first_entry line =
   let (first :: rest) = String.split ~on:',' line in
   String.concat ~sep:"," (String.uppercase first :: rest);;
-;;
 &gt;Lines 2-3, characters 5-60:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
@@ -202,9 +197,9 @@ patterns" data-type="indexterm">&nbsp;</a></p>
 <code>String.split</code> always returns a list with at least one
 element, even when given the empty string.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upcase_first_entry "one,two,three";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upcase_first_entry "one,two,three";;
 &gt;- : string = "ONE,two,three"
-upcase_first_entry "";; ;;
+upcase_first_entry "";;
 &gt;- : string = ""
 </code></pre>
 </div>
@@ -216,7 +211,6 @@ cases explicitly.</p>
   match String.split ~on:',' line with
   | [] -&gt; assert false (* String.split returns at least one element *)
   | first :: rest -&gt; String.concat ~sep:"," (String.uppercase first :: rest);;
-;;
 &gt;val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -241,14 +235,14 @@ declaration in OCaml: the <em>anonymous function</em>. An anonymous
 function is a function that is declared without being named. These can
 be declared using the <code>fun</code> keyword, as shown here. <a data-secondary="anonymous functions" data-primary="fun keyword" data-type="indexterm">&nbsp;</a><a data-primary="anonymous functions" data-type="indexterm">&nbsp;</a><a data-secondary="anonymous functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1);;
 &gt;- : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
 <p>Anonymous functions operate in much the same way as named functions.
 For example, we can apply an anonymous function to an argument.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
 &gt;- : int = 8
 </code></pre>
 </div>
@@ -256,15 +250,15 @@ For example, we can apply an anonymous function to an argument.</p>
 functions like <code>List.map</code> is probably the most common use
 case for anonymous functions.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; x + 1) [1;2;3];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; x + 1) [1;2;3];;
 &gt;- : int list = [2; 3; 4]
 </code></pre>
 </div>
 <p>You can even stuff a function into a data structure, like a list.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let transforms = [ String.uppercase; String.lowercase ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let transforms = [ String.uppercase; String.lowercase ];;
 &gt;val transforms : (string -&gt; string) list = [&lt;fun&gt;; &lt;fun&gt;]
-List.map ~f:(fun g -&gt; g "Hello World") transforms;; ;;
+List.map ~f:(fun g -&gt; g "Hello World") transforms;;
 &gt;- : string list = ["HELLO WORLD"; "hello world"]
 </code></pre>
 </div>
@@ -284,9 +278,9 @@ functions and storing them in data structures. We even name functions in
 the same way that we name other values, by using a <code>let</code>
 binding.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone = (fun x -&gt; x + 1);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone = (fun x -&gt; x + 1);;
 &gt;val plusone : int -&gt; int = &lt;fun&gt;
-plusone 3;; ;;
+plusone 3;;
 &gt;- : int = 4
 </code></pre>
 </div>
@@ -294,7 +288,7 @@ plusone 3;; ;;
 sugar for it. Thus, the following definition of <code>plusone</code> is
 equivalent to the previous definition.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone x = x + 1;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone x = x + 1;;
 &gt;val plusone : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -309,9 +303,9 @@ variable being bound to the value passed by the caller. Indeed, the
 following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let
 syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
 &gt;- : int = 8
-let x = 7 in x + 1;; ;;
+let x = 7 in x + 1;;
 &gt;- : int = 8
 </code></pre>
 </div>
@@ -323,9 +317,9 @@ in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-progr
 <h3>Multiargument functions</h3>
 <p>OCaml of course also supports multiargument functions, such as:<a data-secondary="multi-argument functions" data-primary="fun keyword" data-type="indexterm">&nbsp;</a><a data-primary="multi-argument functions" data-type="indexterm">&nbsp;</a><a data-secondary="multi-argument functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff x y = abs (x - y);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff x y = abs (x - y);;
 &gt;val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
-abs_diff 3 4;; ;;
+abs_diff 3 4;;
 &gt;- : int = 1
 </code></pre>
 </div>
@@ -336,7 +330,6 @@ rewrite <code>abs_diff</code> in an equivalent form, using the
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff =
 (fun x -&gt; (fun y -&gt; abs (x - y)));;
-;;
 &gt;val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -364,11 +357,11 @@ arguments. Here’s an example where we create a specialized version of
 <code>abs_diff</code> that measures the distance of a given number from
 <code>3</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dist_from_3 = abs_diff 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dist_from_3 = abs_diff 3;;
 &gt;val dist_from_3 : int -&gt; int = &lt;fun&gt;
-dist_from_3 8;; ;;
+dist_from_3 8;;
 &gt;- : int = 5
-dist_from_3 (-1);; ;;
+dist_from_3 (-1);;
 &gt;- : int = 4
 </code></pre>
 </div>
@@ -379,7 +372,7 @@ currying, so the following definition of <code>abs_diff</code> is
 equivalent to the previous one.<a data-secondary="currying
 syntax" data-primary="fun keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff = (fun x y -&gt; abs (x - y));; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff = (fun x y -&gt; abs (x - y));;
 &gt;val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -391,9 +384,9 @@ unsurprisingly, does have a small extra cost.)</p>
 OCaml. It’s also possible to use the different parts of a tuple as
 different arguments. So, we could write.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff (x,y) = abs (x - y);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff (x,y) = abs (x - y);;
 &gt;val abs_diff : int * int -&gt; int = &lt;fun&gt;
-abs_diff (3,4);; ;;
+abs_diff (3,4);;
 &gt;- : int = 1
 </code></pre>
 </div>
@@ -428,7 +421,6 @@ element in a list.<a data-primary="rec keyword" data-type="indexterm">&nbsp;</a>
     None
   | x :: y :: tl -&gt;
     if x = y then Some x else find_first_repeat (y::tl);;
-;;
 &gt;val find_first_repeat : int list -&gt; int option = &lt;fun&gt;
 </code></pre>
 </div>
@@ -446,12 +438,11 @@ a (gratuitously inefficient) example.</p>
   if x = 0 then true else is_odd (x - 1)
 and is_odd x =
   if x = 0 then false else is_even (x - 1);;
-;;
 &gt;val is_even : int -&gt; bool = &lt;fun&gt;
 &gt;val is_odd : int -&gt; bool = &lt;fun&gt;
-List.map ~f:is_even [0;1;2;3;4;5];; ;;
+List.map ~f:is_even [0;1;2;3;4;5];;
 &gt;- : bool list = [true; false; true; false; true; false]
-List.map ~f:is_odd [0;1;2;3;4;5];; ;;
+List.map ~f:is_odd [0;1;2;3;4;5];;
 &gt;- : bool list = [false; true; false; true; false; true]
 </code></pre>
 </div>
@@ -477,9 +468,9 @@ infix style.<a data-secondary="prefix and infix
 operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="infix operators" data-type="indexterm">&nbsp;</a><a data-primary="prefix operators" data-type="indexterm">&nbsp;</a><a data-secondary="prefix
 and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 4  (* prefix *);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 4  (* prefix *);;
 &gt;- : int = 4
-3 + 4        (* infix  *);; ;;
+3 + 4        (* infix  *);;
 &gt;- : int = 7
 </code></pre>
 </div>
@@ -489,9 +480,9 @@ really only differ syntactically from other functions. In fact, if we
 put parentheses around an infix operator, you can use it as an ordinary
 prefix function.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(+) 3 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(+) 3 4;;
 &gt;- : int = 7
-List.map ~f:((+) 3) [4;5;6];; ;;
+List.map ~f:((+) 3) [4;5;6];;
 &gt;- : int list = [7; 8; 9]
 </code></pre>
 </div>
@@ -515,16 +506,16 @@ operation.</p>
 example of a simple vector-addition operator on <code>int</code>
 pairs.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 &gt;val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
-(3,2) +! (-2,4);; ;;
+(3,2) +! (-2,4);;
 &gt;- : int * int = (1, 6)
 </code></pre>
 </div>
 <p>Note that you have to be careful when dealing with operators
 containing <code>*</code>. Consider the following example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (***) x y = (x **. y) **. y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (***) x y = (x **. y) **. y;;
 &gt;Line 1, characters 18-19:
 &gt;Error: This expression has type int but an expression was expected of type
 &gt;         float
@@ -535,7 +526,7 @@ operator at all; it’s read as a comment! To get this to work properly,
 we need to put spaces around any operator that begins or ends with
 <code>*</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( *** ) x y = (x **. y) **. y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( *** ) x y = (x **. y) **. y;;
 &gt;val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -637,9 +628,9 @@ application, which means that if you want to pass a negative value, you
 need to wrap it in parentheses, as you can see in this code.<a data-secondary="negation operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation
 operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 (-4);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 (-4);;
 &gt;- : int = 3
-Int.max 3 -4;; ;;
+Int.max 3 -4;;
 &gt;Line 1, characters 1-10:
 &gt;Warning 5 [ignored-partial-application]: this function application is partial,
 &gt;maybe some arguments are missing.
@@ -651,7 +642,7 @@ Int.max 3 -4;; ;;
 <p>Here, OCaml is interpreting the second expression as equivalent
 to.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Int.max 3) - 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Int.max 3) - 4;;
 &gt;Line 1, characters 1-12:
 &gt;Warning 5 [ignored-partial-application]: this function application is partial,
 &gt;maybe some arguments are missing.
@@ -665,7 +656,7 @@ to.</p>
 whose behavior depends critically on the precedence rules described
 previously.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (|&gt;) x f = f x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (|&gt;) x f = f x;;
 &gt;val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
@@ -679,13 +670,12 @@ printing out the unique elements of your <code>PATH</code>. Note that
 list by sorting the list using the provided comparison function.<a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="duplicates,
 removing" data-type="indexterm">&nbsp;</a><a data-primary="List.dedup_and_sort" data-type="indexterm">&nbsp;</a><a data-secondary="sequencing operators" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;; ;;
-let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
 &gt;val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"
 String.split ~on:':' path
 |&gt; List.dedup_and_sort ~compare:String.compare
 |&gt; List.iter ~f:print_endline;;
-;;
 &gt;/bin
 &gt;/sbin
 &gt;/usr/bin
@@ -699,7 +689,6 @@ values, but the result is a bit more verbose.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let split_path = String.split ~on:':' path in
 let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
 List.iter ~f:print_endline deduped_path;;
-;;
 &gt;/bin
 &gt;/sbin
 &gt;/usr/bin
@@ -712,7 +701,7 @@ For example, <code>List.iter</code> takes two arguments: a function to
 be called on each element of the list, and the list to iterate over. We
 can call <code>List.iter</code> with all its arguments. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline ["Two"; "lines"];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline ["Two"; "lines"];;
 &gt;Two
 &gt;lines
 &gt;- : unit = ()
@@ -721,7 +710,7 @@ can call <code>List.iter</code> with all its arguments. <a data-primary="partial
 <p>Or, we can pass it just the function argument, leaving us with a
 function for printing out a list of strings.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline;;
 &gt;- : string list -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -731,12 +720,11 @@ function for printing out a list of strings.</p>
 left-associative. Let’s see what happens if we try using a
 right-associative operator, like (^&gt;).</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (^&gt;) x f = f x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (^&gt;) x f = f x;;
 &gt;val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 String.split ~on:':' path
 ^&gt; List.dedup_and_sort ~compare:String.compare
 ^&gt; List.iter ~f:print_endline;;
-;;
 &gt;Line 3, characters 6-32:
 &gt;Error: This expression has type string list -&gt; unit
 &gt;       but an expression was expected of type
@@ -768,9 +756,8 @@ keyword" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_zero = function
   | Some x -&gt; x
   | None -&gt; 0;;
-;;
 &gt;val some_or_zero : int option -&gt; int = &lt;fun&gt;
-List.map ~f:some_or_zero [Some 3; None; Some 4];; ;;
+List.map ~f:some_or_zero [Some 3; None; Some 4];;
 &gt;- : int list = [3; 0; 4]
 </code></pre>
 </div>
@@ -781,7 +768,6 @@ a <code>match</code>.</p>
   match num_opt with
   | Some x -&gt; x
   | None -&gt; 0;;
-;;
 &gt;val some_or_zero : int option -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -792,11 +778,10 @@ together, as in the following example, where we declare a two-argument
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_default default = function
   | Some x -&gt; x
   | None -&gt; default;;
-;;
 &gt;val some_or_default : 'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;
-some_or_default 3 (Some 5);; ;;
+some_or_default 3 (Some 5);;
 &gt;- : int = 5
-List.map ~f:(some_or_default 100) [Some 3; None; Some 4];; ;;
+List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 &gt;- : int list = [3; 100; 4]
 </code></pre>
 </div>
@@ -817,16 +802,16 @@ marked by a leading tilde, and a label (followed by a colon) is put in
 front of the variable to be labeled. Here’s an example.<a data-primary="labeled arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled
 arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio ~num ~denom = Float.of_int num /. Float.of_int denom;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio ~num ~denom = Float.of_int num /. Float.of_int denom;;
 &gt;val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We can then provide a labeled argument using a similar convention. As
 you can see, the arguments can be provided in any order.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ratio ~num:3 ~denom:10;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ratio ~num:3 ~denom:10;;
 &gt;- : float = 0.3
-ratio ~denom:10 ~num:3;; ;;
+ratio ~denom:10 ~num:3;;
 &gt;- : float = 0.3
 </code></pre>
 </div>
@@ -839,7 +824,6 @@ shows how punning can be used when invoking a function.<a data-primary="punning"
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let num = 3 in
 let denom = 4 in
 ratio ~num ~denom;;
-;;
 &gt;- : float = 0.75
 </code></pre>
 </div>
@@ -897,7 +881,6 @@ chapter.</li>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">String.split ~on:':' path
 |&gt; List.dedup_and_sort ~compare:String.compare
 |&gt; List.iter ~f:print_endline;;
-;;
 &gt;/bin
 &gt;/sbin
 &gt;/usr/bin
@@ -917,7 +900,7 @@ doesn’t matter when calling a function with labeled arguments, it does
 matter in a higher-order context, <em>e.g.</em>, when passing a function
 with labeled arguments to another function. Here’s an example.<a data-primary="higher-order functions, and labels" data-type="indexterm">&nbsp;</a><a data-secondary="higher-order and labels" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;;
 &gt;val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
 </code></pre>
 </div>
@@ -927,21 +910,21 @@ arguments, <code>first</code> and <code>second</code>, listed in that
 order. We could have defined <code>apply_to_tuple</code> differently to
 change the order in which the labeled arguments were listed.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple_2 f (first,second) = f ~second ~first;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple_2 f (first,second) = f ~second ~first;;
 &gt;val apply_to_tuple_2 : (second:'a -&gt; first:'b -&gt; 'c) -&gt; 'b * 'a -&gt; 'c = &lt;fun&gt;
 </code></pre>
 </div>
 <p>It turns out this order matters. In particular, if we define a
 function that has a different order</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide ~first ~second = first / second;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide ~first ~second = first / second;;
 &gt;val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
 <p>we’ll find that it can’t be passed in to
 <code>apply_to_tuple_2</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">apply_to_tuple_2 divide (3,4);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">apply_to_tuple_2 divide (3,4);;
 &gt;Line 1, characters 18-24:
 &gt;Error: This expression has type first:int -&gt; second:int -&gt; int
 &gt;       but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c
@@ -950,9 +933,9 @@ function that has a different order</p>
 <p>But, it works smoothly with the original
 <code>apply_to_tuple</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;;
 &gt;val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
-apply_to_tuple divide (3,4);; ;;
+apply_to_tuple divide (3,4);;
 &gt;- : int = 0
 </code></pre>
 </div>
@@ -975,11 +958,10 @@ string concatenation.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?sep x y =
   let sep = match sep with None -&gt; "" | Some s -&gt; s in
   x ^ sep ^ y;;
-;;
 &gt;val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
-concat "foo" "bar"             (* without the optional argument *);; ;;
+concat "foo" "bar"             (* without the optional argument *);;
 &gt;- : string = "foobar"
-concat ~sep:":" "foo" "bar"    (* with the optional argument    *);; ;;
+concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;
 &gt;- : string = "foo:bar"
 </code></pre>
 </div>
@@ -994,7 +976,7 @@ separator when none was provided. This is a common enough pattern that
 there’s an explicit syntax for providing a default value, which allows
 us to write <code>concat</code> more concisely.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?(sep="") x y = x ^ sep ^ y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?(sep="") x y = x ^ sep ^ y;;
 &gt;val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1027,18 +1009,18 @@ explicitly is exactly what you want. OCaml lets you do this by using
 following two lines are equivalent ways of specifying the
 <code>sep</code> argument to <code>concat</code>.<a data-secondary="explicit passing of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat ~sep:":" "foo" "bar" (* provide the optional argument *);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
 &gt;- : string = "foo:bar"
-concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);; ;;
+concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
 &gt;- : string = "foo:bar"
 </code></pre>
 </div>
 <p>And the following two lines are equivalent ways of calling
 <code>concat</code> without specifying <code>sep</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "foo" "bar" (* don't provide the optional argument *);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "foo" "bar" (* don't provide the optional argument *);;
 &gt;- : string = "foobar"
-concat ?sep:None "foo" "bar" (* explicitly pass `None` *);; ;;
+concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
 &gt;- : string = "foobar"
 </code></pre>
 </div>
@@ -1049,11 +1031,11 @@ example, imagine we wanted to create a function called
 except that it converts the first string that it’s passed to uppercase.
 We could write the function as follows.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b;;
 &gt;val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
-uppercase_concat "foo" "bar";; ;;
+uppercase_concat "foo" "bar";;
 &gt;- : string = "FOObar"
-uppercase_concat "foo" "bar" ~sep:":";; ;;
+uppercase_concat "foo" "bar" ~sep:":";;
 &gt;- : string = "FOO:bar"
 </code></pre>
 </div>
@@ -1065,7 +1047,7 @@ decision as to what the default separator is. Thus, if we later change
 through the optional argument to <code>concat</code> using the
 <code>?</code> syntax.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b;;
 &gt;val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1096,7 +1078,6 @@ arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data
   let dx = (f ~x:x' ~y -. base) /. delta in
   let dy = (f ~x ~y:y' -. base) /. delta in
   (dx,dy);;
-;;
 &gt;val numeric_deriv :
 &gt;  delta:float -&gt;
 &gt;  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
@@ -1132,7 +1113,6 @@ different orders.</p>
   let dx = (f ~y ~x:x' -. base) /. delta in
   let dy = (f ~x ~y:y' -. base) /. delta in
   (dx,dy);;
-;;
 &gt;Line 5, characters 15-16:
 &gt;Error: This function is applied to arguments
 &gt;       in an order different from other calls.
@@ -1151,7 +1131,6 @@ without error, due to the type annotation on <code>f</code>.<a data-primary="typ
   let dx = (f ~y ~x:x' -. base) /. delta in
   let dy = (f ~x ~y:y' -. base) /. delta in
   (dx,dy);;
-;;
 &gt;val numeric_deriv :
 &gt;  delta:float -&gt;
 &gt;  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
@@ -1165,17 +1144,17 @@ without error, due to the type annotation on <code>f</code>.<a data-primary="typ
 partial application. We can of course partially apply the optional
 argument itself.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let colon_concat = concat ~sep:":";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let colon_concat = concat ~sep:":";;
 &gt;val colon_concat : string -&gt; string -&gt; string = &lt;fun&gt;
-colon_concat "a" "b";; ;;
+colon_concat "a" "b";;
 &gt;- : string = "a:b"
 </code></pre>
 </div>
 <p>But what happens if we partially apply just the first argument?</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";;
 &gt;val prepend_pound : string -&gt; string = &lt;fun&gt;
-prepend_pound "a BASH comment";; ;;
+prepend_pound "a BASH comment";;
 &gt;- : string = "# a BASH comment"
 </code></pre>
 </div>
@@ -1183,7 +1162,7 @@ prepend_pound "a BASH comment";; ;;
 <em>erased</em>. Indeed, if we try to pass in that optional argument
 now, it will be rejected.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">prepend_pound "a BASH comment" ~sep:":";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">prepend_pound "a BASH comment" ~sep:":";;
 &gt;Line 1, characters 1-14:
 &gt;Error: This function has type Base.String.t -&gt; Base.String.t
 &gt;       It is applied to too many arguments; maybe you forgot a `;'.
@@ -1197,18 +1176,18 @@ behavior of <code>prepend_pound</code>. But if we had instead defined
 <code>concat</code> with the optional argument in the second
 position.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x ?(sep="") y = x ^ sep ^ y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x ?(sep="") y = x ^ sep ^ y;;
 &gt;val concat : string -&gt; ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
 <p>then application of the first argument would not cause the optional
 argument to be erased.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";;
 &gt;val prepend_pound : ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
-prepend_pound "a BASH comment";; ;;
+prepend_pound "a BASH comment";;
 &gt;- : string = "# a BASH comment"
-prepend_pound "a BASH comment" ~sep:"--- ";; ;;
+prepend_pound "a BASH comment" ~sep:"--- ";;
 &gt;- : string = "# --- a BASH comment"
 </code></pre>
 </div>
@@ -1217,14 +1196,14 @@ erasure of optional arguments isn’t applied until all of the arguments
 are passed in. This preserves our ability to pass in optional arguments
 anywhere on the argument list. Thus, we can write.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b" ~sep:"=";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b" ~sep:"=";;
 &gt;- : string = "a=b"
 </code></pre>
 </div>
 <p>An optional argument that doesn’t have any following positional
 arguments can’t be erased at all, which leads to a compiler warning.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x y ?(sep="") = x ^ sep ^ y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x y ?(sep="") = x ^ sep ^ y;;
 &gt;Line 1, characters 18-24:
 &gt;Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
 &gt;val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
@@ -1234,7 +1213,7 @@ arguments can’t be erased at all, which leads to a compiler warning.</p>
 <code>sep</code> argument is not erased, instead returning a function
 that expects the <code>sep</code> argument to be provided.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b";;
 &gt;- : ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>

@@ -80,9 +80,9 @@ installation instructions</a> if you haven’t already got opam. Once
 installed, you can open it in the <code>utop</code> toplevel by:</p>
 </section>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;; ;;
-#require "yojson";; ;;
-open Yojson;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
+#require "yojson";;
+open Yojson;;
 </code></pre>
 </div>
 </section>
@@ -297,8 +297,8 @@ function" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-secon
 <p>Let’s start with selecting a single <code>title</code> field from the
 record:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Yojson.Basic.Util;; ;;
-let title = json |&gt; member "title" |&gt; to_string;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Yojson.Basic.Util;;
+let title = json |&gt; member "title" |&gt; to_string;;
 &gt;val title : string = "Real World OCaml"
 </code></pre>
 </div>
@@ -311,9 +311,9 @@ raises an exception if there is an unexpected JSON type. The
 <code>|&gt;</code> operator provides a convenient way to chain these
 operations <span class="keep-together">together</span>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string;;
 &gt;val tags : string list = ["functional programming"; "ocaml"; "algorithms"]
-let pages = json |&gt; member "pages" |&gt; to_int;; ;;
+let pages = json |&gt; member "pages" |&gt; to_int;;
 &gt;val pages : int = 450
 </code></pre>
 </div>
@@ -327,9 +327,9 @@ of the same type, so any JSON values that cannot be converted to a
 <code>string</code> will be skipped from the output of
 <code>filter_string</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_online = json |&gt; member "is_online" |&gt; to_bool_option;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_online = json |&gt; member "is_online" |&gt; to_bool_option;;
 &gt;val is_online : bool option = Some true
-let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option;; ;;
+let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option;;
 &gt;val is_translated : bool option = None
 </code></pre>
 </div>
@@ -340,7 +340,7 @@ this and can be extracted via <code>to_bool_option</code>. In our
 example JSON, only <code>is_online</code> is present and
 <code>is_translated</code> will be <code>None</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let authors = json |&gt; member "authors" |&gt; to_list;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let authors = json |&gt; member "authors" |&gt; to_list;;
 &gt;val authors : Yojson.Basic.t list =
 &gt;  [`Assoc
 &gt;     [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
@@ -362,7 +362,6 @@ succinctly using the pipe-forward operator:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let names =
   json |&gt; member "authors" |&gt; to_list
 |&gt; List.map ~f:(fun json -&gt; member "name" json |&gt; to_string);;
-;;
 &gt;val names : string list =
 &gt;  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]
 </code></pre>
@@ -401,7 +400,7 @@ data" data-type="indexterm">&nbsp;</a></p>
 pretty-printing functions in the <code>Yojson.Basic</code> module to
 display JSON output:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let person = `Assoc [ ("name", `String "Anil") ];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let person = `Assoc [ ("name", `String "Anil") ];;
 &gt;val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 &gt;  `Assoc [("name", `String "Anil")]
 </code></pre>
@@ -417,7 +416,7 @@ the inferred type only contains these fields without knowledge of the
 other possible allowed variants in JSON records that you haven’t used
 yet (e.g.&nbsp;<code>Int</code> or <code>Null</code>):</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Yojson.Basic.pretty_to_string;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Yojson.Basic.pretty_to_string;;
 &gt;- : ?std:bool -&gt; Yojson.Basic.t -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -428,9 +427,9 @@ the inferred type of <code>person</code> is statically checked against
 the structure of the <code>json</code> type to ensure that they’re
 compatible:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Yojson.Basic.pretty_to_string person;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Yojson.Basic.pretty_to_string person;;
 &gt;- : string = "{ \"name\": \"Anil\" }"
-Yojson.Basic.pretty_to_channel stdout person;; ;;
+Yojson.Basic.pretty_to_channel stdout person;;
 &gt;{ "name": "Anil" }
 &gt;- : unit = ()
 </code></pre>
@@ -451,10 +450,10 @@ polymorphic variants can be quite verbose. For example, suppose you
 build an <code>Assoc</code> and mistakenly include a single value
 instead of a list of keys:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let person = `Assoc ("name", `String "Anil");; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let person = `Assoc ("name", `String "Anil");;
 &gt;val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =
 &gt;  `Assoc ("name", `String "Anil")
-Yojson.Basic.pretty_to_string person;; ;;
+Yojson.Basic.pretty_to_string person;;
 &gt;Line 1, characters 31-37:
 &gt;Error: This expression has type
 &gt;         [&gt; `Assoc of string * [&gt; `String of string ] ]
@@ -469,7 +468,6 @@ type annotations as a hint about your intentions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (person : Yojson.Basic.t) =
 `Assoc ("name", `String "Anil");;
-;;
 &gt;Line 2, characters 10-34:
 &gt;Error: This expression has type 'a * 'b
 &gt;       but an expression was expected of type (string * Yojson.Basic.t) list

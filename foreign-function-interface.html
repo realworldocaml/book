@@ -374,12 +374,12 @@ function that makes it possible to invoke C functions.
 <p>We can now create a binding to <code>time</code> directly from the
 toplevel.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ctypes-foreign.threaded";; ;;
-#require "ctypes.top";; ;;
-open Ctypes;; ;;
-open PosixTypes;; ;;
-open Foreign;; ;;
-let time = foreign "time" (ptr time_t @-&gt; returning time_t);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ctypes-foreign.threaded";;
+#require "ctypes.top";;
+open Ctypes;;
+open PosixTypes;;
+open Foreign;;
+let time = foreign "time" (ptr time_t @-&gt; returning time_t);;
 &gt;val time : time_t Ctypes_static.ptr -&gt; time_t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -394,14 +394,14 @@ The argument is actually optional, so we’ll just pass a null pointer
 that has been coerced into becoming a null pointer to
 <code>time_t</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let cur_time = time (from_voidp time_t null);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let cur_time = time (from_voidp time_t null);;
 ...
 </code></pre>
 </div>
 <p>Since we’re going to call <code>time</code> a few times, let’s create
 a wrapper function that passes the null pointer through:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let time' () = time (from_voidp time_t null);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let time' () = time (from_voidp time_t null);;
 &gt;val time' : unit -&gt; time_t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -413,14 +413,12 @@ list:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let difftime =
 foreign "difftime" (time_t @-&gt; time_t @-&gt; returning double)
-;;
 &gt;val difftime : time_t -&gt; time_t -&gt; float = &lt;fun&gt;
 let t1 =
   time' () in
 Unix.sleep 2;
 let t2 = time' () in
 difftime t2 t1
-;;
 &gt;- : float = 2.
 </code></pre>
 </div>
@@ -433,7 +431,7 @@ pointer to a function. Continuing with the theme from earlier, we’ll
 bind to the <code>ctime</code> function, which converts a
 <code>time_t</code> value to a human-readable string:<a data-secondary="allocation for pointers" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="allocating typed memory for" data-primary="pointers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ctime = foreign "ctime" (ptr time_t @-&gt; returning string);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ctime = foreign "ctime" (ptr time_t @-&gt; returning string);;
 &gt;val ctime : time_t Ctypes_static.ptr -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -441,7 +439,7 @@ bind to the <code>ctime</code> function, which converts a
 collection. However, we can’t just pass the result of <code>time</code>
 to <code>ctime</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime (time' ());; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime (time' ());;
 &gt;Line 1, characters 7-17:
 &gt;Error: This expression has type time_t but an expression was expected of type
 &gt;         time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
@@ -452,7 +450,7 @@ to <code>ctime</code>:</p>
 allocate some memory for the <code>time_t</code> and obtain its memory
 address:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let t_ptr = allocate time_t (time' ());; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let t_ptr = allocate time_t (time' ());;
 ...
 </code></pre>
 </div>
@@ -461,7 +459,7 @@ allocated and the initial value and it returns a suitably typed pointer.
 We can now call <code>ctime</code> passing the pointer as an
 argument:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime t_ptr;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime t_ptr;;
 ...
 </code></pre>
 </div>
@@ -550,9 +548,9 @@ int gettimeofday(struct timeval *, struct timezone *tv);</code></pre>
 <p>Using Ctypes, we can describe this type as follows in our toplevel,
 continuing on from the previous definitions:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timeval;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timeval;;
 &gt;type timeval
-let timeval : timeval structure typ = structure "timeval";; ;;
+let timeval : timeval structure typ = structure "timeval";;
 &gt;val timeval : timeval structure typ =
 &gt;  Ctypes_static.Struct
 &gt;   {Ctypes_static.tag = "timeval";
@@ -577,15 +575,15 @@ fields, so we need to add those next: <a data-secondary="adding to
 structures" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="field
 addition" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tv_sec  = field timeval "tv_sec" long;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tv_sec  = field timeval "tv_sec" long;;
 &gt;val tv_sec : (Signed.long, timeval structure) field =
 &gt;  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
 &gt;   foffset = 0; fname = "tv_sec"}
-let tv_usec = field timeval "tv_usec" long;; ;;
+let tv_usec = field timeval "tv_usec" long;;
 &gt;val tv_usec : (Signed.long, timeval structure) field =
 &gt;  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
 &gt;   foffset = 8; fname = "tv_usec"}
-seal timeval;; ;;
+seal timeval;;
 &gt;- : unit = ()
 </code></pre>
 </div>
@@ -606,9 +604,9 @@ pointer for its second argument, we also need to define a second
 structure type: <a data-secondary="incomplete
 structure definitions" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timezone;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timezone;;
 &gt;type timezone
-let timezone : timezone structure typ = structure "timezone";; ;;
+let timezone : timezone structure typ = structure "timezone";;
 &gt;val timezone : timezone structure typ =
 &gt;  Ctypes_static.Struct
 &gt;   {Ctypes_static.tag = "timezone";
@@ -624,7 +622,6 @@ size needs to be known, the library will raise an
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let gettimeofday = foreign "gettimeofday" ~check_errno:true
 (ptr timeval @-&gt; ptr timezone @-&gt; returning int);;
-;;
 &gt;val gettimeofday :
 &gt;  timeval structure Ctypes_static.ptr -&gt;
 &gt;  timezone structure Ctypes_static.ptr -&gt; int = &lt;fun&gt;
@@ -647,9 +644,8 @@ structure value, and retrieve the value of a field from a structure:</p>
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Stdlib.(float secs +. float usecs /. 1000000.0)
-;;
 &gt;val gettimeofday' : unit -&gt; float = &lt;fun&gt;
-gettimeofday' () ;;
+gettimeofday' ()
 &gt;- : float = 1633964254.067426
 </code></pre>
 </div>
@@ -870,10 +866,10 @@ definition. Since type descriptions are regular values, we can just use
 <code>let</code> in place of <code>typedef</code> and end up with
 working OCaml bindings to <code>qsort</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Ctypes;; ;;
-open PosixTypes;; ;;
-open Foreign;; ;;
-let compare_t = ptr void @-&gt; ptr void @-&gt; returning int;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Ctypes;;
+open PosixTypes;;
+open Foreign;;
+let compare_t = ptr void @-&gt; ptr void @-&gt; returning int;;
 &gt;val compare_t : (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) fn =
 &gt;  Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
 &gt;   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
@@ -882,7 +878,6 @@ let compare_t = ptr void @-&gt; ptr void @-&gt; returning int;; ;;
 let qsort = foreign "qsort"
               (ptr void @-&gt; size_t @-&gt; size_t @-&gt;
 funptr compare_t @-&gt; returning void);;
-;;
 &gt;val qsort :
 &gt;  unit Ctypes_static.ptr -&gt;
 &gt;  size_t -&gt;

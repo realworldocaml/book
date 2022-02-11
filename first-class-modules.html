@@ -23,16 +23,16 @@ realistic examples in the next section.</p>
 <p>In that light, consider the following signature of a module with a
 single integer variable:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-module type X_int = sig val x : int end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+module type X_int = sig val x : int end;;
 &gt;module type X_int = sig val x : int end
 </code></pre>
 </div>
 <p>We can also create a module that matches this signature:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Three : X_int = struct let x = 3 end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Three : X_int = struct let x = 3 end;;
 &gt;module Three : X_int
-Three.x;; ;;
+Three.x;;
 &gt;- : int = 3
 </code></pre>
 </div>
@@ -45,22 +45,22 @@ keyword. <a data-primary="module keyword" data-type="indexterm">&nbsp;</a></p>
 <p>We can convert <code>Three</code> into a first-class module as
 follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = (module Three : X_int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = (module Three : X_int);;
 &gt;val three : (module X_int) = &lt;module&gt;
 </code></pre>
 </div>
 <p>The module type doesn’t need to be part of the construction of a
 first-class module if it can be inferred. Thus, we can write:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Four = struct let x = 4 end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Four = struct let x = 4 end;;
 &gt;module Four : sig val x : int end
-let numbers = [ three; (module Four) ];; ;;
+let numbers = [ three; (module Four) ];;
 &gt;val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]
 </code></pre>
 </div>
 <p>We can also create a first-class module from an anonymous module:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [three; (module struct let x = 4 end)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [three; (module struct let x = 4 end)];;
 &gt;val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]
 </code></pre>
 </div>
@@ -72,9 +72,9 @@ unpack it into an ordinary module. This can be done using the
 </div>
 <p>Here’s an example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module New_three = (val three : X_int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module New_three = (val three : X_int);;
 &gt;module New_three : X_int
-New_three.x;; ;;
+New_three.x;;
 &gt;- : int = 3
 </code></pre>
 </div>
@@ -88,13 +88,11 @@ functions: <code>to_int</code>, which converts a
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let to_int m =
   let module M = (val m : X_int) in
   M.x;;
-;;
 &gt;val to_int : (module X_int) -&gt; int = &lt;fun&gt;
 let plus m1 m2 =
   (module struct
     let x = to_int m1 + to_int m2
   end : X_int);;
-;;
 &gt;val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
 </code></pre>
 </div>
@@ -102,9 +100,9 @@ let plus m1 m2 =
 <code>(module X_int)</code> in a more natural style, taking advantage of
 the concision and simplicity of the core <span class="keep-together">language</span>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let six = plus three three;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let six = plus three three;;
 &gt;val six : (module X_int) = &lt;module&gt;
-to_int (List.fold ~init:six ~f:plus [three;three]);; ;;
+to_int (List.fold ~init:six ~f:plus [three;three]);;
 &gt;- : int = 12
 </code></pre>
 </div>
@@ -113,7 +111,7 @@ first-class modules. One notable one is that you can do the conversion
 to an ordinary module within a pattern match. Thus, we can rewrite the
 <code>to_int</code> function as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let to_int (module M : X_int) = M.x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let to_int (module M : X_int) = M.x;;
 &gt;val to_int : (module X_int) -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -126,7 +124,6 @@ of the type and produces a new one:</p>
   type t
   val bump : t -&gt; t
 end;;
-;;
 &gt;module type Bumpable = sig type t val bump : t -&gt; t end
 </code></pre>
 </div>
@@ -137,19 +134,17 @@ underlying types:</p>
   type t = int
   let bump n = n + 1
 end;;
-;;
 &gt;module Int_bumper : sig type t = int val bump : t -&gt; t end
 module Float_bumper = struct
   type t = float
   let bump n = n +. 1.
 end;;
-;;
 &gt;module Float_bumper : sig type t = float val bump : t -&gt; t end
 </code></pre>
 </div>
 <p>And we can convert these to first-class modules:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let int_bumper = (module Int_bumper : Bumpable);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let int_bumper = (module Int_bumper : Bumpable);;
 &gt;val int_bumper : (module Bumpable) = &lt;module&gt;
 </code></pre>
 </div>
@@ -159,7 +154,6 @@ recover the fact that the type in question is <code>int</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (module Bumper) = int_bumper in
 Bumper.bump 3;;
-;;
 &gt;Line 2, characters 15-16:
 &gt;Error: This expression has type int but an expression was expected of type
 &gt;         Bumper.t
@@ -170,9 +164,9 @@ type <code>Bumpable.t</code> is actually equal to <code>int</code>.
 Below we’ll do that for <code>int_bumper</code>, and also provide the
 corresponding definition for <code>float_bumper</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let int_bumper = (module Int_bumper : Bumpable with type t = int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 &gt;val int_bumper : (module Bumpable with type t = int) = &lt;module&gt;
-let float_bumper = (module Float_bumper : Bumpable with type t = float);; ;;
+let float_bumper = (module Float_bumper : Bumpable with type t = float);;
 &gt;val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;
 </code></pre>
 </div>
@@ -183,11 +177,9 @@ type:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (module Bumper) = int_bumper in
 Bumper.bump 3;;
-;;
 &gt;- : int = 4
 let (module Bumper) = float_bumper in
 Bumper.bump 3.5;;
-;;
 &gt;- : float = 4.5
 </code></pre>
 </div>
@@ -204,7 +196,6 @@ modules" data-type="indexterm">&nbsp;</a></p>
       (l: a list)
   =
   List.map ~f:Bumper.bump l;;
-;;
 &gt;val bump_list : (module Bumpable with type t = 'a) -&gt; 'a list -&gt; 'a list =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -222,9 +213,9 @@ types" data-type="indexterm">&nbsp;</a><a data-primary="sharing constraint" data
 element and the type <code>Bumpable.t</code>. We can see this function
 in action:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">bump_list int_bumper [1;2;3];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">bump_list int_bumper [1;2;3];;
 &gt;- : int list = [2; 3; 4]
-bump_list float_bumper [1.5;2.5;3.5];; ;;
+bump_list float_bumper [1.5;2.5;3.5];;
 &gt;- : float list = [2.5; 3.5; 4.5]
 </code></pre>
 </div>
@@ -237,7 +228,7 @@ of other values you’re working with.</p>
 dealt with as abstract types in the function they’re defined within, but
 are polymorphic from the outside. Consider the following example: <a data-secondary="in locally abstract types" data-primary="polymorphism" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let wrap_in_list (type a) (x:a) = [x];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let wrap_in_list (type a) (x:a) = [x];;
 &gt;val wrap_in_list : 'a -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -248,7 +239,7 @@ function that is inferred is polymorphic.</p>
 equivalent to some concrete type, say, <code>int</code>, then the
 compiler will complain:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let double_int (type a) (x:a) = x + x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let double_int (type a) (x:a) = x + x;;
 &gt;Line 1, characters 33-34:
 &gt;Error: This expression has type a but an expression was expected of type int
 </code></pre>
@@ -261,19 +252,17 @@ create a new first-class module:</p>
   type t
   val compare : t -&gt; t -&gt; int
 end;;
-;;
 &gt;module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
 let create_comparable (type a) compare =
   (module struct
     type t = a
     let compare = compare
   end : Comparable with type t = a);;
-;;
 &gt;val create_comparable :
 &gt;  ('a -&gt; 'a -&gt; int) -&gt; (module Comparable with type t = 'a) = &lt;fun&gt;
-create_comparable Int.compare;; ;;
+create_comparable Int.compare;;
 &gt;- : (module Comparable with type t = int) = &lt;module&gt;
-create_comparable Float.compare;; ;;
+create_comparable Float.compare;;
 &gt;- : (module Comparable with type t = float) = &lt;module&gt;
 </code></pre>
 </div>
@@ -301,7 +290,7 @@ more detail in <a data-type="xref" href="data-serialization.html#data-serializat
 responding to user-generated queries. Here, we use Base’s
 <code>Sexp</code> module for handling s-expressions. <a data-secondary="and first-class modules" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 module type Query_handler = sig
 
   (** Configuration for a query handler *)
@@ -323,7 +312,6 @@ module type Query_handler = sig
       s-expressions *)
   val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
 end;;
-;;
 &gt;module type Query_handler =
 &gt;  sig
 &gt;    type config
@@ -344,27 +332,27 @@ definition. We’ll enable <code>ppx_sexp_conv</code> by enabling
 <code>ppx_jane</code>, which brings in a larger family of syntax
 extensions.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
 </div>
 <p>Here’s an example of the extension in action. Note that we need the
 annotation <code>[@@deriving sexp]</code> to kick off the generation of
 the converters.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type u = { a: int; b: float } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type u = { a: int; b: float } [@@deriving sexp];;
 &gt;type u = { a : int; b : float; }
 &gt;val u_of_sexp : Sexp.t -&gt; u = &lt;fun&gt;
 &gt;val sexp_of_u : u -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_u {a=3;b=7.};; ;;
+sexp_of_u {a=3;b=7.};;
 &gt;- : Sexp.t = ((a 3) (b 7))
-u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))");; ;;
+u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))");;
 &gt;- : u = {a = 43; b = 3.4}
 </code></pre>
 </div>
 <p>Notably, the same annotations can be attached within a signature to
 add the appropriate type signature.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type M = sig type t [@@deriving sexp] end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type M = sig type t [@@deriving sexp] end;;
 &gt;module type M =
 &gt;  sig type t val t_of_sexp : Sexp.t -&gt; t val sexp_of_t : t -&gt; Sexp.t end
 </code></pre>
@@ -393,7 +381,6 @@ otherwise known as <code>Sexp.unit</code>: <a data-secondary="implementation of"
       t.next_id &lt;- t.next_id + 1;
       response
 end;;
-;;
 &gt;module Unique :
 &gt;  sig
 &gt;    type config = int
@@ -409,11 +396,11 @@ end;;
 <p>We can use this module to create an instance of the
 <code>Unique</code> query handler and interact with it directly:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique = Unique.create 0;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique = Unique.create 0;;
 &gt;val unique : Unique.t = {Unique.next_id = 0}
-Unique.eval unique (Sexp.List []);; ;;
+Unique.eval unique (Sexp.List []);;
 &gt;- : (Sexp.t, Error.t) result = Ok 0
-Unique.eval unique (Sexp.List []);; ;;
+Unique.eval unique (Sexp.List []);;
 &gt;- : (Sexp.t, Error.t) result = Ok 1
 </code></pre>
 </div>
@@ -442,7 +429,6 @@ interpreted within:</p>
       in
       Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
 end;;
-;;
 &gt;module List_dir :
 &gt;  sig
 &gt;    type config = string
@@ -459,14 +445,14 @@ end;;
 <p>Again, we can create an instance of this query handler and interact
 with it directly:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_dir = List_dir.create "/var" ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_dir = List_dir.create "/var"
 &gt;val list_dir : List_dir.t = {List_dir.cwd = "/var"}
-List_dir.eval list_dir (sexp_of_string ".") ;;
+List_dir.eval list_dir (sexp_of_string ".")
 &gt;- : (Sexp.t, Error.t) result =
 &gt;Ok
 &gt; (yp networkd install empty ma mail spool jabberd vm msgs audit root lib db
 &gt;  at log folders netboot run rpc tmp backups agentx rwho)
-List_dir.eval list_dir (sexp_of_string "yp") ;;
+List_dir.eval list_dir (sexp_of_string "yp")
 &gt;- : (Sexp.t, Error.t) result = Ok (binding)
 </code></pre>
 </div>
@@ -486,7 +472,6 @@ multiple" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
   module Query_handler : Query_handler
   val this : Query_handler.t
 end;;
-;;
 &gt;module type Query_handler_instance =
 &gt;  sig module Query_handler : Query_handler val this : Query_handler.t end
 </code></pre>
@@ -501,7 +486,6 @@ for working with that query.</p>
     module Query_handler = Unique
     let this = Unique.create 0
 end : Query_handler_instance);;
-;;
 &gt;val unique_instance : (module Query_handler_instance) = &lt;module&gt;
 </code></pre>
 </div>
@@ -518,7 +502,6 @@ are again making use of a locally abstract type:</p>
     module Query_handler = Q
     let this = Q.create config
   end : Query_handler_instance);;
-;;
 &gt;val build_instance :
 &gt;  (module Query_handler with type config = 'a) -&gt;
 &gt;  'a -&gt; (module Query_handler_instance) = &lt;fun&gt;
@@ -527,9 +510,9 @@ are again making use of a locally abstract type:</p>
 <p>Using <code>build_instance</code>, constructing a new instance
 becomes a one-liner:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique_instance = build_instance (module Unique) 0;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique_instance = build_instance (module Unique) 0;;
 &gt;val unique_instance : (module Query_handler_instance) = &lt;module&gt;
-let list_dir_instance = build_instance (module List_dir)  "/var";; ;;
+let list_dir_instance = build_instance (module List_dir)  "/var";;
 &gt;val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;
 </code></pre>
 </div>
@@ -551,7 +534,6 @@ handler instances and constructs a dispatch table from it:</p>
     ~f:(fun ((module I : Query_handler_instance) as instance) -&gt;
       Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
   table;;
-;;
 &gt;val build_dispatch_table :
 &gt;  (module Query_handler_instance) list -&gt;
 &gt;  (string, (module Query_handler_instance)) Hashtbl.Poly.t = &lt;fun&gt;
@@ -572,7 +554,6 @@ table:</p>
     end
   | _ -&gt;
     Or_error.error_string "malformed query";;
-;;
 &gt;val dispatch :
 &gt;  (string, (module Query_handler_instance)) Hashtbl.Poly.t -&gt;
 &gt;  Sexp.t -&gt; Sexp.t Or_error.t = &lt;fun&gt;
@@ -593,7 +574,7 @@ interdependent types and values.</p>
 <p>Now let’s turn this into a complete, running example by adding a
 command-line interface:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
 let rec cli dispatch_table =
   printf "&gt;&gt;&gt; %!";
   let result =
@@ -616,7 +597,6 @@ let rec cli dispatch_table =
   | `Continue msg -&gt;
     printf "%s\n%!" msg;
     cli dispatch_table;;
-;;
 &gt;val cli : (string, (module Query_handler_instance)) Hashtbl.Poly.t -&gt; unit =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -831,12 +811,11 @@ first-class modules using the following types:<a data-secondary="alternatives to
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type query_handler_instance = { name : string
                               ; eval : Sexp.t -&gt; Sexp.t Or_error.t
 };;
-;;
 &gt;type query_handler_instance = {
 &gt;  name : string;
 &gt;  eval : Sexp.t -&gt; Sexp.t Or_error.t;
 &gt;}
-type query_handler = Sexp.t -&gt; query_handler_instance;; ;;
+type query_handler = Sexp.t -&gt; query_handler_instance;;
 &gt;type query_handler = Sexp.t -&gt; query_handler_instance
 </code></pre>
 </div>
@@ -851,7 +830,6 @@ follows:</p>
   { name = Unique.name
   ; eval = (fun config -&gt; Unique.eval unique config)
   };;
-;;
 &gt;val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
 </code></pre>
 </div>

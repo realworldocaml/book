@@ -58,9 +58,9 @@ closures, or arrays. An OCaml program implicitly allocates a block of
 memory when such a value is created: <a data-primary="blocks (of
 memory)" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: int };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: int };;
 &gt;type t = { foo : int; bar : int; }
-let x = { foo = 13; bar = 14 };; ;;
+let x = { foo = 13; bar = 14 };;
 &gt;val x : t = {foo = 13; bar = 14}
 </code></pre>
 </div>
@@ -241,9 +241,9 @@ representation" data-type="indexterm">&nbsp;</a></p>
 yourself using the <code>Obj</code> module, which exposes the internal
 representation of values to OCaml code:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.is_block (Obj.repr (1,2,3));; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.is_block (Obj.repr (1,2,3));;
 &gt;- : bool = true
-Obj.is_block (Obj.repr 1);; ;;
+Obj.is_block (Obj.repr 1);;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -259,9 +259,9 @@ a block with a single field that contains the number. This block has the
 <code>Double_tag</code> set, which signals to the collector that the
 floating-point value is not to be scanned: <a data-primary="floating-point values" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr 1.0);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr 1.0);;
 &gt;- : int = 253
-Obj.double_tag;; ;;
+Obj.double_tag;;
 &gt;- : int = 253
 </code></pre>
 </div>
@@ -278,9 +278,9 @@ contents are not OCaml values.</p>
 <p>First, let’s check that float arrays do in fact have a different tag
 number from normal floating-point values:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.double_tag;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.double_tag;;
 &gt;- : int = 253
-Obj.double_array_tag;; ;;
+Obj.double_array_tag;;
 &gt;- : int = 254
 </code></pre>
 </div>
@@ -290,13 +290,13 @@ that the allocated block has the expected runtime tag, and also use
 <code>Obj.double_field</code> to retrieve a float from within the
 block:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]);;
 &gt;- : int = 254
-Obj.tag (Obj.repr (1.0, 2.0, 3.0) );; ;;
+Obj.tag (Obj.repr (1.0, 2.0, 3.0) );;
 &gt;- : int = 0
-Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1;; ;;
+Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1;;
 &gt;- : float = 2.2
-Obj.double_field (Obj.repr 1.234) 0;; ;;
+Obj.double_field (Obj.repr 1.234) 0;;
 &gt;- : float = 1.234
 </code></pre>
 </div>
@@ -314,13 +314,13 @@ for records, every single field must be a float.</p>
 branches are simply stored as an OCaml integer, starting with
 <code>0</code> for the first option and in ascending order: <a data-secondary="memory representation of" data-primary="variant types" data-type="indexterm">&nbsp;</a><a data-secondary="memory representation of" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="variants and lists" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange | Pear;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange | Pear;;
 &gt;type t = Apple | Orange | Pear
-((Obj.magic (Obj.repr Apple)) : int);; ;;
+((Obj.magic (Obj.repr Apple)) : int);;
 &gt;- : int = 0
-((Obj.magic (Obj.repr Pear)) : int);; ;;
+((Obj.magic (Obj.repr Pear)) : int);;
 &gt;- : int = 2
-Obj.is_block (Obj.repr Apple);; ;;
+Obj.is_block (Obj.repr Apple);;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -334,17 +334,17 @@ stored as blocks, with the value <em>tags</em> ascending from 0
 (counting from leftmost variants with parameters). The parameters are
 stored as words in the block:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange of int | Pear of string | Kiwi;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = Apple | Orange of int | Pear of string | Kiwi;;
 &gt;type t = Apple | Orange of int | Pear of string | Kiwi
-Obj.is_block (Obj.repr (Orange 1234));; ;;
+Obj.is_block (Obj.repr (Orange 1234));;
 &gt;- : bool = true
-Obj.tag (Obj.repr (Orange 1234));; ;;
+Obj.tag (Obj.repr (Orange 1234));;
 &gt;- : int = 0
-Obj.tag (Obj.repr (Pear "xyz"));; ;;
+Obj.tag (Obj.repr (Pear "xyz"));;
 &gt;- : int = 1
-(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int);; ;;
+(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int);;
 &gt;- : int = 1234
-(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string);; ;;
+(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string);;
 &gt;- : string = "xyz"
 </code></pre>
 </div>
@@ -398,10 +398,10 @@ the <em>name</em> of the variant. The hash function is exposed via the
 <code>compiler-libs</code> package that reveals some of the internals of
 the OCaml compiler:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ocaml-compiler-libs.common";; ;;
-Btype.hash_variant "Foo";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ocaml-compiler-libs.common";;
+Btype.hash_variant "Foo";;
 &gt;- : int = 3505894
-(Obj.magic (Obj.repr `Foo) : int);; ;;
+(Obj.magic (Obj.repr `Foo) : int);;
 &gt;- : int = 3505894
 </code></pre>
 </div>

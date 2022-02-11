@@ -44,12 +44,12 @@ systems. <a data-secondary="benefits of" data-primary="Async library" data-type=
 <p>Recall how I/O is typically done in Core. Here’s a simple
 example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;; ;;
-In_channel.read_all;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
+In_channel.read_all;;
 &gt;- : string -&gt; string = &lt;fun&gt;
-Out_channel.write_all "test.txt" ~data:"This is only a test.";; ;;
+Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 &gt;- : unit = ()
-In_channel.read_all "test.txt";; ;;
+In_channel.read_all "test.txt";;
 &gt;- : string = "This is only a test."
 </code></pre>
 </div>
@@ -64,9 +64,9 @@ will eventually be filled in with the result. As an example, consider
 the signature of the Async equivalent of
 <code>In_channel.read_all</code>. <a data-primary="Deferred.t" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "async";; ;;
-open Async;; ;;
-Reader.file_contents;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "async";;
+open Async;;
+Reader.file_contents;;
 &gt;- : string -&gt; string Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -79,9 +79,9 @@ the future. As such, if we call <code>Reader.file_contents</code>, the
 resulting deferred will initially be empty, as you can see by calling
 <code>Deferred.peek</code>. <a data-primary="Deferred.peek" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let contents = Reader.file_contents "test.txt";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let contents = Reader.file_contents "test.txt";;
 &gt;val contents : string Deferred.t = &lt;abstr&gt;
-Deferred.peek contents;; ;;
+Deferred.peek contents;;
 &gt;- : string option = None
 </code></pre>
 </div>
@@ -95,7 +95,7 @@ deferred values, and when you type in an expression of type
 <code>Deferred.t</code>, it will make sure the scheduler is running and
 block until the deferred is determined. Thus, we can write:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">contents;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">contents;;
 &gt;- : string = "This is only a test."
 </code></pre>
 </div>
@@ -106,7 +106,7 @@ deferred.</p>
 <p>If we peek again, we’ll see that the value of <code>contents</code>
 has been filled in.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.peek contents;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.peek contents;;
 &gt;- : string option = Some "This is only a test."
 </code></pre>
 </div>
@@ -115,7 +115,7 @@ a deferred computation to finish, which we do using
 <code>Deferred.bind</code>. Here’s the type-signature of
 <code>bind</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.bind;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.bind;;
 &gt;- : 'a Deferred.t -&gt; f:('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -130,11 +130,10 @@ a file with an uppercase version of its contents.</p>
   Deferred.bind (Reader.file_contents filename)
     ~f:(fun text -&gt;
        Writer.save filename ~contents:(String.uppercase text));;
-;;
 &gt;val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
-uppercase_file "test.txt";; ;;
+uppercase_file "test.txt";;
 &gt;- : unit = ()
-Reader.file_contents "test.txt";; ;;
+Reader.file_contents "test.txt";;
 &gt;- : string = "THIS IS ONLY A TEST."
 </code></pre>
 </div>
@@ -151,7 +150,6 @@ verbose, and so Async includes an infix operator for it:
   Reader.file_contents filename
   &gt;&gt;= fun text -&gt;
   Writer.save filename ~contents:(String.uppercase text);;
-;;
 &gt;val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -168,7 +166,6 @@ file:</p>
   Reader.file_contents filename
   &gt;&gt;= fun text -&gt;
   List.length (String.split text ~on:'\n');;
-;;
 &gt;Line 4, characters 5-45:
 &gt;Error: This expression has type int but an expression was expected of type
 &gt;         'a Deferred.t
@@ -181,11 +178,11 @@ that returns the result directly. What we need is <code>return</code>, a
 function provided by Async that takes an ordinary value and wraps it up
 in a deferred. <a data-primary="return function" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">return;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">return;;
 &gt;- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
-let three = return 3;; ;;
+let three = return 3;;
 &gt;val three : int Deferred.t = &lt;abstr&gt;
-three;; ;;
+three;;
 &gt;- : int = 3
 </code></pre>
 </div>
@@ -196,7 +193,6 @@ compile:</p>
   Reader.file_contents filename
   &gt;&gt;= fun text -&gt;
   return (List.length (String.split text ~on:'\n'));;
-;;
 &gt;val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -208,7 +204,7 @@ we already ran across monads in <a data-type="xref" href="error-handling.html#bi
 fairly common pattern, and as such there is a standard shortcut for it
 called <code>Deferred.map</code>, which has the following signature:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.map;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.map;;
 &gt;- : 'a Deferred.t -&gt; f:('a -&gt; 'b) -&gt; 'b Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -220,9 +216,8 @@ succinctly:</p>
   Reader.file_contents filename
   &gt;&gt;| fun text -&gt;
   List.length (String.split text ~on:'\n')
-;;
 &gt;val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
-count_lines "/etc/hosts" ;;
+count_lines "/etc/hosts"
 &gt;- : int = 10
 </code></pre>
 </div>
@@ -235,7 +230,7 @@ shows us the contents of the deferred instead.</p>
 for working with monads, which we can enable by enabling
 <code>ppx_let</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
 </code></pre>
 </div>
 <p>Here’s what the <code>bind</code>-using version of
@@ -244,7 +239,6 @@ for working with monads, which we can enable by enabling
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_lines filename =
   let%bind text = Reader.file_contents filename in
   return (List.length (String.split text ~on:'\n'));;
-;;
 &gt;val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -254,7 +248,6 @@ for working with monads, which we can enable by enabling
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_lines filename =
   let%map text = Reader.file_contents filename in
   List.length (String.split text ~on:'\n');;
-;;
 &gt;val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -289,16 +282,16 @@ deferred that corresponds to the ivar in question, using
 corresponding deferred to become determined, using
 <code>Ivar.fill</code>. These operations are illustrated below:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ivar = Ivar.create ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ivar = Ivar.create ();;
 &gt;val ivar : '_weak1 Ivar.t =
 &gt;  {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
-let def = Ivar.read ivar;; ;;
+let def = Ivar.read ivar;;
 &gt;val def : '_weak2 Deferred.t = &lt;abstr&gt;
-Deferred.peek def;; ;;
+Deferred.peek def;;
 &gt;- : '_weak3 option = None
-Ivar.fill ivar "Hello";; ;;
+Ivar.fill ivar "Hello";;
 &gt;- : unit = ()
-Deferred.peek def;; ;;
+Deferred.peek def;;
 &gt;- : string option = Some "Hello"
 </code></pre>
 </div>
@@ -317,7 +310,6 @@ were scheduled in. Here’s a signature that captures this idea:</p>
   val create : Time.Span.t -&gt; t
   val schedule : t -&gt; (unit -&gt; 'a Deferred.t) -&gt; 'a Deferred.t
 end;;
-;;
 &gt;module type Delayer_intf =
 &gt;  sig
 &gt;    type t
@@ -334,7 +326,7 @@ of the deferred value returned by the thunk. To implement this, we’ll
 use an operator called <code>upon</code>, which has the following
 signature: <a data-primary="thunks" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upon;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upon;;
 &gt;- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -366,7 +358,6 @@ after that time span elapses:</p>
       job ());
     Ivar.read ivar
 end;;
-;;
 &gt;module Delayer : Delayer_intf
 </code></pre>
 </div>
@@ -401,7 +392,6 @@ concisely.</p>
   let i = Ivar.create () in
   upon d (fun x -&gt; upon (f x) (fun y -&gt; Ivar.fill i y));
   Ivar.read i;;
-;;
 &gt;val my_bind : 'a Deferred.t -&gt; f:('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -550,9 +540,9 @@ comes from Core that is used to mark functions that don’t return.
 Typically, a function that doesn’t return is inferred as having return
 type <code>'a</code>: <a data-primary="Scheduler.go" data-type="indexterm">&nbsp;</a><a data-primary="loop_forever" data-type="indexterm">&nbsp;</a><a data-primary="never_returns" data-type="indexterm">&nbsp;</a><a data-secondary="non-returning" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () = loop_forever ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () = loop_forever ();;
 &gt;val loop_forever : unit -&gt; 'a = &lt;fun&gt;
-let always_fail () = assert false;; ;;
+let always_fail () = assert false;;
 &gt;val always_fail : unit -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -564,7 +554,6 @@ complain in such a case:</p>
   let x = 3 in
   if n &gt; 0 then loop_forever ();
   x + n;;
-;;
 &gt;val do_stuff : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -574,7 +563,7 @@ it never returns is less clear, and so we use the type system to make it
 more explicit by giving it a return type of <code>never_returns</code>.
 Let’s do the same trick with <code>loop_forever</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : never_returns = loop_forever ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : never_returns = loop_forever ();;
 &gt;val loop_forever : unit -&gt; never_returns = &lt;fun&gt;
 </code></pre>
 </div>
@@ -588,7 +577,6 @@ function, we’ll get a helpful type error:</p>
   let x = 3 in
   if n &gt; 0 then loop_forever ();
   x + n;;
-;;
 &gt;Line 3, characters 19-34:
 &gt;Error: This expression has type never_returns
 &gt;       but an expression was expected of type unit
@@ -598,13 +586,12 @@ function, we’ll get a helpful type error:</p>
 <p>We can resolve the error by calling the function
 <code>never_returns</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">never_returns;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">never_returns;;
 &gt;- : never_returns -&gt; 'a = &lt;fun&gt;
 let do_stuff n =
   let x = 3 in
   if n &gt; 0 then never_returns (loop_forever ());
   x + n;;
-;;
 &gt;val do_stuff : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -666,7 +653,7 @@ use of pipes is fairly minimal here, but they are an important part of
 Async, so it’s worth discussing them in some detail. <a data-primary="pipes" data-type="indexterm">&nbsp;</a></p>
 <p>Pipes are created in connected read/write pairs:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
 &gt;val r : '_weak4 Pipe.Reader.t = &lt;abstr&gt;
 &gt;val w : '_weak4 Pipe.Writer.t = &lt;abstr&gt;
 </code></pre>
@@ -679,21 +666,21 @@ values of a single, yet-to-be-determined type.</p>
 indefinitely in <code>utop</code>. You can break out of the wait by
 hitting <strong><code>Control-C</code></strong>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Pipe.write w "Hello World!";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Pipe.write w "Hello World!";;
 &gt;Interrupted.
 </code></pre>
 </div>
 <p>The deferred returned by write completes on its own once the value
 written into the pipe has been read out:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
 &gt;val r : '_weak5 Pipe.Reader.t = &lt;abstr&gt;
 &gt;val w : '_weak5 Pipe.Writer.t = &lt;abstr&gt;
-let write_complete = Pipe.write w "Hello World!";; ;;
+let write_complete = Pipe.write w "Hello World!";;
 &gt;val write_complete : unit Deferred.t = &lt;abstr&gt;
-Pipe.read r;; ;;
+Pipe.read r;;
 &gt;- : [ `Eof | `Ok of string ] = `Ok "Hello World!"
-write_complete;; ;;
+write_complete;;
 &gt;- : unit = ()
 </code></pre>
 </div>
@@ -703,7 +690,7 @@ module. In particular, we’re using <code>Pipe.transfer</code> to set up
 a process that takes data from a reader-pipe and moves it to a
 writer-pipe. Here’s the type of <code>Pipe.transfer</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Pipe.transfer;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Pipe.transfer;;
 &gt;- : 'a Pipe.Reader.t -&gt; 'b Pipe.Writer.t -&gt; f:('a -&gt; 'b) -&gt; unit Deferred.t =
 &gt;&lt;fun&gt;
 </code></pre>
@@ -724,7 +711,7 @@ library that we introduced in <a data-type="xref" href="command-line-parsing.htm
 shadows the <code>Command</code> module with an extended version that
 contains the <code>async</code> call:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.async_spec;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.async_spec;;
 &gt;- : ('a, unit Deferred.t) Async.Command.basic_spec_command
 &gt;    Command.with_options
 &gt;= &lt;fun&gt;
@@ -843,8 +830,8 @@ let get_definition word =
 for <code>Cohttp_async.Client.get</code>, which we can do in
 <code>utop</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "cohttp-async";; ;;
-Cohttp_async.Client.get;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "cohttp-async";;
+Cohttp_async.Client.get;;
 &gt;- : ?interrupt:unit Deferred.t -&gt;
 &gt;    ?ssl_config:Conduit_async.V2.Ssl.Config.t -&gt;
 &gt;    ?headers:Cohttp.Header.t -&gt;
@@ -896,7 +883,7 @@ let search_and_print words =
 each word, and <code>Deferred.all</code> to wait for all the results.
 Here’s the type of <code>Deferred.all</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.all;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.all;;
 &gt;- : 'a Deferred.t list -&gt; 'a list Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -921,7 +908,7 @@ deferreds and returns a single <code>unit</code> deferred that becomes
 determined when every deferred on the input list is determined. We can
 see the type of this function in <code>utop</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.all_unit;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.all_unit;;
 &gt;- : unit Deferred.t list -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -987,11 +974,10 @@ between the two behaviors on subsequent calls:</p>
     after (Time.Span.of_sec 0.5)
     &gt;&gt;= fun () -&gt;
     if will_fail then raise Exit else return ();;
-;;
 &gt;val maybe_raise : unit -&gt; unit Deferred.t = &lt;fun&gt;
-maybe_raise ();; ;;
+maybe_raise ();;
 &gt;- : unit = ()
-maybe_raise ();; ;;
+maybe_raise ();;
 &gt;Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 </code></pre>
 </div>
@@ -1008,11 +994,10 @@ as you can see that doesn’t quite do the trick:</p>
     maybe_raise ()
     &gt;&gt;| fun () -&gt; "success"
   with _ -&gt; return "failure";;
-;;
 &gt;val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
-handle_error ();; ;;
+handle_error ();;
 &gt;- : string = "success"
-handle_error ();; ;;
+handle_error ();;
 &gt;Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 </code></pre>
 </div>
@@ -1029,11 +1014,10 @@ exited.</p>
   &gt;&gt;| function
   | Ok ()   -&gt; "success"
   | Error _ -&gt; "failure";;
-;;
 &gt;val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
-handle_error ();; ;;
+handle_error ();;
 &gt;- : string = "success"
-handle_error ();; ;;
+handle_error ();;
 &gt;- : string = "failure"
 </code></pre>
 </div>
@@ -1067,11 +1051,10 @@ deferred. Here’s an example:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let blow_up () =
   let monitor = Monitor.create ~name:"blow up monitor" () in
   within' ~monitor maybe_raise;;
-;;
 &gt;val blow_up : unit -&gt; unit Deferred.t = &lt;fun&gt;
-blow_up ();; ;;
+blow_up ();;
 &gt;- : unit = ()
-blow_up ();; ;;
+blow_up ();;
 &gt;Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor"))
 </code></pre>
 </div>
@@ -1097,7 +1080,6 @@ spawns.</p>
   within' ~monitor (fun () -&gt;
     after (Time.Span.of_sec 0.25)
     &gt;&gt;= fun () -&gt; failwith "Kaboom!");;
-;;
 &gt;val swallow_error : unit -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1113,7 +1095,6 @@ becomes determined.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.any [ after (Time.Span.of_sec 0.5)
              ; swallow_error () ];;
-;;
 &gt;an error happened
 &gt;- : unit = ()
 </code></pre>
@@ -1126,7 +1107,7 @@ the parent and handles others. Exceptions are sent to the parent using
 called to find the current monitor, which is the parent of the newly
 created monitor.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Ignore_me;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Ignore_me;;
 &gt;exception Ignore_me
 let swallow_some_errors exn_to_raise =
   let child_monitor  = Monitor.create  () in
@@ -1140,7 +1121,6 @@ let swallow_some_errors exn_to_raise =
   within' ~monitor:child_monitor (fun () -&gt;
     after (Time.Span.of_sec 0.25)
     &gt;&gt;= fun () -&gt; raise exn_to_raise);;
-;;
 &gt;val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1153,11 +1133,10 @@ original exception thrown.</p>
 say, the built-in exception <code>Not_found</code>, then the exception
 will be passed to the parent monitor and delivered as usual:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Another_exception ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Another_exception
 &gt;exception Another_exception
 Deferred.any [ after (Time.Span.of_sec 0.5)
              ; swallow_some_errors Another_exception ]
-;;
 &gt;Exception:
 &gt;(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
 </code></pre>
@@ -1167,7 +1146,6 @@ ignored, and the computation will finish when the timeout expires.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.any [ after (Time.Span.of_sec 0.5)
              ; swallow_some_errors Ignore_me ];;
-;;
 &gt;ignoring exn
 &gt;- : unit = ()
 </code></pre>
@@ -1294,9 +1272,8 @@ time-span equal to a given number of seconds: <a data-secondary="timeouts and ca
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let string_and_float = Deferred.both
                          (after (sec 0.5)  &gt;&gt;| fun () -&gt; "A")
 (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);;
-;;
 &gt;val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;
-string_and_float;; ;;
+string_and_float;;
 &gt;- : string * float = ("A", 32.33)
 </code></pre>
 </div>
@@ -1311,7 +1288,6 @@ determined once any of the values on the list is determined.</p>
 ; (after (sec 1.0) &gt;&gt;| fun () -&gt; "one second")
 ; (after (sec 4.0) &gt;&gt;| fun () -&gt; "four seconds")
 ];;
-;;
 &gt;- : string = "half a second"
 </code></pre>
 </div>
@@ -1382,9 +1358,9 @@ deferred is paired, using the function <code>choice</code>, with a
 function that is called if and only if that deferred is chosen. Here’s
 the type signature of <code>choice</code> and <code>choose</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">choice;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">choice;;
 &gt;- : 'a Deferred.t -&gt; ('a -&gt; 'b) -&gt; 'b Deferred.choice = &lt;fun&gt;
-choose;; ;;
+choose;;
 &gt;- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1480,9 +1456,9 @@ the code in question in a separate thread. Async’s
 just this, <code>In_thread.run</code> being the simplest. We can simply
 write: <a data-primary="In_thread module" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let def = In_thread.run (fun () -&gt; List.range 1 10);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let def = In_thread.run (fun () -&gt; List.range 1 10);;
 &gt;val def : int list Deferred.t = &lt;abstr&gt;
-def;; ;;
+def;;
 &gt;- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
 </code></pre>
 </div>
@@ -1510,14 +1486,13 @@ becomes determined, at which point it prints out one last timestamp:</p>
   print_time ();
   printf "\n";
   Writer.flushed (force Writer.stdout);;
-;;
 &gt;val log_delays : (unit -&gt; unit Deferred.t) -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
 <p>If we feed this function a simple timeout deferred, it works as you
 might expect, waking up roughly every 100 milliseconds:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; after (sec 0.5)) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; after (sec 0.5))
 &gt;37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
 &gt;Finished at: 500.67615509033203ms,
 &gt;- : unit = ()
@@ -1529,9 +1504,8 @@ for a busy loop to finish running:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let busy_loop () =
   let x = ref None in
   for i = 1 to 100_000_000 do x := Some i done
-;;
 &gt;val busy_loop : unit -&gt; unit = &lt;fun&gt;
-log_delays (fun () -&gt; return (busy_loop ())) ;;
+log_delays (fun () -&gt; return (busy_loop ()))
 &gt;Finished at: 874.99594688415527ms,
 &gt;- : unit = ()
 </code></pre>
@@ -1542,7 +1516,7 @@ log_delays (fun () -&gt; return (busy_loop ())) ;;
 <p>If, on the other hand, we use <code>In_thread.run</code> to offload
 this to a different system thread, the behavior will be different:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; In_thread.run busy_loop) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; In_thread.run busy_loop)
 &gt;31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
 &gt;Finished at: 840.72136878967285ms,
 &gt;- : unit = ()
@@ -1564,9 +1538,8 @@ timer process will get to run:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
-;;
 &gt;val noalloc_busy_loop : unit -&gt; unit = &lt;fun&gt;
-log_delays (fun () -&gt; In_thread.run noalloc_busy_loop) ;;
+log_delays (fun () -&gt; In_thread.run noalloc_busy_loop)
 &gt;32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
 &gt;Finished at: 418.69187355041504ms,
 &gt;- : unit = ()

@@ -380,7 +380,7 @@ an example page.</p>
 <p>The example above used a new syntax for string literals, called
 <em>quoted strings</em>. Here’s an example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a quoted string|};; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a quoted string|};;
 &gt;- : string = "This is a quoted string"
 </code></pre>
 </div>
@@ -388,7 +388,7 @@ an example page.</p>
 written without the usual escaping required for ordinary string
 literals. Consider the following examples.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a literal quote: "|};; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a literal quote: "|};;
 &gt;- : string = "This is a literal quote: \""
 </code></pre>
 </div>
@@ -405,7 +405,7 @@ change the delimiter for the quoted string by adding an arbitrary
 identifier, thereby ensuring that the delimiter won’t show up in the
 body of the string.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{xxx|This is how you write a {|quoted string|}|xxx};; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{xxx|This is how you write a {|quoted string|}|xxx};;
 &gt;- : string = "This is how you write a {|quoted string|}"
 </code></pre>
 </div>
@@ -947,9 +947,9 @@ have been obvious, which is that the largest int,
 <code>Int.max_value</code>, is smaller in absolute value than
 <code>Int.max_value</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.min_value;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.min_value;;
 &gt;- : int = -4611686018427387904
-Int.max_value;; ;;
+Int.max_value;;
 &gt;- : int = 4611686018427387903
 </code></pre>
 </div>
@@ -958,7 +958,7 @@ Int.max_value;; ;;
 (not just for OCaml) is for the negation of <code>min_value</code> to be
 equal to itself.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.neg Int.min_value;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.neg Int.min_value;;
 &gt;- : int = -4611686018427387904
 </code></pre>
 </div>
@@ -998,8 +998,8 @@ let%test_unit "List.rev_append is List.append of List.rev" =
 useful for creating a generator for pairs from two generators for the
 constituent types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;; ;;
-Quickcheck.Generator.both;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
+Quickcheck.Generator.both;;
 &gt;- : 'a Base_quickcheck.Generator.t -&gt;
 &gt;    'b Base_quickcheck.Generator.t -&gt; ('a * 'b) Base_quickcheck.Generator.t
 &gt;= &lt;fun&gt;
@@ -1029,7 +1029,6 @@ Here’s a simple example.</p>
   | Rect of { height: float; width: float }
   | Poly of (float * float) list
 [@@deriving quickcheck];;
-;;
 &gt;type shape =
 &gt;    Circle of { radius : float; }
 &gt;  | Rect of { height : float; width : float; }
@@ -1049,7 +1048,6 @@ specifying the weight on a particular variant.</p>
   | Rect of { height: float; width: float }
   | Poly of (float * float) list
 [@@deriving quickcheck];;
-;;
 &gt;type shape =
 &gt;    Circle of { radius : float; }
 &gt;  | Rect of { height : float; width : float; }
@@ -1099,7 +1097,6 @@ height, and width of the shape in question can’t be negative.</p>
     Poly points
   in
   G.union [circle; rect; poly];;
-;;
 &gt;val gen_shape : shape Base_quickcheck.Generator.t = &lt;abstr&gt;
 </code></pre>
 </div>

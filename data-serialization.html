@@ -48,13 +48,12 @@ module, including functions for converting s-expressions to and from
 strings. Let’s rewrite our example s-expression in terms of this
 type:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
 Sexp.List [
   Sexp.Atom "this";
   Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
   Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
 ];;
-;;
 &gt;- : Sexp.t = (this (is an) (s expression))
 </code></pre>
 </div>
@@ -63,9 +62,9 @@ the toplevel. This pretty printer is based on the functions in
 <code>Sexp</code> for converting s-expressions to and from strings:
 <a data-primary="pretty printers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);;
 &gt;- : string = "(1 2)"
-Sexp.of_string ("(1 2 (3 4))");; ;;
+Sexp.of_string ("(1 2 (3 4))");;
 &gt;- : Sexp.t = (1 2 (3 4))
 </code></pre>
 </div>
@@ -74,20 +73,20 @@ base types in Core support conversion to and from s-expressions. For
 example, we can use the conversion functions defined in the respective
 modules for integers, strings, and exceptions:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.sexp_of_t 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.sexp_of_t 3;;
 &gt;- : Sexp.t = 3
-String.sexp_of_t "hello";; ;;
+String.sexp_of_t "hello";;
 &gt;- : Sexp.t = hello
-Exn.sexp_of_t (Invalid_argument "foo");; ;;
+Exn.sexp_of_t (Invalid_argument "foo");;
 &gt;- : Sexp.t = (Invalid_argument foo)
 </code></pre>
 </div>
 <p>It’s also possible to convert more complex types such as lists or
 arrays that are polymorphic across the types that they can contain:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.sexp_of_t;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.sexp_of_t;;
 &gt;- : ('a -&gt; Sexp.t) -&gt; 'a list -&gt; Sexp.t = &lt;fun&gt;
-List.sexp_of_t Int.sexp_of_t [1; 2; 3];; ;;
+List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 &gt;- : Sexp.t = (1 2 3)
 </code></pre>
 </div>
@@ -102,11 +101,11 @@ example. Note that these functions will fail with an exception when
 presented with an s-expression that doesn’t match the structure of the
 OCaml type in question.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.t_of_sexp;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.t_of_sexp;;
 &gt;- : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a list = &lt;fun&gt;
-List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");; ;;
+List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 &gt;- : int list = [1; 2; 3]
-List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");; ;;
+List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 &gt;Exception:
 &gt;(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 </code></pre>
@@ -157,15 +156,14 @@ s-expression? You can of course write it yourself manually. Here’s an
 example: <a data-secondary="generating from OCaml
 types" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: float };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: float };;
 &gt;type t = { foo : int; bar : float; }
 let sexp_of_t t =
   let a x = Sexp.Atom x and l x = Sexp.List x in
   l [ l [a "foo"; Int.sexp_of_t t.foo  ];
 l [a "bar"; Float.sexp_of_t t.bar]; ];;
-;;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_t { foo = 3; bar = -5.5 };; ;;
+sexp_of_t { foo = 3; bar = -5.5 };;
 &gt;- : Sexp.t = ((foo 3) (bar -5.5))
 </code></pre>
 </div>
@@ -185,16 +183,16 @@ collection of useful extensions that includes
 extension in" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a> <a data-secondary="in Sexplib
 package" data-primary="syntax extension" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
 </div>
 <p>And now we can use the extension as follows.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: float } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: float } [@@deriving sexp];;
 &gt;type t = { foo : int; bar : float; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");; ;;
+t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
 &gt;- : t = {foo = 3; bar = 35.}
 </code></pre>
 </div>
@@ -203,13 +201,13 @@ well. As discussed in <a data-type="xref" href="error-handling.html#error-handli
 be attached to the declaration of an exception, which will improve the
 ability of Core to generate a useful string representation:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Bad_message of string list;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Bad_message of string list;;
 &gt;exception Bad_message of string list
-Exn.to_string (Bad_message ["1";"2";"3"]);; ;;
+Exn.to_string (Bad_message ["1";"2";"3"]);;
 &gt;- : string = "(\"Bad_message(_)\")"
-exception Good_message of string list [@@deriving sexp];; ;;
+exception Good_message of string list [@@deriving sexp];;
 &gt;exception Good_message of string list
-Exn.to_string (Good_message ["1";"2";"3"]);; ;;
+Exn.to_string (Good_message ["1";"2";"3"]);;
 &gt;- : string = "(//toplevel//.Good_message (1 2 3))"
 </code></pre>
 </div>
@@ -217,13 +215,12 @@ Exn.to_string (Good_message ["1";"2";"3"]);; ;;
 s-expression converter. The following syntax lets you create one inline,
 as part of a larger expression:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let l = [(1,"one"); (2,"two")];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let l = [(1,"one"); (2,"two")];;
 &gt;val l : (int * string) list = [(1, "one"); (2, "two")]
 List.iter l ~f:(fun x -&gt;
   [%sexp_of: int * string ] x
   |&gt; Sexp.to_string
 |&gt; print_endline);;
-;;
 &gt;(1 one)
 &gt;(2 two)
 &gt;- : unit = ()
@@ -288,7 +285,7 @@ to introduce single-line comments. Thus, the following file,
 <p>can be loaded using Sexplib. As you can see, the commented data is
 not part of the resulting s-expression:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.load_sexp "example.scm";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.load_sexp "example.scm";;
 &gt;- : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 </code></pre>
 </div>
@@ -323,7 +320,7 @@ Comments out the first complete s-expression that follows
 </div>
 <p>Again, loading the file as an s-expression drops the comments:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.load_sexp "comment_heavy.scm";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.load_sexp "comment_heavy.scm";;
 &gt;- : Sexp.t = ((this is included) (this stays) (and now we're done))
 </code></pre>
 </div>
@@ -334,7 +331,6 @@ error:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Exn.handle_uncaught ~exit:false (fun () -&gt;
 ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t));;
-;;
 &gt;Uncaught exception:
 &gt;
 &gt;  (Sexplib.Sexp.Parse_error
@@ -632,9 +628,9 @@ have a sexp converter defined. Here, if we define a type without a sexp
 converter and then try to use another type with a sexp converter, we’ll
 error out:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type no_converter = int * int;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type no_converter = int * int;;
 &gt;type no_converter = int * int
-type t = { a: no_converter; b: string } [@@deriving sexp];; ;;
+type t = { a: no_converter; b: string } [@@deriving sexp];;
 &gt;Line 1, characters 15-27:
 &gt;Error: Unbound value no_converter_of_sexp
 </code></pre>
@@ -643,7 +639,7 @@ type t = { a: no_converter; b: string } [@@deriving sexp];; ;;
 <code>no_converter</code> type within the other data structure without
 an error.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
 &gt;type t = { a : no_converter; b : string; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
@@ -652,14 +648,14 @@ an error.</p>
 <p>And if we now convert a value of this type to an s-expression, we’ll
 see the contents of field <code>a</code> marked as opaque:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_t { a = (3,4); b = "foo" };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_t { a = (3,4); b = "foo" };;
 &gt;- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
 </code></pre>
 </div>
 <p>Note that the <code>t_of_sexp</code> function for an opaque type is
 generated, but will fail at runtime if it is used:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">t_of_sexp (Sexp.of_string "((a whatever) (b foo))");; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
 &gt;Exception:
 &gt;(Of_sexp_error "opaque_of_sexp: cannot convert opaque values"
 &gt;  (invalid_sexp whatever))
@@ -672,11 +668,11 @@ example, if you have a record containing a
 <code>no_converter list</code>, the <code>t_of_sexp</code> function
 would still succeed when the list is empty:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp];;
 &gt;type t = { a : no_converter list; b : string; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-t_of_sexp (Sexp.of_string "((a ()) (b foo))");; ;;
+t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
 &gt;- : t = {a = []; b = "foo"}
 </code></pre>
 </div>
@@ -685,10 +681,10 @@ can do this by annotating the type with
 <code>[@@deriving sexp_of]</code> or <code>[@@deriving of_sexp]</code>
 instead of <code>[@@deriving sexp]</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of];;
 &gt;type t = { a : no_converter; b : string; }
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving of_sexp];; ;;
+type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving of_sexp];;
 &gt;type t = { a : no_converter; b : string; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 </code></pre>
@@ -702,13 +698,11 @@ ideally like. Consider, for example, the following variant type: <a data-seconda
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type compatible_versions =
   | Specific of string list
 | All [@@deriving sexp];;
-;;
 &gt;type compatible_versions = Specific of string list | All
 &gt;val compatible_versions_of_sexp : Sexp.t -&gt; compatible_versions = &lt;fun&gt;
 &gt;val sexp_of_compatible_versions : compatible_versions -&gt; Sexp.t = &lt;fun&gt;
 sexp_of_compatible_versions
 (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-;;
 &gt;- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 </code></pre>
 </div>
@@ -721,13 +715,11 @@ syntax:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type compatible_versions =
   | Specific of string list [@sexp.list]
 | All [@@deriving sexp];;
-;;
 &gt;type compatible_versions = Specific of string list | All
 &gt;val compatible_versions_of_sexp : Sexp.t -&gt; compatible_versions = &lt;fun&gt;
 &gt;val sexp_of_compatible_versions : compatible_versions -&gt; Sexp.t = &lt;fun&gt;
 sexp_of_compatible_versions
 (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-;;
 &gt;- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 </code></pre>
 </div>
@@ -741,13 +733,13 @@ optional values are represented either as <code>()</code> for
 record field containing an option would be rendered accordingly. For
 example: <a data-secondary="sexp_option" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: int option; b: string } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: int option; b: string } [@@deriving sexp];;
 &gt;type t = { a : int option; b : string; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_t { a = None; b = "hello" };; ;;
+sexp_of_t { a = None; b = "hello" };;
 &gt;- : Sexp.t = ((a ()) (b hello))
-sexp_of_t { a = Some 3; b = "hello" };; ;;
+sexp_of_t { a = Some 3; b = "hello" };;
 &gt;- : Sexp.t = ((a (3)) (b hello))
 </code></pre>
 </div>
@@ -755,13 +747,13 @@ sexp_of_t { a = Some 3; b = "hello" };; ;;
 to be omitted from the record entirely? In that case, we can mark it
 with <code>[@sexp.option]</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp];;
 &gt;type t = { a : int option; b : string; }
 &gt;val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;
 &gt;val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_t { a = Some 3; b = "hello" };; ;;
+sexp_of_t { a = Some 3; b = "hello" };;
 &gt;- : Sexp.t = ((a 3) (b hello))
-sexp_of_t { a = None; b = "hello" };; ;;
+sexp_of_t { a = None; b = "hello" };;
 &gt;- : Sexp.t = ((b hello))
 </code></pre>
 </div>
@@ -782,7 +774,6 @@ very simple web server:</p>
   port: int;
   addr: string;
 } [@@deriving sexp];;
-;;
 &gt;type http_server_config = { web_root : string; port : int; addr : string; }
 &gt;val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;
 &gt;val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;
@@ -797,7 +788,6 @@ and to listen as localhost. We can do this as follows:</p>
   port: int [@default 80];
   addr: string [@default "localhost"];
 } [@@deriving sexp];;
-;;
 &gt;type http_server_config = { web_root : string; port : int; addr : string; }
 &gt;val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;
 &gt;val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;
@@ -809,7 +799,6 @@ with the desired defaults:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let cfg = http_server_config_of_sexp
 (Sexp.of_string "((web_root /var/www/html))");;
-;;
 &gt;val cfg : http_server_config =
 &gt;  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 </code></pre>
@@ -818,7 +807,7 @@ with the desired defaults:</p>
 notice that all of the fields are present, even though they’re not
 strictly necessary:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config cfg;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config cfg;;
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
 </code></pre>
 </div>
@@ -830,16 +819,14 @@ by using the <code>sexp_drop_default</code> directive:</p>
   port: int [@default 80] [@sexp_drop_default.equal];
   addr: string [@default "localhost"] [@sexp_drop_default.equal];
 } [@@deriving sexp];;
-;;
 &gt;type http_server_config = { web_root : string; port : int; addr : string; }
 &gt;val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;
 &gt;val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;
 let cfg = http_server_config_of_sexp
 (Sexp.of_string "((web_root /var/www/html))");;
-;;
 &gt;val cfg : http_server_config =
 &gt;  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
-sexp_of_http_server_config cfg;; ;;
+sexp_of_http_server_config cfg;;
 &gt;- : Sexp.t = ((web_root /var/www/html))
 </code></pre>
 </div>
@@ -848,11 +835,10 @@ simply omitted from the s-expression. On the other hand, if we convert a
 config with other values, then those values will be included in the
 s-expression:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config { cfg with port = 8080 };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config { cfg with port = 8080 };;
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 8080))
 sexp_of_http_server_config
 { cfg with port = 8080; addr = "192.168.0.1" };;
-;;
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
 </code></pre>
 </div>

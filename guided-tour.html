@@ -48,7 +48,7 @@ chapter.</p>
 <h2>OCaml as a Calculator</h2>
 <p>Our first step is to open <code>Base</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 </code></pre>
 </div>
 <p>By opening <code>Base</code>, we make the definitions it contains
@@ -57,15 +57,15 @@ is required for many of the examples in the tour and in the remainder of
 the book.</p>
 <p>Now let’s try a few simple numerical calculations:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">3 + 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">3 + 4;;
 &gt;- : int = 7
-8 / 3;; ;;
+8 / 3;;
 &gt;- : int = 2
-3.5 +. 6.;; ;;
+3.5 +. 6.;;
 &gt;- : float = 9.5
-30_000_000 / 300_000;; ;;
+30_000_000 / 300_000;;
 &gt;- : int = 100
-3 * 5 &gt; 14;; ;;
+3 * 5 &gt; 14;;
 &gt;- : bool = true
 </code></pre>
 </div>
@@ -99,9 +99,9 @@ be explicit about which operation you’re using.</p></li>
 expression, using the <code>let</code> keyword. This is known as a
 <em>let binding</em>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 3 + 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 3 + 4;;
 &gt;val x : int = 7
-let y = x + x;; ;;
+let y = x + x;;
 &gt;val y : int = 14
 </code></pre>
 </div>
@@ -113,23 +113,23 @@ for variable names. Punctuation is excluded, except for <code>_</code>
 and <code>'</code>, and variables must start with a lowercase letter or
 an underscore. Thus, these are legal:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x7 = 3 + 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x7 = 3 + 4;;
 &gt;val x7 : int = 7
-let x_plus_y = x + y;; ;;
+let x_plus_y = x + y;;
 &gt;val x_plus_y : int = 21
-let x' = x + 1;; ;;
+let x' = x + 1;;
 &gt;val x' : int = 8
 </code></pre>
 </div>
 <p>The following examples, however, are not legal:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let Seven = 3 + 4;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let Seven = 3 + 4;;
 &gt;Line 1, characters 5-10:
 &gt;Error: Unbound constructor Seven
-let 7x = 7;; ;;
+let 7x = 7;;
 &gt;Line 1, characters 5-7:
 &gt;Error: Unknown modifier 'x' for literal 7x
-let x-plus-y = x + y;; ;;
+let x-plus-y = x + y;;
 &gt;Line 1, characters 7-11:
 &gt;Error: Syntax error
 </code></pre>
@@ -143,11 +143,11 @@ numbers, and can’t contain dashes.</p>
 function:<a data-secondary="function definition
 with" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="defining" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square x = x * x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square x = x * x;;
 &gt;val square : int -&gt; int = &lt;fun&gt;
-square 2;; ;;
+square 2;;
 &gt;- : int = 4
-square (square 2);; ;;
+square (square 2);;
 &gt;- : int = 16
 </code></pre>
 </div>
@@ -167,9 +167,8 @@ functions that take multiple arguments. (Reminder: Don’t forget
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
   Float.of_int x /. Float.of_int y;;
-;;
 &gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
-ratio 4 7;; ;;
+ratio 4 7;;
 &gt;- : float = 0.571428571428571397
 </code></pre>
 </div>
@@ -196,7 +195,6 @@ shadowed locally.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
   let open Float.O in
   of_int x / of_int y;;
-;;
 &gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -207,7 +205,6 @@ opens, as you can see here.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
   Float.O.(of_int x / of_int y);;
-;;
 &gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -226,7 +223,6 @@ integers that pass the test:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let sum_if_true test first second =
   (if test first then first else 0)
   + (if test second then second else 0);;
-;;
 &gt;val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -237,11 +233,10 @@ example of this function in action:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let even x =
 x % 2 = 0;;
-;;
 &gt;val even : int -&gt; bool = &lt;fun&gt;
-sum_if_true even 3 4;; ;;
+sum_if_true even 3 4;;
 &gt;- : int = 4
-sum_if_true even 2 4;; ;;
+sum_if_true even 2 4;;
 &gt;- : int = 6
 </code></pre>
 </div>
@@ -297,7 +292,6 @@ compile.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let sum_if_true (test : int -&gt; bool) (x : int) (y : int) : int =
   (if test x then x else 0)
   + (if test y then y else 0);;
-;;
 &gt;val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -313,7 +307,6 @@ concrete type of a given value. Consider this function..<a data-secondary="gener
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let first_if_true test x y =
   if test x then x else y;;
-;;
 &gt;val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
@@ -342,17 +335,17 @@ C# and Java. <a data-primary="parametric polymorphism" data-type="indexterm">&nb
 <p>Because the type of <code>first_if_true</code> is generic, we can
 write this:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let long_string s = String.length s &gt; 6;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let long_string s = String.length s &gt; 6;;
 &gt;val long_string : string -&gt; bool = &lt;fun&gt;
-first_if_true long_string "short" "loooooong";; ;;
+first_if_true long_string "short" "loooooong";;
 &gt;- : string = "loooooong"
 </code></pre>
 </div>
 <p>As well as this:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let big_number x = x &gt; 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let big_number x = x &gt; 3;;
 &gt;val big_number : int -&gt; bool = &lt;fun&gt;
-first_if_true big_number 4 3;; ;;
+first_if_true big_number 4 3;;
 &gt;- : int = 4
 </code></pre>
 </div>
@@ -363,7 +356,7 @@ and integers in the second). But we can’t mix and match two different
 concrete types for <code>'a</code> in the same use of
 <code>first_if_true</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">first_if_true big_number "short" "loooooong";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">first_if_true big_number "short" "loooooong";;
 &gt;Line 1, characters 26-33:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
@@ -388,7 +381,6 @@ Generally, type errors like this one:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let add_potato x =
 x + "potato";;
-;;
 &gt;Line 2, characters 7-15:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
@@ -401,11 +393,10 @@ exceptions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_a_multiple x y =
 x % y = 0;;
-;;
 &gt;val is_a_multiple : int -&gt; int -&gt; bool = &lt;fun&gt;
-is_a_multiple 8 2;; ;;
+is_a_multiple 8 2;;
 &gt;- : bool = true
-is_a_multiple 8 0;; ;;
+is_a_multiple 8 0;;
 &gt;Exception:
 &gt;(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
 </code></pre>
@@ -431,9 +422,9 @@ collection of values that can each be of a different type. You can
 create a tuple by joining values together with a comma. <a data-primary="tuples" data-type="indexterm">&nbsp;</a><a data-secondary="tuples" data-primary="data
 structures" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a_tuple = (3,"three");; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a_tuple = (3,"three");;
 &gt;val a_tuple : int * string = (3, "three")
-let another_tuple = (3,"four",5.);; ;;
+let another_tuple = (3,"four",5.);;
 &gt;val another_tuple : int * string * float = (3, "four", 5.)
 </code></pre>
 </div>
@@ -446,7 +437,7 @@ product.)</p>
 <p>You can extract the components of a tuple using OCaml’s
 pattern-matching syntax, as shown below:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (x,y) = a_tuple;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (x,y) = a_tuple;;
 &gt;val x : int = 3
 &gt;val y : string = "three"
 </code></pre>
@@ -457,7 +448,7 @@ new variables <code>x</code> and <code>y</code>, each bound to different
 components of the value being matched. These can now be used in
 subsequent expressions:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">x + String.length y;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">x + String.length y;;
 &gt;- : int = 8
 </code></pre>
 </div>
@@ -471,7 +462,6 @@ of fuss:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let distance (x1,y1) (x2,y2) =
   Float.sqrt ((x1 -. x2) **. 2. +. (y1 -. y2) **. 2.);;
-;;
 &gt;val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -502,14 +492,14 @@ different types, lists let you hold any number of items of the same
 type. Consider the following example:<a data-secondary="lists" data-primary="data
 structures" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = ["OCaml";"Perl";"C"];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = ["OCaml";"Perl";"C"];;
 &gt;val languages : string list = ["OCaml"; "Perl"; "C"]
 </code></pre>
 </div>
 <p>Note that you can’t mix elements of different types in the same list,
 unlike tuples:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [3;"four";5];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [3;"four";5];;
 &gt;Line 1, characters 18-24:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
@@ -522,14 +512,14 @@ rich collection of functions for working with lists. We can access
 values from within a module by using dot notation. For example, this is
 how we compute the length of a list:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.length languages;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.length languages;;
 &gt;- : int = 3
 </code></pre>
 </div>
 <p>Here’s something a little more complicated. We can compute the list
 of the lengths of each language as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map languages ~f:String.length;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map languages ~f:String.length;;
 &gt;- : int list = [5; 4; 1]
 </code></pre>
 </div>
@@ -543,7 +533,7 @@ the order in which arguments are presented to a function without
 changing its behavior, as you can see here:<a data-secondary="labeled arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-primary="labeled
 arguments" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:String.length languages;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:String.length languages;;
 &gt;- : int list = [5; 4; 1]
 </code></pre>
 </div>
@@ -556,14 +546,14 @@ arguments" data-type="indexterm">&nbsp;</a></p>
 constructor <code>::</code> for adding elements to the front of a
 list:<a data-secondary=": : operator" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operator : :" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"French" :: "Spanish" :: languages;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"French" :: "Spanish" :: languages;;
 &gt;- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
 </code></pre>
 </div>
 <p>Here, we’re creating a new and extended list, not changing the list
 we started with, as you can see below:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;;
 &gt;- : string list = ["OCaml"; "Perl"; "C"]
 </code></pre>
 </div>
@@ -575,7 +565,7 @@ separating elements in a tuple. If you try to use commas in a list,
 you’ll see that your code compiles but doesn’t do quite what you might
 expect:<a data-primary="commas vs. semicolons" data-type="indexterm">&nbsp;</a><a data-primary="semicolons vs.&nbsp;commas" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">["OCaml", "Perl", "C"];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">["OCaml", "Perl", "C"];;
 &gt;- : (string * string * string) list = [("OCaml", "Perl", "C")]
 </code></pre>
 </div>
@@ -584,7 +574,7 @@ singleton list containing a three-tuple of strings.</p>
 <p>This example uncovers the fact that commas create a tuple, even if
 there are no surrounding parens. So, we can write:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1,2,3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1,2,3;;
 &gt;- : int * int * int = (1, 2, 3)
 </code></pre>
 </div>
@@ -596,11 +586,11 @@ style and should be avoided.</p>
 Note that <code>[]</code> is used to represent the empty list and that
 <code>::</code> is right-associative:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1; 2; 3];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1; 2; 3];;
 &gt;- : int list = [1; 2; 3]
-1 :: (2 :: (3 :: []));; ;;
+1 :: (2 :: (3 :: []));;
 &gt;- : int list = [1; 2; 3]
-1 :: 2 :: 3 :: [];; ;;
+1 :: 2 :: 3 :: [];;
 &gt;- : int list = [1; 2; 3]
 </code></pre>
 </div>
@@ -609,7 +599,7 @@ element to the front of the list, with the list terminating at
 <code>[]</code>, the empty list. There’s also a list concatenation
 operator, <code>@</code>, which can concatenate two lists:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1;2;3] @ [4;5;6];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1;2;3] @ [4;5;6];;
 &gt;- : int list = [1; 2; 3; 4; 5; 6]
 </code></pre>
 </div>
@@ -627,7 +617,6 @@ matching" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let my_favorite_language (my_favorite :: the_rest) =
   my_favorite;;
-;;
 &gt;Lines 1-2, characters 26-16:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
@@ -649,9 +638,9 @@ that doesn’t match the provided pattern, in particular, <code>[]</code>,
 the empty list. If we try to run <code>my_favorite_language</code>,
 we’ll see that it works on nonempty lists and fails on empty ones:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">my_favorite_language ["English";"Spanish";"French"];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">my_favorite_language ["English";"Spanish";"French"];;
 &gt;- : string = "English"
-my_favorite_language [];; ;;
+my_favorite_language [];;
 &gt;Exception: "Match_failure //toplevel//:1:26"
 </code></pre>
 </div>
@@ -672,11 +661,10 @@ being matched.</p>
   match languages with
   | first :: the_rest -&gt; first
   | [] -&gt; "OCaml" (* A good default! *);;
-;;
 &gt;val my_favorite_language : string list -&gt; string = &lt;fun&gt;
-my_favorite_language ["English";"Spanish";"French"];; ;;
+my_favorite_language ["English";"Spanish";"French"];;
 &gt;- : string = "English"
-my_favorite_language [];; ;;
+my_favorite_language [];;
 &gt;- : string = "OCaml"
 </code></pre>
 </div>
@@ -712,9 +700,8 @@ list:</p>
   match l with
   | [] -&gt; 0                   (* base case *)
   | hd :: tl -&gt; hd + sum tl   (* inductive case *);;
-;;
 &gt;val sum : int list -&gt; int = &lt;fun&gt;
-sum [1;2;3];; ;;
+sum [1;2;3];;
 &gt;- : int = 6
 </code></pre>
 </div>
@@ -747,7 +734,6 @@ function for removing sequential duplicates:</p>
   | first :: second :: tl -&gt;
     let new_tl = remove_sequential_duplicates (second :: tl) in
     if first = second then new_tl else first :: new_tl;;
-;;
 &gt;Lines 2-6, characters 5-57:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
@@ -767,9 +753,8 @@ lists. We can fix this warning by adding another case to the match:</p>
   | hd1 :: hd2 :: tl -&gt;
     let new_tl = remove_sequential_duplicates (hd2 :: tl) in
     if hd1 = hd2 then new_tl else hd1 :: new_tl;;
-;;
 &gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
-remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];; ;;
+remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
 &gt;- : int list = [1; 2; 3; 4; 1]
 </code></pre>
 </div>
@@ -796,7 +781,6 @@ syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
 z + z;;
-;;
 &gt;- : int = 14
 </code></pre>
 </div>
@@ -804,7 +788,7 @@ z + z;;
 the double-semicolon, so the value of <code>z</code> is no longer
 available:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">z;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">z;;
 &gt;Line 1, characters 1-2:
 &gt;Error: Unbound value z
 </code></pre>
@@ -815,7 +799,6 @@ one adding a new variable binding to what came before:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 7 in
 let y = x * x in
 x + y;;
-;;
 &gt;- : int = 56
 </code></pre>
 </div>
@@ -834,7 +817,6 @@ structures" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide x y =
 if y = 0 then None else Some (x / y);;
-;;
 &gt;val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 </code></pre>
 </div>
@@ -859,11 +841,9 @@ return type <code>(string * string) option</code>, returning
   | None -&gt; filename
   | Some (base,ext) -&gt;
     base ^ "." ^ String.lowercase ext;;
-;;
 &gt;val downcase_extension : string -&gt; string = &lt;fun&gt;
 List.map ~f:downcase_extension
   [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ];;
-;;
 &gt;- : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 </code></pre>
 </div>
@@ -902,7 +882,7 @@ new" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
 of as a tuple where the individual fields are named, rather than being
 defined positionally. Record types are easy enough to construct:<a data-secondary="record types" data-primary="records" data-type="indexterm">&nbsp;</a><a data-secondary="record types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let p = { x = 3.; y = -4. };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let p = { x = 3.; y = -4. };;
 &gt;val p : point2d = {x = 3.; y = -4.}
 </code></pre>
 </div>
@@ -911,7 +891,6 @@ matching:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x = x_pos; y = y_pos } =
 Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
-;;
 &gt;val magnitude : point2d -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -924,7 +903,7 @@ the variable it is bound to coincide, we don’t have to write them both
 down. Using this, our magnitude function can be rewritten as
 follows:<a data-secondary="field punning" data-primary="fields" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x; y } = Float.sqrt (x **. 2. +. y **. 2.);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x; y } = Float.sqrt (x **. 2. +. y **. 2.);;
 &gt;val magnitude : point2d -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -933,7 +912,6 @@ fields:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let distance v1 v2 =
 magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
-;;
 &gt;val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -980,16 +958,13 @@ process the input, not to separate two declarations</p>
 let is_inside_scene point scene =
   List.exists scene
     ~f:(fun el -&gt; is_inside_scene_element point el);;
-;;
 &gt;val is_inside_scene_element : point2d -&gt; scene_element -&gt; bool = &lt;fun&gt;
 &gt;val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
 is_inside_scene {x=3.;y=7.}
 [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
-;;
 &gt;- : bool = false
 is_inside_scene {x=3.;y=7.}
 [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
-;;
 &gt;- : bool = true
 </code></pre>
 </div>
@@ -1052,11 +1027,11 @@ constant-time operation. Arrays are more compact in terms of memory
 utilization than most other data structures in OCaml, including lists.
 Here’s an example:<a data-secondary="arrays" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-secondary="imperative programming and" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="arrays" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [| 1; 2; 3; 4 |];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [| 1; 2; 3; 4 |];;
 &gt;val numbers : int array = [|1; 2; 3; 4|]
-numbers.(2) &lt;- 4;; ;;
+numbers.(2) &lt;- 4;;
 &gt;- : unit = ()
-numbers;; ;;
+numbers;;
 &gt;- : int array = [|1; 2; 4; 4|]
 </code></pre>
 </div>
@@ -1096,7 +1071,6 @@ deviations, as shown in the following example.</p>
 let stdev rsum =
   Float.sqrt (rsum.sum_sq /. Float.of_int rsum.samples
 -. (rsum.sum /. Float.of_int rsum.samples) **. 2.);;
-;;
 &gt;val mean : running_sum -&gt; float = &lt;fun&gt;
 &gt;val stdev : running_sum -&gt; float = &lt;fun&gt;
 </code></pre>
@@ -1109,7 +1083,6 @@ let update rsum x =
   rsum.samples &lt;- rsum.samples + 1;
   rsum.sum     &lt;- rsum.sum     +. x;
   rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x;;
-;;
 &gt;val create : unit -&gt; running_sum = &lt;fun&gt;
 &gt;val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 </code></pre>
@@ -1126,13 +1099,13 @@ needing it when you’re writing imperative code.</p>
 action. Note that this code uses <code>List.iter</code>, which calls the
 function <code>~f</code> on each element of the provided list:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rsum = create ();; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rsum = create ();;
 &gt;val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
-List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);; ;;
+List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);;
 &gt;- : unit = ()
-mean rsum;; ;;
+mean rsum;;
 &gt;- : float = 1.33333333333333326
-stdev rsum;; ;;
+stdev rsum;;
 &gt;- : float = 3.94405318873307698
 </code></pre>
 </div>
@@ -1151,24 +1124,24 @@ there’s nothing really special about it. It’s just a record type with a
 single mutable field called <code>contents</code>:<a data-secondary="record types" data-primary="records" data-type="indexterm">&nbsp;</a><a data-secondary="ref type" data-primary="imperative
 programming" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = { contents = 0 };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = { contents = 0 };;
 &gt;val x : int ref = {contents = 0}
-x.contents &lt;- x.contents + 1;; ;;
+x.contents &lt;- x.contents + 1;;
 &gt;- : unit = ()
-x;; ;;
+x;;
 &gt;- : int ref = {contents = 1}
 </code></pre>
 </div>
 <p>There are a handful of useful functions and operators defined for
 <code>ref</code>s to make them more convenient to work with:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = ref 0  (* create a ref, i.e., { contents = 0 } *);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = ref 0  (* create a ref, i.e., { contents = 0 } *);;
 &gt;val x : int ref = {Base.Ref.contents = 0}
-!x             (* get the contents of a ref, i.e., x.contents *);; ;;
+!x             (* get the contents of a ref, i.e., x.contents *);;
 &gt;- : int = 0
-x := !x + 1    (* assignment, i.e., x.contents &lt;- ... *);; ;;
+x := !x + 1    (* assignment, i.e., x.contents &lt;- ... *);;
 &gt;- : unit = ()
-!x;; ;;
+!x;;
 &gt;- : int = 1
 </code></pre>
 </div>
@@ -1176,13 +1149,13 @@ x := !x + 1    (* assignment, i.e., x.contents &lt;- ... *);; ;;
 completely reimplement the <code>ref</code> type and all of these
 operators in just a few lines of code:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a ref = { mutable contents : 'a };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a ref = { mutable contents : 'a };;
 &gt;type 'a ref = { mutable contents : 'a; }
-let ref x = { contents = x };; ;;
+let ref x = { contents = x };;
 &gt;val ref : 'a -&gt; 'a ref = &lt;fun&gt;
-let (!) r = r.contents;; ;;
+let (!) r = r.contents;;
 &gt;val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;
-let (:=) r x = r.contents &lt;- x;; ;;
+let (:=) r x = r.contents &lt;- x;;
 &gt;val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1203,7 +1176,6 @@ list, using a <code>ref</code> to accumulate the results:</p>
   let sum = ref 0 in
   List.iter list ~f:(fun x -&gt; sum := !sum + x);
   !sum;;
-;;
 &gt;val sum : int list -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1230,7 +1202,6 @@ loops" data-type="indexterm">&nbsp;</a><a data-primary="for loops" data-type="in
     array.(i) &lt;- array.(j);
     array.(j) &lt;- tmp
   done;;
-;;
 &gt;val permute : 'a array -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1239,12 +1210,12 @@ distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>,
 <code>do</code>, and <code>done</code>.</p>
 <p>Here’s an example run of this code:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ar = Array.init 20 ~f:(fun i -&gt; i) ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ar = Array.init 20 ~f:(fun i -&gt; i)
 &gt;val ar : int array =
 &gt;  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
-permute ar ;;
+permute ar
 &gt;- : unit = ()
-ar ;;
+ar
 &gt;- : int array =
 &gt;[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 </code></pre>
@@ -1260,11 +1231,10 @@ also a keyword:</p>
     pos := !pos + 1
   done;
   if !pos = Array.length array then None else Some !pos;;
-;;
 &gt;val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
-find_first_negative_entry [|1;2;0;3|];; ;;
+find_first_negative_entry [|1;2;0;3|];;
 &gt;- : int option = None
-find_first_negative_entry [|1;-2;0;3|];; ;;
+find_first_negative_entry [|1;-2;0;3|];;
 &gt;- : int option = Some 1
 </code></pre>
 </div>
@@ -1288,9 +1258,8 @@ function to avoid the short-circuiting:</p>
     pos := !pos + 1
   done;
   if !pos = Array.length array then None else Some !pos;;
-;;
 &gt;val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
-find_first_negative_entry [|1;2;0;3|];; ;;
+find_first_negative_entry [|1;2;0;3|];;
 &gt;Exception: (Invalid_argument "index out of bounds")
 </code></pre>
 </div>

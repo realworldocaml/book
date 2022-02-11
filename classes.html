@@ -13,7 +13,7 @@ a module. The syntax for a class definition uses the keyword
 <code>class</code>: <a data-secondary="basic syntax
 for" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 class istack = object
   val mutable v = [0; 2]
 
@@ -27,7 +27,6 @@ class istack = object
   method push hd =
     v &lt;- hd :: v
 end;;
-;;
 &gt;class istack :
 &gt;  object
 &gt;    val mutable v : int list
@@ -51,13 +50,13 @@ type <code>int -&gt; unit</code>.</p>
 <p>To produce an object, classes are instantiated with the keyword
 <code>new</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new istack;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new istack;;
 &gt;val s : istack = &lt;obj&gt;
-s#pop;; ;;
+s#pop;;
 &gt;- : int option = Some 0
-s#push 5;; ;;
+s#push 5;;
 &gt;- : unit = ()
-s#pop;; ;;
+s#pop;;
 &gt;- : int option = Some 5
 </code></pre>
 </div>
@@ -69,7 +68,7 @@ for convenience, the definition of the class <code>istack</code> also
 defines an object type <code>istack</code> with the same methods as the
 class. This type definition is equivalent to:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type istack = &lt; pop: int option; push: int -&gt; unit &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type istack = &lt; pop: int option; push: int -&gt; unit &gt;;;
 &gt;type istack = &lt; pop : int option; push : int -&gt; unit &gt;
 </code></pre>
 </div>
@@ -102,7 +101,6 @@ initial contents of the stack:</p>
   method push hd =
     v &lt;- hd :: v
 end;;
-;;
 &gt;class ['a] stack :
 &gt;  'a list -&gt;
 &gt;  object
@@ -133,7 +131,6 @@ some type <code>'b list</code>:</p>
   method push hd =
     v &lt;- hd :: v
 end;;
-;;
 &gt;Lines 1-13, characters 1-6:
 &gt;Error: Some type variables are unbound in this type:
 &gt;         class ['a] stack :
@@ -196,7 +193,7 @@ later. Let’s demonstrate the technique using object types.</p>
 <p>First, we’ll define an object type <code>iterator</code> that
 specifies the methods in an iterator:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;;;
 &gt;type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;
 </code></pre>
 </div>
@@ -218,7 +215,6 @@ iterate over the contents of our stack:</p>
     | hd :: tl -&gt; current &lt;- tl
     | [] -&gt; raise (Invalid_argument "no value")
 end;;
-;;
 &gt;class ['a] list_iterator :
 &gt;  'a list -&gt;
 &gt;  object
@@ -250,7 +246,6 @@ stack:</p>
   method iterator : 'a iterator =
     new list_iterator v
 end;;
-;;
 &gt;class ['a] stack :
 &gt;  'a list -&gt;
 &gt;  object
@@ -264,23 +259,23 @@ end;;
 <p>Now we can build a new stack, push some values to it, and iterate
 over them:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new stack [];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new stack [];;
 &gt;val s : '_weak1 stack = &lt;obj&gt;
-s#push 5;; ;;
+s#push 5;;
 &gt;- : unit = ()
-s#push 4;; ;;
+s#push 4;;
 &gt;- : unit = ()
-let it = s#iterator;; ;;
+let it = s#iterator;;
 &gt;val it : int iterator = &lt;obj&gt;
-it#get;; ;;
+it#get;;
 &gt;- : int = 4
-it#next;; ;;
+it#next;;
 &gt;- : unit = ()
-it#get;; ;;
+it#get;;
 &gt;- : int = 5
-it#next;; ;;
+it#next;;
 &gt;- : unit = ()
-it#has_value;; ;;
+it#has_value;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -307,7 +302,6 @@ and applies it to each of the elements on the stack: <a data-primary="functional
   method iter f =
     List.iter ~f v
 end;;
-;;
 &gt;class ['a] stack :
 &gt;  'a list -&gt;
 &gt;  object
@@ -344,7 +338,6 @@ example:</p>
   method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =
     (fun f init -&gt; List.fold ~f ~init v)
 end;;
-;;
 &gt;class ['a] stack :
 &gt;  'a list -&gt;
 &gt;  object
@@ -375,7 +368,6 @@ all the strings on the stack: <a data-primary="inheritance" data-type="indexterm
   method print =
     List.iter ~f:Stdio.print_endline v
 end;;
-;;
 &gt;class sstack :
 &gt;  string list -&gt;
 &gt;  object
@@ -396,7 +388,6 @@ they are pushed onto the stack:</p>
   method push hd =
     super#push (hd * 2)
 end;;
-;;
 &gt;class double_stack :
 &gt;  int list -&gt;
 &gt;  object
@@ -657,7 +648,6 @@ methods" data-type="indexterm">&nbsp;</a></p>
   method area = Float.of_int (self#width * self#width)
   method equals (other : 'self) = other#width = self#width
 end;;
-;;
 &gt;class square :
 &gt;  int -&gt;
 &gt;  object ('a)
@@ -670,7 +660,6 @@ class circle r = object(self : 'self)
   method area = 3.14 *. (Float.of_int self#radius) **. 2.0
   method equals (other : 'self) = other#radius = self#radius
 end;;
-;;
 &gt;class circle :
 &gt;  int -&gt;
 &gt;  object ('a)
@@ -685,9 +674,9 @@ obtain the type of the current object.</p>
 <p>We can now test different object instances for equality by using the
 <code>equals</code> binary method:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(new square 5)#equals (new square 5);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(new square 5)#equals (new square 5);;
 &gt;- : bool = true
-(new circle 10)#equals (new circle 7);; ;;
+(new circle 10)#equals (new circle 7);;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -697,9 +686,9 @@ obtain the type of the current object.</p>
 define a common base class <code>shape</code> that also includes an
 equality method:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; equals : shape -&gt; bool; area : float &gt;;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; equals : shape -&gt; bool; area : float &gt;;;
 &gt;type shape = &lt; area : float; equals : shape -&gt; bool &gt;
-(new square 5 :&gt; shape);; ;;
+(new square 5 :&gt; shape);;
 &gt;Line 1, characters 1-24:
 &gt;Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int &gt;
 &gt;       is not a subtype of shape = &lt; area : float; equals : shape -&gt; bool &gt;
@@ -723,7 +712,6 @@ equality has very poor behavior when applied to objects:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(=)
   (object method area = 5 end)
   (object method area = 5 end);;
-;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -739,11 +727,9 @@ and implement the comparison based on the representation type: <a data-primary="
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr =
   | Square of int
   | Circle of int;;
-;;
 &gt;type shape_repr = Square of int | Circle of int
 type shape =
 &lt; repr : shape_repr; equals : shape -&gt; bool; area : float &gt;;;
-;;
 &gt;type shape = &lt; area : float; equals : shape -&gt; bool; repr : shape_repr &gt;
 class square w = object(self)
   method width = w
@@ -754,7 +740,6 @@ class square w = object(self)
      | Square x, Square x' -&gt; Int.(=) x x'
      | _ -&gt; false
 end;;
-;;
 &gt;class square :
 &gt;  int -&gt;
 &gt;  object
@@ -802,13 +787,12 @@ here.</p>
 <p>Here’s how we’d rewrite the above example with extensible
 variants.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr = ..;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr = ..;;
 &gt;type shape_repr = ..
 type shape =
 &lt; repr : shape_repr; equals : shape -&gt; bool; area : float &gt;;;
-;;
 &gt;type shape = &lt; area : float; equals : shape -&gt; bool; repr : shape_repr &gt;
-type shape_repr += Square of int;; ;;
+type shape_repr += Square of int;;
 &gt;type shape_repr += Square of int
 class square w = object(self)
   method width = w
@@ -819,7 +803,6 @@ class square w = object(self)
      | Square x, Square x' -&gt; Int.(=) x x'
      | _ -&gt; false
 end;;
-;;
 &gt;class square :
 &gt;  int -&gt;
 &gt;  object
@@ -1020,9 +1003,8 @@ field: <a data-primary="initializers" data-type="indexterm">&nbsp;</a><a data-se
   object
     val field = Stdio.printf "Initializing field\n"; x
 end;;
-;;
 &gt;class obj : int -&gt; object val field : int end
-let o = new obj 3;; ;;
+let o = new obj 3;;
 &gt;Creating obj 3
 &gt;Initializing field
 &gt;val o : obj = &lt;obj&gt;

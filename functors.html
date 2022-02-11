@@ -50,8 +50,8 @@ mechanics of" data-primary="functors" data-type="indexterm">&nbsp;</a></p>
 <p>First, let’s define a signature for a module that contains a single
 value of type <code>int</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;; ;;
-module type X_int = sig val x : int end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+module type X_int = sig val x : int end;;
 &gt;module type X_int = sig val x : int end
 </code></pre>
 </div>
@@ -62,7 +62,6 @@ returned by the functor:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Increment (M : X_int) : X_int = struct
   let x = M.x + 1
 end;;
-;;
 &gt;module Increment : functor (M : X_int) -&gt; X_int
 </code></pre>
 </div>
@@ -79,7 +78,6 @@ output of the functor:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Increment (M : X_int) = struct
   let x = M.x + 1
 end;;
-;;
 &gt;module Increment : functor (M : X_int) -&gt; sig val x : int end
 </code></pre>
 </div>
@@ -88,11 +86,11 @@ out explicitly, rather than being a reference to the named signature
 <code>X_int</code>.</p>
 <p>We can use <code>Increment</code> to define new modules:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Three = struct let x = 3 end;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Three = struct let x = 3 end;;
 &gt;module Three : sig val x : int end
-module Four = Increment(Three);; ;;
+module Four = Increment(Three);;
 &gt;module Four : sig val x : int end
-Four.x - Three.x;; ;;
+Four.x - Three.x;;
 &gt;- : int = 1
 </code></pre>
 </div>
@@ -109,9 +107,8 @@ example:</p>
   let x = 3
   let y = "three"
 end;;
-;;
 &gt;module Three_and_more : sig val x : int val y : string end
-module Four = Increment(Three_and_more);; ;;
+module Four = Increment(Three_and_more);;
 &gt;module Four : sig val x : int end
 </code></pre>
 </div>
@@ -143,7 +140,6 @@ function and the type of the values to be compared:</p>
   type t
   val compare : t -&gt; t -&gt; int
 end;;
-;;
 &gt;module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
 </code></pre>
 </div>
@@ -204,7 +200,6 @@ interacting with intervals:</p>
       create (max l1 l2) (min h1 h2)
 
 end;;
-;;
 &gt;module Make_interval :
 &gt;  functor (Endpoint : Comparable) -&gt;
 &gt;    sig
@@ -226,7 +221,6 @@ anonymous module:</p>
     type t = int
     let compare = Int.compare
 end);;
-;;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Interval of int * int | Empty
@@ -243,7 +237,7 @@ module to feed to the functor. In this case, we can directly use the
 <code>Int</code> or <code>String</code> modules provided by
 <code>Base</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Make_interval(Base.Int).t = Interval of int * int | Empty
@@ -252,7 +246,7 @@ module to feed to the functor. In this case, we can directly use the
 &gt;    val contains : t -&gt; int -&gt; bool
 &gt;    val intersect : t -&gt; t -&gt; t
 &gt;  end
-module String_interval = Make_interval(String);; ;;
+module String_interval = Make_interval(String);;
 &gt;module String_interval :
 &gt;  sig
 &gt;    type t =
@@ -275,11 +269,11 @@ makes your codebase easier to navigate.</p>
 <p>We can use the newly defined <code>Int_interval</code> module like
 any ordinary module:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i1 = Int_interval.create 3 8;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let i1 = Int_interval.create 3 8;;
 &gt;val i1 : Int_interval.t = Int_interval.Interval (3, 8)
-let i2 = Int_interval.create 4 10;; ;;
+let i2 = Int_interval.create 4 10;;
 &gt;val i2 : Int_interval.t = Int_interval.Interval (4, 10)
-Int_interval.intersect i1 i2;; ;;
+Int_interval.intersect i1 i2;;
 &gt;- : Int_interval.t = Int_interval.Interval (4, 8)
 </code></pre>
 </div>
@@ -294,7 +288,6 @@ for" data-primary="interval computation" data-type="indexterm">&nbsp;</a></p>
     type t = int
     let compare x y = Int.compare y x
 end);;
-;;
 &gt;module Rev_int_interval :
 &gt;  sig
 &gt;    type t = Interval of int * int | Empty
@@ -308,9 +301,9 @@ end);;
 <p>The behavior of <code>Rev_int_interval</code> is of course different
 from <code>Int_interval</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let interval = Int_interval.create 4 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let interval = Int_interval.create 4 3;;
 &gt;val interval : Int_interval.t = Int_interval.Empty
-let rev_interval = Rev_int_interval.create 4 3;; ;;
+let rev_interval = Rev_int_interval.create 4 3;;
 &gt;val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
 </code></pre>
 </div>
@@ -319,7 +312,7 @@ let rev_interval = Rev_int_interval.create 4 3;; ;;
 the same. Indeed, the type system will prevent us from confusing
 them.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int_interval.contains rev_interval 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int_interval.contains rev_interval 3;;
 &gt;Line 1, characters 23-35:
 &gt;Error: This expression has type Rev_int_interval.t
 &gt;       but an expression was expected of type Int_interval.t
@@ -340,11 +333,9 @@ computation" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int_interval.is_empty (* going through create *)
 (Int_interval.create 4 3);;
-;;
 &gt;- : bool = true
 Int_interval.is_empty (* bypassing create *)
 (Int_interval.Interval (4,3));;
-;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -360,7 +351,6 @@ explicit interface that we can use for that purpose:</p>
   val contains : t -&gt; endpoint -&gt; bool
   val intersect : t -&gt; t -&gt; t
 end;;
-;;
 &gt;module type Interval_intf =
 &gt;  sig
 &gt;    type t
@@ -415,7 +405,6 @@ type <code>endpoint</code> to the implementation of the module to match
       create (max l1 l2) (min h1 h2)
 
 end;;
-;;
 &gt;module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf
 </code></pre>
 </div>
@@ -427,7 +416,7 @@ abstract. In particular, we haven’t exposed the type
 <code>endpoint</code>, which means that we can’t even construct an
 interval anymore: <a data-primary="sharing constraint" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Make_interval(Base.Int).t
@@ -437,7 +426,7 @@ interval anymore: <a data-primary="sharing constraint" data-type="indexterm">&nb
 &gt;    val contains : t -&gt; endpoint -&gt; bool
 &gt;    val intersect : t -&gt; t -&gt; t
 &gt;  end
-Int_interval.create 3 4;; ;;
+Int_interval.create 3 4;;
 &gt;Line 1, characters 21-22:
 &gt;Error: This expression has type int but an expression was expected of type
 &gt;         Int_interval.endpoint
@@ -466,7 +455,6 @@ constraints to the same signature:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Int_interval_intf =
 Interval_intf with type endpoint = int;;
-;;
 &gt;module type Int_interval_intf =
 &gt;  sig
 &gt;    type t
@@ -525,7 +513,6 @@ the functor argument. We can do this as follows:</p>
       create (max l1 l2) (min h1 h2)
 
 end;;
-;;
 &gt;module Make_interval :
 &gt;  functor (Endpoint : Comparable) -&gt;
 &gt;    sig
@@ -543,7 +530,7 @@ is known to be equal to <code>Endpoint.t</code>. As a result of that
 type equality, we can again do things that require that
 <code>endpoint</code> be exposed, like constructing intervals:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Make_interval(Base.Int).t
@@ -553,9 +540,9 @@ type equality, we can again do things that require that
 &gt;    val contains : t -&gt; endpoint -&gt; bool
 &gt;    val intersect : t -&gt; t -&gt; t
 &gt;  end
-let i = Int_interval.create 3 4;; ;;
+let i = Int_interval.create 3 4;;
 &gt;val i : Int_interval.t = &lt;abstr&gt;
-Int_interval.contains i 5;; ;;
+Int_interval.contains i 5;;
 &gt;- : bool = false
 </code></pre>
 </div>
@@ -580,7 +567,6 @@ could use this with <code>Make_interval</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Int_interval_intf =
 Interval_intf with type endpoint := int;;
-;;
 &gt;module type Int_interval_intf =
 &gt;  sig
 &gt;    type t
@@ -633,7 +619,6 @@ struct
       create (max l1 l2) (min h1 h2)
 
 end;;
-;;
 &gt;module Make_interval :
 &gt;  functor (Endpoint : Comparable) -&gt;
 &gt;    sig
@@ -651,7 +636,7 @@ values of type <code>Int_interval.t</code> using the creation function,
 but not directly using the constructors and thereby violating the
 invariants of the module:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Make_interval(Base.Int).t
@@ -662,9 +647,8 @@ invariants of the module:</p>
 &gt;  end
 Int_interval.is_empty
 (Int_interval.create 3 4);;
-;;
 &gt;- : bool = false
-Int_interval.is_empty (Int_interval.Interval (4,3));; ;;
+Int_interval.is_empty (Int_interval.Interval (4,3));;
 &gt;Line 1, characters 24-45:
 &gt;Error: Unbound constructor Int_interval.Interval
 </code></pre>
@@ -690,7 +674,6 @@ computation" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.List [ Sexp.Atom "This"; Sexp.Atom "is"
 ; Sexp.List [Sexp.Atom "an"; Sexp.Atom "s-expression"]];;
-;;
 &gt;- : Sexp.t = (This is (an s-expression))
 </code></pre>
 </div>
@@ -701,19 +684,19 @@ conversion functions for any type annotated with
 along with a collection of other useful extensions by enabling
 <code>ppx_jane</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
 </div>
 <p>Now, we can use the deriving annotation to create sexp-converters for
 a given type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type some_type = int * string list [@@deriving sexp];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type some_type = int * string list [@@deriving sexp];;
 &gt;type some_type = int * string list
 &gt;val some_type_of_sexp : Sexp.t -&gt; some_type = &lt;fun&gt;
 &gt;val sexp_of_some_type : some_type -&gt; Sexp.t = &lt;fun&gt;
-sexp_of_some_type (33, ["one"; "two"]);; ;;
+sexp_of_some_type (33, ["one"; "two"]);;
 &gt;- : Sexp.t = (33 (one two))
-Core.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp;; ;;
+Core.Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp;;
 &gt;- : some_type = (44, ["five"; "six"])
 </code></pre>
 </div>
@@ -758,7 +741,6 @@ declaration to the definition of <code>t</code> within the functor:</p>
       create (max l1 l2) (min h1 h2)
 
 end;;
-;;
 &gt;Line 4, characters 28-38:
 &gt;Error: Unbound value Endpoint.t_of_sexp
 </code></pre>
@@ -791,7 +773,6 @@ multiple distinct type <code>t</code>’s clashing with each other:</p>
   include Interval_intf
   include Core.Sexpable with type t := t
 end;;
-;;
 &gt;module type Interval_intf_with_sexp =
 &gt;  sig
 &gt;    type t
@@ -817,7 +798,6 @@ being handled equivalently:</p>
   include Interval_intf with type t := t
   include Core.Sexpable      with type t := t
 end;;
-;;
 &gt;module type Interval_intf_with_sexp =
 &gt;  sig
 &gt;    type t
@@ -883,7 +863,6 @@ are still maintained when reading in from an s-expression:</p>
     | Interval (l1,h1), Interval (l2,h2) -&gt;
       create (max l1 l2) (min h1 h2)
 end;;
-;;
 &gt;module Make_interval :
 &gt;  functor
 &gt;    (Endpoint : sig
@@ -906,7 +885,7 @@ end;;
 </div>
 <p>And now, we can use that sexp converter in the ordinary way:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_interval = Make_interval(Int);;
 &gt;module Int_interval :
 &gt;  sig
 &gt;    type t = Make_interval(Base.Int).t
@@ -917,9 +896,9 @@ end;;
 &gt;    val t_of_sexp : Sexp.t -&gt; t
 &gt;    val sexp_of_t : t -&gt; Sexp.t
 &gt;  end
-Int_interval.sexp_of_t (Int_interval.create 3 4);; ;;
+Int_interval.sexp_of_t (Int_interval.create 3 4);;
 &gt;- : Sexp.t = (Interval 3 4)
-Int_interval.sexp_of_t (Int_interval.create 4 3);; ;;
+Int_interval.sexp_of_t (Int_interval.create 4 3);;
 &gt;- : Sexp.t = Empty
 </code></pre>
 </div>

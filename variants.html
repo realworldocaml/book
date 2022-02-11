@@ -36,9 +36,9 @@ type basic_color =
 <code>basic_color</code> can be used for constructing values of that
 type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Cyan;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Cyan;;
 &gt;- : basic_color = Cyan
-[Blue; Magenta; Red];; ;;
+[Blue; Magenta; Red];;
 &gt;- : basic_color list = [Blue; Magenta; Red]
 </code></pre>
 </div>
@@ -49,9 +49,8 @@ colors to the terminal.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let basic_color_to_int = function
   | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
   | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7;;
-;;
 &gt;val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;
-List.map ~f:basic_color_to_int [Blue;Red];; ;;
+List.map ~f:basic_color_to_int [Blue;Red];;
 &gt;- : int list = [4; 1]
 </code></pre>
 </div>
@@ -61,7 +60,6 @@ we’d missed one:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let incomplete_color_to_int = function
   | Black -&gt; 0 | Red -&gt; 1 | White -&gt; 7;;
-;;
 &gt;Lines 1-2, characters 31-41:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
@@ -74,11 +72,10 @@ to change the color of a given string displayed in a terminal.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_by_number number text =
 Printf.sprintf "\027[38;5;%dm%s\027[0m" number text;;
-;;
 &gt;val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
-let blue = color_by_number (basic_color_to_int Blue) "Blue";; ;;
+let blue = color_by_number (basic_color_to_int Blue) "Blue";;
 &gt;val blue : string = "\027[38;5;4mBlue\027[0m"
-printf "Hello %s World!\n" blue;; ;;
+printf "Hello %s World!\n" blue;;
 &gt;Hello Blue World!
 &gt;- : unit = ()
 </code></pre>
@@ -111,7 +108,7 @@ type color =
 <p>As before, we can use these introduced tags to construct values of
 our newly defined type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[RGB (250,70,70); Basic (Green, Regular)];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[RGB (250,70,70); Basic (Green, Regular)];;
 &gt;- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 </code></pre>
 </div>
@@ -126,7 +123,6 @@ associated with each tag:</p>
     base + basic_color_to_int basic_color
   | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
   | Gray i -&gt; 232 + i;;
-;;
 &gt;val color_to_int : color -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -134,12 +130,11 @@ associated with each tag:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_print color s =
 printf "%s\n" (color_by_number (color_to_int color) s);;
-;;
 &gt;val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;
-color_print (Basic (Red,Bold)) "A bold red!";; ;;
+color_print (Basic (Red,Bold)) "A bold red!";;
 &gt;A bold red!
 &gt;- : unit = ()
-color_print (Gray 4) "A muted gray...";; ;;
+color_print (Gray 4) "A muted gray...";;
 &gt;A muted gray...
 &gt;- : unit = ()
 </code></pre>
@@ -150,7 +145,7 @@ color_print (Gray 4) "A muted gray...";; ;;
 Consider the following example of a value of the type <code>color</code>
 we defined earlier.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">RGB (200,0,200);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">RGB (200,0,200);;
 &gt;- : color = RGB (200, 0, 200)
 </code></pre>
 </div>
@@ -159,9 +154,9 @@ we defined earlier.</p>
 you can see if we create a tuple first and then place it inside the
 <code>RGB</code> constructor.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let purple = (200,0,200);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let purple = (200,0,200);;
 &gt;val purple : int * int * int = (200, 0, 200)
-RGB purple;; ;;
+RGB purple;;
 &gt;Line 1, characters 1-11:
 &gt;Error: The constructor RGB expects 3 argument(s),
 &gt;       but is applied here to 1 argument(s)
@@ -170,7 +165,7 @@ RGB purple;; ;;
 <p>We can also create variants that explicitly contain tuples, like this
 one.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type tupled = Tupled of (int * int);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type tupled = Tupled of (int * int);;
 &gt;type tupled = Tupled of (int * int)
 </code></pre>
 </div>
@@ -178,9 +173,9 @@ one.</p>
 to the extra set of parens around the arguments. But having defined it
 this way, we can now take the tuple in and out freely.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple x = Tupled x;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple x = Tupled x;;
 &gt;val of_tuple : int * int -&gt; tupled = &lt;fun&gt;
-let to_tuple (Tupled x) = x;; ;;
+let to_tuple (Tupled x) = x;;
 &gt;val to_tuple : tupled -&gt; int * int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -188,13 +183,13 @@ let to_tuple (Tupled x) = x;; ;;
 we get the same behavior we got with the <code>RGB</code>
 constructor.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type untupled = Untupled of int * int;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type untupled = Untupled of int * int;;
 &gt;type untupled = Untupled of int * int
-let of_tuple x = Untupled x;; ;;
+let of_tuple x = Untupled x;;
 &gt;Line 1, characters 18-28:
 &gt;Error: The constructor Untupled expects 2 argument(s),
 &gt;       but is applied here to 1 argument(s)
-let to_tuple (Untupled x) = x;; ;;
+let to_tuple (Untupled x) = x;;
 &gt;Line 1, characters 14-26:
 &gt;Error: The constructor Untupled expects 2 argument(s),
 &gt;       but is applied here to 1 argument(s)
@@ -204,9 +199,9 @@ let to_tuple (Untupled x) = x;; ;;
 type, we can achieve more or less the same ends by explicitly
 deconstructing and reconstructing the data we need.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple (x,y) = Untupled (x,y);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple (x,y) = Untupled (x,y);;
 &gt;val of_tuple : int * int -&gt; untupled = &lt;fun&gt;
-let to_tuple (Untupled (x,y)) = (x,y);; ;;
+let to_tuple (Untupled (x,y)) = (x,y);;
 &gt;val to_tuple : untupled -&gt; int * int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -244,7 +239,6 @@ discrepancy:</p>
     base + basic_color_to_int basic_color
   | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
   | Gray i -&gt; 232 + i;;
-;;
 &gt;Line 2, characters 13-33:
 &gt;Error: This pattern matches values of type 'a * 'b
 &gt;       but a pattern was expected which matches values of type basic_color
@@ -259,7 +253,6 @@ the new <code>Bold</code> tag:</p>
   | Basic basic_color -&gt; basic_color_to_int basic_color
   | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
   | Gray i -&gt; 232 + i;;
-;;
 &gt;Lines 1-4, characters 20-24:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
@@ -274,7 +267,6 @@ the new <code>Bold</code> tag:</p>
   | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color
   | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
   | Gray i -&gt; 232 + i;;
-;;
 &gt;val color_to_int : color -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -296,7 +288,6 @@ have written the function as follows.</p>
     let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
     base + basic_color_to_int basic_color
   | _ -&gt; basic_color_to_int White;;
-;;
 &gt;val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -306,7 +297,6 @@ with this.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let oldschool_color_to_int = function
   | Basic basic_color -&gt; basic_color_to_int basic_color
   | _ -&gt; basic_color_to_int White;;
-;;
 &gt;val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
@@ -418,7 +408,6 @@ far</li>
       )
   in
   List.rev user_messages;;
-;;
 &gt;val messages_for_user : string -&gt; client_message list -&gt; client_message list =
 &gt;  &lt;fun&gt;
 </code></pre>
@@ -490,7 +479,6 @@ Otherwise, we’d need to qualify them explicitly.</p>
       )
   in
   List.rev user_messages;;
-;;
 &gt;val messages_for_user :
 &gt;  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
 </code></pre>
@@ -509,7 +497,6 @@ types, we could write a dispatch function as follows:</p>
   | Log_entry m -&gt; handle_log_entry server_state (common,m)
   | Logon     m -&gt; handle_logon     server_state (common,m)
   | Heartbeat m -&gt; handle_heartbeat server_state (common,m);;
-;;
 &gt;val handle_message : server_state -&gt; Common.t * details -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -548,7 +535,6 @@ before.</p>
       )
   in
   List.rev user_messages;;
-;;
 &gt;val messages_for_user :
 &gt;  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
 </code></pre>
@@ -564,7 +550,6 @@ below, OCaml will reject code that tries to do so.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_logon_contents = function
   | Logon m -&gt; Some m
   | _ -&gt; None;;
-;;
 &gt;Line 2, characters 23-24:
 &gt;Error: This form is not allowed as the type of the inlined record could escape.
 </code></pre>
@@ -614,12 +599,11 @@ type mail_predicate = { field: mail_field;
 <p>Using the preceding code, we can construct a simple expression with
 <code>mail_predicate</code> as its base predicate:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let test field contains = Base { field; contains };; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let test field contains = Base { field; contains };;
 &gt;val test : mail_field -&gt; string -&gt; mail_predicate expr = &lt;fun&gt;
 And [ Or [ test To "doligez"; test CC "doligez" ];
       test Subject "runtime";
     ];;
-;;
 &gt;- : mail_predicate expr =
 &gt;And
 &gt; [Or
@@ -641,7 +625,6 @@ to be able to evaluate them. Here’s a function for doing just that:</p>
   | And   exprs -&gt; List.for_all exprs ~f:eval'
   | Or    exprs -&gt; List.exists  exprs ~f:eval'
   | Not   expr  -&gt; not (eval' expr);;
-;;
 &gt;val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -674,7 +657,6 @@ any of the arms of the and are themselves are <code>false</code>.</li>
     | [] -&gt; Const true
     | [ x ] -&gt; x
     | l -&gt; And l;;
-;;
 &gt;val and_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -690,7 +672,6 @@ the code for <code>or_</code> follows a similar pattern as that for
     | [] -&gt; Const false
     | [x] -&gt; x
     | l -&gt; Or l;;
-;;
 &gt;val or_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -700,7 +681,6 @@ applying the ordinary boolean negation function to them.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let not_ = function
   | Const b -&gt; Const (not b)
   | e -&gt; Not e;;
-;;
 &gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -714,7 +694,6 @@ entire expression.</p>
   | And l -&gt; and_ (List.map ~f:simplify l)
   | Or l  -&gt; or_  (List.map ~f:simplify l)
   | Not e -&gt; not_ (simplify e);;
-;;
 &gt;val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -723,7 +702,6 @@ it does at simplifying it.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">simplify (Not (And [ Or [Base "it's snowing"; Const true];
 Base "it's raining"]));;
-;;
 &gt;- : string expr = Not (Base "it's raining")
 </code></pre>
 </div>
@@ -736,7 +714,6 @@ what happens if we add a double negation in.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">simplify (Not (And [ Or [Base "it's snowing"; Const true];
 Not (Not (Base "it's raining"))]));;
-;;
 &gt;- : string expr = Not (Not (Not (Base "it's raining")))
 </code></pre>
 </div>
@@ -750,7 +727,6 @@ negation is more obvious:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let not_ = function
   | Const b -&gt; Const (not b)
   | (Base _ | And _ | Or _ | Not _) as e -&gt; Not e;;
-;;
 &gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -761,7 +737,6 @@ double negation:</p>
   | Const b -&gt; Const (not b)
   | Not e -&gt; e
   | (Base _ | And _ | Or _ ) as e -&gt; Not e;;
-;;
 &gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
 </code></pre>
 </div>
@@ -789,13 +764,13 @@ variants by the leading backtick. And unlike ordinary variants,
 polymorphic variants can be used without an explicit type
 declaration:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = `Int 3;; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = `Int 3;;
 &gt;val three : [&gt; `Int of int ] = `Int 3
-let four = `Float 4.;; ;;
+let four = `Float 4.;;
 &gt;val four : [&gt; `Float of float ] = `Float 4.
-let nan = `Not_a_number;; ;;
+let nan = `Not_a_number;;
 &gt;val nan : [&gt; `Not_a_number ] = `Not_a_number
-[three; four; nan];; ;;
+[three; four; nan];;
 &gt;- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =
 &gt;[`Int 3; `Float 4.; `Not_a_number]
 </code></pre>
@@ -808,9 +783,9 @@ example, the tag name (e.g., <code>`Int</code>) matches the type name
 <p>The type system will complain if it sees incompatible uses of the
 same tag:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let five = `Int "five";; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let five = `Int "five";;
 &gt;val five : [&gt; `Int of string ] = `Int "five"
-[three; four; five];; ;;
+[three; four; five];;
 &gt;Line 1, characters 15-19:
 &gt;Error: This expression has type [&gt; `Int of string ]
 &gt;       but an expression was expected of type
@@ -832,7 +807,6 @@ to indicate “these tags or less,” as in the following example:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive = function
   | `Int   x -&gt; x &gt; 0
   | `Float x -&gt; Float.(x &gt; 0.);;
-;;
 &gt;val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
@@ -845,7 +819,7 @@ same set of tags are both an upper and a lower bound, we end up with an
 <em>exact</em> polymorphic variant type, which has neither marker. For
 example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exact = List.filter ~f:is_positive [three;four];; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exact = List.filter ~f:is_positive [three;four];;
 &gt;val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
 </code></pre>
 </div>
@@ -859,13 +833,11 @@ of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p
   | `Int   x -&gt; Ok (x &gt; 0)
   | `Float x -&gt; Ok Float.(x &gt; 0.)
   | `Not_a_number -&gt; Error "not a number";;
-;;
 &gt;val is_positive :
 &gt;  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt; (bool, string) result =
 &gt;  &lt;fun&gt;
 List.filter [three; four] ~f:(fun x -&gt;
 match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;
-;;
 &gt;- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =
 &gt;[`Int 3; `Float 4.]
 </code></pre>
@@ -889,12 +861,11 @@ types" data-type="indexterm">&nbsp;</a></p>
   | `Int   x -&gt; Ok Int.(x &gt; 0)
   | `Float x -&gt; Ok Float.(x &gt; 0.)
   | _ -&gt; Error "Unknown number type";;
-;;
 &gt;val is_positive_permissive :
 &gt;  [&gt; `Float of float | `Int of int ] -&gt; (bool, string) result = &lt;fun&gt;
-is_positive_permissive (`Int 0);; ;;
+is_positive_permissive (`Int 0);;
 &gt;- : (bool, string) result = Ok false
-is_positive_permissive (`Ratio (3,4));; ;;
+is_positive_permissive (`Ratio (3,4));;
 &gt;- : (bool, string) result = Error "Unknown number type"
 </code></pre>
 </div>
@@ -906,7 +877,7 @@ uses <code>is_positive_permissive</code> passes in <code>Float</code>
 misspelled as <code>Floot</code>, the erroneous code will compile
 without complaint.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">is_positive_permissive (`Floot 3.5);; ;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">is_positive_permissive (`Floot 3.5);;
 &gt;- : (bool, string) result = Error "Unknown number type"
 </code></pre>
 </div>
@@ -937,7 +908,6 @@ One might try to write such a function as follows.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
   | RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
   | (Basic _ | RGB _ | Gray _) as color -&gt; color_to_int color;;
-;;
 &gt;Line 3, characters 59-64:
 &gt;Error: This expression has type extended_color
 &gt;       but an expression was expected of type color
@@ -957,7 +927,6 @@ here is pretty straightforward:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let basic_color_to_int = function
   | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
   | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7;;
-;;
 &gt;val basic_color_to_int :
 &gt;  [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
 &gt;  int = &lt;fun&gt;
@@ -967,7 +936,6 @@ let color_to_int = function
     base + basic_color_to_int basic_color
   | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
   | `Gray i -&gt; 232 + i;;
-;;
 &gt;val color_to_int :
 &gt;  [&lt; `Basic of
 &gt;       [&lt; `Black
@@ -996,7 +964,6 @@ variable <code>color</code> includes only the tags <code>`Basic</code>,
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
   | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
   | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color;;
-;;
 &gt;val extended_color_to_int :
 &gt;  [&lt; `Basic of
 &gt;       [&lt; `Black
@@ -1022,7 +989,6 @@ so compilation fails:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
   | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
   | color -&gt; color_to_int color;;
-;;
 &gt;Line 3, characters 29-34:
 &gt;Error: This expression has type [&gt; `RGBA of int * int * int * int ]
 &gt;       but an expression was expected of type
