@@ -21,8 +21,7 @@ let pp_output ppf = function
  let pp_line ppf l = Fmt.pf ppf "%a\n" pp_html l
 
  let pp_toplevel ppf (t:Mdx.Toplevel.t) =
-  let cmds = match t.command with [c] -> [c ^ " ;;"] | l -> l @ [";;"] in
-  Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_output) t.output
+  Fmt.pf ppf "%a%a" (pp_list pp_line) t.command (pp_list pp_output) t.output
 
 let pp_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
@@ -41,8 +40,8 @@ let pp_markdown_output ppf = function
   |`Ellipsis -> Fmt.pf ppf "...\n"
 
 let pp_markdown_toplevel ppf (t:Mdx.Toplevel.t) =
-  let cmds = match t.command with [c] -> ["# " ^ c ^ " ;;"] | l -> l @ [";;"] in
-  Fmt.pf ppf "%a\n%a" (Fmt.(list ~sep:(any "\n") string)) cmds (pp_list pp_markdown_output) t.output
+  let cmds = match t.command with hd::tl -> ("# " ^ hd) :: tl | [] -> [] in
+  Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_markdown_output) t.output
 
 let pp_markdown_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
