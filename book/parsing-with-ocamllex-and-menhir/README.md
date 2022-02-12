@@ -1,5 +1,9 @@
 # Parsing with OCamllex and Menhir
 
+::: {text-align=right}
+*This chapter includes contributions from Jason Hickey.*
+:::
+
 Many programming tasks start with the interpretion of some form of structured
 textual data. *Parsing* is the process of converting such data into data
 structures that are easy to program against. For simple formats, it's often

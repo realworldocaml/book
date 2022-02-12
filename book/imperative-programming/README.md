@@ -1,5 +1,9 @@
 # Imperative Programming {#imperative-programming-1}
 
+::: {text-align=right}
+*This chapter includes contributions from Jason Hickey.*
+:::
+
 Most of the code shown so far in this book, and indeed, most OCaml
 code in general, is *pure*. Pure code works without mutating the
 program's internal state, performing I/O, reading the clock, or in any
