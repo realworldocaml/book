@@ -61,6 +61,7 @@ also invoke commands via <code>opam exec</code> to modify the path for
 the subcommand specified in the remainder of the command line.</p>
 
 <div data-type="note">
+
 <p>When you want to select a particular version of the OCaml compiler,
 you can use <code>opam switch list-available</code> to get a set of
 versions. You’ll notice that there are three different OCaml compiler
@@ -87,19 +88,49 @@ simple program with a couple of OCaml modules looks like. Let’s now look
 at the set of files in our <code>hello/</code> application to examine a
 fuller project structure.</p>
 <div class="highlight">
-<pre><code class="language-clike">├── bin
-│&nbsp;&nbsp; ├── dune
-│&nbsp;&nbsp; └── main.ml
-├── dune-project
+<pre><code class="language-clike">├── dune-project
 ├── hello.opam
 ├── lib
 │&nbsp;&nbsp; └── dune
+├── bin
+│&nbsp;&nbsp; ├── dune
+│&nbsp;&nbsp; └── main.ml
 └── test
     ├── dune
     └── hello.ml</code></pre>
 </div>
-<p>There are three kinds of names that come up in OCaml projects which
-we’ll look at next: modules, libraries and packages.</p>
+
+
+
+
+<p>Some observations about this structure:</p>
+<ul>
+<li><p>The <code>dune-project</code> file marks the root of the project,
+and is used for writing down some key metadata for the project, but more
+on that later.</p></li>
+<li><p>The <code>hello.opam</code> file contains metadata for
+registering this software as an opam project. As we’ll see, we won’t
+need to edit this manually because we can generate the file via
+dune.</p></li>
+<li><p>There are three source directories, each with its own
+<code>dune</code> file specifying the build parameters for that part of
+the codebase. The trio of <code>lib</code>, <code>bin</code> and
+<code>test</code> makes good sense for a project that is primarily an
+executable, rather than a reusable library. In that case, you would
+generally use these libraries as follows:</p>
+<ul>
+<li>The <code>lib</code> directory would contain the bulk of the
+source.</li>
+<li>The <code>bin</code> directory would contain a thin wrapper on top
+of the code in <code>lib</code> which actually launches the
+executable.</li>
+<li>The <code>test</code> directory has the bulk of the tests for
+<code>lib</code>, which, following the advice in <a data-type="xref" href="testing.html#where-should-tests-go">Chapter 17, Testing</a>,
+are in a separate directory from the source.</li>
+</ul></li>
+</ul>
+<p>Now we’ll talk about the different parts of this structure in more
+detail.</p>
 </section>
 <section class="level3" id="defining-module-names">
 <h3>Defining module names</h3>
@@ -153,11 +184,12 @@ exposed name for the library, which is what you use via the
 the defined library is local to the current dune project only. The
 <code>(libraries)</code> field in the <code>lib/dune</code> file is
 empty since this is a trivial standalone library.</p>
-<section class="level4" id="writing-test-cases-for-a-library">
-<h4>Writing test cases for a library</h4>
+</section>
+<section class="level3" id="writing-test-cases-for-a-library">
+<h3>Writing test cases for a library</h3>
 <p>Our next step is to define a test case in <code>test/dune</code> for
 our library. We can define inline tests within our library as we did
-earlier in the <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a> chapter:</p>
+earlier in <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a>.</p>
 <div class="highlight">
 <pre><code class="language-clike">open Base
 
@@ -182,8 +214,8 @@ locally defined <code>hello</code> library so that we can access it.</p>
 the built artefacts in <code>_build/default/test/</code> in your project
 checkout.</p>
 </section>
-<section class="level4" id="building-an-executable-program">
-<h4>Building an executable program</h4>
+<section class="level3" id="building-an-executable-program">
+<h3>Building an executable program</h3>
 <p>Finally, we want to actually use our hello world from the
 command-line. This is defined in <code>bin/dune</code> in a very similar
 fashion to test cases.</p>
@@ -223,7 +255,6 @@ convenient.</p>
 &gt;Hello World
 </code></pre>
 </div>
-</section>
 </section>
 <section class="level3" id="defining-packages-from-libraries-and-executables">
 <h3>Defining packages from libraries and executables</h3>
