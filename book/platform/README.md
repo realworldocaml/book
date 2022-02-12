@@ -99,7 +99,21 @@ the subcommand specified in the remainder of the command line.
 
 <!-- TODO: Don't we generally put headers on these blocks?  -->
 
+
 ::: {data-type=note}
+
+<!-- This strikes me as a little confusing.  I don't think of
+the things you're describing as compiler packages, so much as
+it's kinds of compiler packages. There are lots of different
+ocaml-variants after all.
+
+I think this section would be better if we just wrote out some
+examples, i.e., show how you can install a different version of OCaml,
+or the same version with a particular variant. The concrete
+command-line invocation would really clarify what's going on.
+-->
+
+
 When you want to select a particular version of the OCaml compiler,
 you can use `opam switch list-available` to get a set of versions.
 You'll notice that there are three different OCaml compiler packages:
