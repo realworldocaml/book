@@ -1,5 +1,9 @@
 # Objects
 
+::: {text-align=right}
+*This chapter was written by Leo White and Jeremy Yallop.*
+:::
+
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules. In addition, OCaml also supports object-oriented
 programming. There are objects, classes, and their associated types. In this

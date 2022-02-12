@@ -5,13 +5,21 @@ let () =
   let tex_block f  = Printf.ksprintf (fun b -> Pandoc.RawBlock ("tex", b)) f in
   let block = function
     | Pandoc.Div ((i,c,attr),b) as d -> begin
-       List.assoc_opt "data-type" attr |> function
+       match List.assoc_opt "data-type" attr with
        | Some note ->
-          let bl =
-              tex_block "\\begin{%sBox}" note :: b @
-            [ tex_block "\\end{%sBox}" note ] in
-          Some [Pandoc.Div ((i,c,attr), bl)]
-       | None -> Some [d]
+           let bl =
+               tex_block "\\begin{%sBox}" note :: b @
+             [ tex_block "\\end{%sBox}" note ] in
+           Some [Pandoc.Div ((i,c,attr), bl)]
+       | None -> begin
+           List.assoc_opt "text-align" attr |> function
+           | Some note ->
+              let bl =
+                tex_block "\\begin{flush%s}" note :: b @
+                [ tex_block "\\end{flush%s}" note ] in
+              Some [Pandoc.Div ((i,c,attr), bl)]
+           | None -> Some [d]
+       end
     end 
     | _ -> None in
   let inline = function
