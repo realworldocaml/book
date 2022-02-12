@@ -18,10 +18,11 @@ let pp_output ppf = function
   |`Output s -> Fmt.pf ppf ">%a\n" pp_html s
   |`Ellipsis -> Fmt.pf ppf "...\n"
 
- let pp_line ppf l = Fmt.pf ppf "%a\n" pp_html l
+ let pp_html_line ppf l = Fmt.pf ppf "%a\n" pp_html l
+ let pp_md_line ppf l = Fmt.pf ppf "%s\n" l
 
  let pp_toplevel ppf (t:Mdx.Toplevel.t) =
-  Fmt.pf ppf "%a%a" (pp_list pp_line) t.command (pp_list pp_output) t.output
+  Fmt.pf ppf "%a%a" (pp_list pp_html_line) t.command (pp_list pp_output) t.output
 
 let pp_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
@@ -41,7 +42,7 @@ let pp_markdown_output ppf = function
 
 let pp_markdown_toplevel ppf (t:Mdx.Toplevel.t) =
   let cmds = match t.command with hd::tl -> ("# " ^ hd) :: tl | [] -> [] in
-  Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_markdown_output) t.output
+  Fmt.pf ppf "%a%a" (pp_list pp_md_line) cmds (pp_list pp_markdown_output) t.output
 
 let pp_markdown_toplevel_block (b: Mdx.Block.t) ppf =
   let ts =
@@ -58,7 +59,7 @@ let pp_cram ppf (t:Mdx.Cram.t) =
     | i -> Fmt.pf ppf "[%d]" i
   in
   Fmt.pf ppf "%a%a%t"
-    (pp_list pp_line) t.command
+    (pp_list pp_html_line) t.command
     (pp_list pp_output) t.output pp_exit
 
 let pp_cram_block content ppf =
