@@ -237,8 +237,8 @@ is a trivial standalone library.
 #### Writing test cases for a library
 
 Our next step is to define a test case in `test/dune` for our library.
-We can define inline tests within our library as we did earlier in the
-[Testing](testing.html#testing){data-type=xref} chapter:
+We can define inline tests within our library as we did earlier in
+[Testing](testing.html#testing){data-type=xref}.
 
 <!-- $MDX file=examples/correct/hello/lib/msg.ml -->
 ```
