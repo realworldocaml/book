@@ -436,14 +436,13 @@ your source code.</p>
 </section>
 <section class="level2" id="string-values">
 <h2>String Values</h2>
-<p>Strings are standard OCaml blocks with the header size defining the
-size of the string in machine words. The <code>String_tag</code> (252)
-is higher than the <code>No_scan_tag</code>, indicating that the
-contents of the block are opaque to the collector. The block contents
-are the contents of the string, with padding bytes to align the block on
-a word boundary. <a data-secondary="memory representation
-of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-secondary="string
-values" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml <code>string</code>s (and their mutable cousins,
+<code>bytes</code>) are standard OCaml blocks with the header size
+defining the size of the string in machine words. The
+<code>String_tag</code> (252) is higher than the
+<code>No_scan_tag</code>, indicating that the contents of the block are
+opaque to the collector. The block contents are the contents of the
+string, with padding bytes to align the block on a word boundary. <a data-secondary="memory representation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-secondary="string values" data-primary="runtime memory representation" data-type="indexterm">&nbsp;</a></p>
 <p><br>
 <img title="String block layout" src="images/memory-repr/string_block.png"><br>
 </p>
@@ -461,9 +460,9 @@ Given a string length modulo 4:</p>
 contents are always zero-terminated by the padding word and to still
 compute its length efficiently without scanning the whole string. The
 following formula is used:</p>
-<p><br>
-<img title="String size calculation" src="images/memory-repr/string_size_calc.png"><br>
-</p>
+<div class="highlight">
+<pre><code class="language-clike">number_of_words_in_block * sizeof(word) - last_byte_of_block - 1</code></pre>
+</div>
 <p>The guaranteed <code>NULL</code> termination comes in handy when
 passing a string to C, but is not relied upon to compute the length from
 OCaml code. OCaml strings can thus contain <code>NULL</code> bytes at

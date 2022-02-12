@@ -279,24 +279,30 @@ data structures) will lead to an exception being thrown.</p>
 as delimiters. Thus, <code>[| 1; 2; 3 |]</code> is a literal integer
 array.</p>
 </section>
-<section class="level4" id="strings">
-<h4>Strings</h4>
-<p>Strings are essentially byte arrays which are often used for textual
-data. The main advantage of using a <code>string</code> in place of a
-<code>Char.t array</code> (a <code>Char.t</code> is an 8-bit character)
-is that the former is considerably more space-efficient; an array uses
-one word—8 bytes on a 64-bit machine—to store a single entry, whereas
-strings use 1 byte per character. <a data-primary="byte
-arrays" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;Char.t arrays" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
-<p>Strings also come with their own syntax for getting and setting
-values:</p>
+<section class="level4" id="bytes-and-strings.">
+<h4><code>bytes</code> and <code>string</code>s.</h4>
+<p>The strings we’ve encountered thus far are essentially byte arrays,
+and are most often used for textual data. You could imagine using a
+<code>char array</code> (a <code>char</code> represents an 8-bit
+character) for the same purpose, but strings are considerably more
+space-efficient; an <code>array</code> uses one 8-byte word on a 64-bit
+machine—to store a single entry, whereas strings use one byte per
+character. <a data-secondary="vs.&nbsp;Char.t arrays" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
+<p>Unlike arrays, though, strings are immutable, and sometimes, it’s
+convenient to have a space-efficient, mutable array of bytes. Happily,
+OCaml has that, via the <code>bytes</code> type.</p>
+<p>You can set individual characters using <code>Bytes.set</code>, and a
+value of type <code>bytes</code> can be converted to and from the
+<code>string</code> type.</p>
 <div class="highlight">
-<pre><code class="language-clike">&lt;string_expr&gt;.[&lt;index_expr&gt;]
-&lt;string_expr&gt;.[&lt;index_expr&gt;] &lt;- &lt;char_expr&gt;</code></pre>
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let b = Bytes.of_string "foobar";;
+&gt;val b : bytes = "foobar"
+Bytes.set b 0 (Char.uppercase (Bytes.get b 0));;
+&gt;- : unit = ()
+Bytes.to_string b;;
+&gt;- : string = "Foobar"
+</code></pre>
 </div>
-<p>And string literals are bounded by quotes. There’s also a module
-<code>String</code> where you’ll find useful functions for working with
-strings.</p>
 </section>
 <section class="level4" id="bigarrays">
 <h4>Bigarrays</h4>
