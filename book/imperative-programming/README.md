@@ -307,24 +307,31 @@ structures) will lead to an exception being thrown.
 Array literals are written using `[|` and `|]` as delimiters. Thus,
 `[| 1; 2; 3 |]` is a literal integer array.
 
-#### Strings
+#### `bytes` and `string`s.
 
-Strings are essentially byte arrays which are often used for textual data.
-The main advantage of using a `string` in place of a `Char.t array` (a
-`Char.t` is an 8-bit character) is that the former is considerably more
-space-efficient; an array uses one word—8 bytes on a 64-bit machine—to
-store a single entry, whereas strings use 1 byte per character. [byte
-arrays]{.idx}[strings/vs. Char.t arrays]{.idx}
+The strings we've encountered thus far are essentially byte arrays,
+and are most often used for textual data.  You could imagine using a
+`char array` (a `char` represents an 8-bit character) for the same
+purpose, but strings are considerably more space-efficient; an `array`
+uses one 8-byte word on a 64-bit machine—to store a single entry,
+whereas strings use one byte per character.  [strings/vs. Char.t
+arrays]{.idx}
 
-Strings also come with their own syntax for getting and setting values:
+Unlike arrays, though, strings are immutable, and sometimes, it's
+convenient to have a space-efficient, mutable array of bytes. Happily,
+OCaml has that, via the `bytes` type.
 
+You can set individual characters using `Bytes.set`, and a value of
+type `bytes` can be converted to and from the `string` type.
+
+```ocaml env=main
+# let b = Bytes.of_string "foobar";;
+val b : bytes = "foobar"
+# Bytes.set b 0 (Char.uppercase (Bytes.get b 0));;
+- : unit = ()
+# Bytes.to_string b;;
+- : string = "Foobar"
 ```
-<string_expr>.[<index_expr>]
-<string_expr>.[<index_expr>] <- <char_expr>
-```
-
-And string literals are bounded by quotes. There's also a module `String`
-where you'll find useful functions for working with strings.
 
 #### Bigarrays
 
