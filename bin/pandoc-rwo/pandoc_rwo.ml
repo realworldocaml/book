@@ -32,6 +32,7 @@ let () =
       | Some _ | None -> Some [l]
     end
     | n -> Some [n] in
-  let p = Pandoc.map ~block ~inline p in
+  let p = Pandoc.map ~block p in
+  let p = Pandoc.map ~inline p in
   let s = Yojson.Basic.pretty_to_string (Pandoc.to_json p) in
   print_endline s
