@@ -456,12 +456,14 @@ referring to these guidelines and your source code.
 
 ## String Values
 
-Strings are standard OCaml blocks with the header size defining the size of
-the string in machine words. The `String_tag` (252) is higher than the
-`No_scan_tag`, indicating that the contents of the block are opaque to the
-collector. The block contents are the contents of the string, with padding
-bytes to align the block on a word boundary. [strings/memory representation
-of]{.idx}[runtime memory representation/string values]{.idx}
+OCaml `string`s (and their mutable cousins, `bytes`) are standard
+OCaml blocks with the header size defining the size of the string in
+machine words. The `String_tag` (252) is higher than the
+`No_scan_tag`, indicating that the contents of the block are opaque to
+the collector. The block contents are the contents of the string, with
+padding bytes to align the block on a word boundary. [strings/memory
+representation of]{.idx}[runtime memory representation/string
+values]{.idx}
 
 \
 ![](images/memory-repr/string_block.png "String block layout")
@@ -477,13 +479,14 @@ Given a string length modulo 4:
 - `2` has padding `00 01`
 - `3` has padding `00`
 
-This string representation is a clever way to ensure that the contents are
-always zero-terminated by the padding word and to still compute its length
-efficiently without scanning the whole string. The following formula is used:
+This string representation is a clever way to ensure that the contents
+are always zero-terminated by the padding word and to still compute
+its length efficiently without scanning the whole string. The
+following formula is used:
 
-\
-![](images/memory-repr/string_size_calc.png "String size calculation")
-\
+```
+number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
+```
 
 The guaranteed `NULL` termination comes in handy when passing a string to C,
 but is not relied upon to compute the length from OCaml code. OCaml strings
