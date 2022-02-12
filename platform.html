@@ -14,13 +14,14 @@ testing.</p>
 <section class="level2" id="a-hello-world-ocaml-project">
 <h2>A Hello World OCaml Project</h2>
 <p>Let’s start by creating a sample OCaml project and navigating around
-it. Dune has a basic built-in command to initialise a project template
+it. Dune has a basic built-in command to initialize a project template
 that is suitable to get us started.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune init proj hello --ppx ppx_inline_test --inline-tests
 &gt;Success: initialized project component named hello
 </code></pre>
 </div>
+
 <p>Dune will create a <code>hello/</code> directory and populate it with
 a skeleton OCaml project. This sample project has all the metadata
 required for us to learn more about the opam package manager and the
@@ -58,6 +59,7 @@ path so that you can invoke locally installed tools:</p>
 <p>If you prefer not to modify your shell configuration, then you can
 also invoke commands via <code>opam exec</code> to modify the path for
 the subcommand specified in the remainder of the command line.</p>
+
 <div data-type="note">
 <p>When you want to select a particular version of the OCaml compiler,
 you can use <code>opam switch list-available</code> to get a set of
