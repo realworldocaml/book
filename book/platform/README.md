@@ -15,14 +15,41 @@ integration (CI) and unit or fuzz testing.
 ## A Hello World OCaml Project
 
 Let's start by creating a sample OCaml project and navigating around
-it.  Dune has a basic built-in command to initialise a project template
-that is suitable to get us started.
+it.  Dune has a basic built-in command to initialize a project
+template that is suitable to get us started.
 
 
 ```sh dir=examples/correct/hello,skip
 $ dune init proj hello --ppx ppx_inline_test --inline-tests
 Success: initialized project component named hello
 ```
+
+<!-- TODO
+
+This doesn't work for me.  I ran the init command, but the lib and
+test are messed up in terms of names. The test is called "hello",
+and the library is called "inline_tests", which I think is backwards.
+
+[yminsky@viserion tmp]$ dune init proj hello --ppx ppx_inline_test --inline-tests
+Success: initialized project component named hello
+[yminsky@viserion tmp]$ cd hello/
+[yminsky@viserion hello]$ ls
+bin  hello.opam  lib  test
+[yminsky@viserion hello]$ cat lib/dune
+(library
+ (inline_tests)
+ (name hello)
+ (preprocess
+  (pps ppx_inline_test)))
+[yminsky@viserion hello]$ cat test/dune
+(test
+ (name hello)
+ (preprocess
+  (pps ppx_inline_test)))
+[yminsky@viserion hello]$
+
+ -->
+
 
 Dune will create a `hello/` directory and populate it with a
 skeleton OCaml project.  This sample project has all the metadata
@@ -69,6 +96,8 @@ $ eval $(opam env)
 If you prefer not to modify your shell configuration, then you can
 also invoke commands via `opam exec` to modify the path for
 the subcommand specified in the remainder of the command line.
+
+<!-- TODO: Don't we generally put headers on these blocks?  -->
 
 ::: {data-type=note}
 When you want to select a particular version of the OCaml compiler,
@@ -148,7 +177,7 @@ By default, dune exposes libraries as *wrapped* under a single module,
 and the `name` field determines the name of that module.  In our
 example project `msg.ml` is defined in `lib/dune` which defines a `hello`
 library. Thus, users of our newly defined module can access it as
-`Hello.Msg`. 
+`Hello.Msg`.
 
 Although our example library only currently contains a single `Msg` module,
 it is common to have multiple modules per library. Other modules within
@@ -408,7 +437,7 @@ open-source OCaml ecosystem is an `opam` file in your source tree.
 Each `opam` file defines a *package* -- a collection of OCaml
 libraries and executable binaries or application data.  Each opam
 package can define dependencies on other opam packages, and includes
-build and testing directions for your project. 
+build and testing directions for your project.
 
 A collection of `opam` files can be stored in an *opam repository* to
 create a package database, with a central one for the OCaml ecosystem
