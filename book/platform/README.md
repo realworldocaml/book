@@ -181,6 +181,9 @@ Some observations about this structure:
     [Testing](testing.html#where-should-tests-go){data-type=xref}, are
     in a separate directory from the source.
 
+Now we'll talk about the different parts of this structure in more
+detail.
+
 ### Defining module names
 
 Individual `ml` and `mli` files each define OCaml modules, named after the file
@@ -234,7 +237,7 @@ the defined library is local to the current dune project only.
 The `(libraries)` field in the `lib/dune` file is empty since this
 is a trivial standalone library.
 
-#### Writing test cases for a library
+### Writing test cases for a library
 
 Our next step is to define a test case in `test/dune` for our library.
 We can define inline tests within our library as we did earlier in
@@ -267,7 +270,7 @@ on our locally defined `hello` library so that we can access it.
 Once you run the tests via `dune runtest`, you can find the built
 artefacts in `_build/default/test/` in your project checkout.
 
-#### Building an executable program
+### Building an executable program
 
 Finally, we want to actually use our hello world from the
 command-line. This is defined in `bin/dune` in a very similar fashion
