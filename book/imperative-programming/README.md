@@ -850,7 +850,7 @@ This implementation requires an argument of a `Hashtbl.Key.t`, which
 plays the role of the `hash` and `equal` from `Dictionary`.
 `Hashtbl.Key.t` is an example of what's called a first-class module,
 which we'll see more of in [First Class
-Modules](first-class-modules.html#First-Class-Modules).
+Modules](first-class-modules.html#first-class-modules){data-type=xref}.
 
 ```ocaml env=main
 # let memoize m f =
