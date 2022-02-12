@@ -909,8 +909,3 @@ val shape_ref : shape ref = {Base.Ref.contents = <obj>}
 - : unit = ()
 ```
 
-::: {data-type=note}
-##### Production Note
-
-This chapter contains significant contributions from Leo White.
-:::
