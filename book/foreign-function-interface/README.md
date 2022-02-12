@@ -41,14 +41,14 @@ Once that's done, Ctypes is available via OPAM as usual:
 :::
 
 ```
-$ brew install libffi     # for MacOS X users
+$ brew install libffi     # for macOS users
 $ opam install ctypes ctypes-foreign
 $ utop
 # require "ctypes-foreign" ;;
 ```
 
 You'll also need the Ncurses library for the first example. This comes
-preinstalled on many operating systems such as Mac OS X, and Debian Linux
+preinstalled on many operating systems such as macOS, and Debian Linux
 provides it as the `libncurses5-dev` package.
 
 ## Example: A Terminal Interface

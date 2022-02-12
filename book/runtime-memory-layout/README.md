@@ -382,7 +382,7 @@ list. [debugging/Obj module warning]{.idx}[security issues/Obj module
 warning]{.idx}[Obj module]{.idx}
 
 ::: {data-type=warning}
-### Obj Module Considered Harmful
+##### Obj Module Considered Harmful
 
 `Obj` is an undocumented module that exposes the internals of the OCaml
 compiler and runtime. It is very useful for examining and understanding how

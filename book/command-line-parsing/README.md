@@ -591,7 +591,7 @@ appear in any order on the command line, or multiple times, depending on how
 they're declared in the specification. [flags]{.idx}[command-line
 parsing/labeled flags and]{.idx}
 
-Let's add two arguments to our `md5` command that mimics the Mac OS X
+Let's add two arguments to our `md5` command that mimics the macOS
 version. A `-s` flag specifies the string to be hashed directly on the
 command line and `-t` runs a self-test. The complete example follows.
 
@@ -954,7 +954,7 @@ parsing/autocompletion with bash]{.idx}
 
 The precise mechanism for autocompletion varies depending on what shell you
 are using, but we'll assume you are using the most common one: `bash`. This
-is the default interactive shell on most Linux distributions and Mac OS X,
+is the default interactive shell on most Linux distributions and macOS,
 but you may need to switch to it on *BSD or Windows (when using Cygwin). The
 rest of this section assumes that you're using `bash`. [bash
 autocompletion]{.idx}
@@ -965,7 +965,7 @@ package manager to see if you have it available.
 Operating system | Package manager | Package
 -----------------|-----------------|--------
 Debian Linux | `apt` | `bash-completion`
-Mac OS X | Homebrew | `bash-completion`
+macOS | Homebrew | `bash-completion`
 FreeBSD | Ports system | <em class="filename">/usr/ports/shells/bash-completion</em>
 
 
@@ -981,7 +981,7 @@ One last bit of information you'll need to find is the location of the
 <em class="filename">bash_completion.d</em> directory. This is where all the
 shell fragments that contain the completion logic are held. On Linux, this is
 often in <em class="filename">/etc/bash_completion.d</em>, and in Homebrew on
-Mac OS X, it would be
+macOS, it would be
 <em class="filename">/usr/local/etc/bash_completion.d</em> by default.
 
 ### Generating Completion Fragments from Command

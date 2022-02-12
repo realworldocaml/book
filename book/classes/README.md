@@ -1332,7 +1332,7 @@ which will pull in all the other dependencies:
 $ dune build shapes.exe
 ```
 
-When you run the binary, a new graphical window should appear (on Mac OS X,
+When you run the binary, a new graphical window should appear (on macOS,
 you will need to install the X11 package first, which you will be prompted
 for). Try clicking on the various widgets, and gasp in awe at the
 sophisticated animations that unfold as a result.
