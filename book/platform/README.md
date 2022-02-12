@@ -136,24 +136,50 @@ You'll notice that there are three different OCaml compiler packages:
 Back in [Files Modules And
 Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 we looked at what a simple program with a couple of OCaml modules
-looks like. Let's now look at the set of files in our
-`hello/` application to examine a fuller project structure.
+looks like. Let's now look at the set of files in our `hello/`
+application to examine a fuller project structure.
 
 ```
-├── bin
-│   ├── dune
-│   └── main.ml
 ├── dune-project
 ├── hello.opam
 ├── lib
 │   └── dune
+├── bin
+│   ├── dune
+│   └── main.ml
 └── test
     ├── dune
     └── hello.ml
 ```
 
-There are three kinds of names that come up in OCaml projects which we'll look
-at next: modules, libraries and packages.
+<!-- TODO: I added a bit more explanation her of what's going on in -->
+<!-- the above file-tree.  I also reorganized the lines in the file -->
+<!-- tree to make them show up in the natural order to explain them. -->
+<!-- What do you think? -->
+
+Some observations about this structure:
+
+- The `dune-project` file marks the root of the project, and is used
+  for writing down some key metadata for the project, but more on that
+  later.
+
+- The `hello.opam` file contains metadata for registering this
+  software as an opam project. As we'll see, we won't need to edit
+  this manually because we can generate the file via dune.
+
+- There are three source directories, each with its own `dune` file
+  specifying the build parameters for that part of the codebase.  The
+  trio of `lib`, `bin` and `test` makes good sense for a project that
+  is primarily an executable, rather than a reusable library.  In that
+  case, you would generally use these libraries as follows:
+
+  - The `lib` directory would contain the bulk of the source.
+  - The `bin` directory would contain a thin wrapper on top of the
+    code in `lib` which actually launches the executable.
+  - The `test` directory has the bulk of the tests for `lib`, which,
+    following the advice in
+    [Testing](testing.html#where-should-tests-go){data-type=xref}, are
+    in a separate directory from the source.
 
 ### Defining module names
 
@@ -307,14 +333,14 @@ But there are reasons for these names to be distinct as well:
 - Package names might differ from library names if a package combines
   multiple libraries and/or binaries together.
 
-It is important to understand the difference between modules, libraries and
-packages, as you will use each of these at different points of your OCaml
-coding journey.  The root of a single project is marked by a `dune-project` file
-(more on that later). In order to keep the file layout clean, we typically
-structure our project into subdirectories that contain the modules for a
-particular library or binary, with each directory containing a separate
-`dune` file with build instructions.  That's why in our example project,
-we have:
+It is important to understand the difference between modules,
+libraries and packages, as you will use each of these at different
+points of your OCaml coding journey.  The root of a single project is
+marked by a `dune-project` file (more on that later). In order to keep
+the file layout clean, we typically structure our project into
+subdirectories that contain the modules for a particular library or
+binary, with each directory containing a separate `dune` file with
+build instructions.  That's why in our example project, we have:
 
 - a `lib/` directory that builds a `hello` library.
 - a `test/` directory that defines unit tests for the library.
