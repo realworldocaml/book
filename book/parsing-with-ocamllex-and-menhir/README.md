@@ -691,7 +691,7 @@ parsing errors. There are currently two errors: `Parser.Error` and
 `Lexer.SyntaxError`. A simple solution when encountering an error is to print
 the error and give up: [errors/"give up on first error" approach]{.idx}
 
-```ocaml file=examples/parsing-test/test.ml,part=0
+```ocaml file=examples/correct/parsing-test/test.ml,part=0
 open Core
 open Lexer
 open Lexing
@@ -726,7 +726,7 @@ structure, where the `Lexing.from_channel` function is used to construct a
 file. We define a function `Json.output_value`, not shown here, to print a
 `Json.value`:
 
-```ocaml file=examples/parsing-test/test.ml,part=1
+```ocaml file=examples/correct/parsing-test/test.ml,part=1
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
@@ -750,7 +750,7 @@ let () =
 
 Here's a test input file we can use to test the code we just wrote:
 
-``` file=examples/parsing-test/test1.json
+``` file=examples/correct/parsing-test/test1.json
 true
 false
 null
@@ -766,7 +766,7 @@ null
 Now build and run the example using this file, and you can see the full
 parser in action:
 
-```sh dir=examples/parsing-test
+```sh dir=examples/correct/parsing-test
 $ dune exec ./test.exe test1.json
 true
 false
@@ -783,7 +783,7 @@ null
 With our simple error handling scheme, errors are fatal and cause the program
 to terminate with a nonzero exit code:
 
-```sh dir=examples/parsing-test
+```sh dir=examples/correct/parsing-test
 $ cat test2.json
 { "name": "Chicago",
   "zips": [12345,
