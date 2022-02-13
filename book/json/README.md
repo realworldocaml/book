@@ -584,12 +584,12 @@ conversion functions individually. [mapping/of JSON to OCaml
 types]{.idx}[JSON data/automatic mapping of]{.idx}
 
 We'll cover an alternative JSON processing method that is better for
-larger-scale JSON handling now, using the
-[atdgen](https://atd.readthedocs.io/en/latest/atdgen.html) tool. This
-will introduce a *domain specific language*, or DSL, that compiles
-JSON specifications into OCaml modules, which are then used throughout
-your application. [ATDgen Library/installation of]{.idx}[Domain
-specific language]{.idx}
+larger-scale JSON handling now, using
+[ATD](https://github.com/ahrefs/atd), which provides a *domain
+specific language*, or DSL, that compiles JSON specifications into
+OCaml modules, which are then used throughout your
+application. [ATDgen Library/installation of]{.idx}[Domain specific
+language]{.idx}
 
 You can install `atdgen` by calling `opam install atdgen`, which will
 install the atdgen executable.
