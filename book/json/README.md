@@ -591,8 +591,8 @@ OCaml modules, which are then used throughout your
 application. [ATDgen Library/installation of]{.idx}[Domain specific
 language]{.idx}
 
-You can install `atdgen` by calling `opam install atdgen`, which will
-install the atdgen executable.
+You can install the `atdgen` executable by calling `opam install
+atdgen`.
 
 ```
 $ opam install atdgen
