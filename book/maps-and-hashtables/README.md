@@ -928,10 +928,9 @@ default, that bound is set at 10 "meaningful" nodes. [hash tables/polymorphic
 hash function]{.idx}
 
 The bound on the traversal means that the hash function may ignore part of
-the data structure, and this can lead to pathological
-<span class="keep-together">cases</span> where every value you store has the
-same hash value. We'll demonstrate this below, using the function
-`List.range` to allocate lists of integers of different length:
+the data structure, and this can lead to pathological cases where every
+value you store has the same hash value. We'll demonstrate this below,
+using the function `List.range` to allocate lists of integers of different length:
 
 ```ocaml env=main
 # Hashtbl.Poly.hashable.hash (List.range 0 9);;

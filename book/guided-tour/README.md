@@ -1093,8 +1093,7 @@ val numbers : int array = [|1; 2; 3; 4|]
 
 The `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
-counted starting at zero, element <span class="keep-together">.(2) is</span>
-the third element.
+counted starting at zero, element `numbers.(2)` is the third element.
 
 The `unit` type that we see in the preceding code is interesting in that it
 has only one possible value, written `()`. This means that a value of type
@@ -1366,14 +1365,14 @@ After `read_and_accumulate` returns, the total needs to be printed. This is
 done using the `printf` command, which provides support for type-safe format
 strings, similar to what you'll find in a variety of languages. The format
 string is parsed by the compiler and used to determine the number and type of
-the remaining arguments that are <span class="keep-together">required</span>.
+the remaining arguments that are required.
 In this case, there is a single formatting directive, `%F`, so `printf`
 expects one additional argument of type `float`.
 
 ### Compiling and Running
 
 We'll compile our program using `dune`, a build system that's designed
-for use with OCaml projects. First, we need to write a *dune* file to
+for use with OCaml projects. First, we need to write a `dune` file to
 specify the build.
 
 ```scheme file=examples/correct/sum/dune

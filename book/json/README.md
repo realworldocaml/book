@@ -322,8 +322,7 @@ JSON field associated with that key, or `Null`. Since we know that the
 `title` value is always a string in our example schema, we want to convert it
 to an OCaml string. The `to_string` function performs this conversion and
 raises an exception if there is an unexpected JSON type. The `|>` operator
-provides a convenient way to chain these operations
-<span class="keep-together">together</span>:
+provides a convenient way to chain these operations together:
 
 ```ocaml env=parse_book
 # let tags = json |> member "tags" |> to_list |> filter_string;;
@@ -383,10 +382,9 @@ val names : string list =
 This style of programming, which omits variable names and chains functions
 together, is known as *point-free programming*. It's a succinct style but
 shouldn't be overused due to the increased difficulty of debugging
-intermediate values. If an explicit <span class="keep-together">name</span>
-is assigned to each stage of the transformations, debuggers in particular
-have an easier time making the program flow simpler to represent to the
-programmer.
+intermediate values. If an explicit name is assigned to each stage of the
+transformations, debuggers in particular have an easier time making the
+program flow simpler to represent to the programmer.
 
 This technique of using statically typed parsing functions is very powerful
 in combination with the OCaml type system. Many errors that don't make sense
