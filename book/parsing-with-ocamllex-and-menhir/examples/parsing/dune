@@ -1,10 +1,6 @@
-(menhir
- (modules parser))
-
+(menhir (modules parser))
 (ocamllex lexer)
-
 (library
   (name json_parser)
   (modules parser lexer json)
-  (libraries core)
-)
+  (libraries core))

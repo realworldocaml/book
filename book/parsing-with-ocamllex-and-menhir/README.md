@@ -417,16 +417,12 @@ tells the build system to switch to using `menhir` instead of `ocamlyacc` to
 handle files with the `.mly` suffix: [`(menhir)` dune stanza]{.idx}[Menhir parser generator/invoking]{.idx}
 
 ```scheme file=examples/parsing/dune
-(menhir
- (modules parser))
-
+(menhir (modules parser))
 (ocamllex lexer)
-
 (library
   (name json_parser)
   (modules parser lexer json)
-  (libraries core)
-)
+  (libraries core))
 ```
 
 ## Defining a Lexer
