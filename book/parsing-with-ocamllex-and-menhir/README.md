@@ -90,7 +90,7 @@ logical units, like curly braces, square brackets, commas, colons,
 identifiers, numbers, and quoted strings. Thus, we could represent our JSON
 text as a sequence of tokens of the following type:
 
-```ocaml file=examples/parsing/manual_token_type.ml
+```ocaml
 type token =
   | NULL
   | TRUE
@@ -98,7 +98,6 @@ type token =
   | STRING of string
   | INT of int
   | FLOAT of float
-  | ID of string
   | LEFT_BRACK
   | RIGHT_BRACK
   | LEFT_BRACE
@@ -116,8 +115,9 @@ required for understanding its meaning.
 If we converted the preceding example into a list of these tokens, it would
 look something like this:
 
-```ocaml file=examples/parsing/tokens.ml
-[ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...
+```ocaml skip
+[ LEFT_BRACE; STRING("title"); COLON; STRING("Cities");
+  COMMA; STRING("cities"); ... ]
 ```
 
 This kind of representation is easier to work with than the original text,
@@ -137,7 +137,6 @@ type value = [
   | `String of string
 ]
 
-(* part 1 *)
 open Core
 open Out_channel
 
@@ -174,7 +173,7 @@ of value types, including numbers, strings, arrays, and objects. The parser
 we'll write will convert a token stream into a value of this AST type, as
 shown below for our earlier JSON example:
 
-```ocaml file=examples/parsing/parsed_example.ml
+```ocaml
 `Assoc
   ["title", `String "Cities";
    "cities", `List
@@ -197,7 +196,7 @@ syntax `%token <`*`type`*`>`*`uid`*, where the *`<type>`* is optional and
 *`uid`* is a capitalized identifier. For JSON, we need tokens for numbers,
 strings, identifiers, and punctuation: [tokens, declaration of]{.idx}
 
-```ocaml file=examples/parsing/parser.mly,part=tokens
+```ocaml file=examples/parsing-annotated/parser.mly,part=tokens
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -242,7 +241,7 @@ the non-terminal symbol `prog`, and by declaring that when parsed, a
 `Json.value option`. We then end the declaration section of the parser with a
 `%%`:
 
-```ocaml file=examples/parsing/parser.mly,part=start-symbol
+```ocaml file=examples/parsing-annotated/parser.mly,part=start-symbol
 %start <Json.value option> prog
 %%
 ```
@@ -252,7 +251,7 @@ productions are organized into *rules*, where each rule lists all the
 possible productions for a given nonterminal symbols. Here, for example, is
 the rule for `prog`:
 
-```ocaml file=examples/parsing/parser.mly,part=prog
+```ocaml file=examples/parsing-annotated/parser.mly,part=prog
 prog:
   | EOF       { None }
   | v = value { Some v }
@@ -277,7 +276,7 @@ within the curly braces for that production.
 
 Now let's consider a more complex example, the rule for the `value` symbol:
 
-```ocaml file=examples/parsing/parser.mly,part=value
+```ocaml file=examples/parsing-annotated/parser.mly,part=value
 value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
@@ -321,7 +320,7 @@ side, because what we're matching on in this case is an empty sequence of
 tokens. The comment `(* empty *)` is used to make this clear:
 [rev_object_fields]{.idx}[object_fields]{.idx}
 
-```ocaml file=examples/parsing/parser.mly,part=objects
+```ocaml file=examples/parsing-annotated/parser.mly,part=objects
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
@@ -338,11 +337,11 @@ right-recursive rule accepts the same input, but during parsing, it requires
 linear stack space to read object field definitions: [Menhir parser
 generator/left-recursive definitions]{.idx}
 
-```ocaml file=examples/parsing/right_rec_rule.mly
+```ocaml skip
 (* Inefficient right-recursive rule *)
 object_fields:
   | (* empty *) { [] }
-  | k = ID; COLON; v = value; COMMA; obj = object_fields
+  | k = STRING; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
 ```
 
@@ -351,11 +350,11 @@ construct the returned value in left-to-right order. This is even less
 efficient, since the complexity of building the list incrementally in this
 way is quadratic in the length of the list:
 
-```ocaml file=examples/parsing/quadratic_rule.mly
+```ocaml skip
 (* Quadratic left-recursive rule *)
 object_fields:
   | (* empty *) { [] }
-  | obj = object_fields; COMMA; k = ID; COLON; v = value
+  | obj = object_fields; COMMA; k = STRING; COLON; v = value
     { obj @ [k, v] }
   ;
 ```
@@ -372,7 +371,23 @@ A version of the JSON grammar using these more succinct Menhir rules follows.
 Notice the use of `separated_list` to parse both JSON objects and lists with
 one rule:
 
-```ocaml file=examples/parsing/short_parser.mly,part=rules
+```ocaml file=examples/parsing/parser.mly
+%token <int> INT
+%token <float> FLOAT
+%token <string> STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
+%start <Json.value option> prog
+%%
+
 prog:
   | v = value { Some v }
   | EOF       { None   } ;
@@ -397,20 +412,21 @@ list_fields:
     vl = separated_list(COMMA, value)         { vl } ;
 ```
 
-We can invoke `menhir` by using `corebuild` with the `-use-menhir` flag. This
+We can hook in `menhir` by adding a `(menhir)` stanza to our dune file, which
 tells the build system to switch to using `menhir` instead of `ocamlyacc` to
-handle files with the `.mly` suffix: [-use-menhir flag]{.idx}[Menhir parser generator/invoking]{.idx}
+handle files with the `.mly` suffix: [`(menhir)` dune stanza]{.idx}[Menhir parser generator/invoking]{.idx}
 
 ```scheme file=examples/parsing/dune
-(rule
- (targets short_parser.mli short_parser.ml)
-  (deps   short_parser.mly)
-  (action (ignore-stderr (run menhir --external-tokens Json --explain ${<}))))
-```
+(menhir
+ (modules parser))
 
+(ocamllex lexer)
 
-
-```sh dir=examples/parsing
+(library
+  (name json_parser)
+  (modules parser lexer json)
+  (libraries core)
+)
 ```
 
 ## Defining a Lexer
@@ -427,7 +443,7 @@ Let's walk through the definition of a lexer section by section. The first
 section is an optional chunk of OCaml code that is bounded by a pair of curly
 braces: [lexers/optional OCaml code for]{.idx}
 
-```ocaml file=examples/parsing/lexer.mll,part=utilities
+```ocaml file=examples/parsing-annotated/lexer.mll,part=utilities
 {
 open Lexing
 open Parser
@@ -461,7 +477,7 @@ really this is a specialized syntax for declaring regular expressions. Here's
 an example: [regular expressions]{.idx}[lexers/regular expressions
 collection]{.idx}
 
-```ocaml file=examples/parsing/lexer.mll,part=int
+```ocaml file=examples/parsing-annotated/lexer.mll,part=int
 let int = '-'? ['0'-'9'] ['0'-'9']*
 ```
 
@@ -478,7 +494,7 @@ points and exponents. We make the expression easier to read by building up a
 sequence of named regular expressions, rather than creating one big and
 impenetrable expression:
 
-```ocaml file=examples/parsing/lexer.mll,part=numbers
+```ocaml file=examples/parsing-annotated/lexer.mll,part=numbers
 let digit = ['0'-'9']
 let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
@@ -487,7 +503,7 @@ let float = digit* frac? exp?
 
 Finally, we define whitespace, newlines, and identifiers:
 
-```ocaml file=examples/parsing/lexer.mll,part=whitespaces
+```ocaml file=examples/parsing-annotated/lexer.mll,part=whitespaces
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
@@ -505,7 +521,7 @@ quite complicated, using side effects and invoking other rules as part of the
 body of the rule. Let's look at the `read` rule for parsing a JSON
 expression: [lexers/rules for]{.idx}
 
-```ocaml file=examples/parsing/lexer.mll,part=rule
+```ocaml file=examples/parsing-annotated/lexer.mll,part=rule
 rule read =
   parse
   | white    { read lexbuf }
@@ -568,6 +584,30 @@ pattern:
   input were `true: 167`, then both `"true"` and `id` match the first four
   characters; `"true"` is first, so the return value is `TRUE`.
 
+::: {data-type=note}
+##### Unused lexing values
+
+In our parser, we have not used all the token regexps that we defined
+in the lexer.  For instance, `id` is unused since we do not parse
+unquoted strings for object identifiers (something that is allowed by
+JavaScript, but not the subset of it that is JSON).  If we included
+a token pattern match for this in the lexer, then we would have to adjust
+the parser accordingly to add a `%token <string> ID`.  This would in
+turn trigger an "unused" warning since the parser never constructs a
+value with type ID:
+
+```
+File "parser.mly", line 4, characters 16-18:        
+Warning: the token ID is unused.
+```
+
+It's completely fine to define unused regexps as we've done, and to
+hook them into parsers as required.  For example, we might use `ID`
+if we adding an extension to our parser for supporting unquoted
+string identifiers as a non-standard JSON extension.
+
+:::
+
 ### Recursive Rules
 
 Unlike many other lexer generators, `ocamllex` allows the definition of
@@ -575,7 +615,7 @@ multiple lexers in the same file, and the definitions can be recursive. In
 this case, we use recursion to match string literals using the following rule
 definition: [recursion/in lexers]{.idx}[lexers/recursive rules]{.idx}
 
-```ocaml file=examples/parsing/lexer.mll,part=rec-rule
+```ocaml file=examples/parsing-annotated/lexer.mll,part=rec-rule
 and read_string buf =
   parse
   | '"'       { STRING (Buffer.contents buf) }
@@ -618,13 +658,6 @@ handle the full spectrum of the world's writing systems. OCaml has several
 third-party solutions to handling Unicode, with varying degrees of
 flexibility and complexity:
 
-- [Camomile](https://github.com/yoriyuki/Camomile) supports the full spectrum of
-  Unicode character types, conversion from around 200 encodings, and
-  collation and locale-sensitive case mappings.
-
-- [sedlex](https://github.com/ocaml-community/sedlex) is a lexer generator for
-  Unicode that can serve as a Unicode-aware replacement for `ocamllex`.
-
 - [Uutf](http://erratique.ch/software/uutf) is a nonblocking streaming
   Unicode codec for OCaml, available as a standalone library. It is
   accompanied by the [Uunf](http://erratique.ch/software/uunf) text
@@ -633,7 +666,14 @@ flexibility and complexity:
   [JSON](http://erratique.ch/software/jsonm) available that illustrates the
   use of Uutf in your own libraries.
 
-All of these libraries are available via OPAM under their respective
+- [Camomile](https://github.com/yoriyuki/Camomile) supports the full spectrum of
+  Unicode character types, conversion from around 200 encodings, and
+  collation and locale-sensitive case mappings.
+
+- [sedlex](https://github.com/ocaml-community/sedlex) is a lexer generator for
+  Unicode that can serve as a Unicode-aware replacement for `ocamllex`.
+
+All of these libraries are available via opam under their respective
 names.
 :::
 
@@ -730,7 +770,7 @@ null
 Now build and run the example using this file, and you can see the full
 parser in action:
 
-```sh dir=examples/parsing-test,skip
+```sh dir=examples/parsing-test
 $ dune exec ./test.exe test1.json
 true
 false
@@ -747,7 +787,7 @@ null
 With our simple error handling scheme, errors are fatal and cause the program
 to terminate with a nonzero exit code:
 
-```sh dir=examples/parsing-test,skip
+```sh dir=examples/parsing-test
 $ cat test2.json
 { "name": "Chicago",
   "zips": [12345,

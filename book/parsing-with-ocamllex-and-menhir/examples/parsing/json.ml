@@ -8,7 +8,6 @@ type value = [
   | `String of string
 ]
 
-(* part 1 *)
 open Core
 open Out_channel
 
