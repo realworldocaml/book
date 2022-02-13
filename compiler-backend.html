@@ -28,12 +28,12 @@ statements into more optimized but low-level statements.</p>
 <section class="level3" id="pattern-matching-optimization">
 <h3>Pattern Matching Optimization</h3>
 <p>The compiler dumps the lambda form in an s-expression syntax if you
-add the <span class="keep-together">-dlambda</span> directive to the
-command line. Let’s use this to learn more about how the OCaml
-pattern-matching engine works by building three different pattern
-matches and comparing their lambda forms.<a data-secondary="optimization in lambda form code" data-primary="pattern
-matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching optimization" data-primary="lambda
-form code" data-type="indexterm">&nbsp;</a></p>
+add the <code>-dlambda</code> directive to the command line. Let’s use
+this to learn more about how the OCaml pattern-matching engine works by
+building three different pattern matches and comparing their lambda
+forms.<a data-secondary="optimization in lambda form
+code" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching
+optimization" data-primary="lambda form code" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s start by creating a straightforward exhaustive pattern match
 using four normal variants:</p>
 <div class="highlight">
@@ -397,7 +397,7 @@ the book builds a bytecode executable, and adding the
 <p>The custom mode is the most similar mode to native code compilation,
 as both generate standalone executables. There are quite a few other
 options available for compiling bytecode (notably with shared libraries
-or building custom runtimes). Full details can be found in the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html">OCaml</a>.</p>
+or building custom runtimes). Full details can be found in the <a href="https://ocaml.org/manual/comp.html#s%3Acomp-options">OCaml</a>.</p>
 </section>
 <section class="level3" id="embedding-ocaml-bytecode-in-c">
 <h3>Embedding OCaml Bytecode in C</h3>

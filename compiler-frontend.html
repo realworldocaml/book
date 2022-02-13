@@ -340,14 +340,13 @@ $ ocamldoc -html -d html doc.ml
 $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc</code></pre>
 </div>
-<p>You should now have HTML files inside the
-<em class="filename">html/</em> directory and also be able to view the
-UNIX manual pages held in <em class="filename">man/man3</em>. There are
-quite a few comment formats and options to control the output for the
-various backends. Refer to the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml
-manual</a> for the complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml
-toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML
-generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML generators" data-type="indexterm">&nbsp;</a></p>
+<p>You should now have HTML files inside the <code>html/</code>
+directory and also be able to view the UNIX manual pages held in
+<code>man/man3</code>. There are quite a few comment formats and options
+to control the output for the various backends. Refer to the <a href="https://ocaml.org/manual/native.html">OCaml manual</a> for the
+complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON
+data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML
+generators" data-type="indexterm">&nbsp;</a></p>
 <p>You can also use <code>odoc</code> to generate complete snapshots of
 your project via integration with dune, as described earlier in <a data-type="xref" href="platform.html#browsing-interface-documentation">Chapter 21, OCaml Platform</a>.</p>
 </section>
@@ -402,12 +401,11 @@ end;;
 &gt;module Abc : sig val a : unit val b : unit end
 </code></pre>
 </div>
-<p>The warning number in our example is taken from the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/native.html">compiler
-manual page</a>. In this case, warning 10 emits a message if the
-expression in a sequence doesn’t have type <code>unit</code>. The
-<code>@@@warning</code> nodes in the module implementation cause the
-compiler to change its behaviour within the scope of that structure
-only.</p>
+<p>The warning number in our example is taken from the <a href="https://ocaml.org/manual/native.html">compiler manual page</a>. In
+this case, warning 10 emits a message if the expression in a sequence
+doesn’t have type <code>unit</code>. The <code>@@@warning</code> nodes
+in the module implementation cause the compiler to change its behaviour
+within the scope of that structure only.</p>
 <p>An annotation can also be more narrowly attached to a block of code.
 For example, a module implementation can be annotated with
 <code>@@deprecated</code> to indicate that it should not be used in new
