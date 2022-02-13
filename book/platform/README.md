@@ -137,7 +137,8 @@ Back in [Files Modules And
 Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 we looked at what a simple program with a couple of OCaml modules
 looks like. Let's now look at the set of files in our `hello/`
-application to examine a fuller project structure.
+application to see what a fuller project looks like.
+
 
 ```
 ├── dune-project
