@@ -127,43 +127,45 @@ used for representing JSON data in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}:
 
 ```ocaml file=examples/parsing/json.ml
-type value = [
-  | `Assoc of (string * value) list
+type value =
+  [ `Assoc of (string * value) list
   | `Bool of bool
   | `Float of float
   | `Int of int
   | `List of value list
   | `Null
-  | `String of string
-]
+  | `String of string ]
 
 open Core
 open Out_channel
 
 let rec output_value outc = function
-  | `Assoc obj  -> print_assoc outc obj
-  | `List l     -> print_list outc l
-  | `String s   -> printf "\"%s\"" s
-  | `Int i      -> printf "%d" i
-  | `Float x    -> printf "%f" x
-  | `Bool true  -> output_string outc "true"
+  | `Assoc obj -> print_assoc outc obj
+  | `List l -> print_list outc l
+  | `String s -> printf "\"%s\"" s
+  | `Int i -> printf "%d" i
+  | `Float x -> printf "%f" x
+  | `Bool true -> output_string outc "true"
   | `Bool false -> output_string outc "false"
-  | `Null       -> output_string outc "null"
+  | `Null -> output_string outc "null"
 
 and print_assoc outc obj =
   output_string outc "{ ";
   let sep = ref "" in
-  List.iter ~f:(fun (key, value) ->
+  List.iter
+    ~f:(fun (key, value) ->
       printf "%s\"%s\": %a" !sep key output_value value;
-      sep := ",\n  ") obj;
+      sep := ",\n  ")
+    obj;
   output_string outc " }"
 
 and print_list outc arr =
   output_string outc "[";
-  List.iteri ~f:(fun i v ->
-      if i > 0 then
-        output_string outc ", ";
-      output_value outc v) arr;
+  List.iteri
+    ~f:(fun i v ->
+      if i > 0 then output_string outc ", ";
+      output_value outc v)
+    arr;
   output_string outc "]"
 ```
 
@@ -417,12 +419,15 @@ tells the build system to switch to using `menhir` instead of `ocamlyacc` to
 handle files with the `.mly` suffix: [`(menhir)` dune stanza]{.idx}[Menhir parser generator/invoking]{.idx}
 
 ```scheme file=examples/parsing/dune
-(menhir (modules parser))
+(menhir
+ (modules parser))
+
 (ocamllex lexer)
+
 (library
-  (name json_parser)
-  (modules parser lexer json)
-  (libraries core))
+ (name json_parser)
+ (modules parser lexer json)
+ (libraries core))
 ```
 
 ## Defining a Lexer
@@ -683,7 +688,7 @@ type definition in `parser.mli`, the parsing function expects a lexer of type
 composition]{.idx}
 
 ```ocaml file=examples/parsing/prog.mli
-val prog:(Lexing.lexbuf -> token) -> Lexing.lexbuf -> Json.value option
+val prog : (Lexing.lexbuf -> token) -> Lexing.lexbuf -> Json.value option
 ```
 
 Before we start with the lexing, let's first define some functions to handle
