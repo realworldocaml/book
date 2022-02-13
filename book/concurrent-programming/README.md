@@ -787,7 +787,7 @@ engine/additional libraries needed]{.idx}[search engines]{.idx}
 
 Our code is going to rely on a number of other libraries, all of which can be
 installed using opam. Refer to
-[the installation instructions](install.html) if you need
+[the installation instructions](http://dev.realworldocaml.org/install.html) if you need
 help on the installation. Here's the list of libraries we'll need:[Async
 library/DuckDuckGo searching example]{.idx}
 

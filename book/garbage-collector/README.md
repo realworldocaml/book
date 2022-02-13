@@ -1,5 +1,9 @@
 # Understanding the Garbage Collector
 
+::: {text-align=right}
+*This chapter includes contributions from Stephen Weeks and Sadiq Jaffer.*
+:::
+
 We've described the runtime format of individual OCaml variables earlier, in
 [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 When you execute your program, OCaml manages the lifecycle of these variables
@@ -79,7 +83,7 @@ You can also control the behavior of OCaml programs by setting the
 lets you set GC parameters without recompiling, for example to benchmark the
 effects of different settings. The format of `OCAMLRUNPARAM` is documented in
 the
-[ OCaml manual](https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html).
+[OCaml manual](https://ocaml.org/manual/runtime.html).
 
 :::
 

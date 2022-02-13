@@ -1,5 +1,9 @@
 # Classes
 
+::: {text-align=right}
+*This chapter was written by Leo White and Jeremy Yallop.*
+:::
+
 Programming with objects directly is great for encapsulation, but one of the
 main goals of object-oriented programming is code reuse through inheritance.
 For inheritance, we need to introduce *classes*. In object-oriented
