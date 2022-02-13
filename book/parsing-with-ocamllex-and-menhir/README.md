@@ -450,25 +450,13 @@ open Lexing
 open Parser
 
 exception SyntaxError of string
-
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p <-
-    { pos with pos_bol = pos.pos_cnum;
-               pos_lnum = pos.pos_lnum + 1
-    }
 }
 ```
 
-This code is there to define utility functions used by later snippets of
-OCaml code and to set up the environment by opening useful modules and define
-an exception, `SyntaxError`.
-
-We also define a utility function `next_line` for tracking the location of
-tokens across line breaks. The `Lexing` module defines a `lexbuf` structure
-that holds the state of the lexer, including the current location within the
-source file. The `next_line` function simply accesses the `lex_curr_p` field
-that holds the current location and updates its line number.
+This code is there to define utility functions used by later snippets of OCaml
+code and to set up the environment by opening useful modules and define an
+exception, `SyntaxError`.  Any OCaml functions you define here will be
+subsequently available in the remainder of the lexer definition.
 
 ### Regular Expressions
 
