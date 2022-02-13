@@ -70,15 +70,11 @@ well as contain an actual value. <a data-secondary="installation of" data-primar
 library" data-type="indexterm">&nbsp;</a><a data-primary="static
 checking" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static
 checking" data-type="indexterm">&nbsp;</a><a data-primary="unit tests" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-the-yojson-library">
-<h5>Installing the Yojson Library</h5>
+<p>::: {data-type=note} ##### Installing the Yojson Library</p>
 <p>There are several JSON libraries available for OCaml. For this
-chapter, we’ve picked the <a href="https://github.com/ocaml-community/yojson">Yojson</a> library by
-Martin Jambon. It’s easiest to install via opam by running
-<code>opam install yojson</code>. See <a href="http://dev.realworldocaml.org/install.html">the installation
-instructions</a> if you haven’t already got opam. Once installed, you
-can open it in the <code>utop</code> toplevel by:</p>
-</section>
+chapter, we’ve picked the popular <a href="https://github.com/ocaml-community/yojson">Yojson</a> library,
+which you can install by running <code>opam install yojson</code>. Once
+installed, you can open it in <code>utop</code> as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
 #require "yojson";;
@@ -563,26 +559,20 @@ generate the mappings from JSON schemas to OCaml values more
 mechanically than writing conversion functions individually. <a data-secondary="of JSON to OCaml types" data-primary="mapping" data-type="indexterm">&nbsp;</a><a data-secondary="automatic mapping of" data-primary="JSON
 data" data-type="indexterm">&nbsp;</a></p>
 <p>We’ll cover an alternative JSON processing method that is better for
-larger-scale JSON handling now, using the <a href="http://mjambon.com/atd-biniou-intro.html">OCaml</a> tool. This
-will introduce our first <em>Domain Specific Language</em> that compiles
-JSON specifications into OCaml modules, which are then used throughout
-your application. <a data-secondary="installation
-of" data-primary="ATDgen Library" data-type="indexterm">&nbsp;</a><a data-primary="Domain Specific Language" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-the-atdgen-library-and-tool">
-<h5>Installing the ATDgen Library and Tool</h5>
-<p>ATDgen installs some OCaml libraries that interface with Yojson, and
-also a command-line tool that generates code. It can all be installed
-via OPAM:</p>
-</section>
+larger-scale JSON handling now, using <a href="https://github.com/ahrefs/atd">ATD</a>, which provides a
+<em>domain specific language</em>, or DSL, that compiles JSON
+specifications into OCaml modules, which are then used throughout your
+application. <a data-secondary="installation
+of" data-primary="ATDgen Library" data-type="indexterm">&nbsp;</a><a data-primary="Domain specific language" data-type="indexterm">&nbsp;</a></p>
+<p>You can install the <code>atdgen</code> executable by calling
+<code>opam install atdgen</code>.</p>
 <div class="highlight">
 <pre><code class="language-clike">$ opam install atdgen
 $ atdgen -version
-2.0.0</code></pre>
+2.2.1</code></pre>
 </div>
-<p>The command-line tool will be installed within your
-<code>~/.opam</code> directory and should already be on your
-<code>PATH</code> from running <code>opam config env</code>. See <a href="http://dev.realworldocaml.org/install.html">the installation
-instructions</a> if this isn’t working.</p>
+<p>You may need to run <code>eval $(opam env)</code> in your shell if
+you don’t find <code>atdgen</code> in your path.</p>
 <section class="level3" id="atd-basics">
 <h3>ATD Basics</h3>
 <p>The idea behind ATD is to specify the format of the JSON in a
