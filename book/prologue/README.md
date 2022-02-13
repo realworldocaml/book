@@ -240,7 +240,7 @@ up-to-date development environment (using the 4.13.1 version of the
 compiler). The installation process is largely automated through the
 opam package manager. Instructions on how to set it up and what
 packages to install can be found at [the installation
-page](install.html).[installation
+page](http://dev.realworldocaml.org/install.html).[installation
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
 Some of the libraries we use, notably `Base`, work anywhere OCaml

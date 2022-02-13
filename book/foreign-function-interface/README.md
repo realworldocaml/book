@@ -1126,12 +1126,12 @@ You can find more information about the C interface in several places:
   C together from the other side of the boundary, by writing C functions that
   operate on the OCaml representation of values. You can find details of the
   standard interface in the
-  [ OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html)
+  [OCaml manual](https://ocaml.org/manual/intfc.html)
   and in the book
   [*Developing Applications with Objective Caml*](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf).
 
-- Florent Monnier maintains an excellent online
-  [ OCaml](http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html)
+- Florent Monnier maintains an excellent
+  [online tutorial](http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html)
   that provides examples of how to call OCaml functions from C. This covers a
   wide variety of OCaml data types and also more complex callbacks between C
   and OCaml.

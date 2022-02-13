@@ -348,11 +348,11 @@ $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc
 ```
 
-You should now have HTML files inside the <em class="filename">html/</em>
+You should now have HTML files inside the `html/`
 directory and also be able to view the UNIX manual pages held in
-<em class="filename">man/man3</em>. There are quite a few comment formats and
+`man/man3`. There are quite a few comment formats and
 options to control the output for the various backends. Refer to the
-[OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html)
+[OCaml manual](https://ocaml.org/manual/native.html)
 for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
 for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
 HTML generator]{.idx}[HTML
@@ -410,7 +410,7 @@ module Abc : sig val a : unit val b : unit end
 ```
 
 The warning number in our example is taken from the
-[compiler manual page](https://caml.inria.fr/pub/docs/manual-ocaml/native.html).
+[compiler manual page](https://ocaml.org/manual/native.html).
 In this case, warning 10 emits a message if the expression in a sequence
 doesn't have type `unit`.  The `@@@warning` nodes in the module implementation
 cause the compiler to change its behaviour within the scope of that structure only.

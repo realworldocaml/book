@@ -1081,24 +1081,20 @@ same basic pattern, including:
 [Monad.Make]{.idx}[Hashable.Make]{.idx}[Comparable
 module/Comparable.Make]{.idx}[Container.Make]{.idx}
 
-`Container.Make`
-: Very similar to `Foldable.Extend`.
+* `Container.Make` : Very similar to `Foldable.Extend`.
 
-`Comparable.Make`
-: Adds support for functionality that depends on the presence of a comparison
+* `Comparable.Make` : Adds support for functionality that depends on the presence of a comparison
   function, including support for containers like maps and sets.
 
-`Hashable.Make`
-: Adds support for hashing-based data structures including hash tables, hash
+* `Hashable.Make` : Adds support for hashing-based data structures including hash tables, hash
   sets, and hash heaps.
 
-`Monad.Make`
-: For so-called monadic libraries, like those discussed in Chapters
-  [Error Handling](error-handling.html#error-handling){data-type=xref data-xrefstyle="select:
-  labelnumber"} and
-  [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref data-xrefstyle="select:
-  labelnumber"}. Here, the functor is used to provide a collection of
-  standard helper functions based on the `bind` and `return` operators.
+* `Monad.Make` : For so-called monadic libraries, like those discussed in Chapters
+  [Error Handling](error-handling.html#error-handling){data-type=xref}
+  and
+  [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+  Here, the functor is used to provide a collection of standard helper
+  dunctions based on the `bind` and `return` operators.
 
 These functors come in handy when you want to add the same kind of
 functionality that is commonly available in `Base` to your own types.
