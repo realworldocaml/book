@@ -77,9 +77,9 @@ checking]{.idx}[unit tests]{.idx}
 
 There are several JSON libraries available for OCaml. For this
 chapter, we've picked the popular
-[Yojson](https://github.com/ocaml-community/yojson) library, which you can
-install by running `opam install yojson`. Once installed, you can open
-it in the `utop` toplevel as follows.
+[Yojson](https://github.com/ocaml-community/yojson) library, which you
+can install by running `opam install yojson`. Once installed, you can
+open it in `utop` as follows:
 
 ```ocaml env=install
 # open Core;;
