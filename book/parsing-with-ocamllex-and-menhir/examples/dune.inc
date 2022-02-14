@@ -4,8 +4,7 @@
  (deps
   (source_tree ./correct/parsing-test)
   (package base)
-  (package core)
-  (package menhir))
+  (package core))
  (action
   (system "dune build @all @runtest --root ./correct/parsing-test")))
 

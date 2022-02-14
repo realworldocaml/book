@@ -1,1 +1,1 @@
-(packages base core menhir)
+(packages base core)
