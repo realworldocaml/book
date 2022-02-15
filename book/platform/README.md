@@ -320,12 +320,16 @@ on our locally defined `hello` library so that we can access it.
 <!-- TODO: This doesn't work, though! inline tests are sadly not
      currently supported with the test stanza.  I propose we:
 
-       - stick a reasonable template in, which, in particular, doesn't
-         use the test stanza, since that won't work for inline tests.
+     - stick a reasonable template in, which, in particular, doesn't
+       use the test stanza, since that won't work for inline tests.
 
-      - Have as near-future work to fix the dune template generation
-        to generate a library instead of a test stanza if
-        -inline-tests is requested.
+     - put our example inline test in the test directory, rather than
+       the lib directory, since that's generally the recommended
+       style.
+
+     - Have as near-future work (before the book is published) to fix
+       the dune template generation to generate a library instead of a
+       test stanza if -inline-tests is requested.
 
      - down the line, we should fix the dune test stanza to support
        inline tests. (We want this internally at JS too.)
