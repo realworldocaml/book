@@ -259,6 +259,11 @@ this makes writing tests and documentation easier in addition to
 improving reusability.  [libraries/defining libraries]{.idx}
 Let's look at `lib/dune` in more detail:
 
+<!-- TODO: This isn't what the file looks like, is it? Since we no longer -->
+<!-- have the ppx-declarations in the "dune init" invocation.  Also, -->
+<!-- we're not going to add any tests inline in msg.ml, so, maybe we -->
+<!-- just don't need it? -->
+
 ```
 (library
  (inline_tests)
@@ -272,7 +277,7 @@ and the `name` field determines the name of that module.  In our
 example project `msg.ml` is defined in `lib/dune` which defines a `hello`
 library. Thus, users of our newly defined module can access it as
 `Hello.Msg`.  You can read more about wrapping and module aliases in
-[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#wrapping-libraries-with-module-aliases){data-type=xref}/
+[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#wrapping-libraries-with-module-aliases){data-type=xref}.
 
 Although our example library only currently contains a single `Msg` module,
 it is common to have multiple modules per library. Other modules within
