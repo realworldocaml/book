@@ -317,6 +317,20 @@ defined within libraries).  In our project, the `test/hello.ml`
 module defines the executable test cases. We'll also add a dependency
 on our locally defined `hello` library so that we can access it.
 
+<!-- TODO: This doesn't work, though! inline tests are sadly not
+     currently supported with the test stanza.  I propose we:
+
+       - stick a reasonable template in, which, in particular, doesn't
+         use the test stanza, since that won't work for inline tests.
+
+      - Have as near-future work to fix the dune template generation
+        to generate a library instead of a test stanza if
+        -inline-tests is requested.
+
+     - down the line, we should fix the dune test stanza to support
+       inline tests. (We want this internally at JS too.)
+-->
+
 <!-- $MDX file=examples/correct/hello/test/dune -->
 ```scheme
 (test
