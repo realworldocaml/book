@@ -200,7 +200,7 @@ implementation.
 
 This all amounts to an improvement in terms of the API, but the
 implementation is if anything worse.  We still have the same evaluator
-with all of it's dynamic checking for type errors.  But we've had to
+with all of its dynamic checking for type errors.  But we've had to
 write yet more wrapper code to make this work.
 
 Also, the phantom-type discipline is quite error prone.  You might

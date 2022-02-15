@@ -895,7 +895,7 @@ val downcase_extension : string -> string = <fun>
 ```
 
 Note that we used the `^` operator for concatenating strings. The
-concatenation operator is provided as part of the `Pervasives` module, which
+concatenation operator is provided as part of the `Stdlib` module, which
 is automatically opened in every OCaml program.
 
 Options are important because they are the standard way in OCaml to encode a
@@ -1128,8 +1128,8 @@ following example.
 ```ocaml env=main
 # let mean rsum = rsum.sum /. Float.of_int rsum.samples
   let stdev rsum =
-    Float.sqrt (rsum.sum_sq /. Float.of_int rsum.samples
-  -. (rsum.sum /. Float.of_int rsum.samples) **. 2.);;
+    Float.sqrt
+      (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
 val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
 ```
