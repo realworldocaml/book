@@ -850,8 +850,8 @@ List.map ~f:downcase_extension
 </div>
 <p>Note that we used the <code>^</code> operator for concatenating
 strings. The concatenation operator is provided as part of the
-<code>Pervasives</code> module, which is automatically opened in every
-OCaml program.</p>
+<code>Stdlib</code> module, which is automatically opened in every OCaml
+program.</p>
 <p>Options are important because they are the standard way in OCaml to
 encode a value that might not be there; there’s no such thing as a
 <code>NullPointerException</code> in OCaml. This is different from most
@@ -1071,8 +1071,8 @@ deviations, as shown in the following example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let mean rsum = rsum.sum /. Float.of_int rsum.samples
 let stdev rsum =
-  Float.sqrt (rsum.sum_sq /. Float.of_int rsum.samples
--. (rsum.sum /. Float.of_int rsum.samples) **. 2.);;
+  Float.sqrt
+    (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
 &gt;val mean : running_sum -&gt; float = &lt;fun&gt;
 &gt;val stdev : running_sum -&gt; float = &lt;fun&gt;
 </code></pre>
