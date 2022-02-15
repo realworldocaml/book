@@ -5,7 +5,7 @@ use to build real OCaml programs.  We'll now wrap up this part by
 examining the tools you can use for editing, compiling, testing,
 documenting and publishing your own projects.
 
-The OCaml community has adopted a platform of modern tools to interface
+The OCaml community has developed a platform of modern tools to interface
 it with IDEs such as Visual Studio Code.  All you need to do is to specify
 your project metadata (for example, library dependencies and compiler
 versions), and the OCaml Platform tools can generate API documentation and
@@ -20,7 +20,7 @@ template that is suitable to get us started.
 
 
 ```sh dir=examples/correct/hello,skip
-$ dune init proj hello --ppx ppx_inline_test --inline-tests
+$ dune init proj hello
 Success: initialized project component named hello
 ```
 
@@ -52,7 +52,7 @@ bin  hello.opam  lib  test
 
 
 Dune will create a `hello/` directory and populate it with a
-skeleton OCaml project.  This sample project has all the metadata
+skeleton OCaml project.  This sample project has the basic metadata
 required for us to learn more about the opam package manager and the
 dune build tool that we've used earlier in the book.
 
@@ -82,7 +82,7 @@ $ cd hello
 $ opam switch create .
 ```
 
-This will invoke opam to install the project libraries (in this case,
+This will invoke opam to install the project dependencies (in this case,
 just dune as we didn't specify any more when initialising the project).
 All of the files from a local switch will be present under `_opam/`
 in the working directory.
@@ -97,38 +97,93 @@ If you prefer not to modify your shell configuration, then you can
 also invoke commands via `opam exec` to modify the path for
 the subcommand specified in the remainder of the command line.
 
-<!-- TODO: Don't we generally put headers on these blocks?  -->
-
-
 ::: {data-type=note}
+##### Choosing an OCaml compiler version
 
-<!-- This strikes me as a little confusing.  I don't think of
-the things you're describing as compiler packages, so much as
-it's kinds of compiler packages. There are lots of different
-ocaml-variants after all.
+<!-- TODO: This feels a little hard to follow.
 
-I think this section would be better if we just wrote out some
-examples, i.e., show how you can install a different version of OCaml,
-or the same version with a particular variant. The concrete
-command-line invocation would really clarify what's going on.
--->
+     Maybe it would be good to start this off by explaining what [opam
+     switch create .] does, which I think is to just use the same
+     compiler setup that's present in the currently active switch.
 
+     The point of this chunk then is to say that sometimes you want to
+     specify a particular compiler version, and here's how you do
+     that. The first question is, what versions are available, which
+     lets you explain `list-available`, and the narrative goes from there.
+  -->
 
 When you want to select a particular version of the OCaml compiler,
 you can use `opam switch list-available` to get a set of versions.
-You'll notice that there are three different OCaml compiler packages:
+You'll notice that there are three different types of OCaml compiler
+packages.
 
-- `ocaml-system` detects a pre-existing version of the OCaml compiler
-  on your machine, and installs a wrapper package of that particular
-  version. This is a fast operation since nothing needs to be compiled.
-- `ocaml-base-compiler` builds a switch-local copy of that version
-  from scratch.  It can take a little longer than `ocaml-system`,
-  but you have much more flexibility since you depend on your OS
-  packages less.
-- `ocaml-variants` is used when you need a custom configuration option
-  to the compiler, such as `flambda`.  In this case, you can also install
-  `ocaml-options-*` packages alongside `ocaml-variants` to activate
-  those variations.
+<!-- TODO: This sounds a bit too active, maybe?  Instead, consider:
+
+    `ocaml-system` is the name opam uses for the pre-existing version
+    of the OCaml compiler that was already installed on your machine.
+    This compiler is always fast to install since nothing needs to be
+    compiled for it.
+
+-->
+
+`ocaml-system` detects a pre-existing version of the OCaml compiler
+on your machine, and installs a wrapper package of that particular
+version. This is a fast operation since nothing needs to be compiled.
+The only thing you need to do to create a system switch is to have
+the right version of OCaml already installed (e.g. via `apt` or
+Homebrew) and to pass the same version to the switch creation as an
+additional argument. For example, if you have OCaml 4.13.1 installed:
+
+```
+$ opam switch create . 4.13.1
+```
+
+<!-- TODO: This is a little confusing! Are you saying that if 4.13.1
+     is installed, and you ask to build 4.13.1, it will...just rebuild
+     it from scratch?  If so, why did you say "if you have OCaml
+     4.13.1 installed"?  Wouldn't the same be true for any version of
+     OCaml you want to install?  Maybe you meant to say:
+
+       For example, if you have OCaml 4.13.1 installed, then running
+       this command:
+
+       ```
+       $ opam switch create . 4.13.1
+       ```
+
+       will install the system compiler into your local switch.
+
+     Perhaps related, but I don't know what `ocaml-base-compiler` is
+     doing in the following sentence.
+-->
+
+`ocaml-base-compiler` builds a switch-local copy of that OCaml version
+from scratch.  It can take a little longer than `ocaml-system`,
+but you have much more flexibility about the choice of versions.
+The default operation of `opam switch create` is to calculate the latest
+supported compiler version from your project metadata and use that one for the
+local switch.
+
+<!-- TODO: Maybe the above would be clearer with an example of how to
+     use ocaml-base-compiler, much as we have an example of using
+     ocaml-variants. -->
+
+`ocaml-variants` is used when you need to add custom configuration options
+to the compiler, such as `flambda`.  In this case, you can also install
+`ocaml-options-*` packages alongside `ocaml-variants` to activate
+those configuration flags.  For example, if you wanted to use the `flambda`
+inliner with your package, you would:
+
+```sh skip
+$ opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
+```
+
+You can see the full set of option packages by using:
+
+```sh skip
+$ opam search ocaml-option
+```
+
 :::
 
 ### Structure of an OCaml project
@@ -152,20 +207,15 @@ application to examine a fuller project structure.
     └── hello.ml
 ```
 
-<!-- TODO: I added a bit more explanation her of what's going on in -->
-<!-- the above file-tree.  I also reorganized the lines in the file -->
-<!-- tree to make them show up in the natural order to explain them. -->
-<!-- What do you think? -->
-
 Some observations about this structure:
 
 - The `dune-project` file marks the root of the project, and is used
-  for writing down some key metadata for the project, but more on that
-  later.
+  for writing down some key metadata for the project (more on that
+  later).
 
 - The `hello.opam` file contains metadata for registering this
   software as an opam project. As we'll see, we won't need to edit
-  this manually because we can generate the file via dune.
+  this manually because we can generate the file via `dune`.
 
 - There are three source directories, each with its own `dune` file
   specifying the build parameters for that part of the codebase.  The
@@ -206,7 +256,13 @@ providing a convenient way to package up multiple dependencies with a
 single name. A project usually puts the business logic of the application
 into a library rather than directly into an executable binary, since
 this makes writing tests and documentation easier in addition to
-improving reusability.  Let's look at `lib/dune` in more detail:
+improving reusability.  [libraries/defining libraries]{.idx}
+Let's look at `lib/dune` in more detail:
+
+<!-- TODO: This isn't what the file looks like, is it? Since we no longer -->
+<!-- have the ppx-declarations in the "dune init" invocation.  Also, -->
+<!-- we're not going to add any tests inline in msg.ml, so, maybe we -->
+<!-- just don't need it? -->
 
 ```
 (library
@@ -220,7 +276,8 @@ By default, dune exposes libraries as *wrapped* under a single module,
 and the `name` field determines the name of that module.  In our
 example project `msg.ml` is defined in `lib/dune` which defines a `hello`
 library. Thus, users of our newly defined module can access it as
-`Hello.Msg`.
+`Hello.Msg`.  You can read more about wrapping and module aliases in
+[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#wrapping-libraries-with-module-aliases){data-type=xref}.
 
 Although our example library only currently contains a single `Msg` module,
 it is common to have multiple modules per library. Other modules within
@@ -259,6 +316,24 @@ that is run when you invoke `dune runtest` (along with any inline tests
 defined within libraries).  In our project, the `test/hello.ml`
 module defines the executable test cases. We'll also add a dependency
 on our locally defined `hello` library so that we can access it.
+
+<!-- TODO: This doesn't work, though! inline tests are sadly not
+     currently supported with the test stanza.  I propose we:
+
+     - stick a reasonable template in, which, in particular, doesn't
+       use the test stanza, since that won't work for inline tests.
+
+     - put our example inline test in the test directory, rather than
+       the lib directory, since that's generally the recommended
+       style.
+
+     - Have as near-future work (before the book is published) to fix
+       the dune template generation to generate a library instead of a
+       test stanza if -inline-tests is requested.
+
+     - down the line, we should fix the dune test stanza to support
+       inline tests. (We want this internally at JS too.)
+-->
 
 <!-- $MDX file=examples/correct/hello/test/dune -->
 ```scheme
@@ -316,40 +391,6 @@ $ dune exec -- hello
 Hello World
 ```
 
-### Defining packages from libraries and executables
-
-A set of libraries, binaries and application data can all be gathered
-together into a *package*.  This is what is installed when you eventually
-publish the package and another user types in `opam install hello`.
-In our project, `hello.opam` contains the specification of the package.
-
-Much of the time, the module, library, and package names are all the
-same.  The same name can often be used for the library and the package.
-But there are reasons for these names to be distinct as well:
-
-- Some libraries are exposed as multiple top-level modules, which
-  means you need to pick a different name for referring to that
-  collection of modules.
-- Even when the library has a single top-level module, you might want
-  the library name to be different from the module name to avoid name
-  clashes at the library level.
-- Package names might differ from library names if a package combines
-  multiple libraries and/or binaries together.
-
-It is important to understand the difference between modules,
-libraries and packages, as you will use each of these at different
-points of your OCaml coding journey.  The root of a single project is
-marked by a `dune-project` file (more on that later). In order to keep
-the file layout clean, we typically structure our project into
-subdirectories that contain the modules for a particular library or
-binary, with each directory containing a separate `dune` file with
-build instructions.  That's why in our example project, we have:
-
-- a `lib/` directory that builds a `hello` library.
-- a `test/` directory that defines unit tests for the library.
-- a `bin/` directory that uses the `hello` library to build a
-  standalone application that can be executed from the command-line.
-
 ## Setting up an integrated development environment
 
 Now that we've seen the basic structure of the OCaml project, it's
@@ -396,7 +437,9 @@ should see some documentation pop up about the function and its
 arguments.  This information comes from the _docstrings_ written into
 the `msg.mli` interface file in the `hello` library.
 
-Modiy th
+Modify the `msg.mli` interface file to contain some signature documentation
+as follows:
+
 <!-- $MDX file=examples/correct/hello/lib/msg.mli -->
 ```
 (** This is a docstring, as it starts with "(**", as opposed to normal comments
@@ -476,11 +519,12 @@ opam packages, set up continuous integration and publish your code.
 ### Defining opam packages
 
 The only metadata file that is really _required_ to participate in the
-open-source OCaml ecosystem is an `opam` file in your source tree.
-Each `opam` file defines a *package* -- a collection of OCaml
-libraries and executable binaries or application data.  Each opam
-package can define dependencies on other opam packages, and includes
-build and testing directions for your project.
+open-source OCaml ecosystem is an `opam` file in your source tree.  Each `opam`
+file defines a *package* -- a collection of OCaml libraries and executable
+binaries or application data.  Each opam package can define dependencies on
+other opam packages, and includes build and testing directions for your
+project.  This is what's installed when you eventually publish the package and
+someone else types in `opam install hello`.
 
 A collection of `opam` files can be stored in an *opam repository* to
 create a package database, with a central one for the OCaml ecosystem
@@ -489,16 +533,36 @@ available at <https://github.com/ocaml/opam-repository>.  The official
 eponymous [opam package manager](https://opam.ocaml.org) that we've
 been using throughout this book.
 
-The `hello.opam` file in our sample project is currently empty, but we
-can generate it next using dune.
+::: {data-type=note}
+##### How do we name OCaml modules, libraries and packages?
+
+Much of the time, the module, library, and package names are all the
+same.  The same name can often be used for the library and the package.
+But there are reasons for these names to be distinct as well:
+
+- Some libraries are exposed as multiple top-level modules, which
+  means you need to pick a different name for referring to that
+  collection of modules.
+- Even when the library has a single top-level module, you might want
+  the library name to be different from the module name to avoid name
+  clashes at the library level.
+- Package names might differ from library names if a package combines
+  multiple libraries and/or binaries together.
+
+It's important to understand the difference between modules, libraries and
+packages as you work on bigger projects. These can easily have thousands of
+modules, hundreds of libraries and dozens of opam packages in a single
+codebase.
+
+:::
 
 ### Generating project metadata from dune
 
-You don't need to write the opam file by hand -- instead, we can use
-define our project metadata using the dune build system and have it
-autogenerated for us. The root directory of an OCaml project built by
-dune has a `dune-project` file that defines the project metadata. In our
-example project, it starts with:
+The `hello.opam` file in our sample project is currently empty, but you don't
+need to write it by hand -- instead, we can define our project metadata using
+the dune build system and have the opam file autogenerated for us. The root
+directory of an OCaml project built by dune has a `dune-project` file that
+defines the project metadata. In our example project, it starts with:
 
 ```scheme
 (lang dune 2.9)
@@ -722,3 +786,59 @@ You can simply delete the git tag and re-run the release process until
 the package is merged.  Once it is merged, you can navigate to the
 <ocaml.org> site and view it online in an hour or so.  It will also be
 available in the central repository for other users to install.
+
+::: {data-type=note}
+##### Creating lock files for your projects
+
+Before you publish a project, you might also want to create an
+opam lock file to include with the archive. A lock file records
+the exact versions of all the transitive opam dependencies at
+the time you generate it.  All you need to do is to run:
+
+```sh skip
+$ opam lock
+```
+
+This generates a `pkgname.opam.locked` file which contains
+the same metadata as your original file, but with all the dependencies
+explictly listed.  Later on, if a user wants to reconstruct your exact opam
+environment (as opposed to the package solution they might calculate with a
+future opam repository), then they can pass an option during installation:
+
+```sh skip
+$ opam install pkgname --locked
+$ opam switch create . --locked
+```
+
+Lock files are an optional but useful step to take when releasing your
+project to the Internet.
+
+:::
+
+## Learning more from real projects
+
+There's a lot more customisation that happens in any real project, and we can't
+cover every aspect in this book. The best way by far to learn more is to dive
+in and compile an already established project, and perhaps even contribute to
+it. There are thousands of libraries and executable projects released on the
+opam repository which you can find online at <https://ocaml.org>.
+
+A selection of some include:
+
+- `patdiff` is an OCaml implementation of the patience diff algorithm,
+  and is a nice self-contained CLI project using Core. <https://github.com/janestreet/patdiff>
+- The source code to this book is published as a self-contained monorepo
+  with all the dependencies bundled together, for convenient compilation.
+  <https://github.com/realworldocaml/book>
+- Flow is a static typechecker for JavaScript written in OCaml that uses
+  Base and works on macOS, Windows and Linux.  It's a good example of a large,
+  cross-platform CLI-driven tool. <https://github.com/facebook/flow>
+- Octez is an OCaml implementation of a proof-of-stake blockchain called Tezos,
+  which contains a [comprehensive collection](https://tezos.gitlab.io/shell/the_big_picture.html#packages)
+  of libraries that such as interpreters for a stack language, and a shell that uses Lwt
+  to provide networking, storage and cryptographic communications to the outside world. <https://gitlab.com/tezos/tezos>
+- MirageOS is a library operating system written in OCaml, that can compile code to a
+  variety of embedded and hypervisor targets. There are 100s of libraries all written
+  using dune in a variety of ways available at <https://github.com/mirage>.
+- You can find a number of standalone OCaml libraries for unicode, parsing and computer
+  graphics and OS interaction over at <https://erratique.ch/software>.
