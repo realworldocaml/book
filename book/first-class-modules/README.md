@@ -112,7 +112,7 @@ val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 
 With these functions in hand, we can now work with values of type
 `(module X_int)` in a more natural style, taking advantage of the concision
-and simplicity of the core <span class="keep-together">language</span>:
+and simplicity of the core language:
 
 ```ocaml env=main
 # let six = plus three three;;
@@ -756,7 +756,7 @@ let unload t handler_name =
 ```
 
 Finally, we need to implement the `eval` function, which will determine the
-query <span class="keep-together">interface</span> presented to the user.
+query interface presented to the user.
 We'll do this by creating a variant type, and using the s-expression
 converter generated for that type to parse the query from the user:
 

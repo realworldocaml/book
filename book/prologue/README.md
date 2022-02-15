@@ -33,12 +33,12 @@ features that have been developed over the last 40 years. These include:
 
 - *Parametric polymorphism*, which enables the construction of abstractions
   that work across different data types, similar to generics in Java and C#
-  and templates in <span class="keep-together">C++.</span>
+  and templates in C++.
 
 - Good support for *immutable programming*, *i.e.*, programming without
   making destructive updates to data structures. This is present in
-  traditional functional <span class="keep-together">languages</span> like
-  Scheme, and is also found in distributed, big-data frameworks like Hadoop.
+  traditional functional languages like Scheme, and is also found in
+  distributed, big-data frameworks like Hadoop.
 
 - *Type inference*, so you don't need to annotate every single variable in
   your program with its type. Instead, types are inferred based on how a
@@ -112,14 +112,14 @@ arguments.
 
 The last two decades has seen OCaml attract a significant user base, and
 language improvements have been steadily added to support the growing
-commercial and academic <span class="keep-together">codebases</span>.  By 2012,
-the OCaml 4.0 release had added Generalised Algebraic Data Types (GADTs) and
-first-class modules to increase the flexibility of the language. Since then,
-OCaml has had a steady yearly release cadence, and OCaml 5.0 with multicore
-support is around the corner in 2022.  There is also fast native code support
-for the latest CPU architectures such as x86_64, ARM, RISC-V and PowerPC,
-making OCaml a good choice for systems where resource usage, predictability,
-and performance all matter.
+commercial and academic codebases.  By 2012, the OCaml 4.0 release had added
+Generalised Algebraic Data Types (GADTs) and first-class modules to increase
+the flexibility of the language. Since then, OCaml has had a steady yearly
+release cadence, and OCaml 5.0 with multicore support is around the corner
+in 2022.  There is also fast native code support for the latest CPU
+architectures such as x86_64, ARM, RISC-V and PowerPC, making OCaml a good
+choice for systems where resource usage, predictability, and performance
+all matter.
 
 ### The `Base` Standard Library {#the-core-standard-library}
 
@@ -220,9 +220,8 @@ personal experience to construct scalable, robust software systems.
 - Part II builds on the basics by working through useful tools and techniques
   for addressing common practical applications, from command-line parsing to
   asynchronous network programming. Along the way, you'll see how some of the
-  <span class="keep-together">concepts</span> from Part I are glued together
-  into real libraries and tools that combine different features of the
-  language to good effect.
+  concepts from Part I are glued together into real libraries and tools that
+  combine different features of the language to good effect.
 
 - Part III discusses OCaml's runtime system and compiler toolchain. It is
   remarkably simple when compared to some other language implementations

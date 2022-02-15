@@ -880,11 +880,10 @@ Memoization is also useful for efficiently implementing some recursive
 algorithms. One good example is the algorithm for computing the *edit
 distance* (also called the Levenshtein distance) between two strings.
 The edit distance is the number of single-character changes (including
-letter switches, insertions, and deletions) required to <span
-class="keep-together">convert</span> one string to the other. This
-kind of distance metric can be useful for a variety of approximate
-string-matching problems, like spellcheckers. [string
-matching]{.idx}[Levenshtein distance]{.idx}[edit distance]{.idx}
+letter switches, insertions, and deletions) required to
+convert one string to the other. This kind of distance metric can be
+useful for a variety of approximate string-matching problems, like
+spellcheckers. [string matching]{.idx}[Levenshtein distance]{.idx}[edit distance]{.idx}
 
 Consider the following code for computing the edit
 distance. Understanding the algorithm isn't important here, but you

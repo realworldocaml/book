@@ -1018,8 +1018,9 @@ preserves your invariants.
 
 Despite these benefits, there is a trade-off here. In particular, exposing
 types concretely makes it possible to use pattern-matching with those types,
-which as we saw in <span class="keep-together">Lists And Patterns</span> is a
-powerful and important tool. You should generally only expose the concrete
+which as we saw in
+[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}
+is a powerful and important tool. You should generally only expose the concrete
 implementation of your types when there's significant value in the ability to
 pattern match, and when the invariants that you care about are already
 enforced by the data type itself.

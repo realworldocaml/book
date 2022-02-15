@@ -208,12 +208,12 @@ algorithm that operates in several phases:
 - The *compact* phase relocates live blocks into a freshly allocated heap to
   eliminate gaps in the free list. This prevents the fragmentation of heap
   blocks in long-running programs and normally occurs much less frequently
-  than the mark and sweep <span class="keep-together">phases</span>.
+  than the mark and sweep phases.
 
 A major garbage collection must also stop the world to ensure that blocks can
 be moved around without this being observed by the live application. The
 mark-and-sweep phases run incrementally over slices of the heap to avoid
-pausing the application for long <span class="keep-together">periods</span>
+pausing the application for long periods
 of time, and also precede each slice with a fast minor collection. Only the
 compaction phase touches all the memory in one go, and is a relatively rare
 operation.
@@ -617,8 +617,7 @@ lifetime of the program, for example, a list of integer constants.
 `Heap_block` explicitly checks to see if the value is in the major or minor
 heap, and rejects most constant values. Compiler optimizations may also
 duplicate some immutable values such as floating-point values in arrays.
-These may be finalized while another
-<span class="keep-together">duplicate</span> copy is being used by the
+These may be finalized while another duplicate copy is being used by the
 program.
 
 For this reason, attach finalizers only to values that you are explicitly

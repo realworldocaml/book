@@ -63,10 +63,10 @@ C++, Java, C#, Ruby, Python, or JavaScript.
 ## OCaml Objects
 
 If you already know about object-oriented programming in a language
-like Java or <span class="keep-together">C++,</span> the OCaml object
-system may come as a surprise. Foremost is the complete separation of
-objects and their types from the class system. In a language like
-Java, a class name is also used as the type of objects created by
+like Java or C++, the OCaml object system may come as a surprise.
+Foremost is the complete separation of objects and their types
+from the class system. In a language like Java, a class name is also
+used as the type of objects created by
 instantiating it, and the relationships between these object types
 correspond to inheritance. For example, if we implement a class
 `Deque` in Java by inheriting from a class `Stack`, we would be
@@ -317,8 +317,7 @@ Some (4, <obj>)
 There are some restrictions on the use of the expression `{<
 ... >}`. It can be used only within a method body, and only the values
 of fields may be updated. Method implementations are fixed at the time
-the object is created; they cannot be changed <span
-class="keep-together">dynamically</span>.
+the object is created; they cannot be changed dynamically.
 
 ## When to Use Objects
 

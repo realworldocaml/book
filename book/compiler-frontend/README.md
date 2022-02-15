@@ -1,4 +1,4 @@
-# The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span>
+# The Compiler Frontend: Parsing and Type Checking
 
 Compiling source code into executable programs involves a fairly complex set of
 libraries, linkers, and assemblers. It's important to understand how these fit
@@ -817,7 +817,7 @@ help with future refactoring and debugging.
 #### Enforcing principal typing
 
 The compiler also has a stricter *principal type checking* mode that is
-activated via the <span class="keep-together">-principal</span> flag. This
+activated via the `-principal` flag. This
 warns about risky uses of type information to ensure that the type inference
 has one principal result. A type is considered risky if the success or
 failure of type inference depends on the order in which subexpressions are
