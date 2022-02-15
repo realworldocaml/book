@@ -215,7 +215,7 @@ Some observations about this structure:
 
 - The `hello.opam` file contains metadata for registering this
   software as an opam project. As we'll see, we won't need to edit
-  this manually because we can generate the file via dune.
+  this manually because we can generate the file via `dune`.
 
 - There are three source directories, each with its own `dune` file
   specifying the build parameters for that part of the codebase.  The
