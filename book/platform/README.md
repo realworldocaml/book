@@ -100,10 +100,31 @@ the subcommand specified in the remainder of the command line.
 ::: {data-type=note}
 ##### Choosing an OCaml compiler version
 
+<!-- TODO: This feels a little hard to follow.
+
+     Maybe it would be good to start this off by explaining what [opam
+     switch create .] does, which I think is to just use the same
+     compiler setup that's present in the currently active switch.
+
+     The point of this chunk then is to say that sometimes you want to
+     specify a particular compiler version, and here's how you do
+     that. The first question is, what versions are available, which
+     lets you explain `list-available`, and the narrative goes from there.
+  -->
+
 When you want to select a particular version of the OCaml compiler,
 you can use `opam switch list-available` to get a set of versions.
 You'll notice that there are three different types of OCaml compiler
 packages.
+
+<!-- TODO: This sounds a bit too active, maybe?  Instead, consider:
+
+    `ocaml-system` is the name opam uses for the pre-existing version
+    of the OCaml compiler that was already installed on your machine.
+    This compiler is always fast to install since nothing needs to be
+    compiled for it.
+
+-->
 
 `ocaml-system` detects a pre-existing version of the OCaml compiler
 on your machine, and installs a wrapper package of that particular
@@ -117,12 +138,35 @@ additional argument. For example, if you have OCaml 4.13.1 installed:
 $ opam switch create . 4.13.1
 ```
 
+<!-- TODO: This is a little confusing! Are you saying that if 4.13.1
+     is installed, and you ask to build 4.13.1, it will...just rebuild
+     it from scratch?  If so, why did you say "if you have OCaml
+     4.13.1 installed"?  Wouldn't the same be true for any version of
+     OCaml you want to install?  Maybe you meant to say:
+
+       For example, if you have OCaml 4.13.1 installed, then running
+       this command:
+
+       ```
+       $ opam switch create . 4.13.1
+       ```
+
+       will install the system compiler into your local switch.
+
+     Perhaps related, but I don't know what `ocaml-base-compiler` is
+     doing in the following sentence.
+-->
+
 `ocaml-base-compiler` builds a switch-local copy of that OCaml version
 from scratch.  It can take a little longer than `ocaml-system`,
 but you have much more flexibility about the choice of versions.
 The default operation of `opam switch create` is to calculate the latest
 supported compiler version from your project metadata and use that one for the
 local switch.
+
+<!-- TODO: Maybe the above would be clearer with an example of how to
+     use ocaml-base-compiler, much as we have an example of using
+     ocaml-variants. -->
 
 `ocaml-variants` is used when you need to add custom configuration options
 to the compiler, such as `flambda`.  In this case, you can also install
@@ -775,4 +819,3 @@ A selection of some include:
   using dune in a variety of ways available at <https://github.com/mirage>.
 - You can find a number of standalone OCaml libraries for unicode, parsing and computer
   graphics and OS interaction over at <https://erratique.ch/software>.
-  
