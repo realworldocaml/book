@@ -404,8 +404,9 @@ or building custom runtimes). Full details can be found in the <a href="https://
 <p>A consequence of using the bytecode compiler is that the final link
 phase must be performed by <code>ocamlc</code>. However, you might
 sometimes want to embed your OCaml code inside an existing C
-application. OCaml also supports this mode of operation via the <span class="keep-together">-output-obj</span> directive.<a data-primary="C
-object files" data-type="indexterm">&nbsp;</a></p>
+application. OCaml also supports this mode of operation via the
+<code>-output-obj</code> directive.<a data-primary="C object
+files" data-type="indexterm">&nbsp;</a></p>
 <p>This mode causes <code>ocamlc</code> to output an object file
 containing the bytecode for the OCaml part of the program, as well as a
 <code>caml_startup</code> function. All of the OCaml modules are linked

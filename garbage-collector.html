@@ -197,14 +197,15 @@ identifies dead blocks that weren’t marked earlier.</p></li>
 <li><p>The <em>compact</em> phase relocates live blocks into a freshly
 allocated heap to eliminate gaps in the free list. This prevents the
 fragmentation of heap blocks in long-running programs and normally
-occurs much less frequently than the mark and sweep <span class="keep-together">phases</span>.</p></li>
+occurs much less frequently than the mark and sweep phases.</p></li>
 </ul>
 <p>A major garbage collection must also stop the world to ensure that
 blocks can be moved around without this being observed by the live
 application. The mark-and-sweep phases run incrementally over slices of
-the heap to avoid pausing the application for long <span class="keep-together">periods</span> of time, and also precede each
-slice with a fast minor collection. Only the compaction phase touches
-all the memory in one go, and is a relatively rare operation.</p>
+the heap to avoid pausing the application for long periods of time, and
+also precede each slice with a fast minor collection. Only the
+compaction phase touches all the memory in one go, and is a relatively
+rare operation.</p>
 <section class="level3" id="allocating-on-the-major-heap">
 <h3>Allocating on the Major Heap</h3>
 <p>The major heap consists of a singly linked list of contiguous memory
@@ -582,8 +583,7 @@ constants. <code>Heap_block</code> explicitly checks to see if the value
 is in the major or minor heap, and rejects most constant values.
 Compiler optimizations may also duplicate some immutable values such as
 floating-point values in arrays. These may be finalized while another
-<span class="keep-together">duplicate</span> copy is being used by the
-program.</p>
+duplicate copy is being used by the program.</p>
 <p>For this reason, attach finalizers only to values that you are
 explicitly sure are heap-allocated and aren’t immutable. A common use is
 to attach them to file descriptors to ensure they are closed. However,
@@ -672,5 +672,4 @@ garbage-collected. It can also loop forever, which will cause other
 finalizers to be interleaved with it.</p>
 </section>
 </section>
-</article></div><a href="compiler-frontend.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 25</small>The Compiler Frontend: Parsing and Type
-Checking</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="compiler-frontend.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 25</small>The Compiler Frontend: Parsing and Type Checking</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

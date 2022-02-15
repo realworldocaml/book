@@ -1,7 +1,5 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The Compiler Frontend: Parsing and Type
-Checking - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="the-compiler-frontend-parsing-and-type-checking">
-<h1>The Compiler Frontend: Parsing and <span class="keep-together">Type
-Checking</span></h1>
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The Compiler Frontend: Parsing and Type Checking - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="the-compiler-frontend-parsing-and-type-checking">
+<h1>The Compiler Frontend: Parsing and Type Checking</h1>
 <p>Compiling source code into executable programs involves a fairly
 complex set of libraries, linkers, and assemblers. It’s important to
 understand how these fit together to help with your day-to-day workflow
@@ -785,12 +783,12 @@ debugging.</p>
 <section class="level4" id="enforcing-principal-typing">
 <h4>Enforcing principal typing</h4>
 <p>The compiler also has a stricter <em>principal type checking</em>
-mode that is activated via the <span class="keep-together">-principal</span> flag. This warns about risky
-uses of type information to ensure that the type inference has one
-principal result. A type is considered risky if the success or failure
-of type inference depends on the order in which subexpressions are
-typed.<a data-secondary="principality checks" data-primary="type inference" data-type="indexterm">&nbsp;</a><a data-primary="risky type" data-type="indexterm">&nbsp;</a><a data-primary="principal type
-checking" data-type="indexterm">&nbsp;</a></p>
+mode that is activated via the <code>-principal</code> flag. This warns
+about risky uses of type information to ensure that the type inference
+has one principal result. A type is considered risky if the success or
+failure of type inference depends on the order in which subexpressions
+are typed.<a data-secondary="principality
+checks" data-primary="type inference" data-type="indexterm">&nbsp;</a><a data-primary="risky type" data-type="indexterm">&nbsp;</a><a data-primary="principal type checking" data-type="indexterm">&nbsp;</a></p>
 <p>The principality check only affects a few language features:</p>
 <ul>
 <li><p>Polymorphic methods for objects</p></li>

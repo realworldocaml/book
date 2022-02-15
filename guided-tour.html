@@ -1038,7 +1038,8 @@ numbers;;
 </div>
 <p>The <code>.(i)</code> syntax is used to refer to an element of an
 array, and the <code>&lt;-</code> syntax is for modification. Because
-the elements of the array are counted starting at zero, element <span class="keep-together">.(2) is</span> the third element.</p>
+the elements of the array are counted starting at zero, element
+<code>numbers.(2)</code> is the third element.</p>
 <p>The <code>unit</code> type that we see in the preceding code is
 interesting in that it has only one possible value, written
 <code>()</code>. This means that a value of type <code>unit</code>
@@ -1304,15 +1305,14 @@ printed. This is done using the <code>printf</code> command, which
 provides support for type-safe format strings, similar to what you’ll
 find in a variety of languages. The format string is parsed by the
 compiler and used to determine the number and type of the remaining
-arguments that are <span class="keep-together">required</span>. In this
-case, there is a single formatting directive, <code>%F</code>, so
-<code>printf</code> expects one additional argument of type
-<code>float</code>.</p>
+arguments that are required. In this case, there is a single formatting
+directive, <code>%F</code>, so <code>printf</code> expects one
+additional argument of type <code>float</code>.</p>
 <section class="level3" id="compiling-and-running">
 <h3>Compiling and Running</h3>
 <p>We’ll compile our program using <code>dune</code>, a build system
 that’s designed for use with OCaml projects. First, we need to write a
-<em>dune</em> file to specify the build.</p>
+<code>dune</code> file to specify the build.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
  (name      sum)

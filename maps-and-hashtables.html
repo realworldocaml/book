@@ -892,10 +892,10 @@ willing to traverse. By default, that bound is set at 10 “meaningful”
 nodes. <a data-secondary="polymorphic hash
 function" data-primary="hash tables" data-type="indexterm">&nbsp;</a></p>
 <p>The bound on the traversal means that the hash function may ignore
-part of the data structure, and this can lead to pathological <span class="keep-together">cases</span> where every value you store has the
-same hash value. We’ll demonstrate this below, using the function
-<code>List.range</code> to allocate lists of integers of different
-length:</p>
+part of the data structure, and this can lead to pathological cases
+where every value you store has the same hash value. We’ll demonstrate
+this below, using the function <code>List.range</code> to allocate lists
+of integers of different length:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Hashtbl.Poly.hashable.hash (List.range 0 9);;
 &gt;- : int = 209331808

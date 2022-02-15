@@ -98,7 +98,7 @@ let plus m1 m2 =
 </div>
 <p>With these functions in hand, we can now work with values of type
 <code>(module X_int)</code> in a more natural style, taking advantage of
-the concision and simplicity of the core <span class="keep-together">language</span>:</p>
+the concision and simplicity of the core language:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let six = plus three three;;
 &gt;val six : (module X_int) = &lt;module&gt;
@@ -703,10 +703,9 @@ Note that the handler explicitly refuses to unload itself:</p>
     )</code></pre>
 </div>
 <p>Finally, we need to implement the <code>eval</code> function, which
-will determine the query <span class="keep-together">interface</span>
-presented to the user. We’ll do this by creating a variant type, and
-using the s-expression converter generated for that type to parse the
-query from the user:</p>
+will determine the query interface presented to the user. We’ll do this
+by creating a variant type, and using the s-expression converter
+generated for that type to parse the query from the user:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type request =
     | Load of string * Sexp.t
