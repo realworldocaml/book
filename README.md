@@ -48,7 +48,7 @@ libraries. To set up your RWO development environment you can run:
 
 ```
 opam switch create rwo 4.09.0
-opam install dune=2.0.1
+opam install dune=2.9.1
 ```
 
 ### Generating the HTML
