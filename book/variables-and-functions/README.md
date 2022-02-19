@@ -628,25 +628,26 @@ Error: This expression has type int -> int
 
 which obviously doesn't make sense.
 
-Here's an example of a very useful operator from the standard library whose
-behavior depends critically on the precedence rules described previously.
+Here's an example of a very useful operator from the standard library
+whose behavior depends critically on the precedence rules described
+previously.
+[operators/reverse application operator]{.idx}
 
 ```ocaml env=main
 # let (|>) x f = f x;;
 val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 ```
 
-It's not quite obvious at first what the purpose of this operator is:
-it just takes a value and a function and applies the function to the
-value. Despite that bland-sounding description, it has the useful role
-of a sequencing operator, similar in spirit to using the pipe
-character in the UNIX shell.  Consider, for example, the following
-code for printing out the unique elements of your `PATH`. Note that
-`List.dedup_and_sort` that follows removes duplicates from a list by
-sorting the list using the provided comparison
-function.[lists/duplicate removal]{.idx}[duplicates,
-removing]{.idx}[List.dedup_and_sort]{.idx}[operators/sequencing
-operators]{.idx}
+This is called the *reverse application operator*, and it's not quite
+obvious at first what its purpose is: it just takes a value and a
+function and applies the function to the value. Despite that
+bland-sounding description, it has the useful role of sequencing
+operations, similar in spirit to using the pipe character in the UNIX
+shell.  Consider, for example, the following code for printing out the
+unique elements of your `PATH`. Note that `List.dedup_and_sort` that
+follows removes duplicates from a list by sorting the list using the
+provided comparison function.  [lists/duplicate removal]{.idx}
+[duplicates, removing]{.idx} [List.dedup_and_sort]{.idx}
 
 ```ocaml env=main
 # open Stdio;;
@@ -662,8 +663,8 @@ val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"
 - : unit = ()
 ```
 
-We can do this without `|>` by naming the intermediate values, but the result
-is a bit more verbose.
+We can do this without `|>` by naming the intermediate values, but the
+result is a bit more verbose.
 
 ```ocaml env=main
 # let split_path = String.split ~on:':' path in
@@ -677,9 +678,9 @@ is a bit more verbose.
 ```
 
 An important part of what's happening here is partial application. For
-example, `List.iter` takes two arguments: a function to be called on each
-element of the list, and the list to iterate over. We can call `List.iter`
-with all its arguments. [partial application]{.idx}
+example, `List.iter` takes two arguments: a function to be called on
+each element of the list, and the list to iterate over. We can call
+`List.iter` with all its arguments. [partial application]{.idx}
 
 ```ocaml env=main
 # List.iter ~f:print_endline ["Two"; "lines"];;
@@ -688,8 +689,8 @@ lines
 - : unit = ()
 ```
 
-Or, we can pass it just the function argument, leaving us with a function for
-printing out a list of strings.
+Or, we can pass it just the function argument, leaving us with a
+function for printing out a list of strings.
 
 ```ocaml env=main
 # List.iter ~f:print_endline;;
@@ -716,15 +717,38 @@ Error: This expression has type string list -> unit
          string list -> string list
 ```
 
-The type error is a little bewildering at first glance. What's going on is
-that, because `^>` is right associative, the operator is trying to feed the
-value `List.dedup_and_sort ~compare:String.compare` to the function
-`List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list
-of strings as its input, not a function.
+The type error is a little bewildering at first glance. What's going
+on is that, because `^>` is right associative, the operator is trying
+to feed the value `List.dedup_and_sort ~compare:String.compare` to the
+function `List.iter ~f:print_endline`. But `List.iter
+~f:print_endline` expects a list of strings as its input, not a
+function.
 
-The type error aside, this example highlights the importance of choosing the
-operator you use with care, particularly with respect to
+The type error aside, this example highlights the importance of
+choosing the operator you use with care, particularly with respect to
 associativity.
+
+::: {data-type=note}
+##### The application operator
+
+`|>` is known as the *reverse application operator*. You might be you
+might be unsurprised to learn that there's also an *application
+operator*: [operators/application operator]{.idx}
+
+```ocaml env=main
+# (@@);;
+- : ('a -> 'b) -> 'a -> 'b = <fun>
+```
+
+This one is useful for cases where you want to avoid many layers of
+parentheses when applying functions to complex expressions.  In
+particular, you can replace `f (g (h x))` with `f @@ g @@ h x`.  Note
+that, just as we needed `|>` to be left associative, we need `@@` to
+be right associative.
+
+:::
+
+
 
 ### Declaring Functions with `function`
 
@@ -879,10 +903,11 @@ This improves the readability of both the signature and of client code that
 - : unit = ()
 ```
 
-This requires that we put the function argument first. In other cases, you
-  want to put the function argument second. One common reason is readability.
-  In particular, a multiline function passed as an argument to another
-  function is easiest to read when it is the final argument to that function.
+This requires that we put the function argument first. In other cases,
+you want to put the function argument second. One common reason is
+readability.  In particular, a multiline function passed as an
+argument to another function is easiest to read when it is the final
+argument to that function.
 
 #### Higher-order functions and labels
 
