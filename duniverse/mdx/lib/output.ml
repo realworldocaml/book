@@ -15,7 +15,6 @@
  *)
 
 open Misc
-open Compat
 
 type t = [ `Output of string | `Ellipsis ]
 

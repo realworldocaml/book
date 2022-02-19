@@ -19,7 +19,7 @@ let debug_active () = !_debug_active
 
 open Lwt.Infix
 
-let default_reporter (file_descr, ppf) =
+let reporter file_descr ppf =
   let ppf, flush =
     let buf = Buffer.create 0x100 in
     ( Fmt.with_buffer ~like:ppf buf,
@@ -62,18 +62,21 @@ let default_reporter (file_descr, ppf) =
   in
   { Logs.report }
 
-let set_log =
+let default_reporter = reporter Lwt_unix.stderr Fmt.stderr
+
+let set_logger =
   lazy
-    ((* If no reporter has been set by the application, set default one
+    (if
+     (* If no reporter has been set by the application, set default one
         that prints to stderr *)
-     if Logs.reporter () == Logs.nop_reporter then
-       Logs.set_level @@ Some Logs.Debug;
-     Logs.set_reporter (default_reporter (Lwt_unix.stderr, Fmt.stderr)))
+     Logs.reporter () == Logs.nop_reporter
+    then Logs.set_reporter default_reporter)
 
 let activate_debug () =
-  Lazy.force set_log;
   if not !_debug_active then (
     _debug_active := true;
+    Lazy.force set_logger;
+    Logs.set_level ~all:true (Some Logs.Debug);
     Logs.debug (fun f -> f "Cohttp debugging output is active"))
 
 let () =

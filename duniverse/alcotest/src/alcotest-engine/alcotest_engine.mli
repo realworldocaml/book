@@ -20,27 +20,31 @@
     to defined tests. The platform-specific runners for these tests are in
     [alcotest], [alcotest-lwt], [alcotest-async] and [alcotest-mirage]. *)
 
-(** {1 Assert functions} *)
+module V1 : sig
+  (** Version 1 of the user-facing Alcotest API. *)
 
-module Test = Test
+  (** {1 Assert functions} *)
 
-(** {1 Monadic test runners} *)
+  module Test = Test
 
-(** These modules provide the ability to run tests inside a concurrency monad:
-    that is, to sequence test cases of type ['a -> unit m] into a computation of
-    type ['a -> unit m] (for some concurrency monad [m]) with can then be
-    scheduled in a main event loop. For tests using [Lwt.t] or
-    [Async_kernel.Deferred.t], use the [Alcotest_lwt] and [Alcotest_async]
-    packages directly. *)
+  (** {1 Monadic test runners} *)
 
-module Core = Core
-(** Defines monadic test runners {i without} command-line interfaces. *)
+  (** These modules provide the ability to run tests inside a concurrency monad:
+      that is, to sequence test cases of type ['a -> unit m] into a computation
+      of type ['a -> unit m] (for some concurrency monad [m]) with can then be
+      scheduled in a main event loop. For tests using [Lwt.t] or
+      [Async_kernel.Deferred.t], use the [Alcotest_lwt] and [Alcotest_async]
+      packages directly. *)
 
-module Cli = Cli
-(** Wraps {!Core} to provide a command-line interface. *)
+  module Core = Core.V1
+  (** Defines monadic test runners {i without} command-line interfaces. *)
+
+  module Cli = Cli.V1
+  (** Wraps {!Core} to provide a command-line interface. *)
+end
 
 module Monad = Monad
-(** Monad signatures for use with {!Core} and {!Cli}. *)
+(** Monad signatures for use with {!V1.Core} and {!V1.Cli}. *)
 
 module Platform = Platform
 (** Defines platform-dependent functions. *)
@@ -48,6 +52,5 @@ module Platform = Platform
 (** These modules are exposed for use internally by other Alcotest packages.
     They do not provide a stable interface. *)
 module Private : sig
-  module Utils = Utils
   module Pp = Pp
 end

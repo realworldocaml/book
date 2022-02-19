@@ -14,17 +14,17 @@
   }                                                                          \
                                                                              \
   CAMLprim value                                                             \
-  mc_ ## name ## _update (value ctx, value src, value off, value len) {      \
+  mc_ ## name ## _update (value ctx, value src, value len) {                 \
     _mc_ ## name ## _update (                                                \
       (struct name ## _ctx *) Bytes_val (ctx),                               \
-      _ba_uint8_off (src, off), Int_val (len));                              \
+      _ba_uint8 (src), Int_val (len));                                       \
     return Val_unit;                                                         \
   }                                                                          \
                                                                              \
   CAMLprim value                                                             \
-  mc_ ## name ## _finalize (value ctx, value dst, value off) {               \
+  mc_ ## name ## _finalize (value ctx, value dst) {                          \
     _mc_ ## name ## _finalize (                                              \
-      (struct name ## _ctx *) Bytes_val (ctx), _ba_uint8_off (dst, off));    \
+      (struct name ## _ctx *) Bytes_val (ctx), _ba_uint8 (dst));             \
     return Val_unit;                                                         \
   }                                                                          \
                                                                              \

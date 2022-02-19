@@ -346,7 +346,7 @@
 
 (* Suppress warning 4, "fragile pattern matching," in this file only, due to
 
-     https://caml.inria.fr/mantis/view.php?id=7451
+     https://github.com/ocaml/ocaml/issues/7451
 
    This can be removed if/when Lwt requires a minimum OCaml version 4.05. *)
 [@@@ocaml.warning "-4"]
@@ -831,8 +831,8 @@ sig
   val add_explicitly_removable_callback_to_each_of :
     'a t list -> 'a regular_callback -> unit
   val add_explicitly_removable_callback_and_give_remove_function :
-    'a t list -> 'a regular_callback -> (unit -> unit)
-  val add_cancel_callback : 'a callbacks -> (unit -> unit) -> unit
+    'a t list -> 'a regular_callback -> cancel_callback
+  val add_cancel_callback : 'a callbacks -> cancel_callback -> unit
   val merge_callbacks : from:'a callbacks -> into:'a callbacks -> unit
 end =
 struct
@@ -1004,10 +1004,6 @@ struct
       clear_explicitly_removable_callback_cell cell ~originally_added_to:ps
 
   let add_cancel_callback callbacks f =
-    (* Ugly cast :( *)
-    let cast_cancel_callback : (unit -> unit) -> cancel_callback = Obj.magic in
-    let f = cast_cancel_callback f in
-
     let node = Cancel_callback_list_callback (!current_storage, f) in
 
     callbacks.cancel_callbacks <-

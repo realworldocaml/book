@@ -3,7 +3,7 @@
   test.output
   (with-accepted-exit-codes
    (not 0)
-   (run %{bin:mdx} test test.md --prelude "env:foo"))))
+   (run %{bin:ocaml-mdx} test test.md --prelude "env:foo"))))
 
 (rule
  (alias runtest)

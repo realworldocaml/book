@@ -4442,3 +4442,35 @@ let callback_list_tests = suite "callback cleanup" [
   end;
 ]
 let suites = suites @ [callback_list_tests]
+
+(*
+
+   Lwt should preserve tail-recursion. When a recursive function [f]
+   lives in the [Lwt] monad, a programmer must assume that [f] is only
+   call in tail position in [Lwt.bind].
+
+   Given that robustness to stack overflows cannot be ignored by OCaml
+   programmers, this property should be documented, be part of
+   [Lwt] specification, and probably never be broken in the future.
+
+   This test tries to ensure that [Lwt.bind x f] indeed calls [f] only
+   in tail position.
+
+*)
+
+let tailrec_tests = suite "tailrec" [
+  test "tailrec" begin fun () ->
+    let rec aux f accu n =
+      if n = 0 then
+        Lwt.return accu
+      else
+        Lwt.bind (f n) (fun s -> aux f (s + accu) (n - 1))
+    in
+    let f n = Lwt.return n in
+    try
+      ignore (aux f 0 10000000);
+      Lwt.return true
+    with _ -> Lwt.return false
+  end;
+]
+let suites = suites @ [tailrec_tests]

@@ -1,0 +1,13 @@
+(rule
+ (alias runtest)
+ (enabled_if
+  (>= %{ocaml_version} "4.08.0"))
+ (deps
+  (:test test.ml)
+  (package ppxlib))
+ (action
+  (chdir
+   %{project_root}
+   (progn
+    (run expect-test %{test})
+    (diff? %{test} %{test}.corrected)))))

@@ -29,12 +29,12 @@ let read_file filename =
     List.rev !lines
 
 (* A test executable [foo.ml] may require certain options to be passed as
-  specified in a [foo.opts] file. *)
+   specified in a [foo.opts] file. *)
 let options_of_test_file file =
   let options_file = chop_extension file ^ ".opts" in
   if not (Sys.file_exists options_file) then [] else read_file options_file
 
-let global_stanza ~libraries filenames =
+let global_stanza ~libraries ~js filenames =
   let bases = List.map chop_extension filenames in
   let libraries = List.map (( ^ ) " ") libraries in
   let pp_sexp_list = Fmt.(list ~sep:(const string "\n   ")) in
@@ -43,7 +43,8 @@ let global_stanza ~libraries filenames =
  (names
    %a
  )
- (libraries alcotest%a)
+ (libraries alcotest alcotest.stdlib_ext%a)
+ %s
  (modules
    %a
  )
@@ -51,9 +52,12 @@ let global_stanza ~libraries filenames =
 |}
     (pp_sexp_list Fmt.string) bases
     Fmt.(list string)
-    libraries (pp_sexp_list Fmt.string) bases
+    libraries
+    (if js then "(modes native js)" else "(modes native)")
+    (pp_sexp_list Fmt.string) bases
 
-let example_rule_stanza ~expect_failure filename =
+let example_rule_stanza ~js ~expect_failure filename =
+  let with_suffix x = if js then x ^ "-js" else x in
   let base = chop_extension filename in
   let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let accepted_exit_codes =
@@ -73,9 +77,11 @@ let example_rule_stanza ~expect_failure filename =
  (action
   (with-outputs-to %%{target}
    (with-accepted-exit-codes %s
-    (run %%{dep:%s.exe}%a)))))
+    (run %s%a)))))
 |}
-    base accepted_exit_codes base
+    (with_suffix base) accepted_exit_codes
+    (if js then Printf.sprintf "node %%{dep:%s.bc.js}" base
+    else Printf.sprintf "%%{dep:%s.exe}" base)
     Fmt.(list string)
     options;
 
@@ -87,23 +93,24 @@ let example_rule_stanza ~expect_failure filename =
   (with-outputs-to %%{target}
    (run ../../strip_randomness.exe %%{dep:%s.actual}))))
 |}
-    base base
+    (with_suffix base) (with_suffix base)
 
-let example_alias_stanza ~package filename =
+let example_alias_stanza ~js ~package filename =
+  let with_suffix x = if js then x ^ "-js" else x in
   let base = chop_extension filename in
   Fmt.pr
     {|
 (rule
- (alias runtest)
+ (alias %s)
  (package %s)
  (action
    (diff %s.expected %s.processed)))
 |}
-    package base base
+    (with_suffix "runtest") package (with_suffix base) (with_suffix base)
 
 let is_example filename = Filename.check_suffix filename ".ml"
 
-let main package expect_failure libraries =
+let main package expect_failure libraries js =
   Sys.readdir "."
   |> Array.to_list
   |> List.sort String.compare
@@ -111,11 +118,14 @@ let main package expect_failure libraries =
   |> function
   | [] -> () (* no tests to execute *)
   | tests ->
-      global_stanza ~libraries tests;
+      global_stanza ~libraries ~js tests;
       List.iter
         (fun test ->
-          example_rule_stanza ~expect_failure test;
-          example_alias_stanza ~package test)
+          example_rule_stanza ~js:false ~expect_failure test;
+          example_alias_stanza ~js:false ~package test;
+          if js then (
+            example_rule_stanza ~js:true ~expect_failure test;
+            example_alias_stanza ~js:true ~package test))
         tests
 
 open Cmdliner
@@ -134,6 +144,10 @@ let libraries =
   in
   Arg.(value & opt (list string) [] & doc)
 
+let js =
+  let doc = Arg.info ~doc:"Test in javascript" [ "js" ] in
+  Arg.(value & flag doc)
+
 let expect_failure =
   let doc =
     Arg.info ~doc:"Negate the return status of the tests" [ "expect-failure" ]
@@ -142,7 +156,7 @@ let expect_failure =
 
 let term =
   Term.
-    ( const main $ package $ expect_failure $ libraries,
-      info ~version:"1.4.0" "gen_dune_rules" )
+    ( const main $ package $ expect_failure $ libraries $ js,
+      info ~version:"1.5.0" "gen_dune_rules" )
 
 let () = Term.(exit @@ eval term)

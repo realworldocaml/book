@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -107,9 +104,10 @@ let semvtypetok tok =
   match Terminal.ocamltype tok with
   | None ->
 
-      (* Token has unit type and is omitted in stack cell. *)
+      (* Token has unit type and is omitted in stack cell,
+         unless [--represent-values] has been passed. *)
 
-      []
+      if Settings.represent_values then [ tunit ] else []
 
   | Some ocamltype ->
 
@@ -126,17 +124,6 @@ let semvtype = function
   | Symbol.N nt ->
       [ semvtypent nt ]
 
-(* [has_semv symbol] indicates whether [symbol] carries a semantic value. *)
-
-let has_semv symbol =
-  match semvtype symbol with
-  | [] ->
-      false
-  | [ _t ] ->
-      true
-  | _ ->
-      assert false
-
 (* ------------------------------------------------------------------------ *)
 
 (* Patterns for tokens. *)
@@ -146,7 +133,20 @@ let has_semv symbol =
 
 let tokpat tok pat =
   let data = TokenType.tokendata (Terminal.print tok) in
-  PData (data, if1 (has_semv (Symbol.T tok)) pat)
+  PData (
+    data,
+    if Terminal.ocamltype tok = None then [] else [ pat ]
+  )
+
+(* [tok_bind_unit tok pat e] binds the pattern [pat] to the unit value
+   in the expression [e] if the token [tok] has no semantic value.
+   Otherwise, it returns just [e]. *)
+
+let tok_bind_unit tok pat e =
+  if Terminal.ocamltype tok = None then
+    blet ([ (pat, EUnit) ], e)
+  else
+    e
 
 (* [tokspat toks] is a pattern that matches any token in the set [toks],
    without binding its semantic value. *)
@@ -206,12 +206,15 @@ let basics =
   (* 2017/01/20 The name [basics] must be an unlikely name, as it might
      otherwise hide a user-defined module by the same name. *)
 
+(* The global definition [let _eRR : exn = Error] includes a type
+   annotation. This allows us to avoid warning 41, which warns
+   about the existence of a data constructor named [Error] in
+   the standard library. *)
+
 let excvaldef = {
   valpublic = false;
   valpat = PVar parse_error;
-  valval = EData (basics ^ "." ^ Interface.excname, [])
-    (* 2016/06/23 We now use the qualified name [Basics.Error], instead of
-       just [Error], so as to avoid OCaml's warning 41. *)
+  valval = EAnnot (EData (Interface.excname, []), type2scheme texn)
 }
 
 (* ------------------------------------------------------------------------ *)
@@ -222,15 +225,27 @@ let excvaldef = {
 
 let mbasics grammar = [
 
+  (* The module [Basics]. *)
   SIModuleDef (basics, MStruct (
+
+    (* The exception [Error]. *)
     SIExcDefs [ Interface.excdef ] ::
+
+    (* 2021/09/27 We now place the definition [let _eRR = Error] at this
+       particular point so as to avoid the risk of a name collision. In
+       previous versions of Menhir, if a token was named [Error], then the
+       definition [let _eRR = Error] would not receive its intended meaning,
+       and the code produced by the code back-end would be ill-typed. *)
+    SIValDefs (false, [ excvaldef ]) ::
+
+    (* The type [token]. *)
     interface_to_structure (
       TokenType.tokentypedef grammar
     )
+
   ));
 
+  (* Include the above submodule. *)
   SIInclude (MVar basics);
-
-  SIValDefs (false, [ excvaldef ]);
 
 ]

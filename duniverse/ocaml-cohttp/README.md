@@ -1,4 +1,4 @@
-## ocaml-cohttp -- an OCaml library for HTTP clients and servers
+## ocaml-cohttp -- an OCaml library for HTTP clients and servers [![Main workflow](https://github.com/mirage/ocaml-cohttp/actions/workflows/workflow.yml/badge.svg)](https://github.com/mirage/ocaml-cohttp/actions/workflows/workflow.yml)
 
 Cohttp is an OCaml library for creating HTTP daemons. It has a portable
 HTTP parser, and implementations using various asynchronous programming
@@ -33,6 +33,7 @@ You can find help from cohttp users and maintainers at the
 - [Managing sessions](#managing-sessions)
 - [Multipart form data](#multipart-form-data)
 - [Creating custom resolver: a Docker Socket Client example](#creating-custom-resolver--a-docker-socket-client-example)
+- [Dealing with redirects](#dealing-with-redirects)
 - [Basic Server Tutorial](#basic-server-tutorial)
   * [Compile and execute with ocamlbuild](#compile-and-execute-with-ocamlbuild-1)
   * [Compile and execute with dune](#compile-and-execute-with-dune-1)
@@ -120,7 +121,7 @@ available on the [repository github pages](https://mirage.github.io/ocaml-cohttp
 Build and execute with:
 
 ```
-$ ocamlbuild -pkg cohttp-lwt-unix client_example.native
+$ ocamlbuild -use-ocamlfind -tag thread -pkg cohttp-lwt-unix client_example.native
 $ ./client_example.native
 ```
 
@@ -183,6 +184,21 @@ Fatal error: exception (Failure "Timeout expired")
 
 Similarly, in the case of `cohttp-async` you can directly use Async's
 [`with_timeout`](https://ocaml.janestreet.com/ocaml-core/latest/doc/async_unix/Async_unix/Clock/index.html#val-with_timeout) function.
+For example,
+
+```ocaml
+let get_body ~uri ~timeout =
+    let%bind _, body = Cohttp_async.Client.get ~interrupt:(after (sec timeout)) uri in
+    Body.to_string body    
+
+let body =
+  let uri = Uri.of_string "https://www.reddit.com/" in
+  let timeout = 0.1 in
+  Clock.with_timeout (sec timeout) (get_body ~uri ~timeout)
+  >>| function
+  | `Result body -> Log.debug logger "body: %s" body
+  | `Timeout  -> Log.debug logger "Timeout with url:%s" url
+```
 
 ## Managing sessions
 
@@ -193,8 +209,10 @@ which is compatible with `cohttp`.
 
 ## Multipart form data
 
-Multipart form data is not supported out of the box, but is provided by the external library
-[`multipart-form-data`](https://github.com/cryptosense/multipart-form-data).
+Multipart form data is not supported out of the box but is provided by external libraries:
+- [`multipart_form`](https://github.com/dinosaure/multipart_form) which has bounded memory consumption even when transferring large amount of data
+- [`multipart-form-data`](https://github.com/cryptosense/multipart-form-data)
+- [`http-multipart-formdata`](https://github.com/lemaetech/http-multipart-formdata) which however does not support streaming
 
 ## Creating custom resolver: a Docker Socket Client example
 
@@ -249,6 +267,95 @@ mentioning it to emphasize that we are creating a new Conduit resolver. Refer to
 [conduit's README](https://github.com/mirage/ocaml-conduit/) for examples of use and
 links to up-to-date conduit documentation.
 
+## Dealing with redirects
+
+This examples has been adapted from a script on the [ocaml.org](https://github.com/ocaml/ocaml.org/blob/master/script/http.ml) website, and shows an explicit way to deal with redirects in `cohttp-lwt-unix`.
+
+```ocaml
+let rec http_get_and_follow ~max_redirects uri =
+  let open Lwt.Syntax in
+  let* ans = Cohttp_lwt_unix.Client.get uri in
+  follow_redirect ~max_redirects uri ans
+
+and follow_redirect ~max_redirects request_uri (response, body) =
+  let open Lwt.Syntax in
+  let status = Cohttp.Response.status response in
+  (* The unconsumed body would otherwise leak memory *)
+  let* () =
+    if status <> `OK then Cohttp_lwt.Body.drain_body body else Lwt.return_unit
+  in
+  match status with
+  | `OK -> Lwt.return (response, body)
+  | `Permanent_redirect | `Moved_permanently ->
+      handle_redirect ~permanent:true ~max_redirects request_uri response
+  | `Found | `Temporary_redirect ->
+      handle_redirect ~permanent:false ~max_redirects request_uri response
+  | `Not_found | `Gone -> Lwt.fail_with "Not found"
+  | status ->
+      Lwt.fail_with
+        (Printf.sprintf "Unhandled status: %s"
+           (Cohttp.Code.string_of_status status))
+
+and handle_redirect ~permanent ~max_redirects request_uri response =
+  if max_redirects <= 0 then Lwt.fail_with "Too many redirects"
+  else
+    let headers = Cohttp.Response.headers response in
+    let location = Cohttp.Header.get headers "location" in
+    match location with
+    | None -> Lwt.fail_with "Redirection without Location header"
+    | Some url ->
+        let open Lwt.Syntax in
+        let uri = Uri.of_string url in
+        let* () =
+          if permanent then
+            Logs.warn (fun m ->
+                m "Permanent redirection from %s to %s"
+                  (Uri.to_string request_uri)
+                  url)
+          else Lwt.return_unit
+        in
+        http_get_and_follow uri ~max_redirects:(max_redirects - 1)
+```
+
+The following example, adapted from [blue-http](https://github.com/brendanlong/blue-http/blob/master/src/redirect.ml), does a similar thing with `cohttp-async` (and [ppx_let](https://github.com/janestreet/ppx_let)).
+
+```ocaml
+open Core_kernel
+open Async_kernel
+
+let with_redirects ~max_redirects uri f =
+  let seen_uris = Hash_set.create (module String) in
+  let rec loop ~max_redirects uri =
+    Hash_set.add seen_uris (Uri.to_string uri);
+    let%bind ((response, response_body) as res) = f uri in
+    let status_code =
+      Cohttp.(Response.status response |> Code.code_of_status)
+    in
+    if Cohttp.Code.is_redirection status_code then (
+      match Cohttp.(Response.headers response |> Header.get_location) with
+      | Some new_uri when Uri.to_string new_uri |> Hash_set.mem seen_uris ->
+          return res
+      | Some new_uri ->
+          if max_redirects > 0 then
+            (* Cohttp leaks connections if we don't drain the response body *)
+            Cohttp_async.Body.drain response_body >>= fun () ->
+            loop ~max_redirects:(max_redirects - 1) new_uri
+          else (
+            Log.Global.debug ~tags:[]
+              "Ignoring %d redirect from %s to %s: redirect limit exceeded"
+              status_code (Uri.to_string uri) (Uri.to_string new_uri);
+            return res)
+      | None ->
+          Log.Global.debug ~tags:[]
+            "Ignoring %d redirect from %s: there is no Location header"
+            status_code (Uri.to_string uri);
+          return res)
+    else return res
+  in
+  loop ~max_redirects uri
+```
+
+You can read a bit more on the rationale behind the absence of this functionality in the API [here](https://github.com/mirage/ocaml-cohttp/issues/76).
 
 ## Basic Server Tutorial
 
@@ -292,7 +399,7 @@ let server =
 
 Build and execute with:
 ```
-$ ocamlbuild -pkg cohttp-lwt-unix server_example.native
+$ ocamlbuild -use-ocamlfind -tag thread -pkg cohttp-lwt-unix server_example.native
 $ ./server_example.native
 ```
 
@@ -355,9 +462,19 @@ folder in the sources
 
 ## Debugging
 
-You can activate some runtime debugging for the servers by setting `COHTTP_DEBUG` to any value different from `0` or `false`, and it will set a default debug-level logger on stdout. Note: If you turn on the debugging on the `cohttp-lwt-server` example, you need to make sure you also pass the `-vvv` option, which forces the debug level of the logger.
+You can activate some runtime debugging for the servers by setting `COHTTP_DEBUG` to any value different from `0` or `false`, and it will set a default debug-level logger on stdout.
 
-Since both Cohttp and Conduit use `Logs` for debugging output, you can enable custom debugging in your code (if needed) by adding something like the following to your code (courtesy of @dinosaure)
+Since both Cohttp and Conduit use `Logs` for debugging output, you can enable custom debugging in your code (if needed). For example, if you intend to make use of the `COHTTP_DEBUG` env variable, you could simply use
+
+```ocaml
+let () =
+  if not @@ Debug.debug_active () then (
+    Fmt_tty.setup_std_outputs ();
+    Logs.set_level ~all:true level;
+    Logs.set_reporter Debug.default_reporter);
+```
+
+Of course you are free to completely override it and use your own reporters, for example by adding something like the following to your code (courtesy of @dinosaure).
 
 ```ocaml
 let reporter ppf =
@@ -374,9 +491,24 @@ let reporter ppf =
     msgf @@ fun ?header ?tags fmt -> with_metadata header tags k ppf fmt in
   { Logs.report }
 
-let () = Fmt_tty.setup_std_outputs ~style_renderer:`Ansi_tty ~utf_8:true ()
-let () = Logs.set_reporter (reporter Fmt.stderr)
-let () = Logs.set_level ~all:true (Some Logs.Debug)
+let () =
+  Fmt_tty.setup_std_outputs ~style_renderer:`Ansi_tty ~utf_8:true ();
+  Logs.set_reporter (reporter Fmt.stderr);
+  Logs.set_level ~all:true (Some Logs.Debug)
+```
+
+Note that you can selectively filter out the logs produced by `cohttp-lwt` and `cohttp-lwt-unix` internals as follows.
+
+```ocaml
+let () =
+  (* Set log level v for all loggers, this does also affect cohttp internal loggers *)
+  Logs.set_level ~all:true level;
+  (* Disable all cohttp-lwt and cohttp-lwt-unix logs *)
+  List.iter (fun src ->
+      match Logs.Src.name src with
+      | "cohttp.lwt.io" | "cohttp.lwt.server" -> Logs.Src.set_level src None
+      | _ -> ())
+  @@ Logs.Src.list ()
 ```
 
 ## Important Links

@@ -1,4 +1,4 @@
-version: "0.14.1"
+version: "0.15.2"
 opam-version: "2.0"
 maintainer: [
   "Hannes Mehnert <hannes@mehnert.org>"
@@ -18,12 +18,11 @@ depends: [
   "cstruct" {>= "6.0.0"}
   "asn1-combinators" {>= "0.2.0"}
   "ptime"
-  "base64" {>= "3.1.0"}
+  "base64" {>= "3.3.0"}
   "mirage-crypto"
   "mirage-crypto-pk"
   "mirage-crypto-ec" {>= "0.10.0"}
   "mirage-crypto-rng"
-  "rresult"
   "fmt" {>= "0.8.7"}
   "alcotest" {with-test}
   "cstruct-unix" {with-test & >= "3.0.0"}
@@ -31,7 +30,9 @@ depends: [
   "domain-name" {>= "0.3.0"}
   "logs"
   "pbkdf"
+  "ipaddr" {>= "5.2.0"}
 ]
+conflicts: [ "result" {< "1.5"} ]
 build: [
   ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]

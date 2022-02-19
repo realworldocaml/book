@@ -1,0 +1,27 @@
+opam-version: "2.0"
+
+synopsis: "Dummy package context for ppx_let tests"
+
+version: "5.5.0"
+license: "MIT"
+homepage: "https://github.com/ocsigen/lwt"
+doc: "https://ocsigen.org/lwt"
+bug-reports: "https://github.com/ocsigen/lwt/issues"
+
+authors: [
+  "Jérôme Vouillon"
+  "Jérémie Dimino"
+]
+maintainer: [
+  "Raphaël Proust <code@bnwr.net>"
+  "Anton Bachin <antonbachin@yahoo.com>"
+]
+dev-repo: "git+https://github.com/ocsigen/lwt.git"
+
+depends: [
+  "dune" {>= "1.8.0"}
+  "lwt"
+  "ppx_let" {with-test}
+]
+
+description: "Internal package used to partition ppx_let tests."

@@ -1,0 +1,22 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+services:
+  - docker
+os: linux
+env:
+  global:
+    - PINS="mirage-crypto:. mirage-crypto-rng:. mirage-crypto-rng-mirage:. mirage-crypto-pk:. mirage-crypto-rng-async:. mirage-crypto-ec:."
+    - PACKAGE="mirage-crypto-pk"
+    - TESTS=true
+    - DISTRO=alpine
+jobs:
+  include:
+  - name: OCaml 4.10 on arm64
+    arch: arm64
+    env: OCAML_VERSION=4.10
+  - name: OCaml 4.09 with freestanding on arm64
+    arch: arm64
+    env: OCAML_VERSION=4.09 TESTS=false POST_INSTALL_HOOK=./.test-mirage.sh
+notifications:
+  email: false

@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -29,26 +26,68 @@
    difficulties arise, including the fact that reductions are subject to a
    lookahead hypothesis; the fact that some states have a default reduction,
    hence will never trigger an error; the fact that conflict resolution
-x   removes some (shift or reduce) actions, hence may suppress the shortest
+   removes some (shift or reduce) actions, hence may suppress the shortest
    path. *)
+
+open Grammar
+
+module type REACHABILITY_RESULT = sig
+  module Word : sig
+    type t
+    val singleton : Terminal.t -> t
+    val elements : t -> Terminal.t list
+    val compare : t -> t -> int
+    val length : t -> int
+  end
+
+  module Graph : sig
+    (* Graph nodes. *)
+    type node
+    include Hashtbl.HashedType with type t := node
+
+    val state : node -> Lr1.node
+    val lookaheads : node -> TerminalSet.t
+
+    (* Edge labels. *)
+    type label
+    val append_word : label -> Word.t -> Word.t
+
+    (* The source node(s). *)
+
+    val sources: (node -> unit) -> unit
+
+    (* [successors n f] presents each of [n]'s successors, in
+       an arbitrary order, to [f], together with the cost of
+       the edge that was followed. *)
+    val successors: node -> (label -> int -> node -> unit) -> unit
+  end
+
+  module Statistics : sig
+    val header : string
+    val print : out_channel -> time:float -> heap:int -> unit
+  end
+end
+
+module type REACHABILITY_ALGORITHM = functor () -> REACHABILITY_RESULT
 
 (* ------------------------------------------------------------------------ *)
 
 (* To delay the side effects performed by this module, we wrap everything in
    in a big functor. The functor also serves to pass verbosity parameters. *)
 
-module Run (X : sig
+module Run
+    (X : sig
+       (* If [verbose] is set, produce various messages on [stderr]. *)
+       val verbose: bool
 
-  (* If [verbose] is set, produce various messages on [stderr]. *)
-  val verbose: bool
+       (* If [statistics] is defined, it is interpreted as the name of
+          a file to which one line of statistics is appended. *)
+       val statistics: string option
+     end)
+    (Alg : REACHABILITY_ALGORITHM)
+    () =
+struct
 
-  (* If [statistics] is defined, it is interpreted as the name of
-     a file to which one line of statistics is appended. *)
-  val statistics: string option
-
-end) = struct
-
-open Grammar
 open Default
 
 (* ------------------------------------------------------------------------ *)
@@ -71,19 +110,16 @@ let start =
    what conditions each nonterminal transition in the automaton can be
    taken. *)
 
-module Core =
-  LRijkstraCore.Run(X)
-
-module W =
-  Core.W
+module Core = Alg()
+module Word = Core.Word
 
 (* ------------------------------------------------------------------------ *)
 
 (* The following code validates the fact that an error can be triggered in
-   state [s'] by beginning at the start symbol [nt] and reading the
-   sequence of terminal symbols [w]. We use this for debugging purposes.
-   Furthermore, this gives us a list of spurious reductions, which we use
-   to produce a comment. *)
+     state [s'] by beginning at the start symbol [nt] and reading the
+     sequence of terminal symbols [w]. We use this for debugging purposes.
+     Furthermore, this gives us a list of spurious reductions, which we use
+     to produce a comment. *)
 
 let fail msg =
   Printf.eprintf "LRijkstra: internal error: %s.\n%!" msg;
@@ -92,10 +128,10 @@ let fail msg =
 let fail format =
   Printf.ksprintf fail format
 
-let validate nt s' w : ReferenceInterpreter.target =
+let validate nt s' elements : ReferenceInterpreter.target =
   let open ReferenceInterpreter in
   match
-    check_error_path false nt (W.elements w)
+    check_error_path false nt elements
   with
   | OInputReadPastEnd ->
       fail "input was read past its end"
@@ -111,6 +147,7 @@ let validate nt s' w : ReferenceInterpreter.target =
       else
         target
 
+
 (* ------------------------------------------------------------------------ *)
 
 (* We now wish to determine, given a state [s'] and a terminal symbol [z], a
@@ -125,65 +162,14 @@ let validate nt s' w : ReferenceInterpreter.target =
    typically 10x shorter than the running time of the main loop above. *)
 
 module A = Astar.Make(struct
+    include Core.Graph
 
-  (* A vertex is a pair [s, z], where [z] is a real terminal symbol. *)
-  type node =
-      Lr1.node * Terminal.t
-
-  let equal (s'1, z1) (s'2, z2) =
-    Lr1.Node.compare s'1 s'2 = 0 && Terminal.compare z1 z2 = 0
-
-  let hash (s, z) =
-    Hashtbl.hash (Lr1.number s, z)
-
-  (* An edge is labeled with a word. *)
-  type label =
-    W.word
-
-  (* We search forward from every [s, z], where [s] is an initial state. *)
-  let sources f =
-    Terminal.iter_real (fun z ->
-      ProductionMap.iter (fun _ s ->
-        f (s, z)
-      ) Lr1.entry
-    )
-
-  (* The successors of [s, z] are defined as follows. *)
-  let successors (s, z) edge =
-    assert (Terminal.real z);
-    (* For every transition out of [s], labeled [sym], leading to [s']... *)
-    Lr1.transitions s |> SymbolMap.iter (fun sym s' ->
-      match sym with
-      | Symbol.T t ->
-          if Terminal.equal z t then
-            (* If [sym] is the terminal symbol [z], then this transition
-               matches our lookahead assumption, so we can take it. For
-               every [z'], we have an edge to [s', z'], labeled with the
-               singleton word [z]. *)
-            let w = W.singleton z in
-            Terminal.iter_real (fun z' ->
-              edge w 1 (s', z')
-            )
-      | Symbol.N nt ->
-          (* If [sym] is a nonterminal symbol [nt], then we query [E]
-             in order to find out which (minimal) words [w] allow us
-             to take this transition. We must again try every [z'],
-             and must respect the constraint that the first symbol
-             of the word [w.z'] is [z]. For every [z'] and [w] that
-             fulfill these requirements, we have an edge to [s', z'],
-             labeled with the word [w]. *)
-          Core.query s nt z (fun w z' ->
-            edge w (W.length w) (s', z')
-          )
-    )
-
-  (* Algorithm A*, used with a zero estimate, is Dijkstra's algorithm.
-     We have experimented with a non-zero estimate, but the performance
-     increase was minimal. *)
-  let estimate _ =
-    0
-
-end)
+    (* Algorithm A*, used with a zero estimate, is Dijkstra's algorithm.
+       We have experimented with a non-zero estimate, but the performance
+       increase was minimal. *)
+    let estimate _ =
+      0
+  end)
 
 (* ------------------------------------------------------------------------ *)
 
@@ -211,7 +197,7 @@ let explored =
 let domain =
   ref Lr1.NodeSet.empty
 
-let data : (Nonterminal.t * W.word * ReferenceInterpreter.target) list ref =
+let data : (Nonterminal.t * Word.t * ReferenceInterpreter.target) list ref =
   ref []
 
 (* The set [reachable] stores every reachable state (regardless of whether an
@@ -223,35 +209,42 @@ let reachable =
 (* Perform the forward search. *)
 
 let _, _ =
-  A.search (fun ((s', z), path) ->
-    incr explored;
-    reachable := Lr1.NodeSet.add s' !reachable;
-    (* If [z] causes an error in state [s'] and this is the first time
-       we are able to trigger an error in this state, ... *)
-    if causes_an_error s' z && not (Lr1.NodeSet.mem s' !domain) then begin
-      (* Reconstruct the initial state [s] and the word [w] that lead
-         to this error. *)
-      let (s, _), ws = A.reverse path in
-      let w = List.fold_right W.append ws (W.singleton z) in
-      (* Check that the reference interpreter confirms our finding.
-         At the same time, compute a list of spurious reductions. *)
-      let nt = Lr1.nt_of_entry s in
-      let target = validate nt s' w in
-      (* Store this new data. *)
-      domain := Lr1.NodeSet.add s' !domain;
-      data := (nt, w, target) :: !data
-    end
-  )
+  A.search (fun (node', path) ->
+      incr explored;
+      let s' = Core.Graph.state node' in
+      let zs = Core.Graph.lookaheads node' in
+      reachable := Lr1.NodeSet.add s' !reachable;
+      (* If [z] causes an error in state [s'] and this is the first time
+         we are able to trigger an error in this state, ... *)
+      if not (Lr1.NodeSet.mem s' !domain) then
+        begin match find_erroneous s' zs with
+          | None -> ()
+          | Some z ->
+            (* Reconstruct the initial state [s] and the word [w] that lead
+               to this error. *)
+            let node, ws = A.reverse path in
+            let w = List.fold_right Core.Graph.append_word ws (Word.singleton z) in
+            (* Check that the reference interpreter confirms our finding.
+               At the same time, compute a list of spurious reductions. *)
+            let nt = Lr1.nt_of_entry (Core.Graph.state node) in
+            let target = validate nt s' (Word.elements w) in
+            (* Store this new data. *)
+            domain := Lr1.NodeSet.add s' !domain;
+            data := (nt, w, target) :: !data
+        end
+    )
 
 (* Sort and output the data. *)
 
 let () =
   !data
-  |> List.fast_sort (fun (nt1, w1, _) (nt2, w2, _) ->
-    let c = Nonterminal.compare nt1 nt2 in
-    if c <> 0 then c else W.compare w2 w1
-  )
-  |> List.map (fun (nt, w, target) -> (nt, W.elements w, target))
+  |> List.fast_sort (fun (nt1, w1, (s1, _)) (nt2, w2, (s2, _)) ->
+      let c = Int.compare (Lr1.number s1) (Lr1.number s2) in
+      if c <> 0 then c else
+        let c = Nonterminal.compare nt1 nt2 in
+        if c <> 0 then c else Word.compare w2 w1
+    )
+  |> List.map (fun (nt, w, target) -> (nt, Word.elements w, target))
   |> List.iter Interpret.print_messages_item
 
 (* ------------------------------------------------------------------------ *)
@@ -272,9 +265,9 @@ let () =
       "%d graph nodes explored by forward search.\n\
        %d out of %d states are reachable.\n\
        Found %d states where an error can occur.\n%!"
-    !explored
-    (Lr1.NodeSet.cardinal !reachable) Lr1.n
-    (Lr1.NodeSet.cardinal !domain)
+      !explored
+      (Lr1.NodeSet.cardinal !reachable) Lr1.n
+      (Lr1.NodeSet.cardinal !domain)
   end
 
 (* ------------------------------------------------------------------------ *)
@@ -286,41 +279,19 @@ let stop =
 
 let () =
   X.statistics |> Option.iter (fun filename ->
-    let c = open_out_gen [ Open_creat; Open_append; Open_text ] 0o644 filename in
-    Printf.fprintf c
-      "%s,%d,%d,%d,%d,%d,%d,%d,%.2f,%d\n%!"
-      (* Grammar name. *)
-      Settings.base
-      (* Number of terminal symbols. *)
-      Terminal.n
-      (* Number of nonterminal symbols. *)
-      Nonterminal.n
-      (* Grammar size (not counting the error productions). *)
-      begin
-        Production.foldx (fun prod accu ->
-          let rhs = Production.rhs prod in
-          if List.mem (Symbol.T Terminal.error) (Array.to_list rhs) then
-            accu
-          else
-            accu + Array.length rhs
-        ) 0
-      end
-      (* Automaton size (i.e., number of states). *)
-      Lr1.n
-      (* Total trie size. *)
-      Core.total_trie_size
-      (* Size of [F]. *)
-      Core.facts
-      (* Size of [E]. *)
-      Core.edge_facts
-      (* Elapsed user time, in seconds. *)
-      (stop -. start)
-      (* Max heap size, in megabytes. *)
-      max_heap_size
-    ;
-    close_out c
-  )
+      let need_header = not (Sys.file_exists filename) in
+      let c = open_out_gen [ Open_creat; Open_append; Open_text ] 0o644 filename in
+      if need_header then (
+        output_string c Core.Statistics.header;
+        output_char c '\n';
+      );
+      Core.Statistics.print c
+        (* Elapsed user time, in seconds. *)
+        ~time:(stop -. start)
+        (* Max heap size, in megabytes. *)
+        ~heap:max_heap_size;
+      close_out c
+    )
 
 (* ------------------------------------------------------------------------ *)
-
 end

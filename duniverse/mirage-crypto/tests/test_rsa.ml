@@ -24,7 +24,7 @@ module Null = struct
 
   let reseed ~g cs = g := Cs.(!g <+> cs)
 
-  let seeded ~g = Cstruct.len !g > 0
+  let seeded ~g = Cstruct.length !g > 0
 
   let accumulate ~g _source = `Acc (reseed ~g)
 
@@ -37,7 +37,7 @@ let random_is seed =
 let gen_rsa ~bits =
   let e     = Z.(if bits < 24 then ~$3 else ~$0x10001) in
   let key   = Rsa.(generate ~e ~bits ()) in
-  let key_s = Sexplib.Sexp.to_string_hum Rsa.(sexp_of_priv key) in
+  let key_s = Sexplib0.Sexp.to_string_hum Rsa.(sexp_of_priv key) in
   assert_equal
     ~msg:Printf.(sprintf "key size not %d bits:\n%s" bits key_s)
     bits Rsa.(priv_bits key);
@@ -231,7 +231,7 @@ let rsa_pss_cases =
     let module Pss = Rsa.PSS (H) in
     let msg = vx msg and sgn = vx sgn and salt = vx salt in
     let key, public = key () in
-    let slen = Cstruct.len salt in
+    let slen = Cstruct.length salt in
     Pss.sign ~g:(random_is salt) ~slen ~mask:`No ~key (`Message msg)
       |> assert_cs_equal ~msg:"recomputing sig:" sgn ;
     Pss.verify ~key:public ~slen ~signature:sgn (`Message msg)

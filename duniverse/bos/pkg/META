@@ -1,5 +1,5 @@
 description = "Basic OS interaction for OCaml"
-version = "%%VERSION_NUM%%"
+version = "0.2.1+dune"
 requires = "rresult astring fpath fmt unix logs"
 archive(byte) = "bos.cma"
 archive(native) = "bos.cmxa"
@@ -8,7 +8,7 @@ plugin(native) = "bos.cmxs"
 
 package "top" (
   description = "Bos toplevel support"
-  version = "%%VERSION_NUM%%"
+  version = "0.2.1+dune"
   requires = "rresult.top astring.top fpath.top fmt.top logs.top bos"
   archive(byte) = "bos_top.cma"
   archive(native) = "bos_top.cmxa"
@@ -18,7 +18,7 @@ package "top" (
 
 package "setup" (
   description = "Bos quick setup for simple programs"
-  version = "%%VERSION_NUM%%"
+  version = "0.2.1+dune"
   requires = "fmt.tty logs.fmt bos"
   archive(byte) = "bos_setup.cma"
   archive(native) = "bos_setup.cmxa"

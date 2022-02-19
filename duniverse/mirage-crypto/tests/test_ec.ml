@@ -6,7 +6,7 @@ module Testable = struct
 end
 
 let pp_hex_le fmt cs =
-  let n = Cstruct.len cs in
+  let n = Cstruct.length cs in
   for i = n - 1 downto 0 do
     let byte = Cstruct.get_uint8 cs i in
     Format.fprintf fmt "%02x" byte
@@ -307,7 +307,7 @@ let ecdsa_rfc6979_p224 =
   let case hash ~message ~k ~r ~s () =
     let msg =
       let h = Mirage_crypto.Hash.digest hash (Cstruct.of_string message) in
-      Cstruct.sub h 0 (min (Cstruct.len h) 28)
+      Cstruct.sub h 0 (min (Cstruct.length h) 28)
     and k = Cstruct.of_hex k
     in
     let k' =
@@ -400,10 +400,22 @@ let ecdsa_rfc6979_p256 =
       Alcotest.(check bool __LOC__ true pub_eq)
     | Error _ -> Alcotest.fail "bad public key"
   in
+  let pub_key_compression () =
+    let _, pub = P256.Dsa.generate () in
+    let compressed = P256.Dsa.pub_to_cstruct ~compress:true pub in
+    let decompressed = P256.Dsa.pub_of_cstruct compressed in
+    let comparison = match decompressed with
+      | Ok decompressed ->
+        let cstruct1 = (P256.Dsa.pub_to_cstruct pub) in
+        let cstruct2 = (P256.Dsa.pub_to_cstruct decompressed) in
+        Cstruct.equal cstruct1 cstruct2
+      | Error _ -> false in
+    Alcotest.(check bool __LOC__ true comparison)
+  in
   let case hash ~message ~k ~r ~s () =
     let msg =
       let h = Mirage_crypto.Hash.digest hash (Cstruct.of_string message) in
-      Cstruct.sub h 0 (min (Cstruct.len h) 32)
+      Cstruct.sub h 0 (min (Cstruct.length h) 32)
     and k = Cstruct.of_hex k
     in
     let k' =
@@ -461,6 +473,7 @@ let ecdsa_rfc6979_p256 =
       ~s:"39AF9F15DE0DB8D97E72719C74820D304CE5226E32DEDAE67519E840D1194E55" ;
   ] in
   ("public key matches", `Quick, pub_rfc) ::
+  ("public key compression and decompression", `Quick, pub_key_compression) ::
   List.mapi (fun i c -> "RFC 6979 A.2.5 " ^ string_of_int i, `Quick, c) cases
 
 let ecdsa_rfc6979_p384 =
@@ -485,10 +498,23 @@ let ecdsa_rfc6979_p384 =
       Alcotest.(check bool __LOC__ true pub_eq)
     | Error _ -> Alcotest.fail "bad public key"
   in
+  let pub_key_compression () =
+    let _, pub = P384.Dsa.generate () in
+    let compressed = P384.Dsa.pub_to_cstruct ~compress:true pub in
+    let decompressed = P384.Dsa.pub_of_cstruct compressed in
+    let comparison = match decompressed with
+      | Ok decompressed ->
+        let cstruct1 = (P384.Dsa.pub_to_cstruct pub) in
+        let cstruct2 = (P384.Dsa.pub_to_cstruct decompressed) in
+        Cstruct.equal cstruct1 cstruct2
+      | Error _ -> false
+    in
+    Alcotest.(check bool __LOC__ true comparison)
+  in
   let case hash ~message ~k ~r ~s () =
     let msg =
       let h = Mirage_crypto.Hash.digest hash (Cstruct.of_string message) in
-      Cstruct.sub h 0 (min (Cstruct.len h) 48)
+      Cstruct.sub h 0 (min (Cstruct.length h) 48)
     and k = Cstruct.of_hex k
     in
     let k' =
@@ -585,6 +611,7 @@ let ecdsa_rfc6979_p384 =
        4A2092CD3792E0159AD9CEE37659C736"
   ] in
   ("public key matches", `Quick, pub_rfc) ::
+  ("public key compression and decompression", `Quick, pub_key_compression) ::
   List.mapi (fun i c -> "RFC 6979 A.2.6 " ^ string_of_int i, `Quick, c) cases
 
 let ecdsa_rfc6979_p521 =
@@ -619,6 +646,19 @@ let ecdsa_rfc6979_p521 =
       in
       Alcotest.(check bool __LOC__ true pub_eq)
     | Error _ -> Alcotest.fail "bad public key"
+  in
+  let pub_key_compression () =
+    let _, pub = P521.Dsa.generate () in
+    let compressed = P521.Dsa.pub_to_cstruct ~compress:true pub in
+    let decompressed = P521.Dsa.pub_of_cstruct compressed in
+    let comparison = match decompressed with
+      | Ok decompressed ->
+        let cstruct1 = (P521.Dsa.pub_to_cstruct pub) in
+        let cstruct2 = (P521.Dsa.pub_to_cstruct decompressed) in
+        Cstruct.equal cstruct1 cstruct2
+      | Error _ -> false
+    in
+    Alcotest.(check bool __LOC__ true comparison)
   in
   let case hash ~message ~k ~r ~s () =
     let msg = Mirage_crypto.Hash.digest hash (Cstruct.of_string message)
@@ -749,7 +789,7 @@ let ecdsa_rfc6979_p521 =
        CE3"
 
   ] in
-  [ ("public key matches", `Quick, pub_rfc) ]
+  [ ("public key matches", `Quick, pub_rfc); ("public key compression and decompression", `Quick, pub_key_compression)]
   (* TODO: our deterministic generator for bit_size mod 8 <> 0 is different from RFC 6979 *)
 (* List.mapi (fun i c -> "RFC 6979 A.2.7 " ^ string_of_int i, `Quick, c) cases *)
 

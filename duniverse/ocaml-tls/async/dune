@@ -2,4 +2,4 @@
   (name        tls_async)
   (public_name tls-async)
   (preprocess (pps ppx_jane))
-  (libraries async async_find core cstruct-async mirage-crypto-rng-async tls))
+  (libraries async core cstruct-async mirage-crypto-rng-async tls))

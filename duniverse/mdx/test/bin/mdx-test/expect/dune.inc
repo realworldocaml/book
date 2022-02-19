@@ -408,18 +408,6 @@
  (action (diff section/test-case.md.expected section.actual)))
 
 (rule
- (target semisemi.actual)
- (deps (package mdx) (source_tree semisemi))
- (action
-  (with-stdout-to %{target}
-   (chdir semisemi
-    (run ocaml-mdx test --output - test-case.md)))))
-
-(rule
- (alias runtest)
- (action (diff semisemi/test-case.md semisemi.actual)))
-
-(rule
  (target shell-file-inc.actual)
  (deps (package mdx) (source_tree shell-file-inc))
  (action

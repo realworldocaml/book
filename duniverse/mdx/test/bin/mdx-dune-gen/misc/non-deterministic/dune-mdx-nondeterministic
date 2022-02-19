@@ -1,0 +1,18 @@
+This test checks whether the non-deterministic mode works with the `dune` `mdx`
+stanza.
+
+Deterministic stanzas should get run and corrected, as for 1 plus one is not 3:
+
+```ocaml
+# 1 + 1;;
+- : int = 42
+```
+
+Non-deterministic ones should not be updated, since whatever `Random` outputs
+should be random:
+
+<!-- $MDX non-deterministic=command -->
+```ocaml
+# Random.int 1000;;
+- : int = 42
+```

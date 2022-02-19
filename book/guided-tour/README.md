@@ -14,7 +14,7 @@ assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
 Before going any further, make sure you've followed the steps in [the
-installation page](install.html).
+installation page](http://dev.realworldocaml.org/install.html).
 
 ::: {data-type=note}
 ##### `Base` and `Core`
@@ -54,7 +54,7 @@ you can try out the examples as you read through the chapter.
 Our first step is to open `Base`:
 
 ```ocaml env=main
-# open Base
+# open Base;;
 ```
 
 By opening `Base`, we make the definitions it contains available without
@@ -64,15 +64,15 @@ examples in the tour and in the remainder of the book.
 Now let's try a few simple numerical calculations:
 
 ```ocaml env=main
-# 3 + 4
+# 3 + 4;;
 - : int = 7
-# 8 / 3
+# 8 / 3;;
 - : int = 2
-# 3.5 +. 6.
+# 3.5 +. 6.;;
 - : float = 9.5
-# 30_000_000 / 300_000
+# 30_000_000 / 300_000;;
 - : int = 100
-# 3 * 5 > 14
+# 3 * 5 > 14;;
 - : bool = true
 ```
 
@@ -106,9 +106,9 @@ We can also create a variable to name the value of a given expression, using
 the `let` keyword. This is known as a *let binding*:
 
 ```ocaml env=main
-# let x = 3 + 4
+# let x = 3 + 4;;
 val x : int = 7
-# let y = x + x
+# let y = x + x;;
 val y : int = 14
 ```
 
@@ -122,24 +122,24 @@ variables must start with a lowercase letter or an underscore. Thus, these
 are legal:
 
 ```ocaml env=main
-# let x7 = 3 + 4
+# let x7 = 3 + 4;;
 val x7 : int = 7
-# let x_plus_y = x + y
+# let x_plus_y = x + y;;
 val x_plus_y : int = 21
-# let x' = x + 1
+# let x' = x + 1;;
 val x' : int = 8
 ```
 
 The following examples, however, are not legal:
 
 ```ocaml env=main
-# let Seven = 3 + 4
+# let Seven = 3 + 4;;
 Line 1, characters 5-10:
 Error: Unbound constructor Seven
-# let 7x = 7
+# let 7x = 7;;
 Line 1, characters 5-7:
 Error: Unknown modifier 'x' for literal 7x
-# let x-plus-y = x + y
+# let x-plus-y = x + y;;
 Line 1, characters 7-11:
 Error: Syntax error
 ```
@@ -153,11 +153,11 @@ The `let` syntax can also be used to define a function:[let syntax/function
 definition with]{.idx}[functions/defining]{.idx}
 
 ```ocaml env=main
-# let square x = x * x
+# let square x = x * x;;
 val square : int -> int = <fun>
-# square 2
+# square 2;;
 - : int = 4
-# square (square 2)
+# square (square 2);;
 - : int = 16
 ```
 
@@ -177,9 +177,9 @@ functions]{.idx}[functions/with multiple arguments]{.idx}
 
 ```ocaml env=main
 # let ratio x y =
-    Float.of_int x /. Float.of_int y
+    Float.of_int x /. Float.of_int y;;
 val ratio : int -> int -> float = <fun>
-# ratio 4 7
+# ratio 4 7;;
 - : float = 0.571428571428571397
 ```
 
@@ -206,7 +206,7 @@ standard int-only arithmetic operators to be shadowed locally.
 ```ocaml env=main
 # let ratio x y =
     let open Float.O in
-    of_int x / of_int y
+    of_int x / of_int y;;
 val ratio : int -> int -> float = <fun>
 ```
 
@@ -216,7 +216,7 @@ There's also a more concise syntax for local opens, as you can see here.
 
 ```ocaml env=main
 # let ratio x y =
-    Float.O.(of_int x / of_int y)
+    Float.O.(of_int x / of_int y);;
 val ratio : int -> int -> float = <fun>
 ```
 
@@ -237,7 +237,7 @@ test:
 ```ocaml env=main
 # let sum_if_true test first second =
     (if test first then first else 0)
-    + (if test second then second else 0)
+    + (if test second then second else 0);;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
 
@@ -248,11 +248,11 @@ in action:
 
 ```ocaml env=main
 # let even x =
-  x % 2 = 0
+  x % 2 = 0;;
 val even : int -> bool = <fun>
-# sum_if_true even 3 4
+# sum_if_true even 3 4;;
 - : int = 4
-# sum_if_true even 2 4
+# sum_if_true even 2 4;;
 - : int = 6
 ```
 
@@ -312,7 +312,7 @@ Here's an annotated version of `sum_if_true`:
 ```ocaml env=main
 # let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
     (if test x then x else 0)
-    + (if test y then y else 0)
+    + (if test y then y else 0);;
 val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 ```
 
@@ -328,7 +328,7 @@ types]{.idx}
 
 ```ocaml env=main
 # let first_if_true test x y =
-    if test x then x else y
+    if test x then x else y;;
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ```
 
@@ -355,18 +355,18 @@ polymorphism]{.idx}[type variables]{.idx}
 Because the type of `first_if_true` is generic, we can write this:
 
 ```ocaml env=main
-# let long_string s = String.length s > 6
+# let long_string s = String.length s > 6;;
 val long_string : string -> bool = <fun>
-# first_if_true long_string "short" "loooooong"
+# first_if_true long_string "short" "loooooong";;
 - : string = "loooooong"
 ```
 
 As well as this:
 
 ```ocaml env=main
-# let big_number x = x > 3
+# let big_number x = x > 3;;
 val big_number : int -> bool = <fun>
-# first_if_true big_number 4 3
+# first_if_true big_number 4 3;;
 - : int = 4
 ```
 
@@ -376,7 +376,7 @@ the first example, and integers in the second). But we can't mix and match
 two different concrete types for `'a` in the same use of `first_if_true`:
 
 ```ocaml env=main
-# first_if_true big_number "short" "loooooong"
+# first_if_true big_number "short" "loooooong";;
 Line 1, characters 26-33:
 Error: This expression has type string but an expression was expected of type
          int
@@ -401,7 +401,7 @@ errors like this one:
 
 ```ocaml env=main
 # let add_potato x =
-  x + "potato"
+  x + "potato";;
 Line 2, characters 7-15:
 Error: This expression has type string but an expression was expected of type
          int
@@ -413,11 +413,11 @@ division by zero, lead to runtime exceptions:
 
 ```ocaml env=main
 # let is_a_multiple x y =
-  x % y = 0
+  x % y = 0;;
 val is_a_multiple : int -> int -> bool = <fun>
-# is_a_multiple 8 2
+# is_a_multiple 8 2;;
 - : bool = true
-# is_a_multiple 8 0
+# is_a_multiple 8 0;;
 Exception:
 (Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
 ```
@@ -442,9 +442,9 @@ that can each be of a different type. You can create a tuple by joining
 values together with a comma. [tuples]{.idx}[data structures/tuples]{.idx}
 
 ```ocaml env=main
-# let a_tuple = (3,"three")
+# let a_tuple = (3,"three");;
 val a_tuple : int * string = (3, "three")
-# let another_tuple = (3,"four",5.)
+# let another_tuple = (3,"four",5.);;
 val another_tuple : int * string * float = (3, "four", 5.)
 ```
 
@@ -457,7 +457,7 @@ You can extract the components of a tuple using OCaml's pattern-matching
 syntax, as shown below:
 
 ```ocaml env=main
-# let (x,y) = a_tuple
+# let (x,y) = a_tuple;;
 val x : int = 3
 val y : string = "three"
 ```
@@ -468,7 +468,7 @@ different components of the value being matched. These can now be used in
 subsequent expressions:
 
 ```ocaml env=main
-# x + String.length y
+# x + String.length y;;
 - : int = 8
 ```
 
@@ -482,7 +482,7 @@ at the values we need with a minimum of fuss:
 
 ```ocaml env=main
 # let distance (x1,y1) (x2,y2) =
-    Float.sqrt ((x1 -. x2) **. 2. +. (y1 -. y2) **. 2.)
+    Float.sqrt ((x1 -. x2) **. 2. +. (y1 -. y2) **. 2.);;
 val distance : float * float -> float * float -> float = <fun>
 ```
 
@@ -520,7 +520,7 @@ different types, lists let you hold any number of items of the same type.
 Consider the following example:[data structures/lists]{.idx}
 
 ```ocaml env=main
-# let languages = ["OCaml";"Perl";"C"]
+# let languages = ["OCaml";"Perl";"C"];;
 val languages : string list = ["OCaml"; "Perl"; "C"]
 ```
 
@@ -528,7 +528,7 @@ Note that you can't mix elements of different types in the same list, unlike
 tuples:
 
 ```ocaml env=main
-# let numbers = [3;"four";5]
+# let numbers = [3;"four";5];;
 Line 1, characters 18-24:
 Error: This expression has type string but an expression was expected of type
          int
@@ -541,7 +541,7 @@ working with lists. We can access values from within a module by using dot
 notation. For example, this is how we compute the length of a list:
 
 ```ocaml env=main
-# List.length languages
+# List.length languages;;
 - : int = 3
 ```
 
@@ -549,7 +549,7 @@ Here's something a little more complicated. We can compute the list of the
 lengths of each language as follows:
 
 ```ocaml env=main
-# List.map languages ~f:String.length
+# List.map languages ~f:String.length;;
 - : int list = [5; 4; 1]
 ```
 
@@ -564,7 +564,7 @@ presented to a function without changing its behavior, as you can see
 here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 
 ```ocaml env=main
-# List.map ~f:String.length languages
+# List.map ~f:String.length languages;;
 - : int list = [5; 4; 1]
 ```
 
@@ -578,7 +578,7 @@ constructor `::` for adding elements to the front of a list:[operators/: :
 operator]{.idx}[lists/operator : :]{.idx}
 
 ```ocaml env=main
-# "French" :: "Spanish" :: languages
+# "French" :: "Spanish" :: languages;;
 - : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
 ```
 
@@ -586,7 +586,7 @@ Here, we're creating a new and extended list, not changing the list we
 started with, as you can see below:
 
 ```ocaml env=main
-# languages
+# languages;;
 - : string list = ["OCaml"; "Perl"; "C"]
 ```
 
@@ -600,7 +600,7 @@ code compiles but doesn't do quite what you might expect:[commas vs.
 semicolons]{.idx}[semicolons vs. commas]{.idx}
 
 ```ocaml env=main
-# ["OCaml", "Perl", "C"]
+# ["OCaml", "Perl", "C"];;
 - : (string * string * string) list = [("OCaml", "Perl", "C")]
 ```
 
@@ -611,7 +611,7 @@ This example uncovers the fact that commas create a tuple, even if there are
 no surrounding parens. So, we can write:
 
 ```ocaml env=main
-# 1,2,3
+# 1,2,3;;
 - : int * int * int = (1, 2, 3)
 ```
 
@@ -625,11 +625,11 @@ the following declarations are all equivalent. Note that `[]` is used to
 represent the empty list and that `::` is right-associative:
 
 ```ocaml env=main
-# [1; 2; 3]
+# [1; 2; 3];;
 - : int list = [1; 2; 3]
-# 1 :: (2 :: (3 :: []))
+# 1 :: (2 :: (3 :: []));;
 - : int list = [1; 2; 3]
-# 1 :: 2 :: 3 :: []
+# 1 :: 2 :: 3 :: [];;
 - : int list = [1; 2; 3]
 ```
 
@@ -638,7 +638,7 @@ the list, with the list terminating at `[]`, the empty list. There's also a
 list concatenation operator, `@`, which can concatenate two lists:
 
 ```ocaml env=main
-# [1;2;3] @ [4;5;6]
+# [1;2;3] @ [4;5;6];;
 - : int list = [1; 2; 3; 4; 5; 6]
 ```
 
@@ -655,7 +655,7 @@ matching]{.idx}
 
 ```ocaml env=main
 # let my_favorite_language (my_favorite :: the_rest) =
-    my_favorite
+    my_favorite;;
 Lines 1-2, characters 26-16:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -678,9 +678,9 @@ provided pattern, in particular, `[]`, the empty list. If we try to run
 on empty ones:
 
 ```ocaml env=main
-# my_favorite_language ["English";"Spanish";"French"]
+# my_favorite_language ["English";"Spanish";"French"];;
 - : string = "English"
-# my_favorite_language []
+# my_favorite_language [];;
 Exception: "Match_failure //toplevel//:1:26"
 ```
 
@@ -702,11 +702,11 @@ trigger a compiler warning:
 # let my_favorite_language languages =
     match languages with
     | first :: the_rest -> first
-    | [] -> "OCaml" (* A good default! *)
+    | [] -> "OCaml" (* A good default! *);;
 val my_favorite_language : string list -> string = <fun>
-# my_favorite_language ["English";"Spanish";"French"]
+# my_favorite_language ["English";"Spanish";"French"];;
 - : string = "English"
-# my_favorite_language []
+# my_favorite_language [];;
 - : string = "OCaml"
 ```
 
@@ -739,9 +739,9 @@ example of a function that sums the elements of a list:
 # let rec sum l =
     match l with
     | [] -> 0                   (* base case *)
-    | hd :: tl -> hd + sum tl   (* inductive case *)
+    | hd :: tl -> hd + sum tl   (* inductive case *);;
 val sum : int list -> int = <fun>
-# sum [1;2;3]
+# sum [1;2;3];;
 - : int = 6
 ```
 
@@ -777,7 +777,7 @@ for removing sequential duplicates:
     | [] -> []
     | first :: second :: tl ->
       let new_tl = remove_sequential_duplicates (second :: tl) in
-      if first = second then new_tl else first :: new_tl
+      if first = second then new_tl else first :: new_tl;;
 Lines 2-6, characters 5-57:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -797,9 +797,9 @@ fix this warning by adding another case to the match:
     | [hd] -> [hd]
     | hd1 :: hd2 :: tl ->
       let new_tl = remove_sequential_duplicates (hd2 :: tl) in
-      if hd1 = hd2 then new_tl else hd1 :: new_tl
+      if hd1 = hd2 then new_tl else hd1 :: new_tl;;
 val remove_sequential_duplicates : int list -> int list = <fun>
-# remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1]
+# remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
 - : int list = [1; 2; 3; 4; 1]
 ```
 
@@ -827,7 +827,7 @@ syntax/nested let binding]{.idx}
 
 ```ocaml env=main
 # let z = 7 in
-  z + z
+  z + z;;
 - : int = 14
 ```
 
@@ -835,7 +835,7 @@ Note that the scope of the `let` binding is terminated by the
 double-semicolon, so the value of `z` is no longer available:
 
 ```ocaml env=main
-# z
+# z;;
 Line 1, characters 1-2:
 Error: Unbound value z
 ```
@@ -846,7 +846,7 @@ new variable binding to what came before:
 ```ocaml env=main
 # let x = 7 in
   let y = x * x in
-  x + y
+  x + y;;
 - : int = 56
 ```
 
@@ -863,7 +863,7 @@ example:[options]{.idx}[data structures/options]{.idx}
 
 ```ocaml env=main
 # let divide x y =
-  if y = 0 then None else Some (x / y)
+  if y = 0 then None else Some (x / y);;
 val divide : int -> int -> int option = <fun>
 ```
 
@@ -887,15 +887,15 @@ to split on.
     match String.rsplit2 filename ~on:'.' with
     | None -> filename
     | Some (base,ext) ->
-      base ^ "." ^ String.lowercase ext
+      base ^ "." ^ String.lowercase ext;;
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
-    [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ]
+    [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ];;
 - : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 ```
 
 Note that we used the `^` operator for concatenating strings. The
-concatenation operator is provided as part of the `Pervasives` module, which
+concatenation operator is provided as part of the `Stdlib` module, which
 is automatically opened in every OCaml program.
 
 Options are important because they are the standard way in OCaml to encode a
@@ -932,7 +932,7 @@ types are easy enough to construct:[records/record
 types]{.idx}[datatypes/record types]{.idx}
 
 ```ocaml env=main
-# let p = { x = 3.; y = -4. }
+# let p = { x = 3.; y = -4. };;
 val p : point2d = {x = 3.; y = -4.}
 ```
 
@@ -940,7 +940,7 @@ And we can get access to the contents of these types using pattern matching:
 
 ```ocaml env=main
 # let magnitude { x = x_pos; y = y_pos } =
-  Float.sqrt (x_pos **. 2. +. y_pos **. 2.)
+  Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -953,7 +953,7 @@ bound to coincide, we don't have to write them both down. Using this, our
 magnitude function can be rewritten as follows:[fields/field punning]{.idx}
 
 ```ocaml env=main
-# let magnitude { x; y } = Float.sqrt (x **. 2. +. y **. 2.)
+# let magnitude { x; y } = Float.sqrt (x **. 2. +. y **. 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -961,7 +961,7 @@ Alternatively, we can use dot notation for accessing record fields:
 
 ```ocaml env=main
 # let distance v1 v2 =
-  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y }
+  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : point2d -> point2d -> float = <fun>
 ```
 
@@ -1011,14 +1011,14 @@ tell *utop* to process the input, not to separate two declarations
 
   let is_inside_scene point scene =
     List.exists scene
-      ~f:(fun el -> is_inside_scene_element point el)
+      ~f:(fun el -> is_inside_scene_element point el);;
 val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
 val is_inside_scene : point2d -> scene_element list -> bool = <fun>
 # is_inside_scene {x=3.;y=7.}
-  [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ]
+  [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
 - : bool = false
 # is_inside_scene {x=3.;y=7.}
-  [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ]
+  [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
 - : bool = true
 ```
 
@@ -1083,18 +1083,17 @@ structures/arrays]{.idx}[arrays/imperative programming and]{.idx}[imperative
 programming/arrays]{.idx}
 
 ```ocaml env=main
-# let numbers = [| 1; 2; 3; 4 |]
+# let numbers = [| 1; 2; 3; 4 |];;
 val numbers : int array = [|1; 2; 3; 4|]
-# numbers.(2) <- 4
+# numbers.(2) <- 4;;
 - : unit = ()
-# numbers
+# numbers;;
 - : int array = [|1; 2; 4; 4|]
 ```
 
 The `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
-counted starting at zero, element <span class="keep-together">.(2) is</span>
-the third element.
+counted starting at zero, element `numbers.(2)` is the third element.
 
 The `unit` type that we see in the preceding code is interesting in that it
 has only one possible value, written `()`. This means that a value of type
@@ -1129,8 +1128,8 @@ following example.
 ```ocaml env=main
 # let mean rsum = rsum.sum /. Float.of_int rsum.samples
   let stdev rsum =
-    Float.sqrt (rsum.sum_sq /. Float.of_int rsum.samples
-  -. (rsum.sum /. Float.of_int rsum.samples) **. 2.)
+    Float.sqrt
+      (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
 val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
 ```
@@ -1142,7 +1141,7 @@ We also need functions to create and update `running_sum`s:
   let update rsum x =
     rsum.samples <- rsum.samples + 1;
     rsum.sum     <- rsum.sum     +. x;
-    rsum.sum_sq  <- rsum.sum_sq  +. x *. x
+    rsum.sum_sq  <- rsum.sum_sq  +. x *. x;;
 val create : unit -> running_sum = <fun>
 val update : running_sum -> float -> unit = <fun>
 ```
@@ -1160,13 +1159,13 @@ uses `List.iter`, which calls the function `~f` on each element of the
 provided list:
 
 ```ocaml env=main
-# let rsum = create ()
+# let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
-# List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x)
+# List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
 - : unit = ()
-# mean rsum
+# mean rsum;;
 - : float = 1.33333333333333326
-# stdev rsum
+# stdev rsum;;
 - : float = 3.94405318873307698
 ```
 
@@ -1186,11 +1185,11 @@ it. It's just a record type with a single mutable field called
 type]{.idx}
 
 ```ocaml env=main
-# let x = { contents = 0 }
+# let x = { contents = 0 };;
 val x : int ref = {contents = 0}
-# x.contents <- x.contents + 1
+# x.contents <- x.contents + 1;;
 - : unit = ()
-# x
+# x;;
 - : int ref = {contents = 1}
 ```
 
@@ -1198,13 +1197,13 @@ There are a handful of useful functions and operators defined for `ref`s to
 make them more convenient to work with:
 
 ```ocaml env=main
-# let x = ref 0  (* create a ref, i.e., { contents = 0 } *)
+# let x = ref 0  (* create a ref, i.e., { contents = 0 } *);;
 val x : int ref = {Base.Ref.contents = 0}
-# !x             (* get the contents of a ref, i.e., x.contents *)
+# !x             (* get the contents of a ref, i.e., x.contents *);;
 - : int = 0
-# x := !x + 1    (* assignment, i.e., x.contents <- ... *)
+# x := !x + 1    (* assignment, i.e., x.contents <- ... *);;
 - : unit = ()
-# !x
+# !x;;
 - : int = 1
 ```
 
@@ -1213,13 +1212,13 @@ reimplement the `ref` type and all of these operators in just a few lines of
 code:
 
 ```ocaml env=main
-# type 'a ref = { mutable contents : 'a }
+# type 'a ref = { mutable contents : 'a };;
 type 'a ref = { mutable contents : 'a; }
-# let ref x = { contents = x }
+# let ref x = { contents = x };;
 val ref : 'a -> 'a ref = <fun>
-# let (!) r = r.contents
+# let (!) r = r.contents;;
 val ( ! ) : 'a ref -> 'a = <fun>
-# let (:=) r x = r.contents <- x
+# let (:=) r x = r.contents <- x;;
 val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
@@ -1238,7 +1237,7 @@ element of a list, using a `ref` to accumulate the results:
 # let sum list =
     let sum = ref 0 in
     List.iter list ~f:(fun x -> sum := !sum + x);
-    !sum
+    !sum;;
 val sum : int list -> int = <fun>
 ```
 
@@ -1265,7 +1264,7 @@ loops]{.idx}
       let tmp = array.(i) in
       array.(i) <- array.(j);
       array.(j) <- tmp
-    done
+    done;;
 val permute : 'a array -> unit = <fun>
 ```
 
@@ -1295,11 +1294,11 @@ finding the position of the first negative entry in an array. Note that
     while !pos < Array.length array && array.(!pos) >= 0 do
       pos := !pos + 1
     done;
-    if !pos = Array.length array then None else Some !pos
+    if !pos = Array.length array then None else Some !pos;;
 val find_first_negative_entry : int array -> int option = <fun>
-# find_first_negative_entry [|1;2;0;3|]
+# find_first_negative_entry [|1;2;0;3|];;
 - : int option = None
-# find_first_negative_entry [|1;-2;0;3|]
+# find_first_negative_entry [|1;-2;0;3|];;
 - : int option = Some 1
 ```
 
@@ -1320,9 +1319,9 @@ error by rewriting the function to avoid the short-circuiting:
     do
       pos := !pos + 1
     done;
-    if !pos = Array.length array then None else Some !pos
+    if !pos = Array.length array then None else Some !pos;;
 val find_first_negative_entry : int array -> int option = <fun>
-# find_first_negative_entry [|1;2;0;3|]
+# find_first_negative_entry [|1;2;0;3|];;
 Exception: (Invalid_argument "index out of bounds")
 ```
 
@@ -1366,14 +1365,14 @@ After `read_and_accumulate` returns, the total needs to be printed. This is
 done using the `printf` command, which provides support for type-safe format
 strings, similar to what you'll find in a variety of languages. The format
 string is parsed by the compiler and used to determine the number and type of
-the remaining arguments that are <span class="keep-together">required</span>.
+the remaining arguments that are required.
 In this case, there is a single formatting directive, `%F`, so `printf`
 expects one additional argument of type `float`.
 
 ### Compiling and Running
 
 We'll compile our program using `dune`, a build system that's designed
-for use with OCaml projects. First, we need to write a *dune* file to
+for use with OCaml projects. First, we need to write a `dune` file to
 specify the build.
 
 ```scheme file=examples/correct/sum/dune

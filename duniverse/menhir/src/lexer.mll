@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -93,6 +90,9 @@ type monster = {
 
 }
 
+(* The reason why we parameterize [check] over [Settings.dollars], instead
+   of reading this setting directly, is that [NewRuleSyntax] calls [check]
+   and wants to disallow dollars. *)
 and check =
   Settings.dollars -> string option array -> unit
 

@@ -44,7 +44,13 @@ char *lwt_unix_strdup(char *string);
     (type *)lwt_unix_malloc(sizeof(type) + size)
 
 /* Raise [Lwt_unix.Not_available]. */
+#if OCAML_VERSION >= 40300
+CAMLnoreturn_start
+void lwt_unix_not_available(char const *feature)
+CAMLnoreturn_end;
+#else
 void lwt_unix_not_available(char const *feature) Noreturn;
+#endif
 
 #define LWT_NOT_AVAILABLE_BYTE(prim)             \
     CAMLprim value lwt_##prim(value *a1, int a2) \

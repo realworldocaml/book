@@ -17,7 +17,6 @@
 let src = Logs.Src.create "ocaml-mdx"
 
 module Log = (val Logs.src_log src : Logs.LOG)
-
 open Astring
 open Misc
 

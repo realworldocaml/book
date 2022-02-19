@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU Library General Public License version 2, with a         *)
-(*  special exception on linking, as described in the file LICENSE.           *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU Library General Public License version 2, with a    *)
+(*   special exception on linking, as described in the file LICENSE.          *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -155,7 +152,8 @@ module Make (T : TABLE) = struct
   (* The following recursive group of functions are tail recursive, produce a
      checkpoint of type [semantic_value checkpoint], and cannot raise an
      exception. A semantic action can raise [Error], but this exception is
-     immediately caught within [reduce]. *)
+     immediately caught within [reduce]. A semantic action raises [Error]
+     only if it contains the $syntaxerror keyword. *)
 
   let rec run env please_discard : semantic_value checkpoint =
 
@@ -311,7 +309,8 @@ module Make (T : TABLE) = struct
 
     (* Invoke the semantic action. The semantic action is responsible for
        truncating the stack and pushing a new cell onto the stack, which
-       contains a new semantic value. It can raise [Error]. *)
+       contains a new semantic value. It can raise [Error] if it contains
+       the $syntaxerror keyword. *)
 
     (* If the semantic action terminates normally, it returns a new stack,
        which becomes the current stack. *)

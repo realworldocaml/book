@@ -1,3 +1,4 @@
+let ( let* ) = Result.bind
 
 module Ext = struct
 
@@ -138,23 +139,24 @@ let validate_signature allowed_hashes { asn ; raw } =
     asn.signature_algorithm asn.signature asn.info.public_key
 
 let decode_der ?(allowed_hashes = Validation.sha2) cs =
-  let open Rresult.R.Infix in
-  Asn_grammars.err_to_msg (Asn.signing_request_of_cs cs) >>= fun csr ->
+  let* csr = Asn_grammars.err_to_msg (Asn.signing_request_of_cs cs) in
   let csr = { raw = cs ; asn = csr } in
-  Rresult.R.error_to_msg ~pp_error:Validation.pp_signature_error
-    (validate_signature allowed_hashes csr) >>| fun () ->
-  csr
+  let* () =
+    Result.map_error
+      (fun e -> `Msg (Fmt.to_to_string Validation.pp_signature_error e))
+      (validate_signature allowed_hashes csr)
+  in
+  Ok csr
 
 let encode_der { raw ; _ } = raw
 
 let decode_pem cs =
-  let open Rresult.R.Infix in
-  Pem.parse cs >>= fun data ->
+  let* data = Pem.parse cs in
   let crs =
     List.filter (fun (t, _) -> String.equal "CERTIFICATE REQUEST" t) data
   in
-  Pem.foldM (fun (_, cs) -> decode_der cs) crs >>=
-  Pem.exactly_one ~what:"certificate request"
+  let* csrs = Pem.foldM (fun (_, cs) -> decode_der cs) crs in
+  Pem.exactly_one ~what:"certificate request" csrs
 
 let encode_pem v =
   Pem.unparse ~tag:"CERTIFICATE REQUEST" (encode_der v)
@@ -171,17 +173,16 @@ let default_digest digest key =
   match digest with None -> digest_of_key key | Some x -> x
 
 let create subject ?digest ?(extensions = Ext.empty) (key : Private_key.t) =
-  let open Rresult.R.Infix in
   let hash = default_digest digest key in
   let public_key = Private_key.public key in
   let info : request_info = { subject ; public_key ; extensions } in
   let info_cs = Asn.request_info_to_cs info in
   let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
-  Private_key.sign hash ~scheme key (`Message info_cs) >>| fun signature ->
+  let* signature = Private_key.sign hash ~scheme key (`Message info_cs) in
   let signature_algorithm = Algorithm.of_signature_algorithm scheme hash in
   let asn = { info ; signature_algorithm ; signature } in
   let raw = Asn.signing_request_to_cs asn in
-  { asn ; raw }
+  Ok { asn ; raw }
 
 let sign signing_request
     ~valid_from ~valid_until
@@ -191,9 +192,8 @@ let sign signing_request
     ?(extensions = Extension.empty)
     ?(subject = signing_request.asn.info.subject)
     key issuer =
-  let open Rresult.R.Infix in
   let hash = default_digest digest key in
-  validate_signature allowed_hashes signing_request >>= fun () ->
+  let* () = validate_signature allowed_hashes signing_request in
   let signature_algo =
     let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
     Algorithm.of_signature_algorithm scheme hash
@@ -213,11 +213,11 @@ let sign signing_request
   } in
   let tbs_raw = Certificate.Asn.tbs_certificate_to_cstruct tbs_cert in
   let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
-  Private_key.sign hash ~scheme key (`Message tbs_raw) >>| fun signature_val ->
+  let* signature_val = Private_key.sign hash ~scheme key (`Message tbs_raw) in
   let asn = {
     Certificate.tbs_cert ;
     signature_algo ;
     signature_val ;
   } in
   let raw = Certificate.Asn.certificate_to_cstruct asn in
-  { Certificate.asn ; raw }
+  Ok { Certificate.asn ; raw }

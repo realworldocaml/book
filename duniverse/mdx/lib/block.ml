@@ -15,7 +15,6 @@
  *)
 
 open Result
-open Compat
 open Util.Result.Infix
 
 module Header = struct
@@ -43,7 +42,6 @@ module Header = struct
 end
 
 type section = int * string
-
 type cram_value = { language : [ `Sh | `Bash ]; non_det : Label.non_det option }
 
 type ocaml_value = {
@@ -53,9 +51,7 @@ type ocaml_value = {
 }
 
 type toplevel_value = { env : Ocaml_env.t; non_det : Label.non_det option }
-
 type include_ocaml_file = { part_included : string option }
-
 type include_other_file = { header : Header.t option }
 
 type include_file_kind =
@@ -63,7 +59,6 @@ type include_file_kind =
   | Fk_other of include_other_file
 
 type include_value = { file_included : string; file_kind : include_file_kind }
-
 type raw_value = { header : Header.t option }
 
 type value =
@@ -77,8 +72,6 @@ type t = {
   loc : Location.t;
   section : section option;
   dir : string option;
-  source_trees : string list;
-  required_packages : string list;
   labels : Label.t list;
   legacy_labels : bool;
   contents : string list;
@@ -90,7 +83,6 @@ type t = {
 }
 
 let dump_string ppf s = Fmt.pf ppf "%S" s
-
 let dump_section = Fmt.(Dump.pair int string)
 
 let header t =
@@ -131,7 +123,7 @@ let pp_lines syntax t =
         fun ppf -> Fmt.fmt "%*s%s" ppf (t.loc.loc_start.pos_cnum + 2) ""
     | _ -> Fmt.string
   in
-  Fmt.(list ~sep:(unit "\n") pp)
+  Fmt.(list ~sep:(any "\n") pp)
 
 let lstrip string =
   let hpad = Misc.hpad_of_lines [ string ] in
@@ -139,9 +131,9 @@ let lstrip string =
 
 let pp_contents ?syntax ppf t =
   match (syntax, t.contents) with
-  | Some Syntax.Mli, [ _ ] -> Fmt.pf ppf "%s" (String.concat "\n" t.contents)
-  | Some Syntax.Mli, _ ->
-      Fmt.pf ppf "\n%a" (pp_lines syntax t) (List.map lstrip t.contents)
+  | Some Syntax.Mli, [ line ] -> Fmt.pf ppf "%s" line
+  | Some Syntax.Mli, lines ->
+      Fmt.pf ppf "@\n%a@\n" (pp_lines syntax t) (List.map lstrip lines)
   | (Some Cram | Some Normal | None), [] -> ()
   | (Some Cram | Some Normal | None), _ ->
       Fmt.pf ppf "%a\n" (pp_lines syntax t) t.contents
@@ -154,20 +146,19 @@ let pp_errors ppf t =
       Fmt.string ppf "```\n"
   | _ -> ()
 
-let pp_footer ?syntax ppf t =
+let pp_footer ?syntax ppf _ =
   match syntax with
-  | Some Syntax.Mli ->
-      if List.length t.contents = 1 then Fmt.pf ppf "" else Fmt.pf ppf "\n"
+  | Some Syntax.Mli -> ()
   | Some Syntax.Cram -> ()
   | _ -> Fmt.string ppf "```\n"
 
 let pp_legacy_labels ppf = function
   | [] -> ()
-  | l -> Fmt.pf ppf " %a" Fmt.(list ~sep:(unit ",") Label.pp) l
+  | l -> Fmt.pf ppf " %a" Fmt.(list ~sep:(any ",") Label.pp) l
 
 let pp_labels ppf = function
   | [] -> ()
-  | l -> Fmt.pf ppf "<!-- $MDX %a -->\n" Fmt.(list ~sep:(unit ",") Label.pp) l
+  | l -> Fmt.pf ppf "<!-- $MDX %a -->\n" Fmt.(list ~sep:(any ",") Label.pp) l
 
 let pp_header ?syntax ppf t =
   match syntax with
@@ -198,10 +189,7 @@ let pp ?syntax ppf b =
   pp_errors ppf b
 
 let directory t = t.dir
-
 let file t = match t.value with Include t -> Some t.file_included | _ -> None
-
-let source_trees t = t.source_trees
 
 let non_det t =
   match t.value with
@@ -211,39 +199,9 @@ let non_det t =
   | Include _ | Raw _ -> None
 
 let skip t = t.skip
-
 let set_variables t = t.set_variables
-
 let unset_variables t = t.unset_variables
-
-let explicit_required_packages t = t.required_packages
-
-let require_re =
-  let open Re in
-  seq [ str "#require \""; group (rep1 any); str "\"" ]
-
-let require_from_line line =
-  let open Util.Result.Infix in
-  let re = Re.compile require_re in
-  match Re.exec_opt re line with
-  | None -> Ok Library.Set.empty
-  | Some group ->
-      let matched = Re.Group.get group 1 in
-      let libs_str = String.split_on_char ',' matched in
-      Util.Result.List.map ~f:Library.from_string libs_str >>| fun libs ->
-      Library.Set.of_list libs
-
-let require_from_lines lines =
-  let open Util.Result.Infix in
-  Util.Result.List.map ~f:require_from_line lines >>| fun libs ->
-  List.fold_left Library.Set.union Library.Set.empty libs
-
-let required_libraries = function
-  | { value = Toplevel _; contents; _ } -> require_from_lines contents
-  | _ -> Ok Library.Set.empty
-
 let value t = t.value
-
 let section t = t.section
 
 let guess_ocaml_kind contents =
@@ -265,7 +223,6 @@ let ends_by_semi_semi c =
   | _ -> false
 
 let pp_line_directive ppf (file, line) = Fmt.pf ppf "#%d %S" line file
-
 let line_directive = Fmt.to_to_string pp_line_directive
 
 let executable_contents ~syntax b =
@@ -321,8 +278,6 @@ type block_config = {
   dir : string option;
   skip : bool;
   version : (Label.Relation.t * Ocaml_version.t) option;
-  source_trees : string list;
-  required_packages : string list;
   set_variables : (string * string) list;
   unset_variables : string list;
   file_inc : string option;
@@ -342,12 +297,6 @@ let get_block_config l =
     dir = get_label (function Dir x -> Some x | _ -> None) l;
     skip = List.exists (function Label.Skip -> true | _ -> false) l;
     version = get_label (function Version (x, y) -> Some (x, y) | _ -> None) l;
-    source_trees =
-      List.filter_map (function Label.Source_tree x -> Some x | _ -> None) l;
-    required_packages =
-      List.filter_map
-        (function Label.Require_package x -> Some x | _ -> None)
-        l;
     set_variables =
       List.filter_map (function Label.Set (v, x) -> Some (v, x) | _ -> None) l;
     unset_variables =
@@ -450,8 +399,6 @@ let mk ~loc ~section ~labels ~legacy_labels ~header ~contents ~errors =
     loc;
     section;
     dir = config.dir;
-    source_trees = config.source_trees;
-    required_packages = config.required_packages;
     labels;
     legacy_labels;
     contents;

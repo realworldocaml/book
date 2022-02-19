@@ -106,13 +106,12 @@ let set_notification id f =
   Notifiers.replace notifiers id { notifier with notify_handler = f }
 
 let call_notification id =
-  match try Some(Notifiers.find notifiers id) with Not_found -> None with
-  | Some notifier ->
+  match Notifiers.find notifiers id with
+  | exception Not_found -> ()
+  | notifier ->
     if notifier.notify_once then
       stop_notification id;
     notifier.notify_handler ()
-  | None ->
-    ()
 
 (* +-----------------------------------------------------------------+
    | Sleepers                                                        |
@@ -124,7 +123,7 @@ let sleep delay =
   Lwt.on_cancel waiter (fun () -> Lwt_engine.stop_event ev);
   waiter
 
-let yield = Lwt_main.yield
+let yield = (Lwt_main.yield [@warning "-3"])
 
 let auto_yield timeout =
   let limit = ref (Unix.gettimeofday () +. timeout) in
@@ -133,6 +132,16 @@ let auto_yield timeout =
     if current >= !limit then begin
       limit := current +. timeout;
       yield ();
+    end else
+      Lwt.return_unit
+
+let auto_pause timeout =
+  let limit = ref (Unix.gettimeofday () +. timeout) in
+  fun () ->
+    let current = Unix.gettimeofday () in
+    if current >= !limit then begin
+      limit := current +. timeout;
+      Lwt.pause ();
     end else
       Lwt.return_unit
 
@@ -1007,7 +1016,7 @@ external lstat_job : string -> Unix.stats job = "lwt_unix_lstat_job"
 
 let lstat name =
   if Sys.win32 then
-    Lwt.return (Unix.stat name)
+    Lwt.return (Unix.lstat name)
   else
     run_job (lstat_job name)
 
@@ -1224,22 +1233,22 @@ let access name mode =
    | Operations on file descriptors                                  |
    +-----------------------------------------------------------------+ *)
 
-let dup ch =
+let dup ?cloexec ch =
   check_descriptor ch;
+#if OCAML_VERSION >= (4, 05, 0)
+  let fd = Unix.dup ?cloexec ch.fd in
+#else
   let fd = Unix.dup ch.fd in
+  if cloexec = Some true then Unix.set_close_on_exec fd;
+#endif
   {
     fd = fd;
     state = Opened;
     set_flags = ch.set_flags;
     blocking =
       if ch.set_flags then
-        lazy(Lazy.force ch.blocking >>= function
-        | true ->
-          Unix.clear_nonblock fd;
-          Lwt.return_true
-        | false ->
-          Unix.set_nonblock fd;
-          Lwt.return_false)
+        lazy(Lazy.force ch.blocking >>= function blocking ->
+               Lazy.force (is_blocking ~blocking fd))
       else
         ch.blocking;
     event_readable = None;
@@ -1248,19 +1257,19 @@ let dup ch =
     hooks_writable = Lwt_sequence.create ();
   }
 
-let dup2 ch1 ch2 =
+let dup2 ?cloexec ch1 ch2 =
   check_descriptor ch1;
+#if OCAML_VERSION >= (4, 05, 0)
+  Unix.dup2 ?cloexec ch1.fd ch2.fd;
+#else
   Unix.dup2 ch1.fd ch2.fd;
+  if cloexec = Some true then Unix.set_close_on_exec ch2.fd;
+#endif
   ch2.set_flags <- ch1.set_flags;
   ch2.blocking <- (
     if ch2.set_flags then
-      lazy(Lazy.force ch1.blocking >>= function
-      | true ->
-        Unix.clear_nonblock ch2.fd;
-        Lwt.return_true
-      | false ->
-        Unix.set_nonblock ch2.fd;
-        Lwt.return_false)
+      lazy(Lazy.force ch1.blocking >>= function blocking ->
+             Lazy.force (is_blocking ~blocking ch2.fd))
     else
       ch1.blocking
   )
@@ -1350,11 +1359,9 @@ let readdir_n handle count =
       if i = count then
         Lwt.return array
       else
-        match try array.(i) <- Unix.readdir handle; true with End_of_file -> false with
-        | true ->
-          fill (i + 1)
-        | false ->
-          Lwt.return (Array.sub array 0 i)
+        match array.(i) <- Unix.readdir handle with
+        | exception End_of_file -> Lwt.return (Array.sub array 0 i)
+        | () -> fill (i + 1)
     in
     fill 0
   else
@@ -1442,16 +1449,40 @@ let files_of_directory path =
    | Pipes and redirections                                          |
    +-----------------------------------------------------------------+ *)
 
-let pipe () =
-  let (out_fd, in_fd) = Unix.pipe() in
+let pipe ?cloexec () =
+#if OCAML_VERSION >= (4, 05, 0)
+  let (out_fd, in_fd) = Unix.pipe ?cloexec () in
+#else
+  let (out_fd, in_fd) = Unix.pipe () in
+  if cloexec = Some true then begin
+    Unix.set_close_on_exec out_fd;
+    Unix.set_close_on_exec in_fd
+  end;
+#endif
   (mk_ch ~blocking:Sys.win32 out_fd, mk_ch ~blocking:Sys.win32 in_fd)
 
-let pipe_in () =
-  let (out_fd, in_fd) = Unix.pipe() in
+let pipe_in ?cloexec () =
+#if OCAML_VERSION >= (4, 05, 0)
+   let (out_fd, in_fd) = Unix.pipe ?cloexec () in
+#else
+   let (out_fd, in_fd) = Unix.pipe () in
+   if cloexec = Some true then begin
+     Unix.set_close_on_exec out_fd;
+     Unix.set_close_on_exec in_fd
+   end;
+#endif
   (mk_ch ~blocking:Sys.win32 out_fd, in_fd)
 
-let pipe_out () =
-  let (out_fd, in_fd) = Unix.pipe() in
+let pipe_out ?cloexec () =
+#if OCAML_VERSION >= (4, 05, 0)
+  let (out_fd, in_fd) = Unix.pipe ?cloexec () in
+#else
+  let (out_fd, in_fd) = Unix.pipe () in
+  if cloexec = Some true then begin
+    Unix.set_close_on_exec out_fd;
+    Unix.set_close_on_exec in_fd
+  end;
+#endif
   (out_fd, mk_ch ~blocking:Sys.win32 in_fd)
 
 external mkfifo_job : string -> int -> unit job = "lwt_unix_mkfifo_job"
@@ -1468,10 +1499,15 @@ let mkfifo name perms =
 
 external symlink_job : string -> string -> unit job = "lwt_unix_symlink_job"
 
-let symlink name1 name2 =
-  if Sys.win32 then
+let symlink ?to_dir name1 name2 =
+  if Sys.win32 then begin
+#if OCAML_VERSION >= (4, 03, 0)
+    Lwt.return (Unix.symlink ?to_dir name1 name2)
+  #else
+    ignore to_dir;
     Lwt.return (Unix.symlink name1 name2)
-  else
+#endif
+  end else
     run_job (symlink_job name1 name2)
 
 external readlink_job : string -> string job = "lwt_unix_readlink_job"
@@ -1662,8 +1698,13 @@ type socket_type =
 
 type sockaddr = Unix.sockaddr = ADDR_UNIX of string | ADDR_INET of inet_addr * int
 
-let socket dom typ proto =
+let socket ?cloexec dom typ proto =
+#if OCAML_VERSION >= (4, 05, 0)
+  let s = Unix.socket ?cloexec dom typ proto in
+#else
   let s = Unix.socket dom typ proto in
+  if cloexec = Some true then Unix.set_close_on_exec s;
+#endif
   mk_ch ~blocking:false s
 
 type shutdown_command =
@@ -1678,33 +1719,56 @@ let shutdown ch shutdown_command =
 
 external stub_socketpair : socket_domain -> socket_type -> int -> Unix.file_descr * Unix.file_descr = "lwt_unix_socketpair_stub"
 
-let socketpair dom typ proto =
 #if OCAML_VERSION >= (4, 05, 0)
-  let do_socketpair =
-    if Sys.win32 then stub_socketpair
-    else Unix.socketpair ?cloexec:None in
-#else
-  let do_socketpair = if Sys.win32 then stub_socketpair else Unix.socketpair  in
+let stub_socketpair ?cloexec dom typ proto =
+  let (s1, s2) = stub_socketpair dom typ proto in
+  if cloexec = Some true then begin
+    Unix.set_close_on_exec s1;
+    Unix.set_close_on_exec s2
+  end;
+  (s1, s2)
 #endif
-  let (s1, s2) = do_socketpair dom typ proto in
+
+let socketpair ?cloexec dom typ proto =
+  let (s1, s2) =
+#if OCAML_VERSION >= (4, 14, 0)
+    if Sys.win32 && (dom <> Unix.PF_UNIX) then
+      stub_socketpair ?cloexec dom typ proto
+    else Unix.socketpair ?cloexec dom typ proto in
+#elif OCAML_VERSION >= (4, 05, 0)
+    if Sys.win32 then stub_socketpair ?cloexec dom typ proto
+    else Unix.socketpair ?cloexec dom typ proto in
+#else
+    if Sys.win32 then stub_socketpair dom typ proto
+    else Unix.socketpair dom typ proto in
+  if cloexec = Some true then begin
+    Unix.set_close_on_exec s1;
+    Unix.set_close_on_exec s2
+  end;
+#endif
   (mk_ch ~blocking:false s1, mk_ch ~blocking:false s2)
 
 external accept4 :
-  close_on_exec:bool -> nonblock:bool -> Unix.file_descr ->
-    Unix.file_descr * Unix.sockaddr = "lwt_unix_accept4"
+  ?cloexec:bool -> nonblock:bool ->
+  Unix.file_descr -> Unix.file_descr * Unix.sockaddr = "lwt_unix_accept4"
 
-let accept_and_set_nonblock ch_fd =
+let accept_and_set_nonblock ?cloexec ch_fd =
   if Lwt_config._HAVE_ACCEPT4 then
-    let (fd, addr) = accept4 ~close_on_exec:false ~nonblock:true ch_fd in
+    let (fd, addr) = accept4 ?cloexec ~nonblock:true ch_fd in
     (mk_ch ~blocking:false ~set_flags:false fd, addr)
   else
+#if OCAML_VERSION >= (4, 05, 0)
+    let (fd, addr) = Unix.accept ?cloexec ch_fd in
+#else
     let (fd, addr) = Unix.accept ch_fd in
+    if cloexec = Some true then Unix.set_close_on_exec fd;
+#endif
     (mk_ch ~blocking:false fd, addr)
 
-let accept ch =
-  wrap_syscall Read ch (fun _ -> accept_and_set_nonblock ch.fd)
+let accept ?cloexec ch =
+  wrap_syscall Read ch (fun _ -> accept_and_set_nonblock ?cloexec ch.fd)
 
-let accept_n ch n =
+let accept_n ?cloexec ch n =
   let l = ref [] in
   Lazy.force ch.blocking >>= fun blocking ->
   Lwt.catch
@@ -1714,7 +1778,7 @@ let accept_n ch n =
            try
              for _i = 1 to n do
                if blocking && not (unix_readable ch.fd) then raise Retry;
-               l := accept_and_set_nonblock ch.fd :: !l
+               l := accept_and_set_nonblock ?cloexec ch.fd :: !l
              done
            with
            | (Unix.Unix_error((Unix.EAGAIN | Unix.EWOULDBLOCK | Unix.EINTR), _, _) | Retry) when !l <> [] ->
@@ -2289,11 +2353,10 @@ let disable_signal_handler id =
     end
 
 let reinstall_signal_handler signum =
-  match try Some (Signal_map.find signum !signals) with Not_found -> None with
-  | Some (notification, _) ->
+  match Signal_map.find signum !signals with
+  | exception Not_found -> ()
+  | notification, _ ->
     set_signal signum notification
-  | None ->
-    ()
 
 (* +-----------------------------------------------------------------+
    | Processes                                                       |
@@ -2318,7 +2381,7 @@ let fork () =
     Lwt_sequence.iter_node_l Lwt_sequence.remove jobs;
     (* And cancel them all. We yield first so that if the program
        do an exec just after, it won't be executed. *)
-    Lwt.on_termination (Lwt_main.yield ()) (fun () -> List.iter (fun f -> f Lwt.Canceled) l);
+    Lwt.on_termination (Lwt_main.yield () [@warning "-3"]) (fun () -> List.iter (fun f -> f Lwt.Canceled) l);
     0
   | pid ->
     pid

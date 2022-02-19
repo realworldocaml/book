@@ -149,14 +149,16 @@ let flow_of_fd fd sa =
       TCP { fd; ip = Ipaddr_unix.of_inet_addr ip; port }
 
 let default_ctx =
-  {
-    src = None;
-    tls_own_key = `None;
-    tls_authenticator = Conduit_lwt_tls.X509.default_authenticator;
-  }
+  lazy
+    {
+      src = None;
+      tls_own_key = `None;
+      tls_authenticator = Lazy.force Conduit_lwt_tls.X509.default_authenticator;
+    }
 
 let init ?src ?(tls_own_key = `None)
-    ?(tls_authenticator = Conduit_lwt_tls.X509.default_authenticator) () =
+    ?(tls_authenticator = Lazy.force Conduit_lwt_tls.X509.default_authenticator)
+    () =
   match src with
   | None -> Lwt.return { src = None; tls_own_key; tls_authenticator }
   | Some host -> (

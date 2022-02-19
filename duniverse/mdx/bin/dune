@@ -9,8 +9,3 @@
  (package mdx)
  (modules :standard \ cli)
  (libraries cli mdx))
-
-(install
- (section bin)
- (files
-  (main.exe as mdx)))

@@ -1,3 +1,20 @@
+## v5.0.0 (2021-10-20)
+
+* change the type of `Conduit_lwt_tls.X509.default_authenticator` and
+  `Conduit_lwt_unix.default_ctx` to be lazy, avoiding various side-effects
+  (system interactions, logging) due to constructing these values at
+  initialisation time. (@craigfe, #395 #404)
+* Adapt conduit-mirage to dns-client 6.0.0 API (#406 @hannesm)
+* Use Lwt.pause instead of Lwt_unix.yield (#403 @MisterDA)
+* Avoid deprecated Fmt.kstrf (#407 @hannesm)
+
+## v4.0.2 (2021-10-09)
+
+* Adapt conduit-mirage to tls 0.15.0 (@hannesm #404)
+* Remove Conduit_mirage.Endpoint.ok_authenticator (@hannesm #404)
+* Now Conduit_mirage.Endpoint.server does not use an authenticator - and thus
+  not request a client certificate (@hannesm #404)
+
 ## v4.0.1 (2021-08-06)
 
 * Add missing `ipaddr-sexp` dependency on conduit-async (#385, @anmonteiro)

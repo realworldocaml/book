@@ -1,0 +1,115 @@
+Testing `test/e2e/alcotest/failing/tail_errors_unlimited.ml'.
+This run has ID `<uuid>'.
+
+> [FAIL]        failing          0   test.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        failing          0   test.                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+output line 1
+output line 2
+output line 3
+output line 4
+output line 5
+output line 6
+output line 7
+output line 8
+output line 9
+output line 10
+output line 11
+output line 12
+output line 13
+output line 14
+output line 15
+output line 16
+output line 17
+output line 18
+output line 19
+output line 20
+output line 21
+output line 22
+output line 23
+output line 24
+output line 25
+output line 26
+output line 27
+output line 28
+output line 29
+output line 30
+output line 31
+output line 32
+output line 33
+output line 34
+output line 35
+output line 36
+output line 37
+output line 38
+output line 39
+output line 40
+output line 41
+output line 42
+output line 43
+output line 44
+output line 45
+output line 46
+output line 47
+output line 48
+output line 49
+output line 50
+output line 51
+output line 52
+output line 53
+output line 54
+output line 55
+output line 56
+output line 57
+output line 58
+output line 59
+output line 60
+output line 61
+output line 62
+output line 63
+output line 64
+output line 65
+output line 66
+output line 67
+output line 68
+output line 69
+output line 70
+output line 71
+output line 72
+output line 73
+output line 74
+output line 75
+output line 76
+output line 77
+output line 78
+output line 79
+output line 80
+output line 81
+output line 82
+output line 83
+output line 84
+output line 85
+output line 86
+output line 87
+output line 88
+output line 89
+output line 90
+output line 91
+output line 92
+output line 93
+output line 94
+output line 95
+output line 96
+output line 97
+output line 98
+output line 99
+output line 100
+ASSERT Logs above should be 101 lines long.
+FAIL Logs above should be 101 lines long.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.

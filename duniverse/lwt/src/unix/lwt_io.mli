@@ -275,12 +275,12 @@ val read_into_exactly_bigstring : input_channel -> Lwt_bytes.t -> int -> int -> 
 val read_value : input_channel -> 'a Lwt.t
 (** [read_value channel] reads a marshaled value from [channel]; it corresponds
     to the standard library's
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Marshal.html#VALfrom_channel} [Marshal.from_channel]}.
+    {{:https://ocaml.org/api/Marshal.html#VALfrom_channel} [Marshal.from_channel]}.
     The corresponding writing function is {!write_value}.
 
     Note that reading marshaled values is {e not}, in general, type-safe. See
     the warning in the description of module
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Marshal.html}
+    {{:https://ocaml.org/api/Marshal.html}
     [Marshal]} for details. The short version is: if you read a value of one
     type, such as [string], when a value of another type, such as [int] has
     actually been marshaled to [channel], you may get arbitrary behavior,
@@ -336,7 +336,7 @@ val write_value :
   output_channel -> ?flags : Marshal.extern_flags list -> 'a -> unit Lwt.t
 (** [write_value channel ?flags v] writes [v] to [channel] using the [Marshal]
     module of the standard library. See
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Marshal.html#VALto_channel}
+    {{:https://ocaml.org/api/Marshal.html#VALto_channel}
     [Marshal.to_channel]} for an explanation of [?flags].
 
     The corresponding reading function is {!read_value}. See warnings about type
@@ -420,7 +420,7 @@ val open_file :
     If [~buffer] is supplied, it is used as the I/O buffer.
 
     If [~flags] is supplied, the file is opened with the given flags (see
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#TYPEopen_flag}
+    {{: https://ocaml.org/api/Unix.html#TYPEopen_flag}
     [Unix.open_flag]}). Note that [~flags] is used {e exactly} as given. For
     example, opening a file with [~flags] and [~mode:Input] does {e not}
     implicitly add [O_RDONLY]. So, you should include [O_RDONLY] when opening
@@ -482,9 +482,9 @@ val open_temp_file :
 
     [?temp_dir] can be used to choose the directory in which the file is
     created. For the current directory, use
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Filename.html#VALcurrent_dir_name}
+    {{: https://ocaml.org/api/Filename.html#VALcurrent_dir_name}
     [Filename.current_dir_name]}. If not specified, the directory is taken from
-    {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Filename.html#VALget_temp_dir_name}
+    {{: https://ocaml.org/api/Filename.html#VALget_temp_dir_name}
     [Filename.get_temp_dir_name]}, which is typically set to your system
     temporary file directory.
 

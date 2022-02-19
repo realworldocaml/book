@@ -75,17 +75,16 @@ checking]{.idx}[unit tests]{.idx}
 ::: {data-type=note}
 ##### Installing the Yojson Library
 
-There are several JSON libraries available for OCaml. For this chapter, we've
-picked the [Yojson](https://github.com/mjambon/yojson) library by Martin Jambon.
-It's easiest to install via OPAM by running `opam install yojson`. See
-[the installation instructions](install.html) if you haven't already got opam.
-Once installed, you can open it in the `utop` toplevel by:
-:::
+There are several JSON libraries available for OCaml. For this
+chapter, we've picked the popular
+[Yojson](https://github.com/ocaml-community/yojson) library, which you
+can install by running `opam install yojson`. Once installed, you can
+open it in `utop` as follows:
 
 ```ocaml env=install
-# open Core
-# #require "yojson"
-# open Yojson
+# open Core;;
+# #require "yojson";;
+# open Yojson;;
 ```
 
 ## Parsing JSON with Yojson
@@ -313,8 +312,8 @@ functions]{.idx}[member function]{.idx}
 Let's start with selecting a single `title` field from the record:
 
 ```ocaml env=parse_book
-# open Yojson.Basic.Util
-# let title = json |> member "title" |> to_string
+# open Yojson.Basic.Util;;
+# let title = json |> member "title" |> to_string;;
 val title : string = "Real World OCaml"
 ```
 
@@ -323,13 +322,12 @@ JSON field associated with that key, or `Null`. Since we know that the
 `title` value is always a string in our example schema, we want to convert it
 to an OCaml string. The `to_string` function performs this conversion and
 raises an exception if there is an unexpected JSON type. The `|>` operator
-provides a convenient way to chain these operations
-<span class="keep-together">together</span>:
+provides a convenient way to chain these operations together:
 
 ```ocaml env=parse_book
-# let tags = json |> member "tags" |> to_list |> filter_string
+# let tags = json |> member "tags" |> to_list |> filter_string;;
 val tags : string list = ["functional programming"; "ocaml"; "algorithms"]
-# let pages = json |> member "pages" |> to_int
+# let pages = json |> member "pages" |> to_int;;
 val pages : int = 450
 ```
 
@@ -342,9 +340,9 @@ values that cannot be converted to a `string` will be skipped from the output
 of `filter_string`:
 
 ```ocaml env=parse_book
-# let is_online = json |> member "is_online" |> to_bool_option
+# let is_online = json |> member "is_online" |> to_bool_option;;
 val is_online : bool option = Some true
-# let is_translated = json |> member "is_translated" |> to_bool_option
+# let is_translated = json |> member "is_translated" |> to_bool_option;;
 val is_translated : bool option = None
 ```
 
@@ -355,7 +353,7 @@ our example JSON, only `is_online` is present and `is_translated` will be
 `None`:
 
 ```ocaml env=parse_book
-# let authors = json |> member "authors" |> to_list
+# let authors = json |> member "authors" |> to_list;;
 val authors : Yojson.Basic.t list =
   [`Assoc
      [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
@@ -376,7 +374,7 @@ operator:
 ```ocaml env=parse_book
 # let names =
     json |> member "authors" |> to_list
-  |> List.map ~f:(fun json -> member "name" json |> to_string)
+  |> List.map ~f:(fun json -> member "name" json |> to_string);;
 val names : string list =
   ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]
 ```
@@ -384,10 +382,9 @@ val names : string list =
 This style of programming, which omits variable names and chains functions
 together, is known as *point-free programming*. It's a succinct style but
 shouldn't be overused due to the increased difficulty of debugging
-intermediate values. If an explicit <span class="keep-together">name</span>
-is assigned to each stage of the transformations, debuggers in particular
-have an easier time making the program flow simpler to represent to the
-programmer.
+intermediate values. If an explicit name is assigned to each stage of the
+transformations, debuggers in particular have an easier time making the
+program flow simpler to represent to the programmer.
 
 This technique of using statically typed parsing functions is very powerful
 in combination with the OCaml type system. Many errors that don't make sense
@@ -419,7 +416,7 @@ pretty-printing functions in the `Yojson.Basic` module to display JSON
 output:
 
 ```ocaml env=build_json
-# let person = `Assoc [ ("name", `String "Anil") ]
+# let person = `Assoc [ ("name", `String "Anil") ];;
 val person : [> `Assoc of (string * [> `String of string ]) list ] =
   `Assoc [("name", `String "Anil")]
 ```
@@ -436,7 +433,7 @@ without knowledge of the other possible allowed variants in JSON records that
 you haven't used yet (e.g. `Int` or `Null`):
 
 ```ocaml env=build_json
-# Yojson.Basic.pretty_to_string
+# Yojson.Basic.pretty_to_string;;
 - : ?std:bool -> Yojson.Basic.t -> string = <fun>
 ```
 
@@ -446,9 +443,9 @@ an argument of type `Yojson.Basic.t`. When `person` is applied to
 against the structure of the `json` type to ensure that they're compatible:
 
 ```ocaml env=build_json
-# Yojson.Basic.pretty_to_string person
+# Yojson.Basic.pretty_to_string person;;
 - : string = "{ \"name\": \"Anil\" }"
-# Yojson.Basic.pretty_to_channel stdout person
+# Yojson.Basic.pretty_to_channel stdout person;;
 { "name": "Anil" }
 - : unit = ()
 ```
@@ -469,10 +466,10 @@ variants can be quite verbose. For example, suppose you build an `Assoc` and
 mistakenly include a single value instead of a list of keys:
 
 ```ocaml env=build_json
-# let person = `Assoc ("name", `String "Anil")
+# let person = `Assoc ("name", `String "Anil");;
 val person : [> `Assoc of string * [> `String of string ] ] =
   `Assoc ("name", `String "Anil")
-# Yojson.Basic.pretty_to_string person
+# Yojson.Basic.pretty_to_string person;;
 Line 1, characters 31-37:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
@@ -487,7 +484,7 @@ about your intentions:
 
 ```ocaml env=build_json
 # let (person : Yojson.Basic.t) =
-  `Assoc ("name", `String "Anil")
+  `Assoc ("name", `String "Anil");;
 Line 2, characters 10-34:
 Error: This expression has type 'a * 'b
        but an expression was expected of type (string * Yojson.Basic.t) list
@@ -585,38 +582,32 @@ conversion functions individually. [mapping/of JSON to OCaml
 types]{.idx}[JSON data/automatic mapping of]{.idx}
 
 We'll cover an alternative JSON processing method that is better for
-larger-scale JSON handling now, using the
-[OCaml](http://mjambon.com/atd-biniou-intro.html) tool. This will introduce
-our first *Domain Specific Language* that compiles JSON specifications into
-OCaml modules, which are then used throughout your application. [ATDgen
-Library/installation of]{.idx}[Domain Specific Language]{.idx}
+larger-scale JSON handling now, using
+[ATD](https://github.com/ahrefs/atd), which provides a *domain
+specific language*, or DSL, that compiles JSON specifications into
+OCaml modules, which are then used throughout your
+application. [ATDgen Library/installation of]{.idx}[Domain specific
+language]{.idx}
 
-::: {data-type=note}
-##### Installing the ATDgen Library and Tool
-
-ATDgen installs some OCaml libraries that interface with Yojson, and also a
-command-line tool that generates code. It can all be installed via OPAM:
-:::
+You can install the `atdgen` executable by calling `opam install
+atdgen`.
 
 ```
 $ opam install atdgen
 $ atdgen -version
-2.0.0
+2.2.1
 ```
 
-The command-line tool will be installed within your
-<em class="filename">~/.opam</em> directory and should already be on your
-`PATH` from running `opam config env`. See
-[the installation instructions](install.html) if this isn't
-working.
+You may need to run `eval $(opam env)` in your shell if you don't find
+`atdgen` in your path.
 
 ### ATD Basics
 
-The idea behind ATD is to specify the format of the JSON in a separate file
-and then run a compiler (`atdgen`) that outputs OCaml code to construct and
-parse JSON values. This means that you don't need to write any OCaml parsing
-code at all, as it will all be autogenerated for you. [ATDgen Library/basics
-of]{.idx}
+The idea behind ATD is to specify the format of the JSON in a separate
+file and then run a compiler (`atdgen`) that outputs OCaml code to
+construct and parse JSON values. This means that you don't need to
+write any OCaml parsing code at all, as it will all be autogenerated
+for you. [ATDgen Library/basics of]{.idx}
 
 Let's go straight into looking at an example of how this works, by using a
 small portion of the GitHub API. GitHub is a popular code hosting and sharing

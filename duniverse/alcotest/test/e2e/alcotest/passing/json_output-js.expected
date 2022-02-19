@@ -1,0 +1,8 @@
+Testing `test/e2e/alcotest/passing/json_output.ml'.
+This run has ID `<uuid>'.
+
+{
+  "success": 3,
+  "failures": 0,
+  "time": <test-duration>
+}

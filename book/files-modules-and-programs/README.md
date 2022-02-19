@@ -28,15 +28,15 @@ module/List.Assoc.find]{.idx}[lists/adding new bindings
 in]{.idx}[lists/finding key associations in]{.idx}
 
 ```ocaml env=intro
-# open Base
-# let assoc = [("one", 1); ("two",2); ("three",3)]
+# open Base;;
+# let assoc = [("one", 1); ("two",2); ("three",3)];;
 val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.find ~equal:String.equal assoc "two"
+# List.Assoc.find ~equal:String.equal assoc "two";;
 - : int option = Some 2
-# List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *)
+# List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
 - : (string, int) Base.List.Assoc.t =
 [("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *)
+# List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
 - : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 ```
 
@@ -630,14 +630,14 @@ environment that the compiler looks at to find the definition of various
 identifiers. Here's an example:
 
 ```ocaml env=main
-# open Base
-# module M = struct let foo = 3 end
+# open Base;;
+# module M = struct let foo = 3 end;;
 module M : sig val foo : int end
-# foo
+# foo;;
 Line 1, characters 1-4:
 Error: Unbound value foo
-# open M
-# foo
+# open M;;
+# foo;;
 - : int = 3
 ```
 
@@ -660,7 +660,7 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
 ```ocaml env=main
 # let average x y =
     let open Int64 in
-    (x + y) / of_int 2
+    (x + y) / of_int 2;;
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
@@ -672,7 +672,7 @@ Here, `of_int` and the infix operators are the ones from the `Int64`
 
 ```ocaml env=main
 # let average x y =
-    Int64.((x + y) / of_int 2)
+    Int64.((x + y) / of_int 2);;
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
@@ -718,7 +718,7 @@ modules]{.idx}
 
     let create low high =
       if high < low then Empty else Interval (low,high)
-  end
+  end;;
 module Interval :
   sig type t = Interval of int * int | Empty val create : int -> int -> t end
 ```
@@ -734,14 +734,14 @@ We can use the `include` directive to create a new, extended version of the
       match t with
       | Empty -> false
       | Interval (low,high) -> x >= low && x <= high
-  end
+  end;;
 module Extended_interval :
   sig
     type t = Interval.t = Interval of int * int | Empty
     val create : int -> int -> t
     val contains : t -> int -> bool
   end
-# Extended_interval.contains (Extended_interval.create 3 10) 4
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
 - : bool = true
 ```
 
@@ -757,10 +757,10 @@ If we'd used `open`, we'd have gotten a quite different result:
       match t with
       | Empty -> false
       | Interval (low,high) -> x >= low && x <= high
-  end
+  end;;
 module Extended_interval :
   sig val contains : Extended_interval.t -> int -> bool end
-# Extended_interval.contains (Extended_interval.create 3 10) 4
+# Extended_interval.contains (Extended_interval.create 3 10) 4;;
 Line 1, characters 29-53:
 Error: Unbound value Extended_interval.create
 ```
@@ -1018,8 +1018,9 @@ preserves your invariants.
 
 Despite these benefits, there is a trade-off here. In particular, exposing
 types concretely makes it possible to use pattern-matching with those types,
-which as we saw in <span class="keep-together">Lists And Patterns</span> is a
-powerful and important tool. You should generally only expose the concrete
+which as we saw in
+[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}
+is a powerful and important tool. You should generally only expose the concrete
 implementation of your types when there's significant value in the ability to
 pattern match, and when the invariants that you care about are already
 enforced by the data type itself.

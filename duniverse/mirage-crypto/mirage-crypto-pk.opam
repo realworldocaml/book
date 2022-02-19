@@ -1,4 +1,4 @@
-version: "0.10.3"
+version: "0.10.5"
 opam-version: "2.0"
 homepage:     "https://github.com/mirage/mirage-crypto"
 dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
@@ -19,15 +19,13 @@ depends: [
   "dune" {>= "2.6"}
   "ounit" {with-test}
   "randomconv" {with-test & >= "0.1.3"}
-  "cstruct" {>="3.2.0"}
+  "cstruct" {>="6.00"}
   "mirage-crypto" {=version}
   "mirage-crypto-rng" {=version}
-  "sexplib"
-  "ppx_sexp_conv"
+  "sexplib0"
   "zarith" {>= "1.4"}
-  "eqaf" {>= "0.7"}
-  "rresult" {>= "0.6.0"}
-  (("mirage-no-solo5" & "mirage-no-xen") | "zarith-freestanding")
+  "eqaf" {>= "0.8"}
+  (("mirage-no-solo5" & "mirage-no-xen") | "zarith-freestanding" | "mirage-runtime" {>= "4.0.0"})
 ]
 conflicts: [
   "mirage-xen" {< "6.0.0"}

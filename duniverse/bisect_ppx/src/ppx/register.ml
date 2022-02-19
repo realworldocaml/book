@@ -4,8 +4,6 @@
 
 
 
-module Common = Bisect_common
-
 let conditional = ref false
 
 let enabled () =
@@ -40,12 +38,17 @@ let switches = [
   " Instrument only when BISECT_ENABLE is YES");
 
   ("--bisect-file",
-  Arg.String (fun s -> Common.bisect_file := Some s),
+  Arg.String (fun s -> Instrument.bisect_file := Some s),
   " Default value for BISECT_FILE environment variable");
 
   ("--bisect-silent",
-  Arg.String (fun s -> Common.bisect_silent := Some s),
+  Arg.String (fun s -> Instrument.bisect_silent := Some s),
   " Default value for BISECT_SILENT environment variable");
+
+  ("--bisect-sigterm",
+  Arg.Set Instrument.bisect_sigterm,
+  (" Install a signal handler writing coverage data and" ^
+   " terminating on reception of SIGTERM"));
 ]
 
 let () =

@@ -1,5 +1,9 @@
 # Objects
 
+::: {text-align=right}
+*This chapter was written by Leo White and Jeremy Yallop.*
+:::
+
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules. In addition, OCaml also supports object-oriented
 programming. There are objects, classes, and their associated types. In this
@@ -59,10 +63,10 @@ C++, Java, C#, Ruby, Python, or JavaScript.
 ## OCaml Objects
 
 If you already know about object-oriented programming in a language
-like Java or <span class="keep-together">C++,</span> the OCaml object
-system may come as a surprise. Foremost is the complete separation of
-objects and their types from the class system. In a language like
-Java, a class name is also used as the type of objects created by
+like Java or C++, the OCaml object system may come as a surprise.
+Foremost is the complete separation of objects and their types
+from the class system. In a language like Java, a class name is also
+used as the type of objects created by
 instantiating it, and the relationships between these object types
 correspond to inheritance. For example, if we implement a class
 `Deque` in Java by inheriting from a class `Stack`, we would be
@@ -75,7 +79,7 @@ support inheritance, but classes are not types. Instead, objects have
 use classes at all. Here's an example of a simple object:
 
 ```ocaml env=stack
-# open Base
+# open Base;;
 # let s = object
     val mutable v = [0; 2]
 
@@ -88,7 +92,7 @@ use classes at all. Here's an example of a simple object:
 
     method push hd =
       v <- hd :: v
-  end
+  end;;
 val s : < pop : int option; push : int -> unit > = <obj>
 ```
 
@@ -102,11 +106,11 @@ of an object. All interaction with an object is through its methods. The
 syntax for a method invocation uses the `#` character:
 
 ```ocaml env=stack
-# s#pop
+# s#pop;;
 - : int option = Some 0
-# s#push 4
+# s#push 4;;
 - : unit = ()
-# s#pop
+# s#pop;;
 - : int option = Some 4
 ```
 
@@ -132,11 +136,11 @@ and returns an object:
 
     method push hd =
       v <- hd :: v
-  end
+  end;;
 val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>
-# let s = stack [3; 2; 1]
+# let s = stack [3; 2; 1];;
 val s : < pop : int option; push : int -> unit > = <obj>
-# s#pop
+# s#pop;;
 - : int option = Some 3
 ```
 
@@ -152,11 +156,11 @@ type declaration: [polymorphism/in objects]{.idx}[objects/polymorphism
 of]{.idx}
 
 ```ocaml env=polymorphism
-# let area sq = sq#width * sq#width
+# let area sq = sq#width * sq#width;;
 val area : < width : int; .. > -> int = <fun>
-# let minimize sq : unit = sq#resize 1
+# let minimize sq : unit = sq#resize 1;;
 val minimize : < resize : int -> unit; .. > -> unit = <fun>
-# let limit sq = if (area sq) > 100 then minimize sq
+# let limit sq = if (area sq) > 100 then minimize sq;;
 val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
 ```
 
@@ -169,7 +173,7 @@ method:
 ```ocaml env=polymorphism
 # let toggle sq b : unit =
     if b then sq#resize `Fullscreen
-  else minimize sq
+  else minimize sq;;
 Line 3, characters 17-19:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
@@ -185,14 +189,14 @@ to be *open*. [open object types]{.idx}
 We can manually *close* an object type using a type annotation:
 
 ```ocaml env=polymorphism
-# let area_closed (sq: < width : int >) = sq#width * sq#width
+# let area_closed (sq: < width : int >) = sq#width * sq#width;;
 val area_closed : < width : int > -> int = <fun>
 # let sq = object
     method width = 30
     method name = "sq"
-  end
+  end;;
 val sq : < name : string; width : int > = <obj>
-# area_closed sq
+# area_closed sq;;
 Line 1, characters 13-15:
 Error: This expression has type < name : string; width : int >
        but an expression was expected of type < width : int >
@@ -210,7 +214,7 @@ polymorphism]{.idx}[row polymorphism]{.idx}[ellipses (..)]{.idx}[type
 variables]{.idx}
 
 ```ocaml env=polymorphism
-# type square = < width : int; ..>
+# type square = < width : int; ..>;;
 Line 1, characters 1-33:
 Error: A type variable is unbound in this type declaration.
        In type < width : Base.int; .. > as 'a the variable 'a is unbound
@@ -232,7 +236,7 @@ implemented. When the method `#pop` is invoked, the actual method that
 is run is determined by the object.  Consider the following function.
 
 ```ocaml env=stack
-# let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop
+# let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop;;
 val print_pop : < pop : int option; .. > -> unit = <fun>
 ```
 
@@ -240,7 +244,7 @@ We can run it on the stack type we defined above, which is based on
 linked lists.
 
 ```ocaml env=stack
-# print_pop (stack [5;4;3;2;1])
+# print_pop (stack [5;4;3;2;1]);;
 Popped: 5
 - : unit = ()
 ```
@@ -252,7 +256,7 @@ using Base's array-based `Stack` module.
 # let array_stack l = object
     val stack = Stack.of_list l
     method pop = Stack.pop stack
-  end
+  end;;
 val array_stack : 'a list -> < pop : 'a option > = <fun>
 ```
 
@@ -260,7 +264,7 @@ And `print_pop` will work just as well on this kind of stack object,
 despite having a completely different implementation.
 
 ```ocaml env=stack
-# print_pop (array_stack [5;4;3;2;1])
+# print_pop (array_stack [5;4;3;2;1]);;
 Popped: 5
 - : unit = ()
 ```
@@ -286,7 +290,7 @@ Let's define a function that creates immutable stack objects:
 
     method push hd =
       {< v = hd :: v >}
-  end
+  end;;
 val imm_stack :
   'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
 ```
@@ -298,14 +302,14 @@ words, the `push hd` method produces a copy of the object, with `v`
 replaced by `hd :: v`. The original object is not modified:
 
 ```ocaml env=immutable
-# let s = imm_stack [3; 2; 1]
+# let s = imm_stack [3; 2; 1];;
 val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# let r = s#push 4
+# let r = s#push 4;;
 val r : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# s#pop
+# s#pop;;
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (3, <obj>)
-# r#pop
+# r#pop;;
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (4, <obj>)
 ```
@@ -313,8 +317,7 @@ Some (4, <obj>)
 There are some restrictions on the use of the expression `{<
 ... >}`. It can be used only within a method body, and only the values
 of fields may be updated. Method implementations are fixed at the time
-the object is created; they cannot be changed <span
-class="keep-together">dynamically</span>.
+the object is created; they cannot be changed dynamically.
 
 ## When to Use Objects
 
@@ -381,7 +384,7 @@ shapes.  The generic type `shape` just has a method to compute the
 area.  [width subtyping]{.idx}[subtyping/width subtyping]{.idx}
 
 ```ocaml
-# type shape = < area : float >
+# type shape = < area : float >;;
 type shape = < area : float >
 ```
 
@@ -389,13 +392,13 @@ Now let's add a type representing a specific kind of shape, as well as
 a function for creating objects of that type.
 
 ```ocaml
-# type square = < area : float; width : int >
+# type square = < area : float; width : int >;;
 type square = < area : float; width : int >
 
 # let square w = object
     method area = Float.of_int (w * w)
     method width = w
-  end
+  end;;
 val square : int -> < area : float; width : int > = <fun>
 ```
 
@@ -404,12 +407,12 @@ method `width`. Still, we expect a `square` to be a `shape`, and it
 is. Note, however, that the coercion `:>` must be explicit:
 
 ```ocaml env=subtyping
-# (square 10 : shape)
+# (square 10 : shape);;
 Line 1, characters 2-11:
 Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
-# (square 10 :> shape)
+# (square 10 :> shape);;
 - : shape = <obj>
 ```
 
@@ -430,13 +433,13 @@ subtyping]{.idx}
 First, let's add a new shape type, `circle`:
 
 ```ocaml env=subtyping
-# type circle = < area : float; radius : int >
+# type circle = < area : float; radius : int >;;
 type circle = < area : float; radius : int >
 
 # let circle r = object
     method area = 3.14 *. (Float.of_int r) **. 2.0
     method radius = r
-  end
+  end;;
 val circle : int -> < area : float; radius : int > = <fun>
 ```
 
@@ -447,7 +450,7 @@ method, one returning a shape of type `circle`:
 # let coin = object
     method shape = circle 5
     method color = "silver"
-  end
+  end;;
 val coin : < color : string; shape : < area : float; radius : int > > = <obj>
 ```
 
@@ -456,7 +459,7 @@ And the other returning a shape of type `square`:
 ```ocaml env=subtyping
 # let map = object
     method shape = square 10
-  end
+  end;;
 val map : < shape : < area : float; width : int > > = <obj>
 ```
 
@@ -465,9 +468,9 @@ Both these objects have a `shape` method whose type is a subtype of the
 `< shape : shape >`:
 
 ```ocaml env=subtyping
-# type item = < shape : shape >
+# type item = < shape : shape >;;
 type item = < shape : shape >
-# let items = [ (coin :> item) ; (map :> item) ]
+# let items = [ (coin :> item) ; (map :> item) ];;
 val items : item list = [<obj>; <obj>]
 ```
 
@@ -479,13 +482,13 @@ polymorphic variant type. A polymorphic variant type *A* is a subtype of
 *B*, if the tags of *A* are a subset of the tags of *B*:
 
 ```ocaml env=subtyping
-# type num = [ `Int of int | `Float of float ]
+# type num = [ `Int of int | `Float of float ];;
 type num = [ `Float of float | `Int of int ]
-# type const = [ num | `String of string ]
+# type const = [ num | `String of string ];;
 type const = [ `Float of float | `Int of int | `String of string ]
-# let n : num = `Int 3
+# let n : num = `Int 3;;
 val n : num = `Int 3
-# let c : const = (n :> const)
+# let c : const = (n :> const);;
 val c : const = `Int 3
 ```
 
@@ -500,9 +503,9 @@ allow such coercions:[variance]{.idx}[subtyping/variance
 and]{.idx}
 
 ```ocaml env=subtyping
-# let squares: square list = [ square 10; square 20 ]
+# let squares: square list = [ square 10; square 20 ];;
 val squares : square list = [<obj>; <obj>]
-# let shapes: shape list = (squares :> shape list)
+# let shapes: shape list = (squares :> shape list);;
 val shapes : shape list = [<obj>; <obj>]
 ```
 
@@ -512,9 +515,9 @@ you to store nonsquare shapes into what should be an array of
 squares. OCaml recognizes this and does not allow the coercion:
 
 ```ocaml env=subtyping
-# let square_array: square array = [| square 10; square 20 |]
+# let square_array: square array = [| square 10; square 20 |];;
 val square_array : square array = [|<obj>; <obj>|]
-# let shape_array: shape array = (square_array :> shape array)
+# let shape_array: shape array = (square_array :> shape array);;
 Line 1, characters 32-61:
 Error: Type square array is not a subtype of shape array
        The second object type has no method width
@@ -531,10 +534,10 @@ not know what to do with a `circle`. However, a function with type
 
 ```ocaml env=subtyping
 # let shape_to_string: shape -> string =
-    fun s -> Printf.sprintf "Shape(%F)" s#area
+    fun s -> Printf.sprintf "Shape(%F)" s#area;;
 val shape_to_string : shape -> string = <fun>
 # let square_to_string: square -> string =
-    (shape_to_string :> square -> string)
+    (shape_to_string :> square -> string);;
 val square_to_string : square -> string = <fun>
 ```
 
@@ -554,7 +557,7 @@ Consider the following simple immutable `Either` type.
       | Right of 'b
     let left x = Left x
     let right x = Right x
-  end
+  end;;
 module Either :
   sig
     type ('a, 'b) t = Left of 'a | Right of 'b
@@ -567,10 +570,10 @@ By looking at what coercions are allowed, we can see that the type
 parameters of the immutable `Either` type are covariant.
 
 ```ocaml env=subtyping
-# let left_square = Either.left (square 40)
+# let left_square = Either.left (square 40);;
 val left_square : (< area : float; width : int >, 'a) Either.t =
   Either.Left <obj>
-# (left_square :> (shape,_) Either.t)
+# (left_square :> (shape,_) Either.t);;
 - : (shape, 'a) Either.t = Either.Left <obj>
 ```
 
@@ -582,7 +585,7 @@ signature.
     type ('a, 'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
-  end = Either
+  end = Either;;
 module Abs_either :
   sig
     type ('a, 'b) t
@@ -594,7 +597,7 @@ module Abs_either :
 In this case, OCaml is forced to assume that the type is invariant.
 
 ```ocaml env=subtyping
-# (Abs_either.left (square 40) :> (shape, _) Abs_either.t)
+# (Abs_either.left (square 40) :> (shape, _) Abs_either.t);;
 Line 1, characters 2-29:
 Error: This expression cannot be coerced to type (shape, 'b) Abs_either.t;
        it has type (< area : float; width : int >, 'a) Abs_either.t
@@ -613,7 +616,7 @@ contravariance:
     type (+'a, +'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
-  end = Either
+  end = Either;;
 module Var_either :
   sig
     type (+'a, +'b) t
@@ -625,7 +628,7 @@ module Var_either :
 As you can see, this now allows the coercion once again.
 
 ```ocaml env=subtyping
-# (Var_either.left (square 40) :> (shape, _) Var_either.t)
+# (Var_either.left (square 40) :> (shape, _) Var_either.t);;
 - : (shape, 'a) Var_either.t = <abstr>
 ```
 
@@ -634,13 +637,13 @@ containing shapes by applying our `stack` function to some squares and
 some circles:
 
 ```ocaml
-# type 'a stack = < pop: 'a option; push: 'a -> unit >
+# type 'a stack = < pop: 'a option; push: 'a -> unit >;;
 type 'a stack = < pop : 'a option; push : 'a -> unit >
 
-# let square_stack: square stack = stack [square 30; square 10]
+# let square_stack: square stack = stack [square 30; square 10];;
 val square_stack : square stack = <obj>
 
-# let circle_stack: circle stack = stack [circle 20; circle 40]
+# let circle_stack: circle stack = stack [circle 20; circle 40];;
 val circle_stack : circle stack = <obj>
 ```
 
@@ -657,7 +660,7 @@ the total area of their shapes, we might try:
       in
       loop acc
     in
-  List.fold ~init:0.0 ~f:stack_area shape_stacks
+  List.fold ~init:0.0 ~f:stack_area shape_stacks;;
 val total_area : shape stack list -> float = <fun>
 ```
 
@@ -665,7 +668,7 @@ However, when we try to apply this function to our objects, we get an
 error:
 
 ```ocaml env=subtyping
-# total_area [(square_stack :> shape stack); (circle_stack :> shape stack)]
+# total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
 Line 1, characters 13-42:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
@@ -693,7 +696,7 @@ method. We define a type `readonly_stack` and confirm that we can coerce the
 list of `stack`s to it:
 
 ```ocaml env=subtyping
-# type 'a readonly_stack = < pop : 'a option >
+# type 'a readonly_stack = < pop : 'a option >;;
 type 'a readonly_stack = < pop : 'a option >
 # let total_area (shape_stacks: shape readonly_stack list) =
     let stack_area acc st =
@@ -704,10 +707,10 @@ type 'a readonly_stack = < pop : 'a option >
       in
       loop acc
     in
-  List.fold ~init:0.0 ~f:stack_area shape_stacks
+  List.fold ~init:0.0 ~f:stack_area shape_stacks;;
 val total_area : shape readonly_stack list -> float = <fun>
 # total_area [(square_stack :> shape readonly_stack); (circle_stack :>
-  shape readonly_stack)]
+  shape readonly_stack)];;
 - : float = 7280.
 ```
 
@@ -787,11 +790,11 @@ object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
 ```ocaml
-# type shape = Circle of { radius : int } | Line of { length: int }
+# type shape = Circle of { radius : int } | Line of { length: int };;
 type shape = Circle of { radius : int; } | Line of { length : int; }
 # let is_barbell = function
   | [Circle {radius=r1}; Line _; Circle {radius=r2}] when r1 = r2 -> true
-  | _ -> false
+  | _ -> false;;
 val is_barbell : shape list -> bool = <fun>
 ```
 
@@ -839,7 +842,7 @@ polymorphism]{.idx}
 
 ```ocaml env=row_polymorphism
 # let remove_large l =
-  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l
+  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l;;
 val remove_large : (< area : float; .. > as 'a) list -> 'a list = <fun>
 ```
 
@@ -848,9 +851,9 @@ argument, preserving any additional methods that it may have:
 
 ```ocaml env=row_polymorphism
 # let squares : < area : float; width : int > list =
-  [square 5; square 15; square 10]
+  [square 5; square 15; square 10];;
 val squares : < area : float; width : int > list = [<obj>; <obj>; <obj>]
-# remove_large squares
+# remove_large squares;;
 - : < area : float; width : int > list = [<obj>; <obj>]
 ```
 
@@ -860,9 +863,9 @@ known to have an `area` method:
 
 ```ocaml env=row_polymorphism
 # let remove_large (l: < area : float > list) =
-  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l
+  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l;;
 val remove_large : < area : float > list -> < area : float > list = <fun>
-# remove_large (squares :> < area : float > list )
+# remove_large (squares :> < area : float > list );;
 - : < area : float > list = [<obj>; <obj>]
 ```
 
@@ -872,7 +875,7 @@ object in the same container. For example, lists of heterogeneous elements
 cannot be created using row polymorphism:
 
 ```ocaml env=row_polymorphism
-# let hlist: < area: float; ..> list = [square 10; circle 30]
+# let hlist: < area: float; ..> list = [square 10; circle 30];;
 Line 1, characters 50-59:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
@@ -883,10 +886,10 @@ Similarly, we cannot use row polymorphism to store different types of object
 in the same reference:
 
 ```ocaml env=row_polymorphism
-# let shape_ref: < area: float; ..> ref = ref (square 40)
+# let shape_ref: < area: float; ..> ref = ref (square 40);;
 val shape_ref : < area : float; width : int > ref =
   {Base.Ref.contents = <obj>}
-# shape_ref := circle 20
+# shape_ref := circle 20;;
 Line 1, characters 14-23:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
@@ -897,16 +900,11 @@ In both these cases we must use
 subtyping:[objects/subtyping]{.idx}
 
 ```ocaml env=row_polymorphism
-# let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)]
+# let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)];;
 val hlist : shape list = [<obj>; <obj>]
-# let shape_ref: shape ref = ref (square 40 :> shape)
+# let shape_ref: shape ref = ref (square 40 :> shape);;
 val shape_ref : shape ref = {Base.Ref.contents = <obj>}
-# shape_ref := (circle 20 :> shape)
+# shape_ref := (circle 20 :> shape);;
 - : unit = ()
 ```
 
-::: {data-type=note}
-##### Production Note
-
-This chapter contains significant contributions from Leo White.
-:::

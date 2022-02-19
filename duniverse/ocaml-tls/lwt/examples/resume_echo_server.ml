@@ -82,7 +82,7 @@ let serve_ssl port callback =
 
   yap ~tag ("-> start @ " ^ string_of_int port) >>= fun () ->
   let rec loop s =
-    let authenticator ~host:_ _ = Ok None in
+    let authenticator ?ip:_ ~host:_ _ = Ok None in
     let config = Tls.Config.server ~certificates:(`Single cert) ~ticket_cache ~authenticator () in
     (Lwt.catch
        (fun () ->

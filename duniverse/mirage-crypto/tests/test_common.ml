@@ -6,7 +6,7 @@ let pp_diff pp ppf (a, b) = prf ppf "@[<v>want: %a@,have: %a@]" pp a pp b
 
 let rec blocks_of_cs n cs =
   let open Cstruct in
-  if len cs <= n then [ cs ]
+  if length cs <= n then [ cs ]
   else sub cs 0 n :: blocks_of_cs n (shift cs n)
 
 let rec range a b =

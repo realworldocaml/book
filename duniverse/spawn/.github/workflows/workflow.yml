@@ -1,0 +1,56 @@
+name: Main workflow
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # We test:
+        # - once for each architecture with the latest OCaml
+        # - once for a few older versions of OCaml under Linux
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        ocaml-version:
+          - 4.11.2
+        include:
+          - ocaml-version: 4.10.0
+            os: ubuntu-latest
+          - ocaml-version: 4.09.1
+            os: ubuntu-latest
+          - ocaml-version: 4.08.1
+            os: ubuntu-latest
+          - ocaml-version: 4.04.2
+            os: ubuntu-latest
+            configurator: true
+          - ocaml-version: 4.02.3
+            os: ubuntu-latest
+
+    env:
+      OCAML_VERSION: ${{ matrix.ocaml-version }}
+      OS: ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+
+      - run: opam exec -- ocaml .github/workflows/ci.ml pin
+
+      - name: run test suite
+        run: opam exec -- ocaml .github/workflows/ci.ml test
+
+      - name: test source is well formatted
+        run: opam exec -- ocaml .github/workflows/ci.ml fmt
+        if: env.OCAML_VERSION == '4.11.2' && env.OS == 'ubuntu-latest'

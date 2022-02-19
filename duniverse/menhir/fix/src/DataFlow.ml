@@ -45,12 +45,19 @@ module Run
 
   (* A set of dirty variables, whose outgoing transitions must be examined. *)
 
-  (* The set of dirty variables is represented as a combination of a stack and
+  (* The set of dirty variables is represented as a combination of a queue and
      a map of variables to Booleans. This map keeps track of which variables
-     are in the stack and allows us to avoid pushing a variable onto the stack
-     when it is already in the stack. (In principle, a map of variables to
+     are in the queue and allows us to avoid inserting a variable into the queue
+     when it is already in the queue. (In principle, a map of variables to
      [unit] should suffice, but our minimal map API does not offer a [remove]
      function. Thus, we have to use a map of variables to Booleans.) *)
+
+  (* A FIFO queue is preferable to a LIFO stack. It leads to a breadth-first
+     traversal. In the absence of cycles, in particular, this guarantees that
+     a node is examined only after its predecessors have been examined.
+     Compared to (say) a depth-first traversal, this allows more accurate
+     properties to be computed in a single iteration, therefore reduces the
+     number of iterations required in order to reach a fixed point. *)
 
   let pending : variable Queue.t =
     Queue.create()
@@ -64,12 +71,12 @@ module Run
   let schedule (x : variable) =
     if not (is_dirty x) then begin
       M.add x true dirty;
-      Queue.push x pending
+      Queue.add x pending
     end
 
   (* [update x' p'] ensures that the property associated with the variable [x']
      is at least [p']. If this causes a change in the property at [x'], then
-     [x] is scheduled or rescheduled. *)
+     [x'] is scheduled or rescheduled. *)
 
   let update (x' : variable) (p' : property) =
     match M.find x' properties with
@@ -88,7 +95,7 @@ module Run
           schedule x'
         end
 
-  (* [examine] examines a variable that has just been taken out of the stack.
+  (* [examine] examines a variable that has just been taken out of the queue.
      Its outgoing transitions are inspected and its successors are updated. *)
 
   let examine (x : variable) =
@@ -96,20 +103,20 @@ module Run
     let p = try M.find x properties with Not_found -> assert false in
     G.foreach_successor x p update
 
-  (* Populate the stack with the root variables. *)
+  (* Populate the queue with the root variables. *)
+
+  (* Our use of [update] here means that it is permitted for [foreach_root]
+     to seed several properties at a single root. *)
 
   let () =
-    G.foreach_root (fun x p ->
-      M.add x p properties;
-      schedule x
-    )
+    G.foreach_root update
 
-  (* As long as the stack is nonempty, pop a variable and examine it. *)
+  (* As long as the queue is nonempty, extract a variable and examine it. *)
 
   let () =
     try
       while true do
-        let x = Queue.pop pending in
+        let x = Queue.take pending in
         M.add x false dirty;
         examine x
       done
@@ -139,3 +146,76 @@ module ForType (T : TYPE) =
 
 module ForIntSegment (K : sig val n: int end) =
   Run(Glue.ArraysAsImperativeMaps(K))
+
+(* [ForCustomMaps] is a forward data flow analysis that is tuned for
+   performance. *)
+
+module ForCustomMaps
+  (P : MINIMAL_SEMI_LATTICE)
+  (G : DATA_FLOW_GRAPH with type property := P.property)
+  (V : ARRAY with type key := G.variable and type value := P.property)
+  (B : ARRAY with type key := G.variable and type value := bool)
+    : sig end
+= struct
+  open P
+  open G
+
+  (* Compared to [Queue], [CompactQueue] is significantly faster and consumes
+     less memory. *)
+
+  let pending =
+    CompactQueue.create ()
+
+  (* The queue stores a set of dirty variables, whose outgoing transitions
+     must be examined. The map [B] records whether a variable is currently
+     queued. *)
+
+  let schedule (x : variable) =
+    if not (B.get x) then begin
+      B.set x true;
+      CompactQueue.add x pending
+    end
+
+  (* [update x' p'] ensures that the property associated with the variable [x']
+     is at least [p']. If this causes a change in the property at [x'], then
+     [x'] is scheduled or rescheduled. *)
+
+  let update (x' : variable) (p' : property) =
+    let p = V.get x' in
+    let p'' = P.leq_join p' p in
+    if p'' != p then begin
+      (* The failure of the physical equality test [p'' == p] implies that
+         [P.leq p' p] does not hold. Thus, [x'] is affected by this update
+         and must itself be scheduled. *)
+      V.set x' p'';
+      schedule x'
+    end
+
+  (* [examine] examines a variable that has just been taken out of the queue.
+     Its outgoing transitions are inspected and its successors are updated. *)
+
+  let examine (x : variable) =
+    let p = V.get x in
+    G.foreach_successor x p update
+
+  (* Populate the queue with the root variables. *)
+
+  (* Our use of [update] here means that it is permitted for [foreach_root]
+     to seed several properties at a single root. *)
+
+  let () =
+    G.foreach_root update
+
+  (* As long as the queue is nonempty, take a variable and examine it. *)
+
+  let () =
+    try
+      while true do
+        let x = CompactQueue.take pending in
+        B.set x false;
+        examine x
+      done
+    with CompactQueue.Empty ->
+      ()
+
+end

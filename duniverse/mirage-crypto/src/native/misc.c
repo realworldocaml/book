@@ -1,6 +1,7 @@
 #include "mirage_crypto.h"
 
 static inline void xor_into (uint8_t *src, uint8_t *dst, size_t n) {
+/* see issue #70 #81 for alignment considerations (memcpy used below) */
 #ifdef ARCH_64BIT
   uint64_t s;
   for (; n >= 8; n -= 8, src += 8, dst += 8)

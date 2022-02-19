@@ -61,11 +61,7 @@ let _ = ul |> previous_siblings |> elements in
     Lambda Soup is developed on {{:https://github.com/aantron/lambdasoup}
     GitHub} and distributed under the
     {{:https://github.com/aantron/lambdasoup/blob/master/LICENSE.md} BSD
-    license}.
-
-    This documentation page is for version 0.7.2 of the library. Documentation
-    for other versions can be downloaded from the
-    {{:https://github.com/aantron/lambdasoup/releases} releases page}. *)
+    license}. *)
 
 
 
@@ -167,6 +163,13 @@ sig
   val ($$) : (_ node) -> string -> element nodes
 end
 
+val matches_selector : (_ node) -> string -> element node -> bool
+(** [matches_select selector root node] checks if [node] would match [selector]
+    in the [root_node] document.
+
+    [node] {e should} be a child of the [root_node].
+    If [node] is a standalone element node created with {!create_element}
+    or a child of some other root node, the result will always be [false]. *)
 
 (** {2 Options} *)
 

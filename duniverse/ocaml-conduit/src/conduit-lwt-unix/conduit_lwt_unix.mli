@@ -153,7 +153,7 @@ type ctx [@@deriving sexp_of]
 
 (** {2 Connection and listening} *)
 
-val default_ctx : ctx
+val default_ctx : ctx Lazy.t
 (** Default context that listens on all source addresses with no TLS certificate
     associated with the Conduit *)
 

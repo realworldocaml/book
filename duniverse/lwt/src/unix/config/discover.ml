@@ -262,10 +262,11 @@ struct
 
   let ws2_32_lib context =
     if Configurator.ocaml_config_var_exn context "os_type" = "Win32" then
+      let unicode = ["-DUNICODE"; "-D_UNICODE"] in
       if Configurator.ocaml_config_var_exn context "ccomp_type" = "msvc" then
-        extend [] ["ws2_32.lib"]
+        extend unicode ["ws2_32.lib"]
       else
-        extend [] ["-lws2_32"]
+        extend unicode ["-lws2_32"]
 
   let c_flags () =
     !c_flags

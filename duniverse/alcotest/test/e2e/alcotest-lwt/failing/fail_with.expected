@@ -8,7 +8,6 @@ This run has ID `<uuid>'.
 │ [FAIL]        all          0   one.                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] should fail
-
 Logs saved to `<build-context>/_build/_tests/<test-dir>/all.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 

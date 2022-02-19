@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The fmt programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 let is_infix ~affix s =

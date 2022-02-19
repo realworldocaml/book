@@ -20,7 +20,7 @@ open Sexplib.Conv
 
 let ( >>= ) = Lwt.( >>= )
 let ( >|= ) = Lwt.( >|= )
-let fail fmt = Fmt.kstrf (fun s -> Lwt.fail (Failure s)) fmt
+let fail fmt = Fmt.kstr (fun s -> Lwt.fail (Failure s)) fmt
 let err_tcp_not_supported = fail "%s: TCP is not supported"
 let err_tls_not_supported = fail "%s: TLS is not supported"
 
@@ -142,7 +142,7 @@ end
 (* TLS *)
 
 let tls_client ~authenticator x = `TLS (Tls.Config.client ~authenticator (), x)
-let tls_server ~authenticator x = `TLS (Tls.Config.server ~authenticator (), x)
+let tls_server ?authenticator x = `TLS (Tls.Config.server ?authenticator (), x)
 
 module TLS (S : S) = struct
   module TLS = Tls_mirage.Make (S.Flow)
@@ -237,14 +237,12 @@ module Endpoint (P : Mirage_clock.PCLOCK) = struct
         >|= tls_client ~authenticator:tls_authenticator
     | `Unknown s -> err_unknown s
 
-  let ok_authenticator ~host:_ _ = Ok None
-
-  let rec server ?(tls_authenticator = ok_authenticator) e =
+  let rec server ?tls_authenticator e =
     match e with
     | `TCP (x, y) -> tcp_server x y
     | `Unix_domain_socket _ -> err_domain_sockets_not_supported "server"
     | (`Vchan_direct _ | `Vchan_domain_socket _) as x -> vchan_server x
     | `TLS (_host, y) ->
-        server y >|= tls_server ~authenticator:tls_authenticator
+        server y >|= tls_server ?authenticator:tls_authenticator
     | `Unknown s -> err_unknown s
 end

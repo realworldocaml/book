@@ -67,3 +67,11 @@ module Make
 module ForHashedType
   (T : HashedType)
      : SERVICE with type data = T.t
+
+(**[ForHashedTypeWeak] is a special case of [Make] where it
+   suffices to pass a hashed type [T] as an argument. A weak
+   hash table is used to hold the memoization table. *)
+
+module ForHashedTypeWeak
+  (T : HashedType)
+     : SERVICE with type data = T.t

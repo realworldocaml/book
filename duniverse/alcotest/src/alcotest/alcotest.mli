@@ -25,12 +25,23 @@
     only faulty runs are fully displayed at the end of the run (with the full
     logs ready to inspect).
 
-    {e Release 1.4.0} *)
+    {e Release 1.5.0} *)
 
-include Alcotest_engine.Cli.S with type return = unit
+include Alcotest_engine.V1.Cli.S with type return = unit
 
-include module type of Alcotest_engine.Test
+include module type of Alcotest_engine.V1.Test
 (** @inline *)
+
+(** {1 Versioned APIs} *)
+
+(** An alias of the above API that provides a stability guarantees over major
+    version changes. *)
+module V1 : sig
+  include Alcotest_engine.V1.Cli.S with type return = unit
+
+  include module type of Alcotest_engine.V1.Test
+  (** @inline *)
+end
 
 (** {1 Unix-specific engine constructors}
 
@@ -38,15 +49,4 @@ include module type of Alcotest_engine.Test
     API, parameterised over the thread implementation and the platform. This
     package provides the [Unix] platform implementation. *)
 
-open Alcotest_engine
-module Unix : Platform.MAKER
-
-(** {!Core.Make} is [Alcotest_engine.Core.Make (Unix)] *)
-module Core : sig
-  module Make : module type of Alcotest_engine.Core.Make (Unix)
-end
-
-(** {!Cli.Make} is [Alcotest_engine.Cli.Make (Unix)] *)
-module Cli : sig
-  module Make : module type of Alcotest_engine.Cli.Make (Unix)
-end
+module Unix_platform : Alcotest_engine.Platform.MAKER

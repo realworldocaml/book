@@ -62,3 +62,17 @@ let unpaired_right_brace : Loc.span -> Warning.t =
 
 let unpaired_right_bracket : Loc.span -> Warning.t =
   Warning.make ~suggestion:"try '\\]'." "Unpaired ']' (end of code)."
+
+let no_language_tag_in_meta : Loc.span -> Warning.t =
+  Warning.make ~suggestion:"try '{[ ... ]}' or '{@ocaml[ ... ]}'."
+    "'{@' should be followed by a language tag."
+
+let language_tag_invalid_char lang_tag : char -> Loc.span -> Warning.t =
+  let suggestion = "try '{@" ^ lang_tag ^ "[ ... ]}'." in
+  Warning.make ~suggestion "Invalid character '%c' in language tag."
+
+let truncated_code_block_meta : Loc.span -> Warning.t =
+  Warning.make ~suggestion:"try '{@ocaml[ ... ]}'." "Missing end of code block."
+
+let truncated_code_block : Loc.span -> Warning.t =
+  Warning.make ~suggestion:"add ']}'." "Missing end of code block."

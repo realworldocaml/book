@@ -49,9 +49,7 @@
    extension is marked as critical in a certificate, but not handled, the
    validation will fail.
 
-    {e v0.14.1 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
-
-open Rresult
+    {e v0.15.2 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
 
 (** Hostnames (strict, wildcard), used for validation. *)
 module Host : sig
@@ -83,7 +81,7 @@ module Key_type : sig
   val to_string : t -> string
   (** [to_string kt] is a string representation of [kt]. *)
 
-  val of_string : string -> (t, [> R.msg ]) result
+  val of_string : string -> (t, [> `Msg of string ]) result
   (** [of_string s] is [Ok key_type] if the string could be decoded as
       [key_type], or an [Error _]. *)
 
@@ -150,7 +148,7 @@ module Public_key : sig
     ?scheme:Key_type.signature_scheme ->
     signature:Cstruct.t -> t ->
     [ `Message of Cstruct.t | `Digest of Cstruct.t ] ->
-    (unit, [> R.msg ]) result
+    (unit, [> `Msg of string ]) result
 
   (** {1 Decoding and encoding in ASN.1 DER and PEM format} *)
 
@@ -158,10 +156,10 @@ module Public_key : sig
   val encode_der : t -> Cstruct.t
 
   (** [decode_der buffer] is [pubkey], the public key of the ASN.1 encoded buffer. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [decode_pem pem] is [t], where the public key of [pem] is extracted *)
-  val decode_pem : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_pem : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_pem public_key] is [pem], the pem encoded public key. *)
   val encode_pem : t -> Cstruct.t
@@ -193,9 +191,17 @@ module Private_key : sig
   *)
   val generate : ?seed:Cstruct.t -> ?bits:int -> Key_type.t -> t
 
-  (** [of_cstruct data] decodes the buffer as private key. Only supported
+  (** [of_cstruct data type] decodes the buffer as private key. Only supported
       for elliptic curve keys. *)
-  val of_cstruct : Cstruct.t -> Key_type.t -> (t, [> R.msg ]) result
+  val of_cstruct : Cstruct.t -> Key_type.t -> (t, [> `Msg of string ]) result
+
+  (** [of_string ~seed_or_data ~bits type data] attempts to decode the data as a
+      private key. If [seed_or_data] is provided and [`Seed], the [data] is
+      taken as seed and {!generate} is used. If it is [`Data], {!of_cstruct} is
+      used with the Base64 decoded [data]. By default, if [type] is RSA, the
+      data is used as seed, otherwise directly as the private key data. *)
+  val of_string : ?seed_or_data:[`Seed | `Data] -> ?bits:int -> Key_type.t ->
+    string -> (t, [> `Msg of string ]) result
 
   (** {1 Operations on private keys} *)
 
@@ -214,14 +220,14 @@ module Private_key : sig
   val sign : Mirage_crypto.Hash.hash ->
     ?scheme:Key_type.signature_scheme ->
     t -> [ `Digest of Cstruct.t | `Message of Cstruct.t ] ->
-    (Cstruct.t, [> R.msg ]) result
+    (Cstruct.t, [> `Msg of string ]) result
 
   (** {1 Decoding and encoding in ASN.1 DER and PEM format} *)
 
   (** [decode_der der] is [t], where the private key of [der] is
       extracted. It must be in PKCS8 (RFC 5208, Section 5) PrivateKeyInfo
       structure. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_der key] is [der], the encoded private key as PKCS8 (RFC 5208,
       Section 5) PrivateKeyInfo structure. *)
@@ -229,7 +235,7 @@ module Private_key : sig
 
   (** [decode_pem pem] is [t], where the private key of [pem] is
       extracted. Both RSA PRIVATE KEY and PRIVATE KEY stanzas are supported. *)
-  val decode_pem : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_pem : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_pem key] is [pem], the encoded private key (using [PRIVATE KEY]). *)
   val encode_pem : t -> Cstruct.t
@@ -316,7 +322,7 @@ module Distinguished_name : sig
   val common_name : t -> string option
 
   (** [decode_der cs] is [dn], the ASN.1 decoded distinguished name of [cs]. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_der dn] is [cstruct], the ASN.1 encoded representation of the
       distinguished name [dn]. *)
@@ -472,7 +478,7 @@ module Certificate : sig
   (** [decode_pkcs1_digest_info buffer] is [hash, signature], the hash and raw
       signature of the given [buffer] in ASN.1 DER encoding, or an error. *)
   val decode_pkcs1_digest_info : Cstruct.t ->
-    (Mirage_crypto.Hash.hash * Cstruct.t, [> R.msg ]) result
+    (Mirage_crypto.Hash.hash * Cstruct.t, [> `Msg of string ]) result
 
   (** [encode_pkcs1_digest_info (hash, signature)] is [data], the ASN.1 DER
       encoded hash and signature. *)
@@ -490,7 +496,7 @@ module Certificate : sig
 
   (** [decode_der cstruct] is [certificate], the ASN.1 decoded [certificate]
       or an error. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_der certificate] is [cstruct], the ASN.1 encoded representation of
       the [certificate]. *)
@@ -498,11 +504,11 @@ module Certificate : sig
 
   (** [decode_pem_multiple pem] is [t list], where all certificates of the [pem]
        are extracted *)
-  val decode_pem_multiple : Cstruct.t -> (t list, [> R.msg ]) result
+  val decode_pem_multiple : Cstruct.t -> (t list, [> `Msg of string ]) result
 
   (** [decode_pem pem] is [t], where the single certificate of the
       [pem] is extracted *)
-  val decode_pem : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_pem : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_pem_multiple certificates] is [pem], the pem encoded certificates. *)
   val encode_pem_multiple : t list -> Cstruct.t
@@ -533,6 +539,14 @@ module Certificate : sig
   (** [supports_hostname certificate hostname] is [result], whether the
       [certificate] contains the given [hostname], using {!hostnames}. *)
   val supports_hostname : t -> [`host] Domain_name.t -> bool
+
+  (** [ips certificate] are the IP addresses the certificate is valid
+      for (as specified in SubjectAlternativeName extensioni). *)
+  val ips : t -> Ipaddr.Set.t
+
+  (** [supports_ip cert ip] is [true] if the [ip] is mentioned in
+      the SubjectAlternativeName extension, [false] otherwise. *)
+  val supports_ip : t -> Ipaddr.t -> bool
 
   (** [fingerprint hash cert] is [digest], the digest of [cert] using the
       specified [hash] algorithm *)
@@ -622,6 +636,7 @@ module Validation : sig
   (** The polymorphic variant of a leaf certificate validation error. *)
   type leaf_validation_error = [
     | `LeafCertificateExpired of Certificate.t * Ptime.t option
+    | `LeafInvalidIP of Certificate.t * Ipaddr.t option
     | `LeafInvalidName of Certificate.t * [`host] Domain_name.t option
     | `LeafInvalidVersion of Certificate.t
     | `LeafInvalidExtensions of Certificate.t
@@ -658,7 +673,7 @@ module Validation : sig
   (** [pp_chain_error ppf chain_error] pretty-prints the [chain_error]. *)
   val pp_chain_error : chain_error Fmt.t
 
-  (** [verify_chain ~host ~time ~revoked ~allowed_hashes ~anchors chain] is
+  (** [verify_chain ~ip ~host ~time ~revoked ~allowed_hashes ~anchors chain] is
       [result], either [Ok] and the trust anchor used to verify the chain, or
       [Error] and the chain error.  RFC 5280 describes the implemented
       {{:https://tools.ietf.org/html/rfc5280#section-6.1}path validation}
@@ -668,9 +683,10 @@ module Validation : sig
       [chain] are checked, then a chain of trust from [anchors] to the server
       certificate is validated.  The path length constraints are checked.  The
       server certificate is checked to contain the given [host], using
-      {!hostnames}.  The returned certificate is the root of the chain, a member
-      of the given list of [anchors]. *)
-  val verify_chain : host:[`host] Domain_name.t option ->
+      {!hostnames}. If [ip] is specified, the certificate is checked to
+      contain the given [ip], using {!ips}. The returned certificate is the
+      root of the chain, a member of the given list of [anchors]. *)
+  val verify_chain : ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
     time:(unit -> Ptime.t option) ->
     ?revoked:(issuer:Certificate.t -> cert:Certificate.t -> bool) ->
     ?allowed_hashes:Mirage_crypto.Hash.hash list ->
@@ -679,8 +695,6 @@ module Validation : sig
 
   (** The polymorphic variant of a fingerprint validation error. *)
   type fingerprint_validation_error = [
-    | `ServerNameNotPresent of Certificate.t * [`host] Domain_name.t
-    | `NameNotInList of Certificate.t
     | `InvalidFingerprint of Certificate.t * Cstruct.t * Cstruct.t
   ]
 
@@ -699,49 +713,50 @@ module Validation : sig
 
   type r = ((Certificate.t list * Certificate.t) option, validation_error) result
 
-  (** [verify_chain_of_trust host ~time ~revoked ~allowed_hashes ~anchors certificates]
+  (** [verify_chain_of_trust ~ip ~host ~time ~revoked ~allowed_hashes ~anchors certificates]
       is [result].  First, all possible paths are constructed using the
       {!build_paths} function, the first certificate of the chain is verified to
       be a valid leaf certificate (no BasicConstraints extension) and contains
-      the given [host] (using {!hostnames}); if some path is valid, using
+      the given [host] (using {!Certificate.hostnames}) or [ip] if specified
+      (using {!Certificate.ips}; if some path is valid, using
       {!verify_chain}, the result will be [Ok] and contain the actual
       certificate chain and the trust anchor. *)
   val verify_chain_of_trust :
-    host:[`host] Domain_name.t option -> time:(unit -> Ptime.t option) ->
+    ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
+    time:(unit -> Ptime.t option) ->
     ?revoked:(issuer:Certificate.t -> cert:Certificate.t -> bool) ->
     ?allowed_hashes:Mirage_crypto.Hash.hash list ->
     anchors:(Certificate.t list) -> Certificate.t list -> r
 
   (** {1 Fingerprint verification} *)
 
-  (** [trust_key_fingerprint host ~time ~hash ~fingerprints certificates] is
+  (** [trust_key_fingerprint ~ip ~host ~time ~hash ~fingerprint certificates] is
       [result], the first element of [certificates] is verified against the
-      given [fingerprints] list using {!key_fingerprint}.  If [time] is
+      given [fingerprint] using {!Public_key.fingerprint}.  If [time] is
       provided, the certificate has to be valid at the given timestamp.  If
-      [host] is provided, the certificate is checked for this name.  The
-      [hostname] of the fingerprint list must match the name in the certificate,
-      using {!hostnames}. *)
+      [host] is provided, the certificate is checked for the given [host]
+      (using {!Certificate.hostnames}). If [ip] is provided, the certificate is
+      checked to include this IP address (using {!Certificate.ips}). *)
   val trust_key_fingerprint :
-    host:[`host] Domain_name.t option -> time:(unit -> Ptime.t option) ->
-    hash:Mirage_crypto.Hash.hash ->
-    fingerprints:([`host] Domain_name.t * Cstruct.t) list ->
-    Certificate.t list -> r
+    ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
+    time:(unit -> Ptime.t option) -> hash:Mirage_crypto.Hash.hash ->
+    fingerprint:Cstruct.t -> Certificate.t list -> r
 
-  (** [trust_cert_fingerprint host ~time ~hash ~fingerprints certificates] is
+  (** [trust_cert_fingerprint host ~time ~hash ~fingerprint certificates] is
       [result], the first element of [certificates] is verified to match the
-      given [fingerprints] list using {!fingerprint}.  If [time] is provided,
-      the certificate is checked to be valid in at the given timestamp.  If
-      [host] is provided, the certificate is checked for this name.  The
-      [hostname] of the fingerprint list must match the name in the
-      certificate, using {!hostnames}. Note that
+      given [fingerprint] using {!Certificate.fingerprint}.  If [time] is
+      provided, the certificate is checked to be valid in at the given
+      timestamp. If [host] is provided, the certificate is checked for the given
+      [host] (using {!Certificate.hostnames}). If [ip] is provided, the
+      certificate is checked to include this IP address (using
+      {!Certificate.ips}). Note that
       {{!trust_key_fingerprint}public key pinning} has
       {{:https://www.imperialviolet.org/2011/05/04/pinning.html} advantages}
       over certificate pinning. *)
   val trust_cert_fingerprint :
-    host:[`host] Domain_name.t option -> time:(unit -> Ptime.t option) ->
-    hash:Mirage_crypto.Hash.hash ->
-    fingerprints:([`host] Domain_name.t * Cstruct.t) list ->
-    Certificate.t list -> r
+    ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
+    time:(unit -> Ptime.t option) -> hash:Mirage_crypto.Hash.hash ->
+    fingerprint:Cstruct.t -> Certificate.t list -> r
 end
 
 (** Certificate Signing request *)
@@ -761,13 +776,13 @@ module Signing_request : sig
       is validated, and its hash algorithm must be in [allowed_hashes] (by
       default only SHA-2 is accepted). *)
   val decode_der : ?allowed_hashes:Mirage_crypto.Hash.hash list -> Cstruct.t ->
-    (t, [> R.msg ]) result
+    (t, [> `Msg of string ]) result
 
   (** [encode_der sr] is [cstruct], the ASN.1 encoded representation of the [sr]. *)
   val encode_der : t -> Cstruct.t
 
   (** [decode_pem pem] is [t], where the single signing request of the [pem] is extracted *)
-  val decode_pem : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_pem : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_pem signing_request] is [pem], the pem encoded signing request. *)
   val encode_pem : t -> Cstruct.t
@@ -813,7 +828,7 @@ module Signing_request : sig
       a certification request using the given [subject], [digest] (defaults to
       [`SHA256]) and list of [extensions]. *)
   val create : Distinguished_name.t -> ?digest:Mirage_crypto.Hash.hash ->
-    ?extensions:Ext.t -> Private_key.t -> (t, [> R.msg ]) result
+    ?extensions:Ext.t -> Private_key.t -> (t, [> `Msg of string ]) result
 
   (** {1 Provision a signing request to a certificate} *)
 
@@ -862,7 +877,7 @@ module CRL : sig
 
   (** [decode_der buffer] is [crl], the certificate revocation list of the
       ASN.1 encoded buffer. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** {1 Operations on CRLs} *)
 
@@ -947,29 +962,32 @@ module CRL : sig
     issuer:Distinguished_name.t ->
     this_update:Ptime.t -> ?next_update:Ptime.t ->
     ?extensions:Extension.t ->
-    revoked_cert list -> Private_key.t -> (t, [> R.msg ]) result
+    revoked_cert list -> Private_key.t -> (t, [> `Msg of string ]) result
 
   (** [revoke_certificate cert ~this_update ~next_update t priv] adds [cert] to
       the revocation list, increments its counter, adjusts [this_update] and
       [next_update] timestamps, and digitally signs it using [priv]. *)
   val revoke_certificate : revoked_cert ->
     this_update:Ptime.t -> ?next_update:Ptime.t -> t -> Private_key.t ->
-    (t, [> R.msg ]) result
+    (t, [> `Msg of string ]) result
 
   (** [revoke_certificates certs ~this_update ~next_update t priv] adds [certs]
       to the revocation list, increments its counter, adjusts [this_update] and
       [next_update] timestamps, and digitally signs it using [priv]. *)
   val revoke_certificates : revoked_cert list ->
     this_update:Ptime.t -> ?next_update:Ptime.t -> t -> Private_key.t ->
-    (t, [> R.msg ]) result
+    (t, [> `Msg of string ]) result
 end
 
 (** Certificate chain authenticators *)
 module Authenticator : sig
 
-  (** An authenticator [a] is a function type which takes a hostname and a
-      certificate stack to an authentication decision {!Validation.r}. *)
-  type t = host:[`host] Domain_name.t option -> Certificate.t list -> Validation.r
+  (** An authenticator [t] is a function type which takes optionally an IP
+      address, a hostname and a certificate stack to an authentication decision
+      {!Validation.r}. If [ip] is specified, it needs to be present in the
+      SubjectAlternativeName extension of the server certificate. *)
+  type t = ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
+    Certificate.t list -> Validation.r
 
   (** [chain_of_trust ~time ~crls ~allowed_hashes trust_anchors] is
       [authenticator], which uses the given [time] and list of [trust_anchors]
@@ -983,24 +1001,22 @@ module Authenticator : sig
   val chain_of_trust : time:(unit -> Ptime.t option) -> ?crls:CRL.t list ->
     ?allowed_hashes:Mirage_crypto.Hash.hash list -> Certificate.t list -> t
 
-  (** [server_key_fingerprint ~time hash fingerprints] is an [authenticator]
-      that uses the given [time] and list of [fingerprints] to verify that the
+  (** [server_key_fingerprint ~time hash fingerprint] is an [authenticator]
+      that uses the given [time] and [fingerprint] to verify that the
       fingerprint of the first element of the certificate chain matches the
       given fingerprint, using {!Validation.trust_key_fingerprint}. *)
   val server_key_fingerprint : time:(unit -> Ptime.t option) ->
-    hash:Mirage_crypto.Hash.hash ->
-    fingerprints:([`host] Domain_name.t * Cstruct.t) list -> t
+    hash:Mirage_crypto.Hash.hash -> fingerprint:Cstruct.t -> t
 
-  (** [server_cert_fingerprint ~time hash fingerprints] is an [authenticator]
-      that uses the given [time] and list of [fingerprints] to verify the first
+  (** [server_cert_fingerprint ~time hash fingerprint] is an [authenticator]
+      that uses the given [time] and [fingerprint] to verify the first
       element of the certificate chain, using
       {!Validation.trust_cert_fingerprint}.  Note that
       {{!server_key_fingerprint}public key pinning} has
       {{:https://www.imperialviolet.org/2011/05/04/pinning.html} advantages}
       over certificate pinning. *)
   val server_cert_fingerprint : time:(unit -> Ptime.t option) ->
-    hash:Mirage_crypto.Hash.hash ->
-    fingerprints:([`host] Domain_name.t * Cstruct.t) list -> t
+    hash:Mirage_crypto.Hash.hash -> fingerprint:Cstruct.t -> t
 end
 
 (** PKCS12 archive files *)
@@ -1010,7 +1026,7 @@ module PKCS12 : sig
   type t
 
   (** [decode_der buffer] is [t], the PKCS12 archive of [buffer]. *)
-  val decode_der : Cstruct.t -> (t, [> R.msg ]) result
+  val decode_der : Cstruct.t -> (t, [> `Msg of string ]) result
 
   (** [encode_der t] is [buf], the PKCS12 encoded archive of [t]. *)
   val encode_der : t -> Cstruct.t
@@ -1020,7 +1036,7 @@ module PKCS12 : sig
   val verify : string -> t ->
     ([ `Certificate of Certificate.t | `Crl of CRL.t
      | `Private_key of Private_key.t | `Decrypted_private_key of Private_key.t ]
-       list, [> R.msg ]) result
+       list, [> `Msg of string ]) result
 
   (** [create ~mac ~algorithm ~iterations password certificates private_key]
       constructs a PKCS12 archive with [certificates] and [private_key]. They
@@ -1066,7 +1082,7 @@ module OCSP : sig
         [certs] may be used by responder to check requestor authority. *)
     val create : ?certs:Certificate.t list -> ?digest:Mirage_crypto.Hash.hash ->
       ?requestor_name:General_name.b -> ?key:Private_key.t -> cert_id list ->
-      (t, [> R.msg ]) result
+      (t, [> `Msg of string ]) result
 
     (** [validate request key] validates the signature of [request]
         with the pulic [key]. *)
@@ -1159,7 +1175,7 @@ module OCSP : sig
       Private_key.t ->
       responder_id ->
       Ptime.t ->
-      single_response list -> (t, [> R.msg ]) result
+      single_response list -> (t, [> `Msg of string ]) result
 
     (** [create status] creates error response. Successful status is not
         allowed here because it requires responseBytes. *)
@@ -1178,10 +1194,10 @@ module OCSP : sig
     val status : t -> status
 
     (** [responder_id request] is responder id from response *)
-    val responder_id : t -> (responder_id, [> R.msg ]) result
+    val responder_id : t -> (responder_id, [> `Msg of string ]) result
 
     (** [responses response] is a list of responses (status per certificate). *)
-    val responses : t -> (single_response list, [> R.msg ]) result
+    val responses : t -> (single_response list, [> `Msg of string ]) result
 
     (** [decode_der buffer] decodes response in buffer *)
     val decode_der : Cstruct.t -> (t, Asn.error) result

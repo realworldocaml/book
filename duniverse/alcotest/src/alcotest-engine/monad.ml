@@ -27,19 +27,21 @@ end
 module Extend (M : S) = struct
   include M
 
-  module Infix = struct
+  module Syntax = struct
     let ( >>= ) = M.bind
     let ( >|= ) x f = x >>= fun y -> M.return (f y)
+    let ( let* ) = ( >>= )
+    let ( let+ ) = ( >|= )
   end
 
-  open Infix
+  open Syntax
 
   module List = struct
     let fold_map_s f init l =
       let rec inner acc results = function
         | [] -> M.return (acc, List.rev results)
         | hd :: tl ->
-            f acc hd >>= fun (acc, r) ->
+            let* acc, r = f acc hd in
             (inner [@ocaml.tailcall]) acc (r :: results) tl
       in
       inner init [] l

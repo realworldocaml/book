@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -124,6 +121,10 @@ val normalize: string -> string
 
 val postincrement: int ref -> int
 
+(* [mkgensym()] returns a fresh generator of unique integers. *)
+
+val mkgensym : unit -> (unit -> int)
+
 (* [filter_map f l] returns the list of [y]s such that [f x = Some y] where [x]
    is in [l], preserving the order of elements of [l]. *)
 val filter_map : ('a -> 'b option) -> 'a list -> 'b list
@@ -180,18 +181,6 @@ val count: int -> string
 (* A nice way of printing "nth" in English, for concrete values of [n]. *)
 
 val nth: int -> string
-
-(* [Array.for_all] *)
-
-val array_for_all : ('a -> bool) -> 'a array -> bool
-val array_for_all2 : ('a -> 'b -> bool) -> 'a array -> 'b array -> bool
-
-val array_fold_left2:
-  ('a -> 'b1 -> 'b2 -> 'a) -> 'a -> 'b1 array -> 'b2 array -> 'a
-
-(* [List.make] *)
-
-val list_make: int -> 'a -> 'a list
 
 (* [padded_index n i] produces a padded string representation of the index
    [i], which must lie in the semi-open interval [0, n). It is defined in such

@@ -1,17 +1,15 @@
-# Bisect_ppx &nbsp; [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![CI status][ci-img]][ci] [![Coverage][coveralls-img]][coveralls]
 
-[Bisect_ppx][self] is a code coverage tool for OCaml and Reason. It helps you
-test thoroughly by showing what's **not** tested.
+[**Bisect_ppx**][self] is a code coverage tool for OCaml and Reason. It helps
+you test thoroughly by showing what's **not** tested.
 
 [![Bisect_ppx usage example][sample]][gh-pages-report]
 
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[travis]: https://travis-ci.org/aantron/bisect_ppx
-[travis-img]: https://img.shields.io/travis/aantron/bisect_ppx/master.svg?label=travis
-[appveyor]: https://ci.appveyor.com/project/aantron/bisect-ppx/branch/master
-[appveyor-img]: https://img.shields.io/appveyor/ci/aantron/bisect-ppx/master.svg?label=appveyor
+[ci]: https://github.com/aantron/bisect_ppx/actions
+[ci-img]: https://img.shields.io/github/workflow/status/aantron/bisect_ppx/test/master
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 [coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
@@ -28,7 +26,7 @@ You can browse the report seen above [online here][gh-pages-report].
   - [**ReScript**](#ReScript) &nbsp; ([starter repo][rescript-repo], [report][rescript-report])
   - [**Js_of_ocaml**](#Js_of_ocaml) &nbsp; ([starter repo][jsoo-repo], [report][jsoo-report])
   - [**Ocamlfind, Ocamlbuild, and OASIS**](#Ocamlbuild)
-- [**Sending to Coveralls**](#Coveralls)
+- [**Sending to Coveralls and Codecov**](#Coveralls)
 - [**Controlling coverage with `[@coverage off]`**](#Exclusion)
 - [**Other topics**](#Other)
 - [**Bisect_ppx users**](#Users)
@@ -57,7 +55,7 @@ Refer to [**aantron/bisect-starter-dune**][dune-repo], which produces
     ]
     ```
 
-2. [Mark the code under test for preprocessing by
+2. [Mark the code under test for instrumentation by
    `bisect_ppx`](https://github.com/aantron/bisect-starter-dune/blob/03cb827553d1264559eab19fdaa8c0056c9b2019/dune#L4) in your `dune` file:
 
     ```ocaml
@@ -142,7 +140,7 @@ instead of in an `opam` file:
 <a id="ReScript"></a>
 ### ReScript
 
-Refer to [**aantron/bisect-starter-bsb**][rescript-repo], which produces
+Refer to [**aantron/bisect-starter-rescript**][rescript-repo], which produces
 [this report][rescript-report].
 
 1. [Depend on Bisect_ppx in `package.json`](https://github.com/aantron/bisect-starter-rescript/blob/master/package.json#L3-L6),
@@ -153,20 +151,12 @@ and install it:
       "bisect_ppx": "^2.0.0"
     },
     "dependencies": {
-      "bs-platform": "*"
+      "rescript": "*"
     }
     ```
 
     ```
     npm install
-    ```
-
-    If you are using Yarn, you need to run an extra command because of
-    [yarnpkg/pkg#3421](https://github.com/yarnpkg/yarn/issues/3421):
-
-    ```
-    yarn add bisect_ppx
-    yarn --check-files
     ```
 
     If pre-built binaries aren't available for your system, the build will
@@ -195,7 +185,7 @@ and install it:
     ```json
     "jest": {
       "setupFilesAfterEnv": [
-        "bisect_ppx/lib/js/src/runtime/bucklescript/jest.js"
+        "bisect_ppx/lib/js/src/runtime/js/jest.js"
       ]
     }
     ```
@@ -204,7 +194,7 @@ and install it:
     `bsconfig.json`, replace the path by
 
     ```json
-    "bisect_ppx/src/runtime/bucklescript/jest.js"
+    "bisect_ppx/src/runtime/js/jest.js"
     ```
 
     You can exclude your test cases from the coverage report by adding this to
@@ -218,7 +208,7 @@ and install it:
 
     Usage with Jest requires Bisect_ppx version 2.4.0 or higher. See the
     [**aantron/bisect-starter-jest**][jest-repo] for a complete minimal example
-    project. The repo produces [this report][jest-report].
+    project. That repo produces [this report][jest-report].
 
     If the tests will be running in the browser, at the end of testing, call
 
@@ -236,7 +226,7 @@ and install it:
     ```
     BISECT_ENABLE=yes npm run build
     npm run test
-    npx bisect-ppx-report.exe html
+    npx bisect-ppx-report html
     ```
 
     To exclude your test files from the report, change your PPX flags like so:
@@ -257,7 +247,7 @@ and install it:
 
 5. If your project uses both ReScript and native Dune, native Dune will start
    picking up OCaml files that are part of the ReScript `bisect_ppx` package.
-   To prevent this, add a `dune` with the following contents to the root of
+   To prevent this, add a `dune` file with the following contents to the root of
    your project:
 
    ```
@@ -329,7 +319,7 @@ test, then run the reporter to generate the [coverage report][jsoo-report] in
 - [Ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-ocamlbuild)
 and [OASIS](https://github.com/aantron/bisect_ppx-ocamlbuild#using-with-oasis)
 instructions can be found at
-[aantron/bisect_ppx-ocamlbuild](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
+[**aantron/bisect_ppx-ocamlbuild**](https://github.com/aantron/bisect_ppx-ocamlbuild#readme).
 
 - With Ocamlfind, you must have your build script issue the right commands, to
 instrument the code under test, but not the tester:
@@ -348,10 +338,11 @@ instrument the code under test, but not the tester:
 <br>
 
 <a id="Coveralls"></a>
-## Sending to [Coveralls](https://coveralls.io)
+## Sending to Coveralls and Codecov
 
-`bisect-ppx-report` can send reports to **Coveralls** and **Codecov** directly
-from **Travis**, **CircleCI**, and **GitHub Actions**. To do this, run
+`bisect-ppx-report` can send reports to [**Coveralls**](https://coveralls.io)
+and [**Codecov**](https://codecov.io/) directly from **Travis**, **CircleCI**,
+and **GitHub Actions**. To do this, run
 
 ```
 bisect-ppx-report send-to Coveralls
@@ -428,7 +419,7 @@ module with `[@@@coverage off]` and `[@@@coverage on]`.
 
 Finally, you can exclude an entire file by putting `[@@@coverage exclude_file]`
 into its top-level module. However, whenever possible, it is recommended to
-exclude files by not preprocessing with Bisect_ppx to begin with.
+exclude files by not instrumenting with Bisect_ppx to begin with.
 
 
 
@@ -441,9 +432,13 @@ See [advanced usage][advanced] for:
 
 - Exhaustiveness checking.
 - Excluding generated files from coverage.
+- SIGTERM handling.
 - Environment variables.
 
+Cornell CS3110 offers a [Bisect_ppx tutorial][cs3110], featuring a video.
+
 [advanced]: https://github.com/aantron/bisect_ppx/blob/master/doc/advanced.md#readme
+[cs3110]: https://cs3110.github.io/textbook/chapters/correctness/black_glass_box.html#bisect
 
 
 
@@ -515,6 +510,6 @@ targets:
 
 - `make test` for unit tests.
 - `make usage` for build system integration tests, except ReScript.
-- `make -C test/bucklescript full-test` for ReScript. This requires npm and esy.
+- `make -C test/js full-test` for ReScript. This requires npm and esy.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues

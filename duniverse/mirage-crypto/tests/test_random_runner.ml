@@ -43,7 +43,7 @@ let ctr_selftest (m : (module Cipher_block.S.CTR)) n =
     let dec = M.decrypt ~key ~ctr enc in
     assert_cs_equal ~msg:"CTR e->d" data dec;
     let (d1, d2) =
-      Cstruct.split data @@ bs * Randomconv.int ~bound:(Cstruct.len data / bs) Mirage_crypto_rng.generate in
+      Cstruct.split data @@ bs * Randomconv.int ~bound:(Cstruct.length data / bs) Mirage_crypto_rng.generate in
     assert_cs_equal ~msg:"CTR chain" enc @@
       Cstruct.append (M.encrypt ~key ~ctr d1)
                      (M.encrypt ~key ~ctr:(M.next_ctr ~ctr d1) d2)

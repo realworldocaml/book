@@ -26,6 +26,14 @@ Reporter still works even in the presence of line number directives.
   let () =
     f ()
   
+  (* Reproduces a HTML display bug that existed in development between 2.6.3 and
+     2.7.0, starting with 1b8d7ec5985aa12a85e797e3d53fc72713e80c35. *)
+  let a () =
+    if true then
+      true
+    else
+      false
+  
   # 1 "other_file.ml"
   
   let h () =
@@ -34,17 +42,19 @@ Reporter still works even in the presence of line number directives.
   let () =
     h ()
   $ dune exec ./test2.exe --instrument-with bisect_ppx
-  $ bisect-ppx-report html
-  Info: found coverage files in './'
+  $ bisect-ppx-report html --verbose
+  Info: found *.coverage files in './'
+  Info: Writing index file...
   $ cat _coverage/test2.ml.html
   <!DOCTYPE html>
   <html lang="en">
     <head>
-      <title>Coverage report</title>
-      <link rel="stylesheet" href="coverage.css" />
+      <meta charset="utf-8"/>
+      <title>test2.ml &mdash; Coverage report</title>
+      <meta name="description" content="50.00% coverage in test2.ml">
+      <link rel="stylesheet" href="coverage.css"/>
       <script src="highlight.pack.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
-      <meta charset="utf-8" />
     </head>
     <body>
       <div id="header">
@@ -53,10 +63,13 @@ Reporter still works even in the presence of line number directives.
             <span class="dirname"></span>test2.ml
           </a>
         </h1>
-        <h2>80.00%</h2>
+        <h2>50.00%</h2>
       </div>
       <div id="navbar">
-        <span class="unvisited" style="top:31.25%"></span>
+        <span class="unvisited" style="top:20.83%"></span>
+        <span class="unvisited" style="bottom:45.83%"></span>
+        <span class="unvisited" style="bottom:41.67%"></span>
+        <span class="unvisited" style="bottom:33.33%"></span>
       </div>
       <div id="report">
         <div id="lines-layer">
@@ -73,10 +86,18 @@ Reporter still works even in the presence of line number directives.
   <a id="L10"></a><span > </span>
   <a id="L11"></a><span > </span>
   <a id="L12"></a><span > </span>
-  <a id="L13"></a><span class="visited"> </span>
-  <a id="L14"></a><span > </span>
+  <a id="L13"></a><span class="unvisited"> </span>
+  <a id="L14"></a><span class="unvisited"> </span>
   <a id="L15"></a><span > </span>
-  <a id="L16"></a><span class="visited"> </span>
+  <a id="L16"></a><span class="unvisited"> </span>
+  <a id="L17"></a><span > </span>
+  <a id="L18"></a><span > </span>
+  <a id="L19"></a><span > </span>
+  <a id="L20"></a><span > </span>
+  <a id="L21"></a><span class="visited"> </span>
+  <a id="L22"></a><span > </span>
+  <a id="L23"></a><span > </span>
+  <a id="L24"></a><span class="visited"> </span>
   </pre>
         </div>
         <div id="text-layer">
@@ -97,6 +118,14 @@ Reporter still works even in the presence of line number directives.
   <a href="#L14">14</a>
   <a href="#L15">15</a>
   <a href="#L16">16</a>
+  <a href="#L17">17</a>
+  <a href="#L18">18</a>
+  <a href="#L19">19</a>
+  <a href="#L20">20</a>
+  <a href="#L21">21</a>
+  <a href="#L22">22</a>
+  <a href="#L23">23</a>
+  <a href="#L24">24</a>
   </pre>
   <pre><code class="ocaml">let f () =
     <span data-count="1">(</span>)
@@ -106,6 +135,14 @@ Reporter still works even in the presence of line number directives.
   
   let () =
     <span data-count="1">f</span> ()
+  
+  (* Reproduces a HTML display bug that existed in development between 2.6.3 and
+     2.7.0, starting with 1b8d7ec5985aa12a85e797e3d53fc72713e80c35. *)
+  let a () =
+    <span data-count="0">i</span>f true then
+      <span data-count="0">t</span>rue
+    else
+      <span data-count="0">f</span>alse
   
   # 1 "other_file.ml"
   

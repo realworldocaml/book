@@ -4,6 +4,6 @@
  (kind ppx_deriver)
  (flags
   (:standard -safe-string))
- (libraries ppxlib)
+ (libraries ppxlib ppxlib_ast ppxlib_traverse_builtins stdppx stdlib-shims)
  (preprocess
   (pps ppxlib_metaquot)))

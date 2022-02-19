@@ -55,6 +55,7 @@ type config = {
   alpn_protocols : string list ;
   groups : group list ;
   zero_rtt : int32 ;
+  ip : Ipaddr_sexp.t option ;
 } [@@deriving sexp_of]
 
 let ciphers13 cfg =
@@ -186,6 +187,7 @@ let default_config = {
   groups = supported_groups ;
   ticket_cache = None ;
   zero_rtt = 0l ;
+  ip = None ;
 }
 
 (* There are inter-configuration option constraints that are checked and
@@ -528,7 +530,7 @@ let with_acceptable_cas conf acceptable_cas = { conf with acceptable_cas }
 let (<?>) ma b = match ma with None -> b | Some a -> a
 
 let client
-  ~authenticator ?peer_name ?ciphers ?version ?signature_algorithms ?reneg ?certificates ?cached_session ?cached_ticket ?ticket_cache ?alpn_protocols ?groups () =
+  ~authenticator ?peer_name ?ciphers ?version ?signature_algorithms ?reneg ?certificates ?cached_session ?cached_ticket ?ticket_cache ?alpn_protocols ?groups ?ip () =
   let ciphers', groups = ciphers_and_groups ?ciphers ?groups default_config.ciphers in
   let ciphers, signature_algorithms = ciphers_and_sig_alg ?ciphers ?signature_algorithms ciphers' in
   let config =
@@ -545,6 +547,7 @@ let client
         ticket_cache = ticket_cache ;
         cached_ticket = cached_ticket ;
         groups ;
+        ip ;
     } in
   let config = validate_common config in
   validate_client config ;
@@ -553,7 +556,7 @@ let client
   config
 
 let server
-    ?ciphers ?version ?signature_algorithms ?reneg ?certificates ?acceptable_cas ?authenticator ?session_cache ?ticket_cache ?alpn_protocols ?groups ?zero_rtt () =
+    ?ciphers ?version ?signature_algorithms ?reneg ?certificates ?acceptable_cas ?authenticator ?session_cache ?ticket_cache ?alpn_protocols ?groups ?zero_rtt ?ip () =
   let ciphers', groups = ciphers_and_groups ?ciphers ?groups default_config.ciphers in
   let ciphers, signature_algorithms = ciphers_and_sig_alg ?ciphers ?signature_algorithms ciphers' in
   let config =
@@ -570,6 +573,7 @@ let server
         ticket_cache = ticket_cache ;
         groups ;
         zero_rtt = zero_rtt <?> default_config.zero_rtt ;
+        ip ;
     } in
   let config = validate_server config in
   let config = validate_common config in

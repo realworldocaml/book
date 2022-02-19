@@ -1,5 +1,9 @@
 # Parsing with OCamllex and Menhir
 
+::: {text-align=right}
+*This chapter includes contributions from Jason Hickey.*
+:::
+
 Many programming tasks start with the interpretion of some form of structured
 textual data. *Parsing* is the process of converting such data into data
 structures that are easy to program against. For simple formats, it's often
@@ -227,8 +231,7 @@ context-free grammar as a set of abstract names, called
 nonterminal symbol into a sequence of tokens and nonterminal symbols. A
 sequence of tokens is parsable by a grammar if you can apply the grammar's
 rules to produce a series of transformations, starting at a distinguished
-*start symbol* that produces the token sequence in
-<span class="keep-together">question</span>.
+*start symbol* that produces the token sequence in question.
 [grammars/context-free]{.idx}[LR(1) grammars]{.idx}[start
 symbols]{.idx}[non-terminal symbols]{.idx}[context-free
 grammars]{.idx}[Menhir parser generator/context-free grammars in]{.idx}

@@ -3,7 +3,7 @@
   test.output
   (with-accepted-exit-codes
    (not 0)
-   (run %{bin:mdx} test foo))))
+   (run %{bin:ocaml-mdx} test foo))))
 
 (rule
  (alias runtest)

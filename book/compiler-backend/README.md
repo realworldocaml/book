@@ -32,7 +32,7 @@ pattern-match statements into more optimized but low-level statements.
 ### Pattern Matching Optimization
 
 The compiler dumps the lambda form in an s-expression syntax if you add the
-<span class="keep-together">-dlambda</span> directive to the command line.
+`-dlambda` directive to the command line.
 Let's use this to learn more about how the OCaml pattern-matching engine
 works by building three different pattern matches and comparing their lambda
 forms.[pattern matching/optimization in lambda form code]{.idx}[lambda form
@@ -429,15 +429,14 @@ The custom mode is the most similar mode to native code compilation, as both
 generate standalone executables. There are quite a few other options
 available for compiling bytecode (notably with shared libraries or building
 custom runtimes). Full details can be found in the
-[ OCaml](http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html).
+[OCaml](https://ocaml.org/manual/comp.html#s%3Acomp-options).
 
 ### Embedding OCaml Bytecode in C
 
 A consequence of using the bytecode compiler is that the final link phase
 must be performed by `ocamlc`. However, you might sometimes want to embed
 your OCaml code inside an existing C application. OCaml also supports this
-mode of operation via the <span class="keep-together">-output-obj</span>
-directive.[C object files]{.idx}
+mode of operation via the `-output-obj` directive.[C object files]{.idx}
 
 This mode causes `ocamlc` to output an object file containing the bytecode
 for the OCaml part of the program, as well as a `caml_startup` function. All

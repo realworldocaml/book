@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -201,11 +198,53 @@ let minimum s =
 let choose =
   minimum
 
-let compare =
+let compare : t -> t -> int =
   compare (* this is [Generic.compare] *)
 
-let equal s1 s2 =
-  s1 = s2
+let equal : t -> t -> bool =
+  (=)
 
 let disjoint s1 s2 =
   is_empty (inter s1 s2)
+
+let quick_subset s1 s2 =
+  inter s1 s2 <> 0
+
+let lsb x = (x land -x)
+
+let compare_lsb x y = lsb x - lsb y
+
+let compare_minimum ss1 ss2 =
+  match compare_lsb ss1 ss2 with
+  | 0 ->
+    let ss1' = ss1 land lnot ss2 in
+    let ss2' = ss2 land lnot ss1 in
+    compare_lsb ss1' ss2'
+  | n -> n
+
+let sorted_union xs = List.fold_left union empty xs
+
+let extract_unique_prefix ss1 ss2 =
+  if ss1 = 0 then
+    0, 0
+  else
+  if compare_lsb ss1 ss2 >= 0 then
+    empty, ss1
+  else
+    let prefix_mask = (lsb ss2) - 1 in
+    let ss0 = ss1 land prefix_mask in
+    assert (ss0 <> 0);
+    (ss0, ss1 land lnot prefix_mask)
+
+let extract_shared_prefix ss1 ss2 =
+  if ss1 = ss2 then
+    ss1, (empty, empty)
+  else
+    let ss1' = ss1 land lnot ss2 in
+    let ss2' = ss2 land lnot ss1 in
+    let common_mask = (lsb ss1' - 1) land (lsb ss2' - 1) in
+    let rest_mask = lnot common_mask in
+    let common = ss1 land common_mask in
+    let r1 = ss1 land rest_mask in
+    let r2 = ss2 land rest_mask in
+    (common, (r1, r2))

@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Astring
@@ -84,12 +83,17 @@ let with_ic file f v =
   | Sys_error e -> R.error_msg e
 
 let read file =
-  let input_stdin () =
+  let is_stream ic =
+    let fd = Unix.descr_of_in_channel ic in
+    try Unix.lseek fd 0 Unix.SEEK_END = 0 with
+    | Unix.Unix_error (Unix.ESPIPE, _, _) -> true
+  in
+  let input_stream ic =
     let bsize = 65536 (* IO_BUFFER_SIZE *) in
     let buf = Buffer.create bsize in
     let b = Bytes.create bsize in
     let rec loop () =
-      let rc = input stdin b 0 bsize in
+      let rc = input ic b 0 bsize in
       if rc = 0 then Ok (Buffer.contents buf) else
 (* FIXME After 4.01  (Buffer.add_subbytes buf b 0 rc; loop ()) *)
       (Buffer.add_substring buf (Bytes.unsafe_to_string b) 0 rc; loop ())
@@ -97,7 +101,7 @@ let read file =
     loop ()
   in
   let input ic () =
-    if ic == stdin then input_stdin () else
+    if is_stream ic then input_stream ic else
     let len = in_channel_length ic in
     if len <= Sys.max_string_length then begin
       let s = Bytes.create len in
@@ -261,7 +265,7 @@ let write ?mode file contents =
   R.join @@ with_oc ?mode file write contents
 
 let writef ?mode file fmt = (* FIXME avoid the kstrf  *)
-  Fmt.kstrf (fun content -> write ?mode file content) fmt
+  Fmt.kstr (fun content -> write ?mode file content) fmt
 
 let write_lines ?mode file lines =
   let rec write oc = function
@@ -273,7 +277,7 @@ let write_lines ?mode file lines =
   R.join @@ with_oc ?mode file write lines
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

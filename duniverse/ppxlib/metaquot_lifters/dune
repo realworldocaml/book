@@ -3,4 +3,4 @@
  (public_name ppxlib.metaquot_lifters)
  (flags
   (:standard -safe-string))
- (libraries ppxlib ppxlib_traverse_builtins))
+ (libraries ppxlib ppxlib_traverse_builtins stdppx stdlib-shims))

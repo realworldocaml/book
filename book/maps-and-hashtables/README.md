@@ -8,10 +8,10 @@ English names as follows: [key/value pairs]{.idx}[data structures/key/value
 pairs]{.idx}[lists/association lists]{.idx}[association lists]{.idx}
 
 ```ocaml env=main
-# open Base
+# open Base;;
 # let digit_alist =
     [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
-    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
+    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ];;
 val digit_alist : (int * string) list =
   [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
    (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
@@ -20,11 +20,11 @@ val digit_alist : (int * string) list =
 We can use functions from the `List.Assoc` module to manipulate this data:
 
 ```ocaml env=main
-# List.Assoc.find ~equal:Int.equal digit_alist 6
+# List.Assoc.find ~equal:Int.equal digit_alist 6;;
 - : string option = Some "six"
-# List.Assoc.find ~equal:Int.equal digit_alist 22
+# List.Assoc.find ~equal:Int.equal digit_alist 22;;
 - : string option = None
-# List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch"
+# List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch";;
 - : (int, string) Base.List.Assoc.t =
 [(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
  (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
@@ -127,12 +127,12 @@ natural, and more efficient, to use `Base`'s specialized set type. Here's a
 simple example. [set types]{.idx}
 
 ```ocaml env=main
-# Set.of_list (module Int) [1;2;3] |> Set.to_list
+# Set.of_list (module Int) [1;2;3] |> Set.to_list;;
 - : int list = [1; 2; 3]
 # Set.union
     (Set.of_list (module Int) [1;2;3;2])
     (Set.of_list (module Int) [3;5;1])
-  |> Set.to_list
+  |> Set.to_list;;
 - : int list = [1; 2; 3; 5]
 ```
 
@@ -148,9 +148,9 @@ module in `Base`. Here, we'll create a map from digits to their English
 names, based on `digit_alist`, which was defined earlier in the chapter.
 
 ```ocaml env=main
-# let digit_map = Map.of_alist_exn (module Int) digit_alist
+# let digit_map = Map.of_alist_exn (module Int) digit_alist;;
 val digit_map : (int, string, Int.comparator_witness) Map.t = <abstr>
-# Map.find digit_map 3
+# Map.find digit_map 3;;
 - : string option = Some "three"
 ```
 
@@ -159,7 +159,7 @@ list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
 ```ocaml env=main
-# Map.of_alist_exn
+# Map.of_alist_exn;;
 - : ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t =
 <fun>
 ```
@@ -169,7 +169,7 @@ representing any module that matches the signature `Comparator.S`, shown
 below.
 
 ```ocaml env=main
-# #show Base.Comparator.S
+# #show Base.Comparator.S;;
 module type S =
   sig
     type t
@@ -200,7 +200,7 @@ a comparison function and an s-expression serializer.
 
     let sexp_of_t t : Sexp.t =
       List [ Atom t.title; Atom t.isbn ]
-  end
+  end;;
 module Book :
   sig
     type t = { title : string; isbn : string; }
@@ -214,7 +214,7 @@ This module has the basic functionality we need, but doesn't satisfy the
 see.
 
 ```ocaml env=main
-# Map.empty (module Book)
+# Map.empty (module Book);;
 Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
@@ -249,7 +249,7 @@ functor to that module.
     end
     include T
     include Comparator.Make(T)
-  end
+  end;;
 module Book :
   sig
     module T :
@@ -276,7 +276,7 @@ With this module in hand, we can now build a set using the type `Book.t`.
       ; { title = "Structure and Interpretation of Computer Programs"
         ; isbn = "978-0262510875" }
       ; { title = "The C Programming Language"
-  ; isbn = "978-0131101630" } ]
+  ; isbn = "978-0131101630" } ];;
 val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
   <abstr>
 ```
@@ -306,7 +306,7 @@ you can see, a lot of extra functions have been defined.
     end
     include T
     include Comparable.Make(T)
-  end
+  end;;
 module Book :
   sig
     module T :
@@ -354,11 +354,11 @@ Consider, for example, `Map.symmetric_diff`, which computes the difference
 between two maps.
 
 ```ocaml env=main
-# let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0]
+# let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
 val left : (string, int, String.comparator_witness) Map.t = <abstr>
-# let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0]
+# let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0];;
 val right : (string, int, String.comparator_witness) Map.t = <abstr>
-# Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list
+# Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 - : (string, int) Map.Symmetric_diff_element.t list =
 [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 ```
@@ -368,7 +368,7 @@ it compares have the same comparator type, and therefore the same comparison
 function.
 
 ```ocaml env=main
-# Map.symmetric_diff
+# Map.symmetric_diff;;
 - : ('k, 'v, 'cmp) Map.t ->
     ('k, 'v, 'cmp) Map.t ->
     data_equal:('v -> 'v -> bool) ->
@@ -393,7 +393,7 @@ reverse of the usual lexicographic order.
     end
     include T
     include Comparator.Make(T)
-  end
+  end;;
 module Reverse :
   sig
     module T :
@@ -416,11 +416,11 @@ As you can see in the following, both `Reverse` and `String` can be used to
 create maps with a key type of `string`:
 
 ```ocaml env=main
-# let alist = ["foo", 0; "snoo", 3]
+# let alist = ["foo", 0; "snoo", 3];;
 val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
-# let ord_map = Map.of_alist_exn (module String) alist
+# let ord_map = Map.of_alist_exn (module String) alist;;
 val ord_map : (string, int, String.comparator_witness) Map.t = <abstr>
-# let rev_map = Map.of_alist_exn (module Reverse) alist
+# let rev_map = Map.of_alist_exn (module Reverse) alist;;
 val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>
 ```
 
@@ -429,9 +429,9 @@ which confirms that these two maps do indeed use different comparison
 functions.
 
 ```ocaml env=main
-# Map.min_elt ord_map
+# Map.min_elt ord_map;;
 - : (string * int) option = Some ("foo", 0)
-# Map.min_elt rev_map
+# Map.min_elt rev_map;;
 - : (string * int) option = Some ("snoo", 3)
 ```
 
@@ -441,7 +441,7 @@ of throwing an error at run time, or worse, silently returning the wrong
 result.
 
 ```ocaml env=main
-# Map.symmetric_diff ord_map rev_map
+# Map.symmetric_diff ord_map rev_map;;
 Line 1, characters 28-35:
 Error: This expression has type
          (string, int, Reverse.comparator_witness) Map.t
@@ -461,7 +461,7 @@ built-in polymorphic comparison function, which was discussed in
 [maps/polymorphic comparison in]{.idx}[polymorphic comparisons]{.idx}
 
 ```ocaml env=main
-# Map.Poly.of_alist_exn digit_alist
+# Map.Poly.of_alist_exn digit_alist;;
 - : (int, string) Map.Poly.t = <abstr>
 ```
 
@@ -472,7 +472,7 @@ function. Thus, the compiler rejects the following:
 ```ocaml env=main
 # Map.symmetric_diff
     (Map.Poly.singleton 3 "three")
-    (Map.singleton (module Int) 3 "four" )
+    (Map.singleton (module Int) 3 "four" );;
 Line 3, characters 5-43:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
@@ -509,9 +509,9 @@ But sometimes, a structural comparison is not what you want. Maps are
 actually a fine example of this. Consider the following two maps.
 
 ```ocaml env=main
-# let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"]
+# let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
 val m1 : (int, string, Int.comparator_witness) Map.t = <abstr>
-# let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"]
+# let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"];;
 val m2 : (int, string, Int.comparator_witness) Map.t = <abstr>
 ```
 
@@ -519,7 +519,7 @@ Logically, these two sets should be equal, and that's the result that you get
 if you call `Map.equal` on them:
 
 ```ocaml env=main
-# Map.equal String.equal m1 m2
+# Map.equal String.equal m1 m2;;
 - : bool = true
 ```
 
@@ -534,7 +534,7 @@ equality. Comparing the maps directly will fail at runtime because the
 comparators stored within the sets contain function values:
 
 ```ocaml env=main
-# Poly.(m1 = m2)
+# Poly.(m1 = m2);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
@@ -545,7 +545,7 @@ the chapter.
 
 ```ocaml env=main
 # Poly.((Map.Using_comparator.to_tree m1) =
-  (Map.Using_comparator.to_tree m2))
+  (Map.Using_comparator.to_tree m2));;
 - : bool = false
 ```
 
@@ -586,7 +586,7 @@ type `Book.t` and set it up for use in creating maps and sets.
     end
     include T
     include Comparator.Make(T)
-  end
+  end;;
 module Book :
   sig
     module T :
@@ -611,7 +611,7 @@ that default implementations of these functions be created, as
 follows.
 
 ```ocaml env=main
-# #require "ppx_jane"
+# #require "ppx_jane";;
 # module Book = struct
     module T = struct
       type t = { title: string; isbn: string }
@@ -619,7 +619,7 @@ follows.
     end
     include T
     include Comparator.Make(T)
-  end
+  end;;
 module Book :
   sig
     module T :
@@ -665,14 +665,14 @@ discourages the use of `==` and provides the more explicit
 anywhere in code that opens `Base`:
 
 ```ocaml env=core_phys_equal
-# open Base
-# 1 == 2
+# open Base;;
+# 1 == 2;;
 Line 1, characters 3-5:
 Alert deprecated: Base.==
 [2016-09] this element comes from the stdlib distributed with OCaml.
 Use [phys_equal] instead.
 - : bool = false
-# phys_equal 1 2
+# phys_equal 1 2;;
 - : bool = false
 ```
 
@@ -704,7 +704,7 @@ want to put a `[@@deriving]` annotation on a map or set type itself?
 ```ocaml env=main
 # type string_int_map =
     (string,int,String.comparator_witness) Map.t
-  [@@deriving sexp]
+  [@@deriving sexp];;
 Line 2, characters 44-49:
 Error: Unbound value Map.t_of_sexp
 Hint: Did you mean m__t_of_sexp?
@@ -721,7 +721,7 @@ the various `[@@deriving]` extensions, which you can see below.
 ```ocaml env=main
 # type string_int_map =
     int Map.M(String).t
-  [@@deriving sexp]
+  [@@deriving sexp];;
 type string_int_map = int Base.Map.M(Base.String).t
 val string_int_map_of_sexp : Sexp.t -> string_int_map = <fun>
 val sexp_of_string_int_map : string_int_map -> Sexp.t = <fun>
@@ -732,9 +732,9 @@ different than the ordinary type signature, the meaning of the type is the
 same, as we can see below.
 
 ```ocaml env=main
-# let m = Map.singleton (module String) "one" 1
+# let m = Map.singleton (module String) "one" 1;;
 val m : (string, int, String.comparator_witness) Map.t = <abstr>
-# (m : int Map.M(String).t)
+# (m : int Map.M(String).t);;
 - : int Base.Map.M(Base.String).t = <abstr>
 ```
 
@@ -752,7 +752,7 @@ tree underlying the map, without the comparator. [Map
 module/Map.to_tree]{.idx}[maps/tree structure]{.idx}
 
 ```ocaml env=main
-# let ord_tree = Map.Using_comparator.to_tree ord_map
+# let ord_tree = Map.Using_comparator.to_tree ord_map;;
 val ord_tree :
   (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
   <abstr>
@@ -768,7 +768,7 @@ Since the comparator isn't included in the tree, we need to provide the
 comparator explicitly when we, say, search for a key, as shown below:
 
 ```ocaml env=main
-# Map.Using_comparator.Tree.find ~comparator:String.comparator ord_tree "snoo"
+# Map.Using_comparator.Tree.find ~comparator:String.comparator ord_tree "snoo";;
 - : int option = Some 3
 ```
 
@@ -778,7 +778,7 @@ invariant that the phantom type is there to enforce. As you can see in the
 following example, using the wrong comparator will lead to a type error:
 
 ```ocaml env=main
-# Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo"
+# Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 Line 1, characters 63-71:
 Error: This expression has type
          (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
@@ -846,11 +846,11 @@ providing a first-class module from which the required operations for
 building a hashtable can be obtained.
 
 ```ocaml env=main
-# let table = Hashtbl.create (module String)
+# let table = Hashtbl.create (module String);;
 val table : (string, '_weak1) Hashtbl.Poly.t = <abstr>
-# Hashtbl.set table ~key:"three" ~data:3
+# Hashtbl.set table ~key:"three" ~data:3;;
 - : unit = ()
-# Hashtbl.find table "three"
+# Hashtbl.find table "three";;
 - : int option = Some 3
 ```
 
@@ -860,7 +860,7 @@ some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
 ```ocaml env=main
-# #show Core.Hashtbl_intf.Key
+# #show Core.Hashtbl_intf.Key;;
 module type Key =
   sig
     type t
@@ -881,7 +881,7 @@ simpler.
 # module Book = struct
     type t = { title: string; isbn: string }
     [@@deriving compare, sexp_of, hash]
-  end
+  end;;
 module Book :
   sig
     type t = { title : string; isbn : string; }
@@ -890,7 +890,7 @@ module Book :
     val hash_fold_t : Hash.state -> t -> Hash.state
     val hash : t -> int
   end
-# let table = Hashtbl.create (module Book)
+# let table = Hashtbl.create (module Book);;
 val table : (Book.t, '_weak2) Hashtbl.Poly.t = <abstr>
 ```
 
@@ -898,11 +898,11 @@ You can also create a hashtable based on OCaml's polymorphic hash and
 comparison functions.
 
 ```ocaml env=main
-# let table = Hashtbl.Poly.create ()
+# let table = Hashtbl.Poly.create ();;
 val table : ('_weak3, '_weak4) Hashtbl.Poly.t = <abstr>
-# Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!"
+# Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
 - : unit = ()
-# Hashtbl.find table ("foo",3,[1;2;3])
+# Hashtbl.find table ("foo",3,[1;2;3]);;
 - : string option = Some "random data!"
 ```
 
@@ -928,19 +928,18 @@ default, that bound is set at 10 "meaningful" nodes. [hash tables/polymorphic
 hash function]{.idx}
 
 The bound on the traversal means that the hash function may ignore part of
-the data structure, and this can lead to pathological
-<span class="keep-together">cases</span> where every value you store has the
-same hash value. We'll demonstrate this below, using the function
-`List.range` to allocate lists of integers of different length:
+the data structure, and this can lead to pathological cases where every
+value you store has the same hash value. We'll demonstrate this below,
+using the function `List.range` to allocate lists of integers of different length:
 
 ```ocaml env=main
-# Hashtbl.Poly.hashable.hash (List.range 0 9)
+# Hashtbl.Poly.hashable.hash (List.range 0 9);;
 - : int = 209331808
-# Hashtbl.Poly.hashable.hash (List.range 0 10)
+# Hashtbl.Poly.hashable.hash (List.range 0 10);;
 - : int = 182325193
-# Hashtbl.Poly.hashable.hash (List.range 0 11)
+# Hashtbl.Poly.hashable.hash (List.range 0 11);;
 - : int = 182325193
-# Hashtbl.Poly.hashable.hash (List.range 0 100)
+# Hashtbl.Poly.hashable.hash (List.range 0 100);;
 - : int = 182325193
 ```
 
@@ -951,13 +950,13 @@ good idea to write one's own hash function, or to use the ones provided by
 `[@@deriving]`, which don't have this problem, as you can see below.
 
 ```ocaml env=main
-# [%hash: int list] (List.range 0 9)
+# [%hash: int list] (List.range 0 9);;
 - : int = 999007935
-# [%hash: int list] (List.range 0 10)
+# [%hash: int list] (List.range 0 10);;
 - : int = 195154657
-# [%hash: int list] (List.range 0 11)
+# [%hash: int list] (List.range 0 11);;
 - : int = 527899773
-# [%hash: int list] (List.range 0 100)
+# [%hash: int list] (List.range 0 100);;
 - : int = 594983280
 ```
 

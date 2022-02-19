@@ -105,9 +105,9 @@ let generate ~g bytes =
 let add ~g (source, _) ~pool data =
   let pool   = pool land (pools - 1)
   and source = source land 0xff in
-  let header = Cs.of_bytes [ source ; Cstruct.len data ] in
+  let header = Cs.of_bytes [ source ; Cstruct.length data ] in
   g.pools.(pool) <- SHAd256.feedi g.pools.(pool) (iter2 header data);
-  if pool = 0 then g.pool0_size <- g.pool0_size + Cstruct.len data
+  if pool = 0 then g.pool0_size <- g.pool0_size + Cstruct.length data
 
 (* XXX
  * Schneier recommends against using generator-imposed pool-seeding schedule

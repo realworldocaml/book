@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2014 The fmt programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 let invalid_arg' = invalid_arg
@@ -170,7 +169,7 @@ let stack ?sep pp_elt = iter Stack.iter pp_elt
 
 module Dump = struct
 
-  (* Stlib types *)
+  (* Stdlib types *)
 
   let sig_names =
     Sys.[ sigabrt, "SIGABRT"; sigalrm, "SIGALRM"; sigfpe, "SIGFPE";

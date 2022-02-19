@@ -1,12 +1,11 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2016 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2016 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 module R = Rresult.R
 include R.Infix
-type ('a, 'b) result = ('a, 'b) Result.result = Ok of 'a | Error of 'b
+type ('a, 'b) result = ('a, 'b) Stdlib.result = Ok of 'a | Error of 'b
 
 let strf = Astring.strf
 let (^) = Astring.(^)
@@ -29,7 +28,7 @@ let setup () =
 let () = setup ()
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2016 Daniel C. Bünzli
+   Copyright (c) 2016 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

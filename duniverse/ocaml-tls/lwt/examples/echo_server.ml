@@ -68,6 +68,6 @@ let port =
 
 let cmd =
   Term.(ret (const echo_server $ setup_log $ port)),
-  Term.info "server" ~version:"0.14.1"
+  Term.info "server" ~version:"0.15.2"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

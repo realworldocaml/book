@@ -43,6 +43,7 @@ type config = private {
   alpn_protocols : string list ; (** optional ordered list of accepted alpn_protocols *)
   groups : group list ; (** the first FFDHE will be used for TLS 1.2 and below if a DHE ciphersuite is used *)
   zero_rtt : int32 ;
+  ip : Ipaddr.t option ;
 } [@@deriving sexp_of]
 
 (** [ciphers13 config] are the ciphersuites for TLS 1.3 in the configuration. *)
@@ -72,6 +73,7 @@ val client :
   ?ticket_cache : ticket_cache ->
   ?alpn_protocols : string list ->
   ?groups : group list ->
+  ?ip : Ipaddr.t ->
   unit -> client
 
 (** [server ?ciphers ?version ?hashes ?reneg ?certificates ?acceptable_cas ?authenticator ?alpn_protocols]
@@ -90,6 +92,7 @@ val server :
   ?alpn_protocols : string list ->
   ?groups : group list ->
   ?zero_rtt : int32 ->
+  ?ip : Ipaddr.t ->
   unit -> server
 
 (** [peer client name] is [client] with [name] as [peer_name] *)

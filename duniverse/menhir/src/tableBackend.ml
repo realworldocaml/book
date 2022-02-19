@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -1056,7 +1053,7 @@ let program =
       SIModuleDef (ti, MApp (MVar make_engine, MVar et)) ::
       SIInclude (MVar ti) ::
 
-      ifnlazy Settings.inspection (fun () ->
+      MList.ifnlazy Settings.inspection (fun () ->
 
         (* Define the internal sub-module [symbols], which contains type
            definitions. Then, include this sub-module. This sub-module is used
@@ -1123,6 +1120,6 @@ let program =
   [])]
 
 let () =
-  Time.tick "Producing abstract syntax"
+  Time.tick "Producing tables and abstract syntax"
 
 end

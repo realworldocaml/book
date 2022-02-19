@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -130,3 +127,25 @@ let causes_an_error s z : bool =
   | None ->
       reductions_on s z = [] &&
       not (SymbolMap.mem (Symbol.T z) (Lr1.transitions s))
+
+(* [find_erroneous s zs] finds whether there is a terminal [z] in [zs] such
+   that state [s] will initiate an error on the lookahead symbol [z].
+   All terminals in [zs] must be real.
+   (It is effectively [causes_an_error] lifted to operate on [TerminalSet].) *)
+
+exception Found_error of Terminal.t
+
+let find_erroneous s zs : Terminal.t option =
+  match has_default_reduction s with
+  | Some _ -> None
+  | None ->
+    begin match
+        TerminalSet.iter (fun z ->
+            if reductions_on s z = [] &&
+               not (SymbolMap.mem (Symbol.T z) (Lr1.transitions s))
+            then raise (Found_error z)
+          ) zs
+      with
+      | () -> None
+      | exception (Found_error z) -> Some z
+    end

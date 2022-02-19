@@ -45,7 +45,7 @@ type push = {
   (* Thread signaled when a new element is added to the stream. *)
   mutable push_waiting : bool;
   (* Is a thread waiting on [push_signal] ? *)
-  mutable push_external : Obj.t;
+  mutable push_external : Obj.t [@ocaml.warning "-69"];
   (* Reference to an external source. *)
 }
 
@@ -66,7 +66,7 @@ type 'a push_bounded = {
   mutable pushb_push_waiter : unit Lwt.t;
   mutable pushb_push_wakener : unit Lwt.u;
   (* Thread blocked on push. *)
-  mutable pushb_external : Obj.t;
+  mutable pushb_external : Obj.t [@ocaml.warning "-69"];
   (* Reference to an external source. *)
 }
 
@@ -187,6 +187,23 @@ let create_with_reference () =
   in
   (t, push, fun x -> source.push_external <- Obj.repr x)
 
+let return a =
+  let stream, push, _ = create_with_reference () in
+  push (Some a);
+  push None;
+  stream
+
+let return_lwt a =
+  let source, push, _ = create_with_reference () in
+  Lwt.dont_wait
+    (fun () ->
+      Lwt.bind a (fun x ->
+        push (Some x);
+        push None;
+        Lwt.return_unit))
+    (fun _exc -> push None);
+  source
+
 let of_seq s =
   let s = ref s in
   let get () =
@@ -195,6 +212,16 @@ let of_seq s =
     | Seq.Cons (elt, s') -> s := s'; Some elt
   in
   from_direct get
+
+let of_lwt_seq s =
+  let s = ref s in
+  let get () =
+    !s () >|= function
+    | Lwt_seq.Nil -> None
+    | Lwt_seq.Cons (elt, s') -> s := s'; Some elt
+  in
+  from get
+
 
 let create () =
   let source, push, _ = create_with_reference () in

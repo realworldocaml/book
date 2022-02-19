@@ -32,25 +32,25 @@ end
 include Gmap.Make(K)
 
 let pp_k : type a. a k -> Format.formatter -> a -> unit = fun k ppf v ->
-  let pp_strs = Fmt.(list ~sep:(unit "; ") string) in
+  let pp_strs = Fmt.(list ~sep:(any "; ") string) in
   match k, v with
   | Rfc_822, x -> Fmt.pf ppf "rfc822 %a" pp_strs x
   | DNS, x ->
-    Fmt.pf ppf "dns %a" Fmt.(list ~sep:(unit "; ") string) x
+    Fmt.pf ppf "dns %a" Fmt.(list ~sep:(any "; ") string) x
   | X400_address, () -> Fmt.string ppf "x400 address"
   | Directory, x ->
     Fmt.pf ppf "directory %a"
-      Fmt.(list ~sep:(unit "; ") Distinguished_name.pp) x
+      Fmt.(list ~sep:(any "; ") Distinguished_name.pp) x
   | EDI_party, xs ->
     Fmt.pf ppf "edi party %a"
-      Fmt.(list ~sep:(unit "; ")
-               (pair ~sep:(unit ", ")
-                  (option ~none:(unit "") string) string)) xs
+      Fmt.(list ~sep:(any "; ")
+               (pair ~sep:(any ", ")
+                  (option ~none:(any "") string) string)) xs
   | URI, x -> Fmt.pf ppf "uri %a" pp_strs x
-  | IP, x -> Fmt.pf ppf "ip %a" Fmt.(list ~sep:(unit ";") Cstruct.hexdump_pp) x
+  | IP, x -> Fmt.pf ppf "ip %a" Fmt.(list ~sep:(any ";") Cstruct.hexdump_pp) x
   | Registered_id, x ->
     Fmt.pf ppf "registered id %a"
-      Fmt.(list ~sep:(unit ";") Asn.OID.pp) x
+      Fmt.(list ~sep:(any ";") Asn.OID.pp) x
   | Other oid, x -> Fmt.pf ppf "other %a: %a" Asn.OID.pp oid pp_strs x
 
 let pp ppf m = iter (fun (B (k, v)) -> pp_k k ppf v ; Fmt.sp ppf ()) m

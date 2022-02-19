@@ -99,6 +99,6 @@ let init ?(stop = fst (Lwt.wait ())) handler fd =
             Log.warn (fun f ->
                 f "Uncaught exception accepting connection: %s"
                   (Printexc.to_string ex));
-            Lwt_unix.yield () >>= loop)
+            Lwt.pause () >>= loop)
   in
   Lwt.finalize loop (fun () -> Lwt_unix.close fd)

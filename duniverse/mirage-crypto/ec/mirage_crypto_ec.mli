@@ -31,15 +31,19 @@ module type Dh = sig
   type secret
   (** Type for private keys. *)
 
-  val secret_of_cs : Cstruct.t -> (secret * Cstruct.t, error) result
-  (** [secret_of_cs secret] decodes the provided buffer as {!secret}. May
-      result in an error if the buffer had an invalid length or was not in
-      bounds. *)
+  val secret_of_cs : ?compress:bool -> Cstruct.t ->
+    (secret * Cstruct.t, error) result
+  (** [secret_of_cs ~compress secret] decodes the provided buffer as {!secret}.
+      If [compress] is provided and [true] (defaults to [false]), the shared
+      part will be compressed. May result in an error if the buffer had an
+      invalid length or was not in bounds. *)
 
-  val gen_key : ?g:Mirage_crypto_rng.g -> unit -> secret * Cstruct.t
-  (** [gen_key ~g ()] generates a private and a public key for Ephemeral
-      Diffie-Hellman. The returned key pair MUST only be used for a single
-      key exchange.
+  val gen_key : ?compress:bool -> ?g:Mirage_crypto_rng.g -> unit ->
+    secret * Cstruct.t
+  (** [gen_key ~compress ~g ()] generates a private and a public key for
+      Ephemeral Diffie-Hellman. If [compress] is provided and [true] (defaults
+      to [false]), the shared part will be compressed. The returned key pair
+      MUST only be used for a single key exchange.
 
       The generated private key is checked to be greater than zero and lower
       than the group order meaning the public key cannot be the point at
@@ -81,8 +85,10 @@ module type Dsa = sig
   (** [pub_of_cstruct cs] decodes a public key from the buffer [cs]. If the
       provided data is invalid, an error is returned. *)
 
-  val pub_to_cstruct : pub -> Cstruct.t
-  (** [pub_to_cstruct p] encodes the public key [p] into a buffer. *)
+  val pub_to_cstruct : ?compress:bool -> pub -> Cstruct.t
+  (** [pub_to_cstruct ~compress p] encodes the public key [p] into a buffer.
+      If [compress] is provided and [true] (default [false]), the compressed
+      representation is returned. *)
 
   (** {2 Deriving the public key} *)
 
@@ -132,7 +138,8 @@ module type Dh_dsa = sig
   module Dsa : Dsa
 end
 
-(** The NIST P-224 curve, also known as SECP224R1. *)
+(** The NIST P-224 curve, also known as SECP224R1. Please note that
+    decompression is not supported for P-224 public keys. *)
 module P224 : Dh_dsa
 
 (** The NIST P-256 curve, also known as SECP256R1. *)

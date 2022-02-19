@@ -1,4 +1,4 @@
-version: "0.14.1"
+version: "0.15.2"
 opam-version: "2.0"
 homepage:     "https://github.com/mirleft/ocaml-tls"
 dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
@@ -26,20 +26,21 @@ depends: [
   "mirage-crypto-ec" {>= "0.10.0"}
   "mirage-crypto-pk"
   "mirage-crypto-rng" {>= "0.8.0"}
-  "x509" {>= "0.13.0"}
+  "x509" {>= "0.15.0"}
   "domain-name" {>= "0.3.0"}
-  "fmt"
-  "rresult"
+  "fmt" {>= "0.8.7"}
   "cstruct-unix" {with-test & >= "3.0.0"}
   "ounit2" {with-test & >= "2.2.0"}
   "lwt" {>= "3.0.0"}
   "ptime" {>= "0.8.1"}
   "hkdf"
   "logs"
+  "ipaddr"
+  "ipaddr-sexp"
   "alcotest" {with-test}
   "randomconv" {with-test}
 ]
-
+conflicts: [ "result" {< "1.5"} ]
 tags: [ "org:mirage"]
 synopsis: "Transport Layer Security purely in OCaml"
 description: """

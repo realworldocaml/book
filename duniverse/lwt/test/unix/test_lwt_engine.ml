@@ -66,7 +66,7 @@ let run_tests = [
 
     (* Make sure we are running in a callback called by Lwt_main.run, not
        synchronously when the testing executable is loaded. *)
-    Lwt_main.yield () >>= fun () ->
+    Lwt.pause () >>= fun () ->
 
     try
       Lwt_main.run (Lwt.return ());

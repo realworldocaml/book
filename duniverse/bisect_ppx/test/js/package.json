@@ -1,0 +1,14 @@
+{
+  "name": "bisect_ppx-test",
+  "dependencies": {
+    "bisect_ppx": "file:package",
+    "rescript": "^9.1.0",
+    "esy": "^0.6.7"
+  },
+  "scripts": {
+    "build": "rescript",
+    "instrument": "BISECT_ENABLE=yes rescript",
+    "execute": "node ./lib/js/hello.js",
+    "clean": "rescript -clean-world"
+  }
+}

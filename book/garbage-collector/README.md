@@ -1,5 +1,9 @@
 # Understanding the Garbage Collector
 
+::: {text-align=right}
+*This chapter includes contributions from Stephen Weeks and Sadiq Jaffer.*
+:::
+
 We've described the runtime format of individual OCaml variables earlier, in
 [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 When you execute your program, OCaml manages the lifecycle of these variables
@@ -79,7 +83,7 @@ You can also control the behavior of OCaml programs by setting the
 lets you set GC parameters without recompiling, for example to benchmark the
 effects of different settings. The format of `OCAMLRUNPARAM` is documented in
 the
-[ OCaml manual](https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html).
+[OCaml manual](https://ocaml.org/manual/runtime.html).
 
 :::
 
@@ -161,15 +165,15 @@ the `Gc.set` function:
 :::
 
 ```ocaml env=tune
-# open Core
-# let c = Gc.get ()
+# open Core;;
+# let c = Gc.get ();;
 val c : Core_kernel.Gc.control =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
    space_overhead = 120; verbose = 0; max_overhead = 500;
    stack_limit = 1048576; allocation_policy = 2; window_size = 1;
    custom_major_ratio = 44; custom_minor_ratio = 100;
    custom_minor_max_size = 8192}
-# Gc.tune ~minor_heap_size:(262144 * 2) ()
+# Gc.tune ~minor_heap_size:(262144 * 2) ();;
 - : unit = ()
 ```
 
@@ -204,12 +208,12 @@ algorithm that operates in several phases:
 - The *compact* phase relocates live blocks into a freshly allocated heap to
   eliminate gaps in the free list. This prevents the fragmentation of heap
   blocks in long-running programs and normally occurs much less frequently
-  than the mark and sweep <span class="keep-together">phases</span>.
+  than the mark and sweep phases.
 
 A major garbage collection must also stop the world to ensure that blocks can
 be moved around without this being observed by the live application. The
 mark-and-sweep phases run incrementally over slices of the heap to avoid
-pausing the application for long <span class="keep-together">periods</span>
+pausing the application for long periods
 of time, and also precede each slice with a fast minor collection. Only the
 compaction phase touches all the memory in one go, and is a relatively rare
 operation.
@@ -259,7 +263,7 @@ require more housekeeping in the OCaml runtime to keep track of them:
 :::
 
 ```ocaml env=tune
-# Gc.tune ~major_heap_increment:(1000448 * 4) ()
+# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
 - : unit = ()
 ```
 
@@ -415,9 +419,9 @@ necessary:
 :::
 
 ```ocaml env=tune
-# Gc.major_slice 0
+# Gc.major_slice 0;;
 - : int = 0
-# Gc.full_major ()
+# Gc.full_major ();;
 - : unit = ()
 ```
 
@@ -457,7 +461,7 @@ allocation patterns that are causing a higher-than-usual rate of compactions:
 :::
 
 ```ocaml env=tune
-# Gc.tune ~max_overhead:0 ()
+# Gc.tune ~max_overhead:0 ();;
 - : unit = ()
 ```
 
@@ -613,8 +617,7 @@ lifetime of the program, for example, a list of integer constants.
 `Heap_block` explicitly checks to see if the value is in the major or minor
 heap, and rejects most constant values. Compiler optimizations may also
 duplicate some immutable values such as floating-point values in arrays.
-These may be finalized while another
-<span class="keep-together">duplicate</span> copy is being used by the
+These may be finalized while another duplicate copy is being used by the
 program.
 
 For this reason, attach finalizers only to values that you are explicitly

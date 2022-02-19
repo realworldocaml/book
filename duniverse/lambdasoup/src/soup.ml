@@ -468,6 +468,7 @@ sig
 
   val parse : string -> t
   val select : (_ node) -> t -> element nodes
+  val matches_selector : t -> soup node -> soup node -> bool
 end =
 struct
   type type_ = Name of string | Universal
@@ -626,43 +627,40 @@ struct
       with_stop (fun stop ->
         sequence.eliminate (fun v node -> f v node |> stop.throw) init)}
 
+  let matches_selector selector root_node at_node =
+    with_stop (fun stop ->
+      let rec backwards_traversal at_node = function
+	| [] -> if at_node == root_node then stop.throw true else ()
+	| (combinator, simple_selectors)::rest ->
+	  if not (is_element at_node) then ()
+	  else
+	    if not (matches_simple_selectors at_node simple_selectors) then ()
+	    else
+	      let next_nodes =
+		match combinator with
+		| Descendant ->
+		  at_node |> simple_ancestors |> up_to root_node
+		| Child -> at_node |> ancestors |> one
+		| IndirectSibling ->
+		  at_node |> previous_siblings |> elements |> up_to root_node
+		| AdjacentSibling ->
+		  at_node |> previous_siblings |> elements |> one
+	      in
+	      next_nodes |> iter (fun node -> backwards_traversal node rest)
+      in
+      backwards_traversal at_node (List.rev selector);
+      false)
+
   let select root_node selector =
     let root_node = forget_type root_node in
-
-    let matches_selector at_node =
-      with_stop (fun stop ->
-        let rec backwards_traversal at_node = function
-          | [] -> if at_node == root_node then stop.throw true else ()
-          | (combinator, simple_selectors)::rest ->
-            if not (is_element at_node) then ()
-            else
-              if not (matches_simple_selectors at_node simple_selectors) then ()
-              else
-                let next_nodes =
-                  match combinator with
-                  | Descendant ->
-                    at_node |> simple_ancestors |> up_to root_node
-                  | Child -> at_node |> ancestors |> one
-                  | IndirectSibling ->
-                    at_node |> previous_siblings |> elements |> up_to root_node
-                  | AdjacentSibling ->
-                    at_node |> previous_siblings |> elements |> one
-                in
-                next_nodes |> iter (fun node -> backwards_traversal node rest)
-        in
-        backwards_traversal at_node (List.rev selector);
-        false)
-    in
-
     let candidates =
       match simple_parent root_node with
       | None -> descendants root_node
       | Some parent -> descendants parent
     in
-
     candidates
     |> elements
-    |> filter matches_selector
+    |> filter (matches_selector selector root_node)
 
   let is_decimal_char c =
     ((Char.code c) >= (Char.code '0')) && ((Char.code c) <= (Char.code '9'))
@@ -975,6 +973,12 @@ struct
     in
     loop []
 end
+
+let matches_selector root_node selector node =
+  let root_node = forget_type root_node in
+  let node = forget_type node in
+  let selector = Selector.parse selector in
+  Selector.matches_selector selector root_node node
 
 let select selector node =
   selector |> Selector.parse |> Selector.select node

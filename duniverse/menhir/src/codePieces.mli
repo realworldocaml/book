@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -55,20 +52,10 @@ val endpos: string array -> int -> string
 
 val semvtypent : Nonterminal.t -> typ
 
-(* [semvtypetok tok] is the type of the semantic value associated with
-   token [tok]. There is no such type if the token does not have a
-   semantic value. *)
-
-val semvtypetok : Terminal.t -> typ list
-
 (* [semvtype symbol] is the type of the semantic value associated with
    [symbol]. *)
 
 val semvtype : Symbol.t -> typ list
-
-(* [has_semv symbol] indicates whether [symbol] carries a semantic value. *)
-
-val has_semv : Symbol.t -> bool
 
 (* ------------------------------------------------------------------------ *)
 
@@ -77,12 +64,18 @@ val has_semv : Symbol.t -> bool
 (* [tokpat tok pat] is a pattern that matches the token [tok] and binds
    its semantic value (if it has one) to the pattern [pat]. *)
 
-val tokpat:  Terminal.t -> pattern -> pattern
+val tokpat: Terminal.t -> pattern -> pattern
 
 (* [tokspat toks] is a pattern that matches any token in the set [toks],
    without binding its semantic value. *)
 
 val tokspat: TerminalSet.t -> pattern
+
+(* [tok_bind_unit tok pat e] binds the pattern [pat] to the unit value
+   in the expression [e] if the token [tok] has no semantic value.
+   Otherwise, it returns just [e]. *)
+
+val tok_bind_unit: Terminal.t -> pattern -> expr -> expr
 
 (* [destructuretokendef name codomain bindsemv branch] generates the
    definition of a function that destructure tokens. [name] is the

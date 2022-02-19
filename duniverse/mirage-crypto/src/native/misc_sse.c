@@ -3,6 +3,7 @@
 #ifdef __mc_ACCELERATE__
 
 static inline void xor_into (uint8_t *src, uint8_t *dst, size_t n) {
+/* see issue #70 #81 for alignment considerations (memcpy used below) */
 #ifdef ARCH_64BIT
   __m128i r;
   for (; n >= 16; n -= 16, src += 16, dst += 16)

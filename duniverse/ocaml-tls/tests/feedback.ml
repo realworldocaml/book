@@ -33,7 +33,7 @@ let loop_chatter ~certificate ~loops ~size =
   let message  = Mirage_crypto_rng.generate size
   and server   = Tls.(Engine.server (Config.server ~certificates:(`Single certificate) ()))
   and (client, init) =
-    let authenticator ~host:_ _ = Ok None in
+    let authenticator ?ip:_ ~host:_ _ = Ok None in
     Tls.(Engine.client @@ Config.client ~authenticator ())
   in
   Testlib.time @@ fun () ->

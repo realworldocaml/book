@@ -10,10 +10,15 @@
 #include <lwt_unix.h>
 
 #define CAML_NAME_SPACE
+#include <caml/version.h>
+#if OCAML_VERSION < 41300
+#define CAML_INTERNALS
+#endif
 
 #include <caml/alloc.h>
 #include <caml/fail.h>
 #include <caml/memory.h>
+#include <caml/osdeps.h>
 
 static HANDLE get_handle(value opt) {
   value fd;
@@ -29,8 +34,6 @@ static HANDLE get_handle(value opt) {
     return INVALID_HANDLE_VALUE;
 }
 
-#define string_option(opt) (Is_block(opt) ? String_val(Field(opt, 0)) : NULL)
-
 CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
                                           value cwd, value fds) {
   CAMLparam5(prog, cmdline, env, cwd, fds);
@@ -38,6 +41,19 @@ CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
 
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
+  DWORD flags = CREATE_UNICODE_ENVIRONMENT;
+  BOOL ret;
+
+#define string_option(opt) \
+  (Is_block(opt) ? caml_stat_strdup_to_os(String_val(Field(opt, 0))) : NULL)
+
+  char_os
+    *progs = string_option(prog),
+    *cmdlines = caml_stat_strdup_to_os(String_val(cmdline)),
+    *envs = string_option(env),
+    *cwds = string_option(cwd);
+
+#undef string_option
 
   ZeroMemory(&si, sizeof(si));
   ZeroMemory(&pi, sizeof(pi));
@@ -47,9 +63,14 @@ CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
   si.hStdOutput = get_handle(Field(fds, 1));
   si.hStdError = get_handle(Field(fds, 2));
 
-  if (!CreateProcess(string_option(prog), (LPSTR)String_val(cmdline), NULL,
-                     NULL, TRUE, 0, (LPVOID)string_option(env),
-                     string_option(cwd), &si, &pi)) {
+  ret = CreateProcess(progs, cmdlines, NULL, NULL, TRUE, flags,
+                      envs, cwds, &si, &pi);
+  caml_stat_free(progs);
+  caml_stat_free(cmdlines);
+  caml_stat_free(envs);
+  caml_stat_free(cwds);
+
+  if (!ret) {
     win32_maperr(GetLastError());
     uerror("CreateProcess", Nothing);
   }

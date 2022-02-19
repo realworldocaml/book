@@ -103,6 +103,15 @@ module HashTablesAsImperativeMaps
      : IMPERATIVE_MAPS with type key = H.t
                         and type 'data t = 'data Hashtbl.Make(H).t
 
+(**An implementation of imperative maps as a weak hash table.
+   Use with caution: this table can forget some of its entries,
+   and can therefore be unsuitable for use in some applications. *)
+
+module WeakHashTablesAsImperativeMaps
+  (H : HashedType)
+     : IMPERATIVE_MAPS with type key = H.t
+                        and type 'data t = 'data Ephemeron.K1.Make(H).t
+
 (* -------------------------------------------------------------------------- *)
 
 (**[MinimalSemiLattice] converts a semi-lattice to a minimal semi-lattice;

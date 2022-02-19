@@ -7,6 +7,7 @@
   (deps
    exe/hello.exe
    exe/list_files.exe
+   pgid_test/checkpgid.exe
    (sandbox always)))
  (preprocess
   (pps ppx_expect)))

@@ -26,7 +26,7 @@ let cached_session : Tls.Core.epoch_data =
 
 let echo_client ?ca hostname port =
   let open Lwt_io in
-  auth ~hostname ?ca () >>= fun authenticator ->
+  auth ?ca () >>= fun authenticator ->
   X509_lwt.private_of_pems
     ~cert:server_cert
     ~priv_key:server_key >>= fun certificate ->
@@ -63,6 +63,6 @@ let trust =
 
 let cmd =
   Term.(const jump $ setup_log $ port $ host $ trust),
-  Term.info "server" ~version:"0.14.1"
+  Term.info "server" ~version:"0.15.2"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

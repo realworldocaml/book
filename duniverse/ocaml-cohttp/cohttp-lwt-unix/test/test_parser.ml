@@ -24,6 +24,8 @@ let basic_res =
    Server: Apache/1.3.3.7 (Unix) (Red-Hat/Linux)\r\n\
    Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\r\n\
    Etag: \"3f80f-1b6-3e1cb03b\"\r\n\
+   Accept: text/*\r\n\
+   Accept: application/xml\r\n\
    Accept-Ranges:  none\r\n\
    Content-Length: 0\r\n\
    Connection: close\r\n\
@@ -244,13 +246,9 @@ let make_simple_req () =
   let open Cohttp in
   let open Cohttp_lwt_unix in
   let expected =
-    "POST /foo/bar HTTP/1.1\r\n\
-     foo: bar\r\n\
-     host: localhost\r\n\
-     transfer-encoding: chunked\r\n\
-     user-agent: "
+    "POST /foo/bar HTTP/1.1\r\nFoo: bar\r\nhost: localhost\r\nuser-agent: "
     ^ user_agent
-    ^ "\r\n\r\n6\r\nfoobar\r\n0\r\n\r\n"
+    ^ "\r\ntransfer-encoding: chunked\r\n\r\n6\r\nfoobar\r\n0\r\n\r\n"
   in
   let req =
     Request.make ~encoding:Transfer.Chunked ~meth:`POST
@@ -263,13 +261,9 @@ let mutate_simple_req () =
   let open Cohttp in
   let open Cohttp_lwt_unix in
   let expected =
-    "POST /foo/bar HTTP/1.1\r\n\
-     foo: bar\r\n\
-     host: localhost\r\n\
-     transfer-encoding: chunked\r\n\
-     user-agent: "
+    "POST /foo/bar HTTP/1.1\r\nfoo: bar\r\nhost: localhost\r\nuser-agent: "
     ^ user_agent
-    ^ "\r\n\r\n6\r\nfoobar\r\n0\r\n\r\n"
+    ^ "\r\ntransfer-encoding: chunked\r\n\r\n6\r\nfoobar\r\n0\r\n\r\n"
   in
   let req =
     Request.make ~encoding:Transfer.Chunked

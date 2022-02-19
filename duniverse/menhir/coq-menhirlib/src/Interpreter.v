@@ -1,15 +1,13 @@
-(****************************************************************************)
-(*                                                                          *)
-(*                                   Menhir                                 *)
-(*                                                                          *)
-(*           Jacques-Henri Jourdan, CNRS, LRI, Université Paris Sud         *)
-(*                                                                          *)
-(*  Copyright Inria. All rights reserved. This file is distributed under    *)
-(*  the terms of the GNU Lesser General Public License as published by the  *)
-(*  Free Software Foundation, either version 3 of the License, or (at your  *)
-(*  option) any later version, as described in the file LICENSE.            *)
-(*                                                                          *)
-(****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                   Menhir                                   *)
+(*                                                                            *)
+(*  Copyright Inria and CNRS. All rights reserved. This file is distributed   *)
+(*  under the terms of the GNU Lesser General Public License as published by  *)
+(*  the Free Software Foundation, either version 3 of the License, or (at     *)
+(*  your option) any later version, as described in the file LICENSE.         *)
+(*                                                                            *)
+(******************************************************************************)
 
 From Coq Require Import List Syntax.
 Import ListNotations.
@@ -27,7 +25,7 @@ Class Decidable (P : Prop) := decide : {P} + {~P}.
 Arguments decide _ {_}.
 
 (** A [Comparable] type has decidable equality. *)
-Instance comparable_decidable_eq T `{ComparableLeibnizEq T} (x y : T) :
+Global Instance comparable_decidable_eq T `{ComparableLeibnizEq T} (x y : T) :
   Decidable (x = y).
 Proof.
   unfold Decidable.
@@ -35,7 +33,7 @@ Proof.
     right; intros ->; by rewrite compare_refl in EQ.
 Defined.
 
-Instance list_decidable_eq T :
+Global Instance list_decidable_eq T :
   (forall x y : T, Decidable (x = y)) ->
   (forall l1 l2 : list T, Decidable (l1 = l2)).
 Proof. unfold Decidable. decide equality. Defined.

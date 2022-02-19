@@ -16,8 +16,7 @@
 
 open Cmdliner
 
-let cmds = [ Test.cmd; Pp.cmd; Rule.cmd; Deps.cmd; Dune_gen.cmd ]
-
+let cmds = [ Test.cmd; Pp.cmd; Deps.cmd; Dune_gen.cmd ]
 let main (`Setup ()) = `Help (`Pager, None)
 
 let main =
@@ -25,16 +24,6 @@ let main =
   let exits = Term.default_exits in
   let man = [] in
   ( Term.(ret (const main $ Cli.setup)),
-    Term.info "ocaml-mdx" ~version:"1.11.0" ~doc ~exits ~man )
+    Term.info "ocaml-mdx" ~version:"2.1.0" ~doc ~exits ~man )
 
-let main () = Term.(exit_status @@ eval_choice main cmds)
-
-let main () =
-  if String.compare Sys.argv.(0) "mdx" == 0 then
-    Format.eprintf
-      "\x1b[0;1mWarning\x1b[0m: 'mdx' is deprecated and will one day be removed.\n\
-      \    Use 'ocaml-mdx' instead\n\
-       %!";
-  main ()
-
-let () = main ()
+let () = Term.(exit_status @@ eval_choice main cmds)

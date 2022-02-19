@@ -3,6 +3,7 @@
 (** {2 What?}
 
     The invariants are as follow:
+
     - AST nodes are requested to be well nested wrt. locations
     - the locations of "sibling" AST nodes should not overlap
 
@@ -25,28 +26,27 @@
     when manipulating the AST.
 
     The intended way to deal with locations is this:
+
     - AST nodes that exist in the source should keep their original location
     - new nodes should be given a "ghost" location (i.e.
-    [{ some_loc with loc_ghost = true }]) to indicate that the node doesn't
-    exist in the sources.
+      [{ some_loc with loc_ghost = true }]) to indicate that the node doesn't
+      exist in the sources.
 
     Both the new check and merlin will happily traverse these ghost nodes as if
-    they didn't exist.
-    Note: this comes into play when deciding which nodes are "siblings", for
-    instance if your AST is:
+    they didn't exist. Note: this comes into play when deciding which nodes are
+    "siblings", for instance if your AST is:
+
     {v
       A (B1(C, D),
          B2(X, Y))
     v}
+
     but [B2] has a ghost location, then [B1], [X] and [Y] are considered
     siblings.
 
-
-    Additionally, there is an attribute [[@merlin.hide]] that you can add on
+    Additionally, there is an attribute [\[@merlin.hide\]] that you can add on
     nodes to tell merlin (and the check) to ignore this node and all of its
-    children.
-    Some helpers for this are provided in {!Merlin_helpers}.
-*)
+    children. Some helpers for this are provided in {!Merlin_helpers}. *)
 
 open! Import
 
@@ -56,4 +56,5 @@ module Non_intersecting_ranges : sig
   val empty : t
 end
 
-val enforce_invariants : string option -> Non_intersecting_ranges.t Ast_traverse.fold
+val enforce_invariants :
+  string option -> Non_intersecting_ranges.t Ast_traverse.fold

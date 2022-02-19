@@ -107,7 +107,7 @@ the type signatures of the various components we've been using. Let's do that
 by recreating some of this code in the toplevel.
 
 ```ocaml env=main
-# let filename_param = Command.Param.(anon ("filename" %: string))
+# let filename_param = Command.Param.(anon ("filename" %: string));;
 val filename_param : string Command.Spec.param = <abstr>
 ```
 
@@ -118,9 +118,9 @@ But `Command.basic` requires a parameter parser that returns a value of type
 `unit -> unit`. We can see that by using `#show` to explore the types.
 
 ```ocaml env=main
-# #show Command.basic
+# #show Command.basic;;
 val basic : unit Command.basic_command
-# #show Command.basic_command
+# #show Command.basic_command;;
 type nonrec 'result basic_command =
     summary:string ->
     ?readme:(unit -> string) ->
@@ -140,7 +140,7 @@ parser. As you can see below, the type of `Command.Param.map` is very similar
 to the code of `List.map`.
 
 ```ocaml env=main
-# #show Command.Param.map
+# #show Command.Param.map;;
 val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param
 ```
 
@@ -244,7 +244,7 @@ multiple arguments by binding together simpler parsers, using the function
 `Command.Param.both`. Here is its type.
 
 ```ocaml env=main
-# #show Command.Param.both
+# #show Command.Param.both;;
 val both :
   'a Command.Spec.param ->
   'b Command.Spec.param -> ('a * 'b) Command.Spec.param
@@ -591,7 +591,7 @@ appear in any order on the command line, or multiple times, depending on how
 they're declared in the specification. [flags]{.idx}[command-line
 parsing/labeled flags and]{.idx}
 
-Let's add two arguments to our `md5` command that mimics the Mac OS X
+Let's add two arguments to our `md5` command that mimics the macOS
 version. A `-s` flag specifies the string to be hashed directly on the
 command line and `-t` runs a self-test. The complete example follows.
 
@@ -707,7 +707,7 @@ Command: just use `Command.group`, which lets you merge a collection of
 `Command.t`'s into one. [Command.group]{.idx}
 
 ```ocaml env=main
-# Command.group
+# Command.group;;
 - : summary:string ->
     ?readme:(unit -> string) ->
     ?preserve_subcommand_order:unit ->
@@ -954,7 +954,7 @@ parsing/autocompletion with bash]{.idx}
 
 The precise mechanism for autocompletion varies depending on what shell you
 are using, but we'll assume you are using the most common one: `bash`. This
-is the default interactive shell on most Linux distributions and Mac OS X,
+is the default interactive shell on most Linux distributions and macOS,
 but you may need to switch to it on *BSD or Windows (when using Cygwin). The
 rest of this section assumes that you're using `bash`. [bash
 autocompletion]{.idx}
@@ -965,7 +965,7 @@ package manager to see if you have it available.
 Operating system | Package manager | Package
 -----------------|-----------------|--------
 Debian Linux | `apt` | `bash-completion`
-Mac OS X | Homebrew | `bash-completion`
+macOS | Homebrew | `bash-completion`
 FreeBSD | Ports system | <em class="filename">/usr/ports/shells/bash-completion</em>
 
 
@@ -981,7 +981,7 @@ One last bit of information you'll need to find is the location of the
 <em class="filename">bash_completion.d</em> directory. This is where all the
 shell fragments that contain the completion logic are held. On Linux, this is
 often in <em class="filename">/etc/bash_completion.d</em>, and in Homebrew on
-Mac OS X, it would be
+macOS, it would be
 <em class="filename">/usr/local/etc/bash_completion.d</em> by default.
 
 ### Generating Completion Fragments from Command

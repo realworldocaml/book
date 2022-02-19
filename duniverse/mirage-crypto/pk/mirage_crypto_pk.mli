@@ -284,11 +284,11 @@ module Rsa : sig
   end
 
   (**/**)
-  val pub_of_sexp : Sexplib.Sexp.t -> pub
-  val sexp_of_pub : pub -> Sexplib.Sexp.t
+  val pub_of_sexp : Sexplib0.Sexp.t -> pub
+  val sexp_of_pub : pub -> Sexplib0.Sexp.t
 
-  val priv_of_sexp : Sexplib.Sexp.t -> priv
-  val sexp_of_priv : priv -> Sexplib.Sexp.t
+  val priv_of_sexp : Sexplib0.Sexp.t -> priv
+  val sexp_of_priv : priv -> Sexplib0.Sexp.t
   (**/**)
 
 end
@@ -398,11 +398,11 @@ module Dsa : sig
   end
 
   (**/**)
-  val pub_of_sexp : Sexplib.Sexp.t -> pub
-  val sexp_of_pub : pub -> Sexplib.Sexp.t
+  val pub_of_sexp : Sexplib0.Sexp.t -> pub
+  val sexp_of_pub : pub -> Sexplib0.Sexp.t
 
-  val priv_of_sexp : Sexplib.Sexp.t -> priv
-  val sexp_of_priv : priv -> Sexplib.Sexp.t
+  val priv_of_sexp : Sexplib0.Sexp.t -> priv
+  val sexp_of_priv : priv -> Sexplib0.Sexp.t
   (**/**)
 
 end
@@ -507,11 +507,11 @@ module Dh : sig
   end
 
   (**/**)
-  val group_of_sexp : Sexplib.Sexp.t -> group
-  val sexp_of_group : group -> Sexplib.Sexp.t
+  val group_of_sexp : Sexplib0.Sexp.t -> group
+  val sexp_of_group : group -> Sexplib0.Sexp.t
 
-  val secret_of_sexp : Sexplib.Sexp.t -> secret
-  val sexp_of_secret : secret -> Sexplib.Sexp.t
+  val secret_of_sexp : Sexplib0.Sexp.t -> secret
+  val sexp_of_secret : secret -> Sexplib0.Sexp.t
   (**/**)
 
 end

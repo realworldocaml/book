@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -119,6 +116,16 @@ let grammar : BasicSyntax.grammar =
 
 let () =
   Time.tick "Joining and expanding"
+
+(* ------------------------------------------------------------------------- *)
+
+(* If [--strategy simplified] has been selected, then check that the [error]
+   token is used only at the end of productions (2021/10/31). Also, check
+   that the $syntaxerror keyword is not used. *)
+
+let grammar =
+  CheckErrorTokenUsage.check_grammar grammar;
+  CheckErrorTokenUsage.filter_grammar grammar
 
 (* ------------------------------------------------------------------------- *)
 

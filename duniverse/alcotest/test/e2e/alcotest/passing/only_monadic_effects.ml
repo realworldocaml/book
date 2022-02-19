@@ -22,7 +22,7 @@ module Terminal : Alcotest_engine.Monad.S = struct
   let catch f on_error = match f () with x -> x | exception ex -> on_error ex
 end
 
-module Runner = Alcotest_engine.Core.Make (Alcotest.Unix) (Terminal)
+module Runner = Alcotest_engine.V1.Core.Make (Alcotest.Unix_platform) (Terminal)
 
 let () =
   let (_ : unit Terminal.t) =

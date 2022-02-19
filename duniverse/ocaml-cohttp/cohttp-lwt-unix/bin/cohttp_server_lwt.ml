@@ -128,11 +128,11 @@ let start_server docroot port host index tls () =
   let ctx = Cohttp_lwt_unix.Net.init ~ctx () in
   Server.create ~ctx ~mode config
 
-let lwt_start_server docroot port host index verbose tls =
-  if verbose <> None then (
-    (* activate_debug sets the reporter *)
-    Cohttp_lwt_unix.Debug.activate_debug ();
-    Logs.set_level verbose);
+let lwt_start_server docroot port host index level tls =
+  if not @@ Debug.debug_active () then (
+    Fmt_tty.setup_std_outputs ();
+    Logs.set_level ~all:true level;
+    Logs.set_reporter Debug.default_reporter);
   Lwt_main.run (start_server docroot port host index tls ())
 
 open Cmdliner

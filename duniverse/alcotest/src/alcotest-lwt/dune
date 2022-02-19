@@ -1,4 +1,11 @@
 (library
  (name alcotest_lwt)
  (public_name alcotest-lwt)
- (libraries logs lwt lwt.unix fmt alcotest.engine alcotest))
+ (libraries
+  logs
+  lwt
+  fmt
+  alcotest.engine
+  alcotest
+  (re_export lwt.unix) ;; Unused dependency added for convenience to consumers
+  ))

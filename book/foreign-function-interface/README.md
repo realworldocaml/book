@@ -41,14 +41,14 @@ Once that's done, Ctypes is available via OPAM as usual:
 :::
 
 ```
-$ brew install libffi     # for MacOS X users
+$ brew install libffi     # for macOS users
 $ opam install ctypes ctypes-foreign
 $ utop
 # require "ctypes-foreign" ;;
 ```
 
 You'll also need the Ncurses library for the first example. This comes
-preinstalled on many operating systems such as Mac OS X, and Debian Linux
+preinstalled on many operating systems such as macOS, and Debian Linux
 provides it as the `libncurses5-dev` package.
 
 ## Example: A Terminal Interface
@@ -390,12 +390,12 @@ The first step is to open some of the Ctypes modules:
 We can now create a binding to `time` directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes-foreign.threaded"
-# #require "ctypes.top"
-# open Ctypes
-# open PosixTypes
-# open Foreign
-# let time = foreign "time" (ptr time_t @-> returning time_t)
+# #require "ctypes-foreign.threaded";;
+# #require "ctypes.top";;
+# open Ctypes;;
+# open PosixTypes;;
+# open Foreign;;
+# let time = foreign "time" (ptr time_t @-> returning time_t);;
 val time : time_t Ctypes_static.ptr -> time_t = <fun>
 ```
 
@@ -409,7 +409,7 @@ actually optional, so we'll just pass a null pointer that has been coerced
 into becoming a null pointer to `time_t`:
 
 ```ocaml env=posix
-# let cur_time = time (from_voidp time_t null)
+# let cur_time = time (from_voidp time_t null);;
 ...
 ```
 
@@ -417,7 +417,7 @@ Since we're going to call `time` a few times, let's create a wrapper function
 that passes the null pointer through:
 
 ```ocaml env=posix
-# let time' () = time (from_voidp time_t null)
+# let time' () = time (from_voidp time_t null);;
 val time' : unit -> time_t = <fun>
 ```
 
@@ -449,7 +449,7 @@ string:[memory/allocation for pointers]{.idx}[pointers/allocating typed
 memory for]{.idx}
 
 ```ocaml env=posix
-# let ctime = foreign "ctime" (ptr time_t @-> returning string)
+# let ctime = foreign "ctime" (ptr time_t @-> returning string);;
 val ctime : time_t Ctypes_static.ptr -> string = <fun>
 ```
 
@@ -457,7 +457,7 @@ The binding is continued in the toplevel to add to our growing collection.
 However, we can't just pass the result of `time` to `ctime`:
 
 ```ocaml env=posix
-# ctime (time' ())
+# ctime (time' ());;
 Line 1, characters 7-17:
 Error: This expression has type time_t but an expression was expected of type
          time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
@@ -468,7 +468,7 @@ it by value. We thus need to allocate some memory for the `time_t` and obtain
 its memory address:
 
 ```ocaml env=posix
-# let t_ptr = allocate time_t (time' ())
+# let t_ptr = allocate time_t (time' ());;
 ...
 ```
 
@@ -477,7 +477,7 @@ initial value and it returns a suitably typed pointer. We can now call
 `ctime` passing the pointer as an argument:
 
 ```ocaml env=posix
-# ctime t_ptr
+# ctime t_ptr;;
 ...
 ```
 
@@ -577,9 +577,9 @@ Using Ctypes, we can describe this type as follows in our toplevel,
 continuing on from the previous definitions:
 
 ```ocaml env=posix
-# type timeval
+# type timeval;;
 type timeval
-# let timeval : timeval structure typ = structure "timeval"
+# let timeval : timeval structure typ = structure "timeval";;
 val timeval : timeval structure typ =
   Ctypes_static.Struct
    {Ctypes_static.tag = "timeval";
@@ -603,15 +603,15 @@ to add those next: [fields/adding to structures]{.idx}[structs and
 unions/field addition]{.idx}
 
 ```ocaml env=posix
-# let tv_sec  = field timeval "tv_sec" long
+# let tv_sec  = field timeval "tv_sec" long;;
 val tv_sec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
    foffset = 0; fname = "tv_sec"}
-# let tv_usec = field timeval "tv_usec" long
+# let tv_usec = field timeval "tv_usec" long;;
 val tv_usec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
    foffset = 8; fname = "tv_usec"}
-# seal timeval
+# seal timeval;;
 - : unit = ()
 ```
 
@@ -632,9 +632,9 @@ argument, we also need to define a second structure type: [structs and
 unions/incomplete structure definitions]{.idx}
 
 ```ocaml env=posix
-# type timezone
+# type timezone;;
 type timezone
-# let timezone : timezone structure typ = structure "timezone"
+# let timezone : timezone structure typ = structure "timezone";;
 val timezone : timezone structure typ =
   Ctypes_static.Struct
    {Ctypes_static.tag = "timezone";
@@ -650,7 +650,7 @@ We're finally ready to bind to `gettimeofday` now:
 
 ```ocaml env=posix
 # let gettimeofday = foreign "gettimeofday" ~check_errno:true
-  (ptr timeval @-> ptr timezone @-> returning int)
+  (ptr timeval @-> ptr timezone @-> returning int);;
 val gettimeofday :
   timeval structure Ctypes_static.ptr ->
   timezone structure Ctypes_static.ptr -> int = <fun>
@@ -915,10 +915,10 @@ definition. Since type descriptions are regular values, we can just use
 `qsort`:
 
 ```ocaml env=qsort
-# open Ctypes
-# open PosixTypes
-# open Foreign
-# let compare_t = ptr void @-> ptr void @-> returning int
+# open Ctypes;;
+# open PosixTypes;;
+# open Foreign;;
+# let compare_t = ptr void @-> ptr void @-> returning int;;
 val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
    Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
@@ -926,7 +926,7 @@ val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
      (Ctypes_static.Primitive Ctypes_primitive_types.Int)))
 # let qsort = foreign "qsort"
                 (ptr void @-> size_t @-> size_t @->
-  funptr compare_t @-> returning void)
+  funptr compare_t @-> returning void);;
 val qsort :
   unit Ctypes_static.ptr ->
   size_t ->
@@ -1126,12 +1126,12 @@ You can find more information about the C interface in several places:
   C together from the other side of the boundary, by writing C functions that
   operate on the OCaml representation of values. You can find details of the
   standard interface in the
-  [ OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html)
+  [OCaml manual](https://ocaml.org/manual/intfc.html)
   and in the book
   [*Developing Applications with Objective Caml*](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf).
 
-- Florent Monnier maintains an excellent online
-  [ OCaml](http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html)
+- Florent Monnier maintains an excellent
+  [online tutorial](http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html)
   that provides examples of how to call OCaml functions from C. This covers a
   wide variety of OCaml data types and also more complex callbacks between C
   and OCaml.

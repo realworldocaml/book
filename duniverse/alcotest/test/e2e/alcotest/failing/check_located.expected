@@ -22,6 +22,9 @@ FAIL Expected failure
 
    Expected: `true'
    Received: `false'
+
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -33,6 +36,9 @@ FAIL Expected failure
 
    Expected: `true'
    Received: `false'
+
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -41,6 +47,8 @@ FAIL Expected failure
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
 FAIL Expected failure: expecting Failure(""), got nothing.
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -49,6 +57,8 @@ FAIL Expected failure: expecting Failure(""), got nothing.
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
 FAIL Expected failure: expecting Failure(""), got nothing.
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -57,6 +67,8 @@ FAIL Expected failure: expecting Failure(""), got nothing.
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
 FAIL Expected failure
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -65,6 +77,8 @@ FAIL Expected failure
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
 FAIL Expected failure
+<stacktrace>
+
  ──────────────────────────────────────────────────────────────────────────────
 
 6 failures! in <test-duration>s. 6 tests run.

@@ -1,4 +1,4 @@
-# The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span>
+# The Compiler Frontend: Parsing and Type Checking
 
 Compiling source code into executable programs involves a fairly complex set of
 libraries, linkers, and assemblers. It's important to understand how these fit
@@ -348,11 +348,11 @@ $ ocamldoc -man -d man/man3 doc.ml
 $ man -M man Doc
 ```
 
-You should now have HTML files inside the <em class="filename">html/</em>
+You should now have HTML files inside the `html/`
 directory and also be able to view the UNIX manual pages held in
-<em class="filename">man/man3</em>. There are quite a few comment formats and
+`man/man3`. There are quite a few comment formats and
 options to control the output for the various backends. Refer to the
-[OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html)
+[OCaml manual](https://ocaml.org/manual/native.html)
 for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
 for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
 HTML generator]{.idx}[HTML
@@ -403,14 +403,14 @@ compiler warning.
 
   [@@@warning "-10"]
   let b = Sys.get_argv (); ()
-  end
+  end;;
 Line 4, characters 11-26:
 Warning 10 [non-unit-statement]: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
 
 The warning number in our example is taken from the
-[compiler manual page](https://caml.inria.fr/pub/docs/manual-ocaml/native.html).
+[compiler manual page](https://ocaml.org/manual/native.html).
 In this case, warning 10 emits a message if the expression in a sequence
 doesn't have type `unit`.  The `@@@warning` nodes in the module implementation
 cause the compiler to change its behaviour within the scope of that structure only.
@@ -423,12 +423,12 @@ should not be used in new code:
 # module Planets = struct
     let earth = true
     let pluto = true
-  end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+  end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."];;
 module Planets : sig val earth : bool val pluto : bool end
 # module Planets2016 = struct
     let earth = true
     let pluto = false
-  end
+  end;;
 module Planets2016 : sig val earth : bool val pluto : bool end
 ```
 
@@ -438,12 +438,12 @@ to the newer code.  Now if we try to use the value that has been marked as
 deprecated, the compiler will issue a warning.
 
 ```ocaml env=main
-# let is_pluto_a_planet = Planets.pluto
+# let is_pluto_a_planet = Planets.pluto;;
 Line 1, characters 25-38:
 Alert deprecated: module Planets
 Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
 val is_pluto_a_planet : bool = true
-# let is_pluto_a_planet = Planets2016.pluto
+# let is_pluto_a_planet = Planets2016.pluto;;
 val is_pluto_a_planet : bool = false
 ```
 
@@ -455,12 +455,12 @@ constant literal.
 ```ocaml env=main
 # type program_result =
   | Error of string [@warn_on_literal_pattern]
-  | Exit_code of int
+  | Exit_code of int;;
 type program_result = Error of string | Exit_code of int
 # let exit_with = function
   | Error "It blew up" -> 1
   | Exit_code code -> code
-  | Error _ -> 100
+  | Error _ -> 100;;
 Line 2, characters 11-23:
 Warning 52 [fragile-literal-pattern]: Code should not depend on the actual values of
 this constructor's arguments. They are only for information
@@ -817,7 +817,7 @@ help with future refactoring and debugging.
 #### Enforcing principal typing
 
 The compiler also has a stricter *principal type checking* mode that is
-activated via the <span class="keep-together">-principal</span> flag. This
+activated via the `-principal` flag. This
 warns about risky uses of type information to ensure that the type inference
 has one principal result. A type is considered risky if the success or
 failure of type inference depends on the order in which subexpressions are

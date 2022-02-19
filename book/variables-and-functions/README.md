@@ -39,12 +39,12 @@ of]{.idx}[bindings/scope of]{.idx}[scope]{.idx}
 Here's a simple example.
 
 ```ocaml env=main
-# open Base
-# let x = 3
+# open Base;;
+# let x = 3;;
 val x : int = 3
-# let y = 4
+# let y = 4;;
 val y : int = 4
-# let z = x + y
+# let z = x + y;;
 val z : int = 7
 ```
 
@@ -60,11 +60,11 @@ bound to whatever value was produced by the evaluation of *`expr1`*. Here's
 how it looks in practice.
 
 ```ocaml env=main
-# let languages = "OCaml,Perl,C++,C"
+# let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
 # let dashed_languages =
     let language_list = String.split languages ~on:',' in
-    String.concat ~sep:"-" language_list
+    String.concat ~sep:"-" language_list;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
 
@@ -73,7 +73,7 @@ Note that the scope of `language_list` is just the expression
 as we can see if we try to access it now.
 
 ```ocaml env=main
-# language_list
+# language_list;;
 Line 1, characters 1-14:
 Error: Unbound value language_list
 ```
@@ -83,11 +83,11 @@ an outer scope. So, for example, we could have written the `dashed_languages`
 example as follows. [variables/shadowing of]{.idx}[shadowing]{.idx}
 
 ```ocaml env=main
-# let languages = "OCaml,Perl,C++,C"
+# let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
 # let dashed_languages =
     let languages = String.split languages ~on:',' in
-    String.concat ~sep:"-" languages
+    String.concat ~sep:"-" languages;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
 
@@ -98,7 +98,7 @@ inner scope has closed and the original definition of languages is still
 available.
 
 ```ocaml env=main
-# languages
+# languages;;
 - : string = "OCaml,Perl,C++,C"
 ```
 
@@ -110,9 +110,9 @@ syntax/nested bindings]{.idx}[nested let binding]{.idx}
 # let area_of_ring inner_radius outer_radius =
     let pi = Float.pi in
     let area_of_circle r = pi *. r *. r in
-    area_of_circle outer_radius -. area_of_circle inner_radius
+    area_of_circle outer_radius -. area_of_circle inner_radius;;
 val area_of_ring : float -> float -> float = <fun>
-# area_of_ring 1. 3.
+# area_of_ring 1. 3.;;
 - : float = 25.132741228718345
 ```
 
@@ -125,7 +125,7 @@ would work if we had instead written this purposefully confusing bit of code:
     let pi = Float.pi in
     let area_of_circle r = pi *. r *. r in
     let pi = 0. in
-    area_of_circle outer_radius -. area_of_circle inner_radius
+    area_of_circle outer_radius -. area_of_circle inner_radius;;
 Line 4, characters 9-11:
 Warning 26 [unused-var]: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
@@ -176,7 +176,7 @@ lists.[pattern matching/and let]{.idx}[let syntax/pattern
 matching]{.idx}[variables/pattern matching in]{.idx}
 
 ```ocaml env=main
-# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")]
+# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
@@ -198,7 +198,7 @@ patterns]{.idx}
 ```ocaml env=main
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
-    String.concat ~sep:"," (String.uppercase first :: rest)
+    String.concat ~sep:"," (String.uppercase first :: rest);;
 Lines 2-3, characters 5-60:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
@@ -210,9 +210,9 @@ This case can't really come up in practice, because `String.split` always
 returns a list with at least one element, even when given the empty string.
 
 ```ocaml env=main
-# upcase_first_entry "one,two,three"
+# upcase_first_entry "one,two,three";;
 - : string = "ONE,two,three"
-# upcase_first_entry ""
+# upcase_first_entry "";;
 - : string = ""
 ```
 
@@ -224,7 +224,7 @@ explicitly.
 # let upcase_first_entry line =
     match String.split ~on:',' line with
     | [] -> assert false (* String.split returns at least one element *)
-    | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
+    | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest);;
 val upcase_first_entry : string -> string = <fun>
 ```
 
@@ -251,7 +251,7 @@ as shown here. [fun keyword/anonymous functions]{.idx}[anonymous
 functions]{.idx}[functions/anonymous functions]{.idx}
 
 ```ocaml env=main
-# (fun x -> x + 1)
+# (fun x -> x + 1);;
 - : int -> int = <fun>
 ```
 
@@ -259,7 +259,7 @@ Anonymous functions operate in much the same way as named functions. For
 example, we can apply an anonymous function to an argument.
 
 ```ocaml env=main
-# (fun x -> x + 1) 7
+# (fun x -> x + 1) 7;;
 - : int = 8
 ```
 
@@ -267,16 +267,16 @@ Or pass it to another function. Passing functions to iteration functions like
 `List.map` is probably the most common use case for anonymous functions.
 
 ```ocaml env=main
-# List.map ~f:(fun x -> x + 1) [1;2;3]
+# List.map ~f:(fun x -> x + 1) [1;2;3];;
 - : int list = [2; 3; 4]
 ```
 
 You can even stuff a function into a data structure, like a list.
 
 ```ocaml env=main
-# let transforms = [ String.uppercase; String.lowercase ]
+# let transforms = [ String.uppercase; String.lowercase ];;
 val transforms : (string -> string) list = [<fun>; <fun>]
-# List.map ~f:(fun g -> g "Hello World") transforms
+# List.map ~f:(fun g -> g "Hello World") transforms;;
 - : string list = ["HELLO WORLD"; "hello world"]
 ```
 
@@ -295,9 +295,9 @@ them in data structures. We even name functions in the same way that we name
 other values, by using a `let` binding.
 
 ```ocaml env=main
-# let plusone = (fun x -> x + 1)
+# let plusone = (fun x -> x + 1);;
 val plusone : int -> int = <fun>
-# plusone 3
+# plusone 3;;
 - : int = 4
 ```
 
@@ -306,7 +306,7 @@ it. Thus, the following definition of `plusone` is equivalent to the previous
 definition.
 
 ```ocaml env=main
-# let plusone x = x + 1
+# let plusone x = x + 1;;
 val plusone : int -> int = <fun>
 ```
 
@@ -323,9 +323,9 @@ value passed by the caller. Indeed, the following two expressions are nearly
 equivalent. [let syntax/functions and]{.idx}
 
 ```ocaml env=main
-# (fun x -> x + 1) 7
+# (fun x -> x + 1) 7;;
 - : int = 8
-# let x = 7 in x + 1
+# let x = 7 in x + 1;;
 - : int = 8
 ```
 
@@ -342,9 +342,9 @@ keyword/multi-argument functions]{.idx}[multi-argument
 functions]{.idx}[functions/multi-argument functions]{.idx}
 
 ```ocaml env=main
-# let abs_diff x y = abs (x - y)
+# let abs_diff x y = abs (x - y);;
 val abs_diff : int -> int -> int = <fun>
-# abs_diff 3 4
+# abs_diff 3 4;;
 - : int = 1
 ```
 
@@ -354,7 +354,7 @@ equivalent form, using the `fun` keyword.
 
 ```ocaml env=main
 # let abs_diff =
-  (fun x -> (fun y -> abs (x - y)))
+  (fun x -> (fun y -> abs (x - y)));;
 val abs_diff : int -> int -> int = <fun>
 ```
 
@@ -385,11 +385,11 @@ an example where we create a specialized version of `abs_diff` that measures
 the distance of a given number from `3`.
 
 ```ocaml env=main
-# let dist_from_3 = abs_diff 3
+# let dist_from_3 = abs_diff 3;;
 val dist_from_3 : int -> int = <fun>
-# dist_from_3 8
+# dist_from_3 8;;
 - : int = 5
-# dist_from_3 (-1)
+# dist_from_3 (-1);;
 - : int = 4
 ```
 
@@ -401,7 +401,7 @@ following definition of `abs_diff` is equivalent to the previous one.[fun
 keyword/currying syntax]{.idx}
 
 ```ocaml env=main
-# let abs_diff = (fun x y -> abs (x - y))
+# let abs_diff = (fun x y -> abs (x - y));;
 val abs_diff : int -> int -> int = <fun>
 ```
 
@@ -415,9 +415,9 @@ It's also possible to use the different parts of a tuple as different
 arguments. So, we could write.
 
 ```ocaml env=main
-# let abs_diff (x,y) = abs (x - y)
+# let abs_diff (x,y) = abs (x - y);;
 val abs_diff : int * int -> int = <fun>
-# abs_diff (3,4)
+# abs_diff (3,4);;
 - : int = 1
 ```
 
@@ -452,7 +452,7 @@ the first sequentially repeated element in a list.[rec keyword]{.idx}
       (* only zero or one elements, so no repeats *)
       None
     | x :: y :: tl ->
-      if x = y then Some x else find_first_repeat (y::tl)
+      if x = y then Some x else find_first_repeat (y::tl);;
 val find_first_repeat : int list -> int option = <fun>
 ```
 
@@ -469,12 +469,12 @@ combined with the `and` keyword. Here's a (gratuitously inefficient) example.
 # let rec is_even x =
     if x = 0 then true else is_odd (x - 1)
   and is_odd x =
-    if x = 0 then false else is_even (x - 1)
+    if x = 0 then false else is_even (x - 1);;
 val is_even : int -> bool = <fun>
 val is_odd : int -> bool = <fun>
-# List.map ~f:is_even [0;1;2;3;4;5]
+# List.map ~f:is_even [0;1;2;3;4;5];;
 - : bool list = [true; false; true; false; true; false]
-# List.map ~f:is_odd [0;1;2;3;4;5]
+# List.map ~f:is_odd [0;1;2;3;4;5];;
 - : bool list = [false; true; false; true; false; true]
 ```
 
@@ -501,9 +501,9 @@ operators]{.idx}[prefix operators]{.idx}[functions/prefix and infix
 operators]{.idx}
 
 ```ocaml env=main
-# Int.max 3 4  (* prefix *)
+# Int.max 3 4  (* prefix *);;
 - : int = 4
-# 3 + 4        (* infix  *)
+# 3 + 4        (* infix  *);;
 - : int = 7
 ```
 
@@ -513,9 +513,9 @@ from other functions. In fact, if we put parentheses around an infix
 operator, you can use it as an ordinary prefix function.
 
 ```ocaml env=main
-# (+) 3 4
+# (+) 3 4;;
 - : int = 7
-# List.map ~f:((+) 3) [4;5;6]
+# List.map ~f:((+) 3) [4;5;6];;
 - : int list = [7; 8; 9]
 ```
 
@@ -541,9 +541,9 @@ We can define (or redefine) the meaning of an operator. Here's an
 example of a simple vector-addition operator on `int` pairs.
 
 ```ocaml env=main
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 val ( +! ) : int * int -> int * int -> int * int = <fun>
-# (3,2) +! (-2,4)
+# (3,2) +! (-2,4);;
 - : int * int = (1, 6)
 ```
 
@@ -551,7 +551,7 @@ Note that you have to be careful when dealing with operators containing
 `*`. Consider the following example.
 
 ```ocaml env=main
-# let (***) x y = (x **. y) **. y
+# let (***) x y = (x **. y) **. y;;
 Line 1, characters 18-19:
 Error: This expression has type int but an expression was expected of type
          float
@@ -562,7 +562,7 @@ read as a comment! To get this to work properly, we need to put spaces around
 any operator that begins or ends with `*`.
 
 ```ocaml env=main
-# let ( *** ) x y = (x **. y) **. y
+# let ( *** ) x y = (x **. y) **. y;;
 val ( *** ) : float -> float -> float = <fun>
 ```
 
@@ -603,9 +603,9 @@ operators]{.idx}[operators/subtraction operators]{.idx}[subtraction
 operators]{.idx}[negation operators]{.idx}
 
 ```ocaml env=main
-# Int.max 3 (-4)
+# Int.max 3 (-4);;
 - : int = 3
-# Int.max 3 -4
+# Int.max 3 -4;;
 Line 1, characters 1-10:
 Warning 5 [ignored-partial-application]: this function application is partial,
 maybe some arguments are missing.
@@ -617,7 +617,7 @@ Error: This expression has type int -> int
 Here, OCaml is interpreting the second expression as equivalent to.
 
 ```ocaml env=main
-# (Int.max 3) - 4
+# (Int.max 3) - 4;;
 Line 1, characters 1-12:
 Warning 5 [ignored-partial-application]: this function application is partial,
 maybe some arguments are missing.
@@ -632,7 +632,7 @@ Here's an example of a very useful operator from the standard library whose
 behavior depends critically on the precedence rules described previously.
 
 ```ocaml env=main
-# let (|>) x f = f x
+# let (|>) x f = f x;;
 val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 ```
 
@@ -649,12 +649,12 @@ removing]{.idx}[List.dedup_and_sort]{.idx}[operators/sequencing
 operators]{.idx}
 
 ```ocaml env=main
-# open Stdio
-# let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"
+# open Stdio;;
+# let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
 val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"
 # String.split ~on:':' path
   |> List.dedup_and_sort ~compare:String.compare
-  |> List.iter ~f:print_endline
+  |> List.iter ~f:print_endline;;
 /bin
 /sbin
 /usr/bin
@@ -668,7 +668,7 @@ is a bit more verbose.
 ```ocaml env=main
 # let split_path = String.split ~on:':' path in
   let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
-  List.iter ~f:print_endline deduped_path
+  List.iter ~f:print_endline deduped_path;;
 /bin
 /sbin
 /usr/bin
@@ -682,7 +682,7 @@ element of the list, and the list to iterate over. We can call `List.iter`
 with all its arguments. [partial application]{.idx}
 
 ```ocaml env=main
-# List.iter ~f:print_endline ["Two"; "lines"]
+# List.iter ~f:print_endline ["Two"; "lines"];;
 Two
 lines
 - : unit = ()
@@ -692,7 +692,7 @@ Or, we can pass it just the function argument, leaving us with a function for
 printing out a list of strings.
 
 ```ocaml env=main
-# List.iter ~f:print_endline
+# List.iter ~f:print_endline;;
 - : string list -> unit = <fun>
 ```
 
@@ -703,11 +703,11 @@ left-associative. Let's see what happens if we try using a
 right-associative operator, like (^>).
 
 ```ocaml env=main
-# let (^>) x f = f x
+# let (^>) x f = f x;;
 val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 # String.split ~on:':' path
   ^> List.dedup_and_sort ~compare:String.compare
-  ^> List.iter ~f:print_endline
+  ^> List.iter ~f:print_endline;;
 Line 3, characters 6-32:
 Error: This expression has type string list -> unit
        but an expression was expected of type
@@ -737,9 +737,9 @@ keyword]{.idx}[functions/declaring with function keyword]{.idx}
 ```ocaml env=main
 # let some_or_zero = function
     | Some x -> x
-    | None -> 0
+    | None -> 0;;
 val some_or_zero : int option -> int = <fun>
-# List.map ~f:some_or_zero [Some 3; None; Some 4]
+# List.map ~f:some_or_zero [Some 3; None; Some 4];;
 - : int list = [3; 0; 4]
 ```
 
@@ -750,7 +750,7 @@ This is equivalent to combining an ordinary function definition with a
 # let some_or_zero num_opt =
     match num_opt with
     | Some x -> x
-    | None -> 0
+    | None -> 0;;
 val some_or_zero : int option -> int = <fun>
 ```
 
@@ -761,11 +761,11 @@ with a pattern match on the second argument.
 ```ocaml env=main
 # let some_or_default default = function
     | Some x -> x
-    | None -> default
+    | None -> default;;
 val some_or_default : 'a -> 'a option -> 'a = <fun>
-# some_or_default 3 (Some 5)
+# some_or_default 3 (Some 5);;
 - : int = 5
-# List.map ~f:(some_or_default 100) [Some 3; None; Some 4]
+# List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 - : int list = [3; 100; 4]
 ```
 
@@ -786,7 +786,7 @@ arguments]{.idx}[arguments/labeled arguments]{.idx}[functions/labeled
 arguments]{.idx}
 
 ```ocaml env=main
-# let ratio ~num ~denom = Float.of_int num /. Float.of_int denom
+# let ratio ~num ~denom = Float.of_int num /. Float.of_int denom;;
 val ratio : num:int -> denom:int -> float = <fun>
 ```
 
@@ -794,9 +794,9 @@ We can then provide a labeled argument using a similar convention. As you can
 see, the arguments can be provided in any order.
 
 ```ocaml env=main
-# ratio ~num:3 ~denom:10
+# ratio ~num:3 ~denom:10;;
 - : float = 0.3
-# ratio ~denom:10 ~num:3
+# ratio ~denom:10 ~num:3;;
 - : float = 0.3
 ```
 
@@ -809,7 +809,7 @@ function.[punning]{.idx}[label punning]{.idx}
 ```ocaml env=main
 # let num = 3 in
   let denom = 4 in
-  ratio ~num ~denom
+  ratio ~num ~denom;;
 - : float = 0.75
 ```
 
@@ -871,7 +871,7 @@ This improves the readability of both the signature and of client code that
 ```ocaml env=main
 # String.split ~on:':' path
   |> List.dedup_and_sort ~compare:String.compare
-  |> List.iter ~f:print_endline
+  |> List.iter ~f:print_endline;;
 /bin
 /sbin
 /usr/bin
@@ -893,7 +893,7 @@ to another function. Here's an example.[higher-order functions, and
 labels]{.idx}[functions/higher-order and labels]{.idx}
 
 ```ocaml env=main
-# let apply_to_tuple f (first,second) = f ~first ~second
+# let apply_to_tuple f (first,second) = f ~first ~second;;
 val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 ```
 
@@ -903,7 +903,7 @@ first argument is a function with two labeled arguments, `first` and
 differently to change the order in which the labeled arguments were listed.
 
 ```ocaml env=main
-# let apply_to_tuple_2 f (first,second) = f ~second ~first
+# let apply_to_tuple_2 f (first,second) = f ~second ~first;;
 val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
@@ -911,14 +911,14 @@ It turns out this order matters. In particular, if we define a function that
 has a different order
 
 ```ocaml env=main
-# let divide ~first ~second = first / second
+# let divide ~first ~second = first / second;;
 val divide : first:int -> second:int -> int = <fun>
 ```
 
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
 ```ocaml env=main
-# apply_to_tuple_2 divide (3,4)
+# apply_to_tuple_2 divide (3,4);;
 Line 1, characters 18-24:
 Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
@@ -927,9 +927,9 @@ Error: This expression has type first:int -> second:int -> int
 But, it works smoothly with the original `apply_to_tuple`.
 
 ```ocaml env=main
-# let apply_to_tuple f (first,second) = f ~first ~second
+# let apply_to_tuple f (first,second) = f ~first ~second;;
 val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
-# apply_to_tuple divide (3,4)
+# apply_to_tuple divide (3,4);;
 - : int = 0
 ```
 
@@ -952,11 +952,11 @@ concatenation.
 ```ocaml env=main
 # let concat ?sep x y =
     let sep = match sep with None -> "" | Some s -> s in
-    x ^ sep ^ y
+    x ^ sep ^ y;;
 val concat : ?sep:string -> string -> string -> string = <fun>
-# concat "foo" "bar"             (* without the optional argument *)
+# concat "foo" "bar"             (* without the optional argument *);;
 - : string = "foobar"
-# concat ~sep:":" "foo" "bar"    (* with the optional argument    *)
+# concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;
 - : string = "foo:bar"
 ```
 
@@ -971,7 +971,7 @@ there's an explicit syntax for providing a default value, which allows us to
 write `concat` more concisely.
 
 ```ocaml env=main
-# let concat ?(sep="") x y = x ^ sep ^ y
+# let concat ?(sep="") x y = x ^ sep ^ y;;
 val concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
@@ -1005,9 +1005,9 @@ argument. Thus, the following two lines are equivalent ways of specifying the
 `sep` argument to `concat`.[optional arguments/explicit passing of]{.idx}
 
 ```ocaml env=main
-# concat ~sep:":" "foo" "bar" (* provide the optional argument *)
+# concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
 - : string = "foo:bar"
-# concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *)
+# concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
 - : string = "foo:bar"
 ```
 
@@ -1015,9 +1015,9 @@ And the following two lines are equivalent ways of calling `concat` without
 specifying `sep`.
 
 ```ocaml env=main
-# concat "foo" "bar" (* don't provide the optional argument *)
+# concat "foo" "bar" (* don't provide the optional argument *);;
 - : string = "foobar"
-# concat ?sep:None "foo" "bar" (* explicitly pass `None` *)
+# concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
 - : string = "foobar"
 ```
 
@@ -1028,11 +1028,11 @@ the same as `concat` except that it converts the first string that it's
 passed to uppercase. We could write the function as follows.
 
 ```ocaml env=main
-# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b
+# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b;;
 val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
-# uppercase_concat "foo" "bar"
+# uppercase_concat "foo" "bar";;
 - : string = "FOObar"
-# uppercase_concat "foo" "bar" ~sep:":"
+# uppercase_concat "foo" "bar" ~sep:":";;
 - : string = "FOO:bar"
 ```
 
@@ -1045,7 +1045,7 @@ Instead, we can have `uppercase_concat` simply pass through the optional
 argument to `concat` using the `?` syntax.
 
 ```ocaml env=main
-# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b
+# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b;;
 val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
@@ -1074,7 +1074,7 @@ of]{.idx}
     let base = f ~x ~y in
     let dx = (f ~x:x' ~y -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
+    (dx,dy);;
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
@@ -1112,7 +1112,7 @@ invocations of `f` list the arguments in different orders.
     let base = f ~x ~y in
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
+    (dx,dy);;
 Line 5, characters 15-16:
 Error: This function is applied to arguments
        in an order different from other calls.
@@ -1131,7 +1131,7 @@ annotation on `f`.[type annotations]{.idx}
     let base = f ~x ~y in
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
+    (dx,dy);;
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
@@ -1144,18 +1144,18 @@ Optional arguments can be tricky to think about in the presence of partial
 application. We can of course partially apply the optional argument itself.
 
 ```ocaml env=main
-# let colon_concat = concat ~sep:":"
+# let colon_concat = concat ~sep:":";;
 val colon_concat : string -> string -> string = <fun>
-# colon_concat "a" "b"
+# colon_concat "a" "b";;
 - : string = "a:b"
 ```
 
 But what happens if we partially apply just the first argument?
 
 ```ocaml env=main
-# let prepend_pound = concat "# "
+# let prepend_pound = concat "# ";;
 val prepend_pound : string -> string = <fun>
-# prepend_pound "a BASH comment"
+# prepend_pound "a BASH comment";;
 - : string = "# a BASH comment"
 ```
 
@@ -1163,7 +1163,7 @@ The optional argument `?sep` has now disappeared, or been *erased*. Indeed,
 if we try to pass in that optional argument now, it will be rejected.
 
 ```ocaml env=main
-# prepend_pound "a BASH comment" ~sep:":"
+# prepend_pound "a BASH comment" ~sep:":";;
 Line 1, characters 1-14:
 Error: This function has type Base.String.t -> Base.String.t
        It is applied to too many arguments; maybe you forgot a `;'.
@@ -1178,7 +1178,7 @@ we had instead defined `concat` with the optional argument in the second
 position.
 
 ```ocaml env=main
-# let concat x ?(sep="") y = x ^ sep ^ y
+# let concat x ?(sep="") y = x ^ sep ^ y;;
 val concat : string -> ?sep:string -> string -> string = <fun>
 ```
 
@@ -1186,11 +1186,11 @@ then application of the first argument would not cause the optional argument
 to be erased.
 
 ```ocaml env=main
-# let prepend_pound = concat "# "
+# let prepend_pound = concat "# ";;
 val prepend_pound : ?sep:string -> string -> string = <fun>
-# prepend_pound "a BASH comment"
+# prepend_pound "a BASH comment";;
 - : string = "# a BASH comment"
-# prepend_pound "a BASH comment" ~sep:"--- "
+# prepend_pound "a BASH comment" ~sep:"--- ";;
 - : string = "# --- a BASH comment"
 ```
 
@@ -1200,7 +1200,7 @@ This preserves our ability to pass in optional arguments anywhere on the
 argument list. Thus, we can write.
 
 ```ocaml env=main
-# concat "a" "b" ~sep:"="
+# concat "a" "b" ~sep:"=";;
 - : string = "a=b"
 ```
 
@@ -1208,7 +1208,7 @@ An optional argument that doesn't have any following positional arguments
 can't be erased at all, which leads to a compiler warning.
 
 ```ocaml env=main
-# let concat x y ?(sep="") = x ^ sep ^ y
+# let concat x y ?(sep="") = x ^ sep ^ y;;
 Line 1, characters 18-24:
 Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
@@ -1219,7 +1219,7 @@ is not erased, instead returning a function that expects the `sep` argument
 to be provided.
 
 ```ocaml env=main
-# concat "a" "b"
+# concat "a" "b";;
 - : ?sep:string -> string = <fun>
 ```
 

@@ -13,7 +13,7 @@ let () = Jbuild_plugin.V1.send @@ {|
  (public_name lwt_ppx)
  (synopsis "Lwt PPX syntax extension")
  (modules ppx_lwt)
- (libraries ocaml-compiler-libs.common ppxlib)
+ (libraries ppxlib)
  (ppx_runtime_libraries lwt)
  (kind ppx_rewriter)
  (preprocess (pps ppxlib.metaquot|} ^ bisect_ppx ^ {|))

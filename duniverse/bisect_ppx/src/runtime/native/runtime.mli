@@ -29,6 +29,10 @@
     routed to [stderr], otherwise [BISECT_SILENT] is used to determine a
     filename for this output. The default value is [bisect.log].
 
+    If the environment variable [BISECT_SIGTERM] is set to [true], then
+    the runtime will install a signal handler for [SIGTERM], writing
+    coverage output before terminating.
+
     Because instrumented modules refer to [Bisect], one is advised to link
     this module as one of the first ones of the program.
 
@@ -41,17 +45,18 @@
 val register_file :
   bisect_file:string option ->
   bisect_silent:string option ->
-  string ->
-  point_count:int ->
-  point_definitions:string ->
-    [`Staged of (int -> unit)]
-(** [register_file ~bisect_file ~bisect_silent file ~point_count
+  bisect_sigterm:bool ->
+  filename:string ->
+  points:int array ->
+    [`Visit of (int -> unit)]
+(** [register_file ~bisect_file ~bisect_silent ~bisect_sigterm file ~point_count
     ~point_definitions] indicates that the file [file] is part of the
     application that has been instrumented. [point_definitions] is a serialized
     [Common.point_definition list] giving the locations of all points in the
     file. The returned callback is used to increment visitation counts.
-    [bisect_file] (resp. [bisect_silent]) is a default value for the environment
-    variable [BISECT_FILE] (resp. [BISECT_SILENT]). *)
+    [bisect_file] (resp. [bisect_silent] and [bisect_sigterm]) is a default
+    value for the environment variable [BISECT_FILE] (resp. [BISECT_SIGTERM] and
+    [BISECT_SIGTERM]). *)
 
 val get_coverage_data : unit -> string option
 (** Returns the binary coverage data accumulated by the program so far. This

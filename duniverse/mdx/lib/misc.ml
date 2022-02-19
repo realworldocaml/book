@@ -29,8 +29,7 @@ let pp_pad ppf = function
   | 0 -> ()
   | i -> Fmt.string ppf (String.v ~len:i (fun _ -> ' '))
 
-let pp_lines pp = Fmt.(list ~sep:(unit "\n") pp)
-
+let pp_lines pp = Fmt.(list ~sep:(any "\n") pp)
 let dump_string ppf s = Fmt.pf ppf "%S" s
 
 let read_file file =
@@ -55,4 +54,4 @@ let pp_position ppf lexbuf =
 
 (* TODO: better error reporting *)
 let err lexbuf fmt =
-  Fmt.kstrf (fun str -> Fmt.failwith "%a: %s" pp_position lexbuf str) fmt
+  Fmt.kstr (fun str -> Fmt.failwith "%a: %s" pp_position lexbuf str) fmt

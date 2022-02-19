@@ -17,15 +17,12 @@
 let src = Logs.Src.create "ocaml-mdx"
 
 module Lexer_mdx = Lexer_mdx
-
 module Log = (val Logs.src_log src : Logs.LOG)
-
 module Output = Output
 module Cram = Cram
 module Deprecated = Deprecated
 module Document = Document
 module Toplevel = Toplevel
-module Library = Library
 module Ocaml_delimiter = Ocaml_delimiter
 module Part = Part
 module Block = Block

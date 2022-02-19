@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -157,7 +154,7 @@ let incremental_api grammar () : interface =
     MTSigEnd (
       IIComment "The incremental API." ::
       IIInclude (incremental_engine()) ::
-      ifnlazy Settings.inspection (inspection_api grammar)
+      MList.ifnlazy Settings.inspection (inspection_api grammar)
     )
   ) ::
 
@@ -172,7 +169,7 @@ let incremental_api grammar () : interface =
 let interface grammar = [
   IIFunctor (grammar.parameters,
     monolithic_api grammar @
-    ifnlazy Settings.table (incremental_api grammar)
+    MList.ifnlazy Settings.table (incremental_api grammar)
   )
 ]
 

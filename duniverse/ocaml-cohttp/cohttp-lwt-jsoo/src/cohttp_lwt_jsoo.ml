@@ -46,7 +46,15 @@ let binary_string str =
 let string_of_uint8array u8a offset len =
   String.init len (fun i -> Char.chr (Typed_array.unsafe_get u8a (offset + i)))
 
+module String_io = Cohttp__String_io
+module IO = Cohttp_lwt__String_io
+module Header_io = Cohttp__Header_io.Make (IO)
+
 module Body_builder (P : Params) = struct
+  let src = Logs.Src.create "cohttp.lwt.jsoo" ~doc:"Cohttp Lwt JSOO module"
+
+  module Log = (val Logs.src_log src : Logs.LOG)
+
   (* perform the body transfer in chunks from string. *)
   let chunked_body_str text =
     let body_len = text##.length in
@@ -94,6 +102,30 @@ module Body_builder (P : Params) = struct
         else
           let u8a = new%js Typed_array.uint8Array_fromBuffer ab in
           CLB.of_string (string_of_uint8array u8a 0 ab##.byteLength)
+
+  let construct_body xml =
+    (* construct body *)
+    let b =
+      let respText () =
+        Js.Opt.case xml##.responseText
+          (fun () -> `String (Js.string ""))
+          (fun s -> `String s)
+      in
+      match xhr_response_supported with
+      | true when Js.Opt.return xml##.response == Js.null ->
+          Log.warn (fun m -> m "XHR Response is null; using empty string");
+          `String (Js.string "")
+      | true ->
+          Js.Opt.case
+            (File.CoerceTo.arrayBuffer xml##.response)
+            (fun () ->
+              Log.warn (fun m ->
+                  m "XHR Response is not an arrayBuffer; using responseText");
+              respText ())
+            (fun ab -> `ArrayBuffer ab)
+      | false -> respText ()
+    in
+    get b
 end
 
 module Make_api (X : sig
@@ -151,10 +183,6 @@ struct
   (* ??? *)
 end
 
-module String_io = Cohttp__String_io
-module IO = Cohttp_lwt__String_io
-module Header_io = Cohttp__Header_io.Make (IO)
-
 module Make_client_async (P : Params) = Make_api (struct
   module Response = Cohttp.Response
   module Request = Cohttp.Request
@@ -182,9 +210,7 @@ module Make_client_async (P : Params) = Make_api (struct
             (fun k v ->
               (* some headers lead to errors in the javascript console, should
                  we filter then out here? *)
-              List.iter
-                (fun v -> xml ## (setRequestHeader (Js.string k) (Js.string v)))
-                v)
+              xml ## (setRequestHeader (Js.string k) (Js.string v)))
             headers
     in
 
@@ -193,45 +219,37 @@ module Make_client_async (P : Params) = Make_api (struct
           match xml##.readyState with
           | XmlHttpRequest.DONE -> (
               try
-                (* construct body *)
-                let body =
-                  let b =
-                    let respText () =
-                      Js.Opt.case xml##.responseText
-                        (fun () -> `String (Js.string ""))
-                        (fun s -> `String s)
-                    in
-                    if xhr_response_supported then
-                      Js.Opt.case
-                        (File.CoerceTo.arrayBuffer xml##.response)
-                        (fun () ->
-                          Firebug.console##log
-                            (Js.string
-                               "XHR Response is not an arrayBuffer; using \
-                                responseText");
-                          respText ())
-                        (fun ab -> `ArrayBuffer ab)
-                    else respText ()
-                  in
-                  Bb.get b
-                in
+                let body = Bb.construct_body xml in
+                (* Note; a type checker subversion seems to be possible here (4.01.0).
+                 * Remove the type constraint on Lwt.task above and return any old
+                 * guff here.  It'll compile and crash in the browser! *)
                 (* (re-)construct the response *)
+                let resp_headers = Js.to_string xml##getAllResponseHeaders in
+                let channel = String_io.open_in resp_headers in
                 let response =
-                  let resp_headers = Js.to_string xml##getAllResponseHeaders in
-                  let channel = String_io.open_in resp_headers in
                   Lwt.(
                     Header_io.parse channel >|= fun resp_headers ->
-                    Response.make ~version:`HTTP_1_1
+                    Cohttp.Response.make ~version:`HTTP_1_1
                       ~status:(C.Code.status_of_code xml##.status)
                       ~flush:false (* ??? *)
                       ~encoding:(CLB.transfer_encoding body)
                       ~headers:resp_headers ())
                 in
-                (* Note; a type checker subversion seems to be possible here (4.01.0).
-                 * Remove the type constraint on Lwt.task above and return any old
-                 * guff here.  It'll compile and crash in the browser! *)
                 Lwt.wakeup wake (response, body)
-              with e -> Lwt.wakeup_exn wake e)
+              with
+              | e
+              (* If we exhaust the stack, it is possible that
+                 Lwt.wakeup just aboves marks the promise as
+                 completed, but raises Stack_overflow while
+                 running the promise callbacks. In this case
+                 waking calling wakeup_exn on the already
+                 completed promise would raise an Invalid_arg
+                 exception, so although the promise is in a
+                 really bad state we may as well let the actual
+                 Stack_overflow exception go through. *)
+              when Lwt.state res = Lwt.Sleep
+              ->
+                Lwt.wakeup_exn wake e)
           | _ -> ());
 
     (* perform call *)
@@ -247,7 +265,6 @@ module Make_client_async (P : Params) = Make_api (struct
         Lwt.return (xml##send (Js.Opt.return (Obj.magic bs))))
     >>= fun () ->
     Lwt.on_cancel res (fun () -> xml##abort);
-
     (* unwrap the response *)
     Lwt.(
       res >>= fun (r, b) ->
@@ -278,12 +295,9 @@ module Make_client_sync (P : Params) = Make_api (struct
       | Some headers ->
           C.Header.iter
             (fun k v ->
-              List.iter
-                (* some headers lead to errors in the javascript console, should
-                   we filter then out here? *)
-                  (fun v ->
-                  xml ## (setRequestHeader (Js.string k) (Js.string v)))
-                v)
+              (* some headers lead to errors in the javascript console, should
+                 we filter then out here? *)
+              xml ## (setRequestHeader (Js.string k) (Js.string v)))
             headers
     in
     (* perform call *)
@@ -294,29 +308,7 @@ module Make_client_sync (P : Params) = Make_api (struct
         let bs = binary_string body in
         xml ## (send (Js.Opt.return (Obj.magic bs))))
     >>= fun _body ->
-    (* TODO: FIXME: looks like an indenting or cut-and-pasto here. Check this - avsm *)
-    (* construct body *)
-    let body =
-      let b =
-        let respText () =
-          Js.Opt.case xml##.responseText
-            (fun () -> `String (Js.string ""))
-            (fun s -> `String s)
-        in
-        if xhr_response_supported then
-          Js.Opt.case
-            (File.CoerceTo.arrayBuffer xml##.response)
-            (fun () ->
-              Firebug.console##log
-                (Js.string
-                   "XHR Response is not an arrayBuffer; using responseText");
-              respText ())
-            (fun ab -> `ArrayBuffer ab)
-        else respText ()
-      in
-      Bb.get b
-    in
-
+    let body = Bb.construct_body xml in
     (* (re-)construct the response *)
     let resp_headers = Js.to_string xml##getAllResponseHeaders in
     Header_io.parse (String_io.open_in resp_headers) >>= fun resp_headers ->

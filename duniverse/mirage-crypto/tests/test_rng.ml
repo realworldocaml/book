@@ -1,7 +1,7 @@
 
 let all0 cs =
   let c = ref 0 in
-  let l = Cstruct.len cs in
+  let l = Cstruct.length cs in
   for i = 0 to pred l do
     if Cstruct.get_uint8 cs i = 0 then incr c
   done;

@@ -41,7 +41,7 @@ and t2 = do_something2 in
 bind t1 (fun x -> bind t2 (fun y -> code))
    ]}
 
-   Due to a {{:https://caml.inria.fr/mantis/view.php?id=7758} bug} in the OCaml
+   Due to a {{:https://github.com/ocaml/ocaml/issues/7758} bug} in the OCaml
    parser, if you'd like to put a type constraint on the variable, please write
 
    {[

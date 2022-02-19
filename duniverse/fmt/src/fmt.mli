@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2014 The fmt programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** {!Format} pretty-printer combinators.
@@ -36,7 +35,7 @@ val epr : ('a, Format.formatter, unit) format -> 'a
 val str : ('a, Format.formatter, unit, string) format4 -> 'a
 (** [str] is {!Format.asprintf}.
 
-    {b Note.} When using [str] {!utf_8} and {!style_renderer} are
+    {b Note.} When using [str] {!utf_8} and {!val-style_renderer} are
     always respectively set to [true] and [`None]. See also
     {!str_like}. *)
 
@@ -50,12 +49,13 @@ val kstr :
 
 val str_like :
   Format.formatter -> ('a, Format.formatter, unit, string) format4 -> 'a
-(** [str_like ppf] is like {!str} except its {!utf_8} and {!style_renderer}
+(** [str_like ppf] is like {!str} except its {!utf_8} and {!val-style_renderer}
     settings are those of [ppf]. *)
 
 val with_buffer : ?like:Format.formatter -> Buffer.t -> Format.formatter
-(** [with_buffer ~like b] is a formatter whose {!utf_8} and {!style_renderer}
-    settings are copied from those of {!like} (if provided). *)
+(** [with_buffer ~like b] is a formatter whose {!utf_8} and
+    {!val-style_renderer} settings are copied from those of [like]
+    (if provided). *)
 
 val failwith : ('a, Format.formatter, unit, 'b) format4 -> 'a
 (** [failwith] is [kstr failwith], raises {!Stdlib.Failure} with
@@ -529,7 +529,7 @@ val text_loc : ((int * int) * (int * int)) t
 val one_of : ?empty:unit t -> 'a t -> 'a list t
 (** [one_of ~empty pp_v ppf l] formats according to the length of [l]
     {ul
-    {- [0], formats {!empty} (defaults to {!nop}).}
+    {- [0], formats [empty] (defaults to {!nop}).}
     {- [1], formats the element with [pp_v].}
     {- [2], formats ["either %a or %a"] with the list elements}
     {- [n], formats ["one of %a, ... or %a"] with the list elements}} *)
@@ -624,30 +624,38 @@ val to_to_string : 'a t -> 'a -> string
 (** {1:deprecated Deprecated} *)
 
 val strf : ('a, Format.formatter, unit, string) format4 -> 'a
+[@@ocaml.deprecated]
 (** @deprecated use {!str} instead. *)
 
 val kstrf : (string -> 'a) -> ('b, Format.formatter, unit, 'a) format4 -> 'b
+[@@ocaml.deprecated]
 (** @deprecated use {!kstr} instead. *)
 
 val strf_like :
   Format.formatter -> ('a, Format.formatter, unit, string) format4 -> 'a
+[@@ocaml.deprecated]
 (** @deprecated use {!str_like} instead. *)
 
 val always : (unit, Format.formatter, unit) Stdlib.format -> 'a t
+[@@ocaml.deprecated]
 (** @deprecated use {!any} instead. *)
 
 val unit : (unit, Format.formatter, unit) Stdlib.format -> unit t
+[@@ocaml.deprecated]
 (** @deprecated use {!any}. *)
 
 val prefix : unit t -> 'a t -> 'a t
+[@@ocaml.deprecated]
 (** @deprecated use {!( ++ )}. *)
 
 val suffix : unit t -> 'a t -> 'a t
+[@@ocaml.deprecated]
 (** @deprecated use {!( ++ )}. *)
 
 val styled_unit :
   style -> (unit, Format.formatter, unit) Stdlib.format -> unit t
-(** @deprecated, use [styled s (any fmt)] instead *)
+[@@ocaml.deprecated]
+(** @deprecated use [styled s (any fmt)] instead *)
 
 (** {1:nameconv Naming conventions}
 
@@ -663,7 +671,7 @@ val styled_unit :
        OCaml syntax. These pretty-printers should make it easy to
        inspect and understand values of the given type, they are
        mainly used for quick printf debugging and/or toplevel interaction.
-       See {{!Dump.stdlib} these examples}.}}
+       See {{!Fmt.Dump.stdlib}these examples}.}}
 
     If you are in a situation where making a difference between [dump_ty]
     and [pp_ty] doesn't make sense then use [pp_ty].

@@ -15,7 +15,16 @@
  *
   }}}*)
 
-(** HTTP client for JavaScript using XMLHttpRequest. *)
+(** {1 HTTP client for JavaScript using XMLHttpRequest.}
+
+    The {!Logs} source name for this module's logger is ["cohttp.lwt.jsoo"]. To
+    log the current warnings using the browser's console log, you can write a
+    custom reporter or use:
+
+    {[
+      let reporter = Logs_browser.console_reporter () in
+      Logs.set_reporter reporter
+    ]} *)
 
 (** Configuration parameters for the XmlHttpRequest engines *)
 module type Params = sig

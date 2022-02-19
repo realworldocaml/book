@@ -256,9 +256,9 @@ let bad_fd fd =
     true
 
 let invoke_actions fd map =
-  match try Some(Fd_map.find fd map) with Not_found -> None with
-  | Some actions -> Lwt_sequence.iter_l (fun f -> f ()) actions
-  | None -> ()
+  match Fd_map.find fd map with
+  | exception Not_found -> ()
+  | actions -> Lwt_sequence.iter_l (fun f -> f ()) actions
 
 class virtual select_or_poll_based = object
   inherit abstract

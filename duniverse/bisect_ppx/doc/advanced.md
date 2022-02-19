@@ -9,6 +9,7 @@
 - [Environment variables](#EnvironmentVariables)
   - [Naming the output files](#OutFiles)
   - [Logging](#Logging)
+  - [SIGTERM handling](#SIGTERM)
   - [Setting at compile time](#CompileTime)
 
 
@@ -64,15 +65,12 @@ is it easy to avoid preprocessing it, you can pass the `--exclusions` option to
 the Bisect_ppx preprocessor:
 
 ```
-(preprocess (pps bisect_ppx --exclusions bisect.exclude))
-(preprocessor_deps (file bisect.exclude))
+(instrumentation
+ (backend bisect_ppx --exclusions bisect.exclude)
+ (deps bisect.exclude))
 ```
 
-*Note: this requires using the old Dune integration, not the current
-`(instrumentation.backend ...)`. See the older README for
-[instructions](https://github.com/aantron/bisect_ppx/tree/a4b8cb617dd9b8f33be8da7b8e63390e81b85fb6#Dune)
-on how to use that integration. `bisect.exclude` will be usable with the new
-integration once https://github.com/ocaml/dune/issues/3983 is addressed.*
+This requires Dune 2.9 or later.
 
 Note that the paths to `bisect.exclude` might be different between the
 `preprocess` and `preprocessor_deps` stanzas, because `pps bisect_ppx` looks for
@@ -142,19 +140,26 @@ message. By default, these messages go to a file `bisect.log`. `BISECT_SILENT`
 can be set to `YES` to turn off logging completely. Alternatively, it can be set
 to another filename, or to `ERR` in order to log to `STDERR`.
 
+<a id="SIGTERM"></a>
+#### SIGTERM handling
+If `BISECT_SIGTERM` is set to `yes`, the Bisect runtime will install a SIGTERM
+handler that will write `.coverage` files and exit. This is useful if you have a
+large number of test programs, and they can be killed by another process.
+
 <a id="CompileTime"></a>
 #### Setting at compile time
 
 If your testing environment doesn't allow you to easily specify these
 environment variables at testing time, you can specify default values for them
-at compile time by passing the `--bisect-file` and `--bisect-silent` options to
-the Bisect_ppx instrumenter:
+at compile time by passing the `--bisect-file`, `--bisect-silent`, and/or
+`--bisect-sigterm` options to the Bisect_ppx instrumenter:
 
 ```
 (instrumentation
  (backend bisect_ppx
   --bisect-file /tmp/mycoverage
-  --bisect-silent /tmp/coverage.log))
+  --bisect-silent /tmp/coverage.log
+  --bisect-sigterm))
 ```
 
 If different values are specified in different `dune` files for code that is

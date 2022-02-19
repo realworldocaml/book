@@ -1,0 +1,12 @@
+Testing `test/e2e/alcotest/passing/filter_range.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          main          0   test-0.
+  [OK]          main          1   test-1.
+  [OK]          main          2   test-2.
+  [OK]          main          3   test-3.
+  [SKIP]        main          4   test-4.
+  [OK]          main          5   test-5.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 5 tests run.

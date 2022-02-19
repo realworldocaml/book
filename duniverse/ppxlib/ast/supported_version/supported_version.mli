@@ -4,11 +4,11 @@ type t
 
 val all : t list
 
-(** Return a string such as "4.02" *)
 val to_string : t -> string
+(** Return a string such as "4.02" *)
 
-(** Return an integer such as [402] *)
 val to_int : t -> int
+(** Return an integer such as [402] *)
 
-(** Parse a string as reported by [ocamlc -version] *)
 val of_string : string -> t option
+(** Parse a string as reported by [ocamlc -version] *)

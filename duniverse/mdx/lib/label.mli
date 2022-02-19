@@ -18,7 +18,6 @@ module Relation : sig
   type t = Eq | Neq | Le | Lt | Ge | Gt
 
   val pp : Format.formatter -> t -> unit
-
   val compare : t -> int -> int -> bool
 
   val raw_parse : string -> string * (t * string) option
@@ -41,7 +40,6 @@ type t =
   | Skip
   | Non_det of non_det option
   | Version of Relation.t * Ocaml_version.t
-  | Require_package of string
   | Set of string * string
   | Unset of string
   | Block_kind of block_kind

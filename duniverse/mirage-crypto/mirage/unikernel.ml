@@ -1,7 +1,7 @@
 module Main (R : Mirage_random.S) = struct
   let start _r =
     Logs.info (fun m -> m "using Fortuna, entropy sources: %a"
-                  Fmt.(list ~sep:(unit ", ") Mirage_crypto_rng.Entropy.pp_source)
+                  Fmt.(list ~sep:(any ", ") Mirage_crypto_rng.Entropy.pp_source)
                   (Mirage_crypto_rng.Entropy.sources ())) ;
     Logs.info (fun m -> m "64 byte random:@ %a" Cstruct.hexdump_pp
                   (R.generate 64)) ;

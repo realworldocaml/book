@@ -79,3 +79,24 @@ module ForIntSegment
      : SOLUTION
        with type variable = G.variable
         and type property = P.property option
+
+(**[ForCustomMaps] is a forward data flow analysis that is tuned for greater
+   performance. It internally relies on [CompactQueue], instead of [Queue].
+   Furthermore, instead of relying on a full-fledged implementation of maps
+   as described by [MINIMAL_IMPERATIVE_MAPS], it expects the user to create
+   and initialize two maps [V] and [B] that satisfy the signature [ARRAY].
+   This typically allows the user to choose an efficient, specialized data
+   representation.
+
+   The map [V] must be initialized with [bottom] everywhere.
+   The map [B] must be initialized with [false] everywhere.
+
+   The functor returns nothing: the map [V] is modified in place and can be
+   read by the user after the fixed point has been reached. *)
+
+module ForCustomMaps
+  (P : MINIMAL_SEMI_LATTICE)
+  (G : DATA_FLOW_GRAPH with type property := P.property)
+  (V : ARRAY with type key := G.variable and type value := P.property)
+  (B : ARRAY with type key := G.variable and type value := bool)
+    : sig end

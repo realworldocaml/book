@@ -1,3 +1,59 @@
+Version 2.7.1 (2022-01-19):
+---------------------------
+
+  Bugs fixed
+
+  - Emit point data as arrays instead of as lists, to avoid exposing JavaScript
+    tooling to large AST structures (#395, Jaap Frolich).
+  - Reporter: look for files relative to Dune workspace root (#369).
+
+Version 2.7.0 (2021-11-23):
+---------------------------
+
+  Additions
+
+  - Reports in Cobertura XML format, used on GitLab (#383, Valentin Chaboche).
+  - .coverage file merging (#389, Valentin Chaboche).
+  - Environment variable BISECT_SIGTERM and PPX option --bisect-sigterm, which
+    cause the runtime to write .coverage files upon receiving SIGTERM (#390,
+    Arvid Jakobsson).
+  - bisect-ppx-report: verbose logging now hidden behind new --verbose flag
+    (4b36eb4).
+  - HTML: minimal metadata so that links to reports are decorated by social
+    media platforms (#373).
+
+  Bugs fixed
+
+  - Adapt to change in how ReScript represents -> (#382, reported by Danni
+    Friedland).
+  - Broken installation on pnpm (#381, reported by Tillmann Rendel).
+  - bisect-ppx-report: clearer error messages (#386, 6327d04).
+  - HTML: visit count tooltip not visible on last line of report (#374).
+
+Version 2.6.3 (2021-07-21):
+---------------------------
+
+  Bugs fixed
+
+  - Downgrade binaries to require Ubuntu only 18.04, not 20.04 (6f86646,
+    reported by Peter Piekarczyk).
+
+Version 2.6.2 (2021-07-20):
+---------------------------
+
+  Changes
+
+  - Remove dependency on Marshal from Bisect_common to adapt to upstream changes
+    in ReScript (#376, reported by John Doneth).
+
+Version 2.6.1 (2021-05-04):
+---------------------------
+
+  Bugs fixed
+
+  - Do not instrument React.forwardRef and React.memo (#375, reported by Mathieu
+    Haton).
+
 Version 2.6.0 (2021-02-06):
 ---------------------------
 

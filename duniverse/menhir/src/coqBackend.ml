@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -37,6 +34,15 @@ module Run (T: sig end) = struct
   let print_symbol = function
     | Symbol.N nt -> sprintf "NT %s" (print_nterm nt)
     | Symbol.T t -> sprintf "T %s" (print_term t)
+
+  let print_cell_symbol cell =
+    print_symbol (Invariant.symbol cell)
+
+  let print_word print_cell w =
+    (* Convert to a list whose head is the top of the stack. *)
+    Invariant.fold_left (fun accu cell -> print_cell cell :: accu) [] w
+    |> String.concat "; "
+    |> sprintf "[%s]%%list"
 
   let print_type ty =
     if Settings.coq_no_actions then "unit"
@@ -123,7 +129,7 @@ module Run (T: sig end) = struct
     if List.length constrs > 0 then
       begin
         let iteri f = ignore (List.fold_left (fun k x -> f k x; succ k) 1 constrs) in
-        fprintf f "Program Instance %sNum : %sAlphabet.Numbered %s :=\n" name menhirlib_path name;
+        fprintf f "Global Program Instance %sNum : %sAlphabet.Numbered %s :=\n" name menhirlib_path name;
         fprintf f "  { inj := fun x => match x return _ with";
         iteri (fun k constr -> fprintf f "\n    | %s => %d%%positive" constr k);
         fprintf f "\n    end;\n";
@@ -134,7 +140,7 @@ module Run (T: sig end) = struct
       end
     else
       begin
-        fprintf f "Program Instance %sAlph : %sAlphabet.Alphabet %s :=\n" name menhirlib_path name;
+        fprintf f "Global Program Instance %sAlph : %sAlphabet.Alphabet %s :=\n" name menhirlib_path name;
         fprintf f "  { AlphabetComparable := {| compare := fun x y =>\n";
         fprintf f "      match x, y return comparison with end |};\n";
         fprintf f "    AlphabetEnumerable := {| all_list := []%%list |} }.";
@@ -144,12 +150,12 @@ module Run (T: sig end) = struct
     write_inductive_alphabet f "terminal" (
       Terminal.fold (fun t l -> if Terminal.pseudo t then l else print_term t::l)
         []);
-    fprintf f "Instance TerminalAlph : %sAlphabet.Alphabet terminal := _.\n\n" menhirlib_path
+    fprintf f "Global Instance TerminalAlph : %sAlphabet.Alphabet terminal := _.\n\n" menhirlib_path
 
   let write_nonterminals f =
     write_inductive_alphabet f "nonterminal" (
       Nonterminal.foldx (fun nt l -> (print_nterm nt)::l) []);
-    fprintf f "Instance NonTerminalAlph : %sAlphabet.Alphabet nonterminal := _.\n\n" menhirlib_path
+    fprintf f "Global Instance NonTerminalAlph : %sAlphabet.Alphabet nonterminal := _.\n\n" menhirlib_path
 
   let write_symbol_semantic_type f =
     fprintf f "Definition terminal_semantic_type (t:terminal) : Type:=\n";
@@ -191,7 +197,7 @@ module Run (T: sig end) = struct
   let write_productions f =
     write_inductive_alphabet f "production" (
       Production.foldx (fun prod l -> (print_prod prod)::l) []);
-    fprintf f "Instance ProductionAlph : %sAlphabet.Alphabet production := _.\n\n" menhirlib_path
+    fprintf f "Global Instance ProductionAlph : %sAlphabet.Alphabet production := _.\n\n" menhirlib_path
 
   let write_productions_contents f =
     fprintf f "Definition prod_contents (p:production) :\n";
@@ -271,13 +277,13 @@ module Run (T: sig end) = struct
   let write_nis f =
     write_inductive_alphabet f "noninitstate" (
       lr1_foldx_nonfinal (fun l node -> (print_nis node)::l) []);
-    fprintf f "Instance NonInitStateAlph : %sAlphabet.Alphabet noninitstate := _.\n\n" menhirlib_path
+    fprintf f "Global Instance NonInitStateAlph : %sAlphabet.Alphabet noninitstate := _.\n\n" menhirlib_path
 
   let write_init f =
     write_inductive_alphabet f "initstate" (
       ProductionMap.fold (fun _prod node l ->
         (print_init node)::l) Lr1.entry []);
-    fprintf f "Instance InitStateAlph : %sAlphabet.Alphabet initstate := _.\n\n" menhirlib_path
+    fprintf f "Global Instance InitStateAlph : %sAlphabet.Alphabet initstate := _.\n\n" menhirlib_path
 
   let write_start_nt f =
     fprintf f "Definition start_nt (init:initstate) : nonterminal :=\n";
@@ -342,12 +348,10 @@ module Run (T: sig end) = struct
     fprintf f "Definition past_symb_of_non_init_state (noninitstate:noninitstate) : list symbol :=\n";
     fprintf f "  match noninitstate with\n";
     lr1_iterx_nonfinal (fun node ->
-      let s =
-        String.concat "; " (List.tl
-          (Invariant.fold (fun l _ symb _ -> print_symbol symb::l)
-             [] (Invariant.stack node)))
-      in
-      fprintf f "  | %s => [%s]%%list\n" (print_nis node) s);
+      let w = Invariant.(pop (Short.stack node)) in
+      fprintf f "  | %s => %s\n"
+        (print_nis node) (print_word print_cell_symbol w)
+    );
     fprintf f "  end.\n";
     fprintf f "Extract Constant past_symb_of_non_init_state => \"fun _ -> assert false\".\n\n"
 
@@ -373,16 +377,17 @@ module Run (T: sig end) = struct
            fprintf f "Extract Inlined Constant %s => \"assert false\".\n\n" id;
            id
     in
+    let print_cell_stateset_id cell =
+      get_stateset_id (Invariant.states cell)
+    in
     let b = Buffer.create 256 in
     bprintf b "Definition past_state_of_non_init_state (s:noninitstate) : list (state -> bool) :=\n";
     bprintf b "  match s with\n";
     lr1_iterx_nonfinal (fun node ->
-      let s =
-        String.concat "; "
-          (Invariant.fold (fun accu _ _ states -> get_stateset_id states::accu)
-            [] (Invariant.stack node))
-      in
-      bprintf b "  | %s => [ %s ]%%list\n" (print_nis node) s);
+      let w = Invariant.Short.stack node in
+      bprintf b "  | %s => %s\n"
+        (print_nis node) (print_word print_cell_stateset_id w)
+    );
     bprintf b "  end.\n";
     Buffer.output_buffer f b;
     fprintf f "Extract Constant past_state_of_non_init_state => \"fun _ -> assert false\".\n\n"

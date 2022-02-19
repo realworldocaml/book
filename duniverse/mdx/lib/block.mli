@@ -20,9 +20,7 @@ module Header : sig
   type t = Shell of [ `Sh | `Bash ] | OCaml | Other of string
 
   val pp : Format.formatter -> t -> unit
-
   val of_string : string -> t option
-
   val infer_from_file : string -> t option
 end
 
@@ -78,8 +76,6 @@ type t = {
   loc : Location.t;
   section : section option;
   dir : string option;
-  source_trees : string list;
-  required_packages : string list;
   labels : Label.t list;
   legacy_labels : bool;
   contents : string list;
@@ -139,10 +135,6 @@ val non_det : t -> Label.non_det option
 val directory : t -> string option
 (** [directory t] is the directory where [t] tests should be run. *)
 
-val source_trees : t -> string list
-(** [source_trees t] is the list of extra source-trees to add as
-   dependency of the code-block. *)
-
 val file : t -> string option
 (** [file t] is the name of the file to synchronize [t] with. *)
 
@@ -151,15 +143,6 @@ val set_variables : t -> (string * string) list
 
 val unset_variables : t -> string list
 (** [unset_variable t] is the list of environment variable to unset *)
-
-val explicit_required_packages : t -> string list
-(** [explicit_required_packages t] returns the list of packages explicitly required by the user
-    through require-package labels in the block [t]. *)
-
-val required_libraries : t -> (Library.Set.t, string) Result.result
-(** [required_libraries t] returns the set of libaries that are loaded through [#require]
-    statements in the block [t]. Always returns an empty set if [t] isn't a toplevel
-    block. *)
 
 val skip : t -> bool
 (** [skip t] is true iff [skip] is in the labels of [t]. *)
@@ -176,13 +159,3 @@ val executable_contents : syntax:Syntax.t -> t -> string list
    (e.g. the phrase result is discarded). *)
 
 val is_active : ?section:string -> t -> bool
-
-(** {2 Parsers} *)
-
-val require_from_line : string -> (Library.Set.t, string) Result.result
-(** [require_from_line line] returns the set of libraries imported by the
-    #require statement on [line] or an empty set if [line] is not a require
-    statement. *)
-
-val require_from_lines : string list -> (Library.Set.t, string) Result.result
-(** Same as [require_from_line] but aggregated over several lines *)

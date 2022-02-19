@@ -1,0 +1,24 @@
+name: Crypto
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version: ["4.12.0", "4.11.2", "4.10.2", "4.09.1", "4.08.1"]
+        operating-system: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}

@@ -149,3 +149,32 @@ let _ = Ppxlib.Code_path.to_string_path complex_path
 [%%expect{|
 - : string = "dir/main.ml.Sub.Sub_sub"
 |}]
+
+let _ =
+  let a = gen_symbol () ~prefix:"__prefix__" in
+  let b = gen_symbol () ~prefix:a in
+  a, b
+[%%expect{|
+- : string * string = ("__prefix____001_", "__prefix____002_")
+|}]
+
+let _ =
+  let open Ast_builder.Make (struct let loc = Location.none end) in
+  let params decl =
+    List.map decl.ptype_params ~f:(fun (core_type, _) -> core_type.ptyp_desc)
+  in
+  let decl =
+    type_declaration
+      ~name:{ txt = "t"; loc = Location.none }
+      ~params:(List.init 3 ~f:(fun _ -> ptyp_any, (NoVariance, NoInjectivity)))
+      ~cstrs:[]
+      ~kind:Ptype_abstract
+      ~private_:Public
+      ~manifest:None
+  in
+  params decl, params (name_type_params_in_td decl)
+[%%expect{|
+- : core_type_desc list * core_type_desc list =
+([Ptyp_any; Ptyp_any; Ptyp_any],
+ [Ptyp_var "a__003_"; Ptyp_var "b__004_"; Ptyp_var "c__005_"])
+|}]

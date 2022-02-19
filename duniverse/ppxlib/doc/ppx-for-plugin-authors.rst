@@ -142,7 +142,7 @@ The type of the ``expand`` function is:
 
 If you want to look at a concrete example of extension rewriter you can find one in the
 ``examples/`` folder of the ``ppxlib`` repository
-`here <https://github.com/ocaml-ppx/ppxlib/tree/master/examples/simple-extension-rewriter>`_.
+`here <https://github.com/ocaml-ppx/ppxlib/tree/main/examples/simple-extension-rewriter>`_.
 
 Writing a deriver
 ^^^^^^^^^^^^^^^^^
@@ -210,7 +210,7 @@ deriver in their ``.ml`` files instead of having to type it and maintain it them
 
 If you want to look at a concrete example of deriver you can find one in the
 ``examples/`` folder of the ``ppxlib`` repository
-`here <https://github.com/ocaml-ppx/ppxlib/tree/master/examples/simple-deriver>`_.
+`here <https://github.com/ocaml-ppx/ppxlib/tree/main/examples/simple-deriver>`_.
 
 Metaquot
 --------

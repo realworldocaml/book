@@ -17,8 +17,11 @@
 
 include Pp_intf
 include Pp_intf.Types
+open! Import
 open Model
-open Utils
+
+let map_theta t ~f ppf = f (fun ppf () -> t ppf) ppf ()
+let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
 
 let colour_of_tag = function
   | `Ok -> `Green
@@ -44,6 +47,8 @@ module Make (P : sig
   val stdout_columns : unit -> int option
 end) =
 struct
+  include Types
+
   let terminal_width =
     lazy (match P.stdout_columns () with Some w -> w | None -> 80)
 
@@ -55,7 +60,7 @@ struct
   (* Colours *)
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
-  let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
+  let red ppf fmt = Fmt.kstr (fun str -> red_s ppf str) fmt
   let green_s fmt = color `Green fmt
   let yellow_s fmt = color `Yellow fmt
   let left_gutter = 2
@@ -170,7 +175,6 @@ struct
     | [] -> Fmt.nop
     | x :: _ as xs -> (if show_all then xs else [ x ]) |> Fmt.concat
 
-  let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
   let quoted f = Fmt.(const char '`' ++ f ++ const char '\'')
 
   let with_surrounding_box (type a) (f : a Fmt.t) : a Fmt.t =
@@ -201,9 +205,8 @@ struct
       ppf ()
 
   let pp_full_logs ppf log_dir =
-    Fmt.pf ppf "Full test results in %a.@,"
-      Fmt.(quoted (styled `Cyan string))
-      log_dir
+    Fmt.pf ppf "Full test results in %t.@,"
+      (map_theta ~f:Fmt.(styled `Cyan >> quoted) log_dir)
 
   let pp_summary ppf r =
     let pp_failures ppf = function

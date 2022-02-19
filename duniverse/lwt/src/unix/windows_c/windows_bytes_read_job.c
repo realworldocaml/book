@@ -47,7 +47,12 @@ static value result_bytes_read(struct job_bytes_read *job)
     value result;
     DWORD error = job->error_code;
     caml_remove_generational_global_root(&job->ocaml_buffer);
-    if (error) {
+    if (error == ERROR_BROKEN_PIPE) {
+        /* The write handle for an anonymous pipe has been closed. We match the
+           Unix behavior, and treat this as a zero-read instead of a Unix_error.
+           See OCaml PR #4790. */
+        job->result = 0;
+    } else if (error) {
         lwt_unix_free_job(&job->job);
         win32_maperr(error);
         uerror("bytes_read", Nothing);

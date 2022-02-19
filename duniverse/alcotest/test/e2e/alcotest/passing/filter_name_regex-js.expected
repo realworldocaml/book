@@ -1,0 +1,11 @@
+Testing `test/e2e/alcotest/passing/filter_name_regex.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          basic-run-a            0   Executed.
+  [OK]          basic-run-a            1   Also executed.
+  [SKIP]        basic-run-b            0   Skipped.
+  [OK]          basic-run-c            0   Executed.
+  [SKIP]        complex-run-a          0   Skipped.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 3 tests run.

@@ -1,15 +1,13 @@
-(****************************************************************************)
-(*                                                                          *)
-(*                                   Menhir                                 *)
-(*                                                                          *)
-(*           Jacques-Henri Jourdan, CNRS, LRI, Université Paris Sud         *)
-(*                                                                          *)
-(*  Copyright Inria. All rights reserved. This file is distributed under    *)
-(*  the terms of the GNU Lesser General Public License as published by the  *)
-(*  Free Software Foundation, either version 3 of the License, or (at your  *)
-(*  option) any later version, as described in the file LICENSE.            *)
-(*                                                                          *)
-(****************************************************************************)
+(******************************************************************************)
+(*                                                                            *)
+(*                                   Menhir                                   *)
+(*                                                                            *)
+(*  Copyright Inria and CNRS. All rights reserved. This file is distributed   *)
+(*  under the terms of the GNU Lesser General Public License as published by  *)
+(*  the Free Software Foundation, either version 3 of the License, or (at     *)
+(*  your option) any later version, as described in the file LICENSE.         *)
+(*                                                                            *)
+(******************************************************************************)
 
 From Coq Require Import List Syntax Derive.
 Import ListNotations.
@@ -62,7 +60,7 @@ Fixpoint is_prefix (l1 l2:list symbol) :=
   | _::_, [] => false
   end.
 
-Instance prefix_is_validator l1 l2 : IsValidator (prefix l1 l2) (is_prefix l1 l2).
+Global Instance prefix_is_validator l1 l2 : IsValidator (prefix l1 l2) (is_prefix l1 l2).
 Proof.
   revert l2. induction l1 as [|x1 l1 IH]=>l2 Hpref.
   - constructor.
@@ -127,7 +125,7 @@ Fixpoint is_prefix_pred (l1 l2:list (state->bool)) :=
   | _::_, [] => false
   end.
 
-Instance prefix_pred_is_validator l1 l2 :
+Global Instance prefix_pred_is_validator l1 l2 :
   IsValidator (prefix_pred l1 l2) (is_prefix_pred l1 l2).
 Proof.
   revert l2. induction l1 as [|x1 l1 IH]=>l2 Hpref.
@@ -180,7 +178,7 @@ Fixpoint is_state_valid_after_pop (state:state) (to_pop:list symbol) annot :=
   | p::pl, s::sl => is_state_valid_after_pop state sl pl
   end.
 
-Instance impl_is_state_valid_after_pop_is_validator state sl pl P b :
+Global Instance impl_is_state_valid_after_pop_is_validator state sl pl P b :
   IsValidator P b ->
   IsValidator (state_valid_after_pop state sl pl -> P)
               (if is_state_valid_after_pop state sl pl then b else true).

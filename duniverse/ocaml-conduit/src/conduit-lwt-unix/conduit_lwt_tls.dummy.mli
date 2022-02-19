@@ -22,7 +22,7 @@ module X509 : sig
 
   type authenticator = unit
 
-  val default_authenticator : authenticator
+  val default_authenticator : authenticator Lazy.t
 end
 
 module Client : sig

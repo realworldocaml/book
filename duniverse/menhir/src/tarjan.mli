@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -40,22 +37,32 @@ end) : sig
 
   open G
 
-  (* This function maps each node to a representative element of its strongly connected component. *)
+  (* This function maps each node to a representative element of its
+     component. *)
 
   val representative: node -> node
 
   (* This function maps each representative element to a list of all
-     members of its strongly connected component. Non-representative
-     elements are mapped to an empty list. *)
+     members of its component. Non-representative elements are mapped
+     to an empty list. *)
 
   val scc: node -> node list
 
-  (* [iter action] allows iterating over all strongly connected
-     components. For each component, the [action] function is applied
-     to the representative element and to a (non-empty) list of all
-     elements. *)
+  (* [iter action] iterates over all components. For each component, the
+     [action] function is applied to the component's representative element
+     and to a list of the component's elements. (This must be a nonempty
+     list.) The components are presented in topological order: that is, a
+     component is examined before its successors are examined. *)
 
   val iter: (node -> node list -> unit) -> unit
 
-end
+  (* [rev_topological_iter action] iterates over all components. For each
+     component, the [action] function is applied to the component's
+     representative element and to a list of the component's elements. (This
+     must be a nonempty list.) The components are presented in reverse
+     topological order: that is, a component is examined after its successors
+     have been examined. *)
 
+  val rev_topological_iter: (node -> node list -> unit) -> unit
+
+end

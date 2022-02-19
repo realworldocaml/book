@@ -1,0 +1,17 @@
+(library
+ (name astlib)
+ (public_name ppxlib.astlib)
+ (libraries ocaml-compiler-libs.common compiler-libs.common)
+ (flags -w -9)
+ (preprocess
+  (action
+   (run %{exe:pp/pp.exe} %{read:ast-version} %{input-file}))))
+
+(rule
+ (targets ast-version)
+ (action
+  (run %{ocaml} %{dep:config/gen.ml} %{ocaml_version})))
+
+(cinaps
+ (files *.ml *.mli)
+ (libraries astlib_cinaps_helpers))

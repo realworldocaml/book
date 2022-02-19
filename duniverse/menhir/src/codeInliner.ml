@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -141,6 +138,10 @@ let inline_valdefs (defs : valdef list) : valdef list =
 
   (* Taking a fresh instance of a type scheme. Ugly. *)
 
+  (* At this time, this function does not support locally abstract type
+     schemes. It would be possible to support them, keeping in mind that
+     in that case one must look for [TypApp] nodes, not [TyVar] nodes. *)
+
   let instance =
     let count = ref 0 in
     let fresh tv =
@@ -148,6 +149,7 @@ let inline_valdefs (defs : valdef list) : valdef list =
       tv, Printf.sprintf "freshtv%d" !count
     in
     fun scheme ->
+      assert (not scheme.locally_abstract);
       let mapping = List.map fresh scheme.quantifiers in
       let rec sub typ =
         match typ with
@@ -165,11 +167,16 @@ let inline_valdefs (defs : valdef list) : valdef list =
             TypTuple (List.map sub typs)
         | TypArrow (typ1, typ2) ->
             TypArrow (sub typ1, sub typ2)
+        | TypAs (typ, v) ->
+            (* Not sure what to do here. Anyway, [TypAs] is used only by the
+               new code back-end, which does not use this inliner. *)
+            TypAs (sub typ, v)
       in
       sub scheme.body
   in
 
-  (* Destructuring a type annotation. *)
+  (* Destructuring a type annotation [typ] on a lambda-abstraction
+     [fun formals -> body]. *)
 
   let rec annotate formals body typ =
     match formals, typ with
@@ -298,8 +305,9 @@ let rec inline_structure_item item =
   | SITypeDefs _
   | SIValDefs (false, _)
   | SIStretch _
-  | SIComment _ ->
-      item
+  | SIComment _
+  | SIAttribute _
+      -> item
 
 and inline_structure s =
   List.map inline_structure_item s

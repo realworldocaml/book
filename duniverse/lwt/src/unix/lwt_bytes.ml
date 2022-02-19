@@ -32,9 +32,18 @@ let fill bytes ofs len ch =
 
 [@@@ocaml.warning "-3"]
 external unsafe_blit_from_bytes : Bytes.t -> int -> t -> int -> int -> unit = "lwt_unix_blit_from_bytes" "noalloc"
+external unsafe_blit_from_string : string -> int -> t -> int -> int -> unit = "lwt_unix_blit_from_string" "noalloc"
 external unsafe_blit_to_bytes : t -> int -> Bytes.t -> int -> int -> unit = "lwt_unix_blit_to_bytes" "noalloc"
 external unsafe_blit : t -> int -> t -> int -> int -> unit = "lwt_unix_blit" "noalloc"
 [@@@ocaml.warning "+3"]
+
+let blit_from_string src_buf src_ofs dst_buf dst_ofs len =
+  if (len < 0
+      || src_ofs < 0 || src_ofs > String.length src_buf - len
+      || dst_ofs < 0 || dst_ofs > length dst_buf - len) then
+    invalid_arg "Lwt_bytes.blit_from_string"
+  else
+    unsafe_blit_from_string src_buf src_ofs dst_buf dst_ofs len
 
 let blit_from_bytes src_buf src_ofs dst_buf dst_ofs len =
   if (len < 0

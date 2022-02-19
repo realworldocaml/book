@@ -12,12 +12,20 @@ opam switch create ./ ocaml-base-compiler.4.10.0    # OPTIONAL: install a projec
 opam install -t --deps-only .                       # Install regular and test dependencies
 ```
 
+Optionally, install `js_of_ocaml-compiler` and [nodejs](https://nodejs.org/en/download/package-manager/) to be able
+run the testsuite using `js_of_ocaml`.
+
+```sh
+opam install -t js_of_ocaml-compiler
+```
+
 Now you can work on the project using the standard Dune commands:
 
 ```sh
-dune build    # Build all libraries, executables and tests
-dune test     # Run the test-suite
-dune clean    # Delete all artefacts
+dune build              # Build all libraries, executables and tests
+dune test               # Run the test-suite
+dune build @runtest-js  # Run the test-suite on nodejs (using js_of_ocaml)
+dune clean              # Delete all artefacts
 ```
 
 ## Project structure
@@ -38,7 +46,7 @@ The high-level project structure is as follows:
 │   │   └── utils.ml          # Standard-library extension
 │   │
 │   │                         # Specific backends:
-│   ├── alcotest/             # - Unix-specific API
+│   ├── alcotest/             # - Unix-specific API (compatible with js_of_ocaml)
 │   ├── alcotest-async/       # - Extends `alcotest/` for test-suites using Async concurrency
 │   ├── alcotest-lwt/         # - Extends `alcotest/` for test-suites using Lwt concurrency
 │   └── alcotest-mirage/      # - MirageOS-specific API
@@ -90,7 +98,8 @@ for instance:
 
 - the time taken to run a particular test;
 - randomly-generated unique identifiers;
-- the full path to the repository on disk.
+- the full path to the repository on disk;
+- the executable file extension.
 
 When running an expect test, these portions of the output are sanitized by
 [`strip_randomness.ml`](./test/e2e/strip_randomness.ml) before being compared to

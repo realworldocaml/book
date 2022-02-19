@@ -1,0 +1,14 @@
+Testing `test/e2e/alcotest/failing/compact.ml'.
+This run has ID `<uuid>'.
+
+..F...
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        alpha          2   3.                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+[failure] Error
+Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha.002.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 6 tests run.

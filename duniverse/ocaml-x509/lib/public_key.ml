@@ -1,3 +1,5 @@
+let ( let* ) = Result.bind
+
 type ecdsa = [
   | `P224 of Mirage_crypto_ec.P224.Dsa.pub
   | `P256 of Mirage_crypto_ec.P256.Dsa.pub
@@ -113,10 +115,9 @@ let hashed hash data =
 
 let verify hash ?scheme ~signature key data =
   let open Mirage_crypto_ec in
-  let open Rresult.R.Infix in
   let ok_if_true p = if p then Ok () else Error (`Msg "bad signature") in
   let ecdsa_of_cs cs =
-    Rresult.R.reword_error (function `Parse s -> `Msg s)
+    Result.map_error (function `Parse s -> `Msg s)
       (Algorithm.ecdsa_sig_of_cstruct cs)
   in
   let scheme = Key_type.opt_signature_scheme ?scheme (key_type key) in
@@ -124,11 +125,11 @@ let verify hash ?scheme ~signature key data =
   | `RSA key, `RSA_PSS ->
     let module H = (val (Mirage_crypto.Hash.module_of hash)) in
     let module PSS = Mirage_crypto_pk.Rsa.PSS(H) in
-    hashed hash data >>= fun d ->
+    let* d = hashed hash data in
     ok_if_true (PSS.verify ~key ~signature (`Digest d))
   | `RSA key, `RSA_PKCS1 ->
     let hashp x = x = hash in
-    hashed hash data >>= fun d ->
+    let* d = hashed hash data in
     ok_if_true (Mirage_crypto_pk.Rsa.PKCS1.verify ~hashp ~key ~signature (`Digest d))
   | `ED25519 key, `ED25519 ->
     begin match data with
@@ -136,8 +137,8 @@ let verify hash ?scheme ~signature key data =
       | `Digest _ -> Error (`Msg "Ed25519 only suitable with raw message")
     end
   | #ecdsa as key, `ECDSA ->
-    hashed hash data >>= fun d ->
-    ecdsa_of_cs signature >>= fun s ->
+    let* d = hashed hash data in
+    let* s = ecdsa_of_cs signature in
     ok_if_true
       (match key with
        | `P224 key -> P224.Dsa.verify ~key s d
@@ -151,11 +152,10 @@ let encode_der = Asn.pub_info_to_cstruct
 let decode_der cs = Asn_grammars.err_to_msg (Asn.pub_info_of_cstruct cs)
 
 let decode_pem cs =
-  let open Rresult.R.Infix in
-  Pem.parse cs >>= fun data ->
+  let* data = Pem.parse cs in
   let pks = List.filter (fun (t, _) -> String.equal "PUBLIC KEY" t) data in
-  Pem.foldM (fun (_, k) -> decode_der k) pks >>=
-  Pem.exactly_one ~what:"public key"
+  let* keys = Pem.foldM (fun (_, k) -> decode_der k) pks in
+  Pem.exactly_one ~what:"public key" keys
 
 let encode_pem v =
   Pem.unparse ~tag:"PUBLIC KEY" (encode_der v)

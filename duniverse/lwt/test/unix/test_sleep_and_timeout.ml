@@ -41,7 +41,7 @@ let suite = suite "Lwt_unix sleep and timeout" [
 
     test "with_timeout : no timeout" begin fun () ->
       let duration = 1.0 in
-      Lwt_unix.with_timeout duration Lwt_unix.yield
+      Lwt_unix.with_timeout duration Lwt.pause
       >>= fun () -> Lwt.return_true
     end;
 
@@ -65,32 +65,32 @@ let suite = suite "Lwt_unix sleep and timeout" [
         )
     end;
 
-    test "yield" begin fun () ->
+    test "pause" begin fun () ->
       let bind_callback_ran = ref false in
       Lwt.async (fun () -> Lwt.return () >|= fun () -> bind_callback_ran := true);
       let bind_is_immediate = !bind_callback_ran in
-      let yield_callback_ran = ref false in
-      Lwt.async (fun () -> Lwt_unix.yield () >|= fun () -> yield_callback_ran := true);
-      let yield_is_immediate = !yield_callback_ran in
-      Lwt.return (bind_is_immediate && not yield_is_immediate)
+      let pause_callback_ran = ref false in
+      Lwt.async (fun () -> Lwt.pause () >|= fun () -> pause_callback_ran := true);
+      let pause_is_immediate = !pause_callback_ran in
+      Lwt.return (bind_is_immediate && not pause_is_immediate)
     end;
 
-    test "auto_yield" begin fun () ->
-      let f = Lwt_unix.auto_yield 1.0 in
-      let run_auto_yield () =
+    test "auto_pause" begin fun () ->
+      let f = Lwt_unix.auto_pause 1.0 in
+      let run_auto_pause () =
         let callback_ran = ref false in
         Lwt.async (fun () -> f () >|= fun () -> callback_ran := true);
         !callback_ran;
       in
-      let check1 = run_auto_yield () in
-      let check2 = run_auto_yield () in
+      let check1 = run_auto_pause () in
+      let check2 = run_auto_pause () in
       Lwt_unix.sleep 1.0
       >|= fun () ->
-      let check3 = run_auto_yield () in
-      let check4 = run_auto_yield () in
-      let check5 = run_auto_yield () in
+      let check3 = run_auto_pause () in
+      let check4 = run_auto_pause () in
+      let check5 = run_auto_pause () in
       let check = check1 && check2 && not check3 && check4 && check5 in
-      instrument check "Lwt_unix sleep and timeout: auto_yield: %b %b %b %b %b"
+      instrument check "Lwt_unix sleep and timeout: auto_pause: %b %b %b %b %b"
         check1 check2 check3 check4 check5
     end;
   ]

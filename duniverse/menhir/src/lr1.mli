@@ -1,13 +1,10 @@
 (******************************************************************************)
 (*                                                                            *)
-(*                                   Menhir                                   *)
+(*                                    Menhir                                  *)
 (*                                                                            *)
-(*                       François Pottier, Inria Paris                        *)
-(*              Yann Régis-Gianas, PPS, Université Paris Diderot              *)
-(*                                                                            *)
-(*  Copyright Inria. All rights reserved. This file is distributed under the  *)
-(*  terms of the GNU General Public License version 2, as described in the    *)
-(*  file LICENSE.                                                             *)
+(*   Copyright Inria. All rights reserved. This file is distributed under     *)
+(*   the terms of the GNU General Public License version 2, as described in   *)
+(*   the file LICENSE.                                                        *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -58,6 +55,9 @@ end
 
 module NodeMap : Map.S with type key = node
 
+module ImperativeNodeMap :
+  Fix.MINIMAL_IMPERATIVE_MAPS with type key = node
+
 (* These are the automaton's entry states, indexed by the start productions. *)
 
 val entry: node ProductionMap.t
@@ -80,6 +80,7 @@ val nt_of_entry: node -> Nonterminal.t
 
 val n: int
 val number: node -> int
+val of_number : int -> node
 
 (* A state is printed simply as its number. *)
 
@@ -117,6 +118,14 @@ val is_start_or_exit: node -> Nonterminal.t option
 
 val predecessors: node -> node list
 
+(* A view of the forward edges as a graph. *)
+
+module ForwardEdges : sig
+  type nonrec node = node
+  type label = Symbol.t
+  val foreach_outgoing_edge: node -> (label -> node -> unit) -> unit
+end
+
 (* A view of the backward (reverse) edges as a graph. *)
 
 module BackwardEdges : sig
@@ -137,13 +146,6 @@ val reductions: node -> Production.index list TerminalMap.t
    that one must forbid a default reduction at this node. *)
 
 val forbid_default_reduction: node -> bool
-
-(* [has_beforeend s] tests whether the state [s] can reduce a production
-   whose semantic action uses [$endpos($0)]. Note that [$startpos] and
-   [$endpos] have been expanded away already, so we need not worry about
-   the fact that (in an epsilon production) they expand to [$endpos($0)]. *)
-
-val has_beforeend: node -> bool
 
 (* Computing which terminal symbols a state is willing to act upon.
 
@@ -176,6 +178,28 @@ val iterx: (node -> unit) -> unit
    the edges in the family and [target] is their common target. *)
 
 val targets: ('a -> node list -> node -> 'a) -> 'a -> Symbol.t -> 'a
+
+(* [all_sources symbol] is the set of all sources of edges labeled
+   with [symbol]. *)
+
+val all_sources: Symbol.t -> NodeSet.t
+
+(* [all_targets symbol] is the set of all targets of edges labeled
+   with [symbol]. *)
+
+val all_targets: Symbol.t -> NodeSet.t
+
+(* [ntargets symbol] counts the number of distinct targets of edges
+   labeled with [symbol]. If [symbol] is a non-terminal symbol [nt]
+   then this is the number of branches in the [goto] function
+   associated with [nt]. *)
+
+val ntargets: Symbol.t -> int
+
+(* [single_target symbol] requires [ntargets symbol = 1], and returns
+   the single target of all edges labeled with [symbol]. *)
+
+val single_target: Symbol.t -> node
 
 (* Iteration over all nodes with conflicts. [conflicts f] invokes [f toks
    node] once for every node [node] with a conflict, where [toks] are the
@@ -239,7 +263,7 @@ val extra_reductions: unit -> unit
 (* Information about which productions are reduced and where. *)
 
 (* [production_where prod] is the set of all states [s] where production
-   [prod] might be reduced. It is an error to call this functios before
+   [prod] might be reduced. It is an error to call this function before
    default conflict resolution has taken place. *)
 
 val production_where: Production.index -> NodeSet.t

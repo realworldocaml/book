@@ -8,7 +8,7 @@
     @since 4.1.0 *)
 
 (** This module bridges the gap between
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html} [Format]}
+    {{:https://ocaml.org/api/Format.html} [Format]}
     and {!Lwt}. Although it is not required, it is recommended to use this
     module with the {{:http://erratique.ch/software/fmt} [Fmt]} library.
 
@@ -19,13 +19,13 @@
 val printf : ('a, Format.formatter, unit, unit Lwt.t) format4 -> 'a
 (** Returns a promise that prints on the standard output.
     Similar to
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALprintf}
+    {{:https://ocaml.org/api/Format.html#VALprintf}
     [Format.printf]}. *)
 
 val eprintf : ('a, Format.formatter, unit, unit Lwt.t) format4 -> 'a
 (** Returns a promise that prints on the standard error.
     Similar to
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALeprintf}
+    {{:https://ocaml.org/api/Format.html#VALeprintf}
     [Format.eprintf]}. *)
 
 (** {1 Formatters} *)
@@ -55,14 +55,14 @@ val stderr : formatter
 val make_formatter :
   commit:(unit -> unit Lwt.t) -> fmt:Format.formatter -> unit -> formatter
 (** [make_formatter ~commit ~fmt] creates a new lwt formatter based on the
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#TYPEformatter}
+    {{:https://ocaml.org/api/Format.html#TYPEformatter}
     [Format.formatter]} [fmt]. The [commit] function will be called by the
     printing functions to update the underlying channel.
 *)
 
 val get_formatter : formatter -> Format.formatter
 (** [get_formatter fmt] returns the underlying
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#TYPEformatter}
+    {{:https://ocaml.org/api/Format.html#TYPEformatter}
     [Format.formatter]}. To access the underlying formatter during printing, it
     isvrecommended to use [%t] and [%a].
 *)
@@ -83,7 +83,7 @@ val ikfprintf :
 
 val flush : formatter -> unit Lwt.t
 (** [flush fmt] flushes the formatter (as with
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALpp_print_flush}
+    {{:https://ocaml.org/api/Format.html#VALpp_print_flush}
     [Format.pp_print_flush]}) and
     executes all the printing action on the underlying channel.
 *)

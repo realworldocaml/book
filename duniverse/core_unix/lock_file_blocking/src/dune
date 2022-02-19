@@ -1,0 +1,2 @@
+(library (name core_unix_lock_file_blocking) (public_name core_unix.lock_file_blocking)
+  (libraries core.lock_file_blocking) (preprocess no_preprocessing))

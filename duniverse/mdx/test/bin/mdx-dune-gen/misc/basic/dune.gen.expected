@@ -9,8 +9,13 @@ let run_exn_defaults =
     ]
   in
   let predicates = Predicate.[ byte; toploop ] in
+  let non_deterministic =
+    match Sys.getenv_opt "MDX_RUN_NON_DETERMINISTIC" with
+    | Some _ -> true
+    | None -> false
+  in
   run_exn ~packages ~predicates ~prelude_str:[]
-    ~non_deterministic:false
+    ~non_deterministic
     ~silent_eval:false ~record_backtrace:false
     ~syntax:None ~silent:false
     ~verbose_findlib:false ~section:None

@@ -11,6 +11,7 @@ function tool_tip_element()
 };
 
 var tool_tip = tool_tip_element();
+var html = document.getElementsByTagName("html")[0];
 
 function attach_tool_tip()
 {
@@ -23,7 +24,12 @@ function attach_tool_tip()
         if (element.dataset.count && element.dataset.count !== "0") {
             tool_tip.textContent = element.dataset.count;
             tool_tip.classList.add("visible");
-            tool_tip.style.top = event.clientY + 7 + "px";
+
+            if (event.clientY < html.clientHeight - 48)
+                tool_tip.style.top = event.clientY + 7 + "px";
+            else
+                tool_tip.style.top = event.clientY - 32 + "px";
+
             tool_tip.style.left = event.clientX + 7 + "px";
         }
         else

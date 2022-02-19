@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Astring
@@ -151,7 +150,7 @@ let err_not_found ?search cmd = match Bos_cmd.is_empty cmd with
     | Some dirs ->
         let pp_dir ppf d = Fmt.string ppf (Filename.quote @@ Fpath.to_string d)
         in
-        Fmt.(list ~sep:(Fmt.unit ",@ ") pp_dir) ppf dirs
+        Fmt.(list ~sep:(Fmt.any ",@ ") pp_dir) ppf dirs
     in
     let tool = List.hd @@ Bos_cmd.to_list cmd in
     R.error_msgf "%s: no such command in %a" tool pp_search search
@@ -596,7 +595,7 @@ let run_status ?env ?err ?(quiet = false) cmd =
   | Error _ as e -> e
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

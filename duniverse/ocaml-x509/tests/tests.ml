@@ -6,6 +6,7 @@ let suites =
     "CRL", Crltests.crl_tests ;
     "PKCS12", Pkcs12.tests ;
     "OCSP", Ocsp.tests ;
+    "Private Key", Priv.tests ;
   ]
 
 

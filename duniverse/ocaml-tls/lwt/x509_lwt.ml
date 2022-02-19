@@ -91,19 +91,19 @@ let authenticator ?allowed_hashes ?crls param =
     X509.Authenticator.chain_of_trust ?allowed_hashes ?crls ~time cas
   and dotted_hex_to_cs hex =
     Cstruct.of_hex (String.map (function ':' -> ' ' | x -> x) hex)
-  and fingerp hash fingerprints =
-    X509.Authenticator.server_key_fingerprint ~time ~hash ~fingerprints
-  and cert_fingerp hash fingerprints =
-    X509.Authenticator.server_cert_fingerprint ~time ~hash ~fingerprints
+  and fingerp hash fingerprint =
+    X509.Authenticator.server_key_fingerprint ~time ~hash ~fingerprint
+  and cert_fingerp hash fingerprint =
+    X509.Authenticator.server_cert_fingerprint ~time ~hash ~fingerprint
   in
   match param with
   | `Ca_file path -> certs_of_pem path >>= of_cas
   | `Ca_dir path  -> certs_of_pem_dir path >>= of_cas
-  | `Key_fingerprints (hash, fps) -> return (fingerp hash fps)
-  | `Hex_key_fingerprints (hash, fps) ->
-    let fps = List.map (fun (n, v) -> (n, dotted_hex_to_cs v)) fps in
-    return (fingerp hash fps)
-  | `Cert_fingerprints (hash, fps) -> return (cert_fingerp hash fps)
-  | `Hex_cert_fingerprints (hash, fps) ->
-    let fps = List.map (fun (n, v) -> (n, dotted_hex_to_cs v)) fps in
-    return (cert_fingerp hash fps)
+  | `Key_fingerprint (hash, fp) -> return (fingerp hash fp)
+  | `Hex_key_fingerprint (hash, fp) ->
+    let fp = dotted_hex_to_cs fp in
+    return (fingerp hash fp)
+  | `Cert_fingerprint (hash, fp) -> return (cert_fingerp hash fp)
+  | `Hex_cert_fingerprint (hash, fp) ->
+    let fp = dotted_hex_to_cs fp in
+    return (cert_fingerp hash fp)

@@ -17,16 +17,12 @@
 open Result
 
 type syntax = Cmt | Attr
-
 type part_begin = { indent : string; payload : string }
-
 type t = Part_begin of syntax * part_begin | Part_end
 
 module Regexp = struct
   let marker = Re.str "$MDX"
-
   let spaces = Re.rep1 Re.space
-
   let id = Re.(rep1 (alt [ alnum; char '_'; char '-'; char '=' ]))
 
   let cmt =

@@ -80,6 +80,21 @@ module type IMPERATIVE_MAPS = sig
   val iter: (key -> 'data -> unit) -> 'data t -> unit
 end
 
+(**An instance of the signature [ARRAY] represents one mutable map.
+   There is no type ['data t] and no [create] operation; there exists
+   just one map. Furthermore, the type [value], which corresponds to
+   ['data] in the previous signatures, is fixed.
+
+   The domain of the map never changes:
+   - [set] does not extend the map,
+   - [get] cannot raise [Not_found]. *)
+module type ARRAY = sig
+  type key
+  type value
+  val get : key -> value
+  val set : key -> value -> unit
+end
+
 (* -------------------------------------------------------------------------- *)
 
 (**The signature [PROPERTY] is used by [Fix.Make], the least fixed point
@@ -262,7 +277,10 @@ end
     problem. It is used to describe the input to [Fix.DataFlow]. *)
 
 (**The function [foreach_root] describes the root nodes of the data flow graph
-    as well as the properties associated with them. *)
+   as well as the properties associated with them. [foreach_call contribute]
+   is expected to call [contribute x p] to indicate that [x] is a root and
+   that [p] is a lower bound on the solution at [x]. It is permitted to call
+   [contribute x _] several times at a root [x]. *)
 
 (**The function [foreach_successor] describes the edges of the data flow graph
     as well as the manner in which a property at the source of an edge is

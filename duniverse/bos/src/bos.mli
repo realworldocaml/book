@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2014 The bos programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Basic OS interaction.
@@ -9,9 +8,7 @@
     Open the module to use it, this defines only modules in your scope.
 
     {b WARNING.} This API is still subject to change in the future but
-    feedback and suggestions are welcome on the project's issue tracker.
-
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    feedback and suggestions are welcome on the project's issue tracker. *)
 
 (** {1 Basic types} *)
 
@@ -25,8 +22,8 @@ open Astring
     except [')'] or [',']. In a named string pattern a ["$"] literal
     must be escaped by ["$$"].
 
-    Named string patterns can be used to {{!format}format} strings or
-    to {{!match}match} data. *)
+    Named string patterns can be used to {{!Pat.format}format} strings or
+    to {{!Pat.match}match} data. *)
 module Pat : sig
 
   (** {1:pats Patterns} *)
@@ -50,9 +47,9 @@ module Pat : sig
   (** [equal p p'] is [p = p']. *)
 
   val compare : t -> t -> int
-  (** [compare p p'] is {!Pervasives.compare}[ p p']. *)
+  (** [compare p p'] is {!Stdlib.compare}[ p p']. *)
 
-  val of_string : string -> (t, [> R.msg]) Result.result
+  val of_string : string -> (t, [> R.msg]) result
   (** [of_string s] parses [s] according to the pattern syntax
       (i.e. a literal ['$'] must be represented by ["$$"] in [s]). *)
 
@@ -115,7 +112,7 @@ end
 (** Command lines.
 
     Both command lines and command line fragments using the same are
-    represented with the same {{!t}type}.
+    represented with the same {{!Cmd.t}type}.
 
     When a command line is {{!section:OS.Cmd.run}run}, the first
     element of the line defines the program name and each other
@@ -123,7 +120,7 @@ end
     program's [argv] array: no shell interpretation or any form of
     argument quoting and/or concatenation occurs.
 
-    See {{!ex}examples}. *)
+    See {{!Cmd.ex}examples}. *)
 module Cmd : sig
 
   (** {1:frags Command line fragments} *)
@@ -168,7 +165,7 @@ module Cmd : sig
       name or file path. *)
 
   val get_line_tool : t -> string
-  (** [get_line_tool l] is like {!line_tool} but @raise Invalid_argument
+  (** [get_line_tool l] is like {!line_tool} but raises [Invalid_argument]
       if there's no first element. *)
 
   val line_args : t -> string list
@@ -272,7 +269,7 @@ module OS : sig
       control over unix errors use the lower level functions in
       {!Bos.OS.U}. *)
 
-  type ('a, 'e) result = ('a, [> R.msg] as 'e) Result.result
+  type ('a, 'e) result = ('a, [> R.msg] as 'e) Stdlib.result
   (** The type for OS results. *)
 
   (** {1:env Environment variables and program arguments} *)
@@ -315,7 +312,7 @@ module OS : sig
 
         See the {{!examples}examples}. *)
 
-    type 'a parser = string -> ('a, R.msg) Result.result
+    type 'a parser = string -> ('a, R.msg) result
     (** The type for environment variable value parsers. *)
 
     val parser : string -> (string -> 'a option) -> 'a parser
@@ -410,14 +407,14 @@ let timeout : int option =
 
     val conv :
       ?docv:string ->
-      (string -> ('a, R.msg) Result.result) ->
+      (string -> ('a, R.msg) result) ->
       (Format.formatter -> 'a -> unit) -> 'a conv
     (** [conv ~docv parse print] is an argument converter parsing
         values with [parse] and printing them with [print]. [docv]
         is a documentation meta-variable used in the documentation
         to stand for the argument value, defaults to ["VALUE"]. *)
 
-    val conv_parser : 'a conv -> (string -> ('a, R.msg) Result.result)
+    val conv_parser : 'a conv -> (string -> ('a, R.msg) result)
     (** [conv_parser c] is [c]'s parser. *)
 
     val conv_printer : 'a conv -> (Format.formatter -> 'a -> unit)
@@ -428,7 +425,7 @@ let timeout : int option =
 
     val parser_of_kind_of_string :
       kind:string -> (string -> 'a option) ->
-      (string -> ('a, R.msg) Result.result)
+      (string -> ('a, R.msg) result)
     (** [parser_of_kind_of_string ~kind kind_of_string] is an argument
         parser using the [kind_of_string] function for parsing and
         [kind] for errors (e.g. could be ["an integer"] for an [int]
@@ -519,7 +516,7 @@ let timeout : int option =
         A parsing error occurs either if an option parser failed, if a
         non repeatable option was specified more than once, if there
         is an unknown option on the line, if there is a positional
-        argument on the command line (use {!parse} to parse them).
+        argument on the command line (use {!val-parse} to parse them).
         [usage] is the command argument synopsis (default is
         automatically inferred).  [doc] is a documentation string for
         the program. *)
@@ -571,7 +568,7 @@ let timeout : int option =
         map to the corresponding value of type ['a].
 
         {b Warning.} The type ['a] must be comparable with
-        {!Pervasives.compare}.
+        {!Stdlib.compare}.
 
         @raise Invalid_argument if [l] is empty. *)
 
@@ -592,7 +589,7 @@ let timeout : int option =
 
         To parse a command line, {b first} perform all the option
         {{!queries}queries} and then invoke one of the
-        {{!parse}parsing} functions. Do not invoke any query after
+        {{!section-parse}parsing} functions. Do not invoke any query after
         parsing has been done, this will raise [Invalid_argument].
         This leads to the following program structure:
 {[
@@ -782,8 +779,8 @@ let main () = main ()
         writes and returns end of file on reads. *)
 
     val dash : Fpath.t
-    (** [dash] is [Fpath.v "-"]. This value is used by {{!input}input}
-        and {{!output}output} functions to respectively denote [stdin]
+    (** [dash] is [Fpath.v "-"]. This value is used by {{!section-input}input}
+        and {{!section-output}output} functions to respectively denote [stdin]
         and [stdout].
 
         {b Note.} Representing [stdin] and [stdout] by this path is a
@@ -845,7 +842,7 @@ let main () = main ()
     (** [with_ic file f v] opens [file] as a channel [ic] and returns
         [Ok (f ic v)]. After the function returns (normally or via an
         exception), [ic] is ensured to be closed.  If [file] is
-        {!dash}, [ic] is {!Pervasives.stdin} and not closed when the
+        {!dash}, [ic] is {!Stdlib.stdin} and not closed when the
         function returns. [End_of_file] exceptions raised by [f] are
         turned it into an error message. *)
 
@@ -886,7 +883,7 @@ let main () = main ()
 
     val with_output :
       ?mode:int -> Fpath.t ->
-      (output -> 'a -> (('c, 'd) Result.result as 'b)) -> 'a ->
+      (output -> 'a -> (('c, 'd) result as 'b)) -> 'a ->
       ('b, 'e) result
     (** [with_output file f v] writes the contents of [file] using an
         output [o] given to [f] and returns [Ok (f o v)]. [file] is
@@ -896,20 +893,20 @@ let main () = main ()
 
     val with_oc :
       ?mode:int -> Fpath.t ->
-      (out_channel -> 'a -> (('c, 'd) Result.result as 'b)) ->
+      (out_channel -> 'a -> (('c, 'd) result as 'b)) ->
       'a -> ('b, 'e) result
     (** [with_oc file f v] opens [file] as a channel [oc] and returns
         [Ok (f oc v)]. After the function returns (normally or via an
         exception) [oc] is closed. [file] is not written if [f]
         returns an error. If [file] is {!dash}, [oc] is
-        {!Pervasives.stdout} and not closed when the function
+        {!Stdlib.stdout} and not closed when the function
         returns. *)
 
     val write :
       ?mode:int -> Fpath.t -> string -> (unit, 'e) result
     (** [write file content] outputs [content] to [file]. If [file]
-        is {!dash}, writes to {!Pervasives.stdout}. If an error is
-        returned [file] is left untouched except if {!Pervasives.stdout}
+        is {!dash}, writes to {!Stdlib.stdout}. If an error is
+        returned [file] is left untouched except if {!Stdlib.stdout}
         is written. *)
 
     val writef :
@@ -937,7 +934,7 @@ let main () = main ()
         (defaults to {!Dir.default_tmp}) named according to [pat] and
         created with permissions [mode] (defaults to [0o600] only
         readable and writable by the user). The file is deleted at the
-        end of program execution using a {!Pervasives.at_exit}
+        end of program execution using a {!Stdlib.at_exit}
         handler.
 
         {b Warning.} If you want to write to the file, using
@@ -986,15 +983,19 @@ end
 
     val create :
       ?path:bool -> ?mode:int -> Fpath.t -> (bool, 'e) result
-    (** [create ~path ~mode dir] creates, if needed, the directory [dir] with
-        file permission [mode] (defaults [0o755] readable and traversable
-        by everyone, writeable by the user). If [path] is [true]
-        (default) intermediate directories are created with the same
-        [mode], otherwise missing intermediate directories lead to an
-        error. The result is [false] if [dir] already exists.
-
-        {b Note.} The mode of existing directories, including
-        [dir] if this is the case is kept unchanged. *)
+    (** [create ~path ~mode dir] creates, if needed, the directory
+        [dir] with file permission [mode] (defaults [0o755] readable
+        and traversable by everyone, writeable by the user). If [path]
+        is [true] (default) intermediate directories are created with
+        the same [mode], otherwise missing intermediate directories
+        lead to an error. The result is:
+        {ul
+        {- [Ok true] if [dir] did not exist and was created.}
+        {- [Ok false] if [dir] did exist as (possibly a symlink to) a
+           directory. In this case the mode of [dir] and any other
+           directory is kept unchanged.}
+        {- [Error _] otherwise and in particular if [dir] exists
+           as a non-directory}} *)
 
     val delete :
       ?must_exist:bool -> ?recurse:bool -> Fpath.t ->
@@ -1017,11 +1018,11 @@ end
       ?err:'b Path.fold_error -> ?dotfiles:bool -> ?elements:Path.elements ->
       ?traverse:Path.traverse -> (Fpath.t -> 'a -> 'a) -> 'a -> Fpath.t ->
       ('a, 'e) result
-    (** [contents_fold err dotfiles elements traverse f acc d] is:
+    (** [fold_contents err dotfiles elements traverse f acc d] is:
 {[
 contents d >>= Path.fold err dotfiles elements traverse f acc
 ]}
-        For more details see {!Path.fold}. *)
+        For more details see {!Path.section-fold}. *)
 
     (** {1:user_current User and current working directory} *)
 
@@ -1058,7 +1059,7 @@ contents d >>= Path.fold err dotfiles elements traverse f acc
         with permissions [mode] (defaults to [0o700] only readable and
         writable by the user). The directory path and its content is
         deleted at the end of program execution using a
-        {!Pervasives.at_exit} handler. *)
+        {!Stdlib.at_exit} handler. *)
 
     val with_tmp :
       ?mode:int -> ?dir:Fpath.t -> tmp_name_pat -> (Fpath.t -> 'a -> 'b) ->
@@ -1112,7 +1113,7 @@ contents d >>= Path.fold err dotfiles elements traverse f acc
       procedure if absent. *)
 
     val find_tool : ?search:Fpath.t list -> Cmd.t -> (Fpath.t option, 'e) result
-    (** [find_tool ~search cmd] is the path to the {{!Cmd.line_tool}tool}
+    (** [find_tool ~search cmd] is the path to the {{!Bos.Cmd.line_tool}tool}
         of [cmd] as found by the tool search procedure in [search]. *)
 
     val get_tool : ?search:Fpath.t list -> Cmd.t -> (Fpath.t, 'e) result
@@ -1140,7 +1141,7 @@ contents d >>= Path.fold err dotfiles elements traverse f acc
     (** {1:run Command runs}
 
         The following set of combinators are designed to be used with
-        {!Pervasives.(|>)} operator. See a few {{!ex}examples}.
+        {!Stdlib.(|>)} operator. See a few {{!ex}examples}.
 
         {b WARNING Windows.} The [~append:true] options for appending
         to files are unsupported on Windows.
@@ -1217,7 +1218,7 @@ contents d >>= Path.fold err dotfiles elements traverse f acc
         {{!out_run_in}pipelined} runs, the reported status is the one
         of the first failing run in the pipeline.
 
-        {b Warning.} When a value of type {!run_out} has been "consumed"
+        {b Warning.} When a value of type {!type-run_out} has been "consumed"
         with one of the following functions it cannot be reused. *)
 
     type run_out
@@ -1233,7 +1234,8 @@ contents d >>= Path.fold err dotfiles elements traverse f acc
       ?trim:bool -> run_out -> (string list * run_status, 'e) result
     (** [out_lines] is like {!out_string} but the result is splitted on
         newlines (['\n']). If the standard output is empty then the empty
-        list is returned. *)
+        list is returned. Note that [trim] is applied before lines are
+        splitted, it is not applied on the individual lines. *)
 
     val out_file :
       ?append:bool -> Fpath.t -> run_out -> (unit * run_status, 'e) result
@@ -1352,18 +1354,18 @@ let send_email mail =
 
     (** {1 Error handling} *)
 
-    type 'a result = ('a, [`Unix of Unix.error]) Result.result
+    type 'a result = ('a, [`Unix of Unix.error]) Stdlib.result
     (** The type for Unix results. *)
 
     val pp_error : Format.formatter -> [`Unix of Unix.error] -> unit
     (** [pp_error ppf e] prints [e] on [ppf]. *)
 
     val open_error :
-      'a result -> ('a, [> `Unix of Unix.error]) Result.result
+      'a result -> ('a, [> `Unix of Unix.error]) Stdlib.result
     (** [open_error r] allows to combine a closed unix error
         variant with other variants. *)
 
-    val error_to_msg : 'a result -> ('a, [> R.msg]) Result.result
+    val error_to_msg : 'a result -> ('a, [> R.msg]) Stdlib.result
     (** [error_to_msg r] converts unix errors in [r] to an error message. *)
 
     (** {1 Wrapping {!Unix} calls} *)
@@ -1413,7 +1415,7 @@ let send_email mail =
 end
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli
+   Copyright (c) 2014 The bos programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

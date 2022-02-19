@@ -15,14 +15,8 @@
  *)
 
 include Core_intf
+open! Import
 open Model
-open Utils
-
-module IntSet = Set.Make (struct
-  type t = int
-
-  let compare = (compare : int -> int -> int)
-end)
 
 exception Check_error of unit Fmt.t
 
@@ -44,8 +38,7 @@ let () =
     | Check_error err -> Some (Lazy.force print_error err)
     | _ -> None)
 
-module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
-struct
+module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module P = P (M)
 
   module Pp = struct
@@ -55,21 +48,8 @@ struct
 
   module M = Monad.Extend (M)
   module Suite = Suite (M)
-  include M.Infix
-
-  (** Take a string path and collapse a leading [$HOME] path segment to [~]. *)
-  let maybe_collapse_home path =
-    match P.home_directory () with
-    | Error _ -> path
-    | Ok home -> (
-        (* Astring doesn't have [cut_prefix]. *)
-        match String.is_prefix ~affix:home path with
-        | false -> path
-        | true ->
-            let tail =
-              String.Sub.to_string (String.sub ~start:(String.length home) path)
-            in
-            "~" ^ tail)
+  module Log_trap = Log_trap.Make (M) (P)
+  include M.Syntax
 
   (* Types *)
   type return = unit M.t
@@ -95,12 +75,23 @@ struct
         (** Longest test label in the suite, in UTF-8 characters. *)
     config : Config.t;
     run_id : string;
+    log_trap : Log_trap.t;
   }
 
-  let empty ~config ~suite_name =
+  let gen_run_id =
+    let random_state = lazy (Random.State.make_self_init ()) in
+    let random_hex _ =
+      let state = Lazy.force random_state in
+      match Random.State.int state 36 with
+      | n when n < 10 -> Char.chr (n + Char.code '0')
+      | n -> Char.chr (n - 10 + Char.code 'A')
+    in
+    fun () -> String.v ~len:8 random_hex
+
+  let empty ~config ~trap_logs ~suite_name:unescaped_name =
     let errors = [] in
     let suite =
-      match Suite.v ~name:suite_name with
+      match Suite.v ~name:unescaped_name with
       | Ok s -> s
       | Error `Empty_name ->
           Pp.user_error
@@ -108,8 +99,15 @@ struct
              to `run`."
     in
     let max_label = 0 in
-    let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
-    { suite; errors; max_label; config; run_id }
+    let run_id = gen_run_id () in
+    let log_trap =
+      match trap_logs with
+      | false -> Log_trap.inactive
+      | true ->
+          Log_trap.active ~root:config#log_dir ~uuid:run_id
+            ~suite_name:(Suite.name suite)
+    in
+    { suite; errors; max_label; config; run_id; log_trap }
 
   let compare_speed_level s1 s2 =
     match (s1, s2) with
@@ -117,55 +115,8 @@ struct
     | `Quick, _ -> 1
     | _, `Quick -> -1
 
-  (*
-     Reverse a list, taking at most the first n elements of the original
-     list.
-  *)
-  let rev_head n l =
-    let rec aux acc n l =
-      match l with
-      | x :: xs -> if n > 0 then aux (x :: acc) (n - 1) xs else acc
-      | [] -> acc
-    in
-    aux [] n l
-
-  (*
-     Show the last lines of a log file.
-     The goal is to not clutter up the console output.
-  *)
-  let read_tail max_lines ic =
-    let rev_lines = ref [] in
-    try
-      while true do
-        rev_lines := input_line ic :: !rev_lines
-      done;
-      assert false
-    with End_of_file ->
-      let selected_lines =
-        match max_lines with
-        | `Unlimited -> List.rev !rev_lines
-        | `Limit n -> rev_head n !rev_lines
-      in
-      let omitted_count = List.length !rev_lines - List.length selected_lines in
-      let display_lines =
-        if omitted_count = 0 then selected_lines
-        else
-          Fmt.strf "... (omitting %i line%a)" omitted_count Pp.pp_plural
-            omitted_count
-          :: selected_lines
-      in
-      String.concat ~sep:"\n" display_lines ^ "\n"
-
-  let log_dir ~via_symlink t =
-    let via_symlink =
-      (* We don't create symlinks on Windows. *)
-      via_symlink && not Sys.win32
-    in
-    Filename.concat t.config#log_dir
-      (if via_symlink then Suite.name t.suite else t.run_id)
-
   let pp_suite_results t =
-    let log_dir = log_dir ~via_symlink:true t |> maybe_collapse_home in
+    let log_dir = Log_trap.pp_current_run_dir t.log_trap in
     Pp.suite_results ~log_dir t.config
 
   let pp_event ~isatty ~prior_error ~tests_so_far t =
@@ -183,33 +134,33 @@ struct
     Pp.info ~max_label:t.max_label
       ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
 
-  let output_file t tname =
-    Filename.concat (log_dir ~via_symlink:true t) (Test_name.file tname)
-
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
-  let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
+  let red ppf fmt = Fmt.kstr (fun str -> red_s ppf str) fmt
 
-  let pp_error ~doc_of_test_name ~output_file ~max_label cfg ppf e =
+  let pp_error t ppf e =
     let path, error_fmt =
       match e with `Error (p, f) -> (p, f) | `Exn (p, _, f) -> (p, f)
     in
     let pp_logs ppf () =
-      let filename = output_file path in
-      if cfg#verbose || not (Sys.file_exists filename) then
-        Fmt.pf ppf "%a@," error_fmt ()
-      else
-        let file = open_in filename in
-        let output = read_tail cfg#tail_errors file in
-        close_in file;
-        Fmt.pf ppf "%s@,Logs saved to %a.@," output
-          Fmt.(Pp.quoted (styled `Cyan string))
-          (maybe_collapse_home filename)
+      let pp_logs =
+        Log_trap.recover_logs ~tail:t.config#tail_errors t.log_trap path
+      in
+      match (t.config#verbose, pp_logs) with
+      | true, _ | _, None -> Fmt.pf ppf "%a@," error_fmt ()
+      | false, Some pp_logs ->
+          let pp_log_dir =
+            Pp.map_theta
+              ~f:(fun s -> Pp.quoted (Fmt.styled `Cyan s))
+              (Log_trap.pp_log_location t.log_trap path)
+          in
+          Fmt.pf ppf "%tLogs saved to %t.@," pp_logs pp_log_dir
     in
     Fmt.(
       Pp.with_surrounding_box
         (const
-           (Pp.event_line ~margins:3 ~max_label ~doc_of_test_name)
+           (Pp.event_line ~margins:3 ~max_label:t.max_label
+              ~doc_of_test_name:(Suite.doc_of_test_name t.suite))
            (`Result (path, e)))
       ++ pp_logs
       ++ Pp.horizontal_rule
@@ -239,37 +190,51 @@ struct
   type running_state = { tests_so_far : int; first_error : int option }
   (** State that is kept during the test executions. *)
 
-  let perform_test t args { tests_so_far; first_error } suite =
+  let with_captured_logs t name fn args =
+    if t.config#verbose then fn args
+    else
+      Log_trap.with_captured_logs t.log_trap name
+        (fun () ->
+          (* When capturing the logs of a test, also add the result of the test
+             at the end. *)
+          let+ result = fn args in
+          Pp.rresult_error Fmt.stdout result;
+          result)
+        ()
+
+  let perform_test t args { tests_so_far; first_error }
+      (test : _ Suite.test_case) =
     let open Suite in
-    let test = suite.fn in
     let print_event =
       pp_event t
         ~prior_error:(Option.is_some first_error)
         ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
     in
-    M.return () >>= fun () ->
-    print_event (`Start suite.name);
-    Fmt.(flush stdout) () (* Show event before any test stderr *);
-    test args >|= fun result ->
-    (* Store errors *)
-    let errored : bool =
-      let pp_error =
-        pp_error
-          ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
-          ~output_file:(output_file t) ~max_label:t.max_label t.config
-      in
-      let error, errored =
-        match result with
-        | (`Error _ | `Exn (_, _, _)) as e -> ([ Fmt.const pp_error e ], true)
-        | _ -> ([], false)
-      in
-      t.errors <- error @ t.errors;
-      errored
+    let* () = M.return () in
+    print_event (`Start test.name);
+    let+ result, errored =
+      match test.fn with
+      | `Skip -> M.return (`Skip, false)
+      | `Run fn ->
+          Fmt.(flush stdout) () (* Show event before any test stderr *);
+          let+ result = with_captured_logs t test.name fn args in
+          (* Store errors *)
+          let errored : bool =
+            let error, errored =
+              match result with
+              | (`Error _ | `Exn (_, _, _)) as e ->
+                  ([ Fmt.const (pp_error t) e ], true)
+              | _ -> ([], false)
+            in
+            t.errors <- error @ t.errors;
+            errored
+          in
+          (* Show any remaining test output before the event *)
+          Fmt.(flush stdout ());
+          Fmt.(flush stderr ());
+          (result, errored)
     in
-    (* Show any remaining test output before the event *)
-    Fmt.(flush stdout ());
-    Fmt.(flush stderr ());
-    print_event (`Result (suite.name, result));
+    print_event (`Result (test.name, result));
     let error = if errored then Some tests_so_far else None in
     let state =
       {
@@ -283,14 +248,15 @@ struct
     let currently_bailing acc =
       Option.is_some acc.first_error && t.config#bail
     in
-    M.List.fold_map_s
-      (fun acc test ->
-        if currently_bailing acc then
-          M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
-        else perform_test t args acc test)
-      { tests_so_far = 0; first_error = None }
-      tests
-    >|= fun (state, test_results) ->
+    let+ state, test_results =
+      M.List.fold_map_s
+        (fun acc test ->
+          if currently_bailing acc then
+            M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
+          else perform_test t args acc test)
+        { tests_so_far = 0; first_error = None }
+        tests
+    in
     let () =
       if currently_bailing state then
         match state.tests_so_far - Option.get_exn state.first_error - 1 with
@@ -303,28 +269,17 @@ struct
     in
     test_results
 
-  let skip_fun _ = M.return `Skip
-  let skip_label test_case = Suite.{ test_case with fn = skip_fun }
+  let skip_label test_case = Suite.{ test_case with fn = `Skip }
 
-  let filter_test_case (regexp, cases) =
-    let regexp_match =
-      match regexp with
-      | None -> fun _ -> true
-      | Some r -> fun n -> Re.execp r n
-    in
-    let index_match =
-      match cases with
-      | None -> fun _ -> true
-      | Some ints ->
-          let set = IntSet.of_list ints in
-          fun i -> IntSet.mem i set
-    in
-    fun test_case ->
-      let name, index =
-        let tn = test_case.Suite.name in
-        Test_name.(name tn, index tn)
-      in
-      regexp_match name && index_match index
+  let filter_test_case p test_case =
+    match p with
+    | None -> true
+    | Some p -> (
+        let name, index =
+          let tn = test_case.Suite.name in
+          Test_name.(Safe_string.to_unescaped_string (name tn), index tn)
+        in
+        match p ~name ~index with `Run -> true | `Skip -> false)
 
   let filter_test_cases ~subst path test_cases =
     let filter_test_case = filter_test_case path in
@@ -334,34 +289,22 @@ struct
            else if subst then Some (skip_label tc)
            else None)
 
-  let redirect_test_output t test_case =
-    let output_file = output_file t test_case.Suite.name in
-    let fn args =
-      P.with_redirect output_file (fun () ->
-          test_case.fn args >|= fun result ->
-          Pp.rresult_error Fmt.stdout result;
-          result)
-    in
-    { test_case with fn }
-
   let select_speed speed_level (test_case : 'a Suite.test_case as 'tc) : 'tc =
     if compare_speed_level test_case.speed_level speed_level >= 0 then test_case
-    else Suite.{ test_case with fn = skip_fun }
+    else Suite.{ test_case with fn = `Skip }
 
   let result t test args =
-    P.prepare ~base:t.config#log_dir
-      ~dir:(log_dir ~via_symlink:false t)
-      ~name:(Suite.name t.suite);
+    let initial_backtrace_status = Printexc.backtrace_status () in
+    if t.config#record_backtrace then Printexc.record_backtrace true;
     let start_time = P.time () in
-    let test =
-      if t.config#verbose then test else List.map (redirect_test_output t) test
-    in
     let speed_level = if t.config#quick_only then `Quick else `Slow in
     let test = List.map (select_speed speed_level) test in
-    perform_tests t test args >|= fun results ->
+    let+ results = perform_tests t test args in
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter Run_result.is_failure results) in
+    if t.config#record_backtrace then
+      Printexc.record_backtrace initial_backtrace_status;
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
@@ -381,7 +324,7 @@ struct
             else doc ^ "."
           in
           let test a = protect_test path test a in
-          (path, doc, speed, test))
+          (path, doc, speed, `Run test))
         ts
     in
     let suite =
@@ -401,15 +344,17 @@ struct
     let filter = t.config#filter in
     let suite = Suite.tests t.suite in
     let is_empty = filter_test_cases ~subst:false filter suite = [] in
-    (if is_empty && filter <> (None, None) then (
-     Fmt.(pf stderr)
-       "%a\n" red
-       "Invalid request (no tests to run, filter skipped everything)!";
-     exit 1)
-    else
-      let tests = filter_test_cases ~subst:true filter suite in
-      result t tests args)
-    >|= fun result ->
+    let+ result =
+      if is_empty && Option.is_some filter then (
+        flush_all ();
+        Fmt.(pf stderr)
+          "%a\n" red
+          "Invalid request (no tests to run, filter skipped everything)!";
+        exit 1)
+      else
+        let tests = filter_test_cases ~subst:true filter suite in
+        result t tests args
+    in
     (pp_suite_results t) Fmt.stdout result;
     result.failures
 
@@ -425,43 +370,49 @@ struct
       Config.apply_defaults ~default_log_dir:"<not-shown-to-user>"
         (Config.User.create ())
     in
-    let t = register_all (empty ~config ~suite_name:"<not-shown-to-user>") tl in
+    let t =
+      register_all
+        (empty ~config ~trap_logs:false ~suite_name:"<not-shown-to-user>")
+        tl
+    in
     list_registered_tests t ();
     M.return ()
 
-  let run_with_args (config : Config.t) name (type a) (args : a)
+  let run_with_args' (config : Config.User.t) name (type a) (args : a)
       (tl : a test list) =
-    let random_state = Random.State.make_self_init () in
-    let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
-    let t = { (empty ~config ~suite_name:name) with run_id } in
+    let config =
+      Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
+    in
+    let t = empty ~config ~trap_logs:(not config#verbose) ~suite_name:name in
     let t = register_all t tl in
-    ( (* Only print inside the concurrency monad *)
-      M.return () >>= fun () ->
+    let+ test_failures =
+      (* Only print inside the concurrency monad *)
+      let* () = M.return () in
       let open Fmt in
       pr "Testing %a.@," (Pp.quoted Fmt.(styled `Bold Suite.pp_name)) t.suite;
       pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
-             pf ppf "This run has ID %a.@,@," (Pp.quoted string) run_id))
+             pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
         ();
-      run_tests t () args )
-    >|= fun test_failures ->
+      run_tests t () args
+    in
     match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
     | 0, false -> ()
     | _, true -> exit 1
     | _, false -> raise Test_error
 
-  let run config name (tl : unit test list) = run_with_args config name () tl
-
-  let with_defaults f cfg =
-    f (Config.apply_defaults ~default_log_dir:(default_log_dir ()) cfg)
+  let run' config name (tl : unit test list) = run_with_args' config name () tl
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail =
-    Config.User.kcreate
-      (with_defaults run_with_args)
-      ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-      ?filter ?log_dir ?bail
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace =
+    Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
 
-  let run = Config.User.kcreate (with_defaults run)
+  let run = Config.User.kcreate run'
+end
+
+module V1 = struct
+  include V1_types
+  module Make = Make
 end

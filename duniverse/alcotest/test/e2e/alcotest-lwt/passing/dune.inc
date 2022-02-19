@@ -2,7 +2,8 @@
  (names
    cli_options
  )
- (libraries alcotest alcotest-lwt lwt lwt.unix)
+ (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt lwt.unix)
+ (modes native)
  (modules
    cli_options
  )

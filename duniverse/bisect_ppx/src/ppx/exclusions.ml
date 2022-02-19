@@ -39,7 +39,7 @@ let add_from_channel filename ch =
       raise e
 
 let add_from_file filename =
-  (* BuckleScript runs the PPX from PROJECT_ROOT/lib/bs. *)
+  (* ReScript runs the PPX from PROJECT_ROOT/lib/bs. *)
   let cwd = Sys.getcwd () in
   let parent = Filename.basename cwd in
   let grandparent = Filename.(basename (dirname cwd)) in
