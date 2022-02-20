@@ -1,4 +1,9 @@
-(rule
- (targets short_parser.mli short_parser.ml)
-  (deps   short_parser.mly)
-  (action (ignore-stderr (run menhir --external-tokens Json --explain ${<}))))
+(menhir
+ (modules parser))
+
+(ocamllex lexer)
+
+(library
+ (name json_parser)
+ (modules parser lexer json)
+ (libraries core))

@@ -5,5 +5,3 @@
   mdx
   ppx_jane)
  (preludes prelude.ml))
-
-(data_only_dirs examples)
