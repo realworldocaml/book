@@ -14,7 +14,8 @@
 (rule
  (alias variants-termcol-fixed)
  (deps
-  (source_tree ./correct/variants-termcol-fixed))
+  (source_tree ./correct/variants-termcol-fixed)
+  (package base))
  (action
   (system "dune build @all @runtest --root ./correct/variants-termcol-fixed")))
 
