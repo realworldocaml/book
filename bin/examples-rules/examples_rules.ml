@@ -55,34 +55,12 @@ let print_rule ~dir_name ~path (config : Config.t) =
     path
     dir_name
 
-let has_external_deps path =
-  let cmd =
-    let open Bos.Cmd in
-    v "dune"
-    % "external-lib-deps"
-    % "--root"
-    % path
-    % "@all" % "@runtest"
-  in
-  let open Bos.OS.Cmd in
-  let open Rresult.R.Infix in
-  run_out ~err:err_null cmd |> out_lines |> success >>| function
-  | [] -> (* No external deps *) false
-  | _ -> true
-
 let get_config path =
-  let open Rresult.R.Infix in
   let config_file = Filename.concat path Config.path in
   if Sys.file_exists config_file then
     Ok (Config.parse config_file)
   else
-    has_external_deps path >>= fun ext_deps ->
-    if ext_deps then
-      Rresult.R.error_msgf
-        "The example at %s should have a .rwo-example config file"
-        path
-    else
-      Ok Config.empty
+    Ok Config.empty
 
 let run examples_dir =
   let correct = Filename.concat examples_dir "correct" in
