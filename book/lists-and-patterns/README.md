@@ -18,6 +18,7 @@ notation:[lists/generation of]{.idx}
 - : int list = [1; 2; 3]
 ```
 
+\noindent
 And they can also be generated using the equivalent `::`
 notation:[operators/: : operator]{.idx}[lists/operator : :]{.idx}
 
@@ -87,8 +88,10 @@ val sum : int list -> int = <fun>
 - : int = 0
 ```
 
-This code follows the convention of using `hd` to represent the first element
-(or head) of the list, and `tl` to represent the remainder (or tail).
+\noindent
+This code follows the convention of using `hd` to represent the first
+element (or head) of the list, and `tl` to represent the remainder (or
+tail).
 
 The `match` expression in `sum` is really doing two things: first,
 it's acting as a case-analysis tool, breaking down the possibilities
@@ -117,6 +120,7 @@ Warning 11 [redundant-case]: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
 
+\noindent
 Moreover, the function clearly does the wrong thing, filtering out all
 elements of the list rather than just those equal to the provided value, as
 you can see here:
@@ -126,6 +130,7 @@ you can see here:
 - : int list = []
 ```
 
+\noindent
 So, what's going on?
 
 The key observation is that the appearance of `to_drop` in the second case
@@ -283,8 +288,8 @@ function we call has to reexamine the first element of the list to
 determine whether or not it's the empty cell. With a `match`
 expression, this work happens exactly once per list element.
 
-This is a more general phenomena: pattern matching is very efficient, and
-pattern matching code is usually a win over what you might write by hand.
+This is a more general phenomena: pattern matching is very efficient,
+and is usually faster than what you might write yourself.
 
 ### Detecting Errors
 
@@ -332,9 +337,12 @@ out common patterns for computing with lists.[tables, creating with List
 module]{.idx}[List module/creating tables with]{.idx}[lists/List
 module]{.idx}
 
-Let's work through a concrete example. We'll write a function `render_table`
-that, given a list of column headers and a list of rows, prints them out in a
-well-formatted text table, as follows:
+Let's work through a concrete example.  We'll write a function
+`render_table` that, given a list of column headers and a list of
+rows, prints them out in a well-formatted text table.  When we're
+done, here's how the resulting function should work:
+
+<!-- TODO: fix the rendering of this table in the PDF -->
 
 ```ocaml skip
 # Stdio.print_endline
@@ -379,6 +387,7 @@ module/List.map2_exn]{.idx}
 - : int list = [3; 2; 3]
 ```
 
+\noindent
 The `_exn` is there because the function throws an exception if the lists are
 of mismatched length:
 
@@ -406,6 +415,7 @@ We can use `List.fold` for something as simple as summing up a list:
 - : int = 10
 ```
 
+\noindent
 This example is particularly simple because the accumulator and the list
 elements are of the same type. But `fold` is not limited to such cases. We
 can for example use `fold` to reverse a list, in which case the accumulator
@@ -455,23 +465,27 @@ val render_separator : int list -> string = <fun>
 - : string = "|-----+--------+----|"
 ```
 
-Note that we make the line of dashes two larger than the provided width to
-provide some whitespace around each entry in the table.[strings/concatenation
-of]{.idx}[String.concat]{.idx}[List module/String.concat and]{.idx}
+\noindent
+Note that we make the line of dashes two larger than the provided
+width to provide some whitespace around each entry in the
+table.[strings/concatenation of]{.idx}[String.concat]{.idx}[List
+module/String.concat and]{.idx}
 
 ::: {data-type=note}
 ##### Performance of String.concat and ^
 
 In the preceding code we’ve concatenated strings two different ways:
-`String.concat`, which operates on lists of strings; and `^`, which is a
-pairwise operator. You should avoid `^` for joining long numbers of strings,
-since it allocates a new string every time it runs. Thus, the following code
+`String.concat`, which operates on lists of strings; and `^`, which is
+a pairwise operator. You should avoid `^` for joining large numbers of
+strings, since it allocates a new string every time it runs. Thus, the
+following code
 
 ```ocaml env=main
 # let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 val s : string = "......."
 ```
 
+\noindent
 will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code
 
 ```ocaml env=main
@@ -479,11 +493,11 @@ will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code
 val s : string = "......."
 ```
 
+\noindent
 allocates one string of size 7, as well as a list of length 7. At these small
 sizes, the differences don't amount to much, but for assembling large
 strings, it can be a serious performance issue.
 :::
-
 
 Now we need code for rendering a row with data in it. We'll first write a
 function called `pad`, for padding out a string to a specified length plus
@@ -510,8 +524,8 @@ val render_row : string list -> int list -> string = <fun>
 - : string = "| Hello      | World           |"
 ```
 
-Now we can bring this all together in a single function that renders the
-table:
+Finally, we can bring this all together to build the `render_table`
+function we wanted at the start!
 
 ```ocaml env=main
 # let render_table header rows =
@@ -550,8 +564,9 @@ Here's the type signature:
 - : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
 ```
 
-`reduce` returns an optional result, returning `None` when the input list is
-empty.
+\noindent
+`reduce` returns an optional result, returning `None` when the input
+list is empty.
 
 Now we can see `reduce` in action:
 
@@ -573,9 +588,6 @@ List.filter]{.idx}[List module/List.filter]{.idx}
 # List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
 - : int list = [2; 4]
 ```
-
-Note that the `mod` used above is an infix operator, as described in
-[Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
 Sometimes, you want to both transform and filter as part of the same
 computation. In that case, `List.filter_map` is what you need. The function
@@ -602,10 +614,10 @@ val extensions : string list -> string list = <fun>
 - : string list = ["c"; "ml"; "mli"]
 ```
 
-The preceding code is also an example of an Or pattern, which allows you to
-have multiple subpatterns within a larger pattern. In this case,
-`None | Some ("",_)` is an Or pattern. As we'll see later, Or patterns can be
-nested anywhere within larger patterns.
+The preceding code is also an example of an or-pattern, which allows
+you to have multiple subpatterns within a larger pattern. In this
+case, `None | Some ("",_)` is an or-pattern. As we'll see later,
+or-patterns can be nested anywhere within larger patterns.
 
 #### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
 
@@ -674,8 +686,10 @@ module Filename = Core.Filename
 val ls_rec : string -> string list = <fun>
 ```
 
-Note that this example uses some functions from the `Sys` and `Filename`
-modules from `Core` for accessing the filesystem and dealing with filenames.
+\noindent
+Note that this example uses some functions from the `Sys` and
+`Filename` modules from `Core` for accessing the filesystem and
+dealing with filenames.
 
 The preceding combination of `List.map` and `List.concat` is common enough
 that there is a function `List.concat_map` that combines these into one, more
@@ -789,59 +803,64 @@ right approach.
 
 ## Terser and Faster Patterns
 
-Now that we know more about how lists and patterns work, let's consider how
-we can improve on an example from
-[Recursive List Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
-the function `destutter`, which removes sequential duplicates from a list.
-Here's the implementation that was described earlier:
-[destutter function]{.idx}
-[pattern matching/terser and faster patterns]{.idx}
-[lists/duplicate removal]{.idx}
-[duplicates, removing]{.idx}
+Now that we know more about how lists and patterns work, let's
+consider how we can improve on an example from [Recursive List
+Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
+the function `remove_sequential_duplicates`.  Here's the
+implementation that was described earlier: [pattern matching/terser
+and faster patterns]{.idx}
 
 ```ocaml env=main
-# let rec destutter list =
+# let rec remove_sequential_duplicates list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
-    | hd :: hd' :: tl ->
-      if hd = hd' then destutter (hd' :: tl)
-      else hd :: destutter (hd' :: tl);;
-val destutter : int list -> int list = <fun>
+    | [x] -> [x]
+    | first :: second :: tl ->
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 We'll consider some ways of making this code more concise and more efficient.
 
-First, let's consider efficiency. One problem with the `destutter` code above
-is that it in some cases re-creates on the righthand side of the arrow a
+First, let's consider efficiency. One problem with the above code is
+that it in some cases re-creates on the righthand side of the arrow a
 value that already existed on the lefthand side. Thus, the pattern
-`[hd] -> [hd]` actually allocates a new list element, when really, it should
-be able to just return the list being matched. We can reduce allocation here
-by using an `as` pattern, which allows us to declare a name for the thing
-matched by a pattern or subpattern. While we're at it, we'll use the
-`function` keyword to eliminate the need for an explicit match:[function
-keyword]{.idx}
+`[hd] -> [hd]` actually allocates a new list element, when really, it
+should be able to just return the list being matched. We can reduce
+allocation here by using an `as` pattern, which allows us to declare a
+name for the thing matched by a pattern or subpattern. While we're at
+it, we'll use the `function` keyword to eliminate the need for an
+explicit match:[function keyword]{.idx}
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] as l -> l
     | [_] as l -> l
-    | hd :: (hd' :: _ as tl) ->
-      if hd = hd' then destutter tl
-      else hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _ as tl) ->
+      if first = second then
+        remove_sequential_duplicates tl
+      else
+        first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
-We can further collapse this by combining the first two cases into one, using
-an *or pattern*:
+We can further collapse this by combining the first two cases into
+one, using an *or-pattern*:
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) ->
-      if hd = hd' then destutter tl
-      else hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _ as tl) ->
+      if first = second then
+        remove_sequential_duplicates tl
+      else
+        first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 We can make the code slightly terser now by using a `when` clause. A
@@ -850,20 +869,29 @@ of an arbitrary OCaml expression. In this case, we can use it to include the
 check on whether the first two elements are equal:
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _ as tl) when first = second ->
+      remove_sequential_duplicates tl
+    | first :: tl -> first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
+<!-- TODO: need to fix the rendering as a note, or figure out some -->
+<!-- other way of integrating this in to the text. -->
+
+::: {data-type=note}
 ##### Polymorphic Compare
 
-You might have noticed that `destutter` is specialized to lists of integers.
-That's because `Base`'s default equality operator is specialized to integers,
-as you can see if you try to apply it to values of a different type.
+You might have noticed that `remove_sequential_duplicates` is
+specialized to lists of integers.  That's because `Base`'s default
+equality operator is specialized to integers, as you can see if you
+try to apply it to values of a different type.
+[polymorphic compare]{.idx}
 
-```ocaml env=main
+```ocaml env=poly
+# open Base;;
 # "foo" = "bar";;
 Line 1, characters 1-6:
 Error: This expression has type string but an expression was expected of type
@@ -872,8 +900,9 @@ Error: This expression has type string but an expression was expected of type
 
 OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
+[Base.Poly]{.idx}
 
-```ocaml env=main
+```ocaml env=poly
 # open Base.Poly;;
 # "foo" = "bar";;
 - : bool = false
@@ -886,73 +915,76 @@ which we can make available by opening the module `Base.Poly`.
 Indeed, if we look at the type of the equality operator, we'll see that it is
 polymorphic.
 
-```ocaml env=main
+```ocaml env=poly
 # (=);;
 - : 'a -> 'a -> bool = <fun>
 ```
 
-If we rewrite our destutter example with `Base.Poly` open, we'll see that it
-gets a polymorphic type, and can now be used on inputs of different types.
+If we rewrite `remove_sequential_duplicates` with `Base.Poly` open,
+we'll see that it gets a polymorphic type, and can now be used on
+inputs of different types.
 
-```ocaml env=main
-# let rec destutter = function
+```ocaml env=poly
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl;;
-val destutter : 'a list -> 'a list = <fun>
-# destutter [1;2;2;3;4;3;3];;
+    | first :: (second :: _ as tl) when first = second ->
+      remove_sequential_duplicates tl
+    | first :: tl -> first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : 'a list -> 'a list = <fun>
+# remove_sequential_duplicates [1;2;2;3;4;3;3];;
 - : int list = [1; 2; 3; 4; 3]
-# destutter ["one";"two";"two";"two";"three"];;
+# remove_sequential_duplicates ["one";"two";"two";"two";"three"];;
 - : string list = ["one"; "two"; "three"]
 ```
 
 OCaml comes with a whole family of polymorphic comparison operators,
-including the standard infix comparators, `<`, `>=`, etc., as well as the
-function `compare` that returns `-1`, `0`, or `1` to flag whether the first
-operand is smaller than, equal to, or greater than the second, respectively.
+including the standard infix comparators, `<`, `>=`, etc., as well as
+the function `compare` that returns `-1`, `0`, or `1` to flag whether
+the first operand is smaller than, equal to, or greater than the
+second, respectively.
 
-You might wonder how you could build functions like these yourself if OCaml
-didn't come with them built in. It turns out that you *can't* build these
-functions on your own. OCaml's polymorphic comparison functions are built
-into the runtime to a low level. These comparisons are polymorphic on the
-basis of ignoring almost everything about the types of the values that are
-being compared, paying attention only to the structure of the values as
-they're laid out in memory. (You can learn more about this structure in
-[Memory Representation of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
+You might wonder how you could build functions like these yourself if
+OCaml didn't come with them built in. It turns out that you *can't*
+build these functions on your own. OCaml's polymorphic comparison
+functions are built into the runtime to a low level. These comparisons
+are polymorphic on the basis of ignoring almost everything about the
+types of the values that are being compared, paying attention only to
+the structure of the values as they're laid out in memory. (You can
+learn more about this structure in [Memory Representation of
+Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
 
-Polymorphic compare does have some limitations. For example, it will fail at
-runtime if it encounters a function value.
+Polymorphic compare does have some limitations. For example, it will
+fail at runtime if it encounters a function value.
 
-```ocaml env=main
+```ocaml env=poly
 # (fun x -> x + 1) = (fun x -> x + 1);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
-Similarly, it will fail on values that come from outside the OCaml heap, like
-values from C bindings. But it will work in a reasonable way for most other
-kinds of values.
+Similarly, it will fail on values that come from outside the OCaml
+heap, like values from C bindings. But it will work in a reasonable
+way for most other kinds of values.
 
-For simple atomic types, polymorphic compare has the semantics you would
-expect: for floating-point numbers and integers, polymorphic compare
-corresponds to the expected numerical comparison functions. For strings, it's
-a lexicographic comparison.
+For simple atomic types, polymorphic compare has the semantics you
+would expect: for floating-point numbers and integers, polymorphic
+compare corresponds to the expected numerical comparison
+functions. For strings, it's a lexicographic comparison.
 
 That said, experienced OCaml developers typically avoid polymorphic
-comparison. That's surprising, given how obviously useful it is, but there's
-a good reason. While it's very convenient, in some cases, the type oblivious
-nature of polymorphic compare means that it does something that doesn't make
-sense for the particular type of values you're dealing with. This can lead to
-surprising and hard to resolve bugs in your code. It's for this reason that
-`Base` discourages the use of polymorphic compare by hiding it by default.
+comparison. That's surprising, given how obviously useful it is, but
+there's a good reason. While it's very convenient, in some cases, the
+type oblivious nature of polymorphic compare means that it does
+something that doesn't make sense for the particular type of values
+you're dealing with. This can lead to surprising and hard to resolve
+bugs in your code. It's for this reason that `Base` discourages the
+use of polymorphic compare by hiding it by default.
 
-We'll discuss this issue more in [Maps And Hash
+We'll discuss the downsides of polymorphic compare in more detail in
+[Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-But in any case, you can restore the default behavior of `Base` by
-opening the module again.
 
-```ocaml env=main
-# open Base;;
-```
+:::
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
 checks associated with pattern matches rely on the fact that patterns are
@@ -1001,6 +1033,7 @@ redundancy.
 val count_some : 'a option list -> int = <fun>
 ```
 
+\noindent
 Probably a better approach is to simply drop the second `when` clause:
 
 ```ocaml env=main
