@@ -1367,21 +1367,21 @@ let () =
   printf "Total: %F\n" (read_and_accumulate 0.)
 ```
 
-This is our first use of OCaml's input and output routines, and we needed to
-open another library, `Stdio`, to get access to them. The function
-`read_and_accumulate` is a recursive function that uses
-`In_channel.input_line` to read in lines one by one from the standard input,
-invoking itself at each iteration with its updated accumulated sum. Note that
-`input_line` returns an optional value, with `None` indicating the end of the
-input stream.
+This is our first use of OCaml's input and output routines, and we
+needed to open another library, `Stdio`, to get access to them. The
+function `read_and_accumulate` is a recursive function that uses
+`In_channel.input_line` to read in lines one by one from the standard
+input, invoking itself at each iteration with its updated accumulated
+sum. Note that `input_line` returns an optional value, with `None`
+indicating the end of the input stream.
 
-After `read_and_accumulate` returns, the total needs to be printed. This is
-done using the `printf` command, which provides support for type-safe format
-strings, similar to what you'll find in a variety of languages. The format
-string is parsed by the compiler and used to determine the number and type of
-the remaining arguments that are required.
-In this case, there is a single formatting directive, `%F`, so `printf`
-expects one additional argument of type `float`.
+After `read_and_accumulate` returns, the total needs to be
+printed. This is done using the `printf` command, which provides
+support for type-safe format strings. The format string is parsed by
+the compiler and used to determine the number and type of the
+remaining arguments that are required.  In this case, there is a
+single formatting directive, `%F`, so `printf` expects one additional
+argument of type `float`.
 
 ### Compiling and Running
 
