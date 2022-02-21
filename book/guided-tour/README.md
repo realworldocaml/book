@@ -13,6 +13,8 @@ can start by typing *ocaml* at the command line). These instructions will
 assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
+<!-- TODO: make the URL actually show up literally in the PDF -->
+
 Before going any further, make sure you've followed the steps in [the
 installation page](http://dev.realworldocaml.org/install.html).
 
@@ -40,7 +42,7 @@ As of this writing, the stable release of `Core` is less portable than
 yet a third library, `Core_kernel`, which is a portable subset of
 `Core`. That said, the latest development version removes
 `Core_kernel`, and makes `Core` itself portable.  The stable release
-should have `Core_kernel` removed by early 2022, so we won't use
+should have `Core_kernel` removed by mid-2022, so we won't use
 `Core_kernel` in this text.
 
 :::
@@ -185,7 +187,7 @@ val ratio : int -> int -> float = <fun>
 
 Note that in OCaml, function arguments are separated by spaces instead
 of by parentheses and commas, which is more like the UNIX shell than
-it is like traditional programming languages such as C or Java.
+it is like traditional programming languages such as Python or Java.
 
 The preceding example also happens to be our first use of
 modules. Here, `Float.of_int` refers to the `of_int` function
@@ -210,9 +212,10 @@ standard int-only arithmetic operators to be shadowed locally.
 val ratio : int -> int -> float = <fun>
 ```
 
-Note that we used a slightly different syntax for opening the module, since
-we were only opening it in the local scope inside the definition of `ratio`.
-There's also a more concise syntax for local opens, as you can see here.
+We used a slightly different syntax for opening the module, since we
+were only opening it in the local scope inside the definition of
+`ratio`.  There's also a more concise syntax for local opens, as you
+can see here.
 
 ```ocaml env=main
 # let ratio x y =
@@ -248,7 +251,7 @@ in action:
 
 ```ocaml env=main
 # let even x =
-  x % 2 = 0;;
+    x % 2 = 0;;
 val even : int -> bool = <fun>
 # sum_if_true even 3 4;;
 - : int = 4
@@ -401,19 +404,20 @@ errors like this one:
 
 ```ocaml env=main
 # let add_potato x =
-  x + "potato";;
-Line 2, characters 7-15:
+    x + "potato";;
+Line 2, characters 9-17:
 Error: This expression has type string but an expression was expected of type
          int
 ```
 
+\noindent
 are compile-time errors (because `+` requires that both its arguments be of
 type `int`), whereas errors that can't be caught by the type system, like
 division by zero, lead to runtime exceptions:
 
 ```ocaml env=main
 # let is_a_multiple x y =
-  x % y = 0;;
+    x % y = 0;;
 val is_a_multiple : int -> int -> bool = <fun>
 # is_a_multiple 8 2;;
 - : bool = true
@@ -448,10 +452,11 @@ val a_tuple : int * string = (3, "three")
 val another_tuple : int * string * float = (3, "four", 5.)
 ```
 
-(For the mathematically inclined, `*` is used in the type `t * s` because
-that type corresponds to the set of all pairs containing one value of type
-`t` and one of type `s`. In other words, it's the *Cartesian product* of the
-two types, which is why we use ` * `, the symbol for product.)
+For the mathematically inclined, `*` is used in the type `t * s`
+because that type corresponds to the set of all pairs containing one
+value of type `t` and one of type `s`. In other words, it's the
+*Cartesian product* of the two types, which is why we use ` * `, the
+symbol for product.
 
 You can extract the components of a tuple using OCaml's pattern-matching
 syntax, as shown below:
@@ -462,6 +467,7 @@ val x : int = 3
 val y : string = "three"
 ```
 
+\noindent
 Here, the `(x,y)` on the left-hand side of the `let` binding is the pattern.
 This pattern lets us mint the new variables `x` and `y`, each bound to
 different components of the value being matched. These can now be used in
@@ -472,6 +478,7 @@ subsequent expressions:
 - : int = 8
 ```
 
+\noindent
 Note that the same syntax is used both for constructing and for pattern
 matching on tuples.
 
@@ -486,6 +493,7 @@ at the values we need with a minimum of fuss:
 val distance : float * float -> float * float -> float = <fun>
 ```
 
+\noindent
 The `**.` operator used above is for raising a floating-point number
 to a power.
 
@@ -557,11 +565,11 @@ lengths of each language as follows:
 elements of that list. It returns a new list with the transformed elements
 and does not modify the original list.
 
-Notably, the function passed to `List.map` is passed under a
-*labeled argument*`~f`. Labeled arguments are specified by name rather than
-by position, and thus allow you to change the order in which arguments are
-presented to a function without changing its behavior, as you can see
-here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
+Notably, the function passed to `List.map` is passed under a *labeled
+argument* `~f`. Labeled arguments are specified by name rather than by
+position, and thus allow you to change the order in which arguments
+are presented to a function without changing its behavior, as you can
+see here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 
 ```ocaml env=main
 # List.map ~f:String.length languages;;
@@ -765,8 +773,9 @@ sum [1;2;3]
 = 6
 ```
 
-This suggests a reasonable mental model for what OCaml is actually doing to
-evaluate a recursive function.
+\noindent
+This suggests a reasonable if not entirely accurate mental model for
+what OCaml is actually doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well. Here's a function
 for removing sequential duplicates:
@@ -863,7 +872,7 @@ example:[options]{.idx}[data structures/options]{.idx}
 
 ```ocaml env=main
 # let divide x y =
-  if y = 0 then None else Some (x / y);;
+    if y = 0 then None else Some (x / y);;
 val divide : int -> int -> int option = <fun>
 ```
 
@@ -940,7 +949,7 @@ And we can get access to the contents of these types using pattern matching:
 
 ```ocaml env=main
 # let magnitude { x = x_pos; y = y_pos } =
-  Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
+    Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -961,7 +970,7 @@ Alternatively, we can use dot notation for accessing record fields:
 
 ```ocaml env=main
 # let distance v1 v2 =
-  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+    magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : point2d -> point2d -> float = <fun>
 ```
 
@@ -977,9 +986,10 @@ type segment_desc = { endpoint1: point2d; endpoint2: point2d }
 
 Now, imagine that you want to combine multiple objects of these types
 together as a description of a multi-object scene. You need some unified way
-of representing these objects together in a single type. One way of doing
-this is using a *variant* type:[datatypes/variant types]{.idx}[variant
-types/combining multiple object types with]{.idx}
+of representing these objects together in a single type. *Variant*
+types let you do just that:
+[datatypes/variant types]{.idx}
+[variant types/combining multiple object types with]{.idx}
 
 ```ocaml env=main
 type scene_element =
@@ -1126,24 +1136,23 @@ and sufficient to compute means and standard deviations, as shown in the
 following example.
 
 ```ocaml env=main
-# let mean rsum = rsum.sum /. Float.of_int rsum.samples
-  let stdev rsum =
+# let mean rsum = rsum.sum /. Float.of_int rsum.samples;;
+val mean : running_sum -> float = <fun>
+# let stdev rsum =
     Float.sqrt
       (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
-val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
 ```
 
 We also need functions to create and update `running_sum`s:
 
 ```ocaml env=main
-# let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
-  let update rsum x =
+# let create () = { sum = 0.; sum_sq = 0.; samples = 0 };;
+val create : unit -> running_sum = <fun>
+# let update rsum x =
     rsum.samples <- rsum.samples + 1;
     rsum.sum     <- rsum.sum     +. x;
     rsum.sum_sq  <- rsum.sum_sq  +. x *. x;;
-val create : unit -> running_sum = <fun>
-val update : running_sum -> float -> unit = <fun>
 ```
 
 `create` returns a `running_sum` corresponding to the empty set, and
@@ -1162,19 +1171,19 @@ provided list:
 # let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
-- : unit = ()
+Line 1, characters 45-51:
+Error: Unbound value update
 # mean rsum;;
-- : float = 1.33333333333333326
+- : float = nan
 # stdev rsum;;
-- : float = 3.94405318873307698
+- : float = nan
 ```
 
-It's worth noting that the preceding algorithm is numerically naive and has
-poor precision in the presence of cancellation. You can look at this
-Wikipedia
-[ article on algorithms for calculating variance](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
-for more details, paying particular attention to the weighted incremental and
-parallel algorithms.
+Be warned that the preceding algorithm is numerically naive and has
+poor precision in the presence of many values that cancel each other
+out. This Wikipedia [article on algorithms for calculating
+variance](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
+provides more details.
 
 ### Refs
 
@@ -1246,13 +1255,12 @@ use a `ref` in place of a mutable variable.
 
 ### For and While Loops
 
-OCaml also supports traditional imperative control-flow constructs like
-`for and while` loops. Here, for example, is some code for permuting an array
-that uses a `for` loop. We use the `Random` module as our source of
-randomness. `Random` starts with a default seed, but you can call
-`Random.self_init` to choose a new seed at random:[Random module]{.idx}[while
-loops]{.idx}[for loops]{.idx}[imperative programming/for and while
-loops]{.idx}
+OCaml also supports traditional imperative control-flow constructs
+like `for` and `while` loops. Here, for example, is some code for
+permuting an array that uses a `for` loop:
+[while loops]{.idx}
+[for loops]{.idx}
+[imperative programming/for and while loops]{.idx}
 
 ```ocaml env=main
 # let permute array =
@@ -1267,6 +1275,12 @@ loops]{.idx}
     done;;
 val permute : 'a array -> unit = <fun>
 ```
+
+\noindent
+This is our first use of the `Random` module. Note that
+`Random` starts with a fixed seed, but you can call `Random.self_init`
+to choose a new seed at random.
+[Random module]{.idx}
 
 From a syntactic perspective, you should note the keywords that distinguish a
 `for` loop: `for`, `to`, `do`, and `done`.
