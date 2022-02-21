@@ -484,14 +484,14 @@ Again, we can create an instance of this query handler and interact with it
 directly:
 
 ```ocaml env=query_handler,non-deterministic=command
-# let list_dir = List_dir.create "/var"
+# let list_dir = List_dir.create "/var";;
 val list_dir : List_dir.t = {List_dir.cwd = "/var"}
-# List_dir.eval list_dir (sexp_of_string ".")
+# List_dir.eval list_dir (sexp_of_string ".");;
 - : (Sexp.t, Error.t) result =
 Ok
  (yp networkd install empty ma mail spool jabberd vm msgs audit root lib db
   at log folders netboot run rpc tmp backups agentx rwho)
-# List_dir.eval list_dir (sexp_of_string "yp")
+# List_dir.eval list_dir (sexp_of_string "yp");;
 - : (Sexp.t, Error.t) result = Ok (binding)
 ```
 

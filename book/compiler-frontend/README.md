@@ -1191,7 +1191,7 @@ verbose. We can see this if you run the vanilla OCaml toplevel (not `utop`).
 
 ```
 $ ocaml
-# List.map print_endline "" ;;
+# List.map print_endline "";;
 Error: This expression has type string but an expression was expected of type
          string list
 ```
@@ -1201,8 +1201,8 @@ switch to Core, though, it gets more verbose:
 
 ```
 $ ocaml
-# open Core ;;
-# List.map ~f:print_endline "" ;;
+# open Core;;
+# List.map ~f:print_endline "";;
 Error: This expression has type string but an expression was expected of type
          'a Core.List.t = 'a list
 ```
