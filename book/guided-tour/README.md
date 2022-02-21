@@ -1153,6 +1153,7 @@ val create : unit -> running_sum = <fun>
     rsum.samples <- rsum.samples + 1;
     rsum.sum     <- rsum.sum     +. x;
     rsum.sum_sq  <- rsum.sum_sq  +. x *. x;;
+val update : running_sum -> float -> unit = <fun>
 ```
 
 `create` returns a `running_sum` corresponding to the empty set, and
@@ -1171,16 +1172,15 @@ provided list:
 # let rsum = create ();;
 val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
-Line 1, characters 45-51:
-Error: Unbound value update
+- : unit = ()
 # mean rsum;;
-- : float = nan
+- : float = 1.33333333333333326
 # stdev rsum;;
-- : float = nan
+- : float = 3.94405318873307698
 ```
 
-Be warned that the preceding algorithm is numerically naive and has
-poor precision in the presence of many values that cancel each other
+Warning: the preceding algorithm is numerically naive and has poor
+precision in the presence of many values that cancel each other
 out. This Wikipedia [article on algorithms for calculating
 variance](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
 provides more details.
