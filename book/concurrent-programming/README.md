@@ -225,9 +225,9 @@ and comes with its own infix equivalent, `>>|`. Using it, we can rewrite
 # let count_lines filename =
     Reader.file_contents filename
     >>| fun text ->
-    List.length (String.split text ~on:'\n')
+    List.length (String.split text ~on:'\n');;
 val count_lines : string -> int Deferred.t = <fun>
-# count_lines "/etc/hosts"
+# count_lines "/etc/hosts";;
 - : int = 10
 ```
 
@@ -1208,10 +1208,10 @@ exception `Not_found`, then the exception will be passed to the parent
 monitor and delivered as usual:
 
 ```ocaml env=main,non-deterministic=command
-# exception Another_exception
+# exception Another_exception;;
 exception Another_exception
 # Deferred.any [ after (Time.Span.of_sec 0.5)
-               ; swallow_some_errors Another_exception ]
+               ; swallow_some_errors Another_exception ];;
 Exception:
 (monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
 ```
@@ -1601,7 +1601,7 @@ If we feed this function a simple timeout deferred, it works as you might
 expect, waking up roughly every 100 milliseconds:
 
 ```ocaml env=main,non-deterministic
-# log_delays (fun () -> after (sec 0.5))
+# log_delays (fun () -> after (sec 0.5));;
 37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
 Finished at: 500.67615509033203ms,
 - : unit = ()
@@ -1613,9 +1613,9 @@ busy loop to finish running:
 ```ocaml env=main,non-deterministic
 # let busy_loop () =
     let x = ref None in
-    for i = 1 to 100_000_000 do x := Some i done
+    for i = 1 to 100_000_000 do x := Some i done;;
 val busy_loop : unit -> unit = <fun>
-# log_delays (fun () -> return (busy_loop ()))
+# log_delays (fun () -> return (busy_loop ()));;
 Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
@@ -1627,7 +1627,7 @@ If, on the other hand, we use `In_thread.run` to offload this to a different
 system thread, the behavior will be different:
 
 ```ocaml env=main,non-deterministic
-# log_delays (fun () -> In_thread.run busy_loop)
+# log_delays (fun () -> In_thread.run busy_loop);;
 31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
 Finished at: 840.72136878967285ms,
 - : unit = ()
@@ -1648,9 +1648,9 @@ we run a nonallocating loop in bytecode, our timer process will get to run:
 
 ```ocaml env=main,non-deterministic
 # let noalloc_busy_loop () =
-    for i = 0 to 100_000_000 do () done
+    for i = 0 to 100_000_000 do () done;;
 val noalloc_busy_loop : unit -> unit = <fun>
-# log_delays (fun () -> In_thread.run noalloc_busy_loop)
+# log_delays (fun () -> In_thread.run noalloc_busy_loop);;
 32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
 Finished at: 418.69187355041504ms,
 - : unit = ()
