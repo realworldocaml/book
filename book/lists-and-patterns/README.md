@@ -840,7 +840,7 @@ explicit match:[function keyword]{.idx}
     match list with
     | [] as l -> l
     | [_] as l -> l
-    | first :: (second :: _) as tl ->
+    | first :: (second :: _ as tl) ->
       if first = second then
         remove_sequential_duplicates tl
       else
@@ -855,7 +855,7 @@ one, using an *or-pattern*:
 # let rec remove_sequential_duplicates list =
     match list with
     | [] | [_] as l -> l
-    | first :: (second :: _) as tl ->
+    | first :: (second :: _ as tl) ->
       if first = second then
         remove_sequential_duplicates tl
       else
@@ -872,12 +872,14 @@ check on whether the first two elements are equal:
 # let rec remove_sequential_duplicates list =
     match list with
     | [] | [_] as l -> l
-    | first :: (second :: _) as tl when first = second ->
+    | first :: (second :: _ as tl) when first = second ->
       remove_sequential_duplicates tl
     | first :: tl -> first :: remove_sequential_duplicates tl;;
 val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
+<!-- TODO: need to fix the rendering as a note, or figure out some -->
+<!-- other way of integrating this in to the text. -->
 
 ::: {data-type=note}
 ##### Polymorphic Compare
@@ -886,6 +888,7 @@ You might have noticed that `remove_sequential_duplicates` is
 specialized to lists of integers.  That's because `Base`'s default
 equality operator is specialized to integers, as you can see if you
 try to apply it to values of a different type.
+[polymorphic compare]{.idx}
 
 ```ocaml env=poly
 # open Base;;
@@ -897,6 +900,7 @@ Error: This expression has type string but an expression was expected of type
 
 OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
+[Base.Poly]{.idx}
 
 ```ocaml env=poly
 # open Base.Poly;;
@@ -921,14 +925,16 @@ we'll see that it gets a polymorphic type, and can now be used on
 inputs of different types.
 
 ```ocaml env=poly
-# let rec destutter = function
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl;;
-val destutter : 'a list -> 'a list = <fun>
-# destutter [1;2;2;3;4;3;3];;
+    | first :: (second :: _ as tl) when first = second ->
+      remove_sequential_duplicates tl
+    | first :: tl -> first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : 'a list -> 'a list = <fun>
+# remove_sequential_duplicates [1;2;2;3;4;3;3];;
 - : int list = [1; 2; 3; 4; 3]
-# destutter ["one";"two";"two";"two";"three"];;
+# remove_sequential_duplicates ["one";"two";"two";"two";"three"];;
 - : string list = ["one"; "two"; "three"]
 ```
 
