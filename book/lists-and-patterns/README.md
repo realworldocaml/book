@@ -852,7 +852,7 @@ We can further collapse this by combining the first two cases into
 one, using an *or-pattern*:
 
 ```ocaml env=main
-# let rec remove_sequential_duplicates = function
+# let rec remove_sequential_duplicates list =
     match list with
     | [] | [_] as l -> l
     | first :: (second :: _) as tl ->
@@ -860,8 +860,7 @@ one, using an *or-pattern*:
         remove_sequential_duplicates tl
       else
         first :: remove_sequential_duplicates tl;;
-Line 2, characters 5-10:
-Error: Syntax error
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 We can make the code slightly terser now by using a `when` clause. A
@@ -870,14 +869,13 @@ of an arbitrary OCaml expression. In this case, we can use it to include the
 check on whether the first two elements are equal:
 
 ```ocaml env=main
-# let rec remove_sequential_duplicates = function
+# let rec remove_sequential_duplicates list =
     match list with
     | [] | [_] as l -> l
     | first :: (second :: _) as tl when first = second ->
       remove_sequential_duplicates tl
     | first :: tl -> first :: remove_sequential_duplicates tl;;
-Line 2, characters 5-10:
-Error: Syntax error
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 
