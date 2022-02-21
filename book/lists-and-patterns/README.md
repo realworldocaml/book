@@ -18,6 +18,7 @@ notation:[lists/generation of]{.idx}
 - : int list = [1; 2; 3]
 ```
 
+\noindent
 And they can also be generated using the equivalent `::`
 notation:[operators/: : operator]{.idx}[lists/operator : :]{.idx}
 
@@ -87,8 +88,10 @@ val sum : int list -> int = <fun>
 - : int = 0
 ```
 
-This code follows the convention of using `hd` to represent the first element
-(or head) of the list, and `tl` to represent the remainder (or tail).
+\noindent
+This code follows the convention of using `hd` to represent the first
+element (or head) of the list, and `tl` to represent the remainder (or
+tail).
 
 The `match` expression in `sum` is really doing two things: first,
 it's acting as a case-analysis tool, breaking down the possibilities
@@ -117,6 +120,7 @@ Warning 11 [redundant-case]: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
 
+\noindent
 Moreover, the function clearly does the wrong thing, filtering out all
 elements of the list rather than just those equal to the provided value, as
 you can see here:
@@ -126,6 +130,7 @@ you can see here:
 - : int list = []
 ```
 
+\noindent
 So, what's going on?
 
 The key observation is that the appearance of `to_drop` in the second case
@@ -283,8 +288,8 @@ function we call has to reexamine the first element of the list to
 determine whether or not it's the empty cell. With a `match`
 expression, this work happens exactly once per list element.
 
-This is a more general phenomena: pattern matching is very efficient, and
-pattern matching code is usually a win over what you might write by hand.
+This is a more general phenomena: pattern matching is very efficient,
+and is usually faster than what you might write yourself.
 
 ### Detecting Errors
 
@@ -332,9 +337,12 @@ out common patterns for computing with lists.[tables, creating with List
 module]{.idx}[List module/creating tables with]{.idx}[lists/List
 module]{.idx}
 
-Let's work through a concrete example. We'll write a function `render_table`
-that, given a list of column headers and a list of rows, prints them out in a
-well-formatted text table, as follows:
+Let's work through a concrete example.  We'll write a function
+`render_table` that, given a list of column headers and a list of
+rows, prints them out in a well-formatted text table.  When we're
+done, here's how the resulting function should work:
+
+<!-- TODO: fix the rendering of this table in the PDF -->
 
 ```ocaml skip
 # Stdio.print_endline
@@ -379,6 +387,7 @@ module/List.map2_exn]{.idx}
 - : int list = [3; 2; 3]
 ```
 
+\noindent
 The `_exn` is there because the function throws an exception if the lists are
 of mismatched length:
 
@@ -406,6 +415,7 @@ We can use `List.fold` for something as simple as summing up a list:
 - : int = 10
 ```
 
+\noindent
 This example is particularly simple because the accumulator and the list
 elements are of the same type. But `fold` is not limited to such cases. We
 can for example use `fold` to reverse a list, in which case the accumulator
@@ -455,23 +465,27 @@ val render_separator : int list -> string = <fun>
 - : string = "|-----+--------+----|"
 ```
 
-Note that we make the line of dashes two larger than the provided width to
-provide some whitespace around each entry in the table.[strings/concatenation
-of]{.idx}[String.concat]{.idx}[List module/String.concat and]{.idx}
+\noindent
+Note that we make the line of dashes two larger than the provided
+width to provide some whitespace around each entry in the
+table.[strings/concatenation of]{.idx}[String.concat]{.idx}[List
+module/String.concat and]{.idx}
 
 ::: {data-type=note}
 ##### Performance of String.concat and ^
 
 In the preceding code we’ve concatenated strings two different ways:
-`String.concat`, which operates on lists of strings; and `^`, which is a
-pairwise operator. You should avoid `^` for joining long numbers of strings,
-since it allocates a new string every time it runs. Thus, the following code
+`String.concat`, which operates on lists of strings; and `^`, which is
+a pairwise operator. You should avoid `^` for joining large numbers of
+strings, since it allocates a new string every time it runs. Thus, the
+following code
 
 ```ocaml env=main
 # let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 val s : string = "......."
 ```
 
+\noindent
 will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code
 
 ```ocaml env=main
@@ -479,11 +493,11 @@ will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code
 val s : string = "......."
 ```
 
+\noindent
 allocates one string of size 7, as well as a list of length 7. At these small
 sizes, the differences don't amount to much, but for assembling large
 strings, it can be a serious performance issue.
 :::
-
 
 Now we need code for rendering a row with data in it. We'll first write a
 function called `pad`, for padding out a string to a specified length plus
@@ -510,8 +524,8 @@ val render_row : string list -> int list -> string = <fun>
 - : string = "| Hello      | World           |"
 ```
 
-Now we can bring this all together in a single function that renders the
-table:
+Finally, we can bring this all together to build the `render_table`
+function we wanted at the start!
 
 ```ocaml env=main
 # let render_table header rows =
@@ -550,8 +564,9 @@ Here's the type signature:
 - : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
 ```
 
-`reduce` returns an optional result, returning `None` when the input list is
-empty.
+\noindent
+`reduce` returns an optional result, returning `None` when the input
+list is empty.
 
 Now we can see `reduce` in action:
 
@@ -570,12 +585,14 @@ doing that:[lists/filtering values in]{.idx}[values/filtering with
 List.filter]{.idx}[List module/List.filter]{.idx}
 
 ```ocaml env=main
-# List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
+# List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 - : int list = [2; 4]
 ```
 
+\noindent
 Note that the `mod` used above is an infix operator, as described in
-[Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
+[Variables And
+Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
 Sometimes, you want to both transform and filter as part of the same
 computation. In that case, `List.filter_map` is what you need. The function
@@ -602,10 +619,10 @@ val extensions : string list -> string list = <fun>
 - : string list = ["c"; "ml"; "mli"]
 ```
 
-The preceding code is also an example of an Or pattern, which allows you to
-have multiple subpatterns within a larger pattern. In this case,
-`None | Some ("",_)` is an Or pattern. As we'll see later, Or patterns can be
-nested anywhere within larger patterns.
+The preceding code is also an example of an or-pattern, which allows
+you to have multiple subpatterns within a larger pattern. In this
+case, `None | Some ("",_)` is an or-pattern. As we'll see later,
+or-patterns can be nested anywhere within larger patterns.
 
 #### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
 
@@ -674,8 +691,10 @@ module Filename = Core.Filename
 val ls_rec : string -> string list = <fun>
 ```
 
-Note that this example uses some functions from the `Sys` and `Filename`
-modules from `Core` for accessing the filesystem and dealing with filenames.
+\noindent
+Note that this example uses some functions from the `Sys` and
+`Filename` modules from `Core` for accessing the filesystem and
+dealing with filenames.
 
 The preceding combination of `List.map` and `List.concat` is common enough
 that there is a function `List.concat_map` that combines these into one, more
@@ -832,8 +851,8 @@ keyword]{.idx}
 val destutter : int list -> int list = <fun>
 ```
 
-We can further collapse this by combining the first two cases into one, using
-an *or pattern*:
+We can further collapse this by combining the first two cases into
+one, using an *or-pattern*:
 
 ```ocaml env=main
 # let rec destutter = function
