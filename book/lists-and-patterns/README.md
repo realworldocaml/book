@@ -1033,6 +1033,7 @@ redundancy.
 val count_some : 'a option list -> int = <fun>
 ```
 
+\noindent
 Probably a better approach is to simply drop the second `when` clause:
 
 ```ocaml env=main
