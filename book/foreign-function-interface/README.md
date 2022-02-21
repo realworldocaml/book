@@ -428,13 +428,13 @@ in our prototype list:
 
 ```ocaml env=posix,non-deterministic
 # let difftime =
-  foreign "difftime" (time_t @-> time_t @-> returning double)
+  foreign "difftime" (time_t @-> time_t @-> returning double);;
 val difftime : time_t -> time_t -> float = <fun>
 # let t1 =
     time' () in
   Unix.sleep 2;
   let t2 = time' () in
-  difftime t2 t1
+  difftime t2 t1;;
 - : float = 2.
 ```
 
@@ -673,9 +673,9 @@ structure:
     ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
     let secs = Signed.Long.(to_int (getf tv tv_sec)) in
     let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-    Stdlib.(float secs +. float usecs /. 1000000.0)
+    Stdlib.(float secs +. float usecs /. 1000000.0);;
 val gettimeofday' : unit -> float = <fun>
-# gettimeofday' ()
+# gettimeofday' ();;
 - : float = 1633964254.067426
 ```
 
