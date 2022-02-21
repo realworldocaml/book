@@ -585,14 +585,13 @@ doing that:[lists/filtering values in]{.idx}[values/filtering with
 List.filter]{.idx}[List module/List.filter]{.idx}
 
 ```ocaml env=main
-# List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
+# List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
+Line 1, characters 28-31:
+Alert deprecated: Base.mod
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use (%), which has slightly different semantics, or Int.rem which is equivalent.
 - : int list = [2; 4]
 ```
-
-\noindent
-Note that the `mod` used above is an infix operator, as described in
-[Variables And
-Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
 Sometimes, you want to both transform and filter as part of the same
 computation. In that case, `List.filter_map` is what you need. The function
@@ -808,25 +807,24 @@ right approach.
 
 ## Terser and Faster Patterns
 
-Now that we know more about how lists and patterns work, let's consider how
-we can improve on an example from
-[Recursive List Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
-the function `destutter`, which removes sequential duplicates from a list.
-Here's the implementation that was described earlier:
-[destutter function]{.idx}
-[pattern matching/terser and faster patterns]{.idx}
-[lists/duplicate removal]{.idx}
-[duplicates, removing]{.idx}
+Now that we know more about how lists and patterns work, let's
+consider how we can improve on an example from [Recursive List
+Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
+the function `remove_sequential_duplicates`.  Here's the
+implementation that was described earlier: [pattern matching/terser
+and faster patterns]{.idx}
 
 ```ocaml env=main
-# let rec destutter list =
+# let rec remove_sequential_duplicates list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
-    | hd :: hd' :: tl ->
-      if hd = hd' then destutter (hd' :: tl)
-      else hd :: destutter (hd' :: tl);;
-val destutter : int list -> int list = <fun>
+    | [x] -> [x]
+    | first :: second :: tl ->
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 We'll consider some ways of making this code more concise and more efficient.
@@ -842,25 +840,32 @@ matched by a pattern or subpattern. While we're at it, we'll use the
 keyword]{.idx}
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates list =
+    match list with
     | [] as l -> l
     | [_] as l -> l
-    | hd :: (hd' :: _ as tl) ->
-      if hd = hd' then destutter tl
-      else hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _) as tl ->
+      if first = second then
+        remove_sequential_duplicates tl
+      else
+        first :: remove_sequential_duplicates tl;;
+val remove_sequential_duplicates : int list -> int list = <fun>
 ```
 
 We can further collapse this by combining the first two cases into
 one, using an *or-pattern*:
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates = function
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) ->
-      if hd = hd' then destutter tl
-      else hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _) as tl ->
+      if first = second then
+        remove_sequential_duplicates tl
+      else
+        first :: remove_sequential_duplicates tl;;
+Line 2, characters 5-10:
+Error: Syntax error
 ```
 
 We can make the code slightly terser now by using a `when` clause. A
@@ -869,30 +874,34 @@ of an arbitrary OCaml expression. In this case, we can use it to include the
 check on whether the first two elements are equal:
 
 ```ocaml env=main
-# let rec destutter = function
+# let rec remove_sequential_duplicates = function
+    match list with
     | [] | [_] as l -> l
-    | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
-    | hd :: tl -> hd :: destutter tl;;
-val destutter : int list -> int list = <fun>
+    | first :: (second :: _) as tl when first = second ->
+      remove_sequential_duplicates tl
+    | first :: tl -> first :: remove_sequential_duplicates tl;;
+Line 2, characters 5-10:
+Error: Syntax error
 ```
 
+
+::: {data-type=note}
 ##### Polymorphic Compare
 
-You might have noticed that `destutter` is specialized to lists of integers.
-That's because `Base`'s default equality operator is specialized to integers,
-as you can see if you try to apply it to values of a different type.
+You might have noticed that `remove_sequential_duplicates` is
+specialized to lists of integers.  That's because `Base`'s default
+equality operator is specialized to integers, as you can see if you
+try to apply it to values of a different type.
 
-```ocaml env=main
+```ocaml env=poly
 # "foo" = "bar";;
-Line 1, characters 1-6:
-Error: This expression has type string but an expression was expected of type
-         int
+- : bool = false
 ```
 
 OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
 
-```ocaml env=main
+```ocaml env=poly
 # open Base.Poly;;
 # "foo" = "bar";;
 - : bool = false
@@ -905,7 +914,7 @@ which we can make available by opening the module `Base.Poly`.
 Indeed, if we look at the type of the equality operator, we'll see that it is
 polymorphic.
 
-```ocaml env=main
+```ocaml env=poly
 # (=);;
 - : 'a -> 'a -> bool = <fun>
 ```
@@ -913,7 +922,7 @@ polymorphic.
 If we rewrite our destutter example with `Base.Poly` open, we'll see that it
 gets a polymorphic type, and can now be used on inputs of different types.
 
-```ocaml env=main
+```ocaml env=poly
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
@@ -930,48 +939,47 @@ including the standard infix comparators, `<`, `>=`, etc., as well as the
 function `compare` that returns `-1`, `0`, or `1` to flag whether the first
 operand is smaller than, equal to, or greater than the second, respectively.
 
-You might wonder how you could build functions like these yourself if OCaml
-didn't come with them built in. It turns out that you *can't* build these
-functions on your own. OCaml's polymorphic comparison functions are built
-into the runtime to a low level. These comparisons are polymorphic on the
-basis of ignoring almost everything about the types of the values that are
-being compared, paying attention only to the structure of the values as
-they're laid out in memory. (You can learn more about this structure in
-[Memory Representation of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
+You might wonder how you could build functions like these yourself if
+OCaml didn't come with them built in. It turns out that you *can't*
+build these functions on your own. OCaml's polymorphic comparison
+functions are built into the runtime to a low level. These comparisons
+are polymorphic on the basis of ignoring almost everything about the
+types of the values that are being compared, paying attention only to
+the structure of the values as they're laid out in memory. (You can
+learn more about this structure in [Memory Representation of
+Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.)
 
-Polymorphic compare does have some limitations. For example, it will fail at
-runtime if it encounters a function value.
+Polymorphic compare does have some limitations. For example, it will
+fail at runtime if it encounters a function value.
 
-```ocaml env=main
+```ocaml env=poly
 # (fun x -> x + 1) = (fun x -> x + 1);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
-Similarly, it will fail on values that come from outside the OCaml heap, like
-values from C bindings. But it will work in a reasonable way for most other
-kinds of values.
+Similarly, it will fail on values that come from outside the OCaml
+heap, like values from C bindings. But it will work in a reasonable
+way for most other kinds of values.
 
-For simple atomic types, polymorphic compare has the semantics you would
-expect: for floating-point numbers and integers, polymorphic compare
-corresponds to the expected numerical comparison functions. For strings, it's
-a lexicographic comparison.
+For simple atomic types, polymorphic compare has the semantics you
+would expect: for floating-point numbers and integers, polymorphic
+compare corresponds to the expected numerical comparison
+functions. For strings, it's a lexicographic comparison.
 
 That said, experienced OCaml developers typically avoid polymorphic
-comparison. That's surprising, given how obviously useful it is, but there's
-a good reason. While it's very convenient, in some cases, the type oblivious
-nature of polymorphic compare means that it does something that doesn't make
-sense for the particular type of values you're dealing with. This can lead to
-surprising and hard to resolve bugs in your code. It's for this reason that
-`Base` discourages the use of polymorphic compare by hiding it by default.
+comparison. That's surprising, given how obviously useful it is, but
+there's a good reason. While it's very convenient, in some cases, the
+type oblivious nature of polymorphic compare means that it does
+something that doesn't make sense for the particular type of values
+you're dealing with. This can lead to surprising and hard to resolve
+bugs in your code. It's for this reason that `Base` discourages the
+use of polymorphic compare by hiding it by default.
 
-We'll discuss this issue more in [Maps And Hash
+We'll discuss the downsides of polymorphic compare in more detail in
+[Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-But in any case, you can restore the default behavior of `Base` by
-opening the module again.
 
-```ocaml env=main
-# open Base;;
-```
+:::
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
 checks associated with pattern matches rely on the fact that patterns are

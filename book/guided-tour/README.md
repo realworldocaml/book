@@ -785,9 +785,11 @@ for removing sequential duplicates:
     match list with
     | [] -> []
     | first :: second :: tl ->
-      let new_tl = remove_sequential_duplicates (second :: tl) in
-      if first = second then new_tl else first :: new_tl;;
-Lines 2-6, characters 5-57:
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
+Lines 2-8, characters 5-61:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -803,10 +805,12 @@ fix this warning by adding another case to the match:
 # let rec remove_sequential_duplicates list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
-    | hd1 :: hd2 :: tl ->
-      let new_tl = remove_sequential_duplicates (hd2 :: tl) in
-      if hd1 = hd2 then new_tl else hd1 :: new_tl;;
+    | [x] -> [x]
+    | first :: second :: tl ->
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
 val remove_sequential_duplicates : int list -> int list = <fun>
 # remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
 - : int list = [1; 2; 3; 4; 1]
@@ -824,45 +828,6 @@ time, you'll find yourself happy to use the iteration functions found in the
 `List` module. But it's good to know how to use recursion for when you need
 to iterate in a new way.[lists/recursion]{.idx}
 
-::: {data-type=note}
-##### Nesting lets with let and in
-
-`new_tl` in the above examples was our first use of `let` to define a
-new variable within the body of a function. A `let` paired with an
-`in` can be used to introduce a new binding within any local scope,
-including a function body. The `in` marks the beginning of the scope
-within which the new variable can be used. Thus, we could write:[let
-syntax/nested let binding]{.idx}
-
-```ocaml env=main
-# let z = 7 in
-  z + z;;
-- : int = 14
-```
-
-Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `z` is no longer available:
-
-```ocaml env=main
-# z;;
-Line 1, characters 1-2:
-Error: Unbound value z
-```
-
-We can also have multiple `let` bindings in a row, each one adding a
-new variable binding to what came before:
-
-```ocaml env=main
-# let x = 7 in
-  let y = x * x in
-  x + y;;
-- : int = 56
-```
-
-This kind of nested `let` binding is a common way of building up a complex
-expression, with each `let` naming some component, before combining them in
-one final expression.
-:::
 
 ### Options
 
@@ -1252,6 +1217,46 @@ val sum : int list -> int = <fun>
 
 This isn't the most idiomatic way to sum up a list, but it shows how you can
 use a `ref` in place of a mutable variable.
+
+::: {data-type=note}
+##### Nesting lets with let and in
+
+The definition of `sum` in the above examples was our first use of
+`let` to define a new variable within the body of a function. A `let`
+paired with an `in` can be used to introduce a new binding within any
+local scope, including a function body. The `in` marks the beginning
+of the scope within which the new variable can be used. Thus, we could
+write:[let syntax/nested let binding]{.idx}
+
+```ocaml env=main
+# let z = 7 in
+  z + z;;
+- : int = 14
+```
+
+Note that the scope of the `let` binding is terminated by the
+double-semicolon, so the value of `z` is no longer available:
+
+```ocaml env=main
+# z;;
+Line 1, characters 1-2:
+Error: Unbound value z
+```
+
+We can also have multiple `let` bindings in a row, each one adding a
+new variable binding to what came before:
+
+```ocaml env=main
+# let x = 7 in
+  let y = x * x in
+  x + y;;
+- : int = 56
+```
+
+This kind of nested `let` binding is a common way of building up a complex
+expression, with each `let` naming some component, before combining them in
+one final expression.
+:::
 
 ### For and While Loops
 
