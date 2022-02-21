@@ -26,9 +26,11 @@ syntax/top-level bindings]{.idx}
 let <variable> = <expr>
 ```
 
-As we'll see when we get to the module system in
-[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
-this same syntax is used for `let` bindings at the top level of a module.
+\noindent
+As we'll see when we get to the module system in [Files Modules And
+Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+this same syntax is used for `let` bindings at the top level of a
+module.
 
 Every variable binding has a *scope*, which is the portion of the code that
 can refer to that binding. When using `utop`, the scope of a top-level
@@ -55,9 +57,10 @@ a particular expression, using the following syntax.
 let <variable> = <expr1> in <expr2>
 ```
 
-This first evaluates *`expr1`* and then evaluates *`expr2`* with *`variable`*
-bound to whatever value was produced by the evaluation of *`expr1`*. Here's
-how it looks in practice.
+\noindent
+This first evaluates *`expr1`* and then evaluates *`expr2`* with
+*`variable`* bound to whatever value was produced by the evaluation of
+*`expr1`*. Here's how it looks in practice.
 
 ```ocaml env=main
 # let languages = "OCaml,Perl,C++,C";;
@@ -68,9 +71,10 @@ val languages : string = "OCaml,Perl,C++,C"
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
 
+\noindent
 Note that the scope of `language_list` is just the expression
-`String.concat ~sep:"-" language_list` and is not available at the toplevel,
-as we can see if we try to access it now.
+`String.concat ~sep:"-" language_list` and is not available at the
+toplevel, as we can see if we try to access it now.
 
 ```ocaml env=main
 # language_list;;
@@ -78,9 +82,10 @@ Line 1, characters 1-14:
 Error: Unbound value language_list
 ```
 
-A `let` binding in an inner scope can *shadow*, or hide, the definition from
-an outer scope. So, for example, we could have written the `dashed_languages`
-example as follows. [variables/shadowing of]{.idx}[shadowing]{.idx}
+A `let` binding in an inner scope can *shadow*, or hide, the
+definition from an outer scope. So, for example, we could have written
+the `dashed_languages` example as follows. [variables/shadowing
+of]{.idx}[shadowing]{.idx}
 
 ```ocaml env=main
 # let languages = "OCaml,Perl,C++,C";;
@@ -91,11 +96,12 @@ val languages : string = "OCaml,Perl,C++,C"
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
 
-This time, in the inner scope we called the list of strings `languages`
-instead of `language_list`, thus hiding the original definition of
-`languages`. But once the definition of `dashed_languages` is complete, the
-inner scope has closed and the original definition of languages is still
-available.
+\noindent
+This time, in the inner scope we called the list of strings
+`languages` instead of `language_list`, thus hiding the original
+definition of `languages`. But once the definition of
+`dashed_languages` is complete, the inner scope has closed and the
+original definition of languages is still available.
 
 ```ocaml env=main
 # languages;;
@@ -216,9 +222,10 @@ returns a list with at least one element, even when given the empty string.
 - : string = ""
 ```
 
+\noindent
 But the compiler doesn't know this, and so it emits the warning. It's
 generally better to use a `match` expression to handle such cases
-explicitly.
+explicitly:
 
 ```ocaml env=main
 # let upcase_first_entry line =
@@ -235,12 +242,12 @@ cases that should be impossible. We'll discuss `assert` in more detail in
 
 ## Functions
 
-Given that OCaml is a functional language, it's no surprise that functions
-are important and pervasive. Indeed, functions have come up in almost every
-example we've done so far. This section will go into more depth, explaining
-the details of how OCaml's functions work. As you'll see, functions in OCaml
-differ in a variety of ways from what you'll find in most mainstream
-languages.
+Given that OCaml is a functional language, it's no surprise that
+functions are important and pervasive. Indeed, functions have come up
+in almost every example we've looked at so far. This section will go
+into more depth, explaining the details of how OCaml's functions
+work. As you'll see, functions in OCaml differ in a variety of ways
+from what you'll find in most mainstream languages.
 
 ### Anonymous Functions
 
@@ -256,22 +263,24 @@ functions]{.idx}[functions/anonymous functions]{.idx}
 ```
 
 Anonymous functions operate in much the same way as named functions. For
-example, we can apply an anonymous function to an argument.
+example, we can apply an anonymous function to an argument:
 
 ```ocaml env=main
 # (fun x -> x + 1) 7;;
 - : int = 8
 ```
 
-Or pass it to another function. Passing functions to iteration functions like
-`List.map` is probably the most common use case for anonymous functions.
+\noindent
+or pass it to another function. Passing functions to iteration
+functions like `List.map` is probably the most common use case for
+anonymous functions.
 
 ```ocaml env=main
 # List.map ~f:(fun x -> x + 1) [1;2;3];;
 - : int list = [2; 3; 4]
 ```
 
-You can even stuff a function into a data structure, like a list.
+You can even stuff a function into a data structure, like a list:
 
 ```ocaml env=main
 # let transforms = [ String.uppercase; String.lowercase ];;
@@ -280,19 +289,21 @@ val transforms : (string -> string) list = [<fun>; <fun>]
 - : string list = ["HELLO WORLD"; "hello world"]
 ```
 
-It's worth stopping for a moment to puzzle this example out, since this kind
-of higher-order use of functions can be a bit obscure at first. Notice that
-`(fun g -> g "Hello World")` is a function that takes a function as an
-argument, and then applies that function to the string `"Hello World"`. The
-invocation of `List.map` applies `(fun g -> g "Hello World")` to the elements
-of `transforms`, which are themselves functions. The returned list containing
-the results of these function applications.
+\noindent
+It's worth stopping for a moment to puzzle this example out. Notice
+that `(fun g -> g "Hello World")` is a function that takes a function
+as an argument, and then applies that function to the string `"Hello
+World"`. The invocation of `List.map` applies `(fun g -> g "Hello
+World")` to the elements of `transforms`, which are themselves
+functions. The returned list containing the results of these function
+applications.
 
-The key thing to understand is that functions are ordinary values in OCaml,
-and you can do everything with them that you'd do with an ordinary value,
-including passing them to and returning them from other functions and storing
-them in data structures. We even name functions in the same way that we name
-other values, by using a `let` binding.
+The key thing to understand is that functions are ordinary values in
+OCaml, and you can do everything with them that you'd do with an
+ordinary value, including passing them to and returning them from
+other functions and storing them in data structures. We even name
+functions in the same way that we name other values, by using a `let`
+binding.
 
 ```ocaml env=main
 # let plusone = (fun x -> x + 1);;
@@ -310,6 +321,7 @@ definition.
 val plusone : int -> int = <fun>
 ```
 
+\noindent
 This is the most common and convenient way to declare a function, but
 syntactic niceties aside, the two styles of function definition are
 equivalent.
@@ -329,9 +341,10 @@ equivalent. [let syntax/functions and]{.idx}
 - : int = 8
 ```
 
-This connection is important, and will come up more when programming in a
-monadic style, as we'll see in
-[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+\noindent
+This connection is important, and will come up more when programming
+in a monadic style, as we'll see in [Concurrent Programming With
+Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 :::
 
 
@@ -348,9 +361,10 @@ val abs_diff : int -> int -> int = <fun>
 - : int = 1
 ```
 
-You may find the type signature of `abs_diff` with all of its arrows a little
-hard to parse. To understand what's going on, let's rewrite `abs_diff` in an
-equivalent form, using the `fun` keyword.
+\noindent
+You may find the type signature of `abs_diff` with all of its arrows a
+little hard to parse. To understand what's going on, let's rewrite
+`abs_diff` in an equivalent form, using the `fun` keyword.
 
 ```ocaml env=main
 # let abs_diff =
@@ -376,13 +390,14 @@ functions]{.idx}
 val abs_diff : int -> (int -> int)
 ```
 
-The parentheses don't change the meaning of the signature, but they make it
-easier to see the currying.
+\noindent
+The parentheses don't change the meaning of the signature, but they
+make it easier to see the currying.
 
-Currying is more than just a theoretical curiosity. You can make use of
-currying to specialize a function by feeding in some of the arguments. Here's
-an example where we create a specialized version of `abs_diff` that measures
-the distance of a given number from `3`.
+Currying is more than just a theoretical curiosity. You can make use
+of currying to specialize a function by feeding in some of the
+arguments. Here's an example where we create a specialized version of
+`abs_diff` that measures the distance of a given number from `3`.
 
 ```ocaml env=main
 # let dist_from_3 = abs_diff 3;;
@@ -393,8 +408,10 @@ val dist_from_3 : int -> int = <fun>
 - : int = 4
 ```
 
-The practice of applying some of the arguments of a curried function to get a
-new function is called *partial application*.[partial application]{.idx}
+\noindent
+The practice of applying some of the arguments of a curried function
+to get a new function is called *partial application*. [partial
+application]{.idx}
 
 Note that the `fun` keyword supports its own syntax for currying, so the
 following definition of `abs_diff` is equivalent to the previous one.[fun
@@ -519,6 +536,7 @@ operator, you can use it as an ordinary prefix function.
 - : int list = [7; 8; 9]
 ```
 
+\noindent
 In the second expression, we've partially applied `(+)` to create a
 function that increments its single argument by `3`.
 
@@ -531,6 +549,7 @@ following set:
 ~ ! $ % & * + - . / : < = > ? @ ^ |
 ```
 
+\noindent
 as long as the first character is not `~`, `!`, or `$`.
 
 There are also a handful of predetermined strings that count as infix
@@ -547,7 +566,8 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1, 6)
 ```
 
-Note that you have to be careful when dealing with operators containing
+\noindent
+You have to be careful when dealing with operators containing
 `*`. Consider the following example.
 
 ```ocaml env=main
@@ -596,6 +616,7 @@ Error: This expression has type int -> int
        but an expression was expected of type int
 ```
 
+\noindent
 Here, OCaml is interpreting the second expression as equivalent to.
 
 ```ocaml env=main
@@ -608,6 +629,7 @@ Error: This expression has type int -> int
        but an expression was expected of type int
 ```
 
+\noindent
 which obviously doesn't make sense.
 
 Here's an example of a very useful operator from the standard library
@@ -626,9 +648,7 @@ function and applies the function to the value. Despite that
 bland-sounding description, it has the useful role of sequencing
 operations, similar in spirit to using the pipe character in the UNIX
 shell.  Consider, for example, the following code for printing out the
-unique elements of your `PATH`. Note that `List.dedup_and_sort` that
-follows removes duplicates from a list by sorting the list using the
-provided comparison function.  [lists/duplicate removal]{.idx}
+unique elements of your `PATH`.  [lists/duplicate removal]{.idx}
 [duplicates, removing]{.idx} [List.dedup_and_sort]{.idx}
 
 ```ocaml env=main
@@ -662,7 +682,7 @@ result is a bit more verbose.
 An important part of what's happening here is partial application. For
 example, `List.iter` takes two arguments: a function to be called on
 each element of the list, and the list to iterate over. We can call
-`List.iter` with all its arguments. [partial application]{.idx}
+`List.iter` with all its arguments: [partial application]{.idx}
 
 ```ocaml env=main
 # List.iter ~f:print_endline ["Two"; "lines"];;
@@ -671,7 +691,8 @@ lines
 - : unit = ()
 ```
 
-Or, we can pass it just the function argument, leaving us with a
+\noindent
+or, we can pass it just the function argument, leaving us with a
 function for printing out a list of strings.
 
 ```ocaml env=main
@@ -679,6 +700,7 @@ function for printing out a list of strings.
 - : string list -> unit = <fun>
 ```
 
+\noindent
 It is this later form that we're using in the preceding `|>` pipeline.
 
 But `|>` only works in the intended way because it is
@@ -749,6 +771,7 @@ val some_or_zero : int option -> int = <fun>
 - : int list = [3; 0; 4]
 ```
 
+\noindent
 This is equivalent to combining an ordinary function definition with a
 `match`.
 
@@ -806,11 +829,11 @@ see, the arguments can be provided in any order.
 - : float = 0.3
 ```
 
-OCaml also supports *label punning*, meaning that you get to drop the text
-after the `:` if the name of the label and the name of the variable being
-used are the same. We were actually already using label punning when defining
-`ratio`. The following shows how punning can be used when invoking a
-function.[punning]{.idx}[label punning]{.idx}
+OCaml also supports *label punning*, meaning that you get to drop the
+text after the colon if the name of the label and the name of the
+variable being used are the same. We were actually already using label
+punning when defining `ratio`. The following shows how punning can be
+used when invoking a function.[punning]{.idx}[label punning]{.idx}
 
 ```ocaml env=main
 # let num = 3 in
@@ -819,17 +842,23 @@ function.[punning]{.idx}[label punning]{.idx}
 - : float = 0.75
 ```
 
-Labeled arguments are useful in a few different cases:
+#### Where are labels useful?
 
-- When defining a function with lots of arguments. Beyond a certain number,
-  arguments are easier to remember by name than by position.[functions/with
-  multiple arguments]{.idx}[multi-argument functions]{.idx}
+Labeled arguments are a surprisingly useful feature, and it's worth
+walking through some of the cases where they come up.
 
-- When the meaning of a particular argument is unclear from the type alone.
-  Consider a function for creating a hash table whose first argument is the
-  initial size of the array backing the hash table, and the second is a
-  Boolean flag, which indicates whether that array will ever shrink when
-  elements are removed.
+##### Explicating long argument lists
+
+Beyond a certain number, arguments are easier to remember by name than
+by position.  Letting the names be used at the call-site (and used in
+any order) makes client code easier to read and to write.
+
+##### Adding information to uninformative argument types
+
+Consider a function for creating a hash table whose first argument is the
+initial size of the array backing the hash table, and the second is a
+Boolean flag, which indicates whether that array will ever shrink when
+elements are removed.
 
 ```ocaml skip
 val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
@@ -844,35 +873,38 @@ val create_hashtable :
 ```
 
 Choosing label names well is especially important for Boolean values, since
-  it's often easy to get confused about whether a value being true is meant
-  to enable or disable a given feature.
+it's often easy to get confused about whether a value being true is meant
+to enable or disable a given feature.
 
-- When defining functions that have multiple arguments that might get
-  confused with each other. This is most at issue when the arguments are of
-  the same type. For example, consider this signature for a function that
-  extracts a substring.
+##### Disambiguating similar arguments
+
+This issue comes up most often when a function has multiple arguments
+of the same type.  Consider this signature for a function that
+extracts a substring.
 
 ```ocaml skip
 val substring: string -> int -> int -> string
 ```
 
-Here, the two `ints` are the starting position and length of the substring
-  to extract, respectively, but you wouldn't know that from the type
-  signature. We can make the signature more informative by adding labels.
+Here, the two `ints` are the starting position and length of the
+substring to extract, respectively, but you wouldn't know that from
+the type signature.  We can make the signature more informative by
+adding labels.
 
 ```ocaml skip
 val substring: string -> pos:int -> len:int -> string
 ```
 
-This improves the readability of both the signature and of client code that
-  makes use of `substring` and makes it harder to accidentally swap the
-  position and the length.
+This improves the readability of both the signature and of client
+code, and makes it harder to accidentally swap the position and the
+length.
 
-- When you want flexibility on the order in which arguments are passed.
-  Consider a function like `List.iter` which takes two arguments: a function
-  and a list of elements to call that function on. A common pattern is to
-  partially apply `List.iter` by giving it just the function, as in the
-  following example from earlier in the chapter.
+##### Flexible argument ordering and partial application
+
+Consider a function like `List.iter` which takes two arguments: a
+function and a list of elements to call that function on. A common
+pattern is to partially apply `List.iter` by giving it just the
+function, as in the following example from earlier in the chapter.
 
 ```ocaml env=main
 # String.split ~on:':' path
@@ -885,11 +917,16 @@ This improves the readability of both the signature and of client code that
 - : unit = ()
 ```
 
-This requires that we put the function argument first. In other cases,
-you want to put the function argument second. One common reason is
-readability.  In particular, a multiline function passed as an
-argument to another function is easiest to read when it is the final
-argument to that function.
+\noindent
+This requires that we put the function argument first.
+
+Other orderings can be useful either for partial application, or for
+simple reasons of readability.  For example, when using `List.iter`
+with a complex, multi-line iteration function, it's generally easier
+to read if the function comes second, after the statement of what list
+is being iterated over.  On the other hand, when calling `List.iter`
+with a small function, but a large, explicitly written list of values,
+it's generally easier if the values come last.
 
 #### Higher-order functions and labels
 
@@ -915,13 +952,14 @@ val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
 It turns out this order matters. In particular, if we define a function that
-has a different order
+has a different order:
 
 ```ocaml env=main
 # let divide ~first ~second = first / second;;
 val divide : first:int -> second:int -> int = <fun>
 ```
 
+\noindent
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
 ```ocaml env=main
@@ -931,6 +969,7 @@ Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
+\noindent
 But, it works smoothly with the original `apply_to_tuple`.
 
 ```ocaml env=main
@@ -1009,7 +1048,7 @@ the caller doesn't provide the argument, and `Some` when it does. But the
 But sometimes, passing in `Some` or `None` explicitly is exactly what you
 want. OCaml lets you do this by using `?` instead of `~` to mark the
 argument. Thus, the following two lines are equivalent ways of specifying the
-`sep` argument to `concat`.[optional arguments/explicit passing of]{.idx}
+`sep` argument to `concat`: [optional arguments/explicit passing of]{.idx}
 
 ```ocaml env=main
 # concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
@@ -1018,8 +1057,9 @@ argument. Thus, the following two lines are equivalent ways of specifying the
 - : string = "foo:bar"
 ```
 
-And the following two lines are equivalent ways of calling `concat` without
-specifying `sep`.
+\noindent
+and the following two lines are equivalent ways of calling `concat`
+without specifying `sep`.
 
 ```ocaml env=main
 # concat "foo" "bar" (* don't provide the optional argument *);;
@@ -1056,6 +1096,7 @@ argument to `concat` using the `?` syntax.
 val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
+\noindent
 Now, if someone calls `uppercase_concat` without an argument, an explicit
 `None` will be passed to `concat`, leaving `concat` to decide what the
 default behavior should be.
@@ -1157,6 +1198,7 @@ val colon_concat : string -> string -> string = <fun>
 - : string = "a:b"
 ```
 
+\noindent
 But what happens if we partially apply just the first argument?
 
 ```ocaml env=main
@@ -1166,6 +1208,7 @@ val prepend_pound : string -> string = <fun>
 - : string = "# a BASH comment"
 ```
 
+\noindent
 The optional argument `?sep` has now disappeared, or been *erased*. Indeed,
 if we try to pass in that optional argument now, it will be rejected.
 
@@ -1176,19 +1219,21 @@ Error: This function has type Base.String.t -> Base.String.t
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 
+\noindent
 So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first positional
 (i.e., neither labeled nor optional) argument defined *after* the optional
 argument is passed in. That explains the behavior of `prepend_pound`. But if
 we had instead defined `concat` with the optional argument in the second
-position.
+position:
 
 ```ocaml env=main
 # let concat x ?(sep="") y = x ^ sep ^ y;;
 val concat : string -> ?sep:string -> string -> string = <fun>
 ```
 
+\noindent
 then application of the first argument would not cause the optional argument
 to be erased.
 
@@ -1221,6 +1266,7 @@ Warning 16 [unerasable-optional-argument]: this optional argument cannot be eras
 val concat : string -> string -> ?sep:string -> string = <fun>
 ```
 
+\noindent
 And indeed, when we provide the two positional arguments, the `sep` argument
 is not erased, instead returning a function that expects the `sep` argument
 to be provided.
