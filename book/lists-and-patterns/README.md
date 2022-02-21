@@ -586,10 +586,6 @@ List.filter]{.idx}[List module/List.filter]{.idx}
 
 ```ocaml env=main
 # List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
-Line 1, characters 28-31:
-Alert deprecated: Base.mod
-[2016-09] this element comes from the stdlib distributed with OCaml.
-Use (%), which has slightly different semantics, or Int.rem which is equivalent.
 - : int list = [2; 4]
 ```
 
