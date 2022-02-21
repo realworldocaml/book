@@ -818,13 +818,13 @@ Here's an example of `show_field` in action:
                 session_id = "26685";
                 time = Time_ns.of_string "2017-07-21 10:11:45 EST";
                 user = "yminsky";
-                credentials = "Xy2d9W"; }
+                credentials = "Xy2d9W"; };;
 val logon : Logon.t =
   {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
    user = "yminsky"; credentials = "Xy2d9W"}
-# show_field Logon.Fields.user Fn.id logon
+# show_field Logon.Fields.user Fn.id logon;;
 - : string = "user: yminsky"
-# show_field Logon.Fields.time Time_ns.to_string logon
+# show_field Logon.Fields.time Time_ns.to_string logon;;
 - : string = "time: 2017-07-21 15:11:45.000000000Z"
 ```
 
@@ -872,9 +872,9 @@ the fields of a `Logon` record:
       ~session_id:(print Fn.id)
       ~time:(print Time_ns.to_string)
       ~user:(print Fn.id)
-      ~credentials:(print Fn.id)
+      ~credentials:(print Fn.id);;
 val print_logon : Logon.t -> unit = <fun>
-# print_logon logon
+# print_logon logon;;
 session_id: 26685
 time: 2017-07-21 15:11:45.000000000Z
 user: yminsky

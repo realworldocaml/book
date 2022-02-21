@@ -944,10 +944,10 @@ val time : (unit -> 'a) -> 'a = <fun>
 And now we can use this to try out some examples:
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> edit_distance "OCaml" "ocaml")
+# time (fun () -> edit_distance "OCaml" "ocaml");;
 Time: 0.655651092529 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
+# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09");;
 Time: 2541.6533947 ms
 - : int = 2
 ```
@@ -981,10 +981,10 @@ This is, however, exponentially slow, for the same reason that
 `fib`. It shows up quite dramatically in the performance:
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> fib 20)
+# time (fun () -> fib 20);;
 Time: 1.14369392395 ms
 - : int = 6765
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 14752.7184486 ms
 - : int = 102334155
 ```
@@ -999,12 +999,12 @@ memoize it after the fact and expect the first call to `fib` to be
 improved.
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memoize (module Int) fib
+# let fib = memoize (module Int) fib;;
 val fib : int -> int = <fun>
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 18174.5970249 ms
 - : int = 102334155
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 0.00524520874023 ms
 - : int = 102334155
 ```
@@ -1075,9 +1075,9 @@ using a `let rec`, which for reasons we'll describe later wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`:
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memo_rec (module Int) fib_norec
+# let fib = memo_rec (module Int) fib_norec;;
 val fib : int -> int = <fun>
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 0.121355056763 ms
 - : int = 102334155
 ```
@@ -1165,7 +1165,7 @@ one we started with; the following call is many thousands of times
 faster than it was without memoization.
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
+# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"));;
 Time: 0.964403152466 ms
 - : int = 2
 ```
@@ -1230,10 +1230,10 @@ without explicit mutation:
 ```ocaml env=main,non-deterministic=command
 # let lazy_memo_rec m f_norec x =
     let rec f = lazy (memoize m (fun x -> f_norec (force f) x)) in
-    (force f) x
+    (force f) x;;
 val lazy_memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
   <fun>
-# time (fun () -> lazy_memo_rec (module Int) fib_norec 40)
+# time (fun () -> lazy_memo_rec (module Int) fib_norec 40);;
 Time: 0.181913375854 ms
 - : int = 102334155
 ```
@@ -1531,7 +1531,7 @@ middle of its work, it won't actually close the file. If we try to read a
 file that doesn't actually contain numbers, we'll see such an error:
 
 ```ocaml env=main,non-deterministic=command
-# sum_file "/etc/hosts"
+# sum_file "/etc/hosts";;
 Exception:
 (Failure
   "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
@@ -1541,9 +1541,9 @@ And if we do this over and over in a loop, we'll eventually run out of file
 descriptors:
 
 ```ocaml skip
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 - : unit = ()
-# sum_file "numbers.txt"
+# sum_file "numbers.txt";;
 Error: I/O error: ...: Too many open files
 ```
 
