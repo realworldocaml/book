@@ -825,15 +825,15 @@ val remove_sequential_duplicates : int list -> int list = <fun>
 
 We'll consider some ways of making this code more concise and more efficient.
 
-First, let's consider efficiency. One problem with the `destutter` code above
-is that it in some cases re-creates on the righthand side of the arrow a
+First, let's consider efficiency. One problem with the above code is
+that it in some cases re-creates on the righthand side of the arrow a
 value that already existed on the lefthand side. Thus, the pattern
-`[hd] -> [hd]` actually allocates a new list element, when really, it should
-be able to just return the list being matched. We can reduce allocation here
-by using an `as` pattern, which allows us to declare a name for the thing
-matched by a pattern or subpattern. While we're at it, we'll use the
-`function` keyword to eliminate the need for an explicit match:[function
-keyword]{.idx}
+`[hd] -> [hd]` actually allocates a new list element, when really, it
+should be able to just return the list being matched. We can reduce
+allocation here by using an `as` pattern, which allows us to declare a
+name for the thing matched by a pattern or subpattern. While we're at
+it, we'll use the `function` keyword to eliminate the need for an
+explicit match:[function keyword]{.idx}
 
 ```ocaml env=main
 # let rec remove_sequential_duplicates list =
@@ -888,8 +888,11 @@ equality operator is specialized to integers, as you can see if you
 try to apply it to values of a different type.
 
 ```ocaml env=poly
+# open Base;;
 # "foo" = "bar";;
-- : bool = false
+Line 1, characters 1-6:
+Error: This expression has type string but an expression was expected of type
+         int
 ```
 
 OCaml also has a collection of polymorphic equality and comparison operators,
@@ -913,8 +916,9 @@ polymorphic.
 - : 'a -> 'a -> bool = <fun>
 ```
 
-If we rewrite our destutter example with `Base.Poly` open, we'll see that it
-gets a polymorphic type, and can now be used on inputs of different types.
+If we rewrite `remove_sequential_duplicates` with `Base.Poly` open,
+we'll see that it gets a polymorphic type, and can now be used on
+inputs of different types.
 
 ```ocaml env=poly
 # let rec destutter = function
@@ -929,9 +933,10 @@ val destutter : 'a list -> 'a list = <fun>
 ```
 
 OCaml comes with a whole family of polymorphic comparison operators,
-including the standard infix comparators, `<`, `>=`, etc., as well as the
-function `compare` that returns `-1`, `0`, or `1` to flag whether the first
-operand is smaller than, equal to, or greater than the second, respectively.
+including the standard infix comparators, `<`, `>=`, etc., as well as
+the function `compare` that returns `-1`, `0`, or `1` to flag whether
+the first operand is smaller than, equal to, or greater than the
+second, respectively.
 
 You might wonder how you could build functions like these yourself if
 OCaml didn't come with them built in. It turns out that you *can't*
