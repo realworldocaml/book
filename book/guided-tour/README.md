@@ -61,7 +61,14 @@ Our first step is to open `Base`:
 
 By opening `Base`, we make the definitions it contains available without
 having to reference `Base` explicitly. This is required for many of the
-examples in the tour and in the remainder of the book.
+examples in the tour and in the remainder of the book. 
+
+Note that for this to work, your `~/.ocamlinit` file should contain the following line: 
+```ocaml env=main 
+#require "base";;
+```
+If it is not included, you may get an `Unbound module Base` error, so be sure that it is in there.
+
 
 Now let's try a few simple numerical calculations:
 
