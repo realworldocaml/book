@@ -42,7 +42,7 @@ jobs:
         run: opam exec -- dune build @site
 
       - name: Run promotion tests
-        run: opam exec -- dune runtest
+        run: opam exec -- dune build runtest
 
       - name: Deploy site
         uses: peaceiris/actions-gh-pages@v3
