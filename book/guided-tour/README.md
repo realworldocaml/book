@@ -1293,12 +1293,12 @@ From a syntactic perspective, you should note the keywords that distinguish a
 Here's an example run of this code:
 
 ```ocaml env=main,non-deterministic
-# let ar = Array.init 20 ~f:(fun i -> i)
+# let ar = Array.init 20 ~f:(fun i -> i);;
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
-# permute ar
+# permute ar;;
 - : unit = ()
-# ar
+# ar;;
 - : int array =
 [|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 ```
