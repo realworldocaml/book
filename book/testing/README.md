@@ -475,7 +475,7 @@ ensuring that the delimiter won't show up in the body of the string.
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
+```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE,skip
 $ dune runtest
      patdiff (internal) (exit 1)
 ...
@@ -521,7 +521,7 @@ let get_href_hosts soup =
 And if we run the test again, we'll see that the output is now as it
 should be.
 
-```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
+```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE,skip
 $ dune runtest
      patdiff (internal) (exit 1)
 ...

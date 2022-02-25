@@ -962,13 +962,9 @@ autocompletion]{.idx}
 Bash autocompletion isn't always installed by default, so check your OS
 package manager to see if you have it available.
 
-Operating system | Package manager | Package
------------------|-----------------|--------
-Debian Linux | `apt` | `bash-completion`
-macOS | Homebrew | `bash-completion`
-FreeBSD | Ports system | <em class="filename">/usr/ports/shells/bash-completion</em>
-
-
+- On Debian Linux, do `apt install bash-completion`
+- On macOS Homebrew, do `brew install bash-completion`
+- On FreeBSD, do `pkg install bash-completion`.
 
 Once *bash* completion is installed and configured, check that it works by
 typing the `ssh` command and pressing the Tab key. This should show you the

@@ -47,8 +47,8 @@ with only `dune` installed to avoid conflicts between the opam and local
 libraries. To set up your RWO development environment you can run:
 
 ```
-opam switch create rwo 4.09.0
-opam install dune=2.9.1
+opam switch create rwo 4.13.1
+opam install dune=3.0.2
 ```
 
 ### Generating the HTML
