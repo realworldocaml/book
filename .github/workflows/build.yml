@@ -14,7 +14,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          # - macos-latest
         ocaml-compiler:
           - 4.13.1
 
@@ -31,17 +30,13 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: ${{ matrix.os != 'macos-latest' }}
+          dune-cache: false
 
       - name: Install dune
         if: ${{ matrix.os == 'macos-latest' }}
-        run: opam install dune>=2.9.0
+        run: opam install dune>=3.0.2
 
-      - name: Build HTML book
-        if: runner.os == 'Linux'
-        run: opam exec -- dune build @site
-
-      - name: Run promotion tests
+      - name: Build HTML book and promotions
         run: opam exec -- dune build @site && opam exec -- dune runtest
 
       - name: Deploy site
