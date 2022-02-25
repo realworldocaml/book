@@ -1,7 +1,7 @@
 # Objects
 
 ::: {text-align=right}
-*This chapter was written by Leo White and Jeremy Yallop.*
+*This chapter was written by Leo White and Jason Hickey.*
 :::
 
 We've already seen several tools that OCaml provides for organizing programs,
