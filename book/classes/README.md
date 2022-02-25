@@ -1,7 +1,7 @@
 # Classes
 
 ::: {text-align=right}
-*This chapter was written by Leo White and Jeremy Yallop.*
+*This chapter was written by Leo White and Jason Hickey.*
 :::
 
 Programming with objects directly is great for encapsulation, but one of the

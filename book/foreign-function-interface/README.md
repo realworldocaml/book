@@ -1,5 +1,9 @@
 # Foreign Function Interface
 
+::: {text-align=right}
+*This chapter includes contributions from Jeremy Yallop.*
+:::
+
 OCaml has several options available to interact with non-OCaml code. The
 compiler can link with external system libraries via C code and also can
 produce standalone native object files that can be embedded within other
