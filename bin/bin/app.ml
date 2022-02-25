@@ -1,7 +1,6 @@
 open Core
 open Async
 open Rwo
-let (/) = Filename.concat
 
 module Params = struct
   open Command.Param
@@ -10,19 +9,6 @@ module Params = struct
     let default = "./" in
     let doc = sprintf "dir Root of repository. Default: \"%s\"." default in
     flag "-repo-root" (optional_with_default default string) ~doc
-
-  let production =
-    let default = false in
-    let doc = sprintf
-        " Set to true to generate file for publication. Default \
-         is %b, which generates dev version of file."
-        default
-    in
-    flag "-production" (optional_with_default default bool) ~doc
-
-  let chapter =
-    let doc = "N Build HTML version of chapter N." in
-    flag "-chapter" (required int) ~doc
 
   let out_dir =
     let default = "_build" in
@@ -37,12 +23,6 @@ module Params = struct
 
   let file =
     anon ("file" %: string)
-
-  let run_nondeterministic =
-    flag "-run-nondeterministic" no_arg
-      ~doc:" In .mlt files, run code marked [%%expect.nondeterministic ...]. \
-            By default, they are skipped."
-
 end
 
 
