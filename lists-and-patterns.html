@@ -215,13 +215,13 @@ of cases increases. Here, we’ll benchmark these functions using the
 <code>core_bench</code> library, which can be installed by running
 <code>opam install core_bench</code> from the command line.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_bench"
-open Core_bench
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_bench";;
+open Core_bench;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () -&gt;
       plus_one_match 10)
 ; Bench.Test.create ~name:"plus_one_if" (fun () -&gt;
       plus_one_if 10) ]
-|&gt; Bench.bench
+|&gt; Bench.bench;;
 &gt;Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 &gt;┌────────────────┬──────────┐
 &gt;│ Name           │ Time/Run │
@@ -251,7 +251,7 @@ matching:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = List.range 0 1000 in
 [ Bench.Test.create ~name:"sum_if" (fun () -&gt; sum_if numbers)
 ; Bench.Test.create ~name:"sum"    (fun () -&gt; sum numbers) ]
-|&gt; Bench.bench
+|&gt; Bench.bench;;
 &gt;Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 &gt;┌────────┬──────────┐
 &gt;│ Name   │ Time/Run │
@@ -327,7 +327,7 @@ done, here’s how the resulting function should work:</p>
        ["C"    ;"Dennis Ritchie";"1969"] ;
        ["ML"   ;"Robin Milner"  ;"1973"] ;
        ["OCaml";"Xavier Leroy"  ;"1996"] ;
-])
+]);;
 &gt;| language | architect      | first release |
 &gt;|----------+----------------+---------------|
 &gt;| Lisp     | John McCarthy  | 1958          |

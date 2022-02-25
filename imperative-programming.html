@@ -873,10 +873,10 @@ timing function, using Core’s <code>Time</code> module.</p>
 </div>
 <p>And now we can use this to try out some examples:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance "OCaml" "ocaml")
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance "OCaml" "ocaml");;
 &gt;Time: 0.655651092529 ms
 &gt;- : int = 2
-time (fun () -&gt; edit_distance "OCaml 4.09" "ocaml 4.09")
+time (fun () -&gt; edit_distance "OCaml 4.09" "ocaml 4.09");;
 &gt;Time: 2541.6533947 ms
 &gt;- : int = 2
 </code></pre>
@@ -908,10 +908,10 @@ if i &lt;= 1 then i else fib (i - 1) + fib (i - 2);;
 calls to <code>fib</code>. It shows up quite dramatically in the
 performance:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; fib 20)
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; fib 20);;
 &gt;Time: 1.14369392395 ms
 &gt;- : int = 6765
-time (fun () -&gt; fib 40)
+time (fun () -&gt; fib 40);;
 &gt;Time: 14752.7184486 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -924,12 +924,12 @@ that we need to insert the memoization before the recursive calls within
 way and memoize it after the fact and expect the first call to
 <code>fib</code> to be improved.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memoize (module Int) fib
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memoize (module Int) fib;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-time (fun () -&gt; fib 40)
+time (fun () -&gt; fib 40);;
 &gt;Time: 18174.5970249 ms
 &gt;- : int = 102334155
-time (fun () -&gt; fib 40)
+time (fun () -&gt; fib 40);;
 &gt;Time: 0.00524520874023 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -999,9 +999,9 @@ later wouldn’t work here.</p>
 <p>Using <code>memo_rec</code>, we can now build an efficient version of
 <code>fib</code>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memo_rec (module Int) fib_norec
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let fib = memo_rec (module Int) fib_norec;;
 &gt;val fib : int -&gt; int = &lt;fun&gt;
-time (fun () -&gt; fib 40)
+time (fun () -&gt; fib 40);;
 &gt;Time: 0.121355056763 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -1087,7 +1087,7 @@ end;;
 than the one we started with; the following call is many thousands of
 times faster than it was without memoization.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance ("OCaml 4.09","ocaml 4.09"))
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">time (fun () -&gt; edit_distance ("OCaml 4.09","ocaml 4.09"));;
 &gt;Time: 0.964403152466 ms
 &gt;- : int = 2
 </code></pre>
@@ -1147,10 +1147,10 @@ definition of <code>memo_rec</code> work without explicit mutation:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let lazy_memo_rec m f_norec x =
   let rec f = lazy (memoize m (fun x -&gt; f_norec (force f) x)) in
-  (force f) x
+  (force f) x;;
 &gt;val lazy_memo_rec : 'a Hashtbl.Key.t -&gt; (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b =
 &gt;  &lt;fun&gt;
-time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40)
+time (fun () -&gt; lazy_memo_rec (module Int) fib_norec 40);;
 &gt;Time: 0.181913375854 ms
 &gt;- : int = 102334155
 </code></pre>
@@ -1427,7 +1427,7 @@ in the middle of its work, it won’t actually close the file. If we try
 to read a file that doesn’t actually contain numbers, we’ll see such an
 error:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sum_file "/etc/hosts"
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sum_file "/etc/hosts";;
 &gt;Exception:
 &gt;(Failure
 &gt;  "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
@@ -1436,9 +1436,9 @@ error:</p>
 <p>And if we do this over and over in a loop, we’ll eventually run out
 of file descriptors:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done;;
 &gt;- : unit = ()
-sum_file "numbers.txt"
+sum_file "numbers.txt";;
 &gt;Error: I/O error: ...: Too many open files
 </code></pre>
 </div>

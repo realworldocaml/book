@@ -1216,12 +1216,12 @@ distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>,
 <code>do</code>, and <code>done</code>.</p>
 <p>Here’s an example run of this code:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ar = Array.init 20 ~f:(fun i -&gt; i)
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ar = Array.init 20 ~f:(fun i -&gt; i);;
 &gt;val ar : int array =
 &gt;  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
-permute ar
+permute ar;;
 &gt;- : unit = ()
-ar
+ar;;
 &gt;- : int array =
 &gt;[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 </code></pre>

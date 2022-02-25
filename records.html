@@ -753,13 +753,13 @@ record from which the field can be grabbed.</p>
               session_id = "26685";
               time = Time_ns.of_string "2017-07-21 10:11:45 EST";
               user = "yminsky";
-              credentials = "Xy2d9W"; }
+              credentials = "Xy2d9W"; };;
 &gt;val logon : Logon.t =
 &gt;  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
 &gt;   user = "yminsky"; credentials = "Xy2d9W"}
-show_field Logon.Fields.user Fn.id logon
+show_field Logon.Fields.user Fn.id logon;;
 &gt;- : string = "user: yminsky"
-show_field Logon.Fields.time Time_ns.to_string logon
+show_field Logon.Fields.time Time_ns.to_string logon;;
 &gt;- : string = "time: 2017-07-21 15:11:45.000000000Z"
 </code></pre>
 </div>
@@ -804,9 +804,9 @@ up using the combination of the record and the <code>Field.t</code>.</p>
     ~session_id:(print Fn.id)
     ~time:(print Time_ns.to_string)
     ~user:(print Fn.id)
-    ~credentials:(print Fn.id)
+    ~credentials:(print Fn.id);;
 &gt;val print_logon : Logon.t -&gt; unit = &lt;fun&gt;
-print_logon logon
+print_logon logon;;
 &gt;session_id: 26685
 &gt;time: 2017-07-21 15:11:45.000000000Z
 &gt;user: yminsky
