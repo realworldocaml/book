@@ -655,16 +655,16 @@ phys_equal 1 2;;
 <p>If you feel like hanging your OCaml interpreter, you can verify what
 happens with recursive values and structural equality for yourself:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 }
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 };;
 &gt;type t1 = { foo1 : int; bar1 : t2; }
 &gt;and t2 = { foo2 : int; bar2 : t1; }
-let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 }
+let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
 &gt;&lt;lots of text&gt;
-v1 == v1
+v1 == v1;;
 &gt;- : bool = true
-phys_equal v1 v1
+phys_equal v1 v1;;
 &gt;- : bool = true
-v1 = v1
+v1 = v1;;
 &gt;&lt;press ^Z and kill the process now&gt;
 </code></pre>
 </div>

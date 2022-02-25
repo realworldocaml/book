@@ -1119,7 +1119,7 @@ more verbose. We can see this if you run the vanilla OCaml toplevel (not
 <code>utop</code>).</p>
 <div class="highlight">
 <pre><code class="language-clike">$ ocaml
-# List.map print_endline "" ;;
+# List.map print_endline "";;
 Error: This expression has type string but an expression was expected of type
          string list</code></pre>
 </div>
@@ -1127,8 +1127,8 @@ Error: This expression has type string but an expression was expected of type
 error. When we switch to Core, though, it gets more verbose:</p>
 <div class="highlight">
 <pre><code class="language-clike">$ ocaml
-# open Core ;;
-# List.map ~f:print_endline "" ;;
+# open Core;;
+# List.map ~f:print_endline "";;
 Error: This expression has type string but an expression was expected of type
          'a Core.List.t = 'a list</code></pre>
 </div>

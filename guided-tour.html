@@ -12,6 +12,7 @@ easier-to-use version of OCaml’s standard toplevel (which you can start
 by typing <em>ocaml</em> at the command line). These instructions will
 assume you’re using <code>utop</code>, but the ordinary toplevel should
 mostly work fine.</p>
+
 <p>Before going any further, make sure you’ve followed the steps in <a href="http://dev.realworldocaml.org/install.html">the installation
 page</a>.</p>
 <section data-type="note" class="level5" id="base-and-core">
@@ -39,7 +40,7 @@ that reason, there’s yet a third library, <code>Core_kernel</code>,
 which is a portable subset of <code>Core</code>. That said, the latest
 development version removes <code>Core_kernel</code>, and makes
 <code>Core</code> itself portable. The stable release should have
-<code>Core_kernel</code> removed by early 2022, so we won’t use
+<code>Core_kernel</code> removed by mid-2022, so we won’t use
 <code>Core_kernel</code> in this text.</p>
 </section>
 <p>Before getting started, make sure you have a working OCaml
@@ -175,7 +176,8 @@ ratio 4 7;;
 </div>
 <p>Note that in OCaml, function arguments are separated by spaces
 instead of by parentheses and commas, which is more like the UNIX shell
-than it is like traditional programming languages such as C or Java.</p>
+than it is like traditional programming languages such as Python or
+Java.</p>
 <p>The preceding example also happens to be our first use of modules.
 Here, <code>Float.of_int</code> refers to the <code>of_int</code>
 function contained in the <code>Float</code> module. This is different
@@ -199,10 +201,10 @@ shadowed locally.</p>
 &gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that we used a slightly different syntax for opening the module,
-since we were only opening it in the local scope inside the definition
-of <code>ratio</code>. There’s also a more concise syntax for local
-opens, as you can see here.</p>
+<p>We used a slightly different syntax for opening the module, since we
+were only opening it in the local scope inside the definition of
+<code>ratio</code>. There’s also a more concise syntax for local opens,
+as you can see here.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
   Float.O.(of_int x / of_int y);;
@@ -233,7 +235,7 @@ boolean, and that the remaining two arguments are integers. Here’s an
 example of this function in action:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let even x =
-x % 2 = 0;;
+  x % 2 = 0;;
 &gt;val even : int -&gt; bool = &lt;fun&gt;
 sum_if_true even 3 4;;
 &gt;- : int = 4
@@ -381,19 +383,19 @@ runtime and compile-time errors, but that difference is still there.
 Generally, type errors like this one:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let add_potato x =
-x + "potato";;
-&gt;Line 2, characters 7-15:
+  x + "potato";;
+&gt;Line 2, characters 9-17:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
 </code></pre>
 </div>
-<p>are compile-time errors (because <code>+</code> requires that both
+<p> are compile-time errors (because <code>+</code> requires that both
 its arguments be of type <code>int</code>), whereas errors that can’t be
 caught by the type system, like division by zero, lead to runtime
 exceptions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_a_multiple x y =
-x % y = 0;;
+  x % y = 0;;
 &gt;val is_a_multiple : int -&gt; int -&gt; bool = &lt;fun&gt;
 is_a_multiple 8 2;;
 &gt;- : bool = true
@@ -429,12 +431,12 @@ let another_tuple = (3,"four",5.);;
 &gt;val another_tuple : int * string * float = (3, "four", 5.)
 </code></pre>
 </div>
-<p>(For the mathematically inclined, <code>*</code> is used in the type
+<p>For the mathematically inclined, <code>*</code> is used in the type
 <code>t * s</code> because that type corresponds to the set of all pairs
 containing one value of type <code>t</code> and one of type
 <code>s</code>. In other words, it’s the <em>Cartesian product</em> of
 the two types, which is why we use <code>*</code>, the symbol for
-product.)</p>
+product.</p>
 <p>You can extract the components of a tuple using OCaml’s
 pattern-matching syntax, as shown below:</p>
 <div class="highlight">
@@ -443,7 +445,7 @@ pattern-matching syntax, as shown below:</p>
 &gt;val y : string = "three"
 </code></pre>
 </div>
-<p>Here, the <code>(x,y)</code> on the left-hand side of the
+<p> Here, the <code>(x,y)</code> on the left-hand side of the
 <code>let</code> binding is the pattern. This pattern lets us mint the
 new variables <code>x</code> and <code>y</code>, each bound to different
 components of the value being matched. These can now be used in
@@ -453,7 +455,7 @@ subsequent expressions:</p>
 &gt;- : int = 8
 </code></pre>
 </div>
-<p>Note that the same syntax is used both for constructing and for
+<p> Note that the same syntax is used both for constructing and for
 pattern matching on tuples.</p>
 <p>Pattern matching can also show up in function arguments. Here’s a
 function for computing the distance between two points on the plane,
@@ -466,7 +468,7 @@ of fuss:</p>
 &gt;val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The <code>**.</code> operator used above is for raising a
+<p> The <code>**.</code> operator used above is for raising a
 floating-point number to a power.</p>
 <p>This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you’ll see, it has surprising power.</p>
@@ -528,7 +530,7 @@ of the lengths of each language as follows:</p>
 transforming the elements of that list. It returns a new list with the
 transformed elements and does not modify the original list.</p>
 <p>Notably, the function passed to <code>List.map</code> is passed under
-a <em>labeled argument</em><code>~f</code>. Labeled arguments are
+a <em>labeled argument</em> <code>~f</code>. Labeled arguments are
 specified by name rather than by position, and thus allow you to change
 the order in which arguments are presented to a function without
 changing its behavior, as you can see here:<a data-secondary="labeled arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-primary="labeled
@@ -724,8 +726,8 @@ equation whose meaning you were unfolding step by step:</p>
 = 1 + 5
 = 6</code></pre>
 </div>
-<p>This suggests a reasonable mental model for what OCaml is actually
-doing to evaluate a recursive function.</p>
+<p> This suggests a reasonable if not entirely accurate mental model for
+what OCaml is actually doing to evaluate a recursive function.</p>
 <p>We can introduce more complicated list patterns as well. Here’s a
 function for removing sequential duplicates:</p>
 <div class="highlight">
@@ -733,9 +735,11 @@ function for removing sequential duplicates:</p>
   match list with
   | [] -&gt; []
   | first :: second :: tl -&gt;
-    let new_tl = remove_sequential_duplicates (second :: tl) in
-    if first = second then new_tl else first :: new_tl;;
-&gt;Lines 2-6, characters 5-57:
+    if first = second then
+      remove_sequential_duplicates (second :: tl)
+    else
+      first :: remove_sequential_duplicates (second :: tl);;
+&gt;Lines 2-8, characters 5-61:
 &gt;Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 &gt;Here is an example of a case that is not matched:
 &gt;_::[]
@@ -750,10 +754,12 @@ lists. We can fix this warning by adding another case to the match:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
   match list with
   | [] -&gt; []
-  | [hd] -&gt; [hd]
-  | hd1 :: hd2 :: tl -&gt;
-    let new_tl = remove_sequential_duplicates (hd2 :: tl) in
-    if hd1 = hd2 then new_tl else hd1 :: new_tl;;
+  | [x] -&gt; [x]
+  | first :: second :: tl -&gt;
+    if first = second then
+      remove_sequential_duplicates (second :: tl)
+    else
+      first :: remove_sequential_duplicates (second :: tl);;
 &gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
 &gt;- : int list = [1; 2; 3; 4; 1]
@@ -770,43 +776,6 @@ recursive functions. In practice, this isn’t usually necessary. Most of
 the time, you’ll find yourself happy to use the iteration functions
 found in the <code>List</code> module. But it’s good to know how to use
 recursion for when you need to iterate in a new way.<a data-secondary="recursion" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="nesting-lets-with-let-and-in">
-<h5>Nesting lets with let and in</h5>
-<p><code>new_tl</code> in the above examples was our first use of
-<code>let</code> to define a new variable within the body of a function.
-A <code>let</code> paired with an <code>in</code> can be used to
-introduce a new binding within any local scope, including a function
-body. The <code>in</code> marks the beginning of the scope within which
-the new variable can be used. Thus, we could write:<a data-secondary="nested let binding" data-primary="let
-syntax" data-type="indexterm">&nbsp;</a></p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
-z + z;;
-&gt;- : int = 14
-</code></pre>
-</div>
-<p>Note that the scope of the <code>let</code> binding is terminated by
-the double-semicolon, so the value of <code>z</code> is no longer
-available:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">z;;
-&gt;Line 1, characters 1-2:
-&gt;Error: Unbound value z
-</code></pre>
-</div>
-<p>We can also have multiple <code>let</code> bindings in a row, each
-one adding a new variable binding to what came before:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 7 in
-let y = x * x in
-x + y;;
-&gt;- : int = 56
-</code></pre>
-</div>
-<p>This kind of nested <code>let</code> binding is a common way of
-building up a complex expression, with each <code>let</code> naming some
-component, before combining them in one final expression.</p>
-</section>
 </section>
 </section>
 <section class="level3" id="options">
@@ -817,7 +786,7 @@ For example:<a data-primary="options" data-type="indexterm">&nbsp;</a><a data-se
 structures" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide x y =
-if y = 0 then None else Some (x / y);;
+  if y = 0 then None else Some (x / y);;
 &gt;val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
 </code></pre>
 </div>
@@ -891,7 +860,7 @@ defined positionally. Record types are easy enough to construct:<a data-secondar
 matching:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x = x_pos; y = y_pos } =
-Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
+  Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
 &gt;val magnitude : point2d -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -912,7 +881,7 @@ follows:<a data-secondary="field punning" data-primary="fields" data-type="index
 fields:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let distance v1 v2 =
-magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 &gt;val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
@@ -926,8 +895,8 @@ type segment_desc = { endpoint1: point2d; endpoint2: point2d }</code></pre>
 </div>
 <p>Now, imagine that you want to combine multiple objects of these types
 together as a description of a multi-object scene. You need some unified
-way of representing these objects together in a single type. One way of
-doing this is using a <em>variant</em> type:<a data-secondary="variant types" data-primary="datatypes" data-type="indexterm">&nbsp;</a><a data-secondary="combining multiple object types with" data-primary="variant
+way of representing these objects together in a single type.
+<em>Variant</em> types let you do just that: <a data-secondary="variant types" data-primary="datatypes" data-type="indexterm">&nbsp;</a> <a data-secondary="combining multiple object types with" data-primary="variant
 types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type scene_element =
@@ -1069,23 +1038,23 @@ record fields" data-primary="imperative programming" data-type="indexterm">&nbsp
 extend incrementally, and sufficient to compute means and standard
 deviations, as shown in the following example.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let mean rsum = rsum.sum /. Float.of_int rsum.samples
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let mean rsum = rsum.sum /. Float.of_int rsum.samples;;
+&gt;val mean : running_sum -&gt; float = &lt;fun&gt;
 let stdev rsum =
   Float.sqrt
     (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
-&gt;val mean : running_sum -&gt; float = &lt;fun&gt;
 &gt;val stdev : running_sum -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We also need functions to create and update
 <code>running_sum</code>s:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create () = { sum = 0.; sum_sq = 0.; samples = 0 };;
+&gt;val create : unit -&gt; running_sum = &lt;fun&gt;
 let update rsum x =
   rsum.samples &lt;- rsum.samples + 1;
   rsum.sum     &lt;- rsum.sum     +. x;
   rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x;;
-&gt;val create : unit -&gt; running_sum = &lt;fun&gt;
 &gt;val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1111,12 +1080,10 @@ stdev rsum;;
 &gt;- : float = 3.94405318873307698
 </code></pre>
 </div>
-<p>It’s worth noting that the preceding algorithm is numerically naive
-and has poor precision in the presence of cancellation. You can look at
-this Wikipedia <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article
-on algorithms for calculating variance</a> for more details, paying
-particular attention to the weighted incremental and parallel
-algorithms.</p>
+<p>Warning: the preceding algorithm is numerically naive and has poor
+precision in the presence of many values that cancel each other out.
+This Wikipedia <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article
+on algorithms for calculating variance</a> provides more details.</p>
 </section>
 <section class="level3" id="refs">
 <h3>Refs</h3>
@@ -1183,16 +1150,50 @@ list, using a <code>ref</code> to accumulate the results:</p>
 </div>
 <p>This isn’t the most idiomatic way to sum up a list, but it shows how
 you can use a <code>ref</code> in place of a mutable variable.</p>
+<section data-type="note" class="level5" id="nesting-lets-with-let-and-in">
+<h5>Nesting lets with let and in</h5>
+<p>The definition of <code>sum</code> in the above examples was our
+first use of <code>let</code> to define a new variable within the body
+of a function. A <code>let</code> paired with an <code>in</code> can be
+used to introduce a new binding within any local scope, including a
+function body. The <code>in</code> marks the beginning of the scope
+within which the new variable can be used. Thus, we could write:<a data-secondary="nested let binding" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
+z + z;;
+&gt;- : int = 14
+</code></pre>
+</div>
+<p>Note that the scope of the <code>let</code> binding is terminated by
+the double-semicolon, so the value of <code>z</code> is no longer
+available:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">z;;
+&gt;Line 1, characters 1-2:
+&gt;Error: Unbound value z
+</code></pre>
+</div>
+<p>We can also have multiple <code>let</code> bindings in a row, each
+one adding a new variable binding to what came before:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 7 in
+let y = x * x in
+x + y;;
+&gt;- : int = 56
+</code></pre>
+</div>
+<p>This kind of nested <code>let</code> binding is a common way of
+building up a complex expression, with each <code>let</code> naming some
+component, before combining them in one final expression.</p>
+</section>
 </section>
 <section class="level3" id="for-and-while-loops">
 <h3>For and While Loops</h3>
 <p>OCaml also supports traditional imperative control-flow constructs
-like <code>for and while</code> loops. Here, for example, is some code
-for permuting an array that uses a <code>for</code> loop. We use the
-<code>Random</code> module as our source of randomness.
-<code>Random</code> starts with a default seed, but you can call
-<code>Random.self_init</code> to choose a new seed at random:<a data-primary="Random module" data-type="indexterm">&nbsp;</a><a data-primary="while
-loops" data-type="indexterm">&nbsp;</a><a data-primary="for loops" data-type="indexterm">&nbsp;</a><a data-secondary="for and while loops" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+like <code>for</code> and <code>while</code> loops. Here, for example,
+is some code for permuting an array that uses a <code>for</code> loop:
+<a data-primary="while loops" data-type="indexterm">&nbsp;</a> <a data-primary="for loops" data-type="indexterm">&nbsp;</a>
+<a data-secondary="for and while loops" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let permute array =
   let length = Array.length array in
@@ -1207,6 +1208,9 @@ loops" data-type="indexterm">&nbsp;</a><a data-primary="for loops" data-type="in
 &gt;val permute : 'a array -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
+<p> This is our first use of the <code>Random</code> module. Note that
+<code>Random</code> starts with a fixed seed, but you can call
+<code>Random.self_init</code> to choose a new seed at random. <a data-primary="Random module" data-type="indexterm">&nbsp;</a></p>
 <p>From a syntactic perspective, you should note the keywords that
 distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>,
 <code>do</code>, and <code>done</code>.</p>
@@ -1302,12 +1306,11 @@ returns an optional value, with <code>None</code> indicating the end of
 the input stream.</p>
 <p>After <code>read_and_accumulate</code> returns, the total needs to be
 printed. This is done using the <code>printf</code> command, which
-provides support for type-safe format strings, similar to what you’ll
-find in a variety of languages. The format string is parsed by the
-compiler and used to determine the number and type of the remaining
-arguments that are required. In this case, there is a single formatting
-directive, <code>%F</code>, so <code>printf</code> expects one
-additional argument of type <code>float</code>.</p>
+provides support for type-safe format strings. The format string is
+parsed by the compiler and used to determine the number and type of the
+remaining arguments that are required. In this case, there is a single
+formatting directive, <code>%F</code>, so <code>printf</code> expects
+one additional argument of type <code>float</code>.</p>
 <section class="level3" id="compiling-and-running">
 <h3>Compiling and Running</h3>
 <p>We’ll compile our program using <code>dune</code>, a build system

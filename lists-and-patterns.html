@@ -16,7 +16,7 @@ of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 &gt;- : int list = [1; 2; 3]
 </code></pre>
 </div>
-<p>And they can also be generated using the equivalent <code>::</code>
+<p> And they can also be generated using the equivalent <code>::</code>
 notation:<a data-secondary=": : operator" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operator : :" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1 :: (2 :: (3 :: []));;
@@ -81,7 +81,7 @@ sum [];;
 &gt;- : int = 0
 </code></pre>
 </div>
-<p>This code follows the convention of using <code>hd</code> to
+<p> This code follows the convention of using <code>hd</code> to
 represent the first element (or head) of the list, and <code>tl</code>
 to represent the remainder (or tail).</p>
 <p>The <code>match</code> expression in <code>sum</code> is really doing
@@ -109,7 +109,7 @@ is wrong:</p>
 &gt;val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Moreover, the function clearly does the wrong thing, filtering out
+<p> Moreover, the function clearly does the wrong thing, filtering out
 all elements of the list rather than just those equal to the provided
 value, as you can see here:</p>
 <div class="highlight">
@@ -117,7 +117,7 @@ value, as you can see here:</p>
 &gt;- : int list = []
 </code></pre>
 </div>
-<p>So, what’s going on?</p>
+<p> So, what’s going on?</p>
 <p>The key observation is that the appearance of <code>to_drop</code> in
 the second case doesn’t imply a check that the first element is equal to
 the value <code>to_drop</code> that was passed in as an argument to
@@ -270,8 +270,7 @@ element of the list to determine whether or not it’s the empty cell.
 With a <code>match</code> expression, this work happens exactly once per
 list element.</p>
 <p>This is a more general phenomena: pattern matching is very efficient,
-and pattern matching code is usually a win over what you might write by
-hand.</p>
+and is usually faster than what you might write yourself.</p>
 </section>
 <section class="level3" id="detecting-errors">
 <h3>Detecting Errors</h3>
@@ -317,8 +316,9 @@ functions that abstract out common patterns for computing with
 lists.<a data-primary="tables, creating with List module" data-type="indexterm">&nbsp;</a><a data-secondary="creating tables with" data-primary="List module" data-type="indexterm">&nbsp;</a><a data-secondary="List module" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s work through a concrete example. We’ll write a function
 <code>render_table</code> that, given a list of column headers and a
-list of rows, prints them out in a well-formatted text table, as
-follows:</p>
+list of rows, prints them out in a well-formatted text table. When we’re
+done, here’s how the resulting function should work:</p>
+
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Stdio.print_endline
   (render_table
@@ -360,7 +360,7 @@ we might write:<a data-secondary="List.map2_exn" data-primary="List module" data
 &gt;- : int list = [3; 2; 3]
 </code></pre>
 </div>
-<p>The <code>_exn</code> is there because the function throws an
+<p> The <code>_exn</code> is there because the function throws an
 exception if the lists are of mismatched length:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
@@ -386,7 +386,7 @@ up a list:</p>
 &gt;- : int = 10
 </code></pre>
 </div>
-<p>This example is particularly simple because the accumulator and the
+<p> This example is particularly simple because the accumulator and the
 list elements are of the same type. But <code>fold</code> is not limited
 to such cases. We can for example use <code>fold</code> to reverse a
 list, in which case the accumulator is itself a list:</p>
@@ -433,7 +433,7 @@ render_separator [3;6;2];;
 &gt;- : string = "|-----+--------+----|"
 </code></pre>
 </div>
-<p>Note that we make the line of dashes two larger than the provided
+<p> Note that we make the line of dashes two larger than the provided
 width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List
 module" data-type="indexterm">&nbsp;</a></p>
 <section data-type="note" class="level5" id="performance-of-string.concat-and">
@@ -441,21 +441,21 @@ module" data-type="indexterm">&nbsp;</a></p>
 <p>In the preceding code we’ve concatenated strings two different ways:
 <code>String.concat</code>, which operates on lists of strings; and
 <code>^</code>, which is a pairwise operator. You should avoid
-<code>^</code> for joining long numbers of strings, since it allocates a
-new string every time it runs. Thus, the following code</p>
+<code>^</code> for joining large numbers of strings, since it allocates
+a new string every time it runs. Thus, the following code</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 &gt;val s : string = "......."
 </code></pre>
 </div>
-<p>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
+<p> will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
 code</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = String.concat [".";".";".";".";".";".";"."];;
 &gt;val s : string = "......."
 </code></pre>
 </div>
-<p>allocates one string of size 7, as well as a list of length 7. At
+<p> allocates one string of size 7, as well as a list of length 7. At
 these small sizes, the differences don’t amount to much, but for
 assembling large strings, it can be a serious performance issue.</p>
 </section>
@@ -482,8 +482,8 @@ render_row ["Hello";"World"] [10;15];;
 &gt;- : string = "| Hello      | World           |"
 </code></pre>
 </div>
-<p>Now we can bring this all together in a single function that renders
-the table:</p>
+<p>Finally, we can bring this all together to build the
+<code>render_table</code> function we wanted at the start!</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_table header rows =
   let widths = max_widths header rows in
@@ -518,7 +518,7 @@ List.reduce" data-primary="elements" data-type="indexterm">&nbsp;</a><a data-sec
 &gt;- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;
 </code></pre>
 </div>
-<p><code>reduce</code> returns an optional result, returning
+<p> <code>reduce</code> returns an optional result, returning
 <code>None</code> when the input list is empty.</p>
 <p>Now we can see <code>reduce</code> in action:</p>
 <div class="highlight">
@@ -541,8 +541,6 @@ List.filter" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secon
 &gt;- : int list = [2; 4]
 </code></pre>
 </div>
-<p>Note that the <code>mod</code> used above is an infix operator, as
-described in <a data-type="xref" href="variables-and-functions.html#variables-and-functions">Chapter 2, Variables And Functions</a>.</p>
 <p>Sometimes, you want to both transform and filter as part of the same
 computation. In that case, <code>List.filter_map</code> is what you
 need. The function passed to <code>List.filter_map</code> returns an
@@ -568,10 +566,10 @@ extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
 &gt;- : string list = ["c"; "ml"; "mli"]
 </code></pre>
 </div>
-<p>The preceding code is also an example of an Or pattern, which allows
+<p>The preceding code is also an example of an or-pattern, which allows
 you to have multiple subpatterns within a larger pattern. In this case,
-<code>None | Some ("",_)</code> is an Or pattern. As we’ll see later, Or
-patterns can be nested anywhere within larger patterns.</p>
+<code>None | Some ("",_)</code> is an or-pattern. As we’ll see later,
+or-patterns can be nested anywhere within larger patterns.</p>
 </section>
 <section class="level4" id="partitioning-with-list.partition_tf">
 <h4>Partitioning with List.partition_tf</h4>
@@ -639,7 +637,7 @@ let rec ls_rec s =
 &gt;val ls_rec : string -&gt; string list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that this example uses some functions from the <code>Sys</code>
+<p> Note that this example uses some functions from the <code>Sys</code>
 and <code>Filename</code> modules from <code>Core</code> for accessing
 the filesystem and dealing with filenames.</p>
 <p>The preceding combination of <code>List.map</code> and
@@ -758,52 +756,59 @@ tail recursion is usually the right approach.</p>
 <h2>Terser and Faster Patterns</h2>
 <p>Now that we know more about how lists and patterns work, let’s
 consider how we can improve on an example from <a data-type="xref" href="guided-tour.html#recursive-list-functions">Chapter 1, Recursive List Functions</a>: the function
-<code>destutter</code>, which removes sequential duplicates from a list.
-Here’s the implementation that was described earlier: <a data-primary="destutter function" data-type="indexterm">&nbsp;</a> <a data-secondary="terser and faster patterns" data-primary="pattern
-matching" data-type="indexterm">&nbsp;</a> <a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a> <a data-primary="duplicates,
-removing" data-type="indexterm">&nbsp;</a></p>
+<code>remove_sequential_duplicates</code>. Here’s the implementation
+that was described earlier: <a data-secondary="terser
+and faster patterns" data-primary="pattern matching" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter list =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
   match list with
   | [] -&gt; []
-  | [hd] -&gt; [hd]
-  | hd :: hd' :: tl -&gt;
-    if hd = hd' then destutter (hd' :: tl)
-    else hd :: destutter (hd' :: tl);;
-&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+  | [x] -&gt; [x]
+  | first :: second :: tl -&gt;
+    if first = second then
+      remove_sequential_duplicates (second :: tl)
+    else
+      first :: remove_sequential_duplicates (second :: tl);;
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We’ll consider some ways of making this code more concise and more
 efficient.</p>
-<p>First, let’s consider efficiency. One problem with the
-<code>destutter</code> code above is that it in some cases re-creates on
-the righthand side of the arrow a value that already existed on the
-lefthand side. Thus, the pattern <code>[hd] -&gt; [hd]</code> actually
-allocates a new list element, when really, it should be able to just
-return the list being matched. We can reduce allocation here by using an
-<code>as</code> pattern, which allows us to declare a name for the thing
-matched by a pattern or subpattern. While we’re at it, we’ll use the
-<code>function</code> keyword to eliminate the need for an explicit
-match:<a data-primary="function keyword" data-type="indexterm">&nbsp;</a></p>
+<p>First, let’s consider efficiency. One problem with the above code is
+that it in some cases re-creates on the righthand side of the arrow a
+value that already existed on the lefthand side. Thus, the pattern
+<code>[hd] -&gt; [hd]</code> actually allocates a new list element, when
+really, it should be able to just return the list being matched. We can
+reduce allocation here by using an <code>as</code> pattern, which allows
+us to declare a name for the thing matched by a pattern or subpattern.
+While we’re at it, we’ll use the <code>function</code> keyword to
+eliminate the need for an explicit match:<a data-primary="function
+keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
   | [] as l -&gt; l
   | [_] as l -&gt; l
-  | hd :: (hd' :: _ as tl) -&gt;
-    if hd = hd' then destutter tl
-    else hd :: destutter tl;;
-&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+  | first :: (second :: _ as tl) -&gt;
+    if first = second then
+      remove_sequential_duplicates tl
+    else
+      first :: remove_sequential_duplicates tl;;
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We can further collapse this by combining the first two cases into
-one, using an <em>or pattern</em>:</p>
+one, using an <em>or-pattern</em>:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
   | [] | [_] as l -&gt; l
-  | hd :: (hd' :: _ as tl) -&gt;
-    if hd = hd' then destutter tl
-    else hd :: destutter tl;;
-&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+  | first :: (second :: _ as tl) -&gt;
+    if first = second then
+      remove_sequential_duplicates tl
+    else
+      first :: remove_sequential_duplicates tl;;
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
 <p>We can make the code slightly terser now by using a <code>when</code>
@@ -812,21 +817,26 @@ precondition to a pattern in the form of an arbitrary OCaml expression.
 In this case, we can use it to include the check on whether the first
 two elements are equal:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
   | [] | [_] as l -&gt; l
-  | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl
-  | hd :: tl -&gt; hd :: destutter tl;;
-&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+  | first :: (second :: _ as tl) when first = second -&gt;
+    remove_sequential_duplicates tl
+  | first :: tl -&gt; first :: remove_sequential_duplicates tl;;
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
-<section class="level5" id="polymorphic-compare">
+
+
+<section data-type="note" class="level5" id="polymorphic-compare">
 <h5>Polymorphic Compare</h5>
-<p>You might have noticed that <code>destutter</code> is specialized to
-lists of integers. That’s because <code>Base</code>’s default equality
-operator is specialized to integers, as you can see if you try to apply
-it to values of a different type.</p>
+<p>You might have noticed that <code>remove_sequential_duplicates</code>
+is specialized to lists of integers. That’s because <code>Base</code>’s
+default equality operator is specialized to integers, as you can see if
+you try to apply it to values of a different type. <a data-primary="polymorphic compare" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"foo" = "bar";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+"foo" = "bar";;
 &gt;Line 1, characters 1-6:
 &gt;Error: This expression has type string but an expression was expected of type
 &gt;         int
@@ -834,7 +844,7 @@ it to values of a different type.</p>
 </div>
 <p>OCaml also has a collection of polymorphic equality and comparison
 operators, which we can make available by opening the module
-<code>Base.Poly</code>.</p>
+<code>Base.Poly</code>. <a data-primary="Base.Poly" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base.Poly;;
 "foo" = "bar";;
@@ -852,18 +862,20 @@ that it is polymorphic.</p>
 &gt;- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>If we rewrite our destutter example with <code>Base.Poly</code> open,
-we’ll see that it gets a polymorphic type, and can now be used on inputs
-of different types.</p>
+<p>If we rewrite <code>remove_sequential_duplicates</code> with
+<code>Base.Poly</code> open, we’ll see that it gets a polymorphic type,
+and can now be used on inputs of different types.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
   | [] | [_] as l -&gt; l
-  | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl
-  | hd :: tl -&gt; hd :: destutter tl;;
-&gt;val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
-destutter [1;2;2;3;4;3;3];;
+  | first :: (second :: _ as tl) when first = second -&gt;
+    remove_sequential_duplicates tl
+  | first :: tl -&gt; first :: remove_sequential_duplicates tl;;
+&gt;val remove_sequential_duplicates : 'a list -&gt; 'a list = &lt;fun&gt;
+remove_sequential_duplicates [1;2;2;3;4;3;3];;
 &gt;- : int list = [1; 2; 3; 4; 3]
-destutter ["one";"two";"two";"two";"three"];;
+remove_sequential_duplicates ["one";"two";"two";"two";"three"];;
 &gt;- : string list = ["one"; "two"; "three"]
 </code></pre>
 </div>
@@ -903,13 +915,9 @@ something that doesn’t make sense for the particular type of values
 you’re dealing with. This can lead to surprising and hard to resolve
 bugs in your code. It’s for this reason that <code>Base</code>
 discourages the use of polymorphic compare by hiding it by default.</p>
-<p>We’ll discuss this issue more in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>. But in any case, you can
-restore the default behavior of <code>Base</code> by opening the module
-again.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-</code></pre>
-</div>
+<p>We’ll discuss the downsides of polymorphic compare in more detail in
+<a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>.</p>
+</section>
 <p>Note that <code>when</code> clauses have some downsides. As we noted
 earlier, the static checks associated with pattern matches rely on the
 fact that patterns are restricted in what they can express. Once we add
@@ -953,7 +961,7 @@ produce a warning about the redundancy.</p>
 &gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Probably a better approach is to simply drop the second
+<p> Probably a better approach is to simply drop the second
 <code>when</code> clause:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec count_some list =
@@ -988,7 +996,6 @@ function:</p>
 &gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-</section>
 </section>
 </section>
 </article></div><a href="files-modules-and-programs.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 04</small>Files, Modules, and Programs</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

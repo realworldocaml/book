@@ -915,37 +915,11 @@ you’re using <code>bash</code>. <a data-primary="bash
 autocompletion" data-type="indexterm">&nbsp;</a></p>
 <p>Bash autocompletion isn’t always installed by default, so check your
 OS package manager to see if you have it available.</p>
-<table>
-<colgroup>
-<col style="width: 40%">
-<col style="width: 40%">
-<col style="width: 19%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Operating system</th>
-<th>Package manager</th>
-<th>Package</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Debian Linux</td>
-<td><code>apt</code></td>
-<td><code>bash-completion</code></td>
-</tr>
-<tr class="even">
-<td>macOS</td>
-<td>Homebrew</td>
-<td><code>bash-completion</code></td>
-</tr>
-<tr class="odd">
-<td>FreeBSD</td>
-<td>Ports system</td>
-<td><em class="filename">/usr/ports/shells/bash-completion</em></td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li>On Debian Linux, do <code>apt install bash-completion</code></li>
+<li>On macOS Homebrew, do <code>brew install bash-completion</code></li>
+<li>On FreeBSD, do <code>pkg install bash-completion</code>.</li>
+</ul>
 <p>Once <em>bash</em> completion is installed and configured, check that
 it works by typing the <code>ssh</code> command and pressing the Tab
 key. This should show you the list of known hosts from your

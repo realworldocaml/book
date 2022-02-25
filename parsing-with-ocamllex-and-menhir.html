@@ -88,7 +88,6 @@ type:</p>
   | STRING of string
   | INT of int
   | FLOAT of float
-  | ID of string
   | LEFT_BRACK
   | RIGHT_BRACK
   | LEFT_BRACE
@@ -104,7 +103,8 @@ original text that are not required for understanding its meaning.</p>
 <p>If we converted the preceding example into a list of these tokens, it
 would look something like this:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">[ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...</code></pre>
+<pre><code class="language-ocaml">[ LEFT_BRACE; STRING("title"); COLON; STRING("Cities");
+  COMMA; STRING("cities"); ... ]</code></pre>
 </div>
 <p>This kind of representation is easier to work with than the original
 text, since it gets rid of some unimportant syntactic details and adds
@@ -112,44 +112,45 @@ useful structure. But it’s still a good deal more low-level than the
 simple AST we used for representing JSON data in <a data-type="xref" href="json.html#handling-json-data">Chapter 18, Handling Json
 Data</a>:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">type value = [
-  | `Assoc of (string * value) list
+<pre><code class="language-ocaml">type value =
+  [ `Assoc of (string * value) list
   | `Bool of bool
   | `Float of float
   | `Int of int
   | `List of value list
   | `Null
-  | `String of string
-]
+  | `String of string ]
 
-(* part 1 *)
 open Core
 open Out_channel
 
 let rec output_value outc = function
-  | `Assoc obj  -&gt; print_assoc outc obj
-  | `List l     -&gt; print_list outc l
-  | `String s   -&gt; printf "\"%s\"" s
-  | `Int i      -&gt; printf "%d" i
-  | `Float x    -&gt; printf "%f" x
-  | `Bool true  -&gt; output_string outc "true"
+  | `Assoc obj -&gt; print_assoc outc obj
+  | `List l -&gt; print_list outc l
+  | `String s -&gt; printf "\"%s\"" s
+  | `Int i -&gt; printf "%d" i
+  | `Float x -&gt; printf "%f" x
+  | `Bool true -&gt; output_string outc "true"
   | `Bool false -&gt; output_string outc "false"
-  | `Null       -&gt; output_string outc "null"
+  | `Null -&gt; output_string outc "null"
 
 and print_assoc outc obj =
   output_string outc "{ ";
   let sep = ref "" in
-  List.iter ~f:(fun (key, value) -&gt;
+  List.iter
+    ~f:(fun (key, value) -&gt;
       printf "%s\"%s\": %a" !sep key output_value value;
-      sep := ",\n  ") obj;
+      sep := ",\n  ")
+    obj;
   output_string outc " }"
 
 and print_list outc arr =
   output_string outc "[";
-  List.iteri ~f:(fun i v -&gt;
-      if i &gt; 0 then
-        output_string outc ", ";
-      output_value outc v) arr;
+  List.iteri
+    ~f:(fun i v -&gt;
+      if i &gt; 0 then output_string outc ", ";
+      output_value outc v)
+    arr;
   output_string outc "]"</code></pre>
 </div>
 <p>This representation is much richer than our token stream, capturing
@@ -321,7 +322,7 @@ definitions" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;
 <pre><code class="language-ocaml">(* Inefficient right-recursive rule *)
 object_fields:
   | (* empty *) { [] }
-  | k = ID; COLON; v = value; COMMA; obj = object_fields
+  | k = STRING; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }</code></pre>
 </div>
 <p>Alternatively, we could keep the left-recursive definition and simply
@@ -332,7 +333,7 @@ this way is quadratic in the length of the list:</p>
 <pre><code class="language-ocaml">(* Quadratic left-recursive rule *)
 object_fields:
   | (* empty *) { [] }
-  | obj = object_fields; COMMA; k = ID; COLON; v = value
+  | obj = object_fields; COMMA; k = STRING; COLON; v = value
     { obj @ [k, v] }
   ;</code></pre>
 </div>
@@ -348,7 +349,23 @@ generator" data-type="indexterm">&nbsp;</a></p>
 follows. Notice the use of <code>separated_list</code> to parse both
 JSON objects and lists with one rule:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">prog:
+<pre><code class="language-ocaml">%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
+%start &lt;Json.value option&gt; prog
+%%
+
+prog:
   | v = value { Some v }
   | EOF       { None   } ;
 
@@ -371,19 +388,20 @@ obj_field:
 list_fields:
     vl = separated_list(COMMA, value)         { vl } ;</code></pre>
 </div>
-<p>We can invoke <code>menhir</code> by using <code>corebuild</code>
-with the <code>-use-menhir</code> flag. This tells the build system to
-switch to using <code>menhir</code> instead of <code>ocamlyacc</code> to
-handle files with the <code>.mly</code> suffix: <a data-primary="-use-menhir flag" data-type="indexterm">&nbsp;</a><a data-secondary="invoking" data-primary="Menhir parser
-generator" data-type="indexterm">&nbsp;</a></p>
+<p>We can hook in <code>menhir</code> by adding a <code>(menhir)</code>
+stanza to our dune file, which tells the build system to switch to using
+<code>menhir</code> instead of <code>ocamlyacc</code> to handle files
+with the <code>.mly</code> suffix: <span class="idx"><code>(menhir)</code> dune stanza</span><a data-secondary="invoking" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre><code class="language-scheme">(rule
- (targets short_parser.mli short_parser.ml)
-  (deps   short_parser.mly)
-  (action (ignore-stderr (run menhir --external-tokens Json --explain ${&lt;}))))</code></pre>
-</div>
-<div class="highlight">
-<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash"></code></pre>
+<pre><code class="language-scheme">(menhir
+ (modules parser))
+
+(ocamllex lexer)
+
+(library
+ (name json_parser)
+ (modules parser lexer json)
+ (libraries core))</code></pre>
 </div>
 </section>
 </section>
@@ -406,25 +424,13 @@ open Lexing
 open Parser
 
 exception SyntaxError of string
-
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p &lt;-
-    { pos with pos_bol = pos.pos_cnum;
-               pos_lnum = pos.pos_lnum + 1
-    }
 }</code></pre>
 </div>
 <p>This code is there to define utility functions used by later snippets
 of OCaml code and to set up the environment by opening useful modules
-and define an exception, <code>SyntaxError</code>.</p>
-<p>We also define a utility function <code>next_line</code> for tracking
-the location of tokens across line breaks. The <code>Lexing</code>
-module defines a <code>lexbuf</code> structure that holds the state of
-the lexer, including the current location within the source file. The
-<code>next_line</code> function simply accesses the
-<code>lex_curr_p</code> field that holds the current location and
-updates its line number.</p>
+and define an exception, <code>SyntaxError</code>. Any OCaml functions
+you define here will be subsequently available in the remainder of the
+lexer definition.</p>
 </section>
 <section class="level3" id="regular-expressions">
 <h3>Regular Expressions</h3>
@@ -535,6 +541,25 @@ If the input were <code>true: 167</code>, then both <code>"true"</code>
 and <code>id</code> match the first four characters; <code>"true"</code>
 is first, so the return value is <code>TRUE</code>.</p></li>
 </ul>
+<section data-type="note" class="level5" id="unused-lexing-values">
+<h5>Unused lexing values</h5>
+<p>In our parser, we have not used all the token regexps that we defined
+in the lexer. For instance, <code>id</code> is unused since we do not
+parse unquoted strings for object identifiers (something that is allowed
+by JavaScript, but not the subset of it that is JSON). If we included a
+token pattern match for this in the lexer, then we would have to adjust
+the parser accordingly to add a <code>%token &lt;string&gt; ID</code>.
+This would in turn trigger an “unused” warning since the parser never
+constructs a value with type ID:</p>
+<div class="highlight">
+<pre><code class="language-clike">File "parser.mly", line 4, characters 16-18:        
+Warning: the token ID is unused.</code></pre>
+</div>
+<p>It’s completely fine to define unused regexps as we’ve done, and to
+hook them into parsers as required. For example, we might use
+<code>ID</code> if we adding an extension to our parser for supporting
+unquoted string identifiers as a non-standard JSON extension.</p>
+</section>
 </section>
 <section class="level3" id="recursive-rules">
 <h3>Recursive Rules</h3>
@@ -582,6 +607,12 @@ characters to handle the full spectrum of the world’s writing systems.
 OCaml has several third-party solutions to handling Unicode, with
 varying degrees of flexibility and complexity:</p>
 <ul>
+<li><p><a href="http://erratique.ch/software/uutf">Uutf</a> is a
+nonblocking streaming Unicode codec for OCaml, available as a standalone
+library. It is accompanied by the <a href="http://erratique.ch/software/uunf">Uunf</a> text normalization and
+<a href="http://erratique.ch/software/uucd">Uucd</a> Unicode character
+database libraries. There is also a robust parser for <a href="http://erratique.ch/software/jsonm">JSON</a> available that
+illustrates the use of Uutf in your own libraries.</p></li>
 <li><p><a href="https://github.com/yoriyuki/Camomile">Camomile</a>
 supports the full spectrum of Unicode character types, conversion from
 around 200 encodings, and collation and locale-sensitive case
@@ -589,14 +620,8 @@ mappings.</p></li>
 <li><p><a href="https://github.com/ocaml-community/sedlex">sedlex</a> is
 a lexer generator for Unicode that can serve as a Unicode-aware
 replacement for <code>ocamllex</code>.</p></li>
-<li><p><a href="http://erratique.ch/software/uutf">Uutf</a> is a
-nonblocking streaming Unicode codec for OCaml, available as a standalone
-library. It is accompanied by the <a href="http://erratique.ch/software/uunf">Uunf</a> text normalization and
-<a href="http://erratique.ch/software/uucd">Uucd</a> Unicode character
-database libraries. There is also a robust parser for <a href="http://erratique.ch/software/jsonm">JSON</a> available that
-illustrates the use of Uutf in your own libraries.</p></li>
 </ul>
-<p>All of these libraries are available via OPAM under their respective
+<p>All of these libraries are available via opam under their respective
 names.</p>
 </section>
 </section>
@@ -609,7 +634,7 @@ function expects a lexer of type <code>Lexing.lexbuf -&gt; token</code>,
 and a <code>lexbuf</code>: <a data-secondary="lexer and parser
 composition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre><code class="language-ocaml">val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option</code></pre>
+<pre><code class="language-ocaml">val prog : (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option</code></pre>
 </div>
 <p>Before we start with the lexing, let’s first define some functions to
 handle parsing errors. There are currently two errors:

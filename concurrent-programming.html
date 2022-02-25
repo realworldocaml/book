@@ -215,9 +215,9 @@ succinctly:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_lines filename =
   Reader.file_contents filename
   &gt;&gt;| fun text -&gt;
-  List.length (String.split text ~on:'\n')
+  List.length (String.split text ~on:'\n');;
 &gt;val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
-count_lines "/etc/hosts"
+count_lines "/etc/hosts";;
 &gt;- : int = 10
 </code></pre>
 </div>
@@ -1133,10 +1133,10 @@ original exception thrown.</p>
 say, the built-in exception <code>Not_found</code>, then the exception
 will be passed to the parent monitor and delivered as usual:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Another_exception
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">exception Another_exception;;
 &gt;exception Another_exception
 Deferred.any [ after (Time.Span.of_sec 0.5)
-             ; swallow_some_errors Another_exception ]
+             ; swallow_some_errors Another_exception ];;
 &gt;Exception:
 &gt;(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
 </code></pre>
@@ -1492,7 +1492,7 @@ becomes determined, at which point it prints out one last timestamp:</p>
 <p>If we feed this function a simple timeout deferred, it works as you
 might expect, waking up roughly every 100 milliseconds:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; after (sec 0.5))
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; after (sec 0.5));;
 &gt;37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
 &gt;Finished at: 500.67615509033203ms,
 &gt;- : unit = ()
@@ -1503,9 +1503,9 @@ for a busy loop to finish running:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let busy_loop () =
   let x = ref None in
-  for i = 1 to 100_000_000 do x := Some i done
+  for i = 1 to 100_000_000 do x := Some i done;;
 &gt;val busy_loop : unit -&gt; unit = &lt;fun&gt;
-log_delays (fun () -&gt; return (busy_loop ()))
+log_delays (fun () -&gt; return (busy_loop ()));;
 &gt;Finished at: 874.99594688415527ms,
 &gt;- : unit = ()
 </code></pre>
@@ -1516,7 +1516,7 @@ log_delays (fun () -&gt; return (busy_loop ()))
 <p>If, on the other hand, we use <code>In_thread.run</code> to offload
 this to a different system thread, the behavior will be different:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; In_thread.run busy_loop)
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">log_delays (fun () -&gt; In_thread.run busy_loop);;
 &gt;31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
 &gt;Finished at: 840.72136878967285ms,
 &gt;- : unit = ()
@@ -1537,9 +1537,9 @@ have this behavior, so if we run a nonallocating loop in bytecode, our
 timer process will get to run:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let noalloc_busy_loop () =
-  for i = 0 to 100_000_000 do () done
+  for i = 0 to 100_000_000 do () done;;
 &gt;val noalloc_busy_loop : unit -&gt; unit = &lt;fun&gt;
-log_delays (fun () -&gt; In_thread.run noalloc_busy_loop)
+log_delays (fun () -&gt; In_thread.run noalloc_busy_loop);;
 &gt;32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
 &gt;Finished at: 418.69187355041504ms,
 &gt;- : unit = ()

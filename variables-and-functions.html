@@ -24,7 +24,7 @@ syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">let &lt;variable&gt; = &lt;expr&gt;</code></pre>
 </div>
-<p>As we’ll see when we get to the module system in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, this same syntax is
+<p> As we’ll see when we get to the module system in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, this same syntax is
 used for <code>let</code> bindings at the top level of a module.</p>
 <p>Every variable binding has a <em>scope</em>, which is the portion of
 the code that can refer to that binding. When using <code>utop</code>,
@@ -49,7 +49,7 @@ syntax.</p>
 <div class="highlight">
 <pre><code class="language-clike">let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;</code></pre>
 </div>
-<p>This first evaluates <em><code>expr1</code></em> and then evaluates
+<p> This first evaluates <em><code>expr1</code></em> and then evaluates
 <em><code>expr2</code></em> with <em><code>variable</code></em> bound to
 whatever value was produced by the evaluation of
 <em><code>expr1</code></em>. Here’s how it looks in practice.</p>
@@ -62,7 +62,7 @@ let dashed_languages =
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
-<p>Note that the scope of <code>language_list</code> is just the
+<p> Note that the scope of <code>language_list</code> is just the
 expression <code>String.concat ~sep:"-" language_list</code> and is not
 available at the toplevel, as we can see if we try to access it now.</p>
 <div class="highlight">
@@ -83,7 +83,7 @@ let dashed_languages =
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
-<p>This time, in the inner scope we called the list of strings
+<p> This time, in the inner scope we called the list of strings
 <code>languages</code> instead of <code>language_list</code>, thus
 hiding the original definition of <code>languages</code>. But once the
 definition of <code>dashed_languages</code> is complete, the inner scope
@@ -203,9 +203,9 @@ upcase_first_entry "";;
 &gt;- : string = ""
 </code></pre>
 </div>
-<p>But the compiler doesn’t know this, and so it emits the warning. It’s
-generally better to use a <code>match</code> expression to handle such
-cases explicitly.</p>
+<p> But the compiler doesn’t know this, and so it emits the warning.
+It’s generally better to use a <code>match</code> expression to handle
+such cases explicitly:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let upcase_first_entry line =
   match String.split ~on:',' line with
@@ -224,10 +224,10 @@ Handling</a>.</p>
 <h2>Functions</h2>
 <p>Given that OCaml is a functional language, it’s no surprise that
 functions are important and pervasive. Indeed, functions have come up in
-almost every example we’ve done so far. This section will go into more
-depth, explaining the details of how OCaml’s functions work. As you’ll
-see, functions in OCaml differ in a variety of ways from what you’ll
-find in most mainstream languages.</p>
+almost every example we’ve looked at so far. This section will go into
+more depth, explaining the details of how OCaml’s functions work. As
+you’ll see, functions in OCaml differ in a variety of ways from what
+you’ll find in most mainstream languages.</p>
 <section class="level3" id="anonymous-functions">
 <h3>Anonymous Functions</h3>
 <p>We’ll start by looking at the most basic style of function
@@ -240,13 +240,13 @@ be declared using the <code>fun</code> keyword, as shown here. <a data-secondary
 </code></pre>
 </div>
 <p>Anonymous functions operate in much the same way as named functions.
-For example, we can apply an anonymous function to an argument.</p>
+For example, we can apply an anonymous function to an argument:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
 &gt;- : int = 8
 </code></pre>
 </div>
-<p>Or pass it to another function. Passing functions to iteration
+<p> or pass it to another function. Passing functions to iteration
 functions like <code>List.map</code> is probably the most common use
 case for anonymous functions.</p>
 <div class="highlight">
@@ -254,7 +254,7 @@ case for anonymous functions.</p>
 &gt;- : int list = [2; 3; 4]
 </code></pre>
 </div>
-<p>You can even stuff a function into a data structure, like a list.</p>
+<p>You can even stuff a function into a data structure, like a list:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let transforms = [ String.uppercase; String.lowercase ];;
 &gt;val transforms : (string -&gt; string) list = [&lt;fun&gt;; &lt;fun&gt;]
@@ -262,15 +262,13 @@ List.map ~f:(fun g -&gt; g "Hello World") transforms;;
 &gt;- : string list = ["HELLO WORLD"; "hello world"]
 </code></pre>
 </div>
-<p>It’s worth stopping for a moment to puzzle this example out, since
-this kind of higher-order use of functions can be a bit obscure at
-first. Notice that <code>(fun g -&gt; g "Hello World")</code> is a
-function that takes a function as an argument, and then applies that
-function to the string <code>"Hello World"</code>. The invocation of
-<code>List.map</code> applies <code>(fun g -&gt; g "Hello World")</code>
-to the elements of <code>transforms</code>, which are themselves
-functions. The returned list containing the results of these function
-applications.</p>
+<p> It’s worth stopping for a moment to puzzle this example out. Notice
+that <code>(fun g -&gt; g "Hello World")</code> is a function that takes
+a function as an argument, and then applies that function to the string
+<code>"Hello World"</code>. The invocation of <code>List.map</code>
+applies <code>(fun g -&gt; g "Hello World")</code> to the elements of
+<code>transforms</code>, which are themselves functions. The returned
+list containing the results of these function applications.</p>
 <p>The key thing to understand is that functions are ordinary values in
 OCaml, and you can do everything with them that you’d do with an
 ordinary value, including passing them to and returning them from other
@@ -292,8 +290,8 @@ equivalent to the previous definition.</p>
 &gt;val plusone : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is the most common and convenient way to declare a function, but
-syntactic niceties aside, the two styles of function definition are
+<p> This is the most common and convenient way to declare a function,
+but syntactic niceties aside, the two styles of function definition are
 equivalent.</p>
 <section data-type="note" class="level5" id="let-and-fun">
 <h5>let and fun</h5>
@@ -309,7 +307,7 @@ let x = 7 in x + 1;;
 &gt;- : int = 8
 </code></pre>
 </div>
-<p>This connection is important, and will come up more when programming
+<p> This connection is important, and will come up more when programming
 in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
 </section>
 </section>
@@ -323,7 +321,7 @@ abs_diff 3 4;;
 &gt;- : int = 1
 </code></pre>
 </div>
-<p>You may find the type signature of <code>abs_diff</code> with all of
+<p> You may find the type signature of <code>abs_diff</code> with all of
 its arrows a little hard to parse. To understand what’s going on, let’s
 rewrite <code>abs_diff</code> in an equivalent form, using the
 <code>fun</code> keyword.</p>
@@ -349,7 +347,7 @@ functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">val abs_diff : int -&gt; (int -&gt; int)</code></pre>
 </div>
-<p>The parentheses don’t change the meaning of the signature, but they
+<p> The parentheses don’t change the meaning of the signature, but they
 make it easier to see the currying.</p>
 <p>Currying is more than just a theoretical curiosity. You can make use
 of currying to specialize a function by feeding in some of the
@@ -365,8 +363,8 @@ dist_from_3 (-1);;
 &gt;- : int = 4
 </code></pre>
 </div>
-<p>The practice of applying some of the arguments of a curried function
-to get a new function is called <em>partial application</em>.<a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
+<p> The practice of applying some of the arguments of a curried function
+to get a new function is called <em>partial application</em>. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
 <p>Note that the <code>fun</code> keyword supports its own syntax for
 currying, so the following definition of <code>abs_diff</code> is
 equivalent to the previous one.<a data-secondary="currying
@@ -486,8 +484,8 @@ List.map ~f:((+) 3) [4;5;6];;
 &gt;- : int list = [7; 8; 9]
 </code></pre>
 </div>
-<p>In the second expression, we’ve partially applied <code>(+)</code> to
-create a function that increments its single argument by
+<p> In the second expression, we’ve partially applied <code>(+)</code>
+to create a function that increments its single argument by
 <code>3</code>.</p>
 <p>A function is treated syntactically as an operator if the name of
 that function is chosen from one of a specialized set of identifiers.
@@ -496,8 +494,8 @@ following set:</p>
 <div class="highlight">
 <pre><code class="language-clike">~ ! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ |</code></pre>
 </div>
-<p>as long as the first character is not <code>~</code>, <code>!</code>,
-or <code>$</code>.</p>
+<p> as long as the first character is not <code>~</code>,
+<code>!</code>, or <code>$</code>.</p>
 <p>There are also a handful of predetermined strings that count as infix
 operators, including <code>mod</code>, the modulus operator, and
 <code>lsl</code>, for “logical shift left,” a bit-shifting
@@ -512,8 +510,8 @@ pairs.</p>
 &gt;- : int * int = (1, 6)
 </code></pre>
 </div>
-<p>Note that you have to be careful when dealing with operators
-containing <code>*</code>. Consider the following example.</p>
+<p> You have to be careful when dealing with operators containing
+<code>*</code>. Consider the following example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (***) x y = (x **. y) **. y;;
 &gt;Line 1, characters 18-19:
@@ -536,88 +534,7 @@ below breaks the different operators and other syntactic forms into
 groups from highest to lowest precedence, explaining how each behaves
 syntactically. We write <code>!</code>… to indicate the class of
 operators beginning with <code>!</code>.</p>
-<table>
-<colgroup>
-<col style="width: 34%">
-<col style="width: 65%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Syntax</th>
-<th>Associativity</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>!</code>…, <code>?</code>…, <code>~</code>…</td>
-<td>Prefix</td>
-</tr>
-<tr class="even">
-<td><code>.</code>, <code>.(</code>, <code>.[</code></td>
-<td>-</td>
-</tr>
-<tr class="odd">
-<td>function application, constructor, <code>assert</code>,
-<code>lazy</code></td>
-<td>Left associative</td>
-</tr>
-<tr class="even">
-<td><code>-</code>, <code>-.</code></td>
-<td>Prefix</td>
-</tr>
-<tr class="odd">
-<td><code>**</code>…, <code>lsl</code>, <code>lsr</code>,
-<code>asr</code></td>
-<td>Right associative</td>
-</tr>
-<tr class="even">
-<td><code>*</code>…, <code>/</code>…, <code>%</code>…, <code>mod</code>,
-<code>land</code>, <code>lor</code>, <code>lxor</code></td>
-<td>Left associative</td>
-</tr>
-<tr class="odd">
-<td><code>+</code>…, <code>-</code>…</td>
-<td>Left associative</td>
-</tr>
-<tr class="even">
-<td><code>::</code></td>
-<td>Right associative</td>
-</tr>
-<tr class="odd">
-<td><code>@</code>…, <code>^</code>…</td>
-<td>Right associative</td>
-</tr>
-<tr class="even">
-<td><code>=</code>…, <code>&lt;</code>…, <code>&gt;</code>…,
-<code>|</code>…, <code>&amp;</code>…, <code>$</code>…</td>
-<td>Left associative</td>
-</tr>
-<tr class="odd">
-<td><code>&amp;</code>, <code>&amp;&amp;</code></td>
-<td>Right associative</td>
-</tr>
-<tr class="even">
-<td><code>or</code>, <code>||</code></td>
-<td>Right associative</td>
-</tr>
-<tr class="odd">
-<td><code>,</code></td>
-<td>-</td>
-</tr>
-<tr class="even">
-<td><code>&lt;-</code>, <code>:=</code></td>
-<td>Right associative</td>
-</tr>
-<tr class="odd">
-<td><code>if</code></td>
-<td>-</td>
-</tr>
-<tr class="even">
-<td><code>;</code></td>
-<td>Right associative</td>
-</tr>
-</tbody>
-</table>
+<p><img title="Operator Associativity" src="images/variables-and-functions/associativity.png"></p>
 <p>There’s one important special case: <code>-</code> and
 <code>-.</code>, which are the integer and floating-point subtraction
 operators, and can act as both prefix operators (for negation) and infix
@@ -639,7 +556,7 @@ Int.max 3 -4;;
 &gt;       but an expression was expected of type int
 </code></pre>
 </div>
-<p>Here, OCaml is interpreting the second expression as equivalent
+<p> Here, OCaml is interpreting the second expression as equivalent
 to.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Int.max 3) - 4;;
@@ -651,24 +568,24 @@ to.</p>
 &gt;       but an expression was expected of type int
 </code></pre>
 </div>
-<p>which obviously doesn’t make sense.</p>
+<p> which obviously doesn’t make sense.</p>
 <p>Here’s an example of a very useful operator from the standard library
 whose behavior depends critically on the precedence rules described
-previously.</p>
+previously. <a data-secondary="reverse application
+operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (|&gt;) x f = f x;;
 &gt;val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It’s not quite obvious at first what the purpose of this operator is:
-it just takes a value and a function and applies the function to the
-value. Despite that bland-sounding description, it has the useful role
-of a sequencing operator, similar in spirit to using the pipe character
-in the UNIX shell. Consider, for example, the following code for
-printing out the unique elements of your <code>PATH</code>. Note that
-<code>List.dedup_and_sort</code> that follows removes duplicates from a
-list by sorting the list using the provided comparison function.<a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="duplicates,
-removing" data-type="indexterm">&nbsp;</a><a data-primary="List.dedup_and_sort" data-type="indexterm">&nbsp;</a><a data-secondary="sequencing operators" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
+<p>This is called the <em>reverse application operator</em>, and it’s
+not quite obvious at first what its purpose is: it just takes a value
+and a function and applies the function to the value. Despite that
+bland-sounding description, it has the useful role of sequencing
+operations, similar in spirit to using the pipe character in the UNIX
+shell. Consider, for example, the following code for printing out the
+unique elements of your <code>PATH</code>. <a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a> <a data-primary="duplicates,
+removing" data-type="indexterm">&nbsp;</a> <a data-primary="List.dedup_and_sort" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
@@ -699,7 +616,7 @@ List.iter ~f:print_endline deduped_path;;
 <p>An important part of what’s happening here is partial application.
 For example, <code>List.iter</code> takes two arguments: a function to
 be called on each element of the list, and the list to iterate over. We
-can call <code>List.iter</code> with all its arguments. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
+can call <code>List.iter</code> with all its arguments: <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline ["Two"; "lines"];;
 &gt;Two
@@ -707,14 +624,14 @@ can call <code>List.iter</code> with all its arguments. <a data-primary="partial
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>Or, we can pass it just the function argument, leaving us with a
+<p> or, we can pass it just the function argument, leaving us with a
 function for printing out a list of strings.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline;;
 &gt;- : string list -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It is this later form that we’re using in the preceding
+<p> It is this later form that we’re using in the preceding
 <code>|&gt;</code> pipeline.</p>
 <p>But <code>|&gt;</code> only works in the intended way because it is
 left-associative. Let’s see what happens if we try using a
@@ -743,6 +660,23 @@ input, not a function.</p>
 <p>The type error aside, this example highlights the importance of
 choosing the operator you use with care, particularly with respect to
 associativity.</p>
+<section data-type="note" class="level5" id="the-application-operator">
+<h5>The application operator</h5>
+<p><code>|&gt;</code> is known as the <em>reverse application
+operator</em>. You might be you might be unsurprised to learn that
+there’s also an <em>application operator</em>: <a data-secondary="application operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(@@);;
+&gt;- : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
+</code></pre>
+</div>
+<p>This one is useful for cases where you want to avoid many layers of
+parentheses when applying functions to complex expressions. In
+particular, you can replace <code>f (g (h x))</code> with
+<code>f @@ g @@ h x</code>. Note that, just as we needed
+<code>|&gt;</code> to be left associative, we need <code>@@</code> to be
+right associative.</p>
+</section>
 </section>
 <section class="level3" id="declaring-functions-with-function">
 <h3>Declaring Functions with <code>function</code></h3>
@@ -761,7 +695,7 @@ List.map ~f:some_or_zero [Some 3; None; Some 4];;
 &gt;- : int list = [3; 0; 4]
 </code></pre>
 </div>
-<p>This is equivalent to combining an ordinary function definition with
+<p> This is equivalent to combining an ordinary function definition with
 a <code>match</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_zero num_opt =
@@ -816,10 +750,10 @@ ratio ~denom:10 ~num:3;;
 </code></pre>
 </div>
 <p>OCaml also supports <em>label punning</em>, meaning that you get to
-drop the text after the <code>:</code> if the name of the label and the
-name of the variable being used are the same. We were actually already
-using label punning when defining <code>ratio</code>. The following
-shows how punning can be used when invoking a function.<a data-primary="punning" data-type="indexterm">&nbsp;</a><a data-primary="label punning" data-type="indexterm">&nbsp;</a></p>
+drop the text after the colon if the name of the label and the name of
+the variable being used are the same. We were actually already using
+label punning when defining <code>ratio</code>. The following shows how
+punning can be used when invoking a function.<a data-primary="punning" data-type="indexterm">&nbsp;</a><a data-primary="label punning" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let num = 3 in
 let denom = 4 in
@@ -827,16 +761,22 @@ ratio ~num ~denom;;
 &gt;- : float = 0.75
 </code></pre>
 </div>
-<p>Labeled arguments are useful in a few different cases:</p>
-<ul>
-<li><p>When defining a function with lots of arguments. Beyond a certain
-number, arguments are easier to remember by name than by position.<a data-secondary="with multiple arguments" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="multi-argument functions" data-type="indexterm">&nbsp;</a></p></li>
-<li><p>When the meaning of a particular argument is unclear from the
-type alone. Consider a function for creating a hash table whose first
-argument is the initial size of the array backing the hash table, and
-the second is a Boolean flag, which indicates whether that array will
-ever shrink when elements are removed.</p></li>
-</ul>
+<section class="level4" id="where-are-labels-useful">
+<h4>Where are labels useful?</h4>
+<p>Labeled arguments are a surprisingly useful feature, and it’s worth
+walking through some of the cases where they come up.</p>
+<section class="level5" id="explicating-long-argument-lists">
+<h5>Explicating long argument lists</h5>
+<p>Beyond a certain number, arguments are easier to remember by name
+than by position. Letting the names be used at the call-site (and used
+in any order) makes client code easier to read and to write.</p>
+</section>
+<section class="level5" id="adding-information-to-uninformative-argument-types">
+<h5>Adding information to uninformative argument types</h5>
+<p>Consider a function for creating a hash table whose first argument is
+the initial size of the array backing the hash table, and the second is
+a Boolean flag, which indicates whether that array will ever shrink when
+elements are removed.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t</code></pre>
 </div>
@@ -850,12 +790,12 @@ immediately clear.</p>
 <p>Choosing label names well is especially important for Boolean values,
 since it’s often easy to get confused about whether a value being true
 is meant to enable or disable a given feature.</p>
-<ul>
-<li>When defining functions that have multiple arguments that might get
-confused with each other. This is most at issue when the arguments are
-of the same type. For example, consider this signature for a function
-that extracts a substring.</li>
-</ul>
+</section>
+<section class="level5" id="disambiguating-similar-arguments">
+<h5>Disambiguating similar arguments</h5>
+<p>This issue comes up most often when a function has multiple arguments
+of the same type. Consider this signature for a function that extracts a
+substring.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val substring: string -&gt; int -&gt; int -&gt; string</code></pre>
 </div>
@@ -867,16 +807,16 @@ adding labels.</p>
 <pre><code class="language-ocaml">val substring: string -&gt; pos:int -&gt; len:int -&gt; string</code></pre>
 </div>
 <p>This improves the readability of both the signature and of client
-code that makes use of <code>substring</code> and makes it harder to
-accidentally swap the position and the length.</p>
-<ul>
-<li>When you want flexibility on the order in which arguments are
-passed. Consider a function like <code>List.iter</code> which takes two
+code, and makes it harder to accidentally swap the position and the
+length.</p>
+</section>
+<section class="level5" id="flexible-argument-ordering-and-partial-application">
+<h5>Flexible argument ordering and partial application</h5>
+<p>Consider a function like <code>List.iter</code> which takes two
 arguments: a function and a list of elements to call that function on. A
 common pattern is to partially apply <code>List.iter</code> by giving it
 just the function, as in the following example from earlier in the
-chapter.</li>
-</ul>
+chapter.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">String.split ~on:':' path
 |&gt; List.dedup_and_sort ~compare:String.compare
@@ -888,11 +828,17 @@ chapter.</li>
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>This requires that we put the function argument first. In other
-cases, you want to put the function argument second. One common reason
-is readability. In particular, a multiline function passed as an
-argument to another function is easiest to read when it is the final
-argument to that function.</p>
+<p> This requires that we put the function argument first.</p>
+<p>Other orderings can be useful either for partial application, or for
+simple reasons of readability. For example, when using
+<code>List.iter</code> with a complex, multi-line iteration function,
+it’s generally easier to read if the function comes second, after the
+statement of what list is being iterated over. On the other hand, when
+calling <code>List.iter</code> with a small function, but a large,
+explicitly written list of values, it’s generally easier if the values
+come last.</p>
+</section>
+</section>
 <section class="level4" id="higher-order-functions-and-labels">
 <h4>Higher-order functions and labels</h4>
 <p>One surprising gotcha with labeled arguments is that while order
@@ -915,13 +861,13 @@ change the order in which the labeled arguments were listed.</p>
 </code></pre>
 </div>
 <p>It turns out this order matters. In particular, if we define a
-function that has a different order</p>
+function that has a different order:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide ~first ~second = first / second;;
 &gt;val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>we’ll find that it can’t be passed in to
+<p> we’ll find that it can’t be passed in to
 <code>apply_to_tuple_2</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">apply_to_tuple_2 divide (3,4);;
@@ -930,7 +876,7 @@ function that has a different order</p>
 &gt;       but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c
 </code></pre>
 </div>
-<p>But, it works smoothly with the original
+<p> But, it works smoothly with the original
 <code>apply_to_tuple</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;;
@@ -1007,7 +953,7 @@ caller.</p>
 explicitly is exactly what you want. OCaml lets you do this by using
 <code>?</code> instead of <code>~</code> to mark the argument. Thus, the
 following two lines are equivalent ways of specifying the
-<code>sep</code> argument to <code>concat</code>.<a data-secondary="explicit passing of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
+<code>sep</code> argument to <code>concat</code>: <a data-secondary="explicit passing of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
 &gt;- : string = "foo:bar"
@@ -1015,7 +961,7 @@ concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
 &gt;- : string = "foo:bar"
 </code></pre>
 </div>
-<p>And the following two lines are equivalent ways of calling
+<p> and the following two lines are equivalent ways of calling
 <code>concat</code> without specifying <code>sep</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "foo" "bar" (* don't provide the optional argument *);;
@@ -1051,7 +997,7 @@ through the optional argument to <code>concat</code> using the
 &gt;val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Now, if someone calls <code>uppercase_concat</code> without an
+<p> Now, if someone calls <code>uppercase_concat</code> without an
 argument, an explicit <code>None</code> will be passed to
 <code>concat</code>, leaving <code>concat</code> to decide what the
 default behavior should be.</p>
@@ -1150,7 +1096,7 @@ colon_concat "a" "b";;
 &gt;- : string = "a:b"
 </code></pre>
 </div>
-<p>But what happens if we partially apply just the first argument?</p>
+<p> But what happens if we partially apply just the first argument?</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";;
 &gt;val prepend_pound : string -&gt; string = &lt;fun&gt;
@@ -1158,7 +1104,7 @@ prepend_pound "a BASH comment";;
 &gt;- : string = "# a BASH comment"
 </code></pre>
 </div>
-<p>The optional argument <code>?sep</code> has now disappeared, or been
+<p> The optional argument <code>?sep</code> has now disappeared, or been
 <em>erased</em>. Indeed, if we try to pass in that optional argument
 now, it will be rejected.</p>
 <div class="highlight">
@@ -1168,19 +1114,19 @@ now, it will be rejected.</p>
 &gt;       It is applied to too many arguments; maybe you forgot a `;'.
 </code></pre>
 </div>
-<p>So when does OCaml decide to erase an optional argument?</p>
+<p> So when does OCaml decide to erase an optional argument?</p>
 <p>The rule is: an optional argument is erased as soon as the first
 positional (i.e., neither labeled nor optional) argument defined
 <em>after</em> the optional argument is passed in. That explains the
 behavior of <code>prepend_pound</code>. But if we had instead defined
 <code>concat</code> with the optional argument in the second
-position.</p>
+position:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x ?(sep="") y = x ^ sep ^ y;;
 &gt;val concat : string -&gt; ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>then application of the first argument would not cause the optional
+<p> then application of the first argument would not cause the optional
 argument to be erased.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";;
@@ -1209,7 +1155,7 @@ arguments can’t be erased at all, which leads to a compiler warning.</p>
 &gt;val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>And indeed, when we provide the two positional arguments, the
+<p> And indeed, when we provide the two positional arguments, the
 <code>sep</code> argument is not erased, instead returning a function
 that expects the <code>sep</code> argument to be provided.</p>
 <div class="highlight">

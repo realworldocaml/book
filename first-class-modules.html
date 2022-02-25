@@ -445,14 +445,14 @@ end;;
 <p>Again, we can create an instance of this query handler and interact
 with it directly:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_dir = List_dir.create "/var"
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_dir = List_dir.create "/var";;
 &gt;val list_dir : List_dir.t = {List_dir.cwd = "/var"}
-List_dir.eval list_dir (sexp_of_string ".")
+List_dir.eval list_dir (sexp_of_string ".");;
 &gt;- : (Sexp.t, Error.t) result =
 &gt;Ok
 &gt; (yp networkd install empty ma mail spool jabberd vm msgs audit root lib db
 &gt;  at log folders netboot run rpc tmp backups agentx rwho)
-List_dir.eval list_dir (sexp_of_string "yp")
+List_dir.eval list_dir (sexp_of_string "yp");;
 &gt;- : (Sexp.t, Error.t) result = Ok (binding)
 </code></pre>
 </div>
