@@ -300,7 +300,7 @@ We would especially like to thank the following individuals for improving
   and is instrumental to the structure and content that formed the
   basis of this revised edition.
 
-- Leo White and Jeremy Yallop contributed greatly to the content and
+- Leo White and Jason Hickey contributed greatly to the content and
   examples in [Objects](objects.html#objects){data-type=xref} and
   [Classes](classes.html#classes){data-type=xref}.
 
