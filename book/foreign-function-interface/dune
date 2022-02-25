@@ -1,10 +1,10 @@
 (mdx
  (files README.md)
- (packages
+ (deps (package ocaml-print-intf))
+ (libraries
   core
   ctypes
   ctypes-foreign
   mdx
-  ocaml-print-intf
   ppx_jane)
  (preludes prelude.ml))
