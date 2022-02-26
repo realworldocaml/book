@@ -114,7 +114,7 @@ We also check that we can declare dependencies to the ppx.
   [1]
 
   $ cat >dune-project <<EOF
-  > (lang dune 2.9)
+  > (lang dune 3.0)
   > EOF
   $ dune build --instrument-with hello
   $ _build/default/main.exe
@@ -185,7 +185,7 @@ Next, we check the backend can be used when it is installed.
   > EOF
   $ cat >installed/main.ml <<EOF
   > EOF
-  $ OCAMLPATH=$PWD/_install/lib dune build --root installed
+  $ OCAMLPATH=$PWD/_install/lib:$OCAMLPATH dune build --root installed
   Entering directory 'installed'
   $ installed/_build/default/main.exe
   Hello from Main!

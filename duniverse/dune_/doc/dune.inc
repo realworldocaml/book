@@ -27,15 +27,6 @@
  (files   dune-clean.1))
 
 (rule
- (with-stdout-to dune-compute.1
-  (run dune compute --help=groff)))
-
-(install
- (section man)
- (package dune)
- (files   dune-compute.1))
-
-(rule
  (with-stdout-to dune-describe.1
   (run dune describe --help=groff)))
 
@@ -43,6 +34,15 @@
  (section man)
  (package dune)
  (files   dune-describe.1))
+
+(rule
+ (with-stdout-to dune-diagnostics.1
+  (run dune diagnostics --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files   dune-diagnostics.1))
 
 (rule
  (with-stdout-to dune-exec.1
@@ -108,6 +108,24 @@
  (files   dune-installed-libraries.1))
 
 (rule
+ (with-stdout-to dune-internal.1
+  (run dune internal --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files   dune-internal.1))
+
+(rule
+ (with-stdout-to dune-ocaml.1
+  (run dune ocaml --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files   dune-ocaml.1))
+
+(rule
  (with-stdout-to dune-ocaml-merlin.1
   (run dune ocaml-merlin --help=groff)))
 
@@ -135,6 +153,15 @@
  (files   dune-promote.1))
 
 (rule
+ (with-stdout-to dune-rpc.1
+  (run dune rpc --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files   dune-rpc.1))
+
+(rule
  (with-stdout-to dune-rules.1
   (run dune rules --help=groff)))
 
@@ -151,6 +178,15 @@
  (section man)
  (package dune)
  (files   dune-runtest.1))
+
+(rule
+ (with-stdout-to dune-shutdown.1
+  (run dune shutdown --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files   dune-shutdown.1))
 
 (rule
  (with-stdout-to dune-subst.1

@@ -6,8 +6,6 @@
  * See the file LICENSE for details.
  *)
 
-module Pervasives = Pervasives [@@ocaml.warning "-3"]
-
 external init : unit -> unit = "integers_unsigned_init"
 let () = init ()
 
@@ -101,10 +99,10 @@ struct
   let succ n = add n one
   let pred n = sub n one
   let lognot n = logxor n max_int
-  let compare (x : t) (y : t) = Pervasives.compare x y
-  let equal (x : t) (y : t) = Pervasives.(=) x y
-  let max (x : t) (y : t) = Pervasives.max x y
-  let min (x : t) (y : t) = Pervasives.min x y
+  let compare (x : t) (y : t) = Stdlib.compare x y
+  let equal (x : t) (y : t) = Stdlib.(=) x y
+  let max (x : t) (y : t) = Stdlib.max x y
+  let min (x : t) (y : t) = Stdlib.min x y
   let of_string_opt (s : string) = try Some (of_string s) with Failure _ -> None
   let pp fmt x = Format.fprintf fmt "%s" (to_string x)
   let pp_hex fmt x = Format.fprintf fmt "%s" (to_hexstring x)
@@ -213,7 +211,7 @@ struct
     external to_int32 : t -> int32 = "integers_int32_of_uint32"
     let max_signed = of_int32 Int32.max_int
     let to_int32 u32 =
-       if Pervasives.compare u32 max_signed <= 0 then
+       if Stdlib.compare u32 max_signed <= 0 then
           to_int32 u32
        else
           Int32.sub (to_int32 (sub u32 half_max_plus_two)) half_max_minus_one_signed
@@ -266,7 +264,7 @@ struct
     external to_int64 : t -> int64 = "integers_uint64_to_int64"
     let max_signed = of_int64 Int64.max_int
     let to_int64 u64 =
-       if Pervasives.compare u64 max_signed <= 0 then
+       if Stdlib.compare u64 max_signed <= 0 then
           to_int64 u64
        else
           Int64.sub (to_int64 (sub u64 half_max_plus_two)) half_max_minus_one_signed

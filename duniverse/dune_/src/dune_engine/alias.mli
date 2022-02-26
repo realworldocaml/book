@@ -7,6 +7,8 @@ module Name : sig
 
   val of_string : string -> t
 
+  val equal : t -> t -> bool
+
   val parse_string_exn : Loc.t * string -> t
 
   val to_string : t -> string
@@ -23,9 +25,7 @@ module Name : sig
 
   val parse_local_path : Loc.t * Path.Local.t -> Path.Local.t * t
 
-  module Map : Map.S with type key = t
-
-  module Set : Set.S with type elt = t
+  include Comparable_intf.S with type key := t
 end
 
 type t
@@ -38,12 +38,12 @@ val compare : t -> t -> Ordering.t
 
 val make : Name.t -> dir:Path.Build.t -> t
 
+val register_as_standard : Name.t -> unit
+
 (** The following always holds: [make (name t) ~dir:(dir t) = t] *)
 val name : t -> Name.t
 
 val dir : t -> Path.Build.t
-
-val stamp_file_dir : t -> Path.Build.t
 
 val to_dyn : t -> Dyn.t
 
@@ -71,9 +71,9 @@ val check : dir:Path.Build.t -> t
 
 val fmt : dir:Path.Build.t -> t
 
-(** Return the underlying stamp file *)
-val stamp_file : t -> Path.Build.t
-
 val is_standard : Name.t -> bool
 
-val suffix : string
+val describe : ?loc:Loc.t -> t -> _ Pp.t
+
+(** Alias for all the files in [_build/install] that belong to this package *)
+val package_install : context:Build_context.t -> pkg:Package.t -> t

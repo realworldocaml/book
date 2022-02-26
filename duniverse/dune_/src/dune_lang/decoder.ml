@@ -16,13 +16,11 @@ module Name = struct
     type t = string
 
     let compare a b =
-      let alen = String.length a
-      and blen = String.length b in
-      match Int.compare alen blen with
-      | Eq -> String.compare a b
-      | ne -> ne
+      let open Ordering.O in
+      let= () = Int.compare (String.length a) (String.length b) in
+      String.compare a b
 
-    let to_dyn = Dyn.Encoder.string
+    let to_dyn = Dyn.string
   end
 
   include T
@@ -82,9 +80,7 @@ end = struct
             | Atom (_, A name) ->
               Name.Map.set acc name
                 { Unparsed.values; entry = sexp; prev = Name.Map.find acc name }
-            | List (loc, _)
-            | Quoted_string (loc, _)
-            | Template { loc; _ } ->
+            | List (loc, _) | Quoted_string (loc, _) | Template { loc; _ } ->
               User_error.raise ~loc [ Pp.text "Atom expected" ])
           | _ ->
             User_error.raise ~loc:(Ast.loc sexp)
@@ -156,9 +152,7 @@ let ( and+ ) a b ctx state =
 
 let map t ~f = t >>| f
 
-let try_ t f ctx state =
-  try t ctx state with
-  | exn -> f exn ctx state
+let try_ t f ctx state = try t ctx state with exn -> f exn ctx state
 
 let get_user_context : type k. k context -> Univ_map.t = function
   | Values (_, _, uc) -> uc
@@ -175,6 +169,19 @@ let set : type a b k. a Univ_map.Key.t -> a -> (b, k) parser -> (b, k) parser =
     t (Values (loc, cstr, Univ_map.set uc key v)) state
   | Fields (loc, cstr, uc) ->
     t (Fields (loc, cstr, Univ_map.set uc key v)) state
+
+let update_var :
+    type a b k.
+       a Univ_map.Key.t
+    -> f:(a option -> a option)
+    -> (b, k) parser
+    -> (b, k) parser =
+ fun key ~f t ctx state ->
+  match ctx with
+  | Values (loc, cstr, uc) ->
+    t (Values (loc, cstr, Univ_map.update uc key ~f)) state
+  | Fields (loc, cstr, uc) ->
+    t (Fields (loc, cstr, Univ_map.update uc key ~f)) state
 
 let set_many : type a k. Univ_map.t -> (a, k) parser -> (a, k) parser =
  fun map t ctx state ->
@@ -251,6 +258,10 @@ let capture ctx state =
   let f t = result ctx (t ctx state) in
   (f, [])
 
+let lazy_ t =
+  let+ f = capture in
+  lazy (f t)
+
 let end_of_list (Values (loc, cstr, _)) =
   match cstr with
   | None ->
@@ -320,28 +331,22 @@ let until_keyword kwd ~before ~after =
 
 let plain_string f =
   next (function
-    | Atom (loc, A s)
-    | Quoted_string (loc, s) ->
-      f ~loc s
-    | Template { loc; _ }
-    | List (loc, _) ->
+    | Atom (loc, A s) | Quoted_string (loc, s) -> f ~loc s
+    | Template { loc; _ } | List (loc, _) ->
       User_error.raise ~loc [ Pp.text "Atom or quoted string expected" ])
 
 let filename =
   plain_string (fun ~loc s ->
       match s with
-      | "."
-      | ".." ->
+      | "." | ".." ->
         User_error.raise ~loc
           [ Pp.textf "'.' and '..' are not valid filenames" ]
       | fn -> fn)
 
 let relative_file =
   plain_string (fun ~loc fn ->
-      if Filename.is_relative fn then
-        fn
-      else
-        User_error.raise ~loc [ Pp.textf "relative filename expected" ])
+      if Filename.is_relative fn then fn
+      else User_error.raise ~loc [ Pp.textf "relative filename expected" ])
 
 let enter t =
   next_with_user_context (fun uc sexp ->
@@ -366,18 +371,16 @@ let either =
       (approximate_how_much_input_a_failing_branch_consumed exn2)
   in
   fun a b ctx state ->
-    try (a >>| Either.left) ctx state with
-    | exn_a -> (
+    try (a >>| Either.left) ctx state
+    with exn_a -> (
       let exn_a = Exn_with_backtrace.capture exn_a in
-      try (b >>| Either.right) ctx state with
-      | exn_b ->
+      try (b >>| Either.right) ctx state
+      with exn_b ->
         let exn_b = Exn_with_backtrace.capture exn_b in
         Exn_with_backtrace.reraise
           (match compare_input_consumed exn_a exn_b with
           | Gt -> exn_a
-          | Eq
-          | Lt ->
-            exn_b))
+          | Eq | Lt -> exn_b))
 
 let ( <|> ) x y =
   let+ res = either x y in
@@ -404,8 +407,7 @@ let loc_between_states : type k. k context -> k -> k -> Loc.t =
     | sexp :: rest ->
       let loc = Ast.loc sexp in
       let rec search last l =
-        if l == state2 then
-          { loc with stop = (Ast.loc last).stop }
+        if l == state2 then { loc with stop = (Ast.loc last).stop }
         else
           match l with
           | [] ->
@@ -443,9 +445,7 @@ let raw = next Fun.id
 
 let basic_loc desc f =
   next (function
-    | Template { loc; _ }
-    | List (loc, _)
-    | Quoted_string (loc, _) ->
+    | Template { loc; _ } | List (loc, _) | Quoted_string (loc, _) ->
       User_error.raise ~loc [ Pp.textf "%s expected" desc ]
     | Atom (loc, s) -> (
       match f ~loc (Atom.to_string s) with
@@ -536,25 +536,19 @@ let sum ?(force_parens = false) cstrs =
       | List (loc, []) ->
         User_error.raise ~loc
           [ Pp.textf "S-expression of the form %s expected"
-              (if force_parens then
-                "(<atom> ...)"
-              else
-                "(<atom> ...) or <atom>")
+              (if force_parens then "(<atom> ...)"
+              else "(<atom> ...) or <atom>")
           ]
       | List (loc, name :: args) -> (
         match name with
-        | Quoted_string (loc, _)
-        | List (loc, _)
-        | Template { loc; _ } ->
+        | Quoted_string (loc, _) | List (loc, _) | Template { loc; _ } ->
           User_error.raise ~loc [ Pp.text "Atom expected" ]
         | Atom (s_loc, A s) ->
           find_cstr cstrs s_loc s (Values (loc, Some s, uc)) args))
 
 let enum cstrs =
   next (function
-    | Quoted_string (loc, _)
-    | Template { loc; _ }
-    | List (loc, _) ->
+    | Quoted_string (loc, _) | Template { loc; _ } | List (loc, _) ->
       User_error.raise ~loc [ Pp.text "Atom expected" ]
     | Atom (loc, A s) -> (
       match List.assoc cstrs s with

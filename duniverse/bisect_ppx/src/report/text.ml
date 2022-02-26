@@ -25,7 +25,7 @@ let output ~per_file ~coverage_files ~coverage_paths ~expect ~do_not_expect =
         ((float_of_int numerator) *. 100.) /. (float_of_int denominator) in
       Printf.sprintf "%.2f" p
     else
-      "0.00"
+      "100.00"
   in
 
   let second (_, v, _) = v in

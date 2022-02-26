@@ -21,4 +21,4 @@ the test suite; but we do not need to print it so we can grep it out
 (redirecting stderr to /dev/null would also silence the stack overflow message).
 
   $ dune runtest --diff-command 'diff -u' 2>&1 | grep -v + | grep -v diff | grep -v "^--- test"
-            sh (internal) (exit 1)
+  File "test", line 1, characters 0-0:

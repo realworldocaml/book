@@ -22,6 +22,11 @@ let js_rule () =
   in
   rule "js_of_ocaml: .byte -> .js" ~dep ~prod f
 
+let lib s =
+  match !Ocamlbuild_plugin.Options.ext_lib with
+  | "" -> s ^ ".a"
+  | x -> s ^ "." ^ x
+
 let () =
   dispatch begin function
   | After_rules ->
@@ -36,7 +41,7 @@ let () =
       dep ["record_mtime_clock_os_stubs"] ["src-os/libmtime_clock_stubs.a"];
       flag_and_dep
         ["link"; "ocaml"; "link_mtime_clock_os_stubs"]
-        (P "src-os/libmtime_clock_stubs.a");
+        (P (lib "src-os/libmtime_clock_stubs"));
       flag ["library"; "ocaml"; "byte"; "record_mtime_clock_os_stubs"]
         (S ([A "-dllib"; A "-lmtime_clock_stubs"] @ system_support_lib));
       flag ["library"; "ocaml"; (* byte and native *)

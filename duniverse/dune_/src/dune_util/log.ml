@@ -5,6 +5,7 @@ module File = struct
     | Default
     | No_log_file
     | This of Path.t
+    | Out_channel of out_channel
 end
 
 type real =
@@ -13,7 +14,7 @@ type real =
   ; ppf : Format.formatter
   }
 
-let t = Fdecl.create Dyn.Encoder.opaque
+let t = Fdecl.create Dyn.opaque
 
 let verbose = ref false
 
@@ -21,6 +22,7 @@ let init ?(file = File.Default) () =
   let oc =
     match file with
     | No_log_file -> None
+    | Out_channel s -> Some s
     | This path -> Some (Io.open_out path)
     | Default ->
       Path.ensure_build_dir_exists ();
@@ -58,9 +60,7 @@ let info paragraphs = info_user_message (User_message.make paragraphs)
 
 let command ~command_line ~output ~exit_status =
   match t () with
-  | None
-  | Some { oc = None; _ } ->
-    ()
+  | None | Some { oc = None; _ } -> ()
   | Some { oc = Some oc; _ } ->
     Printf.fprintf oc "$ %s\n" (Ansi_color.strip command_line);
     List.iter (String.split_lines output) ~f:(fun s ->

@@ -13,8 +13,7 @@ module Pps_and_flags = struct
       List.partition_map l ~f:(fun s ->
           match String_with_vars.is_prefix ~prefix:"-" s with
           | Yes -> Right s
-          | No
-          | Unknown _ -> (
+          | No | Unknown _ -> (
             let loc = String_with_vars.loc s in
             match String_with_vars.text_only s with
             | None ->
@@ -26,7 +25,7 @@ module Pps_and_flags = struct
     if syntax_version < (1, 10) then
       List.iter
         ~f:(fun flag ->
-          if String_with_vars.has_vars flag then
+          if String_with_vars.has_pforms flag then
             Dune_lang.Syntax.Error.since
               (String_with_vars.loc flag)
               Stanza.syntax (1, 10) ~what:"Using variables in pps flags")
@@ -45,17 +44,18 @@ module Pps = struct
     ; staged : bool
     }
 
-  let compare_no_locs compare_pps
-      { loc = _; pps = pps1; flags = flags1; staged = s1 }
-      { loc = _; pps = pps2; flags = flags2; staged = s2 } =
-    match Bool.compare s1 s2 with
-    | (Lt | Gt) as t -> t
-    | Eq -> (
-      match
-        List.compare flags1 flags2 ~compare:String_with_vars.compare_no_loc
-      with
-      | (Lt | Gt) as t -> t
-      | Eq -> List.compare pps1 pps2 ~compare:compare_pps)
+  let equal f t { loc; pps; flags; staged } =
+    Loc.equal t.loc loc && List.equal f t.pps pps
+    && List.equal String_with_vars.equal_no_loc t.flags flags
+    && Bool.equal t.staged staged
+
+  let compare_no_locs compare_pps { pps; flags; staged; loc = _ } t =
+    let open Ordering.O in
+    let= () = Bool.compare staged t.staged in
+    let= () =
+      List.compare flags t.flags ~compare:String_with_vars.compare_no_loc
+    in
+    List.compare pps t.pps ~compare:compare_pps
 end
 
 type 'a t =
@@ -63,6 +63,15 @@ type 'a t =
   | Action of Loc.t * Action_dune_lang.t
   | Pps of 'a Pps.t
   | Future_syntax of Loc.t
+
+let equal f x y =
+  match (x, y) with
+  | No_preprocessing, No_preprocessing -> true
+  | Action (x, y), Action (x', y') ->
+    Tuple.T2.equal Loc.equal Action_dune_lang.equal (x, y) (x', y')
+  | Pps x, Pps y -> Pps.equal f x y
+  | Future_syntax x, Future_syntax y -> Loc.equal x y
+  | _, _ -> false
 
 let map t ~f =
   match t with
@@ -73,20 +82,24 @@ let filter_map t ~f =
   match t with
   | Pps t ->
     let pps = List.filter_map t.pps ~f in
-    let pps, flags = List.split pps in
-    if pps = [] then
-      No_preprocessing
-    else
-      Pps { t with pps; flags = t.flags @ List.flatten flags }
+    if pps = [] then No_preprocessing else Pps { t with pps }
   | (No_preprocessing | Action _ | Future_syntax _) as t -> t
 
-let fold t ~init ~f =
+let filter_map_resolve t ~f =
+  let open Resolve.Build.O in
   match t with
-  | Pps t -> List.fold_left t.pps ~init ~f
-  | No_preprocessing
-  | Action _
-  | Future_syntax _ ->
-    init
+  | Pps t ->
+    let+ pps = Resolve.Build.List.filter_map t.pps ~f in
+    let pps, flags = List.split pps in
+    if pps = [] then No_preprocessing
+    else Pps { t with pps; flags = t.flags @ List.flatten flags }
+  | (No_preprocessing | Action _ | Future_syntax _) as t ->
+    Resolve.Build.return t
+
+let fold_resolve t ~init ~f =
+  match t with
+  | Pps t -> Resolve.Build.List.fold_left t.pps ~init ~f
+  | No_preprocessing | Action _ | Future_syntax _ -> Resolve.Build.return init
 
 module Without_instrumentation = struct
   type t = Loc.t * Lib_name.t
@@ -102,13 +115,23 @@ module With_instrumentation = struct
         ; deps : Dep_conf.t list
         ; flags : String_with_vars.t list
         }
+
+  let equal (x : t) (y : t) = Poly.equal x y
 end
 
 let decode =
   sum
     [ ("no_preprocessing", return No_preprocessing)
     ; ( "action"
-      , located Action_dune_lang.decode >>| fun (loc, x) -> Action (loc, x) )
+      , let+ loc, x =
+          located
+            (update_var String_with_vars.decoding_env_key
+               ~f:(fun env ->
+                 let env = Option.value_exn env in
+                 Some (Pform.Env.lt_renamed_input_file env))
+               Action_dune_lang.decode)
+        in
+        Action (loc, x) )
     ; ( "pps"
       , let+ loc = loc
         and+ pps, flags = Pps_and_flags.decode in
@@ -126,10 +149,7 @@ let decode =
 
 let loc = function
   | No_preprocessing -> None
-  | Action (loc, _)
-  | Pps { loc; _ }
-  | Future_syntax loc ->
-    Some loc
+  | Action (loc, _) | Pps { loc; _ } | Future_syntax loc -> Some loc
 
 let pps = function
   | Pps { pps; _ } -> pps
@@ -157,13 +177,12 @@ let remove_future_syntax (t : 'a t) ~(for_ : Pp_flag_consumer.t) v :
   | Action (loc, action) -> Action (loc, action)
   | Pps pps -> Pps pps
   | Future_syntax loc ->
-    if Ocaml_version.supports_let_syntax v then
-      No_preprocessing
+    if Ocaml_version.supports_let_syntax v then No_preprocessing
     else
       Action
         ( loc
         , Run
-            ( String_with_vars.make_var loc "bin" ~payload:"ocaml-syntax-shims"
+            ( String_with_vars.make_pform loc (Macro (Bin, "ocaml-syntax-shims"))
             , (match for_ with
               | Compiler -> [ String_with_vars.make_text loc "-dump-ast" ]
               | Merlin ->
@@ -178,7 +197,7 @@ let remove_future_syntax (t : 'a t) ~(for_ : Pp_flag_consumer.t) v :
                    Hopefully this will be fixed in merlin before that becomes a
                    necessity. *)
                 [])
-              @ [ String_with_vars.make_var loc "input-file" ] ) )
+              @ [ String_with_vars.make_pform loc (Var Input_file) ] ) )
 
 module Per_module = struct
   module Per_module = Module_name.Per_item
@@ -186,6 +205,8 @@ module Per_module = struct
   type 'a preprocess = 'a t
 
   type 'a t = 'a preprocess Per_module.t
+
+  let equal f x y = Per_module.equal (equal f) x y
 
   let decode = Per_module.decode decode ~default:No_preprocessing
 
@@ -205,10 +226,8 @@ module Per_module = struct
   let dummy_name = Module_name.of_string "A"
 
   let single_preprocess t =
-    if Per_module.is_constant t then
-      Per_module.get t dummy_name
-    else
-      No_preprocessing
+    if Per_module.is_constant t then Per_module.get t dummy_name
+    else No_preprocessing
 
   let add_instrumentation t ~loc ~flags ~deps libname =
     Per_module.map t ~f:(fun pp ->
@@ -227,8 +246,7 @@ module Per_module = struct
             :: pps
           in
           Pps { t with pps }
-        | Action (loc, _)
-        | Future_syntax loc ->
+        | Action (loc, _) | Future_syntax loc ->
           User_error.raise ~loc
             [ Pp.text
                 "Preprocessing with actions and future syntax cannot be used \
@@ -237,32 +255,40 @@ module Per_module = struct
 
   let without_instrumentation t =
     let f = function
-      | With_instrumentation.Ordinary libname -> Some (libname, [])
+      | With_instrumentation.Ordinary libname -> Some libname
       | With_instrumentation.Instrumentation_backend _ -> None
     in
     Per_module.map t ~f:(filter_map ~f)
 
   let with_instrumentation t ~instrumentation_backend =
     let f = function
-      | With_instrumentation.Ordinary libname -> Some (libname, [])
-      | With_instrumentation.Instrumentation_backend { libname; flags; _ } -> (
-        match instrumentation_backend libname with
-        | None -> None
-        | Some backend -> Some (backend, flags))
+      | With_instrumentation.Ordinary libname ->
+        Resolve.Build.return (Some (libname, []))
+      | With_instrumentation.Instrumentation_backend { libname; flags; _ } ->
+        Resolve.Build.map
+          ~f:(fun backend ->
+            match backend with
+            | None -> None
+            | Some backend -> Some (backend, flags))
+          (instrumentation_backend libname)
     in
-    Per_module.map t ~f:(filter_map ~f)
+    Per_module.map_resolve t ~f:(filter_map_resolve ~f)
 
   let instrumentation_deps t ~instrumentation_backend =
+    let open Resolve.Build.O in
     let f = function
-      | With_instrumentation.Ordinary _ -> []
+      | With_instrumentation.Ordinary _ -> Resolve.Build.return []
       | With_instrumentation.Instrumentation_backend
           { libname; deps; flags = _ } -> (
-        match instrumentation_backend libname with
+        instrumentation_backend libname >>| function
         | Some _ -> deps
         | None -> [])
     in
-    Per_module.fold t ~init:[] ~f:(fun t init ->
-        let f acc t = f t :: acc in
-        fold t ~init ~f)
-    |> List.rev |> List.flatten
+    Per_module.fold_resolve t ~init:[] ~f:(fun t init ->
+        let f acc t =
+          let+ x = f t in
+          x :: acc
+        in
+        fold_resolve t ~init ~f)
+    >>| List.rev >>| List.flatten
 end

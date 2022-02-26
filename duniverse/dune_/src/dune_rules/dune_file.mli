@@ -10,15 +10,6 @@ module Lint : sig
   val no_lint : t
 end
 
-module Js_of_ocaml : sig
-  type t =
-    { flags : Ordered_set_lang.Unexpanded.t
-    ; javascript_files : string list
-    }
-
-  val default : t
-end
-
 type for_ =
   | Executable
   | Library of Wrapped.t option
@@ -27,8 +18,6 @@ module Lib_deps : sig
   type nonrec t = Lib_dep.t list
 
   val of_pps : Lib_name.t list -> t
-
-  val info : t -> kind:Lib_deps_info.Kind.t -> Lib_deps_info.t
 
   val decode : for_ -> t Dune_lang.Decoder.t
 end
@@ -44,6 +33,7 @@ module Buildable : sig
     { loc : Loc.t
     ; modules : Ordered_set_lang.t
     ; modules_without_implementation : Ordered_set_lang.t
+    ; empty_module_interface_if_absent : bool
     ; libraries : Lib_dep.t list
     ; foreign_archives : (Loc.t * Foreign.Archive.t) list
     ; foreign_stubs : Foreign.Stubs.t list
@@ -51,13 +41,17 @@ module Buildable : sig
     ; preprocessor_deps : Dep_conf.t list
     ; lint : Lint.t
     ; flags : Ocaml_flags.Spec.t
-    ; js_of_ocaml : Js_of_ocaml.t
+    ; js_of_ocaml : Js_of_ocaml.In_buildable.t
     ; allow_overlapping_dependencies : bool
+    ; ctypes : Ctypes_stanza.t option
     ; root_module : (Loc.t * Module_name.t) option
     }
 
   (** Check if the buildable has any foreign stubs or archives. *)
   val has_foreign : t -> bool
+
+  (** Check if the buildable has any c++ foreign stubs. *)
+  val has_foreign_cxx : t -> bool
 end
 
 module Public_lib : sig
@@ -73,6 +67,12 @@ module Public_lib : sig
 
   (** Package it is part of *)
   val package : t -> Package.t
+
+  val make :
+       allow_deprecated_names:bool
+    -> Dune_project.t
+    -> Loc.t * Lib_name.t
+    -> (t, User_message.t) result
 end
 
 module Mode_conf : sig
@@ -102,7 +102,11 @@ module Mode_conf : sig
   end
 
   module Set : sig
+    type mode_conf = t
+
     type nonrec t = Kind.t option Map.t
+
+    val of_list : (mode_conf * Kind.t) list -> t
 
     val decode : t Dune_lang.Decoder.t
 
@@ -161,6 +165,9 @@ module Library : sig
   (** Check if the library has any foreign stubs or archives. *)
   val has_foreign : t -> bool
 
+  (** Check if the library has any c++ foreign stubs. *)
+  val has_foreign_cxx : t -> bool
+
   (** The list of all foreign archives, including the foreign stubs archive. *)
   val foreign_archives : t -> Foreign.Archive.t list
 
@@ -184,7 +191,10 @@ module Library : sig
   val main_module_name : t -> Lib_info.Main_module_name.t
 
   val to_lib_info :
-    t -> dir:Path.Build.t -> lib_config:Lib_config.t -> Lib_info.local
+       t
+    -> dir:Path.Build.t
+    -> lib_config:Lib_config.t
+    -> Lib_info.local Memo.Build.t
 end
 
 module Plugin : sig
@@ -240,7 +250,7 @@ module Executables : sig
 
   type t =
     { names : (Loc.t * string) list
-    ; link_flags : Ordered_set_lang.Unexpanded.t
+    ; link_flags : Link_flags.Spec.t
     ; link_deps : Dep_conf.t list
     ; modes : Loc.t Link_mode.Map.t
     ; optional : bool
@@ -252,10 +262,14 @@ module Executables : sig
     ; forbidden_libraries : (Loc.t * Lib_name.t) list
     ; bootstrap_info : string option
     ; enabled_if : Blang.t
+    ; dune_version : Dune_lang.Syntax.Version.t
     }
 
   (** Check if the executables have any foreign stubs or archives. *)
   val has_foreign : t -> bool
+
+  (** Check if the executables have any c++ foreign stubs. *)
+  val has_foreign_cxx : t -> bool
 
   val obj_dir : t -> dir:Path.Build.t -> Path.Build.t Obj_dir.t
 end
@@ -287,10 +301,11 @@ end
 
 module Rule : sig
   type t =
-    { targets : String_with_vars.t Targets.t
+    { targets : String_with_vars.t Targets_spec.t
     ; deps : Dep_conf.t Bindings.t
     ; action : Loc.t * Action_dune_lang.t
     ; mode : Rule.Mode.t
+    ; patch_back_source_tree : bool
     ; locks : String_with_vars.t list
     ; loc : Loc.t
     ; enabled_if : Blang.t
@@ -435,17 +450,21 @@ module Stanzas : sig
       [ast] according to the syntax given by [kind] in the context of the
       [project] *)
   val of_ast : Dune_project.t -> Dune_lang.Ast.t -> Stanza.t list
-
-  (** [parse ~file ~kind project stanza_exprs] is a list of [Stanza.t]s derived
-      from decoding the [stanza_exprs] from [Dune_lang.Ast.t]s to [Stanza.t]s.
-
-      [file] is used to check for illegal recursive file inclusions and to
-      anchor file includes given as relative paths.
-
-      The stanzas are parsed in the context of the dune [project].
-
-      The syntax [kind] determines whether the expected syntax is the
-      depreciated jbuilder syntax or the version of Dune syntax specified by the
-      current [project]. *)
-  val parse : file:Path.Source.t -> Dune_project.t -> Dune_lang.Ast.t list -> t
 end
+
+(** A fully evaluated dune file *)
+type t =
+  { dir : Path.Source.t
+  ; project : Dune_project.t
+  ; stanzas : Stanzas.t
+  }
+
+val parse :
+     Dune_lang.Ast.t list
+  -> dir:Path.Source.t
+  -> file:Path.Source.t
+  -> project:Dune_project.t
+  -> t
+
+val fold_stanzas :
+  t list -> init:'acc -> f:(t -> Stanza.t -> 'acc -> 'acc) -> 'acc

@@ -28,9 +28,10 @@ module DB : sig
     -> projects_by_package:Dune_project.t Package.Name.Map.t
     -> context:Context.t
     -> installed_libs:Lib.DB.t
-    -> modules_of_lib:(dir:Path.Build.t -> name:Lib_name.t -> Modules.t) Fdecl.t
-    -> Dune_load.Dune_file.t list
-    -> t * Lib.DB.t
+    -> modules_of_lib:
+         (dir:Path.Build.t -> name:Lib_name.t -> Modules.t Memo.Build.t) Fdecl.t
+    -> Dune_file.t list
+    -> (t * Lib.DB.t) Memo.Build.t
 
   val find_by_dir : t -> Path.Build.t -> scope
 

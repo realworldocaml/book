@@ -10,6 +10,7 @@
 
     --color: #000;
     --dirname-color: #bbb;
+    --stats-color: #aaa;
     --underline-color: #ddd;
     --visited-color: #eaffea;
     --visited-number-color: rgba(64, 192, 64, 0.2);
@@ -43,6 +44,7 @@
 
     --color: #bebebe;
     --dirname-color: #666;
+    --stats-color: #555;
     --underline-color: #444;
     --visited-color: #002800;
     --visited-number-color: #252;
@@ -398,11 +400,51 @@ code span[data-count="0"] {
     border-right: 1px solid var(--meter-separator-color);
 }
 
+#files div {
+    display: flex;
+}
+
+summary {
+    cursor: pointer;
+    display: flex;
+}
+
+.summary-indicator {
+    display: inline-block;
+    width: 1em;
+    color: var(--color);
+}
+
+/* Adds indentation to the directory tree */
+details > details, details > div {
+    margin-left: 1em;
+}
+
+details > summary > .summary-indicator {
+    text-align: center;
+    font-weight: bold;
+}
+
+details > summary > .summary-indicator::before {
+    content: "+";
+}
+
+details[open] > summary > .summary-indicator::before {
+    content: "-";
+}
+
 .percentage {
     display: inline-block;
-    width: 4em;
+    min-width: 7.5em;
+    margin: 0 0.5em;
     font-size: 90%;
     color: var(--color);
+}
+
+.stats {
+    display: inline-block;
+    font-size: 70%;
+    color: var(--stats-color);
 }
 
 #files a {

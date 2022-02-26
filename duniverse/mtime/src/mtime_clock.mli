@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Monotonic time clock.
@@ -19,9 +18,7 @@
 
     Concrete implementation of this interfaces are provided by the
     [mtime.clock.os] and [mtime.clock.jsoo] packages against which you
-    should compile depending on your target.
-
-    {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    should compile depending on your target. *)
 
 (** {1:clock Monotonic clock} *)
 
@@ -57,7 +54,7 @@ val count : counter -> Mtime.span
 (** {1:raw Monotonic clock raw interface} *)
 
 val elapsed_ns : unit -> int64
-(** [now_ns ()] is the {e unsigned} 64-bit integer nanosecond monotonic
+(** [elapsed_ns ()] is the {e unsigned} 64-bit integer nanosecond monotonic
      time span elapsed since the beginning of the program.
 
     @raise Sys_error see {{!err}error handling} *)
@@ -75,7 +72,7 @@ val period_ns : unit -> int64 option
 
 (** {1:err Error handling}
 
-    The functions {!elapsed}, {!now}, {!counter}, {!elapsed_ns} and
+    The functions {!elapsed}, {!now}, {!val-counter}, {!elapsed_ns} and
     {!now_ns} raise [Sys_error] whenever they can't determine the
     current time or that it doesn't fit in [Mtime]'s range. Usually
     this exception should only be catched at the toplevel of your
@@ -95,7 +92,7 @@ val period_ns : unit -> int64 option
        with CLOCK_MONOTONIC.}
     {- Darwin uses
        {{:https://developer.apple.com/library/mac/qa/qa1398/_index.html}[mach_absolute_time]}.}
-    {- Windows is TODO, use
+    {- Windows uses
        {{:https://msdn.microsoft.com/en-us/library/windows/desktop/aa373083%28v=vs.85%29.aspx}Performance counters}. }
     {- JavaScript uses
        {{:http://www.w3.org/TR/hr-time/}[performance.now]} (consult

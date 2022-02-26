@@ -57,6 +57,10 @@ tests that the "old_public_name" field is evaluated lazily
   $ dune_cmd cat $PWD/_install/lib/a/dune-package | sed "s/(lang dune .*)/(lang dune <version>)/"
   (lang dune <version>)
   (name a)
+  (sections
+   (lib
+    $TESTCASE_ROOT/a/../_install/lib/a))
+  (files (lib (META dune-package)))
   (deprecated_library_name (old_public_name a) (new_public_name b))
 
 Now we install "b". We do need to install it as an installed
@@ -91,8 +95,9 @@ that wasn't found:
   1 | (executable (name prog) (libraries a))
                                          ^
   Error: Library "a" not found.
-  Hint: try:
-    dune external-lib-deps --missing c/prog.exe
+  -> required by _build/default/c/.prog.eobjs/byte/dune__exe__Prog.cmi
+  -> required by _build/default/c/.prog.eobjs/native/dune__exe__Prog.cmx
+  -> required by _build/default/c/prog.exe
   [1]
 
 Test that we can migrate top-level libraries

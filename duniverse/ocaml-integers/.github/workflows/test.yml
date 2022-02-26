@@ -1,14 +1,12 @@
-name: Main workflow
+name: Integers
 
 on:
-  pull_request:
-  push:
-  schedule:
-    # Prime the caches every Monday
-    - cron: 0 1 * * MON
+  - pull_request
+  - push
+  - workflow_dispatch
 
 jobs:
-  build:
+  tests:
     strategy:
       fail-fast: false
       matrix:
@@ -33,14 +31,12 @@ jobs:
             ocaml-compiler: 4.11.x
           - os: ubuntu-latest
             ocaml-compiler: 4.12.x
+          - os: ubuntu-latest
+            ocaml-compiler: 4.13.x
           - os: windows-latest
-            ocaml-compiler: 4.11.x
-          - os: windows-latest
-            ocaml-compiler: 4.12.x
+            ocaml-compiler: 4.13.1
           - os: macos-latest
-            ocaml-compiler: 4.11.1
-          - os: macos-latest
-            ocaml-compiler: 4.12.x
+            ocaml-compiler: 4.13.1
 
     runs-on: ${{ matrix.os }}
 

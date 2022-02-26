@@ -56,7 +56,7 @@ module Stdlib = struct
        { modules; main_module_name; exit_module; unwrapped })
 
   let to_dyn { modules; unwrapped; exit_module; main_module_name } =
-    let open Dyn.Encoder in
+    let open Dyn in
     record
       [ ("modules", Module.Name_map.to_dyn modules)
       ; ("unwrapped", Module_name.Set.to_dyn unwrapped)
@@ -74,6 +74,13 @@ module Stdlib = struct
   let fold t ~init ~f = Module_name.Map.fold t.modules ~f ~init
 
   let map t ~f = { t with modules = Module_name.Map.map t.modules ~f }
+
+  let traverse t ~f =
+    let open Memo.Build.O in
+    let+ modules =
+      Module_name.Map_traversals.parallel_map t.modules ~f:(fun _ -> f)
+    in
+    { t with modules }
 
   let lib_interface t = Module_name.Map.find t.modules t.main_module_name
 
@@ -93,10 +100,8 @@ module Stdlib = struct
       Module_name.Map.map modules ~f:(fun m ->
           if
             Module.name m = main_module_name || special_compiler_module stdlib m
-          then
-            m
-          else
-            Module.with_wrapper m ~main_module_name)
+          then m
+          else Module.with_wrapper m ~main_module_name)
     in
     let unwrapped = stdlib.modules_before_stdlib in
     let exit_module = stdlib.exit_module in
@@ -117,17 +122,14 @@ module Stdlib = struct
     if of_name = t.main_module_name then
       if Module_name.Set.mem t.unwrapped name then
         Module_name.Map.find t.modules name
-      else
-        None
-    else
-      Module_name.Map.find t.modules name
+      else None
+    else Module_name.Map.find t.modules name
 
   let alias_for t m =
     let name = Module.name m in
     if name = t.main_module_name || Module_name.Set.mem t.unwrapped name then
       None
-    else
-      lib_interface t
+    else lib_interface t
 end
 
 module Mangle = struct
@@ -149,12 +151,10 @@ module Mangle = struct
 
   let of_lib ~lib_name ~implements ~main_module_name ~modules =
     let kind : Lib.kind =
-      if implements then
-        Implementation lib_name
+      if implements then Implementation lib_name
       else if Module_name.Map.mem modules main_module_name then
         Has_lib_interface
-      else
-        Neither
+      else Neither
     in
     Lib { main_module_name; kind }
 
@@ -162,9 +162,7 @@ module Mangle = struct
     match t with
     | Lib { main_module_name; kind } -> (
       match kind with
-      | Has_lib_interface
-      | Neither ->
-        Visibility.Map.make_both main_module_name
+      | Has_lib_interface | Neither -> Visibility.Map.make_both main_module_name
       | Implementation lib ->
         { private_ =
             sprintf "%s__%s__"
@@ -237,8 +235,7 @@ module Wrapped = struct
 
   let wrap_modules prefix ~main_module_name ~modules =
     Module_name.Map.map modules ~f:(fun (m : Module.t) ->
-        if Module.name m = main_module_name then
-          m
+        if Module.name m = main_module_name then m
         else
           let visibility = Module.visibility m in
           let prefix = Visibility.Map.find prefix visibility in
@@ -296,7 +293,7 @@ module Wrapped = struct
 
   let to_dyn
       { modules; wrapped_compat; alias_module; main_module_name; wrapped } =
-    let open Dyn.Encoder in
+    let open Dyn in
     record
       [ ("modules", Module.Name_map.to_dyn modules)
       ; ("wrapped_compat", Module.Name_map.to_dyn wrapped_compat)
@@ -344,8 +341,7 @@ module Wrapped = struct
   let lib_interface t = Module_name.Map.find t.modules t.main_module_name
 
   let find t name =
-    if is_alias_name t name then
-      Some t.alias_module
+    if is_alias_name t name then Some t.alias_module
     else
       match Module_name.Map.find t.modules name with
       | Some _ as m -> m
@@ -359,16 +355,12 @@ module Wrapped = struct
       | Some li -> Option.some_if (name = Module.name li) li
       | None -> Module_name.Map.find t.modules name)
     | _ ->
-      if is_alias_name t name then
-        Some t.alias_module
-      else
-        Module_name.Map.find t.modules name
+      if is_alias_name t name then Some t.alias_module
+      else Module_name.Map.find t.modules name
 
   let alias_for t m =
     match Module.kind m with
-    | Alias
-    | Wrapped_compat ->
-      None
+    | Alias | Wrapped_compat -> None
     | _ -> Some t.alias_module
 
   let relocate_alias_module t ~src_dir =
@@ -388,6 +380,8 @@ and impl =
   ; vlib : t
   }
 
+let equal (x : t) (y : t) = Poly.equal x y
+
 let rec encode t =
   let open Dune_lang in
   match t with
@@ -398,10 +392,8 @@ let rec encode t =
   | Impl { impl; _ } -> encode impl
 
 let as_singleton m =
-  if Module_name.Map.cardinal m <> 1 then
-    None
-  else
-    Module_name.Map.choose m |> Option.map ~f:snd
+  if Module_name.Map.cardinal m <> 1 then None
+  else Module_name.Map.choose m |> Option.map ~f:snd
 
 (* Pre-1.11 encoding *)
 module Old_format = struct
@@ -424,8 +416,7 @@ module Old_format = struct
          match as_singleton modules with
          | Some m -> Singleton m
          | None -> Unwrapped modules)
-       | Yes_with_transition _
-       | Simple true -> (
+       | Yes_with_transition _ | Simple true -> (
          match (main_module_name, alias_module, as_singleton modules) with
          | Some main_module_name, _, Some m
            when Module.name m = main_module_name && not implements ->
@@ -438,15 +429,15 @@ module Old_format = struct
              ; main_module_name
              ; wrapped
              }
-         | None, _, _
-         | _, None, _ ->
+         | None, _, _ | _, None, _ ->
            User_error.raise ~loc
              [ Pp.text "Cannot wrap without main module name or alias module" ]))
 end
 
+let singleton m = Singleton m
+
 let decode ~version ~src_dir ~implements =
-  if version <= (1, 10) then
-    Old_format.decode ~implements ~src_dir
+  if version <= (1, 10) then Old_format.decode ~implements ~src_dir
   else
     let open Dune_lang.Decoder in
     sum
@@ -465,16 +456,16 @@ let decode ~version ~src_dir ~implements =
       ]
 
 let rec to_dyn =
-  let open Dyn.Encoder in
+  let open Dyn in
   function
-  | Singleton m -> constr "Singleton" [ Module.to_dyn m ]
-  | Unwrapped m -> constr "Unwrapped" [ Module.Name_map.to_dyn m ]
-  | Wrapped w -> constr "Wrapped" [ Wrapped.to_dyn w ]
-  | Stdlib s -> constr "Stdlib" [ Stdlib.to_dyn s ]
-  | Impl impl -> constr "Impl" [ dyn_of_impl impl ]
+  | Singleton m -> variant "Singleton" [ Module.to_dyn m ]
+  | Unwrapped m -> variant "Unwrapped" [ Module.Name_map.to_dyn m ]
+  | Wrapped w -> variant "Wrapped" [ Wrapped.to_dyn w ]
+  | Stdlib s -> variant "Stdlib" [ Stdlib.to_dyn s ]
+  | Impl impl -> variant "Impl" [ dyn_of_impl impl ]
 
 and dyn_of_impl { impl; vlib } =
-  let open Dyn.Encoder in
+  let open Dyn in
   record [ ("impl", to_dyn impl); ("vlib", to_dyn vlib) ]
 
 let rec lib_interface = function
@@ -507,10 +498,8 @@ let lib ~src_dir ~main_module_name ~wrapped ~stdlib ~lib_name ~implements
     | Simple false, _, Some m -> Singleton m
     | Simple false, _, None -> Unwrapped modules
     | (Yes_with_transition _ | Simple true), Some main_module_name, Some m ->
-      if Module.name m = main_module_name && not implements then
-        Singleton m
-      else
-        make_wrapped main_module_name
+      if Module.name m = main_module_name && not implements then Singleton m
+      else make_wrapped main_module_name
     | (Yes_with_transition _ | Simple true), Some main_module_name, None ->
       make_wrapped main_module_name
     | (Simple true | Yes_with_transition _), None, _ ->
@@ -518,10 +507,7 @@ let lib ~src_dir ~main_module_name ~wrapped ~stdlib ~lib_name ~implements
 
 let impl impl ~vlib =
   match (impl, vlib) with
-  | _, Impl _
-  | Impl _, _
-  | Stdlib _, _
-  | _, Stdlib _ ->
+  | _, Impl _ | Impl _, _ | Stdlib _, _ | _, Stdlib _ ->
     Code_error.raise "Modules.impl: invalid arguments"
       [ ("impl", to_dyn impl); ("vlib", to_dyn vlib) ]
   | _, _ -> Impl { impl; vlib }
@@ -544,8 +530,7 @@ type from =
 let from_impl_or_lib = Option.map ~f:(fun m -> (Impl_or_lib, m))
 
 let rec find_dep t ~of_ name =
-  if Module.name of_ = name then
-    None
+  if Module.name of_ = name then None
   else
     let open Option.O in
     let* from, m =
@@ -580,11 +565,7 @@ let exe_wrapped ~src_dir ~modules =
 
 let rec impl_only = function
   | Stdlib w -> Stdlib.impl_only w
-  | Singleton m ->
-    if Module.has ~ml_kind:Impl m then
-      [ m ]
-    else
-      []
+  | Singleton m -> if Module.has ~ml_kind:Impl m then [ m ] else []
   | Unwrapped m -> Module.Name_map.impl_only m
   | Wrapped w -> Wrapped.impl_only w
   | Impl { vlib; impl } -> impl_only impl @ impl_only vlib
@@ -609,31 +590,45 @@ let rec fold_no_vlib t ~init ~f =
   | Wrapped w -> Wrapped.fold w ~init ~f
   | Impl { vlib = _; impl } -> fold_no_vlib impl ~f ~init
 
+let rec map t ~f =
+  match t with
+  | Stdlib w -> Stdlib (Stdlib.map w ~f)
+  | Singleton m -> Singleton (f m)
+  | Unwrapped m -> Unwrapped (Module_name.Map.map m ~f)
+  | Wrapped w -> Wrapped (Wrapped.map w ~f)
+  | Impl { vlib; impl } -> Impl { vlib = map vlib ~f; impl = map impl ~f }
+
+type split_by_lib =
+  { vlib : Module.t list
+  ; impl : Module.t list
+  }
+
+let split_by_lib t =
+  let f m acc = m :: acc in
+  let init = [] in
+  match t with
+  | Impl { vlib; impl } ->
+    let vlib = fold_no_vlib vlib ~init ~f in
+    let impl = fold_no_vlib impl ~init ~f in
+    { vlib; impl }
+  | _ -> { impl = fold_no_vlib t ~init ~f; vlib = [] }
+
 let compat_for_exn t m =
   match t with
-  | Singleton _
-  | Stdlib _
-  | Unwrapped _ ->
-    assert false
+  | Singleton _ | Stdlib _ | Unwrapped _ -> assert false
   | Wrapped { modules; _ } ->
     Module_name.Map.find modules (Module.name m) |> Option.value_exn
   | Impl _ -> Code_error.raise "wrapped compat not supported for vlib" []
 
-let iter_no_vlib t ~f = fold_no_vlib t ~init:() ~f:(fun x () -> f x)
-
 let rec for_alias = function
-  | Stdlib _
-  | Singleton _
-  | Unwrapped _ ->
-    Module_name.Map.empty
+  | Stdlib _ | Singleton _ | Unwrapped _ -> Module_name.Map.empty
   | Wrapped
       { modules
       ; main_module_name
       ; alias_module = _
       ; wrapped_compat = _
       ; wrapped = _
-      } ->
-    Module_name.Map.remove modules main_module_name
+      } -> Module_name.Map.remove modules main_module_name
   | Impl { vlib; impl } ->
     let impl = for_alias impl in
     let vlib = for_alias vlib in
@@ -644,27 +639,50 @@ let rec for_alias = function
         | _, Some vlib -> Option.some_if (Module.visibility vlib = Public) vlib)
 
 let wrapped_compat = function
-  | Stdlib _
-  | Singleton _
-  | Impl _
-  | Unwrapped _ ->
-    Module_name.Map.empty
+  | Stdlib _ | Singleton _ | Impl _ | Unwrapped _ -> Module_name.Map.empty
   | Wrapped w -> w.wrapped_compat
 
-let rec fold_user_written t ~f ~init =
+let rec fold_user_available t ~f ~init =
   match t with
   | Stdlib w -> Stdlib.fold w ~init ~f
   | Singleton m -> f m init
-  | Wrapped { modules; _ }
-  | Unwrapped modules ->
+  | Wrapped { modules; _ } | Unwrapped modules ->
+    Module_name.Map.fold modules ~init ~f
+  | Impl { impl; vlib = _ } ->
+    (* XXX shouldn't we folding over [vlib] as well? *)
+    fold_user_available impl ~f ~init
+
+let is_user_written m =
+  match Module.kind m with
+  | Root -> false
+  | Wrapped_compat | Alias ->
+    (* Logically, this shold be [acc]. But this is unreachable these are stored
+       separately *)
+    assert false
+  | _ -> true
+
+let rec fold_user_written t ~f ~init =
+  let f m acc = if is_user_written m then f m acc else acc in
+  match t with
+  | Stdlib w -> Stdlib.fold w ~init ~f
+  | Singleton m -> f m init
+  | Wrapped { modules; _ } | Unwrapped modules ->
     Module_name.Map.fold modules ~init ~f
   | Impl { impl; vlib = _ } -> fold_user_written impl ~f ~init
 
 let rec map_user_written t ~f =
+  let f m = if is_user_written m then f m else Memo.Build.return m in
+  let open Memo.Build.O in
   match t with
-  | Singleton m -> Singleton (f m)
-  | Unwrapped m -> Unwrapped (Module_name.Map.map m ~f)
-  | Stdlib w -> Stdlib (Stdlib.map w ~f)
+  | Singleton m ->
+    let+ res = f m in
+    Singleton res
+  | Unwrapped m ->
+    let+ res = Module_name.Map_traversals.parallel_map m ~f:(fun _ -> f) in
+    Unwrapped res
+  | Stdlib w ->
+    let+ res = Stdlib.traverse w ~f in
+    Stdlib res
   | Wrapped
       ({ modules
        ; alias_module = _
@@ -672,9 +690,13 @@ let rec map_user_written t ~f =
        ; wrapped_compat = _
        ; wrapped = _
        } as w) ->
-    let modules = Module_name.Map.map modules ~f in
+    let+ modules =
+      Module_name.Map_traversals.parallel_map modules ~f:(fun _ -> f)
+    in
     Wrapped { w with modules }
-  | Impl t -> Impl { t with vlib = map_user_written t.vlib ~f }
+  | Impl t ->
+    let+ vlib = map_user_written t.vlib ~f in
+    Impl { t with vlib }
 
 let version_installed t ~install_dir =
   let f = Module.set_src_dir ~src_dir:install_dir in
@@ -718,6 +740,14 @@ let rec obj_map : 'a. t -> f:(Sourced_module.t -> 'a) -> 'a Module.Obj_map.t =
         | _, Some (Imported_from_vlib _ | Impl_of_virtual_module _) ->
           assert false)
 
+let obj_map_build :
+      'a.
+         t
+      -> f:(Sourced_module.t -> 'a Memo.Build.t)
+      -> 'a Module.Obj_map.t Memo.Build.t =
+ fun t ~f ->
+  Module.Obj_map_traversals.parallel_map (obj_map t ~f) ~f:(fun _ x -> x)
+
 let entry_modules t =
   List.filter
     ~f:(fun m -> Module.visibility m = Public)
@@ -741,18 +771,13 @@ let virtual_module_names =
       | _ -> acc)
 
 let rec alias_module = function
-  | Stdlib _
-  | Singleton _
-  | Unwrapped _ ->
-    None
+  | Stdlib _ | Singleton _ | Unwrapped _ -> None
   | Wrapped w -> Some w.alias_module
   | Impl { impl; vlib = _ } -> alias_module impl
 
 let rec wrapped = function
   | Wrapped w -> w.wrapped
-  | Singleton _
-  | Unwrapped _ ->
-    Simple false
+  | Singleton _ | Unwrapped _ -> Simple false
   | Stdlib _ -> Simple true
   | Impl { vlib = _; impl } -> wrapped impl
 
@@ -761,9 +786,7 @@ let rec alias_for t m =
   | Root -> None
   | _ -> (
     match t with
-    | Singleton _
-    | Unwrapped _ ->
-      None
+    | Singleton _ | Unwrapped _ -> None
     | Wrapped w -> Wrapped.alias_for w m
     | Stdlib w -> Stdlib.alias_for w m
     | Impl { impl; vlib = _ } -> alias_for impl m)
@@ -783,10 +806,7 @@ let relocate_alias_module t ~src_dir =
   | s -> s
 
 let is_empty = function
-  | Stdlib _
-  | Impl _
-  | Singleton _ ->
-    false
+  | Stdlib _ | Impl _ | Singleton _ -> false
   | Unwrapped w -> Module_name.Map.is_empty w
   | Wrapped w -> Wrapped.empty w
 

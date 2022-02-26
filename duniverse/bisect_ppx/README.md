@@ -1,4 +1,4 @@
-# Bisect_ppx &nbsp; [![CI status][ci-img]][ci] [![Coverage][coveralls-img]][coveralls]
+# Bisect_ppx &nbsp; [![Coverage][coveralls-img]][coveralls]
 
 [**Bisect_ppx**][self] is a code coverage tool for OCaml and Reason. It helps
 you test thoroughly by showing what's **not** tested.
@@ -8,8 +8,6 @@ you test thoroughly by showing what's **not** tested.
 You can browse the report seen above [online here][gh-pages-report].
 
 [self]: https://github.com/aantron/bisect_ppx
-[ci]: https://github.com/aantron/bisect_ppx/actions
-[ci-img]: https://img.shields.io/github/workflow/status/aantron/bisect_ppx/test/master
 [sample]: https://raw.githubusercontent.com/aantron/bisect_ppx/master/doc/sample.gif
 [coveralls]: https://coveralls.io/github/aantron/bisect_ppx?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/bisect_ppx/master.svg
@@ -498,18 +496,15 @@ A small sample of projects using Bisect_ppx:
 Bug reports and pull requests are warmly welcome. Bisect_ppx is developed on
 GitHub, so please [open an issue][issues].
 
-Bisect_ppx is developed mainly using opam. To get the latest development
-version, run
-
-```
-opam source --dev-repo --pin bisect_ppx
-```
-
-You will now have a `bisect_ppx` subdirectory to work in. Try these `Makefile`
-targets:
+After cloning the repo, try these `Makefile` targets:
 
 - `make test` for unit tests.
 - `make usage` for build system integration tests, except ReScript.
 - `make -C test/js full-test` for ReScript. This requires npm and esy.
+
+If you'd like to build an npm package, run `npm pack`. You can install the
+resulting `.tgz` file in another project with `npm install`. This requires esy,
+as the Bisect binaries will not be pre-built. The npm package will use esy to
+build them automatically.
 
 [issues]: https://github.com/aantron/bisect_ppx/issues

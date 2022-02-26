@@ -6,10 +6,15 @@ dune < 2.8
   > EOF
 
   $ dune build bar
-  File "dune", line 8, characters 18-31:
+  File "dune", line 8, characters 16-31:
   8 |  (enabled_if (= %{context_name} "not-the-context-name")))
-                        ^^^^^^^^^^^^^
-  Error: This variable is only available since version 2.8 of the dune
+                      ^^^^^^^^^^^^^^^
+  Error: %{context_name} is only available since version 2.8 of the dune
+  language. Please update your dune-project file to have (lang dune 2.8).
+  File "dune", line 13, characters 16-31:
+  13 |  (enabled_if (= %{context_name} "default")))
+                       ^^^^^^^^^^^^^^^
+  Error: %{context_name} is only available since version 2.8 of the dune
   language. Please update your dune-project file to have (lang dune 2.8).
   [1]
 
@@ -29,8 +34,9 @@ dune >= 2.8
   18 |  (libraries bar))
                    ^^^
   Error: Library "bar" in _build/default is hidden (unsatisfied 'enabled_if').
-  Hint: try:
-    dune external-lib-deps --missing ./bar_exe.exe
+  -> required by _build/default/.bar_exe.eobjs/byte/dune__exe__Bar_exe.cmi
+  -> required by _build/default/.bar_exe.eobjs/native/dune__exe__Bar_exe.cmx
+  -> required by _build/default/bar_exe.exe
   [1]
 
 + The actual context

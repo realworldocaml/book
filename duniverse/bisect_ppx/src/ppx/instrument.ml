@@ -1369,8 +1369,29 @@ class instrumenter =
               (instrument_expr (traverse ~is_in_tail_position:false do_))
 
           | Pexp_lazy e ->
-            Exp.lazy_ ~loc ~attrs
-              (instrument_expr (traverse ~is_in_tail_position:true e))
+            let rec is_trivial_syntactic_value e =
+              match e.Parsetree.pexp_desc with
+              | Pexp_function _ | Pexp_fun _ | Pexp_poly _ | Pexp_ident _
+              | Pexp_constant _ | Pexp_construct (_, None) ->
+                true
+              | Pexp_constraint (e, _) | Pexp_coerce (e, _, _) ->
+                is_trivial_syntactic_value e
+              | _ ->
+                false
+            in
+            let e = traverse ~is_in_tail_position:true e in
+            let e =
+              (* lazy applied to certain syntactic values is compiled as already
+                 forced. Since inserting instrumentation under such a lazy would
+                 make the nested expression not a syntactic value, it would
+                 change the compilation of the lazy. See
+                 https://github.com/aantron/bisect_ppx/issues/398. *)
+              if is_trivial_syntactic_value e then
+                e
+              else
+                instrument_expr e
+            in
+            Exp.lazy_ ~loc ~attrs e
 
           | Pexp_poly (e, t) ->
             let e = traverse ~is_in_tail_position:true e in

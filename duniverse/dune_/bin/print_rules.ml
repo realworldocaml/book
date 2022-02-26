@@ -27,35 +27,43 @@ let man =
 
 let info = Term.info "rules" ~doc ~man
 
-let print_rule_makefile ppf (rule : Build_system.Evaluated_rule.t) =
+let print_rule_makefile ppf (rule : Dune_engine.Reflection.Rule.t) =
   let action =
     Action.For_shell.Progn
       [ Mkdir (Path.to_string (Path.build rule.dir))
       ; Action.for_shell rule.action
       ]
   in
+  (* Makefiles seem to allow directory targets, so we include them. *)
+  let targets = Path.Build.Set.union rule.targets.files rule.targets.dirs in
   Format.fprintf ppf
-    "@[<hov 2>@{<makefile-stuff>%a:%t@}@]@,@<0>\t@{<makefile-action>%a@}@,@,"
+    "@[<hov 2>@{<makefile-stuff>%a:%t@}@]@,@<0>\t@{<makefile-action>%a@}\n"
     (Format.pp_print_list ~pp_sep:Format.pp_print_space (fun ppf p ->
          Format.pp_print_string ppf (Path.to_string p)))
-    (List.map ~f:Path.build (Path.Build.Set.to_list rule.targets))
+    (List.map ~f:Path.build (Path.Build.Set.to_list targets))
     (fun ppf ->
-      Path.Set.iter (Dep.Set.paths rule.deps) ~f:(fun dep ->
+      Path.Set.iter rule.expanded_deps ~f:(fun dep ->
           Format.fprintf ppf "@ %s" (Path.to_string dep)))
     Pp.to_fmt (Action_to_sh.pp action)
 
-let print_rule_sexp ppf (rule : Build_system.Evaluated_rule.t) =
+let print_rule_sexp ppf (rule : Dune_engine.Reflection.Rule.t) =
   let sexp_of_action action =
     Action.for_shell action |> Action.For_shell.encode
   in
   let paths ps = Dune_lang.Encoder.list Dpath.encode (Path.Set.to_list ps) in
+  let file_targets = rule.targets.files in
+  if not (Path.Build.Set.is_empty rule.targets.dirs) then
+    User_error.raise
+      [ Pp.text
+          "Printing rules with directory targets is currently not supported"
+      ];
   let sexp =
     Dune_lang.Encoder.record
       (List.concat
          [ [ ("deps", Dep.Set.encode rule.deps)
            ; ( "targets"
              , paths
-                 (Path.Build.Set.to_list rule.targets
+                 (Path.Build.Set.to_list file_targets
                  |> Path.set_of_build_paths_list) )
            ]
          ; (match rule.context with
@@ -74,10 +82,7 @@ module Syntax = struct
   let term =
     let doc = "Output the rules in Makefile syntax." in
     let+ makefile = Arg.(value & flag & info [ "m"; "makefile" ] ~doc) in
-    if makefile then
-      Makefile
-    else
-      Sexp
+    if makefile then Makefile else Sexp
 
   let print_rule = function
     | Makefile -> print_rule_makefile
@@ -106,27 +111,33 @@ let term =
              the given targets.")
   and+ syntax = Syntax.term
   and+ targets = Arg.(value & pos_all dep [] & Arg.info [] ~docv:"TARGET") in
-  Common.set_common common ~targets ~external_lib_deps_mode:true;
+  let config = Common.init common in
   let out = Option.map ~f:Path.of_string out in
-  Scheduler.go ~common (fun () ->
+  Scheduler.go ~common ~config (fun () ->
       let open Fiber.O in
-      let* setup = Import.Main.setup common in
-      let request =
-        match targets with
-        | [] ->
-          Build_system.all_targets ()
-          |> Path.Build.Set.fold ~init:[] ~f:(fun p acc -> Path.build p :: acc)
-          |> Build.paths
-        | _ -> Target.resolve_targets_exn common setup targets |> Target.request
-      in
-      let* rules = Build_system.evaluate_rules ~request ~recursive in
-      let print oc =
-        let ppf = Format.formatter_of_out_channel oc in
-        Syntax.print_rules syntax ppf rules;
-        Fiber.return ()
-      in
-      match out with
-      | None -> print stdout
-      | Some fn -> Io.with_file_out fn ~f:print)
+      let* setup = Import.Main.setup () in
+      Build_system.run_exn (fun () ->
+          let open Memo.Build.O in
+          let* setup = setup in
+          let* request =
+            match targets with
+            | [] ->
+              Load_rules.all_direct_targets ()
+              >>| Path.Build.Map.foldi ~init:[] ~f:(fun p _ acc ->
+                      Path.build p :: acc)
+              >>| Action_builder.paths
+            | _ ->
+              Memo.Build.return
+                (Target.interpret_targets (Common.root common) config setup
+                   targets)
+          in
+          let+ rules = Dune_engine.Reflection.eval ~request ~recursive in
+          let print oc =
+            let ppf = Format.formatter_of_out_channel oc in
+            Syntax.print_rules syntax ppf rules
+          in
+          match out with
+          | None -> print stdout
+          | Some fn -> Io.with_file_out fn ~f:print))
 
 let command = (term, info)

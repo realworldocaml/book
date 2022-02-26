@@ -7,6 +7,8 @@ open Import
 
 type t
 
+val of_atoms : loc:Loc.t -> string list -> t
+
 val decode : t Dune_lang.Decoder.t
 
 (** Return the location of the set. [loc standard] returns [None] *)
@@ -56,6 +58,9 @@ module Unexpanded : sig
 
   val of_strings : pos:string * int * int * int -> string list -> t
 
+  val include_single :
+    context:Univ_map.t -> pos:string * int * int * int -> string -> t
+
   val field :
        ?check:unit Dune_lang.Decoder.t
     -> string
@@ -65,9 +70,6 @@ module Unexpanded : sig
 
   val has_standard : t -> bool
 
-  (** List of files needed to expand this set *)
-  val files : t -> f:(String_with_vars.t -> Path.t) -> Path.Set.t
-
   (** Expand [t] using with the given file contents. [file_contents] is a map
       from filenames to their parsed contents. Every [(:include fn)] in [t] is
       replaced by [Map.find files_contents fn]. Every element is converted to a
@@ -75,9 +77,8 @@ module Unexpanded : sig
   val expand :
        t
     -> dir:Path.t
-    -> files_contents:Dune_lang.Ast.t Path.Map.t
-    -> f:(String_with_vars.t -> Value.t list)
-    -> expanded
+    -> f:Value.t list Action_builder.t String_with_vars.expander
+    -> expanded Action_builder.t
 
   type position =
     | Pos

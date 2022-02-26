@@ -1,3 +1,19 @@
+Version 2.8.0 (2022-07-10):
+---------------------------
+
+  Additions
+
+  - HTML: collapsible tree index for large projects, activated by --tree option
+    (Arvid Jakobsson, #396).
+
+  Bugs fixed
+
+  - Don't instrument lazy values which are compiled as already forced (#398,
+    reported by @Ngoguey42).
+  - Use Sys.backend_type to detect js_of_ocaml (#397, Pat Rondon).
+  - Text summary report: show files with 0 points as having 100% coverage
+    (f3b9108).
+
 Version 2.7.1 (2022-01-19):
 ---------------------------
 

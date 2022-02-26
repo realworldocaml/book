@@ -1,7 +1,7 @@
 {
   "name": "bisect_ppx",
   "description": "Code coverage for OCaml and Reason",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "license": "MIT",
   "homepage": "https://github.com/aantron/bisect_ppx",
   "bugs": {

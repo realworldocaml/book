@@ -3,9 +3,9 @@ that ${@} is not quoted and doesn't contain exactly 1 element
 
   $ dune build --root bad x
   Entering directory 'bad'
-  File "dune", line 3, characters 27-35:
+  File "dune", line 3, characters 25-35:
   3 |  (action (with-stdout-to %{targets} (echo foo))))
-                                 ^^^^^^^^
+                               ^^^^^^^^^^
   Error: Variable %{targets} expands to 2 values, however a single value is
   expected here. Please quote this atom.
   [1]
@@ -25,7 +25,6 @@ The targets should only be interpreted as a single path when quoted
 
   $ dune runtest --root quote-from-context
   Entering directory 'quote-from-context'
-    count_args alias runtest
   Number of args: 3
 
   $ dune runtest --root quotes-multi

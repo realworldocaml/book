@@ -39,25 +39,19 @@ module Dep = struct
   let alias_rec ~dir s = Dep_conf.Alias_rec (make_alias_sw ~dir s)
 
   let parse_alias s =
-    if not (String.is_prefix s ~prefix:"@") then
-      None
+    if not (String.is_prefix s ~prefix:"@") then None
     else
       let pos, recursive =
-        if String.length s >= 2 && s.[1] = '@' then
-          (2, false)
-        else
-          (1, true)
+        if String.length s >= 2 && s.[1] = '@' then (2, false) else (1, true)
       in
       let s = String_with_vars.make_text Loc.none (String.drop s pos) in
-      Some
-        (if recursive then
-          Dep_conf.Alias_rec s
-        else
-          Dep_conf.Alias s)
+      Some (if recursive then Dep_conf.Alias_rec s else Dep_conf.Alias s)
 
   let dep_parser =
     Dune_lang.Syntax.set Stanza.syntax (Active Stanza.latest_version)
-      Dep_conf.decode
+      (String_with_vars.set_decoding_env
+         (Pform.Env.initial Stanza.latest_version)
+         Dep_conf.decode)
 
   let parser s =
     match parse_alias s with
@@ -72,12 +66,7 @@ module Dep = struct
       | exception User_error.E msg -> `Error (User_message.to_string msg))
 
   let string_of_alias ~recursive sv =
-    let prefix =
-      if recursive then
-        "@"
-      else
-        "@@"
-    in
+    let prefix = if recursive then "@" else "@@" in
     String_with_vars.text_only sv |> Option.map ~f:(fun s -> prefix ^ s)
 
   let printer ppf t =
@@ -120,6 +109,9 @@ let bytes =
     Format.pp_print_string state (Int64.to_string i)
   in
   conv (decode, pp_print_int64)
+
+let graph_format : Dune_graph.Graph.File_format.t conv =
+  conv Dune_graph.Graph.File_format.conv
 
 let context_name : Context_name.t conv = conv Context_name.conv
 

@@ -9,7 +9,13 @@ module Name : sig
 
   val version_fn : t -> string
 
-  include Interned_intf.S with type t := t
+  val compare : t -> t -> Ordering.t
+
+  val equal : t -> t -> bool
+
+  val hash : t -> int
+
+  include Comparable_intf.S with type key := t
 
   include Dune_lang.Conv.S with type t := t
 
@@ -18,6 +24,14 @@ module Name : sig
   include Stringlike_intf.S with type t := t
 
   val of_opam_file_basename : string -> t option
+
+  module Map_traversals : sig
+    val parallel_iter :
+      'a Map.t -> f:(t -> 'a -> unit Memo.Build.t) -> unit Memo.Build.t
+
+    val parallel_map :
+      'a Map.t -> f:(t -> 'a -> 'b Memo.Build.t) -> 'b Map.t Memo.Build.t
+  end
 end
 
 module Id : sig
@@ -25,9 +39,7 @@ module Id : sig
 
   val name : t -> Name.t
 
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
+  include Comparable_intf.S with type key := t
 end
 
 module Dependency : sig
@@ -88,7 +100,7 @@ module Source_kind : sig
     | Host of Host.t
     | Url of string
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 
   val to_string : t -> string
 
@@ -112,9 +124,14 @@ module Info : sig
 
   val maintainers : t -> string list option
 
+  (** example package info (used for project initialization ) *)
+  val example : t
+
   val empty : t
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
+
+  val encode_fields : t -> Dune_lang.t list
 
   val decode :
        ?since:Dune_lang.Syntax.Version.t
@@ -138,13 +155,18 @@ type t =
   ; tags : string list
   ; deprecated_package_names : Loc.t Name.Map.t
   ; sites : Section.t Section.Site.Map.t
+  ; allow_empty : bool
   }
+
+val equal : t -> t -> bool
 
 val name : t -> Name.t
 
 val dir : t -> Path.Source.t
 
 val file : dir:Path.t -> name:Name.t -> Path.t
+
+val encode : Name.t -> t Dune_lang.Encoder.t
 
 val decode : dir:Path.Source.t -> t Dune_lang.Decoder.t
 
@@ -159,6 +181,9 @@ val to_dyn : t -> Dyn.t
 val hash : t -> int
 
 val is_opam_file : Path.t -> bool
+
+(** Construct a default package (e.g., for project initialization) *)
+val default : string -> Path.Source.t -> t
 
 (** Construct a package description from an opam file. *)
 val load_opam_file : Path.Source.t -> Name.t -> t

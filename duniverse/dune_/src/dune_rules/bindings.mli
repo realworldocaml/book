@@ -2,8 +2,6 @@
     are used in the dependency specification language for example *)
 open! Dune_engine
 
-open Stdune
-
 type 'a one =
   | Unnamed of 'a
   | Named of string * 'a list
@@ -22,8 +20,12 @@ val to_list : 'a t -> 'a list
 
 val singleton : 'a -> 'a t
 
-val to_dyn : 'a Dyn.Encoder.t -> 'a t Dyn.Encoder.t
+val to_dyn : 'a Dyn.builder -> 'a t Dyn.builder
 
 val decode : 'a Dune_lang.Decoder.t -> 'a t Dune_lang.Decoder.t
 
 val encode : 'a Dune_lang.Encoder.t -> 'a t -> Dune_lang.t
+
+val var_names : _ t -> string list
+
+val to_pform_map : 'a t -> 'a list Pform.Map.t

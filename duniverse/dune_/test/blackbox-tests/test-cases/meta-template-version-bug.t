@@ -2,6 +2,7 @@ This test demonstrates a bug when there's a package with a meta template and a
 custom version:
 
   $ git init -q
+  $ touch foo
   $ git add .
   $ git commit -qm _
   $ git tag -a 1.0 -m 1.0
@@ -30,8 +31,9 @@ custom version:
   $ dune install --prefix ./_install 2>&1 | grep -v Installing
   [1]
 
-  $ cat ./_install/lib/foobarlib/dune-package
-  (lang dune 2.9)
+  $ cat ./_install/lib/foobarlib/dune-package | \
+  >   sed "s/(lang dune .*)/(lang dune <version>)/"
+  (lang dune <version>)
   (use_meta)
 
   $ mkdir external
@@ -44,6 +46,5 @@ custom version:
   > EOF
 
   $ OCAMLPATH=$PWD/_install/lib dune exec --root external ./main.exe
-  Entering directory 'external'
   Entering directory 'external'
   foobarlib

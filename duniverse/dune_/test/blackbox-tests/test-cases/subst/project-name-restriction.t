@@ -31,4 +31,4 @@ doesn't verify that this is the case
   $ cat file.ml
   let name = "dune"
   let authors = "Jane Street Group, LLC <opensource@janestreet.com>"
-  let version = "2.9.3"
+  let version = "3.0.2"
