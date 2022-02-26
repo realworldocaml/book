@@ -1,3 +1,8 @@
+## v1.2.0 (2022-02-24)
+
+- Use `bigarray-compat` instead of `bigarray` library which does not exists on
+  OCaml 5.0 (@dinosaure, @kit-ty-kate, @anmonteiro, #7, #8)
+
 ## v1.1.0 (2019-04-04)
 
 - Add Windows support by making `mmap` just a shim over

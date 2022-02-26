@@ -2,10 +2,9 @@ open Stdune
 open Dune_engine
 open Fiber.O
 open! Dune_tests_common
+module Config = Dune_util.Config
 
-let () =
-  init ();
-  Config.init { Config.default with display = Quiet }
+let () = init ()
 
 let printf = Printf.printf
 
@@ -25,8 +24,7 @@ let run (vcs : Vcs.t) args =
     match vcs.kind with
     | Git -> (Vcs.git, "git", args)
     | Hg -> (
-      if has_hg then
-        (Vcs.hg, "hg", args)
+      if has_hg then (Vcs.hg, "hg", args)
       else
         ( Vcs.git
         , "hg"
@@ -40,8 +38,9 @@ let run (vcs : Vcs.t) args =
     |> String.concat ~sep:" ");
   Process.run Strict (Lazy.force prog) real_args
     ~env:
-      ((* One of the reasons to set GIT_DIR to override any GIT_DIR set by the
-          environment, which helps for example during [git rebase --exec]. *)
+      ((* One of the reasons to set GIT_DIR is to override any GIT_DIR set by
+          the environment, which helps for example during [git rebase
+          --exec]. *)
        Env.add Env.initial ~var:"GIT_DIR"
          ~value:(Filename.concat (Path.to_absolute_filename vcs.root) ".git"))
     ~dir:vcs.root
@@ -72,33 +71,28 @@ let run_action (vcs : Vcs.t) action =
       (match vcs.kind with
       | Git -> "git"
       | Hg -> "hg");
-    Memo.reset ();
+    Memo.reset (Memo.Invalidation.clear_caches ~reason:Test);
     let vcs =
       match vcs.kind with
       | Hg when not has_hg -> { vcs with kind = Git }
       | _ -> vcs
     in
-    Vcs.describe vcs >>| fun s ->
+    let+ s = Memo.Build.run (Vcs.describe vcs) in
+    let s = Option.value s ~default:"n/a" in
     let processed =
       String.split s ~on:'-'
       |> List.map ~f:(fun s ->
              match s with
-             | ""
-             | "dirty" ->
-               s
+             | "" | "dirty" -> s
              | s
                when String.length s = 1
                     && String.for_all s ~f:(function
                          | '0' .. '9' -> true
-                         | _ -> false) ->
-               s
+                         | _ -> false) -> s
              | _
                when String.for_all s ~f:(function
-                      | '0' .. '9'
-                      | 'a' .. 'z' ->
-                        true
-                      | _ -> false) ->
-               "<commit-id>"
+                      | '0' .. '9' | 'a' .. 'z' -> true
+                      | _ -> false) -> "<commit-id>"
              | _ -> s)
       |> String.concat ~sep:"-"
     in
@@ -116,7 +110,17 @@ let run kind script =
   Path.rm_rf temp_dir;
   Path.mkdir_p temp_dir;
   let vcs = { Vcs.kind; root = temp_dir } in
-  Scheduler.go (fun () -> Fiber.sequential_iter script ~f:(run_action vcs))
+  let config =
+    { Scheduler.Config.concurrency = 1
+    ; display = { verbosity = Short; status_line = false }
+    ; rpc = None
+    ; stats = None
+    }
+  in
+  Scheduler.Run.go
+    ~on_event:(fun _ _ -> ())
+    config
+    (fun () -> Fiber.sequential_iter script ~f:(run_action vcs))
 
 let script =
   [ Init

@@ -3,29 +3,26 @@
 (library
  (name dune_rules)
  (libraries
-  unix
   stdune
+  csexp
   fiber
-  incremental_cycles
-  dag
+  fiber_util
   memo
-  xdg
   dune_re
-  threads.posix
   opam_file_format
   dune_lang
-  cache_daemon
-  cache
   dune_glob
   ocaml_config
-  catapult
-  jbuild_support
   dune_action_plugin
+  chrome_trace
+  dune_stats
   dune_util
   dune_meta_parser
   dune_section
+  dune_cache
   build_path_prefix_map
-  dune_engine)
+  dune_engine
+  dune_config)
  (synopsis "Internal Dune library, do not use!"))
 
 (ocamllex ocamlobjinfo cram_lexer)

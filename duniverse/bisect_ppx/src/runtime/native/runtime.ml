@@ -113,13 +113,17 @@ let dump_counters_exn =
   Common.write_runtime_data
 
 let dump () =
-  match file_channel () with
-  (* Failure "TypeError: runtime.unix_open is not a function" indicates that the
-     code was compiled by js_of_ocaml. In this case, we *want* to do nothing at
-     process exit. See https://github.com/aantron/bisect_ppx/issues/334. *)
-  | exception Failure _ -> ()
-  | None -> ()
-  | Some channel ->
+  match Sys.backend_type with
+  | Sys.Other "js_of_ocaml" ->
+    (* The dump function is a no-op when running a js_of_ocaml-compiled binary,
+       as the Unix file-manipulating functions will not be present; instead, the
+       user must explicitly call write_coverage_data or get_coverage_data as
+       appropriate. *)
+    ()
+  | _ ->
+    match file_channel () with
+    | None -> ()
+    | Some channel ->
       (try
         dump_counters_exn channel
       with _ ->

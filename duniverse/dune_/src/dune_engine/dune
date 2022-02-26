@@ -5,7 +5,9 @@
  (libraries
   unix
   stdune
+  dyn
   fiber
+  fiber_util
   incremental_cycles
   dag
   memo
@@ -14,16 +16,25 @@
   threads.posix
   opam_file_format
   dune_lang
-  cache_daemon
-  cache
+  dune_cache
+  dune_cache_storage
   dune_glob
   ocaml_config
-  catapult
-  jbuild_support
+  chrome_trace
+  dune_stats
   dune_action_plugin
   dune_util
   build_path_prefix_map
-  dune_section)
+  dune_section
+  dune_rpc_private
+  dune_rpc_server
+  thread_worker
+  spawn
+  ocamlc_loc
+  dune_file_watcher
+  dune_filesystem_stubs
+  ocaml_inotify
+  async_inotify_for_dune)
  (synopsis "Internal Dune library, do not use!"))
 
 (ocamllex dune_lexer)

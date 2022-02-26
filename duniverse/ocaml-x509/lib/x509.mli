@@ -49,7 +49,7 @@
    extension is marked as critical in a certificate, but not handled, the
    validation will fail.
 
-    {e v0.15.2 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
+    {e v0.16.0 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
 
 (** Hostnames (strict, wildcard), used for validation. *)
 module Host : sig
@@ -107,8 +107,8 @@ module Public_key : sig
   (** {1 The type for public keys} *)
 
   (** The polymorphic variant of public keys, with
-      {{:http://tools.ietf.org/html/rfc5208}PKCS 8}
-      {{!Encoding.Pem.Public_key}encoding and decoding to PEM}. *)
+      {{:http://tools.ietf.org/html/rfc5208}PKCS 8} encoding and decoding to
+      PEM. *)
   type t = [
     | `RSA of Mirage_crypto_pk.Rsa.pub
     | `ED25519 of Mirage_crypto_ec.Ed25519.pub
@@ -552,11 +552,11 @@ module Certificate : sig
       specified [hash] algorithm *)
   val fingerprint : Mirage_crypto.Hash.hash -> t -> Cstruct.t
 
-  (** [subject certificate] is [dn], the subject as {{!distinguished_name}dn} of
+  (** [subject certificate] is [dn], the subject as distinguished name of
       the [certificate]. *)
   val subject : t -> Distinguished_name.t
 
-  (** [issuer certificate] is [dn], the issuer as {{!distinguished_name}dn} of
+  (** [issuer certificate] is [dn], the issuer as distinguished name of
       the [certificate]. *)
   val issuer : t -> Distinguished_name.t
 
@@ -683,9 +683,10 @@ module Validation : sig
       [chain] are checked, then a chain of trust from [anchors] to the server
       certificate is validated.  The path length constraints are checked.  The
       server certificate is checked to contain the given [host], using
-      {!hostnames}. If [ip] is specified, the certificate is checked to
-      contain the given [ip], using {!ips}. The returned certificate is the
-      root of the chain, a member of the given list of [anchors]. *)
+      {!Certificate.hostnames}. If [ip] is specified, the certificate is checked
+      to contain the given [ip], using {!Certificate.ips}. The returned
+      certificate is the root of the chain, a member of the given list of
+      [anchors]. *)
   val verify_chain : ?ip:Ipaddr.t -> host:[`host] Domain_name.t option ->
     time:(unit -> Ptime.t option) ->
     ?revoked:(issuer:Certificate.t -> cert:Certificate.t -> bool) ->
@@ -811,7 +812,7 @@ module Signing_request : sig
   }
 
   (** [info signing_request] is {!request_info}, the information inside the
-      {!signing_request}. *)
+      signing_request. *)
   val info : t -> request_info
 
   (** [signature_algorithm signing_request] is the algorithm used for the signature. *)
@@ -1017,6 +1018,24 @@ module Authenticator : sig
       over certificate pinning. *)
   val server_cert_fingerprint : time:(unit -> Ptime.t option) ->
     hash:Mirage_crypto.Hash.hash -> fingerprint:Cstruct.t -> t
+
+  (** [of_string str] tries to parse the given [str] to an
+      {!type:Authenticator.t}. The format of it is:
+      - [none] no authentication,
+      - [key-fp(:<hash>?):<base64-encoded fingerprint>] to authenticate a peer via
+        its key fingerprint (hash is optional and defaults to SHA256),
+      - [cert-fp(:<hash>?):<base64-encoded fingerprint>] to authenticate a peer via
+        its certificate fingerprint (hash is optional and defaults to SHA256),
+      - [trust-anchor(:<base64-encoded DER certificate>)+] to authenticate a
+        peer from a list of certificates (certificate must be in PEM format
+        without header and footer (----BEGIN CERTIFICATE-----) and without
+        newlines).
+
+      If decoding is successful, the returned value expects a function which
+      outputs the current timestamp ([unit -> Ptime.t option]) and is then
+      an authenticator. If decoding fails, and error is returned. *)
+  val of_string : string ->
+    ((unit -> Ptime.t option) -> t, [> `Msg of string ]) result
 end
 
 (** PKCS12 archive files *)

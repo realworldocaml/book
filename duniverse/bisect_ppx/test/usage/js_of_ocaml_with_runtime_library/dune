@@ -1,0 +1,9 @@
+; This is identical to the test in test/usage/js_of_ocaml, except that it links
+; in the js_of_ocaml runtime library.  This changes the type of exception that's
+; raised when attempting to write coverage data in Runtime.dump from Failure to
+; Js.Error, since Failure is only used by caml_wrap_exception when Js.Error is
+; not present.
+(executable
+ (name source)
+ (libraries js_of_ocaml-compiler.runtime)
+ (preprocess (pps bisect_ppx --conditional)))

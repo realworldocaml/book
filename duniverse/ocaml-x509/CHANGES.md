@@ -1,3 +1,9 @@
+## v0.16.0 (2022-02-15)
+
+* Provide X509.Authenticator.of_string to construct an Authenticator.t from
+  a string (@dinosaure #156, reviewed by @hannesm)
+* Minor documentation fixes (#157 @hannesm)
+
 ## v0.15.2 (2021-11-22)
 
 * Provide X509.Private_key.of_string (as used by awa and dns-certify). This

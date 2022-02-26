@@ -84,13 +84,12 @@ type t = private
   ; findlib_toolchain : Context_name.t option  (** Misc *)
   ; default_ocamlpath : Path.t list
   ; arch_sixtyfour : bool
-  ; install_prefix : Path.t Memo.Lazy.Async.t
   ; ocaml_config : Ocaml_config.t
   ; ocaml_config_vars : Ocaml_config.Vars.t
   ; version : Ocaml_version.t
   ; stdlib_dir : Path.t
   ; supports_shared_libraries : Dynlink_supported.By_the_os.t
-  ; which : string -> Path.t option
+  ; which : string -> Path.t option Memo.Build.t
         (** Given a program name, e.g. ["ocaml"], find the path to a preferred
             executable in PATH, e.g. [Some "/path/to/ocaml.opt.exe"]. *)
   ; lib_config : Lib_config.t
@@ -108,7 +107,7 @@ val to_dyn_concise : t -> Dyn.t
 (** Compare the context names *)
 val compare : t -> t -> Ordering.t
 
-val install_ocaml_libdir : t -> Path.t option Fiber.t
+val install_ocaml_libdir : t -> Path.t option Memo.Build.t
 
 (** Return the compiler needed for this compilation mode *)
 val compiler : t -> Mode.t -> Action.Prog.t
@@ -133,10 +132,18 @@ val map_exe : t -> Path.t -> Path.t
 
 val build_context : t -> Build_context.t
 
-val init_configurator : t -> unit
+(** Query where build artifacts should be installed if the user doesn't specify
+    an explicit installation directory. *)
+val install_prefix : t -> Path.t Fiber.t
+
+(** Generate the rules for producing the files needed by configurator. *)
+val gen_configurator_rules : t -> unit Memo.Build.t
+
+(** Force the files required by configurator at runtime to be produced. *)
+val force_configurator_files : unit Memo.Lazy.t
 
 module DB : sig
-  val get : Path.Build.t -> t
+  val get : Context_name.t -> t Memo.Build.t
 
-  val all : unit -> t list Fiber.t
+  val all : unit -> t list Memo.Build.t
 end

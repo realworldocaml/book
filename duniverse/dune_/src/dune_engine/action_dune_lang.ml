@@ -11,7 +11,7 @@ type target = String_with_vars.t
 module String_with_vars = struct
   include String_with_vars
 
-  let is_dev_null = String_with_vars.is_var ~name:"null"
+  let is_dev_null t = String_with_vars.is_pform t (Var Dev_null)
 end
 
 module type Uast =
@@ -44,17 +44,17 @@ let ensure_at_most_one_dynamic_run ~loc action =
     | Dynamic_run _ -> true
     | Chdir (_, t)
     | Setenv (_, _, t)
-    | Redirect_out (_, _, t)
+    | Redirect_out (_, _, _, t)
     | Redirect_in (_, _, t)
     | Ignore (_, t)
     | With_accepted_exit_codes (_, t)
-    | No_infer t ->
-      loop t
+    | No_infer t -> loop t
     | Run _
     | Echo _
     | Cat _
     | Copy _
     | Symlink _
+    | Hardlink _
     | Copy_and_add_line_directive _
     | System _
     | Bash _
@@ -62,14 +62,11 @@ let ensure_at_most_one_dynamic_run ~loc action =
     | Rename _
     | Remove_tree _
     | Mkdir _
-    | Digest_files _
     | Diff _
     | Merge_files_into _
     | Cram _
-    | Format_dune_file _ ->
-      false
-    | Pipe (_, ts)
-    | Progn ts ->
+    | Format_dune_file _ -> false
+    | Pipe (_, ts) | Progn ts ->
       List.fold_left ts ~init:false ~f:(fun acc t ->
           let have_dyn = loop t in
           if acc && have_dyn then
@@ -78,8 +75,7 @@ let ensure_at_most_one_dynamic_run ~loc action =
                   "Multiple 'dynamic-run' commands within single action are \
                    not supported."
               ]
-          else
-            acc || have_dyn)
+          else acc || have_dyn)
   in
   ignore (loop action)
 
@@ -109,3 +105,5 @@ let decode =
         ]
 
 let to_dyn a = Dune_lang.to_dyn (encode a)
+
+let equal x y = Poly.equal x y

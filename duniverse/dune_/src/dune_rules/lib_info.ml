@@ -6,17 +6,26 @@ module Inherited = struct
     | This of 'a
     | From of (Loc.t * Lib_name.t)
 
+  let equal f x y =
+    match (x, y) with
+    | This x, This y -> f x y
+    | From (x, y), From (x', y') ->
+      Tuple.T2.equal Loc.equal Lib_name.equal (x, y) (x', y')
+    | This _, From _ | From _, This _ -> false
+
   let to_dyn f x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | This x -> constr "This" [ f x ]
-    | From (_, name) -> constr "From" [ Lib_name.to_dyn name ]
+    | This x -> variant "This" [ f x ]
+    | From (_, name) -> variant "From" [ Lib_name.to_dyn name ]
 end
 
 module Main_module_name = struct
   type t = Module_name.t option Inherited.t
 
-  let to_dyn x = Inherited.to_dyn (Dyn.Encoder.option Module_name.to_dyn) x
+  let equal = Inherited.equal (Option.equal Module_name.equal)
+
+  let to_dyn x = Inherited.to_dyn (Dyn.option Module_name.to_dyn) x
 end
 
 type _ path =
@@ -45,7 +54,7 @@ module Special_builtin_support = struct
     type api_version = V1
 
     let api_version_to_dyn = function
-      | V1 -> Dyn.Encoder.constr "V1" []
+      | V1 -> Dyn.variant "V1" []
 
     let supported_api_versions = [ (1, V1) ]
 
@@ -55,7 +64,7 @@ module Special_builtin_support = struct
       }
 
     let to_dyn { data_module; api_version } =
-      let open Dyn.Encoder in
+      let open Dyn in
       record
         [ ("data_module", Module_name.to_dyn data_module)
         ; ("api_version", api_version_to_dyn api_version)
@@ -82,14 +91,14 @@ module Special_builtin_support = struct
     type api_version = V1
 
     let api_version_to_dyn = function
-      | V1 -> Dyn.Encoder.constr "V1" []
+      | V1 -> Dyn.variant "V1" []
 
     let supported_api_versions = [ (1, V1) ]
 
     type t = { api_version : api_version }
 
     let to_dyn { api_version } =
-      let open Dyn.Encoder in
+      let open Dyn in
       record [ ("api_version", api_version_to_dyn api_version) ]
 
     let decode =
@@ -114,7 +123,7 @@ module Special_builtin_support = struct
       }
 
     let to_dyn { data_module; plugins } =
-      let open Dyn.Encoder in
+      let open Dyn in
       record
         [ ("data_module", Module_name.to_dyn data_module)
         ; ("plugins", bool plugins)
@@ -141,13 +150,15 @@ module Special_builtin_support = struct
     | Configurator of Configurator.t
     | Dune_site of Dune_site.t
 
+  let equal (x : t) (y : t) = Poly.equal x y
+
   let to_dyn x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | Findlib_dynload -> constr "Findlib_dynload" []
-    | Build_info info -> constr "Build_info" [ Build_info.to_dyn info ]
-    | Configurator info -> constr "Configurator" [ Configurator.to_dyn info ]
-    | Dune_site info -> constr "Dune_site" [ Dune_site.to_dyn info ]
+    | Findlib_dynload -> variant "Findlib_dynload" []
+    | Build_info info -> variant "Build_info" [ Build_info.to_dyn info ]
+    | Configurator info -> variant "Configurator" [ Configurator.to_dyn info ]
+    | Dune_site info -> variant "Dune_site" [ Dune_site.to_dyn info ]
 
   let decode =
     let open Dune_lang.Decoder in
@@ -185,32 +196,34 @@ module Status = struct
     | Public of Dune_project.t * Package.t
     | Private of Dune_project.t * Package.t option
 
+  let equal x y =
+    match (x, y) with
+    | Installed_private, Installed_private -> true
+    | Installed, Installed -> true
+    | Public (x, y), Public (x', y') ->
+      Dune_project.equal x x' && Package.equal y y'
+    | Private (x, y), Private (x', y') ->
+      Dune_project.equal x x' && Option.equal Package.equal y y'
+    | _, _ -> false
+
   let to_dyn x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | Installed_private -> constr "Installed_private" []
-    | Installed -> constr "Installed" []
+    | Installed_private -> variant "Installed_private" []
+    | Installed -> variant "Installed" []
     | Public (project, package) ->
-      constr "Public" [ Dune_project.to_dyn project; Package.to_dyn package ]
+      variant "Public" [ Dune_project.to_dyn project; Package.to_dyn package ]
     | Private (proj, package) ->
-      constr "Private"
+      variant "Private"
         [ Dune_project.to_dyn proj; option Package.to_dyn package ]
 
   let is_private = function
-    | Installed_private
-    | Private _ ->
-      true
-    | Installed
-    | Public _ ->
-      false
+    | Installed_private | Private _ -> true
+    | Installed | Public _ -> false
 
   let project = function
-    | Installed_private
-    | Installed ->
-      None
-    | Private (project, _)
-    | Public (project, _) ->
-      Some project
+    | Installed_private | Installed -> None
+    | Private (project, _) | Public (project, _) -> Some project
 end
 
 module Source = struct
@@ -218,11 +231,17 @@ module Source = struct
     | Local
     | External of 'a
 
+  let equal f x y =
+    match (x, y) with
+    | Local, Local -> true
+    | External x, External y -> f x y
+    | External _, Local | Local, External _ -> false
+
   let to_dyn f x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | Local -> constr "Local" []
-    | External x -> constr "External" [ f x ]
+    | Local -> variant "Local" []
+    | External x -> variant "External" [ f x ]
 
   let map t ~f =
     match t with
@@ -236,24 +255,32 @@ module Enabled_status = struct
     | Optional
     | Disabled_because_of_enabled_if
 
+  let equal (x : t) (y : t) = Poly.equal x y
+
   let to_dyn x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | Normal -> constr "Normal" []
-    | Optional -> constr "Optional" []
+    | Normal -> variant "Normal" []
+    | Optional -> variant "Optional" []
     | Disabled_because_of_enabled_if ->
-      constr "Disabled_because_of_enabled_if" []
+      variant "Disabled_because_of_enabled_if" []
 end
 
 type 'path native_archives =
   | Needs_module_info of 'path
   | Files of 'path list
 
+let equal_native_archives f x y =
+  match (x, y) with
+  | Needs_module_info x, Needs_module_info y -> f x y
+  | Files x, Files y -> List.equal f x y
+  | _, _ -> false
+
 let dyn_of_native_archives path =
-  let open Dyn.Encoder in
+  let open Dyn in
   function
-  | Needs_module_info f -> constr "Needs_module_info" [ path f ]
-  | Files files -> constr "Files" [ (list path) files ]
+  | Needs_module_info f -> variant "Needs_module_info" [ path f ]
+  | Files files -> variant "Files" [ (list path) files ]
 
 (** {1 Lib_info_invariants}
 
@@ -299,6 +326,98 @@ type 'path t =
   ; instrumentation_backend : (Loc.t * Lib_name.t) option
   ; path_kind : 'path path
   }
+
+let equal (type a) (t : a t)
+    { loc
+    ; name
+    ; kind
+    ; status
+    ; src_dir
+    ; orig_src_dir
+    ; obj_dir
+    ; version
+    ; synopsis
+    ; archives
+    ; plugins
+    ; foreign_objects
+    ; foreign_archives
+    ; native_archives
+    ; foreign_dll_files
+    ; jsoo_runtime
+    ; jsoo_archive
+    ; requires
+    ; ppx_runtime_deps
+    ; preprocess
+    ; enabled
+    ; virtual_deps
+    ; dune_version
+    ; sub_systems
+    ; virtual_
+    ; entry_modules
+    ; implements
+    ; default_implementation
+    ; wrapped
+    ; main_module_name
+    ; modes
+    ; special_builtin_support
+    ; exit_module
+    ; instrumentation_backend
+    ; path_kind
+    } =
+  let path_equal : a -> a -> bool =
+    match (path_kind : a path) with
+    | Local -> Path.Build.equal
+    | External -> Path.equal
+  in
+  Loc.equal t.loc loc && Lib_name.equal t.name name
+  && Lib_kind.equal t.kind kind
+  && Status.equal status t.status
+  && path_equal src_dir t.src_dir
+  && Option.equal path_equal orig_src_dir t.orig_src_dir
+  && Obj_dir.equal obj_dir t.obj_dir
+  && Option.equal String.equal version t.version
+  && Option.equal String.equal synopsis t.synopsis
+  && Mode.Dict.equal (List.equal path_equal) archives t.archives
+  && Mode.Dict.equal (List.equal path_equal) plugins t.plugins
+  && Source.equal (List.equal path_equal) foreign_objects t.foreign_objects
+  && List.equal path_equal foreign_archives t.foreign_archives
+  && equal_native_archives path_equal native_archives t.native_archives
+  && List.equal path_equal foreign_dll_files t.foreign_dll_files
+  && List.equal path_equal jsoo_runtime t.jsoo_runtime
+  && Option.equal path_equal jsoo_archive t.jsoo_archive
+  && List.equal Lib_dep.equal requires t.requires
+  && List.equal
+       (Tuple.T2.equal Loc.equal Lib_name.equal)
+       ppx_runtime_deps t.ppx_runtime_deps
+  && Preprocess.Per_module.equal Preprocess.With_instrumentation.equal
+       preprocess t.preprocess
+  && Enabled_status.equal enabled t.enabled
+  && List.equal
+       (Tuple.T2.equal Loc.equal Lib_name.equal)
+       virtual_deps t.virtual_deps
+  && Option.equal Dune_lang.Syntax.Version.equal dune_version t.dune_version
+  && Sub_system_name.Map.equal ~equal:Sub_system_info.equal sub_systems
+       t.sub_systems
+  && Option.equal (Source.equal Modules.equal) virtual_ t.virtual_
+  && Source.equal
+       (Or_exn.equal (List.equal Module_name.equal))
+       entry_modules t.entry_modules
+  && Option.equal
+       (Tuple.T2.equal Loc.equal Lib_name.equal)
+       implements t.implements
+  && Option.equal
+       (Tuple.T2.equal Loc.equal Lib_name.equal)
+       default_implementation t.default_implementation
+  && Option.equal (Inherited.equal Wrapped.equal) wrapped t.wrapped
+  && Main_module_name.equal main_module_name t.main_module_name
+  && Mode.Dict.Set.equal modes t.modes
+  && Option.equal Special_builtin_support.equal special_builtin_support
+       t.special_builtin_support
+  && Option.equal Module_name.equal exit_module t.exit_module
+  && Option.equal
+       (Tuple.T2.equal Loc.equal Lib_name.equal)
+       instrumentation_backend t.instrumentation_backend
+  && Poly.equal path_kind t.path_kind
 
 let name t = t.name
 
@@ -374,10 +493,7 @@ let eval_native_archives_exn (type path) (t : path t) ~modules =
   | Needs_module_info _, None ->
     Code_error.raise "missing module information" []
   | Needs_module_info f, Some modules ->
-    if Modules.has_impl modules then
-      [ f ]
-    else
-      []
+    if Modules.has_impl modules then [ f ] else []
 
 let for_dune_package t ~name ~ppx_runtime_deps ~requires ~foreign_objects
     ~obj_dir ~implements ~default_implementation ~sub_systems ~modules =
@@ -533,7 +649,7 @@ let to_dyn path
     ; instrumentation_backend
     ; entry_modules
     } =
-  let open Dyn.Encoder in
+  let open Dyn in
   let snd f (_, x) = f x in
   record
     [ ("loc", Loc.to_dyn_hum loc)
@@ -558,7 +674,7 @@ let to_dyn path
     ; ("enabled", Enabled_status.to_dyn enabled)
     ; ("virtual_deps", list (snd Lib_name.to_dyn) virtual_deps)
     ; ("dune_version", option Dune_lang.Syntax.Version.to_dyn dune_version)
-    ; ("sub_systems", Sub_system_name.Map.to_dyn Dyn.Encoder.opaque sub_systems)
+    ; ("sub_systems", Sub_system_name.Map.to_dyn Dyn.opaque sub_systems)
     ; ("virtual_", option (Source.to_dyn Modules.to_dyn) virtual_)
     ; ( "entry_modules"
       , Source.to_dyn (Or_exn.to_dyn (list Module_name.to_dyn)) entry_modules )
@@ -577,9 +693,7 @@ let to_dyn path
 
 let package t =
   match t.status with
-  | Installed_private
-  | Installed ->
-    Some (Lib_name.package_name t.name)
+  | Installed_private | Installed -> Some (Lib_name.package_name t.name)
   | Public (_, p) -> Some (Package.name p)
   | Private (_, p) -> Option.map p ~f:Package.name
 

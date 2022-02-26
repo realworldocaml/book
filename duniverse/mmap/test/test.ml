@@ -1,4 +1,4 @@
-open Bigarray
+open Bigarray_compat
 
 (* Test harness *)
 

@@ -45,7 +45,7 @@ Then we create a workspace with some_package2
   $ cd ..
 
 Then we try to build a library that uses some_package1 which in turn
-depends on the overalpping some_package2:
+depends on the overlapping some_package2:
   $ mkdir proj2
   $ cd proj2
   $ cat >dune-project <<EOF
@@ -67,6 +67,9 @@ And we see the error:
     $TESTCASE_ROOT/use/../external/_build/install/default/lib/some_package2
     -> required by library "some_package1" in
        $TESTCASE_ROOT/use/../external/_build/install/default/lib/some_package1
+  -> required by _build/default/proj2/.bar.objs/byte/bar.cmo
+  -> required by _build/default/proj2/bar.cma
+  -> required by %{cma:proj2/bar} at command line:1
   [1]
 
 We can fix the error by allow overlapping dependencies:
@@ -78,7 +81,7 @@ We can fix the error by allow overlapping dependencies:
   > EOF
   $ OCAMLPATH=$PWD/../external/_build/install/default/lib dune build %{cma:proj2/bar} --root .
 
-Strangely, the error dissapears if we remove the source for the bar lib:
+Strangely, the error disappears if we remove the source for the bar lib:
 
   $ cat >proj2/dune <<EOF
   > (library
@@ -103,4 +106,7 @@ We also make sure the error exists for executables:
     -> required by library "some_package1" in
        $TESTCASE_ROOT/use/../external/_build/install/default/lib/some_package1
   -> required by executable bar in proj2/dune:2
+  -> required by _build/default/proj2/.bar.eobjs/byte/dune__exe__Bar.cmi
+  -> required by _build/default/proj2/.bar.eobjs/native/dune__exe__Bar.cmx
+  -> required by _build/default/proj2/bar.exe
   [1]

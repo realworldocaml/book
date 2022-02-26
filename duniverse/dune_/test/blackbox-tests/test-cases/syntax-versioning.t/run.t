@@ -9,13 +9,10 @@
   [1]
   $ rm -f dune
 
-  $ echo '(jbuild_version 1)' > jbuild
+Since 3.0.0, jbuild files are plain ignored:
+
+  $ echo 'random stuff' > jbuild
   $ dune build
-  File "jbuild", line 1, characters 0-0:
-  Error: jbuild files are no longer supported, please convert this file to a
-  dune file instead.
-  Note: You can use "dune upgrade" to convert your project to dune.
-  [1]
   $ rm -f jbuild
 
   $ echo '(executable (name x) (link_executables false))' > dune
@@ -27,11 +24,12 @@
   [1]
   $ rm -f dune
 
-  $ echo '(alias (name x) (deps x) (action (run %{<})))' > dune
+  $ touch x
+  $ echo '(alias (name default) (deps x) (action (run %{<})))' > dune
   $ dune build
-  File "dune", line 1, characters 40-42:
-  1 | (alias (name x) (deps x) (action (run %{<})))
-                                              ^^
+  File "dune", line 1, characters 44-48:
+  1 | (alias (name default) (deps x) (action (run %{<})))
+                                                  ^^^^
   Error: %{<} was deleted in version 1.0 of the dune language.
   Use a named dependency instead:
   

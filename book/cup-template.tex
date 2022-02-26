@@ -2,7 +2,7 @@
 % for the suite of standard Cambridge designs
 % 2021/07/01, v1.30
 \NeedsTeXFormat{LaTeX2e}[1996/06/01]
-\documentclass[multi]{EngD}
+\documentclass[multi,print,final]{EngD}
 
 \reinstaterules
 % \documentclass[multi]{EngD} % multi-contributor option
@@ -59,12 +59,12 @@
 \usepackage[most]{tcolorbox}
 
 %textmarker style from colorbox doc
+\tcbuselibrary{breakable}
 \tcbset{textmarker/.style={%
-        enhanced,
+        enhanced,breakable,
         parbox=false,boxrule=0mm,boxsep=0mm,arc=0mm,
         outer arc=0mm,left=6mm,right=3mm,top=7pt,bottom=7pt,
         toptitle=1mm,bottomtitle=1mm,oversize}}
-
 
 % define new colorboxes
 \newtcolorbox{hintBox}{textmarker,
@@ -205,6 +205,9 @@ $endif$
 \makeatother
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \includeonly{chap2}
+\makeatletter
+\let\@endpart\vfil
+\makeatother
 \raggedbottom
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}

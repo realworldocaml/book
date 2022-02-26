@@ -33,7 +33,7 @@
           <span class="meter">
             <span class="covered" style="width: 33%"></span>
           </span>
-          <span class="percentage">33%</span>
+          <span class="percentage">33% <span class="stats">(2 / 6)</span></span>
           <a href="test.ml.html">
             <span class="dirname"></span>test.ml
           </a>

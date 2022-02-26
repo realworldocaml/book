@@ -1,9 +1,12 @@
+open Stdune
 open! Dune_engine
 
 module type S = sig
   type key
 
   type 'a t
+
+  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 
   (** Create a mapping where all keys map to the same value *)
   val for_all : 'a -> 'a t
@@ -23,8 +26,16 @@ module type S = sig
 
   val fold : 'a t -> init:'acc -> f:('a -> 'acc -> 'acc) -> 'acc
 
+  val fold_resolve :
+       'a t
+    -> init:'acc
+    -> f:('a -> 'acc -> 'acc Resolve.Build.t)
+    -> 'acc Resolve.Build.t
+
   val exists : 'a t -> f:('a -> bool) -> bool
 
-  val map_with_targets :
-    'a t -> f:('a -> 'b Build.With_targets.t) -> 'b t Build.With_targets.t
+  val map_action_builder :
+    'a t -> f:('a -> 'b Action_builder.t) -> 'b t Action_builder.t
+
+  val map_resolve : 'a t -> f:('a -> 'b Resolve.Build.t) -> 'b t Resolve.Build.t
 end

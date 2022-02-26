@@ -1,7 +1,7 @@
 open Stdune
 open Import
 
-(** A string that is "2.9.3" but not expanded by [dune subst] *)
+(** A string that is "3.0.2" but not expanded by [dune subst] *)
 let literal_version = "%%" ^ "VERSION%%"
 
 let doc = "Substitute watermarks in source files."
@@ -26,12 +26,12 @@ let man =
      ^ {|) strings by the version obtained from the vcs. Currently only git is
             supported and the version is obtained from the output of:|}
       )
-  ; `Pre {|  \$ git describe --always --dirty|}
+  ; `Pre {|  \$ git describe --always --dirty --abbrev=7|}
   ; `P
       {|$(b,dune subst) substitutes the variables that topkg substitutes with
           the default configuration:|}
   ; var "NAME" "the name of the project (from the dune-project file)"
-  ; var "VERSION" "output of $(b,git describe --always --dirty)"
+  ; var "VERSION" "output of $(b,git describe --always --dirty --abbrev=7)"
   ; var "VERSION_NUM"
       ("same as $(b," ^ literal_version
      ^ ") but with a potential leading 'v' or 'V' dropped")
@@ -60,14 +60,20 @@ let info = Term.info "subst" ~doc ~man
 let term =
   let+ () = Common.build_info
   and+ debug_backtraces = Common.debug_backtraces in
-  let config : Config.t =
-    { Config.default with display = Quiet; concurrency = Fixed 1 }
+  let config : Dune_config.t =
+    { Dune_config.default with
+      display = { verbosity = Quiet; status_line = false }
+    ; concurrency = Fixed 1
+    }
   in
   Dune_engine.Clflags.debug_backtraces debug_backtraces;
   Path.set_root (Path.External.cwd ());
   Path.Build.set_build_dir (Path.Build.Kind.of_string Common.default_build_dir);
-  Config.init config;
+  Dune_config.init config;
   Log.init_disabled ();
-  Dune_engine.Scheduler.go ~config Watermarks.subst
+  Dune_engine.Scheduler.Run.go
+    ~on_event:(fun _ _ -> ())
+    (Dune_config.for_scheduler config None None)
+    Watermarks.subst
 
 let command = (term, info)

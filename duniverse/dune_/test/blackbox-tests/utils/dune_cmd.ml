@@ -8,11 +8,13 @@ let register name of_args run =
       let t = of_args args in
       run t)
 
+(* Doesn't follow the symlinks! *)
 module Stat = struct
   type data =
     | Hardlinks
     | Permissions
     | Size
+    | Kind
 
   type t =
     { file : Path.t
@@ -23,6 +25,7 @@ module Stat = struct
     | "size" -> Size
     | "hardlinks" -> Hardlinks
     | "permissions" -> Permissions
+    | "kind" -> Kind
     | s ->
       raise
         (Arg.Bad
@@ -34,6 +37,7 @@ module Stat = struct
     | Size -> Int.to_string stats.st_size
     | Hardlinks -> Int.to_string stats.st_nlink
     | Permissions -> sprintf "%o" stats.st_perm
+    | Kind -> sprintf "%s" (File_kind.to_string_hum stats.st_kind)
 
   let name = "stat"
 
@@ -45,7 +49,7 @@ module Stat = struct
     | _ -> raise (Arg.Bad (sprintf "2 arguments must be provided"))
 
   let run { file; data } =
-    let stats = Path.stat file in
+    let stats = Path.lstat_exn file in
     print_endline (pp_stats data stats)
 
   let () = register name of_args run
@@ -75,15 +79,27 @@ module Wait_for_fs_clock_to_advance = struct
 end
 
 module Cat = struct
-  type t = File of Path.t
-
   let name = "cat"
 
   let of_args = function
-    | [ file ] -> File (Path.of_filename_relative_to_initial_cwd file)
-    | _ -> raise (Arg.Bad "Usage: dune_arg cat <file>")
+    | [ file ] -> file
+    | _ -> raise (Arg.Bad "Usage: dune_cmd cat <file>")
 
-  let run (File p) = print_string (Io.read_file p)
+  let run p = print_string (Io.String_path.read_file p)
+
+  let () = register name of_args run
+end
+
+module Exists = struct
+  type t = Path of Path.t
+
+  let name = "exists"
+
+  let of_args = function
+    | [ path ] -> Path (Path.of_filename_relative_to_initial_cwd path)
+    | _ -> raise (Arg.Bad "Usage: dune_cmd exists <path>")
+
+  let run (Path path) = print_string (Path.exists path |> Bool.to_string)
 
   let () = register name of_args run
 end
@@ -93,7 +109,7 @@ module Expand_lines = struct
 
   let of_args = function
     | [] -> ()
-    | _ -> raise (Arg.Bad ("Usage: dune_arg " ^ name))
+    | _ -> raise (Arg.Bad ("Usage: dune_cmd " ^ name))
 
   let run () =
     let re = Re.compile (Re.str "\\n") in
@@ -158,6 +174,149 @@ module Sanitizer = struct
         loop ()
     in
     loop ()
+
+  let () = register name of_args run
+end
+
+module Count_lines = struct
+  type t =
+    | Stdin
+    | File of Path.t
+
+  let name = "count-lines"
+
+  let count_lines ic =
+    let rec loop n =
+      match input_line ic with
+      | exception End_of_file -> n
+      | _line -> loop (n + 1)
+    in
+    loop 0
+
+  let of_args = function
+    | [] -> Stdin
+    | [ file ] -> File (Path.of_filename_relative_to_initial_cwd file)
+    | _ -> raise (Arg.Bad "Usage: dune_cmd count-lines <file>")
+
+  let run t =
+    let n =
+      match t with
+      | Stdin -> count_lines stdin
+      | File p -> Io.with_file_in p ~binary:false ~f:count_lines
+    in
+    Printf.printf "%d\n%!" n
+
+  let () = register name of_args run
+end
+
+module Override_on = struct
+  module Configurator = Configurator.V1
+
+  type t =
+    { system_to_override_on : string
+    ; desired_output : string
+    }
+
+  let name = "override-on"
+
+  let copy_stdin () =
+    let rec loop () =
+      match input_line stdin with
+      | exception End_of_file -> ()
+      | line ->
+        print_endline line;
+        loop ()
+    in
+    loop ()
+
+  let of_args = function
+    | [ system_to_override_on; desired_output ] ->
+      { system_to_override_on; desired_output }
+    | _ ->
+      raise
+        (Arg.Bad
+           "Usage: dune_cmd override-on <system-to-override-on> \
+            <desired-output>")
+
+  let run { system_to_override_on; desired_output } =
+    let config = Configurator.create "override-on" in
+    match Configurator.ocaml_config_var config "system" with
+    | Some system when String.equal system system_to_override_on ->
+      print_endline desired_output
+    | _ -> copy_stdin ()
+
+  let () = register name of_args run
+end
+
+module Rewrite_path = struct
+  let name = "rewrite-path"
+
+  let of_args = function
+    | [ path ] -> path
+    | _ -> raise (Arg.Bad "Usage: dune_cmd rewrite-path <path>")
+
+  let run path =
+    match
+      Build_path_prefix_map.decode_map (Sys.getenv "BUILD_PATH_PREFIX_MAP")
+    with
+    | Error msg -> failwith msg
+    | Ok map -> print_string (Build_path_prefix_map.rewrite map path)
+
+  let () = register name of_args run
+end
+
+module Find_by_contents = struct
+  let name = "find-file-by-contents-regexp"
+
+  let of_args = function
+    | [ path; contents_regexp ] -> (path, Str.regexp contents_regexp)
+    | _ ->
+      raise
+        (Arg.Bad "Usage: dune_cmd find-files-by-contents-regexp <path> <regexp>")
+
+  let rec find_files ~dir regexp : _ list =
+    List.concat_map
+      (List.sort (Sys.readdir dir |> Array.to_list) ~compare:String.compare)
+      ~f:(fun name ->
+        let path = Filename.concat dir name in
+        let stats = Unix.stat path in
+        match stats.st_kind with
+        | S_DIR -> find_files ~dir:path regexp
+        | S_REG ->
+          let s = Io.String_path.read_file path in
+          if Str.string_match regexp s 0 then [ Printf.sprintf "%s\n" path ]
+          else []
+        | _other -> [])
+
+  let run (dir, regexp) =
+    match find_files ~dir regexp with
+    | [] ->
+      Format.eprintf "No files found matching pattern@.%!";
+      exit 1
+    | [ res ] -> Printf.printf "%s\n" res
+    | _ :: _ as files ->
+      Format.eprintf "Multiple files found matching pattern@.%!";
+      List.iter files ~f:(fun file -> Printf.printf "%s\n%!" file);
+      exit 1
+
+  let () = register name of_args run
+end
+
+module Wait_for_file_to_appear = struct
+  type t = { file : Path.t }
+
+  let name = "wait-for-file-to-appear"
+
+  let of_args = function
+    | [ file ] ->
+      let file = Path.of_filename_relative_to_initial_cwd file in
+      { file }
+    | _ -> raise (Arg.Bad (sprintf "1 argument must be provided"))
+
+  let run { file } =
+    while not (Path.exists file) do
+      Unix.sleepf 0.01
+    done
 
   let () = register name of_args run
 end

@@ -9,28 +9,25 @@ module Alias_rules : sig
   val add :
        Super_context.t
     -> alias:Alias.t
-    -> stamp:'a
     -> loc:Loc.t option
-    -> locks:Path.t list
-    -> Action.t Build.With_targets.t
-    -> unit
+    -> Action.Full.t Action_builder.t
+    -> unit Memo.Build.t
 
   val add_empty :
        Super_context.t
     -> loc:Stdune.Loc.t option
     -> alias:Alias.t
-    -> stamp:'a
-    -> unit
+    -> unit Memo.Build.t
 end
 
-(** Interpret a [(rule ...)] stanza and return the targets it produces. *)
+(** Interpret a [(rule ...)] stanza and return the targets it produces, if any. *)
 val user_rule :
      Super_context.t
-  -> ?extra_bindings:Pform.Map.t
+  -> ?extra_bindings:Value.t list Pform.Map.t
   -> dir:Path.Build.t
   -> expander:Expander.t
   -> Rule.t
-  -> Path.Build.Set.t
+  -> Targets.Validated.t option Memo.Build.t
 
 (** Interpret a [(copy_files ...)] stanza and return the targets it produces. *)
 val copy_files :
@@ -39,13 +36,13 @@ val copy_files :
   -> expander:Expander.t
   -> src_dir:Path.Source.t
   -> Copy_files.t
-  -> Path.Set.t
+  -> Path.Set.t Memo.Build.t
 
 (** Interpret an [(alias ...)] stanza. *)
 val alias :
      Super_context.t
-  -> ?extra_bindings:Pform.Map.t
+  -> ?extra_bindings:Value.t list Pform.Map.t
   -> dir:Path.Build.t
   -> expander:Expander.t
   -> Alias_conf.t
-  -> unit
+  -> unit Memo.Build.t

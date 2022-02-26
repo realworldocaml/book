@@ -15,4 +15,5 @@ val output :
   ignore_missing_files:bool ->
   expect:string list ->
   do_not_expect:string list ->
+  tree:bool ->
     unit

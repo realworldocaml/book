@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see license at the end of the file.
-   %%NAME%% release %%VERSION%%
+   mtime release v1.3.0+dune
    --------------------------------------------------------------------------*/
 
 #include <caml/mlvalues.h>
@@ -26,6 +26,8 @@
  #if defined(_POSIX_VERSION)
    #define OCAML_MTIME_POSIX
  #endif
+#elif defined(_WIN32)
+#define OCAML_MTIME_WINDOWS
 #endif
 
 /* Darwin */
@@ -122,6 +124,74 @@ CAMLprim value ocaml_mtime_clock_period_ns (value unit)
                                 (uint64_t)(res.tv_nsec)));
   CAMLreturn (some);
 }
+
+#elif defined(OCAML_MTIME_WINDOWS)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+static double performance_frequency;
+static void set_performance_frequency(void)
+{
+  LARGE_INTEGER t_freq;
+  if (!QueryPerformanceFrequency(&t_freq)) {
+    OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
+  }
+  performance_frequency = (1000000000.0 / t_freq.QuadPart);
+}
+
+CAMLprim value ocaml_mtime_clock_elapsed_ns (value unit)
+{
+  (void) unit;
+  static LARGE_INTEGER start;
+  if (performance_frequency == 0.0) {
+    set_performance_frequency();
+  }
+  if ( start.QuadPart == 0 )
+  {
+    if (!QueryPerformanceCounter(&start)) {
+      OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
+    }
+  }
+  static LARGE_INTEGER now;
+  if ( !QueryPerformanceCounter(&now)) {
+    OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
+  }
+  uint64_t ret = (now.QuadPart - start.QuadPart) * performance_frequency;
+  return caml_copy_int64(ret);
+}
+
+CAMLprim value ocaml_mtime_clock_now_ns (value unit)
+{
+  (void) unit;
+  if (performance_frequency == 0.0) {
+    set_performance_frequency();
+  }
+  static LARGE_INTEGER now;
+  if ( !QueryPerformanceCounter(&now)) {
+    OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
+  }
+  uint64_t ret = now.QuadPart * performance_frequency;
+  return caml_copy_int64(ret);
+}
+
+CAMLprim value ocaml_mtime_clock_period_ns (value unit)
+{
+  (void) unit;
+  if (performance_frequency == 0.0) {
+    set_performance_frequency();
+  }
+  if ( performance_frequency <= 0.0 ) {
+    return Val_none;
+  }
+  value ret;
+  value p = caml_copy_int64(performance_frequency);
+  Begin_roots1(p);
+  ret = caml_alloc_small(1,0);
+  Field(ret,0) = p;
+  End_roots();
+  return ret;
+}
+
 
 /* Unsupported */
 

@@ -9,20 +9,16 @@ open Import
 
 type t
 
+val all : t Context_name.Map.t Memo.Lazy.t
+
+(** Find a super context by name. *)
+val find : Context_name.t -> t option Memo.Build.t
+
 val modules_of_lib :
   (* to avoid a cycle with [Dir_contents] *)
-  (t -> dir:Path.Build.t -> name:Lib_name.t -> Modules.t) Fdecl.t
+  (t -> dir:Path.Build.t -> name:Lib_name.t -> Modules.t Memo.Build.t) Fdecl.t
 
 val to_dyn : t -> Dyn.t
-
-val create :
-     context:Context.t
-  -> ?host:t
-  -> projects:Dune_project.t list
-  -> packages:Package.t Package.Name.Map.t
-  -> stanzas:Dune_load.Dune_file.t list
-  -> unit
-  -> t
 
 val context : t -> Context.t
 
@@ -38,8 +34,15 @@ val packages : t -> Package.t Package.Name.Map.t
 
 val host : t -> t
 
+val any_package :
+  t -> Package.Name.t -> Expander.any_package option Memo.Build.t
+
 val get_site_of_packages :
-  t -> loc:Loc.t -> pkg:Package.Name.t -> site:Section.Site.t -> Section.t
+     t
+  -> loc:Loc.t
+  -> pkg:Package.Name.t
+  -> site:Section.Site.t
+  -> Section.t Memo.Build.t
 
 module Lib_entry : sig
   type t =
@@ -60,7 +63,20 @@ val internal_lib_names : t -> Lib_name.Set.t
 
 (** Compute the ocaml flags based on the directory environment and a buildable
     stanza *)
-val ocaml_flags : t -> dir:Path.Build.t -> Ocaml_flags.Spec.t -> Ocaml_flags.t
+val ocaml_flags :
+  t -> dir:Path.Build.t -> Ocaml_flags.Spec.t -> Ocaml_flags.t Memo.Build.t
+
+val js_of_ocaml_runtest_alias :
+  t -> dir:Path.Build.t -> Alias.Name.t Memo.Build.t
+
+val js_of_ocaml_compilation_mode :
+  t -> dir:Path.Build.t -> Js_of_ocaml.Compilation_mode.t Memo.Build.t
+
+val js_of_ocaml_flags :
+     t
+  -> dir:Path.Build.t
+  -> Js_of_ocaml.Flags.Spec.t
+  -> string list Action_builder.t Js_of_ocaml.Flags.t Memo.Build.t
 
 val foreign_flags :
      t
@@ -68,30 +84,34 @@ val foreign_flags :
   -> expander:Expander.t
   -> flags:Ordered_set_lang.Unexpanded.t
   -> language:Foreign_language.t
-  -> string list Build.t
+  -> string list Action_builder.t
+
+val link_flags :
+  t -> dir:Path.Build.t -> Link_flags.Spec.t -> Link_flags.t Memo.Build.t
 
 val menhir_flags :
      t
   -> dir:Path.Build.t
   -> expander:Expander.t
   -> flags:Ordered_set_lang.Unexpanded.t
-  -> string list Build.t
+  -> string list Action_builder.t
 
 (** Binaries that are symlinked in the associated .bin directory of [dir]. This
     associated directory is [Path.relative dir ".bin"] *)
-val local_binaries : t -> dir:Path.Build.t -> File_binding.Expanded.t list
+val local_binaries :
+  t -> dir:Path.Build.t -> File_binding.Expanded.t list Memo.Build.t
 
 (** odoc config in the corresponding [(env)] stanza. *)
-val odoc : t -> dir:Path.Build.t -> Env_node.Odoc.t
+val odoc : t -> dir:Path.Build.t -> Env_node.Odoc.t Memo.Build.t
 
 (** coq config in the corresponding [(env)] stanza. *)
-val coq : t -> dir:Path.Build.t -> Env_node.Coq.t Build.t
+val coq : t -> dir:Path.Build.t -> Env_node.Coq.t Action_builder.t Memo.Build.t
 
 (** Formatting settings in the corresponding [(env)] stanza. *)
-val format_config : t -> dir:Path.Build.t -> Format_config.t
+val format_config : t -> dir:Path.Build.t -> Format_config.t Memo.Build.t
 
 (** Dump a directory environment in a readable form *)
-val dump_env : t -> dir:Path.Build.t -> Dune_lang.t list Build.t
+val dump_env : t -> dir:Path.Build.t -> Dune_lang.t list Action_builder.t
 
 val find_scope_by_dir : t -> Path.Build.t -> Scope.t
 
@@ -101,40 +121,33 @@ val find_project_by_key : t -> Dune_project.File_key.t -> Dune_project.t
 
 val add_rule :
      t
-  -> ?sandbox:Sandbox_config.t
   -> ?mode:Rule.Mode.t
-  -> ?locks:Path.t list
   -> ?loc:Loc.t
   -> dir:Path.Build.t
-  -> Action.t Build.With_targets.t
-  -> unit
+  -> Action.Full.t Action_builder.With_targets.t
+  -> unit Memo.Build.t
 
 val add_rule_get_targets :
      t
-  -> ?sandbox:Sandbox_config.t
   -> ?mode:Rule.Mode.t
-  -> ?locks:Path.t list
   -> ?loc:Loc.t
   -> dir:Path.Build.t
-  -> Action.t Build.With_targets.t
-  -> Path.Build.Set.t
+  -> Action.Full.t Action_builder.With_targets.t
+  -> Targets.Validated.t Memo.Build.t
 
 val add_rules :
      t
-  -> ?sandbox:Sandbox_config.t
   -> dir:Path.Build.t
-  -> Action.t Build.With_targets.t list
-  -> unit
+  -> Action.Full.t Action_builder.With_targets.t list
+  -> unit Memo.Build.t
 
 val add_alias_action :
      t
-  -> Build_system.Alias.t
+  -> Alias.t
   -> dir:Path.Build.t
   -> loc:Loc.t option
-  -> ?locks:Path.t list
-  -> stamp:_
-  -> Action.t Build.With_targets.t
-  -> unit
+  -> Action.Full.t Action_builder.t
+  -> unit Memo.Build.t
 
 (** [resolve_program t ?hint name] resolves a program. [name] is looked up in
     the workspace, if it is not found in the tree is is looked up in the PATH.
@@ -149,18 +162,14 @@ val resolve_program :
   -> ?hint:string
   -> loc:Loc.t option
   -> string
-  -> Action.Prog.t
+  -> Action.Prog.t Memo.Build.t
 
-val expander : t -> dir:Path.Build.t -> Expander.t
+val expander : t -> dir:Path.Build.t -> Expander.t Memo.Build.t
 
 val dir_status_db : t -> Dir_status.DB.t
 
 module As_memo_key : sig
-  type nonrec t = t
+  include Memo.Input with type t = t
 
-  val to_dyn : t -> Dyn.t
-
-  val equal : t -> t -> bool
-
-  val hash : t -> int
+  module And_package : Memo.Input with type t = t * Package.t
 end

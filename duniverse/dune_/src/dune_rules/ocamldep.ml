@@ -1,9 +1,20 @@
 open! Dune_engine
 open! Stdune
 open Import
-open Build.O
-module CC = Compilation_context
 module SC = Super_context
+
+module Modules_data = struct
+  type t =
+    { dir : Path.Build.t
+    ; obj_dir : Path.Build.t Obj_dir.t
+    ; sctx : Super_context.t
+    ; vimpl : Vimpl.t option
+    ; modules : Modules.t
+    ; stdlib : Ocaml_stdlib.t option
+    }
+end
+
+open Modules_data
 
 let parse_module_names ~(unit : Module.t) ~modules words =
   List.filter_map words ~f:(fun m ->
@@ -21,9 +32,7 @@ let parse_deps_exn ~file lines =
       ]
   in
   match lines with
-  | []
-  | _ :: _ :: _ ->
-    invalid ()
+  | [] | _ :: _ :: _ -> invalid ()
   | [ line ] -> (
     match String.lsplit2 line ~on:':' with
     | None -> invalid ()
@@ -32,12 +41,11 @@ let parse_deps_exn ~file lines =
       if basename <> Path.basename file then invalid ();
       String.extract_blank_separated_words deps)
 
-let interpret_deps cctx ~unit deps =
-  let dir = CC.dir cctx in
-  let modules = CC.modules cctx in
+let interpret_deps md ~unit deps =
+  let dir = md.dir in
+  let modules = md.modules in
   let deps = parse_module_names ~unit ~modules deps in
-  let stdlib = CC.stdlib cctx in
-  if Option.is_none stdlib then
+  if Option.is_none md.stdlib then
     Modules.main_module_name modules
     |> Option.iter ~f:(fun (main_module_name : Module_name.t) ->
            if
@@ -63,38 +71,40 @@ let interpret_deps cctx ~unit deps =
   | None -> deps
   | Some m -> m :: deps
 
-let deps_of ~cctx ~ml_kind unit =
-  let modules = Compilation_context.modules cctx in
-  let sctx = CC.super_context cctx in
+let deps_of md ~ml_kind unit =
+  let modules = md.modules in
+  let sctx = md.sctx in
   let source = Option.value_exn (Module.source unit ~ml_kind) in
-  let obj_dir = Compilation_context.obj_dir cctx in
-  let dir = Compilation_context.dir cctx in
-  let dep = Obj_dir.Module.dep obj_dir in
+  let dir = md.dir in
+  let dep = Obj_dir.Module.dep md.obj_dir in
   let context = SC.context sctx in
   let parse_module_names = parse_module_names ~modules in
   let all_deps_file = dep (Transitive (unit, ml_kind)) in
   let ocamldep_output = dep (Immediate source) in
-  SC.add_rule sctx ~dir
-    (let flags =
-       Option.value (Module.pp_flags unit) ~default:(Build.return [])
-     in
-     Command.run context.ocamldep
-       ~dir:(Path.build context.build_dir)
-       [ A "-modules"
-       ; Command.Args.dyn flags
-       ; Command.Ml_kind.flag ml_kind
-       ; Dep (Module.File.path source)
-       ]
-       ~stdout_to:ocamldep_output);
+  let open Memo.Build.O in
+  let* () =
+    SC.add_rule sctx ~dir
+      (let open Action_builder.With_targets.O in
+      let flags, sandbox =
+        Option.value (Module.pp_flags unit)
+          ~default:(Action_builder.return [], Sandbox_config.default)
+      in
+      Command.run context.ocamldep
+        ~dir:(Path.build context.build_dir)
+        [ A "-modules"
+        ; Command.Args.dyn flags
+        ; Command.Ml_kind.flag ml_kind
+        ; Dep (Module.File.path source)
+        ]
+        ~stdout_to:ocamldep_output
+      >>| Action.Full.add_sandbox sandbox)
+  in
   let build_paths dependencies =
     let dependency_file_path m =
       let ml_kind m =
-        if Module.kind m = Alias then
-          None
-        else if Module.has m ~ml_kind:Intf then
-          Some Ml_kind.Intf
-        else
-          Some Impl
+        if Module.kind m = Alias then None
+        else if Module.has m ~ml_kind:Intf then Some Ml_kind.Intf
+        else Some Impl
       in
       ml_kind m
       |> Option.map ~f:(fun ml_kind ->
@@ -103,33 +113,38 @@ let deps_of ~cctx ~ml_kind unit =
     List.filter_map dependencies ~f:dependency_file_path
   in
   let action =
+    let open Action_builder.O in
     let paths =
-      let+ lines = Build.lines_of (Path.build ocamldep_output) in
+      let+ lines = Action_builder.lines_of (Path.build ocamldep_output) in
       lines
       |> parse_deps_exn ~file:(Module.File.path source)
-      |> interpret_deps cctx ~unit
+      |> interpret_deps md ~unit
       |> fun modules ->
       ( build_paths modules
       , List.map modules ~f:(fun m -> Module_name.to_string (Module.name m)) )
     in
-    Build.with_targets ~targets:[ all_deps_file ]
+    Action_builder.with_file_targets ~file_targets:[ all_deps_file ]
       (let+ sources, extras =
-         Build.dyn_paths
+         Action_builder.dyn_paths
            (let+ sources, extras = paths in
             ((sources, extras), sources))
        in
        Action.Merge_files_into (sources, extras, all_deps_file))
   in
-  SC.add_rule sctx ~dir action;
+  let+ () =
+    SC.add_rule sctx ~dir
+      (Action_builder.With_targets.map ~f:Action.Full.make action)
+  in
   let all_deps_file = Path.build all_deps_file in
-  Build.memoize
+  Action_builder.memoize
     (Path.to_string all_deps_file)
-    (Build.map ~f:(parse_module_names ~unit) (Build.lines_of all_deps_file))
+    (Action_builder.map ~f:(parse_module_names ~unit)
+       (Action_builder.lines_of all_deps_file))
 
 let read_deps_of ~obj_dir ~modules ~ml_kind unit =
   let all_deps_file = Obj_dir.Module.dep obj_dir (Transitive (unit, ml_kind)) in
-  Build.memoize
+  Action_builder.memoize
     (Path.Build.to_string all_deps_file)
-    (Build.map
+    (Action_builder.map
        ~f:(parse_module_names ~unit ~modules)
-       (Build.lines_of (Path.build all_deps_file)))
+       (Action_builder.lines_of (Path.build all_deps_file)))

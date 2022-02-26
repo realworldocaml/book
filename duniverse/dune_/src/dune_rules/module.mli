@@ -56,23 +56,26 @@ val name : t -> Module_name.t
 
 val source : t -> ml_kind:Ml_kind.t -> File.t option
 
-val pp_flags : t -> string list Build.t option
+val pp_flags : t -> (string list Action_builder.t * Sandbox_config.t) option
 
 val file : t -> ml_kind:Ml_kind.t -> Path.t option
 
 val obj_name : t -> Module_name.Unique.t
 
-val iter : t -> f:(Ml_kind.t -> File.t -> unit) -> unit
+val iter :
+  t -> f:(Ml_kind.t -> File.t -> unit Memo.Build.t) -> unit Memo.Build.t
 
 val has : t -> ml_kind:Ml_kind.t -> bool
 
 (** Prefix the object name with the library name. *)
 val with_wrapper : t -> main_module_name:Module_name.t -> t
 
+val add_file : t -> Ml_kind.t -> File.t -> t
+
 val map_files : t -> f:(Ml_kind.t -> File.t -> File.t) -> t
 
 (** Set preprocessing flags *)
-val set_pp : t -> string list Build.t option -> t
+val set_pp : t -> (string list Action_builder.t * Sandbox_config.t) option -> t
 
 val wrapped_compat : t -> t
 
@@ -101,11 +104,16 @@ module Obj_map : sig
   include Map.S with type key = module_
 
   val find_exn : 'a t -> module_ -> 'a
-
-  val top_closure :
-    module_ list t -> module_ list -> (module_ list, module_ list) Result.result
 end
 with type module_ := t
+
+module Obj_map_traversals : sig
+  val parallel_iter :
+    'a Obj_map.t -> f:(t -> 'a -> unit Memo.Build.t) -> unit Memo.Build.t
+
+  val parallel_map :
+    'a Obj_map.t -> f:(t -> 'a -> 'b Memo.Build.t) -> 'b Obj_map.t Memo.Build.t
+end
 
 val sources : t -> Path.t list
 

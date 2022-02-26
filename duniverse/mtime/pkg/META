@@ -1,5 +1,5 @@
 description = "Monotonic wall-clock time for OCaml"
-version = "%%VERSION_NUM%%"
+version = "1.3.0+dune"
 requires = ""
 archive(byte) = "mtime.cma"
 archive(native) = "mtime.cmxa"
@@ -8,7 +8,7 @@ plugin(native) = "mtime.cmxs"
 
 package "top" (
   description = "Mtime toplevel support"
-  version = "%%VERSION_NUM%%"
+  version = "1.3.0+dune"
   requires = "mtime"
   archive(byte) = "mtime_top.cma"
   archive(native) = "mtime_top.cmxa"
@@ -18,13 +18,13 @@ package "top" (
 
 package "clock" (
   description = "Monotonic time clocks"
-  version = "%%VERSION_NUM%%"
+  version = "1.3.0+dune"
   requires = ""
 
   package "os" (
     directory="os"
     description = "Mtime_clock for native OS"
-    version = "%%VERSION_NUM%%"
+    version = "1.3.0+dune"
     requires = "mtime"
     archive(byte) = "mtime_clock.cma"
     archive(native) = "mtime_clock.cmxa"
@@ -35,8 +35,8 @@ package "clock" (
   package "jsoo" (
     directory="jsoo"
     description = "Mtime_clock for js_of_ocaml"
-    version = "%%VERSION_NUM%%"
-    requires = "js_of_ocaml"
+    version = "1.3.0+dune"
+    requires = "mtime js_of_ocaml"
     archive(byte) = "mtime_clock.cma"
     archive(native) = "mtime_clock.cmxa"
     plugin(byte) = "mtime_clock.cma"

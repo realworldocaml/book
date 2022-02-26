@@ -7,6 +7,8 @@ type t
 
 val to_dyn : t -> Dyn.t
 
+val equal : t -> t -> bool
+
 val lib :
      src_dir:Path.Build.t
   -> main_module_name:Module_name.t option
@@ -35,11 +37,14 @@ val compat_for_exn : t -> Module.t -> Module.t
 
 val impl_only : t -> Module.t list
 
+(** A set of modules from a single module. Not suitable for single module exe as
+    this produce an unwrapped set of modules. Use [singleton_exe] instead for
+    executables. *)
+val singleton : Module.t -> t
+
 val singleton_exe : Module.t -> t
 
 val fold_no_vlib : t -> init:'acc -> f:(Module.t -> 'acc -> 'acc) -> 'acc
-
-val iter_no_vlib : t -> f:(Module.t -> unit) -> unit
 
 val exe_unwrapped : Module.Name_map.t -> t
 
@@ -54,7 +59,12 @@ val for_alias : t -> Module.Name_map.t
 
 val fold_user_written : t -> f:(Module.t -> 'acc -> 'acc) -> init:'acc -> 'acc
 
-val map_user_written : t -> f:(Module.t -> Module.t) -> t
+val map_user_written :
+  t -> f:(Module.t -> Module.t Memo.Build.t) -> t Memo.Build.t
+
+val map : t -> f:(Module.t -> Module.t) -> t
+
+val fold_user_available : t -> f:(Module.t -> 'acc -> 'acc) -> init:'acc -> 'acc
 
 (** Returns all the compatibility modules. *)
 val wrapped_compat : t -> Module.Name_map.t
@@ -67,6 +77,11 @@ module Sourced_module : sig
 end
 
 val obj_map : t -> f:(Sourced_module.t -> 'a) -> 'a Module.Obj_map.t
+
+val obj_map_build :
+     t
+  -> f:(Sourced_module.t -> 'a Memo.Build.t)
+  -> 'a Module.Obj_map.t Memo.Build.t
 
 (** List of entry modules visible to users of the library. For wrapped
     libraries, this is always one module. For unwrapped libraries, this could be
@@ -94,7 +109,7 @@ val is_stdlib_alias : t -> Module.t -> bool
 
 val exit_module : t -> Module.t option
 
-(** [relcoate_alias_module t ~src_dir] sets the source directory of the alias
+(** [relocate_alias_module t ~src_dir] sets the source directory of the alias
     module to [src_dir]. Only works if [t] is wrapped. *)
 val relocate_alias_module : t -> src_dir:Path.t -> t
 
@@ -103,6 +118,13 @@ val is_empty : t -> bool
 val as_singleton : t -> Module.t option
 
 val source_dirs : t -> Path.Set.t
+
+type split_by_lib =
+  { vlib : Module.t list
+  ; impl : Module.t list
+  }
+
+val split_by_lib : t -> split_by_lib
 
 (** [has_impl t] is true if there's at least one implementation in [t]*)
 val has_impl : t -> bool

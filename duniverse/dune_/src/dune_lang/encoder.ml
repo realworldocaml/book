@@ -42,22 +42,14 @@ type field =
 let field name f ?(equal = ( = )) ?default v =
   match default with
   | None -> Normal (name, f v)
-  | Some d ->
-    if equal d v then
-      Absent
-    else
-      Normal (name, f v)
+  | Some d -> if equal d v then Absent else Normal (name, f v)
 
 let field_o name f v =
   match v with
   | None -> Absent
   | Some v -> Normal (name, f v)
 
-let field_b name v =
-  if v then
-    Inlined_list (name, [])
-  else
-    Absent
+let field_b name v = if v then Inlined_list (name, []) else Absent
 
 let field_l name f l =
   match l with
@@ -75,4 +67,4 @@ let record_fields (l : field list) =
     | Normal (name, v) -> Some (List [ Atom (Atom.of_string name); v ])
     | Inlined_list (name, l) -> Some (List (Atom (Atom.of_string name) :: l)))
 
-let unknown _ = unsafe_atom_of_string "<unknown>"
+let unknown _ = atom "<unknown>"

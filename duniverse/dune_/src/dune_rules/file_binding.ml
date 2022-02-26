@@ -1,5 +1,6 @@
 open! Dune_engine
 open! Stdune
+open Memo.Build.O
 
 type ('src, 'dst) t =
   { src : 'src
@@ -38,26 +39,30 @@ module Unexpanded = struct
     ; dst = Some (String_with_vars.make_text locd dst)
     }
 
-  let expand_src t ~dir ~f = Path.Build.relative dir (f t.src)
+  let expand_src t ~dir ~f = f t.src >>| Path.Build.relative dir
 
   let destination_relative_to_install_path t ~section ~expand ~expand_partial =
-    let dst = Option.map ~f:expand t.dst in
-    Install.Entry.adjust_dst ~section ~src:(expand_partial t.src) ~dst
+    let+ src = expand_partial t.src
+    and+ dst = Memo.Build.Option.map ~f:expand t.dst in
+    Install.Entry.adjust_dst ~section ~src ~dst
 
   let expand t ~dir ~f =
-    let f sw = (String_with_vars.loc sw, f sw) in
-    let src =
-      let loc, expanded = f t.src in
+    let f sw =
+      let+ f = f sw in
+      (String_with_vars.loc sw, f)
+    in
+    let* src =
+      let+ loc, expanded = f t.src in
       (loc, Path.Build.relative dir expanded)
     in
-    { src
-    ; dst =
-        (let f sw =
-           let loc, p = f sw in
-           (loc, p)
-         in
-         Option.map ~f t.dst)
-    }
+    let+ dst =
+      match t.dst with
+      | None -> Memo.Build.return None
+      | Some dst ->
+        let+ loc, p = f dst in
+        Some (loc, p)
+    in
+    { src; dst }
 
   module L = struct
     let decode_file =
@@ -71,21 +76,16 @@ module Unexpanded = struct
         and+ version = Dune_lang.Syntax.get_exn Stanza.syntax in
         if (not is_atom) && version < (1, 6) then
           let what =
-            (if String_with_vars.has_vars s then
-              "variables"
-            else
-              "quoted strings")
+            (if String_with_vars.has_pforms s then "variables"
+            else "quoted strings")
             |> sprintf "Using %s here"
           in
           Dune_lang.Syntax.Error.since (String_with_vars.loc s) Stanza.syntax
             (1, 6) ~what
-        else
-          s
+        else s
       in
       peek_exn >>= function
-      | Atom _
-      | Quoted_string _
-      | Template _ ->
+      | Atom _ | Quoted_string _ | Template _ ->
         decode >>| fun src -> { src; dst = None }
       | List (_, [ _; Atom (_, A "as"); _ ]) ->
         enter

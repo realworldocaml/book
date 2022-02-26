@@ -5,8 +5,8 @@ let compare : t -> t -> Ordering.t = Poly.compare
 
 let to_dyn x =
   let s = Dune_section.to_string x in
-  let open Dyn.Encoder in
-  constr (String.uppercase_ascii s) []
+  let open Dyn in
+  variant (String.uppercase_ascii s) []
 
 module Key = struct
   type nonrec t = t
@@ -36,22 +36,9 @@ let encode v =
 let all = Set.of_list (List.map ~f:fst Dune_section.all)
 
 let should_set_executable_bit = function
-  | Lib
-  | Lib_root
-  | Toplevel
-  | Share
-  | Share_root
-  | Etc
-  | Doc
-  | Man
-  | Misc ->
+  | Lib | Lib_root | Toplevel | Share | Share_root | Etc | Doc | Man | Misc ->
     false
-  | Libexec
-  | Libexec_root
-  | Bin
-  | Sbin
-  | Stublibs ->
-    true
+  | Libexec | Libexec_root | Bin | Sbin | Stublibs -> true
 
 let valid_format_doc =
   Pp.text
@@ -73,12 +60,7 @@ Stringlike.Make (struct
   include S
 
   let valid_char = function
-    | 'A' .. 'Z'
-    | 'a' .. 'z'
-    | '0' .. '9'
-    | '\''
-    | '_' ->
-      true
+    | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '\'' | '_' -> true
     | _ -> false
 
   let description_of_valid_string = Some valid_format_doc
@@ -87,13 +69,10 @@ Stringlike.Make (struct
     Some
       (fun name ->
         String.filter_map name ~f:(fun c ->
-            if valid_char c then
-              Some c
+            if valid_char c then Some c
             else
               match c with
-              | '.'
-              | '-' ->
-                Some '_'
+              | '.' | '-' -> Some '_'
               | _ -> None))
 
   let is_valid_module_name name =
@@ -102,48 +81,34 @@ Stringlike.Make (struct
     | s -> (
       try
         (match s.[0] with
-        | 'A' .. 'Z'
-        | 'a' .. 'z' ->
-          ()
+        | 'A' .. 'Z' | 'a' .. 'z' -> ()
         | _ -> raise_notrace Exit);
         String.iter s ~f:(fun c ->
             if not (valid_char c) then raise_notrace Exit);
         true
-      with
-      | Exit -> false)
+      with Exit -> false)
 
-  let of_string_opt s =
-    if is_valid_module_name s then
-      Some (S.make s)
-    else
-      None
+  let of_string_opt s = if is_valid_module_name s then Some (S.make s) else None
 end)
 
 module Site = struct
-  module T =
-    Interned.Make
-      (struct
-        let initial_size = 16
-
-        let resize_policy = Interned.Conservative
-
-        let order = Interned.Natural
-      end)
-      ()
-
-  include T
+  include String
 
   include (
     Modulelike (struct
+      type t = string
+
+      let to_string t = t
+
       let module_ = "Section.Site"
 
       let description = "site name"
 
-      include T
+      let make s = s
     end) :
       Stringlike_intf.S with type t := t)
 
-  module Infix = Comparator.Operators (T)
+  module Infix = Comparator.Operators (String)
 end
 
 let dune_site_syntax =

@@ -1,4 +1,4 @@
-version: "1.1.0"
+version: "1.2.0"
 opam-version: "2.0"
 maintainer: "jeremie@dimino.org"
 authors: ["Jérémie Dimino <jeremie@dimino.org>" "Anton Bachin" ]
@@ -6,13 +6,14 @@ homepage: "https://github.com/mirage/mmap"
 bug-reports: "https://github.com/mirage/mmap/issues"
 doc: "https://mirage.github.io/mmap/"
 dev-repo: "git+https://github.com/mirage/mmap.git"
-license: "LGPL 2.1 with linking exception"
+license: "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
 build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
   "ocaml" {>= "4.02.3"}
-  "dune" {build & >= "1.6"}
+  "dune" {>= "1.6"}
+  "bigarray-compat"
 ]
 synopsis: "File mapping functionality"
 description: """

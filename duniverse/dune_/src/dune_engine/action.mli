@@ -11,6 +11,14 @@ module Inputs : module type of struct
   include Action_intf.Inputs
 end
 
+module File_perm : sig
+  include module type of struct
+    include Action_intf.File_perm
+  end
+
+  val to_unix_perm : t -> int
+end
+
 (** result of the lookup of a program, the path to it or information about the
     failure and possibly a hint how to fix it *)
 module Prog : sig
@@ -31,6 +39,8 @@ module Prog : sig
       -> t
 
     val raise : t -> _
+
+    val user_message : t -> User_message.t
   end
 
   type t = (Path.t, Not_found.t) result
@@ -47,14 +57,6 @@ include
     with type target := Path.Build.t
     with type string := string
 
-module Ast :
-  Action_intf.Ast
-    with type program = Prog.t
-    with type path = Path.t
-    with type target = Path.Build.t
-    with type string = string
-    with type t = t
-
 include
   Action_intf.Helpers
     with type program := Prog.t
@@ -63,7 +65,7 @@ include
     with type string := string
     with type t := t
 
-val decode : t Dune_lang.Decoder.t
+include Monoid with type t := t
 
 module For_shell : sig
   include
@@ -88,38 +90,8 @@ val empty : t
 (** Checks, if action contains a [Dynamic_run]. *)
 val is_dynamic : t -> bool
 
-(** Ast where programs are not yet looked up in the PATH *)
-module Unresolved : sig
-  type action = t
-
-  module Program : sig
-    type t =
-      | This of Path.t
-      | Search of Loc.t option * string
-
-    val of_string : dir:Path.t -> loc:Loc.t option -> string -> t
-  end
-
-  include
-    Action_intf.Ast
-      with type program := Program.t
-      with type path := Path.t
-      with type target := Path.Build.t
-      with type string := string
-
-  val resolve : t -> f:(Loc.t option -> string -> Path.t) -> action
-end
-with type action := t
-
-(** Return a sandboxed version of an action. It takes care of preparing deps in
-    the sandbox, but it does not copy the targets back out. It's the
-    responsibility of the caller to do that. *)
-val sandbox :
-     t
-  -> sandboxed:(Path.Build.t -> Path.Build.t)
-  -> mode:Sandbox_mode.some
-  -> deps:Dep.Set.t
-  -> t
+(** Re-root all the paths in the action to their sandbox version *)
+val sandbox : t -> Sandbox.t -> t
 
 type is_useful =
   | Clearly_not
@@ -145,3 +117,41 @@ val is_useful_to_distribute : t -> is_useful
     but an action creating a symlink should not since the cache will reject it
     anyway. *)
 val is_useful_to_memoize : t -> is_useful
+
+module Full : sig
+  type action := t
+
+  (** A full action with its environment and list of locks *)
+  type t = private
+    { action : action
+    ; env : Env.t
+    ; locks : Path.t list
+    ; can_go_in_shared_cache : bool
+    ; sandbox : Sandbox_config.t
+    }
+
+  val make :
+       ?env:Env.t (** default [Env.empty] *)
+    -> ?locks:Path.t list (** default [\[\]] *)
+    -> ?can_go_in_shared_cache:bool (** default [true] *)
+    -> ?sandbox:Sandbox_config.t (** default [Sandbox_config.default] *)
+    -> action
+    -> t
+
+  val map : t -> f:(action -> action) -> t
+
+  (** The various [add_xxx] functions merge the given value with existing field
+      of the action. Put another way, [add_xxx x t] is the same as:
+
+      {[ combine t (make ~xxx:x (Progn [])) ]} *)
+
+  val add_env : Env.t -> t -> t
+
+  val add_locks : Path.t list -> t -> t
+
+  val add_sandbox : Sandbox_config.t -> t -> t
+
+  val add_can_go_in_shared_cache : bool -> t -> t
+
+  include Monoid with type t := t
+end

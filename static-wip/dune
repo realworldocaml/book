@@ -2,7 +2,7 @@
 
 (rule
   (targets book.md)
-  (deps ../book/toc.scm (alias ../book/latex))
+  (deps ../book/toc.scm ./book/part-language-concepts.md ../book/part-tools-and-techniques.md ../book/part-the-compiler-and-runtime-system.md (alias ../book/latex))
   (action (run rwo-build build inputs -include-wip -o . -repo-root ..)))
 
 (copy_files ../book/EngD.cls)
@@ -38,7 +38,9 @@
         images/bg.jpg
         images/book-cover.jpg
         images/cover.png
-        images/jason.jpg
+        images/cover-p1.jpg
+        images/cover-p2.jpg
+        images/cover-p3.jpg
         images/plain-bg.jpg
         images/yaron.jpg
         images/front-end/pipeline.png

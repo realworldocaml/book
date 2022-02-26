@@ -25,7 +25,7 @@ end
 
     - connect the parser to the [dune] file parser
 
-    - connect the metatada generator [M.to_sexp] so that metadata are included
+    - connect the metadata generator [M.to_sexp] so that metadata are included
       in installed [<lib>.dune] files *)
 module Register_backend (M : Backend) : Registered_backend with type t := M.t
 
@@ -38,4 +38,4 @@ module Register_end_point (M : End_point) : sig end
 
 (** Scan the sub-systems used by the library and generate rules for all of the
     ones that needs it. *)
-val gen_rules : Library_compilation_context.t -> unit
+val gen_rules : Library_compilation_context.t -> unit Memo.Build.t

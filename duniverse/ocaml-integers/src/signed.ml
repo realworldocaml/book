@@ -6,8 +6,6 @@
  * See the file LICENSE for details.
  *)
 
-module Pervasives = Pervasives [@@ocaml.warning "-3"]
-
 module type Infix = sig
   type t
   include Unsigned.Infix with type t := t
@@ -76,8 +74,8 @@ struct
     let mul = ( * )
     let div = ( / )
     let rem = ( mod )
-    let max_int = Pervasives.max_int
-    let min_int = Pervasives.min_int
+    let max_int = Stdlib.max_int
+    let min_int = Stdlib.min_int
     let logand = ( land )
     let logor = ( lor )
     let logxor = ( lxor )
@@ -94,12 +92,12 @@ struct
     let one = 1
     let minus_one = -1
     let lognot = lnot
-    let succ = Pervasives.succ
-    let pred = Pervasives.pred
-    let compare = Pervasives.compare
-    let equal = Pervasives.(=)
-    let max = Pervasives.max
-    let min = Pervasives.min
+    let succ = Stdlib.succ
+    let pred = Stdlib.pred
+    let compare = Stdlib.compare
+    let equal = Stdlib.(=)
+    let max = Stdlib.max
+    let min = Stdlib.min
   end
   include Basics
   module Infix = MakeInfix(Basics)
@@ -107,7 +105,7 @@ struct
   let of_int64 = Int64.to_int
   let to_nativeint = Nativeint.of_int
   let of_nativeint = Nativeint.to_int
-  let abs = Pervasives.abs
+  let abs = Stdlib.abs
   let neg x = -x
   let pp fmt n = Format.fprintf fmt "%d" n
   let pp_hex fmt n = Format.fprintf fmt "%x" n
@@ -126,8 +124,8 @@ struct
   let to_nativeint = Nativeint.of_int32
   let of_int64 = Int64.to_int32
   let to_int64 = Int64.of_int32
-  let max = Pervasives.max
-  let min = Pervasives.min
+  let max = Stdlib.max
+  let min = Stdlib.min
   let pp fmt n = Format.fprintf fmt "%ld" n
   let pp_hex fmt n = Format.fprintf fmt "%lx" n
   let to_hexstring n = Format.asprintf "%lx" n
@@ -144,8 +142,8 @@ struct
   module Infix = MakeInfix(Int64)
   let of_int64 x = x
   let to_int64 x = x
-  let max = Pervasives.max
-  let min = Pervasives.min
+  let max = Stdlib.max
+  let min = Stdlib.min
   let pp fmt n = Format.fprintf fmt "%Ld" n
   let pp_hex fmt n = Format.fprintf fmt "%Lx" n
   let to_hexstring n = Format.asprintf "%Lx" n

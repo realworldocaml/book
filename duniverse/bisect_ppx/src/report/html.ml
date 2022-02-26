@@ -25,15 +25,107 @@ let percentage (visited, total) =
   else
     100. *. (float_of_int visited) /. (float_of_int total)
 
-let output_html_index title theme filename files =
+type index_file = (string * string * (int * int))
+
+type index_element =
+  | File of index_file
+  | Directory of (string * index_element list * (int * int))
+
+let output_html_index ~tree title theme filename files =
   Util.info "Writing index file...";
 
-  let stats =
+  let add_stats (visited, total) (visited', total') =
+    (visited + visited', total + total') in
+
+  let sum_stats files =
     List.fold_left
-      (fun (visited, total) (_, _, (visited', total')) ->
-        (visited + visited', total + total'))
+      (fun stats (_, _, stats') -> add_stats stats stats')
       (0, 0)
       files
+  in
+
+  (*
+    [subdirectory_of dir ~directory file] returns [Some subdirectory] if file is
+    a contained in the subdirectory [subdirectory] of [directory].
+
+    If [file] is not contained in [directory] or if [file] is
+    contained directly in [directory] then [None] is returned.
+   *)
+  let subdirectory_of ~directory file =
+    let len_file = String.length file in
+    let len_directory = String.length directory in
+    if len_file < len_directory then None
+    else if (String.sub file 0 len_directory <> directory) then None
+    else
+      let lfind_string_opt ~needle haystack =
+        let rec aux i =
+          if String.(length haystack - i < length needle) then None
+          else if String.(sub haystack i (length needle)) = needle then Some i
+          else aux (i+1)
+        in aux 0
+      in
+      let file_rel = String.sub file len_directory (len_file - len_directory) in
+      match lfind_string_opt ~needle:Filename.dir_sep file_rel with
+      | Some i -> Some (String.sub file_rel 0 i)
+      | None -> None
+  in
+
+  (* [partition_files ~directory files] returns two lists:
+
+       - the first is a list of pairs [(sub_directory, sub_files)],
+         each corresponding to a [sub_directory] of [~directory] and the [sub_files]
+         contained (recursively) therein
+       - the second is a list of files, corresponding to the set of immediate sub-files of
+         [~directory]
+
+     This function assumes that [files] are sorted lexicographically.
+   *)
+  let partition_files ~directory files =
+    let immediate_child_of ~directory name =
+      let directory', _ = split_filename name in
+      directory' = directory
+    in
+    let rec aux sub_dirs =
+      function
+        [] -> (sub_dirs, [])
+      | (name, _, _) as file :: files ->
+         match subdirectory_of ~directory name with
+         | None ->
+            let (sub_files, _) =
+              Util.split
+                (fun (name, _, _) -> immediate_child_of ~directory name)
+                (file :: files)
+            in
+            (sub_dirs, sub_files)
+         | Some root ->
+            let sub_dir, files' =
+              Util.split
+                (fun (name, _, _) -> subdirectory_of ~directory name = Some root)
+                (file :: files) in
+            aux ((root, sub_dir) :: sub_dirs) files'
+    in aux [] files
+  in
+
+  let collate : index_file list -> index_element list * (int * int) =
+    fun files ->
+    let rec collate_aux :
+              string -> index_file list ->
+              (index_element list * (int * int)) =
+      fun directory files ->
+      let (sub_dirs, sub_files) = partition_files ~directory files in
+      let (dir_elements, dir_stats) =
+        List.fold_left
+          (fun (lines, stats) (sub_dir, files)  ->
+            let directory = directory ^ sub_dir ^ "/" in
+            let (sub_dir_elements, sub_dir_stats) = collate_aux directory files in
+            let sub_dir_element = Directory (directory, sub_dir_elements, sub_dir_stats) in
+            (sub_dir_element :: lines, add_stats stats sub_dir_stats))
+          ([], (0, 0)) sub_dirs in
+      let sub_files_element = List.map (fun file -> File file) sub_files in
+      let dir_stats = add_stats dir_stats (sum_stats sub_files) in
+      ((List.rev dir_elements) @ sub_files_element, dir_stats)
+    in
+    collate_aux "" files
   in
 
   let channel =
@@ -43,6 +135,8 @@ let output_html_index title theme filename files =
   in
   try
     let write format = Printf.fprintf channel format in
+
+    let (files, stats) = collate files in
 
     let overall_coverage =
       Printf.sprintf "%.02f%%" (floor ((percentage stats) *. 100.) /. 100.) in
@@ -67,35 +161,69 @@ let output_html_index title theme filename files =
       title
       overall_coverage;
 
-    files |> List.iter begin fun (name, html_file, stats) ->
-      let dirname, basename = split_filename name in
-      let relative_html_file =
-        if Filename.is_relative html_file then
-          html_file
-        else
-          let prefix_length = String.length Filename.dir_sep in
-          String.sub
-            html_file prefix_length (String.length html_file - prefix_length)
-      in
-      let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
-      write {|      <div>
-        <span class="meter">
+    let rec print_line ~tree =
+      let write_meter ((visited, total) as stats) =
+        let percentage = Printf.sprintf "%.00f" (floor (percentage stats)) in
+        write {|        <span class="meter">
           <span class="covered" style="width: %s%%"></span>
         </span>
-        <span class="percentage">%s%%</span>
-        <a href="%s">
+        <span class="percentage">%s%% <span class="stats">(%d / %d)</span></span>
+|}
+          percentage
+          percentage
+          visited total;
+      in
+      function
+      | File (name, html_file, stats) ->
+         write {|      <div>
+|};
+         if tree then
+           write {|        <span class="summary-indicator"></span>
+|};
+         write_meter stats ;
+         let dirname, basename = split_filename name in
+         let relative_html_file =
+           if Filename.is_relative html_file then
+             html_file
+           else
+             let prefix_length = String.length Filename.dir_sep in
+             String.sub
+               html_file prefix_length (String.length html_file - prefix_length)
+         in
+         write {|        <a href="%s">
           <span class="dirname">%s</span>%s
         </a>
       </div>
 |}
-        percentage
-        percentage
-        relative_html_file
-        dirname basename;
-    end;
+           relative_html_file
+           dirname basename;
+      | Directory (name, files, stats) when tree ->
+         write {|      <details open="">
+        <summary>
+        <span class="summary-indicator"></span>
+        <div class="directory">
+|};
+         write_meter stats ;
+         write {|        <span class="dirname">%s</span>
+        </div>
+        </summary>
+|}
+           name;
+         List.iter (print_line ~tree) files;
+         write {|      </details>
+|} ;
+      | Directory (_, files, _) ->
+         List.iter (print_line ~tree) files;
+    in
+
+    List.iter (print_line ~tree) files;
 
     write {|    </div>
-  </body>
+|};
+    if tree then
+      write {|    <script src="coverage.js"></script>
+|};
+    write {|  </body>
 </html>
 |};
 
@@ -374,7 +502,7 @@ let output_string_to_separate_file content filename =
 
 let output
     ~to_directory ~title ~tab_size ~theme ~coverage_files ~coverage_paths
-    ~source_paths ~ignore_missing_files ~expect ~do_not_expect =
+    ~source_paths ~ignore_missing_files ~expect ~do_not_expect ~tree =
 
   (* Read all the [.coverage] files and get per-source file visit counts. *)
   let coverage =
@@ -407,6 +535,7 @@ let output
 
   (* Write the coverage report landing page. *)
   output_html_index
+    ~tree
     title
     theme
     (Filename.concat to_directory "index.html")

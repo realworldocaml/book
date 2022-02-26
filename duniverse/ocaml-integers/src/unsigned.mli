@@ -121,10 +121,10 @@ module type S = sig
 
   val compare : t -> t -> int
   (** The comparison function for unsigned integers, with the same
-      specification as {!Pervasives.compare}. *)
+      specification as {!Stdlib.compare}. *)
 
   val equal : t -> t -> bool
-  (** Tests for equality, with the same specification as {!Pervasives.(=)}. *)
+  (** Tests for equality, with the same specification as {!Stdlib.(=)}. *)
 
   val max : t -> t -> t
   (** [max x y] is the greater of [x] and [y] *)

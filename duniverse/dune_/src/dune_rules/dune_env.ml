@@ -56,9 +56,7 @@ module Stanza = struct
 
     let warnings_equal x y =
       match (x, y) with
-      | Fatal, Fatal
-      | Nonfatal, Nonfatal ->
-        true
+      | Fatal, Fatal | Nonfatal, Nonfatal -> true
       | (Fatal | Nonfatal), _ -> false
 
     let equal x y = Option.equal warnings_equal x.warnings y.warnings
@@ -74,11 +72,13 @@ module Stanza = struct
   type config =
     { flags : Ocaml_flags.Spec.t
     ; foreign_flags : Ordered_set_lang.Unexpanded.t Foreign_language.Dict.t
+    ; link_flags : Link_flags.Spec.t
     ; env_vars : Env.t
     ; binaries : File_binding.Unexpanded.t list
     ; inline_tests : Inline_tests.t option
     ; menhir_flags : Ordered_set_lang.Unexpanded.t
     ; odoc : Odoc.t
+    ; js_of_ocaml : Ordered_set_lang.Unexpanded.t Js_of_ocaml.Env.t
     ; coq : Ordered_set_lang.Unexpanded.t
     ; format_config : Format_config.t option
     }
@@ -86,17 +86,20 @@ module Stanza = struct
   let equal_config
       { flags
       ; foreign_flags
+      ; link_flags
       ; env_vars
       ; binaries
       ; inline_tests
       ; menhir_flags
       ; odoc
+      ; js_of_ocaml
       ; coq
       ; format_config
       } t =
     Ocaml_flags.Spec.equal flags t.flags
     && Foreign_language.Dict.equal Ordered_set_lang.Unexpanded.equal
          foreign_flags t.foreign_flags
+    && Link_flags.Spec.equal link_flags t.link_flags
     && Env.equal env_vars t.env_vars
     && List.equal File_binding.Unexpanded.equal binaries t.binaries
     && Option.equal Inline_tests.equal inline_tests t.inline_tests
@@ -104,6 +107,7 @@ module Stanza = struct
     && Odoc.equal odoc t.odoc
     && Ordered_set_lang.Unexpanded.equal coq t.coq
     && Option.equal Format_config.equal format_config t.format_config
+    && Js_of_ocaml.Env.equal js_of_ocaml t.js_of_ocaml
 
   let hash_config = Hashtbl.hash
 
@@ -111,11 +115,13 @@ module Stanza = struct
     { flags = Ocaml_flags.Spec.standard
     ; foreign_flags =
         Foreign_language.Dict.make_both Ordered_set_lang.Unexpanded.standard
+    ; link_flags = Link_flags.Spec.standard
     ; env_vars = Env.empty
     ; binaries = []
     ; inline_tests = None
     ; menhir_flags = Ordered_set_lang.Unexpanded.standard
     ; odoc = Odoc.empty
+    ; js_of_ocaml = Js_of_ocaml.Env.empty
     ; coq = Ordered_set_lang.Unexpanded.standard
     ; format_config = None
     }
@@ -140,7 +146,7 @@ module Stanza = struct
   let hash { loc = _; rules } =
     List.hash (Tuple.T2.hash hash_pattern hash_config) rules
 
-  let to_dyn = Dyn.Encoder.opaque
+  let to_dyn = Dyn.opaque
 
   let equal { loc = _; rules } t =
     List.equal (Tuple.T2.equal equal_pattern equal_config) rules t.rules
@@ -164,6 +170,10 @@ module Stanza = struct
     field "odoc" ~default:Odoc.empty
       (Dune_lang.Syntax.since Stanza.syntax (2, 4) >>> Odoc.decode)
 
+  let js_of_ocaml_field =
+    field "js_of_ocaml" ~default:Js_of_ocaml.Env.empty
+      (Dune_lang.Syntax.since Stanza.syntax (3, 0) >>> Js_of_ocaml.Env.decode)
+
   let coq_flags = Ordered_set_lang.Unexpanded.field "flags"
 
   let coq_field =
@@ -173,6 +183,7 @@ module Stanza = struct
   let config =
     let+ flags = Ocaml_flags.Spec.decode
     and+ foreign_flags = foreign_flags ~since:(Some (1, 7))
+    and+ link_flags = Link_flags.Spec.decode ~since:(Some (3, 0))
     and+ env_vars = env_vars_field
     and+ binaries =
       field ~default:[] "binaries"
@@ -181,15 +192,18 @@ module Stanza = struct
     and+ inline_tests = inline_tests_field
     and+ menhir_flags = menhir_flags ~since:(Some (2, 1))
     and+ odoc = odoc_field
+    and+ js_of_ocaml = js_of_ocaml_field
     and+ coq = coq_field
     and+ format_config = Format_config.field ~since:(2, 8) in
     { flags
     ; foreign_flags
+    ; link_flags
     ; env_vars
     ; binaries
     ; inline_tests
     ; menhir_flags
     ; odoc
+    ; js_of_ocaml
     ; coq
     ; format_config
     }

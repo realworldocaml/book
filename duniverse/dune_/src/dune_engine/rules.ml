@@ -1,35 +1,20 @@
 open! Stdune
+module Action_builder = Action_builder0
 
 module Id = Id.Make ()
 
 module Dir_rules = struct
-  type alias_action =
-    { stamp : Digest.t
-    ; action : Action.t Build.With_targets.t
-    ; locks : Path.t list
-    ; context : Build_context.t
-    ; env : Env.t option
-    ; loc : Loc.t option
-    }
-
   module Alias_spec = struct
-    type t =
-      { deps : Path.Set.t
-      ; dyn_deps : Path.Set.t Build.t
-      ; actions : alias_action Appendable_list.t
-      }
+    type item =
+      | Deps of unit Action_builder.t
+      | Action of Rule.Anonymous_action.t Action_builder.t
 
-    let empty =
-      { deps = Path.Set.empty
-      ; dyn_deps = Build.return Path.Set.empty
-      ; actions = Appendable_list.empty
-      }
+    type t = { expansions : (Loc.t * item) Appendable_list.t } [@@unboxed]
+
+    let empty = { expansions = Appendable_list.empty }
 
     let union x y =
-      { deps = Path.Set.union x.deps y.deps
-      ; dyn_deps = Build.map2 x.dyn_deps y.dyn_deps ~f:Path.Set.union
-      ; actions = Appendable_list.( @ ) x.actions y.actions
-      }
+      { expansions = Appendable_list.( @ ) x.expansions y.expansions }
   end
 
   type alias =
@@ -47,13 +32,12 @@ module Dir_rules = struct
     | Rule rule ->
       Dyn.Variant
         ( "Rule"
-        , [ Record [ ("targets", Path.Build.Set.to_dyn rule.action.targets) ] ]
-        )
+        , [ Record [ ("targets", Targets.Validated.to_dyn rule.targets) ] ] )
     | Alias alias ->
       Dyn.Variant
         ("Alias", [ Record [ ("name", Alias.Name.to_dyn alias.name) ] ])
 
-  let to_dyn t = Dyn.Encoder.(list data_to_dyn) (Id.Map.values t)
+  let to_dyn t = Dyn.(list data_to_dyn) (Id.Map.values t)
 
   type ready =
     { rules : Rule.t list
@@ -61,7 +45,7 @@ module Dir_rules = struct
     }
 
   let consume t =
-    let data = List.map ~f:snd (Id.Map.to_list t) in
+    let data = Id.Map.values t in
     let rules =
       List.filter_map data ~f:(function
         | Rule rule -> Some rule
@@ -90,6 +74,10 @@ module Dir_rules = struct
     let id = Id.gen () in
     Id.Map.singleton id data
 
+  let add t data =
+    let id = Id.gen () in
+    Id.Map.set t id data
+
   let is_subset t ~of_ = Id.Map.is_subset t ~of_ ~f:(fun _ ~of_:_ -> true)
 
   let is_empty = Id.Map.is_empty
@@ -104,20 +92,20 @@ module Dir_rules = struct
     val union : t -> t -> t
 
     val singleton : data -> t
+
+    val add : t -> data -> t
   end = struct
     type maybe_empty = t
 
     type nonrec t = t
 
-    let create t =
-      if is_empty t then
-        None
-      else
-        Some t
+    let create t = if is_empty t then None else Some t
 
     let union = union
 
     let singleton = singleton
+
+    let add = add
   end
 end
 
@@ -142,9 +130,9 @@ let singleton_rule (rule : Rule.t) =
 
 let implicit_output = Memo.Implicit_output.add (module T)
 
-let produce = Memo.Implicit_output.produce implicit_output
-
-let produce_opt = Memo.Implicit_output.produce_opt implicit_output
+let produce rules =
+  if Path.Build.Map.is_empty rules then Memo.Build.return ()
+  else Memo.Implicit_output.produce implicit_output rules
 
 module Produce = struct
   let rule rule = produce (singleton_rule rule)
@@ -159,40 +147,51 @@ module Produce = struct
          Path.Build.Map.singleton dir
            (Dir_rules.Nonempty.singleton (Alias { name; spec })))
 
-    let add_deps t ?(dyn_deps = Build.return Path.Set.empty) deps =
-      alias t { deps; dyn_deps; actions = Appendable_list.empty }
-
-    let add_action t ~context ~env ~loc ?(locks = []) ~stamp action =
+    let add_deps t ?(loc = Loc.none) expansion =
       alias t
-        { deps = Path.Set.empty
-        ; dyn_deps = Build.return Path.Set.empty
-        ; actions =
+        { expansions =
+            Appendable_list.singleton (loc, Dir_rules.Alias_spec.Deps expansion)
+        }
+
+    let add_action t ~context ~loc action =
+      let action =
+        let open Action_builder.O in
+        let+ action = action in
+        { Rule.Anonymous_action.context = Some context
+        ; action
+        ; loc
+        ; dir = Alias.dir t
+        ; alias = Some (Alias.name t)
+        }
+      in
+      alias t
+        { expansions =
             Appendable_list.singleton
-              ({ stamp = Digest.generic stamp
-               ; action
-               ; locks
-               ; context
-               ; loc
-               ; env
-               }
-                : Dir_rules.alias_action)
+              ( Option.value loc ~default:Loc.none
+              , Dir_rules.Alias_spec.Action action )
         }
   end
 end
 
-let produce_dir ~dir rules =
+let of_dir_rules ~dir rules =
   match Dir_rules.Nonempty.create rules with
-  | None -> ()
-  | Some rules -> produce (Path.Build.Map.singleton dir rules)
+  | None -> Path.Build.Map.empty
+  | Some rules -> Path.Build.Map.singleton dir rules
 
-let collect_opt f = Memo.Implicit_output.collect_sync implicit_output f
+let of_rules rules =
+  List.fold_left rules ~init:Path.Build.Map.empty ~f:(fun acc rule ->
+      Path.Build.Map.update acc rule.Rule.dir ~f:(function
+        | None -> Some (Dir_rules.Nonempty.singleton (Rule rule))
+        | Some acc -> Some (Dir_rules.Nonempty.add acc (Rule rule))))
 
 let collect f =
-  let result, out = collect_opt f in
+  let open Memo.Build.O in
+  let+ result, out = Memo.Implicit_output.collect implicit_output f in
   (result, Option.value out ~default:T.empty)
 
 let collect_unit f =
-  let (), rules = collect f in
+  let open Memo.Build.O in
+  let+ (), rules = collect f in
   rules
 
 let to_map x = (x : t :> Dir_rules.t Path.Build.Map.t)
@@ -221,3 +220,17 @@ let find t p =
     match Path.Build.Map.find t p with
     | Some dir_rules -> (dir_rules : Dir_rules.Nonempty.t :> Dir_rules.t)
     | None -> Dir_rules.empty)
+
+let prefix_rules prefix ~f =
+  let open Memo.Build.O in
+  let* res, rules = collect f in
+  let+ () =
+    produce
+      (map_rules rules ~f:(fun (rule : Rule.t) ->
+           let t =
+             let open Action_builder.O in
+             prefix >>> rule.action
+           in
+           Rule.set_action rule t))
+  in
+  res

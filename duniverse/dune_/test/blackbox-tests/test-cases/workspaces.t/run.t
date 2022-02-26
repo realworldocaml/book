@@ -35,7 +35,6 @@ see how we can set a "native" target. Which is the default.
 
   $ dune exec ./foo.exe --root targets-native
   Entering directory 'targets-native'
-  Entering directory 'targets-native'
   message from targets-native test
 
 Workspaces also allow you to set the env for a context:
@@ -49,7 +48,12 @@ Workspaces also allow you to set the env for a context:
   (ocamlopt_flags (-g))
   (c_flags ())
   (cxx_flags ())
+  (link_flags ())
   (menhir_flags ())
+  (coq_flags (-q))
+  (js_of_ocaml_flags ())
+  (js_of_ocaml_build_runtime_flags ())
+  (js_of_ocaml_link_flags ())
 
   $ dune build --root multiple-merlin-contexts 
   Entering directory 'multiple-merlin-contexts'

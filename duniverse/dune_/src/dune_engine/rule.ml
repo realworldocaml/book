@@ -1,15 +1,22 @@
 open! Stdune
 open Import
+module Action_builder = Action_builder0
 
 module Info = struct
   type t =
     | From_dune_file of Loc.t
     | Internal
-    | Source_file_copy
+    | Source_file_copy of Path.Source.t
 
   let of_loc_opt = function
     | None -> Internal
     | Some loc -> From_dune_file loc
+
+  let to_dyn : t -> Dyn.t = function
+    | From_dune_file loc -> Dyn.Variant ("From_dune_file", [ Loc.to_dyn loc ])
+    | Internal -> Dyn.Variant ("Internal", [])
+    | Source_file_copy p ->
+      Dyn.Variant ("Source_file_copy", [ Path.Source.to_dyn p ])
 end
 
 module Promote = struct
@@ -47,11 +54,11 @@ module T = struct
   type t =
     { id : Id.t
     ; context : Build_context.t option
-    ; env : Env.t option
-    ; action : Action.t Build.With_targets.t
+    ; targets : Targets.Validated.t
+    ; action : Action.Full.t Action_builder.t
     ; mode : Mode.t
-    ; locks : Path.t list
     ; info : Info.t
+    ; loc : Loc.t
     ; dir : Path.Build.t
     }
 
@@ -61,80 +68,66 @@ module T = struct
 
   let hash t = Id.hash t.id
 
-  let loc t =
-    match (t.info : Info.t) with
-    | From_dune_file loc -> loc
-    | Internal
-    | Source_file_copy ->
-      let dir = Path.drop_optional_build_context_src_exn (Path.build t.dir) in
-      let file =
-        match
-          Option.bind (File_tree.find_dir dir) ~f:File_tree.Dir.dune_file
-        with
-        | Some file -> File_tree.Dune_file.path file
-        | None -> Path.Source.relative dir "_unknown_"
-      in
-      Loc.in_file (Path.source file)
+  let loc t = t.loc
 
   let to_dyn t : Dyn.t =
-    Record [ ("id", Id.to_dyn t.id); ("loc", Loc.to_dyn_hum (loc t)) ]
+    Record [ ("id", Id.to_dyn t.id); ("info", Info.to_dyn t.info) ]
 end
 
 include T
-module O = Comparable.Make (T)
-module Set = O.Set
+include Comparable.Make (T)
 
-let make ?(sandbox = Sandbox_config.default) ?(mode = Mode.Standard) ~context
-    ~env ?(locks = []) ?(info = Info.Internal) action =
-  let open Build.With_targets.O in
-  let action =
-    Build.With_targets.memoize "Rule.make"
-      (Build.with_no_targets (Build.dep (Dep.sandbox_config sandbox)) >>> action)
-  in
-  let targets = action.targets in
-  let dir =
-    match Path.Build.Set.choose targets with
-    | None -> (
-      match info with
-      | From_dune_file loc ->
-        User_error.raise ~loc [ Pp.text "Rule has no targets specified" ]
-      | _ -> Code_error.raise "Build_interpret.Rule.make: no targets" [])
-    | Some x ->
-      let dir = Path.Build.parent_exn x in
-      (if
-       Path.Build.Set.exists targets ~f:(fun path ->
-           Path.Build.( <> ) (Path.Build.parent_exn path) dir)
-      then
-        match info with
-        | Internal
-        | Source_file_copy ->
-          Code_error.raise "rule has targets in different directories"
-            [ ("targets", Path.Build.Set.to_dyn targets) ]
-        | From_dune_file loc ->
-          User_error.raise ~loc
-            [ Pp.text "Rule has targets in different directories.\nTargets:"
-            ; Pp.enumerate (Path.Build.Set.to_list targets) ~f:(fun p ->
-                  Pp.verbatim (Path.to_string_maybe_quoted (Path.build p)))
-            ]);
-      dir
-  in
-  { id = Id.gen (); context; env; action; mode; locks; info; dir }
-
-let with_prefix t ~build =
-  { t with
+let make ?(mode = Mode.Standard) ~context ?(info = Info.Internal) ~targets
     action =
-      (let open Build.With_targets.O in
-      Build.With_targets.memoize "Rule.with_prefix"
-        (Build.with_no_targets build >>> t.action))
-  }
+  let action = Action_builder.memoize "Rule.make" action in
+  let report_error ?(extra_pp = []) message =
+    match info with
+    | From_dune_file loc ->
+      let pp = [ Pp.text message ] @ extra_pp in
+      User_error.raise ~loc pp
+    | Internal | Source_file_copy _ ->
+      Code_error.raise message
+        [ ("info", Info.to_dyn info); ("targets", Targets.to_dyn targets) ]
+  in
+  (* CR-someday amokhov: Since [dir] and [targets] are produced together and are
+     logically related, we could make [dir] a field of [Targets.Validated.t]. *)
+  let dir, targets =
+    match Targets.validate targets with
+    | Valid { parent_dir; targets } -> (parent_dir, targets)
+    | No_targets -> report_error "Rule has no targets specified"
+    | Inconsistent_parent_dir ->
+      report_error "Rule has targets in different directories."
+        ~extra_pp:[ Pp.text "Targets:"; Targets.pp targets ]
+    | File_and_directory_target_with_the_same_name path ->
+      report_error
+        (sprintf "%S is declared as both a file and a directory target."
+           (Dpath.describe_target path))
+  in
+  let loc =
+    match info with
+    | From_dune_file loc -> loc
+    | Internal ->
+      Loc.in_file
+        (Path.drop_optional_build_context
+           (Path.build (Path.Build.relative dir "_unknown_")))
+    | Source_file_copy p -> Loc.in_file (Path.source p)
+  in
+  { id = Id.gen (); targets; context; action; mode; info; loc; dir }
 
-let effective_env t =
-  match (t.env, t.context) with
-  | None, None -> Env.initial
-  | Some e, _ -> e
-  | None, Some c -> c.env
+let set_action t action =
+  let action = Action_builder.memoize "Rule.set_action" action in
+  { t with action }
 
 let find_source_dir rule =
   let _, src_dir = Path.Build.extract_build_context_dir_exn rule.dir in
-  let res = File_tree.nearest_dir src_dir in
-  res
+  Source_tree.nearest_dir src_dir
+
+module Anonymous_action = struct
+  type t =
+    { context : Build_context.t option
+    ; action : Action.Full.t
+    ; loc : Loc.t option
+    ; dir : Path.Build.t
+    ; alias : Alias.Name.t option
+    }
+end

@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Monotonic time values.
@@ -16,9 +15,7 @@
     value is meaningless but they can be compared across the processes
     of an operating system run.
 
-    {!Mtime_clock} provides access to a system monotonic clock.
-
-    {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {!Mtime_clock} provides access to a system monotonic clock. *)
 
 (** {1:spans Monotonic time spans} *)
 

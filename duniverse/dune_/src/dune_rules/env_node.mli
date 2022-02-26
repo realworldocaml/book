@@ -25,31 +25,37 @@ val make :
   -> profile:Profile.t
   -> expander:Expander.t Memo.Lazy.t
   -> expander_for_artifacts:Expander.t Memo.Lazy.t
-  -> default_context_flags:string list Build.t Foreign_language.Dict.t
+  -> default_context_flags:string list Action_builder.t Foreign_language.Dict.t
   -> default_env:Env.t
   -> default_bin_artifacts:Artifacts.Bin.t
+  -> default_cxx_link_flags:string list Action_builder.t
   -> t
 
 val scope : t -> Scope.t
 
-val external_env : t -> Env.t
+val external_env : t -> Env.t Memo.Build.t
 
-val ocaml_flags : t -> Ocaml_flags.t
+val ocaml_flags : t -> Ocaml_flags.t Memo.Build.t
 
-val inline_tests : t -> Dune_env.Stanza.Inline_tests.t
+val inline_tests : t -> Dune_env.Stanza.Inline_tests.t Memo.Build.t
 
-val foreign_flags : t -> string list Build.t Foreign_language.Dict.t
+val js_of_ocaml :
+  t -> string list Action_builder.t Js_of_ocaml.Env.t Memo.Build.t
 
-val local_binaries : t -> File_binding.Expanded.t list
+val foreign_flags : t -> string list Action_builder.t Foreign_language.Dict.t
 
-val bin_artifacts : t -> Artifacts.Bin.t
+val link_flags : t -> Link_flags.t Memo.Build.t
 
-val odoc : t -> Odoc.t
+val local_binaries : t -> File_binding.Expanded.t list Memo.Build.t
 
-val coq : t -> Coq.t Build.t
+val bin_artifacts : t -> Artifacts.Bin.t Memo.Build.t
 
-val menhir_flags : t -> string list Build.t
+val odoc : t -> Odoc.t Memo.Build.t
 
-val format_config : t -> Format_config.t
+val coq : t -> Coq.t Action_builder.t Memo.Build.t
+
+val menhir_flags : t -> string list Action_builder.t
+
+val format_config : t -> Format_config.t Memo.Build.t
 
 val set_format_config : t -> Format_config.t -> t

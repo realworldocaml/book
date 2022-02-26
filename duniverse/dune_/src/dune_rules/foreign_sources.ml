@@ -32,9 +32,7 @@ let empty =
 
 let valid_name language ~loc s =
   match s with
-  | ""
-  | "."
-  | ".." ->
+  | "" | "." | ".." ->
     User_error.raise ~loc
       [ Pp.textf "%S is not a valid %s name." s
           (Foreign_language.proper_name language)
@@ -124,51 +122,30 @@ let check_no_qualified (loc, include_subdirs) =
 
 let make (d : _ Dir_with_dune.t) ~(sources : Foreign.Sources.Unresolved.t)
     ~(lib_config : Lib_config.t) =
-  let libs, exes =
-    List.filter_partition_map d.data ~f:(fun stanza ->
-        match (stanza : Stanza.t) with
-        | Library lib ->
-          let all = eval_foreign_stubs d lib.buildable.foreign_stubs ~sources in
-          Left (Left (lib, all))
-        | Foreign_library library ->
-          let all = eval_foreign_stubs d [ library.stubs ] ~sources in
-          Left (Right (library.archive_name, (library.archive_name_loc, all)))
-        | Executables exes ->
-          let all =
-            eval_foreign_stubs d exes.buildable.foreign_stubs ~sources
-          in
-          Right (exes, all)
-        | _ -> Skip)
-  in
-  let libs, foreign_libs = List.partition_map libs ~f:Fun.id in
-  let libraries =
-    match
-      Lib_name.Map.of_list_map libs ~f:(fun (lib, m) ->
-          (Library.best_name lib, m))
-    with
-    | Ok x -> x
-    | Error (name, _, (lib2, _)) ->
-      User_error.raise ~loc:lib2.buildable.loc
-        [ Pp.textf "Library %S appears for the second time in this directory"
-            (Lib_name.to_string name)
-        ]
-  in
-  let archives =
-    Foreign.Archive.Name.Map.of_list_reducei foreign_libs
-      ~f:(fun archive_name (loc1, _) (loc2, _) ->
-        User_error.raise ~loc:loc2
-          [ Pp.textf
-              "Multiple foreign libraries with the same archive name %S; the \
-               name has already been taken in %s."
-              (Foreign.Archive.Name.to_string archive_name)
-              (Loc.to_file_colon_line loc1)
-          ])
-    |> Foreign.Archive.Name.Map.map ~f:snd
-  in
-  (* TODO: Make this more type-safe by switching to non-empty lists. *)
-  let executables =
-    String.Map.of_list_map_exn exes ~f:(fun (exes, m) ->
-        (snd (List.hd exes.names), m))
+  let libs, foreign_libs, exes =
+    let libs, foreign_libs, exes =
+      List.fold_left d.data ~init:([], [], [])
+        ~f:(fun ((libs, foreign_libs, exes) as acc) stanza ->
+          match (stanza : Stanza.t) with
+          | Library lib ->
+            let all =
+              eval_foreign_stubs d lib.buildable.foreign_stubs ~sources
+            in
+            ((lib, all) :: libs, foreign_libs, exes)
+          | Foreign_library library ->
+            let all = eval_foreign_stubs d [ library.stubs ] ~sources in
+            ( libs
+            , (library.archive_name, (library.archive_name_loc, all))
+              :: foreign_libs
+            , exes )
+          | Executables exe | Tests { exes = exe; _ } ->
+            let all =
+              eval_foreign_stubs d exe.buildable.foreign_stubs ~sources
+            in
+            (libs, foreign_libs, (exe, all) :: exes)
+          | _ -> acc)
+    in
+    List.(rev libs, rev foreign_libs, rev exes)
   in
   let () =
     let objects =
@@ -178,9 +155,8 @@ let make (d : _ Dir_with_dune.t) ~(sources : Foreign.Sources.Unresolved.t)
         ; List.map exes ~f:snd
         ]
       |> List.concat_map ~f:(fun sources ->
-             String.Map.values sources
-             |> List.map ~f:(fun (loc, source) ->
-                    (Foreign.Source.object_name source ^ lib_config.ext_obj, loc)))
+             String.Map.to_list_map sources ~f:(fun _ (loc, source) ->
+                 (Foreign.Source.object_name source ^ lib_config.ext_obj, loc)))
     in
     match String.Map.of_list objects with
     | Ok _ -> ()
@@ -197,6 +173,44 @@ let make (d : _ Dir_with_dune.t) ~(sources : Foreign.Sources.Unresolved.t)
               "You can avoid the name clash by renaming one of the objects, or \
                by placing it into a different directory."
           ]
+  in
+  (* TODO: Make this more type-safe by switching to non-empty lists. *)
+  let executables =
+    String.Map.of_list_map_exn exes ~f:(fun (exes, m) ->
+        (snd (List.hd exes.names), m))
+  in
+  let libraries =
+    match
+      Lib_name.Map.of_list_map libs ~f:(fun (lib, m) ->
+          (Library.best_name lib, m))
+    with
+    | Ok x -> x
+    | Error (name, _, (lib2, _)) ->
+      User_error.raise ~loc:lib2.buildable.loc
+        [ Pp.textf "Library %S appears for the second time in this directory"
+            (Lib_name.to_string name)
+        ]
+  in
+  let archives =
+    Foreign.Archive.Name.Map.of_list_reducei foreign_libs
+      ~f:(fun archive_name (loc1, _) (loc2, _) ->
+        let main_message =
+          sprintf "Multiple foreign libraries with the same archive name %S"
+            (Foreign.Archive.Name.to_string archive_name)
+        in
+        let annots =
+          let main = User_message.make ~loc:loc2 [ Pp.text main_message ] in
+          let related =
+            [ User_message.make ~loc:loc1 [ Pp.text "Name already used here" ] ]
+          in
+          User_message.Annots.singleton Compound_user_error.annot
+            (Compound_user_error.make ~main ~related)
+        in
+        User_error.raise ~annots ~loc:loc2
+          [ Pp.textf "%s; the name has already been taken in %s." main_message
+              (Loc.to_file_colon_line loc1)
+          ])
+    |> Foreign.Archive.Name.Map.map ~f:snd
   in
   { libraries; archives; executables }
 

@@ -30,9 +30,7 @@ module Name : sig
 
   val parse_local_path : Loc.t * Path.Local.t -> Path.Local.t * t
 
-  module Map : Map.S with type key = t
-
-  module Set : Set.S with type elt = t
+  include Comparable_intf.S with type key := t
 end = struct
   include String
 
@@ -43,21 +41,14 @@ end = struct
   let of_string_opt = function
     (* The [""] case is caught by of_string_opt_loose. But there's no harm in
        being more explicit about it *)
-    | ""
-    | "."
-    | "/"
-    | ".." ->
-      None
+    | "" | "." | "/" | ".." -> None
     | s -> of_string_opt_loose s
 
   let invalid_alias = Pp.textf "%S is not a valid alias name"
 
   let parse_string_exn ~syntax (loc, s) =
     let of_string_opt =
-      if syntax >= (2, 0) then
-        of_string_opt
-      else
-        of_string_opt_loose
+      if syntax >= (2, 0) then of_string_opt else of_string_opt_loose
     in
     match of_string_opt s with
     | None -> User_error.raise ~loc [ invalid_alias s ]
@@ -75,8 +66,7 @@ end = struct
   let of_string s =
     match of_string_opt s with
     | Some s -> s
-    | None ->
-      Code_error.raise "invalid alias name" [ ("s", Dyn.Encoder.string s) ]
+    | None -> Code_error.raise "invalid alias name" [ ("s", Dyn.string s) ]
 
   let to_string s = s
 
@@ -132,10 +122,10 @@ end
 
 include T
 
-let compare x y =
-  match Name.compare x.name y.name with
-  | (Lt | Gt) as x -> x
-  | Eq -> Path.Build.compare x.dir y.dir
+let compare { dir; name } t =
+  let open Ordering.O in
+  let= () = Name.compare name t.name in
+  Path.Build.compare dir t.dir
 
 let equal x y = compare x y = Eq
 
@@ -145,20 +135,11 @@ let to_dyn { dir; name } =
   let open Dyn in
   Record [ ("dir", Path.Build.to_dyn dir); ("name", Name.to_dyn name) ]
 
-let suffix = "-" ^ String.make 32 '0'
-
 let name t = t.name
 
 let dir t = t.dir
 
-let stamp_file_dir t =
-  let local = Path.Build.local t.dir in
-  Path.Build.append_local Dpath.Build.alias_dir local
-
 let fully_qualified_name t = Path.Build.relative t.dir (Name.to_string t.name)
-
-let stamp_file t =
-  Path.Build.relative (stamp_file_dir t) (Name.to_string t.name ^ suffix)
 
 (* This mutable table is safe: it's modified only at the top level. *)
 let standard_aliases = Table.create (module Name) 7
@@ -168,6 +149,10 @@ let is_standard name = Table.mem standard_aliases name
 let make_standard name =
   Table.add_exn standard_aliases name ();
   make name
+
+let register_as_standard name =
+  let (_ : (unit, _) result) = Table.add standard_aliases name () in
+  ()
 
 let default = make_standard Name.default
 
@@ -190,3 +175,41 @@ let fmt = make_standard (Name.of_string "fmt")
 let encode { dir; name } =
   let open Dune_lang.Encoder in
   record [ ("dir", Dpath.encode (Path.build dir)); ("name", Name.encode name) ]
+
+let get_ctx (path : Path.Build.t) =
+  match Path.Build.extract_first_component path with
+  | None -> None
+  | Some (name, sub) -> (
+    match Context_name.of_string_opt name with
+    | None -> None
+    | Some ctx -> Some (ctx, Path.Source.of_local sub))
+
+let describe ?(loc = Loc.none) alias =
+  let open Pp.O in
+  let pp =
+    match get_ctx alias.dir with
+    | None ->
+      Pp.textf "invalid-alias %s"
+        (Path.Build.to_string (fully_qualified_name alias))
+    | Some (ctx, dir_in_context) ->
+      let pp =
+        Pp.textf "alias "
+        ++ Pp.verbatim
+             (Path.Source.to_string_maybe_quoted
+                (Path.Source.relative dir_in_context
+                   (Name.to_string alias.name)))
+      in
+      if Context_name.is_default ctx then pp
+      else pp ++ Pp.textf " (context %s)" (Context_name.to_string ctx)
+  in
+  if Loc.is_none loc then pp
+  else pp ++ Pp.textf " in %s" (Loc.to_file_colon_line loc)
+
+let package_install ~(context : Build_context.t) ~(pkg : Package.t) =
+  let dir =
+    let dir = Package.dir pkg in
+    Path.Build.append_source context.build_dir dir
+  in
+  let name = Package.name pkg in
+  sprintf ".%s-files" (Package.Name.to_string name)
+  |> Name.of_string |> make ~dir
