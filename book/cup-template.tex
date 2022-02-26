@@ -2,7 +2,7 @@
 % for the suite of standard Cambridge designs
 % 2021/07/01, v1.30
 \NeedsTeXFormat{LaTeX2e}[1996/06/01]
-\documentclass[multi]{EngD}
+\documentclass[multi,print,final]{EngD}
 
 \reinstaterules
 % \documentclass[multi]{EngD} % multi-contributor option
@@ -205,6 +205,9 @@ $endif$
 \makeatother
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \includeonly{chap2}
+\makeatletter
+\let\@endpart\vfil
+\makeatother
 \raggedbottom
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
