@@ -1,0 +1,12 @@
+EXCLUDE_QUERY_DIR
+B ../_build/default/fix/src/.vendored_fix.objs/byte
+B ../_build/default/pprint/src/.vendored_pprint.objs/byte
+B ../_build/default/lib/pack/.menhirLib.objs/byte
+B ../_build/default/sdk/.menhirSdk.objs/byte
+B ../_build/default/src/stage2/.main.eobjs/byte
+S ../fix/src
+S ../pprint/src
+S ../lib/pack
+S ../sdk
+S .
+FLG -open Dune__exe -strict-sequence -strict-formats -short-paths -keep-locs -safe-string -g -w @1..66-4-9-41-44-45-60 -open MenhirSdk
