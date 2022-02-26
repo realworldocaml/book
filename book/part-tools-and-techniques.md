@@ -7,5 +7,6 @@
   features of the language to good effect.
 \vspace{1in}
 
+\centerline{\includegraphics[width=.75\textwidth]{images/cover-p2.jpg}}
 \vfill
 \cleardoublepage

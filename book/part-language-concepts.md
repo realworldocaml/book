@@ -13,5 +13,6 @@ when switching to other modern languages, many of which have drawn
 inspiration from ML.
 \vspace{1in}
 
+\centerline{\includegraphics[width=.75\textwidth]{images/cover-p1.jpg}}
 \vfill
 \cleardoublepage

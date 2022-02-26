@@ -7,6 +7,7 @@ interface with C libraries. This is also where we talk about
 profiling and debugging techniques using tools such as GNU `gdb`.
 \vspace{1in}
 
+\centerline{\includegraphics[width=.75\textwidth]{images/cover-p3.jpg}}
 \vfill
 \cleardoublepage
 
