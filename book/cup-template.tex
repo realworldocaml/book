@@ -59,12 +59,12 @@
 \usepackage[most]{tcolorbox}
 
 %textmarker style from colorbox doc
+\tcbuselibrary{breakable}
 \tcbset{textmarker/.style={%
-        enhanced,
+        enhanced,breakable,
         parbox=false,boxrule=0mm,boxsep=0mm,arc=0mm,
         outer arc=0mm,left=6mm,right=3mm,top=7pt,bottom=7pt,
         toptitle=1mm,bottomtitle=1mm,oversize}}
-
 
 % define new colorboxes
 \newtcolorbox{hintBox}{textmarker,
