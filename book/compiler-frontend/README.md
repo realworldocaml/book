@@ -264,7 +264,6 @@ to verify that the syntax is correct:
 
 ```sh dir=examples/front-end,skip
 $ ocp-indent follow_on_function_fixed.ml
-(*TODO: Check contents*)
 let concat_and_print x y =
   let v = x ^ y in
   print_endline v;
