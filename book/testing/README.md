@@ -979,7 +979,7 @@ integer `x` is the flip of the sign of `x`.
 
 Here's a simple implementation of this test.
 
-```ocaml file=examples/correct/manual_property_test/test.ml
+```ocaml file=examples/correct/manual_property_test/test.ml,skip
 open Base
 
 let%test_unit "negation flips the sign" =
@@ -1036,7 +1036,7 @@ way of an optional argument.
 Running the test uncovers the fact that the property we've been
 testing doesn't actually hold on all outputs, as you can see below.
 
-```sh dir=examples/erroneous/quickcheck_property_test
+```sh dir=examples/erroneous/quickcheck_property_test,skip
 $ dune runtest
 File "test.ml", line 3, characters 0-244: negation flips the sign threw
 ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
