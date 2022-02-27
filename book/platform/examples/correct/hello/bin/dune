@@ -1,6 +1,4 @@
 (executable
  (public_name hello)
  (name main)
- (libraries hello)
- (preprocess
-  (pps ppx_inline_test)))
+ (libraries hello))
