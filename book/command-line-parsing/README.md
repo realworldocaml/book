@@ -682,7 +682,7 @@ complex, command-line interfaces. After a while, though, too many options can
 make the program very confusing for newcomers to your application. One way to
 solve this is by grouping common operations together and adding some
 hierarchy to the command-line interface. [subcommands, grouping
-of]{.idx}[OPAM package manager]{.idx}[command-line parsing/subcommand
+of]{.idx}[opam package manager]{.idx}[command-line parsing/subcommand
 grouping]{.idx}
 
 You'll have run across this style already when using the opam package manager
@@ -690,7 +690,7 @@ You'll have run across this style already when using the opam package manager
 commands in this form:
 
 ```
-$ opam config env
+$ opam env
 $ opam remote list -k git
 $ opam install --help
 $ opam install core --verbose
@@ -1047,10 +1047,10 @@ scripts and follow their lead, as the details are very OS-specific.
 
 This rounds up our tour of the Command library. This isn't the only way to
 parse command-line arguments of course; there are several alternatives
-available on OPAM. Three of the most prominent ones follow:
+available on opam. Three of the most prominent ones follow:
 [Cmdliner]{.idx}[OCaml toolchain/ocaml-getopt]{.idx}[Arg
 module]{.idx}[command-line parsing/alternatives to Command
-library]{.idx}[OPAM package manager]{.idx}
+library]{.idx}[opam package manager]{.idx}
 
 The `Arg` module
 : The `Arg` module is from the OCaml standard library, which is used by the
@@ -1071,5 +1071,5 @@ The `Arg` module
 : Cmdliner is a mix between the Command and Getopt libraries. It allows for
   the declarative definition of command-line interfaces but exposes a more
   `getopt`-like interface. It also automates the generation of UNIX man pages
-  as part of the specification. Cmdliner is the parser used by OPAM to manage
+  as part of the specification. Cmdliner is the parser used by opam to manage
   its command line.
