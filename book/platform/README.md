@@ -319,7 +319,6 @@ construct a trivial test case.
 ```
 let _ =
   assert(String.equal Hello.Msg.greeting "Hello World")
-
 ```
 
 We can use the `(test)` dune field to build an executable binary that is run
@@ -330,8 +329,8 @@ so that we can access it.  The `test/dune` file looks like this:
 <!-- $MDX file=examples/correct/hello/test/dune -->
 ```scheme
 (test
- (name hello)
- (libraries hello))
+ (libraries hello)
+ (name hello))
 ```
 
 Once you run the tests via `dune runtest`, you can find the built
