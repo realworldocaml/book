@@ -655,14 +655,14 @@ appropriately, without runtime errors.</p>
 assemble complex, command-line interfaces. After a while, though, too
 many options can make the program very confusing for newcomers to your
 application. One way to solve this is by grouping common operations
-together and adding some hierarchy to the command-line interface. <a data-primary="subcommands, grouping of" data-type="indexterm">&nbsp;</a><a data-primary="OPAM
+together and adding some hierarchy to the command-line interface. <a data-primary="subcommands, grouping of" data-type="indexterm">&nbsp;</a><a data-primary="opam
 package manager" data-type="indexterm">&nbsp;</a><a data-secondary="subcommand
 grouping" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
 <p>You’ll have run across this style already when using the opam package
 manager (or, in the non-OCaml world, the Git or Mercurial commands).
 opam exposes commands in this form:</p>
 <div class="highlight">
-<pre><code class="language-clike">$ opam config env
+<pre><code class="language-clike">$ opam env
 $ opam remote list -k git
 $ opam install --help
 $ opam install core --verbose</code></pre>
@@ -998,10 +998,10 @@ OS-specific.</p>
 <h2>Alternative Command-Line Parsers</h2>
 <p>This rounds up our tour of the Command library. This isn’t the only
 way to parse command-line arguments of course; there are several
-alternatives available on OPAM. Three of the most prominent ones follow:
+alternatives available on opam. Three of the most prominent ones follow:
 <a data-primary="Cmdliner" data-type="indexterm">&nbsp;</a><a data-secondary="ocaml-getopt" data-primary="OCaml
 toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Arg module" data-type="indexterm">&nbsp;</a><a data-secondary="alternatives to Command
-library" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a><a data-primary="OPAM package manager" data-type="indexterm">&nbsp;</a></p>
+library" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a><a data-primary="opam package manager" data-type="indexterm">&nbsp;</a></p>
 <dl>
 <dt>The <code>Arg</code> module</dt>
 <dd>
@@ -1028,7 +1028,7 @@ Cmdliner is a mix between the Command and Getopt libraries. It allows
 for the declarative definition of command-line interfaces but exposes a
 more <code>getopt</code>-like interface. It also automates the
 generation of UNIX man pages as part of the specification. Cmdliner is
-the parser used by OPAM to manage its command line.
+the parser used by opam to manage its command line.
 </dd>
 </dl>
 </section>

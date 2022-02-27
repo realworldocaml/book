@@ -1,107 +1,169 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The OCaml Platform - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="the-ocaml-platform">
 <h1>The OCaml Platform</h1>
 <p>So far in the book, we’ve gone through a number of techniques you can
-use to build real OCaml programs. We’ll now wrap up this part by
+use to build larger scale OCaml programs. We’ll now wrap up this part by
 examining the tools you can use for editing, compiling, testing,
 documenting and publishing your own projects.</p>
-<p>The OCaml community has developed a platform of modern tools to
-interface it with IDEs such as Visual Studio Code. All you need to do is
-to specify your project metadata (for example, library dependencies and
-compiler versions), and the OCaml Platform tools can generate API
-documentation and also implement adopt modern software engineering
-practises such as continuous integration (CI) and unit or fuzz
-testing.</p>
+<p>The OCaml community has developed a suite of modern tools to
+interface it with IDEs such as Visual Studio Code, and to generate API
+documentation and implement modern software engineering practises such
+as continuous integration (CI) and unit or fuzz testing. All you need to
+do is to specify your project metadata (for example, library
+dependencies and compiler versions), and the OCaml Platform tools that
+we’ll describe next will do much of the heavy lifting.</p>
+<section data-type="note" class="level5" id="using-the-opam-source-based-package-manager">
+<h5>Using the opam source-based package manager</h5>
+<p>opam is the official package manager and metadata packaging format
+that is used in the OCaml community. We’ve been using it in earlier
+chapters to install OCaml libraries, and we’re going to take a closer
+look at how to use opam within a full project next. You’ve almost
+certainly done this already at this point in the book, but in case
+you’ve skipped straight to this chapter make sure you first initialise
+opam’s global state.<a data-secondary="initializing" data-primary="opam package
+manager" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-clike">$ opam init</code></pre>
+</div>
+<p>By default, opam doesn’t require any special user permissions and
+stores all of the files it installs in <code>~/.opam</code>, such as the
+current build of the OCaml compiler if you didn’t have one pre-installed
+when you initialised opam.</p>
+<p>You can maintain multiple development environments with different
+packages and compilers installed, each of which is called a “switch” –
+the default one can be found under <code>~/.opam/default</code>.<a data-secondary="listing switches" data-primary="opam package manager" data-type="indexterm">&nbsp;</a> Run
+<code>opam switch</code> to see all the different sandboxed environments
+you have available:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam switch
+&gt;#  switch    compiler      description
+&gt;   default   ocaml.4.13.1  default
+</code></pre>
+</div>
+</section>
 <section class="level2" id="a-hello-world-ocaml-project">
 <h2>A Hello World OCaml Project</h2>
 <p>Let’s start by creating a sample OCaml project and navigating around
 it. Dune has a basic built-in command to initialize a project template
-that is suitable to get us started.</p>
+that is suitable to get us started.<a data-secondary="initializing a
+project" data-primary="dune" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune init proj hello
 &gt;Success: initialized project component named hello
 </code></pre>
 </div>
-
 <p>Dune will create a <code>hello/</code> directory and populate it with
 a skeleton OCaml project. This sample project has the basic metadata
 required for us to learn more about the opam package manager and the
 dune build tool that we’ve used earlier in the book.</p>
-<p>At this point, we need to use opam to setup our development
-environment. You’ve almost certainly done this already at this point in
-the book, but in case you’ve skipped straight to this chapter we will
-first initialise opam’s global state.</p>
+<section class="level3" id="setting-up-an-opam-local-switch">
+<h3>Setting up an opam local switch</h3>
+<p>The next thing we need is a suitable compiler developer environment
+for this project, with dune and any other library dependencies
+available. The best way to do this is to create a new opam sandbox, via
+the <code>opam switch create</code> command. If you specify a project
+directory argument to this command, then it creates a “local switch”
+that stores all the dependencies within that directory rather than under
+<code>~/.opam</code>. This is a convenient way to keep all your build
+dependencies and source code in one place on your filesystem. <a data-secondary="local switch" data-primary="opam" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s make a local switch for our hello world project now: <a data-secondary="creating a local switch" data-primary="opam package manager" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre><code class="language-clike">$ opam init</code></pre>
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cd hello
+opam switch create .
+</code></pre>
 </div>
-<p>By default, opam doesn’t require any special user permissions and
-stores all of the files it installs in <code>~/.opam</code> (such as the
-current build of the OCaml compiler if you didn’t have one pre-installed
-when you initialised opam). You can run <code>opam switch</code> to see
-all the different sandboxed environments you have available, and
-<code>opam switch create</code> will let you construct new ones.</p>
-<p>It is also possible to create a “local switch” that stores all the
-dependencies within the current project working directory. Let’s do this
-for our hello world project next:</p>
-
+<p>This invokes opam to install the project dependencies (in this case,
+just the OCaml compiler and dune as we didn’t specify any more when
+initialising the project). All of the files from the local switch will
+be present under <code>_opam/</code> in the working directory. You can
+find the dune binary that was just compiled inside that directory, for
+example:</p>
 <div class="highlight">
-<pre><code class="language-clike">$ cd hello
-$ opam switch create .</code></pre>
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">./_opam/bin/dune --version
+&gt;3.0.2
+</code></pre>
 </div>
-<p>This will invoke opam to install the project dependencies (in this
-case, just dune as we didn’t specify any more when initialising the
-project). All of the files from a local switch will be present under
-<code>_opam/</code> in the working directory. You can use
-<code>opam env</code> to add the right directories to your local shell
-path so that you can invoke locally installed tools:</p>
+<p>Since opam will install other binaries and libraries in the local
+switch as your project grows, you will need to add the switch to your
+command-line path. You can use <code>opam env</code> to add the right
+directories to your local shell path so that you can invoke the locally
+installed tools:</p>
 <div class="highlight">
 <pre><code class="language-clike">$ eval $(opam env)</code></pre>
 </div>
 <p>If you prefer not to modify your shell configuration, then you can
 also invoke commands via <code>opam exec</code> to modify the path for
 the subcommand specified in the remainder of the command line.</p>
+<div class="highlight">
+<pre><code class="language-clike">$ opam exec -- dune build</code></pre>
+</div>
+<p>This executes <code>dune build</code> with the opam environment
+variables added to the command invocation, so it will pick up the
+locally built dune from your project. The double dash in the command
+line is a common Unix convention that tells opam to stop parsing its own
+optional arguments for the remainder of the command, so that they don’t
+interfere with the command that is being executed.</p>
 <section data-type="note" class="level5" id="choosing-an-ocaml-compiler-version">
 <h5>Choosing an OCaml compiler version</h5>
-
-<p>When you want to select a particular version of the OCaml compiler,
-you can use <code>opam switch list-available</code> to get a set of
-versions. You’ll notice that there are three different types of OCaml
-compiler packages.</p>
-
-<p><code>ocaml-system</code> detects a pre-existing version of the OCaml
-compiler on your machine, and installs a wrapper package of that
-particular version. This is a fast operation since nothing needs to be
-compiled. The only thing you need to do to create a system switch is to
-have the right version of OCaml already installed (e.g.&nbsp;via
+<p>When creating a switch, opam analyses the project dependencies and
+selects the newest OCaml compiler that is compatible with them.
+Sometimes though, you will want to select a specific version of the
+OCaml compiler, perhaps to ensure reproducibility or to use a particular
+feature. You can use <code>opam switch list-available</code> to get a
+full list of all the compilers that are available.</p>
+<div class="highlight">
+<pre><code class="language-clike">ocaml-system         4.13.1          The OCaml compiler
+                                     (system version, from outside
+                                      of opam)
+ocaml-base-compiler  4.13.1          Official release 4.13.1
+ocaml-variants       4.13.1+options  Official release of OCaml 4.13.1</code></pre>
+</div>
+<p>You’ll find many more versions present than the snippet above, but
+notice that there are three different types of OCaml compiler packages
+present.</p>
+<p><code>ocaml-system</code> is the name opam uses for the pre-existing
+version of the OCaml compiler that was already installed on your
+machine. This compiler is always fast to install since nothing needs to
+be compiled for it. The only thing needed to create a system switch is
+to have the right version of OCaml already installed (e.g.&nbsp;via
 <code>apt</code> or Homebrew) and to pass the same version to the switch
-creation as an additional argument. For example, if you have OCaml
-4.13.1 installed:</p>
+creation as an additional argument.</p>
+<p>For example, if you have OCaml 4.13.1 installed, then running this
+command will use the system compiler:</p>
 <div class="highlight">
 <pre><code class="language-clike">$ opam switch create . 4.13.1</code></pre>
 </div>
-
-<p><code>ocaml-base-compiler</code> builds a switch-local copy of that
-OCaml version from scratch. It can take a little longer than
-<code>ocaml-system</code>, but you have much more flexibility about the
-choice of versions. The default operation of
+<p>On the other hand, if you didn’t have that system compiler installed,
+then the compiler will need to be built from scratch. The command above
+would select the <code>ocaml-base-compiler</code> package in this case,
+which contains the full OCaml compiler source code. It will take a
+little longer than <code>ocaml-system</code>, but you have much more
+flexibility about the choice of versions. The default operation of
 <code>opam switch create</code> is to calculate the latest supported
 compiler version from your project metadata and use that one for the
 local switch.</p>
-
-<p><code>ocaml-variants</code> is used when you need to add custom
-configuration options to the compiler, such as <code>flambda</code>. In
-this case, you can also install <code>ocaml-options-*</code> packages
-alongside <code>ocaml-variants</code> to activate those configuration
-flags. For example, if you wanted to use the <code>flambda</code>
-inliner with your package, you would:</p>
+<p>If you always want to locally install a particular compiler, then you
+can refine the package description:</p>
+<div class="highlight">
+<pre><code class="language-clike">$ opam switch create . ocaml-base-compiler.4.13.1</code></pre>
+</div>
+<p>Sometimes, you will also need to to add custom configuration options
+to the compiler, such as the <code>flambda</code> optimiser. There are
+two packages that handle this: <code>ocaml-variants</code> is a package
+that detects the presence of various <code>ocaml-option</code> packages
+to activate configuration flags. For example, to build a compiler with
+<code>flambda</code>, you would:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
 </code></pre>
 </div>
-<p>You can see the full set of option packages by using:</p>
+<p>You can specify multiple <code>ocaml-option</code> packages to cover
+all the customisation your project needs. See the full set of option
+packages by using:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam search ocaml-option
 </code></pre>
 </div>
+</section>
 </section>
 <section class="level3" id="structure-of-an-ocaml-project">
 <h3>Structure of an OCaml project</h3>
@@ -110,16 +172,16 @@ simple program with a couple of OCaml modules looks like. Let’s now look
 at the set of files in our <code>hello/</code> application to examine a
 fuller project structure.</p>
 <div class="highlight">
-<pre><code class="language-clike">├── dune-project
-├── hello.opam
-├── lib
-│&nbsp;&nbsp; └── dune
-├── bin
-│&nbsp;&nbsp; ├── dune
-│&nbsp;&nbsp; └── main.ml
-└── test
-    ├── dune
-    └── hello.ml</code></pre>
+<pre><code class="language-clike">-- dune-project
+-- hello.opam
+-- lib
+|  |- dune
+|- bin
+|  |- dune
+|  |- main.ml
+|-- test
+    |- dune
+    |- hello.ml</code></pre>
 </div>
 <p>Some observations about this structure:</p>
 <ul>
@@ -162,7 +224,8 @@ the only name you refer to within OCaml code.</p>
 $ echo 'val greeting : string' &gt; lib/msg.mli</code></pre>
 </div>
 <p>A valid OCaml module name cannot contain dashes or other special
-characters other than underscores.</p>
+characters other than underscores. If you need to refresh your memory
+about how files and modules interact, refer back to <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>.</p>
 </section>
 <section class="level3" id="defining-libraries-as-collections-of-modules">
 <h3>Defining libraries as collections of modules</h3>
@@ -171,73 +234,96 @@ characters other than underscores.</p>
 dependencies with a single name. A project usually puts the business
 logic of the application into a library rather than directly into an
 executable binary, since this makes writing tests and documentation
-easier in addition to improving reusability. <a data-secondary="defining libraries" data-primary="libraries" data-type="indexterm">&nbsp;</a> Let’s look at
-<code>lib/dune</code> in more detail:</p>
-
-
-
-
+easier in addition to improving reusability. <a data-secondary="defining libraries" data-primary="libraries" data-type="indexterm">&nbsp;</a></p>
+<p>Libraries are defined by putting a <code>dune</code> file into a
+directory, such as the one generated for us in
+<code>lib/dune</code>:</p>
 <div class="highlight">
-<pre><code class="language-clike">(library
- (inline_tests)
- (name hello)
- (preprocess
-  (pps ppx_inline_test)))</code></pre>
+<pre><code class="language-scheme">(library
+ (name hello))</code></pre>
 </div>
-<p>By default, dune exposes libraries as <em>wrapped</em> under a single
-module, and the <code>name</code> field determines the name of that
-module. In our example project <code>msg.ml</code> is defined in
+<p>Dune will treat all OCaml modules in that directory as being part of
+the <code>hello</code> library (this behaviour can be overridden by a
+<code>modules</code> field for more advanced projects). By default, dune
+also exposes libraries as <em>wrapped</em> under a single OCaml module,
+and the <code>name</code> field determines the name of that module.</p>
+<p>In our example project, <code>msg.ml</code> is defined in
 <code>lib/dune</code> which defines a <code>hello</code> library. Thus,
 users of our newly defined module can access it as
 <code>Hello.Msg</code>. You can read more about wrapping and module
-aliases in <a data-type="xref" href="compiler-frontend.html#wrapping-libraries-with-module-aliases">Chapter 25, The Compiler Frontend Parsing And Type
-Checking</a>.</p>
-<p>Although our example library only currently contains a single
+aliases in <a data-type="xref" href="compiler-frontend.html#wrapping-libraries-with-module-aliases">Chapter 25, The Compiler Frontend Parsing And Type Checking</a>.
+Although our <code>hello</code> library only currently contains a single
 <code>Msg</code> module, it is common to have multiple modules per
-library. Other modules within the <code>hello</code> library can simply
-refer to <code>Msg</code>. You must refer to library names in a
-<code>dune</code> file when deciding what libraries to link in, and
-never individual module names. You can query the installed libraries in
-your current switch via <code>ocamlfind list</code> at your command
-prompt, after running <code>opam install ocamlfind</code> to install it
-if necessary.</p>
+library in larger projects. Other modules within the <code>hello</code>
+library can simply refer to <code>Msg</code>.</p>
+<p>You must refer to library names in a <code>dune</code> file when
+deciding what libraries to link in, and never individual module names.
+You can query the installed libraries in your current switch via
+<code>ocamlfind list</code> at your command prompt, after running
+<code>opam install ocamlfind</code> to install it if necessary:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlfind list
+&gt;afl-persistent      (version: 1.2)
+&gt;alcotest            (version: 1.5.0)
+&gt;alcotest.engine     (version: 1.5.0)
+&gt;alcotest.stdlib_ext (version: 1.5.0)
+&gt;angstrom            (version: 0.15.0)
+&gt;asn1-combinators    (version: 0.2.6)
+...
+</code></pre>
+</div>
 <p>If there’s a <code>public_name</code> field present in the
 <code>dune</code> library definition, this determines the publically
-exposed name for the library, which is what you use via the
-<code>libraries</code> field in the dune file. Without a public name,
-the defined library is local to the current dune project only. The
-<code>(libraries)</code> field in the <code>lib/dune</code> file is
-empty since this is a trivial standalone library.</p>
+exposed name for the library. The public library name is is what you
+specify via the <code>libraries</code> field in other projects that use
+your project’s libraries. Without a public name, the defined library is
+local to the current dune project only. The <code>(libraries)</code>
+field in the <code>lib/dune</code> file is empty since this is a trivial
+standalone library.</p>
 </section>
 <section class="level3" id="writing-test-cases-for-a-library">
 <h3>Writing test cases for a library</h3>
 <p>Our next step is to define a test case in <code>test/dune</code> for
-our library. We can define inline tests within our library as we did
-earlier in <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a>.</p>
+our library. While we showed you how to define inline tests earlier in
+<a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a>, we’ll now
+take advantage of another dune feature to build executable test
+cases.</p>
+<p>First, add in a simple assertion inside <code>test/hello.ml</code> to
+construct a trivial test case.</p>
 <div class="highlight">
-<pre><code class="language-clike">open Base
-
-let greeting = "Hello World"
-
-let%test "size" =
-  String.length greeting = 11</code></pre>
+<pre><code class="language-clike">let _ =
+  assert(String.equal Hello.Msg.greeting "Hello World")</code></pre>
 </div>
-<p>We can also define more elaborate executable tests inside the
-<code>test/</code> directory as well. The <code>(test)</code> dune field
-builds an executable binary that is run when you invoke
-<code>dune runtest</code> (along with any inline tests defined within
-libraries). In our project, the <code>test/hello.ml</code> module
-defines the executable test cases. We’ll also add a dependency on our
-locally defined <code>hello</code> library so that we can access it.</p>
-
+<p>We can use the <code>(test)</code> dune field to build an executable
+binary that is run when you invoke <code>dune runtest</code> (along with
+any inline tests defined within libraries). We’ll also add a dependency
+on our locally defined <code>hello</code> library so that we can access
+it. The <code>test/dune</code> file looks like this:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(test
- (name hello)
- (libraries hello))</code></pre>
+ (libraries hello)
+ (name hello))</code></pre>
 </div>
 <p>Once you run the tests via <code>dune runtest</code>, you can find
 the built artefacts in <code>_build/default/test/</code> in your project
 checkout.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ls -la _build/default/test 
+&gt;total 992
+&gt;drwxr-xr-x  7 avsm  staff     224 27 Feb 16:13 .
+&gt;drwxr-xr-x  9 avsm  staff     288 27 Feb 15:23 ..
+&gt;drwxr-xr-x  4 avsm  staff     128 27 Feb 15:23 .hello.eobjs
+&gt;drwxr-xr-x  3 avsm  staff      96 27 Feb 16:12 .merlin-conf
+&gt;-r-xr-xr-x  1 avsm  staff  495766 27 Feb 16:13 hello.exe
+&gt;-r--r--r--  1 avsm  staff      64 27 Feb 16:13 hello.ml
+&gt;-r--r--r--  1 avsm  staff      28 27 Feb 15:23 hello.mli
+</code></pre>
+</div>
+<p>We deliberately defined two files called <code>hello.ml</code> in
+both <code>lib/</code> and <code>test/</code>. It’s completely fine to
+define an executable <code>hello.exe</code> (in <code>test/</code>)
+alongside the OCaml library called <code>hello</code> (in
+<code>lib/</code>).</p>
 </section>
 <section class="level3" id="building-an-executable-program">
 <h3>Building an executable program</h3>
@@ -250,7 +336,7 @@ fashion to test cases.</p>
  (name main)
  (libraries hello)))</code></pre>
 </div>
-<p>There has to be a <code>bin/hello.ml</code> alongside the
+<p>There has to be a <code>bin/main.ml</code> alongside the
 <code>bin/dune</code> file that represents the entry module for the
 executable. Only that module and the modules and libraries it depends on
 will be linked into the executable. Much like libraries, the
@@ -280,6 +366,15 @@ convenient.</p>
 &gt;Hello World
 </code></pre>
 </div>
+<p>The <code>dune exec</code> and <code>opam exec</code> command we
+mentioned earlier in the chapter both nest, so you could append them to
+each other using the double-dash directive to separate them.</p>
+<div class="highlight">
+<pre><code class="language-clike">$ opam exec -- dune exec -- hello --args</code></pre>
+</div>
+<p>This is quite a common thing to do when integrating with continuous
+integration systems that need systematic scripting of both opam and dune
+(a topic we’ll come to shortly in this chapter).</p>
 </section>
 </section>
 <section class="level2" id="setting-up-an-integrated-development-environment">
@@ -303,6 +398,23 @@ to install the OCaml LSP server via opam:</p>
 <p>Once installed, the VSCode OCaml plugin will ask you which opam
 switch to use. Just the default one should be sufficient get you going
 with building and browsing your interfaces.</p>
+<section data-type="note" class="level5" id="what-is-the-language-server-protocol">
+<h5>What is the Language Server Protocol?</h5>
+<p>The Language Server Protocol defines a communications standard
+between an editor or IDE and a language-specific server that provides
+features such as auto-completion, definition search, reference indexing
+and other facilities that require specialized support from language
+tooling. This allows a programming language toolchain to implement all
+this functionality just once, and then integrate cleanly into the
+multiplicity of IDE environments available these days – and even go
+beyond conventional desktop environments to web-based notebooks such as
+Jupyter.</p>
+<p>Since OCaml has a complete and mature LSP server, you’ll find that an
+increasing number of IDEs will just support it out of the box once you
+install the ocaml-lsp-server. It integrates automatically with the
+various tools we’ve used in this book, such as detecting opam switches,
+invoking dune rules, and so on.</p>
+</section>
 </section>
 <section class="level3" id="browsing-interface-documentation">
 <h3>Browsing interface documentation</h3>
@@ -436,7 +548,7 @@ autogenerated for us. The root directory of an OCaml project built by
 dune has a <code>dune-project</code> file that defines the project
 metadata. In our example project, it starts with:</p>
 <div class="highlight">
-<pre><code class="language-scheme">(lang dune 2.9)</code></pre>
+<pre><code class="language-scheme">(lang dune 3.0)</code></pre>
 </div>
 <p>The line above is the version of the syntax used in your build files,
 and <em>not</em> the actual version of the <code>dune</code> binary. One
