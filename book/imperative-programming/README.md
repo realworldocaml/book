@@ -959,11 +959,12 @@ And now we can use this to try out some examples:
 # time (fun () -> edit_distance "OCaml" "ocaml");;
 Time: 0.655651092529 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09");;
+# time (fun () -> edit_distance "OCaml 4.13" "ocaml 4.13");;
 Time: 2541.6533947 ms
 - : int = 2
 ```
 
+\noindent
 Just those few extra characters made it thousands of times slower!
 
 Memoization would be a huge help here, but to fix the problem, we need
@@ -1079,7 +1080,8 @@ val memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
   <fun>
 ```
 
-Note that `memo_rec` has the same signature as `make_rec`.
+\noindent
+Note that `memo_rec` has almost the same signature as `make_rec`.
 
 We're using the reference here as a way of tying the recursive knot without
 using a `let rec`, which for reasons we'll describe later wouldn't work here.
@@ -1094,7 +1096,8 @@ Time: 0.121355056763 ms
 - : int = 102334155
 ```
 
-And as you can see, the exponential time complexity is now gone.
+\noindent
+As you can see, the exponential time complexity is now gone.
 
 The memory behavior here is important. If you look back at the
 definition of `memo_rec`, you'll see that the call `memo_rec
