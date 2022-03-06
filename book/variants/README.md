@@ -18,6 +18,7 @@ type <variant> =
   | ...
 ```
 
+\noindent
 Each row essentially represents a case of the variant. Each case has
 an associated tag (also called a *constructor*, since you use it to
 constructing a value) and may optionally have a sequence of fields,
@@ -89,6 +90,7 @@ Hello Blue World!
 - : unit = ()
 ```
 
+\noindent
 On most terminals, that word "Blue" will be rendered in blue.
 
 In this example, the cases of the variant are simple tags with no
@@ -103,7 +105,7 @@ up into the following groups:
 
 - The eight basic colors, in regular and bold versions
 
-- A 6 × 6 × 6 RGB color cube
+- A $6 \times  6 \times  6$ RGB color cube
 
 - A 24-level grayscale ramp
 
@@ -157,6 +159,7 @@ A muted gray...
 - : unit = ()
 ```
 
+::: {data-type=note}
 ##### Variants, tuples and parens
 
 Variants with multiple arguments look an awful lot like tuples.
@@ -182,6 +185,7 @@ Error: The constructor RGB expects 3 argument(s),
        but is applied here to 1 argument(s)
 ```
 
+\noindent
 We can also create variants that explicitly contain tuples, like this
 one.
 
@@ -190,6 +194,7 @@ one.
 type tupled = Tupled of (int * int)
 ```
 
+\noindent
 The syntactic difference is unfortunately quite subtle, coming down to
 the extra set of parens around the arguments. But having defined it
 this way, we can now take the tuple in and out freely.
@@ -235,6 +240,7 @@ containing a tuple requires an extra heap-allocated block for the
 tuple. You can learn more about OCaml's memory representation in
 [Memory Representation of
 Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
+:::
 
 
 ## Catch-All Cases and Refactoring
@@ -656,6 +662,7 @@ type mail_predicate = { field: mail_field;
                         contains: string }
 ```
 
+\noindent
 Using the preceding code, we can construct a simple expression with
 `mail_predicate` as its base predicate:
 
@@ -771,6 +778,7 @@ it does at simplifying it.
 - : string expr = Not (Base "it's raining")
 ```
 
+\noindent
 Here, it correctly converted the `Or` branch to `Const true` and then
 eliminated the `And` entirely, since the `And` then had only one
 nontrivial component.
@@ -884,9 +892,11 @@ OCaml will in some cases infer a variant type with `<`, to indicate
 val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
 ```
 
+\noindent
 The `<` is there because `is_positive` has no way of dealing with
 values that have tags other than `` `Float of float`` or `` `Int of
-int``.
+int``, but can handle types that have either or both of those two
+tags.
 
 We can think of these `<` and `>` markers as indications of upper and
 lower bounds on the tags involved. If the same set of tags are both an
@@ -899,14 +909,14 @@ val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
 ```
 
 Perhaps surprisingly, we can also create polymorphic variant types that have
-different upper and lower bounds. Note that `Ok` and `Error` in the following
+distinct upper and lower bounds. Note that `Ok` and `Error` in the following
 example come from the `Result.t` type from `Base`.
 [polymorphic variant types/upper and lower bounds of]{.idx}
 
 ```ocaml env=main
 # let is_positive = function
     | `Int   x -> Ok (x > 0)
-    | `Float x -> Ok Float.(x > 0.)
+    | `Float x -> Ok Float.O.(x > 0.)
     | `Not_a_number -> Error "not a number";;
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
@@ -1177,6 +1187,7 @@ let extended_color_to_int : extended_color -> int = function
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
 ```
 
+\noindent
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 ```sh dir=examples/erroneous/variants-termcol-annotated
@@ -1219,11 +1230,11 @@ time.  That's because the flexibility of polymorphic variants comes at
 a price. Here are some of the downsides:
 
 Complexity
-: As we've seen, the typing rules for polymorphic variants are a lot
-  more complicated than they are for regular variants. This means that
-  heavy use of polymorphic variants can leave you scratching your head
-  trying to figure out why a given piece of code did or didn't
-  compile. It can also lead to absurdly long and hard to decode error
+: The typing rules for polymorphic variants are a lot more complicated
+  than they are for regular variants. This means that heavy use of
+  polymorphic variants can leave you scratching your head trying to
+  figure out why a given piece of code did or didn't compile. It can
+  also lead to absurdly long and hard to decode error
   messages. Indeed, concision at the value level is often balanced out
   by more verbosity at the type level.
 
