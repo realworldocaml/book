@@ -688,7 +688,7 @@ designed to be opened, like `Base` or `Option.Monad_infix`.
 
 ### Prefer local opens
 
-If you do need to do an open, it's better to do a *local open*. There
+If you do need to do an `open`, it's better to do a *local open*. There
 are two syntaxes for local opens. For example, you can write: [local
 opens]{.idx}
 
