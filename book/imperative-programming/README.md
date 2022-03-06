@@ -62,11 +62,15 @@ open Base
 
 type ('a, 'b) t
 
-val create : hash:('a -> int) -> equal:('a -> 'a -> bool) -> ('a, 'b) t
+val create
+  :  hash:('a -> int)
+  -> equal:('a -> 'a -> bool)
+  -> ('a, 'b) t
+
 val length : ('a, 'b) t -> int
-val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
-val find   : ('a, 'b) t -> 'a -> 'b option
-val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
+val add : ('a, 'b) t -> key:'a -> data:'b -> unit
+val find : ('a, 'b) t -> 'a -> 'b option
+val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
@@ -89,11 +93,12 @@ Our first step is to define the type of a dictionary as a record.
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=1
 open Base
 
-type ('a, 'b) t = { mutable length: int;
-                    buckets: ('a * 'b) list array;
-                    hash: 'a -> int;
-                    equal: 'a -> 'a -> bool;
-                  }
+type ('a, 'b) t =
+  { mutable length : int
+  ; buckets : ('a * 'b) list array
+  ; hash : 'a -> int
+  ; equal : 'a -> 'a -> bool
+  }
 ```
 
 The first field, `length`, is declared as mutable. In OCaml, records
@@ -108,21 +113,22 @@ a dictionary:
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=2
 let num_buckets = 17
-
-let hash_bucket t key = (t.hash key) % num_buckets
+let hash_bucket t key = t.hash key % num_buckets
 
 let create ~hash ~equal =
-  { length = 0;
-    buckets = Array.create ~len:num_buckets [];
-    hash;
-    equal;
+  { length = 0
+  ; buckets = Array.create ~len:num_buckets []
+  ; hash
+  ; equal
   }
 
 let length t = t.length
 
 let find t key =
-  List.find_map t.buckets.(hash_bucket t key)
-    ~f:(fun (key',data) -> if t.equal key' key then Some data else None)
+  List.find_map
+    t.buckets.(hash_bucket t key)
+    ~f:(fun (key', data) ->
+      if t.equal key' key then Some data else None)
 ```
 
 Note that `num_buckets` is a constant, which means our bucket array is
@@ -190,29 +196,31 @@ dictionary:
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=4
 let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
+  List.exists t.buckets.(i) ~f:(fun (key', _) -> t.equal key' key)
 
 let add t ~key ~data =
   let i = hash_bucket t key in
   let replace = bucket_has_key t i key in
   let filtered_bucket =
-    if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
-    else
-      t.buckets.(i)
+    if replace
+    then
+      List.filter t.buckets.(i) ~f:(fun (key', _) ->
+          not (t.equal key' key))
+    else t.buckets.(i)
   in
   t.buckets.(i) <- (key, data) :: filtered_bucket;
   if not replace then t.length <- t.length + 1
 
 let remove t key =
   let i = hash_bucket t key in
-  if bucket_has_key t i key then (
+  if bucket_has_key t i key
+  then (
     let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
+      List.filter t.buckets.(i) ~f:(fun (key', _) ->
+          not (t.equal key' key))
     in
     t.buckets.(i) <- filtered_bucket;
-    t.length <- t.length - 1
-  )
+    t.length <- t.length - 1)
 ```
 
 This preceding code is made more complicated by the fact that we need to
@@ -520,21 +528,25 @@ open Base
 type 'a t
 type 'a element
 
-(** Basic list operations  *)
-val create   : unit -> 'a t
+(** Basic list operations *)
+
+val create : unit -> 'a t
 val is_empty : 'a t -> bool
 
 (** Navigation using [element]s *)
+
 val first : 'a t -> 'a element option
-val next  : 'a element -> 'a element option
-val prev  : 'a element -> 'a element option
+val next : 'a element -> 'a element option
+val prev : 'a element -> 'a element option
 val value : 'a element -> 'a
 
 (** Whole-data-structure iteration *)
-val iter    : 'a t -> f:('a -> unit) -> unit
+
+val iter : 'a t -> f:('a -> unit) -> unit
 val find_el : 'a t -> f:('a -> bool) -> 'a element option
 
 (** Mutation *)
+
 val insert_first : 'a t -> 'a -> 'a element
 val insert_after : 'a element -> 'a -> 'a element
 val remove : 'a t -> 'a element -> unit
@@ -552,9 +564,9 @@ and `'a t`:
 open Base
 
 type 'a element =
-  { value : 'a;
-    mutable next : 'a element option;
-    mutable prev : 'a element option
+  { value : 'a
+  ; mutable next : 'a element option
+  ; mutable prev : 'a element option
   }
 
 type 'a t = 'a element option ref
@@ -574,9 +586,7 @@ Now we can define a few basic functions that operate on lists and elements:
 ```ocaml file=examples/correct/dlist/dlist.ml,part=2
 let create () = ref None
 let is_empty t = Option.is_none !t
-
 let value elt = elt.value
-
 let first t = !t
 let next elt = elt.next
 let prev elt = elt.prev
@@ -616,10 +626,9 @@ Now, we'll start considering operations that mutate the list, starting with
 ```ocaml file=examples/correct/dlist/dlist.ml,part=3
 let insert_first t value =
   let new_elt = { prev = None; next = !t; value } in
-  begin match !t with
+  (match !t with
   | Some old_first -> old_first.prev <- Some new_elt
-  | None -> ()
-  end;
+  | None -> ());
   t := Some new_elt;
   new_elt
 ```
@@ -639,10 +648,9 @@ new node and a value to insert:
 ```ocaml file=examples/correct/dlist/dlist.ml,part=4
 let insert_after elt value =
   let new_elt = { value; prev = Some elt; next = elt.next } in
-  begin match elt.next with
+  (match elt.next with
   | Some old_next -> old_next.prev <- Some new_elt
-  | None -> ()
-  end;
+  | None -> ());
   elt.next <- Some new_elt;
   new_elt
 ```
@@ -652,14 +660,12 @@ Finally, we need a `remove` function:
 ```ocaml file=examples/correct/dlist/dlist.ml,part=5
 let remove t elt =
   let { prev; next; _ } = elt in
-  begin match prev with
+  (match prev with
   | Some prev -> prev.next <- next
-  | None -> t := next
-  end;
-  begin match next with
-  | Some next -> next.prev <- prev;
-  | None -> ()
-  end;
+  | None -> t := next);
+  (match next with
+  | Some next -> next.prev <- prev
+  | None -> ());
   elt.prev <- None;
   elt.next <- None
 ```
@@ -705,16 +711,16 @@ element from a given node:
 let iter t ~f =
   let rec loop = function
     | None -> ()
-    | Some el -> f (value el); loop (next el)
+    | Some el ->
+      f (value el);
+      loop (next el)
   in
   loop !t
 
 let find_el t ~f =
   let rec loop = function
     | None -> None
-    | Some elt ->
-      if f (value elt) then Some elt
-      else loop (next elt)
+    | Some elt -> if f (value elt) then Some elt else loop (next elt)
   in
   loop !t
 ```

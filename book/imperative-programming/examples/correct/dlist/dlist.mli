@@ -1,4 +1,3 @@
-(* file: dlist.mli *)
 open Base
 
 type 'a t

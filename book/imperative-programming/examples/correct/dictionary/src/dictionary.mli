@@ -1,5 +1,4 @@
 (* $MDX part-begin=1 *)
-(* file: dictionary.mli *)
 open Base
 
 type ('a, 'b) t
