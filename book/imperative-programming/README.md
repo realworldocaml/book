@@ -305,12 +305,14 @@ Arrays also come with special syntax for retrieving an element from an array:
 <array_expr>.(<index_expr>)
 ```
 
+\noindent
 and for setting an element in an array:
 
 ```
 <array_expr>.(<index_expr>) <- <value_expr>
 ```
 
+\noindent
 Out-of-bounds accesses for arrays (and indeed for all the array-like data
 structures) will lead to an exception being thrown.
 
@@ -420,20 +422,24 @@ val ( ! ) : 'a ref -> 'a = <fun>
 val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
+This reflects the fact that ref cells are really just a special case
+of mutable record fields.
+
 ### Foreign Functions
 
-Another source of imperative operations in OCaml is resources that come from
-interfacing with external libraries through OCaml's foreign function
-interface (FFI). The FFI opens OCaml up to imperative constructs that are
-exported by system calls or other external libraries. Many of these come
-built in, like access to the `write` system call or to the `clock`, while
-others come from user libraries, like LAPACK bindings. OCaml's FFI is
-discussed in more detail in
-[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
-[libraries/interfacing with external]{.idx}[external libraries/interfacing
-with]{.idx}[LAPACK bindings]{.idx}[foreign function interface
-(FFI)/imperative operations and]{.idx}[primitive mutable data/foreign
-functions]{.idx}
+Another source of imperative operations in OCaml is resources that
+come from interfacing with external libraries through OCaml's foreign
+function interface (FFI). The FFI opens OCaml up to imperative
+constructs that are exported by system calls or other external
+libraries. Many of these come built in, like access to the `write`
+system call or to the `clock`, while others come from user
+libraries. OCaml's FFI is discussed in more detail in [Foreign
+Function
+Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+[libraries/interfacing with external]{.idx}[external
+libraries/interfacing with]{.idx}[LAPACK bindings]{.idx}[foreign
+function interface (FFI)/imperative operations and]{.idx}[primitive
+mutable data/foreign functions]{.idx}
 
 
 ## for and while Loops {#for-and-while-loops-1}
@@ -505,9 +511,9 @@ val nums : int array = [|1; 2; 3; 4; 5|]
 - : int array = [|5; 4; 3; 2; 1|]
 ```
 
-In the preceding example, we used `incr` and `decr`, which are built-in
-functions for incrementing and decrementing an `int ref` by one,
-respectively.
+In the preceding example, we used `Int.incr` and `Int.decr`, which are
+built-in functions for incrementing and decrementing an `int ref` by
+one, respectively.
 
 ## Example: Doubly Linked Lists
 
@@ -516,9 +522,10 @@ list. Doubly linked lists can be traversed in both directions, and
 elements can be added and removed from the list in constant
 time. Core defines a doubly linked list (the module is called
 `Doubly_linked`), but we'll define our own linked list library as an
-illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
-lists]{.idx}[imperative programming/doubly-linked lists]{.idx
-#IPdoublink}
+illustration.
+[lists/doubly-linked lists]{.idx}
+[doubly-linked lists]{.idx}
+[imperative programming/doubly-linked lists]{.idx}
 
 Here's the `mli` of the module we'll build:
 
@@ -655,7 +662,7 @@ let insert_after elt value =
   new_elt
 ```
 
-Finally, we need a `remove` function:
+We also need a `remove` function:
 
 ```ocaml file=examples/correct/dlist/dlist.ml,part=5
 let remove t elt =
@@ -776,6 +783,8 @@ represent a lazy value:
     | Value of 'a
     | Exn of exn;;
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+# type 'a our_lazy = { mutable state : 'a lazy_state };;
+type 'a our_lazy = { mutable state : 'a lazy_state; }
 ```
 
 A `lazy_state` represents the possible states of a lazy value. A lazy
@@ -793,47 +802,48 @@ unit argument. Wrapping an expression in a thunk is another way to
 suspend the computation of an expression: [thunks]{.idx}
 
 ```ocaml env=custom_lazy
-# let create_lazy f = ref (Delayed f);;
-val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
+# let our_lazy f = { state = Delayed f };;
+val our_lazy : (unit -> 'a) -> 'a our_lazy = <fun>
 # let v =
-    create_lazy (fun () ->
-  print_endline "performing lazy computation"; Float.sqrt 16.);;
-val v : float lazy_state ref = {contents = Delayed <fun>}
+    our_lazy (fun () ->
+      print_endline "performing lazy computation"; Float.sqrt 16.);;
+val v : float our_lazy = {state = Delayed <fun>}
 ```
 
 Now we just need a way to force a lazy value. The following function
 does just that.
 
 ```ocaml env=custom_lazy
-# let force v =
-    match !v with
+# let our_force l =
+    match l.state with
     | Value x -> x
     | Exn e -> raise e
     | Delayed f ->
       try
         let x = f () in
-        v := Value x;
+        l.state <- Value x;
         x
       with exn ->
-        v := Exn exn;
+        l.state <- Exn exn;
         raise exn;;
-val force : 'a lazy_state ref -> 'a = <fun>
+val our_force : 'a our_lazy -> 'a = <fun>
 ```
 
 Which we can use in the same way we used `Lazy.force`:
 
 ```ocaml env=custom_lazy
-# force v;;
+# our_force v;;
 performing lazy computation
 - : float = 4.
-# force v;;
+# our_force v;;
 - : float = 4.
 ```
 
 The main user-visible difference between our implementation of
 laziness and the built-in version is syntax. Rather than writing
-`create_lazy (fun () -> sqrt 16.)`, we can (with the built-in `lazy`)
-just write `lazy (sqrt 16.)`.
+`our_lazy (fun () -> sqrt 16.)`, we can (with the built-in `lazy`)
+just write `lazy (sqrt 16.)`, avoiding the necessity of declaring a
+function.
 
 ### Memoization and Dynamic Programming
 
