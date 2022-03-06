@@ -134,15 +134,14 @@ executable. [-linkpkg]{.idx}
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for
 this task is `dune`. To invoke `dune`, you need to have two files: a
-`dune-project` file for the overall project,q and a `dune` file that
+`dune-project` file for the overall project, and a `dune` file that
 configures the particular directory.  This is a single-directory
 project, so we'll just have one of each, but more realistic projects
 will have one `dune-project` and many `dune` files. [dune]{.idx}
 [dune-project]{.idx}
 
-The `dune-project` file can contain a lot of project-level metadata,
-but at it's simplest, it can just specify the version of the `dune`
-configuration-language in use.
+At its simplest, the `dune-project` just specifies the version of the
+`dune` configuration-language in use.
 
 ```scheme file=examples/correct/freq-dune/dune-project
 (lang dune 3.0)
@@ -165,11 +164,11 @@ With that in place, we can invoke `dune` as follows.
 $ dune build freq.exe
 ```
 
-We can run the resulting executable, `freq.exe`, from the command line.
-Executables built with `dune` will be left in the `_build/default`
-directory, from which they can be invoked.  The specific invocation
-below will count the words that come up in the file `freq.ml`
-itself. [OCaml toolchain/dune]{.idx}
+We can run the resulting executable, `freq.exe`, from the command
+line.  Executables built with `dune` will be left in the
+`_build/default` directory, from which they can be invoked.  The
+specific invocation below will count the words that come up in the
+file `freq.ml` itself. [OCaml toolchain/dune]{.idx}
 
 ```sh dir=examples/correct/freq-dune
 $ grep -Eo '[[:alpha:]]+' freq.ml | ./_build/default/freq.exe
@@ -201,6 +200,10 @@ $ grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.exe
   2: f
   2: l
 ```
+
+We've really just scratched the surface of what can be done with
+`dune`.  We'll discuss `dune` in more detail in [The OCaml
+Platform](platform.html){data-type=xref}.
 
 
 ::: {data-type=note}
