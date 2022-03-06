@@ -546,7 +546,8 @@ val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
 - : int list option = None
 ```
 
-\noindent Here we use `assert false`, which means that the `assert`,
+\noindent
+Here we use `assert false`, which means that the `assert`,
 once reached, is guaranteed to trigger. In general, one can put an
 arbitrary condition in the assertion.
 
