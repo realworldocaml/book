@@ -27,7 +27,7 @@ here: [List.Assoc module/List.Assoc.add]{.idx}[List.Assoc
 module/List.Assoc.find]{.idx}[lists/adding new bindings
 in]{.idx}[lists/finding key associations in]{.idx}
 
-```ocaml env=intro
+```ocaml env=main
 # open Base;;
 # let assoc = [("one", 1); ("two",2); ("three",3)];;
 val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
@@ -480,12 +480,12 @@ you'll want to make a type in your interface *concrete*, by including the
 type definition in the interface. [concrete types]{.idx}[signatures/concrete
 types]{.idx}
 
-For example, imagine we wanted to add a function to `Counter` for returning
-the line with the median frequency count. If the number of lines is even,
-then there is no precise median, and the function would return the lines
-before and after the median instead. We'll use a custom type to represent the
-fact that there are two possible return values. Here's a possible
-implementation:
+For example, imagine we wanted to add a function to `Counter` for
+returning the line with the median frequency count. If the number of
+lines is even, then there is no single median, and the function would
+return the lines before and after the median instead. We'll use a
+custom type to represent the fact that there are two possible return
+values. Here's a possible implementation:
 
 ```ocaml file=examples/correct/freq-median/counter.ml,part=1
 type median =
@@ -658,7 +658,6 @@ environment that the compiler looks at to find the definition of various
 identifiers. Here's an example:
 
 ```ocaml env=main
-# open Base;;
 # module M = struct let foo = 3 end;;
 module M : sig val foo : int end
 # foo;;
@@ -676,14 +675,19 @@ terseness and explicitness—the more modules you open, the fewer module
 qualifications you need, and the harder it is to look at an identifier and
 figure out where it comes from.
 
-Here's some general advice on how to deal with `open`s: [local opens]{.idx}
+Here's some general advice on how to deal with `open`s:
 
-- Opening modules at the toplevel of a module should be done quite sparingly,
-  and generally only with modules that have been specifically designed to be
-  opened, like `Base` or `Option.Monad_infix`.
+### Open modules rarely
 
-- If you do need to do an open, it's better to do a *local open*. There are
-  two syntaxes for local opens. For example, you can write:
+Opening modules at the toplevel of a module should be done quite
+sparingly, and generally only with modules that have been specifically
+designed to be opened, like `Base` or `Option.Monad_infix`.
+
+### Prefer local opens
+
+If you do need to do an open, it's better to do a *local open*. There
+are two syntaxes for local opens. For example, you can write: [local
+opens]{.idx}
 
 ```ocaml env=main
 # let average x y =
@@ -693,10 +697,10 @@ val average : int64 -> int64 -> int64 = <fun>
 ```
 
 Here, `of_int` and the infix operators are the ones from the `Int64`
-  module.
+module.
 
-  There's another, even more lightweight syntax for local `open`s, which is
-  particularly useful for small expressions:
+There's another, even more lightweight syntax for local `open`s, which
+is particularly useful for small expressions:
 
 ```ocaml env=main
 # let average x y =
@@ -704,9 +708,11 @@ Here, `of_int` and the infix operators are the ones from the `Int64`
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
-- An alternative to local `open`s that makes your code terser without giving
-  up on explicitness is to locally rebind the name of a module. So, when
-  using the `Counter.median` type, instead of writing:
+### Using module shortcuts instead
+
+An alternative to local `open`s that makes your code terser without
+giving up on explicitness is to locally rebind the name of a
+module. So, when using the `Counter.median` type, instead of writing:
 
 ```ocaml file=examples/correct/freq-median/use_median_1.ml,part=1
 let print_median m =
@@ -727,9 +733,9 @@ let print_median m =
     printf "Before and after median:\n   %s\n   %s\n" before after
 ```
 
-Because the module name `C` only exists for a short scope, it's easy to
-  read and remember what `C` stands for. Rebinding modules to very short
-  names at the top level of your module is usually a mistake.
+Because the module name `C` only exists for a short scope, it's easy
+to read and remember what `C` stands for. Rebinding modules to very
+short names at the top level of your module is usually a mistake.
 
 ## Including Modules
 
@@ -843,6 +849,7 @@ create a file of common definitions, which in this case we'll call
 module Option = Ext_option
 ```
 
+\noindent
 Then, by opening `Import`, we can shadow `Base`'s `Option` module with
 our extension.
 
@@ -1002,6 +1009,7 @@ between files. We could create such a situation by adding a reference to
 let _build_counts = Freq.build_counts
 ```
 
+\noindent
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
@@ -1065,9 +1073,9 @@ API will be doing so by reading and modifying code that uses the API, not by
 reading the interface definition. By making your API as obvious as possible
 from that perspective, you simplify the lives of your users.
 
-There are many ways of improving readability at the call site. One example is
-labeled arguments (discussed in
-[Labeled Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
+There are many ways of improving readability of client code. One
+example is labeled arguments (discussed in [Labeled
+Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
 which act as documentation that is available at the call site.
 
 You can also improve readability simply by choosing good names for
@@ -1077,7 +1085,7 @@ for doubling a number: `(fun x -> x * 2)`, a short variable name like
 `x` is best. A good rule of thumb is that names that have a small
 scope should be short, whereas names that have a large scope, like the
 name of a function in a module interface, should be longer and more
-explicit.
+descriptive.
 
 There is of course a tradeoff here, in that making your APIs more
 explicit tends to make them more verbose as well. Another useful rule
@@ -1092,9 +1100,9 @@ in isolation. The interfaces that appear in your codebase should play
 together harmoniously. Part of achieving that is standardizing aspects of
 those interfaces.
 
-`Base`, `Core` and other libraries from the same family have been designed
-with a uniform set of standards in mind around the design of module
-interfaces. Here are some of the guidelines that they use.
+`Base`, `Core` and related libraries have been designed with a uniform
+set of standards in mind around the design of module interfaces. Here
+are some of the guidelines that they use.
 
 - *A module for (almost) every type.* You should mint a module for almost
   every type in your program, and the primary type of a given module should
