@@ -53,12 +53,11 @@ we'll use an *open hashing* scheme, where the hash table will be an
 array of buckets, each bucket containing a list of key/value pairs
 that have been hashed into that bucket. [open hashing]{.idx}
 
-Here's the interface we'll match, provided as an `mli`. The type `('a,
-'b) t` represents a dictionary with keys of type `'a` and data of type
-`'b`.
+Here's the signature we'll match, provided as an interface file,
+`dictionary.mli`. The type `('a, 'b) t` represents a dictionary with
+keys of type `'a` and data of type `'b`.
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.mli,part=1
-(* file: dictionary.mli *)
 open Base
 
 type ('a, 'b) t
@@ -82,13 +81,12 @@ imperative functions whose primary purpose is to mutate some data
 structure, rather than to compute a value.
 
 We'll now walk through the implementation (contained in the
-corresponding `ml` file) piece by piece, explaining different
-imperative constructs as they come up.
+corresponding `ml` file, `dictionary.ml`) piece by piece, explaining
+different imperative constructs as they come up.
 
 Our first step is to define the type of a dictionary as a record.
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=1
-(* file: dictionary.ml *)
 open Base
 
 type ('a, 'b) t = { mutable length: int;
@@ -517,7 +515,6 @@ lists]{.idx}[imperative programming/doubly-linked lists]{.idx
 Here's the `mli` of the module we'll build:
 
 ```ocaml file=examples/correct/dlist/dlist.mli
-(* file: dlist.mli *)
 open Base
 
 type 'a t
@@ -552,7 +549,6 @@ Now let's look at the implementation. We'll start by defining `'a element`
 and `'a t`:
 
 ```ocaml file=examples/correct/dlist/dlist.ml,part=1
-(* file: dlist.ml *)
 open Base
 
 type 'a element =
