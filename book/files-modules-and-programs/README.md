@@ -51,8 +51,7 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:[]
-    ~f:(fun counts line ->
+  In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line ->
       let count =
         match List.Assoc.find ~equal:String.equal counts line with
         | None -> 0
@@ -367,8 +366,9 @@ val touch : t -> string -> t
 val to_list : t -> (string * int) list
 ```
 
-Note that we needed to add `empty` and `to_list` to `Counter`, since
-otherwise there would be no way to create a `Counter.t` or get data out of
+\noindent
+We added `empty` and `to_list` to `Counter`, since without
+them there would be no way to create a `Counter.t` or get data out of
 one.
 
 We also used this opportunity to document the module. The `mli` file is the
@@ -376,7 +376,7 @@ place where you specify your module's interface, and as such is a natural
 place to put documentation. We started our comments with a double asterisk to
 cause them to be picked up by the `odoc` tool when generating API
 documentation. We'll discuss `odoc` more in
-[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
+[The OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`:
 
@@ -435,6 +435,7 @@ let () =
   |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
+\noindent
 With this implementation, the build now succeeds!
 
 ```sh dir=examples/correct/freq-with-sig-abstract-fixed
@@ -448,7 +449,7 @@ an alternate and far more efficient implementation, based on `Base`'s
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
-type t = (string, int, String.comparator_witness) Map.t
+type t = int Map.M(String).t
 
 let empty = Map.empty (module String)
 let to_list t = Map.to_alist t
@@ -463,9 +464,10 @@ let touch t s =
 ```
 
 There's some unfamiliar syntax in the above example, in particular the
-use of `Map.empty (module String)` to generate an empty map. Here,
-we're making use of a more advanced feature of the language
-(specifically, *first-class modules*, which we'll get to in later
+use of `int Map.M(String).t` to indicate the type of a map, and
+`Map.empty (module String)` to generate an empty map. Here, we're
+making use of a more advanced feature of the language (specifically,
+functors and first-class modules, which we'll get to in later
 chapters). The use of these features for the Map data-structure in
 particular is covered in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
@@ -516,9 +518,9 @@ there's no name clash here. Adding the following two lines to `counter.mli`
 does the trick.
 
 ```ocaml file=examples/correct/freq-median/counter.mli,part=1
-(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
+(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
 type median =
   | Median of string
   | Before_and_after of string * string
@@ -925,9 +927,9 @@ different order: [type definition mismatches]{.idx}[errors/module type
 definition mismatches]{.idx}[modules/type definition mismatches]{.idx}
 
 ```ocaml file=examples/erroneous/freq-with-type-mismatch/counter.mli,part=1
-(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
+(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
 type median =
   | Before_and_after of string * string
   | Median of string
