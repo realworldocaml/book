@@ -671,26 +671,28 @@ Error: Unbound value foo
 - : int = 3
 ```
 
-`open` is essential when you want to modify your environment for a standard
-library like `Base`, but it's generally good style to keep the opening of
-modules to a minimum. Opening a module is basically a trade-off between
-terseness and explicitness—the more modules you open, the fewer module
-qualifications you need, and the harder it is to look at an identifier and
-figure out where it comes from.
-
-Here's some general advice on how to deal with `open`s:
+Here's some general advice on how to use `open` effectively.
 
 ### Open modules rarely
 
-Opening modules at the toplevel of a module should be done quite
-sparingly, and generally only with modules that have been specifically
-designed to be opened, like `Base` or `Option.Monad_infix`.
+`open` is essential when you're using an alternative standard library
+like `Base`, but it's generally good style to keep the opening of
+modules to a minimum. Opening a module is basically a trade-off
+between terseness and explicitness—the more modules you open, the
+fewer module qualifications you need, and the harder it is to look at
+an identifier and figure out where it comes from.
+
+When you do use `open`, it should mostly be with modules that were
+designed to be opened, like `Base` itself, or `Option.Monad_infix` or
+`Float.O` within `Base`..
 
 ### Prefer local opens
 
-If you do need to do an `open`, it's better to do a *local open*. There
-are two syntaxes for local opens. For example, you can write: [local
-opens]{.idx}
+It's generally better to keep down the amount of code affected by an
+`open`. One great tool for this is *local open*s, which let you
+restrict the scope of an open to an arbitrary expression. There are
+two syntaxes for local opens. The following example shows the `let
+open` syntax; [local opens]{.idx}
 
 ```ocaml env=main
 # let average x y =
@@ -702,8 +704,8 @@ val average : int64 -> int64 -> int64 = <fun>
 Here, `of_int` and the infix operators are the ones from the `Int64`
 module.
 
-There's another, even more lightweight syntax for local `open`s, which
-is particularly useful for small expressions:
+The following shows off a more lightweight syntax which is
+particularly useful for small expressions.
 
 ```ocaml env=main
 # let average x y =
