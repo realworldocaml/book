@@ -1,2 +1,1 @@
-(lang dune 2.9)
-(name rwo-example)
+(lang dune 3.0)

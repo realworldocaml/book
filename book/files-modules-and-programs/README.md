@@ -33,13 +33,14 @@ in]{.idx}[lists/finding key associations in]{.idx}
 val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
 # List.Assoc.find ~equal:String.equal assoc "two";;
 - : int option = Some 2
-# List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
+# List.Assoc.add ~equal:String.equal assoc "four" 4;;
 - : (string, int) Base.List.Assoc.t =
 [("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
+# List.Assoc.add ~equal:String.equal assoc "two"  4;;
 - : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 ```
 
+\noindent
 Note that `List.Assoc.add` doesn't modify the original list, but instead
 allocates a new list with the requisite key/value pair added.
 
@@ -50,20 +51,20 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line ->
-    let count =
-      match List.Assoc.find ~equal:String.equal counts line with
-      | None -> 0
-      | Some x -> x
-    in
-    List.Assoc.add ~equal:String.equal counts line (count + 1)
-  )
+  In_channel.fold_lines In_channel.stdin ~init:[]
+    ~f:(fun counts line ->
+      let count =
+        match List.Assoc.find ~equal:String.equal counts line with
+        | None -> 0
+        | Some x -> x
+      in
+      List.Assoc.add ~equal:String.equal counts line (count + 1))
 
 let () =
   build_counts ()
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
 The function `build_counts` reads in lines from `stdin`, constructing from
@@ -114,6 +115,7 @@ Error: Unbound module Base
 [2]
 ```
 
+\noindent
 But as you can see, it fails because it can't find `Base` and `Stdio`. We
 need a somewhat more complex invocation to get them linked in: [OCaml
 toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlfind]{.idx}[Base standard
@@ -131,9 +133,25 @@ ocamlfind to link in the packages as is necessary for building an
 executable. [-linkpkg]{.idx}
 
 While this works well enough for a one-file project, more complicated
-projects require a tool to orchestrate the build. One good tool for this task
-is `dune`. To invoke `dune`, you need to have a `dune` file that
-specifies the details of the build. [dune]{.idx}
+projects require a tool to orchestrate the build. One good tool for
+this task is `dune`. To invoke `dune`, you need to have two files: a
+`dune-project` file for the overall project,q and a `dune` file that
+configures the particular directory.  This is a single-directory
+project, so we'll just have one of each, but more realistic projects
+will have one `dune-project` and many `dune` files. [dune]{.idx}
+[dune-project]{.idx}
+
+The `dune-project` file can contain a lot of project-level metadata,
+but at it's simplest, it can just specify the version of the `dune`
+configuration-language in use.
+
+```scheme file=examples/correct/freq-dune/dune-project
+(lang dune 3.0)
+```
+
+\noindent
+We also need a `dune` file to declare the executable we want to build,
+along with the libraries it depends on.
 
 ```scheme file=examples/correct/freq-dune/dune
 (executable
@@ -141,6 +159,7 @@ specifies the details of the build. [dune]{.idx}
   (libraries base stdio))
 ```
 
+\noindent
 With that in place, we can invoke `dune` as follows.
 
 ```sh dir=examples/correct/freq-dune
@@ -275,9 +294,9 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
 The resulting code can still be built with `dune`, which will discover
@@ -337,14 +356,14 @@ open Base
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -> string -> t
 
-(** Converts the set of frequency counts to an association list.  A string shows
-    up at most once, and the counts are >= 1. *)
+(** Converts the set of frequency counts to an association list. A
+    string shows up at most once, and the counts are >= 1. *)
 val to_list : t -> (string * int) list
 ```
 
@@ -367,7 +386,6 @@ open Base
 type t = (string * int) list
 
 let empty = []
-
 let to_list x = x
 
 let touch counts line =
@@ -404,14 +422,17 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+  In_channel.fold_lines
+    In_channel.stdin
+    ~init:Counter.empty
+    ~f:Counter.touch
 
 let () =
   build_counts ()
   |> Counter.to_list
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun counts -> List.take counts 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
 With this implementation, the build now succeeds!
@@ -427,10 +448,9 @@ an alternate and far more efficient implementation, based on `Base`'s
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = (string, int, String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -466,20 +486,21 @@ fact that there are two possible return values. Here's a possible
 implementation:
 
 ```ocaml file=examples/correct/freq-median/counter.ml,part=1
-type median = | Median of string
-              | Before_and_after of string * string
+type median =
+  | Median of string
+  | Before_and_after of string * string
 
 let median t =
   let sorted_strings =
-    List.sort (Map.to_alist t)
-      ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+    List.sort (Map.to_alist t) ~compare:(fun (_, x) (_, y) ->
+        Int.descending x y)
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";
   let nth n = fst (List.nth_exn sorted_strings n) in
   if len % 2 = 1
-  then Median (nth (len/2))
-  else Before_and_after (nth (len/2 - 1), nth (len/2))
+  then Median (nth (len / 2))
+  else Before_and_after (nth ((len / 2) - 1), nth (len / 2))
 ```
 
 In the above, we use `failwith` to throw an exception for the case of the
@@ -498,8 +519,9 @@ does the trick.
 (** Represents the median computed from a set of strings.  In the case where
     there is an even number of choices, the one before and after the median is
     returned.  *)
-type median = | Median of string
-              | Before_and_after of string * string
+type median =
+  | Median of string
+  | Before_and_after of string * string
 
 val median : t -> median
 ```
@@ -535,14 +557,16 @@ open Base
 
 module Username : sig
   type t
+
   val of_string : string -> t
   val to_string : t -> string
-  val (=) : t -> t -> bool
+  val ( = ) : t -> t -> bool
 end = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end
 ```
 
@@ -571,28 +595,30 @@ module Time = Core.Time
 
 module type ID = sig
   type t
+
   val of_string : string -> t
   val to_string : t -> string
-  val (=) : t -> t -> bool
+  val ( = ) : t -> t -> bool
 end
 
 module String_id = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end
 
 module Username : ID = String_id
 module Hostname : ID = String_id
 
-type session_info = { user: Username.t;
-                      host: Hostname.t;
-                      when_started: Time.t;
-                    }
+type session_info =
+  { user : Username.t
+  ; host : Hostname.t
+  ; when_started : Time.t
+  }
 
-let sessions_have_same_user s1 s2 =
-  Username.(=) s1.user s2.host
+let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host
 ```
 
 The preceding code has a bug: it compares the username in one session to the
@@ -602,9 +628,9 @@ this bug for us.
 
 ```sh dir=examples/erroneous/session_info
 $ dune build session_info.exe
-File "session_info.ml", line 27, characters 23-30:
-27 |   Username.(=) s1.user s2.host
-                            ^^^^^^^
+File "session_info.ml", line 29, characters 59-66:
+29 | let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host
+                                                                ^^^^^^^
 Error: This expression has type Hostname.t
        but an expression was expected of type Username.t
 [1]
@@ -793,7 +819,7 @@ done using `module type of`, which computes a signature from a module:
 open Base
 
 (* Include the interface of the option module from Base *)
-include (module type of Option)
+include module type of Option
 
 (* Signature of function we're adding *)
 val apply : ('a -> 'b) t -> 'a -> 'b t
@@ -822,8 +848,7 @@ our extension.
 open Base
 open Import
 
-let lookup_and_apply map key x =
-  Option.apply (Map.find map key) x
+let lookup_and_apply map key x = Option.apply (Map.find map key) x
 ```
 
 
@@ -859,7 +884,7 @@ Error: The implementation counter.ml
        is not included in
          val touch : string -> t -> t
        File "counter.mli", line 16, characters 0-28: Expected declaration
-       File "counter.ml", line 9, characters 4-9: Actual declaration
+       File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]
 ```
 
@@ -903,8 +928,9 @@ definition mismatches]{.idx}[modules/type definition mismatches]{.idx}
 (** Represents the median computed from a set of strings.  In the case where
     there is an even number of choices, the one before and after the median is
     returned.  *)
-type median = | Before_and_after of string * string
-              | Median of string
+type median =
+  | Before_and_after of string * string
+  | Median of string
 
 val median : t -> median
 ```
@@ -921,8 +947,8 @@ Error: The implementation counter.ml
        is not included in
          type median = Before_and_after of string * string | Median of string
        Constructors number 1 have different names, Median and Before_and_after.
-       File "counter.mli", lines 21-22, characters 0-32: Expected declaration
-       File "counter.ml", lines 18-19, characters 0-51: Actual declaration
+       File "counter.mli", lines 21-23, characters 0-20: Expected declaration
+       File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]
 ```
 

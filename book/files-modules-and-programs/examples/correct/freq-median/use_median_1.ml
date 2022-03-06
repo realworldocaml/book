@@ -2,6 +2,7 @@ open! Base
 open Stdio
 
 [@@@part "1"]
+
 let print_median m =
   match m with
   | Counter.Median string -> printf "True median:\n   %s\n" string

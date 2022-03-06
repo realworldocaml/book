@@ -10,9 +10,9 @@ val empty : t
     up at most once, and the counts are >= 1. *)
 val to_list : t -> (string * int) list
 
-[@@@part "1"] ;;
+[@@@part "1"]
 
 (** Bump the frequency count for the given string. *)
 val touch : string -> t -> t
 
-[@@@part "2"] ;;
+[@@@part "2"]
