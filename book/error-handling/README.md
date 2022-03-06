@@ -246,7 +246,7 @@ function]{.idx}
     match option with
     | None -> None
     | Some x -> f x;;
-val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
+val bind : 'a option -> f:('a -> 'b option) -> 'b option = <fun>
 ```
 
 As you can see, `bind None f` returns `None` without calling `f`, and
