@@ -2,8 +2,7 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:[]
-    ~f:(fun counts line ->
+  In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line ->
       let count =
         match List.Assoc.find ~equal:String.equal counts line with
         | None -> 0
