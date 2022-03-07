@@ -31,14 +31,14 @@ let assoc = [("one", 1); ("two",2); ("three",3)];;
 &gt;val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
 List.Assoc.find ~equal:String.equal assoc "two";;
 &gt;- : int option = Some 2
-List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
+List.Assoc.add ~equal:String.equal assoc "four" 4;;
 &gt;- : (string, int) Base.List.Assoc.t =
 &gt;[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
+List.Assoc.add ~equal:String.equal assoc "two"  4;;
 &gt;- : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 </code></pre>
 </div>
-<p>Note that <code>List.Assoc.add</code> doesn’t modify the original
+<p> Note that <code>List.Assoc.add</code> doesn’t modify the original
 list, but instead allocates a new list with the requisite key/value pair
 added.</p>
 <p>Now we can write <code>freq.ml</code>.</p>
@@ -48,19 +48,18 @@ open Stdio
 
 let build_counts () =
   In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line -&gt;
-    let count =
-      match List.Assoc.find ~equal:String.equal counts line with
-      | None -&gt; 0
-      | Some x -&gt; x
-    in
-    List.Assoc.add ~equal:String.equal counts line (count + 1)
-  )
+      let count =
+        match List.Assoc.find ~equal:String.equal counts line with
+        | None -&gt; 0
+        | Some x -&gt; x
+      in
+      List.Assoc.add ~equal:String.equal counts line (count + 1))
 
 let () =
   build_counts ()
-  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; List.sort ~compare:(fun (_, x) (_, y) -&gt; Int.descending x y)
   |&gt; (fun l -&gt; List.take l 10)
-  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+  |&gt; List.iter ~f:(fun (line, count) -&gt; printf "%3d: %s\n" count line)</code></pre>
 </div>
 <p>The function <code>build_counts</code> reads in lines from
 <code>stdin</code>, constructing from those lines an association list
@@ -103,7 +102,7 @@ libraries, we could build the executable like this:</p>
 &gt;Error: Unbound module Base
 [2]</code></pre>
 </div>
-<p>But as you can see, it fails because it can’t find <code>Base</code>
+<p> But as you can see, it fails because it can’t find <code>Base</code>
 and <code>Stdio</code>. We need a somewhat more complex invocation to
 get them linked in: <a data-secondary="ocamlc" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlfind" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="finding with ocamlfind" data-primary="Base
 standard library" data-type="indexterm">&nbsp;</a></p>
@@ -121,13 +120,24 @@ executable. <a data-primary="-linkpkg" data-type="indexterm">&nbsp;</a></p>
 <p>While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for this
 task is <code>dune</code>. To invoke <code>dune</code>, you need to have
-a <code>dune</code> file that specifies the details of the build. <a data-primary="dune" data-type="indexterm">&nbsp;</a></p>
+two files: a <code>dune-project</code> file for the overall project, and
+a <code>dune</code> file that configures the particular directory. This
+is a single-directory project, so we’ll just have one of each, but more
+realistic projects will have one <code>dune-project</code> and many
+<code>dune</code> files. <a data-primary="dune" data-type="indexterm">&nbsp;</a> <a data-primary="dune-project" data-type="indexterm">&nbsp;</a></p>
+<p>At its simplest, the <code>dune-project</code> just specifies the
+version of the <code>dune</code> configuration-language in use.</p>
+<div class="highlight">
+<pre><code class="language-scheme">(lang dune 3.0)</code></pre>
+</div>
+<p> We also need a <code>dune</code> file to declare the executable we
+want to build, along with the libraries it depends on.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      freq)
   (libraries base stdio))</code></pre>
 </div>
-<p>With that in place, we can invoke <code>dune</code> as follows.</p>
+<p> With that in place, we can invoke <code>dune</code> as follows.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
 </code></pre>
@@ -169,6 +179,8 @@ running an executable into a single operation, which we can do using
 &gt;  2: l
 </code></pre>
 </div>
+<p>We’ve really just scratched the surface of what can be done with
+<code>dune</code>. We’ll discuss <code>dune</code> in more detail in <a data-type="xref" href="platform.html">Chapter 21, The OCaml Platform</a>.</p>
 <section data-type="note" class="level5" id="bytecode-versus-native-code">
 <h5>Bytecode Versus Native Code</h5>
 <p>OCaml ships with two compilers: the <code>ocamlopt</code> native code
@@ -250,9 +262,9 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; List.sort ~compare:(fun (_, x) (_, y) -&gt; Int.descending x y)
   |&gt; (fun l -&gt; List.take l 10)
-  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+  |&gt; List.iter ~f:(fun (line, count) -&gt; printf "%3d: %s\n" count line)</code></pre>
 </div>
 <p>The resulting code can still be built with <code>dune</code>, which
 will discover dependencies and realize that <code>counter.ml</code>
@@ -308,27 +320,25 @@ interface, but its definition is not. Here’s an abstract interface for
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -&gt; string -&gt; t
 
-(** Converts the set of frequency counts to an association list.  A string shows
-    up at most once, and the counts are &gt;= 1. *)
+(** Converts the set of frequency counts to an association list. A
+    string shows up at most once, and the counts are &gt;= 1. *)
 val to_list : t -&gt; (string * int) list</code></pre>
 </div>
-<p>Note that we needed to add <code>empty</code> and
-<code>to_list</code> to <code>Counter</code>, since otherwise there
-would be no way to create a <code>Counter.t</code> or get data out of
-one.</p>
+<p> We added <code>empty</code> and <code>to_list</code> to
+<code>Counter</code>, since without them there would be no way to create
+a <code>Counter.t</code> or get data out of one.</p>
 <p>We also used this opportunity to document the module. The
 <code>mli</code> file is the place where you specify your module’s
 interface, and as such is a natural place to put documentation. We
 started our comments with a double asterisk to cause them to be picked
 up by the <code>odoc</code> tool when generating API documentation.
-We’ll discuss <code>odoc</code> more in <a data-type="xref" href="compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking">Chapter 25, The Compiler Frontend Parsing And Type
-Checking</a>.</p>
+We’ll discuss <code>odoc</code> more in <a data-type="xref" href="platform.html#browsing-interface-documentation">Chapter 21, The OCaml Platform</a>.</p>
 <p>Here’s a rewrite of <code>counter.ml</code> to match the new
 <code>counter.mli</code>:</p>
 <div class="highlight">
@@ -337,7 +347,6 @@ Checking</a>.</p>
 type t = (string * int) list
 
 let empty = []
-
 let to_list x = x
 
 let touch counts line =
@@ -372,16 +381,19 @@ association list. The resulting implementation is shown below.</p>
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+  In_channel.fold_lines
+    In_channel.stdin
+    ~init:Counter.empty
+    ~f:Counter.touch
 
 let () =
   build_counts ()
   |&gt; Counter.to_list
-  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; List.sort ~compare:(fun (_, x) (_, y) -&gt; Int.descending x y)
   |&gt; (fun counts -&gt; List.take counts 10)
-  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+  |&gt; List.iter ~f:(fun (line, count) -&gt; printf "%3d: %s\n" count line)</code></pre>
 </div>
-<p>With this implementation, the build now succeeds!</p>
+<p> With this implementation, the build now succeeds!</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
 </code></pre>
@@ -393,10 +405,9 @@ structure.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = int Map.M(String).t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -408,10 +419,11 @@ let touch t s =
   Map.set t ~key:s ~data:(count + 1)</code></pre>
 </div>
 <p>There’s some unfamiliar syntax in the above example, in particular
-the use of <code>Map.empty (module String)</code> to generate an empty
+the use of <code>int Map.M(String).t</code> to indicate the type of a
+map, and <code>Map.empty (module String)</code> to generate an empty
 map. Here, we’re making use of a more advanced feature of the language
-(specifically, <em>first-class modules</em>, which we’ll get to in later
-chapters). The use of these features for the Map data-structure in
+(specifically, functors and first-class modules, which we’ll get to in
+later chapters). The use of these features for the Map data-structure in
 particular is covered in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>.</p>
 </section>
 <section class="level2" id="concrete-types-in-signatures">
@@ -423,25 +435,26 @@ interface <em>concrete</em>, by including the type definition in the
 interface. <a data-primary="concrete types" data-type="indexterm">&nbsp;</a><a data-secondary="concrete types" data-primary="signatures" data-type="indexterm">&nbsp;</a></p>
 <p>For example, imagine we wanted to add a function to
 <code>Counter</code> for returning the line with the median frequency
-count. If the number of lines is even, then there is no precise median,
+count. If the number of lines is even, then there is no single median,
 and the function would return the lines before and after the median
 instead. We’ll use a custom type to represent the fact that there are
 two possible return values. Here’s a possible implementation:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">type median = | Median of string
-              | Before_and_after of string * string
+<pre><code class="language-ocaml">type median =
+  | Median of string
+  | Before_and_after of string * string
 
 let median t =
   let sorted_strings =
-    List.sort (Map.to_alist t)
-      ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+    List.sort (Map.to_alist t) ~compare:(fun (_, x) (_, y) -&gt;
+        Int.descending x y)
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";
   let nth n = fst (List.nth_exn sorted_strings n) in
   if len % 2 = 1
-  then Median (nth (len/2))
-  else Before_and_after (nth (len/2 - 1), nth (len/2))</code></pre>
+  then Median (nth (len / 2))
+  else Before_and_after (nth ((len / 2) - 1), nth (len / 2))</code></pre>
 </div>
 <p>In the above, we use <code>failwith</code> to throw an exception for
 the case of the empty list. We’ll discuss exceptions more in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error
@@ -453,11 +466,12 @@ that values (of which functions are an example) and types have distinct
 namespaces, so there’s no name clash here. Adding the following two
 lines to <code>counter.mli</code> does the trick.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
-type median = | Median of string
-              | Before_and_after of string * string
+<pre><code class="language-ocaml">(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
+type median =
+  | Median of string
+  | Before_and_after of string * string
 
 val median : t -&gt; median</code></pre>
 </div>
@@ -489,14 +503,16 @@ submodule: <a data-primary="abstract types" data-type="indexterm">&nbsp;</a></p>
 
 module Username : sig
   type t
+
   val of_string : string -&gt; t
   val to_string : t -&gt; string
-  val (=) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
 end = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end</code></pre>
 </div>
 <p>Note that the <code>to_string</code> and <code>of_string</code>
@@ -521,28 +537,30 @@ module Time = Core.Time
 
 module type ID = sig
   type t
+
   val of_string : string -&gt; t
   val to_string : t -&gt; string
-  val (=) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
 end
 
 module String_id = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end
 
 module Username : ID = String_id
 module Hostname : ID = String_id
 
-type session_info = { user: Username.t;
-                      host: Hostname.t;
-                      when_started: Time.t;
-                    }
+type session_info =
+  { user : Username.t
+  ; host : Hostname.t
+  ; when_started : Time.t
+  }
 
-let sessions_have_same_user s1 s2 =
-  Username.(=) s1.user s2.host</code></pre>
+let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host</code></pre>
 </div>
 <p>The preceding code has a bug: it compares the username in one session
 to the host in the other session, when it should be comparing the
@@ -550,9 +568,9 @@ usernames in both cases. Because of how we defined our types, however,
 the compiler will flag this bug for us.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build session_info.exe
-&gt;File "session_info.ml", line 27, characters 23-30:
-&gt;27 |   Username.(=) s1.user s2.host
-&gt;                            ^^^^^^^
+&gt;File "session_info.ml", line 29, characters 59-66:
+&gt;29 | let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host
+&gt;                                                                ^^^^^^^
 &gt;Error: This expression has type Hostname.t
 &gt;       but an expression was expected of type Username.t
 [1]</code></pre>
@@ -576,8 +594,7 @@ in the <code>Base</code> library. In general, opening a module adds the
 contents of that module to the environment that the compiler looks at to
 find the definition of various identifiers. Here’s an example:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-module M = struct let foo = 3 end;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module M = struct let foo = 3 end;;
 &gt;module M : sig val foo : int end
 foo;;
 &gt;Line 1, characters 1-4:
@@ -587,24 +604,29 @@ foo;;
 &gt;- : int = 3
 </code></pre>
 </div>
-<p><code>open</code> is essential when you want to modify your
-environment for a standard library like <code>Base</code>, but it’s
-generally good style to keep the opening of modules to a minimum.
-Opening a module is basically a trade-off between terseness and
-explicitness—the more modules you open, the fewer module qualifications
-you need, and the harder it is to look at an identifier and figure out
-where it comes from.</p>
-<p>Here’s some general advice on how to deal with <code>open</code>s:
-<a data-primary="local opens" data-type="indexterm">&nbsp;</a></p>
-<ul>
-<li><p>Opening modules at the toplevel of a module should be done quite
-sparingly, and generally only with modules that have been specifically
-designed to be opened, like <code>Base</code> or
-<code>Option.Monad_infix</code>.</p></li>
-<li><p>If you do need to do an open, it’s better to do a <em>local
-open</em>. There are two syntaxes for local opens. For example, you can
-write:</p></li>
-</ul>
+<p>Here’s some general advice on how to use <code>open</code>
+effectively.</p>
+<section class="level3" id="open-modules-rarely">
+<h3>Open modules rarely</h3>
+<p><code>open</code> is essential when you’re using an alternative
+standard library like <code>Base</code>, but it’s generally good style
+to keep the opening of modules to a minimum. Opening a module is
+basically a trade-off between terseness and explicitness—the more
+modules you open, the fewer module qualifications you need, and the
+harder it is to look at an identifier and figure out where it comes
+from.</p>
+<p>When you do use <code>open</code>, it should mostly be with modules
+that were designed to be opened, like <code>Base</code> itself, or
+<code>Option.Monad_infix</code> or <code>Float.O</code> within
+<code>Base</code>..</p>
+</section>
+<section class="level3" id="prefer-local-opens">
+<h3>Prefer local opens</h3>
+<p>It’s generally better to keep down the amount of code affected by an
+<code>open</code>. One great tool for this is <em>local open</em>s,
+which let you restrict the scope of an open to an arbitrary expression.
+There are two syntaxes for local opens. The following example shows the
+<code>let open</code> syntax; <a data-primary="local opens" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
   let open Int64 in
@@ -614,21 +636,21 @@ write:</p></li>
 </div>
 <p>Here, <code>of_int</code> and the infix operators are the ones from
 the <code>Int64</code> module.</p>
-<p>There’s another, even more lightweight syntax for local
-<code>open</code>s, which is particularly useful for small
-expressions:</p>
+<p>The following shows off a more lightweight syntax which is
+particularly useful for small expressions.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
   Int64.((x + y) / of_int 2);;
 &gt;val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
 </code></pre>
 </div>
-<ul>
-<li>An alternative to local <code>open</code>s that makes your code
+</section>
+<section class="level3" id="using-module-shortcuts-instead">
+<h3>Using module shortcuts instead</h3>
+<p>An alternative to local <code>open</code>s that makes your code
 terser without giving up on explicitness is to locally rebind the name
 of a module. So, when using the <code>Counter.median</code> type,
-instead of writing:</li>
-</ul>
+instead of writing:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let print_median m =
   match m with
@@ -649,6 +671,7 @@ instead of writing:</li>
 it’s easy to read and remember what <code>C</code> stands for. Rebinding
 modules to very short names at the top level of your module is usually a
 mistake.</p>
+</section>
 </section>
 <section class="level2" id="including-modules">
 <h2>Including Modules</h2>
@@ -737,7 +760,7 @@ module:</p>
 <pre><code class="language-ocaml">open Base
 
 (* Include the interface of the option module from Base *)
-include (module type of Option)
+include module type of Option
 
 (* Signature of function we're adding *)
 val apply : ('a -&gt; 'b) t -&gt; 'a -&gt; 'b t</code></pre>
@@ -757,14 +780,13 @@ of common definitions, which in this case we’ll call
 <div class="highlight">
 <pre><code class="language-ocaml">module Option = Ext_option</code></pre>
 </div>
-<p>Then, by opening <code>Import</code>, we can shadow
+<p> Then, by opening <code>Import</code>, we can shadow
 <code>Base</code>’s <code>Option</code> module with our extension.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 open Import
 
-let lookup_and_apply map key x =
-  Option.apply (Map.find map key) x</code></pre>
+let lookup_and_apply map key x = Option.apply (Map.find map key) x</code></pre>
 </div>
 </section>
 <section class="level2" id="common-errors-with-modules">
@@ -796,7 +818,7 @@ val touch : string -&gt; t -&gt; t</code></pre>
 &gt;       is not included in
 &gt;         val touch : string -&gt; t -&gt; t
 &gt;       File "counter.mli", line 16, characters 0-28: Expected declaration
-&gt;       File "counter.ml", line 9, characters 4-9: Actual declaration
+&gt;       File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]</code></pre>
 </div>
 </section>
@@ -834,11 +856,12 @@ mismatches" data-type="indexterm">&nbsp;</a><a data-secondary="module type defin
 mismatches" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="type definition
 mismatches" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre><code class="language-ocaml">(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
-type median = | Before_and_after of string * string
-              | Median of string
+<pre><code class="language-ocaml">(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
+type median =
+  | Before_and_after of string * string
+  | Median of string
 
 val median : t -&gt; median</code></pre>
 </div>
@@ -853,8 +876,8 @@ val median : t -&gt; median</code></pre>
 &gt;       is not included in
 &gt;         type median = Before_and_after of string * string | Median of string
 &gt;       Constructors number 1 have different names, Median and Before_and_after.
-&gt;       File "counter.mli", lines 21-22, characters 0-32: Expected declaration
-&gt;       File "counter.ml", lines 18-19, characters 0-51: Actual declaration
+&gt;       File "counter.mli", lines 21-23, characters 0-20: Expected declaration
+&gt;       File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]</code></pre>
 </div>
 <p>Order is similarly important to other type declarations, including
@@ -898,7 +921,7 @@ adding the following line.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let _build_counts = Freq.build_counts</code></pre>
 </div>
-<p>In this case, <code>dune</code> will notice the error and complain
+<p> In this case, <code>dune</code> will notice the error and complain
 explicitly about the cycle:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
@@ -959,7 +982,7 @@ your API will be doing so by reading and modifying code that uses the
 API, not by reading the interface definition. By making your API as
 obvious as possible from that perspective, you simplify the lives of
 your users.</p>
-<p>There are many ways of improving readability at the call site. One
+<p>There are many ways of improving readability of client code. One
 example is labeled arguments (discussed in <a data-type="xref" href="variables-and-functions.html#labeled-arguments">Chapter 2, Labeled Arguments</a>), which act as documentation that
 is available at the call site.</p>
 <p>You can also improve readability simply by choosing good names for
@@ -969,7 +992,7 @@ doubling a number: <code>(fun x -&gt; x * 2)</code>, a short variable
 name like <code>x</code> is best. A good rule of thumb is that names
 that have a small scope should be short, whereas names that have a large
 scope, like the name of a function in a module interface, should be
-longer and more explicit.</p>
+longer and more descriptive.</p>
 <p>There is of course a tradeoff here, in that making your APIs more
 explicit tends to make them more verbose as well. Another useful rule of
 thumb is that more rarely used names should be longer and more explicit,
@@ -982,10 +1005,9 @@ goes up the less often a name is used.</p>
 thought of in isolation. The interfaces that appear in your codebase
 should play together harmoniously. Part of achieving that is
 standardizing aspects of those interfaces.</p>
-<p><code>Base</code>, <code>Core</code> and other libraries from the
-same family have been designed with a uniform set of standards in mind
-around the design of module interfaces. Here are some of the guidelines
-that they use.</p>
+<p><code>Base</code>, <code>Core</code> and related libraries have been
+designed with a uniform set of standards in mind around the design of
+module interfaces. Here are some of the guidelines that they use.</p>
 <ul>
 <li><p><em>A module for (almost) every type.</em> You should mint a
 module for almost every type in your program, and the primary type of a
