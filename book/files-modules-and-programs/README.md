@@ -27,19 +27,20 @@ here: [List.Assoc module/List.Assoc.add]{.idx}[List.Assoc
 module/List.Assoc.find]{.idx}[lists/adding new bindings
 in]{.idx}[lists/finding key associations in]{.idx}
 
-```ocaml env=intro
+```ocaml env=main
 # open Base;;
 # let assoc = [("one", 1); ("two",2); ("three",3)];;
 val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
 # List.Assoc.find ~equal:String.equal assoc "two";;
 - : int option = Some 2
-# List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
+# List.Assoc.add ~equal:String.equal assoc "four" 4;;
 - : (string, int) Base.List.Assoc.t =
 [("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
+# List.Assoc.add ~equal:String.equal assoc "two"  4;;
 - : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 ```
 
+\noindent
 Note that `List.Assoc.add` doesn't modify the original list, but instead
 allocates a new list with the requisite key/value pair added.
 
@@ -51,19 +52,18 @@ open Stdio
 
 let build_counts () =
   In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line ->
-    let count =
-      match List.Assoc.find ~equal:String.equal counts line with
-      | None -> 0
-      | Some x -> x
-    in
-    List.Assoc.add ~equal:String.equal counts line (count + 1)
-  )
+      let count =
+        match List.Assoc.find ~equal:String.equal counts line with
+        | None -> 0
+        | Some x -> x
+      in
+      List.Assoc.add ~equal:String.equal counts line (count + 1))
 
 let () =
   build_counts ()
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
 The function `build_counts` reads in lines from `stdin`, constructing from
@@ -114,6 +114,7 @@ Error: Unbound module Base
 [2]
 ```
 
+\noindent
 But as you can see, it fails because it can't find `Base` and `Stdio`. We
 need a somewhat more complex invocation to get them linked in: [OCaml
 toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlfind]{.idx}[Base standard
@@ -131,9 +132,24 @@ ocamlfind to link in the packages as is necessary for building an
 executable. [-linkpkg]{.idx}
 
 While this works well enough for a one-file project, more complicated
-projects require a tool to orchestrate the build. One good tool for this task
-is `dune`. To invoke `dune`, you need to have a `dune` file that
-specifies the details of the build. [dune]{.idx}
+projects require a tool to orchestrate the build. One good tool for
+this task is `dune`. To invoke `dune`, you need to have two files: a
+`dune-project` file for the overall project, and a `dune` file that
+configures the particular directory.  This is a single-directory
+project, so we'll just have one of each, but more realistic projects
+will have one `dune-project` and many `dune` files. [dune]{.idx}
+[dune-project]{.idx}
+
+At its simplest, the `dune-project` just specifies the version of the
+`dune` configuration-language in use.
+
+```scheme file=examples/correct/freq-dune/dune-project
+(lang dune 3.0)
+```
+
+\noindent
+We also need a `dune` file to declare the executable we want to build,
+along with the libraries it depends on.
 
 ```scheme file=examples/correct/freq-dune/dune
 (executable
@@ -141,17 +157,18 @@ specifies the details of the build. [dune]{.idx}
   (libraries base stdio))
 ```
 
+\noindent
 With that in place, we can invoke `dune` as follows.
 
 ```sh dir=examples/correct/freq-dune
 $ dune build freq.exe
 ```
 
-We can run the resulting executable, `freq.exe`, from the command line.
-Executables built with `dune` will be left in the `_build/default`
-directory, from which they can be invoked.  The specific invocation
-below will count the words that come up in the file `freq.ml`
-itself. [OCaml toolchain/dune]{.idx}
+We can run the resulting executable, `freq.exe`, from the command
+line.  Executables built with `dune` will be left in the
+`_build/default` directory, from which they can be invoked.  The
+specific invocation below will count the words that come up in the
+file `freq.ml` itself. [OCaml toolchain/dune]{.idx}
 
 ```sh dir=examples/correct/freq-dune
 $ grep -Eo '[[:alpha:]]+' freq.ml | ./_build/default/freq.exe
@@ -183,6 +200,10 @@ $ grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.exe
   2: f
   2: l
 ```
+
+We've really just scratched the surface of what can be done with
+`dune`.  We'll discuss `dune` in more detail in [The OCaml
+Platform](platform.html){data-type=xref}.
 
 
 ::: {data-type=note}
@@ -275,9 +296,9 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
 The resulting code can still be built with `dune`, which will discover
@@ -337,19 +358,20 @@ open Base
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -> string -> t
 
-(** Converts the set of frequency counts to an association list.  A string shows
-    up at most once, and the counts are >= 1. *)
+(** Converts the set of frequency counts to an association list. A
+    string shows up at most once, and the counts are >= 1. *)
 val to_list : t -> (string * int) list
 ```
 
-Note that we needed to add `empty` and `to_list` to `Counter`, since
-otherwise there would be no way to create a `Counter.t` or get data out of
+\noindent
+We added `empty` and `to_list` to `Counter`, since without
+them there would be no way to create a `Counter.t` or get data out of
 one.
 
 We also used this opportunity to document the module. The `mli` file is the
@@ -357,7 +379,7 @@ place where you specify your module's interface, and as such is a natural
 place to put documentation. We started our comments with a double asterisk to
 cause them to be picked up by the `odoc` tool when generating API
 documentation. We'll discuss `odoc` more in
-[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
+[The OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`:
 
@@ -367,7 +389,6 @@ open Base
 type t = (string * int) list
 
 let empty = []
-
 let to_list x = x
 
 let touch counts line =
@@ -404,16 +425,20 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+  In_channel.fold_lines
+    In_channel.stdin
+    ~init:Counter.empty
+    ~f:Counter.touch
 
 let () =
   build_counts ()
   |> Counter.to_list
-  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_, x) (_, y) -> Int.descending x y)
   |> (fun counts -> List.take counts 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+  |> List.iter ~f:(fun (line, count) -> printf "%3d: %s\n" count line)
 ```
 
+\noindent
 With this implementation, the build now succeeds!
 
 ```sh dir=examples/correct/freq-with-sig-abstract-fixed
@@ -427,10 +452,9 @@ an alternate and far more efficient implementation, based on `Base`'s
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = int Map.M(String).t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -443,9 +467,10 @@ let touch t s =
 ```
 
 There's some unfamiliar syntax in the above example, in particular the
-use of `Map.empty (module String)` to generate an empty map. Here,
-we're making use of a more advanced feature of the language
-(specifically, *first-class modules*, which we'll get to in later
+use of `int Map.M(String).t` to indicate the type of a map, and
+`Map.empty (module String)` to generate an empty map. Here, we're
+making use of a more advanced feature of the language (specifically,
+functors and first-class modules, which we'll get to in later
 chapters). The use of these features for the Map data-structure in
 particular is covered in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
@@ -458,28 +483,29 @@ you'll want to make a type in your interface *concrete*, by including the
 type definition in the interface. [concrete types]{.idx}[signatures/concrete
 types]{.idx}
 
-For example, imagine we wanted to add a function to `Counter` for returning
-the line with the median frequency count. If the number of lines is even,
-then there is no precise median, and the function would return the lines
-before and after the median instead. We'll use a custom type to represent the
-fact that there are two possible return values. Here's a possible
-implementation:
+For example, imagine we wanted to add a function to `Counter` for
+returning the line with the median frequency count. If the number of
+lines is even, then there is no single median, and the function would
+return the lines before and after the median instead. We'll use a
+custom type to represent the fact that there are two possible return
+values. Here's a possible implementation:
 
 ```ocaml file=examples/correct/freq-median/counter.ml,part=1
-type median = | Median of string
-              | Before_and_after of string * string
+type median =
+  | Median of string
+  | Before_and_after of string * string
 
 let median t =
   let sorted_strings =
-    List.sort (Map.to_alist t)
-      ~compare:(fun (_,x) (_,y) -> Int.descending x y)
+    List.sort (Map.to_alist t) ~compare:(fun (_, x) (_, y) ->
+        Int.descending x y)
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";
   let nth n = fst (List.nth_exn sorted_strings n) in
   if len % 2 = 1
-  then Median (nth (len/2))
-  else Before_and_after (nth (len/2 - 1), nth (len/2))
+  then Median (nth (len / 2))
+  else Before_and_after (nth ((len / 2) - 1), nth (len / 2))
 ```
 
 In the above, we use `failwith` to throw an exception for the case of the
@@ -495,11 +521,12 @@ there's no name clash here. Adding the following two lines to `counter.mli`
 does the trick.
 
 ```ocaml file=examples/correct/freq-median/counter.mli,part=1
-(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
-type median = | Median of string
-              | Before_and_after of string * string
+(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
+type median =
+  | Median of string
+  | Before_and_after of string * string
 
 val median : t -> median
 ```
@@ -535,14 +562,16 @@ open Base
 
 module Username : sig
   type t
+
   val of_string : string -> t
   val to_string : t -> string
-  val (=) : t -> t -> bool
+  val ( = ) : t -> t -> bool
 end = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end
 ```
 
@@ -571,28 +600,30 @@ module Time = Core.Time
 
 module type ID = sig
   type t
+
   val of_string : string -> t
   val to_string : t -> string
-  val (=) : t -> t -> bool
+  val ( = ) : t -> t -> bool
 end
 
 module String_id = struct
   type t = string
+
   let of_string x = x
   let to_string x = x
-  let (=) = String.(=)
+  let ( = ) = String.( = )
 end
 
 module Username : ID = String_id
 module Hostname : ID = String_id
 
-type session_info = { user: Username.t;
-                      host: Hostname.t;
-                      when_started: Time.t;
-                    }
+type session_info =
+  { user : Username.t
+  ; host : Hostname.t
+  ; when_started : Time.t
+  }
 
-let sessions_have_same_user s1 s2 =
-  Username.(=) s1.user s2.host
+let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host
 ```
 
 The preceding code has a bug: it compares the username in one session to the
@@ -602,9 +633,9 @@ this bug for us.
 
 ```sh dir=examples/erroneous/session_info
 $ dune build session_info.exe
-File "session_info.ml", line 27, characters 23-30:
-27 |   Username.(=) s1.user s2.host
-                            ^^^^^^^
+File "session_info.ml", line 29, characters 59-66:
+29 | let sessions_have_same_user s1 s2 = Username.( = ) s1.user s2.host
+                                                                ^^^^^^^
 Error: This expression has type Hostname.t
        but an expression was expected of type Username.t
 [1]
@@ -630,7 +661,6 @@ environment that the compiler looks at to find the definition of various
 identifiers. Here's an example:
 
 ```ocaml env=main
-# open Base;;
 # module M = struct let foo = 3 end;;
 module M : sig val foo : int end
 # foo;;
@@ -641,21 +671,28 @@ Error: Unbound value foo
 - : int = 3
 ```
 
-`open` is essential when you want to modify your environment for a standard
-library like `Base`, but it's generally good style to keep the opening of
-modules to a minimum. Opening a module is basically a trade-off between
-terseness and explicitness—the more modules you open, the fewer module
-qualifications you need, and the harder it is to look at an identifier and
-figure out where it comes from.
+Here's some general advice on how to use `open` effectively.
 
-Here's some general advice on how to deal with `open`s: [local opens]{.idx}
+### Open modules rarely
 
-- Opening modules at the toplevel of a module should be done quite sparingly,
-  and generally only with modules that have been specifically designed to be
-  opened, like `Base` or `Option.Monad_infix`.
+`open` is essential when you're using an alternative standard library
+like `Base`, but it's generally good style to keep the opening of
+modules to a minimum. Opening a module is basically a trade-off
+between terseness and explicitness—the more modules you open, the
+fewer module qualifications you need, and the harder it is to look at
+an identifier and figure out where it comes from.
 
-- If you do need to do an open, it's better to do a *local open*. There are
-  two syntaxes for local opens. For example, you can write:
+When you do use `open`, it should mostly be with modules that were
+designed to be opened, like `Base` itself, or `Option.Monad_infix` or
+`Float.O` within `Base`..
+
+### Prefer local opens
+
+It's generally better to keep down the amount of code affected by an
+`open`. One great tool for this is *local open*s, which let you
+restrict the scope of an open to an arbitrary expression. There are
+two syntaxes for local opens. The following example shows the `let
+open` syntax; [local opens]{.idx}
 
 ```ocaml env=main
 # let average x y =
@@ -665,10 +702,10 @@ val average : int64 -> int64 -> int64 = <fun>
 ```
 
 Here, `of_int` and the infix operators are the ones from the `Int64`
-  module.
+module.
 
-  There's another, even more lightweight syntax for local `open`s, which is
-  particularly useful for small expressions:
+The following shows off a more lightweight syntax which is
+particularly useful for small expressions.
 
 ```ocaml env=main
 # let average x y =
@@ -676,9 +713,11 @@ Here, `of_int` and the infix operators are the ones from the `Int64`
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
-- An alternative to local `open`s that makes your code terser without giving
-  up on explicitness is to locally rebind the name of a module. So, when
-  using the `Counter.median` type, instead of writing:
+### Using module shortcuts instead
+
+An alternative to local `open`s that makes your code terser without
+giving up on explicitness is to locally rebind the name of a
+module. So, when using the `Counter.median` type, instead of writing:
 
 ```ocaml file=examples/correct/freq-median/use_median_1.ml,part=1
 let print_median m =
@@ -699,9 +738,9 @@ let print_median m =
     printf "Before and after median:\n   %s\n   %s\n" before after
 ```
 
-Because the module name `C` only exists for a short scope, it's easy to
-  read and remember what `C` stands for. Rebinding modules to very short
-  names at the top level of your module is usually a mistake.
+Because the module name `C` only exists for a short scope, it's easy
+to read and remember what `C` stands for. Rebinding modules to very
+short names at the top level of your module is usually a mistake.
 
 ## Including Modules
 
@@ -793,7 +832,7 @@ done using `module type of`, which computes a signature from a module:
 open Base
 
 (* Include the interface of the option module from Base *)
-include (module type of Option)
+include module type of Option
 
 (* Signature of function we're adding *)
 val apply : ('a -> 'b) t -> 'a -> 'b t
@@ -815,6 +854,7 @@ create a file of common definitions, which in this case we'll call
 module Option = Ext_option
 ```
 
+\noindent
 Then, by opening `Import`, we can shadow `Base`'s `Option` module with
 our extension.
 
@@ -822,8 +862,7 @@ our extension.
 open Base
 open Import
 
-let lookup_and_apply map key x =
-  Option.apply (Map.find map key) x
+let lookup_and_apply map key x = Option.apply (Map.find map key) x
 ```
 
 
@@ -859,7 +898,7 @@ Error: The implementation counter.ml
        is not included in
          val touch : string -> t -> t
        File "counter.mli", line 16, characters 0-28: Expected declaration
-       File "counter.ml", line 9, characters 4-9: Actual declaration
+       File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]
 ```
 
@@ -900,11 +939,12 @@ different order: [type definition mismatches]{.idx}[errors/module type
 definition mismatches]{.idx}[modules/type definition mismatches]{.idx}
 
 ```ocaml file=examples/erroneous/freq-with-type-mismatch/counter.mli,part=1
-(** Represents the median computed from a set of strings.  In the case where
-    there is an even number of choices, the one before and after the median is
-    returned.  *)
-type median = | Before_and_after of string * string
-              | Median of string
+(** Represents the median computed from a set of strings. In the case
+    where there is an even number of choices, the one before and after
+    the median is returned. *)
+type median =
+  | Before_and_after of string * string
+  | Median of string
 
 val median : t -> median
 ```
@@ -921,8 +961,8 @@ Error: The implementation counter.ml
        is not included in
          type median = Before_and_after of string * string | Median of string
        Constructors number 1 have different names, Median and Before_and_after.
-       File "counter.mli", lines 21-22, characters 0-32: Expected declaration
-       File "counter.ml", lines 18-19, characters 0-51: Actual declaration
+       File "counter.mli", lines 21-23, characters 0-20: Expected declaration
+       File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]
 ```
 
@@ -974,6 +1014,7 @@ between files. We could create such a situation by adding a reference to
 let _build_counts = Freq.build_counts
 ```
 
+\noindent
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
@@ -1037,9 +1078,9 @@ API will be doing so by reading and modifying code that uses the API, not by
 reading the interface definition. By making your API as obvious as possible
 from that perspective, you simplify the lives of your users.
 
-There are many ways of improving readability at the call site. One example is
-labeled arguments (discussed in
-[Labeled Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
+There are many ways of improving readability of client code. One
+example is labeled arguments (discussed in [Labeled
+Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
 which act as documentation that is available at the call site.
 
 You can also improve readability simply by choosing good names for
@@ -1049,7 +1090,7 @@ for doubling a number: `(fun x -> x * 2)`, a short variable name like
 `x` is best. A good rule of thumb is that names that have a small
 scope should be short, whereas names that have a large scope, like the
 name of a function in a module interface, should be longer and more
-explicit.
+descriptive.
 
 There is of course a tradeoff here, in that making your APIs more
 explicit tends to make them more verbose as well. Another useful rule
@@ -1064,9 +1105,9 @@ in isolation. The interfaces that appear in your codebase should play
 together harmoniously. Part of achieving that is standardizing aspects of
 those interfaces.
 
-`Base`, `Core` and other libraries from the same family have been designed
-with a uniform set of standards in mind around the design of module
-interfaces. Here are some of the guidelines that they use.
+`Base`, `Core` and related libraries have been designed with a uniform
+set of standards in mind around the design of module interfaces. Here
+are some of the guidelines that they use.
 
 - *A module for (almost) every type.* You should mint a module for almost
   every type in your program, and the primary type of a given module should
