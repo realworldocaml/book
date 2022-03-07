@@ -1311,8 +1311,9 @@ standard file descriptors in Unix:
   intended for error messages.
 
 The values `stdin`, `stdout`, and `stderr` are useful enough that they
-are also available in the global namespace directly, without having to
-go through the `In_channel` and `Out_channel` modules.
+are also available in the top level of `Core`'s namespace directly,
+without having to go through the `In_channel` and `Out_channel`
+modules.
 
 Let's see this in action in a simple interactive application. The
 following program, `time_converter`, prompts the user for a time zone,
@@ -1338,12 +1339,14 @@ let () =
     Out_channel.flush stdout
 ```
 
-We can build this program using `dune` and run it. You'll see that it
-prompts you for input, as follows:
+We can build this program using `dune` and run it (though you'll need
+to add a `dune-project` and `dune` file, as described in [Files
+Modules and
+Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}). You'll
+see that it prompts you for input, as follows:
 
 ```
-$ dune build time_converter.bc
-$ ./_build/default/time_converter.bc
+$ dune exec ./time_converter.exe
 Pick a timezone:
 ```
 
@@ -1407,8 +1410,8 @@ Error: This expression has type float but an expression was expected of type
 ##### Understanding Format Strings
 
 The format strings used by `printf` turn out to be quite different
-from ordinary strings. This difference ties to the fact that OCaml
-format strings, unlike their equivalent in C, are type-safe. In
+from ordinary strings. This difference ties to the fact that OCaml's
+`printf` facility, unlike the equivalent in C, is type-safe.  In
 particular, the compiler checks that the types referred to by the
 format string match the types of the rest of the arguments passed to
 `printf`.
@@ -1552,6 +1555,7 @@ Exception:
   "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
 ```
 
+\noindent
 And if we do this over and over in a loop, we'll eventually run out of file
 descriptors:
 
@@ -1562,6 +1566,7 @@ descriptors:
 Error: I/O error: ...: Too many open files
 ```
 
+\noindent
 And now, you'll need to restart your toplevel if you want to open any more
 files!
 
@@ -1621,9 +1626,9 @@ efficient to process a line at a time. You can use the
 val sum_file : string -> int = <fun>
 ```
 
-This is just a taste of the functionality of `In_channel` and `Out_channel`.
-To get a fuller understanding, you should review the API documentation for
-those modules.
+This is just a taste of the functionality of `In_channel` and
+`Out_channel`.  To get a fuller understanding, you should review the
+API documentation.
 
 
 ## Order of Evaluation
@@ -1651,12 +1656,12 @@ snippet of code would answer that question:
 - : bool = true
 ```
 
-In some sense, we don't really need to compute the `sin 128.` because
-`sin 75.` is negative, so we could know the answer before even computing
-`sin 128.`.
+In some sense, we don't really need to compute the `sin 128` because
+`sin 75` is negative, so we could know the answer before even computing
+`sin 128`.
 
 It doesn't have to be this way. Using the `lazy` keyword, we can write the
-original computation so that `sin 128.` won't ever be computed:
+original computation so that `sin 128` won't ever be computed:
 
 ```ocaml env=main
 # let x = lazy (Float.sin 120.) in
@@ -1726,12 +1731,13 @@ programming/side effects/weak polymorphism ]{.idx}
 val remember : '_weak1 -> '_weak1 = <fun>
 ```
 
-`remember` simply caches the first value that's passed to it, returning that
-value on every call. That's because `cache` is created and initialized once
-and is shared across invocations of `remember`.
+\noindent
+`remember` simply caches the first value that's passed to it,
+returning that value on every call. That's because `cache` is created
+and initialized once and is shared across invocations of `remember`.
 
-`remember` is not a terribly useful function, but it raises an interesting
-question: what is its type?
+`remember` is not a terribly useful function, but it raises an
+interesting question: what should its type be?
 
 On its first call, `remember` returns the same value it's passed, which means
 its input type and return type should match. Accordingly, `remember` should
@@ -1750,6 +1756,7 @@ val identity : 'a -> 'a = <fun>
 - : string = "five"
 ```
 
+\noindent
 As you can see, the polymorphic type of `identity` lets it operate on values
 with different types.
 
@@ -1782,6 +1789,7 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
+\noindent
 Note that the type of `remember` was settled by the definition of
 `remember_three`, even though `remember_three` was never called!
 
@@ -1841,6 +1849,7 @@ polymorphic type:
 val f : unit -> 'a option ref = <fun>
 ```
 
+\noindent
 But a function that has a mutable cache that persists across calls,
 like `memoize`, can only be weakly polymorphic.
 
