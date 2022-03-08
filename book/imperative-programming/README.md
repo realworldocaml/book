@@ -640,13 +640,14 @@ let insert_first t value =
   new_elt
 ```
 
-`insert_first` first defines a new element `new_elt`, and then links it into
-the list, finally setting the list itself to point to `new_elt`. Note that
-the precedence of a `match` expression is very low, so to separate it from
-the following assignment (`t := Some new_elt`), we surround the match with
-`begin ... end`. We could have used parentheses for the same purpose. Without
-some kind of bracketing, the final assignment would incorrectly become part
-of the `None` case. [elements/defining new]{.idx}
+`insert_first` first defines a new element `new_elt`, and then links
+it into the list, finally setting the list itself to point to
+`new_elt`. Note that the precedence of a `match` expression is very
+low, so to separate it from the following assignment (`t := Some
+new_elt`), we surround the match with parenthses.  We could have used
+`begin ... end` for the same purpose, but without some kind of
+bracketing, the final assignment would incorrectly become part of the
+`None` case. [elements/defining new]{.idx}
 
 We can use `insert_after` to insert elements later in the list.
 `insert_after` takes as arguments both an `element` after which to insert the
@@ -793,9 +794,9 @@ function for computing the value in question. A lazy value is in the
 `Value` state when it has been forced and the computation ended
 normally. The `Exn` case is for when the lazy value has been forced,
 but the computation ended with an exception. A lazy value is simply a
-`ref` containing a `lazy_state`, where the `ref` makes it possible to
-change from being in the `Delayed` state to being in the `Value` or
-`Exn` states.
+record with a single mutable field containing a `lazy_state`, where
+the mutability makes it possible to change from being in the `Delayed`
+state to being in the `Value` or `Exn` states.
 
 We can create a lazy value from a thunk, i.e., a function that takes a
 unit argument. Wrapping an expression in a thunk is another way to
@@ -1339,10 +1340,10 @@ let () =
     Out_channel.flush stdout
 ```
 
-We can build this program using `dune` and run it (though you'll need
+We can build this program using `dune` and run it, though you'll need
 to add a `dune-project` and `dune` file, as described in [Files
 Modules and
-Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}). You'll
+Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}. You'll
 see that it prompts you for input, as follows:
 
 ```

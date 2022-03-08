@@ -425,8 +425,8 @@ switched, the `session_id` field was considered first, and so that
 drove the type to be considered to be a `logon`, at which point
 `t.status_message` no longer made sense.
 
-Adding a type annotation resolves the ambiguity, whatever order the
-fields are considered in.
+Adding a type annotation resolves the ambiguity, no matter what order
+the fields are considered in.
 
 ```ocaml env=main
 # let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
@@ -601,7 +601,7 @@ val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 
 The `with` keyword marks that this is a functional update, and the
 value assignments on the right-hand side indicate the changes to be
-made to the cord on the left-hand side of the `with`.
+made to the record on the left-hand side of the `with`.
 
 Functional updates make your code independent of the identity of the
 fields in the record that are not changing. This is often what you
