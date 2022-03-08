@@ -14,7 +14,7 @@
  (deps ../bin/pandoc-rwo/pandoc_rwo.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
  (action
   (progn
-   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
+   (system "pandoc -V links-as-notes=true --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf)
