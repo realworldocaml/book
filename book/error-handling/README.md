@@ -731,7 +731,7 @@ and involves some unnecessary computation (in particular, the
 allocation of the option). Happily, OCaml allows for exceptions to be
 caught by match expressions directly, which lets you write this more
 concisely as follows.
-[exceptions/catching in match expression]
+[exceptions/catching in match expression]{.idx}
 
 ```ocaml env=main
 # let lookup_weight ~compute_weight alist key =
