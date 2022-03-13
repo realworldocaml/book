@@ -15,7 +15,7 @@ types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
   | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
   | ...</code></pre>
 </div>
-<p>Each row essentially represents a case of the variant. Each case has
+<p> Each row essentially represents a case of the variant. Each case has
 an associated tag (also called a <em>constructor</em>, since you use it
 to constructing a value) and may optionally have a sequence of fields,
 where each field has a specified type.</p>
@@ -80,7 +80,7 @@ printf "Hello %s World!\n" blue;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>On most terminals, that word “Blue” will be rendered in blue.</p>
+<p> On most terminals, that word “Blue” will be rendered in blue.</p>
 <p>In this example, the cases of the variant are simple tags with no
 associated data. This is substantively the same as the enumerations
 found in languages like C and Java. But as we’ll see, variants can do
@@ -91,7 +91,8 @@ terminals, including the venerable <code>xterm</code>, support 256
 different colors, broken up into the following groups:</p>
 <ul>
 <li><p>The eight basic colors, in regular and bold versions</p></li>
-<li><p>A 6 × 6 × 6 RGB color cube</p></li>
+<li><p>A <span class="math inline">6 × 6 × 6</span> RGB color
+cube</p></li>
 <li><p>A 24-level grayscale ramp</p></li>
 </ul>
 <p>We’ll also represent this more complicated color space as a variant,
@@ -139,7 +140,7 @@ color_print (Gray 4) "A muted gray...";;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<section class="level5" id="variants-tuples-and-parens">
+<section data-type="note" class="level5" id="variants-tuples-and-parens">
 <h5>Variants, tuples and parens</h5>
 <p>Variants with multiple arguments look an awful lot like tuples.
 Consider the following example of a value of the type <code>color</code>
@@ -162,14 +163,14 @@ RGB purple;;
 &gt;       but is applied here to 1 argument(s)
 </code></pre>
 </div>
-<p>We can also create variants that explicitly contain tuples, like this
-one.</p>
+<p> We can also create variants that explicitly contain tuples, like
+this one.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type tupled = Tupled of (int * int);;
 &gt;type tupled = Tupled of (int * int)
 </code></pre>
 </div>
-<p>The syntactic difference is unfortunately quite subtle, coming down
+<p> The syntactic difference is unfortunately quite subtle, coming down
 to the extra set of parens around the arguments. But having defined it
 this way, we can now take the tuple in and out freely.</p>
 <div class="highlight">
@@ -596,7 +597,7 @@ against an email, as in the following example:</p>
 type mail_predicate = { field: mail_field;
                         contains: string }</code></pre>
 </div>
-<p>Using the preceding code, we can construct a simple expression with
+<p> Using the preceding code, we can construct a simple expression with
 <code>mail_predicate</code> as its base predicate:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let test field contains = Base { field; contains };;
@@ -705,7 +706,7 @@ Base "it's raining"]));;
 &gt;- : string expr = Not (Base "it's raining")
 </code></pre>
 </div>
-<p>Here, it correctly converted the <code>Or</code> branch to
+<p> Here, it correctly converted the <code>Or</code> branch to
 <code>Const true</code> and then eliminated the <code>And</code>
 entirely, since the <code>And</code> then had only one nontrivial
 component.</p>
@@ -810,9 +811,10 @@ to indicate “these tags or less,” as in the following example:</p>
 &gt;val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The <code>&lt;</code> is there because <code>is_positive</code> has
+<p> The <code>&lt;</code> is there because <code>is_positive</code> has
 no way of dealing with values that have tags other than
-<code>`Float of float</code> or <code>`Int of int</code>.</p>
+<code>`Float of float</code> or <code>`Int of int</code>, but can handle
+types that have either or both of those two tags.</p>
 <p>We can think of these <code>&lt;</code> and <code>&gt;</code> markers
 as indications of upper and lower bounds on the tags involved. If the
 same set of tags are both an upper and a lower bound, we end up with an
@@ -824,14 +826,14 @@ example:</p>
 </code></pre>
 </div>
 <p>Perhaps surprisingly, we can also create polymorphic variant types
-that have different upper and lower bounds. Note that <code>Ok</code>
-and <code>Error</code> in the following example come from the
+that have distinct upper and lower bounds. Note that <code>Ok</code> and
+<code>Error</code> in the following example come from the
 <code>Result.t</code> type from <code>Base</code>. <a data-secondary="upper and lower bounds
 of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive = function
   | `Int   x -&gt; Ok (x &gt; 0)
-  | `Float x -&gt; Ok Float.(x &gt; 0.)
+  | `Float x -&gt; Ok Float.O.(x &gt; 0.)
   | `Not_a_number -&gt; Error "not a number";;
 &gt;val is_positive :
 &gt;  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt; (bool, string) result =
@@ -1090,8 +1092,8 @@ to warn us:</p>
   | `Grey x -&gt; 2000 + x
   | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</code></pre>
 </div>
-<p>In particular, the compiler will complain that the <code>`Grey</code>
-case is unused:</p>
+<p> In particular, the compiler will complain that the
+<code>`Grey</code> case is unused:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build @all
 &gt;File "terminal_color.ml", line 30, characters 4-11:
@@ -1126,13 +1128,13 @@ at a price. Here are some of the downsides:</p>
 <dl>
 <dt>Complexity</dt>
 <dd>
-As we’ve seen, the typing rules for polymorphic variants are a lot more
-complicated than they are for regular variants. This means that heavy
-use of polymorphic variants can leave you scratching your head trying to
-figure out why a given piece of code did or didn’t compile. It can also
-lead to absurdly long and hard to decode error messages. Indeed,
-concision at the value level is often balanced out by more verbosity at
-the type level.
+The typing rules for polymorphic variants are a lot more complicated
+than they are for regular variants. This means that heavy use of
+polymorphic variants can leave you scratching your head trying to figure
+out why a given piece of code did or didn’t compile. It can also lead to
+absurdly long and hard to decode error messages. Indeed, concision at
+the value level is often balanced out by more verbosity at the type
+level.
 </dd>
 <dt>Error-finding</dt>
 <dd>

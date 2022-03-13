@@ -16,7 +16,7 @@ syntax for a record type declaration is as follows: <a data-secondary="basic syn
       ...
     }</code></pre>
 </div>
-<p>Note that record field names must start with a lowercase letter.</p>
+<p> Note that record field names must start with a lowercase letter.</p>
 <p>Here’s a simple example: a <code>service_info</code> record that
 represents an entry from the <code>/etc/services</code> file on a
 typical Unix system. That file is used for keeping track of the
@@ -37,7 +37,9 @@ declared its type. The following function tries to construct such a
 record given as input a line from <code>/etc/services</code> file. To do
 this, we’ll use <code>Re</code>, a regular expression engine for OCaml.
 If you don’t know how regular expressions work, you can just think of
-them as a simple pattern language you can use for parsing a string.</p>
+them as a simple pattern language you can use for parsing a string. (You
+may need to install it first by running
+<code>opam install re</code>.)</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "re";;
 let service_info_of_string line =
@@ -48,12 +50,13 @@ let service_info_of_string line =
   { service_name = Re.Group.get matches 1;
     port = Int.of_string (Re.Group.get matches 2);
     protocol = Re.Group.get matches 3;
-  };;
+  }
+;;
 &gt;val service_info_of_string : string -&gt; service_info = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can construct a concrete record by calling the function on a line
-from the file.</p>
+<p> We can now construct a concrete record by calling the function on a
+line from the file.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol";;
 &gt;val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
@@ -89,7 +92,8 @@ individual line.</p>
   List.mapi lines ~f:(fun line_num line -&gt;
     { item = parse line;
       line_num = line_num + 1;
-    });;
+    })
+;;
 &gt;val parse_lines : (string -&gt; 'a) -&gt; string -&gt; 'a with_line_num list = &lt;fun&gt;
 </code></pre>
 </div>
@@ -121,8 +125,11 @@ integer on every line.</p>
 <p>Another way of getting information out of a record is by using a
 pattern match, as shown in the following function.<a data-secondary="and exhaustiveness" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="patterns and exhaustiveness in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-  sprintf "%s %i/%s" name port prot;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string
+  { service_name = name; port = port; protocol = prot  }
+  =
+  sprintf "%s %i/%s" name port prot
+;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
 service_info_to_string ssh;;
 &gt;- : string = "ssh 22/udp"
@@ -165,9 +172,12 @@ toplevel by typing <code>#warnings "+9"</code>), the compiler will
 indeed warn us.<a data-secondary="compiler warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="warning enable/disable" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9";;
-let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-  sprintf "%s %i/%s" name port prot;;
-&gt;Line 1, characters 28-82:
+let service_info_to_string
+  { service_name = name; port = port; protocol = prot  }
+  =
+  sprintf "%s %i/%s" name port prot
+;;
+&gt;Line 2, characters 5-59:
 &gt;Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
 &gt;comment
 &gt;Either bind these labels explicitly or add '; _' to the pattern.
@@ -178,8 +188,11 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 acknowledging that we are ignoring extra fields. This is done by adding
 an underscore to the pattern:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
-  sprintf "%s %i/%s" name port prot;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let service_info_to_string
+  { service_name = name; port = port; protocol = prot; _ }
+  =
+  sprintf "%s %i/%s" name port prot
+;;
 &gt;val service_info_to_string : service_info -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
@@ -243,9 +256,13 @@ following updated version of <code>service_info_of_string</code>.<a data-seconda
     | None -&gt; (line,None)
     | Some (ordinary,comment) -&gt; (ordinary, Some comment)
   in
-  (* now, use a regular expression to break up the service definition *)
+  (* now, use a regular expression to break up the
+     service definition *)
   let matches =
-    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    Re.exec
+      (Re.Posix.compile_pat
+         "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)")
+      line
   in
   let service_name = Re.Group.get matches 1 in
   let port = Int.of_string (Re.Group.get matches 2) in
@@ -269,7 +286,7 @@ punning" data-type="indexterm">&nbsp;</a><a data-secondary="label punning in" da
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is considerably more concise than what you would get without
+<p> This is considerably more concise than what you would get without
 punning:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_service_info
@@ -353,8 +370,6 @@ let session_and_status t = (t.session_id, t.status_message);;
 &gt;Line 1, characters 45-59:
 &gt;Error: This expression has type logon
 &gt;       There is no field status_message within type logon
-let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
-&gt;val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
 </code></pre>
 </div>
 <p>Why did the first definition succeed without a type annotation and
@@ -365,14 +380,20 @@ order was switched, the <code>session_id</code> field was considered
 first, and so that drove the type to be considered to be a
 <code>logon</code>, at which point <code>t.status_message</code> no
 longer made sense.</p>
-<p>We can avoid this ambiguity altogether, either by using
-nonoverlapping field names or by putting different record types in
-different modules. Indeed, packing types into modules is a broadly
-useful idiom (and one used quite extensively by <code>Core</code>),
-providing for each type a namespace within which to put related values.
-When using this style, it is standard practice to name the type
-associated with the module <code>t</code>. Using this style we would
-write:</p>
+<p>Adding a type annotation resolves the ambiguity, no matter what order
+the fields are considered in.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+&gt;val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can avoid the ambiguity altogether, either by using nonoverlapping
+field names or by putting different record types in different modules.
+Indeed, packing types into modules is a broadly useful idiom (and one
+used quite extensively by <code>Base</code>), providing for each type a
+namespace within which to put related values. When using this style, it
+is standard practice to name the type associated with the module
+<code>t</code>. So, we would write:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Log_entry = struct
   type t =
@@ -463,11 +484,7 @@ can otherwise infer the type of the record in question. In particular,
 we can rewrite the above declarations by adding type annotations and
 removing the module qualifications.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_log_entry ~session_id ~important message : Log_entry.t =
-  { time = Time_ns.now (); session_id; important; message };;
-&gt;val create_log_entry :
-&gt;  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
-let message_to_string ({ important; message; _ } : Log_entry.t) =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message;;
 &gt;val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
 let is_important (t:Log_entry.t) = t.important;;
@@ -477,8 +494,6 @@ let is_important (t:Log_entry.t) = t.important;;
 <p>This feature of the language, known by the somewhat imposing name of
 <em>type-directed constructor disambiguation</em>, applies to variant
 tags as well as record fields, as we’ll see in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>.</p>
-<p>For functions defined within the module where a given record is
-defined, the module qualification goes away entirely.</p>
 </section>
 <section class="level2" id="functional-updates">
 <h2>Functional Updates</h2>
@@ -513,24 +528,19 @@ new heartbeat arrives as follows.</p>
 <p>This is fairly verbose, given that there’s only one field that we
 actually want to change, and all the others are just being copied over
 from <code>t</code>. We can use OCaml’s <em>functional update</em>
-syntax to do this more tersely. The syntax of a functional update is as
-follows:</p>
-<div class="highlight">
-<pre><code class="language-clike">{ &lt;record&gt; with &lt;field&gt; = &lt;value&gt;;
-      &lt;field&gt; = &lt;value&gt;;
-      ...
-}</code></pre>
-</div>
-<p>The purpose of the functional update is to create a new record based
-on an existing one, with a set of field changes layered on top.</p>
-<p>Given this, we can rewrite <code>register_heartbeat</code> more
-concisely:</p>
+syntax to do this more tersely.</p>
+<p>The following shows how we can use functional updates to rewrite
+<code>register_heartbeat</code> more concisely.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
 { t with last_heartbeat_time = hb.Heartbeat.time };;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
+<p>The <code>with</code> keyword marks that this is a functional update,
+and the value assignments on the right-hand side indicate the changes to
+be made to the record on the left-hand side of the
+<code>with</code>.</p>
 <p>Functional updates make your code independent of the identity of the
 fields in the record that are not changing. This is often what you want,
 but it has downsides as well. In particular, if you change the
@@ -562,6 +572,9 @@ follows:</p>
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
+<p>These downsides notwithstanding, functional updates are very useful,
+and a good choice for cases where it’s not important that you consider
+every field of the record when making a change.</p>
 </section>
 <section class="level2" id="mutable-fields">
 <h2>Mutable Fields</h2>
@@ -583,9 +596,9 @@ mutable:<a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a>
 The side-effecting version of <code>register_heartbeat</code> would be
 written as follows:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
-  t.last_heartbeat_time   &lt;- hb.Heartbeat.time;
-  t.last_heartbeat_status &lt;- hb.Heartbeat.status_message;;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t (hb:Heartbeat.t) =
+  t.last_heartbeat_time   &lt;- hb.time;
+  t.last_heartbeat_status &lt;- hb.status_message;;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
@@ -605,7 +618,7 @@ fields" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-primary="f
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_users logons =
   List.dedup_and_sort ~compare:String.compare
-(List.map logons ~f:(fun x -&gt; x.Logon.user));;
+    (List.map logons ~f:(fun x -&gt; x.Logon.user));;
 &gt;val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
 </code></pre>
 </div>

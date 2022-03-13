@@ -51,7 +51,7 @@ the largest and smallest element of the list:</p>
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>The <code>match</code> expression is used to handle the error cases,
+<p> The <code>match</code> expression is used to handle the error cases,
 propagating a <code>None</code> in <code>hd</code> or <code>last</code>
 into the return value of <code>compute_bounds</code>.</p>
 <p>On the other hand, in the <code>find_mismatches</code> that follows,
@@ -100,7 +100,7 @@ such, we can write:</p>
 &gt;- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
 </code></pre>
 </div>
-<p>without first opening the <code>Result</code> module.</p>
+<p> without first opening the <code>Result</code> module.</p>
 </section>
 <section class="level3" id="error-and-or_error">
 <h3>Error and Or_error</h3>
@@ -119,18 +119,17 @@ can, for example, construct one from a string.</p>
 &gt;- : Error.t = something went wrong
 </code></pre>
 </div>
-<p>An <code>Or_error.t</code> is simply a <code>Result.t</code> with the
-error case specialized to the <code>Error.t</code> type. Here’s an
+<p> An <code>Or_error.t</code> is simply a <code>Result.t</code> with
+the error case specialized to the <code>Error.t</code> type. Here’s an
 example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error (Error.of_string "failed!");;
 &gt;- : ('a, Error.t) result = Error failed!
 </code></pre>
 </div>
-<p>And the <code>Or_error</code> module provides a bunch of useful
-operators for constructing errors. For example,
-<code>Or_error.try_with</code> can be used for catching exceptions from
-a computation.</p>
+<p>The <code>Or_error</code> module provides a bunch of useful operators
+for constructing errors. For example, <code>Or_error.try_with</code> can
+be used for catching exceptions from a computation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let float_of_string s =
   Or_error.try_with (fun () -&gt; Float.of_string s);;
@@ -158,16 +157,20 @@ converters. <a data-secondary="sexp converter" data-primary="Sexplib package" da
 &gt;- : Error.t = ("Unexpected character" c)
 </code></pre>
 </div>
+
 <p>We’re not restricted to doing this kind of error reporting with
 built-in types. As we’ll discuss in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S-Expressions</a>, Sexplib
 comes with a syntax extension that can autogenerate sexp converters for
 specific types. We can enable it in the toplevel with a
-<code>#require</code> statement.</p>
-
-
+<code>#require</code> statement enabling <code>ppx_jane</code>, which is
+a package that pulls in multiple different syntax extensions, including
+<code>ppx_sexp_value</code>, the one we need here. (Because of technical
+issues with the toplevel, we can’t easily enable these syntax extensions
+individually.)</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
-Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)];;
+Error.t_of_sexp
+  [%sexp ("List is too long",[1;2;3] : string * int list)];;
 &gt;- : Error.t = ("List is too long" (1 2 3))
 </code></pre>
 </div>
@@ -214,18 +217,18 @@ infix operator <code>&gt;&gt;=</code>. Here’s the definition of
 <code>bind</code> for options: <a data-primary="bind
 function" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let bind option f =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let bind option ~f =
   match option with
   | None -&gt; None
   | Some x -&gt; f x;;
-&gt;val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
+&gt;val bind : 'a option -&gt; f:('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
 </code></pre>
 </div>
 <p>As you can see, <code>bind None f</code> returns <code>None</code>
-without calling <code>f</code>, and <code>bind (Some x) f</code> returns
-<code>f x</code>. <code>bind</code> can be used as a way of sequencing
-together error-producing functions so that the first one to produce an
-error terminates the computation. Here’s a rewrite of
+without calling <code>f</code>, and <code>bind (Some x) ~f</code>
+returns <code>f x</code>. <code>bind</code> can be used as a way of
+sequencing together error-producing functions so that the first one to
+produce an error terminates the computation. Here’s a rewrite of
 <code>compute_bounds</code> to use a nested series of
 <code>bind</code>s:</p>
 <div class="highlight">
@@ -307,7 +310,7 @@ even shorter:</p>
 express your error handling both explicitly and concisely. We’ve only
 discussed these functions in the context of the <code>Option</code>
 module, but more functionality of this kind can be found in the
-<code>Result</code> and <code>Or_error</code> modules.<a data-secondary="option types" data-primary="error handling" data-type="indexterm">&nbsp;</a>[</p>
+<code>Result</code> and <code>Or_error</code> modules.<a data-secondary="option types" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
 </section>
 </section>
 <section class="level2" id="exceptions">
@@ -325,7 +328,7 @@ zero:</p>
 &gt;Exception: Division_by_zero.
 </code></pre>
 </div>
-<p>And an exception can terminate a computation even if it happens
+<p> And an exception can terminate a computation even if it happens
 nested somewhere deep within it:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;
@@ -363,9 +366,9 @@ List.filter exceptions  ~f:(function
 &gt;- : exn list = [Key_not_found("b")]
 </code></pre>
 </div>
-<p>Exceptions are all of the same type, <code>exn</code>. The
-<code>exn</code> type is something of a special case in the OCaml type
-system. It is similar to the variant types we encountered in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>, except that
+<p>Exceptions are all of the same type, <code>exn</code>, which is
+itself something of a special case in the OCaml type system. It is
+similar to the variant types we encountered in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>, except that
 it is <em>open</em>, meaning that it’s not fully defined in any one
 place. In particular, new tags (specifically, new exceptions) can be
 added to it by different parts of the program. This is in contrast to
@@ -388,7 +391,7 @@ find_exn alist "c";;
 &gt;Exception: Key_not_found("c").
 </code></pre>
 </div>
-<p>Note that we named the function <code>find_exn</code> to warn the
+<p> Note that we named the function <code>find_exn</code> to warn the
 user that the function routinely throws exceptions, a convention that is
 used heavily in Base.<a data-secondary="exception warnings
 for" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="find_exn function" data-type="indexterm">&nbsp;</a></p>
@@ -412,7 +415,7 @@ example of a function that doesn’t return a value:</p>
 &gt;val forever : unit -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p><code>forever</code> doesn’t return a value for a different reason:
+<p> <code>forever</code> doesn’t return a value for a different reason:
 it’s an infinite loop.</p>
 <p>This all matters because it means that the return type of
 <code>raise</code> can be whatever it needs to be to fit into the
@@ -433,7 +436,7 @@ Crossed_bounds { lower=10; upper=0 };;
 &gt;- : exn = Crossed_bounds(_)
 </code></pre>
 </div>
-<p>But if we declare the exception (and the types it depends on) using
+<p> But if we declare the exception (and the types it depends on) using
 <code>[@@deriving sexp]</code>, we’ll get something with more
 information:</p>
 <div class="highlight">
@@ -496,9 +499,9 @@ merge_lists [1;2;3] [-1;1] ~f:(+);;
 &gt;- : int list option = None
 </code></pre>
 </div>
-<p>Here we use <code>assert false</code>, which means that the
-<code>assert</code> is guaranteed to trigger. In general, one can put an
-arbitrary condition in the assertion.</p>
+<p> Here we use <code>assert false</code>, which means that the
+<code>assert</code>, once reached, is guaranteed to trigger. In general,
+one can put an arbitrary condition in the assertion.</p>
 <p>In this case, the <code>assert</code> can never be triggered because
 we have a check that makes sure that the lists are of the same length
 before we call <code>loop</code>. If we change the code so that we drop
@@ -524,8 +527,8 @@ assertion was made.</p>
 <section class="level3" id="exception-handlers">
 <h3>Exception Handlers</h3>
 <p>So far, we’ve only seen exceptions fully terminate the execution of a
-computation. But often, we want a program to be able to respond to and
-recover from an exception. This is achieved through the use of
+computation. But sometimes, we want a program to be able to respond to
+and recover from an exception. This is achieved through the use of
 <em>exception handlers</em>.<a data-secondary="exception
 handlers" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-secondary="exception
 handlers" data-primary="error handling" data-type="indexterm">&nbsp;</a></p>
@@ -538,7 +541,7 @@ syntax.</p>
 | &lt;pat2&gt; -&gt; &lt;expr2&gt;
 ...</code></pre>
 </div>
-<p>A <code>try/with</code> clause first evaluates its body,
+<p> A <code>try/with</code> clause first evaluates its body,
 <em><code>expr</code></em>. If no exception is thrown, then the result
 of evaluating the body is what the entire <code>try/with</code> clause
 evaluates to.</p>
@@ -570,7 +573,10 @@ let parse_line line =
 &gt;val parse_line : string -&gt; float list = &lt;fun&gt;
 let load filename =
   let inc = In_channel.create filename in
-  let data = In_channel.input_lines inc |&gt; List.map ~f:parse_line in
+  let data =
+    In_channel.input_lines inc
+    |&gt; List.map ~f:parse_line
+  in
   In_channel.close inc;
   data;;
 &gt;val load : string -&gt; float list list = &lt;fun&gt;
@@ -649,10 +655,10 @@ exception on, but if the exception happens to be
 </div>
 <p>This kind of problem is hard to detect in advance because the type
 system doesn’t tell you what exceptions a given function might throw.
-For this reason, it’s generally better to avoid relying on the identity
-of the exception to determine the nature of a failure. A better approach
-is to narrow the scope of the exception handler, so that when it fires
-it’s very clear what part of the code failed:</p>
+For this reason, it’s usually best to avoid relying on the identity of
+the exception to determine the nature of a failure. A better approach is
+to narrow the scope of the exception handler, so that when it fires it’s
+very clear what part of the code failed:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let lookup_weight ~compute_weight alist key =
   match
@@ -670,7 +676,7 @@ it’s very clear what part of the code failed:</p>
 expression is both awkward and involves some unnecessary computation (in
 particular, the allocation of the option). Happily, OCaml allows for
 exceptions to be caught by match expressions directly, which lets you
-write this more concisely as follows.</p>
+write this more concisely as follows. <a data-secondary="catching in match expression" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let lookup_weight ~compute_weight alist key =
   match find_exn alist key with
@@ -681,7 +687,7 @@ write this more concisely as follows.</p>
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that the <code>exception</code> keyword is used to mark the
+<p> Note that the <code>exception</code> keyword is used to mark the
 exception-handling cases.</p>
 <p>Best of all is to avoid exceptions entirely, which we could do by
 using the exception-free function from Base,
@@ -817,9 +823,9 @@ which locally avoids the costs of keeping track of the backtrace.</li>
 </div>
 <p>Note that we lose just a small number of cycles to setting up an
 exception handler, which means that an unused exception handler is quite
-cheap indeed. We lose a much bigger chunk, around 45 cycles, to actually
+cheap indeed. We lose a much bigger chunk, around 55 cycles, to actually
 raising an exception. If we explicitly raise an exception with no
-stacktrace, it costs us about 15 cycles.</p>
+stacktrace, it costs us about 25 cycles.</p>
 <p>We can also disable stacktraces, as we discussed, using
 <code>OCAMLRUNPARAM</code>. That changes the results a bit.</p>
 <div class="highlight">
@@ -836,15 +842,14 @@ stacktrace, it costs us about 15 cycles.</p>
 </code></pre>
 </div>
 <p>The only significant change here is that raising an exception in the
-ordinary way becomes just a bit cheaper: 30 cycles instead of 45 cycles.
+ordinary way becomes just a bit cheaper: 20 cycles instead of 55 cycles.
 But it’s still not as fast as using <code>raise_notrace</code>
 explicitly.</p>
 <p>Differences on this scale should only matter if you’re using
-exceptions routinely as part of your flow control. That’s not a pattern
-you should be using routinely anyway, and when you do, it’s better from
-a performance perspective to use <code>raise_notrace</code> in those
-particular places anyway. All of which is to say, you should almost
-always leave stack-traces on.</p>
+exceptions routinely as part of your flow control. That’s not a common
+pattern, and when you do need it, it’s better from a performance
+perspective to use <code>raise_notrace</code>. All of which is to say,
+you should almost always leave stack-traces on.</p>
 </section>
 <section class="level3" id="from-exceptions-to-error-aware-types-and-back-again">
 <h3>From Exceptions to Error-Aware Types and Back Again</h3>
@@ -865,7 +870,7 @@ find ["a",1; "b",2] "b";;
 &gt;- : int option = Base.Option.Some 2
 </code></pre>
 </div>
-<p>And <code>Result</code> and <code>Or_error</code> have similar
+<p> <code>Result</code> and <code>Or_error</code> have similar
 <code>try_with</code> functions. So, we could write:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find alist key =
@@ -875,7 +880,7 @@ find ["a",1; "b",2] "c";;
 &gt;- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 </code></pre>
 </div>
-<p>And then we can reraise that exception:</p>
+<p> We can then reraise that exception:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Or_error.ok_exn (find ["a",1; "b",2] "b");;
 &gt;- : int = 2
