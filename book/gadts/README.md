@@ -1320,7 +1320,7 @@ end
 All of which is to say: when creating types to act as abstract markers
 for the type parameter of a GADT, you should chose definitions that
 make the distinctness of those types clear, and you should expose
-those definitions in your mlis.
+those definitions in your `mli`s.
 
 #### Narrowing without GADTs
 
