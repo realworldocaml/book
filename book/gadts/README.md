@@ -325,12 +325,12 @@ type _ expr =
 
 The syntax here requires some decoding. The colon to the right of each
 tag is what tells you that this is a GADT.  To the right of the colon,
-you'll see what looks like an ordinary, single-argument function
-signature, and you can almost think of it that way; specifically, as
-the type signature for that particular tag, viewed as a type
-constructor. The left-hand side of the arrow states the types of the
-arguments to the constructor, and the right hand side determines the
-type of the constructed value.
+you'll see what looks like an ordinary, single-argument function type,
+and you can almost think of it that way; specifically, as the type
+signature for that particular tag, viewed as a type constructor. The
+left-hand side of the arrow states the types of the arguments to the
+constructor, and the right hand side determines the type of the
+constructed value.
 
 In the definition of each tag in a GADT, the right-hand side of the
 arrow is an instance of the type of the overall GADT, with independent
@@ -468,11 +468,11 @@ This works because by marking `eval` as polymorphic, the type of
 
 It's also helpful here because `eval` itself is an example of
 *polymorphic recursion*, which is to say that `eval` needs to call
-itself at multiple different types. This comes up, for example, in
-with `If`, since the `If` itself must be of type `bool`, but the type
-of the then and else clauses could be of type `int`, requiring
-dispatching `eval` at a different type then it was called on.
-[polymorphic recursion]{.idx}
+itself at multiple different types. This comes up, for example, with
+`If`, since the `If` itself must be of type `bool`, but the type of
+the then and else clauses could be of type `int`. This means that when
+evaluating `If`, we'll dispatch `eval` at a different type then it was
+called on.  [polymorphic recursion]{.idx}
 
 As such, `eval` needs to see itself as polymorphic.  This kind of
 polymorphism is basically impossible to infer automatically, which is
