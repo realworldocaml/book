@@ -137,9 +137,9 @@ module type Typesafe_lang_sig = sig
 end
 ```
 
-The functions `int_eval` and `bool_eval` are worth of some
-explanation.  You might expect there to be a single evaluation
-function, with this signature.
+The functions `int_eval` and `bool_eval` deserve some explanation.
+You might expect there to be a single evaluation function, with this
+signature.
 
 ```ocaml skip
 val eval : 'a t -> 'a
