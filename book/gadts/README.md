@@ -200,8 +200,8 @@ in the body of the definition of `t`.
 
 Because the type parameter is unused, it's free to take on any value.
 That means we can constrain the use of that type parameter arbitrarily
-in the signature, which is a freedom we use to essentially and the
-type-safety rules that we wanted.
+in the signature, which is a freedom we use to add the type-safety
+rules that we wanted.
 
 This all amounts to an improvement in terms of the API, but the
 implementation is if anything worse.  We still have the same evaluator
