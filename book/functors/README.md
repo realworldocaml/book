@@ -1,11 +1,11 @@
 # Functors
 
 Up until now, we've seen OCaml's modules play an important but limited
-role.  In particular, we've seen them as a mechanism for organizing
-code into units with specified interfaces. But OCaml's module system
-can do much more than that, serving as a powerful tool for building
-generic code and structuring large-scale systems. Much of that power
-comes from functors.  [functors/benefits of]{.idx}
+role.  In particular, used modules to organize code into units with
+specified interfaces. But OCaml's module system can do much more than
+that, serving as a powerful tool for building generic code and
+structuring large-scale systems. Much of that power comes from
+functors.  [functors/benefits of]{.idx}
 
 Functors are, roughly speaking, functions from modules to modules, and
 they can be used to solve a variety of code-structuring problems,
@@ -131,11 +131,10 @@ floating-point values or strings or times, and in each of these cases,
 you want similar operations: testing for emptiness, checking for
 containment, intersecting intervals, and so on.
 
-Let's see how to use functors to build a generic interval library that
-can be used with any type that supports a total ordering on the
-underlying set over which you want to build intervals. [interval
-computation/generic library for]{.idx}[functors/interval computation
-with]{.idx}
+We can use functors to build a generic interval library that can be
+used with any type that supports a total ordering on the underlying
+set. [interval computation/generic library
+for]{.idx}[functors/interval computation with]{.idx}
 
 First we'll define a module type that captures the information we'll
 need about the endpoints of the intervals. This interface, which we'll
@@ -387,8 +386,6 @@ definition of `Make_interval`. Notice that we added the type
     type t = | Interval of Endpoint.t * Endpoint.t
              | Empty
 
-    (* CR: avoid this duplication *)
-
     (** [create low high] creates a new interval from [low] to
         [high].  If [low > high], then the interval is empty *)
     let create low high =
@@ -543,9 +540,10 @@ module Make_interval :
     end
 ```
 
-So now, the interface is as it was, except that `endpoint` is known to be
-equal to `Endpoint.t`. As a result of that type equality, we can again do
-things that require that `endpoint` be exposed, like constructing intervals:
+Now the interface is as it was, except that `endpoint` is known to be
+equal to `Endpoint.t`. As a result of that type equality, we can again
+do things that require that `endpoint` be exposed, like constructing
+intervals:
 
 ```ocaml env=main
 # module Int_interval = Make_interval(Int);;
@@ -566,14 +564,15 @@ val i : Int_interval.t = <abstr>
 
 ### Destructive Substitution
 
-Sharing constraints basically do the job, but they have some downsides. In
-particular, we've now been stuck with the useless type declaration of
-`endpoint` that clutters up both the interface and the implementation. A
-better solution would be to modify the `Interval_intf` signature by replacing
-`endpoint` with `Endpoint.t` everywhere it shows up, and deleting the
-definition of `endpoint` from the signature. We can do just this using what's
-called *destructive substitution*. Here's the basic syntax:[destructive
-substitution]{.idx}[interval computation/destructive substitution]{.idx}
+Sharing constraints basically do the job, but they have some
+downsides. In particular, we've now been stuck with the useless type
+declaration of `endpoint` that clutters up both the interface and the
+implementation. A better solution would be to modify the
+`Interval_intf` signature by replacing `endpoint` with `Endpoint.t`
+everywhere it shows up, and deleting the definition of `endpoint` from
+the signature. We can do just this using what's called *destructive
+substitution*. Here's the basic syntax:[destructive
+substitution]{.idx}
 
 ```
 <Module_type> with type <type> := <type'>
@@ -601,8 +600,7 @@ by `int`. As with sharing constraints, we can also use this in the context of
 a functor:
 
 ```ocaml env=main
-# (* Suspicious # ? *)
-  module Make_interval(Endpoint : Comparable)
+# module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t =
   struct
 
@@ -650,10 +648,10 @@ module Make_interval :
     end
 ```
 
-The interface is precisely what we want: the type `t` is abstract, and the
-type of the endpoint is exposed; so we can create values of type
-`Int_interval.t` using the creation function, but not directly using the
-constructors and thereby violating the invariants of the module:
+The interface is precisely what we want: the type `t` is abstract, and
+the type of the endpoint is exposed; so we can create values of type
+`Int_interval.t` using the creation function, but not directly using
+the constructors and thereby violating the invariants of the module.
 
 ```ocaml env=main
 # module Int_interval = Make_interval(Int);;
@@ -673,8 +671,10 @@ Line 1, characters 24-45:
 Error: Unbound constructor Int_interval.Interval
 ```
 
-In addition, the `endpoint` type is gone from the interface, meaning we no
-longer need to define the `endpoint` type alias in the body of the module.
+\noindent
+In addition, the `endpoint` type is gone from the interface, meaning
+we no longer need to define the `endpoint` type alias in the body of
+the module.
 
 It's worth noting that the name is somewhat misleading, in that there's
 nothing destructive about destructive substitution; it's really just a way of
@@ -708,6 +708,7 @@ enabling `ppx_jane`:
 # #require "ppx_jane";;
 ```
 
+\noindent
 Now, we can use the deriving annotation to create sexp-converters for
 a given type.
 
@@ -722,10 +723,11 @@ val sexp_of_some_type : some_type -> Sexp.t = <fun>
 - : some_type = (44, ["five"; "six"])
 ```
 
-We'll discuss s-expressions and Sexplib in more detail in
-[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
-but for now, let's see what happens if we attach the `[@@deriving sexp]`
-declaration to the definition of `t` within the functor:
+We'll discuss s-expressions and Sexplib in more detail in [Data
+Serialization With S
+Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
+but for now, let's see what happens if we attach the `[@@deriving
+sexp]` declaration to the definition of `t` within the functor:
 
 ```ocaml env=main
 # module Make_interval(Endpoint : Comparable)
@@ -776,27 +778,27 @@ appropriate sexp-conversion functions for `Endpoint.t`. But all we know about
 anything about s-expressions.
 
 Happily, `Base` comes with a built-in interface for just this purpose called
-`Sexpable`, which is defined as follows:
+`Sexpable.S`, which is defined as follows:
 
-```ocaml file=examples/sexpable.ml
-module type Sexpable = sig
+```ocaml skip
+sig
   type t
   val sexp_of_t : t -> Sexp.t
   val t_of_sexp : Sexp.t -> t
 end
 ```
 
-We can modify `Make_interval` to use the `Sexpable` interface, for both its
-input and its output. First, let's create an extended version of the
-`Interval_intf` interface that includes the functions from the `Sexpable`
-interface. We can do this using destructive substitution on the `Sexpable`
-interface, to avoid having multiple distinct type `t`'s clashing with each
-other:
+We can modify `Make_interval` to use the `Sexpable.S` interface, for
+both its input and its output. First, let's create an extended version
+of the `Interval_intf` interface that includes the functions from the
+`Sexpable.S` interface. We can do this using destructive substitution
+on the `Sexpable.S` interface, to avoid having multiple distinct type
+`t`'s clashing with each other:
 
 ```ocaml env=main
 # module type Interval_intf_with_sexp = sig
     include Interval_intf
-    include Core.Sexpable with type t := t
+    include Sexpable.S with type t := t
   end;;
 module type Interval_intf_with_sexp =
   sig
@@ -821,7 +823,7 @@ signatures are being handled equivalently:
 # module type Interval_intf_with_sexp = sig
     type t
     include Interval_intf with type t := t
-    include Core.Sexpable      with type t := t
+    include Sexpable.S with type t := t
   end;;
 module type Interval_intf_with_sexp =
   sig
@@ -844,7 +846,7 @@ maintained when reading in from an s-expression:
 # module Make_interval(Endpoint : sig
       type t
       include Comparable with type t := t
-      include Core.Sexpable with type t := t
+      include Sexpable.S with type t := t
     end)
     : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
   = struct
@@ -909,7 +911,7 @@ module Make_interval :
     end
 ```
 
-And now, we can use that sexp converter in the ordinary way:
+Finally, we can use that sexp converter in the ordinary way:
 
 ```ocaml env=main
 # module Int_interval = Make_interval(Int);;
@@ -957,14 +959,15 @@ val dequeue : 'a t -> ('a * 'a t) option
 val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 ```
 
-The preceding `Fqueue.fold` function requires some explanation. It follows
-the same pattern as the `List.fold` function we described in
-[Using The List Module Effectively](lists-and-patterns.html#using-the-list-module-effectively){data-type=xref}.
-Essentially, `Fqueue.fold q ~init ~f` walks over the elements of `q` from
-front to back, starting with an accumulator of `init` and using `f` to update
-the accumulator value as it walks over the queue, returning the final value
-of the accumulator at the end of the computation. `fold` is a quite powerful
-operation, as we'll see.
+The signature of `fold` function requires some explanation. It follows
+the same pattern as the `List.fold` function we described in [Using
+The List Module
+Effectively](lists-and-patterns.html#using-the-list-module-effectively){data-type=xref}.
+Essentially, `Fqueue.fold q ~init ~f` walks over the elements of `q`
+from front to back, starting with an accumulator of `init` and using
+`f` to update the accumulator value as it walks over the queue,
+returning the final value of the accumulator at the end of the
+computation. `fold` is a quite powerful operation, as we'll see.
 
 We'll implement `Fqueue` using the well known trick of maintaining an
 input and an output list so that one can both efficiently enqueue on
@@ -1096,6 +1099,7 @@ module/Comparable.Make]{.idx}[Container.Make]{.idx}
   Here, the functor is used to provide a collection of standard helper
   dunctions based on the `bind` and `return` operators.
 
+\noindent
 These functors come in handy when you want to add the same kind of
 functionality that is commonly available in `Base` to your own types.
 
