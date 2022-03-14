@@ -551,8 +551,8 @@ module If_not_found = struct
 end
 ```
 
-Now we can write `flexible_find` which takes an `If_not_found.t` as a
-parameter, and varies its behavior accordingly.
+Now we can write `flexible_find`, which takes an `If_not_found.t` as a
+parameter and varies its behavior accordingly.
 
 ```ocaml env=main
 # let rec flexible_find list ~f (if_not_found : _ If_not_found.t) =
@@ -587,9 +587,10 @@ This mostly does what we want, but the problems is that
 used.
 
 To eliminate the unnecessary option in the `Raise` and `Default_to`
-cases, we're going to turn `If_not_found.t` into a GADT, in
-particular, a GADT with two type parameters: one for the type of the
-list element, and one for the return type of the function.
+cases, we're going to turn `If_not_found.t` into a GADT.  In
+particular, we'll mint it as a GADT with two type parameters: one for
+the type of the list element, and one for the return type of the
+function.
 
 ```ocaml env=main
 module If_not_found = struct
@@ -633,7 +634,7 @@ val flexible_find :
 As you can see from the signature of `flexible_find`, the return value
 now depends on the type of `If_not_found.t`, which means it can depend
 on the particular variant of `If_not_found.t` that's in use. As a
-result, we can now call `flexible_find` with no unnecessary options.
+result, `flexible_find` only returns an option when it needs to.
 
 ```ocaml env=main
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Return_none;;
@@ -1286,7 +1287,7 @@ type ('a, _) coption =
 ```
 
 \noindent
-The result is still not exhaustive!
+But the result is still not exhaustive!
 
 ```ocaml env=main
 # let assume_complete (coption : (_,complete) coption) =
