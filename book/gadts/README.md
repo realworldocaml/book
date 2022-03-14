@@ -241,11 +241,11 @@ type of the result varies based on the result of the expression.
 ### Trying to do better with ordinary variants
 
 To see why we need GADTs, let's see how far we can get without
-them. In particular, let's see what happens when we tried to encode
-the typing rules we want for our DSL directly into the definition of
-the expression type.  We'll do that by putting an ordinary type
-parameter on our `expr` type, in order to represent the type of the
-overall expression.
+them. In particular, let's see what happens when we try to encode the
+typing rules we want for our DSL directly into the definition of the
+expression type.  We'll do that by putting an ordinary type parameter
+on our `expr` and `value` types, in order to represent the type of an
+expression or value.
 
 ```ocaml env=main
 type 'a value =
