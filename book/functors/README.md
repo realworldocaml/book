@@ -1,7 +1,7 @@
 # Functors
 
 Up until now, we've seen OCaml's modules play an important but limited
-role.  In particular, used modules to organize code into units with
+role.  In particular, we've used modules to organize code into units with
 specified interfaces. But OCaml's module system can do much more than
 that, serving as a powerful tool for building generic code and
 structuring large-scale systems. Much of that power comes from
