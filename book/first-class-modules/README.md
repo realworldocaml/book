@@ -324,8 +324,8 @@ S-expressions are a simple, flexible, and human-readable serialization
 format commonly used in `Base` and related libraries.  For now, it's
 enough to think of them as balanced parenthetical expressions whose
 atomic values are strings, e.g., `(this (is an) (s expression))`.
-S-expressions are covered in more detail in [Data Serialization With S
-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
+S-expressions are covered in more detail in [Data Serialization With
+S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 [s-expressions]{.idx}
 
 The following signature for a module that implements a system for
@@ -336,37 +336,27 @@ have used another serialization format, like JSON, as discussed in
 [query-handlers/and first-class modules]{.idx}
 
 ```ocaml env=query_handler
-# module type Query_handler = sig
+module type Query_handler = sig
 
-    (** Configuration for a query handler *)
-    type config
+  (** Configuration for a query handler *)
+  type config
 
-    val sexp_of_config : config -> Sexp.t
-    val config_of_sexp : Sexp.t -> config
+  val sexp_of_config : config -> Sexp.t
+  val config_of_sexp : Sexp.t -> config
 
-    (** The name of the query-handling service *)
-    val name : string
+  (** The name of the query-handling service *)
+  val name : string
 
-    (** The state of the query handler *)
-    type t
+  (** The state of the query handler *)
+  type t
 
-    (** Creates a new query handler from a config *)
-    val create : config -> t
+  (** Creates a new query handler from a config *)
+  val create : config -> t
 
-    (** Evaluate a given query, where both input and output are
-        s-expressions *)
-    val eval : t -> Sexp.t -> Sexp.t Or_error.t
-  end;;
-module type Query_handler =
-  sig
-    type config
-    val sexp_of_config : config -> Sexp.t
-    val config_of_sexp : Sexp.t -> config
-    val name : string
-    type t
-    val create : config -> t
-    val eval : t -> Sexp.t -> Sexp.t Or_error.t
-  end
+  (** Evaluate a given query, where both input and output are
+      s-expressions *)
+  val eval : t -> Sexp.t -> Sexp.t Or_error.t
+end;;
 ```
 
 Implementing s-expression converters by hand is tedious and
@@ -395,7 +385,8 @@ val sexp_of_u : u -> Sexp.t = <fun>
 - : u = {a = 43; b = 3.4}
 ```
 
-Notably, the same annotations can be attached within a signature to
+\noindent
+The same annotations can be attached within a signature to
 add the appropriate type signature.
 
 ```ocaml env=query_handler
@@ -406,41 +397,32 @@ module type M =
 
 ### Implementing a Query Handler
 
-Let's look at some examples of query handlers that satisfy the
-`Query_handler` interface. The first example is a handler that produces
-unique integer IDs. It works by keeping an internal counter which it bumps
-every time it produces a new value. The input to the query in this case is
-just the trivial s-expression `()`, otherwise known as `Sexp.unit`:
-[query-handlers/implementation of]{.idx}
+Now we can construct an example of a query handler that satisfies the
+`Query_handler` interface. We'll start with a handler that produces
+unique integer IDs, which works by keeping an internal counter that's
+bumped every time a new value is requested. The input to the query in
+this case is just the trivial s-expression `()`, otherwise known as
+`Sexp.unit`: [query-handlers/implementation of]{.idx}
 
 ```ocaml env=query_handler
-# module Unique = struct
-    type config = int [@@deriving sexp]
-    type t = { mutable next_id: int }
+module Unique = struct
+  type config = int [@@deriving sexp]
+  type t = { mutable next_id: int }
 
-    let name = "unique"
-    let create start_at = { next_id = start_at }
+  let name = "unique"
+  let create start_at = { next_id = start_at }
 
-    let eval t sexp =
-      match Or_error.try_with (fun () -> unit_of_sexp sexp) with
-      | Error _ as err -> err
-      | Ok () ->
-        let response = Ok (Int.sexp_of_t t.next_id) in
-        t.next_id <- t.next_id + 1;
-        response
-  end;;
-module Unique :
-  sig
-    type config = int
-    val config_of_sexp : Sexp.t -> config
-    val sexp_of_config : config -> Sexp.t
-    type t = { mutable next_id : config; }
-    val name : string
-    val create : config -> t
-    val eval : t -> Sexp.t -> (Sexp.t, Error.t) result
-  end
+  let eval t sexp =
+    match Or_error.try_with (fun () -> unit_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok () ->
+      let response = Ok (Int.sexp_of_t t.next_id) in
+      t.next_id <- t.next_id + 1;
+      response
+end;;
 ```
 
+\noindent
 We can use this module to create an instance of the `Unique` query handler
 and interact with it directly:
 
@@ -458,38 +440,27 @@ the config is the default directory that relative paths are interpreted
 within:
 
 ```ocaml env=query_handler
-# module List_dir = struct
-    type config = string [@@deriving sexp]
-    type t = { cwd: string }
+module List_dir = struct
+  type config = string [@@deriving sexp]
+  type t = { cwd: string }
 
-    (** [is_abs p] Returns true if [p] is an absolute path  *)
-    let is_abs p =
-      String.length p > 0 && Char.(=) p.[0] '/'
+  (** [is_abs p] Returns true if [p] is an absolute path  *)
+  let is_abs p =
+    String.length p > 0 && Char.(=) p.[0] '/'
 
-    let name = "ls"
-    let create cwd = { cwd }
+  let name = "ls"
+  let create cwd = { cwd }
 
-    let eval t sexp =
-      match Or_error.try_with (fun () -> string_of_sexp sexp) with
-      | Error _ as err -> err
-      | Ok dir ->
-        let dir =
-          if is_abs dir then dir
-          else Core.Filename.concat t.cwd dir
-        in
-        Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
-  end;;
-module List_dir :
-  sig
-    type config = string
-    val config_of_sexp : Sexp.t -> config
-    val sexp_of_config : config -> Sexp.t
-    type t = { cwd : config; }
-    val is_abs : config -> bool
-    val name : config
-    val create : config -> t
-    val eval : t -> Sexp.t -> (Sexp.t, Error.t) result
-  end
+  let eval t sexp =
+    match Or_error.try_with (fun () -> string_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok dir ->
+      let dir =
+        if is_abs dir then dir
+        else Core.Filename.concat t.cwd dir
+      in
+      Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
+end;;
 ```
 
 Again, we can create an instance of this query handler and interact with it
@@ -559,6 +530,7 @@ val build_instance :
   'a -> (module Query_handler_instance) = <fun>
 ```
 
+\noindent
 Using `build_instance`, constructing a new instance becomes a one-liner:
 
 ```ocaml env=query_handler
@@ -575,6 +547,7 @@ query handler instances. We assume that the shape of the query is as follows:
 (query-name query)
 ```
 
+\noindent
 where *`query-name`* is the name used to determine which query handler to
 dispatch the query to, and *`query`* is the body of the query.
 
@@ -593,7 +566,8 @@ val build_dispatch_table :
   (string, (module Query_handler_instance)) Hashtbl.Poly.t = <fun>
 ```
 
-Now, we need a function that dispatches to a handler using a dispatch table:
+Then, we'll need a function that dispatches to a handler using a
+dispatch table:
 
 ```ocaml env=query_handler
 # let dispatch dispatch_table name_and_query =
@@ -613,19 +587,22 @@ val dispatch :
   Sexp.t -> Sexp.t Or_error.t = <fun>
 ```
 
+\noindent
 This function interacts with an instance by unpacking it into a module
-`I` and then using the query handler instance (`I.this`) in concert with the
-associated module (`I.Query_handler`).[I.Query_handler module]{.idx}
+`I` and then using the query handler instance (`I.this`) in concert
+with the associated module (`I.Query_handler`).[I.Query_handler
+module]{.idx}
 
-The bundling together of the module and the value is in many ways reminiscent
-of object-oriented languages. One key difference, is that first-class modules
-allow you to package up more than just functions or methods. As we've seen,
-you can also include types and even modules. We've only used it in a small
-way here, but this extra power allows you to build more sophisticated
-components that involve multiple interdependent types and values.
+The bundling together of the module and the value is in many ways
+reminiscent of object-oriented languages. One key difference, is that
+first-class modules allow you to package up more than just functions
+or methods. As we've seen, you can also include types and even
+modules. We've only used it in a small way here, but this extra power
+allows you to build more sophisticated components that involve
+multiple interdependent types and values.
 
-Now let's turn this into a complete, running example by adding a command-line
-interface:
+We can turn this into a complete, running example by adding a
+command-line interface:
 
 ```ocaml env=query_handler
 # open Stdio;;
@@ -655,9 +632,9 @@ val cli : (string, (module Query_handler_instance)) Hashtbl.Poly.t -> unit =
   <fun>
 ```
 
-We can most effectively run this command-line interface from a standalone
-program, which we can do by putting the above code in a file along with
-following command to launch the interface:
+We'll run this command-line interface from a standalone program by
+putting the above code in a file, and adding the following code launch
+the interface.
 
 ```ocaml file=examples/correct/query_handler_loader/query_handler.ml,part=1
 let () =
@@ -724,12 +701,13 @@ let create known_list =
     { known; active }
 ```
 
-Now we'll start writing out the functions for manipulating the table of
-active query handlers. We'll start with the function for loading an instance.
-Note that it takes as an argument both the name of the query handler and the
-configuration for instantiating that handler in the form of an s-expression.
-These are used for creating a first-class module of type
-`(module Query_handler_instance)`, which is then added to the active table:
+Now we can write the functions for manipulating the table of active
+query handlers. We'll start with the function for loading an instance.
+Note that it takes as an argument both the name of the query handler
+and the configuration for instantiating that handler in the form of an
+s-expression.  These are used for creating a first-class module of
+type `(module Query_handler_instance)`, which is then added to the
+active table:
 
 ```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=3
 let load t handler_name config =
@@ -804,10 +782,10 @@ let eval t sexp =
 end
 ```
 
-Finally, we can put this all together with the command-line interface. We
-first create an instance of the loader query handler and then add that
-instance to the loader's active table. We can then just launch the
-command-line interface, passing it the active table:
+Finally, we can put this all together with the command-line
+interface. We first create an instance of the loader query handler and
+then add that instance to the loader's active table. We can then
+launch the command-line interface, passing it the active table.
 
 ```ocaml file=examples/correct/query_handler_loader/query_handler_loader.ml,part=1
 let () =
@@ -820,14 +798,14 @@ let () =
   in
   Hashtbl.set loader.Loader.active
     ~key:Loader.name ~data:loader_instance;
-  cli loader.Loader.active
+  cli loader.active
 ```
 
 The resulting command-line interface behaves much as you'd expect,
 starting out with no query handlers available but giving you the
 ability to load and unload them. Here's an example of it in action. As
 you can see, we start out with `loader` itself as the only active
-handler:
+handler.
 
 ```sh skip
 $ dune exec -- ./query_handler_loader.exe
@@ -837,6 +815,7 @@ $ dune exec -- ./query_handler_loader.exe
 (loader)
 ```
 
+\noindent
 Any attempt to use an inactive query handler will fail:
 
 ```
@@ -844,9 +823,10 @@ Any attempt to use an inactive query handler will fail:
 Could not find matching handler: ls
 ```
 
+\noindent
 But, we can load the `ls` handler with a config of our choice, at which point
 it will be available for use. And once we unload it, it will be unavailable
-yet again and could be reloaded with a different config:
+yet again and could be reloaded with a different config.
 
 ```
 >>> (loader (load ls /var))
@@ -884,9 +864,9 @@ without first-class modules using the following types:[first-class
 modules/alternatives to]{.idx}
 
 ```ocaml env=query_handler
-# type query_handler_instance = { name : string
-                                ; eval : Sexp.t -> Sexp.t Or_error.t
-  };;
+# type query_handler_instance =
+    { name : string
+    ; eval : Sexp.t -> Sexp.t Or_error.t };;
 type query_handler_instance = {
   name : string;
   eval : Sexp.t -> Sexp.t Or_error.t;

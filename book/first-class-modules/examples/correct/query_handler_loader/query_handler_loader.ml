@@ -12,4 +12,4 @@ let () =
   in
   Hashtbl.set loader.Loader.active
     ~key:Loader.name ~data:loader_instance;
-  cli loader.Loader.active
+  cli loader.active
