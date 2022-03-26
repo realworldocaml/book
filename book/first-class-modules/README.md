@@ -26,6 +26,8 @@ We'll start out by covering the basic mechanics of first-class modules
 by working through some toy examples. We'll get to more realistic
 examples in the next section.
 
+### Creating first-class modules
+
 In that light, consider the following signature of a module with a
 single integer variable:
 
@@ -59,8 +61,10 @@ We can convert `Three` into a first-class module as follows:
 val three : (module X_int) = <module>
 ```
 
-The module type doesn't need to be part of the construction of a first-class
-module if it can be inferred. Thus, we can write:
+### Inference and anonymous modules
+
+The module type doesn't need to be part of the construction of a
+first-class module if it can be inferred. Thus, we can write:
 
 ```ocaml env=main
 # module Four = struct let x = 4 end;;
@@ -76,6 +80,8 @@ We can also create a first-class module from an anonymous module:
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
+### Unpacking first-class modules
+
 In order to access the contents of a first-class module, you need to unpack
 it into an ordinary module. This can be done using the `val` keyword, using
 this syntax:
@@ -84,6 +90,7 @@ this syntax:
 (val <first_class_module> : <Module_type>)
 ```
 
+\noindent
 Here's an example:
 
 ```ocaml env=main
@@ -92,6 +99,8 @@ module New_three : X_int
 # New_three.x;;
 - : int = 3
 ```
+
+### Functions for manipulating first-class modules
 
 We can also write ordinary functions which consume and create first-class
 modules. The following shows the definition of two functions: `to_int`, which
@@ -110,6 +119,14 @@ val to_int : (module X_int) -> int = <fun>
 val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 ```
 
+You can also unpack a first-class module with a pattern match, which
+lets us write `to_int` more concisely:
+
+```ocaml env=main
+# let to_int (module M : X_int) = M.x;;
+val to_int : (module X_int) -> int = <fun>
+```
+
 With these functions in hand, we can now work with values of type
 `(module X_int)` in a more natural style, taking advantage of the concision
 and simplicity of the core language:
@@ -121,15 +138,7 @@ val six : (module X_int) = <module>
 - : int = 12
 ```
 
-There are some useful syntactic shortcuts when dealing with first-class
-modules. One notable one is that you can do the conversion to an ordinary
-module within a pattern match. Thus, we can rewrite the `to_int` function as
-follows:
-
-```ocaml env=main
-# let to_int (module M : X_int) = M.x;;
-val to_int : (module X_int) -> int = <fun>
-```
+### Richer first-class modules
 
 First-class modules can contain types and functions in addition to simple
 values like `int`. Here's an interface that contains a type and a
@@ -144,6 +153,7 @@ new one:
 module type Bumpable = sig type t val bump : t -> t end
 ```
 
+\noindent
 We can create multiple instances of this module with different underlying
 types:
 
@@ -160,6 +170,7 @@ module Int_bumper : sig type t = int val bump : t -> t end
 module Float_bumper : sig type t = float val bump : t -> t end
 ```
 
+\noindent
 And we can convert these to first-class modules:
 
 ```ocaml env=main
@@ -167,9 +178,12 @@ And we can convert these to first-class modules:
 val int_bumper : (module Bumpable) = <module>
 ```
 
-But you can't do much with `int_bumper`, since `int_bumper` is fully
-abstract, so that we can no longer recover the fact that the type in question
-is `int`.
+### Exposing types
+
+You can't do much with `int_bumper` because it's fully abstract, so we
+can't take advantage of the fact that the type in question is `int`,
+which makes it impossible to construct or really do anything with
+values of `Bumper.t`.
 
 ```ocaml env=main
 # let (module Bumper) = int_bumper in
@@ -191,9 +205,8 @@ val int_bumper : (module Bumpable with type t = int) = <module>
 val float_bumper : (module Bumpable with type t = float) = <module>
 ```
 
-The sharing constraints we've added above make the resulting
-first-class modules polymorphic in the type `t`. As a result, we can
-now use these first-class modules on values of the matching type:
+The adding of the sharing constraint has exposed the type `t`, which
+lets us actually use the values within the module.
 
 ```ocaml env=main
 # let (module Bumper) = int_bumper in
@@ -204,11 +217,11 @@ now use these first-class modules on values of the matching type:
 - : float = 4.5
 ```
 
-We can also write functions that use such first-class modules
-polymorphically. The following function takes two arguments: a
-`Bumpable` module and a list of elements of the same type as the type
-`t` of the module: [polymorphism/in first-class
-modules]{.idx}[first-class modules/polymorphism in]{.idx}
+We can also use these first-class modules polymorphically. The
+following function takes two arguments: a `Bumpable` module and a list
+of elements of the same type as the type `t` of the module:
+[polymorphism/in first-class modules]{.idx}[first-class
+modules/polymorphism in]{.idx}
 
 ```ocaml env=main
 # let bump_list
@@ -221,14 +234,14 @@ val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
   <fun>
 ```
 
-Here, we used a feature of OCaml that hasn't come up before: a
-*locally abstract type*. For any function, you can declare a pseudoparameter
-of the form `(type a)` which introduces a fresh type named `a`. This type
-acts like an abstract type within the context of the function. In the example
-above, the locally abstract type was used as part of a sharing constraint
-that ties the type `B.t` with the type of the elements of the list passed in.
-[datatypes/locally abstract types]{.idx}[abstract types]{.idx}[locally
-abstract types]{.idx}[sharing constraint]{.idx}
+In this example, `a` is a *locally abstract type*. For any function,
+you can declare a pseudoparameter of the form `(type a)` which
+introduces a fresh type named `a`. This type acts like an abstract
+type within the context of the function. In the example above, the
+locally abstract type was used as part of a sharing constraint that
+ties the type `B.t` with the type of the elements of the list passed
+in.  [datatypes/locally abstract types]{.idx} [abstract
+types]{.idx}[locally abstract types]{.idx}[sharing constraint]{.idx}
 
 The resulting function is polymorphic in both the type of the list element
 and the type `Bumpable.t`. We can see this function in action:
@@ -257,12 +270,13 @@ polymorphic from the outside. Consider the following example:
 val wrap_in_list : 'a -> 'a list = <fun>
 ```
 
-This compiles successfully because the type `a` is used in a way that is
-compatible with it being abstract, but the type of the function that is
-inferred is polymorphic.
+The type `a` is used in a way that is compatible with it being
+abstract, but the type of the function that is inferred is
+polymorphic.
 
-If, on the other hand, we try to use the type `a` as equivalent to some
-concrete type, say, `int`, then the compiler will complain:
+If, on the other hand, we try to use the type `a` as if it were
+equivalent to some concrete type, say, `int`, then the compiler will
+complain.
 
 ```ocaml env=main
 # let double_int (type a) (x:a) = x + x;;
@@ -293,9 +307,6 @@ val create_comparable :
 - : (module Comparable with type t = float) = <module>
 ```
 
-Here, what we effectively do is capture a polymorphic type and export it as a
-concrete type within a module.
-
 This technique is useful beyond first-class modules. For example, we can use
 the same approach to construct a local module to be fed to a functor.
 :::
@@ -323,7 +334,6 @@ module for handling s-expressions.
 [query-handlers/and first-class modules]{.idx}
 
 ```ocaml env=query_handler
-# #require "ppx_jane";;
 # module type Query_handler = sig
 
     (** Configuration for a query handler *)
