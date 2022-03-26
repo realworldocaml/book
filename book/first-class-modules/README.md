@@ -315,7 +315,7 @@ the same approach to construct a local module to be fed to a functor.
 ## Example: A Query-Handling Framework
 
 Now let's look at first-class modules in the context of a more
-complete and realistic example.  In particular, we're going to show to
+complete and realistic example.  In particular, we're going to
 implement a system for responding to user-generated queries.
 
 This system will use *s-expressions* for formatting queries and
@@ -330,7 +330,9 @@ Expressions](data-serialization.html#data-serialization-with-s-expressions){data
 
 The following signature for a module that implements a system for
 responding to user-generated queries.  Here, we use Base's `Sexp`
-module for handling s-expressions.
+module for handling s-expressions.  Note that we could just as easily
+have used another serialization format, like JSON, as discussed in
+[Handling JSON Data](json.html#handling-json-data){data-type=xref}.
 [query-handlers/and first-class modules]{.idx}
 
 ```ocaml env=query_handler
