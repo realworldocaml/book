@@ -4,12 +4,13 @@
 *This chapter was written by Leo White and Jason Hickey.*
 :::
 
-Programming with objects directly is great for encapsulation, but one of the
-main goals of object-oriented programming is code reuse through inheritance.
-For inheritance, we need to introduce *classes*. In object-oriented
-programming, a class is a "recipe" for creating objects. The recipe can be
-changed by adding new methods and fields, or it can be changed by modifying
-existing methods. [programming/object-oriented programming (OOP)]{.idx}
+Programming with objects directly is great for encapsulation, but one
+of the main goals of object-oriented programming is code reuse through
+inheritance.  For inheritance, we need to introduce *classes*. In
+object-oriented programming, a class is essentially a recipe for
+creating objects. The recipe can be changed by adding new methods and
+fields, or it can be changed by modifying existing
+methods. [programming/object-oriented programming (OOP)]{.idx}
 
 ## OCaml Classes
 
@@ -214,7 +215,7 @@ over the contents of our stack:
 # class ['a] list_iterator init = object
     val mutable current : 'a list = init
 
-    method has_value = Poly.(current <> [])
+    method has_value = not (List.is_empty current)
 
     method get =
       match current with
