@@ -522,7 +522,7 @@ The simplest way is to use classes and open recursion. For example, the
 following class defines objects that fold over the document data:
 
 ```ocaml env=doc
-open Core
+open Base
 
 class ['a] folder = object(self)
   method doc acc = function
