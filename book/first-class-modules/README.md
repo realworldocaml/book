@@ -183,7 +183,7 @@ val int_bumper : (module Bumpable) = <module>
 You can't do much with `int_bumper` because it's fully abstract, so we
 can't take advantage of the fact that the type in question is `int`,
 which makes it impossible to construct or really do anything with
-values of `Bumper.t`.
+values of type `Bumper.t`.
 
 ```ocaml env=main
 # let (module Bumper) = int_bumper in
@@ -205,7 +205,7 @@ val int_bumper : (module Bumpable with type t = int) = <module>
 val float_bumper : (module Bumpable with type t = float) = <module>
 ```
 
-The adding of the sharing constraint has exposed the type `t`, which
+The addition of the sharing constraint has exposed the type `t`, which
 lets us actually use the values within the module.
 
 ```ocaml env=main
@@ -566,7 +566,7 @@ val build_dispatch_table :
   (string, (module Query_handler_instance)) Hashtbl.Poly.t = <fun>
 ```
 
-Then, we'll need a function that dispatches to a handler using a
+Next, we'll need a function that dispatches to a handler using a
 dispatch table:
 
 ```ocaml env=query_handler
@@ -633,7 +633,7 @@ val cli : (string, (module Query_handler_instance)) Hashtbl.Poly.t -> unit =
 ```
 
 We'll run this command-line interface from a standalone program by
-putting the above code in a file, and adding the following code launch
+putting the above code in a file, and adding the following to launch
 the interface.
 
 ```ocaml file=examples/correct/query_handler_loader/query_handler.ml,part=1
