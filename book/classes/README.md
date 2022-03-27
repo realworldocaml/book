@@ -853,18 +853,28 @@ redundant.
 But equality is an extreme instance of a binary method: it needs
 access to all the information of the other object.  Many other binary
 methods need only partial information about the object.  For instance,
-a method that compares shapes by their sizes:
+consider a method that compares shapes by their sizes:
 
-```ocaml skip
-class square w = object(self)
-  method width = w
-  method area = Float.of_int (self#width * self#width)
-  method larger other = Float.(self#area > other#area)
-end
+<!-- TODO: Is this actually right? -->
+
+```ocaml env=binary
+# class square w = object(self)
+    method width = w
+    method area = Float.of_int (self#width * self#width)
+    method larger (other : < area : float >) = Float.(self#area > other#area)
+  end;;
+class square :
+  int ->
+  object
+    method area : float
+    method larger : < area : float > -> bool
+    method width : int
+  end
 ```
 
-In this case, there is no one-to-one correspondence between the objects and
-their sizes, and we can still easily define new kinds of shape.
+The `larger` method can be applied to compare two `square`s, but it
+can also be applied to other kinds of shapes, as long as they
+implement the `area` method.
 
 ## Virtual Classes and Methods
 
