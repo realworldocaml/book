@@ -175,7 +175,7 @@ method:
 ```ocaml env=polymorphism
 # let toggle sq b : unit =
     if b then sq#resize `Fullscreen else minimize sq;;
-Line 3, characters 17-19:
+Line 2, characters 51-53:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
