@@ -97,7 +97,7 @@ end;;
 &gt;val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
 </code></pre>
 </div>
-<p>The object has an integer list value <code>v</code>, a method
+<p> The object has an integer list value <code>v</code>, a method
 <code>pop</code> that returns the head of <code>v</code>, and a method
 <code>push</code> that adds an integer to the head of
 <code>v</code>.</p>
@@ -162,15 +162,14 @@ let limit sq = if (area sq) &gt; 100 then minimize sq;;
 &gt;val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As you can see, object types are inferred automatically from the
+<p> As you can see, object types are inferred automatically from the
 methods that are invoked on them.</p>
 <p>The type system will complain if it sees incompatible uses of the
 same method:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let toggle sq b : unit =
-  if b then sq#resize `Fullscreen
-else minimize sq;;
-&gt;Line 3, characters 17-19:
+  if b then sq#resize `Fullscreen else minimize sq;;
+&gt;Line 2, characters 51-53:
 &gt;Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;
 &gt;       but an expression was expected of type &lt; resize : int -&gt; unit; .. &gt;
 &gt;       Types for method resize are incompatible
@@ -212,7 +211,7 @@ polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="ellipses (..)" da
 &gt;       In type &lt; width : Base.int; .. &gt; as 'a the variable 'a is unbound
 </code></pre>
 </div>
-<p>This is because <code>..</code> is really a special kind of type
+<p> This is because <code>..</code> is really a special kind of type
 variable called a <em>row variable</em>.</p>
 <p>This kind of typing scheme using row variables is called <em>row
 polymorphism</em>. Row polymorphism is also used in polymorphic variant
@@ -230,7 +229,7 @@ Consider the following function.</p>
 &gt;val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can run it on the stack type we defined above, which is based on
+<p> We can run it on the stack type we defined above, which is based on
 linked lists.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (stack [5;4;3;2;1]);;
@@ -238,7 +237,7 @@ linked lists.</p>
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>But we could also create a totally different implementation of
+<p> But we could also create a totally different implementation of
 stacks, using Base’s array-based <code>Stack</code> module.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let array_stack l = object
@@ -248,7 +247,7 @@ end;;
 &gt;val array_stack : 'a list -&gt; &lt; pop : 'a option &gt; = &lt;fun&gt;
 </code></pre>
 </div>
-<p>And <code>print_pop</code> will work just as well on this kind of
+<p> And <code>print_pop</code> will work just as well on this kind of
 stack object, despite having a completely different implementation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (array_stack [5;4;3;2;1]);;
@@ -310,7 +309,7 @@ dynamically.</p>
 <section class="level2" id="when-to-use-objects">
 <h2>When to Use Objects</h2>
 <p>You might wonder when to use objects in OCaml, which has a multitude
-of alternative mechanisms to express the similar concepts. First-class
+of alternative mechanisms to express similar concepts. First-class
 modules are more expressive (a module can include types, while classes
 and objects cannot). Modules, functors, and data types also offer a wide
 range of ways to express program structure. In fact, many seasoned OCaml
@@ -492,7 +491,7 @@ let shape_array: shape array = (square_array :&gt; shape array);;
 &gt;       The second object type has no method width
 </code></pre>
 </div>
-<p>We say that <code>'a list</code> is <em>covariant</em> (in
+<p> We say that <code>'a list</code> is <em>covariant</em> (in
 <code>'a</code>), while <code>'a array</code> is <em>invariant</em>.
 <a data-primary="invariance" data-type="indexterm">&nbsp;</a><a data-primary="covariance" data-type="indexterm">&nbsp;</a></p>
 <p>Subtyping function types requires a third class of variance. A
@@ -511,9 +510,9 @@ let square_to_string: square -&gt; string =
 &gt;val square_to_string : square -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We say that <code>'a -&gt; string</code> is <em>contravariant</em> in
-<code>'a</code>. In general, function types are contravariant in their
-arguments and covariant in their results. <a data-primary="contravariance" data-type="indexterm">&nbsp;</a></p>
+<p> We say that <code>'a -&gt; string</code> is <em>contravariant</em>
+in <code>'a</code>. In general, function types are contravariant in
+their arguments and covariant in their results. <a data-primary="contravariance" data-type="indexterm">&nbsp;</a></p>
 <section class="level5" id="variance-annotations">
 <h5>Variance Annotations</h5>
 <p>OCaml works out the variance of a type using that type’s definition.
@@ -534,7 +533,7 @@ end;;
 &gt;  end
 </code></pre>
 </div>
-<p>By looking at what coercions are allowed, we can see that the type
+<p> By looking at what coercions are allowed, we can see that the type
 parameters of the immutable <code>Either</code> type are covariant.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left_square = Either.left (square 40);;
@@ -544,7 +543,7 @@ parameters of the immutable <code>Either</code> type are covariant.</p>
 &gt;- : (shape, 'a) Either.t = Either.Left &lt;obj&gt;
 </code></pre>
 </div>
-<p>The story is different, however, if the definition is hidden by a
+<p> The story is different, however, if the definition is hidden by a
 signature.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Abs_either : sig
@@ -560,7 +559,7 @@ end = Either;;
 &gt;  end
 </code></pre>
 </div>
-<p>In this case, OCaml is forced to assume that the type is
+<p> In this case, OCaml is forced to assume that the type is
 invariant.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Abs_either.left (square 40) :&gt; (shape, _) Abs_either.t);;
@@ -590,7 +589,7 @@ end = Either;;
 &gt;  end
 </code></pre>
 </div>
-<p>As you can see, this now allows the coercion once again.</p>
+<p> As you can see, this now allows the coercion once again.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Var_either.left (square 40) :&gt; (shape, _) Var_either.t);;
 &gt;- : (shape, 'a) Var_either.t = &lt;abstr&gt;
@@ -624,8 +623,8 @@ List.fold ~init:0.0 ~f:stack_area shape_stacks;;
 &gt;val total_area : shape stack list -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>However, when we try to apply this function to our objects, we get an
-error:</p>
+<p> However, when we try to apply this function to our objects, we get
+an error:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];;
 &gt;Line 1, characters 13-42:
@@ -726,15 +725,15 @@ object:</p>
   }
 }</code></pre>
 </div>
-<p>Most programmers would consider this code to be “wrong.” Instead of
-performing a case analysis on the type of object, it would be better to
-define a method to return the name of the shape. Instead of calling
-<code>GetShapeName(s)</code>, we should call <code>s.Name()</code>
-instead.</p>
+<p> Most programmers would consider this code to be awkward, at the
+least. Instead of performing a case analysis on the type of object, it
+would be better to define a method to return the name of the shape.
+Instead of calling <code>GetShapeName(s)</code>, we should call
+<code>s.Name()</code> instead.</p>
 <p>However, the situation is not always so obvious. The following code
-checks whether an array of shapes looks like a “barbell,” composed of
-two <code>Circle</code> objects separated by a <code>Line</code>, where
-the circles have the same radius:</p>
+checks whether an array of shapes looks like a barbell, composed of two
+<code>Circle</code> objects separated by a <code>Line</code>, where the
+circles have the same radius:</p>
 <div class="highlight">
 <pre><code class="language-java">boolean IsBarbell(Shape[] s) {
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
@@ -800,7 +799,8 @@ List.filter ~f:(fun s -&gt; Float.(s#area &lt;= 100.)) l;;
 </code></pre>
 </div>
 <p>The return type of this function is built from the open object type
-of its argument, preserving any additional methods that it may have:</p>
+of its argument, preserving any additional methods that it may have, as
+we can see below.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares : &lt; area : float; width : int &gt; list =
 [square 5; square 15; square 10];;
@@ -820,10 +820,10 @@ remove_large (squares :&gt; &lt; area : float &gt; list );;
 &gt;- : &lt; area : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
-<p>However, there are some situations where we cannot use row
-polymorphism. In particular, row polymorphism cannot be used to place
-different types of object in the same container. For example, lists of
-heterogeneous elements cannot be created using row polymorphism:</p>
+<p>There are some situations where we cannot use row polymorphism. In
+particular, row polymorphism cannot be used to place different types of
+object in the same container. For example, lists of heterogeneous
+elements cannot be created using row polymorphism:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30];;
 &gt;Line 1, characters 50-59:
@@ -845,7 +845,7 @@ shape_ref := circle 20;;
 &gt;       The second object type has no method radius
 </code></pre>
 </div>
-<p>In both these cases we must use subtyping:<a data-secondary="subtyping" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p> In both these cases we must use subtyping:<a data-secondary="subtyping" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];;
 &gt;val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]

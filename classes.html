@@ -6,9 +6,9 @@
 <p>Programming with objects directly is great for encapsulation, but one
 of the main goals of object-oriented programming is code reuse through
 inheritance. For inheritance, we need to introduce <em>classes</em>. In
-object-oriented programming, a class is a “recipe” for creating objects.
-The recipe can be changed by adding new methods and fields, or it can be
-changed by modifying existing methods. <a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
+object-oriented programming, a class is essentially a recipe for
+creating objects. The recipe can be changed by adding new methods and
+fields, or it can be changed by modifying existing methods. <a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
 <section class="level2" id="ocaml-classes">
 <h2>OCaml Classes</h2>
 <p>In OCaml, class definitions must be defined as toplevel statements in
@@ -206,7 +206,7 @@ iterate over the contents of our stack:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] list_iterator init = object
   val mutable current : 'a list = init
 
-  method has_value = Poly.(current &lt;&gt; [])
+  method has_value = not (List.is_empty current)
 
   method get =
     match current with
@@ -503,9 +503,7 @@ functions to avoid repetitive boilerplate?</p>
 the following class defines objects that fold over the document
 data:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">open Core
-
-class ['a] folder = object(self)
+<pre><code class="language-ocaml">class ['a] folder = object(self)
   method doc acc = function
   | Heading _ -&gt; acc
   | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
@@ -822,18 +820,25 @@ of the representation type, making the objects seem somewhat
 redundant.</p>
 <p>But equality is an extreme instance of a binary method: it needs
 access to all the information of the other object. Many other binary
-methods need only partial information about the object. For instance, a
-method that compares shapes by their sizes:</p>
+methods need only partial information about the object. For instance,
+consider a method that compares shapes by their sizes:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">class square w = object(self)
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class square w = object(self)
   method width = w
   method area = Float.of_int (self#width * self#width)
-  method larger other = Float.(self#area &gt; other#area)
-end</code></pre>
+  method larger (other : shape) = Float.(self#area &gt; other#area)
+end;;
+&gt;class square :
+&gt;  int -&gt;
+&gt;  object
+&gt;    method area : float
+&gt;    method larger : shape -&gt; bool
+&gt;    method width : int
+&gt;  end
+</code></pre>
 </div>
-<p>In this case, there is no one-to-one correspondence between the
-objects and their sizes, and we can still easily define new kinds of
-shape.</p>
+<p>The <code>larger</code> method can be used on a <code>square</code>,
+but it can also be applied to any object of type <code>shape</code>.</p>
 </section>
 <section class="level2" id="virtual-classes-and-methods">
 <h2>Virtual Classes and Methods</h2>
