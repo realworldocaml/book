@@ -649,8 +649,8 @@ Exception: (Failure "No matching item found")
 
 ### Capturing the unknown
 
-Code that that works with unknown types is routine in OCaml, and comes
-up in the simplest of examples:
+Code that works with unknown types is routine in OCaml, and comes up
+in the simplest of examples:
 
 ```ocaml env=main
 # let tuple x y = (x,y);;
