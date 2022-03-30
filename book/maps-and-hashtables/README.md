@@ -1,11 +1,12 @@
 # Maps and Hash Tables
 
-Lots of programming problems require dealing with data organized as key/value
-pairs. Maybe the simplest way of representing such data in OCaml is an
-*association list*, which is simply a list of pairs of keys and values. For
-example, you could represent a mapping between the 10 digits and their
-English names as follows: [key/value pairs]{.idx}[data structures/key/value
-pairs]{.idx}[lists/association lists]{.idx}[association lists]{.idx}
+Lots of programming problems require dealing with data organized as
+key/value pairs. Maybe the simplest way of representing such data in
+OCaml is an *association list*, which is simply a list of pairs of
+keys and values. For example, you could represent a mapping between
+the 10 digits and their English names as follows: [key/value
+pairs]{.idx}[data structures/key/value pairs]{.idx}[lists/association
+lists]{.idx}[association lists]{.idx}
 
 ```ocaml env=main
 # open Base;;
@@ -92,27 +93,29 @@ let touch t s =
   Map.set t ~key:s ~data:(count + 1)
 ```
 
-Take a look at the definition of the type `t` above. You'll see that the
-`Map.t` has three type parameter. The first two are what you might expect;
-one for the type of the key, and one for type of the data. The third type
-parameter, the *comparator witness*, requires some explaining.
+Take a look at the definition of the type `t` above. You'll see that
+the `Map.t` has three type parameter. The first two are what you might
+expect; one for the type of the key, and one for type of the data. The
+third type parameter, the *comparator witness*, requires some
+explaining.
 
-The comparator witness is used to indicate which comparison function was used
-to construct the map, rather than saying anything about concrete data stored
-in the map. The type `String.comparator_witness` in particular indicates that
-this map was built with the default comparison function from the `String`
-module. We'll talk about why the comparator witness is important later in the
-chapter.
+The comparator witness is used to indicate which comparison function
+was used to construct the map, rather than saying something about the
+type of data stored in the map.  The type `String.comparator_witness`
+in particular indicates that this map was built with the default
+comparison function from the `String` module. We'll talk about why the
+comparator witness is important later in the chapter.
 
-The call to `Map.empty` is also worth explaining, in that, unusually, it
-takes a first-class module as an argument. The point of the first class
-module is to provide the comparison function that is required for building
-the map, along with an s-expression converter for generating useful error
-messages (we'll talk more about s-expressions in
-[Data Serialization with S-Expressions](data-serialization.html#data-serializtion-with-s-expressions){data-type=xref}).
-We don't need to provide the module again for functions like `Map.find` or
-`Map.add`, because the map itself contains a reference to the comparison
-function it uses.
+The call to `Map.empty` is also worth explaining, in that, unusually,
+it takes a first-class module as an argument. The point of the first
+class module is to provide the comparison function that is required
+for building the map, along with an s-expression converter for
+generating useful error messages (we'll talk more about s-expressions
+in [Data Serialization with
+S-Expressions](data-serialization.html#data-serializtion-with-s-expressions){data-type=xref}).
+We don't need to provide the module again for functions like
+`Map.find` or `Map.add`, because the map itself contains a reference
+to the comparison function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
 `Base` are. Later in the chapter, we'll show how you can set up a module of your
@@ -136,10 +139,9 @@ simple example. [set types]{.idx}
 - : int list = [1; 2; 3; 5]
 ```
 
-In addition to the operators you would expect to have for maps, sets support
-the traditional set operations, including union, intersection, and set
-difference. And, as with maps, we can create sets based on type-specific
-comparators or on the polymorphic comparator.
+In addition to the operators you would expect to have for maps, sets
+support the traditional set operations, including union, intersection,
+and set difference.
 
 ### Modules and Comparators
 
@@ -159,9 +161,9 @@ list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
 ```ocaml env=main
-# Map.of_alist_exn;;
-- : ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t =
-<fun>
+# #show Map.of_alist_exn;;
+val of_alist_exn :
+  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
 The type `Map.comparator` is actually an alias for a first-class module type,
@@ -178,10 +180,11 @@ module type S =
   end
 ```
 
-Such a module needs to contain the type of the key itself, as well as the
-`comparator_witness` type, which serves as a type-level identifier of the
-comparison function in question, and finally, the concrete comparator itself,
-a value that contains the necessary comparison function.
+Such a module must contain the type of the key itself, as well as the
+`comparator_witness` type, which serves as a type-level identifier of
+the comparison function in question, and finally, the concrete
+comparator itself, a value that contains the necessary comparison
+function.
 
 Modules from `Base` like `Int` and `String` already satisfy this interface.
 But what if you want to satisfy this interface with a new module? Consider,
@@ -233,40 +236,26 @@ question, and then include both that module and the result of applying a
 functor to that module.
 
 ```ocaml env=main
-# module Book = struct
-    module T = struct
+module Book = struct
+  module T = struct
 
-      type t = { title: string; isbn: string }
+    type t = { title: string; isbn: string }
 
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
+    let compare t1 t2 =
+      let cmp_title = String.compare t1.title t2.title in
+      if cmp_title <> 0 then cmp_title
+      else String.compare t1.isbn t2.isbn
 
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
+    let sexp_of_t t : Sexp.t =
+      List [ Atom t.title; Atom t.isbn ]
 
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
   end
+  include T
+  include Comparator.Make(T)
+end;;
 ```
 
-With this module in hand, we can now build a set using the type `Book.t`.
+With this module in hand, we can now build a set of `Book.t`'s.
 
 ```ocaml env=main
 # let some_programming_books =
@@ -276,82 +265,30 @@ With this module in hand, we can now build a set using the type `Book.t`.
       ; { title = "Structure and Interpretation of Computer Programs"
         ; isbn = "978-0262510875" }
       ; { title = "The C Programming Language"
-  ; isbn = "978-0131101630" } ];;
+        ; isbn = "978-0131101630" } ];;
 val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
   <abstr>
 ```
 
-Note that most of the time one should use `Comparable.Make` instead of
-`Comparator.Make`, since the former provides extra helper functions
-(most notably infix comparison functions) in addition to the
-comparator.
-
-Here's the result of using `Comparable` rather than `Comparator`.  As
-you can see, a lot of extra functions have been defined.
-
-```ocaml env=main
-# module Book = struct
-    module T = struct
-
-      type t = { title: string; isbn: string }
-
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
-
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
-
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val sexp_of_t : t -> Sexp.t
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness = Base.Comparable.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-    val validate_lbound : min:t Maybe_bound.t -> t Validate.check
-    val validate_ubound : max:t Maybe_bound.t -> t Validate.check
-    val validate_bound :
-      min:t Maybe_bound.t -> max:t Maybe_bound.t -> t Validate.check
-  end
-```
+While we used `Comparator.Make` in the above, it's often preferable to
+use `Comparable.Make` instead, since it provides extra helper
+functions, like infix comparison operators and min and max functions,
+in addition to the comparator itself.
 
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
-The comparator witness looks a little surprising at first, and it may not be
-obvious why it's there in the first place. The purpose of the witness is to
-identify the comparison function being used. This is important because some
-of the operations on maps and sets, in particular those that combine multiple
-maps or sets together, depend for their correctness on the fact that the
-different maps are using the same comparison function.
+The comparator witness is quite different from other types that we've
+seen.  Instead of tracking the kind of data being used, it's used to
+single out a particular value, a comparison function.  Why do we even
+need such a thing?
 
-Consider, for example, `Map.symmetric_diff`, which computes the difference
-between two maps.
+The comparator witness matters because some of the operations on maps
+and sets, in particular those that combine multiple maps or sets
+together, depend for their correctness on the fact that the data
+structures being combined use the same comparison function.
+
+Consider, for example, `Map.symmetric_diff`, which computes the
+difference between two maps.
 
 ```ocaml env=main
 # let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
