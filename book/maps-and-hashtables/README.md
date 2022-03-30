@@ -523,40 +523,31 @@ end
 
 Much of the code here is devoted to creating a comparison function and
 s-expression converter for the type `Book.t`. But if we have the
-`ppx_sexp_conv` and `ppx_compare` syntax extensions enabled (both of
-which come with the omnibus `ppx_jane` package), then we can request
-that default implementations of these functions be created, as
-follows.
+`ppx_sexp_conv` and `ppx_compare` syntax extensions enabled, then we
+can request that default implementations of these functions be
+created for us.  We can enable both of these extensions via the
+omnibus `ppx_jane` package.
 
 ```ocaml env=main
 # #require "ppx_jane";;
-# module Book = struct
-    module T = struct
-      type t = { title: string; isbn: string }
-      [@@deriving compare, sexp_of]
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
 ```
 
-If you want your comparison function that orders things in a particular way,
-you can always write your own comparison function by hand; but if all you
-need is a total order suitable for creating maps and sets with, then
+And we can use the extensions in our definition of `Book` as follows:
+
+```ocaml env=main
+module Book = struct
+  module T = struct
+    type t = { title: string; isbn: string }
+    [@@deriving compare, sexp_of]
+  end
+  include T
+  include Comparator.Make(T)
+end;;
+```
+
+If you want a comparison function that orders things in a particular
+way, you can always write your own by hand; but if all you need is a
+total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
 ::: {data-type=note}
