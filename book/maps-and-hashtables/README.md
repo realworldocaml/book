@@ -300,53 +300,40 @@ val right : (string, int, String.comparator_witness) Map.t = <abstr>
 [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 ```
 
-The type of `Map.symmetric_diff`, which follows, requires that the two maps
-it compares have the same comparator type, and therefore the same comparison
-function.
+As you can see below, the type of `Map.symmetric_diff` requires that
+the two maps it compares have the same comparator witness, in addition
+to the same key and value type.
 
 ```ocaml env=main
-# Map.symmetric_diff;;
-- : ('k, 'v, 'cmp) Map.t ->
-    ('k, 'v, 'cmp) Map.t ->
-    data_equal:('v -> 'v -> bool) ->
-    ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
-= <fun>
+# #show Map.symmetric_diff;;
+val symmetric_diff :
+  ('k, 'v, 'cmp) Map.t ->
+  ('k, 'v, 'cmp) Map.t ->
+  data_equal:('v -> 'v -> bool) ->
+  ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
 ```
 
-Without this constraint, we could run `Map.symmetric_diff` on maps that are
-sorted in different orders, which could lead to garbled results. We can show
-how this works in practice by creating two maps with the same key and data
-types, but different comparison functions. In the following, we do this by
-minting a new module `Reverse`, which represents strings sorted in the
-reverse of the usual lexicographic order.
+Without this constraint, we could run `Map.symmetric_diff` on maps
+that are sorted in different orders, which could lead to garbled
+results.
+
+To see this constraint in action, we'll need to create two maps with
+the same key and data types, but different comparison functions.  In
+the following, we do this by minting a new module `Reverse`, which
+represents strings sorted in the reverse of the usual lexicographic
+order.
 
 ```ocaml env=main
-# module Reverse = struct
-    module T = struct
-      type t = string
-      let sexp_of_t = String.sexp_of_t
-      let t_of_sexp = String.t_of_sexp
-      let compare x y = String.compare y x
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Reverse :
-  sig
-    module T :
-      sig
-        type t = string
-        val sexp_of_t : t -> Sexp.t
-        val t_of_sexp : Sexp.t -> t
-        val compare : t -> t -> int
-      end
+module Reverse = struct
+  module T = struct
     type t = string
-    val sexp_of_t : t -> Sexp.t
-    val t_of_sexp : Sexp.t -> t
-    val compare : t -> t -> int
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
+    let sexp_of_t = String.sexp_of_t
+    let t_of_sexp = String.t_of_sexp
+    let compare x y = String.compare y x
   end
+  include T
+  include Comparator.Make(T)
+end;;
 ```
 
 As you can see in the following, both `Reverse` and `String` can be used to
@@ -372,10 +359,10 @@ functions.
 - : (string * int) option = Some ("snoo", 3)
 ```
 
-As such, running `Map.symmetric_diff` on these maps doesn't make any sense.
-Happily, the type system will give us a compile-time error if we try, instead
-of throwing an error at run time, or worse, silently returning the wrong
-result.
+As a result, the algorithm in `Map.symmetric_diff` just wouldn't work
+correctly when applied to these values.  Happily, the type system will
+give us a compile-time error if we try, instead of throwing an error
+at run time, or worse, silently returning the wrong result.
 
 ```ocaml env=main
 # Map.symmetric_diff ord_map rev_map;;
