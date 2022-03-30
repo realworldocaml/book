@@ -412,25 +412,26 @@ polymorphic compare does.
 ::: {data-type=warning}
 ##### The Perils of Polymorphic Compare
 
-Polymorphic compare is highly convenient, but it has serious downsides as
-well and should be used with care. In particular, polymorphic compare has a
-fixed algorithm for comparing values of any type, and that algorithm can
-sometimes yield surprising results.
+Polymorphic compare is awfully convenient, but it has serious
+downsides and should be used with care.  To understand the problem, it
+helps to understand how polymorphic compare works.
 
-To understand what's wrong with polymorphic compare, you need to understand a
-bit about how it works. Polymorphic compare is *structural*, in that it
-operates directly on the runtime representation of OCaml values, walking the
-structure of the values in question without regard for their type.
+Polymorphic compare operates directly on the runtime representation of
+OCaml values, walking the structure of those values without regard for
+their type.  This is convenient because it provides a comparison
+function that works for most OCaml values without having to write any
+type-specific code.
 
-This is convenient because it provides a comparison function that works for
-most OCaml values and largely behaves as you would expect. For example, on
-`int`s and `float`s, it acts as you would expect a numeric comparison
-function to act, and for simple containers like strings and lists and arrays,
-it operates as a lexicographic comparison. Except for values from outside of
-the OCaml heap and functions, it works on almost every OCaml type.
+And despite ignoring types, it mostly behaves as you would hope.
+Comparisons on `int`s and `float`s respect the ordinary ordering of
+numeric values, and simple containers like strings, lists, and arrays
+are compared lexicographically. It also works on almost every OCaml
+type, with some important exceptions like functions.
 
-But sometimes, a structural comparison is not what you want. Maps are
-actually a fine example of this. Consider the following two maps.
+But the type-oblivious nature of polymorphic compare means that it
+peeks under ordinary abstraction boundaries, and that can lead to some
+deeploy confusing results.  Maps themselves provide a great example of
+this.  Consider the following two maps.
 
 ```ocaml env=main
 # let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
@@ -439,33 +440,33 @@ val m1 : (int, string, Int.comparator_witness) Map.t = <abstr>
 val m2 : (int, string, Int.comparator_witness) Map.t = <abstr>
 ```
 
-Logically, these two sets should be equal, and that's the result that you get
-if you call `Map.equal` on them:
+Logically, these two maps should be equal, and that's the result that
+you get if you call `Map.equal` on them:
 
 ```ocaml env=main
 # Map.equal String.equal m1 m2;;
 - : bool = true
 ```
 
-But because the elements were added in different orders, the layout of the
-trees underlying the sets will be different. As such, a structural comparison
-function will conclude that they're different.
+But because the elements were added in different orders, the layout of
+the trees underlying the maps will be different.  As such, a
+structural comparison function will conclude that they're different.
 
-Let's see what happens if we use polymorphic compare to test for equality.
-`Base` hides polymorphic comparison by defaults, but it is available by
+Now let's try to test for equality using polymorphic compare.  `Base`
+hides polymorphic comparison by defaults, but it is available by
 opening the `Poly` module, at which point `=` is bound to polymorphic
-equality. Comparing the maps directly will fail at runtime because the
-comparators stored within the sets contain function values:
+equality.
+
+Comparing the maps directly will fail at runtime because the
+comparators stored within the maps contain function values.
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
-We can, however, use the function `Map.Using_comparator.to_tree` to expose
-the underlying binary tree without the attached comparator. This same issue
-comes up with other data types, including sets, which we'll discuss later in
-the chapter.
+We can, however, use the function `Map.Using_comparator.to_tree` to
+expose the underlying binary tree without the attached comparator.
 
 ```ocaml env=main
 # Poly.((Map.Using_comparator.to_tree m1) =
@@ -473,12 +474,19 @@ the chapter.
 - : bool = false
 ```
 
-This can cause real and quite subtle bugs. If, for example, you use a map
-whose keys contain sets, then the map built with the polymorphic comparator
-will behave incorrectly, separating out keys that should be aggregated
-together. Even worse, it will work sometimes and fail others; since if the
-sets are built in a consistent order, then they will work as expected, but
-once the order changes, the behavior will change.
+\noindent
+As you can see, polymorphic compare produces a result, but it's not
+the result we want.
+
+The abstraction-breaking nature of polymorphic compare can cause real
+and quite subtle bugs.  If, for example, if you build a map whose keys
+are sets (which have the same issues with polymorphic compare that
+maps do), then the map built with the polymorphic comparator will
+behave incorrectly, separating out keys that should be aggregated
+together.  Even worse, it will work some of the times and fail other
+times, since if the sets are built in a consistent order, then they
+will work as expected, but once the order changes, the behavior will
+change.
 
 :::
 
@@ -494,37 +502,23 @@ Let's return to an example from earlier in the chapter, where we created a
 type `Book.t` and set it up for use in creating maps and sets.
 
 ```ocaml env=main
-# module Book = struct
-    module T = struct
+module Book = struct
+  module T = struct
 
-      type t = { title: string; isbn: string }
+    type t = { title: string; isbn: string }
 
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
+    let compare t1 t2 =
+      let cmp_title = String.compare t1.title t2.title in
+      if cmp_title <> 0 then cmp_title
+      else String.compare t1.isbn t2.isbn
 
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
+    let sexp_of_t t : Sexp.t =
+      List [ Atom t.title; Atom t.isbn ]
 
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
   end
+  include T
+  include Comparator.Make(T)
+end
 ```
 
 Much of the code here is devoted to creating a comparison function and
