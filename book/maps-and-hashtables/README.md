@@ -618,8 +618,7 @@ want to put a `[@@deriving]` annotation on a map or set type itself?
 
 ```ocaml env=main
 # type string_int_map =
-    (string,int,String.comparator_witness) Map.t
-  [@@deriving sexp];;
+    (string,int,String.comparator_witness) Map.t [@@deriving sexp];;
 Line 2, characters 44-49:
 Error: Unbound value Map.t_of_sexp
 Hint: Did you mean m__t_of_sexp?
@@ -634,9 +633,7 @@ Happily, there's another way of writing the type of a map that does work with
 the various `[@@deriving]` extensions, which you can see below.
 
 ```ocaml env=main
-# type string_int_map =
-    int Map.M(String).t
-  [@@deriving sexp];;
+# type string_int_map = int Map.M(String).t [@@deriving sexp];;
 type string_int_map = int Base.Map.M(Base.String).t
 val string_int_map_of_sexp : Sexp.t -> string_int_map = <fun>
 val sexp_of_string_int_map : string_int_map -> Sexp.t = <fun>
@@ -653,9 +650,9 @@ val m : (string, int, String.comparator_witness) Map.t = <abstr>
 - : int Base.Map.M(Base.String).t = <abstr>
 ```
 
-This same type works well with other derivers, like those for comparison and
-hash functions. Since this way of writing the type is also shorter, it's what
-you should use most of the time.
+This same type works with other derivers as well, like those for
+comparison and hash functions. Since this way of writing the type is
+also shorter, it's what you should use most of the time.
 
 ### Trees
 
@@ -706,12 +703,13 @@ Error: This expression has type
 
 ## Hash Tables
 
-Hash tables are the imperative cousin of maps. We walked over a basic hash
-table implementation in
-[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
-so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
-module. We'll cover this material more briefly than we did with maps because
-many of the concepts are shared. [hash tables/basics of]{.idx}
+Hash tables are the imperative cousin of maps. We walked through a
+basic hash table implementation in [Imperative
+Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
+so in this section we'll mostly discuss the pragmatics of Core's
+`Hashtbl` module. We'll cover this material more briefly than we did
+with maps because many of the concepts are shared. [hash tables/basics
+of]{.idx}
 
 Hash tables differ from maps in a few key ways. First, hash tables are
 mutable, meaning that adding a key/value pair to a hash table modifies the
@@ -728,13 +726,13 @@ complexity of]{.idx}
 ### Time Complexity of Hash Tables
 
 The statement that hash tables provide constant-time access hides some
-complexities. First of all, any hash table implementation, OCaml's included,
-needs to resize the table when it gets too full. A resize requires allocating
-a new backing array for the hash table and copying over all entries, and so
-it is quite an expensive operation. That means adding a new element to the
-table is only *amortized* constant, which is to say, it's constant on average
-over a long sequence of operations, but some of the individual operations can
-cost more.
+complexities. First of all, most hash table implementations, OCaml's
+included, needs to resize the table when it gets too full. A resize
+requires allocating a new backing array for the hash table and copying
+over all entries, and so it is quite an expensive operation. That
+means adding a new element to the table is only *amortized* constant,
+which is to say, it's constant on average over a long sequence of
+operations, but some of the individual operations can cost more.
 
 Another hidden cost of hash tables has to do with the hash function you use.
 If you end up with a pathologically bad hash function that hashes all of your
