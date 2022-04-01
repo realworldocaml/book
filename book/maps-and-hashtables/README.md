@@ -571,18 +571,23 @@ that's needed in particular cases, most often when you're checking for
 whether two mutable objects have the same identity.
 
 `Base` deprecates polymorphic equality, and the `=` operator by
-default is equality on integers, and various modules in `Base` have
-specialized versions of `=` designed for their particular type.
+default only works on integers integers.
 
 ```ocaml env=main
 # 1 = 2;;
 # "one" = "two";;
+```
+
+Various modules in `Base` have specialized versions of `=` designed
+for their particular type.
+
+```ocaml env=main
 # String.("one" = "two");;
 ```
 
-It's quite easy to mix up `=` and `==`, and so `Base` discourages
-depreactes `==` and provides `phys_equal` instead, a function with a
-clear and descriptive name.  You'll see a warning if you use `==`:
+It's quite easy to mix up `=` and `==`, and so `Base` depreactes `==`
+and provides `phys_equal` instead, a function with a clear and
+descriptive name.
 
 ```ocaml env=main
 # 1 == 2;;
@@ -594,6 +599,9 @@ Use [phys_equal] instead.
 # phys_equal 1 2;;
 - : bool = false
 ```
+
+This is just another small way in which `Base` tries to help you avoid
+mistakes.
 
 :::
 
