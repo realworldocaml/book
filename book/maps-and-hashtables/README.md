@@ -575,7 +575,11 @@ default only works on integers integers.
 
 ```ocaml env=main
 # 1 = 2;;
+- : bool = false
 # "one" = "two";;
+Line 1, characters 1-6:
+Error: This expression has type string but an expression was expected of type
+         int
 ```
 
 Various modules in `Base` have specialized versions of `=` designed
@@ -583,6 +587,7 @@ for their particular type.
 
 ```ocaml env=main
 # String.("one" = "two");;
+- : bool = false
 ```
 
 It's quite easy to mix up `=` and `==`, and so `Base` depreactes `==`
@@ -757,7 +762,7 @@ building a hashtable can be obtained.
 
 ```ocaml env=main
 # let table = Hashtbl.create (module String);;
-val table : (string, '_weak1) Hashtbl.Poly.t = <abstr>
+val table : (string, '_weak1) Base.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:"three" ~data:3;;
 - : unit = ()
 # Hashtbl.find table "three";;
@@ -770,11 +775,10 @@ some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
 ```ocaml env=main
-# #show Core.Hashtbl_intf.Key;;
-module type Key =
+# #show Base.Hashtbl.Key.S;;
+module type S =
   sig
     type t
-    val t_of_sexp : Sexp.t -> t
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
     val hash : t -> int
@@ -797,11 +801,12 @@ module Book :
     type t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t : Hash.state -> t -> Hash.state
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book);;
-val table : (Book.t, '_weak2) Hashtbl.Poly.t = <abstr>
+val table : (Book.t, '_weak2) Base.Hashtbl.t = <abstr>
 ```
 
 You can also create a hashtable based on OCaml's polymorphic hash and
@@ -809,7 +814,7 @@ comparison functions.
 
 ```ocaml env=main
 # let table = Hashtbl.Poly.create ();;
-val table : ('_weak3, '_weak4) Hashtbl.Poly.t = <abstr>
+val table : ('_weak3, '_weak4) Base.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
 - : unit = ()
 # Hashtbl.find table ("foo",3,[1;2;3]);;
