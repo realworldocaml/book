@@ -554,27 +554,37 @@ total order suitable for creating maps and sets with, then
 ##### =, ==, and phys_equal
 
 If you come from a C/C++ background, you'll probably reflexively use
-`==` to test two values for equality. In OCaml, the `==` operator tests for
-*physical* equality, while the `=` operator tests for *structural* equality.
+`==` to test two values for equality.  In OCaml, if you don't open
+`Base` or `Core`, then the `==` operator tests for *physical*
+equality, while the `=` operator is the polymorphic equality function.
 
-The physical equality test will match if two data structures have precisely
-the same pointer in memory. Two data structures that have identical contents
+Two values are considered physically equal if they are the same
+pointer in memory.  Two data structures that have identical contents
 but are constructed separately will not match using `==`.
+Polymorphic equality is *structural*, more or less meaning that it
+considers values to be equal if they have the same data in them.
 
-The `=` structural equality operator recursively inspects each field in the
-two values and tests them individually for equality. Crucially, if your data
-structure is cyclical (that is, a value recursively points back to another
-field within the same structure), the `=` operator will never terminate, and
-your program will hang! You therefore must use the physical equality operator
-or write a custom comparison function when comparing cyclic values.
+Most of the time you don't want either of these forms of equality!
+Polymorphic equality is problematic for reasons we explained earlier
+in the chapter, and physical equality, while useful, is something
+that's needed in particular cases, most often when you're checking for
+whether two mutable objects have the same identity.
 
-It's quite easy to mix up the use of `=` and `==`, so `Base`
-discourages the use of `==` and provides the more explicit
-`phys_equal` function instead.  You'll see a warning if you use `==`
-anywhere in code that opens `Base`:
+`Base` deprecates polymorphic equality, and the `=` operator by
+default is equality on integers, and various modules in `Base` have
+specialized versions of `=` designed for their particular type.
 
-```ocaml env=core_phys_equal
-# open Base;;
+```ocaml env=main
+# 1 = 2;;
+# "one" = "two";;
+# String.("one" = "two");;
+```
+
+It's quite easy to mix up `=` and `==`, and so `Base` discourages
+depreactes `==` and provides `phys_equal` instead, a function with a
+clear and descriptive name.  You'll see a warning if you use `==`:
+
+```ocaml env=main
 # 1 == 2;;
 Line 1, characters 3-5:
 Alert deprecated: Base.==
@@ -583,23 +593,6 @@ Use [phys_equal] instead.
 - : bool = false
 # phys_equal 1 2;;
 - : bool = false
-```
-
-If you feel like hanging your OCaml interpreter, you can verify what happens
-with recursive values and structural equality for yourself:
-
-```ocaml skip
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 };;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-<lots of text>
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1;;
-<press ^Z and kill the process now>
 ```
 
 :::
