@@ -203,10 +203,11 @@ Using `return`, we can make `count_lines` compile:
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
-Together, `bind` and `return` form a design pattern in functional programming
-known as a *monad*. You'll run across this signature in many applications
-beyond just threads. Indeed, we already ran across monads in
-[Bind And Other Error Handling Idioms](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+Together, `bind` and `return` form a design pattern in functional
+programming known as a *monad*. You'll run across this signature in
+many applications beyond just threads. Indeed, we already ran across
+monads in [Bind And Other Error Handling
+Idioms](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 [monads]{.idx}
 
 Calling `bind` and `return` together is a fairly common pattern, and as such
@@ -218,8 +219,8 @@ following signature:
 - : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
 ```
 
-and comes with its own infix equivalent, `>>|`. Using it, we can rewrite
-`count_lines` again a bit more succinctly:
+and comes with its own infix equivalent, `>>|`. Using it, we can
+rewrite `count_lines` again a bit more succinctly:
 
 ```ocaml env=main,non-deterministic
 # let count_lines filename =
@@ -232,11 +233,10 @@ val count_lines : string -> int Deferred.t = <fun>
 ```
 
 Note that `count_lines` returns a deferred, but `utop` waits for that
-deferred to become determined, and shows us the contents of the deferred
-instead.
+deferred to become determined, and shows us the contents of the
+deferred instead.
 
-::: {data-type=note}
-##### Using `Let_syntax` with Async
+### Using `Let_syntax`
 
 As was discussed in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
@@ -266,22 +266,20 @@ And here's the `map`-based version of `count_lines`.
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
-The difference here is just syntactic, with these examples compiling down to
-the same thing as the corresponding examples written using infix operators.
-What's nice about `Let_syntax` is that it highlights the analogy between
-monadic bind and OCaml's built-in let-binding, thereby making your code more
-uniform and more readable.
+The difference here is just syntactic, with these examples compiling
+down to the same thing as the corresponding examples written using
+infix operators.  What's nice about `Let_syntax` is that it highlights
+the analogy between monadic bind and OCaml's built-in let-binding,
+thereby making your code more uniform and more readable.
 
-`Let_syntax` works for any monad, and you decide which monad is in use by
-opening the appropriate `Let_syntax` module. Opening `Async` also implicitly
-opens `Deferred.Let_syntax`, but in some contexts you may want to do that
-explicitly.
+`Let_syntax` works for any monad, and you decide which monad is in use
+by opening the appropriate `Let_syntax` module. Opening `Async` also
+implicitly opens `Deferred.Let_syntax`, but in some contexts you may
+want to do that explicitly.
 
-To keep things simple, we'll use the infix notation for map and bind for the
-remainder of the chapter. But once you get comfortable with Async and monadic
-programming, we recommend using `Let_syntax`.
-:::
-
+For the most part, `Let_syntax` is easier to read and work with, and
+you should default to it when using Async, which is what we'll do for
+the remainder of the chapter.
 
 ### Ivars and Upon
 
@@ -448,8 +446,7 @@ open Async
 (* Copy data from the reader to the writer, using the provided buffer
    as scratch space *)
 let rec copy_blocks buffer r w =
-  Reader.read r buffer
-  >>= function
+  match%bind Reader.read r buffer with
   | `Eof -> return ()
   | `Ok bytes_read ->
     Writer.write w (Bytes.to_string buffer) ~len:bytes_read;
@@ -1061,9 +1058,8 @@ the two behaviors on subsequent calls:
     fun () ->
       let will_fail = !should_fail in
       should_fail := not will_fail;
-      after (Time.Span.of_sec 0.5)
-      >>= fun () ->
-      if will_fail then raise Exit else return ();;
+      let%map () = after (Time.Span.of_sec 0.5) in
+      if will_fail then raise Exit else ();;
 val maybe_raise : unit -> unit Deferred.t = <fun>
 # maybe_raise ();;
 - : unit = ()
@@ -1082,8 +1078,8 @@ can see that doesn't quite do the trick:
 ```ocaml env=main
 # let handle_error () =
     try
-      maybe_raise ()
-      >>| fun () -> "success"
+      let%map () = maybe_raise () in
+      "success"
     with _ -> return "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
 # handle_error ();;
@@ -1102,8 +1098,7 @@ provided by Async: [exceptions/asynchronous errors]{.idx}
 
 ```ocaml env=main
 # let handle_error () =
-    try_with (fun () -> maybe_raise ())
-    >>| function
+    match%map try_with (fun () -> maybe_raise ()) with
     | Ok ()   -> "success"
     | Error _ -> "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
@@ -1172,8 +1167,8 @@ captures and ignores errors in the processes it spawns.
     Stream.iter (Monitor.detach_and_get_error_stream monitor)
       ~f:(fun _exn -> printf "an error happened\n");
     within' ~monitor (fun () ->
-      after (Time.Span.of_sec 0.25)
-      >>= fun () -> failwith "Kaboom!");;
+      let%bind () = after (Time.Span.of_sec 0.25) in
+      failwith "Kaboom!");;
 val swallow_error : unit -> 'a Deferred.t = <fun>
 ```
 
@@ -1214,8 +1209,8 @@ exception Ignore_me
         | Ignore_me -> printf "ignoring exn\n"
         | _ -> Monitor.send_exn parent_monitor error);
     within' ~monitor:child_monitor (fun () ->
-      after (Time.Span.of_sec 0.25)
-      >>= fun () -> raise exn_to_raise);;
+      let%bind () = after (Time.Span.of_sec 0.25) in
+      raise exn_to_raise);;
 val swallow_some_errors : exn -> 'a Deferred.t = <fun>
 ```
 
@@ -1388,9 +1383,10 @@ cancellations]{.idx}[Deferred.both]{.idx}[cancellations]{.idx}[timeouts]{.idx}[A
 library/timeouts and cancellations]{.idx}
 
 ```ocaml env=main
-# let string_and_float = Deferred.both
-                           (after (sec 0.5)  >>| fun () -> "A")
-  (after (sec 0.25) >>| fun () -> 32.33);;
+# let string_and_float =
+    Deferred.both
+      (let%map () = after (sec 0.5) in "A")
+      (let%map () = after (sec 0.25) in 32.33);;
 val string_and_float : (string * float) Deferred.t = <abstr>
 # string_and_float;;
 - : string * float = ("A", 32.33)
@@ -1404,9 +1400,9 @@ list is determined.
 
 ```ocaml env=main
 # Deferred.any
-  [ (after (sec 0.5) >>| fun () -> "half a second")
-  ; (after (sec 1.0) >>| fun () -> "one second")
-  ; (after (sec 4.0) >>| fun () -> "four seconds")
+  [ (let%map () = after (sec 0.5) in "half a second")
+  ; (let%map () = after (sec 1.0) in "one second")
+  ; (let%map () = after (sec 4.0) in "four seconds")
   ];;
 - : string = "half a second"
 ```
@@ -1612,7 +1608,7 @@ prints out one last timestamp:
     in
     let d = thunk () in
     Clock.every (sec 0.1) ~stop:d print_time;
-    d >>= fun () ->
+    let%bind () = d in
     printf "\nFinished at: ";
     print_time ();
     printf "\n";
