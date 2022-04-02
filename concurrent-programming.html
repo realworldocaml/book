@@ -553,7 +553,7 @@ let always_fail () = assert false;;
 </div>
 <p>This is a little odd, but it does make sense. After all, if a
 function never returns, we’re free to impute any type at all to its
-non-existant return value. As a result, from a type perspective, a
+non-existant return value. As a result, from a typing perspective, a
 function that never returns can fit in to any context within your
 program.</p>
 <p>But that itself can be problematic, especially with a function like
@@ -562,7 +562,7 @@ perhaps not entirely obvious. The point of <code>never_returns</code> is
 to create an explicit marker so the user knows that the function in
 question doesn’t return.</p>
 <p>To do this, <code>Scheduler.go</code> is defined to have a return
-value of <code>Nothing.t</code>.</p>
+value of <code>Nothing.t</code>. <a data-primary="Nothing.t" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Scheduler.go;;
 &gt;val go : ?raise_unhandled_exn:bool -&gt; unit -&gt; never_returns
@@ -575,7 +575,7 @@ no values of that type. As such, a function can’t actually return a
 value of type <code>Nothing.t</code>, so only a function that never
 returns can have <code>Nothing.t</code> as its return type! And we can
 cause a function that never returns to have a return value of
-<code>Nothing.t</code> by just adding a type annotation.</p>
+<code>Nothing.t</code> by just adding a type annotation. <a data-primary="uninhabited type" data-type="indexterm">&nbsp;</a><a data-secondary="uninhabited" data-primary="type" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : Nothing.t = loop_forever ();;
 &gt;val loop_forever : unit -&gt; never_returns = &lt;fun&gt;
@@ -698,9 +698,9 @@ hitting <strong><code>Control-C</code></strong>:</p>
 </div>
 <p>That’s because a pipe has a certain amount of internal slack, a
 number of slots in the pipe to which something can be written before the
-write will block. And by default, a pipe has zero slack, which means
-that the deferred returned by a write is determined only when the value
-is read out of the pipe.</p>
+write will block. By default, a pipe has zero slack, which means that
+the deferred returned by a write is determined only when the value is
+read out of the pipe.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
 &gt;val r : '_weak5 Pipe.Reader.t = &lt;abstr&gt;

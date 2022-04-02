@@ -586,8 +586,8 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;;
 </section>
 <section class="level3" id="capturing-the-unknown">
 <h3>Capturing the unknown</h3>
-<p>Code that that works with unknown types is routine in OCaml, and
-comes up in the simplest of examples:</p>
+<p>Code that works with unknown types is routine in OCaml, and comes up
+in the simplest of examples:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tuple x y = (x,y);;
 &gt;val tuple : 'a -&gt; 'b -&gt; 'a * 'b = &lt;fun&gt;
@@ -1195,7 +1195,7 @@ question is impossible at the type level.</p>
 <p>One way to do this is via an <em>uninhabited type</em>, which is a
 type that has no associated values. You can declare such a value by
 creating a variant with no tags. <a data-primary="uninhabited
-types" data-type="indexterm">&nbsp;</a></p>
+type" data-type="indexterm">&nbsp;</a><a data-secondary="uninhabited" data-primary="type" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type nothing = |</code></pre>
 </div>
