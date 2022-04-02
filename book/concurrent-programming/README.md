@@ -595,7 +595,7 @@ val always_fail : unit -> 'a = <fun>
 
 This is a little odd, but it does make sense.  After all, if a
 function never returns, we're free to impute any type at all to its
-non-existant return value.  As a result, from a type perspective, a
+non-existant return value.  As a result, from a typing perspective, a
 function that never returns can fit in to any context within your
 program.
 
@@ -607,6 +607,7 @@ doesn't return.
 
 To do this, `Scheduler.go` is defined to have a return value of
 `Nothing.t`.
+[Nothing.t]{.idx}
 
 ```ocaml env=main
 # #show Scheduler.go;;
@@ -622,6 +623,7 @@ type.  As such, a function can't actually return a value of type
 `Nothing.t` as its return type!  And we can cause a function that
 never returns to have a return value of `Nothing.t` by just adding a
 type annotation.
+[uninhabited type]{.idx}[type/uninhabited]{.idx}
 
 ```ocaml env=main
 # let rec loop_forever () : Nothing.t = loop_forever ();;
@@ -751,9 +753,9 @@ Interrupted.
 
 That's because a pipe has a certain amount of internal slack, a number
 of slots in the pipe to which something can be written before the
-write will block. And by default, a pipe has zero slack, which means
-that the deferred returned by a write is determined only when the
-value is read out of the pipe.
+write will block. By default, a pipe has zero slack, which means that
+the deferred returned by a write is determined only when the value is
+read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
