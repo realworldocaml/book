@@ -14,13 +14,12 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open files =
-        anon (sequence ("filename" %: Filename.arg_type))
-      in
-      fun () ->
-        match files with
-        | [] -> do_hash "-"
-        | _ -> List.iter files ~f:do_hash)
+    (let%map_open.Command files =
+       anon (sequence ("filename" %: Filename.arg_type))
+     in
+     fun () ->
+       match files with
+       | [] -> do_hash "-"
+       | _ -> List.iter files ~f:do_hash)
 
 let () = Command.run ~version:"1.0" ~build_info:"RWO" command

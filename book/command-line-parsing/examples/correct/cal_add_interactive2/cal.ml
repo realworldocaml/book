@@ -22,10 +22,9 @@ let anon_prompt name of_string =
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Let_syntax.(
-      let%map_open base = anon ("base" %: date)
-      and days = anon_prompt "days" Int.of_string in
-      fun () -> add_days base days)
+    (let%map_open.Command base = anon ("base" %: date)
+     and days = anon_prompt "days" Int.of_string in
+     fun () -> add_days base days)
 
 [@@@part "2"]
 

@@ -29,7 +29,7 @@ In this chapter, we'll:
 - Learn how to use Command to construct basic and grouped command-line
   interfaces
 
-- We will build simple equivalents to the cryptographic `md5` and `shasum`
+- Build simple equivalents to the cryptographic `md5` and `shasum`
   utilities
 
 - Demonstrate how to declare complex command-line interfaces in a type-safe
@@ -109,6 +109,7 @@ by recreating some of this code in the toplevel.
 val filename_param : string Command.Spec.param = <abstr>
 ```
 
+\noindent
 The type parameter of `filename_param` is there to indicate the type of the
 value returned by the parser; in this case, `string`.
 
@@ -128,14 +129,14 @@ type nonrec 'result basic_command =
 Note that the `'result` parameter of the type alias `basic_command` is
 instantiated as `unit` for the type of `Command.basic`.
 
-It makes sense that `Command.basic` wants a parser that returns a function;
-after all, in the end, it needs a function it can run that constitutes the
-execution of the program. But how do we get such a parser, given the parser
-we have returns just a filename?
+It makes sense that `Command.basic` wants a parser that returns a
+function; after all, in the end, it needs a function it can run that
+constitutes the execution of the program. But how do we get such a
+parser, given the parser we have returns just a filename?
 
-The answer is to use a `map` function to change the value returned by the
-parser. As you can see below, the type of `Command.Param.map` is very similar
-to the code of `List.map`.
+The answer is to use a `map` function to change the value returned by
+the parser. As you can see below, the type of `Command.Param.map` is
+very similar to the type of `List.map`.
 
 ```ocaml env=main
 # #show Command.Param.map;;
@@ -209,9 +210,9 @@ $ dune exec -- ./md5.exe md5.ml
 2ae55d17ff11d337492a1ca5510ee01b
 ```
 
-And that's all it took to build our little MD5 utility! Here's a complete
-version of the example we just walked through, made slightly more succinct by
-removing intermediate variables.
+And that's all it takes to build our little MD5 utility! Here's a
+complete version of the example we just walked through, made slightly
+more succinct by removing intermediate variables.
 
 ```ocaml file=examples/correct/md5_succinct/md5.ml
 open Core
@@ -305,10 +306,13 @@ using `and` to join the definitions together. This syntax translates down to
 the same pattern based on `both` that we showed above, but it's easier to
 read and use, and scales better to more arguments.
 
-The need to open both modules is a little awkward, and the `Param` module in
-particular you really only need on the right-hand-side of the equals-sign.
-This is achieved automatically by using the `let%map_open` syntax,
-demonstrated below.
+The need to open both modules is a little awkward, and the `Param`
+module in particular you really only need on the right-hand-side of
+the equals-sign.  This is achieved automatically by using the
+`let%map_open` syntax, demonstrated below.  We'll also drop the open
+of `Command.Let_syntax` in favor of explicitly using
+`let%map_open.Command` to mark the let-syntax as coming from the
+`Command` module
 
 ```ocaml file=examples/correct/md5_let_syntax2/md5.ml,part=1
 let command =
@@ -321,8 +325,8 @@ let command =
       fun () -> do_hash hash_length filename)
 ```
 
-Let-syntax is the most common way of writing parsers for `Command`, and we'll
-use that idiom from here on.
+Let-syntax is the most common way of writing parsers for `Command`,
+and we'll use that idiom from here on.
 
 Now that we have the basics in place, the rest of the chapter will examine
 some of the more advanced features of Command.
@@ -704,13 +708,14 @@ Command: just use `Command.group`, which lets you merge a collection of
 = <fun>
 ```
 
-The `group` signature accepts a list of basic `Command.t` values and their
-corresponding names. When executed, it looks for the appropriate subcommand
-from the name list, and dispatches it to the right command handler.
+The `group` signature accepts a list of basic `Command.t` values and
+their corresponding names. When executed, it looks for the appropriate
+subcommand from the name list, and dispatches it to the right command
+handler.
 
-Let's build the outline of a calendar tool that does a few operations over
-dates from the command line. We first need to define a command that adds days
-to an input date and prints the resulting date:
+Let's build the outline of a calendar tool that does a few operations
+over dates from the command line. We first need to define a command
+that adds days to an input date and prints the resulting date:
 
 ```ocaml file=examples/correct/cal_add_days/cal.ml
 open Core

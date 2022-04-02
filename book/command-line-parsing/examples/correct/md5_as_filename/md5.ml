@@ -9,9 +9,10 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open file = anon ("filename" %: Filename.arg_type) in
-      fun () -> do_hash file)
+    (let%map_open.Command file =
+       anon ("filename" %: Filename.arg_type)
+     in
+     fun () -> do_hash file)
 
 [@@@part "2"]
 

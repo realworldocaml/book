@@ -12,10 +12,9 @@ let add =
 let diff =
   Command.basic
     ~summary:"Show days between [date1] and [date2]"
-    Command.Let_syntax.(
-      let%map_open date1 = anon ("date1" %: date)
-      and date2 = anon ("date2" %: date) in
-      fun () -> Date.diff date1 date2 |> printf "%d days\n")
+    (let%map_open.Command date1 = anon ("date1" %: date)
+     and date2 = anon ("date2" %: date) in
+     fun () -> Date.diff date1 date2 |> printf "%d days\n")
 
 let command =
   Command.group
