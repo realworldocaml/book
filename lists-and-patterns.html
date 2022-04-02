@@ -425,9 +425,9 @@ outside:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_separator widths =
   let pieces = List.map widths
-      ~f:(fun w -&gt; String.make (w + 2) '-')
+      ~f:(fun w -&gt; String.make w '-')
   in
-  "|" ^ String.concat ~sep:"+" pieces ^ "|";;
+  "|-" ^ String.concat ~sep:"-+-" pieces ^ "-|";;
 &gt;val render_separator : int list -&gt; string = &lt;fun&gt;
 render_separator [3;6;2];;
 &gt;- : string = "|-----+--------+----|"
@@ -461,13 +461,13 @@ assembling large strings, it can be a serious performance issue.</p>
 </section>
 <p>Now we need code for rendering a row with data in it. We’ll first
 write a function called <code>pad</code>, for padding out a string to a
-specified length plus one blank space on both sides:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
+specified length:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let pad s length =
-  " " ^ s ^ String.make (length - String.length s + 1) ' ';;
+  s ^ String.make (length - String.length s) ' ';;
 &gt;val pad : string -&gt; int -&gt; string = &lt;fun&gt;
 pad "hello" 10;;
-&gt;- : string = " hello      "
+&gt;- : string = "hello     "
 </code></pre>
 </div>
 <p>We can render a row of data by merging together the padded strings.
@@ -476,7 +476,7 @@ data in the row with the list of widths:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_row row widths =
   let padded = List.map2_exn row widths ~f:pad in
-  "|" ^ String.concat ~sep:"|" padded ^ "|";;
+  "| " ^ String.concat ~sep:" | " padded ^ " |";;
 &gt;val render_row : string list -&gt; int list -&gt; string = &lt;fun&gt;
 render_row ["Hello";"World"] [10;15];;
 &gt;- : string = "| Hello      | World           |"
