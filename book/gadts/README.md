@@ -1332,7 +1332,7 @@ question is impossible at the type level.
 
 One way to do this is via an *uninhabited type*, which is a type that
 has no associated values.  You can declare such a value by creating a
-variant with no tags.  [uninhabited types]{.idx}
+variant with no tags.  [uninhabited type]{.idx}[type/uninhabited]{.idx}
 
 ```ocaml env=main
 type nothing = |
