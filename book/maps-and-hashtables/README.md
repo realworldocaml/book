@@ -485,16 +485,18 @@ sets were built.
 
 :::
 
-### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
+### Satisfying `Comparator.S` with `[@@deriving]` {#satisfying-comparator.s-with-deriving}
 
-Using maps and sets on a new type requires satisfying the `Comparator.S`
-interface, which in turn requires s-expression converters and comparison
-functions for the type in question. Writing such functions by hand is
-annoying and error prone, but there's a better way. `Base` comes along with a
-set of syntax extensions that automate these tasks away.
+Using maps and sets on a new type requires satisfying the
+`Comparator.S` interface, which in turn requires s-expression
+converters and comparison functions for the type in question. Writing
+such functions by hand is annoying and error prone, but there's a
+better way. `Base` comes along with a set of syntax extensions that
+automate these tasks away.
 
-Let's return to an example from earlier in the chapter, where we created a
-type `Book.t` and set it up for use in creating maps and sets.
+Let's return to an example from earlier in the chapter, where we
+created a type `Book.t` and set it up for use in creating maps and
+sets.
 
 ```ocaml env=main
 module Book = struct
@@ -548,25 +550,27 @@ total order suitable for creating maps and sets with, then
 ::: {data-type=note}
 ##### =, ==, and phys_equal
 
-If you come from a C/C++ background, you'll probably reflexively use
-`==` to test two values for equality.  In OCaml, if you don't open
-`Base` or `Core`, then the `==` operator tests for *physical*
-equality, while the `=` operator is the polymorphic equality function.
+OCaml has multiple notions of equality, and picking the right one can
+be tricky.  If you don't open `Base`, you'll find that the `==`
+operator tests for *physical* equality, while the `=` operator is the
+polymorphic equality function.
 
 Two values are considered physically equal if they are the same
 pointer in memory.  Two data structures that have identical contents
-but are constructed separately will not match using `==`.
-Polymorphic equality is *structural*, more or less meaning that it
-considers values to be equal if they have the same data in them.
+but are constructed separately will not be considered equal by `==`.
+Polymorphic equality, on the other hand, is *structural*, which
+effectively means that it considers values to be equal if they have
+the same contents.
 
 Most of the time you don't want either of these forms of equality!
 Polymorphic equality is problematic for reasons we explained earlier
 in the chapter, and physical equality, while useful, is something
-that's needed in particular cases, most often when you're checking for
-whether two mutable objects have the same identity.
+that's needed in particular cases, most often when you're dealing with
+mutable objects, where the physical identity of the object matters.
 
-`Base` deprecates polymorphic equality, and the `=` operator by
-default only works on integers integers.
+`Base` hides polymorphic equality, instead reserving `=` for equality
+functions associated with particular types.  At the top-level `=` is
+specialized to integers.
 
 ```ocaml env=main
 # 1 = 2;;
@@ -577,31 +581,31 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-Various modules in `Base` have specialized versions of `=` designed
-for their particular type.
+Other type-specific equality functions are found in their associated
+modules
 
 ```ocaml env=main
 # String.("one" = "two");;
 - : bool = false
 ```
 
-It's quite easy to mix up `=` and `==`, and so `Base` depreactes `==`
+It's quite easy to mix up `=` and `==`, and so `Base` deprecates `==`
 and provides `phys_equal` instead, a function with a clear and
 descriptive name.
 
 ```ocaml env=main
-# 1 == 2;;
-Line 1, characters 3-5:
+# ref 1 == ref 1;;
+Line 1, characters 7-9:
 Alert deprecated: Base.==
 [2016-09] this element comes from the stdlib distributed with OCaml.
 Use [phys_equal] instead.
 - : bool = false
-# phys_equal 1 2;;
+# phys_equal (ref 1) (ref 1);;
 - : bool = false
 ```
 
-This is just another small way in which `Base` tries to help you avoid
-mistakes.
+This is just a small way in which `Base` tries to avoid error-prone
+APIs.
 
 :::
 
