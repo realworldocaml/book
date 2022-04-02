@@ -1,7 +1,7 @@
 open Core
 open Async
 
-[@@@part "1"]
+(* $MDX part-begin=1 *)
 
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
@@ -11,7 +11,7 @@ let query_uri ~server query =
   in
   Uri.add_query_param base_uri ("q", [ query ])
 
-[@@@part "2"]
+(* $MDX part-end *)
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo
    results *)
@@ -47,6 +47,8 @@ let print_result (word, definition) =
     | Some def ->
       String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def))
 
+(* $MDX part-begin=2 *)
+
 (* Run many searches in parallel, printing out the results after
    they're all done. *)
 let search_and_print ~servers words =
@@ -58,6 +60,8 @@ let search_and_print ~servers words =
            get_definition ~server word))
   in
   List.iter results ~f:print_result
+
+(* $MDX part-end *)
 
 let () =
   Command.async

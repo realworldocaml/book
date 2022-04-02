@@ -925,11 +925,11 @@ To better understand what's going on, it's useful to look at the type for
 ```ocaml env=main
 # #require "cohttp-async";;
 # #show Cohttp_async.Client.get;;
-- : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
-    ?headers:Cohttp.Header.t ->
-    Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
-= <fun>
+val get :
+  ?interrupt:unit Deferred.t ->
+  ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
+  ?headers:Cohttp.Header.t ->
+  Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 ```
 
 The `get` call takes as a required argument a URI and returns a deferred
@@ -960,16 +960,17 @@ let print_result (word, definition) =
 ```
 
 We use the `Wrapper` module from the `textwrap` package to do the line
-wrapping. It may not be obvious that this routine is using Async, but it
-does: the version of `printf` that's called here is actually Async's
-specialized `printf` that goes through the Async scheduler rather than
-printing directly. The original definition of `printf` is shadowed by this
-new one when you open `Async`. An important side effect of this is that if
-you write an Async program and forget to start the scheduler, calls like
-`printf` won't actually generate any output!
+wrapping. It may not be obvious that this routine is using Async, but
+it does: the version of `printf` that's called here is actually
+Async's specialized `printf` that goes through the Async scheduler
+rather than printing directly. The original definition of `printf` is
+shadowed by this new one when you open `Async`. An important side
+effect of this is that if you write an Async program and forget to
+start the scheduler, calls like `printf` won't actually generate any
+output!
 
-The next function dispatches the searches in parallel, waits for the results,
-and then prints:
+The next function dispatches the searches in parallel, waits for the
+results, and then prints:
 
 ```ocaml file=examples/correct/search/search.ml,part=4
 (* Run many searches in parallel, printing out the results after
@@ -1119,8 +1120,15 @@ thrown by the code executed synchronously within it, while
 `maybe_raise` schedules an Async job that will throw an exception in
 the future, after the `try/with` expression has exited.
 
-We can capture this kind of asynchronous error using the `try_with` function
-provided by Async: [exceptions/asynchronous errors]{.idx}
+We can capture this kind of asynchronous error using the `try_with`
+function provided by Async.  `try_with f` takes as its argument a
+deferred-returning thunk `f` and returns a deferred that becomes
+determined either as `Ok` of whatever `f` returned, or `Error exn` if
+`f` threw an exception before its return value became determined.
+[try_with]{.idx} [async/try_with]{.idx} [exceptions/asynchronous
+errors]{.idx}
+
+Here's a trivial example of `try_with` in action.
 
 ```ocaml env=main
 # let handle_error () =
@@ -1134,13 +1142,7 @@ val handle_error : unit -> string Deferred.t = <fun>
 - : string = "failure"
 ```
 
-`try_with f` takes as its argument a deferred-returning thunk `f` and returns
-a deferred that becomes determined either as `Ok` of whatever `f` returned,
-or `Error exn` if `f` threw an exception before its return value became
-determined.
-
-::: {data-type=note}
-##### Monitors
+### Monitors
 
 `try_with` is a useful tool for handling exceptions in Async, but it's
 not the whole story. All of Async's exception-handling mechanisms,
@@ -1277,8 +1279,6 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
-:::
-
 ### Example: Handling Exceptions with DuckDuckGo
 
 Let's now go back and improve the exception handling of our DuckDuckGo
@@ -1386,14 +1386,16 @@ Caml language with object-oriented programming constructs."
 
 ```
 
+\noindent
 Now, only the query that went to `localhost` failed.
 
 Note that in this code, we're relying on the fact that
-`Cohttp_async.Client.get` will clean up after itself after an exception, in
-particular by closing its file descriptors. If you need to implement such
-functionality directly, you may want to use the `Monitor.protect` call, which
-is analogous to the `protect` call described in
-[Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.
+`Cohttp_async.Client.get` will clean up after itself after an
+exception, in particular by closing its file descriptors. If you need
+to implement such functionality directly, you may want to use the
+`Monitor.protect` call, which is analogous to the `protect` call
+described in [Cleaning Up In The Presence Of
+Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.
 
 
 ## Timeouts, Cancellation, and Choices
@@ -1450,6 +1452,7 @@ let get_definition_with_timeout ~server ~timeout word =
     ]
 ```
 
+\noindent
 We use `let%map` above to transform the deferred values we're waiting
 for so that `Deferred.any` can choose between values of the same type.
 
@@ -1565,18 +1568,21 @@ DuckDuckGo query failed: Timed out
 
 ## Working with System Threads
 
-Although we haven't worked with them yet, OCaml does have built-in support
-for true system threads, i.e., kernel-level threads whose interleaving is
-controlled by the operating system. We discussed in the beginning of the
-chapter why Async is generally a better choice than system threads, but even
-if you mostly use Async, OCaml's system threads are sometimes necessary, and
-it's worth understanding them. [parallelism]{.idx}[kernel-level
+Although we haven't worked with them yet, OCaml does have built-in
+support for true system threads, i.e., kernel-level threads whose
+interleaving is controlled by the operating system. We discussed in
+the beginning of the chapter the advantages of Async's cooperative
+threading model over system threads, but even if you mostly use Async,
+OCaml's system threads are sometimes necessary, and it's worth
+understanding them. [parallelism]{.idx}[kernel-level
 threads]{.idx}[threads/kernel-level threads]{.idx}[system
 threads]{.idx}[Async library/system threads and]{.idx}
+[system threads]{.idx}
 
-The most surprising aspect of OCaml's system threads is that they don't
-afford you any access to physical parallelism. That's because OCaml's runtime
-has a single runtime lock that at most one thread can be holding at a time.
+The most surprising aspect of OCaml's system threads is that they
+don't afford you any access to physical parallelism. That's because
+OCaml's runtime has a single runtime lock that at most one thread can
+be holding at a time.
 
 Given that threads don't provide physical parallelism, why are they useful at
 all?
@@ -1594,6 +1600,27 @@ In that case, it's sometimes useful to run some OCaml code on the foreign
 thread as part of the communication to your main program. OCaml's foreign
 function interface is discussed in more detail in
 [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+
+::: {data-type=note}
+##### Multicore OCaml
+
+OCaml doesn't support truly parallel threads today, but it will soon.
+The current development branch of OCaml, which is expected to be
+released in 2022 as OCaml 5.0, has a long awaited multicore-capable
+garbage collector, which is the result of years of research and hard
+implementation work.
+[multicore]{.idx}
+
+We won't discuss the multicore gc here in part because it's not yet
+released, and in part because there's a lot of open questions about
+OCaml programs should take advantage of multicore in a way that's
+safe, convenient, and performant.  Given all that, we just don't know
+enough to write a chapter about multicore today.
+
+In any case, while multicore OCaml isn't here yet, it's an exciting
+part of OCaml's near-term future.
+
+:::
 
 Another occasional use for system threads is to better interoperate with
 compute-intensive OCaml code. In Async, if you have a long-running
@@ -1666,6 +1693,7 @@ Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
 
+\noindent
 As you can see, instead of waking up 10 times a second, `log_delays` is
 blocked out entirely while `busy_loop` churns away.
 
@@ -1702,6 +1730,7 @@ Finished at: 418.69187355041504ms,
 - : unit = ()
 ```
 
+\noindent
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
@@ -1717,36 +1746,37 @@ it leads to more predictable behavior.
 
 ### Thread-Safety and Locking
 
-Once you start working with system threads, you'll need to be careful about
-mutable data structures. Most mutable OCaml data structures do not have
-well-defined semantics when accessed concurrently by multiple threads. The
-issues you can run into range from runtime exceptions to corrupted data
-structures to, in some rare cases, segfaults. That means you should always
-use mutexes when sharing mutable data between different systems threads. Even
-data structures that seem like they should be safe but are mutable under the
-covers, like lazy values, can have undefined behavior when accessed from
-multiple threads. [mutexes]{.idx}[segfaults]{.idx}[threads/locking
+Once you start working with system threads, you'll need to be careful
+about mutable data structures. Most mutable OCaml data structures will
+behave non-determinstically when accessed concurrently by multiple
+threads. The issues you can run into range from runtime exceptions to
+corrupted data structures.  That means you should almost always use
+mutexes when sharing mutable data between different systems threads.
+Even data structures that seem like they should be safe but are
+mutable under the covers, like lazy values, can behave in surprising
+ways when accessed from multiple
+threads. [mutexes]{.idx}[segfaults]{.idx}[threads/locking
 and]{.idx}[threads/thread-safety]{.idx}
 
-There are two commonly available mutex packages for OCaml: the `Mutex` module
-that's part of the standard library, which is just a wrapper over OS-level
-mutexes and `Nano_mutex`, a more efficient alternative that takes advantage
-of some of the locking done by the OCaml runtime to avoid needing to create
-an OS-level mutex much of the time. As a result, creating a `Nano_mutex.t` is
-20 times faster than creating a `Mutex.t`, and acquiring the mutex is about
-40 percent faster.
+There are two commonly available mutex packages for OCaml: the `Mutex`
+module that's part of the standard library, which is just a wrapper
+over OS-level mutexes and `Nano_mutex`, a more efficient alternative
+that takes advantage of some of the locking done by the OCaml runtime
+to avoid needing to create an OS-level mutex much of the time. As a
+result, creating a `Nano_mutex.t` is 20 times faster than creating a
+`Mutex.t`, and acquiring the mutex is about 40 percent faster.
 
-Overall, combining Async and threads is quite tricky, but it can be done
-safely if the following hold:
+Overall, combining Async and threads is quite tricky, but it's pretty
+simple if the following two conditions hold:
 
 - There is no shared mutable state between the various threads involved.
 
 - The computations executed by `In_thread.run` do not make any calls to the
   Async library.
 
-It is possible to safely use threads in ways that violate these constraints.
-In particular, foreign threads can acquire the Async lock using calls from
-the `Thread_safe` module in Async, and thereby run Async computations safely.
-This is a very flexible way of connecting threads to the Async world, but
-it's a complex use case that is beyond the scope of this chapter.
-[system threads]{.idx}
+That said, you can safely use threads in ways that violate these
+constraints.  In particular, foreign threads can acquire the Async
+lock using calls from the `Thread_safe` module in Async, and thereby
+run Async computations safely.  This is a very flexible way of
+connecting threads to the Async world, but it's a complex use case
+that is beyond the scope of this chapter.
