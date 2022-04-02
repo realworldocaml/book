@@ -56,15 +56,15 @@ open Base
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -> string -> t
 
-(** Converts the set of frequency counts to an association list.
-    Every string in the list will show up at most once, and the
-    integers will be at least 1. *)
+(** Converts the set of frequency counts to an association list. Every
+    string in the list will show up at most once, and the integers
+    will be at least 1. *)
 val to_list : t -> (string * int) list
 ```
 
@@ -78,10 +78,9 @@ Here's the implementation.
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = (string, int, String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -833,12 +832,12 @@ what it sees. That means that for data structures like maps and sets where
 equivalent instances can have different structures, it will do the wrong
 thing.
 
-But there's another problem with polymorphic hash, which is that it is prone
-to creating hash collisions. OCaml's polymorphic hash function works by
-walking over the data structure it’s given using a breadth-first traversal
-that is bounded in the number of nodes it’s willing to traverse. By
-default, that bound is set at 10 "meaningful" nodes. [hash tables/polymorphic
-hash function]{.idx}
+But there's another problem with polymorphic hash, which is that it is
+prone to creating hash collisions. OCaml's polymorphic hash function
+works by walking over the data structure it’s given using a
+breadth-first traversal that is bounded in the number of nodes it’s
+willing to traverse. By default, that bound is set at 10 "meaningful"
+nodes. [hash tables/polymorphic hash function]{.idx}
 
 The bound on the traversal means that the hash function may ignore part of
 the data structure, and this can lead to pathological cases where every
@@ -907,29 +906,32 @@ open Core_bench
 
 let map_iter ~num_keys ~iterations =
   let rec loop i map =
-    if i <= 0 then ()
-    else loop (i - 1)
-           (Map.change map (i % num_keys) ~f:(fun current ->
-              Some (1 + Option.value ~default:0 current)))
+    if i <= 0
+    then ()
+    else
+      loop
+        (i - 1)
+        (Map.change map (i % num_keys) ~f:(fun current ->
+             Some (1 + Option.value ~default:0 current)))
   in
   loop iterations (Map.empty (module Int))
 
 let table_iter ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i <= 0 then ()
+    if i <= 0
+    then ()
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current ->
-        Some (1 + Option.value ~default:0 current));
-      loop (i - 1)
-    )
+          Some (1 + Option.value ~default:0 current));
+      loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -> table_iter ~num_keys ~iterations)
-  ; test "map"   (fun () -> map_iter   ~num_keys ~iterations)
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -> table_iter ~num_keys ~iterations)
+  ; t "map" (fun () -> map_iter ~num_keys ~iterations)
   ]
 
 let () =
@@ -966,13 +968,13 @@ test; for example, it will vary with the number of distinct keys. But
 overall, for code that is heavy on sequences of querying and updating a set
 of key/value pairs, hash tables will significantly outperform maps.
 
-Hash tables are not always the faster choice, though. In particular, maps
-excel in situations where you need to keep multiple related versions of the
-data structure in memory at once. That's because maps are immutable, and so
-operations like `Map.add` that modify a map do so by creating a new map,
-leaving the original undisturbed. Moreover, the new and old maps share most
-of their physical structure, so multiple versions can be kept around
-efficiently.
+Hash tables are not always the faster choice, though. In particular,
+maps excel in situations where you need to keep multiple related
+versions of the data structure in memory at once. That's because maps
+are immutable, and so operations like `Map.add` that modify a map do
+so by creating a new map, leaving the original undisturbed. Moreover,
+the new and old maps share most of their physical structure, so
+keeping multiple versions around can be space-efficient.
 
 Here's a benchmark that demonstrates this. In it, we create a list of maps
 (or hash tables) that are built up by iteratively applying small updates,
@@ -987,33 +989,34 @@ open Core_bench
 
 let create_maps ~num_keys ~iterations =
   let rec loop i map =
-    if i <= 0 then []
-    else
+    if i <= 0
+    then []
+    else (
       let new_map =
         Map.change map (i % num_keys) ~f:(fun current ->
-          Some (1 + Option.value ~default:0 current))
+            Some (1 + Option.value ~default:0 current))
       in
-      new_map :: loop (i - 1) new_map
+      new_map :: loop (i - 1) new_map)
   in
   loop iterations (Map.empty (module Int))
 
 let create_tables ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i <= 0 then []
+    if i <= 0
+    then []
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current ->
-        Some (1 + Option.value ~default:0 current));
+          Some (1 + Option.value ~default:0 current));
       let new_table = Hashtbl.copy table in
-      new_table :: loop (i - 1)
-    )
+      new_table :: loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
-  ; test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
+  ; t "map" (fun () -> ignore (create_maps ~num_keys ~iterations))
   ]
 
 let () =
