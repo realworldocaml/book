@@ -53,15 +53,15 @@ Here’s the interface:</p>
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -&gt; string -&gt; t
 
-(** Converts the set of frequency counts to an association list.
-    Every string in the list will show up at most once, and the
-    integers will be at least 1. *)
+(** Converts the set of frequency counts to an association list. Every
+    string in the list will show up at most once, and the integers
+    will be at least 1. *)
 val to_list : t -&gt; (string * int) list</code></pre>
 </div>
 <p>The intended behavior here is straightforward.
@@ -73,10 +73,9 @@ nonzero frequencies.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = (string, int, String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -93,8 +92,8 @@ first two are what you might expect; one for the type of the key, and
 one for type of the data. The third type parameter, the <em>comparator
 witness</em>, requires some explaining.</p>
 <p>The comparator witness is used to indicate which comparison function
-was used to construct the map, rather than saying anything about
-concrete data stored in the map. The type
+was used to construct the map, rather than saying something about the
+type of data stored in the map. The type
 <code>String.comparator_witness</code> in particular indicates that this
 map was built with the default comparison function from the
 <code>String</code> module. We’ll talk about why the comparator witness
@@ -104,7 +103,7 @@ unusually, it takes a first-class module as an argument. The point of
 the first class module is to provide the comparison function that is
 required for building the map, along with an s-expression converter for
 generating useful error messages (we’ll talk more about s-expressions in
-<a data-type="xref" href="data-serialization.html#data-serializtion-with-s-expressions">Chapter 20, Data Serialization with S-Expressions</a>). We don’t
+<a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization with S-Expressions</a>). We don’t
 need to provide the module again for functions like
 <code>Map.find</code> or <code>Map.add</code>, because the map itself
 contains a reference to the comparison function it uses.</p>
@@ -130,8 +129,7 @@ Set.union
 </div>
 <p>In addition to the operators you would expect to have for maps, sets
 support the traditional set operations, including union, intersection,
-and set difference. And, as with maps, we can create sets based on
-type-specific comparators or on the polymorphic comparator.</p>
+and set difference.</p>
 </section>
 <section class="level3" id="modules-and-comparators">
 <h3>Modules and Comparators</h3>
@@ -151,9 +149,9 @@ provided association list, throwing an exception if a key is used more
 than once. Let’s take a look at the type signature of
 <code>Map.of_alist_exn</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.of_alist_exn;;
-&gt;- : ('a, 'cmp) Map.comparator -&gt; ('a * 'b) list -&gt; ('a, 'b, 'cmp) Map.t =
-&gt;&lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Map.of_alist_exn;;
+&gt;val of_alist_exn :
+&gt;  ('a, 'cmp) Map.comparator -&gt; ('a * 'b) list -&gt; ('a, 'b, 'cmp) Map.t
 </code></pre>
 </div>
 <p>The type <code>Map.comparator</code> is actually an alias for a
@@ -169,8 +167,8 @@ signature <code>Comparator.S</code>, shown below.</p>
 &gt;  end
 </code></pre>
 </div>
-<p>Such a module needs to contain the type of the key itself, as well as
-the <code>comparator_witness</code> type, which serves as a type-level
+<p>Such a module must contain the type of the key itself, as well as the
+<code>comparator_witness</code> type, which serves as a type-level
 identifier of the comparison function in question, and finally, the
 concrete comparator itself, a value that contains the necessary
 comparison function.</p>
@@ -223,7 +221,7 @@ containing the basic functionality for the type in question, and then
 include both that module and the result of applying a functor to that
 module.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Book = struct
+<pre><code class="language-ocaml">module Book = struct
   module T = struct
 
     type t = { title: string; isbn: string }
@@ -239,25 +237,10 @@ module.</p>
   end
   include T
   include Comparator.Make(T)
-end;;
-&gt;module Book :
-&gt;  sig
-&gt;    module T :
-&gt;      sig
-&gt;        type t = { title : string; isbn : string; }
-&gt;        val compare : t -&gt; t -&gt; int
-&gt;        val sexp_of_t : t -&gt; Sexp.t
-&gt;      end
-&gt;    type t = T.t = { title : string; isbn : string; }
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;  end
-</code></pre>
+end;;</code></pre>
 </div>
-<p>With this module in hand, we can now build a set using the type
-<code>Book.t</code>.</p>
+<p>With this module in hand, we can now build a set of
+<code>Book.t</code>’s.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_programming_books =
   Set.of_list (module Book)
@@ -266,80 +249,27 @@ end;;
     ; { title = "Structure and Interpretation of Computer Programs"
       ; isbn = "978-0262510875" }
     ; { title = "The C Programming Language"
-; isbn = "978-0131101630" } ];;
+      ; isbn = "978-0131101630" } ];;
 &gt;val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
 &gt;  &lt;abstr&gt;
 </code></pre>
 </div>
-<p>Note that most of the time one should use
-<code>Comparable.Make</code> instead of <code>Comparator.Make</code>,
-since the former provides extra helper functions (most notably infix
-comparison functions) in addition to the comparator.</p>
-<p>Here’s the result of using <code>Comparable</code> rather than
-<code>Comparator</code>. As you can see, a lot of extra functions have
-been defined.</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Book = struct
-  module T = struct
-
-    type t = { title: string; isbn: string }
-
-    let compare t1 t2 =
-      let cmp_title = String.compare t1.title t2.title in
-      if cmp_title &lt;&gt; 0 then cmp_title
-      else String.compare t1.isbn t2.isbn
-
-    let sexp_of_t t : Sexp.t =
-      List [ Atom t.title; Atom t.isbn ]
-
-  end
-  include T
-  include Comparable.Make(T)
-end;;
-&gt;module Book :
-&gt;  sig
-&gt;    module T :
-&gt;      sig
-&gt;        type t = { title : string; isbn : string; }
-&gt;        val compare : t -&gt; t -&gt; int
-&gt;        val sexp_of_t : t -&gt; Sexp.t
-&gt;      end
-&gt;    type t = T.t = { title : string; isbn : string; }
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    val ( &gt;= ) : t -&gt; t -&gt; bool
-&gt;    val ( &lt;= ) : t -&gt; t -&gt; bool
-&gt;    val ( = ) : t -&gt; t -&gt; bool
-&gt;    val ( &gt; ) : t -&gt; t -&gt; bool
-&gt;    val ( &lt; ) : t -&gt; t -&gt; bool
-&gt;    val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-&gt;    val equal : t -&gt; t -&gt; bool
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    val min : t -&gt; t -&gt; t
-&gt;    val max : t -&gt; t -&gt; t
-&gt;    val ascending : t -&gt; t -&gt; int
-&gt;    val descending : t -&gt; t -&gt; int
-&gt;    val between : t -&gt; low:t -&gt; high:t -&gt; bool
-&gt;    val clamp_exn : t -&gt; min:t -&gt; max:t -&gt; t
-&gt;    val clamp : t -&gt; min:t -&gt; max:t -&gt; t Base__.Or_error.t
-&gt;    type comparator_witness = Base.Comparable.Make(T).comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;    val validate_lbound : min:t Maybe_bound.t -&gt; t Validate.check
-&gt;    val validate_ubound : max:t Maybe_bound.t -&gt; t Validate.check
-&gt;    val validate_bound :
-&gt;      min:t Maybe_bound.t -&gt; max:t Maybe_bound.t -&gt; t Validate.check
-&gt;  end
-</code></pre>
-</div>
+<p>While we used <code>Comparator.Make</code> in the above, it’s often
+preferable to use <code>Comparable.Make</code> instead, since it
+provides extra helper functions, like infix comparison operators and min
+and max functions, in addition to the comparator itself.</p>
 </section>
 <section class="level3" id="why-comparator-witnesses">
 <h3>Why do we need comparator witnesses?</h3>
-<p>The comparator witness looks a little surprising at first, and it may
-not be obvious why it’s there in the first place. The purpose of the
-witness is to identify the comparison function being used. This is
-important because some of the operations on maps and sets, in particular
-those that combine multiple maps or sets together, depend for their
-correctness on the fact that the different maps are using the same
-comparison function.</p>
+<p>The comparator witness is quite different from other types that we’ve
+seen. Instead of tracking the kind of data being used, it’s used to
+single out a particular value, a comparison function. Why do we even
+need such a thing?</p>
+<p>The comparator witness matters because some of the operations on maps
+and sets, in particular those that combine multiple maps or sets
+together, depend for their correctness on the fact that both objects
+being combined are ordered according to the same total order, which in
+turn is determined by the comparison function.</p>
 <p>Consider, for example, <code>Map.symmetric_diff</code>, which
 computes the difference between two maps.</p>
 <div class="highlight">
@@ -352,27 +282,28 @@ Map.symmetric_diff ~data_equal:Int.equal left right |&gt; Sequence.to_list;;
 &gt;[("bar", `Left 3); ("foo", `Unequal (1, 0))]
 </code></pre>
 </div>
-<p>The type of <code>Map.symmetric_diff</code>, which follows, requires
-that the two maps it compares have the same comparator type, and
-therefore the same comparison function.</p>
+<p>As you can see below, the type of <code>Map.symmetric_diff</code>
+requires that the two maps it compares have the same comparator witness,
+in addition to the same key and value type.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff;;
-&gt;- : ('k, 'v, 'cmp) Map.t -&gt;
-&gt;    ('k, 'v, 'cmp) Map.t -&gt;
-&gt;    data_equal:('v -&gt; 'v -&gt; bool) -&gt;
-&gt;    ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
-&gt;= &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Map.symmetric_diff;;
+&gt;val symmetric_diff :
+&gt;  ('k, 'v, 'cmp) Map.t -&gt;
+&gt;  ('k, 'v, 'cmp) Map.t -&gt;
+&gt;  data_equal:('v -&gt; 'v -&gt; bool) -&gt;
+&gt;  ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
 </code></pre>
 </div>
 <p>Without this constraint, we could run <code>Map.symmetric_diff</code>
 on maps that are sorted in different orders, which could lead to garbled
-results. We can show how this works in practice by creating two maps
-with the same key and data types, but different comparison functions. In
-the following, we do this by minting a new module <code>Reverse</code>,
+results.</p>
+<p>To see this constraint in action, we’ll need to create two maps with
+the same key and data types, but different comparison functions. In the
+following, we do this by minting a new module <code>Reverse</code>,
 which represents strings sorted in the reverse of the usual
 lexicographic order.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Reverse = struct
+<pre><code class="language-ocaml">module Reverse = struct
   module T = struct
     type t = string
     let sexp_of_t = String.sexp_of_t
@@ -381,24 +312,7 @@ lexicographic order.</p>
   end
   include T
   include Comparator.Make(T)
-end;;
-&gt;module Reverse :
-&gt;  sig
-&gt;    module T :
-&gt;      sig
-&gt;        type t = string
-&gt;        val sexp_of_t : t -&gt; Sexp.t
-&gt;        val t_of_sexp : Sexp.t -&gt; t
-&gt;        val compare : t -&gt; t -&gt; int
-&gt;      end
-&gt;    type t = string
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    val t_of_sexp : Sexp.t -&gt; t
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;  end
-</code></pre>
+end;;</code></pre>
 </div>
 <p>As you can see in the following, both <code>Reverse</code> and
 <code>String</code> can be used to create maps with a key type of
@@ -422,10 +336,10 @@ Map.min_elt rev_map;;
 &gt;- : (string * int) option = Some ("snoo", 3)
 </code></pre>
 </div>
-<p>As such, running <code>Map.symmetric_diff</code> on these maps
-doesn’t make any sense. Happily, the type system will give us a
-compile-time error if we try, instead of throwing an error at run time,
-or worse, silently returning the wrong result.</p>
+<p>As a result, the algorithm in <code>Map.symmetric_diff</code> just
+wouldn’t work correctly when applied to these values. Happily, the type
+system will give us a compile-time error if we try, instead of throwing
+an error at run time, or worse, silently returning the wrong result.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.symmetric_diff ord_map rev_map;;
 &gt;Line 1, characters 28-35:
@@ -470,24 +384,21 @@ comparator associated with a given type will order things in the same
 way that polymorphic compare does.</p>
 <section data-type="warning" class="level5" id="the-perils-of-polymorphic-compare">
 <h5>The Perils of Polymorphic Compare</h5>
-<p>Polymorphic compare is highly convenient, but it has serious
-downsides as well and should be used with care. In particular,
-polymorphic compare has a fixed algorithm for comparing values of any
-type, and that algorithm can sometimes yield surprising results.</p>
-<p>To understand what’s wrong with polymorphic compare, you need to
-understand a bit about how it works. Polymorphic compare is
-<em>structural</em>, in that it operates directly on the runtime
-representation of OCaml values, walking the structure of the values in
-question without regard for their type.</p>
-<p>This is convenient because it provides a comparison function that
-works for most OCaml values and largely behaves as you would expect. For
-example, on <code>int</code>s and <code>float</code>s, it acts as you
-would expect a numeric comparison function to act, and for simple
-containers like strings and lists and arrays, it operates as a
-lexicographic comparison. Except for values from outside of the OCaml
-heap and functions, it works on almost every OCaml type.</p>
-<p>But sometimes, a structural comparison is not what you want. Maps are
-actually a fine example of this. Consider the following two maps.</p>
+<p>Polymorphic compare is awfully convenient, but it has serious
+downsides and should mostly be avoided in production code. To understand
+why, it helps to understand how polymorphic compare works.</p>
+<p>Polymorphic compare operates directly on the runtime representation
+of OCaml values, walking the structure of those values without regard
+for their type.</p>
+<p>And despite ignoring types, it mostly behaves as you would hope.
+Comparisons on <code>int</code>s and <code>float</code>s respect the
+ordinary ordering of numeric values, and containers like strings, lists,
+and arrays are compared lexicographically. And it works on almost every
+OCaml type, with some important exceptions like functions.</p>
+<p>But the type-oblivious nature of polymorphic compare means that it
+peeks under ordinary abstraction boundaries, and that can lead to some
+deeply confusing results. Maps themselves provide a great example of
+this. Consider the following two maps.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
 &gt;val m1 : (int, string, Int.comparator_witness) Map.t = &lt;abstr&gt;
@@ -495,7 +406,7 @@ let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"];;
 &gt;val m2 : (int, string, Int.comparator_witness) Map.t = &lt;abstr&gt;
 </code></pre>
 </div>
-<p>Logically, these two sets should be equal, and that’s the result that
+<p>Logically, these two maps should be equal, and that’s the result that
 you get if you call <code>Map.equal</code> on them:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Map.equal String.equal m1 m2;;
@@ -503,39 +414,41 @@ you get if you call <code>Map.equal</code> on them:</p>
 </code></pre>
 </div>
 <p>But because the elements were added in different orders, the layout
-of the trees underlying the sets will be different. As such, a
-structural comparison function will conclude that they’re different.</p>
-<p>Let’s see what happens if we use polymorphic compare to test for
-equality. <code>Base</code> hides polymorphic comparison by defaults,
-but it is available by opening the <code>Poly</code> module, at which
-point <code>=</code> is bound to polymorphic equality. Comparing the
-maps directly will fail at runtime because the comparators stored within
-the sets contain function values:</p>
+of the trees underlying the maps will be different. As such, polymorphic
+compare will conclude that they’re different.</p>
+<p>We can see this below. Note that <code>Base</code> hides polymorphic
+comparison by default, but it is available within the <code>Poly</code>
+module.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(m1 = m2);;
 &gt;Exception: (Invalid_argument "compare: functional value")
 </code></pre>
 </div>
-<p>We can, however, use the function
-<code>Map.Using_comparator.to_tree</code> to expose the underlying
-binary tree without the attached comparator. This same issue comes up
-with other data types, including sets, which we’ll discuss later in the
-chapter.</p>
+<p>This comparison failed because polymorphic compare doesn’t work on
+functions, and maps store the comparison function they were created
+with. Happily, there’s a function,
+<code>Map.Using_comparator.to_tree</code> which exposes the underlying
+binary tree without the attached comparison function. We can use that to
+compare the underlying trees:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.((Map.Using_comparator.to_tree m1) =
 (Map.Using_comparator.to_tree m2));;
 &gt;- : bool = false
 </code></pre>
 </div>
-<p>This can cause real and quite subtle bugs. If, for example, you use a
-map whose keys contain sets, then the map built with the polymorphic
-comparator will behave incorrectly, separating out keys that should be
-aggregated together. Even worse, it will work sometimes and fail others;
-since if the sets are built in a consistent order, then they will work
-as expected, but once the order changes, the behavior will change.</p>
+<p> As you can see, polymorphic compare now produces a result, but it’s
+not the result we want.</p>
+<p>The abstraction-breaking nature of polymorphic compare can cause real
+and quite subtle bugs. If, for example, if you build a map whose keys
+are sets (which have the same issues with polymorphic compare that maps
+do), then the map built with the polymorphic comparator will behave
+incorrectly, separating out keys that should be aggregated together.
+Even worse, it will behave inconsistently, since the behavior of
+polymorphic compare will depend on the order in which the sets were
+built.</p>
 </section>
 </section>
-<section class="level3" id="satsifying-comparator.s-with-deriving">
+<section class="level3" id="satisfying-comparator.s-with-deriving">
 <h3>Satisfying <code>Comparator.S</code> with
 <code>[@@deriving]</code></h3>
 <p>Using maps and sets on a new type requires satisfying the
@@ -548,7 +461,7 @@ automate these tasks away.</p>
 created a type <code>Book.t</code> and set it up for use in creating
 maps and sets.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Book = struct
+<pre><code class="language-ocaml">module Book = struct
   module T = struct
 
     type t = { title: string; isbn: string }
@@ -564,110 +477,87 @@ maps and sets.</p>
   end
   include T
   include Comparator.Make(T)
-end;;
-&gt;module Book :
-&gt;  sig
-&gt;    module T :
-&gt;      sig
-&gt;        type t = { title : string; isbn : string; }
-&gt;        val compare : t -&gt; t -&gt; int
-&gt;        val sexp_of_t : t -&gt; Sexp.t
-&gt;      end
-&gt;    type t = T.t = { title : string; isbn : string; }
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;  end
-</code></pre>
+end</code></pre>
 </div>
 <p>Much of the code here is devoted to creating a comparison function
 and s-expression converter for the type <code>Book.t</code>. But if we
 have the <code>ppx_sexp_conv</code> and <code>ppx_compare</code> syntax
-extensions enabled (both of which come with the omnibus
-<code>ppx_jane</code> package), then we can request that default
-implementations of these functions be created, as follows.</p>
+extensions enabled, then we can request that default implementations of
+these functions be created for us. We can enable both of these
+extensions via the omnibus <code>ppx_jane</code> package.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
-module Book = struct
+</code></pre>
+</div>
+<p>And we can use the extensions in our definition of <code>Book</code>
+as follows:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Book = struct
   module T = struct
     type t = { title: string; isbn: string }
     [@@deriving compare, sexp_of]
   end
   include T
   include Comparator.Make(T)
-end;;
-&gt;module Book :
-&gt;  sig
-&gt;    module T :
-&gt;      sig
-&gt;        type t = { title : string; isbn : string; }
-&gt;        val compare : t -&gt; t -&gt; int
-&gt;        val sexp_of_t : t -&gt; Sexp.t
-&gt;      end
-&gt;    type t = T.t = { title : string; isbn : string; }
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;  end
-</code></pre>
+end;;</code></pre>
 </div>
-<p>If you want your comparison function that orders things in a
-particular way, you can always write your own comparison function by
-hand; but if all you need is a total order suitable for creating maps
-and sets with, then <code>[@@deriving compare]</code> is a good
-choice.</p>
+<p>If you want a comparison function that orders things in a particular
+way, you can always write your own by hand; but if all you need is a
+total order suitable for creating maps and sets with, then
+<code>[@@deriving compare]</code> is a good choice.</p>
 <section data-type="note" class="level5" id="and-phys_equal">
 <h5>=, ==, and phys_equal</h5>
-<p>If you come from a C/C++ background, you’ll probably reflexively use
-<code>==</code> to test two values for equality. In OCaml, the
+<p>OCaml has multiple notions of equality, and picking the right one can
+be tricky. If you don’t open <code>Base</code>, you’ll find that the
 <code>==</code> operator tests for <em>physical</em> equality, while the
-<code>=</code> operator tests for <em>structural</em> equality.</p>
-<p>The physical equality test will match if two data structures have
-precisely the same pointer in memory. Two data structures that have
-identical contents but are constructed separately will not match using
-<code>==</code>.</p>
-<p>The <code>=</code> structural equality operator recursively inspects
-each field in the two values and tests them individually for equality.
-Crucially, if your data structure is cyclical (that is, a value
-recursively points back to another field within the same structure), the
-<code>=</code> operator will never terminate, and your program will
-hang! You therefore must use the physical equality operator or write a
-custom comparison function when comparing cyclic values.</p>
-<p>It’s quite easy to mix up the use of <code>=</code> and
-<code>==</code>, so <code>Base</code> discourages the use of
-<code>==</code> and provides the more explicit <code>phys_equal</code>
-function instead. You’ll see a warning if you use <code>==</code>
-anywhere in code that opens <code>Base</code>:</p>
+<code>=</code> operator is the polymorphic equality function.</p>
+<p>Two values are considered physically equal if they are the same
+pointer in memory. Two data structures that have identical contents but
+are constructed separately will not be considered equal by
+<code>==</code>. Polymorphic equality, on the other hand, is
+<em>structural</em>, which effectively means that it considers values to
+be equal if they have the same contents.</p>
+<p>Most of the time you don’t want either of these forms of equality!
+Polymorphic equality is problematic for reasons we explained earlier in
+the chapter, and physical equality, while useful, is something that’s
+needed in particular cases, most often when you’re dealing with mutable
+objects, where the physical identity of the object matters.</p>
+<p><code>Base</code> hides polymorphic equality, instead reserving
+<code>=</code> for equality functions associated with particular types.
+At the top-level <code>=</code> is specialized to integers.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
-1 == 2;;
-&gt;Line 1, characters 3-5:
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1 = 2;;
+&gt;- : bool = false
+"one" = "two";;
+&gt;Line 1, characters 1-6:
+&gt;Error: This expression has type string but an expression was expected of type
+&gt;         int
+</code></pre>
+</div>
+<p>Other type-specific equality functions are found in their associated
+modules</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">String.("one" = "two");;
+&gt;- : bool = false
+</code></pre>
+</div>
+<p>It’s quite easy to mix up <code>=</code> and <code>==</code>, and so
+<code>Base</code> deprecates <code>==</code> and provides
+<code>phys_equal</code> instead, a function with a clear and descriptive
+name.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ref 1 == ref 1;;
+&gt;Line 1, characters 7-9:
 &gt;Alert deprecated: Base.==
 &gt;[2016-09] this element comes from the stdlib distributed with OCaml.
 &gt;Use [phys_equal] instead.
 &gt;- : bool = false
-phys_equal 1 2;;
+phys_equal (ref 1) (ref 1);;
 &gt;- : bool = false
 </code></pre>
 </div>
-<p>If you feel like hanging your OCaml interpreter, you can verify what
-happens with recursive values and structural equality for yourself:</p>
-<div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 };;
-&gt;type t1 = { foo1 : int; bar1 : t2; }
-&gt;and t2 = { foo2 : int; bar2 : t1; }
-let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-&gt;&lt;lots of text&gt;
-v1 == v1;;
-&gt;- : bool = true
-phys_equal v1 v1;;
-&gt;- : bool = true
-v1 = v1;;
-&gt;&lt;press ^Z and kill the process now&gt;
-</code></pre>
-</div>
+<p>This is just a small way in which <code>Base</code> tries to avoid
+error-prone APIs.</p>
 </section>
 </section>
 <section class="level3" id="applying-deriving-to-maps-and-sets">
@@ -678,8 +568,7 @@ used to create a map or set type. But what if we want to put a
 <code>[@@deriving]</code> annotation on a map or set type itself?</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type string_int_map =
-  (string,int,String.comparator_witness) Map.t
-[@@deriving sexp];;
+  (string,int,String.comparator_witness) Map.t [@@deriving sexp];;
 &gt;Line 2, characters 44-49:
 &gt;Error: Unbound value Map.t_of_sexp
 &gt;Hint: Did you mean m__t_of_sexp?
@@ -693,9 +582,7 @@ something that can be parsed out of the s-expression.</p>
 work with the various <code>[@@deriving]</code> extensions, which you
 can see below.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type string_int_map =
-  int Map.M(String).t
-[@@deriving sexp];;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type string_int_map = int Map.M(String).t [@@deriving sexp];;
 &gt;type string_int_map = int Base.Map.M(Base.String).t
 &gt;val string_int_map_of_sexp : Sexp.t -&gt; string_int_map = &lt;fun&gt;
 &gt;val sexp_of_string_int_map : string_int_map -&gt; Sexp.t = &lt;fun&gt;
@@ -711,7 +598,7 @@ meaning of the type is the same, as we can see below.</p>
 &gt;- : int Base.Map.M(Base.String).t = &lt;abstr&gt;
 </code></pre>
 </div>
-<p>This same type works well with other derivers, like those for
+<p>This same type works with other derivers as well, like those for
 comparison and hash functions. Since this way of writing the type is
 also shorter, it’s what you should use most of the time.</p>
 </section>
@@ -767,8 +654,8 @@ comparator will lead to a type error:</p>
 </section>
 <section class="level2" id="hash-tables">
 <h2>Hash Tables</h2>
-<p>Hash tables are the imperative cousin of maps. We walked over a basic
-hash table implementation in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, so in this section we’ll
+<p>Hash tables are the imperative cousin of maps. We walked through a
+basic hash table implementation in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, so in this section we’ll
 mostly discuss the pragmatics of Core’s <code>Hashtbl</code> module.
 We’ll cover this material more briefly than we did with maps because
 many of the concepts are shared. <a data-secondary="basics
@@ -786,13 +673,13 @@ module" data-type="indexterm">&nbsp;</a><a data-secondary="time complexity of" d
 <section data-type="warning" class="level3 allow_break" id="time-complexity-of-hash-tables">
 <h3>Time Complexity of Hash Tables</h3>
 <p>The statement that hash tables provide constant-time access hides
-some complexities. First of all, any hash table implementation, OCaml’s
-included, needs to resize the table when it gets too full. A resize
-requires allocating a new backing array for the hash table and copying
-over all entries, and so it is quite an expensive operation. That means
-adding a new element to the table is only <em>amortized</em> constant,
-which is to say, it’s constant on average over a long sequence of
-operations, but some of the individual operations can cost more.</p>
+some complexities. First of all, most hash table implementations,
+OCaml’s included, needs to resize the table when it gets too full. A
+resize requires allocating a new backing array for the hash table and
+copying over all entries, and so it is quite an expensive operation.
+That means adding a new element to the table is only <em>amortized</em>
+constant, which is to say, it’s constant on average over a long sequence
+of operations, but some of the individual operations can cost more.</p>
 <p>Another hidden cost of hash tables has to do with the hash function
 you use. If you end up with a pathologically bad hash function that
 hashes all of your data to the same number, then all of your insertions
@@ -816,7 +703,7 @@ by providing a first-class module from which the required operations for
 building a hashtable can be obtained.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.create (module String);;
-&gt;val table : (string, '_weak1) Hashtbl.Poly.t = &lt;abstr&gt;
+&gt;val table : (string, '_weak1) Base.Hashtbl.t = &lt;abstr&gt;
 Hashtbl.set table ~key:"three" ~data:3;;
 &gt;- : unit = ()
 Hashtbl.find table "three";;
@@ -829,11 +716,10 @@ types, you need to do some work to prepare it. In order for a module to
 be suitable for passing to <code>Hashtbl.create</code>, it has to match
 the following interface.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Core.Hashtbl_intf.Key;;
-&gt;module type Key =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Base.Hashtbl.Key.S;;
+&gt;module type S =
 &gt;  sig
 &gt;    type t
-&gt;    val t_of_sexp : Sexp.t -&gt; t
 &gt;    val compare : t -&gt; t -&gt; int
 &gt;    val sexp_of_t : t -&gt; Sexp.t
 &gt;    val hash : t -&gt; int
@@ -855,18 +741,19 @@ end;;
 &gt;    type t = { title : string; isbn : string; }
 &gt;    val compare : t -&gt; t -&gt; int
 &gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    val hash_fold_t : Hash.state -&gt; t -&gt; Hash.state
+&gt;    val hash_fold_t :
+&gt;      Base_internalhash_types.state -&gt; t -&gt; Base_internalhash_types.state
 &gt;    val hash : t -&gt; int
 &gt;  end
 let table = Hashtbl.create (module Book);;
-&gt;val table : (Book.t, '_weak2) Hashtbl.Poly.t = &lt;abstr&gt;
+&gt;val table : (Book.t, '_weak2) Base.Hashtbl.t = &lt;abstr&gt;
 </code></pre>
 </div>
 <p>You can also create a hashtable based on OCaml’s polymorphic hash and
 comparison functions.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.Poly.create ();;
-&gt;val table : ('_weak3, '_weak4) Hashtbl.Poly.t = &lt;abstr&gt;
+&gt;val table : ('_weak3, '_weak4) Base.Hashtbl.t = &lt;abstr&gt;
 Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
 &gt;- : unit = ()
 Hashtbl.find table ("foo",3,[1;2;3]);;
@@ -957,29 +844,32 @@ open Core_bench
 
 let map_iter ~num_keys ~iterations =
   let rec loop i map =
-    if i &lt;= 0 then ()
-    else loop (i - 1)
-           (Map.change map (i % num_keys) ~f:(fun current -&gt;
-              Some (1 + Option.value ~default:0 current)))
+    if i &lt;= 0
+    then ()
+    else
+      loop
+        (i - 1)
+        (Map.change map (i % num_keys) ~f:(fun current -&gt;
+             Some (1 + Option.value ~default:0 current)))
   in
   loop iterations (Map.empty (module Int))
 
 let table_iter ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i &lt;= 0 then ()
+    if i &lt;= 0
+    then ()
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current -&gt;
-        Some (1 + Option.value ~default:0 current));
-      loop (i - 1)
-    )
+          Some (1 + Option.value ~default:0 current));
+      loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -&gt; table_iter ~num_keys ~iterations)
-  ; test "map"   (fun () -&gt; map_iter   ~num_keys ~iterations)
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -&gt; table_iter ~num_keys ~iterations)
+  ; t "map" (fun () -&gt; map_iter ~num_keys ~iterations)
   ]
 
 let () =
@@ -1016,7 +906,7 @@ versions of the data structure in memory at once. That’s because maps
 are immutable, and so operations like <code>Map.add</code> that modify a
 map do so by creating a new map, leaving the original undisturbed.
 Moreover, the new and old maps share most of their physical structure,
-so multiple versions can be kept around efficiently.</p>
+so keeping multiple versions around can be space-efficient.</p>
 <p>Here’s a benchmark that demonstrates this. In it, we create a list of
 maps (or hash tables) that are built up by iteratively applying small
 updates, keeping these copies around. In the map case, this is done by
@@ -1030,33 +920,34 @@ open Core_bench
 
 let create_maps ~num_keys ~iterations =
   let rec loop i map =
-    if i &lt;= 0 then []
-    else
+    if i &lt;= 0
+    then []
+    else (
       let new_map =
         Map.change map (i % num_keys) ~f:(fun current -&gt;
-          Some (1 + Option.value ~default:0 current))
+            Some (1 + Option.value ~default:0 current))
       in
-      new_map :: loop (i - 1) new_map
+      new_map :: loop (i - 1) new_map)
   in
   loop iterations (Map.empty (module Int))
 
 let create_tables ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i &lt;= 0 then []
+    if i &lt;= 0
+    then []
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current -&gt;
-        Some (1 + Option.value ~default:0 current));
+          Some (1 + Option.value ~default:0 current));
       let new_table = Hashtbl.copy table in
-      new_table :: loop (i - 1)
-    )
+      new_table :: loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -&gt; ignore (create_tables ~num_keys ~iterations))
-  ; test "map"   (fun () -&gt; ignore (create_maps   ~num_keys ~iterations))
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -&gt; ignore (create_tables ~num_keys ~iterations))
+  ; t "map" (fun () -&gt; ignore (create_maps ~num_keys ~iterations))
   ]
 
 let () =
