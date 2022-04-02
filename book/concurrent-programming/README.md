@@ -121,7 +121,7 @@ type-signature of `bind`.
 
 ```ocaml env=main
 # #show Deferred.bind;;
-- : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+val bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t
 ```
 
 \noindent
@@ -186,8 +186,8 @@ Async that takes an ordinary value and wraps it up in a deferred.
 [return function]{.idx}
 
 ```ocaml env=main
-# #show return;;
-- : 'a -> 'a Deferred.t = <fun>
+# #show_val return;;
+val return : 'a -> 'a Deferred.t
 # let three = return 3;;
 val three : int Deferred.t = <abstr>
 # three;;
@@ -217,7 +217,7 @@ following signature:
 
 ```ocaml env=main
 # #show Deferred.map;;
-- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
+val map : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t
 ```
 
 \noindent
