@@ -111,7 +111,7 @@ class module is to provide the comparison function that is required
 for building the map, along with an s-expression converter for
 generating useful error messages (we'll talk more about s-expressions
 in [Data Serialization with
-S-Expressions](data-serialization.html#data-serializtion-with-s-expressions){data-type=xref}).
+S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}).
 We don't need to provide the module again for functions like
 `Map.find` or `Map.add`, because the map itself contains a reference
 to the comparison function it uses.
@@ -283,8 +283,9 @@ need such a thing?
 
 The comparator witness matters because some of the operations on maps
 and sets, in particular those that combine multiple maps or sets
-together, depend for their correctness on the fact that the data
-structures being combined use the same comparison function.
+together, depend for their correctness on the fact that both objects
+being combined are ordered according to the same total order, which in
+turn is determined by the comparison function.
 
 Consider, for example, `Map.symmetric_diff`, which computes the
 difference between two maps.
