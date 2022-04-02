@@ -45,8 +45,8 @@ systems. <a data-secondary="benefits of" data-primary="Async library" data-type=
 example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
-In_channel.read_all;;
-&gt;- : string -&gt; string = &lt;fun&gt;
+#show In_channel.read_all;;
+&gt;val read_all : string -&gt; string
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 &gt;- : unit = ()
 In_channel.read_all "test.txt";;
@@ -66,8 +66,8 @@ the signature of the Async equivalent of
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "async";;
 open Async;;
-Reader.file_contents;;
-&gt;- : string -&gt; string Deferred.t = &lt;fun&gt;
+#show Reader.file_contents;;
+&gt;val file_contents : string -&gt; string Deferred.t
 </code></pre>
 </div>
 <p>We first load the Async package in the toplevel using
@@ -115,11 +115,11 @@ a deferred computation to finish, which we do using
 <code>Deferred.bind</code>. Here’s the type-signature of
 <code>bind</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.bind;;
-&gt;- : 'a Deferred.t -&gt; f:('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Deferred.bind;;
+&gt;val bind : 'a Deferred.t -&gt; f:('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t
 </code></pre>
 </div>
-<p><code>bind</code> is effectively a way of sequencing concurrent
+<p> <code>bind</code> is effectively a way of sequencing concurrent
 computations. In particular, <code>Deferred.bind d ~f</code> causes
 <code>f</code> to be called after the value of <code>d</code> has been
 determined. <a data-primary="Deferred.bind" data-type="indexterm">&nbsp;</a></p>
@@ -153,10 +153,10 @@ verbose, and so Async includes an infix operator for it:
 &gt;val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>In the preceding code, we’ve dropped the parentheses around the
-function on the righthand side of the bind, and we didn’t add a level of
-indentation for the contents of that function. This is standard practice
-for using the infix <code>bind</code> operator. <a data-primary="bind
+<p>Here, we’ve dropped the parentheses around the function on the
+righthand side of the bind, and we didn’t add a level of indentation for
+the contents of that function. This is standard practice for using the
+infix <code>bind</code> operator. <a data-primary="bind
 function" data-type="indexterm">&nbsp;</a></p>
 <p>Now let’s look at another potential use of <code>bind</code>. In this
 case, we’ll write a function that counts the number of lines in a
@@ -178,8 +178,8 @@ that returns the result directly. What we need is <code>return</code>, a
 function provided by Async that takes an ordinary value and wraps it up
 in a deferred. <a data-primary="return function" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">return;;
-&gt;- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show_val return;;
+&gt;val return : 'a -&gt; 'a Deferred.t
 let three = return 3;;
 &gt;val three : int Deferred.t = &lt;abstr&gt;
 three;;
@@ -204,11 +204,11 @@ we already ran across monads in <a data-type="xref" href="error-handling.html#bi
 fairly common pattern, and as such there is a standard shortcut for it
 called <code>Deferred.map</code>, which has the following signature:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.map;;
-&gt;- : 'a Deferred.t -&gt; f:('a -&gt; 'b) -&gt; 'b Deferred.t = &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Deferred.map;;
+&gt;val map : 'a Deferred.t -&gt; f:('a -&gt; 'b) -&gt; 'b Deferred.t
 </code></pre>
 </div>
-<p>and comes with its own infix equivalent, <code>&gt;&gt;|</code>.
+<p> and comes with its own infix equivalent, <code>&gt;&gt;|</code>.
 Using it, we can rewrite <code>count_lines</code> again a bit more
 succinctly:</p>
 <div class="highlight">
@@ -224,11 +224,11 @@ count_lines "/etc/hosts";;
 <p>Note that <code>count_lines</code> returns a deferred, but
 <code>utop</code> waits for that deferred to become determined, and
 shows us the contents of the deferred instead.</p>
-<section data-type="note" class="level5" id="using-let_syntax-with-async">
-<h5>Using <code>Let_syntax</code> with Async</h5>
-<p>As was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>, there is a special syntax designed
-for working with monads, which we can enable by enabling
-<code>ppx_let</code>.</p>
+<section class="level3" id="using-let-syntax">
+<h3>Using let syntax</h3>
+<p>As was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>, there is a special syntax, which we
+call <em>let syntax</em>, designed for working with monads, which we can
+enable by enabling <code>ppx_let</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
 </code></pre>
@@ -253,19 +253,17 @@ for working with monads, which we can enable by enabling
 </div>
 <p>The difference here is just syntactic, with these examples compiling
 down to the same thing as the corresponding examples written using infix
-operators. What’s nice about <code>Let_syntax</code> is that it
-highlights the analogy between monadic bind and OCaml’s built-in
-let-binding, thereby making your code more uniform and more
-readable.</p>
-<p><code>Let_syntax</code> works for any monad, and you decide which
-monad is in use by opening the appropriate <code>Let_syntax</code>
-module. Opening <code>Async</code> also implicitly opens
+operators. What’s nice about let syntax is that it highlights the
+analogy between monadic bind and OCaml’s built-in let-binding, thereby
+making your code more uniform and more readable.</p>
+<p>Let syntax works for any monad, and you decide which monad is in use
+by opening the appropriate <code>Let_syntax</code> module. Opening
+<code>Async</code> also implicitly opens
 <code>Deferred.Let_syntax</code>, but in some contexts you may want to
 do that explicitly.</p>
-<p>To keep things simple, we’ll use the infix notation for map and bind
-for the remainder of the chapter. But once you get comfortable with
-Async and monadic programming, we recommend using
-<code>Let_syntax</code>.</p>
+<p>For the most part, let syntax is easier to read and work with, and
+you should default to it when using Async, which is what we’ll do for
+the remainder of the chapter.</p>
 </section>
 <section class="level3" id="ivars-and-upon">
 <h3>Ivars and Upon</h3>
@@ -326,8 +324,8 @@ of the deferred value returned by the thunk. To implement this, we’ll
 use an operator called <code>upon</code>, which has the following
 signature: <a data-primary="thunks" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upon;;
-&gt;- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show upon;;
+&gt;val upon : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit
 </code></pre>
 </div>
 <p>Like <code>bind</code> and <code>return</code>, <code>upon</code>
@@ -425,23 +423,27 @@ open Async
 (* Copy data from the reader to the writer, using the provided buffer
    as scratch space *)
 let rec copy_blocks buffer r w =
-  Reader.read r buffer
-  &gt;&gt;= function
+  match%bind Reader.read r buffer with
   | `Eof -&gt; return ()
   | `Ok bytes_read -&gt;
     Writer.write w (Bytes.to_string buffer) ~len:bytes_read;
-    Writer.flushed w
-    &gt;&gt;= fun () -&gt;
+    let%bind () = Writer.flushed w in
     copy_blocks buffer r w</code></pre>
 </div>
-<p>Bind is used in the code to sequence the operations: first, we call
-<code>Reader.read</code> to get a block of input. Then, when that’s
-complete and if a new block was returned, we write that block to the
-writer. Finally, we wait until the writer’s buffers are flushed, waiting
-on the deferred returned by <code>Writer.flushed</code>, at which point
-we recurse. If we hit an end-of-file condition, the loop is ended. The
-deferred returned by a call to <code>copy_blocks</code> becomes
-determined only once the end-of-file condition is hit. <a data-primary="end-of-file condition" data-type="indexterm">&nbsp;</a></p>
+<p>Bind is used in the code to sequence the operations, with a
+<code>bind</code> marking each place we wait.</p>
+<ul>
+<li>First, we call <code>Reader.read</code> to get a block of
+input.</li>
+<li>When that’s complete and if a new block was returned, we write that
+block to the writer.</li>
+<li>Finally, we wait until the writer’s buffers are flushed, at which
+point we recurse.</li>
+</ul>
+<p>If we hit an end-of-file condition, the loop is ended. The deferred
+returned by a call to <code>copy_blocks</code> becomes determined only
+once the end-of-file condition is hit. <a data-primary="end-of-file
+condition" data-type="indexterm">&nbsp;</a></p>
 <p>One important aspect of how <code>copy_blocks</code> is written is
 that it provides <em>pushback</em>, which is to say that if the process
 can’t make progress writing, it will stop reading. If you don’t
@@ -457,19 +459,19 @@ the allocation of deferreds. If you think about the execution of
 two per time through the loop. The length of this chain is unbounded,
 and so, naively, you’d think this would take up an unbounded amount of
 memory as the echo process continues.</p>
-<p>Happily, it turns out that this is a special case that Async knows
-how to optimize. In particular, the whole chain of deferreds should
-become determined precisely when the final deferred in the chain is
-determined, in this case, when the <code>Eof</code> condition is hit.
-Because of this, we could safely replace all of these deferreds with a
-single deferred. Async does just this, and so there’s no memory leak
-after all.</p>
+<p>Happily, this is a case that Async knows how to optimize. In
+particular, the whole chain of deferreds should become determined
+precisely when the final deferred in the chain is determined, in this
+case, when the <code>Eof</code> condition is hit. Because of this, we
+could safely replace all of these deferreds with a single deferred.
+Async does just this, and so there’s no memory leak after all.</p>
 <p>This is essentially a form of tail-call optimization, lifted to the
-Async monad. Indeed, you can tell that the bind in question doesn’t lead
-to a memory leak in more or less the same way you can tell that the tail
-recursion optimization should apply, which is that the bind that creates
-the deferred is in tail-position. In other words, nothing is done to
-that deferred once it’s created; it’s simply returned as is. <a data-primary="tail calls" data-type="indexterm">&nbsp;</a></p>
+Deferred monad. Indeed, you can tell that the bind in question doesn’t
+lead to a memory leak in more or less the same way you can tell that the
+tail recursion optimization should apply, which is that the bind that
+creates the deferred is in tail-position. In other words, nothing is
+done to that deferred once it’s created; it’s simply returned as is.
+<a data-primary="tail calls" data-type="indexterm">&nbsp;</a></p>
 </section>
 <p><code>copy_blocks</code> provides the logic for handling a client
 connection, but we still need to set up a server to receive such
@@ -486,10 +488,12 @@ let run () =
       ~on_handler_error:`Raise
       (Tcp.Where_to_listen.of_port 8765)
       (fun _addr r w -&gt;
-         let buffer = Bytes.create (16 * 1024) in
-         copy_blocks buffer r w)
+        let buffer = Bytes.create (16 * 1024) in
+        copy_blocks buffer r w)
   in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)</code></pre>
+  ignore
+    (host_and_port
+      : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)</code></pre>
 </div>
 <p>The result of calling <code>Tcp.Server.create</code> is a
 <code>Tcp.Server.t</code>, which is a handle to the server that lets you
@@ -534,11 +538,12 @@ killall echo.exe
 </div>
 <section data-type="note" class="level5" id="functions-that-never-return">
 <h5>Functions that Never Return</h5>
-<p>You might wonder what’s going on with the call to
-<code>never_returns</code>. <code>never_returns</code> is an idiom that
-comes from Core that is used to mark functions that don’t return.
-Typically, a function that doesn’t return is inferred as having return
-type <code>'a</code>: <a data-primary="Scheduler.go" data-type="indexterm">&nbsp;</a><a data-primary="loop_forever" data-type="indexterm">&nbsp;</a><a data-primary="never_returns" data-type="indexterm">&nbsp;</a><a data-secondary="non-returning" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>The call to <code>never_returns</code> around the call to
+<code>Scheduler.go</code> is a little bit surprising, but it has a
+purpose: to make it clear to whoever invokes <code>Scheduler.go</code>
+that the function never returns. <a data-primary="Scheduler.go" data-type="indexterm">&nbsp;</a><a data-primary="never_returns" data-type="indexterm">&nbsp;</a><a data-secondary="non-returning" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>By default, a function that doesn’t return will have an inferred
+return type of <code>'a</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () = loop_forever ();;
 &gt;val loop_forever : unit -&gt; 'a = &lt;fun&gt;
@@ -546,36 +551,51 @@ let always_fail () = assert false;;
 &gt;val always_fail : unit -&gt; 'a = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This can be surprising when you call a function like this expecting
-it to return <code>unit</code>. The type-checker won’t necessarily
-complain in such a case:</p>
+<p>This is a little odd, but it does make sense. After all, if a
+function never returns, we’re free to impute any type at all to its
+non-existant return value. As a result, from a type perspective, a
+function that never returns can fit in to any context within your
+program.</p>
+<p>But that itself can be problematic, especially with a function like
+<code>Scheduler.go</code>, where the fact that it never returns is
+perhaps not entirely obvious. The point of <code>never_returns</code> is
+to create an explicit marker so the user knows that the function in
+question doesn’t return.</p>
+<p>To do this, <code>Scheduler.go</code> is defined to have a return
+value of <code>Nothing.t</code>.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let do_stuff n =
-  let x = 3 in
-  if n &gt; 0 then loop_forever ();
-  x + n;;
-&gt;val do_stuff : int -&gt; int = &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Scheduler.go;;
+&gt;val go : ?raise_unhandled_exn:bool -&gt; unit -&gt; never_returns
 </code></pre>
 </div>
-<p>With a name like <code>loop_forever</code>, the meaning is clear
-enough. But with something like <code>Scheduler.go</code>, the fact that
-it never returns is less clear, and so we use the type system to make it
-more explicit by giving it a return type of <code>never_returns</code>.
-Let’s do the same trick with <code>loop_forever</code>:</p>
+<p> <code>never_returns</code> is just an alias of
+<code>Nothing.t</code>.</p>
+<p><code>Nothing.t</code> is <em>uninhabited</em>, which means there are
+no values of that type. As such, a function can’t actually return a
+value of type <code>Nothing.t</code>, so only a function that never
+returns can have <code>Nothing.t</code> as its return type! And we can
+cause a function that never returns to have a return value of
+<code>Nothing.t</code> by just adding a type annotation.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : never_returns = loop_forever ();;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : Nothing.t = loop_forever ();;
 &gt;val loop_forever : unit -&gt; never_returns = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The type <code>never_returns</code> is uninhabited, so a function
-can’t return a value of type <code>never_returns</code>, which means
-only a function that never returns can have <code>never_returns</code>
-as its return type! Now, if we rewrite our <code>do_stuff</code>
-function, we’ll get a helpful type error:</p>
+<p>The function <code>never_returns</code> consumes a value of type
+<code>Nothing.t</code> and returns an unconstrainted type
+<code>'a</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show_val never_returns;;
+&gt;val never_returns : never_returns -&gt; 'a
+</code></pre>
+</div>
+<p>If you try to write a function that uses <code>Scheduler.go</code>,
+and just assumes that it returns unit, you’ll get a helpful type
+error.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let do_stuff n =
   let x = 3 in
-  if n &gt; 0 then loop_forever ();
+  if n &gt; 0 then Scheduler.go ();
   x + n;;
 &gt;Line 3, characters 19-34:
 &gt;Error: This expression has type never_returns
@@ -583,20 +603,17 @@ function, we’ll get a helpful type error:</p>
 &gt;       because it is in the result of a conditional with no else branch
 </code></pre>
 </div>
-<p>We can resolve the error by calling the function
-<code>never_returns</code>:</p>
+<p>We can fix this by inserting a call to <code>never_returns</code>,
+thus making the fact that <code>Scheduler.go</code> doesn’t return
+apparent to the reader.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">never_returns;;
-&gt;- : never_returns -&gt; 'a = &lt;fun&gt;
-let do_stuff n =
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let do_stuff n =
   let x = 3 in
-  if n &gt; 0 then never_returns (loop_forever ());
+  if n &gt; 0 then never_returns (Scheduler.go ());
   x + n;;
 &gt;val do_stuff : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Thus, we got the compilation to go through by explicitly marking in
-the source that the call to <code>loop_forever</code> never returns.</p>
 </section>
 <section class="level3" id="improving-the-echo-server">
 <h3>Improving the Echo Server</h3>
@@ -618,26 +635,35 @@ open Async
 
 let run ~uppercase ~port =
   let host_and_port =
-    Tcp.Server.create ~on_handler_error:`Raise
-      (Tcp.Where_to_listen.of_port port) (fun _addr r w -&gt;
-        Pipe.transfer (Reader.pipe r) (Writer.pipe w)
+    Tcp.Server.create
+      ~on_handler_error:`Raise
+      (Tcp.Where_to_listen.of_port port)
+      (fun _addr r w -&gt;
+        Pipe.transfer
+          (Reader.pipe r)
+          (Writer.pipe w)
           ~f:(if uppercase then String.uppercase else Fn.id))
   in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
+  ignore
+    (host_and_port
+      : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()
 
 let () =
-  Command.async ~summary:"Start an echo server"
-    Command.Let_syntax.(
-      let%map_open uppercase =
-        flag "-uppercase" no_arg
-          ~doc:" Convert to uppercase before echoing back"
-      and port =
-        flag "-port"
-          (optional_with_default 8765 int)
-          ~doc:" Port to listen on (default 8765)"
-      in
-      fun () -&gt; run ~uppercase ~port)
+  Command.async
+    ~summary:"Start an echo server"
+    (let%map_open.Command uppercase =
+       flag
+         "-uppercase"
+         no_arg
+         ~doc:" Convert to uppercase before echoing back"
+     and port =
+       flag
+         "-port"
+         (optional_with_default 8765 int)
+         ~doc:" Port to listen on (default 8765)"
+     in
+     fun () -&gt; run ~uppercase ~port)
   |&gt; Command.run</code></pre>
 </div>
 <p>Note the use of <code>Deferred.never</code> in the <code>run</code>
@@ -670,8 +696,11 @@ hitting <strong><code>Control-C</code></strong>:</p>
 &gt;Interrupted.
 </code></pre>
 </div>
-<p>The deferred returned by write completes on its own once the value
-written into the pipe has been read out:</p>
+<p>That’s because a pipe has a certain amount of internal slack, a
+number of slots in the pipe to which something can be written before the
+write will block. And by default, a pipe has zero slack, which means
+that the deferred returned by a write is determined only when the value
+is read out of the pipe.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
 &gt;val r : '_weak5 Pipe.Reader.t = &lt;abstr&gt;
@@ -711,10 +740,9 @@ library that we introduced in <a data-type="xref" href="command-line-parsing.htm
 shadows the <code>Command</code> module with an extended version that
 contains the <code>async</code> call:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.async_spec;;
-&gt;- : ('a, unit Deferred.t) Async.Command.basic_spec_command
-&gt;    Command.with_options
-&gt;= &lt;fun&gt;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.async_spec;;
+&gt;val async_spec :
+&gt;  ('a, unit Deferred.t) Async.Command.basic_spec_command Command.with_options
 </code></pre>
 </div>
 <p>This differs from the ordinary <code>Command.basic</code> call in
@@ -778,7 +806,9 @@ open Async
 
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
+  let base_uri =
+    Uri.of_string "http://api.duckduckgo.com/?format=json"
+  in
   Uri.add_query_param base_uri ("q", [ query ])</code></pre>
 </div>
 <p>A <code>Uri.t</code> is constructed from the
@@ -800,16 +830,19 @@ either the key “Abstract” or “Definition,” and so the following code
 looks under both keys, returning the first one for which a nonempty
 value is defined:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">(* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
+<pre><code class="language-ocaml">(* Extract the "Definition" or "Abstract" field from the DuckDuckGo
+   results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
-  | `Assoc kv_list -&gt; (
-      let find key =
-        match List.Assoc.find ~equal:String.equal kv_list key with
-        | None | Some (`String "") -&gt; None
-        | Some s -&gt; Some (Yojson.Safe.to_string s)
-      in
-      match find "Abstract" with Some _ as x -&gt; x | None -&gt; find "Definition" )
+  | `Assoc kv_list -&gt;
+    let find key =
+      match List.Assoc.find ~equal:String.equal kv_list key with
+      | None | Some (`String "") -&gt; None
+      | Some s -&gt; Some (Yojson.Safe.to_string s)
+    in
+    (match find "Abstract" with
+    | Some _ as x -&gt; x
+    | None -&gt; find "Definition")
   | _ -&gt; None</code></pre>
 </div>
 </section>
@@ -822,21 +855,21 @@ HTTP client query in" data-primary="DuckDuckGo search engine" data-type="indexte
 <div class="highlight">
 <pre><code class="language-ocaml">(* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.get (query_uri word) &gt;&gt;= fun (_, body) -&gt;
-  Cohttp_async.Body.to_string body &gt;&gt;| fun string -&gt;
-  (word, get_definition_from_json string)</code></pre>
+  let%bind _, body = Cohttp_async.Client.get (query_uri word) in
+  let%map string = Cohttp_async.Body.to_string body in
+  word, get_definition_from_json string</code></pre>
 </div>
 <p>To better understand what’s going on, it’s useful to look at the type
 for <code>Cohttp_async.Client.get</code>, which we can do in
 <code>utop</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "cohttp-async";;
-Cohttp_async.Client.get;;
-&gt;- : ?interrupt:unit Deferred.t -&gt;
-&gt;    ?ssl_config:Conduit_async.V2.Ssl.Config.t -&gt;
-&gt;    ?headers:Cohttp.Header.t -&gt;
-&gt;    Uri.t -&gt; (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
-&gt;= &lt;fun&gt;
+#show Cohttp_async.Client.get;;
+&gt;val get :
+&gt;  ?interrupt:unit Deferred.t -&gt;
+&gt;  ?ssl_config:Conduit_async.V2.Ssl.Config.t -&gt;
+&gt;  ?headers:Cohttp.Header.t -&gt;
+&gt;  Uri.t -&gt; (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 </code></pre>
 </div>
 <p>The <code>get</code> call takes as a required argument a URI and
@@ -854,12 +887,14 @@ result:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* Print out a word/definition pair *)
 let print_result (word, definition) =
-  printf "%s\n%s\n\n%s\n\n" word
+  printf
+    "%s\n%s\n\n%s\n\n"
+    word
     (String.init (String.length word) ~f:(fun _ -&gt; '-'))
-    ( match definition with
+    (match definition with
     | None -&gt; "No definition found"
-    | Some def -&gt; String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def)
-    )</code></pre>
+    | Some def -&gt;
+      String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def))</code></pre>
 </div>
 <p>We use the <code>Wrapper</code> module from the <code>textwrap</code>
 package to do the line wrapping. It may not be obvious that this routine
@@ -873,10 +908,10 @@ calls like <code>printf</code> won’t actually generate any output!</p>
 <p>The next function dispatches the searches in parallel, waits for the
 results, and then prints:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">(* Run many searches in parallel, printing out the results after they're all
-   done. *)
+<pre><code class="language-ocaml">(* Run many searches in parallel, printing out the results after
+   they're all done. *)
 let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition) &gt;&gt;| fun results -&gt;
+  let%map results = Deferred.all (List.map words ~f:get_definition) in
   List.iter results ~f:print_result</code></pre>
 </div>
 <p>We used <code>List.map</code> to call <code>get_definition</code> on
@@ -895,10 +930,12 @@ all results arrive.</p>
 <p>We could rewrite this code to print out the results as they’re
 received (and thus potentially out of order) as follows:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">(* Run many searches in parallel, printing out the results as you go *)
+<pre><code class="language-ocaml">(* Run many searches in parallel, printing out the results as you
+   go *)
 let search_and_print words =
   Deferred.all_unit
-    (List.map words ~f:(fun word -&gt; get_definition word &gt;&gt;| print_result))</code></pre>
+    (List.map words ~f:(fun word -&gt;
+         get_definition word &gt;&gt;| print_result))</code></pre>
 </div>
 <p>The difference is that we both dispatch the query and print out the
 result in the closure passed to <code>map</code>, rather than wait for
@@ -916,10 +953,12 @@ see the type of this function in <code>utop</code>:</p>
 <code>Command.async</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let () =
-  Command.async ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Let_syntax.(
-      let%map_open words = anon (sequence ("word" %: string)) in
-      fun () -&gt; search_and_print words)
+  Command.async
+    ~summary:"Retrieve definitions from duckduckgo search engine"
+    (let%map_open.Command words =
+       anon (sequence ("word" %: string))
+     in
+     fun () -&gt; search_and_print words)
   |&gt; Command.run</code></pre>
 </div>
 <p>And that’s all we need for a simple but usable definition
@@ -971,9 +1010,8 @@ between the two behaviors on subsequent calls:</p>
   fun () -&gt;
     let will_fail = !should_fail in
     should_fail := not will_fail;
-    after (Time.Span.of_sec 0.5)
-    &gt;&gt;= fun () -&gt;
-    if will_fail then raise Exit else return ();;
+    let%map () = after (Time.Span.of_sec 0.5) in
+    if will_fail then raise Exit else ();;
 &gt;val maybe_raise : unit -&gt; unit Deferred.t = &lt;fun&gt;
 maybe_raise ();;
 &gt;- : unit = ()
@@ -991,8 +1029,8 @@ as you can see that doesn’t quite do the trick:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_error () =
   try
-    maybe_raise ()
-    &gt;&gt;| fun () -&gt; "success"
+    let%map () = maybe_raise () in
+    "success"
   with _ -&gt; return "failure";;
 &gt;val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
 handle_error ();;
@@ -1007,11 +1045,16 @@ while <code>maybe_raise</code> schedules an Async job that will throw an
 exception in the future, after the <code>try/with</code> expression has
 exited.</p>
 <p>We can capture this kind of asynchronous error using the
-<code>try_with</code> function provided by Async: <a data-secondary="asynchronous errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
+<code>try_with</code> function provided by Async.
+<code>try_with f</code> takes as its argument a deferred-returning thunk
+<code>f</code> and returns a deferred that becomes determined either as
+<code>Ok</code> of whatever <code>f</code> returned, or
+<code>Error exn</code> if <code>f</code> threw an exception before its
+return value became determined. <a data-primary="try_with" data-type="indexterm">&nbsp;</a> <a data-secondary="try_with" data-primary="async" data-type="indexterm">&nbsp;</a> <a data-secondary="asynchronous errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
+<p>Here’s a trivial example of <code>try_with</code> in action.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_error () =
-  try_with (fun () -&gt; maybe_raise ())
-  &gt;&gt;| function
+  match%map try_with (fun () -&gt; maybe_raise ()) with
   | Ok ()   -&gt; "success"
   | Error _ -&gt; "failure";;
 &gt;val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
@@ -1021,13 +1064,8 @@ handle_error ();;
 &gt;- : string = "failure"
 </code></pre>
 </div>
-<p><code>try_with f</code> takes as its argument a deferred-returning
-thunk <code>f</code> and returns a deferred that becomes determined
-either as <code>Ok</code> of whatever <code>f</code> returned, or
-<code>Error exn</code> if <code>f</code> threw an exception before its
-return value became determined.</p>
-<section data-type="note" class="level5" id="monitors">
-<h5>Monitors</h5>
+<section class="level3" id="monitors">
+<h3>Monitors</h3>
 <p><code>try_with</code> is a useful tool for handling exceptions in
 Async, but it’s not the whole story. All of Async’s exception-handling
 mechanisms, <code>try_with</code> included, are built on top of Async’s
@@ -1078,8 +1116,8 @@ spawns.</p>
   Stream.iter (Monitor.detach_and_get_error_stream monitor)
     ~f:(fun _exn -&gt; printf "an error happened\n");
   within' ~monitor (fun () -&gt;
-    after (Time.Span.of_sec 0.25)
-    &gt;&gt;= fun () -&gt; failwith "Kaboom!");;
+    let%bind () = after (Time.Span.of_sec 0.25) in
+    failwith "Kaboom!");;
 &gt;val swallow_error : unit -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1119,8 +1157,8 @@ let swallow_some_errors exn_to_raise =
       | Ignore_me -&gt; printf "ignoring exn\n"
       | _ -&gt; Monitor.send_exn parent_monitor error);
   within' ~monitor:child_monitor (fun () -&gt;
-    after (Time.Span.of_sec 0.25)
-    &gt;&gt;= fun () -&gt; raise exn_to_raise);;
+    let%bind () = after (Time.Span.of_sec 0.25) in
+    raise exn_to_raise);;
 &gt;val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
@@ -1176,7 +1214,8 @@ specifying the server to connect to:</p>
 <pre><code class="language-ocaml">(* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
-    Uri.of_string (String.concat [ "http://"; server; "/?format=json" ])
+    Uri.of_string
+      (String.concat [ "http://"; server; "/?format=json" ])
   in
   Uri.add_query_param base_uri ("q", [ query ])</code></pre>
 </div>
@@ -1203,31 +1242,36 @@ follows:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* Execute the DuckDuckGo search *)
 let get_definition ~server word =
-  try_with (fun () -&gt;
-      Cohttp_async.Client.get (query_uri ~server word) &gt;&gt;= fun (_, body) -&gt;
-      Cohttp_async.Body.to_string body &gt;&gt;| fun string -&gt;
-      (word, get_definition_from_json string))
-  &gt;&gt;| function
-  | Ok (word, result) -&gt; (word, Ok result)
-  | Error _ -&gt; (word, Error "Unexpected failure")</code></pre>
+  match%map
+    try_with (fun () -&gt;
+        let%bind _, body =
+          Cohttp_async.Client.get (query_uri ~server word)
+        in
+        let%map string = Cohttp_async.Body.to_string body in
+        word, get_definition_from_json string)
+  with
+  | Ok (word, result) -&gt; word, Ok result
+  | Error _ -&gt; word, Error "Unexpected failure"</code></pre>
 </div>
 <p>Here, we first use <code>try_with</code> to capture the exception,
-and then use map (the <code>&gt;&gt;|</code> operator) to convert the
-error into the form we want: a pair whose first element is the word
-being searched for, and the second element is the (possibly erroneous)
-result.</p>
+and then use <code>match%map</code> (another syntax provided by
+<code>ppx_let</code>) to convert the error into the form we want: a pair
+whose first element is the word being searched for, and the second
+element is the (possibly erroneous) result.</p>
 <p>Now we just need to change the code for <code>print_result</code> so
 that it can handle the new type:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* Print out a word/definition pair *)
 let print_result (word, definition) =
-  printf "%s\n%s\n\n%s\n\n" word
+  printf
+    "%s\n%s\n\n%s\n\n"
+    word
     (String.init (String.length word) ~f:(fun _ -&gt; '-'))
-    ( match definition with
+    (match definition with
     | Error s -&gt; "DuckDuckGo query failed: " ^ s
     | Ok None -&gt; "No definition found"
     | Ok (Some def) -&gt;
-        String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def) )</code></pre>
+      String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def))</code></pre>
 </div>
 <p>Now, if we run that same query, we’ll get individualized handling of
 the connection failures:</p>
@@ -1248,7 +1292,7 @@ the connection failures:</p>
 &gt;Caml language with object-oriented programming constructs."
 </code></pre>
 </div>
-<p>Now, only the query that went to <code>localhost</code> failed.</p>
+<p> Now, only the query that went to <code>localhost</code> failed.</p>
 <p>Note that in this code, we’re relying on the fact that
 <code>Cohttp_async.Client.get</code> will clean up after itself after an
 exception, in particular by closing its file descriptors. If you need to
@@ -1269,9 +1313,10 @@ different types have returned, returning both values as a tuple. Here,
 we use the function <code>sec</code>, which is shorthand for creating a
 time-span equal to a given number of seconds: <a data-secondary="timeouts and cancellations" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="Deferred.both" data-type="indexterm">&nbsp;</a><a data-primary="cancellations" data-type="indexterm">&nbsp;</a><a data-primary="timeouts" data-type="indexterm">&nbsp;</a><a data-secondary="timeouts and cancellations" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let string_and_float = Deferred.both
-                         (after (sec 0.5)  &gt;&gt;| fun () -&gt; "A")
-(after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let string_and_float =
+  Deferred.both
+    (let%map () = after (sec 0.5) in "A")
+    (let%map () = after (sec 0.25) in 32.33);;
 &gt;val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;
 string_and_float;;
 &gt;- : string * float = ("A", 32.33)
@@ -1284,9 +1329,9 @@ given a list of deferreds, returns a single deferred that will become
 determined once any of the values on the list is determined.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Deferred.any
-[ (after (sec 0.5) &gt;&gt;| fun () -&gt; "half a second")
-; (after (sec 1.0) &gt;&gt;| fun () -&gt; "one second")
-; (after (sec 4.0) &gt;&gt;| fun () -&gt; "four seconds")
+[ (let%map () = after (sec 0.5) in "half a second")
+; (let%map () = after (sec 1.0) in "one second")
+; (let%map () = after (sec 4.0) in "four seconds")
 ];;
 &gt;- : string = "half a second"
 </code></pre>
@@ -1298,18 +1343,14 @@ the definition, or, if that takes too long, an error:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
-    [
-      (after timeout &gt;&gt;| fun () -&gt; (word, Error "Timed out"));
-      ( get_definition ~server word &gt;&gt;| fun (word, result) -&gt;
-        let result' =
-          match result with
-          | Ok _ as x -&gt; x
-          | Error _ -&gt; Error "Unexpected failure"
-        in
-        (word, result') );
+    [ (let%map () = after timeout in
+       word, Error "Timed out")
+    ; (match%map get_definition ~server word with
+      | word, Error _ -&gt; word, Error "Unexpected failure"
+      | word, (Ok _ as x) -&gt; word, x)
     ]</code></pre>
 </div>
-<p>We use <code>&gt;&gt;|</code> above to transform the deferred values
+<p> We use <code>let%map</code> above to transform the deferred values
 we’re waiting for so that <code>Deferred.any</code> can choose between
 values of the same type.</p>
 <p>A problem with this code is that the HTTP query kicked off by
@@ -1325,26 +1366,27 @@ to cancel the <code>get</code> call if the timeout expires:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
-  try_with (fun () -&gt;
-      Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-      &gt;&gt;= fun (_, body) -&gt;
-      Cohttp_async.Body.to_string body &gt;&gt;| fun string -&gt;
-      (word, get_definition_from_json string))
-  &gt;&gt;| function
-  | Ok (word, result) -&gt; (word, Ok result)
-  | Error _ -&gt; (word, Error "Unexpected failure")</code></pre>
+  match%map
+    try_with (fun () -&gt;
+        let%bind _, body =
+          Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+        in
+        let%map string = Cohttp_async.Body.to_string body in
+        word, get_definition_from_json string)
+  with
+  | Ok (word, result) -&gt; word, Ok result
+  | Error _ -&gt; word, Error "Unexpected failure"</code></pre>
 </div>
 <p>Next, we’ll modify <code>get_definition_with_timeout</code> to create
 a deferred to pass in to <code>get_definition</code>, which will become
 determined when our timeout expires:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let get_definition_with_timeout ~server ~timeout word =
-  get_definition ~server ~interrupt:(after timeout) word
-  &gt;&gt;| fun (word, result) -&gt;
-  let result' =
-    match result with Ok _ as x -&gt; x | Error _ -&gt; Error "Unexpected failure"
-  in
-  (word, result')</code></pre>
+  match%map
+    get_definition ~server ~interrupt:(after timeout) word
+  with
+  | word, (Ok _ as x) -&gt; word, x
+  | word, Error _ -&gt; word, Error "Unexpected failure"</code></pre>
 </div>
 <p>This will cause the connection to shutdown cleanly when we time out;
 but our code no longer explicitly knows whether or not the timeout has
@@ -1375,11 +1417,10 @@ the timeout deferred is chosen. Here’s the code:</p>
 <pre><code class="language-ocaml">let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
-    [
-      choice (after timeout) (fun () -&gt;
+    [ choice (after timeout) (fun () -&gt;
           Ivar.fill interrupt ();
-          (word, Error "Timed out"));
-      choice
+          word, Error "Timed out")
+    ; choice
         (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
         (fun (word, result) -&gt;
           let result' =
@@ -1387,7 +1428,7 @@ the timeout deferred is chosen. Here’s the code:</p>
             | Ok _ as x -&gt; x
             | Error _ -&gt; Error "Unexpected failure"
           in
-          (word, result'));
+          word, result')
     ]</code></pre>
 </div>
 <p>Now, if we run this with a suitably small timeout, we’ll see that one
@@ -1418,11 +1459,12 @@ query succeeds and the other fails reporting a timeout:</p>
 <p>Although we haven’t worked with them yet, OCaml does have built-in
 support for true system threads, i.e., kernel-level threads whose
 interleaving is controlled by the operating system. We discussed in the
-beginning of the chapter why Async is generally a better choice than
-system threads, but even if you mostly use Async, OCaml’s system threads
-are sometimes necessary, and it’s worth understanding them. <a data-primary="parallelism" data-type="indexterm">&nbsp;</a><a data-primary="kernel-level
+beginning of the chapter the advantages of Async’s cooperative threading
+model over system threads, but even if you mostly use Async, OCaml’s
+system threads are sometimes necessary, and it’s worth understanding
+them. <a data-primary="parallelism" data-type="indexterm">&nbsp;</a><a data-primary="kernel-level
 threads" data-type="indexterm">&nbsp;</a><a data-secondary="kernel-level threads" data-primary="threads" data-type="indexterm">&nbsp;</a><a data-primary="system threads" data-type="indexterm">&nbsp;</a><a data-secondary="system
-threads and" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
+threads and" data-primary="Async library" data-type="indexterm">&nbsp;</a> <a data-primary="system threads" data-type="indexterm">&nbsp;</a></p>
 <p>The most surprising aspect of OCaml’s system threads is that they
 don’t afford you any access to physical parallelism. That’s because
 OCaml’s runtime has a single runtime lock that at most one thread can be
@@ -1442,6 +1484,21 @@ their own threads. In that case, it’s sometimes useful to run some OCaml
 code on the foreign thread as part of the communication to your main
 program. OCaml’s foreign function interface is discussed in more detail
 in <a data-type="xref" href="foreign-function-interface.html#foreign-function-interface">Chapter 22, Foreign Function Interface</a>.</p>
+<section data-type="note" class="level5" id="multicore-ocaml">
+<h5>Multicore OCaml</h5>
+<p>OCaml doesn’t support truly parallel threads today, but it will soon.
+The current development branch of OCaml, which is expected to be
+released in 2022 as OCaml 5.0, has a long awaited multicore-capable
+garbage collector, which is the result of years of research and hard
+implementation work. <a data-primary="multicore" data-type="indexterm">&nbsp;</a></p>
+<p>We won’t discuss the multicore gc here in part because it’s not yet
+released, and in part because there’s a lot of open questions about
+OCaml programs should take advantage of multicore in a way that’s safe,
+convenient, and performant. Given all that, we just don’t know enough to
+write a chapter about multicore today.</p>
+<p>In any case, while multicore OCaml isn’t here yet, it’s an exciting
+part of OCaml’s near-term future.</p>
+</section>
 <p>Another occasional use for system threads is to better interoperate
 with compute-intensive OCaml code. In Async, if you have a long-running
 computation that never calls <code>bind</code> or <code>map</code>, then
@@ -1481,7 +1538,7 @@ becomes determined, at which point it prints out one last timestamp:</p>
   in
   let d = thunk () in
   Clock.every (sec 0.1) ~stop:d print_time;
-  d &gt;&gt;= fun () -&gt;
+  let%bind () = d in
   printf "\nFinished at: ";
   print_time ();
   printf "\n";
@@ -1510,7 +1567,7 @@ log_delays (fun () -&gt; return (busy_loop ()));;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>As you can see, instead of waking up 10 times a second,
+<p> As you can see, instead of waking up 10 times a second,
 <code>log_delays</code> is blocked out entirely while
 <code>busy_loop</code> churns away.</p>
 <p>If, on the other hand, we use <code>In_thread.run</code> to offload
@@ -1545,7 +1602,7 @@ log_delays (fun () -&gt; In_thread.run noalloc_busy_loop);;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>But if we compile this to a native-code executable, then the
+<p> But if we compile this to a native-code executable, then the
 nonallocating busy loop will block anything else from running:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- native_code_log_delays.exe
@@ -1559,14 +1616,15 @@ has its limitations, but it leads to more predictable behavior.</p>
 <section class="level3" id="thread-safety-and-locking">
 <h3>Thread-Safety and Locking</h3>
 <p>Once you start working with system threads, you’ll need to be careful
-about mutable data structures. Most mutable OCaml data structures do not
-have well-defined semantics when accessed concurrently by multiple
+about mutable data structures. Most mutable OCaml data structures will
+behave non-determinstically when accessed concurrently by multiple
 threads. The issues you can run into range from runtime exceptions to
-corrupted data structures to, in some rare cases, segfaults. That means
-you should always use mutexes when sharing mutable data between
-different systems threads. Even data structures that seem like they
-should be safe but are mutable under the covers, like lazy values, can
-have undefined behavior when accessed from multiple threads. <a data-primary="mutexes" data-type="indexterm">&nbsp;</a><a data-primary="segfaults" data-type="indexterm">&nbsp;</a><a data-secondary="locking and" data-primary="threads" data-type="indexterm">&nbsp;</a><a data-secondary="thread-safety" data-primary="threads" data-type="indexterm">&nbsp;</a></p>
+corrupted data structures. That means you should almost always use
+mutexes when sharing mutable data between different systems threads.
+Even data structures that seem like they should be safe but are mutable
+under the covers, like lazy values, can behave in surprising ways when
+accessed from multiple threads. <a data-primary="mutexes" data-type="indexterm">&nbsp;</a><a data-primary="segfaults" data-type="indexterm">&nbsp;</a><a data-secondary="locking
+and" data-primary="threads" data-type="indexterm">&nbsp;</a><a data-secondary="thread-safety" data-primary="threads" data-type="indexterm">&nbsp;</a></p>
 <p>There are two commonly available mutex packages for OCaml: the
 <code>Mutex</code> module that’s part of the standard library, which is
 just a wrapper over OS-level mutexes and <code>Nano_mutex</code>, a more
@@ -1575,21 +1633,20 @@ by the OCaml runtime to avoid needing to create an OS-level mutex much
 of the time. As a result, creating a <code>Nano_mutex.t</code> is 20
 times faster than creating a <code>Mutex.t</code>, and acquiring the
 mutex is about 40 percent faster.</p>
-<p>Overall, combining Async and threads is quite tricky, but it can be
-done safely if the following hold:</p>
+<p>Overall, combining Async and threads is quite tricky, but it’s pretty
+simple if the following two conditions hold:</p>
 <ul>
 <li><p>There is no shared mutable state between the various threads
 involved.</p></li>
 <li><p>The computations executed by <code>In_thread.run</code> do not
 make any calls to the Async library.</p></li>
 </ul>
-<p>It is possible to safely use threads in ways that violate these
+<p>That said, you can safely use threads in ways that violate these
 constraints. In particular, foreign threads can acquire the Async lock
 using calls from the <code>Thread_safe</code> module in Async, and
 thereby run Async computations safely. This is a very flexible way of
 connecting threads to the Async world, but it’s a complex use case that
-is beyond the scope of this chapter. <a data-primary="system
-threads" data-type="indexterm">&nbsp;</a></p>
+is beyond the scope of this chapter.</p>
 </section>
 </section>
 </section>
