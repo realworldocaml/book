@@ -479,9 +479,9 @@ and quite subtle bugs.  If, for example, if you build a map whose keys
 are sets (which have the same issues with polymorphic compare that
 maps do), then the map built with the polymorphic comparator will
 behave incorrectly, separating out keys that should be aggregated
-together.  Even worse, it will work some of the times and fail other
-times, since the behavior depends on the order in which the sets were
-built.
+together.  Even worse, it will behave inconsistently, since the
+behavior of polymorphic compare will depend on the order in which the
+sets were built.
 
 :::
 
