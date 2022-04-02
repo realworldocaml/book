@@ -749,8 +749,11 @@ in `utop`. You can break out of the wait by hitting **`Control-C`**:
 Interrupted.
 ```
 
-The deferred returned by write completes on its own once the value written
-into the pipe has been read out:
+That's because a pipe has a certain amount of internal slack, a number
+of slots in the pipe to which something can be written before the
+write will block. And by default, a pipe has zero slack, which means
+that the deferred returned by a write is determined only when the
+value is read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
@@ -764,10 +767,11 @@ val write_complete : unit Deferred.t = <abstr>
 - : unit = ()
 ```
 
-In the function `run`, we're taking advantage of one of the many utility
-functions provided for pipes in the `Pipe` module. In particular, we're using
-`Pipe.transfer` to set up a process that takes data from a reader-pipe and
-moves it to a writer-pipe. Here's the type of `Pipe.transfer`:
+In the function `run`, we're taking advantage of one of the many
+utility functions provided for pipes in the `Pipe` module. In
+particular, we're using `Pipe.transfer` to set up a process that takes
+data from a reader-pipe and moves it to a writer-pipe. Here's the type
+of `Pipe.transfer`:
 
 ```ocaml env=main
 # Pipe.transfer;;
@@ -794,10 +798,9 @@ Opening `Async`, shadows the `Command` module with an extended version that
 contains the `async` call:
 
 ```ocaml env=main
-# Command.async_spec;;
-- : ('a, unit Deferred.t) Async.Command.basic_spec_command
-    Command.with_options
-= <fun>
+# #show Command.async_spec;;
+val async_spec :
+  ('a, unit Deferred.t) Async.Command.basic_spec_command Command.with_options
 ```
 
 This differs from the ordinary `Command.basic` call in that the main function
@@ -921,7 +924,7 @@ To better understand what's going on, it's useful to look at the type for
 
 ```ocaml env=main
 # #require "cohttp-async";;
-# Cohttp_async.Client.get;;
+# #show Cohttp_async.Client.get;;
 - : ?interrupt:unit Deferred.t ->
     ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
     ?headers:Cohttp.Header.t ->
