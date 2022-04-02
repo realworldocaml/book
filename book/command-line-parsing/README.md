@@ -143,9 +143,18 @@ very similar to the type of `List.map`.
 val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param
 ```
 
-In our program, we used `map` to convert the `filename_param` parser, which
-returns a string representing the file name, into a parser that returns a
-function of type `unit -> unit` containing the body of the command.
+In our program, we used `map` to convert the `filename_param` parser,
+which returns a string representing the file name, into a parser that
+returns a function of type `unit -> unit` containing the body of the
+command.  It might not be obvious that the function passed to map
+returns a function, but remember that, due to currying, the invocation
+of map above could be written equivalently as follows.
+
+```ocaml skip
+Command.Param.map filename_param ~f:(fun filename ->
+  fun () -> do_hash filename)
+```
+
 
 ### Running commands {#running-basic-commands}
 
