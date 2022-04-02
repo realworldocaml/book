@@ -48,8 +48,8 @@ Recall how I/O is typically done in Core. Here's a simple example.
 
 ```ocaml env=main
 # open Core;;
-# In_channel.read_all;;
-- : string -> string = <fun>
+# #show In_channel.read_all;;
+val read_all : string -> string
 # Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 - : unit = ()
 # In_channel.read_all "test.txt";;
@@ -70,8 +70,8 @@ equivalent of `In_channel.read_all`. [Deferred.t]{.idx}
 ```ocaml env=main
 # #require "async";;
 # open Async;;
-# Reader.file_contents;;
-- : string -> string Deferred.t = <fun>
+# #show Reader.file_contents;;
+val file_contents : string -> string Deferred.t
 ```
 
 We first load the Async package in the toplevel using `#require`, and then
@@ -677,19 +677,18 @@ let run ~uppercase ~port =
 let () =
   Command.async
     ~summary:"Start an echo server"
-    Command.Let_syntax.(
-      let%map_open uppercase =
-        flag
-          "-uppercase"
-          no_arg
-          ~doc:" Convert to uppercase before echoing back"
-      and port =
-        flag
-          "-port"
-          (optional_with_default 8765 int)
-          ~doc:" Port to listen on (default 8765)"
-      in
-      fun () -> run ~uppercase ~port)
+    (let%map_open.Command uppercase =
+       flag
+         "-uppercase"
+         no_arg
+         ~doc:" Convert to uppercase before echoing back"
+     and port =
+       flag
+         "-port"
+         (optional_with_default 8765 int)
+         ~doc:" Port to listen on (default 8765)"
+     in
+     fun () -> run ~uppercase ~port)
   |> Command.run
 ```
 
@@ -998,9 +997,10 @@ Finally, we create a command-line interface using `Command.async`:
 let () =
   Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Let_syntax.(
-      let%map_open words = anon (sequence ("word" %: string)) in
-      fun () -> search_and_print words)
+    (let%map_open.Command words =
+       anon (sequence ("word" %: string))
+     in
+     fun () -> search_and_print words)
   |> Command.run
 ```
 
@@ -1322,8 +1322,8 @@ error into the form we want: a pair whose first element is the word
 being searched for, and the second element is the (possibly erroneous)
 result.
 
-Now we just need to change the code for `print_result` so that it can handle
-the new type:
+Now we just need to change the code for `print_result` so that it can
+handle the new type:
 
 ```ocaml file=examples/correct/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
