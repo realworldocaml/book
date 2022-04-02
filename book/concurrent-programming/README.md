@@ -120,10 +120,11 @@ deferred computation to finish, which we do using `Deferred.bind`. Here's the
 type-signature of `bind`.
 
 ```ocaml env=main
-# Deferred.bind;;
+# #show Deferred.bind;;
 - : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
 ```
 
+\noindent
 `bind` is effectively a way of sequencing concurrent computations. In
 particular, `Deferred.bind d ~f` causes `f` to be called after the value of
 `d` has been determined. [Deferred.bind]{.idx}
@@ -159,10 +160,10 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
-In the preceding code, we've dropped the parentheses around the
-function on the righthand side of the bind, and we didn't add a level
-of indentation for the contents of that function. This is standard
-practice for using the infix `bind` operator. [bind function]{.idx}
+Here, we've dropped the parentheses around the function on the
+righthand side of the bind, and we didn't add a level of indentation
+for the contents of that function. This is standard practice for using
+the infix `bind` operator. [bind function]{.idx}
 
 Now let's look at another potential use of `bind`. In this case, we'll write
 a function that counts the number of lines in a file:
@@ -185,7 +186,7 @@ Async that takes an ordinary value and wraps it up in a deferred.
 [return function]{.idx}
 
 ```ocaml env=main
-# return;;
+# #show return;;
 - : 'a -> 'a Deferred.t = <fun>
 # let three = return 3;;
 val three : int Deferred.t = <abstr>
@@ -215,10 +216,11 @@ there is a standard shortcut for it called `Deferred.map`, which has the
 following signature:
 
 ```ocaml env=main
-# Deferred.map;;
+# #show Deferred.map;;
 - : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
 ```
 
+\noindent
 and comes with its own infix equivalent, `>>|`. Using it, we can
 rewrite `count_lines` again a bit more succinctly:
 
