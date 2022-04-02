@@ -344,8 +344,8 @@ we'll use an operator called `upon`, which has the following signature:
 [thunks]{.idx}
 
 ```ocaml env=main
-# upon;;
-- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>
+# #show upon;;
+val upon : 'a Deferred.t -> ('a -> unit) -> unit
 ```
 
 Like `bind` and `return`, `upon` schedules a callback to be executed when the
@@ -456,14 +456,18 @@ let rec copy_blocks buffer r w =
     copy_blocks buffer r w
 ```
 
-Bind is used in the code to sequence the operations: first, we call
-`Reader.read` to get a block of input. Then, when that's complete and if a
-new block was returned, we write that block to the writer. Finally, we wait
-until the writer's buffers are flushed, waiting on the deferred returned by
-`Writer.flushed`, at which point we recurse. If we hit an end-of-file
-condition, the loop is ended. The deferred returned by a call to
-`copy_blocks` becomes determined only once the end-of-file condition is hit.
-[end-of-file condition]{.idx}
+Bind is used in the code to sequence the operations, with a `bind`
+marking each place we wait.
+
+- First, we call `Reader.read` to get a block of input.
+- When that's complete and if a new block was returned, we write that
+  block to the writer.
+- Finally, we wait until the writer's buffers are flushed, at which
+  point we recurse.
+
+If we hit an end-of-file condition, the loop is ended. The deferred
+returned by a call to `copy_blocks` becomes determined only once the
+end-of-file condition is hit.  [end-of-file condition]{.idx}
 
 One important aspect of how `copy_blocks` is written is that it provides
 *pushback*, which is to say that if the process can't make progress
@@ -483,20 +487,19 @@ time through the loop.  The length of this chain is unbounded, and so,
 naively, you'd think this would take up an unbounded amount of memory
 as the echo process continues.
 
-Happily, it turns out that this is a special case that Async knows how
-to optimize.  In particular, the whole chain of deferreds should
-become determined precisely when the final deferred in the chain is
-determined, in this case, when the `Eof` condition is hit.  Because of
-this, we could safely replace all of these deferreds with a single
-deferred.  Async does just this, and so there's no memory leak after
-all.
+Happily, this is a case that Async knows how to optimize.  In
+particular, the whole chain of deferreds should become determined
+precisely when the final deferred in the chain is determined, in this
+case, when the `Eof` condition is hit.  Because of this, we could
+safely replace all of these deferreds with a single deferred.  Async
+does just this, and so there's no memory leak after all.
 
 This is essentially a form of tail-call optimization, lifted to the
-Async monad.  Indeed, you can tell that the bind in question doesn't
-lead to a memory leak in more or less the same way you can tell that
-the tail recursion optimization should apply, which is that the bind
-that creates the deferred is in tail-position.  In other words,
-nothing is done to that deferred once it's created; it's simply
+Deferred monad.  Indeed, you can tell that the bind in question
+doesn't lead to a memory leak in more or less the same way you can
+tell that the tail recursion optimization should apply, which is that
+the bind that creates the deferred is in tail-position.  In other
+words, nothing is done to that deferred once it's created; it's simply
 returned as is.  [tail calls]{.idx}
 
 :::
@@ -602,16 +605,17 @@ val do_stuff : int -> int = <fun>
 With a name like `loop_forever`, the meaning is clear enough. But with
 something like `Scheduler.go`, the fact that it never returns is less clear,
 and so we use the type system to make it more explicit by giving it a return
-type of `never_returns`. Let's do the same trick with `loop_forever`:
+type of `Nothing.t`. Let's do the same trick with `loop_forever`:
 
 ```ocaml env=main
-# let rec loop_forever () : never_returns = loop_forever ();;
+# let rec loop_forever () : Nothing.t = loop_forever ();;
 val loop_forever : unit -> never_returns = <fun>
 ```
 
-The type `never_returns` is uninhabited, so a function can't return a value
-of type `never_returns`, which means only a function that never returns can
-have `never_returns` as its return type! Now, if we rewrite our `do_stuff`
+The type `Nothing.t` is uninhabited, which means there are no values
+of that type.  That means that a function can't ever return a value of
+type `Nothing.t`, so only a function that never returns can have
+`Nothing.t` as its return type! Now, if we rewrite our `do_stuff`
 function, we'll get a helpful type error:
 
 ```ocaml env=main
@@ -628,7 +632,7 @@ Error: This expression has type never_returns
 We can resolve the error by calling the function `never_returns`:
 
 ```ocaml env=main
-# never_returns;;
+# #show never_returns;;
 - : never_returns -> 'a = <fun>
 # let do_stuff n =
     let x = 3 in
