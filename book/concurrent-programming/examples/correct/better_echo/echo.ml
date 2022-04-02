@@ -20,17 +20,16 @@ let run ~uppercase ~port =
 let () =
   Command.async
     ~summary:"Start an echo server"
-    Command.Let_syntax.(
-      let%map_open uppercase =
-        flag
-          "-uppercase"
-          no_arg
-          ~doc:" Convert to uppercase before echoing back"
-      and port =
-        flag
-          "-port"
-          (optional_with_default 8765 int)
-          ~doc:" Port to listen on (default 8765)"
-      in
-      fun () -> run ~uppercase ~port)
+    (let%map_open.Command uppercase =
+       flag
+         "-uppercase"
+         no_arg
+         ~doc:" Convert to uppercase before echoing back"
+     and port =
+       flag
+         "-port"
+         (optional_with_default 8765 int)
+         ~doc:" Port to listen on (default 8765)"
+     in
+     fun () -> run ~uppercase ~port)
   |> Command.run

@@ -236,12 +236,12 @@ Note that `count_lines` returns a deferred, but `utop` waits for that
 deferred to become determined, and shows us the contents of the
 deferred instead.
 
-### Using `Let_syntax`
+### Using let syntax
 
 As was discussed in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
-there is a special syntax designed for working with monads, which we
-can enable by enabling `ppx_let`.
+there is a special syntax, which we call *let syntax*, designed for
+working with monads, which we can enable by enabling `ppx_let`.
 
 ```ocaml env=main
 # #require "ppx_let";;
@@ -268,18 +268,18 @@ val count_lines : string -> int Deferred.t = <fun>
 
 The difference here is just syntactic, with these examples compiling
 down to the same thing as the corresponding examples written using
-infix operators.  What's nice about `Let_syntax` is that it highlights
+infix operators.  What's nice about let syntax is that it highlights
 the analogy between monadic bind and OCaml's built-in let-binding,
 thereby making your code more uniform and more readable.
 
-`Let_syntax` works for any monad, and you decide which monad is in use
+Let syntax works for any monad, and you decide which monad is in use
 by opening the appropriate `Let_syntax` module. Opening `Async` also
 implicitly opens `Deferred.Let_syntax`, but in some contexts you may
 want to do that explicitly.
 
-For the most part, `Let_syntax` is easier to read and work with, and
-you should default to it when using Async, which is what we'll do for
-the remainder of the chapter.
+For the most part, let syntax is easier to read and work with, and you
+should default to it when using Async, which is what we'll do for the
+remainder of the chapter.
 
 ### Ivars and Upon
 
@@ -1316,10 +1316,11 @@ let get_definition ~server word =
   | Error _ -> word, Error "Unexpected failure"
 ```
 
-Here, we first use `try_with` to capture the exception, and then use map (the
-`>>|` operator) to convert the error into the form we want: a pair whose
-first element is the word being searched for, and the second element is the
-(possibly erroneous) result.
+Here, we first use `try_with` to capture the exception, and then use
+`match%map` (another syntax provided by `ppx_let`) to convert the
+error into the form we want: a pair whose first element is the word
+being searched for, and the second element is the (possibly erroneous)
+result.
 
 Now we just need to change the code for `print_result` so that it can handle
 the new type:
@@ -1423,8 +1424,8 @@ let get_definition_with_timeout ~server ~timeout word =
     ]
 ```
 
-We use `>>|` above to transform the deferred values we're waiting for so that
-`Deferred.any` can choose between values of the same type.
+We use `let%map` above to transform the deferred values we're waiting
+for so that `Deferred.any` can choose between values of the same type.
 
 A problem with this code is that the HTTP query kicked off by
 `get_definition` is not actually shut down when the timeout fires. As such,

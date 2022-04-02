@@ -61,7 +61,8 @@ let search_and_print words =
 let () =
   Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Let_syntax.(
-      let%map_open words = anon (sequence ("word" %: string)) in
-      fun () -> search_and_print words)
+    (let%map_open.Command words =
+       anon (sequence ("word" %: string))
+     in
+     fun () -> search_and_print words)
   |> Command.run
