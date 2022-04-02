@@ -578,11 +578,13 @@ $ killall echo.exe
 ::: {data-type=note}
 ##### Functions that Never Return
 
-You might wonder what's going on with the call to `never_returns`.
-`never_returns` is an idiom that comes from Core that is used to mark
-functions that don't return. Typically, a function that doesn't return is
-inferred as having return type `'a`:
-[Scheduler.go]{.idx}[loop_forever]{.idx}[never_returns]{.idx}[functions/non-returning]{.idx}
+The call to `never_returns` around the call to `Scheduler.go` is a
+little bit surprising, but it has a purpose: to make it clear to
+whoever invokes `Scheduler.go` that the function never returns.
+[Scheduler.go]{.idx}[never_returns]{.idx}[functions/non-returning]{.idx}
+
+By default, a function that doesn't return will have an inferred
+return type of `'a`:
 
 ```ocaml env=main
 # let rec loop_forever () = loop_forever ();;
@@ -591,37 +593,56 @@ val loop_forever : unit -> 'a = <fun>
 val always_fail : unit -> 'a = <fun>
 ```
 
-This can be surprising when you call a function like this expecting it to
-return `unit`. The type-checker won't necessarily complain in such a case:
+This is a little odd, but it does make sense.  After all, if a
+function never returns, we're free to impute any type at all to its
+non-existant return value.  As a result, from a type perspective, a
+function that never returns can fit in to any context within your
+program.
+
+But that itself can be problematic, especially with a function like
+`Scheduler.go`, where the fact that it never returns is perhaps not
+entirely obvious.  The point of `never_returns` is to create an
+explicit marker so the user knows that the function in question
+doesn't return.
+
+To do this, `Scheduler.go` is defined to have a return value of
+`Nothing.t`.
 
 ```ocaml env=main
-# let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n;;
-val do_stuff : int -> int = <fun>
+# #show Scheduler.go;;
+val go : ?raise_unhandled_exn:bool -> unit -> never_returns
 ```
 
-With a name like `loop_forever`, the meaning is clear enough. But with
-something like `Scheduler.go`, the fact that it never returns is less clear,
-and so we use the type system to make it more explicit by giving it a return
-type of `Nothing.t`. Let's do the same trick with `loop_forever`:
+\noindent
+`never_returns` is just an alias of `Nothing.t`.
+
+`Nothing.t` is *uninhabited*, which means there are no values of that
+type.  As such, a function can't actually return a value of type
+`Nothing.t`, so only a function that never returns can have
+`Nothing.t` as its return type!  And we can cause a function that
+never returns to have a return value of `Nothing.t` by just adding a
+type annotation.
 
 ```ocaml env=main
 # let rec loop_forever () : Nothing.t = loop_forever ();;
 val loop_forever : unit -> never_returns = <fun>
 ```
 
-The type `Nothing.t` is uninhabited, which means there are no values
-of that type.  That means that a function can't ever return a value of
-type `Nothing.t`, so only a function that never returns can have
-`Nothing.t` as its return type! Now, if we rewrite our `do_stuff`
-function, we'll get a helpful type error:
+The function `never_returns` consumes a value of type `Nothing.t` and
+returns an unconstrainted type `'a`.
+
+```ocaml env=main
+# #show_val never_returns;;
+val never_returns : never_returns -> 'a
+```
+
+If you try to write a function that uses `Scheduler.go`, and just
+assumes that it returns unit, you'll get a helpful type error.
 
 ```ocaml env=main
 # let do_stuff n =
     let x = 3 in
-    if n > 0 then loop_forever ();
+    if n > 0 then Scheduler.go ();
     x + n;;
 Line 3, characters 19-34:
 Error: This expression has type never_returns
@@ -629,20 +650,16 @@ Error: This expression has type never_returns
        because it is in the result of a conditional with no else branch
 ```
 
-We can resolve the error by calling the function `never_returns`:
+We can fix this by inserting a call to `never_returns`, thus making
+the fact that `Scheduler.go` doesn't return apparent to the reader.
 
 ```ocaml env=main
-# #show never_returns;;
-- : never_returns -> 'a = <fun>
 # let do_stuff n =
     let x = 3 in
-    if n > 0 then never_returns (loop_forever ());
+    if n > 0 then never_returns (Scheduler.go ());
     x + n;;
 val do_stuff : int -> int = <fun>
 ```
-
-Thus, we got the compilation to go through by explicitly marking in the
-source that the call to `loop_forever` never returns.
 
 :::
 
