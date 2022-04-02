@@ -432,6 +432,7 @@ let command =
      fun () -> do_hash filename)
 ```
 
+\noindent
 But building this results in a compile-time error.
 
 ```sh dir=examples/erroneous/md5_with_optional_file_broken
@@ -652,10 +653,12 @@ supplied, as with the anonymous arguments in earlier examples.
 There are a number of other functions that you can wrap flags in to control how
 they are parsed: [flag functions]{.idx}
 
-- `required *arg*` will return `*arg*` and error if not present
-- `optional *arg*` with return `*arg* option`
-- `optional_with_default *val* *arg*` will return `*arg*` with default `*val*` if not present
-- `listed *arg*` will return `*arg* list` (this flag may appear multiple times)
+- `required <arg>` will return `<arg>` and error if not present
+- `optional <arg>` with return `<arg> option`
+- `optional_with_default <val> <arg>` will return `<arg>` with default
+  `<val>` if not present
+- `listed <arg>` will return `<arg> list` (this flag may appear
+  multiple times)
 - `no_arg` will return a  `bool` that is true if the flag is present
 
 The flags affect the type of the callback function in exactly the same way as
@@ -1013,14 +1016,13 @@ module]{.idx}[command-line parsing/alternatives to Command
 library]{.idx}[opam package manager]{.idx}
 
 The `Arg` module
-: The `Arg` module is from the OCaml standard library, which is used by the
-  compiler itself to handle its command-line interface. Command is generally
-  more featureful than Arg (mainly via support for subcommands, the `step`
-  combinator to transform inputs, and help generation), but there's
-  absolutely nothing wrong with using Arg either. You can use the
-  `Command.Spec.flags_of_args_exn` function to convert Arg specifications
-  into ones compatible with Command. This is quite often used to help port
-  older non-Core code into the Core standard library world.
+: The `Arg` module is from the OCaml standard library, which is used
+  by the compiler itself to handle its command-line
+  interface. `Command` is built on top of `Arg`, but you can also use
+  `Arg` directly. You can use the `Command.Spec.flags_of_args_exn`
+  function to convert `Arg` specifications into ones compatible with
+  Command, which is a simple way of porting an `Arg`-based command
+  line interface to `Command`.
 
 [ocaml-getopt](https://forge.ocamlcore.org/projects/ocaml-getopt/)
 : `ocaml-getopt` provides the general command-line syntax of GNU `getopt` and
