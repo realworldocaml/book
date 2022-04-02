@@ -13,11 +13,10 @@ let prompt_for_string name of_string =
 
 let anon_prompt name of_string =
   let arg = Command.Arg_type.create of_string in
-  Command.Let_syntax.(
-    let%map_open value = anon (maybe (name %: arg)) in
-    match value with
-    | Some v -> v
-    | None -> prompt_for_string name of_string)
+  let%map_open.Command value = anon (maybe (name %: arg)) in
+  match value with
+  | Some v -> v
+  | None -> prompt_for_string name of_string
 
 let add =
   Command.basic
