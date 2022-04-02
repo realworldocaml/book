@@ -26,12 +26,14 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
-  try_with (fun () ->
-      Cohttp_async.Client.get (query_uri ~server word)
-      >>= fun (_, body) ->
-      Cohttp_async.Body.to_string body
-      >>| fun string -> word, get_definition_from_json string)
-  >>| function
+  match%map
+    try_with (fun () ->
+        let%bind _, body =
+          Cohttp_async.Client.get (query_uri ~server word)
+        in
+        let%map string = Cohttp_async.Body.to_string body in
+        word, get_definition_from_json string)
+  with
   | Ok (word, result) -> word, Ok result
   | Error _ -> word, Error "Unexpected failure"
 
@@ -39,15 +41,11 @@ let get_definition ~server word =
 
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
-    [ (after timeout >>| fun () -> word, Error "Timed out")
-    ; (get_definition ~server word
-      >>| fun (word, result) ->
-      let result' =
-        match result with
-        | Ok _ as x -> x
-        | Error _ -> Error "Unexpected failure"
-      in
-      word, result')
+    [ (let%map () = after timeout in
+       word, Error "Timed out")
+    ; (match%map get_definition ~server word with
+      | word, Error _ -> word, Error "Unexpected failure"
+      | word, (Ok _ as x) -> word, x)
     ]
 
 [@@@part "2"]
@@ -68,11 +66,13 @@ let print_result (word, definition) =
    they're all done. *)
 let search_and_print ~servers ~timeout words =
   let servers = Array.of_list servers in
-  Deferred.all
-    (List.mapi words ~f:(fun i word ->
-         let server = servers.(i mod Array.length servers) in
-         get_definition_with_timeout ~server ~timeout word))
-  >>| fun results -> List.iter results ~f:print_result
+  let%map results =
+    Deferred.all
+      (List.mapi words ~f:(fun i word ->
+           let server = servers.(i mod Array.length servers) in
+           get_definition_with_timeout ~server ~timeout word))
+  in
+  List.iter results ~f:print_result
 
 let () =
   Command.async

@@ -31,10 +31,9 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.get (query_uri word)
-  >>= fun (_, body) ->
-  Cohttp_async.Body.to_string body
-  >>| fun string -> word, get_definition_from_json string
+  let%bind _, body = Cohttp_async.Client.get (query_uri word) in
+  let%map string = Cohttp_async.Body.to_string body in
+  word, get_definition_from_json string
 
 [@@@part "3"]
 

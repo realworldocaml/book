@@ -9,8 +9,7 @@ let log_delays thunk =
   in
   let d = thunk () in
   Clock.every (sec 0.1) ~stop:d print_time;
-  d
-  >>= fun () ->
+  let%bind () = d in
   printf "\nFinished at: ";
   print_time ();
   printf "\n";
@@ -23,6 +22,8 @@ let noalloc_busy_loop () =
 
 let () =
   don't_wait_for
-    (log_delays (fun () -> In_thread.run noalloc_busy_loop)
-    >>| fun () -> shutdown 0);
+    (let%map () =
+       log_delays (fun () -> In_thread.run noalloc_busy_loop)
+     in
+     shutdown 0);
   never_returns (Scheduler.go ())

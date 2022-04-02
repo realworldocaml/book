@@ -11,7 +11,8 @@ let rec copy_blocks buffer r w =
   | `Eof -> return ()
   | `Ok bytes_read ->
     Writer.write w (Bytes.to_string buffer) ~len:bytes_read;
-    Writer.flushed w >>= fun () -> copy_blocks buffer r w
+    let%bind () = Writer.flushed w in
+    copy_blocks buffer r w
 
 [@@@part "1"]
 

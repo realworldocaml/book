@@ -30,10 +30,11 @@ let get_definition_from_json json =
 
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
-  Cohttp_async.Client.get (query_uri ~server word)
-  >>= fun (_, body) ->
-  Cohttp_async.Body.to_string body
-  >>| fun string -> word, get_definition_from_json string
+  let%bin _, body =
+    Cohttp_async.Client.get (query_uri ~server word)
+  in
+  let%map string = Cohttp_async.Body.to_string body in
+  word, get_definition_from_json string
 
 (* Print out a word/definition pair *)
 let print_result (word, definition) =
@@ -50,11 +51,13 @@ let print_result (word, definition) =
    they're all done. *)
 let search_and_print ~servers words =
   let servers = Array.of_list servers in
-  Deferred.all
-    (List.mapi words ~f:(fun i word ->
-         let server = servers.(i mod Array.length servers) in
-         get_definition ~server word))
-  >>| fun results -> List.iter results ~f:print_result
+  let%map results =
+    Deferred.all
+      (List.mapi words ~f:(fun i word ->
+           let server = servers.(i mod Array.length servers) in
+           get_definition ~server word))
+  in
+  List.iter results ~f:print_result
 
 let () =
   Command.async
