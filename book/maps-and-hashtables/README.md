@@ -413,24 +413,22 @@ polymorphic compare does.
 ##### The Perils of Polymorphic Compare
 
 Polymorphic compare is awfully convenient, but it has serious
-downsides and should be used with care.  To understand the problem, it
-helps to understand how polymorphic compare works.
+downsides and should mostly be avoided in production code.  To
+understand why, it helps to understand how polymorphic compare works.
 
 Polymorphic compare operates directly on the runtime representation of
 OCaml values, walking the structure of those values without regard for
-their type.  This is convenient because it provides a comparison
-function that works for most OCaml values without having to write any
-type-specific code.
+their type.
 
 And despite ignoring types, it mostly behaves as you would hope.
 Comparisons on `int`s and `float`s respect the ordinary ordering of
-numeric values, and simple containers like strings, lists, and arrays
-are compared lexicographically. It also works on almost every OCaml
-type, with some important exceptions like functions.
+numeric values, and containers like strings, lists, and arrays are
+compared lexicographically. And it works on almost every OCaml type,
+with some important exceptions like functions.
 
 But the type-oblivious nature of polymorphic compare means that it
 peeks under ordinary abstraction boundaries, and that can lead to some
-deeploy confusing results.  Maps themselves provide a great example of
+deeply confusing results.  Maps themselves provide a great example of
 this.  Consider the following two maps.
 
 ```ocaml env=main
@@ -449,24 +447,22 @@ you get if you call `Map.equal` on them:
 ```
 
 But because the elements were added in different orders, the layout of
-the trees underlying the maps will be different.  As such, a
-structural comparison function will conclude that they're different.
+the trees underlying the maps will be different.  As such, polymorphic
+compare will conclude that they're different.
 
-Now let's try to test for equality using polymorphic compare.  `Base`
-hides polymorphic comparison by defaults, but it is available by
-opening the `Poly` module, at which point `=` is bound to polymorphic
-equality.
-
-Comparing the maps directly will fail at runtime because the
-comparators stored within the maps contain function values.
+We can see this below.  Note that `Base` hides polymorphic comparison
+by default, but it is available within the `Poly` module.
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
-We can, however, use the function `Map.Using_comparator.to_tree` to
-expose the underlying binary tree without the attached comparator.
+This comparison failed because polymorphic compare doesn't work on
+functions, and maps store the comparison function they were created
+with.  Happily, there's a function, `Map.Using_comparator.to_tree`
+which exposes the underlying binary tree without the attached
+comparison function.  We can use that to compare the underlying trees:
 
 ```ocaml env=main
 # Poly.((Map.Using_comparator.to_tree m1) =
@@ -475,8 +471,8 @@ expose the underlying binary tree without the attached comparator.
 ```
 
 \noindent
-As you can see, polymorphic compare produces a result, but it's not
-the result we want.
+As you can see, polymorphic compare now produces a result, but it's
+not the result we want.
 
 The abstraction-breaking nature of polymorphic compare can cause real
 and quite subtle bugs.  If, for example, if you build a map whose keys
@@ -484,9 +480,8 @@ are sets (which have the same issues with polymorphic compare that
 maps do), then the map built with the polymorphic comparator will
 behave incorrectly, separating out keys that should be aggregated
 together.  Even worse, it will work some of the times and fail other
-times, since if the sets are built in a consistent order, then they
-will work as expected, but once the order changes, the behavior will
-change.
+times, since the behavior depends on the order in which the sets were
+built.
 
 :::
 
