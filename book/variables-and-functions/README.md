@@ -735,8 +735,8 @@ associativity.
 ::: {data-type=note}
 ##### The application operator
 
-`|>` is known as the *reverse application operator*. You might be you
-might be unsurprised to learn that there's also an *application
+`|>` is known as the *reverse application operator*. You might be
+unsurprised to learn that there's also an *application
 operator*: [operators/application operator]{.idx}
 
 ```ocaml env=main
