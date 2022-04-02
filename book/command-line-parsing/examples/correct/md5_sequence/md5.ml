@@ -1,7 +1,7 @@
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.input_all In_channel.stdin
+  | "-" -> In_channel.input_all In_channel.stdin
   | filename -> In_channel.read_all filename
 
 let do_hash filename =
@@ -21,7 +21,6 @@ let command =
       fun () ->
         match files with
         | [] -> do_hash "-"
-        | _  -> List.iter files ~f:do_hash)
+        | _ -> List.iter files ~f:do_hash)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command

@@ -1,10 +1,8 @@
 open Core
 
 let get_contents = function
-  | None | Some "-" ->
-    In_channel.input_all In_channel.stdin
-  | Some filename ->
-    In_channel.read_all filename
+  | None | Some "-" -> In_channel.input_all In_channel.stdin
+  | Some filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -22,5 +20,4 @@ let command =
       in
       fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command

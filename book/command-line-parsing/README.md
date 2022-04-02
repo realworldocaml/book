@@ -48,9 +48,7 @@ hash function]{.idx}[command-line parsing/basic approach to]{.idx}
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 ```
 
 The `do_hash` function accepts a `filename` parameter and prints the
@@ -93,8 +91,8 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    (Command.Param.map filename_param ~f:(fun filename ->
-         (fun () -> do_hash filename)))
+    (Command.Param.map filename_param ~f:(fun filename () ->
+         do_hash filename))
 ```
 
 The `summary` argument is a one-line description which goes at the top of the
@@ -154,8 +152,7 @@ Once we've defined the basic command, running it is just one function call
 away.
 
 ```ocaml file=examples/correct/md5/md5.ml,part=3
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 `Command.run` takes a couple of optional arguments that are useful to
@@ -209,7 +206,7 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe md5.ml
-cd43f59095550dce382f8f3427aa3373
+2ae55d17ff11d337492a1ca5510ee01b
 ```
 
 And that's all it took to build our little MD5 utility! Here's a complete
@@ -220,20 +217,18 @@ removing intermediate variables.
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
-     map (anon ("filename" %: string))
-       ~f:(fun filename -> (fun () -> do_hash filename)))
+      map
+        (anon ("filename" %: string))
+        ~f:(fun filename () -> do_hash filename))
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 ### Multi-argument commands {#multiple-arguments}
@@ -270,14 +265,14 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
-      map (both
-            (anon ("hash_length" %: int))
-            (anon ("filename" %: string)))
-       ~f:(fun (hash_length,filename) ->
-            (fun () -> do_hash hash_length filename)))
+      map
+        (both
+           (anon ("hash_length" %: int))
+           (anon ("filename" %: string)))
+        ~f:(fun (hash_length, filename) () ->
+          do_hash hash_length filename))
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this command, we can see that it now indeed expects two
@@ -285,7 +280,7 @@ arguments.
 
 ```sh dir=examples/correct/md5_multiarg
 $ dune exec -- ./md5.exe 5 md5.ml
-c45ae
+f8824
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -299,12 +294,10 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let open Command.Let_syntax in
-     let open Command.Param in
-     let%map
-       hash_length = anon ("hash_length" %: int)
-     and filename  = anon ("filename" %: string)
-     in
-     fun () -> do_hash hash_length filename)
+    let open Command.Param in
+    let%map hash_length = anon ("hash_length" %: int)
+    and filename = anon ("filename" %: string) in
+    fun () -> do_hash hash_length filename)
 ```
 
 Here, we take advantage of let-syntax's support for parallel let bindings,
@@ -323,10 +316,8 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open
-        hash_length = anon ("hash_length" %: int)
-      and filename  = anon ("filename" %: string)
-      in
+      let%map_open hash_length = anon ("hash_length" %: int)
+      and filename = anon ("filename" %: string) in
       fun () -> do_hash hash_length filename)
 ```
 
@@ -375,19 +366,19 @@ file type that can't be fully read. [arguments/defining custom types]{.idx}
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 
 let regular_file =
   Command.Arg_type.create (fun filename ->
       match Sys.is_file filename with
       | `Yes -> filename
       | `No -> failwith "Not a regular file"
-      | `Unknown -> failwith "Could not determine if this was a regular file")
+      | `Unknown ->
+        failwith "Could not determine if this was a regular file")
 
 let command =
-  Command.basic ~summary:"Generate an MD5 hash of the input data"
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
       let%map_open filename = anon ("filename" %: regular_file) in
@@ -403,7 +394,7 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=examples/correct/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-ed81ec895966cab3170befc62cf0a702
+9dfbd13a9fe1bee8b86e687f36bad115
 $ dune exec -- ./md5.exe /dev/null
 Error parsing command line:
 
@@ -439,9 +430,8 @@ But building this results in a compile-time error.
 
 ```sh dir=examples/erroneous/md5_with_optional_file_broken
 $ dune build md5.exe
-...
-File "md5.ml", line 15, characters 24-32:
-15 |       fun () -> do_hash filename)
+File "md5.ml", line 14, characters 24-32:
+14 |       fun () -> do_hash filename)
                              ^^^^^^^^
 Error: This expression has type string option
        but an expression was expected of type string
@@ -458,10 +448,8 @@ no file is specified.
 open Core
 
 let get_contents = function
-  | None | Some "-" ->
-    In_channel.input_all In_channel.stdin
-  | Some filename ->
-    In_channel.read_all filename
+  | None | Some "-" -> In_channel.input_all In_channel.stdin
+  | Some filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -479,8 +467,7 @@ let command =
       in
       fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type. This is
@@ -490,7 +477,7 @@ our previous examples.
 
 ```sh dir=examples/correct/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-e533f209e966f6c6c60f909f651fc24d
+d9e19ad04e1c6df865ef8f28980f66c4
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -505,7 +492,7 @@ replaces `maybe` with `maybe_with_default`:
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.input_all In_channel.stdin
+  | "-" -> In_channel.input_all In_channel.stdin
   | filename -> In_channel.read_all filename
 
 let do_hash filename =
@@ -520,19 +507,19 @@ let command =
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
       let%map_open filename =
-        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+        anon
+          (maybe_with_default "-" ("filename" %: Filename.arg_type))
       in
       fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=examples/correct/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-560f6fd99e100c7df0ef18161e9e8626
+d1d25a608613afa7ee453c1b453d6923
 ```
 
 ### Sequences of Arguments
@@ -545,7 +532,7 @@ to process on the command line. [arguments/sequences of]{.idx}
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.input_all In_channel.stdin
+  | "-" -> In_channel.input_all In_channel.stdin
   | filename -> In_channel.read_all filename
 
 let do_hash filename =
@@ -565,10 +552,9 @@ let command =
       fun () ->
         match files with
         | [] -> do_hash "-"
-        | _  -> List.iter files ~f:do_hash)
+        | _ -> List.iter files ~f:do_hash)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The callback function is a little more complex now, to handle the extra
@@ -599,35 +585,37 @@ command line and `-t` runs a self-test. The complete example follows.
 open Core
 
 let checksum_from_string buf =
-  Md5.digest_string buf
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_string buf |> Md5.to_hex |> print_endline
 
 let checksum_from_file filename =
-  let contents = match filename with
-    | "-"      -> In_channel.input_all In_channel.stdin
+  let contents =
+    match filename with
+    | "-" -> In_channel.input_all In_channel.stdin
     | filename -> In_channel.read_all filename
   in
-  Md5.digest_string contents
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_string contents |> Md5.to_hex |> print_endline
 
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     Command.Let_syntax.(
-      let%map_open
-        use_string = flag "-s" (optional string)
+      let%map_open use_string =
+        flag
+          "-s"
+          (optional string)
           ~doc:"string Checksum the given string"
       and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
       and filename =
-        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+        anon
+          (maybe_with_default "-" ("filename" %: Filename.arg_type))
       in
       fun () ->
-        if trial then printf "Running time trial\n"
-        else match use_string with
+        if trial
+        then printf "Running time trial\n"
+        else (
+          match use_string with
           | Some buf -> checksum_from_string buf
-          | None -> checksum_from_file filename)
+          | None -> checksum_from_file filename))
 
 let () = Command.run command
 ```
@@ -731,14 +719,10 @@ let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
     Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
+      let%map_open base = anon ("base" %: date)
+      and days = anon ("days" %: int) in
       fun () ->
-       Date.add_days base days
-       |> Date.to_string
-       |> print_endline)
+        Date.add_days base days |> Date.to_string |> print_endline)
 
 let () = Command.run add
 ```
@@ -775,29 +759,22 @@ let add =
     ~summary:"Add [days] to the [base] date"
     Command.Let_syntax.(
       let%map_open base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
+      and days = anon ("days" %: int) in
       fun () ->
-        Date.add_days base days
-        |> Date.to_string
-        |> print_endline)
+        Date.add_days base days |> Date.to_string |> print_endline)
 
 let diff =
   Command.basic
     ~summary:"Show days between [date1] and [date2]"
     Command.Let_syntax.(
-      let%map_open
-        date1 = anon ("date1" %: date)
-      and date2 = anon ("date2" %: date)
-      in
-      fun () ->
-        Date.diff date1 date2
-        |> printf "%d days\n")
+      let%map_open date1 = anon ("date1" %: date)
+      and date2 = anon ("date2" %: date) in
+      fun () -> Date.diff date1 date2 |> printf "%d days\n")
 
 let command =
-  Command.group ~summary:"Manipulate dates"
-    [ "add", add
-    ; "diff", diff ]
+  Command.group
+    ~summary:"Manipulate dates"
+    [ "add", add; "diff", diff ]
 
 let () = Command.run command
 ```
@@ -853,14 +830,10 @@ let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
     Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
+      let%map_open base = anon ("base" %: date)
+      and days = anon ("days" %: int) in
       fun () ->
-       Date.add_days base days
-       |> Date.to_string
-       |> print_endline)
+        Date.add_days base days |> Date.to_string |> print_endline)
 
 let () = Command.run add
 ```
@@ -874,9 +847,7 @@ if only the `base` date is supplied.
 open Core
 
 let add_days base days =
-  Date.add_days base days
-  |> Date.to_string
-  |> print_endline
+  Date.add_days base days |> Date.to_string |> print_endline
 
 let prompt_for_string name of_string =
   printf "enter %s: %!" name;
@@ -888,17 +859,14 @@ let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
     Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon (maybe ("days" %: int))
-      in
+      let%map_open base = anon ("base" %: date)
+      and days = anon (maybe ("days" %: int)) in
       let days =
         match days with
         | Some x -> x
         | None -> prompt_for_string "days" Int.of_string
       in
-      fun () ->
-        add_days base days)
+      fun () -> add_days base days)
 
 let () = Command.run add
 ```
@@ -926,12 +894,9 @@ let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
     Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon_prompt "days" Int.of_string
-      in
-      fun () ->
-        add_days base days)
+      let%map_open base = anon ("base" %: date)
+      and days = anon_prompt "days" Int.of_string in
+      fun () -> add_days base days)
 ```
 
 We can see the prompting behavior if we run the program without providing the
