@@ -80,7 +80,7 @@ test.
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 1; 2; 3 ]
 ```
 
 The test passes if the expression on the right-hand side of the
@@ -100,7 +100,7 @@ But if we break the test,
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 3; 2; 1 ]
 ```
 
 \noindent
@@ -108,7 +108,7 @@ we'll see an error when we run it.
 
 ```sh dir=examples/erroneous/broken_inline_test
 $ dune runtest
-File "test.ml", line 3, characters 0-66: rev is false.
+File "test.ml", line 3, characters 0-74: rev is false.
 
 FAILED 1 / 1 tests
 [1]
@@ -150,14 +150,14 @@ little more concise this way.
 open Base
 
 let%test_unit "rev" =
-  [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]
+  [%test_eq: int list] (List.rev [ 3; 2; 1 ]) [ 3; 2; 1 ]
 ```
 
 Now we can run the test to see what the output looks like.
 
 ```sh dir=examples/erroneous/test_eq-inline_test
 $ dune runtest
-File "test.ml", line 3, characters 0-71: rev threw
+File "test.ml", line 3, characters 0-79: rev threw
 (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
   ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
   Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
@@ -261,8 +261,7 @@ isn't captured in the source, at least, not yet.
 open! Base
 open Stdio
 
-let%expect_test "trivial" =
-  print_endline "Hello World!"
+let%expect_test "trivial" = print_endline "Hello World!"
 ```
 
 ::: {data-type=note}
@@ -339,9 +338,9 @@ open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
-  [%expect{| Hello |}];
+  [%expect {| Hello |}];
   print_endline "World!";
-  [%expect{| World! |}]
+  [%expect {| World! |}]
 ```
 
 
@@ -355,7 +354,7 @@ open Base
 open Stdio
 
 let%expect_test _ =
-  print_s [%sexp (List.rev [3;2;1] : int list)];
+  print_s [%sexp (List.rev [ 3; 2; 1 ] : int list)];
   [%expect {| (1 2 3) |}]
 ```
 
@@ -366,7 +365,7 @@ be preferable to this?
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 1; 2; 3 ]
 ```
 
 Indeed, for examples like this, expect tests aren't better: simple
@@ -414,7 +413,8 @@ example page.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
-  let example_html = {|
+  let example_html =
+    {|
     <html>
       Some random <b>text</b> with a
       <a href="http://ocaml.org/base">link</a>.
@@ -581,7 +581,10 @@ open Core
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
 let limiter () =
-  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:2
+  Rate_limiter.create
+    ~now:start_time
+    ~period:(Time_ns.Span.of_sec 1.)
+    ~rate:2
 
 let consume lim offset =
   let result =
@@ -683,8 +686,7 @@ let%expect_test _ =
   for _ = 1 to 3 do
     consume 0.
   done;
-  [%expect
-    {|
+  [%expect {|
     0.00: C
     0.00: C
     0.00: C |}];
@@ -728,8 +730,7 @@ let%expect_test _ =
   for _ = 1 to 3 do
     consume 0.
   done;
-  [%expect
-    {|
+  [%expect {|
     0.00: C
     0.00: C
     0.00: N |}];
@@ -816,9 +817,10 @@ open Helpers
 
 let%expect_test "test uppercase echo" =
   let port = 8081 in
-  let%bind process  = launch ~port ~uppercase:true in
-  Monitor.protect (fun () ->
-      let%bind (r,w) = connect ~port in
+  let%bind process = launch ~port ~uppercase:true in
+  Monitor.protect
+    (fun () ->
+      let%bind r, w = connect ~port in
       let%bind () = send_data r w "one two three\n" in
       let%bind () = [%expect] in
       let%bind () = send_data r w "one 2 three\n" in
@@ -911,12 +913,12 @@ adding a retry loop to the `connect` test helper
 ```ocaml file=examples/correct/echo_test_reconnect/test/helpers.ml,part=connect
 let rec connect ~port =
   match%bind
-    Monitor.try_with
-      (fun () ->
-         Tcp.connect
-           (Tcp.Where_to_connect.of_host_and_port {host="localhost";port}))
+    Monitor.try_with (fun () ->
+        Tcp.connect
+          (Tcp.Where_to_connect.of_host_and_port
+             { host = "localhost"; port }))
   with
-  | Ok (_,r,w) -> return (r,w)
+  | Ok (_, r, w) -> return (r, w)
   | Error _ ->
     let%bind () = Clock.after (Time.Span.of_sec 0.01) in
     connect ~port
@@ -1025,12 +1027,13 @@ that can be used without `Core`.
 open Core
 
 let%test_unit "negation flips the sign" =
-  Quickcheck.test ~sexp_of:[%sexp_of: int]
+  Quickcheck.test
+    ~sexp_of:[%sexp_of: int]
     (Int.gen_incl Int.min_value Int.max_value)
     ~f:(fun x ->
-        [%test_eq: Sign.t]
-          (Int.sign (Int.neg x))
-          (Sign.flip (Int.sign x)))
+      [%test_eq: Sign.t]
+        (Int.sign (Int.neg x))
+        (Sign.flip (Int.sign x)))
 ```
 
 Note that we didn't explicitly state how many examples should be
@@ -1109,10 +1112,10 @@ let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
     gen_int_list_pair
-    ~f:(fun (l1,l2) ->
-        [%test_eq: int list]
-          (List.rev_append l1 l2)
-          (List.append (List.rev l1) l2))
+    ~f:(fun (l1, l2) ->
+      [%test_eq: int list]
+        (List.rev_append l1 l2)
+        (List.append (List.rev l1) l2))
 ```
 
 Here, we made use of `Quickcheck.Generator.both`, which is useful for
@@ -1139,10 +1142,10 @@ let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
     [%quickcheck.generator: int list * int list]
-    ~f:(fun (l1,l2) ->
-        [%test_eq: int list]
-          (List.rev_append l1 l2)
-          (List.append (List.rev l1) l2))
+    ~f:(fun (l1, l2) ->
+      [%test_eq: int list]
+        (List.rev_append l1 l2)
+        (List.append (List.rev l1) l2))
 ```
 
 This also works with other, more complex data-types, like variants.
