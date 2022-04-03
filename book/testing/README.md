@@ -384,10 +384,12 @@ different example use-cases to see why.
 ### Exploratory programming
 
 Expect tests can be especially helpful when you're in exploration
-mode, and have no clear specification in advance.  A routine
-programming task of this type is web-scraping.  The goal is to extract
-some useful information from a web page, and figuring out the right
-way to do so often involves trial and error.
+mode, where you're trying to solve a problem by playing around with
+the data, and have no clear specification in advance.
+
+A common programming task of this type is web-scraping, where the goal
+is generally to extract some useful information from a web page.
+Figuring out the right way to do so often involves trial and error.
 
 Here's some code that does this kind of data extraction, using the
 `lambdasoup` package to traverse a chunk of HTML and spit out some
@@ -447,8 +449,8 @@ literals.  Consider the following examples.
 ```
 
 As you can see, we didn't need to escape the included quote, though
-the version of the string echoed back by the toplevel uses the
-ordinary string literal syntax, and so that does include the escape.
+the version of the string echoed back by the toplevel uses ordinary
+string literal syntax, and so the quote there comes out escaped.
 
 Quoted strings are especially useful when writing strings containing
 text from another language, like HTML.  With quoted strings, you can
@@ -461,14 +463,11 @@ for the quoted string by adding an arbitrary identifier, thereby
 ensuring that the delimiter won't show up in the body of the string.
 
 ```ocaml env=main
-# {xxx|This is how you write a {|quoted string|}|xxx};;
-- : string = "This is how you write a {|quoted string|}"
+# {xxx|This is how you quote a {|quoted string|}|xxx};;
+- : string = "This is how you quote a {|quoted string|}"
 ```
 
 :::
-
-
-
 
 If we run the test, we'll see that the output isn't exactly what was
 intended.
@@ -516,6 +515,7 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
+\noindent
 And if we run the test again, we'll see that the output is now as it
 should be.
 
@@ -557,7 +557,10 @@ Expect tests can be used to examine the dynamic behavior of a system.
 Let's walk through a simple example: a rate limiter.  The job of a
 rate limiter is to bound the rate at which a system consumes a
 particular resource.  The following is the `mli` for a library that
-specifies the logic of a simple rolling-window-style rate limiter.
+specifies the logic of a simple rolling-window-style rate limiter,
+where the intent is to make sure that there's no window of time of the
+specified period during which more than a specified number of events
+occurs.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open Core
