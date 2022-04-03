@@ -92,6 +92,7 @@ running via the test runner.
 $ dune runtest
 ```
 
+\noindent
 No output is generated because the test passed successfully.
 But if we break the test,
 
@@ -102,6 +103,7 @@ let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
 ```
 
+\noindent
 we'll see an error when we run it.
 
 ```sh dir=examples/erroneous/broken_inline_test
@@ -141,13 +143,8 @@ appropriately.
  (inline_tests))
 ```
 
-Rather than add extensions one by one as we find more uses, we'll just
-use `ppx_jane` throughout the rest of this chapter, which bundles
-together `ppx_inline_test` along with a collection of other useful
-preprocessors.
-
-Here's what our new test looks like. You'll notice that it's a little
-more concise this way.
+Here's what our new test looks like. You'll also notice that it's a
+little more concise this way.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
 open Base
@@ -156,7 +153,7 @@ let%test_unit "rev" =
   [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]
 ```
 
-Here's what it looks like when we run the test.
+Now we can run the test to see what the output looks like.
 
 ```sh dir=examples/erroneous/test_eq-inline_test
 $ dune runtest
@@ -172,9 +169,9 @@ FAILED 1 / 1 tests
 ```
 
 As you can see, the data that caused the comparison to fail is printed
-out, along with the stacktrace.  Note that in this case the stacktrace
-is mostly a distraction, which is a downside of using exceptions to
-report test failures.
+out, along with the stacktrace.  Sadly, the stacktrace is in this case
+mostly a distraction. That's a downside of using exceptions to report
+test failures.
 
 ### Where should tests go?
 
@@ -236,9 +233,9 @@ test framework.
 
 So, how do we test code that's part of an executable? The solution is
 to break up your program in to two pieces: a directory containing a
-library that contains the logic of your program, but no dangerous
-top-level effects; and a directory for the executable that links in
-the library, and is responsible for launching the code.
+library that contains the logic of your program, but no top-level
+effects; and a directory for the executable that links in the library,
+and is responsible for launching the code.
 
 :::
 
@@ -362,6 +359,7 @@ let%expect_test _ =
   [%expect {| (1 2 3) |}]
 ```
 
+\noindent
 be preferable to this?
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
@@ -775,7 +773,10 @@ our echo-server implementation.
 ```
 
 The important line is the last one, where in the `inline_tests`
-declaration, we declare a dependency on the echo-server binary.
+declaration, we declare a dependency on the echo-server binary.  Also,
+note that rather than select useful preprocessors one by one, we used
+the omnipus `ppx_jane` package, which bundles together a collection of
+useful extensions.
 
 That done, our next step is to write some helper functions.  We won't
 show the implementation, but here's the signature for our `Helpers`
