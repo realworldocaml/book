@@ -143,8 +143,7 @@ appropriately.
  (inline_tests))
 ```
 
-Here's what our new test looks like. You'll also notice that it's a
-little more concise this way.
+Here's what our new test looks like.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
 open Base
@@ -735,7 +734,7 @@ our echo-server implementation.
 The important line is the last one, where in the `inline_tests`
 declaration, we declare a dependency on the echo-server binary.  Also,
 note that rather than select useful preprocessors one by one, we used
-the omnipus `ppx_jane` package, which bundles together a collection of
+the omnibus `ppx_jane` package, which bundles together a collection of
 useful extensions.
 
 That done, our next step is to write some helper functions.  We won't
@@ -1043,10 +1042,11 @@ for the negation of `min_value` to be equal to itself.
 ```
 
 Quickcheck's insistence on tracking and testing special cases is what
-allowed it to discover this unexpected behavior. Note that in this
+allowed us to discover this unexpected behavior.  Note that in this
 case, it's not really a bug that we've uncovered, it's just that the
-property that we thought would hold doesn't.  But either way,
-Quickcheck helped us understand the behavior of our code better.
+property that we thought would should hold can't in practice.  But
+either way, Quickcheck helped us understand the behavior of our code
+better.
 
 <!-- TODO avsm: could you expand on this a little? You mention the -->
 <!-- probability distribution above is special, so does QC combine -->
@@ -1178,9 +1178,9 @@ val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 Throughout this function we're making choices about the probability
 distribution. For example, the use of the `union` operator means that
 circles, rectangles and polygons will be equally likely. We could have
-used `weighted_union` to pick a different distribution.  Similarly,
-we've ensured that all float values are non-negative, and that the
-width of the rectangle is no smaller than its height.
+used `weighted_union` to pick a different distribution.  Also, we've
+ensured that all float values are non-negative, and that the width of
+the rectangle is no smaller than its height.
 
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
