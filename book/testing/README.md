@@ -1171,7 +1171,7 @@ example generator for the `shape` type above.
       in
       Poly points
     in
-    G.union [ circle; rect; poly ]
+    G.union [ circle; rect; poly ];;
 val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 ```
 
