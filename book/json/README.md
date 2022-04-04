@@ -57,19 +57,21 @@ list, while the `authors` field contains a list of records. Unlike OCaml
 lists, JSON lists can contain multiple different JSON types within a single
 list.
 
-This free-form nature of JSON types is both a blessing and a curse. It's very
-easy to generate JSON values, but code that parses them also has to handle
-subtle variations in how the values are represented. For example, what if the
-preceding `pages` value is actually represented as a string value of "
-`450`" instead of an integer? [JSON data/benefits and drawbacks of]{.idx}
+This free-form nature of JSON types is both a blessing and a
+curse. It's very easy to generate JSON values, but code that parses
+them also has to handle subtle variations in how the values are
+represented. For example, what if the preceding `pages` value is
+actually represented as a string value of "`450`" instead of an
+integer? [JSON data/benefits and drawbacks of]{.idx}
 
-Our first task is to parse the JSON into a more structured OCaml type so that
-we can use static typing more effectively. When manipulating JSON in Python
-or Ruby, you might write unit tests to check that you have handled unusual
-inputs. The OCaml model prefers compile-time static checking as well as unit
-tests. For example, using pattern matching can warn you if you've not checked
-that a value can be `Null` as well as contain an actual value. [Yojson
-library/installation of]{.idx}[static checking]{.idx}[compile-time static
+Our first task is to parse the JSON into a more structured OCaml type
+so that we can use static typing more effectively. When manipulating
+JSON in Python or Ruby, you might write unit tests to check that you
+have handled unusual inputs. The OCaml model prefers compile-time
+static checking as well as unit tests. For example, using pattern
+matching can warn you if you've not checked that a value can be `Null`
+as well as contain an actual value. [Yojson library/installation
+of]{.idx}[static checking]{.idx}[compile-time static
 checking]{.idx}[unit tests]{.idx}
 
 ::: {data-type=note}
@@ -86,6 +88,9 @@ open it in `utop` as follows:
 # #require "yojson";;
 # open Yojson;;
 ```
+
+:::
+
 
 ## Parsing JSON with Yojson
 
@@ -385,6 +390,7 @@ shouldn't be overused due to the increased difficulty of debugging
 intermediate values. If an explicit name is assigned to each stage of the
 transformations, debuggers in particular have an easier time making the
 program flow simpler to represent to the programmer.
+[point-free programming]{.idx}
 
 This technique of using statically typed parsing functions is very powerful
 in combination with the OCaml type system. Many errors that don't make sense
@@ -942,7 +948,8 @@ specification for the GitHub API in the
 [`ocaml-github`](http://github.com/avsm/ocaml-github) repository online,
 which has lots of quirks typical in real-world web APIs.
 
-Our example shells out to `curl` on the command line to obtain the JSON,
-which is rather inefficient. We'll explain how to integrate the HTTP fetch
-directly into your OCaml application in
-[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+Our example shells out to `curl` on the command line to obtain the
+JSON, which is rather inefficient. You could integrate an Async-based
+HTTP fetch directly into your OCaml application, as described in
+[Concurrent Programming With
+Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
