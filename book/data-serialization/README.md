@@ -30,8 +30,8 @@ we'll discuss:
 
 - How to generate s-expressions from arbitrary OCaml types
 
-- How to use custom type annotations to control the exact printing
-  behavior for s-expression converters
+- How to use annotations to control the printing behavior of
+  s-expression converters
 
 - How to integrate s-expressions into your interfaces, in particular
   how to add s-expression converters to a module without breaking
@@ -126,20 +126,24 @@ modules for integers, strings, and exceptions:
 - : Sexp.t = (Invalid_argument foo)
 ```
 
-It's also possible to convert more complex types such as lists or
-arrays that are polymorphic across the types that they can contain:
+It's also possible to convert container types such as lists or arrays
+that are polymorphic over the type of data they contain.
 
 ```ocaml env=main
-# List.sexp_of_t;;
-- : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>
-# List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
-- : Sexp.t = (1 2 3)
+# #show List.sexp_of_t;;
+val sexp_of_t : ('a -> Sexp.t) -> 'a list -> Sexp.t
 ```
 
 Notice that `List.sexp_of_t` is polymorphic and takes as its first
 argument another conversion function to handle the elements of the
-list to be converted. Core uses this scheme more generally for
-defining sexp converters for polymorphic types.
+list to be converted. Base and Core use this scheme more generally for
+defining sexp converters for polymorphic types.  Here's an example of
+it in action.
+
+```ocaml env=main
+# List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
+- : Sexp.t = (1 2 3)
+```
 
 The functions that go in the other direction, *i.e.*, reconstruct an
 OCaml value from an s-expression, use essentially the same trick for
@@ -149,8 +153,6 @@ an s-expression that doesn't match the structure of the OCaml type in
 question.
 
 ```ocaml env=main
-# List.t_of_sexp;;
-- : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 - : int list = [1; 2; 3]
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
