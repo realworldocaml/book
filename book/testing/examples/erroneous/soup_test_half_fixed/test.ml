@@ -1,7 +1,8 @@
 open Base
 open Stdio
 
-[@@@part "0"] ;;
+[@@@part "0"]
+
 let get_href_hosts soup =
   Soup.select "a[href]" soup
   |> Soup.to_list
@@ -9,9 +10,11 @@ let get_href_hosts soup =
   |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
   |> Set.of_list (module String)
 
-[@@@part "1"] ;;
+[@@@part "1"]
+
 let%expect_test _ =
-  let example_html = {|
+  let example_html =
+    {|
     <html>
       Some random <b>text</b> with a
       <a href="http://ocaml.org/base">link</a>.
