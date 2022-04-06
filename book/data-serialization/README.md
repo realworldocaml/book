@@ -15,27 +15,27 @@ An example s-expression might look like this.
 (this (is an) (s expression))
 ```
 
-S-expressions play a major role in Core, effectively acting as the
-default serialization format. Indeed, we've encountered s-expressions
-multiple times already, including in [Error
+S-expressions play a major role in Base and Core, effectively acting
+as the default serialization format. Indeed, we've encountered
+s-expressions multiple times already, including in [Error
 Handling](error-handling.html#error-handling){data-type=xref},
 [Functors](functors.html#functors){data-type=xref}, and [First Class
 Modules](first-class-modules.html#first-class-modules){data-type=xref}.
 
-This chapter will go into s-expressions in more depth. In particular, we'll
-discuss:
+This chapter will go into s-expressions in more depth. In particular,
+we'll discuss:
 
-- The details of the s-expression format, including how to parse it while
-  generating good error messages for debugging malformed inputs
+- The details of the s-expression format, including how to parse it
+  while generating good error messages for debugging malformed inputs
 
 - How to generate s-expressions from arbitrary OCaml types
 
-- How to use custom type annotations to control the exact printing behavior
-  for s-expression converters
+- How to use custom type annotations to control the exact printing
+  behavior for s-expression converters
 
-- How to integrate s-expressions into your interfaces, in particular how to
-  add s-expression converters to a module without breaking abstraction
-  boundaries
+- How to integrate s-expressions into your interfaces, in particular
+  how to add s-expression converters to a module without breaking
+  abstraction boundaries
 
 We'll tie this together at the end of the chapter with a simple s-expression
 formatted configuration file for a web server
@@ -53,13 +53,13 @@ module Sexp : sig
 end
 ```
 
-An s-expression can be thought of as a tree where each node contains a list
-of its children, and where the leaves of the tree are strings. Core provides
-good support for s-expressions in its `Sexp` module, including functions for
-converting s-expressions to and from strings. Let's rewrite our example
-s-expression in terms of this type:
+An s-expression can be thought of as a tree where each node contains a
+list of its children, and where the leaves of the tree are
+strings. Core provides good support for s-expressions in its `Sexp`
+module, including functions for converting s-expressions to and from
+strings. Let's rewrite our example s-expression in terms of this type:
 
-```ocaml env=print_sexp
+```ocaml env=main
 # open Core;;
 # Sexp.List [
     Sexp.Atom "this";
@@ -73,19 +73,51 @@ This prints out nicely because Core registers a pretty printer with the
 toplevel. This pretty printer is based on the functions in `Sexp` for
 converting s-expressions to and from strings: [pretty printers]{.idx}
 
-```ocaml env=sexp_printer
+```ocaml env=main
 # Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);;
 - : string = "(1 2)"
 # Sexp.of_string ("(1 2 (3 4))");;
 - : Sexp.t = (1 2 (3 4))
 ```
 
-In addition to providing the `Sexp` module, most of the base types in Core
-support conversion to and from s-expressions. For example, we can use the
-conversion functions defined in the respective modules for integers, strings,
-and exceptions:
+::: {data-type=note}
+##### Base, Core, and Parsexp
 
-```ocaml env=to_from_sexp
+In these examples, we're using Core rather than Base because Core has
+integrated support for parsing s-expressions, courtesy of the
+`Parsexp` library.  If you just use Base, you'll find that you don't
+have `Sexp.of_string` at your disposal.
+
+```ocaml env=base-only
+# open Base;;
+# Sexp.of_string "(1 2 3)";;
+Line 1, characters 1-15:
+Alert deprecated: Base.Sexp.of_string
+[since 2018-02] Use [Parsexp.Single.parse_string_exn]
+Line 1, characters 1-15:
+Error: This expression has type unit
+       This is not a function; it cannot be applied.
+```
+
+That's because, in an attempt to keep `Base` light, the s-expression
+parsing functions aren't included.  That said, you can always use them
+by calling out to the corresponding functions from the `Parsexp`
+library:
+
+```ocaml env=base-only
+# Parsexp.Single.parse_string_exn "(1 2 3)";;
+- : Sexp.t = (1 2 3)
+```
+
+:::
+
+
+In addition to providing the `Sexp` module, most of the base types in
+Base and Core support conversion to and from s-expressions. For
+example, we can use the conversion functions defined in the respective
+modules for integers, strings, and exceptions:
+
+```ocaml env=main
 # Int.sexp_of_t 3;;
 - : Sexp.t = 3
 # String.sexp_of_t "hello";;
@@ -97,7 +129,7 @@ and exceptions:
 It's also possible to convert more complex types such as lists or
 arrays that are polymorphic across the types that they can contain:
 
-```ocaml env=to_from_sexp
+```ocaml env=main
 # List.sexp_of_t;;
 - : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>
 # List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
@@ -116,7 +148,7 @@ that these functions will fail with an exception when presented with
 an s-expression that doesn't match the structure of the OCaml type in
 question.
 
-```ocaml env=to_from_sexp
+```ocaml env=main
 # List.t_of_sexp;;
 - : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
@@ -177,7 +209,7 @@ But what if you want a function to convert a brand new type to an
 s-expression? You can of course write it yourself manually. Here's an
 example: [s-expressions/generating from OCaml types]{.idx}
 
-```ocaml env=manually_making_sexp
+```ocaml env=main
 # type t = { foo: int; bar: float };;
 type t = { foo : int; bar : float; }
 # let sexp_of_t t =
@@ -204,13 +236,13 @@ larger collection of useful extensions that includes `ppx_sexp_conv`.
 [Sexplib package/syntax extension in]{.idx} [syntax extension/in
 Sexplib package]{.idx}
 
-```ocaml env=auto_making_sexp
+```ocaml env=main
 # #require "ppx_jane";;
 ```
 
 And now we can use the extension as follows.
 
-```ocaml env=auto_making_sexp
+```ocaml env=main
 # type t = { foo: int; bar: float } [@@deriving sexp];;
 type t = { foo : int; bar : float; }
 val t_of_sexp : Sexp.t -> t = <fun>
@@ -225,7 +257,7 @@ discussed in
 `[@@deriving sexp]` can be attached to the declaration of an exception, which will
 improve the ability of Core to generate a useful string representation:
 
-```ocaml env=auto_making_sexp
+```ocaml env=main
 # exception Bad_message of string list;;
 exception Bad_message of string list
 # Exn.to_string (Bad_message ["1";"2";"3"]);;
@@ -240,13 +272,13 @@ You don't always have to declare a named type to create an s-expression
 converter. The following syntax lets you create one inline, as part of a
 larger expression:
 
-```ocaml env=inline_sexp
+```ocaml env=main
 # let l = [(1,"one"); (2,"two")];;
 val l : (int * string) list = [(1, "one"); (2, "two")]
 # List.iter l ~f:(fun x ->
     [%sexp_of: int * string ] x
     |> Sexp.to_string
-  |> print_endline);;
+    |> Stdio.print_endline);;
 (1 one)
 (2 two)
 - : unit = ()
@@ -318,7 +350,7 @@ of]{.idx}
 can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
-```ocaml env=example_load,dir=examples/sexps
+```ocaml env=main,dir=examples/sexps
 # Sexp.load_sexp "example.scm";;
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
@@ -352,7 +384,7 @@ The following example shows all of these in action:
 
 Again, loading the file as an s-expression drops the comments:
 
-```ocaml env=example_load,dir=examples/sexps
+```ocaml env=main,dir=examples/sexps
 # Sexp.load_sexp "comment_heavy.scm";;
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
@@ -361,7 +393,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 `broken_example.scm` which is `example.scm`, without open-paren in front of
 `bar`, we'll get a parse error:
 
-```ocaml env=example_load,dir=examples/sexps
+```ocaml env=main,dir=examples/sexps
 # Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t));;
 Uncaught exception:
@@ -693,7 +725,7 @@ Note that the type of a component marked as opaque doesn't need to have a
 sexp converter defined. Here, if we define a type without a sexp converter
 and then try to use another type with a sexp converter, we'll error out:
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # type no_converter = int * int;;
 type no_converter = int * int
 # type t = { a: no_converter; b: string } [@@deriving sexp];;
@@ -704,7 +736,7 @@ Error: Unbound value no_converter_of_sexp
 But with `[@sexp.opaque]`, we can embed our opaque `no_converter` type within
 the other data structure without an error.
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
 type t = { a : no_converter; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
@@ -714,7 +746,7 @@ val sexp_of_t : t -> Sexp.t = <fun>
 And if we now convert a value of this type to an s-expression, we'll see the
 contents of field `a` marked as opaque:
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # sexp_of_t { a = (3,4); b = "foo" };;
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
@@ -722,7 +754,7 @@ contents of field `a` marked as opaque:
 Note that the `t_of_sexp` function for an opaque type is generated, but will
 fail at runtime if it is used:
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
 Exception:
 (Of_sexp_error "opaque_of_sexp: cannot convert opaque values"
@@ -735,7 +767,7 @@ converters won't necessarily fail on all inputs. For example, if you have a
 record containing a `no_converter list`, the `t_of_sexp` function would still
 succeed when the list is empty:
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp];;
 type t = { a : no_converter list; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
@@ -748,7 +780,7 @@ If you really only want to generate one direction of converter, one can do
 this by annotating the type with `[@@deriving sexp_of]` or
 `[@@deriving of_sexp]` instead of `[@@deriving sexp]`:
 
-```ocaml env=sexp_opaque
+```ocaml env=main
 # type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of];;
 type t = { a : no_converter; b : string; }
 val sexp_of_t : t -> Sexp.t = <fun>
@@ -763,7 +795,7 @@ Sometimes, sexp converters have more parentheses than one would ideally like.
 Consider, for example, the following variant type: [Sexplib
 package/sexp_list]{.idx}
 
-```ocaml env=sexp_list
+```ocaml env=main
 # type compatible_versions =
     | Specific of string list
   | All [@@deriving sexp];;
@@ -779,7 +811,7 @@ You might prefer to make the syntax a bit less parenthesis-laden by dropping
 the parentheses around the list. We can replace the `string list` in the type
 declaration with `string list [@sexp.list]` to give us this alternate syntax:
 
-```ocaml env=sexp_list
+```ocaml env=main
 # type compatible_versions =
     | Specific of string list [@sexp.list]
   | All [@@deriving sexp];;
@@ -799,7 +831,7 @@ either as `()` for `None`, or as `(x)` for `Some x`, and a record field
 containing an option would be rendered accordingly. For example: [Sexplib
 package/sexp_option]{.idx}
 
-```ocaml env=sexp_option
+```ocaml env=main
 # type t = { a: int option; b: string } [@@deriving sexp];;
 type t = { a : int option; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
@@ -814,7 +846,7 @@ But what if we want a field to be optional, i.e., we want to allow it to be
 omitted from the record entirely? In that case, we can mark it with
 `[@sexp.option]`:
 
-```ocaml env=sexp_option
+```ocaml env=main
 # type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp];;
 type t = { a : int option; b : string; }
 val t_of_sexp : Sexp.t -> t = <fun>
@@ -836,7 +868,7 @@ in]{.idx}
 Consider the following type, which represents the configuration of a very
 simple web server:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # type http_server_config = {
     web_root: string;
     port: int;
@@ -851,7 +883,7 @@ One could imagine making some of these parameters optional; in particular, by
 default, we might want the web server to bind to port 80, and to listen as
 localhost. We can do this as follows:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # type http_server_config = {
     web_root: string;
     port: int [@default 80];
@@ -865,7 +897,7 @@ val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 Now, if we try to convert an s-expression that specifies only the `web_root`,
 we'll see that the other values are filled in with the desired defaults:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # let cfg = http_server_config_of_sexp
   (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
@@ -876,7 +908,7 @@ If we convert the configuration back out to an s-expression, you'll notice
 that all of the fields are present, even though they're not strictly
 necessary:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # sexp_of_http_server_config cfg;;
 - : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
 ```
@@ -884,7 +916,7 @@ necessary:
 We could make the generated s-expression also drop exported values, by using
 the `sexp_drop_default` directive:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # type http_server_config = {
     web_root: string;
     port: int [@default 80] [@sexp_drop_default.equal];
@@ -905,7 +937,7 @@ As you can see, the fields that are at their default values are simply
 omitted from the s-expression. On the other hand, if we convert a config with
 other values, then those values will be included in the s-expression:
 
-```ocaml env=sexp_default
+```ocaml env=main
 # sexp_of_http_server_config { cfg with port = 8080 };;
 - : Sexp.t = ((web_root /var/www/html) (port 8080))
 # sexp_of_http_server_config
