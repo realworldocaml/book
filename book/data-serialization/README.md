@@ -147,14 +147,18 @@ it in action.
 
 The functions that go in the other direction, *i.e.*, reconstruct an
 OCaml value from an s-expression, use essentially the same trick for
-handling polymorphic types, as shown in the following example. Note
-that these functions will fail with an exception when presented with
-an s-expression that doesn't match the structure of the OCaml type in
-question.
+handling polymorphic types, as shown in the following example.
 
 ```ocaml env=main
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 - : int list = [1; 2; 3]
+```
+
+Such a function will fail with an exception when presented with an
+s-expression that doesn't match the structure of the OCaml type in
+question.
+
+```ocaml env=main
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 Exception:
 (Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
@@ -205,7 +209,7 @@ s-expression printer.
 :::
 
 
-### Generating S-Expressions from OCaml Types
+### Generating S-Expressions From New Types
 
 But what if you want a function to convert a brand new type to an
 s-expression? You can of course write it yourself manually. Here's an
@@ -217,7 +221,7 @@ type t = { foo : int; bar : float; }
 # let sexp_of_t t =
     let a x = Sexp.Atom x and l x = Sexp.List x in
     l [ l [a "foo"; Int.sexp_of_t t.foo  ];
-  l [a "bar"; Float.sexp_of_t t.bar]; ];;
+        l [a "bar"; Float.sexp_of_t t.bar]; ];;
 val sexp_of_t : t -> Sexp.t = <fun>
 # sexp_of_t { foo = 3; bar = -5.5 };;
 - : Sexp.t = ((foo 3) (bar -5.5))
@@ -242,6 +246,7 @@ Sexplib package]{.idx}
 # #require "ppx_jane";;
 ```
 
+\noindent
 And now we can use the extension as follows.
 
 ```ocaml env=main
@@ -253,47 +258,50 @@ val sexp_of_t : t -> Sexp.t = <fun>
 - : t = {foo = 3; bar = 35.}
 ```
 
-The syntax extension can be used outside of type declarations as well. As
-discussed in
-[Error Handling](error-handling.html#error-handling){data-type=xref},
-`[@@deriving sexp]` can be attached to the declaration of an exception, which will
-improve the ability of Core to generate a useful string representation:
+The syntax extension can be used outside of type declarations as
+well. As discussed in [Error
+Handling](error-handling.html#error-handling){data-type=xref},
+`[@@deriving sexp]` can be attached to the declaration of an exception
+to improve the quality of error messages associated with exceptions.
+
+Here are two exception declarations, one with an annotation, and one
+without:
 
 ```ocaml env=main
-# exception Bad_message of string list;;
-exception Bad_message of string list
-# Exn.to_string (Bad_message ["1";"2";"3"]);;
-- : string = "(\"Bad_message(_)\")"
-# exception Good_message of string list [@@deriving sexp];;
-exception Good_message of string list
-# Exn.to_string (Good_message ["1";"2";"3"]);;
-- : string = "(//toplevel//.Good_message (1 2 3))"
+exception Ordinary_exn of string list;;
+exception Exn_with_sexp of string list [@@deriving sexp];;
 ```
 
-You don't always have to declare a named type to create an s-expression
-converter. The following syntax lets you create one inline, as part of a
-larger expression:
+And here's the difference in what you see when you throw these
+exceptions.
 
 ```ocaml env=main
-# let l = [(1,"one"); (2,"two")];;
-val l : (int * string) list = [(1, "one"); (2, "two")]
-# List.iter l ~f:(fun x ->
-    [%sexp_of: int * string ] x
-    |> Sexp.to_string
-    |> Stdio.print_endline);;
+# raise (Ordinary_exn ["1";"2";"3"]);;
+Exception: Ordinary_exn(_).
+# raise (Exn_with_sexp ["1";"2";"3"]);;
+Exception: (//toplevel//.Exn_with_sexp (1 2 3))
+```
+
+You can also use `ppx_sexp` inline, as part of a larger expression, to
+generate a converter for an anonymous type.
+
+```ocaml env=main
+# let print_pairs l =
+    List.iter l ~f:(fun x ->
+      [%sexp_of: int * string ] x
+      |> Sexp.to_string
+      |> Stdio.print_endline);;
+val print_pairs : (int * string) list -> unit = <fun>
+# print_pairs [(1,"one"); (2,"two")];;
 (1 one)
 (2 two)
 - : unit = ()
 ```
 
-The declaration `[%sexp_of: int * string]` simply gets expanded to the sexp
-converter for the type `int * string`. This is useful whenever you need a
-sexp converter for an anonymous type.
-
-The syntax extensions bundled with Core almost all have the same basic
-structure: they autogenerate code based on type definitions, implementing
-functionality that you could in theory have implemented by hand, but with far
-less programmer effort.
+The syntax extensions bundled with Base and Core almost all have the
+same basic structure: they auto-generate code based on type
+definitions, implementing functionality that you could in theory have
+implemented by hand, but with far less programmer effort.
 
 ::: {data-type=note}
 ##### Syntax Extensions and PPX
@@ -396,26 +404,17 @@ If we introduce an error into our s-expression, by, say, creating a file
 `bar`, we'll get a parse error:
 
 ```ocaml env=main,dir=examples/sexps
-# Exn.handle_uncaught ~exit:false (fun () ->
-  ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t));;
-Uncaught exception:
-
-  (Sexplib.Sexp.Parse_error
-   ((err_msg "unexpected character: ')'") (text_line 4) (text_char 30)
+# Sexp.load_sexp "example_broken.scm";;
+Exception:
+(Sexplib.Sexp.Parse_error
+  ((err_msg "unexpected character: ')'") (text_line 4) (text_char 30)
     (global_offset 78) (buf_pos 78)))
-
-- : unit = ()
 ```
-
-In the preceding example, we use `Exn.handle_uncaught` to make sure that the
-exception gets printed out in full detail. You should generally wrap every
-Core program in this handler to get good error messages for any unexpected
-exceptions.
 
 ## Preserving Invariants
 
 One of the most important bits of sexp-related functionality is the
-autogeneration of converters for new types via `ppx_sexp_conv`. We've
+auto-generation of converters for new types via `ppx_sexp_conv`. We've
 seen a bit of how this works already, but let's walk through a
 complete example. Here's the contents of a file `int_interval.ml`,
 which is a simple library for representing integer intervals, similar
