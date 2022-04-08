@@ -336,7 +336,7 @@ as the author of that section of code.
 
 There are two main tools used to manipulate docstring comments: the `ocamldoc`
 tool that is supplied with the compiler, and the `odoc` tool that is developed
-outside the compiler but is intended to the be long-term replacement.
+outside the compiler but is intended to be the long-term replacement.
 Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
 over the source file:
 
