@@ -476,10 +476,12 @@ One critical invariant here is that the `Range` only represents
 non-empty intervals, and so if you create an interval with a lower
 bound above the upper bound, that will be represented by `Empty`.
 
-Now, let's demonstrate the functionality with some tests.  First,
-we'll write a test helper that takes an interval and a list of points,
-and prints out the result of checking for emptiness, and a
-classification of which points are inside and outside the interval.
+Now, let's demonstrate the functionality with some tests, using the
+expect test framework described in
+[Testing](testing.html#expect-tests){data-type=xref}.  First, we'll
+write a test helper that takes an interval and a list of points, and
+prints out the result of checking for emptiness, and a classification
+of which points are inside and outside the interval.
 
 ```ocaml file=examples/correct/test_interval/test_interval.ml,part=helper
 let test_interval i points =
@@ -601,62 +603,49 @@ let%expect_test "test (range 6 3)" =
 
 ## Getting Good Error Messages
 
-There are two steps to deserializing a type from an s-expression: first,
-converting the bytes in a file to an s-expression; and the second, converting
-that s-expression into the type in question. One problem with this is that it
-can be hard to localize errors to the right place using this scheme. Consider
-the following example: [debugging/s-expressions]{.idx}[errors/error messages
-with s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
-
-```scheme file=examples/correct/read_foo/dune
-(executable
-  (name       read_foo)
-  (libraries  core sexplib)
-  (preprocess (pps ppx_sexp_conv)))
-```
-
-
+There are two steps to deserializing a type from an s-expression:
+first, converting the bytes in a file to an s-expression; and the
+second, converting that s-expression into the type in question. One
+problem with this is that it can be hard to localize errors to the
+right place using this scheme. Consider the following example.
+[debugging/s-expressions]{.idx}[errors/error messages with
+s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
 
 ```ocaml file=examples/correct/read_foo/read_foo.ml
 open Core
 
-type t = {
-  a: string;
-  b: int;
-  c: float option
-} [@@deriving sexp]
-
-let run () =
-  let t =
-    Sexp.load_sexp "foo_broken_example.scm"
-    |> t_of_sexp
-  in
-  printf "b is: %d\n%!" t.b
+type t =
+  { a : string
+  ; b : int
+  ; c : float option
+  }
+[@@deriving sexp]
 
 let () =
-  Exn.handle_uncaught ~exit:true run
+  let t = Sexp.load_sexp "example.scm" |> t_of_sexp in
+  printf "b is: %d\n%!" t.b
 ```
 
 If you were to run this on a malformatted file, say, this one:
 
-``` file=examples/correct/read_foo/foo_broken_example.scm
-((a "not-an-integer")
- (b "not-an-integer")
+``` file=examples/correct/read_foo/example.scm
+((a not-a-string)
+ (b not-a-string)
  (c 1.0))
 ```
 
-you'll get the following error:
+\noindent
+you'll get the following error.  (Note that we set the `OCAMLRUNPARAM`
+environment variable to suppress the stack trace here.)
 
 ```sh dir=examples/correct/read_foo
-$ dune build read_foo.exe
-$ dune exec -- ./read_foo.exe foo_example_broken.scm
+$ OCAMLRUNPARAM=b=0 dune exec -- ./read_foo.exe
 Uncaught exception:
 
   (Of_sexp_error "int_of_sexp: (Failure int_of_string)"
-   (invalid_sexp not-an-integer))
+   (invalid_sexp not-a-string))
 
-...
-[1]
+[2]
 ```
 
 If all you have is the error message and the string, it's not terribly
@@ -667,46 +656,31 @@ bad error message can be pure misery.
 But there's hope! We can make a small change to the code to improve the error
 message greatly:
 
-```scheme file=examples/correct/read_foo_better_errors/dune
-(executable
-  (name       read_foo_better_errors)
-  (libraries  core sexplib)
-  (preprocess (pps ppx_sexp_conv)))
-```
-
-
-
 ```ocaml file=examples/correct/read_foo_better_errors/read_foo_better_errors.ml
 open Core
 
-type t = {
-  a: string;
-  b: int;
-  c: float option
-} [@@deriving sexp]
-
-let run () =
-  let t = Sexp.load_sexp_conv_exn "foo_broken_example.scm" t_of_sexp in
-  printf "b is: %d\n%!" t.b
+type t =
+  { a : string
+  ; b : int
+  ; c : float option
+  }
+[@@deriving sexp]
 
 let () =
-  Exn.handle_uncaught ~exit:true run
+  let t = Sexp.load_sexp_conv_exn "example.scm" t_of_sexp in
+  printf "b is: %d\n%!" t.b
 ```
 
-If we run it again, we'll see a much more specific error:
+If we run it again, we'll see a much more specific error.
 
 ```sh dir=examples/correct/read_foo_better_errors
-$ dune build read_foo_better_errors.exe
-$ dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
+$ OCAMLRUNPARAM=b=0 dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
 Uncaught exception:
 
-  (Of_sexp_error foo_broken_example.scm:2:4
-   "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
+  (Of_sexp_error example.scm:2:4 "int_of_sexp: (Failure int_of_string)"
+   (invalid_sexp not-an-integer))
 
-Raised at Sexplib__Pre_sexp.raise_conv_exn in file "duniverse/sexplib/src/pre_sexp.ml", line 815, characters 32-84
-Called from Dune__exe__Read_foo_better_errors.run in file "read_foo_better_errors.ml", line 10, characters 10-68
-Called from Base__Exn.handle_uncaught_aux in file "duniverse/base/src/exn.ml", line 111, characters 6-10
-[1]
+[2]
 ```
 
 In the preceding error, `foo_broken_example.scm:2:5` tells us that the
