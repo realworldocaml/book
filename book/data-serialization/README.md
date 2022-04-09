@@ -111,7 +111,6 @@ library:
 
 :::
 
-
 In addition to providing the `Sexp` module, most of the base types in
 Base and Core support conversion to and from s-expressions. For
 example, we can use the conversion functions defined in the respective
@@ -209,11 +208,11 @@ s-expression printer.
 :::
 
 
-### Generating S-Expressions From New Types
+### S-Expression Converters for New Types
 
 But what if you want a function to convert a brand new type to an
 s-expression? You can of course write it yourself manually. Here's an
-example: [s-expressions/generating from OCaml types]{.idx}
+example:
 
 ```ocaml env=main
 # type t = { foo: int; bar: float };;
@@ -413,68 +412,146 @@ Exception:
 
 ## Preserving Invariants
 
-One of the most important bits of sexp-related functionality is the
-auto-generation of converters for new types via `ppx_sexp_conv`. We've
-seen a bit of how this works already, but let's walk through a
-complete example. Here's the contents of a file `int_interval.ml`,
-which is a simple library for representing integer intervals, similar
-to the one described in
+Modules and module interfaces are an important part of how OCaml code
+is structured and designed.  One of the key reasons we use module
+interfaces is to make it possible to enforce invariants; by
+restricting how values of a given type can be created and transformed,
+interfaces let you enforce various rules, which among other things can
+ensure that your data is well-formed.  [s-expressions/preserving
+invariants in]{.idx}
+
+When you add s-expression converters (or really any serializer) to an
+API, you're adding an alternate path for creating values, and if
+you're not careful, that alternate path can violate the carefully
+maintained invariants of your code.
+
+In the following, we'll show how this problem can crop up.  Let's
+consider a module `Int_interval` for representing closed integer
+intervals, similar to the one described in
 [Functors](functors.html#functors){data-type=xref}.
-[s-expressions/preserving invariants in]{.idx}
+
+Here's the signature.
+
+```ocaml file=examples/correct/test_interval/int_interval.mli
+type t [@@deriving sexp]
+
+(** [create lo hi] creates an interval from [lo] to [hi] inclusive,
+   and is empty if [lo > hi]. *)
+val create : int -> int -> t
+
+val is_empty : t -> bool
+val contains : t -> int -> bool
+```
+
+As you can see, in addition to basic operations for creating and
+evaluating intervals, this interface also exposes s-expression
+converters.
+
+Here's the implementation.
 
 ```ocaml file=examples/correct/test_interval/int_interval.ml
-(* Module for representing closed integer intervals *)
 open Core
 
-(* Invariant: For any Range (x,y), y >= x *)
+(* for [Range (x,y)], we require that [y >= x] *)
 type t =
   | Range of int * int
   | Empty
 [@@deriving sexp]
 
-let is_empty =
-  function
+let is_empty = function
   | Empty -> true
   | Range _ -> false
 
-let create x y =
-  if x > y then
-    Empty
-  else
-    Range (x,y)
+let create x y = if x > y then Empty else Range (x, y)
 
 let contains i x =
   match i with
   | Empty -> false
-  | Range (low,high) -> x >= low && x <= high
+  | Range (low, high) -> x >= low && x <= high
 ```
 
-Because of the filename, the resulting module will be available under
-the name `Int_interval`. We can use this module as follows.
+One critical invariant here is that the `Range` only represents
+non-empty intervals, and so if you create an interval with a lower
+bound above the upper bound, that will be represented by `Empty`.
 
-```ocaml file=examples/correct/test_interval/test_interval.ml
-open Core
+Now, let's write some tests to see how this actually works.  Here's a
+test helper that takes the bounds for an interval and a list of
+points, and prints out the result of checking for emptiness, and
+classifies each point by whether it's contained in the interval.
 
-let intervals =
-  let module I = Int_interval in
-  [ I.create 3 4;
-    I.create 5 4; (* should be empty *)
-    I.create 2 3;
-    I.create 1 6;
-  ]
-
-let () =
-  intervals
-  |> List.sexp_of_t Int_interval.sexp_of_t
-  |> Sexp.to_string_hum
-  |> print_endline
+```ocaml file=examples/correct/test_interval/test_interval.ml,part=helper
+let test_interval i points =
+  let in_, out =
+    List.partition_tf points ~f:(fun x -> Int_interval.contains i x)
+  in
+  let to_string l =
+    List.map ~f:Int.to_string l |> String.concat ~sep:", "
+  in
+  print_endline
+    (String.concat
+       ~sep:"\n"
+       [ (if Int_interval.is_empty i then "empty" else "non-empty")
+       ; "in:  " ^ to_string in_
+       ; "out: " ^ to_string out
+       ])
 ```
 
-But we're still missing something: we haven't created an `mli` to
-express the signature of `Int_interval` yet.  In doing so, we'll need
-to explicitly export the s-expression converters that were created
-within the `ml` file. For example, here's an interface that doesn't
-export the s-expression functions:
+Here's the test run on a non-empty interval:
+
+```ocaml file=examples/correct/test_interval/test_interval.ml,part=ordinary
+let%expect_test "ordinary interval" =
+  test_interval (Int_interval.create 3 6) (List.range 1 10);
+  [%expect
+    {|
+    non-empty
+    in:  3, 4, 5, 6
+    out: 1, 2, 7, 8, 9 |}]
+```
+
+And here's the test run on an empty interval:
+
+
+```ocaml file=examples/correct/test_interval/test_interval.ml,part=empty
+let%expect_test "empty interval" =
+  test_interval (Int_interval.create 6 3) (List.range 1 10);
+  [%expect {|
+    empty
+    in:
+    out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
+```
+
+So far so good.
+
+Now, let's consider the s-expression converters.  Here's a test that
+demonstrates how the output is supposed to look.  You can also see
+that an interval constructed from crossed bounds ends up as simply
+`Empty`.
+
+```ocaml file=examples/correct/test_interval/test_interval.ml,part=sexp_of
+let%expect_test "test to_sexp" =
+  let t lo hi =
+    let i = Int_interval.create lo hi in
+    print_s [%sexp (i : Int_interval.t)]
+  in
+  t 3 6;
+  [%expect {| (Range 3 6) |}];
+  t 4 4;
+  [%expect {| (Range 4 4) |}];
+  t 6 3;
+  [%expect {| Empty |}]
+```
+
+```ocaml file=examples/correct/test_interval/test_interval.ml,part=of_sexp
+let%expect_test "test (range 6 3)" =
+  let i = Int_interval.t_of_sexp (Sexp.of_string "(Range 6 3)") in
+  test_interval i (List.range 1 10);
+  [%expect
+    {|
+    non-empty
+    in:
+    out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
+```
+
 
 ```ocaml file=examples/erroneous/test_interval_nosexp/int_interval.mli
 type t
@@ -519,26 +596,33 @@ definitions so that we can just use the same `with` shorthand in the
 ```ocaml file=examples/correct/test_interval/int_interval.mli
 type t [@@deriving sexp]
 
-val is_empty : t -> bool
+(** [create lo hi] creates an interval from [lo] to [hi] inclusive,
+   and is empty if [lo > hi]. *)
 val create : int -> int -> t
+
+val is_empty : t -> bool
 val contains : t -> int -> bool
 ```
 
 At this point, `test_interval.ml` will compile again using this `dune` file:
 
 ```scheme file=examples/correct/test_interval/dune
-(executable
-  (name       test_interval)
+(library
+  (name int_interval_test)
   (libraries  core sexplib)
-  (preprocess (pps ppx_sexp_conv)))
+  (inline_tests)
+  (preprocess (pps ppx_jane)))
 ```
 
 And if we run it, we'll get the following output:
 
 ```sh dir=examples/correct/test_interval
 $ dune build test_interval.exe
+Error: Don't know how to build test_interval.exe
+[1]
 $ dune exec ./test_interval.exe
-((Range 3 4) Empty (Range 2 3) (Range 1 6))
+Error: Program "./test_interval.exe" not found!
+[1]
 ```
 
 One easy mistake to make when dealing with sexp converters is to ignore the

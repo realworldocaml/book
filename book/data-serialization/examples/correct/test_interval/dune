@@ -1,4 +1,5 @@
-(executable
-  (name       test_interval)
+(library
+  (name int_interval_test)
   (libraries  core sexplib)
-  (preprocess (pps ppx_sexp_conv)))
+  (inline_tests)
+  (preprocess (pps ppx_jane)))
