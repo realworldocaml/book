@@ -582,9 +582,9 @@ with an ordinary `let` rather than a `let rec`, the call to the
 `t_of_sexp` goes to the derived version of the function, rather than
 being a recursive call.
 
-Note that, rather than fixing up the invariant, we could reasonably
-have decided to throw an exception if it was violated.  In any case,
-the approach we took means that rerunning our test produces a more
+Note that, rather than fixing up the invariant, we could have instead
+thrown an exception if the invariant was violated.  In any case, the
+approach we took means that rerunning our test produces a more
 consistent and sensible result.
 
 ```ocaml file=examples/correct/test_interval_override_of_sexp/test_interval.ml,part=of_sexp
