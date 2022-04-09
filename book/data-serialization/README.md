@@ -238,8 +238,7 @@ called `ppx_sexp_conv` which does just that, creating the required
 functions for every type annotated with `[@@deriving sexp]`.  To
 enable `ppx_sexp_conv`, we're going to enable `ppx_jane`, which is a
 larger collection of useful extensions that includes `ppx_sexp_conv`.
-[Sexplib package/syntax extension in]{.idx} [syntax extension/in
-Sexplib package]{.idx}
+[ppx_sexp_conv]{.idx} [syntax extension/ppx_sexp_conv]{.idx}
 
 ```ocaml env=main
 # #require "ppx_jane";;
@@ -356,6 +355,7 @@ of]{.idx}
  (bar "this is () an \" atom"))
 ```
 
+\noindent
 can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
