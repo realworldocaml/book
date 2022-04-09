@@ -510,8 +510,8 @@ let%expect_test "ordinary interval" =
     out: 1, 2, 7, 8, 9 |}]
 ```
 
+\noindent
 And also on an empty one.
-
 
 ```ocaml file=examples/correct/test_interval/test_interval.ml,part=empty
 let%expect_test "empty interval" =
@@ -522,6 +522,7 @@ let%expect_test "empty interval" =
     out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
 ```
 
+\noindent
 Note that the result of checking `is_empty` lines up with the test of
 what elements are contained and not contained in the interval.
 
@@ -563,11 +564,11 @@ let%expect_test "test (range 6 3)" =
 ```
 
 Now we've clearly got a problem, since this is detected as a non-empty
-interval, but doesn't appear to contain anything.  That's because
-`t_of_sexp` doesn't check the same invariant that `create` does.  We
-can fix this, by overriding the auto-generated s-expression converter
-with one that checks the invariant, in this case, by calling `create`
-itself.
+interval, but doesn't appear to contain anything.  The problem traces
+back to the fact that `t_of_sexp` doesn't check the same invariant
+that `create` does.  We can fix this, by overriding the auto-generated
+s-expression converter with one that checks the invariant, in this
+case, by calling `create` itself.
 
 ```ocaml file=examples/correct/test_interval_override_of_sexp/int_interval.ml,part=override
 let t_of_sexp sexp =
