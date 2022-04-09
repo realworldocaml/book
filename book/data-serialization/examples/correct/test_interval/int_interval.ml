@@ -6,11 +6,11 @@ type t =
   | Empty
 [@@deriving sexp]
 
+let create x y = if x > y then Empty else Range (x, y)
+
 let is_empty = function
   | Empty -> true
   | Range _ -> false
-
-let create x y = if x > y then Empty else Range (x, y)
 
 let contains i x =
   match i with

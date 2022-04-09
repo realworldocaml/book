@@ -85,3 +85,16 @@
 (alias
  (name runtest)
  (deps (alias test_interval)))
+
+(rule
+ (alias test_interval_override_of_sexp)
+ (deps
+  (source_tree ./correct/test_interval_override_of_sexp)
+  (package core)
+  (package sexplib))
+ (action
+  (system "dune build @all @runtest --root ./correct/test_interval_override_of_sexp")))
+
+(alias
+ (name runtest)
+ (deps (alias test_interval_override_of_sexp)))
