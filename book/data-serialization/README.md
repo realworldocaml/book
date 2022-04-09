@@ -656,7 +656,7 @@ bad error message can be pure misery.
 But there's hope! We can make a small change to the code to improve the error
 message greatly:
 
-```ocaml file=examples/correct/read_foo_better_errors/read_foo_better_errors.ml
+```ocaml file=examples/correct/read_foo_better_errors/read_foo.ml
 open Core
 
 type t =
@@ -674,7 +674,7 @@ let () =
 If we run it again, we'll see a much more specific error.
 
 ```sh dir=examples/correct/read_foo_better_errors
-$ OCAMLRUNPARAM=b=0 dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
+$ OCAMLRUNPARAM=b=0 dune exec -- ./read_foo.exe
 Uncaught exception:
 
   (Of_sexp_error example.scm:2:4 "int_of_sexp: (Failure int_of_string)"
