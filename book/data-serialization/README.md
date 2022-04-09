@@ -568,20 +568,33 @@ can fix this, by overriding the auto-generated s-expression converter
 with one that checks the invariant, in this case, by calling `create`
 itself.
 
-```ocaml file=examples/correct/test_interval_override_of_sexp,part=override
+```ocaml file=examples/correct/test_interval_override_of_sexp/int_interval.ml,part=override
+let t_of_sexp sexp =
+  match t_of_sexp sexp with
+  | Empty -> Empty
+  | Range (x, y) -> create x y
 ```
 
+This trick of overriding an existing function definition with a new
+one is perfectly acceptable in OCaml. Since `t_of_sexp` is defined
+with an ordinary `let` rather than a `let rec`, the call to the
+`t_of_sexp` goes to the Sexplib-generated version of the function,
+rather than being a recursive call.
 
-This trick of overriding an existing function definition with a new one is
-perfectly acceptable in OCaml. Since `t_of_sexp` is defined with an ordinary
-`let` rather than a `let rec`, the call to the `t_of_sexp` goes to the
-Sexplib-generated version of the function, rather than being a recursive
-call.
+Note that we could also have reasonably decided to check the ordering
+invariant, and throw an exception if it was violated.  In any case,
+the test we ran before now produces a more consistent answer.
 
-Another important aspect of our definition is that we call the function
-`of_sexp_error` to raise an exception when the parsing process fails. This
-improves the error reporting that Sexplib can provide when a conversion
-fails, as we'll see in the next section.
+```ocaml file=examples/correct/test_interval_override_of_sexp/test_interval.ml,part=of_sexp
+let%expect_test "test (range 6 3)" =
+  let i = Int_interval.t_of_sexp (Sexp.of_string "(Range 6 3)") in
+  test_interval i (List.range 1 10);
+  [%expect
+    {|
+    empty
+    in:
+    out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
+```
 
 ## Getting Good Error Messages
 
