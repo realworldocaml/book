@@ -414,19 +414,20 @@ Exception:
 
 Modules and module interfaces are an important part of how OCaml code
 is structured and designed.  One of the key reasons we use module
-interfaces is to make it possible to enforce invariants; by
-restricting how values of a given type can be created and transformed,
-interfaces let you enforce various rules, including ensuring that your
-data is well-formed.  [s-expressions/preserving invariants in]{.idx}
+interfaces is to make it possible to enforce invariants. In
+particular, by restricting how values of a given type can be created
+and transformed, interfaces let you enforce various rules, including
+ensuring that your data is well-formed.  [s-expressions/preserving
+invariants in]{.idx}
 
 When you add s-expression converters (or really any serializer) to an
 API, you're adding an alternate path for creating values, and if
 you're not careful, that alternate path can violate the carefully
 maintained invariants of your code.
 
-In the following, we'll show how this problem can crop up.  Let's
-consider a module `Int_interval` for representing closed integer
-intervals, similar to the one described in
+In the following, we'll show how this problem can crop up, and how to
+resolve it.  Let's consider a module `Int_interval` for representing
+closed integer intervals, similar to the one described in
 [Functors](functors.html#functors){data-type=xref}.
 
 Here's the signature.
@@ -475,10 +476,10 @@ One critical invariant here is that the `Range` only represents
 non-empty intervals, and so if you create an interval with a lower
 bound above the upper bound, that will be represented by `Empty`.
 
-Now, let's write some tests to see how this actually works.  Here's a
-test helper that takes the bounds for an interval and a list of
-points, and prints out the result of checking for emptiness, and
-classifies each point by whether it's contained in the interval.
+Now, let's demonstrate the functionality with some tests.  First,
+we'll write a test helper that takes an interval and a list of points,
+and prints out the result of checking for emptiness, and a
+classification of which points are inside and outside the interval.
 
 ```ocaml file=examples/correct/test_interval/test_interval.ml,part=helper
 let test_interval i points =
@@ -524,9 +525,9 @@ let%expect_test "empty interval" =
 Note that the result of checking `is_empty` lines up with the test of
 what elements are contained and not contained in the interval.
 
-Now, let's test out the s-expression converters.  Here we're testing
-the `sexp_of_t` converter. This makes the conversion of a
-flipped-bounds interval to `Empty` apparent.
+Now, let's test out the s-expression converters, starting with
+`sexp_of_t`. Note how this test lets you see that a flipped-bounds
+interval is represented by `Empty`.
 
 ```ocaml file=examples/correct/test_interval/test_interval.ml,part=sexp_of
 let%expect_test "test to_sexp" =
@@ -578,12 +579,13 @@ let t_of_sexp sexp =
 This trick of overriding an existing function definition with a new
 one is perfectly acceptable in OCaml. Since `t_of_sexp` is defined
 with an ordinary `let` rather than a `let rec`, the call to the
-`t_of_sexp` goes to the Sexplib-generated version of the function,
-rather than being a recursive call.
+`t_of_sexp` goes to the derived version of the function, rather than
+being a recursive call.
 
-Note that we could also have reasonably decided to check the ordering
-invariant, and throw an exception if it was violated.  In any case,
-the test we ran before now produces a more consistent answer.
+Note that, rather than fixing up the invariant, we could reasonably
+have decided to throw an exception if it was violated.  In any case,
+the approach we took means that rerunning our test produces a more
+consistent and sensible result.
 
 ```ocaml file=examples/correct/test_interval_override_of_sexp/test_interval.ml,part=of_sexp
 let%expect_test "test (range 6 3)" =
