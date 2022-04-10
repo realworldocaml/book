@@ -958,18 +958,16 @@ This can be very useful in designing config file formats that are both
 reasonably terse and easy to generate and maintain. It can also be
 useful for backwards compatibility: if you add a new field to your
 config record but make that field optional, then you should still be
-able to parse older version of your config.  [files/config
-files]{.idx}[config file formats]{.idx}
+able to parse older version of your config.
 
-The exact attribute you use depends on the comparison functions available
-over the type that you wish to drop:
+The exact attribute you use depends on the comparison functions
+available over the type that you wish to drop:
 
 - `[@sexp_drop_default.compare]` if the type supports `[%compare]`
 - `[@sexp_drop_default.equal]` if the type supports `[%equal]`
 - `[@sexp_drop_default.sexp]` if you want to compare the sexp
   representations
-- `[@sexp_drop_default f]` and give an explicit equality function ([f
-  = Poly.(=)] corresponds to the old behavior)
+- `[@sexp_drop_default f]` and give an explicit equality function
 
 Most of the type definitions supplied with Base and Core provide the
 comparison and equality operations, so those are reasonable default
