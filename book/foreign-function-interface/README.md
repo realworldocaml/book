@@ -402,6 +402,7 @@ We can now create a binding to `time` directly from the toplevel.
 ```ocaml env=posix
 # #require "ctypes-foreign.threaded";;
 # #require "ctypes.top";;
+# open Core;;
 # open Ctypes;;
 # open PosixTypes;;
 # open Foreign;;
@@ -603,6 +604,7 @@ instantiate the OCaml version of the struct. This is a *phantom type* that
 exists only to distinguish the underlying C type from other pointer types.
 The particular `timeval` structure now has a distinct type from other
 structures we define elsewhere, which helps to avoid getting them mixed up.
+[phantom type]{.idx}
 
 The second command calls `structure` to create a fresh structure type. At
 this point, the structure type is incomplete: we can add fields but cannot
@@ -662,7 +664,7 @@ We're finally ready to bind to `gettimeofday` now:
 
 ```ocaml env=posix
 # let gettimeofday = foreign "gettimeofday" ~check_errno:true
-  (ptr timeval @-> ptr timezone @-> returning int);;
+    (ptr timeval @-> ptr timezone @-> returning int);;
 val gettimeofday :
   timeval structure Ctypes_static.ptr ->
   timezone structure Ctypes_static.ptr -> int = <fun>
@@ -677,25 +679,24 @@ library functions do.
 As before, we can create a wrapper to make `gettimeofday` easier to use. The
 functions `make`, `addr`, and `getf` create a structure value, retrieve the
 address of a structure value, and retrieve the value of a field from a
-structure:
+structure.
 
-```ocaml env=posix,non-deterministic
+```ocaml env=posix
 # let gettimeofday' () =
     let tv = make timeval in
     ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
     let secs = Signed.Long.(to_int (getf tv tv_sec)) in
     let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-    Stdlib.(float secs +. float usecs /. 1000000.0);;
+    Float.of_int secs +. Float.of_int usecs /. 1_000_000.0;;
 val gettimeofday' : unit -> float = <fun>
+```
+
+And we can now call that function to get the current time.
+
+```ocaml env=posix,non-deterministic
 # gettimeofday' ();;
 - : float = 1633964254.067426
 ```
-
-You need to be a little careful not to get all the open modules mixed up
-here. Both `Stdlib` and `Ctypes` define different `float` functions. The
-`Ctypes` module we opened up earlier overrides the `Pervasives` definition.
-As seen previously though, you just need to locally open `Pervasives` again
-to bring the usual `float` function back in scope.
 
 #### Recap: A time-printing command
 
