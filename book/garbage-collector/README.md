@@ -44,11 +44,11 @@ algorithm used by OCaml to perform this heap traversal is commonly known as
 
 ## Generational Garbage Collection
 
-The usual OCaml programming style involves allocating many small variables
-that are used for a short period of time and then never accessed again. OCaml
-takes advantage of this fact to improve performance by using a *generational*
-GC. [generational garbage collection]{.idx}[garbage collection/generational
-collection]{.idx}
+The usual OCaml programming style involves allocating many small
+values that are used for a short period of time and then never
+accessed again. OCaml takes advantage of this fact to improve
+performance by using a *generational* GC. [generational garbage
+collection]{.idx}[garbage collection/generational]{.idx}
 
 A generational GC maintains separate memory regions to hold blocks based on
 how long the blocks have been live. OCaml's heap is split into two such
@@ -58,25 +58,25 @@ regions: [heaps/regions of]{.idx}
 
 - A larger, variable-size *major heap* for blocks that have been live longer
 
-A typical functional programming style means that young blocks tend to die
-young and old blocks tend to stay around for longer than young ones. This is
-often referred to as the *generational hypothesis*. [generational
-hypothesis]{.idx}
+A typical functional programming style means that young blocks tend to
+die young and old blocks tend to stay around for longer than young
+ones. This is often referred to as the *generational
+hypothesis*. [generational hypothesis]{.idx}
 
 OCaml uses different memory layouts and garbage-collection algorithms for the
 major and minor heaps to account for this generational difference. We'll
-explain how they differ in more detail next. [OCAMLRUNPARAM]{.idx}[Gc
-module]{.idx}
+explain how they differ in more detail next.
 
 ::: {data-type=note}
 ##### The Gc Module and OCAMLRUNPARAM
 
-OCaml provides several mechanisms to query and alter the behavior of the
-runtime system. The `Gc` module provides this functionality from within OCaml
-code, and we'll frequently refer to it in the rest of the chapter. As with
-several other standard library modules, Core alters the `Gc` interface from
-the standard OCaml library. We'll assume that you've opened `Core` in our
-explanations.
+OCaml provides several mechanisms to query and alter the behavior of
+the runtime system. The `Gc` module provides this functionality from
+within OCaml code, and we'll frequently refer to it in the rest of the
+chapter. As with several other standard library modules, Core alters
+the `Gc` interface from the standard OCaml library. We'll assume that
+you've opened `Core` in our explanations.  [OCAMLRUNPARAM]{.idx}[Gc
+module]{.idx}
 
 You can also control the behavior of OCaml programs by setting the
 `OCAMLRUNPARAM` environment variable before launching your application. This
@@ -96,13 +96,14 @@ operation that requires just a couple of CPU instructions. [heaps/minor
 heaps]{.idx}[minor heaps/garbage collection in]{.idx}[copying
 collection]{.idx}[garbage collection/of short-lived values]{.idx}
 
-To garbage-collect the minor heap, OCaml uses *copying collection* to move
-all live blocks in the minor heap to the major heap. This takes work
-proportional to the number of live blocks in the minor heap, which is
-typically small according to the generational hypothesis. The minor
-collection *stops the world* (that it, halts the application) while it runs,
-which is why it's so important that it complete quickly to let the
-application resume running with minimal interruption.
+To garbage-collect the minor heap, OCaml uses *copying collection* to
+move all live blocks in the minor heap to the major heap. This takes
+work proportional to the number of live blocks in the minor heap,
+which is typically small according to the generational hypothesis. In
+general, the garbage collector *stops the world* (that it, halts the
+application) while it runs, which is why it's so important that it
+complete quickly to let the application resume running with minimal
+interruption.
 
 ### Allocating on the Minor Heap
 
@@ -133,13 +134,13 @@ very fast check (with no branching) on most CPU architectures.
 
 #### Understanding allocation
 
-You may wonder why `limit` is required at all, since it always seems to equal
-`start`. It's because the easiest way for the runtime to schedule a minor
-heap collection is by setting `limit` to equal `end`. The next allocation
-will never have enough space after this is done and will always trigger a
-garbage collection. There are various internal reasons for such early
-collections, such as handling pending UNIX signals, and they don't ordinarily
-matter for application code.
+You may wonder why `limit` is required at all, since it always seems
+to equal `start`. It's because the easiest way for the runtime to
+schedule a minor heap collection is by setting `limit` to equal
+`end`. The next allocation will never have enough space after this is
+done and will always trigger a garbage collection. There are various
+internal reasons for such early collections, such as handling pending
+UNIX signals, but they don't ordinarily matter for application code.
 
 It is possible to write loops or recurse in a way that may take a long time
 to do an allocation - if at all. To ensure that UNIX signals and other
@@ -162,7 +163,6 @@ default settings that improve performance, but at the cost of a bigger memory
 profile). This setting can be overridden via the `s=<words>` argument to
 `OCAMLRUNPARAM`. You can change it after the program has started by calling
 the `Gc.set` function:
-:::
 
 ```ocaml env=tune
 # open Core;;
@@ -182,6 +182,7 @@ collection. Note that Core increases the default minor heap size from the
 standard OCaml installation quite significantly, and you'll want to reduce
 this if running in very memory-constrained environments.
 
+:::
 
 ## The Long-Lived Major Heap
 
