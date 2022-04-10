@@ -269,6 +269,7 @@ exception Ordinary_exn of string list;;
 exception Exn_with_sexp of string list [@@deriving sexp];;
 ```
 
+\noindent
 And here's the difference in what you see when you throw these
 exceptions.
 
@@ -807,6 +808,7 @@ type compatible_versions =
   | All [@@deriving sexp]
 ```
 
+\noindent
 And here's the resulting concrete syntax.
 
 ```ocalm env=main
@@ -829,6 +831,7 @@ type t =
   } [@@deriving sexp]
 ```
 
+\noindent
 And here's what the concrete syntax looks like on some simple
 examples.
 
@@ -849,6 +852,7 @@ type t =
   } [@@deriving sexp]
 ```
 
+\noindent
 And here is the new syntax.
 
 ```ocaml env=main
