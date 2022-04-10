@@ -821,7 +821,8 @@ And here's the resulting concrete syntax.
 
 By default, optional values are represented either as `()` for `None`,
 or as `(x)` for `Some x`, and a record field containing an option
-would be rendered accordingly. For example:
+would be rendered accordingly. For example, here's a record type containing
+an option:
 [ppx_sexp_conv/sexp.option]{.idx}
 
 ```ocaml env=main
@@ -864,11 +865,10 @@ And here is the new syntax.
 
 ### Specifying Defaults
 
-You can think of `[@sexp.option]` as a way of specifying a default
-behavior for dealing with an unspecified field.  In particular, where
-absent fields are filled in with `None`.  But you might want to allow
-other ways of filling in default values. [s-expressions/specifying
-defaults in]{.idx}
+`[@sexp.option]` provides one way of providing a default behavior when
+values are unspecified in the s-expression.  The `[@default]`
+directive provides another. [s-expressions/specifying defaults
+in]{.idx} [ppx_sexp_conv/default]{.idx}
 
 Consider the following type, which represents the configuration of a
 very simple web server:
