@@ -689,8 +689,8 @@ structure.
 # let gettimeofday' () =
     let tv = make timeval in
     ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
-    let secs = Signed.Long.(to_int (getf tv tv_sec)) in
-    let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+    let secs = Signed.Long.to_int (getf tv tv_sec) in
+    let usecs = Signed.Long.to_int (getf tv tv_usec) in
     Float.of_int secs +. Float.of_int usecs /. 1_000_000.0;;
 val gettimeofday' : unit -> float = <fun>
 ```
