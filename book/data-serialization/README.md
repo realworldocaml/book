@@ -406,8 +406,8 @@ and transformed, interfaces let you enforce various rules, including
 ensuring that your data is well-formed.  [s-expressions/preserving
 invariants in]{.idx}
 
-When you add s-expression converters (or really any serializer) to an
-API, you're adding an alternate path for creating values, and if
+When you add s-expression converters (or really any deserializer) to
+an API, you're adding an alternate path for creating values, and if
 you're not careful, that alternate path can violate the carefully
 maintained invariants of your code.
 
@@ -555,7 +555,7 @@ detected as non-empty, but doesn't appear to contain anything.  The
 problem traces back to the fact that `t_of_sexp` doesn't check the
 same invariant that `create` does.  We can fix this, by overriding the
 auto-generated s-expression converter with one that checks the
-invariant, in this case, by calling `create` itself.
+invariant, in this case, by calling `create`.
 
 ```ocaml file=examples/correct/test_interval_override_of_sexp/int_interval.ml,part=override
 let t_of_sexp sexp =
@@ -725,8 +725,8 @@ see the contents of field `a` marked as opaque:
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
 
-Note that the `t_of_sexp` function for an opaque type is generated, but will
-fail at runtime if it is used:
+Note that `t_of_sexp` is still generated, but will fail at runtime
+when called.
 
 ```ocaml env=main
 # t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
@@ -737,8 +737,8 @@ Exception:
 
 It might seem perverse to create a parser for a type containing a
 `[@sexp.opaque]` value, but it's not as useless as it seems.  In
-particular, such a converter won't necessarily fail on all
-inputs. Consider a record containing a `no_converter list`:
+particular, such a converter won't necessarily fail on all inputs.
+Consider a record containing a list of opaque values:
 
 ```ocaml env=main
 type t =
@@ -748,22 +748,23 @@ type t =
 ```
 
 \noindent
-The `t_of_sexp` function can still succeed, as long as the list it
-contains is empty.
+The `t_of_sexp` function can still succeed, as long as the list is
+empty.
 
 ```ocaml env=main
 # t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
 - : t = {a = []; b = "foo"}
 ```
 
-Sometimes, though, you really do want to generate only one direction
-of converter. You can do that by using `[@@deriving sexp_of]` or
-`[@@deriving of_sexp]` instead of `[@@deriving sexp]`.
+Sometimes, though, one or other of the converters is useless, and you
+want to explicitly choose what to generate. You can do that by using
+`[@@deriving sexp_of]` or `[@@deriving of_sexp]` instead of
+`[@@deriving sexp]`.
 
 ### `@sexp.list` {#sexp_list}
 
 Sometimes, sexp converters have more parentheses than one would
-ideally like.  Consider, for example, the following variant type.
+ideally like.  Consider the following variant type.
 [ppx_sexp_conv/sexp.list]{.idx}
 
 ```ocaml env=main
@@ -773,7 +774,7 @@ type compatible_versions =
 [@@deriving sexp];;
 ```
 
-Let's look at the concrete syntax for a specific example.
+Here's what the concrete syntax looks like.
 
 ```ocaml env=main
 # sexp_of_compatible_versions
@@ -781,9 +782,8 @@ Let's look at the concrete syntax for a specific example.
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 ```
 
-If you prefer a less parenthesis-heavy syntax that drops the
-parentheses around the list, you can request that by adding the
-`[@sexp.list]` directive.
+The set of parens around the list of versions is arguably excessive.
+We can drop those parens using the `[@sexp.list]` directive.
 
 ```ocaml env=main
 type compatible_versions =
@@ -792,7 +792,7 @@ type compatible_versions =
 ```
 
 \noindent
-And here's the resulting concrete syntax.
+And here's the resulting lighter syntax.
 
 ```ocalm env=main
 # sexp_of_compatible_versions
@@ -802,10 +802,8 @@ And here's the resulting concrete syntax.
 
 ### `@sexp.option` {#sexp_option}
 
-By default, optional values are represented either as `()` for `None`,
-or as `(x)` for `Some x`, and a record field containing an option
-would be rendered accordingly. For example, here's a record type containing
-an option:
+By default, optional values are represented either as `()` for
+`None`. Here's an example of a record type containing an option:
 [ppx_sexp_conv/sexp.option]{.idx}
 
 ```ocaml env=main
@@ -826,8 +824,9 @@ examples.
 - : Sexp.t = ((a (3)) (b hello))
 ```
 
-Another way you might want to represent optional values is by omitting
-them entirely. The `[@sexp.option]` directive gives you that behavior.
+This all works as you might expect, but in the context of a record,
+you might want a different behavior, which is to make the field itself
+optional. The `[@sexp.option]` directive gives you just that.
 
 ```ocaml env=main
 type t =
@@ -837,7 +836,9 @@ type t =
 ```
 
 \noindent
-And here is the new syntax.
+And here is the new syntax.  Note that when the value of `a` is
+`Some`, it shows up in the s-expression unadorned, and when it's
+`None`, the entire record field is omitted.
 
 ```ocaml env=main
 # sexp_of_t { a = Some 3; b = "hello" };;
@@ -848,10 +849,10 @@ And here is the new syntax.
 
 ### Specifying Defaults
 
-`[@sexp.option]` provides one way of providing a default behavior when
-values are unspecified in the s-expression.  The `[@default]`
-directive provides another. [s-expressions/specifying defaults
-in]{.idx} [ppx_sexp_conv/default]{.idx}
+`[@sexp.option]` gives you a way of interpreting the s-expression for
+a record where some of the fields are left unspecified.  The
+`[@default]` directive provides another. [s-expressions/specifying
+defaults in]{.idx} [ppx_sexp_conv/default]{.idx}
 
 Consider the following type, which represents the configuration of a
 very simple web server:
@@ -926,7 +927,7 @@ val cfg : http_server_config =
 
 As you can see, the fields that are at their default values are
 omitted from the generated s-expression. On the other hand, if we
-start with config with non-default values, they will show up in the
+convert a config with non-default values, they will show up in the
 generated s-expression.
 
 ```ocaml env=main
