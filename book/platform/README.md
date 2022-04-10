@@ -416,9 +416,9 @@ come to shortly in this chapter).
 
 Now that we've seen the basic structure of the OCaml project, it's
 time to setup an integrated development environment. An IDE is
-particularly useful for use with OCaml due to the extra information
-you gain from the static type information present in the codebase. A
-good IDE will provide you with the facilities to browse interface
+particularly useful for OCaml because it lets you leverage the
+information that's extracted by OCaml's rich type-system. A good IDE
+will provide you with the facilities to browse interface
 documentation, see inferred types for code, and to jump to the
 definitions of external modules.
 
@@ -483,15 +483,14 @@ as follows:
 
 <!-- $MDX file=examples/correct/hello/lib/msg.mli -->
 ```
-(** This is a docstring, as it starts with "(**", as opposed to normal comments
-    that start with a single star.
+(** This is a docstring, as it starts with "**", as opposed to normal
+    comments that start with a single star.
 
-    The top-most docstring of the module should contain a description of the
-    module, what it does, how to use it, etc.
+    The top-most docstring of the module should contain a description
+    of the module, what it does, how to use it, etc.
 
-    The function-specific documentation located below the function signatures. *)
-
-val greeting : string
+    The function-specific documentation located below the function
+    signatures. *)
 
 (** This is the docstring for the [greeting] function.
 
@@ -502,6 +501,7 @@ val greeting : string
     {4 Examples}
 
     {[ print_endline greeting ]} *)
+val greeting : string
 ```
 
 Documentation strings are parsed by the
