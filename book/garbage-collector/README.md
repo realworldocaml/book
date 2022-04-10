@@ -541,13 +541,6 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-```scheme file=examples/barrier_bench/dune
-(executable
-  (name      barrier_bench)
-  (modules   barrier_bench)
-  (libraries core core_bench))
-```
-
 ```sh dir=examples/barrier_bench,non-deterministic=command
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
