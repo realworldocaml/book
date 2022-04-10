@@ -32,9 +32,9 @@ let time' () = time (from_voidp time_t null)
 let gettimeofday' () =
   let tv = make timeval in
   ignore (gettimeofday (addr tv) (from_voidp timezone null));
-  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
-  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Stdlib.(float secs +. (float usecs /. 1_000_000.))
+  let secs = Signed.Long.to_int (getf tv tv_sec) in
+  let usecs = Signed.Long.to_int (getf tv tv_usec) in
+  Float.of_int secs +. (Float.of_int usecs /. 1_000_000.)
 
 let float_time () = printf "%f%!\n" (gettimeofday' ())
 
@@ -43,10 +43,10 @@ let ascii_time () =
   printf "%s%!" (ctime t_ptr)
 
 let () =
-  let open Command in
-  basic_spec
+  Command.basic
     ~summary:"Display the current time in various formats"
-    Spec.(
-      empty +> flag "-a" no_arg ~doc:" Human-readable output format")
-    (fun human -> if human then ascii_time else float_time)
+    (let%map_open.Command human =
+       flag "-a" no_arg ~doc:" Human-readable output format"
+     in
+     fun () -> if human then ascii_time else float_time)
   |> Command.run
