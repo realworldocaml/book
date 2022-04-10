@@ -299,12 +299,13 @@ signals to the collector that the floating-point value is not to be scanned:
 - : int = 253
 ```
 
-Since each floating-point value is boxed in a separate memory block, it can
-be inefficient to handle large arrays of floats in comparison to unboxed
-integers. OCaml therefore special-cases records or arrays that contain
-*only*`float` types. These are stored in a block that contains the floats
-packed directly in the data section, with `Double_array_tag` set to signal to
-the collector that the contents are not OCaml values.
+Since each floating-point value is boxed in a separate memory block,
+it can be inefficient to handle large arrays of floats in comparison
+to unboxed integers. OCaml therefore special-cases records or arrays
+that contain *only* `float` types. These are stored in a block that
+contains the floats packed directly in the data section, with
+`Double_array_tag` set to signal to the collector that the contents
+are not OCaml values.
 
 
 \
