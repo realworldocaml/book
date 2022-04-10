@@ -696,14 +696,9 @@ sure to do the same when you write custom converters.
 default behavior of the auto-generated sexp converters. These
 directives allow you to customize the way in which types are
 represented as s-expressions without having to write a custom
-converter. [s-expressions/modifying default behavior of]{.idx}
-
-Note that the extra directives aren't part of the standard OCaml
-syntax, but are added by `ppx_sexp_conv`.  You can simply activate the
-preprocessor in your own `dune` files by adding `(preprocess (pps
-ppx_sexp_conv))` to your build descriptions.  We've shown you some
-examples of complete `dune` files with this added previously in the
-chapter.
+converter. Note that the extra directives aren't part of the standard
+OCaml syntax, but are part of `ppx_sexp_conv`.
+[ppx_sexp_conv/directives]{.idx}
 
 ### `@sexp.opaque` {#sexp_opaque}
 
@@ -712,11 +707,12 @@ to mark a given component of a type as being unconvertible. Anything
 marked with the `[@sexp.opaque]` attribute will be presented as the
 atom `<opaque>` by the to-sexp converter, and will trigger an
 exception from the from-sexp converter.
-[ppx_sexp_conv/@sexp.opaque]{.idx}
+[ppx_sexp_conv/sexp.opaque]{.idx}
 
-Note that the type of a component marked as opaque doesn't need to have a
-sexp converter defined. Here, if we define a type without a sexp converter
-and then try to use another type with a sexp converter, we'll error out:
+Note that the type of a component marked as opaque doesn't need to
+have a sexp converter defined.  By default, if we define a type
+without a sexp converter and then try to use it as part of another
+type with a sexp converter, we'll error out:
 
 ```ocaml env=main
 # type no_converter = int * int;;
@@ -726,18 +722,17 @@ Line 1, characters 15-27:
 Error: Unbound value no_converter_of_sexp
 ```
 
-But with `[@sexp.opaque]`, we can embed our opaque `no_converter` type within
-the other data structure without an error.
+\noindent
+But with `[@sexp.opaque]`, we can embed our opaque `no_converter` type
+within the other data structure without an error.
 
 ```ocaml env=main
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
-type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
 ```
 
-And if we now convert a value of this type to an s-expression, we'll see the
-contents of field `a` marked as opaque:
+\noindent
+And if we now convert a value of this type to an s-expression, we'll
+see the contents of field `a` marked as opaque:
 
 ```ocaml env=main
 # sexp_of_t { a = (3,4); b = "foo" };;
@@ -769,81 +764,85 @@ val sexp_of_t : t -> Sexp.t = <fun>
 - : t = {a = []; b = "foo"}
 ```
 
-If you really only want to generate one direction of converter, one can do
-this by annotating the type with `[@@deriving sexp_of]` or
+If you really only want to generate one direction of converter, one
+can do this by annotating the type with `[@@deriving sexp_of]` or
 `[@@deriving of_sexp]` instead of `[@@deriving sexp]`:
-
-```ocaml env=main
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp_of];;
-type t = { a : no_converter; b : string; }
-val sexp_of_t : t -> Sexp.t = <fun>
-# type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving of_sexp];;
-type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-```
 
 ### `@sexp.list` {#sexp_list}
 
 Sometimes, sexp converters have more parentheses than one would
-ideally like.  Consider, for example, the following variant type:
-[ppx_sexp_conv/@sexp.list]{.idx}
+ideally like.  Consider, for example, the following variant type.
+[ppx_sexp_conv/sexp.list]{.idx}
 
 ```ocaml env=main
-# type compatible_versions =
-    | Specific of string list
-  | All [@@deriving sexp];;
-type compatible_versions = Specific of string list | All
-val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
-val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
+type compatible_versions =
+  | Specific of string list
+  | All
+[@@deriving sexp];;
+```
+Let's look at the concrete syntax for a specific example.
+
+```ocaml env=main
 # sexp_of_compatible_versions
-  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
+    (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 ```
 
-You might prefer to make the syntax a bit less parenthesis-laden by dropping
-the parentheses around the list. We can replace the `string list` in the type
-declaration with `string list [@sexp.list]` to give us this alternate syntax:
+If you prefer a less parenthesis-heavy syntax that drops the
+parentheses around the list, you can request that by adding the
+`[@sexp.list]` directive.
 
 ```ocaml env=main
-# type compatible_versions =
-    | Specific of string list [@sexp.list]
-  | All [@@deriving sexp];;
-type compatible_versions = Specific of string list | All
-val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
-val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
+type compatible_versions =
+  | Specific of string list [@sexp.list]
+  | All [@@deriving sexp]
+```
+
+And here's the resulting concrete syntax.
+
+```ocalm env=main
 # sexp_of_compatible_versions
-  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
+    (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
 - : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
 ```
 
 ### `@sexp.option` {#sexp_option}
 
-Another common directive is `[@sexp.option]`, which is used to make a
-record field optional in the s-expression. Normally, optional values
-are represented either as `()` for `None`, or as `(x)` for `Some x`,
-and a record field containing an option would be rendered
-accordingly. For example: [ppx_sexp_conv/@sexp.option]{.idx}
+By default, optional values are represented either as `()` for `None`,
+or as `(x)` for `Some x`, and a record field containing an option
+would be rendered accordingly. For example:
+[ppx_sexp_conv/sexp.option]{.idx}
 
 ```ocaml env=main
-# type t = { a: int option; b: string } [@@deriving sexp];;
-type t = { a : int option; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+type t =
+  { a: int option;
+    b: string;
+  } [@@deriving sexp]
+```
+
+And here's what the concrete syntax looks like on some simple
+examples.
+
+```ocaml env=main
 # sexp_of_t { a = None; b = "hello" };;
 - : Sexp.t = ((a ()) (b hello))
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a (3)) (b hello))
 ```
 
-But what if we want a field to be optional, i.e., we want to allow it to be
-omitted from the record entirely? In that case, we can mark it with
-`[@sexp.option]`:
+Another way you might want to represent optional values is by omitting
+them entirely. The `[@sexp.option]` directive gives you that behavior.
 
 ```ocaml env=main
-# type t = { a: int option [@sexp.option]; b: string } [@@deriving sexp];;
-type t = { a : int option; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+type t =
+  { a: int option [@sexp.option];
+    b: string;
+  } [@@deriving sexp]
+```
+
+And here is the new syntax.
+
+```ocaml env=main
 # sexp_of_t { a = Some 3; b = "hello" };;
 - : Sexp.t = ((a 3) (b hello))
 # sexp_of_t { a = None; b = "hello" };;
@@ -852,62 +851,59 @@ val sexp_of_t : t -> Sexp.t = <fun>
 
 ### Specifying Defaults
 
-The `sexp_option` declaration is really just an example of specifying a
-default behavior for dealing with an unspecified field. In particular,
-`sexp_option` fills in absent fields with `None`. But you might want to allow
-other ways of filling in default values. [s-expressions/specifying defaults
-in]{.idx}
+You can think of `[@sexp.option]` as a way of specifying a default
+behavior for dealing with an unspecified field.  In particular, where
+absent fields are filled in with `None`.  But you might want to allow
+other ways of filling in default values. [s-expressions/specifying
+defaults in]{.idx}
 
-Consider the following type, which represents the configuration of a very
-simple web server:
+Consider the following type, which represents the configuration of a
+very simple web server:
 
 ```ocaml env=main
-# type http_server_config = {
-    web_root: string;
-    port: int;
-    addr: string;
-  } [@@deriving sexp];;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
+type http_server_config = {
+  web_root: string;
+  port: int;
+  addr: string;
+} [@@deriving sexp];;
 ```
 
-One could imagine making some of these parameters optional; in particular, by
-default, we might want the web server to bind to port 80, and to listen as
-localhost. We can do this as follows:
+One could imagine making some of these parameters optional; in
+particular, by default, we might want the web server to bind to port
+80, and to listen as localhost. We can do this as follows:
 
 ```ocaml env=main
-# type http_server_config = {
-    web_root: string;
-    port: int [@default 80];
-    addr: string [@default "localhost"];
-  } [@@deriving sexp];;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
+type http_server_config = {
+  web_root: string;
+  port: int [@default 80];
+  addr: string [@default "localhost"];
+} [@@deriving sexp];;
 ```
 
-Now, if we try to convert an s-expression that specifies only the `web_root`,
-we'll see that the other values are filled in with the desired defaults:
+Now, if we try to convert an s-expression that specifies only the
+`web_root`, we'll see that the other values are filled in with the
+desired defaults:
 
 ```ocaml env=main
-# let cfg = http_server_config_of_sexp
-  (Sexp.of_string "((web_root /var/www/html))");;
+# let cfg =
+    "((web_root /var/www/html))"
+    |> Sexp.of_string
+    |> http_server_config_of_sexp;;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 ```
 
-If we convert the configuration back out to an s-expression, you'll notice
-that all of the fields are present, even though they're not strictly
-necessary:
+If we convert the configuration back out to an s-expression, you'll
+notice that all of the fields are present, even though they're not
+strictly necessary:
 
 ```ocaml env=main
 # sexp_of_http_server_config cfg;;
 - : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
 ```
 
-We could make the generated s-expression also drop exported values, by using
-the `sexp_drop_default` directive:
+We could make the generated s-expression also drop default values, by
+using the `[@sexp_drop_default]` directive:
 
 ```ocaml env=main
 # type http_server_config = {
@@ -918,17 +914,25 @@ the `sexp_drop_default` directive:
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
-# let cfg = http_server_config_of_sexp
-  (Sexp.of_string "((web_root /var/www/html))");;
+```
+
+
+
+```ocaml env=main
+# let cfg =
+    "((web_root /var/www/html))"
+    |> Sexp.of_string
+    |> http_server_config_of_sexp;;
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 # sexp_of_http_server_config cfg;;
 - : Sexp.t = ((web_root /var/www/html))
 ```
 
-As you can see, the fields that are at their default values are simply
-omitted from the s-expression. On the other hand, if we convert a config with
-other values, then those values will be included in the s-expression:
+As you can see, the fields that are at their default values are
+omitted from the generated s-expression. On the other hand, if we
+start with config with non-default values, they will show up in the
+generated s-expression.
 
 ```ocaml env=main
 # sexp_of_http_server_config { cfg with port = 8080 };;
@@ -939,19 +943,22 @@ other values, then those values will be included in the s-expression:
 ```
 
 This can be very useful in designing config file formats that are both
-reasonably terse and easy to generate and maintain. It can also be useful for
-backwards compatibility: if you add a new field to your config record, but
-you make that field optional, then you should still be able to parse older
-version of your config.
-[files/config files]{.idx}[config file formats]{.idx}
+reasonably terse and easy to generate and maintain. It can also be
+useful for backwards compatibility: if you add a new field to your
+config record but make that field optional, then you should still be
+able to parse older version of your config.  [files/config
+files]{.idx}[config file formats]{.idx}
 
 The exact attribute you use depends on the comparison functions available
 over the type that you wish to drop:
 
 - `[@sexp_drop_default.compare]` if the type supports `[%compare]`
 - `[@sexp_drop_default.equal]` if the type supports `[%equal]`
-- `[@sexp_drop_default.sexp]` if you want to compare the sexp representations
-- `[@sexp_drop_default f]` and give an explicit equality function ([f = Poly.(=)] corresponds to the old behavior)
+- `[@sexp_drop_default.sexp]` if you want to compare the sexp
+  representations
+- `[@sexp_drop_default f]` and give an explicit equality function ([f
+  = Poly.(=)] corresponds to the old behavior)
 
-Most of the type definitions supplied with Base and Core provide the comparison
-and equality operations, so those are reasonable default attributes to use.
+Most of the type definitions supplied with Base and Core provide the
+comparison and equality operations, so those are reasonable default
+attributes to use.
