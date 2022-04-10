@@ -109,6 +109,7 @@ state pointer:
 open Ctypes
 
 type window = unit ptr
+
 let window : window typ = ptr void
 ```
 
@@ -121,8 +122,7 @@ function definitions:
 ```ocaml file=examples/correct/ffi_ncurses/ncurses.ml,part=1
 open Foreign
 
-let initscr =
-  foreign "initscr" (void @-> returning window)
+let initscr = foreign "initscr" (void @-> returning window)
 ```
 
 That's all we need to invoke our first function call to `initscr` to
@@ -139,34 +139,25 @@ The remainder of the Ncurses binding simply expands on these definitions:
 
 ```ocaml file=examples/correct/ffi_ncurses/ncurses.ml,part=2
 let newwin =
-  foreign "newwin"
-    (int @-> int @-> int @-> int @-> returning window)
+  foreign "newwin" (int @-> int @-> int @-> int @-> returning window)
 
-let endwin =
-  foreign "endwin" (void @-> returning void)
-
-let refresh =
-  foreign "refresh" (void @-> returning void)
-
-let wrefresh =
-  foreign "wrefresh" (window @-> returning void)
-
-let addstr =
-  foreign "addstr" (string @-> returning void)
+let endwin = foreign "endwin" (void @-> returning void)
+let refresh = foreign "refresh" (void @-> returning void)
+let wrefresh = foreign "wrefresh" (window @-> returning void)
+let addstr = foreign "addstr" (string @-> returning void)
 
 let mvwaddch =
-  foreign "mvwaddch"
+  foreign
+    "mvwaddch"
     (window @-> int @-> int @-> char @-> returning void)
 
 let mvwaddstr =
-  foreign "mvwaddstr"
+  foreign
+    "mvwaddstr"
     (window @-> int @-> int @-> string @-> returning void)
 
-let box =
-  foreign "box" (window @-> char @-> char @-> returning void)
-
-let cbreak =
-  foreign "cbreak" (void @-> returning int)
+let box = foreign "box" (window @-> char @-> char @-> returning void)
+let cbreak = foreign "cbreak" (void @-> returning int)
 ```
 
 These definitions are all straightforward mappings from the C declarations in
@@ -238,7 +229,7 @@ open Ncurses
 
 let () =
   let main_window = initscr () in
-  ignore(cbreak ());
+  ignore (cbreak ());
   let small_window = newwin 10 10 5 5 in
   mvwaddstr main_window 1 2 "Hello";
   mvwaddstr small_window 2 2 "World";
@@ -974,9 +965,14 @@ open Foreign
 
 let compare_t = ptr void @-> ptr void @-> returning int
 
-let qsort = foreign "qsort"
-    (ptr void @-> size_t @-> size_t @-> funptr compare_t @->
-       returning void)
+let qsort =
+  foreign
+    "qsort"
+    (ptr void
+    @-> size_t
+    @-> size_t
+    @-> funptr compare_t
+    @-> returning void)
 
 let qsort' cmp arr =
   let open Unsigned.Size_t in
@@ -984,7 +980,7 @@ let qsort' cmp arr =
   let len = of_int (CArray.length arr) in
   let elsize = of_int (sizeof ty) in
   let start = to_voidp (CArray.start arr) in
-  let compare l r = cmp (!@ (from_voidp ty l)) (!@ (from_voidp ty r)) in
+  let compare l r = cmp !@(from_voidp ty l) !@(from_voidp ty r) in
   qsort start len elsize compare;
   arr
 
@@ -997,8 +993,10 @@ let sort_stdin () =
   |> List.iter ~f:(fun a -> printf "%d\n" a)
 
 let () =
-  Command.basic_spec ~summary:"Sort integers on standard input"
-    Command.Spec.empty sort_stdin
+  Command.basic_spec
+    ~summary:"Sort integers on standard input"
+    Command.Spec.empty
+    sort_stdin
   |> Command.run
 ```
 
@@ -1042,15 +1040,22 @@ The inferred interface shows us the types of the raw `qsort` binding and also
 the `qsort'` wrapper function:
 
 ```ocaml file=examples/correct/ffi_qsort/qsort.mli
-val compare_t :
-  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes_static.fn
-val qsort :
-  unit Ctypes_static.ptr ->
-  PosixTypes.size_t ->
-  PosixTypes.size_t ->
-  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit
-val qsort' :
-  ('a -> 'a -> int) -> 'a Ctypes_static.carray -> 'a Ctypes_static.carray
+val compare_t
+  : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int)
+    Ctypes_static.fn
+
+val qsort
+  :  unit Ctypes_static.ptr
+  -> PosixTypes.size_t
+  -> PosixTypes.size_t
+  -> (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int)
+  -> unit
+
+val qsort'
+  :  ('a -> 'a -> int)
+  -> 'a Ctypes_static.carray
+  -> 'a Ctypes_static.carray
+
 val sort_stdin : unit -> unit
 ```
 
