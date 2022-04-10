@@ -727,7 +727,10 @@ But with `[@sexp.opaque]`, we can embed our opaque `no_converter` type
 within the other data structure without an error.
 
 ```ocaml env=main
-type t = { a: (no_converter [@sexp.opaque]); b: string } [@@deriving sexp];;
+type t =
+  { a: (no_converter [@sexp.opaque]);
+    b: string
+  } [@@deriving sexp];;
 ```
 
 \noindent
@@ -749,22 +752,28 @@ Exception:
   (invalid_sexp whatever))
 ```
 
-This is there to allow for s-expression converters to be created for types
-containing `sexp_opaque` values. This is useful because the resulting
-converters won't necessarily fail on all inputs. For example, if you have a
-record containing a `no_converter list`, the `t_of_sexp` function would still
-succeed when the list is empty:
+This is there to allow for s-expression converters to be created for
+types containing `[@sexp.opaque]` values. This is useful because the
+resulting converters won't necessarily fail on all inputs. For
+example, consider a record containing a `no_converter list`:
 
 ```ocaml env=main
-# type t = { a: (no_converter [@sexp.opaque]) list; b: string } [@@deriving sexp];;
-type t = { a : no_converter list; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+type t =
+  { a: (no_converter [@sexp.opaque]) list;
+    b: string
+  } [@@deriving sexp];;
+```
+
+\noindent
+The `t_of_sexp` function is still useful, since it can succeed when
+the list is empty.
+
+```ocaml env=main
 # t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
 - : t = {a = []; b = "foo"}
 ```
 
-If you really only want to generate one direction of converter, one
+If you do really only want to generate one direction of converter, one
 can do this by annotating the type with `[@@deriving sexp_of]` or
 `[@@deriving of_sexp]` instead of `[@@deriving sexp]`:
 
