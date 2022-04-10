@@ -397,15 +397,14 @@ The first step is to open some of the Ctypes modules:
 : The `Foreign` module exposes the `foreign` function that makes it possible
   to invoke C functions.
 
-We can now create a binding to `time` directly from the toplevel.
+
+With these opens in place, we can now create a binding to `time`
+directly from the toplevel.
 
 ```ocaml env=posix
 # #require "ctypes-foreign.threaded";;
 # #require "ctypes.top";;
-# open Core;;
-# open Ctypes;;
-# open PosixTypes;;
-# open Foreign;;
+# open Core open Ctypes open PosixTypes open Foreign;;
 # let time = foreign "time" (ptr time_t @-> returning time_t);;
 val time : time_t Ctypes_static.ptr -> time_t = <fun>
 ```
@@ -421,7 +420,7 @@ into becoming a null pointer to `time_t`:
 
 ```ocaml env=posix
 # let cur_time = time (from_voidp time_t null);;
-...
+val cur_time : time_t = <abstr>
 ```
 
 Since we're going to call `time` a few times, let's create a wrapper function
@@ -432,21 +431,26 @@ that passes the null pointer through:
 val time' : unit -> time_t = <fun>
 ```
 
-Since `time_t` is an abstract type, we can't actually do anything useful with
-it directly. We need to bind a second function to do anything useful with the
-return values from `time`. We'll move on to `difftime`; the second C function
-in our prototype list:
+Since `time_t` is an abstract type, we can't actually do anything
+useful with it directly. We need to bind a second function to do
+anything useful with the return values from `time`. We'll move on to
+`difftime`; the second C function in our prototype list:
+
+```ocaml env=posix
+# let difftime = foreign "difftime" (time_t @-> time_t @-> returning double);;
+val difftime : time_t -> time_t -> float = <fun>
+```
+
+\noindent
+Here's the resulting `difftime` in action.
 
 ```ocaml env=posix,non-deterministic
-# let difftime =
-  foreign "difftime" (time_t @-> time_t @-> returning double);;
-val difftime : time_t -> time_t -> float = <fun>
-# let t1 =
-    time' () in
-  Unix.sleep 2;
-  let t2 = time' () in
-  difftime t2 t1;;
-- : float = 2.
+# let delta =
+    let t1 = time' () in
+    Unix.sleep 2;
+    let t2 = time' () in
+    difftime t2 t1;;
+val delta : float = 2.
 ```
 
 The binding to `difftime` above is sufficient to compare two `time_t` values.
@@ -695,7 +699,7 @@ And we can now call that function to get the current time.
 
 ```ocaml env=posix,non-deterministic
 # gettimeofday' ();;
-- : float = 1633964254.067426
+- : float = 1649611279.0577121
 ```
 
 #### Recap: A time-printing command
