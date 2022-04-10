@@ -917,19 +917,18 @@ strictly necessary:
 
 We could make the generated s-expression also drop default values, by
 using the `[@sexp_drop_default]` directive:
+[ppx_sexp_conv/sexp_drop_default]{.idx}
 
 ```ocaml env=main
-# type http_server_config = {
-    web_root: string;
-    port: int [@default 80] [@sexp_drop_default.equal];
-    addr: string [@default "localhost"] [@sexp_drop_default.equal];
-  } [@@deriving sexp];;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
+type http_server_config = {
+  web_root: string;
+  port: int [@default 80] [@sexp_drop_default.equal];
+  addr: string [@default "localhost"] [@sexp_drop_default.equal];
+} [@@deriving sexp];;
 ```
 
-
+\noindent
+And here's an example of it in action:
 
 ```ocaml env=main
 # let cfg =
