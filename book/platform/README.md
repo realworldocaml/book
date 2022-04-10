@@ -174,8 +174,9 @@ For example, to build a compiler with `flambda`, you would:
 $ opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
 ```
 
-You can specify multiple `ocaml-option` packages to cover all the customisation
-your project needs. See the full set of option packages by using:
+You can specify multiple `ocaml-option` packages to cover all the
+customization your project needs. See the full set of option packages
+by using:
 
 ```sh skip
 $ opam search ocaml-option
@@ -578,12 +579,10 @@ been using throughout this book.
 ##### How do we name OCaml modules, libraries and packages?
 
 Much of the time, the module, library, and package names are all the
-same.  The same name can often be used for the library and the package.
-But there are reasons for these names to be distinct as well:
+same.  But there are reasons for these names to be distinct as well:
 
 - Some libraries are exposed as multiple top-level modules, which
-  means you need to pick a different name for referring to that
-  collection of modules.
+  means you need a different name for that collection of modules.
 - Even when the library has a single top-level module, you might want
   the library name to be different from the module name to avoid name
   clashes at the library level.
@@ -695,11 +694,11 @@ to find the best solution for your own needs.
 When you create a GitHub repository and push your code to it, you can
 also add an OCaml GitHub Action that will install the OCaml Platform
 tools and run your code across various architectures and operating
-systems.  You can find the full documentation online at the [GitHub
-Setup OCaml](https://github.com/marketplace/actions/set-up-ocaml)
-marketplace.  Configuring an action is as simple as adding a
-`.github/workflows/test.yml` file to your project that looks something
-like this:
+systems.  You can find the full documentation online at the [Set up
+OCaml](https://github.com/marketplace/actions/set-up-ocaml) page on
+the GitHub marketplace.  Configuring an action is as simple as adding
+a `.github/workflows/test.yml` file to your project that looks
+something like this:
 
 ```yaml
 name: Hello world workflow
@@ -733,7 +732,7 @@ This workflow file will run your project on OCaml installations on
 Windows, macOS and Linux, using the latest patch release of OCaml
 4.13.  Notice that it also runs the test cases you have defined
 earlier on all those different operating systems as well.  You can do
-an awful lot of customisation of these continuous integration
+an awful lot of customization of these continuous integration
 workflows, so refer to the online documentation for more options.
 
 ### Other conventions
@@ -858,11 +857,12 @@ project to the Internet.
 
 ## Learning more from real projects
 
-There's a lot more customisation that happens in any real project, and we can't
-cover every aspect in this book. The best way by far to learn more is to dive
-in and compile an already established project, and perhaps even contribute to
-it. There are thousands of libraries and executable projects released on the
-opam repository which you can find online at <https://ocaml.org>.
+There's a lot more customization that happens in any real project, and
+we can't cover every aspect in this book. The best way by far to learn
+more is to dive in and compile an already established project, and
+perhaps even contribute to it. There are thousands of libraries and
+executable projects released on the opam repository which you can find
+online at <https://ocaml.org>.
 
 A selection of some include:
 
