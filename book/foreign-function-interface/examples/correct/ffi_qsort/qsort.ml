@@ -21,16 +21,20 @@ let qsort' cmp arr =
   let elsize = of_int (sizeof ty) in
   let start = to_voidp (CArray.start arr) in
   let compare l r = cmp !@(from_voidp ty l) !@(from_voidp ty r) in
-  qsort start len elsize compare;
-  arr
+  qsort start len elsize compare
 
 let sort_stdin () =
-  In_channel.input_lines In_channel.stdin
-  |> List.map ~f:int_of_string
-  |> CArray.of_list int
-  |> qsort' Int.compare
-  |> CArray.to_list
-  |> List.iter ~f:(fun a -> printf "%d\n" a)
+  let array =
+    In_channel.input_line_exn In_channel.stdin
+    |> String.split ~on:' '
+    |> List.map ~f:int_of_string
+    |> CArray.of_list int
+  in
+  qsort' Int.compare array;
+  CArray.to_list array
+  |> List.map ~f:Int.to_string
+  |> String.concat ~sep:" "
+  |> print_endline
 
 let () =
   Command.basic_spec

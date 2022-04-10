@@ -742,7 +742,7 @@ let time' () = time (from_voidp time_t null)
 
 let gettimeofday' () =
   let tv = make timeval in
-  ignore (gettimeofday (addr tv) (from_voidp timezone null));
+  ignore (gettimeofday (addr tv) (from_voidp timezone null) : int);
   let secs = Signed.Long.to_int (getf tv tv_sec) in
   let usecs = Signed.Long.to_int (getf tv tv_usec) in
   Float.of_int secs +. (Float.of_int usecs /. 1_000_000.)
@@ -759,7 +759,7 @@ let () =
     (let%map_open.Command human =
        flag "-a" no_arg ~doc:" Human-readable output format"
      in
-     fun () -> if human then ascii_time else float_time)
+     if human then ascii_time else float_time)
   |> Command.run
 ```
 
@@ -768,6 +768,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme file=examples/correct/ffi_datetime/dune
 (executable
   (name      datetime)
+  (preprocess (pps ppx_jane))
   (libraries core ctypes-foreign.threaded))
 ```
 
@@ -814,12 +815,14 @@ signature of a two-argument function is written as follows:
 val curried : int -> int -> int
 ```
 
+\noindent
 but this really means:
 
 ```ocaml file=examples/correct/return_frag.ml,part=3
 val curried : int -> (int -> int)
 ```
 
+\noindent
 and the arguments can be supplied one at a time to create a closure. In
 contrast, C functions receive their arguments all at once. The equivalent C
 function type is the following:
@@ -828,6 +831,7 @@ function type is the following:
 int uncurried_C(int, int);
 ```
 
+\noindent
 and the arguments must always be supplied together:
 
 ```
@@ -942,18 +946,15 @@ definition. Since type descriptions are regular values, we can just use
 `qsort`:
 
 ```ocaml env=qsort
-# open Ctypes;;
-# open PosixTypes;;
-# open Foreign;;
+# open Core open Ctypes open PosixTypes open Foreign open Ctypes_static;;
 # let compare_t = ptr void @-> ptr void @-> returning int;;
 val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
-  Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
-   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
-    Ctypes_static.Returns
-     (Ctypes_static.Primitive Ctypes_primitive_types.Int)))
-# let qsort = foreign "qsort"
-                (ptr void @-> size_t @-> size_t @->
-  funptr compare_t @-> returning void);;
+  Function (Pointer Void,
+   Function (Pointer Void, Returns (Primitive Ctypes_primitive_types.Int)))
+# let qsort =
+    foreign "qsort"
+      (ptr void @-> size_t @-> size_t @-> funptr compare_t
+       @-> returning void);;
 val qsort :
   unit Ctypes_static.ptr ->
   size_t ->
@@ -964,13 +965,11 @@ val qsort :
 We only use `compare_t` once (in the `qsort` definition), so you can choose
 to inline it in the OCaml code if you prefer. As the type shows, the
 resulting `qsort` value is a higher-order function, since the fourth argument
-is itself a function. As before, let's define a wrapper function to make
-`qsort` easier to use. The second and third arguments to `qsort` specify the
-length (number of elements) of the array and the element size.
+is itself a function.
 
-Arrays created using Ctypes have a richer runtime structure than C arrays, so
-we don't need to pass size information around. Furthermore, we can use OCaml
-polymorphism in place of the unsafe `void ptr` type.
+Arrays created using Ctypes have a richer runtime structure than C
+arrays, so we don't need to pass size information around. Furthermore,
+we can use OCaml polymorphism in place of the unsafe `void ptr` type.
 
 ### Example: A Command-Line Quicksort
 
@@ -1005,12 +1004,15 @@ let qsort' cmp arr =
   arr
 
 let sort_stdin () =
-  In_channel.input_lines In_channel.stdin
+  In_channel.input_line_exn In_channel.stdin
+  |> String.split ~on:' '
   |> List.map ~f:int_of_string
   |> CArray.of_list int
   |> qsort' Int.compare
   |> CArray.to_list
-  |> List.iter ~f:(fun a -> printf "%d\n" a)
+  |> List.map ~f:Int.to_string
+  |> String.concat ~sep:" "
+  |> print_endline
 
 let () =
   Command.basic_spec
@@ -1029,20 +1031,15 @@ and also build the inferred interface so we can examine it more closely:
   (libraries core ctypes-foreign.threaded))
 ```
 
+```sh dir=examples/correct/ffi_qsort
+$ echo 2 4 1 3 | dune exec ./qsort.exe
+1 2 3 4
+```
 
+The inferred mli shows us the types of the raw `qsort` binding and
+also the `qsort'` wrapper function.
 
 ```sh dir=examples/correct/ffi_qsort
-$ dune build qsort.exe
-$ cat input.txt
-2
-4
-1
-3
-$ ./_build/default/qsort.exe < input.txt
-1
-2
-3
-4
 $ ocaml-print-intf qsort.ml
 val compare_t :
   (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes_static.fn
@@ -1056,42 +1053,21 @@ val qsort' :
 val sort_stdin : unit -> unit
 ```
 
-The inferred interface shows us the types of the raw `qsort` binding and also
-the `qsort'` wrapper function:
+The `qsort'` wrapper function has a much more canonical OCaml
+interface than the raw binding. It accepts a comparator function and a
+Ctypes array, and returns the same Ctypes array. It's not strictly
+required that it returns the array, since it modifies it in-place, but
+it makes it easier to chain the function using the `|>` operator (as
+`sort_stdin` does in the example).
 
-```ocaml file=examples/correct/ffi_qsort/qsort.mli
-val compare_t
-  : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int)
-    Ctypes_static.fn
-
-val qsort
-  :  unit Ctypes_static.ptr
-  -> PosixTypes.size_t
-  -> PosixTypes.size_t
-  -> (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int)
-  -> unit
-
-val qsort'
-  :  ('a -> 'a -> int)
-  -> 'a Ctypes_static.carray
-  -> 'a Ctypes_static.carray
-
-val sort_stdin : unit -> unit
-```
-
-The `qsort'` wrapper function has a much more canonical OCaml interface than
-the raw binding. It accepts a comparator function and a Ctypes array, and
-returns the same Ctypes array. It's not strictly required that it returns the
-array, since it modifies it in-place, but it makes it easier to chain the
-function using the `|>` operator (as `sort_stdin` does in the example).
-
-Using `qsort'` to sort arrays is straightforward. Our example code reads the
-standard input as a list, converts it to a C array, passes it through qsort,
-and outputs the result to the standard output. Again, remember to not confuse
-the `Ctypes.Array` module with the `Core.Array` module: the former is in
-scope since we opened `Ctypes` at the start of the file.[memory/and allocated
-Ctypes]{.idx}[Ctypes library/lifetime of allocated Ctypes]{.idx}[garbage
-collection/of allocated Ctypes]{.idx}
+Using `qsort'` to sort arrays is straightforward. Our example code
+reads the standard input as a list, converts it to a C array, passes
+it through qsort, and outputs the result to the standard
+output. Again, remember to not confuse the `Ctypes.Array` module with
+the `Core.Array` module: the former is in scope since we opened
+`Ctypes` at the start of the file.[memory/and allocated
+Ctypes]{.idx}[Ctypes library/lifetime of allocated
+Ctypes]{.idx}[garbage collection/of allocated Ctypes]{.idx}
 
 ::: {data-type=note}
 ##### Lifetime of Allocated Ctypes

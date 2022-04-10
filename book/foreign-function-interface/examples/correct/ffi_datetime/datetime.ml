@@ -31,7 +31,7 @@ let time' () = time (from_voidp time_t null)
 
 let gettimeofday' () =
   let tv = make timeval in
-  ignore (gettimeofday (addr tv) (from_voidp timezone null));
+  ignore (gettimeofday (addr tv) (from_voidp timezone null) : int);
   let secs = Signed.Long.to_int (getf tv tv_sec) in
   let usecs = Signed.Long.to_int (getf tv tv_usec) in
   Float.of_int secs +. (Float.of_int usecs /. 1_000_000.)
@@ -48,5 +48,5 @@ let () =
     (let%map_open.Command human =
        flag "-a" no_arg ~doc:" Human-readable output format"
      in
-     fun () -> if human then ascii_time else float_time)
+     if human then ascii_time else float_time)
   |> Command.run
