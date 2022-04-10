@@ -789,6 +789,7 @@ type compatible_versions =
   | All
 [@@deriving sexp];;
 ```
+
 Let's look at the concrete syntax for a specific example.
 
 ```ocaml env=main
