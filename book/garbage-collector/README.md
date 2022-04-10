@@ -164,10 +164,11 @@ profile). This setting can be overridden via the `s=<words>` argument to
 `OCAMLRUNPARAM`. You can change it after the program has started by calling
 the `Gc.set` function:
 
+
 ```ocaml env=tune
 # open Core;;
 # let c = Gc.get ();;
-val c : Core_kernel.Gc.control =
+val c : Gc.Control.t =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
    space_overhead = 120; verbose = 0; max_overhead = 500;
    stack_limit = 1048576; allocation_policy = 2; window_size = 1;
@@ -181,7 +182,6 @@ Changing the GC size dynamically will trigger an immediate minor heap
 collection. Note that Core increases the default minor heap size from the
 standard OCaml installation quite significantly, and you'll want to reduce
 this if running in very memory-constrained environments.
-
 :::
 
 ## The Long-Lived Major Heap
@@ -246,40 +246,33 @@ that can be as small as one or two 4 KB pages, but are usually allocated in 1
 MB chunks (or 512 KB on 32-bit architectures). [major heaps/controlling
 growth of]{.idx}
 
-::: {data-type=note}
-##### Controlling Major Heap Growth
+#### Controlling the Major Heap Increment
 
-The `Gc` module uses the `major_heap_increment` value to control the major
-heap growth. This defines the number of words to add to the major heap per
-expansion and is the only memory allocation operation that the operating
-system observes from the OCaml runtime after initial startup (since the minor
-is fixed in size).
+The `Gc` module uses the `major_heap_increment` value to control the
+major heap growth. This defines the number of words to add to the
+major heap per expansion and is the only memory allocation operation
+that the operating system observes from the OCaml runtime after
+initial startup (since the minor is fixed in size).
 
-If you anticipate allocating some large OCaml values or many small values in
-one go, then setting the heap increment to a larger value will improve
-performance by reducing the amount of heap resizing required in order to
-satisfy the allocation requests. A small increment may result in lots of
-smaller heap chunks spread across different regions of virtual memory that
-require more housekeeping in the OCaml runtime to keep track of them:
-:::
+Allocating an OCaml value on the major heap first checks the free list
+of blocks for a suitable region to place it. If there isn't enough
+room on the free list, the runtime expands the major heap by
+allocating a fresh heap chunk that will be large enough. That chunk is
+then added to the free list, and the free list is checked again (and
+this time will definitely succeed).
 
-```ocaml env=tune
-# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
-- : unit = ()
-```
+Older versions of OCaml required setting a fixed number of bytes for
+the major heap increment.  That was a value that was tricky to get
+right: too small of a value could lead to lots of smaller heap chunks
+spread across different regions of virtual memory that require more
+housekeeping in the OCaml runtime to keep track of them; too large of
+a value can waste memory for programs with small heaps.
 
-Allocating an OCaml value on the major heap first checks the free list of
-blocks for a suitable region to place it. If there isn't enough room on the
-free list, the runtime expands the major heap by allocating a fresh heap
-chunk that will be large enough. That chunk is then added to the free list,
-and the free list is checked again (and this time will definitely succeed).
-
-Remember that most allocations to the major heap will go via the minor heap
-and only be promoted if they are still used by the program after a minor
-collection. The one exception to this is for values larger than 256 words
-(that is, 2 KB on 64-bit platforms). These will be allocated directly on the
-major heap, since an allocation on the minor heap would likely trigger an
-immediate collection and copy it to the major heap anyway.
+You can use `Gc.tune` to set that value, but the values are a little
+counter-intuitive, for backwards-compatibility reasons.  Values under
+1000 are interepreted as percentages, and the default is 15%.  Values
+1000 and over are treated as a raw number of bytes.  But most of the
+time, you won't to set the value at all.
 
 ### Memory Allocation Strategies
 
@@ -351,18 +344,18 @@ For some workloads that need more real-time behavior under load, the
 reduction in the frequency of heap compaction will outweigh the extra
 allocation cost.
 
-::: {data-type=note}
-##### Controlling the Heap Allocation Policy
+#### Controlling the Heap Allocation Policy
 
-You can set the heap allocation policy via the `Gc.allocation_policy` field.
-A value of `0` sets it to next-fit, `1` to first-fit, and `2` (the default)
-to the best-fit allocator.
+You can set the heap allocation policy by calling `Gc.tune`:
 
-The same behavior can be controlled at runtime by setting `a=0`, `a=1` or
-`a=2` in `OCAMLRUNPARAM`.
-:::
+```ocaml env=main
+# Gc.tune ~allocation_policy:First_fit ();;
+- : unit = ()
+```
 
-
+The same behavior can be controlled via an environment variable by
+setting `OCAMLRUNPARAM` to `a=0` for next-fit, `a=1` for first-fit, or
+`a=2` for best-fit.
 
 ### Marking and Scanning the Heap
 
@@ -409,7 +402,6 @@ has blocks needing redarkening (i.e were removed from the mark stack during
  until it is a quarter full. The emptying and replenishing cycle continues
 until there are no heap chunks with ranges left to redarken.
 
-::: {data-type=note}
 #### Controlling Major Heap Collections
 
 You can trigger a single slice of the major GC via the `major_slice` call.
@@ -417,7 +409,6 @@ This performs a minor collection first, and then a single slice. The size of
 the slice is normally automatically computed by the GC to an appropriate
 value and returns this value so that you can modify it in future calls if
 necessary:
-:::
 
 ```ocaml env=tune
 # Gc.major_slice 0;;
