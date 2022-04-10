@@ -496,33 +496,43 @@ compile this code:
 open Core
 open Core_bench
 
-type t1 = { mutable iters1: int; mutable count1: float }
-type t2 = { iters2: int; count2: float }
+module Mutable = struct
+  type t =
+    { mutable iters : int
+    ; mutable count : float
+    }
 
-let rec test_mutable t1 =
-  match t1.iters1 with
-  |0 -> ()
-  |_ ->
-    t1.iters1 <- t1.iters1 - 1;
-    t1.count1 <- t1.count1 +. 1.0;
-    test_mutable t1
+  let rec test t =
+    if t.iters = 0
+    then ()
+    else (
+      t.iters <- t.iters - 1;
+      t.count <- t.count +. 1.0;
+      test t)
+end
 
-let rec test_immutable t2 =
-  match t2.iters2 with
-  |0 -> ()
-  |n ->
-    let iters2 = n - 1 in
-    let count2 = t2.count2 +. 1.0 in
-    test_immutable { iters2; count2 }
+module Immutable = struct
+  type t =
+    { iters : int
+    ; count : float
+    }
+
+  let rec test t =
+    if t.iters = 0
+    then ()
+    else test { iters = t.iters - 1; count = t.count +. 1.0 }
+end
 
 let () =
   let iters = 1000000 in
-  let tests = [
-    Bench.Test.create ~name:"mutable"
-      (fun () -> test_mutable { iters1=iters; count1=0.0 });
-    Bench.Test.create ~name:"immutable"
-      (fun () -> test_immutable { iters2=iters; count2=0.0 })
-  ] in
+  let count = 0.0 in
+  let tests =
+    [ Bench.Test.create ~name:"mutable" (fun () ->
+          Mutable.test { iters; count })
+    ; Bench.Test.create ~name:"immutable" (fun () ->
+          Immutable.test { iters; count })
+    ]
+  in
   Bench.make_command tests |> Command.run
 ```
 
@@ -544,18 +554,18 @@ Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
  ----------- ---------- --------- ---------- ---------- ------------
-  mutable       5.10ms    2.00Mw     20.61w     20.61w      100.00%
-  immutable     4.63ms    5.00Mw      0.28w      0.28w       90.88%
+  mutable       5.06ms    2.00Mw     20.61w     20.61w      100.00%
+  immutable     3.95ms    5.00Mw     95.64w     95.64w       77.98%
 
 ```
 
-There is a space/time trade-off here. The mutable version takes
-longer to complete than the immutable one but allocates many
-fewer minor-heap words than the immutable version. Minor allocation in OCaml
-is very fast, and so it is often better to use immutable data structures in
-preference to the more conventional mutable versions. On the other hand, if
-you only rarely mutate a value, it can be faster to take the write-barrier
-hit and not allocate at all.
+There is a space/time trade-off here. The mutable version takes longer
+to complete than the immutable one but allocates many fewer minor-heap
+words than the immutable version.  Minor allocation in OCaml is very
+fast, and so it is often better to use immutable data structures in
+preference to the more conventional mutable versions. On the other
+hand, if you only rarely mutate a value, it can be faster to take the
+write-barrier hit and not allocate at all.
 
 The only way to know for sure is to benchmark your program under real-world
 scenarios using `Core_bench` and experiment with the trade-offs. The
@@ -569,13 +579,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 
 ```
 
@@ -642,7 +652,7 @@ let attach_finalizer n v =
     let final _ = printf "%20s: OK\n%!" n in
     Gc.add_finalizer hb final
 
-type t = { foo: bool }
+type t = { foo : bool }
 
 let main () =
   let alloced_float = Unix.gettimeofday () in
@@ -652,17 +662,19 @@ let main () =
   attach_finalizer "immediate float" 1.0;
   attach_finalizer "immediate variant" (`Foo "hello");
   attach_finalizer "immediate string" "hello world";
-  attach_finalizer "immediate record" { foo=false };
+  attach_finalizer "immediate record" { foo = false };
   attach_finalizer "allocated bool" alloced_bool;
   attach_finalizer "allocated variant" (`Foo alloced_bool);
   attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo=alloced_bool };
+  attach_finalizer "allocated record" { foo = alloced_bool };
   Gc.compact ();
   return ()
 
 let () =
-  Command.async_spec ~summary:"Testing finalizers"
-    Command.Spec.empty main
+  Command.async_spec
+    ~summary:"Testing finalizers"
+    Command.Spec.empty
+    main
   |> Command.run
 ```
 

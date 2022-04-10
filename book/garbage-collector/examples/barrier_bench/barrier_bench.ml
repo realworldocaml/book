@@ -7,13 +7,13 @@ module Mutable = struct
     ; mutable count : float
     }
 
-  let rec test_mutable t =
+  let rec test t =
     if t.iters = 0
     then ()
     else (
       t.iters <- t.iters - 1;
       t.count <- t.count +. 1.0;
-      test_mutable t)
+      test t)
 end
 
 module Immutable = struct
@@ -22,10 +22,10 @@ module Immutable = struct
     ; count : float
     }
 
-  let rec test_immutable t =
+  let rec test t =
     if t.iters = 0
     then ()
-    else test_immutable { iters = n - 1; count = t.count +. 1.0 }
+    else test { iters = t.iters - 1; count = t.count +. 1.0 }
 end
 
 let () =
