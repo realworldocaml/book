@@ -442,7 +442,7 @@ val difftime : time_t -> time_t -> float = <fun>
 ```
 
 \noindent
-Here's the resulting `difftime` in action.
+Here's the resulting function `difftime` in action.
 
 ```ocaml env=posix,non-deterministic
 # let delta =
