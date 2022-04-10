@@ -184,6 +184,8 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
+<!-- TODO: Replace ocaml-print-intf with something better -->
+
 ```sh dir=examples/correct/ffi_ncurses
 $ ocaml-print-intf ncurses.ml
 type window
