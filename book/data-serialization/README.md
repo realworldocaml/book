@@ -1,4 +1,4 @@
-s# Data Serialization with S-Expressions
+# Data Serialization with S-Expressions
 
 S-expressions are nested parenthetical expressions whose atomic values
 are strings. They were first popularized by the Lisp programming
