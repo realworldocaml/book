@@ -247,8 +247,13 @@ let () =
   endwin ()
 ```
 
-The `hello` executable is compiled by linking with the `ctypes-foreign`
-OCamlfind package:
+<!-- TODO: More explanation would be great. Why do we need
+     ctypes-foriegn.threaded (the threaded bit in particular), and why
+     we have the flags declaration.  -->
+
+The `hello` executable is compiled by linking with the
+`ctypes-foreign` package.
+[Ctypes library/build directives for]{.idx}
 
 ```scheme file=examples/correct/ffi_hello/dune
 (executable
@@ -257,19 +262,20 @@ OCamlfind package:
   (flags     :standard -cclib -lncurses))
 ```
 
-
+\noindent
+And now we can build it with Dune.
 
 ```sh dir=examples/correct/ffi_hello
 $ dune build hello.exe
 ```
 
-Running `./hello.native` should now display a Hello World in your terminal!
-[Ctypes library/build directives for]{.idx}
+Running `hello.exe` should now display a Hello World in your terminal!
 
-Ctypes wouldn't be very useful if it were limited to only defining simple C
-types, of course. It provides full support for C pointer arithmetic, pointer
-conversions, and reading and writing through pointers, using OCaml functions
-as function pointers to C code, as well as struct and union definitions.
+Ctypes wouldn't be very useful if it were limited to only defining
+simple C types, of course. It provides full support for C pointer
+arithmetic, pointer conversions, and reading and writing through
+pointers, using OCaml functions as function pointers to C code, as
+well as struct and union definitions.
 
 We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
@@ -285,8 +291,9 @@ types]{.idx}[foreign function interface (FFI)/basic scalar C types]{.idx}
 type 'a typ
 ```
 
-`Ctypes.typ` is the type of values that represents C types to OCaml. There
-are two types associated with each instance of `typ`:
+\noindent
+`Ctypes.typ` is the type of values that represents C types to
+OCaml. There are two types associated with each instance of `typ`:
 
 - The C type used to store and pass values to the foreign library.
 
@@ -527,6 +534,8 @@ let string =
 
 The type of this `string` function is a normal `typ` with no external sign of
 the use of the view function:
+
+<!-- TODO: Is string.typ a typo? Seems like it should be a space... -->
 
 ```ocaml file=examples/correct/ctypes/ctypes.mli,part=4
 val string    : string.typ
