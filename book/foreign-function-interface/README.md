@@ -1055,17 +1055,14 @@ val sort_stdin : unit -> unit
 
 The `qsort'` wrapper function has a much more canonical OCaml
 interface than the raw binding. It accepts a comparator function and a
-Ctypes array, and returns the same Ctypes array. It's not strictly
-required that it returns the array, since it modifies it in-place, but
-it makes it easier to chain the function using the `|>` operator (as
-`sort_stdin` does in the example).
+Ctypes array, and returns unit.
 
 Using `qsort'` to sort arrays is straightforward. Our example code
 reads the standard input as a list, converts it to a C array, passes
 it through qsort, and outputs the result to the standard
 output. Again, remember to not confuse the `Ctypes.Array` module with
 the `Core.Array` module: the former is in scope since we opened
-`Ctypes` at the start of the file.[memory/and allocated
+`Ctypes` at the start of the file. [memory/and allocated
 Ctypes]{.idx}[Ctypes library/lifetime of allocated
 Ctypes]{.idx}[garbage collection/of allocated Ctypes]{.idx}
 
