@@ -2,7 +2,7 @@
 
 S-expressions are nested parenthetical expressions whose atomic values
 are strings. They were first popularized by the Lisp programming
-language in the 1960s. They have remained one of the simplest and most
+language in the 1960s, and have remained one of the simplest and most
 effective ways to encode structured data in a human-readable and
 editable form.  [s-expressions]{.idx} [serialization
 formats/s-expressions]{.idx} [data serialization/with
@@ -27,10 +27,11 @@ we'll discuss:
 - The details of the s-expression format, including how to parse it
   while generating good error messages for debugging malformed inputs
 
-- How to generate s-expressions from arbitrary OCaml types
+- How to generate converters between s-expressions and arbitrary OCaml
+  types
 
-- How to use annotations to control the printing behavior of
-  s-expression converters
+- How to use annotations to control the behavior of these generated
+  converters
 
 - How to integrate s-expressions into your interfaces, in particular
   how to add s-expression converters to a module without breaking
@@ -145,7 +146,7 @@ it in action.
 
 The functions that go in the other direction, *i.e.*, reconstruct an
 OCaml value from an s-expression, use essentially the same trick for
-handling polymorphic types, as shown in the following example.
+handling polymorphic types, as shown below.
 
 ```ocaml env=main
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
@@ -181,20 +182,7 @@ astring.top         (version: 0.8.3)
 cohttp.top          (version: n/a)
 compiler-libs.toplevel (version: [distributed with Ocaml])
 core.top            (version: v0.10.0)
-ctypes.top          (version: 0.13.1)
-findlib.top         (version: 1.7.3)
-fmt.top             (version: 0.8.5)
-ipaddr.top          (version: 2.8.0)
-js_of_ocaml.toplevel (version: n/a)
-logs.top            (version: 0.6.2)
-lwt.simple-top      (version: 3.2.1)
-mtime.top           (version: 1.1.0)
-num-top             (version: 1.1)
-ocaml-compiler-libs.toplevel (version: v0.10.0)
-react.top           (version: 1.2.1)
-topkg               (version: 0.9.1)
-toplevel_expect_test (version: v0.10.0)
-toplevel_expect_test.types (version: v0.10.0)
+...
 uri.top             (version: 1.9.6)
 utop                (version: 2.1.0)
 ```
@@ -246,7 +234,7 @@ larger collection of useful extensions that includes `ppx_sexp_conv`.
 ```
 
 \noindent
-And now we can use the extension as follows.
+We can use the extension as follows.
 
 ```ocaml env=main
 # type t = { foo: int; bar: float } [@@deriving sexp];;
@@ -261,7 +249,8 @@ The syntax extension can be used outside of type declarations as
 well. As discussed in [Error
 Handling](error-handling.html#error-handling){data-type=xref},
 `[@@deriving sexp]` can be attached to the declaration of an exception
-to improve the quality of error messages associated with exceptions.
+to improve the quality of errors printed by OCaml's top-level
+exception handler.
 
 Here are two exception declarations, one with an annotation, and one
 without:
@@ -286,16 +275,10 @@ Exception: (//toplevel//.Exn_with_sexp (1 2 3))
 converters for anonymous types.
 
 ```ocaml env=main
-# let print_pairs l =
-    List.iter l ~f:(fun x ->
-      [%sexp_of: int * string ] x
-      |> Sexp.to_string
-      |> Stdio.print_endline);;
-val print_pairs : (int * string) list -> unit = <fun>
-# print_pairs [(1,"one"); (2,"two")];;
-(1 one)
-(2 two)
-- : unit = ()
+# [%sexp_of: int * string ];;
+- : int * string -> Sexp.t = <fun>
+# [%sexp_of: int * string ] (3, "foo");;
+- : Sexp.t = (3 foo)
 ```
 
 The syntax extensions bundled with Base and Core almost all have the
