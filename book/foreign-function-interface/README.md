@@ -175,7 +175,8 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-<!-- TODO: Replace ocaml-print-intf with something better -->
+<!-- TODO: Replace ocaml-print-intf with something better, maybe? Or,
+     put in instructions on how to install it. -->
 
 ```sh dir=examples/correct/ffi_ncurses
 $ ocaml-print-intf ncurses.ml
@@ -201,8 +202,13 @@ internals more abstract.
 
 Here's the customized interface that we can safely use from other libraries:
 
+<!-- TODO: SHouldn't this be customized more? It's basically the same
+     as what's shown above.  If we're going to change it so little, we
+     shouldn't show it again. -->
+
 ```ocaml file=examples/correct/ffi_ncurses/ncurses.mli
 type window
+
 val window : window Ctypes.typ
 val initscr : unit -> window
 val endwin : unit -> unit
