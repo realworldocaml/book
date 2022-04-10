@@ -211,7 +211,9 @@ s-expression printer.
 
 But what if you want a function to convert a brand new type to an
 s-expression? You can of course write it yourself manually. Here's an
-example:
+example.
+[s-expressions/generating from OCaml types]{.idx}
+
 
 ```ocaml env=main
 # type t = { foo: int; bar: float };;
@@ -280,8 +282,8 @@ Exception: Ordinary_exn(_).
 Exception: (//toplevel//.Exn_with_sexp (1 2 3))
 ```
 
-You can also use `ppx_sexp` inline, as part of a larger expression, to
-generate a converter for an anonymous type.
+`ppx_sexp_conv` also supports inline declarations that generate
+converters for anonymous types.
 
 ```ocaml env=main
 # let print_pairs l =
@@ -361,8 +363,7 @@ can be loaded as follows.
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
 
-As you can see, the commented data is not part of the resulting
-s-expression.
+As you can see, the comment is not part of the loaded s-expression.
 
 All in, the s-expression format supports three comment syntaxes:
 
@@ -398,9 +399,9 @@ Again, loading the file as an s-expression drops the comments:
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
 
-If we introduce an error into our s-expression, by, say, creating a file
-`broken_example.scm` which is `example.scm`, without open-paren in front of
-`bar`, we'll get a parse error:
+If we introduce an error into our s-expression, by, say, creating a
+file `broken_example.scm` which is `example.scm`, without the
+open-paren in front of `bar`, we'll get a parse error:
 
 ```ocaml env=main,dir=examples/sexps
 # Sexp.load_sexp "example_broken.scm";;
@@ -443,11 +444,11 @@ val is_empty : t -> bool
 val contains : t -> int -> bool
 ```
 
-As you can see, in addition to basic operations for creating and
-evaluating intervals, this interface also exposes s-expression
-converters.  Note that the `[@@deriving sexp]` syntax works in a
-signature as well, but in this case, it just adds the signature for
-the conversion functions, not the implementation.
+In addition to basic operations for creating and evaluating intervals,
+this interface also exposes s-expression converters.  Note that the
+`[@@deriving sexp]` syntax works in a signature as well, but in this
+case, it just adds the signature for the conversion functions, not the
+implementation.
 
 Here's the implementation of `Int_interval`.
 
@@ -472,9 +473,9 @@ let contains i x =
   | Range (low, high) -> x >= low && x <= high
 ```
 
-One critical invariant here is that the `Range` only represents
-non-empty intervals, and so if you create an interval with a lower
-bound above the upper bound, that will be represented by `Empty`.
+One critical invariant here is that `Range` is only used to represent
+non-empty intervals.  A call to `create` with a lower bound above the
+upper bound will return an `Empty`.
 
 Now, let's demonstrate the functionality with some tests, using the
 expect test framework described in
@@ -565,12 +566,12 @@ let%expect_test "test (range 6 3)" =
     out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
 ```
 
-Now we've clearly got a problem, since this is detected as a non-empty
-interval, but doesn't appear to contain anything.  The problem traces
-back to the fact that `t_of_sexp` doesn't check the same invariant
-that `create` does.  We can fix this, by overriding the auto-generated
-s-expression converter with one that checks the invariant, in this
-case, by calling `create` itself.
+Oddly, this interval is detected as non-empty, but doesn't appear to
+contain anything.  The problem traces back to the fact that
+`t_of_sexp` doesn't check the same invariant that `create` does.  We
+can fix this, by overriding the auto-generated s-expression converter
+with one that checks the invariant, in this case, by calling `create`
+itself.
 
 ```ocaml file=examples/correct/test_interval_override_of_sexp/int_interval.ml,part=override
 let t_of_sexp sexp =
@@ -579,11 +580,10 @@ let t_of_sexp sexp =
   | Range (x, y) -> create x y
 ```
 
-This trick of overriding an existing function definition with a new
-one is perfectly acceptable in OCaml. Since `t_of_sexp` is defined
-with an ordinary `let` rather than a `let rec`, the call to the
-`t_of_sexp` goes to the derived version of the function, rather than
-being a recursive call.
+Overriding an existing function definition with a new one is perfectly
+acceptable in OCaml. Since `t_of_sexp` is defined with an ordinary
+`let` rather than a `let rec`, the call to the `t_of_sexp` goes to the
+derived version of the function, rather than being a recursive call.
 
 Note that, rather than fixing up the invariant, we could have instead
 thrown an exception if the invariant was violated.  In any case, the
