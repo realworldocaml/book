@@ -11,24 +11,23 @@ let attach_finalizer n v =
 type t = { foo : bool }
 
 let main () =
-  let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = Float.is_positive alloced_float in
-  let alloced_string = Bytes.create 4 in
+  let allocated_float = Unix.gettimeofday () in
+  let allocated_bool = Float.is_positive allocated_float in
+  let allocated_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
   attach_finalizer "immediate variant" (`Foo "hello");
   attach_finalizer "immediate string" "hello world";
   attach_finalizer "immediate record" { foo = false };
-  attach_finalizer "allocated bool" alloced_bool;
-  attach_finalizer "allocated variant" (`Foo alloced_bool);
-  attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo = alloced_bool };
+  attach_finalizer "allocated bool" allocated_bool;
+  attach_finalizer "allocated variant" (`Foo allocated_bool);
+  attach_finalizer "allocated string" allocated_string;
+  attach_finalizer "allocated record" { foo = allocated_bool };
   Gc.compact ();
   return ()
 
 let () =
-  Command.async_spec
+  Command.async
     ~summary:"Testing finalizers"
-    Command.Spec.empty
-    main
+    (Command.Param.return main)
   |> Command.run

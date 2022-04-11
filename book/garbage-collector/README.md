@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-    time       - Number of nano secs taken.
-    cycles     - Number of CPU cycles (RDTSC) taken.
-    alloc      - Allocation of major, minor and promoted words.
-    gc         - Show major and minor collections per 1000 runs.
-    percentage - Relative execution time as a percentage.
-    speedup    - Relative execution cost as a speedup.
-    samples    - Number of samples collected for profiling.
+	time       - Number of nano secs taken.
+	cycles     - Number of CPU cycles (RDTSC) taken.
+	alloc      - Allocation of major, minor and promoted words.
+	gc         - Show major and minor collections per 1000 runs.
+	percentage - Relative execution time as a percentage.
+	speedup    - Relative execution cost as a speedup.
+	samples    - Number of samples collected for profiling.
 
 ```
 
@@ -624,24 +624,36 @@ duplicate some immutable values such as floating-point values in arrays.
 These may be finalized while another duplicate copy is being used by the
 program.
 
-For this reason, attach finalizers only to values that you are explicitly
-sure are heap-allocated and aren't immutable. A common use is to attach them
-to file descriptors to ensure they are closed. However, the finalizer
-normally shouldn't be the primary way of closing the file descriptor, since
-it depends on the GC running in order to collect the value. For a busy
-system, you can easily run out of a scarce resource such as file descriptors
-before the GC catches up.
+For this reason, attach finalizers only to values that you are
+explicitly sure are heap-allocated and aren't immutable. A common use
+is to attach them to file descriptors to ensure they are closed.  <!--
+TODO: This doesn't really line up, since file descriptors are not
+heap-allocated values in OCaml. --> However, the finalizer normally
+shouldn't be the primary way of closing the file descriptor, since it
+depends on the GC running in order to collect the value. For a busy
+system, you can easily run out of a scarce resource such as file
+descriptors before the GC catches up.
 :::
 
+Core provides a `Heap_block` module that dynamically checks if a given
+value is suitable for finalizing.  Core keeps the functions for
+registering finalizers in the `Expert` module finalizers can be pretty
+hard to reason about in multi-threaded contexts, since finalizers can
+run at any time in any thread.
+[heaps/Heap_block module]{.idx}
 
-Core provides a `Heap_block` module that dynamically checks if a given value
-is suitable for finalizing. This block is then passed to Async's
-`Gc.add_finalizer` function that schedules the finalizer safely with respect
-to all the other concurrent program threads. [heaps/Heap_block module]{.idx}
+Async, which we discussed in [Concurrent Programming with
+Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref},
+shadows the `Gc` module with its own module that contains a function,
+`Gc.add_finalizer`, which is concurrency-safe.  In particular,
+finalizers are scheduled in their own Async job, and makes sure to
+capture exceptions and raise them to the appropriate monitor for
+error-handling.
+[Async/finalizers]{.idx}
 
-Let's explore this with a small example that finalizes values of different
-types, some of which are heap-allocated and others which are compile-time
-constants:
+Let's explore this with a small example that finalizes values of
+different types, some of which are heap-allocated and others which are
+compile-time constants:
 
 ```ocaml file=examples/finalizer/finalizer.ml
 open Core
@@ -657,42 +669,31 @@ let attach_finalizer n v =
 type t = { foo : bool }
 
 let main () =
-  let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = Float.is_positive alloced_float in
-  let alloced_string = Bytes.create 4 in
+  let allocated_float = Unix.gettimeofday () in
+  let allocated_bool = Float.is_positive allocated_float in
+  let allocated_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
   attach_finalizer "immediate variant" (`Foo "hello");
   attach_finalizer "immediate string" "hello world";
   attach_finalizer "immediate record" { foo = false };
-  attach_finalizer "allocated bool" alloced_bool;
-  attach_finalizer "allocated variant" (`Foo alloced_bool);
-  attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo = alloced_bool };
+  attach_finalizer "allocated bool" allocated_bool;
+  attach_finalizer "allocated variant" (`Foo allocated_bool);
+  attach_finalizer "allocated string" allocated_string;
+  attach_finalizer "allocated record" { foo = allocated_bool };
   Gc.compact ();
   return ()
 
 let () =
-  Command.async_spec
+  Command.async
     ~summary:"Testing finalizers"
-    Command.Spec.empty
-    main
+    (Command.Param.return main)
   |> Command.run
 ```
 
 Building and running this should show the following output:
 
-```scheme file=examples/finalizer/dune
-(executable
-  (name      finalizer)
-  (modules   finalizer)
-  (libraries core async))
-```
-
-
-
 ```sh dir=examples/finalizer
-$ dune build finalizer.exe
 $ dune exec -- ./finalizer.exe
        immediate int: FAIL
      immediate float: FAIL
