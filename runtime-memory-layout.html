@@ -183,29 +183,31 @@ more detail later in this chapter.</p>
 static OCaml type. All OCaml types are distilled down into
 <code>values</code>, and summarized below.</p>
 <ul>
-<li><code>int</code> or <code>char</code> are stored directly as a
+<li><p><code>int</code> or <code>char</code> are stored directly as a
 value, shifted left by 1 bit, with the least significant bit set to
-1.</li>
-<li><code>unit</code>, <code>[]</code>, <code>false</code> are all
-stored as OCaml <code>int</code> 0.</li>
-<li><code>true</code> is stored as OCaml <code>int</code> 1.</li>
-<li><code>Foo | Bar</code> variants are stored as ascending OCaml
-<code>int</code>s, starting from 0.</li>
-<li><code>Foo | Bar of int</code> variants with parameters are boxed,
-while variants with no parameters are unboxed.</li>
-<li>Polymorphic variants take up variable space usage depending on the
-number of parameters.</li>
-<li>Floating-point numbers are stored as a block with a single field
-containing the double-precision float.</li>
-<li>Strings are word-aligned byte arrays with an explicit length.</li>
-<li><code>[1; 2; 3]</code> lists are stored as <code>1::2::3::[]</code>
-where <code>[]</code> is an int, and <code>h::t</code> a block with tag
-0 and two parameters.</li>
-<li>Tuples, records, and arrays are stored as a C array of values.
-Arrays can be variable size, but tuples and records are fixed-size.</li>
-<li>Records or arrays that are all float use a special tag for unboxed
-arrays of floats, or records that only have <code>float</code>
-fields.</li>
+1.</p></li>
+<li><p><code>unit</code>, <code>[]</code>, <code>false</code> are all
+stored as OCaml <code>int</code> 0.</p></li>
+<li><p><code>true</code> is stored as OCaml <code>int</code> 1.</p></li>
+<li><p><code>Foo | Bar</code> variants are stored as ascending OCaml
+<code>int</code>s, starting from 0.</p></li>
+<li><p><code>Foo | Bar of int</code> variants with parameters are boxed,
+while variants with no parameters are unboxed.</p></li>
+<li><p>Polymorphic variants take up variable space usage depending on
+the number of parameters. </p></li>
+<li><p>Floating-point numbers are stored as a block with a single field
+containing the double-precision float.</p></li>
+<li><p>Strings are word-aligned byte arrays with an explicit
+length.</p></li>
+<li><p><code>[1; 2; 3]</code> lists are stored as
+<code>1::2::3::[]</code> where <code>[]</code> is an int, and
+<code>h::t</code> a block with tag 0 and two parameters.</p></li>
+<li><p>Tuples, records, and arrays are stored as a C array of values.
+Arrays can be variable size, but tuples and records are
+fixed-size.</p></li>
+<li><p>Records or arrays that are all float use a special tag for
+unboxed arrays of floats, or records that only have <code>float</code>
+fields.</p></li>
 </ul>
 <section class="level3" id="integers-characters-and-other-basic-types">
 <h3>Integers, Characters, and Other Basic Types</h3>
@@ -268,7 +270,7 @@ Obj.double_tag;;
 <p>Since each floating-point value is boxed in a separate memory block,
 it can be inefficient to handle large arrays of floats in comparison to
 unboxed integers. OCaml therefore special-cases records or arrays that
-contain <em>only</em><code>float</code> types. These are stored in a
+contain <em>only</em> <code>float</code> types. These are stored in a
 block that contains the floats packed directly in the data section, with
 <code>Double_array_tag</code> set to signal to the collector that the
 contents are not OCaml values.</p>
