@@ -1,6 +1,5 @@
 open Core
 
-(* for [Range (x,y)], we require that [y >= x] *)
 type t =
   | Range of int * int
   | Empty
@@ -16,3 +15,10 @@ let contains i x =
   match i with
   | Empty -> false
   | Range (low, high) -> x >= low && x <= high
+
+(* $MDX part-begin=override *)
+let t_of_sexp sexp =
+  match t_of_sexp sexp with
+  | Empty -> Empty
+  | Range (x, y) -> create x y
+(* $MDX part-end *)

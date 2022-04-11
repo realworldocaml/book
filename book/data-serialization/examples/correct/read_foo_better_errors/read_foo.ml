@@ -8,5 +8,5 @@ type t =
 [@@deriving sexp]
 
 let () =
-  let t = Sexp.load_sexp "example.scm" |> t_of_sexp in
+  let t = Sexp.load_sexp_conv_exn "example.scm" t_of_sexp in
   printf "b is: %d\n%!" t.b

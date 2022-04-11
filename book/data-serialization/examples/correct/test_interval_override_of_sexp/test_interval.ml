@@ -56,7 +56,7 @@ let%expect_test "test (range 6 3)" =
   test_interval i (List.range 1 10);
   [%expect
     {|
-    non-empty
+    empty
     in:
     out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]
 (* $MDX part-end *)
