@@ -1,4 +1,5 @@
 type window
+
 val window : window Ctypes.typ
 val initscr : unit -> window
 val endwin : unit -> unit
