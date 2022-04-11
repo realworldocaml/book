@@ -18,8 +18,8 @@ modules or objects that the compiler started with.
 
 In this chapter, we'll cover the following topics:
 
-- An overview of the compilation pipeline and what each stage
-  represents
+- An overview of the compiler codebase and the compilation pipeline,
+  and what each stage represents
 - Parsing, which goes from raw text to the abstract syntax tree
 - PPX's, which further transform the AST
 - Type-checking, including module resolution
@@ -184,6 +184,15 @@ The syntax error points to the line and character number of the first token
 that couldn't be parsed. In the broken example, the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
+
+<!-- TODO: I wonder if we should just kill the section on indenting
+     source code.  It's a little out of date (ocamlformat is really
+     more the tool of choice these days), and anyway, it's covered
+     some in the platform chapter, and is mostly not really about the
+     compilation toolchain anyway.
+
+    If we keep it, I'd be tempted to refocus it on ocamlformat.
+  -->
 
 ### Automatically Indenting Source Code
 
