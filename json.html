@@ -57,7 +57,7 @@ multiple different JSON types within a single list.</p>
 It’s very easy to generate JSON values, but code that parses them also
 has to handle subtle variations in how the values are represented. For
 example, what if the preceding <code>pages</code> value is actually
-represented as a string value of “<code>450</code>” instead of an
+represented as a string value of ” <code>450</code>” instead of an
 integer? <a data-secondary="benefits and drawbacks
 of" data-primary="JSON data" data-type="indexterm">&nbsp;</a></p>
 <p>Our first task is to parse the JSON into a more structured OCaml type
@@ -70,8 +70,7 @@ well as contain an actual value. <a data-secondary="installation of" data-primar
 library" data-type="indexterm">&nbsp;</a><a data-primary="static
 checking" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static
 checking" data-type="indexterm">&nbsp;</a><a data-primary="unit tests" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="installing-the-yojson-library">
-<h5>Installing the Yojson Library</h5>
+<p>::: {data-type=note} ##### Installing the Yojson Library</p>
 <p>There are several JSON libraries available for OCaml. For this
 chapter, we’ve picked the popular <a href="https://github.com/ocaml-community/yojson">Yojson</a> library,
 which you can install by running <code>opam install yojson</code>. Once
@@ -82,7 +81,6 @@ installed, you can open it in <code>utop</code> as follows:</p>
 open Yojson;;
 </code></pre>
 </div>
-</section>
 </section>
 <section class="level2" id="parsing-json-with-yojson">
 <h2>Parsing JSON with Yojson</h2>
@@ -370,7 +368,7 @@ succinct style but shouldn’t be overused due to the increased difficulty
 of debugging intermediate values. If an explicit name is assigned to
 each stage of the transformations, debuggers in particular have an
 easier time making the program flow simpler to represent to the
-programmer. <a data-primary="point-free programming" data-type="indexterm">&nbsp;</a></p>
+programmer.</p>
 <p>This technique of using statically typed parsing functions is very
 powerful in combination with the OCaml type system. Many errors that
 don’t make sense at runtime (for example, mixing up lists and objects)
@@ -905,9 +903,8 @@ ATD specification for the GitHub API in the <a href="http://github.com/avsm/ocam
 repository online, which has lots of quirks typical in real-world web
 APIs.</p>
 <p>Our example shells out to <code>curl</code> on the command line to
-obtain the JSON, which is rather inefficient. You could integrate an
-Async-based HTTP fetch directly into your OCaml application, as
-described in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
+obtain the JSON, which is rather inefficient. We’ll explain how to
+integrate the HTTP fetch directly into your OCaml application in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
 </section>
 </section>
 </section>
