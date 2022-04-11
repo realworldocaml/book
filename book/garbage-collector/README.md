@@ -44,11 +44,11 @@ algorithm used by OCaml to perform this heap traversal is commonly known as
 
 ## Generational Garbage Collection
 
-The usual OCaml programming style involves allocating many small variables
-that are used for a short period of time and then never accessed again. OCaml
-takes advantage of this fact to improve performance by using a *generational*
-GC. [generational garbage collection]{.idx}[garbage collection/generational
-collection]{.idx}
+The usual OCaml programming style involves allocating many small
+values that are used for a short period of time and then never
+accessed again. OCaml takes advantage of this fact to improve
+performance by using a *generational* GC. [generational garbage
+collection]{.idx}[garbage collection/generational]{.idx}
 
 A generational GC maintains separate memory regions to hold blocks based on
 how long the blocks have been live. OCaml's heap is split into two such
@@ -58,25 +58,25 @@ regions: [heaps/regions of]{.idx}
 
 - A larger, variable-size *major heap* for blocks that have been live longer
 
-A typical functional programming style means that young blocks tend to die
-young and old blocks tend to stay around for longer than young ones. This is
-often referred to as the *generational hypothesis*. [generational
-hypothesis]{.idx}
+A typical functional programming style means that young blocks tend to
+die young and old blocks tend to stay around for longer than young
+ones. This is often referred to as the *generational
+hypothesis*. [generational hypothesis]{.idx}
 
 OCaml uses different memory layouts and garbage-collection algorithms for the
 major and minor heaps to account for this generational difference. We'll
-explain how they differ in more detail next. [OCAMLRUNPARAM]{.idx}[Gc
-module]{.idx}
+explain how they differ in more detail next.
 
 ::: {data-type=note}
 ##### The Gc Module and OCAMLRUNPARAM
 
-OCaml provides several mechanisms to query and alter the behavior of the
-runtime system. The `Gc` module provides this functionality from within OCaml
-code, and we'll frequently refer to it in the rest of the chapter. As with
-several other standard library modules, Core alters the `Gc` interface from
-the standard OCaml library. We'll assume that you've opened `Core` in our
-explanations.
+OCaml provides several mechanisms to query and alter the behavior of
+the runtime system. The `Gc` module provides this functionality from
+within OCaml code, and we'll frequently refer to it in the rest of the
+chapter. As with several other standard library modules, Core alters
+the `Gc` interface from the standard OCaml library. We'll assume that
+you've opened `Core` in our explanations.  [OCAMLRUNPARAM]{.idx}[Gc
+module]{.idx}
 
 You can also control the behavior of OCaml programs by setting the
 `OCAMLRUNPARAM` environment variable before launching your application. This
@@ -96,13 +96,14 @@ operation that requires just a couple of CPU instructions. [heaps/minor
 heaps]{.idx}[minor heaps/garbage collection in]{.idx}[copying
 collection]{.idx}[garbage collection/of short-lived values]{.idx}
 
-To garbage-collect the minor heap, OCaml uses *copying collection* to move
-all live blocks in the minor heap to the major heap. This takes work
-proportional to the number of live blocks in the minor heap, which is
-typically small according to the generational hypothesis. The minor
-collection *stops the world* (that it, halts the application) while it runs,
-which is why it's so important that it complete quickly to let the
-application resume running with minimal interruption.
+To garbage-collect the minor heap, OCaml uses *copying collection* to
+move all live blocks in the minor heap to the major heap. This takes
+work proportional to the number of live blocks in the minor heap,
+which is typically small according to the generational hypothesis. In
+general, the garbage collector *stops the world* (that it, halts the
+application) while it runs, which is why it's so important that it
+complete quickly to let the application resume running with minimal
+interruption.
 
 ### Allocating on the Minor Heap
 
@@ -133,13 +134,13 @@ very fast check (with no branching) on most CPU architectures.
 
 #### Understanding allocation
 
-You may wonder why `limit` is required at all, since it always seems to equal
-`start`. It's because the easiest way for the runtime to schedule a minor
-heap collection is by setting `limit` to equal `end`. The next allocation
-will never have enough space after this is done and will always trigger a
-garbage collection. There are various internal reasons for such early
-collections, such as handling pending UNIX signals, and they don't ordinarily
-matter for application code.
+You may wonder why `limit` is required at all, since it always seems
+to equal `start`. It's because the easiest way for the runtime to
+schedule a minor heap collection is by setting `limit` to equal
+`end`. The next allocation will never have enough space after this is
+done and will always trigger a garbage collection. There are various
+internal reasons for such early collections, such as handling pending
+UNIX signals, but they don't ordinarily matter for application code.
 
 It is possible to write loops or recurse in a way that may take a long time
 to do an allocation - if at all. To ensure that UNIX signals and other
@@ -162,12 +163,12 @@ default settings that improve performance, but at the cost of a bigger memory
 profile). This setting can be overridden via the `s=<words>` argument to
 `OCAMLRUNPARAM`. You can change it after the program has started by calling
 the `Gc.set` function:
-:::
+
 
 ```ocaml env=tune
 # open Core;;
 # let c = Gc.get ();;
-val c : Core_kernel.Gc.control =
+val c : Gc.Control.t =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
    space_overhead = 120; verbose = 0; max_overhead = 500;
    stack_limit = 1048576; allocation_policy = 2; window_size = 1;
@@ -181,7 +182,7 @@ Changing the GC size dynamically will trigger an immediate minor heap
 collection. Note that Core increases the default minor heap size from the
 standard OCaml installation quite significantly, and you'll want to reduce
 this if running in very memory-constrained environments.
-
+:::
 
 ## The Long-Lived Major Heap
 
@@ -245,40 +246,33 @@ that can be as small as one or two 4 KB pages, but are usually allocated in 1
 MB chunks (or 512 KB on 32-bit architectures). [major heaps/controlling
 growth of]{.idx}
 
-::: {data-type=note}
-##### Controlling Major Heap Growth
+#### Controlling the Major Heap Increment
 
-The `Gc` module uses the `major_heap_increment` value to control the major
-heap growth. This defines the number of words to add to the major heap per
-expansion and is the only memory allocation operation that the operating
-system observes from the OCaml runtime after initial startup (since the minor
-is fixed in size).
+The `Gc` module uses the `major_heap_increment` value to control the
+major heap growth. This defines the number of words to add to the
+major heap per expansion and is the only memory allocation operation
+that the operating system observes from the OCaml runtime after
+initial startup (since the minor is fixed in size).
 
-If you anticipate allocating some large OCaml values or many small values in
-one go, then setting the heap increment to a larger value will improve
-performance by reducing the amount of heap resizing required in order to
-satisfy the allocation requests. A small increment may result in lots of
-smaller heap chunks spread across different regions of virtual memory that
-require more housekeeping in the OCaml runtime to keep track of them:
-:::
+Allocating an OCaml value on the major heap first checks the free list
+of blocks for a suitable region to place it. If there isn't enough
+room on the free list, the runtime expands the major heap by
+allocating a fresh heap chunk that will be large enough. That chunk is
+then added to the free list, and the free list is checked again (and
+this time will definitely succeed).
 
-```ocaml env=tune
-# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
-- : unit = ()
-```
+Older versions of OCaml required setting a fixed number of bytes for
+the major heap increment.  That was a value that was tricky to get
+right: too small of a value could lead to lots of smaller heap chunks
+spread across different regions of virtual memory that require more
+housekeeping in the OCaml runtime to keep track of them; too large of
+a value can waste memory for programs with small heaps.
 
-Allocating an OCaml value on the major heap first checks the free list of
-blocks for a suitable region to place it. If there isn't enough room on the
-free list, the runtime expands the major heap by allocating a fresh heap
-chunk that will be large enough. That chunk is then added to the free list,
-and the free list is checked again (and this time will definitely succeed).
-
-Remember that most allocations to the major heap will go via the minor heap
-and only be promoted if they are still used by the program after a minor
-collection. The one exception to this is for values larger than 256 words
-(that is, 2 KB on 64-bit platforms). These will be allocated directly on the
-major heap, since an allocation on the minor heap would likely trigger an
-immediate collection and copy it to the major heap anyway.
+You can use `Gc.tune` to set that value, but the values are a little
+counter-intuitive, for backwards-compatibility reasons.  Values under
+1000 are interepreted as percentages, and the default is 15%.  Values
+1000 and over are treated as a raw number of bytes.  But most of the
+time, you won't to set the value at all.
 
 ### Memory Allocation Strategies
 
@@ -350,18 +344,18 @@ For some workloads that need more real-time behavior under load, the
 reduction in the frequency of heap compaction will outweigh the extra
 allocation cost.
 
-::: {data-type=note}
-##### Controlling the Heap Allocation Policy
+#### Controlling the Heap Allocation Policy
 
-You can set the heap allocation policy via the `Gc.allocation_policy` field.
-A value of `0` sets it to next-fit, `1` to first-fit, and `2` (the default)
-to the best-fit allocator.
+You can set the heap allocation policy by calling `Gc.tune`:
 
-The same behavior can be controlled at runtime by setting `a=0`, `a=1` or
-`a=2` in `OCAMLRUNPARAM`.
-:::
+```ocaml env=main
+# Gc.tune ~allocation_policy:First_fit ();;
+- : unit = ()
+```
 
-
+The same behavior can be controlled via an environment variable by
+setting `OCAMLRUNPARAM` to `a=0` for next-fit, `a=1` for first-fit, or
+`a=2` for best-fit.
 
 ### Marking and Scanning the Heap
 
@@ -408,7 +402,6 @@ has blocks needing redarkening (i.e were removed from the mark stack during
  until it is a quarter full. The emptying and replenishing cycle continues
 until there are no heap chunks with ranges left to redarken.
 
-::: {data-type=note}
 #### Controlling Major Heap Collections
 
 You can trigger a single slice of the major GC via the `major_slice` call.
@@ -416,7 +409,6 @@ This performs a minor collection first, and then a single slice. The size of
 the slice is normally automatically computed by the GC to an appropriate
 value and returns this value so that you can modify it in future calls if
 necessary:
-:::
 
 ```ocaml env=tune
 # Gc.major_slice 0;;
@@ -504,33 +496,43 @@ compile this code:
 open Core
 open Core_bench
 
-type t1 = { mutable iters1: int; mutable count1: float }
-type t2 = { iters2: int; count2: float }
+module Mutable = struct
+  type t =
+    { mutable iters : int
+    ; mutable count : float
+    }
 
-let rec test_mutable t1 =
-  match t1.iters1 with
-  |0 -> ()
-  |_ ->
-    t1.iters1 <- t1.iters1 - 1;
-    t1.count1 <- t1.count1 +. 1.0;
-    test_mutable t1
+  let rec test t =
+    if t.iters = 0
+    then ()
+    else (
+      t.iters <- t.iters - 1;
+      t.count <- t.count +. 1.0;
+      test t)
+end
 
-let rec test_immutable t2 =
-  match t2.iters2 with
-  |0 -> ()
-  |n ->
-    let iters2 = n - 1 in
-    let count2 = t2.count2 +. 1.0 in
-    test_immutable { iters2; count2 }
+module Immutable = struct
+  type t =
+    { iters : int
+    ; count : float
+    }
+
+  let rec test t =
+    if t.iters = 0
+    then ()
+    else test { iters = t.iters - 1; count = t.count +. 1.0 }
+end
 
 let () =
-  let iters = 1000000 in
-  let tests = [
-    Bench.Test.create ~name:"mutable"
-      (fun () -> test_mutable { iters1=iters; count1=0.0 });
-    Bench.Test.create ~name:"immutable"
-      (fun () -> test_immutable { iters2=iters; count2=0.0 })
-  ] in
+  let iters = 1_000_000 in
+  let count = 0.0 in
+  let tests =
+    [ Bench.Test.create ~name:"mutable" (fun () ->
+          Mutable.test { iters; count })
+    ; Bench.Test.create ~name:"immutable" (fun () ->
+          Immutable.test { iters; count })
+    ]
+  in
   Bench.make_command tests |> Command.run
 ```
 
@@ -539,31 +541,24 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-```scheme file=examples/barrier_bench/dune
-(executable
-  (name      barrier_bench)
-  (modules   barrier_bench)
-  (libraries core core_bench))
-```
-
 ```sh dir=examples/barrier_bench,non-deterministic=command
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
  ----------- ---------- --------- ---------- ---------- ------------
-  mutable       5.10ms    2.00Mw     20.61w     20.61w      100.00%
-  immutable     4.63ms    5.00Mw      0.28w      0.28w       90.88%
+  mutable       5.06ms    2.00Mw     20.61w     20.61w      100.00%
+  immutable     3.95ms    5.00Mw     95.64w     95.64w       77.98%
 
 ```
 
-There is a space/time trade-off here. The mutable version takes
-longer to complete than the immutable one but allocates many
-fewer minor-heap words than the immutable version. Minor allocation in OCaml
-is very fast, and so it is often better to use immutable data structures in
-preference to the more conventional mutable versions. On the other hand, if
-you only rarely mutate a value, it can be faster to take the write-barrier
-hit and not allocate at all.
+There is a space/time trade-off here. The mutable version takes longer
+to complete than the immutable one but allocates many fewer minor-heap
+words than the immutable version.  Minor allocation in OCaml is very
+fast, and so it is often better to use immutable data structures in
+preference to the more conventional mutable versions. On the other
+hand, if you only rarely mutate a value, it can be faster to take the
+write-barrier hit and not allocate at all.
 
 The only way to know for sure is to benchmark your program under real-world
 scenarios using `Core_bench` and experiment with the trade-offs. The
@@ -586,6 +581,15 @@ Columns that can be specified are:
 	samples    - Number of samples collected for profiling.
 
 ```
+
+<!-- TODO: Is this right? I thought no-compactions was for preventing
+     compactions adding a lot of noise, and I thought stabilize GC was
+     something where you traded off taking more time in the test for
+     having less GC-driven cross-talk between runs.  Maybe we should
+     just omit this? -->
+
+<!-- TODO: This sounds as if the flags show up above, but they
+     don't, because we cut it off early. -->
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
@@ -620,24 +624,42 @@ duplicate some immutable values such as floating-point values in arrays.
 These may be finalized while another duplicate copy is being used by the
 program.
 
-For this reason, attach finalizers only to values that you are explicitly
-sure are heap-allocated and aren't immutable. A common use is to attach them
-to file descriptors to ensure they are closed. However, the finalizer
-normally shouldn't be the primary way of closing the file descriptor, since
-it depends on the GC running in order to collect the value. For a busy
-system, you can easily run out of a scarce resource such as file descriptors
-before the GC catches up.
+For this reason, attach finalizers only to values that you are
+explicitly sure are heap-allocated and aren't immutable. A common use
+is to attach them to file descriptors to ensure they are closed.  <!--
+TODO: This doesn't really line up, since file descriptors are not
+heap-allocated values in OCaml. --> However, the finalizer normally
+shouldn't be the primary way of closing the file descriptor, since it
+depends on the GC running in order to collect the value. For a busy
+system, you can easily run out of a scarce resource such as file
+descriptors before the GC catches up.
 :::
 
+Core provides a `Heap_block` module that dynamically checks if a given
+value is suitable for finalizing.  Core keeps the functions for
+registering finalizers in the `Expert` module finalizers can be pretty
+hard to reason about in multi-threaded contexts, since finalizers can
+run at any time in any thread.
+[heaps/Heap_block module]{.idx}
 
-Core provides a `Heap_block` module that dynamically checks if a given value
-is suitable for finalizing. This block is then passed to Async's
-`Gc.add_finalizer` function that schedules the finalizer safely with respect
-to all the other concurrent program threads. [heaps/Heap_block module]{.idx}
+Async, which we discussed in [Concurrent Programming with
+Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref},
+shadows the `Gc` module with its own module that contains a function,
+`Gc.add_finalizer`, which is concurrency-safe.  In particular,
+finalizers are scheduled in their own Async job, and makes sure to
+capture exceptions and raise them to the appropriate monitor for
+error-handling.
+[Async/finalizers]{.idx}
 
-Let's explore this with a small example that finalizes values of different
-types, some of which are heap-allocated and others which are compile-time
-constants:
+Let's explore this with a small example that finalizes values of
+different types, some of which are heap-allocated and others which are
+compile-time constants:
+
+<!-- TODO: I'm pretty unsure what this code is getting at.  The
+     "allocated" things aren't necessarily heap allocated: you just
+     can't heap allocate a bool, right?  I tried to figure out how to
+     get my hands on a heap-allocated float, but generally, I just
+     found this whole thing confusing! -->
 
 ```ocaml file=examples/finalizer/finalizer.ml
 open Core
@@ -650,43 +672,34 @@ let attach_finalizer n v =
     let final _ = printf "%20s: OK\n%!" n in
     Gc.add_finalizer hb final
 
-type t = { foo: bool }
+type t = { foo : bool }
 
 let main () =
-  let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = Float.is_positive alloced_float in
-  let alloced_string = Bytes.create 4 in
+  let allocated_float = Unix.gettimeofday () in
+  let allocated_bool = Float.is_positive allocated_float in
+  let allocated_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
   attach_finalizer "immediate variant" (`Foo "hello");
   attach_finalizer "immediate string" "hello world";
-  attach_finalizer "immediate record" { foo=false };
-  attach_finalizer "allocated bool" alloced_bool;
-  attach_finalizer "allocated variant" (`Foo alloced_bool);
-  attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo=alloced_bool };
+  attach_finalizer "immediate record" { foo = false };
+  attach_finalizer "allocated bool" allocated_bool;
+  attach_finalizer "allocated variant" (`Foo allocated_bool);
+  attach_finalizer "allocated string" allocated_string;
+  attach_finalizer "allocated record" { foo = allocated_bool };
   Gc.compact ();
   return ()
 
 let () =
-  Command.async_spec ~summary:"Testing finalizers"
-    Command.Spec.empty main
+  Command.async
+    ~summary:"Testing finalizers"
+    (Command.Param.return main)
   |> Command.run
 ```
 
 Building and running this should show the following output:
 
-```scheme file=examples/finalizer/dune
-(executable
-  (name      finalizer)
-  (modules   finalizer)
-  (libraries core async))
-```
-
-
-
 ```sh dir=examples/finalizer
-$ dune build finalizer.exe
 $ dune exec -- ./finalizer.exe
        immediate int: FAIL
      immediate float: FAIL

@@ -1,4 +1,5 @@
 (executable
   (name      finalizer)
   (modules   finalizer)
+  (preprocess (pps ppx_jane))
   (libraries core async))
