@@ -119,39 +119,7 @@ Data</a>:</p>
   | `Int of int
   | `List of value list
   | `Null
-  | `String of string ]
-
-open Core
-open Out_channel
-
-let rec output_value outc = function
-  | `Assoc obj -&gt; print_assoc outc obj
-  | `List l -&gt; print_list outc l
-  | `String s -&gt; printf "\"%s\"" s
-  | `Int i -&gt; printf "%d" i
-  | `Float x -&gt; printf "%f" x
-  | `Bool true -&gt; output_string outc "true"
-  | `Bool false -&gt; output_string outc "false"
-  | `Null -&gt; output_string outc "null"
-
-and print_assoc outc obj =
-  output_string outc "{ ";
-  let sep = ref "" in
-  List.iter
-    ~f:(fun (key, value) -&gt;
-      printf "%s\"%s\": %a" !sep key output_value value;
-      sep := ",\n  ")
-    obj;
-  output_string outc " }"
-
-and print_list outc arr =
-  output_string outc "[";
-  List.iteri
-    ~f:(fun i v -&gt;
-      if i &gt; 0 then output_string outc ", ";
-      output_value outc v)
-    arr;
-  output_string outc "]"</code></pre>
+  | `String of string ]</code></pre>
 </div>
 <p>This representation is much richer than our token stream, capturing
 the fact that JSON values can be nested inside each other and that JSON
@@ -552,7 +520,7 @@ the parser accordingly to add a <code>%token &lt;string&gt; ID</code>.
 This would in turn trigger an “unused” warning since the parser never
 constructs a value with type ID:</p>
 <div class="highlight">
-<pre><code class="language-clike">File "parser.mly", line 4, characters 16-18:        
+<pre><code class="language-clike">File "parser.mly", line 4, characters 16-18:
 Warning: the token ID is unused.</code></pre>
 </div>
 <p>It’s completely fine to define unused regexps as we’ve done, and to
