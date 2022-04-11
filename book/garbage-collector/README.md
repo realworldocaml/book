@@ -582,6 +582,12 @@ Columns that can be specified are:
 
 ```
 
+<!-- TODO: Is this right? I thought no-compactions was for preventing
+     compactions adding a lot of noise, and I thought stabilize GC was
+     something where you traded off taking more time in the test for
+     having less GC-driven cross-talk between runs.  Maybe we should
+     just omit this? -->
+
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
 of a long-running application without you having to actually wait that long
