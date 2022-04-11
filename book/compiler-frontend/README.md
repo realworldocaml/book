@@ -1,36 +1,33 @@
 # The Compiler Frontend: Parsing and Type Checking
 
-Compiling source code into executable programs involves a fairly complex set of
-libraries, linkers, and assemblers. It's important to understand how these fit
-together to help with your day-to-day workflow of developing, debugging, and
-deploying applications.[compilation process/toolchain for]{.idx}
+Compiling source code into executable programs involves a fairly
+complex set of libraries, linkers, and assemblers. While Dune mostly
+hides this complexity from you, it's still useful to understand how
+these pieces work so that you can debug performance problems, or come
+up with solutions for unusual situations that aren't well handled by
+existing tools.
 
-OCaml has a strong emphasis on static type safety and rejects source code
-that doesn't meet its requirements as early as possible. The compiler does
-this by running the source code through a series of checks and
-transformations. Each stage performs its job (e.g., type checking,
-optimization, or code generation) and discards some information from the
-previous stage. The final native code output is low-level assembly code that
-doesn't know anything about the OCaml modules or objects that the compiler
-started with.[static checking]{.idx}[compile-time static checking]{.idx}
-
-You don't have to do all of this manually, of course. The compiler frontends
-(`ocamlc` and `ocamlopt`) are invoked via the command line and chain the
-stages together for you. Sometimes though, you'll need to dive into the
-toolchain to hunt down a bug or investigate a performance problem. This
-chapter explains the compiler pipeline in more depth so you understand how to
-harness the command-line tools effectively. [OCaml
-toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlopt]{.idx}
+OCaml has a strong emphasis on static type safety and rejects source
+code that doesn't meet its requirements as early as possible. The
+compiler does this by running the source code through a series of
+checks and transformations. Each stage performs its job (e.g., type
+checking, optimization, or code generation) and discards some
+information from the previous stage. The final native code output is
+low-level assembly code that doesn't know anything about the OCaml
+modules or objects that the compiler started with.
 
 In this chapter, we'll cover the following topics:
 
-- The compilation pipeline and what each stage represents
+- An overview of the compilation pipeline and what each stage
+  represents
+- Parsing, which goes from raw text to the abstract syntax tree
+- PPX's, which further transform the AST
+- Type-checking, including module resolution
 
-- The type-checking process, including module resolution
-
-The details of the compilation process into executable code can be found
-next, in
-[The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+The details of the remainder of the compilation process, which gets
+all the way to executable code comes next, in [The Compiler Backend
+Byte Code And Native
+Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 
 ## An Overview of the Toolchain
 
@@ -1033,9 +1030,9 @@ $ ocamlobjinfo typedef.cmi
 File typedef.cmi
 Unit name: Typedef
 Interfaces imported:
-	cdd43318ee9dd1b187513a4341737717	Typedef
-	9b04ecdc97e5102c1d342892ef7ad9a2	Pervasives
-	79ae8c0eb753af6b441fe05456c7970b	CamlinternalFormatBasics
+    cdd43318ee9dd1b187513a4341737717    Typedef
+    9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
+    79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
 ```
 
 `ocamlobjinfo` examines the compiled interface and displays what other
