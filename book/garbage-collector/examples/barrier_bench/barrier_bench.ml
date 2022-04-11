@@ -29,7 +29,7 @@ module Immutable = struct
 end
 
 let () =
-  let iters = 1000000 in
+  let iters = 1_000_000 in
   let count = 0.0 in
   let tests =
     [ Bench.Test.create ~name:"mutable" (fun () ->

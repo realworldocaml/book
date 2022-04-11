@@ -524,7 +524,7 @@ module Immutable = struct
 end
 
 let () =
-  let iters = 1000000 in
+  let iters = 1_000_000 in
   let count = 0.0 in
   let tests =
     [ Bench.Test.create ~name:"mutable" (fun () ->
@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-    time       - Number of nano secs taken.
-    cycles     - Number of CPU cycles (RDTSC) taken.
-    alloc      - Allocation of major, minor and promoted words.
-    gc         - Show major and minor collections per 1000 runs.
-    percentage - Relative execution time as a percentage.
-    speedup    - Relative execution cost as a speedup.
-    samples    - Number of samples collected for profiling.
+	time       - Number of nano secs taken.
+	cycles     - Number of CPU cycles (RDTSC) taken.
+	alloc      - Allocation of major, minor and promoted words.
+	gc         - Show major and minor collections per 1000 runs.
+	percentage - Relative execution time as a percentage.
+	speedup    - Relative execution cost as a speedup.
+	samples    - Number of samples collected for profiling.
 
 ```
 
