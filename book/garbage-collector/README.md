@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 
 ```
 
@@ -587,6 +587,9 @@ Columns that can be specified are:
      something where you traded off taking more time in the test for
      having less GC-driven cross-talk between runs.  Maybe we should
      just omit this? -->
+
+<!-- TODO: This sounds as if the flags show up above, but they
+     don't... -->
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
