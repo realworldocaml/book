@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 
 ```
 
@@ -654,6 +654,12 @@ error-handling.
 Let's explore this with a small example that finalizes values of
 different types, some of which are heap-allocated and others which are
 compile-time constants:
+
+<!-- TODO: I'm pretty unsure what this code is getting at.  The
+     "allocated" things aren't necessarily heap allocated: you just
+     can't heap allocate a bool, right?  I tried to figure out how to
+     get my hands on a heap-allocated float, but generally, I just
+     found this whole thing confusing! -->
 
 ```ocaml file=examples/finalizer/finalizer.ml
 open Core
