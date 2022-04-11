@@ -589,7 +589,7 @@ Columns that can be specified are:
      just omit this? -->
 
 <!-- TODO: This sounds as if the flags show up above, but they
-     don't... -->
+     don't, because we cut it off early. -->
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
