@@ -1002,7 +1002,7 @@ the shell fragment into your global
 loaded in all of your login shells. [completion handlers]{.idx}
 
 ::: {data-type=note}
-##### Installing a Generic Completion Handler
+#### Installing a Generic Completion Handler
 
 Sadly, `bash` doesn't support installing a generic handler for all
 Command-based applications. This means you have to install the completion

@@ -14,7 +14,7 @@ OCaml Platform tools that we'll describe next will do much of the heavy
 lifting.
 
 ::: {data-type=note}
-##### Using the opam source-based package manager
+#### Using the opam source-based package manager
 
 opam is the official package manager and metadata packaging format that is used
 in the OCaml community.  We've been using it in earlier chapters to install
@@ -441,7 +441,7 @@ switch to use. Just the default one should be sufficient get you
 going with building and browsing your interfaces.
 
 ::: {data-type=note}
-##### What is the Language Server Protocol?
+#### What is the Language Server Protocol?
 
 The Language Server Protocol defines a communications standard between
 an editor or IDE and a language-specific server that provides features
@@ -576,7 +576,7 @@ eponymous [opam package manager](https://opam.ocaml.org) that we've
 been using throughout this book.
 
 ::: {data-type=note}
-##### How do we name OCaml modules, libraries and packages?
+#### How do we name OCaml modules, libraries and packages?
 
 Much of the time, the module, library, and package names are all the
 same.  But there are reasons for these names to be distinct as well:
@@ -828,7 +828,7 @@ the package is merged.  Once it is merged, you can navigate to the
 available in the central repository for other users to install.
 
 ::: {data-type=note}
-##### Creating lock files for your projects
+#### Creating lock files for your projects
 
 Before you publish a project, you might also want to create an
 opam lock file to include with the archive. A lock file records

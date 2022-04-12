@@ -27,7 +27,7 @@ you can know rather precisely where a block of performance-critical OCaml
 code is spending its time. [OCaml toolchain/benefits of]{.idx}
 
 ::: {data-type=note}
-##### Why Do OCaml Types Disappear at Runtime?
+#### Why Do OCaml Types Disappear at Runtime?
 
 The OCaml compiler runs through several phases during the compilation
 process. The first phase is syntax checking, during which source files are
@@ -134,7 +134,7 @@ area, it is treated as an opaque C pointer to some other system resource.
 [word-aligned pointers]{.idx}[pointers/word-aligned]{.idx}
 
 ::: {data-type=note}
-##### Some History About OCaml's Word-Aligned Pointers
+#### Some History About OCaml's Word-Aligned Pointers
 
 The alert reader may be wondering how OCaml can guarantee that all of its
 pointers are word-aligned. In the old days, when RISC chips such as Sparc,

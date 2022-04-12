@@ -34,7 +34,7 @@ looks. We'll create a binding to the Ncurses terminal toolkit, as it's widely
 available on most systems and doesn't have any complex dependencies.
 
 ::: {data-type=note}
-## Installing the Ctypes Library
+#### Installing the Ctypes Library
 
 If you want to use Ctypes interactively, you'll also need to install the
 [`libffi`](https://github.com/atgreen/libffi) library as a prerequisite to
@@ -783,7 +783,7 @@ Mon Oct 11 15:57:38 2021
 ```
 
 ::: {data-type=note}
-##### Why Do We Need to Use returning?
+#### Why Do We Need to Use returning?
 
 The alert reader may be curious about why all these function definitions have
 to be terminated by `returning`:
@@ -1067,7 +1067,7 @@ Ctypes]{.idx}[Ctypes library/lifetime of allocated
 Ctypes]{.idx}[garbage collection/of allocated Ctypes]{.idx}
 
 ::: {data-type=note}
-##### Lifetime of Allocated Ctypes
+#### Lifetime of Allocated Ctypes
 
 Values allocated via Ctypes (i.e., using `allocate`, `Array.make`, and so on)
 will not be garbage-collected as long as they are reachable from OCaml

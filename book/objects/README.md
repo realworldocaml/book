@@ -14,7 +14,7 @@ programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
 
 ::: {data-type=note}
-##### What Is Object-Oriented Programming?
+#### What Is Object-Oriented Programming?
 
 Object-oriented programming (often shortened to OOP) is a programming
 style that encapsulates computation and data within logical
@@ -205,7 +205,7 @@ Error: This expression has type < name : string; width : int >
 ```
 
 ::: {data-type=note}
-##### Elisions Are Polymorphic
+#### Elisions Are Polymorphic
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods." It may not be apparent from the syntax, but an elided object type
@@ -480,7 +480,7 @@ val items : item list = [<obj>; <obj>]
 ```
 
 ::: {data-type=note}
-##### Polymorphic Variant Subtyping
+#### Polymorphic Variant Subtyping
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type. A polymorphic variant type *A* is a subtype of

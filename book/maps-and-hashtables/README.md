@@ -548,7 +548,7 @@ total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
 ::: {data-type=note}
-##### =, ==, and phys_equal
+#### =, ==, and phys_equal
 
 OCaml has multiple notions of equality, and picking the right one can
 be tricky.  If you don't open `Base`, you'll find that the `==`

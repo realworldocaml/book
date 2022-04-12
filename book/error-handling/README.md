@@ -292,7 +292,7 @@ large, complex examples with many stages of error handling, the `bind`
 idiom becomes clearer and easier to manage.
 
 ::: {data-type=note}
-##### Monads and `Let_syntax`
+#### Monads and `Let_syntax`
 
 We can make this look a little bit more ordinary by using a syntax
 extension that's designed specifically for monadic binds, called
@@ -466,7 +466,7 @@ type system will let us throw an exception anywhere in a program. [sexp
 declaration]{.idx}[exceptions/textual representation of]{.idx}
 
 ::: {.allow_break data-type=note}
-##### Declaring Exceptions Using `[@@deriving sexp]`
+#### Declaring Exceptions Using `[@@deriving sexp]`
 
 OCaml can't always generate a useful textual representation of an exception.
 For example:

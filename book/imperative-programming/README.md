@@ -602,7 +602,7 @@ let prev elt = elt.prev
 These all follow relatively straightforwardly from our type definitions.
 
 ::: {data-type=note}
-##### Cyclic Data Structures
+#### Cyclic Data Structures
 
 Doubly linked lists are a cyclic data structure, meaning that it is possible
 to follow a nontrivial sequence of pointers that closes in on itself. In
@@ -1187,7 +1187,7 @@ Time: 0.964403152466 ms
 ```
 
 ::: {.allow_break data-type=note}
-##### Limitations of let rec
+#### Limitations of let rec
 
 You might wonder why we didn't tie the recursive knot in `memo_rec` using
 `let rec`, as we did for `make_rec` earlier. Here's code that tries to do
@@ -1408,7 +1408,7 @@ Error: This expression has type float but an expression was expected of type
 ```
 
 ::: {data-type=note}
-##### Understanding Format Strings
+#### Understanding Format Strings
 
 The format strings used by `printf` turn out to be quite different
 from ordinary strings. This difference ties to the fact that OCaml's
