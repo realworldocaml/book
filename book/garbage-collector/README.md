@@ -68,7 +68,7 @@ major and minor heaps to account for this generational difference. We'll
 explain how they differ in more detail next.
 
 ::: {data-type=note}
-##### The Gc Module and OCAMLRUNPARAM
+#### The Gc Module and OCAMLRUNPARAM
 
 OCaml provides several mechanisms to query and alter the behavior of
 the runtime system. The `Gc` module provides this functionality from
@@ -155,7 +155,7 @@ of points necessary to ensure these checks happen in a bounded amount of time.
 [minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
-##### Setting the Size of the Minor Heap
+#### Setting the Size of the Minor Heap
 
 The default minor heap size in OCaml is normally 2 MB on 64-bit platforms,
 but this is increased to 8 MB if you use Core (which generally prefers
@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 
 ```
 
@@ -607,7 +607,7 @@ for]{.idx}[finalizers/in grabage collection]{.idx}[garbage
 collection/finalizer functions]{.idx}
 
 ::: {data-type=note}
-##### What Values Can Be Finalized?
+#### What Values Can Be Finalized?
 
 Various values cannot have finalizers attached since they aren't
 heap-allocated. Some examples of values that are not heap-allocated are

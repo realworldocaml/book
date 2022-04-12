@@ -388,7 +388,7 @@ you should stick to the simpler map/bind/return style of working with
 deferreds when you can.
 
 ::: {data-type=note}
-##### Understanding `bind` in terms of ivars and `upon`
+#### Understanding `bind` in terms of ivars and `upon`
 
 Here's roughly what happens when you write `let d' = Deferred.bind d ~f`.
 
@@ -478,7 +478,7 @@ unbounded amounts of memory, as it keeps track of all the data it
 intends to write but hasn't been able to yet.
 
 ::: {data-type=note}
-##### Tail-calls and chains of deferreds
+#### Tail-calls and chains of deferreds
 
 There's another memory problem you might be concerned about, which is
 the allocation of deferreds.  If you think about the execution of
@@ -576,7 +576,7 @@ $ killall echo.exe
 ```
 
 ::: {data-type=note}
-##### Functions that Never Return
+#### Functions that Never Return
 
 The call to `never_returns` around the call to `Scheduler.go` is a
 little bit surprising, but it has a purpose: to make it clear to
@@ -1604,7 +1604,7 @@ function interface is discussed in more detail in
 [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 
 ::: {data-type=note}
-##### Multicore OCaml
+#### Multicore OCaml
 
 OCaml doesn't support truly parallel threads today, but it will soon.
 The current development branch of OCaml, which is expected to be

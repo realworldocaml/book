@@ -75,7 +75,7 @@ of]{.idx}[static checking]{.idx}[compile-time static
 checking]{.idx}[unit tests]{.idx}
 
 ::: {data-type=note}
-##### Installing the Yojson Library
+#### Installing the Yojson Library
 
 There are several JSON libraries available for OCaml. For this
 chapter, we've picked the popular
@@ -263,7 +263,7 @@ strongly typed OCaml value. [combinators/functional
 combinators]{.idx}[functional combinators]{.idx}
 
 ::: {data-type=note}
-##### Functional Combinators
+#### Functional Combinators
 
 Combinators are a design pattern that crops up quite often in functional
 programming. John Hughes defines them as "a function which builds program
@@ -465,7 +465,7 @@ compile time. [errors/type errors]{.idx}[type checking]{.idx}[polymorphic
 variant types/type checking and]{.idx}[type inference/benefits of]{.idx}
 
 ::: {data-type=note}
-##### Polymorphic Variants and Easier Type Checking
+#### Polymorphic Variants and Easier Type Checking
 
 One difficulty you will encounter is that type errors involving polymorphic
 variants can be quite verbose. For example, suppose you build an `Assoc` and

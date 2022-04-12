@@ -65,7 +65,7 @@ high-performance applications.[compilation process/compiler source
 code]{.idx}[code compilers/bytecode vs. native code]{.idx}
 
 ::: {data-type=note}
-##### Obtaining the Compiler Source Code
+#### Obtaining the Compiler Source Code
 
 Although it's not necessary to understand the examples, you may find it
 useful to have a copy of the OCaml source tree checked out while you read
@@ -615,7 +615,7 @@ Error: The implementation conflicting_interface.ml
 ```
 
 ::: {.allow_break data-type=note}
-##### Which Comes First: The ml or the mli?
+#### Which Comes First: The ml or the mli?
 
 There are two schools of thought on which order OCaml code should be written
 in. It's very easy to begin writing code by starting with an `ml` file and
@@ -1015,7 +1015,7 @@ up a cross-compilation environment). [cmi files]{.idx}[files/cmi
 files]{.idx}[OCaml toolchain/ocamlogjinfo]{.idx}
 
 ::: {data-type=note}
-##### Inspecting Compilation Units with ocamlobjinfo
+#### Inspecting Compilation Units with ocamlobjinfo
 
 For separate compilation to be sound, we need to ensure that all the
 `cmi` files used to type-check a module are the same across compilation runs.
@@ -1033,9 +1033,9 @@ $ ocamlobjinfo typedef.cmi
 File typedef.cmi
 Unit name: Typedef
 Interfaces imported:
-	cdd43318ee9dd1b187513a4341737717	Typedef
-	9b04ecdc97e5102c1d342892ef7ad9a2	Pervasives
-	79ae8c0eb753af6b441fe05456c7970b	CamlinternalFormatBasics
+    cdd43318ee9dd1b187513a4341737717    Typedef
+    9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
+    79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
 ```
 
 `ocamlobjinfo` examines the compiled interface and displays what other
