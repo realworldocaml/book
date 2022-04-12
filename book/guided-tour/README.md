@@ -1026,7 +1026,7 @@ comparison operators when you want them. OCaml also offers a special set of
 *polymorphic comparison operators* that can work on almost any type, but
 those are considered to be problematic, and so are hidden by default by
 `Base`. We'll learn more about polymorphic compare in
-[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}
+[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}.
 :::
 
 
