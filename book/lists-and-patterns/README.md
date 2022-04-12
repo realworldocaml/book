@@ -472,7 +472,7 @@ table.[strings/concatenation of]{.idx}[String.concat]{.idx}[List
 module/String.concat and]{.idx}
 
 ::: {data-type=note}
-#### Performance of String.concat and ^
+#### Performance of `String.concat` and `^`
 
 In the preceding code we’ve concatenated strings two different ways:
 `String.concat`, which operates on lists of strings; and `^`, which is

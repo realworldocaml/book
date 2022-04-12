@@ -203,7 +203,7 @@ $ grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.exe
 
 We've really just scratched the surface of what can be done with
 `dune`.  We'll discuss `dune` in more detail in [The OCaml
-Platform](platform.html){data-type=xref}.
+Platform](platform.html#the-ocaml-platform){data-type=xref}.
 
 
 ::: {data-type=note}

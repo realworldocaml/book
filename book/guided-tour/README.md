@@ -1219,7 +1219,7 @@ This isn't the most idiomatic way to sum up a list, but it shows how you can
 use a `ref` in place of a mutable variable.
 
 ::: {data-type=note}
-#### Nesting lets with let and in
+#### Nesting lets with `let` and `in`
 
 The definition of `sum` in the above examples was our first use of
 `let` to define a new variable within the body of a function. A `let`

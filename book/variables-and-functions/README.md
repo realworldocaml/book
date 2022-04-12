@@ -327,7 +327,7 @@ syntactic niceties aside, the two styles of function definition are
 equivalent.
 
 ::: {data-type=note}
-#### let and fun
+#### `let` and `fun`
 
 Functions and `let` bindings have a lot to do with each other. In some sense,
 you can think of the parameter of a function as a variable being bound to the
