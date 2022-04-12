@@ -1,5 +1,5 @@
-(** example.ml: The first special comment of the file is the comment
-    associated with the whole module. *)
+(** The first special comment of the file is the comment associated
+   with the whole module. *)
 
 (** Comment for exception My_exception. *)
 exception My_exception of (int -> int) * int
