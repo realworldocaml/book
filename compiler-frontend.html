@@ -1,9 +1,11 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The Compiler Frontend: Parsing and Type Checking - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="the-compiler-frontend-parsing-and-type-checking">
 <h1>The Compiler Frontend: Parsing and Type Checking</h1>
 <p>Compiling source code into executable programs involves a fairly
-complex set of libraries, linkers, and assemblers. It’s important to
-understand how these fit together to help with your day-to-day workflow
-of developing, debugging, and deploying applications.<a data-secondary="toolchain for" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
+complex set of libraries, linkers, and assemblers. While Dune mostly
+hides this complexity from you, it’s still useful to understand how
+these pieces work so that you can debug performance problems, or come up
+with solutions for unusual situations that aren’t well handled by
+existing tools.</p>
 <p>OCaml has a strong emphasis on static type safety and rejects source
 code that doesn’t meet its requirements as early as possible. The
 compiler does this by running the source code through a series of checks
@@ -11,21 +13,17 @@ and transformations. Each stage performs its job (e.g., type checking,
 optimization, or code generation) and discards some information from the
 previous stage. The final native code output is low-level assembly code
 that doesn’t know anything about the OCaml modules or objects that the
-compiler started with.<a data-primary="static checking" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static checking" data-type="indexterm">&nbsp;</a></p>
-<p>You don’t have to do all of this manually, of course. The compiler
-frontends (<code>ocamlc</code> and <code>ocamlopt</code>) are invoked
-via the command line and chain the stages together for you. Sometimes
-though, you’ll need to dive into the toolchain to hunt down a bug or
-investigate a performance problem. This chapter explains the compiler
-pipeline in more depth so you understand how to harness the command-line
-tools effectively. <a data-secondary="ocamlc" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlopt" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
+compiler started with.</p>
 <p>In this chapter, we’ll cover the following topics:</p>
 <ul>
-<li><p>The compilation pipeline and what each stage represents</p></li>
-<li><p>The type-checking process, including module resolution</p></li>
+<li>An overview of the compiler codebase and the compilation pipeline,
+and what each stage represents</li>
+<li>Parsing, which goes from raw text to the abstract syntax tree</li>
+<li>PPX’s, which further transform the AST</li>
+<li>Type-checking, including module resolution</li>
 </ul>
-<p>The details of the compilation process into executable code can be
-found next, in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 26, The Compiler Backend Byte Code And Native Code</a>.</p>
+<p>The details of the remainder of the compilation process, which gets
+all the way to executable code comes next, in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 26, The Compiler Backend Byte Code And Native Code</a>.</p>
 <section class="level2" id="an-overview-of-the-toolchain">
 <h2>An Overview of the Toolchain</h2>
 <p>The OCaml tools accept textual source code as input, using the
@@ -189,6 +187,7 @@ successfully:</p>
 token that couldn’t be parsed. In the broken example, the
 <code>module</code> keyword isn’t a valid token at that point in
 parsing, so the error location information is correct.</p>
+
 </section>
 <section class="level3" id="automatically-indenting-source-code">
 <h3>Automatically Indenting Source Code</h3>
@@ -278,11 +277,14 @@ correct:</p>
 </code></pre>
 </div>
 <p>The <code>ocp-indent</code> <a href="https://github.com/OCamlPro/ocp-indent">homepage</a> documents how
-to integrate it with your favorite editor. All the Core libraries are
-formatted using it to ensure consistency, and it’s a good idea to do
-this before publishing your own source code online. For larger projects,
-you can use <code>ocamlformat</code> to format whole files as described
-earlier in <a data-type="xref" href="platform.html#autoformatting-your-source-code">Chapter 21, OCaml Platform</a>.</p>
+to integrate it with your favorite editor. You can also use
+<code>ocamlformat</code> to format your files, as described earlier in
+<a data-type="xref" href="platform.html#autoformatting-your-source-code">Chapter 21, OCaml Platform</a>. <code>ocamlformat</code> goes
+farther than <code>ocp-indent</code>, fully determining your formatting,
+including all line-breaks. <code>Base</code>, <code>Core</code> and
+related libraries are all formatted using <code>ocamlformat</code> to
+ensure consistency, and using some kind of automatic formatting is a
+good practice before publishing your own source code online.</p>
 </section>
 <section class="level3" id="generating-documentation-from-interfaces">
 <h3>Generating Documentation from Interfaces</h3>
@@ -300,8 +302,8 @@ be viewed using <a href="http://www.graphviz.org">Graphviz</a>.</p>
 <p>Here’s a sample of some source code that’s been annotated with
 docstring comments:</p>
 <div class="highlight">
-<pre><code class="language-ocaml">(** example.ml: The first special comment of the file is the comment
-    associated with the whole module. *)
+<pre><code class="language-ocaml">(** The first special comment of the file is the comment associated
+   with the whole module. *)
 
 (** Comment for exception My_exception. *)
 exception My_exception of (int -&gt; int) * int
@@ -371,6 +373,7 @@ external tools.</p>
 <p>The basic form of an attribute is the <code>[@ ... ]</code> syntax.
 The number of <code>@</code> symbols defines which part of the syntax
 tree the attribute is bound to:</p>
+
 <ul>
 <li>a single <code>[@</code> binds to expressions and individual type
 definitions.</li>
@@ -387,10 +390,10 @@ first look at the use of the standalone attribute
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Abc = struct
 
-[@@@warning "+10"]
+[@@@warning "+non-unit-statement"]
 let a = Sys.get_argv (); ()
 
-[@@@warning "-10"]
+[@@@warning "-non-unit-statement"]
 let b = Sys.get_argv (); ()
 end;;
 &gt;Line 4, characters 11-26:
@@ -398,11 +401,11 @@ end;;
 &gt;module Abc : sig val a : unit val b : unit end
 </code></pre>
 </div>
-<p>The warning number in our example is taken from the <a href="https://ocaml.org/manual/native.html">compiler manual page</a>. In
-this case, warning 10 emits a message if the expression in a sequence
-doesn’t have type <code>unit</code>. The <code>@@@warning</code> nodes
-in the module implementation cause the compiler to change its behaviour
-within the scope of that structure only.</p>
+<p>The warning in our example is taken from the <a href="https://ocaml.org/manual/native.html">compiler manual page</a>.
+This warning emits a message if the expression in a sequence doesn’t
+have type <code>unit</code>. The <code>@@@warning</code> nodes in the
+module implementation cause the compiler to change its behaviour within
+the scope of that structure only.</p>
 <p>An annotation can also be more narrowly attached to a block of code.
 For example, a module implementation can be annotated with
 <code>@@deprecated</code> to indicate that it should not be used in new
@@ -568,13 +571,16 @@ an <code>mli</code> signature file for a module, or by the inferred type
 if there is only an <code>ml</code> implementation present.</p>
 <p>The compiler makes sure that your <code>ml</code> and
 <code>mli</code> files have compatible signatures. The type checker
-throws an immediate error if this isn’t the case:</p>
+throws an immediate error if this isn’t the case. For example, if you
+have this as your <code>ml</code> file:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t = Foo</code></pre>
 </div>
+<p> and this as your <code>mli</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t = Bar</code></pre>
 </div>
+<p> then, when you try to build, you’ll get this error:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -c conflicting_interface.mli conflicting_interface.ml
 &gt;File "conflicting_interface.ml", line 1:
@@ -666,6 +672,7 @@ can generate some very large signatures, and errors tend to propagate
 more widely than if you are using more explicitly typed variants or
 classes.<a data-secondary="type checking
 and" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a><a data-primary="row polymorphism" data-type="indexterm">&nbsp;</a></p>
+
 <p>For instance, consider this broken example that expresses some simple
 algebraic operations over integers:</p>
 <div class="highlight">
@@ -918,8 +925,8 @@ contents:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val friends : Bob.t list</code></pre>
 </div>
-<p>These two files are exactly analogous to including the following code
-directly in another module that references <code>Alice</code>:</p>
+<p>These two files produce essentially the same result as the following
+code.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Alice : sig
   val friends : Bob.t list
@@ -945,12 +952,13 @@ search path and use the first ones it encounters as the interfaces for
 <p>The module search path is set by adding <code>-I</code> flags to the
 compiler command line with the directory containing the <code>cmi</code>
 files as the argument. Manually specifying these flags gets complex when
-you have lots of libraries, and is the reason why the OCamlfind frontend
-to the compiler exists. OCamlfind automates the process of turning
-third-party package names and build descriptions into command-line flags
-that are passed to the compiler command line.</p>
+you have lots of libraries, and is the reason why tools like
+<code>dune</code> and <code>ocamlfind</code> exist. They both automate
+the process of turning third-party package names and build descriptions
+into command-line flags that are passed to the compiler command
+line.</p>
 <p>By default, only the current directory and the OCaml standard library
-will be searched for <code>cmi</code> files. The <code>Pervasives</code>
+will be searched for <code>cmi</code> files. The <code>Stdlib</code>
 module from the standard library will also be opened by default in every
 compilation unit. The standard library location is obtained by running
 <code>ocamlc -where</code> and can be overridden by setting the
