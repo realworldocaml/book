@@ -19,7 +19,7 @@ Before going any further, make sure you've followed the steps in [the
 installation page](http://dev.realworldocaml.org/install.html).
 
 ::: {data-type=note}
-##### `Base` and `Core`
+#### `Base` and `Core`
 
 `Base` comes along with another, yet more extensive standard library
 replacement, called `Core`.  We're going to mostly stick to `Base`,
@@ -390,7 +390,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 `string`, and they can't both be right at the same time.
 
 ::: {data-type=note}
-##### Type Errors Versus Exceptions
+#### Type Errors Versus Exceptions
 
 There's a big difference in OCaml between errors that are caught at compile
 time and those that are caught at runtime. It's better to catch errors as early
@@ -501,7 +501,7 @@ This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
 ::: {data-type=note}
-##### Operators in `Base` and the stdlib
+#### Operators in `Base` and the stdlib
 
 OCaml's standard library and `Base` mostly use the same operators for
 the same things, but there are some differences.  For example, in
@@ -599,7 +599,7 @@ started with, as you can see below:
 ```
 
 ::: {data-type=note}
-##### Semicolons Versus Commas
+#### Semicolons Versus Commas
 
 Unlike many other languages, OCaml uses semicolons to separate list elements
 in lists rather than commas. Commas, instead, are used for separating
@@ -1015,7 +1015,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-##### `Base` and polymorphic comparison
+#### `Base` and polymorphic comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,
@@ -1026,7 +1026,7 @@ comparison operators when you want them. OCaml also offers a special set of
 *polymorphic comparison operators* that can work on almost any type, but
 those are considered to be problematic, and so are hidden by default by
 `Base`. We'll learn more about polymorphic compare in
-[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}
+[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}.
 :::
 
 
@@ -1219,7 +1219,7 @@ This isn't the most idiomatic way to sum up a list, but it shows how you can
 use a `ref` in place of a mutable variable.
 
 ::: {data-type=note}
-##### Nesting lets with let and in
+#### Nesting lets with `let` and `in`
 
 The definition of `sum` in the above examples was our first use of
 `let` to define a new variable within the body of a function. A `let`

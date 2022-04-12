@@ -37,7 +37,7 @@ of how to build a parser in OCaml. [ocamlyacc parser generator]{.idx}[Menhir
 parser generator/vs. ocamlyacc]{.idx}
 
 ::: {data-type=note}
-##### Menhir Versus ocamlyacc
+#### Menhir Versus ocamlyacc
 
 Menhir is an alternative parser generator that is generally superior to the
 venerable `ocamlyacc`, which dates back quite a few years. Menhir is mostly
@@ -126,7 +126,7 @@ structure. But it's still a good deal more low-level than the simple AST we
 used for representing JSON data in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}:
 
-```ocaml file=examples/parsing/json.ml
+```ocaml file=examples/parsing/json.ml,part=1
 type value =
   [ `Assoc of (string * value) list
   | `Bool of bool
@@ -135,38 +135,6 @@ type value =
   | `List of value list
   | `Null
   | `String of string ]
-
-open Core
-open Out_channel
-
-let rec output_value outc = function
-  | `Assoc obj -> print_assoc outc obj
-  | `List l -> print_list outc l
-  | `String s -> printf "\"%s\"" s
-  | `Int i -> printf "%d" i
-  | `Float x -> printf "%f" x
-  | `Bool true -> output_string outc "true"
-  | `Bool false -> output_string outc "false"
-  | `Null -> output_string outc "null"
-
-and print_assoc outc obj =
-  output_string outc "{ ";
-  let sep = ref "" in
-  List.iter
-    ~f:(fun (key, value) ->
-      printf "%s\"%s\": %a" !sep key output_value value;
-      sep := ",\n  ")
-    obj;
-  output_string outc " }"
-
-and print_list outc arr =
-  output_string outc "[";
-  List.iteri
-    ~f:(fun i v ->
-      if i > 0 then output_string outc ", ";
-      output_value outc v)
-    arr;
-  output_string outc "]"
 ```
 
 This representation is much richer than our token stream, capturing the fact
@@ -194,7 +162,7 @@ language to be parsed. [files/mly files]{.idx}[parsing/parser
 definition]{.idx}
 
 We'll start by declaring the list of tokens. A token is declared using the
-syntax `%token <`*`type`*`>`*`uid`*, where the *`<type>`* is optional and
+syntax `%token <`*`type`*`> `*`uid`*, where the *`<type>`* is optional and
 *`uid`* is a capitalized identifier. For JSON, we need tokens for numbers,
 strings, identifiers, and punctuation: [tokens, declaration of]{.idx}
 
@@ -574,7 +542,7 @@ pattern:
   characters; `"true"` is first, so the return value is `TRUE`.
 
 ::: {data-type=note}
-##### Unused lexing values
+#### Unused lexing values
 
 In our parser, we have not used all the token regexps that we defined
 in the lexer.  For instance, `id` is unused since we do not parse
@@ -586,7 +554,7 @@ turn trigger an "unused" warning since the parser never constructs a
 value with type ID:
 
 ```
-File "parser.mly", line 4, characters 16-18:        
+File "parser.mly", line 4, characters 16-18:
 Warning: the token ID is unused.
 ```
 
@@ -640,7 +608,7 @@ generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
 ::: {data-type=note}
-##### Handling Unicode
+#### Handling Unicode
 
 We've glossed over an important detail here: parsing Unicode characters to
 handle the full spectrum of the world's writing systems. OCaml has several

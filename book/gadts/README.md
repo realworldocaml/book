@@ -1540,7 +1540,7 @@ be called in each of the duplicated cases.
 <!-- TODO: Fix forward references -->
 
 As will be discussed in more detail in [Data Serialization With
-S-Expressions](data-serialization.html){data-type=xref},
+S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 s-expressions are a convenient data format for representing structured
 data.  Rather than write the serializers and deserializers by hand, we
 typically use `ppx_sexp_value`, which is a syntax extension which

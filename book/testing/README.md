@@ -217,7 +217,7 @@ to do the test that's important but is really awkward to expose.  But
 such cases are very much the exception.
 
 ::: {data-type=note}
-##### Why can't inline tests go in executables?
+#### Why can't inline tests go in executables?
 
 We've only talked about putting tests into libraries. What about
 executables? It turns out you can't do this directly, because Dune
@@ -264,7 +264,7 @@ let%expect_test "trivial" = print_endline "Hello World!"
 ```
 
 ::: {data-type=note}
-##### `open` and `open!`
+#### `open` and `open!`
 
 In this example, we use `open!` instead of `open` because we happen
 not to be using any values from `Base`, and so the compiler will warn
@@ -426,7 +426,7 @@ let%expect_test _ =
 ```
 
 ::: {data-type=note}
-##### Quoted strings
+#### Quoted strings
 
 The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.

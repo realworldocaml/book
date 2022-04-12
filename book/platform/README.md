@@ -1,9 +1,9 @@
 # The OCaml Platform
 
-So far in the book, we've gone through a number of techniques you can
-use to build larger scale OCaml programs.  We'll now wrap up this part by
-examining the tools you can use for editing, compiling, testing,
-documenting and publishing your own projects.
+So far in part II, we've gone through a number of libraries and
+techniques you can use to build larger scale OCaml programs.  We'll
+now wrap up this part by examining the tools you can use for editing,
+compiling, testing, documenting and publishing your own projects.
 
 The OCaml community has developed a suite of modern tools to interface it
 with IDEs such as Visual Studio Code, and to generate API documentation and
@@ -14,7 +14,7 @@ OCaml Platform tools that we'll describe next will do much of the heavy
 lifting.
 
 ::: {data-type=note}
-##### Using the opam source-based package manager
+#### Using the opam source-based package manager
 
 opam is the official package manager and metadata packaging format that is used
 in the OCaml community.  We've been using it in earlier chapters to install
@@ -64,14 +64,14 @@ earlier in the book.
 
 ### Setting up an opam local switch
 
-The next thing we need is a suitable compiler developer environment for this
-project, with dune and any other library dependencies available.  The best way
-to do this is to create a new opam sandbox, via the `opam switch create` command.
-If you specify a project directory argument to this command,
-then it creates a "local switch" that stores all the dependencies within that
-directory rather than under `~/.opam`.  This is a convenient way to keep all your
-build dependencies and source code in one place on your filesystem.
-[opam/local switch]{.idx}
+The next thing we need is a suitable environment for this project,
+with dune and any other library dependencies available.  The best way
+to do this is to create a new opam sandbox, via the `opam switch
+create` command.  If you specify a project directory argument to this
+command, then it creates a "local switch" that stores all the
+dependencies within that directory rather than under `~/.opam`.  This
+is a convenient way to keep all your build dependencies and source
+code in one place on your filesystem.  [opam/local switch]{.idx}
 
 Let's make a local switch for our hello world project now:
 [opam package manager/creating a local switch]{.idx}
@@ -115,8 +115,7 @@ project.  The double dash in the command line is a common Unix convention that
 tells opam to stop parsing its own optional arguments for the remainder of the
 command, so that they don't interfere with the command that is being executed.
 
-::: {data-type=note}
-##### Choosing an OCaml compiler version
+### Choosing an OCaml compiler version
 
 When creating a switch, opam analyses the project dependencies
 and selects the newest OCaml compiler that is compatible with them.
@@ -175,14 +174,13 @@ For example, to build a compiler with `flambda`, you would:
 $ opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
 ```
 
-You can specify multiple `ocaml-option` packages to cover all the customisation
-your project needs. See the full set of option packages by using:
+You can specify multiple `ocaml-option` packages to cover all the
+customization your project needs. See the full set of option packages
+by using:
 
 ```sh skip
 $ opam search ocaml-option
 ```
-
-:::
 
 ### Structure of an OCaml project
 
@@ -193,16 +191,17 @@ looks like. Let's now look at the set of files in our `hello/`
 application to examine a fuller project structure.
 
 ```
--- dune-project
--- hello.opam
--- lib
-|  |- dune
-|- bin
-|  |- dune
-|  |- main.ml
-|-- test
-    |- dune
-    |- hello.ml
+.
+|-- dune-project
+|-- hello.opam
+|-- lib
+|   |-- dune
+|-- bin
+|   |-- dune
+|   `-- main.ml
+`-- test
+    |-- dune
+    `-- hello.ml
 ```
 
 Some observations about this structure:
@@ -219,7 +218,7 @@ Some observations about this structure:
   specifying the build parameters for that part of the codebase.  The
   trio of `lib`, `bin` and `test` makes good sense for a project that
   is primarily an executable, rather than a reusable library.  In that
-  case, you would generally use these libraries as follows:
+  case, you would might use these directories as follows:
 
   - The `lib` directory would contain the bulk of the source.
   - The `bin` directory would contain a thin wrapper on top of the
@@ -234,8 +233,9 @@ detail.
 
 ### Defining module names
 
-Individual `ml` and `mli` files each define OCaml modules, named after the file
-and capitalised. Modules names are the only name you refer to within OCaml code.
+A matching pair of `ml` and `mli` files define an OCaml module, named
+after the file and capitalized.  Modules names are the only name you
+refer to within OCaml code.
 
 Let's create a `Msg` module in our skeleton project inside `lib/`.
 
@@ -253,10 +253,11 @@ about how files and modules interact, refer back to
 
 One or more OCaml modules can be gathered together into a *library*,
 providing a convenient way to package up multiple dependencies with a
-single name. A project usually puts the business logic of the application
-into a library rather than directly into an executable binary, since
-this makes writing tests and documentation easier in addition to
-improving reusability.  [libraries/defining libraries]{.idx}
+single name. A project usually puts the business logic of the
+application into a library rather than directly into an executable
+binary, since this makes writing tests and documentation easier in
+addition to improving reusability.  [libraries/defining
+libraries]{.idx}
 
 Libraries are defined by putting a `dune` file into a directory, such
 as the one generated for us in `lib/dune`:
@@ -308,23 +309,24 @@ file is empty since this is a trivial standalone library.
 ### Writing test cases for a library
 
 Our next step is to define a test case in `test/dune` for our library.
-While we showed you how to define inline tests earlier in
-[Testing](testing.html#testing){data-type=xref}, we'll now take
-advantage of another dune feature to build executable test cases.
+In [Testing](testing.html#testing){data-type=xref}, we showed you how
+to embed tests within a library, using the inline test mechanism.
+In this section, we'll show you how to use dune's `test` stanza to
+create a test-only executable, which is useful when you're not using
+inline tests.
 
-First, add in a simple assertion inside `test/hello.ml` to
-construct a trivial test case.
+Let's start by writing a test as a simple assertion in `test/hello.ml`.
 
 <!-- $MDX file=examples/correct/hello/test/hello.ml -->
 ```
-let _ =
-  assert(String.equal Hello.Msg.greeting "Hello World")
+let () = assert (String.equal Hello.Msg.greeting "Hello World")
 ```
 
-We can use the `(test)` dune field to build an executable binary that is run
-when you invoke `dune runtest` (along with any inline tests defined within
-libraries).  We'll also add a dependency on our locally defined `hello` library
-so that we can access it.  The `test/dune` file looks like this:
+We can use the `test` dune stanza to build an executable binary that
+is run when you invoke `dune runtest` (along with any inline tests
+defined within libraries).  We'll also add a dependency on our locally
+defined `hello` library so that we can access it.  The `test/dune`
+file looks like this:
 
 <!-- $MDX file=examples/correct/hello/test/dune -->
 ```scheme
@@ -334,10 +336,10 @@ so that we can access it.  The `test/dune` file looks like this:
 ```
 
 Once you run the tests via `dune runtest`, you can find the built
-artefacts in `_build/default/test/` in your project checkout.
+artifacts in `_build/default/test/` in your project checkout.
 
 ```sh skip
-$ ls -la _build/default/test 
+$ ls -la _build/default/test
 total 992
 drwxr-xr-x  7 avsm  staff     224 27 Feb 16:13 .
 drwxr-xr-x  9 avsm  staff     288 27 Feb 15:23 ..
@@ -415,9 +417,9 @@ come to shortly in this chapter).
 
 Now that we've seen the basic structure of the OCaml project, it's
 time to setup an integrated development environment. An IDE is
-particularly useful for use with OCaml due to the extra information
-you gain from the static type information present in the codebase. A
-good IDE will provide you with the facilities to browse interface
+particularly useful for OCaml because it lets you leverage the
+information that's extracted by OCaml's rich type-system. A good IDE
+will provide you with the facilities to browse interface
 documentation, see inferred types for code, and to jump to the
 definitions of external modules.
 
@@ -439,7 +441,7 @@ switch to use. Just the default one should be sufficient get you
 going with building and browsing your interfaces.
 
 ::: {data-type=note}
-##### What is the Language Server Protocol?
+#### What is the Language Server Protocol?
 
 The Language Server Protocol defines a communications standard between
 an editor or IDE and a language-specific server that provides features
@@ -482,15 +484,14 @@ as follows:
 
 <!-- $MDX file=examples/correct/hello/lib/msg.mli -->
 ```
-(** This is a docstring, as it starts with "(**", as opposed to normal comments
-    that start with a single star.
+(** This is a docstring, as it starts with "**", as opposed to normal
+    comments that start with a single star.
 
-    The top-most docstring of the module should contain a description of the
-    module, what it does, how to use it, etc.
+    The top-most docstring of the module should contain a description
+    of the module, what it does, how to use it, etc.
 
-    The function-specific documentation located below the function signatures. *)
-
-val greeting : string
+    The function-specific documentation located below the function
+    signatures. *)
 
 (** This is the docstring for the [greeting] function.
 
@@ -501,6 +502,7 @@ val greeting : string
     {4 Examples}
 
     {[ print_endline greeting ]} *)
+val greeting : string
 ```
 
 Documentation strings are parsed by the
@@ -574,15 +576,13 @@ eponymous [opam package manager](https://opam.ocaml.org) that we've
 been using throughout this book.
 
 ::: {data-type=note}
-##### How do we name OCaml modules, libraries and packages?
+#### How do we name OCaml modules, libraries and packages?
 
 Much of the time, the module, library, and package names are all the
-same.  The same name can often be used for the library and the package.
-But there are reasons for these names to be distinct as well:
+same.  But there are reasons for these names to be distinct as well:
 
 - Some libraries are exposed as multiple top-level modules, which
-  means you need to pick a different name for referring to that
-  collection of modules.
+  means you need a different name for that collection of modules.
 - Even when the library has a single top-level module, you might want
   the library name to be different from the module name to avoid name
   clashes at the library level.
@@ -694,11 +694,11 @@ to find the best solution for your own needs.
 When you create a GitHub repository and push your code to it, you can
 also add an OCaml GitHub Action that will install the OCaml Platform
 tools and run your code across various architectures and operating
-systems.  You can find the full documentation online at the [GitHub
-Setup OCaml](https://github.com/marketplace/actions/set-up-ocaml)
-marketplace.  Configuring an action is as simple as adding a
-`.github/workflows/test.yml` file to your project that looks something
-like this:
+systems.  You can find the full documentation online at the [Set up
+OCaml](https://github.com/marketplace/actions/set-up-ocaml) page on
+the GitHub marketplace.  Configuring an action is as simple as adding
+a `.github/workflows/test.yml` file to your project that looks
+something like this:
 
 ```yaml
 name: Hello world workflow
@@ -732,7 +732,7 @@ This workflow file will run your project on OCaml installations on
 Windows, macOS and Linux, using the latest patch release of OCaml
 4.13.  Notice that it also runs the test cases you have defined
 earlier on all those different operating systems as well.  You can do
-an awful lot of customisation of these continuous integration
+an awful lot of customization of these continuous integration
 workflows, so refer to the online documentation for more options.
 
 ### Other conventions
@@ -828,7 +828,7 @@ the package is merged.  Once it is merged, you can navigate to the
 available in the central repository for other users to install.
 
 ::: {data-type=note}
-##### Creating lock files for your projects
+#### Creating lock files for your projects
 
 Before you publish a project, you might also want to create an
 opam lock file to include with the archive. A lock file records
@@ -857,11 +857,12 @@ project to the Internet.
 
 ## Learning more from real projects
 
-There's a lot more customisation that happens in any real project, and we can't
-cover every aspect in this book. The best way by far to learn more is to dive
-in and compile an already established project, and perhaps even contribute to
-it. There are thousands of libraries and executable projects released on the
-opam repository which you can find online at <https://ocaml.org>.
+There's a lot more customization that happens in any real project, and
+we can't cover every aspect in this book. The best way by far to learn
+more is to dive in and compile an already established project, and
+perhaps even contribute to it. There are thousands of libraries and
+executable projects released on the opam repository which you can find
+online at <https://ocaml.org>.
 
 A selection of some include:
 
@@ -882,4 +883,3 @@ A selection of some include:
   using dune in a variety of ways available at <https://github.com/mirage>.
 - You can find a number of standalone OCaml libraries for unicode, parsing and computer
   graphics and OS interaction over at <https://erratique.ch/software>.
-
