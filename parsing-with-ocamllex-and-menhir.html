@@ -32,8 +32,8 @@ Data</a>.</p>
 not to teach all of the theoretical issues, but to provide a pragmatic
 introduction of how to build a parser in OCaml. <a data-primary="ocamlyacc parser generator" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;ocamlyacc" data-primary="Menhir
 parser generator" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="menhir-versus-ocamlyacc">
-<h5>Menhir Versus ocamlyacc</h5>
+<section data-type="note" class="level4" id="menhir-versus-ocamlyacc">
+<h4>Menhir Versus ocamlyacc</h4>
 <p>Menhir is an alternative parser generator that is generally superior
 to the venerable <code>ocamlyacc</code>, which dates back quite a few
 years. Menhir is mostly compatible with <code>ocamlyacc</code> grammars,
@@ -509,8 +509,8 @@ If the input were <code>true: 167</code>, then both <code>"true"</code>
 and <code>id</code> match the first four characters; <code>"true"</code>
 is first, so the return value is <code>TRUE</code>.</p></li>
 </ul>
-<section data-type="note" class="level5" id="unused-lexing-values">
-<h5>Unused lexing values</h5>
+<section data-type="note" class="level4" id="unused-lexing-values">
+<h4>Unused lexing values</h4>
 <p>In our parser, we have not used all the token regexps that we defined
 in the lexer. For instance, <code>id</code> is unused since we do not
 parse unquoted strings for object identifiers (something that is allowed
@@ -568,8 +568,8 @@ parser to bring it all together. <a data-secondary="Unicode
 parsing" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-primary="Uutf Unicode codec" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="sedlex
 lexer generator" data-type="indexterm">&nbsp;</a><a data-primary="Camomile unicode
 parser" data-type="indexterm">&nbsp;</a><a data-primary="Unicode, parsing solutions for" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="handling-unicode">
-<h5>Handling Unicode</h5>
+<section data-type="note" class="level4" id="handling-unicode">
+<h4>Handling Unicode</h4>
 <p>We’ve glossed over an important detail here: parsing Unicode
 characters to handle the full spectrum of the world’s writing systems.
 OCaml has several third-party solutions to handling Unicode, with

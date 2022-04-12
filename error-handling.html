@@ -264,8 +264,8 @@ one we started with, and indeed, for small examples like this, direct
 matching of options is generally better than using <code>bind</code>.
 But for large, complex examples with many stages of error handling, the
 <code>bind</code> idiom becomes clearer and easier to manage.</p>
-<section data-type="note" class="level5" id="monads-and-let_syntax">
-<h5>Monads and <code>Let_syntax</code></h5>
+<section data-type="note" class="level4" id="monads-and-let_syntax">
+<h4>Monads and <code>Let_syntax</code></h4>
 <p>We can make this look a little bit more ordinary by using a syntax
 extension that’s designed specifically for monadic binds, called
 <code>Let_syntax</code>. Here’s what the above example looks like using
@@ -423,8 +423,8 @@ context it is called in. Thus, the type system will let us throw an
 exception anywhere in a program. <a data-primary="sexp
 declaration" data-type="indexterm">&nbsp;</a><a data-secondary="textual representation
 of" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5 allow_break" id="declaring-exceptions-using-deriving-sexp">
-<h5>Declaring Exceptions Using <code>[@@deriving sexp]</code></h5>
+<section data-type="note" class="level4 allow_break" id="declaring-exceptions-using-deriving-sexp">
+<h4>Declaring Exceptions Using <code>[@@deriving sexp]</code></h4>
 <p>OCaml can’t always generate a useful textual representation of an
 exception. For example:</p>
 <div class="highlight">

@@ -190,8 +190,8 @@ some legitimate reasons to want to put some test directly in your
 production library, e.g., when you need access to some functionality to
 do the test that’s important but is really awkward to expose. But such
 cases are very much the exception.</p>
-<section data-type="note" class="level5" id="why-cant-inline-tests-go-in-executables">
-<h5>Why can’t inline tests go in executables?</h5>
+<section data-type="note" class="level4" id="why-cant-inline-tests-go-in-executables">
+<h4>Why can’t inline tests go in executables?</h4>
 <p>We’ve only talked about putting tests into libraries. What about
 executables? It turns out you can’t do this directly, because Dune
 doesn’t support the <code>inline_tests</code> declaration in source
@@ -231,8 +231,8 @@ open Stdio
 
 let%expect_test "trivial" = print_endline "Hello World!"</code></pre>
 </div>
-<section data-type="note" class="level5" id="open-and-open">
-<h5><code>open</code> and <code>open!</code></h5>
+<section data-type="note" class="level4" id="open-and-open">
+<h4><code>open</code> and <code>open!</code></h4>
 <p>In this example, we use <code>open!</code> instead of
 <code>open</code> because we happen not to be using any values from
 <code>Base</code>, and so the compiler will warn us about an unused
@@ -371,8 +371,8 @@ an example page.</p>
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)]</code></pre>
 </div>
-<section data-type="note" class="level5" id="quoted-strings">
-<h5>Quoted strings</h5>
+<section data-type="note" class="level4" id="quoted-strings">
+<h4>Quoted strings</h4>
 <p>The example above used a new syntax for string literals, called
 <em>quoted strings</em>. Here’s an example.</p>
 <div class="highlight">

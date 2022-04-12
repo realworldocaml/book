@@ -140,8 +140,8 @@ color_print (Gray 4) "A muted gray...";;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="variants-tuples-and-parens">
-<h5>Variants, tuples and parens</h5>
+<section data-type="note" class="level4" id="variants-tuples-and-parens">
+<h4>Variants, tuples and parens</h4>
 <p>Variants with multiple arguments look an awful lot like tuples.
 Consider the following example of a value of the type <code>color</code>
 we defined earlier.</p>
@@ -849,8 +849,8 @@ match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;
 and must contain at least <code>`Float</code> and <code>`Int</code>. As
 you can already start to see, polymorphic variants can lead to fairly
 complex inferred types.</p>
-<section data-type="note" class="level5 allow_break" id="polymorphic-variants-and-catch-all-cases">
-<h5>Polymorphic Variants and Catch-all Cases</h5>
+<section data-type="note" class="level4 allow_break" id="polymorphic-variants-and-catch-all-cases">
+<h4>Polymorphic Variants and Catch-all Cases</h4>
 <p>As we saw with the definition of <code>is_positive</code>, a
 <code>match</code> expression can lead to the inference of an upper
 bound on a variant type, limiting the possible tags to those that can be

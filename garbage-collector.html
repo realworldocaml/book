@@ -64,8 +64,8 @@ ones. This is often referred to as the <em>generational hypothesis</em>.
 <p>OCaml uses different memory layouts and garbage-collection algorithms
 for the major and minor heaps to account for this generational
 difference. We’ll explain how they differ in more detail next.</p>
-<section data-type="note" class="level5" id="the-gc-module-and-ocamlrunparam">
-<h5>The Gc Module and OCAMLRUNPARAM</h5>
+<section data-type="note" class="level4" id="the-gc-module-and-ocamlrunparam">
+<h4>The Gc Module and OCAMLRUNPARAM</h4>
 <p>OCaml provides several mechanisms to query and alter the behavior of
 the runtime system. The <code>Gc</code> module provides this
 functionality from within OCaml code, and we’ll frequently refer to it
@@ -146,8 +146,9 @@ function and the back edge of loops. The compiler includes a dataflow
 pass that removes all but the minimum set of points necessary to ensure
 these checks happen in a bounded amount of time.</p>
 <p><a data-secondary="setting size of" data-primary="minor heaps" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="setting-the-size-of-the-minor-heap">
-<h5>Setting the Size of the Minor Heap</h5>
+</section>
+<section data-type="note" class="level4" id="setting-the-size-of-the-minor-heap">
+<h4>Setting the Size of the Minor Heap</h4>
 <p>The default minor heap size in OCaml is normally 2 MB on 64-bit
 platforms, but this is increased to 8 MB if you use Core (which
 generally prefers default settings that improve performance, but at the
@@ -172,7 +173,6 @@ Gc.tune ~minor_heap_size:(262144 * 2) ();;
 collection. Note that Core increases the default minor heap size from
 the standard OCaml installation quite significantly, and you’ll want to
 reduce this if running in very memory-constrained environments.</p>
-</section>
 </section>
 </section>
 </section>
@@ -572,8 +572,8 @@ sweeping it or the program terminating. It’s sometimes useful to run
 extra code just before a value is freed by the GC, for example, to check
 that a file descriptor has been closed, or that a log message is
 recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in grabage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="what-values-can-be-finalized">
-<h5>What Values Can Be Finalized?</h5>
+<section data-type="note" class="level4" id="what-values-can-be-finalized">
+<h4>What Values Can Be Finalized?</h4>
 <p>Various values cannot have finalizers attached since they aren’t
 heap-allocated. Some examples of values that are not heap-allocated are
 integers, constant constructors, Booleans, the empty array, the empty

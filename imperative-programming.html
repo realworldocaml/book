@@ -556,8 +556,8 @@ let prev elt = elt.prev</code></pre>
 </div>
 <p>These all follow relatively straightforwardly from our type
 definitions.</p>
-<section data-type="note" class="level5" id="cyclic-data-structures">
-<h5>Cyclic Data Structures</h5>
+<section data-type="note" class="level4" id="cyclic-data-structures">
+<h4>Cyclic Data Structures</h4>
 <p>Doubly linked lists are a cyclic data structure, meaning that it is
 possible to follow a nontrivial sequence of pointers that closes in on
 itself. In general, building cyclic data structures requires the use of
@@ -1101,8 +1101,8 @@ times faster than it was without memoization.</p>
 &gt;- : int = 2
 </code></pre>
 </div>
-<section data-type="note" class="level5 allow_break" id="limitations-of-let-rec">
-<h5>Limitations of let rec</h5>
+<section data-type="note" class="level4 allow_break" id="limitations-of-let-rec">
+<h4>Limitations of let rec</h4>
 <p>You might wonder why we didn’t tie the recursive knot in
 <code>memo_rec</code> using <code>let rec</code>, as we did for
 <code>make_rec</code> earlier. Here’s code that tries to do just that:
@@ -1307,8 +1307,8 @@ match what’s presented in the format string, we’ll get a type error:</p>
 &gt;         int
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="understanding-format-strings">
-<h5>Understanding Format Strings</h5>
+<section data-type="note" class="level4" id="understanding-format-strings">
+<h4>Understanding Format Strings</h4>
 <p>The format strings used by <code>printf</code> turn out to be quite
 different from ordinary strings. This difference ties to the fact that
 OCaml’s <code>printf</code> facility, unlike the equivalent in C, is

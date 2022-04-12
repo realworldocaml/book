@@ -138,8 +138,8 @@ jump table as it does for normal variants. Instead, it creates a
 decision tree that compares the hash values against the input variable
 in as few comparisons as possible. <a data-secondary="fundamental algorithms in" data-primary="pattern
 matching" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="learning-more-about-pattern-matching-compilation">
-<h5>Learning More About Pattern Matching Compilation</h5>
+<section data-type="note" class="level4" id="learning-more-about-pattern-matching-compilation">
+<h4>Learning More About Pattern Matching Compilation</h4>
 <p>Pattern matching is an important part of OCaml programming. You’ll
 often encounter deeply nested pattern matches over complex data
 structures in real code. A good paper that describes the fundamental
@@ -318,8 +318,8 @@ interpreter.</p>
 variants of commonly encountered operations (e.g., function application
 at a specific arity). You can find full details <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>.
 <a data-secondary="instruction set for" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="where-did-the-bytecode-instruction-set-come-from">
-<h5>Where Did the Bytecode Instruction Set Come From?</h5>
+<section data-type="note" class="level4" id="where-did-the-bytecode-instruction-set-come-from">
+<h4>Where Did the Bytecode Instruction Set Come From?</h4>
 <p>The bytecode interpreter is much slower than compiled native code,
 but is still remarkably performant for an interpreter without a JIT
 compiler. Its efficiency can be traced back to Xavier Leroy’s
@@ -688,8 +688,9 @@ test that, like all such microbenchmarks, isn’t representative of more
 complex codebases. However, if you’re building numerical code that runs
 many iterations in a tight inner loop, it’s worth manually peering at
 the produced assembly code to see if you can hand-optimize it.</p>
-<section data-type="note" class="level5" id="accessing-stdlib-modules-from-within-core">
-<h5>Accessing Stdlib modules from within Core</h5>
+</section>
+<section data-type="note" class="level4" id="accessing-stdlib-modules-from-within-core">
+<h4>Accessing Stdlib modules from within Core</h4>
 <p>In the benchmark above comparing polymorphic and monomorphic
 comparison, you may have noticed that we prepended the comparison
 functions with <code>Stdlib</code>. This is because the Core module
@@ -698,7 +699,6 @@ explicitly redefines the <code>&gt;</code> and <code>&lt;</code> and
 <code>int</code> types, as explained in <a data-type="xref" href="maps-and-hashtables.html#the-polymorphic-comparator">Chapter 14, Maps and Hashtables</a>. You can always recover any of
 the OCaml standard library functions by accessing them through the
 <code>Stdlib</code> module, as we did in our benchmark.</p>
-</section>
 </section>
 </section>
 <section class="level3" id="debugging-native-code-binaries">
@@ -940,8 +940,9 @@ execution time of the application.</p>
 <p>Perf has a growing collection of other commands that let you archive
 these runs and compare them against each other. You can read more on the
 <a href="http://perf.wiki.kernel.org">home page</a>. <a data-primary="frame pointers" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="using-the-frame-pointer-to-get-more-accurate-traces">
-<h5>Using the Frame Pointer to Get More Accurate Traces</h5>
+</section>
+<section data-type="note" class="level4" id="using-the-frame-pointer-to-get-more-accurate-traces">
+<h4>Using the Frame Pointer to Get More Accurate Traces</h4>
 <p>Although Perf doesn’t require adding in explicit probes to the
 binary, it does need to understand how to unwind function calls so that
 the kernel can accurately record the function backtrace for every event.
@@ -964,7 +965,6 @@ switch that compiles OCaml with the frame pointer activated:</p>
 <p>Using the frame pointer changes the OCaml calling convention, but
 opam takes care of recompiling all your libraries with the new
 interface.</p>
-</section>
 </section>
 </section>
 <section class="level3" id="embedding-native-code-in-c">
@@ -997,8 +997,8 @@ libraries is significant in modern GNU toolchains (especially as used in
 Ubuntu 11.10 and later) that resolve symbols from left to right in a
 single pass.<a data-secondary="activating debug
 runtime" data-primary="debugging" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="activating-the-debug-runtime">
-<h5>Activating the Debug Runtime</h5>
+<section data-type="note" class="level4" id="activating-the-debug-runtime">
+<h4>Activating the Debug Runtime</h4>
 <p>Despite your best efforts, it is easy to introduce a bug into some
 components, such as C bindings, that causes heap invariants to be
 violated. OCaml includes a <code>libasmrund.a</code> variant of the

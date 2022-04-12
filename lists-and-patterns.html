@@ -436,8 +436,8 @@ render_separator [3;6;2];;
 <p> Note that we make the line of dashes two larger than the provided
 width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List
 module" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="performance-of-string.concat-and">
-<h5>Performance of String.concat and ^</h5>
+<section data-type="note" class="level4" id="performance-of-string.concat-and">
+<h4>Performance of <code>String.concat</code> and <code>^</code></h4>
 <p>In the preceding code we’ve concatenated strings two different ways:
 <code>String.concat</code>, which operates on lists of strings; and
 <code>^</code>, which is a pairwise operator. You should avoid
@@ -828,8 +828,8 @@ two elements are equal:</p>
 </div>
 
 
-<section data-type="note" class="level5" id="polymorphic-compare">
-<h5>Polymorphic Compare</h5>
+<section data-type="note" class="level4" id="polymorphic-compare">
+<h4>Polymorphic Compare</h4>
 <p>You might have noticed that <code>remove_sequential_duplicates</code>
 is specialized to lists of integers. That’s because <code>Base</code>’s
 default equality operator is specialized to integers, as you can see if

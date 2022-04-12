@@ -66,8 +66,8 @@ Sexp.of_string ("(1 2 (3 4))");;
 &gt;- : Sexp.t = (1 2 (3 4))
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="base-core-and-parsexp">
-<h5>Base, Core, and Parsexp</h5>
+<section data-type="note" class="level4" id="base-core-and-parsexp">
+<h4>Base, Core, and Parsexp</h4>
 <p>In these examples, we’re using Core rather than Base because Core has
 integrated support for parsing s-expressions, courtesy of the
 <code>Parsexp</code> library. If you just use Base, you’ll find that you
@@ -140,8 +140,8 @@ question.</p>
 &gt;(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="more-on-top-level-printing">
-<h5>More on Top-Level Printing</h5>
+<section data-type="note" class="level4" id="more-on-top-level-printing">
+<h4>More on Top-Level Printing</h4>
 <p>The values of the s-expressions that we created were printed properly
 as s-expressions in the toplevel, instead of as the tree of
 <code>Atom</code> and <code>List</code> variants that they’re actually
@@ -243,8 +243,8 @@ generate converters for anonymous types.</p>
 same basic structure: they auto-generate code based on type definitions,
 implementing functionality that you could in theory have implemented by
 hand, but with far less programmer effort.</p>
-<section data-type="note" class="level5" id="syntax-extensions-and-ppx">
-<h5>Syntax Extensions and PPX</h5>
+<section data-type="note" class="level4" id="syntax-extensions-and-ppx">
+<h4>Syntax Extensions and PPX</h4>
 <p>OCaml doesn’t directly support deriving s-expression converters from
 type definitions. Instead, it provides a mechanism called <em>PPX</em>
 which allows you to add to the compilation pipeline code for

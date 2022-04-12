@@ -15,8 +15,8 @@ mostly work fine.</p>
 
 <p>Before going any further, make sure you’ve followed the steps in <a href="http://dev.realworldocaml.org/install.html">the installation
 page</a>.</p>
-<section data-type="note" class="level5" id="base-and-core">
-<h5><code>Base</code> and <code>Core</code></h5>
+<section data-type="note" class="level4" id="base-and-core">
+<h4><code>Base</code> and <code>Core</code></h4>
 <p><code>Base</code> comes along with another, yet more extensive
 standard library replacement, called <code>Core</code>. We’re going to
 mostly stick to <code>Base</code>, but it’s worth understanding the
@@ -370,8 +370,8 @@ concrete types for <code>'a</code> in the same use of
 <code>"short"</code> and <code>"loooooong"</code> require that
 <code>'a</code> be instantiated as <code>string</code>, and they can’t
 both be right at the same time.</p>
-<section data-type="note" class="level5" id="type-errors-versus-exceptions">
-<h5>Type Errors Versus Exceptions</h5>
+<section data-type="note" class="level4" id="type-errors-versus-exceptions">
+<h4>Type Errors Versus Exceptions</h4>
 <p>There’s a big difference in OCaml between errors that are caught at
 compile time and those that are caught at runtime. It’s better to catch
 errors as early as possible in the development process, and compilation
@@ -472,8 +472,8 @@ of fuss:</p>
 floating-point number to a power.</p>
 <p>This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you’ll see, it has surprising power.</p>
-<section data-type="note" class="level5" id="operators-in-base-and-the-stdlib">
-<h5>Operators in <code>Base</code> and the stdlib</h5>
+<section data-type="note" class="level4" id="operators-in-base-and-the-stdlib">
+<h4>Operators in <code>Base</code> and the stdlib</h4>
 <p>OCaml’s standard library and <code>Base</code> mostly use the same
 operators for the same things, but there are some differences. For
 example, in <code>Base</code>, <code>**.</code> is float exponentiation,
@@ -560,8 +560,9 @@ we started with, as you can see below:</p>
 &gt;- : string list = ["OCaml"; "Perl"; "C"]
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="semicolons-versus-commas">
-<h5>Semicolons Versus Commas</h5>
+</section>
+<section data-type="note" class="level4" id="semicolons-versus-commas">
+<h4>Semicolons Versus Commas</h4>
 <p>Unlike many other languages, OCaml uses semicolons to separate list
 elements in lists rather than commas. Commas, instead, are used for
 separating elements in a tuple. If you try to use commas in a list,
@@ -609,7 +610,6 @@ operator, <code>@</code>, which can concatenate two lists:</p>
 <p>It’s important to remember that, unlike <code>::</code>, this is not
 a constant-time operation. Concatenating two lists takes time
 proportional to the length of the first list.</p>
-</section>
 <section class="level4" id="list-patterns-using-match">
 <h4>List patterns using match</h4>
 <p>The elements of a list can be accessed through pattern matching. List
@@ -956,8 +956,8 @@ elements of the list in question for which the provided function
 evaluates to <code>true</code>. In this case, we’re using
 <code>List.exists</code> to check if there is a scene element within
 which our point resides.</p>
-<section data-type="note" class="level5" id="base-and-polymorphic-comparison">
-<h5><code>Base</code> and polymorphic comparison</h5>
+<section data-type="note" class="level4" id="base-and-polymorphic-comparison">
+<h4><code>Base</code> and polymorphic comparison</h4>
 <p>One other thing to notice was the fact that we opened
 <code>Float.O</code> in the definition of
 <code>is_inside_scene_element</code>. That allowed us to use the simple,
@@ -968,7 +968,7 @@ explicitly choose other comparison operators when you want them. OCaml
 also offers a special set of <em>polymorphic comparison operators</em>
 that can work on almost any type, but those are considered to be
 problematic, and so are hidden by default by <code>Base</code>. We’ll
-learn more about polymorphic compare in <a data-type="xref" href="lists-and-patterns.html#terser-and-faster-patterns">Chapter 3, Terser and Faster Patterns</a></p>
+learn more about polymorphic compare in <a data-type="xref" href="lists-and-patterns.html#terser-and-faster-patterns">Chapter 3, Terser and Faster Patterns</a>.</p>
 </section>
 </section>
 <section class="level2" id="imperative-programming">
@@ -1150,8 +1150,8 @@ list, using a <code>ref</code> to accumulate the results:</p>
 </div>
 <p>This isn’t the most idiomatic way to sum up a list, but it shows how
 you can use a <code>ref</code> in place of a mutable variable.</p>
-<section data-type="note" class="level5" id="nesting-lets-with-let-and-in">
-<h5>Nesting lets with let and in</h5>
+<section data-type="note" class="level4" id="nesting-lets-with-let-and-in">
+<h4>Nesting lets with <code>let</code> and <code>in</code></h4>
 <p>The definition of <code>sum</code> in the above examples was our
 first use of <code>let</code> to define a new variable within the body
 of a function. A <code>let</code> paired with an <code>in</code> can be

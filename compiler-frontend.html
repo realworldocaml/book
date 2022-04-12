@@ -53,8 +53,8 @@ portable interpreter and can even be transformed into JavaScript (via <a href="h
 suitable for high-performance applications.<a data-secondary="compiler source code" data-primary="compilation
 process" data-type="indexterm">&nbsp;</a><a data-secondary="bytecode vs.&nbsp;native code" data-primary="code
 compilers" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="obtaining-the-compiler-source-code">
-<h5>Obtaining the Compiler Source Code</h5>
+<section data-type="note" class="level4" id="obtaining-the-compiler-source-code">
+<h4>Obtaining the Compiler Source Code</h4>
 <p>Although it’s not necessary to understand the examples, you may find
 it useful to have a copy of the OCaml source tree checked out while you
 read through this chapter. The source code is available from multiple
@@ -591,8 +591,8 @@ throws an immediate error if this isn’t the case:</p>
 &gt;         Actual declaration
 [2]</code></pre>
 </div>
-<section data-type="note" class="level5 allow_break" id="which-comes-first-the-ml-or-the-mli">
-<h5>Which Comes First: The ml or the mli?</h5>
+<section data-type="note" class="level4 allow_break" id="which-comes-first-the-ml-or-the-mli">
+<h4>Which Comes First: The ml or the mli?</h4>
 <p>There are two schools of thought on which order OCaml code should be
 written in. It’s very easy to begin writing code by starting with an
 <code>ml</code> file and using the type inference to guide you as you
@@ -958,8 +958,9 @@ compilation unit. The standard library location is obtained by running
 override the default path unless you have a good reason to (such as
 setting up a cross-compilation environment). <a data-primary="cmi
 files" data-type="indexterm">&nbsp;</a><a data-secondary="cmi files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlogjinfo" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="inspecting-compilation-units-with-ocamlobjinfo">
-<h5>Inspecting Compilation Units with ocamlobjinfo</h5>
+</section>
+<section data-type="note" class="level4" id="inspecting-compilation-units-with-ocamlobjinfo">
+<h4>Inspecting Compilation Units with ocamlobjinfo</h4>
 <p>For separate compilation to be sound, we need to ensure that all the
 <code>cmi</code> files used to type-check a module are the same across
 compilation runs. If they vary, this raises the possibility of two
@@ -975,9 +976,9 @@ ocamlobjinfo typedef.cmi
 &gt;File typedef.cmi
 &gt;Unit name: Typedef
 &gt;Interfaces imported:
-&gt;   cdd43318ee9dd1b187513a4341737717    Typedef
-&gt;   9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
-&gt;   79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
+&gt;    cdd43318ee9dd1b187513a4341737717    Typedef
+&gt;    9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
+&gt;    79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
 </code></pre>
 </div>
 <p><code>ocamlobjinfo</code> examines the compiled interface and
@@ -1006,7 +1007,6 @@ compilation remains type-safe all the way up to the final link phase.
 Your build system should ensure that you never see the preceding error
 messages, but if you do run into it, just clean out your intermediate
 files and recompile from scratch.</p>
-</section>
 </section>
 </section>
 <section class="level3" id="wrapping-libraries-with-module-aliases">

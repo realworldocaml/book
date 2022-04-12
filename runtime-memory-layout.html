@@ -21,8 +21,8 @@ minimizes the amount of optimization magic that it performs, and relies
 instead on its straightforward execution model for good performance.
 With some experience, you can know rather precisely where a block of
 performance-critical OCaml code is spending its time. <a data-secondary="benefits of" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="why-do-ocaml-types-disappear-at-runtime">
-<h5>Why Do OCaml Types Disappear at Runtime?</h5>
+<section data-type="note" class="level4" id="why-do-ocaml-types-disappear-at-runtime">
+<h4>Why Do OCaml Types Disappear at Runtime?</h4>
 <p>The OCaml compiler runs through several phases during the compilation
 process. The first phase is syntax checking, during which source files
 are parsed into abstract syntax trees (ASTs). The next stage is a
@@ -118,8 +118,8 @@ OCaml runtime, it is assumed to point to an OCaml value. If it points
 outside the OCaml runtime area, it is treated as an opaque C pointer to
 some other system resource. <a data-primary="word-aligned
 pointers" data-type="indexterm">&nbsp;</a><a data-secondary="word-aligned" data-primary="pointers" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="some-history-about-ocamls-word-aligned-pointers">
-<h5>Some History About OCaml’s Word-Aligned Pointers</h5>
+<section data-type="note" class="level4" id="some-history-about-ocamls-word-aligned-pointers">
+<h4>Some History About OCaml’s Word-Aligned Pointers</h4>
 <p>The alert reader may be wondering how OCaml can guarantee that all of
 its pointers are word-aligned. In the old days, when RISC chips such as
 Sparc, MIPS, and Alpha were commonplace, unaligned memory accesses were

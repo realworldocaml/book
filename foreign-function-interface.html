@@ -31,8 +31,8 @@ of" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
 library looks. We’ll create a binding to the Ncurses terminal toolkit,
 as it’s widely available on most systems and doesn’t have any complex
 dependencies.</p>
-<section data-type="note" class="level2" id="installing-the-ctypes-library">
-<h2>Installing the Ctypes Library</h2>
+<section data-type="note" class="level4" id="installing-the-ctypes-library">
+<h4>Installing the Ctypes Library</h4>
 <p>If you want to use Ctypes interactively, you’ll also need to install
 the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a>
 library as a prerequisite to using Ctypes. It’s a fairly popular library
@@ -728,8 +728,9 @@ let () =
 &gt;Mon Oct 11 15:57:38 2021
 </code></pre>
 </div>
-<section data-type="note" class="level5" id="why-do-we-need-to-use-returning">
-<h5>Why Do We Need to Use returning?</h5>
+</section>
+<section data-type="note" class="level4" id="why-do-we-need-to-use-returning">
+<h4>Why Do We Need to Use returning?</h4>
 <p>The alert reader may be curious about why all these function
 definitions have to be terminated by <code>returning</code>:</p>
 <div class="highlight">
@@ -791,7 +792,6 @@ returns a one-argument function.</p>
 OCaml types are the same but the C semantics are quite different, we
 need some kind of marker to distinguish the cases. This is the purpose
 of <code>returning</code> in function definitions.</p>
-</section>
 </section>
 </section>
 <section class="level3" id="defining-arrays">
@@ -989,8 +989,8 @@ module with the <code>Core.Array</code> module: the former is in scope
 since we opened <code>Ctypes</code> at the start of the file. <a data-secondary="and allocated Ctypes" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="lifetime of allocated Ctypes" data-primary="Ctypes
 library" data-type="indexterm">&nbsp;</a><a data-secondary="of allocated Ctypes" data-primary="garbage
 collection" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level5" id="lifetime-of-allocated-ctypes">
-<h5>Lifetime of Allocated Ctypes</h5>
+<section data-type="note" class="level4" id="lifetime-of-allocated-ctypes">
+<h4>Lifetime of Allocated Ctypes</h4>
 <p>Values allocated via Ctypes (i.e., using <code>allocate</code>,
 <code>Array.make</code>, and so on) will not be garbage-collected as
 long as they are reachable from OCaml values. The system memory they
