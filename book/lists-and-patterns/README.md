@@ -288,7 +288,7 @@ function we call has to reexamine the first element of the list to
 determine whether or not it's the empty cell. With a `match`
 expression, this work happens exactly once per list element.
 
-This is a more general phenomena: pattern matching is very efficient,
+This is a more general phenomenon: pattern matching is very efficient,
 and is usually faster than what you might write yourself.
 
 ### Detecting Errors
