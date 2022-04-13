@@ -1127,7 +1127,7 @@ function provided by Async.  `try_with f` takes as its argument a
 deferred-returning thunk `f` and returns a deferred that becomes
 determined either as `Ok` of whatever `f` returned, or `Error exn` if
 `f` threw an exception before its return value became determined.
-[try_with]{.idx} [async/try_with]{.idx} [exceptions/asynchronous
+[try_with]{.idx} [Async library/try_with]{.idx} [exceptions/asynchronous
 errors]{.idx}
 
 Here's a trivial example of `try_with` in action.

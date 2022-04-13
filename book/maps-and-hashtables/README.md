@@ -452,6 +452,7 @@ compare will conclude that they're different.
 
 We can see this below.  Note that `Base` hides polymorphic comparison
 by default, but it is available within the `Poly` module.
+[Base.Poly]{.idx}
 
 ```ocaml env=main
 # Poly.(m1 = m2);;

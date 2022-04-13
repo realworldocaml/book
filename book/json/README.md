@@ -744,8 +744,6 @@ This is pretty convenient! We've now written a single ATD file, and all the
 OCaml boilerplate to convert between JSON and a strongly typed record has
 been generated for us. You can control various aspects of the serializer by
 passing flags to `atdgen`. The important ones for JSON are:
-[-j-defaults]{.idx}[-j-custom-fields
-FUNCTION]{.idx}[-j-std flag]{.idx}[flags]{.idx}
 
 `-j-std`
 : Converts tuples and variants into standard JSON and refuse to print NaN and

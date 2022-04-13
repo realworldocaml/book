@@ -572,13 +572,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 
 ```
 
@@ -649,7 +649,7 @@ shadows the `Gc` module with its own module that contains a function,
 finalizers are scheduled in their own Async job, and makes sure to
 capture exceptions and raise them to the appropriate monitor for
 error-handling.
-[Async/finalizers]{.idx}
+[Async library/finalizers]{.idx}
 
 Let's explore this with a small example that finalizes values of
 different types, some of which are heap-allocated and others which are

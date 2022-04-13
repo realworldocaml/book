@@ -916,13 +916,14 @@ enter days: 2014-01-05
 
 ## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}
 
-Modern UNIX shells usually have a tab-completion feature to interactively
-help you figure out how to build a command line. These work by pressing the
-Tab key in the middle of typing a command, and seeing the options that pop
-up. You've probably used this most often to find the files in the current
-directory, but it can actually be extended for other parts of the command,
-too. [tab-autocompletion]{.idx}[autocompletion]{.idx}[command-line
-parsing/autocompletion with bash]{.idx}
+Modern UNIX shells usually have a tab-completion feature to
+interactively help you figure out how to build a command line. These
+work by pressing the Tab key in the middle of typing a command, and
+seeing the options that pop up. You've probably used this most often
+to find the files in the current directory, but it can actually be
+extended for other parts of the command,
+too. [autocompletion]{.idx}[command-line parsing/autocompletion with
+bash]{.idx}
 
 The precise mechanism for autocompletion varies depending on what shell you
 are using, but we'll assume you are using the most common one: `bash`. This
