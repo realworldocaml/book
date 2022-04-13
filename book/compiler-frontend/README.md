@@ -352,10 +352,9 @@ directory and also be able to view the UNIX manual pages held in
 `man/man3`. There are quite a few comment formats and
 options to control the output for the various backends. Refer to the
 [OCaml manual](https://ocaml.org/manual/native.html)
-for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
-for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
-HTML generator]{.idx}[HTML
-generators]{.idx}
+for the complete list.
+[OCaml toolchain/ocamldoc-generators]{.idx}
+[HTML generators]{.idx}
 
 You can also use `odoc` to generate complete snapshots of your project via
 integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.

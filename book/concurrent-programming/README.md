@@ -60,7 +60,7 @@ From the type of `In_channel.read_all`, you can see that it must be a
 blocking operation. In particular, the fact that it returns a concrete string
 means it can't return until the read has completed. The blocking nature of
 the call means that no progress can be made on anything else until the call
-is complete. [blocking]{.idx}
+is complete. [blocking I/O]{.idx}
 
 In Async, well-behaved functions never block. Instead, they return a value of
 type `Deferred.t` that acts as a placeholder that will eventually be filled

@@ -290,9 +290,9 @@ compilation speed. The mapping from the lambda form to bytecode is
 straightforward, and this results in predictable (but slow) execution speed.
 
 The bytecode interpreter implements a stack-based virtual machine. The OCaml
-stack and an associated accumulator store values that consist of:[bytecode
-compiler/values stored by]{.idx}[code offset values]{.idx}[block
-values]{.idx}[long values]{.idx}[values/stored by bytecode compiler]{.idx}
+stack and an associated accumulator store values that consist of:
+[bytecode compiler/values stored by]{.idx}
+[values/stored by bytecode compiler]{.idx}
 
 long
 : Values that correspond to an OCaml `int` type
@@ -316,19 +316,19 @@ examples:
 
 ```sh dir=examples/back-end
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
-	branch L2
-L1:	acc 0
-	branchifnot L3
-	const 101
-	return 1
-L3:	const 100
-	return 1
-L2:	closure L1, 0
-	push
-	acc 0
-	makeblock 1, 0
-	pop 1
-	setglobal Pattern_monomorphic_small!
+    branch L2
+L1: acc 0
+    branchifnot L3
+    const 101
+    return 1
+L3: const 100
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_small!
 
 ```
 

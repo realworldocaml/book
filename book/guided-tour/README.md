@@ -24,6 +24,8 @@ installation page](http://dev.realworldocaml.org/install.html).
 `Base` comes along with another, yet more extensive standard library
 replacement, called `Core`.  We're going to mostly stick to `Base`,
 but it's worth understanding the differences between these libraries.
+[Base standard library]{.idx}
+[Core standard library]{.idx}
 
 - *`Base`* is designed to be lightweight, portable, and stable, while
   providing all of the fundamentals you need from a standard library.
