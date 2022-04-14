@@ -421,7 +421,7 @@ comes up, for example, with <code>If</code>, since the <code>If</code>
 itself must be of type <code>bool</code>, but the type of the then and
 else clauses could be of type <code>int</code>. This means that when
 evaluating <code>If</code>, we’ll dispatch <code>eval</code> at a
-different type then it was called on. <a data-primary="polymorphic
+different type than it was called on. <a data-primary="polymorphic
 recursion" data-type="indexterm">&nbsp;</a></p>
 <p>As such, <code>eval</code> needs to see itself as polymorphic. This
 kind of polymorphism is basically impossible to infer automatically,
