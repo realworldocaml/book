@@ -1,0 +1,18 @@
+kind: pipeline
+name: amd
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: build
+    image: ocaml/opam:debian-ocaml-4.12-afl
+    commands:
+      - sudo chown -R opam .
+      - git -C /home/opam/opam-repository pull origin 1ce065bc0cbef7bc06effcd3865af0d430c6273b && opam update
+      - opam pin add -n .
+      - opam depext -u cstruct-async cstruct-lwt cstruct-unix cstruct ppx_cstruct
+      - opam install -y .
+      - opam install -y dune crowbar fmt 'bun>=0.3.4'
+      - opam exec -- dune build @fuzz --no-buffer

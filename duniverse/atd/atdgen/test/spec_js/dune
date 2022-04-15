@@ -1,7 +1,7 @@
 (library
  (name spec_js)
  (modules spec_t spec_j spec_js spec_bs)
- (libraries atdgen-runtime atdgen-codec-runtime))
+ (libraries atdgen-runtime atdgen-codec-runtime biniou yojson))
 
 (rule
  (targets spec_t.ml spec_t.mli)
@@ -21,12 +21,12 @@
 (executable
  (name test_j)
  (modules test_j)
- (libraries spec_js atdgen-runtime))
+ (libraries spec_js atdgen-runtime yojson))
 
 (executable
  (name test_bs)
  (modules test_bs)
- (libraries spec_js atdgen-codec-runtime))
+ (libraries spec_js atdgen-codec-runtime yojson))
 
 (rule
  (targets spec_j.json)

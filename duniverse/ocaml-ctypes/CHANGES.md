@@ -1,3 +1,71 @@
+## ctypes 0.20.1
+
+* Fix warning 9 [missing-record-field-pattern] in generated OCaml code  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/700
+
+Thanks to Antonin Décimo (@MisterDA) for contributing to this release.
+
+## ctypes 0.20.0
+
+* Remove naked pointers from the Dl library   
+  https://github.com/ocamllabs/ocaml-ctypes/pull/681
+
+* Avoid running a full GC cycle on every FFI closure allocation  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/694
+
+* Check output of `brew ls --versions` when detecting homebrew  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/697
+
+Thanks to Martin Kletzander (@nertpinx) and Arseniy Alekseyev
+(@aalekseyev) for contributions to this release.
+
+## ctypes 0.19.1
+
+* Fix use of CAMLdrop in generated code  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/680
+
+## ctypes 0.19.0
+
+* Drop compatibility with 4.02, and improve compatibility with Multicore OCaml  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/673
+
+Thanks to Kate Deplaix (@kit-ty-kate) for contributing to this release.
+
+## ctypes 0.18.0
+
+* Remove the `Unix` dependency by using `bigarray-compat`  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/660
+
+* Remove the threaded/unthreaded split in ctypes-foreign  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/651
+
+* Eliminate some `const` warnings in generated code  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/646  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/638
+
+* Speed-up `CArray.make` with initial value  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/644
+
+* Fix complex allocation size  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/642
+
+* Report names of missing symbols also under windows  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/641
+
+* Remove a level of boxing from struct and union values  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/640
+
+* Fix a markup issue in the `funptr` docstring  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/633
+
+* Move conf-pkg-config dependency to ctypes-foreign  
+  https://github.com/ocamllabs/ocaml-ctypes/pull/631
+
+Thanks to Andreas Hauptmann (@fdopen), Anil Madhavapeddy (@avsm),
+Anton Bachin (@aantron), Calascibetta Romain (@dinosaure), Sora
+Morimoto (@smorimoto) and and Stéphane Glondu (@glondu) for
+contributions to this release.
+
 ## ctypes 0.17.1
 
 * Hide the managed component in pointer values  

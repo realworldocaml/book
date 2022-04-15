@@ -1,0 +1,7 @@
+(rule
+ (with-stdout-to
+  link-flags.sexp
+  (run ./gen.exe)))
+
+(executable
+ (name gen))

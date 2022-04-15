@@ -1,3 +1,31 @@
+v1.0.0 2022-02-16 La Forclaz
+----------------------------
+
+* Change the `js_of_ocaml` strategy for `Ptime_clock`'s JavaScript
+  implementation. Primitives of `ptime.clock.os` are now implemented
+  in pure JavaScript and linked by `js_of_ocaml`. This means that the
+  `ptime.clock.jsoo` library no longer exists, simply link against
+  `ptime.clock.os` instead. Thanks to Hugo Heuzard for suggesting and
+  implementing this.
+
+* Require OCaml >= 4.08
+* Correct a potential overflow in Ptime.Span.of_float_s (#26). 
+
+v0.8.6 2021-11-28 Zagreb
+------------------------
+
+* Require OCaml >= 4.03
+* Drop dependency on `result` compatibility package.
+* Alter install structure. `ptime/{os,jsoo}` are now installed in
+  `ptime/clock/{os,jsoo}`. Also a `ptime_clock.cm[t]i` is now
+  installed in `ptime/clock/`. The `ocamlfind` packages are unchanged
+  except for `ptime.clock.os.top` which no longer exists.
+* Handle `Pervasives` deprecation.
+* Fix `Ptime.truncate` to always truncate down. Thanks to David
+  Kaloper Meršinjak for the report & fix.
+* Allow compiling with MSVC compiler. Thanks to Jonah Beckford for the
+  patch.
+
 v0.8.5 2019-05-02 La Forclaz (VS)
 ---------------------------------
 

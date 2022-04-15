@@ -1,5 +1,16 @@
 # Changes
 
+## 2021/11/29
+
+* Trailing blank characters at the end of a line are now suppressed.
+  This includes indentation characters (whose production is implicit)
+  as well as blank characters that are explicitly produced by the
+  combinators [space] and [blank]. Trailing blank characters are
+  suppressed in both rendering modes (pretty and compact).
+  (Contributed by Thomas Refis, reviewed and polished by François Pottier.)
+
+* New function `PPrint.OCaml.unit`.
+
 ## 2020/04/10
 
 * New function `PPrint.utf8format`.

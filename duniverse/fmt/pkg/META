@@ -1,5 +1,5 @@
 description = "OCaml Format pretty-printer combinators"
-version = "0.8.10+dune"
+version = "0.9.0+dune"
 requires = ""
 archive(byte) = "fmt.cma"
 archive(native) = "fmt.cmxa"
@@ -8,7 +8,7 @@ plugin(native) = "fmt.cmxs"
 
 package "tty" (
   description = "Fmt TTY setup"
-  version = "0.8.10+dune"
+  version = "0.9.0+dune"
   requires = "unix fmt"
   archive(byte) = "fmt_tty.cma"
   archive(native) = "fmt_tty.cmxa"
@@ -19,7 +19,7 @@ package "tty" (
 
 package "cli" (
   description = "Cmdliner support for Fmt"
-  version = "0.8.10+dune"
+  version = "0.9.0+dune"
   requires = "cmdliner fmt"
   archive(byte) = "fmt_cli.cma"
   archive(native) = "fmt_cli.cmxa"
@@ -30,7 +30,7 @@ package "cli" (
 
 package "top" (
   description = "Fmt toplevel support"
-  version = "0.8.10+dune"
+  version = "0.9.0+dune"
   requires = "fmt fmt.tty"
   archive(byte) = "fmt_top.cma"
   archive(native) = "fmt_top.cmxa"

@@ -382,7 +382,7 @@ let tokenize report resolve_reference (input, get_location) =
     and target_state () =
       next' pi finish_pi begin function
         | _, c when is_whitespace c ->
-          if String.lowercase (Buffer.contents target_buffer) = "xml" then
+          if String.lowercase_ascii (Buffer.contents target_buffer) = "xml" then
             xml_declaration_state ()
           else
             text_state ()
@@ -422,7 +422,7 @@ let tokenize report resolve_reference (input, get_location) =
         report l (`Bad_token ("<?...", pi, "empty")) !throw (fun () ->
         k None)
       else
-        if String.lowercase (Buffer.contents target_buffer) = "xml" then
+        if String.lowercase_ascii (Buffer.contents target_buffer) = "xml" then
           finish_xml ()
         else
           k (Some
@@ -438,7 +438,7 @@ let tokenize report resolve_reference (input, get_location) =
         scan [] l
       in
 
-      let matches s (_, name, _) = String.lowercase name = s in
+      let matches s (_, name, _) = String.lowercase_ascii name = s in
 
       let version_valid s =
         String.length s = 3 &&
@@ -498,7 +498,7 @@ let tokenize report resolve_reference (input, get_location) =
               report l
                 (`Bad_token (value, xml, "must be 'yes' or 'no'")) !throw
                 (fun () ->
-              match String.lowercase value with
+              match String.lowercase_ascii value with
               | "yes" -> k (Some true)
               | "no" -> k (Some false)
               | _ -> k None))

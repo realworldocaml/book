@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2012 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2012 The uutf programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 let io_buffer_size = 65536                           (* IO_BUFFER_SIZE 4.0.0 *)
@@ -31,7 +30,7 @@ let u_rep = Uchar.unsafe_of_int 0xFFFD             (* replacement character. *)
 type encoding = [ `UTF_8 | `UTF_16 | `UTF_16BE | `UTF_16LE ]
 type decoder_encoding = [ encoding | `US_ASCII | `ISO_8859_1 ]
 
-let encoding_of_string s = match String.uppercase s with      (* IANA names. *)
+let encoding_of_string s = match String.uppercase_ascii s with (* IANA names. *)
 | "UTF-8" -> Some `UTF_8
 | "UTF-16" -> Some `UTF_16
 | "UTF-16LE" -> Some `UTF_16LE
@@ -807,7 +806,7 @@ module Buffer = struct
 end
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2012 Daniel C. Bünzli
+   Copyright (c) 2012 The uutf programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

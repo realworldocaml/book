@@ -1,4 +1,5 @@
-true : bin_annot, safe_string, package(result)
+true : bin_annot, safe_string
+<_b0> : -traverse
 <src> : include
 <src/rresult_top*> : package(compiler-libs.toplevel)
 <test> : include

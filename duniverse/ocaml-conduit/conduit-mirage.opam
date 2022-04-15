@@ -1,4 +1,4 @@
-version: "5.0.0"
+version: "5.1.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["Anil Madhavapeddy" "Thomas Leonard" "Thomas Gazagnaire"]
@@ -13,7 +13,6 @@ depends: [
   "sexplib"
   "uri" {>= "4.0.0"}
   "cstruct" {>= "3.0.0"}
-  "mirage-stack" {>= "2.2.0"}
   "mirage-clock" {>= "3.0.0"}
   "mirage-flow" {>= "2.0.0"}
   "mirage-flow-combinators" {>= "2.0.0"}
@@ -28,7 +27,7 @@ depends: [
   "ca-certs-nss"
   "ipaddr" {>= "3.0.0"}
   "ipaddr-sexp"
-  "tcpip" {with-test}
+  "tcpip" {>= "6.0.0"}
   "fmt" {>= "0.8.7"}
 ]
 conflicts: [

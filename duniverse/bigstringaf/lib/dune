@@ -1,8 +1,6 @@
 (library
  (name        bigstringaf)
  (public_name bigstringaf)
- (libraries   bigarray-compat)
- (flags       (:standard -safe-string))
 
  (foreign_stubs
   (language c)

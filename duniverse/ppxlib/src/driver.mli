@@ -41,7 +41,6 @@ end
 
 module Instrument : sig
   type t
-
   type pos = Before | After
 
   val make : (Parsetree.structure -> Parsetree.structure) -> position:pos -> t
@@ -252,11 +251,7 @@ val pretty : unit -> bool
 (**/**)
 
 val map_structure : structure -> structure
-
 val map_signature : signature -> signature
-
 val enable_checks : unit -> unit
-
 val enable_location_check : unit -> unit
-
 val disable_location_check : unit -> unit

@@ -3,27 +3,27 @@ open Cmdliner
 
 let hey =
   let doc = "Equivalent to set $(opt)." in
-  let env = Arg.env_var "TEST_ENV" ~doc in
+  let env = Cmd.Env.info "TEST_ENV" ~doc in
   let doc = "Set hey." in
   Arg.(value & flag & info ["hey"; "y"] ~env ~doc)
 
 let repodir =
   let doc = "See option $(opt)." in
-  let env = Arg.env_var "TEST_REPODDIR" ~doc in
+  let env = Cmd.Env.info "TEST_REPODDIR" ~doc in
   let doc = "Run the program in repository directory $(docv)." in
   Arg.(value & opt file Filename.current_dir_name & info ["repodir"] ~env
          ~docv:"DIR" ~doc)
 
 let id =
   let doc = "See option $(opt)." in
-  let env = Arg.env_var "TEST_ID" ~doc in
+  let env = Cmd.Env.info "TEST_ID" ~doc in
   let doc = "Whatever $(docv) bla $(env) and $(opt)." in
   Arg.(value & opt int ~vopt:10 0 & info ["id"; "i"] ~env ~docv:"ID)" ~doc)
 
 let miaouw =
   let doc = "See option $(opt). These are term names $(mname) $(tname)" in
   let docs = "MIAOUW SECTION (non-standard unpositioned do not do this)" in
-  let env = Arg.env_var "TEST_MIAOUW" ~doc ~docs in
+  let env = Cmd.Env.info "TEST_MIAOUW" ~doc ~docs in
   let doc = "Whatever this is the doc var $(docv) this is the env var $(env) \
              this is the opt $(opt) and this is $(i,italic) and this is
              $(b,bold) and this $(b,\\$(opt\\)) is \\$(opt) in bold and this
@@ -40,10 +40,11 @@ let man_test_t = Term.(const test $ hey $ repodir $ id $ miaouw)
 
 let info =
   let doc = "print a customizable message repeatedly" in
-  let envs = [ Term.env_info "TEST_IT" ~doc:"This is $(env) for $(tname)" ] in
-  let exits = [ Term.exit_info ~doc:"This is a $(status) for $(tname)" 1;
-                Term.exit_info ~doc:"Ranges from $(status) to $(status_max)"
-                  ~max:10 2; ] @ Term.default_exits
+  let envs = [ Cmd.Env.info "TEST_IT" ~doc:"This is $(env) for $(tname)" ] in
+  let exits = (Cmd.Exit.info ~doc:"This is a $(status) for $(tname)" 1 ::
+               Cmd.Exit.info ~doc:"Ranges from $(status) to $(status_max)"
+                 ~max:10 2 ::
+               Cmd.Exit.defaults)
   in
   let man = [
     `S "THIS IS A SECTION FOR $(mname)";
@@ -95,6 +96,6 @@ let info =
     `P "Email bug reports to <hehey at example.org>.";]
   in
   let man_xrefs = [`Page ("ascii", 7); `Main; `Tool "grep";] in
-  Term.info "man_test" ~version:"%%VERSION%%" ~doc ~envs ~exits ~man ~man_xrefs
+  Cmd.info "man_test" ~version:"v1.1.1" ~doc ~envs ~exits ~man ~man_xrefs
 
-let () = Term.exit @@ Term.eval (man_test_t, info)
+let () = exit (Cmd.eval (Cmd.v info man_test_t))

@@ -1,9 +1,7 @@
 open! Import
 
 val lident : string -> Longident.t
-
 val core_type_of_type_declaration : type_declaration -> core_type
-
 val name_type_params_in_td : type_declaration -> type_declaration
 
 val combinator_type_of_type_declaration :
@@ -15,9 +13,7 @@ val gen_symbol : ?prefix:string -> unit -> string
     @param prefix default = "_x" *)
 
 val string_of_core_type : core_type -> string
-
 val assert_no_attributes : attributes -> unit
-
 val assert_no_attributes_in : Ast_traverse.iter
 
 val get_type_param_name : core_type * (variance * injectivity) -> string Loc.t
@@ -33,11 +29,8 @@ class type_is_recursive :
   -> type_declaration list
   -> object
        inherit Ast_traverse.iter
-
        val type_names : string list
-
        method return_true : unit -> unit
-
        method go : unit -> rec_flag
      end
 
@@ -45,9 +38,7 @@ val really_recursive : rec_flag -> type_declaration list -> rec_flag
 (** [really_recursive rec_flag tds = (new type_is_recursive rec_flag tds)#go ()] *)
 
 val loc_of_payload : attribute -> Location.t
-
 val loc_of_attribute : attribute -> Location.t
-
 val loc_of_extension : extension -> Location.t
 
 val curry_applications : expression -> expression

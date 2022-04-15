@@ -1,5 +1,5 @@
 (* Auto-generated from "bucklespec.atd" *)
-              [@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 type recurse = Bucklespec_t.recurse = { recurse_items: recurse list }
 
@@ -10,6 +10,10 @@ type mutual_recurse1 = Bucklespec_t.mutual_recurse1 = {
 and mutual_recurse2 = Bucklespec_t.mutual_recurse2 = {
   mutual_recurse1: mutual_recurse1
 }
+
+type variant2 = Bucklespec_t.variant2 =  A | C 
+
+type variant1 = Bucklespec_t.variant1 =  A of string | B 
 
 type valid = Bucklespec_t.valid
 
@@ -153,6 +157,59 @@ and read_recurse js = (
     )
   )
 ) js
+let write_variant2 = (
+  Atdgen_codec_runtime.Encode.make (fun (x : variant2) -> match x with
+    | A ->
+    Atdgen_codec_runtime.Encode.constr0 "A"
+    | C ->
+    Atdgen_codec_runtime.Encode.constr0 "C"
+  )
+)
+let read_variant2 = (
+  Atdgen_codec_runtime.Decode.enum
+  [
+      (
+      "A"
+      ,
+        `Single (A: variant2)
+      )
+    ;
+      (
+      "C"
+      ,
+        `Single (C: variant2)
+      )
+  ]
+)
+let write_variant1 = (
+  Atdgen_codec_runtime.Encode.make (fun (x : variant1) -> match x with
+    | A x ->
+    Atdgen_codec_runtime.Encode.constr1 "A" (
+      Atdgen_codec_runtime.Encode.string
+    ) x
+    | B ->
+    Atdgen_codec_runtime.Encode.constr0 "B"
+  )
+)
+let read_variant1 = (
+  Atdgen_codec_runtime.Decode.enum
+  [
+      (
+      "A"
+      ,
+        `Decode (
+        Atdgen_codec_runtime.Decode.string
+        |> Atdgen_codec_runtime.Decode.map (fun x -> ((A x) : variant1))
+        )
+      )
+    ;
+      (
+      "B"
+      ,
+        `Single (B: variant1)
+      )
+  ]
+)
 let write_valid = (
   Atdgen_codec_runtime.Encode.bool
 )

@@ -1,7 +1,6 @@
 (library
  (name cstruct)
  (public_name cstruct)
- (libraries bigarray-compat)
  (foreign_stubs
   (language c)
   (names cstruct_stubs))

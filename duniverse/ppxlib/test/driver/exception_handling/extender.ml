@@ -3,8 +3,7 @@ open Ppxlib
 let expand_into_extension_node ~ctxt =
   let loc = Expansion_context.Extension.extension_point_loc ctxt in
   let extension_node =
-    Location.Error.(
-      make ~loc "An error message in an extension node" ~sub:[] |> to_extension)
+    Location.error_extensionf ~loc "An error message in an extension node"
   in
   Ast_builder.Default.pexp_extension ~loc extension_node
 
@@ -30,9 +29,7 @@ let raise_located_error_extension =
     expand_raise_located_error
 
 let rule1 = Ppxlib.Context_free.Rule.extension extension_point_extension
-
 let rule2 = Ppxlib.Context_free.Rule.extension raise_exception_extension
-
 let rule3 = Ppxlib.Context_free.Rule.extension raise_located_error_extension
 
 let () =

@@ -26,12 +26,13 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *)
-open Mirage_crypto_rng
 
 let src = Logs.Src.create "mirage-crypto-rng-mirage" ~doc:"Mirage crypto RNG mirage"
 module Log = (val Logs.src_log src : Logs.LOG)
 
 module Make (T : Mirage_time.S) (M : Mirage_clock.MCLOCK) = struct
+  include Mirage_crypto_rng
+
   let rdrand_task g delta =
     match Entropy.cpu_rng with
     | Error `Not_supported -> ()
@@ -72,9 +73,4 @@ module Make (T : Mirage_time.S) (M : Mirage_clock.MCLOCK) = struct
       Mirage_runtime.at_enter_iter (Entropy.timer_accumulator (Some rng));
       Lwt.return_unit
     end
-
-  (* For Mirage_random.S compatibility *)
-  type nonrec g = g
-
-  let generate ?g l = generate ?g l
 end

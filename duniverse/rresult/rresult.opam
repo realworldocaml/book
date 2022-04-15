@@ -1,29 +1,29 @@
+version: "0.7.0+dune"
 opam-version: "2.0"
-maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
-authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
-homepage: "http://erratique.ch/software/rresult"
-doc: "http://erratique.ch/software/rresult"
+name: "rresult"
+synopsis: """Result value combinators for OCaml"""
+maintainer: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
+authors: ["The rresult programmers"]
+homepage: "https://github.com/dune-universe/rresult"
 dev-repo: "git+https://github.com/dune-universe/rresult.git"
 bug-reports: "https://github.com/dbuenzli/rresult/issues"
-tags: [ "result" "error" "declarative" "org:erratique" ]
-license: "ISC"
+license: ["ISC"]
+tags: ["result" "error" "org:erratique"]
 depends: [
-  "dune"
-   "ocaml" {>= "4.01.0"}
-   "result"
+    "dune"
+    "ocaml" {>= "4.08.0"}
 ]
-synopsis: """Result value combinators for OCaml"""
-description: """\
-
+build: [ "dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} ]
+description: """
 Rresult is an OCaml module for handling computation results and errors
 in an explicit and declarative manner, without resorting to
 exceptions. It defines combinators to operate on the `result` type
 available from OCaml 4.03 in the standard library.
 
-Rresult depends on the compatibility `result` package and is
-distributed under the ISC license.
-"""
-build: [[ "dune" "build" "-p" name ]]
-url {
-  src: "git://github.com/dune-universe/rresult.git#duniverse-v0.6.0"
-}
+OCaml 4.08 provides the `Stdlib.Result` module which you should prefer
+to Rresult.
+
+Rresult is distributed under the ISC license.
+
+Home page: http://erratique.ch/software/rresult  
+Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`"""

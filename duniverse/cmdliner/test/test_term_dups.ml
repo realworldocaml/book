@@ -13,7 +13,7 @@ let test_pos =
     let doc = "This should show up only once in the docs" in
     Arg.(value & flag & info ["f"; "flag"] ~doc)
   in
-  Term.(const dups $ p $ p $ o $ o),
-  Term.info "test_term_dups" ~doc:"Test multiple term usage"
+  let info = Cmd.info "test_term_dups" ~doc:"Test multiple term usage" in
+  Cmd.v info Term.(const dups $ p $ p $ o $ o)
 
-let () = Term.(exit @@ eval test_pos)
+let () = exit (Cmd.eval test_pos)

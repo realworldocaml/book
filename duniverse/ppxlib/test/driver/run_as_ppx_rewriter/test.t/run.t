@@ -60,7 +60,7 @@ The only possible usage is [extra_args] <infile> <outfile>...
     -locations-check            Enable locations check only
     -apply <names>              Apply these transformations in order (comma-separated list)
     -dont-apply <names>         Exclude these transformations
-    -no-merge                   Do not merge context free transformations (better for debugging rewriters)
+    -no-merge                   Do not merge context free transformations (better for debugging rewriters). As a result, the context-free transformations are not all applied before all impl and intf.
     -cookie NAME=EXPR           Set the cookie NAME to EXPR
     --cookie                    Same as -cookie
     -help                       Display this list of options
@@ -81,7 +81,7 @@ The only exception is consulting help
     -locations-check            Enable locations check only
     -apply <names>              Apply these transformations in order (comma-separated list)
     -dont-apply <names>         Exclude these transformations
-    -no-merge                   Do not merge context free transformations (better for debugging rewriters)
+    -no-merge                   Do not merge context free transformations (better for debugging rewriters). As a result, the context-free transformations are not all applied before all impl and intf.
     -cookie NAME=EXPR           Set the cookie NAME to EXPR
     --cookie                    Same as -cookie
     -help                       Display this list of options

@@ -10,6 +10,18 @@
 
 (** This module parses the command line. *)
 
+(** The back-end that must be used. *)
+val backend: [
+  | `ReferenceInterpreter
+  | `CoqBackend
+  | `NewCodeBackend
+  | `OldCodeBackend
+  | `TableBackend
+]
+
+(** The file name extension that is expected for sources files. *)
+val extension: string
+
 (** The list of file names that appear on the command line. *)
 val filenames: string list
 
@@ -94,7 +106,7 @@ val comment: bool
 val noprefix: bool
 
 (** This undocumented flag causes the code to be transformed by
-    [Inline]. It is on by default. *)
+    [Inline] or [StackLangTransform.inline]. It is on by default. *)
 val code_inlining: bool
 
 (**[represent_positions] forces every stack cell to contain a start position
@@ -143,19 +155,12 @@ val interpret_show_cst : bool
    last token, and displays which state was reached. *)
 val interpret_error : bool
 
-(** Whether to use the table-based back-end ([true]) or the code-based
-   back-end ([false]). *)
-val table : bool
-
 (** Whether to generate the inspection API (which requires GADTs, and
    requires producing more tables). *)
 val inspection : bool
 
 (** Whether the standard menhir library should be used. *)
 val no_stdlib : bool
-
-(** Whether to generate a coq description of the grammar and automaton. *)
-val coq : bool
 
 (** Whether to generate a version check for MenhirLib in the generated parser. *)
 val coq_no_version_check : bool
@@ -170,12 +175,15 @@ val coq_no_actions : bool
    productions that are never reduced, etc. should be treated as errors. *)
 val strict: bool
 
-(** This flag causes the exception [Error] should be declared equal to
+(** This flag causes the exception [Error] to be declared equal to
    [Parsing.Parse_error]. This is useful when full compatibility with
-   ocamlyacc is desired. In particular, this is used when building
-   Menhir itself, since Menhir is compiled first using ocamlyacc, then
-   using Menhir. *)
+   ocamlyacc is desired. *)
 val fixedexc: bool
+
+(**This flag causes the exception [Error] to carry an integer state.
+   This is the state where a syntax error is detected.
+   This feature is supported only by the new code back-end. *)
+val exn_carries_state: bool
 
 (** This is a set of tokens which may be unused and about which we should not
    emit a warning. *)
@@ -263,7 +271,23 @@ val require_aliases : bool
    it is [`Concrete], then every token must have a token alias. *)
 val random_sentence : (string * int * [`Abstract | `Concrete]) option
 
-(** The error handling strategy that should be used by the code back-end, the
+(**The error handling strategy that should be used by the code back-end, the
    table back-end, and the reference interpreter. See [IncrementalEngine] for
    an explanation of the available strategies. *)
 val strategy: [`Legacy | `Simplified]
+
+(**The setting -O allows choosing an optimization level. It is used only by
+   the new code back-end. *)
+val optimization_level: int
+
+(**The undocumented flag [--stacklang-dump] causes the StackLang program to be
+   printed. *)
+val stacklang_dump: bool
+
+(**The undocumented flag [--stacklang-graph] causes the StackLang program to be
+   dumped in the form of a control flow graph in the file [<basename>.dot]. *)
+val stacklang_graph: bool
+
+(**The undocumented flag [--stacklang-test] causes the StackLang program to be
+   tested (by comparison with the reference interpreter). *)
+val stacklang_test: bool

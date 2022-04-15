@@ -317,12 +317,12 @@ let expand_pform_gen ~(context : Context.t) ~bindings ~dir ~source
         let open Memo.Build.O in
         Direct
           (Without
-             (context.which "make" >>| function
+             (Context.make context >>| function
+              | Some p -> path p
               | None ->
                 Utils.program_not_found ~context:context.name
                   ~loc:(Some (Dune_lang.Template.Pform.loc source))
-                  "make"
-              | Some p -> path p))
+                  "make"))
       | Cpp -> static (strings (c_compiler_and_flags context @ [ "-E" ]))
       | Pa_cpp ->
         static
@@ -752,8 +752,10 @@ module With_deps_if_necessary = struct
     E.expand ~dir:(Path.build t.dir) ~mode sw ~f:(expand_pform t)
 
   let expand_path t sw =
-    let+ v = expand t ~mode:Single sw in
-    Value.to_path v ~error_loc:(String_with_vars.loc sw) ~dir:(Path.build t.dir)
+    let+ vs = expand t ~mode:Many sw in
+    List.map vs ~f:(fun v ->
+        Value.to_path v ~error_loc:(String_with_vars.loc sw)
+          ~dir:(Path.build t.dir))
 
   let expand_str t sw =
     let+ v = expand t ~mode:Single sw in

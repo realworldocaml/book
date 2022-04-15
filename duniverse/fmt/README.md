@@ -1,6 +1,6 @@
 Fmt — OCaml Format pretty-printer combinators
 -------------------------------------------------------------------------------
-v0.8.10+dune
+v0.9.0+dune
 
 Fmt exposes combinators to devise `Format` pretty-printing functions.
 

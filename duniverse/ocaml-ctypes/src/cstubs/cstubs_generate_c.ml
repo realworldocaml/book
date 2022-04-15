@@ -270,7 +270,7 @@ struct
       (* f := functions[fn_name];
          x := caml_callbackN(f, nargs, locals);
          y := T_val(x);
-         CAMLdrop();
+         CAMLdrop;
          y *)
       (`Index (functions, idx), value) >>= fun f ->
       (`App (caml_callbackN, [f;

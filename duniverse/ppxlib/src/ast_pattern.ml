@@ -2,9 +2,7 @@ open! Import
 include Ast_pattern0
 
 let save_context ctx = ctx.matched
-
 let restore_context ctx backup = ctx.matched <- backup
-
 let incr_matched c = c.matched <- c.matched + 1
 
 let parse (T f) loc ?on_error x k =
@@ -18,7 +16,6 @@ module Packed = struct
   type ('a, 'b) t = T : ('a, 'b, 'c) Ast_pattern0.t * 'b -> ('a, 'c) t
 
   let create t f = T (t, f)
-
   let parse (T (t, f)) loc x = parse t loc x f
 end
 
@@ -40,6 +37,12 @@ let drop =
       incr_matched ctx;
       k)
 
+let as__ (T f1) =
+  T
+    (fun ctx loc x k ->
+      let k = f1 ctx loc x (k x) in
+      k)
+
 let cst ~to_string ?(equal = Poly.equal) v =
   T
     (fun ctx loc x k ->
@@ -49,19 +52,12 @@ let cst ~to_string ?(equal = Poly.equal) v =
       else fail loc (to_string v))
 
 let int v = cst ~to_string:Int.to_string v
-
 let char v = cst ~to_string:(Printf.sprintf "%C") v
-
 let string v = cst ~to_string:(Printf.sprintf "%S") v
-
 let float v = cst ~to_string:Float.to_string v
-
 let int32 v = cst ~to_string:Int32.to_string v
-
 let int64 v = cst ~to_string:Int64.to_string v
-
 let nativeint v = cst ~to_string:Nativeint.to_string v
-
 let bool v = cst ~to_string:Bool.to_string v
 
 let false_ =
@@ -155,17 +151,11 @@ let alt (T f1) (T f2) =
           else raise e2))
 
 let ( ||| ) = alt
-
 let map (T func) ~f = T (fun ctx loc x k -> func ctx loc x (f k))
-
 let map' (T func) ~f = T (fun ctx loc x k -> func ctx loc x (f loc k))
-
 let map_result (T func) ~f = T (fun ctx loc x k -> f (func ctx loc x k))
-
 let ( >>| ) t f = map t ~f
-
 let map0 (T func) ~f = T (fun ctx loc x k -> func ctx loc x (k f))
-
 let map1 (T func) ~f = T (fun ctx loc x k -> func ctx loc x (fun a -> k (f a)))
 
 let map2 (T func) ~f =
@@ -186,62 +176,38 @@ let many (T f) =
   T (fun ctx loc l k -> k (List.map l ~f:(fun x -> f ctx loc x (fun x -> x))))
 
 let loc (T f) = T (fun ctx _loc (x : _ Loc.t) k -> f ctx x.loc x.txt k)
-
 let pack0 t = map t ~f:(fun f -> f ())
-
 let pack2 t = map t ~f:(fun f x y -> f (x, y))
-
 let pack3 t = map t ~f:(fun f x y z -> f (x, y, z))
 
 include Ast_pattern_generated
 
 let echar t = pexp_constant (pconst_char t)
-
 let estring t = pexp_constant (pconst_string t drop drop)
-
 let efloat t = pexp_constant (pconst_float t drop)
-
 let pchar t = ppat_constant (pconst_char t)
-
 let pstring t = ppat_constant (pconst_string t drop drop)
-
 let pfloat t = ppat_constant (pconst_float t drop)
-
 let int' (T f) = T (fun ctx loc x k -> f ctx loc (int_of_string x) k)
-
 let int32' (T f) = T (fun ctx loc x k -> f ctx loc (Int32.of_string x) k)
-
 let int64' (T f) = T (fun ctx loc x k -> f ctx loc (Int64.of_string x) k)
 
 let nativeint' (T f) =
   T (fun ctx loc x k -> f ctx loc (Nativeint.of_string x) k)
 
 let const_int t = pconst_integer (int' t) none
-
 let const_int32 t = pconst_integer (int32' t) (some (char 'l'))
-
 let const_int64 t = pconst_integer (int64' t) (some (char 'L'))
-
 let const_nativeint t = pconst_integer (nativeint' t) (some (char 'n'))
-
 let eint t = pexp_constant (const_int t)
-
 let eint32 t = pexp_constant (const_int32 t)
-
 let eint64 t = pexp_constant (const_int64 t)
-
 let enativeint t = pexp_constant (const_nativeint t)
-
 let pint t = ppat_constant (const_int t)
-
 let pint32 t = ppat_constant (const_int32 t)
-
 let pint64 t = ppat_constant (const_int64 t)
-
 let pnativeint t = ppat_constant (const_nativeint t)
-
 let single_expr_payload t = pstr (pstr_eval t nil ^:: nil)
-
 let no_label t = cst Asttypes.Nolabel ~to_string:(fun _ -> "Nolabel") ** t
 
 let extension (T f1) (T f2) =
@@ -282,5 +248,4 @@ let esequence (T f) =
              f ctx expr.pexp_loc expr (fun x -> x))))
 
 let of_func f = T f
-
 let to_func (T f) = f

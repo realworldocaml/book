@@ -136,7 +136,7 @@ val string_to_bar16 : string -> bar16 option
 
 (** {2 Base types } *)
 
-type buffer = (char, Bigarray_compat.int8_unsigned_elt, Bigarray_compat.c_layout) Bigarray_compat.Array1.t
+type buffer = (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 (** Type of a buffer. A cstruct is composed of an underlying buffer
     and position/length within this buffer. *)
 
@@ -330,29 +330,8 @@ val blit_to_bytes: t -> int -> bytes -> int -> int -> unit
     valid segment of [src], or if [dstoff] and [len] do not designate
     a valid segment of [dst]. *)
 
-val blit_to_string: t -> int -> bytes -> int -> int -> unit
-  [@@ocaml.deprecated "Use blit_to_bytes instead, blit_to_string will be removed in cstruct 5.0.0"]
-(** [blit_to_string] is a deprecated alias of {!blit_to_bytes}. *)
-
 val memset: t -> int -> unit
 (** [memset t x] sets all the bytes of [t] to [x land 0xff]. *)
-
-val len: t -> int [@@deprecated "len is deprecated, you should use length instead."]
-(** Returns the length of the current cstruct view.  Note that this
-    length is potentially smaller than the actual size of the underlying
-    buffer, as the [sub] or [set_len] functions can construct a smaller view. *)
-
-val set_len : t -> int -> t
-  [@@ocaml.deprecated "This function will be removed in cstruct 5.0.0. If you need this function, discuss other ways in the issue tracker https://github.com/mirage/ocaml-cstruct."]
-(** [set_len t len] sets the length of the cstruct [t] to a new absolute
-    value, and returns a fresh cstruct with these settings.
-    @raise Invalid_argument if [len] exceeds the size of the buffer. *)
-
-val add_len : t -> int -> t
-  [@@ocaml.deprecated "This function will be removed in cstruct 5.0.0. If you need this function, discuss other ways in the issue tracker https://github.com/mirage/ocaml-cstruct."]
-(** [add_len t l] will add [l] bytes to the length of the buffer, and return
-    a fresh cstruct with these settings.
-    @raise Invalid_argument if [len] exceeds the size of the buffer. *)
 
 val split: ?start:int -> t -> int -> t * t
 (** [split ~start cstr len] is a tuple containing the cstruct
@@ -469,7 +448,43 @@ module LE : sig
   (** [set_uint64 cstr off i] writes the 64 bit long little-endian
       unsigned integer [i] at offset [off] of [cstr].
       @raise Invalid_argument if the buffer is too small. *)
+end
 
+module HE : sig
+
+  (** Get/set host-endian integers of various sizes. The second
+      argument of those functions is the position relative to the
+      current offset of the cstruct. *)
+
+  val get_uint16: t -> int -> uint16
+  (** [get_uint16 cstr off] is the 16 bit long host-endian unsigned
+      integer stored in [cstr] at offset [off].
+      @raise Invalid_argument if the buffer is too small. *)
+
+  val get_uint32: t -> int -> uint32
+  (** [get_uint32 cstr off] is the 32 bit long host-endian unsigned
+      integer stored in [cstr] at offset [off].
+      @raise Invalid_argument if the buffer is too small. *)
+
+  val get_uint64: t -> int -> uint64
+  (** [get_uint64 cstr off] is the 64 bit long host-endian unsigned
+      integer stored in [cstr] at offset [off].
+      @raise Invalid_argument if the buffer is too small. *)
+
+  val set_uint16: t -> int -> uint16 -> unit
+  (** [set_uint16 cstr off i] writes the 16 bit long host-endian
+      unsigned integer [i] at offset [off] of [cstr].
+      @raise Invalid_argument if the buffer is too small. *)
+
+  val set_uint32: t -> int -> uint32 -> unit
+  (** [set_uint32 cstr off i] writes the 32 bit long host-endian
+      unsigned integer [i] at offset [off] of [cstr].
+      @raise Invalid_argument if the buffer is too small. *)
+
+  val set_uint64: t -> int -> uint64 -> unit
+  (** [set_uint64 cstr off i] writes the 64 bit long host-endian
+      unsigned integer [i] at offset [off] of [cstr].
+      @raise Invalid_argument if the buffer is too small. *)
 end
 
 (** {2 List of buffers} *)
@@ -614,7 +629,7 @@ val stop_pos : t -> int
 val length : t -> int
 (** Returns the length of the current cstruct view.  Note that this
     length is potentially smaller than the actual size of the underlying
-    buffer, as the [sub] or [set_len] functions can construct a smaller view. *)
+    buffer, as the [sub] function can construct a smaller view. *)
 
 val head : ?rev:bool -> t -> char option
 (** [head cs] is [Some (get cs h)] with [h = 0] if [rev = false] (default) or [h

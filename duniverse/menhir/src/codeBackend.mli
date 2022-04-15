@@ -8,11 +8,19 @@
 (*                                                                            *)
 (******************************************************************************)
 
+open IL
+
 (* The (code-based) code generator. *)
 
 module Run (T : sig end) : sig
 
-  val program: IL.program
+  val program: program
 
 end
 
+(* Some auxiliary functions are exposed for use by the new code back-end. *)
+
+val print_token: string
+val printtokendef: valdef
+val assertfalsedef: valdef
+val call_assertfalse: expr

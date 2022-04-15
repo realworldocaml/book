@@ -1,5 +1,5 @@
 (* Auto-generated from "test_annot.atd" *)
-[@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 type pointC = ProtoC_t.pointC = { f: float }
 

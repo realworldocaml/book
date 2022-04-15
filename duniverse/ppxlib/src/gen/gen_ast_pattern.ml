@@ -237,7 +237,6 @@ let generate filename =
   dump "ast_pattern_generated" Pprintast.structure st ~ext:".ml"
 
 let args = []
-
 let usage = Printf.sprintf "%s [options] <.ml files>\n" Sys.argv.(0)
 
 let () =

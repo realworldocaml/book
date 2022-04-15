@@ -188,7 +188,6 @@ module Generated_code_hook = struct
   }
 
   let nop = { f = (fun _ _ _ -> ()) }
-
   let replace t context loc x = t.f context loc x
 
   let insert_after t context (loc : Location.t) x =

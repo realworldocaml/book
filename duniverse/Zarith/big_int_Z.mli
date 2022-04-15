@@ -1,15 +1,15 @@
 (**
    [Big_int] interface for Z module.
-   
+
    This modules provides an interface compatible with [Big_int], but using
    [Z] functions internally.
 
 
-   This file is part of the Zarith library 
+   This file is part of the Zarith library
    http://forge.ocamlcore.org/projects/zarith .
    It is distributed under LGPL 2 licensing, with static linking exception.
    See the LICENSE file included in the distribution.
-   
+
    Copyright (c) 2010-2011 Antoine Miné, Abstraction project.
    Abstraction is part of the LIENS (Laboratoire d'Informatique de l'ENS),
    a joint laboratory by:

@@ -1,6 +1,6 @@
 name: build
 
-on: 
+on:
   - push
   - pull_request
 
@@ -13,11 +13,11 @@ jobs:
         os:
           - ubuntu-latest
         ocaml-version:
-          - 4.03.0
-          - 4.05.0
-          - 4.07.0
-          - 4.09.0
-          - 4.11.1
+          - 4.08.1
+          - 4.09.1
+          - 4.11.2
+          - 4.13.1
+          - 4.14.0
 
     runs-on: ${{ matrix.os }}
 
@@ -26,14 +26,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
+        uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
+          ocaml-compiler: ${{ matrix.ocaml-version }}
 
       - name: Deps
-        run: |
-          opam pin add -n bigstringaf .
-          opam install -t --deps-only .
+        run: opam install -t --deps-only .
 
       - name: Build
         run: opam exec -- dune build

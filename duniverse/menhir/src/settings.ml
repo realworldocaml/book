@@ -10,8 +10,17 @@
 
 open Printf
 
+let error format =
+  ksprintf (fun s -> prerr_string s; exit 1) format
+
 (* ------------------------------------------------------------------------- *)
 (* Prepare for parsing the command line. *)
+
+let backend =
+  ref `Unspecified
+
+let set_backend b () =
+  backend := b
 
 type token_type_mode =
   | TokenTypeAndCode   (* produce the definition of the [token] type and code for the parser *)
@@ -214,13 +223,10 @@ let interpret_show_cst =
 let interpret_error =
   ref false
 
-let table =
-  ref false
+let optimization_level =
+  ref 2
 
 let inspection =
-  ref false
-
-let coq =
   ref false
 
 let coq_no_version_check =
@@ -236,6 +242,9 @@ let strict =
   ref false
 
 let fixedexc =
+  ref false
+
+let exn_carries_state =
   ref false
 
 type suggestion =
@@ -278,9 +287,8 @@ let set_list_errors_algorithm (algorithm: string) : unit =
     | "classic"  -> `Classic
     | "validate" -> `Validate
     | algorithm ->
-      eprintf "Error: --list-errors-algorithm should be followed with \
-               fast | classic | validate (got %S).\n" algorithm;
-      exit 1
+        error "Error: --list-errors-algorithm should be followed with \
+               fast | classic | validate (got %S).\n" algorithm
   in
   list_errors_algorithm := algorithm
 
@@ -355,7 +363,7 @@ let random_sentence_concrete symbol =
   require_aliases := true
 
 let strategy =
-  ref `Legacy
+  ref `Unspecified
 
 let set_strategy = function
   | "legacy" ->
@@ -363,8 +371,16 @@ let set_strategy = function
   | "simplified" ->
       strategy := `Simplified
   | _ ->
-      eprintf "Error: --strategy should be followed with legacy | simplified.\n";
-      exit 1
+      error "Error: --strategy should be followed with legacy | simplified.\n"
+
+let stacklang_dump =
+  ref false
+
+let stacklang_graph =
+  ref false
+
+let stacklang_test =
+  ref false
 
 (* When new command line options are added, please update both the manual
    in [doc/manual.tex] and the man page in [doc/menhir.1]. *)
@@ -377,10 +393,12 @@ let options = Arg.align [
   "--base", Arg.Set_string base, "<basename> Specifies a base name for the output file(s)";
   "--canonical", Arg.Unit (fun () -> construction_mode := ModeCanonical), " Construct a canonical Knuth LR(1) automaton";
   "--cmly", Arg.Set cmly, " Write a .cmly file";
+  "--code", Arg.Unit (set_backend `NewCodeBackend), " Use the code back-end (default)";
+  "--code-ancient", Arg.Unit (set_backend `OldCodeBackend), " Use the ancient code back-end";
   "--comment", Arg.Set comment, " Include comments in the generated code";
   "--compare-errors", Arg.String add_compare_errors, "<filename> (used twice) Compare two .messages files";
   "--compile-errors", Arg.String set_compile_errors, "<filename> Compile a .messages file to OCaml code";
-  "--coq", Arg.Set coq, " Generate a formally verified parser, in Coq";
+  "--coq", Arg.Unit (set_backend `CoqBackend), " Generate a formally verified parser, in Coq";
   "--coq-lib-path", Arg.String (fun path -> coq_lib_path := Some path), "<path> How to qualify references to MenhirLib";
   "--coq-lib-no-path", Arg.Unit (fun () -> coq_lib_path := None), " Do *not* qualify references to MenhirLib";
   "--coq-no-version-check", Arg.Set coq_no_version_check, " Do not generate a version check.";
@@ -392,6 +410,7 @@ let options = Arg.align [
   "--echo-errors", Arg.String set_echo_errors, "<filename> Echo the sentences in a .messages file";
   "--echo-errors-concrete", Arg.String set_echo_errors_concrete, "<filename> Echo the sentences in a .messages file";
   "--error-recovery", Arg.Set recovery, " (no longer supported)";
+  "--exn-carries-state", Arg.Set exn_carries_state, " Declares exception Error of int";
   "--explain", Arg.Set explain, " Explain conflicts in <basename>.conflicts";
   "--external-tokens", Arg.String codeonly, "<module> Import token type definition from <module>";
   "--fixed-exception", Arg.Set fixedexc, " Declares Error = Parsing.Parse_error";
@@ -439,6 +458,9 @@ let options = Arg.align [
   "--represent-values", Arg.Set represent_values, " (undocumented)";
   "--represent-everything", Arg.Unit represent_everything, " (undocumented)";
   "--require-aliases", Arg.Set require_aliases, " Check that every token has a token alias";
+  "--stacklang-dump", Arg.Set stacklang_dump, " (undocumented)";
+  "--stacklang-graph", Arg.Set stacklang_graph, " (undocumented)";
+  "--stacklang-test", Arg.Set stacklang_test, " (undocumented)";
   "--stdlib", Arg.String ignore, "<directory> Ignored (deprecated)";
   "--strategy", Arg.String set_strategy, "<strategy> Choose an error-handling strategy";
   "--strict", Arg.Set strict, " Warnings about the grammar are errors";
@@ -452,7 +474,7 @@ let options = Arg.align [
                          " Suggest where is MenhirLib";
   "--suggest-ocamlfind", Arg.Unit (fun () -> suggestion := SuggestUseOcamlfind),
                          " (deprecated)";
-  "--table", Arg.Set table, " Use the table-based back-end";
+  "--table", Arg.Unit (set_backend `TableBackend), " Use the table back-end";
   "--timings", Arg.Unit (fun () -> timings := Some stderr), " Output internal timings to stderr";
   "--timings-to", Arg.String (fun filename -> timings := Some (open_out filename)), "<filename> Output internal timings to <filename>";
   "--trace", Arg.Set trace, " Generate tracing instructions";
@@ -465,7 +487,8 @@ let options = Arg.align [
   "-lg", Arg.Set_int logG, " Synonymous with --log-grammar";
   "-la", Arg.Set_int logA, " Synonymous with --log-automaton";
   "-lc", Arg.Set_int logC, " Synonymous with --log-code";
-  "-t", Arg.Set table, " Synonymous with --table";
+  "-O", Arg.Set_int optimization_level, " (0|1|2) Set optimization level";
+  "-t", Arg.Unit (set_backend `TableBackend), " Synonymous with --table";
   "-v", Arg.Unit v, " Synonymous with --dump --explain";
 ]
 
@@ -489,6 +512,102 @@ let () =
 
 (* ------------------------------------------------------------------------- *)
 
+(* Decide which back-end is used. *)
+
+let backend =
+  (* If any of the [--interpret] flags is used, then we consider that
+     the back-end is [`ReferenceInterpreter]. Indeed, in that case,
+     we are not using any of the other back-ends. *)
+  if !interpret || !interpret_error || !interpret_show_cst then
+    `ReferenceInterpreter
+  else
+    match !backend with
+    | `Unspecified ->
+        (* The new code back-end is the default. *)
+        `NewCodeBackend
+    | `CoqBackend
+    | `NewCodeBackend
+    | `OldCodeBackend
+    | `TableBackend
+      as backend ->
+        backend
+
+let extension =
+  match backend with
+  | `CoqBackend ->
+      ".vy"
+  | `ReferenceInterpreter
+  | `NewCodeBackend
+  | `OldCodeBackend
+  | `TableBackend ->
+      ".mly"
+
+let print_backend backend =
+  match backend with
+  | `ReferenceInterpreter ->
+      "reference interpreter"
+  | `OldCodeBackend ->
+      "ancient code back-end"
+  | `NewCodeBackend ->
+      "new code back-end"
+  | `CoqBackend ->
+      "Coq back-end"
+  | `TableBackend ->
+      "table back-end"
+
+let print_strategy strategy =
+  match strategy with
+  | `Legacy ->
+      "legacy"
+  | `Simplified ->
+      "simplified"
+
+let strategy =
+  let strategy = !strategy in
+  match strategy, backend with
+  | (`Unspecified | `Simplified), `NewCodeBackend ->
+      (* The new code back-end supports only the simplified strategy. *)
+      `Simplified
+  | (`Unspecified | `Legacy), `OldCodeBackend ->
+      (* The old code back-end supports only the legacy strategy. *)
+      `Legacy
+  | `Simplified, (`ReferenceInterpreter | `TableBackend) ->
+      (* The reference interpreter and the table back-end support both
+         strategies. *)
+      `Simplified
+  | (`Unspecified | `Legacy), (`ReferenceInterpreter | `TableBackend) ->
+      (* The reference interpreter and the table back-end support both
+         strategies; legacy is the default, for backward
+         compatibility. *)
+      `Legacy
+  | _, `CoqBackend ->
+      (* The Coq back-end does not care. *)
+      `Legacy
+  | (`Legacy as strategy), `NewCodeBackend
+  | (`Simplified as strategy), `OldCodeBackend ->
+      error "Error: the %s does not allow --strategy %s.\n"
+        (print_backend backend)
+        (print_strategy strategy)
+
+(* ------------------------------------------------------------------------- *)
+
+(* [--exn-carries-state] is supported only by the new code back-end,
+   and is incompatible with [--fixed-exception]. *)
+
+let () =
+  if !exn_carries_state
+  && backend <> `NewCodeBackend then
+    error
+      "Error: --exn-carries-state is supported only by the code back-end.\n"
+
+let () =
+  if !exn_carries_state
+  && !fixedexc then
+    error
+      "Error: --fixed-exception and --exn-carries-state are incompatible.\n"
+
+(* ------------------------------------------------------------------------- *)
+
 (* Menhir is able to suggest compile and link flags to be passed to the
    OCaml compilers. If required, do so and stop. *)
 
@@ -504,11 +623,11 @@ let () =
   | SuggestNothing ->
       ()
   | SuggestCompFlags ->
-      if !table then
+      if backend = `TableBackend then
         printf "-I %s\n%!" (Installation.libdir());
       exit 0
   | SuggestLinkFlags extension ->
-      if !table then
+      if backend = `TableBackend then
         printf "menhirLib.%s\n%!" extension;
       exit 0
   | SuggestWhereIsMenhirLibSource ->
@@ -534,7 +653,7 @@ let base =
         fprintf stderr "%s\n" usage;
         exit 1
     | [ filename ] ->
-        Filename.chop_suffix filename (if !coq then ".vy" else ".mly")
+        Filename.chop_suffix filename extension
     | _ ->
         fprintf stderr "Error: you must specify --base when providing multiple input files.\n";
         exit 1
@@ -607,23 +726,20 @@ let interpret_show_cst =
 let interpret_error =
   !interpret_error
 
-let table =
-  !table
+let optimization_level =
+  !optimization_level
 
 let inspection =
   !inspection
 
 let () =
-  if inspection && not table then begin
+  if inspection && backend <> `TableBackend then begin
     fprintf stderr "Error: --inspection requires --table.\n";
     exit 1
   end
 
 let no_stdlib =
   !no_stdlib
-
-let coq =
-  !coq
 
 let coq_no_version_check =
   !coq_no_version_check
@@ -639,6 +755,9 @@ let strict =
 
 let fixedexc =
   !fixedexc
+
+let exn_carries_state =
+  !exn_carries_state
 
 let ignored_unused_tokens =
   !ignored_unused_tokens
@@ -665,10 +784,9 @@ let compare_errors =
   | [ filename2; filename1 ] -> (* LIFO *)
       Some (filename1, filename2)
   | _ ->
-      eprintf
+      error
         "To compare two .messages files, please use:\n\
-         --compare-errors <filename1> --compare-errors <filename2>.\n";
-      exit 1
+         --compare-errors <filename1> --compare-errors <filename2>.\n"
 
 let merge_errors =
   match !merge_errors with
@@ -677,10 +795,9 @@ let merge_errors =
   | [ filename2; filename1 ] -> (* LIFO *)
       Some (filename1, filename2)
   | _ ->
-      eprintf
+      error
         "To merge two .messages files, please use:\n\
-         --merge-errors <filename1> --merge-errors <filename2>.\n";
-      exit 1
+         --merge-errors <filename1> --merge-errors <filename2>.\n"
 
 let update_errors =
   !update_errors
@@ -712,9 +829,6 @@ let random_sentence =
       and style = !random_sentence_style in
       Some (nt, goal, style)
 
-let strategy =
-  !strategy
-
 let infer =
   !infer
 
@@ -723,9 +837,9 @@ let infer =
    and dependency nightmares. *)
 
 let skipping_parser_generation =
-  coq ||
+  backend = `ReferenceInterpreter ||
+  backend = `CoqBackend ||
   compile_errors <> None ||
-  interpret_error ||
   list_errors ||
   compare_errors <> None ||
   merge_errors <> None ||
@@ -746,8 +860,14 @@ let infer =
    positions are represented as part of stack cells. *)
 
 let () =
-  if table || coq then
-    represent_everything()
+  match backend with
+  | `ReferenceInterpreter
+  | `TableBackend
+  | `CoqBackend ->
+      represent_everything()
+  | `OldCodeBackend
+  | `NewCodeBackend ->
+      ()
 
 let represent_positions =
   !represent_positions
@@ -757,3 +877,12 @@ let represent_states =
 
 let represent_values =
   !represent_values
+
+let stacklang_dump =
+  !stacklang_dump
+
+let stacklang_graph =
+  !stacklang_graph
+
+let stacklang_test =
+  !stacklang_test

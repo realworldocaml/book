@@ -1,0 +1,29 @@
+;
+; Convert ATD -> Python
+;
+(rule
+  (targets
+    allcaps.py
+    everything.py
+  )
+  (deps
+    ../atd-input/ALLCAPS.atd
+    ../atd-input/everything.atd
+  )
+  (action
+    (run %{bin:atdpy} %{deps})))
+
+;
+; Typecheck and run the tests on the generated Python code.
+;
+(rule
+ (alias runtest)
+ (package atdpy)
+ (deps
+  everything.py
+  (glob_files *.py))
+ (action
+  (progn
+   (run python3 -m flake8 .)
+   (run python3 -m mypy --strict .)
+   (run python3 -m pytest .))))

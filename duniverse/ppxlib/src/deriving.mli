@@ -5,7 +5,6 @@ open Import
 (** Specification of generator arguments *)
 module Args : sig
   type ('a, 'b) t
-
   type 'a param
 
   val empty : ('m, 'm) t
@@ -44,7 +43,6 @@ type t
 
 module Generator : sig
   type deriver = t
-
   type ('output_ast, 'input_ast) t
 
   val make :

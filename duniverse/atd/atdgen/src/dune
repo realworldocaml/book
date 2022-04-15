@@ -2,4 +2,4 @@
 
 (library
  (name atdgen_emit)
- (libraries atd yojson))
+ (libraries atd biniou easy-format re yojson))

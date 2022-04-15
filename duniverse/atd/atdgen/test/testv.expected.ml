@@ -1,5 +1,5 @@
 (* Auto-generated from "test.atd" *)
-              [@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 (** This is just a test. *)
 
@@ -57,6 +57,11 @@ type test = Test.test = {
 }
 
 type tup = Test.tup
+
+type test_field_prefix = Test.test_field_prefix = {
+  theprefix_hello (*atd hello *): bool;
+  theprefix_world (*atd world *): int
+}
 
 type star_rating = Test.star_rating
 
@@ -343,6 +348,9 @@ let validate_test : _ -> test -> _ = (
 let validate_tup = (
   fun _ _ -> None
 )
+let validate_test_field_prefix : _ -> test_field_prefix -> _ = (
+  fun _ _ -> None
+)
 let validate_star_rating = (
   fun path x ->
     let msg = "Failed check by fun x -> x >= 1 && x <= 5" in
@@ -573,6 +581,14 @@ let create_test
     x2 = x2;
     x3 = x3;
     x4 = x4;
+  }
+let create_test_field_prefix 
+  ~theprefix_hello
+  ~theprefix_world
+  () : test_field_prefix =
+  {
+    theprefix_hello = theprefix_hello;
+    theprefix_world = theprefix_world;
   }
 let create_some_record 
   ~some_field

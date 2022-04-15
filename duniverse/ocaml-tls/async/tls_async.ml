@@ -109,6 +109,7 @@ let connect
       ?reader_buffer_size
       ?writer_buffer_size
       ?timeout
+      ?time_source
       config
       where_to_connect
       ~host
@@ -122,6 +123,7 @@ let connect
       ?reader_buffer_size
       ?writer_buffer_size
       ?timeout
+      ?time_source
       where_to_connect
     |> Deferred.ok
   in

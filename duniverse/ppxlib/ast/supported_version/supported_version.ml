@@ -18,7 +18,6 @@ let all =
   ]
 
 let to_string (a, b) = Printf.sprintf "%d.%02d" a b
-
 let to_int (a, b) = (a * 100) + b
 
 let of_string s =

@@ -12,10 +12,9 @@ $ opam install atdgen
 Documentation
 -------------
 
-https://mjambon.github.io/atdgen-doc/
-
+https://atd.readthedocs.io/
 
 How to contribute
 -----------------
 
-See https://github.com/mjambon/documents/blob/master/how-to-contribute.md
+[CONTRIBUTING.md](../CONTRIBUTING.md)

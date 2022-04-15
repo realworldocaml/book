@@ -116,10 +116,10 @@ module Word = Core.Word
 (* ------------------------------------------------------------------------ *)
 
 (* The following code validates the fact that an error can be triggered in
-     state [s'] by beginning at the start symbol [nt] and reading the
-     sequence of terminal symbols [w]. We use this for debugging purposes.
-     Furthermore, this gives us a list of spurious reductions, which we use
-     to produce a comment. *)
+   state [s'] by beginning at the start symbol [nt] and reading the sequence
+   of terminal symbols [elements]. We use this for debugging purposes.
+   Furthermore, this gives us a list of spurious reductions, which we use to
+   produce a comment. *)
 
 let fail msg =
   Printf.eprintf "LRijkstra: internal error: %s.\n%!" msg;
@@ -131,7 +131,7 @@ let fail format =
 let validate nt s' elements : ReferenceInterpreter.target =
   let open ReferenceInterpreter in
   match
-    check_error_path false nt elements
+    check_error_path Logging.never nt elements
   with
   | OInputReadPastEnd ->
       fail "input was read past its end"

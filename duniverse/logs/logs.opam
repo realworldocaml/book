@@ -1,8 +1,8 @@
+version: "0.7.0+dune2"
 opam-version: "2.0"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: ["The logs programmers"]
-homepage: "https://erratique.ch/software/logs"
-doc: "https://erratique.ch/software/logs/doc"
+homepage: "https://github.com/dune-universe/logs"
 bug-reports: "https://github.com/dbuenzli/logs/issues"
 tags: [ "log" "system" "org:erratique" ]
 license: "ISC"
@@ -47,6 +47,3 @@ Logs and its reporters are distributed under the ISC license.
 
 build: [[ "dune" "build" "-p" name ]]
 dev-repo: "git+https://github.com/dune-universe/logs.git"
-url {
-  src: "git://github.com/dune-universe/logs.git#duniverse-v0.7.0"
-}

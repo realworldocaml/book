@@ -24,7 +24,6 @@ let init lexbuf fname =
     { pos_fname = fname; pos_lnum = 1; pos_bol = 0; pos_cnum = 0 }
 
 let raise_errorf ?loc fmt = L.raise_errorf ?loc fmt
-
 let report_exception = L.report_exception
 
 let of_lexbuf (lexbuf : Lexing.lexbuf) =
@@ -56,7 +55,6 @@ let compare_pos p1 p2 =
   | n -> n
 
 let min_pos p1 p2 = if compare_pos p1 p2 <= 0 then p1 else p2
-
 let max_pos p1 p2 = if compare_pos p1 p2 >= 0 then p1 else p2
 
 let compare loc1 loc2 =
@@ -69,6 +67,11 @@ module Error = struct
 
   let createf ~loc fmt = Format.kasprintf (fun str -> make ~loc ~sub:[] str) fmt
 end
+
+let error_extensionf ~loc fmt =
+  Format.kasprintf
+    (fun str -> Error.to_extension @@ Error.make ~loc ~sub:[] str)
+    fmt
 
 exception Error = L.Error
 

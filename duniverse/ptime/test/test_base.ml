@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Testing
@@ -91,10 +90,31 @@ let posix_arithmetic = test "POSIX arithmetic" @@ fun () ->
     eq_span (Ptime.diff t0 t2) (span 30L);
   end
 
+let truncation = test "Truncation" @@ fun () ->
+  let p ~frac_s t =
+    let d1 = Ptime.(diff t min) |> Ptime.Span.truncate ~frac_s
+    and d2 = Ptime.diff (Ptime.truncate ~frac_s t) Ptime.min in
+    eq_span d1 d2
+  in
+  let t ~frac_s ps =
+    p ~frac_s (Ptime.v (0, ps));
+    p ~frac_s (Ptime.v (1, ps));
+    p ~frac_s (Ptime.v (-1, ps));
+    p ~frac_s (Ptime.v (2932896, ps));
+    p ~frac_s (Ptime.v (-719528, ps));
+  in
+  for i = 0 to 12 do
+    t ~frac_s:i 0L;
+    t ~frac_s:i 86_399_999_999_999_999L;
+    t ~frac_s:i 86_399_000_000_000_000L;
+  done;
+  ()
+
 let suite = suite "Ptime base tests"
     [ base;
       posix_arithmetic;
-      predicates; ]
+      predicates;
+      truncation; ]
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers

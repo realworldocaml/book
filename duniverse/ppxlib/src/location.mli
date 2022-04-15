@@ -25,8 +25,8 @@ val init : Lexing.lexbuf -> string -> unit
     named file. *)
 
 val raise_errorf : ?loc:t -> ('a, Caml.Format.formatter, unit, 'b) format4 -> 'a
-(** Raise a located error. The exception is caught by driver and handled
-    appropriately *)
+(** Raise a located error. Should be avoided as much as possible, in favor of
+    {!error_extensionf}. *)
 
 val of_lexbuf : Lexing.lexbuf -> t
 (** Return the location corresponding to the last matched regular expression *)
@@ -40,16 +40,12 @@ val print : Caml.Format.formatter -> t -> unit
 type nonrec 'a loc = 'a loc = { txt : 'a; loc : t }
 
 val compare_pos : Lexing.position -> Lexing.position -> int
-
 val min_pos : Lexing.position -> Lexing.position -> Lexing.position
-
 val max_pos : Lexing.position -> Lexing.position -> Lexing.position
-
 val compare : t -> t -> int
 
 module Error : sig
   type location = t
-
   type t
 
   val make : loc:location -> string -> sub:(location * string) list -> t
@@ -58,7 +54,6 @@ module Error : sig
     loc:location -> ('a, Caml.Format.formatter, unit, t) format4 -> 'a
 
   val message : t -> string
-
   val set_message : t -> string -> t
 
   val register_error_of_exn : (exn -> t option) -> unit
@@ -83,5 +78,10 @@ module Error : sig
   (** Find out where the error is located. *)
 end
 with type location := t
+
+val error_extensionf :
+  loc:t -> ('a, Format.formatter, unit, extension) format4 -> 'a
+(** Returns an error extension node. When encountered in the AST, the compiler
+    recognizes it and displays the error properly. *)
 
 exception Error of Error.t

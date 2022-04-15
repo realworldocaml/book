@@ -1,3 +1,19 @@
+
+
+* Add alert messages to deprecation annotations (#47).
+* The solution using ephemerons introduced in v0.8.7 for attaching
+  custom data to formatters has unreliable performance characteristics
+  in some usage scenarios. Namely use of `Fmt.styled` with
+  `Fmt.[k]str` heavy code as those rely on `Format.{k,a}sprintf` which
+  allocate one formatter per call. 
+  
+  Hence we subvert again the `Format` tag system to do dirty
+  things. However since as of 4.08 tags became an extensible sum type
+  we can keep our dirty things entirely internal.
+
+  Thanks to Thomas Leonard for reporting and David Kaloper Meršinjak
+  for further investigations (#52).
+  
 v0.8.10 2021-10-04 Zagreb
 -------------------------
 

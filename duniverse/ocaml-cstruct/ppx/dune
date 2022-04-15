@@ -6,4 +6,4 @@
  (ppx_runtime_libraries cstruct stdlib-shims)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries sexplib ppxlib bigarray stdlib-shims))
+ (libraries sexplib ppxlib stdlib-shims))

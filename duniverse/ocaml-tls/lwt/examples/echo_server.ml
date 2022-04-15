@@ -67,7 +67,9 @@ let port =
   Arg.(value & opt int 4433 & info [ "port" ] ~doc)
 
 let cmd =
-  Term.(ret (const echo_server $ setup_log $ port)),
-  Term.info "server" ~version:"0.15.2"
+  let term = Term.(ret (const echo_server $ setup_log $ port))
+  and info = Cmd.info "server" ~version:"0.15.3"
+  in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1
+let () = exit (Cmd.eval cmd)

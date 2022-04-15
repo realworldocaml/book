@@ -25,15 +25,10 @@ open Asttypes
 open Parsetree
 
 type 'a with_loc = 'a Location.loc
-
 type loc = Location.t
-
 type lid = Longident.t with_loc
-
 type str = string with_loc
-
 type str_opt = string option with_loc
-
 type attrs = attribute list
 
 let default_loc = ref Location.none
@@ -58,17 +53,11 @@ let with_default_loc l f = protect_ref (R (default_loc, l)) f
 
 module Const = struct
   let integer ?suffix i = Pconst_integer (i, suffix)
-
   let int ?suffix i = integer ?suffix (Int.to_string i)
-
   let int32 ?(suffix = 'l') i = integer ~suffix (Int32.to_string i)
-
   let int64 ?(suffix = 'L') i = integer ~suffix (Int64.to_string i)
-
   let nativeint ?(suffix = 'n') i = integer ~suffix (Nativeint.to_string i)
-
   let float ?suffix f = Pconst_float (f, suffix)
-
   let char c = Pconst_char c
 
   let string ?quotation_delimiter ?(loc = !default_loc) s =
@@ -90,29 +79,17 @@ module Typ = struct
     }
 
   let attr d a = { d with ptyp_attributes = d.ptyp_attributes @ [ a ] }
-
   let any ?loc ?attrs () = mk ?loc ?attrs Ptyp_any
-
   let var ?loc ?attrs a = mk ?loc ?attrs (Ptyp_var a)
-
   let arrow ?loc ?attrs a b c = mk ?loc ?attrs (Ptyp_arrow (a, b, c))
-
   let tuple ?loc ?attrs a = mk ?loc ?attrs (Ptyp_tuple a)
-
   let constr ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_constr (a, b))
-
   let object_ ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_object (a, b))
-
   let class_ ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_class (a, b))
-
   let alias ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_alias (a, b))
-
   let variant ?loc ?attrs a b c = mk ?loc ?attrs (Ptyp_variant (a, b, c))
-
   let poly ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_poly (a, b))
-
   let package ?loc ?attrs a b = mk ?loc ?attrs (Ptyp_package (a, b))
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Ptyp_extension a)
 
   let force_poly t =
@@ -188,41 +165,23 @@ module Pat = struct
     }
 
   let attr d a = { d with ppat_attributes = d.ppat_attributes @ [ a ] }
-
   let any ?loc ?attrs () = mk ?loc ?attrs Ppat_any
-
   let var ?loc ?attrs a = mk ?loc ?attrs (Ppat_var a)
-
   let alias ?loc ?attrs a b = mk ?loc ?attrs (Ppat_alias (a, b))
-
   let constant ?loc ?attrs a = mk ?loc ?attrs (Ppat_constant a)
-
   let interval ?loc ?attrs a b = mk ?loc ?attrs (Ppat_interval (a, b))
-
   let tuple ?loc ?attrs a = mk ?loc ?attrs (Ppat_tuple a)
-
   let construct ?loc ?attrs a b = mk ?loc ?attrs (Ppat_construct (a, b))
-
   let variant ?loc ?attrs a b = mk ?loc ?attrs (Ppat_variant (a, b))
-
   let record ?loc ?attrs a b = mk ?loc ?attrs (Ppat_record (a, b))
-
   let array ?loc ?attrs a = mk ?loc ?attrs (Ppat_array a)
-
   let or_ ?loc ?attrs a b = mk ?loc ?attrs (Ppat_or (a, b))
-
   let constraint_ ?loc ?attrs a b = mk ?loc ?attrs (Ppat_constraint (a, b))
-
   let type_ ?loc ?attrs a = mk ?loc ?attrs (Ppat_type a)
-
   let lazy_ ?loc ?attrs a = mk ?loc ?attrs (Ppat_lazy a)
-
   let unpack ?loc ?attrs a = mk ?loc ?attrs (Ppat_unpack a)
-
   let open_ ?loc ?attrs a b = mk ?loc ?attrs (Ppat_open (a, b))
-
   let exception_ ?loc ?attrs a = mk ?loc ?attrs (Ppat_exception a)
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Ppat_extension a)
 end
 
@@ -236,82 +195,46 @@ module Exp = struct
     }
 
   let attr d a = { d with pexp_attributes = d.pexp_attributes @ [ a ] }
-
   let ident ?loc ?attrs a = mk ?loc ?attrs (Pexp_ident a)
-
   let constant ?loc ?attrs a = mk ?loc ?attrs (Pexp_constant a)
-
   let let_ ?loc ?attrs a b c = mk ?loc ?attrs (Pexp_let (a, b, c))
-
   let fun_ ?loc ?attrs a b c d = mk ?loc ?attrs (Pexp_fun (a, b, c, d))
-
   let function_ ?loc ?attrs a = mk ?loc ?attrs (Pexp_function a)
-
   let apply ?loc ?attrs a b = mk ?loc ?attrs (Pexp_apply (a, b))
-
   let match_ ?loc ?attrs a b = mk ?loc ?attrs (Pexp_match (a, b))
-
   let try_ ?loc ?attrs a b = mk ?loc ?attrs (Pexp_try (a, b))
-
   let tuple ?loc ?attrs a = mk ?loc ?attrs (Pexp_tuple a)
-
   let construct ?loc ?attrs a b = mk ?loc ?attrs (Pexp_construct (a, b))
-
   let variant ?loc ?attrs a b = mk ?loc ?attrs (Pexp_variant (a, b))
-
   let record ?loc ?attrs a b = mk ?loc ?attrs (Pexp_record (a, b))
-
   let field ?loc ?attrs a b = mk ?loc ?attrs (Pexp_field (a, b))
-
   let setfield ?loc ?attrs a b c = mk ?loc ?attrs (Pexp_setfield (a, b, c))
-
   let array ?loc ?attrs a = mk ?loc ?attrs (Pexp_array a)
-
   let ifthenelse ?loc ?attrs a b c = mk ?loc ?attrs (Pexp_ifthenelse (a, b, c))
-
   let sequence ?loc ?attrs a b = mk ?loc ?attrs (Pexp_sequence (a, b))
-
   let while_ ?loc ?attrs a b = mk ?loc ?attrs (Pexp_while (a, b))
-
   let for_ ?loc ?attrs a b c d e = mk ?loc ?attrs (Pexp_for (a, b, c, d, e))
-
   let constraint_ ?loc ?attrs a b = mk ?loc ?attrs (Pexp_constraint (a, b))
-
   let coerce ?loc ?attrs a b c = mk ?loc ?attrs (Pexp_coerce (a, b, c))
-
   let send ?loc ?attrs a b = mk ?loc ?attrs (Pexp_send (a, b))
-
   let new_ ?loc ?attrs a = mk ?loc ?attrs (Pexp_new a)
-
   let setinstvar ?loc ?attrs a b = mk ?loc ?attrs (Pexp_setinstvar (a, b))
-
   let override ?loc ?attrs a = mk ?loc ?attrs (Pexp_override a)
-
   let letmodule ?loc ?attrs a b c = mk ?loc ?attrs (Pexp_letmodule (a, b, c))
-
   let letexception ?loc ?attrs a b = mk ?loc ?attrs (Pexp_letexception (a, b))
-
   let assert_ ?loc ?attrs a = mk ?loc ?attrs (Pexp_assert a)
-
   let lazy_ ?loc ?attrs a = mk ?loc ?attrs (Pexp_lazy a)
-
   let poly ?loc ?attrs a b = mk ?loc ?attrs (Pexp_poly (a, b))
-
   let object_ ?loc ?attrs a = mk ?loc ?attrs (Pexp_object a)
-
   let newtype ?loc ?attrs a b = mk ?loc ?attrs (Pexp_newtype (a, b))
-
   let pack ?loc ?attrs a = mk ?loc ?attrs (Pexp_pack a)
-
   let open_ ?loc ?attrs a b = mk ?loc ?attrs (Pexp_open (a, b))
 
   let letop ?loc ?attrs let_ ands body =
     mk ?loc ?attrs (Pexp_letop { let_; ands; body })
 
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pexp_extension a)
-
   let unreachable ?loc ?attrs () = mk ?loc ?attrs Pexp_unreachable
-
   let case lhs ?guard rhs = { pc_lhs = lhs; pc_guard = guard; pc_rhs = rhs }
 
   let binding_op op pat exp loc =
@@ -323,19 +246,12 @@ module Mty = struct
     { pmty_desc = d; pmty_loc = loc; pmty_attributes = attrs }
 
   let attr d a = { d with pmty_attributes = d.pmty_attributes @ [ a ] }
-
   let ident ?loc ?attrs a = mk ?loc ?attrs (Pmty_ident a)
-
   let alias ?loc ?attrs a = mk ?loc ?attrs (Pmty_alias a)
-
   let signature ?loc ?attrs a = mk ?loc ?attrs (Pmty_signature a)
-
   let functor_ ?loc ?attrs a b = mk ?loc ?attrs (Pmty_functor (a, b))
-
   let with_ ?loc ?attrs a b = mk ?loc ?attrs (Pmty_with (a, b))
-
   let typeof_ ?loc ?attrs a = mk ?loc ?attrs (Pmty_typeof a)
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pmty_extension a)
 end
 
@@ -344,87 +260,50 @@ module Mod = struct
     { pmod_desc = d; pmod_loc = loc; pmod_attributes = attrs }
 
   let attr d a = { d with pmod_attributes = d.pmod_attributes @ [ a ] }
-
   let ident ?loc ?attrs x = mk ?loc ?attrs (Pmod_ident x)
-
   let structure ?loc ?attrs x = mk ?loc ?attrs (Pmod_structure x)
-
   let functor_ ?loc ?attrs arg body = mk ?loc ?attrs (Pmod_functor (arg, body))
-
   let apply ?loc ?attrs m1 m2 = mk ?loc ?attrs (Pmod_apply (m1, m2))
-
   let constraint_ ?loc ?attrs m mty = mk ?loc ?attrs (Pmod_constraint (m, mty))
-
   let unpack ?loc ?attrs e = mk ?loc ?attrs (Pmod_unpack e)
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pmod_extension a)
 end
 
 module Sig = struct
   let mk ?(loc = !default_loc) d = { psig_desc = d; psig_loc = loc }
-
   let value ?loc a = mk ?loc (Psig_value a)
-
   let type_ ?loc rec_flag a = mk ?loc (Psig_type (rec_flag, a))
-
   let type_subst ?loc a = mk ?loc (Psig_typesubst a)
-
   let type_extension ?loc a = mk ?loc (Psig_typext a)
-
   let exception_ ?loc a = mk ?loc (Psig_exception a)
-
   let module_ ?loc a = mk ?loc (Psig_module a)
-
   let mod_subst ?loc a = mk ?loc (Psig_modsubst a)
-
   let rec_module ?loc a = mk ?loc (Psig_recmodule a)
-
   let modtype ?loc a = mk ?loc (Psig_modtype a)
-
   let open_ ?loc a = mk ?loc (Psig_open a)
-
   let include_ ?loc a = mk ?loc (Psig_include a)
-
   let class_ ?loc a = mk ?loc (Psig_class a)
-
   let class_type ?loc a = mk ?loc (Psig_class_type a)
-
   let extension ?loc ?(attrs = []) a = mk ?loc (Psig_extension (a, attrs))
-
   let attribute ?loc a = mk ?loc (Psig_attribute a)
 end
 
 module Str = struct
   let mk ?(loc = !default_loc) d = { pstr_desc = d; pstr_loc = loc }
-
   let eval ?loc ?(attrs = []) a = mk ?loc (Pstr_eval (a, attrs))
-
   let value ?loc a b = mk ?loc (Pstr_value (a, b))
-
   let primitive ?loc a = mk ?loc (Pstr_primitive a)
-
   let type_ ?loc rec_flag a = mk ?loc (Pstr_type (rec_flag, a))
-
   let type_extension ?loc a = mk ?loc (Pstr_typext a)
-
   let exception_ ?loc a = mk ?loc (Pstr_exception a)
-
   let module_ ?loc a = mk ?loc (Pstr_module a)
-
   let rec_module ?loc a = mk ?loc (Pstr_recmodule a)
-
   let modtype ?loc a = mk ?loc (Pstr_modtype a)
-
   let open_ ?loc a = mk ?loc (Pstr_open a)
-
   let class_ ?loc a = mk ?loc (Pstr_class a)
-
   let class_type ?loc a = mk ?loc (Pstr_class_type a)
-
   let include_ ?loc a = mk ?loc (Pstr_include a)
-
   let extension ?loc ?(attrs = []) a = mk ?loc (Pstr_extension (a, attrs))
-
   let attribute ?loc a = mk ?loc (Pstr_attribute a)
 end
 
@@ -433,21 +312,13 @@ module Cl = struct
     { pcl_desc = d; pcl_loc = loc; pcl_attributes = attrs }
 
   let attr d a = { d with pcl_attributes = d.pcl_attributes @ [ a ] }
-
   let constr ?loc ?attrs a b = mk ?loc ?attrs (Pcl_constr (a, b))
-
   let structure ?loc ?attrs a = mk ?loc ?attrs (Pcl_structure a)
-
   let fun_ ?loc ?attrs a b c d = mk ?loc ?attrs (Pcl_fun (a, b, c, d))
-
   let apply ?loc ?attrs a b = mk ?loc ?attrs (Pcl_apply (a, b))
-
   let let_ ?loc ?attrs a b c = mk ?loc ?attrs (Pcl_let (a, b, c))
-
   let constraint_ ?loc ?attrs a b = mk ?loc ?attrs (Pcl_constraint (a, b))
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pcl_extension a)
-
   let open_ ?loc ?attrs a b = mk ?loc ?attrs (Pcl_open (a, b))
 end
 
@@ -456,15 +327,10 @@ module Cty = struct
     { pcty_desc = d; pcty_loc = loc; pcty_attributes = attrs }
 
   let attr d a = { d with pcty_attributes = d.pcty_attributes @ [ a ] }
-
   let constr ?loc ?attrs a b = mk ?loc ?attrs (Pcty_constr (a, b))
-
   let signature ?loc ?attrs a = mk ?loc ?attrs (Pcty_signature a)
-
   let arrow ?loc ?attrs a b c = mk ?loc ?attrs (Pcty_arrow (a, b, c))
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pcty_extension a)
-
   let open_ ?loc ?attrs a b = mk ?loc ?attrs (Pcty_open (a, b))
 end
 
@@ -473,17 +339,11 @@ module Ctf = struct
     { pctf_desc = d; pctf_loc = loc; pctf_attributes = attrs }
 
   let inherit_ ?loc ?attrs a = mk ?loc ?attrs (Pctf_inherit a)
-
   let val_ ?loc ?attrs a b c d = mk ?loc ?attrs (Pctf_val (a, b, c, d))
-
   let method_ ?loc ?attrs a b c d = mk ?loc ?attrs (Pctf_method (a, b, c, d))
-
   let constraint_ ?loc ?attrs a b = mk ?loc ?attrs (Pctf_constraint (a, b))
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pctf_extension a)
-
   let attribute ?loc a = mk ?loc (Pctf_attribute a)
-
   let attr d a = { d with pctf_attributes = d.pctf_attributes @ [ a ] }
 end
 
@@ -492,23 +352,14 @@ module Cf = struct
     { pcf_desc = d; pcf_loc = loc; pcf_attributes = attrs }
 
   let inherit_ ?loc ?attrs a b c = mk ?loc ?attrs (Pcf_inherit (a, b, c))
-
   let val_ ?loc ?attrs a b c = mk ?loc ?attrs (Pcf_val (a, b, c))
-
   let method_ ?loc ?attrs a b c = mk ?loc ?attrs (Pcf_method (a, b, c))
-
   let constraint_ ?loc ?attrs a b = mk ?loc ?attrs (Pcf_constraint (a, b))
-
   let initializer_ ?loc ?attrs a = mk ?loc ?attrs (Pcf_initializer a)
-
   let extension ?loc ?attrs a = mk ?loc ?attrs (Pcf_extension a)
-
   let attribute ?loc a = mk ?loc (Pcf_attribute a)
-
   let virtual_ ct = Cfk_virtual ct
-
   let concrete o e = Cfk_concrete (o, e)
-
   let attr d a = { d with pcf_attributes = d.pcf_attributes @ [ a ] }
 end
 
@@ -691,6 +542,5 @@ module Of = struct
     { pof_desc = desc; pof_loc = loc; pof_attributes = attrs }
 
   let tag ?loc ?attrs label ty = mk ?loc ?attrs (Otag (label, ty))
-
   let inherit_ ?loc ty = mk ?loc (Oinherit ty)
 end

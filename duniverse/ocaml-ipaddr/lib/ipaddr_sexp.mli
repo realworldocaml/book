@@ -34,42 +34,33 @@
       type t = { ip : Ipaddr.t; mac : Macaddr.t }
 
       val sexp_of_t : t -> Sexplib0.t
-
       val t_of_sexp : Sexplib0.t -> t
     ]} *)
 
 type t = Ipaddr.t
 
 val sexp_of_t : Ipaddr.t -> Sexplib0.Sexp.t
-
 val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.t
-
 val compare : Ipaddr.t -> Ipaddr.t -> int
 
 type scope = Ipaddr.scope
 
 val sexp_of_scope : Ipaddr.scope -> Sexplib0.Sexp.t
-
 val scope_of_sexp : Sexplib0.Sexp.t -> Ipaddr.scope
 
 module V4 : sig
   type t = Ipaddr.V4.t
 
   val sexp_of_t : Ipaddr.V4.t -> Sexplib0.Sexp.t
-
   val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.V4.t
-
   val compare : Ipaddr.V4.t -> Ipaddr.V4.t -> int
 
   module Prefix : sig
     type addr = Ipaddr.V4.Prefix.addr
-
     type t = Ipaddr.V4.Prefix.t
 
     val sexp_of_t : Ipaddr.V4.Prefix.t -> Sexplib0.Sexp.t
-
     val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.V4.Prefix.t
-
     val compare : Ipaddr.V4.Prefix.t -> Ipaddr.V4.Prefix.t -> int
   end
 end
@@ -78,32 +69,24 @@ module V6 : sig
   type t = Ipaddr.V6.t
 
   val sexp_of_t : Ipaddr.V6.t -> Sexplib0.Sexp.t
-
   val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.V6.t
-
   val compare : Ipaddr.V6.t -> Ipaddr.V6.t -> int
 
   module Prefix : sig
     type addr = Ipaddr.V6.Prefix.addr
-
     type t = Ipaddr.V6.Prefix.t
 
     val sexp_of_t : Ipaddr.V6.Prefix.t -> Sexplib0.Sexp.t
-
     val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.V6.Prefix.t
-
     val compare : Ipaddr.V6.Prefix.t -> Ipaddr.V6.Prefix.t -> int
   end
 end
 
 module Prefix : sig
   type addr = Ipaddr.Prefix.addr
-
   type t = Ipaddr.Prefix.t
 
   val sexp_of_t : Ipaddr.Prefix.t -> Sexplib0.Sexp.t
-
   val t_of_sexp : Sexplib0.Sexp.t -> Ipaddr.Prefix.t
-
   val compare : Ipaddr.Prefix.t -> Ipaddr.Prefix.t -> int
 end

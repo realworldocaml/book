@@ -14,19 +14,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Core_kernel
-open Async_unix
-open Async_kernel
+open Core
+open Async
 
 let to_bigsubstring t =
-  Bigsubstring.create 
-    ~pos:t.Cstruct.off 
-    ~len:t.Cstruct.len 
+  Bigsubstring.create
+    ~pos:t.Cstruct.off
+    ~len:t.Cstruct.len
     t.Cstruct.buffer
 
 let of_bigsubstring t =
   Cstruct.of_bigarray
-    ~off:(Bigsubstring.pos t) 
+    ~off:(Bigsubstring.pos t)
     ~len:(Bigsubstring.length t)
     (Bigsubstring.base t)
 

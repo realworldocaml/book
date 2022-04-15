@@ -2,10 +2,8 @@ open Cmdliner
 
 let nop () = print_endline "It's the manual that is of interest."
 
-
 let test_pos =
-  Term.(const nop $ const ()),
-  Term.info "test_pos"
-    ~doc:"UTF-8 test: íöüóőúűéáăîâșț ÍÜÓŐÚŰÉÁĂÎÂȘȚ 雙峰駱駝"
+  let doc = "UTF-8 test: \u{1F42B} íöüóőúűéáăîâșț ÍÜÓŐÚŰÉÁĂÎÂȘȚ 雙峰駱駝" in
+  Cmd.v (Cmd.info "test_pos" ~doc) Term.(const nop $ const ())
 
-let () = Term.(exit @@ eval test_pos)
+let () = exit (Cmd.eval test_pos)

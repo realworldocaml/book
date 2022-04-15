@@ -54,9 +54,9 @@ struct
 
     let iarr = !@int_array in
     begin
-      let expected_ints = Bigarray.(Array1.create int32 c_layout 5) in
+      let expected_ints = Bigarray_compat.(Array1.create int32 c_layout 5) in
       for i = 0 to 4 do
-	Bigarray.Array1.set expected_ints i (Int32.of_int i)
+	Bigarray_compat.Array1.set expected_ints i (Int32.of_int i)
       done;
       assert_equal expected_ints iarr
     end

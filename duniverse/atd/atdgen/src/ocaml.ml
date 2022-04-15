@@ -13,6 +13,7 @@ open Mapping
 
 type pp_convs =
   | Camlp4 of string list
+  | Ppx_deriving of string list
   | Ppx of string list
 
 (* Type mapping from ATD to OCaml *)
@@ -132,6 +133,52 @@ let path_of_target (target : target) =
     | Json -> [ "ocaml_json"; "ocaml" ]
     | Bucklescript -> ["ocaml_bs"; "ocaml"]
     | Validate -> [ "ocaml_validate"; "ocaml" ]
+
+(*
+   This must hold all the valid annotations of the form
+   '<ocaml ...>' or '<ocaml_TARGET>' (see above for the target names).
+*)
+let annot_schema_ocaml : Atd.Annot.schema_section =
+  {
+    section = "ocaml";
+    fields = [
+      Type_def, "attr";
+      Type_def, "from";
+      Type_def, "module";
+      Type_def, "predef";
+      Type_def, "t";
+      Type_expr, "field_prefix";
+      Type_expr, "module";
+      Type_expr, "repr";
+      Type_expr, "t";
+      Type_expr, "unwrap";
+      Type_expr, "valid";
+      Type_expr, "validator";
+      Type_expr, "wrap";
+      Variant, "name";
+      Cell, "default";
+      Field, "default";
+      Field, "mutable";
+      Field, "name";
+      Field, "repr";
+    ]
+  }
+
+let annot_schema_of_target (target : target) : Atd.Annot.schema =
+  let section_names = path_of_target target in
+  let ocaml_sections =
+    List.map
+      (fun section -> { annot_schema_ocaml with section }) section_names
+  in
+  let other_section =
+    match target with
+    | Default -> []
+    | Biniou -> Biniou.annot_schema_biniou
+    | Json -> Json.annot_schema_json
+    | Bucklescript -> Json.annot_schema_json
+    | Validate -> []
+  in
+  ocaml_sections @ other_section
 
 let get_ocaml_int target an =
   let path = path_of_target target in
@@ -331,6 +378,12 @@ let get_ocaml_module_and_t target default_name an =
   |> Option.map (fun (type_module, main_module) ->
   (type_module, main_module, get_ocaml_t target default_name an))
 
+let get_type_attrs an =
+  Atd.Annot.get_fields
+    ~parse:(fun s -> Some s)
+    ~sections:["ocaml"]
+    ~field:"attr"
+    an
 
 (*
   OCaml syntax tree
@@ -355,7 +408,8 @@ type ocaml_def = {
   o_def_name : (string * ocaml_type_param);
   o_def_alias : (string * ocaml_type_param) option;
   o_def_expr : ocaml_expr option;
-  o_def_doc : Atd.Doc.doc option
+  o_def_doc : Atd.Doc.doc option;
+  o_def_attrs : string list;
 }
 
 type ocaml_module_item =
@@ -363,7 +417,17 @@ type ocaml_module_item =
 
 type ocaml_module_body = ocaml_module_item list
 
-
+(* https://ocaml.org/manual/lex.html#sss:keywords *)
+let is_ocaml_keyword = function
+  | "and" | "as" | "assert" | "asr" | "begin" | "class" | "constraint"
+  | "do" | "done" | "downto" | "else" | "end" | "exception" | "external"
+  | "false" | "for" | "fun" | "function" | "functor" | "if" | "in" | "include"
+  | "inherit" | "initializer" | "land" | "lazy" | "let" | "lor" | "lsl"
+  | "lsr" | "lxor" | "match" | "method" | "mod" | "module" | "mutable" | "new"
+  | "nonrec" | "object" | "of" | "open" | "or" | "private" | "rec" | "sig"
+  | "struct" | "then" | "to" | "true" | "try" | "type" | "val" | "virtual"
+  | "when" | "while" | "with" -> true
+  | _ -> false
 
 (*
   Mapping from ATD to OCaml
@@ -374,7 +438,7 @@ let rec map_expr target
   match x with
     Atd.Ast.Sum (_, l, an) ->
       let kind = get_ocaml_sum target an in
-      `Sum (kind, List.map (map_variant target) l)
+      `Sum (kind, List.map (map_variant ~kind target) l)
   | Record (loc, l, an) ->
       let kind = get_ocaml_record target an in
       let field_prefix = get_ocaml_field_prefix target an in
@@ -404,10 +468,13 @@ let rec map_expr target
   | Tvar (_, s) ->
       `Tvar s
 
-and map_variant target (x : variant) : ocaml_variant =
-  match x with
-    Inherit _ -> assert false
-  | Variant (loc, (s, an), o) ->
+and map_variant ~kind target (x : variant) : ocaml_variant =
+  match kind, x with
+  | _, Inherit _ -> assert false
+  | Poly, Variant (loc, _, Some (Record _)) ->
+      Error.error loc
+        "Inline records are not allowed in polymorphic variants (not valid in OCaml)"
+  | _, Variant (loc, (s, an), o) ->
       let s = get_ocaml_cons target s an in
       (s, Option.map (map_expr target []) o, Atd.Doc.get_doc loc an)
 
@@ -417,6 +484,10 @@ and map_field target ocaml_field_prefix (x : field) : ocaml_field =
   | `Field (loc, (atd_fname, _, an), x) ->
       let ocaml_fname =
         get_ocaml_fname target (ocaml_field_prefix ^ atd_fname) an in
+      if is_ocaml_keyword ocaml_fname then
+        Error.error loc
+          ("\"" ^ ocaml_fname ^
+           "\" cannot be used as field name (reserved OCaml keyword)");
       let fname =
         if ocaml_fname = atd_fname then ocaml_fname
         else sprintf "%s (*atd %s *)" ocaml_fname atd_fname
@@ -428,6 +499,9 @@ let map_def
     ~(target : target)
     ~(type_aliases : string option)
     ((loc, (s, param, an1), x) : type_def) : ocaml_def option =
+  if is_ocaml_keyword s then
+    Error.error loc
+      ("\"" ^ s ^ "\" cannot be used as type name (reserved OCaml keyword)");
   let is_predef = get_ocaml_predef target an1 in
   let is_abstract = Mapping.is_abstract x in
   let define_alias =
@@ -468,7 +542,8 @@ let map_def
         o_def_name = (s, param);
         o_def_alias = alias;
         o_def_expr = x;
-        o_def_doc = doc
+        o_def_doc = doc;
+        o_def_attrs = get_type_attrs an1;
       }
 
 
@@ -666,12 +741,15 @@ let append_ocamldoc_comment x doc =
 
 let format_pp_conv_node node = function
   | Camlp4 []
+  | Ppx_deriving []
   | Ppx [] -> node
   | converters ->
+    let attr value = "[@@" ^ value ^ "]" in
     let converters =
       match converters with
-      | Ppx cs -> "[@@deriving " ^ (String.concat ", " cs) ^ "]"
-      | Camlp4 cs -> "with " ^ (String.concat ", " cs) in
+      | Ppx_deriving cs -> attr ("deriving " ^ (String.concat ", " cs))
+      | Camlp4 cs -> "with " ^ (String.concat ", " cs)
+      | Ppx cs -> List.map attr cs |> String.concat "" in
     Label ((node, label), make_atom converters)
 
 let rec format_module_item pp_convs
@@ -681,6 +759,12 @@ let rec format_module_item pp_convs
   let alias = def.o_def_alias in
   let expr = def.o_def_expr in
   let doc = def.o_def_doc in
+  (* TODO: currently replacing, globally set pp_convs, maybe should merge? *)
+  let pp_convs =
+    match def.o_def_attrs with
+    | [] -> pp_convs
+    | attrs -> Ppx attrs
+  in
   let append_if b s1 s2 =
     if b then s1 ^ s2
     else s1
@@ -833,7 +917,7 @@ let format_all l =
 let ocaml_of_expr x : string =
   Easy_format.Pretty.to_string (format_type_expr x)
 
-let ocaml_of_atd ?(pp_convs=Ppx []) ~target ~type_aliases
+let ocaml_of_atd ?(pp_convs=Ppx_deriving []) ~target ~type_aliases
     (head, (l : (bool * module_body) list)) : string =
   let head = format_head head in
   let bodies =

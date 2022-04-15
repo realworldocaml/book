@@ -1,11 +1,11 @@
-/** 
+/**
   Public C interface for Zarith.
 
   This is intended for C libraries that wish to convert between mpz_t and
   Z.t objects.
 
 
-  This file is part of the Zarith library 
+  This file is part of the Zarith library
   http://forge.ocamlcore.org/projects/zarith .
   It is distributed under LGPL 2 licensing, with static linking exception.
   See the LICENSE file included in the distribution.

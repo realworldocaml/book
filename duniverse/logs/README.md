@@ -1,6 +1,6 @@
 Logs — Logging infrastructure for OCaml
 -------------------------------------------------------------------------------
-%%VERSION%%
+v0.7.0+dune2
 
 Logs provides a logging infrastructure for OCaml. Logging is performed
 on sources whose reporting level can be set independently. Log message
