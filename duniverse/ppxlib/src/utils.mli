@@ -6,9 +6,7 @@ module Kind : sig
   type t = Intf | Impl
 
   val of_filename : string -> t option
-
   val describe : t -> string
-
   val equal : t -> t -> bool
 end
 
@@ -16,9 +14,7 @@ module Intf_or_impl : sig
   type t = Intf of signature | Impl of structure
 
   val map : t -> Ast_traverse.map -> t
-
   val map_with_context : t -> 'a Ast_traverse.map_with_context -> 'a -> t
-
   val kind : t -> Kind.t
 end
 
@@ -40,22 +36,17 @@ module Ast_io : sig
     | System_error of Location.Error.t * input_version
 
   type input_source = Stdin | File of string
-
   type input_kind = Possibly_source of Kind.t * string | Necessarily_binary
 
   val read : input_source -> input_kind:input_kind -> (t, read_error) result
-
   val write : out_channel -> t -> add_ppx_context:bool -> unit
 
   module Read_bin : sig
     type ast = Intf of signature | Impl of structure
-
     type t
 
     val read_binary : string -> (t, string) result
-
     val get_ast : t -> ast
-
     val get_input_name : t -> string
   end
 end

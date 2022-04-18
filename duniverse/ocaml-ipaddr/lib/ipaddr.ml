@@ -23,7 +23,6 @@ let try_with_result fn a =
   try Ok (fn a) with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
 let failwith_msg = function Ok x -> x | Error (`Msg m) -> failwith m
-
 let map_result v f = match v with Ok v -> Ok (f v) | Error _ as e -> e
 
 let string_of_scope = function
@@ -46,29 +45,17 @@ let scope_of_string = function
   | s -> Error (`Msg ("unknown scope: " ^ s))
 
 let pp_scope fmt s = Format.pp_print_string fmt (string_of_scope s)
-
 let ( ~| ) = Int32.of_int
-
 let ( |~ ) = Int32.to_int
-
 let ( &&& ) x y = Int32.logand x y
-
 let ( ||| ) x y = Int32.logor x y
-
 let ( <|< ) x y = Int32.shift_left x y
-
 let ( >|> ) x y = Int32.shift_right_logical x y
-
 let ( >! ) x y = x >|> y &&& 0xFF_l
-
 let ( <! ) x y = x &&& 0xFF_l <|< y
-
 let need_more x = Parse_error ("not enough data", x)
-
 let char_0 = int_of_char '0'
-
 let char_a = int_of_char 'a'
-
 let char_A = int_of_char 'A'
 
 let int_of_char c =
@@ -107,7 +94,6 @@ let parse_int base s i =
   else raise (need_more s)
 
 let parse_dec_int s i = parse_int 10 s i
-
 let parse_hex_int s i = parse_int 16 s i
 
 let expect_char s i c =
@@ -186,6 +172,20 @@ module V4 = struct
 
   let of_string s = try_with_result of_string_exn s
 
+  let with_port_of_string ~default s =
+    try
+      let len = String.length s and o = ref 0 in
+      let ipv4 = of_string_raw s o in
+      if !o < len && s.[!o] = ':' then (
+        incr o;
+        let port = parse_dec_int s o in
+        expect_end s o;
+        Ok (ipv4, port))
+      else (
+        expect_end s o;
+        Ok (ipv4, default))
+    with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
+
   let to_buffer b i =
     Printf.bprintf b "%ld.%ld.%ld.%ld" (i >! 24) (i >! 16) (i >! 8) (i >! 0)
 
@@ -229,12 +229,10 @@ module V4 = struct
 
   (* Int32 *)
   let of_int32 i = i
-
   let to_int32 i = i
 
   (* Int16 *)
   let of_int16 (a, b) = ~|a <|< 16 ||| ~|b
-
   let to_int16 a = (( |~ ) (a >|> 16), ( |~ ) (a &&& 0xFF_FF_l))
 
   (* MAC *)
@@ -293,20 +291,14 @@ module V4 = struct
   (* constant *)
 
   let any = make 0 0 0 0
-
   let unspecified = make 0 0 0 0
-
   let broadcast = make 255 255 255 255
-
   let localhost = make 127 0 0 1
-
   let nodes = make 224 0 0 1
-
   let routers = make 224 0 0 2
 
   module Prefix = struct
     type addr = t
-
     type t = addr * int
 
     let compare (pre, sz) (pre', sz') =
@@ -321,7 +313,6 @@ module V4 = struct
       else 0x0_FF_FF_FF_FF_l <|< 32 - sz
 
     let prefix (pre, sz) = (pre &&& mask sz, sz)
-
     let make sz pre = (pre, sz)
 
     let network_address (pre, sz) addr =
@@ -384,29 +375,19 @@ module V4 = struct
       sz1 >= sz2 && mem pre1 (pre2, sz2)
 
     let of_addr ip = make 32 ip
-
     let global = make 0 (ip 0 0 0 0)
-
     let relative = make 8 (ip 0 0 0 0)
-
     let loopback = make 8 (ip 127 0 0 0)
-
     let link = make 16 (ip 169 254 0 0)
-
     let multicast = make 4 (ip 224 0 0 0)
-
     let multicast_org = make 14 (ip 239 192 0 0)
-
     let multicast_admin = make 16 (ip 239 255 0 0)
-
     let multicast_link = make 24 (ip 224 0 0 0)
 
     (* http://tools.ietf.org/html/rfc2365 *)
 
     let private_10 = make 8 (ip 10 0 0 0)
-
     let private_172 = make 12 (ip 172 16 0 0)
-
     let private_192 = make 16 (ip 192 168 0 0)
 
     let private_blocks =
@@ -416,11 +397,8 @@ module V4 = struct
       Int32.logor pre (Int32.logxor (mask sz) 0xFF_FF_FF_FFl)
 
     let network (pre, sz) = pre &&& mask sz
-
     let address (addr, _) = addr
-
     let bits (_, sz) = sz
-
     let netmask subnet = mask (bits subnet)
 
     let first ((_, sz) as cidr) =
@@ -447,9 +425,7 @@ module V4 = struct
     else Global
 
   let is_global i = scope i = Global
-
   let is_multicast i = Prefix.(mem i multicast)
-
   let is_private i = scope i <> Global
 
   module Set = Set.Make (struct
@@ -481,7 +457,6 @@ module B128 = struct
         logor (shift_left (of_int32 c) 32) (of_int32 d) )
 
   let of_int32 x = x
-
   let to_int32 x = x
 
   let of_int16 (a, b, c, d, e, f, g, h) =
@@ -665,6 +640,20 @@ module V6 = struct
 
   let of_string s = try_with_result of_string_exn s
 
+  let with_port_of_string ~default s =
+    let len = String.length s and o = ref 0 in
+    try
+      let ipv6 = of_string_raw s o in
+      if !o < len && s.[!o] = ':' then (
+        incr o;
+        let port = parse_dec_int s o in
+        expect_end s o;
+        Ok (ipv6, port))
+      else (
+        expect_end s o;
+        Ok (ipv6, default))
+    with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
+
   (* http://tools.ietf.org/html/rfc5952 *)
   let to_buffer buf addr =
     let ((a, b, c, d, e, f, g, h) as comp) = to_int16 addr in
@@ -735,7 +724,6 @@ module V6 = struct
     of_int32 (hihi, hilo, lohi, lolo)
 
   let of_octets ?off bs = try_with_result (of_octets_exn ?off) bs
-
   let write_octets ?off i bs = try_with_result (write_octets_exn ?off i) bs
 
   let to_octets i =
@@ -829,22 +817,15 @@ module V6 = struct
   (* constant *)
 
   let unspecified = make 0 0 0 0 0 0 0 0
-
   let localhost = make 0 0 0 0 0 0 0 1
-
   let interface_nodes = make 0xff01 0 0 0 0 0 0 1
-
   let link_nodes = make 0xff02 0 0 0 0 0 0 1
-
   let interface_routers = make 0xff01 0 0 0 0 0 0 2
-
   let link_routers = make 0xff02 0 0 0 0 0 0 2
-
   let site_routers = make 0xff05 0 0 0 0 0 0 2
 
   module Prefix = struct
     type addr = t
-
     type t = addr * int
 
     let compare (pre, sz) (pre', sz') =
@@ -861,7 +842,6 @@ module V6 = struct
       V4.Prefix.(mask (sz - 0), mask (sz - 32), mask (sz - 64), mask (sz - 96))
 
     let prefix (pre, sz) = (logand pre (mask sz), sz)
-
     let make sz pre = (pre, sz)
 
     let network_address (pre, sz) addr =
@@ -927,27 +907,16 @@ module V6 = struct
       sz1 >= sz2 && mem pre1 (pre2, sz2)
 
     let of_addr ip = make 128 ip
-
     let global_unicast_001 = make 3 (ip 0x2000 0 0 0 0 0 0 0)
-
     let link = make 64 (ip 0xfe80 0 0 0 0 0 0 0)
-
     let unique_local = make 7 (ip 0xfc00 0 0 0 0 0 0 0)
-
     let multicast = make 8 (ip 0xff00 0 0 0 0 0 0 0)
-
     let ipv4_mapped = make 96 (ip 0 0 0 0 0 0xffff 0 0)
-
     let noneui64_interface = make 3 (ip 0x0000 0 0 0 0 0 0 0)
-
     let solicited_node = make 104 (ip 0xff02 0 0 0 0 1 0xff00 0)
-
     let network (pre, sz) = logand pre (mask sz)
-
     let address (addr, _) = addr
-
     let bits (_, sz) = sz
-
     let netmask subnet = mask (bits subnet)
 
     let first ((_, sz) as cidr) =
@@ -1000,9 +969,7 @@ module V6 = struct
       Prefix.(network_address link addr)
 
   let is_global i = scope i = Global
-
   let is_multicast i = Prefix.(mem i multicast)
-
   let is_private i = scope i <> Global
 
   module Set = Set.Make (struct
@@ -1019,7 +986,6 @@ module V6 = struct
 end
 
 type ('v4, 'v6) v4v6 = V4 of 'v4 | V6 of 'v6
-
 type t = (V4.t, V6.t) v4v6
 
 let compare a b =
@@ -1067,9 +1033,27 @@ let of_string_raw s offset =
           in
           raise (Parse_error (msg, s))))
 
-let of_string_exn s = of_string_raw s (ref 0)
+let of_string_exn s =
+  let o = ref 0 in
+  let x = of_string_raw s o in
+  expect_end s o;
+  x
 
 let of_string s = try_with_result of_string_exn s
+
+let with_port_of_string ~default s =
+  let len = String.length s and o = ref 0 in
+  try
+    let ipv6 = of_string_raw s o in
+    if !o < len && s.[!o] = ':' then (
+      incr o;
+      let port = parse_dec_int s o in
+      expect_end s o;
+      Ok (ipv6, port))
+    else (
+      expect_end s o;
+      Ok (ipv6, default))
+  with Parse_error (msg, _) -> Error (`Msg ("Ipaddr: " ^ msg))
 
 let v6_of_v4 v4 =
   V6.(Prefix.(network_address ipv4_mapped (of_int32 (0l, 0l, 0l, v4))))
@@ -1081,11 +1065,8 @@ let v4_of_v6 v6 =
   else None
 
 let to_v4 = function V4 v4 -> Some v4 | V6 v6 -> v4_of_v6 v6
-
 let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
-
 let scope = function V4 v4 -> V4.scope v4 | V6 v6 -> V6.scope v6
-
 let is_global = function V4 v4 -> V4.is_global v4 | V6 v6 -> V6.is_global v6
 
 let is_multicast = function
@@ -1126,7 +1107,6 @@ module Prefix = struct
   end
 
   type addr = t
-
   type t = (V4.Prefix.t, V6.Prefix.t) v4v6
 
   let compare a b =
@@ -1154,7 +1134,11 @@ module Prefix = struct
             in
             raise (Parse_error (msg, s))))
 
-  let of_string_exn s = of_string_raw s (ref 0)
+  let of_string_exn s =
+    let o = ref 0 in
+    let x = of_string_raw s o in
+    expect_end s o;
+    x
 
   let of_string s = try_with_result of_string_exn s
 
@@ -1167,9 +1151,7 @@ module Prefix = struct
     | None -> None
 
   let to_v4 = function V4 v4 -> Some v4 | V6 v6 -> v4_of_v6 v6
-
   let to_v6 = function V4 v4 -> v6_of_v4 v4 | V6 v6 -> v6
-
   let mem ip prefix = V6.Prefix.mem (Addr.to_v6 ip) (to_v6 prefix)
 
   let subset ~subnet ~network =

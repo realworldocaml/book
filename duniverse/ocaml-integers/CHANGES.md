@@ -1,3 +1,8 @@
+v0.7.0 2022-03-23
+-----------------
+
+* restore dll support for cygwin64 / newer binutils versions (mingw64) (@fdopen, #40)
+
 v0.6.0 2022-02-05
 -----------------
 

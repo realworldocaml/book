@@ -93,15 +93,10 @@ and direction_flag = Asttypes.direction_flag = Upto | Downto
 
 (* Order matters, used in polymorphic comparison *)
 and private_flag = Asttypes.private_flag = Private | Public
-
 and mutable_flag = Asttypes.mutable_flag = Immutable | Mutable
-
 and virtual_flag = Asttypes.virtual_flag = Virtual | Concrete
-
 and override_flag = Asttypes.override_flag = Override | Fresh
-
 and closed_flag = Asttypes.closed_flag = Closed | Open
-
 and label = string
 
 and arg_label = Asttypes.arg_label =
@@ -111,7 +106,6 @@ and arg_label = Asttypes.arg_label =
 (* ?label:T -> ... *)
 
 and variance = Asttypes.variance = Covariant | Contravariant | NoVariance
-
 and injectivity = Asttypes.injectivity = Injective | NoInjectivity
 
 (** Abstract syntax tree produced by parsing *)
@@ -682,7 +676,6 @@ and 'a class_infos = 'a Parsetree.class_infos = {
 *)
 
 and class_description = class_type class_infos
-
 and class_type_declaration = class_type class_infos
 
 (* Value expressions for the class language *)
@@ -1020,15 +1013,10 @@ and cases = case list [@@deriving_inline traverse]
 class virtual map =
   object (self)
     method virtual bool : bool -> bool
-
     method virtual char : char -> char
-
     method virtual int : int -> int
-
     method virtual list : 'a. ('a -> 'a) -> 'a list -> 'a list
-
     method virtual option : 'a. ('a -> 'a) -> 'a option -> 'a option
-
     method virtual string : string -> string
 
     method position : position -> position =
@@ -1074,19 +1062,12 @@ class virtual map =
       self#loc self#longident
 
     method rec_flag : rec_flag -> rec_flag = fun x -> x
-
     method direction_flag : direction_flag -> direction_flag = fun x -> x
-
     method private_flag : private_flag -> private_flag = fun x -> x
-
     method mutable_flag : mutable_flag -> mutable_flag = fun x -> x
-
     method virtual_flag : virtual_flag -> virtual_flag = fun x -> x
-
     method override_flag : override_flag -> override_flag = fun x -> x
-
     method closed_flag : closed_flag -> closed_flag = fun x -> x
-
     method label : label -> label = self#string
 
     method arg_label : arg_label -> arg_label =
@@ -1101,7 +1082,6 @@ class virtual map =
             Optional a
 
     method variance : variance -> variance = fun x -> x
-
     method injectivity : injectivity -> injectivity = fun x -> x
 
     method constant : constant -> constant =
@@ -2286,15 +2266,10 @@ class virtual map =
 class virtual iter =
   object (self)
     method virtual bool : bool -> unit
-
     method virtual char : char -> unit
-
     method virtual int : int -> unit
-
     method virtual list : 'a. ('a -> unit) -> 'a list -> unit
-
     method virtual option : 'a. ('a -> unit) -> 'a option -> unit
-
     method virtual string : string -> unit
 
     method position : position -> unit =
@@ -2329,21 +2304,13 @@ class virtual iter =
             self#longident b
 
     method longident_loc : longident_loc -> unit = self#loc self#longident
-
     method rec_flag : rec_flag -> unit = fun _ -> ()
-
     method direction_flag : direction_flag -> unit = fun _ -> ()
-
     method private_flag : private_flag -> unit = fun _ -> ()
-
     method mutable_flag : mutable_flag -> unit = fun _ -> ()
-
     method virtual_flag : virtual_flag -> unit = fun _ -> ()
-
     method override_flag : override_flag -> unit = fun _ -> ()
-
     method closed_flag : closed_flag -> unit = fun _ -> ()
-
     method label : label -> unit = self#string
 
     method arg_label : arg_label -> unit =
@@ -2354,7 +2321,6 @@ class virtual iter =
         | Optional a -> self#string a
 
     method variance : variance -> unit = fun _ -> ()
-
     method injectivity : injectivity -> unit = fun _ -> ()
 
     method constant : constant -> unit =
@@ -3165,11 +3131,8 @@ class virtual iter =
 class virtual ['acc] fold =
   object (self)
     method virtual bool : bool -> 'acc -> 'acc
-
     method virtual char : char -> 'acc -> 'acc
-
     method virtual int : int -> 'acc -> 'acc
-
     method virtual list : 'a. ('a -> 'acc -> 'acc) -> 'a list -> 'acc -> 'acc
 
     method virtual option
@@ -3218,19 +3181,12 @@ class virtual ['acc] fold =
       self#loc self#longident
 
     method rec_flag : rec_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method direction_flag : direction_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method private_flag : private_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method mutable_flag : mutable_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method virtual_flag : virtual_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method override_flag : override_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method closed_flag : closed_flag -> 'acc -> 'acc = fun _ acc -> acc
-
     method label : label -> 'acc -> 'acc = self#string
 
     method arg_label : arg_label -> 'acc -> 'acc =
@@ -3241,7 +3197,6 @@ class virtual ['acc] fold =
         | Optional a -> self#string a acc
 
     method variance : variance -> 'acc -> 'acc = fun _ acc -> acc
-
     method injectivity : injectivity -> 'acc -> 'acc = fun _ acc -> acc
 
     method constant : constant -> 'acc -> 'acc =
@@ -4213,9 +4168,7 @@ class virtual ['acc] fold =
 class virtual ['acc] fold_map =
   object (self)
     method virtual bool : bool -> 'acc -> bool * 'acc
-
     method virtual char : char -> 'acc -> char * 'acc
-
     method virtual int : int -> 'acc -> int * 'acc
 
     method virtual list
@@ -5538,11 +5491,8 @@ class virtual ['acc] fold_map =
 class virtual ['ctx] map_with_context =
   object (self)
     method virtual bool : 'ctx -> bool -> bool
-
     method virtual char : 'ctx -> char -> char
-
     method virtual int : 'ctx -> int -> int
-
     method virtual list : 'a. ('ctx -> 'a -> 'a) -> 'ctx -> 'a list -> 'a list
 
     method virtual option
@@ -5598,16 +5548,13 @@ class virtual ['ctx] map_with_context =
       fun _ctx x -> x
 
     method private_flag : 'ctx -> private_flag -> private_flag = fun _ctx x -> x
-
     method mutable_flag : 'ctx -> mutable_flag -> mutable_flag = fun _ctx x -> x
-
     method virtual_flag : 'ctx -> virtual_flag -> virtual_flag = fun _ctx x -> x
 
     method override_flag : 'ctx -> override_flag -> override_flag =
       fun _ctx x -> x
 
     method closed_flag : 'ctx -> closed_flag -> closed_flag = fun _ctx x -> x
-
     method label : 'ctx -> label -> label = self#string
 
     method arg_label : 'ctx -> arg_label -> arg_label =
@@ -5622,7 +5569,6 @@ class virtual ['ctx] map_with_context =
             Optional a
 
     method variance : 'ctx -> variance -> variance = fun _ctx x -> x
-
     method injectivity : 'ctx -> injectivity -> injectivity = fun _ctx x -> x
 
     method constant : 'ctx -> constant -> constant =
@@ -6823,21 +6769,13 @@ class virtual ['ctx] map_with_context =
 class virtual ['res] lift =
   object (self)
     method virtual record : (string * 'res) list -> 'res
-
     method virtual constr : string -> 'res list -> 'res
-
     method virtual tuple : 'res list -> 'res
-
     method virtual bool : bool -> 'res
-
     method virtual char : char -> 'res
-
     method virtual int : int -> 'res
-
     method virtual list : 'a. ('a -> 'res) -> 'a list -> 'res
-
     method virtual option : 'a. ('a -> 'res) -> 'a option -> 'res
-
     method virtual string : string -> 'res
 
     method position : position -> 'res =

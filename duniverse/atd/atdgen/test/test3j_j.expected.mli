@@ -1,5 +1,5 @@
 (* Auto-generated from "test3j.atd" *)
-[@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 type rec_type = Test3j_t.rec_type = { more: rec_type list }
 

@@ -29,4 +29,4 @@ let test_client () =
 ;;
 
 let cmd = Command.async_or_error ~summary:"test client" (Command.Param.return test_client)
-let () = Command.run cmd
+let () = Command_unix.run cmd

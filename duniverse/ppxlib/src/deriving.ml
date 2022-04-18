@@ -5,9 +5,7 @@ open Ast_builder.Default
    contains compiler attribute to disable unused warnings, instead of
    inserting [let _ = ... ]. *)
 let do_insert_unused_warning_attribute = ref false
-
 let keep_w32_impl = ref false
-
 let keep_w32_intf = ref false
 
 let () =
@@ -40,11 +38,8 @@ let () =
     ~doc:" Deprecated, use -deriving-disable-w32-method"
 
 let keep_w32_impl () = !keep_w32_impl || Driver.pretty ()
-
 let keep_w32_intf () = !keep_w32_intf || Driver.pretty ()
-
 let keep_w60_impl = ref false
-
 let keep_w60_intf = ref false
 
 let () =
@@ -63,7 +58,6 @@ let () =
     ~doc:" Do not try to disable warning 60 for the generated code"
 
 let keep_w60_impl () = !keep_w60_impl || Driver.pretty ()
-
 let keep_w60_intf () = !keep_w60_intf || Driver.pretty ()
 
 module Args = struct
@@ -96,7 +90,6 @@ module Args = struct
     | Cons : ('m1, 'a -> 'm2) t * 'a param -> ('m1, 'm2) t
 
   let empty = Nil
-
   let ( +> ) a b = Cons (a, b)
 
   let rec names : type a b. (a, b) t -> string list = function
@@ -321,7 +314,6 @@ module Deriver = struct
   end
 
   type t = Actual_deriver of Actual_deriver.t | Alias of Alias.t
-
   type Ppx_derivers.deriver += T of t
 
   let derivers () =
@@ -467,7 +459,6 @@ module Deriver = struct
 end
 
 let add = Deriver.add
-
 let add_alias = Deriver.add_alias
 
 (* +-----------------------------------------------------------------+

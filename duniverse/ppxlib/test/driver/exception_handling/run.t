@@ -68,9 +68,7 @@ caught, so no AST is produced.
   [1]
 
 When the argument `-embed-errors` is added, the exception is caught
-and the whole AST is replaced with a single error extension node. The
-first line `let x = 1+1.` is thus not present in the AST, and no error
-can be reported about it.
+and the whole AST is prepended with an error extension node.
 
  In the case of extenders:
 
@@ -78,6 +76,8 @@ can be reported about it.
   $ echo "let _ = [%gen_raise_located_error]" >> impl.ml
   $ ./extender.exe -embed-errors impl.ml
   [%%ocaml.error "A raised located error"]
+  let x = 1 + 1.
+  let _ = [%gen_raise_located_error ]
 
  In the case of derivers
 
@@ -86,12 +86,15 @@ can be reported about it.
   $ echo "type b = int [@@deriving deriver_located_error]" >> impl.ml
   $ ./deriver.exe -embed-errors impl.ml
   [%%ocaml.error "A raised located error"]
+  type a = int
+  type b = int[@@deriving deriver_located_error]
 
  In the case of whole file transformations:
 
   $ echo "let x = 1+1. " > impl.ml
   $ ./whole_file_located_error.exe -embed-errors impl.ml
   [%%ocaml.error "A located error in a whole file transform"]
+  let x = 1 + 1.
 
 3. Raising an exception. The exception is not caught by the driver.
 

@@ -5,12 +5,11 @@ open Result.Syntax
 (* OCaml library names *)
 
 let compiler_libs_toplevel = B0_ocaml.libname "compiler-libs.toplevel"
-let js_of_ocaml = B0_ocaml.libname "js_of_ocaml"
 
 let mtime = B0_ocaml.libname "mtime"
 let mtime_top = B0_ocaml.libname "mtime.top"
+let mtime_clock = B0_ocaml.libname "mtime.clock"
 let mtime_clock_os = B0_ocaml.libname "mtime.clock.os"
-let mtime_clock_jsoo = B0_ocaml.libname "mtime.clock.jsoo"
 
 (* Libraries *)
 
@@ -24,26 +23,42 @@ let mtime_top =
   let requires = [compiler_libs_toplevel] in
   B0_ocaml.lib mtime_top ~doc:"The mtime.top library" ~srcs ~requires
 
-let mtime_clock_os_lib =
-  let srcs = Fpath.[`Dir (v "src-os") ] in
+let mtime_clock =
+  let srcs = Fpath.[`File (v "src/mtime_clock.mli")] in
   let requires = [mtime] in
-  B0_ocaml.lib mtime_clock_os ~doc:"The mtime clock OS library" ~srcs ~requires
+  let doc = "The mtime.clock interface library" in
+  B0_ocaml.lib mtime_clock ~doc ~srcs ~requires
 
-let mtime_clock_jsoo_lib =
-  let srcs = Fpath.[`Dir (v "src-jsoo") ] in
-  let requires = [mtime; js_of_ocaml] in
-  let doc = "The mtime clock JSOO library" in
-  B0_ocaml.lib mtime_clock_jsoo ~doc ~srcs ~requires
+let mtime_clock_os_lib =
+  let srcs = Fpath.[`Dir (v "src-clock") ] in
+  let requires = [mtime] in
+  let doc = "The mtime.clock library (including JavaScript support)" in
+  B0_ocaml.lib mtime_clock_os ~doc ~srcs ~requires
 
 (* Tests *)
 
 let test =
-  let srcs = Fpath.[`File (v "test-os/test.ml");
-                    `File (v "test-os/tests.ml")]
-  in
+  let srcs = Fpath.[`File (v "test/test.ml"); `File (v "test/tests.ml")] in
   let meta = B0_meta.(empty |> tag test) in
   let requires = [ mtime; mtime_clock_os ] in
   B0_ocaml.exe "test" ~doc:"Test suite" ~srcs ~meta ~requires
+
+let min_clock =
+  let srcs = Fpath.[`File (v "test/min_clock.ml") ] in
+  let meta = B0_meta.(empty |> tag test) in
+  let requires = [mtime; mtime_clock_os] in
+  let doc = "Minimal clock example" in
+  B0_ocaml.exe "min-clock" ~doc ~srcs ~meta ~requires
+
+(* FIXME b0 this forces the whole build to bytecode which is not
+   what we want.
+let min_clock_jsoo =
+  let srcs = Fpath.[`File (v "test/min_clock.ml") ] in
+  let meta = B0_meta.(empty |> tag test) in
+  let meta = B0_jsoo.meta ~requires:[mtime; mtime_clock_os] ~meta () in
+  let doc = "Minimal clock example" in
+  B0_jsoo.web "min-clock-jsoo" ~doc ~srcs ~meta
+*)
 
 (* Packs *)
 
@@ -61,18 +76,14 @@ let default =
     |> add issues "https://github.com/dbuenzli/mtime/issues"
     |> add description_tags
       ["time"; "monotonic"; "system"; "org:erratique"]
-    |> add B0_opam.Meta.depopts ["js_of_ocaml", ""]
-    |> add B0_opam.Meta.conflicts
-      [ "js_of_ocaml", {|<= "3.3.0"|}]
     |> add B0_opam.Meta.depends
-      [ "ocaml", {|>= "4.03.0"|};
+      [ "ocaml", {|>= "4.08.0"|};
         "ocamlfind", {|build|};
-        "ocamlbuild", {|build|};
+        "ocamlbuild", {|build & != "0.9.0"|};
         "topkg", {|build & >= "1.0.3"|};
       ]
     |> add B0_opam.Meta.build
-      {|[["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"
-          "--with-js_of_ocaml" "%{js_of_ocaml:installed}%"]]|}
+      {|[["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"]]|}
   in
   B0_pack.v "default" ~doc:"mtime package" ~meta ~locked:true @@
   B0_unit.list ()

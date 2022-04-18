@@ -68,7 +68,7 @@ AST from `Ppxlib_ast`. It features:
 Other ASTs
 ----------
 If you want to write code that works with several versions of
-`Ppxlib` using different AST versions, you can use the versionned
+`Ppxlib` using different AST versions, you can use the versioned
 alternatives for `Ast_builder` and `Ast_pattern`. For instance:
 
 ```

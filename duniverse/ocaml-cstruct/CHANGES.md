@@ -1,4 +1,17 @@
-v6.0.1 2020-06-25
+v6.1.0 2022-03-29
+-----------------
+
+**breaking changes**
+- The deprecated functions `Cstruct.len`, `Cstruct.add_len`, `Cstruct.set_len`,
+  and `Cstruct.blit_to_string` have been removed (@hannesm #291)
+
+- Implement host_endian (@haesbaert #292, fixes #72)
+- Compatibility with OCaml 5.0.0 (@dinosaure #294)
+- Drop support of OCaml < 4.08.0, remove bigarray-compat dependency
+  (@hannesm #298)
+- Fix year in changes of 6.0.1 (@reynir #297)
+
+v6.0.1 2021-06-25
 -----------------
 
 **breaking changes**
@@ -9,7 +22,7 @@ v6.0.1 2020-06-25
 - Remove color from ppx's binary to replicate diff of errors in
   any contexts (@dinosaure, @sternenseemann, #285)
 - Add `shiftv` (@talex5, @avsm, @dinosaure, #287)
-- Use `Bytes_val` if available (@hannesm, @avsm, @dinosaure, #286) 
+- Use `Bytes_val` if available (@hannesm, @avsm, @dinosaure, #286)
 
 v6.0.0 2020-09-10
 -----------------

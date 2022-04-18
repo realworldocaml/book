@@ -69,7 +69,8 @@
     assert (Sys.command ("xxd -b " ^ file) = 0);
     Sys.remove file
 *)
-  ;;
+
+  type string_kind = Double_quoted | Single_quoted
 }
 
 let upper = ['A'-'Z']
@@ -112,33 +113,43 @@ rule token = parse
   | newline  { newline lexbuf; token lexbuf }
   | blank+   { token lexbuf }
   | eof      { EOF }
-  | '"'      { STRING (string (Buffer.create 200) lexbuf) }
+  | '"'      { STRING (string Double_quoted (Buffer.create 200) lexbuf) }
+  | '\''     { STRING (string Single_quoted (Buffer.create 200) lexbuf) }
   | "(*"     { comment 1 lexbuf; token lexbuf }
   | _ as c   { lexing_error lexbuf
                  (sprintf "Illegal character %S" (String.make 1 c)) }
 
-and string buf = parse
-  | '"'       { Buffer.contents buf }
-  | '\\' (['\\' '"'] as c)
+and string kind buf = parse
+  | '"'       { match kind with
+                | Double_quoted -> Buffer.contents buf
+                | Single_quoted ->
+                    Buffer.add_char buf '"';
+                    string kind buf lexbuf }
+  | '\''      { match kind with
+                | Double_quoted ->
+                    Buffer.add_char buf '\'';
+                    string kind buf lexbuf
+                | Single_quoted -> Buffer.contents buf }
+  | '\\' (['\\' '"' '\''] as c)
               { Buffer.add_char buf c;
-                string buf lexbuf }
+                string kind buf lexbuf }
   | "\\x" (hex as a) (hex as b)
               { Buffer.add_char buf (byte_of_hex a b);
-                string buf lexbuf }
+                string kind buf lexbuf }
   | '\\' (digit as a) (digit as b) (digit as c)
               { Buffer.add_char buf (byte_of_dec a b c);
-                string buf lexbuf }
-  | "\\n"     { Buffer.add_char buf '\n'; string buf lexbuf }
-  | "\\r"     { Buffer.add_char buf '\r'; string buf lexbuf }
-  | "\\t"     { Buffer.add_char buf '\t'; string buf lexbuf }
-  | "\\b"     { Buffer.add_char buf '\b'; string buf lexbuf }
+                string kind buf lexbuf }
+  | "\\n"     { Buffer.add_char buf '\n'; string kind buf lexbuf }
+  | "\\r"     { Buffer.add_char buf '\r'; string kind buf lexbuf }
+  | "\\t"     { Buffer.add_char buf '\t'; string kind buf lexbuf }
+  | "\\b"     { Buffer.add_char buf '\b'; string kind buf lexbuf }
   | '\n'      { newline lexbuf;
                 Buffer.add_char buf '\n';
-                string buf lexbuf }
+                string kind buf lexbuf }
   | '\\' newline blank*
-              { newline lexbuf; string buf lexbuf }
+              { newline lexbuf; string kind buf lexbuf }
   | '\\'      { lexing_error lexbuf "Invalid escape sequence" }
-  | _ as c    { Buffer.add_char buf c; string buf lexbuf }
+  | _ as c    { Buffer.add_char buf c; string kind buf lexbuf }
   | eof       { lexing_error lexbuf "Unterminated string" }
 
 and comment depth = parse
@@ -146,7 +157,9 @@ and comment depth = parse
                   comment (depth - 1) lexbuf
               }
   | "(*"      { comment (depth + 1) lexbuf }
-  | '"'       { ignore (string (Buffer.create 200) lexbuf);
+  | '"'       { (* we don't parse single-quoted strings similarly because
+                   single-quotes are used all the time as apostrophes. *)
+                ignore (string Double_quoted (Buffer.create 200) lexbuf);
                 comment depth lexbuf }
   | newline   { newline lexbuf; comment depth lexbuf }
   | _         { comment depth lexbuf }

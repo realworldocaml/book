@@ -35,7 +35,7 @@ let null_terminated_array_of_ptr_list typ list =
   (coerce (ptr typ) (ptr (ptr void)) (CArray.start arr +@ nitems)) <-@ null;
   arr
 
-let fts_open ~path_argv ?compar ~options = 
+let fts_open ~path_argv ?compar ~options () =
   let path_argv_cpointers = List.map _strdup path_argv in
   let paths = null_terminated_array_of_ptr_list (ptr char) path_argv_cpointers in
   let options = crush_options fts_open_option_value options in

@@ -39,5 +39,4 @@ let get_location error =
   loc
 
 let of_exn = Astlib.Location.Error.of_exn
-
 let raise error = raise (Astlib.Location.Error error)

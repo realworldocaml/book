@@ -1,4 +1,4 @@
-{0 Logs {%html: <span class="version">%%VERSION%%</span>%}}
+{0 Logs {%html: <span class="version">v0.7.0+dune2</span>%}}
 
 Logs provides a logging infrastructure.
 

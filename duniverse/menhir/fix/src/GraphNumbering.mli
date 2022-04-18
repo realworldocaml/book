@@ -10,8 +10,8 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(**[GraphNumbering] offers a facility for discovering and numbering the
-   reachable vertices in a finite directed graph. *)
+(**This module offers a facility for {b discovering and numbering the
+   reachable vertices} in a finite directed graph. *)
 
 open Sigs
 
@@ -19,32 +19,28 @@ open Sigs
    the subset of the vertices of [G] that are reachable from the roots. The
    type of the vertices must be equipped with an implementation of imperative
    maps. *)
-
 module Make
   (M : IMPERATIVE_MAPS)
   (G : GRAPH with type t = M.key)
      : NUMBERING with type t = G.t
 
-(**[ForOrderedType] is a special case of [Make] where it suffices for
+(**{!ForOrderedType} is a special case of {!Make} where it suffices for
    the vertices of [G] to be ordered. *)
-
 module ForOrderedType
   (T : OrderedType)
   (G : GRAPH with type t = T.t)
      : NUMBERING with type t = G.t
 
-(**[ForHashedType] is a special case of [Make] where it suffices for
+(**{!ForHashedType} is a special case of {!Make} where it suffices for
    the vertices of [G] to be hashed. *)
-
 module ForHashedType
   (T : HashedType)
   (G : GRAPH with type t = T.t)
      : NUMBERING with type t = G.t
 
-(**[ForType] is a special case of [Make] where the vertices of [G] can
+(**{!ForType} is a special case of {!Make} where the vertices of [G] can
    have arbitrary type. OCaml's built-in generic equality and hash
    functions are used. *)
-
 module ForType
   (T : TYPE)
   (G : GRAPH with type t = T.t)

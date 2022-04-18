@@ -1,0 +1,121 @@
+{0:cmdline Command line interface}
+
+For tools evaluating a command without sub commands the most general
+form of invocation is:
+
+{[
+tool [OPTION]… [ARG]…
+]}
+
+The tool automatically reponds to the [--help] option by printing the
+help. If a version string is provided in the
+{{!Cmdliner.Cmd.val-info}command information}, it also automatically
+responds to the [--version] option by printing this string on standard
+output.
+
+Command line arguments are either {{!optargs}{e optional}} or
+{{!posargs}{e positional}}. Both can be freely interleaved but since
+[Cmdliner] accepts many optional forms this may result in
+ambiguities. The special {{!posargs} token [--]} can be used to
+resolve them; anything that follows it is treated as a positional
+argument.
+
+Tools evaluating commands with sub commands have this form of invocation
+
+{[
+tool [COMMAND]… [OPTION]… [ARG]…
+]}
+
+Commands automatically respond to the [--help] option by printing
+their help. The sequence of [COMMAND] strings must be the first
+strings following the tool name – as soon as an optional argument is
+seen the search for a sub command stops. Command names may be specified by
+a prefixe as long as they are not ambiguous.
+
+{1:optargs Optional arguments}
+
+An optional argument is specified on the command line by a {e name}
+possibly followed by a {e value}.
+
+The name of an option can be short or long.
+
+{ul
+{- A {e short} name is a dash followed by a single alphanumeric
+   character: [-h], [-q], [-I].}
+{- A {e long} name is two dashes followed by alphanumeric
+   characters and dashes: [--help], [--silent], [--ignore-case].}}
+
+More than one name may refer to the same optional argument.  For
+example in a given program the names [-q], [--quiet] and [--silent]
+may all stand for the same boolean argument indicating the program to
+be quiet.  Long names can be specified by any non ambiguous prefix.
+
+The value of an option can be specified in three different ways.
+
+{ul
+{- As the next token on the command line: [-o a.out], [--output a.out].}
+{- Glued to a short name: [-oa.out].}
+{- Glued to a long name after an equal character: [--output=a.out].}}
+
+Glued forms are especially useful if the value itself starts with a
+dash as is the case for negative numbers, [--min=-10].
+
+An optional argument without a value is either a {e flag} (see
+{!Cmdliner.Arg.flag}, {!Cmdliner.Arg.vflag}) or an optional argument with
+an optional value (see the [~vopt] argument of {!Cmdliner.Arg.opt}).
+
+Short flags can be grouped together to share a single dash and the
+group can end with a short option. For example assuming [-v] and
+[-x] are flags and [-f] is a short option:
+
+{ul
+{- [-vx] will be parsed as [-v -x].}
+{- [-vxfopt] will be parsed as [-v -x -fopt].}
+{- [-vxf opt] will be parsed as [-v -x -fopt].}
+{- [-fvx] will be parsed as [-f=vx].}}
+
+{1:posargs Positional arguments}
+
+Positional arguments are tokens on the command line that are not
+option names and are not the value of an optional argument. They are
+numbered from left to right starting with zero.
+
+Since positional arguments may be mistaken as the optional value of an
+optional argument or they may need to look like option names, anything
+that follows the special token ["--"] on the command line is
+considered to be a positional argument:
+
+{[
+tool --option -- we -are --all positional --argu=ments
+]}
+
+{1:envlookup Environment variables}
+
+Non-required command line arguments can be backed up by an environment
+variable.  If the argument is absent from the command line and that
+the environment variable is defined, its value is parsed using the
+argument converter and defines the value of the argument.
+
+For {!Cmdliner.Arg.flag} and {!Cmdliner.Arg.flag_all} that do not have an
+argument converter a boolean is parsed from the lowercased variable value
+as follows:
+
+{ul
+{- [""], ["false"], ["no"], ["n"] or ["0"] is [false].}
+{- ["true"], ["yes"], ["y"] or ["1"] is [true].}
+{- Any other string is an error.}}
+
+Note that environment variables are not supported for {!Cmdliner.Arg.vflag} and
+{!Cmdliner.Arg.vflag_all}.
+
+{1:reserved Reserved option names}
+
+Using the cmdliner library puts the following constraints o
+
+{ul
+{- The option name [--cmdliner] is reserved by the library.}
+{- The option name [--help], (and [--version] if you specify a version
+   string) is reserved by the library. Using it as a term or option
+   name may result in undefined behaviour.}
+{- Defining the same option or command name via two different
+   arguments or terms is illegal and raises [Invalid_argument].}}

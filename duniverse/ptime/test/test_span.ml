@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Testing
@@ -54,8 +53,8 @@ let conversions = test "Constants and conversions" @@ fun () ->
   trip_float (-0.);
   trip_float 1.;
   trip_float (-1.);
-  trip_float (Pervasives.float (1 lsl 30 - 1));
-  trip_float (Pervasives.float (- (1 lsl 30)));
+  trip_float (stdlib_float (1 lsl 30 - 1));
+  trip_float (stdlib_float (- (1 lsl 30)));
   eq_span_opt (Ptime.Span.of_d_ps (23, -1L)) None;
   eq_span_opt (Ptime.Span.of_d_ps (23, 86_400_000_000_000_000L)) None;
   ()
@@ -106,7 +105,7 @@ let rounding = test "Rounding" @@ fun () ->
     eq_span (Ptime.Span.truncate ~frac_s:frac (p (3, a))) (p (3, b));
     eq_span (Ptime.Span.truncate ~frac_s:frac (n (3, a))) (n (3, b))
   in
-  for i = 0 to 12 do r ~frac:0 0L 0L done;
+  for i = 0 to 12 do r ~frac:i 0L 0L done;
   r_carry ~frac:(-1) 86_399_500_000_000_000L;
   r_carry ~frac:0 86_399_500_000_000_000L;
   r       ~frac:0 86_399_499_999_999_999L 86_399_000_000_000_000L;
@@ -160,7 +159,7 @@ let rounding = test "Rounding" @@ fun () ->
   r       ~frac:12 10_001_111_111_111_115L 10_001_111_111_111_115L;
   r       ~frac:12 10_001_111_111_111_114L 10_001_111_111_111_114L;
   r       ~frac:13 10_001_111_111_111_114L 10_001_111_111_111_114L;
-  for i = 0 to 12 do t ~frac:0 0L 0L done;
+  for i = 0 to 12 do t ~frac:i 0L 0L done;
   t ~frac:(-1) 86_399_999_999_999_999L 86_399_000_000_000_000L;
   t ~frac:0 86_399_999_999_999_999L 86_399_000_000_000_000L;
   t ~frac:1 86_399_999_999_999_999L 86_399_900_000_000_000L;

@@ -15,11 +15,21 @@
 
 (rule
  (targets ml-stub-generator.exe)
- (deps generated_struct_stubs.c ../clib/test_functions.h
-   ../config/test-cflags)
+ (deps
+  generated_struct_stubs.c
+  ../clib/test_functions.h
+  ../config/test-cflags)
  (action
-  (run %{cc} %{read-lines:../config/test-cflags} -I ../clib -I
-    %{ocaml-config:standard_library} -o %{targets} generated_struct_stubs.c)))
+  (run
+   %{cc}
+   %{read-lines:../config/test-cflags}
+   -I
+   ../clib
+   -I
+   %{ocaml-config:standard_library}
+   -o
+   %{targets}
+   generated_struct_stubs.c)))
 
 (rule
  (targets generated_struct_bindings.ml)
@@ -42,5 +52,12 @@
  (name test_constants)
  (package ctypes-foreign)
  (modules test_constants)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
-   test_constants_stubs test_functions test_constants_bindings tests_common))
+ (libraries
+  oUnit
+  ctypes
+  ctypes.stubs
+  ctypes-foreign
+  test_constants_stubs
+  test_functions
+  test_constants_bindings
+  tests_common))

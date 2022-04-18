@@ -14,9 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Core_kernel
-open Async_unix
-open Async_kernel
+open Core
+open Async
 
 val to_bigsubstring : Cstruct.t -> Bigsubstring.t
 val of_bigsubstring : Bigsubstring.t -> Cstruct.t

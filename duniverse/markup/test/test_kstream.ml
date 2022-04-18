@@ -172,7 +172,7 @@ let internal_tests = [
   ("kstream.internal.tap.exn" >:: fun _ ->
     let buffer = Buffer.create 4 in
     let s = then_exn ['f'; 'o'; 'o'; 'b'] in
-    tap (Buffer.add_char buffer) s |> ignore;
+    (tap (Buffer.add_char buffer) s |> ignore) [@ocaml.warning "-5"];
     to_list s failed (wrong_k "did not fail");
     assert_equal (Buffer.contents buffer) "foob");
 

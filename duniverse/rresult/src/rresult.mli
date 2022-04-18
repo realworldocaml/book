@@ -1,10 +1,12 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2014 The rresult programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Result value combinators.
+
+    {b Note.} OCaml 4.08 provides the {!Stdlib.Result} module
+    which you should prefer to [Rresult].
 
     [Rresult] is a module for handling computation results and errors
     in an explicit and declarative manner without resorting to
@@ -14,22 +16,18 @@
     Open the module to use it, this defines the {{!result}result type},
     the {!R.Infix} operators {!R} in your scope.
 
-    Consult {{!usage}usage guidelines} for the type.
-
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    Consult {{!usage}usage guidelines} for the type. *)
 
 (** {1 Results} *)
 
 (** The type for results. *)
-type ('a, 'b) result = ('a, 'b) Result.result = Ok of 'a | Error of 'b
-
-open Result
+type ('a, 'b) result = ('a, 'b) Stdlib.result = Ok of 'a | Error of 'b
 
 val ( >>= ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
-(** [(>>=)] is {!R.( >>= )}. *)
+(** [(>>=)] is {!R.(>>=)}. *)
 
 val ( >>| ) : ('a, 'b) result -> ('a -> 'c) -> ('c, 'b) result
-(** [(>>|)] is {!R.( >>| )}. *)
+(** [(>>|)] is {!R.(>>|)}. *)
 
 (** Result value combinators. *)
 module R : sig
@@ -52,10 +50,11 @@ module R : sig
       {- [Error (reword e)] if [r = Error e]}} *)
 
   val get_ok : ('a, 'b) result -> 'a
-  (** [get r] is [v] if [r = Ok v] and @raise Invalid_argument otherwise. *)
+  (** [get_ok r] is [v] if [r = Ok v] and raises [Invalid_argument]
+      otherwise. *)
 
   val get_error : ('a, 'b) result -> 'b
-  (** [get_error r] is [e] if [r = Error e] and @raise Invalid_argument
+  (** [get_error r] is [e] if [r = Error e] and raises [Invalid_argument]
       otherwise. *)
 
   (**/**)
@@ -88,10 +87,10 @@ module R : sig
    (** {1 Infix operators} *)
 
     val ( >>= ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
-    (** [(>>=)] is {!R.( >>= )}. *)
+    (** [(>>=)] is {!R.(>>=)}. *)
 
     val ( >>| ) : ('a, 'b) result -> ('a -> 'c) -> ('c, 'b) result
-    (** [(>>|)] is {!R.( >>| )}. *)
+    (** [(>>|)] is {!R.(>>|)}. *)
   end
 
   (** {1:msgs Error messages} *)
@@ -123,7 +122,7 @@ module R : sig
 
   val error_to_msg : pp_error:(Format.formatter -> 'b -> unit) ->
     ('a, 'b) result -> ('a, [> msg]) result
-  (** [error_to_msg pp_error r] converts errors in [r] with [pp_error] to
+  (** [error_to_msg ~pp_error r] converts errors in [r] with [pp_error] to
       an error message. *)
 
   val error_msg_to_invalid_arg : ('a, msg) result -> 'a
@@ -167,8 +166,8 @@ module R : sig
     ok:(Format.formatter -> 'a -> unit) ->
     error:(Format.formatter -> 'b -> unit) -> Format.formatter ->
     ('a, 'b) result -> unit
-  (** [pp ok error ppf r] prints [r] on [ppf] using [ok] and [error] according
-      to [r]. *)
+  (** [pp ~ok ~error ppf r] prints [r] on [ppf] using [ok] and [error]
+      according to [r]. *)
 
   val dump :
     ok:(Format.formatter -> 'a -> unit) ->
@@ -293,7 +292,7 @@ val error_pack_to_msg : ('a, [ `Mod of error]) Rresult.result ->
 *)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2014 Daniel C. Bünzli
+   Copyright (c) 2014 The rresult programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

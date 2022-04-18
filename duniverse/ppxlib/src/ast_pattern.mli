@@ -82,11 +82,9 @@ val parse :
 
 module Packed : sig
   type ('a, 'b, 'c) pattern = ('a, 'b, 'c) t
-
   type ('a, 'b) t
 
   val create : ('a, 'b, 'c) pattern -> 'b -> ('a, 'c) t
-
   val parse : ('a, 'b) t -> Location.t -> 'a -> 'b
 end
 with type ('a, 'b, 'c) pattern := ('a, 'b, 'c) t
@@ -109,6 +107,19 @@ val __' : ('a, 'a Loc.t -> 'b, 'b) t
     In the latter case you should use the [pexp_loc] field of the captured
     expression instead. *)
 
+val drop : ('a, 'b, 'b) t
+(** Useful when some part of the AST is irrelevant. With [__], the captured
+    value is passed to the continuation, with [drop] it is ignored. In
+    higher-level pattern matching, it is called wildcard pattern. *)
+
+val as__ : ('a, 'b, 'c) t -> ('a, 'a -> 'b, 'c) t
+(** As-pattern. Passes the current node to the continuation.
+
+    Pitfall. In general, the continuation is called step by step by being
+    applied partially to every next captured node in the pattern. That means
+    that the node captured by [as__] is passed to the continuation before
+    checking if the pattern is matched. *)
+
 val alt : ('a, 'b, 'c) t -> ('a, 'b, 'c) t -> ('a, 'b, 'c) t
 (** [alt] stands for `alternatives'. It matches either the first pattern or the
     second one. *)
@@ -122,16 +133,13 @@ val ( ||| ) : ('a, 'b, 'c) t -> ('a, 'b, 'c) t -> ('a, 'b, 'c) t
 (** Same as [alt] *)
 
 val map : ('a, 'b, 'c) t -> f:('d -> 'b) -> ('a, 'd, 'c) t
-
 val map' : ('a, 'b, 'c) t -> f:(Location.t -> 'd -> 'b) -> ('a, 'd, 'c) t
-
 val map_result : ('a, 'b, 'c) t -> f:('c -> 'd) -> ('a, 'b, 'd) t
 
 val ( >>| ) : ('a, 'b, 'c) t -> ('d -> 'b) -> ('a, 'd, 'c) t
 (** Same as [map] *)
 
 val map0 : ('a, 'b, 'c) t -> f:'v -> ('a, 'v -> 'b, 'c) t
-
 val map1 : ('a, 'v1 -> 'b, 'c) t -> f:('v1 -> 'v) -> ('a, 'v -> 'b, 'c) t
 
 val map2 :
@@ -148,36 +156,23 @@ val map2' :
   ('a, 'v -> 'b, 'c) t
 
 val nil : (_ list, 'a, 'a) t
-
 val ( ^:: ) : ('a, 'b, 'c) t -> ('a list, 'c, 'd) t -> ('a list, 'b, 'd) t
-
 val many : ('a, 'b -> 'b, 'c) t -> ('a list, 'c list -> 'd, 'd) t
-
 val int : int -> (int, 'a, 'a) t
-
 val char : char -> (char, 'a, 'a) t
-
 val string : string -> (string, 'a, 'a) t
-
 val float : float -> (float, 'a, 'a) t
-
 val int32 : int32 -> (int32, 'a, 'a) t
-
 val int64 : int64 -> (int64, 'a, 'a) t
-
 val nativeint : nativeint -> (nativeint, 'a, 'a) t
-
 val bool : bool -> (bool, 'a, 'a) t
 
 val cst :
   to_string:('a -> string) -> ?equal:('a -> 'a -> bool) -> 'a -> ('a, 'b, 'b) t
 
 val none : (_ option, 'a, 'a) t
-
 val some : ('a, 'b, 'c) t -> ('a option, 'b, 'c) t
-
 val pair : ('a1, 'b, 'c) t -> ('a2, 'c, 'd) t -> ('a1 * 'a2, 'b, 'd) t
-
 val ( ** ) : ('a1, 'b, 'c) t -> ('a2, 'c, 'd) t -> ('a1 * 'a2, 'b, 'd) t
 
 val triple :
@@ -187,11 +182,8 @@ val triple :
   ('a1 * 'a2 * 'a3, 'b, 'e) t
 
 val loc : ('a, 'b, 'c) t -> ('a Loc.t, 'b, 'c) t
-
 val pack0 : ('a, 'b, 'c) t -> ('a, unit -> 'b, 'c) t
-
 val pack2 : ('a, 'b -> 'c -> 'd, 'e) t -> ('a, 'b * 'c -> 'd, 'e) t
-
 val pack3 : ('a, 'b -> 'c -> 'd -> 'e, 'f) t -> ('a, 'b * 'c * 'd -> 'e, 'f) t
 
 include module type of Ast_pattern_generated
@@ -213,37 +205,21 @@ include module type of Ast_pattern_generated
     ]} *)
 
 val true_ : (bool, 'a, 'a) t
-
 val false_ : (bool, 'a, 'a) t
-
 val eint : (int, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val echar : (char, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val estring : (string, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val efloat : (string, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val eint32 : (int32, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val eint64 : (int64, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val enativeint : (nativeint, 'a, 'b) t -> (expression, 'a, 'b) t
-
 val pint : (int, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pchar : (char, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pstring : (string, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pfloat : (string, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pint32 : (int32, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pint64 : (int64, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val pnativeint : (nativeint, 'a, 'b) t -> (pattern, 'a, 'b) t
-
 val single_expr_payload : (expression, 'a, 'b) t -> (payload, 'a, 'b) t
 
 val no_label :
@@ -265,5 +241,4 @@ val esequence :
 type context
 
 val of_func : (context -> Location.t -> 'a -> 'b -> 'c) -> ('a, 'b, 'c) t
-
 val to_func : ('a, 'b, 'c) t -> context -> Location.t -> 'a -> 'b -> 'c

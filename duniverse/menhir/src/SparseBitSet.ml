@@ -153,8 +153,8 @@ let rec subset s1 s2 =
       else
         subset s1 qs2
 
-(* [union] arbitrarily attempts to preserve sharing between its second
-   argument and its result. *)
+(* [union] preserves sharing (if possible) between its second argument
+   and its result. *)
 
 let rec union s1 s2 =
   match s1, s2 with

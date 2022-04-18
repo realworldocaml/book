@@ -98,3 +98,13 @@ type mutual_recurse2 = {
 type using_object = {
    f : (string * int) list <json repr="object">;
  }
+
+type variant1 = [
+  | A of string
+  | B
+] <ocaml repr="classic">
+
+type variant2 = [
+  | A
+  | C
+] <ocaml repr="classic">

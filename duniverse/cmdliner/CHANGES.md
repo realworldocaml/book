@@ -1,3 +1,154 @@
+v1.1.1 2022-03-23 La Forclaz (VS)
+---------------------------------
+
+- General documentation fixes, tweaks and improvements.
+- Docgen: suppress trailing whitespace in synopsis rendering.
+- Docgen: fix duplicate rendering of standard options when using `Term.ret` (#135).
+- Docgen: fix duplicate rendering of command name on ``Term.ret (`Help (fmt, None)`` 
+  (#135).
+
+v1.1.0 2022-02-06 La Forclaz (VS)
+---------------------------------
+
+- Require OCaml 4.08.
+
+- Support for deprecating commands, arguments and environment variables (#66).
+  See the `?deprecated` argument of `Cmd.info`, `Cmd.Env.info` and `Arg.info`.
+
+- Add `Manpage.s_none` a special section name to use whenever you 
+  want something not to be listed in a command's manpage.
+
+- Add `Arg.conv'` like `Arg.conv` but with a parser signature that returns 
+  untagged string errors.
+
+- Add `Term.{term,cli_parse}_result'` functions.
+
+- Add deprecation alerts on what is already deprecated.
+
+- On unices, use `command -v` rather than `type` to find commands.
+
+- Stop using backticks for left quotes. Use apostrophes everywhere. 
+  Thanks to Ryan Moore for reporting a typo that prompted the change (#128).
+
+- Rework documentation structure. Move out tutorial, examples and
+  reference doc from the `.mli` to multiple `.mld` pages.
+
+- `Arg.doc_alts` and `Arg.doc_alts_enum`, change the default rendering
+  to match the manpage convention which is to render these tokens in
+  bold.  If you want to recover the previous rendering or were using
+  these functions outside man page rendering use an explicit
+  `~quoted:true` (the optional argument is available on earlier
+  versions).
+
+- The deprecated `Term.exit` and `Term.exit_status_of_result` now 
+  require a `unit` result.  This avoids various errors to go undetected. 
+  Thanks to Thomas Leonard for the patch (#124).
+  
+- Fix absent and default option values (`?none` string argument of `Arg.some`)
+  rendering in manpages:
+  
+  1. They were not escaped, they now are.
+  2. They where not rendered in bold, they now are.
+  3. The documentation language was interpreted, it is no longer the case.
+  
+  If you were relying on the third point via `?none` of `Arg.some`, use the new
+  `?absent` optional argument of `Arg.info` instead. Besides a new
+  `Arg.some'` function is added to specify a value for `?none` instead
+  of a string.  Thanks to David Allsopp for the patch (#111).
+  
+- Documentation generation use: `…` (U+2026) instead of `...` for 
+  ellipsis. See also UTF-8 manpage support below.
+  
+- Documentation generation, improve command synopsis rendering on 
+  commands with few options (i.e. mention them).
+  
+- Documentation generation, drop section heading in the output if the section 
+  is empty.
+
+### New `Cmd` module and deprecation of the `Term` evaluation interface
+
+This version of cmdliner deprecates the `Term.eval*` evaluation
+functions and `Term.info` information values in favor of the new
+`Cmdliner.Cmd` module. 
+
+The `Cmd` module generalizes the existing sub command support to allow
+arbitrarily nested sub commands each with its own man page and command
+line syntax represented by a `Term.t` value.
+
+The mapping between the old interface and the new one should be rather
+straightforward. In particular `Term.info` and `Cmd.info` have exactly
+the same semantics and fields and a command value simply pairs a
+command information with a term.
+
+However in this transition the following things are changed or added:
+
+* All default values of `Cmd.info` match those of `Term.info` except
+  for:
+  * The `?exits` argument which defaults to `Cmd.Exit.defaults`
+    rather than the empty list.
+  * The `?man_xrefs` which defaults to the list ``[`Main]`` rather
+    than the empty list (this means that by default sub commands 
+    at any level automatically cross-reference the main command).
+  * The `?sdocs` argument which defaults to `Manpage.s_common_options`
+    rather than `Manpage.s_options`.
+    
+* The `Cmd.Exit.some_error` code is added to `Cmd.Exit.defaults`
+  (which in turn is the default for `Cmd.info` see above).  This is an
+  error code clients can use when they don't want to bother about
+  having precise exit codes.  It is high so that low, meaningful,
+  codes can later be added without breaking a tool's compatibility. In
+  particular the convenience evaluation functions `Cmd.eval_result*`
+  use this code when they evaluate to an error.
+
+* If you relied on `?term_err` defaulting to `1` in the various
+  `Term.exit*` function, note that the new `Cmd.eval*` function use
+  `Exit.cli_error` as a default. You may want to explicitely specify
+  `1` instead if you use `Term.ret` with the `` `Error`` case 
+  or `Term.term_result`.
+  
+Finally be aware that if you replace, in an existing tool, an encoding
+of sub commands as positional arguments you will effectively break the
+command line compatibility of your tool since options can no longer be
+specified before the sub commands, i.e. your tool synopsis moves from:
+
+```
+tool cmd [OPTION]… SUBCMD [ARG]…
+```
+to 
+```
+tool cmd SUBCMD [OPTION]… [ARG]…
+```
+
+Thanks to Rudi Grinberg for prototyping the feature in #123.
+
+### UTF-8 manpage support 
+
+It is now possible to write UTF-8 encoded text in your doc strings and
+man pages.
+
+The man page renderer used on `--help` defaults to `mandoc` if
+available, then uses `groff` and then defaults to `nroff`. Starting
+with `mandoc` catches macOS whose `groff` as of 11.6 still doesn't
+support UTF-8 input and struggles to render some Unicode characters.
+
+The invocations were also tweaked to remove the `-P-c` option which
+entails that the default pager `less` is now invoked with the `-R` option.
+
+If you install UTF-8 encoded man pages output via `--help=groff`, in
+`man` directories bear in mind that these pages will look garbled on
+stock macOS (at least until 11.6). One way to work around is to
+instruct your users to change the `NROFF` definition in
+`/private/etc/man.conf` from:
+
+    NROFF       /usr/bin/groff -Wall -mtty-char -Tascii -mandoc -c
+    
+to:
+
+    NROFF       /usr/bin/mandoc -Tutf8 -c
+
+Thanks to Antonin Décimo for his knowledge and helping with these
+`man`gnificent intricacies (#27).
+
 v1.0.4 2019-06-14 Zagreb
 ------------------------
 

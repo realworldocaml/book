@@ -1,8 +1,11 @@
 (executables
- (libraries atd)
+ (libraries
+   atd
+   alcotest
+ )
  (names unit_tests))
 
 (rule
- (alias   runtest)
+ (alias runtest)
  (package atd)
  (action (run ./unit_tests.exe)))

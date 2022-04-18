@@ -1,12 +1,12 @@
 type bigstring =
-  (char, Bigarray_compat.int8_unsigned_elt, Bigarray_compat.c_layout) Bigarray_compat.Array1.t
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
 type t = bigstring
 
-let create size = Bigarray_compat.(Array1.create char c_layout size)
+let create size = Bigarray.(Array1.create char c_layout size)
 let empty       = create 0
 
-module BA1 = Bigarray_compat.Array1
+module BA1 = Bigarray.Array1
 
 let length t = BA1.dim t
 

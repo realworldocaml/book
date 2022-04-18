@@ -1,0 +1,23 @@
+{0 Ptime {%html: <span class="version">v1.0.0+dune2</span>%}}
+
+{!Ptime} has platform independent support for POSIX time. It provides
+a {{!Ptime.t}type} to represent a well-defined range of POSIX
+timestamps with picosecond precision, conversion with
+{{!Ptime.date_time}date-time values}, conversion with
+{{!Ptime.rfc3339}RFC 3339 timestamps} and {{!Ptime.print}pretty
+printing} to a human-readable, locale-independent
+representation. {!Ptime} is not a calendar library.
+
+{!Ptime_clock} provides access to a
+{{!Ptime_clock.platform_support}system POSIX clock} and the system's
+current time zone offset.
+
+{1:ptime Library [ptime]}
+
+{!modules: Ptime}
+
+{1:ptime_clock Library [ptime.clock.os]}
+
+{!modules: Ptime_clock}
+
+Also use this library for compiling to JavaScript.

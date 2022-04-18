@@ -53,13 +53,12 @@
 \section{Foreword}
 
 \menhir is a parser generator. It turns high-level grammar specifications,
-decorated with semantic actions expressed in the \ocaml programming
-language~\cite{ocaml}, into parsers, again expressed in \ocaml. It is
-based on Knuth's LR(1) parser construction technique~\cite{knuth-lr-65}. It is
-strongly inspired by its precursors: \yacc~\cite{johnson-yacc-79},
-\texttt{ML-Yacc}~\cite{tarditi-appel-00}, and \ocamlyacc~\cite{ocaml},
-but offers a large number of minor and major improvements that make it a more
-modern tool.
+decorated with ``semantic actions'' (fragments of executable code), into
+parsers. It is based on Knuth's LR(1) parser construction
+technique~\cite{knuth-lr-65}. It is strongly inspired by its precursors:
+\yacc~\cite{johnson-yacc-79}, \texttt{ML-Yacc}~\cite{tarditi-appel-00}, and
+\ocamlyacc~\cite{ocaml}, but offers a large number of minor and major
+improvements that make it a more modern tool.
 
 This brief reference manual explains how to use \menhir. It does not attempt to
 explain context-free grammars, parsing, or the LR technique. Readers who have
@@ -68,17 +67,47 @@ first~\cite{aho-86,appel-tiger-98,hopcroft-motwani-ullman-00}. They are also
 invited to have a look at the \distrib{demos} directory in \menhir's
 distribution.
 
+\paragraph*{Back-ends}
+Menhir currently offers a choice between several ``back-ends'':
+\begin{itemize}
+\item When the ``code'' back-end is used,
+      the semantic actions are fragments of OCaml code,
+      and the parser produced by \menhir is a stand-alone piece of OCaml code.
+      The grammar must be placed in a file whose name ends with \mly,
+      such as \texttt{parser.mly}, and \menhir produces
+      a parser whose implementation and interface are stored in the files
+      \texttt{parser.ml} and \texttt{parser.mli}.
+      The code back-end is the default back-end.
+\item When the ``table'' back-end is used,
+      the semantic actions are fragments of OCaml code,
+      and the parser produced by \menhir is a piece of OCaml code
+      that needs to be linked with the library \menhirlib.
+      The grammar must be placed in a file whose name ends with \mly,
+      such as \texttt{parser.mly}, and \menhir produces
+      a parser whose implementation and interface are stored in the files
+      \texttt{parser.ml} and \texttt{parser.mli}.
+      The table back-end is selected by passing \otable on the command line.
+\item When the ``Coq'' back-end is used,
+      the semantic actions are fragments of Coq code,
+      and the parser produced by \menhir is a piece of Coq code
+      that contains not only a parser,
+      but also a proof that this parser is correct and complete
+      with respect to the grammar.
+      The grammar must be placed in a file whose name ends with \vy,
+      such as \texttt{parser.vy}, and \menhir produces
+      \texttt{parser.v}.
+\end{itemize}
+
+\paragraph*{Caveat}
+
 Potential users of \menhir should be warned that \menhir's feature set is not
 completely stable. There is a tension between preserving a measure of
 compatibility with \ocamlyacc, on the one hand, and introducing new ideas, on
-the other hand. Some aspects of the tool, such as the error handling
-mechanism, are still potentially subject to incompatible changes: for
-instance, in the future, the current error handling mechanism (which is based
-on the \error token, see \sref{sec:errors}) could be removed and replaced with
-an entirely different mechanism.
-
-There is room for improvement in the tool and in this reference manual. Bug
-reports and suggestions are welcome!
+the other hand. Some aspects of the tool are potentially subject to
+incompatible changes. For instance, the ``traditional'' error-handling
+mechanism (which is based on the \error token, see \sref{sec:errors}) is now
+regarded as \textbf{deprecated} and is likely to be entirely removed in the
+future.
 
 % ------------------------------------------------------------------------------
 
@@ -185,6 +214,15 @@ channel just the input sentences. Each sentence is followed with a comment of
 the form \verb+## Concrete syntax: ...+ that shows this sentence in concrete
 syntax. This comment is printed only if the user has defined an alias for
 every token (\sref{sec:tokens}).
+
+\docswitch{\oexncarriesstate} This switch causes the exception \texttt{Error}
+to carry an integer parameter, as follows: \texttt{exception Error of int}.
+When the parser detects a syntax error, the number of the current state is
+reported in this way. This allows the caller to select a suitable syntax error
+message, along the lines described in \sref{sec:errors:new}. This switch is
+currently supported by the code back-end only.
+% since 20211215
+% incompatible with --fixed-exception
 
 \docswitch{\oexplain} This switch causes conflict explanations to be
 written  to the file \nt{basename}\conflicts. See also \sref{sec:conflicts}.
@@ -332,7 +370,7 @@ missing alias gives rise to a warning (and, in \ostrict mode, to an error).
 \docswitch{\ostdlib \nt{directory}} This switch exists only for
 backwards compatibility and is ignored. It may be removed in the future.
 
-\docswitch{\ostrategy \nt{strategy}} This switch selects an error handling
+\docswitch{\ostrategy \nt{strategy}} This switch selects an error-handling
 strategy, to be used by the code back-end, the table back-end, and the
 reference interpreter. The available strategies are \legacy and
 simplified. (However, at the time of writing, the code back-end does
@@ -350,12 +388,12 @@ end-of-stream conflicts, and missing token aliases.
 
 \docswitch{\oo{suggest-*}} See \sref{sec:build}.
 
-\docswitch{\otable} This switch causes \menhir to use its table-based
-back-end, as opposed to its (default) code-based back-end. When \otable is
-used, \menhir produces significantly more compact and somewhat slower parsers.
-See \sref{sec:qa} for a speed comparison.
+\docswitch{\otable} This switch causes \menhir to use the table back-end, as
+opposed to the code back-end, which is the default. When \otable is used,
+\menhir produces significantly more compact and somewhat slower parsers. See
+\sref{sec:qa} for a speed comparison.
 
-The table-based back-end produces rather compact tables, which are analogous
+The table back-end produces rather compact tables, which are analogous
 to those produced by \yacc, \bison, or \ocamlyacc. These tables are not quite
 stand-alone: they are exploited by an interpreter, which is shipped as part of
 the support library \menhirlib. For this reason, when \otable is used,
@@ -363,11 +401,11 @@ the support library \menhirlib. For this reason, when \otable is used,
 into your executable program. The \texttt{--suggest-*} switches, described
 above, help do this.
 
-The code-based back-end compiles the LR automaton directly into a nest of
+The code back-end compiles the LR automaton directly into a nest of
 mutually recursive \ocaml functions. In that case, \menhirlib is not required.
 
 The incremental API (\sref{sec:incremental}) and the inspection API
-(\sref{sec:inspection}) are made available only by the table-based back-end.
+(\sref{sec:inspection}) are made available only by the table back-end.
 
 \docswitch{\otimings} This switch causes internal timing information to
 be sent to the standard error channel.
@@ -586,17 +624,34 @@ file, \emph{not} to the \mli file. Therefore, it should not contain
 declarations that affect the meaning of the types that appear in the \mli
 file. Here are two problems that people commonly run into:
 \begin{itemize}
-\item Placing an \kw{open} directive that is required for a \dtype declaration
-  to make sense. For instance, writing \verb+open Foo+ in the header and
-  declaring \verb+%type<t> bar+, where the type \verb+t+ is defined in the
-  module \verb+Foo+, will not work. You must write \verb+%type<Foo.t> bar+.
-\item Declaring a module alias that affects a (declared or inferred) type. For
-  instance, writing \verb+module F = Foo+ in the header and declaring
-  \verb+%type<Foo.t> bar+ may not work (from
-  2020/05/25 on). The reason is, OCaml may infer that the symbol \verb+bar+ has
-  type \verb+F.t+, and Menhir will rely on this information without realizing
-  that \verb+F+ is a local name, so in the end, the \mli file contains a
-  reference to \verb+F.t+ that does not make sense.
+\item
+  \textbf{Problem:} Placing an \kw{open} directive that is required for a
+  \dtype declaration to make sense. For instance, writing \verb+open Foo+ in
+  the header and declaring \verb+%type<t> bar+, where the type \verb+t+ is
+  defined in the module \verb+Foo+, will not work.
+  \par\noindent\textbf{Solution:} Write \verb+%type<Foo.t> bar+.
+\item
+  \textbf{Problem:} Declaring a module alias that affects a (declared or
+  inferred) type. For instance, placing the definition \verb+module F = Foo+
+  in the header can create a problem,
+  % from 2020/05/25 on
+  because it allows OCaml to infer that the symbol \verb+bar+ has type
+  \verb+F.t+. Menhir relies on this information without realizing that
+  \verb+F+ is a local name, so in the end, the \mli file contains a reference
+  to \verb+F.t+ that does not make sense. The problem persists even if one
+  declares \verb+%type<Foo.t> bar+, because Menhir prefers the type inferred
+  by OCaml over the type declared by the user.
+  % because of the presence of implicit type variables in certain types,
+  % such as open polymorphic variants, it may be the case that these two
+  % types are *compatible* yet the inferred type is *more specific* (and
+  % only the inferred type is sound).
+  \par\noindent\textbf{Solution:}
+  Wrap the module alias in an anonymous structure, like so:
+  \verb+open struct module F = Foo end+.
+  (This requires OCaml 4.08 or newer.)
+  % Thanks to Frédéric Bour for suggesting this!
+  This makes the name \verb+F+ available in your code,
+  but forces OCaml to prefer the name \verb+Foo+ in the types that it infers.
 \end{itemize}
 
 \subsubsection{Parameters}
@@ -2836,7 +2891,7 @@ raise \verb+Error+.
 
 This means that \menhir's traditional error-handling procedure (which pops the
 stack until a state that can act on the \error token is found) does not get a
-chance to run. Instead, the user can implement her own error handling code, in
+chance to run. Instead, the user can implement her own error-handling code, in
 the \verb+fail+ continuation.
 
 %% val loop_handle_undo
@@ -3332,10 +3387,11 @@ state (as determined by \verb+env+) has an outgoing transition labeled with
 \section{Error handling: the traditional way}
 \label{sec:errors}
 
-\menhir's traditional error handling mechanism is considered deprecated: although
-it is still supported for the time being, it might be removed in the future.
+\menhir's traditional error-handling mechanism is considered deprecated:
+although it is still supported for the time being, it is likely to be removed
+in the future.
 %
-We recommend setting up an error handling mechanism using the new tools
+We recommend setting up an error-handling mechanism using the new tools
 offered by \menhir (\sref{sec:errors:new}).
 
 \paragraph{Error handling}
@@ -3349,23 +3405,26 @@ lookahead token is discarded and replaced with the \error token, which becomes
 the current lookahead token. At this point, the parser enters \emph{error
 handling} mode.
 %
-In error handling mode, the parser behaves as follows:
+In error-handling mode, the parser behaves as follows:
 \begin{itemize}
 \item If the current state has a shift action on the \error token, then this
   action takes place. Under the \legacy strategy, the parser then
   reads the next token and returns to normal mode. Under the
   simplified strategy, it does \emph{not} request the next token, so
-  the current token remains \error, and the parser remains in error handling
-  mode.
+  the current token remains \error, and the parser remains in error-handling
+  mode.%
+  \footnote{In the simplified strategy, once the parser enters error-handling
+  mode, it remains in error-handling mode forever. Thus, the input stream is
+  effectively discarded and replaced with an infinite stream of \error tokens.}
 \item If the current state has a reduce action on the \error token, then this
   action takes place. (This behavior differs from that of \yacc and
   \ocamlyacc, which do not reduce on \error. It is somewhat unclear why not.)
-  The current token remains \error and the parser remains in error handling
+  The current token remains \error and the parser remains in error-handling
   mode.
 \item If the current state has no action on the \error token, then, under the
   simplified strategy, the parser rejects the input. Under the
   \legacy strategy, the parser pops a cell off its stack and remains
-  in error handling mode. If the stack is empty, then the parser rejects the
+  in error-handling mode. If the stack is empty, then the parser rejects the
   input.
 \end{itemize}
 
@@ -3382,10 +3441,11 @@ between them:
 \begin{itemize}
 \item If the \error token is used only to catch an error and stop, then the
   \simplified strategy should be preferred. When this strategy is selected,
-  the \error token should always appears at the end of a production, whose
+  the \error token should always appear at the end of a production, whose
   semantic action should abort the parser by raising an exception. (Menhir
   checks that the \error token is used only at the end of productions.
-  However, it cannot verify that the semantic action raises an exception.)
+  It cannot statically check that the semantic action raises an exception,
+  but it may insert a runtime check.)
 \item If the \error token is used to survive an error and continue parsing,
   then the legacy strategy should be selected.
 \end{itemize}
@@ -3397,21 +3457,6 @@ an \error token was successfully shifted. In this mode, tokens are repeatedly
 taken off the input stream and discarded until an acceptable token is found.
 This feature is no longer offered by \menhir.
 
-\paragraph{Error-related keywords}
-
-Under the \legacy strategy, the \verb+$syntaxerror+ keyword
-is made available to semantic actions.
-%
-When this keyword is evaluated, the evaluation of the semantic action is
-aborted, so that the current reduction is abandoned; the current lookahead
-token is discarded and replaced with the \error token; and error handling mode
-is entered. There is no mechanism for inserting an \error token \emph{in front
-of} the current lookahead token, even though this might also be desirable.
-
-It is unclear whether this keyword is useful.
-It is not supported in the \simplified strategy,
-and it may be suppressed in the future.
-
 % ------------------------------------------------------------------------------
 
 \section{Error handling: the new way}
@@ -3421,7 +3466,7 @@ and it may be suppressed in the future.
 an error is detected. Indeed, as soon as an invalid token is detected, the
 parser produces a checkpoint of the form \verb+HandlingError _+. At this
 point, if one decides to let the parser proceed, by just
-calling \verb+resume+, then \menhir enters its traditional error handling mode
+calling \verb+resume+, then \menhir enters its traditional error-handling mode
 (\sref{sec:errors}). Instead, however, one can decide to take control and
 perform error handling or error recovery in any way one pleases. One can, for
 instance, build and display a diagnostic message, based on the automaton's
@@ -3466,8 +3511,7 @@ The impact of these alterations must be taken into account when writing
 diagnostic messages (\sref{sec:errors:diagnostics}).
 
 In this approach to error handling, the special \error token is not used. It
-should not appear in the grammar. Similarly, the \verb+$syntaxerror+ keyword
-should not be used.
+should not appear in the grammar.
 
 % ------------------------------------------------------------------------------
 
@@ -4034,6 +4078,14 @@ messages is stored in \compcertgithubfile{cparser/handcrafted.messages}.
 % \compcertgithubfile{cparser/ErrorReports.ml}, where we construct and display a
 % full-fledged diagnostic message.
 
+As a final remark, it is worth noting that this approach to producing syntax
+error messages does \emph{not} require using \menhir's incremental API and
+table back-end. One can instead use \menhir's code back-end with
+\oexncarriesstate. In that case, the exception \texttt{Error} carries a state
+number, which can be used to select a syntax error message.
+\menhir uses this method in its own parser; see
+\distrib{src/stage2/Driver.ml}.
+
 % ------------------------------------------------------------------------------
 
 \section{Coq back-end}
@@ -4060,8 +4112,8 @@ serves as an example.
 Several restrictions are imposed when \menhir is used in \ocoq mode:
 %
 \begin{itemize}
-\item The error handling mechanism (\sref{sec:errors}) is absent.
-      The \verb+$syntaxerror+ keyword and the \error token are not supported.
+\item The error-handling mechanism (\sref{sec:errors}) is absent.
+      The \error token is not supported.
 \item Location information is not propagated. The \verb+$start*+ and \verb+$end*+
       keywords (\fref{fig:pos}) are not supported.
 \item \dparameter (\sref{sec:parameter}) is not supported.
@@ -4119,7 +4171,7 @@ the ``fuel'' technique: the parser takes an additional parameter
 \verb+log_fuel+ of type \verb+nat+ such that $2^{\verb+log_fuel+}$ is the
 maximum number of steps the parser is allowed to perform. In practice, one
 can use a value of e.g., 40 or 50 to make sure the parser will never run out
-of fuel in a reasonnable time.
+of fuel in a reasonable time.
 
 Parsing can have three different outcomes, represented by the type
 \verb+parse_result+.
@@ -4226,7 +4278,7 @@ The parse result \verb+Fail_pr_full+ provides the third and simplest option.
 As it carries state and token information, it allows constructing meaningful
 error messages with a small amount of work. The generated function
 \verb+Aut.N_of_state+ converts a state to a state number. While this is not as
-powerful as the advanced error handling enabled by the incremental API for
+powerful as the advanced error-handling possibilities afforded by the incremental API for
 non-verified parsers, this does allow interoperability with the existing
 \messages files and tooling, described in \sref{sec:messages:format} and
 \sref{sec:messages:tools}. This allows error messaging without a second
@@ -4402,7 +4454,8 @@ This material should be of interest only to authors of build systems
 who wish to build support for \menhir into their system.
 %
 Ordinary users should skip this section and use a build system that knows
-about \menhir, such as \hyperlink{dune}{\dune} (preferred) or \ocamlbuild.
+about \menhir, such as \hyperlink{dune}{\dune} (preferred; \sref{sec:dune})
+or \ocamlbuild.
 
 \subsection{\ocaml type inference and dependency analysis}
 \label{sec:build:infer}
@@ -4413,7 +4466,7 @@ according to the \ocaml type discipline, and their types should be known to
 needs to know the \ocaml type of every nonterminal symbol.)
 %
 To address this problem, three approaches exist:
-\begin{itemize}
+\begin{enumerate}
 \item Ignore the problem and let \menhir run without \ocaml type information
       (\sref{sec:build:infer:none}).
 \item Let \menhir obtain \ocaml type information
@@ -4422,7 +4475,9 @@ To address this problem, three approaches exist:
 \item Let \menhir request and receive \ocaml type information
       without invoking the \ocaml compiler
       (\sref{sec:build:infer:indirect}).
-\end{itemize}
+\end{enumerate}
+%
+\dune follows the third approach behind the scenes.
 
 \subsubsection{Running without \ocaml type information}
 \label{sec:build:infer:none}
@@ -4448,9 +4503,14 @@ The drawbacks of this approach are as follows:
       % reported inside Menhir's standard library, whereas when --infer is
       % used, we place the standard library first, so as to ensure that no
       % type error is found inside it. (See [infer.ml].)
-\item Unless a \dtype declaration for every nonterminal symbol is
-      given, the inspection API cannot be generated, that is,
-      \oinspection must be turned off.
+\item Unless the type of every nonterminal symbol is given
+      (via a \dtype declaration),
+      some features of \menhir are disabled.
+      The main features that require type information are
+      the code back-end
+      % (the new one)
+      and
+      the inspection API.
 \end{itemize}
 
 \subsubsection{Obtaining \ocaml type information by calling the \ocaml compiler}
@@ -4662,6 +4722,8 @@ The list is roughly sorted by decreasing order of importance.
       requiring semantic actions to be encapsulated as \ocaml closures and
       invoked by C code. \menhir offers a choice between producing tables
       and producing code. In either case, no C code is involved.
+      In fact, \menhir's code back-end produces \emph{well-typed} and
+      \emph{highly efficient} code.
 
 \item \menhir makes \ocaml's standard library module \texttt{Parsing}
       entirely obsolete. Access to locations is now via keywords
@@ -4669,7 +4731,7 @@ The list is roughly sorted by decreasing order of importance.
       semantic actions are deprecated.  The function \verb+parse_error+ is
       deprecated. They are replaced with keywords (\sref{sec:errors}).
 
-\item \menhir's error handling mechanism (\sref{sec:errors}) is inspired
+\item \menhir's error-handling mechanism (\sref{sec:errors}) is inspired
       by \ocamlyacc's, but is not guaranteed to be fully
       compatible. Error recovery, also known as re-synchronization, is not
       supported by \menhir.
@@ -4710,6 +4772,7 @@ The list is roughly sorted by decreasing order of importance.
 
 \section{Questions and Answers}
 \label{sec:qa}
+\label{sec:dune}
 
 $\mathstrut$ % Ensure correct indentation of the first question. Ugly.
 
@@ -4733,7 +4796,7 @@ or \ocamlbuild.
 Pass \verb+-use-menhir+ to \ocamlbuild.
 To pass options to \menhir,
 pass \verb+-menhir "menhir <options>"+ to \ocamlbuild.
-To use \menhir's table-based back-end,
+To use \menhir's table back-end,
 pass \verb+-menhir "menhir --table"+ to \ocamlbuild,
 and either
 pass \verb+-package menhirLib+ to \ocamlbuild
@@ -4819,15 +4882,11 @@ required for type soundness.)
 %
 In the presence of a~module alias declaration such as \texttt{module F =
   Foo}, OCaml can infer types that begin with \texttt{F.} instead of
-\texttt{Foo.}, and Menhir currently does not detect that \texttt{F} is a local
+\texttt{Foo.}, and Menhir does not detect that \texttt{F} is a local
 name.
 %
-The suggested fix is to avoid placing module alias declarations in \mly files.
-%
-% fp: If people insist on using module aliases, the simplest way of supporting
-%     them would be to generate a module alias definition both in the .ml file
-%     and in the .mli file. This could be done by adding a new %module_alias
-%     declaration to Menhir.
+The fix is to place the module alias declaration
+inside \verb+open struct ... end+ (\sref{sec:decls:headers}).
 
 \question{\menhir reports \emph{more} shift/reduce conflicts than
 \ocamlyacc! How come?} \ocamlyacc sometimes merges two states
@@ -4877,17 +4936,19 @@ deep.
 % definition, and will end up unintentionally redefining the meaning of *.
 
 \question{Can I ship a generated parser while avoiding a dependency on \menhirlib?}
-Yes. One option is to use the code-based back-end (that is, to not
+Yes. One option is to use the code back-end (that is, to not
 use \otable). In this case, the generated parser is self-contained. Another
-option is to use the table-based back-end (that is, use \otable) and include a
+option is to use the table back-end (that is, use \otable) and include a
 copy of the files \verb+menhirLib.{ml,mli}+ together with the generated
 parser. The command \texttt{menhir \osuggestmenhirlib} will tell you where to
 find these source files.
 
-\question{Why is \texttt{\$startpos} off towards the left? It seems to include some leading whitespace.}
-Indeed, as of 2015/11/04, the computation of positions has changed so as to match \ocamlyacc's
-behavior. As a result, \texttt{\$startpos} can now appear to be too far off to the left. This is explained
-in \sref{sec:positions}. In short, the solution is to use \verb+$symbolstartpos+ instead.
+\question{Why is \texttt{\$startpos} off towards the left? It seems to include
+  some leading whitespace.} Indeed, as of 2015/11/04, the computation of
+positions has changed so as to match \ocamlyacc's behavior. As a result,
+\texttt{\$startpos} can now appear to be too far off to the left. This is
+explained in \sref{sec:positions}. A solution may be to use
+\verb+$symbolstartpos+ instead.
 
 \question{Can I pretty-print a grammar in ASCII, HTML, or \LaTeX{} format?}
 Yes. Have a look at \texttt{obelisk} \cite{obelisk}.
@@ -4923,10 +4984,12 @@ factoring out an error matrix, as suggested by Dencker, Dürre, and
 Heuft~\cite{dencker-84}.
 
 The type-theoretic tricks that triggered our interest in LR
-parsers~\cite{pottier-regis-gianas-typed-lr} are not implemented in \menhir.
-In the beginning, we did not implement them because the \ocaml compiler did
-not at the time offer generalized algebraic data types (GADTs). Today, \ocaml
-has GADTs, but, as the saying goes, ``if it ain't broken, don't fix it''.
+parsers~\cite{pottier-regis-gianas-typed-lr} are implemented
+in \menhir's code back-end. (It took 16 years, from the initial
+idea in 2005 to the re-implementation of the code back-end in 2021.)
+A generalized algebraic data type (GADT) is used to describe the
+shape of the stack and the relationship that exists between the
+shape of the stack and the current state of the automaton.
 
 The main ideas behind the Coq back-end are described in a paper by Jourdan,
 Pottier and Leroy~\cite{jourdan-leroy-pottier-12}. The C11 parser in the
@@ -4936,27 +4999,8 @@ Menhir is described by Jourdan and Pottier~\cite{jourdan-pottier-17}.
 
 The approach to error reports presented in \sref{sec:errors:new} was
 proposed by Jeffery~\cite{jeffery-03} and further explored by
-Pottier~\cite{pottier-reachability-cc-2016}.
-
-% ------------------------------------------------------------------------------
-
-\section{Acknowledgements}
-
-\menhir's interpreter (\ointerpret) and table-based back-end (\otable) were
-implemented by Guillaume Bau, Raja Boujbel, and François Pottier. The project
-was generously funded by Jane Street Capital, LLC through the ``OCaml Summer
-Project'' initiative.
-
-Frédéric Bour provided motivation and an initial implementation for the
-incremental API, for the inspection API, for attributes, and for \menhirsdk.
-\href{https://github.com/ocaml/merlin}{Merlin}, an emacs mode for \ocaml,
-contains an impressive incremental, syntax-error-tolerant \ocaml parser,
-which is based on \menhir and has been a driving force for \menhir's APIs.
-
-Jacques-Henri Jourdan designed and implemented the Coq back-end and did the
-Coq proofs for it.
-
-Gabriel Scherer provided motivation for investigating Jeffery's technique.
+Pottier~\cite{pottier-reachability-cc-2016} and by
+Bour and Pottier~\cite{bour-pottier-21}.
 
 % ------------------------------------------------------------------------------
 
@@ -4966,18 +5010,3 @@ Gabriel Scherer provided motivation for investigating Jeffery's technique.
 \bibliography{local}
 
 \end{document}
-
-% LocalWords:  Yann Régis Gianas Regis inria Menhir filename mly basename Coq
-% LocalWords:  coq vy tt Coq's iox Menhir's nonterminal graphviz nullable calc
-% LocalWords:  inline postprocessed postprocessing ocamlc bytecode linkpkg cmo
-% LocalWords:  menhirLib ocamlopt cmx qa ocamlrun runtime uid productiongroups
-% LocalWords:  prec Actuals parameterization Parameterizing ds actuals plist xs
-% LocalWords:  loption LPAREN RPAREN Inlining inlined inlining lp ioption bool
-% LocalWords:  boption sep nonassociative multi basicshiftreduce lookahead decl
-% LocalWords:  UIDENT LIDENT decls tycon expr exprs basiceos basiceosdump lex
-% LocalWords:  curr Lexing lexbuf pos cnum startpos endpos startofs endofs LALR
-% LocalWords:  syntaxerror whitespace EOL cst API lexing MenhirInterpreter pc
-% LocalWords:  InputNeeded HandlingError env CompCert Aut se nat init cparser
-% LocalWords:  validator subdirectory EBNF reentrant eos typecheck menhir ulex
-% LocalWords:  DeRemer Pennello's Tarjan Yao Dencker Dürre Heuft Bau Raja LLC
-% LocalWords:  Acknowledgements Boujbel Frédéric Bour

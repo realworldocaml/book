@@ -16,9 +16,7 @@ open BasicSyntax
 open IL
 open CodeBits
 
-(* This is the conventional name of the [token] type, with no
-   prefix. A prefix is possibly appended to it below, where
-   [tctoken] is redefined before being exported. *)
+(* This is the conventional name of the [token] type, with no prefix. *)
 
 let tctoken =
   "token"

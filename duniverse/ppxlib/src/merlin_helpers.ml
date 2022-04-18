@@ -1,9 +1,7 @@
 open! Import
 
 let mk_attr_noloc txt = Ast_helper.Attr.mk Location.{ txt; loc = none }
-
 let hide_attribute : attribute = mk_attr_noloc "merlin.hide" (PStr [])
-
 let focus_attribute : attribute = mk_attr_noloc "merlin.focus" (PStr [])
 
 let hide_pattern ({ ppat_attributes; _ } as p) =

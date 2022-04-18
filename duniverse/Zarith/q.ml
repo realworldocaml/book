@@ -94,19 +94,6 @@ let of_float d =
   if e >= 0 then of_bigint (Z.shift_left m e)
   else make_real m (Z.shift_left Z.one (-e))
 
-let of_string s =
-  try
-    let i  = String.index s '/' in
-    make
-      (Z.of_substring s ~pos:0 ~len:i)
-      (Z.of_substring s ~pos:(i+1) ~len:(String.length s-i-1))
-  with Not_found ->
-    if s = "inf" || s = "+inf" then inf
-    else if s = "-inf" then minus_inf
-    else if s = "undef" then undef
-    else of_bigint (Z.of_string s)
-
-
 (* queries *)
 (* ------- *)
 
@@ -228,26 +215,78 @@ let to_float x =
          correctly-rounded result. *)
       Int64.to_float (Z.to_int64 p) /. Int64.to_float (Z.to_int64 q)
     else begin
-      (* |p| is in [2^(np-1), 2^np)
+      let negat =
+        if Z.sign p < 0 then -1 else 1
+      in
+      (* p is in [2^(np-1), 2^np)
          q is in [2^(nq-1), 2^nq)
-         hence |p/q| is in (2^(np-nq-1), 2^(np-nq+1)).
-         We define n such that |p/q*2^n| is in [2^54, 2^56).
-         >= 2^54 so that the round to odd technique applies.
-         < 2^56 so that the integral part is representable as an int64. *)
-      let n = 55 - (np - nq) in
+         We define n,p',q' such that p'/q'*2^n=p/q and |p'/q'| is in [1, 2). *)
+      let n = np - nq in
       (* Scaling p/q by 2^n *)
       let (p', q') =
         if n >= 0
-        then (Z.shift_left p n, q)
-        else (p, Z.shift_left q (-n)) in
+        then (p, Z.shift_left q n)
+        else (Z.shift_left p (-n), q)
+      in
+      let (p', n) =
+        if Z.geq (Z.abs p') q'
+        then (p', n)
+        else (Z.shift_left p' 1, pred n)
+      in
+      (* If we divided p' by q' now, the resulting quotient would
+         have one significant digit. *)
+      let p' = Z.shift_left p' 54 in
+      (* When we divide p' by q' next, the resulting quotient will
+         have 55 significant digits. The strategy is:
+         - First, compute the quotient with 55 significant digits in
+           round-to-odd, and
+         - Second, round that number to the number of effective
+           significant digits we desire for the result, which is 53
+           for a normal result and less than 53 for a subnormal result.
+         We cannot afford an intermediate rounding at 53 significant digits
+         if the end-result is subnormal. See
+         https://github.com/ocaml/Zarith/issues/29 *)
       (* Euclidean division of p' by q' *)
       let (quo, rem) = Z.ediv_rem p' q' in
-      (* quo is the integral part of p/q*2^n
-         rem/q' is the fractional part. *)
-      (* Round quo to float *)
-      let f = Z.round_to_float quo (Z.sign rem = 0) in
-      (* Apply exponent *)
-      ldexp f (-n)
+      if n <= -1080
+      then
+        (* The end result is +0.0 or -0.0 (depending on negat)
+           or perhaps the next floating-point number of the same
+           sign (depending on the current rounding mode. *)
+        ldexp (float_of_int negat) (-1080)
+      else
+        let offset =
+          if n <= -1023
+          then
+            (* The end result will be subnormal, add an offset
+               to make the rounding happen directly at the place
+               where it should happend.
+               quo has the form:       1xxxx...
+               we add:               1000000...
+               so as to end up with: 101xxxx... *)
+            Z.shift_left (Z.of_int negat) (55 + (-1023 - n))
+          else
+            Z.zero
+        in
+        let quo = Z.add offset quo in
+        let quo =
+          if Z.sign rem = 0
+          then quo
+          else Z.logor Z.one quo (* round to odd *)
+        in
+        (* The FPU rounding mode affects the Z.to_float that comes next,
+           making the rounding computed according to the current FPU rounding
+           mode. *)
+        let f = Z.to_float quo in
+        (* The subtraction that comes next is exact, so that the rounding
+           mode does not change what it does. *)
+        let f = f -. (Z.to_float offset)
+        in
+        (* ldexp is also exact and unaffected by the rounding mode.
+           We have made sure that if the end result is going to be subnormal,
+           then f has exactly the correct number of significant digits for
+           no rounding to happen here. *)
+        ldexp f (n - 54)
     end
 
 (* operations *)
@@ -359,6 +398,147 @@ let  mul_2exp x n =
 let  div_2exp x n =
   if x.den == Z.zero then x
   else make_real x.num (Z.shift_left x.den n)
+
+
+type supported_base =
+  | B2 | B8 | B10 | B16
+
+let int_of_base = function
+  | B2 -> 2
+  | B8 -> 8
+  | B10 -> 10
+  | B16 -> 16
+
+(* [find_in_string s ~pos ~last pred] find the first index in the string between [pos]
+   (inclusive) and [last] (exclusive) that satisfy the predicate [pred] *)
+let rec find_in_string s ~pos ~last p =
+  if pos >= last
+  then None
+  else if p s.[pos]
+    then Some pos
+    else find_in_string s ~pos:(pos + 1) ~last p
+
+(* The current implementation supports plain decimals, decimal points,
+   scientific notation ('e' or 'E' for base 10 litteral and 'p' or 'P'
+   for base 16), and fraction of integers (eg. 1/2). In particular it
+   accepts any numeric literal accepted by OCaml's lexer.
+   Restrictions:
+   - exponents in scientific notation should fit on an integer
+   - scientific notation only available in hexa and decimal (as in OCaml) *)
+let of_string =
+  (* return a boolean (true for negative) and the next offset to read *)
+  let parse_sign s i j =
+    if j < i + 1
+    then false, i
+    else
+      match s.[i] with
+      | '-' -> true , i + 1
+      | '+' -> false, i + 1
+      | _ -> false ,i
+  in
+  (* return the base and the next offset to read *)
+  let parse_base s i j =
+    if j < i + 2
+    then B10, i
+    else
+      match s.[i],s.[i+1] with
+      | '0',('x'|'X') -> B16, i + 2
+      | '0',('o'|'O') -> B8, i + 2
+      | '0',('b'|'B') -> B2, i + 2
+      | _ -> B10, i
+  in
+  let find_exponent_mark = function
+    | B10 -> (function 'e' | 'E' -> true | _ -> false)
+    | B16 -> (function 'p' | 'P' -> true | _ -> false)
+    | B8 | B2 -> (fun _ -> false)
+  in
+  let of_scientific_notation s =
+    let i = 0 in
+    let j = String.length s in
+    let sign,i = parse_sign s i j in
+    let base,i = parse_base s i j in
+    (* shift left due to the exponent *)
+    let shift_left, j =
+      match find_in_string s ~pos:i ~last:j (find_exponent_mark base) with
+      | None -> 0, j
+      | Some ei ->
+        let pos = ei + 1 in
+        let ez = Z.of_substring_base 10 s ~pos ~len:(j - pos) in
+        Z.to_int ez, ei
+    in
+    (* shift right due to the radix *)
+    let z, shift_right =
+      match base with
+      | B2 | B8 -> Z.of_substring_base (int_of_base base) s ~pos:i ~len:(j - i), 0
+      | B10 | B16 ->
+        match find_in_string s ~pos:i ~last:j ((=) '.') with
+        | None -> Z.of_substring_base (int_of_base base) s ~pos:i ~len:(j - i), 0
+        | Some k ->
+          (* shift_right_factor correspond to the shift to apply when we move the decimal
+             point one position to the left.
+
+             0x1.1p1 = 0x11p-3 = 0x0.11p5
+             1.1e1 = 11e0 = 0.11e2 *)
+          let shift_right_factor =
+            match base with
+            | B10 -> 1
+            | B16 -> 4
+            | B2 | B8 -> assert false
+          in
+          (* We should only consider actual digits to perform the shift. *)
+          let num_digits = ref 0 in
+          for h = k + 1 to j - 1 do
+            match s.[h] with
+            | '0' .. '9' | 'A' .. 'F' | 'a' .. 'f' ->
+              incr num_digits
+            | '_' -> ()
+            | _ ->
+              (* '-' and '+' could wrongly be accepted by Z.of_string_base *)
+              invalid_arg "Q.of_string: invalid digit"
+          done;
+          let first_digit_after_dot =
+            match find_in_string s ~pos:(k+1) ~last:j ((<>) '_') with
+            | None -> j
+            | Some x -> x
+          in
+          let shift = !num_digits * shift_right_factor in
+          let without_dot =
+            String.sub s i (k-i)
+            ^ (String.sub s first_digit_after_dot (j - first_digit_after_dot))
+          in
+          Z.of_string_base (int_of_base base) without_dot, shift
+    in
+    let shift = shift_left - shift_right in
+    let exponent_pow =
+      match base with
+      | B10 -> 10
+      | B16 -> 2
+      | B8 | B2 -> 1
+    in
+    let abs =
+      if shift < 0 then
+        make z (Z.pow (Z.of_int exponent_pow) (~- shift))
+      else
+        of_bigint (Z.mul z (Z.pow (Z.of_int exponent_pow) shift))
+    in
+    if sign
+    then neg abs
+    else abs
+  in
+  function
+  | "" -> zero
+  | "inf" | "+inf" -> inf
+  | "-inf" -> minus_inf
+  | "undef" -> undef
+  | s ->
+    try
+      let i  = String.index s '/' in
+      make
+        (Z.of_substring s 0 i)
+        (Z.of_substring s (i+1) (String.length s-i-1))
+    with Not_found ->
+      of_scientific_notation s
+
 
 
 (* printing *)

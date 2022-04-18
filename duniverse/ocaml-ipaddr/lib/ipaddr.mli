@@ -18,7 +18,7 @@
 
 (** A library for manipulation of IP address representations.
 
-    {e v5.2.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
+    {e v5.3.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
 
 exception Parse_error of string * string
 (** [Parse_error (err,packet)] is raised when parsing of the IP address syntax
@@ -66,6 +66,12 @@ module V4 : sig
       argument the offset into the string for reading. [off] will be mutated to
       an unspecified value during the function call. [s] will a {!Parse_error}
       exception if it is an invalid or truncated IP address. *)
+
+  val with_port_of_string :
+    default:int -> string -> (t * int, [> `Msg of string ]) result
+  (** [with_port_of_string ~default s] is the address {!t} represented by the
+      human-readble IPv4 address [s] with a possibly port [:<port>] (otherwise,
+      we take the [default] value). *)
 
   val to_string : t -> string
   (** [to_string ipv4] is the dotted decimal string representation of [ipv4],
@@ -309,9 +315,7 @@ module V4 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
-
   module Set : Set.S with type elt := t
-
   module Map : Map.S with type key := t
 end
 
@@ -333,6 +337,16 @@ module V6 : sig
   val of_string : string -> (t, [> `Msg of string ]) result
   (** Same as [of_string_exn] but returns an option type instead of raising an
       exception. *)
+
+  val with_port_of_string :
+    default:int -> string -> (t * int, [> `Msg of string ]) result
+  (** [with_port_of_string ~default ipv6_string] is the address represented by
+      [ipv6_string] with a possibly [:<port>] (otherwise, we take the [default]
+      value). Due to the [':'] separator, the user should expand [ipv6_string]
+      to let us to consider the last [:<port>] as a port. In other words:
+
+      - [::1:8080] returns the IPv6 [::1:8080] with the [default] port
+      - [0:0:0:0:0:0:0:1:8080] returns [::1] with the port [8080]. *)
 
   val of_string_raw : string -> int ref -> t
   (** Same as [of_string_exn] but takes as an extra argument the offset into the
@@ -580,9 +594,7 @@ module V6 : sig
       addresses a node. *)
 
   include Map.OrderedType with type t := t
-
   module Set : Set.S with type elt := t
-
   module Map : Map.S with type key := t
 end
 
@@ -615,6 +627,16 @@ val of_string : string -> (t, [> `Msg of string ]) result
 val of_string_raw : string -> int ref -> t
 (** Same as [of_string_exn] but takes as an extra argument the offset into the
     string for reading. *)
+
+val with_port_of_string :
+  default:int -> string -> (t * int, [> `Msg of string ]) result
+(** [with_port_of_string ~default s] parses [s] as an IPv4 or IPv6 address with
+    a possible port seperated by a [':'] (if not, we use [default]). For IPv6,
+    due to the [':'] separator, only a full expansion of the IPv6 plus the port
+    lets us to interpret the last [:<int>] as the port. In other words:
+
+    - [::1:8080] returns the IPv6 [::1:8080] with the [default] port
+    - [0:0:0:0:0:0:0:1:8080] returns [::1] with the port [8080]. *)
 
 val v4_of_v6 : V6.t -> V4.t option
 (** [v4_of_v6 ipv6] is the IPv4 representation of the IPv6 address [ipv6]. If
@@ -734,7 +756,5 @@ module Prefix : sig
 end
 
 include Map.OrderedType with type t := t
-
 module Set : Set.S with type elt := t
-
 module Map : Map.S with type key := t

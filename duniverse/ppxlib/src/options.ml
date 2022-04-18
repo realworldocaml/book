@@ -5,9 +5,6 @@ let perform_checks = false
    them externally to make it easier to use non ppxlib based
    rewriters with ppxlib *)
 let perform_checks_on_extensions = false
-
 let perform_locations_check = false
-
 let fail_on_duplicate_derivers = false
-
 let diff_command = None

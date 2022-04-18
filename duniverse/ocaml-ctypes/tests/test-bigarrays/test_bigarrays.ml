@@ -10,7 +10,7 @@ type 'a std_array = 'a array
 
 open OUnit2
 open Ctypes
-module BA = Bigarray
+module BA = Bigarray_compat
 
 
 let array_of_list2 typ list2 =
@@ -325,14 +325,14 @@ let test_ctypes_array_of_bigarray _ =
 *)
 let test_fortran_layout_bigarrays _ =
   (* array1 *)
-  let a1c = bigarray_of_array array1 Bigarray.int32
+  let a1c = bigarray_of_array array1 Bigarray_compat.int32
       (CArray.of_list int32_t [10l; 20l; 30l; 40l]) in
   let p1 = bigarray_start array1 a1c in
-  let a1f = fortran_bigarray_of_ptr array1 4 Bigarray.int32 p1 in
+  let a1f = fortran_bigarray_of_ptr array1 4 Bigarray_compat.int32 p1 in
   begin
-    assert_equal 4 (Bigarray.Array1.dim a1f);
-    assert_equal Bigarray.int32 (Bigarray.Array1.kind a1f);
-    assert_equal Bigarray.fortran_layout (Bigarray.Array1.layout a1f);
+    assert_equal 4 (Bigarray_compat.Array1.dim a1f);
+    assert_equal Bigarray_compat.int32 (Bigarray_compat.Array1.kind a1f);
+    assert_equal Bigarray_compat.fortran_layout (Bigarray_compat.Array1.layout a1f);
     assert_equal a1f.{1} 10l;
     assert_equal a1f.{2} 20l;
     assert_equal a1f.{3} 30l;
@@ -340,19 +340,19 @@ let test_fortran_layout_bigarrays _ =
   end;
 
   (* array2 *)
-  let a2c = bigarray_of_array array2 Bigarray.int32
+  let a2c = bigarray_of_array array2 Bigarray_compat.int32
       (CArray.of_list (array 2 int32_t)
          [CArray.of_list int32_t [10l; 20l];
           CArray.of_list int32_t [30l; 40l];
           CArray.of_list int32_t [50l; 60l];
           CArray.of_list int32_t [70l; 80l]]) in
   let p2 = bigarray_start array2 a2c in
-  let a2f = fortran_bigarray_of_ptr array2 (4,2) Bigarray.int32 p2 in
+  let a2f = fortran_bigarray_of_ptr array2 (4,2) Bigarray_compat.int32 p2 in
   begin
-    assert_equal 4 (Bigarray.Array2.dim1 a2f);
-    assert_equal 2 (Bigarray.Array2.dim2 a2f);
-    assert_equal Bigarray.int32 (Bigarray.Array2.kind a2f);
-    assert_equal Bigarray.fortran_layout (Bigarray.Array2.layout a2f);
+    assert_equal 4 (Bigarray_compat.Array2.dim1 a2f);
+    assert_equal 2 (Bigarray_compat.Array2.dim2 a2f);
+    assert_equal Bigarray_compat.int32 (Bigarray_compat.Array2.kind a2f);
+    assert_equal Bigarray_compat.fortran_layout (Bigarray_compat.Array2.layout a2f);
     assert_equal a2f.{1,1} 10l;
     assert_equal a2f.{2,1} 20l;
     assert_equal a2f.{3,1} 30l;
@@ -365,27 +365,27 @@ let test_fortran_layout_bigarrays _ =
   end;
 
   (* genarray *)
-  let agc = bigarray_of_array genarray Bigarray.int32
+  let agc = bigarray_of_array genarray Bigarray_compat.int32
       (CArray.of_list int32_t
          [10l; 20l;
           30l; 40l;
           50l; 60l;
           70l; 80l]) in
   let pg = bigarray_start genarray agc in
-  let agf = fortran_bigarray_of_ptr genarray [|4;2|] Bigarray.int32 pg in
+  let agf = fortran_bigarray_of_ptr genarray [|4;2|] Bigarray_compat.int32 pg in
   begin
-    assert_equal [|4;2|] (Bigarray.Genarray.dims agf);
-    assert_equal Bigarray.int32 (Bigarray.Genarray.kind agf);
-    assert_equal Bigarray.fortran_layout (Bigarray.Genarray.layout agf);
-    assert_equal (Bigarray.Genarray.get agf [|1;1|]) 10l;
-    assert_equal (Bigarray.Genarray.get agf [|2;1|]) 20l;
-    assert_equal (Bigarray.Genarray.get agf [|3;1|]) 30l;
-    assert_equal (Bigarray.Genarray.get agf [|4;1|]) 40l;
+    assert_equal [|4;2|] (Bigarray_compat.Genarray.dims agf);
+    assert_equal Bigarray_compat.int32 (Bigarray_compat.Genarray.kind agf);
+    assert_equal Bigarray_compat.fortran_layout (Bigarray_compat.Genarray.layout agf);
+    assert_equal (Bigarray_compat.Genarray.get agf [|1;1|]) 10l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|2;1|]) 20l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|3;1|]) 30l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|4;1|]) 40l;
 
-    assert_equal (Bigarray.Genarray.get agf [|1;2|]) 50l;
-    assert_equal (Bigarray.Genarray.get agf [|2;2|]) 60l;
-    assert_equal (Bigarray.Genarray.get agf [|3;2|]) 70l;
-    assert_equal (Bigarray.Genarray.get agf [|4;2|]) 80l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|1;2|]) 50l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|2;2|]) 60l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|3;2|]) 70l;
+    assert_equal (Bigarray_compat.Genarray.get agf [|4;2|]) 80l;
   end
 
 
@@ -464,7 +464,7 @@ let test_bigarray_lifetime_with_ctypes_reference _ =
   let () =
     let pointer =
       (* Allocate a bigarray and attach a ctypes pointer *)
-      let ba = Bigarray.(Array2.create int c_layout) 1024 1024 in
+      let ba = Bigarray_compat.(Array2.create int c_layout) 1024 1024 in
       begin
         ba.{0,0} <- 1;
         Gc.finalise finalise ba;

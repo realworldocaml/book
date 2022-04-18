@@ -4,41 +4,23 @@ open Utils
 module Arg = Caml.Arg
 
 let exe_name = Caml.Filename.basename Caml.Sys.executable_name
-
 let args = ref []
-
 let add_arg key spec ~doc = args := (key, spec, doc) :: !args
-
 let loc_fname = ref None
-
 let perform_checks = ref Options.perform_checks
-
 let perform_checks_on_extensions = ref Options.perform_checks_on_extensions
-
 let perform_locations_check = ref Options.perform_locations_check
-
 let debug_attribute_drop = ref false
-
 let apply_list = ref None
-
 let preprocessor = ref None
-
 let no_merge = ref false
-
 let request_print_passes = ref false
-
 let request_print_transformations = ref false
-
 let use_color = ref true
-
 let diff_command = ref Options.diff_command
-
 let pretty = ref false
-
 let styler = ref None
-
 let output_metadata_filename = ref None
-
 let corrected_suffix = ref ".ppx-corrected"
 
 module Lint_error = struct
@@ -61,18 +43,14 @@ module Cookies = struct
     Astlib.Ast_metadata.set_cookie name (Selected_ast.to_ocaml Expression expr)
 
   let handlers = ref []
-
   let add_handler f = handlers := !handlers @ [ f ]
 
   let add_simple_handler name pattern ~f =
     add_handler (fun T -> f (get T name pattern))
 
   let acknowledge_cookies T = List.iter !handlers ~f:(fun f -> f T)
-
   let post_handlers = ref []
-
   let add_post_handler f = post_handlers := !post_handlers @ [ f ]
-
   let call_post_handlers T = List.iter !post_handlers ~f:(fun f -> f T)
 end
 
@@ -313,9 +291,13 @@ module Transform = struct
           in
           match Option.map t.instrument ~f with
           | Some (Before, transf) ->
-              ({ reduced_t with impl = Some transf } :: bef_i, aft_i, rest)
+              ( { reduced_t with impl = Some transf; rules = [] } :: bef_i,
+                aft_i,
+                reduced_t :: rest )
           | Some (After, transf) ->
-              (bef_i, { reduced_t with impl = Some transf } :: aft_i, rest)
+              ( bef_i,
+                { reduced_t with impl = Some transf; rules = [] } :: aft_i,
+                reduced_t :: rest )
           | None -> (bef_i, aft_i, reduced_t :: rest))
     in
     ( `Linters
@@ -493,47 +475,99 @@ let get_whole_ast_passes ~hook ~expect_mismatch_handler ~tool_name ~input_name =
       |> List.filter ~f:(fun (ct : Transform.t) ->
              match (ct.impl, ct.intf) with None, None -> false | _ -> true)
   in
-  linters @ preprocess @ make_generic before_instrs @ make_generic cts
-  @ make_generic after_instrs
+  linters @ preprocess @ before_instrs @ make_generic cts @ after_instrs
 
-let apply_transforms ~tool_name ~file_path ~field ~lint_field ~dropped_so_far
-    ~hook ~expect_mismatch_handler ~input_name x =
+let apply_transforms (type t) ~tool_name ~file_path ~field ~lint_field
+    ~dropped_so_far ~hook ~expect_mismatch_handler ~input_name ~f_exception
+    ~embed_errors x =
+  let exception
+    Wrapper of t list * label loc list * (location * label) list * exn
+  in
   let cts =
     get_whole_ast_passes ~tool_name ~hook ~expect_mismatch_handler ~input_name
   in
-  let x, _dropped, lint_errors =
-    List.fold_left cts ~init:(x, [], [])
-      ~f:(fun (x, dropped, lint_errors) (ct : Transform.t) ->
-        let input_name =
-          match input_name with
-          | Some input_name -> input_name
-          | None -> "_none_"
-        in
-        let ctxt =
-          Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
-        in
-        let lint_errors =
-          match lint_field ct with
-          | None -> lint_errors
-          | Some f -> lint_errors @ f ctxt x
-        in
-        match field ct with
-        | None -> (x, dropped, lint_errors)
-        | Some f ->
-            let x = f ctxt x in
-            let dropped =
-              if !debug_attribute_drop then (
-                let new_dropped = dropped_so_far x in
-                debug_dropped_attribute ct.name ~old_dropped:dropped
-                  ~new_dropped;
-                new_dropped)
-              else []
-            in
-            (x, dropped, lint_errors))
+  let return (x, _dropped, lint_errors) =
+    ( x,
+      List.map lint_errors ~f:(fun (loc, s) ->
+          Common.attribute_of_warning loc s) )
   in
-  ( x,
-    List.map lint_errors ~f:(fun (loc, s) -> Common.attribute_of_warning loc s)
-  )
+  try
+    let acc =
+      List.fold_left cts ~init:(x, [], [])
+        ~f:(fun (x, dropped, (lint_errors : _ list)) (ct : Transform.t) ->
+          let input_name =
+            match input_name with
+            | Some input_name -> input_name
+            | None -> "_none_"
+          in
+          let ctxt =
+            Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
+          in
+          let lint_errors =
+            match lint_field ct with
+            | None -> lint_errors
+            | Some f -> (
+                try lint_errors @ f ctxt x
+                with exn when embed_errors ->
+                  raise @@ Wrapper (x, dropped, lint_errors, exn))
+          in
+          match field ct with
+          | None -> (x, dropped, lint_errors)
+          | Some f ->
+              let x =
+                try f ctxt x
+                with exn when embed_errors ->
+                  raise @@ Wrapper (x, dropped, lint_errors, exn)
+              in
+              let dropped =
+                if !debug_attribute_drop then (
+                  let new_dropped = dropped_so_far x in
+                  debug_dropped_attribute ct.name ~old_dropped:dropped
+                    ~new_dropped;
+                  new_dropped)
+                else []
+              in
+              (x, dropped, lint_errors))
+    in
+    Ok (return acc)
+  with Wrapper (x, dropped, lint_errors, exn) ->
+    Error (return (f_exception exn :: x, dropped, lint_errors))
+
+(*$*)
+
+let error_to_str_extension error =
+  let loc = Location.none in
+  let ext = Location.Error.to_extension error in
+  Ast_builder.Default.pstr_extension ~loc ext []
+
+let exn_to_str_extension exn =
+  match Location.Error.of_exn exn with
+  | None -> raise exn
+  | Some error -> error_to_str_extension error
+
+(*$ str_to_sig _last_text_block *)
+
+let error_to_sig_extension error =
+  let loc = Location.none in
+  let ext = Location.Error.to_extension error in
+  Ast_builder.Default.psig_extension ~loc ext []
+
+let exn_to_sig_extension exn =
+  match Location.Error.of_exn exn with
+  | None -> raise exn
+  | Some error -> error_to_sig_extension error
+
+(*$*)
+
+let error_to_extension error ~(kind : Kind.t) =
+  match kind with
+  | Intf -> Intf_or_impl.Intf [ error_to_sig_extension error ]
+  | Impl -> Intf_or_impl.Impl [ error_to_str_extension error ]
+
+let exn_to_extension exn ~(kind : Kind.t) =
+  match Location.Error.of_exn exn with
+  | None -> raise exn
+  | Some error -> error_to_extension error ~kind
 
 (* +-----------------------------------------------------------------+
    | Actual rewriting of structure/signatures                        |
@@ -556,92 +590,122 @@ let print_passes () =
       Printf.printf "<builtin:check-unused-extensions>\n")
 
 (*$*)
-let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name =
+
+let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name
+    ~embed_errors =
   Cookies.acknowledge_cookies T;
   if !perform_checks then (
     Attribute.reset_checks ();
     Attribute.collect#structure st);
-  let st, lint_errors =
-    let file_path = File_path.get_default_path_str st in
+  let lint lint_errors st =
+    let st =
+      match lint_errors with
+      | [] -> st
+      | _ ->
+          List.map lint_errors
+            ~f:(fun ({ attr_name = { loc; _ }; _ } as attr) ->
+              Ast_builder.Default.pstr_attribute ~loc attr)
+          @ st
+    in
+    st
+  in
+  let cookies_and_check st =
+    Cookies.call_post_handlers T;
+    if !perform_checks then (
+      (* TODO: these two passes could be merged, we now have more passes for
+         checks than for actual rewriting. *)
+      Attribute.check_unused#structure st;
+      if !perform_checks_on_extensions then Extension.check_unused#structure st;
+      Attribute.check_all_seen ();
+      if !perform_locations_check then
+        let open Location_check in
+        ignore
+          ((enforce_invariants !loc_fname)#structure st
+             Non_intersecting_ranges.empty
+            : Non_intersecting_ranges.t));
+    st
+  in
+  let file_path = File_path.get_default_path_str st in
+  match
     apply_transforms st ~tool_name ~file_path
       ~field:(fun (ct : Transform.t) -> ct.impl)
       ~lint_field:(fun (ct : Transform.t) -> ct.lint_impl)
       ~dropped_so_far:Attribute.dropped_so_far_structure ~hook
       ~expect_mismatch_handler ~input_name
-  in
-  let st =
-    match lint_errors with
-    | [] -> st
-    | _ ->
-        List.map lint_errors ~f:(fun ({ attr_name = { loc; _ }; _ } as attr) ->
-            Ast_builder.Default.pstr_attribute ~loc attr)
-        @ st
-  in
-  Cookies.call_post_handlers T;
-  if !perform_checks then (
-    (* TODO: these two passes could be merged, we now have more passes for
-       checks than for actual rewriting. *)
-    Attribute.check_unused#structure st;
-    if !perform_checks_on_extensions then Extension.check_unused#structure st;
-    Attribute.check_all_seen ();
-    if !perform_locations_check then
-      let open Location_check in
-      ignore
-        ((enforce_invariants !loc_fname)#structure st
-           Non_intersecting_ranges.empty
-          : Non_intersecting_ranges.t));
-  st
+      ~f_exception:(fun exn -> exn_to_str_extension exn)
+      ~embed_errors
+  with
+  | Error (st, lint_errors) -> Error (lint lint_errors st)
+  | Ok (st, lint_errors) -> Ok (st |> lint lint_errors |> cookies_and_check)
 
 let map_structure st =
-  map_structure_gen st
-    ~tool_name:(Astlib.Ast_metadata.tool_name ())
-    ~hook:Context_free.Generated_code_hook.nop
-    ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
-    ~input_name:None
+  match
+    map_structure_gen st
+      ~tool_name:(Astlib.Ast_metadata.tool_name ())
+      ~hook:Context_free.Generated_code_hook.nop
+      ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
+      ~input_name:None ~embed_errors:false
+  with
+  | Ok ast | Error ast -> ast
 
 (*$ str_to_sig _last_text_block *)
-let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name =
+
+let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name
+    ~embed_errors =
   Cookies.acknowledge_cookies T;
   if !perform_checks then (
     Attribute.reset_checks ();
     Attribute.collect#signature sg);
-  let sg, lint_errors =
-    let file_path = File_path.get_default_path_sig sg in
+  let lint lint_errors sg =
+    let sg =
+      match lint_errors with
+      | [] -> sg
+      | _ ->
+          List.map lint_errors
+            ~f:(fun ({ attr_name = { loc; _ }; _ } as attr) ->
+              Ast_builder.Default.psig_attribute ~loc attr)
+          @ sg
+    in
+    sg
+  in
+  let cookies_and_check sg =
+    Cookies.call_post_handlers T;
+    if !perform_checks then (
+      (* TODO: these two passes could be merged, we now have more passes for
+         checks than for actual rewriting. *)
+      Attribute.check_unused#signature sg;
+      if !perform_checks_on_extensions then Extension.check_unused#signature sg;
+      Attribute.check_all_seen ();
+      if !perform_locations_check then
+        let open Location_check in
+        ignore
+          ((enforce_invariants !loc_fname)#signature sg
+             Non_intersecting_ranges.empty
+            : Non_intersecting_ranges.t));
+    sg
+  in
+  let file_path = File_path.get_default_path_sig sg in
+  match
     apply_transforms sg ~tool_name ~file_path
       ~field:(fun (ct : Transform.t) -> ct.intf)
       ~lint_field:(fun (ct : Transform.t) -> ct.lint_intf)
       ~dropped_so_far:Attribute.dropped_so_far_signature ~hook
       ~expect_mismatch_handler ~input_name
-  in
-  let sg =
-    match lint_errors with
-    | [] -> sg
-    | _ ->
-        List.map lint_errors ~f:(fun ({ attr_name = { loc; _ }; _ } as attr) ->
-            Ast_builder.Default.psig_attribute ~loc attr)
-        @ sg
-  in
-  Cookies.call_post_handlers T;
-  if !perform_checks then (
-    (* TODO: these two passes could be merged, we now have more passes for
-       checks than for actual rewriting. *)
-    Attribute.check_unused#signature sg;
-    if !perform_checks_on_extensions then Extension.check_unused#signature sg;
-    Attribute.check_all_seen ();
-    if !perform_locations_check then
-      let open Location_check in
-      ignore
-        ((enforce_invariants !loc_fname)#signature sg
-           Non_intersecting_ranges.empty
-          : Non_intersecting_ranges.t));
-  sg
+      ~f_exception:(fun exn -> exn_to_sig_extension exn)
+      ~embed_errors
+  with
+  | Error (sg, lint_errors) -> Error (lint lint_errors sg)
+  | Ok (sg, lint_errors) -> Ok (sg |> lint lint_errors |> cookies_and_check)
 
 let map_signature sg =
-  map_signature_gen sg
-    ~tool_name:(Astlib.Ast_metadata.tool_name ())
-    ~hook:Context_free.Generated_code_hook.nop
-    ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
-    ~input_name:None
+  match
+    map_signature_gen sg
+      ~tool_name:(Astlib.Ast_metadata.tool_name ())
+      ~hook:Context_free.Generated_code_hook.nop
+      ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
+      ~input_name:None ~embed_errors:false
+  with
+  | Ok ast | Error ast -> ast
 
 (*$*)
 
@@ -851,7 +915,6 @@ let add_cookies (ast : Intf_or_impl.t) : Intf_or_impl.t =
   | Impl x -> Impl (add_cookies_str x)
 
 let corrections = ref []
-
 let add_to_list r x = r := x :: !r
 
 let register_correction ~loc ~repl =
@@ -860,7 +923,6 @@ let register_correction ~loc ~repl =
        ~repl)
 
 let process_file_hooks = ref []
-
 let register_process_file_hook f = add_to_list process_file_hooks f
 
 module File_property = struct
@@ -873,9 +935,7 @@ module File_property = struct
   type packed = T : _ t -> packed
 
   let all = ref []
-
   let register t = add_to_list all (T t)
-
   let reset_all () = List.iter !all ~f:(fun (T t) -> t.data <- None)
 
   let dump_and_reset_all () =
@@ -896,37 +956,30 @@ struct
     { name = Name.name; data = None; sexp_of_t = T.sexp_of_t }
 
   let () = File_property.register t
-
   let set x = t.data <- Some x
 end
 
-let error_to_extension error ~(kind : Kind.t) =
-  let loc = Location.none in
-  let ext = Location.Error.to_extension error in
-  let open Ast_builder.Default in
-  let ast =
-    match kind with
-    | Intf -> Intf_or_impl.Intf [ psig_extension ~loc ext [] ]
-    | Impl -> Intf_or_impl.Impl [ pstr_extension ~loc ext [] ]
-  in
-  ast
-
-let exn_to_extension exn ~(kind : Kind.t) =
-  match Location.Error.of_exn exn with
-  | None -> raise exn
-  | Some error -> error_to_extension error ~kind
-
 let process_ast (ast : Intf_or_impl.t) ~input_name ~tool_name ~hook
-    ~expect_mismatch_handler =
+    ~expect_mismatch_handler ~embed_errors =
   match ast with
   | Intf x ->
-      Intf_or_impl.Intf
-        (map_signature_gen x ~tool_name ~hook ~expect_mismatch_handler
-           ~input_name:(Some input_name))
+      let ast =
+        match
+          map_signature_gen x ~tool_name ~hook ~expect_mismatch_handler
+            ~input_name:(Some input_name) ~embed_errors
+        with
+        | Error ast | Ok ast -> ast
+      in
+      Intf_or_impl.Intf ast
   | Impl x ->
-      Intf_or_impl.Impl
-        (map_structure_gen x ~tool_name ~hook ~expect_mismatch_handler
-           ~input_name:(Some input_name))
+      let ast =
+        match
+          map_structure_gen x ~tool_name ~hook ~expect_mismatch_handler
+            ~input_name:(Some input_name) ~embed_errors
+        with
+        | Error ast | Ok ast -> ast
+      in
+      Intf_or_impl.Impl ast
 
 let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode
     ~embed_errors ~output =
@@ -967,6 +1020,7 @@ let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode
           let ast =
             extract_cookies ast
             |> process_ast ~input_name ~tool_name ~hook ~expect_mismatch_handler
+                 ~embed_errors
           in
           (input_fname, input_version, ast)
         with exn when embed_errors ->
@@ -1040,13 +1094,9 @@ let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode
     Caml.exit 1)
 
 let output_mode = ref Pretty_print
-
 let output = ref None
-
 let kind = ref None
-
 let input = ref None
-
 let embed_errors = ref false
 
 let set_input fn =
@@ -1185,7 +1235,8 @@ let shared_args =
     ( "-no-merge",
       Arg.Set no_merge,
       " Do not merge context free transformations (better for debugging \
-       rewriters)" );
+       rewriters). As a result, the context-free transformations are not all \
+       applied before all impl and intf." );
     ("-cookie", Arg.String set_cookie, "NAME=EXPR Set the cookie NAME to EXPR");
     ("--cookie", Arg.String set_cookie, " Same as -cookie");
   ]
@@ -1329,6 +1380,7 @@ let rewrite_binary_ast_file input_fn output_fn =
       let hook = Context_free.Generated_code_hook.nop in
       let expect_mismatch_handler = Context_free.Expect_mismatch_handler.nop in
       process_ast ast ~input_name ~tool_name ~hook ~expect_mismatch_handler
+        ~embed_errors:true
     with exn -> exn_to_extension exn ~kind:(Intf_or_impl.kind ast)
   in
   with_output (Some output_fn) ~binary:true ~f:(fun oc ->
@@ -1411,7 +1463,5 @@ let enable_checks () =
   perform_checks_on_extensions := true
 
 let enable_location_check () = perform_locations_check := true
-
 let disable_location_check () = perform_locations_check := false
-
 let map_structure st = map_structure st

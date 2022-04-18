@@ -129,7 +129,7 @@ let check_alignment_large () =
   in
   if Sys.word_size > 32 then
     let msg =
-      Fmt.strf "alignement large: int-size:%d len=%d"
+      Fmt.str "alignement large: int-size:%d len=%d"
         Sys.word_size (Int64.to_int 4294967296L)
     in
     Alcotest.(check bool) msg (check ()) false

@@ -701,12 +701,18 @@ let typedefs =
   pdefs typedef keytyp et
 
 let excdef in_intf f def =
-  match in_intf, def.exceq with
-  | _, None
-  | true, Some _ ->
-      fprintf f "%s" def.excname
-  | false, Some s ->
+  (* If we are in an interface, then the equality must not be printed. *)
+  let def = if in_intf then { def with exceq = None } else def in
+  match def.exceq, def.excparams with
+  | Some s, _ ->
+      (* If there is an equality, then the parameters are not printed. *)
       fprintf f "%s = %s" def.excname s
+  | None, [] ->
+      (* No equality and no parameters. *)
+      fprintf f "%s" def.excname
+  | None, typs ->
+      (* No equality and some parameters. *)
+      fprintf f "%s of %a" def.excname datavalparams typs
 
 let excdefs in_intf =
   pdefs (excdef in_intf) exc exc

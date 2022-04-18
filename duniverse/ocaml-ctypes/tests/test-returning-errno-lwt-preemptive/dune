@@ -15,11 +15,21 @@
 
 (rule
  (targets ml-stub-generator.exe)
- (deps generated_struct_stubs.c ../clib/test_functions.h
-   ../config/test-cflags)
+ (deps
+  generated_struct_stubs.c
+  ../clib/test_functions.h
+  ../config/test-cflags)
  (action
-  (run %{cc} %{read-lines:../config/test-cflags} -I ../clib -I
-    %{ocaml-config:standard_library} -o %{targets} generated_struct_stubs.c)))
+  (run
+   %{cc}
+   %{read-lines:../config/test-cflags}
+   -I
+   ../clib
+   -I
+   %{ocaml-config:standard_library}
+   -o
+   %{targets}
+   generated_struct_stubs.c)))
 
 (rule
  (targets generated_struct_bindings.ml)
@@ -42,6 +52,14 @@
  (name test_returning_errno)
  (modules test_returning_errno)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
-   test_returning_errno_lwt_preemptive_stubs test_functions
-   test_returning_errno_lwt_preemptive_bindings tests_common))
+ (action
+  (run %{test} -runner sequential))
+ (libraries
+  oUnit
+  ctypes
+  ctypes.stubs
+  ctypes-foreign
+  test_returning_errno_lwt_preemptive_stubs
+  test_functions
+  test_returning_errno_lwt_preemptive_bindings
+  tests_common))

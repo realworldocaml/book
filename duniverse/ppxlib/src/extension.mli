@@ -19,31 +19,18 @@ module Context : sig
         (** For ppx_import compat only, please do not use *)
 
   val class_expr : class_expr t
-
   val class_field : class_field t
-
   val class_type : class_type t
-
   val class_type_field : class_type_field t
-
   val core_type : core_type t
-
   val expression : expression t
-
   val module_expr : module_expr t
-
   val module_type : module_type t
-
   val pattern : pattern t
-
   val signature_item : signature_item t
-
   val structure_item : structure_item t
-
   val eq : 'a t -> 'b t -> ('a, 'b) equality
-
   val get_extension : 'a t -> 'a -> (extension * attributes) option
-
   val merge_attributes : 'a t -> 'a -> attributes -> 'a
 end
 

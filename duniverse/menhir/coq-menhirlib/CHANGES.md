@@ -1,5 +1,12 @@
 # Changes
 
+## 2022/02/10
+
+* Remove `Makefile.coq` and use `coq_makefile` instead. The `.coq-native`
+  directories, which were not installed in previous releases, should now
+  be installed, so `coq-menhirlib` should work with versions of Coq that
+  have enabled `native_compute` at configuration time.
+
 ## 2021/09/28
 
 * Change `Instance` to `Global Instance` in the library and in the

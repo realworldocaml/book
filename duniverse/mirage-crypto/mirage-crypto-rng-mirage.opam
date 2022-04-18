@@ -1,4 +1,4 @@
-version: "0.10.5"
+version: "0.10.6"
 opam-version: "2.0"
 homepage:     "https://github.com/mirage/mirage-crypto"
 dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
@@ -24,7 +24,7 @@ depends: [
   "mirage-runtime" {>= "3.8.0"}
   "mirage-time" {>= "2.0.0"}
   "mirage-clock" {>= "3.0.0"}
-  "mirage-unix" {with-test & >= "3.0.0"}
+  "mirage-unix" {with-test & >= "5.0.0"}
   "mirage-time-unix" {with-test & >= "2.0.0"}
   "mirage-clock-unix" {with-test & >= "3.0.0"}
 ]

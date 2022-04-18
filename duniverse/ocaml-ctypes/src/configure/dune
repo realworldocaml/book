@@ -1,4 +1,4 @@
 (executable
  (name gen_c_primitives)
- (libraries dune.configurator)
+ (libraries dune-configurator)
  (modules gen_c_primitives))

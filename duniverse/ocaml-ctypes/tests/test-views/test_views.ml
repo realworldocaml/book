@@ -95,8 +95,8 @@ struct
       assert_equal 0
         ~printer:(Printf.sprintf "%d")
         (strcmp
-           (String.copy "abcdefg")
-           (String.copy "abcdefg"));
+           (Bytes.to_string (Bytes.copy (Bytes.of_string "abcdefg")))
+           (Bytes.to_string (Bytes.copy (Bytes.of_string "abcdefg"))));
       (* Gc.compact ();  *)
     done
 end

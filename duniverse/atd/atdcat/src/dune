@@ -1,0 +1,10 @@
+(executable
+  (name atdcat)
+  (public_name atdcat)
+  (package atd)
+  (libraries
+    atd
+    easy-format
+    re
+  )
+)

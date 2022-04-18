@@ -5,6 +5,20 @@ IFS=$' \n\t'
 # This script compiles OCaml using the current version of Menhir and verifies
 # that it behaves exactly as expected.
 
+# One can use either the table back-end (used by standard OCaml) or the new
+# code back-end (using a slightly modified copy of OCaml 4.13).
+
+USE_TABLE_BACKEND=true
+for arg in "$@" ; do
+  case "$arg" in
+  --table ) USE_TABLE_BACKEND=true; shift;;
+  --code ) USE_TABLE_BACKEND=false; shift;;
+  *) echo "Unknown argument: $arg"; break;;
+  esac
+done
+
+# This working copy of Menhir's repository.
+
 MENHIR_ROOT=$(pwd)
 
 # We use a dedicated opam switch where it is permitted to uninstall/reinstall
@@ -64,7 +78,11 @@ cd $TEMPDIR
 rm -rf ocaml
 
 echo -n "Cloning OCaml..."
-execute "git clone git@github.com:ocaml/ocaml.git --depth 1 --branch 4.13.1"
+if $USE_TABLE_BACKEND ; then
+  execute "git clone git@github.com:ocaml/ocaml.git --depth 1 --branch 4.13.1"
+else
+  execute "git clone git@github.com:fpottier/ocaml.git --depth 1 --branch code"
+fi
 
 cd ocaml
 
@@ -114,11 +132,19 @@ execute "git add boot/menhir && git commit -m 'make promote-menhir'"
 
 # Take a snapshot of the ASTs produced by the current parser.
 
-echo -n "Constructing ASTs for all source files..."
-execute "make -j build-all-asts"
+# We do this only when OCaml's standard repository is used.
+# The custom repository used when $USE_TABLE_BACKEND is false
+# already contains a committed snapshot of the correct ASTs.
 
-echo -n "Committing all ASTs..."
-execute "make list-all-asts | xargs git add && git commit -m 'Build all ASTs.'"
+if $USE_TABLE_BACKEND ; then
+
+  echo -n "Constructing ASTs for all source files..."
+  execute "make -j build-all-asts"
+
+  echo -n "Committing all ASTs..."
+  execute "make list-all-asts | xargs git add && git commit -m 'Build all ASTs.'"
+
+fi
 
 # Compile OCaml (again).
 

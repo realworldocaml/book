@@ -1,0 +1,70 @@
+{0:tool_man Tool man pages}
+
+{1:manual Manual}
+
+Man page sections for a command are printed in the order specified by
+manual as given to {!Cmdliner.Cmd.val-info}. Unless specified
+explicitely in the command's manual the following sections are
+automaticaly created and populated for you:
+
+{ul
+{- {{!Cmdliner.Manpage.s_name}[NAME]} section.}
+{- {{!Cmdliner.Manpage.s_synopsis}[SYNOPSIS]} section.}}
+
+The various [doc] documentation strings specified by the command's
+term arguments get inserted at the end of the documentation section
+they respectively mention in their [docs] argument:
+
+{ol
+{- For commands, see {!Cmdliner.Cmd.val-info}.}
+{- For positional arguments, see {!Cmdliner.Arg.type-info}. Those are listed iff
+   both the [docv] and [doc] string is specified by {!Cmdliner.Arg.val-info}.}
+{- For optional arguments, see {!Cmdliner.Arg.val-info}.}
+{- For exit statuses, see {!Cmdliner.Cmd.Exit.val-info}.}
+{- For environment variables, see
+   {!Cmdliner.Arg.val-env_var} and {!Cmdliner.Cmd.Env.val-info}.}}
+
+If a [docs] section name is mentioned and does not exist in the command's
+manual, an empty section is created for it, after which the [doc] strings
+are inserted, possibly prefixed by boilerplate text (e.g. for
+{!Cmdliner.Manpage.s_environment} and {!Cmdliner.Manpage.s_exit_status}).
+
+If the created section is:
+{ul
+{- {{!Cmdliner.Manpage.standard_sections}standard}, it
+    is inserted at the right place in the order specified
+    {{!Cmdliner.Manpage.standard_sections}here}, but after a
+    possible non-standard
+    section explicitely specified by the command's manual since the latter
+    get the order number of the last previously specified standard section
+    or the order of {!Cmdliner.Manpage.s_synopsis} if there is no such section.}
+{-  non-standard, it is inserted before the {!Cmdliner.Manpage.s_commands}
+    section or the first subsequent existing standard section if it
+    doesn't exist. Taking advantage of this behaviour is discouraged,
+    you should declare manually your non standard section in the command's
+    manual page.}}
+
+Finally note that the header of empty sections are dropped from the
+output.  This allows you to share section placements among many
+commands and render them only if something actually gets inserted in
+it.
+
+{1:doclang Documentation markup language}
+
+Manpage {{!Cmdliner.Manpage.block}blocks} and doc strings support the
+following markup language.
+
+{ul
+{- Markup directives [$(i,text)] and [$(b,text)], where [text] is raw
+   text respectively rendered in italics and bold.}
+{- Outside markup directives, context dependent variables of the form
+   [$(var)] are substituted by marked up data. For example in a term's
+   man page [$(tname)] is substituted by the term name in bold.}
+{- Characters $, (, ) and \ can respectively be escaped by \$, \(, \)
+   and \\ (in OCaml strings this will be ["\\$"], ["\\("], ["\\)"],
+   ["\\\\"]). Escaping $ and \ is mandatory everywhere. Escaping ) is
+   mandatory only in markup directives. Escaping ( is only here for
+   your symmetric pleasure. Any other sequence of characters starting
+   with a \ is an illegal character sequence.}
+{- Refering to unknown markup directives or variables will generate
+   errors on standard error during documentation generation.}}

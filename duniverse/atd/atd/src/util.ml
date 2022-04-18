@@ -1,4 +1,5 @@
 let read_lexbuf
+    ?annot_schema
     ?(expand = false) ?keep_poly ?(xdebug = false)
     ?(inherit_fields = false)
     ?(inherit_variants = false)
@@ -19,10 +20,16 @@ let read_lexbuf
     if expand then Expand.expand_module_body ?keep_poly ~debug: xdebug body
     else (body, Hashtbl.create 0)
   in
-  ((head, body), original_types)
+  let full_module = (head, body) in
+  (match annot_schema with
+   | None -> ()
+   | Some schema ->
+       Annot.validate schema (Ast.Full_module full_module)
+  );
+  (full_module, original_types)
 
 let read_channel
-    ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
+    ?annot_schema ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
     ?pos_fname ?pos_lnum
     ic =
   let lexbuf = Lexing.from_channel ic in
@@ -32,11 +39,11 @@ let read_channel
     else
       pos_fname
   in
-  read_lexbuf ?expand ?keep_poly ?xdebug
+  read_lexbuf ?annot_schema ?expand ?keep_poly ?xdebug
     ?inherit_fields ?inherit_variants ?pos_fname ?pos_lnum lexbuf
 
 let load_file
-    ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
+    ?annot_schema ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
     ?pos_fname ?pos_lnum
     file =
   let ic = open_in file in
@@ -48,8 +55,9 @@ let load_file
         | Some _ -> pos_fname
     in
     let ast =
-      read_channel ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
-        ?pos_fname ?pos_lnum ic
+      read_channel
+        ?annot_schema ?expand ?keep_poly ?xdebug ?inherit_fields
+        ?inherit_variants ?pos_fname ?pos_lnum ic
     in
     finally ();
     ast
@@ -58,11 +66,11 @@ let load_file
     raise e
 
 let load_string
-    ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
+    ?annot_schema ?expand ?keep_poly ?xdebug ?inherit_fields ?inherit_variants
     ?pos_fname ?pos_lnum
     s =
   let lexbuf = Lexing.from_string s in
-  read_lexbuf ?expand ?keep_poly ?xdebug
+  read_lexbuf ?annot_schema ?expand ?keep_poly ?xdebug
     ?inherit_fields ?inherit_variants ?pos_fname ?pos_lnum lexbuf
 
 module Tsort = Sort.Make (

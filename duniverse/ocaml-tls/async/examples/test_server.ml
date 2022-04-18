@@ -49,4 +49,4 @@ let cmd =
        Tcp.Server.close_finished server)
 ;;
 
-let () = Command.run cmd
+let () = Command_unix.run cmd

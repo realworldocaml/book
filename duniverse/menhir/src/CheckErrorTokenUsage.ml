@@ -37,29 +37,3 @@ let filter_grammar grammar =
       filter_grammar grammar
   | `Legacy ->
       grammar
-
-(* -------------------------------------------------------------------------- *)
-
-(* Rejecting the $syntaxerror keyword. *)
-
-(* We could reject this keyword on the fly in the lexer, but the lexer is so
-   ugly that it seems preferable to write a separate piece of code here. *)
-
-let check_branch branch =
-  if Action.has_syntaxerror branch.action then
-    Error.error [branch.branch_position]
-      "when --strategy simplified is selected,\n\
-       the use of $syntaxerror is forbidden."
-
-let check_rule _nt rule =
-  List.iter check_branch rule.branches
-
-let check_grammar grammar =
-  StringMap.iter check_rule grammar.rules
-
-let check_grammar grammar =
-  match Settings.strategy with
-  | `Simplified ->
-      check_grammar grammar
-  | `Legacy ->
-      ()

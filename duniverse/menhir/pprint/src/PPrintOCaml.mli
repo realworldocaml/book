@@ -67,6 +67,9 @@ val char : char -> representation
 (** [bool b] is a representation of the Boolenan value [b]. *)
 val bool : bool -> representation
 
+(** [unit] is a representation of the unit constant [()]. *)
+val unit : representation
+
 (** [option f o] is a representation of the option [o], where the
     representation of the element, if present, is computed by the function
     [f]. *)

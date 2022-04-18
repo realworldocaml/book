@@ -1,4 +1,4 @@
-version: "6.0.1"
+version: "6.1.0"
 opam-version: "2.0"
 maintainer:   "anil@recoil.org"
 authors:      ["Anil Madhavapeddy" "Richard Mortier" "Thomas Gazagnaire"
@@ -12,16 +12,16 @@ doc: "https://mirage.github.io/ocaml-cstruct/"
 
 tags: [ "org:mirage" "org:ocamllabs" ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "ocaml" {>= "4.03.0"}
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "2.0.0"}
-  "bigarray-compat"
   "alcotest" {with-test}
-  ("crowbar" {with-test} | "ocaml" {with-test & < "4.08"})
+  "fmt" {>= "0.8.9"}
+  "crowbar" {with-test}
 ]
 conflicts: [ "js_of_ocaml" {<"3.5.0"} ]
 synopsis: "Access C-like structures directly from OCaml"

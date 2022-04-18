@@ -32,6 +32,28 @@ type biniou_repr =
   | Variant
   | Def
 
+(*
+   This must hold all the valid annotations of the form
+   '<biniou ...>' and '<ocaml_biniou>'.
+*)
+let annot_schema_biniou : Atd.Annot.schema = [
+  {
+    section = "biniou";
+    fields = [
+      Type_expr, "repr";
+    ]
+  };
+  {
+    section = "ocaml_biniou";
+    fields = [
+      Type_def, "from";
+      Type_def, "module";
+      Type_def, "predef";
+      Type_def, "t";
+    ]
+  };
+]
+
 let biniou_int_of_string s : biniou_int option =
   match s with
       "svint" -> Some `Svint

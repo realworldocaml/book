@@ -989,7 +989,6 @@ and copy_loc :
   { To.Asttypes.txt = f0 txt; To.Asttypes.loc = copy_location loc }
 
 and copy_location : Location.t -> Location.t = fun x -> x
-
 and copy_bool : bool -> bool = function false -> false | true -> true
 
 let rec copy_toplevel_phrase :
@@ -1009,9 +1008,6 @@ and copy_directive_argument :
   | From.Parsetree.Pdir_bool x0 -> To.Parsetree.Pdir_bool (copy_bool x0)
 
 let copy_cases x = List.map copy_case x
-
 let copy_pat = copy_pattern
-
 let copy_expr = copy_expression
-
 let copy_typ = copy_core_type

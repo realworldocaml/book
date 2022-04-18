@@ -137,6 +137,17 @@ let test_pow msg gf tf =
         ) g_t_list
     ) pow_list
 
+let test_comparison msg gf tf l =
+  Printf.printf "testing %s on %i x %i numbers\n%!" msg (List.length l) (List.length l);
+  List.iter
+    (fun (g1,t1) ->
+      List.iter
+        (fun (g2,t2) ->
+            let g' = gf g1 g2 and t' = tf t1 t2 in
+            if g' <> t' then failwith (Printf.sprintf "%s failure: arg1=%s arg2=%s" msg (B.string_of_big_int g1) (B.string_of_big_int g2))
+        ) l
+    ) l
+
 let filt_none _ = true
 let filt_pos x = B.sign_big_int x >= 0
 let filt_nonzero2 (_,d) = B.sign_big_int d <> 0
@@ -178,5 +189,10 @@ let _ = test_shift "shift_right_big_int" B.shift_right_big_int T.shift_right_big
 let _ = test_shift "shift_right_towards_zero_big_int" B.shift_right_towards_zero_big_int T.shift_right_towards_zero_big_int
 
 let _ = test_pow "power_big_int_positive_int" B.power_big_int_positive_int T.power_big_int_positive_int
+
+let _ = test_comparison "compare" B.compare_big_int Z.compare g_t_list
+let _ = test_comparison "equal" B.eq_big_int Z.equal g_t_list
+let _ = test_comparison "lt" B.lt_big_int (fun x y -> x < y) g_t_list
+let _ = test_comparison "ge" B.ge_big_int (fun x y -> x >= y) g_t_list
 
 let _ = Printf.printf "All tests passed!\n"

@@ -624,37 +624,37 @@ val to_to_string : 'a t -> 'a -> string
 (** {1:deprecated Deprecated} *)
 
 val strf : ('a, Format.formatter, unit, string) format4 -> 'a
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.str instead."]
 (** @deprecated use {!str} instead. *)
 
 val kstrf : (string -> 'a) -> ('b, Format.formatter, unit, 'a) format4 -> 'b
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.kstr instead."]
 (** @deprecated use {!kstr} instead. *)
 
 val strf_like :
   Format.formatter -> ('a, Format.formatter, unit, string) format4 -> 'a
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.str_like instead."]
 (** @deprecated use {!str_like} instead. *)
 
 val always : (unit, Format.formatter, unit) Stdlib.format -> 'a t
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.any instead."]
 (** @deprecated use {!any} instead. *)
 
 val unit : (unit, Format.formatter, unit) Stdlib.format -> unit t
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.any instead."]
 (** @deprecated use {!any}. *)
 
 val prefix : unit t -> 'a t -> 'a t
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.(++) instead."]
 (** @deprecated use {!( ++ )}. *)
 
 val suffix : unit t -> 'a t -> 'a t
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.(++) instead."]
 (** @deprecated use {!( ++ )}. *)
 
 val styled_unit :
   style -> (unit, Format.formatter, unit) Stdlib.format -> unit t
-[@@ocaml.deprecated]
+[@@ocaml.deprecated "use Fmt.(styled s (any fmt)) instead."]
 (** @deprecated use [styled s (any fmt)] instead *)
 
 (** {1:nameconv Naming conventions}

@@ -7,6 +7,8 @@
 
 (* Tests for binding variadic functions. *)
 
+[@@@ocaml.warning "-6"]
+
 open OUnit2
 open Ctypes
 [@@@warning "-6"]

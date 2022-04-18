@@ -37,11 +37,11 @@ let () =
   add_test ~name:"blit" [cstruct; int; cstruct; int; int] (fun src srcoff dst dstoff len ->
       try Cstruct.blit src srcoff dst dstoff len
       with Invalid_argument _ ->
-        check (srcoff < 0 || srcoff > Cstruct.len src ||
-               dstoff < 0 || dstoff > Cstruct.len src ||
+        check (srcoff < 0 || srcoff > Cstruct.length src ||
+               dstoff < 0 || dstoff > Cstruct.length src ||
                len < 0 ||
-               len > Cstruct.len src - srcoff ||
-               len > Cstruct.len dst - dstoff)
+               len > Cstruct.length src - srcoff ||
+               len > Cstruct.length dst - dstoff)
     );
   add_test ~name:"sexp" [buffer] (fun b ->
       b |> Cstruct_sexp.sexp_of_buffer |> Cstruct_sexp.buffer_of_sexp
@@ -51,17 +51,17 @@ let () =
     );
   add_test ~name:"of_bigarray" [buffer; option int; option int] (fun b off len ->
       match Cstruct.of_bigarray b ?off ?len with
-      | c -> check (Cstruct.len c <= Bigarray.Array1.dim b)
+      | c -> check (Cstruct.length c <= Bigarray.Array1.dim b)
       | exception Invalid_argument _ -> ()
     );
   add_test ~name:"get_char" [cstruct; int] (fun c off ->
-      let in_range = off >= 0 && off < Cstruct.len c in
+      let in_range = off >= 0 && off < Cstruct.length c in
       match Cstruct.get_char c off with
       | _ -> check in_range
       | exception Invalid_argument _ -> check (not in_range)
     );
   add_test ~name:"set_char" [cstruct; int] (fun c off ->
-      let in_range = off >= 0 && off < Cstruct.len c in
+      let in_range = off >= 0 && off < Cstruct.length c in
       match Cstruct.set_char c off 'x' with
       | () -> check in_range
       | exception Invalid_argument _ -> check (not in_range)
@@ -70,16 +70,16 @@ let () =
       match Cstruct.sub base off len with
       | sub ->
         check_within ~base sub;
-        check (Cstruct.len sub = len)
+        check (Cstruct.length sub = len)
       | exception Invalid_argument _ ->
-        check (off < 0 || len < 0 || off + len < 0 || off + len > Cstruct.len base)
+        check (off < 0 || len < 0 || off + len < 0 || off + len > Cstruct.length base)
     );
   add_test ~name:"shift" [cstruct; int] (fun base off ->
       match Cstruct.shift base off with
       | sub ->
         check_within ~base sub;
-        check (Cstruct.len sub = max (Cstruct.len base - off) 0);
-      | exception Invalid_argument _ -> check (off < 0 || off > Cstruct.len base)
+        check (Cstruct.length sub = max (Cstruct.length base - off) 0);
+      | exception Invalid_argument _ -> check (off < 0 || off > Cstruct.length base)
     );
   add_test ~name:"shiftv" [list cstruct; int] (fun ts n ->
       match Cstruct.shiftv ts n with
@@ -97,7 +97,7 @@ let () =
         check (String.length x = len);
         check (String.equal x (Cstruct.sub base off len |> Cstruct.to_string))
       | exception Invalid_argument _ ->
-        check (off < 0 || len < 0 || off + len < 0 || off + len > Cstruct.len base)
+        check (off < 0 || len < 0 || off + len < 0 || off + len > Cstruct.length base)
     );
   add_test ~name:"blit_from_bytes" [bytes; int; cstruct; int; int] (fun src srcoff dst dstoff len ->
       match Cstruct.blit_from_bytes src srcoff dst dstoff len with
@@ -108,41 +108,24 @@ let () =
                dstoff < 0 || dstoff > Bytes.length src ||
                len < 0 ||
                len > Bytes.length src - srcoff ||
-               len > Cstruct.len dst - dstoff)
+               len > Cstruct.length dst - dstoff)
     );
   add_test ~name:"blit_to_bytes" [cstruct; int; bytes; int; int] (fun src srcoff dst dstoff len ->
       match Cstruct.blit_to_bytes src srcoff dst dstoff len with
       | () -> check (Cstruct.equal (Cstruct.sub src srcoff len)
                                    (Cstruct.sub (Cstruct.of_bytes dst) dstoff len))
       | exception Invalid_argument _ ->
-        check (srcoff < 0 || srcoff > Cstruct.len src ||
-               dstoff < 0 || dstoff > Cstruct.len src ||
+        check (srcoff < 0 || srcoff > Cstruct.length src ||
+               dstoff < 0 || dstoff > Cstruct.length src ||
                len < 0 ||
-               len > Cstruct.len src - srcoff ||
+               len > Cstruct.length src - srcoff ||
                len > Bytes.length dst - dstoff)
     );
   add_test ~name:"memset" [cstruct; int; int] (fun c x i ->
-      guard (i >= 0 && i < Cstruct.len c);
+      guard (i >= 0 && i < Cstruct.length c);
       Cstruct.memset c x;
       check (Cstruct.get_uint8 c i = x land 0xff)
      );
-  add_test ~name:"set_len" [cstruct; int] (fun base len ->
-      match[@ocaml.warning "-3"] Cstruct.set_len base len with
-      | x ->
-        (* check_within ~base x; *)   (* Maybe deprecate set_len extending the allocation? *)
-        check (Cstruct.len x >= 0);
-        check (Cstruct.len x <= Bigarray.Array1.dim (base.Cstruct.buffer));
-        check (Cstruct.len x = len)
-      | exception Invalid_argument _ -> ()
-    );
-  add_test ~name:"add_len" [cstruct; int] (fun base len ->
-      match[@ocaml.warning "-3"] Cstruct.add_len base len with
-      | x ->
-        check (Cstruct.len x >= 0);
-        check (Cstruct.len x <= Bigarray.Array1.dim (base.Cstruct.buffer));
-        check (Cstruct.len x = Cstruct.len base + len)
-      | exception Invalid_argument _ -> ()
-    );
   add_test ~name:"split" [cstruct; option int; int] (fun base start len ->
       match Cstruct.split ?start base len  with
       | c1, c2 ->
@@ -154,7 +137,7 @@ let () =
       | exception Invalid_argument _ -> ()
     );
   add_test ~name:"BE.set_uint64" [cstruct; int] (fun c off ->
-      let in_range = off >= 0 && off < Cstruct.len c - 7 in
+      let in_range = off >= 0 && off < Cstruct.length c - 7 in
       match Cstruct.BE.set_uint64 c off 42L with
       | () -> check in_range
       | exception Invalid_argument _ -> check (not in_range)
@@ -173,7 +156,7 @@ let () =
     );
   add_test ~name:"concat" [list cstruct] (fun cs ->
       let x = Cstruct.concat cs in
-      check (Cstruct.len x = Cstruct.lenv cs)
+      check (Cstruct.length x = Cstruct.lenv cs)
     );
   add_test ~name:"span" [ cstruct; list char ] (fun cs p ->
       let sat chr = List.exists ((=) chr) p in
@@ -181,14 +164,14 @@ let () =
       let r = Cstruct.concat [ a; b ] in
       check (Cstruct.to_string r = Cstruct.to_string cs));
   add_test ~name:"cut" [ cstruct; cstruct; ] (fun buf sep ->
-      guard (Cstruct.len sep > 0);
+      guard (Cstruct.length sep > 0);
       ( match Cstruct.cut ~sep buf with
         | Some (l, r) ->
           let r = Cstruct.concat [ l; sep; r; ] in
           check (Cstruct.to_string r = Cstruct.to_string buf)
         | None -> () ));
   add_test ~name:"cuts" [ cstruct; cstruct; ] (fun buf sep ->
-      guard (Cstruct.len sep > 0);
+      guard (Cstruct.length sep > 0);
       let lst = Cstruct.cuts ~sep buf in
       let lst = List.map Cstruct.to_string lst in
       let res = String.concat (Cstruct.to_string sep) lst in

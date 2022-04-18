@@ -300,8 +300,8 @@ let suite = "Union tests" >:::
    "test adding fields to tagless unions"
    >:: Struct_stubs_tests.test_tagless_unions;
 
-   (* "test layout of unions with missing fields" *)
-   (* >:: Struct_stubs_tests.test_missing_fields; *)
+   "test layout of unions with missing fields"
+   >:: Struct_stubs_tests.test_missing_fields;
   ]
 
 

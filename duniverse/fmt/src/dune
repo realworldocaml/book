@@ -1,7 +1,6 @@
 (library
  (name fmt)
  (public_name fmt)
- (libraries result)
  (modules fmt)
  (flags :standard -w -3-6-27-34-50)
  (wrapped false))
@@ -9,6 +8,7 @@
 (library
  (name fmt_tty)
  (public_name fmt.tty)
+ (optional)
  (libraries unix fmt)
  (modules fmt_tty)
  (flags :standard -w -3-6-27)
@@ -17,6 +17,7 @@
 (library
  (name fmt_cli)
  (public_name fmt.cli)
+ (optional)
  (libraries fmt cmdliner)
  (modules fmt_cli)
  (flags :standard -w -3-6-27)

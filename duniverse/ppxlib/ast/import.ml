@@ -81,7 +81,6 @@ module Select_ast (Ocaml : Versions.OCaml_version) = struct
           fun (x, y) -> (f x, g y)
 
   let of_ocaml_mapper item f ctxt x = to_ocaml item x |> f ctxt |> of_ocaml item
-
   let to_ocaml_mapper item f ctxt x = of_ocaml item x |> f ctxt |> to_ocaml item
 end
 
@@ -101,7 +100,6 @@ module Parse = struct
   module Of_ocaml = Versions.Convert (Ocaml) (Js)
 
   let implementation lexbuf = implementation lexbuf |> Of_ocaml.copy_structure
-
   let interface lexbuf = interface lexbuf |> Of_ocaml.copy_signature
 
   let toplevel_phrase lexbuf =
@@ -111,8 +109,6 @@ module Parse = struct
     use_file lexbuf |> List.map Of_ocaml.copy_toplevel_phrase
 
   let core_type lexbuf = core_type lexbuf |> Of_ocaml.copy_core_type
-
   let expression lexbuf = expression lexbuf |> Of_ocaml.copy_expression
-
   let pattern lexbuf = pattern lexbuf |> Of_ocaml.copy_pattern
 end

@@ -151,9 +151,7 @@ module Make (T : TABLE) = struct
 
   (* The following recursive group of functions are tail recursive, produce a
      checkpoint of type [semantic_value checkpoint], and cannot raise an
-     exception. A semantic action can raise [Error], but this exception is
-     immediately caught within [reduce]. A semantic action raises [Error]
-     only if it contains the $syntaxerror keyword. *)
+     exception. *)
 
   let rec run env please_discard : semantic_value checkpoint =
 
@@ -309,34 +307,22 @@ module Make (T : TABLE) = struct
 
     (* Invoke the semantic action. The semantic action is responsible for
        truncating the stack and pushing a new cell onto the stack, which
-       contains a new semantic value. It can raise [Error] if it contains
-       the $syntaxerror keyword. *)
-
-    (* If the semantic action terminates normally, it returns a new stack,
+       contains a new semantic value. The semantic action returns a new stack,
        which becomes the current stack. *)
 
-    (* If the semantic action raises [Error], we catch it and initiate error
-       handling. *)
+    let stack = T.semantic_action prod env in
 
-    (* This [match/with/exception] construct requires OCaml 4.02. *)
+    (* By our convention, the semantic action has produced an updated
+       stack. The state now found in the top stack cell is the return
+       state. *)
 
-    match T.semantic_action prod env with
-    | stack ->
+    (* Perform a goto transition. The target state is determined
+       by consulting the goto table at the return state and at
+       production [prod]. *)
 
-        (* By our convention, the semantic action has produced an updated
-           stack. The state now found in the top stack cell is the return
-           state. *)
-
-        (* Perform a goto transition. The target state is determined
-           by consulting the goto table at the return state and at
-           production [prod]. *)
-
-        let current = T.goto_prod stack.state prod in
-        let env = { env with stack; current } in
-        run env false
-
-    | exception Error ->
-        initiate env
+    let current = T.goto_prod stack.state prod in
+    let env = { env with stack; current } in
+    run env false
 
   and accept env prod =
     (* Log an accept event. *)

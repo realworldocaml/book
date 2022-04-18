@@ -48,59 +48,32 @@ module Context : sig
     | Object_type_field : object_field t
 
   val label_declaration : label_declaration t
-
   val constructor_declaration : constructor_declaration t
-
   val type_declaration : type_declaration t
-
   val type_extension : type_extension t
-
   val type_exception : type_exception t
-
   val extension_constructor : extension_constructor t
-
   val pattern : pattern t
-
   val core_type : core_type t
-
   val expression : expression t
-
   val value_description : value_description t
-
   val class_type : class_type t
-
   val class_type_field : class_type_field t
-
   val class_infos : _ class_infos t
-
   val class_expr : class_expr t
-
   val class_field : class_field t
-
   val module_type : module_type t
-
   val module_declaration : module_declaration t
-
   val module_type_declaration : module_type_declaration t
-
   val open_description : open_description t
-
   val include_infos : _ include_infos t
-
   val module_expr : module_expr t
-
   val value_binding : value_binding t
-
   val module_binding : module_binding t
-
   val pstr_eval : structure_item t
-
   val pstr_extension : structure_item t
-
   val psig_extension : signature_item t
-
   val rtag : row_field t
-
   val object_type_field : object_field t
 end
 
@@ -155,7 +128,6 @@ val declare_with_name_loc :
     attribute. *)
 
 val name : _ t -> string
-
 val context : ('a, _) t -> 'a Context.t
 
 val get :
@@ -182,11 +154,8 @@ module Floating : sig
       | Class_type_field : class_type_field t
 
     val structure_item : structure_item t
-
     val signature_item : signature_item t
-
     val class_field : class_field t
-
     val class_type_field : class_type_field t
   end
 
@@ -198,7 +167,6 @@ module Floating : sig
     ('a, 'c) t
 
   val name : _ t -> string
-
   val convert : ('a, 'b) t list -> 'a -> 'b option
 end
 
@@ -231,7 +199,6 @@ val dropped_so_far_structure : structure -> string Loc.t list
     debug extensions that drop attributes. *)
 
 val dropped_so_far_signature : signature -> string Loc.t list
-
 val reset_checks : unit -> unit
 
 val pattern :

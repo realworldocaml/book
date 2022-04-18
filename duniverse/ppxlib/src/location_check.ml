@@ -4,9 +4,7 @@ module Non_intersecting_ranges : sig
   type t
 
   val empty : t
-
   val insert : node_name:string -> Location.t -> t -> t
-
   val union : t -> t -> t
 
   val covered_by : t -> loc:Location.t -> bool
@@ -134,7 +132,6 @@ let all_payloads_inside_parent ~loc =
       Location.compare_pos loc.loc_end attr.attr_loc.loc_end >= 0)
 
 let file : string option ref = ref None
-
 let same_file_so_far = ref true
 
 let stayed_in_the_same_file fname =
