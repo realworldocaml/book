@@ -104,7 +104,8 @@ let test v =
 </div>
 <p>The compiler emits simpler conditional jumps rather than setting up a
 jump table, since it statically determines that the range of possible
-variants is small enough. Finally, let’s look at the same code, but with
+variants is small enough. Finally, let’s consider code that’s
+essentially the same as our first pattern match example, but with
 polymorphic variants instead of normal variants:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let test v =
@@ -112,10 +113,9 @@ polymorphic variants instead of normal variants:</p>
   | `Alice   -&gt; 100
   | `Bob     -&gt; 101
   | `Charlie -&gt; 102
-  | `David   -&gt; 103
-  | `Eve     -&gt; 104</code></pre>
+  | `David   -&gt; 103</code></pre>
 </div>
-<p>The lambda form for this also shows up the runtime representation of
+<p>The lambda form for this also reflects the runtime representation of
 polymorphic variants:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_polymorphic.ml 2&gt;&amp;1
@@ -123,10 +123,8 @@ polymorphic variants:</p>
 &gt;  (let
 &gt;    (test/81 =
 &gt;       (function v/83 : int
-&gt;         (if (!= v/83 3306965)
-&gt;           (if (&gt;= v/83 482771474) (if (&gt;= v/83 884917024) 100 102)
-&gt;             (if (&gt;= v/83 3457716) 104 103))
-&gt;           101)))
+&gt;         (if (&gt;= v/83 482771474) (if (&gt;= v/83 884917024) 100 102)
+&gt;           (if (&gt;= v/83 3306965) 101 103))))
 &gt;    (makeblock 0 test/81)))
 </code></pre>
 </div>
@@ -151,8 +149,7 @@ optimizations, such as the use of exhaustiveness information and control
 flow optimizations via static exceptions.</p>
 <p>It’s not essential that you understand all of this just to use
 pattern matching, of course, but it’ll give you insight as to why
-pattern matching is such a lightweight language construct to use in
-OCaml code.</p>
+pattern matching is such an efficient language construct in OCaml.</p>
 </section>
 </section>
 <section class="level3" id="benchmarking-pattern-matching">
@@ -166,69 +163,86 @@ variance of the results. You’ll need to
 <pre><code class="language-ocaml">open Core
 open Core_bench
 
-type t = | Alice | Bob
-type s = | A | B | C | D | E
+module Monomorphic = struct
+  type t =
+    | Alice
+    | Bob
+    | Charlie
+    | David
 
-let polymorphic_pattern () =
-  let test v =
-    match v with
-    | `Alice   -&gt; 100
-    | `Bob     -&gt; 101
-    | `Charlie -&gt; 102
-    | `David   -&gt; 103
-    | `Eve     -&gt; 104
-  in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [`Alice; `Bob; `Charlie; `David]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -&gt; 100
+      | Bob -&gt; 101
+      | Charlie -&gt; 102
+      | David -&gt; 103
+    in
+    List.iter
+      ~f:(fun v -&gt; ignore (convert v))
+      [ Alice; Bob; Charlie; David ]
+end
 
-let monomorphic_pattern_small () =
-  let test v =
-    match v with
-    | Alice   -&gt; 100
-    | Bob     -&gt; 101 in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [ Alice; Bob ]
+module Monomorphic_small = struct
+  type t =
+    | Alice
+    | Bob
 
-let monomorphic_pattern_large () =
-  let test v =
-    match v with
-    | A       -&gt; 100
-    | B       -&gt; 101
-    | C       -&gt; 102
-    | D       -&gt; 103
-    | E       -&gt; 104
-  in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [ A; B; C; D ]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -&gt; 100
+      | Bob -&gt; 101
+    in
+    List.iter
+      ~f:(fun v -&gt; ignore (convert v))
+      [ Alice; Bob; Alice; Bob ]
+end
 
-let tests = [
-  "Polymorphic pattern", polymorphic_pattern;
-  "Monomorphic larger pattern", monomorphic_pattern_large;
-  "Monomorphic small pattern", monomorphic_pattern_small;
-]
+module Polymorphic = struct
+  type t =
+    [ `Alice
+    | `Bob
+    | `Charlie
+    | `David
+    ]
+
+  let bench () =
+    let convert v =
+      match v with
+      | `Alice -&gt; 100
+      | `Bob -&gt; 101
+      | `Charlie -&gt; 102
+      | `David -&gt; 103
+    in
+    List.iter
+      ~f:(fun v -&gt; ignore (convert v))
+      [ `Alice; `Bob; `Alice; `Bob ]
+end
+
+let benchmarks =
+  [ "Monomorphic large pattern", Monomorphic.bench
+  ; "Monomorphic small pattern", Monomorphic_small.bench
+  ; "Polymorphic large pattern", Polymorphic.bench
+  ]
 
 let () =
-  List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
+  List.map benchmarks ~f:(fun (name, test) -&gt;
+      Bench.Test.create ~name test)
   |&gt; Bench.make_command
   |&gt; Command.run</code></pre>
 </div>
 <p>Building and executing this example will run for around 30 seconds by
 default, and you’ll see the results summarized in a neat table:</p>
 <div class="highlight">
-<pre><code class="language-scheme">(executable
-  (name      bench_patterns)
-  (modules   bench_patterns)
-  (libraries core_bench))</code></pre>
-</div>
-<div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./bench_patterns.exe -ascii -quota 0.25
 &gt;Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
 &gt;
-&gt;  Name                         Time/Run   Percentage
-&gt; ---------------------------- ---------- ------------
-&gt;  Polymorphic pattern           15.72ns      100.00%
-&gt;  Monomorphic larger pattern     9.41ns       59.89%
-&gt;  Monomorphic small pattern      8.73ns       55.56%
+&gt;  Name                        Time/Run   Percentage
+&gt; --------------------------- ---------- ------------
+&gt;  Monomorphic large pattern     6.54ns       67.89%
+&gt;  Monomorphic small pattern     9.63ns      100.00%
+&gt;  Polymorphic large pattern     9.63ns       99.97%
 </code></pre>
 </div>
 <p>These results confirm the performance hypothesis that we obtained
@@ -667,19 +681,13 @@ let () =
 <p>Running this shows quite a significant runtime difference between the
 two:</p>
 <div class="highlight">
-<pre><code class="language-scheme">(executable
-  (name      bench_poly_and_mono)
-  (modules   bench_poly_and_mono)
-  (libraries core_bench))</code></pre>
-</div>
-<div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
 &gt;Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 &gt;
 &gt;  Name                       Time/Run   Percentage
 &gt; ------------------------ ------------ ------------
-&gt;  Polymorphic comparison   6_856.10ns      100.00%
-&gt;  Monomorphic comparison     753.02ns       10.98%
+&gt;  Polymorphic comparison   4_050.20ns      100.00%
+&gt;  Monomorphic comparison     471.75ns       11.65%
 </code></pre>
 </div>
 <p>We see that the polymorphic comparison is close to 10 times slower!
@@ -1011,9 +1019,9 @@ point of corruption and help isolate the bug in the C code.</p>
 </section>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
-&gt;+ clang -arch x86_64 -Wno-trigraphs -c -o 'hello.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlasm9b916c.s'
-&gt;+ clang -arch x86_64 -Wno-trigraphs -c -o '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartupf69d9a.s'
-&gt;+ cc -O2 -fno-strict-aliasing -fwrapv -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -DCAML_NAME_SPACE   -Wl,-no_compact_unwind -o 'hello.native'   '-L/Users/thomas/git/rwo/book/_opam/lib/ocaml'  '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/std_exit.o' 'hello.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/stdlib.a' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/libasmrund.a'
+&gt;+ as  -o 'hello.o' '/tmp/build_cd0b96_dune/camlasmd3c336.s'
+&gt;+ as  -o '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/tmp/build_cd0b96_dune/camlstartup2b2cd3.s'
+&gt;+ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/rwo-4.13.1/lib/ocaml'  '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/stdlib.a' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/libasmrund.a' -lm -ldl
 ./hello.native
 &gt;### OCaml runtime: debug mode ###
 &gt;Initial minor heap size: 256k words
