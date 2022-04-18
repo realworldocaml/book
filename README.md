@@ -194,8 +194,8 @@ We need to both add the `opam-overlays` repo which contains dune port of some of
 We also use a pinned version of ctypes until the dune-port is stable. To set these up, you can run:
 ```
 opam repository add dune-opam-overlays git+https://github.com/dune-universe/opam-overlays.git
-opam pin add ctypes.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
-opam pin add ctypes-foreign.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
+opam pin add ctypes.0.20.1+dune https://github.com/avsm/ocaml-ctypes.git#dune-port
+opam pin add ctypes-foreign.0.20.1+dune https://github.com/avsm/ocaml-ctypes.git#dune-port
 ```
 
 ### Upgrading or adding dependencies
