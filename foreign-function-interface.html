@@ -230,7 +230,7 @@ library" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      hello)
-  (libraries ctypes-foreign.threaded)
+  (libraries ctypes-foreign)
   (flags     :standard -cclib -lncurses))</code></pre>
 </div>
 <p> And now we can build it with Dune.</p>
@@ -372,9 +372,12 @@ function that makes it possible to invoke C functions.
 <p>With these opens in place, we can now create a binding to
 <code>time</code> directly from the toplevel.</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ctypes-foreign.threaded";;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ctypes-foreign";;
 #require "ctypes.top";;
-open Core open Ctypes open PosixTypes open Foreign;;
+open Core;;
+open Ctypes;;
+open PosixTypes ;;
+open Foreign;;
 let time = foreign "time" (ptr time_t @-&gt; returning time_t);;
 &gt;val time : time_t Ctypes_static.ptr -&gt; time_t = &lt;fun&gt;
 </code></pre>
@@ -650,7 +653,7 @@ structure value, and retrieve the value of a field from a structure.</p>
 <p>And we can now call that function to get the current time.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">gettimeofday' ();;
-&gt;- : float = 1649611279.0577121
+&gt;- : float = 1650045389.278065
 </code></pre>
 </div>
 <section class="level4" id="recap-a-time-printing-command">
@@ -718,7 +721,7 @@ let () =
 <pre><code class="language-scheme">(executable
   (name      datetime)
   (preprocess (pps ppx_jane))
-  (libraries core ctypes-foreign.threaded))</code></pre>
+  (libraries core ctypes-foreign))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build datetime.exe
@@ -956,7 +959,7 @@ it more closely:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      qsort)
-  (libraries core ctypes-foreign.threaded))</code></pre>
+  (libraries core ctypes-foreign))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">echo 2 4 1 3 | dune exec ./qsort.exe
