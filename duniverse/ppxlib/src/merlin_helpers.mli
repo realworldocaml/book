@@ -20,9 +20,6 @@ val focus_attribute : attribute
     specific pieces of AST. *)
 
 val hide_pattern : pattern -> pattern
-
 val focus_pattern : pattern -> pattern
-
 val hide_expression : expression -> expression
-
 val focus_expression : expression -> expression

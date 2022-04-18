@@ -1,23 +1,8 @@
-version: "1.3.0+dune"
+version: "1.4.0+dune"
 opam-version: "2.0"
 name: "mtime"
-synopsis: """Monotonic wall-clock time for OCaml"""
-maintainer: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
-authors: ["The mtime programmers"]
-homepage: "https://erratique.ch/software/mtime"
-doc: "https://erratique.ch/software/mtime/doc/"
-dev-repo: "git+https://github.com/dune-universe/mtime.git"
-bug-reports: "https://github.com/dbuenzli/mtime/issues"
-license: ["ISC"]
-tags: ["time" "monotonic" "system" "org:erratique"]
-depends: [
-  "dune"
-  "ocaml" {>= "4.03.0"}
-]
-depopts: ["js_of_ocaml"]
-conflicts: ["js_of_ocaml" {<= "3.3.0"}]
-build: [[ "dune" "build" "-p" name ]]
-description: """
+synopsis: "Monotonic wall-clock time for OCaml"
+description: """\
 Mtime has platform independent support for monotonic wall-clock time
 in pure OCaml. This time increases monotonically and is not subject to
 operating system calendar time adjustments. The library has types to
@@ -26,10 +11,20 @@ represent nanosecond precision timestamps and time spans.
 The additional Mtime_clock library provide access to a system
 monotonic clock.
 
-Mtime has a no dependency. Mtime_clock depends on your system library.
-The optional JavaScript support depends on [js_of_ocaml][jsoo]. Mtime
-and its libraries are distributed under the ISC license.
-
-[jsoo]: http://ocsigen.org/js_of_ocaml/
+Mtime has a no dependency. Mtime_clock depends on your system library
+or JavaScript runtime system. Mtime and its libraries are distributed
+under the ISC license.
 
 Home page: http://erratique.ch/software/mtime"""
+maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
+authors: "The mtime programmers"
+license: "ISC"
+homepage: "https://github.com/dune-universe/mtime"
+bug-reports: "https://github.com/dbuenzli/mtime/issues"
+depends: [
+  "dune"
+  "ocaml" {>= "4.08.0"}
+]
+build: [ "dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} ]
+tags: [ "time" "posix" "system" "org:erratique" ]
+dev-repo: "git+https://github.com/dune-universe/mtime.git"

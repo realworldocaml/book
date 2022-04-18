@@ -159,6 +159,9 @@ let char =
 let bool =
   dsprintf "%B"
 
+let unit =
+  dsprintf "()"
+
 let string =
   dsprintf "%S"
 

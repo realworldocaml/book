@@ -58,6 +58,82 @@ class type output = object
 
 end
 
+(* ------------------------------------------------------------------------- *)
+
+(* Printing blank space. This is used both internally (to emit indentation
+   characters) and via the public combinator [blank]. *)
+
+let blank_length =
+  80
+
+let blank_buffer =
+  String.make blank_length ' '
+
+let rec blanks (output : output) n =
+  if n <= 0 then
+    ()
+  else if n <= blank_length then
+    output#substring blank_buffer 0 n
+  else begin
+    output#substring blank_buffer 0 blank_length;
+    blanks output (n - blank_length)
+  end
+
+(* ------------------------------------------------------------------------- *)
+
+(* The class [buffering] implements a wrapper that delays the printing of
+   blank characters. This includes indentation characters and characters
+   produced by the combinator [blank]. The printing of these characters is
+   delayed until it is known that they are followed by something on the same
+   line; if they are not followed with anything, then it is canceled.
+
+   The actual printing task is delegated to the object [delegate], whose type
+   is [output]; the new object has type [output] as well. *)
+
+class buffering (delegate : output) : output = object (self)
+
+  (* The number of blank characters that are withholding. *)
+  val mutable buffered = 0
+
+  (* [flush] sends out the blank characters that have been withheld. *)
+  method private flush =
+    blanks delegate buffered;
+    buffered <- 0
+
+  method char c : unit =
+    begin match c with
+    | '\n' ->
+        (* The current line ends here. Any blank characters that were withheld
+           are destroyed. This is where we avoid printing blank characters if
+           nothing follows them. *)
+        buffered <- 0
+    | _ ->
+        (* The current line is nonempty. Any blank characters that were
+           withheld can now be flushed. *)
+        self#flush
+    end;
+    (* Print this character as usual. *)
+    delegate#char c
+
+  method substring s pos len =
+    (* If this is a string of length zero, then there is nothing to do. *)
+    if len = 0 then
+      ()
+    (* If this is a blank string (which we recognize by its address), then
+       its content is withheld. *)
+    else if s == blank_buffer then
+      buffered <- buffered + len
+    (* If this is not a blank string, then the blank characters that were
+       withheld up to this point can now be flushed. *)
+    else begin
+      self#flush;
+      delegate#substring s pos len
+    end
+
+end
+
+(* ------------------------------------------------------------------------- *)
+
 (* Three kinds of output channels are wrapped so as to satisfy the above
    interface: OCaml output channels, OCaml memory buffers, and OCaml
    formatters. *)
@@ -326,7 +402,7 @@ let char c =
   Char c
 
 let space =
-  char ' '
+  Blank 1
 
 let string s =
   String s
@@ -370,8 +446,6 @@ let blank n =
   match n with
   | 0 ->
       empty
-  | 1 ->
-      space
   | _ ->
       Blank n
 
@@ -432,26 +506,6 @@ let custom c =
   (* Sanity check. *)
   assert (c#requirement >= 0);
   Custom c
-
-(* ------------------------------------------------------------------------- *)
-
-(* Printing blank space (indentation characters). *)
-
-let blank_length =
-  80
-
-let blank_buffer =
-  String.make blank_length ' '
-
-let rec blanks output n =
-  if n <= 0 then
-    ()
-  else if n <= blank_length then
-    output#substring blank_buffer 0 n
-  else begin
-    output#substring blank_buffer 0 blank_length;
-    blanks output (n - blank_length)
-  end
 
 (* ------------------------------------------------------------------------- *)
 
@@ -672,17 +726,17 @@ end
 module ToChannel =
   MakeRenderer(struct
     type channel = out_channel
-    let output = new channel_output
+    let output channel = new buffering (new channel_output channel)
   end)
 
 module ToBuffer =
   MakeRenderer(struct
     type channel = Buffer.t
-    let output = new buffer_output
+    let output buffer = new buffering (new buffer_output buffer)
   end)
 
 module ToFormatter =
   MakeRenderer(struct
     type channel = Format.formatter
-    let output = new formatter_output
+    let output fmt = new buffering (new formatter_output fmt)
   end)

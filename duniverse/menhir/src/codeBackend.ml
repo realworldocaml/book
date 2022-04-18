@@ -10,8 +10,6 @@
 
 (* The code generator. *)
 
-module Run (T : sig end) = struct
-
 open Grammar
 open Invariant
 open IL
@@ -108,21 +106,6 @@ let if1, ifnlazy = MList.(if1, ifnlazy)
    fact dead. It would be nice (but difficult) to exploit types
    to prove that. However, one could at least replace the code of
    that branch with a simple [assert false]. TEMPORARY do it *)
-
-(* ------------------------------------------------------------------------ *)
-
-(* At this time, the code back-end supports only the legacy error handling
-   strategy. It does not (yet?) support the simplified strategy. Let the
-   user know about this. *)
-
-let () =
-  match Settings.strategy with
-  | `Legacy ->
-      ()
-  | `Simplified ->
-      Error.error []
-        "The code back-end does not support --strategy simplified.\n\
-         Please use either --strategy legacy or --table."
 
 (* ------------------------------------------------------------------------ *)
 (* Here is a description of our error handling mechanism.
@@ -310,6 +293,62 @@ let getstartp =
 
 let getendp =
   ERecordAccess (ERecordAccess (EVar env, flexbuf), "Lexing.lex_curr_p")
+
+(* ------------------------------------------------------------------------ *)
+
+(* Code production for a few auxiliary functions. *)
+
+(* This is [assertfalse], used when internal failure is detected.
+   This should never happen if our tool is correct. *)
+
+let internal_failure =
+  "Internal failure -- please contact the parser generator's developers."
+
+let assertfalsedef = {
+  valpublic = false;
+  valpat = PVar assertfalse;
+  valval =
+    EAnnot (
+      EFun ([ PUnit ],
+        blet (
+          [ PUnit, eprintf internal_failure []],
+          eassert efalse
+        )
+      ),
+      scheme [ "a" ] (arrow tunit (tvar "a"))
+    )
+}
+
+(* Calls to [assertfalse]. *)
+
+let call_assertfalse =
+  EApp (EVar assertfalse, [ EUnit ])
+
+(* This is [print_token], used to print tokens in [--trace] mode. *)
+
+let printtokendef =
+  destructuretokendef
+    print_token
+    tstring
+    false
+    (fun tok -> EStringConst (Terminal.print tok))
+
+(* ------------------------------------------------------------------------ *)
+
+(* At this time, the code back-end supports only the legacy error handling
+   strategy. It does not (yet?) support the simplified strategy. Let the
+   user know about this. *)
+
+module Run (T : sig end) = struct
+
+let () =
+  match Settings.strategy with
+  | `Legacy ->
+      ()
+  | `Simplified ->
+      Error.error []
+        "The code back-end does not support --strategy simplified.\n\
+         Please use either --strategy legacy or --table."
 
 (* ------------------------------------------------------------------------ *)
 (* Determine whether the [goto] function for nonterminal [nt] will push
@@ -647,25 +686,6 @@ let errortypescheme s =
 let can_die =
   ref false
 
-(* A code pattern for an exception handling construct where both alternatives
-   are in tail position. Concrete syntax in OCaml 4.02 is [match e with x ->
-   e1 | exception Error -> e2]. Earlier versions of OCaml do not support this
-   construct. We continue to emulate it using a combination of [try/with],
-   [match/with], and an [option] value. It is used only in a very rare case
-   anyway. *)
-
-(* TEMPORARY either remove this or add support for [match with exception] *)
-
-let letunless e x e1 e2 =
-  EMatch (
-    ETry (
-      EData ("Some", [ e ]),
-      [ branch (PData (excdef.excname, [])) (EData ("None", [])) ]
-    ),
-    [ branch (PData ("Some", [ PVar x ])) e1 ;
-      branch (PData ("None", []))         e2 ]
-  )
-
 (* ------------------------------------------------------------------------ *)
 (* Calling conventions. *)
 
@@ -818,11 +838,6 @@ let call_error s =
       (* TEMPORARY use [let] binding and reduce duplication *)
   else
     call_error s
-
-(* Calls to [assertfalse]. *)
-
-let call_assertfalse =
-  EApp (EVar assertfalse, [ EUnit ])
 
 (* ------------------------------------------------------------------------ *)
 (* Code production for the automaton functions. *)
@@ -1261,13 +1276,7 @@ let reducebody prod =
         unitbindings @
         posbindings action,
 
-        (* If the semantic action is susceptible of raising [Error],
-           use a [let/unless] construct, otherwise use [let]. *)
-
-        if Action.has_syntaxerror action then
-          letunless act semv (call_goto nt) (errorbookkeeping call_errorcase)
-        else
-          blet ([ PVar semv, act ], call_goto nt)
+        blet ([ PVar semv, act ], call_goto nt)
       ))
 
 (* This is the definition of the [reduce] function associated with
@@ -1420,7 +1429,7 @@ let errorbody s =
       match rewind s with
       | Die ->
           can_die := true;
-          ERaise errorval
+          call_stop (Lr1.number s)
       | DownTo (w, st) ->
           let _, pat = fold_left errorcellparams (0, PVar stack) w in
           blet (
@@ -1538,36 +1547,6 @@ let entrydef s =
 
 (* ------------------------------------------------------------------------ *)
 (* Code production for auxiliary functions. *)
-
-(* This is [assertfalse], used when internal failure is detected.
-   This should never happen if our tool is correct. *)
-
-let internal_failure =
-  "Internal failure -- please contact the parser generator's developers."
-
-let assertfalsedef = {
-  valpublic = false;
-  valpat = PVar assertfalse;
-  valval =
-    EAnnot (
-      EFun ([ PUnit ],
-        blet (
-          [ PUnit, eprintf internal_failure []],
-          eassert efalse
-        )
-      ),
-      scheme [ "a" ] (arrow tunit (tvar "a"))
-    )
-}
-
-(* This is [print_token], used to print tokens in [--trace] mode. *)
-
-let printtokendef =
-  destructuretokendef
-    print_token
-    tstring
-    false
-    (fun tok -> EStringConst (Terminal.print tok))
 
 (* This is [discard], used to take a token off the input stream and
    query the lexer for a new one. The code queries the lexer for a new

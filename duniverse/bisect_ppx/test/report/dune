@@ -1,3 +1,0 @@
-(cram
- (deps test.ml merge.ml test_merge1.ml test_merge2.ml empty.ml)
- (alias compatible))

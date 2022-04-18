@@ -1,11 +1,12 @@
 # Maps and Hash Tables
 
-Lots of programming problems require dealing with data organized as key/value
-pairs. Maybe the simplest way of representing such data in OCaml is an
-*association list*, which is simply a list of pairs of keys and values. For
-example, you could represent a mapping between the 10 digits and their
-English names as follows: [key/value pairs]{.idx}[data structures/key/value
-pairs]{.idx}[lists/association lists]{.idx}[association lists]{.idx}
+Lots of programming problems require dealing with data organized as
+key/value pairs. Maybe the simplest way of representing such data in
+OCaml is an *association list*, which is simply a list of pairs of
+keys and values. For example, you could represent a mapping between
+the 10 digits and their English names as follows: [key/value
+pairs]{.idx}[data structures/key/value pairs]{.idx}[lists/association
+lists]{.idx}[association lists]{.idx}
 
 ```ocaml env=main
 # open Base;;
@@ -55,15 +56,15 @@ open Base
 (** A collection of string frequency counts *)
 type t
 
-(** The empty set of frequency counts  *)
+(** The empty set of frequency counts *)
 val empty : t
 
 (** Bump the frequency count for the given string. *)
 val touch : t -> string -> t
 
-(** Converts the set of frequency counts to an association list.
-    Every string in the list will show up at most once, and the
-    integers will be at least 1. *)
+(** Converts the set of frequency counts to an association list. Every
+    string in the list will show up at most once, and the integers
+    will be at least 1. *)
 val to_list : t -> (string * int) list
 ```
 
@@ -77,10 +78,9 @@ Here's the implementation.
 ```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
-type t = (string,int,String.comparator_witness) Map.t
+type t = (string, int, String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
-
 let to_list t = Map.to_alist t
 
 let touch t s =
@@ -92,27 +92,29 @@ let touch t s =
   Map.set t ~key:s ~data:(count + 1)
 ```
 
-Take a look at the definition of the type `t` above. You'll see that the
-`Map.t` has three type parameter. The first two are what you might expect;
-one for the type of the key, and one for type of the data. The third type
-parameter, the *comparator witness*, requires some explaining.
+Take a look at the definition of the type `t` above. You'll see that
+the `Map.t` has three type parameter. The first two are what you might
+expect; one for the type of the key, and one for type of the data. The
+third type parameter, the *comparator witness*, requires some
+explaining.
 
-The comparator witness is used to indicate which comparison function was used
-to construct the map, rather than saying anything about concrete data stored
-in the map. The type `String.comparator_witness` in particular indicates that
-this map was built with the default comparison function from the `String`
-module. We'll talk about why the comparator witness is important later in the
-chapter.
+The comparator witness is used to indicate which comparison function
+was used to construct the map, rather than saying something about the
+type of data stored in the map.  The type `String.comparator_witness`
+in particular indicates that this map was built with the default
+comparison function from the `String` module. We'll talk about why the
+comparator witness is important later in the chapter.
 
-The call to `Map.empty` is also worth explaining, in that, unusually, it
-takes a first-class module as an argument. The point of the first class
-module is to provide the comparison function that is required for building
-the map, along with an s-expression converter for generating useful error
-messages (we'll talk more about s-expressions in
-[Data Serialization with S-Expressions](data-serialization.html#data-serializtion-with-s-expressions){data-type=xref}).
-We don't need to provide the module again for functions like `Map.find` or
-`Map.add`, because the map itself contains a reference to the comparison
-function it uses.
+The call to `Map.empty` is also worth explaining, in that, unusually,
+it takes a first-class module as an argument. The point of the first
+class module is to provide the comparison function that is required
+for building the map, along with an s-expression converter for
+generating useful error messages (we'll talk more about s-expressions
+in [Data Serialization with
+S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}).
+We don't need to provide the module again for functions like
+`Map.find` or `Map.add`, because the map itself contains a reference
+to the comparison function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
 `Base` are. Later in the chapter, we'll show how you can set up a module of your
@@ -136,10 +138,9 @@ simple example. [set types]{.idx}
 - : int list = [1; 2; 3; 5]
 ```
 
-In addition to the operators you would expect to have for maps, sets support
-the traditional set operations, including union, intersection, and set
-difference. And, as with maps, we can create sets based on type-specific
-comparators or on the polymorphic comparator.
+In addition to the operators you would expect to have for maps, sets
+support the traditional set operations, including union, intersection,
+and set difference.
 
 ### Modules and Comparators
 
@@ -159,9 +160,9 @@ list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
 ```ocaml env=main
-# Map.of_alist_exn;;
-- : ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t =
-<fun>
+# #show Map.of_alist_exn;;
+val of_alist_exn :
+  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
 The type `Map.comparator` is actually an alias for a first-class module type,
@@ -178,10 +179,11 @@ module type S =
   end
 ```
 
-Such a module needs to contain the type of the key itself, as well as the
-`comparator_witness` type, which serves as a type-level identifier of the
-comparison function in question, and finally, the concrete comparator itself,
-a value that contains the necessary comparison function.
+Such a module must contain the type of the key itself, as well as the
+`comparator_witness` type, which serves as a type-level identifier of
+the comparison function in question, and finally, the concrete
+comparator itself, a value that contains the necessary comparison
+function.
 
 Modules from `Base` like `Int` and `String` already satisfy this interface.
 But what if you want to satisfy this interface with a new module? Consider,
@@ -233,40 +235,26 @@ question, and then include both that module and the result of applying a
 functor to that module.
 
 ```ocaml env=main
-# module Book = struct
-    module T = struct
+module Book = struct
+  module T = struct
 
-      type t = { title: string; isbn: string }
+    type t = { title: string; isbn: string }
 
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
+    let compare t1 t2 =
+      let cmp_title = String.compare t1.title t2.title in
+      if cmp_title <> 0 then cmp_title
+      else String.compare t1.isbn t2.isbn
 
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
+    let sexp_of_t t : Sexp.t =
+      List [ Atom t.title; Atom t.isbn ]
 
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
   end
+  include T
+  include Comparator.Make(T)
+end;;
 ```
 
-With this module in hand, we can now build a set using the type `Book.t`.
+With this module in hand, we can now build a set of `Book.t`'s.
 
 ```ocaml env=main
 # let some_programming_books =
@@ -276,82 +264,31 @@ With this module in hand, we can now build a set using the type `Book.t`.
       ; { title = "Structure and Interpretation of Computer Programs"
         ; isbn = "978-0262510875" }
       ; { title = "The C Programming Language"
-  ; isbn = "978-0131101630" } ];;
+        ; isbn = "978-0131101630" } ];;
 val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
   <abstr>
 ```
 
-Note that most of the time one should use `Comparable.Make` instead of
-`Comparator.Make`, since the former provides extra helper functions
-(most notably infix comparison functions) in addition to the
-comparator.
-
-Here's the result of using `Comparable` rather than `Comparator`.  As
-you can see, a lot of extra functions have been defined.
-
-```ocaml env=main
-# module Book = struct
-    module T = struct
-
-      type t = { title: string; isbn: string }
-
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
-
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
-
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val sexp_of_t : t -> Sexp.t
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness = Base.Comparable.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-    val validate_lbound : min:t Maybe_bound.t -> t Validate.check
-    val validate_ubound : max:t Maybe_bound.t -> t Validate.check
-    val validate_bound :
-      min:t Maybe_bound.t -> max:t Maybe_bound.t -> t Validate.check
-  end
-```
+While we used `Comparator.Make` in the above, it's often preferable to
+use `Comparable.Make` instead, since it provides extra helper
+functions, like infix comparison operators and min and max functions,
+in addition to the comparator itself.
 
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
-The comparator witness looks a little surprising at first, and it may not be
-obvious why it's there in the first place. The purpose of the witness is to
-identify the comparison function being used. This is important because some
-of the operations on maps and sets, in particular those that combine multiple
-maps or sets together, depend for their correctness on the fact that the
-different maps are using the same comparison function.
+The comparator witness is quite different from other types that we've
+seen.  Instead of tracking the kind of data being used, it's used to
+single out a particular value, a comparison function.  Why do we even
+need such a thing?
 
-Consider, for example, `Map.symmetric_diff`, which computes the difference
-between two maps.
+The comparator witness matters because some of the operations on maps
+and sets, in particular those that combine multiple maps or sets
+together, depend for their correctness on the fact that both objects
+being combined are ordered according to the same total order, which in
+turn is determined by the comparison function.
+
+Consider, for example, `Map.symmetric_diff`, which computes the
+difference between two maps.
 
 ```ocaml env=main
 # let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
@@ -363,53 +300,40 @@ val right : (string, int, String.comparator_witness) Map.t = <abstr>
 [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 ```
 
-The type of `Map.symmetric_diff`, which follows, requires that the two maps
-it compares have the same comparator type, and therefore the same comparison
-function.
+As you can see below, the type of `Map.symmetric_diff` requires that
+the two maps it compares have the same comparator witness, in addition
+to the same key and value type.
 
 ```ocaml env=main
-# Map.symmetric_diff;;
-- : ('k, 'v, 'cmp) Map.t ->
-    ('k, 'v, 'cmp) Map.t ->
-    data_equal:('v -> 'v -> bool) ->
-    ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
-= <fun>
+# #show Map.symmetric_diff;;
+val symmetric_diff :
+  ('k, 'v, 'cmp) Map.t ->
+  ('k, 'v, 'cmp) Map.t ->
+  data_equal:('v -> 'v -> bool) ->
+  ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
 ```
 
-Without this constraint, we could run `Map.symmetric_diff` on maps that are
-sorted in different orders, which could lead to garbled results. We can show
-how this works in practice by creating two maps with the same key and data
-types, but different comparison functions. In the following, we do this by
-minting a new module `Reverse`, which represents strings sorted in the
-reverse of the usual lexicographic order.
+Without this constraint, we could run `Map.symmetric_diff` on maps
+that are sorted in different orders, which could lead to garbled
+results.
+
+To see this constraint in action, we'll need to create two maps with
+the same key and data types, but different comparison functions.  In
+the following, we do this by minting a new module `Reverse`, which
+represents strings sorted in the reverse of the usual lexicographic
+order.
 
 ```ocaml env=main
-# module Reverse = struct
-    module T = struct
-      type t = string
-      let sexp_of_t = String.sexp_of_t
-      let t_of_sexp = String.t_of_sexp
-      let compare x y = String.compare y x
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Reverse :
-  sig
-    module T :
-      sig
-        type t = string
-        val sexp_of_t : t -> Sexp.t
-        val t_of_sexp : Sexp.t -> t
-        val compare : t -> t -> int
-      end
+module Reverse = struct
+  module T = struct
     type t = string
-    val sexp_of_t : t -> Sexp.t
-    val t_of_sexp : Sexp.t -> t
-    val compare : t -> t -> int
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
+    let sexp_of_t = String.sexp_of_t
+    let t_of_sexp = String.t_of_sexp
+    let compare x y = String.compare y x
   end
+  include T
+  include Comparator.Make(T)
+end;;
 ```
 
 As you can see in the following, both `Reverse` and `String` can be used to
@@ -435,10 +359,10 @@ functions.
 - : (string * int) option = Some ("snoo", 3)
 ```
 
-As such, running `Map.symmetric_diff` on these maps doesn't make any sense.
-Happily, the type system will give us a compile-time error if we try, instead
-of throwing an error at run time, or worse, silently returning the wrong
-result.
+As a result, the algorithm in `Map.symmetric_diff` just wouldn't work
+correctly when applied to these values.  Happily, the type system will
+give us a compile-time error if we try, instead of throwing an error
+at run time, or worse, silently returning the wrong result.
 
 ```ocaml env=main
 # Map.symmetric_diff ord_map rev_map;;
@@ -488,25 +412,24 @@ polymorphic compare does.
 ::: {data-type=warning}
 ##### The Perils of Polymorphic Compare
 
-Polymorphic compare is highly convenient, but it has serious downsides as
-well and should be used with care. In particular, polymorphic compare has a
-fixed algorithm for comparing values of any type, and that algorithm can
-sometimes yield surprising results.
+Polymorphic compare is awfully convenient, but it has serious
+downsides and should mostly be avoided in production code.  To
+understand why, it helps to understand how polymorphic compare works.
 
-To understand what's wrong with polymorphic compare, you need to understand a
-bit about how it works. Polymorphic compare is *structural*, in that it
-operates directly on the runtime representation of OCaml values, walking the
-structure of the values in question without regard for their type.
+Polymorphic compare operates directly on the runtime representation of
+OCaml values, walking the structure of those values without regard for
+their type.
 
-This is convenient because it provides a comparison function that works for
-most OCaml values and largely behaves as you would expect. For example, on
-`int`s and `float`s, it acts as you would expect a numeric comparison
-function to act, and for simple containers like strings and lists and arrays,
-it operates as a lexicographic comparison. Except for values from outside of
-the OCaml heap and functions, it works on almost every OCaml type.
+And despite ignoring types, it mostly behaves as you would hope.
+Comparisons on `int`s and `float`s respect the ordinary ordering of
+numeric values, and containers like strings, lists, and arrays are
+compared lexicographically. And it works on almost every OCaml type,
+with some important exceptions like functions.
 
-But sometimes, a structural comparison is not what you want. Maps are
-actually a fine example of this. Consider the following two maps.
+But the type-oblivious nature of polymorphic compare means that it
+peeks under ordinary abstraction boundaries, and that can lead to some
+deeply confusing results.  Maps themselves provide a great example of
+this.  Consider the following two maps.
 
 ```ocaml env=main
 # let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
@@ -515,33 +438,31 @@ val m1 : (int, string, Int.comparator_witness) Map.t = <abstr>
 val m2 : (int, string, Int.comparator_witness) Map.t = <abstr>
 ```
 
-Logically, these two sets should be equal, and that's the result that you get
-if you call `Map.equal` on them:
+Logically, these two maps should be equal, and that's the result that
+you get if you call `Map.equal` on them:
 
 ```ocaml env=main
 # Map.equal String.equal m1 m2;;
 - : bool = true
 ```
 
-But because the elements were added in different orders, the layout of the
-trees underlying the sets will be different. As such, a structural comparison
-function will conclude that they're different.
+But because the elements were added in different orders, the layout of
+the trees underlying the maps will be different.  As such, polymorphic
+compare will conclude that they're different.
 
-Let's see what happens if we use polymorphic compare to test for equality.
-`Base` hides polymorphic comparison by defaults, but it is available by
-opening the `Poly` module, at which point `=` is bound to polymorphic
-equality. Comparing the maps directly will fail at runtime because the
-comparators stored within the sets contain function values:
+We can see this below.  Note that `Base` hides polymorphic comparison
+by default, but it is available within the `Poly` module.
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
 Exception: (Invalid_argument "compare: functional value")
 ```
 
-We can, however, use the function `Map.Using_comparator.to_tree` to expose
-the underlying binary tree without the attached comparator. This same issue
-comes up with other data types, including sets, which we'll discuss later in
-the chapter.
+This comparison failed because polymorphic compare doesn't work on
+functions, and maps store the comparison function they were created
+with.  Happily, there's a function, `Map.Using_comparator.to_tree`
+which exposes the underlying binary tree without the attached
+comparison function.  We can use that to compare the underlying trees:
 
 ```ocaml env=main
 # Poly.((Map.Using_comparator.to_tree m1) =
@@ -549,149 +470,142 @@ the chapter.
 - : bool = false
 ```
 
-This can cause real and quite subtle bugs. If, for example, you use a map
-whose keys contain sets, then the map built with the polymorphic comparator
-will behave incorrectly, separating out keys that should be aggregated
-together. Even worse, it will work sometimes and fail others; since if the
-sets are built in a consistent order, then they will work as expected, but
-once the order changes, the behavior will change.
+\noindent
+As you can see, polymorphic compare now produces a result, but it's
+not the result we want.
+
+The abstraction-breaking nature of polymorphic compare can cause real
+and quite subtle bugs.  If, for example, if you build a map whose keys
+are sets (which have the same issues with polymorphic compare that
+maps do), then the map built with the polymorphic comparator will
+behave incorrectly, separating out keys that should be aggregated
+together.  Even worse, it will behave inconsistently, since the
+behavior of polymorphic compare will depend on the order in which the
+sets were built.
 
 :::
 
-### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
+### Satisfying `Comparator.S` with `[@@deriving]` {#satisfying-comparator.s-with-deriving}
 
-Using maps and sets on a new type requires satisfying the `Comparator.S`
-interface, which in turn requires s-expression converters and comparison
-functions for the type in question. Writing such functions by hand is
-annoying and error prone, but there's a better way. `Base` comes along with a
-set of syntax extensions that automate these tasks away.
+Using maps and sets on a new type requires satisfying the
+`Comparator.S` interface, which in turn requires s-expression
+converters and comparison functions for the type in question. Writing
+such functions by hand is annoying and error prone, but there's a
+better way. `Base` comes along with a set of syntax extensions that
+automate these tasks away.
 
-Let's return to an example from earlier in the chapter, where we created a
-type `Book.t` and set it up for use in creating maps and sets.
+Let's return to an example from earlier in the chapter, where we
+created a type `Book.t` and set it up for use in creating maps and
+sets.
 
 ```ocaml env=main
-# module Book = struct
-    module T = struct
+module Book = struct
+  module T = struct
 
-      type t = { title: string; isbn: string }
+    type t = { title: string; isbn: string }
 
-      let compare t1 t2 =
-        let cmp_title = String.compare t1.title t2.title in
-        if cmp_title <> 0 then cmp_title
-        else String.compare t1.isbn t2.isbn
+    let compare t1 t2 =
+      let cmp_title = String.compare t1.title t2.title in
+      if cmp_title <> 0 then cmp_title
+      else String.compare t1.isbn t2.isbn
 
-      let sexp_of_t t : Sexp.t =
-        List [ Atom t.title; Atom t.isbn ]
+    let sexp_of_t t : Sexp.t =
+      List [ Atom t.title; Atom t.isbn ]
 
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
   end
+  include T
+  include Comparator.Make(T)
+end
 ```
 
 Much of the code here is devoted to creating a comparison function and
 s-expression converter for the type `Book.t`. But if we have the
-`ppx_sexp_conv` and `ppx_compare` syntax extensions enabled (both of
-which come with the omnibus `ppx_jane` package), then we can request
-that default implementations of these functions be created, as
-follows.
+`ppx_sexp_conv` and `ppx_compare` syntax extensions enabled, then we
+can request that default implementations of these functions be
+created for us.  We can enable both of these extensions via the
+omnibus `ppx_jane` package.
 
 ```ocaml env=main
 # #require "ppx_jane";;
-# module Book = struct
-    module T = struct
-      type t = { title: string; isbn: string }
-      [@@deriving compare, sexp_of]
-    end
-    include T
-    include Comparator.Make(T)
-  end;;
-module Book :
-  sig
-    module T :
-      sig
-        type t = { title : string; isbn : string; }
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Sexp.t
-      end
-    type t = T.t = { title : string; isbn : string; }
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base.Comparator.Make(T).comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
 ```
 
-If you want your comparison function that orders things in a particular way,
-you can always write your own comparison function by hand; but if all you
-need is a total order suitable for creating maps and sets with, then
+And we can use the extensions in our definition of `Book` as follows:
+
+```ocaml env=main
+module Book = struct
+  module T = struct
+    type t = { title: string; isbn: string }
+    [@@deriving compare, sexp_of]
+  end
+  include T
+  include Comparator.Make(T)
+end;;
+```
+
+If you want a comparison function that orders things in a particular
+way, you can always write your own by hand; but if all you need is a
+total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
 ::: {data-type=note}
-##### =, ==, and phys_equal
+#### =, ==, and phys_equal
 
-If you come from a C/C++ background, you'll probably reflexively use
-`==` to test two values for equality. In OCaml, the `==` operator tests for
-*physical* equality, while the `=` operator tests for *structural* equality.
+OCaml has multiple notions of equality, and picking the right one can
+be tricky.  If you don't open `Base`, you'll find that the `==`
+operator tests for *physical* equality, while the `=` operator is the
+polymorphic equality function.
 
-The physical equality test will match if two data structures have precisely
-the same pointer in memory. Two data structures that have identical contents
-but are constructed separately will not match using `==`.
+Two values are considered physically equal if they are the same
+pointer in memory.  Two data structures that have identical contents
+but are constructed separately will not be considered equal by `==`.
+Polymorphic equality, on the other hand, is *structural*, which
+effectively means that it considers values to be equal if they have
+the same contents.
 
-The `=` structural equality operator recursively inspects each field in the
-two values and tests them individually for equality. Crucially, if your data
-structure is cyclical (that is, a value recursively points back to another
-field within the same structure), the `=` operator will never terminate, and
-your program will hang! You therefore must use the physical equality operator
-or write a custom comparison function when comparing cyclic values.
+Most of the time you don't want either of these forms of equality!
+Polymorphic equality is problematic for reasons we explained earlier
+in the chapter, and physical equality, while useful, is something
+that's needed in particular cases, most often when you're dealing with
+mutable objects, where the physical identity of the object matters.
 
-It's quite easy to mix up the use of `=` and `==`, so `Base`
-discourages the use of `==` and provides the more explicit
-`phys_equal` function instead.  You'll see a warning if you use `==`
-anywhere in code that opens `Base`:
+`Base` hides polymorphic equality, instead reserving `=` for equality
+functions associated with particular types.  At the top-level `=` is
+specialized to integers.
 
-```ocaml env=core_phys_equal
-# open Base;;
-# 1 == 2;;
-Line 1, characters 3-5:
+```ocaml env=main
+# 1 = 2;;
+- : bool = false
+# "one" = "two";;
+Line 1, characters 1-6:
+Error: This expression has type string but an expression was expected of type
+         int
+```
+
+Other type-specific equality functions are found in their associated
+modules
+
+```ocaml env=main
+# String.("one" = "two");;
+- : bool = false
+```
+
+It's quite easy to mix up `=` and `==`, and so `Base` deprecates `==`
+and provides `phys_equal` instead, a function with a clear and
+descriptive name.
+
+```ocaml env=main
+# ref 1 == ref 1;;
+Line 1, characters 7-9:
 Alert deprecated: Base.==
 [2016-09] this element comes from the stdlib distributed with OCaml.
 Use [phys_equal] instead.
 - : bool = false
-# phys_equal 1 2;;
+# phys_equal (ref 1) (ref 1);;
 - : bool = false
 ```
 
-If you feel like hanging your OCaml interpreter, you can verify what happens
-with recursive values and structural equality for yourself:
-
-```ocaml skip
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 };;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-<lots of text>
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1;;
-<press ^Z and kill the process now>
-```
+This is just a small way in which `Base` tries to avoid error-prone
+APIs.
 
 :::
 
@@ -703,8 +617,7 @@ want to put a `[@@deriving]` annotation on a map or set type itself?
 
 ```ocaml env=main
 # type string_int_map =
-    (string,int,String.comparator_witness) Map.t
-  [@@deriving sexp];;
+    (string,int,String.comparator_witness) Map.t [@@deriving sexp];;
 Line 2, characters 44-49:
 Error: Unbound value Map.t_of_sexp
 Hint: Did you mean m__t_of_sexp?
@@ -719,9 +632,7 @@ Happily, there's another way of writing the type of a map that does work with
 the various `[@@deriving]` extensions, which you can see below.
 
 ```ocaml env=main
-# type string_int_map =
-    int Map.M(String).t
-  [@@deriving sexp];;
+# type string_int_map = int Map.M(String).t [@@deriving sexp];;
 type string_int_map = int Base.Map.M(Base.String).t
 val string_int_map_of_sexp : Sexp.t -> string_int_map = <fun>
 val sexp_of_string_int_map : string_int_map -> Sexp.t = <fun>
@@ -738,9 +649,9 @@ val m : (string, int, String.comparator_witness) Map.t = <abstr>
 - : int Base.Map.M(Base.String).t = <abstr>
 ```
 
-This same type works well with other derivers, like those for comparison and
-hash functions. Since this way of writing the type is also shorter, it's what
-you should use most of the time.
+This same type works with other derivers as well, like those for
+comparison and hash functions. Since this way of writing the type is
+also shorter, it's what you should use most of the time.
 
 ### Trees
 
@@ -791,12 +702,13 @@ Error: This expression has type
 
 ## Hash Tables
 
-Hash tables are the imperative cousin of maps. We walked over a basic hash
-table implementation in
-[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
-so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
-module. We'll cover this material more briefly than we did with maps because
-many of the concepts are shared. [hash tables/basics of]{.idx}
+Hash tables are the imperative cousin of maps. We walked through a
+basic hash table implementation in [Imperative
+Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
+so in this section we'll mostly discuss the pragmatics of Core's
+`Hashtbl` module. We'll cover this material more briefly than we did
+with maps because many of the concepts are shared. [hash tables/basics
+of]{.idx}
 
 Hash tables differ from maps in a few key ways. First, hash tables are
 mutable, meaning that adding a key/value pair to a hash table modifies the
@@ -813,13 +725,13 @@ complexity of]{.idx}
 ### Time Complexity of Hash Tables
 
 The statement that hash tables provide constant-time access hides some
-complexities. First of all, any hash table implementation, OCaml's included,
-needs to resize the table when it gets too full. A resize requires allocating
-a new backing array for the hash table and copying over all entries, and so
-it is quite an expensive operation. That means adding a new element to the
-table is only *amortized* constant, which is to say, it's constant on average
-over a long sequence of operations, but some of the individual operations can
-cost more.
+complexities. First of all, most hash table implementations, OCaml's
+included, needs to resize the table when it gets too full. A resize
+requires allocating a new backing array for the hash table and copying
+over all entries, and so it is quite an expensive operation. That
+means adding a new element to the table is only *amortized* constant,
+which is to say, it's constant on average over a long sequence of
+operations, but some of the individual operations can cost more.
 
 Another hidden cost of hash tables has to do with the hash function you use.
 If you end up with a pathologically bad hash function that hashes all of your
@@ -847,7 +759,7 @@ building a hashtable can be obtained.
 
 ```ocaml env=main
 # let table = Hashtbl.create (module String);;
-val table : (string, '_weak1) Hashtbl.Poly.t = <abstr>
+val table : (string, '_weak1) Base.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:"three" ~data:3;;
 - : unit = ()
 # Hashtbl.find table "three";;
@@ -860,11 +772,10 @@ some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
 ```ocaml env=main
-# #show Core.Hashtbl_intf.Key;;
-module type Key =
+# #show Base.Hashtbl.Key.S;;
+module type S =
   sig
     type t
-    val t_of_sexp : Sexp.t -> t
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
     val hash : t -> int
@@ -887,11 +798,12 @@ module Book :
     type t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t : Hash.state -> t -> Hash.state
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book);;
-val table : (Book.t, '_weak2) Hashtbl.Poly.t = <abstr>
+val table : (Book.t, '_weak2) Base.Hashtbl.t = <abstr>
 ```
 
 You can also create a hashtable based on OCaml's polymorphic hash and
@@ -899,7 +811,7 @@ comparison functions.
 
 ```ocaml env=main
 # let table = Hashtbl.Poly.create ();;
-val table : ('_weak3, '_weak4) Hashtbl.Poly.t = <abstr>
+val table : ('_weak3, '_weak4) Base.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
 - : unit = ()
 # Hashtbl.find table ("foo",3,[1;2;3]);;
@@ -920,12 +832,12 @@ what it sees. That means that for data structures like maps and sets where
 equivalent instances can have different structures, it will do the wrong
 thing.
 
-But there's another problem with polymorphic hash, which is that it is prone
-to creating hash collisions. OCaml's polymorphic hash function works by
-walking over the data structure it’s given using a breadth-first traversal
-that is bounded in the number of nodes it’s willing to traverse. By
-default, that bound is set at 10 "meaningful" nodes. [hash tables/polymorphic
-hash function]{.idx}
+But there's another problem with polymorphic hash, which is that it is
+prone to creating hash collisions. OCaml's polymorphic hash function
+works by walking over the data structure it’s given using a
+breadth-first traversal that is bounded in the number of nodes it’s
+willing to traverse. By default, that bound is set at 10 "meaningful"
+nodes. [hash tables/polymorphic hash function]{.idx}
 
 The bound on the traversal means that the hash function may ignore part of
 the data structure, and this can lead to pathological cases where every
@@ -994,29 +906,32 @@ open Core_bench
 
 let map_iter ~num_keys ~iterations =
   let rec loop i map =
-    if i <= 0 then ()
-    else loop (i - 1)
-           (Map.change map (i % num_keys) ~f:(fun current ->
-              Some (1 + Option.value ~default:0 current)))
+    if i <= 0
+    then ()
+    else
+      loop
+        (i - 1)
+        (Map.change map (i % num_keys) ~f:(fun current ->
+             Some (1 + Option.value ~default:0 current)))
   in
   loop iterations (Map.empty (module Int))
 
 let table_iter ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i <= 0 then ()
+    if i <= 0
+    then ()
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current ->
-        Some (1 + Option.value ~default:0 current));
-      loop (i - 1)
-    )
+          Some (1 + Option.value ~default:0 current));
+      loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -> table_iter ~num_keys ~iterations)
-  ; test "map"   (fun () -> map_iter   ~num_keys ~iterations)
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -> table_iter ~num_keys ~iterations)
+  ; t "map" (fun () -> map_iter ~num_keys ~iterations)
   ]
 
 let () =
@@ -1053,13 +968,13 @@ test; for example, it will vary with the number of distinct keys. But
 overall, for code that is heavy on sequences of querying and updating a set
 of key/value pairs, hash tables will significantly outperform maps.
 
-Hash tables are not always the faster choice, though. In particular, maps
-excel in situations where you need to keep multiple related versions of the
-data structure in memory at once. That's because maps are immutable, and so
-operations like `Map.add` that modify a map do so by creating a new map,
-leaving the original undisturbed. Moreover, the new and old maps share most
-of their physical structure, so multiple versions can be kept around
-efficiently.
+Hash tables are not always the faster choice, though. In particular,
+maps excel in situations where you need to keep multiple related
+versions of the data structure in memory at once. That's because maps
+are immutable, and so operations like `Map.add` that modify a map do
+so by creating a new map, leaving the original undisturbed. Moreover,
+the new and old maps share most of their physical structure, so
+keeping multiple versions around can be space-efficient.
 
 Here's a benchmark that demonstrates this. In it, we create a list of maps
 (or hash tables) that are built up by iteratively applying small updates,
@@ -1074,33 +989,34 @@ open Core_bench
 
 let create_maps ~num_keys ~iterations =
   let rec loop i map =
-    if i <= 0 then []
-    else
+    if i <= 0
+    then []
+    else (
       let new_map =
         Map.change map (i % num_keys) ~f:(fun current ->
-          Some (1 + Option.value ~default:0 current))
+            Some (1 + Option.value ~default:0 current))
       in
-      new_map :: loop (i - 1) new_map
+      new_map :: loop (i - 1) new_map)
   in
   loop iterations (Map.empty (module Int))
 
 let create_tables ~num_keys ~iterations =
   let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
-    if i <= 0 then []
+    if i <= 0
+    then []
     else (
       Hashtbl.change table (i % num_keys) ~f:(fun current ->
-        Some (1 + Option.value ~default:0 current));
+          Some (1 + Option.value ~default:0 current));
       let new_table = Hashtbl.copy table in
-      new_table :: loop (i - 1)
-    )
+      new_table :: loop (i - 1))
   in
   loop iterations
 
 let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
-  ; test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
+  let t name f = Bench.Test.create f ~name in
+  [ t "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
+  ; t "map" (fun () -> ignore (create_maps ~num_keys ~iterations))
   ]
 
 let () =

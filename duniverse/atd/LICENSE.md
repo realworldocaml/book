@@ -1,4 +1,4 @@
-Copyright (c) 2010 MyLife
+Copyright (c) 2010 MyLife and other contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

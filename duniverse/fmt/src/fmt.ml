@@ -599,59 +599,67 @@ let did_you_mean
 
 (* Conditional UTF-8 and styled formatting. *)
 
-type any = ..
-type 'a attr = int * ('a -> any) * (any -> 'a)
-
-let id = ref 0
-let attr (type a) () =
-  incr id;
-  let module M = struct type any += K of a end in
-  !id, (fun x -> M.K x), (function M.K x -> x | _ -> assert false)
-
-module Int = struct type t = int let compare a b = compare (a: int) b end
 module Imap = Map.Make (Int)
 
-let attrs = ref []
-let store ppf =
-  let open Ephemeron.K1 in
-  let rec go ppf top = function
-  | [] ->
-      let e = create () and v = ref Imap.empty in
-      attrs := e :: List.rev top; set_key e ppf; set_data e v; v
-  | e::es ->
-      match get_key e with
-      | None -> go ppf top es
-      | Some k when not (k == ppf) -> go ppf (e::top) es
-      | Some k ->
-          let v = match get_data e with Some v -> v | _ -> assert false in
-          if not (top == []) then attrs := e :: List.rev_append top es;
-          ignore (Sys.opaque_identity k); v
-  in
-  go ppf [] !attrs
+type 'a attr = int * ('a -> string) * (string -> 'a)
+let id = ref 0
+let attr (type a) enc dec = incr id; (!id, enc, dec)
 
-let get (k, _, prj) ppf =
-  match Imap.find_opt k !(store ppf) with Some x -> Some (prj x) | _ -> None
+type Format.stag +=
+| Fmt_store_get : 'a attr -> Format.stag
+| Fmt_store_set : 'a attr * 'a -> Format.stag
 
-let set (k, inj, _) v ppf =
-  if ppf == Format.str_formatter then invalid_arg' err_str_formatter else
-  let s = store ppf in
-  s := Imap.add k (inj v) !s
+let store () =
+  let s = ref Imap.empty in
+  fun ~other -> function
+  | Fmt_store_get (id, _, _) -> Option.value ~default:"" (Imap.find_opt id !s)
+  | Fmt_store_set ((id, enc, _), v) -> s := Imap.add id (enc v) !s; "ok"
+  | stag -> other stag
+
+let setup_store ppf =
+  let funs = Format.pp_get_formatter_stag_functions ppf () in
+  let mark_open_stag = store () ~other:funs.mark_open_stag in
+  Format.pp_set_formatter_stag_functions ppf { funs with mark_open_stag }
+
+let store_op op ppf =
+  let funs = Format.pp_get_formatter_stag_functions ppf () in
+  funs.mark_open_stag op
+
+let get (_, _, dec as attr) ppf = match store_op (Fmt_store_get attr) ppf with
+| "" -> None | s -> Some (dec s)
+
+let rec set attr v ppf = match store_op (Fmt_store_set (attr, v)) ppf with
+| "ok" -> () | _ -> setup_store ppf; set attr v ppf
 
 let def x = function Some y -> y | _ -> x
 
-let utf_8_attr = attr ()
+let utf_8_attr =
+  let enc = function true -> "t" | false -> "f" in
+  let dec = function "t" -> true | "f" -> false | _ -> assert false in
+  attr enc dec
+
 let utf_8 ppf = get utf_8_attr ppf |> def true
 let set_utf_8 ppf x = set utf_8_attr x ppf
 
 type style_renderer = [ `Ansi_tty | `None ]
-let style_renderer_attr = attr ()
+let style_renderer_attr =
+  let enc = function `Ansi_tty -> "A" | `None -> "N" in
+  let dec = function "A" -> `Ansi_tty | "N" -> `None | _ -> assert false in
+  attr enc dec
+
 let style_renderer ppf = get style_renderer_attr ppf |> def `None
 let set_style_renderer ppf x = set style_renderer_attr x ppf
 
 let with_buffer ?like buf =
   let ppf = Format.formatter_of_buffer buf in
-  (match like with Some like -> store ppf := !(store like) | _ -> ());
-  ppf
+  (* N.B. this does slighty more it also makes buf use other installed
+     semantic tag actions. *)
+  match like with
+  | None -> ppf
+  | Some like ->
+      let funs = Format.pp_get_formatter_stag_functions like () in
+      Format.pp_set_formatter_stag_functions ppf funs;
+      ppf
 
 let str_like ppf fmt =
   let buf = Buffer.create 64 in
@@ -732,23 +740,28 @@ let pp_sgr ppf style =
   Format.pp_print_as ppf 0 style;
   Format.pp_print_as ppf 0 "m"
 
-let curr_style = attr ()
+let curr_style = attr Fun.id Fun.id
 
 let styled style pp_v ppf v = match style_renderer ppf with
 | `None -> pp_v ppf v
 | `Ansi_tty ->
-    let curr = match get curr_style ppf with
-    | None -> let s = ref "0" in set curr_style s ppf; s
+    let prev = match get curr_style ppf with
+    | None -> let zero = "0" in set curr_style zero ppf; zero
     | Some s -> s
     in
-    let prev = !curr and here = ansi_style_code style in
-    curr := (match style with `None -> here | _ -> prev ^ ";" ^ here);
-    try pp_sgr ppf here; pp_v ppf v; pp_sgr ppf prev; curr := prev with
-    | e -> curr := prev; raise e
+    let here = ansi_style_code style in
+    let curr = match style with
+    | `None -> here
+    | _ -> String.concat ";" [prev; here]
+    in
+    let finally () = set curr_style prev ppf in
+    set curr_style curr ppf;
+    Fun.protect ~finally @@ fun () ->
+    pp_sgr ppf here; pp_v ppf v; pp_sgr ppf prev
 
 (* Records *)
 
-external id : 'a -> 'a = "%identity"
+let id = Fun.id
 let label = styled (`Fg `Yellow) string
 let field ?(label = label) ?(sep = any ":@ ") l prj pp_v ppf v =
   pf ppf "@[<1>%a%a%a@]" label l sep () pp_v (prj v)

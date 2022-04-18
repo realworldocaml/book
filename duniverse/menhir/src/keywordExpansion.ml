@@ -19,8 +19,6 @@ open CodeBits
 let posvar_ = function
   | Position (subject, where, flavor) ->
       posvar subject where flavor
-  | _ ->
-      assert false (* [posvar_] should be applied to a position keyword *)
 
 (* [symbolstartpos producers i n] constructs an expression which, beginning at
    index [i], looks for the first non-empty producer and returns its start

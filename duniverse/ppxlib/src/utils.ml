@@ -14,7 +14,6 @@ module Kind = struct
     else None
 
   let describe = function Impl -> "implementation" | Intf -> "interface"
-
   let equal : t -> t -> bool = Poly.equal
 end
 
@@ -54,7 +53,6 @@ module Ast_io = struct
     | System_error of Location.Error.t * input_version
 
   type input_source = Stdin | File of string
-
   type input_kind = Possibly_source of Kind.t * string | Necessarily_binary
 
   let read_error_to_string (error : read_error) =
@@ -191,7 +189,6 @@ module Ast_io = struct
 
   module Read_bin = struct
     type ast = Intf of signature | Impl of structure
-
     type t = { ast : ast; input_name : string }
 
     let read_binary fn =
@@ -208,7 +205,6 @@ module Ast_io = struct
       | Error e -> Error (read_error_to_string e)
 
     let get_ast t = t.ast
-
     let get_input_name t = t.input_name
   end
 end

@@ -1,0 +1,5 @@
+version=0.20.1
+profile=janestreet
+let-binding-spacing=compact
+margin=70
+wrap-comments=true

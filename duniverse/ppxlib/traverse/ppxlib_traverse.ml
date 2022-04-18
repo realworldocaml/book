@@ -11,15 +11,10 @@ let vars_of_list ~get_loc l =
   List.mapi l ~f:(fun i x -> { txt = alphabet.(i); loc = get_loc x })
 
 let evar_of_var { txt; loc } = evar ~loc txt
-
 let pvar_of_var { txt; loc } = pvar ~loc txt
-
 let tvar_of_var { txt; loc } = ptyp_var ~loc txt
-
 let evars_of_vars = List.map ~f:evar_of_var
-
 let pvars_of_vars = List.map ~f:pvar_of_var
-
 let tvars_of_vars = List.map ~f:tvar_of_var
 
 module Backends = struct
@@ -37,7 +32,6 @@ module Backends = struct
   class type what =
     object
       method name : string
-
       inherit reconstructors
 
       method class_params :
@@ -50,7 +44,6 @@ module Backends = struct
 
       (* Basic combinator type *)
       method typ : loc:Location.t -> core_type -> core_type
-
       method any : loc:Location.t -> expression
 
       method combine :
@@ -63,17 +56,11 @@ module Backends = struct
   let mapper : what =
     object
       method name = "map"
-
       inherit reconstructors
-
       method class_params ~loc:_ = []
-
       method apply ~loc expr args = eapply ~loc expr args
-
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
-
       method typ ~loc ty = ptyp_arrow ~loc Nolabel ty ty
-
       method any ~loc = [%expr fun x -> x]
 
       method combine ~loc combinators ~reconstruct =
@@ -86,17 +73,11 @@ module Backends = struct
   let iterator : what =
     object
       method name = "iter"
-
       inherit reconstructors
-
       method class_params ~loc:_ = []
-
       method apply ~loc expr args = eapply ~loc expr args
-
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
-
       method typ ~loc ty = [%type: [%t ty] -> unit]
-
       method any ~loc = [%expr fun _ -> ()]
 
       method combine ~loc combinators ~reconstruct:_ =
@@ -110,7 +91,6 @@ module Backends = struct
   let folder : what =
     object
       method name = "fold"
-
       inherit reconstructors
 
       method class_params ~loc =
@@ -122,7 +102,6 @@ module Backends = struct
         eabstract ~loc [ patt; pvar ~loc "acc" ] expr
 
       method typ ~loc ty = [%type: [%t ty] -> 'acc -> 'acc]
-
       method any ~loc = [%expr fun _ acc -> acc]
 
       method combine ~loc combinators ~reconstruct:_ =
@@ -139,7 +118,6 @@ module Backends = struct
   let fold_mapper : what =
     object
       method name = "fold_map"
-
       inherit reconstructors
 
       method class_params ~loc =
@@ -151,7 +129,6 @@ module Backends = struct
         eabstract ~loc [ patt; pvar ~loc "acc" ] expr
 
       method typ ~loc ty = [%type: [%t ty] -> 'acc -> [%t ty] * 'acc]
-
       method any ~loc = [%expr fun x acc -> (x, acc)]
 
       method combine ~loc combinators ~reconstruct =
@@ -187,7 +164,6 @@ module Backends = struct
     let uses_ctx = uses_var "ctx" in
     object
       method name = "map_with_context"
-
       inherit reconstructors
 
       method class_params ~loc =
@@ -200,7 +176,6 @@ module Backends = struct
         else eabstract ~loc [ pvar ~loc "_ctx"; patt ] expr
 
       method typ ~loc ty = [%type: 'ctx -> [%t ty] -> [%t ty]]
-
       method any ~loc = [%expr fun _ctx x -> x]
 
       method combine ~loc combinators ~reconstruct =
@@ -220,11 +195,8 @@ module Backends = struct
         [ (ptyp_var ~loc "res", (NoVariance, NoInjectivity)) ]
 
       method apply ~loc expr args = eapply ~loc expr args
-
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
-
       method typ ~loc ty = [%type: [%t ty] -> 'res]
-
       method any ~loc = [%expr self#other]
 
       method combine ~loc combinators ~reconstruct =
@@ -479,11 +451,8 @@ let lift_virtual_methods ~loc methods =
         class virtual blah =
           object
             method virtual record : (string * 'res) list -> 'res
-
             method virtual constr : string -> 'res list -> 'res
-
             method virtual tuple : 'res list -> 'res
-
             method virtual other : 'a. 'a -> 'res
           end]
     with

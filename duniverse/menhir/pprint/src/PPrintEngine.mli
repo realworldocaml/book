@@ -68,8 +68,15 @@ val utf8format: ('a, unit, string, document) format4 -> 'a
     groups are dissolved. *)
 val hardline: document
 
-(** [blank n] is a document that consists of [n] blank characters. *)
+(** [blank n] is a document that consists of [n] blank characters. A blank
+    character is like an ordinary ASCII space character [char ' '], except
+    that blank characters that appear at the end of a line are automatically
+    suppressed. *)
 val blank: int -> document
+
+(** [space] is a synonym for [blank 1]. It consists of one blank character.
+    It is therefore not equivalent to [char ' ']. *)
+val space: document
 
 (** [break n] is a document which consists of either [n] blank characters,
     when forced to display on a single line, or a single newline character,

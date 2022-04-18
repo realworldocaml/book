@@ -80,7 +80,7 @@ test.
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 1; 2; 3 ]
 ```
 
 The test passes if the expression on the right-hand side of the
@@ -92,6 +92,7 @@ running via the test runner.
 $ dune runtest
 ```
 
+\noindent
 No output is generated because the test passed successfully.
 But if we break the test,
 
@@ -99,14 +100,15 @@ But if we break the test,
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 3; 2; 1 ]
 ```
 
+\noindent
 we'll see an error when we run it.
 
 ```sh dir=examples/erroneous/broken_inline_test
 $ dune runtest
-File "test.ml", line 3, characters 0-66: rev is false.
+File "test.ml", line 3, characters 0-74: rev is false.
 
 FAILED 1 / 1 tests
 [1]
@@ -141,26 +143,20 @@ appropriately.
  (inline_tests))
 ```
 
-Rather than add extensions one by one as we find more uses, we'll just
-use `ppx_jane` throughout the rest of this chapter, which bundles
-together `ppx_inline_test` along with a collection of other useful
-preprocessors.
-
-Here's what our new test looks like. You'll notice that it's a little
-more concise this way.
+Here's what our new test looks like.
 
 ```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
 open Base
 
 let%test_unit "rev" =
-  [%test_eq: int list] (List.rev [3;2;1]) [3;2;1]
+  [%test_eq: int list] (List.rev [ 3; 2; 1 ]) [ 3; 2; 1 ]
 ```
 
-Here's what it looks like when we run the test.
+Now we can run the test to see what the output looks like.
 
 ```sh dir=examples/erroneous/test_eq-inline_test
 $ dune runtest
-File "test.ml", line 3, characters 0-71: rev threw
+File "test.ml", line 3, characters 0-79: rev threw
 (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
   ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
   Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
@@ -172,9 +168,9 @@ FAILED 1 / 1 tests
 ```
 
 As you can see, the data that caused the comparison to fail is printed
-out, along with the stacktrace.  Note that in this case the stacktrace
-is mostly a distraction, which is a downside of using exceptions to
-report test failures.
+out, along with the stacktrace.  Sadly, the stacktrace is in this case
+mostly a distraction. That's a downside of using exceptions to report
+test failures.
 
 ### Where should tests go?
 
@@ -221,7 +217,7 @@ to do the test that's important but is really awkward to expose.  But
 such cases are very much the exception.
 
 ::: {data-type=note}
-##### Why can't inline tests go in executables?
+#### Why can't inline tests go in executables?
 
 We've only talked about putting tests into libraries. What about
 executables? It turns out you can't do this directly, because Dune
@@ -236,9 +232,9 @@ test framework.
 
 So, how do we test code that's part of an executable? The solution is
 to break up your program in to two pieces: a directory containing a
-library that contains the logic of your program, but no dangerous
-top-level effects; and a directory for the executable that links in
-the library, and is responsible for launching the code.
+library that contains the logic of your program, but no top-level
+effects; and a directory for the executable that links in the library,
+and is responsible for launching the code.
 
 :::
 
@@ -264,12 +260,11 @@ isn't captured in the source, at least, not yet.
 open! Base
 open Stdio
 
-let%expect_test "trivial" =
-  print_endline "Hello World!"
+let%expect_test "trivial" = print_endline "Hello World!"
 ```
 
 ::: {data-type=note}
-##### `open` and `open!`
+#### `open` and `open!`
 
 In this example, we use `open!` instead of `open` because we happen
 not to be using any values from `Base`, and so the compiler will warn
@@ -289,11 +284,9 @@ not to.
 
 If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
-`[%expect]` clause containing the output.
-
-Note that Dune will use the `patdiff` tool if it's available, which
-generates easier-to-read diffs.  You can install `patdiff` with
-`opam`.
+`[%expect]` clause containing the output.  Note that Dune will use the
+`patdiff` tool if it's available, which generates easier-to-read
+diffs.  You can install `patdiff` with `opam`.
 
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
@@ -342,9 +335,9 @@ open Stdio
 
 let%expect_test "multi-block" =
   print_endline "Hello";
-  [%expect{| Hello |}];
+  [%expect {| Hello |}];
   print_endline "World!";
-  [%expect{| World! |}]
+  [%expect {| World! |}]
 ```
 
 
@@ -358,17 +351,18 @@ open Base
 open Stdio
 
 let%expect_test _ =
-  print_s [%sexp (List.rev [3;2;1] : int list)];
+  print_s [%sexp (List.rev [ 3; 2; 1 ] : int list)];
   [%expect {| (1 2 3) |}]
 ```
 
+\noindent
 be preferable to this?
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
 open Base
 
 let%test "rev" =
-  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [ 3; 2; 1 ]) [ 1; 2; 3 ]
 ```
 
 Indeed, for examples like this, expect tests aren't better: simple
@@ -386,10 +380,12 @@ different example use-cases to see why.
 ### Exploratory programming
 
 Expect tests can be especially helpful when you're in exploration
-mode, and have no clear specification in advance.  A routine
-programming task of this type is web-scraping.  The goal is to extract
-some useful information from a web page, and figuring out the right
-way to do so often involves trial and error.
+mode, where you're trying to solve a problem by playing around with
+the data, and have no clear specification in advance.
+
+A common programming task of this type is web-scraping, where the goal
+is generally to extract some useful information from a web page.
+Figuring out the right way to do so often involves trial and error.
 
 Here's some code that does this kind of data extraction, using the
 `lambdasoup` package to traverse a chunk of HTML and spit out some
@@ -414,7 +410,8 @@ example page.
 
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
-  let example_html = {|
+  let example_html =
+    {|
     <html>
       Some random <b>text</b> with a
       <a href="http://ocaml.org/base">link</a>.
@@ -429,7 +426,7 @@ let%expect_test _ =
 ```
 
 ::: {data-type=note}
-##### Quoted strings
+#### Quoted strings
 
 The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.
@@ -449,8 +446,8 @@ literals.  Consider the following examples.
 ```
 
 As you can see, we didn't need to escape the included quote, though
-the version of the string echoed back by the toplevel uses the
-ordinary string literal syntax, and so that does include the escape.
+the version of the string echoed back by the toplevel uses ordinary
+string literal syntax, and so the quote there comes out escaped.
 
 Quoted strings are especially useful when writing strings containing
 text from another language, like HTML.  With quoted strings, you can
@@ -463,14 +460,11 @@ for the quoted string by adding an arbitrary identifier, thereby
 ensuring that the delimiter won't show up in the body of the string.
 
 ```ocaml env=main
-# {xxx|This is how you write a {|quoted string|}|xxx};;
-- : string = "This is how you write a {|quoted string|}"
+# {xxx|This is how you quote a {|quoted string|}|xxx};;
+- : string = "This is how you quote a {|quoted string|}"
 ```
 
 :::
-
-
-
 
 If we run the test, we'll see that the output isn't exactly what was
 intended.
@@ -518,6 +512,7 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
+\noindent
 And if we run the test again, we'll see that the output is now as it
 should be.
 
@@ -559,7 +554,10 @@ Expect tests can be used to examine the dynamic behavior of a system.
 Let's walk through a simple example: a rate limiter.  The job of a
 rate limiter is to bound the rate at which a system consumes a
 particular resource.  The following is the `mli` for a library that
-specifies the logic of a simple rolling-window-style rate limiter.
+specifies the logic of a simple rolling-window-style rate limiter,
+where the intent is to make sure that there's no window of time of the
+specified period during which more than a specified number of events
+occurs.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/rate_limiter.mli
 open Core
@@ -580,7 +578,10 @@ open Core
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
 let limiter () =
-  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:2
+  Rate_limiter.create
+    ~now:start_time
+    ~period:(Time_ns.Span.of_sec 1.)
+    ~rate:2
 
 let consume lim offset =
   let result =
@@ -627,52 +628,8 @@ let%expect_test _ =
   [%expect {|  |}]
 ```
 
-Running the tests will produce a corrected file that includes the
-execution traces.
-
-<!-- ```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE -->
-
-```sh dir=examples/erroneous/rate_limiter_incomplete,unset-INSIDE_DUNE,non-deterministic=command
-$ dune runtest
-     patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
------- test.ml
-++++++ test.ml.corrected
-File "test.ml", line 32, characters 0-1:
- |    "%4.2f: %s\n"
- |    offset
- |    (match result with
- |    | `Consumed -> "C"
- |    | `No_capacity -> "N")
- |
- |
- |[@@@part "2"];;
- |
- |let%expect_test _ =
- |  let lim = limiter () in
- |  let consume offset = consume lim offset in
- |  (* Exhaust the rate limit, without advancing the clock. *)
- |  for _ = 1 to 3 do
- |    consume 0.
- |  done;
--|  [%expect {| |}];
-+|  [%expect {|
-+|    0.00: C
-+|    0.00: C
-+|    0.00: C |}];
- |  (* Wait until a half-second has elapsed, try again *)
- |  consume 0.5;
--|  [%expect {| |}];
-+|  [%expect {| 0.50: C |}];
- |  (* Wait until a full second has elapsed, try again *)
- |  consume 1.;
--|  [%expect {|  |}]
-+|  [%expect {| 1.00: C |}]
-[1]
-```
-
-Running `dune promote` will accept the corrected file, leaving our
-test looking like this:
+Running the tests and accepting the promotions will include the
+execution trace.
 
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=2
 let%expect_test _ =
@@ -682,8 +639,7 @@ let%expect_test _ =
   for _ = 1 to 3 do
     consume 0.
   done;
-  [%expect
-    {|
+  [%expect {|
     0.00: C
     0.00: C
     0.00: C |}];
@@ -727,8 +683,7 @@ let%expect_test _ =
   for _ = 1 to 3 do
     consume 0.
   done;
-  [%expect
-    {|
+  [%expect {|
     0.00: C
     0.00: C
     0.00: N |}];
@@ -741,10 +696,10 @@ let%expect_test _ =
 ```
 
 One of the things that makes this test readable is that we went to
-some trouble to make the example concise. Some of this was about
-creating some simple helpers, and some of it was about having a
-concise and noise-free format for the data captured by the expect
-blocks.
+some trouble to keep the code short and easy to read. Some of this was
+about creating useful helper functions, and some of it was about
+having a concise and noise-free format for the data captured by the
+expect blocks.
 
 ### End-to-end tests
 
@@ -753,8 +708,10 @@ any IO or interacting with system resources.  As a result, these tests
 are fast to run and entirely deterministic.
 
 That's a great ideal, but it's not always achievable, especially when
-you want to run more end-to-end tests of your program.  But expect
-tests are still a useful tool for such tests.
+you want to run more end-to-end tests of your program.  But even if
+you need to run tests that involved multiple processes interacting
+with each other and using real IO, expect tests are still a useful
+tool.
 
 To see how such tests can be built, we'll write some tests for the
 echo server we developed in [Concurrent Programming with
@@ -775,7 +732,10 @@ our echo-server implementation.
 ```
 
 The important line is the last one, where in the `inline_tests`
-declaration, we declare a dependency on the echo-server binary.
+declaration, we declare a dependency on the echo-server binary.  Also,
+note that rather than select useful preprocessors one by one, we used
+the omnibus `ppx_jane` package, which bundles together a collection of
+useful extensions.
 
 That done, our next step is to write some helper functions.  We won't
 show the implementation, but here's the signature for our `Helpers`
@@ -812,9 +772,10 @@ open Helpers
 
 let%expect_test "test uppercase echo" =
   let port = 8081 in
-  let%bind process  = launch ~port ~uppercase:true in
-  Monitor.protect (fun () ->
-      let%bind (r,w) = connect ~port in
+  let%bind process = launch ~port ~uppercase:true in
+  Monitor.protect
+    (fun () ->
+      let%bind r, w = connect ~port in
       let%bind () = send_data r w "one two three\n" in
       let%bind () = [%expect] in
       let%bind () = send_data r w "one 2 three\n" in
@@ -907,12 +868,12 @@ adding a retry loop to the `connect` test helper
 ```ocaml file=examples/correct/echo_test_reconnect/test/helpers.ml,part=connect
 let rec connect ~port =
   match%bind
-    Monitor.try_with
-      (fun () ->
-         Tcp.connect
-           (Tcp.Where_to_connect.of_host_and_port {host="localhost";port}))
+    Monitor.try_with (fun () ->
+        Tcp.connect
+          (Tcp.Where_to_connect.of_host_and_port
+             { host = "localhost"; port }))
   with
-  | Ok (_,r,w) -> return (r,w)
+  | Ok (_, r, w) -> return (r, w)
   | Error _ ->
     let%bind () = Clock.after (Time.Span.of_sec 0.01) in
     connect ~port
@@ -956,7 +917,7 @@ Many tests amount to little more than individual examples decorated
 with simple assertions to check this or that property.  *Property
 testing* is a useful extension of this approach, which lets you
 explore a much larger portion of your code's behavior with only a
-small amount of extra code.
+small amount of programmer effort.
 
 The basic idea is simple enough. A property test requires two things:
 a function that takes an example input and checks that a given
@@ -974,6 +935,7 @@ connecting three operations:
 - `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
   `Negative` and vice versa.
 
+\noindent
 The invariant we want to check is that the sign of the negation of any
 integer `x` is the flip of the sign of `x`.
 
@@ -991,6 +953,7 @@ let%test_unit "negation flips the sign" =
   done
 ```
 
+\noindent
 As you might expect, the test passes.
 
 ```sh dir=examples/correct/manual_property_test
@@ -998,8 +961,8 @@ $ dune runtest
 ```
 
 One choice we had to make in our implementation is which probability
-distribution to use for selecting examples.  This may seem like an
-unimportant question, but when it comes to testing, not all
+distribution to use for selecting examples.  This may not seem like an
+important question, but it is. When it comes to testing, not all
 probability distributions are created equal.
 
 Indeed, the choice we made, which was to pick integers uniformly and
@@ -1021,14 +984,16 @@ that can be used without `Core`.
 open Core
 
 let%test_unit "negation flips the sign" =
-  Quickcheck.test ~sexp_of:[%sexp_of: int]
+  Quickcheck.test
+    ~sexp_of:[%sexp_of: int]
     (Int.gen_incl Int.min_value Int.max_value)
     ~f:(fun x ->
-        [%test_eq: Sign.t]
-          (Int.sign (Int.neg x))
-          (Sign.flip (Int.sign x)))
+      [%test_eq: Sign.t]
+        (Int.sign (Int.neg x))
+        (Sign.flip (Int.sign x)))
 ```
 
+\noindent
 Note that we didn't explicitly state how many examples should be
 tested. Quickcheck has a built in default which can be overridden by
 way of an optional argument.
@@ -1077,7 +1042,11 @@ for the negation of `min_value` to be equal to itself.
 ```
 
 Quickcheck's insistence on tracking and testing special cases is what
-allowed it to find this error.
+allowed us to discover this unexpected behavior.  Note that in this
+case, it's not really a bug that we've uncovered, it's just that the
+property that we thought would should hold can't in practice.  But
+either way, Quickcheck helped us understand the behavior of our code
+better.
 
 <!-- TODO avsm: could you expand on this a little? You mention the -->
 <!-- probability distribution above is special, so does QC combine -->
@@ -1105,10 +1074,10 @@ let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
     gen_int_list_pair
-    ~f:(fun (l1,l2) ->
-        [%test_eq: int list]
-          (List.rev_append l1 l2)
-          (List.append (List.rev l1) l2))
+    ~f:(fun (l1, l2) ->
+      [%test_eq: int list]
+        (List.rev_append l1 l2)
+        (List.append (List.rev l1) l2))
 ```
 
 Here, we made use of `Quickcheck.Generator.both`, which is useful for
@@ -1117,10 +1086,10 @@ types.
 
 ```ocaml env=main
 # open Core;;
-# Quickcheck.Generator.both;;
-- : 'a Base_quickcheck.Generator.t ->
-    'b Base_quickcheck.Generator.t -> ('a * 'b) Base_quickcheck.Generator.t
-= <fun>
+# #show Quickcheck.Generator.both;;
+val both :
+  'a Base_quickcheck.Generator.t ->
+  'b Base_quickcheck.Generator.t -> ('a * 'b) Base_quickcheck.Generator.t
 ```
 
 The declaration of the generator is pretty simple, but it's also
@@ -1135,28 +1104,21 @@ let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
     [%quickcheck.generator: int list * int list]
-    ~f:(fun (l1,l2) ->
-        [%test_eq: int list]
-          (List.rev_append l1 l2)
-          (List.append (List.rev l1) l2))
+    ~f:(fun (l1, l2) ->
+      [%test_eq: int list]
+        (List.rev_append l1 l2)
+        (List.append (List.rev l1) l2))
 ```
 
 This also works with other, more complex data-types, like variants.
 Here's a simple example.
 
 ```ocaml env=main
-# type shape =
-    | Circle of { radius: float }
-    | Rect of { height: float; width: float }
-    | Poly of (float * float) list
-  [@@deriving quickcheck];;
 type shape =
-    Circle of { radius : float; }
-  | Rect of { height : float; width : float; }
+  | Circle of { radius: float }
+  | Rect of { height: float; width: float }
   | Poly of (float * float) list
-val quickcheck_generator_shape : shape Base_quickcheck.Generator.t = <abstr>
-val quickcheck_observer_shape : shape Base_quickcheck.Observer.t = <abstr>
-val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
+[@@deriving quickcheck];;
 ```
 
 This will make a bunch of reasonable default decisions, like picking
@@ -1165,18 +1127,11 @@ annotations to adjust this, for example, by specifying the weight on a
 particular variant.
 
 ```ocaml env=main
-# type shape =
-    | Circle of { radius: float } [@quickcheck.weight 0.5]
-    | Rect of { height: float; width: float }
-    | Poly of (float * float) list
-  [@@deriving quickcheck];;
 type shape =
-    Circle of { radius : float; }
-  | Rect of { height : float; width : float; }
+  | Circle of { radius: float } [@quickcheck.weight 0.5]
+  | Rect of { height: float; width: float }
   | Poly of (float * float) list
-val quickcheck_generator_shape : shape Base_quickcheck.Generator.t = <abstr>
-val quickcheck_observer_shape : shape Base_quickcheck.Observer.t = <abstr>
-val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
+[@@deriving quickcheck];;
 ```
 
 Note that the default weight on each case is `1`, so now `Circle` will
@@ -1192,12 +1147,9 @@ supports operators like `bind` and `map`, which we first presented in
 an error handling context in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 
-In combination with `Let_syntax`, the generator monad gives us a
-convenient way to specify generators for custom types.  Imagine we
-wanted to construct a generator for the `shape` type defined above.
-
-Here's an example generator where we make sure that the radius,
-height, and width of the shape in question can't be negative.
+In combination with let syntax, the generator monad gives us a
+convenient way to specify generators for custom types.  Here's an
+example generator for the `shape` type above.
 
 ```ocaml env=main
 # let gen_shape =
@@ -1208,9 +1160,8 @@ height, and width of the shape in question can't be negative.
       Circle { radius }
     in
     let rect =
-      let%map height = G.float_positive_or_zero
-      and width = G.float_positive_or_zero
-      in
+      let%bind height = G.float_positive_or_zero in
+      let%map width = G.float_inclusive height Float.infinity in
       Rect { height; width }
     in
     let poly =
@@ -1220,24 +1171,27 @@ height, and width of the shape in question can't be negative.
       in
       Poly points
     in
-    G.union [circle; rect; poly];;
+    G.union [ circle; rect; poly ];;
 val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 ```
 
 Throughout this function we're making choices about the probability
 distribution. For example, the use of the `union` operator means that
 circles, rectangles and polygons will be equally likely. We could have
-used `weighted_union` to pick a different distribution.
+used `weighted_union` to pick a different distribution.  Also, we've
+ensured that all float values are non-negative, and that the width of
+the rectangle is no smaller than its height.
 
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
+
 <!-- TODO avsm: could be optimistic and link to v3.ocaml.org docs -->
 
 ## Other testing tools
 
 The testing tools we've described in this chapter cover a lot of
-ground, but there are other tools that are worth knowing about.
+ground, but there are other tools worth knowing about.
 
 ### Other tools to do (mostly) the same things
 
@@ -1254,6 +1208,7 @@ the testing tools we've featured in this chapter.
   These are great for testing command-line utilities, and are inspired
   by Mercurial's testing framework.
 
+\noindent
 Which of these you might end up preferring is to some degree a matter
 of taste.
 

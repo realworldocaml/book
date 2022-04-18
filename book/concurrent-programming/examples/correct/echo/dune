@@ -1,3 +1,4 @@
 (executable
   (name      echo)
-  (libraries core async))
+  (libraries core async)
+  (preprocess (pps ppx_jane)))

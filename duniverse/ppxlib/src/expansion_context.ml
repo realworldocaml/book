@@ -6,11 +6,8 @@ module Base = struct
     { tool_name; code_path; input_name }
 
   let code_path t = t.code_path
-
   let input_name t = t.input_name
-
   let tool_name t = t.tool_name
-
   let enter_expr t = { t with code_path = Code_path.enter_expr t.code_path }
 
   let enter_module ~loc name t =
@@ -24,13 +21,9 @@ module Extension = struct
   type t = { extension_point_loc : Location.t; base : Base.t }
 
   let make ~extension_point_loc ~base () = { extension_point_loc; base }
-
   let extension_point_loc t = t.extension_point_loc
-
   let code_path t = t.base.code_path
-
   let input_name t = t.base.input_name
-
   let tool_name t = t.base.tool_name
 
   let with_loc_and_path f ~ctxt =
@@ -45,13 +38,9 @@ module Deriver = struct
     { derived_item_loc; base; inline }
 
   let derived_item_loc t = t.derived_item_loc
-
   let code_path t = t.base.code_path
-
   let input_name t = t.base.input_name
-
   let tool_name t = t.base.tool_name
-
   let inline t = t.inline
 
   let with_loc_and_path f ~ctxt =

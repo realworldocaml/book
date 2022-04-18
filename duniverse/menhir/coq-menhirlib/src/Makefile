@@ -1,34 +1,28 @@
-PWD := $(shell pwd)
+# The template of this Makefile has been taken from:
+# https://coq.inria.fr/refman/practical-tools/utilities.html
 
-COQINCLUDE := -R . MenhirLib \
+# KNOWNTARGETS will not be passed along to CoqMakefile
+KNOWNTARGETS := CoqMakefile
+# KNOWNFILES will not get implicit targets from the final rule, and so
+# depending on them won't invoke the submake
+# Warning: These files get declared as PHONY, so any targets depending
+# on them always get rebuilt
+KNOWNFILES   := Makefile _CoqProject
 
-export COQINCLUDE
+.DEFAULT_GOAL := invoke-coqmakefile
 
-.PHONY: all clean install uninstall
+CoqMakefile: Makefile _CoqProject
+	$(COQBIN)coq_makefile -f _CoqProject -o CoqMakefile
 
-all: _CoqProject
-	@ $(MAKE) -f Makefile.coq --no-print-directory all
+invoke-coqmakefile: CoqMakefile
+	$(MAKE) --no-print-directory -f CoqMakefile $(filter-out $(KNOWNTARGETS),$(MAKECMDGOALS))
 
-_CoqProject:
-	@ $(MAKE) -f Makefile.coq --no-print-directory _CoqProject
+.PHONY: invoke-coqmakefile $(KNOWNFILES)
 
-clean:
-	@ $(MAKE) -f Makefile.coq --no-print-directory clean
-	@ rm -f _CoqProject
+####################################################################
+##                      Your targets here                         ##
+####################################################################
 
-# The role of DESTDIR is explained here:
-# https://www.gnu.org/prep/standards/html_node/DESTDIR.html
-# Basically, it is empty in a normal installation.
-# A nonempty value can be used to perform a dummy installation
-# in a different location.
-
-CONTRIB = $(shell $(COQBIN)coqc -where  | tr -d '\r' | tr '\\' '/')/user-contrib
-TARGET  = $(DESTDIR)$(CONTRIB)/MenhirLib
-
-install: all
-	rm -rf $(TARGET)
-	mkdir -p $(TARGET)
-	install -m 644 *.v *.vo *.glob $(TARGET)
-
-uninstall:
-	rm -rf $(TARGET)
+# This should be the last rule, to handle any targets not declared above
+%: invoke-coqmakefile
+	@true

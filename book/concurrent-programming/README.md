@@ -48,8 +48,8 @@ Recall how I/O is typically done in Core. Here's a simple example.
 
 ```ocaml env=main
 # open Core;;
-# In_channel.read_all;;
-- : string -> string = <fun>
+# #show In_channel.read_all;;
+val read_all : string -> string
 # Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 - : unit = ()
 # In_channel.read_all "test.txt";;
@@ -70,8 +70,8 @@ equivalent of `In_channel.read_all`. [Deferred.t]{.idx}
 ```ocaml env=main
 # #require "async";;
 # open Async;;
-# Reader.file_contents;;
-- : string -> string Deferred.t = <fun>
+# #show Reader.file_contents;;
+val file_contents : string -> string Deferred.t
 ```
 
 We first load the Async package in the toplevel using `#require`, and then
@@ -120,10 +120,11 @@ deferred computation to finish, which we do using `Deferred.bind`. Here's the
 type-signature of `bind`.
 
 ```ocaml env=main
-# Deferred.bind;;
-- : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+# #show Deferred.bind;;
+val bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t
 ```
 
+\noindent
 `bind` is effectively a way of sequencing concurrent computations. In
 particular, `Deferred.bind d ~f` causes `f` to be called after the value of
 `d` has been determined. [Deferred.bind]{.idx}
@@ -159,10 +160,10 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
-In the preceding code, we've dropped the parentheses around the
-function on the righthand side of the bind, and we didn't add a level
-of indentation for the contents of that function. This is standard
-practice for using the infix `bind` operator. [bind function]{.idx}
+Here, we've dropped the parentheses around the function on the
+righthand side of the bind, and we didn't add a level of indentation
+for the contents of that function. This is standard practice for using
+the infix `bind` operator. [bind function]{.idx}
 
 Now let's look at another potential use of `bind`. In this case, we'll write
 a function that counts the number of lines in a file:
@@ -185,8 +186,8 @@ Async that takes an ordinary value and wraps it up in a deferred.
 [return function]{.idx}
 
 ```ocaml env=main
-# return;;
-- : 'a -> 'a Deferred.t = <fun>
+# #show_val return;;
+val return : 'a -> 'a Deferred.t
 # let three = return 3;;
 val three : int Deferred.t = <abstr>
 # three;;
@@ -203,10 +204,11 @@ Using `return`, we can make `count_lines` compile:
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
-Together, `bind` and `return` form a design pattern in functional programming
-known as a *monad*. You'll run across this signature in many applications
-beyond just threads. Indeed, we already ran across monads in
-[Bind And Other Error Handling Idioms](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+Together, `bind` and `return` form a design pattern in functional
+programming known as a *monad*. You'll run across this signature in
+many applications beyond just threads. Indeed, we already ran across
+monads in [Bind And Other Error Handling
+Idioms](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 [monads]{.idx}
 
 Calling `bind` and `return` together is a fairly common pattern, and as such
@@ -214,12 +216,13 @@ there is a standard shortcut for it called `Deferred.map`, which has the
 following signature:
 
 ```ocaml env=main
-# Deferred.map;;
-- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
+# #show Deferred.map;;
+val map : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t
 ```
 
-and comes with its own infix equivalent, `>>|`. Using it, we can rewrite
-`count_lines` again a bit more succinctly:
+\noindent
+and comes with its own infix equivalent, `>>|`. Using it, we can
+rewrite `count_lines` again a bit more succinctly:
 
 ```ocaml env=main,non-deterministic
 # let count_lines filename =
@@ -232,16 +235,15 @@ val count_lines : string -> int Deferred.t = <fun>
 ```
 
 Note that `count_lines` returns a deferred, but `utop` waits for that
-deferred to become determined, and shows us the contents of the deferred
-instead.
+deferred to become determined, and shows us the contents of the
+deferred instead.
 
-::: {data-type=note}
-##### Using `Let_syntax` with Async
+### Using let syntax
 
 As was discussed in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
-there is a special syntax designed for working with monads, which we
-can enable by enabling `ppx_let`.
+there is a special syntax, which we call *let syntax*, designed for
+working with monads, which we can enable by enabling `ppx_let`.
 
 ```ocaml env=main
 # #require "ppx_let";;
@@ -266,22 +268,20 @@ And here's the `map`-based version of `count_lines`.
 val count_lines : string -> int Deferred.t = <fun>
 ```
 
-The difference here is just syntactic, with these examples compiling down to
-the same thing as the corresponding examples written using infix operators.
-What's nice about `Let_syntax` is that it highlights the analogy between
-monadic bind and OCaml's built-in let-binding, thereby making your code more
-uniform and more readable.
+The difference here is just syntactic, with these examples compiling
+down to the same thing as the corresponding examples written using
+infix operators.  What's nice about let syntax is that it highlights
+the analogy between monadic bind and OCaml's built-in let-binding,
+thereby making your code more uniform and more readable.
 
-`Let_syntax` works for any monad, and you decide which monad is in use by
-opening the appropriate `Let_syntax` module. Opening `Async` also implicitly
-opens `Deferred.Let_syntax`, but in some contexts you may want to do that
-explicitly.
+Let syntax works for any monad, and you decide which monad is in use
+by opening the appropriate `Let_syntax` module. Opening `Async` also
+implicitly opens `Deferred.Let_syntax`, but in some contexts you may
+want to do that explicitly.
 
-To keep things simple, we'll use the infix notation for map and bind for the
-remainder of the chapter. But once you get comfortable with Async and monadic
-programming, we recommend using `Let_syntax`.
-:::
-
+For the most part, let syntax is easier to read and work with, and you
+should default to it when using Async, which is what we'll do for the
+remainder of the chapter.
 
 ### Ivars and Upon
 
@@ -344,8 +344,8 @@ we'll use an operator called `upon`, which has the following signature:
 [thunks]{.idx}
 
 ```ocaml env=main
-# upon;;
-- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>
+# #show upon;;
+val upon : 'a Deferred.t -> ('a -> unit) -> unit
 ```
 
 Like `bind` and `return`, `upon` schedules a callback to be executed when the
@@ -388,7 +388,7 @@ you should stick to the simpler map/bind/return style of working with
 deferreds when you can.
 
 ::: {data-type=note}
-##### Understanding `bind` in terms of ivars and `upon`
+#### Understanding `bind` in terms of ivars and `upon`
 
 Here's roughly what happens when you write `let d' = Deferred.bind d ~f`.
 
@@ -448,24 +448,26 @@ open Async
 (* Copy data from the reader to the writer, using the provided buffer
    as scratch space *)
 let rec copy_blocks buffer r w =
-  Reader.read r buffer
-  >>= function
+  match%bind Reader.read r buffer with
   | `Eof -> return ()
   | `Ok bytes_read ->
     Writer.write w (Bytes.to_string buffer) ~len:bytes_read;
-    Writer.flushed w
-    >>= fun () ->
+    let%bind () = Writer.flushed w in
     copy_blocks buffer r w
 ```
 
-Bind is used in the code to sequence the operations: first, we call
-`Reader.read` to get a block of input. Then, when that's complete and if a
-new block was returned, we write that block to the writer. Finally, we wait
-until the writer's buffers are flushed, waiting on the deferred returned by
-`Writer.flushed`, at which point we recurse. If we hit an end-of-file
-condition, the loop is ended. The deferred returned by a call to
-`copy_blocks` becomes determined only once the end-of-file condition is hit.
-[end-of-file condition]{.idx}
+Bind is used in the code to sequence the operations, with a `bind`
+marking each place we wait.
+
+- First, we call `Reader.read` to get a block of input.
+- When that's complete and if a new block was returned, we write that
+  block to the writer.
+- Finally, we wait until the writer's buffers are flushed, at which
+  point we recurse.
+
+If we hit an end-of-file condition, the loop is ended. The deferred
+returned by a call to `copy_blocks` becomes determined only once the
+end-of-file condition is hit.  [end-of-file condition]{.idx}
 
 One important aspect of how `copy_blocks` is written is that it provides
 *pushback*, which is to say that if the process can't make progress
@@ -476,7 +478,7 @@ unbounded amounts of memory, as it keeps track of all the data it
 intends to write but hasn't been able to yet.
 
 ::: {data-type=note}
-##### Tail-calls and chains of deferreds
+#### Tail-calls and chains of deferreds
 
 There's another memory problem you might be concerned about, which is
 the allocation of deferreds.  If you think about the execution of
@@ -485,20 +487,19 @@ time through the loop.  The length of this chain is unbounded, and so,
 naively, you'd think this would take up an unbounded amount of memory
 as the echo process continues.
 
-Happily, it turns out that this is a special case that Async knows how
-to optimize.  In particular, the whole chain of deferreds should
-become determined precisely when the final deferred in the chain is
-determined, in this case, when the `Eof` condition is hit.  Because of
-this, we could safely replace all of these deferreds with a single
-deferred.  Async does just this, and so there's no memory leak after
-all.
+Happily, this is a case that Async knows how to optimize.  In
+particular, the whole chain of deferreds should become determined
+precisely when the final deferred in the chain is determined, in this
+case, when the `Eof` condition is hit.  Because of this, we could
+safely replace all of these deferreds with a single deferred.  Async
+does just this, and so there's no memory leak after all.
 
 This is essentially a form of tail-call optimization, lifted to the
-Async monad.  Indeed, you can tell that the bind in question doesn't
-lead to a memory leak in more or less the same way you can tell that
-the tail recursion optimization should apply, which is that the bind
-that creates the deferred is in tail-position.  In other words,
-nothing is done to that deferred once it's created; it's simply
+Deferred monad.  Indeed, you can tell that the bind in question
+doesn't lead to a memory leak in more or less the same way you can
+tell that the tail recursion optimization should apply, which is that
+the bind that creates the deferred is in tail-position.  In other
+words, nothing is done to that deferred once it's created; it's simply
 returned as is.  [tail calls]{.idx}
 
 :::
@@ -518,10 +519,12 @@ let run () =
       ~on_handler_error:`Raise
       (Tcp.Where_to_listen.of_port 8765)
       (fun _addr r w ->
-         let buffer = Bytes.create (16 * 1024) in
-         copy_blocks buffer r w)
+        let buffer = Bytes.create (16 * 1024) in
+        copy_blocks buffer r w)
   in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
+  ignore
+    (host_and_port
+      : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 ```
 
 The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
@@ -573,13 +576,15 @@ $ killall echo.exe
 ```
 
 ::: {data-type=note}
-##### Functions that Never Return
+#### Functions that Never Return
 
-You might wonder what's going on with the call to `never_returns`.
-`never_returns` is an idiom that comes from Core that is used to mark
-functions that don't return. Typically, a function that doesn't return is
-inferred as having return type `'a`:
-[Scheduler.go]{.idx}[loop_forever]{.idx}[never_returns]{.idx}[functions/non-returning]{.idx}
+The call to `never_returns` around the call to `Scheduler.go` is a
+little bit surprising, but it has a purpose: to make it clear to
+whoever invokes `Scheduler.go` that the function never returns.
+[Scheduler.go]{.idx}[never_returns]{.idx}[functions/non-returning]{.idx}
+
+By default, a function that doesn't return will have an inferred
+return type of `'a`:
 
 ```ocaml env=main
 # let rec loop_forever () = loop_forever ();;
@@ -588,36 +593,58 @@ val loop_forever : unit -> 'a = <fun>
 val always_fail : unit -> 'a = <fun>
 ```
 
-This can be surprising when you call a function like this expecting it to
-return `unit`. The type-checker won't necessarily complain in such a case:
+This is a little odd, but it does make sense.  After all, if a
+function never returns, we're free to impute any type at all to its
+non-existant return value.  As a result, from a typing perspective, a
+function that never returns can fit in to any context within your
+program.
+
+But that itself can be problematic, especially with a function like
+`Scheduler.go`, where the fact that it never returns is perhaps not
+entirely obvious.  The point of `never_returns` is to create an
+explicit marker so the user knows that the function in question
+doesn't return.
+
+To do this, `Scheduler.go` is defined to have a return value of
+`Nothing.t`.
+[Nothing.t]{.idx}
 
 ```ocaml env=main
-# let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n;;
-val do_stuff : int -> int = <fun>
+# #show Scheduler.go;;
+val go : ?raise_unhandled_exn:bool -> unit -> never_returns
 ```
 
-With a name like `loop_forever`, the meaning is clear enough. But with
-something like `Scheduler.go`, the fact that it never returns is less clear,
-and so we use the type system to make it more explicit by giving it a return
-type of `never_returns`. Let's do the same trick with `loop_forever`:
+\noindent
+`never_returns` is just an alias of `Nothing.t`.
+
+`Nothing.t` is *uninhabited*, which means there are no values of that
+type.  As such, a function can't actually return a value of type
+`Nothing.t`, so only a function that never returns can have
+`Nothing.t` as its return type!  And we can cause a function that
+never returns to have a return value of `Nothing.t` by just adding a
+type annotation.
+[uninhabited type]{.idx}[type/uninhabited]{.idx}
 
 ```ocaml env=main
-# let rec loop_forever () : never_returns = loop_forever ();;
+# let rec loop_forever () : Nothing.t = loop_forever ();;
 val loop_forever : unit -> never_returns = <fun>
 ```
 
-The type `never_returns` is uninhabited, so a function can't return a value
-of type `never_returns`, which means only a function that never returns can
-have `never_returns` as its return type! Now, if we rewrite our `do_stuff`
-function, we'll get a helpful type error:
+The function `never_returns` consumes a value of type `Nothing.t` and
+returns an unconstrainted type `'a`.
+
+```ocaml env=main
+# #show_val never_returns;;
+val never_returns : never_returns -> 'a
+```
+
+If you try to write a function that uses `Scheduler.go`, and just
+assumes that it returns unit, you'll get a helpful type error.
 
 ```ocaml env=main
 # let do_stuff n =
     let x = 3 in
-    if n > 0 then loop_forever ();
+    if n > 0 then Scheduler.go ();
     x + n;;
 Line 3, characters 19-34:
 Error: This expression has type never_returns
@@ -625,20 +652,16 @@ Error: This expression has type never_returns
        because it is in the result of a conditional with no else branch
 ```
 
-We can resolve the error by calling the function `never_returns`:
+We can fix this by inserting a call to `never_returns`, thus making
+the fact that `Scheduler.go` doesn't return apparent to the reader.
 
 ```ocaml env=main
-# never_returns;;
-- : never_returns -> 'a = <fun>
 # let do_stuff n =
     let x = 3 in
-    if n > 0 then never_returns (loop_forever ());
+    if n > 0 then never_returns (Scheduler.go ());
     x + n;;
 val do_stuff : int -> int = <fun>
 ```
-
-Thus, we got the compilation to go through by explicitly marking in the
-source that the call to `loop_forever` never returns.
 
 :::
 
@@ -662,26 +685,35 @@ open Async
 
 let run ~uppercase ~port =
   let host_and_port =
-    Tcp.Server.create ~on_handler_error:`Raise
-      (Tcp.Where_to_listen.of_port port) (fun _addr r w ->
-        Pipe.transfer (Reader.pipe r) (Writer.pipe w)
+    Tcp.Server.create
+      ~on_handler_error:`Raise
+      (Tcp.Where_to_listen.of_port port)
+      (fun _addr r w ->
+        Pipe.transfer
+          (Reader.pipe r)
+          (Writer.pipe w)
           ~f:(if uppercase then String.uppercase else Fn.id))
   in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
+  ignore
+    (host_and_port
+      : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()
 
 let () =
-  Command.async ~summary:"Start an echo server"
-    Command.Let_syntax.(
-      let%map_open uppercase =
-        flag "-uppercase" no_arg
-          ~doc:" Convert to uppercase before echoing back"
-      and port =
-        flag "-port"
-          (optional_with_default 8765 int)
-          ~doc:" Port to listen on (default 8765)"
-      in
-      fun () -> run ~uppercase ~port)
+  Command.async
+    ~summary:"Start an echo server"
+    (let%map_open.Command uppercase =
+       flag
+         "-uppercase"
+         no_arg
+         ~doc:" Convert to uppercase before echoing back"
+     and port =
+       flag
+         "-port"
+         (optional_with_default 8765 int)
+         ~doc:" Port to listen on (default 8765)"
+     in
+     fun () -> run ~uppercase ~port)
   |> Command.run
 ```
 
@@ -719,8 +751,11 @@ in `utop`. You can break out of the wait by hitting **`Control-C`**:
 Interrupted.
 ```
 
-The deferred returned by write completes on its own once the value written
-into the pipe has been read out:
+That's because a pipe has a certain amount of internal slack, a number
+of slots in the pipe to which something can be written before the
+write will block. By default, a pipe has zero slack, which means that
+the deferred returned by a write is determined only when the value is
+read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
@@ -734,10 +769,11 @@ val write_complete : unit Deferred.t = <abstr>
 - : unit = ()
 ```
 
-In the function `run`, we're taking advantage of one of the many utility
-functions provided for pipes in the `Pipe` module. In particular, we're using
-`Pipe.transfer` to set up a process that takes data from a reader-pipe and
-moves it to a writer-pipe. Here's the type of `Pipe.transfer`:
+In the function `run`, we're taking advantage of one of the many
+utility functions provided for pipes in the `Pipe` module. In
+particular, we're using `Pipe.transfer` to set up a process that takes
+data from a reader-pipe and moves it to a writer-pipe. Here's the type
+of `Pipe.transfer`:
 
 ```ocaml env=main
 # Pipe.transfer;;
@@ -764,10 +800,9 @@ Opening `Async`, shadows the `Command` module with an extended version that
 contains the `async` call:
 
 ```ocaml env=main
-# Command.async_spec;;
-- : ('a, unit Deferred.t) Async.Command.basic_spec_command
-    Command.with_options
-= <fun>
+# #show Command.async_spec;;
+val async_spec :
+  ('a, unit Deferred.t) Async.Command.basic_spec_command Command.with_options
 ```
 
 This differs from the ordinary `Command.basic` call in that the main function
@@ -828,7 +863,9 @@ open Async
 
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
+  let base_uri =
+    Uri.of_string "http://api.duckduckgo.com/?format=json"
+  in
   Uri.add_query_param base_uri ("q", [ query ])
 ```
 
@@ -853,16 +890,19 @@ definition itself to come across under either the key "Abstract" or
 first one for which a nonempty value is defined:
 
 ```ocaml file=examples/correct/search/search.ml,part=1
-(* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
+(* Extract the "Definition" or "Abstract" field from the DuckDuckGo
+   results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
-  | `Assoc kv_list -> (
-      let find key =
-        match List.Assoc.find ~equal:String.equal kv_list key with
-        | None | Some (`String "") -> None
-        | Some s -> Some (Yojson.Safe.to_string s)
-      in
-      match find "Abstract" with Some _ as x -> x | None -> find "Definition" )
+  | `Assoc kv_list ->
+    let find key =
+      match List.Assoc.find ~equal:String.equal kv_list key with
+      | None | Some (`String "") -> None
+      | Some s -> Some (Yojson.Safe.to_string s)
+    in
+    (match find "Abstract" with
+    | Some _ as x -> x
+    | None -> find "Definition")
   | _ -> None
 ```
 
@@ -876,9 +916,9 @@ search engine/executing an HTTP client query in]{.idx}
 ```ocaml file=examples/correct/search/search.ml,part=2
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.get (query_uri word) >>= fun (_, body) ->
-  Cohttp_async.Body.to_string body >>| fun string ->
-  (word, get_definition_from_json string)
+  let%bind _, body = Cohttp_async.Client.get (query_uri word) in
+  let%map string = Cohttp_async.Body.to_string body in
+  word, get_definition_from_json string
 ```
 
 To better understand what's going on, it's useful to look at the type for
@@ -886,12 +926,12 @@ To better understand what's going on, it's useful to look at the type for
 
 ```ocaml env=main
 # #require "cohttp-async";;
-# Cohttp_async.Client.get;;
-- : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
-    ?headers:Cohttp.Header.t ->
-    Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
-= <fun>
+# #show Cohttp_async.Client.get;;
+val get :
+  ?interrupt:unit Deferred.t ->
+  ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
+  ?headers:Cohttp.Header.t ->
+  Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 ```
 
 The `get` call takes as a required argument a URI and returns a deferred
@@ -911,31 +951,34 @@ result:
 ```ocaml file=examples/correct/search/search.ml,part=3
 (* Print out a word/definition pair *)
 let print_result (word, definition) =
-  printf "%s\n%s\n\n%s\n\n" word
+  printf
+    "%s\n%s\n\n%s\n\n"
+    word
     (String.init (String.length word) ~f:(fun _ -> '-'))
-    ( match definition with
+    (match definition with
     | None -> "No definition found"
-    | Some def -> String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def)
-    )
+    | Some def ->
+      String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def))
 ```
 
 We use the `Wrapper` module from the `textwrap` package to do the line
-wrapping. It may not be obvious that this routine is using Async, but it
-does: the version of `printf` that's called here is actually Async's
-specialized `printf` that goes through the Async scheduler rather than
-printing directly. The original definition of `printf` is shadowed by this
-new one when you open `Async`. An important side effect of this is that if
-you write an Async program and forget to start the scheduler, calls like
-`printf` won't actually generate any output!
+wrapping. It may not be obvious that this routine is using Async, but
+it does: the version of `printf` that's called here is actually
+Async's specialized `printf` that goes through the Async scheduler
+rather than printing directly. The original definition of `printf` is
+shadowed by this new one when you open `Async`. An important side
+effect of this is that if you write an Async program and forget to
+start the scheduler, calls like `printf` won't actually generate any
+output!
 
-The next function dispatches the searches in parallel, waits for the results,
-and then prints:
+The next function dispatches the searches in parallel, waits for the
+results, and then prints:
 
 ```ocaml file=examples/correct/search/search.ml,part=4
-(* Run many searches in parallel, printing out the results after they're all
-   done. *)
+(* Run many searches in parallel, printing out the results after
+   they're all done. *)
 let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition) >>| fun results ->
+  let%map results = Deferred.all (List.map words ~f:get_definition) in
   List.iter results ~f:print_result
 ```
 
@@ -957,10 +1000,12 @@ We could rewrite this code to print out the results as they're
 received (and thus potentially out of order) as follows:
 
 ```ocaml file=examples/correct/search_out_of_order/search.ml,part=4
-(* Run many searches in parallel, printing out the results as you go *)
+(* Run many searches in parallel, printing out the results as you
+   go *)
 let search_and_print words =
   Deferred.all_unit
-    (List.map words ~f:(fun word -> get_definition word >>| print_result))
+    (List.map words ~f:(fun word ->
+         get_definition word >>| print_result))
 ```
 
 The difference is that we both dispatch the query and print out the result in
@@ -979,10 +1024,12 @@ Finally, we create a command-line interface using `Command.async`:
 
 ```ocaml file=examples/correct/search/search.ml,part=5
 let () =
-  Command.async ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Let_syntax.(
-      let%map_open words = anon (sequence ("word" %: string)) in
-      fun () -> search_and_print words)
+  Command.async
+    ~summary:"Retrieve definitions from duckduckgo search engine"
+    (let%map_open.Command words =
+       anon (sequence ("word" %: string))
+     in
+     fun () -> search_and_print words)
   |> Command.run
 ```
 
@@ -1040,9 +1087,8 @@ the two behaviors on subsequent calls:
     fun () ->
       let will_fail = !should_fail in
       should_fail := not will_fail;
-      after (Time.Span.of_sec 0.5)
-      >>= fun () ->
-      if will_fail then raise Exit else return ();;
+      let%map () = after (Time.Span.of_sec 0.5) in
+      if will_fail then raise Exit else ();;
 val maybe_raise : unit -> unit Deferred.t = <fun>
 # maybe_raise ();;
 - : unit = ()
@@ -1061,8 +1107,8 @@ can see that doesn't quite do the trick:
 ```ocaml env=main
 # let handle_error () =
     try
-      maybe_raise ()
-      >>| fun () -> "success"
+      let%map () = maybe_raise () in
+      "success"
     with _ -> return "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
 # handle_error ();;
@@ -1076,13 +1122,19 @@ thrown by the code executed synchronously within it, while
 `maybe_raise` schedules an Async job that will throw an exception in
 the future, after the `try/with` expression has exited.
 
-We can capture this kind of asynchronous error using the `try_with` function
-provided by Async: [exceptions/asynchronous errors]{.idx}
+We can capture this kind of asynchronous error using the `try_with`
+function provided by Async.  `try_with f` takes as its argument a
+deferred-returning thunk `f` and returns a deferred that becomes
+determined either as `Ok` of whatever `f` returned, or `Error exn` if
+`f` threw an exception before its return value became determined.
+[try_with]{.idx} [async/try_with]{.idx} [exceptions/asynchronous
+errors]{.idx}
+
+Here's a trivial example of `try_with` in action.
 
 ```ocaml env=main
 # let handle_error () =
-    try_with (fun () -> maybe_raise ())
-    >>| function
+    match%map try_with (fun () -> maybe_raise ()) with
     | Ok ()   -> "success"
     | Error _ -> "failure";;
 val handle_error : unit -> string Deferred.t = <fun>
@@ -1092,13 +1144,7 @@ val handle_error : unit -> string Deferred.t = <fun>
 - : string = "failure"
 ```
 
-`try_with f` takes as its argument a deferred-returning thunk `f` and returns
-a deferred that becomes determined either as `Ok` of whatever `f` returned,
-or `Error exn` if `f` threw an exception before its return value became
-determined.
-
-::: {data-type=note}
-##### Monitors
+### Monitors
 
 `try_with` is a useful tool for handling exceptions in Async, but it's
 not the whole story. All of Async's exception-handling mechanisms,
@@ -1151,8 +1197,8 @@ captures and ignores errors in the processes it spawns.
     Stream.iter (Monitor.detach_and_get_error_stream monitor)
       ~f:(fun _exn -> printf "an error happened\n");
     within' ~monitor (fun () ->
-      after (Time.Span.of_sec 0.25)
-      >>= fun () -> failwith "Kaboom!");;
+      let%bind () = after (Time.Span.of_sec 0.25) in
+      failwith "Kaboom!");;
 val swallow_error : unit -> 'a Deferred.t = <fun>
 ```
 
@@ -1193,8 +1239,8 @@ exception Ignore_me
         | Ignore_me -> printf "ignoring exn\n"
         | _ -> Monitor.send_exn parent_monitor error);
     within' ~monitor:child_monitor (fun () ->
-      after (Time.Span.of_sec 0.25)
-      >>= fun () -> raise exn_to_raise);;
+      let%bind () = after (Time.Span.of_sec 0.25) in
+      raise exn_to_raise);;
 val swallow_some_errors : exn -> 'a Deferred.t = <fun>
 ```
 
@@ -1235,8 +1281,6 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
-:::
-
 ### Example: Handling Exceptions with DuckDuckGo
 
 Let's now go back and improve the exception handling of our DuckDuckGo
@@ -1256,7 +1300,8 @@ server to connect to:
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
-    Uri.of_string (String.concat [ "http://"; server; "/?format=json" ])
+    Uri.of_string
+      (String.concat [ "http://"; server; "/?format=json" ])
   in
   Uri.add_query_param base_uri ("q", [ query ])
 ```
@@ -1287,33 +1332,39 @@ within each call to `get_definition`, as follows:
 ```ocaml file=examples/correct/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
-  try_with (fun () ->
-      Cohttp_async.Client.get (query_uri ~server word) >>= fun (_, body) ->
-      Cohttp_async.Body.to_string body >>| fun string ->
-      (word, get_definition_from_json string))
-  >>| function
-  | Ok (word, result) -> (word, Ok result)
-  | Error _ -> (word, Error "Unexpected failure")
+  match%map
+    try_with (fun () ->
+        let%bind _, body =
+          Cohttp_async.Client.get (query_uri ~server word)
+        in
+        let%map string = Cohttp_async.Body.to_string body in
+        word, get_definition_from_json string)
+  with
+  | Ok (word, result) -> word, Ok result
+  | Error _ -> word, Error "Unexpected failure"
 ```
 
-Here, we first use `try_with` to capture the exception, and then use map (the
-`>>|` operator) to convert the error into the form we want: a pair whose
-first element is the word being searched for, and the second element is the
-(possibly erroneous) result.
+Here, we first use `try_with` to capture the exception, and then use
+`match%map` (another syntax provided by `ppx_let`) to convert the
+error into the form we want: a pair whose first element is the word
+being searched for, and the second element is the (possibly erroneous)
+result.
 
-Now we just need to change the code for `print_result` so that it can handle
-the new type:
+Now we just need to change the code for `print_result` so that it can
+handle the new type:
 
 ```ocaml file=examples/correct/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
 let print_result (word, definition) =
-  printf "%s\n%s\n\n%s\n\n" word
+  printf
+    "%s\n%s\n\n%s\n\n"
+    word
     (String.init (String.length word) ~f:(fun _ -> '-'))
-    ( match definition with
+    (match definition with
     | Error s -> "DuckDuckGo query failed: " ^ s
     | Ok None -> "No definition found"
     | Ok (Some def) ->
-        String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def) )
+      String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def))
 ```
 
 Now, if we run that same query, we'll get individualized handling of the
@@ -1337,14 +1388,16 @@ Caml language with object-oriented programming constructs."
 
 ```
 
+\noindent
 Now, only the query that went to `localhost` failed.
 
 Note that in this code, we're relying on the fact that
-`Cohttp_async.Client.get` will clean up after itself after an exception, in
-particular by closing its file descriptors. If you need to implement such
-functionality directly, you may want to use the `Monitor.protect` call, which
-is analogous to the `protect` call described in
-[Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.
+`Cohttp_async.Client.get` will clean up after itself after an
+exception, in particular by closing its file descriptors. If you need
+to implement such functionality directly, you may want to use the
+`Monitor.protect` call, which is analogous to the `protect` call
+described in [Cleaning Up In The Presence Of
+Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.
 
 
 ## Timeouts, Cancellation, and Choices
@@ -1361,9 +1414,10 @@ cancellations]{.idx}[Deferred.both]{.idx}[cancellations]{.idx}[timeouts]{.idx}[A
 library/timeouts and cancellations]{.idx}
 
 ```ocaml env=main
-# let string_and_float = Deferred.both
-                           (after (sec 0.5)  >>| fun () -> "A")
-  (after (sec 0.25) >>| fun () -> 32.33);;
+# let string_and_float =
+    Deferred.both
+      (let%map () = after (sec 0.5) in "A")
+      (let%map () = after (sec 0.25) in 32.33);;
 val string_and_float : (string * float) Deferred.t = <abstr>
 # string_and_float;;
 - : string * float = ("A", 32.33)
@@ -1377,9 +1431,9 @@ list is determined.
 
 ```ocaml env=main
 # Deferred.any
-  [ (after (sec 0.5) >>| fun () -> "half a second")
-  ; (after (sec 1.0) >>| fun () -> "one second")
-  ; (after (sec 4.0) >>| fun () -> "four seconds")
+  [ (let%map () = after (sec 0.5) in "half a second")
+  ; (let%map () = after (sec 1.0) in "one second")
+  ; (let%map () = after (sec 4.0) in "four seconds")
   ];;
 - : string = "half a second"
 ```
@@ -1392,20 +1446,17 @@ or, if that takes too long, an error:
 ```ocaml file=examples/correct/search_with_timeout/search.ml,part=1
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
-    [
-      (after timeout >>| fun () -> (word, Error "Timed out"));
-      ( get_definition ~server word >>| fun (word, result) ->
-        let result' =
-          match result with
-          | Ok _ as x -> x
-          | Error _ -> Error "Unexpected failure"
-        in
-        (word, result') );
+    [ (let%map () = after timeout in
+       word, Error "Timed out")
+    ; (match%map get_definition ~server word with
+      | word, Error _ -> word, Error "Unexpected failure"
+      | word, (Ok _ as x) -> word, x)
     ]
 ```
 
-We use `>>|` above to transform the deferred values we're waiting for so that
-`Deferred.any` can choose between values of the same type.
+\noindent
+We use `let%map` above to transform the deferred values we're waiting
+for so that `Deferred.any` can choose between values of the same type.
 
 A problem with this code is that the HTTP query kicked off by
 `get_definition` is not actually shut down when the timeout fires. As such,
@@ -1421,14 +1472,16 @@ expires:
 ```ocaml file=examples/correct/search_with_timeout_no_leak_simple/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
-  try_with (fun () ->
-      Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-      >>= fun (_, body) ->
-      Cohttp_async.Body.to_string body >>| fun string ->
-      (word, get_definition_from_json string))
-  >>| function
-  | Ok (word, result) -> (word, Ok result)
-  | Error _ -> (word, Error "Unexpected failure")
+  match%map
+    try_with (fun () ->
+        let%bind _, body =
+          Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+        in
+        let%map string = Cohttp_async.Body.to_string body in
+        word, get_definition_from_json string)
+  with
+  | Ok (word, result) -> word, Ok result
+  | Error _ -> word, Error "Unexpected failure"
 ```
 
 Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
@@ -1437,12 +1490,11 @@ expires:
 
 ```ocaml file=examples/correct/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
-  get_definition ~server ~interrupt:(after timeout) word
-  >>| fun (word, result) ->
-  let result' =
-    match result with Ok _ as x -> x | Error _ -> Error "Unexpected failure"
-  in
-  (word, result')
+  match%map
+    get_definition ~server ~interrupt:(after timeout) word
+  with
+  | word, (Ok _ as x) -> word, x
+  | word, Error _ -> word, Error "Unexpected failure"
 ```
 
 This will cause the connection to shutdown cleanly when we time out;
@@ -1477,11 +1529,10 @@ Here's the code:
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
-    [
-      choice (after timeout) (fun () ->
+    [ choice (after timeout) (fun () ->
           Ivar.fill interrupt ();
-          (word, Error "Timed out"));
-      choice
+          word, Error "Timed out")
+    ; choice
         (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
         (fun (word, result) ->
           let result' =
@@ -1489,7 +1540,7 @@ let get_definition_with_timeout ~server ~timeout word =
             | Ok _ as x -> x
             | Error _ -> Error "Unexpected failure"
           in
-          (word, result'));
+          word, result')
     ]
 ```
 
@@ -1519,18 +1570,21 @@ DuckDuckGo query failed: Timed out
 
 ## Working with System Threads
 
-Although we haven't worked with them yet, OCaml does have built-in support
-for true system threads, i.e., kernel-level threads whose interleaving is
-controlled by the operating system. We discussed in the beginning of the
-chapter why Async is generally a better choice than system threads, but even
-if you mostly use Async, OCaml's system threads are sometimes necessary, and
-it's worth understanding them. [parallelism]{.idx}[kernel-level
+Although we haven't worked with them yet, OCaml does have built-in
+support for true system threads, i.e., kernel-level threads whose
+interleaving is controlled by the operating system. We discussed in
+the beginning of the chapter the advantages of Async's cooperative
+threading model over system threads, but even if you mostly use Async,
+OCaml's system threads are sometimes necessary, and it's worth
+understanding them. [parallelism]{.idx}[kernel-level
 threads]{.idx}[threads/kernel-level threads]{.idx}[system
 threads]{.idx}[Async library/system threads and]{.idx}
+[system threads]{.idx}
 
-The most surprising aspect of OCaml's system threads is that they don't
-afford you any access to physical parallelism. That's because OCaml's runtime
-has a single runtime lock that at most one thread can be holding at a time.
+The most surprising aspect of OCaml's system threads is that they
+don't afford you any access to physical parallelism. That's because
+OCaml's runtime has a single runtime lock that at most one thread can
+be holding at a time.
 
 Given that threads don't provide physical parallelism, why are they useful at
 all?
@@ -1548,6 +1602,27 @@ In that case, it's sometimes useful to run some OCaml code on the foreign
 thread as part of the communication to your main program. OCaml's foreign
 function interface is discussed in more detail in
 [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+
+::: {data-type=note}
+#### Multicore OCaml
+
+OCaml doesn't support truly parallel threads today, but it will soon.
+The current development branch of OCaml, which is expected to be
+released in 2022 as OCaml 5.0, has a long awaited multicore-capable
+garbage collector, which is the result of years of research and hard
+implementation work.
+[multicore]{.idx}
+
+We won't discuss the multicore gc here in part because it's not yet
+released, and in part because there's a lot of open questions about
+OCaml programs should take advantage of multicore in a way that's
+safe, convenient, and performant.  Given all that, we just don't know
+enough to write a chapter about multicore today.
+
+In any case, while multicore OCaml isn't here yet, it's an exciting
+part of OCaml's near-term future.
+
+:::
 
 Another occasional use for system threads is to better interoperate with
 compute-intensive OCaml code. In Async, if you have a long-running
@@ -1589,7 +1664,7 @@ prints out one last timestamp:
     in
     let d = thunk () in
     Clock.every (sec 0.1) ~stop:d print_time;
-    d >>= fun () ->
+    let%bind () = d in
     printf "\nFinished at: ";
     print_time ();
     printf "\n";
@@ -1620,6 +1695,7 @@ Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
 
+\noindent
 As you can see, instead of waking up 10 times a second, `log_delays` is
 blocked out entirely while `busy_loop` churns away.
 
@@ -1656,6 +1732,7 @@ Finished at: 418.69187355041504ms,
 - : unit = ()
 ```
 
+\noindent
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
@@ -1671,36 +1748,37 @@ it leads to more predictable behavior.
 
 ### Thread-Safety and Locking
 
-Once you start working with system threads, you'll need to be careful about
-mutable data structures. Most mutable OCaml data structures do not have
-well-defined semantics when accessed concurrently by multiple threads. The
-issues you can run into range from runtime exceptions to corrupted data
-structures to, in some rare cases, segfaults. That means you should always
-use mutexes when sharing mutable data between different systems threads. Even
-data structures that seem like they should be safe but are mutable under the
-covers, like lazy values, can have undefined behavior when accessed from
-multiple threads. [mutexes]{.idx}[segfaults]{.idx}[threads/locking
+Once you start working with system threads, you'll need to be careful
+about mutable data structures. Most mutable OCaml data structures will
+behave non-determinstically when accessed concurrently by multiple
+threads. The issues you can run into range from runtime exceptions to
+corrupted data structures.  That means you should almost always use
+mutexes when sharing mutable data between different systems threads.
+Even data structures that seem like they should be safe but are
+mutable under the covers, like lazy values, can behave in surprising
+ways when accessed from multiple
+threads. [mutexes]{.idx}[segfaults]{.idx}[threads/locking
 and]{.idx}[threads/thread-safety]{.idx}
 
-There are two commonly available mutex packages for OCaml: the `Mutex` module
-that's part of the standard library, which is just a wrapper over OS-level
-mutexes and `Nano_mutex`, a more efficient alternative that takes advantage
-of some of the locking done by the OCaml runtime to avoid needing to create
-an OS-level mutex much of the time. As a result, creating a `Nano_mutex.t` is
-20 times faster than creating a `Mutex.t`, and acquiring the mutex is about
-40 percent faster.
+There are two commonly available mutex packages for OCaml: the `Mutex`
+module that's part of the standard library, which is just a wrapper
+over OS-level mutexes and `Nano_mutex`, a more efficient alternative
+that takes advantage of some of the locking done by the OCaml runtime
+to avoid needing to create an OS-level mutex much of the time. As a
+result, creating a `Nano_mutex.t` is 20 times faster than creating a
+`Mutex.t`, and acquiring the mutex is about 40 percent faster.
 
-Overall, combining Async and threads is quite tricky, but it can be done
-safely if the following hold:
+Overall, combining Async and threads is quite tricky, but it's pretty
+simple if the following two conditions hold:
 
 - There is no shared mutable state between the various threads involved.
 
 - The computations executed by `In_thread.run` do not make any calls to the
   Async library.
 
-It is possible to safely use threads in ways that violate these constraints.
-In particular, foreign threads can acquire the Async lock using calls from
-the `Thread_safe` module in Async, and thereby run Async computations safely.
-This is a very flexible way of connecting threads to the Async world, but
-it's a complex use case that is beyond the scope of this chapter.
-[system threads]{.idx}
+That said, you can safely use threads in ways that violate these
+constraints.  In particular, foreign threads can acquire the Async
+lock using calls from the `Thread_safe` module in Async, and thereby
+run Async computations safely.  This is a very flexible way of
+connecting threads to the Async world, but it's a complex use case
+that is beyond the scope of this chapter.

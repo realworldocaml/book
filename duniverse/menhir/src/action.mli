@@ -60,10 +60,6 @@ val semvars: t -> StringSet.t
 (** [keywords a] is the set of keywords used in the action [a]. *)
 val keywords: t -> KeywordSet.t
 
-(** [has_syntaxerror a] tests whether the keyword [$syntaxerror] appears
-   in the set [keywords a]. *)
-val has_syntaxerror: t -> bool
-
 (** [has_beforeend a] tests whether the keyword [$endpos($0)] appears in
    the set [keywords a]. *)
 val has_beforeend: t -> bool

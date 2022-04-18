@@ -1,20 +1,9 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** POSIX time values.
-
-    {!Ptime} has platform independent support for POSIX time. It
-    provides a {{!t}type} to represent a well-defined range of POSIX
-    timestamps with picosecond precision, conversion with
-    {{!date_time}date-time values}, conversion with {{!rfc3339}RFC
-    3339 timestamps} and {{!print}pretty printing} to a
-    human-readable, locale-independent representation.
-
-    {!Ptime_clock} provides access to a system POSIX clock and the system's
-    current time zone offset. {!Ptime} is not a calendar library.
 
     Consult the {{!basics}basics} and a few {{!notes}notes
     and limitations}.
@@ -24,11 +13,7 @@
     {- The Open Group. {{:http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_15}The Open Group Base Specifications Issue 7, section 4.15 Seconds Since the Epoch}. 2013}
     {- G. Klyne et al.
     {{:http://tools.ietf.org/html/rfc3339}
-    {e Date and Time on the Internet: Timestamps}}. RFC 3339, 2002.}}
-
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
-
-open Result
+    {e Date and Time on the Internet: Timestamps}}. RFC 3339, 2002.}} *)
 
 (** {1:timespans POSIX time spans} *)
 
@@ -49,7 +34,7 @@ module Span : sig
   (** The type for signed, picosecond precision, POSIX time spans. *)
 
   val v : int * int64 -> span
-  (** [v s] is like {!of_d_ps}[ s] but @raise Invalid_argument if
+  (** [v s] is like {!of_d_ps}[ s] but raises [Invalid_argument] if
       [s] is not in the right range. Use {!of_d_ps} to deal with
       untrusted input. *)
 
@@ -88,7 +73,7 @@ module Span : sig
       second span [d]. Subpicosecond precision numbers are truncated.
 
       [None] is returned if [secs] cannot be represented as a span.
-      This occurs on {!Pervasives.nan} or if the duration in POSIX
+      This occurs on {!Stdlib.nan} or if the duration in POSIX
       days cannot fit on an [int] (on 32-bit platforms this means the
       absolute magnitude of the duration is greater than ~2'941'758
       years). *)
@@ -174,7 +159,7 @@ type t
     this type, are by definition always on the UTC timeline. *)
 
 val v : int * int64 -> t
-(** [v s] is [of_span (Span.v s)] but @raise Invalid_argument if [s]
+(** [v s] is [of_span (Span.v s)] but raise [Invalid_argument] if [s]
     is not in the right range. Use {!Span.of_d_ps} and {!of_span}
     to deal with untrusted input. *)
 
@@ -498,9 +483,9 @@ val dump : Format.formatter -> t -> unit
 
 (** {1:basics Basics}
 
-    POSIX time counts {{!posix_seconds}POSIX seconds} since the epoch
-    1970-01-01 00:00:00 UTC. As such a POSIX timestamp is {b always}
-    on the UTC timeline.
+    POSIX time counts POSIX seconds since the epoch 1970-01-01
+    00:00:00 UTC. As such a POSIX timestamp is {b always} on the UTC
+    timeline.
 
     POSIX time doesn't count leap seconds, so by definition it cannot
     represent them. One way of viewing this is that whenever a leap

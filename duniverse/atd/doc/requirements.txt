@@ -1,0 +1,3 @@
+# We use cloud_sptheme because it allows advanced tables
+sphinx
+cloud_sptheme

@@ -63,7 +63,7 @@ let ml_srcs dir =
 let find_cmd cmds =
   let test, null = match Sys.win32 with
   | true -> "where", " NUL"
-  | false -> "type", "/dev/null"
+  | false -> "command -v", "/dev/null"
   in
   let cmd c = Sys.command (strf "%s %s 1>%s 2>%s" test c null null) = 0 in
   try Some (List.find cmd cmds) with Not_found -> None

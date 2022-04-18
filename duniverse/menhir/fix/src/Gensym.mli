@@ -10,28 +10,26 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(**[Gensym] offers a simple facility for generating fresh integer
-   identifiers. *)
+(**This module offers a simple facility for {b generating fresh integer
+   identifiers}. *)
 
 (**A gensym is a generator of unique integer identifiers. *)
-
 type gensym =
   unit -> int
 
 (**[make()] produces a new gensym. *)
-
 val make : unit -> gensym
 
-(**A slightly more powerful abstraction is a generator whose current state
-   can be inspected (without modification). *)
-
+(**A generator whose current state can be inspected (but not modified). *)
 type generator
 
-(**[generator()] creates a new generator. [fresh generator] causes the
-   generator to create and return a fresh integer identifier. [current
-   generator] returns the generator's current state, that is, the next
-   available integer identifier. *)
-
+(**[generator()] creates a new generator. *)
 val generator: unit -> generator
+
+(**[fresh g] causes the generator [g] to create and return a fresh
+   integer identifier. *)
 val fresh: generator -> int
+
+(**[current g] returns the current state of the generator [g], that
+   is, the next available integer identifier. *)
 val current: generator -> int

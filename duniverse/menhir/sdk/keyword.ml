@@ -46,7 +46,6 @@ type subject =
 
 type keyword =
   | Position of subject * where * flavor
-  | SyntaxError
 
 (* ------------------------------------------------------------------------- *)
 (* These auxiliary functions help map a [Position] keyword to the

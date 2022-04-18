@@ -1,4 +1,3 @@
 (executable
  (name translate_entities)
- (libraries yojson)
- (flags (:standard -w +A)))
+ (libraries yojson))

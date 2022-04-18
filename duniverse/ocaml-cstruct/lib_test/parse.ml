@@ -404,7 +404,7 @@ let span =
 
 let cut =
   Alcotest.test_case "cut" `Quick @@ fun () ->
-  let s str = string ~off:1 ~len:(String.length str) (Fmt.strf "\x00%s\x00" str) in
+  let s str = string ~off:1 ~len:(String.length str) (Fmt.str "\x00%s\x00" str) in
   let cut ?rev ~sep str = cut ?rev ~sep:(s sep) (s str) in
   let invalid_cut_argument = Invalid_argument "cut: empty separator" in
   Alcotest.check_raises "invalid" invalid_cut_argument
@@ -479,7 +479,7 @@ let cuts =
   Alcotest.test_case "cuts" `Quick @@ fun () ->
   let ls = Alcotest.(list string) in
   let invalid_cuts_argument = Invalid_argument "cuts: empty separator" in
-  let s str = string ~off:1 ~len:(String.length str) (Fmt.strf "\x00%s\x00" str) in
+  let s str = string ~off:1 ~len:(String.length str) (Fmt.str "\x00%s\x00" str) in
   let cuts ?empty ?rev ~sep str =
     let res = cuts ?empty ?rev ~sep:(s sep) (s str) in
     List.map Cstruct.to_string res in
@@ -557,7 +557,7 @@ let cuts =
 let fields =
   Alcotest.test_case "fields" `Quick @@ fun () ->
   let ls = Alcotest.(list string) in
-  let s str = string ~off:1 ~len:(String.length str) (Fmt.strf "\x00%s\x00" str) in
+  let s str = string ~off:1 ~len:(String.length str) (Fmt.str "\x00%s\x00" str) in
   let fields ?empty ?is_sep str =
     let res = fields ?empty ?is_sep (s str) in
     List.map Cstruct.to_string res in

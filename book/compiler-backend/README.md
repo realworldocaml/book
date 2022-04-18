@@ -153,7 +153,7 @@ variable in as few comparisons as possible. [pattern matching/fundamental
 algorithms in]{.idx}
 
 ::: {data-type=note}
-##### Learning More About Pattern Matching Compilation
+#### Learning More About Pattern Matching Compilation
 
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
@@ -342,7 +342,7 @@ arity). You can find full details
 compiler/instruction set for]{.idx}
 
 ::: {data-type=note}
-##### Where Did the Bytecode Instruction Set Come From?
+#### Where Did the Bytecode Instruction Set Come From?
 
 The bytecode interpreter is much slower than compiled native code, but is
 still remarkably performant for an interpreter without a JIT compiler. Its
@@ -741,7 +741,7 @@ iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
 
 ::: {data-type=note}
-##### Accessing Stdlib modules from within Core
+#### Accessing Stdlib modules from within Core
 
 In the benchmark above comparing polymorphic and monomorphic comparison,
 you may have noticed that we prepended the comparison functions with `Stdlib`.
@@ -1017,7 +1017,7 @@ runs and compare them against each other. You can read more on the
 [home page](http://perf.wiki.kernel.org). [frame pointers]{.idx}
 
 ::: {data-type=note}
-##### Using the Frame Pointer to Get More Accurate Traces
+#### Using the Frame Pointer to Get More Accurate Traces
 
 Although Perf doesn't require adding in explicit probes to the binary, it
 does need to understand how to unwind function calls so that the kernel can
@@ -1080,7 +1080,7 @@ later) that resolve symbols from left to right in a single
 pass.[debugging/activating debug runtime]{.idx}
 
 ::: {data-type=note}
-##### Activating the Debug Runtime
+#### Activating the Debug Runtime
 
 Despite your best efforts, it is easy to introduce a bug into some
 components, such as C bindings, that causes heap invariants to be violated.

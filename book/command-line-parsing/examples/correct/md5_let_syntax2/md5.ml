@@ -6,18 +6,16 @@ let do_hash hash_length filename =
   |> (fun s -> String.prefix s hash_length)
   |> print_endline
 
-[@@@part "1"];;
+[@@@part "1"]
+
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open
-        hash_length = anon ("hash_length" %: int)
-      and filename  = anon ("filename" %: string)
-      in
-      fun () -> do_hash hash_length filename)
+    (let%map_open.Command hash_length = anon ("hash_length" %: int)
+     and filename = anon ("filename" %: string) in
+     fun () -> do_hash hash_length filename)
 
-[@@@part "2"];;
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+[@@@part "2"]
+
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command

@@ -27,7 +27,7 @@ you can know rather precisely where a block of performance-critical OCaml
 code is spending its time. [OCaml toolchain/benefits of]{.idx}
 
 ::: {data-type=note}
-##### Why Do OCaml Types Disappear at Runtime?
+#### Why Do OCaml Types Disappear at Runtime?
 
 The OCaml compiler runs through several phases during the compilation
 process. The first phase is syntax checking, during which source files are
@@ -134,7 +134,7 @@ area, it is treated as an opaque C pointer to some other system resource.
 [word-aligned pointers]{.idx}[pointers/word-aligned]{.idx}
 
 ::: {data-type=note}
-##### Some History About OCaml's Word-Aligned Pointers
+#### Some History About OCaml's Word-Aligned Pointers
 
 The alert reader may be wondering how OCaml can guarantee that all of its
 pointers are word-aligned. In the old days, when RISC chips such as Sparc,
@@ -201,17 +201,40 @@ type, which we describe in more detail later in this chapter.
 The exact representation of values inside a block depends on their static
 OCaml type. All OCaml types are distilled down into `values`, and summarized below.
 
-- `int` or `char` are stored directly as a value, shifted left by 1 bit, with the least significant bit set to 1.
+- `int` or `char` are stored directly as a value, shifted left by 1
+  bit, with the least significant bit set to 1.
+
 - `unit`, `[]`, `false` are all stored as OCaml `int` 0.
+
 - `true` is stored as OCaml `int` 1.
-- `Foo | Bar` variants are stored as ascending OCaml `int`s, starting from 0.
-- `Foo | Bar of int` variants with parameters are boxed, while variants with no parameters are unboxed.
-- Polymorphic variants take up variable space usage depending on the number of parameters.
-- Floating-point numbers are stored as a block with a single field containing the double-precision float.
+
+- `Foo | Bar` variants are stored as ascending OCaml `int`s, starting
+  from 0.
+
+- `Foo | Bar of int` variants with parameters are boxed, while
+  variants with no parameters are unboxed.
+
+- Polymorphic variants take up variable space usage depending on the
+  number of parameters.  <!-- TODO: I'm not sure what this
+  means. Polymorphic variants are IIRC always a header word plus a
+  single slot. Sort of the opposite: ordinary variants can have a
+  variable number of slots, but polymoprhic variants have no
+  equivalent of an inlined tuple or record. -->
+
+- Floating-point numbers are stored as a block with a single field
+  containing the double-precision float.
+
 - Strings are word-aligned byte arrays with an explicit length.
-- `[1; 2; 3]` lists are stored as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
-- Tuples, records, and arrays are stored as a C array of values. Arrays can be variable size, but tuples and records are fixed-size.
-- Records or arrays that are all float use a special tag for unboxed arrays of floats, or records that only have `float` fields.
+
+- `[1; 2; 3]` lists are stored as `1::2::3::[]` where `[]` is an int,
+  and `h::t` a block with tag 0 and two parameters.
+
+- Tuples, records, and arrays are stored as a C array of
+  values. Arrays can be variable size, but tuples and records are
+  fixed-size.
+
+- Records or arrays that are all float use a special tag for unboxed
+  arrays of floats, or records that only have `float` fields.
 
 ### Integers, Characters, and Other Basic Types
 
@@ -276,12 +299,13 @@ signals to the collector that the floating-point value is not to be scanned:
 - : int = 253
 ```
 
-Since each floating-point value is boxed in a separate memory block, it can
-be inefficient to handle large arrays of floats in comparison to unboxed
-integers. OCaml therefore special-cases records or arrays that contain
-*only*`float` types. These are stored in a block that contains the floats
-packed directly in the data section, with `Double_array_tag` set to signal to
-the collector that the contents are not OCaml values.
+Since each floating-point value is boxed in a separate memory block,
+it can be inefficient to handle large arrays of floats in comparison
+to unboxed integers. OCaml therefore special-cases records or arrays
+that contain *only* `float` types. These are stored in a block that
+contains the floats packed directly in the data section, with
+`Double_array_tag` set to signal to the collector that the contents
+are not OCaml values.
 
 
 \

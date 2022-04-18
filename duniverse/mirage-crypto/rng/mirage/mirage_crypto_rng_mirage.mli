@@ -36,10 +36,5 @@ module Make (T : Mirage_time.S) (M : Mirage_clock.MCLOCK) : sig
       [~sleep] is measured in ns, and used as sleep between cpu assisted random
       number collection. It defaults to one second. *)
 
-  (* For Mirage_random.S compatibility *)
-  type g
-  (** The state of the gnerator. *)
-
-  val generate : ?g:g -> int -> Cstruct.t
-  (** [generate ~g n] generates a random buffer of length [n] using [g]. *)
+  include module type of Mirage_crypto_rng
 end

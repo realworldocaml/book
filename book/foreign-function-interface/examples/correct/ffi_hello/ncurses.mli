@@ -1,0 +1,1 @@
+../ffi_ncurses/ncurses.mli

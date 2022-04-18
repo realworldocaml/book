@@ -1,1 +1,0 @@
-../ncurses/ncurses.mli

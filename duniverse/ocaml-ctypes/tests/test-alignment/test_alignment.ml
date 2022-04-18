@@ -243,8 +243,8 @@ let test_struct_tail_padding _ =
 *)
 let test_bigarray_alignment _ =
   let module M = struct
-    module B = Bigarray
-    type k = K : ('a, 'b) Bigarray.kind * int -> k
+    module B = Bigarray_compat
+    type k = K : ('a, 'b) Bigarray_compat.kind * int -> k
     let kind_alignments = [
       K (B.float32, alignment float);
       K (B.float64, alignment double);

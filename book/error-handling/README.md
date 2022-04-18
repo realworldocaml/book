@@ -57,6 +57,7 @@ val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
 
+\noindent
 The `match` expression is used to handle the error cases, propagating a
 `None` in `hd` or `last` into the return value of `compute_bounds`.
 
@@ -110,6 +111,7 @@ write:
 - : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
 ```
 
+\noindent
 without first opening the `Result` module.
 
 ### Error and Or_error {#error-and-or_error}
@@ -132,6 +134,7 @@ example, construct one from a string.
 - : Error.t = something went wrong
 ```
 
+\noindent
 An `Or_error.t` is simply a `Result.t` with the error case
 specialized to the `Error.t` type.  Here's an example.
 
@@ -140,7 +143,7 @@ specialized to the `Error.t` type.  Here's an example.
 - : ('a, Error.t) result = Error failed!
 ```
 
-And the `Or_error` module provides a bunch of useful operators for
+The `Or_error` module provides a bunch of useful operators for
 constructing errors.  For example, `Or_error.try_with` can be used for
 catching exceptions from a computation.
 
@@ -174,19 +177,25 @@ types in Base come with built-in s-expression converters.
 - : Error.t = ("Unexpected character" c)
 ```
 
+<!-- TODO-post: Get individual PPXs (like ppx_sexp_value) working
+properly -->
+
 We're not restricted to doing this kind of error reporting with
 built-in types. As we'll discuss in more detail in [Data Serialization
 With S-Expressions
 ](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 Sexplib comes with a syntax extension that can autogenerate sexp
 converters for specific types.  We can enable it in the toplevel with
-a `#require` statement.
+a `#require` statement enabling `ppx_jane`, which is a package that
+pulls in multiple different syntax extensions, including
+`ppx_sexp_value`, the one we need here.  (Because of technical issues
+with the toplevel, we can't easily enable these syntax extensions
+individually.)
 
-<!-- FIXME: we should use ppx_sexp_value instead of ppx_jane, but that -->
-<!-- doesn't work here for some reason. -->
 ```ocaml env=main
 # #require "ppx_jane";;
-# Error.t_of_sexp [%sexp ("List is too long",[1;2;3] : string * int list)];;
+# Error.t_of_sexp
+    [%sexp ("List is too long",[1;2;3] : string * int list)];;
 - : Error.t = ("List is too long" (1 2 3))
 ```
 
@@ -233,15 +242,15 @@ have been codified by functions in modules like `Option` and
 function]{.idx}
 
 ```ocaml env=main
-# let bind option f =
+# let bind option ~f =
     match option with
     | None -> None
     | Some x -> f x;;
-val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
+val bind : 'a option -> f:('a -> 'b option) -> 'b option = <fun>
 ```
 
 As you can see, `bind None f` returns `None` without calling `f`, and
-`bind (Some x) f` returns `f x`. `bind` can be used as a way of
+`bind (Some x) ~f` returns `f x`. `bind` can be used as a way of
 sequencing together error-producing functions so that the first one to
 produce an error terminates the computation. Here's a rewrite of
 `compute_bounds` to use a nested series of `bind`s:
@@ -283,7 +292,7 @@ large, complex examples with many stages of error handling, the `bind`
 idiom becomes clearer and easier to manage.
 
 ::: {data-type=note}
-##### Monads and `Let_syntax`
+#### Monads and `Let_syntax`
 
 We can make this look a little bit more ordinary by using a syntax
 extension that's designed specifically for monadic binds, called
@@ -332,7 +341,7 @@ These error-handling functions are valuable because they let you express your
 error handling both explicitly and concisely. We've only discussed these
 functions in the context of the `Option` module, but more functionality of
 this kind can be found in the `Result` and `Or_error`
-modules.[error handling/option types]{.idx}[
+modules.[error handling/option types]{.idx}
 
 
 ## Exceptions
@@ -351,6 +360,7 @@ You can trigger an exception by, for example, dividing an integer by zero:
 Exception: Division_by_zero.
 ```
 
+\noindent
 And an exception can terminate a computation even if it happens nested
 somewhere deep within it:
 
@@ -393,15 +403,17 @@ val exceptions : exn list = [Division_by_zero; Key_not_found("b")]
 - : exn list = [Key_not_found("b")]
 ```
 
-Exceptions are all of the same type, `exn`. The `exn` type is something of a
-special case in the OCaml type system. It is similar to the variant types we
-encountered in [Variants](variants.html#variants){data-type=xref}, except
-that it is *open*, meaning that it's not fully defined in any one place. In
-particular, new tags (specifically, new exceptions) can be added to it by
-different parts of the program. This is in contrast to ordinary variants,
-which are defined with a closed universe of available tags. One result of
-this is that you can never have an exhaustive match on an `exn`, since the
-full set of possible exceptions is not known.[exn type]{.idx}
+Exceptions are all of the same type, `exn`, which is itself something
+of a special case in the OCaml type system. It is similar to the
+variant types we encountered in
+[Variants](variants.html#variants){data-type=xref}, except that it is
+*open*, meaning that it's not fully defined in any one place. In
+particular, new tags (specifically, new exceptions) can be added to it
+by different parts of the program. This is in contrast to ordinary
+variants, which are defined with a closed universe of available
+tags. One result of this is that you can never have an exhaustive
+match on an `exn`, since the full set of possible exceptions is not
+known.[exn type]{.idx}
 
 The following function uses the `Key_not_found` exception we defined above to
 signal an error:
@@ -419,6 +431,7 @@ val alist : (string * int) list = [("a", 1); ("b", 2)]
 Exception: Key_not_found("c").
 ```
 
+\noindent
 Note that we named the function `find_exn` to warn the user that the function
 routinely throws exceptions, a convention that is used heavily in
 Base.[functions/exception warnings for]{.idx}[find_exn function]{.idx}
@@ -443,6 +456,7 @@ doesn't return a value:
 val forever : unit -> 'a = <fun>
 ```
 
+\noindent
 `forever` doesn't return a value for a different reason: it's an infinite
 loop.
 
@@ -452,7 +466,7 @@ type system will let us throw an exception anywhere in a program. [sexp
 declaration]{.idx}[exceptions/textual representation of]{.idx}
 
 ::: {.allow_break data-type=note}
-##### Declaring Exceptions Using `[@@deriving sexp]`
+#### Declaring Exceptions Using `[@@deriving sexp]`
 
 OCaml can't always generate a useful textual representation of an exception.
 For example:
@@ -466,6 +480,7 @@ exception Crossed_bounds of int bounds
 - : exn = Crossed_bounds(_)
 ```
 
+\noindent
 But if we declare the exception (and the types it depends on) using
 `[@@deriving sexp]`, we'll get something with more information:
 
@@ -531,8 +546,10 @@ val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
 - : int list option = None
 ```
 
-Here we use `assert false`, which means that the `assert` is guaranteed to
-trigger. In general, one can put an arbitrary condition in the assertion.
+\noindent
+Here we use `assert false`, which means that the `assert`,
+once reached, is guaranteed to trigger. In general, one can put an
+arbitrary condition in the assertion.
 
 In this case, the `assert` can never be triggered because we have a check
 that makes sure that the lists are of the same length before we call
@@ -559,8 +576,8 @@ character offset of the source location from which the assertion was made.
 ### Exception Handlers
 
 So far, we've only seen exceptions fully terminate the execution of a
-computation. But often, we want a program to be able to respond to and
-recover from an exception. This is achieved through the use of
+computation. But sometimes, we want a program to be able to respond to
+and recover from an exception. This is achieved through the use of
 *exception handlers*.[exceptions/exception handlers]{.idx}[error
 handling/exception handlers]{.idx}
 
@@ -574,6 +591,7 @@ try <expr> with
 ...
 ```
 
+\noindent
 A `try/with` clause first evaluates its body, *`expr`*. If no exception is
 thrown, then the result of evaluating the body is what the entire `try/with`
 clause evaluates to.
@@ -606,7 +624,10 @@ up]{.idx}[error handling/exception clean up]{.idx}
 val parse_line : string -> float list = <fun>
 # let load filename =
     let inc = In_channel.create filename in
-    let data = In_channel.input_lines inc |> List.map ~f:parse_line in
+    let data =
+      In_channel.input_lines inc
+      |> List.map ~f:parse_line
+    in
     In_channel.close inc;
     data;;
 val load : string -> float list list = <fun>
@@ -687,7 +708,7 @@ happens to be `Key_not_found`, then that's not what will happen:
 
 This kind of problem is hard to detect in advance because the type system
 doesn't tell you what exceptions a given function might throw. For this
-reason, it's generally better to avoid relying on the identity of the
+reason, it's usually best to avoid relying on the identity of the
 exception to determine the nature of a failure. A better approach is to
 narrow the scope of the exception handler, so that when it fires it's very
 clear what part of the code failed:
@@ -710,6 +731,7 @@ and involves some unnecessary computation (in particular, the
 allocation of the option). Happily, OCaml allows for exceptions to be
 caught by match expressions directly, which lets you write this more
 concisely as follows.
+[exceptions/catching in match expression]{.idx}
 
 ```ocaml env=main
 # let lookup_weight ~compute_weight alist key =
@@ -721,6 +743,7 @@ val lookup_weight :
   <fun>
 ```
 
+\noindent
 Note that the `exception` keyword is used to mark the exception-handling
 cases.
 
@@ -867,9 +890,9 @@ Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
 
 Note that we lose just a small number of cycles to setting up an
 exception handler, which means that an unused exception handler is
-quite cheap indeed.  We lose a much bigger chunk, around 45 cycles, to
+quite cheap indeed.  We lose a much bigger chunk, around 55 cycles, to
 actually raising an exception.  If we explicitly raise an exception
-with no stacktrace, it costs us about 15 cycles.
+with no stacktrace, it costs us about 25 cycles.
 
 We can also disable stacktraces, as we discussed, using
 `OCAMLRUNPARAM`.  That changes the results a bit.
@@ -889,15 +912,14 @@ Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
 ```
 
 The only significant change here is that raising an exception in the
-ordinary way becomes just a bit cheaper: 30 cycles instead of 45
+ordinary way becomes just a bit cheaper: 20 cycles instead of 55
 cycles.  But it's still not as fast as using `raise_notrace` explicitly.
 
 Differences on this scale should only matter if you're using
 exceptions routinely as part of your flow control.  That's not a
-pattern you should be using routinely anyway, and when you do, it's
-better from a performance perspective to use `raise_notrace` in those
-particular places anyway.  All of which is to say, you should almost
-always leave stack-traces on.
+common pattern, and when you do need it, it's better from a
+performance perspective to use `raise_notrace`.  All of which is to
+say, you should almost always leave stack-traces on.
 
 ### From Exceptions to Error-Aware Types and Back Again
 
@@ -919,7 +941,8 @@ val find : (string * 'a) list -> string -> 'a option = <fun>
 - : int option = Base.Option.Some 2
 ```
 
-And `Result` and `Or_error` have similar `try_with` functions. So, we could
+\noindent
+`Result` and `Or_error` have similar `try_with` functions. So, we could
 write:
 
 ```ocaml env=main
@@ -930,7 +953,8 @@ val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
 - : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
-And then we can reraise that exception:
+\noindent
+We can then reraise that exception:
 
 ```ocaml env=main
 # Or_error.ok_exn (find ["a",1; "b",2] "b");;

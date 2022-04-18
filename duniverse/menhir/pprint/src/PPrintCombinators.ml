@@ -30,7 +30,6 @@ let bquote          = char '`'
 let semi            = char ';'
 let colon           = char ':'
 let comma           = char ','
-let space           = char ' '
 let dot             = char '.'
 let sharp           = char '#'
 let slash           = char '/'
@@ -209,7 +208,7 @@ let words s =
   let n = String.length s in
   (* A two-state finite automaton. *)
   (* In this state, we have skipped at least one blank character. *)
-  let rec skipping accu i = 
+  let rec skipping accu i =
     if i = n then
       (* There was whitespace at the end. Drop it. *)
       accu
@@ -234,7 +233,7 @@ let words s =
     | '\n'
     | '\r' ->
         (* A new word has been identified. *)
-        let accu = substring s i (j - i) :: accu in	
+        let accu = substring s i (j - i) :: accu in
 	skipping accu (j + 1)
     | _ ->
         (* Continue inside the current word. *)
@@ -251,7 +250,7 @@ let flow_map sep f docs =
       (* This idiom allows beginning a new line if [doc] does not
 	 fit on the current line. *)
       group (sep ^^ f doc)
-  ) empty docs  
+  ) empty docs
 
 let flow sep docs =
   flow_map sep (fun x -> x) docs
@@ -307,4 +306,3 @@ let surround_separate_map n b void opening sep closing f xs =
       void
   | _ :: _ ->
       surround n b opening (separate_map sep f xs) closing
-

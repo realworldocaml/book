@@ -61,8 +61,8 @@ Documentation is provided by the `--help` option of each command.
 Direct dependencies
 -------------------
 
-* [atdgen](https://github.com/MyLifeLabs/atdgen)
-* [cppo](https://github.com/mjambon/cppo)
+* [atdgen](https://github.com/ahrefs/atd)
+* [cppo](https://github.com/ocaml-community/cppo)
 
 Installation
 ------------

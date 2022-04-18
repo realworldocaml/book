@@ -5,13 +5,9 @@ module Default = struct
     type 'a t = 'a Loc.t
 
     let loc (x : _ t) = x.loc
-
     let mk ~loc x = { loc; txt = x }
-
     let map f t = { t with txt = f t.txt }
-
     let map_lident x = map (fun x -> Longident.Lident x) x
-
     let lident ~loc x = mk ~loc (Longident.parse x)
   end
 
@@ -27,11 +23,8 @@ module Default = struct
       "Ppxlib.Ast_builder.nonrec_type_declaration: don't use this function"
 
   let eint ~loc t = pexp_constant ~loc (Pconst_integer (Int.to_string t, None))
-
   let echar ~loc t = pexp_constant ~loc (Pconst_char t)
-
   let estring ~loc t = pexp_constant ~loc (Pconst_string (t, loc, None))
-
   let efloat ~loc t = pexp_constant ~loc (Pconst_float (t, None))
 
   let eint32 ~loc t =
@@ -44,11 +37,8 @@ module Default = struct
     pexp_constant ~loc (Pconst_integer (Nativeint.to_string t, Some 'n'))
 
   let pint ~loc t = ppat_constant ~loc (Pconst_integer (Int.to_string t, None))
-
   let pchar ~loc t = ppat_constant ~loc (Pconst_char t)
-
   let pstring ~loc t = ppat_constant ~loc (Pconst_string (t, loc, None))
-
   let pfloat ~loc t = ppat_constant ~loc (Pconst_float (t, None))
 
   let pint32 ~loc t =
@@ -67,17 +57,11 @@ module Default = struct
     ppat_construct ~loc (Located.lident ~loc (Bool.to_string t)) None
 
   let evar ~loc v = pexp_ident ~loc (Located.mk ~loc (Longident.parse v))
-
   let pvar ~loc v = ppat_var ~loc (Located.mk ~loc v)
-
   let eunit ~loc = pexp_construct ~loc (Located.lident ~loc "()") None
-
   let punit ~loc = ppat_construct ~loc (Located.lident ~loc "()") None
-
   let pexp_tuple ~loc l = match l with [ x ] -> x | _ -> pexp_tuple ~loc l
-
   let ppat_tuple ~loc l = match l with [ x ] -> x | _ -> ppat_tuple ~loc l
-
   let ptyp_tuple ~loc l = match l with [ x ] -> x | _ -> ptyp_tuple ~loc l
 
   let pexp_tuple_opt ~loc l =
@@ -268,7 +252,6 @@ module Default = struct
 end
 
 module type Loc = Ast_builder_intf.Loc
-
 module type S = Ast_builder_intf.S
 
 module Make (Loc : sig
@@ -286,78 +269,43 @@ end) : S = struct
     include Default.Located
 
     let loc _ = Loc.loc
-
     let mk x = mk ~loc:Loc.loc x
-
     let lident x = lident ~loc:Loc.loc x
   end
 
   let pexp_tuple l = Default.pexp_tuple ~loc l
-
   let ppat_tuple l = Default.ppat_tuple ~loc l
-
   let ptyp_tuple l = Default.ptyp_tuple ~loc l
-
   let pexp_tuple_opt l = Default.pexp_tuple_opt ~loc l
-
   let ppat_tuple_opt l = Default.ppat_tuple_opt ~loc l
-
   let ptyp_poly vars ty = Default.ptyp_poly ~loc vars ty
-
   let pexp_apply e el = Default.pexp_apply ~loc e el
-
   let eint t = Default.eint ~loc t
-
   let echar t = Default.echar ~loc t
-
   let estring t = Default.estring ~loc t
-
   let efloat t = Default.efloat ~loc t
-
   let eint32 t = Default.eint32 ~loc t
-
   let eint64 t = Default.eint64 ~loc t
-
   let enativeint t = Default.enativeint ~loc t
-
   let ebool t = Default.ebool ~loc t
-
   let evar t = Default.evar ~loc t
-
   let pint t = Default.pint ~loc t
-
   let pchar t = Default.pchar ~loc t
-
   let pstring t = Default.pstring ~loc t
-
   let pfloat t = Default.pfloat ~loc t
-
   let pint32 t = Default.pint32 ~loc t
-
   let pint64 t = Default.pint64 ~loc t
-
   let pnativeint t = Default.pnativeint ~loc t
-
   let pbool t = Default.pbool ~loc t
-
   let pvar t = Default.pvar ~loc t
-
   let eunit = Default.eunit ~loc
-
   let punit = Default.punit ~loc
-
   let econstruct = Default.econstruct
-
   let pconstruct = Default.pconstruct
-
   let eapply e el = Default.eapply ~loc e el
-
   let eabstract ps e = Default.eabstract ~loc ps e
-
   let esequence el = Default.esequence ~loc el
-
   let elist l = Default.elist ~loc l
-
   let plist l = Default.plist ~loc l
 
   let type_constr_conv ident ~f args =
@@ -367,7 +315,6 @@ end) : S = struct
     Default.unapplied_type_constr_conv ~loc ident ~f
 
   let eta_reduce = Default.eta_reduce
-
   let eta_reduce_if_possible = Default.eta_reduce_if_possible
 
   let eta_reduce_if_possible_and_nonrec =

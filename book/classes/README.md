@@ -4,12 +4,13 @@
 *This chapter was written by Leo White and Jason Hickey.*
 :::
 
-Programming with objects directly is great for encapsulation, but one of the
-main goals of object-oriented programming is code reuse through inheritance.
-For inheritance, we need to introduce *classes*. In object-oriented
-programming, a class is a "recipe" for creating objects. The recipe can be
-changed by adding new methods and fields, or it can be changed by modifying
-existing methods. [programming/object-oriented programming (OOP)]{.idx}
+Programming with objects directly is great for encapsulation, but one
+of the main goals of object-oriented programming is code reuse through
+inheritance.  For inheritance, we need to introduce *classes*. In
+object-oriented programming, a class is essentially a recipe for
+creating objects. The recipe can be changed by adding new methods and
+fields, or it can be changed by modifying existing
+methods. [programming/object-oriented programming (OOP)]{.idx}
 
 ## OCaml Classes
 
@@ -214,7 +215,7 @@ over the contents of our stack:
 # class ['a] list_iterator init = object
     val mutable current : 'a list = init
 
-    method has_value = Poly.(current <> [])
+    method has_value = not (List.is_empty current)
 
     method get =
       match current with
@@ -521,8 +522,6 @@ The simplest way is to use classes and open recursion. For example, the
 following class defines objects that fold over the document data:
 
 ```ocaml env=doc
-open Core
-
 class ['a] folder = object(self)
   method doc acc = function
   | Heading _ -> acc
@@ -854,18 +853,25 @@ redundant.
 But equality is an extreme instance of a binary method: it needs
 access to all the information of the other object.  Many other binary
 methods need only partial information about the object.  For instance,
-a method that compares shapes by their sizes:
+consider a method that compares shapes by their sizes:
 
-```ocaml skip
-class square w = object(self)
-  method width = w
-  method area = Float.of_int (self#width * self#width)
-  method larger other = Float.(self#area > other#area)
-end
+```ocaml env=binary
+# class square w = object(self)
+    method width = w
+    method area = Float.of_int (self#width * self#width)
+    method larger (other : shape) = Float.(self#area > other#area)
+  end;;
+class square :
+  int ->
+  object
+    method area : float
+    method larger : shape -> bool
+    method width : int
+  end
 ```
 
-In this case, there is no one-to-one correspondence between the objects and
-their sizes, and we can still easily define new kinds of shape.
+The `larger` method can be used on a `square`, but it can also be
+applied to any object of type `shape`.
 
 ## Virtual Classes and Methods
 

@@ -1,4 +1,4 @@
-version: "6.0.1"
+version: "6.1.0"
 opam-version: "2.0"
 maintainer:   "anil@recoil.org"
 authors:      ["Anil Madhavapeddy" "Richard Mortier" "Thomas Gazagnaire"
@@ -12,12 +12,12 @@ doc: "https://mirage.github.io/ocaml-cstruct/"
 
 tags: [ "org:mirage" "org:ocamllabs" ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 depends: [
-  "ocaml" {>= "4.07.0"}
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "2.0.0"}
   "cstruct" {=version}
   "ounit" {with-test}

@@ -150,8 +150,10 @@ type user = \{
 v}
       *)
 
+and simple_field = (loc * (string * field_kind * annot) * type_expr)
+
 and field =
-    [ `Field of (loc * (string * field_kind * annot) * type_expr)
+    [ `Field of simple_field
     | `Inherit of (loc * type_expr) ]
       (**
          A single record field or an [inherit] statement.
@@ -160,6 +162,17 @@ and field =
          offered by the {!Atd.Util} functions.
       *)
 
+type any =
+  | Full_module of full_module
+  | Module_head of module_head
+  | Module_body of module_body
+  | Module_item of module_item
+  | Type_def of type_def
+  | Type_expr of type_expr
+  | Variant of variant
+  | Cell of cell
+  | Field of field
+  (** Type for any kind of node, used to define a visitor root. *)
 
 val loc_of_type_expr : type_expr -> loc
   (** Extract the source location of any type expression. *)
@@ -204,6 +217,56 @@ val map_annot : (annot -> annot) -> type_expr -> type_expr
 val map_all_annot : (annot -> annot) -> full_module -> full_module
   (**
      Replacement of all annotations occurring in an ATD module.
+  *)
+
+val visit :
+  ?full_module: ((full_module -> unit) -> full_module -> unit) ->
+  ?module_head: ((module_head -> unit) -> module_head -> unit) ->
+  ?module_body: ((module_body -> unit) -> module_body -> unit) ->
+  ?module_item: ((module_item -> unit) -> module_item -> unit) ->
+  ?type_def: ((type_def -> unit) -> type_def -> unit) ->
+  ?type_expr: ((type_expr -> unit) -> type_expr -> unit) ->
+  ?variant: ((variant -> unit) -> variant -> unit) ->
+  ?cell: ((cell -> unit) -> cell -> unit) ->
+  ?field: ((field -> unit) -> field -> unit) ->
+  unit ->
+  (any -> unit)
+  (** Create a function that will visit all the nodes of a tree by default.
+      Each optional field defines what to do when encountering a node
+      of a particular kind. For example, the [full_module] that you provide
+      would be applied as [full_module cont x]. The [cont] function
+      must be called for the visitor to continue down the tree, if this
+      is desired. Arbitrary code can be executed before or after
+      the call to [cont]. [cont] may be called on a modified version
+      of the current node if desired.
+
+      Here's is an example that checks that a kind of node isn't present:
+{v
+  let visitor =
+    visit
+      ~type_expr:(fun cont e ->
+        match e with
+        | Tvar _ -> error "type variables are not supported"
+        | e -> cont e
+      )
+      ()
+  in
+  visitor (Full_module root)
+v}
+  *)
+
+val fold_annot :
+  ?module_head: (module_head -> annot -> 'a -> 'a) ->
+  ?type_def: (type_def -> annot -> 'a -> 'a) ->
+  ?type_expr: (type_expr -> annot -> 'a -> 'a) ->
+  ?variant: (variant -> annot -> 'a -> 'a) ->
+  ?cell: (cell -> annot -> 'a -> 'a) ->
+  ?field: (field -> annot -> 'a -> 'a) ->
+  any -> 'a -> 'a
+  (**
+     Iterate over all the annotations and accumulate a result.
+     This is intended for collecting misplaced or invalid annotations
+     of a given kind e.g. all the annotations of the form '<ocaml ...>'.
   *)
 
 val fold : (type_expr -> 'a -> 'a) -> type_expr -> 'a -> 'a

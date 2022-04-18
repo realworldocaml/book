@@ -48,6 +48,9 @@ and excdef = {
     (* Optional equality. *)
     exceq: string option;
 
+    (* Optional parameters. *)
+    excparams: typ list;
+
   }
 
 and typedef = {

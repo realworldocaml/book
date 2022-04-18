@@ -4,11 +4,12 @@ different compiler versions in the subsequent tests
   $ export OCAML_ERROR_STYLE=short
 
 With the `-embed-errors` options, if a PPX raises, the first such exception
-is caught and packed into an output AST
+is caught and prepended to the last valid AST
 
   $ echo "let _ = [%raise]" > impl.ml
   $ ../raiser.exe -embed-errors impl.ml
   [%%ocaml.error "Raising inside the rewriter"]
+  let _ = [%raise ]
 
 The same is true when using the `-as-ppx` mode (note that the error is reported
 by ocaml itself)

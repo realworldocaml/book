@@ -44,8 +44,7 @@ let test_shift_right () =
     (Error (`Msg "Ipaddr: unexpected argument sz (must be >= 0 and < 128)"))
     (B128.shift_right (of_string_exn "::ffff:ffff") (-8))
 
-let suite = "Test B128 module" >::: [ "shift_right" >:: test_shift_right ]
+let suite = "Test B128 module" >::: [ "shift_right" >:: test_shift_right ];;
 
-;;
 let _results = run_test_tt_main suite in
 ()

@@ -23,7 +23,6 @@ module Replacement : sig
 end
 
 type mode = Using_line_directives | Delimiting_generated_blocks
-
 type target = Output of mode | Corrected
 
 val reconcile :

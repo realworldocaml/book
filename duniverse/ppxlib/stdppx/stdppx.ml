@@ -9,50 +9,31 @@ module type Comparisons = sig
   type t
 
   val compare : t -> t -> int
-
   val equal : t -> t -> bool
-
   val ( = ) : t -> t -> bool
-
   val ( < ) : t -> t -> bool
-
   val ( > ) : t -> t -> bool
-
   val ( <> ) : t -> t -> bool
-
   val ( <= ) : t -> t -> bool
-
   val ( >= ) : t -> t -> bool
-
   val min : t -> t -> t
-
   val max : t -> t -> t
 end
 
 module Poly = struct
   let compare = compare
-
   let equal = ( = )
-
   let ( = ) = ( = )
-
   let ( < ) = ( < )
-
   let ( > ) = ( > )
-
   let ( <> ) = ( <> )
-
   let ( <= ) = ( <= )
-
   let ( >= ) = ( >= )
-
   let min = min
-
   let max = max
 end
 
 include (Poly : Comparisons with type t := int)
-
 module Array = Array
 
 module Bool = struct
@@ -72,7 +53,6 @@ end
 
 module Char = struct
   include Char
-
   include (Poly : Comparisons with type t := char)
 end
 
@@ -174,7 +154,6 @@ end
 
 module Int = struct
   let max_int = max_int
-
   let to_string = string_of_int
 
   include (Poly : Comparisons with type t := int)
@@ -186,9 +165,7 @@ module List = struct
   include struct
     (* shadow non-tail-recursive functions *)
     let merge = `not_tail_recursive
-
     let remove_assoc = `not_tail_recursive
-
     let remove_assq = `not_tail_recursive
 
     let rev_mapi list ~f =
@@ -203,14 +180,12 @@ module List = struct
       fold_left2 (rev list1) (rev list2) ~init ~f:(fun acc x y -> f x y acc)
 
     let map list ~f = rev (rev_map list ~f)
-
     let mapi list ~f = rev (rev_mapi list ~f)
 
     let fold_right list ~init ~f =
       fold_left (List.rev list) ~init ~f:(fun acc x -> f x acc)
 
     let append x y = rev_append (rev x) y
-
     let concat list = fold_right list ~init:[] ~f:append
 
     let rev_combine list1 list2 =
@@ -240,9 +215,7 @@ module List = struct
         match option with None -> tail | Some head -> head :: tail)
 
   let filter_opt list = rev (rev_filter_opt list)
-
   let filter_map list ~f = rev_filter_opt (rev_map list ~f)
-
   let concat_map list ~f = concat (map list ~f)
 
   let rec find_map list ~f =
@@ -292,11 +265,8 @@ end
 
 module Option = struct
   let is_some = function None -> false | Some _ -> true
-
   let iter t ~f = match t with None -> () | Some x -> f x
-
   let map t ~f = match t with None -> None | Some x -> Some (f x)
-
   let value t ~default = match t with None -> default | Some x -> x
 end
 
@@ -321,13 +291,9 @@ module String = struct
   include String
 
   let is_empty (t : t) = length t = 0
-
   let prefix t len = sub t ~pos:0 ~len
-
   let suffix t len = sub t ~pos:(length t - len) ~len
-
   let drop_prefix t len = sub t ~pos:len ~len:(length t - len)
-
   let drop_suffix t len = sub t ~pos:0 ~len:(length t - len)
 
   let is_prefix t ~prefix =
@@ -383,11 +349,8 @@ module String = struct
         Some (sub t ~pos:0 ~len:i, sub t ~pos:(i + 1) ~len:(length t - i - 1))
 
   let capitalize_ascii = Stdlib.String.capitalize_ascii
-
   let lowercase_ascii = Stdlib.String.lowercase_ascii
-
   let uncapitalize_ascii = Stdlib.String.uncapitalize_ascii
-
   let split_on_char t ~sep = Stdlib.String.split_on_char sep t
 
   include (Poly : Comparisons with type t := string)
@@ -403,7 +366,5 @@ module String = struct
 end
 
 let ( @ ) = List.append
-
 let output oc bytes ~pos ~len = output oc bytes pos len
-
 let output_substring oc string ~pos ~len = output_substring oc string pos len

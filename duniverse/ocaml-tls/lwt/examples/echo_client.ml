@@ -62,7 +62,9 @@ let trust =
   Arg.(value & opt (some string) None & info [ "trust" ] ~doc)
 
 let cmd =
-  Term.(const jump $ setup_log $ port $ host $ trust),
-  Term.info "server" ~version:"0.15.2"
+  let term = Term.(const jump $ setup_log $ port $ host $ trust)
+  and info = Cmd.info "server" ~version:"0.15.3"
+  in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1
+let () = exit (Cmd.eval cmd)

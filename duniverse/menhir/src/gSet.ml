@@ -62,7 +62,9 @@ module type S = sig
 
   val remove: element -> t -> t
 
-  (* [union s1 s2] returns the union of the sets [s1] and [s2]. *)
+  (* [union s1 s2] returns the union of the sets [s1] and [s2].
+     If the resulting set is logically equal to [s2], then [s2]
+     itself is returned. *)
 
   val union: t -> t -> t
 

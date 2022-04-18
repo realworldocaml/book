@@ -1,0 +1,43 @@
+#
+# Circle CI configuration. Runs each time we push a new commit to Github.
+#
+version: 2.1
+
+commands:
+  build:
+    steps:
+      - checkout
+      - run:
+          name: Install system dependencies
+          command: ./.circleci/setup-system
+      - run:
+          name: Install opam dependencies
+          command: ./.circleci/setup-opam
+      - run:
+          name: Build
+          command: opam exec -- make
+      - run:
+          name: Test
+          command: opam exec -- make test
+
+jobs:
+  build_latest_ocaml:
+    docker:
+      - image: ocaml/opam:ubuntu-20.04-ocaml-4.13
+    working_directory: ~/atd
+    steps:
+      - build
+
+  build_min_ocaml:
+    docker:
+      - image: ocaml/opam:ubuntu-20.04-ocaml-4.08
+    working_directory: ~/atd
+    steps:
+      - build
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build_latest_ocaml
+      - build_min_ocaml

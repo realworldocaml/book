@@ -13,7 +13,7 @@ dev-repo: "git+https://github.com/aantron/markup.ml.git"
 
 depends: [
   "dune" {>= "2.7.0"}
-  "ocaml" {>= "4.02.0"}
+  "ocaml" {>= "4.03.0"}
   "uchar"
   "uutf" {>= "1.0.0"}
 

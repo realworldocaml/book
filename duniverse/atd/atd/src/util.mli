@@ -1,6 +1,7 @@
 (** Top-level utilities *)
 
 val read_lexbuf :
+  ?annot_schema:Annot.schema ->
   ?expand:bool ->
   ?keep_poly:bool ->
   ?xdebug:bool ->
@@ -18,6 +19,8 @@ val read_lexbuf :
       for more information about this table. If expand is false, the value
       will be the empty hash table.
 
+      @param annot_schema
+             Check for misplaced annotations in the ATD input.
       @param expand
              Perform monomorphization by creating specialized
              type definitions starting with an underscore.
@@ -53,6 +56,7 @@ val read_lexbuf :
   *)
 
 val read_channel :
+  ?annot_schema:Annot.schema ->
   ?expand:bool ->
   ?keep_poly:bool ->
   ?xdebug:bool ->
@@ -65,6 +69,7 @@ val read_channel :
       The default [pos_fname] is set to ["<stdin>"] when appropriate. *)
 
 val load_file :
+  ?annot_schema:Annot.schema ->
   ?expand:bool ->
   ?keep_poly:bool ->
   ?xdebug:bool ->
@@ -77,6 +82,7 @@ val load_file :
       The default [pos_fname] is the given input file name. *)
 
 val load_string :
+  ?annot_schema:Annot.schema ->
   ?expand:bool ->
   ?keep_poly:bool ->
   ?xdebug:bool ->

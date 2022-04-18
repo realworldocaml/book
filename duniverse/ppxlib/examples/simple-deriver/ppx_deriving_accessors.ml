@@ -37,9 +37,16 @@ let generate_impl ~ctxt (_rec_flag, type_declarations) =
   let loc = Expansion_context.Deriver.derived_item_loc ctxt in
   List.map type_declarations ~f:(fun (td : type_declaration) ->
       match td with
-      | { ptype_kind = Ptype_abstract | Ptype_variant _ | Ptype_open; _ } ->
-          Location.raise_errorf ~loc
-            "Cannot derive accessors for non record types"
+      | {
+       ptype_kind = Ptype_abstract | Ptype_variant _ | Ptype_open;
+       ptype_loc;
+       _;
+      } ->
+          let ext =
+            Location.error_extensionf ~loc:ptype_loc
+              "Cannot derive accessors for non record types"
+          in
+          [ Ast_builder.Default.pstr_extension ~loc ext [] ]
       | { ptype_kind = Ptype_record fields; _ } ->
           List.map fields ~f:accessor_impl)
   |> List.concat
@@ -48,15 +55,21 @@ let generate_intf ~ctxt (_rec_flag, type_declarations) =
   let loc = Expansion_context.Deriver.derived_item_loc ctxt in
   List.map type_declarations ~f:(fun (td : type_declaration) ->
       match td with
-      | { ptype_kind = Ptype_abstract | Ptype_variant _ | Ptype_open; _ } ->
-          Location.raise_errorf ~loc
-            "Cannot derive accessors for non record types"
+      | {
+       ptype_kind = Ptype_abstract | Ptype_variant _ | Ptype_open;
+       ptype_loc;
+       _;
+      } ->
+          let ext =
+            Location.error_extensionf ~loc:ptype_loc
+              "Cannot derive accessors for non record types"
+          in
+          [ Ast_builder.Default.psig_extension ~loc ext [] ]
       | { ptype_kind = Ptype_record fields; ptype_name; _ } ->
           List.map fields ~f:(accessor_intf ~ptype_name))
   |> List.concat
 
 let impl_generator = Deriving.Generator.V2.make_noarg generate_impl
-
 let intf_generator = Deriving.Generator.V2.make_noarg generate_intf
 
 let my_deriver =

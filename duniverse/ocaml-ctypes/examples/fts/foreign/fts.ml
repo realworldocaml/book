@@ -243,7 +243,7 @@ let null_terminated_array_of_ptr_list typ list =
   (castp (ptr void) (CArray.start arr +@ nitems)) <-@ null;
   arr
 
-let fts_open ~path_argv ?compar ~options = 
+let fts_open ~path_argv ?compar ~options () = 
   let paths = null_terminated_array_of_ptr_list string path_argv in
   let options = crush_options fts_open_option_value options in
   { ptr = _fts_open (CArray.start paths) options compar; compar }

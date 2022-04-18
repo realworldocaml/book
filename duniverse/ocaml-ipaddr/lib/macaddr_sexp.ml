@@ -27,7 +27,5 @@ let to_sexp fn t = Sexp.Atom (fn t)
 type t = Macaddr.t
 
 let sexp_of_t = to_sexp Macaddr.to_string
-
 let t_of_sexp = of_sexp Macaddr.of_string
-
 let compare = Macaddr.compare

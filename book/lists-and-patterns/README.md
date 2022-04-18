@@ -288,7 +288,7 @@ function we call has to reexamine the first element of the list to
 determine whether or not it's the empty cell. With a `match`
 expression, this work happens exactly once per list element.
 
-This is a more general phenomena: pattern matching is very efficient,
+This is a more general phenomenon: pattern matching is very efficient,
 and is usually faster than what you might write yourself.
 
 ### Detecting Errors
@@ -457,9 +457,9 @@ on the outside:
 ```ocaml env=main
 # let render_separator widths =
     let pieces = List.map widths
-        ~f:(fun w -> String.make (w + 2) '-')
+        ~f:(fun w -> String.make w '-')
     in
-    "|" ^ String.concat ~sep:"+" pieces ^ "|";;
+    "|-" ^ String.concat ~sep:"-+-" pieces ^ "-|";;
 val render_separator : int list -> string = <fun>
 # render_separator [3;6;2];;
 - : string = "|-----+--------+----|"
@@ -472,7 +472,7 @@ table.[strings/concatenation of]{.idx}[String.concat]{.idx}[List
 module/String.concat and]{.idx}
 
 ::: {data-type=note}
-##### Performance of String.concat and ^
+#### Performance of `String.concat` and `^`
 
 In the preceding code we’ve concatenated strings two different ways:
 `String.concat`, which operates on lists of strings; and `^`, which is
@@ -500,15 +500,15 @@ strings, it can be a serious performance issue.
 :::
 
 Now we need code for rendering a row with data in it. We'll first write a
-function called `pad`, for padding out a string to a specified length plus
-one blank space on both sides:[strings/padding of]{.idx}
+function called `pad`, for padding out a string to a specified
+length:[strings/padding of]{.idx}
 
 ```ocaml env=main
 # let pad s length =
-    " " ^ s ^ String.make (length - String.length s + 1) ' ';;
+    s ^ String.make (length - String.length s) ' ';;
 val pad : string -> int -> string = <fun>
 # pad "hello" 10;;
-- : string = " hello      "
+- : string = "hello     "
 ```
 
 We can render a row of data by merging together the padded strings. Again,
@@ -518,7 +518,7 @@ list of widths:
 ```ocaml env=main
 # let render_row row widths =
     let padded = List.map2_exn row widths ~f:pad in
-    "|" ^ String.concat ~sep:"|" padded ^ "|";;
+    "| " ^ String.concat ~sep:" | " padded ^ " |";;
 val render_row : string list -> int list -> string = <fun>
 # render_row ["Hello";"World"] [10;15];;
 - : string = "| Hello      | World           |"
@@ -882,7 +882,7 @@ val remove_sequential_duplicates : int list -> int list = <fun>
 <!-- other way of integrating this in to the text. -->
 
 ::: {data-type=note}
-##### Polymorphic Compare
+#### Polymorphic Compare
 
 You might have noticed that `remove_sequential_duplicates` is
 specialized to lists of integers.  That's because `Base`'s default

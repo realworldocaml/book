@@ -1,5 +1,5 @@
 (* Auto-generated from "test.atd" *)
-              [@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 (** This is just a test. *)
 
@@ -63,6 +63,11 @@ type test = {
 }
 
 type tup = (int * test)
+
+type test_field_prefix = {
+  theprefix_hello (*atd hello *): bool;
+  theprefix_world (*atd world *): int
+}
 
 type star_rating = int
 
@@ -811,6 +816,49 @@ val tup_of_string :
   (** Deserialize a biniou value of type {!tup}.
       @param pos specifies the position where
                  reading starts. Default: 0. *)
+
+
+(* Writers for type test_field_prefix *)
+
+val test_field_prefix_tag : Bi_io.node_tag
+  (** Tag used by the writers for type {!test_field_prefix}.
+      Readers may support more than just this tag. *)
+
+val write_untagged_test_field_prefix :
+  Bi_outbuf.t -> test_field_prefix -> unit
+  (** Output an untagged biniou value of type {!test_field_prefix}. *)
+
+val write_test_field_prefix :
+  Bi_outbuf.t -> test_field_prefix -> unit
+  (** Output a biniou value of type {!test_field_prefix}. *)
+
+val string_of_test_field_prefix :
+  ?len:int -> test_field_prefix -> string
+  (** Serialize a value of type {!test_field_prefix} into
+      a biniou string. *)
+
+(* Readers for type test_field_prefix *)
+
+val get_test_field_prefix_reader :
+  Bi_io.node_tag -> (Bi_inbuf.t -> test_field_prefix)
+  (** Return a function that reads an untagged
+      biniou value of type {!test_field_prefix}. *)
+
+val read_test_field_prefix :
+  Bi_inbuf.t -> test_field_prefix
+  (** Input a tagged biniou value of type {!test_field_prefix}. *)
+
+val test_field_prefix_of_string :
+  ?pos:int -> string -> test_field_prefix
+  (** Deserialize a biniou value of type {!test_field_prefix}.
+      @param pos specifies the position where
+                 reading starts. Default: 0. *)
+
+val create_test_field_prefix :
+  theprefix_hello: bool ->
+  theprefix_world: int ->
+  unit -> test_field_prefix
+  (** Create a record of type {!test_field_prefix}. *)
 
 
 (* Writers for type star_rating *)

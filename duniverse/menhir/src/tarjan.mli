@@ -65,4 +65,16 @@ end) : sig
 
   val rev_topological_iter: (node -> node list -> unit) -> unit
 
+  (* [map action] iterates over all components in topological order, like
+     [iter], and produces a list of results. *)
+
+  val map: (node -> node list -> 'a) -> 'a list
+
+  (* [rev_map action] iterates over all components in reverse topological
+     order, like [rev_topological_iter], and produces a list of results in
+     topological order. That is, the order of the traversal differs, but the
+     order of the elements in the result list is the same as in [map]. *)
+
+  val rev_map: (node -> node list -> 'a) -> 'a list
+
 end

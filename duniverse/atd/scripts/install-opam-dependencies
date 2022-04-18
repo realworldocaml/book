@@ -1,0 +1,23 @@
+#! /usr/bin/env bash
+#
+# Install the opam dependencies as specified in the opam packages
+# except for the packages defined by this project.
+#
+set -eu -o pipefail
+
+workspace=tmp/install-deps
+rm -rf "$workspace"
+mkdir -p "$workspace"
+
+# Remove the dependencies on packages provided by this very project.
+for x in *.opam; do
+  grep -v \
+    '"atd"\|"atdgen"\|"atdgen-codec-runtime"\|"atdgen-runtime"\|"atdj"\|"atdpy"\|"atds"' "$x" \
+    > "$workspace"/"$x"
+done
+
+# Install the dependencies, which should be now only external dependencies.
+(
+  cd "$workspace"
+  opam install --deps-only --with-test --with-doc ./*.opam
+)

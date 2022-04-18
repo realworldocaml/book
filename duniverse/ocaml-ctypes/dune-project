@@ -1,6 +1,7 @@
-(lang dune 2.6)
+(lang dune 2.8)
 (name ctypes)
 (formatting (enabled_for dune))
+(use_standard_c_and_cxx_flags true)
 
 (generate_opam_files true)
 
@@ -14,11 +15,12 @@
  (name ctypes)
  (tags (org:mirage org:ocamllabs))
  (depends
-  (ocaml (>= 4.02.3))
+  (ocaml (>= 4.03.0))
   integers
   dune-configurator
-  (bisect_ppx (>= 2.0.0))
-  (ounit :with-test))
+  bigarray-compat
+  (ounit :with-test)
+  (conf-fts :with-test))
  (synopsis "Combinators for binding to C libraries without writing any C")
  (description "
 ctypes is a library for binding to C libraries using pure OCaml. The primary
@@ -41,16 +43,15 @@ This will make the `ctypes-foreign` ocamlfind subpackage available."))
  (name ctypes-foreign)
  (tags (org:mirage org:ocamllabs))
  (depends
-  (ocaml (>= 4.02.3))
+  (ocaml (>= 4.03.0))
   (ctypes (= :version))
   dune-configurator
   conf-pkg-config
-  (bisect_ppx (>= 2.0.0))
   (lwt :with-test)
   (ounit :with-test)
   (conf-ncurses :with-test)
   (stdlib-shims :with-test)
-  bisect_ppx)
+  (conf-fts :with-test))
  (synopsis "Dynamic access to foreign C libraries using Ctypes")
  (description "
 This installs the `ctypes-foreign` interface which

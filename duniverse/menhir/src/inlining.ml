@@ -419,7 +419,7 @@ module Inline (G : sig val grammar: grammar end) = struct
      correct. *)
 
   let () =
-    if Settings.coq then
+    if Settings.backend = `CoqBackend then
       StringMap.iter (fun _ rule ->
         if rule.inline_flag then
           Error.error rule.positions

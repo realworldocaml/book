@@ -9,7 +9,8 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 
 let%expect_test _ =
-  let example_html = {|
+  let example_html =
+    {|
     <html>
       Some random <b>text</b> with a
       <a href="http://ocaml.org/base">link</a>.

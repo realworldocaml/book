@@ -1,5 +1,5 @@
 (* Auto-generated from "bucklespec.atd" *)
-              [@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 type recurse = Bucklespec_t.recurse = { recurse_items: recurse list }
 
@@ -10,6 +10,10 @@ type mutual_recurse1 = Bucklespec_t.mutual_recurse1 = {
 and mutual_recurse2 = Bucklespec_t.mutual_recurse2 = {
   mutual_recurse1: mutual_recurse1
 }
+
+type variant2 = Bucklespec_t.variant2 =  A | C 
+
+type variant1 = Bucklespec_t.variant1 =  A of string | B 
 
 type valid = Bucklespec_t.valid
 
@@ -67,6 +71,14 @@ val write_mutual_recurse1 :  mutual_recurse1 Atdgen_codec_runtime.Encode.t
 val read_mutual_recurse2 :  mutual_recurse2 Atdgen_codec_runtime.Decode.t
 
 val write_mutual_recurse2 :  mutual_recurse2 Atdgen_codec_runtime.Encode.t
+
+val read_variant2 :  variant2 Atdgen_codec_runtime.Decode.t
+
+val write_variant2 :  variant2 Atdgen_codec_runtime.Encode.t
+
+val read_variant1 :  variant1 Atdgen_codec_runtime.Decode.t
+
+val write_variant1 :  variant1 Atdgen_codec_runtime.Encode.t
 
 val read_valid :  valid Atdgen_codec_runtime.Decode.t
 

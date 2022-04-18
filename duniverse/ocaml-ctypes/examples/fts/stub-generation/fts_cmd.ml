@@ -15,17 +15,26 @@ let sort_by_name lp rp =
   let open FTSENT in
   String.compare (name !@lp) (name !@rp)
 
+let rec iter ~gen ~f =
+  match gen () with
+  | None -> ()
+  | Some x ->
+    begin
+      f x;
+      iter ~gen ~f
+    end
+
 let ents ?compar path_argv =
-  let fts : FTS.t = fts_open ~path_argv ?compar ~options:[] in
-  Stream.from (fun _ -> fts_read fts)
+  let fts : FTS.t = fts_open ~path_argv ?compar ~options:[] () in
+  (fun _ -> fts_read fts)
 
 let main paths =
   let indent = ref 0 in
   let show_path ent =
     Printf.printf "%*s%s\n" !indent "" (FTSENT.path ent);
   in
-  Stream.iter
-    FTSENT.(fun ent ->
+  iter
+    ~f:FTSENT.(fun ent ->
       match info ent with
         | FTS_D -> begin
           show_path ent;
@@ -36,7 +45,7 @@ let main paths =
         | FTS_SLNONE -> show_path ent
         | FTS_DP -> decr indent
         | _ -> ())
-    (ents ~compar:sort_by_name paths)
+    ~gen:(ents ~compar:sort_by_name paths)
 
 let () = 
   match List.tl (Array.to_list Sys.argv) with

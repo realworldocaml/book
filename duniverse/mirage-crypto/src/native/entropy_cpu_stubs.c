@@ -2,6 +2,8 @@
  * Copyright (c) 2015-2016 David Kaloper Meršinjak
  */
 
+#define _POSIX_C_SOURCE 199309L
+
 #include <caml/mlvalues.h>
 
 #include "mirage_crypto.h"
@@ -22,6 +24,22 @@
 #endif
 #endif /* __i386__ || __x86_64__ */
 
+/* mc_cycle_counter specification and requirements
+
+   Below the function mc_cycle_counter is defined (with different
+   implementations on different platforms. Its lower 32 bits are used for
+   entropy collection on every entry to the main event loop.
+
+   The requirement for this function is that every call to it (from OCaml)
+   should lead to a different output (in the lower 32 bits), and it should be
+   unpredictable (since the timestamp / cpu cycle counter is fine-grained
+   enough).
+
+   The executable test/test_entropy.ml tests parts of the requirements by
+   calling mc_cycle_counter 10 times and comparing the output to the previous
+   output.
+*/
+
 #if defined (__arm__)
 /*
  * The ideal timing source on ARM are the performance counters, but these are
@@ -40,7 +58,7 @@
   unsigned int res;
   __asm__ __volatile__ ("mrc p15, 0, %0, c9, c13, 0": "=r" (res));
 */
-#ifdef __ocaml_freestanding__
+#if defined(__ocaml_freestanding__) || defined(__ocaml_solo5__)
 static inline uint32_t read_virtual_count ()
 {
   uint32_t c_lo, c_hi;
@@ -73,7 +91,7 @@ static inline uint32_t read_virtual_count ()
   clock_gettime (CLOCK_MONOTONIC, &now);
   return now.tv_nsec;
 }
-#endif /* __ocaml_freestanding__ */
+#endif /* __ocaml_freestanding__ || __ocaml_solo5__ */
 #endif /* arm */
 
 #if defined (__aarch64__)
@@ -117,6 +135,14 @@ static inline uint64_t getticks(void)
 }
 #endif
 
+#if defined (__mips__)
+static inline unsigned long get_count() {
+  unsigned long count;
+  __asm__ __volatile__ ("rdhwr %[rt], $2" : [rt] "=d" (count));
+  return count;
+}
+#endif
+
 
 CAMLprim value mc_cycle_counter (value __unused(unit)) {
 #if defined (__i386__) || defined (__x86_64__)
@@ -129,10 +155,14 @@ CAMLprim value mc_cycle_counter (value __unused(unit)) {
   return Val_long (rdcycle64 ());
 #elif defined (__s390x__)
   return Val_long (getticks ());
+#elif defined(__mips__)
+  return Val_long (get_count());
 #else
 #error ("No known cycle-counting instruction.")
 #endif
 }
+
+/* end of mc_cycle_counter */
 
 enum cpu_rng_t {
   RNG_NONE   = 0,
