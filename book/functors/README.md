@@ -1081,8 +1081,11 @@ include Foldable.Extend(Fqueue)
 
 `Base` comes with a number of functors for extending modules that follow this
 same basic pattern, including:
-[Monad.Make]{.idx}[Hashable.Make]{.idx}[Comparable
-module/Comparable.Make]{.idx}[Container.Make]{.idx}
+[Monad.Make]{.idx}
+[Hashable.Make]{.idx}
+[Comparable
+module]{.idx}
+[Container.Make]{.idx}
 
 * `Container.Make` : Very similar to `Foldable.Extend`.
 

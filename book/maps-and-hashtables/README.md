@@ -4,8 +4,8 @@ Lots of programming problems require dealing with data organized as
 key/value pairs. Maybe the simplest way of representing such data in
 OCaml is an *association list*, which is simply a list of pairs of
 keys and values. For example, you could represent a mapping between
-the 10 digits and their English names as follows: [key/value
-pairs]{.idx}[data structures/key/value pairs]{.idx}[lists/association
+the 10 digits and their English names as follows: [key-value
+pairs]{.idx}[data structures/key-value pairs]{.idx}[lists/association
 lists]{.idx}[association lists]{.idx}
 
 ```ocaml env=main
@@ -97,6 +97,7 @@ the `Map.t` has three type parameter. The first two are what you might
 expect; one for the type of the key, and one for type of the data. The
 third type parameter, the *comparator witness*, requires some
 explaining.
+[comparator/comparator witness]{.idx}
 
 The comparator witness is used to indicate which comparison function
 was used to construct the map, rather than saying something about the
@@ -233,6 +234,7 @@ functor to extend the module. Here, we use a common idiom where we create a
 submodule, called `T` containing the basic functionality for the type in
 question, and then include both that module and the result of applying a
 functor to that module.
+[comparator/Comparator module]{.idx}
 
 ```ocaml env=main
 module Book = struct
@@ -273,6 +275,7 @@ While we used `Comparator.Make` in the above, it's often preferable to
 use `Comparable.Make` instead, since it provides extra helper
 functions, like infix comparison operators and min and max functions,
 in addition to the comparator itself.
+[Comparable module]{.idx}
 
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 

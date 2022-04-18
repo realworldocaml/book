@@ -70,9 +70,11 @@ JSON in Python or Ruby, you might write unit tests to check that you
 have handled unusual inputs. The OCaml model prefers compile-time
 static checking as well as unit tests. For example, using pattern
 matching can warn you if you've not checked that a value can be `Null`
-as well as contain an actual value. [Yojson library/installation
-of]{.idx}[static checking]{.idx}[compile-time static
-checking]{.idx}[unit tests]{.idx}
+as well as contain an actual value.
+[Yojson library/installation of]{.idx}
+[static checking]{.idx}
+[compile-time static checking]{.idx}
+[unit tests]{.idx}
 
 ::: {data-type=note}
 #### Installing the Yojson Library
