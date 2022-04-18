@@ -4,4 +4,3 @@ let test v =
   | `Bob     -> 101
   | `Charlie -> 102
   | `David   -> 103
-  | `Eve     -> 104
