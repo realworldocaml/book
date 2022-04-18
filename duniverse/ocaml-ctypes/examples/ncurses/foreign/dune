@@ -1,7 +1,7 @@
 (library
  (name ncurses)
  (modules ncurses)
- (libraries ctypes-foreign.threaded))
+ (libraries ctypes-foreign))
 
 (executables
  (names ncurses_cmd)

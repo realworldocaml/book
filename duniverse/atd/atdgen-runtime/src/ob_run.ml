@@ -333,6 +333,19 @@ type t = {
 let create () =
   { { _a = None; _b = Array.length Sys.argv } with _a = None }
 
+(*
+   This is a runtime test that checks whether our assumptions about
+   the compiler still hold.
+
+   We get the following warning when using an OCaml compiler built
+   with the flambda optimization. This is probably a good warning
+   and shouldn't be ignored if the OCaml/biniou is to be used.
+   This won't affect the OCaml/JSON backend.
+
+   > Warning 59 [flambda-assignment-to-non-mutable-value]: A potential
+   > assignment to a non-mutable value was detected in this source file.
+   > Such assignments may generate incorrect code when using Flambda.
+*)
 let test () =
   let r = create () in
   let v = Some 17 in

@@ -1,19 +1,6 @@
 (* This file is part of Markup.ml, released under the MIT license. See
    LICENSE.md for details, or visit https://github.com/aantron/markup.ml. *)
 
-(* Aliases for reducing the number of deprecation warnings. *)
-module String =
-struct
-  include String
-  let lowercase = lowercase [@ocaml.warning "-3"]
-end
-
-module Char =
-struct
-  include Char
-  let lowercase = lowercase [@ocaml.warning "-3"]
-end
-
 type 'a cont = 'a -> unit
 type 'a cps = exn cont -> 'a cont -> unit
 

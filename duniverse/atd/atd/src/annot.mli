@@ -94,6 +94,23 @@ val get_field :
       Each section should be unique.
   *)
 
+val get_fields :
+  parse:(string -> 'a option) ->
+  sections:string list ->
+  field:string ->
+  t -> 'a list
+  (** [get_fields parse section_names field_name annotations]
+      looks sequentially into the sections specified by [section_names]
+      for fields named [field_name].
+      Each found value is parsed using the given function [parse] which
+      should return [None] in order to indicate an invalid value.
+      In the end the list of parsed values is returned.
+      If the field is present without an associated value
+      or if [parse] returns [None], a [Failure] exception is raised.
+
+      Each section should be unique.
+  *)
+
 val get_opt_field :
   parse:(string -> 'a option) ->
   sections:string list ->
@@ -131,3 +148,43 @@ v}
 
 val create_id : unit -> string
   (** Create a unique numeric ID *)
+
+type node_kind =
+  | Module_head
+  | Type_def
+  | Type_expr
+  | Variant
+  | Cell
+  | Field
+
+type schema_field = node_kind * string
+
+(** An annotation schema for a section ["foo"] defines all the locations where
+    annotations of the form [<foo ...>] can occur and which fields are
+    allowed.
+    The goal is to detect misspellings in field names or the incorrect
+    placement of an annotation.
+
+    Annotations whose section is undeclared in the schema are ignored.
+    The following is an example specifying the legal placement of annotations
+    of the form [<json name="...">]:
+{v
+    {
+       section = "json";
+       fields = [
+         Variant, "name";
+         Field, "name";
+       ]
+    }
+v}
+*)
+type schema_section = {
+  section: string;
+  fields: schema_field list;
+}
+
+type schema = schema_section list
+
+(** Check that annotations of interest are not misplaced.
+    Raises an exception with an error message when the check fails. *)
+val validate : schema -> Ast.any -> unit

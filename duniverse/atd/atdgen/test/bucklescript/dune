@@ -28,7 +28,7 @@
 (executable
  (name bucklespec_roundtrip)
  (modules bucklespec_roundtrip bucklespec_j a_j)
- (libraries bucklespec_types bucklespec_bs atdgen-runtime))
+ (libraries bucklespec_types bucklespec_bs atdgen-runtime atdgen-codec-runtime biniou yojson))
 
 (rule
  (alias runtest)

@@ -471,7 +471,7 @@ It's also helpful here because `eval` itself is an example of
 itself at multiple different types. This comes up, for example, with
 `If`, since the `If` itself must be of type `bool`, but the type of
 the then and else clauses could be of type `int`. This means that when
-evaluating `If`, we'll dispatch `eval` at a different type then it was
+evaluating `If`, we'll dispatch `eval` at a different type than it was
 called on.  [polymorphic recursion]{.idx}
 
 As such, `eval` needs to see itself as polymorphic.  This kind of

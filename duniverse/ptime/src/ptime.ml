@@ -1,10 +1,7 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
-
-open Result
 
 (* Julian day and proleptic Gregorian calendar date conversion.
 
@@ -93,6 +90,8 @@ type span = t
 
 module Span = struct
 
+  let stdlib_abs = abs
+
   (* Arithmetic *)
 
   let neg = function
@@ -125,7 +124,7 @@ module Span = struct
   let to_d_ps s = s
 
   let of_int_s secs =
-    let d = Pervasives.abs secs in
+    let d = stdlib_abs secs in
     let s = (d / 86_400, Int64.(mul (of_int (d mod 86_400)) ps_count_in_s)) in
     if secs < 0 then neg s else s
 
@@ -146,7 +145,12 @@ module Span = struct
     if days < min_int_float || days > max_int_float then None else
     let rem_s = mod_float secs 86_400. in
     let rem_s = if rem_s < 0. then 86_400. +. rem_s else rem_s in
-    if rem_s >= 86_400. then Some (int_of_float days + 1, 0L) else
+    if rem_s >= 86_400. then
+      (* Guard against a potential overflow in the computation of [rem_s] *)
+      let days = days +. 1. in
+      if days > max_int_float then None else
+      Some (int_of_float days, 0L)
+    else
     let frac_s, rem_s = modf rem_s in
     let rem_ps = Int64.(mul (of_float rem_s) ps_count_in_s) in
     let frac_ps = Int64.(of_float (frac_s *. 1e12)) in
@@ -161,12 +165,12 @@ module Span = struct
   (* Predicates *)
 
   let equal (d0, ps0) (d1, ps1) =
-    (Pervasives.compare : int -> int -> int) d0 d1 = 0 &&
+    (compare : int -> int -> int) d0 d1 = 0 &&
     Int64.compare ps0 ps1 = 0
 
   let compare (d0, ps0) (d1, ps1) =
-    let c = Pervasives.compare d0 d1 in
-    if c <> 0 then c else Pervasives.compare ps0 ps1
+    let c = (compare : int -> int -> int) d0 d1 in
+    if c <> 0 then c else (compare : int64 -> int64 -> int) ps0 ps1
 
   (* Rounding *)
 
@@ -200,6 +204,9 @@ module Span = struct
     let (d, ps) = if sign < 0 then neg t else t in
     let tps = Int64.(sub ps (rem ps frac_div.(frac))) in
     if sign < 0 then neg (d, tps) else (d, tps)
+
+  let truncate_down ~frac_s:frac (d, ps) =
+    (d, Int64.(sub ps (rem ps frac_div.(frac ))))
 
   (* Pretty printing *)
 
@@ -302,8 +309,8 @@ module Span = struct
         if ps >= ps_count_in_ns then pp_ns ppf ~neg ps else
         pp_ps ppf ~neg ps
     | (d, ps) ->
-        if d > 365 then pp_y_d ppf neg d ps else
-        pp_d_h ppf neg d ps
+        if d > 365 then pp_y_d ppf ~neg d ps else
+        pp_d_h ppf ~neg d ps
 end
 
 (* POSIX timestamps *)
@@ -326,7 +333,7 @@ let of_float_s secs = match Span.of_float_s secs with
 
 let to_float_s = Span.to_float_s
 
-let truncate = Span.truncate
+let truncate = Span.truncate_down
 
 let frac_s (_, ps) = (0, Int64.(rem ps ps_count_in_s))
 

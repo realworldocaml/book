@@ -4,4 +4,4 @@
  (synopsis "Error-recovering functional HTML5 and XML parsers")
  (instrumentation (backend bisect_ppx))
  (libraries uutf)
- (flags (:standard -w +A-4-9-44-48 -warn-error -3-4-9-44-48 -safe-string)))
+ (flags (:standard -w -9)))

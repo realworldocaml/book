@@ -26,7 +26,7 @@ let rec rev_take accu n xs =
   | _, x :: xs ->
       rev_take (x :: accu) (n - 1) xs
 
-module Make (M : IMPERATIVE_MAPS) = struct
+module Make (M : MINIMAL_IMPERATIVE_MAPS) = struct
 
   type key = M.key
 

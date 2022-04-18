@@ -33,22 +33,27 @@ let write program =
 (* Construct and print the code using an appropriate back-end. *)
 
 let () =
-  if Settings.table then begin
-    let module B = TableBackend.Run (struct end) in
-    write B.program;
-    Interface.write Front.grammar ()
-  end
-  else if Settings.coq then begin
-    let module B = CoqBackend.Run (struct end) in
-    let filename = Settings.base ^ ".v" in
-    let f = open_out filename in
-    B.write_all f
-  end
-  else begin
-    let module B = CodeBackend.Run (struct end) in
-    write (CodeInliner.inline B.program);
-    Interface.write Front.grammar ()
-  end
+  match Settings.backend with
+  | `ReferenceInterpreter ->
+      (* This case is handled in Interpret. *)
+      assert false
+  | `TableBackend ->
+      let module B = TableBackend.Run (struct end) in
+      write B.program;
+      Interface.write Front.grammar ()
+  | `CoqBackend ->
+      let module B = CoqBackend.Run (struct end) in
+      let filename = Settings.base ^ ".v" in
+      let f = open_out filename in
+      B.write_all f
+  | `OldCodeBackend ->
+      let module B = CodeBackend.Run () in
+      write (CodeInliner.inline B.program);
+      Interface.write Front.grammar ()
+  | `NewCodeBackend ->
+      let module B = NewCodeBackend.Run () in
+      write B.program;
+      Interface.write Front.grammar ()
 
 let () =
   Time.tick "Printing"

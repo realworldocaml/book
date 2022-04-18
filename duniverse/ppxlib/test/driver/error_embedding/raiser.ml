@@ -10,5 +10,4 @@ let rule =
   |> Context_free.Rule.extension
 
 let () = Driver.register_transformation ~rules:[ rule ] "test"
-
 let () = Driver.standalone ()

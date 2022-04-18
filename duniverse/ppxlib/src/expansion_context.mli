@@ -39,7 +39,6 @@ module Base : sig
       details. *)
 
   val enter_module : loc:Location.t -> string -> t -> t
-
   val enter_value : loc:Location.t -> string -> t -> t
 end
 

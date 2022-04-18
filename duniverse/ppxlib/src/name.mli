@@ -65,9 +65,7 @@ end
 
 module Whitelisted : sig
   val get_attribute_list : unit -> string list
-
   val get_extension_list : unit -> string list
-
   val is_whitelisted : kind:[ `Attribute | `Extension ] -> string -> bool
 end
 

@@ -10,6 +10,10 @@
 (*                                                                            *)
 (******************************************************************************)
 
+(* Although the code is polymorphic in the type of elements, it must still
+   be packaged as a functor, because [property] cannot be a parameterized
+   type. *)
+
 module Option (X : sig type t end) = struct
 
   open X

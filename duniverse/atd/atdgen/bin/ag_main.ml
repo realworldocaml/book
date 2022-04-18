@@ -71,21 +71,38 @@ let main () =
     let l = Re.Str.split (Re.Str.regexp " *, *\\| +") s in
     opens := List.rev_append l !opens
   in
-  let pp_convs : Ocaml.pp_convs ref = ref (Ocaml.Ppx []) in
+  let pp_convs : Ocaml.pp_convs ref = ref (Ocaml.Ppx_deriving []) in
+  let set_pp_convs arg =
+    match !pp_convs with
+    | Ocaml.Camlp4 [] | Ppx_deriving [] | Ppx [] ->
+      pp_convs := arg
+    | _ ->
+      match !pp_convs, arg with
+      | Ppx pp_convs', Ppx arg -> pp_convs := Ppx (pp_convs' @ arg)
+      | _ -> failwith "Only one of `-type-conv`, `-deriving-conv`, \
+                       `-type-attr` could be specified. \
+                       `-type-attr` may be used muliple times"
+  in
   let options = [
     "-type-conv", Arg.String (fun s ->
-      pp_convs := Camlp4 (Re.Str.split (Re.Str.regexp ",") s)),
+      set_pp_convs (Camlp4 (Re.Str.split (Re.Str.regexp ",") s))),
     "
     GEN1,GEN2,...
          Insert 'with GEN1, GEN2, ...' after OCaml type definitions for the
          type-conv preprocessor
     ";
     "-deriving-conv", Arg.String (fun s ->
-      pp_convs := Ocaml.Ppx (Re.Str.split (Re.Str.regexp ",") s)),
+      set_pp_convs (Ocaml.Ppx_deriving (Re.Str.split (Re.Str.regexp ",") s))),
     "
     GEN1,GEN2,...
-         Insert 'with GEN1, GEN2, ...' after OCaml type definitions for the
-         ppx_deriving preprocessor
+         Insert '[@@deriving GEN1,GEN2,...]' after OCaml type definitions for
+         the ppx_deriving preprocessor
+    ";
+    "-type-attr", Arg.String (fun s -> set_pp_convs (Ocaml.Ppx [ s ])),
+    "
+    ATTR
+         Insert '[@@ATTR]' after OCaml type definitions.
+         Option can be used multiple times to specify several attributes
     ";
     "-t", Arg.Unit (fun () ->
                       set_once "output type" mode T;

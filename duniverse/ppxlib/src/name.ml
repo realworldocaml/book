@@ -41,7 +41,6 @@ module Pattern = struct
     { name; dot_suffixes = String.Set.of_list (dot_suffixes name) }
 
   let name t = t.name
-
   let matches t matched = String.Set.mem matched t.dot_suffixes
 end
 
@@ -109,23 +108,16 @@ module Whitelisted = struct
     | `Extension -> String.Set.mem name extensions
 
   let get_attribute_list () = String.Set.elements attributes
-
   let get_extension_list () = String.Set.elements extensions
 end
 
 module Reserved_namespaces = struct
   let tbl : (string, unit) Hashtbl.t = Hashtbl.create 16
-
   let reserve ns = Hashtbl.add_exn tbl ~key:ns ~data:()
-
   let () = reserve "merlin"
-
   let () = reserve "reason"
-
   let () = reserve "refmt"
-
   let () = reserve "metaocaml"
-
   let () = reserve "ocamlformat"
 
   let is_in_reserved_namespaces name =
@@ -157,7 +149,6 @@ let ignore_checks name =
 
 module Registrar = struct
   type element = { fully_qualified_name : string; declared_at : Caller_id.t }
-
   type all_for_context = { mutable all : element String.Map.t }
 
   type 'a t = {

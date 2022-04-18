@@ -60,7 +60,6 @@ type subject =
 
 type keyword =
   | Position of subject * where * flavor
-  | SyntaxError
 
 (* This maps a [Position] keyword to the name of the variable that the
    keyword is replaced with. *)

@@ -20,6 +20,8 @@
   ))
 )
 
+(copy_files# StackLang/*.{ml,mli})
+
 ;; The following parsers are built by ocamlyacc.
 
 (ocamlyacc
@@ -52,3 +54,21 @@
     )
   )
 )
+
+;; This rule allows distinguishing development builds and release builds.
+;; The file profile.ml defines the Boolean flag [release] to be [true]
+;; in a release build and false in a development build.
+
+(rule
+  (enabled_if (= %{profile} dev))
+  (action
+    (with-stdout-to profile.ml
+      (echo "let release = false")
+)))
+
+(rule
+  (enabled_if (= %{profile} release))
+  (action
+    (with-stdout-to profile.ml
+      (echo "let release = true")
+)))

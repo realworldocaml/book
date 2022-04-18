@@ -1,17 +1,56 @@
-(test
- ( name zq)
+(env
+ (dev
+  (flags
+   (:standard -w -27-35))))
+
+(executable
+  (name zq)
+  (modes byte exe)
   (modules zq)
   (libraries zarith))
-;; TODO compare against output64 result or define expect test
+
+(rule
+  (alias runtest)
+  (action
+    (progn
+     (with-stdout-to zq.out (run ./zq.exe))
+     (diff zq.output%{ocaml-config:word_size} zq.out))))
+
+(rule
+  (alias runtest)
+  (action
+    (progn
+     (with-stdout-to zq.out.bc (run ./zq.bc))
+     (diff zq.output%{ocaml-config:word_size} zq.out.bc))))
 
 (executable
   (name pi)
+  (modes exe)
   (modules pi)
   (libraries zarith))
- 
-(alias
- (name runtest)
- (deps pi.exe)
- (action (run ./pi.exe 500)))
 
-(rule (copy pi.output pi.expected))
+(rule
+  (alias runtest)
+  (action
+    (progn
+     (with-stdout-to pi.out (run ./pi.exe 500))
+     (diff pi.output pi.out))))
+
+(test
+  (name ofstring)
+  (modules ofstring)
+  (modes exe)
+  (libraries zarith))
+
+(test
+  (name timings)
+  (modules timings)
+  (modes exe)
+  (libraries zarith))
+
+(test
+  (name tofloat)
+  (modules tofloat)
+  (modes exe)
+  (foreign_stubs (language c) (names setround))
+  (libraries zarith))

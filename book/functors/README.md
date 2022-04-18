@@ -337,7 +337,7 @@ functors to mint new types is a useful trick that comes up a lot.
 There's a problem with `Make_interval`. The code we wrote depends on
 the invariant that the upper bound of an interval is greater than its
 lower bound, but that invariant can be violated. The invariant is
-enforced by the `create` function, but because `Interval.t` is not
+enforced by the `create` function, but because `Int_interval.t` is not
 abstract, we can bypass the `create` function:[interval
 computation/abstract functor for]{.idx}
 
@@ -1100,7 +1100,7 @@ module]{.idx}
   and
   [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
   Here, the functor is used to provide a collection of standard helper
-  dunctions based on the `bind` and `return` operators.
+  functions based on the `bind` and `return` operators.
 
 \noindent
 These functors come in handy when you want to add the same kind of

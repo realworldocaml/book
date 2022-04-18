@@ -32,7 +32,6 @@ val bquote: document
 val semi: document
 val colon: document
 val comma: document
-val space: document
 val dot: document
 val sharp: document
 val slash: document

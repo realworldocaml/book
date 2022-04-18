@@ -63,6 +63,36 @@ type json_repr =
   | Variant of json_variant
   | Wrap (* should we add support for Base64 encoding of binary data? *)
 
+(*
+   This must hold all the valid annotations of the form
+   '<json ...>'.
+*)
+let annot_schema_json : Atd.Annot.schema = [
+  {
+    section = "json";
+    fields = [
+      Type_expr, "adapter.ocaml";
+      Type_expr, "keep_nulls";
+      Type_expr, "open_enum";
+      Type_expr, "precision";
+      Type_expr, "repr";
+      Variant, "name";
+      Field, "name";
+      Field, "tag_field";
+    ]
+  };
+  {
+    (* deprecated *)
+    section = "ocaml_json";
+    fields = [
+      Type_def, "from";
+      Type_def, "module";
+      Type_def, "predef";
+      Type_def, "t";
+    ]
+  };
+]
+
 let json_float_of_string s : [ `Float | `Int ] option =
   match s with
       "float" -> Some `Float

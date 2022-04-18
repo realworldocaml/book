@@ -9,9 +9,6 @@ open OUnit2
 open Ctypes
 open Foreign
 
-
-let testlib = Dl.(dlopen ~filename:"../clib/dlltest_functions_stubs.so" ~flags:[RTLD_NOW])
-
 module Common_tests(S : Cstubs.FOREIGN with type 'a result = 'a
                                         and type 'a return = 'a) =
 struct

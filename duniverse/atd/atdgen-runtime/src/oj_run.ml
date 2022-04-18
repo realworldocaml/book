@@ -105,7 +105,9 @@ let write_int32 ob x =
   Bi_outbuf.add_string ob (Int32.to_string x)
 
 let write_int64 ob x =
-  Bi_outbuf.add_string ob (Int64.to_string x)
+  Bi_outbuf.add_char ob '"';
+  Bi_outbuf.add_string ob (Int64.to_string x);
+  Bi_outbuf.add_char ob '"'
 
 let min_float = float min_int
 let max_float = float max_int
@@ -236,33 +238,17 @@ let write_with_adapter restore writer ob x =
   let ast' = restore ast in
   Yojson.Safe.to_outbuf ob ast'
 
-(* We want an identity function that is not inlined *)
-type identity_t = { mutable _identity : 'a. 'a -> 'a }
-let identity_ref = { _identity = (fun x -> x) }
-let identity x = identity_ref._identity x
-
 (*
   Checking at runtime that our assumptions on unspecified compiler behavior
   still hold.
+   TODO: what are these assumptions and which component makes them?
 *)
-
 type t = {
   _a : int option;
   _b : int;
 }
 
-let create () =
+(* This must be a test for the type checker since the function isn't used
+   anywhere. *)
+let _test () =
   { { _a = None; _b = Array.length Sys.argv } with _a = None }
-
-let test () =
-  let r = create () in
-  let v = Some 17 in
-  Obj.set_field (Obj.repr r) 0 (Obj.repr v);
-  let safe_r = identity r in
-  (* r._a is inlined by ocamlopt and equals None
-     because the field is supposed to be immutable. *)
-  assert (safe_r._a = v)
-
-let () = test ()
-
-(************************************)

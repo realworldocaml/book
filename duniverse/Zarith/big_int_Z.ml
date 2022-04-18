@@ -1,15 +1,15 @@
 (**
    [Big_int] interface for Z module.
-   
+
    This modules provides an interface compatible with [Big_int], but using
    [Z] functions internally.
 
 
-   This file is part of the Zarith library 
+   This file is part of the Zarith library
    http://forge.ocamlcore.org/projects/zarith .
    It is distributed under LGPL 2 licensing, with static linking exception.
    See the LICENSE file included in the distribution.
-   
+
    Copyright (c) 2010-2011 Antoine Miné, Abstraction project.
    Abstraction is part of the LIENS (Laboratoire d'Informatique de l'ENS),
    a joint laboratory by:
@@ -57,7 +57,7 @@ let gcd_big_int = Z.gcd
 
 let power = Z.pow
 
-let power_big a b = 
+let power_big a b =
   Z.pow a (Z.to_int b)
 
 let power_int_positive_int a b =
@@ -104,7 +104,7 @@ let big_int_of_int = Z.of_int
 
 let is_int_big_int = Z.fits_int
 
-let int_of_big_int x = 
+let int_of_big_int x =
    try Z.to_int x with Z.Overflow -> failwith "int_of_big_int"
 
 let big_int_of_int32 = Z.of_int32

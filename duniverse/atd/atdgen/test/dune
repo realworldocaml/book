@@ -39,6 +39,26 @@
     -o testj)))
 
 (rule
+ (targets test_unit_biniou_b.ml test_unit_biniou_b.mli)
+ (deps    test_unit_biniou.atd)
+ (action  (run %{bin:atdgen} -b %{deps})))
+
+(rule
+ (targets test_unit_biniou_t.ml test_unit_biniou_t.mli)
+ (deps    test_unit_biniou.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (targets test_int64_enc_t.ml test_int64_enc_t.mli)
+ (deps    test_int64_enc.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (targets test_int64_enc_j.ml test_int64_enc_j.mli)
+ (deps    test_int64_enc.atd)
+ (action  (run %{bin:atdgen} -j %{deps})))
+
+(rule
  (alias runtest)
  (package atdgen)
  (action (diff testj.expected.ml testj.ml)))
@@ -196,11 +216,11 @@
 
 (rule
  (targets test_annot_error.stderr)
- (deps    (:atd test_annot_error.atd))
+ (deps    (:atd test_annot_error.atd) %{bin:atdgen})
  (action
-  (with-stderr-to test_annot_error.stderr
+   (with-stderr-to test_annot_error.stderr
    (with-stdout-to test_annot_error.stdout
-    (with-accepted-exit-codes 1 (run %{bin:atdgen} -t %{atd}))))))
+     (bash "%{bin:atdgen} -t %{atd} || echo 'Failed succesfully!'")))))
 
 (rule
  (alias runtest)
@@ -211,9 +231,86 @@
  (alias runtest)
  (package atdgen)
  (action (diff test_annot_error.expected.stdout test_annot_error.stdout)))
+ 
+ ;; inline records are not allowed within poly variant, but allowed in classic
+
+(rule
+ (targets test_poly_inline_record_error.stderr)
+ (deps    (:atd test_poly_inline_record_error.atd) %{bin:atdgen})
+ (action
+   (with-stderr-to test_poly_inline_record_error.stderr
+   (with-stdout-to test_poly_inline_record_error.stdout
+     (bash "%{bin:atdgen} -t %{atd} || echo 'Failed succesfully!'")))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_poly_inline_record_error.expected.stderr test_poly_inline_record_error.stderr)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_poly_inline_record_error.expected.stdout test_poly_inline_record_error.stdout)))
+
+(rule
+ (targets test_classic_inline_record_t.ml test_classic_inline_record_t.mli)
+ (deps    test_classic_inline_record.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_classic_inline_record_t.expected.ml test_classic_inline_record_t.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_classic_inline_record_t.expected.mli test_classic_inline_record_t.mli)))
+
+;; OCaml keywords cannot be used as type names or record field names
+(rule
+ (targets test_ocaml_keyword_error1.stderr)
+ (deps    (:atd test_ocaml_keyword_error1.atd) %{bin:atdgen})
+ (action
+   (with-stderr-to test_ocaml_keyword_error1.stderr
+   (with-stdout-to test_ocaml_keyword_error1.stdout
+     (bash "%{bin:atdgen} -t %{atd} || echo 'Failed succesfully!'")))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_ocaml_keyword_error1.expected.stderr test_ocaml_keyword_error1.stderr)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_ocaml_keyword_error1.expected.stdout test_ocaml_keyword_error1.stdout)))
+
+(rule
+ (targets test_ocaml_keyword_error2.stderr)
+ (deps    (:atd test_ocaml_keyword_error2.atd) %{bin:atdgen})
+ (action
+   (with-stderr-to test_ocaml_keyword_error2.stderr
+   (with-stdout-to test_ocaml_keyword_error2.stdout
+     (bash "%{bin:atdgen} -t %{atd} || echo 'Failed succesfully!'")))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_ocaml_keyword_error2.expected.stderr test_ocaml_keyword_error2.stderr)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_ocaml_keyword_error2.expected.stdout test_ocaml_keyword_error2.stdout)))
+
+(rule
+ (targets test_ppx_t.ml test_ppx_t.mli)
+ (deps    test_ppx.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
 
 (executables
- (libraries atd atdgen-runtime)
+ (libraries atd atdgen-runtime biniou yojson)
  (names test_atdgen_main)
  (modules
   test
@@ -228,10 +325,16 @@
   testjstd
   testj
   testv
+  test_unit_biniou_t
+  test_unit_biniou_b
+  test_int64_enc_t
+  test_int64_enc_j
   test_atdgen_main
-  test_lib))
+  test_lib
+  test_ppx_t
+  ))
 
 (rule
- (alias   runtest)
+ (alias runtest)
  (package atdgen)
  (action (run ./test_atdgen_main.exe)))

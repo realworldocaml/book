@@ -43,6 +43,12 @@ let test =
   let requires = [ fmt ] in
   B0_ocaml.exe "test" ~doc:"Test suite" ~srcs ~meta ~requires
 
+let styled_test_bug =
+  let srcs = Fpath.[`File (v "test/styled_perf_bug.ml")] in
+  let meta = B0_meta.(empty |> tag test) in
+  let requires = [unix; fmt] in
+  B0_ocaml.exe "styled_perf_bug" ~srcs ~meta ~requires
+
 (* Packs *)
 
 let default =

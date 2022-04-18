@@ -35,19 +35,19 @@
 static int add(int x, int y) { return x + y; }
 static int times(int x, int y) { return x * y; }
 
-int higher_order_1(intfun *callback, int x, int y)
+int higher_order_1(intfun *f, int x, int y)
 {
-  return callback(x, y) == x + y;
+  return f(x, y) == x + y;
 }
 
-int higher_order_3(acceptor *callback, intfun *fn, int x, int y)
+int higher_order_3(acceptor *f, intfun *fn, int x, int y)
 {
-  return callback(fn, x, y);
+  return f(fn, x, y);
 }
 
-int higher_order_simplest(vintfun *callback)
+int higher_order_simplest(vintfun *f)
 {
-  return callback(22);
+  return f(22);
 }
 
 intfun *returning_funptr(int v)
@@ -96,10 +96,10 @@ int is_null(void *p)
   return p == NULL;
 }
 
-int callback_returns_funptr(vintfun *(*callback)(int), int x)
+int callback_returns_funptr(vintfun *(*f)(int), int x)
 {
-  vintfun *v1 = callback(x);
-  vintfun *v2 = callback(x + 1);
+  vintfun *v1 = f(x);
+  vintfun *v2 = f(x + 1);
 
   return v1(10) + v2(20);
 }
@@ -496,9 +496,9 @@ float rotdist_complexf_val(float _Complex c, float r) {
 
 static int (*global_stored_callback)(int) = NULL;
 
-void store_callback(int (*callback)(int))
+void store_callback(int (*f)(int))
 {
-  global_stored_callback = callback;
+  global_stored_callback = f;
 }
 
 int invoke_stored_callback(int x)
@@ -506,9 +506,9 @@ int invoke_stored_callback(int x)
   return global_stored_callback(x);
 }
 
-vintfun *return_callback(vintfun *callback)
+vintfun *return_callback(vintfun *f)
 {
-  return callback;
+  return f;
 }
 
 struct one_int return_struct_by_value(void)
@@ -558,9 +558,9 @@ int sum_range_with_plus_callback(int a, int b)
 
 static callback_t *registered_callback = NULL;
 
-void register_callback(callback_t *callback)
+void register_callback(callback_t *f)
 {
-  registered_callback = callback;
+  registered_callback = f;
 }
 
 void call_registered_callback(int times, int starting_value)

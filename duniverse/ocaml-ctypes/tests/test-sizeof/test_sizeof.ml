@@ -172,8 +172,8 @@ end
 *)
 let test_sizeof_bigarrays _ =
   let module M = struct
-    module B = Bigarray
-    type k = K : ('a, 'b) Bigarray.kind * int -> k
+    module B = Bigarray_compat
+    type k = K : ('a, 'b) Bigarray_compat.kind * int -> k
     let kind_sizes = [
       K (B.float32, 4);
       K (B.float64, 8);

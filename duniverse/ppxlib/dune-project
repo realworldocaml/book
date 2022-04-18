@@ -1,6 +1,6 @@
 (lang dune 2.7)
 (name ppxlib)
-(version 0.24.0)
+(version 0.25.0)
 (using cinaps 1.0)
 (allow_approximate_merlin)
 (implicit_transitive_deps false)

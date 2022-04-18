@@ -8,39 +8,22 @@ module type Additional_helpers = sig
   type 'a with_loc
 
   val eint : (int -> expression) with_loc
-
   val echar : (char -> expression) with_loc
-
   val estring : (string -> expression) with_loc
-
   val efloat : (string -> expression) with_loc
-
   val eint32 : (int32 -> expression) with_loc
-
   val eint64 : (int64 -> expression) with_loc
-
   val enativeint : (nativeint -> expression) with_loc
-
   val ebool : (bool -> expression) with_loc
-
   val pint : (int -> pattern) with_loc
-
   val pchar : (char -> pattern) with_loc
-
   val pstring : (string -> pattern) with_loc
-
   val pfloat : (string -> pattern) with_loc
-
   val pint32 : (int32 -> pattern) with_loc
-
   val pint64 : (int64 -> pattern) with_loc
-
   val pnativeint : (nativeint -> pattern) with_loc
-
   val pbool : (bool -> pattern) with_loc
-
   val eunit : expression with_loc
-
   val punit : pattern with_loc
 
   val evar : (string -> expression) with_loc
@@ -54,19 +37,12 @@ module type Additional_helpers = sig
   (** Same as pexp_apply but without labels *)
 
   val eabstract : (pattern list -> expression -> expression) with_loc
-
   val esequence : (expression list -> expression) with_loc
-
   val ppat_tuple_opt : (pattern list -> pattern option) with_loc
-
   val pexp_tuple_opt : (expression list -> expression option) with_loc
-
   val pconstruct : constructor_declaration -> pattern option -> pattern
-
   val econstruct : constructor_declaration -> expression option -> expression
-
   val elist : (expression list -> expression) with_loc
-
   val plist : (pattern list -> pattern) with_loc
 
   val pstr_value_list :
@@ -138,22 +114,16 @@ end
 
 module type Located = sig
   type 'a with_loc
-
   type 'a t = 'a Loc.t
 
   val loc : _ t -> Location.t
-
   val mk : ('a -> 'a t) with_loc
-
   val map : ('a -> 'b) -> 'a t -> 'b t
-
   val map_lident : string t -> Longident.t t
-
   val lident : (string -> Longident.t t) with_loc
 end
 
 type 'a without_location = 'a
-
 type 'a with_location = loc:Location.t -> 'a
 
 module type S = sig

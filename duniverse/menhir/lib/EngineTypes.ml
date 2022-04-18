@@ -85,6 +85,53 @@ type ('state, 'semantic_value, 'token) env = {
 
 (* --------------------------------------------------------------------------- *)
 
+(* A number of logging hooks are used to (optionally) emit logging messages. *)
+
+(* The comments indicate the conventional messages that correspond
+   to these hooks in the code-based back-end; see [CodeBackend]. *)
+
+module type LOG = sig
+
+  type state
+  type terminal
+  type production
+
+  (* State %d: *)
+
+  val state: state -> unit
+
+  (* Shifting (<terminal>) to state <state> *)
+
+  val shift: terminal -> state -> unit
+
+  (* Reducing a production should be logged either as a reduction
+     event (for regular productions) or as an acceptance event (for
+     start productions). *)
+
+  (* Reducing production <production> / Accepting *)
+
+  val reduce_or_accept: production -> unit
+
+  (* Lookahead token is now <terminal> (<pos>-<pos>) *)
+
+  val lookahead_token: terminal -> Lexing.position -> Lexing.position -> unit
+
+  (* Initiating error handling *)
+
+  val initiating_error_handling: unit -> unit
+
+  (* Resuming error handling *)
+
+  val resuming_error_handling: unit -> unit
+
+  (* Handling error in state <state> *)
+
+  val handling_error: state -> unit
+
+end
+
+(* --------------------------------------------------------------------------- *)
+
 (* This signature describes the parameters that must be supplied to the LR
    engine. *)
 
@@ -261,51 +308,17 @@ module type TABLE = sig
 
   val may_reduce: state -> production -> bool
 
-  (* The LR engine requires a number of hooks, which are used for logging. *)
-
-  (* The comments below indicate the conventional messages that correspond
-     to these hooks in the code-based back-end; see [CodeBackend]. *)
-
   (* If the flag [log] is false, then the logging functions are not called.
      If it is [true], then they are called. *)
 
   val log : bool
 
-  module Log : sig
+  (* The logging hooks required by the LR engine. *)
 
-    (* State %d: *)
-
-    val state: state -> unit
-
-    (* Shifting (<terminal>) to state <state> *)
-
-    val shift: terminal -> state -> unit
-
-    (* Reducing a production should be logged either as a reduction
-       event (for regular productions) or as an acceptance event (for
-       start productions). *)
-
-    (* Reducing production <production> / Accepting *)
-
-    val reduce_or_accept: production -> unit
-
-    (* Lookahead token is now <terminal> (<pos>-<pos>) *)
-
-    val lookahead_token: terminal -> Lexing.position -> Lexing.position -> unit
-
-    (* Initiating error handling *)
-
-    val initiating_error_handling: unit -> unit
-
-    (* Resuming error handling *)
-
-    val resuming_error_handling: unit -> unit
-
-    (* Handling error in state <state> *)
-
-    val handling_error: state -> unit
-
-  end
+  module Log : LOG
+    with type state := state
+     and type terminal := terminal
+     and type production := production
 
 end
 

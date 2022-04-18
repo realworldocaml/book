@@ -1,0 +1,2 @@
+File "test_ocaml_keyword_error2.atd", line 2, characters 2-10:
+"if" cannot be used as field name (reserved OCaml keyword)

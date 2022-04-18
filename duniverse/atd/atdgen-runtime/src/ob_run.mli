@@ -47,7 +47,7 @@ val unsupported_variant : int -> bool -> 'a
 
 val read_error_at : Bi_inbuf.t -> 'a
 
-
+val read_unit : Bi_inbuf.t -> unit
 val read_int : Bi_inbuf.t -> int
 val read_char : Bi_inbuf.t -> char
 val read_bool : Bi_inbuf.t -> bool

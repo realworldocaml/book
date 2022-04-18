@@ -1,6 +1,6 @@
 Uchar — Compatibility library for OCaml's Uchar module
 -------------------------------------------------------------------------------
-Release %%VERSION%%
+Release v0.0.2+dune2
 
 The `uchar` package provides a compatibility library for the
 [`Uchar`][1] module introduced in OCaml 4.03.

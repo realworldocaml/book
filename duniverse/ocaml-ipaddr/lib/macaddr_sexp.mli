@@ -34,14 +34,11 @@
       type t = { ip : Ipaddr.t; mac : Macaddr.t }
 
       val sexp_of_t : t -> Sexplib0.t
-
       val t_of_sexp : Sexplib0.t -> t
     ]} *)
 
 type t = Macaddr.t
 
 val sexp_of_t : Macaddr.t -> Sexplib0.Sexp.t
-
 val t_of_sexp : Sexplib0.Sexp.t -> Macaddr.t
-
 val compare : Macaddr.t -> Macaddr.t -> int

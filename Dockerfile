@@ -10,7 +10,7 @@ WORKDIR /home/opam/src
 COPY Makefile /home/opam/src/.
 COPY rwo.opam /home/opam/src/.
 RUN opam pin add -n rwo /home/opam/src && opam depext -y rwo
-RUN opam install dune=3.0.2
+RUN opam install dune=3.0.3
 
 # compile the project
 COPY . /home/opam/src/

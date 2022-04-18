@@ -1,0 +1,45 @@
+#! /usr/bin/env bash
+#
+# Install system packages required to build and test atd (Ubuntu)
+#
+# This is used by the Dockerfile and by the CI build.
+#
+set -eu
+
+sudo apt-get update
+
+# This includes compilers and libraries to support the various target
+# languages of atd.
+#
+sudo apt-get install -y \
+  default-jdk \
+  python3 \
+  python3-pip \
+  python-is-python3 \
+  scala
+
+# For atdpy
+pip install pytest mypy flake8
+
+###### Sanity checks ######
+
+echo 'check opam'
+opam --version
+
+echo 'check ocamlopt'
+opam exec -- ocamlopt -version
+
+echo 'check javac'
+javac --version
+
+echo 'check scalac'
+scalac -version
+
+echo 'check python3'
+python3 --version
+
+echo 'check pytest'
+python3 -m pytest --version
+
+echo 'check mypy'
+python3 -m mypy --version

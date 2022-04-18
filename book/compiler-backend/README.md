@@ -23,9 +23,10 @@ also analyzed and compiled into highly optimized automata.[lambda form
 code/basics of]{.idx}[compilation process/untyped lambda
 form]{.idx}
 
-The lambda form is the key stage that discards the OCaml type information and
-maps the source code to the runtime memory model described in
-[Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
+The lambda form is the key stage that discards the OCaml type
+information and maps the source code to the runtime memory model
+described in [Memory Representation Of
+Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 This stage also performs some optimizations, most notably converting
 pattern-match statements into more optimized but low-level statements.
 
@@ -112,10 +113,11 @@ $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
     (makeblock 0 test/84)))
 ```
 
-The compiler emits simpler conditional jumps rather than setting up a jump
-table, since it statically determines that the range of possible variants is
-small enough. Finally, let's look at the same code, but with polymorphic
-variants instead of normal variants:
+The compiler emits simpler conditional jumps rather than setting up a
+jump table, since it statically determines that the range of possible
+variants is small enough. Finally, let's consider code that's
+essentially the same as our first pattern match example, but with
+polymorphic variants instead of normal variants:
 
 ```ocaml file=examples/back-end/pattern_polymorphic.ml
 let test v =
@@ -124,10 +126,9 @@ let test v =
   | `Bob     -> 101
   | `Charlie -> 102
   | `David   -> 103
-  | `Eve     -> 104
 ```
 
-The lambda form for this also shows up the runtime representation of
+The lambda form for this also reflects the runtime representation of
 polymorphic variants:
 
 ```sh dir=examples/back-end
@@ -136,10 +137,8 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
   (let
     (test/81 =
        (function v/83 : int
-         (if (!= v/83 3306965)
-           (if (>= v/83 482771474) (if (>= v/83 884917024) 100 102)
-             (if (>= v/83 3457716) 104 103))
-           101)))
+         (if (>= v/83 482771474) (if (>= v/83 884917024) 100 102)
+           (if (>= v/83 3306965) 101 103))))
     (makeblock 0 test/81)))
 ```
 
@@ -168,8 +167,8 @@ the use of exhaustiveness information and control flow optimizations via
 static exceptions.
 
 It's not essential that you understand all of this just to use pattern
-matching, of course, but it'll give you insight as to why pattern matching is
-such a lightweight language construct to use in OCaml code.
+matching, of course, but it'll give you insight as to why pattern
+matching is such an efficient language construct in OCaml.
 :::
 
 
@@ -186,49 +185,72 @@ benchmarking]{.idx}
 open Core
 open Core_bench
 
-type t = | Alice | Bob
-type s = | A | B | C | D | E
+module Monomorphic = struct
+  type t =
+    | Alice
+    | Bob
+    | Charlie
+    | David
 
-let polymorphic_pattern () =
-  let test v =
-    match v with
-    | `Alice   -> 100
-    | `Bob     -> 101
-    | `Charlie -> 102
-    | `David   -> 103
-    | `Eve     -> 104
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [`Alice; `Bob; `Charlie; `David]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -> 100
+      | Bob -> 101
+      | Charlie -> 102
+      | David -> 103
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ Alice; Bob; Charlie; David ]
+end
 
-let monomorphic_pattern_small () =
-  let test v =
-    match v with
-    | Alice   -> 100
-    | Bob     -> 101 in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ Alice; Bob ]
+module Monomorphic_small = struct
+  type t =
+    | Alice
+    | Bob
 
-let monomorphic_pattern_large () =
-  let test v =
-    match v with
-    | A       -> 100
-    | B       -> 101
-    | C       -> 102
-    | D       -> 103
-    | E       -> 104
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ A; B; C; D ]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -> 100
+      | Bob -> 101
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ Alice; Bob; Alice; Bob ]
+end
 
-let tests = [
-  "Polymorphic pattern", polymorphic_pattern;
-  "Monomorphic larger pattern", monomorphic_pattern_large;
-  "Monomorphic small pattern", monomorphic_pattern_small;
-]
+module Polymorphic = struct
+  type t =
+    [ `Alice
+    | `Bob
+    | `Charlie
+    | `David
+    ]
+
+  let bench () =
+    let convert v =
+      match v with
+      | `Alice -> 100
+      | `Bob -> 101
+      | `Charlie -> 102
+      | `David -> 103
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ `Alice; `Bob; `Alice; `Bob ]
+end
+
+let benchmarks =
+  [ "Monomorphic large pattern", Monomorphic.bench
+  ; "Monomorphic small pattern", Monomorphic_small.bench
+  ; "Polymorphic large pattern", Polymorphic.bench
+  ]
 
 let () =
-  List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
+  List.map benchmarks ~f:(fun (name, test) ->
+      Bench.Test.create ~name test)
   |> Bench.make_command
   |> Command.run
 ```
@@ -236,24 +258,15 @@ let () =
 Building and executing this example will run for around 30 seconds by
 default, and you'll see the results summarized in a neat table:
 
-```scheme file=examples/back-end/bench_patterns/dune
-(executable
-  (name      bench_patterns)
-  (modules   bench_patterns)
-  (libraries core_bench))
-```
-
-
-
 ```sh dir=examples/back-end/bench_patterns,non-deterministic=command
 $ dune exec -- ./bench_patterns.exe -ascii -quota 0.25
 Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
 
-  Name                         Time/Run   Percentage
- ---------------------------- ---------- ------------
-  Polymorphic pattern           15.72ns      100.00%
-  Monomorphic larger pattern     9.41ns       59.89%
-  Monomorphic small pattern      8.73ns       55.56%
+  Name                        Time/Run   Percentage
+ --------------------------- ---------- ------------
+  Monomorphic large pattern     6.54ns       67.89%
+  Monomorphic small pattern     9.63ns      100.00%
+  Polymorphic large pattern     9.63ns       99.97%
 
 ```
 
@@ -571,11 +584,11 @@ picture of the code if you get lost in the more verbose assembly.
 
 #### The impact of polymorphic comparison
 
-We warned you in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
-that using polymorphic comparison is both convenient and perilous. Let's look
-at precisely what the difference is at the assembly language level
-now.[polymorphic comparisons]{.idx}
+We warned you in [Maps And Hash
+Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
+that using polymorphic comparison is both convenient and
+perilous. Let's look at precisely what the difference is at the
+assembly language level now.[polymorphic comparisons]{.idx}
 
 First let's create a comparison function where we've explicitly annotated the
 types, so the compiler knows that only integers are being compared:
@@ -713,23 +726,14 @@ let () =
 
 Running this shows quite a significant runtime difference between the two:
 
-```scheme file=examples/back-end/bench_poly_and_mono/dune
-(executable
-  (name      bench_poly_and_mono)
-  (modules   bench_poly_and_mono)
-  (libraries core_bench))
-```
-
-
-
 ```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
 $ dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name                       Time/Run   Percentage
  ------------------------ ------------ ------------
-  Polymorphic comparison   6_856.10ns      100.00%
-  Monomorphic comparison     753.02ns       10.98%
+  Polymorphic comparison   4_050.20ns      100.00%
+  Monomorphic comparison     471.75ns       11.65%
 
 ```
 
@@ -1096,9 +1100,9 @@ To use the debug library, just link your program with the
 
 ```sh dir=examples/back-end-embed,non-deterministic=output
 $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
-+ clang -arch x86_64 -Wno-trigraphs -c -o 'hello.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlasm9b916c.s'
-+ clang -arch x86_64 -Wno-trigraphs -c -o '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartupf69d9a.s'
-+ cc -O2 -fno-strict-aliasing -fwrapv -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -DCAML_NAME_SPACE   -Wl,-no_compact_unwind -o 'hello.native'   '-L/Users/thomas/git/rwo/book/_opam/lib/ocaml'  '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/std_exit.o' 'hello.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/stdlib.a' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/libasmrund.a'
++ as  -o 'hello.o' '/tmp/build_cd0b96_dune/camlasmd3c336.s'
++ as  -o '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/tmp/build_cd0b96_dune/camlstartup2b2cd3.s'
++ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/rwo-4.13.1/lib/ocaml'  '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/stdlib.a' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/libasmrund.a' -lm -ldl
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words
@@ -1119,18 +1123,28 @@ of the compilation toolchain. Here's a cheat sheet of all them in one place.
 extensions]{.idx}
 
 - `.ml` are source files for compilation unit module implementations.
-- `.mli` are source files for compilation unit module interfaces. If missing, generated from the `.ml` file.
-- `.cmi` are compiled module interface from a corresponding `.mli` source file.
-- `.cmo` are compiled bytecode object file of the module implementation.
-- `.cma` are a library of bytecode object files packed into a single file.
-- `.o` are C source files that have been compiled into native object files by the system `cc`.
-- `.cmt` are the typed abstract syntax tree for module implementations.
+- `.mli` are source files for compilation unit module interfaces. If
+  missing, generated from the `.ml` file.
+- `.cmi` are compiled module interface from a corresponding `.mli`
+  source file.
+- `.cmo` are compiled bytecode object file of the module
+  implementation.
+- `.cma` are a library of bytecode object files packed into a single
+  file.
+- `.o` are C source files that have been compiled into native object
+  files by the system `cc`.
+- `.cmt` are the typed abstract syntax tree for module
+  implementations.
 - `.cmti` are the typed abstract syntax tree for module interfaces.
-- `.annot` are old-style annotation file for displaying `typed`, superseded by `cmt` files.
+- `.annot` are old-style annotation file for displaying `typed`,
+  superseded by `cmt` files.
 
 The native code compiler also generates some additional files.
 
 - `.o` are compiled native object files of the module implementation.
-- `.cmx` contains extra information for linking and cross-module optimization of the object file.
-- `.cmxa` and `.a` are libraries of `cmx` and `o` units, stored in the `cmxa` and `a` files respectively. These files are always needed together.
+- `.cmx` contains extra information for linking and cross-module
+  optimization of the object file.
+- `.cmxa` and `.a` are libraries of `cmx` and `o` units, stored in the
+  `cmxa` and `a` files respectively. These files are always needed
+  together.
 - `.S` or `.s` are the assembly language output if `-S` is specified.

@@ -1,0 +1,26 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install packages
+      run: sudo apt-get install ocaml-nox ocaml-dune libgmp-dev
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: rm -rf tests && dune build
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+    - name: Install packages
+      run: brew install ocaml gmp dune
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: dune build
+    - name: Run the testsuite
+      run: dune test

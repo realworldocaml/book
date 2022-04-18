@@ -1,0 +1,10 @@
+(executable
+ (name Atdpy_main)
+ (public_name atdpy)
+ (package atdpy)
+ (libraries
+   cmdliner
+   atdpy
+   atd
+ )
+)

@@ -1,5 +1,4 @@
+--exn-carries-state
 --no-pager
---table
---fixed-exception
 --require-aliases
 --strict

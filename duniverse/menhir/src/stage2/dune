@@ -40,7 +40,6 @@
 (menhir
   (flags
     (:include menhir_flags.sexp)
-    --strict
     -lg 1 -la 1 -lc 1
     -v
   )

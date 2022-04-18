@@ -89,9 +89,7 @@ let parse_sextuple s i =
 
 (* Read a MAC address colon-separated string *)
 let of_string_exn x = parse_sextuple x (ref 0)
-
 let of_string x = try_with_result of_string_exn x
-
 let chri x i = Char.code (Bytes.get x i)
 
 let to_string ?(sep = ':') x =
@@ -99,9 +97,7 @@ let to_string ?(sep = ':') x =
     sep (chri x 2) sep (chri x 3) sep (chri x 4) sep (chri x 5)
 
 let to_octets x = Bytes.to_string x
-
 let pp ppf i = Format.fprintf ppf "%s" (to_string i)
-
 let broadcast = Bytes.make 6 '\255'
 
 let make_local bytegenf =
@@ -114,7 +110,5 @@ let make_local bytegenf =
   x
 
 let get_oui x = (chri x 0 lsl 16) lor (chri x 1 lsl 8) lor chri x 2
-
 let is_local x = (chri x 0 lsr 1) land 1 = 1
-
 let is_unicast x = chri x 0 land 1 = 0

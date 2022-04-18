@@ -1,6 +1,13 @@
+## v0.15.3 (2022-03-29)
+
+* Upgrade to v0.15 of Jane Street packages (#444 @bcc32)
+* Use cmdliner 1.1.0 in lwt/examples (#445 @hannesm)
+
 ## v0.15.2 (2021-11-14)
 
-* Drop dependency on async_find (#442 @torinnd)
+* Tls_async: drop dependency on async_find, now trust anchors in a directory
+  are not recursively read - aligns it with the lwt and mirage implementations
+  (#442 @torinnd)
 
 ## v0.15.1 (2021-10-29)
 

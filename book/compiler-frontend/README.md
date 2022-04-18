@@ -1,36 +1,33 @@
 # The Compiler Frontend: Parsing and Type Checking
 
-Compiling source code into executable programs involves a fairly complex set of
-libraries, linkers, and assemblers. It's important to understand how these fit
-together to help with your day-to-day workflow of developing, debugging, and
-deploying applications.[compilation process/toolchain for]{.idx}
+Compiling source code into executable programs involves a fairly
+complex set of libraries, linkers, and assemblers. While Dune mostly
+hides this complexity from you, it's still useful to understand how
+these pieces work so that you can debug performance problems, or come
+up with solutions for unusual situations that aren't well handled by
+existing tools.
 
-OCaml has a strong emphasis on static type safety and rejects source code
-that doesn't meet its requirements as early as possible. The compiler does
-this by running the source code through a series of checks and
-transformations. Each stage performs its job (e.g., type checking,
-optimization, or code generation) and discards some information from the
-previous stage. The final native code output is low-level assembly code that
-doesn't know anything about the OCaml modules or objects that the compiler
-started with.[static checking]{.idx}[compile-time static checking]{.idx}
-
-You don't have to do all of this manually, of course. The compiler frontends
-(`ocamlc` and `ocamlopt`) are invoked via the command line and chain the
-stages together for you. Sometimes though, you'll need to dive into the
-toolchain to hunt down a bug or investigate a performance problem. This
-chapter explains the compiler pipeline in more depth so you understand how to
-harness the command-line tools effectively. [OCaml
-toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlopt]{.idx}
+OCaml has a strong emphasis on static type safety and rejects source
+code that doesn't meet its requirements as early as possible. The
+compiler does this by running the source code through a series of
+checks and transformations. Each stage performs its job (e.g., type
+checking, optimization, or code generation) and discards some
+information from the previous stage. The final native code output is
+low-level assembly code that doesn't know anything about the OCaml
+modules or objects that the compiler started with.
 
 In this chapter, we'll cover the following topics:
 
-- The compilation pipeline and what each stage represents
+- An overview of the compiler codebase and the compilation pipeline,
+  and what each stage represents
+- Parsing, which goes from raw text to the abstract syntax tree
+- PPX's, which further transform the AST
+- Type-checking, including module resolution
 
-- The type-checking process, including module resolution
-
-The details of the compilation process into executable code can be found
-next, in
-[The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+The details of the remainder of the compilation process, which gets
+all the way to executable code comes next, in [The Compiler Backend
+Byte Code And Native
+Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 
 ## An Overview of the Toolchain
 
@@ -188,6 +185,15 @@ that couldn't be parsed. In the broken example, the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
+<!-- TODO: I wonder if we should just kill the section on indenting
+     source code.  It's a little out of date (ocamlformat is really
+     more the tool of choice these days), and anyway, it's covered
+     some in the platform chapter, and is mostly not really about the
+     compilation toolchain anyway.
+
+    If we keep it, I'd be tempted to refocus it on ocamlformat.
+  -->
+
 ### Automatically Indenting Source Code
 
 Sadly, syntax errors do get more inaccurate sometimes, depending on the
@@ -280,12 +286,15 @@ let () =
   ()
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
-how to integrate it with your favorite editor. All the Core libraries are
-formatted using it to ensure consistency, and it's a good idea to do this
-before publishing your own source code online.  For larger projects, you
-can use `ocamlformat` to format whole files as described earlier in
-[OCaml Platform](platform.html#autoformatting-your-source-code){data-type=xref}.
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent)
+documents how to integrate it with your favorite editor.  You can also
+use `ocamlformat` to format your files, as described earlier in [OCaml
+Platform](platform.html#autoformatting-your-source-code){data-type=xref}.
+`ocamlformat` goes farther than `ocp-indent`, fully determining your
+formatting, including all line-breaks.  `Base`, `Core` and related
+libraries are all formatted using `ocamlformat` to ensure consistency,
+and using some kind of automatic formatting is a good practice before
+publishing your own source code online.
 
 ### Generating Documentation from Interfaces
 
@@ -307,8 +316,8 @@ Here's a sample of some source code that's been annotated with docstring
 comments:
 
 ```ocaml file=examples/front-end/doc.ml
-(** example.ml: The first special comment of the file is the comment
-    associated with the whole module. *)
+(** The first special comment of the file is the comment associated
+   with the whole module. *)
 
 (** Comment for exception My_exception. *)
 exception My_exception of (int -> int) * int
@@ -382,6 +391,9 @@ syntax tree, and subsequently interpreted and expanded by external tools.
 The basic form of an attribute is the `[@ ... ]` syntax.  The number of `@` symbols
 defines which part of the syntax tree the attribute is bound to:
 
+<!-- TODO: I don't think the first bullet is right. [@@ is used for
+     type definitions, e.g., type x = foo [@@deriving bar]  -->
+
 - a single `[@` binds to expressions and individual type definitions.
 - a double `[@@` binds to blocks of code, such as module definitions, type declarations or class fields.
 - a triple `[@@@` appears as a standalone entry in a module implementation or
@@ -396,10 +408,10 @@ compiler warning.
 ```ocaml env=main
 # module Abc = struct
 
-  [@@@warning "+10"]
+  [@@@warning "+non-unit-statement"]
   let a = Sys.get_argv (); ()
 
-  [@@@warning "-10"]
+  [@@@warning "-non-unit-statement"]
   let b = Sys.get_argv (); ()
   end;;
 Line 4, characters 11-26:
@@ -407,11 +419,11 @@ Warning 10 [non-unit-statement]: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
 
-The warning number in our example is taken from the
-[compiler manual page](https://ocaml.org/manual/native.html).
-In this case, warning 10 emits a message if the expression in a sequence
-doesn't have type `unit`.  The `@@@warning` nodes in the module implementation
-cause the compiler to change its behaviour within the scope of that structure only.
+The warning in our example is taken from the [compiler manual
+page](https://ocaml.org/manual/native.html). This warning emits a
+message if the expression in a sequence doesn't have type `unit`.  The
+`@@@warning` nodes in the module implementation cause the compiler to
+change its behaviour within the scope of that structure only.
 
 An annotation can also be more narrowly attached to a block of code.  For example,
 a module implementation can be annotated with `@@deprecated` to indicate that it
@@ -581,20 +593,22 @@ module, or by the inferred type if there is only an `ml` implementation
 present.
 
 The compiler makes sure that your `ml` and `mli` files have compatible
-signatures. The type checker throws an immediate error if this isn't the
-case:
+signatures. The type checker throws an immediate error if this isn't
+the case.  For example, if you have this as your `ml` file:
 
 ```ocaml file=examples/front-end/conflicting_interface.ml
 type t = Foo
 ```
 
-
+\noindent
+and this as your `mli`:
 
 ```ocaml file=examples/front-end/conflicting_interface.mli
 type t = Bar
 ```
 
-
+\noindent
+then, when you try to build, you'll get this error:
 
 ```sh dir=examples/front-end
 $ ocamlc -c conflicting_interface.mli conflicting_interface.ml
@@ -691,6 +705,11 @@ polymorphic variants or objects. Type inference with row polymorphism can
 generate some very large signatures, and errors tend to propagate more widely
 than if you are using more explicitly typed variants or classes.[polymorphic
 variant types/type checking and]{.idx}[row polymorphism]{.idx}
+
+<!-- TODO: I wonder if we should kill this detailed section on
+     polymorphic variants.  It covers at least some of the same
+     territory as the Variants section covers, and it doesn't feel
+     like it's really about the compiler frontend. -->
 
 For instance, consider this broken example that expresses some simple
 algebraic operations over integers:
@@ -970,8 +989,8 @@ and a corresponding signature file:
 val friends : Bob.t list
 ```
 
-These two files are exactly analogous to including the following code
-directly in another module that references `Alice`:
+These two files produce essentially the same result as the following
+code.
 
 ```ocaml file=examples/front-end/alice_combined.ml
 module Alice : sig
@@ -995,22 +1014,23 @@ module's name. For example, it will look for `alice.cmi` and `bob.cmi` on the
 search path and use the first ones it encounters as the interfaces for
 `Alice` and `Bob`.
 
-The module search path is set by adding `-I` flags to the compiler command
-line with the directory containing the `cmi` files as the argument. Manually
-specifying these flags gets complex when you have lots of libraries, and is
-the reason why the OCamlfind frontend to the compiler exists. OCamlfind
-automates the process of turning third-party package names and build
-descriptions into command-line flags that are passed to the compiler command
-line.
+The module search path is set by adding `-I` flags to the compiler
+command line with the directory containing the `cmi` files as the
+argument. Manually specifying these flags gets complex when you have
+lots of libraries, and is the reason why tools like `dune` and
+`ocamlfind` exist.  They both automate the process of turning
+third-party package names and build descriptions into command-line
+flags that are passed to the compiler command line.
 
-By default, only the current directory and the OCaml standard library will be
-searched for `cmi` files. The `Pervasives` module from the standard library
-will also be opened by default in every compilation unit. The standard
-library location is obtained by running `ocamlc -where` and can be overridden
-by setting the `CAMLLIB` environment variable. Needless to say, don't
-override the default path unless you have a good reason to (such as setting
-up a cross-compilation environment). [cmi files]{.idx}[files/cmi
-files]{.idx}[OCaml toolchain/ocamlogjinfo]{.idx}
+By default, only the current directory and the OCaml standard library
+will be searched for `cmi` files. The `Stdlib` module from the
+standard library will also be opened by default in every compilation
+unit. The standard library location is obtained by running `ocamlc
+-where` and can be overridden by setting the `CAMLLIB` environment
+variable. Needless to say, don't override the default path unless you
+have a good reason to (such as setting up a cross-compilation
+environment). [cmi files]{.idx}[files/cmi files]{.idx}[OCaml
+toolchain/ocamlogjinfo]{.idx}
 
 ::: {data-type=note}
 #### Inspecting Compilation Units with ocamlobjinfo

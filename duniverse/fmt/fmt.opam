@@ -1,28 +1,22 @@
-version: "0.8.10+dune"
+version: "0.9.0+dune"
 opam-version: "2.0"
 name: "fmt"
 synopsis: """OCaml Format pretty-printer combinators"""
 maintainer: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
 authors: ["The fmt programmers"]
-homepage: "https://erratique.ch/software/fmt"
-doc: "https://erratique.ch/software/fmt/doc/"
+homepage: "https://github.com/dune-universe/fmt"
 dev-repo: "git+https://github.com/dune-universe/fmt.git"
-bug-reports: "https://github.com/dune-universe/fmt/issues"
+bug-reports: "https://github.com/dbuenzli/fmt/issues"
 license: ["ISC"]
 tags: ["string" "format" "pretty-print" "org:erratique"]
 depends: [
-  "dune"
   "ocaml" {>= "4.08.0"}
+  "dune"
 ]
 depopts: ["base-unix"
           "cmdliner"]
 conflicts: ["cmdliner" {< "0.9.8"}]
-build: [
-  [ "dune" "build" "-p" name "-j" jobs ]
-]
-run-test: [
-  [ "dune" "runtest" "-p" name "-j" jobs ]
-]
+build: [ "dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} ]
 description: """
 Fmt exposes combinators to devise `Format` pretty-printing functions.
 
@@ -36,6 +30,3 @@ Fmt is distributed under the ISC license.
 [cmdliner]: http://erratique.ch/software/cmdliner
 
 Home page: http://erratique.ch/software/fmt"""
-url {
-  src: "git+https://github.com/dune-universe/fmt#duniverse-v0.8.10"
-}

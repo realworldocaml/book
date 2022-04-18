@@ -1,0 +1,17 @@
+;
+; We test in two phases:
+;
+; 1. Check that the generated Python code is what we expect.
+;
+
+(rule
+ (alias runtest)
+ (package atdpy)
+ (action
+   (diff python-expected/everything.py
+     python-tests/everything.py)))
+
+; 2. Run the generated Python code and check that is reads or writes JSON
+;    data as expected.
+;
+; See python-tests/dune

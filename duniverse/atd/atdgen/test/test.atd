@@ -210,3 +210,8 @@ type validate_me =
         <ocaml valid="fun l -> true">
 
 type validated_string_check = string <ocaml valid="fun s -> s = \"abc\"">
+
+type test_field_prefix = {
+  hello: bool;
+  world: int;
+} <ocaml field_prefix="theprefix_">

@@ -70,12 +70,12 @@ val of_float: float -> t
 
 
 val of_string: string -> t
-(** Converts a string to a rational.
-    Plain integers, and [/] separated integer ratios (with optional sign) are
-    understood.
-    Additionally, the special [inf], [-inf], and [undef] are recognized
-    (they can also be typeset respectively as [1/0], [-1/0], [0/0]).
- *)
+(** Converts a string to a rational.  Plain integers, [/] separated
+   integer ratios (with optional sign), decimal point and scientific
+   notations are understood.
+    Additionally, the special [inf], [-inf], and [undef] are
+   recognized (they can also be typeset respectively as [1/0], [-1/0],
+   [0/0]).  *)
 
 
 (** {1 Inspection} *)

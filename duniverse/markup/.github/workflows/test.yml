@@ -1,0 +1,45 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  opam:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml:
+        - 4.13.1
+        - 4.12.1
+        - 4.11.2
+        - 4.10.2
+        - 4.09.1
+        - 4.08.1
+        - 4.07.1
+        - 4.06.1
+        - 4.05.0
+        - 4.04.2
+        - 4.03.0
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ocaml/setup-ocaml@v2
+      with:
+        ocaml-compiler: ${{matrix.ocaml}}
+    - run: sudo apt-get install python-bs4
+    - run: opam install --deps-only --with-test . --yes
+    - run: opam install js_of_ocaml --yes
+
+    - run: opam exec -- make test
+    - run: opam exec -- make js-test
+    - run: opam exec -- make dependency-test
+    - run: opam lint
+
+    - if: ${{matrix.ocaml == '4.13.1'}}
+      env:
+        COVERALLS_REPO_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        PULL_REQUEST_NUMBER: ${{github.event.number}}
+      run: |
+        opam install xmlm ocamlnet --yes
+        opam exec -- make performance-test
+        opam exec -- make clean coverage
+        opam exec -- bisect-ppx-report send-to Coveralls

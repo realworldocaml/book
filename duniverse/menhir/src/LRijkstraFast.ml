@@ -869,27 +869,19 @@ struct
     *)
     let pre outer inner =
       if outer == inner then
-        Pre_identity
+        Some Pre_identity
       else (
         assert (Array.length inner = 1);
         assert (TerminalSet.is_singleton inner.(0));
         let t = TerminalSet.choose inner.(0) in
         match MArray.findi (fun _ ts -> TerminalSet.mem t ts) 0 outer with
-        | i -> Pre_singleton i
+        | i -> Some (Pre_singleton i)
         | exception Not_found ->
-          (* There should always be a class that contains the terminal we are
-             shifting.
-             In theory, if the production that starts with the 'inner'
-             partition cannot be reduced (for instance because of conflict
-             resolution), it is correct to remove the terminal from the
-             explicitly represented classes since the transition is
-             unreachable.
-             This is not the case in practice, therefore this code is
-             unreachable.
-             If in the future, it starts happening, the correct behavior is to
-             consider that the coercion returns no class.
+          (* If the production that starts with the 'inner' partition cannot be
+             reduced (because of conflict resolution), the transition becomes
+             unreachable and the terminal `t` might belong to no classes.
           *)
-          assert false
+          None
       )
 
     (* The type infix is the general representation for the coercion matrices
@@ -1006,11 +998,16 @@ struct
       );
       (* Register dependencies to other reductions *)
       List.iter begin fun (node', lookahead) ->
-        let coerce_pre = Coercion.pre pre (Tree.pre_classes node') in
-        let post' = Tree.post_classes node' in
-        let coerce_post = Coercion.infix post' post ~lookahead in
-        Vector.set_cons dependents node'
-          (Leaf (tr, coerce_pre, coerce_post.Coercion.forward))
+        match Coercion.pre pre (Tree.pre_classes node') with
+        | None ->
+          (* The goto transition is unreachable because of conflict resolution.
+             Don't register any dependency. *)
+          ()
+        | Some coerce_pre ->
+          let post' = Tree.post_classes node' in
+          let coerce_post = Coercion.infix post' post ~lookahead in
+          Vector.set_cons dependents node'
+            (Leaf (tr, coerce_pre, coerce_post.Coercion.forward))
       end non_nullable
 
     (* Record dependencies on a inner node. *)
