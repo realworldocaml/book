@@ -260,11 +260,14 @@ default, and you'll see the results summarized in a neat table:
 
 ```sh dir=examples/back-end/bench_patterns,non-deterministic=command
 $ dune exec -- ./bench_patterns.exe -ascii -quota 0.25
-File "bench_patterns.ml", line 1:
-Error: The files /home/yminsky/Code/rwo/_build/install/default/lib/core/core.cmi
-       and /home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Bench.cmi
-       make inconsistent assumptions over interface Sexplib__Pre_sexp
-[1]
+Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
+
+  Name                        Time/Run   Percentage
+ --------------------------- ---------- ------------
+  Monomorphic large pattern     6.54ns       67.89%
+  Monomorphic small pattern     9.63ns      100.00%
+  Polymorphic large pattern     9.63ns       99.97%
+
 ```
 
 These results confirm the performance hypothesis that we obtained earlier by
@@ -725,11 +728,13 @@ Running this shows quite a significant runtime difference between the two:
 
 ```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
 $ dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
-File "bench_poly_and_mono.ml", line 1:
-Error: The files /home/yminsky/Code/rwo/_build/install/default/lib/core/core.cmi
-       and /home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Bench.cmi
-       make inconsistent assumptions over interface Sexplib__Pre_sexp
-[1]
+Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
+
+  Name                       Time/Run   Percentage
+ ------------------------ ------------ ------------
+  Polymorphic comparison   4_050.20ns      100.00%
+  Monomorphic comparison     471.75ns       11.65%
+
 ```
 
 We see that the polymorphic comparison is close to 10 times slower! These
