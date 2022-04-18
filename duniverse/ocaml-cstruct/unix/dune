@@ -2,4 +2,4 @@
  (name cstruct_unix)
  (wrapped false)
  (public_name cstruct-unix)
- (libraries cstruct bigarray unix))
+ (libraries cstruct unix))

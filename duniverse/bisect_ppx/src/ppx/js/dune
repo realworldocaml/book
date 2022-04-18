@@ -1,3 +1,0 @@
-(executable
- (name ppx)
- (libraries bisect_ppx ppxlib))

@@ -103,27 +103,6 @@ let none : check =
 
 (* ------------------------------------------------------------------------ *)
 
-(* The [$syntaxerror] monster. *)
-
-let syntaxerror pos : monster =
-  let check =
-    none
-  and transform ofs1 content =
-    (* [$syntaxerror] is replaced with
-       [(raise _eRR)]. Same length. *)
-    let pos = start_of_position pos in
-    let ofs = pos.pos_cnum - ofs1 in
-    let source = "(raise _eRR)" in
-    Bytes.blit_string source 0 content ofs (String.length source)
-  and keyword =
-    Some SyntaxError
-  and oid =
-    None
-  in
-  { pos; check; transform; keyword; oid }
-
-(* ------------------------------------------------------------------------ *)
-
 (* We check that every [$i] is within range. Also, we forbid using [$i]
    when a producer has been given a name; this is bad style and may be
    a mistake. (Plus, this simplifies our life, as we rewrite [$i] to [_i],
@@ -679,8 +658,7 @@ and action percent openingpos monsters = parse
 | previouserror
     { error2 lexbuf "$previouserror is no longer supported." }
 | syntaxerror
-    { let monster = syntaxerror (cpos lexbuf) in
-      action percent openingpos (monster :: monsters) lexbuf }
+    { error2 lexbuf "$syntaxerror is no longer supported." }
 | '"'
     { string (lexeme_start_p lexbuf) lexbuf;
       action percent openingpos monsters lexbuf }
@@ -723,8 +701,7 @@ and parentheses openingpos monsters = parse
 | previouserror
     { error2 lexbuf "$previouserror is no longer supported." }
 | syntaxerror
-    { let monster = syntaxerror (cpos lexbuf) in
-      parentheses openingpos (monster :: monsters) lexbuf }
+    { error2 lexbuf "$syntaxerror is no longer supported." }
 | '"'
     { string (lexeme_start_p lexbuf) lexbuf; parentheses openingpos monsters lexbuf }
 | "'"

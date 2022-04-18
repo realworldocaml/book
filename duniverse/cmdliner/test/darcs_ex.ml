@@ -44,9 +44,9 @@ let help_secs = [
  `S Manpage.s_common_options;
  `P "These options are common to all commands.";
  `S "MORE HELP";
- `P "Use `$(mname) $(i,COMMAND) --help' for help on a single command.";`Noblank;
- `P "Use `$(mname) help patterns' for help on patch matching."; `Noblank;
- `P "Use `$(mname) help environment' for help on environment variables.";
+ `P "Use $(mname) $(i,COMMAND) --help for help on a single command.";`Noblank;
+ `P "Use $(mname) $(b,help patterns) for help on patch matching."; `Noblank;
+ `P "Use $(mname) $(b,help environment) for help on environment variables.";
  `S Manpage.s_bugs; `P "Check bug reports at http://bugs.example.org.";]
 
 (* Options common to all commands *)
@@ -73,6 +73,8 @@ let copts_t =
 
 (* Commands *)
 
+let sdocs = Manpage.s_common_options
+
 let initialize_cmd =
   let repodir =
     let doc = "Run the program in repository directory $(docv)." in
@@ -80,15 +82,14 @@ let initialize_cmd =
            ~docv:"DIR" ~doc)
   in
   let doc = "make the current directory a repository" in
-  let exits = Term.default_exits in
   let man = [
     `S Manpage.s_description;
     `P "Turns the current directory into a Darcs repository. Any
-       existing files and subdirectories become ...";
+       existing files and subdirectories become …";
     `Blocks help_secs; ]
   in
-  Term.(const initialize $ copts_t $ repodir),
-  Term.info "initialize" ~doc ~sdocs:Manpage.s_common_options ~exits ~man
+  let info = Cmd.info "initialize" ~doc ~sdocs ~man in
+  Cmd.v info Term.(const initialize $ copts_t $ repodir)
 
 let record_cmd =
   let pname =
@@ -111,39 +112,37 @@ let record_cmd =
   in
   let files = Arg.(value & (pos_all file) [] & info [] ~docv:"FILE or DIR") in
   let doc = "create a patch from unrecorded changes" in
-  let exits = Term.default_exits in
   let man =
     [`S Manpage.s_description;
      `P "Creates a patch from changes in the working tree. If you specify
-         a set of files ...";
+         a set of files…";
      `Blocks help_secs; ]
   in
-  Term.(const record $ copts_t $ pname $ author $ all $ ask_deps $ files),
-  Term.info "record" ~doc ~sdocs:Manpage.s_common_options ~exits ~man
+  let info = Cmd.info "record" ~doc ~sdocs ~man in
+  Cmd.v info
+    Term.(const record $ copts_t $ pname $ author $ all $ ask_deps $ files)
 
 let help_cmd =
   let topic =
-    let doc = "The topic to get help on. `topics' lists the topics." in
+    let doc = "The topic to get help on. $(b,topics) lists the topics." in
     Arg.(value & pos 0 (some string) None & info [] ~docv:"TOPIC" ~doc)
   in
   let doc = "display help about darcs and darcs commands" in
-  let exits = Term.default_exits in
   let man =
     [`S Manpage.s_description;
-     `P "Prints help about darcs commands and other subjects...";
+     `P "Prints help about darcs commands and other subjects…";
      `Blocks help_secs; ]
   in
-  Term.(ret (const help $ copts_t $ Arg.man_format $ Term.choice_names $topic)),
-  Term.info "help" ~doc ~exits ~man
+  let info = Cmd.info "help" ~doc ~man in
+  Cmd.v info
+    Term.(ret (const help $ copts_t $ Arg.man_format $ Term.choice_names $
+               topic))
 
-let default_cmd =
+let main_cmd =
   let doc = "a revision control system" in
-  let sdocs = Manpage.s_common_options in
-  let exits = Term.default_exits in
   let man = help_secs in
-  Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)),
-  Term.info "darcs" ~version:"%%VERSION%%" ~doc ~sdocs ~exits ~man
+  let info = Cmd.info "darcs" ~version:"v1.1.1" ~doc ~sdocs ~man in
+  let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
+  Cmd.group info ~default [initialize_cmd; record_cmd; help_cmd]
 
-let cmds = [initialize_cmd; record_cmd; help_cmd]
-
-let () = Term.(exit @@ eval_choice default_cmd cmds)
+let () = exit (Cmd.eval main_cmd)

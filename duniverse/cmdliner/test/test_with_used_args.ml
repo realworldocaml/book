@@ -12,7 +12,7 @@ let test_pos_left =
     Term.(with_used_args (const ignore_values $ a $ b $ c))
   in
   let other = Arg.(value & flag & info ["other"]) in
-  Term.(const print_args $ main $ other),
-  Term.info "test_capture" ~doc:"Test pos left"
+  let info = Cmd.info "test_capture" ~doc:"Test pos left" in
+  Cmd.v info Term.(const print_args $ main $ other)
 
-let () = Term.(exit @@ eval test_pos_left)
+let () = exit (Cmd.eval test_pos_left)

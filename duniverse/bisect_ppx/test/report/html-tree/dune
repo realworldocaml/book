@@ -1,3 +1,0 @@
-(cram
- (deps test_tree.ml (source_tree foo) (source_tree baz))
- (alias compatible))

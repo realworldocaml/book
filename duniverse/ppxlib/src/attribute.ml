@@ -40,59 +40,32 @@ module Context = struct
     | Object_type_field : object_field t
 
   let label_declaration = Label_declaration
-
   let constructor_declaration = Constructor_declaration
-
   let type_declaration = Type_declaration
-
   let type_extension = Type_extension
-
   let type_exception = Type_exception
-
   let extension_constructor = Extension_constructor
-
   let pattern = Pattern
-
   let core_type = Core_type
-
   let expression = Expression
-
   let value_description = Value_description
-
   let class_type = Class_type
-
   let class_type_field = Class_type_field
-
   let class_infos = Class_infos
-
   let class_expr = Class_expr
-
   let class_field = Class_field
-
   let module_type = Module_type
-
   let module_declaration = Module_declaration
-
   let module_type_declaration = Module_type_declaration
-
   let open_description = Open_description
-
   let include_infos = Include_infos
-
   let module_expr = Module_expr
-
   let value_binding = Value_binding
-
   let module_binding = Module_binding
-
   let pstr_eval = Pstr_eval
-
   let pstr_extension = Pstr_extension
-
   let psig_extension = Psig_extension
-
   let rtag = Rtag
-
   let object_type_field = Object_type_field
 
   let get_pstr_eval st =
@@ -242,11 +215,8 @@ module Floating_context = struct
     | Class_type_field : class_type_field t
 
   let structure_item = Structure_item
-
   let signature_item = Signature_item
-
   let class_field = Class_field
-
   let class_type_field = Class_type_field
 
   let get_attribute_if_is_floating_node : type a. a t -> a -> attribute option =
@@ -299,7 +269,6 @@ type ('a, 'b) t = {
 type packed = T : (_, _) t -> packed
 
 let name t = Name.Pattern.name t.name
-
 let context t = t.context
 
 let registrar =
@@ -323,20 +292,16 @@ module Attribute_table = Caml.Hashtbl.Make (struct
   type t = string loc
 
   let hash : t -> int = Hashtbl.hash
-
   let equal : t -> t -> bool = Poly.equal
 end)
 
 let not_seen = Attribute_table.create 128
-
 let mark_as_seen { attr_name; _ } = Attribute_table.remove not_seen attr_name
-
 let mark_as_handled_manually = mark_as_seen
 
 let explicitly_drop =
   object
     inherit Ast_traverse.iter
-
     method! attribute = mark_as_seen
   end
 
@@ -513,9 +478,7 @@ let check_unused =
       super#extension_constructor (self#check_node Extension_constructor x)
 
     method! pattern x = super#pattern (self#check_node Pattern x)
-
     method! core_type x = super#core_type (self#check_node Core_type x)
-
     method! expression x = super#expression (self#check_node Expression x)
 
     method! value_description x =
@@ -527,7 +490,6 @@ let check_unused =
       super#class_infos f (self#check_node Class_infos x)
 
     method! class_expr x = super#class_expr (self#check_node Class_expr x)
-
     method! module_type x = super#module_type (self#check_node Module_type x)
 
     method! module_declaration x =

@@ -22,7 +22,6 @@ module Make (M : sig
   type t
 
   val get_loc : t -> Location.t
-
   val end_marker : (t, unit) Attribute.Floating.t
 
   module Transform (T : T1) : sig
@@ -34,9 +33,7 @@ module Make (M : sig
   end
 
   val parse : Lexing.lexbuf -> t list
-
   val pp : Format.formatter -> t -> unit
-
   val to_sexp : t -> Sexp.t
 end) =
 struct
@@ -59,9 +56,7 @@ struct
   let remove_loc =
     object
       inherit Ast_traverse.map
-
       method! location _ = Location.none
-
       method! location_stack _ = []
     end
 
@@ -70,7 +65,6 @@ struct
   end)
 
   let remove_loc x = M_map.apply remove_loc x
-
   let rec last prev = function [] -> prev | x :: l -> last x l
 
   let diff_asts ~generated ~round_trip =
@@ -153,7 +147,6 @@ module Str = Make (struct
   type t = structure_item
 
   let get_loc x = x.pstr_loc
-
   let end_marker = end_marker_str
 
   module Transform (T : T1) = struct
@@ -161,9 +154,7 @@ module Str = Make (struct
   end
 
   let parse = Parse.implementation
-
   let pp = Pprintast.structure_item
-
   let to_sexp = Ast_traverse.sexp_of#structure_item
 end)
 
@@ -172,7 +163,6 @@ module Sig = Make (struct
   type t = signature_item
 
   let get_loc x = x.psig_loc
-
   let end_marker = end_marker_sig
 
   module Transform (T : T1) = struct
@@ -180,14 +170,11 @@ module Sig = Make (struct
   end
 
   let parse = Parse.interface
-
   let pp = Pprintast.signature_item
-
   let to_sexp = Ast_traverse.sexp_of#signature_item
 end)
 
 (*$*)
 
 let match_structure = Str.do_match
-
 let match_signature = Sig.do_match

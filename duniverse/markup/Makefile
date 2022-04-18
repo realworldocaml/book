@@ -97,8 +97,6 @@ package-docs : check-doc-prereqs docs
 
 .PHONY : check-doc-prereqs
 check-doc-prereqs :
-	@test $(OCAML_VERSION) -ne 402 \
-		|| (echo "\nocamldoc is broken in 4.02" && false)
 	@ocamlfind query lwt.unix > /dev/null 2> /dev/null \
 		|| (echo "\nLwt not installed" && false)
 	@ocamlfind query lambdasoup > /dev/null 2> /dev/null \

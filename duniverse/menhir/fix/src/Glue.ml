@@ -138,28 +138,40 @@ module ArraysAsImperativeMaps (K : sig val n: int end) = struct
 
 end
 
-module Adapt (T : Hashtbl.S) = struct
+module HashTablesAsImperativeMaps (H : HashedType) = struct
 
-  include T
-    (* types:  [key], ['data t] *)
-    (* values: [clear], [iter]  *)
+  include Hashtbl.Make(H)
+
+  (* [clear], [iter] are included *)
 
   let create () =
-    T.create 1023
+    create 1023
 
   let add key data table =
-    T.add table key data
+    add table key data
 
   let find table key =
-    T.find key table
+    find key table
 
 end
 
-module HashTablesAsImperativeMaps (H : HashedType) =
-  Adapt(Hashtbl.Make(H))
+module WeakHashTablesAsImperativeMaps (H : HashedType) = struct
 
-module WeakHashTablesAsImperativeMaps (H : HashedType) =
-  Adapt(Ephemeron.K1.Make(H))
+  include Ephemeron.K1.Make(H)
+
+  (* [iter] is not included because it is not supported by the new ephemeron
+     API in OCaml 5. *)
+
+  let create () =
+    create 1023
+
+  let add key data table =
+    add table key data
+
+  let find table key =
+    find key table
+
+end
 
 module MinimalSemiLattice (P : SEMI_LATTICE) = struct
 

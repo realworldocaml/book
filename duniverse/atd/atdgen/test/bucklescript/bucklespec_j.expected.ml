@@ -1,5 +1,5 @@
 (* Auto-generated from "bucklespec.atd" *)
-[@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 type recurse = Bucklespec_t.recurse = { recurse_items: recurse list }
 
@@ -10,6 +10,10 @@ type mutual_recurse1 = Bucklespec_t.mutual_recurse1 = {
 and mutual_recurse2 = Bucklespec_t.mutual_recurse2 = {
   mutual_recurse1: mutual_recurse1
 }
+
+type variant2 = Bucklespec_t.variant2 =  A | C 
+
+type variant1 = Bucklespec_t.variant1 =  A of string | B 
 
 type valid = Bucklespec_t.valid
 
@@ -366,6 +370,113 @@ and read_recurse = (
 )
 and recurse_of_string s =
   read_recurse (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_variant2 : _ -> variant2 -> _ = (
+  fun ob x ->
+    match x with
+      | A -> Bi_outbuf.add_string ob "\"A\""
+      | C -> Bi_outbuf.add_string ob "\"C\""
+)
+let string_of_variant2 ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_variant2 ob x;
+  Bi_outbuf.contents ob
+let read_variant2 = (
+  fun p lb ->
+    Yojson.Safe.read_space p lb;
+    match Yojson.Safe.start_any_variant p lb with
+      | `Edgy_bracket -> (
+          match Yojson.Safe.read_ident p lb with
+            | "A" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (A : variant2)
+            | "C" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (C : variant2)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Double_quote -> (
+          match Yojson.Safe.finish_string p lb with
+            | "A" ->
+              (A : variant2)
+            | "C" ->
+              (C : variant2)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Square_bracket -> (
+          match Atdgen_runtime.Oj_run.read_string p lb with
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+)
+let variant2_of_string s =
+  read_variant2 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_variant1 : _ -> variant1 -> _ = (
+  fun ob x ->
+    match x with
+      | A x ->
+        Bi_outbuf.add_string ob "[\"A\",";
+        (
+          Yojson.Safe.write_string
+        ) ob x;
+        Bi_outbuf.add_char ob ']'
+      | B -> Bi_outbuf.add_string ob "\"B\""
+)
+let string_of_variant1 ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_variant1 ob x;
+  Bi_outbuf.contents ob
+let read_variant1 = (
+  fun p lb ->
+    Yojson.Safe.read_space p lb;
+    match Yojson.Safe.start_any_variant p lb with
+      | `Edgy_bracket -> (
+          match Yojson.Safe.read_ident p lb with
+            | "A" ->
+              Atdgen_runtime.Oj_run.read_until_field_value p lb;
+              let x = (
+                  Atdgen_runtime.Oj_run.read_string
+                ) p lb
+              in
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (A x : variant1)
+            | "B" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_gt p lb;
+              (B : variant1)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Double_quote -> (
+          match Yojson.Safe.finish_string p lb with
+            | "B" ->
+              (B : variant1)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+      | `Square_bracket -> (
+          match Atdgen_runtime.Oj_run.read_string p lb with
+            | "A" ->
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_comma p lb;
+              Yojson.Safe.read_space p lb;
+              let x = (
+                  Atdgen_runtime.Oj_run.read_string
+                ) p lb
+              in
+              Yojson.Safe.read_space p lb;
+              Yojson.Safe.read_rbr p lb;
+              (A x : variant1)
+            | x ->
+              Atdgen_runtime.Oj_run.invalid_variant_tag p x
+        )
+)
+let variant1_of_string s =
+  read_variant1 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_valid = (
   Yojson.Safe.write_bool
 )

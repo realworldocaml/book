@@ -240,7 +240,7 @@ struct
            Lowercase the element name given by the user before analysis by the
            parser, to match this convention. [String.lowercase] is acceptable
            here because the API assumes the string [element] is in UTF-8. *)
-        k (`Fragment (String.lowercase element), None)
+        k (`Fragment (String.lowercase_ascii element), None)
       | Some (`Document as c) -> k (c, None)
       | None -> detect tokens throw k)
     (fun (detected_context, deciding_token) ->
@@ -2825,7 +2825,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
     | l, `End {name} ->
       (fun mode' ->
         match Stack.current_element open_elements with
-        | Some {element_name = _, name'} when String.lowercase name' = name ->
+        | Some {element_name = _, name'} when String.lowercase_ascii name' = name ->
           mode' ()
         | _ ->
           report l (`Unmatched_end_tag name) !throw (fun () ->
@@ -2834,7 +2834,7 @@ let parse requested_context report (tokens, set_tokenizer_state, set_foreign) =
         let rec scan = function
           | [] -> mode ()
           | {element_name = ns, name'}::_
-              when String.lowercase name' = name ->
+              when String.lowercase_ascii name' = name ->
             close_element ~ns l name mode
           | {element_name = `HTML, _}::_ -> force_html ()
           | _::rest -> scan rest

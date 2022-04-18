@@ -46,6 +46,7 @@ val scheme: string list -> typ -> typescheme
 (** Building a locally abstract type scheme. *)
 val local_scheme: string list -> typ -> typescheme
 
+(** Converting a type to a type scheme. *)
 val type2scheme: typ -> typescheme
 
 (** Constraining an expression to have a (monomorphic) type. *)

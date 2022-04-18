@@ -1187,7 +1187,5 @@ and copy_loc :
 and copy_location : Location.t -> Location.t = fun x -> x
 
 let copy_expr = copy_expression
-
 let copy_pat = copy_pattern
-
 let copy_typ = copy_core_type

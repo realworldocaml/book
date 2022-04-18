@@ -10,17 +10,20 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(**This module provides support for constructing finite sets at the type level
-   and for encoding the inhabitants of these sets as runtime integers. These
-   runtime integers are statically branded with the name of the set that they
-   inhabit, so two inhabitants of two distinct sets cannot be inadvertently
-   confused. *)
+(**This module offers {b a safe API for manipulating indices into fixed-size
+   arrays}.
+
+   It provides support for constructing finite sets at the type level and
+   for encoding the inhabitants of these sets as runtime integers. These
+   runtime integers are statically branded with the name of the set that
+   they inhabit, so two inhabitants of two distinct sets cannot be
+   inadvertently confused. *)
 
 (**If [n] is a type-level name for a finite set, then a value of type
    [n cardinal] is a runtime integer that represents the cardinal of
    the set [n].
 
-   In the following, the functor [Gensym] allows creating open-ended
+   In the following, the functor {!Gensym} allows creating open-ended
    sets, which can grow over time. If [n] is such a set, then a value
    of type [n cardinal] can be thought of as the as-yet-undetermined
    cardinal of the set. *)
@@ -29,7 +32,7 @@ type 'n cardinal
 (**If [n] is the cardinal of the set [n], then [cardinal n] returns the
    cardinal of this set, as a concrete integer.
 
-   In the following, the functor [Gensym] allows creating open-ended sets,
+   In the following, the functor {!Gensym} allows creating open-ended sets,
    which can grow over time. If [n] is such a set, then calling [cardinal n]
    has the side-effect of freezing this set, thereby fixing its cardinal:
    thereafter, calling [fresh] becomes forbidden, so no new elements can be
@@ -47,7 +50,7 @@ val cardinal : 'n cardinal -> int
 type 'n index =
   private int
 
-(**A new type-level set is created by an application of the functor {!Const},
+(**A new type-level set is created by an application of the functors {!Const},
    {!Gensym}, and {!Sum} below. Each functor application creates a fresh type
    name [n]. More precisely, each functor application returns a module whose
    signature is {!CARDINAL}: it contains both a fresh abstract type [n] and a
@@ -62,15 +65,15 @@ end
    set whose cardinal is [c]. [c] must be nonnegative. *)
 module Const (X : sig val cardinal : int end) : CARDINAL
 
-(**The function [const] is a value-level analogue of the functor {!Const}. *)
+(**The function {!const} is a value-level analogue of the functor {!Const}. *)
 val const : int -> (module CARDINAL)
 
-(**[Empty] contains a type-level name for the empty set. *)
+(**{!Empty} contains a type-level name for the empty set. *)
 module Empty: CARDINAL
 
 (**[Gensym()] creates an open-ended type-level set, whose cardinality is not
    known a priori. As long as the cardinal of the set has not been observed by
-   invoking [cardinal], new elements can be added to the set by invoking
+   invoking {!val-cardinal}, new elements can be added to the set by invoking
    [fresh]. *)
 module Gensym () : sig
 
@@ -91,7 +94,7 @@ type ('l, 'r) either =
   | L of 'l
   | R of 'r
 
-(**The signature [SUM] extends [CARDINAL] with an explicit isomorphism between
+(**The signature {!SUM} extends {!CARDINAL} with an explicit isomorphism between
    the set [n] and the disjoint sum [l + r]. The functions [inj_l] and [inj_r]
    convert an index into [l] or an index into [r] into an index into [n].
    Conversely, the function [prj] converts an index into [r] into either an
@@ -115,11 +118,11 @@ module Sum (L : CARDINAL)(R : CARDINAL) :
   SUM with type l := L.n
        and type r := R.n
 
-(**The function [sum] is a value-level analogue of the functor {!Sum}. *)
+(**The function {!sum} is a value-level analogue of the functor {!Sum}. *)
 val sum : 'l cardinal -> 'r cardinal ->
   (module SUM with type l = 'l and type r = 'r)
 
-(**The submodule [Index] allows safely manipulating indices
+(**The submodule {!Index} allows safely manipulating indices
    into a finite set. *)
 module Index : sig
 
@@ -132,20 +135,20 @@ module Index : sig
      fixes the cardinal [n]. *)
   val of_int : 'n cardinal -> int -> 'n index
 
-  (**[to_int] casts an index [i] back to an ordinary integer value. *)
+  (**{!to_int} casts an index [i] back to an ordinary integer value. *)
   val to_int : 'n index -> int
 
   (**[iter n yield] calls [yield i] successively for every index in the range
      [\[0, n)], in increasing order. *)
   val iter : 'n cardinal -> ('n index -> unit) -> unit
 
-  (**This exception is raised by an iterator (created by [enumerate]) that is
+  (**This exception is raised by an iterator (created by {!enumerate}) that is
      queried after it has been exhausted. *)
   exception End_of_set
 
   (**[enumerate n] returns an imperative iterator, which produces all indices
      in the range [\[0, n)] in increasing order. Querying the iterator after
-     all elements have been produced causes the exception [End_of_set] to be
+     all elements have been produced causes the exception {!End_of_set} to be
      raised. *)
   val enumerate : 'n cardinal -> (unit -> 'n index)
 
@@ -156,30 +159,30 @@ end
 type ('n, 'a) vector =
   private 'a array
 
-(**The submodule [Vector] allows safely manipulating indices into a vector. *)
+(**The submodule {!Vector} allows safely manipulating indices into a vector. *)
 module Vector : sig
 
   type ('n, 'a) t = ('n, 'a) vector
 
-  (**[length] is analogous to [Array.length], but returns a cardinal instead
+  (**{!length} is analogous to [Array.length], but returns a cardinal instead
      of an ordinary integer. *)
   val length : ('n, 'a) t -> 'n cardinal
 
-  (**[get] is [Array.get], but expects an index instead of an ordinary
+  (**{!get} is [Array.get], but expects an index instead of an ordinary
      integer. This guarantees that the index is within bounds. *)
   val get : ('n, 'a) t -> 'n index -> 'a
 
-  (**[set] is [Array.set], but expects an index instead of an ordinary
+  (**{!set} is [Array.set], but expects an index instead of an ordinary
      integer. This guarantees that the index is within bounds. *)
   val set : ('n, 'a) t -> 'n index -> 'a -> unit
 
   (**[set_cons t i x] is short for [set t i (x :: get t i)]. *)
   val set_cons : ('n, 'a list) t -> 'n index -> 'a -> unit
 
-  (**[empty] is the empty vector. *)
-  val empty : (_, _) t
+  (**{!empty} is the empty vector. *)
+  val empty : (Empty.n, _) t
 
-  (**[make] is analogous to [Array.make]. Invoking [make n x] fixes the
+  (**{!make} is analogous to [Array.make]. Invoking [make n x] fixes the
      cardinal [n]. *)
   val make : 'n cardinal -> 'a -> ('n, 'a) t
 
@@ -189,11 +192,11 @@ module Vector : sig
      once. Invoking [make' n f] fixes the cardinal [n]. *)
   val make' : 'n cardinal -> (unit -> 'a) -> ('n, 'a) t
 
-  (**[init] is analogous to [Array.init]. Invoking [init n f] fixes the
+  (**{!init} is analogous to [Array.init]. Invoking [init n f] fixes the
      cardinal [n]. *)
   val init : 'n cardinal -> ('n index -> 'a) -> ('n, 'a) t
 
-  (**[map] is analogous to [Array.map]. *)
+  (**{!map} is analogous to [Array.map]. *)
   val map : ('a -> 'b) -> ('n, 'a) t -> ('n, 'b) t
 
 end

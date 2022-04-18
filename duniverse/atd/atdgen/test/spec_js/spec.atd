@@ -22,7 +22,7 @@ type v1 =
   [ V1
   | V2 <json name="v22">
   | V3 of string
-  | V4 of int <json name="v44">
+  | V4 <json name="v44"> of int
   | V5 of bool option]
 
 type v1list = v1 list

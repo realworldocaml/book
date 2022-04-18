@@ -145,7 +145,6 @@ let generated_code_end =
   "(* -----{ GENERATED CODE END   }------------------------------------- *)"
 
 type mode = Using_line_directives | Delimiting_generated_blocks
-
 type target = Output of mode | Corrected
 
 let skip_blank_eol contents (pos : Lexing.position) =

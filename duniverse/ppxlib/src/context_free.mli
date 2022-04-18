@@ -101,15 +101,10 @@ module Rule : sig
     (signature_item, module_type_declaration, _) attr_inline
 
   val attr_str_type_ext : (structure_item, type_extension, _) attr_inline
-
   val attr_sig_type_ext : (signature_item, type_extension, _) attr_inline
-
   val attr_str_type_ext_expect : (structure_item, type_extension, _) attr_inline
-
   val attr_sig_type_ext_expect : (signature_item, type_extension, _) attr_inline
-
   val attr_str_exception : (structure_item, type_exception, _) attr_inline
-
   val attr_sig_exception : (signature_item, type_exception, _) attr_inline
 
   val attr_str_exception_expect :

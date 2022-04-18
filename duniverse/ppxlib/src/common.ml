@@ -81,9 +81,7 @@ exception Type_is_recursive
 class type_is_recursive rec_flag tds =
   object (self)
     inherit Ast_traverse.iter as super
-
     val type_names : string list = List.map tds ~f:(fun td -> td.ptype_name.txt)
-
     method return_true () = raise_notrace Type_is_recursive
 
     method! core_type ctype =
@@ -113,7 +111,6 @@ class type_is_recursive rec_flag tds =
   end
 
 let really_recursive rec_flag tds = (new type_is_recursive rec_flag tds)#go ()
-
 let rec last x l = match l with [] -> x | x :: l -> last x l
 
 let loc_of_name_and_payload name payload =
@@ -172,7 +169,6 @@ let rec assert_no_attributes = function
 let assert_no_attributes_in =
   object
     inherit Ast_traverse.iter
-
     method! attribute a = assert_no_attributes [ a ]
   end
 

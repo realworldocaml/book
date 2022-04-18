@@ -1,5 +1,4 @@
 (executable
  (name test_js_of_ocaml)
  (modes js)
- (libraries markup markup-lwt)
- (flags (:standard -w +A-44)))
+ (libraries markup markup-lwt))

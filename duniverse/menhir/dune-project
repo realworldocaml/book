@@ -1,7 +1,7 @@
 (lang dune 2.0)
 (name menhir)
 (using menhir 2.0)
-(version 20211128)
+(version 20220210)
 
 (package
   (name menhirLib)

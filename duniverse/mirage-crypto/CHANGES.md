@@ -1,3 +1,17 @@
+## v0.10.6 (2022-03-29)
+
+- Use _WIN32 instead of __WIN32__, as proposed by @jonahbeckford in #137
+- PKG_CONFIG_PATH via cygpath on Window (#150 @MisterDA)
+- ocaml-solo5 (formerly ocaml-freestanding) defines __ocaml_solo5__, use this
+  in ifdef (arm only, #152 @hannesm)
+- mirag-crypto-rng-mirage test: require mirage-unix >= 5.0.0 (#151 @hannesm)
+- use oUnit2 as dependency, instead of oUnit (#149 @MisterDA)
+- support mipsel and mips64el compilation (#148 @glondu)
+- bugfix: define _POSIX_C_SOURCE in entropy_cpu_stubs.c (otherwise clock_gettime
+  is not defined - at least on armhf) (#148 @glondu)
+- bugfix: compilation on kfreebsd-* (adding __FreeBSD_kernel__ to ifdef)
+  (#148 @glondu)
+
 ## v0.10.5 (2021-11-22)
 
 - mirage-crypto-ec: support point compression (#142 #147 @Zett98)

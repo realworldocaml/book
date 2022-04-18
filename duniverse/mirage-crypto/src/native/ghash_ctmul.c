@@ -39,7 +39,7 @@
 #include "mirage_crypto.h"
 #include <string.h>
 
-#if defined (__i386__) || defined (__arm__)
+#if defined (ARCH_32BIT)
 
 /*
  * We cannot really autodetect whether multiplications are "slow" or

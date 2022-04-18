@@ -2,6 +2,9 @@ open Atd.Import
 open Atdj_names
 open Atdj_env
 open Atdj_util
+
+module A = Atd.Ast
+
 (* Calculate the JSON representation of an ATD type.
  *
  * Values of sum types t are encoded as either Strings or two-element
@@ -133,7 +136,7 @@ let assign_field env
   (* Check whether the field is optional *)
   let is_opt =
     match kind with
-    | Atd.Ast.Optional
+    | A.Optional
     | With_default -> true
     | Required -> false in
   let src = sprintf "jo.%s(\"%s\")" (get env atd_ty is_opt) json_field_name in
@@ -149,7 +152,7 @@ let assign_field env
     in
     let opt_set_default =
       match kind with
-      | Atd.Ast.With_default ->
+      | A.With_default ->
           (match norm_ty ~unwrap_option:true env atd_ty with
            | Name (_, (_, name, _), _) ->
                (match name with
@@ -221,7 +224,7 @@ let to_string_field env = function
       let else_part =
         let is_opt =
           match kind with
-          | Atd.Ast.Optional | With_default -> true
+          | A.Optional | With_default -> true
           | Required -> false in
         if is_opt then
           ""
@@ -299,7 +302,7 @@ import org.json.*;
 
 let rec trans_module env items = List.fold_left trans_outer env items
 
-and trans_outer env (Atd.Ast.Type (_, (name, _, _), atd_ty)) =
+and trans_outer env (A.Type (_, (name, _, _), atd_ty)) =
   match unwrap atd_ty with
   | Sum (loc, v, a) ->
       trans_sum name env (loc, v, a)
@@ -320,19 +323,21 @@ and trans_outer env (Atd.Ast.Type (_, (name, _, _), atd_ty)) =
 and trans_sum my_name env (_, vars, _) =
   let class_name = Atdj_names.to_class_name my_name in
 
-  let cases = List.map (function
-    | Atd.Ast.Variant (_, (atd_name, an), opt_ty) ->
-        let json_name = get_json_variant_name atd_name an in
-        let func_name, enum_name, field_name =
-          get_java_variant_names atd_name an in
-        let opt_java_ty =
-          opt_ty |> Option.map (fun ty ->
-            let (java_ty, _) = trans_inner env (unwrap_option env ty) in
-            (ty, java_ty)
-          ) in
-        (json_name, func_name, enum_name, field_name, opt_java_ty)
-    | Inherit _ -> assert false
-  ) vars
+  let cases =
+    List.map (fun (x : A.variant) ->
+      match x with
+      | Variant (_, (atd_name, an), opt_ty) ->
+          let json_name = get_json_variant_name atd_name an in
+          let func_name, enum_name, field_name =
+            get_java_variant_names atd_name an in
+          let opt_java_ty =
+            opt_ty |> Option.map (fun ty ->
+              let (java_ty, _) = trans_inner env (unwrap_option env ty) in
+              (ty, java_ty)
+            ) in
+          (json_name, func_name, enum_name, field_name, opt_java_ty)
+      | Inherit _ -> assert false
+    ) vars
   in
 
   let tags = List.map (fun (_, _, enum_name, _, _) -> enum_name) cases in

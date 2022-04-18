@@ -51,6 +51,7 @@ type shape =
   | Oval
   | Circle
   | DoubleCircle
+  | Record
       (* there are many others, let's stop here *)
 
 (* ------------------------------------------------------------------------- *)
@@ -96,6 +97,8 @@ let print_shape = function
             "circle"
         | DoubleCircle ->
             "doublecircle"
+        | Record ->
+            "record"
       in
       sprintf ", shape = %s" shape
 
@@ -174,4 +177,3 @@ end) = struct
     fprintf f "\n}\n"
 
 end
-

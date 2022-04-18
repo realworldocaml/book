@@ -220,7 +220,7 @@ val fts_open :
   path_argv:string list ->
   ?compar:(FTSENT.t ptr -> FTSENT.t ptr -> int) ->
   options:fts_open_option list ->
-  FTS.t
+  unit -> FTS.t
 
 (* The fts_children() function returns a pointer to an FTSENT structure
    describing the first entry in a NULL-terminated linked list of the

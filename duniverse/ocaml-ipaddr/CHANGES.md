@@ -1,3 +1,11 @@
+## v5.3.0 (2022-03-04)
+
+* Add `with_port_of_string` function (@dinosaure, @hannesm, #108)
+* **breaking-change** Be restrictive on `Ipaddr.of_string` (@dinosaure, @hannesm, #109)
+  Before this release, `Ipaddr.of_string` accepts remaining bytes and returns
+  a valid value such as `"127.0.0.1aaaa"` is valid. Now, `ipaddr` does not
+  accept a string with remaining bytes.
+
 ## v5.2.0 (2021-09-11)
 
 * Use Cstruct.length instead of deprecated Cstruct.len (#106, @hannesm)

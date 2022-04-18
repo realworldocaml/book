@@ -35,4 +35,4 @@ let with_entropy act =
   act ()
 
 let () =
-  OS.(Main.run (with_entropy (fun () -> Time.sleep_ns (Duration.of_sec 3))))
+  Unix_os.(Main.run (with_entropy (fun () -> Time.sleep_ns (Duration.of_sec 3))))

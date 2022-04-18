@@ -1,10 +1,11 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The ptime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 open Testing
+
+let stdlib_float = float
 
 let unit ppf () = Format.fprintf ppf "()"
 let float ppf f = Format.fprintf ppf "%.10f" f

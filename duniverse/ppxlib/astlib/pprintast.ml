@@ -128,15 +128,10 @@ let view_fixity_of_exp = function
   | _ -> `Normal
 
 let is_infix = function `Infix _ -> true | _ -> false
-
 let is_mixfix = function `Mixfix _ -> true | _ -> false
-
 let is_kwdop = function `Letop _ | `Andop _ -> true | _ -> false
-
 let first_is c str = str <> "" && str.[0] = c
-
 let last_is c str = str <> "" && str.[String.length str - 1] = c
-
 let first_is_in cs str = str <> "" && List.mem str.[0] cs
 
 (* which identifiers are in fact operators needing parentheses *)
@@ -223,11 +218,8 @@ let pp = fprintf
 type ctxt = { pipe : bool; semi : bool; ifthenelse : bool }
 
 let reset_ctxt = { pipe = false; semi = false; ifthenelse = false }
-
 let under_pipe ctxt = { ctxt with pipe = true }
-
 let under_semi ctxt = { ctxt with semi = true }
-
 let under_ifthenelse ctxt = { ctxt with ifthenelse = true }
 (*
 let reset_semi ctxt = { ctxt with semi=false }
@@ -322,7 +314,6 @@ let constant f = function
 
 (* trailing space*)
 let mutable_flag f = function Immutable -> () | Mutable -> pp f "mutable@;"
-
 let virtual_flag f = function Concrete -> () | Virtual -> pp f "virtual@;"
 
 (* trailing space added *)
@@ -337,9 +328,7 @@ let direction_flag f = function
   | Downto -> pp f "downto@ "
 
 let private_flag f = function Public -> () | Private -> pp f "private@ "
-
 let iter_loc f ctxt { txt; loc = _ } = f ctxt txt
-
 let constant_string f s = pp f "%S" s
 
 let tyvar ppf s =
@@ -350,7 +339,6 @@ let tyvar ppf s =
   else Format.fprintf ppf "'%s" s
 
 let tyvar_loc f str = tyvar f str.txt
-
 let string_quot f x = pp f "`%s" x
 
 (* c ['a,'b] *)
@@ -907,7 +895,6 @@ and simple_expr ctxt f x =
     | _ -> paren true (expression ctxt) f x
 
 and attributes ctxt f l = List.iter (attribute ctxt f) l
-
 and item_attributes ctxt f l = List.iter (item_attribute ctxt f) l
 
 and attribute ctxt f a =
@@ -1709,29 +1696,16 @@ let top_phrase f x =
   pp_print_newline f ()
 
 let core_type = core_type reset_ctxt
-
 let pattern = pattern reset_ctxt
-
 let signature = signature reset_ctxt
-
 let structure = structure reset_ctxt
-
 let class_expr = class_expr reset_ctxt
-
 let class_field = class_field reset_ctxt
-
 let class_type = class_type reset_ctxt
-
 let class_signature = class_signature reset_ctxt
-
 let class_type_field = class_type_field reset_ctxt
-
 let module_expr = module_expr reset_ctxt
-
 let module_type = module_type reset_ctxt
-
 let signature_item = signature_item reset_ctxt
-
 let structure_item = structure_item reset_ctxt
-
 let type_declaration = type_declaration reset_ctxt

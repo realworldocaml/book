@@ -1,0 +1,1 @@
+type int64 = int <ocaml repr="int64">

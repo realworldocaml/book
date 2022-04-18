@@ -1,0 +1,21 @@
+;; This dune file is copied to every .backend subdirectory, with customized
+;; flags. The flags associated with the backend [foo] are stored in the file
+;; [foo.flags]. The template for this dune file is stored in [TEMPLATE].
+
+(copy_files# ../../src/*.ml)
+(copy_files# ../../src/*.mli)
+(copy_files  ../../src/lexer.mll)
+(copy_files  ../../src/parser.mly)
+
+(ocamllex lexer)
+
+(menhir
+  (modules parser)
+  (flags FLAGS)
+)
+
+(executable
+  (name main)
+  (libraries str pprint menhirLib sexplib unix sek)
+  (preprocess (pps ppx_sexp_conv))
+)

@@ -1,3 +1,4 @@
 true : bin_annot, safe_string
+<_b0> : -traverse
 <src> : include
 <test> : include

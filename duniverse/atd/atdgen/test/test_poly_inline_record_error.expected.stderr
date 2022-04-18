@@ -1,0 +1,2 @@
+File "test_poly_inline_record_error.atd", line 1, characters 13-28:
+Inline records are not allowed in polymorphic variants (not valid in OCaml)

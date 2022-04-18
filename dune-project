@@ -23,7 +23,7 @@ second edition book. See https://realworldocaml.org/")
   async
   atdgen
   base
-  cmdliner
+  (cmdliner (>= 1.1.0))
   cohttp-async
   conf-ncurses
   conf-tzdata

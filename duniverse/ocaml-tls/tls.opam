@@ -1,4 +1,4 @@
-version: "0.15.2"
+version: "0.15.3"
 opam-version: "2.0"
 homepage:     "https://github.com/mirleft/ocaml-tls"
 dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
@@ -39,6 +39,7 @@ depends: [
   "ipaddr-sexp"
   "alcotest" {with-test}
   "randomconv" {with-test}
+  "cmdliner" {dev & > "1.1.0"}
 ]
 conflicts: [ "result" {< "1.5"} ]
 tags: [ "org:mirage"]

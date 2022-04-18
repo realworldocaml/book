@@ -258,7 +258,7 @@ The `hello` executable is compiled by linking with the
 ```scheme file=examples/correct/ffi_hello/dune
 (executable
   (name      hello)
-  (libraries ctypes-foreign.threaded)
+  (libraries ctypes-foreign)
   (flags     :standard -cclib -lncurses))
 ```
 
@@ -402,9 +402,12 @@ With these opens in place, we can now create a binding to `time`
 directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes-foreign.threaded";;
+# #require "ctypes-foreign";;
 # #require "ctypes.top";;
-# open Core open Ctypes open PosixTypes open Foreign;;
+# open Core;;
+# open Ctypes;;
+# open PosixTypes ;;
+# open Foreign;;
 # let time = foreign "time" (ptr time_t @-> returning time_t);;
 val time : time_t Ctypes_static.ptr -> time_t = <fun>
 ```
@@ -444,7 +447,7 @@ val difftime : time_t -> time_t -> float = <fun>
 \noindent
 Here's the resulting function `difftime` in action.
 
-```ocaml env=posix,non-deterministic
+```ocaml env=posix,non-deterministic=output
 # let delta =
     let t1 = time' () in
     Unix.sleep 2;
@@ -697,9 +700,9 @@ val gettimeofday' : unit -> float = <fun>
 
 And we can now call that function to get the current time.
 
-```ocaml env=posix,non-deterministic
+```ocaml env=posix,non-deterministic=output
 # gettimeofday' ();;
-- : float = 1649611279.0577121
+- : float = 1650045389.278065
 ```
 
 #### Recap: A time-printing command
@@ -769,7 +772,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 (executable
   (name      datetime)
   (preprocess (pps ppx_jane))
-  (libraries core ctypes-foreign.threaded))
+  (libraries core ctypes-foreign))
 ```
 
 
@@ -1029,7 +1032,7 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme file=examples/correct/ffi_qsort/dune
 (executable
   (name      qsort)
-  (libraries core ctypes-foreign.threaded))
+  (libraries core ctypes-foreign))
 ```
 
 ```sh dir=examples/correct/ffi_qsort

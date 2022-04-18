@@ -26,15 +26,17 @@ homepage: "https://github.com/ocamllabs/ocaml-ctypes"
 doc: "https://ocamllabs.github.io/ocaml-ctypes/"
 bug-reports: "https://github.com/ocamllabs/ocaml-ctypes/issues"
 depends: [
-  "dune" {>= "2.6"}
-  "ocaml" {>= "4.02.3"}
+  "dune" {>= "2.8"}
+  "ocaml" {>= "4.03.0"}
   "integers"
   "dune-configurator"
-  "bisect_ppx" {>= "2.0.0"}
+  "bigarray-compat"
   "ounit" {with-test}
+  "conf-fts" {with-test}
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"

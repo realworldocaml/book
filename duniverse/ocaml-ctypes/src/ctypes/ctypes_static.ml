@@ -94,28 +94,28 @@ type _ bigarray_class =
     layout: 'l;
     dims: int array;
     ba_repr: 'b;
-    bigarray: ('a, 'b, 'l) Bigarray.Genarray.t;
+    bigarray: ('a, 'b, 'l) Bigarray_compat.Genarray.t;
     carray: 'a carray > bigarray_class
 | Array1 :
   < element: 'a;
     layout: 'l;
     dims: int;
     ba_repr: 'b;
-    bigarray: ('a, 'b, 'l) Bigarray.Array1.t;
+    bigarray: ('a, 'b, 'l) Bigarray_compat.Array1.t;
     carray: 'a carray > bigarray_class
 | Array2 :
   < element: 'a;
     layout: 'l;
     dims: int * int;
     ba_repr: 'b;
-    bigarray: ('a, 'b, 'l) Bigarray.Array2.t;
+    bigarray: ('a, 'b, 'l) Bigarray_compat.Array2.t;
     carray: 'a carray carray > bigarray_class
 | Array3 :
   < element: 'a;
     layout: 'l;
     dims: int * int * int;
     ba_repr: 'b;
-    bigarray: ('a, 'b, 'l) Bigarray.Array3.t;
+    bigarray: ('a, 'b, 'l) Bigarray_compat.Array3.t;
     carray: 'a carray carray carray > bigarray_class
 
 type boxed_typ = BoxedType : 'a typ -> boxed_typ
@@ -246,7 +246,7 @@ let bigarray_ : type a b c d e l.
     ba_repr: c;
     bigarray: d;
     carray: e > bigarray_class -> 
-   b -> (a, c) Bigarray.kind -> l Bigarray.layout -> d typ =
+   b -> (a, c) Bigarray_compat.kind -> l Bigarray_compat.layout -> d typ =
   fun spec dims kind l -> match spec with
   | Genarray -> Bigarray (Ctypes_bigarray.bigarray dims kind l)
   | Array1 -> Bigarray (Ctypes_bigarray.bigarray1 dims kind l)
@@ -255,8 +255,8 @@ let bigarray_ : type a b c d e l.
   | Array3 -> let d1, d2, d3 = dims in
               Bigarray (Ctypes_bigarray.bigarray3 d1 d2 d3 kind l)
 
-let bigarray spec c k = bigarray_ spec c k Bigarray.c_layout
-let fortran_bigarray spec c k = bigarray_ spec c k Bigarray.fortran_layout
+let bigarray spec c k = bigarray_ spec c k Bigarray_compat.c_layout
+let fortran_bigarray spec c k = bigarray_ spec c k Bigarray_compat.fortran_layout
 
 let returning v =
   if not (passable v) then
