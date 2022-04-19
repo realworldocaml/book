@@ -342,8 +342,6 @@ Let's work through a concrete example.  We'll write a function
 rows, prints them out in a well-formatted text table.  When we're
 done, here's how the resulting function should work:
 
-<!-- TODO: fix the rendering of this table in the PDF -->
-
 ```ocaml skip
 # Stdio.print_endline
     (render_table
@@ -877,9 +875,6 @@ check on whether the first two elements are equal:
     | first :: tl -> first :: remove_sequential_duplicates tl;;
 val remove_sequential_duplicates : int list -> int list = <fun>
 ```
-
-<!-- TODO: need to fix the rendering as a note, or figure out some -->
-<!-- other way of integrating this in to the text. -->
 
 ::: {data-type=note}
 #### Polymorphic Compare

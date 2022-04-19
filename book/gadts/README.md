@@ -1537,8 +1537,6 @@ be called in each of the duplicated cases.
 
 ### Deriving serializers
 
-<!-- TODO: Fix forward references -->
-
 As will be discussed in more detail in [Data Serialization With
 S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 s-expressions are a convenient data format for representing structured
