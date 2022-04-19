@@ -354,7 +354,6 @@ let get_href_hosts soup =
 </div>
 <p>We can use an expect test to demonstrate what this function does on
 an example page.</p>
-
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test _ =
   let example_html =
@@ -592,7 +591,6 @@ events occurred, and we use this function to drain the queue.</p>
       drain_old_events t)</code></pre>
 </div>
 
-
 <p>But the comparison goes the wrong way: we should discard events that
 are older than the limit-period, not younger. If we fix that, we’ll see
 that the trace behaves as we’d expect.</p>
@@ -632,7 +630,6 @@ need to run tests that involved multiple processes interacting with each
 other and using real IO, expect tests are still a useful tool.</p>
 <p>To see how such tests can be built, we’ll write some tests for the
 echo server we developed in <a data-type="xref" href="concurrent-programming.html#examples-an-echo-server">Chapter 16, Concurrent Programming with Async</a>.</p>
-
 
 <p>We’ll start by creating a new test directory with a dune file next to
 our echo-server implementation.</p>

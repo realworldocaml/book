@@ -158,8 +158,8 @@ a specific length onto C character buffers whose length is defined by a
 terminating null character that immediately follows the string data.</p>
 <p>The module signature for <code>ncurses.mli</code> looks much like a
 normal OCaml signature. You can infer it directly from the
-<code>ncurses.ml</code> by running a special build target:</p>
-
+<code>ncurses.ml</code> by running a command called
+<code>ocaml-print-intf</code>, which you can install with opam.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocaml-print-intf ncurses.ml
 &gt;type window
