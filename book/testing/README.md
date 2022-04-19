@@ -406,8 +406,6 @@ let get_href_hosts soup =
 We can use an expect test to demonstrate what this function does on an
 example page.
 
-<!-- TODO avsm: is this first use of {| syntax in book? Not explained. -->
-
 ```ocaml file=examples/erroneous/soup_test/test.ml,part=1
 let%expect_test _ =
   let example_html =
@@ -668,8 +666,12 @@ let rec drain_old_events t =
       drain_old_events t)
 ```
 
-<!-- TODO avsm: that operator for Time_ns.Span is pretty awkward. -->
-<!-- Time_ns.(Span.((diff t.now time) < t.period)) isnt much better. -->
+<!-- TODO avsm: that operator for Time_ns.Span is pretty awkward.
+     Time_ns.(Span.((diff t.now time) < t.period)) isnt much better.
+
+    yminsky: I don't really see a better solution here. Modular
+    implicits!
+ -->
 
 But the comparison goes the wrong way: we should discard events that
 are older than the limit-period, not younger.  If we fix that, we'll
@@ -717,8 +719,13 @@ To see how such tests can be built, we'll write some tests for the
 echo server we developed in [Concurrent Programming with
 Async](concurrent-programming.html#examples-an-echo-server){data-type=xref}.
 
-<!-- TODO avsm: mention `dune runtest --force` to rerun -->
-<!-- a test if it hasn't changed? Useful for network tests.-->
+<!-- TODO avsm: mention `dune runtest --force` to rerun
+     a test if it hasn't changed? Useful for network tests.
+
+    yminsky: I don't think so. It's occasionally useful, but I think
+    isn't the next thing I'd add to testing. (That would probably be
+    coverage of mocking techniques.)
+-->
 
 We'll start by creating a new test directory with a dune file next to
 our echo-server implementation.

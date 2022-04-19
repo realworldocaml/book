@@ -172,11 +172,8 @@ buffers whose length is defined by a terminating null character that
 immediately follows the string data.
 
 The module signature for `ncurses.mli` looks much like a normal OCaml
-signature. You can infer it directly from the `ncurses.ml` by running a
-special build target:
-
-<!-- TODO: Replace ocaml-print-intf with something better, maybe? Or,
-     put in instructions on how to install it. -->
+signature. You can infer it directly from the `ncurses.ml` by running
+a command called `ocaml-print-intf`, which you can install with opam.
 
 ```sh dir=examples/correct/ffi_ncurses
 $ ocaml-print-intf ncurses.ml
