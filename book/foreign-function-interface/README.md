@@ -37,15 +37,12 @@ available on most systems and doesn't have any complex dependencies.
 #### Installing the Ctypes Library
 
 If you want to use Ctypes interactively, you'll also need to install the
-[`libffi`](https://github.com/atgreen/libffi) library as a prerequisite to
+`libffi` library as a prerequisite to
 using Ctypes. It's a fairly popular library and should be available in your
-OS package manager. Try `opam depext -ui ctypes-foreign`.
-
-Once that's done, Ctypes is available via OPAM as usual:
-:::
+OS package manager.  If you're using opam 2.1 or higher, it will prompt
+you to install it automatically when you install `ctypes-foreign`.
 
 ```
-$ brew install libffi     # for macOS users
 $ opam install ctypes ctypes-foreign
 $ utop
 # require "ctypes-foreign" ;;
@@ -54,6 +51,8 @@ $ utop
 You'll also need the Ncurses library for the first example. This comes
 preinstalled on many operating systems such as macOS, and Debian Linux
 provides it as the `libncurses5-dev` package.
+
+:::
 
 ## Example: A Terminal Interface
 
@@ -175,33 +174,29 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running
 a command called `ocaml-print-intf`, which you can install with opam.
 
-```sh dir=examples/correct/ffi_ncurses
+```sh dir=examples/correct/ffi_ncurses_nointf
 $ ocaml-print-intf ncurses.ml
-type window
+type window = unit Ctypes.ptr
 val window : window Ctypes.typ
 val initscr : unit -> window
+val newwin : int -> int -> int -> int -> window
 val endwin : unit -> unit
 val refresh : unit -> unit
 val wrefresh : window -> unit
-val newwin : int -> int -> int -> int -> window
-val mvwaddch : window -> int -> int -> char -> unit
 val addstr : string -> unit
+val mvwaddch : window -> int -> int -> char -> unit
 val mvwaddstr : window -> int -> int -> string -> unit
 val box : window -> char -> char -> unit
 val cbreak : unit -> int
 ```
 
-The `inferred.mli` target instructs the compiler to generate the default
-signature for a module file and places it in the `_build` directory as a
-normal output. You should normally copy it out into your source directory and
-customize it to improve its safety for external callers by making some of its
-internals more abstract.
+The `ocaml-print-intf` tool examines the default signature inferred by the
+compiler for a module file and prints it out as human-readable output.  You can
+copy this into a corresponding `mli` file and customize it to improve its
+safety for external callers by making some of its internals more abstract.
 
-Here's the customized interface that we can safely use from other libraries:
-
-<!-- TODO: SHouldn't this be customized more? It's basically the same
-     as what's shown above.  If we're going to change it so little, we
-     shouldn't show it again. -->
+Here's the customized `ncurses.mli` interface that we can safely use from other
+libraries:
 
 ```ocaml file=examples/correct/ffi_ncurses/ncurses.mli
 type window
@@ -219,9 +214,9 @@ val box : window -> char -> char -> unit
 val cbreak : unit -> int
 ```
 
-The `window` type is left abstract in the signature to ensure that window
-pointers can only be constructed via the `Ncurses.initscr` function. This
-prevents void pointers obtained from other sources from being mistakenly
+Note that the `window` type is now abstract in the signature, to ensure that
+window pointers can only be constructed via the `Ncurses.initscr` function.
+This prevents void pointers obtained from other sources from being mistakenly
 passed to an Ncurses library call.
 
 Now compile a "hello world" terminal drawing program to tie this all
@@ -244,13 +239,15 @@ let () =
   endwin ()
 ```
 
-<!-- TODO: More explanation would be great. Why do we need
-     ctypes-foriegn.threaded (the threaded bit in particular), and why
-     we have the flags declaration.  -->
-
 The `hello` executable is compiled by linking with the
 `ctypes-foreign` package.
 [Ctypes library/build directives for]{.idx}
+We also add in a `(flags)` directive to instruct the compiler
+to link in the system `ncurses` C library to the executable.
+If you do not specify the C library in the dune file, then the
+program may build successfully, but attempting to invoke
+the executable will fail as not all of the dependencies
+will be available.
 
 ```scheme file=examples/correct/ffi_hello/dune
 (executable
@@ -277,6 +274,47 @@ well as struct and union definitions.
 We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
 examples.
+
+::: {data-type=note}
+#### Linking modes: libffi and stub generation
+
+The core of ctypes is a set of OCaml combinators for describing the structure of C
+types (numeric types, arrays, pointers, structs, unions and functions). You can
+then use these combinators to describe the types of the C functions that you
+want to call. There are two entirely distinct ways to actually link to the
+system libraries that contain the function definitions: *dynamic linking* and
+*stub generation*.
+
+The `ctypes-foreign` package used in this chapter uses the low-level `libffi`
+library to dynamically open C libraries, search for the relevant symbols for
+the function call being invoked, and marshal the function parameters according
+to the operating system's application binary interface (ABI).  While much
+of this happens behind-the-scenes and permits convenient interactive
+programming while developing bindings, it is not always the solution you want
+to use in production.
+
+The `ctypes-cstubs` package provides an alternative mechanism to shift
+much of the linking work to be done once at build time, instead of doing it on
+every invocation of the function.  It does this by taking the *same* OCaml binding
+descriptions, and generating intermediate C source files that contain the
+corresponding C/OCaml glue code.  When these are compiled with a normal
+dune build, the generated C code is treated just as any handwritten code
+might be, and compiled against the system header files.  This allows certain
+C values to be used that cannot be dynamically probed (e.g. preprocessor
+macro definitions), and can also catch definition errors if there is a C
+header mismatch at compile time.
+
+C rarely makes life easier though. There are some definitions that cannot
+be entirely expressed as static C code (e.g. dynamic function pointers),
+and those require the use of `ctypes-foreign` (and `libffi`).  Using ctypes
+does make it possible to share the majority of definitions across both
+linking modes, all while avoiding writing C code directly.
+
+While we do not cover the details of C stub generation further in this chapter,
+you can read more about how to use this mode in the
+``Dealing with foreign libraries'' chapter in the dune manual.
+
+:::
 
 ## Basic Scalar C Types
 
@@ -540,10 +578,8 @@ let string =
 The type of this `string` function is a normal `typ` with no external sign of
 the use of the view function:
 
-<!-- TODO: Is string.typ a typo? Seems like it should be a space... -->
-
 ```ocaml file=examples/correct/ctypes/ctypes.mli,part=4
-val string    : string.typ
+val string    : string typ
 ```
 
 ::: {data-type=note}
