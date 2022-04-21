@@ -34,21 +34,20 @@ dependencies.</p>
 <section data-type="note" class="level4" id="installing-the-ctypes-library">
 <h4>Installing the Ctypes Library</h4>
 <p>If you want to use Ctypes interactively, you’ll also need to install
-the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a>
-library as a prerequisite to using Ctypes. It’s a fairly popular library
-and should be available in your OS package manager. Try
-<code>opam depext -ui ctypes-foreign</code>.</p>
-<p>Once that’s done, Ctypes is available via OPAM as usual:</p>
-</section>
+the <code>libffi</code> library as a prerequisite to using Ctypes. It’s
+a fairly popular library and should be available in your OS package
+manager. If you’re using opam 2.1 or higher, it will prompt you to
+install it automatically when you install
+<code>ctypes-foreign</code>.</p>
 <div class="highlight">
-<pre><code class="language-clike">$ brew install libffi     # for macOS users
-$ opam install ctypes ctypes-foreign
+<pre><code class="language-clike">$ opam install ctypes ctypes-foreign
 $ utop
 # require "ctypes-foreign" ;;</code></pre>
 </div>
 <p>You’ll also need the Ncurses library for the first example. This
 comes preinstalled on many operating systems such as macOS, and Debian
 Linux provides it as the <code>libncurses5-dev</code> package.</p>
+</section>
 <section class="level2" id="example-a-terminal-interface">
 <h2>Example: A Terminal Interface</h2>
 <p>Ncurses is a library to help build terminal-independent text
@@ -162,29 +161,27 @@ normal OCaml signature. You can infer it directly from the
 <code>ocaml-print-intf</code>, which you can install with opam.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocaml-print-intf ncurses.ml
-&gt;type window
+&gt;type window = unit Ctypes.ptr
 &gt;val window : window Ctypes.typ
 &gt;val initscr : unit -&gt; window
+&gt;val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
 &gt;val endwin : unit -&gt; unit
 &gt;val refresh : unit -&gt; unit
 &gt;val wrefresh : window -&gt; unit
-&gt;val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
-&gt;val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
 &gt;val addstr : string -&gt; unit
+&gt;val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
 &gt;val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
 &gt;val box : window -&gt; char -&gt; char -&gt; unit
 &gt;val cbreak : unit -&gt; int
 </code></pre>
 </div>
-<p>The <code>inferred.mli</code> target instructs the compiler to
-generate the default signature for a module file and places it in the
-<code>_build</code> directory as a normal output. You should normally
-copy it out into your source directory and customize it to improve its
-safety for external callers by making some of its internals more
-abstract.</p>
-<p>Here’s the customized interface that we can safely use from other
-libraries:</p>
-
+<p>The <code>ocaml-print-intf</code> tool examines the default signature
+inferred by the compiler for a module file and prints it out as
+human-readable output. You can copy this into a corresponding
+<code>mli</code> file and customize it to improve its safety for
+external callers by making some of its internals more abstract.</p>
+<p>Here’s the customized <code>ncurses.mli</code> interface that we can
+safely use from other libraries:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type window
 
@@ -200,9 +197,9 @@ val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
 val box : window -&gt; char -&gt; char -&gt; unit
 val cbreak : unit -&gt; int</code></pre>
 </div>
-<p>The <code>window</code> type is left abstract in the signature to
-ensure that window pointers can only be constructed via the
-<code>Ncurses.initscr</code> function. This prevents void pointers
+<p>Note that the <code>window</code> type is now abstract in the
+signature, to ensure that window pointers can only be constructed via
+the <code>Ncurses.initscr</code> function. This prevents void pointers
 obtained from other sources from being mistakenly passed to an Ncurses
 library call.</p>
 <p>Now compile a “hello world” terminal drawing program to tie this all
@@ -223,10 +220,14 @@ let () =
   Unix.sleep 5;
   endwin ()</code></pre>
 </div>
-
 <p>The <code>hello</code> executable is compiled by linking with the
 <code>ctypes-foreign</code> package. <a data-secondary="build directives for" data-primary="Ctypes
-library" data-type="indexterm">&nbsp;</a></p>
+library" data-type="indexterm">&nbsp;</a> We also add in a
+<code>(flags)</code> directive to instruct the compiler to link in the
+system <code>ncurses</code> C library to the executable. If you do not
+specify the C library in the dune file, then the program may build
+successfully, but attempting to invoke the executable will fail as not
+all of the dependencies will be available.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      hello)
@@ -248,6 +249,44 @@ as struct and union definitions.</p>
 <p>We’ll go over some of these features in more detail for the remainder
 of the chapter by using some POSIX date functions as running
 examples.</p>
+<section data-type="note" class="level4" id="linking-modes-libffi-and-stub-generation">
+<h4>Linking modes: libffi and stub generation</h4>
+<p>The core of ctypes is a set of OCaml combinators for describing the
+structure of C types (numeric types, arrays, pointers, structs, unions
+and functions). You can then use these combinators to describe the types
+of the C functions that you want to call. There are two entirely
+distinct ways to actually link to the system libraries that contain the
+function definitions: <em>dynamic linking</em> and <em>stub
+generation</em>.</p>
+<p>The <code>ctypes-foreign</code> package used in this chapter uses the
+low-level <code>libffi</code> library to dynamically open C libraries,
+search for the relevant symbols for the function call being invoked, and
+marshal the function parameters according to the operating system’s
+application binary interface (ABI). While much of this happens
+behind-the-scenes and permits convenient interactive programming while
+developing bindings, it is not always the solution you want to use in
+production.</p>
+<p>The <code>ctypes-cstubs</code> package provides an alternative
+mechanism to shift much of the linking work to be done once at build
+time, instead of doing it on every invocation of the function. It does
+this by taking the <em>same</em> OCaml binding descriptions, and
+generating intermediate C source files that contain the corresponding
+C/OCaml glue code. When these are compiled with a normal dune build, the
+generated C code is treated just as any handwritten code might be, and
+compiled against the system header files. This allows certain C values
+to be used that cannot be dynamically probed (e.g.&nbsp;preprocessor macro
+definitions), and can also catch definition errors if there is a C
+header mismatch at compile time.</p>
+<p>C rarely makes life easier though. There are some definitions that
+cannot be entirely expressed as static C code (e.g.&nbsp;dynamic function
+pointers), and those require the use of <code>ctypes-foreign</code> (and
+<code>libffi</code>). Using ctypes does make it possible to share the
+majority of definitions across both linking modes, all while avoiding
+writing C code directly.</p>
+<p>While we do not cover the details of C stub generation further in
+this chapter, you can read more about how to use this mode in the
+“Dealing with foreign libraries” chapter in the dune manual.</p>
+</section>
 </section>
 <section class="level2" id="basic-scalar-c-types">
 <h2>Basic Scalar C Types</h2>
@@ -504,9 +543,8 @@ val char_ptr_of_string : string -&gt; char ptr</code></pre>
 <p>The type of this <code>string</code> function is a normal
 <code>typ</code> with no external sign of the use of the view
 function:</p>
-
 <div class="highlight">
-<pre><code class="language-ocaml">val string    : string.typ</code></pre>
+<pre><code class="language-ocaml">val string    : string typ</code></pre>
 </div>
 <section data-type="note" class="level4" id="ocaml-strings-versus-c-character-buffers">
 <h4>OCaml Strings Versus C Character Buffers</h4>
