@@ -47,7 +47,7 @@ val char_ptr_of_string : string -> char ptr
 
 [@@@part "4"] ;;
 
-val string    : string.typ
+val string    : string typ
 
 [@@@part "5"] ;;
 
