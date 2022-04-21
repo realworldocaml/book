@@ -312,7 +312,7 @@ linking modes, all while avoiding writing C code directly.
 
 While we do not cover the details of C stub generation further in this chapter,
 you can read more about how to use this mode in the
-``Dealing with foreign libraries'' chapter in the dune manual.
+"Dealing with foreign libraries" chapter in the dune manual.
 
 :::
 
