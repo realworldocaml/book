@@ -301,10 +301,10 @@ asn1-combinators    (version: 0.2.6)
 
 If there's a `public_name` field present in the `dune` library definition, this
 determines the publically exposed name for the library. The public library name
-is is what you specify via the `libraries` field in other projects that use
-your project's libraries.  Without a public name, the defined library is local
-to the current dune project only.  The `(libraries)` field in the `lib/dune`
-file is empty since this is a trivial standalone library.
+is what you specify via the `libraries` field in other projects that use your
+project's libraries.  Without a public name, the defined library is local to
+the current dune project only.  The `(libraries)` field in the `lib/dune` file
+is empty since this is a trivial standalone library.
 
 ### Writing test cases for a library
 
@@ -841,7 +841,7 @@ $ opam lock
 
 This generates a `pkgname.opam.locked` file which contains
 the same metadata as your original file, but with all the dependencies
-explictly listed.  Later on, if a user wants to reconstruct your exact opam
+explicitly listed.  Later on, if a user wants to reconstruct your exact opam
 environment (as opposed to the package solution they might calculate with a
 future opam repository), then they can pass an option during installation:
 
