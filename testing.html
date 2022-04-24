@@ -924,14 +924,12 @@ equal to itself.</p>
 &gt;- : int = -4611686018427387904
 </code></pre>
 </div>
-<p>Quickcheck’s insistence on tracking and testing special cases is what
-allowed us to discover this unexpected behavior. Note that in this case,
-it’s not really a bug that we’ve uncovered, it’s just that the property
-that we thought would should hold can’t in practice. But either way,
-Quickcheck helped us understand the behavior of our code better.</p>
-
-
-
+<p>Quickcheck’s decision to put much larger weight on special cases is
+what allowed us to discover this unexpected behavior. Note that in this
+case, it’s not really a bug that we’ve uncovered, it’s just that the
+property that we thought would should hold can’t in practice. But either
+way, Quickcheck helped us understand the behavior of our code
+better.</p>
 <section class="level3" id="handling-complex-types">
 <h3>Handling complex types</h3>
 <p>Tests can’t subsist on simple atomic types alone, which is why you’ll
@@ -1055,7 +1053,6 @@ height.</p>
 <p>The full API for building generators is beyond the scope of this
 chapter, but it’s worth digging in to the API docs if you want more
 control over the distribution of your test examples.</p>
-
 </section>
 </section>
 <section class="level2" id="other-testing-tools">
