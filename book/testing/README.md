@@ -1048,16 +1048,12 @@ for the negation of `min_value` to be equal to itself.
 - : int = -4611686018427387904
 ```
 
-Quickcheck's insistence on tracking and testing special cases is what
-allowed us to discover this unexpected behavior.  Note that in this
-case, it's not really a bug that we've uncovered, it's just that the
-property that we thought would should hold can't in practice.  But
+Quickcheck's decision to put much larger weight on special cases is
+what allowed us to discover this unexpected behavior.  Note that in
+this case, it's not really a bug that we've uncovered, it's just that
+the property that we thought would should hold can't in practice.  But
 either way, Quickcheck helped us understand the behavior of our code
 better.
-
-<!-- TODO avsm: could you expand on this a little? You mention the -->
-<!-- probability distribution above is special, so does QC combine -->
-<!-- a random distribution with special edge values always included? -->
 
 ### Handling complex types
 
@@ -1192,8 +1188,6 @@ the rectangle is no smaller than its height.
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
 control over the distribution of your test examples.
-
-<!-- TODO avsm: could be optimistic and link to v3.ocaml.org docs -->
 
 ## Other testing tools
 
