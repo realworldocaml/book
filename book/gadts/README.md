@@ -1544,6 +1544,8 @@ data.  Rather than write the serializers and deserializers by hand, we
 typically use `ppx_sexp_value`, which is a syntax extension which
 auto-generates these functions for a given type, based on that type's
 definition.
+[syntax extension/ppx_sexp_value]{.idx}
+[ppx_sexp_value]{.idx}
 
 Here's an example:
 

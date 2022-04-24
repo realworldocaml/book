@@ -303,12 +303,15 @@ like `ppx_sexp_conv`. [PPX syntax extensions]{.idx}[syntax extension with
 PPX]{.idx}
 
 `ppx_sexp_conv` is part of a family of syntax extensions, including
-`ppx_compare`, described in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
+`ppx_compare`, described in [Maps And Hash
+Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
 and `ppx_fields`, described in
-[Records](records.html#records){data-type=xref}, that generate code based
-on type declarations.
+[Records](records.html#records){data-type=xref}, that generate code
+based on type declarations.
+[syntax extension/ppx_sexp_conv]{.idx}
+[syntax extension/ppx_compare]{.idx}
 [ppx_sexp_conv]{.idx}
+[ppx_compare]{.idx}
 
 Using these extensions from a `dune` file is as simple as adding this
 directive to a `(library)` or `(executable)` stanza to indicate that the

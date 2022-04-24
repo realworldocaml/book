@@ -104,6 +104,7 @@ language, but a few things jump right out at you:
 
 We can also create a variable to name the value of a given expression, using
 the `let` keyword. This is known as a *let binding*:
+[let bindings]{.idx}
 
 ```ocaml env=main
 # let x = 3 + 4;;
@@ -202,6 +203,7 @@ slightly awkward `/.` operator. In the following example, we open the
 `Float.O` module, which has a bunch of useful operators and functions that
 are designed to be used in this kind of context. Note that this causes the
 standard int-only arithmetic operators to be shadowed locally.
+[local open]{.idx}
 
 ```ocaml env=main
 # let ratio x y =
@@ -1224,7 +1226,7 @@ The definition of `sum` in the above examples was our first use of
 paired with an `in` can be used to introduce a new binding within any
 local scope, including a function body. The `in` marks the beginning
 of the scope within which the new variable can be used. Thus, we could
-write:[let syntax/nested let binding]{.idx}
+write:[let binding/local]{.idx}
 
 ```ocaml env=main
 # let z = 7 in

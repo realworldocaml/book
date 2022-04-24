@@ -76,12 +76,12 @@ function for each line to update the accumulator. That accumulator is
 initialized to the empty list.
 
 With `build_counts` defined, we then call the function to build the
-association list, sort that list by frequency in descending order, grab the
-first 10 elements off the list, and then iterate over those 10 elements and
-print them to the screen. These operations are tied together using the
-`|>` operator described in
-[Variables And Functions](variables-and-functions.html#prefix-and-infix-operators){data-type=xref}.
-[let ( ) declaration]{.idx}[main function]{.idx}
+association list, sort that list by frequency in descending order,
+grab the first 10 elements off the list, and then iterate over those
+10 elements and print them to the screen. These operations are tied
+together using the `|>` operator described in [Variables And
+Functions](variables-and-functions.html#prefix-and-infix-operators){data-type=xref}.
+[main function]{.idx}
 
 ::: {.allow_break data-type=note}
 #### Where Is `main`?
