@@ -13,8 +13,6 @@ can start by typing *ocaml* at the command line). These instructions will
 assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
-<!-- TODO: make the URL actually show up literally in the PDF -->
-
 Before going any further, make sure you've followed the steps in [the
 installation page](http://dev.realworldocaml.org/install.html).
 

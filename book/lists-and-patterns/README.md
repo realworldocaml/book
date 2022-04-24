@@ -342,8 +342,6 @@ Let's work through a concrete example.  We'll write a function
 rows, prints them out in a well-formatted text table.  When we're
 done, here's how the resulting function should work:
 
-<!-- TODO: fix the rendering of this table in the PDF -->
-
 ```ocaml skip
 # Stdio.print_endline
     (render_table
@@ -542,8 +540,7 @@ val render_table : string list -> string list list -> string = <fun>
 
 The previous example touched on only three of the functions in
 `List`. We won't cover the entire interface (for that you should look
-at the [online docs](
-https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html)),
+at the [online docs](https://v3.ocaml.org/p/base/v0.15.0/doc/Base/List/index.html)),
 but a few more functions are useful enough to mention here.
 
 #### Combining list elements with List.reduce
@@ -877,9 +874,6 @@ check on whether the first two elements are equal:
     | first :: tl -> first :: remove_sequential_duplicates tl;;
 val remove_sequential_duplicates : int list -> int list = <fun>
 ```
-
-<!-- TODO: need to fix the rendering as a note, or figure out some -->
-<!-- other way of integrating this in to the text. -->
 
 ::: {data-type=note}
 #### Polymorphic Compare

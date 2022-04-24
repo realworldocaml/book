@@ -276,8 +276,7 @@ about the language as well as the libraries, tools, and techniques
 that will help you be a more effective OCaml programmer.  But it's no
 replacement for API documentation or the OCaml manual and man pages.
 You can find documentation for all of the libraries and tools
-referenced in the book
-[online](https://ocaml.janestreet.com/ocaml-core/latest/doc/index.html).
+referenced in the book [online](https://v3.ocaml.org/packages).
 
 ### Code Examples
 
