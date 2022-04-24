@@ -1270,8 +1270,8 @@ nature. That includes not only things that mutate your program's data, but
 also operations that interact with the world outside of your program. An
 important example of this kind of interaction is I/O, i.e., operations for
 reading or writing data to things like files, terminal input and output, and
-network sockets. [I/O (input/output) operations/terminal
-I/O]{.idx}[imperative programming/input and output]{.idx}
+network sockets. [IO operations/terminal
+IO]{.idx}[imperative programming/input and output]{.idx}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
@@ -1386,7 +1386,7 @@ modeled after `printf` in the C standard library. `printf` takes a
 well as arguments to be printed, as determined by the formatting
 directives embedded in the format string. So, for example, we can
 write: [strings/format strings]{.idx}[format strings]{.idx}[printf
-function]{.idx}[I/O (input/output) operations/formatted output]{.idx}
+function]{.idx}[IO operations/formatted output]{.idx}
 
 ```ocaml env=main
 # printf
@@ -1518,8 +1518,7 @@ the `Printf` module in the OCaml Manual.
 Another common use of `in_channel`s and `out_channel`s is for working
 with files. Here are a couple of functions—one that creates a file
 full of numbers, and the other that reads in such a file and returns
-the sum of those numbers: [files/file I/O]{.idx}[I/O (input/output)
-operations/file I/O]{.idx}
+the sum of those numbers: [files/file IO]{.idx}[IO operations/file IO]{.idx}
 
 ```ocaml env=main
 # let create_number_file filename numbers =
