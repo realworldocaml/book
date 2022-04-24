@@ -628,7 +628,7 @@ type.  As such, a function can't actually return a value of type
 `Nothing.t` as its return type!  And we can cause a function that
 never returns to have a return value of `Nothing.t` by just adding a
 type annotation.
-[uninhabited type]{.idx}[type/uninhabited]{.idx}
+[uninhabited type]{.idx}[type, uninhabited]{.idx}
 
 ```ocaml env=main
 # let rec loop_forever () : Nothing.t = loop_forever ();;

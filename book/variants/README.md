@@ -360,7 +360,7 @@ are mathematically similar to disjoint unions.
 [sum types]{.idx}
 [product types]{.idx}
 [algebraic data types]{.idx}
-[variants/and records]{.idx}
+[variants and records]{.idx}
 
 Algebraic data types gain much of their power from the ability to
 construct layered combinations of sums and products. Let's see what we
