@@ -1066,7 +1066,7 @@ has been created.
 
 For example, suppose we wanted to extend our previous shapes module with a
 `growing_circle` class for circles that expand when clicked. We could inherit
-from `circle` and used the inherited `on_click` to add a handler for click
+from `circle` and use the inherited `on_click` to add a handler for click
 events:
 
 ```ocaml file=examples/shapes/shapes.ml,part=3
