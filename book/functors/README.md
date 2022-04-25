@@ -703,6 +703,11 @@ computation/multiple interfaces and]{.idx}
 for any type annotated with `[@@deriving sexp]`.  We can enable
 `ppx_sexp_conv` along with a collection of other useful extensions by
 enabling `ppx_jane`:
+[syntax extension/ppx_sexp_conv]{.idx}
+[ppx_sexp_conv]{.idx}
+[syntax extension/ppx_jane]{.idx}
+[ppx_jane]{.idx}
+
 
 ```ocaml env=main
 # #require "ppx_jane";;

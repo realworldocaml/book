@@ -71,7 +71,8 @@ create` command.  If you specify a project directory argument to this
 command, then it creates a "local switch" that stores all the
 dependencies within that directory rather than under `~/.opam`.  This
 is a convenient way to keep all your build dependencies and source
-code in one place on your filesystem.  [opam/local switch]{.idx}
+code in one place on your filesystem.  [opam package manager/local
+switch]{.idx}
 
 Let's make a local switch for our hello world project now:
 [opam package manager/creating a local switch]{.idx}

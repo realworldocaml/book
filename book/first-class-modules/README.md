@@ -365,6 +365,10 @@ a syntax extension which can be used to automatically generate
 s-expression converters based on their type definition.  We'll enable
 `ppx_sexp_conv` by enabling `ppx_jane`, which brings in a larger
 family of syntax extensions.
+[syntax extension/ppx_sexp_conv]{.idx}
+[syntax extension/ppx_jane]{.idx}
+[ppx_sexp_conv]{.idx}
+[ppx_jane]{.idx}
 
 ```ocaml env=query_handler
 # #require "ppx_jane";;
@@ -590,8 +594,7 @@ val dispatch :
 \noindent
 This function interacts with an instance by unpacking it into a module
 `I` and then using the query handler instance (`I.this`) in concert
-with the associated module (`I.Query_handler`).[I.Query_handler
-module]{.idx}
+with the associated module (`I.Query_handler`).
 
 The bundling together of the module and the value is in many ways
 reminiscent of object-oriented languages. One key difference, is that
@@ -659,10 +662,11 @@ $ dune exec -- ./query_handler.exe
 
 ### Loading and Unloading Query Handlers
 
-One of the advantages of first-class modules is that they afford a great deal
-of dynamism and flexibility. For example, it's a fairly simple matter to
-change our design to allow query handlers to be loaded and unloaded at
-runtime.[query-handlers/loading/unloading of]{.idx}
+One of the advantages of first-class modules is that they afford a
+great deal of dynamism and flexibility. For example, it's a fairly
+simple matter to change our design to allow query handlers to be
+loaded and unloaded at runtime. [query-handlers/loading and unloading
+of]{.idx}
 
 We'll do this by creating a query handler whose job is to control the set of
 active query handlers. The module in question will be called `Loader`, and

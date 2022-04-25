@@ -366,8 +366,8 @@ can be declared as mutable. These mutable fields can be set using the
 
 As we'll see in [Objects](objects.html#objects){data-type=xref}, fields of
 an object can similarly be declared as mutable, and can then be modified in
-much the same way as record fields. [primitive mutable data/record/object
-fields and ref cells]{.idx}
+much the same way as record fields. [primitive mutable data/object fields]{.idx}
+[primitive mutable data/record fields]{.idx}
 
 #### Ref cells
 
@@ -1138,6 +1138,9 @@ tedious and error prone, so instead we'll use a few different syntax
 extensions for deriving the necessary functionality automatically.  By
 enabling `ppx_jane`, we pull in a collection of such derivers, three
 of which we use in defining `String_pair` below.
+[syntax extension/ppx_jane]{.idx}
+[ppx_jane]{.idx}
+
 
 ```ocaml env=main
 # #require "ppx_jane";;

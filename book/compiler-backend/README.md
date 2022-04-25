@@ -433,6 +433,8 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 
 ```
 
+<!-- TODO: Remove this reference to ocamlbuild (and the %.byte rule!) -->
+
 OCamlbuild takes care of many of these details with its built-in rules. The
 `%.byte` rule that you've been using throughout the book builds a
 bytecode executable, and adding the `custom` tag will bundle the

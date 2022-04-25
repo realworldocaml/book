@@ -170,7 +170,7 @@ simple example: [s-expressions/example of]{.idx}
 S-expressions are supported by the Sexplib package that is distributed with
 Base and is the most common serialization format used in Base. Indeed, most
 types in Base come with built-in s-expression converters.
-[Sexplib package/sexp converter]{.idx}
+[Sexplib package]{.idx}
 
 ```ocaml env=main
 # Error.create "Unexpected character" 'c' Char.sexp_of_t;;
@@ -191,6 +191,11 @@ pulls in multiple different syntax extensions, including
 `ppx_sexp_value`, the one we need here.  (Because of technical issues
 with the toplevel, we can't easily enable these syntax extensions
 individually.)
+[syntax extension/ppx_jane]{.idx}
+[syntax extension/ppx_sexp_value]{.idx}
+[ppx_jane]{.idx}
+[ppx_sexp_value]{.idx}
+
 
 ```ocaml env=main
 # #require "ppx_jane";;

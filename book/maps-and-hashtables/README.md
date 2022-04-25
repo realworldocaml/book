@@ -528,6 +528,12 @@ s-expression converter for the type `Book.t`. But if we have the
 can request that default implementations of these functions be
 created for us.  We can enable both of these extensions via the
 omnibus `ppx_jane` package.
+[syntax extension/ppx_jane]{.idx}
+[syntax extension/ppx_compare]{.idx}
+[syntax extension/ppx_sexp_conv]{.idx}
+[ppx_jane]{.idx}
+[ppx_compare]{.idx}
+[ppx_sexp_conv]{.idx}
 
 ```ocaml env=main
 # #require "ppx_jane";;
@@ -659,12 +665,13 @@ also shorter, it's what you should use most of the time.
 
 ### Trees
 
-As we've discussed, maps carry within them the comparator that they were
-created with. Sometimes, for space efficiency reasons, you want a version of
-the map data structure that doesn't include the comparator. You can get such
-a representation with `Map.Using_comparator.to_tree`, which returns just the
-tree underlying the map, without the comparator. [Map
-module/Map.to_tree]{.idx}[maps/tree structure]{.idx}
+As we've discussed, maps carry within them the comparator that they
+were created with. Sometimes, for space efficiency reasons, you want a
+version of the map data structure that doesn't include the
+comparator. You can get such a representation with
+`Map.Using_comparator.to_tree`, which returns just the tree underlying
+the map, without the comparator. [Map.to_tree]{.idx}[maps/tree
+structure]{.idx}
 
 ```ocaml env=main
 # let ord_tree = Map.Using_comparator.to_tree ord_map;;
