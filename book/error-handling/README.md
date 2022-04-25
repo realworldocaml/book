@@ -467,16 +467,16 @@ val forever : unit -> 'a = <fun>
 `forever` doesn't return a value for a different reason: it's an infinite
 loop.
 
-This all matters because it means that the return type of `raise` can be
-whatever it needs to be to fit into the context it is called in. Thus, the
-type system will let us throw an exception anywhere in a program. [sexp
-declaration]{.idx}[exceptions/textual representation of]{.idx}
+This all matters because it means that the return type of `raise` can
+be whatever it needs to be to fit into the context it is called
+in. Thus, the type system will let us throw an exception anywhere in a
+program.
 
 ::: {.allow_break data-type=note}
 #### Declaring Exceptions Using `[@@deriving sexp]`
 
-OCaml can't always generate a useful textual representation of an exception.
-For example:
+OCaml can't always generate a useful textual representation of an
+exception.  For example: [exceptions/textual representation of]{.idx}
 
 ```ocaml env=main
 # type 'a bounds = { lower: 'a; upper: 'a };;
