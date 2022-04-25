@@ -588,10 +588,10 @@ val ( *** ) : float -> float -> float = <fun>
 ```
 
 The syntactic role of an operator is typically determined by its first
-character or two, though there are a few exceptions.  The OCaml Manual
+character or two, though there are a few exceptions.  The OCaml manual
 has an explicit [table of each class of
 operator](https://ocaml.org/manual/expr.html#ss:precedence-and-associativity)
-and it's associated precedence.
+and its associated precedence.
 
 We won't go through the full list here, but there's one important
 special case worth mentioning: `-` and `-.`, which are the integer and
