@@ -531,21 +531,20 @@ we need to put spaces around any operator that begins or ends with
 </code></pre>
 </div>
 <p>The syntactic role of an operator is typically determined by its
-first character or two, though there are a few exceptions. The list
-below breaks the different operators and other syntactic forms into
-groups from highest to lowest precedence, explaining how each behaves
-syntactically. We write <code>!</code>… to indicate the class of
-operators beginning with <code>!</code>.</p>
-<p><img title="Operator Associativity" src="images/variables-and-functions/associativity.png"></p>
-<p>There’s one important special case: <code>-</code> and
-<code>-.</code>, which are the integer and floating-point subtraction
-operators, and can act as both prefix operators (for negation) and infix
-operators (for subtraction). So, both <code>-x</code> and
-<code>x - y</code> are meaningful expressions. Another thing to remember
-about negation is that it has lower precedence than function
-application, which means that if you want to pass a negative value, you
-need to wrap it in parentheses, as you can see in this code.<a data-secondary="negation operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation
-operators" data-type="indexterm">&nbsp;</a></p>
+first character or two, though there are a few exceptions. The OCaml
+Manual has an explicit <a href="https://ocaml.org/manual/expr.html#ss:precedence-and-associativity">table
+of each class of operator</a> and it’s associated precedence.</p>
+<p>We won’t go through the full list here, but there’s one important
+special case worth mentioning: <code>-</code> and <code>-.</code>, which
+are the integer and floating-point subtraction operators, and can act as
+both prefix operators (for negation) and infix operators (for
+subtraction). So, both <code>-x</code> and <code>x - y</code> are
+meaningful expressions. Another thing to remember about negation is that
+it has lower precedence than function application, which means that if
+you want to pass a negative value, you need to wrap it in parentheses,
+as you can see in this code.<a data-secondary="negation
+operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction
+operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 (-4);;
 &gt;- : int = 3
