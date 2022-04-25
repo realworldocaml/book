@@ -54,6 +54,8 @@ The first step towards a good testing environment is making it easy to
 set up and and run a test.  To that end, we'll show you how to write
 tests with `ppx_inline_test`, which lets you add tests to any module
 in a library with a specially annotated `let` binding.
+[syntax extension/ppx_inline_test]{.idx}
+[ppx_inline_test]{.idx}
 
 To use inline tests in a library, we need to do two things:
 
@@ -133,6 +135,8 @@ meaningful exception if the arguments are unequal.
 To use `[%test_eq]`, we're going to need to add the `ppx_assert`
 syntax extension, so we'll need to adjust our `dune` file
 appropriately.
+[syntax extension/ppx_assert]{.idx}
+[ppx_assert]{.idx}
 
 ```scheme file=examples/erroneous/test_eq-inline_test/dune
 (library
@@ -743,6 +747,8 @@ declaration, we declare a dependency on the echo-server binary.  Also,
 note that rather than select useful preprocessors one by one, we used
 the omnibus `ppx_jane` package, which bundles together a collection of
 useful extensions.
+[syntax extension/ppx_jane]{.idx}
+[ppx_jane]{.idx}
 
 That done, our next step is to write some helper functions.  We won't
 show the implementation, but here's the signature for our `Helpers`

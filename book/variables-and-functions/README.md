@@ -36,7 +36,7 @@ Every variable binding has a *scope*, which is the portion of the code that
 can refer to that binding. When using `utop`, the scope of a top-level
 `let` binding is everything that follows it in the session. When it shows up
 in a module, the scope is the remainder of that module.[variables/scope
-of]{.idx}[bindings/scope of]{.idx}[scope]{.idx}
+of]{.idx}[let bindings/scope of]{.idx}[scope]{.idx}[let bindings/top-level]{.idx}
 
 Here's a simple example.
 
@@ -75,6 +75,7 @@ val dashed_languages : string = "OCaml-Perl-C++-C"
 Note that the scope of `language_list` is just the expression
 `String.concat ~sep:"-" language_list` and is not available at the
 toplevel, as we can see if we try to access it now.
+[let bindings/local]
 
 ```ocaml env=main
 # language_list;;

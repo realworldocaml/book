@@ -59,7 +59,7 @@ and can even be transformed into JavaScript (via
 [OCamlCC](https://github.com/ocaml-bytes/ocamlcc)). The *native code*
 compiler generates specialized executable binaries suitable for
 high-performance applications.[compilation process/compiler source
-code]{.idx}[code compilers/bytecode vs. native code]{.idx}
+code]{.idx}[compilers/bytecode vs. native code]{.idx}
 
 ::: {data-type=note}
 #### Obtaining the Compiler Source Code
@@ -631,11 +631,11 @@ Error: The implementation conflicting_interface.ml
 ::: {.allow_break data-type=note}
 #### Which Comes First: The ml or the mli?
 
-There are two schools of thought on which order OCaml code should be written
-in. It's very easy to begin writing code by starting with an `ml` file and
-using the type inference to guide you as you build up your functions. The
-`mli` file can then be generated as described, and the exported functions
-documented.[code compilers/order of code]{.idx}[mli files]{.idx}[files/mli
+There are two schools of thought on which order OCaml code should be
+written in. It's very easy to begin writing code by starting with an
+`ml` file and using the type inference to guide you as you build up
+your functions. The `mli` file can then be generated as described, and
+the exported functions documented. [mli files]{.idx}[files/mli
 files]{.idx}[ml files]{.idx}[files/ml files]{.idx}
 
 If you're writing code that spans multiple files, it's sometimes easier to

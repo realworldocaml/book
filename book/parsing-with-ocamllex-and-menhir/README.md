@@ -201,9 +201,12 @@ nonterminal symbol into a sequence of tokens and nonterminal symbols. A
 sequence of tokens is parsable by a grammar if you can apply the grammar's
 rules to produce a series of transformations, starting at a distinguished
 *start symbol* that produces the token sequence in question.
-[grammars/context-free]{.idx}[LR(1) grammars]{.idx}[start
-symbols]{.idx}[non-terminal symbols]{.idx}[context-free
-grammars]{.idx}[Menhir parser generator/context-free grammars in]{.idx}
+[grammar]{.idx}
+[start symbols]{.idx}
+[non-terminal symbols]{.idx}
+[context-free grammar]{.idx}
+[LR(1) grammar]{.idx}
+[Menhir parser generator]{.idx}
 
 We'll start describing the JSON grammar by declaring the start symbol to be
 the non-terminal symbol `prog`, and by declaring that when parsed, a

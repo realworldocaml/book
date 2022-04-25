@@ -244,6 +244,9 @@ As was discussed in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
 there is a special syntax, which we call *let syntax*, designed for
 working with monads, which we can enable by enabling `ppx_let`.
+[syntax extension/ppx_let]{.idx}
+[ppx_let]{.idx}
+
 
 ```ocaml env=main
 # #require "ppx_let";;
@@ -251,6 +254,7 @@ working with monads, which we can enable by enabling `ppx_let`.
 
 Here's what the `bind`-using version of `count_lines` looks like using
 that syntax.
+[let%bind]{.idx}
 
 ```ocaml env=main
 # let count_lines filename =
@@ -260,6 +264,7 @@ val count_lines : string -> int Deferred.t = <fun>
 ```
 
 And here's the `map`-based version of `count_lines`.
+[let%map]{.idx}
 
 ```ocaml env=main
 # let count_lines filename =
@@ -623,7 +628,7 @@ type.  As such, a function can't actually return a value of type
 `Nothing.t` as its return type!  And we can cause a function that
 never returns to have a return value of `Nothing.t` by just adding a
 type annotation.
-[uninhabited type]{.idx}[type/uninhabited]{.idx}
+[uninhabited type]{.idx}[type, uninhabited]{.idx}
 
 ```ocaml env=main
 # let rec loop_forever () : Nothing.t = loop_forever ();;
@@ -1349,6 +1354,7 @@ Here, we first use `try_with` to capture the exception, and then use
 error into the form we want: a pair whose first element is the word
 being searched for, and the second element is the (possibly erroneous)
 result.
+[match%map]{.idx}
 
 Now we just need to change the code for `print_result` so that it can
 handle the new type:
@@ -1402,16 +1408,17 @@ Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-
 
 ## Timeouts, Cancellation, and Choices
 
-In a concurrent program, one often needs to combine results from multiple,
-distinct concurrent subcomputations going on in the same program. We already
-saw this in our DuckDuckGo example, where we used `Deferred.all` and
-`Deferred.all_unit` to wait for a list of deferreds to become determined.
-Another useful primitive is `Deferred.both`, which lets you wait until two
-deferreds of different types have returned, returning both values as a tuple.
-Here, we use the function `sec`, which is shorthand for creating a time-span
-equal to a given number of seconds: [errors/timeouts and
-cancellations]{.idx}[Deferred.both]{.idx}[cancellations]{.idx}[timeouts]{.idx}[Async
-library/timeouts and cancellations]{.idx}
+In a concurrent program, one often needs to combine results from
+multiple, distinct concurrent subcomputations going on in the same
+program. We already saw this in our DuckDuckGo example, where we used
+`Deferred.all` and `Deferred.all_unit` to wait for a list of deferreds
+to become determined.  Another useful primitive is `Deferred.both`,
+which lets you wait until two deferreds of different types have
+returned, returning both values as a tuple.  Here, we use the function
+`sec`, which is shorthand for creating a time-span equal to a given
+number of seconds: [Deferred.both]{.idx}[cancellations in
+Async]{.idx}[timeouts]{.idx}[Async library/timeouts and
+cancellations]{.idx}
 
 ```ocaml env=main
 # let string_and_float =

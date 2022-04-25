@@ -195,8 +195,7 @@ updating the function.
 Happily, OCaml offers an optional warning for missing fields in record
 patterns. With that warning turned on (which you can do in the
 toplevel by typing `#warnings "+9"`), the compiler will indeed warn
-us.[errors/compiler warnings]{.idx}[code compilers/warning
-enable/disable]{.idx}[errors/missing field
+us. [compiler/enabling and disabling warnings]{.idx}[errors/missing field
 warnings]{.idx}[records/missing field warnings]{.idx}
 
 ```ocaml env=main
@@ -697,6 +696,9 @@ the `user` field. This kind of accessor function is a common enough
 pattern that it would be convenient to generate it automatically. The
 `ppx_fields_conv` syntax extension that ships with `Core` does just
 that.[record field accessor functions]{.idx}
+[syntax extension/ppx_fields_conv]{.idx}
+[ppx_fields_conv]{.idx}
+
 
 The `[@@deriving fields]` annotation at the end of the declaration of
 a record type will cause the extension to be applied to a given type
