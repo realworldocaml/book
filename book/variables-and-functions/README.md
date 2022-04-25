@@ -588,22 +588,22 @@ val ( *** ) : float -> float -> float = <fun>
 ```
 
 The syntactic role of an operator is typically determined by its first
-character or two, though there are a few exceptions.
-The list below breaks the different operators and other syntactic forms into groups from highest to
-lowest precedence, explaining how each behaves syntactically. We write
-`!`... to indicate the class of operators beginning with `!`.
+character or two, though there are a few exceptions.  The OCaml Manual
+has an explicit [table of each class of
+operator](https://ocaml.org/manual/expr.html#ss:precedence-and-associativity)
+and it's associated precedence.
 
-![](images/variables-and-functions/associativity.png "Operator Associativity")
-
-There's one important special case: `-` and `-.`, which are the integer and
-floating-point subtraction operators, and can act as both prefix operators
-(for negation) and infix operators (for subtraction). So, both `-x` and
-`x - y` are meaningful expressions. Another thing to remember about negation
-is that it has lower precedence than function application, which means that
-if you want to pass a negative value, you need to wrap it in parentheses, as
-you can see in this code.[operators/negation
-operators]{.idx}[operators/subtraction operators]{.idx}[subtraction
-operators]{.idx}[negation operators]{.idx}
+We won't go through the full list here, but there's one important
+special case worth mentioning: `-` and `-.`, which are the integer and
+floating-point subtraction operators, and can act as both prefix
+operators (for negation) and infix operators (for subtraction). So,
+both `-x` and `x - y` are meaningful expressions. Another thing to
+remember about negation is that it has lower precedence than function
+application, which means that if you want to pass a negative value,
+you need to wrap it in parentheses, as you can see in this
+code.[operators/negation operators]{.idx}[operators/subtraction
+operators]{.idx}[subtraction operators]{.idx}[negation
+operators]{.idx}
 
 ```ocaml env=main
 # Int.max 3 (-4);;
