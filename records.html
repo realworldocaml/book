@@ -169,7 +169,10 @@ updating the function.</p>
 <p>Happily, OCaml offers an optional warning for missing fields in
 record patterns. With that warning turned on (which you can do in the
 toplevel by typing <code>#warnings "+9"</code>), the compiler will
-indeed warn us.<a data-secondary="compiler warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="warning enable/disable" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+indeed warn us. <a data-secondary="enabling and disabling
+warnings" data-primary="compiler" data-type="indexterm">&nbsp;</a><a data-secondary="missing field
+warnings" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing field
+warnings" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#warnings "+9";;
 let service_info_to_string
@@ -628,7 +631,8 @@ field. This kind of accessor function is a common enough pattern that it
 would be convenient to generate it automatically. The
 <code>ppx_fields_conv</code> syntax extension that ships with
 <code>Core</code> does just that.<a data-primary="record field accessor
-functions" data-type="indexterm">&nbsp;</a></p>
+functions" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_fields_conv" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_fields_conv" data-type="indexterm">&nbsp;</a></p>
 <p>The <code>[@@deriving fields]</code> annotation at the end of the
 declaration of a record type will cause the extension to be applied to a
 given type declaration. We need to enable the extension explicitly,</p>

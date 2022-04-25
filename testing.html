@@ -50,8 +50,8 @@ advance these goals.</p>
 <p>The first step towards a good testing environment is making it easy
 to set up and and run a test. To that end, we’ll show you how to write
 tests with <code>ppx_inline_test</code>, which lets you add tests to any
-module in a library with a specially annotated <code>let</code>
-binding.</p>
+module in a library with a specially annotated <code>let</code> binding.
+<a data-secondary="ppx_inline_test" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_inline_test" data-type="indexterm">&nbsp;</a></p>
 <p>To use inline tests in a library, we need to do two things:</p>
 <ul>
 <li>Tell Dune to expect inline tests to show up in the library, and</li>
@@ -117,7 +117,8 @@ code to test for equality and throw a meaningful exception if the
 arguments are unequal.</p>
 <p>To use <code>[%test_eq]</code>, we’re going to need to add the
 <code>ppx_assert</code> syntax extension, so we’ll need to adjust our
-<code>dune</code> file appropriately.</p>
+<code>dune</code> file appropriately. <a data-secondary="ppx_assert" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_assert" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-scheme">(library
  (name foo)
@@ -644,7 +645,7 @@ our echo-server implementation.</p>
 <code>inline_tests</code> declaration, we declare a dependency on the
 echo-server binary. Also, note that rather than select useful
 preprocessors one by one, we used the omnibus <code>ppx_jane</code>
-package, which bundles together a collection of useful extensions.</p>
+package, which bundles together a collection of useful extensions. <a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a></p>
 <p>That done, our next step is to write some helper functions. We won’t
 show the implementation, but here’s the signature for our
 <code>Helpers</code> module. Note that there’s an argument in the

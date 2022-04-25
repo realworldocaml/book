@@ -334,8 +334,9 @@ set using the <code>&lt;-</code> operator, i.e.,
 <code>record.field &lt;- expr</code>. <a data-secondary="mutability of" data-primary="fields" data-type="indexterm">&nbsp;</a></p>
 <p>As we’ll see in <a data-type="xref" href="objects.html#objects">Chapter 12, Objects</a>, fields of an object can similarly be
 declared as mutable, and can then be modified in much the same way as
-record fields. <a data-secondary="record/object
-fields and ref cells" data-primary="primitive mutable data" data-type="indexterm">&nbsp;</a></p>
+record fields. <a data-secondary="object
+fields" data-primary="primitive mutable data" data-type="indexterm">&nbsp;</a> <a data-secondary="record
+fields" data-primary="primitive mutable data" data-type="indexterm">&nbsp;</a></p>
 <section class="level4" id="ref-cells">
 <h4>Ref cells</h4>
 <p>Variables in OCaml are never mutable—they can refer to mutable data,
@@ -1055,7 +1056,7 @@ tedious and error prone, so instead we’ll use a few different syntax
 extensions for deriving the necessary functionality automatically. By
 enabling <code>ppx_jane</code>, we pull in a collection of such
 derivers, three of which we use in defining <code>String_pair</code>
-below.</p>
+below. <a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 module String_pair = struct

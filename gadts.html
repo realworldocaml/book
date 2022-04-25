@@ -1195,7 +1195,7 @@ question is impossible at the type level.</p>
 <p>One way to do this is via an <em>uninhabited type</em>, which is a
 type that has no associated values. You can declare such a value by
 creating a variant with no tags. <a data-primary="uninhabited
-type" data-type="indexterm">&nbsp;</a><a data-secondary="uninhabited" data-primary="type" data-type="indexterm">&nbsp;</a></p>
+type" data-type="indexterm">&nbsp;</a><a data-primary="type, uninhabited" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type nothing = |</code></pre>
 </div>
@@ -1386,7 +1386,8 @@ s-expressions are a convenient data format for representing structured
 data. Rather than write the serializers and deserializers by hand, we
 typically use <code>ppx_sexp_value</code>, which is a syntax extension
 which auto-generates these functions for a given type, based on that
-type’s definition.</p>
+type’s definition. <a data-secondary="ppx_sexp_value" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_value" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s an example:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type position = { x: float; y: float } [@@deriving sexp];;

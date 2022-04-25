@@ -333,7 +333,8 @@ error-prone, but happily, we have an alternative.
 automatically generate s-expression converters based on their type
 definition. We’ll enable <code>ppx_sexp_conv</code> by enabling
 <code>ppx_jane</code>, which brings in a larger family of syntax
-extensions.</p>
+extensions. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a>
+<a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
@@ -542,8 +543,7 @@ dispatch table:</p>
 <p> This function interacts with an instance by unpacking it into a
 module <code>I</code> and then using the query handler instance
 (<code>I.this</code>) in concert with the associated module
-(<code>I.Query_handler</code>).<a data-primary="I.Query_handler
-module" data-type="indexterm">&nbsp;</a></p>
+(<code>I.Query_handler</code>).</p>
 <p>The bundling together of the module and the value is in many ways
 reminiscent of object-oriented languages. One key difference, is that
 first-class modules allow you to package up more than just functions or
@@ -609,7 +609,8 @@ interface.</p>
 <p>One of the advantages of first-class modules is that they afford a
 great deal of dynamism and flexibility. For example, it’s a fairly
 simple matter to change our design to allow query handlers to be loaded
-and unloaded at runtime.<a data-secondary="loading/unloading of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
+and unloaded at runtime. <a data-secondary="loading and
+unloading of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <p>We’ll do this by creating a query handler whose job is to control the
 set of active query handlers. The module in question will be called
 <code>Loader</code>, and its configuration is a list of known

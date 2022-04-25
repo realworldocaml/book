@@ -31,7 +31,8 @@ the code that can refer to that binding. When using <code>utop</code>,
 the scope of a top-level <code>let</code> binding is everything that
 follows it in the session. When it shows up in a module, the scope is
 the remainder of that module.<a data-secondary="scope
-of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-secondary="scope of" data-primary="bindings" data-type="indexterm">&nbsp;</a><a data-primary="scope" data-type="indexterm">&nbsp;</a></p>
+of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-secondary="scope of" data-primary="let bindings" data-type="indexterm">&nbsp;</a><a data-primary="scope" data-type="indexterm">&nbsp;</a><a data-secondary="top-level" data-primary="let
+bindings" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s a simple example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
@@ -64,7 +65,8 @@ let dashed_languages =
 </div>
 <p> Note that the scope of <code>language_list</code> is just the
 expression <code>String.concat ~sep:"-" language_list</code> and is not
-available at the toplevel, as we can see if we try to access it now.</p>
+available at the toplevel, as we can see if we try to access it now.
+[let bindings/local]</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">language_list;;
 &gt;Line 1, characters 1-14:

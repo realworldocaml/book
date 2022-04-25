@@ -98,7 +98,7 @@ be explicit about which operation you’re using.</p></li>
 </ul>
 <p>We can also create a variable to name the value of a given
 expression, using the <code>let</code> keyword. This is known as a
-<em>let binding</em>:</p>
+<em>let binding</em>: <a data-primary="let bindings" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 3 + 4;;
 &gt;val x : int = 7
@@ -192,7 +192,7 @@ little easier to read, both avoiding the repetition of
 <code>Float.O</code> module, which has a bunch of useful operators and
 functions that are designed to be used in this kind of context. Note
 that this causes the standard int-only arithmetic operators to be
-shadowed locally.</p>
+shadowed locally. <a data-primary="local open" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
   let open Float.O in
@@ -1156,7 +1156,7 @@ first use of <code>let</code> to define a new variable within the body
 of a function. A <code>let</code> paired with an <code>in</code> can be
 used to introduce a new binding within any local scope, including a
 function body. The <code>in</code> marks the beginning of the scope
-within which the new variable can be used. Thus, we could write:<a data-secondary="nested let binding" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
+within which the new variable can be used. Thus, we could write:<a data-secondary="local" data-primary="let binding" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
 z + z;;

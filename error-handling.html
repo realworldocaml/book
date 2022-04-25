@@ -151,7 +151,7 @@ simple example: <a data-secondary="example of" data-primary="s-expressions" data
 <p>S-expressions are supported by the Sexplib package that is
 distributed with Base and is the most common serialization format used
 in Base. Indeed, most types in Base come with built-in s-expression
-converters. <a data-secondary="sexp converter" data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
+converters. <a data-primary="Sexplib package" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Error.create "Unexpected character" 'c' Char.sexp_of_t;;
 &gt;- : Error.t = ("Unexpected character" c)
@@ -166,7 +166,7 @@ specific types. We can enable it in the toplevel with a
 a package that pulls in multiple different syntax extensions, including
 <code>ppx_sexp_value</code>, the one we need here. (Because of technical
 issues with the toplevel, we can’t easily enable these syntax extensions
-individually.)</p>
+individually.) <a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_sexp_value" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_value" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 Error.t_of_sexp

@@ -228,13 +228,14 @@ shows us the contents of the deferred instead.</p>
 <h3>Using let syntax</h3>
 <p>As was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>, there is a special syntax, which we
 call <em>let syntax</em>, designed for working with monads, which we can
-enable by enabling <code>ppx_let</code>.</p>
+enable by enabling <code>ppx_let</code>. <a data-secondary="ppx_let" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_let" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_let";;
 </code></pre>
 </div>
 <p>Here’s what the <code>bind</code>-using version of
-<code>count_lines</code> looks like using that syntax.</p>
+<code>count_lines</code> looks like using that syntax. <a data-primary="let%bind" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_lines filename =
   let%bind text = Reader.file_contents filename in
@@ -243,7 +244,7 @@ enable by enabling <code>ppx_let</code>.</p>
 </code></pre>
 </div>
 <p>And here’s the <code>map</code>-based version of
-<code>count_lines</code>.</p>
+<code>count_lines</code>. <a data-primary="let%map" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_lines filename =
   let%map text = Reader.file_contents filename in
@@ -575,7 +576,8 @@ no values of that type. As such, a function can’t actually return a
 value of type <code>Nothing.t</code>, so only a function that never
 returns can have <code>Nothing.t</code> as its return type! And we can
 cause a function that never returns to have a return value of
-<code>Nothing.t</code> by just adding a type annotation. <a data-primary="uninhabited type" data-type="indexterm">&nbsp;</a><a data-secondary="uninhabited" data-primary="type" data-type="indexterm">&nbsp;</a></p>
+<code>Nothing.t</code> by just adding a type annotation. <a data-primary="uninhabited type" data-type="indexterm">&nbsp;</a><a data-primary="type,
+uninhabited" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec loop_forever () : Nothing.t = loop_forever ();;
 &gt;val loop_forever : unit -&gt; never_returns = &lt;fun&gt;
@@ -1257,7 +1259,7 @@ let get_definition ~server word =
 and then use <code>match%map</code> (another syntax provided by
 <code>ppx_let</code>) to convert the error into the form we want: a pair
 whose first element is the word being searched for, and the second
-element is the (possibly erroneous) result.</p>
+element is the (possibly erroneous) result. <a data-primary="match%map" data-type="indexterm">&nbsp;</a></p>
 <p>Now we just need to change the code for <code>print_result</code> so
 that it can handle the new type:</p>
 <div class="highlight">
@@ -1311,7 +1313,9 @@ a list of deferreds to become determined. Another useful primitive is
 <code>Deferred.both</code>, which lets you wait until two deferreds of
 different types have returned, returning both values as a tuple. Here,
 we use the function <code>sec</code>, which is shorthand for creating a
-time-span equal to a given number of seconds: <a data-secondary="timeouts and cancellations" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="Deferred.both" data-type="indexterm">&nbsp;</a><a data-primary="cancellations" data-type="indexterm">&nbsp;</a><a data-primary="timeouts" data-type="indexterm">&nbsp;</a><a data-secondary="timeouts and cancellations" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
+time-span equal to a given number of seconds: <a data-primary="Deferred.both" data-type="indexterm">&nbsp;</a><a data-primary="cancellations in
+Async" data-type="indexterm">&nbsp;</a><a data-primary="timeouts" data-type="indexterm">&nbsp;</a><a data-secondary="timeouts and cancellations" data-primary="Async
+library" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let string_and_float =
   Deferred.both

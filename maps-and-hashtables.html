@@ -484,7 +484,9 @@ and s-expression converter for the type <code>Book.t</code>. But if we
 have the <code>ppx_sexp_conv</code> and <code>ppx_compare</code> syntax
 extensions enabled, then we can request that default implementations of
 these functions be created for us. We can enable both of these
-extensions via the omnibus <code>ppx_jane</code> package.</p>
+extensions via the omnibus <code>ppx_jane</code> package. <a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_compare" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_sexp_conv" data-primary="syntax
+extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_compare" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
@@ -609,8 +611,7 @@ were created with. Sometimes, for space efficiency reasons, you want a
 version of the map data structure that doesn’t include the comparator.
 You can get such a representation with
 <code>Map.Using_comparator.to_tree</code>, which returns just the tree
-underlying the map, without the comparator. <a data-secondary="Map.to_tree" data-primary="Map
-module" data-type="indexterm">&nbsp;</a><a data-secondary="tree
+underlying the map, without the comparator. <a data-primary="Map.to_tree" data-type="indexterm">&nbsp;</a><a data-secondary="tree
 structure" data-primary="maps" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ord_tree = Map.Using_comparator.to_tree ord_map;;

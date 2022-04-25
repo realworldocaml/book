@@ -49,8 +49,8 @@ portable interpreter and can even be transformed into JavaScript (via <a href="h
 (via <a href="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</a>). The
 <em>native code</em> compiler generates specialized executable binaries
 suitable for high-performance applications.<a data-secondary="compiler source code" data-primary="compilation
-process" data-type="indexterm">&nbsp;</a><a data-secondary="bytecode vs.&nbsp;native code" data-primary="code
-compilers" data-type="indexterm">&nbsp;</a></p>
+process" data-type="indexterm">&nbsp;</a><a data-secondary="bytecode
+vs.&nbsp;native code" data-primary="compilers" data-type="indexterm">&nbsp;</a></p>
 <section data-type="note" class="level4" id="obtaining-the-compiler-source-code">
 <h4>Obtaining the Compiler Source Code</h4>
 <p>Although it’s not necessary to understand the examples, you may find
@@ -603,9 +603,9 @@ have this as your <code>ml</code> file:</p>
 written in. It’s very easy to begin writing code by starting with an
 <code>ml</code> file and using the type inference to guide you as you
 build up your functions. The <code>mli</code> file can then be generated
-as described, and the exported functions documented.<a data-secondary="order of code" data-primary="code compilers" data-type="indexterm">&nbsp;</a><a data-primary="mli
-files" data-type="indexterm">&nbsp;</a><a data-secondary="mli files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="ml
-files" data-type="indexterm">&nbsp;</a><a data-secondary="ml files" data-primary="files" data-type="indexterm">&nbsp;</a></p>
+as described, and the exported functions documented. <a data-primary="mli files" data-type="indexterm">&nbsp;</a><a data-secondary="mli
+files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="ml files" data-type="indexterm">&nbsp;</a><a data-secondary="ml
+files" data-primary="files" data-type="indexterm">&nbsp;</a></p>
 <p>If you’re writing code that spans multiple files, it’s sometimes
 easier to start by writing all the <code>mli</code> signatures and
 checking that they type-check against one another. Once the signatures
