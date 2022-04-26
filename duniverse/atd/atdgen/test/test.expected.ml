@@ -1,5 +1,5 @@
 (* Auto-generated from "test.atd" *)
-              [@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 (** This is just a test. *)
 
@@ -63,6 +63,11 @@ type test = {
 }
 
 type tup = (int * test)
+
+type test_field_prefix = {
+  theprefix_hello (*atd hello *): bool;
+  theprefix_world (*atd world *): int
+}
 
 type star_rating = int
 
@@ -2922,6 +2927,95 @@ let read_tup = (
 )
 let tup_of_string ?pos s =
   read_tup (Bi_inbuf.from_string ?pos s)
+let test_field_prefix_tag = Bi_io.record_tag
+let write_untagged_test_field_prefix : Bi_outbuf.t -> test_field_prefix -> unit = (
+  fun ob x ->
+    Bi_vint.write_uvint ob 2;
+    Bi_outbuf.add_char4 ob '\164' '\193' '3' '\018';
+    (
+      Bi_io.write_bool
+    ) ob x.theprefix_hello;
+    Bi_outbuf.add_char4 ob '\206' 'd' '\150' 'R';
+    (
+      Bi_io.write_svint
+    ) ob x.theprefix_world;
+)
+let write_test_field_prefix ob x =
+  Bi_io.write_tag ob Bi_io.record_tag;
+  write_untagged_test_field_prefix ob x
+let string_of_test_field_prefix ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_test_field_prefix ob x;
+  Bi_outbuf.contents ob
+let get_test_field_prefix_reader = (
+  fun tag ->
+    if tag <> 21 then Atdgen_runtime.Ob_run.read_error () else
+      fun ib ->
+        let field_theprefix_hello = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+        let field_theprefix_world = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+        let bits0 = ref 0 in
+        let len = Bi_vint.read_uvint ib in
+        for i = 1 to len do
+          match Bi_io.read_field_hashtag ib with
+            | 616641298 ->
+              field_theprefix_hello := (
+                (
+                  Atdgen_runtime.Ob_run.read_bool
+                ) ib
+              );
+              bits0 := !bits0 lor 0x1;
+            | -832268718 ->
+              field_theprefix_world := (
+                (
+                  Atdgen_runtime.Ob_run.read_int
+                ) ib
+              );
+              bits0 := !bits0 lor 0x2;
+            | _ -> Bi_io.skip ib
+        done;
+        if !bits0 <> 0x3 then Atdgen_runtime.Ob_run.missing_fields [| !bits0 |] [| "hello"; "world" |];
+        (
+          {
+            theprefix_hello = !field_theprefix_hello;
+            theprefix_world = !field_theprefix_world;
+          }
+         : test_field_prefix)
+)
+let read_test_field_prefix = (
+  fun ib ->
+    if Bi_io.read_tag ib <> 21 then Atdgen_runtime.Ob_run.read_error_at ib;
+    let field_theprefix_hello = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let field_theprefix_world = ref (Obj.magic (Sys.opaque_identity 0.0)) in
+    let bits0 = ref 0 in
+    let len = Bi_vint.read_uvint ib in
+    for i = 1 to len do
+      match Bi_io.read_field_hashtag ib with
+        | 616641298 ->
+          field_theprefix_hello := (
+            (
+              Atdgen_runtime.Ob_run.read_bool
+            ) ib
+          );
+          bits0 := !bits0 lor 0x1;
+        | -832268718 ->
+          field_theprefix_world := (
+            (
+              Atdgen_runtime.Ob_run.read_int
+            ) ib
+          );
+          bits0 := !bits0 lor 0x2;
+        | _ -> Bi_io.skip ib
+    done;
+    if !bits0 <> 0x3 then Atdgen_runtime.Ob_run.missing_fields [| !bits0 |] [| "hello"; "world" |];
+    (
+      {
+        theprefix_hello = !field_theprefix_hello;
+        theprefix_world = !field_theprefix_world;
+      }
+     : test_field_prefix)
+)
+let test_field_prefix_of_string ?pos s =
+  read_test_field_prefix (Bi_inbuf.from_string ?pos s)
 let star_rating_tag = Bi_io.svint_tag
 let write_untagged_star_rating = (
   Bi_io.write_untagged_svint
@@ -4722,6 +4816,14 @@ let create_test
     x2 = x2;
     x3 = x3;
     x4 = x4;
+  }
+let create_test_field_prefix 
+  ~theprefix_hello
+  ~theprefix_world
+  () : test_field_prefix =
+  {
+    theprefix_hello = theprefix_hello;
+    theprefix_world = theprefix_world;
   }
 let create_some_record 
   ~some_field

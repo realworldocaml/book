@@ -1,4 +1,13 @@
 (executables
  (names fts_cmd)
- (enabled_if (= %{os_type} "Unix"))
- (libraries ctypes-foreign.threaded))
+ (enabled_if
+  (= %{os_type} Unix))
+ (libraries ctypes-foreign))
+
+(rule
+ (alias runtest)
+ (enabled_if
+  (= %{os_type} Unix))
+ (package ctypes-foreign)
+ (action (progn))
+ (deps ./fts_cmd.exe))

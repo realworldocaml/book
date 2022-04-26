@@ -10,11 +10,10 @@
 (*                                                                            *)
 (******************************************************************************)
 
-(**The lattice of sets. The ordering is set inclusion. Therefore,
-   the empty set is the bottom element. *)
-
 open Sigs
 
+(**The lattice of sets. The ordering is set inclusion. Therefore,
+   the empty set is the bottom element. *)
 module Set (X : sig
   type t
   val empty: t

@@ -5,3 +5,4 @@ true : bin_annot, safe_string
 <src/fmt_cli*> : package(cmdliner)
 <src/fmt_top*> : package(compiler-libs.toplevel)
 <test> : include
+<test/styled_perf_bug*> : package(unix)

@@ -22,7 +22,6 @@ host='auto'
 gmp='auto'
 perf='no'
 
-ar='ar'
 ocaml='ocaml'
 ocamlc='ocamlc'
 ocamlopt='ocamlopt'
@@ -31,7 +30,6 @@ ocamldep='ocamldep'
 ocamldoc='ocamldoc'
 ccinc="$CPPFLAGS"
 cclib="$LDFLAGS"
-asopt="$ASFLAGS"
 ccdef=''
 mlflags="$OCAMLFLAGS"
 mloptflags="$OCAMLOPTFLAGS"
@@ -54,8 +52,6 @@ usage: configure [options]
 where options include:
   -installdir dir      installation directory
   -ocamllibdir dir     ocaml library directory
-  -host arch           host type, for platform-specific asm code
-  -noasm               disable platform-specific asm code
   -gmp                 use GMP library (default if found)
   -mpir                use MPIR library instead of GMP
   -perf                enable performance statistics
@@ -64,7 +60,6 @@ where options include:
 Environment variables that affect configuration:
   CC                   C compiler to use (default: try gcc, then cc)
   CFLAGS               extra flags to pass to the C compiler
-  ASFLAGS              extra flags to pass to the assembler
   CPPFLAGS             extra includes, e.g. -I/path/to/gmp/include
   LDFLAGS              extra link flags, e.g. -L/path/to/gmp/lib
   OCAMLFLAGS           extra flags to pass to the ocamlc Caml compiler
@@ -88,11 +83,6 @@ while : ; do
         -no-ocamlfind|--no-ocamlfind)
             ocamlfind="no"
             shift;;
-        -host|--host)
-            host="$2"
-            shift;;
-        -noasm|--no-asm)
-            host='none';;
         -help|--help)
             help;;
         -gmp|--gmp)
@@ -209,9 +199,6 @@ searchbinreq $ocamlc
 searchbinreq $ocamldep
 searchbinreq $ocamlmklib
 searchbinreq $ocamldoc
-searchbin $ar
-if test $? -eq 0; then ar=$prefixnonocaml$ar; searchbinreq $ar; fi
-searchbinreq perl
 
 if test -n "$CC"; then
   searchbinreq "$CC"
@@ -307,62 +294,6 @@ if test "x$host" = 'xauto'; then
     fi
 fi
 
-
-# set arch from host
-
-arch='none'
-case $host in
-    x86_64-*linux-gnu|x86_64-kfreebsd-gnu)
-        ccdef="-DZ_ELF -DZ_DOT_LABEL_PREFIX $ccdef"
-        if test $wordsize = 32; then
-            # 32-bit OCaml on a 64-bit host
-            arch='i686'
-            ccopt="-m32 $ccopt"
-            asopt="-m32 $asopt"
-        else
-            arch='x86_64'
-        fi
-        ;;
-    i486-*linux-gnu|i686-*linux-gnu|i486-kfreebsd-gnu)
-        ccdef="-DZ_ELF -DZ_DOT_LABEL_PREFIX $ccdef"
-        arch='i686';;
-    i686-*cygwin)
-        if test "x$wordsize" = "x64"; then
-            ccdef="-DZ_COFF $ccdef"
-            arch='x86_64_mingw64'
-        else
-            ccdef="-DZ_UNDERSCORE_PREFIX -DZ_COFF $ccdef"
-            arch='i686'
-        fi
-	;;
-    i386-*darwin* | x86_64-*darwin*)
-        ccdef="-DZ_UNDERSCORE_PREFIX -DZ_MACOS $ccdef"
-        if test "x$wordsize" = "x64"; then
-            ccopt="-arch x86_64 $ccopt"
-            asopt="-arch x86_64 $asopt"
-            arch='x86_64'
-            checkcc
-        else
-            ccopt="-arch i386 $ccopt"
-            asopt="-arch i386 $asopt"
-            arch='i686'
-            checkcc
-        fi
-        ;;
-    armv7*-gnueabi)
-        arch='arm'
-        ;;
-    none)
-        ;;
-    *) 
-        echo "unknown host $host";;
-esac
-
-if test "$arch" != 'none'; then
-    if test ! -f "caml_z_${arch}.S"; then arch='none'; fi
-fi
-
-
 # check GMP, MPIR
 
 if test "$gmp" = 'gmp' -o "$gmp" = 'auto'; then
@@ -394,34 +325,19 @@ if test "$gmp" != 'OK'; then echo "cannot find GMP nor MPIR"; exit 2; fi
 
 ocamlver=`ocamlc -version`
 
-# Extended comparisons available since 3.12.1
-case "$ocamlver" in
-    [12].* | 3.0* | 3.10* | 3.11* | 3.12.0*)
-        ;;
-    *)
-        echo "OCaml extended comparison supported"
-        ccdef="-DZ_OCAML_COMPARE_EXT $ccdef"
-        ;;
-esac
+# OCaml version 4.04 or later is required
 
-# New hash functions available since 4.00.0
 case "$ocamlver" in
-    [123].*)
-        ;;
-    *)
-        echo "OCaml new hash functions available"
-        ccdef="-DZ_OCAML_HASH $ccdef"
+    [123].* | 4.0[0123].*)
+        echo "OCaml version $ocamlver is no longer supported."
+        echo "OCaml version 4.04.0 or later is required."
+        exit 2
         ;;
 esac
 
 # -bin-annot available since 4.00.0
-case "$ocamlver" in
-    [123].*)
-        hasbinannot='no';;
-    *)
-        echo "OCaml supports -bin-annot to produce documentation"
-        hasbinannot='yes';;
-esac
+echo "OCaml supports -bin-annot to produce documentation"
+hasbinannot='yes'
 
 # Changes to C API (the custom_operation struct) since 4.08.0
 case "$ocamlver" in
@@ -448,11 +364,8 @@ OCAMLFLAGS=$mlflags
 OCAMLOPTFLAGS=$mloptflags
 OCAMLINC=$mlinc
 CFLAGS=$ccinc $ccdef $ccopt
-ASFLAGS=$ccdef $asopt
 LIBS=$cclib
-ARCH=$arch
 INSTALLDIR=$installdir
-AR=$ar
 INSTALL=install
 OCAMLFIND=ocamlfind
 INSTMETH=$instmeth
@@ -473,11 +386,9 @@ detected configuration:
 
   native-code:          $hasocamlopt
   dynamic linking:      $hasdynlink
-  asm path:             $arch
   defines:              $ccdef
   libraries:            $cclib
   C options:            $ccopt
-  asm options           $asopt
   installation path:    $installdir
   installation method   $instmeth
 

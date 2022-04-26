@@ -6,20 +6,21 @@ open Import
 
 val build_cm :
      Compilation_context.t
-  -> js_of_ocaml:Dune_file.Js_of_ocaml.t
+  -> in_buildable:Js_of_ocaml.In_buildable.t
   -> src:Path.Build.t
   -> target:Path.Build.t
-  -> Action.t Build.With_targets.t list
+  -> Action.Full.t Action_builder.With_targets.t Memo.Build.t
 
 val build_exe :
      Compilation_context.t
-  -> js_of_ocaml:Dune_file.Js_of_ocaml.t
+  -> in_buildable:Js_of_ocaml.In_buildable.t
   -> src:Path.Build.t
-  -> cm:Path.t list Build.t
-  -> flags:Command.Args.dynamic Command.Args.t
+  -> cm:Path.t list Action_builder.t
   -> promote:Rule.Promote.t option
-  -> unit
+  -> link_time_code_gen:[ `Mod of Path.t | `Lib of Lib.t ] list Memo.Build.t
+  -> unit Memo.Build.t
 
-val setup_separate_compilation_rules : Super_context.t -> string list -> unit
+val setup_separate_compilation_rules :
+  Super_context.t -> string list -> unit Memo.Build.t
 
-val standard : Super_context.t -> string list
+val runner : string

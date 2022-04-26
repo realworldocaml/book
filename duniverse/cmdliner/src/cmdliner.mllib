@@ -1,4 +1,3 @@
-Cmdliner_suggest
 Cmdliner_trie
 Cmdliner_base
 Cmdliner_manpage
@@ -8,4 +7,6 @@ Cmdliner_msg
 Cmdliner_cline
 Cmdliner_arg
 Cmdliner_term
+Cmdliner_cmd
+Cmdliner_eval
 Cmdliner

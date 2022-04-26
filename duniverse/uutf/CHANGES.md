@@ -1,8 +1,16 @@
+v1.0.3 2022-02-03
+-----------------
+
+- Support for OCaml 5.00, thanks to Kate (@kit-ty-kate) for
+  the patch.
+
+v1.0.2 2019-02-05 La Forclaz (VS)
+---------------------------------
 
 - Fix the substring folding functionality introduced in v1.0.0.
   It never worked correctly.
 
-v1.0.1 2016-03-07 La Forclaz (VS)
+v1.0.1 2017-03-07 La Forclaz (VS)
 ---------------------------------
 
 - OCaml 4.05.0 compatibility (removal of `Uchar.dump`).

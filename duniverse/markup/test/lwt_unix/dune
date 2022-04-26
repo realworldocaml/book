@@ -1,7 +1,6 @@
 (executable
  (name test_lwt)
- (libraries lwt.unix markup-lwt.unix ounit2 test_support)
- (flags (:standard -w +A-44)))
+ (libraries lwt.unix markup-lwt.unix ounit2 test_support))
 
 (rule
  (alias runtest)

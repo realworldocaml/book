@@ -2,12 +2,11 @@ open! Dune_engine
 open Import
 
 let add_diff sctx loc alias ~dir ~input ~output =
-  let open Build.O in
+  let open Action_builder.O in
   let action = Action.Chdir (Path.build dir, Action.diff input output) in
-  Super_context.add_alias_action sctx alias ~dir ~loc:(Some loc) ~locks:[]
-    ~stamp:input
-    (Build.with_no_targets
-       (Build.paths [ input; Path.build output ] >>> Build.return action))
+  Super_context.add_alias_action sctx alias ~dir ~loc:(Some loc)
+    (Action_builder.paths [ input; Path.build output ]
+    >>> Action_builder.return (Action.Full.make action))
 
 let rec subdirs_until_root dir =
   match Path.parent dir with
@@ -17,13 +16,13 @@ let rec subdirs_until_root dir =
 let depend_on_files ~named dir =
   subdirs_until_root dir
   |> List.concat_map ~f:(fun dir -> List.map named ~f:(Path.relative dir))
-  |> Build.paths_existing
+  |> Action_builder.paths_existing
 
-let formatted = ".formatted"
+let formatted_dir_basename = ".formatted"
 
 let gen_rules_output sctx (config : Format_config.t) ~version ~dialects
     ~expander ~output_dir =
-  assert (formatted = Path.Build.basename output_dir);
+  assert (formatted_dir_basename = Path.Build.basename output_dir);
   let loc = Format_config.loc config in
   let dir = Path.Build.parent_exn output_dir in
   let source_dir = Path.Build.drop_build_context_exn dir in
@@ -38,11 +37,11 @@ let gen_rules_output sctx (config : Format_config.t) ~version ~dialects
       match Path.Source.basename file with
       | "dune" when Format_config.includes config Dune ->
         Option.some
-        @@ Build.with_targets ~targets:[ output ]
+        @@ Action_builder.with_file_targets ~file_targets:[ output ]
         @@
-        let open Build.O in
-        let+ () = Build.path input in
-        Action.format_dune_file ~version input output
+        let open Action_builder.O in
+        let+ () = Action_builder.path input in
+        Action.Full.make (Action.format_dune_file ~version input output)
       | _ ->
         let ext = Path.Source.extension file in
         let open Option.O in
@@ -63,25 +62,51 @@ let gen_rules_output sctx (config : Format_config.t) ~version ~dialects
         let src = Path.as_in_build_dir_exn input in
         let extra_deps =
           match extra_deps with
-          | [] -> Build.return ()
+          | [] -> Action_builder.return ()
           | extra_deps -> depend_on_files extra_deps
         in
-        let open Build.With_targets.O in
-        Build.with_no_targets extra_deps
-        >>> Preprocessing.action_for_pp ~dep_kind:Lib_deps_info.Kind.Required
-              ~loc ~expander ~action ~src ~target:(Some output)
+        let open Action_builder.With_targets.O in
+        Action_builder.with_no_targets extra_deps
+        >>> Preprocessing.action_for_pp_with_target ~loc ~expander ~action ~src
+              ~target:output
     in
-    Option.iter formatter ~f:(fun arr ->
-        Super_context.add_rule sctx ~mode:Standard ~loc ~dir arr;
-        add_diff sctx loc alias_formatted ~dir ~input:(Path.build input) ~output)
+    Memo.Build.Option.iter formatter ~f:(fun action ->
+        let open Memo.Build.O in
+        Super_context.add_rule sctx ~mode:Standard ~loc ~dir action
+        >>> add_diff sctx loc alias_formatted ~dir ~input:(Path.build input)
+              ~output)
   in
-  File_tree.files_of source_dir |> Path.Source.Set.iter ~f:setup_formatting;
-  Rules.Produce.Alias.add_deps alias_formatted Path.Set.empty
+  let open Memo.Build.O in
+  let* () =
+    Source_tree.files_of source_dir
+    >>= Memo.Build.parallel_iter_set
+          (module Path.Source.Set)
+          ~f:setup_formatting
+  in
+  Rules.Produce.Alias.add_deps alias_formatted (Action_builder.return ())
 
-let gen_rules ~dir =
-  let output_dir = Path.Build.relative dir formatted in
-  let alias = Alias.fmt ~dir in
-  let alias_formatted = Alias.fmt ~dir:output_dir in
-  Alias.stamp_file alias_formatted
-  |> Path.build |> Path.Set.singleton
-  |> Rules.Produce.Alias.add_deps alias
+let gen_rules sctx ~output_dir =
+  let open Memo.Build.O in
+  let dir = Path.Build.parent_exn output_dir in
+  let* config = Super_context.format_config sctx ~dir in
+  Memo.Build.when_
+    (not (Format_config.is_empty config))
+    (fun () ->
+      let* expander = Super_context.expander sctx ~dir in
+      let scope = Super_context.find_scope_by_dir sctx output_dir in
+      let project = Scope.project scope in
+      let dialects = Dune_project.dialects project in
+      let version = Dune_project.dune_version project in
+      gen_rules_output sctx config ~version ~dialects ~expander ~output_dir)
+
+let setup_alias sctx ~dir =
+  let open Memo.Build.O in
+  let* config = Super_context.format_config sctx ~dir in
+  Memo.Build.when_
+    (not (Format_config.is_empty config))
+    (fun () ->
+      let output_dir = Path.Build.relative dir formatted_dir_basename in
+      let alias = Alias.fmt ~dir in
+      let alias_formatted = Alias.fmt ~dir:output_dir in
+      Rules.Produce.Alias.add_deps alias
+        (Action_builder.dep (Dep.alias alias_formatted)))

@@ -9,23 +9,26 @@ BIN := ./dune.exe
 # Dependencies used for testing dune, when developed locally and
 # when tested in CI
 TEST_DEPS := \
+lwt \
 bisect_ppx \
 cinaps \
 coq-native \
-"coq>=8.12.1" \
+"coq>=8.14.0" \
 core_bench \
 "csexp>=1.3.0" \
 js_of_ocaml \
 js_of_ocaml-compiler \
-mdx \
+"mdx>=2.1.0" \
 menhir \
+"merlin>=3.4.0" \
 ocamlfind \
-ocamlformat.0.17.0 \
-"odoc>=1.5.0" \
+ocamlformat.0.20.1 \
+"odoc>=2.0.1" \
 "ppx_expect>=v0.14" \
 ppx_inline_test \
 ppxlib \
 result \
+ctypes \
 "utop>=2.6.0"
 
 # Dependencies recommended for developing dune locally,
@@ -39,10 +42,10 @@ help:
 	@cat doc/make-help.txt
 
 release: $(BIN)
-	$(BIN) build -p dune --profile dune-bootstrap
+	@$(BIN) build -p dune --profile dune-bootstrap
 
 dune.exe: bootstrap.ml boot/libs.ml boot/duneboot.ml
-	ocaml bootstrap.ml
+	@ocaml bootstrap.ml
 
 dev: $(BIN)
 	$(BIN) build @install
@@ -64,8 +67,8 @@ dev-deps:
 dev-switch:
 	opam update
 # Ensuring that either a dev switch already exists or a new one is created
-	[[ $(shell opam switch show) == $(shell pwd) ]] || \
-		opam switch create -y . 4.10.0 --deps-only --with-test
+	test "$(shell opam switch show)" = "$(shell pwd)" || \
+		opam switch create -y . 4.12.0 --deps-only --with-test
 	opam install -y $(TEST_DEPS) $(DEV_DEPS)
 
 test: $(BIN)
@@ -105,11 +108,12 @@ distclean: clean
 	rm -f src/dune_rules/setup.ml
 
 doc:
-	cd doc && sphinx-build . _build
+	sphinx-build doc doc/_build
 
+# livedoc-deps: you may need to [pip3 install sphinx-autobuild] and [pip3 install sphinx-rtd-theme]
 livedoc:
 	cd doc && sphinx-autobuild . _build \
-	  -p 8888 -q  --host $(shell hostname) -r '\.#.*'
+	  --port 8888 -q  --host $(shell hostname) --re-ignore '\.#.*'
 
 update-jbuilds: $(BIN)
 	$(BIN) build @doc/runtest --auto-promote
@@ -121,6 +125,10 @@ ifeq (dune,$(firstword $(MAKECMDGOALS)))
   # ...and turn them into do-nothing targets
   $(eval $(RUN_ARGS):;@:)
 endif
+
+.PHONY: bench
+bench: release
+	@$(BIN) exec -- ./bench/bench.exe _build/default/dune.exe  2> /dev/null
 
 dune: $(BIN)
 	$(BIN) $(RUN_ARGS)
@@ -135,8 +143,13 @@ opam-release: dev
 
 dune-release:
 	dune-release tag
-	dune-release distrib --skip-build --skip-lint --skip-tests -n dune
+	dune-release distrib --skip-build --skip-lint --skip-tests
 # See https://github.com/ocamllabs/dune-release/issues/206
-	DUNE_RELEASE_DELEGATE=github-dune-release-delegate dune-release publish distrib --verbose -n dune
-	dune-release opam pkg -n dune
-	dune-release opam submit -n dune
+	DUNE_RELEASE_DELEGATE=github-dune-release-delegate dune-release publish distrib --verbose
+	dune-release opam pkg
+	dune-release opam submit
+
+# see nix/default.nix for details
+.PHONY: nix/opam-selection.nix
+nix/opam-selection.nix: Makefile
+	nix-shell -A resolve ./

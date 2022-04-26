@@ -1,7 +1,7 @@
 # Objects
 
 ::: {text-align=right}
-*This chapter was written by Leo White and Jeremy Yallop.*
+*This chapter was written by Leo White and Jason Hickey.*
 :::
 
 We've already seen several tools that OCaml provides for organizing programs,
@@ -14,7 +14,7 @@ programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
 
 ::: {data-type=note}
-##### What Is Object-Oriented Programming?
+#### What Is Object-Oriented Programming?
 
 Object-oriented programming (often shortened to OOP) is a programming
 style that encapsulates computation and data within logical
@@ -96,6 +96,7 @@ use classes at all. Here's an example of a simple object:
 val s : < pop : int option; push : int -> unit > = <obj>
 ```
 
+\noindent
 The object has an integer list value `v`, a method `pop` that returns the
 head of `v`, and a method `push` that adds an integer to the head of
 `v`.
@@ -164,6 +165,7 @@ val minimize : < resize : int -> unit; .. > -> unit = <fun>
 val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
 ```
 
+\noindent
 As you can see, object types are inferred automatically from the
 methods that are invoked on them.
 
@@ -172,9 +174,8 @@ method:
 
 ```ocaml env=polymorphism
 # let toggle sq b : unit =
-    if b then sq#resize `Fullscreen
-  else minimize sq;;
-Line 3, characters 17-19:
+    if b then sq#resize `Fullscreen else minimize sq;;
+Line 2, characters 51-53:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
@@ -204,7 +205,7 @@ Error: This expression has type < name : string; width : int >
 ```
 
 ::: {data-type=note}
-##### Elisions Are Polymorphic
+#### Elisions Are Polymorphic
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods." It may not be apparent from the syntax, but an elided object type
@@ -220,8 +221,9 @@ Error: A type variable is unbound in this type declaration.
        In type < width : Base.int; .. > as 'a the variable 'a is unbound
 ```
 
-This is because `..` is really a special kind of type variable called a
-*row variable*.
+\noindent
+This is because `..` is really a special kind of type variable called
+a *row variable*.
 
 This kind of typing scheme using row variables is called *row polymorphism*.
 Row polymorphism is also used in polymorphic variant types, and there is a
@@ -240,6 +242,7 @@ is run is determined by the object.  Consider the following function.
 val print_pop : < pop : int option; .. > -> unit = <fun>
 ```
 
+\noindent
 We can run it on the stack type we defined above, which is based on
 linked lists.
 
@@ -249,6 +252,7 @@ Popped: 5
 - : unit = ()
 ```
 
+\noindent
 But we could also create a totally different implementation of stacks,
 using Base's array-based `Stack` module.
 
@@ -260,6 +264,7 @@ using Base's array-based `Stack` module.
 val array_stack : 'a list -> < pop : 'a option > = <fun>
 ```
 
+\noindent
 And `print_pop` will work just as well on this kind of stack object,
 despite having a completely different implementation.
 
@@ -322,7 +327,7 @@ the object is created; they cannot be changed dynamically.
 ## When to Use Objects
 
 You might wonder when to use objects in OCaml, which has a multitude
-of alternative mechanisms to express the similar concepts. First-class
+of alternative mechanisms to express similar concepts. First-class
 modules are more expressive (a module can include types, while classes
 and objects cannot). Modules, functors, and data types also offer a
 wide range of ways to express program structure. In fact, many
@@ -475,7 +480,7 @@ val items : item list = [<obj>; <obj>]
 ```
 
 ::: {data-type=note}
-##### Polymorphic Variant Subtyping
+#### Polymorphic Variant Subtyping
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type. A polymorphic variant type *A* is a subtype of
@@ -523,6 +528,7 @@ Error: Type square array is not a subtype of shape array
        The second object type has no method width
 ```
 
+\noindent
 We say that `'a list` is *covariant* (in `'a`), while `'a array` is
 *invariant*. [invariance]{.idx}[covariance]{.idx}
 
@@ -541,6 +547,7 @@ val shape_to_string : shape -> string = <fun>
 val square_to_string : square -> string = <fun>
 ```
 
+\noindent
 We say that `'a -> string` is *contravariant* in `'a`. In general,
 function types are contravariant in their arguments and covariant in
 their results.  [contravariance]{.idx}
@@ -566,6 +573,7 @@ module Either :
   end
 ```
 
+\noindent
 By looking at what coercions are allowed, we can see that the type
 parameters of the immutable `Either` type are covariant.
 
@@ -577,6 +585,7 @@ val left_square : (< area : float; width : int >, 'a) Either.t =
 - : (shape, 'a) Either.t = Either.Left <obj>
 ```
 
+\noindent
 The story is different, however, if the definition is hidden by a
 signature.
 
@@ -594,6 +603,7 @@ module Abs_either :
   end
 ```
 
+\noindent
 In this case, OCaml is forced to assume that the type is invariant.
 
 ```ocaml env=subtyping
@@ -625,6 +635,7 @@ module Var_either :
   end
 ```
 
+\noindent
 As you can see, this now allows the coercion once again.
 
 ```ocaml env=subtyping
@@ -664,6 +675,7 @@ the total area of their shapes, we might try:
 val total_area : shape stack list -> float = <fun>
 ```
 
+\noindent
 However, when we try to apply this function to our objects, we get an
 error:
 
@@ -767,13 +779,15 @@ String GetShapeName(Shape s) {
 }
 ```
 
-Most programmers would consider this code to be "wrong." Instead of
-performing a case analysis on the type of object, it would be better to
-define a method to return the name of the shape. Instead of calling
-`GetShapeName(s)`, we should call `s.Name()` instead.
+\noindent
+Most programmers would consider this code to be awkward, at the
+least. Instead of performing a case analysis on the type of object, it
+would be better to define a method to return the name of the
+shape. Instead of calling `GetShapeName(s)`, we should call `s.Name()`
+instead.
 
 However, the situation is not always so obvious. The following code checks
-whether an array of shapes looks like a "barbell," composed of two `Circle`
+whether an array of shapes looks like a barbell, composed of two `Circle`
 objects separated by a `Line`, where the circles have the same radius:
 
 ```java
@@ -847,7 +861,8 @@ val remove_large : (< area : float; .. > as 'a) list -> 'a list = <fun>
 ```
 
 The return type of this function is built from the open object type of its
-argument, preserving any additional methods that it may have:
+argument, preserving any additional methods that it may have, as we
+can see below.
 
 ```ocaml env=row_polymorphism
 # let squares : < area : float; width : int > list =
@@ -869,10 +884,10 @@ val remove_large : < area : float > list -> < area : float > list = <fun>
 - : < area : float > list = [<obj>; <obj>]
 ```
 
-However, there are some situations where we cannot use row polymorphism. In
-particular, row polymorphism cannot be used to place different types of
-object in the same container. For example, lists of heterogeneous elements
-cannot be created using row polymorphism:
+There are some situations where we cannot use row polymorphism. In
+particular, row polymorphism cannot be used to place different types
+of object in the same container. For example, lists of heterogeneous
+elements cannot be created using row polymorphism:
 
 ```ocaml env=row_polymorphism
 # let hlist: < area: float; ..> list = [square 10; circle 30];;
@@ -896,8 +911,8 @@ Error: This expression has type < area : float; radius : int >
        The second object type has no method radius
 ```
 
-In both these cases we must use
-subtyping:[objects/subtyping]{.idx}
+\noindent
+In both these cases we must use subtyping:[objects/subtyping]{.idx}
 
 ```ocaml env=row_polymorphism
 # let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)];;
@@ -907,4 +922,3 @@ val shape_ref : shape ref = {Base.Ref.contents = <obj>}
 # shape_ref := (circle 20 :> shape);;
 - : unit = ()
 ```
-

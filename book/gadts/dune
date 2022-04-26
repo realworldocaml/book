@@ -1,6 +1,4 @@
 (mdx
  (files README.md)
- (packages
-  base
-  mdx)
+ (packages async base core mdx ppx_jane)
  (preludes prelude.ml))

@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Monotonic time values.
@@ -16,9 +15,7 @@
     value is meaningless but they can be compared across the processes
     of an operating system run.
 
-    {!Mtime_clock} provides access to a system monotonic clock.
-
-    {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {!Mtime_clock} provides access to a system monotonic clock. *)
 
 (** {1:spans Monotonic time spans} *)
 
@@ -36,17 +33,7 @@ module Span : sig
   (** {1:spans Monotonic time spans} *)
 
   type t = span
-  (** See {!type:span}. *)
-
-  val to_uint64_ns : span -> int64
-  (** [to_uint64_ns span] is [span] as an {e unsigned} 64-bit integer
-      nanosecond span. *)
-
-  val of_uint64_ns : int64 -> span
-  (** [of_uint64_ns d] is the {e unsigned} 64-bit integer nanosecond
-      span as a span. *)
-
-  (** {1 Constants} *)
+  (** See {!Mtime.type-span}. *)
 
   val zero : span
   (** [zero] is a span of 0ns. *)
@@ -58,9 +45,9 @@ module Span : sig
   (** [min_span] is {!zero}. *)
 
   val max_span : span
-  (** [max_span] is 2^64-1ns. *)
+  (** [max_span] is 2{^64}-1ns. *)
 
-  (** {1 Predicates} *)
+  (** {1:preds Predicates} *)
 
   val equal : span -> span -> bool
   (** [equal span span'] is [true] iff [span] and [span'] are equal. *)
@@ -79,9 +66,47 @@ module Span : sig
   (** [abs_diff span span'] is the absolute difference between
       [span] and [span']. *)
 
-  (** {1 Converting time spans}
+  (** {1:const Durations} *)
 
-      See {{!convert}this section} for time scale definitions.  *)
+  val ( * ) : int -> span -> span
+  (** [n * dur] is [n] times duration [dur].
+
+      {b Warning.} Does not check for overflow or that [n] is
+      positive. *)
+
+  val ns : span
+  (** [ns] is a nanosecond duration, 1·10{^-9}s. *)
+
+  val us : span
+  (** [us] is a microsecond duration, 1·10{^-6}s. *)
+
+  val ms : span
+  (** [ms] is a millisecond duration, 1·10{^-3}s. *)
+
+  val s : span
+  (** [s] is a second duration, 1s. *)
+
+  val min : span
+  (** [min] is a minute duration, 60s. *)
+
+  val hour : span
+  (** [hour] is an hour duration, 3600s. *)
+
+  val day : span
+  (** [day] is a day duration, 86'400s. *)
+
+  val year : span
+  (** [year] is a Julian year duration (365.25 days), 31'557'600s. *)
+
+  (** {1:convert Converting} *)
+
+  val to_uint64_ns : span -> int64
+  (** [to_uint64_ns span] is [span] as an {e unsigned} 64-bit integer
+      nanosecond span. *)
+
+  val of_uint64_ns : int64 -> span
+  (** [of_uint64_ns u] is the {e unsigned} 64-bit integer nanosecond
+      span [u] as a span. *)
 
   val to_ns : span -> float
   (** [to_ns span] is [span] in nanoseconds (1e-9s). *)
@@ -107,20 +132,20 @@ module Span : sig
   val to_year : span -> float
   (** [to_year span] is [span] in Julian years (365.25 days, 31'557'600s). *)
 
-  (** {1 Pretty printing} *)
+  (** {1:fmt Formatters} *)
 
   val pp : Format.formatter -> span -> unit
-  (** [pp_span ppf span] prints an unspecified representation of
+  (** [pp_span ppf span] formats an unspecified representation of
       [span] on [ppf]. The representation is not fixed-width,
       depends on the magnitude of [span] and uses locale
       independent {{!convert}standard time scale} abbreviations. *)
 
   val pp_float_s : Format.formatter -> float -> unit
-  (** [pp_float_s] prints like {!pp} does but on a floating
+  (** [pp_float_s] formats like {!pp} does but on a floating
       point seconds time span value (which can be negative). *)
 
   val dump : Format.formatter -> t -> unit
-  (** [dump ppf span] prints an unspecified raw representation of [span]
+  (** [dump ppf span] formats an unspecified raw representation of [span]
       on [ppf]. *)
 
   (**/**)
@@ -151,7 +176,13 @@ val of_uint64_ns : int64 -> t
     used with other timestamp values that are know to come from the
     same operating system run. *)
 
-(** {1:preds Predicates} *)
+val min_stamp : t
+(** [min_stamp] is the earliest timestamp. *)
+
+val max_stamp : t
+(** [max_stamp] is the latest timestamp. *)
+
+(** {2:preds Predicates} *)
 
 val equal : t -> t -> bool
 (** [equal t t'] is [true] iff [t] and [t'] are equal. *)
@@ -165,7 +196,7 @@ val is_earlier : t -> than:t -> bool
 val is_later : t -> than:t -> bool
 (** [is_later t ~than] is [true] iff [t] occurred after [than]. *)
 
-(** {1:arith Arithmetic} *)
+(** {2:arith Arithmetic} *)
 
 val span : t -> t -> span
 (** [span t t'] is the span between [t] and [t'] regardless of the
@@ -177,18 +208,20 @@ val add_span : t -> span -> t option
 
 val sub_span : t -> span -> t option
 (** [sub_span t s] is the timestamp [s] units earlier than [t] or
-    [None] if overflows. *)
+    [None] if the result underflows. *)
 
-(** {1:pretty Pretty printing} *)
+(** {2:fmt Formatting} *)
 
 val pp : Format.formatter -> t -> unit
-(** [pp ppf t] prints [t] as an {e unsigned} 64-bit integer nanosecond
-    timestamp. Note that the absolute value is meaningless. *)
+(** [pp ppf t] formats [t] as an {e unsigned} 64-bit integer
+    nanosecond timestamp. Note that the absolute value is
+    meaningless. *)
 
 val dump : Format.formatter -> t -> unit
-(** [dump ppf t] prints an unspecified raw representation of [t] on [ppf]. *)
+(** [dump ppf t] formats an unspecified raw representation of [t] on
+    [ppf]. *)
 
-(** {1:convert Time scale conversion}
+(** {1:timescale Time scale conversion (deprecated)}
 
     The following convenience constants relate time scales to seconds.
     Used as multiplicands they can be used to convert these units
@@ -203,50 +236,78 @@ val dump : Format.formatter -> t -> unit
     by the International Astronomical Union (IAU). *)
 
 val ns_to_s : float
-(** [ns_to_s] is [1e-9] the number of seconds in one nanosecond. *)
+[@@ocaml.deprecated "Use 1e-9 instead."]
+(** [ns_to_s] is [1e-9] the number of seconds in one nanosecond.
+    @deprecated *)
 
 val us_to_s : float
-(** [us_to_s] is [1e-6], the number of seconds in one microsecond. *)
+[@@ocaml.deprecated "Use 1e-6 instead."]
+(** [us_to_s] is [1e-6], the number of seconds in one microsecond.
+    @deprecated *)
 
 val ms_to_s : float
-(** [ms_to_s] is [1e-3], the number of seconds in one millisecond. *)
+[@@ocaml.deprecated "Use 1e-3 instead."]
+(** [ms_to_s] is [1e-3], the number of seconds in one millisecond.
+    @deprecated *)
 
 val min_to_s : float
-(** [min_to_s] is [60.], the number of seconds in one SI-accepted minute. *)
+[@@ocaml.deprecated "Use 60. instead."]
+(** [min_to_s] is [60.], the number of seconds in one SI-accepted minute.
+    @deprecated *)
 
 val hour_to_s : float
-(** [hour_to_s] is [3600.], the number of seconds in one SI-accepted hour. *)
+[@@ocaml.deprecated "Use 3600. instead."]
+(** [hour_to_s] is [3600.], the number of seconds in one SI-accepted hour.
+    @deprecated *)
 
 val day_to_s : float
-(** [day_to_s] is [86_400.], the number of seconds in one SI-accepted day. *)
+[@@ocaml.deprecated "Use 86_400. instead."]
+(** [day_to_s] is [86_400.], the number of seconds in one SI-accepted day.
+    @deprecated *)
 
 val year_to_s : float
-(** [year_to_s] is [31_557_600.], the number of seconds in a Julian year. *)
+[@@ocaml.deprecated "Use 31_557_600. instead."]
+(** [year_to_s] is [31_557_600.], the number of seconds in a Julian year.
+    @deprecated *)
 
 val s_to_ns : float
-(** [s_to_ns] is [1e9] the number of nanoseconds in one second. *)
+[@@ocaml.deprecated "Use 1e9 instead."]
+(** [s_to_ns] is [1e9] the number of nanoseconds in one second.
+    @deprecated *)
 
 val s_to_us : float
-(** [s_to_us] is [1e6], the number of microseconds in one second. *)
+[@@ocaml.deprecated "Use 1e6 instead."]
+(** [s_to_us] is [1e6], the number of microseconds in one second.
+    @deprecated *)
 
 val s_to_ms : float
-(** [s_to_ms] is [1e3], the number of milliseconds in one second. *)
+[@@ocaml.deprecated "Use 1e3 instead."]
+(** [s_to_ms] is [1e3], the number of milliseconds in one second.
+    @deprecated *)
 
 val s_to_min : float
+[@@ocaml.deprecated "Use (1. /. 60.) instead."]
 (** [s_to_min] is [1. /. 60.], the number of SI-accepted minutes in
-    one second.  *)
+    one second.
+    @deprecated *)
 
 val s_to_hour : float
+[@@ocaml.deprecated "Use (1. /. 3600.) instead."]
 (** [s_to_hour] is [1. /. 3600.], the number of SI-accepted hours in
-    one second. *)
+    one second.
+    @deprecated *)
 
 val s_to_day : float
+[@@ocaml.deprecated "Use (1. /. 86400.) instead."]
 (** [s_to_day] is [1. /. 86400.], the number of SI-accepted days in
-    one second. *)
+    one second.
+    @deprecated *)
 
 val s_to_year : float
+[@@ocaml.deprecated "Use (1. /. 31_557_600.) instead."]
 (** [s_to_year] is [1. /. 31_557_600.], the number of Julian years
-    in one second. *)
+    in one second.
+    @deprecated *)
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers

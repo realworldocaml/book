@@ -22,6 +22,10 @@ module Dst : sig
   val compare : t -> t -> Ordering.t
 
   val infer : src_basename:string -> Section.t -> t
+
+  include Dune_lang.Conv.S with type t := t
+
+  val to_dyn : t -> Dyn.t
 end = struct
   type t = string
 
@@ -64,10 +68,13 @@ end = struct
     match t with
     | s ->
       let s' = infer ~src_basename section in
-      if String.equal s s' then
-        None
-      else
-        Some s
+      if String.equal s s' then None else Some s
+
+  let decode = Dune_lang.Decoder.string
+
+  let encode = Dune_lang.Encoder.string
+
+  let to_dyn = Dyn.string
 end
 
 module Section_with_site = struct
@@ -79,14 +86,12 @@ module Section_with_site = struct
         ; loc : Loc.t
         }
 
-  (* let compare : t -> t -> Ordering.t = Poly.compare *)
-
   let to_dyn x =
-    let open Dyn.Encoder in
+    let open Dyn in
     match x with
-    | Section s -> constr "Section" [ Section.to_dyn s ]
+    | Section s -> variant "Section" [ Section.to_dyn s ]
     | Site { pkg; site; loc = _ } ->
-      constr "Section" [ Package.Name.to_dyn pkg; Section.Site.to_dyn site ]
+      variant "Section" [ Package.Name.to_dyn pkg; Section.Site.to_dyn site ]
 
   let to_string = function
     | Section s -> Section.to_string s
@@ -105,6 +110,13 @@ module Section_with_site = struct
             >>> located (pair Package.Name.decode Section.Site.decode)
             >>| fun (loc, (pkg, site)) -> Site { pkg; site; loc } )
         ])
+
+  let encode =
+    let open Dune_lang.Encoder in
+    function
+    | Section s -> Section.encode s
+    | Site { pkg; site; loc = _ } ->
+      constr "site" (pair Package.Name.encode Section.Site.encode) (pkg, site)
 end
 
 module Section = struct
@@ -127,6 +139,9 @@ module Section = struct
       ; man : Path.t
       }
 
+    (* FIXME: we should handle all directories uniformly, instead of
+       special-casing etcdir, mandir, and docdir as of today [which was done for
+       convenience of backporting] *)
     let make ~package ~destdir ?(libdir = Path.relative destdir "lib")
         ?(mandir = Path.relative destdir "man")
         ?(docdir = Path.relative destdir "doc")
@@ -171,7 +186,7 @@ module Section = struct
 
     let get_local_location context section package_name =
       (* check that we get the good path *)
-      let install_dir = Config.local_install_dir ~context in
+      let install_dir = Local_install_path.dir ~context in
       let install_dir = Path.build install_dir in
       let paths = make ~package:package_name ~destdir:install_dir () in
       get paths section
@@ -188,80 +203,96 @@ module Entry = struct
     ; section : Section.t
     }
 
-  let compare x y =
-    let c = Path.compare x.src y.src in
-    if c <> Eq then
-      c
-    else
-      let c = Dst.compare x.dst y.dst in
-      if c <> Eq then
-        c
-      else
-        Section.compare x.section y.section
+  module Sourced = struct
+    type source =
+      | User of Loc.t
+      | Dune
 
-  let adjust_dst ~src ~dst ~section =
-    let error var =
-      User_error.raise
-        ~loc:(String_with_vars.Var.loc var)
+    type nonrec t =
+      { source : source
+      ; entry : Path.Build.t t
+      }
+
+    let create ?loc entry =
+      { source =
+          (match loc with
+          | None -> Dune
+          | Some loc -> User loc)
+      ; entry
+      }
+  end
+
+  let compare compare_src { src; dst; section } t =
+    let open Ordering.O in
+    let= () = Section.compare section t.section in
+    let= () = Dst.compare dst t.dst in
+    compare_src src t.src
+
+  let adjust_dst_gen =
+    let error (source_pform : Dune_lang.Template.Pform.t) =
+      User_error.raise ~loc:source_pform.loc
         [ Pp.textf
             "Because this file is installed in the 'bin' section, you cannot \
-             use the variable %s in its basename."
-            (String_with_vars.Var.describe var)
+             use the %s %s in its basename."
+            (Dune_lang.Template.Pform.describe_kind source_pform)
+            (Dune_lang.Template.Pform.describe source_pform)
         ]
     in
-    let is_source_executable () =
-      let has_ext ext =
-        match String_with_vars.Partial.is_suffix ~suffix:ext src with
-        | Unknown var -> error var
-        | Yes -> true
-        | No -> false
-      in
-      has_ext ".exe" || has_ext ".bc"
-    in
-    let src_basename () =
-      match src with
-      | Expanded s -> Filename.basename s
-      | Unexpanded src -> (
-        match String_with_vars.known_suffix src with
-        | Full s -> Filename.basename s
-        | Partial (var, suffix) -> (
-          match String.rsplit2 ~on:'/' suffix with
-          | Some (_, basename) -> basename
-          | None -> error var))
-    in
-    match dst with
-    | Some dst' when Filename.extension dst' = ".exe" -> Dst.explicit dst'
-    | _ ->
-      let dst =
-        match dst with
-        | None -> Dst.infer ~src_basename:(src_basename ()) section
-        | Some dst -> Dst.explicit dst
-      in
-      let is_executable = is_source_executable () in
-      if
-        Sys.win32 && is_executable
-        && Filename.extension (Dst.to_string dst) <> ".exe"
-      then
-        Dst.explicit (Dst.to_string dst ^ ".exe")
-      else
-        dst
+    fun ~(src_suffix : String_with_vars.known_suffix) ~dst ~section ->
+      match dst with
+      | Some dst' when Filename.extension dst' = ".exe" -> Dst.explicit dst'
+      | _ ->
+        let dst =
+          match dst with
+          | None ->
+            let src_basename =
+              match src_suffix with
+              | Full s -> Filename.basename s
+              | Partial { source_pform; suffix } -> (
+                match String.rsplit2 ~on:'/' suffix with
+                | Some (_, basename) -> basename
+                | None -> error source_pform)
+            in
+            Dst.infer ~src_basename section
+          | Some dst -> Dst.explicit dst
+        in
+        let is_executable =
+          let has_ext ext =
+            match src_suffix with
+            | Full s -> String.is_suffix s ~suffix:ext
+            | Partial { source_pform; suffix } ->
+              if String.is_suffix suffix ~suffix:ext then true
+              else if String.is_suffix ext ~suffix then error source_pform
+              else false
+          in
+          has_ext ".exe" || has_ext ".bc"
+        in
+        if
+          Sys.win32 && is_executable
+          && Filename.extension (Dst.to_string dst) <> ".exe"
+        then Dst.explicit (Dst.to_string dst ^ ".exe")
+        else dst
+
+  let adjust_dst ~src ~dst ~section =
+    adjust_dst_gen ~src_suffix:(String_with_vars.known_suffix src) ~dst ~section
+
+  let adjust_dst' ~src ~dst ~section =
+    adjust_dst_gen
+      ~src_suffix:(Full (Path.to_string (Path.build src)))
+      ~dst ~section
 
   let make section ?dst src =
-    let dst =
-      adjust_dst ~src:(Expanded (Path.to_string (Path.build src))) ~dst ~section
-    in
+    let dst = adjust_dst' ~src ~dst ~section in
     { src; dst; section }
 
   let make_with_site section ?dst get_section src =
     match section with
-    | Section_with_site.Section section -> make section ?dst src
+    | Section_with_site.Section section ->
+      Memo.Build.return (make section ?dst src)
     | Site { pkg; site; loc } ->
-      let section = get_section ~loc ~pkg ~site in
-      let dst =
-        adjust_dst
-          ~src:(Expanded (Path.to_string (Path.build src)))
-          ~dst ~section
-      in
+      let open Memo.Build.O in
+      let+ section = get_section ~loc ~pkg ~site in
+      let dst = adjust_dst' ~src ~dst ~section in
       let dst = Dst.add_prefix (Section.Site.to_string site) dst in
       let dst_with_pkg_prefix =
         Dst.add_prefix (Package.Name.to_string pkg) dst
@@ -271,8 +302,7 @@ module Entry = struct
         | Lib -> (Lib_root, dst_with_pkg_prefix)
         | Libexec -> (Libexec_root, dst_with_pkg_prefix)
         | Share -> (Share_root, dst_with_pkg_prefix)
-        | Etc
-        | Doc ->
+        | Etc | Doc ->
           User_error.raise
             [ Pp.textf "Can't have site in etc and doc for opam" ]
         | Lib_root
@@ -283,8 +313,7 @@ module Entry = struct
         | Share_root
         | Stublibs
         | Man
-        | Misc ->
-          (section, dst)
+        | Misc -> (section, dst)
       in
       { src; dst; section }
 
@@ -320,8 +349,11 @@ module Entry_with_site = struct
     }
 end
 
-let files entries =
-  Path.Set.of_list_map entries ~f:(fun (entry : Path.t Entry.t) -> entry.src)
+module Metadata = struct
+  type 'src t =
+    | DefaultEntry of 'src Entry.t
+    | UserDefinedEntry of 'src Entry.t
+end
 
 let group entries =
   List.map entries ~f:(fun (entry : _ Entry.t) -> (entry.section, entry))
@@ -332,7 +364,7 @@ let gen_install_file entries =
   let pr fmt = Printf.bprintf buf (fmt ^^ "\n") in
   Section.Map.iteri (group entries) ~f:(fun section entries ->
       pr "%s: [" (Section.to_string section);
-      List.sort ~compare:Entry.compare entries
+      List.sort ~compare:(Entry.compare Path.compare) entries
       |> List.iter ~f:(fun (e : Path.t Entry.t) ->
              let src = Path.to_string e.src in
              match

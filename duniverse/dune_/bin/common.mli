@@ -1,58 +1,46 @@
 type t
 
-val workspace_file : t -> Arg.Path.t option
-
-val x : t -> Dune_engine.Context_name.t option
-
-val profile : t -> Dune_rules.Profile.t option
-
 val capture_outputs : t -> bool
 
 val root : t -> Workspace_root.t
 
-val config : t -> Dune_engine.Config.t
+val rpc : t -> Dune_rpc_impl.Server.t option
 
-module Only_packages : sig
-  type t = private
-    { names : Dune_engine.Package.Name.Set.t
-    ; command_line_option : string
-          (** Which of [-p], [--only-packages], ... was passed *)
-    }
-end
+val stats : t -> Dune_stats.t option
 
-val only_packages : t -> Only_packages.t option
+val print_metrics : t -> bool
 
-val watch : t -> bool
+val dump_memo_graph_file : t -> string option
+
+val dump_memo_graph_format : t -> Dune_graph.Graph.File_format.t
+
+val dump_memo_graph_with_timing : t -> bool
+
+val watch : t -> Watch_mode_config.t
+
+val file_watcher : t -> Dune_engine.Scheduler.Run.file_watcher
 
 val default_target : t -> Arg.Dep.t
 
 val prefix_target : t -> string -> string
 
-val instrument_with : t -> Dune_engine.Lib_name.t list option
+(** [init] executes sequence of side-effecting actions to initialize Dune's
+    working environment based on the options determined in a [Common.t]
+    record.contents.
 
-(** [set_common ?log common ~targets ~external_lib_deps_mode] is
-    [set_dirs common] followed by [set_common_other common ~targets]. In
-    general, [set_common] executes sequence of side-effecting actions to
-    initialize Dune's working environment based on the options determined in a
-    [Common.t] record.contents. *)
-val set_common :
-     ?log_file:Dune_util.Log.File.t
-  -> ?external_lib_deps_mode:bool
-  -> t
-  -> targets:Arg.Dep.t list
-  -> unit
+    Return the final configuration, which is the same as the one returned in the
+    [config] field of [Dune_rules.Workspace.workspace ()]) *)
+val init : ?log_file:Dune_util.Log.File.t -> t -> Dune_config.t
 
-(** [set_common_other common ~targets] sets all stateful values dictated by
-    [common], except those accounted for by [set_dirs]. [targets] are used to
-    obtain external library dependency hints, if needed. *)
-val set_common_other :
-  ?log_file:Dune_util.Log.File.t -> t -> targets:Arg.Dep.t list -> unit
-
-(** [set_dirs common] sets the workspace root and build directories, and makes
-    the root the current working directory *)
-val set_dirs : t -> unit
-
+(** [examples \[("description", "dune cmd foo"); ...\]] is an [EXAMPLES] manpage
+    section of enumerated examples illustrating how to run the documented
+    commands. *)
 val examples : (string * string) list -> Cmdliner.Manpage.block
+
+(** [command_synopsis subcommands] is a custom [SYNOPSIS] manpage section
+    listing the given [subcommands]. Each subcommand is prefixed with the `dune`
+    top-level command. *)
+val command_synopsis : string list -> Cmdliner.Manpage.block list
 
 val help_secs : Cmdliner.Manpage.block list
 
@@ -60,11 +48,16 @@ val footer : Cmdliner.Manpage.block
 
 val term : t Cmdliner.Term.t
 
+val term_with_default_root_is_cwd : t Cmdliner.Term.t
+
+(** Set whether Dune should print the "Entering directory '<dir>'" message *)
+val set_print_directory : t -> bool -> t
+
 val debug_backtraces : bool Cmdliner.Term.t
 
-val config_term : Dune_engine.Config.t Cmdliner.Term.t
+val config_from_config_file : Dune_config.Partial.t Cmdliner.Term.t
 
-val display_term : Dune_engine.Config.Display.t option Cmdliner.Term.t
+val display_term : Dune_engine.Scheduler.Config.Display.t option Cmdliner.Term.t
 
 val context_arg : doc:string -> Dune_engine.Context_name.t Cmdliner.Term.t
 
@@ -80,3 +73,5 @@ module Let_syntax : sig
   val ( and+ ) :
     'a Cmdliner.Term.t -> 'b Cmdliner.Term.t -> ('a * 'b) Cmdliner.Term.t
 end
+
+val set_rpc : t -> Dune_rpc_impl.Server.t -> t

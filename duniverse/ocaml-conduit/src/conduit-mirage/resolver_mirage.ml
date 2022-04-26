@@ -29,7 +29,7 @@ module Make
     (T : Mirage_time.S)
     (C : Mirage_clock.MCLOCK)
     (P : Mirage_clock.PCLOCK)
-    (S : Mirage_stack.V4V6) =
+    (S : Tcpip.Stack.V4V6) =
 struct
   include Resolver_lwt
 

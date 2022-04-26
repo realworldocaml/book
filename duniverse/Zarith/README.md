@@ -3,7 +3,7 @@
 ## OVERVIEW
 
 This library implements arithmetic and logical operations over
-arbitrary-precision integers.  
+arbitrary-precision integers.
 
 The module is simply named `Z`.  Its interface is similar to that of
 the `Int32`, `Int64` and `Nativeint` modules from the OCaml standard
@@ -11,18 +11,17 @@ library, with some additional functions.  See the file `z.mlip` for
 documentation.
 
 The implementation uses GMP (the GNU Multiple Precision arithmetic
-library) to compute over big integers. 
-However, small integers are represented as unboxed Caml integers, to save 
-space and improve performance. Big integers are allocated in the Caml heap, 
-bypassing GMP's memory management and achieving better GC behavior than e.g. 
+library) to compute over big integers.
+However, small integers are represented as unboxed Caml integers, to save
+space and improve performance. Big integers are allocated in the Caml heap,
+bypassing GMP's memory management and achieving better GC behavior than e.g.
 the MLGMP library.
-Computations on small integers use a special, faster path (coded in assembly
-for some platforms and functions) eschewing calls to GMP, while computations
-on large intergers use the low-level MPN functions from GMP.
+Computations on small integers use a special, faster path (in C or OCaml)
+eschewing calls to GMP, while computations on large intergers use the
+low-level MPN functions from GMP.
 
-Arbitrary-precision integers can be compared correctly using OCaml's 
-polymorphic comparison operators (`=`, `<`, `>`, etc.). 
-This requires OCaml version 3.12.1 or later, though.
+Arbitrary-precision integers can be compared correctly using OCaml's
+polymorphic comparison operators (`=`, `<`, `>`, etc.).
 
 Additional features include:
 * a module `Q` for rationals, built on top of `Z` (see `q.mli`)
@@ -30,10 +29,9 @@ Additional features include:
 
 ## REQUIREMENTS
 
-* OCaml, preferably version 3.12.1 or later.  (Earlier versions are usable but generic comparisons will misbehave.)
+* OCaml, version 4.04.0 or later.
 * Either the GMP library or the MPIR library, including development files.
 * GCC or Clang or a gcc-compatible C compiler and assembler (other compilers may work).
-* The Perl programming language.
 * The Findlib package manager (optional, recommended).
 
 
@@ -60,12 +58,12 @@ or, if you install to a system location but are not an administrator
 ```
    sudo make install
 ```
-If Findlib is detected, it is used to install files. 
-Otherwise, the files are copied to a `zarith/` subdirectory of the directory 
+If Findlib is detected, it is used to install files.
+Otherwise, the files are copied to a `zarith/` subdirectory of the directory
 given by `ocamlc -where`.
 
 The libraries are named `zarith.cmxa` and `zarith.cma`, and the Findlib module
-is named `zarith`. 
+is named `zarith`.
 
 Compiling and linking with the library requires passing the `-I +zarith`
 option to `ocamlc` / `ocamlopt`, or the `-package zarith` option to `ocamlfind`.
@@ -89,16 +87,16 @@ The documentation for the latest release is hosted on [GitHub Pages](https://ant
 ## LICENSE
 
 This Library is distributed under the terms of the GNU Library General
-Public License version 2, with a special exception allowing unconstrained 
-static linking. 
+Public License version 2, with a special exception allowing unconstrained
+static linking.
 See LICENSE file for details.
 
 
 ## AUTHORS
 
-* Antoine Miné, Université Pierre et Marie Curie, formerly ENS Paris.
-* Xavier Leroy, INRIA Paris-Rocquencourt.
-* Pascal Cuoq, CEA LIST.
+* Antoine Miné, Sorbonne Université, formerly at ENS Paris.
+* Xavier Leroy, Collège de France, formerly at Inria Paris.
+* Pascal Cuoq, TrustInSoft.
 * Christophe Troestler (toplevel module)
 
 
@@ -117,17 +115,12 @@ INRIA Rocquencourt (Institut national de recherche en informatique, France).
 Source files        | Description
 --------------------|-----------------------------------------
   configure         | configuration script
-  caml_z.c          | C implementation of all functions
-  caml_z_*.S        | asm implementation for a few functions
-  z_pp.pl           | script to generate z.ml[i] from z.ml[i]p
-  z.ml[i]p          | templates used to generate z.ml[i]p
+  z.ml[i]           | Z module and implementation for small integers
+  caml_z.c          | C implementation
   big_int_z.ml[i]   | wrapper to provide a Big_int compatible API to Z
   q.ml[i]           | rational library, pure OCaml on top of Z
   zarith_top.ml     | toplevel module to provide pretty-printing
   projet.mak        | builds Z, Q and the tests
+  zarith.opam       | package description for opam
+  z_mlgmpidl.ml[i]  | conversion between Zarith and MLGMPIDL
   tests/            | simple regression tests and benchmarks
-
-Note: `z_pp.pl` simply scans the asm file (if any) to see which functions have
-an asm implementation. It then fixes the external statements in .mlp and 
-.mlip accordingly.
-The argument to `z_pp.pl` is the suffix `*` of the `caml_z_*.S` to use (guessed by configure).

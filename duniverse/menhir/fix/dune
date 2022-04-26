@@ -2,7 +2,7 @@
   (dev (flags
     :standard
     -g
-    -w @A-4-44-67
+    -w @A-4-44-67-70
   ))
   (release (flags
     :standard

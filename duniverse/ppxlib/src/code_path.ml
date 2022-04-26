@@ -22,7 +22,6 @@ let top_level ~file_path =
   }
 
 let file_path t = t.file_path
-
 let main_module_name t = t.main_module_name
 
 let submodule_path t =
@@ -49,7 +48,6 @@ let enter_value ~loc value_name t =
   if t.in_expr then t else { t with value = Some { txt = value_name; loc } }
 
 let to_string_path t = String.concat ~sep:"." (t.file_path :: submodule_path t)
-
 let with_string_path f ~loc ~path = f ~loc ~path:(to_string_path path);;
 
 let module M = struct

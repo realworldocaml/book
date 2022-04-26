@@ -1,48 +1,71 @@
 open Core
 open Core_bench
 
-type t = | Alice | Bob
-type s = | A | B | C | D | E
+module Monomorphic = struct
+  type t =
+    | Alice
+    | Bob
+    | Charlie
+    | David
 
-let polymorphic_pattern () =
-  let test v =
-    match v with
-    | `Alice   -> 100
-    | `Bob     -> 101
-    | `Charlie -> 102
-    | `David   -> 103
-    | `Eve     -> 104
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [`Alice; `Bob; `Charlie; `David]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -> 100
+      | Bob -> 101
+      | Charlie -> 102
+      | David -> 103
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ Alice; Bob; Charlie; David ]
+end
 
-let monomorphic_pattern_small () =
-  let test v =
-    match v with
-    | Alice   -> 100
-    | Bob     -> 101 in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ Alice; Bob ]
+module Monomorphic_small = struct
+  type t =
+    | Alice
+    | Bob
 
-let monomorphic_pattern_large () =
-  let test v =
-    match v with
-    | A       -> 100
-    | B       -> 101
-    | C       -> 102
-    | D       -> 103
-    | E       -> 104
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ A; B; C; D ]
+  let bench () =
+    let convert v =
+      match v with
+      | Alice -> 100
+      | Bob -> 101
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ Alice; Bob; Alice; Bob ]
+end
 
-let tests = [
-  "Polymorphic pattern", polymorphic_pattern;
-  "Monomorphic larger pattern", monomorphic_pattern_large;
-  "Monomorphic small pattern", monomorphic_pattern_small;
-]
+module Polymorphic = struct
+  type t =
+    [ `Alice
+    | `Bob
+    | `Charlie
+    | `David
+    ]
+
+  let bench () =
+    let convert v =
+      match v with
+      | `Alice -> 100
+      | `Bob -> 101
+      | `Charlie -> 102
+      | `David -> 103
+    in
+    List.iter
+      ~f:(fun v -> ignore (convert v))
+      [ `Alice; `Bob; `Alice; `Bob ]
+end
+
+let benchmarks =
+  [ "Monomorphic large pattern", Monomorphic.bench
+  ; "Monomorphic small pattern", Monomorphic_small.bench
+  ; "Polymorphic large pattern", Polymorphic.bench
+  ]
 
 let () =
-  List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
+  List.map benchmarks ~f:(fun (name, test) ->
+      Bench.Test.create ~name test)
   |> Bench.make_command
   |> Command.run

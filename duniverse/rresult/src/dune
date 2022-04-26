@@ -1,9 +1,7 @@
 (library
  (name rresult)
  (public_name rresult)
- (libraries result)
  (modules rresult)
- (flags :standard -w -27)
  (wrapped false))
 
 (library

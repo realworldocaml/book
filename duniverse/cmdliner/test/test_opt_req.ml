@@ -6,8 +6,10 @@ let test_opt =
   let req =
     Arg.(required & opt (some string) None & info ["r"; "req"] ~docv:"ARG")
   in
-  Term.(const opt $ req),
-  Term.info "test_opt_req"
-    ~doc:"Test optional required arguments (don't do this)"
+  let info =
+    let doc = "Test optional required arguments (don't do this)" in
+    Cmd.info "test_opt_req"~doc
+  in
+  Cmd.v info Term.(const opt $ req)
 
-let () = Term.(exit @@ eval test_opt)
+let () = exit (Cmd.eval test_opt)

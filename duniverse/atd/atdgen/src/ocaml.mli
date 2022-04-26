@@ -2,6 +2,7 @@
 
 type pp_convs =
   | Camlp4 of string list
+  | Ppx_deriving of string list
   | Ppx of string list
 
 type atd_ocaml_sum = Classic | Poly
@@ -61,6 +62,8 @@ module Repr : sig
     | Variant of atd_ocaml_variant
     | Def of atd_ocaml_def
 end
+
+val annot_schema_of_target : target -> Atd.Annot.schema
 
 val get_ocaml_sum : target -> Atd.Annot.t -> atd_ocaml_sum
 val get_ocaml_record : target -> Atd.Annot.t -> atd_ocaml_record

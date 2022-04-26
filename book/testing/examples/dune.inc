@@ -4,9 +4,11 @@
  (deps
   (source_tree ./correct/bigger_quickcheck_test)
   (package base)
+  (package core)
   (package core_kernel)
   (package ppx_jane)
-  (package stdio))
+  (package stdio)
+  (package timezone))
  (action
   (system "dune build @all @runtest --root ./correct/bigger_quickcheck_test")))
 
@@ -19,6 +21,7 @@
  (deps
   (source_tree ./correct/bigger_quickcheck_test_with_ppx)
   (package base)
+  (package core)
   (package core_kernel)
   (package ppx_jane)
   (package stdio))

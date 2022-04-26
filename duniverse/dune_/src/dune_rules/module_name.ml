@@ -15,6 +15,8 @@ include Section.Modulelike (struct
   let make s = String.capitalize s
 end)
 
+let equal = String.equal
+
 let compare = String.compare
 
 let add_suffix = ( ^ )
@@ -30,6 +32,7 @@ module Set = struct
 end
 
 module Map = String.Map
+module Map_traversals = Memo.Build.Make_map_traversals (Map)
 module Infix = Comparator.Operators (String)
 
 let of_local_lib_name s = of_string (Lib_name.Local.to_string s)

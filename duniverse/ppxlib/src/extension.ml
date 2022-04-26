@@ -21,25 +21,15 @@ module Context = struct
   type packed = T : _ t -> packed
 
   let class_expr = Class_expr
-
   let class_field = Class_field
-
   let class_type = Class_type
-
   let class_type_field = Class_type_field
-
   let core_type = Core_type
-
   let expression = Expression
-
   let module_expr = Module_expr
-
   let module_type = Module_type
-
   let pattern = Pattern
-
   let signature_item = Signature_item
-
   let structure_item = Structure_item
 
   let desc : type a. a t -> string = function
@@ -396,6 +386,5 @@ module V2 = struct
   type nonrec t = t
 
   let declare = declare
-
   let declare_inline = declare_inline
 end

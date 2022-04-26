@@ -1,5 +1,5 @@
 (* Auto-generated from "test.atd" *)
-[@@@ocaml.warning "-27-32-35-39"]
+[@@@ocaml.warning "-27-32-33-35-39"]
 
 (** This is just a test. *)
 
@@ -57,6 +57,11 @@ type test = Test.test = {
 }
 
 type tup = Test.tup
+
+type test_field_prefix = Test.test_field_prefix = {
+  theprefix_hello (*atd hello *): bool;
+  theprefix_world (*atd world *): int
+}
 
 type star_rating = Test.star_rating
 
@@ -3030,6 +3035,177 @@ let read_tup = (
 )
 let tup_of_string s =
   read_tup (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
+let write_test_field_prefix : _ -> test_field_prefix -> _ = (
+  fun ob (x : test_field_prefix) ->
+    Bi_outbuf.add_char ob '{';
+    let is_first = ref true in
+    if !is_first then
+      is_first := false
+    else
+      Bi_outbuf.add_char ob ',';
+    Bi_outbuf.add_string ob "\"hello\":";
+    (
+      Yojson.Safe.write_bool
+    )
+      ob x.theprefix_hello;
+    if !is_first then
+      is_first := false
+    else
+      Bi_outbuf.add_char ob ',';
+    Bi_outbuf.add_string ob "\"world\":";
+    (
+      Yojson.Safe.write_int
+    )
+      ob x.theprefix_world;
+    Bi_outbuf.add_char ob '}';
+)
+let string_of_test_field_prefix ?(len = 1024) x =
+  let ob = Bi_outbuf.create len in
+  write_test_field_prefix ob x;
+  Bi_outbuf.contents ob
+let read_test_field_prefix = (
+  fun p lb ->
+    Yojson.Safe.read_space p lb;
+    Yojson.Safe.read_lcurl p lb;
+    let field_theprefix_hello = ref (None) in
+    let field_theprefix_world = ref (None) in
+    try
+      Yojson.Safe.read_space p lb;
+      Yojson.Safe.read_object_end lb;
+      Yojson.Safe.read_space p lb;
+      let f =
+        fun s pos len ->
+          if pos < 0 || len < 0 || pos + len > String.length s then
+            invalid_arg "out-of-bounds substring position or length";
+          if len = 5 then (
+            match String.unsafe_get s pos with
+              | 'h' -> (
+                  if String.unsafe_get s (pos+1) = 'e' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'o' then (
+                    0
+                  )
+                  else (
+                    (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                  )
+                )
+              | 'w' -> (
+                  if String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'r' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' then (
+                    1
+                  )
+                  else (
+                    (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                  )
+                )
+              | _ -> (
+                  (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                )
+          )
+          else (
+            (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+          )
+      in
+      let i = Yojson.Safe.map_ident p f lb in
+      Atdgen_runtime.Oj_run.read_until_field_value p lb;
+      (
+        match i with
+          | 0 ->
+            field_theprefix_hello := (
+              Some (
+                (
+                  Atdgen_runtime.Oj_run.read_bool
+                ) p lb
+              )
+            );
+          | 1 ->
+            field_theprefix_world := (
+              Some (
+                (
+                  Atdgen_runtime.Oj_run.read_int
+                ) p lb
+              )
+            );
+          | _ -> (
+              Yojson.Safe.skip_json p lb
+            )
+      );
+      while true do
+        Yojson.Safe.read_space p lb;
+        Yojson.Safe.read_object_sep p lb;
+        Yojson.Safe.read_space p lb;
+        let f =
+          fun s pos len ->
+            if pos < 0 || len < 0 || pos + len > String.length s then
+              invalid_arg "out-of-bounds substring position or length";
+            if len = 5 then (
+              match String.unsafe_get s pos with
+                | 'h' -> (
+                    if String.unsafe_get s (pos+1) = 'e' && String.unsafe_get s (pos+2) = 'l' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'o' then (
+                      0
+                    )
+                    else (
+                      (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                    )
+                  )
+                | 'w' -> (
+                    if String.unsafe_get s (pos+1) = 'o' && String.unsafe_get s (pos+2) = 'r' && String.unsafe_get s (pos+3) = 'l' && String.unsafe_get s (pos+4) = 'd' then (
+                      1
+                    )
+                    else (
+                      (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                    )
+                  )
+                | _ -> (
+                    (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+                  )
+            )
+            else (
+              (fun loc s -> Printf.eprintf "Warning: skipping field %s (def: %s)
+" s loc) "File \"test.atd\", line 214, characters 25-91" (String.sub s pos len); -1
+            )
+        in
+        let i = Yojson.Safe.map_ident p f lb in
+        Atdgen_runtime.Oj_run.read_until_field_value p lb;
+        (
+          match i with
+            | 0 ->
+              field_theprefix_hello := (
+                Some (
+                  (
+                    Atdgen_runtime.Oj_run.read_bool
+                  ) p lb
+                )
+              );
+            | 1 ->
+              field_theprefix_world := (
+                Some (
+                  (
+                    Atdgen_runtime.Oj_run.read_int
+                  ) p lb
+                )
+              );
+            | _ -> (
+                Yojson.Safe.skip_json p lb
+              )
+        );
+      done;
+      assert false;
+    with Yojson.End_of_object -> (
+        (
+          {
+            theprefix_hello = (match !field_theprefix_hello with Some x -> x | None -> Atdgen_runtime.Oj_run.missing_field p "theprefix_hello");
+            theprefix_world = (match !field_theprefix_world with Some x -> x | None -> Atdgen_runtime.Oj_run.missing_field p "theprefix_world");
+          }
+         : test_field_prefix)
+      )
+)
+let test_field_prefix_of_string s =
+  read_test_field_prefix (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_star_rating = (
   Yojson.Safe.write_int
 )
@@ -4983,6 +5159,14 @@ let create_test
     x2 = x2;
     x3 = x3;
     x4 = x4;
+  }
+let create_test_field_prefix 
+  ~theprefix_hello
+  ~theprefix_world
+  () : test_field_prefix =
+  {
+    theprefix_hello = theprefix_hello;
+    theprefix_world = theprefix_world;
   }
 let create_some_record 
   ~some_field

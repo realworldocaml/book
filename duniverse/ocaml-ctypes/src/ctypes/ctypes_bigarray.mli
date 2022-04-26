@@ -13,23 +13,23 @@ type ('a, 'b, 'l) t
 
 (** {3 Type constructors} *)
 
-val bigarray : int array -> ('a, 'b) Bigarray.kind -> 'l Bigarray.layout ->
-  ('a, ('a, 'b, 'l) Bigarray.Genarray.t, 'l) t
+val bigarray : int array -> ('a, 'b) Bigarray_compat.kind -> 'l Bigarray_compat.layout ->
+  ('a, ('a, 'b, 'l) Bigarray_compat.Genarray.t, 'l) t
 (** Create a {!t} value for the {!Bigarray.Genarray.t} type. *)
 
-val bigarray1 : int -> ('a, 'b) Bigarray.kind -> 'l Bigarray.layout ->
-  ('a, ('a, 'b, 'l) Bigarray.Array1.t, 'l) t
+val bigarray1 : int -> ('a, 'b) Bigarray_compat.kind -> 'l Bigarray_compat.layout ->
+  ('a, ('a, 'b, 'l) Bigarray_compat.Array1.t, 'l) t
 (** Create a {!t} value for the {!Bigarray.Array1.t} type. *)
 
-val bigarray2 : int -> int -> ('a, 'b) Bigarray.kind -> 'l Bigarray.layout ->
-  ('a, ('a, 'b, 'l) Bigarray.Array2.t, 'l) t
+val bigarray2 : int -> int -> ('a, 'b) Bigarray_compat.kind -> 'l Bigarray_compat.layout ->
+  ('a, ('a, 'b, 'l) Bigarray_compat.Array2.t, 'l) t
 (** Create a {!t} value for the {!Bigarray.Array2.t} type. *)
 
-val bigarray3 : int -> int -> int -> ('a, 'b) Bigarray.kind -> 'l Bigarray.layout ->
-  ('a, ('a, 'b, 'l) Bigarray.Array3.t, 'l) t
+val bigarray3 : int -> int -> int -> ('a, 'b) Bigarray_compat.kind -> 'l Bigarray_compat.layout ->
+  ('a, ('a, 'b, 'l) Bigarray_compat.Array3.t, 'l) t
 (** Create a {!t} value for the {!Bigarray.Array3.t} type. *)
 
-val prim_of_kind : ('a, _) Bigarray.kind -> 'a Ctypes_primitive_types.prim
+val prim_of_kind : ('a, _) Bigarray_compat.kind -> 'a Ctypes_primitive_types.prim
 (** Create a {!Ctypes_ptr.Types.ctype} for a {!Bigarray.kind}. *)
 
 (** {3 Type eliminators} *)

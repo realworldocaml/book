@@ -7,6 +7,10 @@ module Dst : sig
   type t
 
   val to_string : t -> string
+
+  include Dune_lang.Conv.S with type t := t
+
+  val to_dyn : t -> Dyn.t
 end
 
 (** Location for installation, containing the sections relative to the current
@@ -24,7 +28,7 @@ module Section_with_site : sig
 
   (* val parse_string : string -> (t, string) Result.t *)
 
-  val decode : t Dune_lang.Decoder.t
+  include Dune_lang.Conv.S with type t := t
 
   val to_dyn : t -> Dyn.t
 end
@@ -32,7 +36,7 @@ end
 module Section : sig
   type t = Section.t
 
-  module Set : Set.S with type elt = t
+  include Comparable_intf.S with type key := t
 
   val to_string : t -> string
 
@@ -74,11 +78,24 @@ module Entry : sig
     ; section : Section.t
     }
 
+  module Sourced : sig
+    type source =
+      | User of Loc.t
+      | Dune
+
+    type entry
+
+    type nonrec t =
+      { source : source
+      ; entry : entry
+      }
+
+    val create : ?loc:Loc.t -> entry -> t
+  end
+  with type entry := Path.Build.t t
+
   val adjust_dst :
-       src:string String_with_vars.Partial.t
-    -> dst:string option
-    -> section:Section.t
-    -> Dst.t
+    src:String_with_vars.t -> dst:string option -> section:Section.t -> Dst.t
 
   val make : Section.t -> ?dst:string -> Path.Build.t -> Path.Build.t t
 
@@ -88,9 +105,9 @@ module Entry : sig
     -> (   loc:Loc.t
         -> pkg:Package.Name.t
         -> site:Dune_section.Site.t
-        -> Section.t)
+        -> Section.t Memo.Build.t)
     -> Path.Build.t
-    -> Path.Build.t t
+    -> Path.Build.t t Memo.Build.t
 
   val set_src : _ t -> 'src -> 'src t
 
@@ -98,6 +115,8 @@ module Entry : sig
 
   val add_install_prefix :
     'a t -> paths:Section.Paths.t -> prefix:Path.t -> 'a t
+
+  val compare : ('a -> 'a -> Ordering.t) -> 'a t -> 'a t -> Ordering.t
 end
 
 (** Same as Entry, but the destination can be in the site of a package *)
@@ -109,7 +128,11 @@ module Entry_with_site : sig
     }
 end
 
-val files : Path.t Entry.t list -> Path.Set.t
+module Metadata : sig
+  type 'src t =
+    | DefaultEntry of 'src Entry.t
+    | UserDefinedEntry of 'src Entry.t
+end
 
 val gen_install_file : Path.t Entry.t list -> string
 

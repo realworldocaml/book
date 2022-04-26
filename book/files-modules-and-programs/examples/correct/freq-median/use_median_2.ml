@@ -2,6 +2,7 @@ open! Base
 open Stdio
 
 [@@@part "1"]
+
 let print_median m =
   let module C = Counter in
   match m with

@@ -3,7 +3,6 @@ Simple test with a multi dir exe
 
   $ dune build --root test1
   Entering directory 'test1'
-           foo alias default
   Hello, world!
 
 Test that include_subdirs stop the recursion
@@ -11,7 +10,6 @@ Test that include_subdirs stop the recursion
 
   $ dune build --root test2
   Entering directory 'test2'
-          main alias default
   Hello, world!
 
 Test with C stubs in sub-directories
@@ -33,8 +31,8 @@ Test some error cases
   Entering directory 'error1'
   File "dune", line 1, characters 0-0:
   Error: Module "X" appears in several directories:
-  - _build/default/b
   - _build/default/a
+  - _build/default/b
   This is not allowed, please rename one of them.
   [1]
 
@@ -60,6 +58,5 @@ Test for (include_subdir unqualified) with (preprocess (action ...))
 --------------------------------------------------------------------
 
   $ dune exec ./main.exe --root test4 @all
-  Entering directory 'test4'
   Entering directory 'test4'
   print_endline "foo"

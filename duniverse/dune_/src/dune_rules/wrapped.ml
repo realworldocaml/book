@@ -6,6 +6,8 @@ type t =
   | Simple of bool
   | Yes_with_transition of string
 
+let equal = Poly.equal
+
 let decode =
   sum
     [ ("true", return (Simple true))
@@ -27,7 +29,7 @@ let to_bool = function
   | Yes_with_transition _ -> true
 
 let to_dyn =
-  let open Dyn.Encoder in
+  let open Dyn in
   function
-  | Simple s -> constr "Simple" [ bool s ]
-  | Yes_with_transition s -> constr "Yes_with_transition" [ string s ]
+  | Simple s -> variant "Simple" [ bool s ]
+  | Yes_with_transition s -> variant "Yes_with_transition" [ string s ]

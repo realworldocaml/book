@@ -40,19 +40,19 @@ The ppx system is composed of 3 parts:
 - ppxlib
 - a hook in the compiler
 
-Inidividual ppx rewriters are those implemented by various developers
+Individual ppx rewriters are those implemented by various developers
 to provide features to end users, such as ppx_expect_ which provides a
 good inline testing framework.
 
 All these rewriters are written against the ppxlib API. Ppxlib is
-responsible for acknowledging the various rewriters a end user wants
+responsible for acknowledging the various rewriters an end user wants
 to use, making sure they can be composed together and performing the
 actual rewriting of input files.
 
 The hook in the compiler allows ppxlib to insert itself in the
 compilation pipeline and perform the rewriting of input files based on
 a list of ppx rewriters specified by the user. The hooks take the form
-of command line flags that takes a command to execute. The compiler
+of command line flags that take a command to execute. The compiler
 supports two slightly different flags, for providing commands that are
 executed at different stages: ``-pp`` and ``-ppx``. The difference
 between the two is as follow:
@@ -80,7 +80,7 @@ reasons:
   incompatible ways. This means that a ppx rewriter using the compiler
   hook directly is likely to work only with a single version of the
   OCaml compiler
-- the compiler does not provide a good composition semantics, which
+- the compiler does not provide good composition semantics, which
   means that input files will not always be transformed as
   expected. It is hard to predict what the final result will be, and
   for end users it is hard to understand what is happening when things
@@ -90,7 +90,7 @@ reasons:
   rewriters want to interpret the same attribute or extension point in
   incompatible ways, the result is not specified
 
-In summary, ppxlib abstracts away from all the low-level details of
+In summary, ppxlib abstracts away the low-level details of
 the ppx system and exposes a consistent model to authors of ppx
 rewriters and end users.
 

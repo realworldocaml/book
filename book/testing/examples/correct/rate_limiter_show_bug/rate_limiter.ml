@@ -11,7 +11,8 @@ let create ~now ~period ~rate =
   let events = Queue.create () in
   { events; now; period; rate }
 
-[@@@part "1"];;
+[@@@part "1"]
+
 let rec drain_old_events t =
   match Queue.peek t.events with
   | None -> ()
@@ -21,7 +22,8 @@ let rec drain_old_events t =
       ignore (Queue.dequeue_exn t.events : Time_ns.t);
       drain_old_events t)
 
-[@@@part "2"];;
+[@@@part "2"]
+
 let maybe_consume t ~now =
   t.now <- now;
   drain_old_events t;

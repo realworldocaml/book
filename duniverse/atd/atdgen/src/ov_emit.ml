@@ -9,6 +9,9 @@ open Atd.Ast
 open Mapping
 open Ov_mapping
 
+let target : Ocaml.target = Validate
+let annot_schema = Ocaml.annot_schema_of_target target
+
 let make_ocaml_validate_intf ~with_create buf deref defs =
   List.concat_map snd defs
   |> List.iter (fun x ->
@@ -423,11 +426,13 @@ let make_ocaml_files
     match atd_file with
       Some file ->
         Atd.Util.load_file
+          ~annot_schema
           ~expand:false ~inherit_fields:true ~inherit_variants:true
           ?pos_fname ?pos_lnum
           file
     | None ->
         Atd.Util.read_channel
+          ~annot_schema
           ~expand:false ~inherit_fields:true ~inherit_variants:true
           ?pos_fname ?pos_lnum
           stdin
@@ -449,7 +454,7 @@ let make_ocaml_files
      m1 = original type definitions after dependency analysis
      m2 = monomorphic type definitions after dependency analysis *)
   let ocaml_typedefs =
-    Ocaml.ocaml_of_atd ~pp_convs ~target:Validate ~type_aliases (head, m1) in
+    Ocaml.ocaml_of_atd ~pp_convs ~target ~type_aliases (head, m1) in
   let defs = Ov_mapping.defs_of_atd_modules m2 in
   let header =
     let src =
@@ -458,7 +463,7 @@ let make_ocaml_files
       | Some path -> sprintf "%S" (Filename.basename path)
     in
     sprintf {|(* Auto-generated from %s *)
-              [@@@ocaml.warning "-27-32-35-39"]|} src
+[@@@ocaml.warning "-27-32-33-35-39"]|} src
   in
   let mli =
     make_mli ~header ~opens ~with_typedefs ~with_create ~with_fundefs

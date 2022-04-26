@@ -10,6 +10,7 @@
 
 open Grammar
 open Cst
+let dummy_pos = Lexing.dummy_pos
 
 (* ------------------------------------------------------------------------ *)
 
@@ -136,9 +137,9 @@ module T = struct
       let values : semantic_value array =
         Array.make n CstError (* dummy *)
       and startp =
-        ref Lexing.dummy_pos
+        ref dummy_pos
       and endp =
-        ref Lexing.dummy_pos
+        ref dummy_pos
       and current =
         ref env.current
       and stack =
@@ -204,50 +205,6 @@ module T = struct
   let may_reduce node prod =
     Lr1.NodeSet.mem node (Lr1.production_where prod)
 
-  (* The logging functions that follow are called only if [log] is [true]. *)
-
-  module Log = struct
-
-    open Printf
-
-    let state s =
-      fprintf stderr "State %d:" (Lr1.number s);
-      prerr_newline()
-
-    let shift tok s' =
-      fprintf stderr "Shifting (%s) to state %d" (Terminal.print tok) (Lr1.number s');
-      prerr_newline()
-
-    let reduce_or_accept prod =
-      match Production.classify prod with
-      | Some _ ->
-         fprintf stderr "Accepting";
-         prerr_newline()
-      | None ->
-         fprintf stderr "Reducing production %s" (Production.print prod);
-         prerr_newline()
-
-    let lookahead_token tok startp endp =
-      fprintf stderr "Lookahead token is now %s (%d-%d)"
-        (Terminal.print tok)
-        startp.Lexing.pos_cnum
-        endp.Lexing.pos_cnum;
-      prerr_newline()
-
-    let initiating_error_handling () =
-      fprintf stderr "Initiating error handling";
-      prerr_newline()
-
-    let resuming_error_handling () =
-      fprintf stderr "Resuming error handling";
-      prerr_newline()
-
-    let handling_error s =
-      fprintf stderr "Handling error in state %d" (Lr1.number s);
-      prerr_newline()
-
-  end
-
 end
 
 (* ------------------------------------------------------------------------ *)
@@ -269,14 +226,18 @@ let interpret nt log lexer lexbuf =
   let module E =
     MenhirLib.Engine.Make (struct
       include T
-      let log = log
+      (* The logging hooks. *)
+      module Log = (val log : Logging.LOG)
+      (* We want our logging hooks to be called. *)
+      let log = true
     end)
   in
 
   (* Run it. *)
 
   try
-    Some (E.entry strategy (Lr1.entry_of_nt nt) lexer lexbuf)
+    let cst = E.entry strategy (Lr1.entry_of_nt nt) lexer lexbuf in
+    Some cst
   with T.Error | T.Abort ->
     None
 
@@ -315,7 +276,10 @@ let check_error_path log nt input =
   let module E =
     MenhirLib.Engine.Make (struct
       include T
-      let log = log
+      (* The logging hooks. *)
+      module Log = (val log : Logging.LOG)
+      (* We want our logging hooks to be called. *)
+      let log = true
     end)
   in
 
@@ -363,14 +327,15 @@ let check_error_path log nt input =
   let rec loop (checkpoint : cst E.checkpoint) (spurious : spurious_reduction list) =
     match checkpoint with
     | E.InputNeeded _ ->
-      begin match next() with
-      | None ->
-        OInputReadPastEnd
-      | Some t ->
-        loop (E.offer checkpoint (t, Lexing.dummy_pos, Lexing.dummy_pos)) spurious
-      end
+        begin match next() with
+        | None ->
+            OInputReadPastEnd
+        | Some t ->
+            let checkpoint = E.offer checkpoint (t, dummy_pos, dummy_pos) in
+            loop checkpoint spurious
+        end
     | E.Shifting _ ->
-      loop (E.resume ~strategy checkpoint) spurious
+        loop (E.resume ~strategy checkpoint) spurious
     | E.AboutToReduce (env, prod) ->
         (* If we have requested the last input token and if this is not
            a default reduction, then this is a spurious reduction.
@@ -402,4 +367,4 @@ let check_error_path log nt input =
         assert false
   in
 
-  loop (E.start entry Lexing.dummy_pos) []
+  loop (E.start entry dummy_pos) []

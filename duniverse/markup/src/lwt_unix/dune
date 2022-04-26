@@ -3,5 +3,4 @@
  (public_name markup-lwt.unix)
  (synopsis "Lwt_unix helpers for Markup.ml")
  (instrumentation (backend bisect_ppx))
- (libraries lwt lwt.unix markup markup-lwt)
- (flags (:standard -w +A-4-9-44-48 -warn-error -3-4-9-44-48 -safe-string)))
+ (libraries lwt lwt.unix markup markup-lwt))

@@ -15,4 +15,6 @@ let () =
        Pkg.mllib ~cond:cmdliner "src/fmt_cli.mllib";
        Pkg.mllib ~api:[] "src/fmt_top.mllib";
        Pkg.lib "src/fmt_tty_top_init.ml";
-       Pkg.test "test/test"; ]
+       Pkg.test "test/test";
+       Pkg.test "test/styled_perf_bug";
+     ]

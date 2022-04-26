@@ -5,6 +5,11 @@
  (wrapped false))
 
 (library
+ (name mtime_clock_virtual)
+ (public_name mtime.clock)
+ (modules))
+
+(library
  (name mtime_top)
  (public_name mtime.top)
  (libraries compiler-libs.toplevel mtime)

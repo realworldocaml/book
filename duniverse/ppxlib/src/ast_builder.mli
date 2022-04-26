@@ -92,7 +92,6 @@ module Default : sig
 end
 
 module type Loc = Ast_builder_intf.Loc
-
 module type S = Ast_builder_intf.S
 
 (** Build Ast helpers with the location argument factorized. *)

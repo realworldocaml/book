@@ -53,6 +53,7 @@ type shape =
   | Oval
   | Circle
   | DoubleCircle
+  | Record
       (* there are many others, let's stop here *)
 
 (* ------------------------------------------------------------------------- *)
@@ -81,4 +82,3 @@ end) : sig
       unit
 
 end
-

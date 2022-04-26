@@ -15,7 +15,7 @@
 #   help us get more users, weigh in on design decisions.
 
 # Fallback reviewers
-* @mjambon @rgrinberg
+* @mjambon @rgrinberg @Khady @zindel @cyberhuman
 
 # ATD language
 /atd/ @mjambon
@@ -36,5 +36,8 @@ bucklescript/ @rgrinberg
 # Scala support
 /atds/ @aij
 
+# Python support
+/atdpy/ @mjambon
+
 # Use of the dune build system
-dune* @rgrinberg
+dune* @rgrinberg @Khady

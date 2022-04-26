@@ -5,6 +5,8 @@
  * See the file LICENSE for details.
  *)
 
+[@@@ocaml.warning "-6"]
+
 open OUnit2
 open Ctypes
 open Foreign

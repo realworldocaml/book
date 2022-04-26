@@ -1,0 +1,5 @@
+(library
+ (name camlp_streams)
+ (public_name camlp-streams)
+ (wrapped false)
+ (flags :standard -w -9))

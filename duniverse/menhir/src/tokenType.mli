@@ -25,9 +25,10 @@
    then the token type and the token GADT are defined as abbreviations for
    [M.token] and ['a M.terminal]. *)
 
-(* The conventional name of the [token] type, for use by the code
-   generators. *)
+(* The (unqualified) conventional name of the [token] type, for use by
+   the code generators. *)
 
+val tctoken: string
 val ttoken: IL.typ
 
 (* [tokendata] maps the name of a token to a data constructor of the [token]
@@ -59,4 +60,3 @@ val tokengadtdef: BasicSyntax.grammar -> IL.interface
    it does nothing. *)
 
 val produce_tokentypes: BasicSyntax.grammar -> unit
-

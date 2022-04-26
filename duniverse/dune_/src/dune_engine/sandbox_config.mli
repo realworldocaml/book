@@ -1,7 +1,7 @@
 (** Sandboxing configuration of build rules *)
 
 (** This module manages the sandboxing configuration written by the user in dune
-    files or inside the build description.
+    files or inside the action builder.
 
     The sandboxing configuration of a build rule represent what the rule expects
     in terms of sandboxing. For instance, a rule might not work correctly when
@@ -23,6 +23,7 @@ val no_special_requirements : t
 
 val no_sandboxing : t
 
+(** Allow any sandboxing mode, except [Patch_back_source_tree] *)
 val needs_sandboxing : t
 
 (** The default sandboxing config for actions that don't bother specifying it.

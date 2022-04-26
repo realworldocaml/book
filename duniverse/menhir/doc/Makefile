@@ -1,4 +1,4 @@
-.PHONY: all loop clean
+.PHONY: all loop clean check
 
 export TEXINPUTS=.:
 
@@ -31,3 +31,12 @@ loop:
 
 clean:
 	@ rm -f `cat .gitignore`
+
+CHECK := manual.tex
+
+check:
+	@ for f in $(CHECK) ; do \
+	  aspell --mode=tex --lang=en_US --encoding=utf-8 \
+	         --home-dir=. --personal=.aspell.en.pws \
+	         check $$f ; \
+	done

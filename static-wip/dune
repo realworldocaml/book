@@ -2,7 +2,7 @@
 
 (rule
   (targets book.md)
-  (deps ../book/toc.scm (alias ../book/latex))
+  (deps ../book/toc.scm ../book/part-language-concepts.md ../book/part-tools-and-techniques.md ../book/part-the-compiler-and-runtime-system.md (alias ../book/latex))
   (action (run rwo-build build inputs -include-wip -o . -repo-root ..)))
 
 (copy_files ../book/EngD.cls)
@@ -14,7 +14,7 @@
  (deps ../bin/pandoc-rwo/pandoc_rwo_tex.exe book.md EngD.cls colour-blind.sty ../book/book.yml ../book/cup-template.tex)
  (action
   (progn
-   (system "pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo_tex.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
+   (system "pandoc -V links-as-notes=true --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo.exe --metadata-file=../book/book.yml --template ../book/cup-template.tex --listings -o book.tex -t latex -s book.md"))))
 
 (rule
  (alias pdf-wip)
@@ -38,7 +38,9 @@
         images/bg.jpg
         images/book-cover.jpg
         images/cover.png
-        images/jason.jpg
+        images/cover-p1.jpg
+        images/cover-p2.jpg
+        images/cover-p3.jpg
         images/plain-bg.jpg
         images/yaron.jpg
         images/front-end/pipeline.png
@@ -51,6 +53,7 @@
         images/memory-repr/string_block.png
         images/memory-repr/string_size_calc.png
         images/memory-repr/tuple_layout.png
+        images/variables-and-functions/associativity.png
         js/_functions.js
         js/app.js
         js/jquery.min.js

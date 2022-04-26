@@ -1,3 +1,28 @@
+Release 1.12 (2021-03-03)
+- PR #79: fast path in OCaml (instead of assembly language) [Xavier Leroy]
+- PR #94: remove source preprocessing and simplify configuration [Xavier Leroy]
+- PR #93: fix parallel build [Guillaume Melquiond]
+- PR #92: fix benchmark for subtraction [Guillaume Melquiond]
+- require OCaml 4.04 or later [Xavier Leroy]
+- add CI testing on macOS  [Xavier Leroy]
+
+Release 1.11 (2020-11-09)
+- Fixes #72, #75, #78: multiple fixes for of_string, support for underscores [hhugo]
+- Fix #74: fix Q.to_float for denormal numbers [pascal-cuoq]
+- Fix #84: always represent min_int by a tagged integer [xavierleroy]
+- muliple fixes for min_int arguments [xavierleroy]
+- Improvement #85: optimize the fast paths for comparison and equality tests [xavierleroy]
+- Fix #80: ar tool is detected in configure [jsmolic]
+
+Release 1.10 (2020-09-11)
+- Improvement #66: added some mpz functions (divisible, congruent, jacobi, legendre, krobecker, remove, fac, primorial, bin, fib, lucnum)
+- Improvement #65: Q.of_string now handles decimal point and scientific notation [Ghiles Ziat]
+- Fix #60: Z.root now raises an exception for invalid arguments
+- Fix #62: raise division by 0 for 0-modulo in powm
+- Fix #59: improved abs for negative arguments
+- Fix #58: gcd, lcm, gcdext now behave as gmp for negative arguments
+- Fix #57: clean compile with safe strings [hhugo]
+
 Release 1.9.1 (2019-08-28) (bugfix):
 - Fix configure issue for non-bash sh introduced in #45
 - Tweaks to opam file [kit-ty-kate]
@@ -6,7 +31,7 @@ Release 1.9 (2019-08-22):
 - Issue #50: add opam file, make it easy to "opam publish" new versions
 - Issue #38: configure detects 32bit OCaml switch on 64bit host
 - Fix #36: change Q.equal, leq, geq comparisons for undef
-- Request #47: move infix comparison operators of Z in submodule 
+- Request #47: move infix comparison operators of Z in submodule
   avoid shadowing the polymorphic compare [Bernhard Schommer]
 - Fix #49: INT_MAX undeclared
 - Request #46: add prefixnonocaml option [Et7f3]
@@ -22,9 +47,9 @@ Release 1.8 (2019-03-30):
 - Issue #22: wrong stack marking directive in caml_z_x86_64_mingw64.S
   [Bernhard Schommer]
 - Issue #24: generate and install .cmti files for easy access to documentation
-- Issue #25: false alarm in tests/zq.ml owing to unreliable printing  
+- Issue #25: false alarm in tests/zq.ml owing to unreliable printing
   of FP values
-- Request #28: better handling of absolute paths in "configure" 
+- Request #28: better handling of absolute paths in "configure"
 
 Release 1.7 (2017-10-13):
 - Issue#14, pull request#15: ARM assembly code was broken.
@@ -92,7 +117,7 @@ Release 1.1 (2012-03-24):
 - PR#1034: support for static linking of GMP/MPIR
 - PR#1046: autodetection of ocamlopt and dynlink
 - PR#1048: autodetection of more platforms that we support
-- PR#1051: support architectures with strict alignment constraints for 
+- PR#1051: support architectures with strict alignment constraints for
     64-bit integers (e.g. Sparc)
 - Fixed 1-bit precision loss when converting doubles to rationals
 - Improved support for the forthcoming release 4.00 of OCaml

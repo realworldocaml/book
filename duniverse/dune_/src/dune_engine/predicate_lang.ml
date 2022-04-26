@@ -8,9 +8,7 @@ type 'a t =
   | Inter of 'a t list
 
 let diff a = function
-  | Union []
-  | Inter [] ->
-    a
+  | Union [] | Inter [] -> a
   | b -> Inter [ a; Compl b ]
 
 let inter a = Inter a
@@ -40,10 +38,7 @@ let rec decode_one f =
   in
   peek_exn >>= function
   | Atom (loc, A "\\") -> User_error.raise ~loc [ Pp.text "unexpected \\" ]
-  | Atom (_, A "")
-  | Quoted_string (_, _)
-  | Template _ ->
-    elt
+  | Atom (_, A "") | Quoted_string (_, _) | Template _ -> elt
   | Atom (loc, A s) -> (
     match s with
     | ":standard" -> junk >>> return Standard
@@ -58,10 +53,7 @@ let rec decode_one f =
     | ":include" ->
       User_error.raise ~loc
         [ Pp.text ":include isn't supported in the predicate language" ]
-    | "or"
-    | "and"
-    | "not" ->
-      bool_ops ()
+    | "or" | "and" | "not" -> bool_ops ()
     | s when s <> "" && s.[0] <> '-' && s.[0] <> ':' ->
       User_error.raise ~loc
         [ Pp.text
@@ -94,13 +86,13 @@ let rec encode f =
   | Inter xs -> constr "and" (list (encode f)) xs
 
 let rec to_dyn f =
-  let open Dyn.Encoder in
+  let open Dyn in
   function
   | Element a -> f a
-  | Compl a -> constr "compl" [ to_dyn f a ]
+  | Compl a -> variant "compl" [ to_dyn f a ]
   | Standard -> string ":standard"
-  | Union xs -> constr "or" (List.map ~f:(to_dyn f) xs)
-  | Inter xs -> constr "and" (List.map ~f:(to_dyn f) xs)
+  | Union xs -> variant "or" (List.map ~f:(to_dyn f) xs)
+  | Inter xs -> variant "and" (List.map ~f:(to_dyn f) xs)
 
 let rec exec t ~standard elem =
   match (t : _ t) with
@@ -115,7 +107,7 @@ module Glob = struct
 
   type nonrec t = glob t
 
-  let to_dyn t = to_dyn (fun _ -> Dyn.Encoder.string "opaque") t
+  let to_dyn t = to_dyn (fun _ -> Dyn.string "opaque") t
 
   let decode : t Dune_lang.Decoder.t =
     let open Dune_lang.Decoder in
@@ -125,9 +117,7 @@ module Glob = struct
 
   let filter (t : t) ~standard elems =
     match t with
-    | Inter []
-    | Union [] ->
-      []
+    | Inter [] | Union [] -> []
     | _ -> List.filter elems ~f:(fun elem -> exec t ~standard elem)
 
   let of_glob g = Element (Glob.test g)

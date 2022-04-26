@@ -3,7 +3,6 @@ open Base
 type t = (string * int) list
 
 let empty = []
-
 let to_list x = x
 
 let touch counts line =

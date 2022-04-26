@@ -72,7 +72,7 @@ module V1 = struct
   ]
 
   let map_file fd ?pos kind layout shared dims =
-    try Bigarray.Genarray.map_file fd ?pos kind layout shared dims
+    try Bigarray_compat.Genarray.map_file fd ?pos kind layout shared dims
     with Sys_error description as exn ->
       try
         let error_code =

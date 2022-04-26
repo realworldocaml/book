@@ -1,0 +1,443 @@
+{0 Examples}
+
+The examples are self-contained, cut and paste them in a file to play
+with them.
+
+{1:exrm A [rm] command}
+
+We define the command line interface of an [rm] command with the
+synopsis:
+
+{v
+rm [OPTION]… FILE…
+v}
+
+The [-f], [-i] and [-I] flags define the prompt behaviour of [rm].  It
+is represented in our program by the [prompt] type. If more than one
+of these flags is present on the command line the last one takes
+precedence.
+
+To implement this behaviour we map the presence of these flags to
+values of the [prompt] type by using {!Cmdliner.Arg.vflag_all}.
+
+This argument will contain all occurrences of the flag on the command
+line and we just take the {!Cmdliner.Arg.last} one to define our term
+value. If there is no occurrence the last value of the default list
+[[Always]] is taken. This means the default prompt behaviour is [Always].
+
+{[
+(* Implementation of the command, we just print the args. *)
+
+type prompt = Always | Once | Never
+let prompt_str = function
+| Always -> "always" | Once -> "once" | Never -> "never"
+
+let rm prompt recurse files =
+  Printf.printf "prompt = %s\nrecurse = %B\nfiles = %s\n"
+    (prompt_str prompt) recurse (String.concat ", " files)
+
+(* Command line interface *)
+
+open Cmdliner
+
+let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE")
+let prompt =
+  let always =
+    let doc = "Prompt before every removal." in
+    Always, Arg.info ["i"] ~doc
+  in
+  let never =
+    let doc = "Ignore nonexistent files and never prompt." in
+    Never, Arg.info ["f"; "force"] ~doc
+  in
+  let once =
+    let doc = "Prompt once before removing more than three files, or when
+               removing recursively. Less intrusive than $(b,-i), while
+               still giving protection against most mistakes."
+    in
+    Once, Arg.info ["I"] ~doc
+  in
+  Arg.(last & vflag_all [Always] [always; never; once])
+
+let recursive =
+  let doc = "Remove directories and their contents recursively." in
+  Arg.(value & flag & info ["r"; "R"; "recursive"] ~doc)
+
+let cmd =
+  let doc = "Remove files or directories" in
+  let man = [
+    `S Manpage.s_description;
+    `P "$(tname) removes each specified $(i,FILE). By default it does not
+        remove directories, to also remove them and their contents, use the
+        option $(b,--recursive) ($(b,-r) or $(b,-R)).";
+    `P "To remove a file whose name starts with a $(b,-), for example
+        $(b,-foo), use one of these commands:";
+    `Pre "$(mname) $(b,-- -foo)"; `Noblank;
+    `Pre "$(mname) $(b,./-foo)";
+    `P "$(tname) removes symbolic links, not the files referenced by the
+        links.";
+    `S Manpage.s_bugs; `P "Report bugs to <bugs@example.org>.";
+    `S Manpage.s_see_also; `P "$(b,rmdir)(1), $(b,unlink)(2)" ]
+  in
+  let info = Cmd.info "rm" ~version:"v1.1.1" ~doc ~man in
+  Cmd.v info Term.(const rm $ prompt $ recursive $ files)
+
+let main () = exit (Cmd.eval cmd)
+let () = main ()
+]}
+
+{1:excp A [cp] command}
+
+We define the command line interface of a [cp] command with the synopsis:
+{v
+cp [OPTION]… SOURCE… DEST
+v}
+
+The [DEST] argument must be a directory if there is more than one
+[SOURCE]. This constraint is too complex to be expressed by the
+combinators of {!Cmdliner.Arg}.
+
+Hence we just give [DEST] the {!Cmdliner.Arg.string} type and verify the
+constraint at the beginning of the implementation of [cp]. If the
+constraint is unsatisfied we return an [`Error] result. By using
+{!Cmdliner.Term.val-ret} on the lifted result [cp_t] of [cp],
+[Cmdliner] handles the error reporting.
+
+{[
+(* Implementation, we check the dest argument and print the args *)
+
+let cp verbose recurse force srcs dest =
+  let many = List.length srcs > 1 in
+  if many && (not (Sys.file_exists dest) || not (Sys.is_directory dest))
+  then `Error (false, dest ^ ": not a directory") else
+  `Ok (Printf.printf
+         "verbose = %B\nrecurse = %B\nforce = %B\nsrcs = %s\ndest = %s\n"
+         verbose recurse force (String.concat ", " srcs) dest)
+
+(* Command line interface *)
+
+open Cmdliner
+
+let verbose =
+  let doc = "Print file names as they are copied." in
+  Arg.(value & flag & info ["v"; "verbose"] ~doc)
+
+let recurse =
+  let doc = "Copy directories recursively." in
+  Arg.(value & flag & info ["r"; "R"; "recursive"] ~doc)
+
+let force =
+  let doc = "If a destination file cannot be opened, remove it and try again."in
+  Arg.(value & flag & info ["f"; "force"] ~doc)
+
+let srcs =
+  let doc = "Source file(s) to copy." in
+  Arg.(non_empty & pos_left ~rev:true 0 file [] & info [] ~docv:"SOURCE" ~doc)
+
+let dest =
+  let doc = "Destination of the copy. Must be a directory if there is more \
+             than one $(i,SOURCE)." in
+  let docv = "DEST" in
+  Arg.(required & pos ~rev:true 0 (some string) None & info [] ~docv ~doc)
+
+let cmd =
+  let doc = "Copy files" in
+  let man_xrefs =
+    [ `Tool "mv"; `Tool "scp"; `Page ("umask", 2); `Page ("symlink", 7) ]
+  in
+  let man =
+    [ `S Manpage.s_bugs;
+      `P "Email them to <bugs@example.org>."; ]
+  in
+  let info = Cmd.info "cp" ~version:"v1.1.1" ~doc ~man ~man_xrefs in
+  Cmd.v info Term.(ret (const cp $ verbose $ recurse $ force $ srcs $ dest))
+
+
+let main () = exit (Cmd.eval cmd)
+let () = main ()
+]}
+
+{1:extail A [tail] command}
+
+We define the command line interface of a [tail] command with the
+synopsis:
+
+{v
+tail [OPTION]… [FILE]…
+v}
+
+The [--lines] option whose value specifies the number of last lines to
+print has a special syntax where a [+] prefix indicates to start
+printing from that line number. In the program this is represented by
+the [loc] type. We define a custom [loc_arg]
+{{!Cmdliner.Arg.type-conv}argument converter} for this option.
+
+The [--follow] option has an optional enumerated value. The argument
+converter [follow], created with {!Cmdliner.Arg.enum} parses the
+option value into the enumeration. By using {!Cmdliner.Arg.some} and
+the [~vopt] argument of {!Cmdliner.Arg.opt}, the term corresponding to
+the option [--follow] evaluates to [None] if [--follow] is absent from
+the command line, to [Some Descriptor] if present but without a value
+and to [Some v] if present with a value [v] specified.
+
+{[
+(* Implementation of the command, we just print the args. *)
+
+type loc = bool * int
+type verb = Verbose | Quiet
+type follow = Name | Descriptor
+
+let str = Printf.sprintf
+let opt_str sv = function None -> "None" | Some v -> str "Some(%s)" (sv v)
+let loc_str (rev, k) = if rev then str "%d" k else str "+%d" k
+let follow_str = function Name -> "name" | Descriptor -> "descriptor"
+let verb_str = function Verbose -> "verbose" | Quiet -> "quiet"
+
+let tail lines follow verb pid files =
+  Printf.printf
+    "lines = %s\nfollow = %s\nverb = %s\npid = %s\nfiles = %s\n"
+    (loc_str lines) (opt_str follow_str follow) (verb_str verb)
+    (opt_str string_of_int pid) (String.concat ", " files)
+
+(* Command line interface *)
+
+open Cmdliner
+
+let loc_arg =
+  let parse s =
+    try
+      if s <> "" && s.[0] <> '+'
+      then Ok (true, int_of_string s)
+      else Ok (false, int_of_string (String.sub s 1 (String.length s - 1)))
+    with Failure _ -> Error (`Msg "unable to parse integer")
+  in
+  let print ppf p = Format.fprintf ppf "%s" (loc_str p) in
+  Arg.conv ~docv:"N" (parse, print)
+
+let lines =
+  let doc = "Output the last $(docv) lines or use $(i,+)$(docv) to start \
+             output after the $(i,N)-1th line."
+  in
+  Arg.(value & opt loc_arg (true, 10) & info ["n"; "lines"] ~docv:"N" ~doc)
+
+let follow =
+  let doc = "Output appended data as the file grows. $(docv) specifies how \
+             the file should be tracked, by its $(b,name) or by its \
+             $(b,descriptor)."
+  in
+  let follow = Arg.enum ["name", Name; "descriptor", Descriptor] in
+  Arg.(value & opt (some follow) ~vopt:(Some Descriptor) None &
+       info ["f"; "follow"] ~docv:"ID" ~doc)
+
+let verb =
+  let quiet =
+    let doc = "Never output headers giving file names." in
+    Quiet, Arg.info ["q"; "quiet"; "silent"] ~doc
+  in
+  let verbose =
+    let doc = "Always output headers giving file names." in
+    Verbose, Arg.info ["v"; "verbose"] ~doc
+  in
+  Arg.(last & vflag_all [Quiet] [quiet; verbose])
+
+let pid =
+  let doc = "With -f, terminate after process $(docv) dies." in
+  Arg.(value & opt (some int) None & info ["pid"] ~docv:"PID" ~doc)
+
+let files = Arg.(value & (pos_all non_dir_file []) & info [] ~docv:"FILE")
+
+let cmd =
+  let doc = "Display the last part of a file" in
+  let man = [
+    `S Manpage.s_description;
+    `P "$(tname) prints the last lines of each $(i,FILE) to standard output. If
+        no file is specified reads standard input. The number of printed
+        lines can be  specified with the $(b,-n) option.";
+    `S Manpage.s_bugs;
+    `P "Report them to <bugs@example.org>.";
+    `S Manpage.s_see_also;
+    `P "$(b,cat)(1), $(b,head)(1)" ]
+  in
+  let info = Cmd.info "tail" ~version:"v1.1.1" ~doc ~man in
+  Cmd.v info Term.(const tail $ lines $ follow $ verb $ pid $ files)
+
+
+let main () = exit (Cmd.eval cmd)
+let () = main ()
+]}
+
+{1:exdarcs A [darcs] command}
+
+We define the command line interface of a [darcs] command with the
+synopsis:
+
+{v
+darcs [COMMAND] …
+v}
+
+The [--debug], [-q], [-v] and [--prehook] options are available in
+each command.  To avoid having to pass them individually to each
+command we gather them in a record of type [copts]. By lifting the
+record constructor [copts] into the term [copts_t] we now have a term
+that we can pass to the commands to stand for an argument of type
+[copts]. These options are documented in a section called [COMMON
+OPTIONS], since we also want to put [--help] and [--version] in this
+section, the term information of commands makes a judicious use of the
+[sdocs] parameter of {!Cmdliner.Term.val-info}.
+
+The [help] command shows help about commands or other topics. The help
+shown for commands is generated by [Cmdliner] by making an appropriate
+use of {!Cmdliner.Term.val-ret} on the lifted [help] function.
+
+If the program is invoked without a command we just want to show the
+help of the program as printed by [Cmdliner] with [--help]. This is
+done by the [default_cmd] term.
+
+{[
+(* Implementations, just print the args. *)
+
+type verb = Normal | Quiet | Verbose
+type copts = { debug : bool; verb : verb; prehook : string option }
+
+let str = Printf.sprintf
+let opt_str sv = function None -> "None" | Some v -> str "Some(%s)" (sv v)
+let opt_str_str = opt_str (fun s -> s)
+let verb_str = function
+  | Normal -> "normal" | Quiet -> "quiet" | Verbose -> "verbose"
+
+let pr_copts oc copts = Printf.fprintf oc
+    "debug = %B\nverbosity = %s\nprehook = %s\n"
+    copts.debug (verb_str copts.verb) (opt_str_str copts.prehook)
+
+let initialize copts repodir = Printf.printf
+    "%arepodir = %s\n" pr_copts copts repodir
+
+let record copts name email all ask_deps files = Printf.printf
+    "%aname = %s\nemail = %s\nall = %B\nask-deps = %B\nfiles = %s\n"
+    pr_copts copts (opt_str_str name) (opt_str_str email) all ask_deps
+    (String.concat ", " files)
+
+let help copts man_format cmds topic = match topic with
+| None -> `Help (`Pager, None) (* help about the program. *)
+| Some topic ->
+    let topics = "topics" :: "patterns" :: "environment" :: cmds in
+    let conv, _ = Cmdliner.Arg.enum (List.rev_map (fun s -> (s, s)) topics) in
+    match conv topic with
+    | `Error e -> `Error (false, e)
+    | `Ok t when t = "topics" -> List.iter print_endline topics; `Ok ()
+    | `Ok t when List.mem t cmds -> `Help (man_format, Some t)
+    | `Ok t ->
+        let page = (topic, 7, "", "", ""), [`S topic; `P "Say something";] in
+        `Ok (Cmdliner.Manpage.print man_format Format.std_formatter page)
+
+open Cmdliner
+
+(* Help sections common to all commands *)
+
+let help_secs = [
+ `S Manpage.s_common_options;
+ `P "These options are common to all commands.";
+ `S "MORE HELP";
+ `P "Use $(mname) $(i,COMMAND) --help for help on a single command.";`Noblank;
+ `P "Use $(mname) $(b,help patterns) for help on patch matching."; `Noblank;
+ `P "Use $(mname) $(b,help environment) for help on environment variables.";
+ `S Manpage.s_bugs; `P "Check bug reports at http://bugs.example.org.";]
+
+(* Options common to all commands *)
+
+let copts debug verb prehook = { debug; verb; prehook }
+let copts_t =
+  let docs = Manpage.s_common_options in
+  let debug =
+    let doc = "Give only debug output." in
+    Arg.(value & flag & info ["debug"] ~docs ~doc)
+  in
+  let verb =
+    let doc = "Suppress informational output." in
+    let quiet = Quiet, Arg.info ["q"; "quiet"] ~docs ~doc in
+    let doc = "Give verbose output." in
+    let verbose = Verbose, Arg.info ["v"; "verbose"] ~docs ~doc in
+    Arg.(last & vflag_all [Normal] [quiet; verbose])
+  in
+  let prehook =
+    let doc = "Specify command to run before this $(mname) command." in
+    Arg.(value & opt (some string) None & info ["prehook"] ~docs ~doc)
+  in
+  Term.(const copts $ debug $ verb $ prehook)
+
+(* Commands *)
+
+let sdocs = Manpage.s_common_options
+
+let initialize_cmd =
+  let repodir =
+    let doc = "Run the program in repository directory $(docv)." in
+    Arg.(value & opt file Filename.current_dir_name & info ["repodir"]
+           ~docv:"DIR" ~doc)
+  in
+  let doc = "make the current directory a repository" in
+  let man = [
+    `S Manpage.s_description;
+    `P "Turns the current directory into a Darcs repository. Any
+       existing files and subdirectories become …";
+    `Blocks help_secs; ]
+  in
+  let info = Cmd.info "initialize" ~doc ~sdocs ~man in
+  Cmd.v info Term.(const initialize $ copts_t $ repodir)
+
+let record_cmd =
+  let pname =
+    let doc = "Name of the patch." in
+    Arg.(value & opt (some string) None & info ["m"; "patch-name"] ~docv:"NAME"
+           ~doc)
+  in
+  let author =
+    let doc = "Specifies the author's identity." in
+    Arg.(value & opt (some string) None & info ["A"; "author"] ~docv:"EMAIL"
+           ~doc)
+  in
+  let all =
+    let doc = "Answer yes to all patches." in
+    Arg.(value & flag & info ["a"; "all"] ~doc)
+  in
+  let ask_deps =
+    let doc = "Ask for extra dependencies." in
+    Arg.(value & flag & info ["ask-deps"] ~doc)
+  in
+  let files = Arg.(value & (pos_all file) [] & info [] ~docv:"FILE or DIR") in
+  let doc = "create a patch from unrecorded changes" in
+  let man =
+    [`S Manpage.s_description;
+     `P "Creates a patch from changes in the working tree. If you specify
+         a set of files …";
+     `Blocks help_secs; ]
+  in
+  let info = Cmd.info "record" ~doc ~sdocs ~man in
+  Cmd.v info
+    Term.(const record $ copts_t $ pname $ author $ all $ ask_deps $ files)
+
+let help_cmd =
+  let topic =
+    let doc = "The topic to get help on. $(b,topics) lists the topics." in
+    Arg.(value & pos 0 (some string) None & info [] ~docv:"TOPIC" ~doc)
+  in
+  let doc = "display help about darcs and darcs commands" in
+  let man =
+    [`S Manpage.s_description;
+     `P "Prints help about darcs commands and other subjects…";
+     `Blocks help_secs; ]
+  in
+  let info = Cmd.info "help" ~doc ~man in
+  Cmd.v info
+    Term.(ret (const help $ copts_t $ Arg.man_format $ Term.choice_names $
+               topic))
+
+let main_cmd =
+  let doc = "a revision control system" in
+  let man = help_secs in
+  let info = Cmd.info "darcs" ~version:"v1.1.1" ~doc ~sdocs ~man in
+  let default = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ copts_t)) in
+  Cmd.group info ~default [initialize_cmd; record_cmd; help_cmd]
+
+let () = exit (Cmd.eval main_cmd)
+]}

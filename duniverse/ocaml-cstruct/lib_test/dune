@@ -1,5 +1,5 @@
 (executable
- (libraries cstruct bigarray alcotest cstruct-sexp)
+ (libraries cstruct alcotest cstruct-sexp)
  (modules bounds tests)
  (name tests))
 

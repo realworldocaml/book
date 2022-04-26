@@ -15,23 +15,23 @@ val setup_rules :
   -> dir:Path.Build.t
   -> dir_contents:Dir_contents.t
   -> Theory.t
-  -> Action.t Build.With_targets.t list
+  -> Action.Full.t Action_builder.With_targets.t list Memo.Build.t
 
 val install_rules :
      sctx:Super_context.t
   -> dir:Path.Build.t
   -> Theory.t
-  -> (Loc.t option * Path.Build.t Install.Entry.t) list
+  -> Install.Entry.Sourced.t list Memo.Build.t
 
 val coqpp_rules :
      sctx:Super_context.t
   -> dir:Path.Build.t
   -> Coqpp.t
-  -> Action.t Build.With_targets.t list
+  -> Action.Full.t Action_builder.With_targets.t list Memo.Build.t
 
 val extraction_rules :
      sctx:Super_context.t
   -> dir:Path.Build.t
   -> dir_contents:Dir_contents.t
   -> Extraction.t
-  -> Action.t Build.With_targets.t list
+  -> Action.Full.t Action_builder.With_targets.t list Memo.Build.t

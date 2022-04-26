@@ -8,6 +8,7 @@ type param =
   }
 
 let target : Ocaml.target = Bucklescript
+let annot_schema = Ocaml.annot_schema_of_target target
 
 let open_enum_not_supported () =
   failwith "open_enum is not supported in bucklescript mode"
@@ -204,7 +205,10 @@ let rec make_reader ?type_annot p (x : Oj_mapping.t) : Indent.t list =
           let codec_cons =
             match arg with
             | None ->
-                [Line (sprintf "`Single (%s%s)" tick o)]
+                let single_payload = match type_annot with
+                | None -> sprintf "%s%s" tick o
+                | Some type_annot -> sprintf "%s%s: %s" tick o type_annot in
+                [Line (sprintf "`Single (%s)" single_payload)]
             | Some v ->
                 [ Line "`Decode ("
                 ; Inline (make_reader p v)
@@ -695,11 +699,13 @@ let make_ocaml_files
     match atd_file with
       Some file ->
         Atd.Util.load_file
+          ~annot_schema
           ~expand:false ~inherit_fields:true ~inherit_variants:true
           ?pos_fname ?pos_lnum
           file
     | None ->
         Atd.Util.read_channel
+          ~annot_schema
           ~expand:false ~inherit_fields:true ~inherit_variants:true
           ?pos_fname ?pos_lnum
           stdin
@@ -721,7 +727,7 @@ let make_ocaml_files
      m1 = original type definitions after dependency analysis
      m2 = monomorphic type definitions after dependency analysis *)
   let ocaml_typedefs =
-    Ocaml.ocaml_of_atd ~pp_convs:(Ppx []) ~target
+    Ocaml.ocaml_of_atd ~pp_convs:(Ppx_deriving []) ~target
       ~type_aliases (head, m1) in
   let defs = Oj_mapping.defs_of_atd_modules m2 ~target in
   let header =
@@ -731,7 +737,7 @@ let make_ocaml_files
       | Some path -> sprintf "%S" (Filename.basename path)
     in
     sprintf {|(* Auto-generated from %s *)
-              [@@@ocaml.warning "-27-32-35-39"]|} src
+[@@@ocaml.warning "-27-32-33-35-39"]|} src
   in
   let ml =
     make_ml ~opens ~header ~with_typedefs ~with_create ~with_fundefs ~original_types

@@ -14,14 +14,13 @@ Test toplevel-init-file on a tiny project
   > let hello () = print_endline "hello"
   > EOF
 
-  $ dune top
+  $ dune ocaml top
   #directory "$TESTCASE_ROOT/_build/default/.test.objs/byte";;
   #load "$TESTCASE_ROOT/_build/default/test.cma";;
 
   $ ocaml -stdin <<EOF
   > #use "topfind";;
-  > #use "use_output_compat";;
-  > #use_output "dune top";;
+  > #use_output "dune ocaml top";;
   > Test.Main.hello ();;
   > EOF
   hello
@@ -30,7 +29,7 @@ Test toplevel-init-file on a tiny project
   > let oops () = undefined_function ()
   > EOF
 
-  $ dune top
+  $ dune ocaml top
   File "error.ml", line 1, characters 14-32:
   1 | let oops () = undefined_function ()
                     ^^^^^^^^^^^^^^^^^^
@@ -39,8 +38,7 @@ Test toplevel-init-file on a tiny project
 
   $ ocaml -stdin <<EOF
   > #use "topfind";;
-  > #use "use_output_compat";;
-  > #use_output "dune top";;
+  > #use_output "dune ocaml top";;
   > EOF
   File "error.ml", line 1, characters 14-32:
   1 | let oops () = undefined_function ()

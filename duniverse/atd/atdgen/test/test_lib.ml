@@ -1,3 +1,4 @@
+
 type t = Foo of int
 
 let fail _ = failwith "not implemented"

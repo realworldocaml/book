@@ -17,7 +17,7 @@ Before going any further, make sure you've followed the steps in [the
 installation page](http://dev.realworldocaml.org/install.html).
 
 ::: {data-type=note}
-##### `Base` and `Core`
+#### `Base` and `Core`
 
 `Base` comes along with another, yet more extensive standard library
 replacement, called `Core`.  We're going to mostly stick to `Base`,
@@ -40,7 +40,7 @@ As of this writing, the stable release of `Core` is less portable than
 yet a third library, `Core_kernel`, which is a portable subset of
 `Core`. That said, the latest development version removes
 `Core_kernel`, and makes `Core` itself portable.  The stable release
-should have `Core_kernel` removed by early 2022, so we won't use
+should have `Core_kernel` removed by mid-2022, so we won't use
 `Core_kernel` in this text.
 
 :::
@@ -104,6 +104,7 @@ language, but a few things jump right out at you:
 
 We can also create a variable to name the value of a given expression, using
 the `let` keyword. This is known as a *let binding*:
+[let bindings]{.idx}
 
 ```ocaml env=main
 # let x = 3 + 4;;
@@ -185,7 +186,7 @@ val ratio : int -> int -> float = <fun>
 
 Note that in OCaml, function arguments are separated by spaces instead
 of by parentheses and commas, which is more like the UNIX shell than
-it is like traditional programming languages such as C or Java.
+it is like traditional programming languages such as Python or Java.
 
 The preceding example also happens to be our first use of
 modules. Here, `Float.of_int` refers to the `of_int` function
@@ -202,6 +203,7 @@ slightly awkward `/.` operator. In the following example, we open the
 `Float.O` module, which has a bunch of useful operators and functions that
 are designed to be used in this kind of context. Note that this causes the
 standard int-only arithmetic operators to be shadowed locally.
+[local open]{.idx}
 
 ```ocaml env=main
 # let ratio x y =
@@ -210,9 +212,10 @@ standard int-only arithmetic operators to be shadowed locally.
 val ratio : int -> int -> float = <fun>
 ```
 
-Note that we used a slightly different syntax for opening the module, since
-we were only opening it in the local scope inside the definition of `ratio`.
-There's also a more concise syntax for local opens, as you can see here.
+We used a slightly different syntax for opening the module, since we
+were only opening it in the local scope inside the definition of
+`ratio`.  There's also a more concise syntax for local opens, as you
+can see here.
 
 ```ocaml env=main
 # let ratio x y =
@@ -248,7 +251,7 @@ in action:
 
 ```ocaml env=main
 # let even x =
-  x % 2 = 0;;
+    x % 2 = 0;;
 val even : int -> bool = <fun>
 # sum_if_true even 3 4;;
 - : int = 4
@@ -387,7 +390,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 `string`, and they can't both be right at the same time.
 
 ::: {data-type=note}
-##### Type Errors Versus Exceptions
+#### Type Errors Versus Exceptions
 
 There's a big difference in OCaml between errors that are caught at compile
 time and those that are caught at runtime. It's better to catch errors as early
@@ -401,19 +404,20 @@ errors like this one:
 
 ```ocaml env=main
 # let add_potato x =
-  x + "potato";;
-Line 2, characters 7-15:
+    x + "potato";;
+Line 2, characters 9-17:
 Error: This expression has type string but an expression was expected of type
          int
 ```
 
+\noindent
 are compile-time errors (because `+` requires that both its arguments be of
 type `int`), whereas errors that can't be caught by the type system, like
 division by zero, lead to runtime exceptions:
 
 ```ocaml env=main
 # let is_a_multiple x y =
-  x % y = 0;;
+    x % y = 0;;
 val is_a_multiple : int -> int -> bool = <fun>
 # is_a_multiple 8 2;;
 - : bool = true
@@ -448,10 +452,11 @@ val a_tuple : int * string = (3, "three")
 val another_tuple : int * string * float = (3, "four", 5.)
 ```
 
-(For the mathematically inclined, `*` is used in the type `t * s` because
-that type corresponds to the set of all pairs containing one value of type
-`t` and one of type `s`. In other words, it's the *Cartesian product* of the
-two types, which is why we use ` * `, the symbol for product.)
+For the mathematically inclined, `*` is used in the type `t * s`
+because that type corresponds to the set of all pairs containing one
+value of type `t` and one of type `s`. In other words, it's the
+*Cartesian product* of the two types, which is why we use ` * `, the
+symbol for product.
 
 You can extract the components of a tuple using OCaml's pattern-matching
 syntax, as shown below:
@@ -462,6 +467,7 @@ val x : int = 3
 val y : string = "three"
 ```
 
+\noindent
 Here, the `(x,y)` on the left-hand side of the `let` binding is the pattern.
 This pattern lets us mint the new variables `x` and `y`, each bound to
 different components of the value being matched. These can now be used in
@@ -472,6 +478,7 @@ subsequent expressions:
 - : int = 8
 ```
 
+\noindent
 Note that the same syntax is used both for constructing and for pattern
 matching on tuples.
 
@@ -486,6 +493,7 @@ at the values we need with a minimum of fuss:
 val distance : float * float -> float * float -> float = <fun>
 ```
 
+\noindent
 The `**.` operator used above is for raising a floating-point number
 to a power.
 
@@ -493,7 +501,7 @@ This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
 ::: {data-type=note}
-##### Operators in `Base` and the stdlib
+#### Operators in `Base` and the stdlib
 
 OCaml's standard library and `Base` mostly use the same operators for
 the same things, but there are some differences.  For example, in
@@ -557,11 +565,11 @@ lengths of each language as follows:
 elements of that list. It returns a new list with the transformed elements
 and does not modify the original list.
 
-Notably, the function passed to `List.map` is passed under a
-*labeled argument*`~f`. Labeled arguments are specified by name rather than
-by position, and thus allow you to change the order in which arguments are
-presented to a function without changing its behavior, as you can see
-here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
+Notably, the function passed to `List.map` is passed under a *labeled
+argument* `~f`. Labeled arguments are specified by name rather than by
+position, and thus allow you to change the order in which arguments
+are presented to a function without changing its behavior, as you can
+see here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 
 ```ocaml env=main
 # List.map ~f:String.length languages;;
@@ -591,7 +599,7 @@ started with, as you can see below:
 ```
 
 ::: {data-type=note}
-##### Semicolons Versus Commas
+#### Semicolons Versus Commas
 
 Unlike many other languages, OCaml uses semicolons to separate list elements
 in lists rather than commas. Commas, instead, are used for separating
@@ -765,8 +773,9 @@ sum [1;2;3]
 = 6
 ```
 
-This suggests a reasonable mental model for what OCaml is actually doing to
-evaluate a recursive function.
+\noindent
+This suggests a reasonable if not entirely accurate mental model for
+what OCaml is actually doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well. Here's a function
 for removing sequential duplicates:
@@ -776,9 +785,11 @@ for removing sequential duplicates:
     match list with
     | [] -> []
     | first :: second :: tl ->
-      let new_tl = remove_sequential_duplicates (second :: tl) in
-      if first = second then new_tl else first :: new_tl;;
-Lines 2-6, characters 5-57:
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
+Lines 2-8, characters 5-61:
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -794,10 +805,12 @@ fix this warning by adding another case to the match:
 # let rec remove_sequential_duplicates list =
     match list with
     | [] -> []
-    | [hd] -> [hd]
-    | hd1 :: hd2 :: tl ->
-      let new_tl = remove_sequential_duplicates (hd2 :: tl) in
-      if hd1 = hd2 then new_tl else hd1 :: new_tl;;
+    | [x] -> [x]
+    | first :: second :: tl ->
+      if first = second then
+        remove_sequential_duplicates (second :: tl)
+      else
+        first :: remove_sequential_duplicates (second :: tl);;
 val remove_sequential_duplicates : int list -> int list = <fun>
 # remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
 - : int list = [1; 2; 3; 4; 1]
@@ -815,45 +828,6 @@ time, you'll find yourself happy to use the iteration functions found in the
 `List` module. But it's good to know how to use recursion for when you need
 to iterate in a new way.[lists/recursion]{.idx}
 
-::: {data-type=note}
-##### Nesting lets with let and in
-
-`new_tl` in the above examples was our first use of `let` to define a
-new variable within the body of a function. A `let` paired with an
-`in` can be used to introduce a new binding within any local scope,
-including a function body. The `in` marks the beginning of the scope
-within which the new variable can be used. Thus, we could write:[let
-syntax/nested let binding]{.idx}
-
-```ocaml env=main
-# let z = 7 in
-  z + z;;
-- : int = 14
-```
-
-Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `z` is no longer available:
-
-```ocaml env=main
-# z;;
-Line 1, characters 1-2:
-Error: Unbound value z
-```
-
-We can also have multiple `let` bindings in a row, each one adding a
-new variable binding to what came before:
-
-```ocaml env=main
-# let x = 7 in
-  let y = x * x in
-  x + y;;
-- : int = 56
-```
-
-This kind of nested `let` binding is a common way of building up a complex
-expression, with each `let` naming some component, before combining them in
-one final expression.
-:::
 
 ### Options
 
@@ -863,7 +837,7 @@ example:[options]{.idx}[data structures/options]{.idx}
 
 ```ocaml env=main
 # let divide x y =
-  if y = 0 then None else Some (x / y);;
+    if y = 0 then None else Some (x / y);;
 val divide : int -> int -> int option = <fun>
 ```
 
@@ -940,7 +914,7 @@ And we can get access to the contents of these types using pattern matching:
 
 ```ocaml env=main
 # let magnitude { x = x_pos; y = y_pos } =
-  Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
+    Float.sqrt (x_pos **. 2. +. y_pos **. 2.);;
 val magnitude : point2d -> float = <fun>
 ```
 
@@ -961,7 +935,7 @@ Alternatively, we can use dot notation for accessing record fields:
 
 ```ocaml env=main
 # let distance v1 v2 =
-  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+    magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 val distance : point2d -> point2d -> float = <fun>
 ```
 
@@ -977,9 +951,10 @@ type segment_desc = { endpoint1: point2d; endpoint2: point2d }
 
 Now, imagine that you want to combine multiple objects of these types
 together as a description of a multi-object scene. You need some unified way
-of representing these objects together in a single type. One way of doing
-this is using a *variant* type:[datatypes/variant types]{.idx}[variant
-types/combining multiple object types with]{.idx}
+of representing these objects together in a single type. *Variant*
+types let you do just that:
+[datatypes/variant types]{.idx}
+[variant types/combining multiple object types with]{.idx}
 
 ```ocaml env=main
 type scene_element =
@@ -1040,7 +1015,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-##### `Base` and polymorphic comparison
+#### `Base` and polymorphic comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,
@@ -1051,7 +1026,7 @@ comparison operators when you want them. OCaml also offers a special set of
 *polymorphic comparison operators* that can work on almost any type, but
 those are considered to be problematic, and so are hidden by default by
 `Base`. We'll learn more about polymorphic compare in
-[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}
+[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}.
 :::
 
 
@@ -1126,23 +1101,23 @@ and sufficient to compute means and standard deviations, as shown in the
 following example.
 
 ```ocaml env=main
-# let mean rsum = rsum.sum /. Float.of_int rsum.samples
-  let stdev rsum =
+# let mean rsum = rsum.sum /. Float.of_int rsum.samples;;
+val mean : running_sum -> float = <fun>
+# let stdev rsum =
     Float.sqrt
       (rsum.sum_sq /. Float.of_int rsum.samples -. mean rsum **. 2.);;
-val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
 ```
 
 We also need functions to create and update `running_sum`s:
 
 ```ocaml env=main
-# let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
-  let update rsum x =
+# let create () = { sum = 0.; sum_sq = 0.; samples = 0 };;
+val create : unit -> running_sum = <fun>
+# let update rsum x =
     rsum.samples <- rsum.samples + 1;
     rsum.sum     <- rsum.sum     +. x;
     rsum.sum_sq  <- rsum.sum_sq  +. x *. x;;
-val create : unit -> running_sum = <fun>
 val update : running_sum -> float -> unit = <fun>
 ```
 
@@ -1169,12 +1144,11 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 - : float = 3.94405318873307698
 ```
 
-It's worth noting that the preceding algorithm is numerically naive and has
-poor precision in the presence of cancellation. You can look at this
-Wikipedia
-[ article on algorithms for calculating variance](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
-for more details, paying particular attention to the weighted incremental and
-parallel algorithms.
+Warning: the preceding algorithm is numerically naive and has poor
+precision in the presence of many values that cancel each other
+out. This Wikipedia [article on algorithms for calculating
+variance](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
+provides more details.
 
 ### Refs
 
@@ -1244,15 +1218,54 @@ val sum : int list -> int = <fun>
 This isn't the most idiomatic way to sum up a list, but it shows how you can
 use a `ref` in place of a mutable variable.
 
+::: {data-type=note}
+#### Nesting lets with `let` and `in`
+
+The definition of `sum` in the above examples was our first use of
+`let` to define a new variable within the body of a function. A `let`
+paired with an `in` can be used to introduce a new binding within any
+local scope, including a function body. The `in` marks the beginning
+of the scope within which the new variable can be used. Thus, we could
+write:[let binding/local]{.idx}
+
+```ocaml env=main
+# let z = 7 in
+  z + z;;
+- : int = 14
+```
+
+Note that the scope of the `let` binding is terminated by the
+double-semicolon, so the value of `z` is no longer available:
+
+```ocaml env=main
+# z;;
+Line 1, characters 1-2:
+Error: Unbound value z
+```
+
+We can also have multiple `let` bindings in a row, each one adding a
+new variable binding to what came before:
+
+```ocaml env=main
+# let x = 7 in
+  let y = x * x in
+  x + y;;
+- : int = 56
+```
+
+This kind of nested `let` binding is a common way of building up a complex
+expression, with each `let` naming some component, before combining them in
+one final expression.
+:::
+
 ### For and While Loops
 
-OCaml also supports traditional imperative control-flow constructs like
-`for and while` loops. Here, for example, is some code for permuting an array
-that uses a `for` loop. We use the `Random` module as our source of
-randomness. `Random` starts with a default seed, but you can call
-`Random.self_init` to choose a new seed at random:[Random module]{.idx}[while
-loops]{.idx}[for loops]{.idx}[imperative programming/for and while
-loops]{.idx}
+OCaml also supports traditional imperative control-flow constructs
+like `for` and `while` loops. Here, for example, is some code for
+permuting an array that uses a `for` loop:
+[while loops]{.idx}
+[for loops]{.idx}
+[imperative programming/for and while loops]{.idx}
 
 ```ocaml env=main
 # let permute array =
@@ -1268,18 +1281,24 @@ loops]{.idx}
 val permute : 'a array -> unit = <fun>
 ```
 
+\noindent
+This is our first use of the `Random` module. Note that
+`Random` starts with a fixed seed, but you can call `Random.self_init`
+to choose a new seed at random.
+[Random module]{.idx}
+
 From a syntactic perspective, you should note the keywords that distinguish a
 `for` loop: `for`, `to`, `do`, and `done`.
 
 Here's an example run of this code:
 
 ```ocaml env=main,non-deterministic
-# let ar = Array.init 20 ~f:(fun i -> i)
+# let ar = Array.init 20 ~f:(fun i -> i);;
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
-# permute ar
+# permute ar;;
 - : unit = ()
-# ar
+# ar;;
 - : int array =
 [|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 ```
@@ -1353,21 +1372,21 @@ let () =
   printf "Total: %F\n" (read_and_accumulate 0.)
 ```
 
-This is our first use of OCaml's input and output routines, and we needed to
-open another library, `Stdio`, to get access to them. The function
-`read_and_accumulate` is a recursive function that uses
-`In_channel.input_line` to read in lines one by one from the standard input,
-invoking itself at each iteration with its updated accumulated sum. Note that
-`input_line` returns an optional value, with `None` indicating the end of the
-input stream.
+This is our first use of OCaml's input and output routines, and we
+needed to open another library, `Stdio`, to get access to them. The
+function `read_and_accumulate` is a recursive function that uses
+`In_channel.input_line` to read in lines one by one from the standard
+input, invoking itself at each iteration with its updated accumulated
+sum. Note that `input_line` returns an optional value, with `None`
+indicating the end of the input stream.
 
-After `read_and_accumulate` returns, the total needs to be printed. This is
-done using the `printf` command, which provides support for type-safe format
-strings, similar to what you'll find in a variety of languages. The format
-string is parsed by the compiler and used to determine the number and type of
-the remaining arguments that are required.
-In this case, there is a single formatting directive, `%F`, so `printf`
-expects one additional argument of type `float`.
+After `read_and_accumulate` returns, the total needs to be
+printed. This is done using the `printf` command, which provides
+support for type-safe format strings. The format string is parsed by
+the compiler and used to determine the number and type of the
+remaining arguments that are required.  In this case, there is a
+single formatting directive, `%F`, so `printf` expects one additional
+argument of type `float`.
 
 ### Compiling and Running
 

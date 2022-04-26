@@ -1,9 +1,32 @@
+v1.4.0 2022-02-17 La Forclaz (VS)
+---------------------------------
 
-* Add MTIME_OS environment variable for specifying the
-  OS at build time.
-* Add support for node.js. Thanks to Fabian (@copy)
-  for the patch.
+* Change the `js_of_ocaml` strategy for `Mtime_clock`'s JavaScript
+  implementation. Primitives of `mtime.clock.os` are now implemented
+  in pure JavaScript and linked by `js_of_ocaml`.  This means that the
+  `mtime.clock.jsoo` library no longer exists, simply link against
+  `mtime.clock.os` instead. Thanks to Hugo Heuzard for suggesting and
+  implementing this.
+
+* Add `Mtime.{min,max}_stamp`.
+* Add durations `Mtime.Span.{ns,us,ms,s,min,hour,day,year}` and 
+  the `Mtime.Span.(*)` operator (#28).
+* Deprecate `Mtime.s_to_*` and `Mtime.*_to_s` floating point constants (#28).
+* Require OCaml >= 4.08.
+* Allow compiling with MSVC compiler. Thanks to Jonah Beckford for the patch.
+
+v1.3.0 2021-10-20 Zagreb
+------------------------
+
+* Add Windows support. Thanks to Andreas Hauptmann for the patch 
+  and Corentin Leruth for the integration.
+
+v1.2.0 2019-07-19 Zagreb
+------------------------
+
+* Add support for node.js. Thanks to Fabian (@copy) for the patch.
 * Support for js_of_ocaml 3.4.0.
+* Add MTIME_OS environment variable for specifying the OS at build time.
 
 v1.1.0 2017-06-24 London
 ------------------------

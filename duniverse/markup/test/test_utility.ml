@@ -4,7 +4,6 @@
 open OUnit2
 open Test_support
 
-open Markup__Common
 open! Markup
 module Kstream = Markup__Kstream
 

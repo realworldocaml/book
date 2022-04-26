@@ -21,6 +21,7 @@ type <record-name> =
     }
 ```
 
+\noindent
 Note that record field names must start with a lowercase letter.
 
 Here's a simple example: a `service_info` record that represents an
@@ -44,7 +45,8 @@ type. The following function tries to construct such a record given as
 input a line from `/etc/services` file. To do this, we'll use `Re`, a
 regular expression engine for OCaml. If you don't know how regular
 expressions work, you can just think of them as a simple pattern
-language you can use for parsing a string.
+language you can use for parsing a string.  (You may need to install
+it first by running `opam install re`.)
 
 ```ocaml env=main
 # #require "re";;
@@ -56,12 +58,14 @@ language you can use for parsing a string.
     { service_name = Re.Group.get matches 1;
       port = Int.of_string (Re.Group.get matches 2);
       protocol = Re.Group.get matches 3;
-    };;
+    }
+  ;;
 val service_info_of_string : string -> service_info = <fun>
 ```
 
-We can construct a concrete record by calling the function on a line
-from the file.
+\noindent
+We can now construct a concrete record by calling the function on a
+line from the file.
 
 ```ocaml env=main
 # let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol";;
@@ -103,7 +107,8 @@ individual line.
     List.mapi lines ~f:(fun line_num line ->
       { item = parse line;
         line_num = line_num + 1;
-      });;
+      })
+  ;;
 val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>
 ```
 
@@ -140,8 +145,11 @@ matching/and exhaustiveness]{.idx}[records/patterns and exhaustiveness
 in]{.idx}
 
 ```ocaml env=main
-# let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-    sprintf "%s %i/%s" name port prot;;
+# let service_info_to_string
+    { service_name = name; port = port; protocol = prot  }
+    =
+    sprintf "%s %i/%s" name port prot
+  ;;
 val service_info_to_string : service_info -> string = <fun>
 # service_info_to_string ssh;;
 - : string = "ssh 22/udp"
@@ -187,15 +195,17 @@ updating the function.
 Happily, OCaml offers an optional warning for missing fields in record
 patterns. With that warning turned on (which you can do in the
 toplevel by typing `#warnings "+9"`), the compiler will indeed warn
-us.[errors/compiler warnings]{.idx}[code compilers/warning
-enable/disable]{.idx}[errors/missing field
+us. [compiler/enabling and disabling warnings]{.idx}[errors/missing field
 warnings]{.idx}[records/missing field warnings]{.idx}
 
 ```ocaml env=main
 # #warnings "+9";;
-# let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-    sprintf "%s %i/%s" name port prot;;
-Line 1, characters 28-82:
+# let service_info_to_string
+    { service_name = name; port = port; protocol = prot  }
+    =
+    sprintf "%s %i/%s" name port prot
+  ;;
+Line 2, characters 5-59:
 Warning 9 [missing-record-field-pattern]: the following labels are not bound in this record pattern:
 comment
 Either bind these labels explicitly or add '; _' to the pattern.
@@ -207,8 +217,11 @@ acknowledging that we are ignoring extra fields. This is done by
 adding an underscore to the pattern:
 
 ```ocaml env=main
-# let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
-    sprintf "%s %i/%s" name port prot;;
+# let service_info_to_string
+    { service_name = name; port = port; protocol = prot; _ }
+    =
+    sprintf "%s %i/%s" name port prot
+  ;;
 val service_info_to_string : service_info -> string = <fun>
 ```
 
@@ -216,7 +229,7 @@ It's a good idea to enable the warning for incomplete record matches
 and to explicitly disable it with an `_` where necessary.
 
 ::: {data-type=note}
-##### Compiler Warnings
+#### Compiler Warnings
 
 The OCaml compiler is packed full of useful warnings that can be
 enabled and disabled separately. These are documented in the compiler
@@ -280,9 +293,13 @@ following updated version of
       | None -> (line,None)
       | Some (ordinary,comment) -> (ordinary, Some comment)
     in
-    (* now, use a regular expression to break up the service definition *)
+    (* now, use a regular expression to break up the
+       service definition *)
     let matches =
-      Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+      Re.exec
+        (Re.Posix.compile_pat
+           "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)")
+        line
     in
     let service_name = Re.Group.get matches 1 in
     let port = Int.of_string (Re.Group.get matches 2) in
@@ -307,6 +324,7 @@ val create_service_info :
   <fun>
 ```
 
+\noindent
 This is considerably more concise than what you would get without
 punning:
 
@@ -396,8 +414,6 @@ val status_and_session : heartbeat -> string * string = <fun>
 Line 1, characters 45-59:
 Error: This expression has type logon
        There is no field status_message within type logon
-# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
-val session_and_status : heartbeat -> string * string = <fun>
 ```
 
 Why did the first definition succeed without a type annotation and the
@@ -408,13 +424,21 @@ switched, the `session_id` field was considered first, and so that
 drove the type to be considered to be a `logon`, at which point
 `t.status_message` no longer made sense.
 
-We can avoid this ambiguity altogether, either by using nonoverlapping
+Adding a type annotation resolves the ambiguity, no matter what order
+the fields are considered in.
+
+```ocaml env=main
+# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+val session_and_status : heartbeat -> string * string = <fun>
+```
+
+We can avoid the ambiguity altogether, either by using nonoverlapping
 field names or by putting different record types in different
 modules. Indeed, packing types into modules is a broadly useful idiom
-(and one used quite extensively by `Core`), providing for each type a
+(and one used quite extensively by `Base`), providing for each type a
 namespace within which to put related values. When using this style,
 it is standard practice to name the type associated with the module
-`t`. Using this style we would write:
+`t`. So, we would write:
 
 ```ocaml env=main
 module Log_entry = struct
@@ -514,10 +538,6 @@ particular, we can rewrite the above declarations by adding type
 annotations and removing the module qualifications.
 
 ```ocaml env=main
-# let create_log_entry ~session_id ~important message : Log_entry.t =
-    { time = Time_ns.now (); session_id; important; message };;
-val create_log_entry :
-  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 # let message_to_string ({ important; message; _ } : Log_entry.t) =
     if important then String.uppercase message else message;;
 val message_to_string : Log_entry.t -> string = <fun>
@@ -529,9 +549,6 @@ This feature of the language, known by the somewhat imposing name of
 *type-directed constructor disambiguation*, applies to variant tags as
 well as record fields, as we'll see in
 [Variants](variants.html#variants){data-type=xref}.
-
-For functions defined within the module where a given record is
-defined, the module qualification goes away entirely.
 
 ## Functional Updates
 
@@ -570,25 +587,20 @@ val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 This is fairly verbose, given that there's only one field that we
 actually want to change, and all the others are just being copied over
 from `t`. We can use OCaml's *functional update* syntax to do this
-more tersely. The syntax of a functional update is as follows:
+more tersely.
 
-```
-{ <record> with <field> = <value>;
-      <field> = <value>;
-      ...
-}
-```
-
-The purpose of the functional update is to create a new record based
-on an existing one, with a set of field changes layered on top.
-
-Given this, we can rewrite `register_heartbeat` more concisely:
+The following shows how we can use functional updates to rewrite
+`register_heartbeat` more concisely.
 
 ```ocaml env=main
 # let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
+
+The `with` keyword marks that this is a functional update, and the
+value assignments on the right-hand side indicate the changes to be
+made to the record on the left-hand side of the `with`.
 
 Functional updates make your code independent of the identity of the
 fields in the record that are not changing. This is often what you
@@ -624,6 +636,10 @@ follows:
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
+These downsides notwithstanding, functional updates are very useful,
+and a good choice for cases where it's not important that you consider
+every field of the record when making a change.
+
 ## Mutable Fields
 
 Like most OCaml values, records are immutable by default. You can,
@@ -647,9 +663,9 @@ side-effecting version of `register_heartbeat` would be written as
 follows:
 
 ```ocaml env=main
-# let register_heartbeat t hb =
-    t.last_heartbeat_time   <- hb.Heartbeat.time;
-    t.last_heartbeat_status <- hb.Heartbeat.status_message;;
+# let register_heartbeat t (hb:Heartbeat.t) =
+    t.last_heartbeat_time   <- hb.time;
+    t.last_heartbeat_status <- hb.status_message;;
 val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 ```
 
@@ -671,7 +687,7 @@ fields]{.idx}[records/first-class fields in]{.idx}
 ```ocaml env=main
 # let get_users logons =
     List.dedup_and_sort ~compare:String.compare
-  (List.map logons ~f:(fun x -> x.Logon.user));;
+      (List.map logons ~f:(fun x -> x.Logon.user));;
 val get_users : Logon.t list -> string list = <fun>
 ```
 
@@ -680,6 +696,9 @@ the `user` field. This kind of accessor function is a common enough
 pattern that it would be convenient to generate it automatically. The
 `ppx_fields_conv` syntax extension that ships with `Core` does just
 that.[record field accessor functions]{.idx}
+[syntax extension/ppx_fields_conv]{.idx}
+[ppx_fields_conv]{.idx}
+
 
 The `[@@deriving fields]` annotation at the end of the declaration of
 a record type will cause the extension to be applied to a given type
@@ -818,13 +837,13 @@ Here's an example of `show_field` in action:
                 session_id = "26685";
                 time = Time_ns.of_string "2017-07-21 10:11:45 EST";
                 user = "yminsky";
-                credentials = "Xy2d9W"; }
+                credentials = "Xy2d9W"; };;
 val logon : Logon.t =
   {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
    user = "yminsky"; credentials = "Xy2d9W"}
-# show_field Logon.Fields.user Fn.id logon
+# show_field Logon.Fields.user Fn.id logon;;
 - : string = "user: yminsky"
-# show_field Logon.Fields.time Time_ns.to_string logon
+# show_field Logon.Fields.time Time_ns.to_string logon;;
 - : string = "time: 2017-07-21 15:11:45.000000000Z"
 ```
 
@@ -872,9 +891,9 @@ the fields of a `Logon` record:
       ~session_id:(print Fn.id)
       ~time:(print Time_ns.to_string)
       ~user:(print Fn.id)
-      ~credentials:(print Fn.id)
+      ~credentials:(print Fn.id);;
 val print_logon : Logon.t -> unit = <fun>
-# print_logon logon
+# print_logon logon;;
 session_id: 26685
 time: 2017-07-21 15:11:45.000000000Z
 user: yminsky

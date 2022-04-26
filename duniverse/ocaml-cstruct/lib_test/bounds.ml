@@ -15,15 +15,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-[@@@warning "-3"]
-
 let to_string { Cstruct.buffer; off; len } =
   Printf.sprintf "buffer length = %d; off=%d; len=%d" (Bigarray.Array1.dim buffer) off len
 
 (* Check we can create and use an empty cstruct *)
 let test_empty_cstruct () =
   let x = Cstruct.create 0 in
-  Alcotest.(check int) "empty len" 0 (Cstruct.len x);
+  Alcotest.(check int) "empty len" 0 (Cstruct.length x);
   let y = Cstruct.to_string x in
   Alcotest.(check string) "empty" "" y
 
@@ -39,7 +37,7 @@ let test_anti_cstruct () =
 let test_positive_shift () =
   let x = Cstruct.create 1 in
   let y = Cstruct.shift x 1 in
-  Alcotest.(check int) "positive shift" 0 (Cstruct.len y)
+  Alcotest.(check int) "positive shift" 0 (Cstruct.length y)
 
 (* Check that negative shifts are forbidden. *)
 let test_negative_shift () =
@@ -162,34 +160,6 @@ let test_of_bigarray_large_length () =
           failwith (Printf.sprintf "test_of_bigarray_large_length: %s" (to_string x))
         with Invalid_argument _ ->
           ()
-
-let test_set_len_too_big () =
-  let x = Cstruct.create 0 in
-  try
-    let[@ocaml.warning "-3"] y = Cstruct.set_len x 1 in
-    failwith (Printf.sprintf "test_set_len_too_big: %s" (to_string y))
-  with Invalid_argument _ -> ()
-
-let test_set_len_too_small () =
-  let x = Cstruct.create 0 in
-  try
-    let[@ocaml.warning "-3"] y = Cstruct.set_len x (-1) in
-    failwith (Printf.sprintf "test_set_len_too_small: %s" (to_string y))
-  with Invalid_argument _ -> ()
-
-let test_add_len_too_big () =
-  let x = Cstruct.create 0 in
-  try
-    let[@ocaml.warning "-3"] y = Cstruct.add_len x 1 in
-    failwith (Printf.sprintf "test_add_len_too_big: %s" (to_string y))
-  with Invalid_argument _ -> ()
-
-let test_add_len_too_small () =
-  let x = Cstruct.create 0 in
-  try
-    let[@ocaml.warning "-3"] y = Cstruct.add_len x (-1) in
-    failwith (Printf.sprintf "test_add_len_too_small: %s" (to_string y))
-  with Invalid_argument _ -> ()
 
 let test_blit_offset_too_big () =
   let x = Cstruct.create 1 in
@@ -337,6 +307,33 @@ let test_view_bounds_too_small_get_le64 () =
   with
     Invalid_argument _ -> ()
 
+let test_view_bounds_too_small_get_he16 () =
+  let x = Cstruct.create 4 in
+  let x' = Cstruct.sub x 0 1 in
+  try
+    let _ = Cstruct.HE.get_uint16 x' 0 in
+    failwith "test_view_bounds_too_small_get_he16"
+  with
+    Invalid_argument _ -> ()
+
+let test_view_bounds_too_small_get_he32 () =
+  let x = Cstruct.create 8 in
+  let x' = Cstruct.sub x 2 5 in
+  try
+    let _ = Cstruct.HE.get_uint32 x' 2 in
+    failwith "test_view_bounds_too_small_get_he32"
+  with
+    Invalid_argument _ -> ()
+
+let test_view_bounds_too_small_get_he64 () =
+  let x = Cstruct.create 9 in
+  let x' = Cstruct.sub x 1 5 in
+  try
+    let _ = Cstruct.HE.get_uint64 x' 0 in
+    failwith "test_view_bounds_too_small_get_he64"
+  with
+    Invalid_argument _ -> ()
+
 let test_lenv_overflow () =
   if Sys.word_size = 32 then (
     (* free-up some space *)
@@ -368,14 +365,17 @@ let test_subview_containment_get_char,
     test_subview_containment_get_be64,
     test_subview_containment_get_le16,
     test_subview_containment_get_le32,
-    test_subview_containment_get_le64
+    test_subview_containment_get_le64,
+    test_subview_containment_get_he16,
+    test_subview_containment_get_he32,
+    test_subview_containment_get_he64
   =
   let open Cstruct in
   let test get zero () =
     let x = create 24 in
     let x' = sub x 8 8 in
-    for i = 0 to len x - 1 do set_uint8 x i 0xff done ;
-    for i = 0 to len x' - 1 do set_uint8 x' i 0x00 done ;
+    for i = 0 to length x - 1 do set_uint8 x i 0xff done ;
+    for i = 0 to length x' - 1 do set_uint8 x' i 0x00 done ;
     for i = -8 to 8 do
       try
         let v = get x' i in
@@ -391,7 +391,10 @@ let test_subview_containment_get_char,
   test BE.get_uint64 0L,
   test LE.get_uint16 0,
   test LE.get_uint32 0l,
-  test LE.get_uint64 0L
+  test LE.get_uint64 0L,
+  test HE.get_uint16 0,
+  test HE.get_uint32 0l,
+  test HE.get_uint64 0L
 
 (* Steamroll over a buffer and a contained subview, checking that only the
  * contents of the subview is writable. *)
@@ -402,21 +405,24 @@ let test_subview_containment_set_char,
     test_subview_containment_set_be64,
     test_subview_containment_set_le16,
     test_subview_containment_set_le32,
-    test_subview_containment_set_le64
+    test_subview_containment_set_le64,
+    test_subview_containment_set_he16,
+    test_subview_containment_set_he32,
+    test_subview_containment_set_he64
   =
   let open Cstruct in
   let test set ff () =
     let x = create 24 in
     let x' = sub x 8 8 in
-    for i = 0 to len x - 1 do set_uint8 x i 0x00 done ;
+    for i = 0 to length x - 1 do set_uint8 x i 0x00 done ;
     for i = -8 to 8 do
       try set x' i ff with Invalid_argument _ -> ()
     done;
     let acc = ref 0 in
-    for i = 0 to len x - 1 do
+    for i = 0 to length x - 1 do
       acc := !acc + get_uint8 x i
     done ;
-    if !acc <> (len x' * 0xff) then
+    if !acc <> (length x' * 0xff) then
       failwith "test_subview_containment_set"
   in
   test set_char '\255',
@@ -426,7 +432,10 @@ let test_subview_containment_set_char,
   test BE.set_uint64 0xffffffffffffffffL,
   test LE.set_uint16 0xffff,
   test LE.set_uint32 0xffffffffl,
-  test LE.set_uint64 0xffffffffffffffffL
+  test LE.set_uint64 0xffffffffffffffffL,
+  test HE.set_uint16 0xffff,
+  test HE.set_uint32 0xffffffffl,
+  test HE.set_uint64 0xffffffffffffffffL
 
 let regression_244 () =
   let whole = Cstruct.create 44943 in
@@ -451,10 +460,6 @@ let suite = [
   "test of_bigarray negative params", `Quick, test_of_bigarray_negative_params;
   "test of_bigarray large offset", `Quick, test_of_bigarray_large_offset;
   "test of_bigarray large length", `Quick, test_of_bigarray_large_length;
-  "test set len too big", `Quick, test_set_len_too_big;
-  "test set len too small", `Quick, test_set_len_too_small;
-  "test add len too big", `Quick, test_add_len_too_big;
-  "test add len too small", `Quick, test_add_len_too_small;
   "test blit offset too big", `Quick, test_blit_offset_too_big;
   "test blit offset too small", `Quick, test_blit_offset_too_small;
   "test blit dst offset too big", `Quick, test_blit_dst_offset_too_big;
@@ -472,6 +477,9 @@ let suite = [
   "test_view_bounds_too_small_get_le16" , `Quick, test_view_bounds_too_small_get_le16;
   "test_view_bounds_too_small_get_le32" , `Quick, test_view_bounds_too_small_get_le32;
   "test_view_bounds_too_small_get_le64" , `Quick, test_view_bounds_too_small_get_le64;
+  "test_view_bounds_too_small_get_he16" , `Quick, test_view_bounds_too_small_get_he16;
+  "test_view_bounds_too_small_get_he32" , `Quick, test_view_bounds_too_small_get_he32;
+  "test_view_bounds_too_small_get_he64" , `Quick, test_view_bounds_too_small_get_he64;
   "test_lenv_overflow", `Quick, test_lenv_overflow;
   "test_copyv_overflow", `Quick, test_copyv_overflow;
   "test_subview_containment_get_char", `Quick, test_subview_containment_get_char;
@@ -482,6 +490,9 @@ let suite = [
   "test_subview_containment_get_le16", `Quick, test_subview_containment_get_le16;
   "test_subview_containment_get_le32", `Quick, test_subview_containment_get_le32;
   "test_subview_containment_get_le64", `Quick, test_subview_containment_get_le64;
+  "test_subview_containment_get_le16", `Quick, test_subview_containment_get_he16;
+  "test_subview_containment_get_le32", `Quick, test_subview_containment_get_he32;
+  "test_subview_containment_get_le64", `Quick, test_subview_containment_get_he64;
   "test_subview_containment_set_char", `Quick, test_subview_containment_set_char;
   "test_subview_containment_set_8"   , `Quick, test_subview_containment_set_8;
   "test_subview_containment_set_be16", `Quick, test_subview_containment_set_be16;
@@ -490,5 +501,8 @@ let suite = [
   "test_subview_containment_set_le16", `Quick, test_subview_containment_set_le16;
   "test_subview_containment_set_le32", `Quick, test_subview_containment_set_le32;
   "test_subview_containment_set_le64", `Quick, test_subview_containment_set_le64;
+  "test_subview_containment_set_le16", `Quick, test_subview_containment_set_he16;
+  "test_subview_containment_set_le32", `Quick, test_subview_containment_set_he32;
+  "test_subview_containment_set_le64", `Quick, test_subview_containment_set_he64;
   "regression 244", `Quick, regression_244;
 ]

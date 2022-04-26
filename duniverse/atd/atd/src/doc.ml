@@ -16,6 +16,7 @@ let parse_text loc s =
     failwith (Printf.sprintf "%s:\nInvalid format for doc.text %S:\n%s"
                 (Ast.string_of_loc loc) s (Printexc.to_string e))
 
+(* TODO: define a validation schema for the <doc ...> annotations. *)
 let get_doc loc an : doc option =
   Annot.get_opt_field
     ~parse:(fun s -> Some (parse_text loc s))

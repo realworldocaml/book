@@ -1,7 +1,7 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The logs programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
+   logs v0.7.0+dune2
   ---------------------------------------------------------------------------*)
 
 (** {!Lwt} logging.
@@ -12,7 +12,7 @@
 
     See a {{!report_ex}cooperative reporter example}.
 
-    {e %%VERSION%% - {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {e v0.7.0+dune2 - {{:https://github.com/dune-universe/logs }homepage}} *)
 
 (** {1 Log functions} *)
 

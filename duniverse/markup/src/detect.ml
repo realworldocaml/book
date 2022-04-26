@@ -53,7 +53,7 @@ let guess_family_xml source throw k =
 
 (* 5.2 in the Encoding Candidate Recommendation. *)
 let normalize_name for_html s =
-  match String.lowercase (trim_string s) with
+  match String.lowercase_ascii (trim_string s) with
   | "unicode-1-1-utf-8" | "utf-8" | "utf8" ->
     "utf-8"
 
@@ -223,7 +223,7 @@ let meta_tag_prescan =
     let rec iterate () =
       next source throw (fun () -> k "") (function
         | c when c = quote -> k (Buffer.contents buffer)
-        | c -> add_utf_8 buffer (Char.code (Char.lowercase c)); iterate ())
+        | c -> add_utf_8 buffer (Char.code (Char.lowercase_ascii c)); iterate ())
     in
     iterate ()
   in
@@ -237,7 +237,7 @@ let meta_tag_prescan =
           push source c;
           k (Buffer.contents buffer)
         | c ->
-          add_utf_8 buffer (Char.code (Char.lowercase c));
+          add_utf_8 buffer (Char.code (Char.lowercase_ascii c));
           iterate ())
     in
     iterate ()
@@ -249,7 +249,7 @@ let meta_tag_prescan =
       next source throw (fun () -> k None) begin function
         | 'c' ->
           next_n 6 source throw begin fun l ->
-            match List.map Char.lowercase l with
+            match List.map Char.lowercase_ascii l with
             | ['h'; 'a'; 'r'; 's'; 'e'; 't'] ->
               skip_whitespace source throw (fun () ->
               next source throw (fun () -> k None) begin function
@@ -316,7 +316,7 @@ let meta_tag_prescan =
               k (Buffer.contents buffer)
 
             | Some c ->
-              add_utf_8 buffer (Char.code (Char.lowercase c));
+              add_utf_8 buffer (Char.code (Char.lowercase_ascii c));
               iterate ()
           end
         in
@@ -463,7 +463,7 @@ let meta_tag_prescan =
 
             | 'm' ->
               peek_n 5 source throw (fun l ->
-                match List.map Char.lowercase l with
+                match List.map Char.lowercase_ascii l with
                 | ['m'; 'e'; 't'; 'a'; c] when is_whitespace c || c = '/' ->
                   next_n 4 source throw (fun _ ->
                   process_meta_tag scan)

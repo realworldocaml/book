@@ -28,6 +28,14 @@ module type Target_intf = sig
   val is_dev_null : t -> bool
 end
 
+module File_perm = struct
+  include Action_intf.File_perm
+
+  let suffix = function
+    | Normal -> ""
+    | Executable -> "-executable"
+end
+
 module Make
     (Program : Dune_lang.Conv.S)
     (Path : Dune_lang.Conv.S)
@@ -42,10 +50,8 @@ struct
   include Ast
 
   let translate_to_ignore fn output action =
-    if Target.is_dev_null fn then
-      Ignore (output, action)
-    else
-      Redirect_out (output, fn, action)
+    if Target.is_dev_null fn then Ignore (output, action)
+    else Redirect_out (output, fn, Normal, action)
 
   let two_or_more decode =
     let open Dune_lang.Decoder in
@@ -75,18 +81,14 @@ struct
                     Syntax.Version.Infix.(version >= nesting_support_version)
                   in
                   let rec is_ok = function
-                    | Run _
-                    | Bash _
-                    | System _ ->
-                      true
+                    | Run _ | Bash _ | System _ -> true
                     | Chdir (_, t)
                     | Setenv (_, _, t)
                     | Ignore (_, t)
                     | Redirect_in (_, _, t)
-                    | Redirect_out (_, _, t)
+                    | Redirect_out (_, _, _, t)
                     | No_infer t ->
-                      if nesting_support then
-                        is_ok t
+                      if nesting_support then is_ok t
                       else
                         Syntax.Error.since loc Stanza.syntax
                           nesting_support_version
@@ -179,7 +181,7 @@ struct
           ; ( "write-file"
             , let+ fn = target
               and+ s = string in
-              Write_file (fn, s) )
+              Write_file (fn, Normal, s) )
           ; ( "diff"
             , let+ diff = Diff.decode path target ~optional:false in
               Diff diff )
@@ -228,9 +230,12 @@ struct
       List (atom "run_dynamic" :: program a :: List.map xs ~f:string)
     | Chdir (a, r) -> List [ atom "chdir"; path a; encode r ]
     | Setenv (k, v, r) -> List [ atom "setenv"; string k; string v; encode r ]
-    | Redirect_out (outputs, fn, r) ->
+    | Redirect_out (outputs, fn, perm, r) ->
       List
-        [ atom (sprintf "with-%s-to" (Outputs.to_string outputs))
+        [ atom
+            (sprintf "with-%s-to%s"
+               (Outputs.to_string outputs)
+               (File_perm.suffix perm))
         ; target fn
         ; encode r
         ]
@@ -247,16 +252,16 @@ struct
     | Cat x -> List [ atom "cat"; path x ]
     | Copy (x, y) -> List [ atom "copy"; path x; target y ]
     | Symlink (x, y) -> List [ atom "symlink"; path x; target y ]
+    | Hardlink (x, y) -> List [ atom "hardlink"; path x; target y ]
     | Copy_and_add_line_directive (x, y) ->
       List [ atom "copy#"; path x; target y ]
     | System x -> List [ atom "system"; string x ]
     | Bash x -> List [ atom "bash"; string x ]
-    | Write_file (x, y) -> List [ atom "write-file"; target x; string y ]
+    | Write_file (x, perm, y) ->
+      List [ atom ("write-file" ^ File_perm.suffix perm); target x; string y ]
     | Rename (x, y) -> List [ atom "rename"; target x; target y ]
     | Remove_tree x -> List [ atom "remove-tree"; target x ]
     | Mkdir x -> List [ atom "mkdir"; path x ]
-    | Digest_files paths ->
-      List [ atom "digest-files"; List (List.map paths ~f:path) ]
     | Diff { optional; file1; file2; mode = Binary } ->
       assert (not optional);
       List [ atom "cmp"; path file1; target file2 ]
@@ -275,7 +280,7 @@ struct
     | Pipe (outputs, l) ->
       List
         (atom (sprintf "pipe-%s" (Outputs.to_string outputs))
-         :: List.map l ~f:encode)
+        :: List.map l ~f:encode)
     | Format_dune_file (ver, src, dst) ->
       List
         [ atom "format-dune-file"
@@ -291,11 +296,14 @@ struct
 
   let setenv var value t = Setenv (var, value, t)
 
-  let with_stdout_to path t = Redirect_out (Stdout, path, t)
+  let with_stdout_to ?(perm = File_perm.Normal) path t =
+    Redirect_out (Stdout, path, perm, t)
 
-  let with_stderr_to path t = Redirect_out (Stderr, path, t)
+  let with_stderr_to ?(perm = File_perm.Normal) path t =
+    Redirect_out (Stderr, path, perm, t)
 
-  let with_outputs_to path t = Redirect_out (Outputs, path, t)
+  let with_outputs_to ?(perm = File_perm.Normal) path t =
+    Redirect_out (Outputs, path, perm, t)
 
   let with_stdin_from path t = Redirect_in (Stdin, path, t)
 
@@ -321,15 +329,13 @@ struct
 
   let bash s = Bash s
 
-  let write_file p s = Write_file (p, s)
+  let write_file ?(perm = File_perm.Normal) p s = Write_file (p, perm, s)
 
   let rename a b = Rename (a, b)
 
   let remove_tree path = Remove_tree path
 
   let mkdir path = Mkdir path
-
-  let digest_files files = Digest_files files
 
   let diff ?(optional = false) ?(mode = Diff.Mode.Text) file1 file2 =
     Diff { optional; file1; file2; mode }

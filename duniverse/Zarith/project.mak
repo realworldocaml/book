@@ -1,8 +1,8 @@
-# This file is part of the Zarith library 
+# This file is part of the Zarith library
 # http://forge.ocamlcore.org/projects/zarith .
 # It is distributed under LGPL 2 licensing, with static linking exception.
 # See the LICENSE file included in the distribution.
-#   
+#
 # Copyright (c) 2010-2011 Antoine Miné, Abstraction project.
 # Abstraction is part of the LIENS (Laboratoire d'Informatique de l'ENS),
 # a joint laboratory by:
@@ -32,28 +32,29 @@ endif
 ###############
 
 CSRC = caml_z.c
-SSRC = $(wildcard caml_z_$(ARCH).S)
-MLSRC = z.ml q.ml big_int_Z.ml
+MLSRC = zarith_version.ml z.ml q.ml big_int_Z.ml
 MLISRC = z.mli q.mli big_int_Z.mli
 
-AUTOGEN = z.ml z.mli z_features.h
+AUTOGEN = zarith_version.ml
 
 CMIOBJ = $(MLISRC:%.mli=%.cmi)
 CMXOBJ = $(MLISRC:%.mli=%.cmx)
 CMIDOC = $(MLISRC:%.mli=%.cmti)
 
-TOINSTALL := zarith.h zarith.cma libzarith.$(LIBSUFFIX) $(MLISRC) $(CMIOBJ) \
-  zarith_top.cma
+TOBUILD = zarith.cma libzarith.$(LIBSUFFIX) $(CMIOBJ) zarith_top.cma z.mli
+
+TOINSTALL = $(TOBUILD) zarith.h q.mli big_int_Z.mli
 
 ifeq ($(HASOCAMLOPT),yes)
-TOINSTALL += zarith.$(LIBSUFFIX) zarith.cmxa $(CMXOBJ)
+TOBUILD += zarith.cmxa $(CMXOBJ)
+TOINSTALL += zarith.$(LIBSUFFIX)
 endif
 
 OCAMLFLAGS = -I +compiler-libs
 OCAMLOPTFLAGS = -I +compiler-libs
 
 ifeq ($(HASDYNLINK),yes)
-TOINSTALL += zarith.cmxs
+TOBUILD += zarith.cmxs
 endif
 
 ifeq ($(HASBINANNOT),yes)
@@ -64,7 +65,7 @@ endif
 # build targets
 ###############
 
-all: $(TOINSTALL)
+all: $(TOBUILD)
 
 tests:
 	make -C tests test
@@ -72,13 +73,13 @@ tests:
 zarith.cma: $(MLSRC:%.ml=%.cmo)
 	$(OCAMLMKLIB) -failsafe -o zarith $+ $(LIBS)
 
-zarith.cmxa zarith.$(LIBSUFFIX): $(MLSRC:%.ml=%.cmx)
+zarith.cmxa: $(MLSRC:%.ml=%.cmx)
 	$(OCAMLMKLIB) -failsafe -o zarith $+ $(LIBS)
 
 zarith.cmxs: zarith.cmxa libzarith.$(LIBSUFFIX)
 	$(OCAMLOPT) -shared -o $@ -I . zarith.cmxa -linkall
 
-libzarith.$(LIBSUFFIX) dllzarith.$(DLLSUFFIX): $(SSRC:%.S=%.$(OBJSUFFIX)) $(CSRC:%.c=%.$(OBJSUFFIX)) 
+libzarith.$(LIBSUFFIX): $(CSRC:%.c=%.$(OBJSUFFIX))
 	$(OCAMLMKLIB) -failsafe -o zarith $+ $(LIBS)
 
 zarith_top.cma: zarith_top.cmo
@@ -88,7 +89,8 @@ doc: $(MLISRC)
 	mkdir -p html
 	$(OCAMLDOC) -html -d html -charset utf8 $+
 
-
+zarith_version.ml: META
+	(echo "let"; grep "version" META | head -1) > zarith_version.ml
 
 # install targets
 #################
@@ -120,9 +122,6 @@ endif
 # rules
 #######
 
-$(AUTOGEN): z.mlp z.mlip $(SSRC) z_pp.pl
-	./z_pp.pl $(ARCH)
-
 %.cmi: %.mli
 	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -c $<
 
@@ -150,7 +149,7 @@ depend: $(AUTOGEN)
 
 include depend
 
-$(CSRC:%.c=%.$(OBJSUFFIX)): z_features.h zarith.h
+$(CSRC:%.c=%.$(OBJSUFFIX)): zarith.h
 
 .PHONY: clean
 .PHONY: tests

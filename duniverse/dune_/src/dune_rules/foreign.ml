@@ -35,8 +35,7 @@ module Archive = struct
     let decode =
       Dune_lang.Decoder.plain_string (fun ~loc s ->
           match s with
-          | "."
-          | ".." ->
+          | "." | ".." ->
             User_error.raise ~loc
               [ Pp.textf "%S is not a valid archive name." s ]
           | fn when String.exists fn ~f:Path.is_dir_sep ->
@@ -190,6 +189,10 @@ module Sources = struct
   let object_files t ~dir ~ext_obj =
     String.Map.keys t
     |> List.map ~f:(fun c -> Path.Build.relative dir (c ^ ext_obj))
+
+  let has_cxx_sources (t : t) =
+    String.Map.exists t ~f:(fun (_loc, source) ->
+        Foreign_language.(equal Cxx source.stubs.language))
 
   module Unresolved = struct
     type t = (Foreign_language.t * Path.Build.t) String.Map.Multi.t

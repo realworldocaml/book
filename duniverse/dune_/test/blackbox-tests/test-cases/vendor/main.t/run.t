@@ -7,7 +7,6 @@ Aliases should not be resolved in vendored sub directories
 
   $ dune runtest --root duniverse
   Entering directory 'duniverse'
-          test alias tests/runtest
   Hello from main lib!
 
 When compiling vendored code, all warnings should be disabled
@@ -37,7 +36,7 @@ The same directory cannot be marked as both vendored and data-only
 
   $ dune build --root conflicts-with-data-only
   Entering directory 'conflicts-with-data-only'
-  Error: Directory dir was marked as vendored and data_only, it can't be marked
+  Error: Directory dir was marked as data_only and vendored, it can't be marked
   as both.
   [1]
 

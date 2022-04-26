@@ -70,7 +70,7 @@ let footer_item : Html.item =
   footer [
     div ~a:["class","content"] [
       links;
-      p [`Data "Copyright 2012-2021 Anil Madhavapeddy and Yaron Minsky."];
+      p [`Data "Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky."];
     ]
   ]
 
@@ -262,11 +262,13 @@ let make_simple_page file =
 let make_tex_inputs_page ?(repo_root=".") ~include_wip () : string Deferred.t =
   Toc.Repr.get ~repo_root ~include_wip () >>| fun l ->
   let to_input s = In_channel.read_all (repo_root / "book" / s ^ ".md") in
+  let part_preface s = In_channel.read_all (repo_root / "book" / "part-" ^ s ^ ".md") in
   let to_tex t =
       match t with
       | `part (part: Toc.Repr.part) ->
         let names = List.map part.chapters ~f:(fun c -> c.name) in
-        ("# " ^ part.title ^ "\n") :: (List.map ~f:to_input names)
+        let num = String.lowercase @@ Str.global_replace (Str.regexp_string " ") "-" part.title in
+        ("# " ^ part.title ^ "\n") :: (part_preface num) :: (List.map ~f:to_input names)
       | `chapter (c : Toc.Repr.chapter) ->
         [to_input c.name]
   in

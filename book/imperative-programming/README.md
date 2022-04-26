@@ -53,21 +53,24 @@ we'll use an *open hashing* scheme, where the hash table will be an
 array of buckets, each bucket containing a list of key/value pairs
 that have been hashed into that bucket. [open hashing]{.idx}
 
-Here's the interface we'll match, provided as an `mli`. The type `('a,
-'b) t` represents a dictionary with keys of type `'a` and data of type
-`'b`.
+Here's the signature we'll match, provided as an interface file,
+`dictionary.mli`. The type `('a, 'b) t` represents a dictionary with
+keys of type `'a` and data of type `'b`.
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.mli,part=1
-(* file: dictionary.mli *)
 open Base
 
 type ('a, 'b) t
 
-val create : hash:('a -> int) -> equal:('a -> 'a -> bool) -> ('a, 'b) t
+val create
+  :  hash:('a -> int)
+  -> equal:('a -> 'a -> bool)
+  -> ('a, 'b) t
+
 val length : ('a, 'b) t -> int
-val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
-val find   : ('a, 'b) t -> 'a -> 'b option
-val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
+val add : ('a, 'b) t -> key:'a -> data:'b -> unit
+val find : ('a, 'b) t -> 'a -> 'b option
+val iter : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
@@ -82,20 +85,20 @@ imperative functions whose primary purpose is to mutate some data
 structure, rather than to compute a value.
 
 We'll now walk through the implementation (contained in the
-corresponding `ml` file) piece by piece, explaining different
-imperative constructs as they come up.
+corresponding `ml` file, `dictionary.ml`) piece by piece, explaining
+different imperative constructs as they come up.
 
 Our first step is to define the type of a dictionary as a record.
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=1
-(* file: dictionary.ml *)
 open Base
 
-type ('a, 'b) t = { mutable length: int;
-                    buckets: ('a * 'b) list array;
-                    hash: 'a -> int;
-                    equal: 'a -> 'a -> bool;
-                  }
+type ('a, 'b) t =
+  { mutable length : int
+  ; buckets : ('a * 'b) list array
+  ; hash : 'a -> int
+  ; equal : 'a -> 'a -> bool
+  }
 ```
 
 The first field, `length`, is declared as mutable. In OCaml, records
@@ -110,21 +113,22 @@ a dictionary:
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=2
 let num_buckets = 17
-
-let hash_bucket t key = (t.hash key) % num_buckets
+let hash_bucket t key = t.hash key % num_buckets
 
 let create ~hash ~equal =
-  { length = 0;
-    buckets = Array.create ~len:num_buckets [];
-    hash;
-    equal;
+  { length = 0
+  ; buckets = Array.create ~len:num_buckets []
+  ; hash
+  ; equal
   }
 
 let length t = t.length
 
 let find t key =
-  List.find_map t.buckets.(hash_bucket t key)
-    ~f:(fun (key',data) -> if t.equal key' key then Some data else None)
+  List.find_map
+    t.buckets.(hash_bucket t key)
+    ~f:(fun (key', data) ->
+      if t.equal key' key then Some data else None)
 ```
 
 Note that `num_buckets` is a constant, which means our bucket array is
@@ -192,29 +196,31 @@ dictionary:
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=4
 let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
+  List.exists t.buckets.(i) ~f:(fun (key', _) -> t.equal key' key)
 
 let add t ~key ~data =
   let i = hash_bucket t key in
   let replace = bucket_has_key t i key in
   let filtered_bucket =
-    if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
-    else
-      t.buckets.(i)
+    if replace
+    then
+      List.filter t.buckets.(i) ~f:(fun (key', _) ->
+          not (t.equal key' key))
+    else t.buckets.(i)
   in
   t.buckets.(i) <- (key, data) :: filtered_bucket;
   if not replace then t.length <- t.length + 1
 
 let remove t key =
   let i = hash_bucket t key in
-  if bucket_has_key t i key then (
+  if bucket_has_key t i key
+  then (
     let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
+      List.filter t.buckets.(i) ~f:(fun (key', _) ->
+          not (t.equal key' key))
     in
     t.buckets.(i) <- filtered_bucket;
-    t.length <- t.length - 1
-  )
+    t.length <- t.length - 1)
 ```
 
 This preceding code is made more complicated by the fact that we need to
@@ -299,12 +305,14 @@ Arrays also come with special syntax for retrieving an element from an array:
 <array_expr>.(<index_expr>)
 ```
 
+\noindent
 and for setting an element in an array:
 
 ```
 <array_expr>.(<index_expr>) <- <value_expr>
 ```
 
+\noindent
 Out-of-bounds accesses for arrays (and indeed for all the array-like data
 structures) will lead to an exception being thrown.
 
@@ -358,8 +366,8 @@ can be declared as mutable. These mutable fields can be set using the
 
 As we'll see in [Objects](objects.html#objects){data-type=xref}, fields of
 an object can similarly be declared as mutable, and can then be modified in
-much the same way as record fields. [primitive mutable data/record/object
-fields and ref cells]{.idx}
+much the same way as record fields. [primitive mutable data/object fields]{.idx}
+[primitive mutable data/record fields]{.idx}
 
 #### Ref cells
 
@@ -414,20 +422,24 @@ val ( ! ) : 'a ref -> 'a = <fun>
 val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
+This reflects the fact that ref cells are really just a special case
+of mutable record fields.
+
 ### Foreign Functions
 
-Another source of imperative operations in OCaml is resources that come from
-interfacing with external libraries through OCaml's foreign function
-interface (FFI). The FFI opens OCaml up to imperative constructs that are
-exported by system calls or other external libraries. Many of these come
-built in, like access to the `write` system call or to the `clock`, while
-others come from user libraries, like LAPACK bindings. OCaml's FFI is
-discussed in more detail in
-[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
-[libraries/interfacing with external]{.idx}[external libraries/interfacing
-with]{.idx}[LAPACK bindings]{.idx}[foreign function interface
-(FFI)/imperative operations and]{.idx}[primitive mutable data/foreign
-functions]{.idx}
+Another source of imperative operations in OCaml is resources that
+come from interfacing with external libraries through OCaml's foreign
+function interface (FFI). The FFI opens OCaml up to imperative
+constructs that are exported by system calls or other external
+libraries. Many of these come built in, like access to the `write`
+system call or to the `clock`, while others come from user
+libraries. OCaml's FFI is discussed in more detail in [Foreign
+Function
+Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+[libraries/interfacing with external]{.idx}[external
+libraries/interfacing with]{.idx}[LAPACK bindings]{.idx}[foreign
+function interface (FFI)/imperative operations and]{.idx}[primitive
+mutable data/foreign functions]{.idx}
 
 
 ## for and while Loops {#for-and-while-loops-1}
@@ -499,9 +511,9 @@ val nums : int array = [|1; 2; 3; 4; 5|]
 - : int array = [|5; 4; 3; 2; 1|]
 ```
 
-In the preceding example, we used `incr` and `decr`, which are built-in
-functions for incrementing and decrementing an `int ref` by one,
-respectively.
+In the preceding example, we used `Int.incr` and `Int.decr`, which are
+built-in functions for incrementing and decrementing an `int ref` by
+one, respectively.
 
 ## Example: Doubly Linked Lists
 
@@ -510,34 +522,38 @@ list. Doubly linked lists can be traversed in both directions, and
 elements can be added and removed from the list in constant
 time. Core defines a doubly linked list (the module is called
 `Doubly_linked`), but we'll define our own linked list library as an
-illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
-lists]{.idx}[imperative programming/doubly-linked lists]{.idx
-#IPdoublink}
+illustration.
+[lists/doubly-linked lists]{.idx}
+[doubly-linked lists]{.idx}
+[imperative programming/doubly-linked lists]{.idx}
 
 Here's the `mli` of the module we'll build:
 
 ```ocaml file=examples/correct/dlist/dlist.mli
-(* file: dlist.mli *)
 open Base
 
 type 'a t
 type 'a element
 
-(** Basic list operations  *)
-val create   : unit -> 'a t
+(** Basic list operations *)
+
+val create : unit -> 'a t
 val is_empty : 'a t -> bool
 
 (** Navigation using [element]s *)
+
 val first : 'a t -> 'a element option
-val next  : 'a element -> 'a element option
-val prev  : 'a element -> 'a element option
+val next : 'a element -> 'a element option
+val prev : 'a element -> 'a element option
 val value : 'a element -> 'a
 
 (** Whole-data-structure iteration *)
-val iter    : 'a t -> f:('a -> unit) -> unit
+
+val iter : 'a t -> f:('a -> unit) -> unit
 val find_el : 'a t -> f:('a -> bool) -> 'a element option
 
 (** Mutation *)
+
 val insert_first : 'a t -> 'a -> 'a element
 val insert_after : 'a element -> 'a -> 'a element
 val remove : 'a t -> 'a element -> unit
@@ -552,13 +568,12 @@ Now let's look at the implementation. We'll start by defining `'a element`
 and `'a t`:
 
 ```ocaml file=examples/correct/dlist/dlist.ml,part=1
-(* file: dlist.ml *)
 open Base
 
 type 'a element =
-  { value : 'a;
-    mutable next : 'a element option;
-    mutable prev : 'a element option
+  { value : 'a
+  ; mutable next : 'a element option
+  ; mutable prev : 'a element option
   }
 
 type 'a t = 'a element option ref
@@ -578,9 +593,7 @@ Now we can define a few basic functions that operate on lists and elements:
 ```ocaml file=examples/correct/dlist/dlist.ml,part=2
 let create () = ref None
 let is_empty t = Option.is_none !t
-
 let value elt = elt.value
-
 let first t = !t
 let next elt = elt.next
 let prev elt = elt.prev
@@ -589,7 +602,7 @@ let prev elt = elt.prev
 These all follow relatively straightforwardly from our type definitions.
 
 ::: {data-type=note}
-##### Cyclic Data Structures
+#### Cyclic Data Structures
 
 Doubly linked lists are a cyclic data structure, meaning that it is possible
 to follow a nontrivial sequence of pointers that closes in on itself. In
@@ -620,21 +633,21 @@ Now, we'll start considering operations that mutate the list, starting with
 ```ocaml file=examples/correct/dlist/dlist.ml,part=3
 let insert_first t value =
   let new_elt = { prev = None; next = !t; value } in
-  begin match !t with
+  (match !t with
   | Some old_first -> old_first.prev <- Some new_elt
-  | None -> ()
-  end;
+  | None -> ());
   t := Some new_elt;
   new_elt
 ```
 
-`insert_first` first defines a new element `new_elt`, and then links it into
-the list, finally setting the list itself to point to `new_elt`. Note that
-the precedence of a `match` expression is very low, so to separate it from
-the following assignment (`t := Some new_elt`), we surround the match with
-`begin ... end`. We could have used parentheses for the same purpose. Without
-some kind of bracketing, the final assignment would incorrectly become part
-of the `None` case. [elements/defining new]{.idx}
+`insert_first` first defines a new element `new_elt`, and then links
+it into the list, finally setting the list itself to point to
+`new_elt`. Note that the precedence of a `match` expression is very
+low, so to separate it from the following assignment (`t := Some
+new_elt`), we surround the match with parenthses.  We could have used
+`begin ... end` for the same purpose, but without some kind of
+bracketing, the final assignment would incorrectly become part of the
+`None` case. [elements/defining new]{.idx}
 
 We can use `insert_after` to insert elements later in the list.
 `insert_after` takes as arguments both an `element` after which to insert the
@@ -643,27 +656,24 @@ new node and a value to insert:
 ```ocaml file=examples/correct/dlist/dlist.ml,part=4
 let insert_after elt value =
   let new_elt = { value; prev = Some elt; next = elt.next } in
-  begin match elt.next with
+  (match elt.next with
   | Some old_next -> old_next.prev <- Some new_elt
-  | None -> ()
-  end;
+  | None -> ());
   elt.next <- Some new_elt;
   new_elt
 ```
 
-Finally, we need a `remove` function:
+We also need a `remove` function:
 
 ```ocaml file=examples/correct/dlist/dlist.ml,part=5
 let remove t elt =
   let { prev; next; _ } = elt in
-  begin match prev with
+  (match prev with
   | Some prev -> prev.next <- next
-  | None -> t := next
-  end;
-  begin match next with
-  | Some next -> next.prev <- prev;
-  | None -> ()
-  end;
+  | None -> t := next);
+  (match next with
+  | Some next -> next.prev <- prev
+  | None -> ());
   elt.prev <- None;
   elt.next <- None
 ```
@@ -709,16 +719,16 @@ element from a given node:
 let iter t ~f =
   let rec loop = function
     | None -> ()
-    | Some el -> f (value el); loop (next el)
+    | Some el ->
+      f (value el);
+      loop (next el)
   in
   loop !t
 
 let find_el t ~f =
   let rec loop = function
     | None -> None
-    | Some elt ->
-      if f (value elt) then Some elt
-      else loop (next elt)
+    | Some elt -> if f (value elt) then Some elt else loop (next elt)
   in
   loop !t
 ```
@@ -774,6 +784,8 @@ represent a lazy value:
     | Value of 'a
     | Exn of exn;;
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+# type 'a our_lazy = { mutable state : 'a lazy_state };;
+type 'a our_lazy = { mutable state : 'a lazy_state; }
 ```
 
 A `lazy_state` represents the possible states of a lazy value. A lazy
@@ -782,56 +794,57 @@ function for computing the value in question. A lazy value is in the
 `Value` state when it has been forced and the computation ended
 normally. The `Exn` case is for when the lazy value has been forced,
 but the computation ended with an exception. A lazy value is simply a
-`ref` containing a `lazy_state`, where the `ref` makes it possible to
-change from being in the `Delayed` state to being in the `Value` or
-`Exn` states.
+record with a single mutable field containing a `lazy_state`, where
+the mutability makes it possible to change from being in the `Delayed`
+state to being in the `Value` or `Exn` states.
 
 We can create a lazy value from a thunk, i.e., a function that takes a
 unit argument. Wrapping an expression in a thunk is another way to
 suspend the computation of an expression: [thunks]{.idx}
 
 ```ocaml env=custom_lazy
-# let create_lazy f = ref (Delayed f);;
-val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
+# let our_lazy f = { state = Delayed f };;
+val our_lazy : (unit -> 'a) -> 'a our_lazy = <fun>
 # let v =
-    create_lazy (fun () ->
-  print_endline "performing lazy computation"; Float.sqrt 16.);;
-val v : float lazy_state ref = {contents = Delayed <fun>}
+    our_lazy (fun () ->
+      print_endline "performing lazy computation"; Float.sqrt 16.);;
+val v : float our_lazy = {state = Delayed <fun>}
 ```
 
 Now we just need a way to force a lazy value. The following function
 does just that.
 
 ```ocaml env=custom_lazy
-# let force v =
-    match !v with
+# let our_force l =
+    match l.state with
     | Value x -> x
     | Exn e -> raise e
     | Delayed f ->
       try
         let x = f () in
-        v := Value x;
+        l.state <- Value x;
         x
       with exn ->
-        v := Exn exn;
+        l.state <- Exn exn;
         raise exn;;
-val force : 'a lazy_state ref -> 'a = <fun>
+val our_force : 'a our_lazy -> 'a = <fun>
 ```
 
 Which we can use in the same way we used `Lazy.force`:
 
 ```ocaml env=custom_lazy
-# force v;;
+# our_force v;;
 performing lazy computation
 - : float = 4.
-# force v;;
+# our_force v;;
 - : float = 4.
 ```
 
 The main user-visible difference between our implementation of
 laziness and the built-in version is syntax. Rather than writing
-`create_lazy (fun () -> sqrt 16.)`, we can (with the built-in `lazy`)
-just write `lazy (sqrt 16.)`.
+`our_lazy (fun () -> sqrt 16.)`, we can (with the built-in `lazy`)
+just write `lazy (sqrt 16.)`, avoiding the necessity of declaring a
+function.
 
 ### Memoization and Dynamic Programming
 
@@ -944,14 +957,15 @@ val time : (unit -> 'a) -> 'a = <fun>
 And now we can use this to try out some examples:
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> edit_distance "OCaml" "ocaml")
+# time (fun () -> edit_distance "OCaml" "ocaml");;
 Time: 0.655651092529 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
+# time (fun () -> edit_distance "OCaml 4.13" "ocaml 4.13");;
 Time: 2541.6533947 ms
 - : int = 2
 ```
 
+\noindent
 Just those few extra characters made it thousands of times slower!
 
 Memoization would be a huge help here, but to fix the problem, we need
@@ -981,10 +995,10 @@ This is, however, exponentially slow, for the same reason that
 `fib`. It shows up quite dramatically in the performance:
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> fib 20)
+# time (fun () -> fib 20);;
 Time: 1.14369392395 ms
 - : int = 6765
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 14752.7184486 ms
 - : int = 102334155
 ```
@@ -999,12 +1013,12 @@ memoize it after the fact and expect the first call to `fib` to be
 improved.
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memoize (module Int) fib
+# let fib = memoize (module Int) fib;;
 val fib : int -> int = <fun>
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 18174.5970249 ms
 - : int = 102334155
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 0.00524520874023 ms
 - : int = 102334155
 ```
@@ -1067,7 +1081,8 @@ val memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
   <fun>
 ```
 
-Note that `memo_rec` has the same signature as `make_rec`.
+\noindent
+Note that `memo_rec` has almost the same signature as `make_rec`.
 
 We're using the reference here as a way of tying the recursive knot without
 using a `let rec`, which for reasons we'll describe later wouldn't work here.
@@ -1075,14 +1090,15 @@ using a `let rec`, which for reasons we'll describe later wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`:
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memo_rec (module Int) fib_norec
+# let fib = memo_rec (module Int) fib_norec;;
 val fib : int -> int = <fun>
-# time (fun () -> fib 40)
+# time (fun () -> fib 40);;
 Time: 0.121355056763 ms
 - : int = 102334155
 ```
 
-And as you can see, the exponential time complexity is now gone.
+\noindent
+As you can see, the exponential time complexity is now gone.
 
 The memory behavior here is important. If you look back at the
 definition of `memo_rec`, you'll see that the call `memo_rec
@@ -1122,6 +1138,9 @@ tedious and error prone, so instead we'll use a few different syntax
 extensions for deriving the necessary functionality automatically.  By
 enabling `ppx_jane`, we pull in a collection of such derivers, three
 of which we use in defining `String_pair` below.
+[syntax extension/ppx_jane]{.idx}
+[ppx_jane]{.idx}
+
 
 ```ocaml env=main
 # #require "ppx_jane";;
@@ -1165,13 +1184,13 @@ one we started with; the following call is many thousands of times
 faster than it was without memoization.
 
 ```ocaml env=main,non-deterministic=command
-# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
+# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"));;
 Time: 0.964403152466 ms
 - : int = 2
 ```
 
 ::: {.allow_break data-type=note}
-##### Limitations of let rec
+#### Limitations of let rec
 
 You might wonder why we didn't tie the recursive knot in `memo_rec` using
 `let rec`, as we did for `make_rec` earlier. Here's code that tries to do
@@ -1230,10 +1249,10 @@ without explicit mutation:
 ```ocaml env=main,non-deterministic=command
 # let lazy_memo_rec m f_norec x =
     let rec f = lazy (memoize m (fun x -> f_norec (force f) x)) in
-    (force f) x
+    (force f) x;;
 val lazy_memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
   <fun>
-# time (fun () -> lazy_memo_rec (module Int) fib_norec 40)
+# time (fun () -> lazy_memo_rec (module Int) fib_norec 40);;
 Time: 0.181913375854 ms
 - : int = 102334155
 ```
@@ -1296,8 +1315,9 @@ standard file descriptors in Unix:
   intended for error messages.
 
 The values `stdin`, `stdout`, and `stderr` are useful enough that they
-are also available in the global namespace directly, without having to
-go through the `In_channel` and `Out_channel` modules.
+are also available in the top level of `Core`'s namespace directly,
+without having to go through the `In_channel` and `Out_channel`
+modules.
 
 Let's see this in action in a simple interactive application. The
 following program, `time_converter`, prompts the user for a time zone,
@@ -1323,12 +1343,14 @@ let () =
     Out_channel.flush stdout
 ```
 
-We can build this program using `dune` and run it. You'll see that it
-prompts you for input, as follows:
+We can build this program using `dune` and run it, though you'll need
+to add a `dune-project` and `dune` file, as described in [Files
+Modules and
+Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}. You'll
+see that it prompts you for input, as follows:
 
 ```
-$ dune build time_converter.bc
-$ ./_build/default/time_converter.bc
+$ dune exec ./time_converter.exe
 Pick a timezone:
 ```
 
@@ -1389,11 +1411,11 @@ Error: This expression has type float but an expression was expected of type
 ```
 
 ::: {data-type=note}
-##### Understanding Format Strings
+#### Understanding Format Strings
 
 The format strings used by `printf` turn out to be quite different
-from ordinary strings. This difference ties to the fact that OCaml
-format strings, unlike their equivalent in C, are type-safe. In
+from ordinary strings. This difference ties to the fact that OCaml's
+`printf` facility, unlike the equivalent in C, is type-safe.  In
 particular, the compiler checks that the types referred to by the
 format string match the types of the rest of the arguments passed to
 `printf`.
@@ -1531,22 +1553,24 @@ middle of its work, it won't actually close the file. If we try to read a
 file that doesn't actually contain numbers, we'll see such an error:
 
 ```ocaml env=main,non-deterministic=command
-# sum_file "/etc/hosts"
+# sum_file "/etc/hosts";;
 Exception:
 (Failure
   "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
 ```
 
+\noindent
 And if we do this over and over in a loop, we'll eventually run out of file
 descriptors:
 
 ```ocaml skip
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 - : unit = ()
-# sum_file "numbers.txt"
+# sum_file "numbers.txt";;
 Error: I/O error: ...: Too many open files
 ```
 
+\noindent
 And now, you'll need to restart your toplevel if you want to open any more
 files!
 
@@ -1606,9 +1630,9 @@ efficient to process a line at a time. You can use the
 val sum_file : string -> int = <fun>
 ```
 
-This is just a taste of the functionality of `In_channel` and `Out_channel`.
-To get a fuller understanding, you should review the API documentation for
-those modules.
+This is just a taste of the functionality of `In_channel` and
+`Out_channel`.  To get a fuller understanding, you should review the
+API documentation.
 
 
 ## Order of Evaluation
@@ -1636,12 +1660,12 @@ snippet of code would answer that question:
 - : bool = true
 ```
 
-In some sense, we don't really need to compute the `sin 128.` because
-`sin 75.` is negative, so we could know the answer before even computing
-`sin 128.`.
+In some sense, we don't really need to compute the `sin 128` because
+`sin 75` is negative, so we could know the answer before even computing
+`sin 128`.
 
 It doesn't have to be this way. Using the `lazy` keyword, we can write the
-original computation so that `sin 128.` won't ever be computed:
+original computation so that `sin 128` won't ever be computed:
 
 ```ocaml env=main
 # let x = lazy (Float.sin 120.) in
@@ -1711,12 +1735,13 @@ programming/side effects/weak polymorphism ]{.idx}
 val remember : '_weak1 -> '_weak1 = <fun>
 ```
 
-`remember` simply caches the first value that's passed to it, returning that
-value on every call. That's because `cache` is created and initialized once
-and is shared across invocations of `remember`.
+\noindent
+`remember` simply caches the first value that's passed to it,
+returning that value on every call. That's because `cache` is created
+and initialized once and is shared across invocations of `remember`.
 
-`remember` is not a terribly useful function, but it raises an interesting
-question: what is its type?
+`remember` is not a terribly useful function, but it raises an
+interesting question: what should its type be?
 
 On its first call, `remember` returns the same value it's passed, which means
 its input type and return type should match. Accordingly, `remember` should
@@ -1735,6 +1760,7 @@ val identity : 'a -> 'a = <fun>
 - : string = "five"
 ```
 
+\noindent
 As you can see, the polymorphic type of `identity` lets it operate on values
 with different types.
 
@@ -1767,6 +1793,7 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
+\noindent
 Note that the type of `remember` was settled by the definition of
 `remember_three`, even though `remember_three` was never called!
 
@@ -1826,6 +1853,7 @@ polymorphic type:
 val f : unit -> 'a option ref = <fun>
 ```
 
+\noindent
 But a function that has a mutable cache that persists across calls,
 like `memoize`, can only be weakly polymorphic.
 

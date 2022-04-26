@@ -15,8 +15,6 @@
    in a more ambitious manner, so as to help our end users understand
    their mistakes. *)
 
-open Parser.MenhirInterpreter (* incremental API to our parser *)
-
 (* [fail buffer lexbuf s] is invoked if a syntax error is encountered
    in state [s]. *)
 
@@ -40,16 +38,6 @@ let fail buffer lexbuf (s : int) =
   (* Display our message and die. *)
   Error.error (Positions.lexbuf lexbuf) "syntax error %s.\n%s" where message
 
-(* Same as above, except we expect a checkpoint instead of a state [s]. *)
-
-let fail buffer lexbuf checkpoint =
-  match checkpoint with
-  | HandlingError env ->
-      let s = current_state_number env in
-      fail buffer lexbuf s
-  | _ ->
-      assert false (* this cannot happen *)
-
 (* The entry point. *)
 
 let grammar lexer lexbuf =
@@ -57,8 +45,8 @@ let grammar lexer lexbuf =
   (* Keep track of the last two tokens in a buffer. *)
   let buffer, lexer = MenhirLib.ErrorReports.wrap lexer in
 
-  loop_handle
-    (fun v -> v)
-    (fail buffer lexbuf)
-    (lexer_lexbuf_to_supplier lexer lexbuf)
-    (Parser.Incremental.grammar lexbuf.Lexing.lex_curr_p)
+  try
+    Parser.grammar lexer lexbuf
+  with
+  | Parser.Error s ->
+      fail buffer lexbuf s

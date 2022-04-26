@@ -16,6 +16,9 @@
  *
  *)
 
+let src = Logs.Src.create "conduit_mirage" ~doc:"Conduit Mirage"
+
+module Log = (val Logs.src_log src : Logs.LOG)
 open Sexplib.Conv
 
 let ( >>= ) = Lwt.( >>= )
@@ -63,7 +66,7 @@ end
 let tcp_client i p = Lwt.return (`TCP (i, p))
 let tcp_server _ p = Lwt.return (`TCP p)
 
-module TCP (S : Mirage_stack.V4V6) = struct
+module TCP (S : Tcpip.Stack.V4V6) = struct
   module Flow = S.TCP
 
   type flow = Flow.flow
@@ -85,7 +88,7 @@ module TCP (S : Mirage_stack.V4V6) = struct
     match s with
     | `TCP port ->
         let s, _u = Lwt.task () in
-        S.listen_tcp t ~port (fun flow -> fn flow);
+        S.TCP.listen (S.tcp t) ~port (fun flow -> fn flow);
         s
     | _ -> err_not_supported s "listen"
 end
@@ -198,14 +201,12 @@ module TLS (S : S) = struct
     let close = function TLS f -> TLS.close f | Clear f -> S.Flow.close f
   end
 
-  let err_flow_write m e = fail "%s: %a" m TLS.pp_write_error e
-
   let connect (t : t) (c : client) =
     match c with
     | `TLS (c, x) -> (
         S.connect t x >>= fun flow ->
         TLS.client_of_flow c flow >>= function
-        | Error e -> err_flow_write "connect" e
+        | Error e -> fail "connect: %a" TLS.pp_write_error e
         | Ok flow -> Lwt.return (TLS flow))
     | _ -> S.connect t c >|= fun t -> Clear t
 
@@ -214,7 +215,9 @@ module TLS (S : S) = struct
     | `TLS (c, x) ->
         S.listen t x (fun flow ->
             TLS.server_of_flow c flow >>= function
-            | Error e -> err_flow_write "listen" e
+            | Error e ->
+                Log.info (fun m -> m "listen: %a" TLS.pp_write_error e);
+                Lwt.return_unit
             | Ok flow -> fn (TLS flow))
     | _ -> S.listen t s (fun f -> fn (Clear f))
 end

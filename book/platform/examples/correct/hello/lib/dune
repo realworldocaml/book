@@ -1,5 +1,2 @@
 (library
- (inline_tests)
- (name hello)
- (preprocess
-  (pps ppx_inline_test)))
+ (name hello))

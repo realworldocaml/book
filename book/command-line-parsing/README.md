@@ -29,7 +29,7 @@ In this chapter, we'll:
 - Learn how to use Command to construct basic and grouped command-line
   interfaces
 
-- We will build simple equivalents to the cryptographic `md5` and `shasum`
+- Build simple equivalents to the cryptographic `md5` and `shasum`
   utilities
 
 - Demonstrate how to declare complex command-line interfaces in a type-safe
@@ -48,9 +48,7 @@ hash function]{.idx}[command-line parsing/basic approach to]{.idx}
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 ```
 
 The `do_hash` function accepts a `filename` parameter and prints the
@@ -93,8 +91,8 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    (Command.Param.map filename_param ~f:(fun filename ->
-         (fun () -> do_hash filename)))
+    (Command.Param.map filename_param ~f:(fun filename () ->
+         do_hash filename))
 ```
 
 The `summary` argument is a one-line description which goes at the top of the
@@ -111,6 +109,7 @@ by recreating some of this code in the toplevel.
 val filename_param : string Command.Spec.param = <abstr>
 ```
 
+\noindent
 The type parameter of `filename_param` is there to indicate the type of the
 value returned by the parser; in this case, `string`.
 
@@ -130,23 +129,32 @@ type nonrec 'result basic_command =
 Note that the `'result` parameter of the type alias `basic_command` is
 instantiated as `unit` for the type of `Command.basic`.
 
-It makes sense that `Command.basic` wants a parser that returns a function;
-after all, in the end, it needs a function it can run that constitutes the
-execution of the program. But how do we get such a parser, given the parser
-we have returns just a filename?
+It makes sense that `Command.basic` wants a parser that returns a
+function; after all, in the end, it needs a function it can run that
+constitutes the execution of the program. But how do we get such a
+parser, given the parser we have returns just a filename?
 
-The answer is to use a `map` function to change the value returned by the
-parser. As you can see below, the type of `Command.Param.map` is very similar
-to the code of `List.map`.
+The answer is to use a `map` function to change the value returned by
+the parser. As you can see below, the type of `Command.Param.map` is
+very similar to the type of `List.map`.
 
 ```ocaml env=main
 # #show Command.Param.map;;
 val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param
 ```
 
-In our program, we used `map` to convert the `filename_param` parser, which
-returns a string representing the file name, into a parser that returns a
-function of type `unit -> unit` containing the body of the command.
+In our program, we used `map` to convert the `filename_param` parser,
+which returns a string representing the file name, into a parser that
+returns a function of type `unit -> unit` containing the body of the
+command.  It might not be obvious that the function passed to map
+returns a function, but remember that, due to currying, the invocation
+of map above could be written equivalently as follows.
+
+```ocaml skip
+Command.Param.map filename_param ~f:(fun filename ->
+  fun () -> do_hash filename)
+```
+
 
 ### Running commands {#running-basic-commands}
 
@@ -154,8 +162,7 @@ Once we've defined the basic command, running it is just one function call
 away.
 
 ```ocaml file=examples/correct/md5/md5.ml,part=3
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 `Command.run` takes a couple of optional arguments that are useful to
@@ -209,31 +216,29 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe md5.ml
-cd43f59095550dce382f8f3427aa3373
+2ae55d17ff11d337492a1ca5510ee01b
 ```
 
-And that's all it took to build our little MD5 utility! Here's a complete
-version of the example we just walked through, made slightly more succinct by
-removing intermediate variables.
+And that's all it takes to build our little MD5 utility! Here's a
+complete version of the example we just walked through, made slightly
+more succinct by removing intermediate variables.
 
 ```ocaml file=examples/correct/md5_succinct/md5.ml
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
-     map (anon ("filename" %: string))
-       ~f:(fun filename -> (fun () -> do_hash filename)))
+      map
+        (anon ("filename" %: string))
+        ~f:(fun filename () -> do_hash filename))
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 ### Multi-argument commands {#multiple-arguments}
@@ -270,14 +275,14 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
-      map (both
-            (anon ("hash_length" %: int))
-            (anon ("filename" %: string)))
-       ~f:(fun (hash_length,filename) ->
-            (fun () -> do_hash hash_length filename)))
+      map
+        (both
+           (anon ("hash_length" %: int))
+           (anon ("filename" %: string)))
+        ~f:(fun (hash_length, filename) () ->
+          do_hash hash_length filename))
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this command, we can see that it now indeed expects two
@@ -285,7 +290,7 @@ arguments.
 
 ```sh dir=examples/correct/md5_multiarg
 $ dune exec -- ./md5.exe 5 md5.ml
-c45ae
+f8824
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -299,12 +304,10 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let open Command.Let_syntax in
-     let open Command.Param in
-     let%map
-       hash_length = anon ("hash_length" %: int)
-     and filename  = anon ("filename" %: string)
-     in
-     fun () -> do_hash hash_length filename)
+    let open Command.Param in
+    let%map hash_length = anon ("hash_length" %: int)
+    and filename = anon ("filename" %: string) in
+    fun () -> do_hash hash_length filename)
 ```
 
 Here, we take advantage of let-syntax's support for parallel let bindings,
@@ -312,26 +315,26 @@ using `and` to join the definitions together. This syntax translates down to
 the same pattern based on `both` that we showed above, but it's easier to
 read and use, and scales better to more arguments.
 
-The need to open both modules is a little awkward, and the `Param` module in
-particular you really only need on the right-hand-side of the equals-sign.
-This is achieved automatically by using the `let%map_open` syntax,
-demonstrated below.
+The need to open both modules is a little awkward, and the `Param`
+module in particular you really only need on the right-hand-side of
+the equals-sign.  This is achieved automatically by using the
+`let%map_open` syntax, demonstrated below.  We'll also drop the open
+of `Command.Let_syntax` in favor of explicitly using
+`let%map_open.Command` to mark the let-syntax as coming from the
+`Command` module
 
 ```ocaml file=examples/correct/md5_let_syntax2/md5.ml,part=1
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open
-        hash_length = anon ("hash_length" %: int)
-      and filename  = anon ("filename" %: string)
-      in
-      fun () -> do_hash hash_length filename)
+    (let%map_open.Command hash_length = anon ("hash_length" %: int)
+     and filename = anon ("filename" %: string) in
+     fun () -> do_hash hash_length filename)
 ```
 
-Let-syntax is the most common way of writing parsers for `Command`, and we'll
-use that idiom from here on.
+Let-syntax is the most common way of writing parsers for `Command`,
+and we'll use that idiom from here on.
 
 Now that we have the basics in place, the rest of the chapter will examine
 some of the more advanced features of Command.
@@ -355,9 +358,10 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open file = anon ("filename" %: Filename.arg_type) in
-      fun () -> do_hash file)
+    (let%map_open.Command file =
+       anon ("filename" %: Filename.arg_type)
+     in
+     fun () -> do_hash file)
 ```
 
 This doesn't change the validation of the provided value, but it does
@@ -375,23 +379,24 @@ file type that can't be fully read. [arguments/defining custom types]{.idx}
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking file
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_file_blocking file |> Md5.to_hex |> print_endline
 
 let regular_file =
   Command.Arg_type.create (fun filename ->
       match Sys.is_file filename with
       | `Yes -> filename
       | `No -> failwith "Not a regular file"
-      | `Unknown -> failwith "Could not determine if this was a regular file")
+      | `Unknown ->
+        failwith "Could not determine if this was a regular file")
 
 let command =
-  Command.basic ~summary:"Generate an MD5 hash of the input data"
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open filename = anon ("filename" %: regular_file) in
-      fun () -> do_hash filename)
+    (let%map_open.Command filename =
+       anon ("filename" %: regular_file)
+     in
+     fun () -> do_hash filename)
 
 let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
@@ -403,7 +408,7 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=examples/correct/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-ed81ec895966cab3170befc62cf0a702
+5df5ec6301ea37bebc22912ceaa6b2e2
 $ dune exec -- ./md5.exe /dev/null
 Error parsing command line:
 
@@ -430,19 +435,20 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open filename = anon (maybe ("filename" %: string)) in
-      fun () -> do_hash filename)
+    (let%map_open.Command filename =
+       anon (maybe ("filename" %: string))
+     in
+     fun () -> do_hash filename)
 ```
 
+\noindent
 But building this results in a compile-time error.
 
 ```sh dir=examples/erroneous/md5_with_optional_file_broken
 $ dune build md5.exe
-...
-File "md5.ml", line 15, characters 24-32:
-15 |       fun () -> do_hash filename)
-                             ^^^^^^^^
+File "md5.ml", line 15, characters 23-31:
+15 |      fun () -> do_hash filename)
+                            ^^^^^^^^
 Error: This expression has type string option
        but an expression was expected of type string
 [1]
@@ -458,10 +464,8 @@ no file is specified.
 open Core
 
 let get_contents = function
-  | None | Some "-" ->
-    In_channel.input_all In_channel.stdin
-  | Some filename ->
-    In_channel.read_all filename
+  | None | Some "-" -> In_channel.input_all In_channel.stdin
+  | Some filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -473,14 +477,12 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open filename =
-        anon (maybe ("filename" %: Filename.arg_type))
-      in
-      fun () -> do_hash filename)
+    (let%map_open.Command filename =
+       anon (maybe ("filename" %: Filename.arg_type))
+     in
+     fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type. This is
@@ -490,7 +492,7 @@ our previous examples.
 
 ```sh dir=examples/correct/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-e533f209e966f6c6c60f909f651fc24d
+54fd98cd30f8faa76be46be0005f00bf
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -505,7 +507,7 @@ replaces `maybe` with `maybe_with_default`:
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.input_all In_channel.stdin
+  | "-" -> In_channel.input_all In_channel.stdin
   | filename -> In_channel.read_all filename
 
 let do_hash filename =
@@ -518,21 +520,19 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open filename =
-        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-      in
-      fun () -> do_hash filename)
+    (let%map_open.Command filename =
+       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+     in
+     fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=examples/correct/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-560f6fd99e100c7df0ef18161e9e8626
+f0ea4085ca226eef2c0d70026619a244
 ```
 
 ### Sequences of Arguments
@@ -545,7 +545,7 @@ to process on the command line. [arguments/sequences of]{.idx}
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.input_all In_channel.stdin
+  | "-" -> In_channel.input_all In_channel.stdin
   | filename -> In_channel.read_all filename
 
 let do_hash filename =
@@ -558,17 +558,15 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Let_syntax.(
-      let%map_open files =
-        anon (sequence ("filename" %: Filename.arg_type))
-      in
-      fun () ->
-        match files with
-        | [] -> do_hash "-"
-        | _  -> List.iter files ~f:do_hash)
+    (let%map_open.Command files =
+       anon (sequence ("filename" %: Filename.arg_type))
+     in
+     fun () ->
+       match files with
+       | [] -> do_hash "-"
+       | _ -> List.iter files ~f:do_hash)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The callback function is a little more complex now, to handle the extra
@@ -599,35 +597,35 @@ command line and `-t` runs a self-test. The complete example follows.
 open Core
 
 let checksum_from_string buf =
-  Md5.digest_string buf
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_string buf |> Md5.to_hex |> print_endline
 
 let checksum_from_file filename =
-  let contents = match filename with
-    | "-"      -> In_channel.input_all In_channel.stdin
+  let contents =
+    match filename with
+    | "-" -> In_channel.input_all In_channel.stdin
     | filename -> In_channel.read_all filename
   in
-  Md5.digest_string contents
-  |> Md5.to_hex
-  |> print_endline
+  Md5.digest_string contents |> Md5.to_hex |> print_endline
 
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
-    Command.Let_syntax.(
-      let%map_open
-        use_string = flag "-s" (optional string)
-          ~doc:"string Checksum the given string"
-      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
-      and filename =
-        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-      in
-      fun () ->
-        if trial then printf "Running time trial\n"
-        else match use_string with
-          | Some buf -> checksum_from_string buf
-          | None -> checksum_from_file filename)
+    (let%map_open.Command use_string =
+       flag
+         "-s"
+         (optional string)
+         ~doc:"string Checksum the given string"
+     and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
+     and filename =
+       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+     in
+     fun () ->
+       if trial
+       then printf "Running time trial\n"
+       else (
+         match use_string with
+         | Some buf -> checksum_from_string buf
+         | None -> checksum_from_file filename))
 
 let () = Command.run command
 ```
@@ -664,10 +662,12 @@ supplied, as with the anonymous arguments in earlier examples.
 There are a number of other functions that you can wrap flags in to control how
 they are parsed: [flag functions]{.idx}
 
-- `required *arg*` will return `*arg*` and error if not present
-- `optional *arg*` with return `*arg* option`
-- `optional_with_default *val* *arg*` will return `*arg*` with default `*val*` if not present
-- `listed *arg*` will return `*arg* list` (this flag may appear multiple times)
+- `required <arg>` will return `<arg>` and error if not present
+- `optional <arg>` with return `<arg> option`
+- `optional_with_default <val> <arg>` will return `<arg>` with default
+  `<val>` if not present
+- `listed <arg>` will return `<arg> list` (this flag may appear
+  multiple times)
 - `no_arg` will return a  `bool` that is true if the flag is present
 
 The flags affect the type of the callback function in exactly the same way as
@@ -682,7 +682,7 @@ complex, command-line interfaces. After a while, though, too many options can
 make the program very confusing for newcomers to your application. One way to
 solve this is by grouping common operations together and adding some
 hierarchy to the command-line interface. [subcommands, grouping
-of]{.idx}[OPAM package manager]{.idx}[command-line parsing/subcommand
+of]{.idx}[opam package manager]{.idx}[command-line parsing/subcommand
 grouping]{.idx}
 
 You'll have run across this style already when using the opam package manager
@@ -690,7 +690,7 @@ You'll have run across this style already when using the opam package manager
 commands in this form:
 
 ```
-$ opam config env
+$ opam env
 $ opam remote list -k git
 $ opam install --help
 $ opam install core --verbose
@@ -716,13 +716,14 @@ Command: just use `Command.group`, which lets you merge a collection of
 = <fun>
 ```
 
-The `group` signature accepts a list of basic `Command.t` values and their
-corresponding names. When executed, it looks for the appropriate subcommand
-from the name list, and dispatches it to the right command handler.
+The `group` signature accepts a list of basic `Command.t` values and
+their corresponding names. When executed, it looks for the appropriate
+subcommand from the name list, and dispatches it to the right command
+handler.
 
-Let's build the outline of a calendar tool that does a few operations over
-dates from the command line. We first need to define a command that adds days
-to an input date and prints the resulting date:
+Let's build the outline of a calendar tool that does a few operations
+over dates from the command line. We first need to define a command
+that adds days to an input date and prints the resulting date:
 
 ```ocaml file=examples/correct/cal_add_days/cal.ml
 open Core
@@ -730,15 +731,10 @@ open Core
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
-      fun () ->
-       Date.add_days base days
-       |> Date.to_string
-       |> print_endline)
+    (let%map_open.Command base = anon ("base" %: date)
+     and days = anon ("days" %: int) in
+     fun () ->
+       Date.add_days base days |> Date.to_string |> print_endline)
 
 let () = Command.run add
 ```
@@ -775,29 +771,21 @@ let add =
     ~summary:"Add [days] to the [base] date"
     Command.Let_syntax.(
       let%map_open base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
+      and days = anon ("days" %: int) in
       fun () ->
-        Date.add_days base days
-        |> Date.to_string
-        |> print_endline)
+        Date.add_days base days |> Date.to_string |> print_endline)
 
 let diff =
   Command.basic
     ~summary:"Show days between [date1] and [date2]"
-    Command.Let_syntax.(
-      let%map_open
-        date1 = anon ("date1" %: date)
-      and date2 = anon ("date2" %: date)
-      in
-      fun () ->
-        Date.diff date1 date2
-        |> printf "%d days\n")
+    (let%map_open.Command date1 = anon ("date1" %: date)
+     and date2 = anon ("date2" %: date) in
+     fun () -> Date.diff date1 date2 |> printf "%d days\n")
 
 let command =
-  Command.group ~summary:"Manipulate dates"
-    [ "add", add
-    ; "diff", diff ]
+  Command.group
+    ~summary:"Manipulate dates"
+    [ "add", add; "diff", diff ]
 
 let () = Command.run command
 ```
@@ -852,15 +840,10 @@ open Core
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon ("days" %: int)
-      in
-      fun () ->
-       Date.add_days base days
-       |> Date.to_string
-       |> print_endline)
+    (let%map_open.Command base = anon ("base" %: date)
+     and days = anon ("days" %: int) in
+     fun () ->
+       Date.add_days base days |> Date.to_string |> print_endline)
 
 let () = Command.run add
 ```
@@ -874,9 +857,7 @@ if only the `base` date is supplied.
 open Core
 
 let add_days base days =
-  Date.add_days base days
-  |> Date.to_string
-  |> print_endline
+  Date.add_days base days |> Date.to_string |> print_endline
 
 let prompt_for_string name of_string =
   printf "enter %s: %!" name;
@@ -887,18 +868,14 @@ let prompt_for_string name of_string =
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon (maybe ("days" %: int))
-      in
-      let days =
-        match days with
-        | Some x -> x
-        | None -> prompt_for_string "days" Int.of_string
-      in
-      fun () ->
-        add_days base days)
+    (let%map_open.Command base = anon ("base" %: date)
+     and days = anon (maybe ("days" %: int)) in
+     let days =
+       match days with
+       | Some x -> x
+       | None -> prompt_for_string "days" Int.of_string
+     in
+     fun () -> add_days base days)
 
 let () = Command.run add
 ```
@@ -916,22 +893,17 @@ the value isn't provided.
 ```ocaml file=examples/correct/cal_add_interactive2/cal.ml,part=1
 let anon_prompt name of_string =
   let arg = Command.Arg_type.create of_string in
-  Command.Let_syntax.(
-    let%map_open value = anon (maybe (name %: arg)) in
-    match value with
-    | Some v -> v
-    | None -> prompt_for_string name of_string)
+  let%map_open.Command value = anon (maybe (name %: arg)) in
+  match value with
+  | Some v -> v
+  | None -> prompt_for_string name of_string
 
 let add =
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Let_syntax.(
-      let%map_open
-        base = anon ("base" %: date)
-      and days = anon_prompt "days" Int.of_string
-      in
-      fun () ->
-        add_days base days)
+    (let%map_open.Command base = anon ("base" %: date)
+     and days = anon_prompt "days" Int.of_string in
+     fun () -> add_days base days)
 ```
 
 We can see the prompting behavior if we run the program without providing the
@@ -962,13 +934,9 @@ autocompletion]{.idx}
 Bash autocompletion isn't always installed by default, so check your OS
 package manager to see if you have it available.
 
-Operating system | Package manager | Package
------------------|-----------------|--------
-Debian Linux | `apt` | `bash-completion`
-macOS | Homebrew | `bash-completion`
-FreeBSD | Ports system | <em class="filename">/usr/ports/shells/bash-completion</em>
-
-
+- On Debian Linux, do `apt install bash-completion`
+- On macOS Homebrew, do `brew install bash-completion`
+- On FreeBSD, do `pkg install bash-completion`.
 
 Once *bash* completion is installed and configured, check that it works by
 typing the `ssh` command and pressing the Tab key. This should show you the
@@ -1034,7 +1002,7 @@ the shell fragment into your global
 loaded in all of your login shells. [completion handlers]{.idx}
 
 ::: {data-type=note}
-##### Installing a Generic Completion Handler
+#### Installing a Generic Completion Handler
 
 Sadly, `bash` doesn't support installing a generic handler for all
 Command-based applications. This means you have to install the completion
@@ -1051,20 +1019,19 @@ scripts and follow their lead, as the details are very OS-specific.
 
 This rounds up our tour of the Command library. This isn't the only way to
 parse command-line arguments of course; there are several alternatives
-available on OPAM. Three of the most prominent ones follow:
+available on opam. Three of the most prominent ones follow:
 [Cmdliner]{.idx}[OCaml toolchain/ocaml-getopt]{.idx}[Arg
 module]{.idx}[command-line parsing/alternatives to Command
-library]{.idx}[OPAM package manager]{.idx}
+library]{.idx}[opam package manager]{.idx}
 
 The `Arg` module
-: The `Arg` module is from the OCaml standard library, which is used by the
-  compiler itself to handle its command-line interface. Command is generally
-  more featureful than Arg (mainly via support for subcommands, the `step`
-  combinator to transform inputs, and help generation), but there's
-  absolutely nothing wrong with using Arg either. You can use the
-  `Command.Spec.flags_of_args_exn` function to convert Arg specifications
-  into ones compatible with Command. This is quite often used to help port
-  older non-Core code into the Core standard library world.
+: The `Arg` module is from the OCaml standard library, which is used
+  by the compiler itself to handle its command-line
+  interface. `Command` is built on top of `Arg`, but you can also use
+  `Arg` directly. You can use the `Command.Spec.flags_of_args_exn`
+  function to convert `Arg` specifications into ones compatible with
+  Command, which is a simple way of porting an `Arg`-based command
+  line interface to `Command`.
 
 [ocaml-getopt](https://forge.ocamlcore.org/projects/ocaml-getopt/)
 : `ocaml-getopt` provides the general command-line syntax of GNU `getopt` and
@@ -1075,5 +1042,5 @@ The `Arg` module
 : Cmdliner is a mix between the Command and Getopt libraries. It allows for
   the declarative definition of command-line interfaces but exposes a more
   `getopt`-like interface. It also automates the generation of UNIX man pages
-  as part of the specification. Cmdliner is the parser used by OPAM to manage
+  as part of the specification. Cmdliner is the parser used by opam to manage
   its command line.

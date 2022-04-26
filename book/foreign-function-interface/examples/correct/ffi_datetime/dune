@@ -1,0 +1,4 @@
+(executable
+  (name      datetime)
+  (preprocess (pps ppx_jane))
+  (libraries core ctypes-foreign))

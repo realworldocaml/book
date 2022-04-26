@@ -21,8 +21,7 @@ cinaps doesn't work with (include_subdirs unqualified)
   > EOF
 
   $ dune runtest --diff-command diff 2>&1 | sed -E 's/[^ ]+sh/\$sh/'
-            sh (internal) (exit 1)
-  (cd _build/default && $sh -c 'diff sub/test.ml sub/test.ml.cinaps-corrected')
+  File "sub/test.ml", line 1, characters 0-0:
   2,3c2
   < (*)
   < let x = 1

@@ -1,7 +1,7 @@
 (library
  (name        rwo)
  (public_name rwo)
- (libraries   core async lambdasoup re sexp_pretty)
+ (libraries   core async lambdasoup re sexp_pretty str)
  (preprocess  (pps ppx_jane)))
 
 (rule

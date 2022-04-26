@@ -4,4 +4,4 @@
 (library
  (name atd)
  (public_name atd)
- (libraries easy-format unix re))
+ (libraries easy-format unix))

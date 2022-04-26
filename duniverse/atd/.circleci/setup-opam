@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+#
+# Set up opam and install opam packages required to build and test atd
+#
+# This is used by the Dockerfile and by the CI build.
+#
+set -eu
+
+eval "$(opam env)"
+
+opam repo add --all-switches -k git \
+  github https://github.com/ocaml/opam-repository.git
+opam repo remove default
+# no need for 'opam update'
+
+./scripts/install-opam-dependencies

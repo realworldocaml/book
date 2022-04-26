@@ -9,7 +9,7 @@ let test_pos =
     Arg.(required & pos p (some string) None & info [] ~docv)
   in
   let right = Arg.(non_empty & pos_right 2 string [] & info [] ~docv:"RIGHT") in
-  Term.(const pos $ right $ req 1 $ req 0 $ req 2),
-  Term.info "test_pos_req" ~doc:"Test pos req arguments"
+  let info = Cmd.info "test_pos_req" ~doc:"Test pos req arguments" in
+  Cmd.v info Term.(const pos $ right $ req 1 $ req 0 $ req 2)
 
-let () = Term.(exit @@ eval test_pos)
+let () = exit (Cmd.eval test_pos)

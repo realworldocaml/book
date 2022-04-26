@@ -7,25 +7,20 @@ type t =
   | Template of Template.t
 
 let atom_or_quoted_string s =
-  if Atom.is_valid s then
-    Atom (Atom.of_string s)
-  else
-    Quoted_string s
+  if Atom.is_valid s then Atom (Atom.of_string s) else Quoted_string s
 
 let atom s = Atom (Atom.of_string s)
 
-let unsafe_atom_of_string s = atom s
-
 let rec to_string t =
   match t with
-  | Atom a -> Atom.print a
+  | Atom (A s) -> s
   | Quoted_string s -> Escape.quoted s
   | List l ->
     Printf.sprintf "(%s)" (List.map l ~f:to_string |> String.concat ~sep:" ")
   | Template t -> Template.to_string t
 
 let rec pp = function
-  | Atom s -> Pp.verbatim (Atom.print s)
+  | Atom (A s) -> Pp.verbatim s
   | Quoted_string s -> Pp.verbatim (Escape.quoted s)
   | List [] -> Pp.verbatim "()"
   | List l ->
@@ -47,12 +42,11 @@ module Deprecated = struct
         Format.fprintf ppf "@[<hv 1>\"@{<atom>%s" (Escape.escaped first);
         List.iter rest ~f:(fun s ->
             Format.fprintf ppf "@,\\n%s" (Escape.escaped s));
-        Format.fprintf ppf "@}\"@]"
-    ) else
-      Format.pp_print_string ppf (Escape.quoted s)
+        Format.fprintf ppf "@}\"@]")
+    else Format.pp_print_string ppf (Escape.quoted s)
 
   let rec pp_split_strings ppf = function
-    | Atom s -> Format.pp_print_string ppf (Atom.print s)
+    | Atom (A s) -> Format.pp_print_string ppf s
     | Quoted_string s -> pp_print_quoted_string ppf s
     | List [] -> Format.pp_print_string ppf "()"
     | List (first :: rest) ->
@@ -122,9 +116,9 @@ module Deprecated = struct
 end
 
 let rec to_dyn =
-  let open Dyn.Encoder in
+  let open Dyn in
   function
   | Atom (A a) -> string a
   | List s -> List (List.map s ~f:to_dyn)
   | Quoted_string s -> string s
-  | Template t -> constr "template" [ string (Template.to_string t) ]
+  | Template t -> variant "template" [ string (Template.to_string t) ]

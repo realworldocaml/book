@@ -1,7 +1,6 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2012 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2012 The uutf programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** Non-blocking streaming Unicode codec.
@@ -13,32 +12,34 @@
   character without blocking on IO. Decoders perform
   character position tracking and support {{!nln}newline normalization}.
 
-  Functions are also provided to {{!String} fold over} the
-  characters of UTF encoded OCaml string values and to
-  {{!Buffer}directly encode} characters in OCaml {!Buffer.t}
-  values.
+  Functions are also provided to {{!String} fold over} the characters
+  of UTF encoded OCaml string values and to {{!Buffer}directly encode}
+  characters in OCaml {!Stdlib.Buffer.t} values. {b Note} that since OCaml
+  4.14, that functionality can be found in {!Stdlib.String} and
+  {!Stdlib.Buffer} and you are encouraged to migrate to it.
 
   See {{:#examples}examples} of use.
 
-  {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}}
-
-  {3 References}
-    {ul
-    {- The Unicode Consortium.
-    {e {{:http://www.unicode.org/versions/latest}The Unicode Standard}}.
-    (latest version)}}
+  {b References}
+  {ul
+  {- The Unicode Consortium.
+  {e {{:http://www.unicode.org/versions/latest}The Unicode Standard}}.
+  (latest version)}}
 *)
 
   (** {1:ucharcsts Special Unicode characters} *)
 
 val u_bom : Uchar.t
 (** [u_bom] is the {{:http://unicode.org/glossary/#byte_order_mark}byte
-    order mark} (BOM) character ([U+FEFF]). *)
+    order mark} (BOM) character ([U+FEFF]). From OCaml 4.06 on, use
+    {!Uchar.bom}. *)
 
 val u_rep : Uchar.t
 (** [u_rep] is the
     {{:http://unicode.org/glossary/#replacement_character}replacement}
-    character ([U+FFFD]). *)
+    character ([U+FFFD]). From OCaml 4.06 on, use
+    {!Uchar.rep}. *)
+
 
 (** {1:schemes Unicode encoding schemes} *)
 
@@ -121,7 +122,7 @@ val decoder : ?nln:[< nln] -> ?encoding:[< decoder_encoding] -> [< src] ->
     can only be [`UTF_8], [`UTF_16BE] or [`UTF_16LE]. The heuristic
     looks at the first three bytes of input (or less if impossible)
     and takes the {e first} matching byte pattern in the table below.
-{[
+{v
 xx = any byte
 .. = any byte or no byte (input too small)
 pp = positive byte
@@ -137,7 +138,7 @@ pp 00 .. | `UTF_16LE | ASCII UTF-16LE and U+0000 is often forbidden
 uu .. .. | `UTF_8    | ASCII UTF-8 or valid UTF-8 first byte.
 xx xx .. | `UTF_16BE | Not UTF-8 => UTF-16, no BOM => UTF-16BE
 .. .. .. | `UTF_8    | Single malformed UTF-8 byte or no input.
-]}
+v}
     This heuristic is compatible both with BOM based
     recognitition and
     {{:http://tools.ietf.org/html/rfc4627#section-3}JSON-like encoding
@@ -153,12 +154,12 @@ xx xx .. | `UTF_16BE | Not UTF-8 => UTF-16, no BOM => UTF-16BE
     and character count of the last decoded character (including
     [`Malformed] ones) are respectively returned by {!decoder_line},
     {!decoder_col}, {!decoder_byte_count} and {!decoder_count}. Before
-    the first call to {!decode} the line number is [1] and the column
-    is [0].  Each {!decode} returning [`Uchar] or [`Malformed]
+    the first call to {!val-decode} the line number is [1] and the column
+    is [0].  Each {!val-decode} returning [`Uchar] or [`Malformed]
     increments the column until a newline.  On a newline, the line
     number is incremented and the column set to zero. For example the
     line is [2] and column [0] after the first newline was
-    decoded. This can be understood as if {!decode} was moving an
+    decoded. This can be understood as if {!val-decode} was moving an
     insertion point to the right in the data.  A {e newline} is
     anything normalized by [`Readline], see {!nln}.
 
@@ -205,7 +206,7 @@ val set_decoder_encoding : decoder -> [< decoder_encoding] -> unit
 (** [set_decoder_encoding d enc] changes the decoded encoding
     to [enc] after decoding started.
 
-    {b Warning.} Call only after {!decode} was called on [d] and that the
+    {b Warning.} Call only after {!val-decode} was called on [d] and that the
     last call to it returned something different from [`Await] or data may
     be lost. After encoding guess wait for at least three [`Uchar]s. *)
 
@@ -213,25 +214,25 @@ val set_decoder_encoding : decoder -> [< decoder_encoding] -> unit
 
 val decoder_line : decoder -> int
 (** [decoder_line d] is the line number of the last
-    decoded (or malformed) character. See {!decoder} for details. *)
+    decoded (or malformed) character. See {!val-decoder} for details. *)
 
 val decoder_col : decoder -> int
 (** [decoder_col d] is the column number of the last decoded
-    (or malformed) character. See {!decoder} for details. *)
+    (or malformed) character. See {!val-decoder} for details. *)
 
 val decoder_byte_count : decoder -> int
 (** [decoder_byte_count d] is the number of bytes already decoded on
-    [d] (including malformed ones). This is the last {!decode}'s
+    [d] (including malformed ones). This is the last {!val-decode}'s
     end byte offset counting from the beginning of the stream. *)
 
 val decoder_count : decoder -> int
 (** [decoder_count d] is the number of characters already decoded on [d]
-    (including malformed ones). See {!decoder} for details. *)
+    (including malformed ones). See {!val-decoder} for details. *)
 
 val decoder_removed_bom : decoder -> bool
 (** [decoder_removed_bom d] is [true] iff an {e initial}
     {{:http://unicode.org/glossary/#byte_order_mark}BOM} was
-    removed from the input stream. See {!decoder} for details. *)
+    removed from the input stream. See {!val-decoder} for details. *)
 
 val decoder_src : decoder -> src
 (** [decoder_src d] is [d]'s input source. *)
@@ -267,7 +268,7 @@ val encode :
     {ul
     {- [`Partial] iff [e] has a [`Manual] destination and needs more output
        storage. The client must use {!Manual.dst} to provide a new buffer
-       and then call {!encode} with [`Await] until [`Ok] is returned.}
+       and then call {!val-encode} with [`Await] until [`Ok] is returned.}
     {- [`Ok] when the encoder is ready to encode a new [`Uchar] or [`End]}}
 
     For [`Manual] destination, encoding [`End] always returns
@@ -293,15 +294,15 @@ val encoder_dst : encoder -> dst
 module Manual : sig
   val src : decoder -> Bytes.t -> int -> int -> unit
   (** [src d s j l] provides [d] with [l] bytes to read, starting at
-      [j] in [s]. This byte range is read by calls to {!decode} with [d]
+      [j] in [s]. This byte range is read by calls to {!val-decode} with [d]
       until [`Await] is returned. To signal the end of input call the function
       with [l = 0]. *)
 
   val dst : encoder -> Bytes.t -> int -> int -> unit
   (** [dst e s j l] provides [e] with [l] bytes to write, starting
-      at [j] in [s]. This byte range is written by calls to {!encode} with [e]
-      until [`Partial] is returned. Use {!dst_rem} to know the remaining
-      number of non-written free bytes in [s]. *)
+      at [j] in [s]. This byte range is written by calls to
+      {!val-encode} with [e] until [`Partial] is returned. Use {!dst_rem} to
+      know the remaining number of non-written free bytes in [s]. *)
 
   val dst_rem : encoder -> int
   (** [dst_rem e] is the remaining number of non-written, free bytes
@@ -310,7 +311,10 @@ end
 
 (** {1:strbuf String folders and Buffer encoders} *)
 
-(** Fold over the characters of UTF encoded OCaml [string] values. *)
+(** Fold over the characters of UTF encoded OCaml [string] values.
+
+    {b Note.} Since OCaml 4.14, UTF decoders are available in
+    {!Stdlib.String}. You are encouraged to migrate to them. *)
 module String : sig
 
 (** {1 Encoding guess} *)
@@ -358,7 +362,10 @@ module String : sig
       [String.length s - pos]. *)
 end
 
-(**  UTF encode characters in OCaml {!Buffer.t} values. *)
+(**  UTF encode characters in OCaml {!Buffer.t} values.
+
+     {b Note.} Since OCaml 4.06, these encoders are available in
+     {!Stdlib.Buffer}. You are encouraged to migrate to them. *)
 module Buffer : sig
 
   (** {1 Buffer encoders} *)
@@ -487,7 +494,7 @@ end
 *)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2012 Daniel C. Bünzli
+   Copyright (c) 2012 The uutf programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

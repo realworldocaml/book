@@ -23,15 +23,3 @@ val filter_grammar : grammar -> grammar
    take place, whose semantic action will abort the parser. However, if the
    [error] token was used inside a production, then we could very well fall
    into an endless shift cycle. *)
-
-(**Under the simplified strategy, the use of the $syntaxerror keyword is
-   disallowed. This keyword is dubious, for several reasons. First, it means
-   that some sentences that seem legal (according to the grammar) are in
-   reality rejected. This causes confusion when generating tests, when
-   generating syntax error messages, etc. Second, $syntaxerror is used to
-   generate a syntax error during a reduction, so the error is behind us
-   already, yet the next token is replaced with an error token, leading to a
-   nonsensical error location. Better get rid of this mechanism, which is
-   seldom used anyway. [check_grammar] reports an error if $syntaxerror is
-   used. *)
-val check_grammar : grammar -> unit

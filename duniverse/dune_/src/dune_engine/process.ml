@@ -1,6 +1,13 @@
 open! Stdune
 open Import
 open Fiber.O
+module Json = Chrome_trace.Json
+module Event = Chrome_trace.Event
+module Timestamp = Event.Timestamp
+module Action_output_on_success = Execution_parameters.Action_output_on_success
+
+let with_directory_annot =
+  User_message.Annots.Key.create ~name:"with-directory" Path.to_dyn
 
 type ('a, 'b) failure_mode =
   | Strict : ('a, 'a) failure_mode
@@ -34,7 +41,10 @@ module Io = struct
   type kind =
     | File of Path.t
     | Null
-    | Terminal
+    | Terminal of
+        (* This argument make no sense for inputs, but it seems annoying to
+           change, especially as this code is meant to change again in #4435. *)
+        Action_output_on_success.t
 
   type status =
     | Keep_open
@@ -71,51 +81,44 @@ module Io = struct
     ; mutable status : status
     }
 
-  let terminal ch =
+  let terminal ch output_on_success =
     let fd = descr_of_channel ch in
-    { kind = Terminal
+    { kind = Terminal output_on_success
     ; mode = mode_of_channel ch
     ; fd = lazy fd
     ; channel = lazy ch
     ; status = Keep_open
     }
 
-  let stdout = terminal (Out_chan stdout)
+  let make_stdout output_on_success =
+    terminal (Out_chan stdout) output_on_success
 
-  let stderr = terminal (Out_chan stderr)
+  let stdout = make_stdout Print
 
-  let stdin = terminal (In_chan stdin)
+  let make_stderr output_on_success =
+    terminal (Out_chan stderr) output_on_success
 
-  let null_path =
-    lazy
-      (if Sys.win32 then
-        "nul"
-      else
-        "/dev/null")
+  let stderr = make_stderr Print
 
-  let open_null flags = lazy (Unix.openfile (Lazy.force null_path) flags 0o666)
-
-  let null_in = open_null [ Unix.O_RDONLY ]
-
-  let null_out = open_null [ Unix.O_WRONLY ]
+  let stdin = terminal (In_chan stdin) Print
 
   let null (type a) (mode : a mode) : a t =
     let fd =
       match mode with
-      | In -> null_in
-      | Out -> null_out
+      | In -> Config.dev_null_in
+      | Out -> Config.dev_null_out
     in
     let channel = lazy (channel_of_descr (Lazy.force fd) mode) in
-    { kind = Null; mode; fd; channel; status = Close_after_exec }
+    { kind = Null; mode; fd; channel; status = Keep_open }
 
-  let file : type a. _ -> a mode -> a t =
-   fun fn mode ->
+  let file : type a. _ -> ?perm:int -> a mode -> a t =
+   fun fn ?(perm = 0o666) mode ->
     let flags =
       match mode with
       | Out -> [ Unix.O_WRONLY; O_CREAT; O_TRUNC; O_SHARE_DELETE ]
       | In -> [ O_RDONLY; O_SHARE_DELETE ]
     in
-    let fd = lazy (Unix.openfile (Path.to_string fn) flags 0o666) in
+    let fd = lazy (Unix.openfile (Path.to_string fn) flags perm) in
     let channel = lazy (channel_of_descr (Lazy.force fd) mode) in
     { kind = File fn; mode; fd; channel; status = Close_after_exec }
 
@@ -139,22 +142,25 @@ module Io = struct
     | Keep_open -> flush t
     | Close_after_exec ->
       t.status <- Closed;
-      if Lazy.is_val t.channel then
-        close_channel (Lazy.force t.channel)
-      else
-        Unix.close (Lazy.force t.fd)
+      if Lazy.is_val t.channel then close_channel (Lazy.force t.channel)
+      else Unix.close (Lazy.force t.fd)
 
   let multi_use t = { t with status = Keep_open }
 end
 
 type purpose =
-  | Internal_job
-  | Build_job of Path.Build.Set.t
+  | Internal_job of Loc.t option * User_message.Annots.t
+  | Build_job of
+      Loc.t option * User_message.Annots.t * Targets.Validated.t option
+
+let loc_and_annots_of_purpose = function
+  | Internal_job (loc, annots) -> (loc, annots)
+  | Build_job (loc, annots, _) -> (loc, annots)
 
 let io_to_redirection_path (kind : Io.kind) =
   match kind with
-  | Terminal -> None
-  | Null -> Some (Lazy.force Io.null_path)
+  | Terminal _ -> None
+  | Null -> Some (Path.to_string Config.dev_null)
   | File fn -> Some (Path.to_string fn)
 
 let command_line_enclosers ~dir ~(stdout_to : Io.output Io.t)
@@ -167,9 +173,7 @@ let command_line_enclosers ~dir ~(stdout_to : Io.output Io.t)
   in
   let suffix =
     match stdin_from.kind with
-    | Null
-    | Terminal ->
-      suffix
+    | Null | Terminal _ -> suffix
     | File fn -> suffix ^ " < " ^ quote fn
   in
   let suffix =
@@ -199,20 +203,24 @@ let command_line ~prog ~args ~dir ~stdout_to ~stderr_to ~stdin_from =
   in
   prefix ^ s ^ suffix
 
+module Exit_status = struct
+  type error =
+    | Failed of int
+    | Signaled of string
+
+  type t = (int, error) result
+end
+
 module Fancy = struct
   let split_prog s =
     let len = String.length s in
-    if len = 0 then
-      ("", "", "")
+    if len = 0 then ("", "", "")
     else
       let rec find_prog_start i =
-        if i < 0 then
-          0
+        if i < 0 then 0
         else
           match s.[i] with
-          | '\\'
-          | '/' ->
-            i + 1
+          | '\\' | '/' -> i + 1
           | _ -> find_prog_start (i - 1)
       in
       let prog_end =
@@ -231,6 +239,10 @@ module Fancy = struct
       let prog = String.sub s ~pos:prog_start ~len:(prog_end - prog_start) in
       (before, prog, after)
 
+  let short_prog_name_of_prog s =
+    let _, s, _ = split_prog s in
+    s
+
   let color_combos =
     let open Ansi_color.Style in
     [| [ fg_blue; bg_bright_green ]
@@ -245,8 +257,7 @@ module Fancy = struct
 
   let colorize_prog s =
     let len = String.length s in
-    if len = 0 then
-      Pp.verbatim s
+    if len = 0 then Pp.verbatim s
     else
       let before, prog, after = split_prog s in
       let styles =
@@ -261,10 +272,9 @@ module Fancy = struct
     | [] -> []
     | "-o" :: fn :: rest ->
       Pp.verbatim "-o"
-      ::
-      Pp.tag
-        (User_message.Style.Ansi_styles Ansi_color.Style.[ bold; fg_green ])
-        (Pp.verbatim (String.quote_for_shell fn))
+      :: Pp.tag
+           (User_message.Style.Ansi_styles Ansi_color.Style.[ bold; fg_green ])
+           (Pp.verbatim (String.quote_for_shell fn))
       :: colorize_args rest
     | x :: rest -> Pp.verbatim (String.quote_for_shell x) :: colorize_args rest
 
@@ -276,18 +286,29 @@ module Fancy = struct
       command_line_enclosers ~dir ~stdout_to ~stderr_to ~stdin_from
     in
     Pp.verbatim prefix ++ pp ++ Pp.verbatim suffix
+end
 
+(* Implemt the rendering for [--display short] *)
+module Short_display : sig
+  val pp_ok : prog:string -> purpose:purpose -> User_message.Style.t Pp.t
+
+  val pp_error :
+       prog:string
+    -> purpose:purpose
+    -> has_unexpected_stdout:bool
+    -> has_unexpected_stderr:bool
+    -> error:Exit_status.error
+    -> User_message.Style.t Pp.t
+end = struct
   let pp_purpose = function
-    | Internal_job -> Pp.verbatim "(internal)"
-    | Build_job targets -> (
+    | Internal_job _ -> Pp.verbatim "(internal)"
+    | Build_job (_, _, targets) -> (
       let rec split_paths targets_acc ctxs_acc = function
         | [] -> (List.rev targets_acc, Context_name.Set.to_list ctxs_acc)
         | path :: rest -> (
           let add_ctx ctx acc =
-            if Context_name.is_default ctx then
-              acc
-            else
-              Context_name.Set.add acc ctx
+            if Context_name.is_default ctx then acc
+            else Context_name.Set.add acc ctx
           in
           match Dpath.analyse_target path with
           | Other path ->
@@ -303,16 +324,26 @@ module Fancy = struct
           | Install (ctx, name) ->
             split_paths
               (("install " ^ Path.Source.to_string name) :: targets_acc)
+              (add_ctx ctx ctxs_acc) rest
+          | Anonymous_action ctx ->
+            split_paths
+              ("(internal)" :: targets_acc)
               (add_ctx ctx ctxs_acc) rest)
       in
-      let targets = Path.Build.Set.to_list targets in
       let target_names, contexts =
-        split_paths [] Context_name.Set.empty targets
+        let file_targets, directory_targets =
+          match targets with
+          | None -> ([], [])
+          | Some targets ->
+            ( Path.Build.Set.to_list targets.files
+            , Path.Build.Set.to_list targets.dirs )
+        in
+        split_paths [] Context_name.Set.empty (file_targets @ directory_targets)
       in
       let targets =
         List.map target_names ~f:Filename.split_extension_after_dot
-        |> String.Map.of_list_multi |> String.Map.to_list
-        |> List.map ~f:(fun (prefix, suffixes) ->
+        |> String.Map.of_list_multi
+        |> String.Map.to_list_map ~f:(fun prefix suffixes ->
                match suffixes with
                | [] -> assert false
                | [ suffix ] -> prefix ^ suffix
@@ -330,6 +361,37 @@ module Fancy = struct
              ++ Pp.concat_map l ~sep:(Pp.char ',') ~f:(fun ctx ->
                     Pp.verbatim (Context_name.to_string ctx))
              ++ Pp.char ']'))
+
+  let progname_and_purpose ~tag ~prog ~purpose =
+    let open Pp.O in
+    let progname = sprintf "%12s" (Fancy.short_prog_name_of_prog prog) in
+    Pp.tag tag (Pp.verbatim progname) ++ Pp.char ' ' ++ pp_purpose purpose
+
+  let pp_ok = progname_and_purpose ~tag:Ok
+
+  let pp_error ~prog ~purpose ~has_unexpected_stdout ~has_unexpected_stderr
+      ~(error : Exit_status.error) =
+    let open Pp.O in
+    let msg =
+      match error with
+      | Signaled signame -> sprintf "(got signal %s)" signame
+      | Failed n -> (
+        let unexpected_outputs =
+          List.filter_map
+            [ (has_unexpected_stdout, "stdout")
+            ; (has_unexpected_stderr, "stderr")
+            ]
+            ~f:(fun (b, name) -> Option.some_if b name)
+        in
+        match (n, unexpected_outputs) with
+        | 0, _ :: _ ->
+          sprintf "(had unexpected output on %s)"
+            (String.enumerate_and unexpected_outputs)
+        | _ -> sprintf "(exit %d)" n)
+    in
+    progname_and_purpose ~prog ~tag:Error ~purpose
+    ++ Pp.char ' '
+    ++ Pp.tag User_message.Style.Error (Pp.verbatim msg)
 end
 
 let gen_id =
@@ -346,43 +408,97 @@ let pp_id id =
   let open Pp.O in
   Pp.char '[' ++ Pp.tag User_message.Style.Id (Pp.textf "%d" id) ++ Pp.char ']'
 
-module Exit_status = struct
-  type error =
-    | Failed of int
-    | Signaled of string
+module Handle_exit_status : sig
+  open Exit_status
 
-  type t = (int, error) result
+  val verbose :
+       ('a, error) result
+    -> id:int
+    -> purpose:purpose
+    -> output:string
+    -> command_line:User_message.Style.t Pp.t
+    -> dir:Path.t option
+    -> 'a
+
+  val non_verbose :
+       ('a, error) result
+    -> verbosity:Scheduler.Config.Display.verbosity
+    -> purpose:purpose
+    -> output:string
+    -> prog:string
+    -> command_line:string
+    -> dir:Path.t option
+    -> has_unexpected_stdout:bool
+    -> has_unexpected_stderr:bool
+    -> 'a
+end = struct
+  open Exit_status
+
+  type output =
+    | No_output
+    | Has_output of
+        { with_color : User_message.Style.t Pp.t
+        ; without_color : string
+        ; has_embedded_location : bool
+        }
+
+  let pp_output = function
+    | No_output -> []
+    | Has_output t -> [ t.with_color ]
 
   let parse_output = function
-    | "" -> None
+    | "" -> No_output
     | s ->
-      Some
-        (Pp.map_tags (Ansi_color.parse s) ~f:(fun styles ->
-             User_message.Style.Ansi_styles styles))
+      let with_color =
+        Pp.map_tags (Ansi_color.parse s) ~f:(fun styles ->
+            User_message.Style.Ansi_styles styles)
+      in
+      let without_color = Ansi_color.strip s in
+      let has_embedded_location =
+        String.is_prefix ~prefix:"File " without_color
+      in
+      Has_output { with_color; without_color; has_embedded_location }
 
-  (* In this module, we don't need the "Error: " prefix given that it is already
-     included in the error message from the command. *)
-  let fail paragraphs = raise (User_error.E (User_message.make paragraphs))
+  let get_loc_and_annots ~dir ~purpose ~output =
+    let loc, annots = loc_and_annots_of_purpose purpose in
+    let dir = Option.value dir ~default:Path.root in
+    let annots = User_message.Annots.set annots with_directory_annot dir in
+    let annots =
+      match output with
+      | No_output -> annots
+      | Has_output output ->
+        if output.has_embedded_location then
+          let annots =
+            User_message.Annots.set annots
+              User_message.Annots.has_embedded_location ()
+          in
+          match Compound_user_error.parse_output ~dir output.without_color with
+          | None -> annots
+          | Some e -> User_message.Annots.set annots Compound_user_error.annot e
+        else annots
+    in
+    (loc, annots)
 
-  let handle_verbose t ~ok_codes ~id ~output ~command_line =
+  let fail ~loc ~annots paragraphs =
+    (* We don't use [User_error.make] as it would add the "Error: " prefix. We
+       don't need this prefix as it is already included in the output of the
+       command. *)
+    raise (User_error.E (User_message.make ?loc ~annots paragraphs))
+
+  let verbose t ~id ~purpose ~output ~command_line ~dir =
     let open Pp.O in
     let output = parse_output output in
     match t with
     | Ok n ->
-      Option.iter output ~f:(fun output ->
-          Console.print_user_message
-            (User_message.make
-               [ Pp.tag User_message.Style.Kwd (Pp.verbatim "Output")
-                 ++ pp_id id ++ Pp.char ':'
-               ; output
-               ]));
-      if not (ok_codes n) then
-        User_warning.emit
-          [ Pp.tag User_message.Style.Kwd (Pp.verbatim "Command")
-            ++ Pp.space ++ pp_id id
-            ++ Pp.textf
-                 " exited with code %d, but I'm ignoring it, hope that's OK." n
-          ];
+      (match output with
+      | No_output -> ()
+      | Has_output output ->
+        Console.print_user_message
+          (User_message.make
+             [ Pp.tag User_message.Style.Kwd (Pp.verbatim "Output")
+               ++ pp_id id ++ Pp.char ':'
+             ; output.with_color
+             ]));
       n
     | Error err ->
       let msg =
@@ -390,91 +506,100 @@ module Exit_status = struct
         | Failed n -> sprintf "exited with code %d" n
         | Signaled signame -> sprintf "got signal %s" signame
       in
-      fail
+      let loc, annots = get_loc_and_annots ~dir ~purpose ~output in
+      fail ~loc ~annots
         (Pp.tag User_message.Style.Kwd (Pp.verbatim "Command")
          ++ Pp.space ++ pp_id id ++ Pp.space ++ Pp.text msg ++ Pp.char ':'
-         ::
-         Pp.tag User_message.Style.Prompt (Pp.char '$')
-         ++ Pp.char ' ' ++ command_line
-         :: Option.to_list output)
+        :: Pp.tag User_message.Style.Prompt (Pp.char '$')
+           ++ Pp.char ' ' ++ command_line
+        :: pp_output output)
 
-  (* Check if the command output starts with a location, ignoring ansi escape
-     sequences *)
-  let outputs_starts_with_location =
-    let rec loop s pos len prefix =
-      match prefix with
-      | [] -> true
-      | c :: rest -> (
-        pos < len
-        &&
-        match s.[pos] with
-        | '\027' -> (
-          match String.index_from s pos 'm' with
-          | None -> false
-          | Some pos -> loop s (pos + 1) len prefix)
-        | c' -> c = c' && loop s (pos + 1) len rest)
-    in
-    fun output ->
-      loop output 0 (String.length output) [ 'F'; 'i'; 'l'; 'e'; ' ' ]
-
-  let handle_non_verbose t ~display ~purpose ~output ~prog ~command_line =
-    let open Pp.O in
-    let show_command =
-      Config.show_full_command_on_error ()
-      || not (outputs_starts_with_location output)
-    in
+  let non_verbose t ~(verbosity : Scheduler.Config.Display.verbosity) ~purpose
+      ~output ~prog ~command_line ~dir ~has_unexpected_stdout
+      ~has_unexpected_stderr =
     let output = parse_output output in
-    let _, progname, _ = Fancy.split_prog prog in
-    let progname_and_purpose tag =
-      let progname = sprintf "%12s" progname in
-      Pp.tag tag (Pp.verbatim progname)
-      ++ Pp.char ' ' ++ Fancy.pp_purpose purpose
+    let show_command =
+      !Clflags.always_show_command_line
+      || (* We want to show command lines in the CI, but not when running inside
+            dune. Otherwise tests would yield different result whether they are
+            executed locally or in the CI. *)
+      (Config.inside_ci && not Config.inside_dune)
+    in
+    let add_command_line paragraphs =
+      if show_command then
+        Pp.tag User_message.Style.Details (Pp.verbatim command_line)
+        :: paragraphs
+      else paragraphs
     in
     match t with
     | Ok n ->
-      if
-        Option.is_some output
-        || (display = Config.Display.Short && purpose <> Internal_job)
-      then
-        Console.print_user_message
-          (User_message.make
-             (if show_command then
-               progname_and_purpose Ok :: Option.to_list output
-             else
-               Option.to_list output));
-      n
-    | Error err ->
-      let msg =
-        match err with
-        | Failed n ->
-          if show_command then
-            sprintf "(exit %d)" n
-          else
-            fail (Option.to_list output)
-        | Signaled signame -> sprintf "(got signal %s)" signame
+      let paragraphs =
+        match output with
+        | No_output -> []
+        | Has_output output -> add_command_line [ output.with_color ]
       in
-      fail
-        (progname_and_purpose Error ++ Pp.char ' '
-         ++ Pp.tag User_message.Style.Error (Pp.verbatim msg)
-         ::
-         Pp.tag User_message.Style.Details (Pp.verbatim command_line)
-         :: Option.to_list output)
+      let paragraphs =
+        match (verbosity, purpose, output) with
+        | Short, Build_job _, _ | Short, Internal_job _, Has_output _ ->
+          Short_display.pp_ok ~prog ~purpose :: paragraphs
+        | _ -> paragraphs
+      in
+      if not (List.is_empty paragraphs) then
+        Console.print_user_message (User_message.make paragraphs);
+      n
+    | Error error ->
+      let loc, annots = get_loc_and_annots ~dir ~purpose ~output in
+      let paragraphs =
+        match verbosity with
+        | Short ->
+          Short_display.pp_error ~prog ~purpose ~error ~has_unexpected_stdout
+            ~has_unexpected_stderr
+          :: add_command_line (pp_output output)
+        | _ ->
+          add_command_line
+            (match output with
+            | Has_output output -> [ output.with_color ]
+            | No_output -> (
+              (* If the command has no output, we need to say something.
+                 Otherwise it's not clear what's going on. *)
+              match error with
+              | Failed n -> [ Pp.textf "Command exited with code %d." n ]
+              | Signaled signame ->
+                [ Pp.textf "Command got signal %s." signame ]))
+      in
+      fail ~loc ~annots paragraphs
 end
 
-let default_env = lazy (Dtemp.add_to_env Env.initial)
+let report_process_start stats ~id ~prog ~args ~now =
+  let common =
+    let name = Filename.basename prog in
+    let ts = Timestamp.of_float_seconds now in
+    Event.common_fields ~cat:[ "process" ] ~name ~ts ()
+  in
+  let args =
+    [ ("process_args", `List (List.map args ~f:(fun arg -> `String arg))) ]
+  in
+  let event = Event.async (Int id) ~args Start common in
+  Dune_stats.emit stats event;
+  (common, args)
+
+let report_process_end stats (common, args) ~now (times : Proc.Times.t) =
+  let common = Event.set_ts common (Timestamp.of_float_seconds now) in
+  let dur = Chrome_trace.Event.Timestamp.of_float_seconds times.elapsed_time in
+  let event = Event.complete ~args ~dur common in
+  Dune_stats.emit stats event
+
+let set_temp_dir_when_running_actions = ref true
 
 let run_internal ?dir ?(stdout_to = Io.stdout) ?(stderr_to = Io.stderr)
-    ?(stdin_from = Io.null In) ~env ~purpose fail_mode prog args =
-  Scheduler.with_job_slot (fun () ->
-      let display = (Config.t ()).display in
+    ?(stdin_from = Io.null In) ?(env = Env.initial) ~purpose fail_mode prog args
+    =
+  Scheduler.with_job_slot (fun (config : Scheduler.Config.t) ->
+      let display = config.display in
       let dir =
         match dir with
         | None -> dir
-        | Some p ->
-          if Path.is_root p then
-            None
-          else
-            Some p
+        | Some p -> if Path.is_root p then None else Some p
       in
       let id = gen_id () in
       let ok_codes = accepted_codes fail_mode in
@@ -483,7 +608,7 @@ let run_internal ?dir ?(stdout_to = Io.stdout) ?(stderr_to = Io.stderr)
         command_line ~prog:prog_str ~args ~dir ~stdout_to ~stderr_to ~stdin_from
       in
       let fancy_command_line =
-        match display with
+        match display.verbosity with
         | Verbose ->
           let open Pp.O in
           let cmdline =
@@ -503,98 +628,196 @@ let run_internal ?dir ?(stdout_to = Io.stdout) ?(stderr_to = Io.stderr)
           match Response_file.get ~prog with
           | Not_supported -> (args, None)
           | Zero_terminated_strings arg ->
-            let fn = Temp.create File ~prefix:"responsefile" ~suffix:".data" in
+            let fn = Temp.create File ~prefix:"responsefile" ~suffix:"data" in
             Stdune.Io.with_file_out fn ~f:(fun oc ->
                 List.iter args ~f:(fun arg ->
                     output_string oc arg;
                     output_char oc '\000'));
-            ([ arg; Path.to_string fn ], Some fn)
-        ) else
-          (args, None)
+            ([ arg; Path.to_string fn ], Some fn))
+        else (args, None)
       in
       let argv = prog_str :: args in
-      let output_filename, stdout_to, stderr_to =
-        match (stdout_to.kind, stderr_to.kind) with
-        | Terminal, _
-        | _, Terminal
-          when !Clflags.capture_outputs ->
-          let fn = Temp.create File ~prefix:"dune" ~suffix:".output" in
-          let terminal = Io.file fn Io.Out in
-          let get (out : Io.output Io.t) =
-            if out.kind = Terminal then (
-              Io.flush out;
-              terminal
-            ) else
-              out
-          in
-          (Some fn, get stdout_to, get stderr_to)
-        | _ -> (None, stdout_to, stderr_to)
+      let output_on_success (out : Io.output Io.t) =
+        match out.kind with
+        | Terminal x -> x
+        | _ -> Print
       in
-      let run =
+      let stdout_on_success = output_on_success stdout_to in
+      let stderr_on_success = output_on_success stderr_to in
+      let (stdout_capture, stdout_to), (stderr_capture, stderr_to) =
+        match (stdout_to.kind, stderr_to.kind) with
+        | (Terminal _, _ | _, Terminal _) when !Clflags.capture_outputs ->
+          let capture () =
+            let fn = Temp.create File ~prefix:"dune" ~suffix:"output" in
+            (`Capture fn, Io.file fn Io.Out)
+          in
+          let stdout =
+            match stdout_to.kind with
+            | Terminal _ ->
+              Io.flush stdout_to;
+              capture ()
+            | _ -> (`No_capture, stdout_to)
+          in
+          let stderr =
+            match (stdout_to.kind, stderr_to.kind) with
+            | Terminal Print, Terminal Print
+            | Terminal Swallow, Terminal Swallow ->
+              (* We don't merge when both are [Must_be_empty]. If we did and an
+                 action had unexpected output on both stdout and stderr the
+                 error message would be "has unexpected output on stdout". With
+                 the current code, it is "has unexpected output on stdout and
+                 stderr", which is more precise. *)
+              Io.flush stderr_to;
+              (`Merged_with_stdout, snd stdout)
+            | _, Terminal _ ->
+              Io.flush stderr_to;
+              capture ()
+            | _ -> (`No_capture, stderr_to)
+          in
+          (stdout, stderr)
+        | _ -> ((`No_capture, stdout_to), (`No_capture, stderr_to))
+      in
+      let event_common, started_at, pid =
         (* Output.fd might create the file with Unix.openfile. We need to make
-           sure to call it before doing the chdir as the path might be relative. *)
+           sure to call it before doing the chdir as the path might be
+           relative. *)
         let stdout = Io.fd stdout_to in
         let stderr = Io.fd stderr_to in
         let stdin = Io.fd stdin_from in
         let env =
-          match env with
-          | None -> Lazy.force default_env
-          | Some env -> Dtemp.add_to_env env
+          match !set_temp_dir_when_running_actions with
+          | true -> Dtemp.add_to_env env
+          | false -> env
         in
-        fun () ->
-          Spawn.spawn () ~prog:prog_str ~argv ~env ~stdout ~stderr ~stdin
-      in
-      let pid =
-        match dir with
-        | None -> run ()
-        | Some dir -> Scheduler.with_chdir ~dir ~f:run
+        let env = env |> Scheduler.Config.add_to_env config in
+        let env = Env.to_unix env |> Spawn.Env.of_list in
+        let started_at, pid =
+          (* jeremiedimino: I think we should do this just before the [execve]
+             in the stub for [Spawn.spawn] to be as precise as possible *)
+          let now = Unix.gettimeofday () in
+          ( now
+          , Spawn.spawn () ~prog:prog_str ~argv ~env ~stdout ~stderr ~stdin
+              ~setpgid:Spawn.Pgid.new_process_group
+              ~cwd:
+                (match dir with
+                | None -> Inherit
+                | Some dir -> Path (Path.to_string dir))
+            |> Pid.of_int )
+        in
+        let event_common =
+          Option.map config.stats ~f:(fun stats ->
+              ( stats
+              , report_process_start stats ~id ~prog:prog_str ~args
+                  ~now:started_at ))
+        in
+        (event_common, started_at, pid)
       in
       Io.release stdout_to;
       Io.release stderr_to;
-      let+ exit_status =
-        Stats.with_process ~program:prog_str ~args
-          (Scheduler.wait_for_process pid)
+      let+ process_info =
+        Scheduler.wait_for_process pid ~is_process_group_leader:true
       in
+      let times =
+        { Proc.Times.elapsed_time = process_info.end_time -. started_at
+        ; resource_usage = process_info.resource_usage
+        }
+      in
+      Option.iter event_common ~f:(fun (stats, common) ->
+          report_process_end stats common ~now:process_info.end_time times);
       Option.iter response_file ~f:Path.unlink;
-      let output =
-        match output_filename with
-        | None -> ""
-        | Some fn ->
-          let s = Stdune.Io.read_file fn in
-          Temp.destroy File fn;
-          s
+      let actual_stdout =
+        match stdout_capture with
+        | `No_capture -> lazy ""
+        | `Capture fn -> lazy (Stdune.Io.read_file fn)
       in
-      Log.command ~command_line ~output ~exit_status;
-      let exit_status : Exit_status.t =
-        match exit_status with
-        | WEXITED n when ok_codes n -> Ok n
+      let actual_stderr =
+        match stderr_capture with
+        | `No_capture | `Merged_with_stdout -> lazy ""
+        | `Capture fn -> lazy (Stdune.Io.read_file fn)
+      in
+      let has_unexpected_output (on_success : Action_output_on_success.t)
+          actual_output =
+        match on_success with
+        | Must_be_empty -> Lazy.force actual_output <> ""
+        | Print | Swallow -> false
+      in
+      let has_unexpected_stdout =
+        has_unexpected_output stdout_on_success actual_stdout
+      and has_unexpected_stderr =
+        has_unexpected_output stderr_on_success actual_stderr
+      in
+      let exit_status' : Exit_status.t =
+        match process_info.status with
+        | WEXITED n
+          when (not has_unexpected_stdout)
+               && (not has_unexpected_stderr)
+               && ok_codes n -> Ok n
         | WEXITED n -> Error (Failed n)
         | WSIGNALED n -> Error (Signaled (Signal.name n))
         | WSTOPPED _ -> assert false
       in
-      match (display, exit_status, output) with
-      | (Quiet | Progress), Ok n, "" -> n (* Optimisation for the common case *)
-      | Verbose, _, _ ->
-        Exit_status.handle_verbose exit_status ~ok_codes ~id
-          ~command_line:fancy_command_line ~output
-      | _ ->
-        Exit_status.handle_non_verbose exit_status ~prog:prog_str ~command_line
-          ~output ~purpose ~display)
+      let success = Result.is_ok exit_status' in
+      let swallow_on_success_if_requested fn actual_output
+          (on_success : Action_output_on_success.t) =
+        let s =
+          match (success, on_success) with
+          | true, Swallow -> ""
+          | _ -> Lazy.force actual_output
+        in
+        Temp.destroy File fn;
+        s
+      in
+      let stdout =
+        match stdout_capture with
+        | `No_capture -> ""
+        | `Capture fn ->
+          swallow_on_success_if_requested fn actual_stdout stdout_on_success
+      in
+      let stderr =
+        match stderr_capture with
+        | `No_capture | `Merged_with_stdout -> ""
+        | `Capture fn ->
+          swallow_on_success_if_requested fn actual_stderr stderr_on_success
+      in
+      let output = stdout ^ stderr in
+      Log.command ~command_line ~output ~exit_status:process_info.status;
+      let res =
+        match (display.verbosity, exit_status', output) with
+        | Quiet, Ok n, "" -> n (* Optimisation for the common case *)
+        | Verbose, _, _ ->
+          Handle_exit_status.verbose exit_status' ~id ~purpose ~dir
+            ~command_line:fancy_command_line ~output
+        | _ ->
+          Handle_exit_status.non_verbose exit_status' ~prog:prog_str ~dir
+            ~command_line ~output ~purpose ~verbosity:display.verbosity
+            ~has_unexpected_stdout ~has_unexpected_stderr
+      in
+      (res, times))
 
-let run ?dir ?stdout_to ?stderr_to ?stdin_from ?env ?(purpose = Internal_job)
-    fail_mode prog args =
+let run ?dir ?stdout_to ?stderr_to ?stdin_from ?env
+    ?(purpose = Internal_job (None, User_message.Annots.empty)) fail_mode prog
+    args =
   let+ run =
-    run_internal ?dir ?stdout_to ?stderr_to ?stdin_from ~env ~purpose fail_mode
+    run_internal ?dir ?stdout_to ?stderr_to ?stdin_from ?env ~purpose fail_mode
       prog args
+    >>| fst
   in
   map_result fail_mode run ~f:ignore
 
-let run_capture_gen ?dir ?stderr_to ?stdin_from ?env ?(purpose = Internal_job)
-    fail_mode prog args ~f =
-  let fn = Temp.create File ~prefix:"dune" ~suffix:".output" in
+let run_with_times ?dir ?stdout_to ?stderr_to ?stdin_from ?env
+    ?(purpose = Internal_job (None, User_message.Annots.empty)) prog args =
+  run_internal ?dir ?stdout_to ?stderr_to ?stdin_from ?env ~purpose Strict prog
+    args
+  >>| snd
+
+let run_capture_gen ?dir ?stderr_to ?stdin_from ?env
+    ?(purpose = Internal_job (None, User_message.Annots.empty)) fail_mode prog
+    args ~f =
+  let fn = Temp.create File ~prefix:"dune" ~suffix:"output" in
   let+ run =
-    run_internal ?dir ~stdout_to:(Io.file fn Io.Out) ?stderr_to ?stdin_from ~env
+    run_internal ?dir ~stdout_to:(Io.file fn Io.Out) ?stderr_to ?stdin_from ?env
       ~purpose fail_mode prog args
+    >>| fst
   in
   map_result fail_mode run ~f:(fun () ->
       let x = f fn in
@@ -608,8 +831,9 @@ let run_capture_lines = run_capture_gen ~f:Stdune.Io.lines_of_file
 let run_capture_zero_separated =
   run_capture_gen ~f:Stdune.Io.zero_strings_of_file
 
-let run_capture_line ?dir ?stderr_to ?stdin_from ?env ?(purpose = Internal_job)
-    fail_mode prog args =
+let run_capture_line ?dir ?stderr_to ?stdin_from ?env
+    ?(purpose = Internal_job (None, User_message.Annots.empty)) fail_mode prog
+    args =
   run_capture_gen ?dir ?stderr_to ?stdin_from ?env ~purpose fail_mode prog args
     ~f:(fun fn ->
       match Stdune.Io.lines_of_file fn with
@@ -622,11 +846,13 @@ let run_capture_line ?dir ?stderr_to ?stdin_from ?env ?(purpose = Internal_job)
           | None -> prog_display
           | Some dir -> sprintf "cd %s && %s" (Path.to_string dir) prog_display
         in
+        let loc, annots = loc_and_annots_of_purpose purpose in
         match l with
         | [] ->
-          User_error.raise [ Pp.textf "Command returned nothing: %s" cmdline ]
+          User_error.raise ?loc ~annots
+            [ Pp.textf "Command returned nothing: %s" cmdline ]
         | _ ->
-          User_error.raise
+          User_error.raise ?loc ~annots
             [ Pp.textf "command returned too many lines: %s" cmdline
             ; Pp.vbox
                 (Pp.concat_map l ~sep:Pp.cut ~f:(fun line ->

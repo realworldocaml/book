@@ -1,5 +1,5 @@
 #require "core,core.top";;
 
-open Base
+open Core
 
 let () = Printexc.record_backtrace false

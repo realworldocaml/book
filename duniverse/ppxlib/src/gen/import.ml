@@ -12,7 +12,6 @@ let lident x = Longident.Lident x
 
 module Loc = struct
   let mk x = { Location.loc; txt = x }
-
   let lident x = mk (Longident.parse x) [@@warning "-3"]
 end
 
@@ -21,7 +20,6 @@ module String = Stdppx.String
 module Array = Stdppx.Array
 
 let evar v = Exp.ident (Loc.lident v)
-
 let pvar v = Pat.var (Loc.mk v)
 
 let common_prefix l =
@@ -73,7 +71,6 @@ let fqn_longident' path s : Longident.t =
   | Lapply _ -> assert false
 
 let fqn_longident path id : Longident.t = fqn_longident' path id
-
 let is_loc = function Lident "loc" -> true | _ -> false
 
 let get_types ~filename =
@@ -81,7 +78,6 @@ let get_types ~filename =
   let map =
     object
       inherit Ast.map as super
-
       inherit Ppxlib_traverse_builtins.map
 
       method! core_type_desc =
@@ -120,13 +116,9 @@ let is_wrapper ~prefix lds =
 (* Small metaquotation system *)
 module M = struct
   let parse f fmt = Format.kasprintf (fun s -> f (Lexing.from_string s)) fmt
-
   let expr fmt = parse Parse.expression fmt
-
   let patt fmt = parse Parse.pattern fmt
-
   let ctyp fmt = parse Parse.core_type fmt
-
   let str fmt = parse Parse.implementation fmt
 
   let stri fmt =
@@ -141,11 +133,8 @@ end
 (* Antiquotations *)
 module A = struct
   let expr = Pprintast.expression
-
   let patt = Pprintast.pattern
-
   let ctyp = Pprintast.core_type
-
   let str = Pprintast.structure
 
   let id ppf x =

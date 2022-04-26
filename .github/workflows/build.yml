@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-latest
         ocaml-compiler:
           - 4.13.1
 
@@ -38,18 +38,13 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: ${{ matrix.os != 'macos-latest' }}
+          dune-cache: false
 
       - name: Install dune
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: opam install dune>=2.9.0
+        run: opam install dune>=3.0.2
 
-      - name: Build book
-        if: runner.os == 'Linux'
-        run: opam exec -- dune build
-
-      - name: Run promotion tests
-        run: opam exec -- dune runtest
+      - name: Build HTML book
+        run: opam exec -- dune build @site
 
       - name: Deploy site
         uses: peaceiris/actions-gh-pages@v3

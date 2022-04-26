@@ -98,7 +98,7 @@ let write_field fmt specs =
    "let rec field : type t a. t typ -> string -> a typ -> (a, t) field =";
    "  fun s fname ftype -> match s, fname with";]
   ~case
-  ["  | View { ty }, _ ->";
+  ["  | View { ty; _ }, _ ->";
    "    let { ftype; foffset; fname } = field ty fname ftype in";
    "    { ftype; foffset; fname }";
    "  | _ -> failwith (\"Unexpected field \"^ fname)"]
@@ -126,7 +126,7 @@ let write_seal fmt specs =
      "    raise (ModifyingSealedType tag)";
      "  | Union { utag; uspec = Some _; _ } ->";
      "    raise (ModifyingSealedType utag)";
-     "  | View { ty } -> seal ty";
+     "  | View { ty; _ } -> seal ty";
      "  | _ ->";
      "    raise (Unsupported \"Sealing a non-structured type\")";
      ""]

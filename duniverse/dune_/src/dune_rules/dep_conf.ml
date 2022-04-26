@@ -7,7 +7,10 @@ type t =
   | File of String_with_vars.t
   | Alias of String_with_vars.t
   | Alias_rec of String_with_vars.t
-  | Glob_files of String_with_vars.t
+  | Glob_files of
+      { glob : String_with_vars.t
+      ; recursive : bool
+      }
   | Source_tree of String_with_vars.t
   | Package of String_with_vars.t
   | Universe
@@ -18,7 +21,8 @@ let remove_locs = function
   | File sw -> File (String_with_vars.remove_locs sw)
   | Alias sw -> Alias (String_with_vars.remove_locs sw)
   | Alias_rec sw -> Alias_rec (String_with_vars.remove_locs sw)
-  | Glob_files sw -> Glob_files (String_with_vars.remove_locs sw)
+  | Glob_files g ->
+    Glob_files { g with glob = String_with_vars.remove_locs g.glob }
   | Source_tree sw -> Source_tree (String_with_vars.remove_locs sw)
   | Package sw -> Package (String_with_vars.remove_locs sw)
   | Universe -> Universe
@@ -46,7 +50,12 @@ let decode =
       [ ("file", sw >>| fun x -> File x)
       ; ("alias", sw >>| fun x -> Alias x)
       ; ("alias_rec", sw >>| fun x -> Alias_rec x)
-      ; ("glob_files", sw >>| fun x -> Glob_files x)
+      ; ( "glob_files"
+        , sw >>| fun x -> Glob_files { glob = x; recursive = false } )
+      ; ( "glob_files_rec"
+        , let+ () = Dune_lang.Syntax.since Stanza.syntax (3, 0)
+          and+ x = sw in
+          Glob_files { glob = x; recursive = true } )
       ; ("package", sw >>| fun x -> Package x)
       ; ("universe", return Universe)
       ; ( "files_recursively_in"
@@ -69,34 +78,23 @@ let decode =
 open Dune_lang
 
 let encode = function
-  | File t ->
-    List [ Dune_lang.unsafe_atom_of_string "file"; String_with_vars.encode t ]
-  | Alias t ->
-    List [ Dune_lang.unsafe_atom_of_string "alias"; String_with_vars.encode t ]
+  | File t -> List [ Dune_lang.atom "file"; String_with_vars.encode t ]
+  | Alias t -> List [ Dune_lang.atom "alias"; String_with_vars.encode t ]
   | Alias_rec t ->
+    List [ Dune_lang.atom "alias_rec"; String_with_vars.encode t ]
+  | Glob_files { glob = t; recursive } ->
     List
-      [ Dune_lang.unsafe_atom_of_string "alias_rec"; String_with_vars.encode t ]
-  | Glob_files t ->
-    List
-      [ Dune_lang.unsafe_atom_of_string "glob_files"
+      [ Dune_lang.atom (if recursive then "glob_files_rec" else "glob_files")
       ; String_with_vars.encode t
       ]
   | Source_tree t ->
-    List
-      [ Dune_lang.unsafe_atom_of_string "source_tree"
-      ; String_with_vars.encode t
-      ]
-  | Package t ->
-    List
-      [ Dune_lang.unsafe_atom_of_string "package"; String_with_vars.encode t ]
-  | Universe -> Dune_lang.unsafe_atom_of_string "universe"
-  | Env_var t ->
-    List
-      [ Dune_lang.unsafe_atom_of_string "env_var"; String_with_vars.encode t ]
+    List [ Dune_lang.atom "source_tree"; String_with_vars.encode t ]
+  | Package t -> List [ Dune_lang.atom "package"; String_with_vars.encode t ]
+  | Universe -> Dune_lang.atom "universe"
+  | Env_var t -> List [ Dune_lang.atom "env_var"; String_with_vars.encode t ]
   | Sandbox_config config ->
     if Sandbox_config.equal config Sandbox_config.no_special_requirements then
       List []
-    else
-      Code_error.raise "There's no syntax for [Sandbox_config] yet" []
+    else Code_error.raise "There's no syntax for [Sandbox_config] yet" []
 
 let to_dyn t = Dune_lang.to_dyn (encode t)

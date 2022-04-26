@@ -84,6 +84,30 @@ developer had in their mind when they originally wrote the code. What is worse,
 they might understand the code in a completely different way which would lead
 them to update it the wrong way.
 
+Releasing Dune
+==============
+
+Dune's release process relies on dune-release_. Make sure to install and understand
+this software works before proceeding. Publishing a release consists of two steps:
+
+* Updating ``CHANGES.md`` to reflect the version being published
+* Running ``$ make opam-release`` to create the release tarball, publish it to
+  github, and submit it to opam.
+
+Major & Feature Releases
+------------------------
+
+Given a new version `x.y.z`, a major release increments `x`, and a feature
+release increments `y`.  Such a release must be done from the `main` branch.
+Once the release is published, be sure to publish a release branch named `x.y`.
+
+Point Releases
+--------------
+
+Point releases increment the `z` in `x.y.z`. Such releases are done from the
+respective `x.y` branch of the respective feature release. Once the release is
+done, be sure to update `CHANGES` in the `main` branch.
+
 Adding Stanzas
 ==============
 
@@ -148,7 +172,7 @@ Such languages must be enabled in the dune-project separately:
 
 .. code:: scheme
 
-   (lang dune 2.9)
+   (lang dune 3.0)
    (using coq 0.2)
 
 If such extensions are experimental, it's recommended that they pass
@@ -164,24 +188,24 @@ Dune Rules
 Creating Rules
 --------------
 
-A dune rule consists of 3 components:
+A Dune rule consists of 3 components:
 
-- Dependencies that the rule may read when executed (files, aliases, ..)
-  This is described by ``'a Build.t`` values
+- *Dependencies* that the rule may read when executed (files, aliases, etc.).
+  This is described by ``'a Action_builder.t`` values.
 
-- Targets the rule produces (files)
-  Targets, in addition to dependencies is described by ``'a Build.With_targets.t'``
+- *Targets* that the rule produces (files and/or directories).
+  This is described by ``'a Action_builder.With_targets.t'`` values.
 
-- Action that dune must execute (external programs, redirects, etc.)
-  Actions are represented by ``Action.t``
+- *Action* that Dune must execute (external programs, redirects, etc.).
+  Actions are represented by ``Action.t`` values.
 
-Combined, one needs to produce a ``Action.t Build.With_targets.t`` value to
-create a rule. The rule may then be added by ``Super_context.add_rule``, or a
-related function.
+Combined, one needs to produce an ``Action.t Action_builder.With_targets.t``
+value to create a rule. The rule may then be added by
+``Super_context.add_rule``, or a related function.
 
 To make this maximally convenient, there's a ``Command`` module to make it
-easier to create actions that run external commands and describe their targets &
-dependencies simultaneously.
+easier to create actions that run external commands and describe their targets
+and dependencies simultaneously.
 
 Loading Rules
 -------------
@@ -199,3 +223,5 @@ algorithm that tries to load the rule that generates some target file `t`.
 To adhere to this loading scheme, our rules must therefore be generated as part
 of the callback that generates targets in that directory. See the ``Gen_rules``
 module for how this callback is constructed.
+
+.. _dune-release: https://github.com/ocamllabs/dune-release

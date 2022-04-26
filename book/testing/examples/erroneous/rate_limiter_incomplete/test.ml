@@ -1,10 +1,14 @@
-[@@@part "1"];;
+[@@@part "1"]
+
 open Core
 
 let start_time = Time_ns.of_string "2021-06-01 7:00:00"
 
 let limiter () =
-  Rate_limiter.create ~now:start_time ~period:(Time_ns.Span.of_sec 1.) ~rate:2
+  Rate_limiter.create
+    ~now:start_time
+    ~period:(Time_ns.Span.of_sec 1.)
+    ~rate:2
 
 let consume lim offset =
   let result =
@@ -19,8 +23,7 @@ let consume lim offset =
     | `Consumed -> "C"
     | `No_capacity -> "N")
 
-
-[@@@part "2"];;
+[@@@part "2"]
 
 let%expect_test _ =
   let lim = limiter () in

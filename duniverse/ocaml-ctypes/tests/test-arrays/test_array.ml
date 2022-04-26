@@ -9,10 +9,6 @@ open OUnit2
 open Ctypes
 
 
-(* TODO not needed anymore?
- * let testlib = Dl.(dlopen ~filename:"clib/libtest_functions.so" ~flags:[RTLD_NOW]) *)
-
-
 (*
   Creating multidimensional arrays, and reading and writing elements.
 *)

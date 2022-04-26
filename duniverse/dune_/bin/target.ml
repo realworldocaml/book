@@ -1,39 +1,39 @@
 open Stdune
 module Log = Dune_util.Log
 module Context = Dune_rules.Context
-module Build = Dune_engine.Build
+module Action_builder = Dune_engine.Action_builder
 module Build_system = Dune_engine.Build_system
+module Load_rules = Dune_engine.Load_rules
+open Action_builder.O
 
+(* CR-someday amokhov: Split [File] into [File] and [Dir] for clarity. *)
 type t =
   | File of Path.t
   | Alias of Alias.t
 
-type resolve_input =
-  | Path of Path.t
-  | Dep of Arg.Dep.t
-
 let request targets =
-  List.fold_left targets ~init:(Build.return ()) ~f:(fun acc target ->
-      let open Build.O in
+  List.fold_left targets ~init:(Action_builder.return ()) ~f:(fun acc target ->
       acc
       >>>
       match target with
-      | File path -> Build.path path
-      | Alias { Alias.name; recursive; dir; contexts } ->
-        let contexts = List.map ~f:Dune_rules.Context.name contexts in
-        (if recursive then
-          Build_system.Alias.dep_rec_multi_contexts
-        else
-          Build_system.Alias.dep_multi_contexts)
-          ~dir ~name ~contexts)
+      | File path -> Action_builder.path path
+      | Alias a -> Alias.request a)
 
 let target_hint (_setup : Dune_rules.Main.build_system) path =
   assert (Path.is_managed path);
+  let open Memo.Build.O in
   let sub_dir = Option.value ~default:path (Path.parent path) in
-  let candidates = Path.Build.Set.to_list (Build_system.all_targets ()) in
+  (* CR-someday amokhov: There are two issues with the code below.
+
+     (1) We first get *all* targets but then filter out only those that are
+     defined in the [sub_dir]. It would be better to just get the targets for
+     the [sub_dir] directly (the API supports this).
+
+     (2) We currently provide the same hint for all targets. It would be nice to
+     indicate whether a hint corresponds to a file or to a directory target. *)
+  let+ candidates = Load_rules.all_direct_targets () >>| Path.Build.Map.keys in
   let candidates =
-    if Path.is_in_build_dir path then
-      List.map ~f:Path.build candidates
+    if Path.is_in_build_dir path then List.map ~f:Path.build candidates
     else
       List.map candidates ~f:(fun path ->
           match Path.Build.extract_build_context path with
@@ -46,111 +46,117 @@ let target_hint (_setup : Dune_rules.Main.build_system) path =
     List.filter_map candidates ~f:(fun path ->
         if Path.equal (Path.parent_exn path) sub_dir then
           Some (Path.to_string path)
-        else
-          None)
+        else None)
   in
   let candidates = String.Set.of_list candidates |> String.Set.to_list in
   User_message.did_you_mean (Path.to_string path) ~candidates
 
 let resolve_path path ~(setup : Dune_rules.Main.build_system) =
-  let checked = Util.check_path setup.workspace.contexts path in
-  let can't_build path = Error (target_hint setup path) in
+  let open Memo.Build.O in
+  let checked = Util.check_path setup.contexts path in
+  let can't_build path =
+    let+ hint = target_hint setup path in
+    Error hint
+  in
   let as_source_dir src =
-    if Dune_engine.File_tree.dir_exists src then
+    Dune_engine.Source_tree.dir_exists src >>| function
+    | true ->
       Some
         [ Alias
             (Alias.in_dir ~name:Dune_engine.Alias.Name.default ~recursive:true
-               ~contexts:setup.workspace.contexts path)
+               ~contexts:setup.contexts path)
         ]
-    else
-      None
+    | false -> None
   in
-  let build () =
-    if Build_system.is_target path then
-      Ok [ File path ]
-    else
-      can't_build path
+  let matching_targets src =
+    Memo.Build.parallel_map setup.contexts ~f:(fun ctx ->
+        let path = Path.append_source (Path.build ctx.Context.build_dir) src in
+        Load_rules.is_target path >>| function
+        | Yes _ | Under_directory_target_so_cannot_say -> Some (File path)
+        | No -> None)
+    >>| List.filter_map ~f:Fun.id
+  in
+  let matching_target () =
+    Load_rules.is_target path >>| function
+    | Yes _ | Under_directory_target_so_cannot_say -> Some [ File path ]
+    | No -> None
   in
   match checked with
-  | External _ -> Ok [ File path ]
+  | External _ -> Memo.Build.return (Ok [ File path ])
   | In_source_dir src -> (
-    match as_source_dir src with
-    | Some res -> Ok res
-    | None -> (
-      match
-        List.filter_map setup.workspace.contexts ~f:(fun ctx ->
-            let path =
-              Path.append_source (Path.build ctx.Context.build_dir) src
-            in
-            if Build_system.is_target path then
-              Some (File path)
-            else
-              None)
-      with
-      | [] -> can't_build path
-      | l -> Ok l))
+    matching_targets src >>= function
+    | [] -> (
+      as_source_dir src >>= function
+      | Some res -> Memo.Build.return (Ok res)
+      | None -> can't_build path)
+    | l -> Memo.Build.return (Ok l))
   | In_build_dir (_ctx, src) -> (
-    match as_source_dir src with
-    | Some res -> Ok res
-    | None -> build ())
-  | In_install_dir _ -> build ()
+    matching_target () >>= function
+    | Some res -> Memo.Build.return (Ok res)
+    | None -> (
+      as_source_dir src >>= function
+      | Some res -> Memo.Build.return (Ok res)
+      | None -> can't_build path))
+  | In_install_dir _ -> (
+    matching_target () >>= function
+    | Some res -> Memo.Build.return (Ok res)
+    | None -> can't_build path)
 
-let expand_path common ~(setup : Dune_rules.Main.build_system) ctx sv =
+let expand_path (root : Workspace_root.t)
+    ~(setup : Dune_rules.Main.build_system) ctx sv =
   let sctx =
     Dune_engine.Context_name.Map.find_exn setup.scontexts (Context.name ctx)
   in
   let dir =
     Path.Build.relative ctx.Context.build_dir
-      (String.concat ~sep:Filename.dir_sep (Common.root common).to_cwd)
+      (String.concat ~sep:Filename.dir_sep root.to_cwd)
   in
-  let expander = Dune_rules.Super_context.expander sctx ~dir in
+  let* expander =
+    Action_builder.memo_build (Dune_rules.Super_context.expander sctx ~dir)
+  in
   let expander =
     Dune_rules.Dir_contents.add_sources_to_expander sctx expander
   in
-  Path.relative Path.root
-    (Common.prefix_target common (Dune_rules.Expander.expand_str expander sv))
+  let+ s = Dune_rules.Expander.expand_str expander sv in
+  Path.relative Path.root (root.reach_from_root_prefix ^ s)
 
-let resolve_alias common ~recursive sv ~(setup : Dune_rules.Main.build_system) =
+let resolve_alias root ~recursive sv ~(setup : Dune_rules.Main.build_system) =
   match Dune_engine.String_with_vars.text_only sv with
   | Some s ->
-    Ok
-      [ Alias
-          (Alias.of_string common ~recursive s
-             ~contexts:setup.workspace.contexts)
-      ]
+    Ok [ Alias (Alias.of_string root ~recursive s ~contexts:setup.contexts) ]
   | None -> Error [ Pp.text "alias cannot contain variables" ]
 
-let resolve_target common ~setup = function
+let resolve_target root ~setup target =
+  match target with
   | Dune_rules.Dep_conf.Alias sv as dep ->
-    Result.map_error
-      ~f:(fun hints -> (dep, hints))
-      (resolve_alias common ~recursive:false sv ~setup)
+    Action_builder.return
+      (Result.map_error
+         ~f:(fun hints -> (dep, hints))
+         (resolve_alias root ~recursive:false sv ~setup))
   | Alias_rec sv as dep ->
-    Result.map_error
-      ~f:(fun hints -> (dep, hints))
-      (resolve_alias common ~recursive:true sv ~setup)
+    Action_builder.return
+      (Result.map_error
+         ~f:(fun hints -> (dep, hints))
+         (resolve_alias root ~recursive:true sv ~setup))
   | File sv as dep ->
     let f ctx =
-      let path = expand_path common ~setup ctx sv in
-      Result.map_error ~f:(fun hints -> (dep, hints)) (resolve_path path ~setup)
+      let* path = expand_path root ~setup ctx sv in
+      Action_builder.memo_build (resolve_path path ~setup)
+      >>| Result.map_error ~f:(fun hints -> (dep, hints))
     in
-    Result.List.concat_map ~f setup.workspace.contexts
-  | dep -> Error (dep, [])
+    Action_builder.List.map setup.contexts ~f
+    >>| Result.List.concat_map ~f:Fun.id
+  | dep -> Action_builder.return (Error (dep, []))
 
-let resolve_targets_mixed common setup user_targets =
+let resolve_targets root (config : Dune_config.t)
+    (setup : Dune_rules.Main.build_system) user_targets =
   match user_targets with
-  | [] -> []
+  | [] -> Action_builder.return []
   | _ ->
-    let targets =
-      List.map user_targets ~f:(function
-        | Dep d -> resolve_target common ~setup d
-        | Path p ->
-          Result.map_error
-            ~f:(fun hints -> (Arg.Dep.file (Path.to_string p), hints))
-            (resolve_path p ~setup))
+    let+ targets =
+      Action_builder.List.map user_targets ~f:(resolve_target root ~setup)
     in
-    let config = Common.config common in
-    if config.display = Verbose then
+    if config.display.verbosity = Verbose then
       Log.info
         [ Pp.text "Actual targets:"
         ; Pp.enumerate
@@ -163,17 +169,17 @@ let resolve_targets_mixed common setup user_targets =
         ];
     targets
 
-let resolve_targets common (setup : Dune_rules.Main.build_system) user_targets =
-  List.map ~f:(fun dep -> Dep dep) user_targets
-  |> resolve_targets_mixed common setup
+let resolve_targets_exn root config setup user_targets =
+  resolve_targets root config setup user_targets
+  >>| List.concat_map ~f:(function
+        | Error (dep, hints) ->
+          User_error.raise
+            [ Pp.textf "Don't know how to build %s"
+                (Arg.Dep.to_string_maybe_quoted dep)
+            ]
+            ~hints
+        | Ok targets -> targets)
 
-let resolve_targets_exn common setup user_targets =
-  resolve_targets common setup user_targets
-  |> List.concat_map ~f:(function
-       | Error (dep, hints) ->
-         User_error.raise
-           [ Pp.textf "Don't know how to build %s"
-               (Arg.Dep.to_string_maybe_quoted dep)
-           ]
-           ~hints
-       | Ok targets -> targets)
+let interpret_targets root config setup user_targets =
+  let* () = Action_builder.return () in
+  resolve_targets_exn root config setup user_targets >>= request

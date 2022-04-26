@@ -15,11 +15,21 @@
 
 (rule
  (targets ml-stub-generator.exe)
- (deps generated_struct_stubs.c ../clib/test_functions.h
-   ../config/test-cflags)
+ (deps
+  generated_struct_stubs.c
+  ../clib/test_functions.h
+  ../config/test-cflags)
  (action
-  (run %{cc} %{read-lines:../config/test-cflags} -I ../clib -I
-    %{ocaml-config:standard_library} -o %{targets} generated_struct_stubs.c)))
+  (run
+   %{cc}
+   %{read-lines:../config/test-cflags}
+   -I
+   ../clib
+   -I
+   %{ocaml-config:standard_library}
+   -o
+   %{targets}
+   generated_struct_stubs.c)))
 
 (rule
  (targets generated_struct_bindings.ml)
@@ -42,5 +52,14 @@
  (name test_lwt_jobs)
  (package ctypes-foreign)
  (modules test_lwt_jobs)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
-   test_lwt_jobs_stubs test_functions test_lwt_jobs_bindings tests_common))
+ (action
+  (run %{test} -runner sequential))
+ (libraries
+  oUnit
+  ctypes
+  ctypes.stubs
+  ctypes-foreign
+  test_lwt_jobs_stubs
+  test_functions
+  test_lwt_jobs_bindings
+  tests_common))

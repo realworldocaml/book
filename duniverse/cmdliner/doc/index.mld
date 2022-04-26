@@ -1,0 +1,34 @@
+{0 Cmdliner {%html: <span class="version">v1.1.1</span>%}}
+
+[Cmdliner] provides a simple and compositional mechanism
+to convert command line arguments to OCaml values and pass them to
+your functions.
+
+The library automatically handles syntax errors, help messages and
+UNIX man page generation. It supports programs with single or multiple
+commands (like [git]) and respect most of the
+{{:http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap12.html}
+POSIX} and
+{{:http://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html}
+GNU} conventions.
+
+{1:manuals Manuals}
+
+The following manuals are available.
+
+{ul
+{- The {{!page-tutorial}tutorial} gets you through the steps to write
+   your first command line interface with Cmdliner.}
+{- The {{!page-cli}Command line interface manual} describes how command
+   lines and environment variables are parsed by Cmdliner.}
+{- {{!page-tool_man}Tool man pages} describes how Cmdliner generates
+   man pages for your tools and how you can format them.}
+{- The {{!page-examples}examples page} has a few annoted examples that
+   show to express the command line interface of a few classic tools with
+   Cmdliner}}
+
+{1:api API}
+
+{!modules:
+Cmdliner
+}

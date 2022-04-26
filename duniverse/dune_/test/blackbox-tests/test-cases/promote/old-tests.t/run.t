@@ -108,12 +108,33 @@ Only "only1" should be promoted in the source tree:
   $ ls -1 only*
   only1
 
+Dune restores only1 if it's deleted from the source tree
+
+  $ rm only1
+  $ dune build only2
+  $ ls -1 only*
+  only1
+
+Dune restores only1 if it's modified in the source tree
+
+  $ cat only1
+  0
+  $ echo 1 > only1
+  $ dune build only2
+  $ cat only1
+  0
+
 Test for (promote (into ...)) + (enabled_if %{ignoring_promoted_rules}
 ----------------------------------------------------------------------
 
   $ dune build into+ignoring
+  $ ls -1 subdir/into*
+  subdir/into+ignoring
+
   $ dune clean
   $ dune build into+ignoring --ignore-promoted-rules
+  $ ls -1 _build/default/into*
+  _build/default/into+ignoring
 
 Reproduction case for #3069
 ---------------------------
@@ -123,11 +144,24 @@ Reproduction case for #3069
   $ cat >dune <<EOF
   > (rule
   >  (action (with-stdout-to x (echo bar)))
-  >  (mode (promote (into does-not-exist))))
+  >  (mode (promote (into dir))))
   > EOF
   $ dune build ./x
-  File "dune", line 3, characters 22-36:
-  3 |  (mode (promote (into does-not-exist))))
-                            ^^^^^^^^^^^^^^
-  Error: directory "does-not-exist" does not exist
+  File "dune", line 3, characters 22-25:
+  3 |  (mode (promote (into dir))))
+                            ^^^
+  Error: Directory "dir" does not exist. Please create it manually.
+  -> required by _build/default/x
+  [1]
+
+Now test the case where dir exists but is a file
+
+  $ touch dir
+
+  $ dune build ./x
+  File "dune", line 3, characters 22-25:
+  3 |  (mode (promote (into dir))))
+                            ^^^
+  Error: "dir" is not a directory.
+  -> required by _build/default/x
   [1]

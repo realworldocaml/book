@@ -1,11 +1,19 @@
-{0 Mtime {%html: <span class="version">%%VERSION%%</span>%}}
+{0 Mtime {%html: <span class="version">v1.4.0+dune</span>%}}
 
-Mtime has platform independent support for monotonic wall-clock time
-in pure OCaml.
+Mtime has platform independent support for monotonic wall-clock time.
+This time increases monotonically and is not subject to operating
+system calendar time adjustments. The library has types to represent
+nanosecond precision timestamps and time spans.
 
-{1:api API}
+{!Mtime_clock} provides acces to {{!Mtime_clock.platform_support}a
+monotonic system clock} and its resolution (if available).
 
-{!modules:
-Mtime
-Mtime_clock
-}
+{1:mtime Library [mtime]}
+
+{!modules: Mtime}
+
+{1:mtime_clock Library [mtime.clock.os]}
+
+{!modules: Mtime_clock}
+
+Also use this library for compiling to JavaScript.

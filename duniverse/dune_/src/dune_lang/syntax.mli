@@ -11,7 +11,7 @@ module Version : sig
 
   include Conv.S with type t := t
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 
   val hash : t -> int
 
@@ -23,6 +23,10 @@ module Version : sig
   val can_read : parser_version:t -> data_version:t -> bool
 
   val compare : t -> t -> Ordering.t
+
+  val min : t -> t -> t
+
+  val max : t -> t -> t
 
   module Infix : Comparator.OPS with type t = t
 end
@@ -74,9 +78,6 @@ val check_supported : dune_lang_ver:Version.t -> t -> Loc.t * Version.t -> unit
 
 val greatest_supported_version : t -> Version.t
 
-val greatest_supported_version_for_dune_lang :
-  t -> dune_lang_ver:Version.t -> Version.t option
-
 (** {1 S-expression parsing} *)
 
 (** {2 High-level functions} *)
@@ -103,7 +104,7 @@ val since : ?fatal:bool -> t -> Version.t -> (unit, _) Decoder.parser
 module Key : sig
   type nonrec t =
     | Active of Version.t
-    | Disabled of
+    | Inactive of
         { lang : t
         ; dune_lang_ver : Version.t
         }

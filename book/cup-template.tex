@@ -2,7 +2,7 @@
 % for the suite of standard Cambridge designs
 % 2021/07/01, v1.30
 \NeedsTeXFormat{LaTeX2e}[1996/06/01]
-\documentclass[multi]{EngD}
+\documentclass[multi,print,final]{EngD}
 
 \reinstaterules
 % \documentclass[multi]{EngD} % multi-contributor option
@@ -23,6 +23,15 @@
 \usepackage{floatpag}
 
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage[hidelinks]{hyperref}}
+
+$if(links-as-notes)$
+% Make links footnotes instead of hotlinks:
+\DeclareRobustCommand{\href}[2]{#2\footnote{\url{#1}}}
+$endif$
+
+\def\sectionautorefname{Chapter}
+\def\chapterautorefname{Chapter}
+\def\subsectionautorefname{Chapter}
 
 \rotfloatpagestyle{empty}
 \usepackage[bottom]{footmisc}
@@ -55,12 +64,12 @@
 \usepackage[most]{tcolorbox}
 
 %textmarker style from colorbox doc
+\tcbuselibrary{breakable}
 \tcbset{textmarker/.style={%
-        enhanced,
+        enhanced,breakable,
         parbox=false,boxrule=0mm,boxsep=0mm,arc=0mm,
         outer arc=0mm,left=6mm,right=3mm,top=7pt,bottom=7pt,
         toptitle=1mm,bottomtitle=1mm,oversize}}
-
 
 % define new colorboxes
 \newtcolorbox{hintBox}{textmarker,
@@ -82,6 +91,7 @@ $if(listings)$
   autogobble,
   columns=fullflexible,
   showspaces=false,
+  keepspaces=true,
   showtabs=false,
   breaklines=true,
   showstringspaces=false,
@@ -200,9 +210,13 @@ $endif$
 \makeatother
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \includeonly{chap2}
+\makeatletter
+\let\@endpart\vfil
+\makeatother
 \raggedbottom
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+\arabicfootnotes
 \frontmatter
 \begin{halftitlepage}
 
@@ -215,24 +229,28 @@ $endif$
 %\vskip\baselineskip
 \halftitleblurb{Functional Programming for the Masses.}
 %\vskip\baselineskip
-\halftitleauthor{Yaron Minsky and Anil Madhavapeddy}.
+\halftitleauthor{Anil Madhavapeddy and Yaron Minsky}.
 \end{halftitlepage}
 \cleardoublepage
 \begin{titlepage}
 \fmtitle{$title$}
 \fmsubtitle{$subtitle$}
-\fmtitleauthor{Yaron Minsky}
-\fmtitleaffil{Jane Street}
 \fmtitleauthor{Anil Madhavapeddy}
 \fmtitleaffil{University of Cambridge}
+\fmtitleauthor{Yaron Minsky}
+\fmtitleaffil{Jane Street}
 %\cuplogo
 \end{titlepage}
 \begin{copyrightpage}
 %\copyrightlogo\par\vskip\baselineskip
 \end{copyrightpage}
 \begin{dedication}
-For\\
-Alpha and Beta
+For Lisa, a believer in the power of words,\\
+who helps me find mine.~~~--Yaron
+\\
+\vspace{1cm}
+For Mum and Dad, who took me to the library\\
+and unlocked my imagination.~~~--Anil
 \end{dedication}
 \tocmax{2.10}{2.8.8}{}
 \tableofcontents

@@ -7,11 +7,8 @@ module Make (M : sig
   type result
 
   val cast : extension -> result
-
   val location : location -> result
-
   val location_stack : (location -> result) option
-
   val attributes : (location -> result) option
 
   class std_lifters : location -> [result] Ppxlib_traverse_builtins.std_lifters
@@ -20,7 +17,6 @@ struct
   let lift loc =
     object
       inherit [M.result] Ast_traverse.lift as super
-
       inherit! M.std_lifters loc
 
       method! attribute x =
@@ -86,9 +82,7 @@ module Expr = Make (struct
   type result = expression
 
   let location loc = evar ~loc:{ loc with loc_ghost = true } "loc"
-
   let location_stack = None
-
   let attributes = None
 
   class std_lifters = Ppxlib_metaquot_lifters.expression_lifters

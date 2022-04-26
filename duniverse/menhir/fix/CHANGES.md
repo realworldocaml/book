@@ -1,5 +1,18 @@
 # CHANGES
 
+## 2022/01/21
+
+* The functor `Memoize.Make` now requires just `MINIMAL_IMPERATIVE_MAPS`
+  instead of `IMPERATIVE_MAPS`, which was needlessly strong.
+
+* The functor `Glue.WeakHashTablesAsImperativeMaps` now provides only
+  `MINIMAL_IMPERATIVE_MAPS` instead of `IMPERATIVE_MAPS`. This change
+  is made for compatibility with the new ephemeron API in OCaml 5.
+
+## 2021/12/31
+
+* Improved documentation.
+
 ## 2021/11/25
 
 * The new module `CompactQueue` offers a minimalist mutable FIFO queue. It is

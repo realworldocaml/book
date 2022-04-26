@@ -27,7 +27,7 @@ module Lib : sig
     -> modules:Modules.t
     -> t
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 end
 
 module Deprecated_library_name : sig
@@ -37,7 +37,7 @@ module Deprecated_library_name : sig
     ; new_public_name : Lib_name.t
     }
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 end
 
 module Entry : sig
@@ -59,7 +59,7 @@ module Entry : sig
 
   val loc : t -> Loc.t
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 end
 
 type t =
@@ -69,9 +69,10 @@ type t =
   ; sections : Path.t Section.Map.t
   ; sites : Section.t Section.Site.Map.t
   ; dir : Path.t
+  ; files : (Section.t * Install.Dst.t list) list
   }
 
-val to_dyn : t Dyn.Encoder.t
+val to_dyn : t Dyn.builder
 
 module Or_meta : sig
   type nonrec t =
@@ -83,5 +84,5 @@ module Or_meta : sig
 
   val load : Dpath.t -> t Or_exn.t
 
-  val to_dyn : t Dyn.Encoder.t
+  val to_dyn : t Dyn.builder
 end

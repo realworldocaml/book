@@ -1,0 +1,18 @@
+(cram
+ (applies_to :whole_subtree)
+ (deps
+  libexample/libexample.a
+  libexample/libexample.so
+  libexample/example.h
+  libexample/libexample.pc
+  %{bin:install}
+  %{bin:awk}
+  (package ctypes)))
+
+(cram
+ (applies_to
+  lib-pkg_config
+  lib-pkg_config-multiple-fd
+  exe-pkg_config-multiple-fd
+  exe-pkg_config)
+ (deps %{bin:pkg-config}))

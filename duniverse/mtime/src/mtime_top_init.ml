@@ -1,11 +1,10 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-#install_printer Mtime.pp
-#install_printer Mtime.Span.pp
+#install_printer Mtime.pp;;
+#install_printer Mtime.Span.pp;;
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers

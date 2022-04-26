@@ -146,8 +146,9 @@ let interpret ((_, toks) as sentence) : unit =
      sentences be supplied). *)
 
   let lexer, lexbuf = stream toks in
+  let log = Logging.maybe Settings.trace in
   begin match
-    ReferenceInterpreter.interpret nt Settings.trace lexer lexbuf
+    ReferenceInterpreter.interpret nt log lexer lexbuf
   with
 
   | Some cst ->
@@ -315,7 +316,8 @@ let succeed nt terminals target =
   exit 0
 
 let interpret_error sentence =
-  interpret_error_aux Settings.trace [] sentence fail succeed
+  let log = Logging.maybe Settings.trace in
+  interpret_error_aux log [] sentence fail succeed
 
 (* --------------------------------------------------------------------------- *)
 
@@ -363,7 +365,8 @@ let validate_located_sentence c (poss, sentence) : targeted_sentence =
   (* First, validate every symbol. *)
   let sentence = validate_sentence c sentence in
   (* Then, check that this sentence leads to an error state. *)
-  interpret_error_aux false poss sentence
+  let log = Logging.never in
+  interpret_error_aux log poss sentence
     (* failure: *)
     (fun msg ->
        Error.signal c poss

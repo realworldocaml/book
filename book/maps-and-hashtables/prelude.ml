@@ -1,3 +1,3 @@
-#require "core,core.top";;
+#require "base";;
 
 let () = Printexc.record_backtrace false

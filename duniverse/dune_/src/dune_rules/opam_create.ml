@@ -57,17 +57,46 @@ let default_build_command =
   [ "dune" "install" "-p" name "--create-install-files" name ]
 ]
 |}))
+  and from_3_0 ~with_subst ~with_sites =
+    let subst = if with_subst then {|  [ "dune" "subst" ] {dev} |} else "" in
+    let promote_install_files =
+      if with_sites then {|  "--promote-install-files=false" |} else ""
+    in
+    let install =
+      if with_sites then
+        {| [ "dune" "install" "-p" name "--create-install-files" name ] |}
+      else ""
+    in
+    lazy
+      (Opam_file.parse_value
+         (Lexbuf.from_string ~fname:"<internal>"
+            (Printf.sprintf
+               {|
+[
+  %s
+  [ "dune" "build" "-p" name "-j" jobs %s
+      "@install"
+      "@runtest" {with-test}
+      "@doc" {with-doc}
+  ]
+  %s
+]
+|}
+               subst promote_install_files install)))
   in
   fun project ->
     Lazy.force
-      (if Dune_project.dune_version project < (1, 11) then
-        before_1_11
+      (if Dune_project.dune_version project < (1, 11) then before_1_11
       else if Dune_project.dune_version project < (2, 7) then
         from_1_11_before_2_7
-      else if Dune_project.dune_version project < (2, 9) then
-        from_2_7
+      else if Dune_project.dune_version project < (2, 9) then from_2_7
+      else if Dune_project.dune_version project < (3, 0) then from_2_9
       else
-        from_2_9)
+        from_3_0
+          ~with_subst:
+            (Subst_config.is_enabled (Dune_project.subst_config project))
+          ~with_sites:
+            Dune_project.(is_extension_set project dune_site_extension))
 
 let package_fields
     { Package.synopsis
@@ -83,14 +112,10 @@ let package_fields
     ; loc = _
     ; deprecated_package_names = _
     ; sites = _
+    ; allow_empty = _
     } ~project =
   let open Opam_file.Create in
-  let tags =
-    if tags = [] then
-      []
-    else
-      [ ("tags", string_list tags) ]
-  in
+  let tags = if tags = [] then [] else [ ("tags", string_list tags) ] in
   let optional =
     [ ("synopsis", synopsis); ("description", description) ]
     |> List.filter_map ~f:(fun (k, v) ->
@@ -108,10 +133,7 @@ let package_fields
   let fields = [ optional; dep_fields ] in
   let fields =
     let dune_version = Dune_project.dune_version project in
-    if dune_version >= (2, 0) && tags <> [] then
-      tags :: fields
-    else
-      fields
+    if dune_version >= (2, 0) && tags <> [] then tags :: fields else fields
   in
   List.concat fields
 
@@ -133,8 +155,7 @@ let insert_dune_dep depends dune_version =
     | (dep : Package.Dependency.t) :: rest ->
       if Package.Name.equal dep.name dune_name then
         let dep =
-          if dune_version < (2, 6) then
-            dep
+          if dune_version < (2, 6) then dep
           else
             { dep with
               constraint_ =
@@ -145,17 +166,13 @@ let insert_dune_dep depends dune_version =
             }
         in
         List.rev_append acc (dep :: rest)
-      else
-        loop (dep :: acc) rest
+      else loop (dep :: acc) rest
   in
   loop [] depends
 
 let rec already_requires_odoc : Package.Dependency.Constraint.t -> bool =
   function
-  | Bvar (Var "with-doc" | Var "build" | Var "post")
-  | Uop _
-  | Bop _ ->
-    true
+  | Bvar (Var "with-doc" | Var "build" | Var "post") | Uop _ | Bop _ -> true
   | Bvar _ -> false
   | And l -> List.for_all ~f:already_requires_odoc l
   | Or l -> List.exists ~f:already_requires_odoc l
@@ -174,8 +191,7 @@ let insert_odoc_dep depends =
       then
         (* Stop now as odoc will be required anyway *)
         List.rev_append (dep :: acc) rest
-      else
-        loop (dep :: acc) rest
+      else loop (dep :: acc) rest
   in
   loop [] depends
 
@@ -185,14 +201,12 @@ let opam_fields project (package : Package.t) =
   let package =
     if dune_version < (1, 11) || Package.Name.equal package_name dune_name then
       package
-    else
-      { package with depends = insert_dune_dep package.depends dune_version }
+    else { package with depends = insert_dune_dep package.depends dune_version }
   in
   let package =
     if dune_version < (2, 7) || Package.Name.equal package_name odoc_name then
       package
-    else
-      { package with depends = insert_odoc_dep package.depends }
+    else { package with depends = insert_odoc_dep package.depends }
   in
   let package_fields = package_fields package ~project in
   let open Opam_file.Create in
@@ -216,9 +230,7 @@ let opam_fields project (package : Package.t) =
     ]
     |> List.filter_map ~f:(fun (k, v) ->
            match v with
-           | None
-           | Some [] ->
-             None
+           | None | Some [] -> None
            | Some (_ :: _ as v) -> Some (k, string_list v))
   in
   let fields =
@@ -227,21 +239,19 @@ let opam_fields project (package : Package.t) =
   let fields =
     List.concat [ fields; list_fields; optional_fields; package_fields ]
   in
-  if Dune_project.dune_version project < (1, 11) then
-    fields
-  else
-    Opam_file.Create.normalise_field_order fields
+  if Dune_project.dune_version project < (1, 11) then fields
+  else Opam_file.Create.normalise_field_order fields
 
 let template_file = Path.extend_basename ~suffix:".template"
 
 let opam_template ~opam_path =
-  let open Build.O in
+  let open Action_builder.O in
   let opam_template_path = template_file opam_path in
-  Build.if_file_exists opam_template_path
+  Action_builder.if_file_exists opam_template_path
     ~then_:
-      (let+ contents = Build.contents opam_template_path in
+      (let+ contents = Action_builder.contents opam_template_path in
        Some (opam_template_path, contents))
-    ~else_:(Build.return None)
+    ~else_:(Action_builder.return None)
 
 let generate project pkg ~template =
   let opam_fname = Package.opam_file pkg in
@@ -266,19 +276,20 @@ let generate project pkg ~template =
     | Some (_, s) -> s)
 
 let add_rule sctx ~project ~pkg =
-  let open Build.O in
+  let open Action_builder.O in
   let build_dir = (Super_context.context sctx).build_dir in
   let opam_path = Path.Build.append_source build_dir (Package.opam_file pkg) in
   let opam_rule =
     (let+ template = opam_template ~opam_path:(Path.build opam_path) in
      generate project pkg ~template)
-    |> Build.write_file_dyn opam_path
+    |> Action_builder.write_file_dyn opam_path
   in
   let dir = Path.Build.append_source build_dir (Package.dir pkg) in
   let mode =
     Rule.Mode.Promote { lifetime = Unlimited; into = None; only = None }
   in
-  Super_context.add_rule sctx ~mode ~dir opam_rule;
+  let open Memo.Build.O in
+  let* () = Super_context.add_rule sctx ~mode ~dir opam_rule in
   let aliases =
     [ Alias.install ~dir
     ; Alias.runtest ~dir
@@ -286,11 +297,11 @@ let add_rule sctx ~project ~pkg =
     ]
   in
   let deps = Path.Set.singleton (Path.build opam_path) in
-  List.iter aliases ~f:(fun alias -> Rules.Produce.Alias.add_deps alias deps)
+  Memo.Build.sequential_iter aliases ~f:(fun alias ->
+      Rules.Produce.Alias.add_deps alias (Action_builder.path_set deps))
 
-let add_rules sctx ~dir =
-  let project = Super_context.find_scope_by_dir sctx dir |> Scope.project in
-  if Dune_project.generate_opam_files project then
-    Dune_project.packages project
-    |> Package.Name.Map.iter ~f:(fun (pkg : Package.t) ->
-           add_rule sctx ~project ~pkg)
+let add_rules sctx project =
+  Memo.Build.when_ (Dune_project.generate_opam_files project) (fun () ->
+      let packages = Dune_project.packages project in
+      Package.Name.Map_traversals.parallel_iter packages
+        ~f:(fun _name (pkg : Package.t) -> add_rule sctx ~project ~pkg))

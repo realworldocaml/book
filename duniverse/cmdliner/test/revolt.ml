@@ -5,5 +5,5 @@ let revolt () = print_endline "Revolt!"
 open Cmdliner
 
 let revolt_t = Term.(const revolt $ const ())
-
-let () = Term.(exit @@ eval (revolt_t, Term.info "revolt"))
+let cmd = Cmd.v (Cmd.info "revolt") revolt_t
+let () = exit (Cmd.eval cmd)

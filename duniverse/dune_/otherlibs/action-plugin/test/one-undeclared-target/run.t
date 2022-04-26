@@ -12,7 +12,9 @@
   $ cp ./bin/foo.exe ./
 
   $ dune runtest
-           foo alias runtest (exit 1)
-  (cd _build/default && ./foo.exe)
+  File "dune", line 1, characters 0-57:
+  1 | (rule
+  2 |  (alias runtest)
+  3 |  (action (dynamic-run ./foo.exe)))
   bar is written despite not being declared as a target in dune file. To fix, add it to target list in dune file.
   [1]
