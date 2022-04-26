@@ -4,9 +4,9 @@
  (libraries yojson))
 
 (executable
- (public_name pandoc-rwo-tex)
- (name pandoc_rwo_tex)
- (modules pandoc_rwo_tex)
+ (public_name pandoc-rwo)
+ (name pandoc_rwo)
+ (modules pandoc_rwo)
  (libraries yojson pandoc))
 
 (executable
