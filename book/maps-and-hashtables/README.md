@@ -475,7 +475,7 @@ As you can see, polymorphic compare now produces a result, but it's
 not the result we want.
 
 The abstraction-breaking nature of polymorphic compare can cause real
-and quite subtle bugs.  If, for example, if you build a map whose keys
+and quite subtle bugs.  If, for example, you build a map whose keys
 are sets (which have the same issues with polymorphic compare that
 maps do), then the map built with the polymorphic comparator will
 behave incorrectly, separating out keys that should be aggregated
