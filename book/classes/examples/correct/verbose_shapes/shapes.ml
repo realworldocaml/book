@@ -1,12 +1,9 @@
-(* $MDX part-begin=0 *)
 open Core
 open Async
 open Async_graphics
 
 type drawable = < draw : unit >
-(* $MDX part-end *)
 
-(* $MDX part-begin=1 *)
 class virtual shape x y =
   object (self)
     method virtual private contains : int -> int -> bool
@@ -25,23 +22,35 @@ class virtual shape x y =
           if self#contains ev.mouse_x ev.mouse_y
           then f ev.mouse_x ev.mouse_y)
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=2 *)
+(* $MDX part-begin=1 *)
 class square w x y =
-  object
-    inherit shape x y
+  object (self)
+    val mutable x : int = x
+    method x = x
+    val mutable y : int = y
+    method y = y
     val mutable width = w
     method width = width
     method draw = fill_rect x y width width
 
     method private contains x' y' =
       x <= x' && x' <= x + width && y <= y' && y' <= y + width
-  end
 
+    method on_click ?start ?stop f =
+      on_click ?start ?stop (fun ev ->
+          if self#contains ev.mouse_x ev.mouse_y
+          then f ev.mouse_x ev.mouse_y)
+  end
+(* $MDX part-end *)
+
+(* $MDX part-begin=2 *)
 class circle r x y =
-  object
-    inherit shape x y
+  object (self)
+    val mutable x : int = x
+    method x = x
+    val mutable y : int = y
+    method y = y
     val mutable radius = r
     method radius = radius
     method draw = fill_circle x y radius
@@ -51,18 +60,20 @@ class circle r x y =
       let dy = abs (y' - y) in
       let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
       dist <= Float.of_int radius
+
+    method on_click ?start ?stop f =
+      on_click ?start ?stop (fun ev ->
+          if self#contains ev.mouse_x ev.mouse_y
+          then f ev.mouse_x ev.mouse_y)
   end
 (* $MDX part-end *)
 
-(* $MDX part-begin=3 *)
 class growing_circle r x y =
   object (self)
     inherit circle r x y
     initializer self#on_click (fun _x _y -> radius <- radius * 2)
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=4 *)
 class virtual draggable =
   object (self)
     method
@@ -91,17 +102,13 @@ class virtual draggable =
             x <- ev.mouse_x + offset_x;
             y <- ev.mouse_y + offset_y))
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=5 *)
 class small_square =
   object
     inherit square 20 40 40
     inherit draggable
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=6 *)
 class virtual animated span =
   object (self)
     method
@@ -130,18 +137,14 @@ class virtual animated span =
     initializer
     self#on_click (fun _x _y -> if not self#running then self#animate)
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=7 *)
 class my_circle =
   object
     inherit circle 20 50 50
     inherit animated Time.Span.second
     initializer updates <- [ (fun _ -> x <- x + 5) ]
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=8 *)
 class virtual linear x' y' =
   object
     val virtual mutable updates : (int -> unit) list
@@ -176,17 +179,7 @@ class virtual harmonic offset x' y' =
     in
     updates <- update :: updates
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=multiple_inheritance *)
-class square_outline w x y =
-  object
-    inherit square w x y
-    method draw = draw_rect x y width width
-  end
-(* $MDX part-end *)
-
-(* $MDX part-begin=9 *)
 class my_square x y =
   object
     inherit square 40 x y
@@ -203,9 +196,7 @@ let my_circle =
     inherit harmonic 0.0 10 0
     inherit harmonic (pi /. 2.0) 0 10
   end
-(* $MDX part-end *)
 
-(* $MDX part-begin=10 *)
 let main () =
   let shapes =
     [ (my_circle :> drawable)
@@ -224,4 +215,3 @@ let main () =
   Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
 
 let () = never_returns (Scheduler.go_main ~main ())
-(* $MDX part-end *)
