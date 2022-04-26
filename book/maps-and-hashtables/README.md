@@ -117,7 +117,7 @@ We don't need to provide the module again for functions like
 to the comparison function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
-`Base` are. Later in the chapter, we'll show how you can set up a module of your
+`Base` can. Later in the chapter, we'll show how you can set up a module of your
 own so it can be used in this way.
 
 ### Sets
