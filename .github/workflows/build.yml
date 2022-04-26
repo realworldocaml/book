@@ -44,7 +44,7 @@ jobs:
         run: opam install dune>=3.0.2
 
       - name: Build HTML book
-        run: opam exec -- dune build @site
+        run: opam exec -- dune build
 
       - name: Deploy site
         uses: peaceiris/actions-gh-pages@v3
