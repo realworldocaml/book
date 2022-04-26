@@ -956,8 +956,7 @@ class circle r x y = object(self)
   method private contains x' y' =
     let dx = x' - x in
     let dy = y' - y in
-    let dist = sqrt (Float.of_int (dx * dx + dy * dy)) in
-      dist <= (Float.of_int radius)
+      dx * dx + dy * dy <= radius * radius
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
@@ -1028,8 +1027,7 @@ class circle r x y = object
   method private contains x' y' =
     let dx = x' - x in
     let dy = y' - y in
-    let dist = sqrt (Float.of_int (dx * dx + dy * dy)) in
-    dist <= (Float.of_int radius)
+      dx * dx + dy * dy <= radius * radius
 end
 ```
 
