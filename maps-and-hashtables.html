@@ -4,7 +4,7 @@
 key/value pairs. Maybe the simplest way of representing such data in
 OCaml is an <em>association list</em>, which is simply a list of pairs
 of keys and values. For example, you could represent a mapping between
-the 10 digits and their English names as follows: <a data-secondary="value pairs" data-primary="key" data-type="indexterm">&nbsp;</a><a data-secondary="key/value pairs" data-primary="data
+the 10 digits and their English names as follows: <a data-primary="key-value pairs" data-type="indexterm">&nbsp;</a><a data-secondary="key-value pairs" data-primary="data
 structures" data-type="indexterm">&nbsp;</a><a data-secondary="association
 lists" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="association lists" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
@@ -90,7 +90,7 @@ let touch t s =
 You’ll see that the <code>Map.t</code> has three type parameter. The
 first two are what you might expect; one for the type of the key, and
 one for type of the data. The third type parameter, the <em>comparator
-witness</em>, requires some explaining.</p>
+witness</em>, requires some explaining. <a data-secondary="comparator witness" data-primary="comparator" data-type="indexterm">&nbsp;</a></p>
 <p>The comparator witness is used to indicate which comparison function
 was used to construct the map, rather than saying something about the
 type of data stored in the map. The type
@@ -219,7 +219,7 @@ a map, as you can see.</p>
 a common idiom where we create a submodule, called <code>T</code>
 containing the basic functionality for the type in question, and then
 include both that module and the result of applying a functor to that
-module.</p>
+module. <a data-secondary="Comparator module" data-primary="comparator" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Book = struct
   module T = struct
@@ -257,7 +257,7 @@ end;;</code></pre>
 <p>While we used <code>Comparator.Make</code> in the above, it’s often
 preferable to use <code>Comparable.Make</code> instead, since it
 provides extra helper functions, like infix comparison operators and min
-and max functions, in addition to the comparator itself.</p>
+and max functions, in addition to the comparator itself. <a data-primary="Comparable module" data-type="indexterm">&nbsp;</a></p>
 </section>
 <section class="level3" id="why-comparator-witnesses">
 <h3>Why do we need comparator witnesses?</h3>
@@ -418,7 +418,7 @@ of the trees underlying the maps will be different. As such, polymorphic
 compare will conclude that they’re different.</p>
 <p>We can see this below. Note that <code>Base</code> hides polymorphic
 comparison by default, but it is available within the <code>Poly</code>
-module.</p>
+module. <a data-primary="Base.Poly" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(m1 = m2);;
 &gt;Exception: (Invalid_argument "compare: functional value")

@@ -57,7 +57,8 @@ In_channel.read_all "test.txt";;
 it must be a blocking operation. In particular, the fact that it returns
 a concrete string means it can’t return until the read has completed.
 The blocking nature of the call means that no progress can be made on
-anything else until the call is complete. <a data-primary="blocking" data-type="indexterm">&nbsp;</a></p>
+anything else until the call is complete. <a data-primary="blocking
+IO" data-type="indexterm">&nbsp;</a></p>
 <p>In Async, well-behaved functions never block. Instead, they return a
 value of type <code>Deferred.t</code> that acts as a placeholder that
 will eventually be filled in with the result. As an example, consider
@@ -415,8 +416,8 @@ example" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
 input to an output. Here, we’ll use Async’s <code>Reader</code> and
 <code>Writer</code> modules, which provide a convenient abstraction for
 working with input and output channels: <a data-primary="Writer
-module" data-type="indexterm">&nbsp;</a><a data-primary="Reader module" data-type="indexterm">&nbsp;</a><a data-secondary="O
-(input/output) operations/copying data" data-primary="I" data-type="indexterm">&nbsp;</a></p>
+module" data-type="indexterm">&nbsp;</a><a data-primary="Reader module" data-type="indexterm">&nbsp;</a><a data-secondary="copying data" data-primary="IO
+operations" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 open Async
@@ -1052,7 +1053,7 @@ exited.</p>
 <code>f</code> and returns a deferred that becomes determined either as
 <code>Ok</code> of whatever <code>f</code> returned, or
 <code>Error exn</code> if <code>f</code> threw an exception before its
-return value became determined. <a data-primary="try_with" data-type="indexterm">&nbsp;</a> <a data-secondary="try_with" data-primary="async" data-type="indexterm">&nbsp;</a> <a data-secondary="asynchronous errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
+return value became determined. <a data-primary="try_with" data-type="indexterm">&nbsp;</a> <a data-secondary="try_with" data-primary="Async library" data-type="indexterm">&nbsp;</a> <a data-secondary="asynchronous errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s a trivial example of <code>try_with</code> in action.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_error () =

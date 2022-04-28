@@ -606,7 +606,7 @@ contexts, since finalizers can run at any time in any thread. <a data-secondary=
 <code>Gc.add_finalizer</code>, which is concurrency-safe. In particular,
 finalizers are scheduled in their own Async job, and makes sure to
 capture exceptions and raise them to the appropriate monitor for
-error-handling. <a data-secondary="finalizers" data-primary="Async" data-type="indexterm">&nbsp;</a></p>
+error-handling. <a data-secondary="finalizers" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s explore this with a small example that finalizes values of
 different types, some of which are heap-allocated and others which are
 compile-time constants:</p>

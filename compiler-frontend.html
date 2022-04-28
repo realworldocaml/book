@@ -343,8 +343,8 @@ $ man -M man Doc</code></pre>
 directory and also be able to view the UNIX manual pages held in
 <code>man/man3</code>. There are quite a few comment formats and options
 to control the output for the various backends. Refer to the <a href="https://ocaml.org/manual/native.html">OCaml manual</a> for the
-complete list.<a data-primary="Xen" data-type="indexterm">&nbsp;</a><a data-secondary="Xen custom generator for" data-primary="JSON
-data" data-type="indexterm">&nbsp;</a><a data-primary="Bibtex" data-type="indexterm">&nbsp;</a><a data-secondary="ocamldoc-generators" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Argot HTML generator" data-type="indexterm">&nbsp;</a><a data-primary="HTML
+complete list. <a data-secondary="ocamldoc-generators" data-primary="OCaml
+toolchain" data-type="indexterm">&nbsp;</a> <a data-primary="HTML
 generators" data-type="indexterm">&nbsp;</a></p>
 <p>You can also use <code>odoc</code> to generate complete snapshots of
 your project via integration with dune, as described earlier in <a data-type="xref" href="platform.html#browsing-interface-documentation">Chapter 21, OCaml Platform</a>.</p>
@@ -506,7 +506,7 @@ verify that the code obeys the rules of the OCaml type system. Code that
 is syntactically correct but misuses values is rejected with an
 explanation of the problem.</p>
 <p>Although type checking is done in a single pass in OCaml, it actually
-consists of three distinct steps that happen simultaneously:<a data-primary="explicit subtyping" data-type="indexterm">&nbsp;</a><a data-primary="automatic type
+consists of three distinct steps that happen simultaneously:<a data-primary="explicit subtyping" data-type="indexterm">&nbsp;</a><a data-primary="type
 inference" data-type="indexterm">&nbsp;</a><a data-secondary="in static type
 checking" data-primary="subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="in static type
 checking" data-primary="modules" data-type="indexterm">&nbsp;</a><a data-secondary="in static type
@@ -658,8 +658,8 @@ compilation time rather than by generating an error at runtime. Learning
 how to navigate the type checker’s compile-time feedback is key to
 building robust libraries and applications that take full advantage of
 these static checks.<a data-secondary="error detection
-with" data-primary="type inference" data-type="indexterm">&nbsp;</a><a data-primary="annotations, for type checking" data-type="indexterm">&nbsp;</a><a data-secondary="detecting with type annotations" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="type annotations" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static
-checking" data-type="indexterm">&nbsp;</a></p>
+with" data-primary="type inference" data-type="indexterm">&nbsp;</a><a data-secondary="detecting with type
+annotations" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="type annotations" data-type="indexterm">&nbsp;</a><a data-primary="compile-time static checking" data-type="indexterm">&nbsp;</a></p>
 <p>There are a couple of tricks to make it easier to quickly locate type
 errors in your code. The first is to introduce manual type annotations
 to narrow down the source of your error more accurately. These

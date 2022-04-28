@@ -1179,8 +1179,9 @@ nature. That includes not only things that mutate your program’s data,
 but also operations that interact with the world outside of your
 program. An important example of this kind of interaction is I/O, i.e.,
 operations for reading or writing data to things like files, terminal
-input and output, and network sockets. <a data-secondary="O
-(input/output) operations/terminal I/O" data-primary="I" data-type="indexterm">&nbsp;</a><a data-secondary="input and output" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+input and output, and network sockets. <a data-secondary="terminal IO" data-primary="IO
+operations" data-type="indexterm">&nbsp;</a><a data-secondary="input and output" data-primary="imperative
+programming" data-type="indexterm">&nbsp;</a></p>
 <p>There are multiple I/O libraries in OCaml. In this section we’ll
 discuss OCaml’s buffered I/O library that can be used through the
 <code>In_channel</code> and <code>Out_channel</code> modules in Stdio.
@@ -1289,7 +1290,7 @@ in the C standard library. <code>printf</code> takes a <em>format
 string</em> that describes what to print and how to format it, as well
 as arguments to be printed, as determined by the formatting directives
 embedded in the format string. So, for example, we can write: <a data-secondary="format strings" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="format
-strings" data-type="indexterm">&nbsp;</a><a data-primary="printf function" data-type="indexterm">&nbsp;</a><a data-secondary="O (input/output) operations/formatted output" data-primary="I" data-type="indexterm">&nbsp;</a></p>
+strings" data-type="indexterm">&nbsp;</a><a data-primary="printf function" data-type="indexterm">&nbsp;</a><a data-secondary="formatted output" data-primary="IO operations" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">printf
   "%i is an integer, %F is a float, \"%s\" is a string\n"
@@ -1408,8 +1409,8 @@ Manual.</p>
 <p>Another common use of <code>in_channel</code>s and
 <code>out_channel</code>s is for working with files. Here are a couple
 of functions—one that creates a file full of numbers, and the other that
-reads in such a file and returns the sum of those numbers: <a data-secondary="file I/O" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="O (input/output)
-operations/file I/O" data-primary="I" data-type="indexterm">&nbsp;</a></p>
+reads in such a file and returns the sum of those numbers: <a data-secondary="file IO" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="file
+IO" data-primary="IO operations" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create_number_file filename numbers =
   let outc = Out_channel.create filename in
