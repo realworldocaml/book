@@ -388,6 +388,7 @@ Exception: Division_by_zero.
 
 In addition to built-in exceptions like `Divide_by_zero`, OCaml lets you
 define your own:
+[raise]{.idx}
 
 ```ocaml env=main
 # exception Key_not_found of string;;
@@ -443,6 +444,7 @@ Base.[functions/exception warnings for]{.idx}[find_exn function]{.idx}
 
 In the preceding example, `raise` throws the exception, thus terminating the
 computation. The type of raise is a bit surprising when you first see it:
+[raise}{.idx}
 
 ```ocaml env=main
 # raise;;
@@ -465,16 +467,16 @@ val forever : unit -> 'a = <fun>
 `forever` doesn't return a value for a different reason: it's an infinite
 loop.
 
-This all matters because it means that the return type of `raise` can be
-whatever it needs to be to fit into the context it is called in. Thus, the
-type system will let us throw an exception anywhere in a program. [sexp
-declaration]{.idx}[exceptions/textual representation of]{.idx}
+This all matters because it means that the return type of `raise` can
+be whatever it needs to be to fit into the context it is called
+in. Thus, the type system will let us throw an exception anywhere in a
+program.
 
 ::: {.allow_break data-type=note}
 #### Declaring Exceptions Using `[@@deriving sexp]`
 
-OCaml can't always generate a useful textual representation of an exception.
-For example:
+OCaml can't always generate a useful textual representation of an
+exception.  For example: [exceptions/textual representation of]{.idx}
 
 ```ocaml env=main
 # type 'a bounds = { lower: 'a; upper: 'a };;
@@ -767,11 +769,12 @@ val lookup_weight :
 
 ### Backtraces
 
-A big part of the value of exceptions is that they provide useful debugging
-information in the form of a stack backtrace. Consider the following simple
-program:[debugging/stack backtraces]{.idx}[stack
-backtraces]{.idx}[backtraces]{.idx}[exceptions/stack backtraces
-for]{.idx}[error handling/exception backtracing]{.idx}
+A big part of the value of exceptions is that they provide useful
+debugging information in the form of a stack backtrace. Consider the
+following simple program:
+[debugging/backtraces]{.idx}
+[backtraces]{.idx}
+[exceptions/backtraces for]{.idx}
 
 ```ocaml file=examples/correct/blow_up/blow_up.ml
 open Base
@@ -804,7 +807,7 @@ You can also capture a backtrace within your program by calling
 `Backtrace.Exn.most_recent`, which returns the backtrace of the most
 recently thrown exception.  This is useful for reporting detailed
 information on errors that did not cause your program to fail.
-[Backtrace module/Backtrace.Exn.most_recent]{.idx}
+[backtraces/capturing the most recent]{.idx}
 
 This works well if you have backtraces enabled, but that isn't always the
 case. In fact, by default, OCaml has backtraces turned off, and even if you
@@ -825,8 +828,8 @@ Fatal error: exception Dune__exe__Blow_up.Empty_list
 
 The resulting error message is considerably less informative. You can
 also turn backtraces off in your code by calling
-`Backtrace.Exn.set_recording false`.[Exn
-module/Backtrace.Exn.set_recording false]{.idx}
+`Backtrace.Exn.set_recording false`.
+[backtraces/control recording of]{.idx}
 
 There is a legitimate reasons to run without backtraces:
 speed. OCaml's exceptions are fairly fast, but they're faster still if
@@ -869,6 +872,9 @@ let () =
 ```
 
 We're testing four cases here:
+[backtraces/raising exceptions without one]{.idx}
+[raise_notrace]{.idx}
+[raise]{.idx}
 
 - a simple computation with no exception,
 - the same, but with an exception handler but no exception thrown,

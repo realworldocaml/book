@@ -649,7 +649,7 @@ shadows the `Gc` module with its own module that contains a function,
 finalizers are scheduled in their own Async job, and makes sure to
 capture exceptions and raise them to the appropriate monitor for
 error-handling.
-[Async/finalizers]{.idx}
+[Async library/finalizers]{.idx}
 
 Let's explore this with a small example that finalizes values of
 different types, some of which are heap-allocated and others which are

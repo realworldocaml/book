@@ -904,9 +904,9 @@ function definitions.
 
 ### Defining Arrays
 
-Arrays in C are contiguous blocks of the same type of value. Any of the basic
-types defined previously can be allocated as blocks via the `Array` module:
-[arrays/definition of]{.idx}[structs and unions/array definition]{.idx}
+Arrays in C are contiguous blocks of the same type of value. Any of
+the basic types defined previously can be allocated as blocks via the
+`Array` module: [Ctypes library/arrays]{.idx}
 
 ```ocaml file=examples/correct/ctypes/ctypes.mli,part=5
 module Array : sig

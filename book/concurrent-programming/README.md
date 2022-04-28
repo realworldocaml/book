@@ -60,7 +60,7 @@ From the type of `In_channel.read_all`, you can see that it must be a
 blocking operation. In particular, the fact that it returns a concrete string
 means it can't return until the read has completed. The blocking nature of
 the call means that no progress can be made on anything else until the call
-is complete. [blocking]{.idx}
+is complete. [blocking IO]{.idx}
 
 In Async, well-behaved functions never block. Instead, they return a value of
 type `Deferred.t` that acts as a placeholder that will eventually be filled
@@ -443,7 +443,7 @@ example]{.idx}
 The first step is to create a function that can copy data from an input to an
 output. Here, we'll use Async's `Reader` and `Writer` modules, which provide
 a convenient abstraction for working with input and output channels: [Writer
-module]{.idx}[Reader module]{.idx}[I/O (input/output) operations/copying
+module]{.idx}[Reader module]{.idx}[IO operations/copying
 data]{.idx}
 
 ```ocaml file=examples/correct/echo/echo.ml,part=0
@@ -1132,7 +1132,7 @@ function provided by Async.  `try_with f` takes as its argument a
 deferred-returning thunk `f` and returns a deferred that becomes
 determined either as `Ok` of whatever `f` returned, or `Error exn` if
 `f` threw an exception before its return value became determined.
-[try_with]{.idx} [async/try_with]{.idx} [exceptions/asynchronous
+[try_with]{.idx} [Async library/try_with]{.idx} [exceptions/asynchronous
 errors]{.idx}
 
 Here's a trivial example of `try_with` in action.

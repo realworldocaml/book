@@ -24,7 +24,7 @@ Luckily, the OCaml toolchain is very predictable. The compiler minimizes the
 amount of optimization magic that it performs, and relies instead on its
 straightforward execution model for good performance. With some experience,
 you can know rather precisely where a block of performance-critical OCaml
-code is spending its time. [OCaml toolchain/benefits of]{.idx}
+code is spending its time.
 
 ::: {data-type=note}
 #### Why Do OCaml Types Disappear at Runtime?

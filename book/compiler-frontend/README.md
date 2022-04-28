@@ -361,10 +361,9 @@ directory and also be able to view the UNIX manual pages held in
 `man/man3`. There are quite a few comment formats and
 options to control the output for the various backends. Refer to the
 [OCaml manual](https://ocaml.org/manual/native.html)
-for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
-for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
-HTML generator]{.idx}[HTML
-generators]{.idx}
+for the complete list.
+[OCaml toolchain/ocamldoc-generators]{.idx}
+[HTML generators]{.idx}
 
 You can also use `odoc` to generate complete snapshots of your project via
 integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
@@ -529,7 +528,7 @@ correct but misuses values is rejected with an explanation of the problem.
 
 Although type checking is done in a single pass in OCaml, it actually
 consists of three distinct steps that happen simultaneously:[explicit
-subtyping]{.idx}[automatic type inference]{.idx}[subtyping/in static type
+subtyping]{.idx}[type inference]{.idx}[subtyping/in static type
 checking]{.idx}[modules/in static type checking]{.idx}[type inference/in
 static type checking]{.idx}[compilation process/static type
 checking]{.idx}
@@ -691,8 +690,7 @@ abstraction violations by rejecting your program at compilation time rather
 than by generating an error at runtime. Learning how to navigate the type
 checker's compile-time feedback is key to building robust libraries and
 applications that take full advantage of these static checks.[type
-inference/error detection with]{.idx}[annotations, for type
-checking]{.idx}[errors/detecting with type annotations]{.idx}[type
+inference/error detection with]{.idx}[errors/detecting with type annotations]{.idx}[type
 annotations]{.idx}[compile-time static checking]{.idx}
 
 There are a couple of tricks to make it easier to quickly locate type errors

@@ -16,7 +16,8 @@ It's tedious and error-prone to code all of this manually for every program
 you write. Core provides the Command library, which simplifies all of this by
 letting you declare your command-line options in one place and by deriving
 all of the above functionality from these declarations. [command-line
-parsing/Command library for]{.idx}
+parsing/Command library]{.idx}
+[Command library]{.idx}
 
 Command is simple to use for simple applications but also scales well as your
 needs grow more complex. In particular, Command provides a sophisticated
@@ -916,13 +917,14 @@ enter days: 2014-01-05
 
 ## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}
 
-Modern UNIX shells usually have a tab-completion feature to interactively
-help you figure out how to build a command line. These work by pressing the
-Tab key in the middle of typing a command, and seeing the options that pop
-up. You've probably used this most often to find the files in the current
-directory, but it can actually be extended for other parts of the command,
-too. [tab-autocompletion]{.idx}[autocompletion]{.idx}[command-line
-parsing/autocompletion with bash]{.idx}
+Modern UNIX shells usually have a tab-completion feature to
+interactively help you figure out how to build a command line. These
+work by pressing the Tab key in the middle of typing a command, and
+seeing the options that pop up. You've probably used this most often
+to find the files in the current directory, but it can actually be
+extended for other parts of the command,
+too. [autocompletion]{.idx}[command-line parsing/autocompletion with
+bash]{.idx}
 
 The precise mechanism for autocompletion varies depending on what shell you
 are using, but we'll assume you are using the most common one: `bash`. This
@@ -1020,9 +1022,7 @@ scripts and follow their lead, as the details are very OS-specific.
 This rounds up our tour of the Command library. This isn't the only way to
 parse command-line arguments of course; there are several alternatives
 available on opam. Three of the most prominent ones follow:
-[Cmdliner]{.idx}[OCaml toolchain/ocaml-getopt]{.idx}[Arg
-module]{.idx}[command-line parsing/alternatives to Command
-library]{.idx}[opam package manager]{.idx}
+[command-line parsing/alternatives to Command library]{.idx}
 
 The `Arg` module
 : The `Arg` module is from the OCaml standard library, which is used
@@ -1032,15 +1032,17 @@ The `Arg` module
   function to convert `Arg` specifications into ones compatible with
   Command, which is a simple way of porting an `Arg`-based command
   line interface to `Command`.
+  [Arg module]{.idx}
 
 [ocaml-getopt](https://forge.ocamlcore.org/projects/ocaml-getopt/)
 : `ocaml-getopt` provides the general command-line syntax of GNU `getopt` and
   `getopt_long`. The GNU conventions are widely used in the open source
   world, and this library lets your OCaml programs obey the same rules.
+  [ocaml-getopt]{.idx}
 
 [Cmdliner](http://erratique.ch/software/cmdliner)
 : Cmdliner is a mix between the Command and Getopt libraries. It allows for
   the declarative definition of command-line interfaces but exposes a more
   `getopt`-like interface. It also automates the generation of UNIX man pages
   as part of the specification. Cmdliner is the parser used by opam to manage
-  its command line.
+  its command line. [Cmdliner library]{.idx}
