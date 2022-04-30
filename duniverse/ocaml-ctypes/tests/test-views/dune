@@ -3,4 +3,4 @@
  (package ctypes-foreign)
  (link_flags
   (:include ../flags/link-flags.sexp))
- (libraries oUnit ctypes test_views_stubs test_views_bindings tests_common))
+ (libraries ounit2 ctypes test_views_stubs test_views_bindings tests_common))

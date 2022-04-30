@@ -17,7 +17,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ocaml-version:
-          - 4.11.2
+          - 4.13.1
         include:
           - ocaml-version: 4.10.0
             os: ubuntu-latest
@@ -25,10 +25,7 @@ jobs:
             os: ubuntu-latest
           - ocaml-version: 4.08.1
             os: ubuntu-latest
-          - ocaml-version: 4.04.2
-            os: ubuntu-latest
-            configurator: true
-          - ocaml-version: 4.02.3
+          - ocaml-version: 4.05.0
             os: ubuntu-latest
 
     env:

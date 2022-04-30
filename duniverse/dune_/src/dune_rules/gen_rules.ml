@@ -5,7 +5,7 @@ module Menhir_rules = Menhir
 module Toplevel_rules = Toplevel.Stanza
 open Dune_file
 open! No_io
-open Memo.Build.O
+open Memo.O
 
 module For_stanza : sig
   type ('merlin, 'cctx, 'js, 'source_dirs) t =
@@ -24,13 +24,13 @@ module For_stanza : sig
     -> scope:Scope.t
     -> dir_contents:Dir_contents.t
     -> expander:Expander.t
-    -> files_to_install:(Install_conf.t -> unit Memo.Build.t)
+    -> files_to_install:(Install_conf.t -> unit Memo.t)
     -> ( Merlin.t list
        , (Loc.t * Compilation_context.t) list
        , Path.Build.t list
        , Path.Source.t list )
        t
-       Memo.Build.t
+       Memo.t
 end = struct
   type ('merlin, 'cctx, 'js, 'source_dirs) t =
     { merlin : 'merlin
@@ -88,7 +88,7 @@ end = struct
         ; js = None
         ; source_dirs = None
         }
-      else Memo.Build.return empty_none
+      else Memo.return empty_none
     | Foreign_library lib ->
       let+ () =
         Lib_rules.foreign_rules lib ~sctx ~dir ~dir_contents ~expander
@@ -96,11 +96,9 @@ end = struct
       empty_none
     | Executables exes -> (
       Expander.eval_blang expander exes.enabled_if >>= function
-      | false -> Memo.Build.return empty_none
+      | false -> Memo.return empty_none
       | true ->
-        let* () =
-          Memo.Build.Option.iter exes.install_conf ~f:files_to_install
-        in
+        let* () = Memo.Option.iter exes.install_conf ~f:files_to_install in
         let+ cctx, merlin =
           Exe_rules.rules exes ~sctx ~dir ~scope ~expander ~dir_contents
         in
@@ -136,7 +134,7 @@ end = struct
             |> Path.Source.parent_exn)
         else None
       in
-      Memo.Build.return { merlin = None; cctx = None; js = None; source_dirs }
+      Memo.return { merlin = None; cctx = None; js = None; source_dirs }
     | Install i ->
       let+ () = files_to_install i in
       empty_none
@@ -148,11 +146,11 @@ end = struct
       empty_none
     | Mdx.T mdx -> (
       Expander.eval_blang expander (Mdx.enabled_if mdx) >>= function
-      | false -> Memo.Build.return empty_none
+      | false -> Memo.return empty_none
       | true ->
         let+ () = Mdx.gen_rules ~sctx ~dir ~scope ~expander mdx in
         empty_none)
-    | _ -> Memo.Build.return empty_none
+    | _ -> Memo.return empty_none
 
   let of_stanzas stanzas ~cctxs ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents
       ~expander ~files_to_install =
@@ -160,7 +158,7 @@ end = struct
       of_stanza ~sctx ~src_dir ~ctx_dir ~scope ~dir_contents ~expander
         ~files_to_install
     in
-    let+ l = Memo.Build.parallel_map stanzas ~f:of_stanza in
+    let+ l = Memo.parallel_map stanzas ~f:of_stanza in
     List.fold_left l ~init:{ empty_list with cctx = cctxs } ~f:(fun acc x ->
         cons acc x)
     |> rev
@@ -212,7 +210,7 @@ let gen_rules sctx dir_contents cctxs expander
     =
   let files_to_install
       { Install_conf.section = _; files; package = _; enabled_if = _ } =
-    Memo.Build.List.map files ~f:(fun fb ->
+    Memo.List.map files ~f:(fun fb ->
         File_binding.Unexpanded.expand_src ~dir:ctx_dir fb
           ~f:(Expander.No_deps.expand_str expander)
         >>| Path.build)
@@ -229,18 +227,18 @@ let gen_rules sctx dir_contents cctxs expander
       ~dir_contents ~expander ~files_to_install
   in
   let* () =
-    Memo.Build.sequential_iter merlins ~f:(fun merlin ->
+    Memo.sequential_iter merlins ~f:(fun merlin ->
         let more_src_dirs =
           lib_src_dirs ~dir_contents |> List.rev_append (src_dir :: source_dirs)
         in
         Merlin.add_rules sctx ~dir:ctx_dir ~more_src_dirs ~expander merlin)
   in
   let* () =
-    Memo.Build.parallel_iter stanzas ~f:(fun stanza ->
+    Memo.parallel_iter stanzas ~f:(fun stanza ->
         match (stanza : Stanza.t) with
         | Menhir.T m -> (
           Expander.eval_blang expander m.enabled_if >>= function
-          | false -> Memo.Build.return ()
+          | false -> Memo.return ()
           | true -> (
             let* ml_sources = Dir_contents.ocaml dir_contents in
             match
@@ -271,7 +269,7 @@ let gen_rules sctx dir_contents cctxs expander
             | Some cctx -> Menhir_rules.gen_rules cctx m ~dir:ctx_dir))
         | Coq_stanza.Theory.T m -> (
           Expander.eval_blang expander m.enabled_if >>= function
-          | false -> Memo.Build.return ()
+          | false -> Memo.return ()
           | true ->
             Coq_rules.setup_rules ~sctx ~dir:ctx_dir ~dir_contents m
             >>= Super_context.add_rules ~dir:ctx_dir sctx)
@@ -281,13 +279,13 @@ let gen_rules sctx dir_contents cctxs expander
         | Coq_stanza.Coqpp.T m ->
           Coq_rules.coqpp_rules ~sctx ~dir:ctx_dir m
           >>= Super_context.add_rules ~dir:ctx_dir sctx
-        | _ -> Memo.Build.return ())
+        | _ -> Memo.return ())
   in
   let+ () = define_all_alias ~dir:ctx_dir ~scope ~js_targets in
   cctxs
 
 let gen_rules sctx dir_contents cctxs ~source_dir ~dir :
-    (Loc.t * Compilation_context.t) list Memo.Build.t =
+    (Loc.t * Compilation_context.t) list Memo.t =
   let* expander =
     let+ expander = Super_context.expander sctx ~dir in
     Dir_contents.add_sources_to_expander sctx expander
@@ -335,43 +333,49 @@ let gen_rules_for_automatic_sub_dir ~sctx ~dir kind =
     let* local_binaries =
       Super_context.local_binaries sctx ~dir:(Path.Build.parent_exn dir)
     in
-    Memo.Build.sequential_iter local_binaries ~f:(fun t ->
+    Memo.sequential_iter local_binaries ~f:(fun t ->
         let loc = File_binding.Expanded.src_loc t in
         let src = Path.build (File_binding.Expanded.src t) in
         let dst = File_binding.Expanded.dst_path t ~dir in
         Super_context.add_rule sctx ~loc ~dir (Action_builder.symlink ~src ~dst))
 
-let has_rules m =
-  let+ subdirs, rules = Rules.collect (fun () -> m) in
-  Build_config.Rules (subdirs, rules)
+let has_rules subdirs f =
+  let rules = Rules.collect_unit f in
+  Memo.return
+    (Build_config.Rules
+       { build_dir_only_sub_dirs = subdirs
+       ; directory_targets = Path.Build.Map.empty
+       ; rules
+       })
 
-let redirect_to_parent = Memo.Build.return Build_config.Redirect_to_parent
+let redirect_to_parent = Memo.return Build_config.Redirect_to_parent
 
 (* Once [gen_rules] has decided what to do with the directory, it should end
    with [has_rules] or [redirect_to_parent] *)
-let gen_rules ~sctx ~dir components : Build_config.gen_rules_result Memo.Build.t
-    =
+let gen_rules ~sctx ~dir components : Build_config.gen_rules_result Memo.t =
   let module S = Subdir_set in
   match components with
   | [ ".dune"; "ccomp" ] ->
+    has_rules S.empty (fun () ->
+        (* Add rules for C compiler detection *)
+        Cxx_rules.rules ~sctx ~dir)
+  | [ ".dune" ] ->
     has_rules
-      ((* Add rules for C compiler detection *)
-       let+ () = Cxx_rules.rules ~sctx ~dir in
-       S.empty)
-  | [ ".dune" ] -> has_rules (Memo.Build.return S.empty)
+      (S.These (String.Set.of_list [ "ccomp" ]))
+      (fun () -> Context.gen_configurator_rules (Super_context.context sctx))
   | ".js" :: rest ->
     has_rules
-      (let+ () = Jsoo_rules.setup_separate_compilation_rules sctx rest in
-       match rest with
-       | [] -> S.All
-       | _ -> S.empty)
+      (match rest with
+      | [] -> S.All
+      | _ -> S.empty)
+      (fun () -> Jsoo_rules.setup_separate_compilation_rules sctx rest)
   | "_doc" :: rest -> Odoc.gen_rules sctx rest ~dir
   | ".ppx" :: rest ->
     has_rules
-      (let+ () = Preprocessing.gen_rules sctx rest in
-       match rest with
-       | [] -> S.All
-       | _ -> S.empty)
+      (match rest with
+      | [] -> S.All
+      | _ -> S.empty)
+      (fun () -> Preprocessing.gen_rules sctx rest)
   | _ -> (
     let src_dir = Path.Build.drop_build_context_exn dir in
     Source_tree.find_dir src_dir >>= function
@@ -387,62 +391,58 @@ let gen_rules ~sctx ~dir components : Build_config.gen_rules_result Memo.Build.t
         with
         | None -> redirect_to_parent
         | Some kind ->
-          has_rules
-            (gen_rules_for_automatic_sub_dir ~sctx ~dir kind
-            >>> Memo.Build.return Subdir_set.empty)))
+          has_rules Subdir_set.empty (fun () ->
+              gen_rules_for_automatic_sub_dir ~sctx ~dir kind)))
     | Some source_dir -> (
       (* This interprets "rule" and "copy_files" stanzas. *)
       Dir_contents.triage sctx ~dir
       >>= function
       | Group_part _ -> redirect_to_parent
-      | Standalone_or_root { root = dir_contents; subdirs; rules } ->
-        has_rules
-          (let* () = Rules.produce rules in
-           let* () =
-             let project = Source_tree.Dir.project source_dir in
-             if
-               Path.Build.equal
-                 (Path.Build.append_source
-                    (Super_context.context sctx).build_dir
-                    (Dune_project.root project))
-                 dir
-             then gen_project_rules sctx project
-             else Memo.Build.return ()
-           in
-           let* cctxs = gen_rules sctx dir_contents [] ~source_dir ~dir in
-           let+ () =
-             Memo.Build.parallel_iter subdirs ~f:(fun dc ->
-                 gen_rules sctx dir_contents cctxs ~source_dir
-                   ~dir:(Dir_contents.dir dc)
-                 >>| ignore)
-           in
-           let subdirs = String.Set.of_keys automatic_sub_dirs_map in
-           let subdirs =
-             match components with
-             | [] ->
-               String.Set.union subdirs
-                 (String.Set.of_list [ ".js"; "_doc"; ".ppx"; ".dune" ])
-             | _ -> subdirs
-           in
-           S.These subdirs)))
-
-let gen_rules ~sctx ~dir components =
-  let module S = Subdir_set in
-  match components with
-  | [ ".dune" ] ->
-    has_rules
-      ((* [.dune] is treated specifically as generating the rules in all other
-          directories forces the production of the configurator files for which
-          the rules are setup in this branch. *)
-       let+ () = Context.gen_configurator_rules (Super_context.context sctx) in
-       S.These (String.Set.of_list [ "ccomp" ]))
-  | _ ->
-    let* () = Memo.Lazy.force Context.force_configurator_files in
-    gen_rules ~sctx ~dir components
+      | Standalone_or_root { directory_targets; contents } ->
+        let rules =
+          let* () = Memo.Lazy.force Context.force_configurator_files in
+          let* { Dir_contents.root = dir_contents; subdirs; rules } =
+            Memo.Lazy.force contents
+          in
+          let* rules' =
+            Rules.collect_unit (fun () ->
+                let* () =
+                  let project = Source_tree.Dir.project source_dir in
+                  if
+                    Path.Build.equal
+                      (Path.Build.append_source
+                         (Super_context.context sctx).build_dir
+                         (Dune_project.root project))
+                      dir
+                  then gen_project_rules sctx project
+                  else Memo.return ()
+                in
+                let* cctxs = gen_rules sctx dir_contents [] ~source_dir ~dir in
+                Memo.parallel_iter subdirs ~f:(fun dc ->
+                    gen_rules sctx dir_contents cctxs ~source_dir
+                      ~dir:(Dir_contents.dir dc)
+                    >>| ignore))
+          in
+          Memo.return (Rules.union rules rules')
+        in
+        let subdirs = String.Set.of_keys automatic_sub_dirs_map in
+        let subdirs =
+          match components with
+          | [] ->
+            String.Set.union subdirs
+              (String.Set.of_list [ ".js"; "_doc"; ".ppx"; ".dune" ])
+          | _ -> subdirs
+        in
+        Memo.return
+          (Build_config.Rules
+             { build_dir_only_sub_dirs = S.These subdirs
+             ; directory_targets
+             ; rules
+             })))
 
 let with_context ctx ~f =
   Super_context.find ctx >>= function
-  | None -> Memo.Build.return Build_config.Unknown_context_or_install
+  | None -> Memo.return Build_config.Unknown_context_or_install
   | Some ctx -> f ctx
 
 let gen_rules ctx_or_install ~dir components =
@@ -450,6 +450,10 @@ let gen_rules ctx_or_install ~dir components =
   | Install ctx ->
     with_context ctx ~f:(fun sctx ->
         let+ subdirs, rules = Install_rules.symlink_rules sctx ~dir in
-        Build_config.Rules (subdirs, rules))
+        Build_config.Rules
+          { build_dir_only_sub_dirs = subdirs
+          ; directory_targets = Path.Build.Map.empty
+          ; rules = Memo.return rules
+          })
   | Context ctx ->
     with_context ctx ~f:(fun sctx -> gen_rules ~sctx ~dir components)

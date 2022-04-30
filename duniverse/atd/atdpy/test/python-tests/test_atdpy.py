@@ -79,6 +79,7 @@ def test_everything_to_json() -> None:
             "g": 7,
             "h": 8,
         },
+        nullables=[12, None, 34],
     )
     a_str = a_obj.to_json_string(indent=2)
     print(a_str)
@@ -152,6 +153,11 @@ def test_everything_to_json() -> None:
     "g": 7,
     "h": 8
   },
+  "nullables": [
+    12,
+    null,
+    34
+  ],
   "answer": 42
 }"""
     b_obj = e.Root.from_json_string(a_str)

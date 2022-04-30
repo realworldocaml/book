@@ -22,9 +22,9 @@ js_of_ocaml-compiler \
 menhir \
 "merlin>=3.4.0" \
 ocamlfind \
-ocamlformat.0.20.1 \
+ocamlformat.$$(awk -F = '$$1 == "version" {print $$2}' .ocamlformat) \
 "odoc>=2.0.1" \
-"ppx_expect>=v0.14" \
+"ppx_expect.v0.14.2" \
 ppx_inline_test \
 ppxlib \
 result \
@@ -68,7 +68,7 @@ dev-switch:
 	opam update
 # Ensuring that either a dev switch already exists or a new one is created
 	test "$(shell opam switch show)" = "$(shell pwd)" || \
-		opam switch create -y . 4.12.0 --deps-only --with-test
+		opam switch create -y . 4.14.0 --deps-only --with-test
 	opam install -y $(TEST_DEPS) $(DEV_DEPS)
 
 test: $(BIN)

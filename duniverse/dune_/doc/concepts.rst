@@ -206,7 +206,7 @@ In addition, ``(action ...)`` fields support the following special variables:
 - ``bin-available:<program>`` expands to ``true`` or ``false``, depending
   on whether ``<program>`` is available or not.
 - ``lib:<public-library-name>:<file>`` expands to the file's installation path 
-``<file>`` in the library ``<public-library-name>``. If
+  ``<file>`` in the library ``<public-library-name>``. If
   ``<public-library-name>`` is available in the current workspace, the local
   file will be used, otherwise the one from the installed world will be used.
 - ``lib-private:<library-name>:<file>`` expands to the file's build path 
@@ -428,7 +428,7 @@ not.
 
 .. _preprocessing-spec:
 
-PreprocessingSspecification
+Preprocessing Specification
 ===========================
 
 Dune accepts three kinds of preprocessing:
@@ -592,12 +592,11 @@ Dependencies in ``dune`` files can be specified using one of the following:
   ``(alias src/runtest)``, ``(alias src/foo/bar/runtest)``, etc.
 - ``(glob_files <glob>)`` depends on all files matched by ``<glob>``. See the
   :ref:`glob <glob>` for details.
-- ``(glob_files_rec <glob>)``is the recursive version of
-``(glob_files <glob>)``. See the :ref:`glob <glob>` for details.
+- ``(glob_files_rec <glob>)`` is the recursive version of
+  ``(glob_files <glob>)``. See the :ref:`glob <glob>` for details.
 - ``(source_tree <dir>)`` depends on all source files in the subtree with root
   ``<dir>``.
-
-- ``(universe)``depends on everything in the universe. This is for
+- ``(universe)`` depends on everything in the universe. This is for
   cases where dependencies are too hard to specify. Note that Dune
   will not be able to cache the result of actions that depend on the
   universe. In any case, this is only for dependencies in the
@@ -616,6 +615,9 @@ Dependencies in ``dune`` files can be specified using one of the following:
   - ``none``: the action must run in the build directory
   - ``preserve_file_kind``: the action needs the files it reads to look
     like normal files (so Dune won't use symlinks for sandboxing)
+- ``(include <file>)`` read the s-expression in ``<file>`` and intepret it as
+  additional dependencies. The s-expression is expected to be a list of the
+  same constructs enumerated here.
 
 In all these cases, the argument supports :ref:`variables`.
 

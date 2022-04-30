@@ -4,7 +4,7 @@
  (link_flags
   (:include ../flags/link-flags.sexp))
  (libraries
-  oUnit
+  ounit2
   ctypes
   ctypes.stubs
   ctypes-foreign

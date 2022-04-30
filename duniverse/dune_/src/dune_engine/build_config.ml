@@ -11,10 +11,14 @@ module Context_or_install = struct
     | Context s -> Context_name.to_dyn s
 end
 
-type extra_sub_directories_to_keep = Subdir_set.t
+type rules =
+  { build_dir_only_sub_dirs : Subdir_set.t
+  ; directory_targets : Loc.t Path.Build.Map.t
+  ; rules : Rules.t Memo.t
+  }
 
 type gen_rules_result =
-  | Rules of extra_sub_directories_to_keep * Rules.t
+  | Rules of rules
   | Unknown_context_or_install
   | Redirect_to_parent
 
@@ -23,7 +27,7 @@ module type Rule_generator = sig
        Context_or_install.t
     -> dir:Path.Build.t
     -> string list
-    -> gen_rules_result Memo.Build.t
+    -> gen_rules_result Memo.t
 end
 
 type t =
@@ -40,8 +44,7 @@ type t =
   ; stats : Dune_stats.t option
   ; cache_config : Dune_cache.Config.t
   ; cache_debug_flags : Cache_debug_flags.t
-  ; implicit_default_alias :
-      Path.Build.t -> unit Action_builder.t option Memo.Build.t
+  ; implicit_default_alias : Path.Build.t -> unit Action_builder.t option Memo.t
   }
 
 let t = Fdecl.create Dyn.opaque
@@ -50,7 +53,7 @@ let set ~stats ~contexts ~promote_source ~cache_config ~cache_debug_flags
     ~sandboxing_preference ~rule_generator ~implicit_default_alias =
   let contexts =
     Memo.lazy_ ~name:"Build_config.set" (fun () ->
-        let open Memo.Build.O in
+        let open Memo.O in
         let+ contexts = Memo.Lazy.force contexts in
         Context_name.Map.of_list_map_exn contexts ~f:(fun c ->
             (c.Build_context.name, c)))

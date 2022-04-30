@@ -161,6 +161,7 @@ let%expect_test "related error" =
           ; "The implementation foo.ml\n\
             \       does not match the interface .foo.objs/byte/foo.cmi: \n\
             \       Values do not match: val x : bool is not included in val x : int\n\
+            \       The type bool is not compatible with the type int\n\
              "
           ]
         ]
@@ -234,14 +235,14 @@ let%expect_test "promotion" =
         ; [ [ "start"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "0" ]
-              ; [ "pos_fname"; "x" ]
+              ; [ "pos_fname"; "$CWD/x" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
           ; [ "stop"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "0" ]
-              ; [ "pos_fname"; "x" ]
+              ; [ "pos_fname"; "$CWD/x" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
@@ -291,14 +292,14 @@ let%expect_test "optional promotion" =
         ; [ [ "start"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "0" ]
-              ; [ "pos_fname"; "output.expected" ]
+              ; [ "pos_fname"; "$CWD/output.expected" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
           ; [ "stop"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "0" ]
-              ; [ "pos_fname"; "output.expected" ]
+              ; [ "pos_fname"; "$CWD/output.expected" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
@@ -348,14 +349,14 @@ let%expect_test "error from user rule" =
         ; [ [ "start"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "0" ]
-              ; [ "pos_fname"; "dune" ]
+              ; [ "pos_fname"; "$CWD/dune" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
           ; [ "stop"
             ; [ [ "pos_bol"; "0" ]
               ; [ "pos_cnum"; "49" ]
-              ; [ "pos_fname"; "dune" ]
+              ; [ "pos_fname"; "$CWD/dune" ]
               ; [ "pos_lnum"; "1" ]
               ]
             ]
@@ -367,6 +368,46 @@ let%expect_test "error from user rule" =
              targets:- foo\n\
              "
           ]
+        ]
+      ; [ "promotion"; [] ]
+      ; [ "related"; [] ]
+      ; [ "targets"; [] ]
+      ]
+    ] |}]
+
+let%expect_test "library error location" =
+  diagnostic_with_build
+    [ ("dune", "(library (name foo) (libraries fake-library))")
+    ; ("foo.ml", "")
+    ]
+    "./foo.cma";
+  [%expect
+    {|
+    Building ./foo.cma
+    Build ./foo.cma failed
+    [ "Add"
+    ; [ [ "id"; "0" ]
+      ; [ "loc"
+        ; [ [ "start"
+            ; [ [ "pos_bol"; "0" ]
+              ; [ "pos_cnum"; "31" ]
+              ; [ "pos_fname"; "$CWD/dune" ]
+              ; [ "pos_lnum"; "1" ]
+              ]
+            ]
+          ; [ "stop"
+            ; [ [ "pos_bol"; "0" ]
+              ; [ "pos_cnum"; "43" ]
+              ; [ "pos_fname"; "$CWD/dune" ]
+              ; [ "pos_lnum"; "1" ]
+              ]
+            ]
+          ]
+        ]
+      ; [ "message"
+        ; [ "Verbatim"; "Error: Library \"fake-library\" not\n\
+                         found.\n\
+                         " ]
         ]
       ; [ "promotion"; [] ]
       ; [ "related"; [] ]

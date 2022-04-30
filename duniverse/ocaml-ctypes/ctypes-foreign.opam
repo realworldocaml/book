@@ -19,10 +19,10 @@ depends: [
   "dune-configurator"
   "conf-pkg-config"
   "lwt" {with-test}
-  "ounit" {with-test}
+  "ounit2" {with-test}
   "conf-ncurses" {with-test}
   "stdlib-shims" {with-test}
-  "conf-fts" {with-test}
+  "conf-fts" {with-test & os != "win32"}
   "odoc" {with-doc}
 ]
 build: [

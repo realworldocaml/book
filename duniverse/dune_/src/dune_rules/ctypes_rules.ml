@@ -297,7 +297,7 @@ let add_rule_gen ~sctx ~dir ~filename f =
   let script =
     let open Action_builder.O in
     let* expander =
-      Action_builder.memo_build @@ Super_context.expander sctx ~dir
+      Action_builder.of_memo @@ Super_context.expander sctx ~dir
     in
     let+ pp = f ~expander in
     Format.asprintf "%a" Pp.to_fmt pp
@@ -336,9 +336,9 @@ let rule ?(deps = []) ?stdout_to ?(args = []) ?(targets = []) ~exe ~sctx ~dir ()
   Super_context.add_rule sctx ~dir build
 
 let build_c_program ~foreign_archives_deps ~sctx ~dir ~source_files ~scope
-    ~cflags_sexp ~output () =
+    ~cflags_sexp ~output ~deps () =
   let ctx = Super_context.context sctx in
-  let open Memo.Build.O in
+  let open Memo.O in
   let* exe =
     Ocaml_config.c_compiler ctx.Context.ocaml_config
     |> Super_context.resolve_program ~loc:None ~dir sctx
@@ -346,7 +346,7 @@ let build_c_program ~foreign_archives_deps ~sctx ~dir ~source_files ~scope
   let include_args =
     let ocaml_where = Path.to_string ctx.Context.stdlib_dir in
     (* XXX: need glob dependency *)
-    let open Resolve.Build.O in
+    let open Resolve.Memo.O in
     let+ ctypes_include_dirs =
       let+ lib =
         let ctypes = Lib_name.of_string "ctypes" in
@@ -365,10 +365,16 @@ let build_c_program ~foreign_archives_deps ~sctx ~dir ~source_files ~scope
       List.map source_files ~f:(Path.relative (Path.build dir))
       |> Dep.Set.of_files
     in
+
     let foreign_archives_deps =
       List.map foreign_archives_deps ~f:Path.build |> Dep.Set.of_files
     in
-    Dep.Set.union source_file_deps foreign_archives_deps
+    let open Action_builder.O in
+    let* () =
+      Dep.Set.union source_file_deps foreign_archives_deps
+      |> Action_builder.deps
+    in
+    deps
   in
   let build =
     let cflags_args =
@@ -401,8 +407,8 @@ let build_c_program ~foreign_archives_deps ~sctx ~dir ~source_files ~scope
     in
     let action =
       let open Action_builder.O in
-      let* include_args = Resolve.Build.read include_args in
-      Action_builder.deps deps
+      let* include_args = Resolve.Memo.read include_args in
+      deps
       >>> Action_builder.map cflags_args ~f:(fun cflags_args ->
               let source_files = List.map source_files ~f:absolute_path_hack in
               let output = absolute_path_hack output in
@@ -445,48 +451,52 @@ let program_of_module_and_dir ~dir program =
     ; loc = Loc.in_file (Path.relative build_dir program)
     }
 
-let exe_build_and_link ?libraries ?(modules = []) ~scope ~loc ~dir ~cctx program
-    =
-  let open Memo.Build.O in
+let exe_build_and_link ?libraries ?(modules = []) ~scope ~loc ~dir ~cctx
+    ~sandbox program =
+  let open Memo.O in
   let* cctx =
     cctx_with_substitutions ?libraries ~loc ~scope ~dir ~cctx
       ~modules:(program :: modules) ()
   in
   let program = program_of_module_and_dir ~dir program in
   Exe.build_and_link ~program ~linkages:[ Exe.Linkage.native ] ~promote:None
-    cctx
+    ~sandbox cctx
 
-let exe_link_only ~dir ~shared_cctx program =
+let exe_link_only ~dir ~shared_cctx ~sandbox program ~deps =
+  let link_args =
+    let open Action_builder.O in
+    let+ () = deps in
+    Command.Args.empty
+  in
   let program = program_of_module_and_dir ~dir program in
-  Exe.link_many ~programs:[ program ] ~linkages:[ Exe.Linkage.native ]
-    ~promote:None shared_cctx
+  Exe.link_many ~link_args ~programs:[ program ]
+    ~linkages:[ Exe.Linkage.native ] ~promote:None shared_cctx ~sandbox
 
-let write_osl_to_sexp_file ~sctx ~dir ~filename osl =
+let write_osl_to_sexp_file ~sctx ~dir ~filename ~expand_flag flags =
   let build =
-    let path = Path.Build.relative dir filename in
     let sexp =
-      let encoded =
-        match Ordered_set_lang.Unexpanded.encode osl with
-        | [ s ] -> s
-        | _lst ->
-          User_error.raise
-            [ Pp.textf "expected %s to contain a list of atoms" filename ]
+      let open Action_builder.O in
+      let* expander =
+        Action_builder.of_memo @@ Super_context.expander sctx ~dir
       in
-      Dune_lang.to_string encoded
+      let+ flags = expand_flag ~expander flags in
+      let sexp = Sexp.List (List.map ~f:(fun x -> Sexp.Atom x) flags) in
+      Sexp.to_string sexp
     in
-    Action_builder.write_file path sexp
+    let path = Path.Build.relative dir filename in
+    Action_builder.write_file_dyn path sexp
   in
   Super_context.add_rule ~loc:Loc.none sctx ~dir build
 
-(* Adding an 'iter' to Memo.Build produced pretty strange far-flung type errors,
-   so just doing this here. *)
-let rec memo_build_list_iter lst ~f =
-  let open Memo.Build.O in
+(* Adding an 'iter' to Memo produced pretty strange far-flung type errors, so
+   just doing this here. *)
+let rec memo_list_iter lst ~f =
+  let open Memo.O in
   match lst with
-  | [] -> Memo.Build.return ()
+  | [] -> Memo.return ()
   | x :: tl ->
     let* () = f x in
-    memo_build_list_iter tl ~f
+    memo_list_iter tl ~f
 
 let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
   let ctypes = Option.value_exn buildable.Buildable.ctypes in
@@ -495,7 +505,7 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
   let c_types_includer_module = Stanza_util.c_types_includer_module ctypes in
   let c_generated_types_module = Stanza_util.c_generated_types_module ctypes in
   let rule = rule ~sctx ~dir in
-  let open Memo.Build.O in
+  let open Memo.O in
   let foreign_archives_deps =
     let ctx = Super_context.context sctx in
     let ext_lib = ctx.Context.lib_config.ext_lib in
@@ -506,6 +516,8 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
         ; Foreign.Archive.dll_file ~archive ~dir ~ext_dll
         ])
   in
+  let* expander = Super_context.expander sctx ~dir in
+  let deps, sandbox = Dep_conf_eval.unnamed ~expander ctypes.deps in
   let* () =
     write_c_types_includer_module ~sctx ~dir
       ~filename:(ml_of_module_name c_types_includer_module)
@@ -525,9 +537,13 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
     | Vendored { c_flags; c_library_flags } ->
       let* () =
         write_osl_to_sexp_file ~sctx ~dir ~filename:cflags_sexp c_flags
+          ~expand_flag:(fun ~expander flags ->
+            Super_context.foreign_flags sctx ~dir ~expander ~flags ~language:C)
       in
       write_osl_to_sexp_file ~sctx ~dir ~filename:c_library_flags_sexp
-        c_library_flags
+        c_library_flags ~expand_flag:(fun ~expander flags ->
+          Expander.expand_and_eval_set expander flags
+            ~standard:(Action_builder.return []))
     | Pkg_config ->
       let cflags_sexp = Stanza_util.cflags_sexp ctypes in
       let discover_script = Stanza_util.discover_script ctypes in
@@ -536,7 +552,7 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
           ~cflags_sexp ~c_library_flags_sexp ~external_library_name
       in
       let* () =
-        exe_build_and_link ~scope ~loc ~dir ~cctx
+        exe_build_and_link ~scope ~loc ~dir ~cctx ~sandbox
           ~libraries:[ "dune.configurator" ] discover_script
       in
       rule
@@ -545,7 +561,7 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
   in
   let generated_entry_module = Stanza_util.entry_module ctypes in
   let headers = ctypes.Ctypes.headers in
-  let exe_link_only = exe_link_only ~dir ~shared_cctx:cctx in
+  let exe_link_only = exe_link_only ~deps ~dir ~shared_cctx:cctx ~sandbox in
   (* Type_gen produces a .c file, taking your type description module above as
      an input. The .c file is compiled into an .exe. The .exe, when run produces
      an .ml file. The .ml file is compiled into a module that will have the
@@ -573,7 +589,7 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
     let* () =
       build_c_program ~foreign_archives_deps ~sctx ~dir ~scope ~cflags_sexp
         ~source_files:[ c_generated_types_cout_c ]
-        ~output:c_generated_types_cout_exe ()
+        ~output:c_generated_types_cout_exe ~deps ()
     in
     rule
       ~stdout_to:(c_generated_types_module |> ml_of_module_name)
@@ -588,7 +604,7 @@ let gen_rules ~cctx ~buildable ~loc ~scope ~dir ~sctx =
      functions, for example, which requires a different 'concurrency' parameter
      in the code generator. *)
   let* () =
-    memo_build_list_iter ctypes.Ctypes.function_description ~f:(fun fd ->
+    memo_list_iter ctypes.Ctypes.function_description ~f:(fun fd ->
         let stubs_prefix = external_library_name ^ "_stubs" in
         let c_generated_functions_cout_c =
           Stanza_util.c_generated_functions_cout_c ctypes fd

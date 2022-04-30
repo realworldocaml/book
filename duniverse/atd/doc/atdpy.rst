@@ -22,8 +22,11 @@ Tutorials
 Hello World
 -----------
 
-Grab a copy of ``atdpy`` [how?]. Create a file ``hello.atd``
-containing this:
+Install ``atdpy`` with ``opam``::
+
+  opam install atdpy
+
+Create a file ``hello.atd`` containing this:
 
 .. code-block:: ocaml
 

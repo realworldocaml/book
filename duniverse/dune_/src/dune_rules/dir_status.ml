@@ -12,15 +12,15 @@ module T = struct
     | Generated
     | Source_only of Source_tree.Dir.t
     | (* Directory not part of a multi-directory group *)
-        Standalone of
+      Standalone of
         Source_tree.Dir.t * Stanza.t list Dir_with_dune.t
     | (* Directory with [(include_subdirs x)] where [x] is not [no] *)
-        Group_root of
+      Group_root of
         Source_tree.Dir.t
         * (Loc.t * Include_subdirs.qualification)
         * Stanza.t list Dir_with_dune.t
     | (* Sub-directory of a [Group_root _] *)
-        Is_component_of_a_group_but_not_the_root of
+      Is_component_of_a_group_but_not_the_root of
         is_component_of_a_group_but_not_the_root
 end
 
@@ -65,21 +65,21 @@ let check_no_module_consumer stanzas =
 module DB = struct
   type nonrec t =
     { stanzas_per_dir : Dune_file.Stanzas.t Dir_with_dune.t Path.Build.Map.t
-    ; fn : (Path.Build.t, t) Memo.t
+    ; fn : (Path.Build.t, t) Memo.Table.t
     }
 
   let stanzas_in db ~dir = Path.Build.Map.find db.stanzas_per_dir dir
 
   let get db ~dir =
-    let open Memo.Build.O in
+    let open Memo.O in
     let get ~dir = Memo.exec db.fn dir in
     let enclosing_group ~dir =
       match Path.Build.parent dir with
-      | None -> Memo.Build.return No_group
+      | None -> Memo.return No_group
       | Some parent_dir -> get ~dir:parent_dir >>| current_group parent_dir
     in
     (match Path.Build.drop_build_context dir with
-    | None -> Memo.Build.return None
+    | None -> Memo.return None
     | Some dir -> Source_tree.find_dir dir)
     >>= function
     | None -> (
@@ -95,7 +95,7 @@ module DB = struct
       in
       match stanzas_in db ~dir with
       | None -> (
-        if build_dir_is_project_root then Memo.Build.return (Source_only st_dir)
+        if build_dir_is_project_root then Memo.return (Source_only st_dir)
         else
           let+ enclosing_group = enclosing_group ~dir in
           match enclosing_group with
@@ -106,11 +106,10 @@ module DB = struct
       | Some d -> (
         match get_include_subdirs d.data with
         | Some (loc, Include mode) ->
-          Memo.Build.return (T.Group_root (st_dir, (loc, mode), d))
-        | Some (_, No) -> Memo.Build.return (Standalone (st_dir, d))
+          Memo.return (T.Group_root (st_dir, (loc, mode), d))
+        | Some (_, No) -> Memo.return (Standalone (st_dir, d))
         | None -> (
-          if build_dir_is_project_root then
-            Memo.Build.return (Standalone (st_dir, d))
+          if build_dir_is_project_root then Memo.return (Standalone (st_dir, d))
           else
             let+ enclosing_group = enclosing_group ~dir in
             match enclosing_group with
@@ -135,7 +134,7 @@ module DB = struct
       end
 
       and Fn : sig
-        val get : Path.Build.t -> T.t Memo.Build.t
+        val get : Path.Build.t -> T.t Memo.t
       end = struct
         let get dir = get Res.t ~dir
       end

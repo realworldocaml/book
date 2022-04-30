@@ -7,12 +7,13 @@ depends: [
   "asn1-combinators" {= "0.2.6"}
   "astring" {= "0.8.5+dune"}
   "async" {= "v0.14.0"}
+  "async_graphics" {= "0.7.0"}
   "async_kernel" {= "v0.14.0"}
   "async_rpc_kernel" {= "v0.14.0"}
   "async_unix" {= "v0.14.0"}
-  "atd" {= "2.4.1"}
-  "atdgen" {= "2.4.1"}
-  "atdgen-runtime" {= "2.4.1"}
+  "atd" {= "2.5.0"}
+  "atdgen" {= "2.5.0"}
+  "atdgen-runtime" {= "2.5.0"}
   "base" {= "v0.14.3"}
   "base-bigarray" {= "base"}
   "base-bytes" {= "base"}
@@ -34,6 +35,7 @@ depends: [
   "conduit-async" {= "5.1.0"}
   "conf-gmp" {= "4"}
   "conf-gmp-powm-sec" {= "3"}
+  "conf-libX11" {= "1"}
   "conf-libpcre" {= "1"}
   "conf-ncurses" {= "1"}
   "conf-pkg-config" {= "2"}
@@ -49,17 +51,18 @@ depends: [
   "ctypes" {= "0.20.1+dune"}
   "ctypes-foreign" {= "0.20.1+dune"}
   "domain-name" {= "0.4.0"}
-  "dune" {= "3.0.3"}
-  "dune-build-info" {= "3.0.3"}
-  "dune-configurator" {= "3.0.3"}
+  "dune" {= "3.1.1"}
+  "dune-build-info" {= "3.1.1"}
+  "dune-configurator" {= "3.1.1"}
   "duration" {= "0.2.0"}
-  "easy-format" {= "1.3.2"}
+  "easy-format" {= "1.3.3"}
   "eqaf" {= "0.8"}
   "fieldslib" {= "v0.14.0"}
   "findlib" {= "1.8.1+dune"}
   "fmt" {= "0.9.0+dune"}
   "fpath" {= "0.7.3+dune"}
   "gmap" {= "0.3.0"}
+  "graphics" {= "5.1.2"}
   "hkdf" {= "1.0.4"}
   "integers" {= "0.7.0"}
   "ipaddr" {= "5.3.0"}
@@ -85,7 +88,7 @@ depends: [
   "mirage-no-xen" {= "1"}
   "mmap" {= "1.2.0"}
   "mtime" {= "1.4.0+dune"}
-  "num" {= "1.3+dune"}
+  "num" {= "1.4+dune"}
   "ocaml" {= "4.13.1"}
   "ocaml-base-compiler" {= "4.13.1"}
   "ocaml-compiler-libs" {= "v0.12.4"}
@@ -136,14 +139,14 @@ depends: [
   "ppxlib" {= "0.25.0"}
   "protocol_version_header" {= "v0.14.0"}
   "ptime" {= "1.0.0+dune2"}
-  "re" {= "1.10.3"}
+  "re" {= "1.10.4"}
   "result" {= "1.5"}
   "rresult" {= "0.7.0+dune"}
   "seq" {= "base+dune"}
   "sexp_pretty" {= "v0.14.0"}
   "sexplib" {= "v0.14.0"}
   "sexplib0" {= "v0.14.0"}
-  "spawn" {= "v0.15.0"}
+  "spawn" {= "v0.15.1"}
   "splittable_random" {= "v0.14.0"}
   "stdio" {= "v0.14.0"}
   "stdlib-shims" {= "0.3.0"}
@@ -190,6 +193,14 @@ depexts: [
   ["libgmp-dev"] {os-family = "ubuntu"}
   ["libpcre-devel"] {os-distribution = "mageia"}
   ["libpcre3-dev"] {os-family = "debian"}
+  ["libX11-dev"] {os-distribution = "cygwin"}
+  ["libX11-devel"]
+    {os-distribution = "centos" | os-distribution = "oraclelinux" |
+     os-distribution = "fedora" |
+     os-distribution = "opensuse"}
+  ["libx11"] {os-distribution = "arch"}
+  ["libx11-dev"] {os-distribution = "alpine"}
+  ["libx11-dev"] {os-family = "debian"}
   ["linux-headers"] {os-distribution = "alpine"}
   ["ncurses"] {os-distribution = "arch"}
   ["ncurses"] {os-distribution = "nixos"}
@@ -231,6 +242,8 @@ depexts: [
   ["tzdata"] {os-distribution = "alpine"}
   ["tzdata"] {os-family = "debian"}
   ["tzdata"] {os-family = "fedora"}
+  ["xorg-libX11"] {os = "macos" & os-distribution = "macports"}
+  ["xquartz"] {os = "macos" & os-distribution = "homebrew"}
 ]
 pin-depends: [
   [
@@ -254,6 +267,10 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/async-v0.14.0.tar.gz"
   ]
   [
+    "async_graphics.0.7.0"
+    "https://github.com/lpw25/async_graphics/archive/0.7.0.tar.gz"
+  ]
+  [
     "async_kernel.v0.14.0"
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/async_kernel-v0.14.0.tar.gz"
   ]
@@ -266,16 +283,16 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/async_unix-v0.14.0.tar.gz"
   ]
   [
-    "atd.2.4.1"
-    "https://github.com/ahrefs/atd/releases/download/2.4.1/atdgen-codec-runtime-2.4.1.tbz"
+    "atd.2.5.0"
+    "https://github.com/ahrefs/atd/releases/download/2.5.0/atdts-2.5.0.tbz"
   ]
   [
-    "atdgen.2.4.1"
-    "https://github.com/ahrefs/atd/releases/download/2.4.1/atdgen-codec-runtime-2.4.1.tbz"
+    "atdgen.2.5.0"
+    "https://github.com/ahrefs/atd/releases/download/2.5.0/atdts-2.5.0.tbz"
   ]
   [
-    "atdgen-runtime.2.4.1"
-    "https://github.com/ahrefs/atd/releases/download/2.4.1/atdgen-codec-runtime-2.4.1.tbz"
+    "atdgen-runtime.2.5.0"
+    "https://github.com/ahrefs/atd/releases/download/2.5.0/atdts-2.5.0.tbz"
   ]
   [
     "base.v0.14.3" "https://github.com/janestreet/base/archive/v0.14.3.tar.gz"
@@ -369,31 +386,31 @@ pin-depends: [
   ]
   [
     "ctypes.0.20.1+dune"
-    "git+https://github.com/avsm/ocaml-ctypes.git#a9345c589051788d2e6efab716ca0510641543e1"
+    "git+https://github.com/avsm/ocaml-ctypes.git#ab4ff6a9b75b8842e315c32b2f62b355ec7b9c50"
   ]
   [
     "ctypes-foreign.0.20.1+dune"
-    "git+https://github.com/avsm/ocaml-ctypes.git#a9345c589051788d2e6efab716ca0510641543e1"
+    "git+https://github.com/avsm/ocaml-ctypes.git#ab4ff6a9b75b8842e315c32b2f62b355ec7b9c50"
   ]
   [
     "domain-name.0.4.0"
     "https://github.com/hannesm/domain-name/releases/download/v0.4.0/domain-name-0.4.0.tbz"
   ]
   [
-    "dune-build-info.3.0.3"
-    "https://github.com/ocaml/dune/releases/download/3.0.3/fiber-3.0.3.tbz"
+    "dune-build-info.3.1.1"
+    "https://github.com/ocaml/dune/releases/download/3.1.1/fiber-3.1.1.tbz"
   ]
   [
-    "dune-configurator.3.0.3"
-    "https://github.com/ocaml/dune/releases/download/3.0.3/fiber-3.0.3.tbz"
+    "dune-configurator.3.1.1"
+    "https://github.com/ocaml/dune/releases/download/3.1.1/fiber-3.1.1.tbz"
   ]
   [
     "duration.0.2.0"
     "https://github.com/hannesm/duration/releases/download/0.2.0/duration-0.2.0.tbz"
   ]
   [
-    "easy-format.1.3.2"
-    "https://github.com/mjambon/easy-format/releases/download/1.3.2/easy-format-1.3.2.tbz"
+    "easy-format.1.3.3"
+    "https://github.com/mjambon/easy-format/releases/download/1.3.3/easy-format-1.3.3.tbz"
   ]
   [
     "eqaf.0.8"
@@ -418,6 +435,10 @@ pin-depends: [
   [
     "gmap.0.3.0"
     "https://github.com/hannesm/gmap/releases/download/0.3.0/gmap-0.3.0.tbz"
+  ]
+  [
+    "graphics.5.1.2"
+    "https://github.com/ocaml/graphics/releases/download/5.1.2/graphics-5.1.2.tbz"
   ]
   [
     "hkdf.1.0.4"
@@ -510,10 +531,7 @@ pin-depends: [
     "mtime.1.4.0+dune"
     "https://github.com/dune-universe/mtime/releases/download/v1.4.0%2Bdune/mtime-1.4.0.dune.tbz"
   ]
-  [
-    "num.1.3+dune"
-    "https://github.com/dune-universe/num/archive/v1.3+dune-2.tar.gz"
-  ]
+  ["num.1.4+dune" "https://github.com/ocaml/num/archive/v1.4.tar.gz"]
   [
     "ocaml-compiler-libs.v0.12.4"
     "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.4/ocaml-compiler-libs-v0.12.4.tbz"
@@ -699,8 +717,8 @@ pin-depends: [
     "https://github.com/dune-universe/ptime/releases/download/v1.0.0%2Bdune2/ptime-1.0.0.dune2.tbz"
   ]
   [
-    "re.1.10.3"
-    "https://github.com/ocaml/ocaml-re/releases/download/1.10.3/re-1.10.3.tbz"
+    "re.1.10.4"
+    "https://github.com/ocaml/ocaml-re/releases/download/1.10.4/re-1.10.4.tbz"
   ]
   [
     "result.1.5"
@@ -724,8 +742,8 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/sexplib0-v0.14.0.tar.gz"
   ]
   [
-    "spawn.v0.15.0"
-    "https://github.com/janestreet/spawn/archive/v0.15.0.tar.gz"
+    "spawn.v0.15.1"
+    "https://github.com/janestreet/spawn/archive/v0.15.1.tar.gz"
   ]
   [
     "splittable_random.v0.14.0"
@@ -835,15 +853,15 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ahrefs/atd/releases/download/2.4.1/atdgen-codec-runtime-2.4.1.tbz"
+    "https://github.com/ahrefs/atd/releases/download/2.5.0/atdts-2.5.0.tbz"
     "atd"
     [
-      "sha256=6a68236c0bc41027e61cc21e611ba141ff5b1e08527fab7bf7053eb86d460899"
-      "sha512=7a9587836c6a8b049e6e9af99f311e56c55674769da2b0d04847b78dda4ec01ea05c017ae9fb4e5335306cb9eafb0fb8845aeb287b59d09b33b6247e13da4b6b"
+      "sha256=ab66e4e7b39ee6fe5a99b920c4c694cf18c9eca4391ae1d6ca88fd481dc254ae"
+      "sha512=11b1bf952f3ae4e5f87e3ea80351220cad82430cc7a4f7782dd212c20e0190c74a1317bb6ab194a6fce251713d61c0c2aaa548b2d9368ccee0c99c135d826076"
     ]
   ]
   [
-    "git+https://github.com/avsm/ocaml-ctypes.git#a9345c589051788d2e6efab716ca0510641543e1"
+    "git+https://github.com/avsm/ocaml-ctypes.git#ab4ff6a9b75b8842e315c32b2f62b355ec7b9c50"
     "ocaml-ctypes"
   ]
   [
@@ -928,13 +946,6 @@ x-opam-monorepo-duniverse-dirs: [
     [
       "sha256=52e588f55c567478ccc0572c5b24139aaa4d7f77fa1100b535d23fa5e17f7f8c"
       "sha512=882345618b87913d005811584b74d7df8d100a46734b770be41d6eaa9c656c1c6c15527451132d83bc553fee36e6e6e59b57c88dc6b9b0e32064b6181ff3b641"
-    ]
-  ]
-  [
-    "https://github.com/dune-universe/num/archive/v1.3+dune-2.tar.gz"
-    "num"
-    [
-      "sha256=32156376be05260eb72f651ae33df41fe0af03ad322bee29a10495efadfb2d1d"
     ]
   ]
   [
@@ -1139,12 +1150,17 @@ x-opam-monorepo-duniverse-dirs: [
     ["md5=1b82dec78849680b49ae9a8a365b831b"]
   ]
   [
-    "https://github.com/janestreet/spawn/archive/v0.15.0.tar.gz"
+    "https://github.com/janestreet/spawn/archive/v0.15.1.tar.gz"
     "spawn"
     [
-      "sha256=310fb2a50ac7f64c738182cbabd9d27c1aeae1a08107fe14da8d35a87cbb57c7"
-      "sha512=3a775b57a73efee6adbc30b32fa779f27d11c7008a46f90fdb9da6288533e2d83fc49dbcd770c087f2e4560c5586ff72a9a2985d8929955773cc10d83f126013"
+      "sha256=9afdee314fab6c3fcd689ab6eb5608d6b78078e6dede3953a47debde06c19d50"
+      "sha512=efdb31d5ec5ea36d0bc80224d4ee04e46ce3428d1662870e6cebece92bc313d6eebee378802c0c059dd6e0cafea515308c31b7dfaf04a098eb4566583c1e9ed4"
     ]
+  ]
+  [
+    "https://github.com/lpw25/async_graphics/archive/0.7.0.tar.gz"
+    "async_graphics"
+    ["md5=a4ee8d84a699c3b1fbdc1d1b892499bd"]
   ]
   [
     "https://github.com/mirage/alcotest/releases/download/1.5.0/alcotest-js-1.5.0.tbz"
@@ -1275,11 +1291,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/mjambon/easy-format/releases/download/1.3.2/easy-format-1.3.2.tbz"
+    "https://github.com/mjambon/easy-format/releases/download/1.3.3/easy-format-1.3.3.tbz"
     "easy-format"
     [
-      "sha256=3440c2b882d537ae5e9011eb06abb53f5667e651ea4bb3b460ea8230fa8c1926"
-      "sha512=e39377a2ff020ceb9ac29e8515a89d9bdbc91dfcfa871c4e3baafa56753fac2896768e5d9822a050dc1e2ade43c8967afb69391a386c0a8ecd4e1f774e236135"
+      "sha256=eafccae911c26ca23e4ddacee3eaa54654d20f973b8680f84b708cef43adc416"
+      "sha512=611b3124f6a0ec6406b7bda8018a94c9c4a9da9d22495a5c34a6312bf7f0f0607a9529b276f7039ce3f3b15a955dac413d6d1229a55d5ac291302a3ddd5807e5"
     ]
   ]
   [
@@ -1354,19 +1370,35 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocaml/dune/releases/download/3.0.3/fiber-3.0.3.tbz"
+    "https://github.com/ocaml/dune/releases/download/3.1.1/fiber-3.1.1.tbz"
     "dune_"
     [
-      "sha256=d504499a1658f0d99caefbffd7386f2e31d46ceca73167157fe4686c41e5732f"
-      "sha512=aa1bdf87a00994d18ddc9d9d6ef914813c10dbc8c68c34c00467669092dde9adc95718937f8a60a2e1307b25f281196b20e913b2f82e2ee6aadd24d54dca88aa"
+      "sha256=02484454ab1b998840c7873509ec6b2301eb92662c132ef8f5f4f569b35a6b60"
+      "sha512=c92199924af75f801d264d3b3e98497757c9932d8e03fa100fca2df16315b87d595a3e0cbbc3ce9b8d86adb2a8b6d3a7cef0f88c7654f15f6b6a4d10d523fad1"
     ]
   ]
   [
-    "https://github.com/ocaml/ocaml-re/releases/download/1.10.3/re-1.10.3.tbz"
+    "https://github.com/ocaml/graphics/releases/download/5.1.2/graphics-5.1.2.tbz"
+    "graphics"
+    [
+      "sha256=400fd81d23f1cb4146b96979342c247971dd54f5879ffd2f80ec7cd0212e32d4"
+      "sha512=1387c1ecf5dfd62c3927f1f8ce0bcc8b162ef22f15bfd41eba47c955091f7ce5f19395beab550d31cff38d22c4ad097350975381e60936a0004271e96f65b09b"
+    ]
+  ]
+  [
+    "https://github.com/ocaml/num/archive/v1.4.tar.gz"
+    "num"
+    [
+      "md5=cda2b727e116a0b6a9c03902cc4b2415"
+      "sha512=0cc9be8ad95704bb683b4bf6698bada1ee9a40dc05924b72adc7b969685c33eeb68ccf174cc09f6a228c48c18fe94af06f28bebc086a24973a066da620db8e6f"
+    ]
+  ]
+  [
+    "https://github.com/ocaml/ocaml-re/releases/download/1.10.4/re-1.10.4.tbz"
     "ocaml-re"
     [
-      "sha256=846546967f3fe31765935dd40a6460a9424337ecce7b12727fcba49480790ebb"
-      "sha512=d02103b7b8b8d8bc797341dcc933554745427f3c1b51b54b4ac9ff81badfd68c94726c57548b08e00ca99f3e09741b54b6500e97c19fc0e8fcefd6dfbe71da7f"
+      "sha256=83eb3e4300aa9b1dc7820749010f4362ea83524742130524d78c20ce99ca747c"
+      "sha512=92b05cf92c389fa8c753f2acca837b15dd05a4a2e8e2bec7a269d2e14c35b1a786d394258376648f80b4b99250ba1900cfe68230b8385aeac153149d9ce56099"
     ]
   ]
   [

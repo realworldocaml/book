@@ -1,5 +1,7 @@
-(tests
-  (names run_tests)
-  (libraries num)
-  (flags -w +a-33)
-)
+(alias
+  (name runtest)
+  (action (progn (run %{dep:test.bc}) (run %{dep:test.exe}))))
+
+(executable
+  (name test)
+  (libraries num))

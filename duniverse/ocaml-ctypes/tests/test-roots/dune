@@ -1,4 +1,4 @@
 (test
  (name test_roots)
  (package ctypes-foreign)
- (libraries ctypes ctypes-foreign oUnit))
+ (libraries ctypes ctypes-foreign ounit2))

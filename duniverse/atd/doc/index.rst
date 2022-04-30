@@ -10,3 +10,4 @@ Welcome to ATD's documentation!
    atdj
    atds
    atdpy
+   atdts

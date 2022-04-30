@@ -1,10 +1,3 @@
-(executable
+(test
  (name test_easy_format)
  (libraries easy-format))
-
-(alias
- (name runtest)
- (deps
-  (:< test_easy_format.exe))
- (action
-  (run %{<})))

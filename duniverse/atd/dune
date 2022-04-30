@@ -8,4 +8,5 @@
 (rule (copy atd.opam.template atdgen-runtime.opam.template))
 (rule (copy atd.opam.template atdgen.opam.template))
 (rule (copy atd.opam.template atdj.opam.template))
+(rule (copy atd.opam.template atdpy.opam.template))
 (rule (copy atd.opam.template atds.opam.template))

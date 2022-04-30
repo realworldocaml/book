@@ -3,7 +3,7 @@
 ; When changing the version, don't forget to regenerate *.opam files
 ; by running [dune build].
 (name dune)
-(version 3.0.3)
+(version 3.1.1)
 
 (generate_opam_files true)
 
@@ -147,7 +147,7 @@ understood by dune language."))
  (synopsis "Communicate with dune using rpc and Lwt")
  (depends
   (dune-rpc (= :version))
-  (result (>= 1.5.0))
+  (result (>= 1.5))
   (csexp (>= 1.5.0))
   (lwt (>= 5.3.0)))
  (description "Specialization of dune-rpc to Lwt"))
@@ -184,6 +184,15 @@ understood by dune language."))
   (ordering (= :version))
   (pp (>= 1.1.0))
   (csexp (>= 1.5.0)))
+ (description "This library offers no backwards compatibility guarantees. Use at your own risk."))
+
+(package
+ (name ocamlc-loc)
+ (synopsis "Parse ocaml compiler output into structured form")
+ (depends
+  (ocaml (>= 4.08.0))
+  (dune-private-libs (= :version))
+  (dyn (= :version)))
  (description "This library offers no backwards compatibility guarantees. Use at your own risk."))
 
 (package

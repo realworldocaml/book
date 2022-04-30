@@ -1,12 +1,12 @@
 open! Stdune
 open Import
-open Memo.Build.O
+open Memo.O
 module Action_builder = Action_builder0
 
 module Fs : sig
   (** A memoized version of [mkdir] that avoids calling [mkdir] multiple times
       in the same directory. *)
-  val mkdir_p : Path.Build.t -> unit Memo.Build.t
+  val mkdir_p : Path.Build.t -> unit Memo.t
 end = struct
   let mkdir_p_memo =
     (* CR-someday amokhov: It's difficult to think about the correctness of this
@@ -24,7 +24,7 @@ end = struct
       ~input:(module Path.Build)
       (fun p ->
         Path.mkdir_p (Path.build p);
-        Memo.Build.return ())
+        Memo.return ())
 
   let mkdir_p = Memo.exec mkdir_p_memo
 end
@@ -223,7 +223,7 @@ let rec with_locks ~f = function
   | m :: mutexes ->
     Fiber.Mutex.with_lock
       (Table.find_or_add State.locks m ~f:(fun _ -> Fiber.Mutex.create ()))
-      (fun () -> with_locks ~f mutexes)
+      ~f:(fun () -> with_locks ~f mutexes)
 
 (* All file targets of non-sandboxed actions that are currently being executed.
    On exit, we need to delete them as they might contain garbage. There is no
@@ -246,32 +246,29 @@ type rule_execution_result =
 module type Rec = sig
   (** Build all the transitive dependencies of the alias and return the alias
       expansion. *)
-  val build_alias : Alias.t -> Dep.Fact.Files.t Memo.Build.t
+  val build_alias : Alias.t -> Dep.Fact.Files.t Memo.t
 
-  val build_file : Path.t -> Digest.t Memo.Build.t
+  val build_file : Path.t -> Digest.t Memo.t
 
-  val build_dir :
-    Path.t -> (Digest.t * Digest.t Path.Build.Map.t) option Memo.Build.t
+  val build_dir : Path.t -> (Digest.t * Digest.t Path.Build.Map.t) Memo.t
 
-  val build_deps : Dep.Set.t -> Dep.Facts.t Memo.Build.t
+  val build_deps : Dep.Set.t -> Dep.Facts.t Memo.t
 
   val eval_deps :
-    'a Action_builder.eval_mode -> Dep.Set.t -> 'a Dep.Map.t Memo.Build.t
+    'a Action_builder.eval_mode -> Dep.Set.t -> 'a Dep.Map.t Memo.t
 
-  val execute_rule : Rule.t -> rule_execution_result Memo.Build.t
+  val execute_rule : Rule.t -> rule_execution_result Memo.t
 
   val execute_action :
-    observing_facts:Dep.Facts.t -> Rule.Anonymous_action.t -> unit Memo.Build.t
+    observing_facts:Dep.Facts.t -> Rule.Anonymous_action.t -> unit Memo.t
 
   val execute_action_stdout :
-       observing_facts:Dep.Facts.t
-    -> Rule.Anonymous_action.t
-    -> string Memo.Build.t
+    observing_facts:Dep.Facts.t -> Rule.Anonymous_action.t -> string Memo.t
 
   module Pred : sig
-    val eval : File_selector.t -> Path.Set.t Memo.Build.t
+    val eval : File_selector.t -> Path.Set.t Memo.t
 
-    val build : File_selector.t -> Dep.Fact.Files.t Memo.Build.t
+    val build : File_selector.t -> Dep.Fact.Files.t Memo.t
   end
 end
 
@@ -283,16 +280,20 @@ module rec Used_recursively : Rec = Exported
 and Exported : sig
   include Rec
 
-  val execute_rule : Rule.t -> rule_execution_result Memo.Build.t
+  val execute_rule : Rule.t -> rule_execution_result Memo.t
+
+  type target_kind =
+    | File_target
+    | Dir_target of { generated_file_digests : Digest.t Path.Build.Map.t }
 
   (* The below two definitions are useless, but if we remove them we get an
      "Undefined_recursive_module" exception. *)
 
-  val build_file_memo :
-    (Path.t, Import.Digest.t * Import.Digest.t Path.Build.Map.t option) Memo.t
+  val build_file_memo : (Path.t, Digest.t * target_kind) Memo.Table.t
     [@@warning "-32"]
 
-  val build_alias_memo : (Alias.t, Dep.Fact.Files.t) Memo.t [@@warning "-32"]
+  val build_alias_memo : (Alias.t, Dep.Fact.Files.t) Memo.Table.t
+    [@@warning "-32"]
 
   val dep_on_alias_definition :
     Rules.Dir_rules.Alias_spec.item -> unit Action_builder.t
@@ -301,7 +302,7 @@ end = struct
 
   (* [build_dep] turns a [Dep.t] which is a description of a dependency into a
      fact about the world. To do that, it needs to do some building. *)
-  let build_dep : Dep.t -> Dep.Fact.t Memo.Build.t = function
+  let build_dep : Dep.t -> Dep.Fact.t Memo.t = function
     | Alias a ->
       let+ digests = build_alias a in
       (* Fact: alias [a] expands to the set of file-digest pairs [digests] *)
@@ -318,17 +319,16 @@ end = struct
     | Universe | Env _ ->
       (* Facts about these dependencies are constructed in
          [Dep.Facts.digest]. *)
-      Memo.Build.return Dep.Fact.nothing
+      Memo.return Dep.Fact.nothing
 
   let build_deps deps =
     Dep.Map.parallel_map deps ~f:(fun dep () -> build_dep dep)
 
   let eval_deps :
-      type a.
-      a Action_builder.eval_mode -> Dep.Set.t -> a Dep.Map.t Memo.Build.t =
+      type a. a Action_builder.eval_mode -> Dep.Set.t -> a Dep.Map.t Memo.t =
    fun mode deps ->
     match mode with
-    | Lazy -> Memo.Build.return deps
+    | Lazy -> Memo.return deps
     | Eager -> build_deps deps
 
   let select_sandbox_mode (config : Sandbox_config.t) ~loc
@@ -480,7 +480,7 @@ end = struct
       let chdirs = Action.chdirs action in
       Fiber.sequential_iter_seq (Path.Set.to_seq chdirs) ~f:(fun path ->
           match Path.as_in_build_dir path with
-          | Some path -> Memo.Build.run (Fs.mkdir_p path)
+          | Some path -> Memo.run (Fs.mkdir_p path)
           | None ->
             Code_error.raise ~loc
               (sprintf
@@ -501,7 +501,7 @@ end = struct
     in
     let+ exec_result =
       with_locks locks ~f:(fun () ->
-          let build_deps deps = Memo.Build.run (build_deps deps) in
+          let build_deps deps = Memo.run (build_deps deps) in
           let+ action_exec_result =
             Action_exec.exec ~root ~context ~env ~targets:(Some targets)
               ~rule_loc:loc ~build_deps ~execution_parameters action
@@ -546,10 +546,10 @@ end = struct
       rule
     in
     (* We run [State.start_rule_exn ()] entirely for its side effect, so one
-       might be tempted to use [Memo.Build.of_reproducible_fiber] here but that
-       is wrong, because that would force us to rerun [execute_rule_impl] on
-       every incremental build. *)
-    let* () = Memo.Build.of_reproducible_fiber (State.start_rule_exn ()) in
+       might be tempted to use [Memo.of_non_reproducible_fiber] here but that is
+       wrong, because that would force us to rerun [execute_rule_impl] on every
+       incremental build. *)
+    let* () = Memo.of_reproducible_fiber (State.start_rule_exn ()) in
     let head_target = Targets.Validated.head targets in
     let* execution_parameters =
       match Dpath.Target_dir.of_target dir with
@@ -566,7 +566,7 @@ end = struct
        here by executing it sequentially. *)
     let* action, deps = Action_builder.run action Eager in
     let wrap_fiber f =
-      Memo.Build.of_reproducible_fiber
+      Memo.of_reproducible_fiber
         (if Loc.is_none loc then f ()
         else
           Fiber.with_error_handler f ~on_error:(fun exn ->
@@ -580,7 +580,7 @@ end = struct
     wrap_fiber (fun () ->
         let open Fiber.O in
         report_evaluated_rule_exn config;
-        let* () = Memo.Build.run (Fs.mkdir_p dir) in
+        let* () = Memo.run (Fs.mkdir_p dir) in
         let is_action_dynamic = Action.is_dynamic action.action in
         let sandbox_mode =
           match Action.is_useful_to_sandbox action.action with
@@ -870,14 +870,23 @@ end = struct
     in
     Io.read_file (Path.build target)
 
-  (* A rule can have multiple targets but calls to [execute_rule] are memoized,
-     so the rule will be executed only once.
+  type target_kind =
+    | File_target
+    | Dir_target of { generated_file_digests : Digest.t Path.Build.Map.t }
 
-     [build_file_impl] returns both the set of dependencies of the file as well
-     as its digest. *)
+  let target_kind_equal a b =
+    match (a, b) with
+    | File_target, File_target -> true
+    | ( Dir_target { generated_file_digests = a }
+      , Dir_target { generated_file_digests = b } ) ->
+      Path.Build.Map.equal a b ~equal:Digest.equal
+    | File_target, Dir_target _ | Dir_target _, File_target -> false
+
+  (* A rule can have multiple targets but calls to [execute_rule] are memoized,
+     so the rule will be executed only once. *)
   let build_file_impl path =
     Load_rules.get_rule_or_source path >>= function
-    | Source digest -> Memo.Build.return (digest, None)
+    | Source digest -> Memo.return (digest, File_target)
     | Rule (path, rule) -> (
       let+ { deps = _; targets } =
         Memo.push_stack_frame
@@ -886,7 +895,7 @@ end = struct
             Pp.text (Path.to_string_maybe_quoted (Path.build path)))
       in
       match Path.Build.Map.find targets path with
-      | Some digest -> (digest, None)
+      | Some digest -> (digest, File_target)
       | None -> (
         (* CR-someday amokhov: [Cached_digest.build_file] doesn't do a good job
            for computing directory digests -- it relies on [mtime] instead of
@@ -894,7 +903,9 @@ end = struct
            the consequences, we currently can't support the early cutoff for
            directory targets. *)
         match Cached_digest.build_file ~allow_dirs:true path with
-        | Ok digest -> (digest, Some targets) (* Must be a directory target *)
+        | Ok digest ->
+          (digest, Dir_target { generated_file_digests = targets })
+          (* Must be a directory target *)
         | No_such_file
         | Broken_symlink
         | Cyclic_symlink
@@ -940,7 +951,7 @@ end = struct
       { f =
           (fun (type m) (mode : m Action_builder.eval_mode) ->
             match mode with
-            | Lazy -> Memo.Build.return ((), Dep.Map.empty)
+            | Lazy -> Memo.return ((), Dep.Map.empty)
             | Eager ->
               let* action, facts = Action_builder.run x Eager in
               let+ () = execute_action action ~observing_facts:facts in
@@ -955,7 +966,7 @@ end = struct
   let build_alias_impl alias =
     let+ l =
       Load_rules.get_alias_definition alias
-      >>= Memo.Build.parallel_map ~f:(fun (loc, definition) ->
+      >>= Memo.parallel_map ~f:(fun (loc, definition) ->
               Memo.push_stack_frame
                 (fun () ->
                   Action_builder.run (dep_on_alias_definition definition) Eager
@@ -968,23 +979,19 @@ end = struct
   module Pred = struct
     let build_impl g =
       let dir = File_selector.dir g in
-      let* build_dir =
-        Load_rules.is_target dir >>= function
-        | No -> Memo.Build.return None
-        | Yes _ | Under_directory_target_so_cannot_say -> build_dir dir
-      in
-      match build_dir with
-      | None ->
+      Load_rules.load_dir ~dir >>= function
+      | Non_build _ | Build _ ->
         let* paths = Pred.eval g in
         let+ files =
-          Memo.Build.parallel_map (Path.Set.to_list paths) ~f:(fun p ->
+          Memo.parallel_map (Path.Set.to_list paths) ~f:(fun p ->
               let+ d = build_file p in
               (p, d))
         in
         Dep.Fact.Files.make
           ~files:(Path.Map.of_list_exn files)
           ~dirs:Path.Map.empty
-      | Some (digest, path_map) ->
+      | Build_under_directory_target _ ->
+        let* digest, path_map = build_dir dir in
         let files =
           Path.Build.Map.foldi path_map ~init:Path.Map.empty
             ~f:(fun path digest acc ->
@@ -995,18 +1002,13 @@ end = struct
               | false -> acc)
         in
         let dirs = Path.Map.singleton dir digest in
-        Memo.Build.return (Dep.Fact.Files.make ~files ~dirs)
+        Memo.return (Dep.Fact.Files.make ~files ~dirs)
 
-    (* CR-someday amokhov: This function is broken for [dir]s located inside a
-       directory target. To check this and give a good error message we need to
-       call [load_dir] on the parent directory but that creates a dependency
-       cycle because of [copy_rules]. So, for now, this function just silently
-       produces a wrong result (the glob evalutes to the empty set of files). Of
-       course, we'd like to eventually fix this. *)
     let eval_impl g =
       let dir = File_selector.dir g in
-      Load_rules.load_dir ~dir >>| function
-      | Non_build targets -> Path.Set.filter targets ~f:(File_selector.test g)
+      Load_rules.load_dir ~dir >>= function
+      | Non_build targets ->
+        Memo.return (Path.Set.filter targets ~f:(File_selector.test g))
       | Build { rules_here; _ } ->
         let only_generated_files = File_selector.only_generated_files g in
         (* We look only at [by_file_targets] because [File_selector] does not
@@ -1018,7 +1020,13 @@ end = struct
             | _ ->
               let s = Path.build s in
               if File_selector.test g s then s :: acc else acc)
-        |> Path.Set.of_list
+        |> Path.Set.of_list |> Memo.return
+      | Build_under_directory_target _ ->
+        (* To evaluate a glob in a generated directory, we have no choice but to
+           build the whole directory, so we might as well build the
+           predicate. *)
+        let+ fact = Pred.build g in
+        Dep.Fact.Files.paths fact |> Path.Set.of_keys
 
     let eval_memo =
       Memo.create "eval-pred"
@@ -1040,19 +1048,18 @@ end = struct
   end
 
   let build_file_memo =
-    let cutoff =
-      Tuple.T2.equal Digest.equal
-        (Option.equal (Path.Build.Map.equal ~equal:Digest.equal))
-    in
+    let cutoff = Tuple.T2.equal Digest.equal target_kind_equal in
     Memo.create "build-file" ~input:(module Path) ~cutoff build_file_impl
 
   let build_file path = Memo.exec build_file_memo path >>| fst
 
   let build_dir path =
-    let+ digest, path_map = Memo.exec build_file_memo path in
-    match path_map with
-    | Some path_map -> Some (digest, path_map)
-    | None -> None
+    let+ digest, kind = Memo.exec build_file_memo path in
+    match kind with
+    | Dir_target { generated_file_digests } -> (digest, generated_file_digests)
+    | File_target ->
+      Code_error.raise "build_dir called on a file target"
+        [ ("path", Path.to_dyn path) ]
 
   let build_alias_memo =
     Memo.create "build-alias"
@@ -1098,53 +1105,61 @@ let build_pred = Pred.build
    the results of both [Action_builder.static_deps] and [Action_builder.exec]
    are cached. *)
 let file_exists fn =
-  Load_rules.load_dir ~dir:(Path.parent_exn fn) >>| function
-  | Non_build targets -> Path.Set.mem targets fn
-  | Build { rules_here; _ } -> (
-    match Path.as_in_build_dir fn with
-    | None -> false
-    | Some fn -> (
-      match Path.Build.Map.mem rules_here.by_file_targets fn with
-      | true -> true
-      | false -> (
-        match Path.Build.parent fn with
-        | None -> false
-        | Some dir -> Path.Build.Map.mem rules_here.by_directory_targets dir)))
+  Load_rules.load_dir ~dir:(Path.parent_exn fn) >>= function
+  | Non_build targets -> Memo.return (Path.Set.mem targets fn)
+  | Build { rules_here; _ } ->
+    Memo.return
+      (Path.Build.Map.mem rules_here.by_file_targets
+         (Path.as_in_build_dir_exn fn))
+  | Build_under_directory_target { directory_target_ancestor } ->
+    let+ _digest, path_map = build_dir (Path.build directory_target_ancestor) in
+    Path.Build.Map.mem path_map (Path.as_in_build_dir_exn fn)
 
 let files_of ~dir =
-  Load_rules.load_dir ~dir >>| function
-  | Non_build file_targets -> file_targets
+  Load_rules.load_dir ~dir >>= function
+  | Non_build file_targets -> Memo.return file_targets
   | Build { rules_here; _ } ->
-    Path.Build.Map.keys rules_here.by_file_targets
-    |> Path.Set.of_list_map ~f:Path.build
+    Memo.return
+      (Path.Build.Map.keys rules_here.by_file_targets
+      |> Path.Set.of_list_map ~f:Path.build)
+  | Build_under_directory_target { directory_target_ancestor } ->
+    let+ _digest, path_map = build_dir (Path.build directory_target_ancestor) in
+    let dir = Path.as_in_build_dir_exn dir in
+    Path.Build.Map.foldi path_map ~init:Path.Set.empty
+      ~f:(fun path _digest acc ->
+        let parent = Path.Build.parent_exn path in
+        match Path.Build.equal parent dir with
+        | true -> Path.Set.add acc (Path.build path)
+        | false -> acc)
 
 let package_deps ~packages_of (pkg : Package.t) files =
-  (* CR-someday amokhov: We should get rid of this mutable state. *)
-  let rules_seen = ref Rule.Set.empty in
-  let rec loop (fn : Path.Build.t) =
+  let rec loop rules_seen (fn : Path.Build.t) =
     let* pkgs = packages_of fn in
     if Package.Id.Set.is_empty pkgs || Package.Id.Set.mem pkgs pkg.id then
-      loop_deps fn
-    else Memo.Build.return pkgs
-  and loop_deps fn =
+      loop_deps rules_seen fn
+    else Memo.return (pkgs, rules_seen)
+  and loop_deps rules_seen fn =
     Load_rules.get_rule (Path.build fn) >>= function
-    | None -> Memo.Build.return Package.Id.Set.empty
+    | None -> Memo.return (Package.Id.Set.empty, rules_seen)
     | Some rule ->
-      if Rule.Set.mem !rules_seen rule then
-        Memo.Build.return Package.Id.Set.empty
-      else (
-        rules_seen := Rule.Set.add !rules_seen rule;
+      if Rule.Set.mem rules_seen rule then
+        Memo.return (Package.Id.Set.empty, rules_seen)
+      else
+        let rules_seen = Rule.Set.add rules_seen rule in
         let* res = execute_rule rule in
-        loop_files
+        loop_files rules_seen
           (Dep.Facts.paths res.deps |> Path.Map.keys
           |> (* if this file isn't in the build dir, it doesn't belong to any
                 package and it doesn't have dependencies that do *)
-          List.filter_map ~f:Path.as_in_build_dir))
-  and loop_files files =
-    let+ sets = Memo.Build.parallel_map files ~f:loop in
-    List.fold_left sets ~init:Package.Id.Set.empty ~f:Package.Id.Set.union
+          List.filter_map ~f:Path.as_in_build_dir)
+  and loop_files rules_seen files =
+    Memo.List.fold_left ~init:(Package.Id.Set.empty, rules_seen) files
+      ~f:(fun (sets, rules_seen) file ->
+        let+ set, rules_seen = loop rules_seen file in
+        (Package.Id.Set.union set sets, rules_seen))
   in
-  loop_files files
+  let+ packages, _rules_seen = loop_files Rule.Set.empty files in
+  packages
 
 let caused_by_cancellation (exn : Exn_with_backtrace.t) =
   match exn.exn with
@@ -1183,8 +1198,7 @@ let run f =
   let f () =
     let* res =
       Fiber.collect_errors (fun () ->
-          Memo.Build.run_with_error_handler f
-            ~handle_error_no_raise:report_early_exn)
+          Memo.run_with_error_handler f ~handle_error_no_raise:report_early_exn)
     in
     match res with
     | Ok res ->
@@ -1200,7 +1214,7 @@ let run f =
       let+ () = State.set final_status in
       Error `Already_reported
   in
-  Fiber.Mutex.with_lock State.build_mutex f
+  Fiber.Mutex.with_lock State.build_mutex ~f
 
 let run_exn f =
   let open Fiber.O in

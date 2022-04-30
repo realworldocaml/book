@@ -1,0 +1,12 @@
+(executable
+  (name Main)
+  (libraries
+     atdts
+     alcotest
+  )
+)
+
+(rule
+  (alias runtest)
+  (action (run ./Main.exe))
+)

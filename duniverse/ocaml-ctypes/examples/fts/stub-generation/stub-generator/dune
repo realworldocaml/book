@@ -20,5 +20,8 @@
  (modules fts_generated)
  (foreign_stubs
   (language c)
-  (names fts_stubs))
+  (names fts_stubs)
+  (flags
+   :standard
+   (:include ../config/c_flags.sexp)))
  (libraries ctypes.stubs))

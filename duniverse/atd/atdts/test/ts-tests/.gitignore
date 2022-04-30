@@ -1,0 +1,7 @@
+/node_modules
+/package-lock.json
+
+# Test output
+/a_str
+/b_str
+/b_str2

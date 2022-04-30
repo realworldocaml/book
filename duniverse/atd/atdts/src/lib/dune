@@ -1,0 +1,8 @@
+(library
+ (name atdts)
+ (libraries
+   re
+   atd
+   atdgen_emit
+ )
+)

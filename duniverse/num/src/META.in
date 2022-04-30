@@ -1,0 +1,19 @@
+# This META is the one provided by findlib when the "num" library was
+# part of the core OCaml distribution.  For backward compatibility,
+# it is installed into OCaml's standard library directory. If the
+# directory line below is removed, then it's installed in a
+# subdirectory, as normal for a findlib package.
+
+requires = "num.core"
+requires(toploop) = "num.core,num-top"
+version = "%%VERSION%%"
+description = "Arbitrary-precision rational arithmetic"
+package "core" (
+  directory = "^"
+  version = "%%VERSION%%"
+  browse_interfaces = ""
+  archive(byte) = "nums.cma"
+  archive(native) = "nums.cmxa"
+  plugin(byte) = "nums.cma"
+  plugin(native) = "nums.cmxs"
+)

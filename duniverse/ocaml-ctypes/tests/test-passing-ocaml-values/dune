@@ -2,7 +2,7 @@
  (name test_passing_ocaml_values)
  (package ctypes-foreign)
  (libraries
-  oUnit
+  ounit2
   ctypes
   ctypes.stubs
   ctypes-foreign

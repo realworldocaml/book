@@ -21,6 +21,12 @@ type follow_symlink_error =
 
 val follow_symlink : string -> (string, follow_symlink_error) result
 
+(** [follow_symlinks path] returns a file path that is equivalent to [path], but
+    free of symbolic links. The value [None] is returned if the maximum symbolic
+    link depth is reached (i.e., [follow_symlink] returns the value
+    [Error Max_depth_exceeded] on some intermediate path). *)
+val follow_symlinks : string -> string option
+
 val unlink : string -> unit
 
 val unlink_no_err : string -> unit
@@ -34,6 +40,6 @@ type clear_dir_result =
 val clear_dir : string -> clear_dir_result
 
 (** If the path does not exist, this function is a no-op. *)
-val rm_rf : ?allow_external:bool -> string -> unit
+val rm_rf : string -> unit
 
 val is_root : string -> bool

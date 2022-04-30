@@ -69,6 +69,27 @@ let follow_symlink path =
   | Ok (Some p) -> loop 20 p
   | Error e -> Error (Unix_error e)
 
+let rec follow_symlinks path =
+  let parent = Filename.dirname path in
+  let file = Filename.basename path in
+  (* If we reached the root, just return the path. *)
+  if parent = path then Some path
+  else if parent = Filename.current_dir_name then
+    (* Only keep the initial ["."] if it was in the path. *)
+    if path = Filename.concat Filename.current_dir_name file then Some path
+    else Some file
+  else
+    (* Recurse on parent, and re-add toplevel file. *)
+    match follow_symlinks parent with
+    | None -> None
+    | Some parent -> (
+      let path = Filename.concat parent file in
+      (* Normalize the result. *)
+      match follow_symlink path with
+      | Ok p -> Some p
+      | Error Max_depth_exceeded -> None
+      | Error _ -> Some path)
+
 let win32_unlink fn =
   try Unix.unlink fn
   with Unix.Unix_error (Unix.EACCES, _, _) as e -> (
@@ -116,9 +137,7 @@ and rm_rf_dir path =
          deleted the directory. *)
       ())
 
-let rm_rf ?(allow_external = false) fn =
-  if (not allow_external) && not (Filename.is_relative fn) then
-    Code_error.raise "Path.rm_rf called on external dir" [ ("fn", String fn) ];
+let rm_rf fn =
   match Unix.lstat fn with
   | exception Unix.Unix_error (ENOENT, _, _) -> ()
   | { Unix.st_kind = S_DIR; _ } -> rm_rf_dir fn

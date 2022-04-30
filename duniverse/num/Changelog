@@ -1,3 +1,14 @@
+Release 1.4 (2020-11-09)
+
+- Pull request #20: fix bug caused by unsafe string/bytes conversions,
+  and remove all uses of `Bytes.unsafe_of_string`
+
+Release 1.3 (2019-11-20)
+
+- Pull request #16: use Sys.word_size and Sys.int_size more consistently
+  (fixes js_of_ocaml)
+- Pull request #15: support DESTDIR in install target
+
 Release 1.2 (2019-06-21)
 
 - Issue #9: install all .cmx files.
