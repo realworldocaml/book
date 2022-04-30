@@ -1352,10 +1352,10 @@ subsystems: [js_of_ocaml library]{.idx}[LabIGL library]{.idx}[Lablgtk
 library]{.idx}[graphics libraries]{.idx}[libraries/for
 graphics]{.idx}[external libraries/for graphics]{.idx}
 
-[Lablgtk](http://lablgtk.forge.ocamlcore.org)
+[Lablgtk](https://github.com/garrigue/lablgtk)
 : A strongly typed interface to the GTK widget library.
 
-[LablGL](https://forge.ocamlcore.org/projects/lablgl/)
+[LablGL](https://github.com/garrigue/lablgl)
 : An interface between OCaml and OpenGL, a widely supported standard for 3D
   rendering.
 
