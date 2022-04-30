@@ -954,10 +954,9 @@ class circle r x y = object(self)
   method draw = fill_circle x y radius
 
   method private contains x' y' =
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist <= (Float.of_int radius)
+    let dx = x' - x in
+    let dy = y' - y in
+      dx * dx + dy * dy <= radius * radius
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
@@ -1026,10 +1025,9 @@ class circle r x y = object
   method draw = fill_circle x y radius
 
   method private contains x' y' =
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-    dist <= (Float.of_int radius)
+    let dx = x' - x in
+    let dy = y' - y in
+      dx * dx + dy * dy <= radius * radius
 end
 ```
 
@@ -1066,7 +1064,7 @@ has been created.
 
 For example, suppose we wanted to extend our previous shapes module with a
 `growing_circle` class for circles that expand when clicked. We could inherit
-from `circle` and used the inherited `on_click` to add a handler for click
+from `circle` and use the inherited `on_click` to add a handler for click
 events:
 
 ```ocaml file=examples/correct/shapes/shapes.ml,part=3

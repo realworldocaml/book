@@ -118,7 +118,7 @@ We don't need to provide the module again for functions like
 to the comparison function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
-`Base` are. Later in the chapter, we'll show how you can set up a module of your
+`Base` can. Later in the chapter, we'll show how you can set up a module of your
 own so it can be used in this way.
 
 ### Sets
@@ -479,7 +479,7 @@ As you can see, polymorphic compare now produces a result, but it's
 not the result we want.
 
 The abstraction-breaking nature of polymorphic compare can cause real
-and quite subtle bugs.  If, for example, if you build a map whose keys
+and quite subtle bugs.  If, for example, you build a map whose keys
 are sets (which have the same issues with polymorphic compare that
 maps do), then the map built with the polymorphic comparator will
 behave incorrectly, separating out keys that should be aggregated

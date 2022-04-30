@@ -38,10 +38,9 @@ class circle r x y = object(self)
   method draw = fill_circle x y radius
 
   method private contains x' y' =
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist <= (Float.of_int radius)
+    let dx = x' - x in
+    let dy = y' - y in
+      dx * dx + dy * dy <= radius * radius
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
