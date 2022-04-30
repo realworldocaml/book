@@ -898,7 +898,7 @@ for now you can safely ignore the details. You just need to run
 We will give each shape a `draw` method that describes how to draw the shape
 on the `Async_graphics` display:
 
-```ocaml file=examples/shapes/shapes.ml,part=0
+```ocaml file=examples/correct/shapes/shapes.ml,part=0
 open Core
 open Async
 open Async_graphics
@@ -977,7 +977,7 @@ method but leave its definition to the subclasses.
 Here is the more succinct definition, starting with a virtual `shape` class
 that implements `on_click` and `on_mousedown`:
 
-```ocaml file=examples/shapes/shapes.ml,part=1
+```ocaml file=examples/correct/shapes/shapes.ml,part=1
 class virtual shape x y = object(self)
   method virtual private contains: int -> int -> bool
 
@@ -1003,7 +1003,7 @@ end
 
 Now we can define `square` and `circle` by inheriting from `shape`:
 
-```ocaml file=examples/shapes/shapes.ml,part=2
+```ocaml file=examples/correct/shapes/shapes.ml,part=2
 class square w x y = object
   inherit shape x y
 
@@ -1069,7 +1069,7 @@ For example, suppose we wanted to extend our previous shapes module with a
 from `circle` and used the inherited `on_click` to add a handler for click
 events:
 
-```ocaml file=examples/shapes/shapes.ml,part=3
+```ocaml file=examples/correct/shapes/shapes.ml,part=3
 class growing_circle r x y = object(self)
   inherit circle r x y
 
@@ -1152,7 +1152,7 @@ shapes. We may wish to allow a shape to be dragged by the mouse. We can
 define this functionality for any object that has mutable `x` and `y` fields
 and an `on_mousedown` method for adding event handlers:
 
-```ocaml file=examples/shapes/shapes.ml,part=4
+```ocaml file=examples/correct/shapes/shapes.ml,part=4
 class virtual draggable = object(self)
   method virtual on_mousedown:
     ?start:unit Deferred.t ->
@@ -1185,7 +1185,7 @@ end
 
 This allows us to create draggable shapes using multiple inheritance:
 
-```ocaml file=examples/shapes/shapes.ml,part=5
+```ocaml file=examples/correct/shapes/shapes.ml,part=5
 class small_square = object
   inherit square 20 40 40
   inherit draggable
@@ -1198,7 +1198,7 @@ create an `animated` mixin to provide this update list and ensure that
 the functions in it are called at regular intervals when the shape is
 animated: [animation/creating with mixins]{.idx}
 
-```ocaml file=examples/shapes/shapes.ml,part=6
+```ocaml file=examples/correct/shapes/shapes.ml,part=6
 class virtual animated span = object(self)
   method virtual on_click:
     ?start:unit Deferred.t ->
@@ -1231,7 +1231,7 @@ end
 We use initializers to add functions to this update list. For example, this
 class will produce circles that move to the right for a second when clicked:
 
-```ocaml file=examples/shapes/shapes.ml,part=7
+```ocaml file=examples/correct/shapes/shapes.ml,part=7
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
@@ -1241,7 +1241,7 @@ end
 
 These initializers can also be added using mixins:
 
-```ocaml file=examples/shapes/shapes.ml,part=8
+```ocaml file=examples/correct/shapes/shapes.ml,part=8
 class virtual linear x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
@@ -1278,7 +1278,7 @@ Since the `linear` and `harmonic` mixins are only used for their side
 effects, they can be inherited multiple times within the same object to
 produce a variety of different animations: [linear mixins]{.idx}
 
-```ocaml file=examples/shapes/shapes.ml,part=9
+```ocaml file=examples/correct/shapes/shapes.ml,part=9
 class my_square x y = object
   inherit square 40 x y
   inherit draggable
@@ -1302,7 +1302,7 @@ on the graphical display and running that function using the Async scheduler:
 [animation/displaying animated shapes]{.idx}[multiple inheritance/displaying
 animated shapes with]{.idx}
 
-```ocaml file=examples/shapes/shapes.ml,part=10
+```ocaml file=examples/correct/shapes/shapes.ml,part=10
 let main () =
   let shapes = [
      (my_circle :> drawable);
@@ -1329,7 +1329,7 @@ graphical display and ask Async to run `repaint` at regular intervals.
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies:
 
-```scheme file=examples/shapes/dune
+```scheme file=examples/correct/shapes/dune
 (executable
   (name      shapes)
   (modules   shapes)
@@ -1338,7 +1338,7 @@ which will pull in all the other dependencies:
 
 
 
-```sh dir=examples/shapes,skip
+```sh dir=examples/correct/shapes
 $ dune build shapes.exe
 ```
 
