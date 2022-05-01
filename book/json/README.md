@@ -748,9 +748,9 @@ been generated for us. You can control various aspects of the serializer by
 passing flags to `atdgen`. The important ones for JSON are:
 
 `-j-std`
-: Converts tuples and variants into standard JSON and refuse to print NaN and
-  infinities. You should specify this if you intend to interoperate with
-  services that aren't using ATD.
+: Converts tuples and variants into standard JSON and refuses to print
+  NaN and infinities. You should specify this if you intend to
+  interoperate with services that aren't using ATD.
 
 `-j-custom-fields FUNCTION`
 : Calls a custom function for every unknown field encountered, instead of
