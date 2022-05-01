@@ -5,31 +5,33 @@ techniques you can use to build larger scale OCaml programs.  We'll
 now wrap up this part by examining the tools you can use for editing,
 compiling, testing, documenting and publishing your own projects.
 
-The OCaml community has developed a suite of modern tools to interface it
-with IDEs such as Visual Studio Code, and to generate API documentation and
-implement modern software engineering practises such as continuous integration
-(CI) and unit or fuzz testing.  All you need to do is to specify your project
-metadata (for example, library dependencies and compiler versions), and the
-OCaml Platform tools that we'll describe next will do much of the heavy
-lifting.
+The OCaml community has developed a suite of modern tools to interface
+it with IDEs such as Visual Studio Code, and to generate API
+documentation and implement modern software engineering practices such
+as continuous integration (CI) and unit or fuzz testing.  All you need
+to do is to specify your project metadata (for example, library
+dependencies and compiler versions), and the OCaml Platform tools that
+we'll describe next will do much of the heavy lifting.
 
 ::: {data-type=note}
 #### Using the opam source-based package manager
 
-opam is the official package manager and metadata packaging format that is used
-in the OCaml community.  We've been using it in earlier chapters to install
-OCaml libraries, and we're going to take a closer look at how to use opam
-within a full project next.  You've almost certainly done this already at this
-point in the book, but in case you've skipped straight to this chapter make
-sure you first initialise opam's global state.[opam package manager/initializing]{.idx}
+opam is the official package manager and metadata packaging format
+that is used in the OCaml community.  We've been using it in earlier
+chapters to install OCaml libraries, and we're going to take a closer
+look at how to use opam within a full project next.  You've almost
+certainly done this already at this point in the book, but in case
+you've skipped straight to this chapter make sure you first initialize
+opam's global state.[opam package manager/initializing]{.idx}
 
 ```
 $ opam init
 ```
 
-By default, opam doesn't require any special user permissions and stores all of
-the files it installs in `~/.opam`, such as the current build of the OCaml
-compiler if you didn't have one pre-installed when you initialised opam.
+By default, opam doesn't require any special user permissions and
+stores all of the files it installs in `~/.opam`, such as the current
+build of the OCaml compiler if you didn't have one pre-installed when
+you initialized opam.
 
 You can maintain multiple development environments with different packages
 and compilers installed, each of which is called a "switch" -- the default
@@ -83,7 +85,7 @@ $ opam switch create .
 ```
 
 This invokes opam to install the project dependencies (in this case, just the
-OCaml compiler and dune as we didn't specify any more when initialising the
+OCaml compiler and dune as we didn't specify any more when initializing the
 project).  All of the files from the local switch will be present under `_opam/`
 in the working directory. You can find the dune binary that was just
 compiled inside that directory, for example:
@@ -165,11 +167,11 @@ refine the package description:
 $ opam switch create . ocaml-base-compiler.4.13.1
 ```
 
-Sometimes, you will also need to to add custom configuration options
-to the compiler, such as the `flambda` optimiser. There are two packages
-that handle this: `ocaml-variants` is a package that detects the presence
-of various `ocaml-option` packages to activate configuration flags.
-For example, to build a compiler with `flambda`, you would:
+Sometimes, you will also need to add custom configuration options to
+the compiler, such as the `flambda` optimiser. There are two packages
+that handle this: `ocaml-variants` is a package that detects the
+presence of various `ocaml-option` packages to activate configuration
+flags.  For example, to build a compiler with `flambda`, you would:
 
 ```sh skip
 $ opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
@@ -235,8 +237,8 @@ detail.
 ### Defining module names
 
 A matching pair of `ml` and `mli` files define an OCaml module, named
-after the file and capitalized.  Modules names are the only name you
-refer to within OCaml code.
+after the file and capitalized.  Module names are the only kind of
+name you refer to within OCaml code.
 
 Let's create a `Msg` module in our skeleton project inside `lib/`.
 
@@ -269,7 +271,7 @@ as the one generated for us in `lib/dune`:
 ```
 
 Dune will treat all OCaml modules in that directory as being part of the
-`hello` library (this behaviour can be overridden by a `modules` field for more
+`hello` library (this behavior can be overridden by a `modules` field for more
 advanced projects).
 By default, dune also exposes libraries as *wrapped* under a single OCaml module,
 and the `name` field determines the name of that module.
@@ -301,7 +303,7 @@ asn1-combinators    (version: 0.2.6)
 ```
 
 If there's a `public_name` field present in the `dune` library definition, this
-determines the publically exposed name for the library. The public library name
+determines the publicly exposed name for the library. The public library name
 is what you specify via the `libraries` field in other projects that use your
 project's libraries.  Without a public name, the defined library is local to
 the current dune project only.  The `(libraries)` field in the `lib/dune` file
@@ -394,8 +396,8 @@ $ dune exec -- bin/main.exe
 Hello World
 ```
 
-You can also refer to the public name of the executable if its
-more convenient.
+You can also refer to the public name of the executable if it's more
+convenient.
 
 ```sh dir=examples/correct/hello,skip
 $ dune exec -- hello
@@ -437,9 +439,9 @@ LSP server via opam:
 opam install ocaml-lsp-server
 ```
 
-Once installed, the VSCode OCaml plugin will ask you which opam
-switch to use. Just the default one should be sufficient get you
-going with building and browsing your interfaces.
+Once installed, the VSCode OCaml plugin will ask you which opam switch
+to use. Just the default one should be sufficient to get you going
+with building and browsing your interfaces.
 
 ::: {data-type=note}
 #### What is the Language Server Protocol?
@@ -520,7 +522,7 @@ $ dune build @doc
 ```
 
 This will leave the HTML files in `_build/default/_doc/_html`, which
-you can view normally with a webbrowser.
+you can view normally with a web browser.
 
 ### Autoformatting your source code
 
@@ -614,7 +616,7 @@ and _not_ the actual version of the `dune` binary.  One of the nicest
 features of dune is that it is forwards-compatible with older
 metadata. By defining the version of the dune language that you are
 currently using, _future_ versions of dune will do their best to
-emulate the current behaviour until you chose to upgrade your project.
+emulate the current behavior until you choose to upgrade your project.
 
 The rest of the `dune-project` file defines other useful project metadata:
 
@@ -741,17 +743,17 @@ workflows, so refer to the online documentation for more options.
 There are a few other files you may also want to add to a project
 to match common conventions:
 
-- a `Makefile` contains targets for common actions such as `all`,
+- A `Makefile` contains targets for common actions such as `all`,
   `build`, `test` or `clean`. While you don't need this when using
   VSCode, some other operating system package managers might benefit
   from having one present.
-- the `LICENSE` defines the terms under which your code is made
+- The `LICENSE` defines the terms under which your code is made
   available. Our example defaults to the permissive ISC license, and
   this is generally a safe default unless you have specific plans
   for your project.
-- a `README.md` is a Markdown-formatted introduction to your library
+- A `README.md` is a Markdown-formatted introduction to your library
   or application.
-- a `.gitignore` file contains the patterns for generated files from
+- A `.gitignore` file contains the patterns for generated files from
   the OCaml tools so that they can be ignored by the Git version
   control software.  If you're not familiar with using Git, look over
   one of the tutorials one such as GitHub's [git hello
@@ -875,10 +877,13 @@ A selection of some include:
 - Flow is a static typechecker for JavaScript written in OCaml that uses
   Base and works on macOS, Windows and Linux.  It's a good example of a large,
   cross-platform CLI-driven tool. <https://github.com/facebook/flow>
-- Octez is an OCaml implementation of a proof-of-stake blockchain called Tezos,
-  which contains a [comprehensive collection](https://tezos.gitlab.io/shell/the_big_picture.html#packages)
-  of libraries that such as interpreters for a stack language, and a shell that uses Lwt
-  to provide networking, storage and cryptographic communications to the outside world. <https://gitlab.com/tezos/tezos>
+- Octez is an OCaml implementation of a proof-of-stake blockchain
+  called Tezos, which contains a [comprehensive
+  collection](https://tezos.gitlab.io/shell/the_big_picture.html#packages)
+  of libraries such as interpreters for a stack language, and a shell
+  that uses Lwt to provide networking, storage and cryptographic
+  communications to the outside
+  world. <https://gitlab.com/tezos/tezos>
 - MirageOS is a library operating system written in OCaml, that can compile code to a
   variety of embedded and hypervisor targets. There are 100s of libraries all written
   using dune in a variety of ways available at <https://github.com/mirage>.
