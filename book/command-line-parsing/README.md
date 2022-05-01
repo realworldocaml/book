@@ -657,11 +657,11 @@ $ dune exec -- ./md5.exe -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
-The `-s` flag in our specification requires a `string` argument and isn't
-optional. The Command parser outputs an error message if the flag isn't
-supplied, as with the anonymous arguments in earlier examples.
-There are a number of other functions that you can wrap flags in to control how
-they are parsed: [flag functions]{.idx}
+The `-s` flag in our specification requires a `string` argument and
+isn't optional. The Command parser outputs an error message if the
+flag isn't supplied, as with the anonymous arguments in earlier
+examples.  There are a number of other functions that you can wrap
+flags in to control how they are parsed: [flag functions]{.idx}
 
 - `required <arg>` will return `<arg>` and error if not present
 - `optional <arg>` with return `<arg> option`

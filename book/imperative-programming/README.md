@@ -1059,12 +1059,12 @@ val fib : int -> int = <fun>
 - : int = 6765
 ```
 
-This is a pretty strange piece of code, and it may take a few moments of
-thought to figure out what's going on. Like `fib_norec`, the function
-`f_norec` passed into `make_rec` is a function that isn't recursive but takes
-as an argument a function that it will call. What `make_rec` does is to
-essentially feed `f_norec` to itself, thus making it a true recursive
-function.
+This is a pretty strange piece of code, and it may take a few moments
+of thought to figure out what's going on. Like `fib_norec`, the
+function `f_norec` passed in to `make_rec` is a function that isn't
+recursive but takes as an argument a function that it will call. What
+`make_rec` does is to essentially feed `f_norec` to itself, thus
+making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
 implement the same old slow Fibonacci function. To make it faster, we need a
@@ -1120,7 +1120,7 @@ val fib : int -> int = <fun>
 
 Memoization is overkill for implementing Fibonacci, and indeed, the `fib`
 defined above is not especially efficient, allocating space linear in the
-number passed in to `fib`. It's easy enough to write a Fibonacci function
+number passed into `fib`. It's easy enough to write a Fibonacci function
 that takes a constant amount of space.
 
 But memoization is a good approach for optimizing `edit_distance`, and
