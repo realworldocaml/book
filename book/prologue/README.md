@@ -122,7 +122,7 @@ methods, variants, and labeled and optional arguments.
 The last two decades has seen OCaml attract a significant user base,
 and language improvements have been steadily added to support the
 growing commercial and academic codebases.  By 2012, the OCaml 4.0
-release had added Generalised Algebraic Data Types (GADTs) and
+release had added Generalized Algebraic Data Types (GADTs) and
 first-class modules to increase the flexibility of the language. Since
 then, OCaml has had a steady yearly release cadence, and OCaml 5.0
 with multicore support is around the corner in 2022.  There is also
@@ -264,7 +264,7 @@ instructions]{.idx}[OCaml/installation instructions]{.idx}
 
 Some of the libraries we use, notably `Base`, work anywhere OCaml
 does, and in particular work on Windows and JavaScript.  The examples
-in Part I of the book will for the most part will stick to such highly
+in Part I of the book will for the most part stick to such highly
 portable libraries.[OCaml/operating system support]{.idx} Some of the
 libraries used, however, require a UNIX based operating system, and so
 only work on systems like macOS, Linux, FreeBSD, OpenBSD, and the
