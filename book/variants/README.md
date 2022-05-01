@@ -21,8 +21,8 @@ type <variant> =
 \noindent
 Each row essentially represents a case of the variant. Each case has
 an associated tag (also called a *constructor*, since you use it to
-constructing a value) and may optionally have a sequence of fields,
-where each field has a specified type.
+construct a value) and may optionally have a sequence of fields, where
+each field has a specified type.
 
 Let's consider a concrete example of how variants can be useful.  Most
 UNIX-like operating systems support terminals as a fundamental,
@@ -472,7 +472,7 @@ session ID is somewhat repetitive, contemplating each of the possible
 message types (including the `Logon` case, which isn't actually
 possible at that point in the code) and extracting the session ID in
 each case. This per-message-type handling seems unnecessary, since the
-session ID works the same way for all of message types.
+session ID works the same way for all message types.
 
 We can improve the code by refactoring our types to explicitly reflect
 the information that's shared between the different messages. The
@@ -641,7 +641,7 @@ type 'a expr =
   | Not   of 'a expr
 ```
 
-Note that the definition of the type `expr` is recursive, meaning that a
+Note that the definition of the type `expr` is recursive, meaning that an
 `expr` may contain other `expr`s. Also, `expr` is parameterized by a
 polymorphic type `'a` which is used for specifying the type of the value that
 goes under the `Base` tag.
@@ -711,7 +711,7 @@ construction functions that mirror the tags of an `expr`.
 The `and_` function below does a few things:
 
 - Reduces the entire expression to the constant `false` if any of the
-  arms of the and are themselves are `false`.
+  arms of the `And` are themselves `false`.
 - Drops any arms of the `And` that there the constant `true`.
 - Drops the `And` if it only has one arm.
 - If the `And` has no arms, then reduces it to `Const true`.
@@ -990,7 +990,7 @@ type extended_color =
   | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
 ```
 
-We want to write a function `extended_color_to_int`, that works like
+We want to write a function `extended_color_to_int` that works like
 `color_to_int` for all of the old kinds of colors, with new logic only for
 handling colors that include an alpha channel. One might try to write such a
 function as follows.
