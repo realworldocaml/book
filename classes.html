@@ -916,10 +916,9 @@ end</code></pre>
   method draw = fill_circle x y radius
 
   method private contains x' y' =
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist &lt;= (Float.of_int radius)
+    let dx = x' - x in
+    let dy = y' - y in
+      dx * dx + dy * dy &lt;= radius * radius
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
@@ -987,10 +986,9 @@ class circle r x y = object
   method draw = fill_circle x y radius
 
   method private contains x' y' =
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-    dist &lt;= (Float.of_int radius)
+    let dx = x' - x in
+    let dy = y' - y in
+      dx * dx + dy * dy &lt;= radius * radius
 end</code></pre>
 </div>
 <p>One way to view a <code>virtual</code> class is that it is like a
@@ -1025,8 +1023,8 @@ initializer. An initializer is an expression that will be executed
 during instantiation but after the object has been created.</p>
 <p>For example, suppose we wanted to extend our previous shapes module
 with a <code>growing_circle</code> class for circles that expand when
-clicked. We could inherit from <code>circle</code> and used the
-inherited <code>on_click</code> to add a handler for click events:</p>
+clicked. We could inherit from <code>circle</code> and use the inherited
+<code>on_click</code> to add a handler for click events:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">class growing_circle r x y = object(self)
   inherit circle r x y
@@ -1296,11 +1294,11 @@ various graphics subsystems: <a data-primary="js_of_ocaml
 library" data-type="indexterm">&nbsp;</a><a data-primary="LabIGL library" data-type="indexterm">&nbsp;</a><a data-primary="Lablgtk library" data-type="indexterm">&nbsp;</a><a data-primary="graphics
 libraries" data-type="indexterm">&nbsp;</a><a data-secondary="for graphics" data-primary="libraries" data-type="indexterm">&nbsp;</a><a data-secondary="for graphics" data-primary="external libraries" data-type="indexterm">&nbsp;</a></p>
 <dl>
-<dt><a href="http://lablgtk.forge.ocamlcore.org">Lablgtk</a></dt>
+<dt><a href="https://github.com/garrigue/lablgtk">Lablgtk</a></dt>
 <dd>
 A strongly typed interface to the GTK widget library.
 </dd>
-<dt><a href="https://forge.ocamlcore.org/projects/lablgl/">LablGL</a></dt>
+<dt><a href="https://github.com/garrigue/lablgl">LablGL</a></dt>
 <dd>
 An interface between OCaml and OpenGL, a widely supported standard for
 3D rendering.
