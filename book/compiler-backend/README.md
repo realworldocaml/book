@@ -73,16 +73,17 @@ It's not important to understand every detail of this internal form, and it
 is explicitly undocumented since it can change across compiler revisions.
 Despite these caveats, some interesting points emerge from reading it:
 
-- There are no mention of modules or types any more. Global values are
-  created via `setglobal`, and OCaml values are constructed by `makeblock`.
-  The blocks are the runtime values you should remember from
-  [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
+- There are no mentions of modules or types any more. Global values
+  are created via `setglobal`, and OCaml values are constructed by
+  `makeblock`.  The blocks are the runtime values you should remember
+  from [Memory Representation Of
+  Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 
-- The pattern match has turned into a switch case that jumps to the right
-  case depending on the header tag of `v`. Recall that variants without
-  parameters are stored in memory as integers in the order which they appear.
-  The pattern-matching engine knows this and has transformed the pattern into
-  an efficient jump table.
+- The pattern match has turned into a switch case that jumps to the
+  right case depending on the header tag of `v`. Recall that variants
+  without parameters are stored in memory as integers in the order in
+  which they appear.  The pattern-matching engine knows this and has
+  transformed the pattern into an efficient jump table.
 
 - Values are addressed by a unique name that distinguishes shadowed values by
   appending a number (e.g., `v/1014`). The type safety checks in the earlier
@@ -329,19 +330,19 @@ examples:
 
 ```sh dir=examples/back-end
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
-	branch L2
-L1:	acc 0
-	branchifnot L3
-	const 101
-	return 1
-L3:	const 100
-	return 1
-L2:	closure L1, 0
-	push
-	acc 0
-	makeblock 1, 0
-	pop 1
-	setglobal Pattern_monomorphic_small!
+    branch L2
+L1: acc 0
+    branchifnot L3
+    const 101
+    return 1
+L3: const 100
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_small!
 
 ```
 
@@ -561,12 +562,13 @@ contents of the `cmx` files to perform cross-module inlining across
 compilation units. This can be a significant speedup for standard library
 functions that are frequently used outside of their module.
 
-Collections of `.cmx` and `.o` files can also be be linked into a `.cmxa`
+Collections of `.cmx` and `.o` files can also be linked into a `.cmxa`
 archive by passing the `-a` flag to the compiler. However, unlike the
-bytecode version, you must keep the individual `cmx` files in the compiler
-search path so that they are available for cross-module inlining. If you
-don't do this, the compilation will still succeed, but you will have missed
-out on an important optimization and have slower binaries.
+bytecode version, you must keep the individual `cmx` files in the
+compiler search path so that they are available for cross-module
+inlining. If you don't do this, the compilation will still succeed,
+but you will have missed out on an important optimization and have
+slower binaries.
 
 ### Inspecting Assembly Output
 
@@ -749,13 +751,15 @@ assembly code to see if you can hand-optimize it.
 ::: {data-type=note}
 #### Accessing Stdlib modules from within Core
 
-In the benchmark above comparing polymorphic and monomorphic comparison,
-you may have noticed that we prepended the comparison functions with `Stdlib`.
-This is because the Core module explicitly redefines the `>` and `<` and `=`
-operators to be specialised for operating over `int` types, as explained in
-[Maps and Hashtables](maps-and-hashtables.html#the-polymorphic-comparator){data-type=xref}.
-You can always recover any of the OCaml standard library functions by accessing
-them through the `Stdlib` module, as we did in our benchmark.
+In the benchmark above comparing polymorphic and monomorphic
+comparison, you may have noticed that we prepended the comparison
+functions with `Stdlib`.  This is because the Core module explicitly
+redefines the `>` and `<` and `=` operators to be specialized for
+operating over `int` types, as explained in [Maps and
+Hashtables](maps-and-hashtables.html#the-polymorphic-comparator){data-type=xref}.
+You can always recover any of the OCaml standard library functions by
+accessing them through the `Stdlib` module, as we did in our
+benchmark.
 
 :::
 
@@ -892,9 +896,10 @@ Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 4         function
 ```
 
-The binary has run until the first take invocation and stopped, waiting for
-further instructions. GDB has lots of features, so let's continue the program
-and check the stacktrace after a couple of recursions:
+The binary has run until the first `take` invocation and stopped,
+waiting for further instructions. GDB has lots of features, so let's
+continue the program and check the backtrace after a couple of
+recursions:
 
 ```
 (gdb) cont
