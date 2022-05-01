@@ -296,7 +296,7 @@ that `(fun g -> g "Hello World")` is a function that takes a function
 as an argument, and then applies that function to the string `"Hello
 World"`. The invocation of `List.map` applies `(fun g -> g "Hello
 World")` to the elements of `transforms`, which are themselves
-functions. The returned list containing the results of these function
+functions. The returned list contains the results of these function
 applications.
 
 The key thing to understand is that functions are ordinary values in
