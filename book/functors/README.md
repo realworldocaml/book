@@ -595,9 +595,9 @@ module type Int_interval_intf =
   end
 ```
 
-There's now no `endpoint` type: all of its occurrences of have been replaced
-by `int`. As with sharing constraints, we can also use this in the context of
-a functor:
+There's now no `endpoint` type: all of its occurrences have been
+replaced by `int`. As with sharing constraints, we can also use this
+in the context of a functor:
 
 ```ocaml env=main
 # module Make_interval(Endpoint : Comparable)
@@ -964,9 +964,9 @@ val dequeue : 'a t -> ('a * 'a t) option
 val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 ```
 
-The signature of `fold` function requires some explanation. It follows
-the same pattern as the `List.fold` function we described in [Using
-The List Module
+The signature of the `fold` function requires some explanation. It
+follows the same pattern as the `List.fold` function we described in
+[Using The List Module
 Effectively](lists-and-patterns.html#using-the-list-module-effectively){data-type=xref}.
 Essentially, `Fqueue.fold q ~init ~f` walks over the elements of `q`
 from front to back, starting with an accumulator of `init` and using
