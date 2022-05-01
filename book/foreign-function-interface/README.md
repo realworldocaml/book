@@ -950,7 +950,7 @@ being more strongly typed, of course.
 - `p +@ n` computes the address of the `n`th next element, if `p` points to an array element.
 - `p -@ n` computes the address of the `n`th previous element, if `p` points to an array element.
 
-There are also other useful nonoperator functions available (see the Ctypes
+There are also other useful non-operator functions available (see the Ctypes
 documentation), such as pointer differencing and comparison.
 
 ## Passing Functions to C
