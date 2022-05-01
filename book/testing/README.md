@@ -51,11 +51,10 @@ advance these goals.
 ## Inline tests
 
 The first step towards a good testing environment is making it easy to
-set up and and run a test.  To that end, we'll show you how to write
-tests with `ppx_inline_test`, which lets you add tests to any module
-in a library with a specially annotated `let` binding.
-[syntax extension/ppx_inline_test]{.idx}
-[ppx_inline_test]{.idx}
+set up and run a test.  To that end, we'll show you how to write tests
+with `ppx_inline_test`, which lets you add tests to any module in a
+library with a specially annotated `let` binding.  [syntax
+extension/ppx_inline_test]{.idx} [ppx_inline_test]{.idx}
 
 To use inline tests in a library, we need to do two things:
 
@@ -172,9 +171,9 @@ FAILED 1 / 1 tests
 ```
 
 As you can see, the data that caused the comparison to fail is printed
-out, along with the stacktrace.  Sadly, the stacktrace is in this case
-mostly a distraction. That's a downside of using exceptions to report
-test failures.
+out, along with the stack backtrace.  Sadly, the backtrace is in this
+case mostly a distraction. That's a downside of using exceptions to
+report test failures.
 
 ### Where should tests go?
 
@@ -235,7 +234,7 @@ since you don't want those top-level effects to be triggered by the
 test framework.
 
 So, how do we test code that's part of an executable? The solution is
-to break up your program in to two pieces: a directory containing a
+to break up your program into two pieces: a directory containing a
 library that contains the logic of your program, but no top-level
 effects; and a directory for the executable that links in the library,
 and is responsible for launching the code.
@@ -312,7 +311,7 @@ File "test.ml", line 5, characters 0-1:
 The expect test runner also creates a version of the file with the
 captured output, with `.corrected` appended to the end of the
 filename.  If this new output looks correct, we can *promote* it by
-copying the corrected file it over the original source.  The `dune
+copying the corrected file over the original source.  The `dune
 promote` command does just this, leaving our source as follows.
 
 ```ocaml file=examples/correct/trivial_expect_test_fixed/test.ml
@@ -360,7 +359,7 @@ let%expect_test _ =
 ```
 
 \noindent
-be preferable to this?
+be preferable to this:
 
 ```ocaml file=examples/correct/simple_inline_test/test.ml
 open Base
@@ -715,9 +714,8 @@ are fast to run and entirely deterministic.
 
 That's a great ideal, but it's not always achievable, especially when
 you want to run more end-to-end tests of your program.  But even if
-you need to run tests that involved multiple processes interacting
-with each other and using real IO, expect tests are still a useful
-tool.
+you need to run tests that involve multiple processes interacting with
+each other and using real IO, expect tests are still a useful tool.
 
 To see how such tests can be built, we'll write some tests for the
 echo server we developed in [Concurrent Programming with
@@ -868,12 +866,12 @@ let%expect_test "test uppercase echo" =
     ~finally:(fun () -> cleanup process)
 ```
 
-We fixed the problem, but solution should make you uncomfortable.  For
-one thing, why is one second the right timeout, rather than a half a
-second, or ten?  The time we wait is some balance between reducing the
-likelihood of a non-deterministic failure versus preserving
-performance of the test, which is a bit of an awkward trade-off to have
-to make.
+We fixed the problem, but the solution should make you uncomfortable.
+For one thing, why is one second the right timeout, rather than a half
+a second, or ten?  The time we wait is some balance between reducing
+the likelihood of a non-deterministic failure versus preserving
+performance of the test, which is a bit of an awkward trade-off to
+have to make.
 
 We can improve on this by removing the `Clock.after` call, and instead
 adding a retry loop to the `connect` test helper
@@ -945,7 +943,7 @@ connecting three operations:
 - `Int.sign`, which computes a `Sign.t` representing the sign of an
   integer, either `Positive`, `Negative`, or `Zero`
 - `Int.neg`, which negates a number
-- `Sign.flip`, which, flips a `Sign.t`, i.e., mapping `Positive` to
+- `Sign.flip`, which flips a `Sign.t`, i.e., mapping `Positive` to
   `Negative` and vice versa.
 
 \noindent
@@ -1008,7 +1006,7 @@ let%test_unit "negation flips the sign" =
 
 \noindent
 Note that we didn't explicitly state how many examples should be
-tested. Quickcheck has a built in default which can be overridden by
+tested. Quickcheck has a built-in default which can be overridden by
 way of an optional argument.
 
 Running the test uncovers the fact that the property we've been
@@ -1057,9 +1055,8 @@ for the negation of `min_value` to be equal to itself.
 Quickcheck's decision to put much larger weight on special cases is
 what allowed us to discover this unexpected behavior.  Note that in
 this case, it's not really a bug that we've uncovered, it's just that
-the property that we thought would should hold can't in practice.  But
-either way, Quickcheck helped us understand the behavior of our code
-better.
+the property that we thought would hold can't in practice.  But either
+way, Quickcheck helped us understand the behavior of our code better.
 
 ### Handling complex types
 
@@ -1192,7 +1189,7 @@ ensured that all float values are non-negative, and that the width of
 the rectangle is no smaller than its height.
 
 The full API for building generators is beyond the scope of this
-chapter, but it's worth digging in to the API docs if you want more
+chapter, but it's worth digging into the API docs if you want more
 control over the distribution of your test examples.
 
 ## Other testing tools
@@ -1251,4 +1248,4 @@ knowing about.
 - [Crowbar](https://github.com/stedolan/crowbar) is a quickcheck-style
   library for writing down properties to be tested by AFL.
 - [Bun](https://github.com/ocurrent/bun) is a library for integrating
-  AFL in to your continuous-integration pipeline.
+  AFL into your continuous-integration pipeline.
