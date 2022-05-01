@@ -2,7 +2,7 @@
  (name test_variadic)
  (package ctypes-foreign)
  (libraries
-  oUnit
+  ounit2
   ctypes
   integers
   test_variadic_stubs

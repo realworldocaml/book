@@ -258,6 +258,9 @@ let test_comparisons _ =
   end
 
 let test_int_conversions _ =
+  skip_if
+    (Sys.int_size > 8 * Ctypes.sizeof Ctypes.ldouble)
+    "Needs long double larger than int";
   begin
     assert_equal max_int (LDouble.to_int
 			    (LDouble.of_int max_int))

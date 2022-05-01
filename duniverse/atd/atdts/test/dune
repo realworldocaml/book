@@ -1,0 +1,17 @@
+;
+; We test in two phases:
+;
+; 1. Check that the generated TypeScript code is what we expect.
+;
+
+(rule
+ (alias runtest)
+ (package atdts)
+ (action
+   (diff ts-expected/everything.ts
+     ts-tests/everything.ts)))
+
+; 2. Run the generated TypeScript code and check that is reads or writes JSON
+;    data as expected.
+;
+; See ts-tests/dune

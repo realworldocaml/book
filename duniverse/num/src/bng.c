@@ -17,14 +17,12 @@
 #include "caml/config.h"
 
 #if defined(__GNUC__)
-#if defined(BNG_ARCH_ia32)
+#if defined(BNG_ARCH_i386)
 #include "bng_ia32.c"
 #elif defined(BNG_ARCH_amd64)
 #include "bng_amd64.c"
-#elif defined(BNG_ARCH_ppc)
+#elif defined(BNG_ARCH_power)
 #include "bng_ppc.c"
-#elif defined (BNG_ARCH_sparc)
-#include "bng_sparc.c"
 #elif defined (BNG_ARCH_arm64)
 #include "bng_arm64.c"
 #endif

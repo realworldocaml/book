@@ -48,7 +48,7 @@ let failure_test test_number fun_to_test arg =
 let failwith_test test_number fun_to_test arg correct_failure =
  flush_all ();
  try
-   fun_to_test arg |> ignore;
+   ignore (fun_to_test arg);
    fprintf stderr ">>> Failure expected (%s, test %d)\n"
                   !function_tested test_number;
    error ()
@@ -80,7 +80,7 @@ let eq_bytes_string (i: bytes) (j: string) = (i = Bytes.of_string j);;
 let eq_nativeint (i: nativeint) (j: nativeint) = (i = j);;
 let eq_int32 (i: int32) (j: int32) = (i = j);;
 let eq_int64 (i: int64) (j: int64) = (i = j);;
-let eq_float (x: float) (y: float) = Pervasives.compare x y = 0;;
+let eq_float (x: float) (y: float) = compare x y = 0;;
 
 let sixtyfour = Sys.int_size > 32
 

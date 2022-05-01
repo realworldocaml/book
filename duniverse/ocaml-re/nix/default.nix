@@ -3,7 +3,7 @@
 let
   strings = pkgs.lib.strings;
   args = {
-    inherit (pkgs.ocaml-ng.ocamlPackages_4_12) ocaml;
+    inherit (pkgs.ocaml-ng.ocamlPackages_4_13) ocaml;
     selection = ./opam-selection.nix;
     src = builtins.filterSource (path: type:
       let name = baseNameOf path;

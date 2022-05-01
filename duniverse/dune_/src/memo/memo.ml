@@ -34,50 +34,14 @@ module Counters = struct
     paths_in_cycle_detection_graph := 0
 end
 
-module Build0 = struct
-  include Fiber
+include Fiber
 
-  let when_ x y =
-    match x with
-    | true -> y ()
-    | false -> return ()
+let when_ x y =
+  match x with
+  | true -> y ()
+  | false -> return ()
 
-  let of_reproducible_fiber = Fun.id
-
-  module Option = struct
-    let iter option ~f =
-      match option with
-      | None -> return ()
-      | Some a -> f a
-
-    let map option ~f =
-      match option with
-      | None -> return None
-      | Some a -> f a >>| Option.some
-
-    let bind option ~f =
-      match option with
-      | None -> return None
-      | Some a -> f a
-  end
-
-  module Result = struct
-    let iter result ~f =
-      match result with
-      | Error _ -> return ()
-      | Ok a -> f a
-  end
-
-  module List = struct
-    include Monad.List (Fiber)
-
-    let map = parallel_map
-
-    let concat_map l ~f = map l ~f >>| List.concat
-  end
-
-  let memo_build = Fun.id
-end
+let of_reproducible_fiber = Fun.id
 
 module Allow_cutoff = struct
   type 'o t =
@@ -107,9 +71,7 @@ module Spec = struct
     let name =
       match name with
       | None when !Debug.track_locations_of_lazy_values ->
-        Option.map
-          (Caller_id.get ~skip:[ __FILE__ ])
-          ~f:(fun loc ->
+        Option.map (Caller_id.get ~skip:[ __FILE__ ]) ~f:(fun loc ->
             sprintf "lazy value created at %s" (Loc.to_file_colon_line loc))
       | _ -> name
     in
@@ -1021,18 +983,18 @@ module State = struct
         ]
 end
 
-type ('input, 'output) t =
-  { spec : ('input, 'output) Spec.t
-  ; cache : ('input, ('input, 'output) Dep_node.t) Store.t
-  }
+module Table = struct
+  type ('input, 'output) t =
+    { spec : ('input, 'output) Spec.t
+    ; cache : ('input, ('input, 'output) Dep_node.t) Store.t
+    }
+end
 
 module Stack_frame = struct
-  type ('input, 'output) memo = ('input, 'output) t
-
   include Stack_frame_without_state
 
   let as_instance_of (type i) (Dep_node_without_state.T t)
-      ~of_:(memo : (i, _) memo) : i option =
+      ~of_:(memo : (i, _) Table.t) : i option =
     match Type_eq.Id.same memo.spec.witness t.spec.witness with
     | Some Type_eq.T -> Some t.input
     | None -> None
@@ -1079,7 +1041,7 @@ let invalidate_dep_node (dep_node : _ Dep_node.t) =
 let invalidate_store = Store.iter ~f:invalidate_dep_node
 
 let create_with_cache (type i o) name ~cache ~input ~cutoff
-    ~human_readable_description (f : i -> o Fiber.t) =
+    ~human_readable_description (f : i -> o Fiber.t) : (i, o) Table.t =
   let spec =
     Spec.create ~name:(Some name) ~input ~cutoff ~human_readable_description f
   in
@@ -1097,7 +1059,7 @@ let create_with_store (type i) name
 let create (type i) name ~input:(module Input : Input with type t = i) ?cutoff
     ?human_readable_description f =
   (* This mutable table is safe: the implementation tracks all dependencies. *)
-  let cache = Store.of_table (Table.create (module Input) 2) in
+  let cache = Store.of_table (Stdune.Table.create (module Input) 2) in
   let input = (module Input : Store_intf.Input with type t = i) in
   create_with_cache name ~cache ~input ~cutoff ~human_readable_description f
 
@@ -1113,7 +1075,7 @@ let make_dep_node ~spec ~input : _ Dep_node.t =
       | No -> false)
   }
 
-let dep_node (t : (_, _) t) input =
+let dep_node (t : (_, _) Table.t) input =
   match Store.find t.cache input with
   | Some dep_node -> dep_node
   | None ->
@@ -1366,7 +1328,7 @@ end = struct
         | Error cycle_error -> raise (Cycle_error.E cycle_error))
 end
 
-let exec (type i o) (t : (i, o) t) i = Exec.exec_dep_node (dep_node t i)
+let exec (type i o) (t : (i, o) Table.t) i = Exec.exec_dep_node (dep_node t i)
 
 let dump_cached_graph ?(on_not_cached = `Raise) ?(time_nodes = false) cell =
   let rec collect_graph (Dep_node.T dep_node) graph : Graph.t Fiber.t =
@@ -1409,8 +1371,6 @@ let dump_cached_graph ?(on_not_cached = `Raise) ?(time_nodes = false) cell =
 let get_call_stack = Call_stack.get_call_stack_without_state
 
 module Invalidation = struct
-  type ('i, 'o) memo = ('i, 'o) t
-
   (* This is currently used only for informing the user about the reason for
      restarting a build. *)
   module Reason = struct
@@ -1532,7 +1492,7 @@ module Invalidation = struct
 
   let clear_caches ~reason = Leaf { kind = Clear_caches; reason }
 
-  let invalidate_cache ~reason { cache; _ } =
+  let invalidate_cache ~reason ({ cache; _ } : _ Table.t) =
     Leaf { kind = Clear_cache cache; reason }
 
   let invalidate_node ~reason (dep_node : _ Dep_node.t) =
@@ -1540,7 +1500,7 @@ module Invalidation = struct
 end
 
 module Current_run = struct
-  let f () = Run.current () |> Build0.return
+  let f () = Run.current () |> return
 
   let memo = create "current-run" ~input:(module Unit) f
 
@@ -1552,37 +1512,33 @@ end
 
 let current_run () = Current_run.exec ()
 
-module Build = struct
-  include Build0
+let of_non_reproducible_fiber fiber =
+  let* (_ : Run.t) = current_run () in
+  fiber
 
-  let of_non_reproducible_fiber fiber =
-    let* (_ : Run.t) = current_run () in
-    fiber
+let is_top_level =
+  let+ is_set = Error_handler.is_set in
+  not is_set
 
-  let is_top_level =
-    let+ is_set = Error_handler.is_set in
-    not is_set
+let run_with_error_handler t ~handle_error_no_raise =
+  Error_handler.with_error_handler handle_error_no_raise (fun () ->
+      let* res = report_and_collect_errors t in
+      match res with
+      | Ok ok -> Fiber.return ok
+      | Error ({ exns; reproducible = _ } : Collect_errors_monoid.t) ->
+        Fiber.reraise_all (Exn_set.to_list exns))
 
-  let run_with_error_handler t ~handle_error_no_raise =
-    Error_handler.with_error_handler handle_error_no_raise (fun () ->
-        let* res = report_and_collect_errors t in
-        match res with
-        | Ok ok -> Fiber.return ok
-        | Error ({ exns; reproducible = _ } : Collect_errors_monoid.t) ->
-          Fiber.reraise_all (Exn_set.to_list exns))
-
-  let run t =
-    let* is_top_level = is_top_level in
-    (* CR-someday aalekseyev: I think this automagical detection of toplevel
-       calls is weird. My hunch is that having separate functions for toplevel
-       and non-toplevel [run] would be better. *)
-    match is_top_level with
-    | true ->
-      run_with_error_handler
-        (fun () -> t)
-        ~handle_error_no_raise:(fun _exn -> Fiber.return ())
-    | false -> t
-end
+let run t =
+  let* is_top_level = is_top_level in
+  (* CR-someday aalekseyev: I think this automagical detection of toplevel calls
+     is weird. My hunch is that having separate functions for toplevel and
+     non-toplevel [run] would be better. *)
+  match is_top_level with
+  | true ->
+    run_with_error_handler
+      (fun () -> t)
+      ~handle_error_no_raise:(fun _exn -> Fiber.return ())
+  | false -> t
 
 module With_implicit_output = struct
   type ('i, 'o) t = 'i -> 'o Fiber.t
@@ -1751,7 +1707,7 @@ module Perf_counters = struct
 end
 
 module For_tests = struct
-  let get_deps (type i o) (t : (i, o) t) inp =
+  let get_deps (type i o) (t : (i, o) Table.t) inp =
     match Store.find t.cache inp with
     | None -> None
     | Some dep_node -> (
@@ -1779,15 +1735,26 @@ module Run = struct
   end
 end
 
-(* By placing this definition at the end of the file we prevent Merlin from
-   using [build] instead of [Fiber.t] when showing types throughout this
-   file. *)
-type 'a build = 'a Fiber.t
+module type S = sig
+  type 'a memo = 'a t
 
-module type Build = sig
   include Monad.S
 
   module List : Monad.List with type 'a t := 'a t
 
-  val memo_build : 'a build -> 'a t
+  val of_memo : 'a memo -> 'a t
 end
+with type 'a memo := 'a t
+
+let of_memo = Fun.id
+
+module List = struct
+  include Monad.List (Fiber)
+
+  let map = parallel_map
+
+  let concat_map l ~f = map l ~f >>| List.concat
+end
+
+module Option = Monad.Option (Fiber)
+module Result = Monad.Result (Fiber)

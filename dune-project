@@ -21,6 +21,7 @@ second edition book. See https://realworldocaml.org/")
   (ocaml (and (>= 4.13.0) (< 4.14.0)))
   alcotest
   async
+  async_graphics
   atdgen
   base
   (cmdliner (>= 1.1.0))

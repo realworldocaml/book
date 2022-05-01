@@ -12,7 +12,7 @@ module Source_tree_map_reduce =
 
 let collect_source_files_recursively dir ~f =
   let prefix_with, dir = Path.extract_build_context_dir_exn dir in
-  Action_builder.memo_build (Source_tree.find_dir dir) >>= function
+  Action_builder.of_memo (Source_tree.find_dir dir) >>= function
   | None -> Action_builder.return Path.Set.empty
   | Some dir ->
     Source_tree_map_reduce.map_reduce dir ~traverse:Sub_dirs.Status.Set.all
@@ -20,12 +20,12 @@ let collect_source_files_recursively dir ~f =
         f (Path.append_source prefix_with (Source_tree.Dir.path dir)))
 
 type dep_evaluation_result =
-  | Simple of Path.t list Memo.Build.t
+  | Simple of Path.t list Memo.t
   | Other of Path.t list Action_builder.t
 
 let to_action_builder = function
   | Simple paths ->
-    let* paths = Action_builder.memo_build paths in
+    let* paths = Action_builder.of_memo paths in
     let+ () = Action_builder.all_unit (List.map ~f:Action_builder.path paths) in
     paths
   | Other x -> x
@@ -34,7 +34,7 @@ let dep_on_alias_rec alias ~loc =
   let ctx_name, src_dir =
     Path.Build.extract_build_context_exn (Alias.dir alias)
   in
-  Action_builder.memo_build (Source_tree.find_dir src_dir) >>= function
+  Action_builder.of_memo (Source_tree.find_dir src_dir) >>= function
   | None ->
     Action_builder.fail
       { fail =
@@ -57,7 +57,45 @@ let dep_on_alias_rec alias ~loc =
             (Path.Source.to_string_maybe_quoted src_dir)
         ]
 
-let dep expander = function
+let relative d s = Path.build (Path.Build.relative d s)
+
+let expand_include ~expander s =
+  let path = relative (Expander.dir expander) s in
+  let+ ast = Action_builder.read_sexp path in
+  match ast with
+  | Dune_lang.Ast.List (_loc, asts) ->
+    let dep_parser =
+      Dune_lang.Syntax.set Stanza.syntax
+        (Active
+           (Dune_project.dune_version (Scope.project (Expander.scope expander))))
+        (String_with_vars.set_decoding_env
+           (Pform.Env.initial Stanza.latest_version)
+           (Bindings.decode Dep_conf.decode))
+    in
+    List.concat_map ~f:(Dune_lang.Decoder.parse dep_parser Univ_map.empty) asts
+  | ast ->
+    let loc = Dune_lang.Ast.loc ast in
+    User_error.raise ~loc
+      [ Pp.text
+          "Dependency specification in `(include <filename>)` must be a list"
+      ]
+
+let prepare_expander expander =
+  Expander.set_expanding_what expander Deps_like_field
+
+let add_sandbox_config acc (dep : Dep_conf.t) =
+  match dep with
+  | Sandbox_config cfg -> Sandbox_config.inter acc cfg
+  | _ -> acc
+
+let rec dep expander = function
+  | Include s ->
+    let deps = expand_include ~expander s in
+    Other
+      (let* deps = deps in
+       let builder, _bindings = named_paths_builder ~expander deps in
+       let+ paths = builder in
+       paths)
   | File s -> (
     match Expander.With_deps_if_necessary.expand_path expander s with
     | Without paths ->
@@ -115,7 +153,7 @@ let dep expander = function
        let+ () =
          let pkg = Package.Name.of_string pkg in
          let context = Expander.context expander in
-         Action_builder.memo_build (Expander.find_package expander pkg)
+         Action_builder.of_memo (Expander.find_package expander pkg)
          >>= function
          | Some (Local pkg) ->
            Action_builder.alias
@@ -171,24 +209,7 @@ let dep expander = function
        [])
   | Sandbox_config _ -> Other (Action_builder.return [])
 
-let prepare_expander expander =
-  Expander.set_expanding_what expander Deps_like_field
-
-let add_sandbox_config acc (dep : Dep_conf.t) =
-  match dep with
-  | Sandbox_config cfg -> Sandbox_config.inter acc cfg
-  | _ -> acc
-
-let unnamed ~expander l =
-  let expander = prepare_expander expander in
-  ( List.fold_left l ~init:(Action_builder.return ()) ~f:(fun acc x ->
-        let+ () = acc
-        and+ _x = to_action_builder (dep expander x) in
-        ())
-  , List.fold_left l ~init:Sandbox_config.no_special_requirements
-      ~f:add_sandbox_config )
-
-let named ~expander l =
+and named_paths_builder ~expander l =
   let builders, bindings =
     let expander = prepare_expander expander in
     List.fold_left l ~init:([], Pform.Map.empty)
@@ -205,8 +226,8 @@ let named ~expander l =
                 | Other _ -> None))
           with
           | Some x ->
-            let open Memo.Build.O in
-            let x = Memo.lazy_ (fun () -> Memo.Build.all x) in
+            let open Memo.O in
+            let x = Memo.lazy_ (fun () -> Memo.all x) in
             let bindings =
               Pform.Map.set bindings (Var (User_var name))
                 (Expander.Deps.Without
@@ -215,7 +236,7 @@ let named ~expander l =
             in
             let x =
               let open Action_builder.O in
-              let* x = Action_builder.memo_build (Memo.Lazy.force x) in
+              let* x = Action_builder.of_memo (Memo.Lazy.force x) in
               let x = List.concat x in
               let+ () = Action_builder.paths x in
               x
@@ -236,18 +257,34 @@ let named ~expander l =
   in
   let builder =
     let+ l = Action_builder.all (List.rev builders) in
-    Dune_util.Value.L.paths (List.concat l)
+    List.concat l
+  in
+  (builder, bindings)
+
+let named ~expander l =
+  let builder, bindings = named_paths_builder ~expander l in
+  let builder =
+    let+ paths = builder in
+    Dune_util.Value.L.paths paths
   in
   let builder = Action_builder.memoize "deps" builder in
   let bindings =
     Pform.Map.set bindings (Var Deps) (Expander.Deps.With builder)
   in
   let expander = Expander.add_bindings_full expander ~bindings in
-  let builder = Action_builder.ignore builder in
-  ( builder
+  ( Action_builder.ignore builder
   , expander
   , Bindings.fold l ~init:Sandbox_config.no_special_requirements
       ~f:(fun one acc ->
         match one with
         | Unnamed dep -> add_sandbox_config acc dep
         | Named (_, l) -> List.fold_left l ~init:acc ~f:add_sandbox_config) )
+
+let unnamed ~expander l =
+  let expander = prepare_expander expander in
+  ( List.fold_left l ~init:(Action_builder.return ()) ~f:(fun acc x ->
+        let+ () = acc
+        and+ _x = to_action_builder (dep expander x) in
+        ())
+  , List.fold_left l ~init:Sandbox_config.no_special_requirements
+      ~f:add_sandbox_config )

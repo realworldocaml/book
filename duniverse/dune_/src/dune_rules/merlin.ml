@@ -175,13 +175,14 @@ module Processed = struct
             , init.config.src_dirs
             , [ init.config.flags ]
             , init.config.extensions )
-          ~f:
-            (fun (acc_pp, acc_obj, acc_src, acc_flags, acc_ext)
-                 { modules = _
-                 ; pp_config
-                 ; config =
-                     { stdlib_dir = _; obj_dirs; src_dirs; flags; extensions }
-                 } ->
+          ~f:(fun
+               (acc_pp, acc_obj, acc_src, acc_flags, acc_ext)
+               { modules = _
+               ; pp_config
+               ; config =
+                   { stdlib_dir = _; obj_dirs; src_dirs; flags; extensions }
+               }
+             ->
             ( pp_config :: acc_pp
             , Path.Set.union acc_obj obj_dirs
             , Path.Set.union acc_src src_dirs
@@ -332,9 +333,9 @@ module Unprocessed = struct
     let+ config =
       let+ flags = flags
       and+ src_dirs, obj_dirs =
-        Action_builder.memo_build
-          (let open Memo.Build.O in
-          Memo.Build.parallel_map (Lib.Set.to_list requires) ~f:(fun lib ->
+        Action_builder.of_memo
+          (let open Memo.O in
+          Memo.parallel_map (Lib.Set.to_list requires) ~f:(fun lib ->
               let+ dirs = Lib.src_dirs lib in
               (lib, dirs))
           >>| List.fold_left
@@ -364,7 +365,7 @@ module Unprocessed = struct
 end
 
 let dot_merlin sctx ~dir ~more_src_dirs ~expander (t : Unprocessed.t) =
-  let open Memo.Build.O in
+  let open Memo.O in
   let merlin_file = Merlin_ident.merlin_file_path dir t.ident in
   let* () =
     Rules.Produce.Alias.add_deps (Alias.check ~dir)
@@ -379,7 +380,7 @@ let dot_merlin sctx ~dir ~more_src_dirs ~expander (t : Unprocessed.t) =
   SC.add_rule sctx ~dir action
 
 let add_rules sctx ~dir ~more_src_dirs ~expander merlin =
-  Memo.Build.when_ (SC.context sctx).merlin (fun () ->
+  Memo.when_ (SC.context sctx).merlin (fun () ->
       dot_merlin sctx ~more_src_dirs ~expander ~dir merlin)
 
 include Unprocessed

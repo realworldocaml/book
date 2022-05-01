@@ -29,18 +29,18 @@ val create :
   -> obj_dir:Path.Build.t Obj_dir.t
   -> modules:Modules.t
   -> flags:Ocaml_flags.t
-  -> requires_compile:Lib.t list Resolve.Build.t
+  -> requires_compile:Lib.t list Resolve.Memo.t
   -> requires_link:Lib.t list Resolve.t Memo.Lazy.t
   -> ?preprocessing:Pp_spec.t
   -> opaque:opaque
   -> ?stdlib:Ocaml_stdlib.t
-  -> js_of_ocaml:Js_of_ocaml.In_buildable.t option
+  -> js_of_ocaml:Js_of_ocaml.In_context.t option
   -> package:Package.t option
   -> ?vimpl:Vimpl.t
   -> ?modes:Dune_file.Mode_conf.Set.Details.t Mode.Dict.t
   -> ?bin_annot:bool
   -> unit
-  -> t Memo.Build.t
+  -> t Memo.t
 
 (** Return a compilation context suitable for compiling the alias module. *)
 val for_alias_module : t -> Module.t -> t
@@ -63,9 +63,9 @@ val modules : t -> Modules.t
 
 val flags : t -> Ocaml_flags.t
 
-val requires_link : t -> Lib.t list Resolve.Build.t
+val requires_link : t -> Lib.t list Resolve.Memo.t
 
-val requires_compile : t -> Lib.t list Resolve.Build.t
+val requires_compile : t -> Lib.t list Resolve.Memo.t
 
 val includes : t -> Command.Args.without_targets Command.Args.t Cm_kind.Dict.t
 
@@ -75,7 +75,7 @@ val opaque : t -> bool
 
 val stdlib : t -> Ocaml_stdlib.t option
 
-val js_of_ocaml : t -> Js_of_ocaml.In_buildable.t option
+val js_of_ocaml : t -> Js_of_ocaml.In_context.t option
 
 val sandbox : t -> Sandbox_config.t
 
@@ -92,7 +92,7 @@ val for_wrapped_compat : t -> t
 val for_root_module : t -> Module.t -> t
 
 val for_module_generated_at_link_time :
-  t -> requires:Lib.t list Resolve.Build.t -> module_:Module.t -> t
+  t -> requires:Lib.t list Resolve.Memo.t -> module_:Module.t -> t
 
 val for_plugin_executable :
   t -> embed_in_plugin_libraries:(Loc.t * Lib_name.t) list -> t

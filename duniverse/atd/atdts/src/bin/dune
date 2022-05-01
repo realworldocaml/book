@@ -1,0 +1,10 @@
+(executable
+ (name Atdts_main)
+ (public_name atdts)
+ (package atdts)
+ (libraries
+   cmdliner
+   atdts
+   atd
+ )
+)

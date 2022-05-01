@@ -2,7 +2,10 @@
  (name fts_cmd)
  (enabled_if
   (= %{os_type} Unix))
- (libraries fts_stubs fts_generated))
+ (libraries fts_stubs fts_generated)
+ (link_flags
+  :standard
+  (:include config/c_library_flags.sexp)))
 
 (rule
  (alias runtest)

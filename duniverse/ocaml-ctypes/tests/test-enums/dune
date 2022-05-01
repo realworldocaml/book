@@ -44,4 +44,4 @@
  (name test_enums)
  (modules test_enums)
  (package ctypes-foreign)
- (libraries oUnit ctypes test_enums_generated test_enums_stubs))
+ (libraries ounit2 ctypes test_enums_generated test_enums_stubs))

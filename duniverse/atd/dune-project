@@ -3,7 +3,7 @@
 (implicit_transitive_deps false)
 
 (name atd)
-(version 2.4.1)
+(version 2.5.0)
 (license MIT)
 
 (maintainers
@@ -75,7 +75,10 @@
  (name atd)
  (depends
   (ocaml (>= 4.08))
-  (menhir (and (>= 20180523) (< "20211215")))
+  ; 20211230 has a bug when parsing variants with a payload https://github.com/ahrefs/atd/pull/272
+  ; preserve the ability to compile with older versions because recent ones create slow builds
+  ; https://github.com/returntocorp/pfff/issues/512
+  (menhir (and (>= 20180523) (<> 20211230)))
   easy-format
   (alcotest :with-test)
   (odoc :with-doc)
@@ -180,4 +183,17 @@ This library contains the types that are used by atdgen's
 bucklescript backend")
  (depends
   (ocaml (>= 4.08))
+  (odoc :with-doc)))
+
+(package
+ (name atdts)
+ (synopsis "TypeScript code generation for ATD APIs")
+ (description "TypeScript code generation for ATD APIs")
+ (depends
+  (ocaml (>= 4.08))
+  (atd (>= 2.3.0))
+  (atdgen (>= 2.3.0))
+  (cmdliner (>= 1.1.0))
+  re
+  (alcotest :with-test)
   (odoc :with-doc)))

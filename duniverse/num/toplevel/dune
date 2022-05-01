@@ -4,5 +4,12 @@
   (libraries num compiler-libs)
   (wrapped false)
   (modes byte)
-  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -safe-string -strict-sequence -strict-formats)
-)
+  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -safe-string -strict-sequence -strict-formats))
+
+(rule
+  (with-stdout-to META.shim
+    (progn (echo "requires = \"num.top\"\nversion = \"%{version:num}\"\ndescription = \"Add-on for num inside toploops\"\n"))))
+
+(install
+  (files (META.shim as num_top/META))
+  (section lib_root))

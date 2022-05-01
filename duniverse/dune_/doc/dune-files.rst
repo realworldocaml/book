@@ -14,7 +14,7 @@ contents of all configuration files read by Dune and looks like:
 
 .. code:: scheme
 
-   (lang dune 3.0)
+   (lang dune 3.1)
 
 Additionally, they can contains the following stanzas.
 
@@ -302,9 +302,9 @@ defined in the project:
 - ``(license <name>)`` - specifies the license of the project, ideally as an
   identifier from the `SPDX License List <https://spdx.org/licenses/>`__
 
-- ``(authors <authors>)`` - a list of authors
+- ``(authors <author> ..)`` - authors as inline strings
 
-- ``(maintainers <maintainers>)`` - a list of maintainers
+- ``(maintainers <maintainer> ..)`` - maintainers as inline strings
 
 - ``(source <source>)`` - where the source is specified two ways:
   ``(github <user/repo>)`` or ``(uri <uri>)``
@@ -328,7 +328,7 @@ Some or all of these fields may be overridden for each package of the project, s
 package
 -------
 
-Package specific information is specified in the ``(package <package>)`` stanza.
+Package specific information is specified in the ``(package <package-fields>)`` stanza.
 It contains the following fields:
 
 - ``(name <string>)`` is the name of the package. This must be specified.
@@ -374,7 +374,8 @@ language. The syntax is a list of the following elements:
 
    logop := or | and
 
-   dep := (name <stage>)
+   dep := name
+        | (name <stage>)
         | (name <constr>)
         | (name (<logop> (<stage> | <constr>)*))
 
@@ -399,7 +400,8 @@ adding the following field to the ``dune-project`` file:
 
 In this mode, Dune will populate the ``:standard`` set of C flags with the
 content of ``ocamlc_cflags`` and  ``ocamlc_cppflags``. These flags can be
-completed or overridden using the :ref:`ordered-set-language`.
+completed or overridden using the :ref:`ordered-set-language`. The value
+``true`` is the default for Dune 3.0.
 
 accept_alternative_dune_file_name
 ---------------------------------
@@ -494,8 +496,6 @@ to use the :ref:`include_subdirs` stanza.
 
 - ``(package <package>)`` installs a private library under the specified package.
   Such a library is now usable by public libraries defined in the same project.
-
-=======
   The Findlib name for this library will be ``<package>.__private__.<name>``;
   however, the library's interface will be hidden from consumers outside the
   project.
@@ -988,7 +988,7 @@ It shares the same fields as the ``executable`` stanza, except that instead of
   of each executable.
 
 - ``(public_names <names>)`` describes under what name to install each executable.
-The list of names must be of the same length as the list in the
+  The list of names must be of the same length as the list in the
   ``(names ...)`` field. Moreover, you can use ``-`` for executables that
   shouldn't be installed.
 
@@ -1022,8 +1022,9 @@ target ``foo`` and a directory target ``bar``.
      (targets foo (dir bar))
      (action  <action>))
 
-To enable this experimental feature, add ``(using directory-targets 0.1)``
-to your ``dune-project`` file.
+To enable this experimental feature, add ``(using directory-targets 0.1)`` to
+your ``dune-project`` file. However note that currently rules with a directory
+target are always rebuilt. We are working on fixing this performance bug.
 
 
 ``<action>`` is what you run to produce the targets from the dependencies.
@@ -1190,7 +1191,7 @@ To use Menhir in a Dune project, the language version should be selected in the
 
 .. code:: scheme
 
-  (using Menhir 2.0)
+  (using menhir 2.0)
 
 This will enable support for Menhir stanzas in the current project. If the
 language version is absent, Dune will automatically add this line with the
@@ -1561,7 +1562,7 @@ Fields supported in ``<settings>`` are:
   whether to use separate compilation or not.
 
 - ``(js_of_ocaml (runtest_alias <alias-name>))`` is used to specify
-  the alias under which `inline_tests`_ and tests (`tests-stanza`_)
+  the alias under which :ref:`inline_tests` and tests (`tests-stanza`_)
   run for the `js` mode.
 
 - ``(binaries <binaries>)``, where ``<binaries>`` is a list of entries
@@ -2130,7 +2131,7 @@ a typical ``dune-workspace`` file looks like:
 
 .. code:: scheme
 
-    (lang dune 3.0)
+    (lang dune 3.1)
     (context (opam (switch 4.07.1)))
     (context (opam (switch 4.08.1)))
     (context (opam (switch 4.11.1)))
@@ -2142,7 +2143,7 @@ containing exactly:
 
 .. code:: scheme
 
-    (lang dune 3.0)
+    (lang dune 3.1)
     (context default)
 
 This allows you to use an empty ``dune-workspace`` file to mark the root of your

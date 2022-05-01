@@ -12,7 +12,7 @@ type conf = {
 
 let run conf =
   if conf.version then (
-    print_endline Atd.Version.version;
+    print_endline Atdpy.Version.version;
     exit 0
   )
   else
@@ -90,7 +90,7 @@ type bar = [
   `P "Report issues at https://github.com/ahrefs/atd";
 
   `S Manpage.s_see_also;
-  `P "atdgen, atdj, atds"
+  `P "atdgen, atdj, atds, atdts"
 ]
 
 let cmdline_term run =

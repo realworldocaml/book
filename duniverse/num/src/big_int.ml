@@ -674,7 +674,7 @@ let approx_big_int prec bi =
                                       (big_int_of_string "963295986"))
                         (big_int_of_string "100000000")))) in
   let s =
-    Bytes.unsafe_of_string
+    Bytes.of_string
       (string_of_big_int (div_big_int bi (power_int_positive_int 10 n)))
   in
   let (sign, off) =

@@ -1,7 +1,0 @@
-(executable
-  (name discover)
-  (libraries dune.configurator))
-
-(rule
-  (targets arch cflags)
-  (action (run ./discover.exe)))

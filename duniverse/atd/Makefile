@@ -10,7 +10,6 @@ DUNE ?= dune
 .PHONY: all
 all:
 	$(DUNE) build
-	./scripts/patch-opam-files  # see 'opam-files' target
 
 # Install the OCaml dependencies for the build.
 .PHONY: setup
@@ -42,7 +41,12 @@ docker-build:
 # to support all the target languages.
 .PHONY: test
 test:
-	$(DUNE) runtest -f
+	$(MAKE) test-ts
+	$(MAKE) test-ocaml
+	$(MAKE) test-scala
+	$(MAKE) test-java
+	$(MAKE) test-python
+	$(MAKE) test-ts
 
 # Test the OCaml code used by all the backends
 test-common:
@@ -74,6 +78,12 @@ test-python:
 	$(MAKE) test-common
 	$(MAKE) -C atdpy test
 
+# Test only the TypeScript backend
+.PHONY: test-ts
+test-ts:
+	$(MAKE) test-common
+	$(MAKE) -C atdts test
+
 ############################################################################
 
 .PHONY: js
@@ -102,13 +112,11 @@ livedoc:
 	python3 -m http.server 8888 --directory doc/_build
 
 # Prepare the opam files for a release. They're derived from 'dune-project'
-# by 'dune build' and then patched to work around some issues.
-# https://discuss.ocaml.org/t/when-exactly-does-dune-generate-opam-files/8292/2
+# and from the template specified in the root 'dune' file..
 #
 .PHONY: opam-files
 opam-files:
 	$(DUNE) build *.opam
-	./scripts/patch-opam-files
 
 # This is only part of the release process.
 # See complete release instructions in CONTRIBUTING.md.

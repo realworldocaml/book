@@ -2,13 +2,20 @@
   (name num)
   (public_name num)
   (wrapped false)
-  (c_names nat_stubs bng bng_generic)
-  (c_flags (:include config/cflags))
-  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -bin-annot -g -safe-string -strict-sequence -strict-formats )
-)
+  (modules )
+  (synopsis "Arbitrary-precision rational arithmetic")
+  (libraries num.core))
 
+(library
+  (name num_core)
+  (public_name num.core)
+  (wrapped false)
+  (modules arith_flags arith_status big_int int_misc nat num ratio)
+  (c_names nat_stubs bng bng_generic)
+  (c_flags "-DBNG_ARCH_%{architecture}")
+  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -bin-annot -g -safe-string -strict-sequence -strict-formats))
 
 (rule
   (targets bng_generic.c)
-  (deps bng_digit.c bng_amd64.c bng_arm64.c bng_ia32.c bng_ppc.c bng_sparc.c)
+  (deps bng_digit.c bng_amd64.c bng_arm64.c bng_ia32.c bng_ppc.c)
   (action (run touch bng_generic.c)))

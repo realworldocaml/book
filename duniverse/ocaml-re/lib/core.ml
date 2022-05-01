@@ -631,11 +631,11 @@ let rec translate ids kind ign_group ign_case greedy pos cache c = function
   | Beg_of_word ->
     (A.seq ids `First
        (A.after ids Category.(inexistant ++ not_letter))
-       (A.before ids Category.(inexistant ++ letter)),
+       (A.before ids Category.letter),
      kind)
   | End_of_word ->
     (A.seq ids `First
-       (A.after ids Category.(inexistant ++ letter))
+       (A.after ids Category.letter)
        (A.before ids Category.(inexistant ++ not_letter)),
      kind)
   | Not_bound ->
@@ -643,8 +643,8 @@ let rec translate ids kind ign_group ign_case greedy pos cache c = function
                   (A.after ids Category.letter)
                   (A.before ids Category.letter);
                 A.seq ids `First
-                  (A.after ids Category.letter)
-                  (A.before ids Category.letter)],
+                  (A.after ids Category.(inexistant ++ not_letter))
+                  (A.before ids Category.(inexistant ++ not_letter))],
      kind)
   | Beg_of_str ->
     (A.after ids Category.inexistant, kind)
