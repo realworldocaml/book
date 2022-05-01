@@ -97,7 +97,7 @@ full codebase is one big `main` function.
 
 The idiom of writing `let () =` may seem a bit odd, but it has a purpose. The
 `let` binding here is a pattern-match to a value of type `unit`, which is
-there to ensure that the expression on the righthand side returns `unit`, as
+there to ensure that the expression on the right-hand side returns `unit`, as
 is common for functions that operate primarily by side effect.
 :::
 

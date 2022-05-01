@@ -504,7 +504,7 @@ rule read =
 
 The rules are structured very similarly to pattern matches, except that the
 variants are replaced by regular expressions on the left-hand side. The
-righthand-side clause is the parsed OCaml return value of that rule. The
+right-hand side clause is the parsed OCaml return value of that rule. The
 OCaml code for the rules has a parameter called `lexbuf` that defines the
 input, including the position in the input file, as well as the text that was
 matched by the regular expression. [pattern matching/vs. lexing rules]{.idx}

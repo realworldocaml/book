@@ -607,7 +607,7 @@ But if the evaluation of the body throws an exception, then the
 exception will be fed to the pattern-match clauses following the
 `with`. If the exception matches a pattern, then we consider the
 exception caught, and the `try/with` clause evaluates to the
-expression on the righthand side of the matching pattern.
+expression on the right-hand side of the matching pattern.
 
 Otherwise, the original exception continues up the stack of function calls,
 to be handled by the next outer exception handler. If the exception is never

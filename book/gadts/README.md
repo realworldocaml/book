@@ -329,7 +329,7 @@ you'll see what looks like an ordinary, single-argument function type,
 and you can almost think of it that way; specifically, as the type
 signature for that particular tag, viewed as a type constructor. The
 left-hand side of the arrow states the types of the arguments to the
-constructor, and the right hand side determines the type of the
+constructor, and the right-hand side determines the type of the
 constructed value.
 
 In the definition of each tag in a GADT, the right-hand side of the
@@ -1504,7 +1504,7 @@ val source_to_sexp : 'a Source_kind.t -> 'a -> Sexp.t = <fun>
 ```
 
 \noindent
-But, observing that the right hand side of `Raw_data` and `Filename`
+But, observing that the right-hand side of `Raw_data` and `Filename`
 are the same, you might try to merge those cases together with an
 or-pattern.  Unfortunately, that doesn't work.
 

@@ -161,7 +161,7 @@ val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
 Here, we've dropped the parentheses around the function on the
-righthand side of the bind, and we didn't add a level of indentation
+right-hand side of the bind, and we didn't add a level of indentation
 for the contents of that function. This is standard practice for using
 the infix `bind` operator. [bind function]{.idx}
 

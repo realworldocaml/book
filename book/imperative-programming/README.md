@@ -1205,7 +1205,7 @@ Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
 OCaml rejects the definition because OCaml, as a strict language, has limits
-on what it can put on the righthand side of a `let rec`. In particular,
+on what it can put on the right-hand side of a `let rec`. In particular,
 imagine how the following code snippet would be compiled:
 
 ```ocaml skip
@@ -1219,7 +1219,7 @@ compiling down to an infinite loop, but `x` is of type `int`, and there's no
 effectively impossible to compile.
 
 To avoid such impossible cases, the compiler only allows three possible
-constructs to show up on the righthand side of a `let rec`: a function
+constructs to show up on the right-hand side of a `let rec`: a function
 definition, a constructor, or the lazy keyword. This excludes some reasonable
 things, like our definition of `memo_rec`, but it also blocks things that
 don't make sense, like our definition of `x`.
