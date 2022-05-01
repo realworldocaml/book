@@ -6,7 +6,7 @@ exception My_exception of (int -> int) * int
 
 (** Comment for type [weather]  *)
 type weather =
-  | Rain of int (** The comment for construtor Rain *)
+  | Rain of int (** The comment for constructor Rain *)
   | Sun         (** The comment for constructor Sun *)
 
 (** Find the current weather for a country
