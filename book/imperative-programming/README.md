@@ -75,7 +75,7 @@ val remove : ('a, 'b) t -> 'a -> unit
 ```
 
 This `mli` also includes a collection of helper functions whose
-purpose and behavior should be largely inferrable from their names and
+purpose and behavior should be largely inferable from their names and
 type signatures. Note that the `create` function takes as its
 arguments functions for hashing keys and testing them for equality.
 
@@ -644,7 +644,7 @@ let insert_first t value =
 it into the list, finally setting the list itself to point to
 `new_elt`. Note that the precedence of a `match` expression is very
 low, so to separate it from the following assignment (`t := Some
-new_elt`), we surround the match with parenthses.  We could have used
+new_elt`), we surround the match with parentheses.  We could have used
 `begin ... end` for the same purpose, but without some kind of
 bracketing, the final assignment would incorrectly become part of the
 `None` case. [elements/defining new]{.idx}
