@@ -401,7 +401,7 @@ this case means the <code>area</code> method.</p>
 <section class="level3" id="depth-subtyping">
 <h3>Depth Subtyping</h3>
 <p>We can also use <em>depth</em> subtyping with objects. Depth
-subtyping allows us coerce an object if its individual methods could
+subtyping allows us to coerce an object if its individual methods could
 safely be coerced. So an object type <code>&lt; m: t1 &gt;</code> is a
 subtype of <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a subtype
 of <code>t2</code>. <a data-primary="depth subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="depth subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
@@ -479,8 +479,8 @@ let shapes: shape list = (squares :&gt; shape list);;
 </div>
 <p>Note that this relies on lists being immutable. It would not be safe
 to treat a <code>square array</code> as a <code>shape array</code>
-because it would allow you to store nonsquare shapes into what should be
-an array of squares. OCaml recognizes this and does not allow the
+because it would allow you to store non-square shapes into what should
+be an array of squares. OCaml recognizes this and does not allow the
 coercion:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square_array: square array = [| square 10; square 20 |];;
@@ -822,7 +822,7 @@ remove_large (squares :&gt; &lt; area : float &gt; list );;
 </div>
 <p>There are some situations where we cannot use row polymorphism. In
 particular, row polymorphism cannot be used to place different types of
-object in the same container. For example, lists of heterogeneous
+objects in the same container. For example, lists of heterogeneous
 elements cannot be created using row polymorphism:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30];;

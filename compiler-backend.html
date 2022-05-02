@@ -66,15 +66,15 @@ and it is explicitly undocumented since it can change across compiler
 revisions. Despite these caveats, some interesting points emerge from
 reading it:</p>
 <ul>
-<li><p>There are no mention of modules or types any more. Global values
+<li><p>There are no mentions of modules or types any more. Global values
 are created via <code>setglobal</code>, and OCaml values are constructed
 by <code>makeblock</code>. The blocks are the runtime values you should
 remember from <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 23, Memory Representation Of Values</a>.</p></li>
 <li><p>The pattern match has turned into a switch case that jumps to the
 right case depending on the header tag of <code>v</code>. Recall that
 variants without parameters are stored in memory as integers in the
-order which they appear. The pattern-matching engine knows this and has
-transformed the pattern into an efficient jump table.</p></li>
+order in which they appear. The pattern-matching engine knows this and
+has transformed the pattern into an efficient jump table.</p></li>
 <li><p>Values are addressed by a unique name that distinguishes shadowed
 values by appending a number (e.g., <code>v/1014</code>). The type
 safety checks in the earlier phase ensure that these low-level accesses
@@ -522,7 +522,7 @@ inlining across compilation units. This can be a significant speedup for
 standard library functions that are frequently used outside of their
 module.</p>
 <p>Collections of <code>.cmx</code> and <code>.o</code> files can also
-be be linked into a <code>.cmxa</code> archive by passing the
+be linked into a <code>.cmxa</code> archive by passing the
 <code>-a</code> flag to the compiler. However, unlike the bytecode
 version, you must keep the individual <code>cmx</code> files in the
 compiler search path so that they are available for cross-module
@@ -703,7 +703,7 @@ the produced assembly code to see if you can hand-optimize it.</p>
 comparison, you may have noticed that we prepended the comparison
 functions with <code>Stdlib</code>. This is because the Core module
 explicitly redefines the <code>&gt;</code> and <code>&lt;</code> and
-<code>=</code> operators to be specialised for operating over
+<code>=</code> operators to be specialized for operating over
 <code>int</code> types, as explained in <a data-type="xref" href="maps-and-hashtables.html#the-polymorphic-comparator">Chapter 14, Maps and Hashtables</a>. You can always recover any of
 the OCaml standard library functions by accessing them through the
 <code>Stdlib</code> module, as we did in our benchmark.</p>
@@ -826,9 +826,9 @@ Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 4         function</code></pre>
 </div>
-<p>The binary has run until the first take invocation and stopped,
-waiting for further instructions. GDB has lots of features, so let’s
-continue the program and check the stacktrace after a couple of
+<p>The binary has run until the first <code>take</code> invocation and
+stopped, waiting for further instructions. GDB has lots of features, so
+let’s continue the program and check the backtrace after a couple of
 recursions:</p>
 <div class="highlight">
 <pre><code class="language-clike">(gdb) cont

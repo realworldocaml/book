@@ -3,7 +3,7 @@
 <div data-text-align="right">
 <p><em>This chapter includes contributions from Jason Hickey.</em></p>
 </div>
-<p>Many programming tasks start with the interpretion of some form of
+<p>Many programming tasks start with the interpretation of some form of
 structured textual data. <em>Parsing</em> is the process of converting
 such data into data structures that are easy to program against. For
 simple formats, it’s often enough to parse the data in an ad hoc way,
@@ -201,7 +201,7 @@ declaration section of the parser with a <code>%%</code>:</p>
 <p>Once that’s in place, we can start specifying the productions. In
 <code>menhir</code>, productions are organized into <em>rules</em>,
 where each rule lists all the possible productions for a given
-nonterminal symbols. Here, for example, is the rule for
+nonterminal symbol. Here, for example, is the rule for
 <code>prog</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">prog:
@@ -465,8 +465,8 @@ other rules as part of the body of the rule. Let’s look at the
 </div>
 <p>The rules are structured very similarly to pattern matches, except
 that the variants are replaced by regular expressions on the left-hand
-side. The righthand-side clause is the parsed OCaml return value of that
-rule. The OCaml code for the rules has a parameter called
+side. The right-hand side clause is the parsed OCaml return value of
+that rule. The OCaml code for the rules has a parameter called
 <code>lexbuf</code> that defines the input, including the position in
 the input file, as well as the text that was matched by the regular
 expression. <a data-secondary="vs.&nbsp;lexing
@@ -523,7 +523,7 @@ Warning: the token ID is unused.</code></pre>
 </div>
 <p>It’s completely fine to define unused regexps as we’ve done, and to
 hook them into parsers as required. For example, we might use
-<code>ID</code> if we adding an extension to our parser for supporting
+<code>ID</code> if we add an extension to our parser for supporting
 unquoted string identifiers as a non-standard JSON extension.</p>
 </section>
 </section>

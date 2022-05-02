@@ -267,7 +267,7 @@ each tag. That’s where GADTs can help.</p>
 </section>
 <section class="level3" id="gadts-to-the-rescue">
 <h3>GADTs to the rescue</h3>
-<p>Now we’re ready write our first GADT. Here’s a new version of our
+<p>Now we’re ready to write our first GADT. Here’s a new version of our
 <code>value</code> and <code>expr</code> types that correctly encode our
 desired typing rules.</p>
 <div class="highlight">
@@ -287,7 +287,7 @@ colon, you’ll see what looks like an ordinary, single-argument function
 type, and you can almost think of it that way; specifically, as the type
 signature for that particular tag, viewed as a type constructor. The
 left-hand side of the arrow states the types of the arguments to the
-constructor, and the right hand side determines the type of the
+constructor, and the right-hand side determines the type of the
 constructed value.</p>
 <p>In the definition of each tag in a GADT, the right-hand side of the
 arrow is an instance of the type of the overall GADT, with independent
@@ -523,9 +523,9 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;;
 &gt;- : int option = Some 20
 </code></pre>
 </div>
-<p>This mostly does what we want, but the problems is that
+<p>This mostly does what we want, but the problem is that
 <code>flexible_find</code> always returns an option, even when it’s
-passed <code>Raise</code> or <code>Default_to</code>, which guarantee
+passed <code>Raise</code> or <code>Default_to</code>, which guarantees
 that the <code>None</code> case is never used.</p>
 <p>To eliminate the unnecessary option in the <code>Raise</code> and
 <code>Default_to</code> cases, we’re going to turn
@@ -836,7 +836,7 @@ library like this has several advantages over having combinators that
 build a more concrete computational machine: <a data-primary="combinators, implementing with GADTs" data-type="indexterm">&nbsp;</a></p>
 <ul>
 <li><p>The core types are simpler, since they are typically built out of
-GADT tags that are just reflections the types of the base
+GADT tags that are just reflections of the types of the base
 combinators.</p></li>
 <li><p>The design is more modular, since your core types don’t need to
 contemplate every possible use you want to make of them.</p></li>
@@ -1182,7 +1182,7 @@ end = struct
 end</code></pre>
 </div>
 <p>All of which is to say: when creating types to act as abstract
-markers for the type parameter of a GADT, you should chose definitions
+markers for the type parameter of a GADT, you should choose definitions
 that make the distinctness of those types clear, and you should expose
 those definitions in your <code>mli</code>s.</p>
 </section>
@@ -1324,7 +1324,7 @@ applied to code that isn’t designed with narrowing in mind.</p>
 <p>Hopefully, we’ve demonstrated the utility of GADTs, while at the same
 time showing some of the attendant complexities. In this final section,
 we’re going to highlight some remaining difficulties with using GADTs
-that you may run in to, as well as how to work around them.</p>
+that you may run into, as well as how to work around them.</p>
 <section class="level3" id="or-patterns">
 <h3>Or-patterns</h3>
 <p>GADTs don’t work well with or-patterns. Consider the following type
@@ -1350,7 +1350,7 @@ the corresponding source, and prints it out.</p>
 &gt;val source_to_sexp : 'a Source_kind.t -&gt; 'a -&gt; Sexp.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p> But, observing that the right hand side of <code>Raw_data</code> and
+<p> But, observing that the right-hand side of <code>Raw_data</code> and
 <code>Filename</code> are the same, you might try to merge those cases
 together with an or-pattern. Unfortunately, that doesn’t work.</p>
 <div class="highlight">

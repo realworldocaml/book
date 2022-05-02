@@ -574,7 +574,7 @@ Interval_intf with type endpoint := int;;
 &gt;  end
 </code></pre>
 </div>
-<p>There’s now no <code>endpoint</code> type: all of its occurrences of
+<p>There’s now no <code>endpoint</code> type: all of its occurrences
 have been replaced by <code>int</code>. As with sharing constraints, we
 can also use this in the context of a functor:</p>
 <div class="highlight">
@@ -926,7 +926,7 @@ val dequeue : 'a t -&gt; ('a * 'a t) option
 (** Folds over the queue, from front to back *)
 val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</code></pre>
 </div>
-<p>The signature of <code>fold</code> function requires some
+<p>The signature of the <code>fold</code> function requires some
 explanation. It follows the same pattern as the <code>List.fold</code>
 function we described in <a data-type="xref" href="lists-and-patterns.html#using-the-list-module-effectively">Chapter 3, Using The List Module Effectively</a>. Essentially,
 <code>Fqueue.fold q ~init ~f</code> walks over the elements of

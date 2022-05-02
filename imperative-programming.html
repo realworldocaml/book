@@ -62,7 +62,7 @@ val iter : ('a, 'b) t -&gt; f:(key:'a -&gt; data:'b -&gt; unit) -&gt; unit
 val remove : ('a, 'b) t -&gt; 'a -&gt; unit</code></pre>
 </div>
 <p>This <code>mli</code> also includes a collection of helper functions
-whose purpose and behavior should be largely inferrable from their names
+whose purpose and behavior should be largely inferable from their names
 and type signatures. Note that the <code>create</code> function takes as
 its arguments functions for hashing keys and testing them for
 equality.</p>
@@ -595,10 +595,10 @@ lists" data-primary="elements" data-type="indexterm">&nbsp;</a></p>
 the list itself to point to <code>new_elt</code>. Note that the
 precedence of a <code>match</code> expression is very low, so to
 separate it from the following assignment
-(<code>t := Some new_elt</code>), we surround the match with parenthses.
-We could have used <code>begin ... end</code> for the same purpose, but
-without some kind of bracketing, the final assignment would incorrectly
-become part of the <code>None</code> case. <a data-secondary="defining new" data-primary="elements" data-type="indexterm">&nbsp;</a></p>
+(<code>t := Some new_elt</code>), we surround the match with
+parentheses. We could have used <code>begin ... end</code> for the same
+purpose, but without some kind of bracketing, the final assignment would
+incorrectly become part of the <code>None</code> case. <a data-secondary="defining new" data-primary="elements" data-type="indexterm">&nbsp;</a></p>
 <p>We can use <code>insert_after</code> to insert elements later in the
 list. <code>insert_after</code> takes as arguments both an
 <code>element</code> after which to insert the new node and a value to
@@ -981,8 +981,8 @@ fib 20;;
 </div>
 <p>This is a pretty strange piece of code, and it may take a few moments
 of thought to figure out what’s going on. Like <code>fib_norec</code>,
-the function <code>f_norec</code> passed into <code>make_rec</code> is a
-function that isn’t recursive but takes as an argument a function that
+the function <code>f_norec</code> passed in to <code>make_rec</code> is
+a function that isn’t recursive but takes as an argument a function that
 it will call. What <code>make_rec</code> does is to essentially feed
 <code>f_norec</code> to itself, thus making it a true recursive
 function.</p>
@@ -1037,7 +1037,7 @@ if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2));;
 </div>
 <p>Memoization is overkill for implementing Fibonacci, and indeed, the
 <code>fib</code> defined above is not especially efficient, allocating
-space linear in the number passed in to <code>fib</code>. It’s easy
+space linear in the number passed into <code>fib</code>. It’s easy
 enough to write a Fibonacci function that takes a constant amount of
 space.</p>
 <p>But memoization is a good approach for optimizing
@@ -1117,7 +1117,7 @@ times faster than it was without memoization.</p>
 </code></pre>
 </div>
 <p>OCaml rejects the definition because OCaml, as a strict language, has
-limits on what it can put on the righthand side of a
+limits on what it can put on the right-hand side of a
 <code>let rec</code>. In particular, imagine how the following code
 snippet would be compiled:</p>
 <div class="highlight">
@@ -1130,7 +1130,7 @@ compiler. You could imagine it compiling down to an infinite loop, but
 <code>int</code> that corresponds to an infinite loop. As such, this
 construct is effectively impossible to compile.</p>
 <p>To avoid such impossible cases, the compiler only allows three
-possible constructs to show up on the righthand side of a
+possible constructs to show up on the right-hand side of a
 <code>let rec</code>: a function definition, a constructor, or the lazy
 keyword. This excludes some reasonable things, like our definition of
 <code>memo_rec</code>, but it also blocks things that don’t make sense,

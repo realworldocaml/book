@@ -87,10 +87,10 @@ let touch t s =
   Map.set t ~key:s ~data:(count + 1)</code></pre>
 </div>
 <p>Take a look at the definition of the type <code>t</code> above.
-You’ll see that the <code>Map.t</code> has three type parameter. The
+You’ll see that the <code>Map.t</code> has three type parameters. The
 first two are what you might expect; one for the type of the key, and
-one for type of the data. The third type parameter, the <em>comparator
-witness</em>, requires some explaining. <a data-secondary="comparator witness" data-primary="comparator" data-type="indexterm">&nbsp;</a></p>
+one for the type of the data. The third type parameter, the
+<em>comparator witness</em>, requires some explaining. <a data-secondary="comparator witness" data-primary="comparator" data-type="indexterm">&nbsp;</a></p>
 <p>The comparator witness is used to indicate which comparison function
 was used to construct the map, rather than saying something about the
 type of data stored in the map. The type
@@ -675,7 +675,7 @@ module" data-type="indexterm">&nbsp;</a><a data-secondary="time complexity of" d
 <h3>Time Complexity of Hash Tables</h3>
 <p>The statement that hash tables provide constant-time access hides
 some complexities. First of all, most hash table implementations,
-OCaml’s included, needs to resize the table when it gets too full. A
+OCaml’s included, need to resize the table when it gets too full. A
 resize requires allocating a new backing array for the hash table and
 copying over all entries, and so it is quite an expensive operation.
 That means adding a new element to the table is only <em>amortized</em>

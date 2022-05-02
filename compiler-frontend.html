@@ -83,7 +83,7 @@ Command-line interfaces for the compiler tools.
 </dd>
 <dt><code>file_formats/</code></dt>
 <dd>
-Serialiser and deserialisers for on-disk files used by the compiler
+Serializer and deserializers for on-disk files used by the compiler
 driver.
 </dd>
 <dt><code>lambda/</code></dt>
@@ -154,11 +154,11 @@ process" data-type="indexterm">&nbsp;</a></p>
 <section class="level3" id="syntax-errors">
 <h3>Syntax Errors</h3>
 <p>The OCaml parser’s goal is to output a well-formed AST data structure
-to the next phase of compilation, and so it any source code that doesn’t
-match basic syntactic requirements. The compiler emits a <em>syntax
-error</em> in this situation, with a pointer to the filename and line
-and character number that’s as close to the error as possible.<a data-secondary="syntax errors" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="syntax
-errors" data-type="indexterm">&nbsp;</a></p>
+to the next phase of compilation, and so it fails on any source code
+that doesn’t match basic syntactic requirements. The compiler emits a
+<em>syntax error</em> in this situation, with a pointer to the filename
+and line and character number that’s as close to the error as
+possible.<a data-secondary="syntax errors" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="syntax errors" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s an example syntax error that we obtain by performing a module
 assignment as a statement instead of as a <code>let</code> binding:</p>
 <div class="highlight">
@@ -310,7 +310,7 @@ exception My_exception of (int -&gt; int) * int
 
 (** Comment for type [weather]  *)
 type weather =
-  | Rain of int (** The comment for construtor Rain *)
+  | Rain of int (** The comment for constructor Rain *)
   | Sun         (** The comment for constructor Sun *)
 
 (** Find the current weather for a country
@@ -404,7 +404,7 @@ end;;
 <p>The warning in our example is taken from the <a href="https://ocaml.org/manual/native.html">compiler manual page</a>.
 This warning emits a message if the expression in a sequence doesn’t
 have type <code>unit</code>. The <code>@@@warning</code> nodes in the
-module implementation cause the compiler to change its behaviour within
+module implementation cause the compiler to change its behavior within
 the scope of that structure only.</p>
 <p>An annotation can also be more narrowly attached to a block of code.
 For example, a module implementation can be annotated with
@@ -1107,12 +1107,12 @@ module B : sig
   val w : int
 end</code></pre>
 </div>
-<p>If you want to disable this behaviour of dune and deliberately
-include multiple toplevel modules, you can add
-<code>(wrapped false)</code> to your libraries stanza. However, this is
-discouraged in general due to the increased likelyhood of linking
-clashes when you have a lot of library dependencies, since every module
-that is linked into an executable must have a unique name in OCaml.</p>
+<p>If you want to disable this behavior of dune and deliberately include
+multiple toplevel modules, you can add <code>(wrapped false)</code> to
+your libraries stanza. However, this is discouraged in general due to
+the increased likelihood of linking clashes when you have a lot of
+library dependencies, since every module that is linked into an
+executable must have a unique name in OCaml.</p>
 </section>
 <section class="level3" id="shorter-module-paths-in-type-errors">
 <h3>Shorter Module Paths in Type Errors</h3>

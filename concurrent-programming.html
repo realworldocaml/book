@@ -155,9 +155,9 @@ verbose, and so Async includes an infix operator for it:
 </code></pre>
 </div>
 <p>Here, we’ve dropped the parentheses around the function on the
-righthand side of the bind, and we didn’t add a level of indentation for
-the contents of that function. This is standard practice for using the
-infix <code>bind</code> operator. <a data-primary="bind
+right-hand side of the bind, and we didn’t add a level of indentation
+for the contents of that function. This is standard practice for using
+the infix <code>bind</code> operator. <a data-primary="bind
 function" data-type="indexterm">&nbsp;</a></p>
 <p>Now let’s look at another potential use of <code>bind</code>. In this
 case, we’ll write a function that counts the number of lines in a
@@ -174,10 +174,11 @@ file:</p>
 </div>
 <p>This looks reasonable enough, but as you can see, the compiler is
 unhappy. The issue here is that <code>bind</code> expects a function
-that returns a <code>Deferred.t</code>, but we’ve provided it a function
-that returns the result directly. What we need is <code>return</code>, a
-function provided by Async that takes an ordinary value and wraps it up
-in a deferred. <a data-primary="return function" data-type="indexterm">&nbsp;</a></p>
+that returns a <code>Deferred.t</code>, but we’ve provided it with a
+function that returns the result directly. What we need is
+<code>return</code>, a function provided by Async that takes an ordinary
+value and wraps it up in a deferred. <a data-primary="return
+function" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show_val return;;
 &gt;val return : 'a -&gt; 'a Deferred.t
@@ -399,8 +400,8 @@ concisely.</p>
 <p>Async’s real implementation has more optimizations and is therefore
 more complicated. But the above implementation is still a useful
 first-order mental model for how bind works under the covers. And it’s
-another good example of how <code>upon</code> and ivars can useful for
-building concurrency primitives.</p>
+another good example of how <code>upon</code> and ivars can be useful
+for building concurrency primitives.</p>
 </section>
 </section>
 </section>
@@ -555,8 +556,8 @@ let always_fail () = assert false;;
 </div>
 <p>This is a little odd, but it does make sense. After all, if a
 function never returns, we’re free to impute any type at all to its
-non-existant return value. As a result, from a typing perspective, a
-function that never returns can fit in to any context within your
+non-existent return value. As a result, from a typing perspective, a
+function that never returns can fit into any context within your
 program.</p>
 <p>But that itself can be problematic, especially with a function like
 <code>Scheduler.go</code>, where the fact that it never returns is
@@ -585,7 +586,7 @@ uninhabited" data-type="indexterm">&nbsp;</a></p>
 </code></pre>
 </div>
 <p>The function <code>never_returns</code> consumes a value of type
-<code>Nothing.t</code> and returns an unconstrainted type
+<code>Nothing.t</code> and returns an unconstrained type
 <code>'a</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show_val never_returns;;
@@ -593,8 +594,8 @@ uninhabited" data-type="indexterm">&nbsp;</a></p>
 </code></pre>
 </div>
 <p>If you try to write a function that uses <code>Scheduler.go</code>,
-and just assumes that it returns unit, you’ll get a helpful type
-error.</p>
+and just assumes that it returns <code>unit</code>, you’ll get a helpful
+type error.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let do_stuff n =
   let x = 3 in
@@ -1226,7 +1227,7 @@ let query_uri ~server query =
 servers on the command-line, and to distribute the search queries
 round-robin across the list of servers.</p>
 <p>Now, let’s see what happens when we rebuild the application and run
-it two servers, one of which won’t respond to the query.</p>
+it on two servers, one of which won’t respond to the query.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 &gt;(monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
@@ -1497,7 +1498,7 @@ released in 2022 as OCaml 5.0, has a long awaited multicore-capable
 garbage collector, which is the result of years of research and hard
 implementation work. <a data-primary="multicore" data-type="indexterm">&nbsp;</a></p>
 <p>We won’t discuss the multicore gc here in part because it’s not yet
-released, and in part because there’s a lot of open questions about
+released, and in part because there’s a lot of open questions about how
 OCaml programs should take advantage of multicore in a way that’s safe,
 convenient, and performant. Given all that, we just don’t know enough to
 write a chapter about multicore today.</p>
@@ -1622,7 +1623,7 @@ has its limitations, but it leads to more predictable behavior.</p>
 <h3>Thread-Safety and Locking</h3>
 <p>Once you start working with system threads, you’ll need to be careful
 about mutable data structures. Most mutable OCaml data structures will
-behave non-determinstically when accessed concurrently by multiple
+behave non-deterministically when accessed concurrently by multiple
 threads. The issues you can run into range from runtime exceptions to
 corrupted data structures. That means you should almost always use
 mutexes when sharing mutable data between different systems threads.

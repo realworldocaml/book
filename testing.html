@@ -48,8 +48,8 @@ advance these goals.</p>
 <section class="level2" id="inline-tests">
 <h2>Inline tests</h2>
 <p>The first step towards a good testing environment is making it easy
-to set up and and run a test. To that end, we’ll show you how to write
-tests with <code>ppx_inline_test</code>, which lets you add tests to any
+to set up and run a test. To that end, we’ll show you how to write tests
+with <code>ppx_inline_test</code>, which lets you add tests to any
 module in a library with a specially annotated <code>let</code> binding.
 <a data-secondary="ppx_inline_test" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_inline_test" data-type="indexterm">&nbsp;</a></p>
 <p>To use inline tests in a library, we need to do two things:</p>
@@ -148,8 +148,8 @@ let%test_unit "rev" =
 [1]</code></pre>
 </div>
 <p>As you can see, the data that caused the comparison to fail is
-printed out, along with the stacktrace. Sadly, the stacktrace is in this
-case mostly a distraction. That’s a downside of using exceptions to
+printed out, along with the stack backtrace. Sadly, the backtrace is in
+this case mostly a distraction. That’s a downside of using exceptions to
 report test failures.</p>
 </section>
 <section class="level3" id="where-should-tests-go">
@@ -203,7 +203,7 @@ modules have toplevel side-effects, that’s a recipe for disaster, since
 you don’t want those top-level effects to be triggered by the test
 framework.</p>
 <p>So, how do we test code that’s part of an executable? The solution is
-to break up your program in to two pieces: a directory containing a
+to break up your program into two pieces: a directory containing a
 library that contains the logic of your program, but no top-level
 effects; and a directory for the executable that links in the library,
 and is responsible for launching the code.</p>
@@ -272,7 +272,7 @@ with <code>opam</code>.</p>
 <p>The expect test runner also creates a version of the file with the
 captured output, with <code>.corrected</code> appended to the end of the
 filename. If this new output looks correct, we can <em>promote</em> it
-by copying the corrected file it over the original source. The
+by copying the corrected file over the original source. The
 <code>dune promote</code> command does just this, leaving our source as
 follows.</p>
 <div class="highlight">
@@ -313,7 +313,7 @@ let%expect_test _ =
   print_s [%sexp (List.rev [ 3; 2; 1 ] : int list)];
   [%expect {| (1 2 3) |}]</code></pre>
 </div>
-<p> be preferable to this?</p>
+<p> be preferable to this:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
 
@@ -627,7 +627,7 @@ doing any IO or interacting with system resources. As a result, these
 tests are fast to run and entirely deterministic.</p>
 <p>That’s a great ideal, but it’s not always achievable, especially when
 you want to run more end-to-end tests of your program. But even if you
-need to run tests that involved multiple processes interacting with each
+need to run tests that involve multiple processes interacting with each
 other and using real IO, expect tests are still a useful tool.</p>
 <p>To see how such tests can be built, we’ll write some tests for the
 echo server we developed in <a data-type="xref" href="concurrent-programming.html#examples-an-echo-server">Chapter 16, Concurrent Programming with Async</a>.</p>
@@ -754,8 +754,8 @@ let%expect_test "test uppercase echo" =
       return ())
     ~finally:(fun () -&gt; cleanup process)</code></pre>
 </div>
-<p>We fixed the problem, but solution should make you uncomfortable. For
-one thing, why is one second the right timeout, rather than a half a
+<p>We fixed the problem, but the solution should make you uncomfortable.
+For one thing, why is one second the right timeout, rather than a half a
 second, or ten? The time we wait is some balance between reducing the
 likelihood of a non-deterministic failure versus preserving performance
 of the test, which is a bit of an awkward trade-off to have to make.</p>
@@ -826,7 +826,7 @@ connecting three operations:</p>
 representing the sign of an integer, either <code>Positive</code>,
 <code>Negative</code>, or <code>Zero</code></li>
 <li><code>Int.neg</code>, which negates a number</li>
-<li><code>Sign.flip</code>, which, flips a <code>Sign.t</code>, i.e.,
+<li><code>Sign.flip</code>, which flips a <code>Sign.t</code>, i.e.,
 mapping <code>Positive</code> to <code>Negative</code> and vice
 versa.</li>
 </ul>
@@ -881,7 +881,7 @@ let%test_unit "negation flips the sign" =
         (Sign.flip (Int.sign x)))</code></pre>
 </div>
 <p> Note that we didn’t explicitly state how many examples should be
-tested. Quickcheck has a built in default which can be overridden by way
+tested. Quickcheck has a built-in default which can be overridden by way
 of an optional argument.</p>
 <p>Running the test uncovers the fact that the property we’ve been
 testing doesn’t actually hold on all outputs, as you can see below.</p>
@@ -928,9 +928,8 @@ equal to itself.</p>
 <p>Quickcheck’s decision to put much larger weight on special cases is
 what allowed us to discover this unexpected behavior. Note that in this
 case, it’s not really a bug that we’ve uncovered, it’s just that the
-property that we thought would should hold can’t in practice. But either
-way, Quickcheck helped us understand the behavior of our code
-better.</p>
+property that we thought would hold can’t in practice. But either way,
+Quickcheck helped us understand the behavior of our code better.</p>
 <section class="level3" id="handling-complex-types">
 <h3>Handling complex types</h3>
 <p>Tests can’t subsist on simple atomic types alone, which is why you’ll
@@ -1052,7 +1051,7 @@ distribution. Also, we’ve ensured that all float values are
 non-negative, and that the width of the rectangle is no smaller than its
 height.</p>
 <p>The full API for building generators is beyond the scope of this
-chapter, but it’s worth digging in to the API docs if you want more
+chapter, but it’s worth digging into the API docs if you want more
 control over the distribution of your test examples.</p>
 </section>
 </section>
@@ -1106,7 +1105,7 @@ knowing about.</p>
 quickcheck-style library for writing down properties to be tested by
 AFL.</li>
 <li><a href="https://github.com/ocurrent/bun">Bun</a> is a library for
-integrating AFL in to your continuous-integration pipeline.</li>
+integrating AFL into your continuous-integration pipeline.</li>
 </ul>
 </section>
 </section>

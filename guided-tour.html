@@ -323,7 +323,7 @@ down. That makes it seem like <code>first_if_true</code> would work on
 values of any type.</p>
 <p>Indeed, if we look at the type returned by the toplevel, we see that
 rather than choose a single concrete type, OCaml has introduced a
-<em>type variable</em><code>'a</code> to express that the type is
+<em>type variable</em> <code>'a</code> to express that the type is
 generic. (You can tell it’s a type variable by the leading single quote
 mark.) In particular, the type of the <code>test</code> argument is
 <code>('a -&gt; bool)</code>, which means that <code>test</code> is a
@@ -1245,7 +1245,7 @@ find_first_negative_entry [|1;-2;0;3|];;
 </code></pre>
 </div>
 <p>As a side note, the preceding code takes advantage of the fact that
-<code>&amp;&amp;</code>, OCaml’s And operator, short-circuits. In
+<code>&amp;&amp;</code>, OCaml’s “and” operator, short-circuits. In
 particular, in an expression of the form
 <em><code>expr1</code></em><code>&amp;&amp;</code><em><code>expr2</code></em>,
 <em><code>expr2</code></em> will only be evaluated if

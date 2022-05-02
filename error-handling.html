@@ -548,7 +548,7 @@ evaluates to.</p>
 exception will be fed to the pattern-match clauses following the
 <code>with</code>. If the exception matches a pattern, then we consider
 the exception caught, and the <code>try/with</code> clause evaluates to
-the expression on the righthand side of the matching pattern.</p>
+the expression on the right-hand side of the matching pattern.</p>
 <p>Otherwise, the original exception continues up the stack of function
 calls, to be handled by the next outer exception handler. If the
 exception is never caught, it terminates the program.</p>
@@ -755,7 +755,7 @@ as shown below.</p>
 <p>The resulting error message is considerably less informative. You can
 also turn backtraces off in your code by calling
 <code>Backtrace.Exn.set_recording false</code>. <a data-secondary="control recording of" data-primary="backtraces" data-type="indexterm">&nbsp;</a></p>
-<p>There is a legitimate reasons to run without backtraces: speed.
+<p>There is a legitimate reason to run without backtraces: speed.
 OCaml’s exceptions are fairly fast, but they’re faster still if you
 disable backtraces. Here’s a simple benchmark that shows the effect,
 using the <code>core_bench</code> package:</p>
@@ -823,8 +823,8 @@ which locally avoids the costs of keeping track of the backtrace.</li>
 exception handler, which means that an unused exception handler is quite
 cheap indeed. We lose a much bigger chunk, around 55 cycles, to actually
 raising an exception. If we explicitly raise an exception with no
-stacktrace, it costs us about 25 cycles.</p>
-<p>We can also disable stacktraces, as we discussed, using
+backtrace, it costs us about 25 cycles.</p>
+<p>We can also disable backtraces, as we discussed, using
 <code>OCAMLRUNPARAM</code>. That changes the results a bit.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">OCAMLRUNPARAM=b=0 dune exec -- 

@@ -706,8 +706,7 @@ option: <a data-secondary="sexp.option" data-primary="ppx_sexp_conv" data-type="
     b: string;
   } [@@deriving sexp]</code></pre>
 </div>
-<p> And here’s what the concrete syntax looks like on some simple
-examples.</p>
+<p> And here’s what the concrete syntax looks like.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_t { a = None; b = "hello" };;
 &gt;- : Sexp.t = ((a ()) (b hello))
@@ -818,7 +817,7 @@ sexp_of_http_server_config
 both reasonably terse and easy to generate and maintain. It can also be
 useful for backwards compatibility: if you add a new field to your
 config record but make that field optional, then you should still be
-able to parse older version of your config.</p>
+able to parse older versions of your config.</p>
 <p>The exact attribute you use depends on the comparison functions
 available over the type that you wish to drop:</p>
 <ul>

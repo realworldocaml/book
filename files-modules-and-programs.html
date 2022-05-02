@@ -89,8 +89,8 @@ full codebase is one big <code>main</code> function.</p>
 <p>The idiom of writing <code>let () =</code> may seem a bit odd, but it
 has a purpose. The <code>let</code> binding here is a pattern-match to a
 value of type <code>unit</code>, which is there to ensure that the
-expression on the righthand side returns <code>unit</code>, as is common
-for functions that operate primarily by side effect.</p>
+expression on the right-hand side returns <code>unit</code>, as is
+common for functions that operate primarily by side effect.</p>
 </section>
 <p>If we weren’t using <code>Base</code> or any other external
 libraries, we could build the executable like this:</p>
@@ -960,7 +960,7 @@ create new instances of that type (or if mutable, modify existing
 instances) in any way allowed by the underlying type. That may violate a
 desired invariant <em>i.e.</em>, a property about your type that is
 always supposed to be true. Abstract types allow you to protect
-invariants by making sure that you only expose functions that preserves
+invariants by making sure that you only expose functions that preserve
 your invariants.</p>
 <p>Despite these benefits, there is a trade-off here. In particular,
 exposing types concretely makes it possible to use pattern-matching with

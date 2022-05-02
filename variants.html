@@ -17,7 +17,7 @@ types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
 </div>
 <p> Each row essentially represents a case of the variant. Each case has
 an associated tag (also called a <em>constructor</em>, since you use it
-to constructing a value) and may optionally have a sequence of fields,
+to construct a value) and may optionally have a sequence of fields,
 where each field has a specified type.</p>
 <p>Let’s consider a concrete example of how variants can be useful. Most
 UNIX-like operating systems support terminals as a fundamental,
@@ -422,7 +422,7 @@ session ID is somewhat repetitive, contemplating each of the possible
 message types (including the <code>Logon</code> case, which isn’t
 actually possible at that point in the code) and extracting the session
 ID in each case. This per-message-type handling seems unnecessary, since
-the session ID works the same way for all of message types.</p>
+the session ID works the same way for all message types.</p>
 <p>We can improve the code by refactoring our types to explicitly
 reflect the information that’s shared between the different messages.
 The first step is to cut down the definitions of each per-message record
@@ -578,7 +578,7 @@ support:</p>
   | Not   of 'a expr</code></pre>
 </div>
 <p>Note that the definition of the type <code>expr</code> is recursive,
-meaning that a <code>expr</code> may contain other <code>expr</code>s.
+meaning that an <code>expr</code> may contain other <code>expr</code>s.
 Also, <code>expr</code> is parameterized by a polymorphic type
 <code>'a</code> which is used for specifying the type of the value that
 goes under the <code>Base</code> tag.</p>
@@ -641,7 +641,8 @@ construction functions that mirror the tags of an <code>expr</code>.</p>
 <p>The <code>and_</code> function below does a few things:</p>
 <ul>
 <li>Reduces the entire expression to the constant <code>false</code> if
-any of the arms of the and are themselves are <code>false</code>.</li>
+any of the arms of the <code>And</code> are themselves
+<code>false</code>.</li>
 <li>Drops any arms of the <code>And</code> that there the constant
 <code>true</code>.</li>
 <li>Drops the <code>And</code> if it only has one arm.</li>
@@ -902,7 +903,7 @@ variant types" data-type="indexterm">&nbsp;</a></p>
   | Gray  of int                   (* 24 grayscale levels *)
   | RGBA  of int * int * int * int (* 6x6x6x6 color space *)</code></pre>
 </div>
-<p>We want to write a function <code>extended_color_to_int</code>, that
+<p>We want to write a function <code>extended_color_to_int</code> that
 works like <code>color_to_int</code> for all of the old kinds of colors,
 with new logic only for handling colors that include an alpha channel.
 One might try to write such a function as follows.</p>

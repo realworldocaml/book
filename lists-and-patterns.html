@@ -48,7 +48,7 @@ out as a data structure. The final arrow (from the box containing
 <p><br>
 <img title="Lists layout" src="images/lists-and-patterns/lists_layout.png"><br>
 </p>
-<p>Each <code>::</code> essentially adds a new block to the proceding
+<p>Each <code>::</code> essentially adds a new block to the preceding
 picture. Such a block contains two things: a reference to the data in
 that list element, and a reference to the remainder of the list. This is
 why <code>::</code> can extend a list without modifying it; extension
@@ -745,11 +745,11 @@ again, and so you don’t need to keep it around. Thus, instead of
 allocating a new stack frame for the callee, the compiler is free to
 reuse the caller’s stack frame.</p>
 <p>Tail recursion is important for more than just lists. Ordinary
-nontail recursive calls are reasonable when dealing with data structures
-like binary trees, where the depth of the tree is logarithmic in the
-size of your data. But when dealing with situations where the depth of
-the sequence of nested calls is on the order of the size of your data,
-tail recursion is usually the right approach.</p>
+non-tail recursive calls are reasonable when dealing with data
+structures like binary trees, where the depth of the tree is logarithmic
+in the size of your data. But when dealing with situations where the
+depth of the sequence of nested calls is on the order of the size of
+your data, tail recursion is usually the right approach.</p>
 </section>
 <section class="level2" id="terser-and-faster-patterns">
 <h2>Terser and Faster Patterns</h2>
@@ -774,8 +774,8 @@ and faster patterns" data-primary="pattern matching" data-type="indexterm">&nbsp
 <p>We’ll consider some ways of making this code more concise and more
 efficient.</p>
 <p>First, let’s consider efficiency. One problem with the above code is
-that it in some cases re-creates on the righthand side of the arrow a
-value that already existed on the lefthand side. Thus, the pattern
+that it in some cases re-creates on the right-hand side of the arrow a
+value that already existed on the left-hand side. Thus, the pattern
 <code>[hd] -&gt; [hd]</code> actually allocates a new list element, when
 really, it should be able to just return the list being matched. We can
 reduce allocation here by using an <code>as</code> pattern, which allows
