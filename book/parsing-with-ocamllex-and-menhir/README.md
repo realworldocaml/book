@@ -4,12 +4,12 @@
 *This chapter includes contributions from Jason Hickey.*
 :::
 
-Many programming tasks start with the interpretion of some form of structured
-textual data. *Parsing* is the process of converting such data into data
-structures that are easy to program against. For simple formats, it's often
-enough to parse the data in an ad hoc way, say, by breaking up the data into
-lines, and then using regular expressions for breaking those lines down into
-their component pieces.
+Many programming tasks start with the interpretation of some form of
+structured textual data. *Parsing* is the process of converting such
+data into data structures that are easy to program against. For simple
+formats, it's often enough to parse the data in an ad hoc way, say, by
+breaking up the data into lines, and then using regular expressions
+for breaking those lines down into their component pieces.
 
 But this simplistic approach tends to fall down when parsing more complicated
 data, particularly data with the kind of recursive structure you find in
@@ -219,10 +219,10 @@ the non-terminal symbol `prog`, and by declaring that when parsed, a
 %%
 ```
 
-Once that's in place, we can start specifying the productions. In `menhir`,
-productions are organized into *rules*, where each rule lists all the
-possible productions for a given nonterminal symbols. Here, for example, is
-the rule for `prog`:
+Once that's in place, we can start specifying the productions. In
+`menhir`, productions are organized into *rules*, where each rule
+lists all the possible productions for a given nonterminal
+symbol. Here, for example, is the rule for `prog`:
 
 ```ocaml file=examples/parsing-annotated/parser.mly,part=prog
 prog:
@@ -504,7 +504,7 @@ rule read =
 
 The rules are structured very similarly to pattern matches, except that the
 variants are replaced by regular expressions on the left-hand side. The
-righthand-side clause is the parsed OCaml return value of that rule. The
+right-hand side clause is the parsed OCaml return value of that rule. The
 OCaml code for the rules has a parameter called `lexbuf` that defines the
 input, including the position in the input file, as well as the text that was
 matched by the regular expression. [pattern matching/vs. lexing rules]{.idx}
@@ -562,9 +562,9 @@ Warning: the token ID is unused.
 ```
 
 It's completely fine to define unused regexps as we've done, and to
-hook them into parsers as required.  For example, we might use `ID`
-if we adding an extension to our parser for supporting unquoted
-string identifiers as a non-standard JSON extension.
+hook them into parsers as required.  For example, we might use `ID` if
+we add an extension to our parser for supporting unquoted string
+identifiers as a non-standard JSON extension.
 
 :::
 

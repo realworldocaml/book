@@ -607,7 +607,7 @@ But if the evaluation of the body throws an exception, then the
 exception will be fed to the pattern-match clauses following the
 `with`. If the exception matches a pattern, then we consider the
 exception caught, and the `try/with` clause evaluates to the
-expression on the righthand side of the matching pattern.
+expression on the right-hand side of the matching pattern.
 
 Otherwise, the original exception continues up the stack of function calls,
 to be handled by the next outer exception handler. If the exception is never
@@ -831,10 +831,10 @@ also turn backtraces off in your code by calling
 `Backtrace.Exn.set_recording false`.
 [backtraces/control recording of]{.idx}
 
-There is a legitimate reasons to run without backtraces:
-speed. OCaml's exceptions are fairly fast, but they're faster still if
-you disable backtraces. Here's a simple benchmark that shows the
-effect, using the `core_bench` package:
+There is a legitimate reason to run without backtraces: speed. OCaml's
+exceptions are fairly fast, but they're faster still if you disable
+backtraces. Here's a simple benchmark that shows the effect, using the
+`core_bench` package:
 
 ```ocaml file=examples/correct/exn_cost/exn_cost.ml
 open Core
@@ -903,9 +903,9 @@ Note that we lose just a small number of cycles to setting up an
 exception handler, which means that an unused exception handler is
 quite cheap indeed.  We lose a much bigger chunk, around 55 cycles, to
 actually raising an exception.  If we explicitly raise an exception
-with no stacktrace, it costs us about 25 cycles.
+with no backtrace, it costs us about 25 cycles.
 
-We can also disable stacktraces, as we discussed, using
+We can also disable backtraces, as we discussed, using
 `OCAMLRUNPARAM`.  That changes the results a bit.
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output

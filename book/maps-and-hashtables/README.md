@@ -93,11 +93,10 @@ let touch t s =
 ```
 
 Take a look at the definition of the type `t` above. You'll see that
-the `Map.t` has three type parameter. The first two are what you might
-expect; one for the type of the key, and one for type of the data. The
-third type parameter, the *comparator witness*, requires some
-explaining.
-[comparator/comparator witness]{.idx}
+the `Map.t` has three type parameters. The first two are what you
+might expect; one for the type of the key, and one for the type of the
+data. The third type parameter, the *comparator witness*, requires
+some explaining.  [comparator/comparator witness]{.idx}
 
 The comparator witness is used to indicate which comparison function
 was used to construct the map, rather than saying something about the
@@ -737,7 +736,7 @@ complexity of]{.idx}
 
 The statement that hash tables provide constant-time access hides some
 complexities. First of all, most hash table implementations, OCaml's
-included, needs to resize the table when it gets too full. A resize
+included, need to resize the table when it gets too full. A resize
 requires allocating a new backing array for the hash table and copying
 over all entries, and so it is quite an expensive operation. That
 means adding a new element to the table is only *amortized* constant,

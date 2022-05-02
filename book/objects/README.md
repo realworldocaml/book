@@ -430,7 +430,7 @@ subtype of `shape` because it implements all of the methods of
 ### Depth Subtyping
 
 We can also use *depth* subtyping with objects. Depth subtyping allows
-us coerce an object if its individual methods could safely be
+us to coerce an object if its individual methods could safely be
 coerced. So an object type `< m: t1 >` is a subtype of `< m: t2 >` if
 `t1` is a subtype of `t2`. [depth subtyping]{.idx}[subtyping/depth
 subtyping]{.idx}
@@ -516,7 +516,7 @@ val shapes : shape list = [<obj>; <obj>]
 
 Note that this relies on lists being immutable. It would not be safe
 to treat a `square array` as a `shape array` because it would allow
-you to store nonsquare shapes into what should be an array of
+you to store non-square shapes into what should be an array of
 squares. OCaml recognizes this and does not allow the coercion:
 
 ```ocaml env=subtyping
@@ -886,7 +886,7 @@ val remove_large : < area : float > list -> < area : float > list = <fun>
 
 There are some situations where we cannot use row polymorphism. In
 particular, row polymorphism cannot be used to place different types
-of object in the same container. For example, lists of heterogeneous
+of objects in the same container. For example, lists of heterogeneous
 elements cannot be created using row polymorphism:
 
 ```ocaml env=row_polymorphism

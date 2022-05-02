@@ -75,7 +75,7 @@ val remove : ('a, 'b) t -> 'a -> unit
 ```
 
 This `mli` also includes a collection of helper functions whose
-purpose and behavior should be largely inferrable from their names and
+purpose and behavior should be largely inferable from their names and
 type signatures. Note that the `create` function takes as its
 arguments functions for hashing keys and testing them for equality.
 
@@ -644,7 +644,7 @@ let insert_first t value =
 it into the list, finally setting the list itself to point to
 `new_elt`. Note that the precedence of a `match` expression is very
 low, so to separate it from the following assignment (`t := Some
-new_elt`), we surround the match with parenthses.  We could have used
+new_elt`), we surround the match with parentheses.  We could have used
 `begin ... end` for the same purpose, but without some kind of
 bracketing, the final assignment would incorrectly become part of the
 `None` case. [elements/defining new]{.idx}
@@ -1059,12 +1059,12 @@ val fib : int -> int = <fun>
 - : int = 6765
 ```
 
-This is a pretty strange piece of code, and it may take a few moments of
-thought to figure out what's going on. Like `fib_norec`, the function
-`f_norec` passed into `make_rec` is a function that isn't recursive but takes
-as an argument a function that it will call. What `make_rec` does is to
-essentially feed `f_norec` to itself, thus making it a true recursive
-function.
+This is a pretty strange piece of code, and it may take a few moments
+of thought to figure out what's going on. Like `fib_norec`, the
+function `f_norec` passed in to `make_rec` is a function that isn't
+recursive but takes as an argument a function that it will call. What
+`make_rec` does is to essentially feed `f_norec` to itself, thus
+making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
 implement the same old slow Fibonacci function. To make it faster, we need a
@@ -1120,7 +1120,7 @@ val fib : int -> int = <fun>
 
 Memoization is overkill for implementing Fibonacci, and indeed, the `fib`
 defined above is not especially efficient, allocating space linear in the
-number passed in to `fib`. It's easy enough to write a Fibonacci function
+number passed into `fib`. It's easy enough to write a Fibonacci function
 that takes a constant amount of space.
 
 But memoization is a good approach for optimizing `edit_distance`, and
@@ -1205,7 +1205,7 @@ Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
 OCaml rejects the definition because OCaml, as a strict language, has limits
-on what it can put on the righthand side of a `let rec`. In particular,
+on what it can put on the right-hand side of a `let rec`. In particular,
 imagine how the following code snippet would be compiled:
 
 ```ocaml skip
@@ -1219,7 +1219,7 @@ compiling down to an infinite loop, but `x` is of type `int`, and there's no
 effectively impossible to compile.
 
 To avoid such impossible cases, the compiler only allows three possible
-constructs to show up on the righthand side of a `let rec`: a function
+constructs to show up on the right-hand side of a `let rec`: a function
 definition, a constructor, or the lazy keyword. This excludes some reasonable
 things, like our definition of `memo_rec`, but it also blocks things that
 don't make sense, like our definition of `x`.

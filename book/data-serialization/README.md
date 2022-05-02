@@ -817,8 +817,7 @@ type t =
 ```
 
 \noindent
-And here's what the concrete syntax looks like on some simple
-examples.
+And here's what the concrete syntax looks like.
 
 ```ocaml env=main
 # sexp_of_t { a = None; b = "hello" };;
@@ -945,7 +944,7 @@ This can be very useful in designing config file formats that are both
 reasonably terse and easy to generate and maintain. It can also be
 useful for backwards compatibility: if you add a new field to your
 config record but make that field optional, then you should still be
-able to parse older version of your config.
+able to parse older versions of your config.
 
 The exact attribute you use depends on the comparison functions
 available over the type that you wish to drop:
