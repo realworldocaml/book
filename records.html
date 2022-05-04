@@ -536,7 +536,7 @@ syntax to do this more tersely.</p>
 <code>register_heartbeat</code> more concisely.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
-{ t with last_heartbeat_time = hb.Heartbeat.time };;
+  { t with last_heartbeat_time = hb.Heartbeat.time };;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
@@ -559,7 +559,7 @@ field for the status message received on the last heartbeat:</p>
     credentials: string;
     last_heartbeat_time: Time_ns.t;
     last_heartbeat_status: string;
-}</code></pre>
+  }</code></pre>
 </div>
 <p>The original implementation of <code>register_heartbeat</code> would
 now be invalid, and thus the compiler would effectively warn us to think
@@ -571,7 +571,7 @@ follows:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
-};;
+  };;
 &gt;val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
 </code></pre>
 </div>
@@ -593,7 +593,7 @@ mutable:<a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a>
     credentials: string;
     mutable last_heartbeat_time: Time_ns.t;
     mutable last_heartbeat_status: string;
-}</code></pre>
+  }</code></pre>
 </div>
 <p>The <code>&lt;-</code> operator is used for setting a mutable field.
 The side-effecting version of <code>register_heartbeat</code> would be
