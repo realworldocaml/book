@@ -53,7 +53,7 @@
  (modules test_type_printing)
  (package ctypes-foreign)
  (libraries
-  oUnit
+  ounit2
   ctypes
   ctypes.stubs
   ctypes-foreign

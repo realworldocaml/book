@@ -53,7 +53,7 @@
  (package ctypes-foreign)
  (modules test_constants)
  (libraries
-  oUnit
+  ounit2
   ctypes
   ctypes.stubs
   ctypes-foreign

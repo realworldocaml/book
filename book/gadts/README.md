@@ -307,7 +307,7 @@ each tag.  That's where GADTs can help.
 
 ### GADTs to the rescue
 
-Now we're ready write our first GADT. Here's a new version of our
+Now we're ready to write our first GADT. Here's a new version of our
 `value` and `expr` types that correctly encode our desired typing
 rules.
 
@@ -329,7 +329,7 @@ you'll see what looks like an ordinary, single-argument function type,
 and you can almost think of it that way; specifically, as the type
 signature for that particular tag, viewed as a type constructor. The
 left-hand side of the arrow states the types of the arguments to the
-constructor, and the right hand side determines the type of the
+constructor, and the right-hand side determines the type of the
 constructed value.
 
 In the definition of each tag in a GADT, the right-hand side of the
@@ -581,10 +581,9 @@ Exception: (Failure "Element not found")
 - : int option = Some 20
 ```
 
-This mostly does what we want, but the problems is that
-`flexible_find` always returns an option, even when it's passed
-`Raise` or `Default_to`, which guarantee that the `None` case is never
-used.
+This mostly does what we want, but the problem is that `flexible_find`
+always returns an option, even when it's passed `Raise` or
+`Default_to`, which guarantees that the `None` case is never used.
 
 To eliminate the unnecessary option in the `Raise` and `Default_to`
 cases, we're going to turn `If_not_found.t` into a GADT.  In
@@ -929,7 +928,7 @@ build a more concrete computational machine:
 [combinators, implementing with GADTs]{.idx}
 
 - The core types are simpler, since they are typically built out of
-  GADT tags that are just reflections the types of the base
+  GADT tags that are just reflections of the types of the base
   combinators.
 
 - The design is more modular, since your core types don't need to
@@ -1319,7 +1318,7 @@ end
 ```
 
 All of which is to say: when creating types to act as abstract markers
-for the type parameter of a GADT, you should chose definitions that
+for the type parameter of a GADT, you should choose definitions that
 make the distinctness of those types clear, and you should expose
 those definitions in your `mli`s.
 
@@ -1472,7 +1471,7 @@ applied to code that isn't designed with narrowing in mind.
 Hopefully, we've demonstrated the utility of GADTs, while at the same
 time showing some of the attendant complexities.  In this final
 section, we're going to highlight some remaining difficulties with
-using GADTs that you may run in to, as well as how to work around
+using GADTs that you may run into, as well as how to work around
 them.
 
 ### Or-patterns
@@ -1504,7 +1503,7 @@ val source_to_sexp : 'a Source_kind.t -> 'a -> Sexp.t = <fun>
 ```
 
 \noindent
-But, observing that the right hand side of `Raw_data` and `Filename`
+But, observing that the right-hand side of `Raw_data` and `Filename`
 are the same, you might try to merge those cases together with an
 or-pattern.  Unfortunately, that doesn't work.
 

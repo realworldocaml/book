@@ -4,8 +4,8 @@ Lots of programming problems require dealing with data organized as
 key/value pairs. Maybe the simplest way of representing such data in
 OCaml is an *association list*, which is simply a list of pairs of
 keys and values. For example, you could represent a mapping between
-the 10 digits and their English names as follows: [key/value
-pairs]{.idx}[data structures/key/value pairs]{.idx}[lists/association
+the 10 digits and their English names as follows: [key-value
+pairs]{.idx}[data structures/key-value pairs]{.idx}[lists/association
 lists]{.idx}[association lists]{.idx}
 
 ```ocaml env=main
@@ -93,10 +93,10 @@ let touch t s =
 ```
 
 Take a look at the definition of the type `t` above. You'll see that
-the `Map.t` has three type parameter. The first two are what you might
-expect; one for the type of the key, and one for type of the data. The
-third type parameter, the *comparator witness*, requires some
-explaining.
+the `Map.t` has three type parameters. The first two are what you
+might expect; one for the type of the key, and one for the type of the
+data. The third type parameter, the *comparator witness*, requires
+some explaining.  [comparator/comparator witness]{.idx}
 
 The comparator witness is used to indicate which comparison function
 was used to construct the map, rather than saying something about the
@@ -117,7 +117,7 @@ We don't need to provide the module again for functions like
 to the comparison function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
-`Base` are. Later in the chapter, we'll show how you can set up a module of your
+`Base` can. Later in the chapter, we'll show how you can set up a module of your
 own so it can be used in this way.
 
 ### Sets
@@ -233,6 +233,7 @@ functor to extend the module. Here, we use a common idiom where we create a
 submodule, called `T` containing the basic functionality for the type in
 question, and then include both that module and the result of applying a
 functor to that module.
+[comparator/Comparator module]{.idx}
 
 ```ocaml env=main
 module Book = struct
@@ -273,6 +274,7 @@ While we used `Comparator.Make` in the above, it's often preferable to
 use `Comparable.Make` instead, since it provides extra helper
 functions, like infix comparison operators and min and max functions,
 in addition to the comparator itself.
+[Comparable module]{.idx}
 
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
@@ -452,6 +454,7 @@ compare will conclude that they're different.
 
 We can see this below.  Note that `Base` hides polymorphic comparison
 by default, but it is available within the `Poly` module.
+[Base.Poly]{.idx}
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
@@ -475,7 +478,7 @@ As you can see, polymorphic compare now produces a result, but it's
 not the result we want.
 
 The abstraction-breaking nature of polymorphic compare can cause real
-and quite subtle bugs.  If, for example, if you build a map whose keys
+and quite subtle bugs.  If, for example, you build a map whose keys
 are sets (which have the same issues with polymorphic compare that
 maps do), then the map built with the polymorphic comparator will
 behave incorrectly, separating out keys that should be aggregated
@@ -733,7 +736,7 @@ complexity of]{.idx}
 
 The statement that hash tables provide constant-time access hides some
 complexities. First of all, most hash table implementations, OCaml's
-included, needs to resize the table when it gets too full. A resize
+included, need to resize the table when it gets too full. A resize
 requires allocating a new backing array for the hash table and copying
 over all entries, and so it is quite an expensive operation. That
 means adding a new element to the table is only *amortized* constant,

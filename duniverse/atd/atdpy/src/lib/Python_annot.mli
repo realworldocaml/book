@@ -14,7 +14,7 @@
 *)
 val get_python_default : Atd.Annot.t -> string option
 
-(** Whether an association list of ATD type [(foo * bar) list]
+(** Whether an association list of ATD type [(string * foo) list]
     must be represented in Python as a list of pairs or as a dictionary.
     This is independent of the JSON representation.
 *)

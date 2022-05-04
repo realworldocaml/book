@@ -2,16 +2,6 @@
 
 open OUnit
 
-module String = struct
-  [@@@ocaml.warning "-32-3"]
-  let capitalize_ascii   = String.capitalize
-  let uncapitalize_ascii = String.uncapitalize
-  let uppercase_ascii    = String.uppercase
-  let lowercase_ascii    = String.lowercase
-
-  include String
-end
-
 let pp_str x = x
 let quote = Printf.sprintf "'%s'"
 let pp_list l =

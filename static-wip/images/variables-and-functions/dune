@@ -1,1 +1,0 @@
-(copy_files %{project_root}/static/images/variables-and-functions/*)

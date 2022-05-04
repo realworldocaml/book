@@ -16,4 +16,3 @@ val big_int_printer : Format.formatter -> Big_int.big_int -> unit
 val ratio_printer : Format.formatter -> Ratio.ratio -> unit
 val num_printer: Format.formatter -> Num.num -> unit
 
-val printers : string list

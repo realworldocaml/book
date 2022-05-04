@@ -8,8 +8,7 @@ in with local;
 pkgs.mkShell {
   inputsFrom = [ re ];
   buildInputs = (with pkgs; [
-    gnumake
-    ocamlPackages.ocaml-lsp
+    ocaml-ng.ocamlPackages_4_13.ocaml-lsp
   ]) ++ (with opam; [
     # test
     ounit

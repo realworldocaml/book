@@ -24,7 +24,7 @@ Luckily, the OCaml toolchain is very predictable. The compiler minimizes the
 amount of optimization magic that it performs, and relies instead on its
 straightforward execution model for good performance. With some experience,
 you can know rather precisely where a block of performance-critical OCaml
-code is spending its time. [OCaml toolchain/benefits of]{.idx}
+code is spending its time.
 
 ::: {data-type=note}
 #### Why Do OCaml Types Disappear at Runtime?
@@ -93,12 +93,13 @@ for]{.idx}[integers]{.idx}[values/integer vs. pointer]{.idx}
 
 ### Distinguishing Integers and Pointers at Runtime {#distinguishing-integer-and-pointers-at-runtime}
 
-Wrapping primitives types (such as integers) inside another data structure
-that records extra metadata about the value is known as *boxing*. Values are
-boxed in order to make it easier for the garbage collector (GC) to do its
-job, but at the expense of an extra level of indirection to access the data
-within the boxed value. [garbage collection/and boxed values]{.idx}[boxing
-(of values)]{.idx}[values/boxing of]{.idx}
+Wrapping primitive types (such as integers) inside another data
+structure that records extra metadata about the value is known as
+*boxing*. Values are boxed in order to make it easier for the garbage
+collector (GC) to do its job, but at the expense of an extra level of
+indirection to access the data within the boxed value. [garbage
+collection/and boxed values]{.idx}[boxing (of
+values)]{.idx}[values/boxing of]{.idx}
 
 OCaml values don't all have to be boxed at runtime. Instead, values
 use a single tag bit per word to distinguish integers and pointers at

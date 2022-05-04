@@ -24,6 +24,8 @@ type root = {
   assoc2: (string * int) list <json repr="object">;
   assoc3: (float * int) list <python repr="dict">;
   assoc4: (string * int) list <json repr="object"> <python repr="dict">;
+  nullables: int nullable list;
+  (*options: int option list;*)
 }
 
 type alias = int list

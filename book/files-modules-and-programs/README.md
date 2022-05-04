@@ -97,7 +97,7 @@ full codebase is one big `main` function.
 
 The idiom of writing `let () =` may seem a bit odd, but it has a purpose. The
 `let` binding here is a pattern-match to a value of type `unit`, which is
-there to ensure that the expression on the righthand side returns `unit`, as
+there to ensure that the expression on the right-hand side returns `unit`, as
 is common for functions that operate primarily by side effect.
 :::
 
@@ -1049,13 +1049,13 @@ only the specific operations you want to expose are available. This means
 that you can freely change the implementation without affecting clients, as
 long as you preserve the semantics of those operations.
 
-In a similar way, abstraction allows you to enforce invariants on your types.
-If your types are exposed, then users of the module can create new instances
-of that type (or if mutable, modify existing instances) in any way allowed by
-the underlying type. That may violate a desired invariant *i.e.*, a property
-about your type that is always supposed to be true. Abstract types allow you
-to protect invariants by making sure that you only expose functions that
-preserves your invariants.
+In a similar way, abstraction allows you to enforce invariants on your
+types.  If your types are exposed, then users of the module can create
+new instances of that type (or if mutable, modify existing instances)
+in any way allowed by the underlying type. That may violate a desired
+invariant *i.e.*, a property about your type that is always supposed
+to be true. Abstract types allow you to protect invariants by making
+sure that you only expose functions that preserve your invariants.
 
 Despite these benefits, there is a trade-off here. In particular, exposing
 types concretely makes it possible to use pattern-matching with those types,

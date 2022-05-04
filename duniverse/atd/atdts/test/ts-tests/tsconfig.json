@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+    "target": "es2016",
+    "lib": ["es7", "dom"],
+
+    /* Modules */
+    "module": "commonjs",  /* Specify what module code is generated. */
+
+    /* Type Checking */
+    "strict": true,
+
+    /* Completeness */
+    "skipLibCheck": true  /* Skip type checking all .d.ts files. */
+  }
+}

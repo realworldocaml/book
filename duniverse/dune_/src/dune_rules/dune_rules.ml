@@ -32,6 +32,14 @@ module Toplevel = Toplevel
 module Global = Global
 module Only_packages = Only_packages
 module Resolve = Resolve
+module Ocamldep = Ocamldep
+module Preprocess = Preprocess
+module Coq_rules = Coq_rules
+module Coq_module = Coq_module
+module Coq_sources = Coq_sources
+module Coq_stanza = Coq_stanza
+module Coq_lib = Coq_lib
+module Command = Command
 
 (* Only for tests *)
 module Scheme = Scheme

@@ -60,7 +60,7 @@ From the type of `In_channel.read_all`, you can see that it must be a
 blocking operation. In particular, the fact that it returns a concrete string
 means it can't return until the read has completed. The blocking nature of
 the call means that no progress can be made on anything else until the call
-is complete. [blocking]{.idx}
+is complete. [blocking IO]{.idx}
 
 In Async, well-behaved functions never block. Instead, they return a value of
 type `Deferred.t` that acts as a placeholder that will eventually be filled
@@ -161,7 +161,7 @@ val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
 Here, we've dropped the parentheses around the function on the
-righthand side of the bind, and we didn't add a level of indentation
+right-hand side of the bind, and we didn't add a level of indentation
 for the contents of that function. This is standard practice for using
 the infix `bind` operator. [bind function]{.idx}
 
@@ -180,10 +180,10 @@ Error: This expression has type int but an expression was expected of type
 
 This looks reasonable enough, but as you can see, the compiler is
 unhappy.  The issue here is that `bind` expects a function that
-returns a `Deferred.t`, but we've provided it a function that returns
-the result directly.  What we need is `return`, a function provided by
-Async that takes an ordinary value and wraps it up in a deferred.
-[return function]{.idx}
+returns a `Deferred.t`, but we've provided it with a function that
+returns the result directly.  What we need is `return`, a function
+provided by Async that takes an ordinary value and wraps it up in a
+deferred.  [return function]{.idx}
 
 ```ocaml env=main
 # #show_val return;;
@@ -423,11 +423,12 @@ val my_bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t =
   <fun>
 ```
 
-Async's real implementation has more optimizations and is therefore more
-complicated. But the above implementation is still a useful first-order
-mental model for how bind works under the covers. And it's another good
-example of how `upon` and ivars can useful for building concurrency
-primitives.
+Async's real implementation has more optimizations and is therefore
+more complicated. But the above implementation is still a useful
+first-order mental model for how bind works under the covers. And it's
+another good example of how `upon` and ivars can be useful for
+building concurrency primitives.
+
 :::
 
 
@@ -443,7 +444,7 @@ example]{.idx}
 The first step is to create a function that can copy data from an input to an
 output. Here, we'll use Async's `Reader` and `Writer` modules, which provide
 a convenient abstraction for working with input and output channels: [Writer
-module]{.idx}[Reader module]{.idx}[I/O (input/output) operations/copying
+module]{.idx}[Reader module]{.idx}[IO operations/copying
 data]{.idx}
 
 ```ocaml file=examples/correct/echo/echo.ml,part=0
@@ -600,8 +601,8 @@ val always_fail : unit -> 'a = <fun>
 
 This is a little odd, but it does make sense.  After all, if a
 function never returns, we're free to impute any type at all to its
-non-existant return value.  As a result, from a typing perspective, a
-function that never returns can fit in to any context within your
+non-existent return value.  As a result, from a typing perspective, a
+function that never returns can fit into any context within your
 program.
 
 But that itself can be problematic, especially with a function like
@@ -636,7 +637,7 @@ val loop_forever : unit -> never_returns = <fun>
 ```
 
 The function `never_returns` consumes a value of type `Nothing.t` and
-returns an unconstrainted type `'a`.
+returns an unconstrained type `'a`.
 
 ```ocaml env=main
 # #show_val never_returns;;
@@ -644,7 +645,7 @@ val never_returns : never_returns -> 'a
 ```
 
 If you try to write a function that uses `Scheduler.go`, and just
-assumes that it returns unit, you'll get a helpful type error.
+assumes that it returns `unit`, you'll get a helpful type error.
 
 ```ocaml env=main
 # let do_stuff n =
@@ -1132,7 +1133,7 @@ function provided by Async.  `try_with f` takes as its argument a
 deferred-returning thunk `f` and returns a deferred that becomes
 determined either as `Ok` of whatever `f` returned, or `Error exn` if
 `f` threw an exception before its return value became determined.
-[try_with]{.idx} [async/try_with]{.idx} [exceptions/asynchronous
+[try_with]{.idx} [Async library/try_with]{.idx} [exceptions/asynchronous
 errors]{.idx}
 
 Here's a trivial example of `try_with` in action.
@@ -1316,7 +1317,7 @@ the command-line, and to distribute the search queries round-robin across the
 list of servers.
 
 Now, let's see what happens when we rebuild the application and run it
-two servers, one of which won't respond to the query.
+on two servers, one of which won't respond to the query.
 
 ```sh dir=examples/correct/search_with_configurable_server,non-deterministic=output
 $ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
@@ -1622,7 +1623,7 @@ implementation work.
 
 We won't discuss the multicore gc here in part because it's not yet
 released, and in part because there's a lot of open questions about
-OCaml programs should take advantage of multicore in a way that's
+how OCaml programs should take advantage of multicore in a way that's
 safe, convenient, and performant.  Given all that, we just don't know
 enough to write a chapter about multicore today.
 
@@ -1757,7 +1758,7 @@ it leads to more predictable behavior.
 
 Once you start working with system threads, you'll need to be careful
 about mutable data structures. Most mutable OCaml data structures will
-behave non-determinstically when accessed concurrently by multiple
+behave non-deterministically when accessed concurrently by multiple
 threads. The issues you can run into range from runtime exceptions to
 corrupted data structures.  That means you should almost always use
 mutexes when sharing mutable data between different systems threads.

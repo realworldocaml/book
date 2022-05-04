@@ -252,10 +252,10 @@ from what you'll find in most mainstream languages.
 
 ### Anonymous Functions
 
-We'll start by looking at the most basic style of function declaration in
-OCaml: the *anonymous function*. An anonymous function is a function that is
-declared without being named. These can be declared using the `fun` keyword,
-as shown here. [fun keyword/anonymous functions]{.idx}[anonymous
+We'll start by looking at the most basic style of function declaration
+in OCaml: the *anonymous function*. An anonymous function is a
+function that is declared without being named. These can be declared
+using the `fun` keyword, as shown here. [fun keyword]{.idx}[anonymous
 functions]{.idx}[functions/anonymous functions]{.idx}
 
 ```ocaml env=main
@@ -296,7 +296,7 @@ that `(fun g -> g "Hello World")` is a function that takes a function
 as an argument, and then applies that function to the string `"Hello
 World"`. The invocation of `List.map` applies `(fun g -> g "Hello
 World")` to the elements of `transforms`, which are themselves
-functions. The returned list containing the results of these function
+functions. The returned list contains the results of these function
 applications.
 
 The key thing to understand is that functions are ordinary values in

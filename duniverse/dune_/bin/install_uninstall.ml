@@ -21,7 +21,7 @@ let get_dirs context ~prefix_from_command_line ~libdir_from_command_line =
     let* prefix = Context.install_prefix context in
     let+ libdir =
       match libdir_from_command_line with
-      | None -> Memo.Build.run (Context.install_ocaml_libdir context)
+      | None -> Memo.run (Context.install_ocaml_libdir context)
       | Some l -> Fiber.return (Some (Path.relative prefix l))
     in
     (prefix, libdir)
@@ -33,8 +33,8 @@ module Workspace = struct
     }
 
   let get () =
-    let open Memo.Build.O in
-    Memo.Build.run
+    let open Memo.O in
+    Memo.run
       (let+ conf = Dune_rules.Dune_load.load ()
        and+ contexts = Context.DB.all () in
        { packages = conf.packages; contexts })
@@ -84,6 +84,10 @@ module Special_file = struct
     | _ -> None
 end
 
+type rmdir_mode =
+  | Fail
+  | Warn
+
 (** Operations that act on real files or just pretend to (for --dry-run) *)
 module type File_operations = sig
   val copy_file :
@@ -99,7 +103,7 @@ module type File_operations = sig
 
   val remove_file_if_exists : Path.t -> unit
 
-  val remove_dir_if_exists_and_empty : Path.t -> unit
+  val remove_dir_if_exists : if_non_empty:rmdir_mode -> Path.t -> unit
 end
 
 module type Workspace = sig
@@ -120,8 +124,11 @@ module File_ops_dry_run : File_operations = struct
   let remove_file_if_exists path =
     print_line "Removing (if it exists) %s" (Path.to_string_maybe_quoted path)
 
-  let remove_dir_if_exists_and_empty path =
-    print_line "Removing directory (if empty) %s"
+  let remove_dir_if_exists ~if_non_empty path =
+    print_line "Removing directory (%s if not empty) %s"
+      (match if_non_empty with
+      | Fail -> "fail"
+      | Warn -> "warn")
       (Path.to_string_maybe_quoted path)
 end
 
@@ -150,11 +157,11 @@ module File_ops_real (W : Workspace) : File_operations = struct
           let* packages =
             match Package.Name.Map.find workspace.packages package with
             | None -> Fiber.return None
-            | Some package -> Memo.Build.run (get_vcs (Package.dir package))
+            | Some package -> Memo.run (get_vcs (Package.dir package))
           in
           match packages with
           | None -> Fiber.return None
-          | Some vcs -> Memo.Build.run (Dune_engine.Vcs.describe vcs)
+          | Some vcs -> Memo.run (Dune_engine.Vcs.describe vcs)
         else Fiber.return None
       in
       let ppf = Format.formatter_of_out_channel oc in
@@ -285,7 +292,7 @@ module File_ops_real (W : Workspace) : File_operations = struct
       print_line "Deleting %s" (Path.to_string_maybe_quoted dst);
       print_unix_error (fun () -> Path.unlink dst))
 
-  let remove_dir_if_exists_and_empty dir =
+  let remove_dir_if_exists ~if_non_empty dir =
     if Path.exists dir then
       match Path.readdir_unsorted dir with
       | Ok [] ->
@@ -294,11 +301,18 @@ module File_ops_real (W : Workspace) : File_operations = struct
         print_unix_error (fun () -> Path.rmdir dir)
       | Error (e, _, _) ->
         User_message.prerr (User_error.make [ Pp.text (Unix.error_message e) ])
-      | _ ->
-        User_error.raise
-          [ Pp.textf "Please delete non-empty directory %s manually."
-              (Path.to_string_maybe_quoted dir)
-          ]
+      | _ -> (
+        let dir = Path.to_string_maybe_quoted dir in
+        match if_non_empty with
+        | Warn ->
+          User_message.prerr
+            (User_error.make
+               [ Pp.textf "Directory %s is not empty, cannot delete (ignoring)."
+                   dir
+               ])
+        | Fail ->
+          User_error.raise
+            [ Pp.textf "Please delete non-empty directory %s manually." dir ])
 
   let mkdir_p p =
     (* CR-someday amokhov: We should really change [Path.mkdir_p dir] to fail if
@@ -353,7 +367,7 @@ let file_operations ~dry_run ~workspace : (module File_operations) =
 
 let package_is_vendored (pkg : Dune_engine.Package.t) =
   let dir = Package.dir pkg in
-  Memo.Build.run (Dune_engine.Source_tree.is_vendored dir)
+  Memo.run (Dune_engine.Source_tree.is_vendored dir)
 
 type what =
   | Install
@@ -607,7 +621,8 @@ let install_uninstall ~what =
                           if copy then
                             let* () =
                               (match Path.is_directory dst with
-                              | true -> Ops.remove_dir_if_exists_and_empty dst
+                              | true ->
+                                Ops.remove_dir_if_exists ~if_non_empty:Fail dst
                               | false | (exception _) ->
                                 Ops.remove_file_if_exists dst);
                               print_line "%s %s" msg
@@ -635,7 +650,7 @@ let install_uninstall ~what =
         (* This [List.rev] is to ensure we process children directories before
            their parents *)
         |> List.rev
-        |> List.iter ~f:Ops.remove_dir_if_exists_and_empty)
+        |> List.iter ~f:(Ops.remove_dir_if_exists ~if_non_empty:Warn))
   in
   (term, Cmdliner.Term.info (cmd_what what) ~doc ~man:Common.help_secs)
 

@@ -131,13 +131,13 @@ let init_env () : env =
     "self"; "cls"; "repr";
   ] in
   let variables =
-    Unique_name.init
+    Atd.Unique_name.init
       ~reserved_identifiers:(reserved_variables @ keywords)
       ~reserved_prefixes:["atd_"; "_atd_"]
       ~safe_prefix:"x_"
   in
   let method_names () =
-    Unique_name.init
+    Atd.Unique_name.init
       ~reserved_identifiers:(
         ["from_json"; "to_json";
          "from_json_string"; "to_json_string"]
@@ -147,14 +147,14 @@ let init_env () : env =
       ~safe_prefix:"x_"
   in
   let create_variable name =
-    Unique_name.create variables name
+    Atd.Unique_name.create variables name
   in
   let translate_variable id =
-    Unique_name.translate variables id
+    Atd.Unique_name.translate variables id
   in
   let translate_inst_variable () =
     let u = method_names () in
-    fun id -> Unique_name.translate u id
+    fun id -> Atd.Unique_name.translate u id
   in
   {
     create_variable;
@@ -443,7 +443,7 @@ let double_spaced blocks =
   spaced ~spacer:[Line ""; Line ""] blocks
 
 (*
-   Representations of ATD type '(key * value) list' in JSON and Python.
+   Representations of ATD type '(string * value) list' in JSON and Python.
    Key type or value type are provided when it's useful.
 *)
 type assoc_kind =
@@ -481,6 +481,10 @@ let py_type_name env (name : string) =
   | "abstract" -> (* not supported *) "Any"
   | user_defined -> class_name env user_defined
 
+let option_is_not_implemented loc =
+  not_implemented loc "true option type (did you forget a '?' \
+                       before the field name?)"
+
 let rec type_name_of_expr env (e : type_expr) : string =
   match e with
   | Sum (loc, _, _) -> not_implemented loc "inline sum types"
@@ -505,7 +509,7 @@ let rec type_name_of_expr env (e : type_expr) : string =
              (type_name_of_expr env value)
       )
   | Option (loc, e, an) -> sprintf "Optional[%s]" (type_name_of_expr env e)
-  | Nullable (loc, e, an) -> type_name_of_expr env e
+  | Nullable (loc, e, an) -> sprintf "Optional[%s]" (type_name_of_expr env e)
   | Shared (loc, e, an) -> not_implemented loc "shared"
   | Wrap (loc, e, an) -> todo "wrap"
   | Name (loc, (loc2, name, []), an) -> py_type_name env name
@@ -521,7 +525,7 @@ let rec get_default_default
   | List _ ->
       if mutable_ok then Some "[]"
       else None
-  | Option _ -> Some "Option(None)"
+  | Option _ -> None
   | Nullable _ -> Some "None"
   | Shared (loc, e, an) -> get_default_default ~mutable_ok e
   | Wrap (loc, e, an) -> get_default_default ~mutable_ok e
@@ -599,7 +603,7 @@ let rec json_writer env e =
            sprintf "_atd_write_assoc_list_to_object(%s)"
              (json_writer env value)
       )
-  | Option (loc, e, an) -> sprintf "_atd_write_option(%s)" (json_writer env e)
+  | Option (loc, e, an) -> option_is_not_implemented loc
   | Nullable (loc, e, an) ->
       sprintf "_atd_write_nullable(%s)" (json_writer env e)
   | Shared (loc, e, an) -> not_implemented loc "shared"
@@ -679,7 +683,7 @@ let rec json_reader env (e : type_expr) =
            sprintf "_atd_read_assoc_object_into_list(%s)"
              (json_reader env value)
       )
-  | Option (loc, e, an) -> sprintf "_atd_read_option(%s)" (json_reader env e)
+  | Option (loc, e, an) -> option_is_not_implemented loc
   | Nullable (loc, e, an) ->
       sprintf "_atd_read_nullable(%s)" (json_reader env e)
   | Shared (loc, e, an) -> not_implemented loc "shared"

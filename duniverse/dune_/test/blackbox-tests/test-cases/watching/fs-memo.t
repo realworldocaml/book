@@ -448,22 +448,18 @@ However, deleting [another-dir] isn't handled correctly.
   Updating path_stat cache for "another-dir": Updated { changed = true }
   Updating path_stat cache for "another-dir/file-7": Skipped
 
-Here is what should have happened:
+If we force a rebuild, Dune belatedly notices that [another-dir/file-7] is now
+unreachable but doesn't complain about the symlink [dir] now being broken. We
+should fix this too.
 
   $ test "echo force > dep"
   ------------------------------------------
-  Failure
-  Failure
-  File "dir", line 1, characters 0-0:
-  Error: File unavailable: dir
-  Broken symbolic link
-  Had errors, waiting for filesystem changes...
-  File "dir", line 1, characters 0-0:
-  Error: File unavailable: dir
-  Broken symbolic link
-  Had errors, waiting for filesystem changes...
+  Executing rule...
+  Success, waiting for filesystem changes...
+  Executing rule...
+  Success, waiting for filesystem changes...
   ------------------------------------------
-  result = '357' -> '357' -> '357'
+  result = '357' -> '35' -> '35'
   ------------------------------------------
   Updating dir_contents cache for "dep": Skipped
   Updating file_digest cache for "dep": Updated { changed = true }

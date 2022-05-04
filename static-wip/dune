@@ -53,7 +53,6 @@
         images/memory-repr/string_block.png
         images/memory-repr/string_size_calc.png
         images/memory-repr/tuple_layout.png
-        images/variables-and-functions/associativity.png
         js/_functions.js
         js/app.js
         js/jquery.min.js

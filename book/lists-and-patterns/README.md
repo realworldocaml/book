@@ -53,7 +53,7 @@ the box containing `3`) points to the empty list.[lists/structure of]{.idx}
 ![](images/lists-and-patterns/lists_layout.png "Lists layout")
 \
 
-Each `::` essentially adds a new block to the proceding picture. Such a block
+Each `::` essentially adds a new block to the preceding picture. Such a block
 contains two things: a reference to the data in that list element, and a
 reference to the remainder of the list. This is why `::` can extend a list
 without modifying it; extension allocates a new list element but does not
@@ -791,7 +791,7 @@ never be used again, and so you don't need to keep it around. Thus, instead
 of allocating a new stack frame for the callee, the compiler is free to reuse
 the caller's stack frame.
 
-Tail recursion is important for more than just lists. Ordinary nontail
+Tail recursion is important for more than just lists. Ordinary non-tail
 recursive calls are reasonable when dealing with data structures like binary
 trees, where the depth of the tree is logarithmic in the size of your data.
 But when dealing with situations where the depth of the sequence of nested
@@ -823,8 +823,8 @@ val remove_sequential_duplicates : int list -> int list = <fun>
 We'll consider some ways of making this code more concise and more efficient.
 
 First, let's consider efficiency. One problem with the above code is
-that it in some cases re-creates on the righthand side of the arrow a
-value that already existed on the lefthand side. Thus, the pattern
+that it in some cases re-creates on the right-hand side of the arrow a
+value that already existed on the left-hand side. Thus, the pattern
 `[hd] -> [hd]` actually allocates a new list element, when really, it
 should be able to just return the list being matched. We can reduce
 allocation here by using an `as` pattern, which allows us to declare a

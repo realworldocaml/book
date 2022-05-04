@@ -88,7 +88,7 @@ of:
 : Command-line interfaces for the compiler tools.
 
 `file_formats/`
-: Serialiser and deserialisers for on-disk files used by the compiler driver.
+: Serializer and deserializers for on-disk files used by the compiler driver.
 
 `lambda/`
 : The lambda conversion pass.
@@ -144,12 +144,12 @@ of]{.idx}[parsing/of source code]{.idx}[compilation process/parsing source code]
 
 ### Syntax Errors
 
-The OCaml parser's goal is to output a well-formed AST data structure to the
-next phase of compilation, and so it any source code that doesn't match basic
-syntactic requirements. The compiler emits a *syntax error* in this
-situation, with a pointer to the filename and line and character number
-that's as close to the error as possible.[errors/syntax errors]{.idx}[syntax
-errors]{.idx}
+The OCaml parser's goal is to output a well-formed AST data structure
+to the next phase of compilation, and so it fails on any source code
+that doesn't match basic syntactic requirements. The compiler emits a
+*syntax error* in this situation, with a pointer to the filename and
+line and character number that's as close to the error as
+possible.[errors/syntax errors]{.idx}[syntax errors]{.idx}
 
 Here's an example syntax error that we obtain by performing a module
 assignment as a statement instead of as a `let` binding:
@@ -324,7 +324,7 @@ exception My_exception of (int -> int) * int
 
 (** Comment for type [weather]  *)
 type weather =
-  | Rain of int (** The comment for construtor Rain *)
+  | Rain of int (** The comment for constructor Rain *)
   | Sun         (** The comment for constructor Sun *)
 
 (** Find the current weather for a country
@@ -361,10 +361,9 @@ directory and also be able to view the UNIX manual pages held in
 `man/man3`. There are quite a few comment formats and
 options to control the output for the various backends. Refer to the
 [OCaml manual](https://ocaml.org/manual/native.html)
-for the complete list.[Xen]{.idx}[JSON data/Xen custom generator
-for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
-HTML generator]{.idx}[HTML
-generators]{.idx}
+for the complete list.
+[OCaml toolchain/ocamldoc-generators]{.idx}
+[HTML generators]{.idx}
 
 You can also use `odoc` to generate complete snapshots of your project via
 integration with dune, as described earlier in [OCaml Platform](platform.html#browsing-interface-documentation){data-type=xref}.
@@ -424,7 +423,7 @@ The warning in our example is taken from the [compiler manual
 page](https://ocaml.org/manual/native.html). This warning emits a
 message if the expression in a sequence doesn't have type `unit`.  The
 `@@@warning` nodes in the module implementation cause the compiler to
-change its behaviour within the scope of that structure only.
+change its behavior within the scope of that structure only.
 
 An annotation can also be more narrowly attached to a block of code.  For example,
 a module implementation can be annotated with `@@deprecated` to indicate that it
@@ -529,7 +528,7 @@ correct but misuses values is rejected with an explanation of the problem.
 
 Although type checking is done in a single pass in OCaml, it actually
 consists of three distinct steps that happen simultaneously:[explicit
-subtyping]{.idx}[automatic type inference]{.idx}[subtyping/in static type
+subtyping]{.idx}[type inference]{.idx}[subtyping/in static type
 checking]{.idx}[modules/in static type checking]{.idx}[type inference/in
 static type checking]{.idx}[compilation process/static type
 checking]{.idx}
@@ -691,8 +690,7 @@ abstraction violations by rejecting your program at compilation time rather
 than by generating an error at runtime. Learning how to navigate the type
 checker's compile-time feedback is key to building robust libraries and
 applications that take full advantage of these static checks.[type
-inference/error detection with]{.idx}[annotations, for type
-checking]{.idx}[errors/detecting with type annotations]{.idx}[type
+inference/error detection with]{.idx}[errors/detecting with type annotations]{.idx}[type
 annotations]{.idx}[compile-time static checking]{.idx}
 
 There are a couple of tricks to make it easier to quickly locate type errors
@@ -1191,9 +1189,9 @@ module B : sig
 end
 ```
 
-If you want to disable this behaviour of dune and deliberately include
+If you want to disable this behavior of dune and deliberately include
 multiple toplevel modules, you can add `(wrapped false)` to your libraries
-stanza. However, this is discouraged in general due to the increased likelyhood
+stanza. However, this is discouraged in general due to the increased likelihood
 of linking clashes when you have a lot of library dependencies, since every
 module that is linked into an executable must have a unique name in OCaml.
 

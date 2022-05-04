@@ -1,3 +1,51 @@
+3.1.1 (19/04/2022)
+------------------
+
+- Fix build on Cygwin. (#5593, fixes 5577, @nojb)
+
+- Fix execution of `(system ..)` actions on Windows. (#5593, fixes #5523,
+  @nojb)
+
+3.1.0 (15/04/2022)
+------------------
+
+- Add `sourcehut` as an option for defining project sources in dune-project
+  files. For example, `(source (sourcehut user/repo))`. (#5564, @rgrinberg)
+
+- Add `dune coq top` command for running a Coq toplevel (#5457, @rlepigre)
+
+- Fix dune exec dumping database in wrong directory (#5544, @bobot)
+
+- Always output absolute paths for locations in RPC reported diagnostics
+  (#5539, @rgrinberg)
+
+- Add `(deps <deps>)` in ctype field (#5346, @bobot)
+
+- Add `(include <file>)` constructor to dependency specifications. This can be
+  used to introduce dynamic dependencies (#5442, @anmonteiro)
+
+- Ensure that `dune describe` computes a transitively closed set of
+  libraries (#5395, @esope)
+
+- Add direct dependencies to $ dune describe output (#5412, @esope)
+
+- Show auto-detected concurrency on Windows too (#5502, @MisterDA)
+
+- Fix operations that remove folders with absolute path. This happens when
+  using esy (#5507, @EduardoRFS)
+
+- Dune will not fail if some directories are non-empty when uninstalling.
+  (#5543, fixes #5542, @nojb)
+
+- `coqdep` now depends only on the filesystem layout of the .v files,
+  and not on their contents (#5547, helps with #5100, @ejgallego)
+
+- The mdx stanza 0.2 can now be used with `(implicit_transitive_deps false)`
+  (#5558, fixes #5499, @emillon)
+
+- Fix missing parenthesis in printing of corresponding terminal command for
+  `(with-outputs-to )` (#5551, fixes #5546, @Alizter)
+
 3.0.3 (01/03/2022)
 ------------------
 

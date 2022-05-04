@@ -1,3 +1,12 @@
+2.5.0 (2022-04-23)
+------------------
+
+* atdpy: make `atdpy --version` print the version of atdpy itself
+  rather than the version of the `atd` library (#270)
+* atdpy: fix handling of `nullable` and improve error message on
+         `option` types used without optional fields (#277)
+* Add TypeScript backend called atdts (#274)
+
 2.4.1 (2022-03-25)
 ------------------
 
@@ -41,6 +50,7 @@
 * atdpy: Disable flake8 checks on generated code via a special comment (#252)
 * atdgen: Add support for ppx attributes on individual type
   definitions (#238)
+* (BREAKING) atdgen: change encoding of int64 values to string (#231)
 * other enhancement and fixes (see git log)
 
 2.2.0 (2020-09-03)

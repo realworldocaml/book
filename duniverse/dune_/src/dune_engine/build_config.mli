@@ -13,10 +13,26 @@ module Context_or_install : sig
   val to_dyn : t -> Dyn.t
 end
 
-type extra_sub_directories_to_keep = Subdir_set.t
+(** Rules for a given directory. This type is structured so that all generated
+    sub-directories (either directory targets or internal generated directories
+    such as [.ppx]) are known immediately, while the actual build rules are
+    computed in a second stage. The staging is to avoid computation cycles
+    created during the computation of the rules. *)
+type rules =
+  { build_dir_only_sub_dirs : Subdir_set.t
+        (** Sub-directories that don't exist in the source tree but exists in
+            the build directory. This is for internal directories such as
+            [.dune] or [.ppx]. *)
+  ; directory_targets : Loc.t Path.Build.Map.t
+        (** Directories that are target of a rule. For each directory target,
+            give the location of the rule that generates it. The keys in this
+            map must correspond exactly to the set of directory targets that
+            will be produces by [rules]. *)
+  ; rules : Rules.t Memo.t
+  }
 
 type gen_rules_result =
-  | Rules of extra_sub_directories_to_keep * Rules.t
+  | Rules of rules
   | Unknown_context_or_install
   | Redirect_to_parent
       (** [Redirect_to_parent] means that the parent will generate the rules for
@@ -37,7 +53,7 @@ module type Rule_generator = sig
        Context_or_install.t
     -> dir:Path.Build.t
     -> string list
-    -> gen_rules_result Memo.Build.t
+    -> gen_rules_result Memo.t
 end
 
 type t = private
@@ -54,8 +70,7 @@ type t = private
   ; stats : Dune_stats.t option
   ; cache_config : Dune_cache.Config.t
   ; cache_debug_flags : Cache_debug_flags.t
-  ; implicit_default_alias :
-      Path.Build.t -> unit Action_builder.t option Memo.Build.t
+  ; implicit_default_alias : Path.Build.t -> unit Action_builder.t option Memo.t
   }
 
 (** Initialise the build system. This must be called before running the build
@@ -75,7 +90,7 @@ val set :
   -> sandboxing_preference:Sandbox_mode.t list
   -> rule_generator:(module Rule_generator)
   -> implicit_default_alias:
-       (Path.Build.t -> unit Action_builder.t option Memo.Build.t)
+       (Path.Build.t -> unit Action_builder.t option Memo.t)
   -> unit
 
 val get : unit -> t

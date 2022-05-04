@@ -70,9 +70,11 @@ JSON in Python or Ruby, you might write unit tests to check that you
 have handled unusual inputs. The OCaml model prefers compile-time
 static checking as well as unit tests. For example, using pattern
 matching can warn you if you've not checked that a value can be `Null`
-as well as contain an actual value. [Yojson library/installation
-of]{.idx}[static checking]{.idx}[compile-time static
-checking]{.idx}[unit tests]{.idx}
+as well as contain an actual value.
+[Yojson library/installation of]{.idx}
+[static checking]{.idx}
+[compile-time static checking]{.idx}
+[unit tests]{.idx}
 
 ::: {data-type=note}
 #### Installing the Yojson Library
@@ -744,13 +746,11 @@ This is pretty convenient! We've now written a single ATD file, and all the
 OCaml boilerplate to convert between JSON and a strongly typed record has
 been generated for us. You can control various aspects of the serializer by
 passing flags to `atdgen`. The important ones for JSON are:
-[-j-defaults]{.idx}[-j-custom-fields
-FUNCTION]{.idx}[-j-std flag]{.idx}[flags]{.idx}
 
 `-j-std`
-: Converts tuples and variants into standard JSON and refuse to print NaN and
-  infinities. You should specify this if you intend to interoperate with
-  services that aren't using ATD.
+: Converts tuples and variants into standard JSON and refuses to print
+  NaN and infinities. You should specify this if you intend to
+  interoperate with services that aren't using ATD.
 
 `-j-custom-fields FUNCTION`
 : Calls a custom function for every unknown field encountered, instead of

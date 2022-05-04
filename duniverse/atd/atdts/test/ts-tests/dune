@@ -1,0 +1,12 @@
+;
+; Convert ATD -> TypeScript
+;
+(rule
+  (targets
+    everything.ts
+  )
+  (deps
+    ../atd-input/everything.atd
+  )
+  (action
+    (run %{bin:atdts} %{deps})))

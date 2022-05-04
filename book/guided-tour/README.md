@@ -22,6 +22,8 @@ installation page](http://dev.realworldocaml.org/install.html).
 `Base` comes along with another, yet more extensive standard library
 replacement, called `Core`.  We're going to mostly stick to `Base`,
 but it's worth understanding the differences between these libraries.
+[Base standard library]{.idx}
+[Core standard library]{.idx}
 
 - *`Base`* is designed to be lightweight, portable, and stable, while
   providing all of the fundamentals you need from a standard library.
@@ -344,7 +346,7 @@ type.
 
 Indeed, if we look at the type returned by the toplevel, we see that rather
 than choose a single concrete type, OCaml has introduced a
-*type variable*`'a` to express that the type is generic. (You can tell it's a
+*type variable* `'a` to express that the type is generic. (You can tell it's a
 type variable by the leading single quote mark.) In particular, the type of
 the `test` argument is `('a -> bool)`, which means that `test` is a
 one-argument function whose return value is `bool` and whose argument could
@@ -1321,12 +1323,13 @@ val find_first_negative_entry : int array -> int option = <fun>
 - : int option = Some 1
 ```
 
-As a side note, the preceding code takes advantage of the fact that `&&`,
-OCaml's And operator, short-circuits. In particular, in an expression of the
-form *`expr1`*`&&`*`expr2`*, *`expr2`* will only be evaluated if *`expr1`*
-evaluated to true. Were it not for that, then the preceding function would
-result in an out-of-bounds error. Indeed, we can trigger that out-of-bounds
-error by rewriting the function to avoid the short-circuiting:
+As a side note, the preceding code takes advantage of the fact that
+`&&`, OCaml's "and" operator, short-circuits. In particular, in an
+expression of the form *`expr1`*`&&`*`expr2`*, *`expr2`* will only be
+evaluated if *`expr1`* evaluated to true. Were it not for that, then
+the preceding function would result in an out-of-bounds error. Indeed,
+we can trigger that out-of-bounds error by rewriting the function to
+avoid the short-circuiting:
 
 ```ocaml env=main
 # let find_first_negative_entry array =

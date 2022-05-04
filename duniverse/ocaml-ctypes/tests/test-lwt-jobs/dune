@@ -55,7 +55,7 @@
  (action
   (run %{test} -runner sequential))
  (libraries
-  oUnit
+  ounit2
   ctypes
   ctypes.stubs
   ctypes-foreign

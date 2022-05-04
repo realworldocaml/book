@@ -63,6 +63,7 @@ Each subproject has its own README:
 * [atdj](atdj): targets Java
 * [atdpy](atdpy): targets Python
 * [atds](atds): targets Scala
+* [atdts](atdts): targets TypeScript
 
 Updating the documentation
 --

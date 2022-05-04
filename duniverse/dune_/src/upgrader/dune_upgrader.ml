@@ -76,7 +76,9 @@ module Common = struct
       | List
           ( loc
           , (Atom (_, A "lang") as lang)
-            :: (Atom (_, A "dune") as dune) :: Atom (loc3, A _) :: tll )
+            :: (Atom (_, A "dune") as dune)
+            :: Atom (loc3, A _)
+            :: tll )
         :: tl ->
         List
           (loc, lang :: dune :: Atom (loc3, Dune_lang.Atom.of_string v) :: tll)
@@ -323,10 +325,10 @@ let upgrade () =
   let rec aux last =
     let todo = { to_rename_and_edit = []; to_edit = [] } in
     let* current_versions =
-      Memo.Build.run
+      Memo.run
         (let module M =
            Source_tree.Make_map_reduce_with_progress
-             (Memo.Build)
+             (Memo)
              (Monoid.Appendable_list (struct
                type t = Source_tree.Dir.t * project_version
              end))
@@ -334,8 +336,7 @@ let upgrade () =
         M.map_reduce ~traverse:Sub_dirs.Status.Set.normal_only ~f:(fun dir ->
             let project = Source_tree.Dir.project dir in
             let detected_version = detect_project_version project dir in
-            Memo.Build.return
-              (Appendable_list.singleton (dir, detected_version))))
+            Memo.return (Appendable_list.singleton (dir, detected_version))))
       >>| Appendable_list.to_list
     in
     let v1_updates = ref false in

@@ -100,7 +100,7 @@ To garbage-collect the minor heap, OCaml uses *copying collection* to
 move all live blocks in the minor heap to the major heap. This takes
 work proportional to the number of live blocks in the minor heap,
 which is typically small according to the generational hypothesis. In
-general, the garbage collector *stops the world* (that it, halts the
+general, the garbage collector *stops the world* (that is, halts the
 application) while it runs, which is why it's so important that it
 complete quickly to let the application resume running with minimal
 interruption.
@@ -145,7 +145,7 @@ UNIX signals, but they don't ordinarily matter for application code.
 It is possible to write loops or recurse in a way that may take a long time
 to do an allocation - if at all. To ensure that UNIX signals and other
 internal bookkeeping that require interrupting the running OCaml program
-still happen the compiler introduces *poll points* in to generated native code.
+still happen the compiler introduces *poll points* into generated native code.
 
 These poll points check `ptr` against `limit` and developers should expect
 them to be placed at the start of every function and the back edge of loops.
@@ -270,9 +270,9 @@ a value can waste memory for programs with small heaps.
 
 You can use `Gc.tune` to set that value, but the values are a little
 counter-intuitive, for backwards-compatibility reasons.  Values under
-1000 are interepreted as percentages, and the default is 15%.  Values
+1000 are interpreted as percentages, and the default is 15%.  Values
 1000 and over are treated as a raw number of bytes.  But most of the
-time, you won't to set the value at all.
+time, you won't set the value at all.
 
 ### Memory Allocation Strategies
 
@@ -392,7 +392,7 @@ values to mark. There's one important edge case in this process, though. The
 mark stack can only grow to a certain size, after which the GC can no longer
 recurse into intermediate values since it has nowhere to store them while it
 follows their fields. This is known as mark stack *overflow* and a process
-called _pruning_ begins. Pruning empties the mark stack entirely, summarising
+called _pruning_ begins. Pruning empties the mark stack entirely, summarizing
 the addresses of each block as start and end ranges in each heap chunk header.
 
 Later in the marking process when the mark stack is empty it is replenished by
@@ -594,7 +594,7 @@ Columns that can be specified are:
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
 where your application has fragmented memory. This can simulate the behavior
 of a long-running application without you having to actually wait that long
-to re-create the behavior in a performance unit test.
+to recreate the behavior in a performance unit test.
 
 ## Attaching Finalizer Functions to Values
 
@@ -646,10 +646,9 @@ Async, which we discussed in [Concurrent Programming with
 Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref},
 shadows the `Gc` module with its own module that contains a function,
 `Gc.add_finalizer`, which is concurrency-safe.  In particular,
-finalizers are scheduled in their own Async job, and makes sure to
-capture exceptions and raise them to the appropriate monitor for
-error-handling.
-[Async/finalizers]{.idx}
+finalizers are scheduled in their own Async job, and care is taken by
+Async to capture exceptions and raise them to the appropriate monitor
+for error-handling.  [Async library/finalizers]{.idx}
 
 Let's explore this with a small example that finalizes values of
 different types, some of which are heap-allocated and others which are

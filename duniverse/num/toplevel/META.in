@@ -1,0 +1,4 @@
+requires = "num.core"
+version = "%%VERSION%%"
+description = "Add-on for num inside toploops"
+archive(byte,toploop) = "num_top.cma"

@@ -75,7 +75,7 @@ val remove : ('a, 'b) t -> 'a -> unit
 ```
 
 This `mli` also includes a collection of helper functions whose
-purpose and behavior should be largely inferrable from their names and
+purpose and behavior should be largely inferable from their names and
 type signatures. Note that the `create` function takes as its
 arguments functions for hashing keys and testing them for equality.
 
@@ -644,7 +644,7 @@ let insert_first t value =
 it into the list, finally setting the list itself to point to
 `new_elt`. Note that the precedence of a `match` expression is very
 low, so to separate it from the following assignment (`t := Some
-new_elt`), we surround the match with parenthses.  We could have used
+new_elt`), we surround the match with parentheses.  We could have used
 `begin ... end` for the same purpose, but without some kind of
 bracketing, the final assignment would incorrectly become part of the
 `None` case. [elements/defining new]{.idx}
@@ -1059,12 +1059,12 @@ val fib : int -> int = <fun>
 - : int = 6765
 ```
 
-This is a pretty strange piece of code, and it may take a few moments of
-thought to figure out what's going on. Like `fib_norec`, the function
-`f_norec` passed into `make_rec` is a function that isn't recursive but takes
-as an argument a function that it will call. What `make_rec` does is to
-essentially feed `f_norec` to itself, thus making it a true recursive
-function.
+This is a pretty strange piece of code, and it may take a few moments
+of thought to figure out what's going on. Like `fib_norec`, the
+function `f_norec` passed in to `make_rec` is a function that isn't
+recursive but takes as an argument a function that it will call. What
+`make_rec` does is to essentially feed `f_norec` to itself, thus
+making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
 implement the same old slow Fibonacci function. To make it faster, we need a
@@ -1120,7 +1120,7 @@ val fib : int -> int = <fun>
 
 Memoization is overkill for implementing Fibonacci, and indeed, the `fib`
 defined above is not especially efficient, allocating space linear in the
-number passed in to `fib`. It's easy enough to write a Fibonacci function
+number passed into `fib`. It's easy enough to write a Fibonacci function
 that takes a constant amount of space.
 
 But memoization is a good approach for optimizing `edit_distance`, and
@@ -1205,7 +1205,7 @@ Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
 OCaml rejects the definition because OCaml, as a strict language, has limits
-on what it can put on the righthand side of a `let rec`. In particular,
+on what it can put on the right-hand side of a `let rec`. In particular,
 imagine how the following code snippet would be compiled:
 
 ```ocaml skip
@@ -1219,7 +1219,7 @@ compiling down to an infinite loop, but `x` is of type `int`, and there's no
 effectively impossible to compile.
 
 To avoid such impossible cases, the compiler only allows three possible
-constructs to show up on the righthand side of a `let rec`: a function
+constructs to show up on the right-hand side of a `let rec`: a function
 definition, a constructor, or the lazy keyword. This excludes some reasonable
 things, like our definition of `memo_rec`, but it also blocks things that
 don't make sense, like our definition of `x`.
@@ -1273,8 +1273,8 @@ nature. That includes not only things that mutate your program's data, but
 also operations that interact with the world outside of your program. An
 important example of this kind of interaction is I/O, i.e., operations for
 reading or writing data to things like files, terminal input and output, and
-network sockets. [I/O (input/output) operations/terminal
-I/O]{.idx}[imperative programming/input and output]{.idx}
+network sockets. [IO operations/terminal
+IO]{.idx}[imperative programming/input and output]{.idx}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
@@ -1389,7 +1389,7 @@ modeled after `printf` in the C standard library. `printf` takes a
 well as arguments to be printed, as determined by the formatting
 directives embedded in the format string. So, for example, we can
 write: [strings/format strings]{.idx}[format strings]{.idx}[printf
-function]{.idx}[I/O (input/output) operations/formatted output]{.idx}
+function]{.idx}[IO operations/formatted output]{.idx}
 
 ```ocaml env=main
 # printf
@@ -1521,8 +1521,7 @@ the `Printf` module in the OCaml Manual.
 Another common use of `in_channel`s and `out_channel`s is for working
 with files. Here are a couple of functions—one that creates a file
 full of numbers, and the other that reads in such a file and returns
-the sum of those numbers: [files/file I/O]{.idx}[I/O (input/output)
-operations/file I/O]{.idx}
+the sum of those numbers: [files/file IO]{.idx}[IO operations/file IO]{.idx}
 
 ```ocaml env=main
 # let create_number_file filename numbers =

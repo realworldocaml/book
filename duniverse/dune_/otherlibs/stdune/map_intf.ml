@@ -95,13 +95,17 @@ module type S = sig
 
   (** Return a map of [(k, v)] bindings such that:
 
-      {[ v = f init @@ f v1 @@ fv2 @@ ... @@ f vn ]}
+      {[
+        v = f init @@ f v1 @@ fv2 @@ ... @@ f vn
+      ]}
 
       where [v1], [v2], ... [vn] are the values associated to [k] in the input
       list, in the order in which they appear. This is essentially a more
       efficient version of:
 
-      {[ of_list_multi l |> map ~f:(List.fold_left ~init ~f) ]} *)
+      {[
+        of_list_multi l |> map ~f:(List.fold_left ~init ~f)
+      ]} *)
   val of_list_fold : (key * 'a) list -> init:'b -> f:('b -> 'a -> 'b) -> 'b t
 
   val keys : 'a t -> key list
@@ -151,5 +155,11 @@ module type S = sig
     val find : 'a t -> key -> 'a list
 
     val add_all : 'a t -> key -> 'a list -> 'a t
+
+    (** [find_elt m ~f] linearly traverses the map [m] and the contained lists
+        to find the first element [e] (in a list [l], mapped to key [k]) such
+        that [f e = true]. If such an [e] is found then the function returns
+        [Some (k,e)], otherwise it returns [None]. *)
+    val find_elt : 'a t -> f:('a -> bool) -> (key * 'a) option
   end
 end

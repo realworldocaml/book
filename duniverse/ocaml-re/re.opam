@@ -1,4 +1,4 @@
-version: "1.10.3"
+version: "1.10.4"
 opam-version: "2.0"
 
 maintainer: "rudi.grinberg@gmail.com"
@@ -9,19 +9,19 @@ authors: [
   "Rudi Grinberg"
   "Gabriel Radanne"
 ]
-license: "LGPL-2.0 with OCaml linking exception"
+license: "LGPL-2.0-or-later WITH OCaml-LGPL-linking-exception"
 homepage: "https://github.com/ocaml/ocaml-re"
 bug-reports: "https://github.com/ocaml/ocaml-re/issues"
 dev-repo: "git+https://github.com/ocaml/ocaml-re.git"
 
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
 
 depends: [
-  "ocaml" {>= "4.02"}
+  "ocaml" {>= "4.03"}
   "dune" {>= "2.0"}
   "ounit" {with-test}
   "seq"

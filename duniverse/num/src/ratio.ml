@@ -438,13 +438,13 @@ let approx_ratio_fix n r =
                    (base_power_big_int
                        10 (succ n) (abs_big_int r.numerator))
                    r.denominator)) in
+       let s1 = Bytes.of_string s1 in
        (* Round up and add 1 in front if needed *)
        let s2 =
-         if round_futur_last_digit (Bytes.unsafe_of_string s1) 0
-                                   (String.length s1)
-         then "1" ^ s1
+         if round_futur_last_digit s1 0 (Bytes.length s1)
+         then Bytes.cat (Bytes.of_string "1") s1
          else s1 in
-       let l2 = String.length s2 - 1 in
+       let l2 = Bytes.length s2 - 1 in
        (*   if s2 without last digit is xxxxyyy with n 'yyy' digits:
                <sign> xxxx . yyy
             if s2 without last digit is      yy with <= n digits:
@@ -452,15 +452,15 @@ let approx_ratio_fix n r =
        if l2 > n then begin
          let s = Bytes.make (l2 + 2) '0' in
          Bytes.set s 0  (if sign_r = -1 then '-' else '+');
-         String.blit s2 0 s 1 (l2 - n);
+         Bytes.blit s2 0 s 1 (l2 - n);
          Bytes.set s (l2 - n + 1) '.';
-         String.blit s2 (l2 - n) s (l2 - n + 2) n;
+         Bytes.blit s2 (l2 - n) s (l2 - n + 2) n;
          Bytes.unsafe_to_string s
        end else begin
          let s = Bytes.make (n + 3) '0' in
          Bytes.set s 0  (if sign_r = -1 then '-' else '+');
          Bytes.set s 2 '.';
-         String.blit s2 0 s (n + 3 - l2) l2;
+         Bytes.blit s2 0 s (n + 3 - l2) l2;
          Bytes.unsafe_to_string s
        end
      end else begin
@@ -508,8 +508,8 @@ let approx_ratio_exp n r =
                                 10 k (abs_big_int r.numerator))
                                r.denominator) in
        string_of_nat nat) in
-     if round_futur_last_digit (Bytes.unsafe_of_string s) 0
-                               (String.length s)
+     let s = Bytes.of_string s in
+     if round_futur_last_digit s 0 (Bytes.length s)
       then
        let m = num_decimal_digits_int (succ msd) in
        let str = Bytes.make (n + m + 4) '0' in
@@ -525,7 +525,7 @@ let approx_ratio_exp n r =
       and p = n + 3 in
       let str = Bytes.make (succ (m + p)) '0' in
         (String.blit (if sign_r = -1 then "-0." else "+0.") 0 str 0 3);
-        (String.blit s 0 str 3 n);
+        (Bytes.blit s 0 str 3 n);
         Bytes.set str p 'e';
         (if m = 0
           then Bytes.set str (succ p) '0'
