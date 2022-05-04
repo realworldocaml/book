@@ -594,7 +594,7 @@ The following shows how we can use functional updates to rewrite
 
 ```ocaml env=main
 # let register_heartbeat t hb =
-  { t with last_heartbeat_time = hb.Heartbeat.time };;
+    { t with last_heartbeat_time = hb.Heartbeat.time };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
@@ -618,7 +618,7 @@ type client_info =
     credentials: string;
     last_heartbeat_time: Time_ns.t;
     last_heartbeat_status: string;
-}
+  }
 ```
 
 The original implementation of `register_heartbeat` would now be
@@ -632,7 +632,7 @@ follows:
 # let register_heartbeat t hb =
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
-  };;
+    };;
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ```
 
@@ -655,7 +655,7 @@ type client_info =
     credentials: string;
     mutable last_heartbeat_time: Time_ns.t;
     mutable last_heartbeat_status: string;
-}
+  }
 ```
 
 The `<-` operator is used for setting a mutable field. The
