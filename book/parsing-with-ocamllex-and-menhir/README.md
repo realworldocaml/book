@@ -328,7 +328,7 @@ way is quadratic in the length of the list:
 object_fields:
   | (* empty *) { [] }
   | obj = object_fields; COMMA; k = STRING; COLON; v = value
-    { obj @ [k, v] }
+    { obj @ [(k, v)] }
   ;
 ```
 
