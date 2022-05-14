@@ -215,12 +215,9 @@ OCaml type. All OCaml types are distilled down into `values`, and summarized bel
 - `Foo | Bar of int` variants with parameters are boxed, while
   variants with no parameters are unboxed.
 
-- Polymorphic variants take up variable space usage depending on the
-  number of parameters.  <!-- TODO: I'm not sure what this
-  means. Polymorphic variants are IIRC always a header word plus a
-  single slot. Sort of the opposite: ordinary variants can have a
-  variable number of slots, but polymoprhic variants have no
-  equivalent of an inlined tuple or record. -->
+- Polymorphic variants with parameters are boxed with an extra
+  header word to store the value, as compared to normal variants.
+  Polymorphic variants with no parameters are unboxed.
 
 - Floating-point numbers are stored as a block with a single field
   containing the double-precision float.
