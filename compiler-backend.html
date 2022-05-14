@@ -403,15 +403,20 @@ follows: <a data-primary="custom runtime mode" data-type="indexterm">&nbsp;</a><
 <pre><code class="language-clike">$ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 </code></pre>
 </div>
-
-<p>OCamlbuild takes care of many of these details with its built-in
-rules. The <code>%.byte</code> rule that you’ve been using throughout
-the book builds a bytecode executable, and adding the
-<code>custom</code> tag will bundle the interpreter with it, too. <a data-primary="%.byte rule" data-type="indexterm">&nbsp;</a></p>
 <p>The custom mode is the most similar mode to native code compilation,
 as both generate standalone executables. There are quite a few other
 options available for compiling bytecode (notably with shared libraries
 or building custom runtimes). Full details can be found in the <a href="https://ocaml.org/manual/comp.html#s%3Acomp-options">OCaml</a>.</p>
+<p>Dune can build a self-contained bytecode executable if you specify
+the <code>byte_complete</code> mode in the executable rule. For example,
+this <code>dune</code> file will generate a <code>prog.bc.exe</code>
+target:</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name prog)
+  (modules prog)
+  (modes byte byte_complete))</code></pre>
+</div>
 </section>
 <section class="level3" id="embedding-ocaml-bytecode-in-c">
 <h3>Embedding OCaml Bytecode in C</h3>
