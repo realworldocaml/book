@@ -616,9 +616,9 @@ sure are boxed and heap-allocated and aren't immutable.
 
 Core provides a `Heap_block` module that dynamically checks if a given
 value is suitable for finalizing.  Core keeps the functions for
-registering finalizers in the `Core.Gc.Expert` module as finalizers
-can be pretty hard to reason about in multi-threaded contexts, since finalizers
-can run at any time in any thread.  [heaps/Heap_block module]{.idx}
+registering finalizers in the `Core.Gc.Expert` module. Finalizers
+can run at any time in any thread, so they can be pretty hard to reason
+about in multi-threaded contexts. [heaps/Heap_block module]{.idx}
 Async, which we discussed in [Concurrent Programming with
 Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref},
 shadows the `Gc` module with its own module that contains a function,
