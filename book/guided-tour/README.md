@@ -37,12 +37,13 @@ but it's worth understanding the differences between these libraries.
   same time, it has many more dependencies, and so takes longer to
   build, and will add more to the size of your executables.
 
-As of this writing, the stable release of `Core` is less portable than
-`Base`, running only on UNIX-like systems.  For that reason, there's
-yet a third library, `Core_kernel`, which is a portable subset of
-`Core`. That said, the latest development version removes
-`Core_kernel`, and makes `Core` itself portable.  The stable release
-should have `Core_kernel` removed by mid-2022, so we won't use
+As of the version of `Base` and `Core` used in this book (version
+`v0.14.0`), `Core` is less portable than `Base`, running only on
+UNIX-like systems.  For that reason, there is another package,
+`Core_kernel`, which is the portable subset of `Core`.  That said, in
+the latest stable release, `v0.15.0` (which was released too late to
+be adopted for this edition of the book) `Core` is portable, and
+`Core_kernel` has been deprecated. Given that, we don't use
 `Core_kernel` in this text.
 
 :::
