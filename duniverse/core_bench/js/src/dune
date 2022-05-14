@@ -1,0 +1,3 @@
+(library (name core_bench_js) (public_name core_bench.js)
+ (libraries textutils.ascii_table_kernel core_bench_internals core)
+ (preprocess (pps ppx_jane)))

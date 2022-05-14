@@ -4,6 +4,7 @@ module Records = struct
       { x1 : float
       ; y1 : int
       ; z1 : int
+      ; next : t option
       }
   end
 
@@ -12,6 +13,7 @@ module Records = struct
       { x1 : int
       ; y2 : int
       ; z1 : int
+      ; next : t option
       }
     [@@deriving
       stable_record ~version:V1.t ~add:[ y1 ] ~remove:[ y2 ] ~modify:[ x1 ] ~set:[ z1 ]]
@@ -33,6 +35,7 @@ module Variants = struct
       | Z2 of float
       | Z3
       | T of char option * bool option
+      | B of t * t
     [@@deriving stable_variant]
   end
 
@@ -52,6 +55,7 @@ module Variants = struct
       | Z3 of int * int
       | T1 of char
       | T2 of bool
+      | B of t * t
     [@@deriving
       stable_variant
         ~version:V1.t
@@ -99,7 +103,7 @@ module X0b = struct
   type t = float
 
   let of_int x = Base.Float.of_int x
-  let of_x0a (_ : X0a.t) = (assert false : t)
+  let of_x0a (_ : X0a.t) : t = assert false
 end
 
 module X = struct
@@ -135,14 +139,15 @@ module Inline_record = struct
       | X of { v0 : int }
       | I of { y : float }
     [@@deriving stable_variant ~version:V1.t ~modify:[ X ] ~add:[ Y; Z; E ]]
-  end
-end
 
-module Both_kinds = struct
-  module V1 = struct
-    type t =
-      | X of int
-      | Y of { y : float }
-    [@@deriving stable_variant]
+    let of_prev : V1.t -> t =
+      of_V1_t
+        ~modify_X:(fun ~v1:_ ~v0 -> X { v0 })
+        ~remove_Z:(fun v0 _ -> X { v0 })
+        ~remove_Y:(fun ~y -> I { y })
+        ~remove_E:(fun () -> failwith "Unable to upconvert E")
+    ;;
+
+    let to_prev : t -> V1.t = to_V1_t ~modify_X:(fun ~v0 -> X { v0; v1 = 0. })
   end
 end

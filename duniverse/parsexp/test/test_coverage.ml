@@ -1,5 +1,5 @@
 open! Import
-open Gen_parsexp_lib.Automaton
+open Parsexp_symbolic_automaton.Automaton
 
 (* For the coverage tests, we write as input a list of string and expected s-expression.
 
@@ -15,13 +15,13 @@ open Gen_parsexp_lib.Automaton
 
 (* Compute the classes of character that give the same transition whatever the state. *)
 module Char_class = struct
-  open Table
+  open Parsexp_symbolic_automaton.Table
 
   module T = struct
-    type t = transition or_error list [@@deriving compare, sexp_of, hash]
+    type t = Transition.t Or_parse_error_reason.t list [@@deriving compare, sexp_of, hash]
   end
 
-  let compute (table : Table.t) =
+  let compute (table : t) =
     let transitions_to_class = Hashtbl.create (module T) in
     let classes = Array.create 0 ~len:256 in
     for i = 0 to 255 do
@@ -37,7 +37,7 @@ module Char_class = struct
     Hashtbl.length transitions_to_class, classes
   ;;
 
-  let count, class_table = compute table
+  let count, class_table = compute Parsexp_symbolic_automaton.table
   let () = assert (count <= 256)
   let of_char ch = class_table.(Char.to_int ch)
 
@@ -82,7 +82,7 @@ module Char_class = struct
   ;;
 end
 
-module A = Private.Parser_automaton
+module A = Private.Automaton
 
 type 'a result =
   | Sexp of 'a
@@ -105,7 +105,7 @@ let feed_eoi state stack =
 ;;
 
 let parse_string_gen mode s =
-  let state = A.new_state mode Sexp in
+  let state = A.create mode Sexp in
   let len = String.length s in
   let rec loop pos stack =
     if pos = len
@@ -226,9 +226,7 @@ let witness_for_class cl =
   let rec loop i =
     if i = 256
     then  raise Caml.Not_found;
-    if Char_class.of_char (Char.of_int_exn i) = cl
-    then Char.of_int_exn i
-    else loop (i + 1)
+    if Char_class.of_char (Char.of_int_exn i) = cl then Char.of_int_exn i else loop (i + 1)
   in
   let ch = loop 0 in
   match ch with
@@ -568,7 +566,7 @@ let%expect_test "coverage" =
   List.iter zero_sexp_cases ~f:test_one_case_dealing_with_many_sexps;
   (* Transition after an error *)
   let after_error () =
-    let state = A.new_state Many Sexp in
+    let state = A.create Many Sexp in
     match feed state ')' Automaton_stack.empty with
     | (_ : Automaton_stack.t) -> assert false
     | exception _ -> state

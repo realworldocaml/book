@@ -25,7 +25,8 @@ let%expect_test "message when non-ASCII text files differ" =
     (fg:black bg:red)-|(fg:red)      │clock(off)    ││         ││┌───┐   ┌───┐ │
     (fg:black bg:green)+|(fg:green)      │clock2(off)   ││         ││┌───┐   ┌───┐ │
     (fg:black) |(off)      │         ││         ││    └───┘   └─│
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "message when binary files differ" =
@@ -43,5 +44,6 @@ let%expect_test "message when binary files differ" =
       File "next/file"
       binary files differ
 
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;

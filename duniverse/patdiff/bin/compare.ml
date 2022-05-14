@@ -1,4 +1,5 @@
 open Core
+module Unix = Core_unix
 module Compare_core = Patdiff.Compare_core
 module Configuration = Patdiff.Configuration
 module Format = Patdiff.Format
@@ -19,7 +20,6 @@ module Args = struct
   type compare_flags =
     { unrefined_opt : bool option
     ; produce_unified_lines_opt : bool option
-    ; ext_cmp_opt : string option option
     ; float_tolerance_opt : Percent.t option option
     ; keep_ws_opt : bool option
     ; interleave_opt : bool option
@@ -49,15 +49,15 @@ module Args = struct
     | Make_config of string
 end
 
-let remove_at_exit = ref []
-
 let files_from_anons = function
   | Some (prev_file, next_file) -> prev_file, next_file
   | None ->
     (* read from stdin *)
     let temp_txt_file prefix =
-      let file, oc = Filename.open_temp_file prefix ".txt" in
-      remove_at_exit := file :: !remove_at_exit;
+      let file, oc = Filename_unix.open_temp_file prefix ".txt" in
+      at_exit (fun () ->
+        try Unix.unlink file with
+        | _ -> ());
       file, oc
     in
     let prev_file, prev_oc = temp_txt_file "patdiff_prev_" in
@@ -91,49 +91,40 @@ let files_from_anons = function
 
 (* Override default/config file options with command line arguments *)
 let override config (args : Args.compare_flags) =
-  let config =
-    Configuration.override
-      config
-      ?output:args.output
-      ?unrefined:args.unrefined_opt
-      ?produce_unified_lines:args.produce_unified_lines_opt
-      ?float_tolerance:args.float_tolerance_opt
-      ?keep_ws:args.keep_ws_opt
-      ?split_long_lines:args.split_long_lines_opt
-      ?interleave:args.interleave_opt
-      ?assume_text:args.assume_text_opt
-      ?context:args.context_opt
-      ?line_big_enough:args.line_big_enough_opt
-      ?word_big_enough:args.word_big_enough_opt
-      ?shallow:args.shallow_opt
-      ?quiet:args.quiet_opt
-      ?double_check:args.double_check_opt
-      ?mask_uniques:args.mask_uniques_opt
-      ?prev_alt:args.prev_alt_opt
-      ?next_alt:args.next_alt_opt
-      ?location_style:args.location_style
-      ?warn_if_no_trailing_newline_in_both:args.warn_if_no_trailing_newline_in_both
-  in
-  match args.ext_cmp_opt with
-  | None -> config
-  | Some ext_cmp ->
-    (Configuration.Private.with_ext_cmp [@alert "-deprecated"])
-      config
-      ~ext_cmp
-      ~notify:ignore
+  Configuration.override
+    config
+    ?output:args.output
+    ?unrefined:args.unrefined_opt
+    ?produce_unified_lines:args.produce_unified_lines_opt
+    ?float_tolerance:args.float_tolerance_opt
+    ?keep_ws:args.keep_ws_opt
+    ?split_long_lines:args.split_long_lines_opt
+    ?interleave:args.interleave_opt
+    ?assume_text:args.assume_text_opt
+    ?context:args.context_opt
+    ?line_big_enough:args.line_big_enough_opt
+    ?word_big_enough:args.word_big_enough_opt
+    ?shallow:args.shallow_opt
+    ?quiet:args.quiet_opt
+    ?double_check:args.double_check_opt
+    ?mask_uniques:args.mask_uniques_opt
+    ?prev_alt:args.prev_alt_opt
+    ?next_alt:args.next_alt_opt
+    ?location_style:args.location_style
+    ?warn_if_no_trailing_newline_in_both:args.warn_if_no_trailing_newline_in_both
 ;;
 
-let main' (args : Args.compare_flags) =
+let compare_main (args : Args.compare_flags) =
   (* Load config file if it exists, use default if not *)
   let config = Configuration.get_config ?filename:args.config_opt () in
   let config = override config args in
   (* 2012-06-28 mbac: /dev/null is used as a placeholder for deleted files. *)
-  let file_or_dev_null f = if Sys.file_exists_exn f then f else "/dev/null" in
+  let file_or_dev_null f = if Sys_unix.file_exists_exn f then f else "/dev/null" in
   let prev_file = file_or_dev_null args.prev_file in
   let next_file = file_or_dev_null args.next_file in
   if String.equal prev_file "/dev/null" && String.equal next_file "/dev/null"
   then failwithf "Both files, %s and %s, do not exist" args.prev_file args.next_file ();
-  let is_dir = Sys.is_directory_exn in
+  let is_dir = Sys_unix.is_directory_exn in
   let if_not_diffing_two_dirs () =
     match args with
     | { include_ = []; exclude = []; _ } -> ()
@@ -148,7 +139,7 @@ let main' (args : Args.compare_flags) =
     in
     (* Match file with its twin file in dir *)
     let matches =
-      Sys.ls_dir dir
+      Sys_unix.ls_dir dir
       |> List.find_map ~f:(fun file' ->
         let file' = dir ^/ file' in
         if String.equal file file' then Some file' else None)
@@ -186,13 +177,10 @@ let main arg =
   match arg with
   | Args.Make_config file -> Make_config.main file
   | Args.Compare compare_args ->
-    let res = main' compare_args in
-    List.iter !remove_at_exit ~f:(fun file ->
-      try Unix.unlink file with
-      | _ -> ());
-    (match res with
-     | `Same -> exit 0
-     | `Different -> exit 1)
+    exit
+      (match compare_main compare_args with
+       | `Same -> 0
+       | `Different -> 1)
 ;;
 
 let command =
@@ -200,25 +188,24 @@ let command =
     let open Command.Param in
     map ~f:(fun b -> if b then Some (not inverted) else None) (flag name no_arg ~doc)
   in
-  let specified_more_than_once s = failwithf "%s specified more than once" s () in
-  let open Command.Let_syntax in
   Command.basic
     ~summary
     ~readme:(fun () -> Readme.doc)
-    (let%map_open config_opt =
-       let%map default =
-         flag
-           "default"
-           no_arg
-           ~doc:" Use the default configuration instead of ~/.patdiff"
-       and file =
+    (let%map_open.Command config_opt =
+       let%map.Command default, default_arg_name =
+         flag "default" no_arg ~doc:" Use the default configuration instead of ~/.patdiff"
+         |> and_arg_name
+       and file, file_arg_name =
          flag
            "file"
-           (optional Filename.arg_type)
+           (optional Filename_unix.arg_type)
            ~doc:"FILE Use FILE as configuration file instead of ~/.patdiff"
+         |> and_arg_name
        in
        match file, default with
-       | Some _, true -> specified_more_than_once "config"
+       | Some _, true ->
+         failwith
+           [%string "Cannot pass both [%{default_arg_name}] and [%{file_arg_name}]"]
        | None, true -> Some ""
        | _, false -> file
      and context_opt =
@@ -227,18 +214,20 @@ let command =
          (optional int)
          ~doc:"NUM Show lines of unchanged context before and after changes"
      and line_big_enough_opt, word_big_enough_opt =
-       let%map line_big_enough =
+       let%map.Command line_big_enough =
          flag
            "line-big-enough"
            (optional int)
            ~doc:
              "NUM Limit line-level semantic cleanup to the matches of length less than \
               NUM lines"
-       and no_semantic_cleanup =
+         |> and_arg_name
+       and no_semantic_cleanup, no_semantic_cleanup_arg_name =
          flag
            "no-semantic-cleanup"
            no_arg
            ~doc:" Don't do any semantic cleanup; let small, spurious matches survive"
+         |> and_arg_name
        and word_big_enough =
          flag
            "word-big-enough"
@@ -246,37 +235,21 @@ let command =
            ~doc:
              "NUM Limit word-level semantic cleanup to the matches of length less than \
               NUM words"
+         |> and_arg_name
        in
-       let f name value =
+       let check_conflict_with_no_semantic_cleanup (value, arg_name) =
          match value, no_semantic_cleanup with
-         | Some _, true -> specified_more_than_once name
+         | Some _, true ->
+           failwith
+             [%string
+               "Cannot pass both [%{arg_name}] and [%{no_semantic_cleanup_arg_name}]"]
          | None, true -> Some 1
          | _, false -> value
        in
-       f "line-big-enough" line_big_enough, f "word-big-enough" word_big_enough
-     and ext_cmp_opt, unrefined_opt =
-       let%map ext_cmp =
-         flag
-           "ext-cmp"
-           (optional Filename.arg_type)
-           ~doc:"FILE Use external string comparison program (implies -unrefined)"
-       and unrefined =
-         flag "unrefined" no_arg ~doc:" Don't highlight word differences between lines"
-       in
-       let unrefined_opt =
-         match ext_cmp, unrefined with
-         | Some _, true ->
-           (* unrefined is set more than once, but both values agree, so it's fine. *)
-           Some true
-         | Some _, false | None, true ->
-           (* only set once *)
-           Some true
-         | None, false ->
-           (* never set. *)
-           None
-       in
-       let ext_cmp_opt = Option.map ~f:Option.some ext_cmp in
-       ext_cmp_opt, unrefined_opt
+       ( check_conflict_with_no_semantic_cleanup line_big_enough
+       , check_conflict_with_no_semantic_cleanup word_big_enough )
+     and unrefined_opt =
+       flag_no_arg "unrefined" ~doc:" Don't highlight word differences between lines"
      and keep_ws_opt =
        flag_no_arg "keep-whitespace" ~doc:" Consider whitespace when comparing lines"
      and split_long_lines_opt =
@@ -349,16 +322,16 @@ let command =
        flag
          "alt-prev"
          ~aliases:[ "alt-old" ]
-         (optional (Arg_type.map Filename.arg_type ~f:Option.some))
+         (optional (Arg_type.map Filename_unix.arg_type ~f:Option.some))
          ~doc:"NAME Mask prev filename with NAME"
      and next_alt_opt =
        flag
          "alt-next"
          ~aliases:[ "alt-new" ]
-         (optional (Arg_type.map Filename.arg_type ~f:Option.some))
+         (optional (Arg_type.map Filename_unix.arg_type ~f:Option.some))
          ~doc:"NAME Mask next filename with NAME"
      and make_config =
-       flag "make-config" (optional Filename.arg_type) ~doc:Make_config.doc
+       flag "make-config" (optional Filename_unix.arg_type) ~doc:Make_config.doc
      and include_ =
        flag
          "include"
@@ -391,7 +364,9 @@ let command =
                constitute a diff (default: read from config, or %b)"
               Configuration.warn_if_no_trailing_newline_in_both_default)
      and files =
-       anon (maybe (t2 ("FILE1" %: Filename.arg_type) ("FILE2" %: Filename.arg_type)))
+       anon
+         (maybe
+            (t2 ("FILE1" %: Filename_unix.arg_type) ("FILE2" %: Filename_unix.arg_type)))
      in
      fun () ->
        let args =
@@ -418,7 +393,6 @@ let command =
              ; shallow_opt
              ; double_check_opt
              ; mask_uniques_opt
-             ; ext_cmp_opt
              ; float_tolerance_opt
              ; prev_alt_opt
              ; next_alt_opt

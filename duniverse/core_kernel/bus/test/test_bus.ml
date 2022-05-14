@@ -1,7 +1,8 @@
-open! Core_kernel
+open! Core
 open! Expect_test_helpers_core
 open! Bus
 
+let () = Backtrace.elide := true
 let does_raise = Exn.does_raise
 
 include (
@@ -123,8 +124,7 @@ struct
     let%expect_test "subscriber raise" =
       let bus = create1 [%here] ~on_subscription_after_first_write:Raise in
       ignore
-        (subscribe_exn bus [%here] ~f:(fun _ ->
-           raise_s [%message "subscriber raising"])
+        (subscribe_exn bus [%here] ~f:(fun _ -> raise_s [%message "subscriber raising"])
          : _ Subscriber.t);
       show_raise ~hide_positions:true (fun () -> write bus ());
       [%expect
@@ -276,14 +276,23 @@ struct
          (r2 1)) |}]
     ;;
 
-    let%expect_test "correct exception raised for [subscribe_exn ~extract_exn:true]" =
-      List.iter Bool.all ~f:(fun extract_exn ->
+    let%expect_test "correct exception raised for [subscribe_exn ~extract_exn]" =
+      let print_error ~extract_exn ~error_handler error =
+        print_s
+          ~hide_positions:true
+          [%message
+            ""
+              (extract_exn : bool)
+              (error_handler : [ `Subscriber | `Bus ])
+              (error : Error.t)]
+      in
+      let test ~extract_exn ~on_callback_raise =
         let bus =
           create
             [%here]
             Arity1
             ~on_subscription_after_first_write:Allow
-            ~on_callback_raise:ignore
+            ~on_callback_raise:(print_error ~extract_exn ~error_handler:`Bus)
         in
         ignore
           (subscribe_exn
@@ -291,15 +300,29 @@ struct
              [%here]
              ~extract_exn
              ~f:(fun () -> assert false)
-             ~on_callback_raise:(fun error ->
-               print_s
-                 ~hide_positions:true
-                 [%message (extract_exn : bool) (error : Error.t)])
+             ?on_callback_raise:
+               (match on_callback_raise with
+                | `Fall_back_to_bus -> None
+                | `Print -> Some (print_error ~extract_exn ~error_handler:`Subscriber))
            : (unit -> _) Subscriber.t);
-        write bus ());
+        write bus ()
+      in
+      test ~extract_exn:false ~on_callback_raise:`Fall_back_to_bus;
       [%expect
         {|
-        ((extract_exn false)
+        ((extract_exn   false)
+         (error_handler Bus)
+         (error (
+           "Bus subscriber raised"
+           (exn "Assert_failure test_bus.ml:LINE:COL")
+           (backtrace ("<backtrace elided in test>"))
+           (subscriber (
+             Bus.Subscriber.t (subscribed_from lib/bus/test/test_bus.ml:LINE:COL)))))) |}];
+      test ~extract_exn:false ~on_callback_raise:`Print;
+      [%expect
+        {|
+        ((extract_exn   false)
+         (error_handler Subscriber)
          (error (
            "Bus subscriber raised"
            (exn "Assert_failure test_bus.ml:LINE:COL")
@@ -307,9 +330,19 @@ struct
            (subscriber (
              Bus.Subscriber.t (
                (on_callback_raise <fun>)
-               (subscribed_from   lib/bus/test/test_bus.ml:LINE:COL)))))))
-        ((extract_exn true)
-         (error       "Assert_failure test_bus.ml:LINE:COL")) |}]
+               (subscribed_from   lib/bus/test/test_bus.ml:LINE:COL))))))) |}];
+      test ~extract_exn:true ~on_callback_raise:`Fall_back_to_bus;
+      [%expect
+        {|
+        ((extract_exn   true)
+         (error_handler Bus)
+         (error         "Assert_failure test_bus.ml:LINE:COL")) |}];
+      test ~extract_exn:true ~on_callback_raise:`Print;
+      [%expect
+        {|
+        ((extract_exn   true)
+         (error_handler Subscriber)
+         (error         "Assert_failure test_bus.ml:LINE:COL")) |}]
     ;;
 
     let%expect_test "subscribe_exn ~on_callback_raise:raise" =
@@ -380,8 +413,8 @@ struct
          : _ Subscriber.t)
     ;;
 
-    let%expect_test "during a write, [subscribe_exn] does not raise after [close], \
-                     and [on_close] is not called"
+    let%expect_test "during a write, [subscribe_exn] does not raise after [close], and \
+                     [on_close] is not called"
       =
       let bus = create1 [%here] ~on_subscription_after_first_write:Allow in
       let bus_r = read_only bus in
@@ -401,9 +434,9 @@ struct
     ;;
 
     let%expect_test "During write, if [close] and [subscribe_exn] are called, \
-                     [on_close] will be called only if the subscriptions happen \
-                     before [close]. This depends on the order of when the callbacks \
-                     were fired, which could change over time."
+                     [on_close] will be called only if the subscriptions happen before \
+                     [close]. This depends on the order of when the callbacks were \
+                     fired, which could change over time."
       =
       let bus = create1 [%here] ~on_subscription_after_first_write:Allow in
       let bus_r = read_only bus in
@@ -435,9 +468,9 @@ struct
         [on_close] #1 called |}]
     ;;
 
-    let%expect_test "During write, if [unsubscribe] is called before [close], then \
-                     the corresponding [on_close] will not be called. But if [close] \
-                     is called before [unsubscribe], [on_close] will be called."
+    let%expect_test "During write, if [unsubscribe] is called before [close], then the \
+                     corresponding [on_close] will not be called. But if [close] is \
+                     called before [unsubscribe], [on_close] will be called."
       =
       let bus = create1 [%here] ~on_subscription_after_first_write:Allow in
       let bus_r = read_only bus in
@@ -542,7 +575,7 @@ struct
     ;;
   end
 
-  module A1_1 = Arity_1 (struct
+  module _ = Arity_1 (struct
       let write = write
     end)
 
@@ -591,7 +624,7 @@ struct
     ;;
   end
 
-  module A2_2 = Arity_2 (struct
+  module _ = Arity_2 (struct
       let write = write2
     end)
 end

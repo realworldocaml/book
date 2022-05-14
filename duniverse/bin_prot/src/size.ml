@@ -63,6 +63,7 @@ module Minimum = struct
   let bin_size_float32_mat = bin_size_mat
   let bin_size_float64_mat = bin_size_mat
   let bin_size_bigstring = bin_size_len
+  let bin_size_floatarray = bin_size_len
   let bin_size_float_array = bin_size_len
   let bin_size_variant_int = Maximum.bin_size_variant_int
   let bin_size_int_8bit = Maximum.bin_size_int_8bit
@@ -178,19 +179,24 @@ let bin_size_triple bin_size_a bin_size_b bin_size_c (a, b, c) =
   bin_size_a a + bin_size_b b + bin_size_c c
 ;;
 
-let bin_size_list bin_size_el lst =
-  let rec loop len = function
-    | [] -> len
-    | h :: t -> loop (len + bin_size_el h) t
+let bin_size_list =
+  let rec loop ~bin_size_el ~size_acc ~len_acc lst =
+    match lst with
+    | [] -> size_acc + bin_size_nat0 (Nat0.unsafe_of_int len_acc)
+    | hd :: tl ->
+      loop ~bin_size_el ~size_acc:(size_acc + bin_size_el hd) ~len_acc:(len_acc + 1) tl
   in
-  let len = Nat0.unsafe_of_int (List.length lst) in
-  let size_len = bin_size_nat0 len in
-  loop size_len lst
+  fun bin_size_el lst -> loop ~bin_size_el ~size_acc:0 ~len_acc:0 lst
 ;;
 
 let bin_size_len len =
   let plen = Nat0.unsafe_of_int len in
   bin_size_nat0 plen
+;;
+
+let bin_size_floatarray ar =
+  let len = Float.Array.length ar in
+  bin_size_len len + (8 * len)
 ;;
 
 let bin_size_float_array ar =

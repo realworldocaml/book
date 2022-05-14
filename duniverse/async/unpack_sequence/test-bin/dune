@@ -1,4 +1,4 @@
 (alias (name runtest) (deps qtest.exe) (action (bash ./qtest.exe)))
 
-(executables (names qtest) (libraries unpack_sequence qtest_lib)
+(executables (names qtest) (libraries unpack_sequence qtest_deprecated)
  (preprocess (pps ppx_jane)))

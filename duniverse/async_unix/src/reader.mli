@@ -82,7 +82,7 @@ val create : ?buf_len:int -> Fd.t -> t
 
 val of_in_channel : In_channel.t -> Fd.Kind.t -> t
 
-(** [with_file file f] opens [files], creates a reader with it, and passes the reader to
+(** [with_file file f] opens [file], creates a reader with it, and passes the reader to
     [f].  It closes the reader when the result of [f] becomes determined, and returns
     [f]'s result.
 
@@ -93,7 +93,16 @@ val of_in_channel : In_channel.t -> Fd.Kind.t -> t
     {b Note:} You need to be careful that all your IO is done when the deferred you return
     becomes determined. If for example you use [with_file] and call [lines], make sure
     you return a deferred that becomes determined when the EOF is reached on the pipe,
-    not when you get the pipe (because you get it straight away). *)
+    not when you get the pipe (because you get it straight away).
+
+    [exclusive = true] uses a filesystem lock to try and make sure that the file is not
+    read while it's being modified. This is an advisory lock, which means that the writer
+    must be cooperating by taking a relevant lock when writing (see
+    [Writer.with_file]). This is unrelated and should not be confused with the [O_EXCL]
+    flag in [open] systemcall.  Note that the implementation uses [Unix.lockf], which has
+    known pitfalls.  It's recommended that you avoid the [exclusive] flag in favor of
+    using a library dedicated to dealing with file locks where the pitfalls can be
+    documented in detail. *)
 val with_file
   :  ?buf_len:int
   -> ?exclusive:bool (** default is [false] *)
@@ -189,10 +198,7 @@ type 'a handle_chunk_result =
     may read from [t] after [read_one_chunk_at_a_time] returns. *)
 val read_one_chunk_at_a_time
   :  t
-  -> handle_chunk:(Bigstring.t
-                   -> pos:int
-                   -> len:int
-                   -> 'a handle_chunk_result Deferred.t)
+  -> handle_chunk:(Bigstring.t -> pos:int -> len:int -> 'a handle_chunk_result Deferred.t)
   -> 'a read_one_chunk_at_a_time_result Deferred.t
 
 (** [`Stop a] or [`Continue] respects the usual [Iobuf] semantics where data up to the
@@ -225,12 +231,7 @@ val read_char : t -> char Read_result.t Deferred.t
     [pos], or runs out of input.  In the former case it returns [`Ok].  In the latter, it
     returns [`Eof n] where [n] is the number of bytes that were read before end of input,
     and [0 <= n < String.length ss]. *)
-val really_read
-  :  t
-  -> ?pos:int
-  -> ?len:int
-  -> Bytes.t
-  -> [ `Ok | `Eof of int ] Deferred.t
+val really_read : t -> ?pos:int -> ?len:int -> Bytes.t -> [ `Ok | `Eof of int ] Deferred.t
 
 val really_read_substring
   :  t
@@ -259,9 +260,12 @@ val read_until
   -> keep_delim:bool
   -> [ `Ok of string | `Eof_without_delim of string | `Eof ] Deferred.t
 
-(** [read_until_max] is just like [read_until], except you have the option of specifying
-    a maximum number of chars to read. *)
-val read_until_max
+(** [read_until_bounded] is just like [read_until], except you have the option of
+    specifying a maximum number of chars to read (not including the separator).
+
+    When [`Max_exceeded str] is returned, the length of [str] will be equal to
+    [max + 1]. *)
+val read_until_bounded
   :  t
   -> [ `Pred of char -> bool | `Char of char ]
   -> keep_delim:bool
@@ -389,3 +393,8 @@ type ('a, 'b) load_bin_prot =
 
 val load_bin_prot : ('a, 'a Or_error.t) load_bin_prot
 val load_bin_prot_exn : ('a, 'a) load_bin_prot
+
+module For_testing : sig
+  (** [of_string str], when read, will have contents equal to [str]. *)
+  val of_string : ?info:Info.t -> string -> t Deferred.t
+end

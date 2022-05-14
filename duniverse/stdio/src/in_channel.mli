@@ -9,7 +9,6 @@
 *)
 
 open! Base
-open! Import
 
 type t = Caml.in_channel
 
@@ -27,15 +26,18 @@ val create : ?binary:bool (** defaults to [true] *) -> string -> t
     [fname], and closes it afterwards. *)
 val with_file : ?binary:bool (** defaults to [true] *) -> string -> f:(t -> 'a) -> 'a
 
+
 (** [close t] closes [t], or does nothing if [t] is already closed, and may raise an
     exception. *)
 val close : t -> unit
 
 val input : t -> buf:bytes -> pos:int -> len:int -> int
-val really_input     : t -> buf:bytes -> pos:int -> len:int -> unit option
+
+val really_input : t -> buf:bytes -> pos:int -> len:int -> unit option
 
 (** Same as [Pervasives.really_input], for backwards compatibility *)
 val really_input_exn : t -> buf:bytes -> pos:int -> len:int -> unit
+
 
 (** Read one character from the given input channel.  Return [None] if there are no more
     characters to read. *)
@@ -53,6 +55,7 @@ val input_binary_int : t -> int option
 (** Ocaml's built-in marshal format *)
 val unsafe_input_value : t -> _ option
 
+
 (** [input_buffer t buf ~len] reads at most [len] characters from the input channel [t]
     and stores them at the end of buffer [buf].  Return [None] if the channel contains
     fewer than [len] characters. In this case, the characters are still added to the
@@ -65,7 +68,8 @@ val input_all : t -> string
     the newline ("\n") character at the end, and, if [fix_win_eol] the trailing
     "\r\n" is dropped.
 *)
-val input_line     : ?fix_win_eol:bool (** defaults to [true] *) -> t -> string option
+val input_line : ?fix_win_eol:bool (** defaults to [true] *) -> t -> string option
+
 val input_line_exn : ?fix_win_eol:bool (** defaults to [true] *) -> t -> string
 
 (** [fold_lines ?fix_win_eol t ~init ~f] folds over the lines read from [t]

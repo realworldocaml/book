@@ -6,28 +6,9 @@ let stage = Staged.stage
 module T = struct
   type t = bytes [@@deriving_inline sexp, sexp_grammar]
 
-  let t_of_sexp = (bytes_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_bytes : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "bytes" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ bytes_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "bytes.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (bytes_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_bytes : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = bytes_sexp_grammar
 
   [@@@end]
 
@@ -47,7 +28,6 @@ module To_bytes = Blit.Make (struct
 
 include To_bytes
 include Comparator.Make (T)
-include Comparable.Validate (T)
 include Pretty_printer.Register_pp (T)
 
 (* Open replace_polymorphic_compare after including functor instantiations so they do not

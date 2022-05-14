@@ -3,7 +3,7 @@
     This heap implementations supports an arbitrary element type via a comparison
     function. *)
 
-open! Core_kernel
+open! Core
 
 (** of_sexp and bin_io functions aren't supplied for heaps due to the difficulties in
     reconstructing the correct comparison function when de-serializing. *)
@@ -12,15 +12,14 @@ type 'a t [@@deriving sexp_of]
 (** Mutation of the heap during iteration is not supported, but there is no check to
     prevent it.  The behavior of a heap that is mutated during iteration is
     undefined. *)
-include
-  Container.S1 with type 'a t := 'a t
+include Container.S1 with type 'a t := 'a t
 
 include Invariant.S1 with type 'a t := 'a t
 
 (** Even though these two functions [min_elt] and [max_elt] are part of Container.S1, they
     are documented separately to make sure there is no confusion. They are independent of
     the comparison function used to order the heap. Instead, a traversal of the entire
-    structure is done using the provided [cmp] function to find a min or max.
+    structure is done using the provided [compare] function to find a min or max.
 
     If you want to access the smallest element of the heap according to the heap's
     comparison function in constant time, you should use [top]. *)
@@ -54,6 +53,10 @@ val add : 'a t -> 'a -> unit
 
 (** [remove_top t] does nothing if [t] is empty. *)
 val remove_top : _ t -> unit
+
+(** Removes all elements, leaving an empty heap. This operation is O(n) where n is the
+    size of the heap. *)
+val clear : _ t -> unit
 
 
 (** [pop] removes and returns the top (i.e. least) element. *)

@@ -6,17 +6,11 @@ open! Import
 
 type 'a t = 'a list [@@deriving_inline compare, hash, sexp, sexp_grammar]
 
-val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+include Ppx_hash_lib.Hashable.S1 with type 'a t := 'a t
+include Sexplib0.Sexpable.S1 with type 'a t := 'a t
 
-val hash_fold_t
-  :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
-  -> Ppx_hash_lib.Std.Hash.state
-  -> 'a t
-  -> Ppx_hash_lib.Std.Hash.state
-
-include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
-
-val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
@@ -24,6 +18,14 @@ val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
 include Container.S1 with type 'a t := 'a t
 
 include Invariant_intf.S1 with type 'a t := 'a t
+
+(** Implements cartesian-product behavior for [map] and [bind]. **)
+module Cartesian_product : sig
+  include Applicative.S with type 'a t := 'a t
+  include Monad.S with type 'a t := 'a t
+end
+
+(** The monad portion of [Cartesian_product] is re-exported at top level. *)
 include Monad.S with type 'a t := 'a t
 
 (** [Or_unequal_lengths] is used for functions that take multiple lists and that only make
@@ -36,8 +38,9 @@ module Or_unequal_lengths : sig
     | Unequal_lengths
   [@@deriving_inline compare, sexp_of]
 
-  val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+  include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+
+  val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
 
   [@@@end]
 end
@@ -88,12 +91,7 @@ val rev_map2 : 'a t -> 'b t -> f:('a -> 'b -> 'c) -> 'c t Or_unequal_lengths.t
     ...) bn cn].  The exn version will raise if the two lists have different lengths. *)
 val fold2_exn : 'a t -> 'b t -> init:'c -> f:('c -> 'a -> 'b -> 'c) -> 'c
 
-val fold2
-  :  'a t
-  -> 'b t
-  -> init:'c
-  -> f:('c -> 'a -> 'b -> 'c)
-  -> 'c Or_unequal_lengths.t
+val fold2 : 'a t -> 'b t -> init:'c -> f:('c -> 'a -> 'b -> 'c) -> 'c Or_unequal_lengths.t
 
 (** Like {!List.for_all}, but passes the index as an argument. *)
 val for_alli : 'a t -> f:(int -> 'a -> bool) -> bool
@@ -132,8 +130,8 @@ val partition3_map
   -> 'b t * 'c t * 'd t
 
 (** [partition_tf l ~f] returns a pair of lists [(l1, l2)], where [l1] is the list of all
-    the elements of [l] that satisfy the predicate [p], and [l2] is the list of all the
-    elements of [l] that do not satisfy [p].  The order of the elements in the input list
+    the elements of [l] that satisfy the predicate [f], and [l2] is the list of all the
+    elements of [l] that do not satisfy [f].  The order of the elements in the input list
     is preserved.  The "tf" suffix is mnemonic to remind readers at a call that the result
     is (trues, falses). *)
 val partition_tf : 'a t -> f:('a -> bool) -> 'a t * 'a t
@@ -183,6 +181,9 @@ val tl_exn : 'a t -> 'a t
 
 val findi : 'a t -> f:(int -> 'a -> bool) -> (int * 'a) option
 
+(** Like [find_exn], but passes the index as an argument. *)
+val findi_exn : 'a t -> f:(int -> 'a -> bool) -> int * 'a
+
 (** [find_exn t ~f] returns the first element of [t] that satisfies [f].  It raises
     [Caml.Not_found] or [Not_found_s] if there is no such element. *)
 val find_exn : 'a t -> f:('a -> bool) -> 'a
@@ -224,8 +225,8 @@ val concat_mapi : 'a t -> f:(int -> 'a -> 'b t) -> 'b t
 
 (** [map2 [a1; ...; an] [b1; ...; bn] ~f] is [[f a1 b1; ...; f an bn]].  The exn
     version will raise if the two lists have different lengths. *)
-val map2_exn : 'a t -> 'b t -> f:('a -> 'b -> 'c) -> 'c t
 
+val map2_exn : 'a t -> 'b t -> f:('a -> 'b -> 'c) -> 'c t
 val map2 : 'a t -> 'b t -> f:('a -> 'b -> 'c) -> 'c t Or_unequal_lengths.t
 
 (** Analogous to [rev_map2]. *)
@@ -325,6 +326,9 @@ val group : 'a t -> break:('a -> 'a -> bool) -> 'a t t
 *)
 val groupi : 'a t -> break:(int -> 'a -> 'a -> bool) -> 'a t t
 
+(** Group equal elements into the same buckets. Sorting is stable. *)
+val sort_and_group : 'a t -> compare:('a -> 'a -> int) -> 'a t t
+
 (** [chunks_of l ~length] returns a list of lists whose concatenation is equal to the
     original list.  Every list has [length] elements, except for possibly the last list,
     which may have fewer.  [chunks_of] raises if [length <= 0]. *)
@@ -358,19 +362,23 @@ val remove_consecutive_duplicates
   -> 'a t
 
 (** Returns the given list with duplicates removed and in sorted order. *)
-val dedup_and_sort : compare:('a -> 'a -> int) -> 'a t -> 'a t
+val dedup_and_sort : 'a t -> compare:('a -> 'a -> int) -> 'a t
 
 (** [find_a_dup] returns a duplicate from the list (with no guarantees about which
     duplicate you get), or [None] if there are no dups. *)
-val find_a_dup : compare:('a -> 'a -> int) -> 'a t -> 'a option
+val find_a_dup : 'a t -> compare:('a -> 'a -> int) -> 'a option
 
 (** Returns true if there are any two elements in the list which are the same. O(n log n)
     time complexity. *)
-val contains_dup : compare:('a -> 'a -> int) -> 'a t -> bool
+val contains_dup : 'a t -> compare:('a -> 'a -> int) -> bool
 
 (** [find_all_dups] returns a list of all elements that occur more than once, with
     no guarantees about order. O(n log n) time complexity. *)
-val find_all_dups : compare:('a -> 'a -> int) -> 'a t -> 'a list
+val find_all_dups : 'a t -> compare:('a -> 'a -> int) -> 'a list
+
+(** [all_equal] returns a single element of the list that is equal to all other elements,
+    or [None] if no such element exists. *)
+val all_equal : 'a t -> equal:('a -> 'a -> bool) -> 'a option
 
 (** [count l ~f] is the number of elements in [l] that satisfy the predicate [f]. *)
 val count : 'a t -> f:('a -> bool) -> int
@@ -435,9 +443,14 @@ val filter_opt : 'a option t -> 'a t
 
     {[ Map.xxx (alist |> Map.of_alist_multi |> Map.map ~f:List.hd) ...args... ]} *)
 module Assoc : sig
-  type ('a, 'b) t = ('a * 'b) list [@@deriving_inline sexp]
+  type ('a, 'b) t = ('a * 'b) list [@@deriving_inline sexp, sexp_grammar]
 
-  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+  include Sexplib0.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
+  val t_sexp_grammar
+    :  'a Sexplib0.Sexp_grammar.t
+    -> 'b Sexplib0.Sexp_grammar.t
+    -> ('a, 'b) t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -450,6 +463,15 @@ module Assoc : sig
 
   (** Bijectivity is not guaranteed because we allow a key to appear more than once. *)
   val inverse : ('a, 'b) t -> ('b, 'a) t
+
+  (** Converts an association list with potential consecutive duplicate keys into an
+      association list of (non-empty) lists with no (consecutive) duplicate keys. Any
+      non-consecutive duplicate keys in the input will remain in the output. *)
+  val group : ('a * 'b) list -> equal:('a -> 'a -> bool) -> ('a, 'b list) t
+
+  (** Converts an association list with potential duplicate keys into an association list
+      of (non-empty) lists with no duplicate keys. *)
+  val sort_and_group : ('a * 'b) list -> compare:('a -> 'a -> int) -> ('a, 'b list) t
 end
 
 (** [sub pos len l] is the [len]-element sublist of [l], starting at [pos]. *)

@@ -23,10 +23,16 @@ module type S3 = sig
   type ('a, 'b, 'c) t
 
   val t_of_sexp
-    : (Sexp.t -> 'a) -> (Sexp.t -> 'b) -> (Sexp.t -> 'c) -> Sexp.t
+    :  (Sexp.t -> 'a)
+    -> (Sexp.t -> 'b)
+    -> (Sexp.t -> 'c)
+    -> Sexp.t
     -> ('a, 'b, 'c) t
 
   val sexp_of_t
-    : ('a -> Sexp.t) -> ('b -> Sexp.t) -> ('c -> Sexp.t) -> ('a, 'b, 'c) t
+    :  ('a -> Sexp.t)
+    -> ('b -> Sexp.t)
+    -> ('c -> Sexp.t)
+    -> ('a, 'b, 'c) t
     -> Sexp.t
 end

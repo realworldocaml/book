@@ -20,6 +20,7 @@ int main()
   clock_gettime(CLOCK_REALTIME, &ts);
   clock_settime(CLOCK_REALTIME, &ts);
   clock_getres(CLOCK_REALTIME, &ts);
+  clock_getcpuclockid(0, CLOCK_REALTIME);
   return 0;
 }
 |}
@@ -27,6 +28,17 @@ int main()
 type posix_timers =
   | Available of { need_lrt : bool }
   | Not_available
+
+let timespec_code = {|
+#include <time.h>
+
+int main()
+{
+  struct timespec ts;
+  timespec_get(&ts, TIME_UTC);
+  return 0;
+}
+|}
 
 let timerfd_code = {|
 #include <sys/timerfd.h>
@@ -144,21 +156,19 @@ int main()
 }
 |}
 
+let readdir_dtype_code = {|
+#include <dirent.h>
+int main()
+{
+  int i = DT_BLK;
+  return 0;
+}
+|}
+
 let () =
   C.main ~name:"config_h" (fun c ->
     let posix_timers =
-      if C.c_test c posix_timers_code ~link_flags:["-lrt"] then
-        Available { need_lrt = true }
-      else if C.c_test c posix_timers_code then
-        Available { need_lrt = false }
-      else
-        Not_available
-    in
-
-    let posix_timers, need_lrt =
-      match posix_timers with
-      | Available { need_lrt } -> true, need_lrt
-      | Not_available         -> false, false
+      C.c_test c posix_timers_code
     in
 
     let thread_id_method =
@@ -169,25 +179,26 @@ let () =
     in
 
     let linux =
-      let system = C.ocaml_config_var_exn c "system" in
+      let system = C.ocaml_config_var_exn c "system" in (* TODO: "uname -s" should be used instead *)
       (* Possible values for this field: linux, linux_elf, linux_eabi, ... *)
-      String.is_prefix system ~prefix:"linux" ||
-      String.equal system "elf"
+      String.is_prefix system ~prefix:"linux" || String.equal system "elf"
     in
 
     let simple_vars =
-      List.map ~f:(fun (v, code, link_flags) ->
-        (v, C.C_define.Value.Switch (C.c_test c code ~link_flags)))
-        [ "EVENTFD"          , eventfd_code          , []
-        ; "TIMERFD"          , timerfd_code          , []
-        ; "WORDEXP"          , wordexp_code          , []
-        ; "MSG_NOSIGNAL"     , msg_nosignal_code     , []
-        ; "SO_NOSIGPIPE"     , so_nosigpipe_code     , []
-        ; "FDATASYNC"        , fdatasync_code        , []
-        ; "RECVMMSG"         , recvmmsg_code         , []
-        ; "THREAD_CPUTIME"   , thread_cputime_code   , ["-lpthread"]
-        ; "PTHREAD_NP"       , pthread_np            , ["-lpthread"]
-        ; "MKOSTEMP"         , mkostemp_code         , []
+      List.map ~f:(fun (v, code, c_flags, link_flags) ->
+        (v, C.C_define.Value.Switch (C.c_test c code ~c_flags ~link_flags)))
+        [ "EVENTFD"        , eventfd_code        , []           , []
+        ; "TIMESPEC"       , timespec_code       , ["-std=c11"] , []
+        ; "TIMERFD"        , timerfd_code        , []           , []
+        ; "WORDEXP"        , wordexp_code        , []           , []
+        ; "MSG_NOSIGNAL"   , msg_nosignal_code   , []           , []
+        ; "SO_NOSIGPIPE"   , so_nosigpipe_code   , []           , []
+        ; "FDATASYNC"      , fdatasync_code      , []           , []
+        ; "RECVMMSG"       , recvmmsg_code       , []           , []
+        ; "THREAD_CPUTIME" , thread_cputime_code , []           , ["-lpthread"]
+        ; "PTHREAD_NP"     , pthread_np          , []           , ["-lpthread"]
+        ; "MKOSTEMP"       , mkostemp_code       , []           , []
+        ; "READDIR_DTYPE"  , readdir_dtype_code  , []           , []
         ]
     in
 
@@ -226,11 +237,5 @@ let () =
       List.map vars ~f:(fun (name, v) -> ("JSC_" ^ name, v))
     in
 
-    C.C_define.gen_header_file c ~fname:"config.h" jsc_vars;
-
-    let rt_flags : Sexp.t =
-      if need_lrt
-      then List [Atom "-lrt"]
-      else List []
-    in
-    Stdio.Out_channel.write_all "rt-flags" ~data:(Sexp.to_string rt_flags))
+    C.C_define.gen_header_file c ~fname:"config.h" jsc_vars
+  )

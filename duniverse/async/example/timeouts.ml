@@ -10,5 +10,5 @@ let () =
       >>| function
       | `Result () -> if n = 0 then `Finished () else `Repeat (n - 1)
       | `Timeout -> failwith "Timeout"))
-  |> Command.run
+  |> Command_unix.run
 ;;

@@ -1,3 +1,4 @@
 (library (name jane_street_headers) (public_name jane-street-headers)
- (install_c_headers core_params jane_common ocaml_utils unix_utils)
+ (install_c_headers core_params jane_common ocaml_utils ocaml_utils_macros
+  unix_utils)
  (js_of_ocaml (flags --no-sourcemap)) (preprocess no_preprocessing))

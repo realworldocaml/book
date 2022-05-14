@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 (** Default amount of context shown around each change in the diff *)
@@ -27,7 +27,6 @@ val warn_if_no_trailing_newline_in_both_default : bool
 type t = private
   { output : Output.t
   ; rules : Format.Rules.t
-  ; ext_cmp : string option
   ; float_tolerance : Percent.t option
   ; produce_unified_lines : bool
   ; unrefined : bool
@@ -100,10 +99,3 @@ val override
   -> t
 
 val default : t
-
-module Private : sig
-  (* [t] is private, so the only way to construct a [t] with [ext_cmp = Some _] is using
-     this function, which is deprecated. *)
-  val with_ext_cmp : t -> ext_cmp:string option -> notify:(unit -> unit) -> t
-  [@@deprecated "[since 2020-04] Dangerous and slated for deletion"]
-end

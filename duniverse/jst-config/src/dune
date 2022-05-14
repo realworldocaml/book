@@ -1,10 +1,9 @@
-(rule (targets config.h rt-flags)
+(rule (targets config.h)
  (deps (:first_dep ../discover/discover.exe) thread_id.h)
  (action (run %{first_dep})))
 
 (install (section lib)
- (files (config.h as config.h) (thread_id.h as thread_id.h)
-  (rt-flags as rt-flags)))
+ (files (config.h as config.h) (thread_id.h as thread_id.h)))
 
 (library (name config_h) (public_name jst-config)
  (preprocess no_preprocessing))

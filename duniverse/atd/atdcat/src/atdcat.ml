@@ -1,5 +1,10 @@
 open Atd.Import
 
+type out_format =
+  | Atd
+  | Ocaml of string (* output file name [why?] *)
+  | Jsonschema of string (* root type *)
+
 let html_of_doc loc s =
   let doc = Atd.Doc.parse_text loc s in
   Atd.Doc.html_of_doc doc
@@ -46,13 +51,14 @@ let strip all sections x =
   Atd.Ast.map_all_annot filter x
 
 let parse
+    ~annot_schema
     ~expand ~keep_poly ~xdebug ~inherit_fields ~inherit_variants
     ~strip_all ~strip_sections files =
   let l =
     List.map (
       fun file ->
         fst (
-          Atd.Util.load_file ~expand ~keep_poly ~xdebug
+          Atd.Util.load_file ~annot_schema ~expand ~keep_poly ~xdebug
             ~inherit_fields ~inherit_variants file
         )
     ) files
@@ -67,11 +73,12 @@ let parse
   let m = first_head, List.flatten bodies in
   strip strip_all strip_sections m
 
-let print ~html_doc ~out_format ~out_channel:oc ast =
+let print ~src_name ~html_doc ~out_format ~out_channel:oc ast =
   let f =
     match out_format with
-        `Atd -> print_atd ~html_doc
-      | `Ocaml name -> print_ml ~name
+    | Atd -> print_atd ~html_doc
+    | Ocaml name -> print_ml ~name
+    | Jsonschema root_type -> Atd.Jsonschema.print ~src_name ~root_type
   in
   f oc ast
 
@@ -86,7 +93,7 @@ let () =
   let inherit_variants = ref false in
   let strip_sections = ref [] in
   let strip_all = ref false in
-  let out_format = ref `Atd in
+  let out_format = ref Atd in
   let html_doc = ref false in
   let input_files = ref [] in
   let output_file = ref None in
@@ -123,7 +130,11 @@ let () =
     "
           expand `inherit' statements in sum types";
 
-    "-ml", Arg.String (fun s -> out_format := `Ocaml s),
+    "-jsonschema", Arg.String (fun s -> out_format := Jsonschema s),
+    "<root type name>
+          translate the ATD file to JSON Schema.";
+
+    "-ml", Arg.String (fun s -> out_format := Ocaml s),
     "<name>
           output the ocaml code of the ATD abstract syntax tree";
 
@@ -157,23 +168,41 @@ let () =
   let msg = sprintf "Usage: %s FILE" Sys.argv.(0) in
   Arg.parse options (fun file -> input_files := file :: !input_files) msg;
   try
+    let force_inherit, annot_schema =
+      match !out_format with
+      | Jsonschema _ -> true, Atd.Jsonschema.annot_schema
+      | _ -> false, []
+    in
+    let inherit_fields = !inherit_fields || force_inherit in
+    let inherit_variants = !inherit_variants || force_inherit in
     let ast =
       parse
-          ~expand: !expand
-          ~keep_poly: !keep_poly
-          ~xdebug: !xdebug
-          ~inherit_fields: !inherit_fields
-          ~inherit_variants: !inherit_variants
-          ~strip_all: !strip_all
-          ~strip_sections: !strip_sections
-          !input_files
+        ~annot_schema
+        ~expand: !expand
+        ~keep_poly: !keep_poly
+        ~xdebug: !xdebug
+        ~inherit_fields
+        ~inherit_variants
+        ~strip_all: !strip_all
+        ~strip_sections: !strip_sections
+        !input_files
     in
     let out_channel =
       match !output_file with
       | None -> stdout
       | Some file -> open_out file
     in
-    print ~html_doc: !html_doc ~out_format: !out_format ~out_channel ast;
+    let src_name =
+      match !input_files with
+      | [] -> "<empty>"
+      | [file] -> sprintf "'%s'" (Filename.basename file)
+      | _ -> "multiple files"
+    in
+    print
+      ~src_name
+      ~html_doc: !html_doc
+      ~out_format: !out_format
+      ~out_channel ast;
     close_out out_channel
   with
       Atd.Ast.Atd_error s ->

@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Async_kernel
 
 module type Quickcheck_async_configured = sig
@@ -9,6 +9,7 @@ module type Quickcheck_async_configured = sig
     :  ?seed:Quickcheck.seed
     -> ?trials:int
     -> ?sexp_of:('a -> Sexp.t)
+    -> ?examples:'a list
     -> 'a Quickcheck.Generator.t
     -> f:('a -> unit Deferred.t)
     -> unit Deferred.t

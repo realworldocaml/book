@@ -1,7 +1,7 @@
-(** This module defines signatures that extend [Core_kernel.Invariant] with an [Async]
+(** This module defines signatures that extend [Core.Invariant] with an [Async]
     submodule for invariants that use async computation and return [unit Deferred.t]. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 module Async = struct
@@ -34,7 +34,7 @@ module Async = struct
 end
 
 module type Async_invariant = sig
-  include module type of Core_kernel.Invariant
+  include module type of Core.Invariant
 
   module Async : sig
     open Async
@@ -82,11 +82,6 @@ module type Async_invariant = sig
                 ~foo:  (check' Foo.invariant)
                 ~bar:  (check  Bar.invariant)
                 ~quux: (check  ignore) ]} *)
-    val check_field
-      :  'a
-      -> 'b t
-      -> unit Deferred.t
-      -> ('a, 'b) Field.t
-      -> unit Deferred.t
+    val check_field : 'a -> 'b t -> unit Deferred.t -> ('a, 'b) Field.t -> unit Deferred.t
   end
 end

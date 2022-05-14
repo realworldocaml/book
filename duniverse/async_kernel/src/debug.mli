@@ -1,6 +1,6 @@
 (** Internal Async debugging functions. *)
 
-open! Core_kernel
+open! Core
 include module type of Async_kernel_config.Print_debug_messages_for
 
 (** Calls to [Debug.log] should look like [if Debug.??? then Debug.log ...]. *)

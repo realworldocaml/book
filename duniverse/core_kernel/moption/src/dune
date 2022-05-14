@@ -1,2 +1,2 @@
 (library (name moption) (public_name core_kernel.moption)
- (preprocess (pps ppx_jane -check-doc-comments)) (libraries core_kernel))
+ (preprocess (pps ppx_jane)) (libraries core))

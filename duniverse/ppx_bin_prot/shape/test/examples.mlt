@@ -1,12 +1,14 @@
 open Core
-module Shape = Bin_prot.Shape
+module Shape = Bin_prot.Shape;;
 
 #verbose true
 
 module type Interface_for_types_named_t = sig
   type t [@@deriving bin_shape]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Interface_for_types_named_t =
   sig type t val bin_shape_t : Shape.t end
 |}]
@@ -14,7 +16,9 @@ module type Interface_for_types_named_t =
 module type Interface_for_types_named_other_than_t = sig
   type my_type [@@deriving bin_shape]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Interface_for_types_named_other_than_t =
   sig type my_type val bin_shape_my_type : Shape.t end
 |}]
@@ -22,7 +26,8 @@ module type Interface_for_types_named_other_than_t =
 module Record = struct
   type r = { x : int } [@@deriving bin_shape]
 end
-[%%expect{|
+
+[%%expect {|
 module Record : sig type r = { x : int; } val bin_shape_r : Shape.t end
 |}]
 
@@ -30,46 +35,63 @@ module Annotation_syntax = struct
   type t = int [@@deriving bin_shape ~annotate:"my-annotation"]
 end
 
-[%%expect{|
+[%%expect {|
 module Annotation_syntax : sig type t = int val bin_shape_t : Shape.t end
 |}]
 
 module Annotation_on_multi_type_dec = struct
-  type t = int and u = float [@@deriving bin_shape ~annotate:"this-is-not-allowed"]
+  type t = int
+
+  and u = float [@@deriving bin_shape ~annotate:"this-is-not-allowed"]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_bin_shape: unexpected [~annotate] on multi type-declaration
 |}]
 
 module Annotation_syntax_uuid = struct
   let uuid = Shape.Uuid.of_string "test-it"
+
   type t = int [@@deriving bin_shape ~annotate:uuid]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Annotation_syntax_uuid :
   sig val uuid : Shape.Uuid.t type t = int val bin_shape_t : Shape.t end
 |}]
 
 module Annotation_syntax_uuid_wrong_type = struct
   let uuid = true
+
   type t = int [@@deriving bin_shape ~annotate:uuid]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: This expression has type bool but an expression was expected of type
          Shape.Uuid.t
 |}]
 
 module Inheriting_from_polymorphic_variant = struct
-  type t1 = [ `A | `B of int ] [@@deriving bin_shape]
-  type t2 = [ `C | t1 ] [@@deriving bin_shape]
+  type t1 =
+    [ `A
+    | `B of int
+    ]
+  [@@deriving bin_shape]
+
+  type t2 =
+    [ `C
+    | t1
+    ]
+  [@@deriving bin_shape]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Inheriting_from_polymorphic_variant :
   sig
     type t1 = [ `A | `B of int ]
@@ -80,27 +102,49 @@ module Inheriting_from_polymorphic_variant :
 |}]
 
 module Inheriting_from_recursive_polymorphic_variant = struct
-  type t1 = [ `A | `B of t1 ] [@@deriving bin_shape]
-  type t2 = [ `C | t1 ] [@@deriving bin_shape]
+  type t1 =
+    [ `A
+    | `B of t1
+    ]
+  [@@deriving bin_shape]
+
+  type t2 =
+    [ `C
+    | t1
+    ]
+  [@@deriving bin_shape]
+
   let (_ : Shape.Digest.t) = Shape.eval_to_digest bin_shape_t2
 end
 
-[%%expect{|
+[%%expect
+  {|
 Exception:
 (Failure
-  "ppx/ppx_bin_prot/shape/test/examples.mlt:84:19: The shape for an inherited type is not described as a polymorphic-variant: (Application ...())")
+ "ppx/ppx_bin_prot/shape/test/examples.mlt:113:6: The shape for an inherited type is not described as a polymorphic-variant: (Application ...())").
 |}]
 
 module Inheriting_from_annotated_polymorphic_variant = struct
-  type t1 = [ `A | `B of int ] [@@deriving bin_shape ~annotate:"my-t1"]
-  type t2 = [ `C | t1 ] [@@deriving bin_shape]
+  type t1 =
+    [ `A
+    | `B of int
+    ]
+  [@@deriving bin_shape ~annotate:"my-t1"]
+
+  type t2 =
+    [ `C
+    | t1
+    ]
+  [@@deriving bin_shape]
+
   let (_ : Shape.Digest.t) = Shape.eval_to_digest bin_shape_t2
 end
 
-[%%expect{|
+[%%expect
+  {|
 Exception:
 (Failure
-  "ppx/ppx_bin_prot/shape/test/examples.mlt:96:19: The shape for an inherited type is not described as a polymorphic-variant: (Annotate my-t1 ...)")
+ "ppx/ppx_bin_prot/shape/test/examples.mlt:136:6: The shape for an inherited type is not described as a polymorphic-variant: (Annotate my-t1 ...)").
 |}]
 
 module Duplicated_variant_constructor_allowed = struct
@@ -108,10 +152,16 @@ module Duplicated_variant_constructor_allowed = struct
   type t2 = t1 [@@deriving bin_shape]
   type v1 = [ `a of t1 ] [@@deriving bin_shape]
   type v2 = [ `a of t2 ] [@@deriving bin_shape]
-  type t = [ v1 | v2 ] [@@deriving bin_shape]
+
+  type t =
+    [ v1
+    | v2
+    ]
+  [@@deriving bin_shape]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Duplicated_variant_constructor_allowed :
   sig
     type t1 = T1
@@ -130,24 +180,36 @@ module Duplicated_variant_constructor_allowed :
 module Duplicated_variant_constructor_Same_type_diff_serialization = struct
   type t1 = T1 [@@deriving bin_shape]
   type t2 = t1
-  let bin_shape_t2 = Shape.(annotate (Uuid.of_string "t2 has a special meaning") bin_shape_t1)
+
+  let bin_shape_t2 =
+    Shape.(annotate (Uuid.of_string "t2 has a special meaning") bin_shape_t1)
+  ;;
+
   type v1 = [ `a of t1 ] [@@deriving bin_shape]
   type v2 = [ `a of t2 ] [@@deriving bin_shape]
-  type t = [ v1 | v2 ] [@@deriving bin_shape]
+
+  type t =
+    [ v1
+    | v2
+    ]
+  [@@deriving bin_shape]
+
   let (_ : Shape.Digest.t) = Shape.eval_to_digest bin_shape_t
 end
 
-[%%expect{|
+[%%expect
+  {|
 Exception:
 (Failure
-  "ppx/ppx_bin_prot/shape/test/examples.mlt:136:11: Different shapes for duplicated polymorphic constructor: `a")
+ "ppx/ppx_bin_prot/shape/test/examples.mlt:192:4: Different shapes for duplicated polymorphic constructor: `a").
 |}]
 
 module No_such_bin_shape_syntax = struct
   type t = int [@@deriving bin_shape ~floob:"X"]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: Ppxlib.Deriving: generator 'bin_shape' doesn't accept argument 'floob'
 |}]
@@ -156,7 +218,7 @@ module Shapeless = struct
   type t = int
 end
 
-[%%expect{|
+[%%expect {|
 module Shapeless : sig type t = int end
 |}]
 
@@ -164,7 +226,7 @@ module Annotation_requires_shape_on_subtypes = struct
   type t = Shapeless.t [@@deriving bin_shape ~annotate:"my-annotation"]
 end
 
-[%%expect{|
+[%%expect {|
 Line _, characters _-_:
 Error: Unbound value Shapeless.bin_shape_t
 |}]
@@ -173,7 +235,8 @@ module Not_allowed_both_annotation_and_basetype_syntax = struct
   type t = int [@@deriving bin_shape ~annotate:"X" ~basetype:"X"]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_bin_shape: cannot write both [bin_shape ~annotate] and [bin_shape ~basetype]
 |}]
@@ -182,15 +245,16 @@ module Basetype_syntax = struct
   type t = Shapeless.t [@@deriving bin_shape ~basetype:"my-base"]
 end
 
-[%%expect{|
+[%%expect {|
 module Basetype_syntax : sig type t = int val bin_shape_t : Shape.t end
 |}]
 
 module Basetype_syntax_kind2 = struct
-  type ('a,'b) t = 'a * 'b [@@deriving bin_shape ~basetype:"my-base-kind2"]
+  type ('a, 'b) t = 'a * 'b [@@deriving bin_shape ~basetype:"my-base-kind2"]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Basetype_syntax_kind2 :
   sig
     type ('a, 'b) t = 'a * 'b
@@ -199,40 +263,48 @@ module Basetype_syntax_kind2 :
 |}]
 
 module Basetype_on_multi_type_dec = struct
-  type t = int and u = float [@@deriving bin_shape ~basetype:"this-is-not-allowed"]
+  type t = int
+
+  and u = float [@@deriving bin_shape ~basetype:"this-is-not-allowed"]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_bin_shape: unexpected [~basetype] on multi type-declaration
 |}]
 
 module Basetype_syntax_uuid = struct
   let uuid = Shape.Uuid.of_string "test-it"
+
   type t = Shapeless.t [@@deriving bin_shape ~basetype:uuid]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Basetype_syntax_uuid :
   sig val uuid : Shape.Uuid.t type t = int val bin_shape_t : Shape.t end
 |}]
 
 module Basetype_syntax_uuid_wrong_type = struct
   let uuid = true
+
   type t = Shapeless.t [@@deriving bin_shape ~basetype:uuid]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: This expression has type bool but an expression was expected of type
          Shape.Uuid.t
 |}]
 
 module Cannot_evaluate_shape_containing_type_vars = struct
-  let _ = [%bin_shape: 'a list]
+  let (_ : _) = [%bin_shape: 'a list]
 end
 
-[%%expect{|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_bin_shape: unexpected free type variable: 'a
 |}]

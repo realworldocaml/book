@@ -72,23 +72,22 @@ type pos =
 [@@deriving_inline sexp_of]
 
 let sexp_of_pos =
-  (function
-    | { line = v_line; col = v_col; offset = v_offset } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_int v_offset in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "offset"; arg ] :: bnds
-      in
-      let bnds =
-        let arg = sexp_of_int v_col in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "col"; arg ] :: bnds
-      in
-      let bnds =
-        let arg = sexp_of_int v_line in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "line"; arg ] :: bnds
-      in
-      Ppx_sexp_conv_lib.Sexp.List bnds
-      : pos -> Ppx_sexp_conv_lib.Sexp.t)
+  (fun { line = line__002_; col = col__004_; offset = offset__006_ } ->
+     let bnds__001_ = [] in
+     let bnds__001_ =
+       let arg__007_ = sexp_of_int offset__006_ in
+       Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "offset"; arg__007_ ] :: bnds__001_
+     in
+     let bnds__001_ =
+       let arg__005_ = sexp_of_int col__004_ in
+       Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "col"; arg__005_ ] :: bnds__001_
+     in
+     let bnds__001_ =
+       let arg__003_ = sexp_of_int line__002_ in
+       Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "line"; arg__003_ ] :: bnds__001_
+     in
+     Sexplib0.Sexp.List bnds__001_
+     : pos -> Sexplib0.Sexp.t)
 ;;
 
 [@@@end]
@@ -104,20 +103,18 @@ type range =
 [@@deriving_inline sexp_of]
 
 let sexp_of_range =
-  (function
-    | { start_pos = v_start_pos; end_pos = v_end_pos } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_pos v_end_pos in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "end_pos"; arg ] :: bnds
-      in
-      let bnds =
-        let arg = sexp_of_pos v_start_pos in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "start_pos"; arg ]
-        :: bnds
-      in
-      Ppx_sexp_conv_lib.Sexp.List bnds
-      : range -> Ppx_sexp_conv_lib.Sexp.t)
+  (fun { start_pos = start_pos__009_; end_pos = end_pos__011_ } ->
+     let bnds__008_ = [] in
+     let bnds__008_ =
+       let arg__012_ = sexp_of_pos end_pos__011_ in
+       Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "end_pos"; arg__012_ ] :: bnds__008_
+     in
+     let bnds__008_ =
+       let arg__010_ = sexp_of_pos start_pos__009_ in
+       Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "start_pos"; arg__010_ ] :: bnds__008_
+     in
+     Sexplib0.Sexp.List bnds__008_
+     : range -> Sexplib0.Sexp.t)
 ;;
 
 [@@@end]
@@ -150,8 +147,9 @@ end = struct
      to be sure we don't waste space. *)
   let length = 62
   let alloc () = Bytes.create length
-  let get16 = Bytes0.get16
-  let set16 = Bytes0.set16
+
+  external get16 : bytes -> pos:int -> int = "%caml_bytes_get16"
+  external set16 : bytes -> pos:int -> int -> unit = "%caml_bytes_set16"
 
   (* If we want to make a [Positions.t] serializable:
 
@@ -327,10 +325,7 @@ module Builder = struct
     match n with
     | 0 | 1 | 2 | 3 | 4 ->
       let num_bits = (n lsl 1) + instr_bits in
-      add_bits
-        t
-        ((shift4 lsl instr_bits) lor instr land ((1 lsl num_bits) - 1))
-        ~num_bits
+      add_bits t ((shift4 lsl instr_bits) lor instr land ((1 lsl num_bits) - 1)) ~num_bits
     | 5
     | 6
     | 7

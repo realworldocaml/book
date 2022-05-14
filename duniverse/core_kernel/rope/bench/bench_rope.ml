@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Rope
 
 (* This set of benchmarks can trigger some pathological GC behavior where compaction

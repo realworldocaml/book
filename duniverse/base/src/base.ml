@@ -1,7 +1,6 @@
 (** This module is the toplevel of the Base library; it's what you get when you write
     [open Base].
 
-
     The goal of Base is both to be a more complete standard library, with richer APIs,
     and to be more consistent in its design. For instance, in the standard library
     some things have modules and others don't; in Base, everything is a module.
@@ -20,9 +19,6 @@
     - [Container], which provides a consistent interface across container-like data
       structures (arrays, lists, strings).
     - [Result], [Error], and [Or_error], supporting the or-error pattern.
-
-    The recommended way to use Base is to build with [-open Base]. Files compiled this
-    way will have the environment described in this file as their initial environment.
 *)
 
 (*_ We hide this from the web docs because the line wrapping is bad, making it
@@ -158,7 +154,6 @@ module Type_equal = Type_equal
 module Uniform_array = Uniform_array
 module Unit = Unit
 module Uchar = Uchar
-module Validate = Validate
 module Variant = Variant
 module With_return = With_return
 module Word_size = Word_size
@@ -176,10 +171,9 @@ end
 module Exported_for_specific_uses = struct
   module Fieldslib = Fieldslib
   module Ppx_hash_lib = Ppx_hash_lib
-  module Sexplib = Sexplib
   module Variantslib = Variantslib
   module Ppx_compare_lib = Ppx_compare_lib
-  module Ppx_sexp_conv_lib = Ppx_sexp_conv_lib
+  module Ppx_enumerate_lib = Ppx_enumerate_lib
 
   let am_testing = am_testing
 end
@@ -187,48 +181,24 @@ end
 (**/**)
 
 module Export = struct
-  include Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.Builtin
-
   (* [deriving hash] is missing for [array] and [ref] since these types are mutable. *)
   type 'a array = 'a Array.t [@@deriving_inline compare, equal, sexp, sexp_grammar]
 
-  let compare_array : 'a. ('a -> 'a -> int) -> 'a array -> 'a array -> int =
-    Array.compare
-  ;;
-
+  let compare_array : 'a. ('a -> 'a -> int) -> 'a array -> 'a array -> int = Array.compare
   let equal_array : 'a. ('a -> 'a -> bool) -> 'a array -> 'a array -> bool = Array.equal
 
-  let array_of_sexp :
-    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a array
-    =
+  let array_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a array =
     Array.t_of_sexp
   ;;
 
-  let sexp_of_array :
-    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a array -> Ppx_sexp_conv_lib.Sexp.t
-    =
+  let sexp_of_array : 'a. ('a -> Sexplib0.Sexp.t) -> 'a array -> Sexplib0.Sexp.t =
     Array.sexp_of_t
   ;;
 
-  let (array_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Array.t" ]
-      ; ggid = "r\177A\255~\129%\178\226\196g\165\t\232\204\001"
-      ; types =
-          [ "array", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Array.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (array_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("array", _the_group)
-    in
-    array_sexp_grammar
+  let (array_sexp_grammar :
+         'a Sexplib0.Sexp_grammar.t -> 'a array Sexplib0.Sexp_grammar.t)
+    =
+    fun _'a_sexp_grammar -> Array.t_sexp_grammar _'a_sexp_grammar
   ;;
 
   [@@@end]
@@ -248,28 +218,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let bool_of_sexp = (Bool.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> bool)
-  let sexp_of_bool = (Bool.sexp_of_t : bool -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (bool_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Bool.t" ]
-      ; ggid = "{\171\239\166\219\128\005\201\192$\149\202\251?\186\164"
-      ; types = [ "bool", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Bool.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (bool_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("bool", _the_group)
-    in
-    bool_sexp_grammar
-  ;;
+  let bool_of_sexp = (Bool.t_of_sexp : Sexplib0.Sexp.t -> bool)
+  let sexp_of_bool = (Bool.sexp_of_t : bool -> Sexplib0.Sexp.t)
+  let (bool_sexp_grammar : bool Sexplib0.Sexp_grammar.t) = Bool.t_sexp_grammar
 
   [@@@end]
 
@@ -288,34 +239,15 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let char_of_sexp = (Char.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> char)
-  let sexp_of_char = (Char.sexp_of_t : char -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (char_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Char.t" ]
-      ; ggid = "H\140\243\204Y\222\191d\000@\024Md\028\147>"
-      ; types = [ "char", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Char.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (char_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("char", _the_group)
-    in
-    char_sexp_grammar
-  ;;
+  let char_of_sexp = (Char.t_of_sexp : Sexplib0.Sexp.t -> char)
+  let sexp_of_char = (Char.sexp_of_t : char -> Sexplib0.Sexp.t)
+  let (char_sexp_grammar : char Sexplib0.Sexp_grammar.t) = Char.t_sexp_grammar
 
   [@@@end]
 
   type exn = Exn.t [@@deriving_inline sexp_of]
 
-  let sexp_of_exn = (Exn.sexp_of_t : exn -> Ppx_sexp_conv_lib.Sexp.t)
+  let sexp_of_exn = (Exn.sexp_of_t : exn -> Sexplib0.Sexp.t)
 
   [@@@end]
 
@@ -334,28 +266,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let float_of_sexp = (Float.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> float)
-  let sexp_of_float = (Float.sexp_of_t : float -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (float_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Float.t" ]
-      ; ggid = "\190E\020\242\249\135C\240+\214\226\143Ip\217\223"
-      ; types = [ "float", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Float.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (float_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("float", _the_group)
-    in
-    float_sexp_grammar
-  ;;
+  let float_of_sexp = (Float.t_of_sexp : Sexplib0.Sexp.t -> float)
+  let sexp_of_float = (Float.sexp_of_t : float -> Sexplib0.Sexp.t)
+  let (float_sexp_grammar : float Sexplib0.Sexp_grammar.t) = Float.t_sexp_grammar
 
   [@@@end]
 
@@ -364,8 +277,7 @@ module Export = struct
   let compare_int = (Int.compare : int -> int -> int)
   let equal_int = (Int.equal : int -> int -> bool)
 
-  let (hash_fold_int : Ppx_hash_lib.Std.Hash.state -> int -> Ppx_hash_lib.Std.Hash.state)
-    =
+  let (hash_fold_int : Ppx_hash_lib.Std.Hash.state -> int -> Ppx_hash_lib.Std.Hash.state) =
     Int.hash_fold_t
 
   and (hash_int : int -> Ppx_hash_lib.Std.Hash.hash_value) =
@@ -373,28 +285,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let int_of_sexp = (Int.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> int)
-  let sexp_of_int = (Int.sexp_of_t : int -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (int_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Int.t" ]
-      ; ggid = "\159\159\197^\165]\236\165\229\165R8\169\225H\020"
-      ; types = [ "int", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Int.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (int_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("int", _the_group)
-    in
-    int_sexp_grammar
-  ;;
+  let int_of_sexp = (Int.t_of_sexp : Sexplib0.Sexp.t -> int)
+  let sexp_of_int = (Int.sexp_of_t : int -> Sexplib0.Sexp.t)
+  let (int_sexp_grammar : int Sexplib0.Sexp_grammar.t) = Int.t_sexp_grammar
 
   [@@@end]
 
@@ -413,28 +306,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let int32_of_sexp = (Int32.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> int32)
-  let sexp_of_int32 = (Int32.sexp_of_t : int32 -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (int32_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Int32.t" ]
-      ; ggid = "9\153\000*L5O+l\018\179b\198\248\026\177"
-      ; types = [ "int32", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Int32.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (int32_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("int32", _the_group)
-    in
-    int32_sexp_grammar
-  ;;
+  let int32_of_sexp = (Int32.t_of_sexp : Sexplib0.Sexp.t -> int32)
+  let sexp_of_int32 = (Int32.sexp_of_t : int32 -> Sexplib0.Sexp.t)
+  let (int32_sexp_grammar : int32 Sexplib0.Sexp_grammar.t) = Int32.t_sexp_grammar
 
   [@@@end]
 
@@ -453,28 +327,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let int64_of_sexp = (Int64.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> int64)
-  let sexp_of_int64 = (Int64.sexp_of_t : int64 -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (int64_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Int64.t" ]
-      ; ggid = "r\153\022\135\131L\155\236\235CKa\197o\248^"
-      ; types = [ "int64", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Int64.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (int64_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("int64", _the_group)
-    in
-    int64_sexp_grammar
-  ;;
+  let int64_of_sexp = (Int64.t_of_sexp : Sexplib0.Sexp.t -> int64)
+  let sexp_of_int64 = (Int64.sexp_of_t : int64 -> Sexplib0.Sexp.t)
+  let (int64_sexp_grammar : int64 Sexplib0.Sexp_grammar.t) = Int64.t_sexp_grammar
 
   [@@@end]
 
@@ -484,43 +339,25 @@ module Export = struct
   let equal_list : 'a. ('a -> 'a -> bool) -> 'a list -> 'a list -> bool = List.equal
 
   let hash_fold_list :
-    'a. (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
-    -> Ppx_hash_lib.Std.Hash.state -> 'a list -> Ppx_hash_lib.Std.Hash.state
+    'a.
+    (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> 'a list
+    -> Ppx_hash_lib.Std.Hash.state
     =
     List.hash_fold_t
   ;;
 
-  let list_of_sexp :
-    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a list
-    =
+  let list_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a list =
     List.t_of_sexp
   ;;
 
-  let sexp_of_list :
-    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a list -> Ppx_sexp_conv_lib.Sexp.t
-    =
+  let sexp_of_list : 'a. ('a -> Sexplib0.Sexp.t) -> 'a list -> Sexplib0.Sexp.t =
     List.sexp_of_t
   ;;
 
-  let (list_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "List.t" ]
-      ; ggid = "\144\022<Z\014\198\014\175\025\218\004\199\252~\031="
-      ; types =
-          [ "list", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ List.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (list_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("list", _the_group)
-    in
-    list_sexp_grammar
+  let (list_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a list Sexplib0.Sexp_grammar.t) =
+    fun _'a_sexp_grammar -> List.t_sexp_grammar _'a_sexp_grammar
   ;;
 
   [@@@end]
@@ -541,27 +378,11 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let nativeint_of_sexp = (Nativeint.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> nativeint)
-  let sexp_of_nativeint = (Nativeint.sexp_of_t : nativeint -> Ppx_sexp_conv_lib.Sexp.t)
+  let nativeint_of_sexp = (Nativeint.t_of_sexp : Sexplib0.Sexp.t -> nativeint)
+  let sexp_of_nativeint = (Nativeint.sexp_of_t : nativeint -> Sexplib0.Sexp.t)
 
-  let (nativeint_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Nativeint.t" ]
-      ; ggid = "\019\184AE\023\\->1fcm\002\254\196\129"
-      ; types = [ "nativeint", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Nativeint.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (nativeint_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("nativeint", _the_group)
-    in
-    nativeint_sexp_grammar
+  let (nativeint_sexp_grammar : nativeint Sexplib0.Sexp_grammar.t) =
+    Nativeint.t_sexp_grammar
   ;;
 
   [@@@end]
@@ -578,44 +399,27 @@ module Export = struct
   ;;
 
   let hash_fold_option :
-    'a. (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
-    -> Ppx_hash_lib.Std.Hash.state -> 'a option -> Ppx_hash_lib.Std.Hash.state
+    'a.
+    (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> 'a option
+    -> Ppx_hash_lib.Std.Hash.state
     =
     Option.hash_fold_t
   ;;
 
-  let option_of_sexp :
-    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a option
-    =
+  let option_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a option =
     Option.t_of_sexp
   ;;
 
-  let sexp_of_option :
-    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a option -> Ppx_sexp_conv_lib.Sexp.t
-    =
+  let sexp_of_option : 'a. ('a -> Sexplib0.Sexp.t) -> 'a option -> Sexplib0.Sexp.t =
     Option.sexp_of_t
   ;;
 
-  let (option_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Option.t" ]
-      ; ggid = "\242@\255j`*d\203\161\182\021\175\236\146x\217"
-      ; types =
-          [ "option", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ]))
-          ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Option.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (option_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("option", _the_group)
-    in
-    option_sexp_grammar
+  let (option_sexp_grammar :
+         'a Sexplib0.Sexp_grammar.t -> 'a option Sexplib0.Sexp_grammar.t)
+    =
+    fun _'a_sexp_grammar -> Option.t_sexp_grammar _'a_sexp_grammar
   ;;
 
   [@@@end]
@@ -625,37 +429,16 @@ module Export = struct
   let compare_ref : 'a. ('a -> 'a -> int) -> 'a ref -> 'a ref -> int = Ref.compare
   let equal_ref : 'a. ('a -> 'a -> bool) -> 'a ref -> 'a ref -> bool = Ref.equal
 
-  let ref_of_sexp :
-    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a ref
-    =
+  let ref_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a ref =
     Ref.t_of_sexp
   ;;
 
-  let sexp_of_ref :
-    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a ref -> Ppx_sexp_conv_lib.Sexp.t
-    =
+  let sexp_of_ref : 'a. ('a -> Sexplib0.Sexp.t) -> 'a ref -> Sexplib0.Sexp.t =
     Ref.sexp_of_t
   ;;
 
-  let (ref_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Ref.t" ]
-      ; ggid = "\185\246\012[\001\197\230\192y=\b\199\141\248\020\012"
-      ; types =
-          [ "ref", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Ref.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (ref_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("ref", _the_group)
-    in
-    ref_sexp_grammar
+  let (ref_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a ref Sexplib0.Sexp_grammar.t) =
+    fun _'a_sexp_grammar -> Ref.t_sexp_grammar _'a_sexp_grammar
   ;;
 
   [@@@end]
@@ -675,28 +458,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let string_of_sexp = (String.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> string)
-  let sexp_of_string = (String.sexp_of_t : string -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (string_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "String.t" ]
-      ; ggid = "\141\195]\143\139/M\t\159\t\152\214g\198\023\176"
-      ; types = [ "string", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ String.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (string_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("string", _the_group)
-    in
-    string_sexp_grammar
-  ;;
+  let string_of_sexp = (String.t_of_sexp : Sexplib0.Sexp.t -> string)
+  let sexp_of_string = (String.sexp_of_t : string -> Sexplib0.Sexp.t)
+  let (string_sexp_grammar : string Sexplib0.Sexp_grammar.t) = String.t_sexp_grammar
 
   [@@@end]
 
@@ -704,28 +468,9 @@ module Export = struct
 
   let compare_bytes = (Bytes.compare : bytes -> bytes -> int)
   let equal_bytes = (Bytes.equal : bytes -> bytes -> bool)
-  let bytes_of_sexp = (Bytes.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> bytes)
-  let sexp_of_bytes = (Bytes.sexp_of_t : bytes -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (bytes_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Bytes.t" ]
-      ; ggid = "\015\153L1\012\241\015\252\150\000\191\127Jb#3"
-      ; types = [ "bytes", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Bytes.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (bytes_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("bytes", _the_group)
-    in
-    bytes_sexp_grammar
-  ;;
+  let bytes_of_sexp = (Bytes.t_of_sexp : Sexplib0.Sexp.t -> bytes)
+  let sexp_of_bytes = (Bytes.sexp_of_t : bytes -> Sexplib0.Sexp.t)
+  let (bytes_sexp_grammar : bytes Sexplib0.Sexp_grammar.t) = Bytes.t_sexp_grammar
 
   [@@@end]
 
@@ -744,28 +489,9 @@ module Export = struct
     fun x -> func x
   ;;
 
-  let unit_of_sexp = (Unit.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> unit)
-  let sexp_of_unit = (Unit.sexp_of_t : unit -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (unit_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "Unit.t" ]
-      ; ggid = "=\005 \134\187\"64\197S\19256,\031l"
-      ; types = [ "unit", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ Unit.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "base.ml.Export"
-      }
-    in
-    let (unit_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("unit", _the_group)
-    in
-    unit_sexp_grammar
-  ;;
+  let unit_of_sexp = (Unit.t_of_sexp : Sexplib0.Sexp.t -> unit)
+  let sexp_of_unit = (Unit.sexp_of_t : unit -> Sexplib0.Sexp.t)
+  let (unit_sexp_grammar : unit Sexplib0.Sexp_grammar.t) = Unit.t_sexp_grammar
 
   [@@@end]
 
@@ -774,33 +500,6 @@ module Export = struct
   type nonrec ('a, 'b, 'c) format = ('a, 'b, 'c) format
   type nonrec ('a, 'b, 'c, 'd) format4 = ('a, 'b, 'c, 'd) format4
   type nonrec ('a, 'b, 'c, 'd, 'e, 'f) format6 = ('a, 'b, 'c, 'd, 'e, 'f) format6
-
-  (** {2 Sexp}
-
-      Exporting the ad-hoc types that are recognized by [ppx_sexp_*] converters.
-      [sexp_array], [sexp_list], and [sexp_option] allow a record field to be absent when
-      converting from a sexp, and if absent, the field will take a default value of the
-      appropriate type:
-
-      {v
-        sexp_array   [||]
-        sexp_bool    false
-        sexp_list    []
-        sexp_option  None
-      v}
-
-      [sexp_opaque] causes the conversion to sexp to produce the atom [<opaque>].
-
-      For more documentation, see sexplib/README.md. *)
-
-  type 'a sexp_array = 'a array
-  [@@deprecated "[since 2019-03] use [@sexp.array] instead"]
-
-  type 'a sexp_list = 'a list [@@deprecated "[since 2019-03] use [@sexp.list] instead"]
-  type 'a sexp_opaque = 'a [@@deprecated "[since 2019-03] use [@sexp.opaque] instead"]
-
-  type 'a sexp_option = 'a option
-  [@@deprecated "[since 2019-03] use [@sexp.option] instead"]
 
   (** List operators *)
 

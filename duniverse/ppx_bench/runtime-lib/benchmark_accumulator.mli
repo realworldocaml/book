@@ -10,36 +10,37 @@
 *)
 
 module Current_libname : sig
-  val set   : string -> unit
-  val unset : unit   -> unit
+  val set : string -> unit
+  val unset : unit -> unit
 end
 
 module Entry : sig
-  type 'a indexed_spec = {
-    arg_name   : string;
-    arg_values : int list;
-    thunk      : int -> unit -> 'a;
-  }
+  type ('param, 'a) parameterised_spec =
+    { arg_name : string
+    ; params : (string * 'param) list
+    (** The first coordinate is some string representation of the second coordinate. *)
+    ; thunk : 'param -> unit -> 'a
+    }
 
   type test_spec =
-    | Regular_thunk : ([`init] -> unit -> 'a) -> test_spec
-    | Indexed_thunk : 'a indexed_spec -> test_spec
+    | Regular_thunk : ([ `init ] -> unit -> 'a) -> test_spec
+    | Parameterised_thunk : ('param, 'a) parameterised_spec -> test_spec
 
-  type t = private {
-    unique_id         : int;
-    code              : string;
-    type_conv_path    : string;
-    name              : string;
-    filename          : string;
-    line              : int;
-    startpos          : int;
-    endpos            : int;
-    test_spec         : test_spec;
-    bench_module_name : string option;
-  }
+  type t = private
+    { unique_id : int
+    ; code : string
+    ; type_conv_path : string
+    ; name : string
+    ; filename : string
+    ; line : int
+    ; startpos : int
+    ; endpos : int
+    ; test_spec : test_spec
+    ; bench_module_name : string option
+    }
 
+  val with_test_spec : t -> test_spec -> t
   val compare : t -> t -> int
-  val get_indexed_arg_name : t -> string option
   val get_module_name_opt : t -> string option
 end
 

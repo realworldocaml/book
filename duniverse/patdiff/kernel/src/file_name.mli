@@ -1,6 +1,6 @@
 (** Used to determine which name to use for a file, depending on the operation. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type t =

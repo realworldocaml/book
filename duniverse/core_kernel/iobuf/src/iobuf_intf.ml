@@ -1,6 +1,6 @@
 (** See {{!Iobuf}[Iobuf]} for documentation. *)
 
-open! Core_kernel
+open! Core
 
 (** [no_seek] and [seek] are phantom types used in a similar manner to [read] and
     [read_write]. *)
@@ -62,6 +62,23 @@ module type Accessors_read = sig
   val uint32_le : (int, 'd, 'w) t
   val uint64_be_exn : (int, 'd, 'w) t
   val uint64_le_exn : (int, 'd, 'w) t
+
+  module Int_repr : sig
+    val int8 : (Int_repr.Int8.t, 'd, 'w) t
+    val int16_be : (Int_repr.Int16.t, 'd, 'w) t
+    val int16_le : (Int_repr.Int16.t, 'd, 'w) t
+    val int32_be : (Int_repr.Int32.t, 'd, 'w) t
+    val int32_le : (Int_repr.Int32.t, 'd, 'w) t
+    val int64_be : (Int_repr.Int64.t, 'd, 'w) t
+    val int64_le : (Int_repr.Int64.t, 'd, 'w) t
+    val uint8 : (Int_repr.Uint8.t, 'd, 'w) t
+    val uint16_be : (Int_repr.Uint16.t, 'd, 'w) t
+    val uint16_le : (Int_repr.Uint16.t, 'd, 'w) t
+    val uint32_be : (Int_repr.Uint32.t, 'd, 'w) t
+    val uint32_le : (Int_repr.Uint32.t, 'd, 'w) t
+    val uint64_be : (Int_repr.Uint64.t, 'd, 'w) t
+    val uint64_le : (Int_repr.Uint64.t, 'd, 'w) t
+  end
 end
 
 module type Accessors_write = sig
@@ -81,6 +98,23 @@ module type Accessors_write = sig
   val uint32_le_trunc : (int, 'd, 'w) t
   val uint64_be_trunc : (int, 'd, 'w) t
   val uint64_le_trunc : (int, 'd, 'w) t
+
+  module Int_repr : sig
+    val int8 : (Int_repr.Int8.t, 'd, 'w) t
+    val int16_be : (Int_repr.Int16.t, 'd, 'w) t
+    val int16_le : (Int_repr.Int16.t, 'd, 'w) t
+    val int32_be : (Int_repr.Int32.t, 'd, 'w) t
+    val int32_le : (Int_repr.Int32.t, 'd, 'w) t
+    val int64_be : (Int_repr.Int64.t, 'd, 'w) t
+    val int64_le : (Int_repr.Int64.t, 'd, 'w) t
+    val uint8 : (Int_repr.Uint8.t, 'd, 'w) t
+    val uint16_be : (Int_repr.Uint16.t, 'd, 'w) t
+    val uint16_le : (Int_repr.Uint16.t, 'd, 'w) t
+    val uint32_be : (Int_repr.Uint32.t, 'd, 'w) t
+    val uint32_le : (Int_repr.Uint32.t, 'd, 'w) t
+    val uint64_be : (Int_repr.Uint64.t, 'd, 'w) t
+    val uint64_le : (Int_repr.Uint64.t, 'd, 'w) t
+  end
 end
 
 (** An iobuf window bound, either upper or lower.  You can't see its int value, but you
@@ -97,7 +131,7 @@ module type Bound = sig
 
 end
 
-(** The [src_pos] argument of {!Core_kernel.Blit.blit} doesn't make sense here. *)
+(** The [src_pos] argument of {!Core.Blit.blit} doesn't make sense here. *)
 
 type ('src, 'dst) consuming_blit = src:'src -> dst:'dst -> dst_pos:int -> len:int -> unit
 
@@ -132,4 +166,27 @@ module type Compound_hexdump = sig
     val to_string_hum : ?max_lines:int -> (_, _) t -> string
     val to_sequence : ?max_lines:int -> (_, _) t -> string Sequence.t
   end
+end
+
+module type Peek = sig
+  type ('rw, 'seek) iobuf
+  type 'seek src = (read, 'seek) iobuf
+
+  (** Similar to [Consume.To_*], but do not advance the buffer. *)
+
+  module To_bytes :
+    Blit.S1_distinct with type 'seek src := 'seek src with type _ dst := Bytes.t
+
+  module To_bigstring :
+    Blit.S1_distinct with type 'seek src := 'seek src with type _ dst := Bigstring.t
+
+  module To_string : sig
+    val sub : (_ src, string) Base.Blit.sub
+    val subo : (_ src, string) Base.Blit.subo
+  end
+
+  include
+    Accessors_read
+    with type ('a, 'd, 'w) t = ('d, 'w) iobuf -> pos:int -> 'a
+    with type 'a bin_prot := 'a Bin_prot.Type_class.reader
 end

@@ -2,50 +2,6 @@ open Base
 open Ppxlib
 open Ast_builder.Default
 
-module List = struct
-  include List
-
-  (* All functions copied from core_list.ml (except for [invalid_argf], which is copied
-     from core_printf.ml. *)
-  let invalid_argf fmt = Printf.ksprintf (fun s () -> invalid_arg s) fmt
-
-  let init n ~f =
-    if n < 0 then invalid_argf "List.init %d" n ();
-    let rec loop i accum =
-      assert (i >= 0);
-      if i = 0 then accum
-      else loop (i-1) (f (i-1) :: accum)
-    in
-    loop n []
-  ;;
-
-  let split_n t_orig n =
-  if n <= 0 then
-    ([], t_orig)
-  else
-    let rec loop n t accum =
-      if n = 0 then
-        (List.rev accum, t)
-      else
-        match t with
-        | [] -> (t_orig, []) (* in this case, t_orig = List.rev accum *)
-        | hd :: tl -> loop (n - 1) tl (hd :: accum)
-    in
-    loop n t_orig []
-
-  let take t n = fst (split_n t n)
-  let drop t n = snd (split_n t n)
-
-  let rev_mapi l ~f =
-    let rec loop i acc = function
-      | [] -> acc
-      | h :: t -> loop (i + 1) (f i h :: acc) t
-    in
-    loop 0 [] l
-
-  let mapi l ~f = List.rev (rev_mapi l ~f)
-end
-
 let name_of_type_name = function
   | "t" -> "all"
   | type_name -> "all_of_" ^ type_name
@@ -65,14 +21,21 @@ let enumeration_type_of_td td =
       [%type: [%t tp] list -> [%t acc] ])
 ;;
 
-let sig_of_tds ~loc:_ ~path:_ (_rec_flag, tds) =
-  List.map tds ~f:(fun td ->
-    let td = name_type_params_in_td td in
-    let enumeration_type = enumeration_type_of_td td in
-    let name = name_of_type_name td.ptype_name.txt in
-    let loc = td.ptype_loc in
-    psig_value ~loc (value_description ~loc ~name:(Located.mk ~loc name)
-                       ~type_:enumeration_type ~prim:[]))
+let sig_of_td td =
+  let td = name_type_params_in_td td in
+  let enumeration_type = enumeration_type_of_td td in
+  let name = name_of_type_name td.ptype_name.txt in
+  let loc = td.ptype_loc in
+  psig_value ~loc (value_description ~loc ~name:(Located.mk ~loc name)
+                     ~type_:enumeration_type ~prim:[])
+
+let sig_of_tds ~loc ~path:_ (_rec_flag, tds) =
+  let sg_name = "Ppx_enumerate_lib.Enumerable.S" in
+  match
+    mk_named_sig tds ~loc ~sg_name ~handle_polymorphic_variant:true
+  with
+  | Some include_infos -> [ psig_include ~loc include_infos ]
+  | None -> List.map tds ~f:sig_of_td
 
 let gen_symbol = gen_symbol ~prefix:"enumerate"
 
@@ -133,9 +96,9 @@ let cartesian_product_map ~exhaust_check l's ~f loc =
       let apply_case =
         let patts = List.mapi hd_vars ~f:(fun i x ->
           [%pat? ([%p pvar ~loc x] :: [%p if i = 0 then
-                                            patt_lid tl_var
-                                          else
-                                            ppat_any ~loc])])
+                      patt_lid tl_var
+                    else
+                      ppat_any ~loc])])
         in
         case ~guard:None ~lhs:(patt_tuple loc patts)
           ~rhs:(apply [%expr loop ([%e f (List.map hd_vars ~f:lid)] :: acc)]
@@ -163,7 +126,7 @@ let cartesian_product_map ~exhaust_check l's ~f loc =
       in
       let match_exp =
         pexp_match ~loc (tuple loc (List.map args_vars ~f:lid))
-           (base_case :: apply_case :: decrement_cases)
+          (base_case :: apply_case :: decrement_cases)
       in
       let match_exp =
         if exhaust_check then
@@ -186,7 +149,7 @@ let cartesian_product_map ~exhaust_check l's ~f loc =
         [%e apply [%expr loop []] (List.map ~f:lid alias_vars)]
       ]
     in
-    Caml.ListLabels.fold_right2 alias_vars l's ~init ~f:(fun alias_var input_list acc ->
+    Stdlib.ListLabels.fold_right2 alias_vars l's ~init ~f:(fun alias_var input_list acc ->
       [%expr
         let [%p pvar ~loc alias_var] = [%e input_list] in
         [%e acc]
@@ -260,8 +223,8 @@ and enum_of_lab_decs ~exhaust_check ~loc lds ~k =
   )
 
 and product ~exhaust_check loc tps f =
-    let all = List.map tps ~f:(fun tp -> enum ~exhaust_check ~main_type:tp tp) in
-    cartesian_product_map ~exhaust_check all loc ~f
+  let all = List.map tps ~f:(fun tp -> enum ~exhaust_check ~main_type:tp tp) in
+  cartesian_product_map ~exhaust_check all loc ~f
 
 let quantify loc tps typ =
   match tps with

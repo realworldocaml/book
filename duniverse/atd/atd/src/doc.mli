@@ -10,10 +10,10 @@
    account by code generators that care about documentation:
 
    - after the type name on the left-hand side of a type definition
-   - after the type expression on the right-hand side of a type definition
-    (but not after any type expression)
    - after record field names
    - after variant names
+   - DEPRECATED: after the type expression on the right-hand side of a type
+     definition (but not after any type expression)
 
    Formats:
 
@@ -46,14 +46,23 @@ type block =
       within [\{\{\{ \}\}\}] and should be rendered using a fixed-width
       font preserving all space and newline characters. *)
 
-type doc = block list
 (** A document is a list of paragraph-like blocks. *)
+type doc = block list
 
-val parse_text : Ast.loc -> string -> doc
 (** Parse the contents of a doc.text annotation. *)
+val parse_text : Ast.loc -> string -> doc
 
-val get_doc : Ast.loc -> Ast.annot -> doc option
+(** Print documentation in ATD's "text" format.
+    This performs whitespace normalization, i.e. some non-significant
+    whitespace is removed and newlines are inserted if needed
+    to ensure that [{{{] and [}}}] are on their own line. *)
+val print_text : doc -> string
+
+(** This is for checking the placement of <doc ...> annotations. *)
+val annot_schema : Annot.schema
+
 (** Get and parse doc data from annotations. *)
+val get_doc : Ast.loc -> Ast.annot -> doc option
 
-val html_of_doc : doc -> string
 (** Convert parsed doc into HTML. *)
+val html_of_doc : doc -> string

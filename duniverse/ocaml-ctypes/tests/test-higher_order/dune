@@ -1,6 +1,7 @@
 (test
  (name test_higher_order)
  (package ctypes-foreign)
+ (deps ../clib/clib%{ext_dll})
  (link_flags
   (:include ../flags/link-flags.sexp))
  (libraries

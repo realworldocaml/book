@@ -113,7 +113,6 @@ module On_disk = struct
       ; html : bool option [@sexp.option]
       ; alt_old : string option [@sexp.option]
       ; alt_new : string option [@sexp.option]
-      ; ext_cmp : string option [@sexp.option]
       ; header_old : Header.t option [@sexp.option]
       ; header_new : Header.t option [@sexp.option]
       ; hunk : Hunk.t option [@sexp.option]
@@ -179,7 +178,6 @@ module On_disk = struct
       ; line_big_enough : int option [@sexp.option]
       ; word_big_enough : int option [@sexp.option]
       ; unrefined : bool option [@sexp.option]
-      ; external_compare : string option [@sexp.option]
       ; keep_whitespace : bool option [@sexp.option]
       ; split_long_lines : bool option [@sexp.option]
       ; interleave : bool option [@sexp.option]
@@ -222,7 +220,6 @@ module On_disk = struct
       ; html = None
       ; alt_old = None
       ; alt_new = None
-      ; ext_cmp = t.external_compare
       ; header_old =
           Option.map t.header ~f:(fun header ->
             { Rule.style = header.Old_header.style_old
@@ -242,8 +239,7 @@ module On_disk = struct
               Line_rule.style = t.line_same
             ; prefix = t.line_same_prefix
             ; word_same =
-                Option.map t.word_same ~f:(fun word_same ->
-                  word_same.Word_same.style_old)
+                Option.map t.word_same ~f:(fun word_same -> word_same.Word_same.style_old)
             }
       ; line_old =
           Option.map t.line_changed ~f:(fun line_changed ->
@@ -313,7 +309,6 @@ let parse
        ; html
        ; alt_old
        ; alt_new
-       ; ext_cmp
        ; header_old
        ; header_new
        ; hunk
@@ -370,46 +365,40 @@ let parse
       ~default:prefix
   in
   (* Final *)
-  let t =
-    create_exn
-      ~rules:
-        { Format.Rules.line_same = create_line line_same
-        ; line_prev = create_line line_prev
-        ; line_next = create_line line_next
-        ; line_unified = create_line line_unified
-        ; word_same_prev = create_word_same line_prev
-        ; word_same_next = create_word_same line_next
-        ; word_same_unified = create_word_same line_unified
-        ; word_prev = create_word ~line_rule:line_prev word_old
-        ; word_next = create_word ~line_rule:line_next word_new
-        ; hunk = On_disk.Hunk.to_internal (Option.value hunk ~default:On_disk.Rule.blank)
-        ; header_prev = create_header header_old "---"
-        ; header_next = create_header header_new "+++"
-        }
-      ~output:(if default_false html then Html else Ansi)
-      ~context:(Option.value ~default:(-1) context)
-      ~word_big_enough:(Option.value ~default:default_word_big_enough word_big_enough)
-      ~line_big_enough:(Option.value ~default:default_line_big_enough line_big_enough)
-      ~unrefined:(default_false unrefined)
-      ~produce_unified_lines:(not (default_false dont_produce_unified_lines))
-      ~float_tolerance:None
-      ~keep_ws:(default_false keep_whitespace)
-      ~split_long_lines:(default_false split_long_lines)
-      ~interleave:(default_true interleave)
-      ~assume_text:(default_false assume_text)
-      ~shallow:(default_false shallow)
-      ~quiet:(default_false quiet)
-      ~double_check:(default_false double_check)
-      ~mask_uniques:(default_false mask_uniques)
-      ~prev_alt:alt_old
-      ~next_alt:alt_new
-      ~location_style
-      ~warn_if_no_trailing_newline_in_both
-  in
-  match ext_cmp with
-  | None -> t
-  | Some _ as some ->
-    (Private.with_ext_cmp [@alert "-deprecated"]) t ~ext_cmp:some ~notify:ignore
+  create_exn
+    ~rules:
+      { Format.Rules.line_same = create_line line_same
+      ; line_prev = create_line line_prev
+      ; line_next = create_line line_next
+      ; line_unified = create_line line_unified
+      ; word_same_prev = create_word_same line_prev
+      ; word_same_next = create_word_same line_next
+      ; word_same_unified = create_word_same line_unified
+      ; word_prev = create_word ~line_rule:line_prev word_old
+      ; word_next = create_word ~line_rule:line_next word_new
+      ; hunk = On_disk.Hunk.to_internal (Option.value hunk ~default:On_disk.Rule.blank)
+      ; header_prev = create_header header_old "---"
+      ; header_next = create_header header_new "+++"
+      }
+    ~output:(if default_false html then Html else Ansi)
+    ~context:(Option.value ~default:(-1) context)
+    ~word_big_enough:(Option.value ~default:default_word_big_enough word_big_enough)
+    ~line_big_enough:(Option.value ~default:default_line_big_enough line_big_enough)
+    ~unrefined:(default_false unrefined)
+    ~produce_unified_lines:(not (default_false dont_produce_unified_lines))
+    ~float_tolerance:None
+    ~keep_ws:(default_false keep_whitespace)
+    ~split_long_lines:(default_false split_long_lines)
+    ~interleave:(default_true interleave)
+    ~assume_text:(default_false assume_text)
+    ~shallow:(default_false shallow)
+    ~quiet:(default_false quiet)
+    ~double_check:(default_false double_check)
+    ~mask_uniques:(default_false mask_uniques)
+    ~prev_alt:alt_old
+    ~next_alt:alt_new
+    ~location_style
+    ~warn_if_no_trailing_newline_in_both
 ;;
 
 let dark_bg =
@@ -481,7 +470,7 @@ let rec load_exn' ~set config_file =
        | Error _another_exn -> raise exn
        | Ok c ->
          (let new_file = config_file ^ ".new" in
-          match Sys.file_exists new_file with
+          match Sys_unix.file_exists new_file with
           | `Yes | `Unknown -> ()
           | `No ->
             (try Sexp.save_hum new_file (On_disk.V1.sexp_of_t c) with
@@ -548,9 +537,7 @@ let default_string =
 ;;
 
 let%test_unit "default Config.t sexp matches default Configuration.t" =
-  let default_from_disk =
-    parse ([%of_sexp: On_disk.t] (Sexp.of_string default_string))
-  in
+  let default_from_disk = parse ([%of_sexp: On_disk.t] (Sexp.of_string default_string)) in
   [%test_eq: t] default default_from_disk
 ;;
 
@@ -564,7 +551,7 @@ let get_config ?filename () =
       (* ~/.patdiff exists *)
       Option.bind (Sys.getenv "HOME") ~f:(fun home ->
         let f = home ^/ ".patdiff" in
-        match Sys.file_exists f with
+        match Sys_unix.file_exists f with
         | `Yes -> Some f
         | `No | `Unknown -> None)
   in

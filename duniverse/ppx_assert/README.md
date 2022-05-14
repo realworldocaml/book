@@ -1,7 +1,7 @@
 ppx\_assert
 ===========
 
-Assert-like extension nodes that raise useful errors on failure.
+Extension nodes to compare value and raise useful errors if they differ.
 
 This ppx rewriter defines 3 extension nodes.
 
@@ -51,11 +51,12 @@ then an exception containing the value shown using `[%sexp_of: typ]` is thrown.
 Intended usage
 --------------
 
-These assertions are very useful when testing. Compared to using `assert (x = y)`, you can
-see the values that are not equal, and the assertion is not turned off by
-`-noassert`. Compared to using the various `assert_bool` or `assert_string` functions you
-can find in various unit testing libraries, it works with any sexpable and comparable type
-for zero effort.  For instance, tests commonly look like this:
+These assertions are very useful when testing. Compared to using `assert (x = y)`, errors
+display the values that are not equal. Also, there is no mechanism to remove these tests
+in production builds like `-noassert` does for `assert`. Compared to using the various
+`assert_bool` or `assert_string` functions you can find in various unit testing libraries,
+it works with any sexpable and comparable type for zero effort.  For instance, tests
+commonly look like this:
 
 ```ocaml
 let%test_unit "List.length" =

@@ -23,16 +23,12 @@ let enclose_impl = function
     let prefix =
       let loc = { loc with loc_end = loc.loc_start; loc_ghost = true } in
       [%str
-        let () =
-          Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
-        ;;]
+        let () = Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__]
     in
     let suffix =
       let loc = { loc with loc_start = loc.loc_end; loc_ghost = true } in
       [%str
-        let () =
-          Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__
-        ;;]
+        let () = Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__]
     in
     prefix, suffix
   | _ -> [], []
@@ -74,16 +70,15 @@ module Time_individual_definitions = struct
           else (
             let loc = { item.pstr_loc with loc_ghost = true } in
             let name =
-              Location.print Caml.Format.str_formatter loc;
-              Caml.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
+              Location.print Stdlib.Format.str_formatter loc;
+              Stdlib.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
             in
             [%str
               let () =
                 Ppx_module_timer_runtime.record_definition_start [%e estring ~loc name]
               ;;
 
-              [%%i
-                item]
+              [%%i item]
 
               let () =
                 Ppx_module_timer_runtime.record_definition_until [%e estring ~loc name]

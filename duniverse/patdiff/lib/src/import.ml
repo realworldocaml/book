@@ -7,6 +7,7 @@ include struct
   module Ansi_output = Ansi_output
   module Comparison_result = Comparison_result
   module Diff_input = Diff_input
+  module File_helpers = File_helpers
   module File_name = File_name
   module Float_tolerance = Float_tolerance
   module Format = Format

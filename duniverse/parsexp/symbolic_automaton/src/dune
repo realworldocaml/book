@@ -1,0 +1,2 @@
+(library (name parsexp_symbolic_automaton) (libraries base)
+ (preprocess (pps ppx_jane)))

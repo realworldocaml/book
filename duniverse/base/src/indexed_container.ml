@@ -47,8 +47,13 @@ let findi ~iteri c ~f =
     None)
 ;;
 
-module Make (T : Make_arg) : S1 with type 'a t := 'a T.t = struct
-  include Container.Make (T)
+module Make_gen (T : sig
+    include Container_intf.Make_gen_arg
+
+    val iteri : [ `Define_using_fold | `Custom of ('a t, 'a elt) iteri ]
+    val foldi : [ `Define_using_fold | `Custom of ('a t, 'a elt, _) foldi ]
+  end) : Generic with type 'a t := 'a T.t with type 'a elt := 'a T.elt = struct
+  include Container.Make_gen (T)
 
   let iteri =
     match T.iteri with
@@ -67,4 +72,32 @@ module Make (T : Make_arg) : S1 with type 'a t := 'a T.t = struct
   let for_alli t ~f = for_alli ~iteri t ~f
   let find_mapi t ~f = find_mapi ~iteri t ~f
   let findi t ~f = findi ~iteri t ~f
+end
+
+module Make (T : Make_arg) = struct
+  module C = Container.Make (T)
+
+  (* Not part of [Container.Generic]. *)
+  let mem = C.mem
+
+  include Make_gen (struct
+      include T
+
+      type 'a t = 'a T.t
+      type 'a elt = 'a
+    end)
+end
+
+module Make0 (T : Make0_arg) = struct
+  module C = Container.Make0 (T)
+
+  (* Not part of [Container.Generic]. *)
+  let mem = C.mem
+
+  include Make_gen (struct
+      include T
+
+      type 'a t = T.t
+      type 'a elt = T.Elt.t
+    end)
 end

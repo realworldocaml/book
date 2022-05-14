@@ -52,15 +52,10 @@ module Generator_examples = struct
 
   let (_ : _ Generator.t) = Option.quickcheck_generator String.quickcheck_generator
   let (_ : _ Generator.t) = Generator.map Char.quickcheck_generator ~f:Char.to_int
-
-  let (_ : _ Generator.t) =
-    Generator.filter Float.quickcheck_generator ~f:Float.is_finite
-  ;;
+  let (_ : _ Generator.t) = Generator.filter Float.quickcheck_generator ~f:Float.is_finite
 
   (* use [filter] sparingly! *)
-  let (_ : _ Generator.t) =
-    Generator.fn Int.quickcheck_observer Bool.quickcheck_generator
-  ;;
+  let (_ : _ Generator.t) = Generator.fn Int.quickcheck_observer Bool.quickcheck_generator
 
   let (_ : _ Generator.t) =
     Generator.(union [ singleton (Ok ()); singleton (Or_error.error_string "fail") ])

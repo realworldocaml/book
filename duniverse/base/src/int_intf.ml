@@ -41,13 +41,14 @@ module type Hexable = sig
   type t
 
   module Hex : sig
-    type nonrec t = t [@@deriving_inline sexp, compare, hash]
+    type nonrec t = t [@@deriving_inline sexp, sexp_grammar, compare, hash]
 
-    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+    include Sexplib0.Sexpable.S with type t := t
 
-    val compare : t -> t -> int
-    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+    val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+    include Ppx_compare_lib.Comparable.S with type t := t
+    include Ppx_hash_lib.Hashable.S with type t := t
 
     [@@@end]
 
@@ -60,9 +61,9 @@ end
 module type S_common = sig
   type t [@@deriving_inline sexp, sexp_grammar]
 
-  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+  include Sexplib0.Sexpable.S with type t := t
 
-  val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -298,19 +299,48 @@ module type S = sig
   module O : Operators with type t := t
 end
 
-include (
-struct
-  (** Various functors whose type-correctness ensures desired relationships between
-      interfaces. *)
-
-  module Check_O_contained_in_S (M : S) : module type of M.O = M
-  module Check_O_contained_in_S_unbounded (M : S_unbounded) : module type of M.O = M
-  module Check_S_unbounded_in_S (M : S) : S_unbounded = M
-end :
-sig end)
-
 module type Int_without_module_types = sig
-  include S with type t = int
+  (** OCaml's native integer type.
+
+      The number of bits in an integer is platform dependent, being 31-bits on a 32-bit
+      platform, and 63-bits on a 64-bit platform.  [int] is a signed integer type.  [int]s
+      are also subject to overflow, meaning that [Int.max_value + 1 = Int.min_value].
+
+      [int]s always fit in a machine word. *)
+
+  include S with type t = int (** @inline *)
+
+  module O : sig
+    (*_ Declared as externals so that the compiler skips the caml_apply_X wrapping even
+      when compiling without cross library inlining. *)
+    external ( + ) : t -> t -> t = "%addint"
+    external ( - ) : t -> t -> t = "%subint"
+    external ( * ) : t -> t -> t = "%mulint"
+    external ( / ) : t -> t -> t = "%divint"
+    external ( ~- ) : t -> t = "%negint"
+    val ( ** ) : t -> t -> t
+    external ( = ) : t -> t -> bool = "%equal"
+    external ( <> ) : t -> t -> bool = "%notequal"
+    external ( < ) : t -> t -> bool = "%lessthan"
+    external ( > ) : t -> t -> bool = "%greaterthan"
+    external ( <= ) : t -> t -> bool = "%lessequal"
+    external ( >= ) : t -> t -> bool = "%greaterequal"
+    external ( land ) : t -> t -> t = "%andint"
+    external ( lor ) : t -> t -> t = "%orint"
+    external ( lxor ) : t -> t -> t = "%xorint"
+    val lnot : t -> t
+    val abs : t -> t
+    external neg : t -> t = "%negint"
+    val zero : t
+    val ( % ) : t -> t -> t
+    val ( /% ) : t -> t -> t
+    val ( // ) : t -> t -> float
+    external ( lsl ) : t -> int -> t = "%lslint"
+    external ( asr ) : t -> int -> t = "%asrint"
+    external ( lsr ) : t -> int -> t = "%lsrint"
+  end
+
+  include module type of O
 
   (** [max_value_30_bits = 2^30 - 1].  It is useful for writing tests that work on both
       64-bit and 32-bit platforms. *)
@@ -331,10 +361,12 @@ module type Int_without_module_types = sig
       These functions return the least-significant bits of the input. In cases
       where optional conversions return [Some x], truncating conversions return [x]. *)
 
-  val of_int32_trunc : int32 -> t
-  val to_int32_trunc : t -> int32
-  val of_int64_trunc : int64 -> t
-  val of_nativeint_trunc : nativeint -> t
+  (*_ Declared as externals so that the compiler skips the caml_apply_X wrapping even when
+    compiling without cross library inlining. *)
+  external to_int32_trunc : t -> int32 = "%int32_of_int"
+  external of_int32_trunc : int32 -> t = "%int32_to_int"
+  external of_int64_trunc : int64 -> t = "%int64_to_int"
+  external of_nativeint_trunc : nativeint -> t = "%nativeint_to_int"
 
   (** {2 Byte swap operations}
 
@@ -350,7 +382,9 @@ module type Int_without_module_types = sig
 
   (** Byte swaps bottom 16 bits (2 bytes). The values of the remaining bytes
       are undefined. *)
-  val bswap16 : t -> t
+  external bswap16 : int -> int = "%bswap16"
+  (*_ Declared as an external so that the compiler skips the caml_apply_X wrapping even
+    when compiling without cross library inlining. *)
 
   (**/**)
 
@@ -367,15 +401,8 @@ module type Int_without_module_types = sig
   end
 end
 
-(** OCaml's native integer type.
-
-    The number of bits in an integer is platform dependent, being 31-bits on a 32-bit
-    platform, and 63-bits on a 64-bit platform.  [int] is a signed integer type.  [int]s
-    are also subject to overflow, meaning that [Int.max_value + 1 = Int.min_value].
-
-    [int]s always fit in a machine word. *)
 module type Int = sig
-  include Int_without_module_types
+  include Int_without_module_types (** @inline *)
 
   (** {2 Module types specifying integer operations.} *)
   module type Hexable = Hexable

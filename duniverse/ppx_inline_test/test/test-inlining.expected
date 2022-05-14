@@ -1,8 +1,9 @@
 Partitions diff:
 2a3
 > file_without_test_module
-4a6
+4a6,7
 > random_state
+> unidiomatic_syntax
 
 File "performance_test.ml", line 1, characters 0-70: alloc-test-ok (XXX sec)
 File "performance_test.ml", line 5, characters 0-73: alloc-test-fail (XXX sec)

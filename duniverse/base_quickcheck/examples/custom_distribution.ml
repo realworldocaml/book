@@ -1,7 +1,7 @@
 open! Base
 open Base_quickcheck
 
-module Variant : sig
+module _ : sig
   type t =
     | Nullary
     | Unary of bool
@@ -69,7 +69,7 @@ end = struct
   ;;
 end
 
-module Record : sig
+module _ : sig
   type t =
     { rationals : float list
     ; index : int

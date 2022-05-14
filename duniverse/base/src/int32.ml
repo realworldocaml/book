@@ -12,31 +12,13 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (int32_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_int32 : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "int32" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ int32_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "int32.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (int32_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_int32 : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = int32_sexp_grammar
 
   [@@@end]
 
+  let hashable : t Hashable.t = { hash; compare; sexp_of_t }
   let compare (x : t) y = compare x y
   let to_string = to_string
   let of_string = of_string
@@ -82,7 +64,7 @@ let of_float f =
       ()
 ;;
 
-include Comparable.Validate_with_zero (struct
+include Comparable.With_zero (struct
     include T
 
     let zero = zero
@@ -170,7 +152,6 @@ let bswap16 x = Caml.Int32.shift_right_logical (bswap32 x) 16
 module Pow2 = struct
   open! Import
   open Int32_replace_polymorphic_compare
-  module Sys = Sys0
 
   let raise_s = Error.raise_s
 
@@ -236,8 +217,7 @@ module Pow2 = struct
   let ceil_log2 i =
     if i <= Caml.Int32.zero
     then
-      raise_s
-        (Sexp.message "[Int32.ceil_log2] got invalid input" [ "", sexp_of_int32 i ]);
+      raise_s (Sexp.message "[Int32.ceil_log2] got invalid input" [ "", sexp_of_int32 i ]);
     (* The [i = 1] check is needed because clz(0) is undefined *)
     if Caml.Int32.equal i Caml.Int32.one then 0 else num_bits - clz (Caml.Int32.pred i)
   ;;

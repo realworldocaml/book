@@ -1,6 +1,6 @@
 (** Internal to [Async_rpc_kernel].  See [Rpc.Implementations]. *)
 
-open! Core_kernel
+open! Core
 open! Async_kernel
 open Protocol
 
@@ -11,21 +11,18 @@ type 'connection_state on_unknown_rpc =
   | `Continue
   | `Close_connection
   | `Call of
-      ('connection_state
-       -> rpc_tag : string
-       -> version : int
-       -> [ `Close_connection | `Continue ])
+      'connection_state
+      -> rpc_tag:string
+      -> version:int
+      -> [ `Close_connection | `Continue ]
   ]
 
 val create
-  :  implementations : 'connection_state Implementation.t list
-  -> on_unknown_rpc : 'connection_state on_unknown_rpc
-  -> ( 'connection_state t
-     , [ `Duplicate_implementations of Description.t list ]
-     ) Result.t
+  :  implementations:'connection_state Implementation.t list
+  -> on_unknown_rpc:'connection_state on_unknown_rpc
+  -> ('connection_state t, [ `Duplicate_implementations of Description.t list ]) Result.t
 
 val null : unit -> 'a t
-
 val lift : 'a t -> f:('b -> 'a) -> 'b t
 
 module Direct_stream_writer : sig
@@ -36,8 +33,8 @@ module Direct_stream_writer : sig
   val close : _ t -> unit
   val closed : _ t -> unit Deferred.t
   val is_closed : _ t -> bool
-  val write : 'a t -> 'a -> [`Flushed of unit Deferred.t | `Closed]
-  val write_without_pushback : 'a t -> 'a -> [`Ok | `Closed]
+  val write : 'a t -> 'a -> [ `Flushed of unit Deferred.t | `Closed ]
+  val write_without_pushback : 'a t -> 'a -> [ `Ok | `Closed ]
   val flushed : _ t -> unit Deferred.t
   val bin_writer : 'a t -> 'a Bin_prot.Type_class.writer
 
@@ -47,14 +44,14 @@ module Direct_stream_writer : sig
       -> buf:Bigstring.t
       -> pos:int
       -> len:int
-      -> [`Flushed of unit Deferred.t | `Closed]
+      -> [ `Flushed of unit Deferred.t | `Closed ]
 
     val write_without_pushback
       :  'a t
       -> buf:Bigstring.t
       -> pos:int
       -> len:int
-      -> [`Ok | `Closed]
+      -> [ `Ok | `Closed ]
   end
 end
 
@@ -63,9 +60,10 @@ module Instance : sig
 
   val handle_query
     :  t
-    -> query : Nat0.t Query.t
-    -> read_buffer : Bigstring.t
-    -> read_buffer_pos_ref : int ref
+    -> query:Nat0.t Query.t
+    -> read_buffer:Bigstring.t
+    -> read_buffer_pos_ref:int ref
+    -> close_connection_monitor:Monitor.t
     -> unit Rpc_result.t Transport.Handler_result.t
 
   (* Flushes all open streaming responses *)
@@ -78,23 +76,23 @@ end
 
 val instantiate
   :  'a t
-  -> connection_description : Info.t
-  -> connection_close_started : Info.t Deferred.t
-  -> connection_state : 'a
-  -> writer : Transport.Writer.t
+  -> connection_description:Info.t
+  -> connection_close_started:Info.t Deferred.t
+  -> connection_state:'a
+  -> writer:Transport.Writer.t
   -> Instance.t
 
 val create_exn
-  :  implementations : 'connection_state Implementation.t list
-  -> on_unknown_rpc :
+  :  implementations:'connection_state Implementation.t list
+  -> on_unknown_rpc:
        [ `Raise
        | `Continue
        | `Close_connection
        | `Call of
-           ('connection_state
-            -> rpc_tag : string
-            -> version : int
-            -> [ `Close_connection | `Continue ])
+           'connection_state
+           -> rpc_tag:string
+           -> version:int
+           -> [ `Close_connection | `Continue ]
        ]
   -> 'connection_state t
 
@@ -117,28 +115,37 @@ module Expert : sig
     type t = Responder.t
 
     val schedule
-      :  t -> Bigstring.t -> pos:int -> len:int
-      -> [`Connection_closed | `Flushed of unit Deferred.t]
+      :  t
+      -> Bigstring.t
+      -> pos:int
+      -> len:int
+      -> [ `Connection_closed | `Flushed of unit Deferred.t ]
 
     val write_bigstring : t -> Bigstring.t -> pos:int -> len:int -> unit
-    val write_bin_prot  : t -> 'a Bin_prot.Type_class.writer -> 'a -> unit
-    val write_error     : t -> Error.t -> unit
+    val write_bin_prot : t -> 'a Bin_prot.Type_class.writer -> 'a -> unit
+    val write_error : t -> Error.t -> unit
   end
 
   val create_exn
-    :  implementations : 'connection_state Implementation.t list
-    -> on_unknown_rpc :
+    :  implementations:'connection_state Implementation.t list
+    -> on_unknown_rpc:
          [ `Raise
          | `Continue
          | `Close_connection
          | `Call of
-             ('connection_state
-              -> rpc_tag : string
-              -> version : int
-              -> [ `Close_connection | `Continue ])
+             'connection_state
+             -> rpc_tag:string
+             -> version:int
+             -> [ `Close_connection | `Continue ]
          | `Expert of
-             ('connection_state -> rpc_tag : string -> version : int -> Responder.t
-              -> Bigstring.t -> pos : int -> len : int -> unit Deferred.t)
+             'connection_state
+             -> rpc_tag:string
+             -> version:int
+             -> Responder.t
+             -> Bigstring.t
+             -> pos:int
+             -> len:int
+             -> unit Deferred.t
          ]
     -> 'connection_state t
 end

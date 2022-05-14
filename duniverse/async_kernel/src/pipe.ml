@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Import
 open Deferred_std
 module Stream = Async_stream
@@ -79,8 +79,7 @@ end = struct
              | `Have_not_been_sent_downstream ivar -> assert (Ivar.is_empty ivar)))
         ~downstream_flushed:ignore
     with
-    | exn ->
-      raise_s [%message "Pipe.Consumer.invariant failed" (exn : exn) ~pipe:(t : t)]
+    | exn -> raise_s [%message "Pipe.Consumer.invariant failed" (exn : exn) ~pipe:(t : t)]
   ;;
 
   let create ~pipe_id ~downstream_flushed =
@@ -313,7 +312,7 @@ end
 
 let id_ref = ref 0
 
-let create_internal ~info ~initial_buffer =
+let create_internal ~size_budget ~info ~initial_buffer =
   incr id_ref;
   let t =
     { id = !id_ref
@@ -321,7 +320,7 @@ let create_internal ~info ~initial_buffer =
     ; closed = Ivar.create ()
     ; read_closed = Ivar.create ()
     ;
-      size_budget = 0
+      size_budget
     ; pushback = Ivar.create ()
     ; buffer = initial_buffer
     ; num_values_read = 0
@@ -334,8 +333,19 @@ let create_internal ~info ~initial_buffer =
   t
 ;;
 
-let create ?info () =
-  let t = create_internal ~info ~initial_buffer:(Queue.create ()) in
+let validate_size_budget size_budget =
+  if size_budget < 0
+  then raise_s [%message "negative size_budget" (size_budget : int)]
+  else size_budget
+;;
+
+let create ?size_budget ?info () =
+  let size_budget =
+    match size_budget with
+    | Some v -> validate_size_budget v
+    | None -> 0
+  in
+  let t = create_internal ~size_budget ~info ~initial_buffer:(Queue.create ()) in
   (* initially, the pipe does not pushback *)
   Ivar.fill t.pushback ();
   if !check_invariant then invariant t;
@@ -368,8 +378,7 @@ let close_read t =
   if not (is_read_closed t)
   then (
     Ivar.fill t.read_closed ();
-    Queue.iter t.blocked_flushes ~f:(fun flush ->
-      Blocked_flush.fill flush `Reader_closed);
+    Queue.iter t.blocked_flushes ~f:(fun flush -> Blocked_flush.fill flush `Reader_closed);
     Queue.clear t.blocked_flushes;
     Queue.clear t.buffer;
     update_pushback t;
@@ -377,19 +386,22 @@ let close_read t =
     close t)
 ;;
 
-let create_reader_not_close_on_exception f =
-  let r, w = create () in
+let create_reader_not_close_on_exception ?size_budget f =
+  let r, w = create ?size_budget () in
   upon (f w) (fun () -> close w);
   r
 ;;
 
-let create_reader ~close_on_exception f =
+let create_reader ?size_budget ~close_on_exception f =
   if not close_on_exception
-  then create_reader_not_close_on_exception f
+  then create_reader_not_close_on_exception ?size_budget f
   else (
-    let r, w = create () in
+    let r, w = create ?size_budget () in
     don't_wait_for
       (Monitor.protect
+         ~run:
+           `Schedule
+         ~rest:`Log
          (fun () -> f w)
          ~finally:(fun () ->
            close w;
@@ -397,10 +409,13 @@ let create_reader ~close_on_exception f =
     r)
 ;;
 
-let create_writer f =
-  let r, w = create () in
+let create_writer ?size_budget f =
+  let r, w = create ?size_budget () in
   don't_wait_for
     (Monitor.protect
+       ~run:
+         `Schedule
+       ~rest:`Log
        (fun () -> f r)
        ~finally:(fun () ->
          close_read r;
@@ -420,9 +435,8 @@ let values_were_read t consumer =
         (match consumer with
          | None -> Blocked_flush.fill flush `Ok
          | Some consumer ->
-           upon
-             (Consumer.values_sent_downstream_and_flushed consumer)
-             (fun flush_result -> Blocked_flush.fill flush flush_result));
+           upon (Consumer.values_sent_downstream_and_flushed consumer) (fun flush_result ->
+             Blocked_flush.fill flush flush_result));
         loop ())
   in
   loop ()
@@ -461,7 +475,7 @@ let consume t ~max_queue_length consumer =
 ;;
 
 let set_size_budget t size_budget =
-  if size_budget < 0 then raise_s [%message "negative size_budget" (size_budget : int)];
+  let size_budget = validate_size_budget size_budget in
   t.size_budget <- size_budget;
   update_pushback t
 ;;
@@ -610,6 +624,12 @@ let read ?consumer t =
     return (`Ok (consume_one t consumer)))
 ;;
 
+let read_exn ?consumer t =
+  match%map read ?consumer t with
+  | `Ok value -> value
+  | `Eof -> raise_s [%message "Pipe.read_exn: received EOF"]
+;;
+
 let values_available t =
   start_read t "values_available";
   if not (is_empty t)
@@ -636,9 +656,8 @@ let read_choice_single_consumer_exn t here =
     | `Nothing_available ->
       raise_s
         [%message
-          "Pipe.read_choice_single_consumer_exn: choice was enabled but pipe is \
-           empty; this is likely due to a race condition with one or more other \
-           consumers"
+          "Pipe.read_choice_single_consumer_exn: choice was enabled but pipe is empty; \
+           this is likely due to a race condition with one or more other consumers"
             (here : Source_code_position.t)])
 ;;
 
@@ -696,9 +715,7 @@ let upstream_flushed t =
     |> Flushed_result.combine
 ;;
 
-let add_upstream_flushed t upstream_flushed =
-  Bag.add t.upstream_flusheds upstream_flushed
-;;
+let add_upstream_flushed t upstream_flushed = Bag.add t.upstream_flusheds upstream_flushed
 
 let add_consumer t ~downstream_flushed =
   let consumer = Consumer.create ~pipe_id:t.id ~downstream_flushed in
@@ -810,7 +827,13 @@ let with_error_to_current_monitor ?(continue_on_error = false) f a =
   if not continue_on_error
   then f a
   else (
-    match%map Monitor.try_with (fun () -> f a) with
+    match%map
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        (fun () -> f a)
+    with
     | Ok () -> ()
     | Error exn -> Monitor.send_exn (Monitor.current ()) (Monitor.extract_exn exn))
 ;;
@@ -994,8 +1017,7 @@ let transfer_gen
 ;;
 
 let transfer' ?max_queue_length input output ~f =
-  transfer_gen (read_now' ?max_queue_length) write' input output ~f:(fun q k ->
-    f q >>> k)
+  transfer_gen (read_now' ?max_queue_length) write' input output ~f:(fun q k -> f q >>> k)
 ;;
 
 let transfer input output ~f =
@@ -1018,6 +1040,11 @@ let map' ?max_queue_length input ~f =
 ;;
 
 let map input ~f = map_gen read_now write input ~f:(fun a k -> k (f a))
+
+let concat_map_list ?max_queue_length input ~f =
+  map_gen (read_now' ?max_queue_length) write' input ~f:(fun q k ->
+    k (Queue.concat_map q ~f))
+;;
 
 let filter_map' ?max_queue_length input ~f =
   map' ?max_queue_length input ~f:(fun q -> Deferred.Queue.filter_map q ~f)
@@ -1053,7 +1080,7 @@ let folding_map ?max_queue_length input ~init ~f =
 let filter input ~f = filter_map input ~f:(fun x -> if f x then Some x else None)
 
 let of_list l =
-  let t = create_internal ~info:None ~initial_buffer:(Queue.of_list l) in
+  let t = create_internal ~size_budget:0 ~info:None ~initial_buffer:(Queue.of_list l) in
   Ivar.fill t.closed ();
   update_pushback t;
   t

@@ -55,6 +55,19 @@ function bigstring_memcmp_stub(v_s1, v_s1_pos, v_s2, v_s2_pos, v_len){
   return 0;
 }
 
+//Provides: bigstring_memcmp_bytes_stub
+//Requires: caml_ba_get_1, caml_bytes_get
+function bigstring_memcmp_bytes_stub(v_s1, v_s1_pos, v_s2, v_s2_pos, v_len) {
+  for (var i = 0; i < v_len; i++) {
+    var a = caml_ba_get_1(v_s1, v_s1_pos + i);
+    var b = caml_bytes_get(v_s2, v_s2_pos + i);
+    if (a < b) return -1;
+    if (a > b) return 1;
+  }
+
+  return 0;
+}
+
 //Provides: internalhash_fold_bigstring
 //Requires: caml_hash_mix_bigstring
 var internalhash_fold_bigstring = caml_hash_mix_bigstring

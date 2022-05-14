@@ -36,3 +36,9 @@ let rev = function
   | ([] | [ _ ]) as res -> res
   | x :: y :: rest -> rev_append rest [ y; x ]
 ;;
+
+let fold_right l ~f ~init =
+  match l with
+  | [] -> init (* avoid the allocation of [~f] below *)
+  | _ -> fold ~f:(fun a b -> f b a) ~init (rev l)
+;;

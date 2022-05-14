@@ -10,6 +10,7 @@ open Atd.Import
 open Easy_format
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 type pp_convs =
   | Camlp4 of string list

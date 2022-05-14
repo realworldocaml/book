@@ -50,13 +50,12 @@ let test_cont_state input =
     | _ -> [%sexp Raised]
   in
   let parsexp =
-    let open Private.Parser_automaton in
-    let state = new_state Single Sexp in
+    let state = Private.Automaton.create Single Sexp in
     ignore
-      (String.fold input ~init:Automaton_stack.empty ~f:(fun stack ch ->
-         feed state ch stack)
-       : Automaton_stack.t);
-    let old_state = old_parser_cont_state state in
+      (String.fold input ~init:Private.Automaton.Stack.empty ~f:(fun stack ch ->
+         Private.Automaton.feed state ch stack)
+       : Private.Automaton.Stack.t);
+    let old_state = Private.Automaton.old_parser_cont_state state in
     [%sexp Cont (old_state : Old_parser_cont_state.t)]
   in
   if Sexp.equal sexplib parsexp

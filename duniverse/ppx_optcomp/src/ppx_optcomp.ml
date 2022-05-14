@@ -3,7 +3,7 @@ open Stdio
 open Ppxlib
 open Ast_builder.Default
 
-module Filename = Caml.Filename
+module Filename = Stdlib.Filename
 module Env = Interpreter.Env
 module Value = Interpreter.Value
 
@@ -81,7 +81,7 @@ module Ast_utils = struct
   let get_string ~loc payload =
     let e = get_expr ~loc payload in
     match e with
-    | { pexp_desc = Pexp_constant (Pconst_string (x, _, _ )); _ } -> x
+    | { pexp_desc = Pexp_constant (Pconst_string (x, _, _)); _ } -> x
     | _ -> Location.raise_errorf ~loc "optcomp: invalid directive syntax, expected string"
 
 end
@@ -130,45 +130,45 @@ end = struct
     lexbuf.lex_curr_p <- { pos_fname = fpath; pos_lnum = 1; pos_bol = 0; pos_cnum = 0 };
     in_ch, lexbuf, ftype
 
- let unroll (stack : 'a Token.t list) : ('a Token.t * 'a Token.t list) =
-   let bs, _, rest_rev =
-     List.fold stack ~init:([], false, []) ~f:(fun (bs, found, rest) x ->
-       match x, found with
-       | Block b, false -> b @ bs, false, rest
-       | _ -> bs, true, x :: rest
-     )
-   in
-   Block bs, List.rev rest_rev
+  let unroll (stack : 'a Token.t list) : ('a Token.t * 'a Token.t list) =
+    let bs, _, rest_rev =
+      List.fold stack ~init:([], false, []) ~f:(fun (bs, found, rest) x ->
+        match x, found with
+        | Block b, false -> b @ bs, false, rest
+        | _ -> bs, true, x :: rest
+      )
+    in
+    Block bs, List.rev rest_rev
 
- let rec of_items : 'a. 'a list -> of_item:('a -> 'a Token.t) -> 'a t =
-   fun items ~of_item ->
-     let of_items_st x = of_items ~of_item:Of_item.structure x in
-     let tokens_rev =
-       List.fold items ~init:[] ~f:(fun acc item ->
-         match of_item item with
-         | Directive (dir, loc, payload) as token ->
-           let last_block, rest = unroll acc in
-           begin match dir with
-           | Import ->
-             let in_ch, lexbuf, ftype = import_open ~loc payload in
-             let new_tokens =
-               match ftype with
-               | C -> Cparser.parse_loop lexbuf
-               | Ocaml ->
-                 let st_items = Parse.implementation lexbuf in
-                 Token.just_directives_exn ~loc (of_items_st st_items)
-             in
-             In_channel.close in_ch;
-             List.rev new_tokens @ (last_block :: rest)
-           | _ -> token :: last_block :: rest
-           end
-         | _ -> begin match acc with
-           | Block items :: acc -> Block (items @ [item]) :: acc
-           | _ -> Block [item] :: acc
-         end
-       )
-     in
-     List.rev tokens_rev
+  let rec of_items : 'a. 'a list -> of_item:('a -> 'a Token.t) -> 'a t =
+    fun items ~of_item ->
+    let of_items_st x = of_items ~of_item:Of_item.structure x in
+    let tokens_rev =
+      List.fold items ~init:[] ~f:(fun acc item ->
+        match of_item item with
+        | Directive (dir, loc, payload) as token ->
+          let last_block, rest = unroll acc in
+          begin match dir with
+          | Import ->
+            let in_ch, lexbuf, ftype = import_open ~loc payload in
+            let new_tokens =
+              match ftype with
+              | C -> Cparser.parse_loop lexbuf
+              | Ocaml ->
+                let st_items = Parse.implementation lexbuf in
+                Token.just_directives_exn ~loc (of_items_st st_items)
+            in
+            In_channel.close in_ch;
+            List.rev new_tokens @ (last_block :: rest)
+          | _ -> token :: last_block :: rest
+          end
+        | _ -> begin match acc with
+          | Block items :: acc -> Block (items @ [item]) :: acc
+          | _ -> Block [item] :: acc
+        end
+      )
+    in
+    List.rev tokens_rev
 end
 
 module Meta_ast : sig
@@ -296,10 +296,10 @@ end = struct
       | Leaf l -> List.iter l ~f:drop_item
       | Block (ast::asts) -> drop ast; drop (Block asts)
       | If (cond, ast1, ast2) -> begin
-        Attribute.explicitly_drop#expression cond;
-        drop ast1;
-        drop ast2
-      end
+          Attribute.explicitly_drop#expression cond;
+          drop ast1;
+          drop ast2
+        end
       | _ -> ()
     in
     let rec aux_eval ~env (ast : 'a t) : (Env.t * 'a list list) =
@@ -328,9 +328,9 @@ end = struct
           *)
           match cond.pexp_desc, ast1 with
           | Pexp_apply (
-              { pexp_desc = Pexp_ident { txt = Lident "not_defined"; _ }; _ },
-              [Nolabel, ({ pexp_desc = Pexp_ident { txt = Lident i1; loc }; _ } as expr)]
-            ),
+            { pexp_desc = Pexp_ident { txt = Lident "not_defined"; _ }; _ },
+            [Nolabel, ({ pexp_desc = Pexp_ident { txt = Lident i1; loc }; _ } as expr)]
+          ),
             Block (Define ({ txt = i2; _}, None) :: _)
             when String.(=) i1 i2 ->
             make_apply_fun ~loc "not_defined_permissive" expr
@@ -346,8 +346,8 @@ end = struct
         end
       | Error { loc; txt } -> Location.raise_errorf ~loc "%s" txt
       | Warning { txt; loc } ->
-        let ppf = Caml.Format.err_formatter in
-        Caml.Format.fprintf ppf "%a:@.Warning %s@." Location.print loc txt;
+        let ppf = Stdlib.Format.err_formatter in
+        Stdlib.Format.fprintf ppf "%a:@.Warning %s@." Location.print loc txt;
         env, []
     in
     let new_env, res = aux_eval ~env ast in

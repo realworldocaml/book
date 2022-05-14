@@ -1,0 +1,3 @@
+(library (name laziness_preserving_deferred)
+ (public_name async_kernel.laziness_preserving_deferred)
+ (libraries async_kernel core) (preprocess (pps ppx_jane)))

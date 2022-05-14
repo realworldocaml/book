@@ -1,20 +1,22 @@
 open! Import
 open! Random
 
-module State = struct
-  include State
+let%test_module "State" =
+  (module struct
+    include State
 
-  let%test_unit ("random int above 2^30"[@tags "64-bits-only"]) =
-    let state = make [| 1; 2; 3; 4; 5 |] in
-    for _ = 1 to 100 do
-      let bound = Int.shift_left 1 40 in
-      let n = int state bound in
-      if n < 0 || n >= bound
-      then
-        failwith (Printf.sprintf "random result %d out of bounds (0,%d)" n (bound - 1))
-    done
-  ;;
-end
+    let%test_unit ("random int above 2^30" [@tags "64-bits-only"]) =
+      let state = make [| 1; 2; 3; 4; 5 |] in
+      for _ = 1 to 100 do
+        let bound = Int.shift_left 1 40 in
+        let n = int state bound in
+        if n < 0 || n >= bound
+        then
+          failwith (Printf.sprintf "random result %d out of bounds (0,%d)" n (bound - 1))
+      done
+    ;;
+  end)
+;;
 
 external random_seed : unit -> Caml.Obj.t = "caml_sys_random_seed"
 
@@ -294,8 +296,7 @@ let%expect_test "int63_incl" =
     (fun () -> Int63.random_incl Int63.min_value Int63.max_value)
     ~min:Int63.min_value
     ~max:Int63.max_value
-    ~check_range:
-      (Int63.( / ) Int63.min_value (i 100), Int63.( / ) Int63.max_value (i 100));
+    ~check_range:(Int63.( / ) Int63.min_value (i 100), Int63.( / ) Int63.max_value (i 100));
   [%expect {||}]
 ;;
 
@@ -339,10 +340,7 @@ let%test_module "float upper bound is inclusive despite docs" =
         st.(2) <- 0b11111__11111__11111__11111__11111__00000;
         (Caml.Obj.magic (st, 0) : Random.State.t)
       in
-      require
-        [%here]
-        ~cr:CR_someday
-        (Float.( < ) (Random.State.float random_state 1.) 1.);
+      require [%here] ~cr:CR_someday (Float.( < ) (Random.State.float random_state 1.) 1.);
       [%expect {| |}]
     ;;
 

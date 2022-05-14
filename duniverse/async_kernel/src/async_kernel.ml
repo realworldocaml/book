@@ -1,10 +1,10 @@
 (** Contains Async's core data structures, like {{!Async_kernel.Deferred}[Deferred]},
     {{!Async_kernel.Ivar}[Ivar]}, and {{!Async_kernel.Clock_intf.Clock}[Clock]}.
 
-    [Async_kernel] is designed to depend only on {{!Core_kernel}[Core_kernel]} (as opposed
-    to {{!Core}[Core]}), and so is more platform-independent. *)
+    [Async_kernel] is designed to depend only on {{!Core}[Core]} and so is more
+    platform-independent. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Async_kernel_config = Async_kernel_config
 module Async_kernel_require_explicit_time_source = Require_explicit_time_source
@@ -35,6 +35,7 @@ module Time_source = Time_source
 
     The functions below are broadly useful when writing Async programs, and so are made
     available at the toplevel. *)
+
 
 let after = Clock_ns.after
 let at = Clock_ns.at

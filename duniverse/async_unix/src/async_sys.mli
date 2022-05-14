@@ -26,21 +26,17 @@ val when_file_exists
   -> string
   -> unit Deferred.t
 
-
 (** [when_file_changes file] polls [file] using [stat] and writes [file]'s mtime to the
-    pipe every time it changes.  The first time in the pipe will be [file]'s current
+    pipe every time it changes or there's an error.
+    The first time in the pipe will be [file]'s current
     mtime.  To stop polling, close the pipe. *)
 val when_file_changes
-  :  ?on_exn:(exn -> unit)
+  :  ?time_source:Time_source.t
   -> ?poll_delay:Time.Span.t
   -> string
-  -> Time.t Pipe.Reader.t
+  -> (Time.t, exn) Result.t Pipe.Reader.t
 
-val is_directory
-  :  ?follow_symlinks:bool
-  -> string
-  -> [ `Yes | `No | `Unknown ] Deferred.t
-
+val is_directory : ?follow_symlinks:bool -> string -> [ `Yes | `No | `Unknown ] Deferred.t
 val is_directory_exn : ?follow_symlinks:bool -> string -> bool Deferred.t
 val is_file : ?follow_symlinks:bool -> string -> [ `Yes | `No | `Unknown ] Deferred.t
 val is_file_exn : ?follow_symlinks:bool -> string -> bool Deferred.t
@@ -51,6 +47,7 @@ val getenv_exn : string -> string
 val command : string -> int Deferred.t
 val command_exn : string -> unit Deferred.t
 val quote : string -> string
+val concat_quoted : string list -> string
 val chdir : string -> unit Deferred.t
 val getcwd : unit -> string Deferred.t
 val readdir : string -> string array Deferred.t

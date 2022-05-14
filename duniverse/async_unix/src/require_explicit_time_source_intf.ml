@@ -36,7 +36,7 @@ module type Require_explicit_time_source = sig
 
   module Time : sig
     include module type of struct
-      include Core.Time
+      include Time_unix
     end
 
     module Ofday : sig
@@ -52,7 +52,7 @@ module type Require_explicit_time_source = sig
 
   module Time_ns : sig
     include module type of struct
-      include Core.Time_ns
+      include Time_ns_unix
     end
 
     module Ofday : sig

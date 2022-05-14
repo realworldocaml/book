@@ -4,7 +4,7 @@ include Ast_builder.Default
 
 (* errors and error messages *)
 
-let ( ^^ ) = Caml.( ^^ )
+let ( ^^ ) = Stdlib.( ^^ )
 let error ~loc fmt = Location.raise_errorf ~loc ("ppx_quickcheck: " ^^ fmt)
 let invalid ~loc fmt = error ~loc ("invalid syntax: " ^^ fmt)
 let unsupported ~loc fmt = error ~loc ("unsupported: " ^^ fmt)

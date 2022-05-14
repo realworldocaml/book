@@ -21,6 +21,7 @@ let bin_shape_float32_mat = basetype (Uuid.of_string "float32_mat") []
 let bin_shape_float64_mat = basetype (Uuid.of_string "float64_mat") []
 let bin_shape_mat = basetype (Uuid.of_string "mat") []
 let bin_shape_bigstring = basetype (Uuid.of_string "bigstring") []
+let bin_shape_floatarray = basetype (Uuid.of_string "floatarray") []
 let bin_shape_variant_int = basetype (Uuid.of_string "variant_int") []
 let bin_shape_int_8bit = basetype (Uuid.of_string "int_8bit") []
 let bin_shape_int_16bit = basetype (Uuid.of_string "int_16bit") []
@@ -42,6 +43,10 @@ let bin_shape_hashtbl x y = basetype (Uuid.of_string "hashtbl") [ x; y ]
 
 (* shape alias *)
 let bin_shape_float_array = bin_shape_array bin_shape_float
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+;;
 
 (* shape-constructor aliases *)
 let bin_shape_lazy x = x

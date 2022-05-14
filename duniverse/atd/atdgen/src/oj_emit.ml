@@ -8,6 +8,7 @@ open Indent
 
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 let target : Ocaml.target = Json
 let annot_schema = Ocaml.annot_schema_of_target target

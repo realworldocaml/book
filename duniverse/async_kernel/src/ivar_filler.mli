@@ -2,7 +2,7 @@
     read it.  This allows the implementation to drop the reference to the ivar once it is
     full, which can be useful to avoid holding onto unused memory. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type 'a t [@@deriving sexp_of]

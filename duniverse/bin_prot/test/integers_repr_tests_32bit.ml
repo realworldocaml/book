@@ -1,6 +1,6 @@
 (* WARNING: never accept the corrected output for this file, it must never change! *)
 
-let%expect_test ("32 bit integer tests"[@tags "32-bits-only", "no-js"]) =
+let%expect_test ("32 bit integer tests" [@tags "32-bits-only", "no-js"]) =
   Integers_repr.run_tests ();
   [%expect
     {|

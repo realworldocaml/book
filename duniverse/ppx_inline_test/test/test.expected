@@ -16,5 +16,7 @@ TEST_MODULE at file "failures.ml", line 10, characters 2-72: name3 threw Exit.
 
 TEST_MODULE at file "failures.ml", line 14, characters 0-60 threw Exit.
 
-FAILED 5 / 26 tests, 2 TEST_MODULES
+File "failures.ml", line 18, characters 0-30: name4 is false.
+
+FAILED 6 / 28 tests, 2 TEST_MODULES
 code: 2

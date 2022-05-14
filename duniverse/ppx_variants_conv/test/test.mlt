@@ -1,5 +1,5 @@
 open Variantslib
-
+;;
 #verbose true;;
 
 module Normal = struct
@@ -13,6 +13,12 @@ module Normal :
     val foo : int -> t
     val bar : t
     val exception_ : t
+    val is_foo : t -> bool
+    val is_bar : t -> bool
+    val is_exception_ : t -> bool
+    val foo_val : t -> int option
+    val bar_val : t -> unit option
+    val exception__val : t -> unit option
     module Variants :
       sig
         val foo : (int -> t) Variant.t
@@ -53,6 +59,12 @@ module Normal2 :
     val foo : int -> t
     val bar : t
     val exception_ : t
+    val is_foo : t -> bool
+    val is_bar : t -> bool
+    val is_exception_ : t -> bool
+    val foo_val : t -> int option
+    val bar_val : t -> unit option
+    val exception__val : t -> unit option
     module Variants :
       sig
         val foo : (int -> t) Variant.t
@@ -95,6 +107,10 @@ module Normal_inline_record :
     type t = Foo of { a : int; b : string; } | Bar
     val foo : a:int -> b:string -> t
     val bar : t
+    val is_foo : t -> bool
+    val is_bar : t -> bool
+    val foo_val : t -> ([> `a of int ] * [> `b of string ]) option
+    val bar_val : t -> unit option
     module Variants :
       sig
         val foo : (a:int -> b:string -> t) Variant.t
@@ -133,6 +149,12 @@ module Poly :
     val foo : 'a -> [> `Foo of 'a ]
     val bar : [> `Bar ]
     val exception_ : [> `Exception ]
+    val is_foo : [> `Foo of 'a ] -> bool
+    val is_bar : [> `Bar ] -> bool
+    val is_exception_ : [> `Exception ] -> bool
+    val foo_val : [> `Foo of 'a ] -> 'a option
+    val bar_val : [> `Bar ] -> unit option
+    val exception__val : [> `Exception ] -> unit option
     module Variants :
       sig
         val foo : ('a -> [> `Foo of 'a ]) Variant.t
@@ -176,6 +198,10 @@ module Wildcard :
     type _ t = A | B
     val a : 'a t
     val b : 'a t
+    val is_a : 'a t -> bool
+    val is_b : 'a t -> bool
+    val a_val : 'a t -> unit option
+    val b_val : 'a t -> unit option
     module Variants :
       sig
         val a : 'a t Variant.t

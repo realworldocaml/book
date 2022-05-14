@@ -29,7 +29,7 @@ let annot_schema_ts : Atd.Annot.schema_section =
   }
 
 let annot_schema : Atd.Annot.schema =
-  annot_schema_ts :: Atdgen_emit.Json.annot_schema_json
+  annot_schema_ts :: Atd.Json.annot_schema_json
 
 let not_implemented loc msg =
   A.error_at loc ("not implemented in atdts: " ^ msg)
@@ -575,7 +575,7 @@ type assoc_kind =
   | Object_array of type_expr (* value type *)
 
 let assoc_kind loc (e : type_expr) an : assoc_kind =
-  let json_repr = Atdgen_emit.Json.get_json_list an in
+  let json_repr = Atd.Json.get_json_list an in
   let ts_repr = TS_annot.get_ts_assoc_repr an in
   match e, json_repr, ts_repr with
   | Tuple (loc, [(_, key, _); (_, value, _)], an2), Array, Map ->
@@ -813,7 +813,7 @@ let string_of_case_name name =
 
 let case_type env type_name (loc, case_name, an, opt_e) =
   let comment =
-    let json_name = Atdgen_emit.Json.get_json_cons case_name an in
+    let json_name = Atd.Json.get_json_cons case_name an in
     if case_name <> json_name then
       sprintf " /* JSON: \"%s\" */" (double_esc json_name)
     else
@@ -868,7 +868,7 @@ let make_type_def env ((loc, (name, param, an), e) : A.type_def) : B.t =
   | Tvar _ -> assert false
 
 let read_case env loc orig_name an opt_e =
-  let json_name = Atdgen_emit.Json.get_json_cons orig_name an in
+  let json_name = Atd.Json.get_json_cons orig_name an in
   match opt_e with
   | None ->
       [
@@ -888,7 +888,7 @@ let read_case env loc orig_name an opt_e =
       ]
 
 let write_case env loc orig_name an opt_e =
-  let json_name = Atdgen_emit.Json.get_json_cons orig_name an in
+  let json_name = Atd.Json.get_json_cons orig_name an in
   match opt_e with
   | None ->
       [
@@ -980,7 +980,7 @@ let read_root_expr env ~ts_type_name e =
           | `Field ((loc, (name, kind, an), e) : simple_field) ->
               let ts_name = trans env name in
               let json_name_lit =
-                Atdgen_emit.Json.get_json_fname name an |> single_esc
+                Atd.Json.get_json_fname name an |> single_esc
               in
               let unwrapped_e = unwrap_field_type loc name kind e in
               (match kind with
@@ -1052,7 +1052,7 @@ let write_root_expr env ~ts_type_name e =
               let ts_name = trans env name in
               let json_name_lit =
                 sprintf "'%s'"
-                  (Atdgen_emit.Json.get_json_fname name an |> single_esc)
+                  (Atd.Json.get_json_fname name an |> single_esc)
               in
               let unwrapped_e = unwrap_field_type loc name kind e in
               (match kind with

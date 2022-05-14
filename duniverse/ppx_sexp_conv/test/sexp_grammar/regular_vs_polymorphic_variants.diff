@@ -1,0 +1,73 @@
+------ test_regular_variants.ml
+++++++ test_polymorphic_variants.ml
+@|============================================================
+-|    | A
+-|    | B
++|    [ `A
++|    | `B
++|    ]
+@|============================================================
+-|          { case_sensitivity = Case_sensitive_except_first_character
++|          { case_sensitivity = Case_sensitive
+@|============================================================
+-|      | A of int * int
+-|      | B of string
++|      [ `A of int * int
++|      | `B of string
++|      ]
+@|============================================================
+-|  type t = With_sexp.t =
+-|    | A of int * int
+-|    | B of string
++|  type t =
++|    [ `A of int * int
++|    | `B of string
++|    ]
+@|============================================================
+-|               { case_sensitivity = Case_sensitive_except_first_character
++|               { case_sensitivity = Case_sensitive
+@|============================================================
+-|                                   ( int_sexp_grammar.untyped
+-|                                   , Cons (int_sexp_grammar.untyped, Empty) )
++|                                   ( List
++|                                       (Cons
++|                                          ( int_sexp_grammar.untyped
++|                                          , Cons (int_sexp_grammar.untyped, Empty) ))
++|                                   , Empty )
+@|============================================================
+-|    print_s (With_sexp.sexp_of_t (A (1, 2)));
+-|    print_s (With_sexp.sexp_of_t (B "foo"));
++|    print_s (With_sexp.sexp_of_t (`A (1, 2)));
++|    print_s (With_sexp.sexp_of_t (`B "foo"));
+@|============================================================
+-|      (A 1 2)
++|      (A (1 2))
+@|============================================================
+-|      | Int of int
+-|      | List of int list
+-|      | Sexp_dot_list of int list [@sexp.list]
++|      [ `Int of int
++|      | `List of int list
++|      | `Sexp_dot_list of int list [@sexp.list]
++|      ]
+@|============================================================
+-|  type t = With_sexp.t =
+-|    | Int of int
+-|    | List of int list
+-|    | Sexp_dot_list of int list [@sexp.list]
++|  type t =
++|    [ `Int of int
++|    | `List of int list
++|    | `Sexp_dot_list of int list [@sexp.list]
++|    ]
+@|============================================================
+-|               { case_sensitivity = Case_sensitive_except_first_character
++|               { case_sensitivity = Case_sensitive
+@|============================================================
+-|    print_s (With_sexp.sexp_of_t (Int 1));
++|    print_s (With_sexp.sexp_of_t (`Int 1));
+@|============================================================
+-|      print_s (With_sexp.sexp_of_t (List l));
+-|      print_s (With_sexp.sexp_of_t (Sexp_dot_list l)));
++|      print_s (With_sexp.sexp_of_t (`List l));
++|      print_s (With_sexp.sexp_of_t (`Sexp_dot_list l)));

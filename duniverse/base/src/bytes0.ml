@@ -34,6 +34,9 @@ module Primitives = struct
     -> unit
     = "caml_blit_string"
   [@@noalloc]
+
+  external unsafe_get_int64 : bytes -> int -> int64 = "%caml_bytes_get64u"
+  external unsafe_set_int64 : bytes -> int -> int64 -> unit = "%caml_bytes_set64u"
 end
 
 include Primitives
@@ -52,9 +55,5 @@ let sub = Caml.Bytes.sub
 let unsafe_blit = Caml.Bytes.unsafe_blit
 let to_string = Caml.Bytes.to_string
 let of_string = Caml.Bytes.of_string
-
-let unsafe_to_string ~no_mutation_while_string_reachable:s =
-  Caml.Bytes.unsafe_to_string s
-;;
-
+let unsafe_to_string ~no_mutation_while_string_reachable:s = Caml.Bytes.unsafe_to_string s
 let unsafe_of_string_promise_no_mutation = Caml.Bytes.unsafe_of_string

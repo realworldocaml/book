@@ -4,12 +4,13 @@ type t = Sexplib0.Sexp.t =
   | List of t list
 [@@deriving_inline hash]
 
-val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+include Ppx_hash_lib.Hashable.S with type t := t
 
 [@@@end]
 
 include module type of Sexplib0.Sexp with type t := Sexplib0.Sexp.t
+
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 val invariant : t -> unit
 

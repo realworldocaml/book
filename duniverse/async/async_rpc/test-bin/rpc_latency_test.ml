@@ -123,9 +123,7 @@ module Protocol = struct
     type query = unit [@@deriving bin_io]
     type response = unit [@@deriving bin_io]
 
-    let rpc =
-      Rpc.create ~name:"test-rpc-latency-quit" ~version:1 ~bin_query ~bin_response
-    ;;
+    let rpc = Rpc.create ~name:"test-rpc-latency-quit" ~version:1 ~bin_query ~bin_response
   end
 end
 
@@ -152,9 +150,7 @@ module Client = struct
 
   let main msgs_per_sec msg_size ~host ~port ~rpc_impl () =
     let payload = String.make msg_size '\000' in
-    Rpc_impl.make_client rpc_impl host port
-    >>| Result.ok_exn
-    >>= fun connection ->
+    let%bind connection = Rpc_impl.make_client rpc_impl host port >>| Result.ok_exn in
     let stats = Stats.create () in
     let record = ref false in
     loop
@@ -163,10 +159,10 @@ module Client = struct
       ~record
       ~span_between_call:(Time_ns.Span.of_int_ns (1_000_000_000 / msgs_per_sec))
       ~payload;
-    Clock.after (sec 1.)
-    >>= fun () ->
+    let%bind () = Clock.after (sec 1.) in
     record := true;
-    Clock.after (sec 5.) >>| fun () -> Stats.print stats
+    let%map () = Clock.after (sec 5.) in
+    Stats.print stats
   ;;
 end
 
@@ -215,15 +211,12 @@ module Client_long = struct
       ~record
       ~span_between_call:(Time_ns.Span.of_int_ns (1_000_000_000 / msgs_per_sec))
       ~payload;
-    Clock.after (sec 5.)
-    >>= fun () ->
+    let%bind () = Clock.after (sec 5.) in
     record := true;
-    Clock.after (sec 10.)
-    >>= fun () ->
+    let%bind () = Clock.after (sec 10.) in
     running := false;
     record := false;
-    wait_for_pending ()
-    >>| fun () ->
+    let%map () = wait_for_pending () in
     let real_msgs_per_sec = float (Rstats.samples stats) /. 10. in
     Core.printf
       {|msgs/s : %f
@@ -248,51 +241,51 @@ max    : %f us
 
   let main csv_prefix msg_size ~host ~port ~rpc_impl () =
     let payload = String.make msg_size '\000' in
-    Rpc_impl.make_client rpc_impl host port
-    >>| Result.ok_exn
-    >>= fun connection ->
+    let%bind connection = Rpc_impl.make_client rpc_impl host port >>| Result.ok_exn in
     let csv_oc = ksprintf Core.Out_channel.create "out-%s-%d.csv" csv_prefix msg_size in
     Core.fprintf csv_oc "msgs/s,mean,stdev\n";
-    Deferred.List.iter
-      [ 100
-      ; 200
-      ; 300
-      ; 400
-      ; 500
-      ; 600
-      ; 700
-      ; 800
-      ; 900
-      ; 1000
-      ; 10_000
-      ; 20_000
-      ; 30_000
-      ; 40_000
-      ; 50_000
-      ; 60_000
-      ; 70_000
-      ; 80_000
-      ; 90_000
-      ; 100_000
-      ; 110_000
-      ; 120_000
-      ; 130_000
-      ; 140_000
-      ; 150_000
-      ; 200_000
-      ; 300_000
-      ; 400_000
-      ; 500_000
-      ; 600_000
-      ; 700_000
-      ; 800_000
-      ; 900_000
-      ; 1_000_000
-      ; 1_500_000
-      ; 2_000_000
-      ]
-      ~f:(fun msgs_per_sec -> try_one csv_oc ~connection ~msgs_per_sec ~payload)
-    >>| fun () -> Core.Out_channel.close csv_oc
+    let%map () =
+      Deferred.List.iter
+        [ 100
+        ; 200
+        ; 300
+        ; 400
+        ; 500
+        ; 600
+        ; 700
+        ; 800
+        ; 900
+        ; 1000
+        ; 10_000
+        ; 20_000
+        ; 30_000
+        ; 40_000
+        ; 50_000
+        ; 60_000
+        ; 70_000
+        ; 80_000
+        ; 90_000
+        ; 100_000
+        ; 110_000
+        ; 120_000
+        ; 130_000
+        ; 140_000
+        ; 150_000
+        ; 200_000
+        ; 300_000
+        ; 400_000
+        ; 500_000
+        ; 600_000
+        ; 700_000
+        ; 800_000
+        ; 900_000
+        ; 1_000_000
+        ; 1_500_000
+        ; 2_000_000
+        ]
+        ~f:(fun msgs_per_sec -> try_one csv_oc ~connection ~msgs_per_sec ~payload)
+    in
+    Core.Out_channel.close csv_oc
   ;;
 end
 
@@ -308,21 +301,22 @@ module Server = struct
     let implementations =
       Implementations.create_exn ~implementations ~on_unknown_rpc:`Raise
     in
-    Rpc_impl.make_server
-      ~initial_connection_state:(fun _ -> ())
-      ~implementations
-      ~port
-      rpc_impl
-    >>= fun _server -> Deferred.never ()
+    let%bind _server =
+      Rpc_impl.make_server
+        ~initial_connection_state:(fun _ -> ())
+        ~implementations
+        ~port
+        rpc_impl
+    in
+    Deferred.never ()
   ;;
 end
 
 module Quit = struct
   let main ~host ~port ~rpc_impl () =
-    Rpc_impl.make_client rpc_impl host port
-    >>| Result.ok_exn
-    >>= fun connection ->
-    Rpc.dispatch_exn Protocol.Quit.rpc connection () >>| fun () -> shutdown 0
+    let%bind connection = Rpc_impl.make_client rpc_impl host port >>| Result.ok_exn in
+    let%map () = Rpc.dispatch_exn Protocol.Quit.rpc connection () in
+    shutdown 0
   ;;
 end
 
@@ -367,7 +361,7 @@ let quit_command =
 ;;
 
 let () =
-  Command.run
+  Command_unix.run
     (Command.group
        ~summary:"Async RPC latency test"
        [ "server", server_command

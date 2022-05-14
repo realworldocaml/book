@@ -13,7 +13,7 @@ open Foreign
 
 [@@@warning "-6"]
 
-let testlib = Dl.(dlopen ~filename:"../clib/dlltest_functions_stubs.so" ~flags:[RTLD_NOW])
+let testlib = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
 
 module Common_tests(S : Cstubs.FOREIGN with type 'a result = 'a
                                         and type 'a return = 'a) =
@@ -64,7 +64,7 @@ struct
       (allocate (ptr (ptr int)) (allocate (ptr int) (allocate int 4))) in
 
     assert_equal ~msg:"Passing pointers to pointers"
-      Stdlib.(1 + 2 + 3 + 4)
+      (1 + 2 + 3 + 4)
       (accept_pointers_to_pointers p pp ppp pppp)
 
 

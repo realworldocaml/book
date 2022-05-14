@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 open Hashtbl_intf
 open With_return
@@ -91,8 +91,7 @@ module type S_binable = S_binable with type ('a, 'b) hashtbl = ('a, 'b) t
 let sexp_of_key t = t.hashable.Hashable.sexp_of_t
 
 let ensure_mutation_allowed t =
-  if not t.mutation_allowed
-  then failwith "Hashtbl: mutation not allowed during iteration"
+  if not t.mutation_allowed then failwith "Hashtbl: mutation not allowed during iteration"
 ;;
 
 let without_mutating t f v =
@@ -426,30 +425,14 @@ let find_and_call2 =
   let call_if_found ~if_found ~key:_ ~data a b = if_found data a b in
   let call_if_not_found ~if_not_found key a b = if_not_found key a b in
   fun t key ~a ~b ~if_found ~if_not_found ->
-    find_and_call_impl
-      t
-      key
-      ~call_if_found
-      ~call_if_not_found
-      ~if_found
-      ~if_not_found
-      a
-      b
+    find_and_call_impl t key ~call_if_found ~call_if_not_found ~if_found ~if_not_found a b
 ;;
 
 let findi_and_call2 =
   let call_if_found ~if_found ~key ~data a b = if_found ~key ~data a b in
   let call_if_not_found ~if_not_found key a b = if_not_found key a b in
   fun t key ~a ~b ~if_found ~if_not_found ->
-    find_and_call_impl
-      t
-      key
-      ~call_if_found
-      ~call_if_not_found
-      ~if_found
-      ~if_not_found
-      a
-      b
+    find_and_call_impl t key ~call_if_found ~call_if_not_found ~if_found ~if_not_found a b
 ;;
 
 (* This is split in a rather odd way so as to make find_and_remove for a single entry
@@ -530,6 +513,12 @@ let incr_by ~remove_if_zero t key by =
 let incr ?(by = 1) ?(remove_if_zero = false) t key = incr_by ~remove_if_zero t key by
 let decr ?(by = 1) ?(remove_if_zero = false) t key = incr_by ~remove_if_zero t key (-by)
 let update t key ~f = change t key ~f:(fun data -> Some (f data))
+
+(* This could be optimized if desired. *)
+let update_and_return t key ~f =
+  update t key ~f;
+  find_exn t key
+;;
 
 (* Split similar to find and removed. Code duplicated to avoid allocation and
    unroll/inline the single entry case *)
@@ -739,8 +728,7 @@ let partition_mapi t ~f =
 let partition_map t ~f = partition_mapi t ~f:(fun ~key:_ ~data -> f data)
 
 let partitioni_tf t ~f =
-  partition_mapi t ~f:(fun ~key ~data ->
-    if f ~key ~data then First data else Second data)
+  partition_mapi t ~f:(fun ~key ~data -> if f ~key ~data then First data else Second data)
 ;;
 
 let partition_tf t ~f = partitioni_tf t ~f:(fun ~key:_ ~data -> f data)
@@ -843,8 +831,7 @@ let create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows =
 ;;
 
 let create_with_key_exn ?growth_allowed ?size ~hashable ~get_key rows =
-  Or_error.ok_exn
-    (create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows)
+  Or_error.ok_exn (create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows)
 ;;
 
 let merge =
@@ -906,9 +893,7 @@ let filter_inplace t ~f = filteri_inplace t ~f:(fun ~key:_ ~data -> f data)
 let filter_keys_inplace t ~f = filteri_inplace t ~f:(fun ~key ~data:_ -> f key)
 
 let filter_mapi_inplace t ~f =
-  let map_results =
-    fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac)
-  in
+  let map_results = fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac) in
   List.iter map_results ~f:(fun (key, result) ->
     match result with
     | None -> remove t key
@@ -918,9 +903,7 @@ let filter_mapi_inplace t ~f =
 let filter_map_inplace t ~f = filter_mapi_inplace t ~f:(fun ~key:_ ~data -> f data)
 
 let mapi_inplace t ~f =
-  let map_results =
-    fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac)
-  in
+  let map_results = fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac) in
   List.iter map_results ~f:(fun (key, data) -> set t ~key ~data)
 ;;
 
@@ -970,6 +953,7 @@ module Accessors = struct
   let add_exn = add_exn
   let change = change
   let update = update
+  let update_and_return = update_and_return
   let add_multi = add_multi
   let remove_multi = remove_multi
   let find_multi = find_multi
@@ -1115,6 +1099,10 @@ module Poly = struct
 
   let sexp_of_t = sexp_of_t
 
+  let t_sexp_grammar k_grammar v_grammar =
+    Sexplib.Sexp_grammar.coerce (List.Assoc.t_sexp_grammar k_grammar v_grammar)
+  ;;
+
   include Bin_prot.Utils.Make_iterable_binable2 (struct
       type ('a, 'b) z = ('a, 'b) t
       type ('a, 'b) t = ('a, 'b) z
@@ -1141,12 +1129,15 @@ module Poly = struct
     end)
 end
 
-module Make_plain (Key : Key_plain) = struct
-  let hashable =
-    { Hashable.hash = Key.hash; compare = Key.compare; sexp_of_t = Key.sexp_of_t }
-  ;;
+module Make_plain_with_hashable (T : sig
+    module Key : Key_plain
 
-  type key = Key.t [@@deriving sexp_of]
+    val hashable : Key.t Hashable.t
+  end) =
+struct
+  let hashable = T.hashable
+
+  type key = T.Key.t [@@deriving sexp_of]
   type ('a, 'b) hashtbl = ('a, 'b) t
   type 'a t = (key, 'a) hashtbl
   type 'a key_ = key
@@ -1154,14 +1145,14 @@ module Make_plain (Key : Key_plain) = struct
   let invariant invariant_data t = invariant ignore invariant_data t
 
   include Creators (struct
-      type 'a t = Key.t
+      type 'a t = T.Key.t
 
       let hashable = hashable
     end)
 
   include Accessors
 
-  let sexp_of_t sexp_of_v t = Poly.sexp_of_t Key.sexp_of_t sexp_of_v t
+  let sexp_of_t sexp_of_v t = Poly.sexp_of_t T.Key.sexp_of_t sexp_of_v t
 
   module Provide_of_sexp
       (X : sig
@@ -1179,7 +1170,7 @@ module Make_plain (Key : Key_plain) = struct
        with type t := key) =
     Bin_prot.Utils.Make_iterable_binable1 (struct
       module Key = struct
-        include Key
+        include T.Key
         include X
       end
 
@@ -1212,6 +1203,34 @@ module Make_plain (Key : Key_plain) = struct
     end)
 end
 
+module Make_with_hashable (T : sig
+    module Key : Key
+
+    val hashable : Key.t Hashable.t
+  end) =
+struct
+  include Make_plain_with_hashable (T)
+  include Provide_of_sexp (T.Key)
+end
+
+module Make_binable_with_hashable (T : sig
+    module Key : Key_binable
+
+    val hashable : Key.t Hashable.t
+  end) =
+struct
+  include Make_with_hashable (T)
+  include Provide_bin_io (T.Key)
+end
+
+module Make_plain (Key : Key_plain) = Make_plain_with_hashable (struct
+    module Key = Key
+
+    let hashable =
+      { Hashable.hash = Key.hash; compare = Key.compare; sexp_of_t = Key.sexp_of_t }
+    ;;
+  end)
+
 module Make (Key : Key) = struct
   include Make_plain (Key)
   include Provide_of_sexp (Key)
@@ -1240,6 +1259,12 @@ module type M_of_sexp = sig
   include Key with type t := t
 end
 
+module type M_sexp_grammar = sig
+  type t [@@deriving sexp_grammar]
+end
+
+module type Equal_m = sig end
+
 let t_of_sexp ~hashable k_of_sexp d_of_sexp sexp =
   let alist = list_of_sexp (pair_of_sexp k_of_sexp d_of_sexp) sexp in
   of_alist_exn ~hashable alist ~size:(List.length alist)
@@ -1252,6 +1277,12 @@ let sexp_of_m__t (type k) (module K : Sexp_of_m with type t = k) sexp_of_v t =
 let m__t_of_sexp (type k) (module K : M_of_sexp with type t = k) v_of_sexp s =
   t_of_sexp ~hashable:(Hashable.of_key (module K)) K.t_of_sexp v_of_sexp s
 ;;
+
+let m__t_sexp_grammar (type k) (module K : M_sexp_grammar with type t = k) v_grammar =
+  Sexplib.Sexp_grammar.coerce (List.Assoc.t_sexp_grammar K.t_sexp_grammar v_grammar)
+;;
+
+let equal_m__t (module _ : Equal_m) equal_v t1 t2 = equal equal_v t1 t2
 
 module Using_hashable = struct
   type nonrec ('a, 'b) t = ('a, 'b) t [@@deriving sexp_of]
@@ -1311,4 +1342,34 @@ let create_with_key_exn ?growth_allowed ?size m ~get_key l =
 
 let group ?growth_allowed ?size m ~get_key ~get_data ~combine l =
   group ~hashable:(Hashable.of_key m) ?growth_allowed ?size ~get_key ~get_data ~combine l
+;;
+
+module type M_quickcheck = M_quickcheck
+
+let of_alist_option m alist = Result.ok (of_alist_or_error m alist)
+
+let quickcheck_generator_m__t
+      (type key)
+      (module Key : M_quickcheck with type t = key)
+      quickcheck_generator_data
+  =
+  [%quickcheck.generator: (Key.t * data) List.t]
+  |> Quickcheck.Generator.filter_map ~f:(of_alist_option (module Key))
+;;
+
+let quickcheck_observer_m__t
+      (type key)
+      (module Key : M_quickcheck with type t = key)
+      quickcheck_observer_data
+  =
+  [%quickcheck.observer: (Key.t * data) List.t] |> Quickcheck.Observer.unmap ~f:to_alist
+;;
+
+let quickcheck_shrinker_m__t
+      (type key)
+      (module Key : M_quickcheck with type t = key)
+      quickcheck_shrinker_data
+  =
+  [%quickcheck.shrinker: (Key.t * data) List.t]
+  |> Quickcheck.Shrinker.filter_map ~f:(of_alist_option (module Key)) ~f_inverse:to_alist
 ;;

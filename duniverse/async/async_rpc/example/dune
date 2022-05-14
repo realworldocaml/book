@@ -1,2 +1,3 @@
 (executables (names profile_rpc rpc_client rpc_server)
- (libraries async bin_prot ocaml_value_size) (preprocess (pps ppx_jane)))
+ (libraries async bin_prot core_unix.command_unix ocaml_value_size)
+ (preprocess (pps ppx_jane)))

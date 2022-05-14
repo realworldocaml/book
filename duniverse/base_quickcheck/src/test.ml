@@ -45,8 +45,7 @@ let lazy_nondeterministic_state = lazy (Random.State.make_self_init ())
 
 let initial_random_state ~config =
   match Config.seed config with
-  | Nondeterministic ->
-    Splittable_random.State.create (force lazy_nondeterministic_state)
+  | Nondeterministic -> Splittable_random.State.create (force lazy_nondeterministic_state)
   | Deterministic string -> Splittable_random.State.of_int (String.hash string)
 ;;
 

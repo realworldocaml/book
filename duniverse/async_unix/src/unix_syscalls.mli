@@ -27,10 +27,7 @@ val getppid_exn : unit -> Pid.t
     information about parent death.
 
     [?poll_delay] controls how often to check. *)
-val this_process_became_child_of_init
-  :  ?poll_delay:Time.Span.t
-  -> unit
-  -> unit Deferred.t
+val this_process_became_child_of_init : ?poll_delay:Time.Span.t -> unit -> unit Deferred.t
 
 val nice : int -> int
 
@@ -54,7 +51,12 @@ type open_flag =
 
 type file_perm = int
 
-val openfile : ?perm:file_perm -> string -> mode:open_flag list -> Fd.t Deferred.t
+val openfile
+  :  ?info:Info.t
+  -> ?perm:file_perm
+  -> string
+  -> mode:open_flag list
+  -> Fd.t Deferred.t
 
 module Lock_mode : sig
   type t =
@@ -90,7 +92,7 @@ end
 
     If [lock] is supplied, then the file descriptor is locked before calling [f] with
     the specified [lock_mechanism]. Note that it is not unlocked before close, which might
-    be significant if this file descriptior is held elsewhere (e.g., by fork() or
+    be significant if this file descriptor is held elsewhere (e.g., by fork() or
     dup()). *)
 val with_file
   :  ?lock:Lock.t (** default is no lock *)
@@ -103,7 +105,7 @@ val with_file
 module Open_flags = Unix.Open_flags
 
 (** [fcntl_getfl] and [fcntl_setf] are deferred wrappers around the corresponding
-    functions in [Core.Unix] for accessing the open-file-descriptor table. *)
+    functions in [Core_unix] for accessing the open-file-descriptor table. *)
 val fcntl_getfl : Fd.t -> Open_flags.t Deferred.t
 
 val fcntl_setfl : Fd.t -> Open_flags.t -> unit Deferred.t
@@ -120,6 +122,9 @@ val sync : unit -> unit Deferred.t
 (** [lockf fd lock_mode ?len] locks the section of the open file [fd] specified by the
     current file position and [len] (see man lockf).  It returns when the lock has been
     acquired.  It raises if [fd] is closed.
+
+    Warning: [lockf] locks are held per-process, so taking the lock on the same file
+    multiple times in the same process is going to break in terrible ways.
 
     Note that, despite the name, this function does not call the UNIX lockf() system call;
     rather it calls fcntl() with F_SETLKW *)
@@ -175,7 +180,7 @@ module File_kind : sig
 
   include Comparable.S with type t := t
 
-  val of_unix : Core.Unix.file_kind -> t
+  val of_unix : Core_unix.file_kind -> t
 end
 
 module Stats : sig
@@ -195,7 +200,7 @@ module Stats : sig
     }
   [@@deriving fields, sexp, bin_io, compare]
 
-  val of_unix : Core.Unix.stats -> t
+  val of_unix : Core_unix.stats -> t
   val to_string : t -> string
 end
 
@@ -357,7 +362,7 @@ module Inet_addr : sig
   val of_string_or_getbyname : string -> t Deferred.t
 end
 
-module Cidr = Core.Unix.Cidr
+module Cidr = Core_unix.Cidr
 
 module Protocol_family : sig
   type t = Unix.Protocol_family.t
@@ -372,7 +377,7 @@ module Socket : sig
 
       val create : string -> t
       val to_string : t -> string
-      val to_sockaddr : t -> Core.Unix.sockaddr
+      val to_sockaddr : t -> Core_unix.sockaddr
     end
 
     module Inet : sig
@@ -398,7 +403,7 @@ module Socket : sig
       val port : t -> int
       val to_string : t -> string
       val to_host_and_port : t -> Host_and_port.t
-      val to_sockaddr : t -> Core.Unix.sockaddr
+      val to_sockaddr : t -> Core_unix.sockaddr
     end
 
     type t =
@@ -413,7 +418,7 @@ module Socket : sig
     end
 
     val to_string : [< t ] -> string
-    val to_sockaddr : [< t ] -> Core.Unix.sockaddr
+    val to_sockaddr : [< t ] -> Core_unix.sockaddr
   end
 
   module Family : sig
@@ -421,6 +426,7 @@ module Socket : sig
 
     val unix : Address.Unix.t t
     val inet : Address.Inet.t t
+    val is_inet_witness : 'a t -> ('a, Address.Inet.t) Type_equal.t option
     val to_string : 'a t -> string
   end
 
@@ -449,10 +455,13 @@ module Socket : sig
     val udp : Address.Inet.t t
     val unix : Address.Unix.t t
     val unix_dgram : Address.Unix.t t
+    val family : 'a t -> 'a Family.t
   end
 
   val create : 'addr Type.t -> ([ `Unconnected ], 'addr) t
 
+  (** Calling [Fd.close] on the socket's file descriptor before {e or during} [connect]
+      may cause [connect] to raise. *)
   val connect
     :  ([< `Unconnected | `Bound ], 'addr) t
     -> 'addr
@@ -557,13 +566,7 @@ module Socket : sig
 
   val getopt : ('a, 'addr) t -> 'c Opt.t -> 'c
   val setopt : ('a, 'addr) t -> 'c Opt.t -> 'c -> unit
-
-  val mcast_join
-    :  ?ifname:string
-    -> ?source:Inet_addr.t
-    -> ('a, 'addr) t
-    -> 'addr
-    -> unit
+  val mcast_join : ?ifname:string -> ?source:Inet_addr.t -> ('a, 'addr) t -> 'addr -> unit
 
   val mcast_leave
     :  ?ifname:string
@@ -580,7 +583,8 @@ module Socket : sig
       For similar functionality when using multicast, see
       {!Core_unix.mcast_set_ifname}. *)
   val bind_to_interface_exn
-    : (([ `Unconnected ], Address.t) t -> Linux_ext.Bound_to_interface.t -> unit) Or_error.t
+    : (([ `Unconnected ], Address.t) t -> Linux_ext.Bound_to_interface.t -> unit)
+        Or_error.t
 end
 
 val bind_to_interface_exn : (Fd.t -> Linux_ext.Bound_to_interface.t -> unit) Or_error.t
@@ -646,11 +650,7 @@ module Addr_info : sig
     | AI_PASSIVE
   [@@deriving bin_io, sexp]
 
-  val get
-    :  ?service:string
-    -> host:string
-    -> getaddrinfo_option list
-    -> t list Deferred.t
+  val get : ?service:string -> host:string -> getaddrinfo_option list -> t list Deferred.t
 end
 
 module Name_info : sig
@@ -686,7 +686,7 @@ module Error = Unix.Error
 exception Unix_error of Error.t * string * string
 
 module Terminal_io : sig
-  type t = Caml.Unix.terminal_io =
+  type t = Caml_unix.terminal_io =
     { mutable c_ignbrk : bool (** Ignore the break condition. *)
     ; mutable c_brkint : bool (** Signal interrupt on break condition. *)
     ; mutable c_ignpar : bool (** Ignore characters with parity errors. *)
@@ -731,7 +731,7 @@ module Terminal_io : sig
     ; mutable c_vstop : char (** Stop character (usually ctrl-S). *)
     }
 
-  type setattr_when = Caml.Unix.setattr_when =
+  type setattr_when = Caml_unix.setattr_when =
     | TCSANOW
     | TCSADRAIN
     | TCSAFLUSH
@@ -742,7 +742,7 @@ end
 
 (** Structure of entries in the [passwd] database. *)
 module Passwd : sig
-  type t = Core.Unix.Passwd.t =
+  type t = Core_unix.Passwd.t =
     { name : string
     ; passwd : string
     ; uid : int
@@ -761,7 +761,7 @@ end
 
 (** Structure of entries in the [groups] database. *)
 module Group : sig
-  type t = Core.Unix.Group.t =
+  type t = Core_unix.Group.t =
     { name : string
     ; passwd : string
     ; gid : int
@@ -775,7 +775,7 @@ module Group : sig
   val getbygid_exn : int -> t Deferred.t
 end
 
-module Ifaddr = Core.Unix.Ifaddr
+module Ifaddr = Core_unix.Ifaddr
 
 (** Gets the information using the socket-based netlink interface, which can block; see
     https://www.infradead.org/~tgr/libnl/doc/core.html. *)

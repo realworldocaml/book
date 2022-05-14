@@ -24,6 +24,7 @@ type 'a create =
   -> ?prog_search_path:string list
   -> ?stdin:string
   -> ?working_dir:string
+  -> ?setpgid:Core_unix.Pgid.t
   -> prog:string
   -> args:string list
   -> unit
@@ -36,19 +37,21 @@ let create
       ?prog_search_path
       ?stdin:write_to_stdin
       ?working_dir
+      ?setpgid
       ~prog
       ~args
       ()
   =
   match%map
     In_thread.syscall ~name:"create_process_env" (fun () ->
-      Core.Unix.create_process_env
+      Core_unix.create_process_env
         ~prog
         ~args
         ~env
         ?working_dir
         ?prog_search_path
         ?argv0
+        ?setpgid
         ())
   with
   | Error exn -> Or_error.of_exn exn
@@ -93,8 +96,29 @@ let create
     Ok t
 ;;
 
-let create_exn ?argv0 ?buf_len ?env ?prog_search_path ?stdin ?working_dir ~prog ~args () =
-  create ?argv0 ?buf_len ?env ?prog_search_path ?stdin ?working_dir ~prog ~args ()
+let create_exn
+      ?argv0
+      ?buf_len
+      ?env
+      ?prog_search_path
+      ?stdin
+      ?working_dir
+      ?setpgid
+      ~prog
+      ~args
+      ()
+  =
+  create
+    ?argv0
+    ?buf_len
+    ?env
+    ?prog_search_path
+    ?stdin
+    ?working_dir
+    ?setpgid
+    ~prog
+    ~args
+    ()
   >>| ok_exn
 ;;
 
@@ -298,25 +322,41 @@ let run_expect_no_output
 
 let run_expect_no_output_exn = map_run run_expect_no_output ok_exn
 
-let send_signal t signal =
+let send_signal_compat t signal =
   (* We don't force the lazy (and therefore we don't reap the PID) here. We only do
      that if the user calls [wait] explicitly. *)
   if Lazy.is_val t.wait && Deferred.is_determined (Lazy.force t.wait)
-  then (* The process was reaped, so it's not safe to send signals to this pid. *)
-    ()
+  then
+    (* The process was reaped, so it's not safe to send signals to this pid. *)
+    `No_such_process
   else (
-    match Signal.send signal (`Pid t.pid) with
+    match Signal_unix.send signal (`Pid t.pid) with
     | `No_such_process ->
-      (* This should not be reachable: even for a zombie process (a process that has
-         already been terminated, but wasn't waited for), the [kill] system call returns
-         successfully. And we know that we haven't waited for this process because
+      (* Normally this should not be reachable: even for a zombie process (a process that
+         has already been terminated, but wasn't waited for), the [kill] system call
+         returns successfully. And we know that we haven't waited for this process because
          otherwise [t.wait] would have been determined.
 
-         Let's print a log, but not raise in case our analysis is wrong and this can
-         legitimately happen for some reason. After all, not doing anything is the
-         correct behavior if there is no such process. *)
-      Debug.log_string
-        "Bug? We know we never waited for this process, but [kill] says the process \
-         does not exist."
-    | `Ok -> ())
+         However, we do expose the [pid] so the users can and do sometimes call
+         [Unix.waitpid] on that pid, which can still lead to the race we are trying to
+         prevent.
+
+         The right fix would be to prevent users from calling [waitpid] on our pid. *)
+      `No_such_process
+    | `Ok -> `Ok)
+;;
+
+let send_signal_compat_exn t signal =
+  match (send_signal_compat t signal : [ `Ok | `No_such_process ]) with
+  | `Ok -> ()
+  | `No_such_process ->
+    failwithf
+      "Process.send_signal_compat_exn %s pid:%s"
+      (Signal.to_string signal)
+      (Pid.to_string t.pid)
+      ()
+;;
+
+let send_signal t signal =
+  ignore (send_signal_compat t signal : [ `Ok | `No_such_process ])
 ;;

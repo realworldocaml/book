@@ -15,11 +15,21 @@ let invalid_argf = Printf.invalid_argf
 
 module Array = struct
   external create : int -> 'a -> 'a array = "caml_make_vect"
+  external create_float_uninitialized : int -> float array = "caml_make_float_vect"
   external get : 'a array -> int -> 'a = "%array_safe_get"
   external length : 'a array -> int = "%array_length"
   external set : 'a array -> int -> 'a -> unit = "%array_safe_set"
   external unsafe_get : 'a array -> int -> 'a = "%array_unsafe_get"
   external unsafe_set : 'a array -> int -> 'a -> unit = "%array_unsafe_set"
+
+  external unsafe_blit
+    :  src:'a array
+    -> src_pos:int
+    -> dst:'a array
+    -> dst_pos:int
+    -> len:int
+    -> unit
+    = "caml_array_blit"
 end
 
 include Array
@@ -29,6 +39,12 @@ let max_length = Sys.max_array_length
 let create ~len x =
   try create len x with
   | Invalid_argument _ -> invalid_argf "Array.create ~len:%d: invalid length" len ()
+;;
+
+let create_float_uninitialized ~len =
+  try create_float_uninitialized len with
+  | Invalid_argument _ ->
+    invalid_argf "Array.create_float_uninitialized ~len:%d: invalid length" len ()
 ;;
 
 let append = Caml.Array.append
@@ -53,7 +69,8 @@ let mapi t ~f = Caml.Array.mapi t ~f
 let stable_sort t ~compare = Caml.Array.stable_sort t ~cmp:compare
 
 let swap t i j =
-  let tmp = t.(i) in
-  t.(i) <- t.(j);
-  t.(j) <- tmp
+  let elt_i = t.(i) in
+  let elt_j = t.(j) in
+  unsafe_set t i elt_j;
+  unsafe_set t j elt_i
 ;;

@@ -26,6 +26,8 @@ include Int_intf.S with type t := t
 module Overflow_exn : sig
   val ( + ) : t -> t -> t
   val ( - ) : t -> t -> t
+  val ( * ) : t -> t -> t
+  val ( / ) : t -> t -> t
   val abs : t -> t
   val neg : t -> t
 end

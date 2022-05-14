@@ -35,14 +35,14 @@ open! Import
 
 module type S = sig
   (** Serialization and comparison force the lazy message. *)
-  type t [@@deriving_inline compare, equal, hash, sexp]
+  type t [@@deriving_inline compare, equal, hash, sexp, sexp_grammar]
 
-  val compare : t -> t -> int
-  val equal : t -> t -> bool
-  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+  include Ppx_compare_lib.Comparable.S with type t := t
+  include Ppx_compare_lib.Equal.S with type t := t
+  include Ppx_hash_lib.Hashable.S with type t := t
+  include Sexplib0.Sexpable.S with type t := t
 
-  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -73,6 +73,7 @@ module type S = sig
       will only be called at an undetermined later point. *)
 
   val of_lazy : string Lazy.t -> t
+  val of_lazy_sexp : Sexp.t Lazy.t -> t
   val of_thunk : (unit -> string) -> t
   val of_lazy_t : t Lazy.t -> t
 
@@ -99,6 +100,9 @@ module type S = sig
 
   (** Adds a sexp to the front. *)
   val tag_s : t -> tag:Sexp.t -> t
+
+  (** Adds a lazy sexp to the front. *)
+  val tag_s_lazy : t -> tag:Sexp.t Lazy.t -> t
 
   (** Adds a string and some other data in the form of an s-expression at the front. *)
   val tag_arg : t -> string -> 'a -> ('a -> Sexp.t) -> t
@@ -134,7 +138,7 @@ module type S = sig
       | With_backtrace of t * string (** The second argument is the backtrace *)
     [@@deriving_inline sexp_of]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
 
@@ -147,5 +151,5 @@ end
 module type Info = sig
   module type S = S
 
-  include S
+  include S (** @inline *)
 end

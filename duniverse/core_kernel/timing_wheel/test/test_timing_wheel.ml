@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 open! Timing_wheel
 
@@ -22,7 +22,7 @@ let show t = print_s [%sexp (t : _ t)]
 let gibi = 2. ** 30.
 let gibi_nanos float = float *. gibi |> Time_ns.Span.of_ns
 
-module Num_key_bits = struct
+module _ = struct
   open! Private.Num_key_bits
 
   let%test_unit _ = invariant zero
@@ -276,8 +276,7 @@ let create_config ?extend_to_max_num_bits ?level_bits ~alarm_precision () =
   Config.create
     ()
     ~alarm_precision:(alarm_precision |> Alarm_precision.of_span_floor_pow2_ns)
-    ?level_bits:
-      (Option.map level_bits ~f:(Level_bits.create_exn ?extend_to_max_num_bits))
+    ?level_bits:(Option.map level_bits ~f:(Level_bits.create_exn ?extend_to_max_num_bits))
 ;;
 
 let%expect_test "[Config.create] with negative alarm precision" =
@@ -290,8 +289,7 @@ let%expect_test "[Config.create] with negative alarm precision" =
 ;;
 
 let%expect_test "[Config.create] with zero alarm precision" =
-  require_does_raise [%here] (fun () ->
-    create_config ~alarm_precision:(gibi_nanos 0.) ());
+  require_does_raise [%here] (fun () -> create_config ~alarm_precision:(gibi_nanos 0.) ());
   [%expect
     {|
     ("[Alarm_precision.of_span_floor_pow2_ns] got non-positive span" (span 0s)) |}]
@@ -966,10 +964,7 @@ let%expect_test "[iter]" =
   show_count ();
   [%expect {|
       9 |}];
-  advance_clock_to_interval_num
-    t
-    ~to_:(Interval_num.of_int num_elts)
-    ~handle_fired:ignore;
+  advance_clock_to_interval_num t ~to_:(Interval_num.of_int num_elts) ~handle_fired:ignore;
   show_count ();
   [%expect {|
       0 |}]
@@ -1137,11 +1132,7 @@ let%expect_test "min alarm at [max_time]" =
     List.iter [ 1; 2 ] ~f:(fun ns ->
       let alarm_precision = Time_ns.Span.scale_int Time_ns.Span.nanosecond ns in
       let t =
-        create_unit
-          ~alarm_precision
-          ~level_bits:[ 1 ]
-          ~extend_to_max_num_bits:true
-          ()
+        create_unit ~alarm_precision ~level_bits:[ 1 ] ~extend_to_max_num_bits:true ()
       in
       if advance_to_max then advance_clock t ~to_:max_time ~handle_fired:ignore;
       ignore (add t ~at:max_time () : _ Alarm.t);
@@ -1642,12 +1633,7 @@ let%expect_test "[advance_clock] fires alarms at the right time" =
             let alarm_separation = gibi_nanos s in
             List.iter [ 0.1; 0.5; 1.; 2.; 10. ] ~f:(fun s ->
               let advance_by = gibi_nanos s in
-              test
-                ~add
-                ~num_alarms
-                ~alarm_precision
-                ~alarm_separation
-                ~advance_by)))))
+              test ~add ~num_alarms ~alarm_precision ~alarm_separation ~advance_by)))))
 ;;
 
 let%expect_test "[add] and [advance_clock]" =
@@ -1788,8 +1774,8 @@ let%expect_test "[next_alarm_fires_at] with an alarm at [max_time]" =
          (value _))))))) |}]
 ;;
 
-let%expect_test "[fire_past_alarms] - all possible subsets of alarms in the first \
-                 bucket that fire"
+let%expect_test "[fire_past_alarms] - all possible subsets of alarms in the first bucket \
+                 that fire"
   =
   let start = Time_ns.epoch in
   let at sec = Time_ns.add start (gibi_nanos sec) in
@@ -1948,6 +1934,30 @@ let%expect_test "[max_alarm_time_in_min_interval]" =
   let _ = add_after (gibi_nanos 2.1) in
   let _ = add_after (gibi_nanos 3.9) in
   max_alarm_time_in_min_interval ();
+  [%expect {|
+    ("1970-01-01 00:00:02.25485783Z") |}]
+;;
+
+let%expect_test "[min_alarm_time_in_min_interval]" =
+  let t = create_unit () ~level_bits:[ 1; 1 ] in
+  let min_alarm_time_in_min_interval () =
+    print_s [%sexp (min_alarm_time_in_min_interval t : Time_ns.t option)]
+  in
+  min_alarm_time_in_min_interval ();
+  [%expect {|
+    () |}];
+  let add_after span = add t ~at:(Time_ns.add (now t) span) ignore in
+  let a = add_after (gibi_nanos 0.5) in
+  min_alarm_time_in_min_interval ();
+  [%expect {|
+    ("1970-01-01 00:00:00.536870912Z") |}];
+  remove t a;
+  min_alarm_time_in_min_interval ();
+  [%expect {|
+    () |}];
+  let _ = add_after (gibi_nanos 2.1) in
+  let _ = add_after (gibi_nanos 3.9) in
+  min_alarm_time_in_min_interval ();
   [%expect {|
     ("1970-01-01 00:00:02.25485783Z") |}]
 ;;

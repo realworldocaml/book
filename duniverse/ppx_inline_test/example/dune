@@ -1,2 +1,2 @@
-(library (name ppx_inline_test_example_lib) (libraries core)
+(library (name ppx_inline_test_example_lib) (libraries core core_unix)
  (preprocess (pps ppx_jane)))

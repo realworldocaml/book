@@ -9,7 +9,10 @@ open! Import
 
 module Export = struct
   (** [Continue_or_stop.t] is used by the [f] argument to [fold_until] in order to
-      indicate whether folding should continue, or stop early. *)
+      indicate whether folding should continue, or stop early.
+
+      @canonical Base.Container.Continue_or_stop
+  *)
   module Continue_or_stop = struct
     type ('a, 'b) t =
       | Continue of 'a
@@ -19,6 +22,7 @@ end
 
 include Export
 
+(** @canonical Base.Container.Summable *)
 module type Summable = sig
   type t
 
@@ -30,7 +34,9 @@ module type Summable = sig
   val ( + ) : t -> t -> t
 end
 
-(** Signature for monomorphic container, e.g., string. *)
+(** Signature for monomorphic container - a container for a specific element type, e.g.,
+    string, which is a container of characters ([type elt = char]) and never of anything
+    else. *)
 module type S0 = sig
   type t
   type elt
@@ -531,9 +537,7 @@ module type Make0_arg = sig
 
   type t
 
-  val fold : t -> init:'accum -> f:('accum -> Elt.t -> 'accum) -> 'accum
-  val iter : [ `Define_using_fold | `Custom of t -> f:(Elt.t -> unit) -> unit ]
-  val length : [ `Define_using_fold | `Custom of t -> int ]
+  include Make_gen_arg with type 'a t := t and type 'a elt := Elt.t
 end
 
 module type Container = sig
@@ -632,4 +636,7 @@ module type Container = sig
   module Make (T : Make_arg) : S1 with type 'a t := 'a T.t
 
   module Make0 (T : Make0_arg) : S0 with type t := T.t and type elt := T.Elt.t
+
+  module Make_gen (T : Make_gen_arg) :
+    Generic with type 'a t := 'a T.t and type 'a elt := 'a T.elt
 end

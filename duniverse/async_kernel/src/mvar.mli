@@ -19,7 +19,7 @@
     [value_available].  This way the natural batch size is passed between the two
     sub-systems with minimal overhead. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type ('a, -'phantom) t [@@deriving sexp_of]

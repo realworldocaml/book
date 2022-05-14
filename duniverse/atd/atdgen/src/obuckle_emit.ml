@@ -1,5 +1,6 @@
 open Atd.Import
 open Indent
+module Json = Atd.Json
 
 type param =
   { deref

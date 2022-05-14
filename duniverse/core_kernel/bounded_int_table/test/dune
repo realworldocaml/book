@@ -1,2 +1,2 @@
 (library (name bounded_int_table_test) (libraries bounded_int_table)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (preprocess (pps ppx_jane)))

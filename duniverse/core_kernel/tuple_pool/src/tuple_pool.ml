@@ -1,11 +1,11 @@
-open! Core_kernel
+open! Core
 open! Import
 open Tuple_pool_intf
 module Tuple_type = Tuple_type
 
 let failwiths = Error.failwiths
 let phys_equal = Caml.( == )
-let arch_sixtyfour = Sys.word_size = 64
+let arch_sixtyfour = Sys.word_size_in_bits = 64
 
 module Int = struct
   let num_bits = Int.num_bits
@@ -1112,8 +1112,7 @@ module Debug (Pool : S) = struct
   ;;
 
   let debug_get name f t pointer =
-    debug name [ t ] pointer [%sexp_of: _ Pointer.t] [%sexp_of: _] (fun () ->
-      f t pointer)
+    debug name [ t ] pointer [%sexp_of: _ Pointer.t] [%sexp_of: _] (fun () -> f t pointer)
   ;;
 
   let get t pointer slot = debug_get "get" get t pointer slot

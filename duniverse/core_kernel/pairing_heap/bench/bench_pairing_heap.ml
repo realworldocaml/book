@@ -1,7 +1,7 @@
-open! Core_kernel
+open! Core
 open! Pairing_heap
 
-let%bench_fun ("pop_insert_with_existing_heap"[@indexed
+let%bench_fun ("pop_insert_with_existing_heap" [@indexed
                  initial_size
                  = [ 1; 100; 10_000; 1_000_000 ]])
   =

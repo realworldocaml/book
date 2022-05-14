@@ -2,159 +2,236 @@ open Base
 open Ppxlib
 open Ast_builder.Default
 
-module Part = struct
+module Where = struct
   type t =
-    | String of string loc
-    | Expr of
-        { expr : string loc
-        ; converter : string loc option
-        }
+    | Imprecise of Location.t
+    | Precise of { mutable position : position }
+
+  let is_precise = function
+    | Imprecise _ -> false
+    | Precise _ -> true
+  ;;
+
+  let advance position char =
+    let pos_cnum = position.pos_cnum + 1 in
+    match char with
+    | '\n' ->
+      { position with pos_lnum = position.pos_lnum + 1; pos_bol = pos_cnum; pos_cnum }
+    | _ -> { position with pos_cnum }
+  ;;
+
+  let skip t string =
+    match t with
+    | Imprecise _ -> ()
+    | Precise at ->
+      for pos = 0 to String.length string - 1 do
+        at.position <- advance at.position string.[pos]
+      done
+  ;;
+
+  let loc_start = function
+    | Imprecise loc -> loc.loc_start
+    | Precise { position } -> position
+  ;;
+
+  let loc_end = function
+    | Imprecise loc -> loc.loc_end
+    | Precise { position } -> position
+  ;;
+
+  let skip_with_loc t string =
+    let loc_start = loc_start t in
+    skip t string;
+    let loc_end = loc_end t in
+    { loc_ghost = true; loc_start; loc_end }
+  ;;
+
+  let has_escapes ~loc ~string ~delimiter =
+    match delimiter with
+    | Some _ -> false
+    | None ->
+      let unescaped_len = 1 + String.length string + 1 in
+      let actual_len = loc.loc_end.pos_cnum - loc.loc_start.pos_cnum in
+      unescaped_len <> actual_len
+  ;;
+
+  let literal_prefix ~delimiter =
+    match delimiter with
+    | None -> "\""
+    | Some id -> Printf.sprintf "{%s|" id
+  ;;
+
+  let create ~loc ~string ~delimiter =
+    if has_escapes ~loc ~string ~delimiter
+    then Imprecise { loc with loc_ghost = true }
+    else (
+      let t = Precise { position = loc.loc_start } in
+      skip t (literal_prefix ~delimiter);
+      t)
+  ;;
 end
 
-(** [relative_position ~base s ~offset] computes the absolute position of [offset] in the
-    string [s] assuming the beginning of the string is at position [base] *)
-let relative_position ~base:pos s ~offset =
-  String.foldi s ~init:pos ~f:(fun i (pos : position) cur ->
-    if i >= offset
-    then pos
-    else (
-      match cur with
-      | '\n' ->
-        { pos with
-          pos_lnum = pos.pos_lnum + 1
-        ; pos_bol = pos.pos_cnum + 1
-        ; pos_cnum = pos.pos_cnum + 1
-        }
-      | _ -> { pos with pos_cnum = pos.pos_cnum + 1 }))
+let add_literal string ~where ~start ~until ~acc =
+  if start >= until
+  then acc
+  else (
+    let literal = String.sub string ~pos:start ~len:(until - start) in
+    let loc = Where.skip_with_loc where literal in
+    estring ~loc literal :: acc)
 ;;
 
-(** [relative_location ~base ~start ~end_] compute the absolute location of the relative
-    location \[start end_\) in the string [base.txt] *)
-let relative_location ~base:{ loc; txt } ~start ~end_ =
-  { loc with
-    loc_start = relative_position ~base:loc.loc_start txt ~offset:start
-  ; loc_end = relative_position ~base:loc.loc_start txt ~offset:end_
+let set_locs loc =
+  object
+    inherit Ast_traverse.map
+    method! location _ = loc
+  end
+;;
+
+let parse_error ~loc ~name string =
+  Location.raise_errorf ~loc "invalid %s: %S" name string
+;;
+
+let parse_expression ~where ~loc ~name string =
+  let lexbuf = Lexing.from_string string in
+  lexbuf.lex_abs_pos <- loc.loc_start.pos_cnum;
+  lexbuf.lex_curr_p <- loc.loc_start;
+  match Parse.expression lexbuf with
+  | exception _ -> parse_error ~loc ~name string
+  | expr -> if Where.is_precise where then expr else (set_locs loc)#expression expr
+;;
+
+let parse_ident ~where ~loc ~name module_path =
+  (* We want to parse a module path here, such as [Core.Int]. Whitespace, comments, etc.
+     have been allowed here historically.
+
+     Parsing a module path using [Longident.parse] would be too restrictive and disallow
+     whitespace, comments, etc.
+
+     Parsing [module_path ^ ".to_string"] assigns locations incorrectly because of the
+     synthetic suffix.
+
+     So we parse [module_path] as an expression. A valid module path, used in an
+     expression context, looks like a nullary variant constructor. So we convert nullary
+     variant constructors to module paths, and reject all other expressions. *)
+  match parse_expression ~where ~loc ~name module_path with
+  | { pexp_desc = Pexp_construct (ident, None); _ } ->
+    pexp_ident ~loc { ident with txt = Ldot (ident.txt, "to_string") }
+  | _ -> parse_error ~loc ~name module_path
+;;
+
+let parse_body ~where string =
+  let loc = Where.skip_with_loc where string in
+  parse_expression ~where ~loc ~name:"#{...} expression" string
+;;
+
+let parse_module_path ~where string =
+  let loc = Where.skip_with_loc where string in
+  parse_ident ~where ~loc ~name:"%{...} module path" string
+;;
+
+let parse_pad_length ~where string =
+  let loc = Where.skip_with_loc where string in
+  parse_expression ~where ~loc ~name:"#{...} pad length" string
+;;
+
+let add_interpreted string ~where ~start ~until ~acc =
+  Where.skip where "%{";
+  let loc_start = Where.loc_start where in
+  let expression =
+    let string = String.sub string ~pos:start ~len:(until - start) in
+    let value, module_path, pad_length =
+      match String.rsplit2 string ~on:'#' with
+      | None ->
+        let value = parse_body ~where string in
+        value, None, None
+      | Some (body, formatting) ->
+        let body = parse_body ~where body in
+        Where.skip where "#";
+        let module_path, pad_length =
+          match String.rsplit2 formatting ~on:':' with
+          | None ->
+            let fn = parse_module_path ~where formatting in
+            Some fn, None
+          | Some (module_path, pad_length) ->
+            let fn =
+              if String.is_empty module_path
+              then None
+              else Some (parse_module_path ~where module_path)
+            in
+            Where.skip where ":";
+            let len = parse_pad_length ~where pad_length in
+            fn, Some len
+        in
+        body, module_path, pad_length
+    in
+    let unpadded =
+      match module_path with
+      | None -> fun ~loc:_ -> value
+      | Some fn -> fun ~loc -> pexp_apply ~loc fn [ Nolabel, value ]
+    in
+    match pad_length with
+    | None -> unpadded
+    | Some len ->
+      fun ~loc ->
+        let ex_var = gen_symbol ~prefix:"__string_exp" () in
+        let ex = evar ~loc ex_var in
+        let lenvar = gen_symbol ~prefix:"__string_len" () in
+        [%expr
+          let [%p pvar ~loc ex_var] = [%e unpadded ~loc] in
+          let [%p pvar ~loc lenvar] = Stdlib.String.length [%e ex] in
+          Stdlib.( ^ )
+            (Stdlib.String.make (Stdlib.max 0 ([%e len] - [%e evar ~loc lenvar])) ' ')
+            [%e ex]]
+  in
+  let loc_end = Where.loc_end where in
+  Where.skip where "}";
+  expression ~loc:{ loc_ghost = true; loc_start; loc_end } :: acc
+;;
+
+type interpreted =
+  { percent : int
+  ; lbrace : int
+  ; rbrace : int
   }
+
+let find_interpreted string ~where ~pos =
+  String.substr_index string ~pos ~pattern:"%{"
+  |> Option.map ~f:(fun percent ->
+    let lbrace = percent + 1 in
+    match String.substr_index string ~pos:(lbrace + 1) ~pattern:"}" with
+    | None ->
+      Where.skip where (String.sub string ~pos ~len:(percent - pos));
+      let loc = Where.skip_with_loc where "%{" in
+      Location.raise_errorf ~loc "unterminated %%{"
+    | Some rbrace -> { percent; lbrace; rbrace })
 ;;
 
-let to_parts (s : string loc) =
-  let string start end_ =
-    Part.String
-      { txt = String.sub s.txt ~pos:start ~len:(end_ - start)
-      ; loc = relative_location ~base:s ~start ~end_
-      }
-  in
-  let rec loop acc pos =
-    match String.substr_index ~pos s.txt ~pattern:"%{" with
-    | None -> string pos (String.length s.txt) :: acc
-    | Some start ->
-      let acc = string pos start :: acc in
-      let pos = start + 2 in
-      let end_ =
-        match String.index_from s.txt pos '}' with
-        | None -> Location.raise_errorf ~loc:s.loc "unterminated %%{"
-        | Some end_ -> end_
-      in
-      let string_expr = String.sub s.txt ~pos ~len:(end_ - pos) in
-      let acc =
-        match String.rsplit2 ~on:'#' string_expr with
-        | None ->
-          let loc = relative_location ~base:s ~start:pos ~end_ in
-          Part.Expr { expr = { txt = string_expr; loc }; converter = None } :: acc
-        | Some (string_expr, conversion_module) ->
-          let conv =
-            { txt = conversion_module ^ ".to_string"
-            ; loc =
-                relative_location
-                  ~base:s
-                  ~start:(pos + String.length string_expr + 1)
-                  ~end_
-            }
-          in
-          Part.Expr
-            { expr =
-                { txt = string_expr
-                ; loc =
-                    relative_location
-                      ~base:s
-                      ~start:pos
-                      ~end_:(pos + String.length string_expr)
-                }
-            ; converter = Some conv
-            }
-          :: acc
-      in
-      loop acc (end_ + 1)
-  in
-  List.rev (loop [] 0)
+let rec expand_expressions_from string ~where ~pos ~acc =
+  match find_interpreted string ~where ~pos with
+  | None ->
+    let len = String.length string in
+    let acc = add_literal string ~where ~start:pos ~until:len ~acc in
+    List.rev acc
+  | Some { percent; lbrace; rbrace } ->
+    let acc = add_literal string ~where ~start:pos ~until:percent ~acc in
+    let acc = add_interpreted string ~where ~start:(lbrace + 1) ~until:rbrace ~acc in
+    expand_expressions_from string ~where ~pos:(rbrace + 1) ~acc
 ;;
 
-
-let to_parts { loc; txt = s } =
-  if String.equal loc.loc_start.pos_fname loc.loc_end.pos_fname
-  && Caml.Sys.file_exists loc.loc_start.pos_fname
-  then (
-    match
-      Stdio.In_channel.with_file loc.loc_start.pos_fname ~f:(fun ic ->
-        Stdio.In_channel.seek ic (Int64.of_int loc.loc_start.pos_cnum);
-        let buf_len = loc.loc_end.pos_cnum - loc.loc_start.pos_cnum in
-        let buf = Bytes.create buf_len in
-        Stdio.In_channel.really_input_exn ic ~buf ~pos:0 ~len:buf_len;
-        Bytes.to_string buf)
-    with
-    | s_from_file ->
-      let from_ast = to_parts { loc; txt = s } in
-      let from_file = to_parts { loc; txt = s_from_file } in
-      (* If we have access to the original file, we extract location from it. *)
-      (* Ideally, one should check that [from_file] and [from_ast] are equal (modulo
-         encoding in strings). Note that we only check the general shapes are equal.
-         The worse that can happen here is an error message with slightly incorrect
-         locations. *)
-      List.zip_exn from_ast from_file
-      |> List.map ~f:(fun ((x, y) : Part.t * Part.t) ->
-        match x, y with
-        | String { txt; _ }, String { txt = _raw_string; loc } ->
-          Part.String { txt; loc }
-        | Expr { expr = e1; converter = c1 }, Expr { expr = e2; converter = c2 } ->
-          assert (Bool.equal (Option.is_some c1) (Option.is_some c2));
-          Part.Expr
-            { expr = { e1 with loc = e2.loc }
-            ; converter =
-                Option.map2 c1 c2 ~f:(fun c1 c2 -> { c1 with loc = c2.loc })
-            }
-        | String _, Expr _ | Expr _, String _ -> assert false)
-    | exception _ -> to_parts { loc; txt = s })
-  else to_parts { loc; txt = s }
+let expand_expressions ~loc ~delimiter string =
+  let where = Where.create ~loc ~delimiter ~string in
+  expand_expressions_from string ~where ~pos:0 ~acc:[]
 ;;
 
-let parse (tokens : Part.t list) =
-  let parse_expression ~loc string =
-    let lexbuf = Lexing.from_string string in
-    lexbuf.lex_abs_pos <- loc.loc_start.pos_cnum;
-    lexbuf.lex_curr_p <- loc.loc_start;
-    Ppxlib.Parse.expression lexbuf
-  in
-  List.filter_map tokens ~f:(function
-    | Part.String { txt = ""; _ } -> None
-    | String { txt; loc } -> Some (estring ~loc txt)
-    | Expr { expr; converter } ->
-      let e = parse_expression ~loc:expr.loc expr.txt in
-      (match converter with
-       | None -> Some e
-       | Some conv ->
-         let conversion_module = parse_expression ~loc:conv.loc conv.txt in
-         Some
-           (eapply
-              ~loc:{ expr.loc with loc_end = conv.loc.loc_end }
-              conversion_module
-              [ e ])))
+let concatenate ~loc expressions =
+  match expressions with
+  | [] -> [%expr ""]
+  | [ expr ] -> [%expr ([%e expr] : Stdlib.String.t)]
+  | multiple -> [%expr Stdlib.String.concat "" [%e elist ~loc multiple]]
 ;;
 
-let concat ~loc = function
-  | [] -> estring ~loc ""
-  | [ x ] -> x
-  | _ :: _ :: _ as l ->
-    eapply ~loc (evar ~loc "Stdlib.String.concat") [ estring ~loc ""; elist ~loc l ]
+let expand ~expr_loc ~string_loc ~string ~delimiter =
+  concatenate ~loc:expr_loc (expand_expressions ~loc:string_loc ~delimiter string)
 ;;
 
 let () =
@@ -164,10 +241,10 @@ let () =
       [ Extension.declare
           "ppx_string.string"
           Extension.Context.expression
-          Ast_pattern.(pstr (pstr_eval (estring __') nil ^:: nil))
-          (fun ~loc:_ ~path:_ sym ->
-             let tokens = to_parts sym in
-             let exprs = parse tokens in
-             Merlin_helpers.hide_expression (concat ~loc:sym.loc exprs))
+          Ast_pattern.(
+            pstr (pstr_eval (pexp_constant (pconst_string __' __ __)) nil ^:: nil))
+          (fun ~loc:expr_loc ~path:_ { loc = string_loc; txt = string } _ delimiter ->
+             Merlin_helpers.hide_expression
+               (expand ~expr_loc ~string_loc ~string ~delimiter))
       ]
 ;;

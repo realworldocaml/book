@@ -1,0 +1,61 @@
+open Ppx_sexp_conv_lib
+open Conv;;
+
+#verbose true
+
+module No_keys = struct
+  type t = (unit[@sexp_grammar.tag]) [@@deriving sexp_grammar]
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: :: expected
+|}]
+
+module Key_literal_is_not_string = struct
+  type t = (unit[@sexp_grammar.tag 1 = [%sexp ""]]) [@@deriving sexp_grammar]
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type int but an expression was expected of type
+         string
+|}]
+
+module Key_ident_is_not_string = struct
+  let k = 1
+
+  type t = (unit[@sexp_grammar.tag k = [%sexp ""]]) [@@deriving sexp_grammar]
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type int but an expression was expected of type
+         string
+|}]
+
+module Value_literal_is_not_sexp = struct
+  type t = (unit[@sexp_grammar.tag "key" = 1]) [@@deriving sexp_grammar]
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type int but an expression was expected of type
+         Sexp.t
+|}]
+
+module Value_ident_is_not_sexp = struct
+  let v = 1
+
+  type t = (unit[@sexp_grammar.tag "key" = v]) [@@deriving sexp_grammar]
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type int but an expression was expected of type
+         Sexp.t
+|}]

@@ -1,0 +1,7 @@
+(library (name for_ppx_disable_unused_warnings_test) (libraries)
+ (preprocess (pps ppx_disable_unused_warnings)))
+
+(alias (name runtest) (deps example.ml.pp.output))
+
+(rule (targets example.pp.output) (deps (:first_dep example.pp))
+ (action (bash "cp %{first_dep} %{targets}}")))

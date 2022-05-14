@@ -86,8 +86,9 @@ struct hash_state
 void siphash_fold_uint64(value state, uint64_t i)
 {
   struct hash_state * h = (struct hash_state *) state;
+  unsigned round;
   h->v3 ^= i;
-  for (i = 0; i < cROUNDS; ++i)
+  for (round = 0; round < cROUNDS; ++round)
     SIPROUND(h);
   h->v0 ^= i;
 }
@@ -160,16 +161,22 @@ CAMLprim value siphash_fold_string(value st, value s)
   switch (left) {
   case 7:
     w |= ((uint64_t)in[6]) << 48;
+    /* fall through */
   case 6:
     w |= ((uint64_t)in[5]) << 40;
+    /* fall through */
   case 5:
     w |= ((uint64_t)in[4]) << 32;
+    /* fall through */
   case 4:
     w |= ((uint64_t)in[3]) << 24;
+    /* fall through */
   case 3:
     w |= ((uint64_t)in[2]) << 16;
+    /* fall through */
   case 2:
     w |= ((uint64_t)in[1]) << 8;
+    /* fall through */
   case 1:
     w |= ((uint64_t)in[0]);
     break;
@@ -191,10 +198,11 @@ CAMLprim value siphash_reset (value st, value key)
   char buffer[16];
   uint64_t k0, k1;
   unsigned i;
+  unsigned key_len = caml_string_length(key);
   /* initialize the buffer */
   memset(buffer, 0, 16);
   /* copy the first 16 chars of the key to the buffer */
-  for (i = 0; i < (caml_string_length(key) & 0xF); i++)
+  for (i = 0; i < (key_len > 16 ? 16 : key_len); i++)
     buffer[i] = Byte_u(key,i);
   /* initialize k0 and k1 */
   k0 = U8TO64_LE(buffer);

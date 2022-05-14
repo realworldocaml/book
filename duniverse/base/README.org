@@ -34,12 +34,6 @@ In order to access these values, one must use the =Caml= library,
 which re-exports them all through the toplevel name =Caml=:
 =Caml.String=, =Caml.print_string=, ...
 
-The recommended way to build code using Base is as follows:
-
-#+begin_src ocaml
-$ ocamlc -open Base
-#+end_src
-
 ** Differences between Base and the OCaml standard library
 
 Programmers who are used to the OCaml standard library should read
@@ -62,10 +56,10 @@ representation of values. Since these are often error-prone,
 i.e. they don't correspond to what the user expects, they are not
 exposed directly by Base.
 
-To use polymorphic comparison with Base, one should use the
-=Polymorphic_compare= module. The default comparison operators exposed
-by Base are the integer ones, just like the default arithmetic
-operators are the integer ones.
+To use polymorphic comparison with Base, one should use the =Poly=
+module. The default comparison operators exposed by Base are the
+integer ones, just like the default arithmetic operators are the
+integer ones.
 
 The recommended way to compare arbitrary complex data structures is to
 use the specific =compare= functions. For instance:
@@ -131,6 +125,12 @@ Things are not yet setup in the git repository to make it convenient
 to change types and update the generated code, but they will be setup
 soon.
 
+** OCaml Version Support
+
+Base will maintain compatibility with the latest OCaml release, and the three
+prior minor version releases. Because of this, there will be a lag of four
+minor versions before features introduced in the Stdlib will reach Base.
+
 ** Base coding rules
 
 There are a few coding rules across the code base that are enforced by
@@ -162,26 +162,55 @@ The Base specific coding rules are checked by =ppx_base_lint=, in the
 These checks are currently not run by =dune=, but it will soon get a
 =-dev= flag to run them automatically.
 
-** Roadmap
+** Sexp (de-)serializers
 
-Following is the current plan for a stable version 1 of Base.
+Most types in Base have ~sexp_of_t~ and ~t_of_sexp~ functions for converting
+between values of that type and their sexp representations.
 
-*** Add more integer types
+One pair of functions deserves special attention: ~String.sexp_of_t~ and
+~String.t_of_sexp~.  These functions have the same types as ~Sexp.of_string~ and
+~Sexp.to_string~ but very different behavior.
 
-Add support for ={,u}int{8,16,32,64}=. These are always useful when
-implementing binary protocols.
+~String.sexp_of_t~ and ~String.t_of_sexp~ are used to encode and decode strings
+"embedded" in a sexp representation. On the other hand, ~Sexp.of_string~ and
+~Sexp.to_string~ are used to encode and decode the textual form of
+s-expressions.
 
-Initially they should be implemented with C stubs and eventually we
-should propose their inclusion in the compiler.
+The following example demonstrates the two pairs of functions in action:
 
-*** 80 columns limit
+#+begin_src ocaml
+  open! Base
+  open! Stdio
 
-Currently lines in Base are limited to a maximum width of 90
-characters. To make things more standard, we should use an 80 columns
-limit.  The only thing needed for this is to extend the style checker
-to enforce a maximum line width.
+  (* Embed a string in a sexp *)
 
-*** Improve the generated code
+  let example_sexp : Sexp.t = List.sexp_of_t String.sexp_of_t [ "hello"; "world" ]
 
-Improve our code generators to produce code that looks more like
-hand-written code.
+  let () =
+    assert (Sexp.equal example_sexp (Sexp.List [ Sexp.Atom "hello"; Sexp.Atom "world" ]))
+  ;;
+
+  let () =
+    assert (
+      List.equal
+        String.equal
+        [ "hello"; "world" ]
+        (List.t_of_sexp String.t_of_sexp example_sexp))
+  ;;
+
+  (* Embed a sexp in text (string) *)
+
+  let write_sexp_to_file sexp =
+    Out_channel.write_all "/tmp/file" ~data:(Sexp.to_string example_sexp)
+  ;;
+
+  (* /tmp/file now contains:
+
+     {v
+       (hello world)
+     v} *)
+
+  let () =
+    assert (Sexp.equal example_sexp (Sexp.of_string (In_channel.read_all "/tmp/file")))
+  ;;
+#+end_src

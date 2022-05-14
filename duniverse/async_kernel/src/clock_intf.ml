@@ -4,10 +4,20 @@
     run in the future.  The Async scheduler is responsible for waking up at the right time
     to run the jobs. *)
 
-open Core_kernel
+open Core
 module Deferred = Deferred1
 
+module Or_timeout = struct
+  type 'a t =
+    [ `Result of 'a
+    | `Timeout
+    ]
+  [@@deriving compare, sexp_of]
+end
+
 module type Clock = sig
+  module Or_timeout = Or_timeout
+
   module Time : sig
     module Span : sig
       type t
@@ -27,12 +37,11 @@ module type Clock = sig
   val run_after : Time.Span.t -> ('a -> unit) -> 'a -> unit
 
   (** [at time] returns a deferred [d] that will become determined as soon as possible
-      after [time] *)
+      after [time]. *)
   val at : Time.t -> unit Deferred.t
 
   (** [after] is like [at], except that one specifies a time span rather than an absolute
-      time.  If you set up a lot of [after] events at the beginning of your program they
-      will trigger at the same time.  Use [Time.Span.randomize] to even them out. *)
+      time. *)
   val after : Time.Span.t -> unit Deferred.t
 
   (** [with_timeout span d] returns a deferred that will become determined after either
@@ -40,10 +49,7 @@ module type Clock = sig
       depending on which one succeeded first.  At the time the returned deferred becomes
       determined, both things may have happened, in which case [`Result] is given
       preference. *)
-  val with_timeout
-    :  Time.Span.t
-    -> 'a Deferred.t
-    -> [ `Timeout | `Result of 'a ] Deferred.t
+  val with_timeout : Time.Span.t -> 'a Deferred.t -> 'a Or_timeout.t Deferred.t
 
   (** Events provide variants of [run_at] and [run_after] with the ability to abort or
       reschedule an event that hasn't yet happened.  Once an event happens or is aborted,
@@ -197,7 +203,7 @@ module type Clock = sig
 
   (** [every' ?start ?stop span f] runs [f ()] every [span] amount of time starting when
       [start] becomes determined and stopping when [stop] becomes determined.  [every']
-      waits until the result of [f ()] becomes determined before waiting for the next
+      waits until the outcome of [f ()] becomes determined before waiting for the next
       [span].
 
       It is guaranteed that if [stop] becomes determined, even during evaluation of [f],
@@ -205,15 +211,18 @@ module type Clock = sig
 
       It is an error for [span] to be nonpositive.
 
-      With [~continue_on_error:true], when [f] asynchronously raises, iteration continues.
-      With [~continue_on_error:false], if [f] asynchronously raises, then iteration only
-      continues when the result of [f] becomes determined.
+      [continue_on_error] controls what should happen if [f] raises an exception.
+      With [~continue_on_error:false], iteration only continues if [f] successfully
+      returns a deferred and that deferred is determined.
+      With [~continue_on_error:true], iteration also continues if [f] raises an exception.
+      If [f] raises an exception asynchronously, this may cause us to proceed with the
+      next iteration while the previous call to [f] is still running.
 
-      Exceptions raised by [f] are always sent to monitor in effect when [every'] was
+      Exceptions raised by [f] are always sent to the monitor in effect when [every'] was
       called, even with [~continue_on_error:true].
 
       If [finished] is supplied, [every'] will fill it once all of the following become
-      determined: [start], [stop], and the result of the final call to [f]. *)
+      determined: [start], [stop], and the outcome of the final call to [f]. *)
   val every'
     :  ?start:unit Deferred.t (** default is [return ()] *)
     -> ?stop:unit Deferred.t (** default is [Deferred.never ()] *)
@@ -261,11 +270,21 @@ module type Clock = sig
     -> Time.Span.t
     -> (unit -> unit)
     -> unit
+
+  (** [duration_of f] invokes [f ()] and measures how long it takes from the invocation
+      to after the deferred is determined.
+
+      Note that the measurement is not exact; because it involves an additional map on the
+      deferred, the timing also includes the duration of jobs in the job queue when [f ()]
+      is determined. *)
+  val duration_of : (unit -> 'a Deferred.t) -> ('a * Time.Span.t) Deferred.t
 end
 
 (** [Clock_deprecated] is used in [Require_explicit_time_source] to create a clock
     module in which all functions are deprecated. *)
 module type Clock_deprecated = sig
+  module Or_timeout = Or_timeout
+
   module Time : sig
     module Span : sig
       type t
@@ -285,10 +304,7 @@ module type Clock_deprecated = sig
   val after : Time.Span.t -> unit Deferred.t
   [@@deprecated "[since 2016-02] Use [Time_source]"]
 
-  val with_timeout
-    :  Time.Span.t
-    -> 'a Deferred.t
-    -> [ `Timeout | `Result of 'a ] Deferred.t
+  val with_timeout : Time.Span.t -> 'a Deferred.t -> 'a Or_timeout.t Deferred.t
   [@@deprecated "[since 2016-02] Use [Time_source]"]
 
   module Event : sig
@@ -398,6 +414,9 @@ module type Clock_deprecated = sig
     -> (unit -> unit)
     -> unit
   [@@deprecated "[since 2016-02] Use [Time_source]"]
+
+  val duration_of : (unit -> 'a Deferred.t) -> ('a * Time.Span.t) Deferred.t
+  [@@deprecated "[since 2016-02] Use [Time_source]"]
 end
 
 (** @inline *)
@@ -405,7 +424,8 @@ include (
 struct
   [@@@warning "-3"]
 
-  module F1 (C : Clock) : Clock_deprecated = C
-  module F2 (C : Clock_deprecated) : Clock = C
+  module _ (C : Clock) : Clock_deprecated = C
+
+  module _ (C : Clock_deprecated) : Clock = C
 end :
 sig end)

@@ -13,31 +13,13 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (int_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_int : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "int" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ int_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "int.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (int_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_int : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = int_sexp_grammar
 
   [@@@end]
 
+  let hashable : t Hashable.t = { hash; compare; sexp_of_t }
   let compare x y = Int_replace_polymorphic_compare.compare x y
 
   let of_string s =
@@ -72,7 +54,7 @@ let minus_one = -1
 include T
 include Comparator.Make (T)
 
-include Comparable.Validate_with_zero (struct
+include Comparable.With_zero (struct
     include T
 
     let zero = zero
@@ -137,6 +119,11 @@ let clamp t ~min ~max =
   else Ok (clamp_unchecked t ~min ~max)
 ;;
 
+external to_int32_trunc : t -> int32 = "%int32_of_int"
+external of_int32_trunc : int32 -> t = "%int32_to_int"
+external of_int64_trunc : int64 -> t = "%int64_to_int"
+external of_nativeint_trunc : nativeint -> t = "%nativeint_to_int"
+
 let pred i = i - 1
 let succ i = i + 1
 let to_int i = i
@@ -148,26 +135,16 @@ let min_value = Caml.min_int
 let max_value_30_bits = 0x3FFF_FFFF
 let of_int32 = Conv.int32_to_int
 let of_int32_exn = Conv.int32_to_int_exn
-let of_int32_trunc = Conv.int32_to_int_trunc
 let to_int32 = Conv.int_to_int32
 let to_int32_exn = Conv.int_to_int32_exn
-let to_int32_trunc = Conv.int_to_int32_trunc
 let of_int64 = Conv.int64_to_int
 let of_int64_exn = Conv.int64_to_int_exn
-let of_int64_trunc = Conv.int64_to_int_trunc
 let to_int64 = Conv.int_to_int64
 let of_nativeint = Conv.nativeint_to_int
 let of_nativeint_exn = Conv.nativeint_to_int_exn
-let of_nativeint_trunc = Conv.nativeint_to_int_trunc
 let to_nativeint = Conv.int_to_nativeint
 let to_nativeint_exn = to_nativeint
 let abs x = abs x
-let ( + ) x y = x + y
-let ( - ) x y = x - y
-let ( * ) x y = x * y
-let ( / ) x y = x / y
-let neg x = -x
-let ( ~- ) = neg
 
 (* note that rem is not same as % *)
 let rem a b = a mod b
@@ -185,7 +162,6 @@ let ( ** ) b e = pow b e
 
 module Pow2 = struct
   open! Import
-  module Sys = Sys0
 
   let raise_s = Error.raise_s
 
@@ -246,8 +222,7 @@ module Pow2 = struct
   (** Hacker's Delight Second Edition p106 *)
   let floor_log2 i =
     if i <= 0
-    then
-      raise_s (Sexp.message "[Int.floor_log2] got invalid input" [ "", sexp_of_int i ]);
+    then raise_s (Sexp.message "[Int.floor_log2] got invalid input" [ "", sexp_of_int i ]);
     num_bits - 1 - clz i
   ;;
 
@@ -260,23 +235,24 @@ end
 
 include Pow2
 
-(* This is already defined by Comparable.Validate_with_zero, but Sign.of_int is
-   more direct. *)
 let sign = Sign.of_int
 let popcount = Popcount.int_popcount
 
 module Pre_O = struct
-  let ( + ) = ( + )
-  let ( - ) = ( - )
-  let ( * ) = ( * )
-  let ( / ) = ( / )
-  let ( ~- ) = ( ~- )
+  external ( + ) : int -> int -> int = "%addint"
+  external ( - ) : int -> int -> int = "%subint"
+  external ( * ) : int -> int -> int = "%mulint"
+  external ( / ) : int -> int -> int = "%divint"
+  external ( ~- ) : int -> int = "%negint"
+
   let ( ** ) = ( ** )
 
-  include (Int_replace_polymorphic_compare : Comparisons.Infix with type t := t)
+  include Int_replace_polymorphic_compare
 
   let abs = abs
-  let neg = neg
+
+  external neg : t -> t = "%negint"
+
   let zero = zero
   let of_int_exn = of_int_exn
 end
@@ -334,13 +310,16 @@ module O = struct
   ;;
 
   let ( // ) x y = to_float x /. to_float y
-  let ( land ) = ( land )
-  let ( lor ) = ( lor )
-  let ( lxor ) = ( lxor )
+
+  external ( land ) : int -> int -> int = "%andint"
+  external ( lor ) : int -> int -> int = "%orint"
+  external ( lxor ) : int -> int -> int = "%xorint"
+
   let lnot = lnot
-  let ( lsl ) = ( lsl )
-  let ( asr ) = ( asr )
-  let ( lsr ) = ( lsr )
+
+  external ( lsl ) : int -> int -> int = "%lslint"
+  external ( lsr ) : int -> int -> int = "%lsrint"
+  external ( asr ) : int -> int -> int = "%asrint"
 end
 
 include O

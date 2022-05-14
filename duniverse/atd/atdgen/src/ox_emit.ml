@@ -5,6 +5,7 @@
 
 open Atd.Import
 open Mapping
+module Json = Atd.Json
 
 type 'a expr = (Ocaml.Repr.t, 'a) Mapping.mapping
 type 'a def = (Ocaml.Repr.t, 'a) Mapping.def

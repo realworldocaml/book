@@ -227,6 +227,8 @@ and core_type_desc = Parsetree.core_type_desc =
                                                 - As the pld_type field of a label_declaration.
 
                                                 - As a core_type of a Ptyp_object node.
+
+                                                - As the pval_type field of a value_description.
                                              *)
   | Ptyp_package of package_type
   (* (module S) *)
@@ -252,12 +254,10 @@ and row_field_desc = Parsetree.row_field_desc =
      [`A of T1 & .. & Tn]   ( false, [T1;...Tn] )
      [`A of & T1 & .. & Tn] ( true,  [T1;...Tn] )
 
-     - The 2nd field is true if the tag contains a
+     - The 'bool' field is true if the tag contains a
      constant (empty) constructor.
      - '&' occurs when several types are used for the same constructor
      (see 4.2 in the manual)
-
-     - TODO: switch to a record representation, and keep location
   *)
   | Rinherit of core_type
 (* [ | t ] *)
@@ -299,10 +299,11 @@ and pattern_desc = Parsetree.pattern_desc =
 
      Invariant: n >= 2
   *)
-  | Ppat_construct of longident_loc * pattern option
+  | Ppat_construct of longident_loc * (string loc list * pattern) option
   (* C                None
-     C P              Some P
-     C (P1, ..., Pn)  Some (Ppat_tuple [P1; ...; Pn])
+     C P              Some ([], P)
+     C (P1, ..., Pn)  Some ([], Ppat_tuple [P1; ...; Pn])
+     C (type a b) P   Some ([a; b], P)
   *)
   | Ppat_variant of label * pattern option
   (* `A             (None)
@@ -325,7 +326,9 @@ and pattern_desc = Parsetree.pattern_desc =
   | Ppat_lazy of pattern
   (* lazy P *)
   | Ppat_unpack of string option loc
-  (* (module P)
+  (* (module P)        Some "P"
+     (module _)        None
+
      Note: (module P : S) is represented as
      Ppat_constraint(Ppat_unpack, Ptyp_package)
   *)
@@ -548,6 +551,7 @@ and label_declaration = Parsetree.label_declaration = {
 *)
 and constructor_declaration = Parsetree.constructor_declaration = {
   pcd_name : string loc;
+  pcd_vars : string loc list;
   pcd_args : constructor_arguments;
   pcd_res : core_type option;
   pcd_loc : location;
@@ -585,19 +589,21 @@ and extension_constructor = Parsetree.extension_constructor = {
   pext_attributes : attributes; (* C of ... [@id1] [@id2] *)
 }
 
+(* exception E *)
 and type_exception = Parsetree.type_exception = {
   ptyexn_constructor : extension_constructor;
   ptyexn_loc : location;
-  ptyexn_attributes : attributes;
+  ptyexn_attributes : attributes; (* ... [@@id1] [@@id2] *)
 }
 
 and extension_constructor_kind = Parsetree.extension_constructor_kind =
-  | Pext_decl of constructor_arguments * core_type option
+  | Pext_decl of string loc list * constructor_arguments * core_type option
   (*
-     | C of T1 * ... * Tn     ([T1; ...; Tn], None)
-     | C: T0                  ([], Some T0)
-     | C: T1 * ... * Tn -> T0 ([T1; ...; Tn], Some T0)
-  *)
+   | C of T1 * ... * Tn     ([], [T1; ...; Tn], None)
+   | C: T0                  ([], [], Some T0)
+   | C: T1 * ... * Tn -> T0 ([], [T1; ...; Tn], Some T0)
+   | C: 'a... . T1... -> T0 (['a;...]; [T1;...], Some T0)
+ *)
   | Pext_rebind of longident_loc
 (*
      | C = D
@@ -813,7 +819,8 @@ and signature_item_desc = Parsetree.signature_item_desc =
   | Psig_exception of type_exception
   (* exception C of T *)
   | Psig_module of module_declaration
-  (* module X : MT *)
+  (* module X = M
+     module X : MT *)
   | Psig_modsubst of module_substitution
   (* module X := M *)
   | Psig_recmodule of module_declaration list
@@ -821,6 +828,8 @@ and signature_item_desc = Parsetree.signature_item_desc =
   | Psig_modtype of module_type_declaration
   (* module type S = MT
      module type S *)
+  | Psig_modtypesubst of module_type_declaration
+  (* module type S :=  ...  *)
   | Psig_open of open_description
   (* open X *)
   | Psig_include of include_description
@@ -847,6 +856,7 @@ and module_substitution = Parsetree.module_substitution = {
   pms_name : string loc;
   pms_manifest : longident_loc;
   pms_attributes : attributes;
+  (* ... [@@id1] [@@id2] *)
   pms_loc : location;
 }
 
@@ -867,14 +877,19 @@ and 'a open_infos = 'a Parsetree.open_infos = {
   popen_loc : location;
   popen_attributes : attributes;
 }
-
-and open_description = longident_loc open_infos
 (* open! X - popen_override = Override (silences the 'used identifier
-   shadowing' warning)
+                             shadowing' warning)
    open  X - popen_override = Fresh
 *)
 
+and open_description = longident_loc open_infos
+(* open M.N
+   open M(N).O *)
+
 and open_declaration = module_expr open_infos
+(* open M.N
+   open M(N).O
+   open struct ... end *)
 
 and 'a include_infos = 'a Parsetree.include_infos = {
   pincl_mod : 'a;
@@ -896,6 +911,10 @@ and with_constraint = Parsetree.with_constraint =
      the name of the type_declaration. *)
   | Pwith_module of longident_loc * longident_loc
   (* with module X.Y = Z *)
+  | Pwith_modtype of longident_loc * module_type
+  (* with module type X.Y = Z *)
+  | Pwith_modtypesubst of longident_loc * module_type
+  (* with module type X.Y := sig end *)
   | Pwith_typesubst of longident_loc * type_declaration
   (* with type X.t := ..., same format as [Pwith_type] *)
   | Pwith_modsubst of longident_loc * longident_loc
@@ -1272,7 +1291,14 @@ class virtual map =
             Ppat_tuple a
         | Ppat_construct (a, b) ->
             let a = self#longident_loc a in
-            let b = self#option self#pattern b in
+            let b =
+              self#option
+                (fun (a, b) ->
+                  let a = self#list (self#loc self#string) a in
+                  let b = self#pattern b in
+                  (a, b))
+                b
+            in
             Ppat_construct (a, b)
         | Ppat_variant (a, b) ->
             let a = self#label a in
@@ -1600,13 +1626,14 @@ class virtual map =
 
     method constructor_declaration
         : constructor_declaration -> constructor_declaration =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
         let pcd_name = self#loc self#string pcd_name in
+        let pcd_vars = self#list (self#loc self#string) pcd_vars in
         let pcd_args = self#constructor_arguments pcd_args in
         let pcd_res = self#option self#core_type pcd_res in
         let pcd_loc = self#location pcd_loc in
         let pcd_attributes = self#attributes pcd_attributes in
-        { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes }
+        { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes }
 
     method constructor_arguments
         : constructor_arguments -> constructor_arguments =
@@ -1680,10 +1707,11 @@ class virtual map =
         : extension_constructor_kind -> extension_constructor_kind =
       fun x ->
         match x with
-        | Pext_decl (a, b) ->
-            let a = self#constructor_arguments a in
-            let b = self#option self#core_type b in
-            Pext_decl (a, b)
+        | Pext_decl (a, b, c) ->
+            let a = self#list (self#loc self#string) a in
+            let b = self#constructor_arguments b in
+            let c = self#option self#core_type c in
+            Pext_decl (a, b, c)
         | Pext_rebind a ->
             let a = self#longident_loc a in
             Pext_rebind a
@@ -2014,6 +2042,9 @@ class virtual map =
         | Psig_modtype a ->
             let a = self#module_type_declaration a in
             Psig_modtype a
+        | Psig_modtypesubst a ->
+            let a = self#module_type_declaration a in
+            Psig_modtypesubst a
         | Psig_open a ->
             let a = self#open_description a in
             Psig_open a
@@ -2098,6 +2129,14 @@ class virtual map =
             let a = self#longident_loc a in
             let b = self#longident_loc b in
             Pwith_module (a, b)
+        | Pwith_modtype (a, b) ->
+            let a = self#longident_loc a in
+            let b = self#module_type b in
+            Pwith_modtype (a, b)
+        | Pwith_modtypesubst (a, b) ->
+            let a = self#longident_loc a in
+            let b = self#module_type b in
+            Pwith_modtypesubst (a, b)
         | Pwith_typesubst (a, b) ->
             let a = self#longident_loc a in
             let b = self#type_declaration b in
@@ -2460,7 +2499,11 @@ class virtual iter =
         | Ppat_tuple a -> self#list self#pattern a
         | Ppat_construct (a, b) ->
             self#longident_loc a;
-            self#option self#pattern b
+            self#option
+              (fun (a, b) ->
+                self#list (self#loc self#string) a;
+                self#pattern b)
+              b
         | Ppat_variant (a, b) ->
             self#label a;
             self#option self#pattern b
@@ -2680,8 +2723,9 @@ class virtual iter =
         self#attributes pld_attributes
 
     method constructor_declaration : constructor_declaration -> unit =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
         self#loc self#string pcd_name;
+        self#list (self#loc self#string) pcd_vars;
         self#constructor_arguments pcd_args;
         self#option self#core_type pcd_res;
         self#location pcd_loc;
@@ -2732,9 +2776,10 @@ class virtual iter =
     method extension_constructor_kind : extension_constructor_kind -> unit =
       fun x ->
         match x with
-        | Pext_decl (a, b) ->
-            self#constructor_arguments a;
-            self#option self#core_type b
+        | Pext_decl (a, b, c) ->
+            self#list (self#loc self#string) a;
+            self#constructor_arguments b;
+            self#option self#core_type c
         | Pext_rebind a -> self#longident_loc a
 
     method class_type : class_type -> unit =
@@ -2956,6 +3001,7 @@ class virtual iter =
         | Psig_modsubst a -> self#module_substitution a
         | Psig_recmodule a -> self#list self#module_declaration a
         | Psig_modtype a -> self#module_type_declaration a
+        | Psig_modtypesubst a -> self#module_type_declaration a
         | Psig_open a -> self#open_description a
         | Psig_include a -> self#include_description a
         | Psig_class a -> self#list self#class_description a
@@ -3020,6 +3066,12 @@ class virtual iter =
         | Pwith_module (a, b) ->
             self#longident_loc a;
             self#longident_loc b
+        | Pwith_modtype (a, b) ->
+            self#longident_loc a;
+            self#module_type b
+        | Pwith_modtypesubst (a, b) ->
+            self#longident_loc a;
+            self#module_type b
         | Pwith_typesubst (a, b) ->
             self#longident_loc a;
             self#type_declaration b
@@ -3361,7 +3413,14 @@ class virtual ['acc] fold =
         | Ppat_tuple a -> self#list self#pattern a acc
         | Ppat_construct (a, b) ->
             let acc = self#longident_loc a acc in
-            let acc = self#option self#pattern b acc in
+            let acc =
+              self#option
+                (fun (a, b) acc ->
+                  let acc = self#list (self#loc self#string) a acc in
+                  let acc = self#pattern b acc in
+                  acc)
+                b acc
+            in
             acc
         | Ppat_variant (a, b) ->
             let acc = self#label a acc in
@@ -3636,8 +3695,9 @@ class virtual ['acc] fold =
         acc
 
     method constructor_declaration : constructor_declaration -> 'acc -> 'acc =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } acc ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } acc ->
         let acc = self#loc self#string pcd_name acc in
+        let acc = self#list (self#loc self#string) pcd_vars acc in
         let acc = self#constructor_arguments pcd_args acc in
         let acc = self#option self#core_type pcd_res acc in
         let acc = self#location pcd_loc acc in
@@ -3701,9 +3761,10 @@ class virtual ['acc] fold =
         : extension_constructor_kind -> 'acc -> 'acc =
       fun x acc ->
         match x with
-        | Pext_decl (a, b) ->
-            let acc = self#constructor_arguments a acc in
-            let acc = self#option self#core_type b acc in
+        | Pext_decl (a, b, c) ->
+            let acc = self#list (self#loc self#string) a acc in
+            let acc = self#constructor_arguments b acc in
+            let acc = self#option self#core_type c acc in
             acc
         | Pext_rebind a -> self#longident_loc a acc
 
@@ -3967,6 +4028,7 @@ class virtual ['acc] fold =
         | Psig_modsubst a -> self#module_substitution a acc
         | Psig_recmodule a -> self#list self#module_declaration a acc
         | Psig_modtype a -> self#module_type_declaration a acc
+        | Psig_modtypesubst a -> self#module_type_declaration a acc
         | Psig_open a -> self#open_description a acc
         | Psig_include a -> self#include_description a acc
         | Psig_class a -> self#list self#class_description a acc
@@ -4040,6 +4102,14 @@ class virtual ['acc] fold =
         | Pwith_module (a, b) ->
             let acc = self#longident_loc a acc in
             let acc = self#longident_loc b acc in
+            acc
+        | Pwith_modtype (a, b) ->
+            let acc = self#longident_loc a acc in
+            let acc = self#module_type b acc in
+            acc
+        | Pwith_modtypesubst (a, b) ->
+            let acc = self#longident_loc a acc in
+            let acc = self#module_type b acc in
             acc
         | Pwith_typesubst (a, b) ->
             let acc = self#longident_loc a acc in
@@ -4450,7 +4520,14 @@ class virtual ['acc] fold_map =
             (Ppat_tuple a, acc)
         | Ppat_construct (a, b) ->
             let a, acc = self#longident_loc a acc in
-            let b, acc = self#option self#pattern b acc in
+            let b, acc =
+              self#option
+                (fun (a, b) acc ->
+                  let a, acc = self#list (self#loc self#string) a acc in
+                  let b, acc = self#pattern b acc in
+                  ((a, b), acc))
+                b acc
+            in
             (Ppat_construct (a, b), acc)
         | Ppat_variant (a, b) ->
             let a, acc = self#label a acc in
@@ -4784,13 +4861,14 @@ class virtual ['acc] fold_map =
 
     method constructor_declaration
         : constructor_declaration -> 'acc -> constructor_declaration * 'acc =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } acc ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } acc ->
         let pcd_name, acc = self#loc self#string pcd_name acc in
+        let pcd_vars, acc = self#list (self#loc self#string) pcd_vars acc in
         let pcd_args, acc = self#constructor_arguments pcd_args acc in
         let pcd_res, acc = self#option self#core_type pcd_res acc in
         let pcd_loc, acc = self#location pcd_loc acc in
         let pcd_attributes, acc = self#attributes pcd_attributes acc in
-        ({ pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes }, acc)
+        ({ pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes }, acc)
 
     method constructor_arguments
         : constructor_arguments -> 'acc -> constructor_arguments * 'acc =
@@ -4867,10 +4945,11 @@ class virtual ['acc] fold_map =
           extension_constructor_kind * 'acc =
       fun x acc ->
         match x with
-        | Pext_decl (a, b) ->
-            let a, acc = self#constructor_arguments a acc in
-            let b, acc = self#option self#core_type b acc in
-            (Pext_decl (a, b), acc)
+        | Pext_decl (a, b, c) ->
+            let a, acc = self#list (self#loc self#string) a acc in
+            let b, acc = self#constructor_arguments b acc in
+            let c, acc = self#option self#core_type c acc in
+            (Pext_decl (a, b, c), acc)
         | Pext_rebind a ->
             let a, acc = self#longident_loc a acc in
             (Pext_rebind a, acc)
@@ -5219,6 +5298,9 @@ class virtual ['acc] fold_map =
         | Psig_modtype a ->
             let a, acc = self#module_type_declaration a acc in
             (Psig_modtype a, acc)
+        | Psig_modtypesubst a ->
+            let a, acc = self#module_type_declaration a acc in
+            (Psig_modtypesubst a, acc)
         | Psig_open a ->
             let a, acc = self#open_description a acc in
             (Psig_open a, acc)
@@ -5318,6 +5400,14 @@ class virtual ['acc] fold_map =
             let a, acc = self#longident_loc a acc in
             let b, acc = self#longident_loc b acc in
             (Pwith_module (a, b), acc)
+        | Pwith_modtype (a, b) ->
+            let a, acc = self#longident_loc a acc in
+            let b, acc = self#module_type b acc in
+            (Pwith_modtype (a, b), acc)
+        | Pwith_modtypesubst (a, b) ->
+            let a, acc = self#longident_loc a acc in
+            let b, acc = self#module_type b acc in
+            (Pwith_modtypesubst (a, b), acc)
         | Pwith_typesubst (a, b) ->
             let a, acc = self#longident_loc a acc in
             let b, acc = self#type_declaration b acc in
@@ -5760,7 +5850,14 @@ class virtual ['ctx] map_with_context =
             Ppat_tuple a
         | Ppat_construct (a, b) ->
             let a = self#longident_loc ctx a in
-            let b = self#option self#pattern ctx b in
+            let b =
+              self#option
+                (fun ctx (a, b) ->
+                  let a = self#list (self#loc self#string) ctx a in
+                  let b = self#pattern ctx b in
+                  (a, b))
+                ctx b
+            in
             Ppat_construct (a, b)
         | Ppat_variant (a, b) ->
             let a = self#label ctx a in
@@ -6089,13 +6186,14 @@ class virtual ['ctx] map_with_context =
 
     method constructor_declaration
         : 'ctx -> constructor_declaration -> constructor_declaration =
-      fun ctx { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+      fun ctx { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
         let pcd_name = self#loc self#string ctx pcd_name in
+        let pcd_vars = self#list (self#loc self#string) ctx pcd_vars in
         let pcd_args = self#constructor_arguments ctx pcd_args in
         let pcd_res = self#option self#core_type ctx pcd_res in
         let pcd_loc = self#location ctx pcd_loc in
         let pcd_attributes = self#attributes ctx pcd_attributes in
-        { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes }
+        { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes }
 
     method constructor_arguments
         : 'ctx -> constructor_arguments -> constructor_arguments =
@@ -6170,10 +6268,11 @@ class virtual ['ctx] map_with_context =
         : 'ctx -> extension_constructor_kind -> extension_constructor_kind =
       fun ctx x ->
         match x with
-        | Pext_decl (a, b) ->
-            let a = self#constructor_arguments ctx a in
-            let b = self#option self#core_type ctx b in
-            Pext_decl (a, b)
+        | Pext_decl (a, b, c) ->
+            let a = self#list (self#loc self#string) ctx a in
+            let b = self#constructor_arguments ctx b in
+            let c = self#option self#core_type ctx c in
+            Pext_decl (a, b, c)
         | Pext_rebind a ->
             let a = self#longident_loc ctx a in
             Pext_rebind a
@@ -6507,6 +6606,9 @@ class virtual ['ctx] map_with_context =
         | Psig_modtype a ->
             let a = self#module_type_declaration ctx a in
             Psig_modtype a
+        | Psig_modtypesubst a ->
+            let a = self#module_type_declaration ctx a in
+            Psig_modtypesubst a
         | Psig_open a ->
             let a = self#open_description ctx a in
             Psig_open a
@@ -6597,6 +6699,14 @@ class virtual ['ctx] map_with_context =
             let a = self#longident_loc ctx a in
             let b = self#longident_loc ctx b in
             Pwith_module (a, b)
+        | Pwith_modtype (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#module_type ctx b in
+            Pwith_modtype (a, b)
+        | Pwith_modtypesubst (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#module_type ctx b in
+            Pwith_modtypesubst (a, b)
         | Pwith_typesubst (a, b) ->
             let a = self#longident_loc ctx a in
             let b = self#type_declaration ctx b in
@@ -7112,7 +7222,14 @@ class virtual ['res] lift =
             self#constr "Ppat_tuple" [ a ]
         | Ppat_construct (a, b) ->
             let a = self#longident_loc a in
-            let b = self#option self#pattern b in
+            let b =
+              self#option
+                (fun (a, b) ->
+                  let a = self#list (self#loc self#string) a in
+                  let b = self#pattern b in
+                  self#tuple [ a; b ])
+                b
+            in
             self#constr "Ppat_construct" [ a; b ]
         | Ppat_variant (a, b) ->
             let a = self#label a in
@@ -7467,8 +7584,9 @@ class virtual ['res] lift =
           ]
 
     method constructor_declaration : constructor_declaration -> 'res =
-      fun { pcd_name; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+      fun { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
         let pcd_name = self#loc self#string pcd_name in
+        let pcd_vars = self#list (self#loc self#string) pcd_vars in
         let pcd_args = self#constructor_arguments pcd_args in
         let pcd_res = self#option self#core_type pcd_res in
         let pcd_loc = self#location pcd_loc in
@@ -7476,6 +7594,7 @@ class virtual ['res] lift =
         self#record
           [
             ("pcd_name", pcd_name);
+            ("pcd_vars", pcd_vars);
             ("pcd_args", pcd_args);
             ("pcd_res", pcd_res);
             ("pcd_loc", pcd_loc);
@@ -7563,10 +7682,11 @@ class virtual ['res] lift =
     method extension_constructor_kind : extension_constructor_kind -> 'res =
       fun x ->
         match x with
-        | Pext_decl (a, b) ->
-            let a = self#constructor_arguments a in
-            let b = self#option self#core_type b in
-            self#constr "Pext_decl" [ a; b ]
+        | Pext_decl (a, b, c) ->
+            let a = self#list (self#loc self#string) a in
+            let b = self#constructor_arguments b in
+            let c = self#option self#core_type c in
+            self#constr "Pext_decl" [ a; b; c ]
         | Pext_rebind a ->
             let a = self#longident_loc a in
             self#constr "Pext_rebind" [ a ]
@@ -7930,6 +8050,9 @@ class virtual ['res] lift =
         | Psig_modtype a ->
             let a = self#module_type_declaration a in
             self#constr "Psig_modtype" [ a ]
+        | Psig_modtypesubst a ->
+            let a = self#module_type_declaration a in
+            self#constr "Psig_modtypesubst" [ a ]
         | Psig_open a ->
             let a = self#open_description a in
             self#constr "Psig_open" [ a ]
@@ -8041,6 +8164,14 @@ class virtual ['res] lift =
             let a = self#longident_loc a in
             let b = self#longident_loc b in
             self#constr "Pwith_module" [ a; b ]
+        | Pwith_modtype (a, b) ->
+            let a = self#longident_loc a in
+            let b = self#module_type b in
+            self#constr "Pwith_modtype" [ a; b ]
+        | Pwith_modtypesubst (a, b) ->
+            let a = self#longident_loc a in
+            let b = self#module_type b in
+            self#constr "Pwith_modtypesubst" [ a; b ]
         | Pwith_typesubst (a, b) ->
             let a = self#longident_loc a in
             let b = self#type_declaration b in
@@ -8227,4 +8358,5 @@ class virtual ['res] lift =
     method cases : cases -> 'res = self#list self#case
   end
 
+[@@@end]
 [@@@end]

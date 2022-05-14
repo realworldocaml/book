@@ -16,28 +16,9 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (char_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_char : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "char" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ char_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "char.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (char_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_char : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = char_sexp_grammar
 
   [@@@end]
 
@@ -57,6 +38,8 @@ include Identifiable.Make (struct
 
     let module_name = "Base.Char"
   end)
+
+let pp fmt c = Caml.Format.fprintf fmt "%C" c
 
 (* Open replace_polymorphic_compare after including functor instantiations so they do not
    shadow its definitions. This is here so that efficient versions of the comparison
@@ -113,6 +96,34 @@ let get_digit_exn t =
 
 let get_digit t = if is_digit t then Some (get_digit_unsafe t) else None
 
+let is_hex_digit = function
+  | '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' -> true
+  | _ -> false
+;;
+
+let is_hex_digit_lower = function
+  | '0' .. '9' | 'a' .. 'f' -> true
+  | _ -> false
+;;
+
+let is_hex_digit_upper = function
+  | '0' .. '9' | 'A' .. 'F' -> true
+  | _ -> false
+;;
+
+let get_hex_digit_exn = function
+  | '0' .. '9' as t -> to_int t - to_int '0'
+  | 'a' .. 'f' as t -> to_int t - to_int 'a' + 10
+  | 'A' .. 'F' as t -> to_int t - to_int 'A' + 10
+  | t ->
+    Error.raise_s
+      (Sexp.message
+         "Char.get_hex_digit_exn: not a hexadecimal digit"
+         [ "char", sexp_of_t t ])
+;;
+
+let get_hex_digit t = if is_hex_digit t then Some (get_hex_digit_exn t) else None
+
 module O = struct
   let ( >= ) = ( >= )
   let ( <= ) = ( <= )
@@ -124,10 +135,11 @@ end
 
 module Caseless = struct
   module T = struct
-    type t = char [@@deriving_inline sexp]
+    type t = char [@@deriving_inline sexp, sexp_grammar]
 
-    let t_of_sexp = (char_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-    let sexp_of_t = (sexp_of_char : t -> Ppx_sexp_conv_lib.Sexp.t)
+    let t_of_sexp = (char_of_sexp : Sexplib0.Sexp.t -> t)
+    let sexp_of_t = (sexp_of_char : t -> Sexplib0.Sexp.t)
+    let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = char_sexp_grammar
 
     [@@@end]
 

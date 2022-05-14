@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Deferred_std
 module Deferred = Deferred1
 include Tail.Stream
@@ -231,7 +231,11 @@ let iter_durably' t ~f =
       >>> function
       | Nil -> Ivar.fill result ()
       | Cons (x, t) ->
-        Monitor.try_with ~rest:`Raise (fun () -> f x)
+        Monitor.try_with
+          ~run:
+            `Schedule
+          ~rest:`Raise
+          (fun () -> f x)
         >>> fun z ->
         loop t;
         (match z with

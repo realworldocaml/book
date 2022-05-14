@@ -12,8 +12,8 @@ module Code : sig
 end
 
 module Sig : sig
-  val mk_base_tp : string -> string -> unit
-  val mk_base : string -> unit
+  val mk_base_tp : ?deprecate:string -> string -> string -> unit
+  val mk_base : ?deprecate:string -> string -> unit
   val mk_base1_tp : string -> string -> unit
   val mk_base1 : string -> unit
   val mk_base2_tp : string -> string -> unit

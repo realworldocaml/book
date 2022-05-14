@@ -48,6 +48,7 @@ module Kind : sig
         | `Passive (** the result of [listen()] *)
         | `Active (** the result of [connect()] or [accept()] *)
         ]
+  [@@deriving sexp_of]
 
   val infer_using_stat : Unix.File_descr.t -> t Deferred.t
 end
@@ -69,14 +70,30 @@ val to_string : t -> string
     used within the Async implementation -- clients shouldn't need it unless they are
     mixing Async and non-Async code.
 
-    If [avoid_nonblock_if_possible], then Async will treat the file descriptor as blocking
-    if it can (more precisely, if it's not a bound socket). *)
+    If [avoid_setting_nonblock], then Async will not set nonblock flag on the file
+    descriptor. The fd will be used in accordance with the existing flag. *)
 val create
-  :  ?avoid_nonblock_if_possible:bool (** default is [false] *)
+  :  ?avoid_setting_nonblock:bool (** default is [false] *)
   -> Kind.t
   -> Unix.File_descr.t
   -> Info.t
   -> t
+
+(** [create_borrowed kind descr info ~f] borrows a file descriptor that is not managed by
+    Async, creates an [Fd.t] (see [create]), and runs [f] that uses that fd in async.
+
+    After [f] is finished (or raises an exception), it returns the file
+    descriptor to its original owner (leaving [Fd.t] in a closed state, but not closing
+    [descr]).
+
+    The caller must not close [descr] while [create_borrowed] is running. *)
+val create_borrowed
+  :  ?avoid_setting_nonblock:bool (** default is [false] *)
+  -> Kind.t
+  -> Unix.File_descr.t
+  -> Info.t
+  -> f:(t -> 'a Deferred.t)
+  -> 'a Deferred.t
 
 (** [kind t] returns the kind of file descriptor that [t] is. *)
 val kind : t -> Kind.t
@@ -188,7 +205,10 @@ val with_file_descr_deferred_exn
 
 (** [interruptible_ready_to t read_write ~interrupt] returns a deferred that will become
     determined when the file descriptor underlying [t] can be read from or written to
-    without blocking, or when [interrupt] becomes determined. *)
+    without blocking, or when [interrupt] becomes determined.
+
+    It's an error to make multiple concurrent calls to [*ready_to] functions on
+    the same file descriptor. *)
 val interruptible_ready_to
   :  t
   -> [ `Read | `Write ]
@@ -263,11 +283,7 @@ val syscall_in_thread
 
 (** [syscall_in_thread_exn] is like [syscall_in_thread], except it raises rather than
     return [`Already_closed] or [`Error]. *)
-val syscall_in_thread_exn
-  :  t
-  -> name:string
-  -> (Unix.File_descr.t -> 'a)
-  -> 'a Deferred.t
+val syscall_in_thread_exn : t -> name:string -> (Unix.File_descr.t -> 'a) -> 'a Deferred.t
 
 (** [of_in_channel] and [of_out_channel] create an fd from their underlying file
     descriptor. *)
@@ -300,6 +316,11 @@ val file_descr_exn : t -> Unix.File_descr.t
 val to_int_exn : t -> int
 
 (**/**)
+
+
+(** Run a function [f] with the expectation that it's going to redirect the file
+    descriptor, thereby possibly changing its kind. *)
+val expect_file_descr_redirection : Unix.File_descr.t -> f:(unit -> 'a) -> 'a
 
 module Private : sig
   (** [replace t kind] is for internal use only, by [Unix_syscalls].  It is used when one

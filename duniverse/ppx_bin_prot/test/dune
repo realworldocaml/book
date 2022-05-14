@@ -3,5 +3,5 @@
 
 (executables
  (names example test_runner mac_test microbench bin_prot_test_nonrec)
- (libraries bin_prot core core_bench oUnit)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (libraries bin_prot core_unix.command_unix core core_bench oUnit)
+ (preprocess (pps ppx_jane)))

@@ -1,5 +1,4 @@
 open! Import
-module A = Parser_automaton
 
 module type State = sig
   (** State of the parser *)
@@ -32,7 +31,12 @@ module type State = sig
   val stop : t -> unit
 end
 
-module type Stack = Kind.Stack
+module type Stack = sig
+  (** Parser stack. The stack is not in [state] for optimization purposes. *)
+  type t
+
+  val empty : t
+end
 
 module type S = sig
   (** Values produced by the parser *)
@@ -160,35 +164,19 @@ module type S_eager = sig
   end
 end
 
-module Mode (Kind : Kind.S) = struct
-  module type S = sig
-    type parsed_value
-
-    val mode : (Kind.state, Kind.Stack.t) A.mode
-    val make_value : (Kind.state, Kind.Stack.t) A.state -> Kind.Stack.t -> parsed_value
-  end
-end
-
-module Mode_eager (Kind : Kind.S) = struct
-  module type S = sig
-    type parsed_value
-
-    val make_value : (Kind.state, Kind.Stack.t) A.state -> Kind.Stack.t -> parsed_value
-  end
-end
-
 module type Parser = sig
-  module Mode = Mode
-  module Mode_eager = Mode_eager
-
   module type S = S
   module type S_eager = S_eager
   module type Stack = Stack
-  module type State = State
 
-  module Make (Kind : Kind.S) (Mode : Mode(Kind).S) :
-    S with type parsed_value = Mode.parsed_value
+  val make
+    :  ('state, 'stack) Automaton_state.Kind.t
+    -> ('state, 'stack) Automaton_state.Mode.t
+    -> (('state, 'stack) Automaton_state.t -> 'stack -> 'a)
+    -> (module S with type parsed_value = 'a)
 
-  module Make_eager (Kind : Kind.S) (Mode : Mode_eager(Kind).S) :
-    S_eager with type parsed_value = Mode.parsed_value
+  val make_eager
+    :  ('state, 'stack) Automaton_state.Kind.t
+    -> (('state, 'stack) Automaton_state.t -> 'stack -> 'a)
+    -> (module S_eager with type parsed_value = 'a)
 end

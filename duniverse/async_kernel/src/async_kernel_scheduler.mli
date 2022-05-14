@@ -3,7 +3,7 @@
     queue, along with some other bookkeeping, like advancing Async's clock to the current
     time. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type 'a with_options = ?monitor:Monitor.t -> ?priority:Priority.t -> 'a
@@ -154,16 +154,15 @@ val num_pending_jobs : unit -> int
 
 module Expert : sig
   val run_cycles_until_no_jobs_remain : unit -> unit
-
-  val set_on_start_of_cycle : (unit -> unit) -> unit
-  [@@deprecated "[since 2020-01] Use [run_every_cycle_start]"]
-
-  val set_on_end_of_cycle : (unit -> unit) -> unit
-  [@@deprecated "[since 2020-01] Use [run_every_cycle_end]"]
-
   val last_cycle_num_jobs : unit -> int
-  val run_every_cycle_start : (unit -> unit) -> unit
-  val run_every_cycle_end : (unit -> unit) -> unit
+  val run_every_cycle_start : Cycle_hook.t -> unit
+  val run_every_cycle_end : Cycle_hook.t -> unit
+  val add_every_cycle_start_hook : f:Cycle_hook.t -> Cycle_hook.Handle.t
+  val add_every_cycle_end_hook : f:Cycle_hook.t -> Cycle_hook.Handle.t
+  val remove_every_cycle_start_hook_exn : Cycle_hook.Handle.t -> unit
+  val remove_every_cycle_end_hook_exn : Cycle_hook.Handle.t -> unit
+  val with_execution_context : Execution_context.t -> (unit -> unit) -> unit
+  val with_execution_context1 : Execution_context.t -> f:('a -> unit) -> 'a -> unit
 end
 
 module Private = Scheduler

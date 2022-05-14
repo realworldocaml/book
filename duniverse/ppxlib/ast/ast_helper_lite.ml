@@ -17,7 +17,7 @@
 open Stdlib0
 module Location = Astlib.Location
 module Longident = Astlib.Longident
-open Astlib.Ast_412
+open Astlib.Ast_414
 
 [@@@warning "-9"]
 
@@ -171,7 +171,10 @@ module Pat = struct
   let constant ?loc ?attrs a = mk ?loc ?attrs (Ppat_constant a)
   let interval ?loc ?attrs a b = mk ?loc ?attrs (Ppat_interval (a, b))
   let tuple ?loc ?attrs a = mk ?loc ?attrs (Ppat_tuple a)
-  let construct ?loc ?attrs a b = mk ?loc ?attrs (Ppat_construct (a, b))
+
+  let construct ?loc ?attrs a b =
+    mk ?loc ?attrs (Ppat_construct (a, Option.map (fun b -> ([], b)) b))
+
   let variant ?loc ?attrs a b = mk ?loc ?attrs (Ppat_variant (a, b))
   let record ?loc ?attrs a b = mk ?loc ?attrs (Ppat_record (a, b))
   let array ?loc ?attrs a = mk ?loc ?attrs (Ppat_array a)
@@ -451,10 +454,11 @@ module Type = struct
       ptype_loc = loc;
     }
 
-  let constructor ?(loc = !default_loc) ?(attrs = []) ?(args = Pcstr_tuple [])
-      ?res name =
+  let constructor ?(loc = !default_loc) ?(attrs = []) ?(vars = [])
+      ?(args = Pcstr_tuple []) ?res name =
     {
       pcd_name = name;
+      pcd_vars = vars;
       pcd_args = args;
       pcd_res = res;
       pcd_loc = loc;
@@ -499,11 +503,11 @@ module Te = struct
       pext_attributes = attrs;
     }
 
-  let decl ?(loc = !default_loc) ?(attrs = []) ?(args = Pcstr_tuple []) ?res
-      name =
+  let decl ?(loc = !default_loc) ?(attrs = []) ?(vars = [])
+      ?(args = Pcstr_tuple []) ?res name =
     {
       pext_name = name;
-      pext_kind = Pext_decl (args, res);
+      pext_kind = Pext_decl (vars, args, res);
       pext_loc = loc;
       pext_attributes = attrs;
     }

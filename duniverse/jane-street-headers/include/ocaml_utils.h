@@ -13,9 +13,11 @@
 #include <caml/custom.h>
 #include <caml/unixsupport.h>
 #include <caml/threads.h>
+#include <caml/version.h>
 
 #include <stdint.h>
 
+#include "ocaml_utils_macros.h"
 #define XSTR(S) STR(S)
 #define STR(S) #S
 
@@ -60,5 +62,18 @@ extern const char* string_of_ocaml_string_option(value v);
 extern int int_of_ocaml_int_option(value v, int* i);
 
 extern const char** array_map(value array, const char* (*f__must_not_allocate)(value));
+
+#if OCAML_VERSION < 41200
+static inline value caml_alloc_some(value v)
+{
+  CAMLparam1(v);
+  value some;
+
+  some = caml_alloc_small(1, 0);
+  Field(some, 0) = v;
+
+  CAMLreturn(some);
+}
+#endif
 
 #endif /* OCAML_UTILS_H */

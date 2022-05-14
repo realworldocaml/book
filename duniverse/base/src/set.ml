@@ -113,7 +113,7 @@ module Tree0 = struct
   ;;
 
   (* We must call [f] with increasing indexes, because the bin_prot reader in
-     Core_kernel.Set needs it. *)
+     Core.Set needs it. *)
   let of_increasing_iterator_unchecked ~len ~f =
     let rec loop n ~f i =
       match n with
@@ -160,14 +160,12 @@ module Tree0 = struct
       with_return (fun r ->
         let increasing =
           match compare_elt array.(0) array.(1) with
-          | 0 ->
-            r.return (Or_error.error_string "of_sorted_array: duplicated elements")
+          | 0 -> r.return (Or_error.error_string "of_sorted_array: duplicated elements")
           | i -> i < 0
         in
         for i = 1 to Array.length array - 2 do
           match compare_elt array.(i) array.(i + 1) with
-          | 0 ->
-            r.return (Or_error.error_string "of_sorted_array: duplicated elements")
+          | 0 -> r.return (Or_error.error_string "of_sorted_array: duplicated elements")
           | i ->
             if Poly.( <> ) (i < 0) increasing
             then
@@ -214,7 +212,7 @@ module Tree0 = struct
     then (
       match r with
       | Empty -> assert false
-      | Leaf rv -> create (create l v Empty) rv Empty
+      | Leaf _ -> assert false (* because h(r)>h(l)+2 and h(leaf)=1 *)
       | Node (rl, rv, rr, _, _) ->
         if height rr >= height rl
         then create (create l v rl) rv rr
@@ -254,8 +252,8 @@ module Tree0 = struct
         if c = 0
         then raise Same
         else if c < 0
-        then bal (Leaf x) v Empty
-        else bal Empty v (Leaf x)
+        then create (Leaf x) v Empty
+        else create Empty v (Leaf x)
       | Node (l, v, r, _, _) ->
         let c = compare_elt x v in
         if c = 0 then raise Same else if c < 0 then bal (aux l) v r else bal l v (aux r)
@@ -290,11 +288,11 @@ module Tree0 = struct
   exception Set_min_elt_exn_of_empty_set [@@deriving_inline sexp]
 
   let () =
-    Ppx_sexp_conv_lib.Conv.Exn_converter.add
+    Sexplib0.Sexp_conv.Exn_converter.add
       [%extension_constructor Set_min_elt_exn_of_empty_set]
       (function
         | Set_min_elt_exn_of_empty_set ->
-          Ppx_sexp_conv_lib.Sexp.Atom "set.ml.Tree0.Set_min_elt_exn_of_empty_set"
+          Sexplib0.Sexp.Atom "set.ml.Tree0.Set_min_elt_exn_of_empty_set"
         | _ -> assert false)
   ;;
 
@@ -303,11 +301,11 @@ module Tree0 = struct
   exception Set_max_elt_exn_of_empty_set [@@deriving_inline sexp]
 
   let () =
-    Ppx_sexp_conv_lib.Conv.Exn_converter.add
+    Sexplib0.Sexp_conv.Exn_converter.add
       [%extension_constructor Set_max_elt_exn_of_empty_set]
       (function
         | Set_max_elt_exn_of_empty_set ->
-          Ppx_sexp_conv_lib.Sexp.Atom "set.ml.Tree0.Set_max_elt_exn_of_empty_set"
+          Sexplib0.Sexp.Atom "set.ml.Tree0.Set_max_elt_exn_of_empty_set"
         | _ -> assert false)
   ;;
 
@@ -322,7 +320,7 @@ module Tree0 = struct
   let fold_until t ~init ~f ~finish =
     let rec fold_until_helper ~f t acc =
       match t with
-      | Empty -> Continue_or_stop.Continue acc
+      | Empty -> Container.Continue_or_stop.Continue acc
       | Leaf value -> f acc value
       | Node (left, value, right, _, _) ->
         (match fold_until_helper ~f left acc with
@@ -714,8 +712,7 @@ module Tree0 = struct
   let binary_search t ~compare how v =
     match how with
     | `Last_strictly_less_than -> find_last_satisfying t ~f:(fun x -> compare x v < 0)
-    | `Last_less_than_or_equal_to ->
-      find_last_satisfying t ~f:(fun x -> compare x v <= 0)
+    | `Last_less_than_or_equal_to -> find_last_satisfying t ~f:(fun x -> compare x v <= 0)
     | `First_equal_to ->
       (match find_first_satisfying t ~f:(fun x -> compare x v >= 0) with
        | Some x as elt when compare x v = 0 -> elt
@@ -889,9 +886,7 @@ module Tree0 = struct
       | Empty -> accu
       | Leaf v -> if p v then add t v ~compare_elt, f else t, add f v ~compare_elt
       | Node (l, v, r, _, _) ->
-        part
-          (part (if p v then add t v ~compare_elt, f else t, add f v ~compare_elt) l)
-          r
+        part (part (if p v then add t v ~compare_elt, f else t, add f v ~compare_elt) l) r
     in
     part (Empty, Empty) s
   ;;
@@ -924,6 +919,10 @@ module Tree0 = struct
 
   let of_list lst ~compare_elt =
     List.fold lst ~init:empty ~f:(fun t x -> add t x ~compare_elt)
+  ;;
+
+  let of_sequence sequence ~compare_elt =
+    Sequence.fold sequence ~init:empty ~f:(fun t x -> add t x ~compare_elt)
   ;;
 
   let to_list s = elements s
@@ -1135,10 +1134,7 @@ module Accessors = struct
 
   let compare_direct t1 t2 = Tree0.compare (compare_elt t1) t1.tree t2.tree
   let equal t1 t2 = Tree0.equal t1.tree t2.tree ~compare_elt:(compare_elt t1)
-
-  let is_subset t ~of_ =
-    Tree0.is_subset t.tree ~of_:of_.tree ~compare_elt:(compare_elt t)
-  ;;
+  let is_subset t ~of_ = Tree0.is_subset t.tree ~of_:of_.tree ~compare_elt:(compare_elt t)
 
   let are_disjoint t1 t2 =
     Tree0.are_disjoint t1.tree t2.tree ~compare_elt:(compare_elt t1)
@@ -1180,11 +1176,7 @@ module Accessors = struct
   ;;
 
   let nth t i = Tree0.nth t.tree i
-
-  let remove_index t i =
-    like t (Tree0.remove_index t.tree i ~compare_elt:(compare_elt t))
-  ;;
-
+  let remove_index t i = like t (Tree0.remove_index t.tree i ~compare_elt:(compare_elt t))
   let sexp_of_t sexp_of_a _ t = Tree0.sexp_of_t sexp_of_a t.tree
 
   let to_sequence ?order ?greater_or_equal_to ?less_or_equal_to t =
@@ -1254,11 +1246,7 @@ module Tree = struct
   let map ~comparator t ~f = Tree0.map t ~f ~compare_elt:(ce comparator)
   let filter ~comparator t ~f = Tree0.filter t ~f ~compare_elt:(ce comparator)
   let filter_map ~comparator t ~f = Tree0.filter_map t ~f ~compare_elt:(ce comparator)
-
-  let partition_tf ~comparator t ~f =
-    Tree0.partition_tf t ~f ~compare_elt:(ce comparator)
-  ;;
-
+  let partition_tf ~comparator t ~f = Tree0.partition_tf t ~f ~compare_elt:(ce comparator)
   let iter2 ~comparator a b ~f = Tree0.iter2 a b ~f ~compare_elt:(ce comparator)
   let mem ~comparator t a = Tree0.mem t a ~compare_elt:(ce comparator)
   let add ~comparator t a = Tree0.add t a ~compare_elt:(ce comparator)
@@ -1280,6 +1268,7 @@ module Tree = struct
   ;;
 
   let of_list ~comparator l = Tree0.of_list l ~compare_elt:(ce comparator)
+  let of_sequence ~comparator s = Tree0.of_sequence s ~compare_elt:(ce comparator)
   let of_array ~comparator a = Tree0.of_array a ~compare_elt:(ce comparator)
 
   let of_sorted_array_unchecked ~comparator a =
@@ -1290,20 +1279,14 @@ module Tree = struct
     Tree0.of_increasing_iterator_unchecked ~len ~f
   ;;
 
-  let of_sorted_array ~comparator a =
-    Tree0.of_sorted_array a ~compare_elt:(ce comparator)
-  ;;
-
+  let of_sorted_array ~comparator a = Tree0.of_sorted_array a ~compare_elt:(ce comparator)
   let union_list ~comparator l = Tree0.union_list l ~to_tree:Fn.id ~comparator
 
   let stable_dedup_list ~comparator xs =
     Tree0.stable_dedup_list xs ~compare_elt:(ce comparator)
   ;;
 
-  let group_by ~comparator t ~equiv =
-    Tree0.group_by t ~equiv ~compare_elt:(ce comparator)
-  ;;
-
+  let group_by ~comparator t ~equiv = Tree0.group_by t ~equiv ~compare_elt:(ce comparator)
   let split ~comparator t a = Tree0.split t a ~compare_elt:(ce comparator)
   let nth t i = Tree0.nth t i
   let remove_index ~comparator t i = Tree0.remove_index t i ~compare_elt:(ce comparator)
@@ -1395,6 +1378,10 @@ module Using_comparator = struct
     { comparator; tree = Tree0.of_list l ~compare_elt:comparator.Comparator.compare }
   ;;
 
+  let of_sequence ~comparator s =
+    { comparator; tree = Tree0.of_sequence s ~compare_elt:comparator.Comparator.compare }
+  ;;
+
   let of_array ~comparator a =
     { comparator; tree = Tree0.of_array a ~compare_elt:comparator.Comparator.compare }
   ;;
@@ -1441,11 +1428,9 @@ let of_increasing_iterator_unchecked m ~len ~f =
   Using_comparator.of_increasing_iterator_unchecked ~comparator:(to_comparator m) ~len ~f
 ;;
 
-let of_sorted_array m a =
-  Using_comparator.of_sorted_array ~comparator:(to_comparator m) a
-;;
-
+let of_sorted_array m a = Using_comparator.of_sorted_array ~comparator:(to_comparator m) a
 let of_list m a = Using_comparator.of_list ~comparator:(to_comparator m) a
+let of_sequence m a = Using_comparator.of_sequence ~comparator:(to_comparator m) a
 let of_array m a = Using_comparator.of_array ~comparator:(to_comparator m) a
 
 let stable_dedup_list m a =
@@ -1466,7 +1451,7 @@ end
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 
   [@@@end]
 end
@@ -1474,11 +1459,19 @@ end
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
 
-  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+  val t_of_sexp : Sexplib0.Sexp.t -> t
 
   [@@@end]
 
   include Comparator.S with type t := t
+end
+
+module type M_sexp_grammar = sig
+  type t [@@deriving_inline sexp_grammar]
+
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+  [@@@end]
 end
 
 module type Compare_m = sig end
@@ -1497,8 +1490,14 @@ let m__t_of_sexp
   Using_comparator.t_of_sexp_direct ~comparator:Elt.comparator Elt.t_of_sexp sexp
 ;;
 
-let compare_m__t (module Elt : Compare_m) t1 t2 = compare_direct t1 t2
-let equal_m__t (module Elt : Equal_m) t1 t2 = equal t1 t2
+let m__t_sexp_grammar (type elt) (module Elt : M_sexp_grammar with type t = elt)
+  : (elt, _) t Sexplib0.Sexp_grammar.t
+  =
+  Sexplib0.Sexp_grammar.coerce (list_sexp_grammar Elt.t_sexp_grammar)
+;;
+
+let compare_m__t (module _ : Compare_m) t1 t2 = compare_direct t1 t2
+let equal_m__t (module _ : Equal_m) t1 t2 = equal t1 t2
 
 let hash_fold_m__t (type elt) (module Elt : Hash_fold_m with type t = elt) state =
   hash_fold_direct Elt.hash_fold_t state
@@ -1535,6 +1534,7 @@ module Poly = struct
 
   let of_sorted_array a = Using_comparator.of_sorted_array ~comparator a
   let of_list a = Using_comparator.of_list ~comparator a
+  let of_sequence a = Using_comparator.of_sequence ~comparator a
   let of_array a = Using_comparator.of_array ~comparator a
   let stable_dedup_list a = Using_comparator.stable_dedup_list ~comparator a
   let map a ~f = Using_comparator.map ~comparator a ~f

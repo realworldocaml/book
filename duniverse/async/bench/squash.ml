@@ -16,7 +16,7 @@ let deep_create () = ignore (deep 100 : unit Ivar.t)
 let deep_create_and_fill () = Ivar.fill (deep 100 : unit Ivar.t) ()
 
 let () =
-  Command.run
+  Command_unix.run
     (Bench.make_command
        [ (* Bench.Test.create ~name:"one-create" (fun () ->
           *   ignore (Ivar.create ()));

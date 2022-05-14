@@ -35,10 +35,10 @@ open T
 type ('a, 'b) t = T : ('a, 'a) t [@@deriving_inline sexp_of]
 
 val sexp_of_t
-  :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
-  -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+  :  ('a -> Sexplib0.Sexp.t)
+  -> ('b -> Sexplib0.Sexp.t)
   -> ('a, 'b) t
-  -> Ppx_sexp_conv_lib.Sexp.t
+  -> Sexplib0.Sexp.t
 
 [@@@end]
 
@@ -125,8 +125,8 @@ val tuple2 : ('a1, 'b1) t -> ('a2, 'b2) t -> ('a1 * 'a2, 'b1 * 'b2) t
     are equal from a proof that both types transformed by [M.t] are equal.
 
     OCaml has no built-in language feature to state that a type is injective, which is why
-    we have [module type Injective].  However, OCaml can infer that a type is injective,
-    and we can use this to match [Injective].  A typical implementation will look like
+    we have [module type Injective]. However, OCaml can infer that a type is injective,
+    and we can use this to match [Injective]. A typical implementation will look like
     this:
 
     {[
@@ -183,7 +183,7 @@ module Composition_preserves_injectivity (M1 : Injective) (M2 : Injective) :
 module Id : sig
   type 'a t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
 
   [@@@end]
 
@@ -192,8 +192,7 @@ module Id : sig
   module Uid : sig
     type t [@@deriving_inline hash]
 
-    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+    include Ppx_hash_lib.Hashable.S with type t := t
 
     [@@@end]
 

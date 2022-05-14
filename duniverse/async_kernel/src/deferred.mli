@@ -4,7 +4,7 @@
     at some point become determined with value v, and will henceforth always be determined
     with value v. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type +'a t = 'a Deferred1.t [@@deriving sexp_of]
@@ -67,8 +67,7 @@ val is_determined : 'a t -> bool
     In general, for deferreds that are allocated by [let%bind] to be garbage collected
     quickly, it is sufficient that the allocating bind be executed in tail-call position
     of the right-hand side of an outer bind. *)
-include
-  Monad with type 'a t := 'a t
+include Monad with type 'a t := 'a t
 
 module Infix : sig
   include Monad.Infix with type 'a t := 'a t
@@ -111,12 +110,10 @@ val don't_wait_for : unit t -> unit
 
 (** A [Choice.t] is used to produce an argument to [enabled] or [choose].  See below. *)
 module Choice : sig
-  type +'a t = 'a Deferred1.choice
+  type +'a t = 'a Deferred1.Choice.t
 
   val map : 'a t -> f:('a -> 'b) -> 'b t
 end
-
-type 'a choice = 'a Choice.t [@@deprecated "[since 2020-01] Use [Choice.t] instead."]
 
 val choice : 'a t -> ('a -> 'b) -> 'b Choice.t
 
@@ -179,7 +176,7 @@ val forever : 'state -> ('state -> 'state t) -> unit
 
 (** Useful for lifting values from the [Deferred.t] monad to the [Result.t Deferred.t]
     monad. *)
-val ok : 'a t -> ('a, _) Core_kernel.Result.t t
+val ok : 'a t -> ('a, _) Core.Result.t t
 
 (** {2 Deferred collections}
 

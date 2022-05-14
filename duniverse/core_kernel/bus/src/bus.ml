@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 
 module State = struct
   type t =
@@ -29,7 +29,7 @@ module On_subscription_after_first_write = struct
     | Allow
     | Allow_and_send_last_value
     | Raise
-  [@@deriving sexp_of]
+  [@@deriving enumerate, sexp_of]
 
   let allow_subscription_after_first_write = function
     | Allow -> true
@@ -371,9 +371,7 @@ let unsubscribe_assuming_valid_subscriber t (subscriber : _ Subscriber.t) =
   remove_subscriber t subscriber;
   if subscriber_index < last_subscriber_index
   then (
-    let last_subscriber =
-      Option_array.get_some_exn t.subscribers last_subscriber_index
-    in
+    let last_subscriber = Option_array.get_some_exn t.subscribers last_subscriber_index in
     remove_subscriber t last_subscriber;
     add_subscriber t last_subscriber ~at_subscribers_index:subscriber_index);
   t.num_subscribers <- t.num_subscribers - 1;
@@ -411,8 +409,7 @@ let[@cold] unsubscribe_all t =
 ;;
 
 let[@inline always] finish_write t =
-  if not (List.is_empty t.unsubscribes_during_write)
-  then unsubscribe_after_finish_write t;
+  if not (List.is_empty t.unsubscribes_during_write) then unsubscribe_after_finish_write t;
   match t.state with
   | Closed -> unsubscribe_all t
   | Ok_to_write -> assert false
@@ -436,23 +433,28 @@ let call_on_callback_raise t error =
 ;;
 
 let callback_raised t i exn =
-  let backtrace = Backtrace.Exn.most_recent () in
   (* [i] was incremented before the callback was called, so we have to subtract one
      here.  We do this here, rather than at the call site, because there are multiple
      call sites due to the optimizations needed to keep this zero-alloc. *)
   let subscriber = Option_array.get_some_exn t.subscribers (i - 1) in
   let error =
-    [%message
-      "Bus subscriber raised"
-        (exn : exn)
-        (backtrace : Backtrace.t)
-        (subscriber : _ Subscriber.t)]
-    |> [%of_sexp: Error.t]
+    match subscriber.extract_exn with
+    | true -> Error.of_exn exn
+    | false ->
+      (* This [Backtrace.Exn.most_recent ()] is intended to grab the backtrace of the [try
+         ... with]'s that call [callback_raised].  The call is here rather than earlier so
+         that we only do it when [subscriber.extract_exn = false]. *)
+      let backtrace = Backtrace.Exn.most_recent () in
+      [%message
+        "Bus subscriber raised"
+          (exn : exn)
+          (backtrace : Backtrace.t)
+          (subscriber : _ Subscriber.t)]
+      |> [%of_sexp: Error.t]
   in
   match subscriber.on_callback_raise with
   | None -> call_on_callback_raise t error
   | Some f ->
-    let error = if subscriber.extract_exn then Error.of_exn exn else error in
     (try f error with
      | exn ->
        let backtrace = Backtrace.Exn.most_recent () in
@@ -739,15 +741,11 @@ let subscribe_exn
     subscriber
 ;;
 
-let iter_exn t subscribed_from ~f =
+let iter_exn ?extract_exn t subscribed_from ~f =
   if not (can_subscribe t)
   then
-    failwiths
-      ~here:[%here]
-      "Bus.iter_exn called after first write"
-      t
-      [%sexp_of: (_, _) t];
-  ignore (subscribe_exn t subscribed_from ~f : _ Subscriber.t)
+    failwiths ~here:[%here] "Bus.iter_exn called after first write" t [%sexp_of: (_, _) t];
+  ignore (subscribe_exn ?extract_exn t subscribed_from ~f : _ Subscriber.t)
 ;;
 
 module Fold_arity = struct
@@ -765,6 +763,7 @@ module Fold_arity = struct
 end
 
 let fold_exn
+      ?extract_exn
       (type c f s)
       (t : (c, _) t)
       subscribed_from
@@ -775,13 +774,9 @@ let fold_exn
   let state = ref init in
   if not (can_subscribe t)
   then
-    failwiths
-      ~here:[%here]
-      "Bus.fold_exn called after first write"
-      t
-      [%sexp_of: (_, _) t];
-  let module A = Fold_arity in
+    failwiths ~here:[%here] "Bus.fold_exn called after first write" t [%sexp_of: (_, _) t];
   iter_exn
+    ?extract_exn
     t
     subscribed_from
     ~f:

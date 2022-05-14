@@ -4,4 +4,10 @@
 (library
  (name atd)
  (public_name atd)
- (libraries easy-format unix))
+ (libraries
+   re
+   easy-format
+   unix
+   yojson
+ )
+)

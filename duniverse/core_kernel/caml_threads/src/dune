@@ -1,0 +1,2 @@
+(library (name caml_threads) (public_name core_kernel.caml_threads)
+ (libraries threads) (preprocess no_preprocessing))

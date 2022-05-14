@@ -61,7 +61,9 @@ module type Parsexp = sig
 
     https://opensource.janestreet.com/standards/#private-submodules *)
   module Private : sig
+    module Automaton = Automaton
     module Automaton_stack = Automaton_stack
-    module Parser_automaton = Parser_automaton
+    module Automaton_state = Automaton_state
+    module Positions = Positions
   end
 end

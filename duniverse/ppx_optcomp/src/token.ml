@@ -9,8 +9,8 @@ module Directive = struct
            Elifdef | Elifndef
 
   let matches ~expected matched =
-      String.(=) expected matched ||
-      String.(=) ("optcomp." ^ expected) matched
+    String.(=) expected matched ||
+    String.(=) ("optcomp." ^ expected) matched
 
   (* not using [matches] here because I'm pretty sure the pattern matching
      compiler will make this faster than string equality. *)

@@ -1,2 +1,8 @@
-(library (name core_unix_linux_ext) (public_name core_unix.linux_ext)
-  (libraries core.linux_ext) (preprocess no_preprocessing))
+(library (name linux_ext) (public_name core_unix.linux_ext)
+ (libraries core_kernel.bounded_int_table core core_thread filename_unix
+  time_ns_unix)
+ (c_names linux_ext_stubs) (preprocessor_deps config.h)
+ (preprocess (pps ppx_jane)))
+
+(rule (targets config.h) (deps)
+ (action (bash "cp %{lib:jst-config:config.h} .")))

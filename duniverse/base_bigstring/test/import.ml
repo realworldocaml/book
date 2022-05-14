@@ -4,15 +4,15 @@ include Base_for_tests
 include Expect_test_helpers_core
 
 module Quickcheck = struct
-  include Core_kernel.Quickcheck
-  module Bool = Core_kernel.Bool
-  module Char = Core_kernel.Char
-  module Int = Core_kernel.Int
-  module Int32 = Core_kernel.Int32
-  module Int64 = Core_kernel.Int64
-  module List = Core_kernel.List
-  module Nativeint = Core_kernel.Nativeint
-  module String = Core_kernel.String
+  include Core.Quickcheck
+  module Bool = Core.Bool
+  module Char = Core.Char
+  module Int = Core.Int
+  module Int32 = Core.Int32
+  module Int64 = Core.Int64
+  module List = Core.List
+  module Nativeint = Core.Nativeint
+  module String = Core.String
 end
 
 module Core_kernel = struct end

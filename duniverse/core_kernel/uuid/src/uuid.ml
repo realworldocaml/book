@@ -8,11 +8,11 @@
 *)
 
 module Stable = struct
-  open Core_kernel.Core_kernel_stable
+  open Core.Core_stable
 
   module V1 = struct
     module T = struct
-      type t = string [@@deriving bin_io, compare, hash, sexp]
+      type t = string [@@deriving bin_io, compare, equal, hash, sexp]
 
       include (val Comparator.V1.make ~compare ~sexp_of_t)
     end
@@ -24,7 +24,7 @@ module Stable = struct
   end
 end
 
-open! Core_kernel
+open! Core
 
 module T = struct
   type t = string [@@deriving bin_io, compare, hash]
@@ -49,7 +49,7 @@ module T = struct
   ;;
 
   let set_version bytes ~version = Bytes.set bytes 14 version
-  let to_string = ident
+  let to_string = Fn.id
 
   (*{v
      xxxxxxxx-xxxx-3xxx-xxxx-xxxxxxxxxxxx
@@ -149,12 +149,17 @@ let invariant t = ignore (of_string t : t)
 let nil = "00000000-0000-0000-0000-000000000000"
 
 module Unstable = struct
-  type nonrec t = t [@@deriving bin_io, compare, hash, sexp]
+  type nonrec t = t [@@deriving bin_io, compare, equal, hash, sexp]
+  type nonrec comparator_witness = comparator_witness
+
+  let comparator = comparator
 end
 
-let to_string_hum t = if am_running_test then nil else to_string t
 let arg_type = Command.Arg_type.create of_string
-let sexp_of_t t = if am_running_test then sexp_of_t nil else sexp_of_t t
+
+let sexp_of_t t =
+  if am_running_test then [%sexp "<uuid-omitted-in-test>"] else [%sexp (t : t)]
+;;
 
 module Private = struct
   let create = create
@@ -163,12 +168,8 @@ module Private = struct
   let nil = nil
 end
 
-let create () = raise_s [%message "[Uuid.create] is deprecated"]
 let quickcheck_shrinker : t Quickcheck.Shrinker.t = Quickcheck.Shrinker.empty ()
-
-let quickcheck_observer : t Quickcheck.Observer.t =
-  Quickcheck.Observer.of_hash (module T)
-;;
+let quickcheck_observer : t Quickcheck.Observer.t = Quickcheck.Observer.of_hash (module T)
 
 let quickcheck_generator : t Quickcheck.Generator.t =
   let open Quickcheck.Generator.Let_syntax in

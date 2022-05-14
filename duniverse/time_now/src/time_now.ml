@@ -1,10 +1,8 @@
-[%%import
-  "config.h"]
+[%%import "config.h"]
 
 open! Base
 
-[%%ifdef
-  JSC_ARCH_SIXTYFOUR]
+[%%ifdef JSC_ARCH_SIXTYFOUR]
 
 external nanoseconds_since_unix_epoch_or_zero
   :  unit
@@ -20,9 +18,7 @@ external nanoseconds_since_unix_epoch_or_zero
   = "time_now_nanoseconds_since_unix_epoch_or_zero"
 
 [%%endif]
-
-[%%ifdef
-  JSC_POSIX_TIMERS]
+[%%ifdef JSC_POSIX_TIMERS]
 
 let[@cold] gettime_failed () = failwith "clock_gettime(CLOCK_REALTIME) failed"
 

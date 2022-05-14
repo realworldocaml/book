@@ -1,2 +1,3 @@
 (library (name ascii_table_kernel) (public_name textutils.ascii_table_kernel)
- (libraries core_kernel.ansi_kernel core_kernel) (preprocess (pps ppx_jane)))
+ (libraries core_kernel.ansi_kernel core textutils_kernel.utf8_text uutf)
+ (preprocess (pps ppx_jane)))

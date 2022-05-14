@@ -182,17 +182,7 @@ module T = struct
 
   module Builtin = struct
     module Folding = Folding (Internalhash)
-
-    include (
-      Folding :
-        Hash_intf.Builtin_hash_fold_intf
-      with type state := state
-       and type 'a folder := 'a folder)
-
-    let hash_nativeint = Folding.hash_nativeint
-    let hash_int64 = Folding.hash_int64
-    let hash_int32 = Folding.hash_int32
-    let hash_string = Folding.hash_string
+    include Folding
 
     (* [Folding] provides some default implementations for the [hash_*] functions below,
        but they are inefficient for some use-cases because of the use of the [hash_fold]

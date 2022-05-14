@@ -11,7 +11,7 @@ let%test_unit "( * )" =
       ~expect:(Int.( * ) (to_int s1) (to_int s2)))
 ;;
 
-let%expect_test ("hash coherence"[@tags "64-bits-only"]) =
+let%expect_test ("hash coherence" [@tags "64-bits-only"]) =
   check_hash_coherence [%here] (module Sign) all;
   [%expect {| |}]
 ;;

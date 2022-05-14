@@ -2,7 +2,7 @@ open Core
 
 let stdout () = Lazy.force Writer.stdout
 let stderr () = Lazy.force Writer.stderr
-let do_printf writer = ksprintf (Writer.write (writer ()))
+let do_printf writer = ksprintf (fun s -> Writer.write (writer ()) s)
 let printf fmt = do_printf stdout fmt
 let fprintf writer fmt = Printf.ksprintf (fun s -> Writer.write writer s) fmt
 let eprintf fmt = do_printf stderr fmt

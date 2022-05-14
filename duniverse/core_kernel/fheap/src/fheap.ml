@@ -1,10 +1,8 @@
-open! Core_kernel
+open! Core
 module Array = Base.Array
-module Int = Base.Int
 module List = Base.List
 module Option = Base.Option
 module Sequence = Base.Sequence
-module Sexp = Base.Sexp
 
 module Node = struct
   type 'a t =
@@ -16,44 +14,44 @@ end
 open Node
 
 type 'a t =
-  { cmp : 'a -> 'a -> int
+  { compare : 'a -> 'a -> int
   ; length : int
   ; heap : 'a Node.t option
   }
 
-let create ~cmp = { cmp; length = 0; heap = None }
+let create ~compare = { compare; length = 0; heap = None }
 
 let merge
-      ~cmp
+      ~compare
       ({ value = e1; children = nl1 } as n1)
       ({ value = e2; children = nl2 } as n2)
   =
-  if cmp e1 e2 < 0
+  if compare e1 e2 < 0
   then { value = e1; children = n2 :: nl1 }
   else { value = e2; children = n1 :: nl2 }
 ;;
 
-let merge_pairs ~cmp t =
+let merge_pairs ~compare t =
   let rec loop acc t =
     match t with
     | [] -> acc
     | [ head ] -> head :: acc
-    | head :: next1 :: next2 -> loop (merge ~cmp head next1 :: acc) next2
+    | head :: next1 :: next2 -> loop (merge ~compare head next1 :: acc) next2
   in
   match loop [] t with
   | [] -> None
   | [ h ] -> Some h
-  | x :: xs -> Some (List.fold xs ~init:x ~f:(merge ~cmp))
+  | x :: xs -> Some (List.fold xs ~init:x ~f:(merge ~compare))
 ;;
 
-let add { cmp; length; heap } e =
+let add { compare; length; heap } e =
   let new_node = { value = e; children = [] } in
   let heap =
     match heap with
     | None -> new_node
-    | Some heap -> merge ~cmp new_node heap
+    | Some heap -> merge ~compare new_node heap
   in
-  { cmp; length = length + 1; heap = Some heap }
+  { compare; length = length + 1; heap = Some heap }
 ;;
 
 let top_exn t =
@@ -67,12 +65,12 @@ let top t =
   | _ -> None
 ;;
 
-let pop_exn { cmp; length; heap } =
+let pop_exn { compare; length; heap } =
   match heap with
   | None -> failwith "Heap.pop_exn called on an empty heap"
   | Some { value; children } ->
-    let new_heap = merge_pairs ~cmp children in
-    let t' = { cmp; length = length - 1; heap = new_heap } in
+    let new_heap = merge_pairs ~compare children in
+    let t' = { compare; length = length - 1; heap = new_heap } in
     value, t'
 ;;
 
@@ -80,6 +78,9 @@ let pop t =
   try Some (pop_exn t) with
   | _ -> None
 ;;
+
+let pop_min = pop
+let pop_min_exn = pop_exn
 
 let remove_top t =
   try
@@ -137,12 +138,12 @@ let fold_until = C.fold_until
 (* We could avoid the intermediate list here, but it doesn't seem like a big deal. *)
 let to_array = C.to_array
 
-let of_fold c ~cmp fold =
-  let h = create ~cmp in
+let of_fold c ~compare fold =
+  let h = create ~compare in
   fold c ~init:h ~f:add
 ;;
 
-let of_list l ~cmp = of_fold l ~cmp List.fold
-let of_array arr ~cmp = of_fold arr ~cmp Array.fold
+let of_list l ~compare = of_fold l ~compare List.fold
+let of_array arr ~compare = of_fold arr ~compare Array.fold
 let sexp_of_t sexp_of_a t = List.sexp_of_t sexp_of_a (to_list t)
 let to_sequence t = Sequence.unfold ~init:t ~f:pop

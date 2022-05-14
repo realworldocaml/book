@@ -13,9 +13,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(** Copy of Ast_helper from OCaml 4.12 with docstring related stuff removed *)
+(** Copy of Ast_helper from OCaml 4.14 with docstring related stuff removed *)
 
-open Astlib.Ast_412
+open Astlib.Ast_414
 open Asttypes
 open Parsetree
 
@@ -295,6 +295,7 @@ module Type : sig
   val constructor :
     ?loc:loc ->
     ?attrs:attrs ->
+    ?vars:str list ->
     ?args:constructor_arguments ->
     ?res:core_type ->
     str ->
@@ -333,6 +334,7 @@ module Te : sig
   val decl :
     ?loc:loc ->
     ?attrs:attrs ->
+    ?vars:str list ->
     ?args:constructor_arguments ->
     ?res:core_type ->
     str ->

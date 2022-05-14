@@ -2,11 +2,16 @@
    like ones we would get from parsing OCaml file.
 *)
 
+module Unshadow = struct
+  module Parser = Parser
+end
+
 open Ppxlib
+open Unshadow
 
-module Parsing  = Caml.Parsing
+module Parsing = Stdlib.Parsing
 
-type lexer = Lexing.lexbuf -> Ocaml_common.Parser.token
+type lexer = Lexing.lexbuf -> Parser.token
 
 (* +---------------------------------------------------------------+
    | Parsing of directives                                         |
@@ -28,9 +33,9 @@ let parse parsing_fun lexer lexbuf =
 ;;
 
 let fetch_directive_argument (lexer : lexer) lexbuf =
-  let rec loop acc (brackets : Ocaml_common.Parser.token list) =
+  let rec loop acc (brackets : Parser.token list) =
     match lexer lexbuf, brackets with
-    | EOF, _ | EOL, [] -> located Ocaml_common.Parser.EOF lexbuf :: acc
+    | EOF, _ | EOL, [] -> located Parser.EOF lexbuf :: acc
     | (EOL | COMMENT _), _ -> loop acc brackets
     | token, _ ->
       let acc = located token lexbuf :: acc in
@@ -58,7 +63,7 @@ let fetch_directive_argument (lexer : lexer) lexbuf =
   | []     -> None
   | tokens ->
     let tokens = ref tokens in
-    let fake_lexer (lexbuf : Lexing.lexbuf) : Ocaml_common.Parser.token =
+    let fake_lexer (lexbuf : Lexing.lexbuf) : Parser.token =
       match !tokens with
       | [] -> EOF
       | token :: rest ->
@@ -69,10 +74,10 @@ let fetch_directive_argument (lexer : lexer) lexbuf =
     in
     let fake_lexbuf = Lexing.from_function (fun _ _ -> assert false) in
     fake_lexbuf.lex_curr_p <- start_pos;
-    match parse Ocaml_common.Parser.implementation fake_lexer fake_lexbuf with
+    match Parse.Of_ocaml.copy_structure (parse Parser.implementation fake_lexer fake_lexbuf) with
     | []   -> None
     | [st] ->
-      assert_no_attributes_in#structure (Ppxlib.Selected_ast.Of_ocaml.copy_structure [st]);
+      assert_no_attributes_in#structure_item st;
       Some st
     | _ :: st :: _ ->
       Location.raise_errorf ~loc:st.pstr_loc "optcomp: too many structure items"
@@ -83,14 +88,14 @@ let parse_directive (lexer : lexer) lexbuf : ('a Token.t) =
   let arg = fetch_directive_argument lexer lexbuf in
   let loc = { token.loc with loc_end = Lexing.lexeme_end_p lexbuf } in
   let payload = match arg with
-    | Some st_item -> PStr (Ppxlib.Selected_ast.Of_ocaml.copy_structure [st_item])
+    | Some st_item -> PStr [st_item]
     | None -> PStr []
   in
   match token.txt with
-    | IF                -> Token.make_directive "if" loc payload
-    | ELSE              -> Token.make_directive "else" loc payload
-    | LIDENT s          -> Token.make_directive s loc payload
-    | _ -> Location.raise_errorf ~loc "optcomp: unknown token"
+  | IF                -> Token.make_directive "if" loc payload
+  | ELSE              -> Token.make_directive "else" loc payload
+  | LIDENT s          -> Token.make_directive s loc payload
+  | _ -> Location.raise_errorf ~loc "optcomp: unknown token"
 
 let parse_loop lexbuf =
   let is_beginning_of_line lexbuf =

@@ -12,30 +12,13 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (int64_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_int64 : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "int64" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ int64_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "int64.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (int64_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_int64 : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = int64_sexp_grammar
 
   [@@@end]
+
+  let hashable : t Hashable.t = { hash; compare; sexp_of_t }
 
   let compare = Int64_replace_polymorphic_compare.compare
   let to_string = to_string
@@ -98,7 +81,7 @@ let[@inline always] bswap32 x =
 
 let[@inline always] bswap48 x = Caml.Int64.shift_right_logical (bswap64 x) 16
 
-include Comparable.Validate_with_zero (struct
+include Comparable.With_zero (struct
     include T
 
     let zero = zero
@@ -128,40 +111,37 @@ let clamp t ~min ~max =
   else Ok (clamp_unchecked t ~min ~max)
 ;;
 
-let ( / ) = div
-let ( * ) = mul
-let ( - ) = sub
-let ( + ) = add
-let ( ~- ) = neg
-let incr r = r := !r + one
-let decr r = r := !r - one
-let of_int64 t = t
+let incr r = r := add !r one
+let decr r = r := sub !r one
+
+external of_int64 : t -> t = "%identity"
+
 let of_int64_exn = of_int64
 let to_int64 t = t
 let popcount = Popcount.int64_popcount
 
 module Conv = Int_conversions
 
-let of_int = Conv.int_to_int64
+external to_int_trunc : t -> int = "%int64_to_int"
+external to_int32_trunc : int64 -> int32 = "%int64_to_int32"
+external to_nativeint_trunc : int64 -> nativeint = "%int64_to_nativeint"
+external of_int : int -> int64 = "%int64_of_int"
+external of_int32 : int32 -> int64 = "%int64_of_int32"
+
 let of_int_exn = of_int
 let to_int = Conv.int64_to_int
 let to_int_exn = Conv.int64_to_int_exn
-let to_int_trunc = Conv.int64_to_int_trunc
-let of_int32 = Conv.int32_to_int64
 let of_int32_exn = of_int32
 let to_int32 = Conv.int64_to_int32
 let to_int32_exn = Conv.int64_to_int32_exn
-let to_int32_trunc = Conv.int64_to_int32_trunc
 let of_nativeint = Conv.nativeint_to_int64
 let of_nativeint_exn = of_nativeint
 let to_nativeint = Conv.int64_to_nativeint
 let to_nativeint_exn = Conv.int64_to_nativeint_exn
-let to_nativeint_trunc = Conv.int64_to_nativeint_trunc
 
 module Pow2 = struct
   open! Import
   open Int64_replace_polymorphic_compare
-  module Sys = Sys0
 
   let raise_s = Error.raise_s
 
@@ -229,8 +209,7 @@ module Pow2 = struct
   let ceil_log2 i =
     if Poly.( <= ) i Caml.Int64.zero
     then
-      raise_s
-        (Sexp.message "[Int64.ceil_log2] got invalid input" [ "", sexp_of_int64 i ]);
+      raise_s (Sexp.message "[Int64.ceil_log2] got invalid input" [ "", sexp_of_int64 i ]);
     if Caml.Int64.equal i Caml.Int64.one then 0 else num_bits - clz (Caml.Int64.pred i)
   ;;
 end
@@ -254,7 +233,7 @@ include Conv.Make_hex (struct
     [@@@end]
 
     let zero = zero
-    let neg = ( ~- )
+    let neg = neg
     let ( < ) = ( < )
     let to_string i = Printf.sprintf "%Lx" i
     let of_string s = Caml.Scanf.sscanf s "%Lx" Fn.id
@@ -269,17 +248,20 @@ include Pretty_printer.Register (struct
   end)
 
 module Pre_O = struct
-  let ( + ) = ( + )
-  let ( - ) = ( - )
-  let ( * ) = ( * )
-  let ( / ) = ( / )
-  let ( ~- ) = ( ~- )
+  external ( + ) : t -> t -> t = "%int64_add"
+  external ( - ) : t -> t -> t = "%int64_sub"
+  external ( * ) : t -> t -> t = "%int64_mul"
+  external ( / ) : t -> t -> t = "%int64_div"
+  external ( ~- ) : t -> t = "%int64_neg"
+
   let ( ** ) = ( ** )
 
-  include (Int64_replace_polymorphic_compare : Comparisons.Infix with type t := t)
+  include Int64_replace_polymorphic_compare
 
   let abs = abs
-  let neg = neg
+
+  external neg : t -> t = "%int64_neg"
+
   let zero = zero
   let of_int_exn = of_int_exn
 end
@@ -299,13 +281,15 @@ module O = struct
       let to_string = T.to_string
     end)
 
-  let ( land ) = bit_and
-  let ( lor ) = bit_or
-  let ( lxor ) = bit_xor
+  external ( land ) : t -> t -> t = "%int64_and"
+  external ( lor ) : t -> t -> t = "%int64_or"
+  external ( lxor ) : t -> t -> t = "%int64_xor"
+
   let lnot = bit_not
-  let ( lsl ) = shift_left
-  let ( asr ) = shift_right
-  let ( lsr ) = shift_right_logical
+
+  external ( lsl ) : t -> int -> t = "%int64_lsl"
+  external ( asr ) : t -> int -> t = "%int64_asr"
+  external ( lsr ) : t -> int -> t = "%int64_lsr"
 end
 
 include O

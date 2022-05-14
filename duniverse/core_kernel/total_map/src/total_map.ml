@@ -1,5 +1,5 @@
 module Stable = struct
-  open Core_kernel.Core_kernel_stable
+  open Core.Core_stable
 
   module V1 = struct
     type ('key, 'a, 'cmp, 'enum) t = ('key, 'a, 'cmp) Map.V1.t
@@ -39,7 +39,7 @@ module Stable = struct
   end
 end
 
-open! Core_kernel
+open! Core
 open! Import
 module Enumeration = Enumeration
 
@@ -135,7 +135,7 @@ module type S = sig
   type enumeration_witness
 
   type nonrec 'a t = (Key.t, 'a, comparator_witness, enumeration_witness) t
-  [@@deriving sexp, bin_io, compare]
+  [@@deriving sexp, bin_io, compare, equal]
 
   include Applicative with type 'a t := 'a t
 
@@ -156,7 +156,7 @@ struct
 
   type comparator_witness = Key.comparator_witness
   type enumeration_witness = Key.enumeration_witness
-  type 'a t = 'a Key.Map.t [@@deriving sexp, compare]
+  type 'a t = 'a Key.Map.t [@@deriving sexp, compare, equal]
 
   let all_set = Key.Set.of_list Key.all
 

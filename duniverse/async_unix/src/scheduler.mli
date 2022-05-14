@@ -84,6 +84,7 @@ type 'b folder = { folder : 'a. 'b -> t -> (t, 'a) Field.t -> 'b }
 val fold_fields : init:'b -> 'b folder -> 'b
 
 val is_ready_to_initialize : unit -> bool
+val is_initialized : unit -> bool
 
 (** If a process that has already created, but not started, the Async scheduler would like
     to fork, and would like the child to have a clean Async, i.e., not inherit any of the
@@ -91,6 +92,12 @@ val is_ready_to_initialize : unit -> bool
     start of execution in the child process.  After that, the child can do Async stuff and
     then start the Async scheduler. *)
 val reset_in_forked_process : unit -> unit
+
+(** [reset_in_forked_process_without_taking_lock] is similar to [reset_in_forked_process],
+    with the difference that async lock is not taken by the calling thread. This means
+    it's not safe to do Async stuff unless you obtain the lock first, usually by calling
+    functions from the [Thread_safe] module. *)
+val reset_in_forked_process_without_taking_lock : unit -> unit
 
 (** [make_async_unusable ()] makes subsequent attempts to use the Async scheduler raise.
     One use case for [make_async_unusable] is if you fork from a process already running
@@ -120,3 +127,26 @@ val time_spent_waiting_for_io : unit -> Time_ns.Span.t
     scheduler and other threads.  A plausible setting is 10us.  This can also be set via
     the [ASYNC_CONFIG] environment variable. *)
 val set_min_inter_cycle_timeout : Time_ns.Span.t -> unit
+
+(** Returns true if any user-created fds are registered with the file descriptor
+    watcher.
+
+    The intended use case for this function (together with
+    [thread_pool_has_unfinished_work]) is approximate deadlock detection, so that
+    a test can crash when it runs out of things to do.
+*)
+val fds_may_produce_events : unit -> bool
+
+(** Returns true if any of the threads in the thread pool are in use.
+    Note that this value can change from [true] to [false] "suddenly" (from a separate
+    thread) when a thread pool thread finishes.
+
+    However, the work items submitted to the thread pool by [In_thread.run]
+    enqueue their result as an [external_job] before finishing.
+
+    So if you observe [thread_pool_has_unfinished_work () = false] and then confirm that
+    there are no external jobs in the scheduler, then you know you didn't miss any thead
+    pool work.
+
+*)
+val thread_pool_has_unfinished_work : unit -> bool

@@ -75,7 +75,7 @@
       |        2^61 | nanosecond      | 73 years |
     v} *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 (** An [Interval_num.t] is an index of one of the intervals into which a timing-wheel
@@ -271,7 +271,7 @@ module type Timing_wheel = sig
 
     (** [microsecond_precision ()] returns a reasonable configuration for a timing wheel
         with microsecond [alarm_precision], and level durations of 1ms, 1s, 1m, 1h, 1d.
-        See the relevant expect test in [Core_kernel_test] library. *)
+        See the relevant expect test in [Core_test] library. *)
     val microsecond_precision : unit -> t
   end
 
@@ -394,15 +394,29 @@ module type Timing_wheel = sig
       simulating time, to ensure that alarms are processed in order. *)
   val max_alarm_time_in_min_interval : 'a t -> Time_ns.t option
 
+
+  (** [min_alarm_time_in_min_interval t] returns the minimum [Alarm.at] over all alarms in
+      [t].  This function is useful for advancing to the exact time when the next alarm
+      is scheduled to fire. *)
+  val min_alarm_time_in_min_interval : 'a t -> Time_ns.t option
+
   (** [max_alarm_time_in_min_interval_exn t] is like [max_alarm_time_in_min_interval],
       except that it raises if [is_empty t]. *)
   val max_alarm_time_in_min_interval_exn : 'a t -> Time_ns.t
 
-  (** [next_alarm_fires_at t] returns the minimum time to which the clock can be advanced
-      such that an alarm will fire, or [None] if [t] has no alarms (or all alarms
-      are in the max interval, and hence cannot fire).  If
-      [next_alarm_fires_at t = Some next], then for the minimum alarm time [min] that
-      occurs in [t], it is guaranteed that: [next - alarm_precision t <= min < next]. *)
+  (** [min_alarm_time_in_min_interval_exn t] is like [min_alarm_time_in_min_interval],
+      except that it raises if [is_empty t]. *)
+  val min_alarm_time_in_min_interval_exn : 'a t -> Time_ns.t
+
+  (** The name of this function is misleading: it does not take into account events that
+      can fire due to [fire_past_alarms].
+
+      [next_alarm_fires_at t] returns the minimum time to which the clock can be advanced
+      such that an alarm will be fired by [advance_clock], or [None] if [t] has no alarms
+      (or all alarms are in the max interval, and hence cannot fire by [advance_clock]).
+      If [next_alarm_fires_at t = Some next], then for the minimum alarm time [min] that
+      occurs in [t], it is guaranteed that: [next - alarm_precision t <= min < next].
+  *)
   val next_alarm_fires_at : _ t -> Time_ns.t option
 
   (** [next_alarm_fires_at_exn] is like [next_alarm_fires_at], except that it raises if

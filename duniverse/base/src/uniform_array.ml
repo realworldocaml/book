@@ -21,6 +21,8 @@ module Trusted : sig
   val unsafe_set_int : 'a t -> int -> int -> unit
   val unsafe_set_int_assuming_currently_int : 'a t -> int -> int -> unit
   val unsafe_set_assuming_currently_int : 'a t -> int -> 'a -> unit
+  val unsafe_set_with_caml_modify : 'a t -> int -> 'a -> unit
+  val set_with_caml_modify : 'a t -> int -> 'a -> unit
   val length : 'a t -> int
   val unsafe_blit : ('a t, 'a t) Blit.blit
   val copy : 'a t -> 'a t
@@ -56,6 +58,11 @@ end = struct
     Obj_array.unsafe_set_omit_phys_equal_check t i (Caml.Obj.repr x)
   ;;
 
+  let unsafe_set_with_caml_modify t i x =
+    Obj_array.unsafe_set_with_caml_modify t i (Caml.Obj.repr x)
+  ;;
+
+  let set_with_caml_modify t i x = Obj_array.set_with_caml_modify t i (Caml.Obj.repr x)
   let unsafe_clear_if_pointer = Obj_array.unsafe_clear_if_pointer
 end
 
@@ -76,6 +83,7 @@ let init l ~f =
 
 let of_array arr = init ~f:(Array.unsafe_get arr) (Array.length arr)
 let map a ~f = init ~f:(fun i -> f (unsafe_get a i)) (length a)
+let mapi a ~f = init ~f:(fun i -> f i (unsafe_get a i)) (length a)
 
 let iter a ~f =
   for i = 0 to length a - 1 do
@@ -87,6 +95,14 @@ let iteri a ~f =
   for i = 0 to length a - 1 do
     f i (unsafe_get a i)
   done
+;;
+
+let foldi a ~init ~f =
+  let acc = ref init in
+  for i = 0 to length a - 1 do
+    acc := f i !acc (unsafe_get a i)
+  done;
+  !acc
 ;;
 
 let to_list t = List.init ~f:(get t) (length t)
@@ -109,13 +125,25 @@ let exists t ~f =
   loop t ~f (length t - 1)
 ;;
 
+let for_all t ~f =
+  let rec loop t ~f i = if i < 0 then true else f (unsafe_get t i) && loop t ~f (i - 1) in
+  loop t ~f (length t - 1)
+;;
+
 let map2_exn t1 t2 ~f =
   let len = length t1 in
   if length t2 <> len then invalid_arg "Array.map2_exn";
   init len ~f:(fun i -> f (unsafe_get t1 i) (unsafe_get t2 i))
 ;;
 
-include Sexpable.Of_sexpable1
+let t_sexp_grammar (type elt) (grammar : elt Sexplib0.Sexp_grammar.t)
+  : elt t Sexplib0.Sexp_grammar.t
+  =
+  Sexplib0.Sexp_grammar.coerce (Array.t_sexp_grammar grammar)
+;;
+
+include
+  Sexpable.Of_sexpable1
     (Array)
     (struct
       type nonrec 'a t = 'a t
@@ -150,3 +178,26 @@ let fold t ~init ~f =
 
 let min_elt t ~compare = Container.min_elt ~fold t ~compare
 let max_elt t ~compare = Container.max_elt ~fold t ~compare
+
+(* This is the same as the ppx_compare [compare_array] but uses our [unsafe_get] and [length]. *)
+let compare compare_elt a b =
+  if phys_equal a b
+  then 0
+  else (
+    let len_a = length a in
+    let len_b = length b in
+    let ret = compare len_a len_b in
+    if ret <> 0
+    then ret
+    else (
+      let rec loop i =
+        if i = len_a
+        then 0
+        else (
+          let l = unsafe_get a i
+          and r = unsafe_get b i in
+          let res = compare_elt l r in
+          if res <> 0 then res else loop (i + 1))
+      in
+      loop 0))
+;;

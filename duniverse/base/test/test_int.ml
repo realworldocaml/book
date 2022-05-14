@@ -1,7 +1,7 @@
 open! Import
 open! Int
 
-let%expect_test ("hash coherence"[@tags "64-bits-only"]) =
+let%expect_test ("hash coherence" [@tags "64-bits-only"]) =
   check_int_hash_coherence [%here] (module Int);
   [%expect {| |}]
 ;;
@@ -131,3 +131,19 @@ let%expect_test "bswap16" =
     0x1122_331f --> 0x1f33
     0x1122_3344 --> 0x4433 |}]
 ;;
+
+include (
+struct
+  (** Various functors whose type-correctness ensures desired relationships between
+      interfaces. *)
+
+  (* O contained in S *)
+  module _ (M : S) : module type of M.O = M
+
+  (* O contained in S_unbounded *)
+  module _ (M : S_unbounded) : module type of M.O = M
+
+  (* S_unbounded in S *)
+  module _ (M : S) : S_unbounded = M
+end :
+sig end)

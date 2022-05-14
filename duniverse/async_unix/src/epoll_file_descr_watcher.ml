@@ -1,7 +1,7 @@
 open Core
 open Import
 open File_descr_watcher_intf
-open Read_write.Export
+open Read_write_pair.Export
 module Epoll = Linux_ext.Epoll
 module Timerfd = Linux_ext.Timerfd
 
@@ -108,10 +108,17 @@ let set t file_descr desired =
     | true, true -> Some Flags.in_out
   in
   match actual_flags, desired_flags with
-  | None, None -> ()
-  | None, Some d -> Epoll.set t.epoll file_descr d
-  | Some _, None -> Epoll.remove t.epoll file_descr
-  | Some a, Some d -> if not (Flags.equal a d) then Epoll.set t.epoll file_descr d
+  | None, None -> `Ok
+  | None, Some d ->
+    (match Epoll.set t.epoll file_descr d with
+     | exception Core_unix.Unix_error (EPERM, _, _) -> `Unsupported
+     | () -> `Ok)
+  | Some _, None ->
+    Epoll.remove t.epoll file_descr;
+    `Ok
+  | Some a, Some d ->
+    if not (Flags.equal a d) then Epoll.set t.epoll file_descr d;
+    `Ok
 ;;
 
 module Pre = struct
@@ -129,7 +136,6 @@ end
 
 let epoll_wait (type a) (epoll : Epoll.t) (timeout : a Timeout.t) (span_or_unit : a) =
   match timeout with
-  | Never -> Epoll.wait epoll ~timeout:`Never
   | Immediately -> Epoll.wait epoll ~timeout:`Immediately
   | After -> Epoll.wait_timeout_after epoll span_or_unit
 ;;

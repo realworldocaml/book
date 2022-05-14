@@ -1,13 +1,20 @@
-open! Core_kernel
+open! Core
 open! Deferred.Let_syntax
 open! Import
-include Core_kernel.Invariant
+include Core.Invariant
 
 module Async = struct
   include Async_invariant_intf.Async
 
   let invariant here t sexp_of_t f =
-    match%map Monitor.try_with f ~extract_exn:true with
+    match%map
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        f
+        ~extract_exn:true
+    with
     | Ok () -> ()
     | Error exn ->
       raise_s
@@ -17,7 +24,14 @@ module Async = struct
 
   let check_field t f wait_for_previous field =
     let%bind () = wait_for_previous in
-    match%map Monitor.try_with ~extract_exn:true (fun () -> f (Field.get field t)) with
+    match%map
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        ~extract_exn:true
+        (fun () -> f (Field.get field t))
+    with
     | Ok () -> ()
     | Error exn ->
       raise_s

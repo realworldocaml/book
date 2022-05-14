@@ -1,11 +1,10 @@
-(** Async's analog of [Core_kernel.Gc]. *)
+(** Async's analog of [Core.Gc]. *)
 
-open! Core_kernel
+open! Core
 
 (** We remove the [Expert] module, which has functions that are superseded by
     Async-friendly functions below. *)
-include
-  module type of Core_kernel.Gc with module Expert := Core_kernel.Gc.Expert
+include module type of Core.Gc with module Expert := Core.Gc.Expert
 
 (** [add_finalizer b f] ensures that [f] runs after [b] becomes unreachable.  [f b] will
     run in its own Async job.  If [f] raises, the unhandled exception will be raised to

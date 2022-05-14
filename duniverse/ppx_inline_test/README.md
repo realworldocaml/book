@@ -15,12 +15,13 @@ let%test_module "name" = (module <module-expr>)  (* to group tests (to share
                                                     some setup for instance) *)
 ```
 
-We may write `_` instead of `"name"` for anonymous tests.
+We may write `_` instead of `"name"` for anonymous tests. It is also possible to use
+`[%name <string expr>]` for a dynamically computed name.
 
-When running tests, they will be executed when the control flow
-reaches the structure item (i.e. at toplevel for a toplevel test; when
-the functor is applied for a test defined in the body of a functor,
-etc.).
+
+When running tests, they will be executed when the control flow reaches the structure item
+(i.e. at toplevel for a toplevel test; when the functor is applied for a test defined in
+the body of a functor, etc.).
 
 Tags
 ----
@@ -49,16 +50,14 @@ One can also tag entire test modules similarly:
 let%test_module "name" [@tags "no-js"] = (module struct end)
 ```
 
-The flags `-drop-tag` and `-require-tag` can be passed to the test
-runner to restrict which tests are run. We say the tags of a test are
-the union of the tags applied directly to that test using
-`[@tags ...]` and the tags of all enclosing modules. It is to this
+The flags `-drop-tag` and `-require-tag` can be passed to the test runner to restrict
+which tests are run. We say the tags of a test are the union of the tags applied directly
+to that test using `[@tags ...]` and the tags of all enclosing modules. It is to this
 union that the predicates `-drop-tag` and `-require-tag` are applied.
 
-If it is clear, from a test-module's tags, that none of the tests
-within will possibly match the tag predicates imposed by the command
-line flags, then additionally the top-level of that module will not be
-run.
+If it is clear, from a test-module's tags, that none of the tests within will possibly
+match the tag predicates imposed by the command line flags, then additionally the
+top-level of that module will not be run.
 
 Examples
 --------
@@ -87,9 +86,8 @@ module M = Make(Int)
 
 ### Grouping test and side-effecting initialisation.
 
-Since the module passed as an argument to `let%test_module` is only
-initialised when we run the tests, it is ok to perform side-effects in
-the module-expression argument.
+Since the module passed as an argument to `let%test_module` is only initialised when we
+run the tests, it is ok to perform side-effects in the module-expression argument.
 
 ```ocaml
 let%test_module _ = (module struct
@@ -112,28 +110,36 @@ The full set of tests are run when building the jenga `runtest` alias.
 
     jenga .runtest
 
-Building and running the tests outside of jane street
+Building and running the tests outside of jane street with dune
+----------------------------------------
+
+To use this with dune, see [dune's documentation](https://dune.readthedocs.io/en/latest/tests.html).
+At the time of writing of the current document, the short version is:
+* define a library this way:
+```lisp
+(library
+  (name foo)
+  (inline_tests)
+  (preprocess (pps ppx_inline_test)))
+```
+* add tests to it
+* call `dune runtest`
+
+Building and running the tests outside of jane street without dune
 ----------------------------------------
 
 Code using this extension must be compiled and linked using the
-`ppx_inline_test.runtime.lib` library. The `ppx_inline_test` syntax
-extension will reject any test if it wasn't passed a `-inline-test-lib
-libname` flag.
+`ppx_inline_test.runtime-lib` library. The `ppx_inline_test` syntax extension will reject
+any test if it wasn't passed a `-inline-test-lib libname` flag.
 
-To integrate this in your build system, you should look at the
-instruction provided for
-[the ppx\_driver ocamlbuild plugin](https://github.com/janestreet/ppx_driver). There
-are a few working example using oasis in the
-[Jane Street tests](https://github.com/janestreet/jane-street-tests).
+#### Execution
 
-### Execution
+Tests are only executed when both these conditions are met:
 
-Tests are executed when the executable containing the tests is called with command line
-arguments:
+- the executable containing the tests is linked with `ppx_inline_test.runner.lib`
+- the executable containing the tests is called with command line arguments:
 
     your.exe inline-test-runner libname [options]
-
-otherwise they are ignored.
 
 This `libname` is a way of restricting the tests run by the executable. The dependencies
 of your library (or executable) could also use `ppx_inline_test`, but you don't
@@ -142,12 +148,27 @@ necessarily want to run their tests too. For instance, `core` is built by giving
 core_extended`. And now when an executable linked with both `core` and `core_extended` is
 run with a `libname` of `core_extended`, only the tests of `core_extended` are run.
 
-Finally, after running tests, `Ppx_inline_test_lib.Runtime.exit ()` should be called
-(to exit with an error and a summary of the number of failed tests if there were errors or
+Finally, after running tests, `Ppx_inline_test_lib.Runtime.exit ()` should be called (to
+exit with an error and a summary of the number of failed tests if there were errors or
 exit normally otherwise).
+
+One can construct a dual-use binary that only runs the tests when prompted to (through the
+command line), by sticking the following piece of code in it, after the tests have run but
+before the binary starts doing non-test side effects. However be aware that
+`Base.am_testing` will be `true` even when not running tests, which may be undesirable.
+
+```ocaml
+match Ppx_inline_test_lib.Runtime.testing with
+| `Testing `Am_test_runner ->
+  print_endline "Exiting test suite";
+  Ppx_inline_test_lib.Runtime.exit ()
+| `Testing _ -> exit 0
+| `Not_testing -> ()
+```
 
 Command line arguments
 ----------------------
+
 The executable that runs tests can take additional command line arguments. The most useful
 of these are:
 

@@ -21,10 +21,6 @@ let%test_module "Type_equal.Id" =
     let%test _ = Option.is_none (same_witness t1 t2)
     let%test_unit _ = ignore (same_witness_exn t1 t1 : (_, _) Type_equal.equal)
     let%test _ = Result.is_error (Result.try_with (fun () -> same_witness_exn t1 t2))
-
-    let%expect_test "to_sexp allocation" =
-      require_no_allocation [%here] (fun () -> ignore (to_sexp t1 : 'a -> Sexp.t))
-    ;;
   end)
 ;;
 

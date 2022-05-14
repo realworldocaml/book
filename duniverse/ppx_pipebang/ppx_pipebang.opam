@@ -1,7 +1,7 @@
 opam-version: "2.0"
-version: "v0.14.0"
-maintainer: "opensource@janestreet.com"
-authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
+version: "v0.15.0"
+maintainer: "Jane Street developers"
+authors: ["Jane Street Group, LLC"]
 homepage: "https://github.com/janestreet/ppx_pipebang"
 bug-reports: "https://github.com/janestreet/ppx_pipebang/issues"
 dev-repo: "git+https://github.com/janestreet/ppx_pipebang.git"
@@ -11,9 +11,9 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml"  {>= "4.04.2"}
+  "ocaml"  {>= "4.08.0"}
   "dune"   {>= "2.0.0"}
-  "ppxlib" {>= "0.11.0"}
+  "ppxlib" {>= "0.23.0"}
 ]
 synopsis: "A ppx rewriter that inlines reverse application operators `|>` and `|!`"
 description: "

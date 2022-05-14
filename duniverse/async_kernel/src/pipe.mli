@@ -23,7 +23,7 @@
     For debugging your pipe usage you can use [show_debug_messages], and also use
     [set_info] to attach some data to a pipe for identification purposes. *)
 
-open! Core_kernel
+open! Core
 
 type ('a, 'phantom) t [@@deriving sexp_of]
 type ('a, 'phantom) pipe = ('a, 'phantom) t [@@deriving sexp_of]
@@ -62,7 +62,8 @@ end
     will be raised to the monitor in effect when [create_reader] was called.  There is a
     race between those two actions, which can easily lead to confusion or bugs. *)
 val create_reader
-  :  close_on_exception:bool
+  :  ?size_budget:int
+  -> close_on_exception:bool
   -> ('a Writer.t -> unit Deferred.t)
   -> 'a Reader.t
 
@@ -73,13 +74,16 @@ val create_reader
     [create_writer].  [create_writer] closes on exception, unlike [create_reader], because
     closing closing the read end of a pipe is a signal to the writer that the consumer has
     failed. *)
-val create_writer : ('a Reader.t -> unit Deferred.t) -> 'a Writer.t
+val create_writer : ?size_budget:int -> ('a Reader.t -> unit Deferred.t) -> 'a Writer.t
 
 (** [create ()] creates a new pipe.  It is preferable to use [create_reader] or
     [create_writer] instead of [create], since they provide exception handling and
     automatic closing of the pipe.  [info] is an arbitrary sexp displayed by [sexp_of_t],
-    for debugging purposes; see also [set_info]. *)
-val create : ?info:Sexp.t -> unit -> 'a Reader.t * 'a Writer.t
+    for debugging purposes; see also [set_info].
+
+    [size_budget] defaults to 0. See [set_size_budget] for documentation.
+*)
+val create : ?size_budget:int -> ?info:Sexp.t -> unit -> 'a Reader.t * 'a Writer.t
 
 (** [empty ()] returns a closed pipe reader with no contents. *)
 val empty : unit -> _ Reader.t
@@ -155,7 +159,7 @@ module Flushed_result : sig
     [ `Ok
     | `Reader_closed
     ]
-  [@@deriving sexp_of]
+  [@@deriving compare, sexp_of]
 end
 
 (** Deferreds returned by [upstream_flushed] and [downstream_flushed] become determined
@@ -261,18 +265,18 @@ val is_empty : (_, _) t -> bool
 (** {2 Writing} *)
 
 (** The write operations return a deferred value that is determined when either (1) it is
-    OK to write again to the pipe or (2) the pipe has been closed.  This deferred is the
+    OK to write again to the pipe or (2) the pipe has been closed. This deferred is the
     data-producer's interface to the pipe pushback mechanism: it tells the producer when
     it should proceed after doing a write -- either to produce and write more data to the
-    pipe, or to abandon production entirely.  The pushback mechanism is just advisory: a
+    pipe, or to abandon production entirely. The pushback mechanism is just advisory: a
     producer task can, but typically should not, dump arbitrary amounts of data into a
     pipe even if there is no consumer draining it.
 
     Producers that write a sequence of values to a pipe should be aware that the consumers
     who read from the pipe can close the pipe early -- that is, before the producer has
-    finished doing all of its writes.  If this happens, further writes will raise an
-    exception.  To avoid these errors, all writes must be atomically guarded by
-    [is_closed] tests.  Thus, a typical writer loop should look like this:
+    finished doing all of its writes. If this happens, further writes will raise an
+    exception. To avoid these errors, all writes must be atomically guarded by [is_closed]
+    tests. Thus, a typical writer loop should look like this:
 
     {[
       fun countup hi w = (* Send the ints in range \[0,hi) to writer W. *)
@@ -376,6 +380,9 @@ val read'
 (** [read pipe] reads a single value from the pipe.  The [consumer] is used to extend the
     meaning of values being flushed (see the [Consumer] module above). *)
 val read : ?consumer:Consumer.t -> 'a Reader.t -> [ `Eof | `Ok of 'a ] Deferred.t
+
+(** [read_exn] is like [read], except it raises on [`Eof]. *)
+val read_exn : ?consumer:Consumer.t -> 'a Reader.t -> 'a Deferred.t
 
 
 (** [read_exactly r ~num_values] reads exactly [num_values] items, unless EOF is
@@ -609,6 +616,14 @@ val map'
 
 (** [map] is like [map'], except that it processes one element at a time. *)
 val map : 'a Reader.t -> f:('a -> 'b) -> 'b Reader.t
+
+(** [concat_map_list] is like [List.concat_map].  It produces the same result as
+    [map' ~f:(fun q -> return (Queue.concat_map q ~f))] *)
+val concat_map_list
+  :  ?max_queue_length:int (** default is [Int.max_value] *)
+  -> 'a Reader.t
+  -> f:('a -> 'b list)
+  -> 'b Reader.t
 
 (** [folding_map] is a version of [map] that threads an accumulator through calls to [f].
 *)

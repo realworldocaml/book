@@ -38,6 +38,9 @@ module Make (Config : Expect_test_config_types.S) : sig
     -> unit
 end
 
+(** Flushes stdout/stderr. Same as [Make().save_and_return_output], without monad. *)
+val save_and_return_output : File.Location.t -> string
+
 (** The tests that ran, in the order they ran *)
 val tests_run : unit -> Test_outcome.t list
 

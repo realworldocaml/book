@@ -10,7 +10,7 @@ open Ctypes
 open Foreign
 
 
-let testlib = Dl.(dlopen ~filename:"../clib/dlltest_functions_stubs.so" ~flags:[RTLD_NOW])
+let testlib = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
 
 
 (*

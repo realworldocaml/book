@@ -1,39 +1,47 @@
-open! Core_kernel
+open! Core
 open! Import
+include Enum_intf
 
-module type S = sig
-  type t [@@deriving sexp_of]
+module Single = struct
+  module type S = Sexp_of
 
-  val all : t list
+  type 'a t = (module S with type t = 'a)
+
+  let command_friendly_name s =
+    s
+    |> String.tr ~target:'_' ~replacement:'-'
+    |> String.lowercase
+    |> String.filter ~f:(Char.( <> ) '\'')
+  ;;
+
+  let atom (type a) (m : a t) a =
+    let module M = (val m) in
+    match [%sexp_of: M.t] a with
+    | Atom s -> s
+    | List _ as sexp -> raise_s [%sexp "Enum.t expects atomic sexps.", (sexp : Sexp.t)]
+  ;;
+
+  let to_string_hum m a = command_friendly_name (atom m a)
+
+  let check_field_name t a field =
+    [%test_eq: string] (to_string_hum t a) (command_friendly_name (Field.name field))
+  ;;
 end
 
 type 'a t = (module S with type t = 'a)
 
-let command_friendly_name t =
-  t |> String.tr ~target:'_' ~replacement:'-' |> String.lowercase
+let to_string_hum (type a) ((module M) : a t) a = Single.to_string_hum (module M) a
+
+let check_field_name (type a) ((module M) : a t) a field =
+  Single.check_field_name (module M) a field
 ;;
 
-let atom (type a) (m : a t) a =
-  let module M = (val m) in
-  match [%sexp_of: M.t] a with
-  | Atom s -> s
-  | List _ as sexp -> raise_s [%sexp "Enum.t expects atomic sexps.", (sexp : Sexp.t)]
+let enum (type a) ((module M) : a t) =
+  List.map M.all ~f:(fun a -> to_string_hum (module M) a, a)
 ;;
 
-let to_string_hum m a = command_friendly_name (atom m a)
-
-let check_field_name (type a) (t : a t) (a : a) field =
-  [%test_eq: string] (to_string_hum t a) (command_friendly_name (Field.name field))
-;;
-
-let enum (type a) (m : a t) =
-  let module M = (val m) in
-  List.map M.all ~f:(fun a -> to_string_hum m a, a)
-;;
-
-let assert_alphabetic_order_exn here (type a) (m : a t) =
-  let module M = (val m) in
-  let as_strings = List.map M.all ~f:(atom m) in
+let assert_alphabetic_order_exn here (type a) ((module M) : a t) =
+  let as_strings = List.map M.all ~f:(Single.atom (module M)) in
   [%test_result: string list]
     ~here:[ here ]
     ~message:"This enumerable type is intended to be defined in alphabetic order"
@@ -41,34 +49,25 @@ let assert_alphabetic_order_exn here (type a) (m : a t) =
     as_strings
 ;;
 
-let arg_type' = Command.Arg_type.of_alist_exn
-let arg_type m = arg_type' (enum m)
+module Rewrite_sexp_of (S : S) : S with type t = S.t = struct
+  include S
 
-let doc' ?represent_choice_with enum ~doc =
-  let choices =
-    enum
-    |> List.map ~f:fst
-    |> List.sort ~compare:String.compare
-    |> String.concat ~sep:"|"
-  in
-  match represent_choice_with with
-  | None -> sprintf "(%s) %s" choices doc
-  | Some represent_choice_with ->
-    let doc =
-      if String.is_empty doc
-      then ""
-      else (
-        let separator =
-          match doc.[String.length doc - 1] with
-          | ',' | '.' -> ""
-          | _ -> ","
-        in
-        sprintf " %s%s" doc separator)
-    in
-    sprintf "%s%s %s can be (%s)" represent_choice_with doc represent_choice_with choices
+  let sexp_of_t t = to_string_hum (module S) t |> Sexp.of_string
+end
+
+let arg_type
+      (type t)
+      ?case_sensitive
+      ?key
+      ?list_values_in_help
+      (module S : S with type t = t)
+  =
+  Command.Arg_type.enumerated_sexpable
+    ?key
+    ?list_values_in_help
+    ?case_sensitive
+    (module Rewrite_sexp_of (S))
 ;;
-
-let doc ?represent_choice_with m ~doc = doc' ?represent_choice_with (enum m) ~doc
 
 module Make_param = struct
   type 'a t =
@@ -76,41 +75,77 @@ module Make_param = struct
     ; doc : string
     }
 
-  let create ?represent_choice_with ~doc m =
-    let enum = enum m in
-    { arg_type = arg_type' enum; doc = doc' ?represent_choice_with enum ~doc }
+  let create ?key ?represent_choice_with ?list_values_in_help ~doc m =
+    let doc =
+      match represent_choice_with with
+      | None -> " " ^ doc
+      | Some represent_choice_with -> represent_choice_with ^ " " ^ doc
+    in
+    { arg_type = arg_type ?key ?list_values_in_help m; doc }
   ;;
 end
 
 type ('a, 'b) make_param =
   ?represent_choice_with:string
+  -> ?list_values_in_help:bool
   -> ?aliases:string list
+  -> ?key:'a Univ_map.Multi.Key.t
   -> string
   -> doc:string
   -> 'a t
   -> 'b Command.Param.t
 
-let make_param ~f ?represent_choice_with ?aliases flag_name ~doc m =
-  let { Make_param.arg_type; doc } = Make_param.create ?represent_choice_with ~doc m in
-  Command.Param.flag ?aliases flag_name ~doc (f arg_type)
-;;
-
-let make_param_optional_with_default_doc
-      ~default
+let make_param
+      ~f
       ?represent_choice_with
+      ?list_values_in_help
       ?aliases
+      ?key
       flag_name
       ~doc
       m
   =
-  let { Make_param.arg_type; doc } = Make_param.create ?represent_choice_with ~doc m in
+  let { Make_param.arg_type; doc } =
+    Make_param.create ?key ?represent_choice_with ?list_values_in_help ~doc m
+  in
+  Command.Param.flag ?aliases flag_name ~doc (f arg_type)
+;;
+
+let make_param_optional_with_default_doc
+      (type a)
+      ~default
+      ?represent_choice_with
+      ?list_values_in_help
+      ?aliases
+      ?key
+      flag_name
+      ~doc
+      (m : a t)
+  =
+  let { Make_param.arg_type; doc } =
+    Make_param.create ?key ?represent_choice_with ?list_values_in_help ~doc m
+  in
   Command.Param.flag_optional_with_default_doc
     ?aliases
     flag_name
     arg_type
-    (fun default -> Sexp.Atom (to_string_hum m default))
+    (fun default -> Sexp.Atom (to_string_hum (module (val m)) default))
     ~default
     ~doc
+;;
+
+let make_param_one_of_flags
+      ?(if_nothing_chosen = Command.Param.If_nothing_chosen.Raise)
+      ?aliases
+      ~doc
+      m
+  =
+  Command.Param.choose_one
+    ~if_nothing_chosen
+    (List.map (enum m) ~f:(fun (name, enum) ->
+       let aliases = Option.map aliases ~f:(fun aliases -> aliases enum) in
+       let doc = doc enum in
+       Command.Param.flag ?aliases name (Command.Param.no_arg_some enum) ~doc))
 ;;
 
 module Make_stringable (M : S) = struct

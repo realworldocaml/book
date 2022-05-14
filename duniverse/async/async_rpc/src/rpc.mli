@@ -11,6 +11,7 @@ module Transport = Rpc_transport
 module Low_latency_transport = Rpc_transport_low_latency
 module Any = Rpc_kernel.Any
 module Description = Rpc_kernel.Description
+module On_exception = Rpc_kernel.On_exception
 module Implementation = Rpc_kernel.Implementation
 module Implementations = Rpc_kernel.Implementations
 module One_way = Rpc_kernel.One_way
@@ -58,6 +59,7 @@ module Connection : sig
     -> ?max_message_size:int
     -> ?handshake_timeout:Time.Span.t
     -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
     -> connection_state:(t -> 's)
     -> Reader.t
     -> Writer.t
@@ -69,6 +71,7 @@ module Connection : sig
     :  ?max_message_size:int
     -> ?handshake_timeout:Time.Span.t
     -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
     -> Reader.t
     -> Writer.t
     -> implementations:'s Implementations.t
@@ -109,6 +112,8 @@ module Connection : sig
     -> where_to_listen:('address, 'listening_on) Tcp.Where_to_listen.t
     -> ?max_connections:int
     -> ?backlog:int
+    -> ?drop_incoming_connections:bool
+    -> ?time_source:[> read ] Time_source.T1.t
     -> ?max_message_size:int
     -> ?make_transport:transport_maker
     -> ?handshake_timeout:Time.Span.t
@@ -127,36 +132,25 @@ module Connection : sig
     -> where_to_listen:Tcp.Where_to_listen.inet
     -> ?max_connections:int
     -> ?backlog:int
+    -> ?drop_incoming_connections:bool
+    -> ?time_source:[> read ] Time_source.T1.t
     -> ?max_message_size:int
     -> ?make_transport:transport_maker
     -> ?handshake_timeout:Time.Span.t
     -> ?heartbeat_config:Heartbeat_config.t
     -> ?auth:(Socket.Address.Inet.t -> bool) (** default is [`Ignore] *)
     -> ?on_handshake_error:on_handshake_error (** default is [`Ignore] *)
-    -> ?on_handler_error:[ `Raise
-                         | `Ignore
-                         | `Call of Socket.Address.Inet.t -> exn -> unit
-                         ]
+    -> ?on_handler_error:
+         [ `Raise | `Ignore | `Call of Socket.Address.Inet.t -> exn -> unit ]
     -> unit
     -> (Socket.Address.Inet.t, int) Tcp.Server.t
-
-  val serve_with_transport
-    :  handshake_timeout:Time.Span.t option
-    -> heartbeat_config:Heartbeat_config.t option
-    -> implementations:'s Implementations.t
-    -> description:Info.t
-    -> connection_state:(t -> 's)
-    -> on_handshake_error:on_handshake_error
-    -> Transport.t
-    -> unit Deferred.t
 
   (** [client where_to_connect ()] connects to the server at [where_to_connect] and
       returns the connection or an Error if a connection could not be made. It is the
       responsibility of the caller to eventually call [close].
 
       In [client] and [with_client], the [handshake_timeout] encompasses both the TCP
-      connection timeout and the timeout for this module's own handshake.
-  *)
+      connection timeout and the timeout for this module's own handshake. *)
   val client
     :  ?implementations:_ Client_implementations.t
     -> ?max_message_size:int
@@ -176,16 +170,15 @@ module Connection : sig
     -> ?handshake_timeout:Time.Span.t
     -> ?heartbeat_config:Heartbeat_config.t
     -> ?description:Info.t
-    -> 'transport Tcp.Where_to_connect.t
-    -> ('transport * t, Exn.t) Result.t Deferred.t
+    -> 'address Tcp.Where_to_connect.t
+    -> ('address * t, Exn.t) Result.t Deferred.t
 
 
   (** [with_client where_to_connect f] connects to the server at [where_to_connect] and
       runs f until an exception is thrown or until the returned Deferred is fulfilled.
 
       NOTE:  As with [with_close], you should be careful when using this with [Pipe_rpc].
-      See [with_close] for more information.
-  *)
+      See [with_close] for more information. *)
   val with_client
     :  ?implementations:_ Client_implementations.t
     -> ?max_message_size:int
@@ -204,6 +197,7 @@ module Connection : sig
     -> ?make_transport:transport_maker
     -> ?handshake_timeout:Time.Span.t
     -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
     -> 'transport Tcp.Where_to_connect.t
     -> (remote_server:'transport -> t -> 'a Deferred.t)
     -> ('a, Exn.t) Result.t Deferred.t

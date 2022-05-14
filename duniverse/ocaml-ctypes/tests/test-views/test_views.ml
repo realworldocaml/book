@@ -8,6 +8,8 @@
 open OUnit2
 open Ctypes
 
+let _ = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
+
 [@@@warning "-3-35"]
 
 module Common_tests(S : Cstubs.FOREIGN with type 'a result = 'a
@@ -80,7 +82,7 @@ struct
         (-1) (accepting_possibly_null_funptr None 2 3);
 
       assert_equal ~msg:"passing non-null function pointer"
-        5 (accepting_possibly_null_funptr (Some Pervasives.(+)) 2 3);
+        5 (accepting_possibly_null_funptr (Some (+)) 2 3);
 
       assert_equal ~msg:"passing non-null function pointer obtained from C"
         6 (accepting_possibly_null_funptr (returning_funptr 1) 2 3);

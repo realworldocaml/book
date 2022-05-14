@@ -1,6 +1,7 @@
 open Atd.Import
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 type t = (Ocaml.Repr.t, Json.json_repr) Mapping.mapping
 type variant_mapping = (Ocaml.Repr.t, Json.json_repr) Mapping.variant_mapping

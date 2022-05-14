@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Range = Patience_diff.Range
 module Hunk = Patience_diff.Hunk
@@ -81,8 +81,7 @@ module String_with_floats = struct
       let t7 = create "(foo -1234567891011.e-2)" in
       let t8 = create "(foo -1234567891011e-2)" in
       print_s
-        [%message
-          (t1 : t) (t2 : t) (t3 : t) (t4 : t) (t5 : t) (t6 : t) (t7 : t) (t8 : t)];
+        [%message (t1 : t) (t2 : t) (t3 : t) (t4 : t) (t5 : t) (t6 : t) (t7 : t) (t8 : t)];
       [%expect
         {|
         ((t1 ((floats (-12345678910.11)) (without_floats "(foo )")))
@@ -168,9 +167,7 @@ type partial_range_indexes =
 let recover_ranges xs ys a =
   (* index of smallest element in triple, with ties going to the element with higher
      index *)
-  let smallest a b c =
-    if a < b then if a < c then 0 else 2 else if b < c then 1 else 2
-  in
+  let smallest a b c = if a < b then if a < c then 0 else 2 else if b < c then 1 else 2 in
   let cons_minus_one car cdr ~if_unequal_to =
     if car = if_unequal_to then cdr else (car - 1) :: cdr
   in

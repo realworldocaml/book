@@ -1,0 +1,4 @@
+(library (name expect_test_helpers_core)
+ (public_name expect_test_helpers_core)
+ (libraries core expect_test_helpers_base re sexp_pretty)
+ (preprocess (pps ppx_jane)))

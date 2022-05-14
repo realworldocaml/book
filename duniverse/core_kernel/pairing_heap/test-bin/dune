@@ -3,4 +3,4 @@
 
 (executables (names test_pairing_heap)
  (libraries core pairing_heap oUnit quickcheck_deprecated)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (preprocess (pps ppx_jane)))

@@ -85,7 +85,7 @@ val default_value
 val include_intf : (Ocaml.Repr.t, 'a) Mapping.def -> bool
 
 type field =
-  { mapping : (Ocaml.Repr.t, Json.json_repr) Mapping.field_mapping
+  { mapping : (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.field_mapping
   ; ocaml_fname : string
   ; json_fname : string
   ; ocaml_default : string option
@@ -94,16 +94,19 @@ type field =
   }
 
 val get_fields
-  : ((Ocaml.Repr.t, Json.json_repr) Mapping.mapping
+  : ((Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping
      -> (Ocaml.Repr.t, 'a) Mapping.mapping)
-  -> (Ocaml.Repr.t, Json.json_repr) Mapping.field_mapping array
+  -> (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.field_mapping array
   -> field list
 
-val is_string : (('a, 'b) Mapping.mapping -> ('a, 'b) Mapping.mapping) -> ('a, 'b) Mapping.mapping -> bool
+val is_string :
+  (('a, 'b) Mapping.mapping -> ('a, 'b) Mapping.mapping)
+  -> ('a, 'b) Mapping.mapping
+  -> bool
 
-val get_assoc_type : ((Ocaml.Repr.t, Json.json_repr) Mapping.mapping ->
-  (Ocaml.Repr.t, Json.json_repr) Mapping.mapping) ->
+val get_assoc_type : ((Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping ->
+  (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping) ->
     Mapping.loc ->
-      (Ocaml.Repr.t, Json.json_repr) Mapping.mapping ->
-        (Ocaml.Repr.t, Json.json_repr) Mapping.mapping *
-          (Ocaml.Repr.t, Json.json_repr) Mapping.mapping
+      (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping ->
+        (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping *
+          (Ocaml.Repr.t, Atd.Json.json_repr) Mapping.mapping

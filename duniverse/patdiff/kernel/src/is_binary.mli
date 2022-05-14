@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 (** Heuristics for detecting files that are clearly binary. *)

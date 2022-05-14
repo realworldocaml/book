@@ -1,13 +1,9 @@
 open! Base
 open! Expect_test_helpers_core
 open Sexplib
-module Generator = Base_quickcheck.Generator
+open Sexp_grammar_validation
 
-let test m =
-  Sexp_grammar_validation.validate_grammar m
-  |> Base.Result.iter_error ~f:(fun error ->
-    print_cr [%here] [%message (error : Error.t)])
-;;
+let test m = validate_grammar m |> require_ok [%here]
 
 module Test = struct
   include Sexplib0.Sexp_conv
@@ -27,7 +23,7 @@ module Test = struct
       (module struct
         type t = mat [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {||}]
+    [%expect {| (List (Cons Integer (Cons Integer (Many Float)))) |}]
   ;;
 
   type float64_mat = Conv.float64_mat
@@ -45,7 +41,7 @@ module Test = struct
       (module struct
         type t = float64_mat [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {||}]
+    [%expect {| (List (Cons Integer (Cons Integer (Many Float)))) |}]
   ;;
 
   type float32_mat = Conv.float32_mat
@@ -63,7 +59,7 @@ module Test = struct
       (module struct
         type t = float32_mat [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {||}]
+    [%expect {| (List (Cons Integer (Cons Integer (Many Float)))) |}]
   ;;
 
   type vec = Conv.vec
@@ -81,7 +77,7 @@ module Test = struct
       (module struct
         type t = vec [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {| |}]
+    [%expect {| (List (Many Float)) |}]
   ;;
 
   type float64_vec = Conv.float64_vec
@@ -99,7 +95,7 @@ module Test = struct
       (module struct
         type t = float64_vec [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {| |}]
+    [%expect {| (List (Many Float)) |}]
   ;;
 
   type float32_vec = Conv.float32_vec
@@ -117,7 +113,7 @@ module Test = struct
       (module struct
         type t = float32_vec [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {| |}]
+    [%expect {| (List (Many Float)) |}]
   ;;
 
   type bigstring = Conv.bigstring
@@ -135,7 +131,7 @@ module Test = struct
       (module struct
         type t = bigstring [@@deriving compare, quickcheck, sexp, sexp_grammar]
       end);
-    [%expect {| |}]
+    [%expect {| String |}]
   ;;
 
   module Exn_converter = Conv.Exn_converter
@@ -148,5 +144,5 @@ module type S = module type of struct
   include Sexplib.Conv
 end
 
-module Completeness (M : S) : sig end = struct end
+module Completeness (_ : S) : sig end = struct end
 include Completeness (Test)

@@ -255,6 +255,33 @@ let%expect_test "string" =
       ("\000\000" => "\000"))) |}]
 ;;
 
+let bytes = Shrinker.bytes
+
+let%expect_test "bytes" =
+  test_shrinker Shrinker.bytes m_bytes;
+  [%expect
+    {|
+    (shrinker
+     (("\000" => "")
+      (" " => "")
+      (0 => "")
+      (A => "")
+      (_ => "")
+      (z => "")
+      ("\000\000" => "\000")
+      ("\000\000" => "\000")
+      ("  " => " ")
+      ("  " => " ")
+      (00 => 0)
+      (00 => 0)
+      (AA => A)
+      (AA => A)
+      (__ => _)
+      (__ => _)
+      (zz => z)
+      (zz => z))) |}]
+;;
+
 let int = Shrinker.int
 
 let%expect_test "int" =
@@ -400,6 +427,56 @@ let%expect_test "list" =
       ((4 0) => (4)))) |}]
 ;;
 
+let array = Shrinker.array
+
+let%expect_test "array" =
+  test_shrinker (Shrinker.array natural_number_shrinker) (m_array (m_nat ~up_to:4));
+  [%expect
+    {|
+    (shrinker
+     (((0) => ())
+      ((1) => ())
+      ((1) => (0))
+      ((2) => ())
+      ((2) => (1))
+      ((3) => ())
+      ((3) => (2))
+      ((4) => ())
+      ((4) => (3))
+      ((0 4) => (4))
+      ((0 4) => (0))
+      ((0 4) => (0 3))
+      ((1 3) => (3))
+      ((1 3) => (0 3))
+      ((1 3) => (1))
+      ((1 3) => (1 2))
+      ((2 2) => (2))
+      ((2 2) => (1 2))
+      ((2 2) => (2))
+      ((2 2) => (2 1))
+      ((3 1) => (1))
+      ((3 1) => (2 1))
+      ((3 1) => (3))
+      ((3 1) => (3 0))
+      ((4 0) => (0))
+      ((4 0) => (3 0))
+      ((4 0) => (4)))) |}]
+;;
+
+let ref = Shrinker.ref
+
+let%expect_test "ref" =
+  test_shrinker (Shrinker.ref natural_number_shrinker) (m_ref (m_nat ~up_to:4));
+  [%expect {| (shrinker ((1 => 0) (2 => 1) (3 => 2) (4 => 3))) |}]
+;;
+
+let lazy_t = Shrinker.lazy_t
+
+let%expect_test "lazy_t" =
+  test_shrinker (Shrinker.lazy_t natural_number_shrinker) (m_lazy_t (m_nat ~up_to:4));
+  [%expect {| (shrinker ((1 => 0) (2 => 1) (3 => 2) (4 => 3))) |}]
+;;
+
 let either = Shrinker.either
 
 let%expect_test "either" =
@@ -533,7 +610,7 @@ let%expect_test "of_lazy, unforced" =
        ~f:(fun string -> Either.First string)
        ~f_inverse:(function
          | Either.First string -> string
-         | Either.Second (_ : (int, string) Type_equal.t) -> .));
+         | Either.Second (_ : Nothing.t) -> .));
   [%expect
     {|
     (shrinker

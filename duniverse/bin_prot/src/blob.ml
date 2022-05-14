@@ -1,7 +1,7 @@
 open Common
 
 module T = struct
-  type 'a t = 'a [@@deriving compare]
+  type 'a t = 'a [@@deriving compare, sexp_of]
 
   let bin_shape_t t =
     Shape.(basetype (Uuid.of_string "85a2557e-490a-11e6-98ac-4b8953d525fe") [ t ])
@@ -94,6 +94,13 @@ module Opaque = struct
 
     let to_opaque blob bin_writer = Utils.bin_dump bin_writer blob
     let of_opaque_exn (t : t) bin_reader = bin_reader.Type_class.read t ~pos_ref:(ref 0)
+
+    (* Bigstrings are a primitive type that polymorphic compare handles well. *)
+    let compare = (Stdlib.compare : buf -> buf -> int)
+
+    let sexp_of_t t =
+      Ppx_sexp_conv_lib.Sexp.Atom (of_opaque_exn t Type_class.bin_reader_string)
+    ;;
   end
 
   module String = struct
@@ -155,6 +162,10 @@ module Opaque = struct
         failwith error)
       else res
     ;;
+
+    (* Strings are a primitive type that polymorphic compare handles well. *)
+    let compare = (Stdlib.compare : string -> string -> int)
+    let sexp_of_t = Ppx_sexp_conv_lib.Conv.sexp_of_string
   end
 end
 

@@ -130,19 +130,15 @@ module Creators (Elt : sig
 
     val hashable : 'a t Hashable.t
   end) : sig
-  type 'a t_ = 'a Elt.t t
-
-  val t_of_sexp : (Sexp.t -> 'a Elt.t) -> Sexp.t -> 'a t_
+  val t_of_sexp : (Sexp.t -> 'a Elt.t) -> Sexp.t -> 'a Elt.t t
 
   include
     Creators_generic
-    with type 'a t := 'a t_
+    with type 'a t := 'a Elt.t t
     with type 'a elt := 'a Elt.t
     with type ('elt, 'z) create_options :=
       ('elt, 'z) create_options_without_first_class_module
 end = struct
-  type 'a t_ = 'a Elt.t t
-
   let create ?growth_allowed ?size () =
     create ?growth_allowed ?size (Hashable.to_key Elt.hashable)
   ;;
@@ -169,28 +165,11 @@ module Poly = struct
   include Accessors
 
   let sexp_of_t = sexp_of_t
+  let t_sexp_grammar grammar = Sexplib0.Sexp_grammar.coerce (List.t_sexp_grammar grammar)
 end
 
 module M (Elt : T.T) = struct
   type nonrec t = Elt.t t
-end
-
-module type Sexp_of_m = sig
-  type t [@@deriving_inline sexp_of]
-
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-
-  [@@@end]
-end
-
-module type M_of_sexp = sig
-  type t [@@deriving_inline of_sexp]
-
-  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-
-  [@@@end]
-
-  include Hashtbl_intf.Key.S with type t := t
 end
 
 let sexp_of_m__t (type elt) (module Elt : Sexp_of_m with type t = elt) t =
@@ -200,6 +179,12 @@ let sexp_of_m__t (type elt) (module Elt : Sexp_of_m with type t = elt) t =
 let m__t_of_sexp (type elt) (module Elt : M_of_sexp with type t = elt) sexp =
   t_of_sexp (module Elt) Elt.t_of_sexp sexp
 ;;
+
+let m__t_sexp_grammar (type elt) (module Elt : M_sexp_grammar with type t = elt) =
+  Sexplib0.Sexp_grammar.coerce (list_sexp_grammar Elt.t_sexp_grammar)
+;;
+
+let equal_m__t (module _ : Equal_m) t1 t2 = equal t1 t2
 
 module Private = struct
   let hashable = Hashtbl.Private.hashable

@@ -36,8 +36,7 @@ module Int_option = struct
   type t = int option [@@deriving compare, sexp_of]
 end
 
-let check (type a) here examples ~actual ~expect (module Output : Output with type t = a)
-  =
+let check (type a) here examples ~actual ~expect (module Output : Output with type t = a) =
   List.iter examples ~f:(fun example ->
     let actual = actual example in
     let expect = expect example in

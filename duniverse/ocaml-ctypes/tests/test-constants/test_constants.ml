@@ -9,7 +9,7 @@ open OUnit2
 open Ctypes
 
 
-let testlib = Dl.(dlopen ~filename:"../clib/dlltest_functions_stubs.so" ~flags:[RTLD_NOW])
+let testlib = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
 
 module Constants = Types.Struct_stubs(Generated_struct_bindings)
 

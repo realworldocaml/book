@@ -1,0 +1,6 @@
+(library (name parsexp_prefix)
+ (libraries base.caml parsexp parsexp_symbolic_automaton
+  ppx_sexp_conv.runtime-lib sexplib0)
+ (preprocess
+  (pps ppx_js_style -check-doc-comments ppx_sexp_conv ppx_compare
+   ppx_enumerate ppx_hash ppx_variants_conv)))

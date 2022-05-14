@@ -1,8 +1,15 @@
-(executables (names main) (libraries core_kernel version_util)
+(executables (names main) (libraries version_util) (modules main)
  (preprocess (pps ppx_jane)))
 
-(alias (name DEFAULT) (deps main.exe)
- (action (bash "./main.exe > /dev/null")))
+(executables (names test_rewrite)
+ (libraries core core_unix core_unix.filename_unix core_unix.sys_unix
+  version_util)
+ (modules test_rewrite) (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT) (deps main.exe) (action (bash ./main.exe)))
 
 (alias (name javascript-runtest) (deps main.bc.js)
- (action (bash "%{NODE} main.bc.js > /dev/null")))
+ (action (bash "%{NODE} main.bc.js")))
+
+(alias (name DEFAULT) (deps test_rewrite.exe main.exe)
+ (action (bash ./test_rewrite.exe)))

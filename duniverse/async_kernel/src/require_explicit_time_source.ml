@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Clock_ns = Clock_ns
 module Time_ns = Time_ns

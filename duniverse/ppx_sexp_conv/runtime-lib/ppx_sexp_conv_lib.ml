@@ -1,11 +1,11 @@
-module Conv          = Sexplib0.Sexp_conv
-module Conv_error    = Sexplib0.Sexp_conv_error
-module Lazy_group_id = Sexplib0.Private.Lazy_group_id
-module Sexp          = Sexplib0.Sexp
-module Sexpable      = Sexplib0.Sexpable
+module Conv = Sexplib0.Sexp_conv
+module Conv_error = Sexplib0.Sexp_conv_error
+module Sexp_grammar = Sexplib0.Sexp_grammar
 
-module Option = struct
-  type 'a t = 'a option =
-    | None
-    | Some of 'a
+module Sexp = struct
+  include Sexplib0.Sexp
+
+  let t_sexp_grammar = Conv.sexp_t_sexp_grammar
 end
+
+module Sexpable = Sexplib0.Sexpable

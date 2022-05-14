@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 type slots = (Execution_context.t, Obj.t -> unit, Obj.t) Pool.Slots.t3

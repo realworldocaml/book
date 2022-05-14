@@ -1,11 +1,11 @@
 open Core
 open Import
 open File_descr_watcher_intf
-open Read_write.Export
+open Read_write_pair.Export
 module Table = Bounded_int_table
 
 type t =
-  { descr_tables : (File_descr.t, unit) Table.t Read_write.t
+  { descr_tables : (File_descr.t, unit) Table.t Read_write_pair.t
   ; handle_fd_read_ready : File_descr.t -> unit
   ; handle_fd_read_bad : File_descr.t -> unit
   ; handle_fd_write_ready : File_descr.t -> unit
@@ -16,7 +16,7 @@ type t =
 let backend = Config.File_descr_watcher.Select
 
 let invariant t : unit =
-  try Read_write.iter t.descr_tables ~f:(Table.invariant ignore ignore) with
+  try Read_write_pair.iter t.descr_tables ~f:(Table.invariant ignore ignore) with
   | exn ->
     raise_s
       [%message
@@ -38,7 +38,7 @@ let create
       ~handle_fd_write_ready
   =
   { descr_tables =
-      Read_write.create_fn (fun () ->
+      Read_write_pair.create_fn (fun () ->
         Table.create
           ~num_keys:num_file_descrs
           ~key_to_int:File_descr.to_int
@@ -54,22 +54,23 @@ let create
 let reset_in_forked_process _ = ()
 
 let iter t ~f =
-  Read_write.iteri t.descr_tables ~f:(fun read_or_write table ->
+  Read_write_pair.iteri t.descr_tables ~f:(fun read_or_write table ->
     Table.iteri table ~f:(fun ~key ~data:_ -> f key read_or_write))
 ;;
 
 module Pre = struct
-  type t = File_descr.t list Read_write.t [@@deriving sexp_of]
+  type t = File_descr.t list Read_write_pair.t [@@deriving sexp_of]
 end
 
 let set t file_descr desired =
-  Read_write.iteri t.descr_tables ~f:(fun read_or_write table ->
-    if Read_write.get desired read_or_write
+  Read_write_pair.iteri t.descr_tables ~f:(fun read_or_write table ->
+    if Read_write_pair.get desired read_or_write
     then Table.set table ~key:file_descr ~data:()
-    else Table.remove table file_descr)
+    else Table.remove table file_descr);
+  `Ok
 ;;
 
-let pre_check t = Read_write.map t.descr_tables ~f:Table.keys
+let pre_check t = Read_write_pair.map t.descr_tables ~f:Table.keys
 
 module Check_result = struct
   type t =
@@ -82,7 +83,6 @@ end
 let thread_safe_check (type a) (_ : t) (pre : Pre.t) (timeout : a Timeout.t) (span : a) =
   let timeout =
     match timeout with
-    | Never -> `Never
     | Immediately -> `Immediately
     (* Wait no longer than one second, which avoids any weirdness due to feeding large
        timeouts to select. *)

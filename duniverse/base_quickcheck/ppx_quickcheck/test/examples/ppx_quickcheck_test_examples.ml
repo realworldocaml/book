@@ -1,6 +1,13 @@
 open Base
 open Base_quickcheck
 
+(* ensure that shadowing doesn't break anything *)
+include struct
+  module Base = struct end
+  module Base_quickcheck = struct end
+  module Quickcheckable = struct end
+end
+
 module Simple_reference = struct
   type t = bool [@@deriving quickcheck]
 end
@@ -122,6 +129,15 @@ module Instance_of_binary = struct
   type t = (bool, unit option) Poly_binary.t [@@deriving quickcheck]
 end
 
+module Poly_ternary = struct
+  type ('a, 'b, 'c) t = 'a * 'b * 'c [@@deriving quickcheck]
+end
+
+module Instance_of_ternary = struct
+  type t = (bool, unit option, (unit option, bool) Poly_binary.t) Poly_ternary.t
+  [@@deriving quickcheck]
+end
+
 module Poly_with_variance = struct
   type (-'a, +'b) t = 'b * ('a -> 'b) [@@deriving quickcheck]
 end
@@ -188,6 +204,17 @@ module Mutually_recursive = struct
   and args = expr list [@@deriving quickcheck]
 end
 
+module Poly_recursive = struct
+  type 'a t =
+    | Zero
+    | Succ of 'a * 'a t
+  [@@deriving quickcheck]
+end
+
+module Instance_of_recursive = struct
+  type t = bool Poly_recursive.t [@@deriving quickcheck]
+end
+
 module Extensions = struct
   type t =
     [ `A
@@ -211,9 +238,7 @@ module Escaped = struct
     [%quickcheck.observer: int * [%custom Observer.opaque] * bool option]
   ;;
 
-  let quickcheck_shrinker =
-    [%quickcheck.shrinker: int * char * [%custom Shrinker.atomic]]
-  ;;
+  let quickcheck_shrinker = [%quickcheck.shrinker: int * char * [%custom Shrinker.atomic]]
 end
 
 module Wildcard (Elt : sig
@@ -232,8 +257,7 @@ end
 module Attribute_override = struct
   type t =
     | Null [@quickcheck.weight 0.1]
-    | Text of
-        (string[@quickcheck.generator Generator.string_of Generator.char_lowercase])
+    | Text of (string[@quickcheck.generator Generator.string_of Generator.char_lowercase])
     | Number of (float[@quickcheck.generator Generator.float_strictly_positive])
   [@@deriving quickcheck]
 end
@@ -253,4 +277,36 @@ module Deriving_from_wildcard = struct
   let compare_opaque = compare_option
   let sexp_of_opaque = sexp_of_option
   let opaque_examples = [ None; Some 0L; Some 1L ]
+end
+
+module Do_not_generate_clauses = struct
+  module Cannot_generate = struct
+    type t = bool option
+
+    let all = None :: List.map Bool.all ~f:Option.return
+    let compare = Option.compare Bool.compare
+    let sexp_of_t = Option.sexp_of_t Bool.sexp_of_t
+    let quickcheck_observer = quickcheck_observer_option quickcheck_observer_bool
+    let quickcheck_shrinker = quickcheck_shrinker_option quickcheck_shrinker_bool
+  end
+
+  type t =
+    | Can_generate of bool
+    | Cannot_generate of Cannot_generate.t [@quickcheck.do_not_generate]
+  [@@deriving quickcheck]
+
+  module Poly = struct
+    type t =
+      [ `Can_generate of bool
+      | `Cannot_generate of Cannot_generate.t [@quickcheck.do_not_generate]
+      ]
+    [@@deriving quickcheck]
+  end
+
+  module _ = struct
+    type t =
+      | A
+      | B of t [@quickcheck.do_not_generate]
+    [@@deriving quickcheck]
+  end
 end

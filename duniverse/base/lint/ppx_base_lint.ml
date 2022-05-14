@@ -53,16 +53,10 @@ let print_payload ppf = function
 let remove_loc =
   object
     inherit Ast_traverse.map
-
     method! location _ = Location.none
-
     method! location_stack _ = []
   end
 ;;
-
-(* Disable this check given that in base we replace [@cold] by [@cold] [@inline never]
-   ... in the source code *)
-let () = Ppx_js_style.cold_instead_of_inline_never := false
 
 let check current_module =
   let zero_modules = zero_modules () in

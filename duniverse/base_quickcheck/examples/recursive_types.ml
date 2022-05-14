@@ -1,7 +1,7 @@
 open! Base
 open Base_quickcheck
 
-module Binary_tree : sig
+module _ : sig
   type t =
     | Leaf
     | Node of t * t
@@ -41,7 +41,7 @@ end = struct
   ;;
 end
 
-module N_ary_tree : sig
+module _ : sig
   type 'a t = Node of 'a * 'a t list [@@deriving quickcheck]
 end = struct
   type 'a t = Node of 'a * 'a t list

@@ -1,5 +1,6 @@
 (library (name ppx_quickcheck_expander)
  (public_name base_quickcheck.ppx_quickcheck.expander)
  (libraries base ppxlib compiler-libs.common)
- (ppx_runtime_libraries base base_quickcheck)
+ (ppx_runtime_libraries base_quickcheck.ppx_quickcheck.runtime
+  base_quickcheck)
  (preprocess (pps ppxlib.metaquot)))

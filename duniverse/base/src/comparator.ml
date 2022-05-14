@@ -27,6 +27,10 @@ module type S_fc = sig
   include S with type t := comparable_t
 end
 
+module Module = struct
+  type ('a, 'b) t = (module S with type t = 'a and type comparator_witness = 'b)
+end
+
 let make (type t) ~compare ~sexp_of_t =
   (module struct
     type comparable_t = t
@@ -49,8 +53,9 @@ end
 module Make (M : sig
     type t [@@deriving_inline compare, sexp_of]
 
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S with type t := t
+
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) =
@@ -95,8 +100,9 @@ end
 module Derived (M : sig
     type 'a t [@@deriving_inline compare, sexp_of]
 
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+
+    val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) =
@@ -121,13 +127,13 @@ end
 module Derived2 (M : sig
     type ('a, 'b) t [@@deriving_inline compare, sexp_of]
 
-    val compare : ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
+    include Ppx_compare_lib.Comparable.S2 with type ('a, 'b) t := ('a, 'b) t
 
     val sexp_of_t
-      :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
-      -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+      :  ('a -> Sexplib0.Sexp.t)
+      -> ('b -> Sexplib0.Sexp.t)
       -> ('a, 'b) t
-      -> Ppx_sexp_conv_lib.Sexp.t
+      -> Sexplib0.Sexp.t
 
     [@@@end]
   end) =

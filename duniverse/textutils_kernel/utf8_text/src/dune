@@ -1,0 +1,2 @@
+(library (name utf8_text) (public_name textutils_kernel.utf8_text)
+ (libraries core uutf) (preprocess (pps ppx_jane)))

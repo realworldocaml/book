@@ -4,10 +4,11 @@ open! Import
 open! Require_explicit_time_source
 include Persistent_connection_intf
 
-module Make (Conn : T) = struct
+module Make (Conn : Closable) = struct
   include Persistent_connection_kernel.Make (Conn)
 
   let create
+        (type address)
         ~server_name
         ?log
         ?(on_event = fun _ -> Deferred.unit)
@@ -15,8 +16,10 @@ module Make (Conn : T) = struct
         ?random_state
         ?time_source
         ~connect
+        ~address
         get_address
     =
+    let (module Address : Address with type t = address) = address in
     let retry_delay =
       Option.map retry_delay ~f:(fun f () ->
         f () |> Time_ns.Span.of_span_float_round_nearest)
@@ -29,7 +32,7 @@ module Make (Conn : T) = struct
             log
             ~tags:[ "persistent-connection-to", server_name ]
             ~level:(Event.log_level event)
-            (Event.sexp_of_t event));
+            [%sexp (event : Address.t Event.t)]);
       on_event event
     in
     create
@@ -39,6 +42,7 @@ module Make (Conn : T) = struct
       ?random_state
       ?time_source
       ~connect
+      ~address
       get_address
   ;;
 end
@@ -50,6 +54,8 @@ let create_convenience_wrapper
       ?log
       ?on_event
       ?retry_delay
+      ?random_state
+      ?time_source
       ?bind_to_address
       ?implementations
       ?max_message_size
@@ -77,16 +83,15 @@ let create_convenience_wrapper
     ?log
     ?on_event
     ?retry_delay
-    ?random_state:None
-    ?time_source:None
+    ?random_state
+    ?time_source
     ~connect
+    ~address:(module Host_and_port : Address with type t = Host_and_port.t)
     get_address
 ;;
 
 module Versioned_rpc = struct
   include Make (struct
-      module Address = Host_and_port
-
       type t = Versioned_rpc.Connection_with_menu.t
 
       let rpc_connection = Versioned_rpc.Connection_with_menu.connection
@@ -105,8 +110,6 @@ end
 
 module Rpc = struct
   include Make (struct
-      module Address = Host_and_port
-
       type t = Rpc.Connection.t
 
       let close t = Rpc.Connection.close t

@@ -50,7 +50,7 @@ let annot_schema_python : Atd.Annot.schema_section =
   }
 
 let annot_schema : Atd.Annot.schema =
-  annot_schema_python :: Atdgen_emit.Json.annot_schema_json
+  annot_schema_python :: Atd.Json.annot_schema_json
 
 (* Translate a preferred variable name into an available Python identifier. *)
 let trans env id =
@@ -454,7 +454,7 @@ type assoc_kind =
   | Object_list of type_expr (* value type *)
 
 let assoc_kind loc (e : type_expr) an : assoc_kind =
-  let json_repr = Atdgen_emit.Json.get_json_list an in
+  let json_repr = Atd.Json.get_json_list an in
   let python_repr = Python_annot.get_python_assoc_repr an in
   match e, json_repr, python_repr with
   | Tuple (loc, [(_, key, _); (_, value, _)], an2), Array, Dict ->
@@ -641,7 +641,7 @@ let construct_json_field env trans_meth
   let assignment =
     [
       Line (sprintf "res['%s'] = %s(self.%s)"
-              (Atdgen_emit.Json.get_json_fname name an |> single_esc)
+              (Atd.Json.get_json_fname name an |> single_esc)
               writer_function
               (inst_var_name trans_meth name))
     ]
@@ -717,7 +717,7 @@ and tuple_reader env cells =
 let from_json_class_argument
     env trans_meth py_class_name ((loc, (name, kind, an), e) : simple_field) =
   let python_name = inst_var_name trans_meth name in
-  let json_name = Atdgen_emit.Json.get_json_fname name an in
+  let json_name = Atd.Json.get_json_fname name an in
   let unwrapped_type =
     match kind with
     | Required
@@ -917,7 +917,7 @@ let alias_wrapper env ~class_decorators name type_expr =
 
 let case_class env type_name
     (loc, orig_name, unique_name, an, opt_e) =
-  let json_name = Atdgen_emit.Json.get_json_cons orig_name an in
+  let json_name = Atd.Json.get_json_cons orig_name an in
   match opt_e with
   | None ->
       [
@@ -983,7 +983,7 @@ let read_cases0 env loc name cases0 =
   let ifs =
     cases0
     |> List.map (fun (loc, orig_name, unique_name, an, opt_e) ->
-      let json_name = Atdgen_emit.Json.get_json_cons orig_name an in
+      let json_name = Atd.Json.get_json_cons orig_name an in
       Inline [
         Line (sprintf "if x == '%s':" (single_esc json_name));
         Block [
@@ -1007,7 +1007,7 @@ let read_cases1 env loc name cases1 =
         | None -> assert false
         | Some x -> x
       in
-      let json_name = Atdgen_emit.Json.get_json_cons orig_name an in
+      let json_name = Atd.Json.get_json_cons orig_name an in
       Inline [
         Line (sprintf "if cons == '%s':" (single_esc json_name));
         Block [

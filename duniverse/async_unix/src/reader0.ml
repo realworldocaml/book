@@ -82,14 +82,8 @@ module Internal = struct
       mutable state : State.t
     ; close_finished : unit Ivar.t
     ; mutable last_read_time : Time.t
-    ; (* [open_flags] is the open-file-descriptor bits of [fd].  It is created when [t] is
-         created, and starts a deferred computation that calls [Unix.fcntl_getfl].
-         [open_flags] is used to report an error when [fd] is not readable.  [Fd] treats
-         the call to [fcntl_getfl] as an active system call, which prevents [Unix.close
-         fd] from completing until [fcntl_getfl] finishes.  This prevents a
-         file-descriptor or thread leak even though client code doesn't explicitly wait on
-         [open_flags]. *)
-      open_flags : open_flags Deferred.t
+    ; (* [open_flags] is the open-file-descriptor bits of [fd]. *)
+      open_flags : open_flags
     }
   [@@deriving fields]
 
@@ -116,8 +110,7 @@ module Internal = struct
       ; state : State.t
       ; available : int
       ; pos : int
-      ; open_flags =
-          (open_flags |> unless_testing : (open_flags Deferred.t option[@sexp.option]))
+      ; open_flags = (open_flags |> unless_testing : (open_flags option[@sexp.option]))
       ; last_read_time =
           (last_read_time |> unless_testing : (Time.t option[@sexp.option]))
       ; close_may_destroy_buf : [ `Yes | `Not_now | `Not_ever ]
@@ -150,8 +143,9 @@ module Internal = struct
               "Reader.create got non positive buf_len" (buf_len : int) (fd : Fd.t)]
     in
     let open_flags =
-      Fd.syscall_in_thread fd ~name:"fcntl_getfl" (fun file_descr ->
-        Core.Unix.fcntl_getfl file_descr)
+      (* Even though [fcntl] in general can block, [fcntl_getfl] simply reads flags that
+         are already in memory, so it does not need to be run in a separate thread. *)
+      Fd.syscall fd (fun file_descr -> Core_unix.fcntl_getfl file_descr)
     in
     { fd
     ; id = Id.create ()
@@ -205,13 +199,25 @@ module Internal = struct
     close_finished t
   ;;
 
-  let with_close t ~f = Monitor.protect f ~finally:(fun () -> close t)
+  let with_close t ~f =
+    Monitor.protect
+      ~run:
+        `Schedule
+      ~rest:`Log
+      f
+      ~finally:(fun () -> close t)
+  ;;
 
   let with_reader_exclusive t f =
     let%bind () = Unix.lockf t.fd Shared in
-    Monitor.protect f ~finally:(fun () ->
-      if not (Fd.is_closed t.fd) then Unix.unlockf t.fd;
-      return ())
+    Monitor.protect
+      ~run:
+        `Schedule
+      ~rest:`Log
+      f
+      ~finally:(fun () ->
+        if not (Fd.is_closed t.fd) then Unix.unlockf t.fd;
+        return ())
   ;;
 
   let with_file ?buf_len ?(exclusive = false) file ~f =
@@ -224,10 +230,8 @@ module Internal = struct
      returns [`Ok], otherwise it returns [`Eof]. *)
   let get_data t : [ `Ok | `Eof ] Deferred.t =
     Deferred.create (fun result ->
-      t.open_flags
-      >>> fun open_flags ->
       let eof () = Ivar.fill result `Eof in
-      match t.state, open_flags with
+      match t.state, t.open_flags with
       | `Not_in_use, _ -> assert false
       | `Closed, _ | _, `Already_closed -> eof ()
       | `In_use, ((`Error _ | `Ok _) as open_flags) ->
@@ -409,8 +413,7 @@ module Internal = struct
 
      With [force_refill = true], [with_nonempty_buffer'] will do a read, whether or not
      there is already data available in [t.buf]. *)
-  let with_nonempty_buffer' ?(force_refill = false) t (f : [ `Ok | `Eof ] -> unit) : unit
-    =
+  let with_nonempty_buffer' ?(force_refill = false) t (f : [ `Ok | `Eof ] -> unit) : unit =
     match t.state with
     | `Not_in_use -> assert false
     | `Closed -> f `Eof
@@ -647,8 +650,8 @@ module Internal = struct
         `Ok c)
   ;;
 
-  let first_char t p =
-    let limit = t.pos + t.available in
+  let first_char t p ~available =
+    let limit = t.pos + available in
     let buf = t.buf in
     match p with
     | `Pred p ->
@@ -683,20 +686,33 @@ module Internal = struct
           let concat_helper ss lst =
             Bigsubstring.concat_string (List.rev_append lst [ ss ])
           in
-          (match first_char t p with
+          let available, need_more_bytes_to_exceed_max =
+            match max with
+            | None -> t.available, true
+            | Some max ->
+              if t.available < max - total + 1
+              then t.available, true
+              else max - total + 1, false
+          in
+          (match first_char t p ~available with
            | Error _ as e -> k e
            | Ok None ->
-             let len = t.available in
-             let total = total + len in
-             let ss = Bigsubstring.create t.buf ~pos:t.pos ~len in
-             t.buf <- Bigstring.create (Bigstring.length t.buf);
-             t.pos <- 0;
-             t.available <- 0;
-             (match max with
-              | Some max when total > max ->
-                let s = concat_helper ss ac in
-                k (Ok (`Max_exceeded s))
-              | Some _ | None -> loop (ss :: ac) total)
+             (match need_more_bytes_to_exceed_max with
+              | false ->
+                let amount_consumed = available in
+                let len = amount_consumed in
+                let ss = Bigsubstring.create t.buf ~pos:t.pos ~len in
+                consume t amount_consumed;
+                let res = concat_helper ss ac in
+                k (Ok (`Max_exceeded res))
+              | true ->
+                let len = t.available in
+                let total = total + len in
+                let ss = Bigsubstring.create t.buf ~pos:t.pos ~len in
+                t.buf <- Bigstring.create (Bigstring.length t.buf);
+                t.pos <- 0;
+                t.available <- 0;
+                loop (ss :: ac) total)
            | Ok (Some pos) ->
              let amount_consumed = pos + 1 - t.pos in
              let len = if keep_delim then amount_consumed else amount_consumed - 1 in
@@ -838,10 +854,7 @@ module Internal = struct
   ;;
 
   let read_sexps ?parse_pos t = gen_read_sexps t ~sexp_kind:Plain ?parse_pos
-
-  let read_annotated_sexps ?parse_pos t =
-    gen_read_sexps t ~sexp_kind:Annotated ?parse_pos
-  ;;
+  let read_annotated_sexps ?parse_pos t = gen_read_sexps t ~sexp_kind:Annotated ?parse_pos
 
   module Peek_or_read = struct
     type t =
@@ -904,18 +917,17 @@ module Internal = struct
                  | `In_use ->
                    let pos = t.pos + Bin_prot.Utils.size_header_length in
                    pos_ref := pos;
-                   (
-                     match
-                       Or_error.try_with (fun () -> bin_prot_reader.read t.buf ~pos_ref)
-                     with
-                     | Error _ as e -> k e
-                     | Ok v ->
-                       if !pos_ref - pos <> len
-                       then error "pos_ref <> len, (%d <> %d)" (!pos_ref - pos) len ();
-                       (match peek_or_read with
-                        | Peek -> ()
-                        | Read -> consume t need);
-                       k (Ok (`Ok v)))))))
+                   (match
+                      Or_error.try_with (fun () -> bin_prot_reader.read t.buf ~pos_ref)
+                    with
+                    | Error _ as e -> k e
+                    | Ok v ->
+                      if !pos_ref - pos <> len
+                      then error "pos_ref <> len, (%d <> %d)" (!pos_ref - pos) len ();
+                      (match peek_or_read with
+                       | Peek -> ()
+                       | Read -> consume t need);
+                      k (Ok (`Ok v)))))))
   ;;
 
   let read_marshal_raw t =
@@ -923,8 +935,7 @@ module Internal = struct
       if n = 0
       then `Eof
       else
-        raise_s
-          [%message "Reader.read_marshal got EOF with bytes remaining" ~_:(n : int)]
+        raise_s [%message "Reader.read_marshal got EOF with bytes remaining" ~_:(n : int)]
     in
     let header = Bytes.create Marshal.header_size in
     match%bind really_read t header with
@@ -1129,7 +1140,7 @@ let do_read_k
 
 let read_until t p ~keep_delim = do_read_k t (read_until t p ~keep_delim) Fn.id
 
-let read_until_max t p ~keep_delim ~max =
+let read_until_bounded t p ~keep_delim ~max =
   do_read_k t (read_until_gen t p ~keep_delim ~max:(Some max)) Fn.id
 ;;
 
@@ -1249,16 +1260,21 @@ let gen_load_exn
   let may_load_file_multiple_times = ref false in
   let load ~sexp_kind =
     match%map
-      Monitor.try_with ~extract_exn:true (fun () ->
-        with_file ?exclusive file ~f:(fun t ->
-          (may_load_file_multiple_times
-           := (* Although [file] typically is of kind [Fd.Kind.File], it may also have other
-                 kinds.  We can only load it multiple times if it has kind [File]. *)
-             match Fd.kind (fd t) with
-             | File -> true
-             | Char | Fifo | Socket _ -> false);
-          use t;
-          Pipe.to_list (gen_read_sexps t ~sexp_kind)))
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        ~extract_exn:true
+        (fun () ->
+           with_file ?exclusive file ~f:(fun t ->
+             (may_load_file_multiple_times
+              := (* Although [file] typically is of kind [Fd.Kind.File], it may also have other
+                    kinds.  We can only load it multiple times if it has kind [File]. *)
+                match Fd.kind (fd t) with
+                | File -> true
+                | Char | Fifo | Socket _ -> false);
+             use t;
+             Pipe.to_list (gen_read_sexps t ~sexp_kind)))
     with
     | Ok sexps -> sexps
     | Error exn ->
@@ -1306,6 +1322,7 @@ let gen_load_sexp_exn
       ~(sexp_kind : sexp sexp_kind)
       ~file
       ~(a_of_sexp : sexp -> a)
+      ()
   =
   let multiple sexps =
     Error.create
@@ -1335,24 +1352,27 @@ let gen_load_sexp_exn
 ;;
 
 let load_sexp_exn ?exclusive file a_of_sexp =
-  gen_load_sexp_exn ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp
+  gen_load_sexp_exn ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp ()
 ;;
 
 let load_annotated_sexp_exn ?exclusive file a_of_sexp =
-  gen_load_sexp_exn ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp
+  gen_load_sexp_exn ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp ()
 ;;
 
-let gen_load_sexp ?exclusive ~sexp_kind ~file ~a_of_sexp =
-  Deferred.Or_error.try_with ~extract_exn:true (fun () ->
-    gen_load_sexp_exn ?exclusive ~sexp_kind ~file ~a_of_sexp)
+let gen_load_sexp ?exclusive ~sexp_kind ~file ~a_of_sexp () =
+  Deferred.Or_error.try_with
+    ~run:`Schedule
+    ~rest:`Log
+    ~extract_exn:true
+    (gen_load_sexp_exn ?exclusive ~sexp_kind ~file ~a_of_sexp)
 ;;
 
 let load_sexp ?exclusive file a_of_sexp =
-  gen_load_sexp ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp
+  gen_load_sexp ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp ()
 ;;
 
 let load_annotated_sexp ?exclusive file a_of_sexp =
-  gen_load_sexp ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp
+  gen_load_sexp ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp ()
 ;;
 
 let gen_load_sexps_exn
@@ -1361,6 +1381,7 @@ let gen_load_sexps_exn
       ~(sexp_kind : sexp sexp_kind)
       ~file
       ~(a_of_sexp : sexp -> a)
+      ()
   =
   gen_load_exn
     ?exclusive
@@ -1376,24 +1397,27 @@ let gen_load_sexps_exn
 ;;
 
 let load_sexps_exn ?exclusive file a_of_sexp =
-  gen_load_sexps_exn ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp
+  gen_load_sexps_exn ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp ()
 ;;
 
 let load_annotated_sexps_exn ?exclusive file a_of_sexp =
-  gen_load_sexps_exn ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp
+  gen_load_sexps_exn ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp ()
 ;;
 
-let gen_load_sexps ?exclusive ~sexp_kind ~file ~a_of_sexp =
-  Deferred.Or_error.try_with ~extract_exn:true (fun () ->
-    gen_load_sexps_exn ?exclusive ~sexp_kind ~file ~a_of_sexp)
+let gen_load_sexps ?exclusive ~sexp_kind ~file ~a_of_sexp () =
+  Deferred.Or_error.try_with
+    ~run:`Schedule
+    ~rest:`Log
+    ~extract_exn:true
+    (gen_load_sexps_exn ?exclusive ~sexp_kind ~file ~a_of_sexp)
 ;;
 
 let load_sexps ?exclusive file a_of_sexp =
-  gen_load_sexps ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp
+  gen_load_sexps ?exclusive ~sexp_kind:Plain ~file ~a_of_sexp ()
 ;;
 
 let load_annotated_sexps ?exclusive file a_of_sexp =
-  gen_load_sexps ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp
+  gen_load_sexps ?exclusive ~sexp_kind:Annotated ~file ~a_of_sexp ()
 ;;
 
 let pipe t =
@@ -1420,8 +1444,11 @@ type ('a, 'b) load_bin_prot =
 
 let load_bin_prot ?exclusive ?max_len file bin_reader =
   match%map
-    Monitor.try_with_or_error ~here:[%here] ~name:"Reader.load_bin_prot" (fun () ->
-      with_file ?exclusive file ~f:(fun t -> read_bin_prot ?max_len t bin_reader))
+    Monitor.try_with_or_error
+      ~rest:`Log
+      ~name:"Reader.load_bin_prot"
+      (fun () ->
+         with_file ?exclusive file ~f:(fun t -> read_bin_prot ?max_len t bin_reader))
   with
   | Ok (`Ok v) -> Ok v
   | Ok `Eof -> Or_error.error_string "Reader.load_bin_prot got unexpected eof"

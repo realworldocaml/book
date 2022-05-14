@@ -38,8 +38,7 @@ writing:
 open Sexplib.Std
 #+end_src
 
-If you're using [[https://github.com/janestreet/core][=Core=]] or [[https://github.com/janestreet/core_kernel][=Core_kernel=]], you can get the same effect with
-=open Core= or =open Core_kernel=.
+If you're using [[https://github.com/janestreet/core][=Core=]], you can get the same effect with =open Core=.
 
 It's also possible to construct converters based on type expressions,
 /i.e./:
@@ -67,7 +66,7 @@ putting underscores for that type name.
 
 If =ppx_sexp_conv= can derive =of_sexp=, it can also generate a description of
 the sexps that the resulting =t_of_sexp= would accept.  This is the sexp grammar.
-See =Sexplib0.Raw_grammar= for details.
+See =Sexplib0.Sexp_grammar= for details.
 
 It is possible to construct sexp grammars directly from type expressions, e.g.,
 
@@ -75,22 +74,12 @@ It is possible to construct sexp grammars directly from type expressions, e.g.,
 [%sexp_grammar: (int, bool array) Either.t Base.Map.M(String).t]
 #+END_SRC
 
-The syntax for grammars of polymorphic types is nonstandard:
-
-#+BEGIN_SRC ocaml
-[%sexp_grammar: < for_all : 'a 'b . ('a, 'b) Either.t > ]
-#+END_SRC
-
-We represent polymorphic types as object types because we cannot
-deserialize objects from sexps, and object method types are one of the
-few places we can use OCaml's syntax for explicit type variables.
-
-** Conversion rules
+* Conversion rules
 
 In the following, we'll review the serialization rules for different
 OCaml types.
 
-*** Basic types
+** Basic types
 
 Basic types are represented as atoms.  For numbers like =int=,
 =int32=, =int64=, =float=, the string in the atom is what is accepted
@@ -98,11 +87,11 @@ the standard ocaml functions =int_of_string=, =Int32.of_string=, etc.
 For the types =char= or =string=, the string in the atom is
 respectively a one character string or the string itself.
 
-*** Lists and arrays
+** Lists and arrays
 
 OCaml-lists and arrays are represented as s-expression lists.
 
-*** Tuples and unit
+** Tuples and unit
 
 OCaml tuples are treated as lists of values in the same order as in
 the tuple.  The type =unit= is treated like a 0-tuple.  /e.g./:
@@ -111,7 +100,7 @@ the tuple.  The type =unit= is treated like a 0-tuple.  /e.g./:
   (3.14, "foo", "bar bla", 27)  =>  (3.14 foo "bar bla" 27)
 #+end_src
 
-*** Options
+** Options
 
 With options, =None= is treated as a zero-element list, and =Some= is
 treated as a singleton list, as shown below.
@@ -131,7 +120,7 @@ Some value  =>  (Some value)
 
 The rules for variants are described below.
 
-*** Records
+** Records
 
 Records are represented as lists of lists, where each inner list is a
 key-value pair. Each pair consists of the name of the record field
@@ -174,7 +163,21 @@ as either present or absent, but not as containing a value.
   { enabled = false } => ()
 #+end_src
 
-**** Defaults
+The attributes =sexp.list= and =sexp.array= indicate that a list or array record
+field, respectively, can be omitted when it is empty.
+
+#+begin_src ocaml
+  type t =
+    { arr : int array [@sexp.array]
+    ; lst : int list [@sexp.list]
+    }
+  [@@deriving sexp]
+
+  { arr = [||]; lst = [] } => ()
+  { arr = [|1;2|]; lst = [3;4] } => ((arr (1 2)) (lst (3 4)))
+#+end_src
+
+*** Defaults
 
 More complex default values can be specified explicitly using several
 constructs, /e.g./:
@@ -199,7 +202,7 @@ Finally, =@sexp.omit_nil= means to treat a missing field as if it
 has value =List []= when reading, and drop the field if it has value
 =List []= when writing.
 
-***** Specifying equality for [@sexp_drop_default]
+**** Specifying equality for [@sexp_drop_default]
 
 The equality used by [@sexp_drop_default] is customizable. There
 are several ways to specify the equality function:
@@ -214,7 +217,7 @@ are several ways to specify the equality function:
     } [@@deriving sexp]
 #+end_src
 
-**** Allowing extra fields
+*** Allowing extra fields
 
 The =@sexp.allow_extra_fields= annotation lets one specify that the
 sexp-converters should silently ignore extra fields, instead of
@@ -233,7 +236,7 @@ conversion of a sexp to the record.
   (A (a 0)(b b)) => A {a = 0}
 #+end_src
 
-*** Variants
+** Variants
 
 Constant constructors in variants are represented as
 strings. Constructors with arguments are represented as lists, the
@@ -263,7 +266,20 @@ list as its argument.
   B [1; 2; 3] => (B 1 2 3)
 #+end_src
 
-*** Polymorphic variants
+*** Inline records
+
+Constructors with inline records are represented as lists, the first element
+being the constructor name, the rest being the record fields, represented the
+same way as in record types, but without being wrapped in an extra layer of
+parentheses.
+
+#+begin_src ocaml
+  type t = A of { x : int }
+
+  A { x = 8 } => (A (x 8))
+#+end_src
+
+** Polymorphic variants
 
 Polymorphic variants behave almost the same as ordinary variants.  The
 notable difference is that polymorphic variant constructors must
@@ -296,7 +312,7 @@ sexp_poly]` (resp `of_sexp_poly`) instead of `[@@deriving sexp]` (resp
   type abcd = [ ab | `C | `D ] [@@deriving sexp]
 #+end_src
 
-*** Polymorphic values
+** Polymorphic values
 
 There is nothing special about polymorphic values as long as there are
 conversion functions for the type parameters.  /e.g./:
@@ -326,7 +342,7 @@ S-expression.  Types with more than one parameter require passing
 conversion functions for those parameters in the order of their
 appearance on the left hand side of the type definition.
 
-*** Opaque values
+** Opaque values
 
 Opaque values are ones for which we do not want to perform
 conversions.  This may be, because we do not have S-expression
@@ -348,7 +364,7 @@ back to the original value.  Here is an example conversion:
   (42, some_stuff)  =>  (42 <opaque>)
 #+end_src
 
-*** Exceptions
+** Exceptions
 
 S-expression converters for exceptions can be automatically
 registered.
@@ -373,7 +389,7 @@ all arguments, as S-expressions.  The library already contains
 mappings for all known exceptions that can escape functions in the
 OCaml standard library.
 
-*** Hash tables
+** Hash tables
 
 The Stdlib's Hash tables, which are abstract values in OCaml, are
 represented as association lists, /i.e./ lists of key-value pairs,
@@ -393,7 +409,7 @@ be inserted into the hash table in the order of appearance. Therefore,
 the last binding of a key will be the "visible" one, the others are
 "hidden".  See the OCaml documentation on hash tables for details.
 
-** A note about signatures
+* A note about signatures
 
 In signatures, =ppx_sexp_conv= tries to generate an include of a named
 interface, instead of a list of value bindings.
@@ -424,7 +440,7 @@ There are however a number of limitations:
 If these aren't met, then =ppx_sexp_conv= will simply generate a list of value
 bindings.
 
-*** Weird looking type errors
+** Weird looking type errors
 
 In some cases, a type can meet all the conditions listed above, in which case the
 rewriting will apply, but lead to a type error. This happens when the type [t]
@@ -456,13 +472,14 @@ Error: In this `with' constraint, the new definition of t
 To workaround that error, simply copy the constraint on the type which has the
 =[@@deriving]= annotation. This will force generating a list of value bindings.
 
-** Deprecated syntax
+* Deprecated syntax
 
 Originally, ~ppx_sexp_conv~ used special types instead of attributes. Those
-types are now deprecated. Here are the appropriate conversions to update from
-code using now-deprecated types to the newer attributes.
+types have been replaced with attributes. Here are the appropriate conversions
+to update from code using the old types to the new attributes.
 
-*** Opaque types
+
+** Opaque types
 
 Convert uses of ~sexp_opaque~ to uses of ~[@sexp.opaque]~. The ~[@sexp.opaque]~
 attribute usually needs explicit parentheses to clarify what type it annotate.
@@ -481,7 +498,7 @@ type t = (int [@sexp.opaque]) list
 [@@deriving sexp]
 #+end_src
 
-*** Record fields
+** Record fields
 
 Convert uses of ~sexp_option~, ~sexp_list~, ~sexp_array~, and ~sexp_bool~ to
 uses of ~[@sexp.option]~, ~[@sexp.list]~, ~[@sexp.array]~, and ~[@sexp.bool]~ as
@@ -513,7 +530,7 @@ type t =
 [@@deriving sexp]
 #+end_src
 
-*** Variant constructors
+** Variant constructors
 
 Convert uses of ~sexp_list~ in variants and polymorphic variants to uses of
 ~[@sexp.list]~. You need to add the regular type ~list~ as well. Unlike

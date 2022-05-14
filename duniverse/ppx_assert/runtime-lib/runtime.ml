@@ -25,9 +25,7 @@ type 'a test_result
 
 exception E of string * Sexp.t [@@deriving sexp]
 
-let failwith message sexp = raise (E (message, sexp))
-
-let fail_in_sexp_style ~message ~pos ~here ~tag body =
+let exn_sexp_style ~message ~pos ~here ~tag body =
   let message =
     match message with
     | None -> tag
@@ -45,18 +43,21 @@ let fail_in_sexp_style ~message ~pos ~here ~tag body =
       end
     )
   in
-  failwith message sexp
+  (* Here and in other places we return exceptions, rather than directly raising, and
+     instead raise at the latest moment possible, so backtrace don't include noise from
+     these functions that construct exceptions. *)
+  E (message, sexp)
 
-let [@cold] test_pred_failed ~message ~pos ~here ~sexpifier t =
-  fail_in_sexp_style ~message ~pos ~here ~tag:"predicate failed" [
+let [@cold] exn_test_pred ~message ~pos ~here ~sexpifier t =
+  exn_sexp_style ~message ~pos ~here ~tag:"predicate failed" [
     Sexp.List [Sexp.Atom "Value"; sexpifier t]
   ]
 
 let test_pred ~pos ~sexpifier ~here ?message predicate t =
   if not (predicate t) then
-    test_pred_failed ~message ~pos ~here ~sexpifier t
+    raise (exn_test_pred ~message ~pos ~here ~sexpifier t)
 
-let r_diff : (from_:string -> to_:string -> unit) option ref = ref None
+let r_diff : (from_:string -> to_:string -> unit) option ref = ref   None
 let set_diff_function f = r_diff := f
 
 let [@cold] test_result_or_eq_failed ~sexpifier ~expect ~got =
@@ -71,7 +72,7 @@ let [@cold] test_result_or_eq_failed ~sexpifier ~expect ~got =
   end;
   `Fail (expect, got)
 
-let test_result_or_eq ~sexpifier ~comparator ?equal ~expect ~got =
+let test_result_or_eq ~sexpifier ~comparator ~equal ~expect ~got =
   let pass =
     match equal with
     | None -> comparator got expect = 0
@@ -81,25 +82,25 @@ let test_result_or_eq ~sexpifier ~comparator ?equal ~expect ~got =
   then `Pass
   else test_result_or_eq_failed ~sexpifier ~expect ~got
 
-let [@cold] test_eq_failed ~message ~pos ~here ~t1 ~t2 =
-  fail_in_sexp_style ~message ~pos ~here ~tag:"comparison failed" [
+let [@cold] exn_test_eq ~message ~pos ~here ~t1 ~t2 =
+  exn_sexp_style ~message ~pos ~here ~tag:"comparison failed" [
     t1;
     Sexp.Atom "vs";
     t2;
   ]
 
 let test_eq ~pos ~sexpifier ~comparator ~here ?message ?equal t1 t2 =
-  match test_result_or_eq ~sexpifier ~comparator ?equal ~expect:t1 ~got:t2 with
+  match test_result_or_eq ~sexpifier ~comparator ~equal ~expect:t1 ~got:t2 with
   | `Pass -> ()
-  | `Fail (t1, t2) -> test_eq_failed ~message ~pos ~here ~t1 ~t2
+  | `Fail (t1, t2) -> raise (exn_test_eq ~message ~pos ~here ~t1 ~t2)
 
-let [@cold] test_result_failed ~message ~pos ~here ~expect ~got =
-  fail_in_sexp_style ~message ~pos ~here ~tag:"got unexpected result" [
+let [@cold] exn_test_result ~message ~pos ~here ~expect ~got =
+  exn_sexp_style ~message ~pos ~here ~tag:"got unexpected result" [
     Sexp.List [Sexp.Atom "expected"; expect];
     Sexp.List [Sexp.Atom "got"; got];
   ]
 
-let test_result ~pos ~sexpifier ~comparator ~here ?message ?equal ~expect ~got =
-  match test_result_or_eq ~sexpifier ~comparator ?equal ~expect ~got with
+let[@warning "-16"] test_result ~pos ~sexpifier ~comparator ~here ?message ?equal ~expect ~got =
+  match test_result_or_eq ~sexpifier ~comparator ~equal ~expect ~got with
   | `Pass -> ()
-  | `Fail (expect, got) -> test_result_failed ~message ~pos ~here ~expect ~got
+  | `Fail (expect, got) -> raise (exn_test_result ~message ~pos ~here ~expect ~got)

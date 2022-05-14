@@ -148,7 +148,7 @@ Let's compile our program::
   read_message_wrong.ts:11:33 - error TS2339: Property 'subj' does not exist on type 'Message'.
 
   11   console.log("subject: " + msg.subj)
-                                   ~~~~
+                                     ~~~~
 
 
   Found 1 error in read_message_wrong.ts:11

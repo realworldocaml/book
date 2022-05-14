@@ -1,7 +1,7 @@
 (** Representation of parsed [%expect] lines *)
 
 open! Base
-open Import
+open Base.Exported_for_specific_uses (* for [Ppx_compare_lib] *)
 
 type t =
   | Regexp of string
@@ -12,9 +12,10 @@ type t =
 include sig
   [@@@ocaml.warning "-32"]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  val compare : t -> t -> int
-  val equal : t -> t -> bool
+  val sexp_of_t : t -> Sexplib0.Sexp.t
+
+  include Ppx_compare_lib.Comparable.S with type t := t
+  include Ppx_compare_lib.Equal.S with type t := t
 end
 [@@ocaml.doc "@inline"]
 

@@ -1,1 +1,1 @@
-include module type of struct include Core.Time_ns end
+include Time_ns_unix_intf.Time_ns_unix (** @inline *)

@@ -1,7 +1,7 @@
 (** A [Moption] is a mutable option, like ['a option ref], but with a more efficient
     implementation; in particular, [set_some] does not allocate. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type 'a t [@@deriving sexp_of]

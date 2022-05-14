@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Base
 open Base_test_helpers
 
 let%test_module _ =
@@ -10,7 +10,7 @@ let%test_module _ =
 
      let does_raise = Exn.does_raise
 
-     type nonrec 'a t = 'a t [@@deriving bin_io, sexp]
+     type nonrec 'a t = 'a t [@@deriving sexp, sexp_grammar]
 
      let capacity = capacity
      let set_capacity = set_capacity
@@ -71,7 +71,7 @@ let%test_module _ =
      ;;
 
      let%test_unit _ =
-       assert (does_raise (fun () -> (create ~capacity:(-1) () : _ Queue.t)))
+       assert (does_raise (fun () : _ Queue.t -> create ~capacity:(-1) ()))
      ;;
 
      let singleton = singleton
@@ -104,8 +104,7 @@ let%test_module _ =
      ;;
 
      let%test_unit _ =
-       assert (
-         does_raise (fun () -> (init (-1) ~f:(fun _ -> ()) : unit Queue.t)))
+       assert (does_raise (fun () : unit Queue.t -> init (-1) ~f:(fun _ -> ())))
      ;;
 
      let get = get
@@ -262,8 +261,7 @@ let%test_module _ =
              ~expect:(List.equal Int.equal (to_list t1) (to_list t2));
            [%test_result: int]
              (sign (compare Int.compare t1 t2))
-             ~expect:
-               (sign (List.compare Int.compare (to_list t1) (to_list t2)))
+             ~expect:(sign (List.compare Int.compare (to_list t1) (to_list t2)))
          ;;
 
          let lists =
@@ -415,7 +413,7 @@ let%test_module _ =
            let end_b = That_queue.to_array t_b in
            if not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "enqueue transition failure of: %s -> %s vs. %s -> %s"
                (array_string start_a)
                (array_string end_a)
@@ -430,7 +428,7 @@ let%test_module _ =
            That_queue.iter t_b ~f:(fun x -> r_b := !r_b + x);
            if !r_a <> !r_b
            then
-             failwithf
+             Printf.failwithf
                "error in iter: %s (from %s) <> %s (from %s)"
                (Int.to_string !r_a)
                (this_to_string t_a)
@@ -445,7 +443,7 @@ let%test_module _ =
            That_queue.iteri t_b ~f:(fun i x -> r_b := !r_b + (x lxor i));
            if !r_a <> !r_b
            then
-             failwithf
+             Printf.failwithf
                "error in iteri: %s (from %s) <> %s (from %s)"
                (Int.to_string !r_a)
                (this_to_string t_a)
@@ -463,7 +461,7 @@ let%test_module _ =
            if (not ([%equal: int option] a b))
            || not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "error in dequeue: %s (%s -> %s) <> %s (%s -> %s)"
                (Option.value ~default:"None" (Option.map a ~f:Int.to_string))
                (array_string start_a)
@@ -489,7 +487,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in filter: %s -> %s vs. %s -> %s"
                (this_to_string t_a)
                (this_to_string t_a')
@@ -512,7 +510,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in filteri: %s -> %s vs. %s -> %s"
                (this_to_string t_a)
                (this_to_string t_a')
@@ -530,7 +528,7 @@ let%test_module _ =
            let end_b = That_queue.to_array t_b in
            if not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "error in filter_inplace: %s -> %s vs. %s -> %s"
                (array_string start_a)
                (array_string end_a)
@@ -549,7 +547,7 @@ let%test_module _ =
            let end_b = That_queue.to_array t_b in
            if not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "error in filteri_inplace: %s -> %s vs. %s -> %s"
                (array_string start_a)
                (array_string end_a)
@@ -567,7 +565,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in concat_map: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -585,7 +583,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in concat_mapi: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -603,7 +601,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in filter_map: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -625,7 +623,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in filter_mapi: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -643,7 +641,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in map: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -661,7 +659,7 @@ let%test_module _ =
                    (This_queue.to_array t_a')
                    (That_queue.to_array t_b'))
            then
-             failwithf
+             Printf.failwithf
                "error in mapi: %s (for %s) <> %s (for %s)"
                (this_to_string t_a')
                (this_to_string t_a)
@@ -676,7 +674,7 @@ let%test_module _ =
            let b' = That_queue.counti t_b ~f in
            if a' <> b'
            then
-             failwithf
+             Printf.failwithf
                "error in counti: %d (for %s) <> %d (for %s)"
                a'
                (this_to_string t_a)
@@ -691,7 +689,7 @@ let%test_module _ =
            let b' = That_queue.existsi t_b ~f in
            if not ([%equal: bool] a' b')
            then
-             failwithf
+             Printf.failwithf
                "error in existsi: %b (for %s) <> %b (for %s)"
                a'
                (this_to_string t_a)
@@ -706,7 +704,7 @@ let%test_module _ =
            let b' = That_queue.for_alli t_b ~f in
            if not ([%equal: bool] a' b')
            then
-             failwithf
+             Printf.failwithf
                "error in for_alli: %b (for %s) <> %b (for %s)"
                a'
                (this_to_string t_a)
@@ -721,7 +719,7 @@ let%test_module _ =
            let b' = That_queue.findi t_b ~f in
            if not ([%equal: (int * int) option] a' b')
            then
-             failwithf
+             Printf.failwithf
                "error in findi: %s (for %s) <> %s (for %s)"
                (Sexp.to_string ([%sexp_of: (int * int) option] a'))
                (this_to_string t_a)
@@ -736,7 +734,7 @@ let%test_module _ =
            let b' = That_queue.find_mapi t_b ~f in
            if not ([%equal: int option] a' b')
            then
-             failwithf
+             Printf.failwithf
                "error in find_mapi: %s (for %s) <> %s (for %s)"
                (Sexp.to_string ([%sexp_of: int option] a'))
                (this_to_string t_a)
@@ -754,7 +752,7 @@ let%test_module _ =
            let end_b = That_queue.to_array copy_b in
            if not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "error in copy: %s -> %s vs. %s -> %s"
                (array_string start_a)
                (array_string end_a)
@@ -783,7 +781,7 @@ let%test_module _ =
            if (not ([%equal: int array] end_a' end_b'))
            || not ([%equal: int array] end_a end_b)
            then
-             failwithf
+             Printf.failwithf
                "error in transfer: %s -> (%s, %s) vs. %s -> (%s, %s)"
                (array_string start_a)
                (array_string end_a)
@@ -800,7 +798,7 @@ let%test_module _ =
            let that_l = make_list That_queue.fold t_b in
            if not ([%equal: int list] this_l that_l)
            then
-             failwithf
+             Printf.failwithf
                "error in fold:  %s (from %s) <> %s (from %s)"
                (Sexp.to_string (this_l |> [%sexp_of: int list]))
                (this_to_string t_a)
@@ -817,7 +815,7 @@ let%test_module _ =
            let that_l = make_list That_queue.foldi t_b in
            if not ([%equal: (int * int) list] this_l that_l)
            then
-             failwithf
+             Printf.failwithf
                "error in foldi:  %s (from %s) <> %s (from %s)"
                (Sexp.to_string (this_l |> [%sexp_of: (int * int) list]))
                (this_to_string t_a)
@@ -831,7 +829,7 @@ let%test_module _ =
            let that_len = That_queue.length t_b in
            if this_len <> that_len
            then
-             failwithf
+             Printf.failwithf
                "error in length: %i (for %s) <> %i (for %s)"
                this_len
                (this_to_string t_a)
@@ -850,7 +848,7 @@ let%test_module _ =
                let arr_b = That_queue.to_array t_b in
                if not ([%equal: int array] arr_a arr_b)
                then
-                 failwithf
+                 Printf.failwithf
                    "queue final states not equal: %s vs. %s"
                    (array_string arr_a)
                    (array_string arr_b)
@@ -920,9 +918,6 @@ let%test_module _ =
          ;;
        end)
      ;;
-
-     let binary_search = binary_search
-     let binary_search_segmented = binary_search_segmented
 
      let%test_unit "modification-during-iteration" =
        let x = `A 0 in
@@ -994,29 +989,8 @@ let%test_module _ =
        assert (does_raise (fun () -> iter t ~f));
        assert (not !reached_unreachable)
      ;;
-
-     module Stable = struct
-       module V1 = Stable.V1
-
-       include Stable_unit_test.Make (struct
-           type nonrec t = int V1.t [@@deriving sexp, bin_io, compare]
-
-           let equal = [%compare.equal: t]
-
-           let tests =
-             let manipulated = Queue.of_list [ 0; 3; 6; 1 ] in
-             ignore (Queue.dequeue_exn manipulated : int);
-             ignore (Queue.dequeue_exn manipulated : int);
-             Queue.enqueue manipulated 4;
-             [ Queue.of_list [], "()", "\000"
-             ; Queue.of_list [ 1; 2; 6; 4 ], "(1 2 6 4)", "\004\001\002\006\004"
-             ; manipulated, "(6 1 4)", "\003\006\001\004"
-             ]
-           ;;
-         end)
-     end
    end
    (* This signature is here to remind us to update the unit tests whenever we
-      change [Core_queue]. *) :
+      change [Queue]. *) :
      module type of Queue))
 ;;

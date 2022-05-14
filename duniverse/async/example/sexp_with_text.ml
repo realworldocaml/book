@@ -53,7 +53,7 @@ let rec edit_loop t =
       | Some x -> x
       | None -> Sexp.With_text.of_value [%sexp_of: (int * string) list] []
     in
-    let filename = Filename.temp_file "test" ".scm" in
+    let filename = Filename_unix.temp_file "test" ".scm" in
     Writer.save filename ~contents:(Sexp.With_text.text current)
     >>= fun () ->
     edit_file (module Data) filename

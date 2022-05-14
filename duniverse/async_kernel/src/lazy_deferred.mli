@@ -26,12 +26,17 @@
 
     See also [Deferred.Memo.unit], if you only are interested in [create] and [force]. *)
 
-open! Core_kernel
+open! Core
 
 type 'a t
 
 (** [create f] creates a new lazy deferred that will call [f] when it is forced. *)
 val create : (unit -> 'a Deferred.t) -> 'a t
+
+(** Same as {!create} but allows [f] to explicitly return errors as well as
+    raise. The two cases are joined and not distingused in the result of
+    {!force}. *)
+val create_or_error : (unit -> 'a Deferred.Or_error.t) -> 'a t
 
 (** [force t] forces evaluation of [t] and returns a deferred that becomes determined
     when the deferred computation becomes determined or raises. *)
@@ -45,10 +50,15 @@ val wait : 'a t -> 'a Or_error.t Deferred.t
 
 val wait_exn : 'a t -> 'a Deferred.t
 
+(** This monad is designed to let you write as though you are in a lazy language, where
+    all computations only run when needed (forced). If your use case just has a few lazy
+    computations and you want to reason about them the same way you reason about regular
+    deferreds (where [map/bind] means run the next step once the previous is determined),
+    see [Laziness_preserving_deferred]. *)
+
 (** [bind t f] in the lazy-deferred monad creates a computation that, when forced, will
     force [t], apply [f] to the result, and then force the result of that. *)
-include
-  Monad with type 'a t := 'a t
+include Monad with type 'a t := 'a t
 
 (** [bind'] differs from [bind] in that the supplied function produces an ['a Deferred.t]
     rather than an ['a t]. *)

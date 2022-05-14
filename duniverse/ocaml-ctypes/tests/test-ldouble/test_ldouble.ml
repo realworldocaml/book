@@ -258,16 +258,15 @@ let test_comparisons _ =
   end
 
 let test_int_conversions _ =
-  skip_if
-    (Sys.int_size > 8 * Ctypes.sizeof Ctypes.ldouble)
-    "Needs long double larger than int";
   begin
-    assert_equal max_int (LDouble.to_int
-			    (LDouble.of_int max_int))
+    let max_ok = 1 lsr 53 in
+    let min_ok = -max_ok in
+    assert_equal max_ok (LDouble.to_int
+			    (LDouble.of_int max_ok))
       ~printer:string_of_int;
 
-    assert_equal min_int (LDouble.to_int
-			    (LDouble.of_int min_int))
+    assert_equal min_ok (LDouble.to_int
+			    (LDouble.of_int min_ok))
       ~printer:string_of_int;
   end
     

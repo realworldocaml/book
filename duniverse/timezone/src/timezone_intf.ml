@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 module type Extend_zone = sig
   type t
@@ -50,7 +50,7 @@ end
 module type Timezone = sig
   module type Extend_zone = Extend_zone
 
-  include Core_kernel_private.Time_zone.S with type t = Time.Zone.t
+  include Core_private.Time_zone.S with type t = Time.Zone.t
   include Extend_zone with type t := t
 
   module Stable : sig
@@ -58,7 +58,7 @@ module type Timezone = sig
       type nonrec t = t [@@deriving bin_io, compare, hash, sexp]
     end
 
-    include Core_kernel_private.Time_zone.S_stable with type t := t
+    include Core_private.Time_zone.S_stable with type t := t
   end
 
   (**/**)

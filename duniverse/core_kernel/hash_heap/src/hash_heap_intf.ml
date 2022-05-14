@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 module type Key = Hashtbl.Key_plain
@@ -42,4 +42,7 @@ module type S = sig
   val to_alist : 'a t -> (Key.t * 'a) list
 
   val length : 'a t -> int
+
+  (** Removes all values, leaving the hash heap empty. **)
+  val clear : 'a t -> unit
 end

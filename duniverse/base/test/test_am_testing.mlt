@@ -1,5 +1,4 @@
 open! Base
-
 open! Expect_test_helpers_base
 
 let () = print_s [%sexp (Exported_for_specific_uses.am_testing : bool)]

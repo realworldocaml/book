@@ -17,16 +17,12 @@ open Import
 module Timeout = struct
   type 'a t =
     (*_ performance hack: avoid allocation *)
-    | Never : unit t
     | Immediately : unit t
     | After : Time_ns.Span.t t
 
-  let variant_of
-    : type a. a t -> a -> [ `Never | `Immediately | `After of Time_ns.Span.t ]
-    =
+  let variant_of : type a. a t -> a -> [ `Immediately | `After of Time_ns.Span.t ] =
     fun t span_or_unit ->
     match t with
-    | Never -> `Never
     | Immediately -> `Immediately
     | After -> `After (span_or_unit : Time_ns.Span.t)
   ;;
@@ -34,9 +30,9 @@ end
 
 module type S = sig
   (** A file-descr-watcher is essentially a map from [File_descr.t] to [bool
-      Read_write.t], which defines the set of file descriptors being watched, and for each
-      file descriptor, whether it is being watched for read, write, or both.  If a file
-      descriptor is not being watched for either, it is not in the map. *)
+      Read_write_pair.t], which defines the set of file descriptors being watched, and for
+      each file descriptor, whether it is being watched for read, write, or both. If a
+      file descriptor is not being watched for either, it is not in the map. *)
   type t [@@deriving sexp_of]
 
   include Invariant.S with type t := t
@@ -58,12 +54,15 @@ module type S = sig
 
   (** [set] alters the map of file descriptors being watched.  It will take effect on the
       next call to [thread_safe_check].  Calling [set fd] with [{ read = false, write =
-      false }] removes [fd] from the map. *)
-  val set : t -> File_descr.t -> bool Read_write.t -> unit
+      false }] removes [fd] from the map.
+      [`Unsupported] can be returned for file descriptors that do not support polling.
+      This usually (always?) means that they are always ready for read or write.
+  *)
+  val set : t -> File_descr.t -> bool Read_write_pair.t -> [ `Ok | `Unsupported ]
 
   (** [iter t ~f] iterates over every file descriptor in the map, apply [f] to it once
       for each of \{`Read,`Write\} that it is being watched for. *)
-  val iter : t -> f:(File_descr.t -> Read_write.Key.t -> unit) -> unit
+  val iter : t -> f:(File_descr.t -> Read_write_pair.Key.t -> unit) -> unit
 
   (** [pre_check t] does whatever non-thread-safe work is necessary to prepare for the
       system call that checks file descriptors being ready for read or write.  [pre_check]

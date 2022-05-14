@@ -4,7 +4,7 @@
     [Deferred.Sequence].  The [Monad_sequence.how] type specifies the parallelism of
     container iterators. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type how =

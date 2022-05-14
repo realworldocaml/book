@@ -152,16 +152,19 @@ let ( /. ) = Caml.( /. )
 module Poly = Poly0 (** @canonical Base.Poly *)
 
 module Int_replace_polymorphic_compare = struct
-  let ( < ) (x : int) y = Poly.( < ) x y
-  let ( <= ) (x : int) y = Poly.( <= ) x y
-  let ( <> ) (x : int) y = Poly.( <> ) x y
-  let ( = ) (x : int) y = Poly.( = ) x y
-  let ( > ) (x : int) y = Poly.( > ) x y
-  let ( >= ) (x : int) y = Poly.( >= ) x y
-  let compare (x : int) y = bool_to_int (x > y) - bool_to_int (x < y)
+  (* Declared as externals so that the compiler skips the caml_apply_X wrapping even when
+     compiling without cross library inlining. *)
+  external ( = ) : int -> int -> bool = "%equal"
+  external ( <> ) : int -> int -> bool = "%notequal"
+  external ( < ) : int -> int -> bool = "%lessthan"
+  external ( > ) : int -> int -> bool = "%greaterthan"
+  external ( <= ) : int -> int -> bool = "%lessequal"
+  external ( >= ) : int -> int -> bool = "%greaterequal"
+  external compare : int -> int -> int = "%compare"
+  external equal : int -> int -> bool = "%equal"
+
   let ascending (x : int) y = compare x y
   let descending (x : int) y = compare y x
-  let equal (x : int) y = Poly.equal x y
   let max (x : int) y = if x >= y then x else y
   let min (x : int) y = if x <= y then x else y
 end
@@ -184,16 +187,19 @@ module Int32_replace_polymorphic_compare = struct
 end
 
 module Int64_replace_polymorphic_compare = struct
-  let ( < ) (x : Caml.Int64.t) y = Poly.( < ) x y
-  let ( <= ) (x : Caml.Int64.t) y = Poly.( <= ) x y
-  let ( <> ) (x : Caml.Int64.t) y = Poly.( <> ) x y
-  let ( = ) (x : Caml.Int64.t) y = Poly.( = ) x y
-  let ( > ) (x : Caml.Int64.t) y = Poly.( > ) x y
-  let ( >= ) (x : Caml.Int64.t) y = Poly.( >= ) x y
+  (* Declared as externals so that the compiler skips the caml_apply_X wrapping even when
+     compiling without cross library inlining. *)
+  external ( = ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%equal"
+  external ( <> ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%notequal"
+  external ( < ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%lessthan"
+  external ( > ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%greaterthan"
+  external ( <= ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%lessequal"
+  external ( >= ) : Caml.Int64.t -> Caml.Int64.t -> bool = "%greaterequal"
+  external compare : Caml.Int64.t -> Caml.Int64.t -> int = "%compare"
+  external equal : Caml.Int64.t -> Caml.Int64.t -> bool = "%equal"
+
   let ascending (x : Caml.Int64.t) y = Poly.ascending x y
   let descending (x : Caml.Int64.t) y = Poly.descending x y
-  let compare (x : Caml.Int64.t) y = Poly.compare x y
-  let equal (x : Caml.Int64.t) y = Poly.equal x y
   let max (x : Caml.Int64.t) y = if x >= y then x else y
   let min (x : Caml.Int64.t) y = if x <= y then x else y
 end

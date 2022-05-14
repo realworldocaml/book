@@ -1,5 +1,5 @@
 open! Base
-open Expect_test_helpers_core
+open Expect_test_helpers_base
 
 type int_hashtbl = int Hashtbl.M(Int).t [@@deriving sexp]
 
@@ -7,8 +7,7 @@ let%test "Hashtbl.merge succeeds with first-class-module interface" =
   let t1 = Hashtbl.create (module Int) in
   let t2 = Hashtbl.create (module Int) in
   let result =
-    Hashtbl.merge t1 t2 ~f:(fun ~key:_ ->
-      function
+    Hashtbl.merge t1 t2 ~f:(fun ~key:_ -> function
       | `Left x -> x
       | `Right x -> x
       | `Both _ -> assert false)
@@ -59,9 +58,7 @@ let%expect_test "[t_of_sexp] error on duplicate" =
 
 let%expect_test "[choose], [choose_exn]" =
   let test ?size l =
-    let t =
-      l |> List.map ~f:(fun i -> i, i) |> Hashtbl.of_alist_exn ?size (module Int)
-    in
+    let t = l |> List.map ~f:(fun i -> i, i) |> Hashtbl.of_alist_exn ?size (module Int) in
     print_s
       [%message
         ""
@@ -112,79 +109,18 @@ let%expect_test "[choose], [choose_exn]" =
      (choose_exn (Ok (_ _)))) |}]
 ;;
 
-let%expect_test "find_and_call_1_and_2" =
-  let test x =
-    let t = Hashtbl.create (module Int) ~size:16 ~growth_allowed:false in
-    for i = 0 to x - 1 do
-      Hashtbl.add_exn t ~key:i ~data:(i * 7)
-    done;
-    let if_found a b = assert (a = b) in
-    let if_not_found a b =
-      assert (a = x);
-      assert (b = x * 7)
-    in
-    require_no_allocation [%here] (fun () ->
-      for i = 0 to x do
-        Hashtbl.find_and_call1 t i ~a:(i * 7) ~if_found ~if_not_found
-      done);
-    let if_found ~key ~data:a b =
-      assert (a = b);
-      assert (key = a / 7)
-    in
-    let if_not_found a b =
-      assert (a = x);
-      assert (b = x * 7)
-    in
-    require_no_allocation [%here] (fun () ->
-      for i = 0 to x do
-        Hashtbl.findi_and_call1 t i ~a:(i * 7) ~if_found ~if_not_found
-      done);
-    let if_found a b c =
-      assert (a = b);
-      assert (b = c / 2)
-    in
-    let if_not_found a b c =
-      assert (a = x);
-      assert (b = x * 7);
-      assert (c = x * 14)
-    in
-    require_no_allocation [%here] (fun () ->
-      for i = 0 to x do
-        Hashtbl.find_and_call2 t i ~a:(i * 7) ~b:(i * 14) ~if_found ~if_not_found
-      done);
-    let if_found ~key ~data:a b c =
-      assert (a = b);
-      assert (b = c / 2);
-      assert (key = a / 7)
-    in
-    let if_not_found a b c =
-      assert (a = x);
-      assert (b = x * 7);
-      assert (c = x * 14)
-    in
-    require_no_allocation [%here] (fun () ->
-      for i = 0 to x do
-        Hashtbl.findi_and_call2 t i ~a:(i * 7) ~b:(i * 14) ~if_found ~if_not_found
-      done);
-    print_s (Int.sexp_of_t x)
+let%expect_test "update_and_return" =
+  let t = Hashtbl.create (module String) in
+  let update_and_return str ~f =
+    let x = Hashtbl.update_and_return t str ~f in
+    print_s [%message (t : (string, int) Hashtbl.t) (x : int)]
   in
-  (* try various load factors, to exercise all branches of matching on the structure of
-     the avl tree *)
-  test 1;
-  test 3;
-  test 10;
-  test 17;
-  test 25;
-  test 29;
-  test 33;
-  test 3133;
-  [%expect {|
-    1
-    3
-    10
-    17
-    25
-    29
-    33
-    3_133 |}]
+  update_and_return "foo" ~f:(function
+    | None -> 1
+    | Some _ -> failwith "no");
+  [%expect {| ((t ((foo 1))) (x 1)) |}];
+  update_and_return "foo" ~f:(function
+    | Some 1 -> 2
+    | _ -> failwith "no");
+  [%expect {| ((t ((foo 2))) (x 2)) |}]
 ;;

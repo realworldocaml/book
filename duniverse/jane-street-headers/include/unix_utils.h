@@ -42,19 +42,4 @@ static inline ssize_t jane_writev(int fd, struct iovec *iov, int iovcnt)
   return ret;
 }
 
-
-/* if https://caml.inria.fr/mantis/view.php?id=5154 gets done we can remove these */
-static inline value core_Val_some(value v)
-{
-  CAMLparam1(v);
-  value some;
-
-  some = caml_alloc_small(1, 0);
-  Field(some, 0) = v;
-
-  CAMLreturn(some);
-}
-
-#define core_Val_none Val_int(0)
-
 #endif /* UNIX_UTILS_H */

@@ -3,7 +3,7 @@
 
    This interface serves as a reference of which Python-specific
    ATD annotations are supported. Atdpy also honors JSON-related annotations
-   defined in [Atdgen_emit.Json].
+   defined in [Atd.Json].
 *)
 
 (** Extract ["42"] from [<python default="42">].

@@ -17,3 +17,28 @@
  (alias runtest)
  (deps test2.out.atd)
  (action (diff test2.expected.atd test2.out.atd)))
+
+;;;;;;;;;;;;;;;;;;;;;; Test JSON Schema output
+
+; Translate ATD -> JSON Schema
+(rule
+ (targets schema.json)
+ (deps schema.atd)
+ (action (run %{bin:atdcat} %{deps} -o %{targets} -jsonschema root)))
+
+(rule
+ (alias runtest)
+ (deps
+   schema.json
+   data.json
+ )
+ (action
+   (progn
+     ; Check JSON Schema output
+     (diff schema.expected.json schema.json)
+
+     ; Check that the JSON Schema is valid and compatible with some JSON data
+     (run python3 -m jsonschema schema.json -i data.json)
+   )
+ )
+)

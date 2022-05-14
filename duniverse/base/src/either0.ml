@@ -3,7 +3,7 @@ open! Import
 type ('f, 's) t =
   | First of 'f
   | Second of 's
-[@@deriving_inline compare, hash, sexp]
+[@@deriving_inline compare, hash, sexp, sexp_grammar]
 
 let compare :
   'f 's. ('f -> 'f -> int) -> ('s -> 's -> int) -> ('f, 's) t -> ('f, 's) t -> int
@@ -39,56 +39,90 @@ let hash_fold_t
     _hash_fold_s hsv _a0
 ;;
 
-let t_of_sexp
-  : type f s.
-    (Ppx_sexp_conv_lib.Sexp.t -> f)
-    -> (Ppx_sexp_conv_lib.Sexp.t -> s)
-    -> Ppx_sexp_conv_lib.Sexp.t
-    -> (f, s) t
+let t_of_sexp :
+  'f 's.
+  (Sexplib0.Sexp.t -> 'f) -> (Sexplib0.Sexp.t -> 's) -> Sexplib0.Sexp.t -> ('f, 's) t
   =
-  let _tp_loc = "either0.ml.t" in
-  fun _of_f _of_s -> function
-    | Ppx_sexp_conv_lib.Sexp.List
-        (Ppx_sexp_conv_lib.Sexp.Atom (("first" | "First") as _tag) :: sexp_args) as _sexp
-      ->
-      (match sexp_args with
-       | [ v0 ] ->
-         let v0 = _of_f v0 in
-         First v0
-       | _ -> Ppx_sexp_conv_lib.Conv_error.stag_incorrect_n_args _tp_loc _tag _sexp)
-    | Ppx_sexp_conv_lib.Sexp.List
-        (Ppx_sexp_conv_lib.Sexp.Atom (("second" | "Second") as _tag) :: sexp_args) as
-      _sexp ->
-      (match sexp_args with
-       | [ v0 ] ->
-         let v0 = _of_s v0 in
-         Second v0
-       | _ -> Ppx_sexp_conv_lib.Conv_error.stag_incorrect_n_args _tp_loc _tag _sexp)
-    | Ppx_sexp_conv_lib.Sexp.Atom ("first" | "First") as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.stag_takes_args _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.Atom ("second" | "Second") as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.stag_takes_args _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.List _ :: _) as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.List [] as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.empty_list_invalid_sum _tp_loc sexp
-    | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp
+  fun (type f__023_ s__024_)
+      :  ((Sexplib0.Sexp.t -> f__023_) -> (Sexplib0.Sexp.t -> s__024_) -> Sexplib0.Sexp.t
+          -> (f__023_, s__024_) t) ->
+    let error_source__011_ = "either0.ml.t" in
+    fun _of_f__007_ _of_s__008_ -> function
+      | Sexplib0.Sexp.List
+          (Sexplib0.Sexp.Atom (("first" | "First") as _tag__014_) :: sexp_args__015_) as
+        _sexp__013_ ->
+        (match sexp_args__015_ with
+         | [ arg0__016_ ] ->
+           let res0__017_ = _of_f__007_ arg0__016_ in
+           First res0__017_
+         | _ ->
+           Sexplib0.Sexp_conv_error.stag_incorrect_n_args
+             error_source__011_
+             _tag__014_
+             _sexp__013_)
+      | Sexplib0.Sexp.List
+          (Sexplib0.Sexp.Atom (("second" | "Second") as _tag__019_) :: sexp_args__020_) as
+        _sexp__018_ ->
+        (match sexp_args__020_ with
+         | [ arg0__021_ ] ->
+           let res0__022_ = _of_s__008_ arg0__021_ in
+           Second res0__022_
+         | _ ->
+           Sexplib0.Sexp_conv_error.stag_incorrect_n_args
+             error_source__011_
+             _tag__019_
+             _sexp__018_)
+      | Sexplib0.Sexp.Atom ("first" | "First") as sexp__012_ ->
+        Sexplib0.Sexp_conv_error.stag_takes_args error_source__011_ sexp__012_
+      | Sexplib0.Sexp.Atom ("second" | "Second") as sexp__012_ ->
+        Sexplib0.Sexp_conv_error.stag_takes_args error_source__011_ sexp__012_
+      | Sexplib0.Sexp.List (Sexplib0.Sexp.List _ :: _) as sexp__010_ ->
+        Sexplib0.Sexp_conv_error.nested_list_invalid_sum error_source__011_ sexp__010_
+      | Sexplib0.Sexp.List [] as sexp__010_ ->
+        Sexplib0.Sexp_conv_error.empty_list_invalid_sum error_source__011_ sexp__010_
+      | sexp__010_ ->
+        Sexplib0.Sexp_conv_error.unexpected_stag error_source__011_ sexp__010_
 ;;
 
-let sexp_of_t
-  : type f s.
-    (f -> Ppx_sexp_conv_lib.Sexp.t)
-    -> (s -> Ppx_sexp_conv_lib.Sexp.t)
-    -> (f, s) t
-    -> Ppx_sexp_conv_lib.Sexp.t
+let sexp_of_t :
+  'f 's.
+  ('f -> Sexplib0.Sexp.t) -> ('s -> Sexplib0.Sexp.t) -> ('f, 's) t -> Sexplib0.Sexp.t
   =
-  fun _of_f _of_s -> function
-    | First v0 ->
-      let v0 = _of_f v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "First"; v0 ]
-    | Second v0 ->
-      let v0 = _of_s v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Second"; v0 ]
+  fun (type f__031_ s__032_)
+      :  ((f__031_ -> Sexplib0.Sexp.t) -> (s__032_ -> Sexplib0.Sexp.t)
+          -> (f__031_, s__032_) t -> Sexplib0.Sexp.t) ->
+    fun _of_f__025_ _of_s__026_ -> function
+      | First arg0__027_ ->
+        let res0__028_ = _of_f__025_ arg0__027_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "First"; res0__028_ ]
+      | Second arg0__029_ ->
+        let res0__030_ = _of_s__026_ arg0__029_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Second"; res0__030_ ]
+;;
+
+let (t_sexp_grammar :
+       'f Sexplib0.Sexp_grammar.t
+     -> 's Sexplib0.Sexp_grammar.t
+     -> ('f, 's) t Sexplib0.Sexp_grammar.t)
+  =
+  fun _'f_sexp_grammar _'s_sexp_grammar ->
+  { untyped =
+      Variant
+        { case_sensitivity = Case_sensitive_except_first_character
+        ; clauses =
+            [ No_tag
+                { name = "First"
+                ; clause_kind =
+                    List_clause { args = Cons (_'f_sexp_grammar.untyped, Empty) }
+                }
+            ; No_tag
+                { name = "Second"
+                ; clause_kind =
+                    List_clause { args = Cons (_'s_sexp_grammar.untyped, Empty) }
+                }
+            ]
+        }
+  }
 ;;
 
 [@@@end]

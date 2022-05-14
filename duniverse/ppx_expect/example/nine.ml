@@ -22,7 +22,7 @@
    Generate with [cp nine.ml.corrected nine.ml] the following [%expect]... *)
 
 let%expect_test _ =
-  let module M = struct
+  let module _ = struct
     let () =
       print_string "hello";
       [%expect {| hello |}]

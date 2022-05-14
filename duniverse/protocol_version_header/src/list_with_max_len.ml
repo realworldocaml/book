@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 include List_with_max_len_intf
 
 module Make (Config : Config) = struct

@@ -7,11 +7,12 @@ type 'a t =
   | Incl of 'a
   | Excl of 'a
   | Unbounded
-[@@deriving_inline enumerate, sexp]
+[@@deriving_inline enumerate, sexp, sexp_grammar]
 
-val all : 'a list -> 'a t list
+include Ppx_enumerate_lib.Enumerable.S1 with type 'a t := 'a t
+include Sexplib0.Sexpable.S1 with type 'a t := 'a t
 
-include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
@@ -37,10 +38,11 @@ type interval_comparison =
   | Below_lower_bound
   | In_range
   | Above_upper_bound
-[@@deriving_inline sexp, compare, hash]
+[@@deriving_inline sexp, sexp_grammar, compare, hash]
 
-val sexp_of_interval_comparison : interval_comparison -> Ppx_sexp_conv_lib.Sexp.t
-val interval_comparison_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> interval_comparison
+val sexp_of_interval_comparison : interval_comparison -> Sexplib0.Sexp.t
+val interval_comparison_of_sexp : Sexplib0.Sexp.t -> interval_comparison
+val interval_comparison_sexp_grammar : interval_comparison Sexplib0.Sexp_grammar.t
 val compare_interval_comparison : interval_comparison -> interval_comparison -> int
 
 val hash_fold_interval_comparison

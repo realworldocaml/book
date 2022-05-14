@@ -10,7 +10,7 @@ module Scheduler = Raw_scheduler
 let the_one_and_only = Scheduler.the_one_and_only
 
 let handle ?stop ts ~f =
-  let scheduler = the_one_and_only ~should_lock:true in
+  let scheduler = the_one_and_only () in
   let signal_manager = scheduler.signal_manager in
   let handler =
     Raw_signal_manager.install_handler
@@ -25,7 +25,7 @@ let handle ?stop ts ~f =
 let terminating = [ alrm; hup; int; term; usr1; usr2 ]
 
 let is_managed_by_async t =
-  let scheduler = the_one_and_only ~should_lock:true in
+  let scheduler = the_one_and_only () in
   let signal_manager = scheduler.signal_manager in
   Raw_signal_manager.is_managing signal_manager t
 ;;

@@ -67,7 +67,7 @@ let test byte_order =
           Int32.to_string
   ; ("[pack|unpack]_signed_32_int"
      >::
-     if Sys.word_size = 64
+     if Sys.word_size_in_bits = 64
      then
        inverses
          ( + )

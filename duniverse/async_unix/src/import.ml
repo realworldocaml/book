@@ -1,4 +1,8 @@
 open Core
+module Unix = Core_unix
+module Thread = Core_thread
+module Time = Time_unix
+module Time_ns = Time_ns_unix
 include Int.Replace_polymorphic_compare
 include Async_kernel
 module Epoll_max_ready_events = Config.Epoll_max_ready_events

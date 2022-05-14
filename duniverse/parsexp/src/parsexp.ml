@@ -10,120 +10,47 @@ module Old_parser_cont_state = Old_parser_cont_state
 module Parse_error = Parse_error
 module Positions = Positions
 module Cst = Cst
-module A = Parser_automaton
+module A = Automaton
 
 exception Parse_error = Parse_error.Parse_error
 exception Of_sexp_error = Of_sexp_error.Of_sexp_error
 
-module Single =
-  Parser.Make
-    (Kind.Sexp)
-    (struct
-      type parsed_value = Sexp.t
+let const c _ = c
 
-      let mode = A.Single
-      let make_value _ stack = Automaton_stack.get_single stack
-    end)
+module Single = (val Parser.make Sexp Single (const Automaton_stack.get_single))
+module Many = (val Parser.make Sexp Many (const Automaton_stack.get_many))
+module Eager = (val Parser.make_eager Sexp (const Automaton_stack.get_single))
 
-module Many =
-  Parser.Make
-    (Kind.Sexp)
-    (struct
-      type parsed_value = Sexp.t list
+let and_get_positions get_sexp state stack = get_sexp stack, A.positions state
 
-      let mode = A.Many
-      let make_value _ stack = Automaton_stack.get_many stack
-    end)
+let and_positions mode get_sexp =
+  Parser.make Sexp_with_positions mode (and_get_positions get_sexp)
+;;
 
-module Eager =
-  Parser.Make_eager
-    (Kind.Sexp)
-    (struct
-      type parsed_value = Sexp.t
-
-      let make_value _ stack = Automaton_stack.get_single stack
-    end)
-
-module Single_and_positions =
-  Parser.Make
-    (Kind.Sexp_with_positions)
-    (struct
-      type parsed_value = Sexp.t * Positions.t
-
-      let mode = A.Single
-      let make_value state stack = Automaton_stack.get_single stack, A.positions state
-    end)
-
-module Many_and_positions =
-  Parser.Make
-    (Kind.Sexp_with_positions)
-    (struct
-      type parsed_value = Sexp.t list * Positions.t
-
-      let mode = A.Many
-      let make_value state stack = Automaton_stack.get_many stack, A.positions state
-    end)
+module Single_and_positions = (val and_positions Single Automaton_stack.get_single)
+module Many_and_positions = (val and_positions Many Automaton_stack.get_many)
 
 module Eager_and_positions =
-  Parser.Make_eager
-    (Kind.Sexp_with_positions)
-    (struct
-      type parsed_value = Sexp.t * Positions.t
+  (val Parser.make_eager
+         Sexp_with_positions
+         (Automaton_stack.get_single |> and_get_positions))
 
-      let make_value state stack = Automaton_stack.get_single stack, A.positions state
-    end)
+let just_get_positions state () = A.positions state
+let just_positions mode = Parser.make Positions mode just_get_positions
 
-module Single_just_positions =
-  Parser.Make
-    (Kind.Positions)
-    (struct
-      type parsed_value = Positions.t
+module Single_just_positions = (val just_positions Single)
+module Many_just_positions = (val just_positions Many)
+module Eager_just_positions = (val Parser.make_eager Positions just_get_positions)
 
-      let mode = A.Single
-      let make_value state () = A.positions state
-    end)
+let cst mode f = Parser.make Cst mode (const f)
 
-module Many_just_positions =
-  Parser.Make
-    (Kind.Positions)
-    (struct
-      type parsed_value = Positions.t
-
-      let mode = A.Many
-      let make_value state () = A.positions state
-    end)
-
-module Eager_just_positions =
-  Parser.Make_eager
-    (Kind.Positions)
-    (struct
-      type parsed_value = Positions.t
-
-      let make_value state () = A.positions state
-    end)
-
-module Many_cst =
-  Parser.Make
-    (Kind.Cst)
-    (struct
-      type parsed_value = Cst.t_or_comment list
-
-      let mode = A.Many
-      let make_value _ stack = Automaton_stack.For_cst.get_many stack
-    end)
+module Many_cst = (val cst Many Automaton_stack.For_cst.get_many)
 
 module Eager_cst =
-  Parser.Make_eager
-    (Kind.Cst)
-    (struct
-      type parsed_value = Cst.t_or_comment
-
-      let make_value _ stack =
-        match Automaton_stack.For_cst.get_many stack with
-        | [ sexp ] -> sexp
-        | _ -> assert false
-      ;;
-    end)
+  (val Parser.make_eager Cst (fun _ stack ->
+     match Automaton_stack.For_cst.get_many stack with
+     | [ sexp ] -> sexp
+     | _ -> assert false))
 
 type 'a id = 'a
 type sexp_list = Sexp.t list
@@ -168,6 +95,8 @@ module Conv_many_at_once =
     (Many_just_positions)
 
 module Private = struct
+  module Automaton = Automaton
   module Automaton_stack = Automaton_stack
-  module Parser_automaton = Parser_automaton
+  module Automaton_state = Automaton_state
+  module Positions = Positions
 end

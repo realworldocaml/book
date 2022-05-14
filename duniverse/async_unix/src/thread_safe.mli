@@ -84,3 +84,12 @@ val run_in_async_wait_exn : (unit -> 'a Deferred.t) -> 'a
     a thread outside Async.  [reset_scheduler] is known to be imperfect, and to have races
     in which there are still threads running after it returns. *)
 val reset_scheduler : unit -> unit
+
+(** [without_async_lock f] can not be called from async, usually because [f] is expected
+    to block. It's safe to call it in these two circumstances:
+    - from a separate thread that's not holding the async lock
+    - from the main thread, even if it is holding the async lock, as long as it's not
+      running async jobs.
+      In the latter case the async lock is dropped for the duration of [f].
+*)
+val without_async_lock : (unit -> 'a) -> 'a

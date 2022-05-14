@@ -29,7 +29,8 @@ let%expect_test "patdiff" =
     @|-1,1 +1,1 ============================================================
     -|prev
     +|next
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "patdiff -exclude" =
@@ -46,7 +47,8 @@ let%expect_test "patdiff -exclude" =
     @|-1,1 +1,1 ============================================================
     -|prev
     +|next
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "patdiff -include" =
@@ -63,7 +65,8 @@ let%expect_test "patdiff -include" =
     @|-1,1 +1,1 ============================================================
     -|prev
     +|next
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "patdiff -include -exclude" =
@@ -75,5 +78,6 @@ let%expect_test "patdiff -include -exclude" =
     @|-1,1 +1,1 ============================================================
     -|prev
     +|next
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;

@@ -1,61 +1,53 @@
+(* Typechecking this code is a compile-time check that the specific interfaces have not
+   drifted apart from each other. *)
+
 open Base
 
-let () =
-  let module M : sig
-    open Set
+module _ : sig
+  open Set
 
-    type ('a, 'b) t
+  type ('a, 'b) t
 
-    include
-      Accessors2
-      with type ('a, 'b) t := ('a, 'b) t
-      with type ('a, 'b) tree := ('a, 'b) Set.Using_comparator.Tree.t
-      with type ('a, 'b) named := ('a, 'b) Set.Named.t
+  include
+    Accessors2
+    with type ('a, 'b) t := ('a, 'b) t
+    with type ('a, 'b) tree := ('a, 'b) Set.Using_comparator.Tree.t
+    with type ('a, 'b) named := ('a, 'b) Set.Named.t
 
-    include
-      Creators_generic
-      with type ('a, 'b, 'c) options := ('a, 'b, 'c) With_first_class_module.t
-      with type ('a, 'b) set := ('a, 'b) t
-      with type ('a, 'b) t := ('a, 'b) t
-      with type ('a, 'b) tree := ('a, 'b) Set.Using_comparator.Tree.t
-  end = struct
-    type 'a elt = 'a
-    type _ cmp
+  include
+    Creators_generic
+    with type ('a, 'b, 'c) options := ('a, 'b, 'c) With_first_class_module.t
+    with type ('a, 'b) set := ('a, 'b) t
+    with type ('a, 'b) t := ('a, 'b) t
+    with type ('a, 'b) tree := ('a, 'b) Set.Using_comparator.Tree.t
+end = struct
+  type 'a elt = 'a
+  type _ cmp
 
-    include Set
+  include Set
 
-    let of_tree _ = assert false
-    let to_tree _ = assert false
-  end
-  in
-  ()
-;;
+  let of_tree _ = assert false
+  let to_tree _ = assert false
+end
 
-let () =
-  let module M : sig
-    open Map
+module _ : sig
+  open Map
 
-    type ('a, 'b, 'c) t
+  type ('a, 'b, 'c) t
 
-    include
-      Accessors3
-      with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
-      with type ('a, 'b, 'c) tree := ('a, 'b, 'c) Map.Using_comparator.Tree.t
+  include
+    Accessors3
+    with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
+    with type ('a, 'b, 'c) tree := ('a, 'b, 'c) Map.Using_comparator.Tree.t
 
-    include
-      Creators_generic
-      with type ('a, 'b, 'c) options := ('a, 'b, 'c) With_first_class_module.t
-      with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
-      with type ('a, 'b, 'c) tree := ('a, 'b, 'c) Map.Using_comparator.Tree.t
-  end = struct
-    type 'a key = 'a
-    type 'a cmp = 'a
+  include
+    Creators_generic
+    with type ('a, 'b, 'c) options := ('a, 'b, 'c) With_first_class_module.t
+    with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
+    with type ('a, 'b, 'c) tree := ('a, 'b, 'c) Map.Using_comparator.Tree.t
+end = struct
+  type 'a key = 'a
+  type 'a cmp = 'a
 
-    include Map
-
-    let of_tree _ = assert false
-    let to_tree _ = assert false
-  end
-  in
-  ()
-;;
+  include Map
+end

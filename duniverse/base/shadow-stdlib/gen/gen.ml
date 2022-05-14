@@ -1,12 +1,16 @@
 open StdLabels
 
 let () =
-  let cmi_fn, oc =
+  (* -permissive indicates that we should tolerate additions to stdlib.
+     It's [true] in public-release so that new versions of the stdlib can be compatible
+     with base, but it should be [false] internally so that we remember to
+     consider implementing the equivalents in base. *)
+  let permissive, cmi_fn, oc =
     match Sys.argv with
-    | [| _; "-caml-cmi"; cmi_fn; "-o"; fn |] -> cmi_fn, open_out fn
-    | [| _; "-caml-cmi"; cmi_fn1; cmi_fn2; "-o"; fn |] ->
+    | [| _; "-caml-cmi"; cmi_fn; "-o"; fn |] -> false, cmi_fn, open_out fn
+    | [| _; "-caml-cmi"; "-permissive"; cmi_fn1; cmi_fn2; "-o"; fn |] ->
       let cmi_fn = if Sys.file_exists cmi_fn1 then cmi_fn1 else cmi_fn2 in
-      cmi_fn, open_out fn
+      true, cmi_fn, open_out fn
     | _ -> failwith "bad command line arguments"
   in
   try
@@ -19,6 +23,7 @@ let () =
     let s = Buffer.contents buf in
     let lines = Str.split (Str.regexp "\n") s in
     Printf.fprintf oc "[@@@warning \"-3\"]\n\n";
+    Mapper.permissive := permissive;
     List.iter lines ~f:(fun line ->
       let repl = Mapper.line (Lexing.from_string line) in
       if repl <> "" then Printf.fprintf oc "%s\n\n" repl);

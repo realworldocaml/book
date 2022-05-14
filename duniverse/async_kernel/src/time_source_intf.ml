@@ -7,7 +7,7 @@
     useful so that state machines can depend on a notion of time that is distinct from
     wall-clock time. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Deferred = Deferred1
 
@@ -56,6 +56,7 @@ module type Time_source = sig
   (** Accessors.  [now (wall_clock ())] behaves specially; see [wall_clock] above. *)
 
   val alarm_precision : [> read ] T1.t -> Time_ns.Span.t
+  val is_wall_clock : [> read ] T1.t -> bool
   val next_alarm_fires_at : [> read ] T1.t -> Time_ns.t option
   val now : [> read ] T1.t -> Time_ns.t
 
@@ -104,6 +105,15 @@ module type Time_source = sig
     -> to_:Time_ns.t
     -> unit Deferred.t
 
+  val advance_by_max_alarms_in_each_timing_wheel_interval
+    :  ?wait_for:(unit -> unit Deferred.t)
+    -> [> write ] T1.t
+    -> to_:Time_ns.t
+    -> unit Deferred.t
+  [@@deprecated
+    "[since 2021-12] This is the old implementation of [advance_by_alarms], kept in \
+     case the new implementation causes problems."]
+
   (** [advance_by_alarms_by ?wait_for t by] is equivalent to:
       [advance_by_alarms ?wait_for t ~to_:(Time_ns.add (now t) by)] *)
   val advance_by_alarms_by
@@ -145,6 +155,11 @@ module type Time_source = sig
     -> Time_ns.Span.t
     -> 'a Deferred.t
     -> [ `Timeout | `Result of 'a ] Deferred.t
+
+  val duration_of
+    :  [> read ] T1.t
+    -> (unit -> 'a Deferred.t)
+    -> ('a * Time_ns.Span.t) Deferred.t
 
   module Event : sig
     type ('a, 'h) t [@@deriving sexp_of]
@@ -235,7 +250,7 @@ module type Time_source = sig
     -> unit
 
   val run_at_intervals'
-    :  ?start:Time_ns.t (** default is [Time_ns.now ()] *)
+    :  ?start:Time_ns.t (** default is [now t] *)
     -> ?stop:unit Deferred.t (** default is [Deferred.never ()] *)
     -> ?continue_on_error:bool (** default is [true] *)
     -> [> read ] T1.t
@@ -244,7 +259,7 @@ module type Time_source = sig
     -> unit
 
   val run_at_intervals
-    :  ?start:Time_ns.t (** default is [Time_ns.now ()] *)
+    :  ?start:Time_ns.t (** default is [now t] *)
     -> ?stop:unit Deferred.t (** default is [Deferred.never ()] *)
     -> ?continue_on_error:bool (** default is [true] *)
     -> [> read ] T1.t
@@ -254,7 +269,7 @@ module type Time_source = sig
 
   (** [Time_source] and [Synchronous_time_source] are the same data structure and use the
       same underlying timing wheel.  The types are freely interchangeable. *)
-  val of_synchronous : 'a Synchronous_time_source.T1.t -> 'a T1.t
+  val of_synchronous : 'a Synchronous_time_source0.T1.t -> 'a T1.t
 
-  val to_synchronous : 'a T1.t -> 'a Synchronous_time_source.T1.t
+  val to_synchronous : 'a T1.t -> 'a Synchronous_time_source0.T1.t
 end
