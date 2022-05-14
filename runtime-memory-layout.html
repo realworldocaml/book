@@ -193,8 +193,9 @@ stored as OCaml <code>int</code> 0.</p></li>
 <code>int</code>s, starting from 0.</p></li>
 <li><p><code>Foo | Bar of int</code> variants with parameters are boxed,
 while variants with no parameters are unboxed.</p></li>
-<li><p>Polymorphic variants take up variable space usage depending on
-the number of parameters. </p></li>
+<li><p>Polymorphic variants with parameters are boxed with an extra
+header word to store the value, as compared to normal variants.
+Polymorphic variants with no parameters are unboxed.</p></li>
 <li><p>Floating-point numbers are stored as a block with a single field
 containing the double-precision float.</p></li>
 <li><p>Strings are word-aligned byte arrays with an explicit
