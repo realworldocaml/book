@@ -61,8 +61,7 @@ compiler generates specialized executable binaries suitable for
 high-performance applications.[compilation process/compiler source
 code]{.idx}[compilers/bytecode vs. native code]{.idx}
 
-::: {data-type=note}
-#### Obtaining the Compiler Source Code
+### Obtaining the Compiler Source Code
 
 Although it's not necessary to understand the examples, you may find it
 useful to have a copy of the OCaml source tree checked out while you read
@@ -125,8 +124,6 @@ A number of tools and scripts are also built alongside the core compiler:
 
 `testsuite/`
 : Regression tests for the core compiler.
-
-:::
 
 We'll go through each of the compilation stages now and explain how they will
 be useful to you during day-to-day OCaml development.
