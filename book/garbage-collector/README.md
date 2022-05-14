@@ -609,9 +609,6 @@ heap, and rejects most constant values. Compiler optimizations may also
 duplicate some immutable values such as floating-point values in arrays.
 These may be finalized while another duplicate copy is being used by the
 program.
-
-For this reason, attach finalizers only to values that you are explicitly
-sure are boxed and heap-allocated and aren't immutable.
 :::
 
 Core provides a `Heap_block` module that dynamically checks if a given
