@@ -1186,16 +1186,6 @@ You can find more information about the C interface in several places:
   wide variety of OCaml data types and also more complex callbacks between C
   and OCaml.
 
-<!-- TODO: Is SWIG actually any good? I looked at it years ago and
-     thought it was really painful to use with OCaml.  Should we
-     really be recommending it? I don't know off-hand of any packages
-     using it. -->
-
-- [SWIG](http://www.swig.org) is a tool that connects programs written in
-  C/C++ to a variety of higher-level programming languages, including OCaml.
-  The SWIG manual has examples of converting library specifications into
-  OCaml bindings.
-
 ### Struct Memory Layout
 
 The C language gives implementations a certain amount of freedom in choosing
