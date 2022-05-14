@@ -669,13 +669,6 @@ let rec drain_old_events t =
       drain_old_events t)
 ```
 
-<!-- TODO avsm: that operator for Time_ns.Span is pretty awkward.
-     Time_ns.(Span.((diff t.now time) < t.period)) isnt much better.
-
-    yminsky: I don't really see a better solution here. Modular
-    implicits!
- -->
-
 But the comparison goes the wrong way: we should discard events that
 are older than the limit-period, not younger.  If we fix that, we'll
 see that the trace behaves as we'd expect.
