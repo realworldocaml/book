@@ -152,9 +152,6 @@ creates a decision tree that compares the hash values against the input
 variable in as few comparisons as possible. [pattern matching/fundamental
 algorithms in]{.idx}
 
-::: {data-type=note}
-#### Learning More About Pattern Matching Compilation
-
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
 code. A good paper that describes the fundamental algorithms implemented in
@@ -166,11 +163,9 @@ The paper describes the backtracking algorithm used in classical pattern
 matching compilation, and also several OCaml-specific optimizations, such as
 the use of exhaustiveness information and control flow optimizations via
 static exceptions.
-
 It's not essential that you understand all of this just to use pattern
 matching, of course, but it'll give you insight as to why pattern
 matching is such an efficient language construct in OCaml.
-:::
 
 
 ### Benchmarking Pattern Matching
