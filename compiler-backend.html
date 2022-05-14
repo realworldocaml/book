@@ -136,8 +136,6 @@ jump table as it does for normal variants. Instead, it creates a
 decision tree that compares the hash values against the input variable
 in as few comparisons as possible. <a data-secondary="fundamental algorithms in" data-primary="pattern
 matching" data-type="indexterm">&nbsp;</a></p>
-<section data-type="note" class="level4" id="learning-more-about-pattern-matching-compilation">
-<h4>Learning More About Pattern Matching Compilation</h4>
 <p>Pattern matching is an important part of OCaml programming. You’ll
 often encounter deeply nested pattern matches over complex data
 structures in real code. A good paper that describes the fundamental
@@ -146,11 +144,10 @@ matching”</a> by Fabrice Le Fessant and Luc Maranget.</p>
 <p>The paper describes the backtracking algorithm used in classical
 pattern matching compilation, and also several OCaml-specific
 optimizations, such as the use of exhaustiveness information and control
-flow optimizations via static exceptions.</p>
-<p>It’s not essential that you understand all of this just to use
-pattern matching, of course, but it’ll give you insight as to why
-pattern matching is such an efficient language construct in OCaml.</p>
-</section>
+flow optimizations via static exceptions. It’s not essential that you
+understand all of this just to use pattern matching, of course, but
+it’ll give you insight as to why pattern matching is such an efficient
+language construct in OCaml.</p>
 </section>
 <section class="level3" id="benchmarking-pattern-matching">
 <h3>Benchmarking Pattern Matching</h3>
