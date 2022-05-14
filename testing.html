@@ -591,7 +591,6 @@ events occurred, and we use this function to drain the queue.</p>
       ignore (Queue.dequeue_exn t.events : Time_ns.t);
       drain_old_events t)</code></pre>
 </div>
-
 <p>But the comparison goes the wrong way: we should discard events that
 are older than the limit-period, not younger. If we fix that, we’ll see
 that the trace behaves as we’d expect.</p>
