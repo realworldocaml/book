@@ -1399,6 +1399,8 @@ for use with OCaml projects. First, we need to write a `dune-project`
 file to specify the project's root directory.
 
 ```scheme file=examples/correct/sum/dune-project
+(lang dune 2.9)
+(name rwo-example)
 ```
 
 Then, we need to write a `dune` file to specify the build.
