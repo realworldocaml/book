@@ -765,6 +765,8 @@ useful for all sorts of system automation tasks.
 But, can't we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:
 
+<!-- TODO: Maybe add #require's for Sys_unix and Core_unix -->
+
 ```ocaml env=abstracting
 # open Core;;
 # let sum_file_sizes () =
