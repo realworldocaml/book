@@ -466,6 +466,14 @@ module List_dir = struct
       Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
 end;;
 ```
+```mdx-error
+Line 20, characters 47-63:
+Alert deprecated: Core.Sys.readdir
+[since 2021-04] Use [Sys_unix]
+Line 20, characters 47-63:
+Error: This expression has type [ `Use_Sys_unix ]
+       This is not a function; it cannot be applied.
+```
 
 Again, we can create an instance of this query handler and interact with it
 directly:
@@ -541,7 +549,8 @@ Using `build_instance`, constructing a new instance becomes a one-liner:
 # let unique_instance = build_instance (module Unique) 0;;
 val unique_instance : (module Query_handler_instance) = <module>
 # let list_dir_instance = build_instance (module List_dir)  "/var";;
-val list_dir_instance : (module Query_handler_instance) = <module>
+Line 1, characters 48-56:
+Error: Unbound module List_dir
 ```
 
 We can now write code that lets you dispatch queries to one of a list of

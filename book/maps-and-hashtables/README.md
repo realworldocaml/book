@@ -162,7 +162,7 @@ look at the type signature of `Map.of_alist_exn`.
 ```ocaml env=main
 # #show Map.of_alist_exn;;
 val of_alist_exn :
-  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
+  ('a, 'cmp) Set.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
 The type `Map.comparator` is actually an alias for a first-class module type,
@@ -171,12 +171,7 @@ below.
 
 ```ocaml env=main
 # #show Base.Comparator.S;;
-module type S =
-  sig
-    type t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
+module type S = Base.Comparator.S
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -221,10 +216,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The type `comparator_witness' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 18, characters 2-25:
          Expected declaration
        The value `comparator' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 20, characters 2-53:
          Expected declaration
 ```
 
@@ -402,9 +397,9 @@ function. Thus, the compiler rejects the following:
 Line 3, characters 5-43:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
-         (int, string, Comparator.Poly.comparator_witness) Map.t
+         (int, string, Map.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness
+         Map.Poly.comparator_witness
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
@@ -458,7 +453,7 @@ by default, but it is available within the `Poly` module.
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
-Exception: (Invalid_argument "compare: functional value")
+Exception: Invalid_argument "compare: functional value".
 ```
 
 This comparison failed because polymorphic compare doesn't work on
@@ -783,13 +778,7 @@ some work to prepare it. In order for a module to be suitable for passing to
 
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
-module type S =
-  sig
-    type t
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    val hash : t -> int
-  end
+module type S = Base__Hashtbl_intf.Key.S
 ```
 
 Note that there's no equivalent to the comparator witness that came up for

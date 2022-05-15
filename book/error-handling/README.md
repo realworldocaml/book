@@ -574,7 +574,7 @@ the `assert`:
     loop xs ys;;
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
 # merge_lists [1;2;3] [-1] ~f:(+);;
-Exception: "Assert_failure //toplevel//:6:14"
+Exception: "Assert_failure //toplevel//:6:14".
 ```
 
 This shows what's special about `assert`: it captures the line number and

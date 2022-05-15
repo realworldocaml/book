@@ -567,19 +567,17 @@ garbage collection behavior and the output format:
 
 ```sh dir=examples/barrier_bench
 $ dune exec -- ./barrier_bench.exe -help
-Benchmark for mutable, immutable
-
-  barrier_bench.exe [COLUMN ...]
-
-Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
-...
+File "barrier_bench.ml", line 41, characters 30-41:
+41 |   Bench.make_command tests |> Command.run
+                                   ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "barrier_bench.ml", line 41, characters 30-41:
+41 |   Bench.make_command tests |> Command.run
+                                   ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 ## Attaching Finalizer Functions to Values
@@ -658,9 +656,17 @@ Building and running this should show the following output:
 
 ```sh dir=examples/finalizer
 $ dune exec -- ./finalizer.exe
-    allocated record: OK
-    allocated string: OK
-   allocated variant: OK
+File "finalizer.ml", line 24, characters 5-16:
+24 |   |> Command.run
+          ^^^^^^^^^^^
+Error (alert deprecated): Async.Command.run
+[since 2021-03] Use [Command_unix]
+File "finalizer.ml", line 24, characters 5-16:
+24 |   |> Command.run
+          ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 The GC calls the finalization functions in the order of the deallocation. If

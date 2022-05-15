@@ -182,9 +182,29 @@ exec`. Let's use this to query version information from the binary.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe -version
-1.0
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 $ dune exec -- ./md5.exe -build-info
-RWO
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 The versions that you see in the output were defined via the optional
@@ -197,19 +217,17 @@ We can invoke our binary with `-help` to see the auto-generated help.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe -help
-Generate an MD5 hash of the input data
-
-  md5.exe FILENAME
-
-More detailed information
-
-=== flags ===
-
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 If you supply the `filename` argument, then `do_hash` is called with the
@@ -217,7 +235,17 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe md5.ml
-2ae55d17ff11d337492a1ca5510ee01b
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "md5.ml", line 25, characters 9-20:
+25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 And that's all it takes to build our little MD5 utility! Here's a
@@ -291,7 +319,17 @@ arguments.
 
 ```sh dir=examples/correct/md5_multiarg
 $ dune exec -- ./md5.exe 5 md5.ml
-f8824
+File "md5.ml", line 21, characters 9-20:
+21 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "md5.ml", line 21, characters 9-20:
+21 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -409,17 +447,28 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=examples/correct/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-5df5ec6301ea37bebc22912ceaa6b2e2
+File "md5.ml", line 8, characters 12-23:
+8 |       match Sys.is_file filename with
+                ^^^^^^^^^^^
+Error (alert deprecated): Core.Sys.is_file
+[since 2021-04] Use [Sys_unix]
+File "md5.ml", line 8, characters 12-23:
+8 |       match Sys.is_file filename with
+                ^^^^^^^^^^^
+Error: This expression has type [ `Use_Sys_unix ]
+       This is not a function; it cannot be applied.
+[1]
 $ dune exec -- ./md5.exe /dev/null
-Error parsing command line:
-
-  failed to parse FILENAME value "/dev/null"
-  (Failure "Not a regular file")
-
-For usage information, run
-
-  md5.exe -help
-
+File "md5.ml", line 8, characters 12-23:
+8 |       match Sys.is_file filename with
+                ^^^^^^^^^^^
+Error (alert deprecated): Core.Sys.is_file
+[since 2021-04] Use [Sys_unix]
+File "md5.ml", line 8, characters 12-23:
+8 |       match Sys.is_file filename with
+                ^^^^^^^^^^^
+Error: This expression has type [ `Use_Sys_unix ]
+       This is not a function; it cannot be applied.
 [1]
 ```
 
@@ -493,7 +542,17 @@ our previous examples.
 
 ```sh dir=examples/correct/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-54fd98cd30f8faa76be46be0005f00bf
+File "md5.ml", line 18, characters 34-51:
+18 |        anon (maybe ("filename" %: Filename.arg_type))
+                                       ^^^^^^^^^^^^^^^^^
+Error (alert deprecated): Core.Filename.arg_type
+[since 2021-04] Use [Filename_unix]
+File "md5.ml", line 18, characters 34-51:
+18 |        anon (maybe ("filename" %: Filename.arg_type))
+                                       ^^^^^^^^^^^^^^^^^
+Error: This expression has type [ `Use_Filename_unix ]
+       but an expression was expected of type 'a Arg_type.t
+[1]
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -533,7 +592,17 @@ Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=examples/correct/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-f0ea4085ca226eef2c0d70026619a244
+File "md5.ml", line 18, characters 51-68:
+18 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error (alert deprecated): Core.Filename.arg_type
+[since 2021-04] Use [Filename_unix]
+File "md5.ml", line 18, characters 51-68:
+18 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error: This expression has type [ `Use_Filename_unix ]
+       but an expression was expected of type 'a Arg_type.t
+[1]
 ```
 
 ### Sequences of Arguments
@@ -640,21 +709,29 @@ code looks like this:
 
 ```sh dir=examples/correct/md5_with_flags
 $ dune exec -- ./md5.exe -help
-Generate an MD5 hash of the input data
-
-  md5.exe [FILENAME]
-
-=== flags ===
-
-  [-s string]    Checksum the given string
-  [-t]           run a built-in time trial
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
+File "md5.ml", line 24, characters 51-68:
+24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error (alert deprecated): Core.Filename.arg_type
+[since 2021-04] Use [Filename_unix]
+File "md5.ml", line 24, characters 51-68:
+24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error: This expression has type [ `Use_Filename_unix ]
+       but an expression was expected of type 'a Arg_type.t
+[1]
 $ dune exec -- ./md5.exe -s "ocaml rocks"
-5a118fe92ac3b6c7854c595ecf6419cb
+File "md5.ml", line 24, characters 51-68:
+24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error (alert deprecated): Core.Filename.arg_type
+[since 2021-04] Use [Filename_unix]
+File "md5.ml", line 24, characters 51-68:
+24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+                                                        ^^^^^^^^^^^^^^^^^
+Error: This expression has type [ `Use_Filename_unix ]
+       but an expression was expected of type 'a Arg_type.t
+[1]
 ```
 
 The `-s` flag in our specification requires a `string` argument and
@@ -745,19 +822,29 @@ you might expect.
 
 ```sh dir=examples/correct/cal_add_days
 $ dune exec -- ./cal.exe -help
-Add [days] to the [base] date and print day
-
-  cal.exe BASE DAYS
-
-=== flags ===
-
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
+File "cal.ml", line 11, characters 9-20:
+11 | let () = Command.run add
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 11, characters 9-20:
+11 | let () = Command.run add
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 $ dune exec -- ./cal.exe 2012-12-25 40
-2013-02-03
+File "cal.ml", line 11, characters 9-20:
+11 | let () = Command.run add
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 11, characters 9-20:
+11 | let () = Command.run add
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 Now, let's also add the ability to take the difference between two dates,
@@ -806,17 +893,17 @@ reflects the subcommands we just added.
 
 ```sh dir=examples/correct/cal_add_sub_days
 $ dune exec -- ./cal.exe -help
-Manipulate dates
-
-  cal.exe SUBCOMMAND
-
-=== subcommands ===
-
-  add      Add [days] to the [base] date
-  diff     Show days between [date1] and [date2]
-  version  print version information
-  help     explain a given subcommand (perhaps recursively)
-
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 We can invoke the two commands we just defined to verify that they work and
@@ -824,9 +911,29 @@ see the date parsing in action:
 
 ```sh dir=examples/correct/cal_add_sub_days
 $ dune exec -- ./cal.exe add 2012-12-25 40
-2013-02-03
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 $ dune exec -- ./cal.exe diff 2012-12-25 2012-11-01
-54 days
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 24, characters 9-20:
+24 | let () = Command.run command
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 ## Prompting for Interactive Input
@@ -912,7 +1019,17 @@ second argument.
 
 ```sh dir=examples/correct/cal_add_interactive2
 $ echo 35 | dune exec -- ./cal.exe 2013-12-01
-enter days: 2014-01-05
+File "cal.ml", line 30, characters 9-20:
+30 | let () = Command.run add
+              ^^^^^^^^^^^
+Error (alert deprecated): Core.Command.run
+[since 2021-03] Use [Command_unix]
+File "cal.ml", line 30, characters 9-20:
+30 | let () = Command.run add
+              ^^^^^^^^^^^
+Error: This expression has type [ `Use_Command_unix ]
+       This is not a function; it cannot be applied.
+[1]
 ```
 
 ## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}
