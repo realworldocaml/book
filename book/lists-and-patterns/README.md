@@ -695,17 +695,12 @@ efficient operation:
 
 ```ocaml env=main
 # let rec ls_rec s =
-    if Sys.is_file_exn ~follow_symlinks:true s
+    if Sys_unix.is_file_exn ~follow_symlinks:true s
     then [s]
     else
-      Sys.ls_dir s
+      Sys_unix.ls_dir s
       |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub));;
-Line 2, characters 8-23:
-Alert deprecated: Sys.is_file_exn
-[since 2021-04] Use [Sys_unix]
-Line 2, characters 8-23:
-Error: This expression has type [ `Use_Sys_unix ]
-       This is not a function; it cannot be applied.
+val ls_rec : string -> string list = <fun>
 ```
 
 ## Tail Recursion
