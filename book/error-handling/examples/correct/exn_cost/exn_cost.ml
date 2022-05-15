@@ -29,4 +29,5 @@ let () =
     Bench.Test.create ~name:"end with exn notrace" (fun () ->
         computation_with_handler Raise_no_backtrace);
   ]
-  |> Bench.make_command |> Command.run
+  |> Bench.make_command
+  |> Command_unix.run
