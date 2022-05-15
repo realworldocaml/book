@@ -171,7 +171,12 @@ below.
 
 ```ocaml env=main
 # #show Base.Comparator.S;;
-module type S = Base.Comparator.S
+module type S =
+  sig
+    type t
+    type comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+  end
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -778,7 +783,13 @@ some work to prepare it. In order for a module to be suitable for passing to
 
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
-module type S = Base__Hashtbl_intf.Key.S
+module type S =
+  sig
+    type t
+    val compare : t Exported_for_specific_uses.Ppx_compare_lib.compare
+    val sexp_of_t : t -> Sexp.t
+    val hash : t -> int
+  end
 ```
 
 Note that there's no equivalent to the comparator witness that came up for
@@ -936,7 +947,7 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:1000 ~iterations:100_000
   |> Bench.make_command
-  |> Core.Command.run
+  |> Command_unix.run
 ```
 
 The results show the hash table version to be around four times faster than
@@ -945,7 +956,7 @@ the map version:
 ```scheme file=examples/correct/map_vs_hash/dune
 (executable
   (name      map_vs_hash)
-  (libraries base core_bench))
+  (libraries base core_bench core_unix.command_unix))
 ```
 
 
