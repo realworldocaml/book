@@ -1403,7 +1403,12 @@ file to specify the project's root directory.
 (name rwo-example)
 ```
 
-Then, we need to write a `dune` file to specify the build.
+Then, we need to write a `dune` file to specify the specific thing
+being built.  Note that a single project will have just one
+`dune-project` file, but potentially many sub-directories with
+different `dune` files.
+
+In this case, however, we just have one:
 
 ```scheme file=examples/correct/sum/dune
 (executable
@@ -1411,9 +1416,9 @@ Then, we need to write a `dune` file to specify the build.
  (libraries base stdio))
 ```
 
-All we need to specify is the fact that we're building an executable rather
-than a library, the name of the executable, and the name of the libraries we
-depend on.
+All we need to specify is the fact that we're building an executable
+(rather than a library), the name of the executable, and the name of
+the libraries we depend on.
 
 We can now invoke dune to build the executable.
 
