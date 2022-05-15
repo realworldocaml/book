@@ -2,7 +2,8 @@
 
 open Core
 
-let start_time = Time_ns.of_string "2021-06-01 7:00:00"
+let start_time =
+  Time_ns.of_string_with_utc_offset "2021-06-01 7:00:00Z"
 
 let limiter () =
   Rate_limiter.create
