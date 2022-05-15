@@ -1395,8 +1395,13 @@ argument of type `float`.
 ### Compiling and Running
 
 We'll compile our program using `dune`, a build system that's designed
-for use with OCaml projects. First, we need to write a `dune` file to
-specify the build.
+for use with OCaml projects. First, we need to write a `dune-project`
+file to specify the project's root directory.
+
+```scheme file=examples/correct/sum/dune-project
+```
+
+Then, we need to write a `dune` file to specify the build.
 
 ```scheme file=examples/correct/sum/dune
 (executable
