@@ -359,7 +359,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let%map_open.Command file =
-       anon ("filename" %: Filename.arg_type)
+       anon ("filename" %: Filename_unix.arg_type)
      in
      fun () -> do_hash file)
 ```
@@ -478,7 +478,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let%map_open.Command filename =
-       anon (maybe ("filename" %: Filename.arg_type))
+       anon (maybe ("filename" %: Filename_unix.arg_type))
      in
      fun () -> do_hash filename)
 
@@ -492,17 +492,7 @@ our previous examples.
 
 ```sh dir=examples/correct/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-File "md5.ml", line 18, characters 34-51:
-18 |        anon (maybe ("filename" %: Filename.arg_type))
-                                       ^^^^^^^^^^^^^^^^^
-Error (alert deprecated): Core.Filename.arg_type
-[since 2021-04] Use [Filename_unix]
-File "md5.ml", line 18, characters 34-51:
-18 |        anon (maybe ("filename" %: Filename.arg_type))
-                                       ^^^^^^^^^^^^^^^^^
-Error: This expression has type [ `Use_Filename_unix ]
-       but an expression was expected of type 'a Arg_type.t
-[1]
+068f02a29536dbcf111e7adebb085aa1
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -531,7 +521,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let%map_open.Command filename =
-       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+       anon (maybe_with_default "-" ("filename" %: Filename_unix.arg_type))
      in
      fun () -> do_hash filename)
 
@@ -542,17 +532,7 @@ Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=examples/correct/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-File "md5.ml", line 18, characters 51-68:
-18 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error (alert deprecated): Core.Filename.arg_type
-[since 2021-04] Use [Filename_unix]
-File "md5.ml", line 18, characters 51-68:
-18 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error: This expression has type [ `Use_Filename_unix ]
-       but an expression was expected of type 'a Arg_type.t
-[1]
+370616ab5fad3dd995c136f09d0adb29
 ```
 
 ### Sequences of Arguments
@@ -579,7 +559,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let%map_open.Command files =
-       anon (sequence ("filename" %: Filename.arg_type))
+       anon (sequence ("filename" %: Filename_unix.arg_type))
      in
      fun () ->
        match files with
@@ -637,7 +617,7 @@ let command =
          ~doc:"string Checksum the given string"
      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
      and filename =
-       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+       anon (maybe_with_default "-" ("filename" %: Filename_unix.arg_type))
      in
      fun () ->
        if trial
@@ -647,7 +627,7 @@ let command =
          | Some buf -> checksum_from_string buf
          | None -> checksum_from_file filename))
 
-let () = Command.run command
+let () = Command_unix.run command
 ```
 
 The specification now uses the `flag` function to define the two new labeled,
@@ -659,29 +639,20 @@ code looks like this:
 
 ```sh dir=examples/correct/md5_with_flags
 $ dune exec -- ./md5.exe -help
-File "md5.ml", line 24, characters 51-68:
-24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error (alert deprecated): Core.Filename.arg_type
-[since 2021-04] Use [Filename_unix]
-File "md5.ml", line 24, characters 51-68:
-24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error: This expression has type [ `Use_Filename_unix ]
-       but an expression was expected of type 'a Arg_type.t
-[1]
+Generate an MD5 hash of the input data
+
+  md5.exe [FILENAME]
+
+=== flags ===
+
+  [-s string]                . Checksum the given string
+  [-t]                       . run a built-in time trial
+  [-build-info]              . print info about this build and exit
+  [-version]                 . print the version of this build and exit
+  [-help], -?                . print this help text and exit
+
 $ dune exec -- ./md5.exe -s "ocaml rocks"
-File "md5.ml", line 24, characters 51-68:
-24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error (alert deprecated): Core.Filename.arg_type
-[since 2021-04] Use [Filename_unix]
-File "md5.ml", line 24, characters 51-68:
-24 |        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
-                                                        ^^^^^^^^^^^^^^^^^
-Error: This expression has type [ `Use_Filename_unix ]
-       but an expression was expected of type 'a Arg_type.t
-[1]
+5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
 The `-s` flag in our specification requires a `string` argument and

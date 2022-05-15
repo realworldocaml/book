@@ -21,7 +21,7 @@ let command =
          ~doc:"string Checksum the given string"
      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
      and filename =
-       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+       anon (maybe_with_default "-" ("filename" %: Filename_unix.arg_type))
      in
      fun () ->
        if trial
@@ -31,4 +31,4 @@ let command =
          | Some buf -> checksum_from_string buf
          | None -> checksum_from_file filename))
 
-let () = Command.run command
+let () = Command_unix.run command

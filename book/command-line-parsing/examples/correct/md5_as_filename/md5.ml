@@ -10,7 +10,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     (let%map_open.Command file =
-       anon ("filename" %: Filename.arg_type)
+       anon ("filename" %: Filename_unix.arg_type)
      in
      fun () -> do_hash file)
 
