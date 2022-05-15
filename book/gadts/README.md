@@ -523,7 +523,7 @@ types.
 # List.find ~f:(fun x -> x > 3) [1;3;5;2];;
 - : int option = Some 5
 # List.find ~f:(Char.is_uppercase) ['a';'B';'C'];;
-- : char option = Some B
+- : char option = Some 'B'
 ```
 
 But this approach is limited to simple dependencies between types that
@@ -576,7 +576,7 @@ Here are some examples of the above function in action:
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int option = Some 10
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
-Exception: (Failure "Element not found")
+Exception: (Failure "Element not found").
 # flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int option = Some 20
 ```
@@ -641,7 +641,7 @@ result, `flexible_find` only returns an option when it needs to.
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int = 10
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
-Exception: (Failure "No matching item found")
+Exception: (Failure "No matching item found").
 # flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int = 20
 ```
@@ -768,9 +768,9 @@ perfectly serviceable pipeline operator:
 ```ocaml env=abstracting
 # open Core;;
 # let sum_file_sizes () =
-    Sys.ls_dir "."
-    |> List.filter ~f:Sys.is_file_exn
-    |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+    Sys_unix.ls_dir "."
+    |> List.filter ~f:Sys_unix.is_file_exn
+    |> List.map ~f:(fun file_name -> (Core_unix.lstat file_name).st_size)
     |> List.sum (module Int) ~f:Int64.to_int_exn;;
 val sum_file_sizes : unit -> int = <fun>
 ```
@@ -816,9 +816,9 @@ code using the pipeline API before we've implemented it.
 # module Example_pipeline (Pipeline : Pipeline) = struct
     open Pipeline
     let sum_file_sizes =
-      (fun () -> Sys.ls_dir ".")
-      @> List.filter ~f:Sys.is_file_exn
-      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+      (fun () -> Sys_unix.ls_dir ".")
+      @> List.filter ~f:Sys_unix.is_file_exn
+      @> List.map ~f:(fun file_name -> (Core_unix.lstat file_name).st_size)
       @> List.sum (module Int) ~f:Int64.to_int_exn
       @> empty
   end;;
@@ -1569,8 +1569,8 @@ work with GADTs.
   [@@deriving sexp];;
 Lines 1-4, characters 1-20:
 Error: This expression has type int number_kind
-       but an expression was expected of type a__001_ number_kind
-       Type int is not compatible with type a__001_
+       but an expression was expected of type a__007_ number_kind
+       Type int is not compatible with type a__007_
 ```
 
 The error message is pretty awful, but if you stop and think about it,
