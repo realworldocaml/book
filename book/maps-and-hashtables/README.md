@@ -1032,7 +1032,7 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:50 ~iterations:1000
   |> Bench.make_command
-  |> Core.Command.run
+  |> Command_unix.run
 ```
 
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
@@ -1041,7 +1041,7 @@ in this case by more than a factor of 10:
 ```scheme file=examples/correct/map_vs_hash2/dune
 (executable
   (name      map_vs_hash2)
-  (libraries core_bench))
+  (libraries core_bench core_unix.command_unix))
 ```
 
 
