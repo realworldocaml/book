@@ -163,17 +163,17 @@ Once we've defined the basic command, running it is just one function call
 away.
 
 ```ocaml file=examples/correct/md5/md5.ml,part=3
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
-`Command.run` takes a couple of optional arguments that are useful to
+`Command_unix.run` takes a couple of optional arguments that are useful to
 identify which version of the binary you are running in production.
 You'll need the following `dune` file:
 
 ```scheme file=examples/correct/md5/dune
 (executable
   (name       md5)
-  (libraries  core)
+  (libraries  core core_unix.command_unix)
   (preprocess (pps ppx_jane)))
 ```
 
@@ -182,29 +182,9 @@ exec`. Let's use this to query version information from the binary.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe -version
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+1.0
 $ dune exec -- ./md5.exe -build-info
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+RWO
 ```
 
 The versions that you see in the output were defined via the optional
@@ -217,17 +197,18 @@ We can invoke our binary with `-help` to see the auto-generated help.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe -help
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+Generate an MD5 hash of the input data
+
+  md5.exe FILENAME
+
+More detailed information
+
+=== flags ===
+
+  [-build-info]              . print info about this build and exit
+  [-version]                 . print the version of this build and exit
+  [-help], -?                . print this help text and exit
+
 ```
 
 If you supply the `filename` argument, then `do_hash` is called with the
@@ -235,17 +216,7 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=examples/correct/md5
 $ dune exec -- ./md5.exe md5.ml
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "md5.ml", line 25, characters 9-20:
-25 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+045215e7e7891779b261851a8458b656
 ```
 
 And that's all it takes to build our little MD5 utility! Here's a
