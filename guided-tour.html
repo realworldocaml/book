@@ -1316,14 +1316,24 @@ one additional argument of type <code>float</code>.</p>
 <h3>Compiling and Running</h3>
 <p>We’ll compile our program using <code>dune</code>, a build system
 that’s designed for use with OCaml projects. First, we need to write a
-<code>dune</code> file to specify the build.</p>
+<code>dune-project</code> file to specify the project’s root
+directory.</p>
+<div class="highlight">
+<pre><code class="language-scheme">(lang dune 2.9)
+(name rwo-example)</code></pre>
+</div>
+<p>Then, we need to write a <code>dune</code> file to specify the
+specific thing being built. Note that a single project will have just
+one <code>dune-project</code> file, but potentially many sub-directories
+with different <code>dune</code> files.</p>
+<p>In this case, however, we just have one:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
  (name      sum)
  (libraries base stdio))</code></pre>
 </div>
 <p>All we need to specify is the fact that we’re building an executable
-rather than a library, the name of the executable, and the name of the
+(rather than a library), the name of the executable, and the name of the
 libraries we depend on.</p>
 <p>We can now invoke dune to build the executable.</p>
 <div class="highlight">
