@@ -425,7 +425,7 @@ val is_a_multiple : int -> int -> bool = <fun>
 - : bool = true
 # is_a_multiple 8 0;;
 Exception:
-(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
+Invalid_argument "8 % 0 in core_int.ml: modulus should be positive".
 ```
 
 The distinction here is that type errors will stop you whether or not the
@@ -691,7 +691,7 @@ on empty ones:
 # my_favorite_language ["English";"Spanish";"French"];;
 - : string = "English"
 # my_favorite_language [];;
-Exception: "Match_failure //toplevel//:1:26"
+Exception: Match_failure ("//toplevel//", 1, 26).
 ```
 
 You can avoid these warnings, and more importantly make sure that your
@@ -1344,7 +1344,7 @@ avoid the short-circuiting:
     if !pos = Array.length array then None else Some !pos;;
 val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|];;
-Exception: (Invalid_argument "index out of bounds")
+Exception: Invalid_argument "index out of bounds".
 ```
 
 The or operator, `||`, short-circuits in a similar way to `&&`.
