@@ -159,6 +159,8 @@ Command.Param.map filename_param ~f:(fun filename ->
 
 ### Running commands {#running-basic-commands}
 
+<!-- TODO: Explain command_unix properly -->
+
 Once we've defined the basic command, running it is just one function call
 away.
 
