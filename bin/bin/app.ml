@@ -139,4 +139,4 @@ let () =
     | None -> "unknown"
     | Some x -> x
   in
-  Command.run ~build_info main
+  Command_unix.run ~build_info main

@@ -308,9 +308,9 @@ ivar, thus causing the corresponding deferred to become determined, using
 val ivar : '_weak1 Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 # let def = Ivar.read ivar;;
-val def : '_weak2 Deferred.t = <abstr>
+val def : '_weak1 Deferred.t = <abstr>
 # Deferred.peek def;;
-- : '_weak3 option = None
+- : '_weak2 option = None
 # Ivar.fill ivar "Hello";;
 - : unit = ()
 # Deferred.peek def;;
@@ -740,8 +740,8 @@ Pipes are created in connected read/write pairs:
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak4 Pipe.Reader.t = <abstr>
-val w : '_weak4 Pipe.Writer.t = <abstr>
+val r : '_weak3 Pipe.Reader.t = <abstr>
+val w : '_weak3 Pipe.Writer.t = <abstr>
 ```
 
 `r` and `w` are really just read and write handles to the same underlying
@@ -765,8 +765,8 @@ read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak5 Pipe.Reader.t = <abstr>
-val w : '_weak5 Pipe.Writer.t = <abstr>
+val r : '_weak4 Pipe.Reader.t = <abstr>
+val w : '_weak4 Pipe.Writer.t = <abstr>
 # let write_complete = Pipe.write w "Hello World!";;
 val write_complete : unit Deferred.t = <abstr>
 # Pipe.read r;;

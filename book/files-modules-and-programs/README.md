@@ -900,6 +900,9 @@ Error: The implementation counter.ml
            ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
        is not included in
          val touch : string -> t -> t
+       The type ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
+       is not compatible with the type string -> t -> t
+       Type ('a, int, 'b) Base.Map.t is not compatible with type string
        File "counter.mli", line 16, characters 0-28: Expected declaration
        File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]
@@ -963,7 +966,7 @@ Error: The implementation counter.ml
          type median = Median of string | Before_and_after of string * string
        is not included in
          type median = Before_and_after of string * string | Median of string
-       Constructors number 1 have different names, Median and Before_and_after.
+       Constructor Before_and_after has been moved from position 1 to 2.
        File "counter.mli", lines 21-23, characters 0-20: Expected declaration
        File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]

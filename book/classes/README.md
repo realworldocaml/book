@@ -145,7 +145,7 @@ Error: Some type variables are unbound in this type:
              method pop : 'b option
              method push : 'b -> unit
            end
-       The method pop has type 'b option where 'b is unbound
+       The method pop has type 'a option where 'a is unbound
 ```
 
 In general, we need to provide enough constraints so that the compiler will
@@ -1340,13 +1340,13 @@ which will pull in all the other dependencies:
 $ dune build shapes.exe
 File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
 Error: File unavailable:
-/home/yminsky/Code/rwo/_build/install/default/lib/async_graphics/async_graphics.cmx
+/home/yminsky/Code/rwo-4.14/_build/install/default/lib/async_graphics/async_graphics.cmx
 Broken symbolic link
 File "dune", line 2, characters 13-19:
 2 |   (name      shapes)
                  ^^^^^^
 Error: File unavailable:
-/home/yminsky/Code/rwo/_build/install/default/lib/graphics/libgraphics_stubs.a
+/home/yminsky/Code/rwo-4.14/_build/install/default/lib/graphics/libgraphics_stubs.a
 [1]
 ```
 

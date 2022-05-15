@@ -172,14 +172,12 @@ The type `Map.comparator` is actually an alias for a first-class module type,
 representing any module that matches the signature `Comparator.S`, shown
 below.
 
+<!-- TODO: Something broke show here, so we don't actually see the
+    definition -->
+
 ```ocaml env=main
 # #show Base.Comparator.S;;
-module type S =
-  sig
-    type t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
+module type S = Base.Comparator.S
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -788,15 +786,13 @@ some work to prepare it. In order for a module to be suitable for passing to
      and why it shows up here.
 -->
 
+<!-- TODO: Something broke show here, so we don't actually see the
+    definition -->
+
+
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
-module type S =
-  sig
-    type t
-    val compare : t Exported_for_specific_uses.Ppx_compare_lib.compare
-    val sexp_of_t : t -> Sexp.t
-    val hash : t -> int
-  end
+module type S = Base__Hashtbl_intf.Key.S
 ```
 
 Note that there's no equivalent to the comparator witness that came up for
