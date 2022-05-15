@@ -668,6 +668,8 @@ In addition, there is `List.concat`, for concatenating a list of lists:
 Here's an example of using `List.concat` along with `List.map` to compute a
 recursive listing of a directory tree.
 
+<!-- TODO: explain require -->
+
 ```ocaml env=main
 # #require "core_unix.sys_unix";;
 # module Sys = Core.Sys
