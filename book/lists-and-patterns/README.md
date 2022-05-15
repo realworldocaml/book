@@ -391,7 +391,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4")
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4").
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a
@@ -674,13 +674,18 @@ recursive listing of a directory tree.
 module Sys = Core.Sys
 module Filename = Core.Filename
 # let rec ls_rec s =
-    if Sys.is_file_exn ~follow_symlinks:true s
+    if Sys_unix.is_file_exn ~follow_symlinks:true s
     then [s]
     else
       Sys.ls_dir s
       |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
       |> List.concat;;
-val ls_rec : string -> string list = <fun>
+Line 2, characters 8-23:
+Alert deprecated: Sys.is_file_exn
+[since 2021-04] Use [Sys_unix]
+Line 2, characters 8-23:
+Error: This expression has type [ `Use_Sys_unix ]
+       This is not a function; it cannot be applied.
 ```
 
 \noindent
@@ -699,7 +704,12 @@ efficient operation:
     else
       Sys.ls_dir s
       |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub));;
-val ls_rec : string -> string list = <fun>
+Line 2, characters 8-23:
+Alert deprecated: Sys.is_file_exn
+[since 2021-04] Use [Sys_unix]
+Line 2, characters 8-23:
+Error: This expression has type [ `Use_Sys_unix ]
+       This is not a function; it cannot be applied.
 ```
 
 ## Tail Recursion
@@ -953,7 +963,7 @@ fail at runtime if it encounters a function value.
 
 ```ocaml env=poly
 # (fun x -> x + 1) = (fun x -> x + 1);;
-Exception: (Invalid_argument "compare: functional value")
+Exception: (Invalid_argument "compare: functional value").
 ```
 
 Similarly, it will fail on values that come from outside the OCaml
