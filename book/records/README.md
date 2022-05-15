@@ -560,9 +560,16 @@ heartbeat was received from that client.
 [functional updates]{.idx}
 [records/functional updates to]{.idx}
 
+<!-- TODO: explain why we're requiring core_unix here. -->
+
+```ocaml env=main
+# #require "core_unix";;
+```
+
+
 ```ocaml env=main
 type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -612,7 +619,7 @@ a field for the status message received on the last heartbeat:
 
 ```ocaml env=main
 type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -649,7 +656,7 @@ record fields]{.idx}[records/mutable fields in]{.idx}
 
 ```ocaml env=main
 type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -833,11 +840,13 @@ which the field can be grabbed.
 Here's an example of `show_field` in action:
 
 ```ocaml env=main,non-deterministic=output
-# let logon = { Logon.
-                session_id = "26685";
-                time = Time_ns.of_string "2017-07-21 10:11:45 EST";
-                user = "yminsky";
-                credentials = "Xy2d9W"; };;
+# let logon =
+   { Logon.
+     session_id = "26685";
+     time = Time_ns.of_string_with_utc_offset "2017-07-21 10:11:45Z";
+     user = "yminsky";
+     credentials = "Xy2d9W";
+   };;
 val logon : Logon.t =
   {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
    user = "yminsky"; credentials = "Xy2d9W"}
