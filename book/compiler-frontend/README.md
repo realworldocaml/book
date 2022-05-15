@@ -508,7 +508,7 @@ Error: The implementation conflicting_interface.ml
          type t = Foo
        is not included in
          type t = Bar
-       Constructors have different names, Foo and Bar.
+       Constructors number 1 have different names, Foo and Bar.
        File "conflicting_interface.mli", line 1, characters 0-12:
          Expected declaration
        File "conflicting_interface.ml", line 1, characters 0-12:
@@ -1237,7 +1237,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Tstr_type Rec
     [
-      type_declaration t/267 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+      type_declaration t/81 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
         ptype_params =
           []
         ptype_cstrs =
@@ -1246,11 +1246,11 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
           Ttype_variant
             [
               (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-                Foo/268
+                Foo/82
                 []
                 None
               (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-                Bar/269
+                Bar/83
                 []
                 None
             ]
@@ -1263,7 +1263,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
     [
       <def>
         pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Tpat_var "v/270"
+          Tpat_var "v/84"
         expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
           Texp_construct "Foo"
           []

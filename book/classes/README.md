@@ -145,7 +145,7 @@ Error: Some type variables are unbound in this type:
              method pop : 'b option
              method push : 'b -> unit
            end
-       The method pop has type 'a option where 'a is unbound
+       The method pop has type 'b option where 'b is unbound
 ```
 
 In general, we need to provide enough constraints so that the compiler will
@@ -1338,16 +1338,15 @@ which will pull in all the other dependencies:
 
 ```sh dir=examples/correct/shapes
 $ dune build shapes.exe
-File "/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/dune-package", line 309, characters 2-11:
-309 |   core.uuid
-        ^^^^^^^^^
-Error: Library "core.uuid" not found.
--> required by library "async_unix" in
-   /home/yminsky/Code/rwo/_build/install/default/lib/async_unix
--> required by executable shapes in dune:2
--> required by _build/default/.shapes.eobjs/byte/dune__exe__Shapes.cmi
--> required by _build/default/.shapes.eobjs/native/dune__exe__Shapes.cmx
--> required by _build/default/shapes.exe
+File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_graphics/async_graphics.cmx
+Broken symbolic link
+File "dune", line 2, characters 13-19:
+2 |   (name      shapes)
+                 ^^^^^^
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/graphics/libgraphics_stubs.a
 [1]
 ```
 
