@@ -669,6 +669,7 @@ Here's an example of using `List.concat` along with `List.map` to compute a
 recursive listing of a directory tree.
 
 ```ocaml env=main
+# #require "core_unix.sys_unix";;
 # module Sys = Core.Sys
   module Filename = Core.Filename;;
 module Sys = Core.Sys
@@ -677,15 +678,10 @@ module Filename = Core.Filename
     if Sys_unix.is_file_exn ~follow_symlinks:true s
     then [s]
     else
-      Sys.ls_dir s
+      Sys_unix.ls_dir s
       |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
       |> List.concat;;
-Line 2, characters 8-23:
-Alert deprecated: Sys.is_file_exn
-[since 2021-04] Use [Sys_unix]
-Line 2, characters 8-23:
-Error: This expression has type [ `Use_Sys_unix ]
-       This is not a function; it cannot be applied.
+val ls_rec : string -> string list = <fun>
 ```
 
 \noindent
