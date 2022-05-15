@@ -383,7 +383,7 @@ let do_hash file =
 
 let regular_file =
   Command.Arg_type.create (fun filename ->
-      match Sys.is_file filename with
+      match Sys_unix.is_file filename with
       | `Yes -> filename
       | `No -> failwith "Not a regular file"
       | `Unknown ->
@@ -408,28 +408,17 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=examples/correct/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-File "md5.ml", line 8, characters 12-23:
-8 |       match Sys.is_file filename with
-                ^^^^^^^^^^^
-Error (alert deprecated): Core.Sys.is_file
-[since 2021-04] Use [Sys_unix]
-File "md5.ml", line 8, characters 12-23:
-8 |       match Sys.is_file filename with
-                ^^^^^^^^^^^
-Error: This expression has type [ `Use_Sys_unix ]
-       This is not a function; it cannot be applied.
-[1]
+6a6c128cdc8e75f3b174559316e49a5d
 $ dune exec -- ./md5.exe /dev/null
-File "md5.ml", line 8, characters 12-23:
-8 |       match Sys.is_file filename with
-                ^^^^^^^^^^^
-Error (alert deprecated): Core.Sys.is_file
-[since 2021-04] Use [Sys_unix]
-File "md5.ml", line 8, characters 12-23:
-8 |       match Sys.is_file filename with
-                ^^^^^^^^^^^
-Error: This expression has type [ `Use_Sys_unix ]
-       This is not a function; it cannot be applied.
+Error parsing command line:
+
+  failed to parse FILENAME value "/dev/null"
+  (Failure "Not a regular file")
+
+For usage information, run
+
+  md5.exe -help
+
 [1]
 ```
 

@@ -5,7 +5,7 @@ let do_hash file =
 
 let regular_file =
   Command.Arg_type.create (fun filename ->
-      match Sys.is_file filename with
+      match Sys_unix.is_file filename with
       | `Yes -> filename
       | `No -> failwith "Not a regular file"
       | `Unknown ->
