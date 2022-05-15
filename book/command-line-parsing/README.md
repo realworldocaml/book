@@ -238,7 +238,7 @@ let command =
         (anon ("filename" %: string))
         ~f:(fun filename () -> do_hash filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 ### Multi-argument commands {#multiple-arguments}
@@ -282,7 +282,7 @@ let command =
         ~f:(fun (hash_length, filename) () ->
           do_hash hash_length filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this command, we can see that it now indeed expects two
@@ -290,17 +290,7 @@ arguments.
 
 ```sh dir=examples/correct/md5_multiarg
 $ dune exec -- ./md5.exe 5 md5.ml
-File "md5.ml", line 21, characters 9-20:
-21 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "md5.ml", line 21, characters 9-20:
-21 | let () = Command.run ~version:"1.0" ~build_info:"RWO" command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+bc879
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -408,7 +398,7 @@ let command =
      in
      fun () -> do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The `regular_file` function transforms a `filename` string parameter into the
@@ -503,7 +493,7 @@ let command =
      in
      fun () -> do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type. This is
@@ -556,7 +546,7 @@ let command =
      in
      fun () -> do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 Building and running this confirms that it has the same behavior as before.
@@ -607,7 +597,7 @@ let command =
        | [] -> do_hash "-"
        | _ -> List.iter files ~f:do_hash)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The callback function is a little more complex now, to handle the extra
@@ -785,7 +775,7 @@ let add =
      fun () ->
        Date.add_days base days |> Date.to_string |> print_endline)
 
-let () = Command.run add
+let () = Command_unix.run add
 ```
 
 Everything in this command should be familiar to you by now, and it works as
@@ -793,29 +783,18 @@ you might expect.
 
 ```sh dir=examples/correct/cal_add_days
 $ dune exec -- ./cal.exe -help
-File "cal.ml", line 11, characters 9-20:
-11 | let () = Command.run add
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 11, characters 9-20:
-11 | let () = Command.run add
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+Add [days] to the [base] date and print day
+
+  cal.exe BASE DAYS
+
+=== flags ===
+
+  [-build-info]              . print info about this build and exit
+  [-version]                 . print the version of this build and exit
+  [-help], -?                . print this help text and exit
+
 $ dune exec -- ./cal.exe 2012-12-25 40
-File "cal.ml", line 11, characters 9-20:
-11 | let () = Command.run add
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 11, characters 9-20:
-11 | let () = Command.run add
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+2013-02-03
 ```
 
 Now, let's also add the ability to take the difference between two dates,
@@ -846,7 +825,7 @@ let command =
     ~summary:"Manipulate dates"
     [ "add", add; "diff", diff ]
 
-let () = Command.run command
+let () = Command_unix.run command
 ```
 
 And that's all you really need to add subcommand support! Let's build the
@@ -856,7 +835,7 @@ reflects the subcommands we just added.
 ```scheme file=examples/correct/cal_add_sub_days/dune
 (executable
   (name       cal)
-  (libraries  core)
+  (libraries  core core_unix.command_unix)
   (preprocess (pps ppx_jane)))
 ```
 
@@ -864,17 +843,17 @@ reflects the subcommands we just added.
 
 ```sh dir=examples/correct/cal_add_sub_days
 $ dune exec -- ./cal.exe -help
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+Manipulate dates
+
+  cal.exe SUBCOMMAND
+
+=== subcommands ===
+
+  add                        . Add [days] to the [base] date
+  diff                       . Show days between [date1] and [date2]
+  version                    . print version information
+  help                       . explain a given subcommand (perhaps recursively)
+
 ```
 
 We can invoke the two commands we just defined to verify that they work and
@@ -882,29 +861,9 @@ see the date parsing in action:
 
 ```sh dir=examples/correct/cal_add_sub_days
 $ dune exec -- ./cal.exe add 2012-12-25 40
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+2013-02-03
 $ dune exec -- ./cal.exe diff 2012-12-25 2012-11-01
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 24, characters 9-20:
-24 | let () = Command.run command
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+54 days
 ```
 
 ## Prompting for Interactive Input
@@ -924,7 +883,7 @@ let add =
      fun () ->
        Date.add_days base days |> Date.to_string |> print_endline)
 
-let () = Command.run add
+let () = Command_unix.run add
 ```
 
 This program requires you to specify both the `base` date and the number of
@@ -956,7 +915,7 @@ let add =
      in
      fun () -> add_days base days)
 
-let () = Command.run add
+let () = Command_unix.run add
 ```
 
 The `days` anonymous argument is now an optional integer in the spec, and
@@ -990,17 +949,7 @@ second argument.
 
 ```sh dir=examples/correct/cal_add_interactive2
 $ echo 35 | dune exec -- ./cal.exe 2013-12-01
-File "cal.ml", line 30, characters 9-20:
-30 | let () = Command.run add
-              ^^^^^^^^^^^
-Error (alert deprecated): Core.Command.run
-[since 2021-03] Use [Command_unix]
-File "cal.ml", line 30, characters 9-20:
-30 | let () = Command.run add
-              ^^^^^^^^^^^
-Error: This expression has type [ `Use_Command_unix ]
-       This is not a function; it cannot be applied.
-[1]
+enter days: 2014-01-05
 ```
 
 ## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}

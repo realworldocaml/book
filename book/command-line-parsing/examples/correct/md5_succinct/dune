@@ -1,3 +1,3 @@
 (executable
   (name      md5)
-  (libraries core))
+  (libraries core core_unix.command_unix))

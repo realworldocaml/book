@@ -12,4 +12,4 @@ let command =
         (anon ("filename" %: string))
         ~f:(fun filename () -> do_hash filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command

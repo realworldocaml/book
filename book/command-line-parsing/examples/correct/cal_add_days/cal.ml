@@ -8,4 +8,4 @@ let add =
      fun () ->
        Date.add_days base days |> Date.to_string |> print_endline)
 
-let () = Command.run add
+let () = Command_unix.run add
