@@ -159,6 +159,9 @@ The function `Map.of_alist_exn` constructs a map from a provided association
 list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
+<!-- TODO: explain why Set.comparator shows up, not Map.comparator (or
+     some other better name)-->
+
 ```ocaml env=main
 # #show Map.of_alist_exn;;
 val of_alist_exn :
@@ -780,6 +783,10 @@ As with maps, most modules in Base are ready to be used for this purpose, but
 if you want to create a hash table from one of your own types, you need to do
 some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
+
+<!-- TODO: explain Exported_for_specific_uses.Ppx_compare_lib.compare,
+     and why it shows up here.
+-->
 
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
