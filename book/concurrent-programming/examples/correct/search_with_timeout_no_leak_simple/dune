@@ -1,4 +1,4 @@
 (executable
   (name      search)
-  (libraries cohttp-async yojson textwrap)
+  (libraries cohttp-async yojson textwrap core_unix.command_unix)
   (preprocess (pps ppx_jane)))

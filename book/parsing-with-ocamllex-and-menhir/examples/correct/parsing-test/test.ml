@@ -37,4 +37,4 @@ let () =
   Command.basic_spec ~summary:"Parse and display JSON"
     Command.Spec.(empty +> anon ("filename" %: string))
     loop
-  |> Command.run
+  |> Command_unix.run

@@ -190,10 +190,11 @@ RWO
 ```
 
 The versions that you see in the output were defined via the optional
-arguments to `Command.run`. You can leave these blank in your own programs or
-get your build system to generate them directly from your version control
-system.  Dune provides a [`dune-build-info` library](https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables) that automates this
-process for most common workflows.
+arguments to `Command_unix.run`. You can leave these blank in your own
+programs or get your build system to generate them directly from your
+version control system.  Dune provides a [`dune-build-info`
+library](https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables)
+that automates this process for most common workflows.
 
 We can invoke our binary with `-help` to see the auto-generated help.
 

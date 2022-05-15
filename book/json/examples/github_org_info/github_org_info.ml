@@ -14,4 +14,4 @@ let () =
   Command.basic_spec ~summary:"Print Github organization information"
     Command.Spec.(empty +> anon ("organization" %: string))
     print_org
-  |> Command.run
+  |> Command_unix.run

@@ -4,4 +4,4 @@
 
 (executable
   (name      test)
-  (libraries core))
+  (libraries core core_unix.command_unix))

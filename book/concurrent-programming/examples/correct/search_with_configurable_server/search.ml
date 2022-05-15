@@ -77,4 +77,4 @@ let () =
          ~doc:" Specify server to connect to"
      in
      fun () -> search_and_print ~servers words)
-  |> Command.run
+  |> Command_unix.run

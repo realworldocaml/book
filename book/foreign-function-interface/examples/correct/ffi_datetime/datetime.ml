@@ -49,4 +49,4 @@ let () =
        flag "-a" no_arg ~doc:" Human-readable output format"
      in
      if human then ascii_time else float_time)
-  |> Command.run
+  |> Command_unix.run

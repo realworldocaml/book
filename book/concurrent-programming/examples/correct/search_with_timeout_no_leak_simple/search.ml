@@ -91,4 +91,4 @@ let () =
          ~doc:" Abandon queries that take longer than this time"
      in
      fun () -> search_and_print ~servers ~timeout words)
-  |> Command.run
+  |> Command_unix.run

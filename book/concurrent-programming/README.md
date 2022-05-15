@@ -811,10 +811,10 @@ val async_spec :
   ('a, unit Deferred.t) Async.Command.basic_spec_command Command.with_options
 ```
 
-This differs from the ordinary `Command.basic` call in that the main function
-must return a `Deferred.t`, and that the running of the command (using
-`Command.run`) automatically starts the Async scheduler, without requiring an
-explicit call to
+This differs from the ordinary `Command.basic` call in that the main
+function must return a `Deferred.t`, and that the running of the
+command (using `Command_unix.run`) automatically starts the Async
+scheduler, without requiring an explicit call to
 `Scheduler.go`.[command-line parsing/running async commands]{.idx}
 
 

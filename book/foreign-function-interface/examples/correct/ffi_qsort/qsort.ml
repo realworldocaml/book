@@ -41,4 +41,4 @@ let () =
     ~summary:"Sort integers on standard input"
     Command.Spec.empty
     sort_stdin
-  |> Command.run
+  |> Command_unix.run
