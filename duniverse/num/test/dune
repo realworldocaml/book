@@ -1,7 +1,11 @@
-(alias
-  (name runtest)
-  (action (progn (run %{dep:test.bc}) (run %{dep:test.exe}))))
+(rule
+  (alias runtest)
+  (action
+    (progn
+      (run ./test.bc.exe)
+      (run ./test.exe))))
 
 (executable
   (name test)
-  (libraries num))
+  (libraries num)
+  (modes byte_complete native))
