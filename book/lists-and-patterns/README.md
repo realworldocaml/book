@@ -540,7 +540,7 @@ val render_table : string list -> string list list -> string = <fun>
 
 The previous example touched on only three of the functions in
 `List`. We won't cover the entire interface (for that you should look
-at the [online docs](https://v3.ocaml.org/p/base/v0.15.0/doc/Base/List/index.html)),
+at the [online docs](https://v3.ocaml.org/p/base/v0.14.3/doc/Base/List/index.html)),
 but a few more functions are useful enough to mention here.
 
 #### Combining list elements with List.reduce

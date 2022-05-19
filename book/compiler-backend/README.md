@@ -152,9 +152,6 @@ creates a decision tree that compares the hash values against the input
 variable in as few comparisons as possible. [pattern matching/fundamental
 algorithms in]{.idx}
 
-::: {data-type=note}
-#### Learning More About Pattern Matching Compilation
-
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
 code. A good paper that describes the fundamental algorithms implemented in
@@ -166,11 +163,9 @@ The paper describes the backtracking algorithm used in classical pattern
 matching compilation, and also several OCaml-specific optimizations, such as
 the use of exhaustiveness information and control flow optimizations via
 static exceptions.
-
 It's not essential that you understand all of this just to use pattern
 matching, of course, but it'll give you insight as to why pattern
 matching is such an efficient language construct in OCaml.
-:::
 
 
 ### Benchmarking Pattern Matching
@@ -434,18 +429,22 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 
 ```
 
-<!-- TODO: Remove this reference to ocamlbuild (and the %.byte rule!) -->
-
-OCamlbuild takes care of many of these details with its built-in rules. The
-`%.byte` rule that you've been using throughout the book builds a
-bytecode executable, and adding the `custom` tag will bundle the
-interpreter with it, too. [%.byte rule]{.idx}
-
 The custom mode is the most similar mode to native code compilation, as both
 generate standalone executables. There are quite a few other options
 available for compiling bytecode (notably with shared libraries or building
 custom runtimes). Full details can be found in the
 [OCaml](https://ocaml.org/manual/comp.html#s%3Acomp-options).
+
+Dune can build a self-contained bytecode executable if you specify the
+`byte_complete` mode in the executable rule. For example, this `dune`
+file will generate a `prog.bc.exe` target:
+
+```scheme
+(executable
+  (name prog)
+  (modules prog)
+  (modes byte byte_complete))
+```
 
 ### Embedding OCaml Bytecode in C
 
