@@ -502,7 +502,7 @@ should look at the <a href="https://v3.ocaml.org/p/base/v0.14.3/doc/Base/List/in
 docs</a>), but a few more functions are useful enough to mention
 here.</p>
 <section class="level4" id="combining-list-elements-with-list.reduce">
-<h4>Combining list elements with List.reduce</h4>
+<h4>Combining List Elements with <code>List.reduce</code></h4>
 <p><code>List.fold</code>, which we described earlier, is a very general
 and powerful function. Sometimes, however, you want something simpler
 and easier to use. One such function is <code>List.reduce</code>, which
@@ -529,7 +529,8 @@ List.reduce ~f:(+) [];;
 </div>
 </section>
 <section class="level4" id="filtering-with-list.filter-and-list.filter_map">
-<h4>Filtering with List.filter and List.filter_map</h4>
+<h4>Filtering with <code>List.filter</code> and
+<code>List.filter_map</code></h4>
 <p>Very often when processing lists, you want to restrict your attention
 to a subset of the values on your list. The <code>List.filter</code>
 function is one way of doing that:<a data-secondary="filtering
@@ -571,7 +572,7 @@ you to have multiple subpatterns within a larger pattern. In this case,
 or-patterns can be nested anywhere within larger patterns.</p>
 </section>
 <section class="level4" id="partitioning-with-list.partition_tf">
-<h4>Partitioning with List.partition_tf</h4>
+<h4>Partitioning with <code>List.partition_tf</code></h4>
 <p>Another useful operation that’s closely related to filtering is
 partitioning. The function <code>List.partition_tf</code> takes a list
 and a function for computing a Boolean condition on the list elements,

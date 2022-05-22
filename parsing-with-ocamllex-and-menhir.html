@@ -357,7 +357,9 @@ list_fields:
 <p>We can hook in <code>menhir</code> by adding a <code>(menhir)</code>
 stanza to our dune file, which tells the build system to switch to using
 <code>menhir</code> instead of <code>ocamlyacc</code> to handle files
-with the <code>.mly</code> suffix: <span class="idx"><code>(menhir)</code> dune stanza</span><a data-secondary="invoking" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+with the <code>.mly</code> suffix: <a data-primary="menhir dune
+stanza" data-type="indexterm">&nbsp;</a><a data-secondary="invoking" data-primary="Menhir parser
+generator" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-scheme">(menhir
  (modules parser))
@@ -508,7 +510,7 @@ and <code>id</code> match the first four characters; <code>"true"</code>
 is first, so the return value is <code>TRUE</code>.</p></li>
 </ul>
 <section data-type="note" class="level4" id="unused-lexing-values">
-<h4>Unused lexing values</h4>
+<h4>Unused Lexing Values</h4>
 <p>In our parser, we have not used all the token regexps that we defined
 in the lexer. For instance, <code>id</code> is unused since we do not
 parse unquoted strings for object identifiers (something that is allowed

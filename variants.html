@@ -141,7 +141,7 @@ color_print (Gray 4) "A muted gray...";;
 </code></pre>
 </div>
 <section data-type="note" class="level4" id="variants-tuples-and-parens">
-<h4>Variants, tuples and parens</h4>
+<h4>Variants, Tuples and Parens</h4>
 <p>Variants with multiple arguments look an awful lot like tuples.
 Consider the following example of a value of the type <code>color</code>
 we defined earlier.</p>
@@ -506,7 +506,7 @@ types, we could write a dispatch function as follows:</p>
 <code>handle_logon</code> sees only <code>Logon</code> messages,
 etc.</p>
 <section class="level3" id="embedded-records">
-<h3>Embedded records</h3>
+<h3>Embedded Records</h3>
 <p>If we don’t need to be able to pass the record types separately from
 the variant, then OCaml allows us to embed the records directly into the
 variant.</p>
@@ -851,7 +851,7 @@ and must contain at least <code>`Float</code> and <code>`Int</code>. As
 you can already start to see, polymorphic variants can lead to fairly
 complex inferred types.</p>
 <section data-type="note" class="level4 allow_break" id="polymorphic-variants-and-catch-all-cases">
-<h4>Polymorphic Variants and Catch-all Cases</h4>
+<h4>Polymorphic Variants and Catch-All Cases</h4>
 <p>As we saw with the definition of <code>is_positive</code>, a
 <code>match</code> expression can lead to the inference of an upper
 bound on a variant type, limiting the possible tags to those that can be

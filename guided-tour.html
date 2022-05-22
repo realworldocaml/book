@@ -474,7 +474,7 @@ floating-point number to a power.</p>
 <p>This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you’ll see, it has surprising power.</p>
 <section data-type="note" class="level4" id="operators-in-base-and-the-stdlib">
-<h4>Operators in <code>Base</code> and the stdlib</h4>
+<h4>Operators in <code>Base</code> and the Stdlib</h4>
 <p>OCaml’s standard library and <code>Base</code> mostly use the same
 operators for the same things, but there are some differences. For
 example, in <code>Base</code>, <code>**.</code> is float exponentiation,
@@ -510,7 +510,7 @@ unlike tuples:</p>
 </code></pre>
 </div>
 <section class="level4" id="the-list-module">
-<h4>The List module</h4>
+<h4>The List Module</h4>
 <p><code>Base</code> comes with a <code>List</code> module that has a
 rich collection of functions for working with lists. We can access
 values from within a module by using dot notation. For example, this is
@@ -545,7 +545,7 @@ arguments" data-type="indexterm">&nbsp;</a></p>
 <a data-type="xref" href="variables-and-functions.html#variables-and-functions">Chapter 2, Variables And Functions</a>.</p>
 </section>
 <section class="level4" id="constructing-lists-with">
-<h4>Constructing lists with ::</h4>
+<h4>Constructing Lists with ::</h4>
 <p>In addition to constructing lists using brackets, we can use the list
 constructor <code>::</code> for adding elements to the front of a
 list:<a data-secondary=": : operator" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operator : :" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
@@ -612,7 +612,7 @@ operator, <code>@</code>, which can concatenate two lists:</p>
 a constant-time operation. Concatenating two lists takes time
 proportional to the length of the first list.</p>
 <section class="level4" id="list-patterns-using-match">
-<h4>List patterns using match</h4>
+<h4>List Patterns Using Match</h4>
 <p>The elements of a list can be accessed through pattern matching. List
 patterns are based on the two list constructors, <code>[]</code> and
 <code>::</code>. Here’s a simple example:<a data-secondary="in lists" data-primary="pattern
@@ -685,7 +685,7 @@ or has at least one element, a fact that is verified by the
 compiler.</p>
 </section>
 <section class="level4" id="recursive-list-functions">
-<h4>Recursive list functions</h4>
+<h4>Recursive List Functions</h4>
 <p>Recursive functions, or functions that call themselves, are an
 important part of working in OCaml or really any functional language.
 The typical approach to designing a recursive function is to separate
@@ -958,7 +958,7 @@ evaluates to <code>true</code>. In this case, we’re using
 <code>List.exists</code> to check if there is a scene element within
 which our point resides.</p>
 <section data-type="note" class="level4" id="base-and-polymorphic-comparison">
-<h4><code>Base</code> and polymorphic comparison</h4>
+<h4><code>Base</code> and Polymorphic Comparison</h4>
 <p>One other thing to notice was the fact that we opened
 <code>Float.O</code> in the definition of
 <code>is_inside_scene_element</code>. That allowed us to use the simple,

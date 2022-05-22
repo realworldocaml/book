@@ -17,7 +17,8 @@ which is a collection of memory regions that it obtains from the
 operating system. The runtime uses this memory to hold <em>heap
 blocks</em> that it fills up with OCaml values in response to allocation
 requests by the OCaml program. <a data-secondary="allocation
-requests and" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="heap blocks" data-primary="heaps" data-type="indexterm">&nbsp;</a><a data-secondary="definition of" data-primary="heaps" data-type="indexterm">&nbsp;</a></p>
+requests and" data-primary="values" data-type="indexterm">&nbsp;</a>  <a data-secondary="heap blocks" data-primary="heaps" data-type="indexterm">&nbsp;</a> <a data-secondary="definition
+of" data-primary="heaps" data-type="indexterm">&nbsp;</a></p>
 <section class="level2" id="mark-and-sweep-garbage-collection">
 <h2>Mark and Sweep Garbage Collection</h2>
 <p>When there isn’t enough memory available to satisfy an allocation
@@ -126,7 +127,7 @@ space left for the block without decrementing past <code>limit</code>, a
 minor garbage collection is triggered. This is a very fast check (with
 no branching) on most CPU architectures.</p>
 <section class="level4" id="understanding-allocation">
-<h4>Understanding allocation</h4>
+<h4>Understanding Allocation</h4>
 <p>You may wonder why <code>limit</code> is required at all, since it
 always seems to equal <code>start</code>. It’s because the easiest way
 for the runtime to schedule a minor heap collection is by setting
@@ -273,7 +274,7 @@ block in the major heap. The default free list search is called
 <em>first-fit</em> algorithms also available. <a data-primary="best-fit
 allocation" data-type="indexterm">&nbsp;</a><a data-primary="first-fit allocation" data-type="indexterm">&nbsp;</a><a data-primary="next-fit allocation" data-type="indexterm">&nbsp;</a></p>
 <section class="level4" id="best-fit-allocation">
-<h4>Best-fit allocation</h4>
+<h4>Best-Fit Allocation</h4>
 <p>The best-fit allocator is a combination of two strategies. The first,
 size-segregated free lists, is based on the observation that nearly all
 major heap allocations in OCaml are small (consider list elements and
@@ -297,7 +298,7 @@ represents a good trade-off between the allocation cost (in terms of CPU
 work) and heap fragmentation.</p>
 </section>
 <section class="level4" id="next-fit-allocation">
-<h4>Next-fit allocation</h4>
+<h4>Next-Fit Allocation</h4>
 <p>Next-fit allocation keeps a pointer to the block in the free list
 that was most recently used to satisfy a request. When a new request
 comes in, the allocator searches from the next block to the end of the
@@ -311,7 +312,7 @@ allocations are small, large blocks at the start of the free list become
 heavily fragmented.</p>
 </section>
 <section class="level4" id="first-fit-allocation">
-<h4>First-fit allocation</h4>
+<h4>First-Fit Allocation</h4>
 <p>If your program allocates values of many varied sizes, you may
 sometimes find that your free list becomes fragmented. In this
 situation, the GC is forced to perform an expensive compaction despite
@@ -455,7 +456,7 @@ compiler introduces a write barrier to update this so-called
 <em>remembered set</em> whenever a major-heap block is modified to point
 at a minor-heap block. <a data-primary="write barriers" data-type="indexterm">&nbsp;</a><a data-primary="remembered sets" data-type="indexterm">&nbsp;</a></p>
 <section class="level4" id="the-mutable-write-barrier">
-<h4>The mutable write barrier</h4>
+<h4>The Mutable Write Barrier</h4>
 <p>The write barrier can have profound implications for the structure of
 your code. It’s one of the reasons using immutable data structures and
 allocating a fresh copy with changes can sometimes be faster than

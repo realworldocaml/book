@@ -116,7 +116,7 @@ the appropriate flags to link in particular libraries and packages.
 Here, <code>-package base</code> is asking <code>ocamlfind</code> to
 link in the <code>Base</code> library; <code>-linkpkg</code> asks
 ocamlfind to link in the packages as is necessary for building an
-executable. <a data-primary="-linkpkg" data-type="indexterm">&nbsp;</a></p>
+executable. <a data-primary="linkpkg" data-type="indexterm">&nbsp;</a></p>
 <p>While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for this
 task is <code>dune</code>. To invoke <code>dune</code>, you need to have
@@ -608,7 +608,7 @@ foo;;
 <p>Here’s some general advice on how to use <code>open</code>
 effectively.</p>
 <section class="level3" id="open-modules-rarely">
-<h3>Open modules rarely</h3>
+<h3>Open Modules Rarely</h3>
 <p><code>open</code> is essential when you’re using an alternative
 standard library like <code>Base</code>, but it’s generally good style
 to keep the opening of modules to a minimum. Opening a module is
@@ -622,7 +622,7 @@ that were designed to be opened, like <code>Base</code> itself, or
 <code>Base</code>..</p>
 </section>
 <section class="level3" id="prefer-local-opens">
-<h3>Prefer local opens</h3>
+<h3>Prefer Local Opens</h3>
 <p>It’s generally better to keep down the amount of code affected by an
 <code>open</code>. One great tool for this is <em>local open</em>s,
 which let you restrict the scope of an open to an arbitrary expression.
@@ -647,7 +647,7 @@ particularly useful for small expressions.</p>
 </div>
 </section>
 <section class="level3" id="using-module-shortcuts-instead">
-<h3>Using module shortcuts instead</h3>
+<h3>Using Module Shortcuts Instead</h3>
 <p>An alternative to local <code>open</code>s that makes your code
 terser without giving up on explicitness is to locally rebind the name
 of a module. So, when using the <code>Counter.median</code> type,
@@ -1035,7 +1035,7 @@ improve the usability of your codebase by finding some consistent set of
 standards to apply.</p>
 </section>
 <section class="level3" id="interfaces-before-implementations">
-<h3>Interfaces before implementations</h3>
+<h3>Interfaces Before Implementations</h3>
 <p>OCaml’s concise and flexible type language enables a type-oriented
 approach to software design. Such an approach involves thinking through
 and writing out the types you’re going to use before embarking on the

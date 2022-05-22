@@ -25,7 +25,7 @@ work with data of a specific but unknown type. <a data-primary="existential type
 <p>It’s a little hard to understand these features without working
 through some examples, so we’ll do that next.</p>
 <section class="level2" id="a-little-language">
-<h2>A little language</h2>
+<h2>A Little Language</h2>
 <p>One classic use-case for GADTs is for writing typed expression
 languages, similar to the boolean expression language described in <a data-type="xref" href="variants.html#variants-and-recursive-data-structures">Chapter 6, Variants</a>. In this section, we’ll create a slightly
 richer language that lets us mix arithmetic and boolean expressions.
@@ -95,7 +95,7 @@ eval (i 3 +: b false);;
 implementation: it’s also a problem for users, since it’s all too easy
 to create ill-typed expressions by mistake.</p>
 <section class="level3" id="making-the-language-type-safe">
-<h3>Making the language type-safe</h3>
+<h3>Making the Language Type-Safe</h3>
 <p>Let’s consider what a type-safe version of this API might look like
 in the absence of GADTs. To even express the type constraints, we’ll
 need expressions to have a type parameter to distinguish integer
@@ -205,7 +205,7 @@ where the type of the result varies based on the result of the
 expression.</p>
 </section>
 <section class="level3" id="trying-to-do-better-with-ordinary-variants">
-<h3>Trying to do better with ordinary variants</h3>
+<h3>Trying to Do Better with Ordinary Variants</h3>
 <p>To see why we need GADTs, let’s see how far we can get without them.
 In particular, let’s see what happens when we try to encode the typing
 rules we want for our DSL directly into the definition of the expression
@@ -266,7 +266,7 @@ to depend in non-trivial ways on the types of the data associated with
 each tag. That’s where GADTs can help.</p>
 </section>
 <section class="level3" id="gadts-to-the-rescue">
-<h3>GADTs to the rescue</h3>
+<h3>GADTs to the Rescue</h3>
 <p>Now we’re ready to write our first GADT. Here’s a new version of our
 <code>value</code> and <code>expr</code> types that correctly encode our
 desired typing rules.</p>
@@ -346,7 +346,7 @@ to the two type-specific evaluators we needed when using phantom
 types.</p>
 </section>
 <section class="level3" id="gadts-locally-abstract-types-and-polymorphic-recursion">
-<h3>GADTs, locally abstract types, and polymorphic recursion</h3>
+<h3>GADTs, Locally Abstract Types, and Polymorphic Recursion</h3>
 <p>The above example lets us see one of the downsides of GADTs, which is
 that code using them needs extra type annotations. Look at what happens
 if we write the definition of <code>value</code> without the
@@ -444,13 +444,13 @@ recursive function that makes use of GADTs.</p>
 </section>
 </section>
 <section class="level2" id="when-are-gadts-useful">
-<h2>When are GADTs useful?</h2>
+<h2>When Are GADTs Useful?</h2>
 <p>The typed language we showed above is a perfectly reasonable example,
 but GADTs are useful for a lot more than designing little languages. In
 this section, we’ll try to give you a broader sampling of the kinds of
 things you can do with GADTs.</p>
 <section class="level3" id="varying-your-return-type">
-<h3>Varying your return type</h3>
+<h3>Varying Your Return Type</h3>
 <p>Sometimes, you want to write a single function that can effectively
 have different types in different circumstances. In some sense, this is
 totally ordinary. After all, OCaml’s polymorphism means that values can
@@ -585,7 +585,7 @@ flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;;
 </div>
 </section>
 <section class="level3" id="capturing-the-unknown">
-<h3>Capturing the unknown</h3>
+<h3>Capturing the Unknown</h3>
 <p>Code that works with unknown types is routine in OCaml, and comes up
 in the simplest of examples:</p>
 <div class="highlight">
@@ -677,7 +677,7 @@ tag.</li>
 </ul>
 </section>
 <section class="level3" id="abstracting-computational-machines">
-<h3>Abstracting computational machines</h3>
+<h3>Abstracting Computational Machines</h3>
 <p>A common idiom in OCaml is to combine small components into larger
 computational machines, using a collection of component-combining
 functions, or <em>combinators</em>. <a data-primary="combinators" data-type="indexterm">&nbsp;</a></p>
@@ -847,7 +847,7 @@ tags.</p></li>
 </ul>
 </section>
 <section class="level3" id="narrowing-the-possibilities">
-<h3>Narrowing the possibilities</h3>
+<h3>Narrowing the Possibilities</h3>
 <p>Another use-case for GADTs is to narrow the set of possible states
 for a given data-type in different circumstances.</p>
 <p>One context where this can be useful is when managing complex
@@ -912,7 +912,7 @@ track the state of the request in a type parameter, and have that
 parameter be used to narrow the set of available cases, without
 duplicating the type.</p>
 <section class="level4" id="a-completion-sensitive-option-type">
-<h4>A completion-sensitive option type</h4>
+<h4>A Completion-Sensitive Option Type</h4>
 <p>We’ll start by creating an option type that is sensitive to whether
 our request is in a complete or incomplete state. To do that, we’ll mint
 types to represent the states of being complete and incomplete.</p>
@@ -987,7 +987,7 @@ longer compiles.</p>
 <code>Present</code> case.</p>
 </section>
 <section class="level4" id="a-completion-sensitive-request-type">
-<h4>A completion-sensitive request type</h4>
+<h4>A Completion-Sensitive Request Type</h4>
 <p>We can use <code>coption</code> to define a completion-sensitive
 version of <code>logon_request</code>.</p>
 <div class="highlight">
@@ -1057,7 +1057,7 @@ contemplate can make a big difference to the comprehensibility and
 correctness of the result.</p>
 </section>
 <section class="level4" id="type-distinctness-and-abstraction">
-<h4>Type distinctness and abstraction</h4>
+<h4>Type Distinctness and Abstraction</h4>
 <p>In the example in this section, we used two types,
 <code>complete</code> and <code>incomplete</code> to mark different
 states, and we defined those types so as to be in some sense obviously
@@ -1187,7 +1187,7 @@ that make the distinctness of those types clear, and you should expose
 those definitions in your <code>mli</code>s.</p>
 </section>
 <section class="level4" id="narrowing-without-gadts">
-<h4>Narrowing without GADTs</h4>
+<h4>Narrowing Without GADTs</h4>
 <p>Thus far, we’ve only seen narrowing in the context of GADTs, but
 OCaml can eliminate impossible cases from ordinary variants too. As with
 GADTs, to eliminate a case you need to demonstrate that the case in
@@ -1326,7 +1326,7 @@ time showing some of the attendant complexities. In this final section,
 we’re going to highlight some remaining difficulties with using GADTs
 that you may run into, as well as how to work around them.</p>
 <section class="level3" id="or-patterns">
-<h3>Or-patterns</h3>
+<h3>Or-Patterns</h3>
 <p>GADTs don’t work well with or-patterns. Consider the following type
 that represents various ways we might use for obtaining some piece of
 data. <a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
@@ -1380,7 +1380,7 @@ the content of the duplicated right-hand sides into functions that can
 be called in each of the duplicated cases.</p>
 </section>
 <section class="level3" id="deriving-serializers">
-<h3>Deriving serializers</h3>
+<h3>Deriving Serializers</h3>
 <p>As will be discussed in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S-Expressions</a>,
 s-expressions are a convenient data format for representing structured
 data. Rather than write the serializers and deserializers by hand, we

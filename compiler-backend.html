@@ -261,10 +261,8 @@ assembly code from compiled executables.</p>
 executable code. The OCaml toolchain branches into two separate
 compilers at this point. We’ll describe the bytecode compiler first,
 which consists of two pieces: <a data-secondary="ocamlrun" data-primary="OCaml
-toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlc" data-primary="OCaml
-toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="tools
-used" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a><a data-secondary="portable
-bytecode" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
+toolchain" data-type="indexterm">&nbsp;</a> <a data-secondary="ocamlc" data-primary="OCaml
+toolchain" data-type="indexterm">&nbsp;</a>  <a data-secondary="tools used" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a> <a data-secondary="portable bytecode" data-primary="compilation process" data-type="indexterm">&nbsp;</a></p>
 <dl>
 <dt><code>ocamlc</code></dt>
 <dd>
@@ -547,7 +545,7 @@ what executes on the CPU. Don’t forget that you can use the lambda code
 from earlier to get a slightly higher-level picture of the code if you
 get lost in the more verbose assembly.</p>
 <section class="level4" id="the-impact-of-polymorphic-comparison">
-<h4>The impact of polymorphic comparison</h4>
+<h4>The Impact of Polymorphic Comparison</h4>
 <p>We warned you in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a> that using polymorphic
 comparison is both convenient and perilous. Let’s look at precisely what
 the difference is at the assembly language level now.<a data-primary="polymorphic comparisons" data-type="indexterm">&nbsp;</a></p>
@@ -649,7 +647,7 @@ code that’s being called (e.g., when it allocates OCaml values), and so
 comparison is popped from the stack and returned.</p>
 </section>
 <section class="level4" id="benchmarking-polymorphic-comparison">
-<h4>Benchmarking polymorphic comparison</h4>
+<h4>Benchmarking Polymorphic Comparison</h4>
 <p>You don’t have to fully understand the intricacies of assembly
 language to see that this polymorphic comparison is much heavier than
 the simple monomorphic integer comparison from earlier. Let’s confirm
@@ -700,7 +698,7 @@ many iterations in a tight inner loop, it’s worth manually peering at
 the produced assembly code to see if you can hand-optimize it.</p>
 </section>
 <section data-type="note" class="level4" id="accessing-stdlib-modules-from-within-core">
-<h4>Accessing Stdlib modules from within Core</h4>
+<h4>Accessing Stdlib Modules from Within Core</h4>
 <p>In the benchmark above comparing polymorphic and monomorphic
 comparison, you may have noticed that we prepended the comparison
 functions with <code>Stdlib</code>. This is because the Core module
@@ -724,7 +722,7 @@ will have noticed in the profiling output earlier
 (<code>.cfi_start_proc</code> and <code>.cfi_end_proc</code> to delimit
 an OCaml function call, for example).</p>
 <section class="level4" id="understanding-name-mangling">
-<h4>Understanding name mangling</h4>
+<h4>Understanding Name Mangling</h4>
 <p>So how do you refer to OCaml functions in an interactive debugger
 like <code>gdb</code>? The first thing you need to know is how OCaml
 function names compile down to symbol names in the compiled object
@@ -755,7 +753,7 @@ easier to modify the source code to let-bind the anonymous function to a
 variable name.</p>
 </section>
 <section class="level4" id="interactive-breakpoints-with-the-gnu-debugger">
-<h4>Interactive breakpoints with the GNU debugger</h4>
+<h4>Interactive Breakpoints with the GNU Debugger</h4>
 <p>Let’s see name mangling in action with some interactive debugging
 using GNU <code>gdb</code>. <a data-primary="GNU debugger" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s write a mutually recursive function that selects alternating
@@ -982,9 +980,9 @@ interface.</p>
 <p>The native code compiler normally links a complete executable, but
 can also output a standalone native object file just as the bytecode
 compiler can. This object file has no further dependencies on OCaml
-except for the runtime library.<a data-primary="libasmrun.a
-library" data-type="indexterm">&nbsp;</a><a data-secondary="embedding code in
-C" data-primary="native-code compiler" data-type="indexterm">&nbsp;</a></p>
+except for the runtime library. <a data-primary="libasmrun.a
+library" data-type="indexterm">&nbsp;</a> <a data-secondary="embedding code in
+C" data-primary="native-code compiler" data-type="indexterm">&nbsp;</a> </p>
 <p>The native code runtime is a different library from the bytecode one,
 and is installed as <code>libasmrun.a</code> in the OCaml standard
 library directory.</p>

@@ -1,6 +1,6 @@
 <html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The OCaml Platform - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2021)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="the-ocaml-platform">
 <h1>The OCaml Platform</h1>
-<p>So far in part II, we’ve gone through a number of libraries and
+<p>So far in Part II, we’ve gone through a number of libraries and
 techniques you can use to build larger scale OCaml programs. We’ll now
 wrap up this part by examining the tools you can use for editing,
 compiling, testing, documenting and publishing your own projects.</p>
@@ -12,7 +12,7 @@ do is to specify your project metadata (for example, library
 dependencies and compiler versions), and the OCaml Platform tools that
 we’ll describe next will do much of the heavy lifting.</p>
 <section data-type="note" class="level4" id="using-the-opam-source-based-package-manager">
-<h4>Using the opam source-based package manager</h4>
+<h4>Using the Opam Source-Based Package Manager</h4>
 <p>opam is the official package manager and metadata packaging format
 that is used in the OCaml community. We’ve been using it in earlier
 chapters to install OCaml libraries, and we’re going to take a closer
@@ -56,7 +56,7 @@ a skeleton OCaml project. This sample project has the basic metadata
 required for us to learn more about the opam package manager and the
 dune build tool that we’ve used earlier in the book.</p>
 <section class="level3" id="setting-up-an-opam-local-switch">
-<h3>Setting up an opam local switch</h3>
+<h3>Setting Up an Opam Local Switch</h3>
 <p>The next thing we need is a suitable environment for this project,
 with dune and any other library dependencies available. The best way to
 do this is to create a new opam sandbox, via the
@@ -104,7 +104,7 @@ optional arguments for the remainder of the command, so that they don’t
 interfere with the command that is being executed.</p>
 </section>
 <section class="level3" id="choosing-an-ocaml-compiler-version">
-<h3>Choosing an OCaml compiler version</h3>
+<h3>Choosing an OCaml Compiler Version</h3>
 <p>When creating a switch, opam analyses the project dependencies and
 selects the newest OCaml compiler that is compatible with them.
 Sometimes though, you will want to select a specific version of the
@@ -166,7 +166,7 @@ packages by using:</p>
 </div>
 </section>
 <section class="level3" id="structure-of-an-ocaml-project">
-<h3>Structure of an OCaml project</h3>
+<h3>Structure of an OCaml Project</h3>
 <p>Back in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, we looked at what a
 simple program with a couple of OCaml modules looks like. Let’s now look
 at the set of files in our <code>hello/</code> application to examine a
@@ -214,7 +214,7 @@ are in a separate directory from the source.</li>
 detail.</p>
 </section>
 <section class="level3" id="defining-module-names">
-<h3>Defining module names</h3>
+<h3>Defining Module Names</h3>
 <p>A matching pair of <code>ml</code> and <code>mli</code> files define
 an OCaml module, named after the file and capitalized. Module names are
 the only kind of name you refer to within OCaml code.</p>
@@ -229,7 +229,7 @@ characters other than underscores. If you need to refresh your memory
 about how files and modules interact, refer back to <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>.</p>
 </section>
 <section class="level3" id="defining-libraries-as-collections-of-modules">
-<h3>Defining libraries as collections of modules</h3>
+<h3>Defining Libraries as Collections of Modules</h3>
 <p>One or more OCaml modules can be gathered together into a
 <em>library</em>, providing a convenient way to package up multiple
 dependencies with a single name. A project usually puts the business
@@ -283,7 +283,7 @@ field in the <code>lib/dune</code> file is empty since this is a trivial
 standalone library.</p>
 </section>
 <section class="level3" id="writing-test-cases-for-a-library">
-<h3>Writing test cases for a library</h3>
+<h3>Writing Test Cases for a Library</h3>
 <p>Our next step is to define a test case in <code>test/dune</code> for
 our library. In <a data-type="xref" href="testing.html#testing">Chapter 17, Testing</a>, we showed you how to embed tests within a
 library, using the inline test mechanism. In this section, we’ll show
@@ -326,7 +326,7 @@ alongside the OCaml library called <code>hello</code> (in
 <code>lib/</code>).</p>
 </section>
 <section class="level3" id="building-an-executable-program">
-<h3>Building an executable program</h3>
+<h3>Building an Executable Program</h3>
 <p>Finally, we want to actually use our hello world from the
 command-line. This is defined in <code>bin/dune</code> in a very similar
 fashion to test cases.</p>
@@ -378,7 +378,7 @@ integration systems that need systematic scripting of both opam and dune
 </section>
 </section>
 <section class="level2" id="setting-up-an-integrated-development-environment">
-<h2>Setting up an integrated development environment</h2>
+<h2>Setting Up an Integrated Development Environment</h2>
 <p>Now that we’ve seen the basic structure of the OCaml project, it’s
 time to setup an integrated development environment. An IDE is
 particularly useful for OCaml because it lets you leverage the
@@ -399,7 +399,7 @@ to install the OCaml LSP server via opam:</p>
 switch to use. Just the default one should be sufficient to get you
 going with building and browsing your interfaces.</p>
 <section data-type="note" class="level4" id="what-is-the-language-server-protocol">
-<h4>What is the Language Server Protocol?</h4>
+<h4>What Is The Language Server Protocol?</h4>
 <p>The Language Server Protocol defines a communications standard
 between an editor or IDE and a language-specific server that provides
 features such as auto-completion, definition search, reference indexing
@@ -417,7 +417,7 @@ invoking dune rules, and so on.</p>
 </section>
 </section>
 <section class="level3" id="browsing-interface-documentation">
-<h3>Browsing interface documentation</h3>
+<h3>Browsing Interface Documentation</h3>
 <p>The OCaml LSP server understands how to interface with dune and
 examine the build artifacts (such as the typed <code>.cmt</code>
 interface files), so opening your local project in VS Code is sufficient
@@ -471,7 +471,7 @@ $ dune build @doc</code></pre>
 a web browser.</p>
 </section>
 <section class="level3" id="autoformatting-your-source-code">
-<h3>Autoformatting your source code</h3>
+<h3>Autoformatting Your Source Code</h3>
 <p>As you develop more OCaml code, you’ll find it convenient to have it
 formatted to a common style. The <code>ocamlformat</code> tool can help
 you do this easily from within VSCode.</p>
@@ -498,12 +498,12 @@ in the testing chapter.</p>
 </section>
 </section>
 <section class="level2" id="publishing-your-code-online">
-<h2>Publishing your code online</h2>
+<h2>Publishing Your Code Online</h2>
 <p>With your IDE all set up you’ll quickly develop useful OCaml code and
 want to share it with others. We’ll now go through how to define opam
 packages, set up continuous integration and publish your code.</p>
 <section class="level3" id="defining-opam-packages">
-<h3>Defining opam packages</h3>
+<h3>Defining Opam Packages</h3>
 <p>The only metadata file that is really <em>required</em> to
 participate in the open-source OCaml ecosystem is an <code>opam</code>
 file in your source tree. Each <code>opam</code> file defines a
@@ -519,7 +519,7 @@ OCaml ecosystem available at <a class="uri" href="https://github.com/ocaml/opam-
 is the eponymous <a href="https://opam.ocaml.org">opam package
 manager</a> that we’ve been using throughout this book.</p>
 <section data-type="note" class="level4" id="how-do-we-name-ocaml-modules-libraries-and-packages">
-<h4>How do we name OCaml modules, libraries and packages?</h4>
+<h4>How Do We Name OCaml Modules, Libraries and Packages?</h4>
 <p>Much of the time, the module, library, and package names are all the
 same. But there are reasons for these names to be distinct as well:</p>
 <ul>
@@ -538,7 +538,7 @@ packages in a single codebase.</p>
 </section>
 </section>
 <section class="level3" id="generating-project-metadata-from-dune">
-<h3>Generating project metadata from dune</h3>
+<h3>Generating Project Metadata from Dune</h3>
 <p>The <code>hello.opam</code> file in our sample project is currently
 empty, but you don’t need to write it by hand – instead, we can define
 our project metadata using the dune build system and have the opam file
@@ -662,7 +662,7 @@ customization of these continuous integration workflows, so refer to the
 online documentation for more options.</p>
 </section>
 <section class="level3" id="other-conventions">
-<h3>Other conventions</h3>
+<h3>Other Conventions</h3>
 <p>There are a few other files you may also want to add to a project to
 match common conventions:</p>
 <ul>
@@ -685,7 +685,7 @@ world</a>.</li>
 </ul>
 </section>
 <section class="level3" id="releasing-your-code-into-the-opam-repository">
-<h3>Releasing your code into the opam repository</h3>
+<h3>Releasing Your Code into the Opam Repository</h3>
 <p>Once your continuous integration is passing, you are all set to try
 to tag a release of your project and share it with other users! The
 OCaml Platform supplies a convenient tool called
@@ -747,7 +747,7 @@ package is merged. Once it is merged, you can navigate to the
 &lt;ocaml.org&gt; site and view it online in an hour or so. It will also
 be available in the central repository for other users to install.</p>
 <section data-type="note" class="level4" id="creating-lock-files-for-your-projects">
-<h4>Creating lock files for your projects</h4>
+<h4>Creating Lock Files for Your Projects</h4>
 <p>Before you publish a project, you might also want to create an opam
 lock file to include with the archive. A lock file records the exact
 versions of all the transitive opam dependencies at the time you
@@ -773,7 +773,7 @@ your project to the Internet.</p>
 </section>
 </section>
 <section class="level2" id="learning-more-from-real-projects">
-<h2>Learning more from real projects</h2>
+<h2>Learning More from Real Projects</h2>
 <p>There’s a lot more customization that happens in any real project,
 and we can’t cover every aspect in this book. The best way by far to
 learn more is to dive in and compile an already established project, and

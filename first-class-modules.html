@@ -21,7 +21,7 @@ express and making it easier to build flexible and modular systems.</p>
 modules by working through some toy examples. We’ll get to more
 realistic examples in the next section.</p>
 <section class="level3" id="creating-first-class-modules">
-<h3>Creating first-class modules</h3>
+<h3>Creating First-Class Modules</h3>
 <p>In that light, consider the following signature of a module with a
 single integer variable:</p>
 <div class="highlight">
@@ -53,7 +53,7 @@ follows:</p>
 </div>
 </section>
 <section class="level3" id="inference-and-anonymous-modules">
-<h3>Inference and anonymous modules</h3>
+<h3>Inference and Anonymous Modules</h3>
 <p>The module type doesn’t need to be part of the construction of a
 first-class module if it can be inferred. Thus, we can write:</p>
 <div class="highlight">
@@ -71,7 +71,7 @@ let numbers = [ three; (module Four) ];;
 </div>
 </section>
 <section class="level3" id="unpacking-first-class-modules">
-<h3>Unpacking first-class modules</h3>
+<h3>Unpacking First-Class Modules</h3>
 <p>In order to access the contents of a first-class module, you need to
 unpack it into an ordinary module. This can be done using the
 <code>val</code> keyword, using this syntax:</p>
@@ -88,7 +88,7 @@ New_three.x;;
 </div>
 </section>
 <section class="level3" id="functions-for-manipulating-first-class-modules">
-<h3>Functions for manipulating first-class modules</h3>
+<h3>Functions for Manipulating First-Class Modules</h3>
 <p>We can also write ordinary functions which consume and create
 first-class modules. The following shows the definition of two
 functions: <code>to_int</code>, which converts a
@@ -126,7 +126,7 @@ to_int (List.fold ~init:six ~f:plus [three;three]);;
 </div>
 </section>
 <section class="level3" id="richer-first-class-modules">
-<h3>Richer first-class modules</h3>
+<h3>Richer First-Class Modules</h3>
 <p>First-class modules can contain types and functions in addition to
 simple values like <code>int</code>. Here’s an interface that contains a
 type and a corresponding <code>bump</code> operation that takes a value

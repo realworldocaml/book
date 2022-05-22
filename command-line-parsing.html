@@ -58,7 +58,7 @@ for optional flags and positional arguments, including documentation,
 the types they should map to, and whether to take special actions such
 as pausing for interactive input if certain inputs are encountered.</p>
 <section class="level3" id="anonymous-arguments">
-<h3>Defining an anonymous argument</h3>
+<h3>Defining an Anonymous Argument</h3>
 <p>Let’s build a parser for a command line UI with a single
 <em>anonymous</em> argument, i.e., an argument that is passed in without
 a flag.</p>
@@ -79,7 +79,7 @@ guide features like input validation. The values <code>anon</code>,
 <code>Command.Param</code> module.</p>
 </section>
 <section class="level3" id="defining-basic-commands">
-<h3>Defining basic commands</h3>
+<h3>Defining Basic Commands</h3>
 <p>Once we’ve defined a specification, we need to put it to work on real
 input. The simplest way is to directly create a command-line interface
 with <code>Command.basic</code>. <a data-primary="Command.basic" data-type="indexterm">&nbsp;</a></p>
@@ -150,7 +150,7 @@ written equivalently as follows.</p>
 </div>
 </section>
 <section class="level3" id="running-basic-commands">
-<h3>Running commands</h3>
+<h3>Running Commands</h3>
 <p>Once we’ve defined the basic command, running it is just one function
 call away.</p>
 <div class="highlight">
@@ -228,7 +228,7 @@ let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 </section>
 <section class="level3" id="multiple-arguments">
-<h3>Multi-argument commands</h3>
+<h3>Multi-Argument Commands</h3>
 <p>All the examples thus far have involved a single argument, but we can
 of course create multi-argument commands as well. We can make a parser
 for multiple arguments by binding together simpler parsers, using the

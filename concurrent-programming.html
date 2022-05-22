@@ -227,7 +227,7 @@ count_lines "/etc/hosts";;
 <code>utop</code> waits for that deferred to become determined, and
 shows us the contents of the deferred instead.</p>
 <section class="level3" id="using-let-syntax">
-<h3>Using let syntax</h3>
+<h3>Using Let Syntax</h3>
 <p>As was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>, there is a special syntax, which we
 call <em>let syntax</em>, designed for working with monads, which we can
 enable by enabling <code>ppx_let</code>. <a data-secondary="ppx_let" data-primary="syntax
@@ -370,7 +370,7 @@ typical of code that involves ivars and <code>upon</code>, and because
 of this, you should stick to the simpler map/bind/return style of
 working with deferreds when you can.</p>
 <section data-type="note" class="level4" id="understanding-bind-in-terms-of-ivars-and-upon">
-<h4>Understanding <code>bind</code> in terms of ivars and
+<h4>Understanding <code>bind</code> in Terms of Ivars and
 <code>upon</code></h4>
 <p>Here’s roughly what happens when you write
 <code>let d' = Deferred.bind d ~f</code>.</p>
@@ -455,7 +455,7 @@ writing (e.g., a client that is unable to keep up) will cause your
 program to allocate unbounded amounts of memory, as it keeps track of
 all the data it intends to write but hasn’t been able to yet.</p>
 <section data-type="note" class="level4" id="tail-calls-and-chains-of-deferreds">
-<h4>Tail-calls and chains of deferreds</h4>
+<h4>Tail-Calls and Chains of Deferreds</h4>
 <p>There’s another memory problem you might be concerned about, which is
 the allocation of deferreds. If you think about the execution of
 <code>copy_blocks</code>, you’ll see it’s creating a chain of deferreds,

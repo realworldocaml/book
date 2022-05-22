@@ -158,7 +158,7 @@ to different inputs, and thus its variables will take on different
 values, even without mutation.</p>
 </section>
 <section class="level3" id="pattern-matching-and-let">
-<h3>Pattern Matching and let</h3>
+<h3>Pattern Matching and Let</h3>
 <p>Another useful feature of <code>let</code> bindings is that they
 support the use of <em>patterns</em> on the left-hand side. Consider the
 following code, which uses <code>List.unzip</code>, a function for
@@ -316,7 +316,7 @@ in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-progr
 </section>
 </section>
 <section class="level3" id="multi-argument-functions">
-<h3>Multiargument functions</h3>
+<h3>Multiargument Functions</h3>
 <p>OCaml of course also supports multiargument functions, such as:<a data-secondary="multi-argument functions" data-primary="fun keyword" data-type="indexterm">&nbsp;</a><a data-primary="multi-argument functions" data-type="indexterm">&nbsp;</a><a data-secondary="multi-argument functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff x y = abs (x - y);;
@@ -664,7 +664,7 @@ input, not a function.</p>
 choosing the operator you use with care, particularly with respect to
 associativity.</p>
 <section data-type="note" class="level4" id="the-application-operator">
-<h4>The application operator</h4>
+<h4>The Application Operator</h4>
 <p><code>|&gt;</code> is known as the <em>reverse application
 operator</em>. You might be unsurprised to learn that there’s also an
 <em>application operator</em>: <a data-secondary="application
@@ -766,17 +766,17 @@ ratio ~num ~denom;;
 </code></pre>
 </div>
 <section class="level4" id="where-are-labels-useful">
-<h4>Where are labels useful?</h4>
+<h4>Where Are Labels Useful?</h4>
 <p>Labeled arguments are a surprisingly useful feature, and it’s worth
 walking through some of the cases where they come up.</p>
 <section class="level5" id="explicating-long-argument-lists">
-<h5>Explicating long argument lists</h5>
+<h5>Explicating Long Argument Lists</h5>
 <p>Beyond a certain number, arguments are easier to remember by name
 than by position. Letting the names be used at the call-site (and used
 in any order) makes client code easier to read and to write.</p>
 </section>
 <section class="level5" id="adding-information-to-uninformative-argument-types">
-<h5>Adding information to uninformative argument types</h5>
+<h5>Adding Information to Uninformative Argument Types</h5>
 <p>Consider a function for creating a hash table whose first argument is
 the initial size of the array backing the hash table, and the second is
 a Boolean flag, which indicates whether that array will ever shrink when
@@ -796,7 +796,7 @@ since it’s often easy to get confused about whether a value being true
 is meant to enable or disable a given feature.</p>
 </section>
 <section class="level5" id="disambiguating-similar-arguments">
-<h5>Disambiguating similar arguments</h5>
+<h5>Disambiguating Similar Arguments</h5>
 <p>This issue comes up most often when a function has multiple arguments
 of the same type. Consider this signature for a function that extracts a
 substring.</p>
@@ -815,7 +815,7 @@ code, and makes it harder to accidentally swap the position and the
 length.</p>
 </section>
 <section class="level5" id="flexible-argument-ordering-and-partial-application">
-<h5>Flexible argument ordering and partial application</h5>
+<h5>Flexible Argument Ordering and Partial Application</h5>
 <p>Consider a function like <code>List.iter</code> which takes two
 arguments: a function and a list of elements to call that function on. A
 common pattern is to partially apply <code>List.iter</code> by giving it
@@ -844,7 +844,7 @@ come last.</p>
 </section>
 </section>
 <section class="level4" id="higher-order-functions-and-labels">
-<h4>Higher-order functions and labels</h4>
+<h4>Higher-Order Functions and Labels</h4>
 <p>One surprising gotcha with labeled arguments is that while order
 doesn’t matter when calling a function with labeled arguments, it does
 matter in a higher-order context, <em>e.g.</em>, when passing a function
@@ -947,7 +947,7 @@ functions internal to a module, <em>i.e.</em>, functions that are not
 included in the module’s interface, or <code>mli</code> file. We’ll
 learn more about <code>mli</code>s in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>.</p>
 <section class="level4" id="explicit-passing-of-an-optional-argument">
-<h4>Explicit passing of an optional argument</h4>
+<h4>Explicit Passing of an Optional Argument</h4>
 <p>Under the covers, a function with an optional argument receives
 <code>None</code> when the caller doesn’t provide the argument, and
 <code>Some</code> when it does. But the <code>Some</code> and
@@ -1007,7 +1007,7 @@ argument, an explicit <code>None</code> will be passed to
 default behavior should be.</p>
 </section>
 <section class="level4" id="inference-of-labeled-and-optional-arguments">
-<h4>Inference of labeled and optional arguments</h4>
+<h4>Inference of Labeled and Optional Arguments</h4>
 <p>One subtle aspect of labeled and optional arguments is how they are
 inferred by the type system. Consider the following example for
 computing numerical derivatives of a function of two real variables. The
@@ -1072,7 +1072,7 @@ different orders.</p>
 <p>As suggested by the error message, we can get OCaml to accept the
 fact that <code>f</code> is used with different argument orders if we
 provide explicit type information. Thus, the following code compiles
-without error, due to the type annotation on <code>f</code>.<a data-primary="type annotations" data-type="indexterm">&nbsp;</a></p>
+without error, due to the type annotation on <code>f</code>. <a data-primary="type annotations" data-type="indexterm">&nbsp;</a> </p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =
   let x' = x +. delta in
@@ -1089,7 +1089,7 @@ without error, due to the type annotation on <code>f</code>.<a data-primary="typ
 </div>
 </section>
 <section class="level4" id="optional-arguments-and-partial-application">
-<h4>Optional arguments and partial application</h4>
+<h4>Optional Arguments and Partial Application</h4>
 <p>Optional arguments can be tricky to think about in the presence of
 partial application. We can of course partially apply the optional
 argument itself.</p>

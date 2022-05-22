@@ -46,7 +46,7 @@ fronts.</p>
 of the available tooling, you should be able to see how each tool helps
 advance these goals.</p>
 <section class="level2" id="inline-tests">
-<h2>Inline tests</h2>
+<h2>Inline Tests</h2>
 <p>The first step towards a good testing environment is making it easy
 to set up and run a test. To that end, we’ll show you how to write tests
 with <code>ppx_inline_test</code>, which lets you add tests to any
@@ -102,7 +102,7 @@ let%test "rev" =
 [1]</code></pre>
 </div>
 <section class="level3" id="more-readable-errors-with-test_eq">
-<h3>More readable errors with <code>test_eq</code></h3>
+<h3>More Readable Errors with <code>test_eq</code></h3>
 <p>One problem with the test output we just saw is that it doesn’t show
 the data associated with the failed test, thus making it harder to
 diagnose and fix the problem when it occurs. We can fix this if we
@@ -153,7 +153,7 @@ this case mostly a distraction. That’s a downside of using exceptions to
 report test failures.</p>
 </section>
 <section class="level3" id="where-should-tests-go">
-<h3>Where should tests go?</h3>
+<h3>Where Should Tests Go?</h3>
 <p>The inline test framework lets you put tests into any
 <code>.ml</code> file that’s part of a library. But just because you can
 do something doesn’t mean you should.</p>
@@ -192,7 +192,7 @@ production library, e.g., when you need access to some functionality to
 do the test that’s important but is really awkward to expose. But such
 cases are very much the exception.</p>
 <section data-type="note" class="level4" id="why-cant-inline-tests-go-in-executables">
-<h4>Why can’t inline tests go in executables?</h4>
+<h4>Why Can’t Inline Tests Go in Executables?</h4>
 <p>We’ve only talked about putting tests into libraries. What about
 executables? It turns out you can’t do this directly, because Dune
 doesn’t support the <code>inline_tests</code> declaration in source
@@ -218,7 +218,7 @@ want is not to test this or that property, but to capture and make
 visible your code’s behavior. <em>Expect tests</em> let you do just
 that.</p>
 <section class="level3" id="basic-mechanics">
-<h3>Basic mechanics</h3>
+<h3>Basic Mechanics</h3>
 <p>With expect tests, your source file specifies both the code to be
 executed and the expected output. Upon running an expect test, any
 discrepancy between the expected output and what was actually generated
@@ -302,7 +302,7 @@ let%expect_test "multi-block" =
 </div>
 </section>
 <section class="level3" id="what-are-expect-tests-good-for">
-<h3>What are expect tests good for?</h3>
+<h3>What Are Expect Tests Good For?</h3>
 <p>It’s not obvious why one would want to use expect tests in the first
 place. Why should this:</p>
 <div class="highlight">
@@ -332,7 +332,7 @@ predicate. This is more useful than it might seem at first. Let’s
 consider a few different example use-cases to see why.</p>
 </section>
 <section class="level3" id="exploratory-programming">
-<h3>Exploratory programming</h3>
+<h3>Exploratory Programming</h3>
 <p>Expect tests can be especially helpful when you’re in exploration
 mode, where you’re trying to solve a problem by playing around with the
 data, and have no clear specification in advance.</p>
@@ -372,7 +372,7 @@ an example page.</p>
   print_s [%sexp (hrefs : Set.M(String).t)]</code></pre>
 </div>
 <section data-type="note" class="level4" id="quoted-strings">
-<h4>Quoted strings</h4>
+<h4>Quoted Strings</h4>
 <p>The example above used a new syntax for string literals, called
 <em>quoted strings</em>. Here’s an example.</p>
 <div class="highlight">
@@ -483,7 +483,7 @@ gotten things working, you can leave the examples you used to develop
 the code as permanent tests.</p>
 </section>
 <section class="level3" id="visualizing-complex-behavior">
-<h3>Visualizing complex behavior</h3>
+<h3>Visualizing Complex Behavior</h3>
 <p>Expect tests can be used to examine the dynamic behavior of a system.
 Let’s walk through a simple example: a rate limiter. The job of a rate
 limiter is to bound the rate at which a system consumes a particular
@@ -620,7 +620,7 @@ a concise and noise-free format for the data captured by the expect
 blocks.</p>
 </section>
 <section class="level3" id="end-to-end-tests">
-<h3>End-to-end tests</h3>
+<h3>End-to-End Tests</h3>
 <p>The expect tests we’ve seen so far have been self-contained, not
 doing any IO or interacting with system resources. As a result, these
 tests are fast to run and entirely deterministic.</p>
@@ -786,8 +786,8 @@ should write your code in a way that allows most of it to be tested
 without having to connect to real running servers. But when you do need
 to do it, you can still use expect tests for this purpose.</p>
 </section>
-<section class="level3" id="how-to-make-a-good-expect-tests">
-<h3>How to make a good expect tests</h3>
+<section class="level3" id="how-to-make-a-good-expect-test">
+<h3>How to Make a Good Expect Test</h3>
 <p>Taken together, these examples suggest some guidelines for building
 good expect tests:</p>
 <ul>
@@ -806,7 +806,7 @@ stopgaps that will fall apart under performance pressure.</p></li>
 </section>
 </section>
 <section class="level2" id="property-testing-with-quickcheck">
-<h2>Property testing with Quickcheck</h2>
+<h2>Property Testing with Quickcheck</h2>
 <p>Many tests amount to little more than individual examples decorated
 with simple assertions to check this or that property. <em>Property
 testing</em> is a useful extension of this approach, which lets you
@@ -930,7 +930,7 @@ case, it’s not really a bug that we’ve uncovered, it’s just that the
 property that we thought would hold can’t in practice. But either way,
 Quickcheck helped us understand the behavior of our code better.</p>
 <section class="level3" id="handling-complex-types">
-<h3>Handling complex types</h3>
+<h3>Handling Complex Types</h3>
 <p>Tests can’t subsist on simple atomic types alone, which is why you’ll
 often want to build probability distributions over more complex types.
 Here’s a simple example, where we want to test the behavior of
@@ -1009,7 +1009,7 @@ specifying the weight on a particular variant.</p>
 probability that it would have natively.</p>
 </section>
 <section class="level3" id="more-control-with-let-syntax">
-<h3>More control with let-syntax</h3>
+<h3>More Control with Let-Syntax</h3>
 <p>If the annotations associated with <code>ppx_quickcheck</code> don’t
 let you do precisely what you want, you can get more control by taking
 advantage of the fact that Quickcheck’s generators form a monad. That
@@ -1055,11 +1055,11 @@ control over the distribution of your test examples.</p>
 </section>
 </section>
 <section class="level2" id="other-testing-tools">
-<h2>Other testing tools</h2>
+<h2>Other Testing Tools</h2>
 <p>The testing tools we’ve described in this chapter cover a lot of
 ground, but there are other tools worth knowing about.</p>
 <section class="level3" id="other-tools-to-do-mostly-the-same-things">
-<h3>Other tools to do (mostly) the same things</h3>
+<h3>Other Tools to Do (Mostly) the Same Things</h3>
 <p>Here are some notable tools that do more or less the same things as
 the testing tools we’ve featured in this chapter.</p>
 <ul>

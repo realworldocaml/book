@@ -363,7 +363,7 @@ let exit_with = function
 </div>
 </section>
 <section class="level3" id="commonly-used-extension-attributes">
-<h3>Commonly used extension attributes</h3>
+<h3>Commonly Used Extension Attributes</h3>
 <p>We have already used extension points in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S Expressions</a> to generate
 boilerplate code for handling s-expressions. These are introduced by a
 third-party library using the <code>(preprocess)</code> directive in a
@@ -549,7 +549,7 @@ principal type inference, but by and large, most programs you write will
 never <em>require</em> annotations (although they sometimes help the
 compiler produce better error messages).</p>
 <section class="level4" id="adding-type-annotations-to-find-errors">
-<h4>Adding type annotations to find errors</h4>
+<h4>Adding Type Annotations to Find Errors</h4>
 <p>It’s often said that the hardest part of writing OCaml code is
 getting past the type checker—but once the code does compile, it works
 correctly the first time! This is an exaggeration of course, but it can
@@ -689,7 +689,7 @@ annotations there, of course, to help with future refactoring and
 debugging.</p>
 </section>
 <section class="level4" id="enforcing-principal-typing">
-<h4>Enforcing principal typing</h4>
+<h4>Enforcing Principal Typing</h4>
 <p>The compiler also has a stricter <em>principal type checking</em>
 mode that is activated via the <code>-principal</code> flag. This warns
 about risky uses of type information to ensure that the type inference
@@ -812,7 +812,7 @@ or two files, and the module system minimizes such recompilation while
 still encouraging code reuse. <a data-primary="compilation
 units" data-type="indexterm">&nbsp;</a></p>
 <section class="level4" id="the-mapping-between-files-and-modules">
-<h4>The mapping between files and modules</h4>
+<h4>The Mapping Between Files and Modules</h4>
 <p>Individual compilation units provide a convenient way to break up a
 big module hierarchy into a collection of files. The relationship
 between files and modules can be explained directly in terms of the
@@ -838,7 +838,7 @@ end</code></pre>
 </div>
 </section>
 <section class="level4" id="defining-a-module-search-path">
-<h4>Defining a module search path</h4>
+<h4>Defining a Module Search Path</h4>
 <p>In the preceding example, <code>Alice</code> also has a reference to
 another module <code>Bob</code>. For the overall type of
 <code>Alice</code> to be valid, the compiler also needs to check that
@@ -920,7 +920,7 @@ files and recompile from scratch.</p>
 </section>
 </section>
 <section class="level3" id="wrapping-libraries-with-module-aliases">
-<h3>Wrapping libraries with module aliases</h3>
+<h3>Wrapping Libraries with Module Aliases</h3>
 <p>The module-to-file mapping described so far rigidly enforces a 1:1
 mapping between a top-level module and a file. It’s often convenient to
 split larger modules into separate files to make editing easier, but
