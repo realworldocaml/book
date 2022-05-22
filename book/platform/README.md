@@ -1,6 +1,6 @@
 # The OCaml Platform
 
-So far in part II, we've gone through a number of libraries and
+So far in Part II, we've gone through a number of libraries and
 techniques you can use to build larger scale OCaml programs.  We'll
 now wrap up this part by examining the tools you can use for editing,
 compiling, testing, documenting and publishing your own projects.

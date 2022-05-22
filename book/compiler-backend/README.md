@@ -284,9 +284,11 @@ executables.
 After the lambda form has been generated, we are very close to having
 executable code. The OCaml toolchain branches into two separate compilers at
 this point. We'll describe the bytecode compiler first, which consists of two
-pieces: [OCaml toolchain/ocamlrun]{.idx}[OCaml
-toolchain/ocamlc]{.idx}[bytecode compiler/tools used]{.idx}[compilation
-process/portable bytecode]{.idx}
+pieces:
+[OCaml toolchain/ocamlrun]{.idx}
+[OCaml toolchain/ocamlc]{.idx} <!-- TODO: bad index-->
+[bytecode compiler/tools used]{.idx}
+[compilation process/portable bytecode]{.idx}
 
 `ocamlc`
 : Compiles files into a bytecode that is a close mapping to the lambda form
@@ -1062,8 +1064,9 @@ care of recompiling all your libraries with the new interface.
 The native code compiler normally links a complete executable, but can also
 output a standalone native object file just as the bytecode compiler can.
 This object file has no further dependencies on OCaml except for the runtime
-library.[libasmrun.a library]{.idx}[native-code compiler/embedding code in
-C]{.idx}
+library.
+[libasmrun.a library]{.idx}
+[native-code compiler/embedding code in C]{.idx} <!-- TODO: bad index   -->
 
 The native code runtime is a different library from the bytecode one, and is
 installed as `libasmrun.a` in the OCaml standard library directory.

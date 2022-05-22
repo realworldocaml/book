@@ -387,7 +387,7 @@ list_fields:
 
 We can hook in `menhir` by adding a `(menhir)` stanza to our dune file, which
 tells the build system to switch to using `menhir` instead of `ocamlyacc` to
-handle files with the `.mly` suffix: [`(menhir)` dune stanza]{.idx}[Menhir parser generator/invoking]{.idx}
+handle files with the `.mly` suffix: [menhir dune stanza]{.idx}[Menhir parser generator/invoking]{.idx}
 
 ```scheme file=examples/parsing/dune
 (menhir

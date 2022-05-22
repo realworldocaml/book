@@ -1171,7 +1171,8 @@ Error: This function is applied to arguments
 As suggested by the error message, we can get OCaml to accept the fact that
 `f` is used with different argument orders if we provide explicit type
 information. Thus, the following code compiles without error, due to the type
-annotation on `f`.[type annotations]{.idx}
+annotation on `f`.
+[type annotations]{.idx} <!-- TODO: bad index -->
 
 ```ocaml env=main
 # let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =

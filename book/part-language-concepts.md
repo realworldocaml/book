@@ -16,3 +16,8 @@ inspiration from ML.
 \centerline{\includegraphics[width=.75\textwidth]{images/cover-p1.jpg}}
 \vfill
 \cleardoublepage
+
+
+<!-- TODO: Not really about this place, but: we need an extra blank
+     page before the index, and we need to get rid of the references
+     page. This is all in the mode of latex tweakery. -->

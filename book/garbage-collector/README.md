@@ -17,8 +17,9 @@ from running OCaml programs. The runtime manages a *heap*, which is a
 collection of memory regions that it obtains from the operating system. The
 runtime uses this memory to hold *heap blocks* that it fills up with OCaml
 values in response to allocation requests by the OCaml program.
-[values/allocation requests and]{.idx}[heaps/heap
-blocks]{.idx}[heaps/definition of]{.idx}
+[values/allocation requests and]{.idx} <!-- TODO: bad index -->
+[heaps/heap blocks]{.idx}
+[heaps/definition of]{.idx}
 
 ## Mark and Sweep Garbage Collection
 

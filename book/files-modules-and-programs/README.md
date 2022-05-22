@@ -129,7 +129,7 @@ OCaml toolchain (in this case, `ocamlopt`) with the appropriate flags to
 link in particular libraries and packages. Here, `-package base` is
 asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
 ocamlfind to link in the packages as is necessary for building an
-executable. [-linkpkg]{.idx}
+executable. [linkpkg]{.idx}
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for
