@@ -545,7 +545,7 @@ pattern:
   characters; `"true"` is first, so the return value is `TRUE`.
 
 ::: {data-type=note}
-#### Unused lexing values
+#### Unused Lexing Values
 
 In our parser, we have not used all the token regexps that we defined
 in the lexer.  For instance, `id` is unused since we do not parse

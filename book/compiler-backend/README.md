@@ -325,19 +325,19 @@ examples:
 
 ```sh dir=examples/back-end
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
-	branch L2
-L1:	acc 0
-	branchifnot L3
-	const 101
-	return 1
-L3:	const 100
-	return 1
-L2:	closure L1, 0
-	push
-	acc 0
-	makeblock 1, 0
-	pop 1
-	setglobal Pattern_monomorphic_small!
+    branch L2
+L1: acc 0
+    branchifnot L3
+    const 101
+    return 1
+L3: const 100
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_small!
 
 ```
 
@@ -585,7 +585,7 @@ you a more accurate picture of what executes on the CPU. Don't forget that
 you can use the lambda code from earlier to get a slightly higher-level
 picture of the code if you get lost in the more verbose assembly.
 
-#### The impact of polymorphic comparison
+#### The Impact of Polymorphic Comparison
 
 We warned you in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
@@ -694,7 +694,7 @@ minor heap pointer can also be changed by the C code that's being called
 returning from the `caml_greaterthan` call. Finally, the return value of the
 comparison is popped from the stack and returned.
 
-#### Benchmarking polymorphic comparison
+#### Benchmarking Polymorphic Comparison
 
 You don't have to fully understand the intricacies of assembly language to
 see that this polymorphic comparison is much heavier than the simple
@@ -748,7 +748,7 @@ iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
 
 ::: {data-type=note}
-#### Accessing Stdlib modules from within Core
+#### Accessing Stdlib Modules from Within Core
 
 In the benchmark above comparing polymorphic and monomorphic
 comparison, you may have noticed that we prepended the comparison
@@ -776,7 +776,7 @@ library is compiled in debug mode. These include the CFI stubs you will have
 noticed in the profiling output earlier (`.cfi_start_proc` and
 `.cfi_end_proc` to delimit an OCaml function call, for example).
 
-#### Understanding name mangling
+#### Understanding Name Mangling
 
 So how do you refer to OCaml functions in an interactive debugger like
 `gdb`? The first thing you need to know is how OCaml function names compile
@@ -808,7 +808,7 @@ Anonymous functions are hard to predict without inspecting intermediate
 compiler output. If you need to debug them, it's usually easier to modify the
 source code to let-bind the anonymous function to a variable name.
 
-#### Interactive breakpoints with the GNU debugger
+#### Interactive Breakpoints with the GNU Debugger
 
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}

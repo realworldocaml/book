@@ -276,7 +276,7 @@ chapter by using some POSIX date functions as running
 examples.
 
 ::: {data-type=note}
-#### Linking modes: libffi and stub generation
+#### Linking Modes: libffi and Stub Generation
 
 The core of ctypes is a set of OCaml combinators for describing the structure of C
 types (numeric types, arrays, pointers, structs, unions and functions). You can
@@ -738,7 +738,7 @@ And we can now call that function to get the current time.
 - : float = 1650045389.278065
 ```
 
-#### Recap: A time-printing command
+#### Recap: a Time-Printing Command
 
 We built up a lot of bindings in the previous section, so let's recap them
 with a complete example that ties it together with a command-line frontend:

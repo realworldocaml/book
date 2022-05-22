@@ -160,7 +160,7 @@ A muted gray...
 ```
 
 ::: {data-type=note}
-#### Variants, tuples and parens
+#### Variants, Tuples and Parens
 
 Variants with multiple arguments look an awful lot like tuples.
 Consider the following example of a value of the type `color` we

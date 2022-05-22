@@ -1014,7 +1014,7 @@ track the state of the request in a type parameter, and have that
 parameter be used to narrow the set of available cases, without
 duplicating the type.
 
-#### A completion-sensitive option type
+#### A Completion-Sensitive Option Type
 
 We'll start by creating an option type that is sensitive to whether
 our request is in a complete or incomplete state.  To do that, we'll
@@ -1100,7 +1100,7 @@ As we can see, when the `coption` is known to be `complete`, the
 pattern matching is narrowed to just the `Present` case.
 
 
-#### A completion-sensitive request type
+#### A Completion-Sensitive Request Type
 
 We can use `coption` to define a completion-sensitive version of
 `logon_request`.
@@ -1175,7 +1175,7 @@ machine, cutting down on the possibilities that your code needs to
 contemplate can make a big difference to the comprehensibility and
 correctness of the result.
 
-#### Type distinctness and abstraction
+#### Type Distinctness and Abstraction
 
 In the example in this section, we used two types, `complete` and
 `incomplete` to mark different states, and we defined those types so
@@ -1322,7 +1322,7 @@ for the type parameter of a GADT, you should choose definitions that
 make the distinctness of those types clear, and you should expose
 those definitions in your `mli`s.
 
-#### Narrowing without GADTs
+#### Narrowing Without GADTs
 
 Thus far, we've only seen narrowing in the context of GADTs, but OCaml
 can eliminate impossible cases from ordinary variants too.  As with
@@ -1474,7 +1474,7 @@ section, we're going to highlight some remaining difficulties with
 using GADTs that you may run into, as well as how to work around
 them.
 
-### Or-patterns
+### Or-Patterns
 
 GADTs don't work well with or-patterns.  Consider the following type
 that represents various ways we might use for obtaining some piece of

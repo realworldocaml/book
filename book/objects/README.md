@@ -205,7 +205,7 @@ Error: This expression has type < name : string; width : int >
 ```
 
 ::: {data-type=note}
-#### Elisions Are Polymorphic
+#### Elisions are Polymorphic
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods." It may not be apparent from the syntax, but an elided object type
