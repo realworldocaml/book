@@ -1,3 +1,7 @@
+<!-- TODO: This isn't actually markdown, right? I tried to but in a ~
+     to prevent a break in "Part I", but it didn't work.  Note sure
+     what to do here. -->
+
 \vspace*{1in}
 \noindent Part II builds on the basics by working through useful tools and
   techniques for addressing common practical applications, from
