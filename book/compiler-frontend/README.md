@@ -364,7 +364,7 @@ and may change in future versions. (See manual section 11.5)
 val exit_with : program_result -> int = <fun>
 ```
 
-### Commonly used extension attributes
+### Commonly Used Extension Attributes
 
 We have already used extension points in [Data Serialization With S
 Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}
@@ -973,7 +973,7 @@ scratch.
 :::
 
 
-### Wrapping libraries with module aliases
+### Wrapping Libraries with Module Aliases
 
 The module-to-file mapping described so far rigidly enforces a 1:1 mapping
 between a top-level module and a file. It's often convenient to split larger

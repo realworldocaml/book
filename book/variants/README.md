@@ -564,7 +564,7 @@ val handle_message : server_state -> Common.t * details -> unit = <fun>
 And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
 
-### Embedded records
+### Embedded Records
 
 If we don't need to be able to pass the record types separately from
 the variant, then OCaml allows us to embed the records directly into

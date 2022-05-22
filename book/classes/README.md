@@ -1086,6 +1086,11 @@ inheritance hierarchy is a graph rather than a tree, so it should be used
 with care. [multiple inheritance/name resolution
 in]{.idx}[inheritance]{.idx}[classes/multiple inheritance in]{.idx}
 
+<!-- TODO: The space before the corresponding index item is missing.
+     This was noted by the editors, and is true for this item and the
+     next couple which are at the same level. I guess this is some tex
+     issue, but I don't understand it.  -->
+
 ### How Names Are Resolved
 
 The main trickiness of multiple inheritance is due to naming—what happens

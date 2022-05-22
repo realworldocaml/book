@@ -349,7 +349,7 @@ Async](concurrent-programming.html#concurrent-programming-with-async){data-type=
 :::
 
 
-### Multiargument functions {#multi-argument-functions}
+### Multiargument Functions {#multi-argument-functions}
 
 OCaml of course also supports multiargument functions, such as:[fun
 keyword/multi-argument functions]{.idx}[multi-argument
