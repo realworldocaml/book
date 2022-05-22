@@ -784,8 +784,7 @@ While we’re at it, we’ll use the <code>function</code> keyword to
 eliminate the need for an explicit match:<a data-primary="function
 keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
-  match list with
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates = function
   | [] as l -&gt; l
   | [_] as l -&gt; l
   | first :: (second :: _ as tl) -&gt;
