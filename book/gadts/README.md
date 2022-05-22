@@ -494,7 +494,7 @@ val eval : 'a expr -> 'a = <fun>
 This type of annotation is the right one to pick when you write any
 recursive function that makes use of GADTs.
 
-## When are GADTs Useful?
+## When Are GADTs Useful?
 
 The typed language we showed above is a perfectly reasonable example,
 but GADTs are useful for a lot more than designing little languages.

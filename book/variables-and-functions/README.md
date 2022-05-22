@@ -843,7 +843,7 @@ used when invoking a function.[punning]{.idx}[label punning]{.idx}
 - : float = 0.75
 ```
 
-#### Where are Labels Useful?
+#### Where Are Labels Useful?
 
 Labeled arguments are a surprisingly useful feature, and it's worth
 walking through some of the cases where they come up.

@@ -933,7 +933,7 @@ Here, the inferred type states that the tags can be no more than ``
 polymorphic variants can lead to fairly complex inferred types.
 
 ::: {.allow_break data-type=note}
-#### Polymorphic Variants and Catch-all Cases
+#### Polymorphic Variants and Catch-All Cases
 
 As we saw with the definition of `is_positive`, a `match` expression
 can lead to the inference of an upper bound on a variant type,

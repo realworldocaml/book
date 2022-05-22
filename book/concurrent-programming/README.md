@@ -484,7 +484,7 @@ unbounded amounts of memory, as it keeps track of all the data it
 intends to write but hasn't been able to yet.
 
 ::: {data-type=note}
-#### Tail-calls and Chains of Deferreds
+#### Tail-Calls and Chains of Deferreds
 
 There's another memory problem you might be concerned about, which is
 the allocation of deferreds.  If you think about the execution of

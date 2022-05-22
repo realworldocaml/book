@@ -344,7 +344,7 @@ let%expect_test "multi-block" =
 ```
 
 
-### What are Expect Tests Good For?
+### What Are Expect Tests Good For?
 
 It's not obvious why one would want to use expect tests in the first
 place. Why should this:
