@@ -833,8 +833,7 @@ it, we'll use the `function` keyword to eliminate the need for an
 explicit match:[function keyword]{.idx}
 
 ```ocaml env=main
-# let rec remove_sequential_duplicates list =
-    match list with
+# let rec remove_sequential_duplicates = function
     | [] as l -> l
     | [_] as l -> l
     | first :: (second :: _ as tl) ->
