@@ -1,6 +1,6 @@
 # The OCaml Platform
 
-So far in part II, we've gone through a number of libraries and
+So far in Part II, we've gone through a number of libraries and
 techniques you can use to build larger scale OCaml programs.  We'll
 now wrap up this part by examining the tools you can use for editing,
 compiling, testing, documenting and publishing your own projects.
@@ -14,7 +14,7 @@ dependencies and compiler versions), and the OCaml Platform tools that
 we'll describe next will do much of the heavy lifting.
 
 ::: {data-type=note}
-#### Using the opam source-based package manager
+#### Using the Opam Source-Based Package Manager
 
 opam is the official package manager and metadata packaging format
 that is used in the OCaml community.  We've been using it in earlier
@@ -64,7 +64,7 @@ project.  This sample project has the basic metadata required for us to learn
 more about the opam package manager and the dune build tool that we've used
 earlier in the book.
 
-### Setting up an opam local switch
+### Setting Up an Opam Local Switch
 
 The next thing we need is a suitable environment for this project,
 with dune and any other library dependencies available.  The best way
@@ -118,7 +118,7 @@ project.  The double dash in the command line is a common Unix convention that
 tells opam to stop parsing its own optional arguments for the remainder of the
 command, so that they don't interfere with the command that is being executed.
 
-### Choosing an OCaml compiler version
+### Choosing an OCaml Compiler Version
 
 When creating a switch, opam analyses the project dependencies
 and selects the newest OCaml compiler that is compatible with them.
@@ -185,7 +185,7 @@ by using:
 $ opam search ocaml-option
 ```
 
-### Structure of an OCaml project
+### Structure of an OCaml Project
 
 Back in [Files Modules And
 Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
@@ -234,7 +234,7 @@ Some observations about this structure:
 Now we'll talk about the different parts of this structure in more
 detail.
 
-### Defining module names
+### Defining Module Names
 
 A matching pair of `ml` and `mli` files define an OCaml module, named
 after the file and capitalized.  Module names are the only kind of
@@ -252,7 +252,7 @@ characters other than underscores. If you need to refresh your memory
 about how files and modules interact, refer back to
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 
-### Defining libraries as collections of modules
+### Defining Libraries as Collections of Modules
 
 One or more OCaml modules can be gathered together into a *library*,
 providing a convenient way to package up multiple dependencies with a
@@ -309,7 +309,7 @@ project's libraries.  Without a public name, the defined library is local to
 the current dune project only.  The `(libraries)` field in the `lib/dune` file
 is empty since this is a trivial standalone library.
 
-### Writing test cases for a library
+### Writing Test Cases for a Library
 
 Our next step is to define a test case in `test/dune` for our library.
 In [Testing](testing.html#testing){data-type=xref}, we showed you how
@@ -358,7 +358,7 @@ We deliberately defined two files called `hello.ml` in both
 `hello.exe` (in `test/`) alongside the OCaml library called `hello`
 (in `lib/`).
 
-### Building an executable program
+### Building an Executable Program
 
 Finally, we want to actually use our hello world from the
 command-line. This is defined in `bin/dune` in a very similar fashion
@@ -416,7 +416,7 @@ This is quite a common thing to do when integrating with continuous integration
 systems that need systematic scripting of both opam and dune (a topic we'll
 come to shortly in this chapter).
 
-## Setting up an integrated development environment
+## Setting Up an Integrated Development Environment
 
 Now that we've seen the basic structure of the OCaml project, it's
 time to setup an integrated development environment. An IDE is
@@ -444,7 +444,7 @@ to use. Just the default one should be sufficient to get you going
 with building and browsing your interfaces.
 
 ::: {data-type=note}
-#### What is the Language Server Protocol?
+#### What Is The Language Server Protocol?
 
 The Language Server Protocol defines a communications standard between
 an editor or IDE and a language-specific server that provides features
@@ -463,7 +463,7 @@ opam switches, invoking dune rules, and so on.
 :::
 
 
-### Browsing interface documentation
+### Browsing Interface Documentation
 
 The OCaml LSP server understands how to interface with dune and
 examine the build artifacts (such as the typed `.cmt` interface files), so
@@ -524,7 +524,7 @@ $ dune build @doc
 This will leave the HTML files in `_build/default/_doc/_html`, which
 you can view normally with a web browser.
 
-### Autoformatting your source code
+### Autoformatting Your Source Code
 
 As you develop more OCaml code, you'll find it convenient to have it
 formatted to a common style.  The `ocamlformat` tool can help you do
@@ -555,13 +555,13 @@ This will generate a set of reformatted files in the build directory,
 which you can accept with `dune promote` as you did earlier in the
 testing chapter.
 
-## Publishing your code online
+## Publishing Your Code Online
 
 With your IDE all set up you'll quickly develop useful OCaml code and
 want to share it with others.  We'll now go through how to define
 opam packages, set up continuous integration and publish your code.
 
-### Defining opam packages
+### Defining Opam Packages
 
 The only metadata file that is really _required_ to participate in the
 open-source OCaml ecosystem is an `opam` file in your source tree.  Each `opam`
@@ -579,7 +579,7 @@ eponymous [opam package manager](https://opam.ocaml.org) that we've
 been using throughout this book.
 
 ::: {data-type=note}
-#### How do we name OCaml modules, libraries and packages?
+#### How Do We Name OCaml Modules, Libraries and Packages?
 
 Much of the time, the module, library, and package names are all the
 same.  But there are reasons for these names to be distinct as well:
@@ -599,7 +599,7 @@ codebase.
 
 :::
 
-### Generating project metadata from dune
+### Generating Project Metadata from Dune
 
 The `hello.opam` file in our sample project is currently empty, but you don't
 need to write it by hand -- instead, we can define our project metadata using
@@ -738,7 +738,7 @@ earlier on all those different operating systems as well.  You can do
 an awful lot of customization of these continuous integration
 workflows, so refer to the online documentation for more options.
 
-### Other conventions
+### Other Conventions
 
 There are a few other files you may also want to add to a project
 to match common conventions:
@@ -759,7 +759,7 @@ to match common conventions:
   one of the tutorials one such as GitHub's [git hello
   world](https://guides.github.com/activities/hello-world/).
 
-### Releasing your code into the opam repository
+### Releasing Your Code into the Opam Repository
 
 Once your continuous integration is passing, you are all set to try to
 tag a release of your project and share it with other users!  The
@@ -831,7 +831,7 @@ the package is merged.  Once it is merged, you can navigate to the
 available in the central repository for other users to install.
 
 ::: {data-type=note}
-#### Creating lock files for your projects
+#### Creating Lock Files for Your Projects
 
 Before you publish a project, you might also want to create an
 opam lock file to include with the archive. A lock file records
@@ -858,7 +858,7 @@ project to the Internet.
 
 :::
 
-## Learning more from real projects
+## Learning More from Real Projects
 
 There's a lot more customization that happens in any real project, and
 we can't cover every aspect in this book. The best way by far to learn

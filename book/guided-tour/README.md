@@ -504,7 +504,7 @@ This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
 ::: {data-type=note}
-#### Operators in `Base` and the stdlib
+#### Operators in `Base` and the Stdlib
 
 OCaml's standard library and `Base` mostly use the same operators for
 the same things, but there are some differences.  For example, in
@@ -545,7 +545,7 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-#### The List module
+#### The List Module
 
 `Base` comes with a `List` module that has a rich collection of functions for
 working with lists. We can access values from within a module by using dot
@@ -582,7 +582,7 @@ see here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 We'll learn more about labeled arguments and why they're important in
 [Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
-#### Constructing lists with ::
+#### Constructing Lists with ::
 
 In addition to constructing lists using brackets, we can use the list
 constructor `::` for adding elements to the front of a list:[operators/: :
@@ -657,7 +657,7 @@ It's important to remember that, unlike `::`, this is not a constant-time
 operation. Concatenating two lists takes time proportional to the length of
 the first list.
 
-#### List patterns using match
+#### List Patterns Using Match
 
 The elements of a list can be accessed through pattern matching. List
 patterns are based on the two list constructors, `[]` and `::`. Here's a
@@ -732,7 +732,7 @@ written down with one or more `::`'s. The second pattern, `[]`, matches only
 the empty list. These cases are exhaustive, since every list is either empty
 or has at least one element, a fact that is verified by the compiler.
 
-#### Recursive list functions
+#### Recursive List Functions
 
 Recursive functions, or functions that call themselves, are an important part
 of working in OCaml or really any functional language. The typical approach
@@ -1018,7 +1018,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-#### `Base` and polymorphic comparison
+#### `Base` and Polymorphic Comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,

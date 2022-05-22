@@ -442,7 +442,7 @@ function interface (FFI)/imperative operations and]{.idx}[primitive
 mutable data/foreign functions]{.idx}
 
 
-## for and while Loops {#for-and-while-loops-1}
+## For and While Loops {#for-and-while-loops-1}
 
 OCaml provides support for traditional imperative looping constructs, in
 particular, `for` and `while` loops. Neither of these constructs is strictly

@@ -276,7 +276,7 @@ functions, like infix comparison operators and min and max functions,
 in addition to the comparator itself.
 [Comparable module]{.idx}
 
-### Why do we need comparator witnesses? {#why-comparator-witnesses}
+### Why Do We Need Comparator Witnesses? {#why-comparator-witnesses}
 
 The comparator witness is quite different from other types that we've
 seen.  Instead of tracking the kind of data being used, it's used to
@@ -618,7 +618,7 @@ APIs.
 
 :::
 
-### Applying `[@@deriving]` to maps and sets
+### Applying `[@@deriving]` to Maps and Sets
 
 In the previous section, we showed how to use `[@@deriving]` annotations to
 set up a type so it could be used to create a map or set type. But what if we

@@ -31,7 +31,7 @@ ordinary variants:
 It's a little hard to understand these features without working
 through some examples, so we'll do that next.
 
-## A little language
+## A Little Language
 
 One classic use-case for GADTs is for writing typed expression
 languages, similar to the boolean expression language described in
@@ -110,7 +110,7 @@ This possibility of ill-typed expressions doesn't just complicate the
 implementation: it's also a problem for users, since it's all too easy
 to create ill-typed expressions by mistake.
 
-### Making the language type-safe
+### Making the Language Type-Safe
 
 Let's consider what a type-safe version of this API might look like in
 the absence of GADTs. To even express the type constraints, we'll need
@@ -238,7 +238,7 @@ have any type-level guarantee of when it's handling a bool expression
 versus an int expression, so it can't safely give results where the
 type of the result varies based on the result of the expression.
 
-### Trying to do better with ordinary variants
+### Trying to Do Better with Ordinary Variants
 
 To see why we need GADTs, let's see how far we can get without
 them. In particular, let's see what happens when we try to encode the
@@ -305,7 +305,7 @@ parameter to be populated in different ways in the different tags, and
 to depend in non-trivial ways on the types of the data associated with
 each tag.  That's where GADTs can help.
 
-### GADTs to the rescue
+### GADTs to the Rescue
 
 Now we're ready to write our first GADT. Here's a new version of our
 `value` and `expr` types that correctly encode our desired typing
@@ -392,7 +392,7 @@ Note that we now have a single polymorphic eval function, as opposed
 to the two type-specific evaluators we needed when using phantom
 types.
 
-### GADTs, locally abstract types, and polymorphic recursion
+### GADTs, Locally Abstract Types, and Polymorphic Recursion
 
 The above example lets us see one of the downsides of GADTs, which is
 that code using them needs extra type annotations. Look at what
@@ -494,14 +494,14 @@ val eval : 'a expr -> 'a = <fun>
 This type of annotation is the right one to pick when you write any
 recursive function that makes use of GADTs.
 
-## When are GADTs useful?
+## When Are GADTs Useful?
 
 The typed language we showed above is a perfectly reasonable example,
 but GADTs are useful for a lot more than designing little languages.
 In this section, we'll try to give you a broader sampling of the kinds
 of things you can do with GADTs.
 
-### Varying your return type
+### Varying Your Return Type
 
 Sometimes, you want to write a single function that can effectively
 have different types in different circumstances.  In some sense, this
@@ -646,7 +646,7 @@ Exception: (Failure "No matching item found")
 - : int = 20
 ```
 
-### Capturing the unknown
+### Capturing the Unknown
 
 Code that works with unknown types is routine in OCaml, and comes up
 in the simplest of examples:
@@ -748,7 +748,7 @@ think of this variable as having three parts:
 - `'a` is the name of the type variable from inside that tag.
 
 
-### Abstracting computational machines
+### Abstracting Computational Machines
 
 A common idiom in OCaml is to combine small components into larger
 computational machines, using a collection of component-combining
@@ -939,7 +939,7 @@ build a more concrete computational machine:
   necessary functionality, and closures are more heavyweight than GADT
   tags.
 
-### Narrowing the possibilities
+### Narrowing the Possibilities
 
 Another use-case for GADTs is to narrow the set of possible states for
 a given data-type in different circumstances.
@@ -1014,7 +1014,7 @@ track the state of the request in a type parameter, and have that
 parameter be used to narrow the set of available cases, without
 duplicating the type.
 
-#### A completion-sensitive option type
+#### A Completion-Sensitive Option Type
 
 We'll start by creating an option type that is sensitive to whether
 our request is in a complete or incomplete state.  To do that, we'll
@@ -1100,7 +1100,7 @@ As we can see, when the `coption` is known to be `complete`, the
 pattern matching is narrowed to just the `Present` case.
 
 
-#### A completion-sensitive request type
+#### A Completion-Sensitive Request Type
 
 We can use `coption` to define a completion-sensitive version of
 `logon_request`.
@@ -1175,7 +1175,7 @@ machine, cutting down on the possibilities that your code needs to
 contemplate can make a big difference to the comprehensibility and
 correctness of the result.
 
-#### Type distinctness and abstraction
+#### Type Distinctness and Abstraction
 
 In the example in this section, we used two types, `complete` and
 `incomplete` to mark different states, and we defined those types so
@@ -1322,7 +1322,7 @@ for the type parameter of a GADT, you should choose definitions that
 make the distinctness of those types clear, and you should expose
 those definitions in your `mli`s.
 
-#### Narrowing without GADTs
+#### Narrowing Without GADTs
 
 Thus far, we've only seen narrowing in the context of GADTs, but OCaml
 can eliminate impossible cases from ordinary variants too.  As with
@@ -1474,7 +1474,7 @@ section, we're going to highlight some remaining difficulties with
 using GADTs that you may run into, as well as how to work around
 them.
 
-### Or-patterns
+### Or-Patterns
 
 GADTs don't work well with or-patterns.  Consider the following type
 that represents various ways we might use for obtaining some piece of
@@ -1534,7 +1534,7 @@ deal, since you can reduce the code duplication by pulling out most of
 the content of the duplicated right-hand sides into functions that can
 be called in each of the duplicated cases.
 
-### Deriving serializers
+### Deriving Serializers
 
 As will be discussed in more detail in [Data Serialization With
 S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},

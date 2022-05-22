@@ -129,7 +129,7 @@ OCaml toolchain (in this case, `ocamlopt`) with the appropriate flags to
 link in particular libraries and packages. Here, `-package base` is
 asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
 ocamlfind to link in the packages as is necessary for building an
-executable. [-linkpkg]{.idx}
+executable. [linkpkg]{.idx}
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for
@@ -673,7 +673,7 @@ Error: Unbound value foo
 
 Here's some general advice on how to use `open` effectively.
 
-### Open modules rarely
+### Open Modules Rarely
 
 `open` is essential when you're using an alternative standard library
 like `Base`, but it's generally good style to keep the opening of
@@ -686,7 +686,7 @@ When you do use `open`, it should mostly be with modules that were
 designed to be opened, like `Base` itself, or `Option.Monad_infix` or
 `Float.O` within `Base`..
 
-### Prefer local opens
+### Prefer Local Opens
 
 It's generally better to keep down the amount of code affected by an
 `open`. One great tool for this is *local open*s, which let you
@@ -713,7 +713,7 @@ particularly useful for small expressions.
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
-### Using module shortcuts instead
+### Using Module Shortcuts Instead
 
 An alternative to local `open`s that makes your code terser without
 giving up on explicitness is to locally rebind the name of a
@@ -1134,7 +1134,7 @@ Base's standards may or may not fit your projects, but you can improve the
 usability of your codebase by finding some consistent set of standards to
 apply.
 
-### Interfaces before implementations
+### Interfaces Before Implementations
 
 OCaml's concise and flexible type language enables a type-oriented approach
 to software design. Such an approach involves thinking through and writing

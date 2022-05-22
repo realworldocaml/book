@@ -61,7 +61,7 @@ for optional flags and positional arguments, including documentation, the
 types they should map to, and whether to take special actions such as pausing
 for interactive input if certain inputs are encountered.
 
-### Defining an anonymous argument {#anonymous-arguments}
+### Defining an Anonymous Argument {#anonymous-arguments}
 
 Let's build a parser for a command line UI with a single *anonymous*
 argument, i.e., an argument that is passed in without a flag.
@@ -81,7 +81,7 @@ both to nail down the OCaml type of the returned value (`string`, in
 this case) and to guide features like input validation. The values
 `anon`, `string` and `%:` all come from the `Command.Param` module.
 
-### Defining basic commands
+### Defining Basic Commands
 
 Once we've defined a specification, we need to put it to work on real input.
 The simplest way is to directly create a command-line interface with
@@ -157,7 +157,7 @@ Command.Param.map filename_param ~f:(fun filename ->
 ```
 
 
-### Running commands {#running-basic-commands}
+### Running Commands {#running-basic-commands}
 
 Once we've defined the basic command, running it is just one function call
 away.
@@ -242,7 +242,7 @@ let command =
 let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
-### Multi-argument commands {#multiple-arguments}
+### Multi-Argument Commands {#multiple-arguments}
 
 All the examples thus far have involved a single argument, but we can of
 course create multi-argument commands as well. We can make a parser for

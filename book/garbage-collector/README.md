@@ -17,8 +17,9 @@ from running OCaml programs. The runtime manages a *heap*, which is a
 collection of memory regions that it obtains from the operating system. The
 runtime uses this memory to hold *heap blocks* that it fills up with OCaml
 values in response to allocation requests by the OCaml program.
-[values/allocation requests and]{.idx}[heaps/heap
-blocks]{.idx}[heaps/definition of]{.idx}
+[values/allocation requests and]{.idx} <!-- TODO: bad index -->
+[heaps/heap blocks]{.idx}
+[heaps/definition of]{.idx}
 
 ## Mark and Sweep Garbage Collection
 
@@ -132,7 +133,7 @@ than `limit`. If there isn't enough space left for the block without
 decrementing past `limit`, a minor garbage collection is triggered. This is a
 very fast check (with no branching) on most CPU architectures.
 
-#### Understanding allocation
+#### Understanding Allocation
 
 You may wonder why `limit` is required at all, since it always seems
 to equal `start`. It's because the easiest way for the runtime to
@@ -289,7 +290,7 @@ in the major heap. The default free list search is called
 also available.
 [best-fit allocation]{.idx}[first-fit allocation]{.idx}[next-fit allocation]{.idx}
 
-#### Best-fit allocation
+#### Best-Fit Allocation
 
 The best-fit allocator is a combination of two strategies. The first,
 size-segregated free lists, is based on the observation that nearly all
@@ -313,7 +314,7 @@ Best-fit allocation is the default allocation mechanism. It represents a good
 trade-off between the allocation cost (in terms of CPU work) and heap
 fragmentation.
 
-#### Next-fit allocation
+#### Next-Fit Allocation
 
 Next-fit allocation keeps a pointer to the block in the free list that was
 most recently used to satisfy a request. When a new request comes in, the
@@ -327,7 +328,7 @@ memory locality to use CPU caches better. The big downside of next-fit is
 that since most allocations are small, large blocks at the start of the
 free list become heavily fragmented.
 
-#### First-fit allocation
+#### First-Fit Allocation
 
 If your program allocates values of many varied sizes, you may sometimes find
 that your free list becomes fragmented. In this situation, the GC is forced
@@ -474,7 +475,7 @@ a write barrier to update this so-called *remembered set* whenever a
 major-heap block is modified to point at a minor-heap block. [write
 barriers]{.idx}[remembered sets]{.idx}
 
-#### The mutable write barrier
+#### The Mutable Write Barrier
 
 The write barrier can have profound implications for the structure of your
 code. It's one of the reasons using immutable data structures and allocating
