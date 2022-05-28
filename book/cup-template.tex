@@ -42,6 +42,9 @@ $endif$
 \usepackage{newtxmath}
 \usepackage{graphicx}
 \makeatletter
+\renewcommand*{\pagenumbering}[1]{%
+  \gdef\thepage{\csname @#1\endcsname\c@page}%
+}
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
 \makeatother
@@ -253,6 +256,7 @@ For Mum and Dad, who took me to the library\\
 and unlocked my imagination.~~~--Anil
 \end{dedication}
 \tocmax{2.10}{2.8.8}{}
+\setcounter{page}{6}
 \tableofcontents
 %\listoffigures
 %\listoftables
