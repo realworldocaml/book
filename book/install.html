@@ -7,12 +7,11 @@
 <p>At a high level, here's what you need to do:</p>
 
 <ul>
-  <li><a href="#install-opam">Install opam</a>, OCaml's default
-    package manager</li>
+  <li><a href="#install-opam">Install and set up opam</a>, OCaml's
+    default package manager.</li>
 
-  <li><a href="#set-up-opam">Set up opam</a>, including installing
-    the right version of OCaml you'll need, and libraries and tools
-    that you'll need to work through the examples in the book.</li>
+  <li><a href="#libraries-and-tools">Install libraries and tools</a>,
+  which you'll need for working through the examples in the book</li>
 
   <li><a href="#editor-setup">Set up your editor.</a>  We have
     pointers for a few editors, including Visual Studio Code, Emacs,
@@ -29,7 +28,9 @@
 
 <p>Let's get started.</p>
 
-<h2 id="install-opam">Install opam</h2>
+<h2 id="install-opam">Install and set up opam</h2>
+
+<h3>Install opam</h3>
 
 <p>The easiest way to install opam is through your OS's package
   manager. </p>
@@ -43,9 +44,7 @@
   with your package manager.
 </p>
 
-<h2 id="#set-up-opam">Set up opam</h2>
-
-<h3>Run <code>opam init</code></h3>
+<h3>Initialize opam</h3>
 
 <p>Initialize the opam package database by running:</p>
 
@@ -90,24 +89,29 @@ You should run: eval $(opam env)
   all libraries associated with it. The second line is required to
   point your current shell to the new switch.</p>
 
-<h3>Installing libraries and tools</h3>
+<h2 id="libraries-and-tools">Installing libraries and tools</h2>
 
-<p>Finally, we're ready to install the libraries and tools we'll
-  need for the book. The two important ones are <code>base</code>,
-  which provides the standard library that all the examples in the
-  book are based on, and <code>utop</code>, which is the
-  interactive toplevel that you can use for working through the
-  examples.  We can install them as follows. </p>
+<h3>Install via opam</h3>
+
+<p>You'll need to install <code>base</code> and <code>core</code>,
+  which provide the standard library that all the examples in the book
+  are based on, along with <code>utop</code>, which is the interactive
+  toplevel that you can use for working through the examples.</p>
+
+<p>Both can be installed as follows:</p>
+
 <pre class="command-line" data-user="rwo" data-host="lama">
   <code class="language-bash">
-opam install base core utop
+opam install core core_bench utop
 </code></pre>
 
 <p>Other packages will come up in the book, but you can install them
   when you need them.</p>
 
-<p>To set utop up, you should create an <code>~/.ocamlinit</code>
-  file in your home directory with the following contents:</p>
+<h3>Set up utop</h3>
+
+<p>You should create an <code>~/.ocamlinit</code> file in your home
+  directory with the following contents:</p>
 
 <pre ><code class="language-ocaml">
 #require "core.top";;
@@ -117,9 +121,11 @@ open Base;;
 
 <p> This will open the Base standard library and set up some useful
   pretty-printers and syntax extensions. Notice that <code>#</code> is
-  used to mark a toplevel directive, not a comment.</p>
+  used to mark a toplevel directive, not a comment. Notice
+  that <code>#</code> is used to mark a toplevel directive, not a
+  comment.</p>
 
-<h2 id="editor-setup">Editor set-up</h2>
+<h2 id="editor-setup">Set up your editor</h2>
 
 <h3>Visual Studio Code</h3>
 
