@@ -20,7 +20,7 @@
 
     <li><a href="#editor-setup">Set up your editing environment.</a>
     We have pointers for a few editors, including Visual Studio Code,
-    Emacs, and Vi</li>
+    Emacs, and Vim</li>
   </ul>
 
   <p>Note that Windows is not fully supported by the examples in Real
@@ -60,23 +60,12 @@ opam init</code></pre>
   <p><code>opam init</code> will ask you if you want it to adjust some
   of the config files for your shell.  We recommend you say yes here
   so as to automate adjusting the PATH environment variable of your
-  shell and to prepare your environment in other ways.</p>
-
-  <p>If for whatever reason your shell is not set up properly, you can
-    put it in the right state by running:</p>
-
-    <pre class="command-line" data-user="rwo"
-  data-host="lama"><code class="language-bash">
-eval $(opam env)</code></pre>
-
-  <p>This <em>only</em> works with your current shell and it can only
-  be automated for future shells by adding the line to your login
-  scripts (which is exactly what opam offers to do for you
-  in <code>opam init</code>). </p>
+  shell and to prepare your environment in other ways.  Note that this
+  will only take effect on a newly launched shell.</p>
 
   <p>You can check if your environment is set up properly by
-  running <code>opam switch</code> with no arguments.  It will emit
-  a warning if your shell is not set up correctly, along with
+  running <code>opam switch</code> with no arguments.  It will emit a
+  warning if your shell is not set up correctly, along with
   instructions on how to fix it.</p>
   <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-7">
 <code class="language-bash">
