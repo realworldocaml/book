@@ -145,7 +145,7 @@ Error: Some type variables are unbound in this type:
              method pop : 'b option
              method push : 'b -> unit
            end
-       The method pop has type 'b option where 'b is unbound
+       The method pop has type 'a option where 'a is unbound
 ```
 
 In general, we need to provide enough constraints so that the compiler will
@@ -1343,6 +1343,40 @@ which will pull in all the other dependencies:
 
 ```sh dir=examples/correct/shapes
 $ dune build shapes.exe
+File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/async_unix__Config.cmx
+Broken symbolic link
+File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/async_unix__Raw_signal_manager.cmx
+Broken symbolic link
+File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/async_unix__Read_write.cmx
+Broken symbolic link
+File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/async_unix__Syscall.cmx
+Broken symbolic link
+File "dune", line 2, characters 13-19:
+2 |   (name      shapes)
+                 ^^^^^^
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/thread_pool/thread_pool.a
+Broken symbolic link
+File "dune", line 2, characters 13-19:
+2 |   (name      shapes)
+                 ^^^^^^
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/thread_pool/thread_pool.cmxa
+Broken symbolic link
+File "dune", line 2, characters 13-19:
+2 |   (name      shapes)
+                 ^^^^^^
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/graphics/libgraphics_stubs.a
+[1]
 ```
 
 When you run the binary, a new graphical window should appear (on macOS,

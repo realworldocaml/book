@@ -59,14 +59,14 @@ The lambda output for this code looks like this:
 $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
-    (test/86 =
-       (function v/88 : int
-         (switch* v/88
+    (test/272 =
+       (function v/274[int] : int
+         (switch* v/274
           case int 0: 100
           case int 1: 101
           case int 2: 102
           case int 3: 103)))
-    (makeblock 0 test/86)))
+    (makeblock 0 test/272)))
 ```
 
 It's not important to understand every detail of this internal form, and it
@@ -110,8 +110,8 @@ The lambda output for this code is now quite different:
 ```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
-  (let (test/84 = (function v/86 : int (if v/86 101 100)))
-    (makeblock 0 test/84)))
+  (let (test/270 = (function v/272[int] : int (if v/272 101 100)))
+    (makeblock 0 test/270)))
 ```
 
 The compiler emits simpler conditional jumps rather than setting up a
@@ -136,11 +136,11 @@ polymorphic variants:
 $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
-    (test/81 =
-       (function v/83 : int
-         (if (>= v/83 482771474) (if (>= v/83 884917024) 100 102)
-           (if (>= v/83 3306965) 101 103))))
-    (makeblock 0 test/81)))
+    (test/267 =
+       (function v/269[int] : int
+         (if (>= v/269 482771474) (if (>= v/269 884917024) 100 102)
+           (if (>= v/269 3306965) 101 103))))
+    (makeblock 0 test/267)))
 ```
 
 We mentioned in [Variants](variants.html#variants){data-type=xref} that
@@ -256,14 +256,23 @@ default, and you'll see the results summarized in a neat table:
 
 ```sh dir=examples/back-end/bench_patterns,non-deterministic=command
 $ dune exec -- ./bench_patterns.exe -ascii -quota 0.25
-Estimated testing time 750ms (3 benchmarks x 250ms). Change using '-quota'.
-
-  Name                        Time/Run   Percentage
- --------------------------- ---------- ------------
-  Monomorphic large pattern     6.54ns       67.89%
-  Monomorphic small pattern     9.63ns      100.00%
-  Polymorphic large pattern     9.63ns       99.97%
-
+File ".bench_patterns.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".bench_patterns.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".bench_patterns.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".bench_patterns.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 ```
 
 These results confirm the performance hypothesis that we obtained earlier by
@@ -733,13 +742,23 @@ Running this shows quite a significant runtime difference between the two:
 
 ```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
 $ dune exec -- ./bench_poly_and_mono.exe -ascii -quota 1
-Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
-
-  Name                       Time/Run   Percentage
- ------------------------ ------------ ------------
-  Polymorphic comparison   4_050.20ns      100.00%
-  Monomorphic comparison     471.75ns       11.65%
-
+File ".bench_poly_and_mono.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".bench_poly_and_mono.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".bench_poly_and_mono.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".bench_poly_and_mono.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 ```
 
 We see that the polymorphic comparison is close to 10 times slower! These
@@ -1109,9 +1128,9 @@ To use the debug library, just link your program with the
 
 ```sh dir=examples/back-end-embed,non-deterministic=output
 $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
-+ as  -o 'hello.o' '/tmp/build_cd0b96_dune/camlasmd3c336.s'
-+ as  -o '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/tmp/build_cd0b96_dune/camlstartup2b2cd3.s'
-+ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/rwo-4.13.1/lib/ocaml'  '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/stdlib.a' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/libasmrund.a' -lm -ldl
++ as  -o 'hello.o' '/tmp/build_3f0fb0_dune/camlasm0fdd10.s'
++ as  -o '/tmp/build_3f0fb0_dune/camlstartupd488f4.o' '/tmp/build_3f0fb0_dune/camlstartupe841ce.s'
++ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/4.14.0/lib/ocaml'  '/tmp/build_3f0fb0_dune/camlstartupd488f4.o' '/home/yminsky/.opam/4.14.0/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/4.14.0/lib/ocaml/stdlib.a' '/home/yminsky/.opam/4.14.0/lib/ocaml/libasmrund.a' -lm
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words

@@ -502,7 +502,7 @@ Error: The implementation conflicting_interface.ml
          type t = Foo
        is not included in
          type t = Bar
-       Constructors number 1 have different names, Foo and Bar.
+       Constructors have different names, Foo and Bar.
        File "conflicting_interface.mli", line 1, characters 0-12:
          Expected declaration
        File "conflicting_interface.ml", line 1, characters 0-12:
@@ -934,9 +934,9 @@ $ ocamlobjinfo typedef.cmi
 File typedef.cmi
 Unit name: Typedef
 Interfaces imported:
-    cdd43318ee9dd1b187513a4341737717    Typedef
-    9b04ecdc97e5102c1d342892ef7ad9a2    Pervasives
-    79ae8c0eb753af6b441fe05456c7970b    CamlinternalFormatBasics
+	82fcf11e091627e9f2dabf2e44f83a10	Typedef
+	6d7bf11af14ea68354925f3a37387930	Stdlib
+	8f8f634558798ee408df3c50a5539b15	CamlinternalFormatBasics
 ```
 
 `ocamlobjinfo` examines the compiled interface and displays what other
@@ -1231,7 +1231,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Tstr_type Rec
     [
-      type_declaration t/81 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+      type_declaration t/267 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
         ptype_params =
           []
         ptype_cstrs =
@@ -1240,11 +1240,11 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
           Ttype_variant
             [
               (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-                Foo/82
+                Foo/268
                 []
                 None
               (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-                Bar/83
+                Bar/269
                 []
                 None
             ]
@@ -1257,7 +1257,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
     [
       <def>
         pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Tpat_var "v/84"
+          Tpat_var "v/270"
         expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
           Texp_construct "Foo"
           []

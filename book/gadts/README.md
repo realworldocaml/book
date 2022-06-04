@@ -435,7 +435,7 @@ this approach with `eval`, we'll see that it doesn't work.
 Line 4, characters 43-44:
 Error: This expression has type a expr but an expression was expected of type
          bool expr
-       The type constructor a would escape its scope
+       Type a is not compatible with type bool
 ```
 
 \noindent

@@ -548,8 +548,8 @@ Estimated testing time 2s (2 benchmarks x 1s). Change using '-quota'.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
  ----------- ---------- --------- ---------- ---------- ------------
-  mutable       5.06ms    2.00Mw     20.61w     20.61w      100.00%
-  immutable     3.95ms    5.00Mw     95.64w     95.64w       77.98%
+  mutable      10.24ms    2.00Mw     20.94w     20.94w      100.00%
+  immutable     7.43ms    5.00Mw     95.84w     95.84w       72.50%
 
 ```
 

@@ -476,10 +476,10 @@ val list_dir : List_dir.t = {List_dir.cwd = "/var"}
 # List_dir.eval list_dir (sexp_of_string ".");;
 - : (Sexp.t, Error.t) result =
 Ok
- (yp networkd install empty ma mail spool jabberd vm msgs audit root lib db
-  at log folders netboot run rpc tmp backups agentx rwho)
+ (lock run account adm cache crash db empty ftp games kerberos lib local log
+  nis opt preserve spool tmp www yp mail .updated)
 # List_dir.eval list_dir (sexp_of_string "yp");;
-- : (Sexp.t, Error.t) result = Ok (binding)
+- : (Sexp.t, Error.t) result = Ok ()
 ```
 
 ### Dispatching to Multiple Query Handlers

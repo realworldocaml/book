@@ -735,7 +735,7 @@ And we can now call that function to get the current time.
 
 ```ocaml env=posix,non-deterministic=output
 # gettimeofday' ();;
-- : float = 1650045389.278065
+- : float = 1654349563.332417
 ```
 
 #### Recap: a Time-Printing Command
@@ -813,9 +813,9 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```sh dir=examples/correct/ffi_datetime,non-deterministic=output
 $ dune build datetime.exe
 $ ./_build/default/datetime.exe
-1633964258.014484
+1654349566.558047
 $ ./_build/default/datetime.exe -a
-Mon Oct 11 15:57:38 2021
+Sat Jun  4 09:32:46 2022
 ```
 
 ::: {data-type=note}

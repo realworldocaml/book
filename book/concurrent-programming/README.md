@@ -231,7 +231,7 @@ rewrite `count_lines` again a bit more succinctly:
     List.length (String.split text ~on:'\n');;
 val count_lines : string -> int Deferred.t = <fun>
 # count_lines "/etc/hosts";;
-- : int = 10
+- : int = 8
 ```
 
 Note that `count_lines` returns a deferred, but `utop` waits for that
@@ -308,9 +308,9 @@ ivar, thus causing the corresponding deferred to become determined, using
 val ivar : '_weak1 Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 # let def = Ivar.read ivar;;
-val def : '_weak2 Deferred.t = <abstr>
+val def : '_weak1 Deferred.t = <abstr>
 # Deferred.peek def;;
-- : '_weak3 option = None
+- : '_weak2 option = None
 # Ivar.fill ivar "Hello";;
 - : unit = ()
 # Deferred.peek def;;
@@ -740,8 +740,8 @@ Pipes are created in connected read/write pairs:
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak4 Pipe.Reader.t = <abstr>
-val w : '_weak4 Pipe.Writer.t = <abstr>
+val r : '_weak3 Pipe.Reader.t = <abstr>
+val w : '_weak3 Pipe.Writer.t = <abstr>
 ```
 
 `r` and `w` are really just read and write handles to the same underlying
@@ -765,8 +765,8 @@ read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak5 Pipe.Reader.t = <abstr>
-val w : '_weak5 Pipe.Writer.t = <abstr>
+val r : '_weak4 Pipe.Reader.t = <abstr>
+val w : '_weak4 Pipe.Writer.t = <abstr>
 # let write_complete = Pipe.write w "Hello World!";;
 val write_complete : unit Deferred.t = <abstr>
 # Pipe.read r;;
@@ -1048,22 +1048,36 @@ Concurrent Programming
 ----------------------
 
 "Concurrent computing is a form of computing in which several
-computations are executed during overlapping time
-periods—concurrently—instead of sequentially. This is a property
-of a system—this may be an individual program, a computer, or a
-network—and there is a separate execution point or \"thread of
-control\" for each computation. A concurrent system is one where a
-computation can advance without waiting for all other computations to
-complete."
+computations are executed concurrently—during overlapping time
+periods—instead of sequentially—with one completing before the
+next starts. This is a property of a system—whether a program,
+computer, or a network—where there is a separate execution point or
+\"thread of control\" for each process. A concurrent system is one
+where a computation can advance without waiting for all other
+computations to complete. Concurrent computing is a form of modular
+programming. In its paradigm an overall computation is factored into
+subcomputations that may be executed concurrently. Pioneers in the
+field of concurrent computing include Edsger Dijkstra, Per Brinch
+Hansen, and C.A.R. Hoare."
 
 OCaml
 -----
 
-"OCaml, originally named Objective Caml, is the main implementation of
-the programming language Caml, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
-in 1996. A member of the ML language family, OCaml extends the core
-Caml language with object-oriented programming constructs."
+"OCaml is a general-purpose, multi-paradigm programming language which
+extends the Caml dialect of ML with object-oriented features. OCaml
+was created in 1996 by Xavier Leroy, Jérôme Vouillon, Damien
+Doligez, Didier Rémy, Ascánder Suárez, and others. The OCaml
+toolchain includes an interactive top-level interpreter, a bytecode
+compiler, an optimizing native code compiler, a reversible debugger,
+and a package manager. OCaml was initially developed in the context of
+automated theorem proving, and has an outsize presence in static
+analysis and formal methods software. Beyond these areas, it has found
+serious use in systems programming, web development, and financial
+engineering, among other application domains. The acronym CAML
+originally stood for Categorical Abstract Machine Language, but OCaml
+omits this abstract machine. OCaml is a free and open-source software
+project managed and principally maintained by the French Institute for
+Research in Computer Science and Automation."
 
 ```
 
@@ -1265,7 +1279,7 @@ exception Another_exception
 # Deferred.any [ after (Time.Span.of_sec 0.5)
                ; swallow_some_errors Another_exception ];;
 Exception:
-(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
+(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)"))
 ```
 
 If instead we use `Ignore_me`, the exception will be ignored, and the
@@ -1322,9 +1336,9 @@ on two servers, one of which won't respond to the query.
 ```sh dir=examples/correct/search_with_configurable_server,non-deterministic=output
 $ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
- ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
-  "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
-  "Called from file \"duniverse/async_kernel/src/job_queue.ml\", line 170, characters 6-47"
+ ("Raised by primitive operation at Async_unix__Unix_syscalls.Socket.connect_interruptible.(fun) in file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1069, characters 17-74"
+  "Called from Async_kernel__Deferred1.M.map.(fun) in file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
+  "Called from Async_kernel__Job_queue.run_jobs in file \"duniverse/async_kernel/src/job_queue.ml\", line 167, characters 6-47"
   "Caught by monitor Tcp.close_sock_on_error"))
 [1]
 ```
@@ -1387,11 +1401,21 @@ DuckDuckGo query failed: Unexpected failure
 OCaml
 -----
 
-"OCaml, originally named Objective Caml, is the main implementation of
-the programming language Caml, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
-in 1996. A member of the ML language family, OCaml extends the core
-Caml language with object-oriented programming constructs."
+"OCaml is a general-purpose, multi-paradigm programming language which
+extends the Caml dialect of ML with object-oriented features. OCaml
+was created in 1996 by Xavier Leroy, Jérôme Vouillon, Damien
+Doligez, Didier Rémy, Ascánder Suárez, and others. The OCaml
+toolchain includes an interactive top-level interpreter, a bytecode
+compiler, an optimizing native code compiler, a reversible debugger,
+and a package manager. OCaml was initially developed in the context of
+automated theorem proving, and has an outsize presence in static
+analysis and formal methods software. Beyond these areas, it has found
+serious use in systems programming, web development, and financial
+engineering, among other application domains. The acronym CAML
+originally stood for Categorical Abstract Machine Language, but OCaml
+omits this abstract machine. OCaml is a free and open-source software
+project managed and principally maintained by the French Institute for
+Research in Computer Science and Automation."
 
 ```
 
@@ -1561,13 +1585,17 @@ concurrent programming
 ----------------------
 
 "Concurrent computing is a form of computing in which several
-computations are executed during overlapping time
-periods—concurrently—instead of sequentially. This is a property
-of a system—this may be an individual program, a computer, or a
-network—and there is a separate execution point or \"thread of
-control\" for each computation. A concurrent system is one where a
-computation can advance without waiting for all other computations to
-complete."
+computations are executed concurrently—during overlapping time
+periods—instead of sequentially—with one completing before the
+next starts. This is a property of a system—whether a program,
+computer, or a network—where there is a separate execution point or
+\"thread of control\" for each process. A concurrent system is one
+where a computation can advance without waiting for all other
+computations to complete. Concurrent computing is a form of modular
+programming. In its paradigm an overall computation is factored into
+subcomputations that may be executed concurrently. Pioneers in the
+field of concurrent computing include Edsger Dijkstra, Per Brinch
+Hansen, and C.A.R. Hoare."
 
 ocaml
 -----
@@ -1685,8 +1713,8 @@ expect, waking up roughly every 100 milliseconds:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> after (sec 0.5));;
-37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
-Finished at: 500.67615509033203ms,
+37.670135498046875us, 101.30047798156738ms, 201.69949531555176ms, 302.10065841674805ms, 402.51708030700684ms,
+Finished at: 500.24700164794922ms,
 - : unit = ()
 ```
 
@@ -1699,7 +1727,7 @@ busy loop to finish running:
     for i = 1 to 100_000_000 do x := Some i done;;
 val busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> return (busy_loop ()));;
-Finished at: 874.99594688415527ms,
+Finished at: 798.83670806884766ms,
 - : unit = ()
 ```
 
@@ -1712,8 +1740,8 @@ system thread, the behavior will be different:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> In_thread.run busy_loop);;
-31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
-Finished at: 840.72136878967285ms,
+30.279159545898438us, 133.79931449890137ms, 283.9195728302002ms, 384.15169715881348ms, 484.32636260986328ms, 584.43069458007812ms, 684.62777137756348ms,
+Finished at: 787.88185119628906ms,
 - : unit = ()
 ```
 
@@ -1735,8 +1763,8 @@ we run a nonallocating loop in bytecode, our timer process will get to run:
     for i = 0 to 100_000_000 do () done;;
 val noalloc_busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> In_thread.run noalloc_busy_loop);;
-32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
-Finished at: 418.69187355041504ms,
+44.82269287109375us, 116.34492874145508ms, 230.40461540222168ms, 330.52921295166016ms, 480.86380958557129ms, 580.97171783447266ms,
+Finished at: 657.45329856872559ms,
 - : unit = ()
 ```
 
@@ -1746,8 +1774,9 @@ busy loop will block anything else from running:
 
 ```sh dir=examples/correct/native_code_log_delays,non-deterministic=output
 $ dune exec -- native_code_log_delays.exe
-197.41058349609375us,
-Finished at: 1.2127914428710938s,
+Error: Program "native_code_log_delays.exe" not found!
+Hint: did you mean ./native_code_log_delays.exe?
+[1]
 ```
 
 The takeaway from these examples is that predicting thread interleavings is a

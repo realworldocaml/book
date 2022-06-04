@@ -171,12 +171,7 @@ below.
 
 ```ocaml env=main
 # #show Base.Comparator.S;;
-module type S =
-  sig
-    type t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
+module type S = Base.Comparator.S
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -783,13 +778,7 @@ some work to prepare it. In order for a module to be suitable for passing to
 
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
-module type S =
-  sig
-    type t
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    val hash : t -> int
-  end
+module type S = Base__Hashtbl_intf.Key.S
 ```
 
 Note that there's no equivalent to the comparator witness that came up for
@@ -963,14 +952,26 @@ the map version:
 
 ```sh dir=examples/correct/map_vs_hash,non-deterministic=command
 $ dune build map_vs_hash.exe
+File ".map_vs_hash.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".map_vs_hash.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".map_vs_hash.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".map_vs_hash.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup
-Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
-
-  Name    Time/Run   Speedup
- ------- ---------- ---------
-  table    13.34ms      1.00
-  map      44.54ms      3.34
-
+sh: line 1: ./_build/default/map_vs_hash.exe: No such file or directory
+[127]
 ```
 
 We can make the speedup smaller or larger depending on the details of the
@@ -1047,14 +1048,26 @@ in this case by more than a factor of 10:
 
 ```sh dir=examples/correct/map_vs_hash2,non-deterministic=command
 $ dune build map_vs_hash2.exe
+File ".map_vs_hash2.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".map_vs_hash2.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".map_vs_hash2.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".map_vs_hash2.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 $ ./_build/default/map_vs_hash2.exe -ascii -clear-columns time speedup
-Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
-
-  Name      Time/Run   Speedup
- ------- ------------ ---------
-  table   4_453.95us     25.80
-  map       172.61us      1.00
-
+sh: line 1: ./_build/default/map_vs_hash2.exe: No such file or directory
+[127]
 ```
 
 These numbers can be made more extreme by increasing the size of the tables

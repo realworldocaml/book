@@ -578,8 +578,8 @@ and runs them through `do_hash` sequentially.
 
 ```sh dir=examples/correct/md5_sequence,non-deterministic=output
 $ dune exec -- ./md5.exe /etc/services ./_build/default/md5.exe
-MD5 (/etc/services) = 6501e9c7bf20b1dc56f015e341f79833
-MD5 (./_build/default/md5.exe) = 6602408aa98478ba5617494f7460d3d9
+MD5 (/etc/services) = efa95d5c777290aa2635ca1eb8b98d39
+MD5 (./_build/default/md5.exe) = 908a6fcbf7eb34aa59d85f618e4854b7
 ```
 
 ## Adding Labeled Flags
@@ -967,16 +967,16 @@ binary is called `md5` in the current directory:
 
 ```sh dir=examples/correct/md5_with_flags,non-deterministic=output
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
-function _jsautocom_32087 {
+function _jsautocom_145536 {
   export COMP_CWORD
-  COMP_WORDS[0]=./md5.exe
+  COMP_WORDS[0]=_build/default/md5.exe
   if type readarray > /dev/null
   then readarray -t COMPREPLY < <("${COMP_WORDS[@]}")
   else IFS="
 " read -d "" -A COMPREPLY < <("${COMP_WORDS[@]}")
   fi
 }
-complete -F _jsautocom_32087 ./md5.exe
+complete -F _jsautocom_145536 _build/default/md5.exe
 ```
 
 Recall that we used the `Arg_type.file` to specify the argument type. This

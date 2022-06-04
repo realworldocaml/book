@@ -178,13 +178,23 @@ ending in `top`:
 
 ```sh dir=examples,non-deterministic=output
 $ ocamlfind list | grep top
-astring.top         (version: 0.8.3)
-cohttp.top          (version: n/a)
+astring.top         (version: n/a)
+bos.top             (version: 0.2.1+dune)
 compiler-libs.toplevel (version: [distributed with Ocaml])
-core.top            (version: v0.10.0)
-...
-uri.top             (version: 1.9.6)
-utop                (version: 2.1.0)
+core.top            (version: v0.14.0)
+ctypes.top          (version: n/a)
+findlib.top         (version: n/a)
+fmt.top             (version: 0.9.0+dune)
+fpath.top           (version: n/a)
+integers.top        (version: n/a)
+ipaddr.top          (version: 5.3.0)
+logs.top            (version: 0.7.0+dune2)
+macaddr.top         (version: 5.3.0)
+mdx.top             (version: 2.1.0)
+num.top             (version: 1.4)
+num_top             (version: 1.4)
+ocaml-compiler-libs.toplevel (version: v0.12.4)
+rresult.top         (version: 0.7.0+dune)
 ```
 
 The `core.top` package (which you should have loaded by default in

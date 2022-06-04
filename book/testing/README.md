@@ -293,17 +293,15 @@ diffs.  You can install `patdiff` with `opam`.
 
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
-     patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+File "test.ml", line 1, characters 0-0:
 ------ test.ml
 ++++++ test.ml.corrected
-File "test.ml", line 5, characters 0-1:
+File "test.ml", line 4, characters 0-1:
  |open! Base
  |open Stdio
  |
- |let%expect_test "trivial" =
--|  print_endline "Hello World!"
-+|  print_endline "Hello World!";
+-|let%expect_test "trivial" = print_endline "Hello World!"
++|let%expect_test "trivial" = print_endline "Hello World!";
 +|  [%expect {| Hello World! |}]
 [1]
 ```
@@ -796,39 +794,11 @@ happens.  The results, however, are not what you might hope for.
 
 ```sh dir=examples/erroneous/echo_test_original/test,unset-INSIDE_DUNE,non-deterministic=command
 $ dune runtest
-Entering directory 'rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
-     patdiff (internal) (exit 1)
-(cd _build/default && rwo/_build/install/default/bin/patdiff -keep-whitespace -location-style omake -ascii test/test.ml test/test.ml.corrected)
------- test/test.ml
-++++++ test/test.ml.corrected
-File "test/test.ml", line 11, characters 0-1:
- |open! Core
- |open Async
- |open Helpers
- |
- |let%expect_test "test uppercase echo" =
- |  let port = 8081 in
- |  let%bind process  = launch ~port ~uppercase:true in
- |  Monitor.protect (fun () ->
- |      let%bind (r,w) = connect ~port in
- |      let%bind () = send_data r w "one two three\n" in
--|      let%bind () = [%expect] in
-+|      let%bind () = [%expect.unreachable] in
- |      let%bind () = send_data r w "one 2 three\n" in
--|      let%bind () = [%expect] in
-+|      let%bind () = [%expect.unreachable] in
- |      return ())
- |    ~finally:(fun () -> cleanup process)
-+|[@@expect.uncaught_exn {|
-+|  (* CR expect_test_collector: This test expectation appears to contain a backtrace.
-+|     This is strongly discouraged as backtraces are fragile.
-+|     Please change this test to not include a backtrace. *)
-+|
-+|  (monitor.ml.Error
-+|    (Unix.Unix_error "Connection refused" connect 127.0.0.1:8081)
-+|    ("<backtrace elided in test>" "Caught by monitor Tcp.close_sock_on_error"))
-+|  Raised at Base__Result.ok_exn in file "duniverse/base/src/result.ml", line 201, characters 17-26
-+|  Called from Expect_test_collector.Make.Instance.exec in file "duniverse/ppx_expect/collector/expect_test_collector.ml", line 244, characters 12-19 |}]
+Entering directory '/home/yminsky/Code/rwo/_build/default/book/testing/examples/erroneous/echo_test_original'
+File "test/.echo_test.inline-tests/.echo_test.inline-tests.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/async_unix/async_unix__Tcp.cmx
+Broken symbolic link
 [1]
 ```
 

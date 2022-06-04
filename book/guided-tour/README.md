@@ -1303,7 +1303,7 @@ val ar : int array =
 - : unit = ()
 # ar;;
 - : int array =
-[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
+[|8; 4; 12; 13; 17; 1; 11; 18; 0; 3; 5; 16; 9; 19; 14; 7; 2; 6; 10; 15|]
 ```
 
 OCaml also supports `while` loops, as shown in the following function for

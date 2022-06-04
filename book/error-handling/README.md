@@ -888,15 +888,23 @@ Here are the results.
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
 $ dune exec -- \
 > ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
-Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
-
-  Name                    Time/Run   Cycls/Run
- ----------------------- ---------- -----------
-  simple computation        1.84ns       3.66c
-  computation w/handler     3.13ns       6.23c
-  end with exn             27.96ns      55.69c
-  end with exn notrace     11.69ns      23.28c
-
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 ```
 
 Note that we lose just a small number of cycles to setting up an
@@ -911,15 +919,23 @@ We can also disable backtraces, as we discussed, using
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
 $ OCAMLRUNPARAM=b=0 dune exec -- \
 > ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
-Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
-
-  Name                    Time/Run   Cycls/Run
- ----------------------- ---------- -----------
-  simple computation        1.71ns       3.41c
-  computation w/handler     3.04ns       6.05c
-  end with exn             19.36ns      38.57c
-  end with exn notrace     11.48ns      22.86c
-
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_config.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Analysis_result_intf.cmx
+Broken symbolic link
+File ".exn_cost.eobjs/native/_unknown_", line 1, characters 0-0:
+Error: File unavailable:
+/home/yminsky/Code/rwo/_build/install/default/lib/core_bench/core_bench__Measurement.cmx
+Broken symbolic link
+[1]
 ```
 
 The only significant change here is that raising an exception in the
