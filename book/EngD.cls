@@ -2908,11 +2908,13 @@
    \@hangfrom{\hskip #3\relax\@svsec}{\interlinepenalty \@M #8\par}
   \endgroup
   \csname #1mark\endcsname{#7}%
+  \def\leftmark{\thesection\hspace{0.5em}#7}
   \addcontentsline{toc}{#1}{\ifnum #2>\c@secnumdepth \else
    \protect\numberline{\csname the#1\endcsname}\fi #7}
  \else
   \def\@svsechd{#6\hskip #3\@svsec #8%
    \csname #1mark\endcsname{#7}%
+   \def\leftmark{\thesection\hspace{0.5em}#7}
    \addcontentsline{toc}{#1}{\ifnum #2>\c@secnumdepth \else
     \protect\numberline{\csname the#1\endcsname}\fi#7}}%
  \fi
