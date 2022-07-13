@@ -2060,6 +2060,8 @@
  \columnsep 1pc
  \twocolumn[\vspace*{10\p@}\mbox{}\par\@makeschapterhead{#1}]
  \@mkboth{#1}{#1}
+ \def\leftmark{\indexname}%
+ \def\rightmark{\indexname}%
  \typeout{#1.}
  \ifAJW@indentsty
   \ifdim\AJW@indent>\z@
@@ -2699,10 +2701,11 @@
 %
 \newcommand\@greyrunningheadrule{%
 \setlength\fboxsep{1\p@}%
-  \def\FrameCommand{\hspace*{-17mm}\colorbox{thirtycolor}}%  %%EngD changed
+  \def\FrameCommand{\if@twocolumn\else\hspace*{-17mm}\fi\colorbox{thirtycolor}}%  %%EngD changed
   \parindent0pt%
 % frame needs to be \hsize + 17mm - 2x \fboxsep   %%EngD changed
   \MakeFramed{%
+    \if@twocolumn\hsize=\textwidth\advance\hsize 2\fboxsep\fi%
     \advance\hsize-\width
     \advance\hsize\fourpica
     \advance\hsize-2\fboxsep
@@ -2713,6 +2716,7 @@
 
 \newcommand\@insertgreyrunningheadrule{%
   {\parindent0pt\par\vbox to .5pt{%
+    \if@twocolumn\hskip5.4pc\fi%
     \hbox to\textwidthplus{%
       \vbox{\@greyrunningheadrule}%
     }\par
