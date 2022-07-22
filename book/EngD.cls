@@ -2730,7 +2730,7 @@
   %
 %%EngD changed definitions of oddhead and evenhead below
 \def\@oddhead{%
-   \hbox to \textwidth{\hfil\runningheadsize\boldseriffont{\rightmark}\hspace*{17mm}%
+   \hbox to \textwidth{\hfil\runningheadsize\boldseriffont{\leftmark}\hspace*{17mm}%
      \llap{\runningheadsize\lightseriffont\thepage}}%
    \hspace*{-\textwidth}{\@insertgreyrunningheadrule}%
    }%
@@ -2738,7 +2738,7 @@
    \runningheadsize\lightseriffont\thepage\hfil}%
    \hbox to \textwidthplus{\runningheadsize%
      {\boldseriffont
-       {\leftmark}\hfil}}%
+       {\rightmark}\hfil}}%
      \hspace*{-\textwidthplus}{\@insertgreyrunningheadrule}%
     }%
   \ifAJW@multisty
