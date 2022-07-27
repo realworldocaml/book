@@ -334,7 +334,8 @@ We would especially like to thank the following individuals for improving
 
 - David Tranah, Clare Dennison, Anna Scriven and Suresh Kumar from
   Cambridge University Press for input into the layout of the print edition.
-  Airlie Anderson drew the cover art with assistance from Christy Nyberg.
+  Airlie Anderson drew the cover art, and Christy Nyberg advised on the
+  design and layout.
 
 - The many people who collectively submitted over 4000 comments to
   online drafts of this book, through whose efforts countless errors
