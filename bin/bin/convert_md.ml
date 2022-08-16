@@ -138,9 +138,6 @@ let pp_block_md ppf (b:Mdx.Block.t) =
 let pp_text_html ppf l =
   List.iter (Fmt.pf ppf "%s\n") (List.rev l)
 
-let pp_text_md ppf l =
-  List.iter (Fmt.pf ppf "%s\n") (List.rev l)
-
 open Astring
 
 let pp_text_latex ppf l =
