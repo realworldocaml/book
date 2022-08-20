@@ -82,7 +82,7 @@ With that in hand, we can write the evaluator itself.
        | Int _ -> raise Ill_typed)
     | Eq (x, y) ->
       (match eval x, eval y with
-       | Bool f1, Bool f2 -> Bool (f1 = f2)
+       | Bool b1, Bool b2 -> Bool (Bool.equal b1 b2)
        | Int f1, Int f2 -> Bool (f1 = f2)
        | Bool _, Int _ | Int _, Bool _ -> raise Ill_typed)
     | Plus (x, y) ->
