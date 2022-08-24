@@ -277,10 +277,7 @@ syntax tree, and subsequently interpreted and expanded by external tools.
 The basic form of an attribute is the `[@ ... ]` syntax.  The number of `@` symbols
 defines which part of the syntax tree the attribute is bound to:
 
-<!-- TODO: I don't think the first bullet is right. [@@ is used for
-     type definitions, e.g., type x = foo [@@deriving bar]  -->
-
-- a single `[@` binds to expressions and individual type definitions.
+- a single `[@` binds using a postfix notation to algebraic categories such as expressions or individual constructors in type definitions.
 - a double `[@@` binds to blocks of code, such as module definitions, type declarations or class fields.
 - a triple `[@@@` appears as a standalone entry in a module implementation or
  signature, and are not tied to any specific source code node.
@@ -364,7 +361,7 @@ and may change in future versions. (See manual section 11.5)
 val exit_with : program_result -> int = <fun>
 ```
 
-### Commonly used extension attributes
+### Commonly Used Extension Attributes
 
 We have already used extension points in [Data Serialization With S
 Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}
@@ -565,7 +562,7 @@ type inference, but by and large, most programs you write will never
 *require* annotations (although they sometimes help the compiler produce
 better error messages).
 
-#### Adding type annotations to find errors
+#### Adding Type Annotations to Find Errors
 
 It's often said that the hardest part of writing OCaml code is getting past
 the type checker—but once the code does compile, it works correctly the
@@ -716,7 +713,7 @@ Once you fix the problem, you can remove the manual annotations if you prefer
 more succinct code. You can also leave the annotations there, of course, to
 help with future refactoring and debugging.
 
-#### Enforcing principal typing
+#### Enforcing Principal Typing
 
 The compiler also has a stricter *principal type checking* mode that is
 activated via the `-principal` flag. This
@@ -856,7 +853,7 @@ single source file when changing just one or two files, and the module system
 minimizes such recompilation while still encouraging code reuse. [compilation
 units]{.idx}
 
-#### The mapping between files and modules
+#### The Mapping Between Files and Modules
 
 Individual compilation units provide a convenient way to break up a big
 module hierarchy into a collection of files. The relationship between files
@@ -886,7 +883,7 @@ end = struct
 end
 ```
 
-#### Defining a module search path
+#### Defining a Module Search Path
 
 In the preceding example, `Alice` also has a reference to another module
 `Bob`. For the overall type of `Alice` to be valid, the compiler also needs
@@ -973,7 +970,7 @@ scratch.
 :::
 
 
-### Wrapping libraries with module aliases
+### Wrapping Libraries with Module Aliases
 
 The module-to-file mapping described so far rigidly enforces a 1:1 mapping
 between a top-level module and a file. It's often convenient to split larger

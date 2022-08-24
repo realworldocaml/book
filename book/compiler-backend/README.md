@@ -284,9 +284,11 @@ executables.
 After the lambda form has been generated, we are very close to having
 executable code. The OCaml toolchain branches into two separate compilers at
 this point. We'll describe the bytecode compiler first, which consists of two
-pieces: [OCaml toolchain/ocamlrun]{.idx}[OCaml
-toolchain/ocamlc]{.idx}[bytecode compiler/tools used]{.idx}[compilation
-process/portable bytecode]{.idx}
+pieces:
+[OCaml toolchain/ocamlrun]{.idx}
+[OCaml toolchain/ocamlc]{.idx} <!-- TODO: bad index-->
+[bytecode compiler/tools used]{.idx}
+[compilation process/portable bytecode]{.idx}
 
 `ocamlc`
 : Compiles files into a bytecode that is a close mapping to the lambda form
@@ -585,7 +587,7 @@ you a more accurate picture of what executes on the CPU. Don't forget that
 you can use the lambda code from earlier to get a slightly higher-level
 picture of the code if you get lost in the more verbose assembly.
 
-#### The impact of polymorphic comparison
+#### The Impact of Polymorphic Comparison
 
 We warned you in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
@@ -694,7 +696,7 @@ minor heap pointer can also be changed by the C code that's being called
 returning from the `caml_greaterthan` call. Finally, the return value of the
 comparison is popped from the stack and returned.
 
-#### Benchmarking polymorphic comparison
+#### Benchmarking Polymorphic Comparison
 
 You don't have to fully understand the intricacies of assembly language to
 see that this polymorphic comparison is much heavier than the simple
@@ -748,7 +750,7 @@ iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
 
 ::: {data-type=note}
-#### Accessing Stdlib modules from within Core
+#### Accessing Stdlib Modules from Within Core
 
 In the benchmark above comparing polymorphic and monomorphic
 comparison, you may have noticed that we prepended the comparison
@@ -776,7 +778,7 @@ library is compiled in debug mode. These include the CFI stubs you will have
 noticed in the profiling output earlier (`.cfi_start_proc` and
 `.cfi_end_proc` to delimit an OCaml function call, for example).
 
-#### Understanding name mangling
+#### Understanding Name Mangling
 
 So how do you refer to OCaml functions in an interactive debugger like
 `gdb`? The first thing you need to know is how OCaml function names compile
@@ -808,7 +810,7 @@ Anonymous functions are hard to predict without inspecting intermediate
 compiler output. If you need to debug them, it's usually easier to modify the
 source code to let-bind the anonymous function to a variable name.
 
-#### Interactive breakpoints with the GNU debugger
+#### Interactive Breakpoints with the GNU Debugger
 
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}
@@ -1062,8 +1064,9 @@ care of recompiling all your libraries with the new interface.
 The native code compiler normally links a complete executable, but can also
 output a standalone native object file just as the bytecode compiler can.
 This object file has no further dependencies on OCaml except for the runtime
-library.[libasmrun.a library]{.idx}[native-code compiler/embedding code in
-C]{.idx}
+library.
+[libasmrun.a library]{.idx}
+[native-code compiler/embedding code in C]{.idx} <!-- TODO: bad index   -->
 
 The native code runtime is a different library from the bytecode one, and is
 installed as `libasmrun.a` in the OCaml standard library directory.

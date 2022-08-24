@@ -332,6 +332,11 @@ We would especially like to thank the following individuals for improving
   changes to OCaml and various libraries and tools.  Ashish also
   developed a new and improved version of the book's website.
 
+- David Tranah, Clare Dennison, Anna Scriven and Suresh Kumar from
+  Cambridge University Press for input into the layout of the print edition.
+  Airlie Anderson drew the cover art, and Christy Nyberg advised on the
+  design and layout.
+
 - The many people who collectively submitted over 4000 comments to
   online drafts of this book, through whose efforts countless errors
   were found and fixed.

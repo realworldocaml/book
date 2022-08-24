@@ -48,7 +48,7 @@ As we go through the rest of this chapter and introduce you to some of
 the available tooling, you should be able to see how each tool helps
 advance these goals.
 
-## Inline tests
+## Inline Tests
 
 The first step towards a good testing environment is making it easy to
 set up and run a test.  To that end, we'll show you how to write tests
@@ -116,7 +116,7 @@ FAILED 1 / 1 tests
 ```
 
 
-### More readable errors with `test_eq`
+### More Readable Errors with `test_eq`
 
 One problem with the test output we just saw is that it doesn't show
 the data associated with the failed test, thus making it harder to
@@ -175,7 +175,7 @@ out, along with the stack backtrace.  Sadly, the backtrace is in this
 case mostly a distraction. That's a downside of using exceptions to
 report test failures.
 
-### Where should tests go?
+### Where Should Tests Go?
 
 The inline test framework lets you put tests into any `.ml` file
 that's part of a library. But just because you can do something
@@ -220,7 +220,7 @@ to do the test that's important but is really awkward to expose.  But
 such cases are very much the exception.
 
 ::: {data-type=note}
-#### Why can't inline tests go in executables?
+#### Why Can't Inline Tests Go in Executables?
 
 We've only talked about putting tests into libraries. What about
 executables? It turns out you can't do this directly, because Dune
@@ -248,7 +248,7 @@ specific properties in a given scenario.  Sometimes, though, what you
 want is not to test this or that property, but to capture and make
 visible your code's behavior.  *Expect tests* let you do just that.
 
-### Basic mechanics
+### Basic Mechanics
 
 With expect tests, your source file specifies both the code to be
 executed and the expected output.  Upon running an expect test, any
@@ -344,7 +344,7 @@ let%expect_test "multi-block" =
 ```
 
 
-### What are expect tests good for?
+### What Are Expect Tests Good For?
 
 It's not obvious why one would want to use expect tests in the first
 place. Why should this:
@@ -380,7 +380,7 @@ of the behavior of your system that's hard to capture in a predicate.
 This is more useful than it might seem at first.  Let's consider a few
 different example use-cases to see why.
 
-### Exploratory programming
+### Exploratory Programming
 
 Expect tests can be especially helpful when you're in exploration
 mode, where you're trying to solve a problem by playing around with
@@ -427,7 +427,7 @@ let%expect_test _ =
 ```
 
 ::: {data-type=note}
-#### Quoted strings
+#### Quoted Strings
 
 The example above used a new syntax for string literals, called
 *quoted strings*.  Here's an example.
@@ -549,7 +549,7 @@ One nice aspect of this exploratory workflow is that once you've
 gotten things working, you can leave the examples you used to develop
 the code as permanent tests.
 
-### Visualizing complex behavior
+### Visualizing Complex Behavior
 
 Expect tests can be used to examine the dynamic behavior of a system.
 Let's walk through a simple example: a rate limiter.  The job of a
@@ -699,7 +699,7 @@ about creating useful helper functions, and some of it was about
 having a concise and noise-free format for the data captured by the
 expect blocks.
 
-### End-to-end tests
+### End-to-End Tests
 
 The expect tests we've seen so far have been self-contained, not doing
 any IO or interacting with system resources.  As a result, these tests
@@ -896,7 +896,7 @@ should write your code in a way that allows most of it to be tested
 without having to connect to real running servers.  But when you do
 need to do it, you can still use expect tests for this purpose.
 
-### How to make a good expect tests
+### How to Make a Good Expect Test
 
 Taken together, these examples suggest some guidelines for building
 good expect tests:
@@ -915,7 +915,7 @@ good expect tests:
   But if you must, be careful to avoid timeouts and other stopgaps
   that will fall apart under performance pressure.
 
-## Property testing with Quickcheck
+## Property Testing with Quickcheck
 
 Many tests amount to little more than individual examples decorated
 with simple assertions to check this or that property.  *Property
@@ -1051,7 +1051,7 @@ this case, it's not really a bug that we've uncovered, it's just that
 the property that we thought would hold can't in practice.  But either
 way, Quickcheck helped us understand the behavior of our code better.
 
-### Handling complex types
+### Handling Complex Types
 
 Tests can't subsist on simple atomic types alone, which is why you'll
 often want to build probability distributions over more complex types.
@@ -1137,7 +1137,7 @@ Note that the default weight on each case is `1`, so now `Circle` will
 be generated with probability `0.5 / 2.5` or `0.2`, instead of the
 1/3rd probability that it would have natively.
 
-### More control with let-syntax
+### More Control with Let-Syntax
 
 If the annotations associated with `ppx_quickcheck` don't let you do
 precisely what you want, you can get more control by taking advantage
@@ -1185,12 +1185,12 @@ The full API for building generators is beyond the scope of this
 chapter, but it's worth digging into the API docs if you want more
 control over the distribution of your test examples.
 
-## Other testing tools
+## Other Testing Tools
 
 The testing tools we've described in this chapter cover a lot of
 ground, but there are other tools worth knowing about.
 
-### Other tools to do (mostly) the same things
+### Other Tools to Do (Mostly) the Same Things
 
 Here are some notable tools that do more or less the same things as
 the testing tools we've featured in this chapter.

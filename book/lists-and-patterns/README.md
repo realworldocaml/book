@@ -543,7 +543,7 @@ The previous example touched on only three of the functions in
 at the [online docs](https://v3.ocaml.org/p/base/v0.14.3/doc/Base/List/index.html)),
 but a few more functions are useful enough to mention here.
 
-#### Combining list elements with List.reduce
+#### Combining List Elements with `List.reduce`
 
 `List.fold`, which we described earlier, is a very general and powerful
 function. Sometimes, however, you want something simpler and easier to use.
@@ -574,12 +574,13 @@ Now we can see `reduce` in action:
 - : int option = None
 ```
 
-#### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map}
+#### Filtering with `List.filter` and `List.filter_map` {#filtering-with-list.filter-and-list.filter_map}
 
-Very often when processing lists, you want to restrict your attention to a
-subset of the values on your list. The `List.filter` function is one way of
-doing that:[lists/filtering values in]{.idx}[values/filtering with
-List.filter]{.idx}[List module/List.filter]{.idx}
+Very often when processing lists, you want to restrict your attention
+to a subset of the values on your list. The `List.filter` function is
+one way of doing that:[lists/filtering values
+in]{.idx}[values/filtering with List.filter]{.idx}[List
+module/List.filter]{.idx}
 
 ```ocaml env=main
 # List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
@@ -616,7 +617,7 @@ you to have multiple subpatterns within a larger pattern. In this
 case, `None | Some ("",_)` is an or-pattern. As we'll see later,
 or-patterns can be nested anywhere within larger patterns.
 
-#### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
+#### Partitioning with `List.partition_tf` {#partitioning-with-list.partition_tf}
 
 Another useful operation that's closely related to filtering is partitioning.
 The function `List.partition_tf` takes a list and a function for computing a
@@ -833,8 +834,7 @@ it, we'll use the `function` keyword to eliminate the need for an
 explicit match:[function keyword]{.idx}
 
 ```ocaml env=main
-# let rec remove_sequential_duplicates list =
-    match list with
+# let rec remove_sequential_duplicates = function
     | [] as l -> l
     | [_] as l -> l
     | first :: (second :: _ as tl) ->

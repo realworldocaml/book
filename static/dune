@@ -25,6 +25,7 @@
      (system "xelatex book.tex")
      (system "makeindex book.idx")
      (system "xelatex book.tex")
+     (system "makeindex book.idx")
      (system "xelatex book.tex")
   )))
 

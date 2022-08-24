@@ -174,7 +174,7 @@ without mutation.
 :::
 
 
-### Pattern Matching and let
+### Pattern Matching and Let
 
 Another useful feature of `let` bindings is that they support the use of
 *patterns* on the left-hand side. Consider the following code, which uses
@@ -349,7 +349,7 @@ Async](concurrent-programming.html#concurrent-programming-with-async){data-type=
 :::
 
 
-### Multiargument functions {#multi-argument-functions}
+### Multiargument Functions {#multi-argument-functions}
 
 OCaml of course also supports multiargument functions, such as:[fun
 keyword/multi-argument functions]{.idx}[multi-argument
@@ -734,7 +734,7 @@ choosing the operator you use with care, particularly with respect to
 associativity.
 
 ::: {data-type=note}
-#### The application operator
+#### The Application Operator
 
 `|>` is known as the *reverse application operator*. You might be
 unsurprised to learn that there's also an *application
@@ -843,18 +843,18 @@ used when invoking a function.[punning]{.idx}[label punning]{.idx}
 - : float = 0.75
 ```
 
-#### Where are labels useful?
+#### Where Are Labels Useful?
 
 Labeled arguments are a surprisingly useful feature, and it's worth
 walking through some of the cases where they come up.
 
-##### Explicating long argument lists
+##### Explicating Long Argument Lists
 
 Beyond a certain number, arguments are easier to remember by name than
 by position.  Letting the names be used at the call-site (and used in
 any order) makes client code easier to read and to write.
 
-##### Adding information to uninformative argument types
+##### Adding Information to Uninformative Argument Types
 
 Consider a function for creating a hash table whose first argument is the
 initial size of the array backing the hash table, and the second is a
@@ -877,7 +877,7 @@ Choosing label names well is especially important for Boolean values, since
 it's often easy to get confused about whether a value being true is meant
 to enable or disable a given feature.
 
-##### Disambiguating similar arguments
+##### Disambiguating Similar Arguments
 
 This issue comes up most often when a function has multiple arguments
 of the same type.  Consider this signature for a function that
@@ -900,7 +900,7 @@ This improves the readability of both the signature and of client
 code, and makes it harder to accidentally swap the position and the
 length.
 
-##### Flexible argument ordering and partial application
+##### Flexible Argument Ordering and Partial Application
 
 Consider a function like `List.iter` which takes two arguments: a
 function and a list of elements to call that function on. A common
@@ -929,7 +929,7 @@ is being iterated over.  On the other hand, when calling `List.iter`
 with a small function, but a large, explicitly written list of values,
 it's generally easier if the values come last.
 
-#### Higher-order functions and labels
+#### Higher-Order Functions and Labels
 
 One surprising gotcha with labeled arguments is that while order doesn't
 matter when calling a function with labeled arguments, it does matter in a
@@ -1040,7 +1040,7 @@ module, *i.e.*, functions that are not included in the module's interface, or
 `mli` file. We'll learn more about `mli`s in
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 
-#### Explicit passing of an optional argument
+#### Explicit Passing of an Optional Argument
 
 Under the covers, a function with an optional argument receives `None` when
 the caller doesn't provide the argument, and `Some` when it does. But the
@@ -1102,7 +1102,7 @@ Now, if someone calls `uppercase_concat` without an argument, an explicit
 `None` will be passed to `concat`, leaving `concat` to decide what the
 default behavior should be.
 
-#### Inference of labeled and optional arguments
+#### Inference of Labeled and Optional Arguments
 
 One subtle aspect of labeled and optional arguments is how they are inferred
 by the type system. Consider the following example for computing numerical
@@ -1171,7 +1171,8 @@ Error: This function is applied to arguments
 As suggested by the error message, we can get OCaml to accept the fact that
 `f` is used with different argument orders if we provide explicit type
 information. Thus, the following code compiles without error, due to the type
-annotation on `f`.[type annotations]{.idx}
+annotation on `f`.
+[type annotations]{.idx} <!-- TODO: bad index -->
 
 ```ocaml env=main
 # let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
@@ -1187,7 +1188,7 @@ val numeric_deriv :
   <fun>
 ```
 
-#### Optional arguments and partial application
+#### Optional Arguments and Partial Application
 
 Optional arguments can be tricky to think about in the presence of partial
 application. We can of course partially apply the optional argument itself.
