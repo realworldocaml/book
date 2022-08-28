@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-20.04
         ocaml-compiler:
           - 4.13.1
 
