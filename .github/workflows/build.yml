@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-latest
         ocaml-compiler:
           - 4.13.1
 
@@ -25,10 +25,6 @@ jobs:
 
       - name: Install pandoc
         run: sudo apt-get -y install pandoc
-
-      - name: Install Calibre
-        if: runner.os == 'Linux'
-        run: sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
 
       - name: Install LaTeX dependencies
         if: runner.os == 'Linux'
@@ -78,15 +74,3 @@ jobs:
         with:
           name: book.epub
           path: ./_build/default/static/book.epub
-
-      - name: Convert to MOBI
-        if: runner.os == 'Linux'
-        working-directory: ./_build/default/static
-        run: ebook-convert book.epub book.mobi
-
-      - name: Upload MOBI artifact
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2
-        with:
-          name: book.mobi
-          path: ./_build/default/static/book.mobi
