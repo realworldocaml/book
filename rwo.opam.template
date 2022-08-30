@@ -1,0 +1,4 @@
+pin-depends: [
+ [ "async_graphics.dev" "https://github.com/avsm/async_graphics.git#update-to-v15" ]
+]
+
