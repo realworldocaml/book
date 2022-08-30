@@ -1338,16 +1338,6 @@ which will pull in all the other dependencies:
 
 ```sh dir=examples/correct/shapes
 $ dune build shapes.exe
-File ".shapes.eobjs/native/_unknown_", line 1, characters 0-0:
-Error: File unavailable:
-/home/yminsky/Code/rwo-4.14/_build/install/default/lib/async_graphics/async_graphics.cmx
-Broken symbolic link
-File "dune", line 2, characters 13-19:
-2 |   (name      shapes)
-                 ^^^^^^
-Error: File unavailable:
-/home/yminsky/Code/rwo-4.14/_build/install/default/lib/graphics/libgraphics_stubs.a
-[1]
 ```
 
 When you run the binary, a new graphical window should appear (on macOS,
