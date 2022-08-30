@@ -27,7 +27,7 @@
 
   (* see description in common.mli *)
   type lexer_state = Lexer_state.t = {
-    buf : Bi_outbuf.t;
+    buf : Buffer.t;
     mutable lnum : int;
     mutable bol : int;
     mutable fname : string option;
@@ -147,11 +147,11 @@
 
   let add_lexeme buf lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    Bi_outbuf.add_subbytes buf lexbuf.lex_buffer lexbuf.lex_start_pos len
+    Buffer.add_subbytes buf lexbuf.lex_buffer lexbuf.lex_start_pos len
 
   let map_lexeme f lexbuf =
     let len = lexbuf.lex_curr_pos - lexbuf.lex_start_pos in
-    f (Bytes.to_string lexbuf.lex_buffer) lexbuf.lex_start_pos len
+    f (Bytes.sub_string lexbuf.lex_buffer lexbuf.lex_start_pos len) 0 len
 
   type variant_kind = [ `Edgy_bracket | `Square_bracket | `Double_quote ]
   type tuple_kind = [ `Parenthesis | `Square_bracket ]
@@ -211,7 +211,7 @@ rule read_json v = parse
                 }
   | '"'         {
                   #ifdef STRING
-                    Bi_outbuf.clear v.buf;
+                    Buffer.clear v.buf;
                     `String (finish_string v lexbuf)
                   #elif defined STRINGLIT
                     `Stringlit (finish_stringlit v lexbuf)
@@ -308,7 +308,7 @@ rule read_json v = parse
 
 
 and finish_string v = parse
-    '"'           { Bi_outbuf.contents v.buf }
+    '"'           { Buffer.contents v.buf }
   | '\\'          { finish_escaped_char v lexbuf;
                     finish_string v lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
@@ -317,7 +317,7 @@ and finish_string v = parse
 
 and map_string v f = parse
     '"'           { let b = v.buf in
-                    f (Bytes.to_string b.Bi_outbuf.o_s) 0 b.Bi_outbuf.o_len }
+                    f (Buffer.contents b) 0 (Buffer.length b) }
   | '\\'          { finish_escaped_char v lexbuf;
                     map_string v f lexbuf }
   | [^ '"' '\\']+ { add_lexeme v.buf lexbuf;
@@ -327,12 +327,12 @@ and map_string v f = parse
 and finish_escaped_char v = parse
     '"'
   | '\\'
-  | '/' as c { Bi_outbuf.add_char v.buf c }
-  | 'b'  { Bi_outbuf.add_char v.buf '\b' }
-  | 'f'  { Bi_outbuf.add_char v.buf '\012' }
-  | 'n'  { Bi_outbuf.add_char v.buf '\n' }
-  | 'r'  { Bi_outbuf.add_char v.buf '\r' }
-  | 't'  { Bi_outbuf.add_char v.buf '\t' }
+  | '/' as c { Buffer.add_char v.buf c }
+  | 'b'  { Buffer.add_char v.buf '\b' }
+  | 'f'  { Buffer.add_char v.buf '\012' }
+  | 'n'  { Buffer.add_char v.buf '\n' }
+  | 'r'  { Buffer.add_char v.buf '\r' }
+  | 't'  { Buffer.add_char v.buf '\t' }
   | 'u' (hex as a) (hex as b) (hex as c) (hex as d)
          { let x =
              (hex a lsl 12) lor (hex b lsl 8) lor (hex c lsl 4) lor hex d
@@ -398,7 +398,7 @@ and read_comma v = parse
 
 and start_any_variant v = parse
     '<'      { `Edgy_bracket }
-  | '"'      { Bi_outbuf.clear v.buf;
+  | '"'      { Buffer.clear v.buf;
                `Double_quote }
   | '['      { `Square_bracket }
   | _        { long_error "Expected '<', '\"' or '[' but found" v lexbuf }
@@ -454,7 +454,7 @@ and read_int v = parse
                            with Int_overflow ->
                              lexer_error "Int overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
-                           Bi_outbuf.clear v.buf;
+                           Buffer.clear v.buf;
                            let s = finish_string v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
@@ -475,7 +475,7 @@ and read_int32 v = parse
                            with _ ->
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
-                           Bi_outbuf.clear v.buf;
+                           Buffer.clear v.buf;
                            let s = finish_string v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
@@ -496,7 +496,7 @@ and read_int64 v = parse
                            with _ ->
                              lexer_error "Int32 overflow" v lexbuf }
   | '"'                  { (* Support for double-quoted "ints" *)
-                           Bi_outbuf.clear v.buf;
+                           Buffer.clear v.buf;
                            let s = finish_string v lexbuf in
                            try
                              (* Any OCaml-compliant int will pass,
@@ -517,7 +517,7 @@ and read_number v = parse
   | "Infinity"  { infinity }
   | "-Infinity" { neg_infinity }
   | number      { float_of_string (lexeme lexbuf) }
-  | '"'         { Bi_outbuf.clear v.buf;
+  | '"'         { Buffer.clear v.buf;
                   let s = finish_string v lexbuf in
                   try
                     (* Any OCaml-compliant float will pass,
@@ -539,13 +539,13 @@ and read_number v = parse
   | eof         { custom_error "Unexpected end of input" v lexbuf }
 
 and read_string v = parse
-    '"'      { Bi_outbuf.clear v.buf;
+    '"'      { Buffer.clear v.buf;
                finish_string v lexbuf }
   | _        { long_error "Expected '\"' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and read_ident v = parse
-    '"'      { Bi_outbuf.clear v.buf;
+    '"'      { Buffer.clear v.buf;
                finish_string v lexbuf }
   | ident as s
              { s }
@@ -553,7 +553,7 @@ and read_ident v = parse
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and map_ident v f = parse
-    '"'      { Bi_outbuf.clear v.buf;
+    '"'      { Buffer.clear v.buf;
                map_string v f lexbuf }
   | ident
              { map_lexeme f lexbuf }
@@ -871,7 +871,7 @@ and buffer_json v = parse
 
   | '"'         { finish_buffer_stringlit v lexbuf }
   | '{'          { try
-                     Bi_outbuf.add_char v.buf '{';
+                     Buffer.add_char v.buf '{';
                      buffer_space v lexbuf;
                      buffer_object_end v lexbuf;
                      buffer_ident v lexbuf;
@@ -895,7 +895,7 @@ and buffer_json v = parse
                  }
 
   | '['          { try
-                     Bi_outbuf.add_char v.buf '[';
+                     Buffer.add_char v.buf '[';
                      buffer_space v lexbuf;
                      buffer_array_end v lexbuf;
                      buffer_json v lexbuf;
@@ -913,7 +913,7 @@ and buffer_json v = parse
   | '('          {
                    #ifdef TUPLE
                      try
-                       Bi_outbuf.add_char v.buf '(';
+                       Buffer.add_char v.buf '(';
                        buffer_space v lexbuf;
                        buffer_tuple_end v lexbuf;
                        buffer_json v lexbuf;
@@ -933,7 +933,7 @@ and buffer_json v = parse
 
   | '<'          {
                    #ifdef VARIANT
-                     Bi_outbuf.add_char v.buf '<';
+                     Buffer.add_char v.buf '<';
                      buffer_space v lexbuf;
                      buffer_ident v lexbuf;
                      buffer_space v lexbuf;
@@ -944,10 +944,10 @@ and buffer_json v = parse
                  }
 
   | "//"[^'\n']* { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
-  | "/*"         { Bi_outbuf.add_string v.buf "/*";
+  | "/*"         { Buffer.add_string v.buf "/*";
                    finish_buffer_comment v lexbuf;
                    buffer_json v lexbuf }
-  | "\n"         { Bi_outbuf.add_char v.buf '\n';
+  | "\n"         { Buffer.add_char v.buf '\n';
                    newline v lexbuf;
                    buffer_json v lexbuf }
   | space        { add_lexeme v.buf lexbuf; buffer_json v lexbuf }
@@ -958,18 +958,18 @@ and buffer_json v = parse
 and finish_buffer_stringlit v = parse
     ( '\\' (['"' '\\' '/' 'b' 'f' 'n' 'r' 't'] | 'u' hex hex hex hex)
     | [^'"' '\\'] )* '"'
-         { Bi_outbuf.add_char v.buf '"';
+         { Buffer.add_char v.buf '"';
            add_lexeme v.buf lexbuf
          }
   | _    { long_error "Invalid string literal" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_buffer_variant v = parse
-    ':'  { Bi_outbuf.add_char v.buf ':';
+    ':'  { Buffer.add_char v.buf ':';
            buffer_json v lexbuf;
            buffer_space v lexbuf;
            buffer_gt v lexbuf }
-  | '>'  { Bi_outbuf.add_char v.buf '>' }
+  | '>'  { Buffer.add_char v.buf '>' }
   | _    { long_error "Expected ':' or '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
@@ -985,11 +985,11 @@ and buffer_space v = parse
     newline v lexbuf;
     buffer_space v lexbuf }
   | "/*"                     {
-    Bi_outbuf.add_string v.buf "/*";
+    Buffer.add_string v.buf "/*";
     finish_buffer_comment v lexbuf;
     buffer_space v lexbuf }
   | '\n'                     {
-    Bi_outbuf.add_char v.buf '\n';
+    Buffer.add_char v.buf '\n';
     newline v lexbuf;
     buffer_space v lexbuf }
   | [' ' '\t' '\r']+         {
@@ -999,52 +999,52 @@ and buffer_space v = parse
 
 and buffer_object_end v = parse
     '}'      {
-      Bi_outbuf.add_char v.buf '}';
+      Buffer.add_char v.buf '}';
       raise End_of_object }
   | ""       { () }
 
 and buffer_object_sep v = parse
-    ','      { Bi_outbuf.add_char v.buf ',' }
-  | '}'      { Bi_outbuf.add_char v.buf '}'; raise End_of_object }
+    ','      { Buffer.add_char v.buf ',' }
+  | '}'      { Buffer.add_char v.buf '}'; raise End_of_object }
   | _        { long_error "Expected ',' or '}' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_array_end v = parse
-    ']'      { Bi_outbuf.add_char v.buf ']'; raise End_of_array }
+    ']'      { Buffer.add_char v.buf ']'; raise End_of_array }
   | ""       { () }
 
 and buffer_array_sep v = parse
-    ','      { Bi_outbuf.add_char v.buf ',' }
-  | ']'      { Bi_outbuf.add_char v.buf ']'; raise End_of_array }
+    ','      { Buffer.add_char v.buf ',' }
+  | ']'      { Buffer.add_char v.buf ']'; raise End_of_array }
   | _        { long_error "Expected ',' or ']' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_tuple_end v = parse
     ')'      {
-      Bi_outbuf.add_char v.buf ')';
+      Buffer.add_char v.buf ')';
       raise End_of_tuple }
   | ""       { () }
 
 and buffer_tuple_sep v = parse
-    ','      { Bi_outbuf.add_char v.buf ',' }
-  | ')'      { Bi_outbuf.add_char v.buf ')'; raise End_of_tuple }
+    ','      { Buffer.add_char v.buf ',' }
+  | ')'      { Buffer.add_char v.buf ')'; raise End_of_tuple }
   | _        { long_error "Expected ',' or ')' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_colon v = parse
-    ':'      { Bi_outbuf.add_char v.buf ':' }
+    ':'      { Buffer.add_char v.buf ':' }
   | _        { long_error "Expected ':' but found" v lexbuf }
   | eof      { custom_error "Unexpected end of input" v lexbuf }
 
 and buffer_gt v = parse
-    '>'  { Bi_outbuf.add_char v.buf '>' }
+    '>'  { Buffer.add_char v.buf '>' }
   | _    { long_error "Expected '>' but found" v lexbuf }
   | eof  { custom_error "Unexpected end of input" v lexbuf }
 
 and finish_buffer_comment v = parse
-  | "*/" { Bi_outbuf.add_string v.buf "*/" }
+  | "*/" { Buffer.add_string v.buf "*/" }
   | eof  { long_error "Unterminated comment" v lexbuf }
-  | '\n' { Bi_outbuf.add_char v.buf '\n';
+  | '\n' { Buffer.add_char v.buf '\n';
            newline v lexbuf;
            finish_buffer_comment v lexbuf }
   | _    { add_lexeme v.buf lexbuf; finish_buffer_comment v lexbuf }
@@ -1143,30 +1143,30 @@ and junk = parse
 
   exception Finally of exn * exn
 
-  let stream_from_lexbuf v ?(fin = fun () -> ()) lexbuf =
+  let seq_from_lexbuf v ?(fin = fun () -> ()) lexbuf =
     let stream = Some true in
-    let f i =
-      try Some (from_lexbuf v ?stream lexbuf)
+    let rec f () =
+      try Seq.Cons (from_lexbuf v ?stream lexbuf, f)
       with
           End_of_input ->
             fin ();
-            None
+            Seq.Nil
         | e ->
             (try fin () with fin_e -> raise (Finally (e, fin_e)));
             raise e
     in
-    Stream.from f
+    f
 
-  let stream_from_string ?buf ?fname ?lnum s =
+  let seq_from_string ?buf ?fname ?lnum s =
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v (Lexing.from_string s)
+    seq_from_lexbuf v (Lexing.from_string s)
 
-  let stream_from_channel ?buf ?fin ?fname ?lnum ic =
+  let seq_from_channel ?buf ?fin ?fname ?lnum ic =
     let lexbuf = Lexing.from_channel ic in
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v ?fin lexbuf
+    seq_from_lexbuf v ?fin lexbuf
 
-  let stream_from_file ?buf ?fname ?lnum file =
+  let seq_from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     let fin () = close_in ic in
     let fname =
@@ -1176,29 +1176,28 @@ and junk = parse
     in
     let lexbuf = Lexing.from_channel ic in
     let v = init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf v ~fin lexbuf
+    seq_from_lexbuf v ~fin lexbuf
 
   type json_line = [ `Json of t | `Exn of exn ]
 
-  let linestream_from_channel
+  let lineseq_from_channel
       ?buf ?(fin = fun () -> ()) ?fname ?lnum:(lnum0 = 1) ic =
     let buf =
       match buf with
-          None -> Some (Bi_outbuf.create 256)
+          None -> Some (Buffer.create 256)
         | Some _ -> buf
     in
-    let f i =
+    let rec f lnum = fun () ->
       try
         let line = input_line ic in
-        let lnum = lnum0 + i in
-        Some (`Json (from_string ?buf ?fname ~lnum line))
+        Seq.Cons (`Json (from_string ?buf ?fname ~lnum line), f (lnum + 1))
       with
-          End_of_file -> fin (); None
-        | e -> Some (`Exn e)
+          End_of_file -> fin (); Seq.Nil
+        | e -> Seq.Cons (`Exn e, f (lnum + 1))
     in
-    Stream.from f
+    f lnum0
 
-  let linestream_from_file ?buf ?fname ?lnum file =
+  let lineseq_from_file ?buf ?fname ?lnum file =
     let ic = open_in file in
     let fin () = close_in ic in
     let fname =
@@ -1206,13 +1205,11 @@ and junk = parse
           None -> Some file
         | x -> x
     in
-    linestream_from_channel ?buf ~fin ?fname ?lnum ic
+    lineseq_from_channel ?buf ~fin ?fname ?lnum ic
 
   let prettify ?std s =
     pretty_to_string ?std (from_string s)
 
   let compact ?std s =
     to_string (from_string s)
-
-  let validate_json _path _value = None
 }

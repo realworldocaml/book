@@ -20,7 +20,7 @@ CAMLprim value lwt_unix_accept4(value vcloexec, value vnonblock, value vsock)
 
     union sock_addr_union addr;
     socklen_param_type addr_len;
-    int cloexec = Is_block(vcloexec) && Bool_val(Field(vcloexec, 0)) ? SOCK_CLOEXEC : 0;
+    int cloexec = Is_some(vcloexec) && Bool_val(Some_val(vcloexec)) ? SOCK_CLOEXEC : 0;
     int nonblock = Bool_val(vnonblock) ? SOCK_NONBLOCK : 0;
     addr_len = sizeof(addr);
 

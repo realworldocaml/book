@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description":
-    "Translated by atdcat from 'schema.atd'.\n\nThis is the title. Here's a code block:\n\n{{{\nthis is line 1\nthis is line 2\n}}}\n\nThis is the root object. For example, the empty object {{ {} }} is invalid.",
+  "title": "root",
+  "description": "Translated by atdcat from 'schema.atd'.\n\nThis is the title. Here's a code block:\n\n{{{\nthis is line 1\nthis is line 2\n}}}\n\nThis is the root object. For example, the empty object {{ {} }} is invalid.",
   "type": "object",
   "required": [
     "ID", "items", "aliased", "point", "kinds", "assoc1", "assoc2"
@@ -9,8 +9,7 @@
   "properties": {
     "ID": { "description": "This is the 'id' field.", "type": "string" },
     "items": {
-      "description":
-        "An example of JSON value is {{[[1, 2], [3], [4, 5, 6]]}}",
+      "description": "An example of JSON value is {{[[1, 2], [3], [4, 5, 6]]}}",
       "type": "array",
       "items": { "type": "array", "items": { "type": "integer" } }
     },
@@ -58,7 +57,8 @@
     "nullables": {
       "type": "array",
       "items": { "type": [ "integer", "null" ] }
-    }
+    },
+    "untyped_things": { "type": "array", "items": {} }
   },
   "definitions": {
     "different_kinds_of_things": {

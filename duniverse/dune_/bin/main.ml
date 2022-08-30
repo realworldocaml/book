@@ -7,6 +7,7 @@ let all : _ Term.Group.t list =
     ; External_lib_deps.command
     ; Build_cmd.build
     ; Build_cmd.runtest
+    ; Build_cmd.fmt
     ; command_alias Build_cmd.runtest "test"
     ; Clean.command
     ; Install_uninstall.install
@@ -30,7 +31,7 @@ let all : _ Term.Group.t list =
     ]
     |> List.map ~f:in_group
   in
-  let groups = [ Ocaml.group; Coq.group; Rpc.group; Internal.group ] in
+  let groups = [ Ocaml_cmd.group; Coq.group; Rpc.group; Internal.group ] in
   terms @ groups
 
 (* Short reminders for the most used and useful commands *)
@@ -91,7 +92,8 @@ let () =
     | `Error _ -> exit 1
     | _ -> exit 0
   with
-  | Scheduler.Run.Shutdown_requested -> exit 0
+  | Scheduler.Run.Shutdown.E Requested -> exit 0
+  | Scheduler.Run.Shutdown.E (Signal _) -> exit 130
   | exn ->
     let exn = Exn_with_backtrace.capture exn in
     Dune_util.Report_error.report exn;

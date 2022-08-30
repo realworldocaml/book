@@ -144,7 +144,12 @@ end
 
 (* TLS *)
 
-let tls_client ~authenticator x = `TLS (Tls.Config.client ~authenticator (), x)
+let tls_client ~host ~authenticator x =
+  let peer_name =
+    Result.to_option (Result.bind (Domain_name.of_string host) Domain_name.host)
+  in
+  `TLS (Tls.Config.client ?peer_name ~authenticator (), x)
+
 let tls_server ?authenticator x = `TLS (Tls.Config.server ?authenticator (), x)
 
 module TLS (S : S) = struct
@@ -235,9 +240,9 @@ module Endpoint (P : Mirage_clock.PCLOCK) = struct
     | `TCP (x, y) -> tcp_client x y
     | `Unix_domain_socket _ -> err_domain_sockets_not_supported "client"
     | (`Vchan_direct _ | `Vchan_domain_socket _) as x -> vchan_client x
-    | `TLS (_host, y) ->
+    | `TLS (host, y) ->
         client ~tls_authenticator y
-        >|= tls_client ~authenticator:tls_authenticator
+        >|= tls_client ~host ~authenticator:tls_authenticator
     | `Unknown s -> err_unknown s
 
   let rec server ?tls_authenticator e =

@@ -1,24 +1,26 @@
 opam-version: "2.0"
 name: "async_graphics"
-version: "0.6.0+dev"
 synopsis: "Async wrapper for the OCaml Graphics library"
 maintainer: "Leo White <leo@lpw25.net>"
 authors: ["Leo White <leo@lpw25.net>"]
 homepage: "https://github.com/lpw25/async_graphics"
 bug-reports: "https://github.com/lpw25/async_graphics/issues"
 dev-repo: "git://github.com/lpw25/async_graphics"
-license: "LGPL-2.0 with OCaml linking exception"
+license: "LGPL-2.0-only WITH OCaml-LGPL-linking-exception"
 tags: [
   "async"
   "graphics"
 ]
 depends: [
+  "ocaml"
+  "dune"
   "graphics"
-  "async" {>= "v0.9"}
-  "async_unix" {>= "v0.12"}
+  "core" {>= "v0.15"}
+  "async" {>= "v0.15"}
+  "async_unix" {>= "v0.15"}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]

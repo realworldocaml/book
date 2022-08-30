@@ -1,4 +1,4 @@
-version: "0.8"
+version: "0.9"
 opam-version: "2.0"
 maintainer:   [ "Romain Calascibetta <romain.calascibetta@gmail.com>" ]
 authors:      [ "Romain Calascibetta <romain.calascibetta@gmail.com>" ]
@@ -25,4 +25,6 @@ depends: [
   "base64"         {with-test}
   "alcotest"       {with-test}
   "crowbar"        {with-test}
+  "fmt"            {with-test & >= "0.8.7"}
+  "bechamel"       {with-test}
 ]

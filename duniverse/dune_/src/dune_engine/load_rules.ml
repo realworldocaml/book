@@ -1,4 +1,3 @@
-open! Stdune
 open Import
 open Memo.O
 module Action_builder = Action_builder0
@@ -32,7 +31,8 @@ module Loaded = struct
     }
 
   type t =
-    | Non_build of Path.Set.t
+    | Source of { files : Path.Source.Set.t }
+    | External of { files : Path.External.Set.t }
     | Build of build
     | Build_under_directory_target of
         { directory_target_ancestor : Path.Build.t }
@@ -79,20 +79,28 @@ let get_dir_triage ~dir =
   match Dpath.analyse_dir dir with
   | Source dir ->
     let+ files = Source_tree.files_of dir in
-    Dir_triage.Known (Non_build (Path.set_of_source_paths files))
-  | External _ ->
-    Memo.return
-    @@ Dir_triage.Known
-         (Non_build
-            (match Path.Untracked.readdir_unsorted dir with
-            | Error (Unix.ENOENT, _, _) -> Path.Set.empty
-            | Error unix_error ->
-              User_warning.emit
-                [ Pp.textf "Unable to read %s" (Path.to_string_maybe_quoted dir)
-                ; Unix_error.Detailed.pp ~prefix:"Reason: " unix_error
-                ];
-              Path.Set.empty
-            | Ok filenames -> Path.Set.of_listing ~dir ~filenames))
+    Dir_triage.Known (Source { files })
+  | External dir_ext ->
+    let+ files =
+      Fs_memo.dir_contents dir >>| function
+      | Error (Unix.ENOENT, _, _) -> Path.External.Set.empty
+      | Error unix_error ->
+        User_warning.emit
+          [ Pp.textf "Unable to read %s" (Path.to_string_maybe_quoted dir)
+          ; Unix_error.Detailed.pp ~prefix:"Reason: " unix_error
+          ];
+        Path.External.Set.empty
+      | Ok filenames ->
+        let filenames =
+          Fs_cache.Dir_contents.to_list filenames
+          |> List.filter_map ~f:(fun (name, kind) ->
+                 match kind with
+                 | Unix.S_DIR -> None
+                 | _ -> Some name)
+        in
+        Path.External.Set.of_listing ~dir:dir_ext ~filenames
+    in
+    Dir_triage.Known (External { files })
   | Build (Regular Root) ->
     let+ contexts = Memo.Lazy.force (Build_config.get ()).contexts in
     let allowed_subdirs =
@@ -181,16 +189,16 @@ let report_rule_conflict fn (rule' : Rule.t) (rule : Rule.t) =
         ]
       | _ -> [])
 
-let remove_old_artifacts ~dir ~rules_here ~(subdirs_to_keep : Subdir_set.t) =
+let remove_old_artifacts ~dir ~(rules_here : Loaded.rules_here)
+    ~(subdirs_to_keep : Subdir_set.t) =
   match Path.Untracked.readdir_unsorted_with_kinds (Path.build dir) with
-  | exception _ -> ()
   | Error _ -> ()
   | Ok files ->
     List.iter files ~f:(fun (fn, kind) ->
         let path = Path.Build.relative dir fn in
         let path_is_a_target =
-          (* CR-someday amokhov: Also check directory targets. *)
-          Path.Build.Map.mem rules_here.Loaded.by_file_targets path
+          Path.Build.Map.mem rules_here.by_file_targets path
+          || Path.Build.Map.mem rules_here.by_directory_targets path
         in
         if not path_is_a_target then
           match kind with
@@ -206,7 +214,6 @@ let remove_old_artifacts ~dir ~rules_here ~(subdirs_to_keep : Subdir_set.t) =
 let remove_old_sub_dirs_in_anonymous_actions_dir ~dir
     ~(subdirs_to_keep : Subdir_set.t) =
   match Path.Untracked.readdir_unsorted_with_kinds (Path.build dir) with
-  | exception _ -> ()
   | Error _ -> ()
   | Ok files ->
     List.iter files ~f:(fun (fn, kind) ->
@@ -271,7 +278,8 @@ let no_rule_found ~loc fn =
     Code_error.raise ?loc "Build_system.no_rule_found got anonymous action path"
       [ ("fn", Path.Build.to_dyn fn) ]
 
-let source_file_digest path =
+let source_or_external_file_digest path =
+  assert (not (Path.is_in_build_dir path));
   let report_user_error details =
     let+ loc = Current_rule_loc.get () in
     User_error.raise ?loc
@@ -297,7 +305,7 @@ let eval_source_file : type a. a Action_builder.eval_mode -> Path.t -> a Memo.t
   match mode with
   | Lazy -> Memo.return ()
   | Eager ->
-    let+ d = source_file_digest path in
+    let+ d = source_or_external_file_digest path in
     Dep.Fact.file path d
 
 module rec Load_rules : sig
@@ -366,7 +374,7 @@ end = struct
 
   let lookup_alias alias =
     load_dir ~dir:(Path.build (Alias.dir alias)) >>| function
-    | Non_build _ ->
+    | Source _ | External _ ->
       Code_error.raise "Alias in a non-build dir"
         [ ("alias", Alias.to_dyn alias) ]
     | Build { aliases; _ } -> Alias.Name.Map.find aliases (Alias.name alias)
@@ -476,7 +484,7 @@ end = struct
         Restricted
           (Memo.Lazy.create ~name:"allowed_dirs" (fun () ->
                load_dir ~dir:(Path.build dir) >>| function
-               | Non_build _ -> Dir_set.just_the_root
+               | External _ | Source _ -> Dir_set.just_the_root
                | Build { allowed_subdirs; _ } ->
                  Dir_set.descend allowed_subdirs subdir
                | Build_under_directory_target _ -> Dir_set.empty))
@@ -622,6 +630,37 @@ end = struct
             && Subdir_set.mem build_dir_only_sub_dirs name
           then report_rule_internal_dir_conflict name loc);
       let* rules_produced = Memo.Lazy.force rules in
+      let () =
+        let real_directory_targets = Rules.directory_targets rules_produced in
+        if
+          not
+            (Path.Build.Map.equal real_directory_targets directory_targets
+               ~equal:(fun _ _ ->
+                 (* The locations should match if the declration knows which
+                    rule will generate the directory, but it it's not necessary
+                    as the rule's actual location has higher priority. *)
+                 true))
+        then
+          let mismatched_directories =
+            let error message loc =
+              Dyn.record
+                [ ("message", Dyn.string message); ("loc", Loc.to_dyn_hum loc) ]
+            in
+            Path.Build.Map.merge real_directory_targets directory_targets
+              ~f:(fun _ generated declared ->
+                match (generated, declared) with
+                | None, None | Some _, Some _ -> None
+                | Some loc, None -> Some (error "not declared" loc)
+                | None, Some loc -> Some (error "not generated" loc))
+          in
+          Code_error.raise
+            "gen_rules returned a set of directory targets that doesn't match \
+             the set of directory targets from returned rules"
+            [ ("dir", Path.Build.to_dyn dir)
+            ; ( "mismatched_directories"
+              , Path.Build.Map.to_dyn Fun.id mismatched_directories )
+            ]
+      in
       let rules =
         let dir = Path.build dir in
         Rules.find rules_produced dir
@@ -664,9 +703,8 @@ end = struct
                 | None -> targets.files
                 | Some pred ->
                   let is_promoted file =
-                    Predicate_lang.Glob.exec pred
+                    Predicate.test pred
                       (Path.reach (Path.build file) ~from:(Path.build dir))
-                      ~standard:Predicate_lang.any
                   in
                   Path.Build.Set.filter targets.files ~f:is_promoted
               in
@@ -775,20 +813,6 @@ end = struct
       in
       let subdirs_to_keep = Subdir_set.of_dir_set descendants_to_keep in
       let rules_here = compile_rules ~dir ~source_dirs rules in
-      let real_directory_targets =
-        Path.Build.Set.of_keys rules_here.by_directory_targets
-      in
-      let directory_targets = Path.Build.Set.of_keys directory_targets in
-      if not (Path.Build.Set.equal directory_targets real_directory_targets)
-      then
-        Code_error.raise
-          "gen_rules returned a set of directory targets that doesn't match \
-           the set of directory targets from returned rules"
-          [ ("dir", Path.Build.to_dyn dir)
-          ; ("directory_targets", Path.Build.Set.to_dyn directory_targets)
-          ; ( "real_directory_targets"
-            , Path.Build.Set.to_dyn real_directory_targets )
-          ];
       remove_old_artifacts ~dir ~rules_here ~subdirs_to_keep;
       remove_old_sub_dirs_in_anonymous_actions_dir
         ~dir:
@@ -833,7 +857,7 @@ include Load_rules
 let get_rule_internal path =
   let dir = Path.Build.parent_exn path in
   load_dir ~dir:(Path.build dir) >>= function
-  | Non_build _ -> assert false
+  | External _ | Source _ -> assert false
   | Build { rules_here; _ } -> (
     match Path.Build.Map.find rules_here.by_file_targets path with
     | Some _ as rule -> Memo.return rule
@@ -842,7 +866,7 @@ let get_rule_internal path =
   | Build_under_directory_target { directory_target_ancestor } -> (
     load_dir ~dir:(Path.build (Path.Build.parent_exn directory_target_ancestor))
     >>= function
-    | Non_build _ | Build_under_directory_target _ -> assert false
+    | External _ | Source _ | Build_under_directory_target _ -> assert false
     | Build { rules_here; _ } ->
       Memo.return
         (Path.Build.Map.find rules_here.by_directory_targets
@@ -867,7 +891,7 @@ let get_rule_or_source path =
       let* loc = Current_rule_loc.get () in
       no_rule_found ~loc path
   else
-    let+ d = source_file_digest path in
+    let+ d = source_or_external_file_digest path in
     Source d
 
 type target_type =
@@ -898,10 +922,10 @@ let all_direct_targets () =
           load_dir
             ~dir:
               (Path.build
-                 (Path.Build.append_source ctx.Build_context.build_dir
+                 (Path.Build.append_source ctx.build_dir
                     (Source_tree.Dir.path dir)))
           >>| function
-          | Non_build _ -> All_targets.empty
+          | External _ | Source _ -> All_targets.empty
           | Build { rules_here; _ } ->
             All_targets.combine
               (Path.Build.Map.map rules_here.by_file_targets ~f:(fun _ -> File))
@@ -929,7 +953,7 @@ let is_target file =
   | None -> Memo.return No
   | Some dir -> (
     load_dir ~dir >>| function
-    | Non_build _ -> No
+    | External _ | Source _ -> No
     | Build { rules_here; _ } -> (
       let file = Path.as_in_build_dir_exn file in
       match Path.Build.Map.find rules_here.by_file_targets file with

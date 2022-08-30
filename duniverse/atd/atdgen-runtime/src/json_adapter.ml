@@ -1,5 +1,27 @@
 (* Json adapters. See .mli. *)
 
+let normalize_type_field type_field_name (x : Yojson.Safe.t) : Yojson.Safe.t =
+  match x with
+  | `Assoc fields ->
+      (match List.assoc type_field_name fields with
+       | `String type_ -> `List [ `String type_; x ]
+       | exception Not_found -> x
+       | _ -> x (* malformed *)
+      )
+  | `String type_ as x -> x
+  | malformed -> malformed
+
+let restore_type_field type_field_name (x : Yojson.Safe.t) : Yojson.Safe.t =
+  match x with
+  | `List [ `String type_; `Assoc fields ] ->
+      let fields =
+        (type_field_name, `String type_) ::
+        List.filter (fun (k, v) -> k <> type_field_name) fields
+      in
+      `Assoc fields
+  | `String type_ as x -> x
+  | malformed -> malformed
+
 module type S = sig
   val normalize : Yojson.Safe.t -> Yojson.Safe.t
   val restore : Yojson.Safe.t -> Yojson.Safe.t
@@ -11,31 +33,9 @@ module Type_field = struct
   end
 
   module Make (Param : Param) : S = struct
-    open Yojson.Safe
+    let normalize = normalize_type_field Param.type_field_name
 
-    open Param
-
-    let normalize (x : t) : t =
-      match x with
-      | `Assoc fields ->
-          (match List.assoc type_field_name fields with
-           | `String type_ -> `List [ `String type_; x ]
-           | exception Not_found -> x
-           | _ -> x (* malformed *)
-          )
-      | `String type_ as x -> x
-      | malformed -> malformed
-
-    let restore (x : t) : t =
-      match x with
-      | `List [ `String type_; `Assoc fields ] ->
-          let fields =
-            (type_field_name, `String type_) ::
-            List.filter (fun (k, v) -> k <> type_field_name) fields
-          in
-          `Assoc fields
-      | `String type_ as x -> x
-      | malformed -> malformed
+    let restore = restore_type_field Param.type_field_name
   end
 
   module Default_param : Param = struct

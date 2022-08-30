@@ -3,6 +3,11 @@
  (modules check linear_algebra benchmark fmt unsafe)
  (libraries eqaf base64 clock))
 
+(executable
+ (name bench)
+ (modules bench)
+ (libraries bechamel eqaf base64))
+
 (rule
  (copy %{read:../config/which-unsafe-file} unsafe.ml))
 

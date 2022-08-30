@@ -1,0 +1,6 @@
+(executables
+ (names extender deriver)
+ (libraries ppxlib))
+
+(cram
+ (deps extender.exe deriver.exe))

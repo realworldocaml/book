@@ -10,7 +10,7 @@ let () = Jbuild_plugin.V1.send @@ {|
 
 (library
  (public_name lwt_luv)
- (libraries luv lwt lwt.unix result)
+ (libraries luv lwt lwt.unix)
  |} ^ preprocess ^ {|
 )
 |}

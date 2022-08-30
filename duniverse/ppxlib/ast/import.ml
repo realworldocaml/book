@@ -4,7 +4,7 @@
    It must be opened in all modules, especially the ones coming from the compiler.
 *)
 
-module Js = Versions.OCaml_414
+module Js = Versions.OCaml_500
 module Ocaml = Versions.OCaml_current
 
 module Select_ast (Ocaml : Versions.OCaml_version) = struct

@@ -5,6 +5,25 @@ type out_format =
   | Ocaml of string (* output file name [why?] *)
   | Jsonschema of string (* root type *)
 
+(* These string identifiers aren't standard, unlike the full URLs
+   such as "https://json-schema.org/draft/2020-12" that
+   are too cumbersome to use on the command line. *)
+let available_jsonschema_versions = [
+  "draft-2019-09", Atd.Jsonschema.Draft_2019_09;
+  "draft-2020-12", Atd.Jsonschema.Draft_2020_12;
+]
+
+let string_of_jsonschema_version x =
+  match List.find_opt (fun (s, x0) -> x = x0) available_jsonschema_versions
+  with
+  | Some (s, _) -> s
+  | None -> assert false
+
+let jsonschema_version_of_string s =
+  match List.assoc_opt s available_jsonschema_versions with
+  | Some x -> x
+  | None -> failwith (sprintf "Invalid JSON Schema version identifier: %S" s)
+
 let html_of_doc loc s =
   let doc = Atd.Doc.parse_text loc s in
   Atd.Doc.html_of_doc doc
@@ -73,12 +92,18 @@ let parse
   let m = first_head, List.flatten bodies in
   strip strip_all strip_sections m
 
-let print ~src_name ~html_doc ~out_format ~out_channel:oc ast =
+let print
+    ~xprop ~jsonschema_version
+    ~src_name ~html_doc ~out_format ~out_channel:oc ast =
   let f =
     match out_format with
     | Atd -> print_atd ~html_doc
     | Ocaml name -> print_ml ~name
-    | Jsonschema root_type -> Atd.Jsonschema.print ~src_name ~root_type
+    | Jsonschema root_type ->
+        Atd.Jsonschema.print
+          ~xprop
+          ~version:jsonschema_version
+          ~src_name ~root_type
   in
   f oc ast
 
@@ -94,6 +119,8 @@ let () =
   let strip_sections = ref [] in
   let strip_all = ref false in
   let out_format = ref Atd in
+  let jsonschema_version = ref Atd.Jsonschema.default_version in
+  let jsonschema_allow_additional_properties = ref true in
   let html_doc = ref false in
   let input_files = ref [] in
   let output_file = ref None in
@@ -120,19 +147,35 @@ let () =
                       inherit_fields := true;
                       inherit_variants := true),
     "
-          expand all `inherit' statements";
+          expand all 'inherit' statements";
 
     "-if", Arg.Set inherit_fields,
     "
-          expand `inherit' statements in records";
+          expand 'inherit' statements in records";
 
     "-iv", Arg.Set inherit_variants,
     "
-          expand `inherit' statements in sum types";
+          expand 'inherit' statements in sum types";
 
     "-jsonschema", Arg.String (fun s -> out_format := Jsonschema s),
     "<root type name>
           translate the ATD file to JSON Schema.";
+
+    "-jsonschema-no-additional-properties",
+    Arg.Unit (fun () -> jsonschema_allow_additional_properties := false),
+    "
+          emit a JSON Schema that doesn't tolerate extra fields on JSON
+          objects.";
+
+    "-jsonschema-version",
+    Arg.String (fun s ->
+      jsonschema_version := jsonschema_version_of_string s
+    ),
+    sprintf "{ %s }
+          specify which version of the JSON Schema standard to target.
+          Default: latest supported version, which is currently '%s'."
+      (available_jsonschema_versions |> List.map fst |> String.concat " | ")
+      (string_of_jsonschema_version Atd.Jsonschema.default_version);
 
     "-ml", Arg.String (fun s -> out_format := Ocaml s),
     "<name>
@@ -199,14 +242,17 @@ let () =
       | _ -> "multiple files"
     in
     print
+      ~jsonschema_version: !jsonschema_version
+      ~xprop: !jsonschema_allow_additional_properties
       ~src_name
       ~html_doc: !html_doc
       ~out_format: !out_format
       ~out_channel ast;
     close_out out_channel
   with
-      Atd.Ast.Atd_error s ->
-        flush stdout;
-        eprintf "%s\n%!" s;
-        exit 1
-    | e -> raise e
+  | Atd.Ast.Atd_error msg
+  | Failure msg ->
+      flush stdout;
+      eprintf "%s\n%!" msg;
+      exit 1
+  | e -> raise e

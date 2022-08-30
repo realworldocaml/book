@@ -51,6 +51,26 @@ let apply_rewriters : Parsetree.toplevel_phrase -> Parsetree.toplevel_phrase =
       Ptop_def (Ppxlib.Selected_ast.to_ocaml Structure s')
 
 let main () =
+  let rec map_tree = function
+    | Outcometree.Oval_constr (name, params) ->
+        Outcometree.Oval_constr (name, List.map ~f:map_tree params)
+    | Oval_variant (name, Some param) ->
+        Oval_variant (name, Some (map_tree param))
+    | Oval_string (s, maxlen, kind) ->
+        Oval_string (s, (if maxlen < 8 then 8 else maxlen), kind)
+    | Oval_tuple tl -> Oval_tuple (List.map ~f:map_tree tl)
+    | Oval_array tl -> Oval_array (List.map ~f:map_tree tl)
+    | Oval_list tl -> Oval_list (List.map ~f:map_tree tl)
+    | Oval_record fel ->
+        Oval_record
+          (List.map ~f:(fun (name, tree) -> (name, map_tree tree)) fel)
+    | tree -> tree
+  in
+  let print_out_value = !Toploop.print_out_value in
+  (* Achieve 4.14 printing behaviour, as introduced in
+     https://github.com/ocaml/ocaml/pull/10565 *)
+  (Toploop.print_out_value :=
+     fun ppf tree -> print_out_value ppf (map_tree tree));
   run_expect_test Sys.argv.(1) ~f:(fun file_contents lexbuf ->
       let chunks = Expect_lexer.split_file ~file_contents lexbuf in
 
@@ -87,7 +107,8 @@ let main () =
                 try
                   let phr = apply_rewriters phr in
                   if !Clflags.dump_source then
-                    Format.fprintf ppf "%a@?" Pprintast.top_phrase phr;
+                    Format.fprintf ppf "%a@?" Ppxlib.Pprintast.top_phrase
+                      (Ppxlib.Selected_ast.Of_ocaml.copy_toplevel_phrase phr);
                   ignore (Toploop.execute_phrase true ppf phr : bool)
                 with exn -> Location.report_exception ppf exn));
           Format.fprintf ppf "@?|}]@.");

@@ -45,10 +45,8 @@ val create : unit -> 'a t * ('a option -> unit)
 (** [create ()] returns a new stream and a push function.
 
     To notify the stream's consumer of errors, either use a separate
-    communication channel, or use a
-    {{:https://ocaml.org/api/Stdlib.html#TYPEresult}
-    [result]} stream. There is no way to push an exception into a
-    push-stream. *)
+    communication channel, or use a {!Stdlib.result} stream. There is
+    no way to push an exception into a push-stream. *)
 
 val create_with_reference : unit -> 'a t * ('a option -> unit) * ('b -> unit)
 (** [create_with_reference ()] returns a new stream and a push
@@ -78,22 +76,22 @@ class type ['a] bounded_push = object
   (** Change the size of the stream queue. Note that the new size
       can smaller than the current stream queue size.
 
-      It raises [Invalid_argument] if [size < 0]. *)
+      It raises {!Stdlib.Invalid_argument} if [size < 0]. *)
 
   method push : 'a -> unit Lwt.t
   (** Pushes a new element to the stream. If the stream is full then
       it will block until one element is consumed. If another thread
-      is already blocked on {!push}, it raises {!Full}. *)
+      is already blocked on [push], it raises {!Lwt_stream.Full}. *)
 
   method close : unit
-  (** Closes the stream. Any thread currently blocked on {!push}
-      fails with {!Closed}. *)
+  (** Closes the stream. Any thread currently blocked on
+      {!Lwt_stream.bounded_push.push} fails with {!Lwt_stream.Closed}. *)
 
   method count : int
   (** Number of elements in the stream queue. *)
 
   method blocked : bool
-  (** Is a thread is blocked on {!push} ? *)
+  (** Is a thread is blocked on {!Lwt_stream.bounded_push.push} ? *)
 
   method closed : bool
   (** Is the stream closed ? *)
@@ -238,11 +236,7 @@ val junk_while_s : ('a -> bool Lwt.t) -> 'a t -> unit Lwt.t
 
 val junk_old : 'a t -> unit Lwt.t
 (** [junk_old st] removes all elements that are ready to be read
-    without yielding from [st].
-
-    For example, the [read_password] function of [Lwt_read_line]
-    uses it to flush keys previously typed by the user.
-*)
+    without yielding from [st]. *)
 
 val get_available : 'a t -> 'a list
 (** [get_available st] returns all available elements of [l] without
@@ -397,7 +391,11 @@ val hexdump : char t -> string t
     Basically, here is a simple implementation of [hexdump -C]:
 
     {[
-      let () = Lwt_main.run (Lwt_io.write_lines Lwt_io.stdout (Lwt_stream.hexdump (Lwt_io.read_lines Lwt_io.stdin)))
+      let () = Lwt_main.run begin
+          Lwt_io.write_lines
+            Lwt_io.stdout
+            (Lwt_stream.hexdump (Lwt_io.read_lines Lwt_io.stdin))
+        end
     ]}
 *)
 

@@ -37,8 +37,10 @@ failure
 
 #define test_multiline \
 "abc\
+ xyz
  def" \
 (* 123 \
+   789
    456 *)
 test_multiline
 
@@ -73,7 +75,7 @@ obj
 '  (* lone single quote *)
 
 #define one 1
-one is not 1
+one = 1
 
 #undef x
 #define x #

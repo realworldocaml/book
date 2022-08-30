@@ -1,0 +1,37 @@
+  
+# 5 "version.cppo"
+  Cape buffalos
+
+  
+# 10 "version.cppo"
+  onion rings
+
+# 16 "version.cppo"
+major: 
+# 16 "version.cppo"
+        123 
+# 17 "version.cppo"
+minor: 
+# 17 "version.cppo"
+        05 
+# 18 "version.cppo"
+patch: 
+# 18 "version.cppo"
+        2 
+
+  
+# 21 "version.cppo"
+  prerelease: 
+# 21 "version.cppo"
+               alpha.1 
+
+  
+# 27 "version.cppo"
+  build: 
+# 27 "version.cppo"
+          foo-2.1 
+
+# 32 "version.cppo"
+Coq: 
+# 32 "version.cppo"
+      (8, 13, 0) 

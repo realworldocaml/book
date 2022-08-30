@@ -1,3 +1,8 @@
+v6.1.1 2022-07-24
+-----------------
+
+- ppx_cstruct: remove superfluous stdlib-shims dependency (@hannesm #300)
+
 v6.1.0 2022-03-29
 -----------------
 

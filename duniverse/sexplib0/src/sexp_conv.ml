@@ -1,5 +1,4 @@
 (* Utility Module for S-expression Conversions *)
-let polymorphic_compare = compare
 
 open StdLabels
 open MoreLabels
@@ -82,25 +81,6 @@ module Exn_converter = struct
 
   (* Fast and automatic exception registration *)
 
-  module Int = struct
-    type t = int
-
-    let compare t1 t2 = polymorphic_compare (t1 : int) t2
-  end
-
-  module Exn_ids = Map.Make (Int)
-
-  module Obj = struct
-    module Extension_constructor = struct
-      [@@@ocaml.warning "-3"]
-
-      type t = extension_constructor
-
-      let id = Obj.extension_id
-      let of_val = Obj.extension_constructor
-    end
-  end
-
   module Registration = struct
     type t =
       { sexp_of_exn : exn -> Sexp.t
@@ -109,73 +89,33 @@ module Exn_converter = struct
       }
   end
 
-  let exn_id_map
-    : (Obj.Extension_constructor.t, Registration.t) Ephemeron.K1.t Exn_ids.t ref
-    =
-    ref Exn_ids.empty
-  ;;
+  module Exn_table = Ephemeron.K1.Make (struct
+      type t = extension_constructor
 
-  (* [Obj.extension_id] works on both the exception itself, and the extension slot of the
-     exception. *)
-  let rec clean_up_handler (slot : Obj.Extension_constructor.t) =
-    let id = Obj.Extension_constructor.id slot in
-    let old_exn_id_map = !exn_id_map in
-    let new_exn_id_map = Exn_ids.remove id old_exn_id_map in
-    (* This trick avoids mutexes and should be fairly efficient *)
-    if !exn_id_map != old_exn_id_map
-    then clean_up_handler slot
-    else exn_id_map := new_exn_id_map
-  ;;
+      let equal = ( == )
+      let hash = Obj.Extension_constructor.id
+    end)
+
+  let the_exn_table : Registration.t Exn_table.t = Exn_table.create 17
 
   (* Ephemerons are used so that [sexp_of_exn] closure don't keep the
      extension_constructor live. *)
-  let add ?(printexc = true) ?(finalise = true) extension_constructor sexp_of_exn =
-    let id = Obj.Extension_constructor.id extension_constructor in
-    let rec loop () =
-      let old_exn_id_map = !exn_id_map in
-      let ephe = Ephemeron.K1.create () in
-      Ephemeron.K1.set_data ephe ({ sexp_of_exn; printexc } : Registration.t);
-      Ephemeron.K1.set_key ephe extension_constructor;
-      let new_exn_id_map = Exn_ids.add old_exn_id_map ~key:id ~data:ephe in
-      (* This trick avoids mutexes and should be fairly efficient *)
-      if !exn_id_map != old_exn_id_map
-      then loop ()
-      else (
-        exn_id_map := new_exn_id_map;
-        if finalise
-        then (
-          try Gc.finalise clean_up_handler extension_constructor with
-          | Invalid_argument _ ->
-            (* Pre-allocated extension constructors cannot be finalised *)
-            ()))
-    in
-    loop ()
-  ;;
-
-  let add_auto ?finalise exn sexp_of_exn =
-    add ?finalise (Obj.Extension_constructor.of_val exn) sexp_of_exn
+  let add ?(printexc = true) ?finalise:_ extension_constructor sexp_of_exn =
+    Exn_table.add the_exn_table extension_constructor { sexp_of_exn; printexc }
   ;;
 
   let find_auto ~for_printexc exn =
-    let id = Obj.Extension_constructor.id (Obj.Extension_constructor.of_val exn) in
-    match Exn_ids.find id !exn_id_map with
-    | exception Not_found -> None
-    | ephe ->
-      (match Ephemeron.K1.get_data ephe with
-       | None -> None
-       | Some { sexp_of_exn; printexc } ->
-         (match for_printexc, printexc with
-          | false, _ | _, true -> Some (sexp_of_exn exn)
-          | true, false -> None))
+    let extension_constructor = Obj.Extension_constructor.of_val exn in
+    match Exn_table.find_opt the_exn_table extension_constructor with
+    | None -> None
+    | Some { sexp_of_exn; printexc } ->
+      (match for_printexc, printexc with
+       | false, _ | _, true -> Some (sexp_of_exn exn)
+       | true, false -> None)
   ;;
 
   module For_unit_tests_only = struct
-    let size () =
-      Exn_ids.fold !exn_id_map ~init:0 ~f:(fun ~key:_ ~data:ephe acc ->
-        match Ephemeron.K1.get_data ephe with
-        | None -> acc
-        | Some _ -> acc + 1)
-    ;;
+    let size () = (Exn_table.stats_alive the_exn_table).num_bindings
   end
 end
 
@@ -451,14 +391,6 @@ let () =
     ; ( [%extension_constructor Stack.Empty]
       , function
         | Stack.Empty -> Atom "Stack.Empty"
-        | _ -> assert false )
-    ; ( [%extension_constructor Stream.Failure]
-      , function
-        | Stream.Failure -> Atom "Stream.Failure"
-        | _ -> assert false )
-    ; ( [%extension_constructor Stream.Error]
-      , function
-        | Stream.Error arg -> List [ Atom "Stream.Error"; Atom arg ]
         | _ -> assert false )
     ; ( [%extension_constructor Sys.Break]
       , function

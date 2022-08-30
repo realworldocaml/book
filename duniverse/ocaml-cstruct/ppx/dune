@@ -3,7 +3,7 @@
  (public_name ppx_cstruct)
  (kind ppx_rewriter)
  (wrapped false)
- (ppx_runtime_libraries cstruct stdlib-shims)
+ (ppx_runtime_libraries cstruct)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries sexplib ppxlib stdlib-shims))
+ (libraries sexplib ppxlib))

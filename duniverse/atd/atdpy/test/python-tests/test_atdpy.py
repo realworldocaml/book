@@ -80,6 +80,7 @@ def test_everything_to_json() -> None:
             "h": 8,
         },
         nullables=[12, None, 34],
+        untyped_things=[[["hello"]], {}, None, 123],
     )
     a_str = a_obj.to_json_string(indent=2)
     print(a_str)
@@ -158,6 +159,16 @@ def test_everything_to_json() -> None:
     null,
     34
   ],
+  "untyped_things": [
+    [
+      [
+        "hello"
+      ]
+    ],
+    {},
+    null,
+    123
+  ],
   "answer": 42
 }"""
     b_obj = e.Root.from_json_string(a_str)
@@ -183,6 +194,35 @@ def test_pair() -> None:
                 "incompatible JSON value where type "
                 "'array of length 2' was expected: '[1, 2, 3]'"
             )
+
+
+def test_recursive_class() -> None:
+    child1 = e.RecursiveClass(id=1, flag=True, children=[])
+    child2 = e.RecursiveClass(id=2, flag=True, children=[])
+    a_obj = e.RecursiveClass(id=0, flag=False, children=[child1, child2])
+    a_str = a_obj.to_json_string(indent=2)
+
+    b_str = """{
+  "id": 0,
+  "flag": false,
+  "children": [
+    {
+      "id": 1,
+      "flag": true,
+      "children": []
+    },
+    {
+      "id": 2,
+      "flag": true,
+      "children": []
+    }
+  ]
+}"""
+    b_obj = e.RecursiveClass.from_json_string(a_str)
+    b_str2 = b_obj.to_json_string(indent=2)
+
+    assert b_str == b_str2
+    assert b_str2 == a_str
 
 
 # print updated json

@@ -600,7 +600,7 @@ let suite = suite "lwt_bytes" [
     test "read: buffer retention" ~sequential:true begin fun () ->
       let buffer = Lwt_bytes.create 3 in
 
-      let read_fd, write_fd = Lwt_unix.pipe () in
+      let read_fd, write_fd = Lwt_unix.pipe ~cloexec:true () in
       Lwt_unix.set_blocking read_fd true;
 
       Lwt_unix.write_string write_fd "foo" 0 3 >>= fun _ ->
@@ -637,7 +637,7 @@ let suite = suite "lwt_bytes" [
     test "write: buffer retention" ~sequential:true begin fun () ->
       let buffer = Lwt_bytes.create 3 in
 
-      let read_fd, write_fd = Lwt_unix.pipe () in
+      let read_fd, write_fd = Lwt_unix.pipe ~cloexec:true () in
       Lwt_unix.set_blocking write_fd true;
 
       let retained = Lwt_unix.retained buffer in
@@ -774,7 +774,7 @@ let suite = suite "lwt_bytes" [
     end;
 
     test "page_size" begin fun () ->
-      let sizes = [4096; 65536] in
+      let sizes = [4096; 16384; 65536] in
       Lwt.return (List.mem Lwt_bytes.page_size sizes)
     end;
 

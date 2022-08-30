@@ -16,7 +16,6 @@
 */
 
 /* Caml headers. */
-#define CAML_NAME_SPACE
 #include <lwt_unix.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>
@@ -50,7 +49,7 @@ static int access_permission_table[] = {
 static int int_of_access_permissions(value list)
 {
   int result = 0;
-  while (Is_block(list)) {
+  while (list != Val_emptylist) {
     result |= access_permission_table[Int_val(Field(list, 0))];
     list = Field(list, 1);
   };

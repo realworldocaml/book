@@ -1,3 +1,9 @@
+### v0.9 2022-07-24 Paris (France)
+
+- Add support of OCaml 5.00 (@kit-ty-kate, #37)
+- Add support for current-bench and fix bad r² for unequal strings (@Zined-Ada, @art-w, #38)
+- Add benchmark with `bechamel` (@Zineb-Ada, @art-w, #38)
+
 ### v0.8 2021-08-06 Paris (France)
 
 - Fix the check tool on 4.11.0 (@dinosaure, @cfcs, @stedolan, #30)

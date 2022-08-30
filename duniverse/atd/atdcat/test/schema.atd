@@ -35,6 +35,7 @@ type root
   assoc2: (string * int) list <json repr="object">;
   ~options: int option list;
   ~nullables: int nullable list;
+  ~untyped_things: abstract list;
 }
 
 type alias = int list

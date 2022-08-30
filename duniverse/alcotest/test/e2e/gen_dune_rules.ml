@@ -61,12 +61,12 @@ let example_rule_stanza ~js ~expect_failure filename =
   let base = chop_extension filename in
   let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let accepted_exit_codes =
-    Fmt.str "(or %s %d)"
+    Fmt.str "(or %s %d %d)"
       (if expect_failure then
        (* 1 = failing test, 2 = failed assertion outside runner *)
        "1 2"
       else "0")
-      Cmdliner.Term.exit_status_internal_error
+      Cmdliner.Cmd.Exit.cli_error Cmdliner.Cmd.Exit.internal_error
   in
   (* Run Alcotest to get *.actual, then pass through the strip_randomness
      sanitiser to get *.processed. *)
@@ -154,9 +154,8 @@ let expect_failure =
   in
   Arg.(value & flag doc)
 
-let term =
-  Term.
-    ( const main $ package $ expect_failure $ libraries $ js,
-      info ~version:"1.5.0" "gen_dune_rules" )
+let cmd =
+  let info = Cmd.info ~version:"1.5.0-29-g6be328d" "gen_dune_rules" in
+  Cmd.v info Term.(const main $ package $ expect_failure $ libraries $ js)
 
-let () = Term.(exit @@ eval term)
+let () = exit @@ Cmd.eval cmd

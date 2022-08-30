@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "Helpers for using Domainslib with Lwt"
 
-version: "0.1.0"
+version: "0.2.0"
 license: "MIT"
 homepage: "https://github.com/ocsigen/lwt"
 doc: "https://ocsigen.org/lwt/dev/api/Lwt_domain"
@@ -19,8 +19,9 @@ dev-repo: "git+https://github.com/ocsigen/lwt.git"
 depends: [
   "dune" {>= "1.8.0"}
   "lwt" {>= "3.0.0"}
-  "ocaml"
+  "ocaml" {>= "4.08"}
   "domainslib" {>= "0.3.2"}
+  "base-domains"
 ]
 
 build: [

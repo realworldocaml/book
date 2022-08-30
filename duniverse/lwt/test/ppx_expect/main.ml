@@ -67,10 +67,7 @@ let () =
     |> List.map Filename.chop_extension
   in
   let only_if () =
-    Sys.cygwin = false && Sys.win32 = false &&
-    (* 4.02.3 prints file paths differently *)
-    Scanf.sscanf Sys.ocaml_version "%u.%u"
-      (fun major minor -> (major, minor) >= (4, 4))
+    Sys.cygwin = false && Sys.win32 = false
   in
   let suite = Test.suite "ppx_expect" (
     List.map (fun test_case ->

@@ -1,8 +1,8 @@
-(lang dune 2.9)
+(lang dune 3.2)
 (name easy-format)
-(version 1.3.3)
+(version 1.3.4)
 
-(source (github mjambon/easy-format))
+(source (github ocaml-community/easy-format))
 (generate_opam_files true)
 (license "BSD-3-Clause")
 (maintainers "martin@mjambon.com" "rudi.grinberg@gmail.com")
@@ -32,4 +32,4 @@ labelled with something like \"int main\", \"let x =\" or \"x:\".")
  (name easy-format)
  (depends
   (dune (>= 1.10))
-  (ocaml (>= "4.02.3"))))
+  (ocaml (>= 4.08))))

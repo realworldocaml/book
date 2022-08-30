@@ -1,0 +1,41 @@
+(library
+  (name stream_stdlib)
+  (flags :standard -w -3)
+  (modules stream_stdlib)
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(library
+  (name stream_camlp_streams)
+  (libraries camlp-streams)
+  (modules stream_camlp_streams))
+
+(executable
+  (name equality)
+  (libraries stream_stdlib stream_camlp_streams)
+  (modules equality)
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(rule
+  (action (with-stdout-to equality.output (run ./equality.exe)))
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(rule
+  (alias runtest)
+  (action (diff equality.expected equality.output))
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(executable
+  (name linking)
+  (libraries camlp-streams stream_stdlib)
+  (modules linking)
+  (flags :standard -w -3)
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(rule
+  (action (with-stdout-to issue4.output (run ./linking.exe)))
+  (enabled_if (< %{ocaml_version} 5.0)))
+
+(rule
+  (alias runtest)
+  (action (diff issue4.expected issue4.output))
+  (enabled_if (< %{ocaml_version} 5.0)))

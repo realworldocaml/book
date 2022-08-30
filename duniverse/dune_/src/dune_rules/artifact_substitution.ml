@@ -76,17 +76,15 @@ let conf_of_context (context : Context.t option) =
     ; hardcoded_ocaml_path
     }
 
-let conf_for_install ~relocatable ~default_ocamlpath ~stdlib_dir ~prefix ~libdir
-    ~mandir ~docdir ~etcdir =
+let conf_for_install ~relocatable ~default_ocamlpath ~stdlib_dir ~roots =
   let get_vcs = Source_tree.nearest_vcs in
   let hardcoded_ocaml_path =
-    if relocatable then Relocatable prefix else Hardcoded default_ocamlpath
+    match relocatable with
+    | Some prefix -> Relocatable prefix
+    | None -> Hardcoded default_ocamlpath
   in
   let get_location section package =
-    let paths =
-      Install.Section.Paths.make ~package ~destdir:prefix ?libdir ?mandir
-        ?docdir ?etcdir ()
-    in
+    let paths = Install.Section.Paths.make ~package ~roots in
     Install.Section.Paths.get paths section
   in
   let get_config_path = function
@@ -565,7 +563,7 @@ let copy_file ~conf ?chmod ?(delete_dst_if_it_is_a_directory = false) ~src ~dst
       let open Fiber.O in
       let+ () = copy_file_non_atomic ~conf ?chmod ~src ~dst:temp_file () in
       let up_to_date =
-        match Path.stat dst with
+        match Path.Untracked.stat dst with
         | Ok { st_kind; _ } when st_kind = S_DIR -> (
           match delete_dst_if_it_is_a_directory with
           | true ->

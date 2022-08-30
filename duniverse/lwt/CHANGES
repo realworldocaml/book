@@ -1,3 +1,54 @@
+===== dev =====
+
+===== 5.6.1 =====
+
+====== Fixes ======
+
+  *  Fix null file descriptor being closed when used as redirection for standard fd of child processes. (#957, Antonin Décimo)
+
+===== 5.6.0 =====
+
+====== Installability ======
+
+  * Lwt is now compatible with OCaml 5.00. Lwt is now incompatible with OCaml 4.02. (#925, #923, Kate Deplaix, Patrick Ferris)
+  * Lwt is now incompatible with OCaml.4.07 and earlier. (#947, Hannes Mehnert, Tim McGilchrist)
+  * Lwt-unix is now compatible with OCaml 5.0.0. (#953, David Allsopp)
+
+====== Additions ======
+
+  * In the Lwt_io module, add `?cloexec:bool` optional arguments to functions that create file descriptors (`pipe`). The `?cloexec` argument is simply forwarded to the wrapped Lwt_unix function. (#872, #911, Antonin Décimo)
+  * Add Lwt_result.error, Lwt_result.iter, and Lwt_result.iter_error for consistency with Stdlib. (#927, Antonin Décimo)
+  * Lwt_result.bind_error. (#943, Boning Dong)
+  * Add ?cloexec parameter to Lwt_io.pipe. (#911, Antonin Décimo)
+
+====== Misc ======
+
+  * On Windows, make Lwt_process.create_process duplicate standard handles given to the child process if they're not inheritable, to mimic the behaviour of Unix.create_process. (#909, Antonin Décimo)
+  * Add missing dependency to `cppo` in lwt-react's opam file. (#946, Rizo I)
+  * Improve documentation (especially internal links). (#928, Antonin Décimo)
+  * Fix documentation of infix choose. (#952, Reynir Björnsson)
+  * Only define OCAML_NAME_SPACE for OCaml<5.0.0. (#929, Antonin Décimo)
+  * Replace mentions of Pervasives with Stdlib in the doc. (#954, Antonin Décimo)
+  * Improve deprecation message for auto_yield. (#908, Seb Mondet)
+  * Fix mirage tutorial link. (#936, Tuomas Lukka)
+  * Fix issues in opam file. (#937, Andreas Hauptmann)
+
+====== Fixes ======
+
+  * Fix win32_spawn leaking dev_null fd in the parent process. (#906, Antonin Décimo)
+  * Prefer SetHandleInformation to DuplicateHandle in set_close_on_exec for sockets. DuplicateHandle mustn't be used on sockets. (#907, Antonin Décimo)
+  * Lwt.pick and Lwt.choose select preferentially failed promises as per documentation (#856, #874, Raman Varabets)
+  * Use the WSA_FLAG_NO_HANDLE_INHERIT on Windows when creating sockets with WSASocket if the cloexec (non-inheritable) parameter is true. Fixes a Windows problem where a child process would inherit a supposedly non-inheritable socket. (#910, Antonin Décimo)
+  * Fix macOS/arm64 tests which have a 16k page. (#932, Kate Deplaix)
+  * Fix Lwt_unix.closedir incorrectly checking the return value of closedir(3). (#942, Antonin Décimo)
+  * Fix custom_operations struct not fully initialized after OCaml 4.08. (Antonin Décimo, #918)
+  * Fix missing include directive. (#940, Antonin Décimo)
+  * Fix missing initialisation in Unix stub. (#941, Antonin Décimo)
+
+====== Deprecations ======
+
+  * Alias Lwt_result.map_err and Lwt_result.bind_lwt_err to Lwt_result.map_error and Lwt_result.bind_lwt_error for consistency with Stdlib. (#927, Antonin Décimo)
+
 ===== 5.5.0 =====
 
 ====== Deprecations ======

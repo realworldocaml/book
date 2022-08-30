@@ -1,0 +1,17 @@
+
+type 'x abs1 <ocaml_biniou module="Test">
+             <ocaml_json module="Testj"> = abstract
+
+type 'x abs2 <ocaml module="Test">
+             <ocaml_json module="Testj"> = abstract
+
+(* import an external type *)
+type int_assoc_list <ocaml module="Testj"> = abstract
+
+(* untyped JSON.
+
+   'abstract' translates to the 'Yojson.Safe.t' type even for the biniou
+   backend since it shares type definitions with the JSON backend.
+ *)
+type any = abstract
+type any_items = abstract list

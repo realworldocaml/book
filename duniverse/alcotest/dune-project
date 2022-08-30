@@ -3,7 +3,7 @@
 (generate_opam_files true)
 
 (name alcotest)
-(version 1.5.0)
+(version 1.5.0-29-g6be328d)
 (source (github mirage/alcotest))
 (license ISC)
 (authors "Thomas Gazagnaire")
@@ -25,13 +25,13 @@ inspect), with a simple (yet expressive) query language to select the
 tests to run.
 ")
  (depends
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (fmt (>= 0.8.7))
   astring
-  (cmdliner (>= 1.0.0))
-  re
+  (cmdliner (>= 1.1.0))
+  (re (>= 1.7.2))
   stdlib-shims
-  uutf
+  (uutf (>= 1.0.1))
   ocaml-syntax-shims)
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
@@ -45,14 +45,15 @@ tests to run.
  (depends
   (re :with-test)
   (fmt :with-test)
-  (cmdliner :with-test)
-  core
+  (cmdliner (and :with-test (>= 1.1.0)))
+  (core (>= v0.15.0))
+  (core_unix (>= v0.15.0))
   base
   async_kernel
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.11.0))
   (alcotest (= :version))
-  (async_unix (>= v0.9.0))
-  (core_kernel (>= v0.9.0))))
+  (async (>= v0.15.0))
+  (async_unix (>= v0.15.0))))
 
 (package
  (name alcotest-lwt)
@@ -61,9 +62,9 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner :with-test)
+  (cmdliner (and :with-test (>= 1.1.0)))
   fmt
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (alcotest (= :version))
   lwt
   logs))
@@ -75,9 +76,9 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner :with-test)
+  (cmdliner (and :with-test (>= 1.1.0)))
   fmt
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
   duration
@@ -93,4 +94,4 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.0.0)))))
+  (cmdliner (and :with-test (>= 1.1.0)))))

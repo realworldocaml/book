@@ -30,8 +30,8 @@ type t = {
    [offset], relative to the beginning of a comment, into a location, relative
    to the beginning of the file containing the comment. This can then be used
    to convert from byte offset to line number / column number - a Loc.point,
-   and additionally for converting back from a Loc.point to a Lexing.position. 
-   *)
+   and additionally for converting back from a Loc.point to a Lexing.position.
+*)
 
 let reversed_newlines : input:string -> (int * int) list =
  fun ~input ->
@@ -118,5 +118,4 @@ let parse_comment ~location ~text =
 
 (* Accessor functions, as [t] is opaque *)
 let warnings t = t.warnings
-
 let ast t = t.ast

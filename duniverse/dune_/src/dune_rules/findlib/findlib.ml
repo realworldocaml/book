@@ -1,10 +1,8 @@
-open! Dune_engine
-open! Dune_engine.Import
-open! Stdune
+open Import
 open Memo.O
 module Opam_package = Package
-module P = Variant
-module Ps = Variant.Set
+module P = Ocaml.Variant
+module Ps = Ocaml.Variant.Set
 
 let meta_fn = "META"
 
@@ -81,7 +79,7 @@ module Rules = struct
     let set_rules =
       List.map rules.set_rules ~f:Rule.make
       |> List.stable_sort ~compare:(fun a b ->
-             Poly.compare
+             Int.compare
                (Rule.formal_predicates_count b)
                (Rule.formal_predicates_count a))
     in
@@ -522,24 +520,6 @@ end = struct
     let meta = dummy top_lib subs in
     load_builtin db meta
 
-  let lookup_and_load_one_dir db ~dir ~name =
-    let meta_file = Path.relative dir meta_fn in
-    let* meta_file_exists = Fs_memo.file_exists meta_file in
-    if meta_file_exists then
-      load_and_convert db ~dir ~meta_file ~name >>| Option.some
-    else
-      (* Alternative layout *)
-      match Path.parent dir with
-      | None -> Memo.return None
-      | Some dir ->
-        let meta_file =
-          Path.relative dir (meta_fn ^ "." ^ Package.Name.to_string name)
-        in
-        let* meta_exists = Fs_memo.file_exists meta_file in
-        if meta_exists then
-          load_and_convert db ~dir ~meta_file ~name >>| Option.some
-        else Memo.return None
-
   let lookup_and_load (db : DB.t) name =
     let rec loop dirs : (Dune_package.t, Unavailable_reason.t) Result.t Memo.t =
       match dirs with
@@ -548,25 +528,35 @@ end = struct
         | "dune" -> Memo.return (Ok builtin_for_dune)
         | _ -> Memo.return (Error Unavailable_reason.Not_found))
       | dir :: dirs -> (
-        let dir = Path.relative dir (Package.Name.to_string name) in
-        let* dir_exists = Fs_memo.dir_exists dir in
-        if not dir_exists then loop dirs
+        let meta_file =
+          Path.relative dir (meta_fn ^ "." ^ Package.Name.to_string name)
+        in
+        let* file_exists = Fs_memo.file_exists meta_file in
+        if file_exists then
+          let+ p = load_and_convert db ~dir ~meta_file ~name in
+          Ok p
         else
-          let dune = Path.relative dir Dune_package.fn in
-          let* exists =
-            let+ exists = Fs_memo.file_exists dune in
-            if exists then Dune_package.Or_meta.load dune
-            else Ok Dune_package.Or_meta.Use_meta
-          in
-          match exists with
-          | Error e ->
-            Memo.return (Error (Unavailable_reason.Invalid_dune_package e))
-          | Ok (Dune_package.Or_meta.Dune_package p) -> Memo.return (Ok p)
-          | Ok Use_meta -> (
-            let open Memo.O in
-            lookup_and_load_one_dir db ~dir ~name >>= function
-            | None -> loop dirs
-            | Some p -> Memo.return (Ok p)))
+          let dir = Path.relative dir (Package.Name.to_string name) in
+          let* dir_exists = Fs_memo.dir_exists dir in
+          if not dir_exists then loop dirs
+          else
+            let dune = Path.relative dir Dune_package.fn in
+            let* exists =
+              let* exists = Fs_memo.file_exists dune in
+              if exists then Dune_package.Or_meta.load dune
+              else Memo.return (Ok Dune_package.Or_meta.Use_meta)
+            in
+            match exists with
+            | Error e ->
+              Memo.return (Error (Unavailable_reason.Invalid_dune_package e))
+            | Ok (Dune_package.Or_meta.Dune_package p) -> Memo.return (Ok p)
+            | Ok Use_meta ->
+              let meta_file = Path.relative dir meta_fn in
+              let* meta_file_exists = Fs_memo.file_exists meta_file in
+              if meta_file_exists then
+                let+ p = load_and_convert db ~dir ~meta_file ~name in
+                Ok p
+              else loop dirs)
     in
     match Package.Name.Map.find db.builtins name with
     | None -> loop db.paths
@@ -649,14 +639,13 @@ let all_packages t =
            (Dune_package.Entry.name a)
            (Dune_package.Entry.name b))
 
-let create ~paths ~(lib_config : Lib_config.t) : t =
+let create ~paths ~(lib_config : Lib_config.t) =
   let stdlib_dir = lib_config.stdlib_dir in
   let version = lib_config.ocaml_version in
-  { DB.stdlib_dir
-  ; paths
-  ; builtins = Meta.builtins ~stdlib_dir ~version
-  ; lib_config
-  }
+  let+ builtins = Meta.builtins ~stdlib_dir ~version in
+  { DB.stdlib_dir; paths; builtins; lib_config }
+
+let lib_config (t : t) = t.lib_config
 
 let all_broken_packages t =
   let+ packages = load_all_packages t in
@@ -665,3 +654,21 @@ let all_broken_packages t =
       | Ok _ | Error Unavailable_reason.Not_found -> acc
       | Error (Invalid_dune_package exn) -> (name, exn) :: acc)
   |> List.sort ~compare:(fun (a, _) (b, _) -> Package.Name.compare a b)
+
+let create =
+  let module Input = struct
+    type t = Path.t list * Lib_config.t
+
+    let equal (paths, libs) (paths', libs') =
+      List.equal Path.equal paths paths' && Lib_config.equal libs libs'
+
+    let hash = Tuple.T2.hash (List.hash Path.hash) Lib_config.hash
+
+    let to_dyn = Dyn.pair (Dyn.list Path.to_dyn) Lib_config.to_dyn
+  end in
+  let memo =
+    Memo.create "lib-installed"
+      ~input:(module Input)
+      (fun (paths, lib_config) -> create ~paths ~lib_config)
+  in
+  fun ~paths ~lib_config -> Memo.exec memo (paths, lib_config)

@@ -6,11 +6,11 @@
 (** Functional priority queues (deprecated).
 
     A priority queue maintains, in the abstract sense, a set of elements in
-    order, and supports fast lookup and removal of the first ("minimum")
+    order, and supports fast lookup and removal of the first (“minimum”)
     element. This is used in Lwt for organizing threads that are waiting for
     timeouts.
 
-    The priority queues in this module preserve "duplicates": elements that
+    The priority queues in this module preserve “duplicates”: elements that
     compare equal in their order.
 
     @deprecated This module is an internal implementation detail of Lwt, and may

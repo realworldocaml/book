@@ -1,12 +1,11 @@
 module type V1 = sig
-  include
-    Alcotest_engine.V1.Cli.S with type return = unit Async_kernel.Deferred.t
+  include Alcotest_engine.V1.Cli.S with type return = unit Async.Deferred.t
 
   val test_case :
-    ?timeout:Core_kernel.Time.Span.t ->
+    ?timeout:Time_unix.Span.t ->
     string ->
     Alcotest.speed_level ->
-    ('a -> unit Async_kernel.Deferred.t) ->
+    ('a -> unit Async.Deferred.t) ->
     'a test_case
 
   val test_case_sync :

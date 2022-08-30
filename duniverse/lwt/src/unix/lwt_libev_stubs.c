@@ -10,8 +10,6 @@
 
 #if defined(HAVE_LIBEV)
 
-#define CAML_NAME_SPACE
-
 #include <assert.h>
 
 #include <caml/alloc.h>
@@ -69,7 +67,10 @@ static long hash_loop(value loop) { return (long)Ev_loop_val(loop); }
 
 static struct custom_operations loop_ops = {
     "lwt.libev.loop", custom_finalize_default,  compare_loops,
-    hash_loop,        custom_serialize_default, custom_deserialize_default};
+    hash_loop,        custom_serialize_default, custom_deserialize_default,
+    custom_compare_ext_default,
+    NULL
+};
 
 /* Do nothing.
 
@@ -127,7 +128,10 @@ static long hash_watcher(value watcher) { return (long)Ev_io_val(watcher); }
 
 static struct custom_operations watcher_ops = {
     "lwt.libev.watcher", custom_finalize_default,  compare_watchers,
-    hash_watcher,        custom_serialize_default, custom_deserialize_default};
+    hash_watcher,        custom_serialize_default, custom_deserialize_default,
+    custom_compare_ext_default,
+    NULL
+};
 
 /* +-----------------------------------------------------------------+
    | IO watchers                                                     |

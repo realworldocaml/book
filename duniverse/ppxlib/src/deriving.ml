@@ -170,38 +170,64 @@ module Generator = struct
     loop String.Set.empty l
 
   let check_arguments name generators (args : (string * expression) list) =
-    List.iter args ~f:(fun (label, e) ->
-        if String.is_empty label then
-          Location.raise_errorf ~loc:e.pexp_loc
-            "Ppxlib.Deriving: generator arguments must be labelled");
-    Option.iter
-      (List.find_a_dup args ~compare:(fun (a, _) (b, _) -> String.compare a b))
-      ~f:(fun (label, e) ->
-        Location.raise_errorf ~loc:e.pexp_loc
-          "Ppxlib.Deriving: argument labelled '%s' appears more than once" label);
+    let empty_label_error =
+      List.filter_map args ~f:(fun (label, e) ->
+          if String.is_empty label then
+            Some
+              (Location.error_extensionf ~loc:e.pexp_loc
+                 "Ppxlib.Deriving: generator arguments must be labelled")
+          else None)
+    in
+    let duplicate_argument_error =
+      Option.map
+        (List.find_a_dup args ~compare:(fun (a, _) (b, _) -> String.compare a b))
+        ~f:(fun (label, e) ->
+          Location.error_extensionf ~loc:e.pexp_loc
+            "Ppxlib.Deriving: argument labelled '%s' appears more than once"
+            label)
+      |> Option.to_list
+    in
     let accepted_args = merge_accepted_args generators in
-    List.iter args ~f:(fun (label, e) ->
-        if not (String.Set.mem label accepted_args) then
-          let spellcheck_msg =
-            match
-              Spellcheck.spellcheck (String.Set.elements accepted_args) label
-            with
-            | None -> ""
-            | Some s -> ".\n" ^ s
-          in
-          Location.raise_errorf ~loc:e.pexp_loc
-            "Ppxlib.Deriving: generator '%s' doesn't accept argument '%s'%s"
-            name label spellcheck_msg)
+    let unaccepted_argument =
+      List.filter_map args ~f:(fun (label, e) ->
+          if not (String.Set.mem label accepted_args) then
+            let spellcheck_msg =
+              match
+                Spellcheck.spellcheck (String.Set.elements accepted_args) label
+              with
+              | None -> ""
+              | Some s -> ".\n" ^ s
+            in
+            Some
+              (Location.error_extensionf ~loc:e.pexp_loc
+                 "Ppxlib.Deriving: generator '%s' doesn't accept argument \
+                  '%s'%s"
+                 name label spellcheck_msg)
+          else None)
+    in
+    let errors =
+      empty_label_error @ duplicate_argument_error @ unaccepted_argument
+    in
+    if List.length errors = 0 then Ok () else Error errors
 
   let apply (T t) ~name:_ ~ctxt x args = Args.apply t.spec args (t.gen ~ctxt x)
 
   let apply_all ~ctxt entry (name, generators, args) =
-    check_arguments name.txt generators args;
+    let open Result in
+    check_arguments name.txt generators args >>| fun () ->
     List.concat_map generators ~f:(fun t ->
         apply t ~name:name.txt ~ctxt entry args)
 
-  let apply_all ~ctxt entry generators =
-    List.concat_map generators ~f:(apply_all ~ctxt entry)
+  let apply_all ~ctxt entry generators ext_to_item =
+    let l = List.map generators ~f:(apply_all ~ctxt entry) in
+    let l1, lerr =
+      List.partition_map (function Ok e -> Left e | Error e -> Right e) l
+    in
+    let lerr =
+      List.concat lerr
+      |> List.map ~f:(fun err -> ext_to_item ~loc:Location.none err [])
+    in
+    List.concat l1 @ lerr
 end
 
 module Deriver = struct
@@ -360,54 +386,77 @@ module Deriver = struct
         | Some s -> ".\n" ^ s
       else ""
     in
-    Location.raise_errorf ~loc:name.loc
+    Location.error_extensionf ~loc:name.loc
       "Ppxlib.Deriving: '%s' is not a supported %s deriving generator%s"
       name.txt field.name spellcheck_msg
 
   let resolve field name =
-    try resolve_internal field name.txt
+    try Ok (resolve_internal field name.txt)
     with Not_supported name' ->
-      not_supported field ~spellcheck:(String.equal name.txt name') name
+      Error (not_supported field ~spellcheck:(String.equal name.txt name') name)
 
   let resolve_all field derivers =
-    let derivers_and_args =
-      List.filter_map derivers ~f:(fun (name, args) ->
+    let derivers_and_args, derivers_and_args_errors =
+      List.partition_map
+        (fun (name, args) ->
           match Ppx_derivers.lookup name.txt with
-          | None -> not_supported field name
-          | Some (T _) ->
+          | None -> Either.Right (not_supported field name)
+          | Some (T _) -> (
               (* It's one of ours, parse the arguments now. We can't do it before since
                  ppx_deriving uses a different syntax for arguments. *)
-              Some
-                ( name,
-                  match args with
-                  | Args l -> l
-                  | Unknown_syntax (loc, msg) ->
-                      Location.raise_errorf ~loc "Ppxlib.Deriving: %s" msg )
+              match args with
+              | Args l -> Either.Left (Some (name, l))
+              | Unknown_syntax (loc, msg) ->
+                  Either.Right
+                    (Location.error_extensionf ~loc "Ppxlib.Deriving: %s" msg))
           | Some _ ->
               (* It's not one of ours, ignore it. *)
-              None)
+              Either.Left None)
+        derivers
+      |> fun (l1, l2) -> (List.filter_opt l1, l2)
     in
     (* Set of actual deriver names *)
     let seen = Hashtbl.create 16 in
-    List.map derivers_and_args ~f:(fun (name, args) ->
-        let named_generators = resolve field name in
-        List.iter named_generators ~f:(fun (actual_deriver_name, gen) ->
-            if
-              Options.fail_on_duplicate_derivers
-              && Hashtbl.mem seen actual_deriver_name
-            then
-              Location.raise_errorf ~loc:name.loc "Deriver %s appears twice"
-                actual_deriver_name;
-            List.iter (Generator.deps gen) ~f:(fun dep ->
-                List.iter (resolve_actual_derivers field dep) ~f:(fun drv ->
-                    let dep_name = drv.name in
-                    if not (Hashtbl.mem seen dep_name) then
-                      Location.raise_errorf ~loc:name.loc
-                        "Deriver %s is needed for %s, you need to add it \
-                         before in the list"
-                        dep_name name.txt));
-            Hashtbl.set seen ~key:actual_deriver_name ~data:());
-        (name, List.map named_generators ~f:snd, args))
+    let result, dep_errors =
+      List.fold_left ~init:([], []) derivers_and_args
+        ~f:(fun (result, errors) (name, args) ->
+          match resolve field name with
+          | Error e -> (result, errors @ [ e ])
+          | Ok named_generators ->
+              let l_err =
+                List.concat_map named_generators
+                  ~f:(fun (actual_deriver_name, gen) ->
+                    let dup_error =
+                      if
+                        Options.fail_on_duplicate_derivers
+                        && Hashtbl.mem seen actual_deriver_name
+                      then
+                        [
+                          Location.error_extensionf ~loc:name.loc
+                            "Deriver %s appears twice" actual_deriver_name;
+                        ]
+                      else []
+                    in
+                    let l_err =
+                      List.concat_map (Generator.deps gen) ~f:(fun dep ->
+                          List.filter_map (resolve_actual_derivers field dep)
+                            ~f:(fun drv ->
+                              let dep_name = drv.name in
+                              if not (Hashtbl.mem seen dep_name) then
+                                Some
+                                  (Location.error_extensionf ~loc:name.loc
+                                     "Deriver %s is needed for %s, you need to \
+                                      add it before in the list"
+                                     dep_name name.txt)
+                              else None))
+                    in
+                    Hashtbl.set seen ~key:actual_deriver_name ~data:();
+                    dup_error @ l_err)
+              in
+              ( result @ [ (name, List.map named_generators ~f:snd, args) ],
+                errors @ l_err ))
+    in
+    (result, derivers_and_args_errors @ dep_errors)
 
   let add ?str_type_decl ?str_type_ext ?str_exception ?str_module_type_decl
       ?sig_type_decl ?sig_type_ext ?sig_exception ?sig_module_type_decl
@@ -652,12 +701,19 @@ let merge_generators field l =
   List.filter_map l ~f:(fun x -> x) |> List.concat |> Deriver.resolve_all field
 
 let expand_str_type_decls ~ctxt rec_flag tds values =
-  let generators = merge_generators Deriver.Field.str_type_decl values in
+  let generators, l_err = merge_generators Deriver.Field.str_type_decl values in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.pstr_extension ~loc:Location.none err [])
+      l_err
+  in
   (* TODO: instead of disabling the unused warning for types themselves, we
      should add a tag [@@unused]. *)
   let generated =
-    types_used_by_deriving tds
+    types_used_by_deriving tds @ l_err
     @ Generator.apply_all ~ctxt (rec_flag, tds) generators
+        Ast_builder.Default.pstr_extension
   in
   wrap_str
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
@@ -665,60 +721,135 @@ let expand_str_type_decls ~ctxt rec_flag tds values =
     generated
 
 let expand_sig_type_decls ~ctxt rec_flag tds values =
-  let generators = merge_generators Deriver.Field.sig_type_decl values in
-  let generated = Generator.apply_all ~ctxt (rec_flag, tds) generators in
+  let generators, l_err = merge_generators Deriver.Field.sig_type_decl values in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.psig_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt (rec_flag, tds) generators
+        Ast_builder.Default.psig_extension
+  in
   wrap_sig
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_str_module_type_decl ~ctxt mtd generators =
-  let generators =
+  let generators, l_err =
     Deriver.resolve_all Deriver.Field.str_module_type_decl generators
   in
-  let generated = Generator.apply_all ~ctxt mtd generators in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.pstr_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt mtd generators
+        Ast_builder.Default.pstr_extension
+  in
+
   wrap_str
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_sig_module_type_decl ~ctxt mtd generators =
-  let generators =
+  let generators, l_err =
     Deriver.resolve_all Deriver.Field.sig_module_type_decl generators
   in
-  let generated = Generator.apply_all ~ctxt mtd generators in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.psig_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt mtd generators
+        Ast_builder.Default.psig_extension
+  in
   wrap_sig
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_str_exception ~ctxt ec generators =
-  let generators = Deriver.resolve_all Deriver.Field.str_exception generators in
-  let generated = Generator.apply_all ~ctxt ec generators in
+  let generators, l_err =
+    Deriver.resolve_all Deriver.Field.str_exception generators
+  in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.pstr_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt ec generators Ast_builder.Default.pstr_extension
+  in
   wrap_str
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_sig_exception ~ctxt ec generators =
-  let generators = Deriver.resolve_all Deriver.Field.sig_exception generators in
-  let generated = Generator.apply_all ~ctxt ec generators in
+  let generators, l_err =
+    Deriver.resolve_all Deriver.Field.sig_exception generators
+  in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.psig_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt ec generators Ast_builder.Default.psig_extension
+  in
   wrap_sig
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_str_type_ext ~ctxt te generators =
-  let generators = Deriver.resolve_all Deriver.Field.str_type_ext generators in
-  let generated = Generator.apply_all ~ctxt te generators in
+  let generators, l_err =
+    Deriver.resolve_all Deriver.Field.str_type_ext generators
+  in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.pstr_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt te generators Ast_builder.Default.pstr_extension
+  in
   wrap_str
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)
     generated
 
 let expand_sig_type_ext ~ctxt te generators =
-  let generators = Deriver.resolve_all Deriver.Field.sig_type_ext generators in
-  let generated = Generator.apply_all ~ctxt te generators in
+  let generators, l_err =
+    Deriver.resolve_all Deriver.Field.sig_type_ext generators
+  in
+  let l_err =
+    List.map
+      ~f:(fun err ->
+        Ast_builder.Default.psig_extension ~loc:Location.none err [])
+      l_err
+  in
+  let generated =
+    l_err
+    @ Generator.apply_all ~ctxt te generators Ast_builder.Default.psig_extension
+  in
   wrap_sig
     ~loc:(Expansion_context.Deriver.derived_item_loc ctxt)
     ~hide:(not @@ Expansion_context.Deriver.inline ctxt)

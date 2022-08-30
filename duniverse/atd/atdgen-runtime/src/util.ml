@@ -44,7 +44,7 @@ end
 module Json =
 struct
   type 'a reader = Yojson.Safe.lexer_state -> Lexing.lexbuf -> 'a
-  type 'a writer = Bi_outbuf.t -> 'a -> unit
+  type 'a writer = Buffer.t -> 'a -> unit
 
   let finish ls lexbuf =
     Yojson.Safe.read_space ls lexbuf;
@@ -84,10 +84,17 @@ struct
     in
     input_file fname (fun ic -> from_channel ?buf ~fname:fname0 ?lnum read ic)
 
-  let stream_from_lexbuf ?(fin = fun () -> ()) read ls lexbuf =
-    let stream = Some true in
-    let f _ =
-      try Some (from_lexbuf ?stream read ls lexbuf)
+  (* seq_unfold is Seq.unfold, needed for ocaml < 4.11 *)
+  let rec seq_unfold f u () =
+    match f u with
+    | None -> Seq.Nil
+    | Some (x, u') -> Seq.Cons (x, seq_unfold f u')
+
+  let seq_from_lexbuf ?(fin = fun () -> ()) read ls lexbuf =
+    let f () =
+      try
+        let v = from_lexbuf ~stream:true read ls lexbuf in
+        Some (v, ())
       with
           Yojson.End_of_input ->
             fin ();
@@ -96,19 +103,20 @@ struct
             (try fin () with _ -> ());
             raise e
     in
-    Stream.from f
+    (* Seq.unfold is only available from ocaml 4.11 *)
+    seq_unfold f ()
 
-  let stream_from_string ?buf ?fin ?fname ?lnum read ic =
+  let seq_from_string ?buf ?fin ?fname ?lnum read ic =
     let lexbuf = Lexing.from_string ic in
     let ls = Yojson.Safe.init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf ?fin read ls lexbuf
+    seq_from_lexbuf ?fin read ls lexbuf
 
-  let stream_from_channel ?buf ?fin ?fname ?lnum read ic =
+  let seq_from_channel ?buf ?fin ?fname ?lnum read ic =
     let lexbuf = Lexing.from_channel ic in
     let ls = Yojson.Safe.init_lexer ?buf ?fname ?lnum () in
-    stream_from_lexbuf ?fin read ls lexbuf
+    seq_from_lexbuf ?fin read ls lexbuf
 
-  let stream_from_file ?buf ?(fin = fun () -> ()) ?fname:src ?lnum read fname =
+  let seq_from_file ?buf ?(fin = fun () -> ()) ?fname:src ?lnum read fname =
     let fname0 =
       match src with
           None -> fname
@@ -116,19 +124,15 @@ struct
     in
     let ic = open_in_bin fname in
     let fin () = close_in_noerr ic; fin () in
-    stream_from_channel ?buf ~fin ~fname:fname0 ?lnum read ic
+    seq_from_channel ?buf ~fin ~fname:fname0 ?lnum read ic
 
   let list_from_string ?buf ?fin ?fname ?lnum read ic =
-    let stream = stream_from_string ?buf ?fin ?fname ?lnum read ic in
-    let acc = ref [] in
-    Stream.iter (fun x -> acc := x :: !acc) stream;
-    List.rev !acc
+    let seq = seq_from_string ?buf ?fin ?fname ?lnum read ic in
+    List.of_seq seq
 
   let list_from_channel ?buf ?fin ?fname ?lnum read ic =
-    let stream = stream_from_channel ?buf ?fin ?fname ?lnum read ic in
-    let acc = ref [] in
-    Stream.iter (fun x -> acc := x :: !acc) stream;
-    List.rev !acc
+    let seq = seq_from_channel ?buf ?fin ?fname ?lnum read ic in
+    List.of_seq seq
 
   let list_from_file ?buf ?fname:src ?lnum read fname =
     let fname0 =
@@ -141,34 +145,39 @@ struct
     list_from_channel ?buf ~fin ~fname:fname0 ?lnum read ic
 
   let to_string ?(len = 1024) write x =
-    let ob = Bi_outbuf.create len in
+    let ob = Buffer.create len in
     write ob x;
-    Bi_outbuf.contents ob
+    Buffer.contents ob
 
-  let to_channel ?len write oc x = Biniou.to_channel ?len ~shrlen:0 write oc x
-  let to_file ?len write fname x = Biniou.to_file ?len ~shrlen:0 write fname x
+  let to_channel ?(len = 1024) write oc x =
+    let ob = Buffer.create len in
+    write ob x;
+    Buffer.output_buffer oc ob
 
-  let stream_to_string ?(len = 1024) ?(lf = "\n") write stream =
-    let ob = Bi_outbuf.create len in
-    Stream.iter (fun x -> write ob x; Bi_outbuf.add_string ob lf) stream;
-    Bi_outbuf.contents ob
+  let to_file ?len write fname x =
+    output_file fname (fun oc -> to_channel ?len write oc x)
 
-  let stream_to_channel ?len ?(lf = "\n") write oc stream =
-    let ob = Bi_outbuf.create_channel_writer ?len ~shrlen:0 oc in
-    Stream.iter (fun x -> write ob x; Bi_outbuf.add_string ob lf) stream;
-    Bi_outbuf.flush_channel_writer ob
+  let seq_to_string ?(len = 1024) ?(lf = "\n") write seq =
+    let ob = Buffer.create len in
+    Seq.iter (fun x -> write ob x; Buffer.add_string ob lf) seq;
+    Buffer.contents ob
 
-  let stream_to_file ?len ?lf write fname stream =
-    output_file fname (fun oc -> stream_to_channel ?len ?lf write oc stream)
+  let seq_to_channel ?(len = 1024) ?(lf = "\n") write oc seq =
+    let ob = Buffer.create len in
+    Seq.iter (fun x -> write ob x; Buffer.add_string ob lf) seq;
+    Buffer.output_buffer oc ob
+
+  let seq_to_file ?len ?lf write fname seq =
+    output_file fname (fun oc -> seq_to_channel ?len ?lf write oc seq)
 
   let list_to_string ?len ?lf write l =
-    stream_to_string ?len ?lf write (Stream.of_list l)
+    seq_to_string ?len ?lf write (List.to_seq l)
 
   let list_to_channel ?len ?lf write oc l =
-    stream_to_channel ?len ?lf write oc (Stream.of_list l)
+    seq_to_channel ?len ?lf write oc (List.to_seq l)
 
   let list_to_file ?len ?lf write fname  l =
-    stream_to_file ?len ?lf write fname (Stream.of_list l)
+    seq_to_file ?len ?lf write fname (List.to_seq l)
 
   let preset_unknown_field_handler loc name =
     let msg =

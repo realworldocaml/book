@@ -9,6 +9,12 @@ type kind = [
   | Amaze <json name="!!!"> of string list
 ]
 
+type frozen
+  <python decorator="dataclass(frozen=True)"> = [
+  | A
+  | B of int
+]
+
 type root = {
   id <json name="ID">: string;
   await: bool;
@@ -25,6 +31,7 @@ type root = {
   assoc3: (float * int) list <python repr="dict">;
   assoc4: (string * int) list <json repr="object"> <python repr="dict">;
   nullables: int nullable list;
+  untyped_things: abstract list;
   (*options: int option list;*)
 }
 
@@ -36,4 +43,10 @@ type require_field <python decorator="deco.deco1"
                            decorator="deco.deco2(42)"
                            decorator="dataclass(order=True)"> = {
   req: string;
+}
+
+type recursive_class = {
+  id: int;
+  flag: bool;
+  children: recursive_class list;
 }

@@ -266,18 +266,10 @@ val printexc_prefer_sexp : exn -> string
 val sexp_of_exn_opt : exn -> Sexp.t option
 
 module Exn_converter : sig
-  val add_auto : ?finalise:bool -> exn -> (exn -> Sexp.t) -> unit
-  [@@deprecated "[since 2016-07] use Conv.Exn_converter.add"]
-
-  (** [add ?finalise constructor sexp_of_exn] registers exception S-expression
+  (** [add constructor sexp_of_exn] registers exception S-expression
       converter [sexp_of_exn] for exceptions with the given [constructor].
 
-      NOTE: If [finalise] is [true], then the exception will be automatically
-      registered for removal with the GC (default).  Finalisation will not work
-      with exceptions that have been allocated outside the heap, which is the
-      case for some standard ones e.g. [Sys_error].
-
-      @param finalise default = [true] *)
+      NOTE: [finalise] is ignored, and provided only for backward compatibility. *)
   val add
     :  ?printexc:bool
     -> ?finalise:bool

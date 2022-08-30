@@ -15,7 +15,7 @@ let f x = 1 [@@deprecatd "..."]
 [%%expect{|
 Line _, characters 15-24:
 Error: Attribute `deprecatd' was not used.
-Hint: Did you mean deprecated?
+       Hint: Did you mean deprecated?
 |}]
 
 let attr : _ Attribute.t =
@@ -31,9 +31,10 @@ type t = int [@blah]
 [%%expect{|
 Line _, characters 15-19:
 Error: Attribute `blah' was not used.
-Hint: `blah' is available for type declarations but is used here in the
-context of a core type.
-Did you put it at the wrong level?
+       Hint: `blah' is available for type declarations but is used here in
+       the
+       context of a core type.
+       Did you put it at the wrong level?
 |}]
 
 let attr : _ Attribute.t =
@@ -49,9 +50,10 @@ type t = int [@blah]
 [%%expect{|
 Line _, characters 15-19:
 Error: Attribute `blah' was not used.
-Hint: `blah' is available for expressions and type declarations but is used
-here in the context of a core type.
-Did you put it at the wrong level?
+       Hint: `blah' is available for expressions and type declarations but is
+       used
+       here in the context of a core type.
+       Did you put it at the wrong level?
 |}]
 
 (* Attribute drops *)

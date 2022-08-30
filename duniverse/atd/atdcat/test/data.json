@@ -9,5 +9,7 @@
   "assoc1": [ [ 1.1, 1 ], [ 2.2, 2 ] ],
   "assoc2": { "c": 3, "d": 4 },
   "options": [ [ "Some", 10 ], "None", [ "Some", 88 ] ],
-  "nullables": [ 13, 71, null ]
+  "nullables": [ 13, 71, null ],
+  "untyped_things": [123, [[""]], {}],
+  "extra": "ignore me please"
 }

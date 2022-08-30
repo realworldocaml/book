@@ -32,7 +32,8 @@ let rec extract_names_from_expr ?(is_root = false) root_loc acc (x : 'a expr) =
   | Bool _
   | Int _
   | Float  _
-  | String _ -> acc
+  | String _
+  | Abstract _ -> acc
   | Sum (loc, va, o, _) ->
       let l, (fn, pvn, cvn) =
         Array.fold_left (extract_names_from_variant root_loc) ([], acc) va
@@ -262,7 +263,7 @@ let make_record_creator deref x =
         sprintf "\
 val create_%s :%s
   unit -> %s
-  (** Create a record of type {!%s}. *)
+  (** Create a record of type {!type:%s}. *)
 
 "
           s (String.concat "" intf_params)

@@ -18,7 +18,7 @@
 
 (** A library for manipulation of IP address representations.
 
-    {e v5.3.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
+    {e v5.3.1 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
 
 exception Parse_error of string * string
 (** [Parse_error (err,packet)] is raised when parsing of the IP address syntax

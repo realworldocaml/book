@@ -1,9 +1,20 @@
 (executable
  (name bench)
+ (package yojson-bench)
+ (public_name yojson-bench)
  (flags (-safe-string))
- (libraries yojson core_bench core))
+ (libraries yojson core_bench core core_unix.command_unix))
+
+(alias
+  (name bench-generic)
+  (deps bench.json)
+  (action (run ./bench.exe generic)))
+
+(alias
+  (name bench-buffer)
+  (deps bench.json)
+  (action (run ./bench.exe buffer)))
 
 (alias
   (name bench)
-  (deps bench.json)
-  (action (run ./bench.exe)))
+  (deps (alias bench-generic) (alias bench-buffer)))

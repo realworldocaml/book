@@ -2,10 +2,15 @@
   Mapping from ATD to JSON
 *)
 
+type ocaml_adapter = {
+    normalize : string;
+    restore : string;
+}
+
 (** Association between languages and json adapter for that language.
     The specification of each json adapter is language-specific. *)
 type json_adapter = {
-  ocaml_adapter : string option;
+  ocaml_adapter : ocaml_adapter option;
     (** A module implementing [normalize] and [restore]. *)
 
   java_adapter : string option;
@@ -40,6 +45,7 @@ type json_sum = {
 
 (** The different kinds of ATD nodes with their json-specific options. *)
 type json_repr =
+  | Abstract
   | Bool
   | Cell
   | Def

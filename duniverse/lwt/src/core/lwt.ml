@@ -115,7 +115,7 @@
      A resolved promise is either "fulfilled" with a value, or "rejected" with
      an exception. The state of a resolved promise will never change again: a
      resolved promise is immutable. A resolved promise is basically equivalent
-     to an [('a, exn) Pervasives.result]. Resolved promises are produced in two
+     to an [('a, exn) Stdlib.result]. Resolved promises are produced in two
      ways:
 
      - [Lwt.return], [Lwt.fail], and related functions, produce "trivial"
@@ -344,15 +344,6 @@
 
 
 
-(* Suppress warning 4, "fragile pattern matching," in this file only, due to
-
-     https://github.com/ocaml/ocaml/issues/7451
-
-   This can be removed if/when Lwt requires a minimum OCaml version 4.05. *)
-[@@@ocaml.warning "-4"]
-
-
-
 (* [Lwt_sequence] is deprecated – we don't want users outside Lwt using it.
    However, it is still used internally by Lwt. So, briefly disable warning 3
    ("deprecated"), and create a local, non-deprecated alias for
@@ -361,8 +352,6 @@
 [@@@ocaml.warning "-3"]
 module Lwt_sequence = Lwt_sequence
 [@@@ocaml.warning "+3"]
-
-
 
 (* Some sequence-associated storage types
 
@@ -489,7 +478,7 @@ struct
 
      - The type parameters of ['a resolved_state] guarantee that it is either
        [Fulfilled _] or [Rejected _]. So, it is equivalent to
-       [('a, exn) Pervasives.result], and, indeed, should have an identical
+       [('a, exn) Stdlib.result], and, indeed, should have an identical
        memory representation.
 
      - As per the Overview, there are regular callbacks and cancel callbacks.
@@ -585,9 +574,9 @@ struct
 
   (* Internal name of the public [+'a Lwt.result]. The public name is defined
      later in the module. This is to avoid potential confusion with
-     [Pervasives.result]/[Result.result], as the public name would not be
+     [Stdlib.result]/[Result.result], as the public name would not be
      prefixed with [Lwt.] inside this file. *)
-  type +'a lwt_result = ('a, exn) Result.result
+  type +'a lwt_result = ('a, exn) Result.t
 
   (* This could probably save an allocation by using [Obj.magic]. *)
   let state_of_result = function
@@ -1489,8 +1478,8 @@ sig
   val return_false : bool t
   val return_none : _ option t
   val return_some : 'a -> 'a option t
-  val return_ok : 'a -> ('a, _) Result.result t
-  val return_error : 'e -> (_, 'e) Result.result t
+  val return_ok : 'a -> ('a, _) Result.t t
+  val return_error : 'e -> (_, 'e) Result.t t
   val return_nil : _ list t
 
   val fail_with : string -> _ t
@@ -2642,15 +2631,28 @@ struct
      [choose]/[pick] implementation, which may actually be optimal anyway with
      Flambda. *)
 
-  let count_resolved_promises_in (ps : _ t list) =
-    let accumulate total p =
-      let Internal p = to_internal_promise p in
-      match (underlying p).state with
-      | Fulfilled _ -> total + 1
-      | Rejected _ -> total + 1
-      | Pending _ -> total
+  let count_resolved_promises_in (ps : 'a t list) =
+    let rec count_and_gather_rejected total rejected ps =
+       match ps with
+       | [] -> Result.Error (total, rejected)
+       | p :: ps ->
+            let Internal q = to_internal_promise p in
+            match (underlying q).state with
+            | Fulfilled _ -> count_and_gather_rejected total rejected ps
+            | Rejected _ -> count_and_gather_rejected (total + 1) (p :: rejected) ps
+            | Pending _ -> count_and_gather_rejected total rejected ps
     in
-    List.fold_left accumulate 0 ps
+    let rec count_fulfilled total ps =
+       match ps with
+       | [] -> Result.Ok total
+       | p :: ps ->
+            let Internal q = to_internal_promise p in
+            match (underlying q).state with
+            | Fulfilled _ -> count_fulfilled (total + 1) ps
+            | Rejected _ -> count_and_gather_rejected 1 [p] ps
+            | Pending _ -> count_fulfilled total ps
+    in
+    count_fulfilled 0 ps
 
   (* Evaluates to the [n]th promise in [ps], among only those promises in [ps]
      that are resolved. The caller is expected to ensure that there are at
@@ -2704,7 +2706,7 @@ struct
       invalid_arg
         "Lwt.choose [] would return a promise that is pending forever";
     match count_resolved_promises_in ps with
-    | 0 ->
+    | Result.Ok 0 ->
       let p = new_pending ~how_to_cancel:(propagate_cancel_to_several ps) in
 
       let callback result =
@@ -2718,17 +2720,20 @@ struct
 
       to_public_promise p
 
-    | 1 ->
+    | Result.Ok 1 ->
       nth_resolved ps 0
 
-    | n ->
+    | Result.Ok n ->
+      nth_resolved ps (Random.State.int (Lazy.force prng) n)
+
+    | Result.Error (n, ps) ->
       nth_resolved ps (Random.State.int (Lazy.force prng) n)
 
   let pick ps =
     if ps = [] then
       invalid_arg "Lwt.pick [] would return a promise that is pending forever";
     match count_resolved_promises_in ps with
-    | 0 ->
+    | Ok 0 ->
       let p = new_pending ~how_to_cancel:(propagate_cancel_to_several ps) in
 
       let callback result =
@@ -2743,12 +2748,16 @@ struct
 
       to_public_promise p
 
-    | 1 ->
+    | Ok 1 ->
       nth_resolved_and_cancel_pending ps 0
 
-    | n ->
+    | Ok n ->
       nth_resolved_and_cancel_pending ps
         (Random.State.int (Lazy.force prng) n)
+
+    | Error (n, qs) ->
+      List.iter cancel ps;
+      nth_resolved qs (Random.State.int (Lazy.force prng) n)
 
 
 

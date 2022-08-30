@@ -24,8 +24,14 @@ type root = {
   assoc4: (string * int) list <json repr="object"> <ts repr="map">;
   ~options: int option list;
   ~nullables: int nullable list;
+  untyped_things: abstract list;
+  foo: foo nullable;
 }
 
 type alias = int list
 
 type pair = (string * int)
+
+type foo = {
+  foo: string;
+}

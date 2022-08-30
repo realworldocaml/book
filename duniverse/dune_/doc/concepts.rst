@@ -73,6 +73,7 @@ Dune can evaluate. Here's a semi-formal specification of the language:
    expr := (and <expr>+)
          | (or <expr>+)
          | (<op> <template> <template>)
+         | (not <expr>)
          | <template>
 
 After an expression is evaluated, it must be exactly the string ``true`` or
@@ -362,14 +363,8 @@ to use the public name. For instance: ``(libraries base re)``.
 When resolving libraries, ones that are part of the workspace are always
 preferred to ones that are part of the installed world.
 
-.. _alternative-deps:
-
 Alternative Dependencies
 ------------------------
-
-In addition to direct dependencies, you can specify alternative dependencies.
-This is described in the :ref:`Alternative Dependencies <alternative-deps>`
-section.
 
 Sometimes, one doesn't want to depend on a specific library but rather 
 on whatever is already installed, e.g., to use a different
@@ -753,7 +748,7 @@ The following constructions are available:
 - ``(progn <DSL>...)`` to execute several commands in sequence
 - ``(echo <string>)`` to output a string on stdout
 - ``(write-file <file> <string>)`` writes ``<string>`` to ``<file>``
-- ``(cat <file>)`` to print the contents of a file to stdout
+- ``(cat <file> ...)`` to sequentially print the contents of files to stdout
 - ``(copy <src> <dst>)`` to copy a file. If these files are OCaml sources you
   should follow the ``module_name.xxx.ml``
   :ref:`naming convention <merlin-filenames>` to preserve Merlin's
@@ -988,7 +983,7 @@ However, it is different for the following reason:
   called when the files are not byte equals
 
 - By default, it will use ``patdiff`` if it is installed. ``patdiff``
-  is a better diffing program. You can install it via Opam with:
+  is a better diffing program. You can install it via opam with:
 
   .. code:: sh
 
@@ -1050,9 +1045,9 @@ Package Specification
 
 Installation is the process of copying freshly built libraries,
 binaries, and other files from the build directory to the system. Dune
-offers two ways of doing this: via Opam or directly via the ``install``
+offers two ways of doing this: via opam or directly via the ``install``
 command. In particular, the installation model implemented by Dune
-was copied from Opam. Opam is the standard OCaml package manager.
+was copied from opam. Opam is the standard OCaml package manager.
 
 In both cases, Dune only know how to install whole packages. A
 package being a collection of executables, libraries, and other files.
@@ -1106,11 +1101,11 @@ we will go through the various kinds of elements and describe how to
 attach each of them to a package.
 
 In the rest of this section, ``<prefix>`` refers to the directory in
-which the user chooses to install packages. When installing via Opam,
-it's Opam that sets this directory. When calling ``dune install``,
+which the user chooses to install packages. When installing via opam,
+it's opam that sets this directory. When calling ``dune install``,
 the installation directory is either guessed or can be manually
-specified by the user. This is described more in detail in the last
-section of this page.
+specified by the user. Defaults directories which replace guessing
+can be set during the compilation of dune.
 
 Sites of a Package
 ------------------

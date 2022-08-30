@@ -68,7 +68,7 @@ let suite = suite "lwt_event" [
         List.iter (Printf.eprintf "%i ") !l;
         prerr_newline ()
        end;
-       ignore (Lwt_react.opaque_identity event');
+       ignore (Sys.opaque_identity event');
        return result);
 
   test "of_stream"

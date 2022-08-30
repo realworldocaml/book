@@ -36,14 +36,7 @@ let test_iter f test_list =
   ()
 
 let test_exception list_combinator =
-  (* This really should be a local exception, but local exceptions require OCaml
-     4.04, while Lwt still supports, and is tested on, 4.02. *)
-  let module E =
-    struct
-      exception Exception
-    end
-  in
-  let open E in
+  let exception Exception in
 
   let number_of_callback_calls = ref 0 in
 

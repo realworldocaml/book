@@ -1,30 +1,59 @@
 open Stdune
 open Import
 
+let synopsis =
+  [ `P "The installation directories used are defined by priority:"
+  ; `Noblank
+  ; `P
+      "- directories set on the command line of $(i,dune install), or \
+       corresponding environment variables"
+  ; `Noblank
+  ; `P
+      "- directories set in dune binary. They are setup before the compilation \
+       of dune with $(i,./configure)"
+  ; `Noblank
+  ; `P
+      "- inferred from the environment variable $(i,OPAM_SWITCH_PREFIX) if \
+       present"
+  ]
+
 let print_line fmt =
   Printf.ksprintf (fun s -> Console.print [ Pp.verbatim s ]) fmt
 
 let interpret_destdir ~destdir path =
   match destdir with
   | None -> path
-  | Some prefix ->
-    Path.append_local (Path.of_string prefix) (Path.local_part path)
+  | Some destdir -> Path.append_local destdir (Path.local_part path)
 
-let get_dirs context ~prefix_from_command_line ~libdir_from_command_line =
-  match prefix_from_command_line with
-  | Some p ->
-    let prefix = Path.of_string p in
-    let dir = Option.value ~default:"lib" libdir_from_command_line in
-    Fiber.return (prefix, Some (Path.relative prefix dir))
-  | None ->
-    let open Fiber.O in
-    let* prefix = Context.install_prefix context in
-    let+ libdir =
-      match libdir_from_command_line with
-      | None -> Memo.run (Context.install_ocaml_libdir context)
-      | Some l -> Fiber.return (Some (Path.relative prefix l))
-    in
-    (prefix, libdir)
+let get_dirs context ~prefix_from_command_line ~from_command_line =
+  let module Roots = Install.Section.Paths.Roots in
+  let prefix_from_command_line =
+    Option.map ~f:Path.of_string prefix_from_command_line
+  in
+  let roots =
+    match prefix_from_command_line with
+    | Some prefix ->
+      Roots.opam_from_prefix prefix |> Roots.map ~f:(fun s -> Some s)
+    | None -> Context.roots context
+  in
+  let roots = Roots.first_has_priority from_command_line roots in
+  let must_be_defined name v =
+    match v with
+    | Some v -> v
+    | None ->
+      User_error.raise
+        [ Pp.textf "The %s installation directory is unknown." name ]
+        ~hints:[ Pp.textf "It could be specified with --%s" name ]
+  in
+  { Roots.lib_root = must_be_defined "libdir" roots.lib_root
+  ; libexec_root = must_be_defined "libexecdir" roots.libexec_root
+  ; bin = must_be_defined "bindir" roots.bin
+  ; sbin = must_be_defined "sbindir" roots.sbin
+  ; etc_root = must_be_defined "etcdir" roots.etc_root
+  ; doc_root = must_be_defined "docdir" roots.doc_root
+  ; share_root = must_be_defined "datadir" roots.share_root
+  ; man = must_be_defined "mandir" roots.man
+  }
 
 module Workspace = struct
   type t =
@@ -47,7 +76,8 @@ module Workspace = struct
       let dir = Package.dir p in
       Ok
         (Path.Source.relative dir
-           (Dune_engine.Utils.install_file ~package:name ~findlib_toolchain:None))
+           (Dune_rules.Install_rules.install_file ~package:name
+              ~findlib_toolchain:None))
 end
 
 let resolve_package_install workspace pkg =
@@ -169,6 +199,7 @@ module File_ops_real (W : Workspace) : File_operations = struct
       Format.pp_print_flush ppf ();
       Fiber.return ()
     | None -> plain_copy ()
+    (* XXX should we really be catching everything here? *)
     | exception _ ->
       User_warning.emit ~loc:(Loc.in_file src)
         [ Pp.text
@@ -384,52 +415,104 @@ let cmd_what = function
 let install_uninstall ~what =
   let doc = Format.asprintf "%a packages." pp_what what in
   let name_ = Arg.info [] ~docv:"PACKAGE" in
+  let absolute_path =
+    ( (fun path ->
+        if Filename.is_relative path then
+          `Error "the path must be absolute to avoid ambiguity"
+        else `Ok path)
+    , snd Arg.string )
+  in
   let term =
     let+ common = Common.term
     and+ prefix_from_command_line =
       Arg.(
         value
         & opt (some string) None
-        & info [ "prefix" ] ~docv:"PREFIX"
+        & info [ "prefix" ]
+            ~env:(env_var "DUNE_INSTALL_PREFIX")
+            ~docv:"PREFIX"
             ~doc:
               "Directory where files are copied. For instance binaries are \
                copied into $(i,\\$prefix/bin), library files into \
-               $(i,\\$prefix/lib), etc... It defaults to the current opam \
-               prefix if opam is available and configured, otherwise it uses \
-               the same prefix as the ocaml compiler.")
-    and+ libdir_from_command_line =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "libdir" ] ~docv:"PATH"
-            ~doc:
-              "Directory where library files are copied, relative to \
-               $(b,prefix) or absolute. If $(b,--prefix) is specified the \
-               default is $(i,\\$prefix/lib), otherwise it is the output of \
-               $(b,ocamlfind printconf destdir)")
+               $(i,\\$prefix/lib), etc...")
     and+ destdir =
       Arg.(
         value
         & opt (some string) None
         & info [ "destdir" ] ~env:(env_var "DESTDIR") ~docv:"PATH"
+            ~doc:"This directory is prepended to all installed paths.")
+    and+ libdir_from_command_line =
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "libdir" ] ~docv:"PATH"
             ~doc:
-              "When passed, this directory is prepended to all installed paths.")
-    and+ mandir =
+              "Directory where library files are copied, relative to \
+               $(b,prefix) or absolute. If $(b,--prefix) is specified the \
+               default is $(i,\\$prefix/lib). Only absolute path accepted.")
+    and+ mandir_from_command_line =
       let doc =
-        "When passed, manually override the directory to install man pages"
+        "Manually override the directory to install man pages. Only absolute \
+         path accepted."
       in
-      Arg.(value & opt (some string) None & info [ "mandir" ] ~docv:"PATH" ~doc)
-    and+ docdir =
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "mandir" ] ~docv:"PATH" ~doc)
+    and+ docdir_from_command_line =
       let doc =
-        "When passed, manually override the directory to install documentation"
+        "Manually override the directory to install documentation files. Only \
+         absolute path accepted."
       in
-      Arg.(value & opt (some string) None & info [ "docdir" ] ~docv:"PATH" ~doc)
-    and+ etcdir =
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "docdir" ] ~docv:"PATH" ~doc)
+    and+ etcdir_from_command_line =
       let doc =
-        "When passed, manually override the directory to install configuration \
-         files"
+        "Manually override the directory to install configuration files. Only \
+         absolute path accepted."
       in
-      Arg.(value & opt (some string) None & info [ "etcdir" ] ~docv:"PATH" ~doc)
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "etcdir" ] ~docv:"PATH" ~doc)
+    and+ bindir_from_command_line =
+      let doc =
+        "Manually override the directory to install public binaries. Only \
+         absolute path accepted."
+      in
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "bindir" ] ~docv:"PATH" ~doc)
+    and+ sbindir_from_command_line =
+      let doc =
+        "Manually override the directory to install files from sbin section. \
+         Only absolute path accepted."
+      in
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "sbindir" ] ~docv:"PATH" ~doc)
+    and+ datadir_from_command_line =
+      let doc =
+        "Manually override the directory to install files from share section. \
+         Only absolute path accepted."
+      in
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "datadir" ] ~docv:"PATH" ~doc)
+    and+ libexecdir_from_command_line =
+      let doc =
+        "Manually override the directory to install executable library files. \
+         Only absolute path accepted."
+      in
+      Arg.(
+        value
+        & opt (some absolute_path) None
+        & info [ "libexecdir" ] ~docv:"PATH" ~doc)
     and+ dry_run =
       Arg.(
         value & flag
@@ -441,7 +524,8 @@ let install_uninstall ~what =
         & info [ "relocatable" ]
             ~doc:
               "Make the binaries relocatable (the installation directory can \
-               be moved).")
+               be moved). The installation directory must be specified with \
+               --prefix")
     and+ create_install_files =
       Arg.(
         value & flag
@@ -487,7 +571,7 @@ let install_uninstall ~what =
                 package_is_vendored pkg >>| function
                 | true -> None
                 | false -> Some (Package.name pkg))
-            >>| List.filter_map ~f:Fun.id
+            >>| List.filter_opt
           | l -> Fiber.return l
         in
         let install_files, missing_install_files =
@@ -506,7 +590,7 @@ let install_uninstall ~what =
             ; Pp.enumerate missing_install_files ~f:(fun p ->
                   Pp.text (Path.to_string p))
             ]
-            ~hints:[ Pp.text "try running: dune build @install" ];
+            ~hints:[ Pp.text "try running: dune build [-p <pkg>] @install" ];
         (match
            (contexts, prefix_from_command_line, libdir_from_command_line)
          with
@@ -549,50 +633,52 @@ let install_uninstall ~what =
                  (context, entries_per_package))
         in
         let destdir =
-          if create_install_files then
-            Some (Option.value ~default:"_destdir" destdir)
-          else destdir
+          Option.map ~f:Path.of_string
+            (if create_install_files then
+             Some (Option.value ~default:"_destdir" destdir)
+            else destdir)
         in
+        let relocatable =
+          if relocatable then
+            match prefix_from_command_line with
+            | Some dir -> Some (Path.of_string dir)
+            | None ->
+              User_error.raise
+                [ Pp.text "Option --prefix is needed with --relocation" ]
+          else None
+        in
+
         let open Fiber.O in
         let (module Ops) = file_operations ~dry_run ~workspace in
         let files_deleted_in = ref Path.Set.empty in
+        let from_command_line =
+          let open Install.Section.Paths.Roots in
+          { lib_root = libdir_from_command_line
+          ; etc_root = etcdir_from_command_line
+          ; doc_root = docdir_from_command_line
+          ; man = mandir_from_command_line
+          ; bin = bindir_from_command_line
+          ; sbin = sbindir_from_command_line
+          ; libexec_root = libexecdir_from_command_line
+          ; share_root = datadir_from_command_line
+          }
+          |> map ~f:(Option.map ~f:Path.of_string)
+          |> complete
+        in
         let+ () =
-          let mandir =
-            Option.map ~f:Path.of_string
-              (match mandir with
-              | Some _ -> mandir
-              | None -> Dune_rules.Setup.mandir)
-          in
-          let docdir =
-            Option.map ~f:Path.of_string
-              (match docdir with
-              | Some _ -> docdir
-              | None -> Dune_rules.Setup.docdir)
-          in
-          let etcdir =
-            Option.map ~f:Path.of_string
-              (match etcdir with
-              | Some _ -> etcdir
-              | None -> Dune_rules.Setup.etcdir)
-          in
           Fiber.sequential_iter install_files_by_context
             ~f:(fun (context, entries_per_package) ->
-              let* prefix, libdir =
-                get_dirs context ~prefix_from_command_line
-                  ~libdir_from_command_line
+              let roots =
+                get_dirs context ~prefix_from_command_line ~from_command_line
               in
               let conf =
                 Dune_rules.Artifact_substitution.conf_for_install ~relocatable
                   ~default_ocamlpath:context.default_ocamlpath
-                  ~stdlib_dir:context.stdlib_dir ~prefix ~libdir ~mandir ~docdir
-                  ~etcdir
+                  ~stdlib_dir:context.stdlib_dir ~roots
               in
               Fiber.sequential_iter entries_per_package
                 ~f:(fun (package, entries) ->
-                  let paths =
-                    Install.Section.Paths.make ~package ~destdir:prefix ?libdir
-                      ?mandir ?docdir ?etcdir ()
-                  in
+                  let paths = Install.Section.Paths.make ~package ~roots in
                   let+ entries =
                     Fiber.sequential_map entries ~f:(fun entry ->
                         let special_file = Special_file.of_entry entry in
@@ -623,8 +709,7 @@ let install_uninstall ~what =
                               (match Path.is_directory dst with
                               | true ->
                                 Ops.remove_dir_if_exists ~if_non_empty:Fail dst
-                              | false | (exception _) ->
-                                Ops.remove_file_if_exists dst);
+                              | false -> Ops.remove_file_if_exists dst);
                               print_line "%s %s" msg
                                 (Path.to_string_maybe_quoted dst);
                               Ops.mkdir_p dir;
@@ -652,7 +737,9 @@ let install_uninstall ~what =
         |> List.rev
         |> List.iter ~f:(Ops.remove_dir_if_exists ~if_non_empty:Warn))
   in
-  (term, Cmdliner.Term.info (cmd_what what) ~doc ~man:Common.help_secs)
+  ( term
+  , Cmdliner.Term.info (cmd_what what) ~doc
+      ~man:Manpage.(`S s_synopsis :: (synopsis @ Common.help_secs)) )
 
 let install = install_uninstall ~what:Install
 

@@ -195,6 +195,8 @@ methods and functions to convert data from/to JSON.
 # Disable flake8 entirely on this file:
 # flake8: noqa
 
+# Import annotations to allow forward references
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, NoReturn, Optional, Tuple, Union
 
@@ -478,7 +480,7 @@ let py_type_name env (name : string) =
   | "int" -> "int"
   | "float" -> "float"
   | "string" -> "str"
-  | "abstract" -> (* not supported *) "Any"
+  | "abstract" -> "Any"
   | user_defined -> class_name env user_defined
 
 let option_is_not_implemented loc =
@@ -536,6 +538,7 @@ let rec get_default_default
        | "int" -> Some "0"
        | "float" -> Some "0.0"
        | "string" -> Some {|""|}
+       | "abstract" -> Some "None"
        | _ -> None
       )
   | Name _ -> None
@@ -611,6 +614,7 @@ let rec json_writer env e =
   | Name (loc, (loc2, name, []), an) ->
       (match name with
        | "bool" | "int" | "float" | "string" -> sprintf "_atd_write_%s" name
+       | "abstract" -> "(lambda x: x)"
        | _ -> "(lambda x: x.to_json())")
   | Name (loc, _, _) -> not_implemented loc "parametrized types"
   | Tvar (loc, _) -> not_implemented loc "type variables"
@@ -691,6 +695,7 @@ let rec json_reader env (e : type_expr) =
   | Name (loc, (loc2, name, []), an) ->
       (match name with
        | "bool" | "int" | "float" | "string" -> sprintf "_atd_read_%s" name
+       | "abstract" -> "(lambda x: x)"
        | _ -> sprintf "%s.from_json" (class_name env name))
   | Name (loc, _, _) -> not_implemented loc "parametrized types"
   | Tvar (loc, _) -> not_implemented loc "type variables"
@@ -915,13 +920,13 @@ let alias_wrapper env ~class_decorators name type_expr =
     ]
   ]
 
-let case_class env type_name
+let case_class env ~class_decorators type_name
     (loc, orig_name, unique_name, an, opt_e) =
   let json_name = Atd.Json.get_json_cons orig_name an in
   match opt_e with
   | None ->
       [
-        Line "@dataclass";
+        Inline class_decorators;
         Line (sprintf "class %s:" (trans env unique_name));
         Block [
           Line (sprintf {|"""Original type: %s = [ ... | %s | ... ]"""|}
@@ -949,7 +954,7 @@ let case_class env type_name
       ]
   | Some e ->
       [
-        Line "@dataclass";
+        Inline class_decorators;
         Line (sprintf "class %s:" (trans env unique_name));
         Block [
           Line (sprintf {|"""Original type: %s = [ ... | %s of ... | ... ]"""|}
@@ -1113,7 +1118,7 @@ let sum env ~class_decorators loc name cases =
     ) cases
   in
   let case_classes =
-    List.map (fun x -> Inline (case_class env name x)) cases
+    List.map (fun x -> Inline (case_class env ~class_decorators name x)) cases
     |> double_spaced
   in
   let container_class = sum_container env ~class_decorators loc name cases in
@@ -1165,19 +1170,8 @@ let module_body env x =
   |> List.rev
   |> spaced
 
-let extract_definition_names (items : A.module_body) =
-  List.map (fun (Type (loc, (name, param, an), e)) -> name) items
-
 let definition_group ~atd_filename env
     (is_recursive, (items: A.module_body)) : B.t =
-  if is_recursive then
-    A.error (
-      sprintf "recursive definitions are not supported by atdpy \
-               at this time: types %s in %S"
-        (extract_definition_names items
-         |> String.concat ", ")
-        atd_filename
-    );
   [
     Inline (module_body env items);
   ]

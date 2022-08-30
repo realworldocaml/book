@@ -87,7 +87,7 @@ VERSION=$(shell sed -ne 's/^ *version *: *"\([^"]*\)".*$$/\1/p' ../num.opam)
 
 install:
 	$(INSTALL_DIR) $(DESTDIR)$(STDLIBDIR)
-	sed -e 's/%%VERSION%%/$(VERSION)/g' META.in > META
+	sed -e 's/v1.4+dune2/$(VERSION)/g' META.in > META
 	$(OCAMLFIND) install num META
 	rm -f META
 	$(INSTALL_DATA) $(TOINSTALL) $(DESTDIR)$(STDLIBDIR)
@@ -97,7 +97,7 @@ ifeq "$(SUPPORTS_SHARED_LIBRARIES)" "true"
 endif
 
 findlib-install:
-	sed -e '/\^/d' -e 's/%%VERSION%%/$(VERSION)/g' META.in > META
+	sed -e '/\^/d' -e 's/v1.4+dune2/$(VERSION)/g' META.in > META
 	$(OCAMLFIND) install num META $(TOINSTALL) $(TOINSTALL_STUBS)
 	rm -f META
 

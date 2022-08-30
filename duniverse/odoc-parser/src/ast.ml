@@ -8,7 +8,6 @@
     are out of range. *)
 
 type 'a with_location = 'a Loc.with_location
-
 type style = [ `Bold | `Italic | `Emphasis | `Superscript | `Subscript ]
 
 type reference_kind = [ `Simple | `With_text ]
@@ -22,7 +21,8 @@ type inline_element =
   | `Styled of style * inline_element with_location list
   | `Reference of
     reference_kind * string with_location * inline_element with_location list
-  | `Link of string * inline_element with_location list ]
+  | `Link of string * inline_element with_location list
+  | `Math_span of string  (** @since 2.0.0 *) ]
 (** Inline elements are equivalent to what would be found in a [span] in HTML.
     Mostly these are straightforward. The [`Reference] constructor takes a triple
     whose second element is the reference itself, and the third the replacement
@@ -40,7 +40,8 @@ type nestable_block_element =
   | `List of
     [ `Unordered | `Ordered ]
     * [ `Light | `Heavy ]
-    * nestable_block_element with_location list list ]
+    * nestable_block_element with_location list list
+  | `Math_block of string  (** @since 2.0.0 *) ]
 (** Some block elements may be nested within lists or tags, but not all.
     The [`List] constructor has a parameter of type [\[`Light | `Heavy\]].
     This corresponds to the syntactic constructor used (see the
@@ -68,7 +69,6 @@ type ocamldoc_tag =
 (** ocamldoc tags are those that are specified in the {{:https://ocaml.org/releases/4.12/htmlman/ocamldoc.html#ss:ocamldoc-tags}manual}) *)
 
 type tag = [ ocamldoc_tag | internal_tag ]
-
 type heading = int * string option * inline_element with_location list
 
 type block_element =

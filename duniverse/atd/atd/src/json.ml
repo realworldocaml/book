@@ -6,8 +6,13 @@ type json_float =
   | Float of int option (* max decimal places *)
   | Int
 
+type ocaml_adapter = {
+    normalize : string;
+    restore : string;
+}
+
 type json_adapter = {
-  ocaml_adapter : string option;
+  ocaml_adapter : ocaml_adapter option;
   java_adapter : string option;
 }
 
@@ -45,6 +50,7 @@ type json_sum = {
    into (json_repr * json_adapter).
 *)
 type json_repr =
+  | Abstract
   | Bool
   | Cell
   | Def
@@ -72,6 +78,8 @@ let annot_schema_json : Annot.schema = [
     section = "json";
     fields = [
       Type_expr, "adapter.ocaml";
+      Type_expr, "adapter.to_ocaml";
+      Type_expr, "adapter.from_ocaml";
       Type_expr, "keep_nulls";
       Type_expr, "open_enum";
       Type_expr, "precision";
@@ -130,24 +138,46 @@ let json_list_of_string s : json_list option =
 
 (*
    <json adapter.ocaml="Foo.Bar">
-   --> { ocaml_adapter = Some "Foo.Bar";
+   --> { ocaml_adapter =
+           Some { normalize="Foo.Bar.normalize" restore="Foo.Bar.restore"};
          java_adapter = None; }
 *)
 let get_json_adapter an =
+  let get_field field =
+    Annot.get_opt_field
+      ~parse:(fun s -> Some s)
+      ~sections:["json"]
+      ~field
+      an
+  in
+  let get_loc field = Annot.get_loc_exn ~sections:["json"] ~field an in
   let ocaml_adapter =
-    Annot.get_opt_field
-      ~parse:(fun s -> Some s)
-      ~sections:["json"]
-      ~field:"adapter.ocaml"
-      an
+    let field_module = "adapter.ocaml" in
+    let field_normalize = "adapter.to_ocaml" in
+    let field_restore = "adapter.from_ocaml" in
+    match
+      get_field field_module,
+      get_field field_normalize,
+      get_field field_restore
+    with
+    | None, None, None -> None
+    | Some m, None, None -> Some { normalize = m ^ ".normalize"; restore = m ^ ".restore"; }
+    | None, Some normalize, Some restore ->
+      Some { normalize = "(" ^ normalize ^ ")"; restore = "(" ^ restore ^ ")" }
+    | Some _, _, _ ->
+      Ast.error_at (get_loc field_module)
+        (Printf.sprintf "Cannot use %S field together with %S or %S"
+           field_module field_normalize field_restore)
+    | None, Some _, None ->
+      Ast.error_at (get_loc field_normalize)
+        (Printf.sprintf "%S is used without required counterpart %S"
+           field_normalize field_restore)
+    | None, None, Some _ ->
+      Ast.error_at (get_loc field_restore)
+        (Printf.sprintf "%S is used without required counterpart %S"
+           field_restore field_normalize)
   in
-  let java_adapter =
-    Annot.get_opt_field
-      ~parse:(fun s -> Some s)
-      ~sections:["json"]
-      ~field:"adapter.java"
-      an
-  in
+  let java_adapter = get_field "adapter.java" in
   { ocaml_adapter;
     java_adapter }
 

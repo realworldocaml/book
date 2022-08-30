@@ -244,7 +244,9 @@ of ``atdcat -help``:
 
 ::
 
-  Usage: atdcat FILE
+  Usage: _build/install/default/bin/atdcat FILE
+    -o <path>
+            write to this file instead of stdout
     -x 
             make type expressions monomorphic
     -xk 
@@ -253,11 +255,20 @@ of ``atdcat -help``:
     -xd 
             debug mode implying -x
     -i 
-            expand all `inherit' statements
+            expand all 'inherit' statements
     -if 
-            expand `inherit' statements in records
+            expand 'inherit' statements in records
     -iv 
-            expand `inherit' statements in sum types
+            expand 'inherit' statements in sum types
+    -jsonschema <root type name>
+            translate the ATD file to JSON Schema.
+    -jsonschema-no-additional-properties 
+            emit a JSON Schema that doesn't tolerate extra fields on JSON
+            objects.
+    -jsonschema-version { draft-2019-09 | draft-2020-12 }
+            specify which version of the JSON Schema standard to target.
+            Default: latest supported version, which is currently
+            'draft-2020-12  '.
     -ml <name>
             output the ocaml code of the ATD abstract syntax tree
     -html-doc 
@@ -509,14 +520,19 @@ Type name          Intended use
                    may be applied, as specified by
                    language-specific annotations.
 
-``abstract``       Type defined elsewhere
+``abstract``       Unspecified type. By default, this is meant to
+                   accept any data that is syntactically valid, such as
+                   any JSON data that could be parsed successfully.
+                   With the help of ATD annotations, this can be
+                   used to express types not supported by the ATD
+                   language such as "either a boolean or a string".
 ================== =========================================================
 
 
-Shared values
-^^^^^^^^^^^^^
+Shared values (deprecated)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-ATD supports a special type $x$ `shared` where $x$ can be
+ATD supports a special type ``x shared`` where ``x`` can be
 any monomorphic type expression.
 It allows notably to represent cyclic values and to enforce that cycles
 are preserved during transformations such as serialization.
@@ -534,7 +550,7 @@ are preserved during transformations such as serialization.
 Two shared values that are physically identical must remain physically
 identical after any translation from one data format to another.
 
-Each occurrence of a `shared` type expression in the ATD
+Each occurrence of a ``shared`` type expression in the ATD
 source definition defines its own sharing point.
 Therefore the following attempt at defining a graph type will not
 preserve cycles because two sharing points are defined:
@@ -553,7 +569,7 @@ preserve cycles because two sharing points are defined:
 There is actually a way of having multiple ``shared`` type expressions using the
 same sharing point but this feature is designed for code generators and should
 not be used in handwritten ATD definitions. The technique consists in providing
-an annotation of the form ``<share id=`_x_`>`` where _x_ is any string
+an annotation of the form ``<share id=x>`` where ``x`` is any string
 identifying the sharing point. The graph example can be rewritten correctly as:
 
 .. code-block:: ocaml

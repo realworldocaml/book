@@ -119,6 +119,21 @@ val get_opt_field :
   (** This is the same as [get_field] except that no default value
       for the field exists. *)
 
+val get_loc :
+  sections:string list ->
+  field:string ->
+  t -> Ast.loc option
+  (** Returns the location of the annotation. Useful for error
+      reporting. *)
+
+val get_loc_exn :
+  sections:string list ->
+  field:string ->
+  t -> Ast.loc
+  (** Returns the location of the annotation. Useful for error
+      reporting. *)
+
+
 val set_field :
   loc:Ast.loc ->
   section:string ->

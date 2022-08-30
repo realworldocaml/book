@@ -1,3 +1,11 @@
+## v3.5.0 (2022-07-08)
+
+ * Add 4.14 entry (@dra27 #45)
+ * Add 5.0 entry (@dra27 @kit-ty-kate #44)
+ * Add oldest versions of OCaml that support arm64, ppc64le and s390x (@tmcgilchrist #47)
+ * Add 5.1.0 trunk development version (@dra27 #48)
+ * Add riscv64 for 4.11 onwards (@mtelvers @dra27 #49)
+
 ## v3.4.0 (2021-10-05)
 
 * Add 4.13.1 entry (@Octachron #42)

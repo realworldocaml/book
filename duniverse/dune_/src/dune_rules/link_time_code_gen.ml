@@ -1,10 +1,9 @@
-open! Dune_engine
 open Import
 module CC = Compilation_context
 module SC = Super_context
 
 type t =
-  { to_link : Lib.Lib_and_module.t list
+  { to_link : Lib_flags.Lib_and_module.L.t
   ; force_linkall : bool
   }
 
@@ -80,11 +79,12 @@ let findlib_init_code ~preds ~libs =
       pr buf "Findlib.record_package Findlib.Record_core %S;;"
         (Lib_name.to_string lib));
   prvariants buf "preds" preds;
-  pr buf "in";
-  pr buf "let preds =";
-  pr buf "  (if Dynlink.is_native then \"native\" else \"byte\") :: preds";
-  pr buf "in";
-  pr buf "Findlib.record_package_predicates preds;;";
+  pr buf
+    {ocaml|in
+let preds =
+  (if Dynlink.is_native then "native" else "byte") :: preds
+in
+Findlib.record_package_predicates preds;;|ocaml};
   Buffer.contents buf
 
 let build_info_code cctx ~libs ~api_version =
@@ -143,7 +143,8 @@ let build_info_code cctx ~libs ~api_version =
             | Public (_, p) -> version_of_package placeholders p
             | Private _ ->
               let p =
-                Path.drop_build_context_exn (Obj_dir.dir (Lib.obj_dir lib))
+                Lib.info lib |> Lib_info.obj_dir |> Obj_dir.dir
+                |> Path.drop_build_context_exn
               in
               placeholder placeholders p)
         in
@@ -152,20 +153,21 @@ let build_info_code cctx ~libs ~api_version =
   let libs = List.rev libs in
   let buf = Buffer.create 1024 in
   (* Parse the replacement format described in [artifact_substitution.ml]. *)
-  pr buf "let eval s =";
-  pr buf "  let s = Bytes.unsafe_to_string (Bytes.unsafe_of_string s) in";
-  pr buf "  let len = String.length s in";
-  pr buf "  if s.[0] = '=' then";
-  pr buf "    let colon_pos = String.index_from s 1 ':' in";
-  pr buf "    let vlen = int_of_string (String.sub s 1 (colon_pos - 1)) in";
-  pr buf "    (* This [min] is because the value might have been truncated";
-  pr buf "       if it was too large *)";
-  pr buf "    let vlen = min vlen (len - colon_pos - 1) in";
-  pr buf "    Some (String.sub s (colon_pos + 1) vlen)";
-  pr buf "  else";
-  pr buf "    None";
-  pr buf "[@@inline never]";
-  pr buf "";
+  pr buf
+    {ocaml|let eval s =
+  let s = Bytes.unsafe_to_string (Bytes.unsafe_of_string s) in
+  let len = String.length s in
+  if s.[0] = '=' then
+    let colon_pos = String.index_from s 1 ':' in
+    let vlen = int_of_string (String.sub s 1 (colon_pos - 1)) in
+    (* This [min] is because the value might have been truncated
+       if it was too large *)
+    let vlen = min vlen (len - colon_pos - 1) in
+    Some (String.sub s (colon_pos + 1) vlen)
+  else
+    None
+[@@inline never]
+|ocaml};
   let fmt_eval : _ format6 = "let %s = eval %S" in
   Path.Source.Map.iteri placeholders ~f:(fun path var ->
       pr buf fmt_eval var
@@ -187,10 +189,12 @@ let dune_site_code () =
 
 let dune_site_plugins_code ~libs ~builtins =
   let buf = Buffer.create 5000 in
-  pr buf "let findlib_predicates_set_by_dune pred =";
-  pr buf "   match Sys.backend_type, pred with";
-  pr buf "   | Sys.Native, \"native\" -> true";
-  pr buf "   | Sys.Bytecode, \"byte\" -> true";
+  pr buf
+    {ocaml|
+let findlib_predicates_set_by_dune pred =
+   match Sys.backend_type, pred with
+   | Sys.Native, "native" -> true
+   | Sys.Bytecode, "byte" -> true|ocaml};
   Variant.Set.iter Findlib.findlib_predicates_set_by_dune ~f:(fun variant ->
       pr buf "   | _, %S -> true" (Variant.to_string variant));
   pr buf "   | _, _ -> false";
@@ -218,7 +222,13 @@ let handle_special_libs cctx =
   let obj_dir = Compilation_context.obj_dir cctx |> Obj_dir.of_local in
   let sctx = CC.super_context cctx in
   let ctx = Super_context.context sctx in
-  let module LM = Lib.Lib_and_module in
+  let open Memo.O in
+  let* builtins =
+    let+ findlib =
+      Findlib.create ~paths:ctx.findlib_paths ~lib_config:ctx.lib_config
+    in
+    Findlib.builtins findlib
+  in
   let rec process_libs ~to_link_rev ~force_linkall libs =
     match libs with
     | [] ->
@@ -226,9 +236,7 @@ let handle_special_libs cctx =
     | lib :: libs -> (
       match Lib_info.special_builtin_support (Lib.info lib) with
       | None ->
-        process_libs libs
-          ~to_link_rev:(LM.Lib lib :: to_link_rev)
-          ~force_linkall
+        process_libs libs ~to_link_rev:(Lib lib :: to_link_rev) ~force_linkall
       | Some special -> (
         match special with
         | Build_info { data_module; api_version } ->
@@ -241,7 +249,7 @@ let handle_special_libs cctx =
               ~precompiled_cmi:true
           in
           process_libs libs
-            ~to_link_rev:(LM.Lib lib :: Module (obj_dir, module_) :: to_link_rev)
+            ~to_link_rev:(Lib lib :: Module (obj_dir, module_) :: to_link_rev)
             ~force_linkall
         | Findlib_dynload ->
           (* If findlib.dynload is linked, we stores in the binary the packages
@@ -250,7 +258,7 @@ let handle_special_libs cctx =
           let requires =
             (* This shouldn't fail since findlib.dynload depends on dynlink and
                findlib. That's why it's ok to use a dummy location. *)
-            let db = SC.public_libs sctx in
+            let* db = Scope.DB.public_libs (Super_context.context sctx) in
             let open Resolve.Memo.O in
             let+ dynlink =
               Lib.DB.resolve db (Loc.none, Lib_name.of_string "dynlink")
@@ -270,18 +278,15 @@ let handle_special_libs cctx =
               ~requires ~precompiled_cmi:false
           in
           process_libs libs
-            ~to_link_rev:(LM.Module (obj_dir, module_) :: Lib lib :: to_link_rev)
+            ~to_link_rev:(Module (obj_dir, module_) :: Lib lib :: to_link_rev)
             ~force_linkall:true
         | Configurator _ ->
-          process_libs libs
-            ~to_link_rev:(LM.Lib lib :: to_link_rev)
-            ~force_linkall
+          process_libs libs ~to_link_rev:(Lib lib :: to_link_rev) ~force_linkall
         | Dune_site { data_module; plugins } ->
           let code =
             if plugins then
               Action_builder.return
-                (dune_site_plugins_code ~libs:all_libs
-                   ~builtins:(Findlib.builtins ctx.Context.findlib))
+                (dune_site_plugins_code ~libs:all_libs ~builtins)
             else Action_builder.return (dune_site_code ())
           in
           let& module_ =
@@ -290,7 +295,7 @@ let handle_special_libs cctx =
               ~precompiled_cmi:true
           in
           process_libs libs
-            ~to_link_rev:(LM.Lib lib :: Module (obj_dir, module_) :: to_link_rev)
+            ~to_link_rev:(Lib lib :: Module (obj_dir, module_) :: to_link_rev)
             ~force_linkall:true))
   in
   process_libs all_libs ~to_link_rev:[] ~force_linkall:false

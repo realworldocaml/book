@@ -1,0 +1,30 @@
+{0 Ppxlib's user manual}
+
+{1 Overview}
+
+This is the user manual and api for ppxlib, the core of the ppx meta-programming
+system for {{:https://ocaml.org/}OCaml} and its derivatives such as
+{{:https://reasonml.github.io/}Reason}. This manual is aimed at both users and
+authors of ppx rewriters and contains everything one should know in order to use
+or write ppx rewriters.
+
+It is assumed in this manual that the user is familiar with the
+{{:https://dune.build/}Dune} build system. In particular, all the examples in
+this manual referring to the build system will present
+{{:https://dune.build/}Dune} configurations files and commands. It is possible
+to use ppxlib with other build systems, however this is not covered by this
+manual.
+
+{1 Manual}
+
+The {{!page-manual}manual} consists of three main sections:
+
+- {{!page-manual."what-is-ppx"}What is ppx}
+- {{!page-manual."ppxlib-for-end-users"}Ppxlib for end users}
+- {{!page-manual."ppxlib-for-plugin-authors"}Ppxlib for plugin authors}
+
+{1 API}
+
+The API exposes the following modules:
+
+{!modules: ppxlib ppxlib_ast astlib ppxlib_metaquot Ppxlib_metaquot_lifters Ppxlib_print_diff Ppxlib_runner Ppxlib_runner_as_ppx Stdppx Ppxlib_traverse Ppxlib_traverse_builtins}

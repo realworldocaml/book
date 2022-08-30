@@ -8,8 +8,6 @@
 #define _GNU_SOURCE
 #define _POSIX_PTHREAD_SEMANTICS
 
-#define CAML_NAME_SPACE
-
 #include <caml/alloc.h>
 #include <caml/bigarray.h>
 #include <caml/callback.h>
@@ -105,13 +103,6 @@ void lwt_unix_not_available(char const *feature) {
    | Operation on bigarrays                                          |
    +-----------------------------------------------------------------+ */
 
-/* Needed while Lwt supports OCaml < 4.06. */
-#ifdef Bytes_val
-#define Lwt_bytes_val(v) Bytes_val(v)
-#else
-#define Lwt_bytes_val(v) String_val(v)
-#endif
-
 CAMLprim value lwt_unix_blit(value val_buf1, value val_ofs1, value val_buf2,
                              value val_ofs2, value val_len) {
   memmove((char *)Caml_ba_data_val(val_buf2) + Long_val(val_ofs2),
@@ -124,7 +115,7 @@ CAMLprim value lwt_unix_blit_from_bytes(value val_buf1, value val_ofs1,
                                         value val_buf2, value val_ofs2,
                                         value val_len) {
   memcpy((char *)Caml_ba_data_val(val_buf2) + Long_val(val_ofs2),
-         Lwt_bytes_val(val_buf1) + Long_val(val_ofs1), Long_val(val_len));
+         Bytes_val(val_buf1) + Long_val(val_ofs1), Long_val(val_len));
   return Val_unit;
 }
 
@@ -140,7 +131,7 @@ CAMLprim value lwt_unix_blit_from_string(value val_buf1, value val_ofs1,
 CAMLprim value lwt_unix_blit_to_bytes(value val_buf1, value val_ofs1,
                                       value val_buf2, value val_ofs2,
                                       value val_len) {
-  memcpy(Lwt_bytes_val(val_buf2) + Long_val(val_ofs2),
+  memcpy(Bytes_val(val_buf2) + Long_val(val_ofs2),
          (char *)Caml_ba_data_val(val_buf1) + Long_val(val_ofs1),
          Long_val(val_len));
   return Val_unit;
@@ -342,8 +333,57 @@ void lwt_unix_condition_wait(lwt_unix_condition *condition,
 
 #if defined(LWT_ON_WINDOWS)
 
+#if OCAML_VERSION < 41400
+static int win_set_inherit(HANDLE fd, BOOL inherit)
+{
+  if (! SetHandleInformation(fd,
+                             HANDLE_FLAG_INHERIT,
+                             inherit ? HANDLE_FLAG_INHERIT : 0)) {
+    win32_maperr(GetLastError());
+    return -1;
+  }
+  return 0;
+}
+#endif
+
+static SOCKET lwt_win_socket(int domain, int type, int protocol,
+                             LPWSAPROTOCOL_INFO info,
+                             BOOL inherit)
+{
+  SOCKET s;
+  DWORD flags = WSA_FLAG_OVERLAPPED;
+
+#ifndef WSA_FLAG_NO_HANDLE_INHERIT
+#define WSA_FLAG_NO_HANDLE_INHERIT 0x80
+#endif
+
+  if (! inherit)
+    flags |= WSA_FLAG_NO_HANDLE_INHERIT;
+
+  s = WSASocket(domain, type, protocol, info, 0, flags);
+  if (s == INVALID_SOCKET) {
+    if (! inherit && WSAGetLastError() == WSAEINVAL) {
+      /* WSASocket probably doesn't suport WSA_FLAG_NO_HANDLE_INHERIT,
+       * retry without. */
+      flags &= ~(DWORD)WSA_FLAG_NO_HANDLE_INHERIT;
+      s = WSASocket(domain, type, protocol, info, 0, flags);
+      if (s == INVALID_SOCKET)
+        goto err;
+      win_set_inherit((HANDLE) s, FALSE);
+      return s;
+    }
+    goto err;
+  }
+
+  return s;
+
+ err:
+  win32_maperr(WSAGetLastError());
+  return INVALID_SOCKET;
+}
+
 static void lwt_unix_socketpair(int domain, int type, int protocol,
-                                SOCKET sockets[2]) {
+                                SOCKET sockets[2], BOOL inherit) {
   union {
     struct sockaddr_in inaddr;
     struct sockaddr_in6 inaddr6;
@@ -360,7 +400,7 @@ static void lwt_unix_socketpair(int domain, int type, int protocol,
   sockets[0] = INVALID_SOCKET;
   sockets[1] = INVALID_SOCKET;
 
-  listener = socket(domain, type, protocol);
+  listener = lwt_win_socket(domain, type, protocol, NULL, inherit);
   if (listener == INVALID_SOCKET) goto failure;
 
   memset(&a, 0, sizeof(a));
@@ -394,7 +434,7 @@ static void lwt_unix_socketpair(int domain, int type, int protocol,
 
   if (listen(listener, 1) == SOCKET_ERROR) goto failure;
 
-  sockets[0] = socket(domain, type, protocol);
+  sockets[0] = lwt_win_socket(domain, type, protocol, NULL, inherit);
   if (sockets[0] == INVALID_SOCKET) goto failure;
 
   addrlen = domain == PF_INET ? sizeof(a.inaddr) : sizeof(a.inaddr6);
@@ -421,14 +461,15 @@ static int socket_domain_table[] = {PF_UNIX, PF_INET, PF_INET6};
 static int socket_type_table[] = {SOCK_STREAM, SOCK_DGRAM, SOCK_RAW,
                                   SOCK_SEQPACKET};
 
-CAMLprim value lwt_unix_socketpair_stub(value domain, value type,
+CAMLprim value lwt_unix_socketpair_stub(value cloexec, value domain, value type,
                                         value protocol) {
-  CAMLparam3(domain, type, protocol);
+  CAMLparam4(cloexec, domain, type, protocol);
   CAMLlocal1(result);
   SOCKET sockets[2];
   lwt_unix_socketpair(socket_domain_table[Int_val(domain)],
                       socket_type_table[Int_val(type)], Int_val(protocol),
-                      sockets);
+                      sockets,
+                      ! unix_cloexec_p(cloexec));
   result = caml_alloc_tuple(2);
   Store_field(result, 0, win_alloc_socket(sockets[0]));
   Store_field(result, 1, win_alloc_socket(sockets[1]));
@@ -608,18 +649,6 @@ value lwt_unix_recv_notifications() {
 
 #if defined(LWT_ON_WINDOWS)
 
-static SOCKET set_close_on_exec(SOCKET socket) {
-  SOCKET new_socket;
-  if (!DuplicateHandle(GetCurrentProcess(), (HANDLE)socket, GetCurrentProcess(),
-                       (HANDLE *)&new_socket, 0L, FALSE,
-                       DUPLICATE_SAME_ACCESS)) {
-    win32_maperr(GetLastError());
-    uerror("set_close_on_exec", Nothing);
-  }
-  closesocket(socket);
-  return new_socket;
-}
-
 static SOCKET socket_r, socket_w;
 
 static int windows_notification_send() {
@@ -653,10 +682,10 @@ value lwt_unix_init_notification() {
 
   /* Since pipes do not works with select, we need to use a pair of
      sockets. */
-  lwt_unix_socketpair(AF_INET, SOCK_STREAM, IPPROTO_TCP, sockets);
+  lwt_unix_socketpair(AF_INET, SOCK_STREAM, IPPROTO_TCP, sockets, FALSE);
 
-  socket_r = set_close_on_exec(sockets[0]);
-  socket_w = set_close_on_exec(sockets[1]);
+  socket_r = sockets[0];
+  socket_w = sockets[1];
   notification_mode = NOTIFICATION_MODE_WINDOWS;
   notification_send = windows_notification_send;
   notification_recv = windows_notification_recv;
@@ -690,7 +719,7 @@ static int eventfd_notification_recv() {
 static int notification_fds[2];
 
 static int pipe_notification_send() {
-  char buf;
+  char buf = 0;
   return write(notification_fds[1], &buf, 1);
 }
 
@@ -992,7 +1021,10 @@ static void *worker_loop(void *data) {
 /* Description of jobs. */
 struct custom_operations job_ops = {
     "lwt.unix.job",      custom_finalize_default,  custom_compare_default,
-    custom_hash_default, custom_serialize_default, custom_deserialize_default};
+    custom_hash_default, custom_serialize_default, custom_deserialize_default,
+    custom_compare_ext_default,
+    NULL
+};
 
 /* Get the job structure contained in a custom value. */
 #define Job_val(v) *(lwt_unix_job *)Data_custom_val(v)

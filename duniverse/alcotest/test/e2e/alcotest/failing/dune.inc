@@ -41,7 +41,7 @@
  (target bail.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:bail.exe})))))
 
 (rule
@@ -60,7 +60,7 @@
  (target bail-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:bail.bc.js})))))
 
 (rule
@@ -79,7 +79,7 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:check_basic.exe})))))
 
 (rule
@@ -98,7 +98,7 @@
  (target check_basic-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:check_basic.bc.js})))))
 
 (rule
@@ -117,7 +117,7 @@
  (target check_located.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:check_located.exe})))))
 
 (rule
@@ -136,7 +136,7 @@
  (target check_located-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:check_located.bc.js})))))
 
 (rule
@@ -155,7 +155,7 @@
  (target check_long.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:check_long.exe})))))
 
 (rule
@@ -174,7 +174,7 @@
  (target check_long-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:check_long.bc.js})))))
 
 (rule
@@ -193,7 +193,7 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:compact.exe})))))
 
 (rule
@@ -212,7 +212,7 @@
  (target compact-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:compact.bc.js})))))
 
 (rule
@@ -231,7 +231,7 @@
  (target duplicate_test_names.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:duplicate_test_names.exe})))))
 
 (rule
@@ -250,7 +250,7 @@
  (target duplicate_test_names-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:duplicate_test_names.bc.js})))))
 
 (rule
@@ -269,7 +269,7 @@
  (target empty_suite_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:empty_suite_name.exe})))))
 
 (rule
@@ -288,7 +288,7 @@
  (target empty_suite_name-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:empty_suite_name.bc.js})))))
 
 (rule
@@ -307,7 +307,7 @@
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:exception_in_test.exe})))))
 
 (rule
@@ -326,7 +326,7 @@
  (target exception_in_test-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:exception_in_test.bc.js})))))
 
 (rule
@@ -345,7 +345,7 @@
  (target filter_all_tests.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:filter_all_tests.exe} test bar 1)))))
 
 (rule
@@ -364,7 +364,7 @@
  (target filter_all_tests-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:filter_all_tests.bc.js} test bar 1)))))
 
 (rule
@@ -383,7 +383,7 @@
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:invalid_arg_in_test.exe})))))
 
 (rule
@@ -402,7 +402,7 @@
  (target invalid_arg_in_test-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:invalid_arg_in_test.bc.js})))))
 
 (rule
@@ -421,7 +421,7 @@
  (target long_test_case_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:long_test_case_name.exe})))))
 
 (rule
@@ -440,7 +440,7 @@
  (target long_test_case_name-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:long_test_case_name.bc.js})))))
 
 (rule
@@ -459,7 +459,7 @@
  (target outside_runner.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:outside_runner.exe})))))
 
 (rule
@@ -478,7 +478,7 @@
  (target outside_runner-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:outside_runner.bc.js})))))
 
 (rule
@@ -497,7 +497,7 @@
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:tail_errors_limit.exe})))))
 
 (rule
@@ -516,7 +516,7 @@
  (target tail_errors_limit-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:tail_errors_limit.bc.js})))))
 
 (rule
@@ -535,7 +535,7 @@
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:tail_errors_unlimited.exe})))))
 
 (rule
@@ -554,7 +554,7 @@
  (target tail_errors_unlimited-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:tail_errors_unlimited.bc.js})))))
 
 (rule
@@ -573,7 +573,7 @@
  (target unknown_option.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run %{dep:unknown_option.exe} --dry-runn)))))
 
 (rule
@@ -592,7 +592,7 @@
  (target unknown_option-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124 125)
     (run node %{dep:unknown_option.bc.js} --dry-runn)))))
 
 (rule

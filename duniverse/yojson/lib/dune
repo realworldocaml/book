@@ -23,7 +23,6 @@
    write.mli
    read.mli
    safe.mli
-   pretty.mli
    write2.mli
    common.mli
    util.mli
@@ -33,8 +32,7 @@
 (library
  (name yojson)
  (public_name yojson)
- (modules yojson yojson_biniou)
- (wrapped false)
- (synopsis "JSON parsing and printing (successor of json-wheel)")
- (flags (-safe-string))
- (libraries easy-format biniou))
+ (modules yojson)
+ (synopsis "JSON parsing and printing")
+ (libraries seq)
+ (flags (-safe-string)))

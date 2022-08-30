@@ -1,4 +1,4 @@
-{0 Mtime {%html: <span class="version">v1.4.0+dune</span>%}}
+{0 Mtime {%html: <span class="version">v1.4.0+dune2</span>%}}
 
 Mtime has platform independent support for monotonic wall-clock time.
 This time increases monotonically and is not subject to operating

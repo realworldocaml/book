@@ -1,19 +1,15 @@
 (library
   (name num)
   (public_name num)
-  (wrapped false)
-  (modules )
-  (synopsis "Arbitrary-precision rational arithmetic")
-  (libraries num.core))
-
-(library
-  (name num_core)
-  (public_name num.core)
-  (wrapped false)
   (modules arith_flags arith_status big_int int_misc nat num ratio)
-  (c_names nat_stubs bng bng_generic)
-  (c_flags "-DBNG_ARCH_%{architecture}")
-  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -bin-annot -g -safe-string -strict-sequence -strict-formats))
+  (foreign_stubs
+    (language c)
+    (names nat_stubs bng bng_generic)
+    (flags :standard "-DBNG_ARCH_%{architecture}")
+    (extra_deps "bng_digit.c" "bng_amd64.c" "bng_arm64.c" "bng_ia32.c" "bng_ppc.c"))
+  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -bin-annot -g -safe-string -strict-sequence -strict-formats)
+  (wrapped false)
+  (synopsis "Arbitrary-precision rational arithmetic"))
 
 (rule
   (targets bng_generic.c)

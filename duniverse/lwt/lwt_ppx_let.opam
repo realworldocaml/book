@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "Dummy package context for ppx_let tests"
 
-version: "5.5.0"
+version: "5.6.0"
 license: "MIT"
 homepage: "https://github.com/ocsigen/lwt"
 doc: "https://ocsigen.org/lwt"
@@ -22,6 +22,7 @@ depends: [
   "dune" {>= "1.8.0"}
   "lwt"
   "ppx_let" {with-test}
+  "ocaml" {>= "4.08"}
 ]
 
 description: "Internal package used to partition ppx_let tests."

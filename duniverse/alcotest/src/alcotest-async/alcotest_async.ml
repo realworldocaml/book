@@ -1,5 +1,4 @@
-open Core
-open Async_kernel
+open Async
 open Async_unix
 
 let run_test timeout name fn args =
@@ -8,7 +7,7 @@ let run_test timeout name fn args =
   | `Timeout ->
       Alcotest.fail
         (Printf.sprintf "%s timed out after %s" name
-           (Time.Span.to_string_hum timeout))
+           (Time_unix.Span.to_string_hum timeout))
 
 module Promise = struct
   include Deferred
@@ -25,7 +24,7 @@ module V1 = struct
 
   let test_case_sync n s f = test_case n s (fun x -> Deferred.return (f x))
 
-  let test_case ?(timeout = sec 2.) name s f =
+  let test_case ?(timeout = Time_unix.Span.of_sec 2.) name s f =
     test_case name s (run_test timeout name f)
 end
 

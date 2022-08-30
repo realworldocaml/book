@@ -10,3 +10,4 @@
 (rule (copy atd.opam.template atdj.opam.template))
 (rule (copy atd.opam.template atdpy.opam.template))
 (rule (copy atd.opam.template atds.opam.template))
+(rule (copy atd.opam.template atdts.opam.template))

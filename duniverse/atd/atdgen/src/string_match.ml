@@ -298,7 +298,10 @@ let make_ocaml_int_mapping
             pos_id len_id pos_id len_id string_id
         );
         Block [
-          Line "invalid_arg \"out-of-bounds substring position or length\";";
+          Line "invalid_arg (Printf.sprintf \
+                \"out-of-bounds substring position or length: \
+                string = %S, requested position = %i, requested length = %i\" \
+                s pos len);";
         ];
         Inline int_mapping_body;
       ];
