@@ -26,7 +26,7 @@ We'll start out by covering the basic mechanics of first-class modules
 by working through some toy examples. We'll get to more realistic
 examples in the next section.
 
-### Creating first-class modules
+### Creating First-Class Modules
 
 In that light, consider the following signature of a module with a
 single integer variable:
@@ -61,7 +61,7 @@ We can convert `Three` into a first-class module as follows:
 val three : (module X_int) = <module>
 ```
 
-### Inference and anonymous modules
+### Inference and Anonymous Modules
 
 The module type doesn't need to be part of the construction of a
 first-class module if it can be inferred. Thus, we can write:
@@ -80,7 +80,7 @@ We can also create a first-class module from an anonymous module:
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
-### Unpacking first-class modules
+### Unpacking First-Class Modules
 
 In order to access the contents of a first-class module, you need to unpack
 it into an ordinary module. This can be done using the `val` keyword, using
@@ -100,7 +100,7 @@ module New_three : X_int
 - : int = 3
 ```
 
-### Functions for manipulating first-class modules
+### Functions for Manipulating First-Class Modules
 
 We can also write ordinary functions which consume and create first-class
 modules. The following shows the definition of two functions: `to_int`, which
@@ -138,7 +138,7 @@ val six : (module X_int) = <module>
 - : int = 12
 ```
 
-### Richer first-class modules
+### Richer First-Class Modules
 
 First-class modules can contain types and functions in addition to simple
 values like `int`. Here's an interface that contains a type and a

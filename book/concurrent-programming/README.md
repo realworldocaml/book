@@ -238,7 +238,7 @@ Note that `count_lines` returns a deferred, but `utop` waits for that
 deferred to become determined, and shows us the contents of the
 deferred instead.
 
-### Using let syntax
+### Using Let Syntax
 
 As was discussed in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
@@ -393,7 +393,7 @@ you should stick to the simpler map/bind/return style of working with
 deferreds when you can.
 
 ::: {data-type=note}
-#### Understanding `bind` in terms of ivars and `upon`
+#### Understanding `bind` in Terms of Ivars and `upon`
 
 Here's roughly what happens when you write `let d' = Deferred.bind d ~f`.
 
@@ -484,7 +484,7 @@ unbounded amounts of memory, as it keeps track of all the data it
 intends to write but hasn't been able to yet.
 
 ::: {data-type=note}
-#### Tail-calls and chains of deferreds
+#### Tail-Calls and Chains of Deferreds
 
 There's another memory problem you might be concerned about, which is
 the allocation of deferreds.  If you think about the execution of

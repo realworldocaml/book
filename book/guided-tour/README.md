@@ -37,12 +37,13 @@ but it's worth understanding the differences between these libraries.
   same time, it has many more dependencies, and so takes longer to
   build, and will add more to the size of your executables.
 
-As of this writing, the stable release of `Core` is less portable than
-`Base`, running only on UNIX-like systems.  For that reason, there's
-yet a third library, `Core_kernel`, which is a portable subset of
-`Core`. That said, the latest development version removes
-`Core_kernel`, and makes `Core` itself portable.  The stable release
-should have `Core_kernel` removed by mid-2022, so we won't use
+As of the version of `Base` and `Core` used in this book (version
+`v0.14`), `Core` is less portable than `Base`, running only on
+UNIX-like systems.  For that reason, there is another package,
+`Core_kernel`, which is the portable subset of `Core`.  That said, in
+the latest stable release, `v0.15` (which was released too late to be
+adopted for this edition of the book) `Core` is portable, and
+`Core_kernel` has been deprecated. Given that, we don't use
 `Core_kernel` in this text.
 
 :::
@@ -503,7 +504,7 @@ This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
 ::: {data-type=note}
-#### Operators in `Base` and the stdlib
+#### Operators in `Base` and the Stdlib
 
 OCaml's standard library and `Base` mostly use the same operators for
 the same things, but there are some differences.  For example, in
@@ -544,7 +545,7 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-#### The List module
+#### The List Module
 
 `Base` comes with a `List` module that has a rich collection of functions for
 working with lists. We can access values from within a module by using dot
@@ -581,7 +582,7 @@ see here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 We'll learn more about labeled arguments and why they're important in
 [Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
-#### Constructing lists with ::
+#### Constructing Lists with ::
 
 In addition to constructing lists using brackets, we can use the list
 constructor `::` for adding elements to the front of a list:[operators/: :
@@ -656,7 +657,7 @@ It's important to remember that, unlike `::`, this is not a constant-time
 operation. Concatenating two lists takes time proportional to the length of
 the first list.
 
-#### List patterns using match
+#### List Patterns Using Match
 
 The elements of a list can be accessed through pattern matching. List
 patterns are based on the two list constructors, `[]` and `::`. Here's a
@@ -731,7 +732,7 @@ written down with one or more `::`'s. The second pattern, `[]`, matches only
 the empty list. These cases are exhaustive, since every list is either empty
 or has at least one element, a fact that is verified by the compiler.
 
-#### Recursive list functions
+#### Recursive List Functions
 
 Recursive functions, or functions that call themselves, are an important part
 of working in OCaml or really any functional language. The typical approach
@@ -1017,7 +1018,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-#### `Base` and polymorphic comparison
+#### `Base` and Polymorphic Comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,
@@ -1394,8 +1395,20 @@ argument of type `float`.
 ### Compiling and Running
 
 We'll compile our program using `dune`, a build system that's designed
-for use with OCaml projects. First, we need to write a `dune` file to
-specify the build.
+for use with OCaml projects. First, we need to write a `dune-project`
+file to specify the project's root directory.
+
+```scheme file=examples/correct/sum/dune-project
+(lang dune 2.9)
+(name rwo-example)
+```
+
+Then, we need to write a `dune` file to specify the specific thing
+being built.  Note that a single project will have just one
+`dune-project` file, but potentially many sub-directories with
+different `dune` files.
+
+In this case, however, we just have one:
 
 ```scheme file=examples/correct/sum/dune
 (executable
@@ -1403,9 +1416,9 @@ specify the build.
  (libraries base stdio))
 ```
 
-All we need to specify is the fact that we're building an executable rather
-than a library, the name of the executable, and the name of the libraries we
-depend on.
+All we need to specify is the fact that we're building an executable
+(rather than a library), the name of the executable, and the name of
+the libraries we depend on.
 
 We can now invoke dune to build the executable.
 

@@ -2060,6 +2060,8 @@
  \columnsep 1pc
  \twocolumn[\vspace*{10\p@}\mbox{}\par\@makeschapterhead{#1}]
  \@mkboth{#1}{#1}
+ \def\leftmark{\indexname}%
+ \def\rightmark{\indexname}%
  \typeout{#1.}
  \ifAJW@indentsty
   \ifdim\AJW@indent>\z@
@@ -2699,10 +2701,11 @@
 %
 \newcommand\@greyrunningheadrule{%
 \setlength\fboxsep{1\p@}%
-  \def\FrameCommand{\hspace*{-17mm}\colorbox{thirtycolor}}%  %%EngD changed
+  \def\FrameCommand{\if@twocolumn\else\hspace*{-17mm}\fi\colorbox{thirtycolor}}%  %%EngD changed
   \parindent0pt%
 % frame needs to be \hsize + 17mm - 2x \fboxsep   %%EngD changed
   \MakeFramed{%
+    \if@twocolumn\hsize=\textwidth\advance\hsize 2\fboxsep\fi%
     \advance\hsize-\width
     \advance\hsize\fourpica
     \advance\hsize-2\fboxsep
@@ -2713,6 +2716,7 @@
 
 \newcommand\@insertgreyrunningheadrule{%
   {\parindent0pt\par\vbox to .5pt{%
+    \if@twocolumn\hskip5.4pc\fi%
     \hbox to\textwidthplus{%
       \vbox{\@greyrunningheadrule}%
     }\par
@@ -2726,7 +2730,7 @@
   %
 %%EngD changed definitions of oddhead and evenhead below
 \def\@oddhead{%
-   \hbox to \textwidth{\hfil\runningheadsize\boldseriffont{\rightmark}\hspace*{17mm}%
+   \hbox to \textwidth{\hfil\runningheadsize\boldseriffont{\leftmark}\hspace*{17mm}%
      \llap{\runningheadsize\lightseriffont\thepage}}%
    \hspace*{-\textwidth}{\@insertgreyrunningheadrule}%
    }%
@@ -2734,7 +2738,7 @@
    \runningheadsize\lightseriffont\thepage\hfil}%
    \hbox to \textwidthplus{\runningheadsize%
      {\boldseriffont
-       {\leftmark}\hfil}}%
+       {\rightmark}\hfil}}%
      \hspace*{-\textwidthplus}{\@insertgreyrunningheadrule}%
     }%
   \ifAJW@multisty
@@ -2908,11 +2912,13 @@
    \@hangfrom{\hskip #3\relax\@svsec}{\interlinepenalty \@M #8\par}
   \endgroup
   \csname #1mark\endcsname{#7}%
+  \def\leftmark{\thesection\hspace{0.5em}#7}
   \addcontentsline{toc}{#1}{\ifnum #2>\c@secnumdepth \else
    \protect\numberline{\csname the#1\endcsname}\fi #7}
  \else
   \def\@svsechd{#6\hskip #3\@svsec #8%
    \csname #1mark\endcsname{#7}%
+   \def\leftmark{\thesection\hspace{0.5em}#7}
    \addcontentsline{toc}{#1}{\ifnum #2>\c@secnumdepth \else
     \protect\numberline{\csname the#1\endcsname}\fi#7}}%
  \fi

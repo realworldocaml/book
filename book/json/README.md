@@ -80,8 +80,7 @@ as well as contain an actual value.
 #### Installing the Yojson Library
 
 There are several JSON libraries available for OCaml. For this
-chapter, we've picked the popular
-[Yojson](https://github.com/ocaml-community/yojson) library, which you
+chapter, we've picked the popular Yojson library, which you
 can install by running `opam install yojson`. Once installed, you can
 open it in `utop` as follows:
 

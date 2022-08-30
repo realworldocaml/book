@@ -42,6 +42,9 @@ $endif$
 \usepackage{newtxmath}
 \usepackage{graphicx}
 \makeatletter
+\renewcommand*{\pagenumbering}[1]{%
+  \gdef\thepage{\csname @#1\endcsname\c@page}%
+}
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
 \makeatother
@@ -253,6 +256,11 @@ For Mum and Dad, who took me to the library\\
 and unlocked my imagination.~~~--Anil
 \end{dedication}
 \tocmax{2.10}{2.8.8}{}
+\setcounter{page}{6}
+\makeatletter
+\addtocontents{toc}{\hspace*{-18mm}}
+\makeatother
+\tocmax{99.99}{99.99.9}{}
 \tableofcontents
 %\listoffigures
 %\listoftables
@@ -277,7 +285,11 @@ and unlocked my imagination.~~~--Anil
 %  The Edinburgh Building, Shaftesbury Road,
 %  Cambridge CB2 8RU}}
 \cleardoublepage
+\ \thispagestyle{empty}
+\cleardoublepage
 %\include{EngD_preface}
+\pagenumbering{arabic} 
+\setcounter{page}{1}
 \mainmatter
 $body$
 \backmatter
@@ -286,13 +298,12 @@ $body$
 \endappendix
 % insert a blank line to the toc list
 \addtocontents{toc}{\vspace{\baselineskip}}
-\theendnotes
 % bibliography style files
 % \bibliographystyle{vancouver}% uncomment for vancouver style
 % \bibliographystyle{IEEEtran} % uncomment for IEEE style
 %   \bibliographystyle{cambridgeauthordate}  %% already called in chapter 5
 % \renewcommand{\refname}{Bibliography}% if you prefer this heading
-\bookreferences
+%\bookreferences
 %\bibliography{percolation}\label{reflist}
 \cleardoublepage
 % indexes
