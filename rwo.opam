@@ -58,6 +58,6 @@ build: [
 ]
 dev-repo: "git+https://github.com/realworldocaml/book.git"
 pin-depends: [
- [ "async_graphics.dev" "https://github.com/avsm/async_graphics.git#update-to-v15" ]
+ [ "async_graphics.dev" "git+https://github.com/avsm/async_graphics.git#update-to-v15" ]
 ]
 
