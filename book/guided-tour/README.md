@@ -37,6 +37,8 @@ but it's worth understanding the differences between these libraries.
   same time, it has many more dependencies, and so takes longer to
   build, and will add more to the size of your executables.
 
+<!-- TODO: Rewrite the following section to be more up to date. -->
+
 As of the version of `Base` and `Core` used in this book (version
 `v0.14`), `Core` is less portable than `Base`, running only on
 UNIX-like systems.  For that reason, there is another package,
