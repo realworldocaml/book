@@ -443,6 +443,10 @@ This is a pretty unhelpful error message, but the basic problem is
 that `eval` is recursive, and inference of GADTs doesn't play well
 with recursive calls.
 
+<!-- TODO: we should fix the text below, which is explaining a -->
+<!-- confusing error message about "the type constructor a would -->
+<!-- escape its scope", which is not there anymore -->
+
 More specifically, the issue is that the type-checker is trying to
 merge the locally abstract type `a` into the type of the recursive
 function `eval`, and merging it into the outer scope within which

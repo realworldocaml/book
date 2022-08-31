@@ -837,6 +837,10 @@ This takes three arguments: the `Field.t`, a function for converting
 the contents of the field in question to a string, and a record from
 which the field can be grabbed.
 
+<!-- TODO: need to rerun this non-determinstic output, since the time -->
+<!-- has now changed timezone, and the output doesn't reflect -->
+<!-- it. (Also, why is this non-deterministic at all?) -->
+
 Here's an example of `show_field` in action:
 
 ```ocaml env=main,non-deterministic=output
