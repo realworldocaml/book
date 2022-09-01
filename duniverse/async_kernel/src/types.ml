@@ -7,7 +7,7 @@
    cycle, split the file into pieces as needed to break the cycle, e.g. scheduler0.ml,
    scheduler1.ml, scheduler.ml. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 module rec Cell : sig
@@ -65,17 +65,24 @@ and Execution_context : sig
 end =
   Execution_context
 
+and Forwarding : sig
+  type t =
+    | Detached
+    | Parent of Monitor.t
+    | Report_uncaught_exn
+end =
+  Forwarding
+
 and Monitor : sig
   type t =
     { name : Info.t
     ; here : Source_code_position.t option
     ; id : int
-    ; parent : t option
     ; mutable next_error : exn Ivar.t
     ; mutable handlers_for_all_errors : (Execution_context.t * (exn -> unit)) Bag.t
     ; mutable tails_for_all_errors : exn Tail.t list
     ; mutable has_seen_error : bool
-    ; mutable is_detached : bool
+    ; mutable forwarding : Forwarding.t
     }
 end =
   Monitor
@@ -124,11 +131,14 @@ end
 module rec Event : sig
   module Status : sig
     type t =
-      | Aborted
       | Fired
       | Happening
       | Scheduled
       | Unscheduled
+  end
+
+  module Option : sig
+    type t
   end
 
   type t =
@@ -137,7 +147,8 @@ module rec Event : sig
     ; callback : unit -> unit
     ; execution_context : Execution_context.t
     ; mutable interval : Time_ns.Span.t option
-    ; mutable next_fired : t
+    ; mutable next_fired : Option.t
+    ; mutable prev_fired : Option.t
     ; mutable status : Status.t
     }
 end =
@@ -200,8 +211,10 @@ and Scheduler : sig
     ; mutable cycle_count : int
     ; mutable cycle_start : Time_ns.t
     ; mutable in_cycle : bool
-    ; mutable run_every_cycle_start : (unit -> unit) list
-    ; mutable run_every_cycle_end : (unit -> unit) list
+    ; mutable run_every_cycle_start : Cycle_hook.t list
+    ; run_every_cycle_start_state : (Cycle_hook_handle.t, Cycle_hook.t) Hashtbl.t
+    ; mutable run_every_cycle_end : Cycle_hook.t list
+    ; run_every_cycle_end_state : (Cycle_hook_handle.t, Cycle_hook.t) Hashtbl.t
     ; mutable last_cycle_time : Time_ns.Span.t
     ; mutable last_cycle_num_jobs : int
     ; mutable total_cycle_time : Time_ns.Span.t
@@ -215,12 +228,16 @@ and Scheduler : sig
     ; mutable check_invariants : bool
     ; mutable max_num_jobs_per_priority_per_cycle : Max_num_jobs_per_priority_per_cycle.t
     ; mutable record_backtraces : bool
-    ; mutable on_start_of_cycle : unit -> unit
-    ; mutable on_end_of_cycle : unit -> unit
     }
 end =
   Scheduler
 
+and Cycle_hook : sig
+  type t = unit -> unit
+end =
+  Cycle_hook
+
+and Cycle_hook_handle : Unique_id.Id = Unique_id.Int63 ()
 and Time_source_id : Unique_id.Id = Unique_id.Int63 ()
 
 and Time_source : sig
@@ -229,8 +246,8 @@ and Time_source : sig
     ; mutable advance_errors : Error.t list
     ; mutable am_advancing : bool
     ; events : Job_or_event.t Timing_wheel.t
-    ; mutable fired_events : Event.t
-    ; mutable most_recently_fired : Event.t
+    ; mutable fired_events : Event.Option.t
+    ; mutable most_recently_fired : Event.Option.t
     ; handle_fired : Job_or_event.t Timing_wheel.Alarm.t -> unit
     ; is_wall_clock : bool
     ; scheduler : Scheduler.t

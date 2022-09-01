@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 (* From https://en.wikipedia.org/wiki/ANSI_escape_code last accessed 2016-05-26 *)

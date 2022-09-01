@@ -66,21 +66,7 @@ CAMLprim value lwt_unix_get_credentials(value fd)
 
     res = caml_alloc_tuple(3);
 
-    /* This triggers a warning on OCaml 4.02, because Val_int (actually,
-       Val_long) shifts the -1 left by one bit. It seems difficult to suppress,
-       because wrapping the -1 in a cast to an unsigned type is undone by
-       Val_long, which internally casts the -1 back to a signed type. Inlining a
-       suitable macro definition is not future-safe. The warning could be
-       suppressed by using conditional compilation to check for OCaml 4.02, and
-       inlining a suitable definition only in that case, but it seems not worth
-       the trouble, and that it is better to live with the warning for now.
-
-       See
-
-         https://github.com/ocaml/ocaml/issues/5934
-         ocaml/ocaml@24c118d7b63cdab58ed9bad28e2d337e9d1d30ba */
     Store_field(res, 0, Val_int(-1));
-
     Store_field(res, 1, Val_int(euid));
     Store_field(res, 2, Val_int(egid));
     CAMLreturn(res);

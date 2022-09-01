@@ -1,5 +1,3 @@
-open! Dune_engine
-open! Stdune
 open Import
 open Memo.O
 
@@ -36,16 +34,12 @@ end
 module Bin = struct
   include Bin
 
-  let exists fn =
-    Fs_memo.file_exists fn >>| function
-    | true -> Some fn
-    | false -> None
-
   let which ~path prog =
     let prog = add_exe prog in
     Memo.List.find_map path ~f:(fun dir ->
         let fn = Path.relative dir prog in
-        exists fn)
+        let+ exists = Fs_memo.file_exists fn in
+        if exists then Some fn else None)
 end
 
 module Program = struct
@@ -57,7 +51,8 @@ module Program = struct
   let best_path dir program =
     let exe_path program =
       let fn = Path.relative dir (program ^ Bin.exe) in
-      Bin.exists fn
+      let+ exists = Fs_memo.file_exists fn in
+      if exists then Some fn else None
     in
     if List.mem programs_for_which_we_prefer_opt_ext program ~equal:String.equal
     then
@@ -67,8 +62,39 @@ module Program = struct
       | Some _ as path -> Memo.return path
     else exe_path program
 
-  let which ~path program =
-    Memo.List.find_map path ~f:(fun dir -> best_path dir program)
+  module rec Rec : sig
+    val which : path:Path.t list -> string -> Path.t option Memo.t
+  end = struct
+    open Rec
+
+    let which_impl (path, program) =
+      match path with
+      | [] -> Memo.return None
+      | dir :: path -> (
+        let* res = best_path dir program in
+        match res with
+        | None -> which ~path program
+        | Some prog -> Memo.return (Some prog))
+
+    let which =
+      let memo =
+        let module Input = struct
+          type t = Path.t list * string
+
+          let equal = Tuple.T2.equal (List.equal Path.equal) String.equal
+
+          let hash = Tuple.T2.hash (List.hash Path.hash) String.hash
+
+          let to_dyn = Dyn.opaque
+        end in
+        Memo.create "which"
+          ~input:(module Input)
+          ~cutoff:(Option.equal Path.equal) which_impl
+      in
+      fun ~path prog -> Memo.exec memo (path, prog)
+  end
+
+  include Rec
 end
 
 type t =
@@ -92,16 +118,15 @@ type t =
   ; ocamlmklib : Action.Prog.t
   ; ocamlobjinfo : Action.Prog.t
   ; env : Env.t
-  ; findlib : Findlib.t
+  ; findlib_paths : Path.t list
   ; findlib_toolchain : Context_name.t option
   ; default_ocamlpath : Path.t list
   ; arch_sixtyfour : bool
   ; ocaml_config : Ocaml_config.t
   ; ocaml_config_vars : Ocaml_config.Vars.t
-  ; version : Ocaml_version.t
+  ; version : Ocaml.Version.t
   ; stdlib_dir : Path.t
   ; supports_shared_libraries : Dynlink_supported.By_the_os.t
-  ; which : string -> Path.t option Memo.t
   ; lib_config : Lib_config.t
   ; build_context : Build_context.t
   ; make : Path.t option Memo.Lazy.t
@@ -134,7 +159,7 @@ let to_dyn t : Dyn.t =
     ; ("ocamldep", Action.Prog.to_dyn t.ocamldep)
     ; ("ocamlmklib", Action.Prog.to_dyn t.ocamlmklib)
     ; ("env", Env.to_dyn (Env.diff t.env Env.initial))
-    ; ("findlib_path", list path (Findlib.paths t.findlib))
+    ; ("findlib_paths", list path t.findlib_paths)
     ; ("arch_sixtyfour", Bool t.arch_sixtyfour)
     ; ( "natdynlink_supported"
       , Bool (Dynlink_supported.By_the_os.get t.lib_config.natdynlink_supported)
@@ -153,8 +178,6 @@ module Opam : sig
   (** Environment for this opam switch *)
   val env :
     env:Env.t -> root:string option -> switch:string -> string Env.Map.t Memo.t
-
-  val opam_binary_exn : unit -> Path.t Memo.t
 end = struct
   let opam =
     Memo.Lazy.create ~name:"context-opam" (fun () ->
@@ -229,12 +252,16 @@ end = struct
         && Option.equal String.equal root_a root_b
         && String.equal switch_a switch_b
 
-      let hash (env, root, switch) = Hashtbl.hash (Env.hash env, root, switch)
+      let hash (env, root, switch) = Poly.hash (Env.hash env, root, switch)
 
       let to_dyn (env, root, switch) =
         Dyn.Tuple [ Env.to_dyn env; Dyn.(option string root); String switch ]
     end in
-    let memo = Memo.create "opam-env" ~input:(module Input) impl in
+    let memo =
+      Memo.create "opam-env" impl
+        ~cutoff:(Env.Map.equal ~equal:String.equal)
+        ~input:(module Input)
+    in
     fun ~env ~root ~switch -> Memo.exec memo (env, root, switch)
 end
 
@@ -269,8 +296,8 @@ module Build_environment_kind = struct
           assert false)
       | Default -> (
         match Setup.library_path with
-        | Some l -> Hardcoded_path l
-        | None -> (
+        | _ :: _ as l -> Hardcoded_path l
+        | [] -> (
           match opam_prefix with
           | Some s -> Opam2_environment s
           | None -> Unknown)))
@@ -290,7 +317,7 @@ let ocamlfind_printconf_path ~env ~ocamlfind ~toolchain =
   List.map l ~f:Path.of_filename_relative_to_initial_cwd
 
 let check_fdo_support has_native ocfg ~name =
-  let version = Ocaml_version.of_ocaml_config ocfg in
+  let version = Ocaml.Version.of_ocaml_config ocfg in
   let version_string = Ocaml_config.version_string ocfg in
   let err () =
     User_error.raise
@@ -308,8 +335,8 @@ let check_fdo_support has_native ocfg ~name =
          the toolchain. When using a dev version of ocamlopt that does not
          support the required options, fdo builds will fail because the compiler
          won't recognize the options. Normals builds won't be affected. *) )
-  else if not (Ocaml_version.supports_split_at_emit version) then
-    if not (Ocaml_version.supports_function_sections version) then err ()
+  else if not (Ocaml.Version.supports_split_at_emit version) then
+    if not (Ocaml.Version.supports_function_sections version) then err ()
     else
       User_warning.emit
         [ Pp.textf
@@ -325,13 +352,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
   let prog_not_found_in_path prog =
     Utils.program_not_found prog ~context:name ~loc:None
   in
-  let which_memo =
-    Memo.create
-      (sprintf "which-memo-for-%s" (Context_name.to_string name))
-      ~input:(module Program.Name)
-      ~cutoff:(Option.equal Path.equal) (Program.which ~path)
-  in
-  let which = Memo.exec which_memo in
+  let which = Program.which ~path in
   let which_exn x =
     which x >>| function
     | None -> prog_not_found_in_path x
@@ -465,8 +486,14 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
               (vars, ocfg)
             | Error msg -> Error (Ocamlc_config, msg)))
     in
+    let stdlib_dir = Path.of_string (Ocaml_config.standard_library ocfg) in
+    let version = Ocaml.Version.of_ocaml_config ocfg in
+    let default_ocamlpath =
+      if Ocaml.Version.has_META_files version then
+        stdlib_dir :: default_ocamlpath
+      else default_ocamlpath
+    in
     let findlib_paths = ocamlpath @ default_ocamlpath in
-    let version = Ocaml_version.of_ocaml_config ocfg in
     let env =
       (* See comment in ansi_color.ml for setup_env_for_colors. For versions
          where OCAML_COLOR is not supported, but 'color' is in OCAMLPARAM, use
@@ -475,8 +502,8 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       if
         !Clflags.capture_outputs
         && Lazy.force Ansi_color.stderr_supports_color
-        && Ocaml_version.supports_color_in_ocamlparam version
-        && not (Ocaml_version.supports_ocaml_color version)
+        && Ocaml.Version.supports_color_in_ocamlparam version
+        && not (Ocaml.Version.supports_ocaml_color version)
       then
         let value =
           match Env.get env "OCAMLPARAM" with
@@ -530,7 +557,6 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
               (Option.map findlib_config ~f:Findlib.Config.env))
       |> Env.extend_env (Env_nodes.extra_env ~profile env_nodes)
     in
-    let stdlib_dir = Path.of_string (Ocaml_config.standard_library ocfg) in
     let natdynlink_supported = Ocaml_config.natdynlink_supported ocfg in
     let arch_sixtyfour = Ocaml_config.word_size ocfg = 64 in
     let* ocamlopt = get_ocaml_tool "ocamlopt" in
@@ -549,7 +575,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; ccomp_type = Ocaml_config.ccomp_type ocfg
       ; profile
       ; ocaml_version_string = Ocaml_config.version_string ocfg
-      ; ocaml_version = Ocaml_version.of_ocaml_config ocfg
+      ; ocaml_version = Ocaml.Version.of_ocaml_config ocfg
       ; instrument_with
       ; context_name = name
       }
@@ -610,7 +636,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; ocamlmklib
       ; ocamlobjinfo
       ; env
-      ; findlib = Findlib.create ~paths:findlib_paths ~lib_config
+      ; findlib_paths
       ; findlib_toolchain
       ; default_ocamlpath
       ; arch_sixtyfour
@@ -620,13 +646,12 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       ; version
       ; supports_shared_libraries =
           Dynlink_supported.By_the_os.of_bool supports_shared_libraries
-      ; which
       ; lib_config
       ; build_context
       ; make
       }
     in
-    if Ocaml_version.supports_response_file version then (
+    if Ocaml.Version.supports_response_file version then (
       let set prog =
         Response_file.set ~prog (Zero_terminated_strings "-args0")
       in
@@ -634,7 +659,7 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       set t.ocamlc;
       Result.iter t.ocamlopt ~f:set;
       Result.iter t.ocamldep ~f:set;
-      if Ocaml_version.ocamlmklib_supports_response_file version then
+      if Ocaml.Version.ocamlmklib_supports_response_file version then
         Result.iter ~f:set t.ocamlmklib);
     Memo.return t
   in
@@ -657,6 +682,8 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
         >>| Option.some)
   in
   native :: List.filter_opt others
+
+let which t fname = Program.which ~path:t.path fname
 
 let extend_paths t ~env =
   let t =
@@ -811,8 +838,8 @@ module DB = struct
             ]);
       all
     in
-    let memo = Memo.create "build-contexts" ~input:(module Unit) impl in
-    Memo.exec memo
+    let memo = Memo.lazy_ ~name:"build-contexts" impl in
+    fun () -> Memo.Lazy.force memo
 
   let get =
     let memo =
@@ -823,13 +850,20 @@ module DB = struct
           List.find_exn contexts ~f:(fun c -> Context_name.equal name c.name))
     in
     Memo.exec memo
-end
 
-let install_ocaml_libdir t =
-  match (t.kind, Setup.library_destdir) with
-  | Default, Some d ->
-    Memo.return (Some (Path.of_filename_relative_to_initial_cwd d))
-  | _ -> Memo.return None
+  let by_dir dir =
+    let context =
+      match Dune_engine.Dpath.analyse_dir (Path.build dir) with
+      | Build
+          ( Install (With_context (name, _))
+          | Regular (With_context (name, _))
+          | Anonymous_action (With_context (name, _)) ) -> name
+      | _ ->
+        Code_error.raise "directory does not have an associated context"
+          [ ("dir", Path.Build.to_dyn dir) ]
+    in
+    get context
+end
 
 let compiler t (mode : Mode.t) =
   match mode with
@@ -862,11 +896,31 @@ let map_exe (context : t) =
         Path.append_source (Path.build host.build_dir) exe
       | _ -> exe)
 
-let install_prefix t =
-  let open Fiber.O in
-  let* opam = Memo.run (Opam.opam_binary_exn ()) in
-  let+ s = Process.run_capture Strict opam ~env:t.env [ "var"; "prefix" ] in
-  Path.of_filename_relative_to_initial_cwd (String.trim s)
+let host t = Option.value ~default:t t.for_host
+
+let roots t =
+  let module Roots = Install.Section.Paths.Roots in
+  let prefix_roots =
+    match Env.get t.env Build_environment_kind.opam_switch_prefix_var_name with
+    | None ->
+      { Roots.lib_root = None
+      ; libexec_root = None
+      ; bin = None
+      ; sbin = None
+      ; etc_root = None
+      ; doc_root = None
+      ; share_root = None
+      ; man = None
+      }
+    | Some prefix ->
+      let prefix = Path.of_filename_relative_to_initial_cwd prefix in
+      Roots.opam_from_prefix prefix |> Roots.map ~f:(fun s -> Some s)
+  in
+  match t.kind with
+  | Default ->
+    let setup_roots = Roots.map ~f:(Option.map ~f:Path.of_string) Setup.roots in
+    Roots.first_has_priority setup_roots prefix_roots
+  | Opam _ -> prefix_roots
 
 let dot_dune_dir t = Path.Build.relative t.build_dir ".dune"
 

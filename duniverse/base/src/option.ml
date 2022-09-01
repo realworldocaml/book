@@ -1,9 +1,5 @@
 open! Import
 
-type 'a t = 'a option =
-  | None
-  | Some of 'a
-
 include (
 struct
   type 'a t = 'a option [@@deriving_inline compare, hash, sexp, sexp_grammar]
@@ -11,44 +7,25 @@ struct
   let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int = compare_option
 
   let hash_fold_t :
-    'a. (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
-    -> Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
+    'a.
+    (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> 'a t
+    -> Ppx_hash_lib.Std.Hash.state
     =
     hash_fold_option
   ;;
 
-  let t_of_sexp :
-    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t
-    =
+  let t_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a t =
     option_of_sexp
   ;;
 
-  let sexp_of_t :
-    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    =
+  let sexp_of_t : 'a. ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t =
     sexp_of_option
   ;;
 
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group)
-      =
-      { implicit_vars = [ "option" ]
-      ; ggid = "j\132);\135qH\158\135\222H\001\007\004\158\218"
-      ; types =
-          [ "t", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ option_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "option.ml"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
+  let (t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t) =
+    fun _'a_sexp_grammar -> option_sexp_grammar _'a_sexp_grammar
   ;;
 
   [@@@end]
@@ -56,21 +33,18 @@ end :
 sig
   type 'a t = 'a option [@@deriving_inline compare, hash, sexp, sexp_grammar]
 
-  val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+  include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+  include Ppx_hash_lib.Hashable.S1 with type 'a t := 'a t
+  include Sexplib0.Sexpable.S1 with type 'a t := 'a t
 
-  val hash_fold_t
-    :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
-    -> Ppx_hash_lib.Std.Hash.state
-    -> 'a t
-    -> Ppx_hash_lib.Std.Hash.state
-
-  include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
-
-  val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+  val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
 
   [@@@end]
-end
-with type 'a t := 'a t)
+end)
+
+type 'a t = 'a option =
+  | None
+  | Some of 'a
 
 let is_none = function
   | None -> true
@@ -95,12 +69,6 @@ let iter o ~f =
 ;;
 
 let invariant f t = iter t ~f
-
-let map2 o1 o2 ~f =
-  match o1, o2 with
-  | Some a1, Some a2 -> Some (f a1 a2)
-  | _ -> None
-;;
 
 let call x ~f =
   match f with
@@ -136,6 +104,12 @@ let value_exn ?here ?error ?message t =
     Error.raise error
 ;;
 
+let value_or_thunk o ~default =
+  match o with
+  | Some x -> x
+  | None -> default ()
+;;
+
 let to_array t =
   match t with
   | None -> [||]
@@ -152,9 +126,7 @@ let min_elt t ~compare:_ = t
 let max_elt t ~compare:_ = t
 
 let sum (type a) (module M : Container.Summable with type t = a) t ~f =
-  match t with
-  | None -> M.zero
-  | Some x -> f x
+  value_map t ~default:M.zero ~f
 ;;
 
 let for_all t ~f =
@@ -198,7 +170,7 @@ let count t ~f =
 let find t ~f =
   match t with
   | None -> None
-  | Some x -> if f x then Some x else None
+  | Some x -> if f x then t else None
 ;;
 
 let find_map t ~f =
@@ -215,12 +187,6 @@ let equal f t t' =
 ;;
 
 let some x = Some x
-
-let both x y =
-  match x, y with
-  | Some a, Some b -> Some (a, b)
-  | _ -> None
-;;
 
 let first_some x y =
   match x with
@@ -254,32 +220,34 @@ let try_with_join f =
   | exception _ -> None
 ;;
 
-include Monad.Make (struct
-    type 'a t = 'a option
+let map t ~f =
+  match t with
+  | None -> None
+  | Some a -> Some (f a)
+;;
 
-    let return x = Some x
+let apply f x =
+  match f with
+  | None -> None
+  | Some f -> map ~f x
+;;
 
-    let map t ~f =
-      match t with
-      | None -> None
-      | Some a -> Some (f a)
-    ;;
+module Monad_arg = struct
+  type 'a t = 'a option
 
-    let map = `Custom map
+  let return x = Some x
+  let apply = apply
+  let map = `Custom map
 
-    let bind o ~f =
-      match o with
-      | None -> None
-      | Some x -> f x
-    ;;
-  end)
+  let bind o ~f =
+    match o with
+    | None -> None
+    | Some x -> f x
+  ;;
+end
+
+include Monad.Make (Monad_arg)
+include Applicative.Make (Monad_arg)
 
 let fold_result t ~init ~f = Container.fold_result ~fold ~init ~f t
 let fold_until t ~init ~f = Container.fold_until ~fold ~init ~f t
-
-let validate ~none ~some t =
-  let module V = Validate in
-  match t with
-  | None -> V.name "none" (V.protect none ())
-  | Some x -> V.name "some" (V.protect some x)
-;;

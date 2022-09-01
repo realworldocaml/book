@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Async_kernel
 open! Import
 
@@ -34,8 +34,7 @@ let value_exn = Deferred.value_exn
 let upon t f = if is_determined t then f (value_exn t) else Deferred.upon t f
 
 let both t1 t2 =
-  create (fun result ->
-    upon t1 (fun a1 -> upon t2 (fun a2 -> Ivar.fill result (a1, a2))))
+  create (fun result -> upon t1 (fun a1 -> upon t2 (fun a2 -> Ivar.fill result (a1, a2))))
 ;;
 
 let ok t = if is_determined t then return (Ok (value_exn t)) else Deferred.ok t

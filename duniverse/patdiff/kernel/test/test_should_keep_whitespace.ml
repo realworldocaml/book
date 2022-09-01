@@ -1,14 +1,10 @@
-open! Core_kernel
+open! Core
 open! Import
 open Patdiff_kernel.Should_keep_whitespace
 
 let test file1 lines1 file2 lines2 =
-  let prev : Patdiff_kernel.Diff_input.t =
-    { name = file1; text = String.strip lines1 }
-  in
-  let next : Patdiff_kernel.Diff_input.t =
-    { name = file2; text = String.strip lines2 }
-  in
+  let prev : Patdiff_kernel.Diff_input.t = { name = file1; text = String.strip lines1 } in
+  let next : Patdiff_kernel.Diff_input.t = { name = file2; text = String.strip lines2 } in
   let should_keep_whitespace = for_diff ~prev ~next in
   (* [for_diff] should be symmetric. *)
   require_equal
@@ -55,4 +51,20 @@ let%expect_test "#!/bin/bash" =
 echo foo
 |};
   [%expect {| (should_keep_whitespace false) |}]
+;;
+
+let%expect_test "f#" =
+  test1
+    "fsharp.fs"
+    {|
+// Learn more about F# at http://fsharp.org
+
+open System
+
+[<EntryPoint>]
+let main argv =
+    printfn "Hello World from F#!"
+    0 // return an integer exit code
+|};
+  [%expect {| (should_keep_whitespace true) |}]
 ;;

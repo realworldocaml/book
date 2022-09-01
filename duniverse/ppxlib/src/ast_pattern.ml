@@ -5,17 +5,23 @@ let save_context ctx = ctx.matched
 let restore_context ctx backup = ctx.matched <- backup
 let incr_matched c = c.matched <- c.matched + 1
 
-let parse (T f) loc ?on_error x k =
-  try f { matched = 0 } loc x k
+let parse_res (T f) loc ?on_error x k =
+  try Ok (f { matched = 0 } loc x k)
   with Expected (loc, expected) -> (
     match on_error with
-    | None -> Location.raise_errorf ~loc "%s expected" expected
-    | Some f -> f ())
+    | None -> Error (Location.Error.createf ~loc "%s expected" expected, [])
+    | Some f -> Ok (f ()))
+
+let parse (T f) loc ?on_error x k =
+  match parse_res (T f) loc ?on_error x k with
+  | Ok r -> r
+  | Error (r, _) -> Location.Error.raise r
 
 module Packed = struct
   type ('a, 'b) t = T : ('a, 'b, 'c) Ast_pattern0.t * 'b -> ('a, 'c) t
 
   let create t f = T (t, f)
+  let parse_res (T (t, f)) loc x = parse_res t loc x f
   let parse (T (t, f)) loc x = parse t loc x f
 end
 
@@ -173,7 +179,13 @@ let alt_option some none =
   alt (map1 some ~f:(fun x -> Some x)) (map0 none ~f:None)
 
 let many (T f) =
-  T (fun ctx loc l k -> k (List.map l ~f:(fun x -> f ctx loc x (fun x -> x))))
+  T
+    (fun ctx loc l k ->
+      let rec aux accu = function
+        | [] -> k (List.rev accu)
+        | x :: xs -> f ctx loc x (fun x -> aux (x :: accu) xs)
+      in
+      aux [] l)
 
 let loc (T f) = T (fun ctx _loc (x : _ Loc.t) k -> f ctx x.loc x.txt k)
 let pack0 t = map t ~f:(fun f -> f ())

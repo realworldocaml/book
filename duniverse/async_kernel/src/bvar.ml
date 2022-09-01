@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 type ('a, 'permission) t = ('a, 'permission) Types.Bvar.t

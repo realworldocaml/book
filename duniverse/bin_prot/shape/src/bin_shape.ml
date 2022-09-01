@@ -42,9 +42,7 @@ end = struct
       | (key, value) :: xs ->
         if String.(last_key = key)
         then
-          if eq last_value value
-          then loop acc ~last_key ~last_value xs
-          else `Mismatch key
+          if eq last_value value then loop acc ~last_key ~last_value xs else `Mismatch key
         else loop ((key, value) :: acc) ~last_key:key ~last_value:value xs
     in
     function
@@ -303,8 +301,7 @@ module Canonical_digest : Canonical = struct
     let tuple l = Exp1.create (Tuple l)
 
     let poly_variant loc l =
-      Exp1.create
-        (Poly_variant (Sorted_table.create loc ~eq:(equal_option Exp1.equal) l))
+      Exp1.create (Poly_variant (Sorted_table.create loc ~eq:(equal_option Exp1.equal) l))
     ;;
 
     let var x = Exp1.create (Var x)
@@ -662,8 +659,7 @@ module Evaluation (Canonical : Canonical) = struct
         eval group venv t >>= fun v -> return (Canonical.Create.annotate s v)
       | Base (s, ts) ->
         eval_list group venv ts >>= fun vs -> return (Canonical.Create.basetype s vs)
-      | Tuple ts ->
-        eval_list group venv ts >>= fun vs -> return (Canonical.Create.tuple vs)
+      | Tuple ts -> eval_list group venv ts >>= fun vs -> return (Canonical.Create.tuple vs)
       | Top_app (in_group, tid, args) ->
         eval_list group venv args
         >>= fun args ->
@@ -705,8 +701,7 @@ module Evaluation (Canonical : Canonical) = struct
       let venv = Venv.create (List.mapi formals ~f:(fun i x -> x, Canonical.Exp1.var i)) in
       eval group venv body >>= fun v -> return (Canonical.Create.define v)
 
-  and eval_app : group -> Tid.t -> _ Canonical.Exp1.t list -> _ Canonical.Exp1.t defining
-    =
+  and eval_app : group -> Tid.t -> _ Canonical.Exp1.t list -> _ Canonical.Exp1.t defining =
     fun group tid args ->
       let gid = Group.id group in
       let formals, body = Group.lookup group tid in

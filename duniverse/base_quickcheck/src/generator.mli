@@ -19,12 +19,12 @@ include With_basic_types.S with type 'a t := 'a t (** @inline *)
 val fn : 'a Observer0.t -> 'b t -> ('a -> 'b) t
 
 val map_t_m
-  :  ('key, 'cmp) Set.comparator
+  :  ('key, 'cmp) Comparator.Module.t
   -> 'key t
   -> 'data t
   -> ('key, 'data, 'cmp) Map.t t
 
-val set_t_m : ('elt, 'cmp) Set.comparator -> 'elt t -> ('elt, 'cmp) Set.t t
+val set_t_m : ('elt, 'cmp) Comparator.Module.t -> 'elt t -> ('elt, 'cmp) Set.t t
 
 val map_tree_using_comparator
   :  comparator:('key, 'cmp) Comparator.t
@@ -342,3 +342,21 @@ val create : (size:int -> random:Splittable_random.State.t -> 'a) -> 'a t
 (** Generates a random value using the given size and pseudorandom state. Useful when
     using [create] and dispatching to other existing generators. *)
 val generate : 'a t -> size:int -> random:Splittable_random.State.t -> 'a
+
+module Debug : sig
+  (** {3 Helpers for debugging generators} *)
+
+  (** [coverage (module Key) sample] counts how many times each key appears in [sample].
+
+      See [Test.with_sample] for a convenient way to generate [sample]. *)
+  val coverage
+    :  (module Comparator.S with type t = 'k and type comparator_witness = 'cmp)
+    -> 'k Sequence.t
+    -> ('k, int, 'cmp) Map.t
+
+  (** [monitor t ~f] returns a generator which gives the same values as [t] and also calls
+      [f] for each value. This can help diagnose behavior of generators "hidden" behind
+      [map], [filter], etc. One might count the number of values a generator produces, or
+      record the set of values that do not satisfy some filter. *)
+  val monitor : 'a t -> f:('a -> unit) -> 'a t
+end

@@ -1,4 +1,4 @@
-open Base
+open! Base
 
 let of_sexp_error = Sexplib.Conv.of_sexp_error
 
@@ -95,7 +95,7 @@ type comment_print_style =
   | Pretty_print
   (* Leaves block comments as they are, only adjusts indentation. *)
   | Conservative_print
-[@@deriving sexp]
+[@@deriving enumerate, sexp]
 
 (* Comment treatment. *)
 type comments =

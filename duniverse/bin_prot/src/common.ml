@@ -272,6 +272,26 @@ external unsafe_blit_buf_float_array
   = "bin_prot_blit_buf_float_array_stub"
 [@@noalloc]
 
+external unsafe_blit_floatarray_buf
+  :  src_pos:int
+  -> floatarray
+  -> dst_pos:int
+  -> buf
+  -> len:int
+  -> unit
+  = "bin_prot_blit_float_array_buf_stub"
+[@@noalloc]
+
+external unsafe_blit_buf_floatarray
+  :  src_pos:int
+  -> buf
+  -> dst_pos:int
+  -> floatarray
+  -> len:int
+  -> unit
+  = "bin_prot_blit_buf_float_array_stub"
+[@@noalloc]
+
 (***)
 
 let ( + ) = ( + )

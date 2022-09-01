@@ -29,78 +29,77 @@ and comment =
 
 let rec sexp_of_t =
   (function
-    | Atom { loc = v_loc; atom = v_atom; unescaped = v_unescaped } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_option sexp_of_string v_unescaped in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "unescaped"; arg ]
-        :: bnds
+    | Atom { loc = loc__002_; atom = atom__004_; unescaped = unescaped__006_ } ->
+      let bnds__001_ = [] in
+      let bnds__001_ =
+        let arg__007_ = sexp_of_option sexp_of_string unescaped__006_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "unescaped"; arg__007_ ] :: bnds__001_
       in
-      let bnds =
-        let arg = sexp_of_string v_atom in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "atom"; arg ] :: bnds
+      let bnds__001_ =
+        let arg__005_ = sexp_of_string atom__004_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "atom"; arg__005_ ] :: bnds__001_
       in
-      let bnds =
-        let arg = Positions.sexp_of_range v_loc in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "loc"; arg ] :: bnds
+      let bnds__001_ =
+        let arg__003_ = Positions.sexp_of_range loc__002_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "loc"; arg__003_ ] :: bnds__001_
       in
-      Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom "Atom" :: bnds)
-    | List { loc = v_loc; elements = v_elements } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_list sexp_of_t_or_comment v_elements in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "elements"; arg ]
-        :: bnds
+      Sexplib0.Sexp.List (Sexplib0.Sexp.Atom "Atom" :: bnds__001_)
+    | List { loc = loc__009_; elements = elements__011_ } ->
+      let bnds__008_ = [] in
+      let bnds__008_ =
+        let arg__012_ = sexp_of_list sexp_of_t_or_comment elements__011_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "elements"; arg__012_ ] :: bnds__008_
       in
-      let bnds =
-        let arg = Positions.sexp_of_range v_loc in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "loc"; arg ] :: bnds
+      let bnds__008_ =
+        let arg__010_ = Positions.sexp_of_range loc__009_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "loc"; arg__010_ ] :: bnds__008_
       in
-      Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom "List" :: bnds)
-      : t -> Ppx_sexp_conv_lib.Sexp.t)
+      Sexplib0.Sexp.List (Sexplib0.Sexp.Atom "List" :: bnds__008_)
+      : t -> Sexplib0.Sexp.t)
 
 and sexp_of_t_or_comment =
   (function
-    | Sexp v0 ->
-      let v0 = sexp_of_t v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Sexp"; v0 ]
-    | Comment v0 ->
-      let v0 = sexp_of_comment v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Comment"; v0 ]
-      : t_or_comment -> Ppx_sexp_conv_lib.Sexp.t)
+    | Sexp arg0__013_ ->
+      let res0__014_ = sexp_of_t arg0__013_ in
+      Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Sexp"; res0__014_ ]
+    | Comment arg0__015_ ->
+      let res0__016_ = sexp_of_comment arg0__015_ in
+      Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Comment"; res0__016_ ]
+      : t_or_comment -> Sexplib0.Sexp.t)
 
 and sexp_of_comment =
   (function
-    | Plain_comment { loc = v_loc; comment = v_comment } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_string v_comment in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "comment"; arg ] :: bnds
+    | Plain_comment { loc = loc__018_; comment = comment__020_ } ->
+      let bnds__017_ = [] in
+      let bnds__017_ =
+        let arg__021_ = sexp_of_string comment__020_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "comment"; arg__021_ ] :: bnds__017_
       in
-      let bnds =
-        let arg = Positions.sexp_of_range v_loc in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "loc"; arg ] :: bnds
+      let bnds__017_ =
+        let arg__019_ = Positions.sexp_of_range loc__018_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "loc"; arg__019_ ] :: bnds__017_
       in
-      Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom "Plain_comment" :: bnds)
+      Sexplib0.Sexp.List (Sexplib0.Sexp.Atom "Plain_comment" :: bnds__017_)
     | Sexp_comment
-        { hash_semi_pos = v_hash_semi_pos; comments = v_comments; sexp = v_sexp } ->
-      let bnds = [] in
-      let bnds =
-        let arg = sexp_of_t v_sexp in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "sexp"; arg ] :: bnds
+        { hash_semi_pos = hash_semi_pos__023_
+        ; comments = comments__025_
+        ; sexp = sexp__027_
+        } ->
+      let bnds__022_ = [] in
+      let bnds__022_ =
+        let arg__028_ = sexp_of_t sexp__027_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "sexp"; arg__028_ ] :: bnds__022_
       in
-      let bnds =
-        let arg = sexp_of_list sexp_of_comment v_comments in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "comments"; arg ]
-        :: bnds
+      let bnds__022_ =
+        let arg__026_ = sexp_of_list sexp_of_comment comments__025_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "comments"; arg__026_ ] :: bnds__022_
       in
-      let bnds =
-        let arg = Positions.sexp_of_pos v_hash_semi_pos in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "hash_semi_pos"; arg ]
-        :: bnds
+      let bnds__022_ =
+        let arg__024_ = Positions.sexp_of_pos hash_semi_pos__023_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "hash_semi_pos"; arg__024_ ] :: bnds__022_
       in
-      Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom "Sexp_comment" :: bnds)
-      : comment -> Ppx_sexp_conv_lib.Sexp.t)
+      Sexplib0.Sexp.List (Sexplib0.Sexp.Atom "Sexp_comment" :: bnds__022_)
+      : comment -> Sexplib0.Sexp.t)
 ;;
 
 [@@@end]

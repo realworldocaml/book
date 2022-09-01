@@ -18,6 +18,6 @@ let%test_unit _ = Random.init 0; test after_random_init_0
 
 (* Tests inside a functor restore the existing random state after they run: *)
 module Make () = struct let%test_unit _ = () end
-let%test_unit _ = Random.init 0; let module M = Make () in test after_random_init_0
-let%test_unit _ = Random.init 0; let module M = Make () in test after_random_init_0
-let%test_unit _ = Random.init 0; let module M = Make () in test after_random_init_0
+let%test_unit _ = Random.init 0; let module _ = Make () in test after_random_init_0
+let%test_unit _ = Random.init 0; let module _ = Make () in test after_random_init_0
+let%test_unit _ = Random.init 0; let module _ = Make () in test after_random_init_0

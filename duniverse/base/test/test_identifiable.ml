@@ -11,7 +11,7 @@ module T = struct
     end)
 end
 
-let%expect_test ("hash coherence"[@tags "64-bits-only"]) =
+let%expect_test ("hash coherence" [@tags "64-bits-only"]) =
   check_hash_coherence [%here] (module T) ([ ""; "a"; "foo" ] |> List.map ~f:T.of_string);
   [%expect {| |}]
 ;;

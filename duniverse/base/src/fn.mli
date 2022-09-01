@@ -2,14 +2,16 @@
 
 open! Import
 
-(** A "pipe" operator. *)
+(** A "pipe" operator. [x |> f] is equivalent to [f x].
+
+    See {{:https://github.com/janestreet/ppx_pipebang} ppx_pipebang} for
+    further details. *)
 external ( |> ) : 'a -> ('a -> 'b) -> 'b = "%revapply"
 
 (** Produces a function that just returns its first argument. *)
 val const : 'a -> _ -> 'a
 
-(** [ignore] is the same as [Caml.ignore].  It is useful to have here so that code
-    that rebinds [ignore] can still refer to [Fn.ignore]. *)
+(** Ingores its argument and returns [()]. *)
 external ignore : _ -> unit = "%ignore"
 
 (** Negates a boolean function. *)

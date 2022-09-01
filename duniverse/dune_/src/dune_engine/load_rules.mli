@@ -1,7 +1,6 @@
 (** Loading build rules *)
 
-open! Stdune
-open! Import
+open Import
 module Action_builder := Action_builder0
 
 (** A way to determine the [Loc.t] of the current rule. Set by [Build_system]. *)
@@ -22,7 +21,8 @@ module Loaded : sig
     }
 
   type t =
-    | Non_build of Path.Set.t
+    | Source of { files : Path.Source.Set.t }
+    | External of { files : Path.External.Set.t }
     | Build of build
     | Build_under_directory_target of
         { directory_target_ancestor : Path.Build.t }

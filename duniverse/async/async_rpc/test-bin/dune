@@ -3,6 +3,6 @@
 
 (executables
  (names rpc_test rpc_latency_test test_low_latency_transport_close)
- (libraries async async_rpc_kernel async_rpc core cpu_usage jane
-  async_kernel.limiter_async netkit netkit_rpc netkit_sockets)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (libraries async async_rpc_kernel async_rpc core_unix.command_unix core
+  cpu_usage jane async_kernel.limiter_async netkit netkit_rpc netkit_sockets)
+ (preprocess (pps ppx_jane)))

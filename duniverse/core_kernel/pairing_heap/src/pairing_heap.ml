@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 module Pool = Tuple_pool
 module Pointer = Pool.Pointer
 
@@ -408,6 +408,29 @@ let remove_non_empty t node =
 ;;
 
 let remove_top t = if not (Node.is_empty t.root) then remove_non_empty t t.root
+
+(* Note that this is tail-recursive and that each node is visited at most 3 times (once
+   for each branch of the "if"), so it takes linear time and constant space. *)
+let rec remove_all_nodes_non_empty node ~pool =
+  let child = Node.child node ~pool in
+  let sibling = Node.sibling node ~pool in
+  if not (Node.is_empty child)
+  then remove_all_nodes_non_empty child ~pool
+  else if not (Node.is_empty sibling)
+  then remove_all_nodes_non_empty sibling ~pool
+  else (
+    let prev = Node.prev node ~pool in
+    Node.detach node ~pool;
+    Node.free node ~pool;
+    if not (Node.is_empty prev) then remove_all_nodes_non_empty prev ~pool)
+;;
+
+let clear t =
+  if not (Node.is_empty t.root)
+  then (
+    remove_all_nodes_non_empty t.root ~pool:t.pool;
+    t.root <- Node.empty ())
+;;
 
 let pop_exn t =
   let r = top_exn t in

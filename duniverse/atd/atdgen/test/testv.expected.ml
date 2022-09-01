@@ -476,6 +476,9 @@ let validate__27 = (
 let validate_even_natural = (
   validate__27
 )
+let validate_def = (
+  (fun _ _ -> None)
+)
 let validate_char = (
   (fun _ _ -> None)
 )

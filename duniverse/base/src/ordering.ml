@@ -4,7 +4,7 @@ type t =
   | Less
   | Equal
   | Greater
-[@@deriving_inline compare, hash, enumerate, sexp]
+[@@deriving_inline compare, hash, enumerate, sexp, sexp_grammar]
 
 let compare = (Ppx_compare_lib.polymorphic_compare : t -> t -> int)
 
@@ -29,32 +29,44 @@ let (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
 let all = ([ Less; Equal; Greater ] : t list)
 
 let t_of_sexp =
-  (let _tp_loc = "ordering.ml.t" in
+  (let error_source__005_ = "ordering.ml.t" in
    function
-   | Ppx_sexp_conv_lib.Sexp.Atom ("less" | "Less") -> Less
-   | Ppx_sexp_conv_lib.Sexp.Atom ("equal" | "Equal") -> Equal
-   | Ppx_sexp_conv_lib.Sexp.Atom ("greater" | "Greater") -> Greater
-   | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("less" | "Less") :: _) as
-     sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-   | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("equal" | "Equal") :: _)
-     as sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-   | Ppx_sexp_conv_lib.Sexp.List
-       (Ppx_sexp_conv_lib.Sexp.Atom ("greater" | "Greater") :: _) as sexp ->
-     Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-   | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.List _ :: _) as sexp ->
-     Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
-   | Ppx_sexp_conv_lib.Sexp.List [] as sexp ->
-     Ppx_sexp_conv_lib.Conv_error.empty_list_invalid_sum _tp_loc sexp
-   | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp
-             : Ppx_sexp_conv_lib.Sexp.t -> t)
+   | Sexplib0.Sexp.Atom ("less" | "Less") -> Less
+   | Sexplib0.Sexp.Atom ("equal" | "Equal") -> Equal
+   | Sexplib0.Sexp.Atom ("greater" | "Greater") -> Greater
+   | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("less" | "Less") :: _) as sexp__006_ ->
+     Sexplib0.Sexp_conv_error.stag_no_args error_source__005_ sexp__006_
+   | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("equal" | "Equal") :: _) as sexp__006_ ->
+     Sexplib0.Sexp_conv_error.stag_no_args error_source__005_ sexp__006_
+   | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("greater" | "Greater") :: _) as sexp__006_ ->
+     Sexplib0.Sexp_conv_error.stag_no_args error_source__005_ sexp__006_
+   | Sexplib0.Sexp.List (Sexplib0.Sexp.List _ :: _) as sexp__004_ ->
+     Sexplib0.Sexp_conv_error.nested_list_invalid_sum error_source__005_ sexp__004_
+   | Sexplib0.Sexp.List [] as sexp__004_ ->
+     Sexplib0.Sexp_conv_error.empty_list_invalid_sum error_source__005_ sexp__004_
+   | sexp__004_ -> Sexplib0.Sexp_conv_error.unexpected_stag error_source__005_ sexp__004_
+                   : Sexplib0.Sexp.t -> t)
 ;;
 
 let sexp_of_t =
   (function
-    | Less -> Ppx_sexp_conv_lib.Sexp.Atom "Less"
-    | Equal -> Ppx_sexp_conv_lib.Sexp.Atom "Equal"
-    | Greater -> Ppx_sexp_conv_lib.Sexp.Atom "Greater"
-                 : t -> Ppx_sexp_conv_lib.Sexp.t)
+    | Less -> Sexplib0.Sexp.Atom "Less"
+    | Equal -> Sexplib0.Sexp.Atom "Equal"
+    | Greater -> Sexplib0.Sexp.Atom "Greater"
+                 : t -> Sexplib0.Sexp.t)
+;;
+
+let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) =
+  { untyped =
+      Variant
+        { case_sensitivity = Case_sensitive_except_first_character
+        ; clauses =
+            [ No_tag { name = "Less"; clause_kind = Atom_clause }
+            ; No_tag { name = "Equal"; clause_kind = Atom_clause }
+            ; No_tag { name = "Greater"; clause_kind = Atom_clause }
+            ]
+        }
+  }
 ;;
 
 [@@@end]

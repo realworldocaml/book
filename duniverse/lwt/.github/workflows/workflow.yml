@@ -15,16 +15,13 @@ jobs:
         os:
           - ubuntu-latest
         ocaml-compiler:
-          - 4.04.x
-          - 4.05.x
-          - 4.06.x
-          - 4.07.x
           - 4.08.x
           - 4.09.x
           - 4.10.x
           - 4.11.x
           - 4.12.x
           - 4.13.x
+          - 4.14.x
         libev:
           - true
           - false
@@ -38,7 +35,7 @@ jobs:
             !lwt_domain.opam
         include:
           - os: ubuntu-latest
-            ocaml-compiler: ocaml-variants.4.13.1+options,ocaml-option-flambda,ocaml-option-musl,ocaml-option-static
+            ocaml-compiler: ocaml-variants.4.14.0+options,ocaml-option-flambda,ocaml-option-musl,ocaml-option-static
             libev: false
             ppx: true
             domain: false
@@ -52,7 +49,7 @@ jobs:
             domain: true
             local-packages: "*.opam"
           - os: macos-latest
-            ocaml-compiler: 4.13.x
+            ocaml-compiler: 4.14.x
             libev: true
             ppx: true
             domain: false
@@ -60,7 +57,7 @@ jobs:
               *.opam
               !lwt_domain.opam
           - os: windows-latest
-            ocaml-compiler: 4.13.x
+            ocaml-compiler: 4.14.x
             libev: false
             ppx: true
             domain: false
@@ -68,16 +65,7 @@ jobs:
               *.opam
               !lwt_domain.opam
           - os: ubuntu-latest
-            ocaml-compiler: 4.02.x
-            libev: true
-            ppx: false
-            domain: false
-            local-packages: |
-              *.opam
-              !lwt_domain.opam
-              !lwt_ppx.opam
-          - os: ubuntu-latest
-            ocaml-compiler: 4.03.x
+            ocaml-compiler: 4.08.x
             libev: true
             ppx: false
             domain: false
@@ -86,7 +74,7 @@ jobs:
               !lwt_domain.opam
               !lwt_ppx.opam
           - os: macos-latest
-            ocaml-compiler: 4.02.x
+            ocaml-compiler: 4.08.x
             libev: true
             ppx: false
             domain: false
@@ -95,7 +83,7 @@ jobs:
               !lwt_domain.opam
               !lwt_ppx.opam
           - os: windows-latest
-            ocaml-compiler: 4.06.x
+            ocaml-compiler: 4.08.x
             libev: false
             ppx: false
             domain: false
@@ -109,6 +97,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Hack Git CRLF for ocaml/setup-ocaml issue #529
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        run: |
+          & "C:\Program Files\Git\bin\git.exe" config --system core.autocrlf input
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2

@@ -1,4 +1,3 @@
-open! Dune_engine
 open Import
 
 module Odoc = struct
@@ -59,6 +58,14 @@ let odoc t = Memo.Lazy.force t.odoc
 
 let coq t = Memo.Lazy.force t.coq
 
+let expand_str_lazy expander sw =
+  match String_with_vars.text_only sw with
+  | Some s -> Memo.return s
+  | None ->
+    let open Memo.O in
+    let* expander = Memo.Lazy.force expander in
+    Expander.No_deps.expand_str expander sw
+
 let make ~dir ~inherit_from ~scope ~config_stanza ~profile ~expander
     ~expander_for_artifacts ~default_context_flags ~default_env
     ~default_bin_artifacts ~default_cxx_link_flags =
@@ -86,21 +93,20 @@ let make ~dir ~inherit_from ~scope ~config_stanza ~profile ~expander
     Memo.lazy_ (fun () ->
         Memo.sequential_map config.binaries
           ~f:
-            (File_binding.Unexpanded.expand ~dir ~f:(fun template ->
-                 let* expander_for_artifacts =
-                   Memo.Lazy.force expander_for_artifacts
-                 in
-                 Expander.No_deps.expand_str expander_for_artifacts template)))
+            (File_binding.Unexpanded.expand ~dir
+               ~f:(expand_str_lazy expander_for_artifacts)))
   in
   let external_env =
     inherited ~field:external_env ~root:default_env (fun env ->
         let env, have_binaries =
           (Env.extend_env env config.env_vars, List.is_non_empty config.binaries)
         in
+        Memo.return
+        @@
         if have_binaries then
-          let dir = Utils.local_bin dir |> Path.build in
-          Memo.return (Env.cons_path env ~dir)
-        else Memo.return env)
+          let dir = Artifacts.Bin.local_bin dir |> Path.build in
+          Env.cons_path env ~dir
+        else env)
   in
   let bin_artifacts =
     inherited ~field:bin_artifacts ~root:default_bin_artifacts (fun binaries ->

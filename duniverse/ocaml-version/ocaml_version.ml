@@ -38,11 +38,12 @@ let to_string ?prerelease_sep ?sep v =
   let presep, sep = choose_seps ~prerelease_sep ~sep in
   let prerelease = with_sep ~sep:presep v.prerelease in
   let extra = with_sep ~sep v.extra in
+  let minor_fmt = format_of_string (if v.major >= 5 then "%d" else "%02d") in
   match v.patch with
   | None ->
-    Printf.sprintf "%d.%02d%s%s" v.major v.minor prerelease extra
+    Printf.sprintf "%d.%(%d%)%s%s" v.major minor_fmt v.minor prerelease extra
   | Some patch ->
-    Printf.sprintf "%d.%02d.%d%s%s" v.major v.minor patch prerelease extra
+    Printf.sprintf "%d.%(%d%).%d%s%s" v.major minor_fmt v.minor patch prerelease extra
 
 let parse s =
   let build patch major minor sep extra =
@@ -170,24 +171,32 @@ module Releases = struct
   let v4_14_0 = of_string_exn "4.14.0"
   let v4_14 = v4_14_0
 
+  let v5_0_0 = of_string_exn "5.0.0"
+  let v5_0 = v5_0_0
+
+  let v5_1_0 = of_string_exn "5.1.0"
+  let v5_1 = v5_1_0
+
   let all_patches = [
     v4_00_1; v4_01_0; v4_02_0; v4_02_1; v4_02_2;
     v4_02_3; v4_03_0; v4_04_0; v4_04_1; v4_04_2;
     v4_05_0; v4_06_0; v4_06_1; v4_07_0; v4_07_1;
     v4_08_0; v4_08_1; v4_09_0; v4_09_1; v4_10_0;
     v4_10_1; v4_10_2; v4_11_0; v4_11_1; v4_11_2;
-    v4_12_0; v4_12_1; v4_13_0; v4_13_1; v4_14_0 ]
+    v4_12_0; v4_12_1; v4_13_0; v4_13_1; v4_14_0;
+    v5_0_0; v5_1_0 ]
 
   let all = [ v4_00; v4_01; v4_02; v4_03; v4_04;
               v4_05; v4_06; v4_07; v4_08; v4_09;
-              v4_10; v4_11; v4_12; v4_13; v4_14 ]
+              v4_10; v4_11; v4_12; v4_13; v4_14;
+              v5_0; v5_1 ]
 
-  let recent = [ v4_02; v4_03; v4_04; v4_05; v4_06; v4_07; v4_08; v4_09; v4_10; v4_11; v4_12; v4_13 ]
+  let recent = [ v4_02; v4_03; v4_04; v4_05; v4_06; v4_07; v4_08; v4_09; v4_10; v4_11; v4_12; v4_13; v4_14 ]
 
-  let latest = v4_13
+  let latest = v4_14
 
-  let unreleased_betas = []
-  let dev = [ v4_14 ]
+  let unreleased_betas = [ v5_0_0 ]
+  let dev = [ v5_0; v5_1 ]
 
   let trunk =
     match dev with
@@ -203,8 +212,8 @@ module Releases = struct
   let recent_with_dev = List.concat [recent; dev]
 end
 
-type arch = [ `I386 | `X86_64 | `Aarch64 | `Ppc64le | `Aarch32 | `S390x ]
-let arches = [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
+type arch = [ `I386 | `X86_64 | `Aarch64 | `Ppc64le | `Aarch32 | `S390x | `Riscv64 ]
+let arches = [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x; `Riscv64 ]
 
 let arch_is_32bit = function `I386 | `Aarch32 -> true |_ -> false
 
@@ -215,6 +224,7 @@ let string_of_arch = function
   | `Ppc64le -> "ppc64le"
   | `I386 -> "i386"
   | `S390x -> "s390x"
+  | `Riscv64 -> "riscv64"
 
 let arch_of_string = function
   | "arm64" | "aarch64" -> Ok `Aarch64
@@ -223,6 +233,7 @@ let arch_of_string = function
   | "arm32" | "arm32v7" | "aarch32" -> Ok `Aarch32
   | "ppc64le" -> Ok `Ppc64le
   | "s390x" -> Ok `S390x
+  | "riscv64" -> Ok `Riscv64
   | arch -> Error (`Msg ("Unknown architecture " ^ arch))
 
 let arch_of_string_exn a =
@@ -237,6 +248,7 @@ let to_opam_arch = function
   | `Aarch32 -> "arm32"
   | `Aarch64 -> "arm64"
   | `S390x -> "s390x"
+  | `Riscv64 -> "riscv64"
 
 let of_opam_arch = function
   | "x86_32" -> Some `I386
@@ -245,6 +257,7 @@ let of_opam_arch = function
   | "arm32" -> Some `Aarch32
   | "arm64" -> Some `Aarch64
   | "s390x" -> Some `S390x
+  | "riscv64" -> Some `Riscv64
   | _ -> None
 
 let to_docker_arch = function
@@ -254,6 +267,7 @@ let to_docker_arch = function
    | `Aarch32 -> "arm"
    | `Aarch64 -> "arm64"
    | `S390x -> "s390x"
+   | `Riscv64 -> "riscv64"
 
 let of_docker_arch = function
   | "386" -> Some `I386
@@ -262,6 +276,7 @@ let of_docker_arch = function
   | "arm" -> Some `Aarch32
   | "arm64" -> Some `Aarch64
   | "s390x" -> Some `S390x
+  | "riscv64" -> Some `Riscv64
   | _ -> None
 
 module Since = struct
@@ -270,10 +285,11 @@ module Since = struct
   let arch (a:arch) =
     match a with
     | `I386 -> Releases.v4_06_0 (* can be earlier, but no demand *)
-    | `Aarch32 -> Releases.v4_06_0
-    | `Aarch64 -> Releases.v4_05_0
-    | `Ppc64le -> Releases.v4_06_0
-    | `S390x -> Releases.v4_10_0 (* can be earlier, but not enough build resources *)
+    | `Aarch32 -> Releases.v4_02_3
+    | `Aarch64 -> Releases.v4_02_3
+    | `Ppc64le -> Releases.v4_03_0
+    | `S390x -> Releases.v4_03_0
+    | `Riscv64 -> Releases.v4_11_0
     | `X86_64 -> Releases.v4_00_0 (* can be earlier, but no demand for earlier versions *)
 
   let autoconf = Releases.v4_08_0
@@ -453,13 +469,19 @@ module Sources = struct
 end
 
 let trunk_variants (arch:arch) =
-  let base = [[]; [`No_naked_pointers]; [`Afl]; [`Flambda]; [`Disable_flat_float_array]] in
-  let arch_opts =
+  let base =
+    if arch = `X86_64 || arch = `Aarch64 then
+      [[]; [`Afl]; [`Flambda]; [`Disable_flat_float_array]]
+    else
+      [[]; [`Disable_flat_float_array]]
+  in
+  (* Frame pointers aren't currently supported on trunk *)
+  let _arch_opts =
     match arch with
-    |`X86_64 -> [[`Frame_pointer]; [`Frame_pointer;`Flambda]; [`No_naked_pointers_checker]]
+    |`X86_64 -> [[`Frame_pointer]; [`Frame_pointer; `Flambda]]
     |_ -> []
   in
-  List.map (Configure_options.to_t Sources.trunk) (base @ arch_opts)
+  List.map (Configure_options.to_t Sources.trunk) (base (*@ arch_opts*))
 
 let compiler_variants arch ({major; minor; _} as t) =
   let variants = [] in
@@ -479,15 +501,15 @@ let compiler_variants arch ({major; minor; _} as t) =
           | _ ->
             variants
         in
-        (* +nnpchecker for OCaml 4.12+ on x86_64 *)
+        (* +nnpchecker for OCaml 4.12-4.14 on x86_64 *)
         let variants =
-          if arch = `X86_64 && version >= (4, 12) then
+          if arch = `X86_64 && version >= (4, 12) && version < (5, 0) then
             [`No_naked_pointers_checker] :: variants
           else
             variants in
-        (* +nnp for OCaml 4.12+ *)
+        (* +nnp for OCaml 4.12-4.14 *)
         let variants =
-          if version >= (4, 12) then
+          if version >= (4, 12) && version < (5, 0) then
             [`No_naked_pointers] :: variants
           else
             variants in
@@ -499,24 +521,24 @@ let compiler_variants arch ({major; minor; _} as t) =
             variants in
         (* +fp+flambda for OCaml 4.12+ on x86_64 *)
         let variants =
-          if arch = `X86_64 && version >= (4, 12) then
+          if arch = `X86_64 && (version >= (4, 12) && version < (5, 0)) then
             [`Frame_pointer;`Flambda] :: variants
           else
             variants in
       (* +fp for OCaml 4.08+ on x86_64 *)
         let variants =
-          if arch = `X86_64 && version >= (4, 08) then
+          if arch = `X86_64 && (version >= (4, 08) && version < (5, 0)) then
             [`Frame_pointer] :: variants
           else
             variants in
         (* +flambda for OCaml 4.03+ *)
         let variants =
-          if version >= (4, 03) then
+          if version >= (4, 03) && (version < (5, 0) || arch = `X86_64 || arch = `Aarch64) then
             [`Flambda] :: variants
           else
             variants in
         (* +afl for OCaml 4.05+ *)
-        if version >= (4, 05) then
+        if version >= (4, 05) && (version < (5, 0) || arch = `X86_64 || arch = `Aarch64) then
           [`Afl] :: variants
         else
           variants in

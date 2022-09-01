@@ -12,17 +12,22 @@ let arrow
     match arg_label with
     | Nolabel | Labelled _ -> observer_of_core_type input_type
     | Optional _ ->
-      [%expr Base_quickcheck.Observer.option [%e observer_of_core_type input_type]]
+      [%expr
+        Ppx_quickcheck_runtime.Base_quickcheck.Observer.option
+          [%e observer_of_core_type input_type]]
   in
   let output_generator = generator_of_core_type output_type in
   let unlabelled =
-    [%expr Base_quickcheck.Generator.fn [%e input_observer] [%e output_generator]]
+    [%expr
+      Ppx_quickcheck_runtime.Base_quickcheck.Generator.fn
+        [%e input_observer]
+        [%e output_generator]]
   in
   match arg_label with
   | Nolabel -> unlabelled
   | Labelled _ | Optional _ ->
     [%expr
-      Base_quickcheck.Generator.map
+      Ppx_quickcheck_runtime.Base_quickcheck.Generator.map
         ~f:[%e fn_map_label ~loc ~from:Nolabel ~to_:arg_label]
         [%e unlabelled]]
 ;;
@@ -32,17 +37,18 @@ let compound_generator ~loc ~make_compound_expr generator_list =
   let size_pat, size_expr = gensym "size" loc in
   let random_pat, random_expr = gensym "random" loc in
   [%expr
-    Base_quickcheck.Generator.create (fun ~size:[%p size_pat] ~random:[%p random_pat] ->
-      [%e
-        make_compound_expr
-          ~loc
-          (List.map generator_list ~f:(fun generator ->
-             let loc = { generator.pexp_loc with loc_ghost = true } in
-             [%expr
-               Base_quickcheck.Generator.generate
-                 [%e generator]
-                 ~size:[%e size_expr]
-                 ~random:[%e random_expr]]))])]
+    Ppx_quickcheck_runtime.Base_quickcheck.Generator.create
+      (fun ~size:[%p size_pat] ~random:[%p random_pat] ->
+         [%e
+           make_compound_expr
+             ~loc
+             (List.map generator_list ~f:(fun generator ->
+                let loc = { generator.pexp_loc with loc_ghost = true } in
+                [%expr
+                  Ppx_quickcheck_runtime.Base_quickcheck.Generator.generate
+                    [%e generator]
+                    ~size:[%e size_expr]
+                    ~random:[%e random_expr]]))])]
 ;;
 
 let compound
@@ -100,17 +106,25 @@ let variant
       (List.map (Clause.core_type_list clause) ~f:generator_of_core_type)
   in
   let make_pair clause =
-    pexp_tuple
-      ~loc:{ (Clause.location clause) with loc_ghost = true }
-      [ Clause.weight clause; make_generator clause ]
+    Option.map (Clause.weight clause) ~f:(fun weight ->
+      pexp_tuple
+        ~loc:{ (Clause.location clause) with loc_ghost = true }
+        [ weight; make_generator clause ])
+  in
+  (* We filter out clauses with weight None now. If we don't, then we can get code in
+     [body] below that relies on bindings that don't get generated. *)
+  let clauses =
+    List.filter clauses ~f:(fun clause -> Option.is_some (Clause.weight clause))
   in
   match
     List.partition_tf clauses ~f:(fun clause ->
       clause_is_recursive ~clause ~rec_names (module Clause))
   with
   | [], clauses | clauses, [] ->
-    let pairs = List.map clauses ~f:make_pair in
-    [%expr Base_quickcheck.Generator.weighted_union [%e elist ~loc pairs]]
+    let pairs = List.filter_map clauses ~f:make_pair in
+    [%expr
+      Ppx_quickcheck_runtime.Base_quickcheck.Generator.weighted_union
+        [%e elist ~loc pairs]]
   | recursive_clauses, nonrecursive_clauses ->
     let size_pat, size_expr = gensym "size" loc in
     let nonrec_pat, nonrec_expr = gensym "gen" loc in
@@ -122,36 +136,39 @@ let variant
       gensyms "pair" (List.map recursive_clauses ~f:Clause.location)
     in
     let bindings =
-      List.map2_exn nonrec_pats nonrecursive_clauses ~f:(fun pat clause ->
-        let loc = { (Clause.location clause) with loc_ghost = true } in
-        let expr = make_pair clause in
-        value_binding ~loc ~pat ~expr)
-      @ List.map2_exn rec_pats recursive_clauses ~f:(fun pat clause ->
-        let loc = { (Clause.location clause) with loc_ghost = true } in
-        let weight_expr = Clause.weight clause in
-        let gen_expr =
-          [%expr
-            Base_quickcheck.Generator.bind
-              Base_quickcheck.Generator.size
-              ~f:(fun [%p size_pat] ->
-                Base_quickcheck.Generator.with_size
-                  ~size:(Base.Int.pred [%e size_expr])
-                  [%e make_generator clause])]
-        in
-        let expr = pexp_tuple ~loc [ weight_expr; gen_expr ] in
-        value_binding ~loc ~pat ~expr)
+      List.filter_opt
+        (List.map2_exn nonrec_pats nonrecursive_clauses ~f:(fun pat clause ->
+           let loc = { (Clause.location clause) with loc_ghost = true } in
+           Option.map (make_pair clause) ~f:(fun expr -> value_binding ~loc ~pat ~expr))
+         @ List.map2_exn rec_pats recursive_clauses ~f:(fun pat clause ->
+           Option.map (Clause.weight clause) ~f:(fun weight_expr ->
+             let loc = { (Clause.location clause) with loc_ghost = true } in
+             let gen_expr =
+               [%expr
+                 Ppx_quickcheck_runtime.Base_quickcheck.Generator.bind
+                   Ppx_quickcheck_runtime.Base_quickcheck.Generator.size
+                   ~f:(fun [%p size_pat] ->
+                     Ppx_quickcheck_runtime.Base_quickcheck.Generator.with_size
+                       ~size:(Ppx_quickcheck_runtime.Base.Int.pred [%e size_expr])
+                       [%e make_generator clause])]
+             in
+             let expr = pexp_tuple ~loc [ weight_expr; gen_expr ] in
+             value_binding ~loc ~pat ~expr)))
     in
     let body =
       [%expr
         let [%p nonrec_pat] =
-          Base_quickcheck.Generator.weighted_union [%e elist ~loc nonrec_exprs]
+          Ppx_quickcheck_runtime.Base_quickcheck.Generator.weighted_union
+            [%e elist ~loc nonrec_exprs]
         and [%p rec_pat] =
-          Base_quickcheck.Generator.weighted_union
+          Ppx_quickcheck_runtime.Base_quickcheck.Generator.weighted_union
             [%e elist ~loc (nonrec_exprs @ rec_exprs)]
         in
-        Base_quickcheck.Generator.bind Base_quickcheck.Generator.size ~f:(function
-          | 0 -> [%e nonrec_expr]
-          | _ -> [%e rec_expr])]
+        Ppx_quickcheck_runtime.Base_quickcheck.Generator.bind
+          Ppx_quickcheck_runtime.Base_quickcheck.Generator.size
+          ~f:(function
+            | 0 -> [%e nonrec_expr]
+            | _ -> [%e rec_expr])]
     in
     pexp_let ~loc Nonrecursive bindings body
 ;;

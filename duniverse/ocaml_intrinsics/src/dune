@@ -1,0 +1,8 @@
+(library (name ocaml_intrinsics) (public_name ocaml_intrinsics) (libraries)
+ (c_names int_stubs float_stubs perfmon_stubs crc_stubs ext_pointer_stubs
+  native_pointer_stubs prefetch_stubs)
+ (c_flags :standard (:include builtin_flags.sexp))
+ (preprocess no_preprocessing))
+
+(rule (targets builtin_flags.sexp)
+ (action (run ./discover/discover.exe -o %{targets})))

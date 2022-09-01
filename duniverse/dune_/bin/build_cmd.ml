@@ -85,23 +85,18 @@ let run_build_command_poll_passive ~(common : Common.t) ~config ~request:_ :
   (* CR-someday aalekseyev: It would've been better to complain if [request] is
      non-empty, but we can't check that here because [request] is a function.*)
   let open Fiber.O in
-  match Common.rpc common with
-  | None ->
-    Code_error.raise
-      "Attempted to start a passive polling mode without an RPC server" []
-  | Some rpc ->
-    Import.Scheduler.go_with_rpc_server_and_console_status_reporting ~common
-      ~config (fun () ->
-        Scheduler.Run.poll_passive
-          ~get_build_request:
-            (let+ (Build (targets, ivar)) =
-               Dune_rpc_impl.Server.pending_build_action rpc
-             in
-             let request setup =
-               Target.interpret_targets (Common.root common) config setup
-                 targets
-             in
-             (run_build_system ~common ~request, ivar)))
+  let rpc = Common.rpc common in
+  Import.Scheduler.go_with_rpc_server_and_console_status_reporting ~common
+    ~config (fun () ->
+      Scheduler.Run.poll_passive
+        ~get_build_request:
+          (let+ (Build (targets, ivar)) =
+             Dune_rpc_impl.Server.pending_build_action rpc
+           in
+           let request setup =
+             Target.interpret_targets (Common.root common) config setup targets
+           in
+           (run_build_system ~common ~request, ivar)))
 
 let run_build_command_once ~(common : Common.t) ~config ~request =
   let open Fiber.O in
@@ -188,3 +183,28 @@ let build =
     run_build_command ~common ~config ~request
   in
   (term, Term.info "build" ~doc ~man)
+
+let fmt =
+  let doc = "Format source code." in
+  let man =
+    [ `S "DESCRIPTION"
+    ; `P
+        {|$(b,dune fmt) runs the formatter on the source code. The formatter is automatically selected. ocamlformat is used to format OCaml source code (*.ml and *.mli files) and refmt is used to format Reason source code (*.re and *.rei files).|}
+    ; `Blocks Common.help_secs
+    ]
+  in
+  let term =
+    let+ common = Common.term in
+    let common =
+      Common.set_promote common Dune_engine.Clflags.Promote.Automatically
+    in
+    let config = Common.init common in
+    let request (setup : Import.Main.build_system) =
+      let dir = Path.(relative root) (Common.prefix_target common ".") in
+      Alias.in_dir ~name:Dune_engine.Alias.Name.fmt ~recursive:true
+        ~contexts:setup.contexts dir
+      |> Alias.request
+    in
+    run_build_command ~common ~config ~request
+  in
+  (term, Term.info "fmt" ~doc ~man)

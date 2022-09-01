@@ -443,6 +443,12 @@ Here's another example: a query handler that does directory listings. Here,
 the config is the default directory that relative paths are interpreted
 within:
 
+<!-- TODO: explain #require -->
+
+```ocaml env=query_handler
+# #require "core_unix.sys_unix";;
+```
+
 ```ocaml env=query_handler
 module List_dir = struct
   type config = string [@@deriving sexp]
@@ -463,7 +469,7 @@ module List_dir = struct
         if is_abs dir then dir
         else Core.Filename.concat t.cwd dir
       in
-      Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
+      Ok (Array.sexp_of_t String.sexp_of_t (Sys_unix.readdir dir))
 end;;
 ```
 

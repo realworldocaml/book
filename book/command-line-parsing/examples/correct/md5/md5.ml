@@ -22,6 +22,6 @@ let command =
 
 [@@@part "3"]
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 
 [@@@part "4"]

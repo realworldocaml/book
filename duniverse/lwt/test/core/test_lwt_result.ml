@@ -1,8 +1,6 @@
 (* This file is part of Lwt, released under the MIT license. See LICENSE.md for
    details, or visit https://github.com/ocsigen/lwt/blob/master/LICENSE.md. *)
 
-
-
 open Test
 
 exception Dummy_error
@@ -32,17 +30,17 @@ let suite =
          Lwt.return (Lwt_result.map ((+) 1) x = x)
       );
 
-    test "map_err"
+    test "map_error"
       (fun () ->
          let x = Lwt_result.return 0 in
-         Lwt.return (Lwt_result.map_err ((+) 1) x = x)
+         Lwt.return (Lwt_result.map_error ((+) 1) x = x)
       );
 
-    test "map_err, error case"
+    test "map_error, error case"
       (fun () ->
          let x = Lwt_result.fail 0 in
          let correct = Lwt_result.fail 1 in
-         Lwt.return (Lwt_result.map_err ((+) 1) x = correct)
+         Lwt.return (Lwt_result.map_error ((+) 1) x = correct)
       );
 
     test "bind"
@@ -59,11 +57,32 @@ let suite =
          let actual = Lwt_result.bind x (fun y -> Lwt_result.return (y + 1)) in
          Lwt.return (actual = x)
       );
+      
+    test "bind_error"
+      (fun () ->
+         let x = Lwt_result.return 0 in
+         let actual = Lwt_result.bind_error x (fun y -> Lwt_result.return (y + 1)) in
+         Lwt.return (actual = x)
+      );
 
+    test "bind_error, error case"
+      (fun () ->
+         let x = Lwt_result.fail 0 in
+         let correct = Lwt_result.return 1 in
+         let actual = Lwt_result.bind_error x (fun y -> Lwt_result.return (y + 1)) in
+         Lwt.return (actual = correct)
+      );
+      
     test "ok"
       (fun () ->
          let x = Lwt.return 0 in
          Lwt.return (Lwt_result.ok x = Lwt_result.return 0)
+      );
+
+    test "error"
+      (fun () ->
+        let x = Lwt.return 0 in
+        Lwt.return (Lwt_result.error x = Lwt_result.fail 0)
       );
 
     test "catch"
@@ -104,18 +123,18 @@ let suite =
          Lwt.return (Lwt_result.bind_lwt x f = Lwt_result.fail 0)
       );
 
-    test "bind_lwt_err"
+    test "bind_lwt_error"
       (fun () ->
          let x = Lwt_result.return 0 in
          let f y = Lwt.return (y + 1) in
-         Lwt.return (Lwt_result.bind_lwt_err x f = Lwt_result.return 0)
+         Lwt.return (Lwt_result.bind_lwt_error x f = Lwt_result.return 0)
       );
 
-    test "bind_lwt_err, error case"
+    test "bind_lwt_error, error case"
       (fun () ->
          let x = Lwt_result.fail 0 in
          let f y = Lwt.return (y + 1) in
-         Lwt.return (Lwt_result.bind_lwt_err x f = Lwt_result.fail 1)
+         Lwt.return (Lwt_result.bind_lwt_error x f = Lwt_result.fail 1)
       );
 
     test "bind_result"
@@ -184,6 +203,42 @@ let suite =
          in
          Lwt.wakeup_later r1 (Result.Error 0);
          Lwt.bind p (fun x -> Lwt.return (x = Result.Error 1))
+      );
+
+    test "iter"
+      (fun () ->
+        let x = Lwt_result.return 1 in
+        let actual = ref 0 in
+        Lwt.bind
+          (Lwt_result.iter (fun y -> actual := y + 1; Lwt.return_unit) x)
+          (fun () -> Lwt.return (!actual = 2))
+      );
+
+    test "iter, error case"
+      (fun () ->
+        let x = Lwt_result.fail 1 in
+        let actual = ref 0 in
+        Lwt.bind
+          (Lwt_result.iter (fun y -> actual := y + 1; Lwt.return_unit) x)
+          (fun () -> Lwt.return (!actual <> 2))
+      );
+
+    test "iter_error"
+      (fun () ->
+        let x = Lwt_result.fail 1 in
+        let actual = ref 0 in
+        Lwt.bind
+          (Lwt_result.iter_error (fun y -> actual := y + 1; Lwt.return_unit) x)
+          (fun () -> Lwt.return (!actual = 2))
+      );
+
+    test "iter_error, success case"
+      (fun () ->
+        let x = Lwt_result.return 1 in
+        let actual = ref 0 in
+        Lwt.bind
+          (Lwt_result.iter_error (fun y -> actual := y + 1; Lwt.return_unit) x)
+          (fun () -> Lwt.return (!actual <> 2))
       );
 
     test "let*"

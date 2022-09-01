@@ -1,2 +1,2 @@
-(library (name timezone_test) (libraries core_kernel timezone)
+(library (name timezone_test) (libraries core timezone)
  (preprocess (pps ppx_jane)))

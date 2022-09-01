@@ -9,7 +9,7 @@ let () =
         it will only be stuck for a small amount of time, since it was idle for the prior
         60s. *)
      Deferred.List.init ~how:`Parallel 50 ~f:(fun _ ->
-       In_thread.run (fun () -> Core.Unix.sleep 2))
+       In_thread.run (fun () -> Core_unix.sleep 2))
      >>= fun _ ->
      shutdown 0;
      return ())

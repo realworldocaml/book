@@ -1,13 +1,8 @@
-(* WARNING: never accept the corrected output for this file, it must never change! *)
-
-open! Core_kernel
+open! Core
 open! Import
 module Blob = Bin_prot.Blob
 module Opaque = Blob.Opaque
-module Read = Bin_prot.Read
-module Shape = Bin_prot.Shape
 module Type_class = Bin_prot.Type_class
-module Write = Bin_prot.Write
 
 let buf = lazy (Bin_prot.Common.create_buf 10_000)
 
@@ -33,7 +28,7 @@ let print_bin_dump tag bin_a a =
   printf "%s : %s\n" tag (bin_dump_to_string bin_a a |> String.escaped)
 ;;
 
-let run_test (bin_a : 'a Type_class.t) equal a : unit =
+let run_stability_test (bin_a : 'a Type_class.t) equal a : unit =
   print_bin_dump "bin dump" bin_a a;
   print_bin_dump "bin dump (blob)" (Blob.bin_t bin_a) a;
   let buf = Lazy.force buf in
@@ -62,43 +57,100 @@ let run_test (bin_a : 'a Type_class.t) equal a : unit =
      && String.( = ) bin_dump_blob bin_dump_opaque_string)
 ;;
 
-let%expect_test "" =
-  run_test Int.Stable.V1.bin_t Int.equal 12;
-  [%expect
-    {|
-    bin dump : \012
-    bin dump (blob) : \001\000\000\000\000\000\000\000\012
-    bin dump as opaque big string and string are the same? true
-  |}];
-  run_test String.Stable.V1.bin_t String.equal "Testing string";
-  [%expect
-    {|
-    bin dump : \014Testing string
-    bin dump (blob) : \015\000\000\000\000\000\000\000\014Testing string
-    bin dump as opaque big string and string are the same? true
-  |}];
-  run_test Float_with_finite_only_serialization.Stable.V1.bin_t Float.equal 1.234;
-  [%expect
-    {|
-    bin dump : X9\180\200v\190\243?
-    bin dump (blob) : \b\000\000\000\000\000\000\000X9\180\200v\190\243?
-    bin dump as opaque big string and string are the same? true
-  |}];
-  run_test
-    Host_and_port.Stable.V1.bin_t
-    Host_and_port.equal
-    (Host_and_port.create ~host:"testhost" ~port:123);
-  [%expect
-    {|
-    bin dump : \btesthost{
-    bin dump (blob) : \n\000\000\000\000\000\000\000\btesthost{
-    bin dump as opaque big string and string are the same? true
-  |}];
-  run_test (bin_list Int.Stable.V1.bin_t) (List.equal Int.equal) [ 1; 3; 1; 5 ];
-  [%expect
-    {|
-    bin dump : \004\001\003\001\005
-    bin dump (blob) : \005\000\000\000\000\000\000\000\004\001\003\001\005
-    bin dump as opaque big string and string are the same? true
-  |}]
+let%test_module _ =
+  (module struct
+    open Blob
+    open Poly
+
+    module Mystery = struct
+      type t =
+        { name : string
+        ; age : int
+        ; favorite_colors : string list
+        }
+      [@@deriving bin_io]
+
+      let value = { name = "Drew"; age = 25; favorite_colors = [ "Blue"; "Yellow" ] }
+    end
+
+    module T = struct
+      type 'a t =
+        { header : string
+        ; mystery : 'a
+        ; footer : string
+        }
+      [@@deriving bin_io]
+
+      let value mystery = { header = "header"; mystery; footer = "footer" }
+    end
+
+    (* Some Rumsfeldian tests follow... *)
+    module Known = struct
+      type nonrec t = Mystery.t t T.t [@@deriving bin_io]
+
+      let value = T.value Mystery.value
+    end
+
+    module Unknown = struct
+      type t = Opaque.Bigstring.t T.t [@@deriving bin_io]
+
+      let value = T.value (Opaque.Bigstring.to_opaque Mystery.value Mystery.bin_writer_t)
+    end
+
+    let convert bin_writer bin_reader value =
+      let buffer = Bin_prot.Utils.bin_dump bin_writer value in
+      bin_reader.Bin_prot.Type_class.read buffer ~pos_ref:(ref 0)
+    ;;
+
+    let roundtrip { Bin_prot.Type_class.reader; writer; shape = _ } value =
+      assert (convert writer reader value = value)
+    ;;
+
+    module Dropped = struct
+      type t = Ignored.t T.t [@@deriving bin_read]
+
+      let bin_size_t = T.bin_size_t Ignored.bin_size_t
+    end
+
+    let bigstring_to_string bigstring =
+      let len = Bigarray.Array1.dim bigstring in
+      String.init len ~f:(fun i -> bigstring.{i})
+    ;;
+
+    let%test_unit "roundtrip known" = roundtrip Known.bin_t Known.value
+    let%test_unit "roundtrip unknown" = roundtrip Unknown.bin_t Unknown.value
+
+    let%test_unit "opaque and wrapped serialize the same way" =
+      let known_buffer = Bin_prot.Utils.bin_dump Known.bin_writer_t Known.value in
+      let unknown_buffer = Bin_prot.Utils.bin_dump Unknown.bin_writer_t Unknown.value in
+      let known_s = bigstring_to_string known_buffer in
+      let unknown_s = bigstring_to_string unknown_buffer in
+      if known_s <> unknown_s then failwith (Printf.sprintf "%s <> %s" known_s unknown_s)
+    ;;
+
+    let%test_unit "serialized wrapped deserializes to the expected opaque" =
+      let unknown_from_known =
+        convert Known.bin_writer_t Unknown.bin_reader_t Known.value
+      in
+      assert (Unknown.value = unknown_from_known)
+    ;;
+
+    let%test_unit "serialized opaque deserializes to the expected wrapped" =
+      let known_from_unknown =
+        convert Unknown.bin_writer_t Known.bin_reader_t Unknown.value
+      in
+      assert (Known.value = known_from_unknown)
+    ;;
+
+    let%test_unit "Dropped" =
+      let buffer = Bin_prot.Utils.bin_dump Known.bin_writer_t Known.value in
+      let value = Dropped.bin_reader_t.Bin_prot.Type_class.read buffer ~pos_ref:(ref 0) in
+      let ignored = value.mystery in
+      (* The value deserialized with [Dropped] agrees with the value serialized by
+         [Known], except for the ignored bit. *)
+      assert ({ Known.value with mystery = ignored } = value);
+      (* [Dropped] remembered the size of the ignored data. *)
+      assert (Dropped.bin_size_t value = Known.bin_size_t Known.value)
+    ;;
+  end)
 ;;

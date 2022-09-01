@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 (** Heuristics for whitespace-sensitive inputs (e.g., if it looks like Python). *)

@@ -21,43 +21,43 @@ module Message = struct
 
   let rec sexp_of_t =
     (function
-      | Could_not_construct v0 ->
-        let v0 = Sexp.sexp_of_t v0 in
-        Ppx_sexp_conv_lib.Sexp.List
-          [ Ppx_sexp_conv_lib.Sexp.Atom "Could_not_construct"; v0 ]
-      | String v0 ->
-        let v0 = sexp_of_string v0 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "String"; v0 ]
-      | Exn v0 ->
-        let v0 = sexp_of_exn v0 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Exn"; v0 ]
-      | Sexp v0 ->
-        let v0 = Sexp.sexp_of_t v0 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Sexp"; v0 ]
-      | Tag_sexp (v0, v1, v2) ->
-        let v0 = sexp_of_string v0
-        and v1 = Sexp.sexp_of_t v1
-        and v2 = sexp_of_option Source_code_position0.sexp_of_t v2 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Tag_sexp"; v0; v1; v2 ]
-      | Tag_t (v0, v1) ->
-        let v0 = sexp_of_string v0
-        and v1 = sexp_of_t v1 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Tag_t"; v0; v1 ]
-      | Tag_arg (v0, v1, v2) ->
-        let v0 = sexp_of_string v0
-        and v1 = Sexp.sexp_of_t v1
-        and v2 = sexp_of_t v2 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Tag_arg"; v0; v1; v2 ]
-      | Of_list (v0, v1) ->
-        let v0 = sexp_of_option sexp_of_int v0
-        and v1 = sexp_of_list sexp_of_t v1 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Of_list"; v0; v1 ]
-      | With_backtrace (v0, v1) ->
-        let v0 = sexp_of_t v0
-        and v1 = sexp_of_string v1 in
-        Ppx_sexp_conv_lib.Sexp.List
-          [ Ppx_sexp_conv_lib.Sexp.Atom "With_backtrace"; v0; v1 ]
-        : t -> Ppx_sexp_conv_lib.Sexp.t)
+      | Could_not_construct arg0__001_ ->
+        let res0__002_ = Sexp.sexp_of_t arg0__001_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Could_not_construct"; res0__002_ ]
+      | String arg0__003_ ->
+        let res0__004_ = sexp_of_string arg0__003_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "String"; res0__004_ ]
+      | Exn arg0__005_ ->
+        let res0__006_ = sexp_of_exn arg0__005_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Exn"; res0__006_ ]
+      | Sexp arg0__007_ ->
+        let res0__008_ = Sexp.sexp_of_t arg0__007_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Sexp"; res0__008_ ]
+      | Tag_sexp (arg0__009_, arg1__010_, arg2__011_) ->
+        let res0__012_ = sexp_of_string arg0__009_
+        and res1__013_ = Sexp.sexp_of_t arg1__010_
+        and res2__014_ = sexp_of_option Source_code_position0.sexp_of_t arg2__011_ in
+        Sexplib0.Sexp.List
+          [ Sexplib0.Sexp.Atom "Tag_sexp"; res0__012_; res1__013_; res2__014_ ]
+      | Tag_t (arg0__015_, arg1__016_) ->
+        let res0__017_ = sexp_of_string arg0__015_
+        and res1__018_ = sexp_of_t arg1__016_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Tag_t"; res0__017_; res1__018_ ]
+      | Tag_arg (arg0__019_, arg1__020_, arg2__021_) ->
+        let res0__022_ = sexp_of_string arg0__019_
+        and res1__023_ = Sexp.sexp_of_t arg1__020_
+        and res2__024_ = sexp_of_t arg2__021_ in
+        Sexplib0.Sexp.List
+          [ Sexplib0.Sexp.Atom "Tag_arg"; res0__022_; res1__023_; res2__024_ ]
+      | Of_list (arg0__025_, arg1__026_) ->
+        let res0__027_ = sexp_of_option sexp_of_int arg0__025_
+        and res1__028_ = sexp_of_list sexp_of_t arg1__026_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Of_list"; res0__027_; res1__028_ ]
+      | With_backtrace (arg0__029_, arg1__030_) ->
+        let res0__031_ = sexp_of_t arg0__029_
+        and res1__032_ = sexp_of_string arg1__030_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "With_backtrace"; res0__031_; res1__032_ ]
+        : t -> Sexplib0.Sexp.t)
   ;;
 
   [@@@end]
@@ -149,6 +149,7 @@ let of_message = Message.to_info
    can handle any sexp. *)
 let sexp_of_t t = Message.to_sexp_hum (to_message t)
 let t_of_sexp sexp = lazy (Message.Sexp sexp)
+let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = { untyped = Any "Info.t" }
 let compare t1 t2 = Sexp.compare (sexp_of_t t1) (sexp_of_t t2)
 let equal t1 t2 = Sexp.equal (sexp_of_t t1) (sexp_of_t t2)
 let hash_fold_t state t = Sexp.hash_fold_t state (sexp_of_t t)
@@ -163,6 +164,7 @@ let to_string_hum t =
 let to_string_hum_deprecated t = Message.to_string_hum_deprecated (to_message t)
 let to_string_mach t = Sexp.to_string_mach (sexp_of_t t)
 let of_lazy l = lazy (protect (fun () -> String (Lazy.force l)))
+let of_lazy_sexp l = lazy (protect (fun () -> Sexp (Lazy.force l)))
 let of_lazy_t lazy_t = Lazy.join lazy_t
 let of_string message = Lazy.from_val (String message)
 let createf format = Printf.ksprintf of_string format
@@ -176,7 +178,12 @@ let create ?here ?strict tag x sexp_of_x =
 
 let create_s sexp = Lazy.from_val (Sexp sexp)
 let tag t ~tag = lazy (Tag_t (tag, to_message t))
-let tag_s t ~tag = lazy (protect (fun () -> Tag_arg ("", tag, to_message t)))
+
+let tag_s_lazy t ~tag =
+  lazy (protect (fun () -> Tag_arg ("", Lazy.force tag, to_message t)))
+;;
+
+let tag_s t ~tag = tag_s_lazy t ~tag:(Lazy.from_val tag)
 
 let tag_arg t tag x sexp_of_x =
   lazy (protect (fun () -> Tag_arg (tag, sexp_of_x x, to_message t)))
@@ -190,7 +197,7 @@ let () =
   (* We install a custom exn-converter rather than use
      [exception Exn of t [@@deriving_inline sexp] ... [@@@end]] to eliminate the extra
      wrapping of "(Exn ...)". *)
-  Sexplib.Conv.Exn_converter.add [%extension_constructor Exn] (function
+  Sexplib0.Sexp_conv.Exn_converter.add [%extension_constructor Exn] (function
     | Exn t -> sexp_of_t t
     | _ ->
       (* Reaching this branch indicates a bug in sexplib. *)

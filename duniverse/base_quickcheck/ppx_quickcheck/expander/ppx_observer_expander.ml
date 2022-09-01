@@ -1,6 +1,6 @@
 open! Import
 
-let any ~loc = [%expr Base_quickcheck.Observer.opaque]
+let any ~loc = [%expr Ppx_quickcheck_runtime.Base_quickcheck.Observer.opaque]
 
 let arrow
       ~observer_of_core_type
@@ -14,17 +14,22 @@ let arrow
     match arg_label with
     | Nolabel | Labelled _ -> generator_of_core_type input_type
     | Optional _ ->
-      [%expr Base_quickcheck.Generator.option [%e generator_of_core_type input_type]]
+      [%expr
+        Ppx_quickcheck_runtime.Base_quickcheck.Generator.option
+          [%e generator_of_core_type input_type]]
   in
   let output_observer = observer_of_core_type output_type in
   let unlabelled =
-    [%expr Base_quickcheck.Observer.fn [%e input_generator] [%e output_observer]]
+    [%expr
+      Ppx_quickcheck_runtime.Base_quickcheck.Observer.fn
+        [%e input_generator]
+        [%e output_observer]]
   in
   match arg_label with
   | Nolabel -> unlabelled
   | Labelled _ | Optional _ ->
     [%expr
-      Base_quickcheck.Observer.unmap
+      Ppx_quickcheck_runtime.Base_quickcheck.Observer.unmap
         ~f:[%e fn_map_label ~loc ~from:arg_label ~to_:Nolabel]
         [%e unlabelled]]
 ;;
@@ -34,7 +39,7 @@ let compound_hash ~loc ~size_expr ~hash_expr ~hash_pat ~observer_exprs ~field_ex
   List.fold_right alist ~init:hash_expr ~f:(fun (observer_expr, field_expr) body_expr ->
     [%expr
       let [%p hash_pat] =
-        Base_quickcheck.Observer.observe
+        Ppx_quickcheck_runtime.Base_quickcheck.Observer.observe
           [%e observer_expr]
           [%e field_expr]
           ~size:[%e size_expr]
@@ -59,7 +64,7 @@ let compound
   let size_pat, size_expr = gensym "size" loc in
   let hash_pat, hash_expr = gensym "hash" loc in
   [%expr
-    Base_quickcheck.Observer.create
+    Ppx_quickcheck_runtime.Base_quickcheck.Observer.create
       (fun [%p pat] ~size:[%p size_pat] ~hash:[%p hash_pat] ->
          [%e
            compound_hash ~loc ~size_expr ~hash_expr ~hash_pat ~observer_exprs ~field_exprs])]
@@ -77,7 +82,7 @@ let variant
   let size_pat, size_expr = gensym "size" loc in
   let hash_pat, hash_expr = gensym "hash" loc in
   [%expr
-    Base_quickcheck.Observer.create
+    Ppx_quickcheck_runtime.Base_quickcheck.Observer.create
       (fun [%p pat] ~size:[%p size_pat] ~hash:[%p hash_pat] ->
          [%e
            pexp_match
@@ -113,7 +118,9 @@ let variant
                           ~pat:hash_pat
                           ~expr:
                             [%expr
-                              Base.hash_fold_int [%e hash_expr] [%e eint ~loc salt]]
+                              Ppx_quickcheck_runtime.Base.hash_fold_int
+                                [%e hash_expr]
+                                [%e eint ~loc salt]]
                       ]
                       body
                 in

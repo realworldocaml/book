@@ -1,14 +1,13 @@
-(** Mutable vector of elements with O(1) [get] and [set] operations. *)
+(** Fixed-length, mutable vector of elements with O(1) [get] and [set] operations. *)
 
 open! Import
 
 type 'a t = 'a array [@@deriving_inline compare, sexp, sexp_grammar]
 
-val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+include Sexplib0.Sexpable.S1 with type 'a t := 'a t
 
-include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
-
-val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
@@ -21,6 +20,11 @@ include Invariant.S1 with type 'a t := 'a t
 (** Maximum length of a normal array.  The maximum length of a float array is
     [max_length/2] on 32-bit machines and [max_length] on 64-bit machines. *)
 val max_length : int
+
+(*_ Declared as externals so that the compiler skips the caml_apply_X wrapping even when
+  compiling without cross library inlining. *)
+
+external length : 'a array -> int = "%array_length"
 
 (** [Array.get a n] returns the element number [n] of array [a].
     The first element has number 0.
@@ -51,6 +55,12 @@ external unsafe_set : 'a t -> int -> 'a -> unit = "%array_unsafe_set"
     each element. *)
 val create : len:int -> 'a -> 'a t
 
+(** [create_float_uninitialized ~len] creates a float array of length [len] with
+    uninitialized elements -- that is, they may contain arbitrary, nondeterministic float
+    values. This can be significantly faster than using [create], when unboxed float array
+    representations are enabled. *)
+val create_float_uninitialized : len:int -> float t
+
 (** [init n ~f] creates an array of length [n] where the [i]th element (starting at zero)
     is initialized with [f i]. *)
 val init : int -> f:(int -> 'a) -> 'a t
@@ -66,6 +76,10 @@ val init : int -> f:(int -> 'a) -> 'a t
     If the value of [e] is a floating-point number, then the maximum size is only
     [Array.max_length / 2]. *)
 val make_matrix : dimx:int -> dimy:int -> 'a -> 'a t t
+
+(** [Array.copy_matrix t] returns a fresh copy of the array of arrays [t].  This is
+    typically used when [t] is a matrix created by [Array.make_matrix]. *)
+val copy_matrix : 'a t t -> 'a t t
 
 (** [Array.append v1 v2] returns a fresh array containing the concatenation of the arrays
     [v1] and [v2]. *)
@@ -95,8 +109,7 @@ val fill : 'a t -> pos:int -> len:int -> 'a -> unit
 
     [int_blit] and [float_blit] provide fast bound-checked blits for immediate
     data types.  The unsafe versions do not bound-check the arguments. *)
-include
-  Blit.S1 with type 'a t := 'a t
+include Blit.S1 with type 'a t := 'a t
 
 (** [Array.of_list l] returns a fresh array containing the elements of [l]. *)
 val of_list : 'a list -> 'a t
@@ -147,6 +160,12 @@ val is_sorted : 'a t -> compare:('a -> 'a -> int) -> bool
 (** [is_sorted_strictly xs ~compare] iff [is_sorted xs ~compare] and no two
     consecutive elements in [xs] are equal according to [compare]. *)
 val is_sorted_strictly : 'a t -> compare:('a -> 'a -> int) -> bool
+
+(** Merges two arrays: assuming that [a1] and [a2] are sorted according to the comparison
+    function [compare], [merge a1 a2 ~compare] will return a sorted array containing all
+    the elements of [a1] and [a2]. If several elements compare equal, the elements of [a1]
+    will be before the elements of [a2]. *)
+val merge : 'a t -> 'a t -> compare:('a -> 'a -> int) -> 'a t
 
 (** Like [List.concat_map], [List.concat_mapi]. *)
 val concat_map : 'a t -> f:('a -> 'b array) -> 'b array
@@ -208,6 +227,9 @@ val swap : 'a t -> int -> int -> unit
 (** [rev_inplace t] reverses [t] in place. *)
 val rev_inplace : 'a t -> unit
 
+(** [rev t] returns a reversed copy of [t] *)
+val rev : 'a t -> 'a t
+
 (** [of_list_rev l] converts from list then reverses in place. *)
 val of_list_rev : 'a list -> 'a t
 
@@ -259,11 +281,14 @@ val reduce : 'a t -> f:('a -> 'a -> 'a) -> 'a option
 
 val reduce_exn : 'a t -> f:('a -> 'a -> 'a) -> 'a
 
-(** [permute ?random_state t] randomly permutes [t] in place.
+(** [permute ?random_state ?pos ?len t] randomly permutes [t] in place.
+
+    To permute only part of the array, specify [pos] to be the index to start permuting
+    from and [len] indicating how many elements to permute.
 
     [permute] side-effects [random_state] by repeated calls to [Random.State.int].  If
     [random_state] is not supplied, [permute] uses [Random.State.default]. *)
-val permute : ?random_state:Random.State.t -> 'a t -> unit
+val permute : ?random_state:Random.State.t -> ?pos:int -> ?len:int -> 'a t -> unit
 
 (** [random_element ?random_state t] is [None] if [t] is empty, else it is [Some x] for
     some [x] chosen uniformly at random from [t].

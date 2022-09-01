@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 module Infinite_or_finite = struct
@@ -63,6 +63,51 @@ end
 
 open Infinite_or_finite.T
 
+(** Collect all the "dimensional analysis"-type things in one place.  Not every possible
+    function is exposed here, just the ones that are actually used.
+
+    These types are not exposed in the mli. *)
+module Float_types : sig
+  module Tokens_per_sec : sig
+    type t = private float
+
+    (** This is the only entry-point to the interface, as all arguments in the mli are
+        "*_per_sec".  *)
+    val create : float -> t
+
+    val to_span : t -> tokens:int -> Time_ns.Span.t
+  end
+
+  module Tokens_per_ns : sig
+    type t = private float [@@deriving sexp_of]
+
+    val to_tokens_per_sec : t -> Tokens_per_sec.t
+    val of_tokens_per_sec : Tokens_per_sec.t -> t
+    val to_tokens : t -> Time_ns.Span.t -> int
+  end
+end = struct
+  module Tokens_per_sec = struct
+    type t = float
+
+    let create x = x
+    let to_span t ~tokens = Time_ns.Span.of_sec (Float.of_int tokens /. t)
+  end
+
+  module Tokens_per_ns = struct
+    type t = float [@@deriving sexp_of]
+
+    let to_tokens_per_sec x = x *. 1E9
+    let of_tokens_per_sec x = x /. 1E9
+
+    (* this will raise when there is an int overflow, but in a way that will be annoying
+       to understand/track down if it fails.  This comment is here to help while keeping
+       the common case fast. *)
+    let to_tokens t span = Float.iround_down_exn (t *. Time_ns.Span.to_ns span)
+  end
+end
+
+open Float_types
+
 module Try_take_result = struct
   type t =
     | Taken
@@ -83,9 +128,9 @@ module Tokens_may_be_available_result = struct
     | When_return_to_hopper_is_called
 end
 
-module Try_increase_bucket_limit_result = struct
+module Try_reconfigure_result = struct
   type t =
-    | Increased
+    | Reconfigured
     | Unable
   [@@deriving sexp_of]
 end
@@ -110,16 +155,13 @@ type t =
   ; mutable bucket_limit : int (** maximum size allowable in flight *)
   ; in_flight_limit : int Iofm.t
   (** rate at which tokens "fall" from the hopper into the bucket *)
-  ; hopper_to_bucket_rate_per_ns : Float.t Iofm.t
+  ; mutable hopper_to_bucket_rate_per_ns : Tokens_per_ns.t Iofm.t
   }
 [@@deriving sexp_of, fields]
 
-let fill_rate_must_be_positive fill_rate =
-  if Iofm.is_finite fill_rate
-  then (
-    let rate = Iofm.get_finite_exn fill_rate in
-    if Float.( < ) rate Float.zero
-    then raise_s [%message "hopper_to_bucket_rate_per_ns must be >= 0" (rate : Float.t)])
+let fill_rate_is_positive_or_zero fill_rate =
+  Iofm.is_infinite fill_rate
+  || Float.( >= ) (Iofm.get_finite_exn fill_rate : Tokens_per_ns.t :> float) Float.zero
 ;;
 
 let in_system t =
@@ -129,7 +171,12 @@ let in_system t =
 ;;
 
 let invariant t =
-  fill_rate_must_be_positive t.hopper_to_bucket_rate_per_ns;
+  if not (fill_rate_is_positive_or_zero t.hopper_to_bucket_rate_per_ns)
+  then
+    raise_s
+      [%message
+        "hopper_to_bucket_rate_per_ns must be >= 0"
+          (t.hopper_to_bucket_rate_per_ns : Tokens_per_ns.t Iofm.t)];
   (* bucket is limited to size *)
   if t.in_bucket > t.bucket_limit
   then
@@ -177,7 +224,8 @@ let create_exn
   let hopper_to_bucket_rate_per_ns =
     match hopper_to_bucket_rate_per_sec with
     | Infinite -> Iofm.infinite ()
-    | Finite rate_per_sec -> Iofm.finite (rate_per_sec /. 1E9)
+    | Finite rate_per_sec ->
+      Iofm.finite (Tokens_per_ns.of_tokens_per_sec (Tokens_per_sec.create rate_per_sec))
   in
   let t =
     { start_time = now
@@ -212,14 +260,8 @@ let update_time_in_token_space (t : t) =
   if Iofm.is_finite t.hopper_to_bucket_rate_per_ns
   then (
     let tokens_per_ns = Iofm.get_finite_exn t.hopper_to_bucket_rate_per_ns in
-    let time_elapsed_since_start_in_ns =
-      Time_ns.Span.to_ns (Time_ns.diff t.time t.start_time)
-    in
-    (* this will raise when there is an int overflow, but in a way that will be annoying
-       to understand/track down if it fails.  This comment is here to help while keeping
-       the common case fast. *)
     let time_in_token_space =
-      Float.iround_down_exn (time_elapsed_since_start_in_ns *. tokens_per_ns)
+      Tokens_per_ns.to_tokens tokens_per_ns (Time_ns.diff t.time t.start_time)
     in
     Iofm.set_finite t.time_in_token_space time_in_token_space)
 ;;
@@ -322,9 +364,13 @@ let tokens_may_be_available_when t ~now amount : Tokens_may_be_available_result.
     then When_return_to_hopper_is_called
     else (
       let tokens_per_ns = Iofm.get_finite_exn t.hopper_to_bucket_rate_per_ns in
-      let min_seconds_left = Float.of_int amount_missing /. (tokens_per_ns *. 1E9) in
+      let min_time_left =
+        Tokens_per_sec.to_span
+          (Tokens_per_ns.to_tokens_per_sec tokens_per_ns)
+          ~tokens:amount_missing
+      in
       let (min_time : Tokens_may_be_available_result.t) =
-        At (Time_ns.add t.time (Time_ns.Span.of_sec min_seconds_left))
+        At (Time_ns.add t.time min_time_left)
       in
       if Iofm.is_infinite t.in_hopper
       then min_time
@@ -364,7 +410,11 @@ let bucket_limit t = t.bucket_limit
 let hopper_to_bucket_rate_per_sec t =
   if Iofm.is_infinite t.hopper_to_bucket_rate_per_ns
   then Infinite
-  else Finite (Iofm.get_finite_exn t.hopper_to_bucket_rate_per_ns *. 1E9)
+  else
+    Finite
+      (Tokens_per_ns.to_tokens_per_sec
+         (Iofm.get_finite_exn t.hopper_to_bucket_rate_per_ns)
+       :> float)
 ;;
 
 module Token_bucket = struct
@@ -395,14 +445,28 @@ module Token_bucket = struct
       create_exn ~now ~burst_size ~initial_bucket_level:burst_size ()
     ;;
 
-    let try_increase_bucket_limit t ~new_limit : Try_increase_bucket_limit_result.t =
-      if new_limit < t.bucket_limit
+    let try_reconfigure
+          t
+          ~burst_size:new_bucket_limit
+          ~sustained_rate_per_sec:new_sustained_rate_per_sec
+      : Try_reconfigure_result.t
+      =
+      if new_bucket_limit < t.bucket_limit
       then Unable
       else (
-        let increase_amount = new_limit - t.bucket_limit in
-        t.in_bucket <- t.in_bucket + increase_amount;
-        t.bucket_limit <- new_limit;
-        Increased)
+        let hopper_to_bucket_rate_per_ns =
+          Iofm.finite
+            (Tokens_per_ns.of_tokens_per_sec
+               (Tokens_per_sec.create new_sustained_rate_per_sec))
+        in
+        if not (fill_rate_is_positive_or_zero hopper_to_bucket_rate_per_ns)
+        then Unable
+        else (
+          let increase_amount = new_bucket_limit - t.bucket_limit in
+          t.in_bucket <- t.in_bucket + increase_amount;
+          t.bucket_limit <- new_bucket_limit;
+          t.hopper_to_bucket_rate_per_ns <- hopper_to_bucket_rate_per_ns;
+          Reconfigured))
     ;;
   end
 end

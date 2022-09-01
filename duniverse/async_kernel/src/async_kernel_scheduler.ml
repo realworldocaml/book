@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 include Scheduler
 
@@ -44,11 +44,27 @@ let num_pending_jobs () = num_pending_jobs (t ())
 
 module Expert = struct
   let run_cycles_until_no_jobs_remain = run_cycles_until_no_jobs_remain
-  let set_on_start_of_cycle f = set_on_start_of_cycle (t ()) f
-  let set_on_end_of_cycle f = set_on_end_of_cycle (t ()) f
   let last_cycle_num_jobs () = last_cycle_num_jobs (t ())
   let run_every_cycle_start f = run_every_cycle_start (t ()) ~f
   let run_every_cycle_end f = run_every_cycle_end (t ()) ~f
+  let add_every_cycle_start_hook ~f = add_every_cycle_start_hook (t ()) ~f
+  let add_every_cycle_end_hook ~f = add_every_cycle_end_hook (t ()) ~f
+
+  let remove_every_cycle_start_hook_exn handle =
+    remove_every_cycle_start_hook_exn (t ()) handle
+  ;;
+
+  let remove_every_cycle_end_hook_exn handle =
+    remove_every_cycle_end_hook_exn (t ()) handle
+  ;;
+
+  let with_execution_context execution_context f =
+    with_execution_context (t ()) execution_context ~f
+  ;;
+
+  let with_execution_context1 execution_context ~f x =
+    with_execution_context1 (t ()) execution_context ~f x
+  ;;
 end
 
 module Private = Scheduler

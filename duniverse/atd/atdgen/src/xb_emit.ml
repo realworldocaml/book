@@ -23,7 +23,8 @@ let rec extract_names_from_expr acc (x : 'a expr) =
   | Bool _
   | Int _
   | Float  _
-  | String _ -> acc
+  | String _
+  | Abstract _ -> acc
   | Sum (_, va, _, _) ->
       let l, (fn, vn) =
         Array.fold_left extract_names_from_variant ([], acc) va

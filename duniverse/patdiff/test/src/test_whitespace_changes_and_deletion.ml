@@ -37,7 +37,8 @@ let%expect_test "default" =
     (fg:black bg:yellow)!|(fg:red)      Int.( = )
     (fg:black bg:yellow)!|(fg:red)        (Set.length t.by_varying_usage)
     (fg:black bg:yellow)!|(fg:red)        ((off)Hashtbl.length t.bucket_id_to_keys(fg:red))(off)))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "-no-semantic-cleanup" =
@@ -55,7 +56,8 @@ let%expect_test "-no-semantic-cleanup" =
     (fg:black bg:yellow)!|(fg:red)      Int.( = )
     (fg:black bg:yellow)!|(fg:red)        (Set.length t.by_varying_usage)
     (fg:black bg:yellow)!|(fg:red)        ((off)Hashtbl.length t.bucket_id_to_keys(fg:red))(off)))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 (* The diff gets much better if I add a newline to both inputs. *)
@@ -95,5 +97,6 @@ let%expect_test "with extra newlines" =
     (fg:black bg:yellow)!|(off)      Int.( = )
     (fg:black bg:yellow)!|(off)        (Set.length t.by_varying_usage)
     (fg:black bg:yellow)!|(off)        (Hashtbl.length t.bucket_id_to_keys(fg:red))(off)))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;

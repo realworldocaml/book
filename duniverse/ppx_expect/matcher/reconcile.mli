@@ -1,7 +1,8 @@
 (** Determine whether a test's output matches its expected output. *)
 
 open! Base
-open Import
+open Base.Exported_for_specific_uses (* for [Ppx_compare_lib] *)
+
 open Expect_test_common
 
 module Result : sig
@@ -13,8 +14,9 @@ module Result : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+
+    val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
   end
   [@@ocaml.doc "@inline"]
 

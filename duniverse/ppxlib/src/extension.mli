@@ -31,7 +31,20 @@ module Context : sig
   val structure_item : structure_item t
   val eq : 'a t -> 'b t -> ('a, 'b) equality
   val get_extension : 'a t -> 'a -> (extension * attributes) option
+
+  val node_of_extension : ?loc:Location.t -> ?x:'a -> 'a t -> extension -> 'a
+  (** [node_of_extension ctx ext] turns an extension node into an AST node of
+      the same type as [ctx]. By default, the location of the node is
+      {!Location.none}.
+
+      Only for the special case of [Ppx_import], a value of type
+      {!type_declaration} has to be passed as the named argument [x], the
+      extension node will be added as the {!ptype_manifest} of [x]. *)
+
   val merge_attributes : 'a t -> 'a -> attributes -> 'a
+
+  val merge_attributes_res :
+    'a t -> 'a -> attributes -> ('a, Location.Error.t NonEmptyList.t) result
 end
 
 type t
@@ -95,8 +108,20 @@ module For_context : sig
 
   type 'a t
 
+  val convert_res :
+    'a t list ->
+    ctxt:Expansion_context.Extension.t ->
+    extension ->
+    ('a option, Location.Error.t NonEmptyList.t) result
+
   val convert :
     'a t list -> ctxt:Expansion_context.Extension.t -> extension -> 'a option
+
+  val convert_inline_res :
+    'a t list ->
+    ctxt:Expansion_context.Extension.t ->
+    extension ->
+    ('a list option, Location.Error.t NonEmptyList.t) result
 
   val convert_inline :
     'a t list ->
@@ -134,10 +159,17 @@ module Expert : sig
     (arg:Longident.t Loc.t option -> 'a) ->
     ('context, 'b) t
 
+  val convert_res :
+    (_, 'a) t list ->
+    loc:Location.t ->
+    extension ->
+    ('a option, Location.Error.t NonEmptyList.t) result
+
   val convert : (_, 'a) t list -> loc:Location.t -> extension -> 'a option
 end
 
 val check_unused : Ast_traverse.iter
+val collect_unhandled_extension_errors : Location.Error.t list Ast_traverse.fold
 
 module V2 : sig
   type nonrec t = t

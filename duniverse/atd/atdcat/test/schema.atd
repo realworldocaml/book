@@ -1,0 +1,43 @@
+(* Input ATD file for testing the translation to JSON Schema *)
+
+<doc text="This is the title. Here's a code block:
+{{{
+this is line 1
+this is line 2
+}}}
+">
+
+type different_kinds_of_things = [
+  | Root <doc text="this is Root">
+  | Thing <doc text="this is Thing"> of int
+  | WOW <json name="wow">
+  | Amaze <json name="!!!"> of string list
+]
+
+type root
+ <doc text="This is the root object. For example, the empty object {{ {} }}
+            is invalid.">
+ = {
+  id
+    <json name="ID">
+    <doc text="This is the 'id' field.">
+    : string;
+  items
+    <doc text="An example of JSON value is {{ [[1, 2], [3], [4, 5, 6]] }}">
+    : int list list;
+  ?maybe: int option;
+  ~extras: int list;
+  ~answer: int;
+  aliased: alias;
+  point: (float * float);
+  kinds: different_kinds_of_things list;
+  assoc1: (float * int) list;
+  assoc2: (string * int) list <json repr="object">;
+  ~options: int option list;
+  ~nullables: int nullable list;
+  ~untyped_things: abstract list;
+}
+
+type alias = int list
+
+type pair = (string * int)

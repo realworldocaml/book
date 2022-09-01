@@ -51,6 +51,7 @@
 (test
  (name test_constants)
  (package ctypes-foreign)
+ (deps ../clib/clib%{ext_dll})
  (modules test_constants)
  (libraries
   ounit2

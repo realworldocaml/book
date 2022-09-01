@@ -102,9 +102,6 @@ char *s_strdup(const char *s)
 }
 #endif
 
-CAMLexport value alloc_inet_addr(struct in_addr *inaddr);
-CAMLexport value alloc_inet6_addr(struct in6_addr *inaddr);
-
 static value alloc_one_addr(char const *a)
 {
     struct in_addr addr;

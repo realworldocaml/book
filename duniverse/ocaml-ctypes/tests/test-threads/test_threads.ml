@@ -13,7 +13,7 @@ open Foreign
 let () =
   (* temporary workaround due to flexlink limitations *)
   if Sys.os_type = "Win32" then
-    ignore (Dl.(dlopen ~filename:"clib/libtest_functions.so" ~flags:[RTLD_NOW]))
+    ignore (Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW]))
 
 
 let callback_with_pointers = Foreign.foreign "passing_pointers_to_callback"

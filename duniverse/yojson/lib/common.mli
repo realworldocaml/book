@@ -1,11 +1,15 @@
 val version : string
 
 exception Json_error of string
+(** Exception used:
+    - in JSON readers, if parsing fails;
+    - in JSON writers and pretty printing, if [float] value is not allowed in standard JSON. *)
 
 val json_error : string -> 'a
+(** @raise Json_error *)
 
 type lexer_state = {
-  buf : Bi_outbuf.t;
+  buf : Buffer.t;
     (** Buffer used to accumulate substrings *)
 
   mutable lnum : int;
@@ -22,7 +26,7 @@ type lexer_state = {
 module Lexer_state :
 sig
   type t = lexer_state = {
-    buf : Bi_outbuf.t;
+    buf : Buffer.t;
     mutable lnum : int;
     mutable bol : int;
     mutable fname : string option;
@@ -30,7 +34,7 @@ sig
 end
 
 val init_lexer :
-  ?buf: Bi_outbuf.t ->
+  ?buf: Buffer.t ->
   ?fname: string ->
   ?lnum: int ->
   unit -> lexer_state

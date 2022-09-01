@@ -1,0 +1,16 @@
+(executable
+  (name test)
+  (libraries
+    alcotest
+    yojson
+  )
+)
+
+(alias
+  (name compliance-tests)
+  (deps
+    (:test test.exe)
+    (glob_files test_cases/*)
+  )
+  (action (run %{test} --show-errors))
+)

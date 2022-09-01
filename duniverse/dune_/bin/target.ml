@@ -74,7 +74,7 @@ let resolve_path path ~(setup : Dune_rules.Main.build_system) =
         Load_rules.is_target path >>| function
         | Yes _ | Under_directory_target_so_cannot_say -> Some (File path)
         | No -> None)
-    >>| List.filter_map ~f:Fun.id
+    >>| List.filter_opt
   in
   let matching_target () =
     Load_rules.is_target path >>| function
@@ -121,7 +121,7 @@ let expand_path (root : Workspace_root.t)
   Path.relative Path.root (root.reach_from_root_prefix ^ s)
 
 let resolve_alias root ~recursive sv ~(setup : Dune_rules.Main.build_system) =
-  match Dune_engine.String_with_vars.text_only sv with
+  match Dune_lang.String_with_vars.text_only sv with
   | Some s ->
     Ok [ Alias (Alias.of_string root ~recursive s ~contexts:setup.contexts) ]
   | None -> Error [ Pp.text "alias cannot contain variables" ]

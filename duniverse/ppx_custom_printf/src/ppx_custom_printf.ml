@@ -7,9 +7,9 @@ let rec skip_over_format_flags fmt i =
   if i >= String.length fmt
   then `Eoi
   else match fmt.[i] with
-  | '*' | '#' | '-' | ' ' | '+' | '_' | '0'..'9' | '.' ->
-    skip_over_format_flags fmt (i + 1)
-  | _ -> `Ok i
+    | '*' | '#' | '-' | ' ' | '+' | '_' | '0'..'9' | '.' ->
+      skip_over_format_flags fmt (i + 1)
+    | _ -> `Ok i
 
 (* doesn't check to make sure the format string is well-formed *)
 (* Formats with subformats are skipped for the following reasons:
@@ -25,14 +25,14 @@ let has_subformats (fmt:string) =
     if i > lim
     then false
     else
-      if Char.equal fmt.[i] '%' then
-        match skip_over_format_flags fmt (i + 1) with
-        | `Eoi -> false
-        | `Ok i ->
-          match fmt.[i] with
-          | '(' | ')' | '}' -> true
-          | _ -> loop (i + 1)
-      else loop (i + 1)
+    if Char.equal fmt.[i] '%' then
+      match skip_over_format_flags fmt (i + 1) with
+      | `Eoi -> false
+      | `Ok i ->
+        match fmt.[i] with
+        | '(' | ')' | '}' -> true
+        | _ -> loop (i + 1)
+    else loop (i + 1)
   in
   loop 0
 

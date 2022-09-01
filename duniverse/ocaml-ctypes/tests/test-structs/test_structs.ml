@@ -10,7 +10,7 @@ open OUnit2
 open Ctypes
 
 
-let testlib = Dl.(dlopen ~filename:"../clib/dlltest_functions_stubs.so" ~flags:[RTLD_NOW])
+let testlib = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
 
 
 module Build_foreign_tests(S : Cstubs.FOREIGN with type 'a result = 'a

@@ -1,0 +1,35 @@
+(* Demonstrate the sort of type errors you get when static lengths don't agree in
+   [Text_block.With_static_lengths]. *)
+
+open! Core
+open Text_block
+
+let () =
+  let [ x; y ] = With_static_lengths.halign `Left [ nil; nil; nil ] in
+  ignore (x, y : Text_block.t * Text_block.t)
+;;
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This pattern matches values of type
+         (t, [ `nil ]) With_static_lengths.List.t
+       but a pattern was expected which matches values of type
+         (t, [ `cons of [ `nil ] ]) With_static_lengths.List.t
+       Type [ `nil ] is not compatible with type [ `cons of [ `nil ] ]
+|}]
+
+let () =
+  let [ x; y; z ] = With_static_lengths.halign `Left [ nil; nil ] in
+  ignore (x, y, z : Text_block.t * Text_block.t * Text_block.t)
+;;
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This pattern matches values of type
+         (t, [ `cons of $0 ]) With_static_lengths.List.t
+       but a pattern was expected which matches values of type
+         (t, [ `nil ]) With_static_lengths.List.t
+       Type [ `cons of $0 ] is not compatible with type [ `nil ]
+|}]

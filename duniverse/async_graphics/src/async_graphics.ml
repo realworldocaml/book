@@ -45,7 +45,7 @@ let create_event_reader () =
     Some rd -> Deferred.return rd
   | None ->
       let (rd_d, fill) = Thread_safe.deferred () in
-        ignore (Thread.create 
+        ignore (Core_thread.create ~on_uncaught_exn:`Print_to_stderr
                   (fun () -> 
                    let (rd, wr) = Thread_safe_pipe.create () in
                      event_reader := Some rd;

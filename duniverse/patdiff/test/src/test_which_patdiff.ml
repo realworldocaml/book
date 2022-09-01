@@ -7,5 +7,6 @@ open! Import
 let%expect_test "which patdiff" =
   within_temp_dir ~links (fun () ->
     let%bind () = system {|which patdiff | grep -q "$TMPDIR"|} in
-    [%expect {| |}])
+    [%expect {| |}];
+    return ())
 ;;

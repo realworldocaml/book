@@ -159,74 +159,74 @@ type 'a abs1 = 'a Test.abs1
 
 val validate_test_variant :
   Atdgen_runtime.Util.Validation.path -> test_variant -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!test_variant}. *)
+  (** Validate a value of type {!type:test_variant}. *)
 
 val create_poly :
   fst: 'x list ->
   snd: ('x, 'y) poly option ->
   unit -> ('x, 'y) poly
-  (** Create a record of type {!poly}. *)
+  (** Create a record of type {!type:poly}. *)
 
 val validate_poly :
   (Atdgen_runtime.Util.Validation.path -> 'x -> Atdgen_runtime.Util.Validation.error option) ->
   (Atdgen_runtime.Util.Validation.path -> 'y -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> ('x, 'y) poly -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!poly}. *)
+  (** Validate a value of type {!type:poly}. *)
 
 val validate_p' :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a p' -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!p'}. *)
+  (** Validate a value of type {!type:p'}. *)
 
 val validate_p :
   Atdgen_runtime.Util.Validation.path -> p -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!p}. *)
+  (** Validate a value of type {!type:p}. *)
 
 val create_r :
   a: int ->
   b: bool ->
   c: p ->
   unit -> r
-  (** Create a record of type {!r}. *)
+  (** Create a record of type {!type:r}. *)
 
 val validate_r :
   Atdgen_runtime.Util.Validation.path -> r -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!r}. *)
+  (** Validate a value of type {!type:r}. *)
 
 val validate_validated_string_check :
   Atdgen_runtime.Util.Validation.path -> validated_string_check -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!validated_string_check}. *)
+  (** Validate a value of type {!type:validated_string_check}. *)
 
 val validate_validate_me :
   Atdgen_runtime.Util.Validation.path -> validate_me -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!validate_me}. *)
+  (** Validate a value of type {!type:validate_me}. *)
 
 val create_val1 :
   val1_x: int ->
   unit -> val1
-  (** Create a record of type {!val1}. *)
+  (** Create a record of type {!type:val1}. *)
 
 val validate_val1 :
   Atdgen_runtime.Util.Validation.path -> val1 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!val1}. *)
+  (** Validate a value of type {!type:val1}. *)
 
 val create_val2 :
   val2_x: val1 ->
   ?val2_y: val1 ->
   unit -> val2
-  (** Create a record of type {!val2}. *)
+  (** Create a record of type {!type:val2}. *)
 
 val validate_val2 :
   Atdgen_runtime.Util.Validation.path -> val2 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!val2}. *)
+  (** Validate a value of type {!type:val2}. *)
 
 val validate_unixtime_list :
   Atdgen_runtime.Util.Validation.path -> unixtime_list -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!unixtime_list}. *)
+  (** Validate a value of type {!type:unixtime_list}. *)
 
 val validate_date :
   Atdgen_runtime.Util.Validation.path -> date -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!date}. *)
+  (** Validate a value of type {!type:date}. *)
 
 val create_mixed_record :
   ?field0: int ->
@@ -245,15 +245,15 @@ val create_mixed_record :
   field13: string option list ->
   field14: date ->
   unit -> mixed_record
-  (** Create a record of type {!mixed_record}. *)
+  (** Create a record of type {!type:mixed_record}. *)
 
 val validate_mixed_record :
   Atdgen_runtime.Util.Validation.path -> mixed_record -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!mixed_record}. *)
+  (** Validate a value of type {!type:mixed_record}. *)
 
 val validate_mixed :
   Atdgen_runtime.Util.Validation.path -> mixed -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!mixed}. *)
+  (** Validate a value of type {!type:mixed}. *)
 
 val create_test :
   ?x0: int ->
@@ -262,129 +262,129 @@ val create_test :
   x3: mixed_record list ->
   x4: Int64.t ->
   unit -> test
-  (** Create a record of type {!test}. *)
+  (** Create a record of type {!type:test}. *)
 
 val validate_test :
   Atdgen_runtime.Util.Validation.path -> test -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!test}. *)
+  (** Validate a value of type {!type:test}. *)
 
 val validate_tup :
   Atdgen_runtime.Util.Validation.path -> tup -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!tup}. *)
+  (** Validate a value of type {!type:tup}. *)
 
 val create_test_field_prefix :
   theprefix_hello: bool ->
   theprefix_world: int ->
   unit -> test_field_prefix
-  (** Create a record of type {!test_field_prefix}. *)
+  (** Create a record of type {!type:test_field_prefix}. *)
 
 val validate_test_field_prefix :
   Atdgen_runtime.Util.Validation.path -> test_field_prefix -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!test_field_prefix}. *)
+  (** Validate a value of type {!type:test_field_prefix}. *)
 
 val validate_star_rating :
   Atdgen_runtime.Util.Validation.path -> star_rating -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!star_rating}. *)
+  (** Validate a value of type {!type:star_rating}. *)
 
 val create_generic :
   x294623: int ->
   unit -> 'a generic
-  (** Create a record of type {!generic}. *)
+  (** Create a record of type {!type:generic}. *)
 
 val validate_generic :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a generic -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!generic}. *)
+  (** Validate a value of type {!type:generic}. *)
 
 val validate_specialized :
   Atdgen_runtime.Util.Validation.path -> specialized -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!specialized}. *)
+  (** Validate a value of type {!type:specialized}. *)
 
 val create_some_record :
   some_field: int ->
   unit -> some_record
-  (** Create a record of type {!some_record}. *)
+  (** Create a record of type {!type:some_record}. *)
 
 val validate_some_record :
   Atdgen_runtime.Util.Validation.path -> some_record -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!some_record}. *)
+  (** Validate a value of type {!type:some_record}. *)
 
 val create_precision :
   sqrt2_5: float ->
   small_2: float ->
   large_2: float ->
   unit -> precision
-  (** Create a record of type {!precision}. *)
+  (** Create a record of type {!type:precision}. *)
 
 val validate_precision :
   Atdgen_runtime.Util.Validation.path -> precision -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!precision}. *)
+  (** Validate a value of type {!type:precision}. *)
 
 val validate_p'' :
   Atdgen_runtime.Util.Validation.path -> p'' -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!p''}. *)
+  (** Validate a value of type {!type:p''}. *)
 
 val validate_option_validation :
   Atdgen_runtime.Util.Validation.path -> option_validation -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!option_validation}. *)
+  (** Validate a value of type {!type:option_validation}. *)
 
 val validate_no_real_wrap :
   Atdgen_runtime.Util.Validation.path -> no_real_wrap -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!no_real_wrap}. *)
+  (** Validate a value of type {!type:no_real_wrap}. *)
 
 val validate_natural :
   Atdgen_runtime.Util.Validation.path -> natural -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!natural}. *)
+  (** Validate a value of type {!type:natural}. *)
 
 val validate_id :
   Atdgen_runtime.Util.Validation.path -> id -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!id}. *)
+  (** Validate a value of type {!type:id}. *)
 
 val validate_json_map :
   Atdgen_runtime.Util.Validation.path -> json_map -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!json_map}. *)
+  (** Validate a value of type {!type:json_map}. *)
 
 val validate_intopt :
   Atdgen_runtime.Util.Validation.path -> intopt -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!intopt}. *)
+  (** Validate a value of type {!type:intopt}. *)
 
 val validate_int_assoc_list :
   Atdgen_runtime.Util.Validation.path -> int_assoc_list -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!int_assoc_list}. *)
+  (** Validate a value of type {!type:int_assoc_list}. *)
 
 val validate_int_assoc_array :
   Atdgen_runtime.Util.Validation.path -> int_assoc_array -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!int_assoc_array}. *)
+  (** Validate a value of type {!type:int_assoc_array}. *)
 
 val validate_int8 :
   Atdgen_runtime.Util.Validation.path -> int8 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!int8}. *)
+  (** Validate a value of type {!type:int8}. *)
 
 val validate_int64 :
   Atdgen_runtime.Util.Validation.path -> int64 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!int64}. *)
+  (** Validate a value of type {!type:int64}. *)
 
 val validate_int32 :
   Atdgen_runtime.Util.Validation.path -> int32 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!int32}. *)
+  (** Validate a value of type {!type:int32}. *)
 
 val validate_hello :
   Atdgen_runtime.Util.Validation.path -> hello -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!hello}. *)
+  (** Validate a value of type {!type:hello}. *)
 
 val create_floats :
   f32: float ->
   f64: float ->
   unit -> floats
-  (** Create a record of type {!floats}. *)
+  (** Create a record of type {!type:floats}. *)
 
 val validate_floats :
   Atdgen_runtime.Util.Validation.path -> floats -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!floats}. *)
+  (** Validate a value of type {!type:floats}. *)
 
 val validate_extended_tuple :
   Atdgen_runtime.Util.Validation.path -> extended_tuple -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!extended_tuple}. *)
+  (** Validate a value of type {!type:extended_tuple}. *)
 
 val create_extended :
   b0x: int ->
@@ -394,51 +394,55 @@ val create_extended :
   b4x: string option ->
   ?b5x: float ->
   unit -> extended
-  (** Create a record of type {!extended}. *)
+  (** Create a record of type {!type:extended}. *)
 
 val validate_extended :
   Atdgen_runtime.Util.Validation.path -> extended -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!extended}. *)
+  (** Validate a value of type {!type:extended}. *)
 
 val validate_even_natural :
   Atdgen_runtime.Util.Validation.path -> even_natural -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!even_natural}. *)
+  (** Validate a value of type {!type:even_natural}. *)
+
+val validate_def :
+  Atdgen_runtime.Util.Validation.path -> def -> Atdgen_runtime.Util.Validation.error option
+  (** Validate a value of type {!type:def}. *)
 
 val validate_char :
   Atdgen_runtime.Util.Validation.path -> char -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!char}. *)
+  (** Validate a value of type {!type:char}. *)
 
 val validate_base_tuple :
   Atdgen_runtime.Util.Validation.path -> base_tuple -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!base_tuple}. *)
+  (** Validate a value of type {!type:base_tuple}. *)
 
 val create_base :
   b0: int ->
   b1: bool ->
   unit -> base
-  (** Create a record of type {!base}. *)
+  (** Create a record of type {!type:base}. *)
 
 val validate_base :
   Atdgen_runtime.Util.Validation.path -> base -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!base}. *)
+  (** Validate a value of type {!type:base}. *)
 
 val validate_array :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a array -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!array}. *)
+  (** Validate a value of type {!type:array}. *)
 
 val validate_abs3 :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a abs3 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!abs3}. *)
+  (** Validate a value of type {!type:abs3}. *)
 
 val validate_abs2 :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a abs2 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!abs2}. *)
+  (** Validate a value of type {!type:abs2}. *)
 
 val validate_abs1 :
   (Atdgen_runtime.Util.Validation.path -> 'a -> Atdgen_runtime.Util.Validation.error option) ->
   Atdgen_runtime.Util.Validation.path -> 'a abs1 -> Atdgen_runtime.Util.Validation.error option
-  (** Validate a value of type {!abs1}. *)
+  (** Validate a value of type {!type:abs1}. *)
 

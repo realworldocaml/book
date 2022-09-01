@@ -1,2 +1,2 @@
-(library (name core_unix_daemon) (public_name core_unix.daemon)
-  (libraries core.daemon) (preprocess no_preprocessing))
+(library (name daemon) (public_name core_unix.daemon)
+ (libraries core core_thread core_unix) (preprocess (pps ppx_jane)))

@@ -1,5 +1,12 @@
 open! Core
 open! Import
+module Unix := Core_unix
+
+include module type of struct
+  include Patdiff_kernel.Compare_core
+end
+
+include Patdiff_kernel.Compare_core.S
 
 val diff_files
   :  Configuration.t
@@ -13,12 +20,3 @@ val diff_dirs
   -> next_dir:string
   -> file_filter:(string * Unix.stats -> bool) option
   -> [ `Different | `Same ]
-
-(* diff strings and output to strings, supposed to be used by ocaml code *)
-
-val diff_strings
-  :  ?print_global_header:bool
-  -> Configuration.t
-  -> prev:Diff_input.t
-  -> next:Diff_input.t
-  -> [ `Different of string | `Same ]

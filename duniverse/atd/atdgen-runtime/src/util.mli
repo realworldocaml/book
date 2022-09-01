@@ -59,7 +59,7 @@ sig
         [Yojson.lexer_state], [Yojson.Basic.lexer_state] and
         [Yojson.Raw.lexer_state]. *)
 
-  type 'a writer = Bi_outbuf.t -> 'a -> unit
+  type 'a writer = Buffer.t -> 'a -> unit
     (** Type of a [write_] function as produced by [atdgen -json]. *)
 
   val from_lexbuf :
@@ -74,7 +74,7 @@ sig
     *)
 
   val from_string :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fname:string ->
     ?lnum:int ->
     'a reader -> string -> 'a
@@ -91,7 +91,7 @@ sig
     *)
 
   val from_channel :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fname:string ->
     ?lnum:int ->
     'a reader -> in_channel -> 'a
@@ -108,7 +108,7 @@ sig
     *)
 
   val from_file :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fname:string ->
     ?lnum:int ->
     'a reader -> string -> 'a
@@ -124,9 +124,9 @@ sig
                        Default: 1.
     *)
 
-  val stream_from_lexbuf :
+  val seq_from_lexbuf :
     ?fin:(unit -> unit) ->
-    'a reader -> Yojson.Safe.lexer_state -> Lexing.lexbuf -> 'a Stream.t
+    'a reader -> Yojson.Safe.lexer_state -> Lexing.lexbuf -> 'a Seq.t
     (** Read a stream of JSON values from a lexbuf.
         @param fin     finalization function executed once when the end of the
                        stream is reached either because there is no more
@@ -135,12 +135,12 @@ sig
                        [fun () -> close_in_noerr ic].
     *)
 
-  val stream_from_string :
-    ?buf:Bi_outbuf.t ->
+  val seq_from_string :
+    ?buf:Buffer.t ->
     ?fin:(unit -> unit) ->
     ?fname:string ->
     ?lnum:int ->
-    'a reader -> string -> 'a Stream.t
+    'a reader -> string -> 'a Seq.t
     (** Read a stream of JSON values from a channel.
         Values do not have to be separated by newline characters.
         @param buf     buffer used to accumulate string data
@@ -158,12 +158,12 @@ sig
                        Default: 1.
     *)
 
-  val stream_from_channel :
-    ?buf:Bi_outbuf.t ->
+  val seq_from_channel :
+    ?buf:Buffer.t ->
     ?fin:(unit -> unit) ->
     ?fname:string ->
     ?lnum:int ->
-    'a reader -> in_channel -> 'a Stream.t
+    'a reader -> in_channel -> 'a Seq.t
     (** Read a stream of JSON values from a channel.
         Values do not have to be separated by newline characters.
         @param buf     buffer used to accumulate string data
@@ -182,12 +182,12 @@ sig
                        Default: 1.
     *)
 
-  val stream_from_file :
-    ?buf:Bi_outbuf.t ->
+  val seq_from_file :
+    ?buf:Buffer.t ->
     ?fin:(unit -> unit) ->
     ?fname:string ->
     ?lnum:int ->
-    'a reader -> string -> 'a Stream.t
+    'a reader -> string -> 'a Seq.t
     (** Read a stream of JSON values from a file.
         Values do not have to be separated by newline characters.
         @param buf     buffer used to accumulate string data
@@ -207,7 +207,7 @@ sig
     *)
 
   val list_from_string :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fin:(unit -> unit) ->
     ?fname:string ->
     ?lnum:int ->
@@ -230,7 +230,7 @@ sig
     *)
 
   val list_from_channel :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fin:(unit -> unit) ->
     ?fname:string ->
     ?lnum:int ->
@@ -254,7 +254,7 @@ sig
     *)
 
   val list_from_file :
-    ?buf:Bi_outbuf.t ->
+    ?buf:Buffer.t ->
     ?fname:string ->
     ?lnum:int ->
     'a reader -> string -> 'a list
@@ -292,28 +292,28 @@ sig
         @param len     output buffer length.
     *)
 
-  val stream_to_string :
+  val seq_to_string :
     ?len:int ->
     ?lf:string ->
-    'a writer -> 'a Stream.t -> string
+    'a writer -> 'a Seq.t -> string
     (** Write a stream of values to a string.
         @param len     output buffer length.
         @param lf      additional element terminator. Default: ["\n"].
     *)
 
-  val stream_to_channel :
+  val seq_to_channel :
     ?len:int ->
     ?lf:string ->
-    'a writer -> out_channel -> 'a Stream.t -> unit
+    'a writer -> out_channel -> 'a Seq.t -> unit
     (** Write a stream of values to a channel.
         @param len     output buffer length.
         @param lf      additional element terminator. Default: ["\n"].
     *)
 
-  val stream_to_file :
+  val seq_to_file :
     ?len:int ->
     ?lf:string ->
-    'a writer -> string -> 'a Stream.t -> unit
+    'a writer -> string -> 'a Seq.t -> unit
     (** Write a stream of values to a file.
         @param len     output buffer length.
         @param lf      additional element terminator. Default: ["\n"].

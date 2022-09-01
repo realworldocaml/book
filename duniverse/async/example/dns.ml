@@ -20,4 +20,4 @@ let command () =
          Unix.Name_info.sexp_of_t name_info |> Sexp.to_string |> print_endline))
 ;;
 
-let () = command () |> Command.run
+let () = command () |> Command_unix.run

@@ -1,12 +1,12 @@
-open! Core_kernel
+open! Core
 open! Expect_test_helpers_base
 
 let string =
   "`Boston is populous' is about Boston and contains `Boston'; ``Boston' is disyllabic' \
    is about `Boston' and contains ``Boston''.  ``Boston'' designates `Boston', which in \
    turn designates Boston.  To mention Boston we use `Boston' or a synonym, and to \
-   mention `Boston' we use ``Boston'' or a synonym.  ``Boston'' contains six letters \
-   and just one pair of quotation marks; `Boston' contains six letters and no quotation \
+   mention `Boston' we use ``Boston'' or a synonym.  ``Boston'' contains six letters and \
+   just one pair of quotation marks; `Boston' contains six letters and no quotation \
    marks; and Boston contains some 800,000 people."
 ;;
 

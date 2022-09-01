@@ -27,22 +27,22 @@
  (name test_ipaddr)
  (package ipaddr-sexp)
  (modules test_ipaddr)
- (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp ounit2))
 
 (test
  (name test_ipaddr_b128)
  (package ipaddr-sexp)
  (modules test_ipaddr_b128 ipaddr_internal)
- (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp ounit2))
 
 (test
  (name test_macaddr)
  (package macaddr-sexp)
  (modules test_macaddr)
- (libraries macaddr macaddr-cstruct test_macaddr_sexp oUnit))
+ (libraries macaddr macaddr-cstruct test_macaddr_sexp ounit2))
 
 (test
  (name test_ppx)
  (modules test_ppx)
  (package ipaddr-sexp)
- (libraries ipaddr macaddr test_ipaddr_sexp test_macaddr_sexp oUnit))
+ (libraries ipaddr macaddr test_ipaddr_sexp test_macaddr_sexp ounit2))

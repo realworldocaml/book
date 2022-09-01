@@ -1,6 +1,6 @@
 (lang dune 2.7)
 (name ppxlib)
-(version 0.25.0)
+(version 0.27.0)
 (using cinaps 1.0)
 (allow_approximate_merlin)
 (implicit_transitive_deps false)
@@ -16,10 +16,11 @@
 (package
  (name ppxlib)
  (depends
-  (ocaml (and (>= 4.04.1) (< 4.15)))
+  (ocaml (and (>= 4.04.1) (< 5.1.0)))
   (ocaml-compiler-libs (>= v0.11.0))
   (ppx_derivers (>= 1.0))
   (sexplib0 (>= v0.12))
+  (sexplib0 (and :with-test (< "v0.15"))) ; Printexc.register_printer in sexplib0 changed
   stdlib-shims
   (ocamlfind :with-test)
   (re (and :with-test (>= 1.9.0)))
@@ -31,7 +32,7 @@
   base-effects)
  (synopsis "Standard library for ppx rewriters")
  (description "Ppxlib is the standard library for ppx rewriters and other programs
-that manipulate the in-memory reprensation of OCaml programs, a.k.a
+that manipulate the in-memory representation of OCaml programs, a.k.a
 the \"Parsetree\".
 
 It also comes bundled with two ppx rewriters that are commonly used to

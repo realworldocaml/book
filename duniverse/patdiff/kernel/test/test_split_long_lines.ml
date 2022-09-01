@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 open Patdiff_kernel
 module Patdiff_core = Patdiff_core.Without_unix

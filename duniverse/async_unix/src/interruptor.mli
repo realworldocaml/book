@@ -3,6 +3,7 @@
     interruptor when a thread needs the Async scheduler to service a request. *)
 
 open! Core
+open! Import
 
 type t [@@deriving sexp_of]
 

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 module Scheduler = Scheduler1
 include Deferred0
 
@@ -58,8 +58,7 @@ let _ = all
 let unit = return ()
 
 let both t1 t2 =
-  create (fun result ->
-    upon t1 (fun a1 -> upon t2 (fun a2 -> Ivar.fill result (a1, a2))))
+  create (fun result -> upon t1 (fun a1 -> upon t2 (fun a2 -> Ivar.fill result (a1, a2))))
 ;;
 
 module Infix = struct
@@ -78,8 +77,6 @@ module Choice = struct
 
   let map (T (t, f1)) ~f:f2 = T (t, fun x -> f2 (f1 x))
 end
-
-type 'a choice = 'a Choice.t
 
 module Unregister = struct
   (* This representation saves 2n words for a list of n choices. *)

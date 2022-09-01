@@ -31,11 +31,12 @@ authors: ["Daniel de Rauglaudre" "Xavier Leroy"]
 homepage: "https://github.com/ocaml/camlp-streams"
 bug-reports: "https://github.com/ocaml/camlp-streams/issues"
 depends: [
-  "dune" {>= "2.5"}
-  "ocaml" {>= "4.05.0"}
+  "dune" {>= "2.7"}
+  "ocaml" {>= "4.02.3"}
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"

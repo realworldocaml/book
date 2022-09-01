@@ -30,9 +30,7 @@ let bench_choose_over2 =
   fun () ->
     reset_ivar ivar1;
     reset_ivar ivar2;
-    let d =
-      choose [ choice (Ivar.read ivar1) ignore; choice (Ivar.read ivar2) ignore ]
-    in
+    let d = choose [ choice (Ivar.read ivar1) ignore; choice (Ivar.read ivar2) ignore ] in
     ignore (d : unit Deferred.t)
 ;;
 
@@ -106,16 +104,14 @@ let bench_connect_d =
 ;;
 
 let () =
-  Command.run
+  Command_unix.run
     (Bench.make_command
        [ Bench.Test.create ~name:"create" bench_create
        ; Bench.Test.create ~name:"1handler" bench_1handler
        ; Bench.Test.create ~name:"5handlers" bench_5handlers
        ; Bench.Test.create ~name:"choose_over2" bench_choose_over2
        ; Bench.Test.create ~name:"install_remove_handler" bench_install_remove_handler
-       ; Bench.Test.create
-           ~name:"install5_remove1_handler"
-           bench_install5_remove1_handler
+       ; Bench.Test.create ~name:"install5_remove1_handler" bench_install5_remove1_handler
        ; Bench.Test.create ~name:"bench_connect_a" bench_connect_a
        ; Bench.Test.create ~name:"bench_connect_b" bench_connect_b
        ; Bench.Test.create ~name:"bench_connect_c" bench_connect_c

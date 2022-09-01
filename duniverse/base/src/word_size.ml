@@ -8,9 +8,9 @@ type t =
 
 let sexp_of_t =
   (function
-    | W32 -> Ppx_sexp_conv_lib.Sexp.Atom "W32"
-    | W64 -> Ppx_sexp_conv_lib.Sexp.Atom "W64"
-             : t -> Ppx_sexp_conv_lib.Sexp.t)
+    | W32 -> Sexplib0.Sexp.Atom "W32"
+    | W64 -> Sexplib0.Sexp.Atom "W64"
+             : t -> Sexplib0.Sexp.t)
 ;;
 
 [@@@end]

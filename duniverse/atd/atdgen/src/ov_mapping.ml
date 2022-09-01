@@ -207,6 +207,8 @@ let rec mapping_of_expr
            Float (loc, Float, (v an, true))
        | "string" ->
            String (loc, String, (v an, true))
+       | "abstract" ->
+           Abstract (loc, Abstract, (v an, true))
        | s ->
            let validator =
              match v2 an x0 with
@@ -307,13 +309,14 @@ let def_of_atd is_shallow (loc, (name, param, an), x) =
   let o =
     match as_abstract x with
     | Some (_, an2) ->
-        Ocaml.get_ocaml_module_and_t Validate name an
-        |> Option.map (fun (types_module, main_module, ext_name) ->
-          let args = List.map (fun s -> Tvar (loc, s)) param in
-          External (loc, name, args,
-                    Ocaml.Repr.External (types_module, main_module, ext_name),
-                    (Validate.get_validator an2, false))
-        )
+        (match Ocaml.get_ocaml_module_and_t Validate name an with
+          | None -> Some (mapping_of_expr is_shallow x)
+          | Some (types_module, main_module, ext_name) ->
+              let args = List.map (fun s -> Tvar (loc, s)) param in
+              Some (External (loc, name, args,
+                              Ocaml.Repr.External (types_module, main_module, ext_name),
+                              (Validate.get_validator an2, false))))
+
     | None -> Some (mapping_of_expr is_shallow x)
   in
   {

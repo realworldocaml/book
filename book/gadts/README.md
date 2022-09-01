@@ -435,13 +435,17 @@ this approach with `eval`, we'll see that it doesn't work.
 Line 4, characters 43-44:
 Error: This expression has type a expr but an expression was expected of type
          bool expr
-       The type constructor a would escape its scope
+       Type a is not compatible with type bool
 ```
 
 \noindent
 This is a pretty unhelpful error message, but the basic problem is
 that `eval` is recursive, and inference of GADTs doesn't play well
 with recursive calls.
+
+<!-- TODO: we should fix the text below, which is explaining a -->
+<!-- confusing error message about "the type constructor a would -->
+<!-- escape its scope", which is not there anymore -->
 
 More specifically, the issue is that the type-checker is trying to
 merge the locally abstract type `a` into the type of the recursive
@@ -523,7 +527,7 @@ types.
 # List.find ~f:(fun x -> x > 3) [1;3;5;2];;
 - : int option = Some 5
 # List.find ~f:(Char.is_uppercase) ['a';'B';'C'];;
-- : char option = Some B
+- : char option = Some 'B'
 ```
 
 But this approach is limited to simple dependencies between types that
@@ -576,7 +580,7 @@ Here are some examples of the above function in action:
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int option = Some 10
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
-Exception: (Failure "Element not found")
+Exception: (Failure "Element not found").
 # flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int option = Some 20
 ```
@@ -641,7 +645,7 @@ result, `flexible_find` only returns an option when it needs to.
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] (Default_to 10);;
 - : int = 10
 # flexible_find ~f:(fun x -> x > 10) [1;2;5] Raise;;
-Exception: (Failure "No matching item found")
+Exception: (Failure "No matching item found").
 # flexible_find ~f:(fun x -> x > 10) [1;2;20] Raise;;
 - : int = 20
 ```
@@ -765,12 +769,14 @@ useful for all sorts of system automation tasks.
 But, can't we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:
 
+<!-- TODO: Maybe add #require's for Sys_unix and Core_unix -->
+
 ```ocaml env=abstracting
 # open Core;;
 # let sum_file_sizes () =
-    Sys.ls_dir "."
-    |> List.filter ~f:Sys.is_file_exn
-    |> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+    Sys_unix.ls_dir "."
+    |> List.filter ~f:Sys_unix.is_file_exn
+    |> List.map ~f:(fun file_name -> (Core_unix.lstat file_name).st_size)
     |> List.sum (module Int) ~f:Int64.to_int_exn;;
 val sum_file_sizes : unit -> int = <fun>
 ```
@@ -816,9 +822,9 @@ code using the pipeline API before we've implemented it.
 # module Example_pipeline (Pipeline : Pipeline) = struct
     open Pipeline
     let sum_file_sizes =
-      (fun () -> Sys.ls_dir ".")
-      @> List.filter ~f:Sys.is_file_exn
-      @> List.map ~f:(fun file_name -> (Unix.lstat file_name).st_size)
+      (fun () -> Sys_unix.ls_dir ".")
+      @> List.filter ~f:Sys_unix.is_file_exn
+      @> List.map ~f:(fun file_name -> (Core_unix.lstat file_name).st_size)
       @> List.sum (module Int) ~f:Int64.to_int_exn
       @> empty
   end;;
@@ -1569,8 +1575,8 @@ work with GADTs.
   [@@deriving sexp];;
 Lines 1-4, characters 1-20:
 Error: This expression has type int number_kind
-       but an expression was expected of type a__001_ number_kind
-       Type int is not compatible with type a__001_
+       but an expression was expected of type a__007_ number_kind
+       Type int is not compatible with type a__007_
 ```
 
 The error message is pretty awful, but if you stop and think about it,

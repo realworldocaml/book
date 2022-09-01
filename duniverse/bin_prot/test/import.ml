@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 include Bin_prot.Std
 
 let hex_char n =

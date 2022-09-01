@@ -1,6 +1,6 @@
 (** Internal to Async -- see {!Async_unix.Scheduler} for the public API. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Deferred = Deferred1
 
@@ -12,6 +12,7 @@ include Invariant.S with type t := t
 
 val current_execution_context : t -> Execution_context.t
 val with_execution_context : t -> Execution_context.t -> f:(unit -> 'a) -> 'a
+val with_execution_context1 : t -> Execution_context.t -> f:('a -> 'b) -> 'a -> 'b
 val set_execution_context : t -> Execution_context.t -> unit
 val enqueue : t -> Execution_context.t -> ('a -> unit) -> 'a -> unit
 val create_job : t -> Execution_context.t -> ('a -> unit) -> 'a -> Job.t
@@ -41,8 +42,12 @@ val check_access : t -> unit
 val check_invariants : t -> bool
 val set_check_invariants : t -> bool -> unit
 val set_record_backtraces : t -> bool -> unit
-val run_every_cycle_start : t -> f:(unit -> unit) -> unit
-val run_every_cycle_end : t -> f:(unit -> unit) -> unit
+val run_every_cycle_start : t -> f:Cycle_hook.t -> unit
+val run_every_cycle_end : t -> f:Cycle_hook.t -> unit
+val add_every_cycle_start_hook : t -> f:Cycle_hook.t -> Cycle_hook.Handle.t
+val add_every_cycle_end_hook : t -> f:Cycle_hook.t -> Cycle_hook.Handle.t
+val remove_every_cycle_start_hook_exn : t -> Cycle_hook.Handle.t -> unit
+val remove_every_cycle_end_hook_exn : t -> Cycle_hook.Handle.t -> unit
 val last_cycle_time : t -> Time_ns.Span.t
 val long_cycles : t -> at_least:Time_ns.Span.t -> Time_ns.Span.t Async_stream.t
 val can_run_a_job : t -> bool
@@ -54,8 +59,6 @@ val add_finalizer_last_exn : t -> 'a -> (unit -> unit) -> unit
 val set_thread_safe_external_job_hook : t -> (unit -> unit) -> unit
 val set_job_queued_hook : t -> (Priority.t -> unit) -> unit
 val set_event_added_hook : t -> (Time_ns.t -> unit) -> unit
-val set_on_start_of_cycle : t -> (unit -> unit) -> unit
-val set_on_end_of_cycle : t -> (unit -> unit) -> unit
 
 val thread_safe_enqueue_external_job
   :  t
@@ -107,3 +110,5 @@ end
 module For_bench : sig
   val advance_clock : t -> now:Time_ns.t -> unit
 end
+
+val in_cycle : t -> bool

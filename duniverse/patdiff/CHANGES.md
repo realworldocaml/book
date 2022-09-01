@@ -1,5 +1,9 @@
 ## git version
 
+- Added a unit argument to `Patience_diff.S.get_hunks` and
+  `Patience_diff.S.get_matching_blocks`, to ensure that the optional
+  argument can be erased.
+
 - Extract a Js\_of\_ocaml-compatible library called `Patdiff_kernel`.
   `Patdiff_lib` is renamed to simply `Patdiff`.
 

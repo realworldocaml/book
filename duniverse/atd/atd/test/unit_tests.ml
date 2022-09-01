@@ -8,6 +8,7 @@ let test_suites : unit Alcotest.test list = [
     "sort", `Quick, Atd.Sort.test
   ];
   Unique_name.test;
+  Doc.test;
 ]
 
 let main () = Alcotest.run "atd" test_suites

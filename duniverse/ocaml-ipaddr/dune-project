@@ -1,5 +1,5 @@
 (lang dune 1.9)
 (name ipaddr)
-(version v5.3.0)
+(version v5.3.1)
 (allow_approximate_merlin)
 (using fmt 1.1)

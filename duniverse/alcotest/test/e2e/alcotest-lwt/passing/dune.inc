@@ -13,7 +13,7 @@
  (target cli_options.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:cli_options.exe} --json)))))
 
 (rule

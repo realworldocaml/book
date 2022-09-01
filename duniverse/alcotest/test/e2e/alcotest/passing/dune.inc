@@ -53,7 +53,7 @@
  (target and_exit_false.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:and_exit_false.exe})))))
 
 (rule
@@ -72,7 +72,7 @@
  (target and_exit_false-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:and_exit_false.bc.js})))))
 
 (rule
@@ -91,7 +91,7 @@
  (target and_exit_true.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:and_exit_true.exe})))))
 
 (rule
@@ -110,7 +110,7 @@
  (target and_exit_true-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:and_exit_true.bc.js})))))
 
 (rule
@@ -129,7 +129,7 @@
  (target assert_and_verbose.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:assert_and_verbose.exe})))))
 
 (rule
@@ -148,7 +148,7 @@
  (target assert_and_verbose-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:assert_and_verbose.bc.js})))))
 
 (rule
@@ -167,7 +167,7 @@
  (target assert_not_printed.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:assert_not_printed.exe})))))
 
 (rule
@@ -186,7 +186,7 @@
  (target assert_not_printed-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:assert_not_printed.bc.js})))))
 
 (rule
@@ -205,7 +205,7 @@
  (target basic.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:basic.exe})))))
 
 (rule
@@ -224,7 +224,7 @@
  (target basic-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:basic.bc.js})))))
 
 (rule
@@ -243,7 +243,7 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:check_basic.exe})))))
 
 (rule
@@ -262,7 +262,7 @@
  (target check_basic-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:check_basic.bc.js})))))
 
 (rule
@@ -281,7 +281,7 @@
  (target cli_verbose.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:cli_verbose.exe} --verbose)))))
 
 (rule
@@ -300,7 +300,7 @@
  (target cli_verbose-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:cli_verbose.bc.js} --verbose)))))
 
 (rule
@@ -319,7 +319,7 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:compact.exe} --compact)))))
 
 (rule
@@ -338,7 +338,7 @@
  (target compact-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:compact.bc.js} --compact)))))
 
 (rule
@@ -357,7 +357,7 @@
  (target empty_test_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:empty_test_name.exe})))))
 
 (rule
@@ -376,7 +376,7 @@
  (target empty_test_name-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:empty_test_name.bc.js})))))
 
 (rule
@@ -395,7 +395,7 @@
  (target filter_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:filter_name.exe})))))
 
 (rule
@@ -414,7 +414,7 @@
  (target filter_name-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:filter_name.bc.js})))))
 
 (rule
@@ -433,7 +433,7 @@
  (target filter_name_regex.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:filter_name_regex.exe})))))
 
 (rule
@@ -452,7 +452,7 @@
  (target filter_name_regex-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:filter_name_regex.bc.js})))))
 
 (rule
@@ -471,7 +471,7 @@
  (target filter_range.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:filter_range.exe} test main 0..1,1-3,5)))))
 
 (rule
@@ -490,7 +490,7 @@
  (target filter_range-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:filter_range.bc.js} test main 0..1,1-3,5)))))
 
 (rule
@@ -509,7 +509,7 @@
  (target isatty.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:isatty.exe})))))
 
 (rule
@@ -528,7 +528,7 @@
  (target isatty-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:isatty.bc.js})))))
 
 (rule
@@ -547,7 +547,7 @@
  (target json_output.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:json_output.exe})))))
 
 (rule
@@ -566,7 +566,7 @@
  (target json_output-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:json_output.bc.js})))))
 
 (rule
@@ -585,7 +585,7 @@
  (target list_tests.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:list_tests.exe})))))
 
 (rule
@@ -604,7 +604,7 @@
  (target list_tests-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:list_tests.bc.js})))))
 
 (rule
@@ -623,7 +623,7 @@
  (target only_monadic_effects.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:only_monadic_effects.exe})))))
 
 (rule
@@ -642,7 +642,7 @@
  (target only_monadic_effects-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:only_monadic_effects.bc.js})))))
 
 (rule
@@ -661,7 +661,7 @@
  (target quick_only.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:quick_only.exe})))))
 
 (rule
@@ -680,7 +680,7 @@
  (target quick_only-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:quick_only.bc.js})))))
 
 (rule
@@ -699,7 +699,7 @@
  (target quick_only_regex.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:quick_only_regex.exe})))))
 
 (rule
@@ -718,7 +718,7 @@
  (target quick_only_regex-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:quick_only_regex.bc.js})))))
 
 (rule
@@ -737,7 +737,7 @@
  (target separator_testname.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:separator_testname.exe})))))
 
 (rule
@@ -756,7 +756,7 @@
  (target separator_testname-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:separator_testname.bc.js})))))
 
 (rule
@@ -775,7 +775,7 @@
  (target unicode_testname.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:unicode_testname.exe})))))
 
 (rule
@@ -794,7 +794,7 @@
  (target unicode_testname-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:unicode_testname.bc.js})))))
 
 (rule
@@ -813,7 +813,7 @@
  (target verbose_newlines.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run %{dep:verbose_newlines.exe})))))
 
 (rule
@@ -832,7 +832,7 @@
  (target verbose_newlines-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
+   (with-accepted-exit-codes (or 0 124 125)
     (run node %{dep:verbose_newlines.bc.js})))))
 
 (rule

@@ -1,9 +1,8 @@
 open Core
 open Import
 open Require_explicit_time_source
-module Core_unix = Core.Unix
 module Unix = Unix_syscalls
-module IOVec = Core.Unix.IOVec
+module IOVec = Core_unix.IOVec
 module Id = Unique_id.Int63 ()
 
 let io_stats = Io_stats.create ()
@@ -62,7 +61,12 @@ end
 
 module Open_flags = Unix.Open_flags
 
-type open_flags = (Open_flags.t, exn) Result.t [@@deriving sexp_of]
+type open_flags =
+  [ `Already_closed
+  | `Ok of Open_flags.t
+  | `Error of exn
+  ]
+[@@deriving sexp_of]
 
 module Backing_out_channel = Backing_out_channel
 
@@ -157,13 +161,9 @@ type t =
        consumer leaves.  By default, it raises, but that can be disabled. *)
     consumer_left : unit Ivar.t
   ; mutable raise_when_consumer_leaves : bool (* default is [true] *)
-  ; (* [open_flags] is the open-file-descriptor bits of [fd].  It is created when [t] is
-       created, and starts a deferred computation that calls [Unix.fcntl_getfl].
-       [open_flags] is used to report an error when [fd] is not writable.  [Fd] treats the
-       call to [fcntl_getfl] as an active system call, which prevents [Unix.close fd] from
-       completing until [fcntl_getfl] finishes.  This prevents a file-descriptor or thread
-       leak even though client code doesn't explicitly wait on [open_flags]. *)
-    open_flags : open_flags Deferred.t
+  ; (* [open_flags] is the open-file-descriptor bits of [fd].
+       [open_flags] is used to report an error when [fd] is not writable. *)
+    open_flags : open_flags
   ; line_ending : Line_ending.t
   ; (* If specified, subsequent writes are synchronously redirected here. *)
     mutable backing_out_channel : Backing_out_channel.t option
@@ -239,16 +239,17 @@ let sexp_of_t_internals
     ; num_producers_to_flush_at_close = (Bag.length producers_to_flush_at_close : int)
     ; flush_at_shutdown_elt =
         (suppress_in_test flush_at_shutdown_elt : ((t[@sexp.opaque]) Bag.Elt.t option
-                                                     option[@sexp.option]))
+                                                     option
+                                                   [@sexp.option]))
     ; check_buffer_age =
         (suppress_in_test check_buffer_age : ((t[@sexp.opaque]) Check_buffer_age'.t
                                                 Bag.Elt.t
                                                 option
-                                                option[@sexp.option]))
+                                                option
+                                              [@sexp.option]))
     ; consumer_left : unit Ivar.t
     ; raise_when_consumer_leaves : bool
-    ; open_flags =
-        (suppress_in_test open_flags : (open_flags Deferred.t option[@sexp.option]))
+    ; open_flags = (suppress_in_test open_flags : (open_flags option[@sexp.option]))
     ; line_ending : Line_ending.t
     ; backing_out_channel : (Backing_out_channel.t option[@sexp.option])
     }]
@@ -438,9 +439,7 @@ end = struct
         then (
           Queue.enqueue e.bytes_received_queue e.writer.bytes_received;
           Queue.enqueue e.times_received_queue now));
-      let too_old =
-        Int63.O.(e.bytes_received_at_now_minus_maximum_age > bytes_written)
-      in
+      let too_old = Int63.O.(e.bytes_received_at_now_minus_maximum_age > bytes_written) in
       match Ivar.is_full e.too_old, too_old with
       | true, true | false, false -> ()
       | true, false -> e.too_old <- Ivar.create ()
@@ -632,6 +631,8 @@ let with_synchronous_backing_out_channel t backing_out_channel ~f =
      [oc].  The flush is caused by [set_synchronous_backing_out_channel].  In theory this
      could happen but in practice is exceedingly unlikely. *)
   Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
     (fun () ->
        let%bind () = set_synchronous_backing_out_channel t backing_out_channel in
        f ())
@@ -690,8 +691,7 @@ let final_flush ?force t =
          [after (sec 5.)]  makes sense. *)
       (match Fd.kind t.fd with
        | File -> Deferred.never ()
-       | Char | Fifo | Socket _ ->
-         Time_source.after t.time_source (Time_ns.Span.of_sec 5.))
+       | Char | Fifo | Socket _ -> Time_source.after t.time_source (Time_ns.Span.of_sec 5.))
   in
   Deferred.any_unit
     [ (* If the consumer leaves, there's no more writing we can do. *)
@@ -817,7 +817,7 @@ let create
       ?name:(if am_running_inline_test then Some "Writer.inner_monitor" else None)
   in
   let consumer_left = Ivar.create () in
-  let open_flags = try_with (fun () -> Unix.fcntl_getfl fd) in
+  let open_flags = Fd.syscall fd (fun file_descr -> Core_unix.fcntl_getfl file_descr) in
   let t =
     { id
     ; fd
@@ -855,7 +855,7 @@ let create
          [%message
            "Writer error from inner_monitor"
              ~_:(Monitor.extract_exn exn : Exn.t)
-             ~writer:(t : t_internals)]));
+             ~writer:(t : t)]));
   t.check_buffer_age <- Check_buffer_age.create t ~maximum_age:buffer_age_limit;
   t.flush_at_shutdown_elt <- Some (Bag.add writers_to_flush_at_shutdown t);
   t
@@ -879,6 +879,7 @@ let ensure_can_write t =
 ;;
 
 let open_file
+      ?info
       ?(append = false)
       ?buf_len
       ?syscall
@@ -891,16 +892,27 @@ let open_file
      a file. *)
   let mode = [ `Wronly; `Creat ] in
   let mode = (if append then `Append else `Trunc) :: mode in
-  Unix.openfile file ~mode ~perm >>| create ?buf_len ?syscall ?line_ending ?time_source
+  Unix.openfile ?info file ~mode ~perm
+  >>| create ?buf_len ?syscall ?line_ending ?time_source
 ;;
 
-let with_close t ~f = Monitor.protect f ~finally:(fun () -> close t)
+let with_close t ~f =
+  Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
+    f
+    ~finally:(fun () -> close t)
+;;
 
 let with_writer_exclusive t f =
   let%bind () = Unix.lockf t.fd Exclusive in
-  Monitor.protect f ~finally:(fun () ->
-    let%map () = flushed t in
-    Unix.unlockf t.fd)
+  Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
+    f
+    ~finally:(fun () ->
+      let%map () = flushed t in
+      Unix.unlockf t.fd)
 ;;
 
 let with_file
@@ -1086,7 +1098,7 @@ and write_finished t bytes_written =
     t.background_writer_state <- `Not_running)
   else (
     match t.syscall with
-    | `Per_cycle -> write_when_ready t
+    | `Per_cycle -> start_write t
     | `Periodic span ->
       Time_source.after t.time_source (Time_ns.Span.of_span_float_round_nearest span)
       >>> fun _ -> start_write t)
@@ -1103,12 +1115,11 @@ let maybe_start_writer t =
          runs at the end of the cycle and that all of the calls to Writer.write will
          usually be batched into a single system call. *)
       schedule ~monitor:t.inner_monitor ~priority:Priority.low (fun () ->
-        t.open_flags
-        >>> fun open_flags ->
+        let open_flags = t.open_flags in
         let can_write_fd =
           match open_flags with
-          | Error _ -> false
-          | Ok flags -> Unix.Open_flags.can_write flags
+          | `Error _ | `Already_closed -> false
+          | `Ok flags -> Unix.Open_flags.can_write flags
         in
         if not can_write_fd
         then
@@ -1204,12 +1215,7 @@ let write_gen_internal
         blit_to_bigstring ~src ~src_pos ~len:available ~dst:t.buf ~dst_pos;
         let remaining = src_len - available in
         let dst, dst_pos = give_buf t remaining in
-        blit_to_bigstring
-          ~src
-          ~src_pos:(src_pos + available)
-          ~len:remaining
-          ~dst
-          ~dst_pos)
+        blit_to_bigstring ~src ~src_pos:(src_pos + available) ~len:remaining ~dst ~dst_pos)
       else (
         let dst, dst_pos = give_buf t src_len in
         blit_to_bigstring ~src ~src_pos ~dst ~dst_pos ~len:src_len);
@@ -1600,37 +1606,44 @@ let newline ?line_ending t =
   newline ?line_ending t
 ;;
 
+let stdout_and_stderr_behave_nicely_in_pipeline = ref ignore
+
 let stdout_and_stderr =
   lazy
-    ((* We [create] the writers inside [Monitor.main] so that it is their monitors'
-        parent. *)
-      match
-        Scheduler.within_v ~monitor:Monitor.main (fun () ->
-          let stdout = Fd.stdout () in
-          let stderr = Fd.stderr () in
-          let t = create stdout in
-          let dev_and_ino fd =
-            let stats = Core.Unix.fstat (Fd.file_descr_exn fd) in
-            stats.st_dev, stats.st_ino
-          in
-          match am_test_runner with
-          | true ->
-            (* In tests, we use synchronous output to improve determinism, especially
-               when mixing libraries that use Core and Async printing. *)
-            set_backing_out_channel
-              t
-              (Backing_out_channel.of_out_channel Out_channel.stdout);
-            t, t
-          | false ->
-            if [%compare.equal: int * int] (dev_and_ino stdout) (dev_and_ino stderr)
-            then
-              (* If stdout and stderr point to the same file, we must share a single writer
-                 between them.  See the comment in writer.mli for details. *)
-              t, t
-            else t, create stderr)
-      with
-      | None -> raise_s [%message [%here] "unable to create stdout/stderr"]
-      | Some v -> v)
+    (* We [create] the writers inside [Monitor.main] so that it is their monitors'
+       parent. *)
+    (match
+       Scheduler.within_v ~monitor:Monitor.main (fun () ->
+         let stdout = Fd.stdout () in
+         let stderr = Fd.stderr () in
+         let t = create stdout in
+         let dev_and_ino fd =
+           let stats = Core_unix.fstat (Fd.file_descr_exn fd) in
+           stats.st_dev, stats.st_ino
+         in
+         match am_test_runner with
+         | true ->
+           (* In tests, we use synchronous output to improve determinism, especially
+              when mixing libraries that use Core and Async printing. *)
+           set_backing_out_channel
+             t
+             (Backing_out_channel.of_out_channel Out_channel.stdout);
+           t, t
+         | false ->
+           let stdout, stderr =
+             if [%compare.equal: int * int] (dev_and_ino stdout) (dev_and_ino stderr)
+             then
+               (* If stdout and stderr point to the same file, we must share a single writer
+                  between them.  See the comment in writer.mli for details. *)
+               t, t
+             else t, create stderr
+           in
+           !stdout_and_stderr_behave_nicely_in_pipeline stdout;
+           !stdout_and_stderr_behave_nicely_in_pipeline stderr;
+           stdout, stderr)
+     with
+     | None -> raise_s [%message [%here] "unable to create stdout/stderr"]
+     | Some v -> v)
 ;;
 
 let stdout = lazy (fst (Lazy.force stdout_and_stderr))
@@ -1641,10 +1654,10 @@ let use_synchronous_stdout_and_stderr () =
   let ts_and_channels =
     (stdout, Out_channel.stdout)
     ::
-    ((* We only set [stderr] if it is distinct from [stdout]. *)
-      match phys_equal stdout stderr with
-      | true -> []
-      | false -> [ stderr, Out_channel.stderr ])
+    (* We only set [stderr] if it is distinct from [stdout]. *)
+    (match phys_equal stdout stderr with
+     | true -> []
+     | false -> [ stderr, Out_channel.stderr ])
   in
   List.map ts_and_channels ~f:(fun (t, out_channel) ->
     set_synchronous_out_channel t out_channel)
@@ -1659,7 +1672,7 @@ let%expect_test "stdout and stderr are always the same in tests" =
   [%expect {| ("Lazy.is_val stdout" false) |}];
   print_s [%message (Lazy.is_val stderr : bool)];
   [%expect {| ("Lazy.is_val stderr" false) |}];
-  let module U = Core.Unix in
+  let module U = Core_unix in
   let saved_stderr = U.dup U.stderr in
   (* Make sure fd 1 and 2 have different inodes at the point that we force them. *)
   let pipe_r, pipe_w = U.pipe () in
@@ -1674,24 +1687,58 @@ let%expect_test "stdout and stderr are always the same in tests" =
   [%expect {| ("phys_equal stdout stderr" true) |}]
 ;;
 
-let behave_nicely_in_pipeline ?writers () =
-  let writers =
-    match writers with
-    | Some z -> z
-    | None -> List.map [ stdout; stderr ] ~f:force
-  in
-  List.iter writers ~f:(fun writer ->
-    set_buffer_age_limit writer `Unlimited;
-    set_raise_when_consumer_leaves writer false;
-    don't_wait_for
-      (let%map () = consumer_left writer in
-       Shutdown.shutdown 0))
+let make_writer_behave_nicely_in_pipeline writer =
+  set_buffer_age_limit writer `Unlimited;
+  set_raise_when_consumer_leaves writer false;
+  don't_wait_for
+    (let%map () = consumer_left writer in
+     Shutdown.shutdown 0)
 ;;
 
-let with_file_atomic ?temp_file ?perm ?fsync:(do_fsync = false) ?time_source file ~f =
+let behave_nicely_in_pipeline ?writers () =
+  match writers with
+  | Some l -> List.iter l ~f:make_writer_behave_nicely_in_pipeline
+  | None ->
+    if Lazy.is_val stdout_and_stderr
+    then (
+      let stdout, stderr = force stdout_and_stderr in
+      List.iter [ stdout; stderr ] ~f:make_writer_behave_nicely_in_pipeline)
+    else
+      (* Forcing the lazy would initialize the scheduler, which would make calls to
+         Scheduler.go_main raise. Avoid that, so users can call this function without
+         having to think about this kind of implication. *)
+      stdout_and_stderr_behave_nicely_in_pipeline := make_writer_behave_nicely_in_pipeline
+;;
+
+let with_file_atomic
+      ?temp_file
+      ?perm
+      ?fsync:(do_fsync = false)
+      ?(replace_special = false)
+      ?time_source
+      file
+      ~f
+  =
   let%bind current_file_permissions =
-    match%map Monitor.try_with (fun () -> Unix.stat file) with
-    | Ok stats -> Some stats.perm
+    match%map Monitor.try_with ~run:`Now ~rest:`Raise (fun () -> Unix.stat file) with
+    | Ok stats ->
+      (match stats.kind with
+       | `File -> Some stats.perm
+       | `Directory ->
+         raise_s
+           [%message
+             "Writer.with_file_atomic: not replacing a directory" ~_:(file : string)]
+       | `Char | `Block | `Fifo | `Socket ->
+         (match replace_special with
+          | true -> Some stats.perm
+          | false ->
+            raise_s
+              [%message
+                "Writer.with_file_atomic: not replacing special file" ~_:(file : string)])
+       | `Link ->
+         (* [Unix.stat] resolves the symlinks already.
+            Unfortunately, this means we won't be able to replace a "broken" symlink. *)
+         assert false)
     | Error _ -> None
   in
   let initial_permissions =
@@ -1708,85 +1755,122 @@ let with_file_atomic ?temp_file ?perm ?fsync:(do_fsync = false) ?time_source fil
       let dir = Filename.dirname temp_file in
       let prefix = Filename.basename temp_file in
       In_thread.run (fun () ->
-        Core.Filename.open_temp_file_fd ~perm:initial_permissions ~in_dir:dir prefix "")
+        Filename_unix.open_temp_file_fd ~perm:initial_permissions ~in_dir:dir prefix "")
     in
     temp_file, Fd.create File fd (Info.of_string temp_file)
   in
   let t = create ?time_source fd in
-  let%bind result =
-    with_close t ~f:(fun () ->
-      let%bind result = f t in
-      if is_closed t
-      then
-        raise_s
-          [%message "Writer.with_file_atomic: writer closed by [f]" ~_:(file : string)];
-      let%bind () =
-        match current_file_permissions with
-        | None ->
-          (* We don't need to change the permissions here.
-             The [initial_permissions] (with umask applied by the OS) should be good. *)
-          return ()
-        | Some _ ->
-          (* We are overwriting permissions here to undo the umask that was applied
-             by [openfile]. This is, perhaps, unreasonable, but it preserves the previous
-             behavior. *)
-          Unix.fchmod fd ~perm:initial_permissions
-      in
-      let%map () = if do_fsync then fsync t else return () in
-      result)
-  in
-  match%bind Monitor.try_with (fun () -> Unix.rename ~src:temp_file ~dst:file) with
-  | Ok () -> return result
-  | Error exn ->
-    let fail v sexp_of_v =
-      raise_s
-        [%message
-          "Writer.with_file_atomic could not create file" (file : string) ~_:(v : v)]
+  (let%bind.Deferred.Result f_result =
+     Monitor.try_with_or_error (fun () -> f t)
+     >>| Result.map_error ~f:(fun e -> `f_raised e)
+   in
+   match%map
+     let%bind.Deferred.Or_error () =
+       Result.ok_if_true
+         (not (is_closed t))
+         ~error:(Error.create_s [%message "writer closed by [f]" ~_:(file : string)])
+       |> Deferred.return
+     in
+     Monitor.try_with_or_error (fun () ->
+       let%bind () =
+         match current_file_permissions with
+         | None ->
+           (* We don't need to change the permissions here.
+              The [initial_permissions] (with umask applied by the OS) should be good. *)
+           return ()
+         | Some _ ->
+           (* We are overwriting permissions here to undo the umask that was applied
+              by [openfile]. This is, perhaps, unreasonable, but it preserves the previous
+              behavior. *)
+           Unix.fchmod fd ~perm:initial_permissions
+       in
+       let%bind () = if do_fsync then fsync t else return () in
+       let%bind () = close t in
+       Unix.rename ~src:temp_file ~dst:file)
+   with
+   | Error e -> Error (`final_steps_raised e)
+   | Ok () -> Ok f_result)
+  >>= function
+  | Ok res -> return res
+  | Error error ->
+    let%bind unlink_result =
+      Monitor.try_with_or_error (fun () -> Unix.unlink temp_file)
     in
-    (match%map Monitor.try_with (fun () -> Unix.unlink temp_file) with
-     | Ok () -> fail exn [%sexp_of: exn]
-     | Error exn2 ->
-       fail (exn, `Cleanup_failed exn2) [%sexp_of: exn * [ `Cleanup_failed of exn ]])
+    (* NB we may have tried to close above, but that's OK because close is
+       idempotent. *)
+    let%map close_result = Monitor.try_with_or_error (fun () -> close t) in
+    (match Or_error.combine_errors_unit [ close_result; unlink_result ] with
+     | Ok () ->
+       (match error with
+        | `f_raised f_error ->
+          (* We do not tag an error arising in [f] *)
+          Error.raise f_error
+        | `final_steps_raised our_error -> our_error)
+     | Error cleanup_error ->
+       let initial_error =
+         match error with
+         | `final_steps_raised e | `f_raised e -> e
+       in
+       Error.of_list [ initial_error; cleanup_error ])
+    |> Error.tag_s ~tag:[%message "Error in Writer.with_file_atomic" (file : string)]
+    |> Error.raise
 ;;
 
-let save ?temp_file ?perm ?fsync file ~contents =
-  with_file_atomic ?temp_file ?perm ?fsync file ~f:(fun t ->
+let save ?temp_file ?perm ?fsync ?replace_special file ~contents =
+  with_file_atomic ?temp_file ?perm ?fsync ?replace_special file ~f:(fun t ->
     write t contents;
     return ())
 ;;
 
-let save_lines ?temp_file ?perm ?fsync file lines =
-  with_file_atomic ?temp_file ?perm ?fsync file ~f:(fun t ->
+let save_lines ?temp_file ?perm ?fsync ?replace_special file lines =
+  with_file_atomic ?temp_file ?perm ?fsync ?replace_special file ~f:(fun t ->
     List.iter lines ~f:(fun line ->
       write t line;
       newline t);
     return ())
 ;;
 
-let save_sexp ?temp_file ?perm ?fsync ?(hum = true) file sexp =
-  with_file_atomic ?temp_file ?perm ?fsync file ~f:(fun t ->
+let save_sexp ?temp_file ?perm ?fsync ?replace_special ?(hum = true) file sexp =
+  with_file_atomic ?temp_file ?perm ?fsync ?replace_special file ~f:(fun t ->
     write_sexp_internal t sexp ~hum ~terminate_with:Newline;
     return ())
 ;;
 
-let save_sexps ?temp_file ?perm ?fsync ?(hum = true) file sexps =
-  with_file_atomic ?temp_file ?perm ?fsync file ~f:(fun t ->
-    List.iter sexps ~f:(fun sexp ->
-      write_sexp_internal t sexp ~hum ~terminate_with:Newline);
+let save_sexps_conv
+      ?temp_file
+      ?perm
+      ?fsync
+      ?replace_special
+      ?(hum = true)
+      file
+      xs
+      sexp_of_x
+  =
+  with_file_atomic ?temp_file ?perm ?fsync ?replace_special file ~f:(fun t ->
+    List.iter xs ~f:(fun x ->
+      write_sexp_internal t (sexp_of_x x) ~hum ~terminate_with:Newline);
     return ())
 ;;
 
-let save_bin_prot ?temp_file ?perm ?fsync file bin_writer a =
-  with_file_atomic ?temp_file ?perm ?fsync file ~f:(fun t ->
+let save_sexps ?temp_file ?perm ?fsync ?replace_special ?hum file sexps =
+  save_sexps_conv ?temp_file ?perm ?fsync ?replace_special ?hum file sexps Fn.id
+;;
+
+let save_bin_prot ?temp_file ?perm ?fsync ?replace_special file bin_writer a =
+  with_file_atomic ?temp_file ?perm ?fsync ?replace_special file ~f:(fun t ->
     write_bin_prot t bin_writer a;
     return ())
 ;;
 
 let with_flushed_at_close t ~flushed ~f =
   let producers_to_flush_at_close_elt = Bag.add t.producers_to_flush_at_close flushed in
-  Monitor.protect f ~finally:(fun () ->
-    Bag.remove t.producers_to_flush_at_close producers_to_flush_at_close_elt;
-    return ())
+  Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
+    f
+    ~finally:(fun () ->
+      Bag.remove t.producers_to_flush_at_close producers_to_flush_at_close_elt;
+      return ())
 ;;
 
 let make_transfer ?(stop = Deferred.never ()) ?max_num_values_per_read t pipe_r write_f =

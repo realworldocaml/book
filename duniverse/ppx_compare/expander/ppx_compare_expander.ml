@@ -475,7 +475,7 @@ module Make(Params : Params) = struct
     let bindings = List.map tds ~f:(compare_of_td ~hide ~rec_flag) in
     [ pstr_value ~loc rec_flag bindings ]
 
-  let sig_type_decl ~ctxt (_rec_flag, tds) =
+  let mk_sig ~ctxt (_rec_flag, tds) =
     let hide = not (Expansion_context.Deriver.inline ctxt) in
     let tds = List.map tds ~f:name_type_params_in_td in
     List.map tds ~f:(fun td ->
@@ -484,6 +484,21 @@ module Make(Params : Params) = struct
       let loc = td.ptype_loc in
       psig_value ~loc (value_description ~loc ~name:{ td.ptype_name with txt = name }
                          ~type_:compare_of ~prim:[]))
+
+  let sig_type_decl ~ctxt (rec_flag, tds) =
+    let loc = Expansion_context.Deriver.derived_item_loc ctxt in
+    let module_name = match kind with
+      | Compare -> "Comparable"
+      | Equal -> "Equal"
+    in
+    let sg_name = Printf.sprintf "Ppx_compare_lib.%s.S" module_name in
+    match
+      mk_named_sig ~loc ~sg_name
+        ~handle_polymorphic_variant:false
+        tds
+    with
+    | Some include_infos -> [ psig_include ~loc include_infos ]
+    | None -> mk_sig ~ctxt (rec_flag, tds)
 
   let compare_core_type ty = compare_of_ty_fun ~hide:true ~type_constraint:true ty
 

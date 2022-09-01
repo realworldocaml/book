@@ -1,4 +1,3 @@
-open! Stdune
 open Import
 
 (** [init] must be called at initialization. Returns the set of nodes that need
@@ -14,6 +13,8 @@ val file_exists : Path.t -> bool Memo.t
 (** Check if a source or external directory exists and declare a dependency on
     it. *)
 val dir_exists : Path.t -> bool Memo.t
+
+val is_directory : Path.t -> (bool, Unix_error.Detailed.t) result Memo.t
 
 (** Call [Path.stat] on a path and declare a dependency on it. *)
 val path_stat :
@@ -34,6 +35,8 @@ val file_digest :
 (** Like [Io.Untracked.with_lexbuf_from_file] but declares a dependency on the
     path. *)
 val with_lexbuf_from_file : Path.t -> f:(Lexing.lexbuf -> 'a) -> 'a Memo.t
+
+val file_contents : Path.t -> string Memo.t
 
 (** Read the contents of a source or external directory and declare a dependency
     on it. When [force_update = true], evict the directory from the file-system

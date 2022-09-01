@@ -23,7 +23,8 @@ let%expect_test "default" =
     (fg:black) |
     (fg:black bg:yellow)!|(off)((fg:red)(foo (1 2))
     (fg:black bg:yellow)!|(fg:red) (bar 0.5%)(off))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "-float-tolerance 0x" =
@@ -36,7 +37,8 @@ let%expect_test "-float-tolerance 0x" =
     (fg:black) |
     (fg:black bg:yellow)!|(off)((fg:red)(foo (1 2))
     (fg:black bg:yellow)!|(fg:red) (bar 0.5%)(off))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let%expect_test "-float-tolerance 0x -no-semantic-cleanup" =
@@ -51,5 +53,6 @@ let%expect_test "-float-tolerance 0x -no-semantic-cleanup" =
     (fg:black) |
     (fg:black bg:yellow)!|(off)((fg:red)(foo (1 2))
     (fg:black bg:yellow)!|(fg:red) (bar 0.5%)(off))
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;

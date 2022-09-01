@@ -13,10 +13,14 @@ let () =
   let promoted_before = Gc.promoted_words () in
   for _ = 1 to num_iters do
     ignore
-      (try_with (fun () ->
-         let i = Ivar.create () in
-         ivars := i :: !ivars;
-         Ivar.read i))
+      (try_with
+         ~run:
+           `Schedule
+         ~rest:`Log
+         (fun () ->
+            let i = Ivar.create () in
+            ivars := i :: !ivars;
+            Ivar.read i))
   done;
   Async_kernel_scheduler.Expert.run_cycles_until_no_jobs_remain ();
   Gc.full_major ();

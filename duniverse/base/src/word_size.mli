@@ -7,7 +7,7 @@ type t =
   | W64
 [@@deriving_inline sexp_of]
 
-val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+val sexp_of_t : t -> Sexplib0.Sexp.t
 
 [@@@end]
 

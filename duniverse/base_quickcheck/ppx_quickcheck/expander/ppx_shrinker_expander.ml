@@ -1,11 +1,11 @@
 open! Import
 
-let any ~loc = [%expr Base_quickcheck.Shrinker.atomic]
-let arrow ~loc = [%expr Base_quickcheck.Shrinker.atomic]
+let any ~loc = [%expr Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.atomic]
+let arrow ~loc = [%expr Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.atomic]
 
 let compound_sequence ~loc ~make_compound_expr ~field_pats ~field_exprs ~shrinker_exprs =
   [%expr
-    Base.Sequence.round_robin
+    Ppx_quickcheck_runtime.Base.Sequence.round_robin
       [%e
         elist
           ~loc
@@ -16,8 +16,10 @@ let compound_sequence ~loc ~make_compound_expr ~field_pats ~field_exprs ~shrinke
              ~f:(fun field_pat field_expr shrinker ->
                let loc = { shrinker.pexp_loc with loc_ghost = true } in
                [%expr
-                 Base.Sequence.map
-                   (Base_quickcheck.Shrinker.shrink [%e shrinker] [%e field_expr])
+                 Ppx_quickcheck_runtime.Base.Sequence.map
+                   (Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.shrink
+                      [%e shrinker]
+                      [%e field_expr])
                    ~f:(fun [%p field_pat] -> [%e make_compound_expr ~loc field_exprs])]))]]
 ;;
 
@@ -34,14 +36,15 @@ let compound
     List.map fields ~f:(fun field -> shrinker_of_core_type (Field.core_type field))
   in
   [%expr
-    Base_quickcheck.Shrinker.create (fun [%p Field.pattern fields ~loc field_pats] ->
-      [%e
-        compound_sequence
-          ~loc
-          ~make_compound_expr:(Field.expression fields)
-          ~field_pats
-          ~field_exprs
-          ~shrinker_exprs])]
+    Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.create
+      (fun [%p Field.pattern fields ~loc field_pats] ->
+         [%e
+           compound_sequence
+             ~loc
+             ~make_compound_expr:(Field.expression fields)
+             ~field_pats
+             ~field_exprs
+             ~shrinker_exprs])]
 ;;
 
 let variant
@@ -54,7 +57,7 @@ let variant
   =
   let clauses = Clause.create_list clauses in
   [%expr
-    Base_quickcheck.Shrinker.create
+    Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.create
       [%e
         pexp_function
           ~loc

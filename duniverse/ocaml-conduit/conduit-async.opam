@@ -1,4 +1,4 @@
-version: "5.1.0"
+version: "5.1.1"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -11,13 +11,13 @@ bug-reports: "https://github.com/mirage/ocaml-conduit/issues"
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {>= "2.0"}
-  "core"
+  "core" {>= "v0.15.0"}
   "uri" {>= "4.0.0"}
   "ppx_here" {>= "v0.9.0"}
   "ppx_sexp_conv" {>="v0.13.0"}
   "sexplib"
   "conduit" {=version}
-  "async" {>= "v0.10.0"}
+  "async" {>= "v0.15.0"}
   "ipaddr" {>= "3.0.0"}
   "ipaddr-sexp" {>= "4.0.0"}
 ]

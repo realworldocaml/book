@@ -4,7 +4,7 @@ let doc = "FILE Write default configuration file"
 
 let main filename =
   let delete =
-    if Sys.file_exists_exn filename
+    if Sys_unix.file_exists_exn filename
     then (
       printf "%s already exists. Overwrite? (y/n) %!" filename;
       let resp = In_channel.input_line In_channel.stdin in

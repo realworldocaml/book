@@ -54,4 +54,4 @@ let () =
       +> flag "-cert-file" (optional string) ~doc:"file Certificate file"
       +> flag "-key-file" (optional string) ~doc:"File Private key file")
     start_server
-  |> Command.run
+  |> Command_unix.run

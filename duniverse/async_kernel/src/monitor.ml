@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Import
 open Deferred_std
 module Deferred = Deferred1
@@ -16,30 +16,20 @@ let invariant t =
       ~name:ignore
       ~here:ignore
       ~id:ignore
-      ~parent:ignore
+      ~forwarding:ignore
       ~next_error:(check (fun next_error -> assert (Ivar.is_empty next_error)))
       ~handlers_for_all_errors:ignore
       ~tails_for_all_errors:ignore
-      ~has_seen_error:ignore
-      ~is_detached:ignore)
+      ~has_seen_error:ignore)
 ;;
 
 let current_execution_context () = Scheduler.(current_execution_context (t ()))
 let current () = Execution_context.monitor (current_execution_context ())
 
-let depth t =
-  let rec loop t n =
-    match t.parent with
-    | None -> n
-    | Some t -> loop t (n + 1)
-  in
-  loop t 0
-;;
-
 type 'a with_optional_monitor_name =
   ?here:Source_code_position.t -> ?info:Info.t -> ?name:string -> 'a
 
-let detach t = t.is_detached <- true
+let detach t = t.forwarding <- Detached
 
 type handler_state =
   | Uninitialized
@@ -88,13 +78,16 @@ let create ?here ?info ?name () =
   create_with_parent ?here ?info ?name (Some parent)
 ;;
 
-module Exn_for_monitor = struct
+module Monitor_exn = struct
   type t =
     { exn : exn
     ; backtrace : Backtrace.t option
     ; backtrace_history : Backtrace.t list
     ; monitor : Monitor.t
     }
+
+  let backtrace t = t.backtrace
+  let extract_exn t = t.exn
 
   let backtrace_truncation_heuristics =
     let job_queue = "Called from file \"job_queue.ml\"" in
@@ -148,12 +141,27 @@ module Exn_for_monitor = struct
              perhaps that's what should change. *)
           let column = here.pos_cnum - here.pos_bol in
           Some
-            (sprintf
-               "file %S, line %d, characters %d-%d"
-               here.pos_fname
-               here.pos_lnum
-               column
-               column)
+            (* We hide line and column numbers when [am_running_test] to make test output
+               more robust.  This saves people manually hiding the numbers or even worse,
+               leaving them in test output.  Hiding in test is different choice for
+               behavior than our codebase makes for [Backtrace.elide], which has default
+               [false], and thus shows backtraces in test.  There are a couple reasons for
+               this different choice.  First, expect-test machinery has check to prevent
+               backtraces from appearing in test output.  It has no such checks for line
+               and column numbers.  Second, when there is a real error and you want to see
+               the backtrace, throwing away the whole backtrace loses a lot of potentially
+               useful information that may be hard to recover.  Whereas we're just
+               throwing a way a line number and column, which are a minor convenience
+               given that the filename has most of the information. *)
+            (if am_running_test
+             then sprintf "file %S, line LINE, characters C1-C2" here.pos_fname
+             else
+               sprintf
+                 "file %S, line %d, characters %d-%d"
+                 here.pos_fname
+                 here.pos_lnum
+                 column
+                 column)
       in
       match pos, name with
       | None, None -> []
@@ -181,11 +189,11 @@ module Exn_for_monitor = struct
   ;;
 end
 
-exception Error_ of Exn_for_monitor.t
+exception Monitor_exn of Monitor_exn.t
 
 let () =
-  Sexplib.Conv.Exn_converter.add [%extension_constructor Error_] (function
-    | Error_ t -> [%sexp "monitor.ml.Error" :: (t : Exn_for_monitor.t)]
+  Sexplib.Conv.Exn_converter.add [%extension_constructor Monitor_exn] (function
+    | Monitor_exn t -> [%sexp "monitor.ml.Error" :: (t : Monitor_exn.t)]
     | _ ->
       (* Reaching this branch indicates a bug in sexplib. *)
       assert false)
@@ -193,47 +201,43 @@ let () =
 
 let extract_exn exn =
   match exn with
-  | Error_ error -> error.exn
+  | Monitor_exn error -> error.exn
   | exn -> exn
 ;;
 
-let send_exn t ?backtrace exn =
+let send_exn t ?(backtrace = `Get) exn =
   let exn =
     match exn with
-    | Error_ _ -> exn
+    | Monitor_exn _ -> exn
     | _ ->
       let backtrace =
         match backtrace with
-        | None -> None
-        | Some `Get -> Some (Backtrace.Exn.most_recent ())
-        | Some (`This b) -> Some b
+        | `Get -> Backtrace.Exn.most_recent_for_exn exn
+        | `This b -> Some b
       in
       let backtrace_history = (current_execution_context ()).backtrace_history in
-      Error_ { Exn_for_monitor.exn; backtrace; backtrace_history; monitor = t }
+      Monitor_exn { Monitor_exn.exn; backtrace; backtrace_history; monitor = t }
   in
-  if Debug.monitor_send_exn
-  then Debug.log "Monitor.send_exn" (t, exn) [%sexp_of: t * exn];
+  if Debug.monitor_send_exn then Debug.log "Monitor.send_exn" (t, exn) [%sexp_of: t * exn];
   t.has_seen_error <- true;
   let scheduler = Scheduler.t () in
   let rec loop t =
     Ivar.fill t.next_error exn;
     t.next_error <- Ivar.create ();
-    if t.is_detached
-    then (
+    match t.forwarding with
+    | Detached ->
       if Debug.monitor_send_exn
       then
         Debug.log "Monitor.send_exn found listening monitor" (t, exn) [%sexp_of: t * exn];
       Bag.iter t.handlers_for_all_errors ~f:(fun (execution_context, f) ->
         Scheduler.enqueue scheduler execution_context f exn);
-      List.iter t.tails_for_all_errors ~f:(fun tail -> Tail.extend tail exn))
-    else (
-      match t.parent with
-      | Some t' -> loop t'
-      | None ->
-        (* Do not change this branch to print the exception or to exit.  Having the
-           scheduler raise an uncaught exception is the necessary behavior for programs
-           that call [Scheduler.go] and want to handle it. *)
-        Scheduler.(got_uncaught_exn (t ())) exn (!Async_kernel_config.task_id ()))
+      List.iter t.tails_for_all_errors ~f:(fun tail -> Tail.extend tail exn)
+    | Parent parent -> loop parent
+    | Report_uncaught_exn ->
+      (* Do not change this branch to print the exception or to exit.  Having the
+         scheduler raise an uncaught exception is the necessary behavior for programs
+         that call [Scheduler.go] and want to handle it. *)
+      Scheduler.(got_uncaught_exn (t ())) exn (!Async_kernel_config.task_id ())
   in
   loop t
 ;;
@@ -368,8 +372,7 @@ let fill_result_and_handle_background_errors
 module Expert = struct
   let try_with_log_exn : (exn -> unit) ref =
     ref (fun exn ->
-      raise_s
-        [%message "failed to set [Monitor.Expert.try_with_log_exn]" (exn : Exn.t)])
+      raise_s [%message "failed to set [Monitor.Expert.try_with_log_exn]" (exn : Exn.t)])
   ;;
 end
 
@@ -391,8 +394,8 @@ let try_with
       ?info
       ?(name = "")
       ?extract_exn:(do_extract_exn = false)
-      ?(run = `Schedule)
-      ?(rest = `Log)
+      ?(run = `Now)
+      ?(rest = `Raise)
       f
   =
   let { Ok_and_exns.ok; exns } = Ok_and_exns.create ?here ?info ~name ~run f in
@@ -427,18 +430,33 @@ let try_with
       result))
 ;;
 
-let try_with_or_error ?here ?info ?(name = "try_with_or_error") ?extract_exn f =
-  try_with f ?here ?info ~name ?extract_exn ~run:`Now ~rest:`Log
-  >>| Or_error.of_exn_result
+let try_with_or_error ?here ?info ?(name = "try_with_or_error") ?extract_exn ?rest f =
+  try_with f ?here ?info ~name ?extract_exn ~run:`Now ?rest >>| Or_error.of_exn_result
 ;;
 
-let try_with_join_or_error ?here ?info ?(name = "try_with_join_or_error") ?extract_exn f =
-  try_with_or_error f ?here ?info ~name ?extract_exn >>| Or_error.join
+let try_with_join_or_error
+      ?here
+      ?info
+      ?(name = "try_with_join_or_error")
+      ?extract_exn
+      ?rest
+      f
+  =
+  try_with_or_error f ?here ?info ~name ?extract_exn ?rest >>| Or_error.join
 ;;
 
-let protect ?here ?info ?(name = "Monitor.protect") ?extract_exn ?run f ~finally =
-  let%bind r = try_with ?extract_exn ?here ?info ?run ~name f in
-  let%map fr = try_with ~extract_exn:false ?here ?info ~name:"finally" finally in
+let protect ?here ?info ?(name = "Monitor.protect") ?extract_exn ?run ?rest f ~finally =
+  let%bind r = try_with ?extract_exn ?here ?info ?run ?rest ~name f in
+  let%map fr =
+    try_with
+      ~extract_exn:false
+      ?here
+      ?info
+      ~run:`Schedule (* consider [~run:`Now] *)
+      ?rest
+      ~name:"finally"
+      finally
+  in
   match r, fr with
   | Error exn, Error finally_exn ->
     raise_s [%message "Async finally" (exn : exn) (finally_exn : exn)]
@@ -468,3 +486,21 @@ let catch ?here ?info ?name f =
 ;;
 
 let catch_error ?here ?info ?name f = catch ?here ?info ?name f >>| Error.of_exn
+
+module For_tests = struct
+  let parent t =
+    match t.forwarding with
+    | Report_uncaught_exn -> None
+    | Parent parent -> Some parent
+    | Detached -> None
+  ;;
+
+  let depth t =
+    let rec loop t n =
+      match parent t with
+      | None -> n
+      | Some t -> loop t (n + 1)
+    in
+    loop t 0
+  ;;
+end

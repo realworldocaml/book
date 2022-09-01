@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 module type Slots = sig
@@ -176,20 +176,7 @@ module type Slots = sig
   [@@deriving sexp_of]
 
   type ('a0, 'a1, 'a2, 'a3, 'a4, 'a5, 'a6, 'a7, 'a8, 'a9, 'a10, 'a11, 'a12, 'a13) t14 =
-    ( 'a0
-      * 'a1
-      * 'a2
-      * 'a3
-      * 'a4
-      * 'a5
-      * 'a6
-      * 'a7
-      * 'a8
-      * 'a9
-      * 'a10
-      * 'a11
-      * 'a12
-      * 'a13
+    ( 'a0 * 'a1 * 'a2 * 'a3 * 'a4 * 'a5 * 'a6 * 'a7 * 'a8 * 'a9 * 'a10 * 'a11 * 'a12 * 'a13
     , [ `S0 of 'a0
       | `S1 of 'a1
       | `S2 of 'a2

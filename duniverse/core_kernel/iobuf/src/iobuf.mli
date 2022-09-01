@@ -21,7 +21,7 @@
     Functions operate on the window unless the documentation or naming indicates
     otherwise. *)
 
-open! Core_kernel
+open! Core
 open Iobuf_intf
 
 type nonrec seek = seek [@@deriving sexp_of]
@@ -45,6 +45,8 @@ type t_repr
     as desired. *)
 type (-'data_perm_read_write, +'seek_permission) t = private t_repr
 
+type ('rw, 'seek) iobuf := ('rw, 'seek) t
+
 (** [t_with_shallow_sexp] has a [sexp_of] that shows the windows and limits of
     the underlying bigstring, but no data. We do this rather than deriving sexp_of
     on [t] because it is much more likely to be noise than useful information, and
@@ -61,8 +63,7 @@ module Limits : Hexdump.S2 with type ('rw, 'seek) t := ('rw, 'seek) t
 
 (** Provides a [Hexdump] submodule that renders the contents of [t]'s window and limits
     using indices relative to the limits. *)
-include
-  Compound_hexdump with type ('rw, 'seek) t := ('rw, 'seek) t
+include Compound_hexdump with type ('rw, 'seek) t := ('rw, 'seek) t
 
 (** Provides a [Debug.Hexdump] submodule that renders the contents of [t]'s window,
     limits, and underlying bigstring using indices relative to the bigstring. *)
@@ -73,6 +74,9 @@ module Debug : Compound_hexdump with type ('rw, 'seek) t := ('rw, 'seek) t
 (** [create ~len] creates a new iobuf, backed by a bigstring of length [len],
     with the limits and window set to the entire bigstring. *)
 val create : len:int -> (_, _) t
+
+(** [empty] is an immutable [t] of size 0. *)
+val empty : (read, no_seek) t
 
 
 (** [of_bigstring bigstring ~pos ~len] returns an iobuf backed by [bigstring], with the
@@ -100,6 +104,12 @@ val copy : (_, _) t -> (_, _) t
     the underlying buffer and bounds. This means data outside the window is copied as
     well. *)
 val clone : (_, _) t -> (_, _) t
+
+(** [transfer ~src ~dst] makes the window of [dst] into a copy of the window of [src].
+    Like [blito], [transfer] will raise if [Iobuf.length dst] < [Iobuf.length src].
+
+    It is a utility function defined as [reset dst; blito ~src ~dst; flip_lo dst]. *)
+val transfer : src:([> read ], _) t -> dst:([> write ], seek) t -> unit
 
 (** [set_bounds_and_buffer ~src ~dst] copies bounds metadata (i.e., limits and window) and
     shallowly copies the buffer (data pointer) from [src] to [dst].  It does not access
@@ -286,6 +296,25 @@ val protect_window_and_bounds_1
   -> f:(('rw, seek) t -> 'a -> 'b)
   -> 'b
 
+(** [protect_window_and_bounds_2 t x y ~f] is a more efficient version of
+    [protect_window_and_bounds t ~f:(fun t -> f t x y)]. *)
+val protect_window_and_bounds_2
+  :  ('rw, no_seek) t
+  -> 'a
+  -> 'b
+  -> f:(('rw, seek) t -> 'a -> 'b -> 'c)
+  -> 'c
+
+(** [protect_window_and_bounds_3 t x y z ~f] is a more efficient version of
+    [protect_window_and_bounds t ~f:(fun t -> f t x y z)]. *)
+val protect_window_and_bounds_3
+  :  ('rw, no_seek) t
+  -> 'a
+  -> 'b
+  -> 'c
+  -> f:(('rw, seek) t -> 'a -> 'b -> 'c -> 'd)
+  -> 'd
+
 (** {2 Getting and setting data}
 
     "consume" and "fill" functions access data at the lower bound of the window and
@@ -360,26 +389,14 @@ end
     long.  [Peek.], [Poke.], [Consume.], and [Fill.bin_prot] do not add any size prefix or
     other framing to the [bin_prot] representation. *)
 module Peek : sig
-  (** Similar to [Consume.To_*], but do not advance the buffer. *)
-  type 'seek src = (read, 'seek) t
+  include Peek with type ('rw, 'seek) iobuf := ('rw, 'seek) t (** @open *)
 
-  module To_bytes :
-    Blit.S1_distinct with type 'seek src := 'seek src with type _ dst := Bytes.t
+  (** [index ?pos ?len t c] returns [Some i] for the smallest [i >= pos] such that [char t
+      i = c], or [None] if there is no such [i].
 
-  module To_bigstring :
-    Blit.S1_distinct with type 'seek src := 'seek src with type _ dst := Bigstring.t
-
-  module To_string : sig
-    val sub : (_ src, string) Base.Blit.sub
-    val subo : (_ src, string) Base.Blit.subo
-  end
-
-  val index : ([> read ], _) t -> ?pos:int -> ?len:int -> char -> int option
-
-  include
-    Accessors_read
-    with type ('a, 'd, 'w) t = ('d, 'w) t -> pos:int -> 'a
-    with type 'a bin_prot := 'a Bin_prot.Type_class.reader
+      @param pos default = 0
+      @param len default = [length t - pos] *)
+  val index : ([> read ], _) iobuf -> ?pos:int -> ?len:int -> char -> int option
 end
 
 
@@ -410,7 +427,15 @@ end
 module Unsafe : sig
   module Consume : module type of Consume
   module Fill : module type of Fill
-  module Peek : module type of Peek
+
+  module Peek : sig
+    include Peek with type ('rw, 'seek) iobuf := ('rw, 'seek) t (** @open *)
+
+    (** Like [Peek.index] but with no bounds checks, and returns a negative number rather
+        than [None] when the character is not found. *)
+    val index_or_neg : ([> read ], _) iobuf -> pos:int -> len:int -> char -> int
+  end
+
   module Poke : module type of Poke
 end
 
@@ -441,15 +466,11 @@ val consume_bin_prot
 
 (** [Blit] copies between iobufs and advances neither [src] nor [dst]. *)
 module Blit : sig
-  (** [Blit.S1_permissions] defines the type parameters in reverse order! *)
-  include
-    Blit.S1_permissions with type ('seek, 'rw) t := ('rw, 'seek) t
-
-  (** Override types of [sub] and [subo] to allow return type to have [seek/no_seek] as
-      needed. *)
-  val sub : ([> read ], _) t -> pos:int -> len:int -> (_, _) t
-
-  val subo : ?pos:int -> ?len:int -> ([> read ], _) t -> (_, _) t
+  val blit : (([> read ], _) t, ([> write ], _) t) Base.Blit.blit
+  val blito : (([> read ], _) t, ([> write ], _) t) Base.Blit.blito
+  val unsafe_blit : (([> read ], _) t, ([> write ], _) t) Base.Blit.blit
+  val sub : (([> read ], _) t, (_, _) t) Base.Blit.sub
+  val subo : (([> read ], _) t, (_, _) t) Base.Blit.subo
 
   (** Copies as much as possible (returning the number of bytes copied) without running
       out of either buffer's window. *)
@@ -540,12 +561,7 @@ module Blit_consume_and_fill : sig
     -> unit
     -> unit
 
-  val unsafe_blit
-    :  src:([> read ], seek) t
-    -> dst:([> write ], seek) t
-    -> len:int
-    -> unit
-
+  val unsafe_blit : src:([> read ], seek) t -> dst:([> write ], seek) t -> len:int -> unit
   val blit_maximal : src:([> read ], seek) t -> dst:([> write ], seek) t -> int
 end
 
@@ -556,6 +572,9 @@ val memset : (read_write, _) t -> pos:int -> len:int -> char -> unit
 val zero
   :  (read_write, _) t
   -> unit
+
+(** Create a new iobuf whose contents are the appended contents of the passed array. *)
+val concat : ([> read ], _) t array -> (_, _) t
 
 (** {2 Expert} *)
 
@@ -593,6 +612,17 @@ module Expert : sig
       and the window and limits specified starting at [pos] and of length [len]. *)
   val reinitialize_of_bigstring : (_, _) t -> pos:int -> len:int -> Bigstring.t -> unit
 
+  (** As [reinitialize_of_bigstring] but without checking, and requires explicit
+      specification of bounds. *)
+  val unsafe_reinitialize
+    :  _ t
+    -> lo_min:int
+    -> lo:int
+    -> hi:int
+    -> hi_max:int
+    -> Bigstring.t
+    -> unit
+
   (** These versions of [set_bounds_and_buffer] allow [~src] to be read-only.  [~dst] will
       be writable through [~src] aliases even though the type does not reflect this! *)
   val set_bounds_and_buffer : src:('data, _) t -> dst:('data, seek) t -> unit
@@ -608,6 +638,15 @@ module Expert : sig
       bounds. Mixing this with functions like [set_bounds_and_buffer] or [narrow] is
       unsafe; you should not modify anyything but the window inside [f]. *)
   val protect_window : ('rw, _) t -> f:(('rw, seek) t -> 'a) -> 'a
+
+  val protect_window_1 : ('rw, _) t -> 'a -> f:(('rw, seek) t -> 'a -> 'b) -> 'b
+
+  val protect_window_2
+    :  ('rw, _) t
+    -> 'a
+    -> 'b
+    -> f:(('rw, seek) t -> 'a -> 'b -> 'c)
+    -> 'c
 end
 
 module type Accessors_common = Accessors_common

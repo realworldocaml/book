@@ -1,2 +1,2 @@
-(library (name uuid) (public_name core_kernel.uuid) (libraries core_kernel)
+(library (name uuid) (public_name core_kernel.uuid) (libraries core)
  (preprocess (pps ppx_jane)))

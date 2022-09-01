@@ -1,17 +1,19 @@
 open Ppx_hash_lib.Std
-open Hash.Builtin
+open Hash.Builtin;;
 
 #verbose true
 
 module type Interface_for_types_named_t = sig
   type t [@@deriving hash]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Interface_for_types_named_t =
   sig
     type t
     val hash_fold_t :
-      Base_internalhash_types.state -> t -> Base_internalhash_types.state
+      t Base.Exported_for_specific_uses.Ppx_hash_lib.hash_fold
     val hash : t -> int
   end
 |}]
@@ -19,7 +21,9 @@ module type Interface_for_types_named_t =
 module type Interface_for_types_named_other_than_t = sig
   type my_type [@@deriving hash]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Interface_for_types_named_other_than_t =
   sig
     type my_type
@@ -33,7 +37,9 @@ module type Interface_for_types_named_other_than_t =
 module type Interface_for_poly_types = sig
   type 'a my_container [@@deriving hash]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Interface_for_poly_types =
   sig
     type 'a my_container
@@ -48,22 +54,25 @@ module type Interface_for_poly_types_with_unnamed_argument = sig
   type _ my_container [@@deriving hash]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module type Interface_for_poly_types_with_unnamed_argument =
   sig
     type _ my_container
     val hash_fold_my_container :
       (Base_internalhash_types.state ->
-       'v_x__001_ -> Base_internalhash_types.state) ->
+       'a__001_ -> Base_internalhash_types.state) ->
       Base_internalhash_types.state ->
-      'v_x__001_ my_container -> Base_internalhash_types.state
+      'a__001_ my_container -> Base_internalhash_types.state
   end
 |}]
 
 module Use_of_hash_fold_syntax_extension = struct
   let f = [%hash_fold: (int * string) list]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module Use_of_hash_fold_syntax_extension :
   sig
     val f :
@@ -73,9 +82,15 @@ module Use_of_hash_fold_syntax_extension :
 |}]
 
 module Support_for_builtins = struct
-  let f = [%hash_fold: (nativeint * int64 * int32 * char * int * bool * string * float * unit) option list lazy_t]
+  let f =
+    [%hash_fold:
+      (nativeint * int64 * int32 * char * int * bool * string * float * unit) option list
+        lazy_t]
+  ;;
 end
-[%%expect{|
+
+[%%expect
+  {|
 module Support_for_builtins :
   sig
     val f :
@@ -90,7 +105,8 @@ module Support_for_builtins :
 module No_builtin_support_for_array = struct
   type fail = int array [@@deriving hash]
 end
-[%%expect{|
+
+[%%expect {|
 Line _, characters _-_:
 Error: Unbound value hash_fold_array
 |}]
@@ -98,32 +114,39 @@ Error: Unbound value hash_fold_array
 module No_builtin_support_for_ref = struct
   type fail = int ref [@@deriving hash]
 end
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: Unbound value hash_fold_ref
 Hint: Did you mean hash_fold_int?
 |}]
 
 type fail = int -> int [@@deriving hash]
-[%%expect{|
+
+[%%expect {|
 Line _, characters _-_:
 Error: ppx_hash: functions can not be hashed.
 |}]
 
 type fail = < f : int > [@@deriving hash]
-[%%expect{|
+
+[%%expect {|
 Line _, characters _-_:
 Error: ppx_hash: unsupported type: < f: int   >
 |}]
 
 type fail = .. [@@deriving hash]
-[%%expect{|
+
+[%%expect {|
 Line _, characters _-_:
 Error: ppx_hash: open types are not supported
 |}]
 
-type fail = [> `Foo ] [@@deriving hash]
-[%%expect{|
+type fail = private [> `Foo ] [@@deriving hash]
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_hash: cannot hash open polymorphic variant types
 |}]
@@ -133,9 +156,12 @@ type fail =
   ; s : string
   }
 [@@deriving hash]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
-Error: ppx_hash: require [@hash.ignore] or [@compare.ignore] on mutable record field
+Error: ppx_hash: require [@hash.ignore] or [@compare.ignore] on mutable
+       record field
 |}]
 
 type unhashable
@@ -145,7 +171,9 @@ type ok =
   ; s : string
   }
 [@@deriving hash]
-[%%expect{|
+
+[%%expect
+  {|
 type unhashable
 type ok = { mutable u : unhashable; s : string; }
 val hash_fold_ok :
@@ -155,11 +183,13 @@ val hash_ok : ok -> int = <fun>
 |}]
 
 type ok_nested =
-  { u : (unhashable [@ignore]) * int
+  { u : (unhashable[@ignore]) * int
   ; s : string
   }
 [@@deriving hash]
-[%%expect{|
+
+[%%expect
+  {|
 type ok_nested = { u : unhashable * int; s : string; }
 val hash_fold_ok_nested :
   Base_internalhash_types.state -> ok_nested -> Base_internalhash_types.state =
@@ -171,7 +201,9 @@ module type Type_extension = sig
   val f : [%hash_fold: 'a] -> [%hash_fold: 'a * 'a]
   val g : [%hash_fold: _] -> [%hash_fold: _]
 end
-[%%expect{|
+
+[%%expect
+  {|
 module type Type_extension =
   sig
     val f :
@@ -185,7 +217,9 @@ module type Type_extension =
 |}]
 
 type warn = { foo : string [@no_hashing] } [@@deriving hash]
-[%%expect {|
+
+[%%expect
+  {|
 Line _, characters _-_:
-Error (warning 22): [@hash.no_hashing] is deprecated.  Use [@hash.ignore].
+Error (warning 22 [preprocessor]): [@hash.no_hashing] is deprecated.  Use [@hash.ignore].
 |}]

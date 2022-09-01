@@ -18,7 +18,8 @@ let system s = In_thread.syscall_exn ~name:"system" (fun () -> Unix.system s)
 let system_exn s =
   let%map status = system s in
   if not (Result.is_ok status)
-  then raise_s [%message "system failed" ~_:(s : string) (status : Exit_or_signal.t)]
+  then
+    raise_s [%message "shell command failed" ~_:(s : string) (status : Exit_or_signal.t)]
 ;;
 
 let getpid () = Unix.getpid ()
@@ -72,13 +73,13 @@ type open_flag =
 
 type file_perm = int [@@deriving sexp, bin_io, compare]
 
-let openfile ?perm file ~mode =
+let openfile ?info ?perm file ~mode =
   let mode = List.map mode ~f:convert_open_flag @ [ O_CLOEXEC ] in
   let%bind file_descr =
     In_thread.syscall_exn ~name:"openfile" (fun () -> Unix.openfile ?perm file ~mode)
   in
   let%map kind = Fd.Kind.infer_using_stat file_descr in
-  Fd.create kind file_descr (Info.of_string file)
+  Fd.create kind file_descr (Option.value info ~default:(Info.of_string file))
 ;;
 
 let fcntl_getfl fd =
@@ -348,8 +349,12 @@ let fchown fd ~uid ~gid =
 
 let access filename perm =
   match%map
-    Monitor.try_with (fun () ->
-      In_thread.syscall_exn ~name:"access" (fun () -> Unix.access filename perm))
+    Monitor.try_with
+      ~run:
+        `Schedule
+      ~rest:`Log
+      (fun () ->
+         In_thread.syscall_exn ~name:"access" (fun () -> Unix.access filename perm))
   with
   | Ok res -> res
   | Error exn -> Error (Monitor.extract_exn exn)
@@ -467,8 +472,8 @@ type env = Unix.env [@@deriving sexp]
 let environment = Unix.environment
 let getenv = Sys.getenv
 let getenv_exn = Sys.getenv_exn
-let unsafe_getenv = Sys.unsafe_getenv
-let unsafe_getenv_exn = Sys.unsafe_getenv_exn
+let unsafe_getenv = Sys_unix.unsafe_getenv
+let unsafe_getenv_exn = Sys_unix.unsafe_getenv_exn
 let putenv = Unix.putenv
 let unsetenv = Unix.unsetenv
 
@@ -566,8 +571,7 @@ end = struct
     Lazy.force install_sigchld_handler_the_first_time;
     match Kind.wait_nohang kind wait_on with
     | Some result -> return result
-    | None ->
-      Deferred.create (fun result -> add ~kind ~result ~wait_on) >>| Result.ok_exn
+    | None -> Deferred.create (fun result -> add ~kind ~result ~wait_on) >>| Result.ok_exn
   ;;
 
   let wait wait_on = deferred_wait wait_on ~kind:Normal
@@ -694,15 +698,31 @@ module Socket = struct
   end
 
   module Family = struct
+    module Gadt = struct
+      type _ t =
+        | Inet : Address.Inet.t t
+        | Unix : Address.Unix.t t
+
+      let is_inet_witness : type a. a t -> (a, Address.Inet.t) Type_equal.t option
+        = function
+          | Inet -> Some T
+          | Unix -> None
+      ;;
+    end
+
     type 'address t =
       { family : Unix.socket_domain
+      ; family_gadt : 'address Gadt.t
       ; address_of_sockaddr_exn : Unix.sockaddr -> 'address
       ; sexp_of_address : 'address -> Sexp.t
       }
       constraint 'address = [< Address.t ]
     [@@deriving fields]
 
-    let sexp_of_t _ { address_of_sockaddr_exn = _; family; sexp_of_address = _ } =
+    let sexp_of_t
+          _
+          { address_of_sockaddr_exn = _; family; family_gadt = _; sexp_of_address = _ }
+      =
       [%sexp (family : Unix.socket_domain)]
     ;;
 
@@ -715,6 +735,7 @@ module Socket = struct
 
     let inet =
       { family = PF_INET
+      ; family_gadt = Inet
       ; address_of_sockaddr_exn = Address.Inet.of_sockaddr_exn
       ; sexp_of_address = Address.Inet.sexp_of_t
       }
@@ -722,10 +743,13 @@ module Socket = struct
 
     let unix =
       { family = PF_UNIX
+      ; family_gadt = Unix
       ; address_of_sockaddr_exn = Address.Unix.of_sockaddr_exn
       ; sexp_of_address = Address.Unix.sexp_of_t
       }
     ;;
+
+    let is_inet_witness t = Gadt.is_inet_witness t.family_gadt
   end
 
   module Type = struct
@@ -735,6 +759,7 @@ module Socket = struct
       }
     [@@deriving sexp_of]
 
+    let family t = t.family
     let sexp_of_address t = t.family.sexp_of_address
     let tcp = { family = Family.inet; socket_type = SOCK_STREAM }
     let udp = { family = Family.inet; socket_type = SOCK_DGRAM }
@@ -761,9 +786,7 @@ module Socket = struct
         then [%sexp "udp"]
         else [%sexp (type_ : _ Type.t)]
       in
-      let bound_on, listening_on =
-        if listening then None, bound_on else bound_on, None
-      in
+      let bound_on, listening_on = if listening then None, bound_on else bound_on, None in
       Info.create_s
         [%sexp
           { connected_to : ([< Address.t ] option[@sexp.option])
@@ -845,7 +868,7 @@ module Socket = struct
     let sndtimeo = float "sndtimeo" SO_SNDTIMEO
 
     (* Since there aren't socket options like SO_MCASTLOOP or SO_MCASTTTL, we wrap
-       [Core.Unix] functions to match async's socket-options interface. *)
+       [Core_unix] functions to match async's socket-options interface. *)
     let mcast_loop =
       { name = "mcast_loop"; get = Unix.get_mcast_loop; set = Unix.set_mcast_loop }
     ;;
@@ -946,9 +969,9 @@ module Socket = struct
           file_descr
           (Info.create
              "socket"
-             (`listening_on t, `client address)
+             (`listening_on (Fd.info t.fd), `client address)
              (let sexp_of_address = sexp_of_address t in
-              [%sexp_of: [ `listening_on of (_, _) t ] * [ `client of address ]]))
+              [%sexp_of: [ `listening_on of Info.t ] * [ `client of address ]]))
       in
       let s = { fd; type_ = t.type_; for_info = None } in
       turn_off_nagle sockaddr s;
@@ -981,8 +1004,7 @@ module Socket = struct
          | `Ready -> `Repeat ()
          | `Interrupted as x -> `Finished x
          | `Closed -> `Finished `Socket_closed
-         | `Bad_fd ->
-           raise_s [%message "accept on bad file descriptor" ~_:(t.fd : Fd.t)]))
+         | `Bad_fd -> raise_s [%message "accept on bad file descriptor" ~_:(t.fd : Fd.t)]))
   ;;
 
   let accept t =
@@ -1040,19 +1062,18 @@ module Socket = struct
       Fd.Private.replace t.fd (Fd.Kind.Socket `Active) info;
       `Ok t
     in
-    let fail_closed () = raise_s [%message "connect on closed fd" ~_:(t.fd : Fd.t)] in
-    (* We call [connect] with [~nonblocking:true] to initiate an asynchronous connect
-       (see Stevens' book on Unix Network Programming, p413).  Once the connect succeeds
-       or fails, [select] on the socket will return it in the writeable set. *)
+    (* We call [connect] with [~nonblocking:true] to initiate an asynchronous connect (see
+       Stevens' book on Unix Network Programming, p413).  Once the connect succeeds or
+       fails, [select] on the socket will return it in the writeable set. *)
     match
       Fd.with_file_descr t.fd ~nonblocking:true (fun file_descr ->
         Unix.connect file_descr ~addr:sockaddr)
     with
-    | `Already_closed -> fail_closed ()
+    | `Already_closed -> raise_s [%message "close before connect" (t.fd : Fd.t)]
     | `Ok () -> return (success ())
     | `Error (Unix_error ((EINPROGRESS | EINTR), _, _)) ->
       (match%map Fd.interruptible_ready_to t.fd `Write ~interrupt with
-       | `Closed -> fail_closed ()
+       | `Closed -> raise_s [%message "close during connect" (t.fd : Fd.t)]
        | `Bad_fd -> raise_s [%message "connect on bad file descriptor" ~_:(t.fd : Fd.t)]
        | `Interrupted as x -> x
        | `Ready ->
@@ -1061,7 +1082,7 @@ module Socket = struct
             Fd.with_file_descr t.fd (fun file_descr ->
               Unix.getsockopt_int file_descr SO_ERROR)
           with
-          | `Already_closed -> fail_closed ()
+          | `Already_closed -> raise_s [%message "close after connect" (t.fd : Fd.t)]
           | `Error exn -> raise exn
           | `Ok err ->
             if err = 0
@@ -1230,8 +1251,7 @@ module Terminal_io = struct
   include Unix.Terminal_io
 
   let tcgetattr fd =
-    Fd.syscall_in_thread_exn fd ~name:"tcgetattr" (fun file_descr ->
-      tcgetattr file_descr)
+    Fd.syscall_in_thread_exn fd ~name:"tcgetattr" (fun file_descr -> tcgetattr file_descr)
   ;;
 
   let tcsetattr t fd ~mode =

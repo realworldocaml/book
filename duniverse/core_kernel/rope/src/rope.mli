@@ -2,7 +2,7 @@
     strings, allowing concatenation to do no work up front. See the README.md file for
     details and motivating examples. *)
 
-open! Core_kernel
+open! Core
 
 type t [@@deriving equal, quickcheck, sexp]
 

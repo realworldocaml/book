@@ -1,4 +1,5 @@
 (test
  (name test_roots)
  (package ctypes-foreign)
+ (deps ../clib/clib%{ext_dll})
  (libraries ctypes ctypes-foreign ounit2))

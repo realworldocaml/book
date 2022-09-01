@@ -1,4 +1,4 @@
 (executable
   (name       cal)
-  (libraries  core)
+  (libraries  core core_unix.command_unix)
   (preprocess (pps ppx_jane)))

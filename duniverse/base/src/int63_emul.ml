@@ -21,31 +21,13 @@ module T0 = struct
       fun x -> func x
     ;;
 
-    let t_of_sexp = (int64_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-    let sexp_of_t = (sexp_of_int64 : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group)
-        =
-        { implicit_vars = [ "int64" ]
-        ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-        ; types = [ "t", Implicit_var 0 ]
-        }
-      in
-      let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-        { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-        ; apply_implicit = [ int64_sexp_grammar ]
-        ; generic_group = _the_generic_group
-        ; origin = "int63_emul.ml.T0.T"
-        }
-      in
-      let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-        Ref ("t", _the_group)
-      in
-      t_sexp_grammar
-    ;;
+    let t_of_sexp = (int64_of_sexp : Sexplib0.Sexp.t -> t)
+    let sexp_of_t = (sexp_of_int64 : t -> Sexplib0.Sexp.t)
+    let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = int64_sexp_grammar
 
     [@@@end]
+
+    let hashable : t Hashable.t = { hash; compare; sexp_of_t }
   end
 
   include T
@@ -56,12 +38,11 @@ module Conv = Int_conversions
 
 module W : sig
 
-  type t = int64
-
   include module type of struct
     include T0
   end
-  with type t := t
+
+  type t = int64
 
   val wrap_exn : Caml.Int64.t -> t
   val wrap_modulo : Caml.Int64.t -> t
@@ -104,14 +85,9 @@ module W : sig
   val clz : t -> int
   val ctz : t -> int
 end = struct
-  type t = int64
+  include T0
 
-  include (
-    T0 :
-      module type of struct
-      include T0
-    end
-    with type t := t)
+  type t = int64
 
   let wrap_exn x =
     (* Raises if the int64 value does not fit on int63. *)
@@ -192,28 +168,9 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (W.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (W.sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "W.t" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ W.t_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "int63_emul.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (W.t_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (W.sexp_of_t : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = W.t_sexp_grammar
 
   [@@@end]
 
@@ -226,6 +183,7 @@ module T = struct
   (* We don't expect [hash] to follow the behavior of int in 64bit architecture *)
   let _ = hash
   let hash (x : t) = Caml.Hashtbl.hash x
+  let hashable : t Hashable.t = { hash; compare; sexp_of_t }
   let invalid_str x = Printf.failwithf "Int63.of_string: invalid input %S" x ()
 
   (*
@@ -346,7 +304,7 @@ let of_int64_exn = of_int64_exn
 let of_int64_trunc = of_int64_trunc
 let to_int64 = to_int64
 
-include Comparable.Validate_with_zero (struct
+include Comparable.With_zero (struct
     include T
 
     let zero = zero

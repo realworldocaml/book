@@ -7,6 +7,7 @@ module Debug (Stack : S) : S with type 'a t = 'a Stack.t = struct
   type nonrec 'a t = 'a t
 
   let invariant = invariant
+  let t_sexp_grammar = t_sexp_grammar
 
   let check_and_return t =
     invariant ignore t;
@@ -64,6 +65,7 @@ struct
 
   include Test_container.Test_S1 (Stack)
 
+  let t_sexp_grammar = t_sexp_grammar
   let invariant = invariant
   let create = create
   let is_empty = is_empty

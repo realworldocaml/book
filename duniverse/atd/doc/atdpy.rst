@@ -253,6 +253,8 @@ Type mapping
 +--------------------+----------------------+-------------------------+
 | ``int nullable``   | ``Union[int, None]`` | ``42`` or ``null``      |
 +--------------------+----------------------+-------------------------+
+| ``abstract``       | ``Any``              | anything                |
++--------------------+----------------------+-------------------------+
 | record type        | class                | ``{"id": 17}``          |
 +--------------------+----------------------+-------------------------+
 | ``[A | B of int]`` | ``Union[A, B]``      | ``"A"`` or ``["B", 5]`` |
@@ -396,3 +398,6 @@ The generated Python class will start like this:
    @dataclass
    class Thing:
        ...
+
+If extra class decorators are specifed on a sum type, the python classes generated
+for the constructors of the sum type will also have the extra class decorators.

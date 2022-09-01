@@ -1,4 +1,6 @@
-(executables (names main) (libraries core patdiff pcre)
+(executables (names main)
+ (libraries core_unix.command_unix core core_unix.filename_unix patdiff pcre
+  core_unix.sys_unix)
  (preprocess (pps ppx_jane)))
 
 (install (section bin) (files (main.exe as patdiff) patdiff-git-wrapper))

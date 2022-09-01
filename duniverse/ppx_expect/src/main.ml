@@ -28,9 +28,7 @@ let eoption ~loc x =
 
 let estring_option ~loc x = eoption ~loc (Option.map x ~f:(estring ~loc))
 
-let lift_expectation
-      ~loc
-      ({ tag; body; extid_location; body_location } : _ Expectation.t)
+let lift_expectation ~loc ({ tag; body; extid_location; body_location } : _ Expectation.t)
   =
   Merlin_helpers.hide_expression
     [%expr
@@ -86,10 +84,10 @@ let file_digest =
   let cache = Hashtbl.create (module String) ~size:32 in
   fun fname ->
     Hashtbl.find_or_add cache fname ~default:(fun () ->
-      Caml.Digest.file fname |> Caml.Digest.to_hex)
+      Stdlib.Digest.file fname |> Stdlib.Digest.to_hex)
 ;;
 
-let rewrite_test_body ~descr ~tags ~uncaught_exn pstr_loc body =
+let rewrite_test_body ~descr ~tags ~uncaught_exn ~called_by_merlin pstr_loc body =
   let loc = pstr_loc in
   let expectations =
     List.map (collect_expectations#expression body []) ~f:(fun (loc, expect_extension) ->
@@ -105,7 +103,11 @@ let rewrite_test_body ~descr ~tags ~uncaught_exn pstr_loc body =
   let absolute_filename =
     Ppx_here_expander.expand_filename pstr_loc.loc_start.pos_fname
   in
-  let hash = file_digest loc.loc_start.pos_fname in
+  let hash =
+    if called_by_merlin
+    then Stdlib.Digest.string ""
+    else file_digest loc.loc_start.pos_fname
+  in
   [%expr
     let module Expect_test_collector = Expect_test_collector.Make (Expect_test_config) in
     Expect_test_collector.run
@@ -168,17 +170,22 @@ module Has_tests =
     (Bool)
 
 let expect_test =
-  Extension.declare_inline
+  Extension.V3.declare_inline
     "expect_test"
     Structure_item
     (P.pattern ())
-    (fun ~loc ~path:_ uncaught_exn ~name ~tags code ->
+    (fun ~ctxt uncaught_exn ~name ~tags code ->
+       let loc = Ppxlib.Expansion_context.Extension.extension_point_loc ctxt in
+       let loc = { loc with loc_ghost = true } in
+       let called_by_merlin =
+         String.equal (Ppxlib.Expansion_context.Extension.tool_name ctxt) "merlin"
+       in
        Has_tests.set true;
        Ppx_inline_test.validate_extension_point_exn
          ~name_of_ppx_rewriter:"ppx_expect"
          ~loc
          ~tags;
-       rewrite_test_body ~descr:name ~tags ~uncaught_exn loc code
+       rewrite_test_body ~descr:name ~tags ~uncaught_exn ~called_by_merlin loc code
        |> Ppx_inline_test.maybe_drop loc)
 ;;
 
@@ -190,6 +197,7 @@ let () =
       match whole_loc, Ppx_inline_test_libname.get () with
       | None, _ | _, None -> [], []
       | Some loc, Some _ ->
+        let loc = { loc with loc_ghost = true } in
         let maybe_drop = Ppx_inline_test.maybe_drop in
         let absolute_filename =
           Ppx_here_expander.expand_filename loc.loc_start.pos_fname

@@ -1,0 +1,2 @@
+(executables (names testpty) (libraries core core_unix unix_pseudo_terminal)
+ (preprocess (pps ppx_jane)))

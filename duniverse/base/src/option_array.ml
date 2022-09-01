@@ -16,8 +16,8 @@ open! Import
       through the module signature then it could decide to construct a float
       array instead. *)
 module Cheap_option = struct
-  (* This is taken from core_kernel. Rather than expose it in the public
-     interface of base, just keep a copy around here. *)
+  (* This is taken from core. Rather than expose it in the public interface of base, just
+     keep a copy around here. *)
   let phys_same (type a b) (a : a) (b : b) = phys_equal a (Caml.Obj.magic b : a)
 
   module T0 : sig
@@ -29,6 +29,7 @@ module Cheap_option = struct
     val is_some : _ t -> bool
     val value_exn : 'a t -> 'a
     val value_unsafe : 'a t -> 'a
+    val iter_some : 'a t -> f:('a -> unit) -> unit
   end = struct
     type +'a t
 
@@ -74,6 +75,8 @@ module Cheap_option = struct
       then value_unsafe x
       else failwith "Option_array.get_some_exn: the element is [None]"
     ;;
+
+    let iter_some t ~f = if is_some t then f (value_unsafe t)
   end
 
   module T1 = struct
@@ -84,24 +87,36 @@ module Cheap_option = struct
       | Some x -> some x
     ;;
 
-    let to_option x = if is_some x then Some (value_unsafe x) else None
+    let[@inline] to_option x = if is_some x then Some (value_unsafe x) else None
     let to_sexpable = to_option
     let of_sexpable = of_option
+
+    let t_sexp_grammar (type a) (grammar : a Sexplib0.Sexp_grammar.t)
+      : a t Sexplib0.Sexp_grammar.t
+      =
+      Sexplib0.Sexp_grammar.coerce (Option.t_sexp_grammar grammar)
+    ;;
   end
 
   include T1
   include Sexpable.Of_sexpable1 (Option) (T1)
 end
 
-type 'a t = 'a Cheap_option.t Uniform_array.t [@@deriving_inline sexp]
+type 'a t = 'a Cheap_option.t Uniform_array.t [@@deriving_inline sexp, sexp_grammar]
 
-let t_of_sexp : 'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
-  let _tp_loc = "option_array.ml.t" in
-  fun _of_a t -> Uniform_array.t_of_sexp (Cheap_option.t_of_sexp _of_a) t
+let t_of_sexp : 'a. (Sexplib0.Sexp.t -> 'a) -> Sexplib0.Sexp.t -> 'a t =
+  fun _of_a__001_ x__003_ ->
+  Uniform_array.t_of_sexp (Cheap_option.t_of_sexp _of_a__001_) x__003_
 ;;
 
-let sexp_of_t : 'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
-  fun _of_a v -> Uniform_array.sexp_of_t (Cheap_option.sexp_of_t _of_a) v
+let sexp_of_t : 'a. ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t =
+  fun _of_a__004_ x__005_ ->
+  Uniform_array.sexp_of_t (Cheap_option.sexp_of_t _of_a__004_) x__005_
+;;
+
+let (t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t) =
+  fun _'a_sexp_grammar ->
+  Uniform_array.t_sexp_grammar (Cheap_option.t_sexp_grammar _'a_sexp_grammar)
 ;;
 
 [@@@end]
@@ -111,7 +126,7 @@ let create ~len = Uniform_array.create ~len Cheap_option.none
 let init n ~f = Uniform_array.init n ~f:(fun i -> Cheap_option.of_option (f i))
 let init_some n ~f = Uniform_array.init n ~f:(fun i -> Cheap_option.some (f i))
 let length = Uniform_array.length
-let get t i = Cheap_option.to_option (Uniform_array.get t i)
+let[@inline] get t i = Cheap_option.to_option (Uniform_array.get t i)
 let get_some_exn t i = Cheap_option.value_exn (Uniform_array.get t i)
 let is_none t i = Cheap_option.is_none (Uniform_array.get t i)
 let is_some t i = Cheap_option.is_some (Uniform_array.get t i)
@@ -136,6 +151,61 @@ let clear t =
     unsafe_set_none t i
   done
 ;;
+
+let iteri input ~f =
+  for i = 0 to length input - 1 do
+    f i (unsafe_get input i)
+  done
+;;
+
+let iter input ~f = iteri input ~f:(fun (_ : int) x -> f x)
+
+let foldi input ~init ~f =
+  let acc = ref init in
+  iteri input ~f:(fun i elem -> acc := f i !acc elem);
+  !acc
+;;
+
+let fold input ~init ~f = foldi input ~init ~f:(fun (_ : int) acc x -> f acc x)
+
+include Indexed_container.Make_gen (struct
+    type nonrec 'a t = 'a t
+    type 'a elt = 'a option
+
+    let fold = fold
+    let foldi = `Custom foldi
+    let iter = `Custom iter
+    let iteri = `Custom iteri
+    let length = `Custom length
+  end)
+
+let mapi input ~f =
+  let output = create ~len:(length input) in
+  iteri input ~f:(fun i elem -> unsafe_set output i (f i elem));
+  output
+;;
+
+let map input ~f = mapi input ~f:(fun (_ : int) elem -> f elem)
+
+let map_some input ~f =
+  let len = length input in
+  let output = create ~len in
+  let () =
+    for i = 0 to len - 1 do
+      let opt = Uniform_array.unsafe_get input i in
+      Cheap_option.iter_some opt ~f:(fun x -> unsafe_set_some output i (f x))
+    done
+  in
+  output
+;;
+
+let of_array array = init (Array.length array) ~f:(fun i -> Array.unsafe_get array i)
+
+let of_array_some array =
+  init_some (Array.length array) ~f:(fun i -> Array.unsafe_get array i)
+;;
+
+let to_array t = Array.init (length t) ~f:(fun i -> unsafe_get t i)
 
 include Blit.Make1_generic (struct
     type nonrec 'a t = 'a t

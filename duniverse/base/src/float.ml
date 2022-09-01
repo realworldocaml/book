@@ -16,31 +16,13 @@ module T = struct
     fun x -> func x
   ;;
 
-  let t_of_sexp = (float_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-  let sexp_of_t = (sexp_of_float : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
-      { implicit_vars = [ "float" ]
-      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
-      ; types = [ "t", Implicit_var 0 ]
-      }
-    in
-    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
-      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
-      ; apply_implicit = [ float_sexp_grammar ]
-      ; generic_group = _the_generic_group
-      ; origin = "float.ml.T"
-      }
-    in
-    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
-      Ref ("t", _the_group)
-    in
-    t_sexp_grammar
-  ;;
+  let t_of_sexp = (float_of_sexp : Sexplib0.Sexp.t -> t)
+  let sexp_of_t = (sexp_of_float : t -> Sexplib0.Sexp.t)
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) = float_sexp_grammar
 
   [@@@end]
 
+  let hashable : t Hashable.t = { hash; compare; sexp_of_t }
   let compare = Float_replace_polymorphic_compare.compare
 end
 
@@ -306,7 +288,7 @@ let round_nearest_ub = 2. ** 52.
    and it gets rounded up to [1.] due to the round-ties-to-even rule. *)
 let one_ulp_less_than_half = one_ulp `Down 0.5
 
-let add_half_for_round_nearest t =
+let[@ocaml.inline always] add_half_for_round_nearest t =
   t
   +.
   if t = one_ulp_less_than_half
@@ -397,11 +379,8 @@ let iround ?(dir = `Nearest) t =
   | _ -> None
 ;;
 
-let is_inf x =
-  match classify_float x with
-  | FP_infinite -> true
-  | _ -> false
-;;
+let is_inf t = 1. /. t = 0.
+let is_finite t = t -. t = 0.
 
 let min_inan (x : t) y =
   if is_nan y then x else if is_nan x then y else if x < y then x else y
@@ -508,7 +487,7 @@ let int63_round_down_exn t =
 ;;
 
 let int63_round_nearest_portable_alloc_exn t0 =
-  let t = round_nearest t0 in
+  let t = (round_nearest [@ocaml.inlined always]) t0 in
   if t > 0.
   then
     if t <= int63_round_ubound
@@ -550,48 +529,61 @@ module Class = struct
     | Normal
     | Subnormal
     | Zero
-  [@@deriving_inline compare, enumerate, sexp]
+  [@@deriving_inline compare, enumerate, sexp, sexp_grammar]
 
   let compare = (Ppx_compare_lib.polymorphic_compare : t -> t -> int)
   let all = ([ Infinite; Nan; Normal; Subnormal; Zero ] : t list)
 
   let t_of_sexp =
-    (let _tp_loc = "float.ml.Class.t" in
+    (let error_source__006_ = "float.ml.Class.t" in
      function
-     | Ppx_sexp_conv_lib.Sexp.Atom ("infinite" | "Infinite") -> Infinite
-     | Ppx_sexp_conv_lib.Sexp.Atom ("nan" | "Nan") -> Nan
-     | Ppx_sexp_conv_lib.Sexp.Atom ("normal" | "Normal") -> Normal
-     | Ppx_sexp_conv_lib.Sexp.Atom ("subnormal" | "Subnormal") -> Subnormal
-     | Ppx_sexp_conv_lib.Sexp.Atom ("zero" | "Zero") -> Zero
-     | Ppx_sexp_conv_lib.Sexp.List
-         (Ppx_sexp_conv_lib.Sexp.Atom ("infinite" | "Infinite") :: _) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("nan" | "Nan") :: _) as
-       sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List
-         (Ppx_sexp_conv_lib.Sexp.Atom ("normal" | "Normal") :: _) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List
-         (Ppx_sexp_conv_lib.Sexp.Atom ("subnormal" | "Subnormal") :: _) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("zero" | "Zero") :: _)
-       as sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.List _ :: _) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List [] as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.empty_list_invalid_sum _tp_loc sexp
-     | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp
-               : Ppx_sexp_conv_lib.Sexp.t -> t)
+     | Sexplib0.Sexp.Atom ("infinite" | "Infinite") -> Infinite
+     | Sexplib0.Sexp.Atom ("nan" | "Nan") -> Nan
+     | Sexplib0.Sexp.Atom ("normal" | "Normal") -> Normal
+     | Sexplib0.Sexp.Atom ("subnormal" | "Subnormal") -> Subnormal
+     | Sexplib0.Sexp.Atom ("zero" | "Zero") -> Zero
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("infinite" | "Infinite") :: _) as
+       sexp__007_ -> Sexplib0.Sexp_conv_error.stag_no_args error_source__006_ sexp__007_
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("nan" | "Nan") :: _) as sexp__007_ ->
+       Sexplib0.Sexp_conv_error.stag_no_args error_source__006_ sexp__007_
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("normal" | "Normal") :: _) as sexp__007_ ->
+       Sexplib0.Sexp_conv_error.stag_no_args error_source__006_ sexp__007_
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("subnormal" | "Subnormal") :: _) as
+       sexp__007_ -> Sexplib0.Sexp_conv_error.stag_no_args error_source__006_ sexp__007_
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.Atom ("zero" | "Zero") :: _) as sexp__007_ ->
+       Sexplib0.Sexp_conv_error.stag_no_args error_source__006_ sexp__007_
+     | Sexplib0.Sexp.List (Sexplib0.Sexp.List _ :: _) as sexp__005_ ->
+       Sexplib0.Sexp_conv_error.nested_list_invalid_sum error_source__006_ sexp__005_
+     | Sexplib0.Sexp.List [] as sexp__005_ ->
+       Sexplib0.Sexp_conv_error.empty_list_invalid_sum error_source__006_ sexp__005_
+     | sexp__005_ ->
+       Sexplib0.Sexp_conv_error.unexpected_stag error_source__006_ sexp__005_
+       : Sexplib0.Sexp.t -> t)
   ;;
 
   let sexp_of_t =
     (function
-      | Infinite -> Ppx_sexp_conv_lib.Sexp.Atom "Infinite"
-      | Nan -> Ppx_sexp_conv_lib.Sexp.Atom "Nan"
-      | Normal -> Ppx_sexp_conv_lib.Sexp.Atom "Normal"
-      | Subnormal -> Ppx_sexp_conv_lib.Sexp.Atom "Subnormal"
-      | Zero -> Ppx_sexp_conv_lib.Sexp.Atom "Zero"
-                : t -> Ppx_sexp_conv_lib.Sexp.t)
+      | Infinite -> Sexplib0.Sexp.Atom "Infinite"
+      | Nan -> Sexplib0.Sexp.Atom "Nan"
+      | Normal -> Sexplib0.Sexp.Atom "Normal"
+      | Subnormal -> Sexplib0.Sexp.Atom "Subnormal"
+      | Zero -> Sexplib0.Sexp.Atom "Zero"
+                : t -> Sexplib0.Sexp.t)
+  ;;
+
+  let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) =
+    { untyped =
+        Variant
+          { case_sensitivity = Case_sensitive_except_first_character
+          ; clauses =
+              [ No_tag { name = "Infinite"; clause_kind = Atom_clause }
+              ; No_tag { name = "Nan"; clause_kind = Atom_clause }
+              ; No_tag { name = "Normal"; clause_kind = Atom_clause }
+              ; No_tag { name = "Subnormal"; clause_kind = Atom_clause }
+              ; No_tag { name = "Zero"; clause_kind = Atom_clause }
+              ]
+          }
+    }
   ;;
 
   [@@@end]
@@ -610,8 +602,6 @@ let classify t =
   | FP_nan -> C.Nan
 ;;
 
-let is_finite t = not (t = infinity || t = neg_infinity || is_nan t)
-
 let insert_underscores ?(delimiter = '_') ?(strip_zero = false) string =
   match String.lsplit2 string ~on:'.' with
   | None -> Int_conversions.insert_delimiter string ~delimiter
@@ -625,14 +615,17 @@ let insert_underscores ?(delimiter = '_') ?(strip_zero = false) string =
      | _ -> left ^ "." ^ right)
 ;;
 
-let to_string_hum ?delimiter ?(decimals = 3) ?strip_zero f =
+let to_string_hum ?delimiter ?(decimals = 3) ?strip_zero ?(explicit_plus = false) f =
   if Int_replace_polymorphic_compare.( < ) decimals 0
   then invalid_argf "to_string_hum: invalid argument ~decimals=%d" decimals ();
   match classify f with
   | Class.Infinite -> if f > 0. then "inf" else "-inf"
   | Class.Nan -> "nan"
   | Class.Normal | Class.Subnormal | Class.Zero ->
-    insert_underscores (sprintf "%.*f" decimals f) ?delimiter ?strip_zero
+    let s =
+      if explicit_plus then sprintf "%+.*f" decimals f else sprintf "%.*f" decimals f
+    in
+    insert_underscores s ?delimiter ?strip_zero
 ;;
 
 let sexp_of_t t =
@@ -882,6 +875,7 @@ let ( - ) = ( -. )
 let ( * ) = ( *. )
 let ( ** ) = ( ** )
 let ( / ) = ( /. )
+let ( % ) = ( %. )
 let ( ~- ) = ( ~-. )
 
 let sign_exn t : Sign.t =
@@ -950,41 +944,13 @@ module Terse = struct
   let to_string x = Printf.sprintf "%.8G" x
   let sexp_of_t x = Sexp.Atom (to_string x)
   let of_string x = of_string x
+  let t_sexp_grammar = t_sexp_grammar
 end
-
-let validate_ordinary t =
-  Validate.of_error_opt
-    (let module C = Class in
-     match classify t with
-     | C.Normal | C.Subnormal | C.Zero -> None
-     | C.Infinite -> Some "value is infinite"
-     | C.Nan -> Some "value is NaN")
-;;
-
-module V = struct
-  module ZZ = Comparable.Validate (T)
-
-  let validate_bound ~min ~max t =
-    Validate.first_failure (validate_ordinary t) (ZZ.validate_bound t ~min ~max)
-  ;;
-
-  let validate_lbound ~min t =
-    Validate.first_failure (validate_ordinary t) (ZZ.validate_lbound t ~min)
-  ;;
-
-  let validate_ubound ~max t =
-    Validate.first_failure (validate_ordinary t) (ZZ.validate_ubound t ~max)
-  ;;
-end
-
-include V
 
 include Comparable.With_zero (struct
     include T
 
     let zero = zero
-
-    include V
   end)
 
 (* These are partly here as a performance hack to avoid some boxing we're getting with
@@ -1008,6 +974,7 @@ module O = struct
   let ( - ) = ( - )
   let ( * ) = ( * )
   let ( / ) = ( / )
+  let ( % ) = ( % )
   let ( ~- ) = ( ~- )
   let ( ** ) = ( ** )
 
@@ -1025,6 +992,7 @@ module O_dot = struct
   let ( +. ) = ( + )
   let ( -. ) = ( - )
   let ( /. ) = ( / )
+  let ( %. ) = ( % )
   let ( ~-. ) = ( ~- )
   let ( **. ) = ( ** )
 end

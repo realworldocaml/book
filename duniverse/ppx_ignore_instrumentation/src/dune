@@ -1,0 +1,3 @@
+(library (name ppx_ignore_instrumentation)
+ (public_name ppx_ignore_instrumentation) (kind ppx_rewriter)
+ (libraries ppxlib) (preprocess (pps ppxlib.metaquot)))

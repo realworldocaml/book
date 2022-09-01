@@ -2,6 +2,7 @@
  (files README.md)
  (packages
   core
+  core_unix
   mdx
   ppx_jane
   re)

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Poly
 
 (* This is not intended as a realistic candidate hash function since it allocates when
@@ -35,21 +35,25 @@ type v =
   | Float of float
 [@@deriving sexp]
 
-let compare_v a b = match (a, b) with
+let compare_v a b =
+  match a, b with
   | Int a, Int b -> compare a b
   | Int64 a, Int64 b -> compare a b
   | String a, String b -> compare a b
   | Float a, Float b -> compare a b
   | _, _ -> failwith "uncomparable"
+;;
 
 module State = struct
   module T = struct
     type t = v list [@@deriving sexp]
 
-    let rec compare a b = match (a, b) with
-      | (x :: xs), (y :: ys) -> [%compare : v * t] (x, xs) (y, ys)
+    let rec compare a b =
+      match a, b with
+      | x :: xs, y :: ys -> [%compare: v * t] (x, xs) (y, ys)
       | [], [] -> 0
       | _, _ -> failwith "perfect hashes of different lengths"
+    ;;
 
     let compare a b = compare (List.rev a) (List.rev b)
   end
@@ -68,12 +72,16 @@ let fold_float t i = Float i :: t
 type seed = unit
 
 let alloc () = []
-
 let reset ?seed:_ _ = []
+
 let get_hash_value t =
-  Caml.Int64.to_int (Int64.of_string (
-    "0x" ^ String.prefix (Md5.to_hex (Md5.digest_string (
-      Sexplib.Sexp.to_string (State.sexp_of_t t)))) 16))
+  Stdlib.Int64.to_int
+    (Int64.of_string
+       ("0x"
+        ^ String.prefix
+            (Md5.to_hex (Md5.digest_string (Sexplib.Sexp.to_string (State.sexp_of_t t))))
+            16))
+;;
 
 module For_tests = struct
   let state_to_string t = Sexplib.Sexp.to_string (State.sexp_of_t t)

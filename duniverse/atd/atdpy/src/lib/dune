@@ -3,6 +3,5 @@
  (libraries
    re
    atd
-   atdgen_emit
  )
 )

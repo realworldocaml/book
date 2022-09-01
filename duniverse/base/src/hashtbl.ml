@@ -25,8 +25,7 @@ let sexp_of_key t = t.hashable.Hashable.sexp_of_t
 let compare_key t = t.hashable.Hashable.compare
 
 let ensure_mutation_allowed t =
-  if not t.mutation_allowed
-  then failwith "Hashtbl: mutation not allowed during iteration"
+  if not t.mutation_allowed then failwith "Hashtbl: mutation not allowed during iteration"
 ;;
 
 let without_mutating t f =
@@ -180,14 +179,7 @@ let find_and_call2 t key ~a ~b ~if_found ~if_not_found =
   | Avltree.Leaf { key = k; value = v } ->
     if compare_key t k key = 0 then if_found v a b else if_not_found key a b
   | tree ->
-    Avltree.find_and_call2
-      tree
-      ~compare:(compare_key t)
-      key
-      ~a
-      ~b
-      ~if_found
-      ~if_not_found
+    Avltree.find_and_call2 tree ~compare:(compare_key t) key ~a ~b ~if_found ~if_not_found
 ;;
 
 let findi_and_call t key ~if_found ~if_not_found =
@@ -408,28 +400,35 @@ let partition_mapi t ~f =
 let partition_map t ~f = partition_mapi t ~f:(fun ~key:_ ~data -> f data)
 
 let partitioni_tf t ~f =
-  partition_mapi t ~f:(fun ~key ~data ->
-    if f ~key ~data then First data else Second data)
+  partition_mapi t ~f:(fun ~key ~data -> if f ~key ~data then First data else Second data)
 ;;
 
 let partition_tf t ~f = partitioni_tf t ~f:(fun ~key:_ ~data -> f data)
 
 let find_or_add t id ~default =
-  match find t id with
-  | Some x -> x
-  | None ->
-    let default = default () in
-    set t ~key:id ~data:default;
-    default
+  find_and_call2
+    t
+    id
+    ~a:t
+    ~b:default
+    ~if_found:(fun data _ _ -> data)
+    ~if_not_found:(fun key t default ->
+      let default = default () in
+      set t ~key ~data:default;
+      default)
 ;;
 
 let findi_or_add t id ~default =
-  match find t id with
-  | Some x -> x
-  | None ->
-    let default = default id in
-    set t ~key:id ~data:default;
-    default
+  find_and_call2
+    t
+    id
+    ~a:t
+    ~b:default
+    ~if_found:(fun data _ _ -> data)
+    ~if_not_found:(fun key t default ->
+      let default = default key in
+      set t ~key ~data:default;
+      default)
 ;;
 
 (* Some hashtbl implementations may be able to perform this more efficiently than two
@@ -447,7 +446,13 @@ let change t id ~f =
   | Some data -> set t ~key:id ~data
 ;;
 
-let update t id ~f = set t ~key:id ~data:(f (find t id))
+let update_and_return t id ~f =
+  let data = f (find t id) in
+  set t ~key:id ~data;
+  data
+;;
+
+let update t id ~f = ignore (update_and_return t id ~f : _)
 
 let incr_by ~remove_if_zero t key by =
   if remove_if_zero
@@ -570,7 +575,15 @@ let t_of_sexp ~hashable k_of_sexp d_of_sexp sexp =
     assert false
 ;;
 
-let validate ~name f t = Validate.alist ~name f (to_alist t)
+let t_sexp_grammar
+      (type k v)
+      (k_grammar : k Sexplib0.Sexp_grammar.t)
+      (v_grammar : v Sexplib0.Sexp_grammar.t)
+  : (k, v) t Sexplib0.Sexp_grammar.t
+  =
+  Sexplib0.Sexp_grammar.coerce (List.Assoc.t_sexp_grammar k_grammar v_grammar)
+;;
+
 let keys t = fold t ~init:[] ~f:(fun ~key ~data:_ acc -> key :: acc)
 let data t = fold ~f:(fun ~key:_ ~data list -> data :: list) ~init:[] t
 
@@ -608,8 +621,7 @@ let create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows =
 ;;
 
 let create_with_key_exn ?growth_allowed ?size ~hashable ~get_key rows =
-  Or_error.ok_exn
-    (create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows)
+  Or_error.ok_exn (create_with_key_or_error ?growth_allowed ?size ~hashable ~get_key rows)
 ;;
 
 let merge =
@@ -665,9 +677,7 @@ let filter_inplace t ~f = filteri_inplace t ~f:(fun ~key:_ ~data -> f data)
 let filter_keys_inplace t ~f = filteri_inplace t ~f:(fun ~key ~data:_ -> f key)
 
 let filter_mapi_inplace t ~f =
-  let map_results =
-    fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac)
-  in
+  let map_results = fold t ~init:[] ~f:(fun ~key ~data ac -> (key, f ~key ~data) :: ac) in
   List.iter map_results ~f:(fun (key, result) ->
     match result with
     | None -> remove t key
@@ -708,6 +718,7 @@ module Accessors = struct
   let add_exn = add_exn
   let change = change
   let update = update
+  let update_and_return = update_and_return
   let add_multi = add_multi
   let remove_multi = remove_multi
   let find_multi = find_multi
@@ -747,7 +758,6 @@ module Accessors = struct
   let findi_and_call2 = findi_and_call2
   let find_and_remove = find_and_remove
   let to_alist = to_alist
-  let validate = validate
   let merge = merge
   let merge_into = merge_into
   let keys = keys
@@ -843,6 +853,7 @@ module Poly = struct
   include Accessors
 
   let sexp_of_t = sexp_of_t
+  let t_sexp_grammar = t_sexp_grammar
 end
 
 module Private = struct
@@ -908,7 +919,7 @@ end
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 
   [@@@end]
 end
@@ -916,12 +927,22 @@ end
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
 
-  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+  val t_of_sexp : Sexplib0.Sexp.t -> t
 
   [@@@end]
 
   include Key.S with type t := t
 end
+
+module type M_sexp_grammar = sig
+  type t [@@deriving_inline sexp_grammar]
+
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+  [@@@end]
+end
+
+module type Equal_m = sig end
 
 let sexp_of_m__t (type k) (module K : Sexp_of_m with type t = k) sexp_of_v t =
   sexp_of_t K.sexp_of_t sexp_of_v t
@@ -931,33 +952,8 @@ let m__t_of_sexp (type k) (module K : M_of_sexp with type t = k) v_of_sexp sexp 
   t_of_sexp ~hashable:(Hashable.of_key (module K)) K.t_of_sexp v_of_sexp sexp
 ;;
 
-(* typechecking this code is a compile-time test that [Creators] is a specialization of
-   [Creators_generic].  *)
-module Check : sig end = struct
-  module Make_creators_check
-      (Type : T.T2)
-      (Key : T.T1)
-      (Options : T.T3)
-      (M : Creators_generic
-       with type ('a, 'b) t := ('a, 'b) Type.t
-       with type 'a key := 'a Key.t
-       with type ('a, 'b, 'z) create_options := ('a, 'b, 'z) Options.t) =
-  struct end
+let m__t_sexp_grammar (type k) (module K : M_sexp_grammar with type t = k) v_grammar =
+  t_sexp_grammar K.t_sexp_grammar v_grammar
+;;
 
-  module Check_creators_is_specialization_of_creators_generic (M : Creators) =
-    Make_creators_check
-      (struct
-        type ('a, 'b) t = ('a, 'b) M.t
-      end)
-      (struct
-        type 'a t = 'a
-      end)
-      (struct
-        type ('a, 'b, 'z) t = ('a, 'b, 'z) create_options
-      end)
-      (struct
-        include M
-
-        let create ?growth_allowed ?size m () = create ?growth_allowed ?size m
-      end)
-end
+let equal_m__t (module _ : Equal_m) equal_v t1 t2 = equal equal_v t1 t2

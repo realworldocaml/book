@@ -1,30 +1,19 @@
 (**
-   The Yojson library provides runtime functions for reading and writing JSON
-   data from OCaml. It addresses a few shortcomings of its predecessor
-   json-wheel and is about twice as fast (2.7x reading, 1.3x writing; results
-   may vary).
-   The design goals of Yojson are the following:
-   - Reducing inter-package dependencies by the use of polymorphic
-   variants for the JSON tree type.
-   - Allowing type-aware serializers/deserializers 
-   to read and write directly without going through a generic JSON tree,
-   for efficiency purposes.
-   Readers and writers of all JSON syntaxic elements are provided
-   but are undocumented and meant to be used by generated OCaml code.
-   - Distinguishing between ints and floats.
-   - Providing optional extensions of the JSON syntax.
-   These extensions include comments, arbitrary strings,
-   optional quotes around field names, tuples and variants.
-   
-   @author Martin Jambon
-   @see <http://json.org> JSON specification
- *)
+   The Yojson library provides several types for representing JSON values, with different use cases.
+
+   - The {{!basic}Basic} JSON type,
+   - The {{!safe}Safe} JSON type, a superset of JSON with safer support for integers,
+   - The {{!raw}Raw} JSON type, a superset of JSON, safer but less integrated with OCaml types.
+
+Each of these different types have their own module.
+
+*)
 
 (** {1 Shared types and functions} *)
 
 #include "common.mli"
 
-(** {1 Basic JSON tree type} *)
+(** {1:basic Basic JSON tree type} *)
 
 module Basic :
 sig
@@ -45,6 +34,7 @@ sig
 #include "monomorphic.mli"
 #include "write2.mli"
 #include "read.mli"
+(** This module provides combinators for extracting fields from JSON values. *)
 module Util :
 sig
   #include "util.mli"
@@ -54,7 +44,7 @@ end
 #undef STRING
 end
 
-(** {1 Multipurpose JSON tree type} *)
+(** {1:safe Multipurpose JSON tree type} *)
 
 module Safe :
 sig
@@ -62,7 +52,8 @@ sig
    This module supports a specific syntax for variants and tuples
    in addition to the standard JSON nodes.
    Arbitrary integers are supported and represented as a decimal string 
-   using [`Intlit] when they cannot be represented using OCaml's int type.
+   using [`Intlit] when they cannot be represented using OCaml's int type
+   (31 or 63 bits depending on the platform).
 
    This module is recommended for intensive use 
    or OCaml-friendly use of JSON.
@@ -80,6 +71,7 @@ sig
 #include "write.mli"
 #include "write2.mli"
 #include "read.mli"
+(** This module provides combinators for extracting fields from JSON values. *)
 module Util :
 sig
   #include "util.mli"
@@ -120,7 +112,7 @@ sig
 #undef VARIANT
 end
 
-(** {1 Supertype of all JSON tree types} *)
+(** {1:raw Supertype of all JSON tree types} *)
 
 #define INT
 #define INTLIT
@@ -132,7 +124,6 @@ end
 #define VARIANT
 #include "type.ml"
 #include "monomorphic.mli"
-type json_max = t
 #include "write.mli"
 #include "write2.mli"
 #undef INT
@@ -143,4 +134,3 @@ type json_max = t
 #undef STRINGLIT
 #undef TUPLE
 #undef VARIANT
-

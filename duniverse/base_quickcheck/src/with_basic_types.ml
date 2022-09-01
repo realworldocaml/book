@@ -20,6 +20,7 @@ module type S = sig
   val bool : bool t
   val char : char t
   val string : string t
+  val bytes : bytes t
   val int : int t
   val int32 : int32 t
   val int63 : Int63.t t
@@ -29,6 +30,9 @@ module type S = sig
   val sexp : Sexp.t t
   val option : 'a t -> 'a option t
   val list : 'a t -> 'a list t
+  val array : 'a t -> 'a array t
+  val ref : 'a t -> 'a ref t
+  val lazy_t : 'a t -> 'a Lazy.t t
   val both : 'a t -> 'b t -> ('a * 'b) t
   val either : 'a t -> 'b t -> ('a, 'b) Either.t t
   val result : 'a t -> 'b t -> ('a, 'b) Result.t t

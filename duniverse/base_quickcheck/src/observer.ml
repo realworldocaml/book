@@ -26,6 +26,7 @@ let float32_vec = of_hash_fold (Bigarray_helpers.Array1.hash_fold hash_fold_floa
 let float64_vec = of_hash_fold (Bigarray_helpers.Array1.hash_fold hash_fold_float)
 let float32_mat = of_hash_fold (Bigarray_helpers.Array2.hash_fold hash_fold_float)
 let float64_mat = of_hash_fold (Bigarray_helpers.Array2.hash_fold hash_fold_float)
+let bytes = unmap string ~f:Bytes.to_string
 
 let either fst_t snd_t =
   create (fun either ~size ~hash ->
@@ -64,6 +65,10 @@ let list elt_t =
     List.fold2_exn list sizes ~init:(hash_fold_int hash 0) ~f:(fun hash elt size ->
       observe elt_t elt ~size ~hash:(hash_fold_int hash 1)))
 ;;
+
+let array t = unmap (list t) ~f:Array.to_list
+let ref t = unmap t ~f:Ref.( ! )
+let lazy_t t = unmap t ~f:Lazy.force
 
 let fn dom rng =
   create (fun f ~size ~hash ->

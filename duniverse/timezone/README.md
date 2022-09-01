@@ -3,8 +3,8 @@ Timezone for OCaml
 
 Timezone handles parsing timezone data and create [Timezone.t] that
 can later be used to manipulate time in
-[core_kernel](https://github.com/janestreet/core_kernel) and
-[core](https://github.com/janestreet/core) (using [Time] and [Time_ns] modules).
+[core](https://github.com/janestreet/core) (using [Time] and [Time_ns]
+modules).
 
 Timezone is currently only able to read the Timezone Database
 provided by [IANA](https://www.iana.org/time-zones). It should work
@@ -52,7 +52,7 @@ grep -r TZif /usr/share/zoneinfo -l | xargs -n 1 -I {} echo {}:{} | xargs jsoo_f
 ## Example
 
 ```ocaml
-open Core_kernel
+open Core
 
 let now = Time_ns.now ()
 

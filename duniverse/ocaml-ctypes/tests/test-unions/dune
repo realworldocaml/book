@@ -51,6 +51,7 @@
 (test
  (name test_unions)
  (modules test_unions)
+ (deps ../clib/clib%{ext_dll})
  (package ctypes-foreign)
  (action
   (run %{test} -runner sequential))

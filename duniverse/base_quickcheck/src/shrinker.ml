@@ -59,7 +59,7 @@ let bigarray1 src =
     Sequence.init dim ~f:(fun to_skip ->
       let to_skip = to_skip + offset in
       Bigarray_helpers.Array1.init kind layout (dim - 1) ~f:(fun i ->
-        src.{(if i < to_skip then i else i + 1)}))
+        src.{if i < to_skip then i else i + 1}))
 ;;
 
 let bigstring = create bigarray1
@@ -122,6 +122,10 @@ let list elt_t =
 ;;
 
 let string = map (list char) ~f:String.of_char_list ~f_inverse:String.to_list
+let bytes = map string ~f:Bytes.of_string ~f_inverse:Bytes.to_string
+let array t = map (list t) ~f:Array.of_list ~f_inverse:Array.to_list
+let ref t = map t ~f:Ref.create ~f_inverse:Ref.( ! )
+let lazy_t t = map t ~f:Lazy.from_val ~f_inverse:Lazy.force
 
 let sexp =
   fixed_point (fun shrinker ->
@@ -166,11 +170,7 @@ let map_tree_using_comparator ~comparator key_t data_t =
            let tree = Map.Using_comparator.Tree.remove ~comparator tree key in
            Sequence.filter_map (shrink key_t key) ~f:(fun smaller_key ->
              match
-               Map.Using_comparator.Tree.add
-                 ~comparator
-                 tree
-                 ~key:smaller_key
-                 ~data
+               Map.Using_comparator.Tree.add ~comparator tree ~key:smaller_key ~data
              with
              | `Ok tree -> Some tree
              | `Duplicate -> None)))

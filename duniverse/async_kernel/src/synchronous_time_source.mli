@@ -6,7 +6,7 @@
     [Timing_wheel] that is only true for alarms in different time intervals as
     determined by [alarm_precision]. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 module T1 : sig
@@ -14,6 +14,8 @@ module T1 : sig
 end
 
 module Read_write : sig
+  (** With read permission you can get the current time and schedule alarms.
+      With write permission you can advance time and inspect the event queue. *)
   type t = read_write T1.t [@@deriving sexp_of]
 
   include Invariant.S with type t := t
@@ -33,9 +35,6 @@ include Invariant.S with type t := t
     table key. *)
 val id : _ T1.t -> Id.t
 
-(** [length t] returns the number of alarms in the underlying [Timing_wheel]. *)
-val length : _ T1.t -> int
-
 val read_only : [> read ] T1.t -> t
 
 type callback = unit -> unit
@@ -52,13 +51,6 @@ val create
 
 val alarm_precision : [> read ] T1.t -> Time_ns.Span.t
 
-(** [next_alarm_fires_at t] returns a time to which the clock can be advanced
-    such that an alarm will fire, or [None] if [t] has no alarms that can ever fire.
-
-    Note that this is not necessarily the minimum such time, but it's within
-    [alarm_precision] of that. *)
-val next_alarm_fires_at : [> read ] T1.t -> Time_ns.t option
-
 (** [is_wall_clock] reports whether this time source represents 'wall clock' time, or some
     alternate source of time. *)
 val is_wall_clock : [> read ] T1.t -> bool
@@ -71,18 +63,6 @@ val now : [> read ] T1.t -> Time_ns.t
     timing wheel's notion of now, which means that the following inequality always holds:
     [timing_wheel_now () <= now ()]. *)
 val timing_wheel_now : [> read ] T1.t -> Time_ns.t
-
-(** [advance_by_alarms t ~to_] advances [t]'s time to [to_], running callbacks for all
-    alarms in [t] whose [at <= to_].  Callbacks run in nondecreasing order of [at].  If
-    [to_ <= now t], then [now t] does not change (and in particular does not go backward),
-    but alarms with [at <= to_] may still may fire. *)
-val advance_by_alarms : [> write ] T1.t -> to_:Time_ns.t -> unit Or_error.t
-
-(** Instead of [advance_directly], you probably should use [advance_by_alarms].
-    [advance_directly t ~to_] advances the clock directly to [to_], whereas
-    [advance_by_alarms] advances the clock in steps, to each intervening alarm.  In
-    particular periodic/rearming timers will fire at most twice. *)
-val advance_directly : [> write ] T1.t -> to_:Time_ns.t -> unit Or_error.t
 
 (** [run_at t at f] schedules an alarm that will run [f] during the next subsequent
     [advance_by_alarms t ~to_] that causes [now t >= at].  If [at <= now t], then [f] will
@@ -103,17 +83,38 @@ val run_at_intervals : [> read ] T1.t -> Time_ns.Span.t -> callback -> unit
     [max_allowed_alarm_time] is not constant; its value increases as [now t] increases. *)
 val max_allowed_alarm_time : [> read ] T1.t -> Time_ns.t
 
+(** [duration_of t f] invokes [f] and measures how long it takes for the call to finish. *)
+val duration_of : [> read ] T1.t -> (unit -> 'a) -> 'a * Time_ns.Span.t
+
 module Event : sig
   type t [@@deriving sexp_of]
 
   include Invariant.S with type t := t
 
   module Option : sig
-    type value = t
+    type value := t
     type t [@@deriving sexp_of]
 
-    include
-      Immediate_option.S_without_immediate_plain with type t := t and type value := value
+    (** Constructors analogous to [None] and [Some].  If [not (some_is_representable x)]
+        then [some x] may raise or return [none]. *)
+
+    val none : t
+    val some : value -> t
+    val is_none : t -> bool
+    val is_some : t -> bool
+
+    (** [value (some x) ~default = x] and [value none ~default = default]. *)
+    val value : t -> default:value -> value
+
+    (** [value_exn (some x) = x].  [value_exn none] raises.  Unlike [Option.value_exn],
+        there is no [?message] argument, so that calls to [value_exn] that do not raise
+        also do not have to allocate. *)
+    val value_exn : t -> value
+
+    val to_option : t -> value option
+    val of_option : value option -> t
+
+    module Optional_syntax : Optional_syntax.S with type t := t with type value := value
   end
 
   (** These are like the corresponding [run_*] functions, except they return an event that
@@ -152,26 +153,17 @@ module Event : sig
   val schedule_after : [> read ] T1.t -> t -> Time_ns.Span.t -> unit Or_error.t
   val schedule_at_intervals : [> read ] T1.t -> t -> Time_ns.Span.t -> unit Or_error.t
 
-  module Reschedule_result : sig
-    (** [Recently_aborted] and [Recently_fired] can happen if the time was not advanced
-        between the corresponding thing happening and the call to [reschedule*]. *)
-    type t =
-      | Ok
-      | Currently_happening
-      | Recently_aborted
-      | Recently_fired
-    [@@deriving sexp_of]
-  end
+  (** [reschedule_at timesource t time] updates [t] to next fire at [time].
 
-  (** [reschedule_at timesource t time] attempts to update [t] to next fire at [time].
-      This returns [Ok] for events that are unscheduled, or scheduled but not yet fired.
-      If the event is in the process of firing or being aborted, [reschedule_at] does not
-      succeed.  For periodic events, [reschedule] updates the next time to fire, and leave
-      the interval unchanged.  Events rescheduled to a past time will fire at the next
-      advance of [timesource]. *)
-  val reschedule_at : [> read ] T1.t -> t -> Time_ns.t -> Reschedule_result.t
+      For periodic events, [reschedule] updates the next time to fire, and
+      leaves the interval unchanged.  Events rescheduled to a past time will
+      fire at the next advance of [timesource]. *)
+  val reschedule_at : [> read ] T1.t -> t -> Time_ns.t -> unit
 
-  val reschedule_after : [> read ] T1.t -> t -> Time_ns.Span.t -> Reschedule_result.t
+  val reschedule_after : [> read ] T1.t -> t -> Time_ns.Span.t -> unit
+
+  (** [scheduled_at] returns the time that the event is currently scheduled at *)
+  val scheduled_at : t -> Time_ns.t
 end
 
 val default_timing_wheel_config : Timing_wheel.Config.t
@@ -182,16 +174,61 @@ val default_timing_wheel_config : Timing_wheel.Config.t
     the [ASYNC_CONFIG] environment variable. *)
 val wall_clock : unit -> t
 
-module Expert : sig
+(** {2 For Scheduler Implementors} *)
 
-  (** This value is close to [next_alarm_fires_at] but differs from it by at most
-      [alarm_precision]. Requires a more expensive iteration of alarms.
+(** [length t] returns the number of alarms in the underlying [Timing_wheel]. *)
+val length : [> write ] T1.t -> int
 
-      This is a closer approximation of the minimum time at which an alarm will fire,
-      but it's still not there (you need min_alarm_time_... for that). *)
-  val max_alarm_time_in_min_timing_wheel_interval : [> read ] T1.t -> Time_ns.t option
+(** [next_alarm_runs_at t] returns a time to which the clock can be advanced
+    such that an alarm will fire, or [None] if [t] has no alarms that can ever fire.
 
-  (** Returns true iff there is work to do without advancing time further. (This can be
-      caused by scheduling events in the past, or starting a recurring event.) *)
-  val has_events_to_run : t -> bool
-end
+    Note that this is not necessarily the minimum such time, but it's within
+    [alarm_precision] of that.
+
+    If an alarm was already fired (e.g. because it was scheduled in the past), but
+    its callbacks were not run yet, this function returns [Some now], to indicate
+    that a trivial time advancement is sufficient for those to run.
+*)
+val next_alarm_runs_at : [> write ] T1.t -> Time_ns.t option
+
+val next_alarm_fires_at : [> write ] T1.t -> Time_ns.t option
+[@@deprecated "[since 2021-06] Use [next_alarm_runs_at]"]
+
+(** [advance_by_alarms t ~to_] advances [t]'s time to [to_], running callbacks for all
+    alarms in [t] whose [at <= to_].  Callbacks run in nondecreasing order of [at].  If
+    [to_ <= now t], then [now t] does not change (and in particular does not go backward),
+    but alarms with [at <= to_] may still may fire. *)
+val advance_by_alarms : [> write ] T1.t -> to_:Time_ns.t -> unit Or_error.t
+
+(** A version of [advance_by_alarms] with some weird behavior caused by timing wheel
+    [alarm_precision]: if there are multiple alarms within the same timing_wheel
+    precision bucket, then this function fires them all at the same time (when the last
+    of the bunch of alarms is supposed to fire).
+    The time  [to_] counts as an alarm for this purpose. (any alarms in the same bucket as
+    [to_] will be fired at time [to_].
+
+    [advance_by_alarms] has no such weirdness, and fires every alarm at the time that
+    alarm is scheduled.
+*)
+val advance_by_max_alarms_in_each_timing_wheel_interval
+  :  [> write ] T1.t
+  -> to_:Time_ns.t
+  -> unit Or_error.t
+
+(** Instead of [advance_directly], you probably should use [advance_by_alarms].
+    [advance_directly t ~to_] advances the clock directly to [to_], whereas
+    [advance_by_alarms] advances the clock in steps, to each intervening alarm.  In
+    particular periodic/rearming timers will fire at most twice. *)
+val advance_directly : [> write ] T1.t -> to_:Time_ns.t -> unit Or_error.t
+
+
+(** This value is close to [next_alarm_fires_at] but differs from it by at most
+    [alarm_precision]. Requires a more expensive iteration of alarms.
+
+    This is a closer approximation of the minimum time at which an alarm will fire,
+    but it's still not there (you need min_alarm_time_... for that). *)
+val max_alarm_time_in_min_timing_wheel_interval : [> write ] T1.t -> Time_ns.t option
+
+(** Returns true iff there is work to do without advancing time further. (This can be
+    caused by scheduling events in the past, or starting a recurring event.) *)
+val has_events_to_run : [> write ] T1.t -> bool

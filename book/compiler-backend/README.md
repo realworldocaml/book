@@ -59,14 +59,14 @@ The lambda output for this code looks like this:
 $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
-    (test/86 =
-       (function v/88 : int
-         (switch* v/88
+    (test/272 =
+       (function v/274[int] : int
+         (switch* v/274
           case int 0: 100
           case int 1: 101
           case int 2: 102
           case int 3: 103)))
-    (makeblock 0 test/86)))
+    (makeblock 0 test/272)))
 ```
 
 It's not important to understand every detail of this internal form, and it
@@ -110,8 +110,8 @@ The lambda output for this code is now quite different:
 ```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
-  (let (test/84 = (function v/86 : int (if v/86 101 100)))
-    (makeblock 0 test/84)))
+  (let (test/270 = (function v/272[int] : int (if v/272 101 100)))
+    (makeblock 0 test/270)))
 ```
 
 The compiler emits simpler conditional jumps rather than setting up a
@@ -136,11 +136,11 @@ polymorphic variants:
 $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
-    (test/81 =
-       (function v/83 : int
-         (if (>= v/83 482771474) (if (>= v/83 884917024) 100 102)
-           (if (>= v/83 3306965) 101 103))))
-    (makeblock 0 test/81)))
+    (test/267 =
+       (function v/269[int] : int
+         (if (>= v/269 482771474) (if (>= v/269 884917024) 100 102)
+           (if (>= v/269 3306965) 101 103))))
+    (makeblock 0 test/267)))
 ```
 
 We mentioned in [Variants](variants.html#variants){data-type=xref} that
@@ -248,7 +248,7 @@ let () =
   List.map benchmarks ~f:(fun (name, test) ->
       Bench.Test.create ~name test)
   |> Bench.make_command
-  |> Command.run
+  |> Command_unix.run
 ```
 
 Building and executing this example will run for around 30 seconds by
@@ -726,7 +726,7 @@ let tests =
 let () =
   List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
   |> Bench.make_command
-  |> Command.run
+  |> Command_unix.run
 ```
 
 Running this shows quite a significant runtime difference between the two:

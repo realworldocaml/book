@@ -308,7 +308,7 @@ let explicitly_drop =
 let get_internal =
   let rec find_best_match t attributes longest_match =
     match attributes with
-    | [] -> longest_match
+    | [] -> Ok longest_match
     | ({ attr_name = name; _ } as attr) :: rest ->
         if Name.Pattern.matches t.name name.txt then
           match longest_match with
@@ -318,7 +318,10 @@ let get_internal =
               let len' = String.length name'.txt in
               if len > len' then find_best_match t rest (Some attr)
               else if len < len' then find_best_match t rest longest_match
-              else Location.raise_errorf ~loc:name.loc "Duplicated attribute"
+              else
+                Error
+                  ( Location.Error.createf ~loc:name.loc "Duplicated attribute",
+                    [] )
         else find_best_match t rest longest_match
   in
   fun t attributes -> find_best_match t attributes None
@@ -326,54 +329,80 @@ let get_internal =
 let convert ?(do_mark_as_seen = true) pattern attr =
   if do_mark_as_seen then mark_as_seen attr;
   let (Payload_parser (pattern, k)) = pattern in
-  Ast_pattern.parse pattern
+  Ast_pattern.parse_res pattern
     (Common.loc_of_payload attr)
     attr.attr_payload
     (k ~name_loc:attr.attr_name.loc)
 
-let get t ?mark_as_seen:do_mark_as_seen x =
+let get_res t ?mark_as_seen:do_mark_as_seen x =
+  let open Result in
   let attrs = Context.get_attributes t.context x in
-  match get_internal t attrs with
-  | None -> None
-  | Some attr -> Some (convert t.payload attr ?do_mark_as_seen)
+  get_internal t attrs >>= fun res ->
+  match res with
+  | None -> Ok None
+  | Some attr ->
+      convert t.payload attr ?do_mark_as_seen >>| fun value -> Some value
 
-let consume t x =
+let get t ?mark_as_seen:do_mark_as_seen x =
+  get_res t ?mark_as_seen:do_mark_as_seen x
+  |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
+
+let consume_res t x =
+  let open Result in
   let attrs = Context.get_attributes t.context x in
-  match get_internal t attrs with
-  | None -> None
+  get_internal t attrs >>= fun res ->
+  match res with
+  | None -> Ok None
   | Some attr ->
       let attrs = List.filter attrs ~f:(fun attr' -> not (attr == attr')) in
       let x = Context.set_attributes t.context x attrs in
-      Some (x, convert t.payload attr)
+      convert t.payload attr >>| fun value -> Some (x, value)
 
-let remove_seen (type a) (context : a Context.t) packeds (x : a) =
+let consume t x =
+  consume_res t x
+  |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
+
+let remove_seen_res (type a) (context : a Context.t) packeds (x : a) =
+  let open Result in
   let attrs = Context.get_attributes context x in
-  let matched =
-    let rec loop acc = function
-      | [] -> acc
-      | T t :: rest ->
-          if Context.equal t.context context then
-            match get_internal t attrs with
-            | None -> loop acc rest
-            | Some attr ->
-                let name = attr.attr_name in
-                if Attribute_table.mem not_seen name then loop acc rest
-                else loop (attr :: acc) rest
-          else loop acc rest
-    in
-    loop [] packeds
+  let rec loop acc = function
+    | [] -> Ok acc
+    | T t :: rest ->
+        if Context.equal t.context context then
+          get_internal t attrs >>= fun res ->
+          match res with
+          | None -> loop acc rest
+          | Some attr ->
+              let name = attr.attr_name in
+              if Attribute_table.mem not_seen name then loop acc rest
+              else loop (attr :: acc) rest
+        else loop acc rest
   in
+  loop [] packeds >>| fun matched ->
   let attrs =
     List.filter attrs ~f:(fun attr' -> not (List.memq ~set:matched attr'))
   in
   Context.set_attributes context x attrs
 
-let pattern t p =
+let remove_seen (type a) (context : a Context.t) packeds (x : a) =
+  remove_seen_res (context : a Context.t) packeds (x : a)
+  |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
+
+let pattern_res t p =
+  let open Result in
   let f = Ast_pattern.to_func p in
   Ast_pattern.of_func (fun ctx loc x k ->
-      match consume t x with
+      consume_res t x >>| fun res ->
+      match res with
       | None -> f ctx loc x (k None)
       | Some (x, v) -> f ctx loc x (k (Some v)))
+
+let pattern t p =
+  pattern_res t p |> Ast_pattern.to_func
+  |> (fun f a b c d ->
+       f a b c d
+       |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err))
+  |> Ast_pattern.of_func
 
 module Floating = struct
   module Context = Floating_context
@@ -394,9 +423,10 @@ module Floating = struct
       payload = Payload_parser (pattern, fun ~name_loc:_ -> k);
     }
 
-  let convert ts x =
+  let convert_res ts x =
+    let open Result in
     match ts with
-    | [] -> None
+    | [] -> Ok None
     | { context; _ } :: _ -> (
         assert (List.for_all ts ~f:(fun t -> Context.equal t.context context));
         let attr = Context.get_attribute context x in
@@ -404,33 +434,232 @@ module Floating = struct
         match
           List.filter ts ~f:(fun t -> Name.Pattern.matches t.name name.txt)
         with
-        | [] -> None
-        | [ t ] -> Some (convert t.payload attr)
+        | [] -> Ok None
+        | [ t ] -> convert t.payload attr >>| fun value -> Some value
         | l ->
-            Location.raise_errorf ~loc:name.loc
-              "Multiple match for floating attributes: %s"
-              (String.concat ~sep:", "
-                 (List.map l ~f:(fun t -> Name.Pattern.name t.name))))
+            Error
+              ( Location.Error.createf ~loc:name.loc
+                  "Multiple match for floating attributes: %s"
+                  (String.concat ~sep:", "
+                     (List.map l ~f:(fun t -> Name.Pattern.name t.name))),
+                [] ))
+
+  let convert ts x =
+    convert_res ts x
+    |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
 end
 
-let check_attribute registrar context name =
+let collect_attribute_errors registrar context name =
   if
     (not
-       (Name.Whitelisted.is_whitelisted ~kind:`Attribute name.txt
+       (Name.Allowlisted.is_allowlisted ~kind:`Attribute name.txt
        || Name.ignore_checks name.txt))
     && Attribute_table.mem not_seen name
   then
-    let white_list = Name.Whitelisted.get_attribute_list () in
-    Name.Registrar.raise_errorf registrar context ~white_list
-      "Attribute `%s' was not used" name
+    let allowlist = Name.Allowlisted.get_attribute_list () in
+    [
+      Name.Registrar.Error.createf registrar context ~allowlist
+        "Attribute `%s' was not used" name;
+    ]
+  else []
+
+let collect_unused_attributes_errors =
+  object (self)
+    inherit [Location.Error.t list] Ast_traverse.fold as super
+
+    method! attribute { attr_name = name; _ } _ =
+      [
+        Location.Error.createf ~loc:name.loc
+          "attribute not expected here, Ppxlib.Attribute needs updating!";
+      ]
+
+    method private check_node : type a.
+        a Context.t -> a -> a * Location.Error.t list =
+      fun context node ->
+        let attrs = Context.get_attributes context node in
+        match attrs with
+        | [] -> (node, [])
+        | _ ->
+            let errors =
+              List.map attrs
+                ~f:(fun
+                     ({ attr_name = name; attr_payload = payload; _ } as attr)
+                   ->
+                  let collected_errors =
+                    self#payload payload []
+                    @ collect_attribute_errors registrar (On_item context) name
+                  in
+                  (* If we allow the attribute to pass through, mark it as seen *)
+                  mark_as_seen attr;
+                  collected_errors)
+              |> List.concat
+            in
+            (Context.set_attributes context node [], errors)
+
+    method private check_floating : type a.
+        a Floating.Context.t -> a -> a * Location.Error.t list =
+      fun context node ->
+        match
+          Floating.Context.get_attribute_if_is_floating_node context node
+        with
+        | None -> (node, [])
+        | Some ({ attr_name = name; attr_payload = payload; _ } as attr) ->
+            let collected_errors =
+              self#payload payload []
+              @ collect_attribute_errors registrar (Floating context) name
+            in
+            mark_as_seen attr;
+            (Floating.Context.replace_by_dummy context node, collected_errors)
+
+    method! label_declaration x acc =
+      let res, errors = self#check_node Label_declaration x in
+      super#label_declaration res (acc @ errors)
+
+    method! constructor_declaration x acc =
+      let res, errors = self#check_node Constructor_declaration x in
+      super#constructor_declaration res (acc @ errors)
+
+    method! type_declaration x acc =
+      let res, errors = self#check_node Type_declaration x in
+      super#type_declaration res (acc @ errors)
+
+    method! type_extension x acc =
+      let res, errors = self#check_node Type_extension x in
+      super#type_extension res (acc @ errors)
+
+    method! type_exception x acc =
+      let res, errors = self#check_node Type_exception x in
+      super#type_exception res (acc @ errors)
+
+    method! extension_constructor x acc =
+      let res, errors = self#check_node Extension_constructor x in
+      super#extension_constructor res (acc @ errors)
+
+    method! pattern x acc =
+      let res, errors = self#check_node Pattern x in
+      super#pattern res (acc @ errors)
+
+    method! core_type x acc =
+      let res, errors = self#check_node Core_type x in
+      super#core_type res (acc @ errors)
+
+    method! expression x acc =
+      let res, errors = self#check_node Expression x in
+      super#expression res (acc @ errors)
+
+    method! value_description x acc =
+      let res, errors = self#check_node Value_description x in
+      super#value_description res (acc @ errors)
+
+    method! class_type x acc =
+      let res, errors = self#check_node Class_type x in
+      super#class_type res (acc @ errors)
+
+    method! class_infos f x acc =
+      let res, errors = self#check_node Class_infos x in
+      super#class_infos f res (acc @ errors)
+
+    method! class_expr x acc =
+      let res, errors = self#check_node Class_expr x in
+      super#class_expr res (acc @ errors)
+
+    method! module_type x acc =
+      let res, errors = self#check_node Module_type x in
+      super#module_type res (acc @ errors)
+
+    method! module_declaration x acc =
+      let res, errors = self#check_node Module_declaration x in
+      super#module_declaration res (acc @ errors)
+
+    method! module_type_declaration x acc =
+      let res, errors = self#check_node Module_type_declaration x in
+      super#module_type_declaration res (acc @ errors)
+
+    method! open_description x acc =
+      let res, errors = self#check_node Open_description x in
+      super#open_description res (acc @ errors)
+
+    method! open_declaration x acc =
+      let res, errors = self#check_node Open_declaration x in
+      super#open_declaration res (acc @ errors)
+
+    method! include_infos f x acc =
+      let res, errors = self#check_node Include_infos x in
+      super#include_infos f res (acc @ errors)
+
+    method! module_expr x acc =
+      let res, errors = self#check_node Module_expr x in
+      super#module_expr res (acc @ errors)
+
+    method! value_binding x acc =
+      let res, errors = self#check_node Value_binding x in
+      super#value_binding res (acc @ errors)
+
+    method! module_binding x acc =
+      let res, errors = self#check_node Module_binding x in
+      super#module_binding res (acc @ errors)
+
+    method! class_field x acc =
+      let x, errors1 = self#check_node Class_field x in
+      let x, errors2 = self#check_floating Class_field x in
+      super#class_field x (acc @ errors1 @ errors2)
+
+    method! class_type_field x acc =
+      let x, errors1 = self#check_node Class_type_field x in
+      let x, errors2 = self#check_floating Class_type_field x in
+      super#class_type_field x (acc @ errors1 @ errors2)
+
+    method! row_field x acc =
+      let x, errors =
+        match x.prf_desc with Rtag _ -> self#check_node Rtag x | _ -> (x, [])
+      in
+      super#row_field x (acc @ errors)
+
+    method! core_type_desc x acc =
+      let x, errors =
+        match x with
+        | Ptyp_object (fields, closed_flag) ->
+            let fields, errors =
+              List.map fields ~f:(self#check_node Object_type_field)
+              |> List.split
+            in
+            (Ptyp_object (fields, closed_flag), List.concat errors)
+        | _ -> (x, [])
+      in
+      super#core_type_desc x (acc @ errors)
+
+    method! structure_item item acc =
+      let item, errors = self#check_floating Structure_item item in
+      let item, errors2 =
+        match item.pstr_desc with
+        | Pstr_eval _ -> self#check_node Pstr_eval item
+        | Pstr_extension _ -> self#check_node Pstr_extension item
+        | _ -> (item, [])
+      in
+      super#structure_item item (acc @ errors @ errors2)
+
+    method! signature_item item acc =
+      let item, errors = self#check_floating Signature_item item in
+      let item, errors2 =
+        match item.psig_desc with
+        | Psig_extension _ -> self#check_node Psig_extension item
+        | _ -> (item, [])
+      in
+      super#signature_item item (acc @ errors @ errors2)
+  end
+
+let check_attribute registrar context name =
+  match collect_attribute_errors registrar context name with
+  | [] -> ()
+  | err :: _ -> Location.Error.raise err
+
+let raise_if_non_empty = function
+  | [] -> ()
+  | err :: _ -> Location.Error.raise err
 
 let check_unused =
   object (self)
     inherit Ast_traverse.iter as super
-
-    method! attribute { attr_name = name; _ } =
-      Location.raise_errorf ~loc:name.loc
-        "attribute not expected here, Ppxlib.Attribute needs updating!"
 
     method private check_node : type a. a Context.t -> a -> a =
       fun context node ->
@@ -447,120 +676,105 @@ let check_unused =
                 mark_as_seen attr);
             Context.set_attributes context node []
 
-    method private check_floating : type a. a Floating.Context.t -> a -> a =
-      fun context node ->
-        match
-          Floating.Context.get_attribute_if_is_floating_node context node
-        with
-        | None -> node
-        | Some ({ attr_name = name; attr_payload = payload; _ } as attr) ->
-            self#payload payload;
-            check_attribute registrar (Floating context) name;
-            mark_as_seen attr;
-            Floating.Context.replace_by_dummy context node
+    method! attribute { attr_name = name; _ } =
+      Location.raise_errorf ~loc:name.loc
+        "attribute not expected here, Ppxlib.Attribute needs updating!"
 
     method! label_declaration x =
-      super#label_declaration (self#check_node Label_declaration x)
+      collect_unused_attributes_errors#label_declaration x []
+      |> raise_if_non_empty
 
     method! constructor_declaration x =
-      super#constructor_declaration (self#check_node Constructor_declaration x)
+      collect_unused_attributes_errors#constructor_declaration x []
+      |> raise_if_non_empty
 
     method! type_declaration x =
-      super#type_declaration (self#check_node Type_declaration x)
+      collect_unused_attributes_errors#type_declaration x []
+      |> raise_if_non_empty
 
     method! type_extension x =
-      super#type_extension (self#check_node Type_extension x)
+      collect_unused_attributes_errors#type_extension x [] |> raise_if_non_empty
 
     method! type_exception x =
-      super#type_exception (self#check_node Type_exception x)
+      collect_unused_attributes_errors#type_exception x [] |> raise_if_non_empty
 
     method! extension_constructor x =
-      super#extension_constructor (self#check_node Extension_constructor x)
+      collect_unused_attributes_errors#extension_constructor x []
+      |> raise_if_non_empty
 
-    method! pattern x = super#pattern (self#check_node Pattern x)
-    method! core_type x = super#core_type (self#check_node Core_type x)
-    method! expression x = super#expression (self#check_node Expression x)
+    method! pattern x =
+      collect_unused_attributes_errors#pattern x [] |> raise_if_non_empty
+
+    method! core_type x =
+      collect_unused_attributes_errors#core_type x [] |> raise_if_non_empty
+
+    method! expression x =
+      collect_unused_attributes_errors#expression x [] |> raise_if_non_empty
 
     method! value_description x =
-      super#value_description (self#check_node Value_description x)
+      collect_unused_attributes_errors#value_description x []
+      |> raise_if_non_empty
 
-    method! class_type x = super#class_type (self#check_node Class_type x)
+    method! class_type x =
+      collect_unused_attributes_errors#class_type x [] |> raise_if_non_empty
 
     method! class_infos f x =
       super#class_infos f (self#check_node Class_infos x)
 
-    method! class_expr x = super#class_expr (self#check_node Class_expr x)
-    method! module_type x = super#module_type (self#check_node Module_type x)
+    method! class_expr x =
+      collect_unused_attributes_errors#class_expr x [] |> raise_if_non_empty
+
+    method! module_type x =
+      collect_unused_attributes_errors#module_type x [] |> raise_if_non_empty
 
     method! module_declaration x =
-      super#module_declaration (self#check_node Module_declaration x)
+      collect_unused_attributes_errors#module_declaration x []
+      |> raise_if_non_empty
 
     method! module_type_declaration x =
-      super#module_type_declaration (self#check_node Module_type_declaration x)
+      collect_unused_attributes_errors#module_type_declaration x []
+      |> raise_if_non_empty
 
     method! open_description x =
-      super#open_description (self#check_node Open_description x)
+      collect_unused_attributes_errors#open_description x []
+      |> raise_if_non_empty
 
     method! open_declaration x =
-      super#open_declaration (self#check_node Open_declaration x)
+      collect_unused_attributes_errors#open_declaration x []
+      |> raise_if_non_empty
 
     method! include_infos f x =
       super#include_infos f (self#check_node Include_infos x)
 
-    method! module_expr x = super#module_expr (self#check_node Module_expr x)
+    method! module_expr x =
+      collect_unused_attributes_errors#module_expr x [] |> raise_if_non_empty
 
     method! value_binding x =
-      super#value_binding (self#check_node Value_binding x)
+      collect_unused_attributes_errors#value_binding x [] |> raise_if_non_empty
 
     method! module_binding x =
-      super#module_binding (self#check_node Module_binding x)
+      collect_unused_attributes_errors#module_binding x [] |> raise_if_non_empty
 
     method! class_field x =
-      let x = self#check_node Class_field x in
-      let x = self#check_floating Class_field x in
-      super#class_field x
+      collect_unused_attributes_errors#class_field x [] |> raise_if_non_empty
 
     method! class_type_field x =
-      let x = self#check_node Class_type_field x in
-      let x = self#check_floating Class_type_field x in
-      super#class_type_field x
+      collect_unused_attributes_errors#class_type_field x []
+      |> raise_if_non_empty
 
     method! row_field x =
-      let x =
-        match x.prf_desc with Rtag _ -> self#check_node Rtag x | _ -> x
-      in
-      super#row_field x
+      collect_unused_attributes_errors#row_field x [] |> raise_if_non_empty
 
     method! core_type_desc x =
-      let x =
-        match x with
-        | Ptyp_object (fields, closed_flag) ->
-            let fields =
-              List.map fields ~f:(self#check_node Object_type_field)
-            in
-            Ptyp_object (fields, closed_flag)
-        | _ -> x
-      in
-      super#core_type_desc x
+      collect_unused_attributes_errors#core_type_desc x [] |> raise_if_non_empty
 
     method! structure_item item =
-      let item = self#check_floating Structure_item item in
-      let item =
-        match item.pstr_desc with
-        | Pstr_eval _ -> self#check_node Pstr_eval item
-        | Pstr_extension _ -> self#check_node Pstr_extension item
-        | _ -> item
-      in
-      super#structure_item item
+      collect_unused_attributes_errors#structure_item item []
+      |> raise_if_non_empty
 
     method! signature_item item =
-      let item = self#check_floating Signature_item item in
-      let item =
-        match item.psig_desc with
-        | Psig_extension _ -> self#check_node Psig_extension item
-        | _ -> item
-      in
-      super#signature_item item
+      collect_unused_attributes_errors#signature_item item []
+      |> raise_if_non_empty
   end
 
 let reset_checks () = Attribute_table.clear not_seen
@@ -576,13 +790,20 @@ let collect =
       Attribute_table.add not_seen name loc
   end
 
-let check_all_seen () =
-  let fail name loc =
+let collect_unseen_errors () =
+  let fail name loc acc =
     let txt = name.txt in
     if not (Name.ignore_checks txt) then
-      Location.raise_errorf ~loc "Attribute `%s' was silently dropped" txt
+      Location.Error.createf ~loc "Attribute `%s' was silently dropped" txt
+      :: acc
+    else acc
   in
-  Attribute_table.iter fail not_seen
+  Attribute_table.fold fail not_seen []
+
+let check_all_seen () =
+  match collect_unseen_errors () with
+  | [] -> ()
+  | err :: _ -> Location.Error.raise err
 
 let remove_attributes_present_in table =
   object

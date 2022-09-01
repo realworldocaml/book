@@ -12,17 +12,24 @@
 #define __builtin_popcountll __popcnt64
 #define __builtin_popcount   __popcnt
 
-static uint32_t __inline __builtin_clz(uint32_t x)
+static int __inline __builtin_clz(uint32_t x)
 {
   int r = 0;
   _BitScanForward(&r, x);
   return r;
 }
 
-static uint64_t __inline __builtin_clzll(uint64_t x)
+static int __inline __builtin_clzll(uint64_t x)
 {
   int r = 0;
+#ifdef _WIN64
   _BitScanForward64(&r, x);
+#else
+  if (!_BitScanForward(&r, (uint32_t)x) &&
+      _BitScanForward(&r, (uint32_t)(x>>32))) {
+    r += 32;
+  }
+#endif
   return r;
 }
 

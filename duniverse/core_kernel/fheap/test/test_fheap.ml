@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Fheap
 
 let%test_module _ =
@@ -6,13 +6,13 @@ let%test_module _ =
     module type Heap_intf = sig
       type 'a t [@@deriving sexp_of]
 
-      val create : cmp:('a -> 'a -> int) -> 'a t
+      val create : compare:('a -> 'a -> int) -> 'a t
       val add : 'a t -> 'a -> 'a t
       val pop : 'a t -> ('a * 'a t) option
       val length : 'a t -> int
       val top : 'a t -> 'a option
       val remove_top : 'a t -> 'a t option
-      val of_list : 'a list -> cmp:('a -> 'a -> int) -> 'a t
+      val of_list : 'a list -> compare:('a -> 'a -> int) -> 'a t
       val to_list : 'a t -> 'a list
 
       val sum
@@ -24,18 +24,21 @@ let%test_module _ =
 
     module That_heap : Heap_intf = struct
       type 'a t =
-        { cmp : 'a -> 'a -> int
+        { compare : 'a -> 'a -> int
         ; heap : 'a list
         }
 
       let sexp_of_t sexp_of_v t = List.sexp_of_t sexp_of_v t.heap
-      let create ~cmp = { cmp; heap = [] }
-      let add t v = { cmp = t.cmp; heap = List.sort ~compare:t.cmp (v :: t.heap) }
+      let create ~compare = { compare; heap = [] }
+
+      let add t v =
+        { compare = t.compare; heap = List.sort ~compare:t.compare (v :: t.heap) }
+      ;;
 
       let pop t =
         match t.heap with
         | [] -> None
-        | x :: xs -> Some (x, { cmp = t.cmp; heap = xs })
+        | x :: xs -> Some (x, { compare = t.compare; heap = xs })
       ;;
 
       let length t = List.length t.heap
@@ -44,10 +47,10 @@ let%test_module _ =
       let remove_top t =
         match t.heap with
         | [] -> None
-        | _ :: xs -> Some { cmp = t.cmp; heap = xs }
+        | _ :: xs -> Some { compare = t.compare; heap = xs }
       ;;
 
-      let of_list l ~cmp = { cmp; heap = List.sort ~compare:cmp l }
+      let of_list l ~compare = { compare; heap = List.sort ~compare l }
       let to_list t = t.heap
       let sum m t ~f = List.sum m (to_list t) ~f
     end
@@ -55,7 +58,7 @@ let%test_module _ =
     module This_heap : Heap_intf = struct
       type nonrec 'a t = 'a t [@@deriving sexp_of]
 
-      let create ~cmp = create ~cmp
+      let create ~compare = create ~compare
       let add = add
       let pop = pop
       let length = length
@@ -85,8 +88,8 @@ let%test_module _ =
     ;;
 
     let create () =
-      let cmp = Int.compare in
-      This_heap.create ~cmp, That_heap.create ~cmp
+      let compare = Int.compare in
+      This_heap.create ~compare, That_heap.create ~compare
     ;;
 
     let add (this_t, that_t) v =
@@ -132,17 +135,17 @@ let%test_module _ =
     let remove_top (this_t, that_t) =
       let this_t = This_heap.remove_top this_t in
       let that_t = That_heap.remove_top that_t in
-      let cmp = Int.compare in
-      let this_default = This_heap.create ~cmp in
-      let that_default = That_heap.create ~cmp in
+      let compare = Int.compare in
+      let this_default = This_heap.create ~compare in
+      let that_default = That_heap.create ~compare in
       let this_t = Option.value ~default:this_default this_t in
       let that_t = Option.value ~default:that_default that_t in
       length_check (this_t, that_t)
     ;;
 
-    let of_list l ~cmp =
-      let this_t = This_heap.of_list l ~cmp in
-      let that_t = That_heap.of_list l ~cmp in
+    let of_list l ~compare =
+      let this_t = This_heap.of_list l ~compare in
+      let that_t = That_heap.of_list l ~compare in
       length_check (this_t, that_t)
     ;;
 
@@ -187,7 +190,7 @@ let%test_module _ =
 
     let%test_unit _ =
       let l = List.init 10_000 ~f:(fun _ -> Random.int 100_000) in
-      let dual = of_list ~cmp:Int.compare l in
+      let dual = of_list ~compare:Int.compare l in
       check dual;
       let sum0 = check_sum dual in
       let dual = add dual (-100) in
@@ -199,7 +202,7 @@ let%test_module _ =
 
 let%test_unit _ =
   let data = [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
-  let h = of_list data ~cmp:Int.compare in
+  let h = of_list data ~compare:Int.compare in
   let top_value, t = pop_exn h in
   [%test_result: int] ~expect:0 top_value;
   let list_sum = List.sum (module Int) data ~f:Fn.id in
@@ -215,7 +218,7 @@ let%test_unit _ =
 
 let%test_unit _ =
   let data = [ 0; 1; 2; 3; 4; 5; 6; 7 ] in
-  let t = of_list data ~cmp:Int.compare in
+  let t = of_list data ~compare:Int.compare in
   let s = sum (module Int) t ~f:Fn.id in
   [%test_result: int] ~expect:28 s;
   let t = add t 8 in

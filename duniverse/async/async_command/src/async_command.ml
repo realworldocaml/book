@@ -70,7 +70,13 @@ let in_async ?extract_exn param on_result =
                 a "shutdown forced" message and exit 1 if [prev ()] finished first. *)
              [ prev (); (before_shutdown () >>= fun () -> after (sec 1.)) ]);
       upon
-        (Deferred.Or_error.try_with ?extract_exn (fun () -> main `Scheduler_started))
+        (Deferred.Or_error.try_with
+           ~run:
+             `Schedule
+           ~rest:
+             `Log
+           ?extract_exn
+           (fun () -> main `Scheduler_started))
         on_result;
       (never_returns (Scheduler.go ()) : unit))
 ;;

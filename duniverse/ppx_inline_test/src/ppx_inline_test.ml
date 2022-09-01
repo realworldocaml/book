@@ -87,12 +87,15 @@ let descr ~(loc:Location.t) ?(inner_loc=loc) e_opt id_opt =
   let start_pos = loc.loc_start.pos_cnum - loc.loc_start.pos_bol in
   let end_pos   = inner_loc.Location.loc_end.pos_cnum - loc.loc_start.pos_bol in
   let descr =
-    match id_opt, e_opt with
-    | None, None -> ""
-    | None, Some e -> ": <<" ^ short_desc_of_expr ~max_len:50 e ^ ">>"
-    | Some id, _ -> ": " ^ id
+    match id_opt with
+    | `Literal id -> estring ~loc id
+    | `Expr e -> e
+    | `None ->
+      estring ~loc (match e_opt with
+        | None -> ""
+        | Some e -> "<<" ^ short_desc_of_expr ~max_len:50 e ^ ">>")
   in
-  (estring ~loc descr,
+  (pexp_lazy ~loc descr,
    estring ~loc filename,
    eint ~loc line,
    eint ~loc start_pos,
@@ -165,16 +168,22 @@ let validate_extension_point_exn ~name_of_ppx_rewriter ~loc ~tags =
 let name_of_ppx_rewriter = "ppx_inline_test"
 
 let expand_test ~loc ~path:_ ~name:id ~tags e =
+  let loc = { loc with loc_ghost = true } in
   validate_extension_point_exn ~name_of_ppx_rewriter ~loc ~tags;
-  apply_to_descr "test" ~loc (Some e) id tags (pexp_fun ~loc Nolabel None (punit ~loc) e)
+  apply_to_descr "test" ~loc (Some e) id tags
+    [%expr fun () -> [%e e]]
 ;;
 
 let expand_test_unit ~loc ~path:_ ~name:id ~tags e =
+  let loc = { loc with loc_ghost = true } in
   validate_extension_point_exn ~name_of_ppx_rewriter ~loc ~tags;
-  apply_to_descr "test_unit" ~loc (Some e) id tags (pexp_fun ~loc Nolabel None (punit ~loc) e)
+  (* The "; ()" bit is there to breaks tail call optimization, for better backtraces. *)
+  apply_to_descr "test_unit" ~loc (Some e) id tags
+    [%expr fun () -> [%e e]; ()]
 ;;
 
 let expand_test_module ~loc ~path:_ ~name:id ~tags m =
+  let loc = { loc with loc_ghost = true } in
   validate_extension_point_exn ~name_of_ppx_rewriter ~loc ~tags;
   apply_to_descr "test_module" ~loc ~inner_loc:m.pmod_loc None id tags
     (pexp_fun ~loc Nolabel None (punit ~loc)
@@ -200,8 +209,11 @@ module E = struct
     | Some x -> x
 
   let opt_name () =
-         map (pstring __) ~f:(fun f x -> f (Some x))
-     ||| map ppat_any     ~f:(fun f   -> f None)
+    map (pstring __) ~f:(fun f x -> f (`Literal x))
+    ||| map ppat_any     ~f:(fun f   -> f `None)
+    ||| map (ppat_extension (extension (cst ~to_string:Fn.id "name") (single_expr_payload __)))
+          ~f:(fun f e -> f (`Expr e))
+
 
   let opt_name_and_expr expr =
     pstr ((
@@ -242,7 +254,6 @@ module E = struct
 end
 
 let tags = E.tags
-let opt_name_and_expr = E.opt_name_and_expr
 
 let () =
   Driver.register_transformation "inline-test"
@@ -251,6 +262,7 @@ let () =
       match loc, Ppx_inline_test_libname.get () with
       | None, _ | _, None -> ([], [])
       | Some loc, Some (libname, partition) ->
+        let loc = { loc with loc_ghost = true } in
         (* See comment in benchmark_accumulator.ml *)
         let header =
           let loc = { loc with loc_end = loc.loc_start } in

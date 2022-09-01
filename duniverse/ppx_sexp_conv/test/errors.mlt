@@ -1,81 +1,83 @@
-type t =
-  { a : int [@sexp_drop_default] [@sexp.omit_nil] }
-[@@deriving sexp_of]
-[%%expect{|
+type t = { a : int [@sexp_drop_default] [@sexp.omit_nil] } [@@deriving sexp_of]
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: The following elements are mutually exclusive: sexp.sexp_drop_default sexp.omit_nil
 |}]
 
-type t =
-  { a : int sexp_list [@sexp.omit_nil] }
-[@@deriving sexp_of]
-[%%expect{|
+type t = { a : int list [@sexp.list] [@sexp.omit_nil] } [@@deriving sexp_of]
+
+[%%expect
+  {|
 Line _, characters _-_:
-Error: The following elements are mutually exclusive: sexp.omit_nil sexp_list
+Error: The following elements are mutually exclusive: sexp.omit_nil [@sexp.list]
 |}]
 
-type t =
-  { a : int [@default 0] [@sexp.omit_nil] }
-[@@deriving of_sexp]
-[%%expect{|
+type t = { a : int [@default 0] [@sexp.omit_nil] } [@@deriving of_sexp]
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: The following elements are mutually exclusive: sexp.default sexp.omit_nil
 |}]
 
+type t = int [@@deriving sexp] [@@sexp.allow_extra_fields]
 
-type t = int [@@deriving sexp][@@sexp.allow_extra_fields]
-[%%expect {|
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@@allow_extra_fields] is only allowed on records.
 |}]
 
-
-type 'a t = 'a option = None | Some of 'a
-[@@deriving sexp][@@sexp.allow_extra_fields]
-[%%expect {|
-Line _, characters _-_:
-Error: ppx_sexp_conv: [@@allow_extra_fields] is only allowed on records.
-|}]
-
-
-
-type 'a t = Some of {a : int}
+type 'a t = 'a option =
+  | None
+  | Some of 'a
 [@@deriving sexp] [@@sexp.allow_extra_fields]
-[%%expect {|
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_sexp_conv: [@@allow_extra_fields] is only allowed on records.
+|}]
+
+type 'a t = Some of { a : int } [@@deriving sexp] [@@sexp.allow_extra_fields]
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@@allow_extra_fields] only works on records. For inline records, do: type t = A of { a : int } [@allow_extra_fields] | B [@@deriving sexp]
 |}]
 
-
 type 'a t =
-  | Some of {a : int}
+  | Some of { a : int }
   | None [@sexp.allow_extra_fields]
 [@@deriving sexp]
-[%%expect {|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@allow_extra_fields] is only allowed on inline records.
 |}]
 
 type t =
   | Non
-  | Som of
-      {
-        next : t; [@default Non] [@sexp_drop_default.equal]
-      }
+  | Som of { next : t [@default Non] [@sexp_drop_default.equal] }
 [@@deriving sexp]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: [@sexp_drop_default.equal] was used, but the type of the field contains a type defined in the current recursive block: t.
 This is not supported.
 Consider using [@sexp_drop_if _] or [@sexp_drop_default.sexp] instead.
 |}]
 
-type nonrec 'a t =
-  {
-    foo : 'a option; [@default None] [@sexp_drop_default.equal]
-  }
+type nonrec 'a t = { foo : 'a option [@default None] [@sexp_drop_default.equal] }
 [@@deriving sexp]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: [@sexp_drop_default.equal] was used, but the type of the field contains a type variable: 'a.
 Comparison is not avaiable for type variables.
@@ -84,12 +86,12 @@ Consider using [@sexp_drop_if _] or [@sexp_drop_default.sexp] instead.
 
 open Base
 
-type t =
-  { a : int [@default 8] [@sexp_drop_default] }
-[@@deriving sexp_of]
-[%%expect{|
+type t = { a : int [@default 8] [@sexp_drop_default] } [@@deriving sexp_of]
+
+[%%expect
+  {|
 Line _, characters _-_:
-Error (warning 22): [@sexp_drop_default] is deprecated: please use one of:
+Error (warning 22 [preprocessor]): [@sexp_drop_default] is deprecated: please use one of:
 - [@sexp_drop_default f] and give an explicit equality function ([f = Poly.(=)] corresponds to the old behavior)
 - [@sexp_drop_default.compare] if the type supports [%compare]
 - [@sexp_drop_default.equal] if the type supports [%equal]
@@ -99,7 +101,9 @@ Error (warning 22): [@sexp_drop_default] is deprecated: please use one of:
 type t = { x : unit [@sexp.opaque] } [@@deriving sexp_of]
 type t = { x : unit [@sexp.opaque] } [@@deriving of_sexp]
 type t = { x : unit [@sexp.opaque] } [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: Attribute `sexp.opaque' was not used.
 Hint: `sexp.opaque' is available for core types but is used here in the
@@ -120,7 +124,9 @@ Did you put it at the wrong level?
 type t = { x : unit [@sexp.option] } [@@deriving sexp_of]
 type t = { x : unit [@sexp.option] } [@@deriving of_sexp]
 type t = { x : unit [@sexp.option] } [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.option] is only allowed on type [_ option].
 Line _, characters _-_:
@@ -132,7 +138,9 @@ Error: ppx_sexp_conv: [@sexp.option] is only allowed on type [_ option].
 type t = { x : unit [@sexp.list] } [@@deriving sexp_of]
 type t = { x : unit [@sexp.list] } [@@deriving of_sexp]
 type t = { x : unit [@sexp.list] } [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 Line _, characters _-_:
@@ -144,7 +152,9 @@ Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 type t = { x : unit [@sexp.array] } [@@deriving sexp_of]
 type t = { x : unit [@sexp.array] } [@@deriving of_sexp]
 type t = { x : unit [@sexp.array] } [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.array] is only allowed on type [_ array].
 Line _, characters _-_:
@@ -156,7 +166,9 @@ Error: ppx_sexp_conv: [@sexp.array] is only allowed on type [_ array].
 type t = { x : unit [@sexp.bool] } [@@deriving sexp_of]
 type t = { x : unit [@sexp.bool] } [@@deriving of_sexp]
 type t = { x : unit [@sexp.bool] } [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.bool] is only allowed on type [bool].
 Line _, characters _-_:
@@ -168,7 +180,9 @@ Error: ppx_sexp_conv: [@sexp.bool] is only allowed on type [bool].
 type t = A of unit [@sexp.list] [@@deriving sexp_of]
 type t = A of unit [@sexp.list] [@@deriving of_sexp]
 type t = A of unit [@sexp.list] [@@deriving sexp_grammar]
-[%%expect{|
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 Line _, characters _-_:
@@ -177,10 +191,12 @@ Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 |}]
 
-type t = [`A of unit [@sexp.list]] [@@deriving sexp_of]
-type t = [`A of unit [@sexp.list]] [@@deriving of_sexp]
-type t = [ `A of unit [@sexp.list]] [@@deriving sexp_grammar]
-[%%expect{|
+type t = [ `A of unit [@sexp.list] ] [@@deriving sexp_of]
+type t = [ `A of unit [@sexp.list] ] [@@deriving of_sexp]
+type t = [ `A of unit [@sexp.list] ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
 Line _, characters _-_:
 Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 Line _, characters _-_:
@@ -190,27 +206,60 @@ Error: ppx_sexp_conv: [@sexp.list] is only allowed on type [_ list].
 |}]
 
 let (_ : _) = [%sexp_grammar: 'k -> 'v -> ('k * 'v) list]
-[%%expect{|
+
+[%%expect {|
 |}]
 
-let (_ : _) = [%sexp_grammar: < for_all : 'k 'v . ('k * 'v) list > ]
-[%%expect{|
-|}]
+let (_ : _) = [%sexp_grammar: < for_all : 'k 'v. ('k * 'v) list > ]
 
-let (_ : _) = [%sexp_grammar: < other : 'k 'v . ('k * 'v) list > ]
-[%%expect{|
+[%%expect {|
 Line _, characters _-_:
-Error: ppx_sexp_conv: sexp_grammar doesn't support objects, except the syntax [%sexp_grammar: < for_all : 'a 'b . ... >] to generate grammars of polymorphic types
+Error: sexp_grammar: object types are unsupported
 |}]
 
-type t = < for_all : 'k 'v . ('k * 'v) list >  [@@deriving sexp_grammar]
-[%%expect{|
+let (_ : _) = [%sexp_grammar: < other : 'k 'v. ('k * 'v) list > ]
+
+[%%expect {|
 Line _, characters _-_:
-Error: ppx_sexp_conv: sexp_grammar doesn't support objects
+Error: sexp_grammar: object types are unsupported
 |}]
 
-type t = < other : 'k 'v . ('k * 'v) list >  [@@deriving sexp_grammar]
-[%%expect{|
+type t = < for_all : 'k 'v. ('k * 'v) list > [@@deriving sexp_grammar]
+
+[%%expect {|
 Line _, characters _-_:
-Error: ppx_sexp_conv: sexp_grammar doesn't support objects
+Error: sexp_grammar: object types are unsupported
+|}]
+
+type t = < other : 'k 'v. ('k * 'v) list > [@@deriving sexp_grammar]
+
+[%%expect {|
+Line _, characters _-_:
+Error: sexp_grammar: object types are unsupported
+|}]
+
+type t = T : 'a -> t [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Unbound value _'a_sexp_grammar
+Hint: Did you mean char_sexp_grammar, int_sexp_grammar or ref_sexp_grammar?
+|}]
+
+(* If we can sensibly derive [sexp_grammar], we might as well, because the user might
+   still be able to pair it with a consistent hand-written [t_of_sexp]. *)
+type _ t = T : int -> string t [@@deriving sexp_grammar]
+
+[%%expect {|
+|}]
+
+type _ t = T : int -> string t [@@deriving of_sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type string t
+       but an expression was expected of type a__192_ t
+       Type string is not compatible with type a__192_
 |}]

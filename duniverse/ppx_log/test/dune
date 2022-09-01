@@ -1,0 +1,3 @@
+(library (name ppx_log_test)
+ (libraries async core ppx_log_lib_with_source_pos)
+ (preprocess (pps ppx_expect ppx_let ppx_log)))

@@ -127,7 +127,7 @@ maps, etc.).
 Consider the following type definition:
 
     :::ocaml
-    type t = A | B with bin_io
+    type t = A | B [@@deriving bin_io]
 
 This will generate the functions `bin_size_t`, `bin_write_t`, and `bin_read_t`,
 as well as the type class values `bin_writer_t`, `bin_reader_t`, and `bin_t`.
@@ -300,9 +300,9 @@ included polymorphic types.  The first type containing a match for the
 variant will be used for reading.  E.g.:
 
     :::ocaml
-    type ab = [ `A | `B ] with bin_io
-    type cda = [ `C | `D | `A ] with bin_io
-    type abcda = [ ab | cda ] with bin_io
+    type ab = [ `A | `B ] [@@deriving bin_io]
+    type cda = [ `C | `D | `A ] [@@deriving bin_io]
+    type abcda = [ ab | cda ] [@@deriving bin_io]
 
 When reading type `abcda`, the reader associated with type `ab` rather than
 `cda` will be invoked if a value of type ```A`` can be read.  This may not
@@ -341,8 +341,8 @@ There is nothing special about polymorphic values as long as there are
 conversion functions for the type parameters.  E.g.:
 
     :::ocaml
-    type 'a t = A | B of 'a with bin_io
-    type foo = int t with bin_io
+    type 'a t = A | B of 'a [@@deriving bin_io]
+    type foo = int t [@@deriving bin_io]
 
 In the above case the conversion functions will behave as if `foo` had been
 defined as a monomorphic version of `t` with `int` substituted for `'a`

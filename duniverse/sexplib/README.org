@@ -130,3 +130,12 @@ same scope as the type, and should be named =sexp_of_[type]= and
 You must report failures by raising the =Of_sexp_error=-exception so
 that then =sexplib='s tools for pinpointing the location of type
 errors within an s-expression file will work properly.
+
+** Pretty-printers for OCaml toplevel
+
+To get s-expressions pretty-printed in an OCaml toplevel (e.g. utop),
+you need to install a pretty printer.
+
+If you use [[https://github.com/janestreet/base][=base=]], then you should look at =Base.Pretty_printer.all= and get those pretty-printers registered.
+
+If not, then =#install_printer Sexplib.Sexp.pp_hum= should work.

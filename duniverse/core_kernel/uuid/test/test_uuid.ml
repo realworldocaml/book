@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Uuid
 open! Uuid.Private
 open! Expect_test_helpers_core

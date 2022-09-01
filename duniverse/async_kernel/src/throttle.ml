@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 open! Deferred_std
 module Deferred = Deferred1
@@ -32,7 +32,13 @@ end = struct
       match%bind Ivar.read start with
       | `Abort -> return `Aborted
       | `Start a ->
-        (match%map Monitor.try_with (fun () -> work a) with
+        (match%map
+           Monitor.try_with
+             ~run:
+               `Schedule
+             ~rest:`Log
+             (fun () -> work a)
+         with
          | Ok a -> `Ok a
          | Error exn -> `Raised exn)
     in
@@ -280,7 +286,7 @@ let enqueue_exclusive t f =
   handle_enqueue_result result
 ;;
 
-let monad_sequence_how ?(how = `Sequential) ~f =
+let monad_sequence_how ~how ~f =
   stage
     (match how with
      | `Parallel -> f
@@ -294,7 +300,7 @@ let monad_sequence_how ?(how = `Sequential) ~f =
        fun a -> enqueue t (fun () -> f a))
 ;;
 
-let monad_sequence_how2 ?(how = `Sequential) ~f =
+let monad_sequence_how2 ~how ~f =
   stage
     (match how with
      | `Parallel -> f

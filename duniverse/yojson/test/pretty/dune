@@ -1,0 +1,23 @@
+(executables
+ (names test atd)
+ (libraries yojson))
+
+(rule
+  (deps ./sample.json)
+  (action
+    (with-stdout-to
+      test.output.json
+      (run ./test.exe))))
+
+(rule
+  (action
+    (with-stdout-to
+      atd.output.json
+      (run ./atd.exe))))
+
+(alias
+ (name runtest)
+ (action
+  (progn
+   (diff test.expected.json test.output.json)
+   (diff atd.expected.json atd.output.json))))

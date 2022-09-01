@@ -71,6 +71,7 @@ module type Base_quickcheck_test_helpers = sig
   val m_char : (module With_examples with type t = char)
   val m_float : (module With_examples with type t = float)
   val m_string : (module With_examples with type t = string)
+  val m_bytes : (module With_examples with type t = bytes)
   val m_sexp : (module With_examples with type t = Sexp.t)
 
   val m_option
@@ -80,6 +81,18 @@ module type Base_quickcheck_test_helpers = sig
   val m_list
     :  (module With_examples with type t = 'a)
     -> (module With_examples with type t = 'a list)
+
+  val m_array
+    :  (module With_examples with type t = 'a)
+    -> (module With_examples with type t = 'a array)
+
+  val m_ref
+    :  (module With_examples with type t = 'a)
+    -> (module With_examples with type t = 'a ref)
+
+  val m_lazy_t
+    :  (module With_examples with type t = 'a)
+    -> (module With_examples with type t = 'a lazy_t)
 
   val m_either
     :  (module With_examples with type t = 'a)
@@ -95,6 +108,12 @@ module type Base_quickcheck_test_helpers = sig
     :  (module With_examples with type t = 'a)
     -> (module With_examples with type t = 'b)
     -> (module With_examples with type t = 'a * 'b)
+
+  val m_triple
+    :  (module With_examples with type t = 'a)
+    -> (module With_examples with type t = 'b)
+    -> (module With_examples with type t = 'c)
+    -> (module With_examples with type t = 'a * 'b * 'c)
 
   val m_arrow
     :  (module With_examples with type t = 'a)

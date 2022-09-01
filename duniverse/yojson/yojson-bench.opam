@@ -1,0 +1,26 @@
+version: "2.0.2"
+opam-version: "2.0"
+maintainer: ["paul-elliot@tarides.com" "nathan@tarides.com" "marek@tarides.com"]
+authors: ["Martin Jambon"]
+homepage: "https://github.com/ocaml-community/yojson"
+bug-reports: "https://github.com/ocaml-community/yojson/issues"
+dev-repo: "git+https://github.com/ocaml-community/yojson.git"
+doc: "https://ocaml-community.github.io/yojson/"
+license: "BSD-3-Clause"
+depends: [
+  "ocaml" {>= "4.08"}
+  "yojson" {= version}
+  "dune"
+  "core_bench" {>= "v0.14.0"}
+  "core" {>= "v0.14.0"}
+  "core_unix" {>= "v0.14.0"}
+]
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+synopsis: "Run Yojson benchmarks"
+description: """\
+Yojson benchmarks require `Core_bench` which is not a dependency of Yojson,
+because it is not part of the regular installation/testing flow. This is solely
+meant for developers that are worried about performance changes in Yojson."""

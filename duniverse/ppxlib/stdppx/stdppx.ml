@@ -159,6 +159,10 @@ module Int = struct
   include (Poly : Comparisons with type t := int)
 end
 
+module Either = struct
+  type ('a, 'b) t = Left of 'a | Right of 'b
+end
+
 module List = struct
   include List
 
@@ -200,6 +204,16 @@ module List = struct
     let map2 list1 list2 ~f =
       rev (fold_left2 list1 list2 ~init:[] ~f:(fun acc x y -> f x y :: acc))
   end
+
+  let partition_map p l =
+    let rec part left right = function
+      | [] -> (rev left, rev right)
+      | x :: l -> (
+          match p x with
+          | Either.Left v -> part (v :: left) right l
+          | Either.Right v -> part left (v :: right) l)
+    in
+    part [] [] l
 
   let init ~len ~f =
     let rec loop ~len ~pos ~f ~acc =
@@ -268,6 +282,25 @@ module Option = struct
   let iter t ~f = match t with None -> () | Some x -> f x
   let map t ~f = match t with None -> None | Some x -> Some (f x)
   let value t ~default = match t with None -> default | Some x -> x
+  let to_list t = match t with None -> [] | Some x -> [ x ]
+end
+
+module Result = struct
+  let bind t ~f = match t with Ok a -> f a | Error e -> Error e
+  let map t ~f = match t with Ok a -> Ok (f a) | Error e -> Error e
+  let map_error t ~f = match t with Ok a -> Ok (f a) | Error e -> Error e
+  let ( >>= ) t f = bind t ~f
+  let ( >>| ) t f = map t ~f
+  let handle_error t ~f = match t with Ok a -> a | Error e -> f e
+end
+
+module NonEmptyList = struct
+  type 'a t = 'a * 'a list
+
+  let ( @ ) (t1, q1) (t2, q2) = (t1, q1 @ (t2 :: q2))
+  let hd = fst
+  let to_list (t, q) = t :: q
+  let map ~f (t, q) = (f t, List.map ~f q)
 end
 
 module Out_channel = struct

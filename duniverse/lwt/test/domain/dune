@@ -1,9 +1,10 @@
 (executable
  (name main)
+ (package lwt_domain)
+ (public_name lwt_domain)
  (libraries lwt_domain lwttester tester))
 
 (alias
  (name runtest)
  (package lwt_domain)
- (action (run %{exe:main.exe}))
-)
+ (action (run %{exe:main.exe})))

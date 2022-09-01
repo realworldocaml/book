@@ -20,8 +20,7 @@ let tr_create_map ~target ~replacement =
   done;
   let last_replacement = String.unsafe_get replacement (String.length replacement - 1) in
   for
-    i = min (String.length target) (String.length replacement)
-    to String.length target - 1
+    i = min (String.length target) (String.length replacement) to String.length target - 1
   do
     let index = Char.to_int (String.unsafe_get target i) in
     Bytes.unsafe_set tr_map index last_replacement

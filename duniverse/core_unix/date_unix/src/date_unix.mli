@@ -1,1 +1,1 @@
-include module type of struct include Core.Date end
+include Date_unix_intf.Date_unix (** @inline *)

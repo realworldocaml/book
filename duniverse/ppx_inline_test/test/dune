@@ -1,8 +1,8 @@
 (library (name ppx_inline_test_lib_test)
  (preprocess
   (per_module
-   ((pps ppx_inline_test) config failures order performance_test
-    file_without_test_module random_state)
+   ((pps ppx_inline_test) config failures file_without_test_module order
+    performance_test random_state unidiomatic_syntax)
    ((pps ppx_inline_test_drop) drop))))
 
 (rule (targets test.output test-partitions.output test-inlining.output)

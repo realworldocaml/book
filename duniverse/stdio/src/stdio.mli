@@ -1,7 +1,5 @@
 open! Base
-open! Import
-
-module In_channel  = In_channel
+module In_channel = In_channel
 module Out_channel = Out_channel
 
 (** Same as {!In_channel.stdin} *)
@@ -17,10 +15,10 @@ val stderr : Out_channel.t
 val printf : ('a, Out_channel.t, unit) format -> 'a
 
 (** Same as {!Out_channel.print_s} *)
-val print_s : ?mach : unit -> Sexp.t -> unit
+val print_s : ?mach:unit -> Sexp.t -> unit
 
 (** Same as {!Out_channel.eprint_s} *)
-val eprint_s : ?mach : unit -> Sexp.t -> unit
+val eprint_s : ?mach:unit -> Sexp.t -> unit
 
 (** Same as {!Out_channel.eprintf} *)
 val eprintf : ('a, Out_channel.t, unit) format -> 'a

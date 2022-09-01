@@ -18,7 +18,7 @@
  (description "Scripts and sources to compile the Real World OCaml
 second edition book. See https://realworldocaml.org/")
  (depends
-  (ocaml (and (>= 4.13.0) (< 4.14.0)))
+  (ocaml (and (>= 4.14.0) (< 4.15.0)))
   alcotest
   async
   async_graphics
@@ -28,7 +28,7 @@ second edition book. See https://realworldocaml.org/")
   cohttp-async
   conf-ncurses
   conf-tzdata
-  core
+  (core (>= v0.15.0))
   core_bench
   ctypes
   ctypes-foreign

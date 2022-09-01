@@ -16,7 +16,7 @@
     [Deferred] interface.  For documentation, refer to
     {{!Async_kernel.Deferred}[Deferred]}. *)
 
-open! Core_kernel
+open! Core
 open! Async_kernel
 open! Import
 

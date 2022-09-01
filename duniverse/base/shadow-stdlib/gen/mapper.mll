@@ -58,17 +58,66 @@ type replacement =
   | Repl_text of string
   | Approx of string
 
+let permissive = ref false
+
 let val_replacement = function
+  | "( ! )"               -> No_equivalent
   | "( != )"              -> Repl "not (phys_equal ...)"
-  | "( == )"              -> Repl "phys_equal"
+  | "( & )"               -> No_equivalent
+  | "( && )"              -> No_equivalent
+  | "( * )"               -> No_equivalent
   | "( ** )"              -> Repl "**."
-  | "( mod )"             -> Repl_text "Use (%), which has slightly different \
-                                        semantics, or Int.rem which is equivalent"
+  | "( *. )"              -> No_equivalent
+  | "( + )"               -> No_equivalent
+  | "( +. )"              -> No_equivalent
+  | "( - )"               -> No_equivalent
+  | "( -. )"              -> No_equivalent
+  | "( / )"               -> No_equivalent
+  | "( /. )"              -> No_equivalent
+  | "( := )"              -> No_equivalent
+  | "( < )"               -> No_equivalent
+  | "( <= )"              -> No_equivalent
+  | "( <> )"              -> No_equivalent
+  | "( = )"               -> No_equivalent
+  | "( == )"              -> Repl "phys_equal"
+  | "( > )"               -> No_equivalent
+  | "( >= )"              -> No_equivalent
+  | "( @ )"               -> No_equivalent
+  | "( @@ )"              -> No_equivalent
+  | "( ^ )"               -> No_equivalent
+  | "( ^^ )"              -> No_equivalent
+  | "( asr )"             -> No_equivalent
+  | "( land )"            -> No_equivalent
+  | "( lor )"             -> No_equivalent
+  | "( lsl )"             -> No_equivalent
+  | "( lsr )"             -> No_equivalent
+  | "( lxor )"            -> No_equivalent
+  | "( mod )"             -> Repl_text "Use (%), which has slightly different semantics, or Int.rem which is equivalent"
+  | "( or )"              -> No_equivalent
+  | "( |> )"              -> No_equivalent
+  | "( || )"              -> No_equivalent
+  | "( ~+ )"              -> No_equivalent
+  | "( ~+. )"             -> No_equivalent
+  | "( ~- )"              -> No_equivalent
+  | "( ~-. )"             -> No_equivalent
+  | "__FILE__"            -> No_equivalent
+  | "__FUNCTION__"        -> No_equivalent
+  | "__LINE__"            -> No_equivalent
+  | "__LINE_OF__"         -> No_equivalent
+  | "__LOC__"             -> No_equivalent
+  | "__LOC_OF__"          -> No_equivalent
+  | "__MODULE__"          -> No_equivalent
+  | "__POS__"             -> No_equivalent
+  | "__POS_OF__"          -> No_equivalent
+  | "abs"                 -> No_equivalent
+  | "abs_float"           -> No_equivalent
   | "acos"                -> Repl "Float.acos"
   | "asin"                -> Repl "Float.asin"
+  | "at_exit"             -> No_equivalent
   | "atan"                -> Repl "Float.atan"
   | "atan2"               -> Repl "Float.atan2"
   | "bool_of_string"      -> Repl "Bool.of_string"
+  | "bool_of_string_opt"  -> No_equivalent
   | "ceil"                -> Repl "Float.round_up"
   | "char_of_int"         -> Repl "Char.of_int_exn"
   | "classify_float"      -> Repl "Float.classify"
@@ -76,24 +125,32 @@ let val_replacement = function
   | "close_in_noerr"      -> Repl "Stdio.In_channel.close"
   | "close_out"           -> Repl "Stdio.Out_channel.close"
   | "close_out_noerr"     -> Repl "Stdio.Out_channel.close"
+  | "compare"             -> No_equivalent
   | "copysign"            -> Repl "Float.copysign"
   | "cos"                 -> Repl "Float.cos"
   | "cosh"                -> Repl "Float.cosh"
   | "decr"                -> Repl "Int.decr"
+  | "do_at_exit"          -> No_equivalent
   | "epsilon_float"       -> Repl "Float.epsilon_float"
+  | "exit"                -> No_equivalent
   | "exp"                 -> Repl "Float.exp"
   | "expm1"               -> Repl "Float.expm1"
+  | "failwith"            -> No_equivalent
   | "float"               -> Repl "Float.of_int"
   | "float_of_int"        -> Repl "Float.of_int"
   | "float_of_string"     -> Repl "Float.of_string"
+  | "float_of_string_opt" -> No_equivalent
   | "floor"               -> Repl "Float.round_down"
   | "flush"               -> Repl "Stdio.Out_channel.flush"
   | "flush_all"           -> No_equivalent
+  | "format_of_string"    -> No_equivalent
   | "frexp"               -> Repl "Float.frexp"
+  | "fst"                 -> No_equivalent
   | "hypot"               -> Repl "Float.hypot"
+  | "ignore"              -> No_equivalent
   | "in_channel_length"   -> Repl "Stdio.In_channel.length"
-  | "infinity"            -> Repl "Float.infinity"
   | "incr"                -> Repl "Int.incr"
+  | "infinity"            -> Repl "Float.infinity"
   | "input"               -> Repl "Stdio.In_channel.input"
   | "input_binary_int"    -> Repl "Stdio.In_channel.input_binary_int"
   | "input_byte"          -> Repl "Stdio.In_channel.input_byte"
@@ -103,18 +160,24 @@ let val_replacement = function
   | "int_of_char"         -> Repl "Char.to_int"
   | "int_of_float"        -> Repl "Int.of_float"
   | "int_of_string"       -> Repl "Int.of_string"
+  | "int_of_string_opt"   -> No_equivalent
+  | "invalid_arg"         -> No_equivalent
   | "ldexp"               -> Repl "Float.ldexp"
+  | "lnot"                -> No_equivalent
   | "log"                 -> Repl "Float.log"
   | "log10"               -> Repl "Float.log10"
   | "log1p"               -> Repl "Float.log1p"
+  | "max"                 -> No_equivalent
   | "max_float"           -> Repl "Float.max_finite_value"
   | "max_int"             -> Repl "Int.max_value"
+  | "min"                 -> No_equivalent
   | "min_float"           -> Repl "Float.min_positive_normal_value"
   | "min_int"             -> Repl "Int.min_value"
   | "mod_float"           -> Repl "Float.mod_float"
   | "modf"                -> Repl "Float.modf"
   | "nan"                 -> Repl "Float.nan"
   | "neg_infinity"        -> Repl "Float.neg_infinity"
+  | "not"                 -> No_equivalent
   | "open_in"             -> Repl "Stdio.In_channel.create"
   | "open_in_bin"         -> Repl "Stdio.In_channel.create"
   | "open_in_gen"         -> No_equivalent
@@ -147,31 +210,44 @@ let val_replacement = function
   | "print_int"           -> Repl "Stdio.eprintf \"%d\""
   | "print_newline"       -> Repl "Stdio.eprintf \"\n%!\""
   | "print_string"        -> Repl "Stdio.Out_channel.output_string Stdio.stdout"
+  | "raise"               -> No_equivalent
+  | "raise_notrace"       -> No_equivalent
   | "read_float"          -> No_equivalent
+  | "read_float_opt"      -> No_equivalent
   | "read_int"            -> No_equivalent
+  | "read_int_opt"        -> No_equivalent
   | "read_line"           -> Repl "Stdio.In_channel.input_line"
   | "really_input"        -> Repl "Stdio.In_channel.really_input"
   | "really_input_string" -> Approx "Stdio.In_channel"
+  | "ref"                 -> No_equivalent
   | "seek_in"             -> Repl "Stdio.In_channel.seek"
   | "seek_out"            -> Repl "Stdio.Out_channel.seek"
   | "set_binary_mode_in"  -> Repl "Stdio.In_channel.set_binary_mode"
   | "set_binary_mode_out" -> Repl "Stdio.Out_channel.set_binary_mode"
   | "sin"                 -> Repl "Float.sin"
   | "sinh"                -> Repl "Float.sinh"
+  | "snd"                 -> No_equivalent
   | "sqrt"                -> Repl "Float.sqrt"
   | "stderr"              -> Repl "Stdio.stderr"
   | "stdin"               -> Repl "Stdio.stdin"
   | "stdout"              -> Repl "Stdio.stdout"
   | "string_of_bool"      -> Repl "Bool.to_string"
   | "string_of_float"     -> Repl "Float.to_string"
+  | "string_of_format"    -> No_equivalent
   | "string_of_int"       -> Repl "Int.to_string"
   | "succ"                -> Repl "Int.succ"
   | "tan"                 -> Repl "Float.tan"
   | "tanh"                -> Repl "Float.tanh"
   | "truncate"            -> Repl "Int.of_float"
-  (* This is documented as DO-NOT-USE in the stdlib *)
   | "unsafe_really_input" -> No_equivalent
-  | _                     -> No_equivalent
+  | "valid_float_lexem"   -> No_equivalent
+  | symbol                ->
+    if !permissive then No_equivalent
+    else
+      failwith
+        (sprintf
+           "Consider adding to [Base] an equivalent for symbol %S defined in stdlib"
+           symbol)
 ;;
 
 let exception_replacement = function
@@ -184,14 +260,13 @@ raise [Not_found_s] with an informative error message")
   | _ -> None
 
 let type_replacement = function
-  | "result" -> Some (Repl "Result.t")
   | "in_channel"  -> Some (Repl "Stdio.In_channel.t")
   | "out_channel" -> Some (Repl "Stdio.Out_channel.t")
-  | _ -> None
+  | "result"      -> Some (Repl "Result.t")
+  | _             -> None
 ;;
 
 let module_replacement = function
-  | "Printexc" -> Some (Repl_text "Use [Exn] or [Backtrace] instead")
   | "Format" ->
     let repl_text =
       "[Base] doesn't export a [Format] module, although the \n\
@@ -199,10 +274,11 @@ let module_replacement = function
        for interaction with other libraries"
     in
     Some (Repl_text repl_text)
-  | "Fun" -> Some (Repl "Fn")
-  | "Gc" -> Some No_equivalent
-  | "Seq" -> Some (Approx "Sequence")
-  | _ -> None
+  | "Fun"      -> Some (Repl "Fn")
+  | "Gc"       -> Some No_equivalent
+  | "Printexc" -> Some (Repl_text "Use [Exn] or [Backtrace] instead")
+  | "Seq"      -> Some (Approx "Sequence")
+  | _          -> None
 
 let replace ~is_exn id replacement line =
   let msg =

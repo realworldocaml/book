@@ -1,0 +1,2 @@
+(library (name ppx_log_types) (public_name ppx_log.types)
+ (libraries base sexplib) (preprocess no_preprocessing))

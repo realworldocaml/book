@@ -4,7 +4,7 @@
     If the block would otherwise remain live, then the weak pointer remains pointed
     to the block.  If the block is collected, then the weak pointer is cleared. *)
 
-open! Core_kernel
+open! Core
 
 type 'a t [@@deriving sexp_of]
 

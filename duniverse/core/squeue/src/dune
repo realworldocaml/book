@@ -1,2 +1,0 @@
-(library (name squeue) (public_name core.squeue)
- (libraries core error_checking_mutex) (preprocess (pps ppx_jane)))

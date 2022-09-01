@@ -1,9 +1,10 @@
-open! Core_kernel
+open! Core
 open Async_kernel
 
 module Kind : sig
   type 'a t
-  val string    : String.t    t
+
+  val string : String.t t
   val bigstring : Bigstring.t t
 end
 

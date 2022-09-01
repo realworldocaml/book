@@ -1,0 +1,3 @@
+(library (name ppx_quickcheck_runtime)
+ (public_name base_quickcheck.ppx_quickcheck.runtime)
+ (libraries base base_quickcheck) (preprocess no_preprocessing))

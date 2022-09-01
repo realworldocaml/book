@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 let default_context = 16
@@ -24,7 +24,6 @@ let warn_if_no_trailing_newline_in_both_default = true
 type t =
   { output : Output.t
   ; rules : Format.Rules.t
-  ; ext_cmp : string option
   ; float_tolerance : Percent.t option
   ; produce_unified_lines : bool
   ; unrefined : bool
@@ -56,18 +55,7 @@ let invariant t =
            if Output.implies_unrefined output
            then [%test_eq: bool] t.unrefined true ~message:"output implies unrefined"))
       ~rules:ignore
-      ~ext_cmp:
-        (check (fun ext_cmp ->
-           Option.iter ext_cmp ~f:(fun (_ : string) ->
-             [%test_eq: bool] t.unrefined true ~message:"ext_cmp implies unrefined")))
-      ~float_tolerance:
-        (check (fun float_tolerance ->
-           if Option.is_some float_tolerance
-           then
-             [%test_eq: string option]
-               t.ext_cmp
-               None
-               ~message:"ext_cmp and float_tolerance cannot both be some"))
+      ~float_tolerance:ignore
       ~produce_unified_lines:ignore
       ~unrefined:ignore
       ~keep_ws:ignore
@@ -123,7 +111,6 @@ let create_exn
   let t =
     { output
     ; rules
-    ; ext_cmp = None
     ; float_tolerance
     ; produce_unified_lines
     ; unrefined
@@ -143,66 +130,6 @@ let create_exn
     ; location_style
     ; warn_if_no_trailing_newline_in_both
     }
-  in
-  invariant t;
-  t
-;;
-
-let override_internal
-      ?output
-      ?rules
-      ?ext_cmp
-      ?float_tolerance
-      ?produce_unified_lines
-      ?unrefined
-      ?keep_ws
-      ?split_long_lines
-      ?interleave
-      ?assume_text
-      ?context
-      ?line_big_enough
-      ?word_big_enough
-      ?shallow
-      ?quiet
-      ?double_check
-      ?mask_uniques
-      ?prev_alt
-      ?next_alt
-      ?location_style
-      ?warn_if_no_trailing_newline_in_both
-      t
-  =
-  let output = Option.value ~default:t.output output in
-  let ext_cmp = Option.value ~default:t.ext_cmp ext_cmp in
-  let unrefined =
-    Option.value ~default:t.unrefined unrefined
-    || is_some ext_cmp
-    || Output.implies_unrefined output
-  in
-  let t =
-    let value value field = Option.value value ~default:(Field.get field t) in
-    Fields.map
-      ~output:(const output)
-      ~rules:(value rules)
-      ~ext_cmp:(const ext_cmp)
-      ~float_tolerance:(value float_tolerance)
-      ~produce_unified_lines:(value produce_unified_lines)
-      ~unrefined:(const unrefined)
-      ~keep_ws:(value keep_ws)
-      ~interleave:(value interleave)
-      ~assume_text:(value assume_text)
-      ~split_long_lines:(value split_long_lines)
-      ~context:(value context)
-      ~line_big_enough:(value line_big_enough)
-      ~word_big_enough:(value word_big_enough)
-      ~shallow:(value shallow)
-      ~quiet:(value quiet)
-      ~double_check:(value double_check)
-      ~mask_uniques:(value mask_uniques)
-      ~prev_alt:(value prev_alt)
-      ~next_alt:(value next_alt)
-      ~location_style:(value location_style)
-      ~warn_if_no_trailing_newline_in_both:(value warn_if_no_trailing_newline_in_both)
   in
   invariant t;
   t
@@ -231,29 +158,36 @@ let override
       ?warn_if_no_trailing_newline_in_both
       t
   =
-  override_internal
-    ?output
-    ?rules
-    ~ext_cmp:None
-    ?float_tolerance
-    ?produce_unified_lines
-    ?unrefined
-    ?keep_ws
-    ?split_long_lines
-    ?interleave
-    ?assume_text
-    ?context
-    ?line_big_enough
-    ?word_big_enough
-    ?shallow
-    ?quiet
-    ?double_check
-    ?mask_uniques
-    ?prev_alt
-    ?next_alt
-    ?location_style
-    ?warn_if_no_trailing_newline_in_both
-    t
+  let output = Option.value ~default:t.output output in
+  let unrefined =
+    Option.value ~default:t.unrefined unrefined || Output.implies_unrefined output
+  in
+  let t =
+    let value value field = Option.value value ~default:(Field.get field t) in
+    Fields.map
+      ~output:(const output)
+      ~rules:(value rules)
+      ~float_tolerance:(value float_tolerance)
+      ~produce_unified_lines:(value produce_unified_lines)
+      ~unrefined:(const unrefined)
+      ~keep_ws:(value keep_ws)
+      ~interleave:(value interleave)
+      ~assume_text:(value assume_text)
+      ~split_long_lines:(value split_long_lines)
+      ~context:(value context)
+      ~line_big_enough:(value line_big_enough)
+      ~word_big_enough:(value word_big_enough)
+      ~shallow:(value shallow)
+      ~quiet:(value quiet)
+      ~double_check:(value double_check)
+      ~mask_uniques:(value mask_uniques)
+      ~prev_alt:(value prev_alt)
+      ~next_alt:(value next_alt)
+      ~location_style:(value location_style)
+      ~warn_if_no_trailing_newline_in_both:(value warn_if_no_trailing_newline_in_both)
+  in
+  invariant t;
+  t
 ;;
 
 let default =
@@ -296,7 +230,6 @@ let default =
             [ Bold ]
             ~pre:(Format.Rule.Affix.create "++++++ " ~styles:[ Fg Green ])
       }
-  ; ext_cmp = None
   ; float_tolerance = None
   ; produce_unified_lines = true
   ; unrefined = false
@@ -317,10 +250,3 @@ let default =
   ; warn_if_no_trailing_newline_in_both = warn_if_no_trailing_newline_in_both_default
   }
 ;;
-
-module Private = struct
-  let with_ext_cmp t ~ext_cmp ~notify =
-    if is_some ext_cmp then notify ();
-    { t with ext_cmp }
-  ;;
-end

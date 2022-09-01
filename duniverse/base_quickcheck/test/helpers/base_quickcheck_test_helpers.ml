@@ -113,9 +113,7 @@ let test_generator (type a) ?config ?(mode = `exhaustive) ?cr generator m =
     let generated_values = Sequence.to_list sequence in
     let distinct_generated_values = Set.of_list (module Value) generated_values in
     let distinct_known_values = Set.of_list (module Value) Value.examples in
-    let failed_to_generate =
-      Set.diff distinct_known_values distinct_generated_values
-    in
+    let failed_to_generate = Set.diff distinct_known_values distinct_generated_values in
     let message =
       if Set.equal distinct_generated_values distinct_known_values
       then [%message "exhaustive"]
@@ -242,9 +240,7 @@ let test_shrinker (type a) ?config:_ ?(mode = `compound) ?cr shrinker m =
       ~if_false_then_print_s:(lazy [%message "compound shrinker should shrink values"])
 ;;
 
-let percent ~count ~total =
-  Core_kernel.Percent.of_mult (Float.of_int count /. Float.of_int total)
-;;
+let percent ~count ~total = Core.Percent.of_mult (Float.of_int count /. Float.of_int total)
 
 let show_distribution (type a) ?config ?(show = 20) generator m =
   let (module Value : Value with type t = a) = m in
@@ -268,7 +264,7 @@ let show_distribution (type a) ?config ?(show = 20) generator m =
       |> List.rev
       |> fun list -> List.take list show
     in
-    print_s [%sexp (value_by_count : (Core_kernel.Percent.t * Value.t) list)])
+    print_s [%sexp (value_by_count : (Core.Percent.t * Value.t) list)])
 ;;
 
 module type Exhaustive = sig
@@ -335,6 +331,10 @@ let m_list (type elt) (module Elt : With_examples with type t = elt) =
   end : With_examples
     with type t = elt list)
 ;;
+
+let m_array m = m_biject (m_list m) ~f:Array.of_list ~f_inverse:Array.to_list
+let m_ref m = m_biject m ~f:Ref.create ~f_inverse:Ref.( ! )
+let m_lazy_t m = m_biject m ~f:Lazy.from_val ~f_inverse:Lazy.force
 
 let m_arrow
       (type a b)
@@ -431,6 +431,23 @@ let m_pair
     with type t = a * b)
 ;;
 
+let m_triple
+      (type a b c)
+      (module A : With_examples with type t = a)
+      (module B : With_examples with type t = b)
+      (module C : With_examples with type t = c)
+  =
+  (module struct
+    type t = A.t * B.t * C.t [@@deriving compare, sexp_of]
+
+    let examples =
+      List.cartesian_product (List.cartesian_product A.examples B.examples) C.examples
+      |> List.map ~f:(fun ((a, b), c) -> a, b, c)
+    ;;
+  end : With_examples
+    with type t = a * b * c)
+;;
+
 let m_string =
   (module struct
     type t = string [@@deriving sexp_of]
@@ -450,6 +467,8 @@ let m_string =
   end : With_examples
     with type t = string)
 ;;
+
+let m_bytes = m_biject m_string ~f:Bytes.of_string ~f_inverse:Bytes.to_string
 
 let m_nat ~up_to =
   (module struct

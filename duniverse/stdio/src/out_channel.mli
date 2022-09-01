@@ -13,12 +13,16 @@
 *)
 
 open! Base
-open! Import
 
 type t = Caml.out_channel [@@deriving_inline sexp_of]
-include
-  sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+include sig
+  [@@@ocaml.warning "-32"]
+
+  val sexp_of_t : t -> Sexplib0.Sexp.t
+end
+[@@ocaml.doc "@inline"]
+
 [@@@end]
 
 include Equal.S with type t := t
@@ -27,12 +31,11 @@ val stdout : t
 val stderr : t
 
 type 'a with_create_args =
-  ?binary:bool            (** defaults to [true] *)
-  -> ?append:bool         (** defaults to [false] *)
+  ?binary:bool (** defaults to [true] *)
+  -> ?append:bool (** defaults to [false] *)
   -> ?fail_if_exists:bool (** defaults to [false] *)
   -> ?perm:int
   -> 'a
-
 
 val create : (string -> t) with_create_args
 val with_file : (string -> f:(t -> 'a) -> 'a) with_create_args
@@ -64,9 +67,7 @@ val close : t -> unit
 val close_no_err : t -> unit
 
 val set_binary_mode : t -> bool -> unit
-
 val flush : t -> unit
-
 val output : t -> buf:bytes -> pos:int -> len:int -> unit
 val output_string : t -> string -> unit
 val output_substring : t -> buf:string -> pos:int -> len:int -> unit
@@ -75,7 +76,9 @@ val output_char : t -> char -> unit
 val output_byte : t -> int -> unit
 val output_binary_int : t -> int -> unit
 val output_buffer : t -> Buffer.t -> unit
-val output_value : t -> _ -> unit  (** OCaml's internal Marshal format *)
+
+(** OCaml's internal Marshal format *)
+val output_value : t -> _ -> unit
 
 val newline : t -> unit
 
@@ -93,11 +96,11 @@ val printf : ('a, t, unit) format -> 'a
 
 (** [print_s sexp] outputs [sexp] on [stdout], by default using [Sexp.to_string_hum],
     or, with [~mach:()], [Sexp.to_string_mach]. *)
-val print_s : ?mach : unit -> Sexp.t -> unit
+val print_s : ?mach:unit -> Sexp.t -> unit
 
 (** [eprint_s sexp] outputs [sexp] on [stderr], by default using [Sexp.to_string_hum],
     or, with [~mach:()], [Sexp.to_string_mach]. *)
-val eprint_s : ?mach : unit -> Sexp.t -> unit
+val eprint_s : ?mach:unit -> Sexp.t -> unit
 
 (** [eprintf fmt] is the same as [fprintf stderr fmt] *)
 val eprintf : ('a, t, unit) format -> 'a
@@ -123,7 +126,7 @@ val length : t -> int64
 
 (** The first argument of these is the file name to write to. *)
 val write_lines : string -> string list -> unit
-val write_all : string -> data:string -> unit
 
+val write_all : string -> data:string -> unit
 
 

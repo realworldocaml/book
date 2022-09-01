@@ -21,9 +21,14 @@ val argv : string array
     otherwise. *)
 val interactive : bool ref
 
-(** [os_type] describes the operating system that the OCaml program is running on.  Its
-    value is one of ["Unix"], ["Win32"], or ["Cygwin"]. When running in JavaScript, it is
-    ["Unix"]. *)
+(** [os_type] describes the operating system that the OCaml program is running on.
+
+    Its value is one of:
+    - ["Unix"] (for all Unix versions, including Linux and macOS);
+    - ["Win32"] (for MS-Windows, OCaml compiled with MSVC++ or MinGW); or
+    - ["Cygwin"] (for MS-Windows, OCaml compiled with Cygwin)
+
+    When running in JavaScript, it is ["Unix"]. *)
 val os_type : string
 
 (** [unix] is [true] if [os_type = "Unix"]. *)
@@ -102,6 +107,7 @@ val runtime_warnings_enabled : unit -> bool
 val getenv : string -> string option
 
 val getenv_exn : string -> string
+
 
 (** For the purposes of optimization, [opaque_identity] behaves like an unknown (and thus
     possibly side-effecting) function.  At runtime, [opaque_identity] disappears

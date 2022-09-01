@@ -1,6 +1,6 @@
 open Ppxlib
 
-module Filename = Caml.Filename
+module Filename = Stdlib.Filename
 
 let dirname = ref None
 

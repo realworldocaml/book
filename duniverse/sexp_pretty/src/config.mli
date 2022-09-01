@@ -1,3 +1,5 @@
+open! Base
+
 type color =
   | Black
   | Red
@@ -53,9 +55,8 @@ type comment_indent =
 
 type comment_print_style =
   | Pretty_print (** Auto aligns multi-line block comments. *)
-  | Conservative_print
-  (** Leaves block comments as they are, only adjusts indentation. *)
-[@@deriving sexp]
+  | Conservative_print (** Leaves block comments as they are, only adjusts indentation. *)
+[@@deriving enumerate, sexp]
 
 (** Comment treatment. *)
 type comments =

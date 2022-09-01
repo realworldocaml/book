@@ -1,6 +1,8 @@
 open Bin_prot
 open Core
 
+[@@@ocaml.alert "-deprecated"]
+
 let%bench_module "float array" =
   (module struct
     let a = Array.create ~len:1000 0.

@@ -9,7 +9,7 @@
     [Stream.next], which (asynchronously) returns the element and the rest of the
     stream. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Deferred = Deferred1
 

@@ -1,2 +1,2 @@
-open! Core_kernel
+open! Core
 module Heap = Pairing_heap

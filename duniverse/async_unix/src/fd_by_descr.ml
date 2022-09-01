@@ -98,6 +98,12 @@ let iter t ~f =
   done
 ;;
 
+let exists t ~f =
+  Option_array.exists t ~f:(function
+    | None -> false
+    | Some x -> f x)
+;;
+
 (* The default sexp representation of this is huge and pollutes debug output *)
 let sexp_of_t t =
   let fd_alist = foldi ~init:[] t ~f:(fun i acc fd -> (i, fd) :: acc) in

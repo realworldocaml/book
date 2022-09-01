@@ -1,6 +1,6 @@
 (** [Async.Process] is for creating child processes of the current process, and
     communicating with children via their stdin, stdout, and stderr.  [Async.Process] is
-    the Async analog of [Core.Unix.create_process] and related functions. *)
+    the Async analog of [Core_unix.create_process] and related functions. *)
 
 open! Core
 open! Import
@@ -16,9 +16,14 @@ val stderr : t -> Reader.t
 
 type env = Unix.env [@@deriving sexp]
 
-(** [create ~prog ~args ()] uses [Core.Unix.create_process_env] to create a child process
-    that runs the executable [prog] with [args] as arguments.  It creates pipes to
-    communicate with the child process's [stdin], [stdout], and [stderr].
+(** [create ~prog ~args ()] uses [Core_unix.create_process_env] to create a child process
+    that runs the executable [prog] with [args] as arguments.
+
+    This creates pipes to communicate with the child process's [stdin], [stdout], and
+    [stderr]. The caller is responsible for closing all these pipes. A lot of calls in the
+    [Reader] module will close the underlying fd (e.g. iterating on [Reader.pipe]). You
+    likely will have to explicitly call [Writer.close] on the [stdin] writer unless you
+    call [collect_output_and_wait].
 
     Unlike [exec], [args] should not include [prog] as the first argument.
 
@@ -43,7 +48,7 @@ type env = Unix.env [@@deriving sexp]
     binary exits with non-zero exit code; instead, it returns [OK t], where [wait t]
     returns an [Error].
 
-    See [Core.Unix.create_process_env] for more details. *)
+    See [Core_unix.create_process_env] for more details. *)
 type 'a create =
   ?argv0:string
   -> ?buf_len:int
@@ -51,6 +56,7 @@ type 'a create =
   -> ?prog_search_path:string list
   -> ?stdin:string
   -> ?working_dir:string
+  -> ?setpgid:Unix.Pgid.t
   -> prog:string
   -> args:string list
   -> unit
@@ -130,8 +136,7 @@ val run_expect_no_output_exn : unit run
 
 (** [collect_stdout_and_wait] and [collect_stdout_lines_and_wait] are like [run] and
     [run_lines] but work from an existing process instead of creating a new one. *)
-type 'a collect =
-  ?accept_nonzero_exit:int list (** default is [] *) -> t -> 'a Deferred.t
+type 'a collect = ?accept_nonzero_exit:int list (** default is [] *) -> t -> 'a Deferred.t
 
 val collect_stdout_and_wait : string Or_error.t collect
 val collect_stdout_and_wait_exn : string collect
@@ -144,6 +149,18 @@ val collect_stdout_lines_and_wait_exn : string list collect
     If the process was already terminated, the call succeeds and silently does nothing,
     regardless of whether or not the process was waited for. *)
 val send_signal : t -> Signal.t -> unit
+
+(** Similar to [send_signal], but additionally reports if a signal was actually sent,
+    or a process was already terminated and waited for.
+
+    Note that if you never called [wait] on this process, you will always get [`Ok], which
+    can be surprising. This function is exposed for compatibility with the code that used
+    [Signal_unix.send]. *)
+val send_signal_compat : t -> Signal.t -> [ `Ok | `No_such_process ]
+
+(** Similar to [send_signal_compat], but raises an exception on [`No_such_process].
+    Used to migrate the code that uses [Signal_unix.send_exn]. *)
+val send_signal_compat_exn : t -> Signal.t -> unit
 
 (** [Lines_or_sexp] is useful for rendering a string nicely in a sexp, avoiding quoting if
     the string is multi-line or was produced by converting a sexp to a string.

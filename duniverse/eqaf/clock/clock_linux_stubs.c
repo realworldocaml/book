@@ -1,3 +1,5 @@
+#define CAML_NAME_SPACE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -22,7 +24,7 @@ clock_linux_get_time_byte(__unit ())
   if (clock_gettime(CLOCK_MONOTONIC, &ts))
     caml_invalid_argument("clock: unsupported clock");
 
-  return copy_int64(ts.tv_sec * 1000000000LL + ts.tv_nsec);
+  return caml_copy_int64(ts.tv_sec * 1000000000LL + ts.tv_nsec);
 }
 
 // XXX(dinosaure): commented because to be able to compile the test into any

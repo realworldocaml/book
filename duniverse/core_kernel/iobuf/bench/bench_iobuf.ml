@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Iobuf
 
 (* Minimal blit benchmarks. *)
@@ -40,19 +40,19 @@ let%bench_module "Blit" =
   (module struct
     let lengths = [ 5; 10; 100; 1000; 10_000 ]
 
-    let%bench_fun ("string"[@indexed len = lengths]) =
+    let%bench_fun ("string" [@indexed len = lengths]) =
       let buf = create ~len in
       let str = Bytes.create len in
       fun () -> Peek.To_bytes.blit ~src:buf ~dst:str ~src_pos:0 ~dst_pos:0 ~len
     ;;
 
-    let%bench_fun ("blito"[@indexed len = lengths]) =
+    let%bench_fun ("blito" [@indexed len = lengths]) =
       let src = create ~len in
       let dst = create ~len in
       fun () -> Blit.blito () ~src ~dst
     ;;
 
-    let%bench_fun ("consume"[@indexed len = lengths]) =
+    let%bench_fun ("consume" [@indexed len = lengths]) =
       let src = create ~len in
       let dst = create ~len in
       fun () ->
@@ -60,7 +60,7 @@ let%bench_module "Blit" =
         reset src
     ;;
 
-    let%bench_fun ("fill"[@indexed len = lengths]) =
+    let%bench_fun ("fill" [@indexed len = lengths]) =
       let src = create ~len in
       let dst = create ~len in
       fun () ->
@@ -68,7 +68,7 @@ let%bench_module "Blit" =
         reset dst
     ;;
 
-    let%bench_fun ("consume_and_fill"[@indexed len = lengths]) =
+    let%bench_fun ("consume_and_fill" [@indexed len = lengths]) =
       let src = create ~len in
       let dst = create ~len in
       fun () ->
@@ -77,7 +77,7 @@ let%bench_module "Blit" =
         reset dst
     ;;
 
-    let%bench_fun ("unsafe [overlap]"[@indexed len = lengths]) =
+    let%bench_fun ("unsafe [overlap]" [@indexed len = lengths]) =
       let t = create ~len:(len + 1) in
       fun () -> Blit.unsafe_blit ~src:t ~dst:t ~len ~src_pos:0 ~dst_pos:1
     ;;
@@ -145,7 +145,7 @@ let%bench_module "Poke" =
     let%bench "int64_be" = Poke.int64_be iobuf ~pos (Sys.opaque_identity pos)
 
     (* We test a few offsets to see if alignment affects performance. *)
-    let%bench_fun ("int64_le"[@indexed pos = [ 4; 12; 20; 28; 36; 44; 52; 60 ]]) =
+    let%bench_fun ("int64_le" [@indexed pos = [ 4; 12; 20; 28; 36; 44; 52; 60 ]]) =
       fun () -> Poke.int64_le iobuf ~pos (Sys.opaque_identity pos)
     ;;
   end)
@@ -201,7 +201,7 @@ let%bench_module "Peek" =
     let%bench "int64_be_trunc" = Peek.int64_be_trunc iobuf ~pos
 
     (* We test a few offsets to see if alignment affects performance. *)
-    let%bench_fun ("int64_le_trunc"[@indexed pos = [ 4; 12; 20; 28; 36; 44; 52; 60 ]]) =
+    let%bench_fun ("int64_le_trunc" [@indexed pos = [ 4; 12; 20; 28; 36; 44; 52; 60 ]]) =
       fun () -> Peek.int64_le_trunc iobuf ~pos
     ;;
   end)
@@ -224,19 +224,19 @@ let%bench_module "decimal" =
 
     let iobuf = create ~len:32
 
-    let%bench_fun ("Fill"[@indexed x = values]) =
+    let%bench_fun ("Fill" [@indexed x = values]) =
       fun () ->
       reset iobuf;
       Fill.decimal iobuf x
     ;;
 
-    let%bench_fun ("Unsafe.Fill"[@indexed x = values]) =
+    let%bench_fun ("Unsafe.Fill" [@indexed x = values]) =
       fun () ->
         reset iobuf;
         Unsafe.Fill.decimal iobuf x
     ;;
 
-    let%bench_fun ("Fill.stringo"[@indexed x = values]) =
+    let%bench_fun ("Fill.stringo" [@indexed x = values]) =
       fun () ->
         reset iobuf;
         Fill.stringo iobuf (Int.to_string x)

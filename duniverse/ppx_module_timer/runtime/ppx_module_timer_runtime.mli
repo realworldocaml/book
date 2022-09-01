@@ -34,7 +34,7 @@ module Duration : sig
   (** Determines the format of durations when reading [am_recording_environment_variable]
       and when printing results. Defaults to integer nanoseconds with a "ns" suffix.
 
-      [Core_kernel.Time_ns] overrides this to use [Time_ns.Span.to_string] on input and
+      [Core.Time_ns] overrides this to use [Time_ns.Span.to_string] on input and
       [Time_ns.Span.to_string_hum] on output. *)
   val format : (module Format) ref
 end

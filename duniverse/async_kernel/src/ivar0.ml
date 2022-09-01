@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Scheduler = Scheduler1
 module Cell = Types.Cell
@@ -468,6 +468,5 @@ let connect =
         let handler1 = Handler.add handler2 run1 execution_context1 in
         bind_result.cell <- cell_of_handler handler1
       | ( (Empty_one_or_more_handlers _ as handler1)
-        , (Empty_one_or_more_handlers _ as handler2) ) ->
-        Handler.splice handler1 handler2)
+        , (Empty_one_or_more_handlers _ as handler2) ) -> Handler.splice handler1 handler2)
 ;;

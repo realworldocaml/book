@@ -1,0 +1,21 @@
+{0 The [yojson] library}
+
+The Yojson library provides runtime functions for reading and writing JSON
+data from OCaml.
+The design goals of Yojson are the following:
+- Allowing type-aware serializers/deserializers
+to read and write directly without going through a generic JSON tree,
+for efficiency purposes.
+- Distinguishing between ints and floats.
+- Providing optional extensions of the JSON syntax.
+These extensions include comments, arbitrary strings,
+optional quotes around field names, tuples and variants.
+
+See {{:http://json.org}JSON specification}.
+
+Author: Martin Jambon
+
+{1 Entry point}
+
+The entry point of this library is the module {!yojson}.
+

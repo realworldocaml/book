@@ -88,7 +88,7 @@ let start_writer pid fd =
 ;;
 
 let () =
-  let module Unix = Core.Unix in
+  let module Unix = Core_unix in
   (* Create pipe for communicating between reader and writer process *)
   let ifd, ofd = Unix.pipe () in
   (* Fork off reader process *)

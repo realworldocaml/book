@@ -1,7 +1,0 @@
-(ocamllex octLexer)
-
-(ocamlyacc octParser)
-
-(library
- (name octavius)
- (public_name octavius))

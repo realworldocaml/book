@@ -18,7 +18,7 @@ type 'a test_eq
   -> unit
 
 type 'a test_result
-   = ?here:Lexing.position list
+  = ?here:Lexing.position list
   -> ?message:string
   -> ?equal:('a -> 'a -> bool)
   -> expect:'a

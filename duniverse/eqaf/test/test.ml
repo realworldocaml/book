@@ -11,44 +11,44 @@ let of_expected = function
 let value w = Alcotest.testable Fmt.int (equal w)
 
 let be a b expected =
-  let title = Fmt.strf "be %S %S = %d" a b expected in
+  let title = Fmt.str "be %S %S = %d" a b expected in
   Alcotest.test_case title `Quick @@ fun () ->
   let expected' = String.compare a b in
   Alcotest.(check (value (of_expected expected))) "result" (Eqaf.compare_be a b) expected ;
   Alcotest.(check (value (of_expected expected'))) "string.compare" (Eqaf.compare_be a b) expected'
 
 let le a b expected =
-  let title = Fmt.strf "le %S %S = %d" a b expected in
+  let title = Fmt.str "le %S %S = %d" a b expected in
   Alcotest.test_case title `Quick @@ fun () ->
   Alcotest.(check (value (of_expected expected))) "result" (Eqaf.compare_le a b) expected
 
 let exists str chr exists =
-  Alcotest.test_case (Fmt.strf "contains %S %c = %b" str chr exists) `Quick @@ fun () ->
+  Alcotest.test_case (Fmt.str "contains %S %c = %b" str chr exists) `Quick @@ fun () ->
   let res = Eqaf.exists_uint8 ~f:((=) (Char.code chr)) str in
   Alcotest.(check bool) "result" res exists
 
 let find str chr index =
-  Alcotest.test_case (Fmt.strf "index %S %c = %d" str chr index) `Quick @@ fun () ->
+  Alcotest.test_case (Fmt.str "index %S %c = %d" str chr index) `Quick @@ fun () ->
   let res = Eqaf.find_uint8 ~f:((=) (Char.code chr)) str in
   Alcotest.(check int) "result" res index
 
 let int_of_bool bool expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        "int_of_bool %B = %d" bool expect
     ) `Quick @@ fun ()->
   Alcotest.(check int) "result" expect (Eqaf.int_of_bool bool)
 
 let bool_of_int desc n expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        "int_of_bool %s = %B" desc expect
     ) `Quick @@ fun ()->
   Alcotest.(check bool) "result" expect (Eqaf.bool_of_int n)
 
 let select_a_if_in_range (low,high) n a b expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        "select_a_if_in_range (%d,%d) ~n:%d %d %d"
        low high n a b
     ) `Quick @@ fun ()->
@@ -61,7 +61,7 @@ let a_uint32 = Alcotest.testable Fmt.uint32 (=)
 let divmod str x m q r =
   (* (x / m = q) and (x mod m = r) *)
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        "divmod %s %lu / %lu = %lu, %lu mod %lu = %lu"
        str x m q x m r
     ) `Quick @@ fun ()->
@@ -70,7 +70,7 @@ let divmod str x m q r =
 
 let ascii_of_int32 str digits n expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        "ascii_of_string %s %d %lu %S"
        str digits n expect
     ) `Quick @@ fun ()->
@@ -81,7 +81,7 @@ let ascii_of_int32 str digits n expect =
 
 let string_of_hex str hex expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        " %s %S %S"
        str hex expect
     ) `Quick @@ fun ()->
@@ -90,7 +90,7 @@ let string_of_hex str hex expect =
 
 let hex_of_string str raw expect =
   Alcotest.test_case
-    (Fmt.strf
+    (Fmt.str
        " %s %S %S"
        str raw expect
     ) `Quick @@ fun ()->

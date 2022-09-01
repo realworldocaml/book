@@ -15,7 +15,16 @@ module Cookies : sig
 
   val get : t -> string -> (expression, 'a -> 'a, 'b) Ast_pattern.t -> 'b option
   (** [get cookies name pattern] look for a cookie named [name] and parse it
-      using [pattern]. *)
+      using [pattern]. Raises if the parsing fails. *)
+
+  val get_res :
+    t ->
+    string ->
+    (expression, 'a -> 'a, 'b) Ast_pattern.t ->
+    ('b option, Location.Error.t NonEmptyList.t) result
+  (** [get cookies name pattern] look for a cookie named [name] and parse it
+      using [pattern], returning a [result] instead of raising when the parsing
+      fails. *)
 
   val set : t -> string -> expression -> unit
   (** [set cookies name expr] set cookie [name] to [expr]. *)

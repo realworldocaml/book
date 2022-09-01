@@ -63,8 +63,7 @@ let%test_module "sorted list" =
 
     (* run () *)
 
-    let%test_unit "Invalid merge \"should\" produce a valid sorted list (with shrinking)"
-      =
+    let%test_unit "Invalid merge \"should\" produce a valid sorted list (with shrinking)" =
       let run () =
         Quickcheck.test
           ~shrinker:sorted_list_tuple_shrinker

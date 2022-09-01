@@ -24,7 +24,7 @@ clock_windows_get_time(value unit)
 
   QueryPerformanceCounter(&now);
 
-  res = copy_int64(now.QuadPart * frequency.QuadPart);
+  res = caml_copy_int64(now.QuadPart * frequency.QuadPart);
 
   CAMLreturn(res);
 }

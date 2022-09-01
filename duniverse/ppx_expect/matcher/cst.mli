@@ -8,7 +8,7 @@
 *)
 
 open! Base
-open Import
+open Base.Exported_for_specific_uses (* for [Ppx_compare_lib] *)
 
 module Line : sig
   type 'a not_blank =
@@ -20,12 +20,12 @@ module Line : sig
     (** Data associated to the line. *)
     }
   [@@deriving_inline sexp_of, compare, equal]
+
   include
     sig
       [@@@ocaml.warning "-32"]
       val sexp_of_not_blank :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-        'a not_blank -> Ppx_sexp_conv_lib.Sexp.t
+        ('a -> Sexplib0.Sexp.t) -> 'a not_blank -> Sexplib0.Sexp.t
       val compare_not_blank :
         ('a -> 'a -> int) -> 'a not_blank -> 'a not_blank -> int
       val equal_not_blank :
@@ -34,16 +34,18 @@ module Line : sig
   [@@@end]
 
   type 'a t =
-    | Blank     of string  (** regexp: "[ \t]*" *)
-    | Not_blank of 'a not_blank
+    | Blank           of string (** regexp: "[ \t]*" *)
+    | Conflict_marker of string (** regexp: "^(<{7} |[|]{7} |>{7} |={7})" *)
+    | Not_blank       of 'a not_blank
   [@@deriving_inline sexp_of, compare, equal]
+
+
   include
     sig
       [@@@ocaml.warning "-32"]
-      val sexp_of_t :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-      val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-      val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+      val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
+      include Ppx_compare_lib.Comparable.S1 with type 'a t :=  'a t
+      include Ppx_compare_lib.Equal.S1 with type 'a t :=  'a t
     end[@@ocaml.doc "@inline"]
   [@@@end]
 
@@ -55,7 +57,7 @@ module Line : sig
   (** Delete trailing blanks (everything for blank lines) *)
   val strip : 'a t -> 'a t
 
-  val data : 'a t -> blank:'a -> 'a
+  val data : 'a t -> blank:'a -> conflict_marker:(string -> 'a) -> 'a
 end
 
 (** Single line represent [%expect] nodes with data on the first line but not on the
@@ -80,8 +82,7 @@ include
   sig
     [@@@ocaml.warning "-32"]
     val sexp_of_single_line :
-      ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-      'a single_line -> Ppx_sexp_conv_lib.Sexp.t
+      ('a -> Sexplib0.Sexp.t) -> 'a single_line -> Sexplib0.Sexp.t
     val compare_single_line :
       ('a -> 'a -> int) -> 'a single_line -> 'a single_line -> int
     val equal_single_line :
@@ -133,8 +134,7 @@ include
   sig
     [@@@ocaml.warning "-32"]
     val sexp_of_multi_lines :
-      ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-      'a multi_lines -> Ppx_sexp_conv_lib.Sexp.t
+      ('a -> Sexplib0.Sexp.t) -> 'a multi_lines -> Sexplib0.Sexp.t
     val compare_multi_lines :
       ('a -> 'a -> int) -> 'a multi_lines -> 'a multi_lines -> int
     val equal_multi_lines :
@@ -150,10 +150,9 @@ type 'a t =
 include
   sig
     [@@@ocaml.warning "-32"]
-    val sexp_of_t :
-      ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+    val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
+    include Ppx_compare_lib.Comparable.S1 with type 'a t :=  'a t
+    include Ppx_compare_lib.Equal.S1 with type 'a t :=  'a t
   end[@@ocaml.doc "@inline"]
 [@@@end]
 
@@ -163,7 +162,7 @@ val empty : 'a t
 
 val map : 'a t -> f:(string -> 'a -> 'b) -> 'b t
 
-val data : 'a t -> blank:'a -> 'a list
+val data : 'a t -> blank:'a -> conflict_marker:(string -> 'a) -> 'a list
 
 val strip : 'a t -> 'a t
 
@@ -176,7 +175,7 @@ val to_lines : 'a t -> 'a Line.t list
 val trim_lines : 'a Line.t list -> 'a Line.t list
 
 (** Given a contents [t] and a list of [lines], try to produce a new contents containing
-    [lines] but with the same formating as [t].
+    [lines] but with the same formatting as [t].
 
     [default_indentation] is the indentation to use in case we ignore [t]'s indentation
     (for instance if [t] is [Single_line] or [Empty]). *)
@@ -187,7 +186,7 @@ val reconcile
   -> pad_single_line     : bool
   -> 'a t
 
-(** Compuute the longest indentation of a list of lines and trim it from every line. It
+(** Compute the longest indentation of a list of lines and trim it from every line. It
     returns the found indentation and the list of trimmed lines. *)
 val extract_indentation : 'a Line.t list -> string * 'a Line.t list
 

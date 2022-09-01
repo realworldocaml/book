@@ -21,4 +21,4 @@ let add =
      in
      fun () -> add_days base days)
 
-let () = Command.run add
+let () = Command_unix.run add

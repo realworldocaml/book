@@ -1,11 +1,11 @@
-open! Core_kernel
+open! Core
 open! Import
 module Core_char = Char
 module Char = Caml.Char
 module Int32 = Caml.Int32
 module Int64 = Caml.Int64
 
-let arch_sixtyfour = Sys.word_size = 64
+let arch_sixtyfour = Sys.word_size_in_bits = 64
 let signed_max = Int32.to_int Int32.max_int
 let unsigned_max = Int64.to_int 0xffff_ffffL
 
@@ -155,7 +155,7 @@ let check_unsigned_32_in_range n =
 ;;
 
 let pack_unsigned_32_int ~byte_order ~buf ~pos n =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   check_unsigned_32_in_range n;
   Bytes.set
     buf
@@ -205,7 +205,7 @@ let check_signed_32_in_range n =
 ;;
 
 let pack_signed_32_int ~byte_order ~buf ~pos n =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   check_signed_32_in_range n;
   Bytes.set
     buf
@@ -279,7 +279,7 @@ let unpack_signed_32 ~byte_order ~buf ~pos =
 ;;
 
 let unpack_unsigned_32_int ~byte_order ~buf ~pos =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   let b1 = Char.code (Bytes.get buf (pos + offset ~len:4 ~byte_order 0)) lsl 24 in
   (* msb *)
   let b2 = Char.code (Bytes.get buf (pos + offset ~len:4 ~byte_order 1)) lsl 16 in
@@ -503,7 +503,7 @@ let unpack_signed_64_little_endian ~buf ~pos =
 ;;
 
 let pack_signed_64_int ~byte_order ~buf ~pos n =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   Bytes.set
     buf
     (pos + offset ~len:8 ~byte_order 0)
@@ -568,7 +568,7 @@ let pack_signed_64_int_little_endian ~buf ~pos v =
 ;;
 
 let unpack_signed_64_int ~byte_order ~buf ~pos =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   (Char.code (Bytes.get buf (pos + offset ~len:8 ~byte_order 0)) lsl 56)
   lor (Char.code (Bytes.get buf (pos + offset ~len:8 ~byte_order 1)) lsl 48)
   lor (Char.code (Bytes.get buf (pos + offset ~len:8 ~byte_order 2)) lsl 40)
@@ -588,7 +588,7 @@ let check_highest_order_byte_range byte =
 ;;
 
 let unpack_signed_64_int_big_endian ~buf ~pos =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   (* Do bounds checking only on the first and last bytes *)
   let b1 = Char.code (Bytes.get buf pos)
   and b8 = Char.code (Bytes.get buf (pos + 7)) in
@@ -610,7 +610,7 @@ let unpack_signed_64_int_big_endian ~buf ~pos =
 ;;
 
 let unpack_signed_64_int_little_endian ~buf ~pos =
-  assert (Sys.word_size = 64);
+  assert (Sys.word_size_in_bits = 64);
   (* Do bounds checking only on the first and last bytes *)
   let b1 = Char.code (Bytes.get buf pos)
   and b8 = Char.code (Bytes.get buf (pos + 7)) in
@@ -662,8 +662,7 @@ let pack_tail_padded_fixed_string ?(padding = '\x00') ~buf ~pos ~len s =
   let slen = String.length s in
   if slen > len
   then
-    raise
-      (Pack_tail_padded_fixed_string_argument_too_long (`s s, `longer_than, `len len))
+    raise (Pack_tail_padded_fixed_string_argument_too_long (`s s, `longer_than, `len len))
   else (
     Bytes.From_string.blit ~src:s ~dst:buf ~src_pos:0 ~dst_pos:pos ~len:slen;
     if slen < len

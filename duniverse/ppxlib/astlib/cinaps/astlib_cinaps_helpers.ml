@@ -20,6 +20,7 @@ let supported_versions =
     ("412", "4.12");
     ("413", "4.13");
     ("414", "4.14");
+    ("500", "5.00");
   ]
 
 let foreach_version f =

@@ -10,7 +10,7 @@ open! Import
 
 type t = float [@@deriving_inline sexp_grammar]
 
-val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
@@ -19,14 +19,10 @@ include Floatable.S with type t := t
 (** [max] and [min] will return nan if either argument is nan.
 
     The [validate_*] functions always fail if class is [Nan] or [Infinite]. *)
-include
-  Identifiable.S with type t := t
+include Identifiable.S with type t := t
 
 include Comparable.With_zero with type t := t
 include Invariant.S with type t := t
-
-(** [validate_ordinary] fails if class is [Nan] or [Infinite]. *)
-val validate_ordinary : t Validate.check
 
 val nan : t
 val infinity : t
@@ -161,11 +157,13 @@ val int63_round_down_exn : t -> Int63.t
 val int63_round_up_exn : t -> Int63.t
 val int63_round_nearest_exn : t -> Int63.t
 
-(** If [f <= iround_lbound || f >= iround_ubound], then [iround*] functions will refuse
-    to round [f], returning [None] or raising as appropriate. *)
+(** If [f < iround_lbound || f > iround_ubound], then [iround*] functions will refuse to
+    round [f], returning [None] or raising as appropriate. *)
 val iround_lbound : t
 
 val iround_ubound : t
+val int63_round_lbound : t
+val int63_round_ubound : t
 
 (** [round_significant x ~significant_digits:n] rounds to the nearest number with [n]
     significant digits.  More precisely: it returns the representable float closest to [x
@@ -242,8 +240,14 @@ val round_decimal : float -> decimal_digits:int -> float
 
 val is_nan : t -> bool
 
-(** Includes positive and negative [Float.infinity]. *)
+(** A float is infinite when it is either [infinity] or [neg_infinity]. *)
 val is_inf : t -> bool
+
+(** A float is finite when neither [is_nan] nor [is_inf] is true. *)
+val is_finite : t -> bool
+
+(** [is_integer x] is [true] if and only if [x] is an integer. *)
+val is_integer : t -> bool
 
 (** [min_inan] and [max_inan] return, respectively, the min and max of the two given
     values, except when one of the values is a [nan], in which case the other is
@@ -254,6 +258,17 @@ val max_inan : t -> t -> t
 val ( + ) : t -> t -> t
 val ( - ) : t -> t -> t
 val ( / ) : t -> t -> t
+
+(** In analogy to Int.( % ), ( % ):
+    - always produces non-negative (or NaN) result
+    - raises when given a negative modulus.
+
+    Like the other infix operators, NaNs in mean NaNs out.
+
+    Other cases: (a % Infinity) = a when 0 <= a < Infinity, (a % Infinity) = Infinity when
+    -Infinity < a < 0, (+/- Infinity % a) = NaN, (a % 0) = NaN. *)
+val ( % ) : t -> t -> t
+
 val ( * ) : t -> t -> t
 val ( ** ) : t -> t -> t
 val ( ~- ) : t -> t
@@ -301,6 +316,7 @@ module O : sig
   val ( - ) : t -> t -> t
   val ( * ) : t -> t -> t
   val ( / ) : t -> t -> t
+  val ( % ) : t -> t -> t
   val ( ** ) : t -> t -> t
   val ( ~- ) : t -> t
 
@@ -320,6 +336,7 @@ module O_dot : sig
   val ( -. ) : t -> t -> t
   val ( *. ) : t -> t -> t
   val ( /. ) : t -> t -> t
+  val ( %. ) : t -> t -> t
   val ( **. ) : t -> t -> t
   val ( ~-. ) : t -> t
 end
@@ -340,6 +357,9 @@ val to_string_hum
   :  ?delimiter:char (** defaults to ['_'] *)
   -> ?decimals:int (** defaults to [3] *)
   -> ?strip_zero:bool (** defaults to [false] *)
+  -> ?explicit_plus:bool
+  (** Forces a + in front of non-negative values. Defaults
+      to [false] *)
   -> t
   -> string
 
@@ -543,12 +563,13 @@ module Class : sig
     | Normal
     | Subnormal
     | Zero
-  [@@deriving_inline compare, enumerate, sexp]
+  [@@deriving_inline compare, enumerate, sexp, sexp_grammar]
 
-  val compare : t -> t -> int
-  val all : t list
+  include Ppx_compare_lib.Comparable.S with type t := t
+  include Ppx_enumerate_lib.Enumerable.S with type t := t
+  include Sexplib0.Sexpable.S with type t := t
 
-  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -556,9 +577,6 @@ module Class : sig
 end
 
 val classify : t -> Class.t
-
-(** [is_finite t] returns [true] iff [classify t] is in [Normal; Subnormal; Zero;]. *)
-val is_finite : t -> bool
 
 (*_ Caution: If we remove this sig item, [sign] will still be present from
   [Comparable.With_zero]. *)
@@ -595,9 +613,11 @@ val ieee_mantissa : t -> Int63.t
 
 (** S-expressions contain at most 8 significant digits. *)
 module Terse : sig
-  type nonrec t = t [@@deriving_inline sexp]
+  type nonrec t = t [@@deriving_inline sexp, sexp_grammar]
 
-  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+  include Sexplib0.Sexpable.S with type t := t
+
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 

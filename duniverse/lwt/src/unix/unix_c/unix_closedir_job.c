@@ -30,7 +30,7 @@ static void worker_closedir(struct job_closedir *job)
 
 static value result_closedir(struct job_closedir *job)
 {
-    LWT_UNIX_CHECK_JOB(job, job->dir < 0, "closedir");
+    LWT_UNIX_CHECK_JOB(job, job->result < 0, "closedir");
     lwt_unix_free_job(&job->job);
     return Val_unit;
 }

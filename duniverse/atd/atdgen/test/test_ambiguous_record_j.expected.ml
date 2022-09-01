@@ -5,13 +5,13 @@ open Test_ambiguous_record_t
 let write_ambiguous' : _ -> ambiguous' -> _ = (
   Atdgen_runtime.Oj_run.write_with_adapter Json_adapters.Identity.restore (
     fun ob (x : ambiguous') ->
-      Bi_outbuf.add_char ob '{';
+      Buffer.add_char ob '{';
       let is_first = ref true in
       if !is_first then
         is_first := false
       else
-        Bi_outbuf.add_char ob ',';
-      Bi_outbuf.add_string ob "\"ambiguous\":";
+        Buffer.add_char ob ',';
+        Buffer.add_string ob "\"ambiguous\":";
       (
         Yojson.Safe.write_string
       )
@@ -19,19 +19,19 @@ let write_ambiguous' : _ -> ambiguous' -> _ = (
       if !is_first then
         is_first := false
       else
-        Bi_outbuf.add_char ob ',';
-      Bi_outbuf.add_string ob "\"not_ambiguous2\":";
+        Buffer.add_char ob ',';
+        Buffer.add_string ob "\"not_ambiguous2\":";
       (
         Yojson.Safe.write_int
       )
         ob x.not_ambiguous2;
-      Bi_outbuf.add_char ob '}';
+      Buffer.add_char ob '}';
   )
 )
 let string_of_ambiguous' ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_ambiguous' ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_ambiguous' = (
   Atdgen_runtime.Oj_run.read_with_adapter Json_adapters.Identity.normalize (
     fun p lb ->
@@ -46,7 +46,7 @@ let read_ambiguous' = (
         let f =
           fun s pos len ->
             if pos < 0 || len < 0 || pos + len > String.length s then
-              invalid_arg "out-of-bounds substring position or length";
+              invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
             match len with
               | 9 -> (
                   if String.unsafe_get s pos = 'a' && String.unsafe_get s (pos+1) = 'm' && String.unsafe_get s (pos+2) = 'b' && String.unsafe_get s (pos+3) = 'i' && String.unsafe_get s (pos+4) = 'g' && String.unsafe_get s (pos+5) = 'u' && String.unsafe_get s (pos+6) = 'o' && String.unsafe_get s (pos+7) = 'u' && String.unsafe_get s (pos+8) = 's' then (
@@ -99,7 +99,7 @@ let read_ambiguous' = (
           let f =
             fun s pos len ->
               if pos < 0 || len < 0 || pos + len > String.length s then
-                invalid_arg "out-of-bounds substring position or length";
+                invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
               match len with
                 | 9 -> (
                     if String.unsafe_get s pos = 'a' && String.unsafe_get s (pos+1) = 'm' && String.unsafe_get s (pos+2) = 'b' && String.unsafe_get s (pos+3) = 'i' && String.unsafe_get s (pos+4) = 'g' && String.unsafe_get s (pos+5) = 'u' && String.unsafe_get s (pos+6) = 'o' && String.unsafe_get s (pos+7) = 'u' && String.unsafe_get s (pos+8) = 's' then (
@@ -161,13 +161,13 @@ let ambiguous'_of_string s =
   read_ambiguous' (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_ambiguous : _ -> ambiguous -> _ = (
   fun ob (x : ambiguous) ->
-    Bi_outbuf.add_char ob '{';
+    Buffer.add_char ob '{';
     let is_first = ref true in
     if !is_first then
       is_first := false
     else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"ambiguous\":";
+      Buffer.add_char ob ',';
+      Buffer.add_string ob "\"ambiguous\":";
     (
       Yojson.Safe.write_string
     )
@@ -175,18 +175,18 @@ let write_ambiguous : _ -> ambiguous -> _ = (
     if !is_first then
       is_first := false
     else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"not_ambiguous1\":";
+      Buffer.add_char ob ',';
+      Buffer.add_string ob "\"not_ambiguous1\":";
     (
       Yojson.Safe.write_int
     )
       ob x.not_ambiguous1;
-    Bi_outbuf.add_char ob '}';
+    Buffer.add_char ob '}';
 )
 let string_of_ambiguous ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_ambiguous ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_ambiguous = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
@@ -200,7 +200,7 @@ let read_ambiguous = (
       let f =
         fun s pos len ->
           if pos < 0 || len < 0 || pos + len > String.length s then
-            invalid_arg "out-of-bounds substring position or length";
+            invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
           match len with
             | 9 -> (
                 if String.unsafe_get s pos = 'a' && String.unsafe_get s (pos+1) = 'm' && String.unsafe_get s (pos+2) = 'b' && String.unsafe_get s (pos+3) = 'i' && String.unsafe_get s (pos+4) = 'g' && String.unsafe_get s (pos+5) = 'u' && String.unsafe_get s (pos+6) = 'o' && String.unsafe_get s (pos+7) = 'u' && String.unsafe_get s (pos+8) = 's' then (
@@ -253,7 +253,7 @@ let read_ambiguous = (
         let f =
           fun s pos len ->
             if pos < 0 || len < 0 || pos + len > String.length s then
-              invalid_arg "out-of-bounds substring position or length";
+              invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
             match len with
               | 9 -> (
                   if String.unsafe_get s pos = 'a' && String.unsafe_get s (pos+1) = 'm' && String.unsafe_get s (pos+2) = 'b' && String.unsafe_get s (pos+3) = 'i' && String.unsafe_get s (pos+4) = 'g' && String.unsafe_get s (pos+5) = 'u' && String.unsafe_get s (pos+6) = 'o' && String.unsafe_get s (pos+7) = 'u' && String.unsafe_get s (pos+8) = 's' then (

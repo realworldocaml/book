@@ -1,8 +1,5 @@
 open Core
 open Async
-module Fd = Unix.Fd
-module Inet_addr = Unix.Inet_addr
-module Socket = Unix.Socket
 
 let stdout_writer = Lazy.force Writer.stdout
 let message s = Writer.write stdout_writer s

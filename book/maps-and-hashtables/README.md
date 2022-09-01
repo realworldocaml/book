@@ -159,24 +159,25 @@ The function `Map.of_alist_exn` constructs a map from a provided association
 list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
+<!-- TODO: explain why Set.comparator shows up, not Map.comparator (or
+     some other better name)-->
+
 ```ocaml env=main
 # #show Map.of_alist_exn;;
 val of_alist_exn :
-  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
+  ('a, 'cmp) Set.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
 The type `Map.comparator` is actually an alias for a first-class module type,
 representing any module that matches the signature `Comparator.S`, shown
 below.
 
+<!-- TODO: Something broke show here, so we don't actually see the
+    definition -->
+
 ```ocaml env=main
 # #show Base.Comparator.S;;
-module type S =
-  sig
-    type t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-  end
+module type S = Base.Comparator.S
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -221,10 +222,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The type `comparator_witness' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 18, characters 2-25:
          Expected declaration
        The value `comparator' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 20, characters 2-53:
          Expected declaration
 ```
 
@@ -402,9 +403,9 @@ function. Thus, the compiler rejects the following:
 Line 3, characters 5-43:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
-         (int, string, Comparator.Poly.comparator_witness) Map.t
+         (int, string, Map.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness
+         Map.Poly.comparator_witness
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
@@ -458,7 +459,7 @@ by default, but it is available within the `Poly` module.
 
 ```ocaml env=main
 # Poly.(m1 = m2);;
-Exception: (Invalid_argument "compare: functional value")
+Exception: Invalid_argument "compare: functional value".
 ```
 
 This comparison failed because polymorphic compare doesn't work on
@@ -781,15 +782,17 @@ if you want to create a hash table from one of your own types, you need to do
 some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
+<!-- TODO: explain Exported_for_specific_uses.Ppx_compare_lib.compare,
+     and why it shows up here.
+-->
+
+<!-- TODO: Something broke show here, so we don't actually see the
+    definition -->
+
+
 ```ocaml env=main
 # #show Base.Hashtbl.Key.S;;
-module type S =
-  sig
-    type t
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Sexp.t
-    val hash : t -> int
-  end
+module type S = Base__Hashtbl_intf.Key.S
 ```
 
 Note that there's no equivalent to the comparator witness that came up for
@@ -947,7 +950,7 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:1000 ~iterations:100_000
   |> Bench.make_command
-  |> Core.Command.run
+  |> Command_unix.run
 ```
 
 The results show the hash table version to be around four times faster than
@@ -956,7 +959,7 @@ the map version:
 ```scheme file=examples/correct/map_vs_hash/dune
 (executable
   (name      map_vs_hash)
-  (libraries base core_bench))
+  (libraries base core_bench core_unix.command_unix))
 ```
 
 
@@ -1032,7 +1035,7 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:50 ~iterations:1000
   |> Bench.make_command
-  |> Core.Command.run
+  |> Command_unix.run
 ```
 
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
@@ -1041,7 +1044,7 @@ in this case by more than a factor of 10:
 ```scheme file=examples/correct/map_vs_hash2/dune
 (executable
   (name      map_vs_hash2)
-  (libraries core_bench))
+  (libraries core_bench core_unix.command_unix))
 ```
 
 

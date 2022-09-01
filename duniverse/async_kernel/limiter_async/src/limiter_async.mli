@@ -10,7 +10,7 @@
 
     Jobs are always executed in FIFO order. *)
 
-open! Core_kernel
+open! Core
 open! Async_kernel
 
 (** The outcome of a job *)
@@ -24,7 +24,6 @@ end
 
 type t [@@deriving sexp_of]
 type limiter = t [@@deriving sexp_of]
-
 
 (** {5 Specialized limiters}
 
@@ -50,16 +49,19 @@ end
 module Token_bucket : sig
   type t [@@deriving sexp_of]
   type _ u = t
+
   (*_ This type synonym is introduced because older versions of OCaml
     do not support destructive substitutions with `type 'a t1 = t2`. *)
 
   val create_exn
     :  burst_size:int
     -> sustained_rate_per_sec:float
-    -> continue_on_error:bool (** If false, then the token bucket is [kill]ed if there's
-                                  an unhandled exception in any job *)
-    -> ?in_flight_limit:int (** default to infinite. This can be used for concurrency
-                                control *)
+    -> continue_on_error:bool
+    (** If false, then the token bucket is [kill]ed if there's
+        an unhandled exception in any job *)
+    -> ?in_flight_limit:int
+    (** default to infinite. This can be used for concurrency
+        control *)
     -> ?initial_burst_size:int (** Defaults to zero *)
     -> unit
     -> t
@@ -81,7 +83,7 @@ module Token_bucket : sig
 
   (** [enqueue' t x f a] enqueues a deferred job consuming [x] tokens, running [f] on
       input [a].  No part of f is run before [enqueue'] returns. *)
-  val enqueue'    : t -> int -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
+  val enqueue' : t -> int -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
 
   include Common with type 'a t := 'a u
 end
@@ -101,8 +103,9 @@ end
     value is never changed, then this is in fact a hard upper bound.  The value is
     mutable, however, and so may be violated temporarily if the value is reduced. *)
 module Throttle : sig
-  type t [@@ deriving sexp_of]
+  type t [@@deriving sexp_of]
   type _ u = t
+
   (*_ This type synonym is introduced because older versions of OCaml
     do not support destructive substitutions with `type 'a t1 = t2`. *)
 
@@ -114,12 +117,11 @@ module Throttle : sig
     -> unit
     -> t
 
-  val concurrent_jobs_target    : t -> int
+  val concurrent_jobs_target : t -> int
   val num_jobs_waiting_to_start : t -> int
-  val num_jobs_running          : t -> int
-
-  val enqueue_exn        : t -> ?allow_immediate_run:bool -> ('a -> unit) -> 'a -> unit
-  val enqueue'           : t -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
+  val num_jobs_running : t -> int
+  val enqueue_exn : t -> ?allow_immediate_run:bool -> ('a -> unit) -> 'a -> unit
+  val enqueue' : t -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
 
   include Common with type 'a t := 'a u
 end
@@ -129,6 +131,7 @@ end
 module Sequencer : sig
   type t [@@deriving sexp_of]
   type _ u = t
+
   (*_ This type synonym is introduced because older versions of OCaml
     do not support destructive substitutions with `type 'a t1 = t2`. *)
 
@@ -139,9 +142,8 @@ module Sequencer : sig
     -> unit
     -> t
 
-  val enqueue_exn        : t -> ?allow_immediate_run:bool -> ('a -> unit) -> 'a -> unit
-  val enqueue'           : t -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
-
+  val enqueue_exn : t -> ?allow_immediate_run:bool -> ('a -> unit) -> 'a -> unit
+  val enqueue' : t -> ('a -> 'b Deferred.t) -> 'a -> 'b Outcome.t Deferred.t
   val num_jobs_waiting_to_start : t -> int
 
   include Common with type 'a t := 'a u
@@ -163,9 +165,8 @@ module Resource_throttle : sig
     -> 'a t
 
   val max_concurrent_jobs : _ t -> int
-
-  val enqueue_exn        : 'a t -> ?allow_immediate_run:bool -> ('a -> unit) -> unit
-  val enqueue'           : 'a t -> ('a -> 'b Deferred.t) -> 'b Outcome.t Deferred.t
+  val enqueue_exn : 'a t -> ?allow_immediate_run:bool -> ('a -> unit) -> unit
+  val enqueue' : 'a t -> ('a -> 'b Deferred.t) -> 'b Outcome.t Deferred.t
 
   include Common with type 'a t := 'a t
 end
@@ -186,5 +187,5 @@ module Expert : sig
 
   (** returns the underlying limiter.  It is an error to do anything with the limiter that
       isn't a read-only operation. *)
-  val to_jane_limiter  : t -> Limiter.t
+  val to_jane_limiter : t -> Limiter.t
 end

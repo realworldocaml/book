@@ -1,5 +1,6 @@
 open Core
 open Poly
+module Unix = Core_unix
 
 module type S = sig
   type t
@@ -23,7 +24,7 @@ module Cnt(V:S) : Cnt with type t = V.t = struct
   let%test _ = (V.succ V.zero > V.zero);;
 end
 
-module C1 = Cnt(Int)
+module _ = Cnt(Int)
 let%test_module _ = (module Cnt(Int))
 let%test_module "description" = (module Cnt(Int))
 

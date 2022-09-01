@@ -1,3 +1,3 @@
 (executable
   (name      qsort)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign core_unix.command_unix))

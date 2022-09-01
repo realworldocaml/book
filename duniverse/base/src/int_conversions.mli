@@ -83,9 +83,8 @@ end
 module Make_hex (I : sig
     type t [@@deriving_inline compare, hash]
 
-    val compare : t -> t -> int
-    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+    include Ppx_compare_lib.Comparable.S with type t := t
+    include Ppx_hash_lib.Hashable.S with type t := t
 
     [@@@end]
 
@@ -111,11 +110,7 @@ val sexp_of_int_style : [ `No_underscores | `Underscores ] ref
 (** utility for defining to_string_hum on numeric types -- takes a string matching
     (-|+)?[0-9a-fA-F]+ and puts [delimiter] every [chars_per_delimiter] characters
     starting from the right. *)
-val insert_delimiter_every
-  :  string
-  -> delimiter:char
-  -> chars_per_delimiter:int
-  -> string
+val insert_delimiter_every : string -> delimiter:char -> chars_per_delimiter:int -> string
 
 (** [insert_delimiter_every ~chars_per_delimiter:3] *)
 val insert_delimiter : string -> delimiter:char -> string

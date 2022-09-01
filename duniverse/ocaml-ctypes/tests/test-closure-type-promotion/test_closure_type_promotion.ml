@@ -5,6 +5,8 @@
 
 open OUnit2
 
+let _testlib = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
+
 (*
  *  Using the closure API of libffi is error prone due to differences
  *  in endianess and calling conventions.

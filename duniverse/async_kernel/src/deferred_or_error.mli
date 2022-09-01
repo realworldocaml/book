@@ -21,7 +21,7 @@
     If you have to deal with a function that does not respect this idiom, you can use
     [Deferred.Or_error.try_with_join] to wrap its execution and enforce this property. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Deferred = Deferred1
 
@@ -30,8 +30,7 @@ type 'a t = 'a Or_error.t Deferred.t
 (** The applicative operations match the behavior of the applicative operations in
     [Or_error].  This means that [all] and [all_unit] are equivalent to [combine_errors]
     and [combine_errors_unit] respectively. *)
-include
-  Applicative.S with type 'a t := 'a t
+include Applicative.S with type 'a t := 'a t
 
 (** [return x = Deferred.return (Ok x)] **)
 include Monad.S with type 'a t := 'a t
@@ -50,6 +49,7 @@ val error_string : string -> _ t
 val errorf : ('a, unit, string, _ t) format4 -> 'a
 val tag : 'a t -> tag:string -> 'a t
 val tag_s : 'a t -> tag:Sexp.t -> 'a t
+val tag_s_lazy : 'a t -> tag:Sexp.t Lazy.t -> 'a t
 val tag_arg : 'a t -> string -> 'b -> ('b -> Sexp.t) -> 'a t
 val unimplemented : string -> _ t
 
@@ -72,10 +72,17 @@ val ok_unit : unit t
 
     The option [extract_exn] is passed along to [Monitor.try_with ?extract_exn] and
     specifies whether or not the monitor exn wrapper should be skipped ([extract_exn:true]
-    or kept ([extract_exn:false]). *)
+    or kept ([extract_exn:false]).
+
+    The [~rest] argument controls how exceptions are handled after the [try_with] deferred
+    becomes determined. They may be logged, raised, or passed to a callback.
+
+    The [~run] argument controls when [f] gets called. [`Now] calls [f] immediately;
+    [`Schedule] schedules an asynchronous job to run [f]. *)
 val try_with
   :  ?extract_exn:bool (** default is [false] *)
-  -> ?run:[ `Now | `Schedule ] (** default is [`Schedule] *)
+  -> ?run:[ `Now | `Schedule ] (** default is [`Now] *)
+  -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
   -> ?here:Lexing.position
   -> ?name:string
   -> (unit -> 'a Deferred.t)
@@ -83,7 +90,8 @@ val try_with
 
 val try_with_join
   :  ?extract_exn:bool (** default is [false] *)
-  -> ?run:[ `Now | `Schedule ] (** default is [`Schedule] *)
+  -> ?run:[ `Now | `Schedule ] (** default is [`Now] *)
+  -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
   -> ?here:Lexing.position
   -> ?name:string
   -> (unit -> 'a t)
@@ -106,7 +114,7 @@ val try_with_join
     only evaluates [n] of the deferreds at a time. *)
 module List : Monad_sequence.S with type 'a monad := 'a t with type 'a t := 'a list
 
-(** [repeat_until_finished initial_state f] works the just like
+(** [repeat_until_finished initial_state f] works just like
     {!Deferred.repeat_until_finished} but with the [Deferred.Or_error] monad.
     If [f] returns an [Or_error.Error] the loop terminates and returns. *)
 val repeat_until_finished

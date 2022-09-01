@@ -1,15 +1,47 @@
-open! Dune_engine
-open! Stdune
+open Import
 open Dune_lang.Decoder
 
 (* workspace files use the same version numbers as dune-project files for
    simplicity *)
 let syntax = Stanza.syntax
 
+let all_binaries (e : Dune_env.Stanza.t) =
+  List.concat_map e.rules ~f:(fun (_, config) -> config.binaries)
+
 let env_field, env_field_lazy =
   let make f g =
     field "env" ~default:(f Dune_env.Stanza.empty)
-      (g (Dune_lang.Syntax.since syntax (1, 1) >>> Dune_env.Stanza.decode))
+      (g
+         (let+ () = Dune_lang.Syntax.since syntax (1, 1)
+          and+ version = Dune_lang.Syntax.get_exn syntax
+          and+ loc = loc
+          and+ s = Dune_env.Stanza.decode in
+          let binaries = all_binaries s in
+          if List.is_empty binaries then s
+          else
+            let minimum_version = (3, 2) in
+            if version < minimum_version then
+              let message =
+                User_message.make ~loc
+                  [ Pp.text
+                      (Dune_lang.Syntax.Error_msg.since syntax minimum_version
+                         ~what:
+                           "'binaries' in an 'env' stanza in a dune-workspace \
+                            file")
+                  ]
+              in
+              s
+              |> Dune_env.Stanza.add_warning ~message
+              |> Dune_env.Stanza.add_error ~message
+            else
+              match File_binding.Unexpanded.L.find_pform binaries with
+              | None -> s
+              | Some loc ->
+                User_error.raise ~loc
+                  [ Pp.text
+                      "Variables are not supported in 'binaries' in an 'env' \
+                       stanza in a dune-workspace file."
+                  ]))
   in
   (make Fun.id Fun.id, make Lazy.from_val lazy_)
 
@@ -249,7 +281,7 @@ module Context = struct
     | Default of Default.t
     | Opam of Opam.t
 
-  let hash = Hashtbl.hash
+  let hash = Poly.hash
 
   let to_dyn =
     let open Dyn in
@@ -352,7 +384,7 @@ let equal { merlin_context; contexts; env; config } w =
   && Dune_config.equal config w.config
 
 let hash { merlin_context; contexts; env; config } =
-  Hashtbl.hash
+  Poly.hash
     ( Option.hash Context_name.hash merlin_context
     , List.hash Context.hash contexts
     , Dune_env.Stanza.hash env
@@ -586,8 +618,8 @@ let default_step1 clflags =
   { Step1.t = lazy t; config = t.config }
 
 let load_step1 clflags p =
-  Io.with_lexbuf_from_file p ~f:(fun lb ->
-      if Dune_lexer.eof_reached lb then default_step1 clflags
+  Fs_memo.with_lexbuf_from_file p ~f:(fun lb ->
+      if Dune_lang.Dune_lexer.eof_reached lb then default_step1 clflags
       else
         parse_contents lb ~f:(fun lang ->
             String_with_vars.set_decoding_env
@@ -600,7 +632,7 @@ let workspace_step1 =
   let open Memo.O in
   let f () =
     let clflags = Clflags.t () in
-    let+ workspace_file =
+    let* workspace_file =
       match clflags.workspace_file with
       | None ->
         let p = Path.of_string filename in
@@ -617,11 +649,11 @@ let workspace_step1 =
     in
     let clflags = { clflags with workspace_file } in
     match workspace_file with
-    | None -> default_step1 clflags
+    | None -> Memo.return (default_step1 clflags)
     | Some p -> load_step1 clflags p
   in
-  let memo = Memo.create "workspaces-internal" ~input:(module Unit) f in
-  Memo.exec memo
+  let memo = Memo.lazy_ ~name:"workspaces-internal" f in
+  fun () -> Memo.Lazy.force memo
 
 let workspace_config () =
   let open Memo.O in
@@ -634,8 +666,8 @@ let workspace =
     let+ step1 = workspace_step1 () in
     Lazy.force step1.t
   in
-  let memo = Memo.create "workspace" ~input:(module Unit) ~cutoff:equal f in
-  Memo.exec memo
+  let memo = Memo.lazy_ ~cutoff:equal ~name:"workspace" f in
+  fun () -> Memo.Lazy.force memo
 
 let update_execution_parameters t ep =
   ep

@@ -17,8 +17,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  print_endline
-    (to_string_hum (tag_s ~tag:[%message "tag"] (create_s [%message "info"])));
+  print_endline (to_string_hum (tag_s ~tag:[%message "tag"] (create_s [%message "info"])));
   [%expect {| (tag info) |}]
 ;;
 

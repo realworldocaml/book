@@ -21,3 +21,5 @@
  (action (run ./discover/discover.exe -o %{targets})))
 
 (ocamllex hex_lexer)
+
+(documentation)

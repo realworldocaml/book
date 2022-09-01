@@ -1,6 +1,7 @@
 open Atd.Import
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 type t = (Ocaml.Repr.t, Json.json_repr) Mapping.mapping
 type variant_mapping = (Ocaml.Repr.t, Json.json_repr) Mapping.variant_mapping
@@ -99,6 +100,8 @@ let rec mapping_of_expr (x : type_expr) =
            Float (loc, Float, Float j)
        | "string" ->
            String (loc, String, String)
+       | "abstract" ->
+           Abstract (loc, Abstract, Abstract)
        | s ->
            Name (loc, s, List.map mapping_of_expr l, None, None)
       )
@@ -169,9 +172,3 @@ let defs_of_atd_modules l ~(target : Ocaml.target)=
       ) l
     )
   ) l
-
-let json_normalizer_of_adapter_path module_ =
-  module_ ^ ".normalize"
-
-let json_restorer_of_adapter_path module_ =
-  module_ ^ ".restore"

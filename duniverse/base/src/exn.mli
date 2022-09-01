@@ -9,7 +9,7 @@ open! Import
 
 type t = exn [@@deriving_inline sexp_of]
 
-val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+val sexp_of_t : t -> Sexplib0.Sexp.t
 
 [@@@end]
 
@@ -29,6 +29,11 @@ val create_s : Sexp.t -> t
 
 (** Same as [raise], except that the backtrace is not recorded. *)
 val raise_without_backtrace : t -> _
+
+(** [raise_with_original_backtrace t bt] raises the exception [exn], recording [bt]
+    as the backtrace it was originally raised at. This is useful to re-raise
+    exceptions annotated with extra information. *)
+val raise_with_original_backtrace : t -> Caml.Printexc.raw_backtrace -> _
 
 val reraise : t -> string -> _
 
@@ -86,7 +91,17 @@ val reraise_uncaught : string -> (unit -> 'a) -> 'a
     tests. *)
 val does_raise : (unit -> _) -> bool
 
-(** User code never calls this.  It is called in [std_kernel.ml] as a top-level side
+(** Returns [true] if this exception is physically equal to the most recently raised one.
+    If so, then [Backtrace.Exn.most_recent ()] is a backtrace corresponding to this
+    exception.
+
+    Note that, confusingly, exceptions can be physically equal even if the caller was not
+    involved in handling of the last-raised exception. See the documentation of
+    [Backtrace.Exn.most_recent_for_exn] for further discussion.
+*)
+val is_phys_equal_most_recent : t -> bool
+
+(** User code never calls this.  It is called in [base.ml] as a top-level side
     effect to change the display of exceptions and install an uncaught-exception
     printer. *)
 val initialize_module : unit -> unit

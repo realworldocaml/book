@@ -21,6 +21,10 @@ module T = struct
       (try Caml.Scanf.sscanf s "U+%X" (fun i -> Uchar0.of_int i) with
        | _ -> of_sexp_error "Uchar.t_of_sexp: atom of the form U+XXXX needed" sexp)
   ;;
+
+  let t_sexp_grammar : t Sexplib0.Sexp_grammar.t =
+    Sexplib0.Sexp_grammar.coerce String.t_sexp_grammar
+  ;;
 end
 
 include T
@@ -70,6 +74,17 @@ let to_char_exn c =
   if is_char c
   then unsafe_to_char c
   else failwithf "Uchar.to_char_exn got a non latin-1 character: U+%04X" (to_int c) ()
+;;
+
+let utf8_byte_length uchar =
+  let codepoint = to_scalar uchar in
+  if Int.( < ) codepoint 0x80
+  then 1
+  else if Int.( < ) codepoint 0x800
+  then 2
+  else if Int.( < ) codepoint 0x10000
+  then 3
+  else 4
 ;;
 
 (* Include type-specific [Replace_polymorphic_compare] at the end, after

@@ -4,85 +4,120 @@ module Either = Either0
 type ('a, 'b) t = ('a, 'b) Caml.result =
   | Ok of 'a
   | Error of 'b
-[@@deriving_inline sexp, compare, equal, hash]
+[@@deriving_inline sexp, sexp_grammar, compare, equal, hash]
 
-let t_of_sexp
-  : type a b.
-    (Ppx_sexp_conv_lib.Sexp.t -> a)
-    -> (Ppx_sexp_conv_lib.Sexp.t -> b)
-    -> Ppx_sexp_conv_lib.Sexp.t
-    -> (a, b) t
+let t_of_sexp :
+  'a 'b.
+  (Sexplib0.Sexp.t -> 'a) -> (Sexplib0.Sexp.t -> 'b) -> Sexplib0.Sexp.t -> ('a, 'b) t
   =
-  let _tp_loc = "result.ml.t" in
-  fun _of_a _of_b -> function
-    | Ppx_sexp_conv_lib.Sexp.List
-        (Ppx_sexp_conv_lib.Sexp.Atom (("ok" | "Ok") as _tag) :: sexp_args) as _sexp ->
-      (match sexp_args with
-       | [ v0 ] ->
-         let v0 = _of_a v0 in
-         Ok v0
-       | _ -> Ppx_sexp_conv_lib.Conv_error.stag_incorrect_n_args _tp_loc _tag _sexp)
-    | Ppx_sexp_conv_lib.Sexp.List
-        (Ppx_sexp_conv_lib.Sexp.Atom (("error" | "Error") as _tag) :: sexp_args) as _sexp
-      ->
-      (match sexp_args with
-       | [ v0 ] ->
-         let v0 = _of_b v0 in
-         Error v0
-       | _ -> Ppx_sexp_conv_lib.Conv_error.stag_incorrect_n_args _tp_loc _tag _sexp)
-    | Ppx_sexp_conv_lib.Sexp.Atom ("ok" | "Ok") as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.stag_takes_args _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.Atom ("error" | "Error") as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.stag_takes_args _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.List _ :: _) as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
-    | Ppx_sexp_conv_lib.Sexp.List [] as sexp ->
-      Ppx_sexp_conv_lib.Conv_error.empty_list_invalid_sum _tp_loc sexp
-    | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp
+  fun (type a__017_ b__018_)
+      :  ((Sexplib0.Sexp.t -> a__017_) -> (Sexplib0.Sexp.t -> b__018_) -> Sexplib0.Sexp.t
+          -> (a__017_, b__018_) t) ->
+    let error_source__005_ = "result.ml.t" in
+    fun _of_a__001_ _of_b__002_ -> function
+      | Sexplib0.Sexp.List
+          (Sexplib0.Sexp.Atom (("ok" | "Ok") as _tag__008_) :: sexp_args__009_) as
+        _sexp__007_ ->
+        (match sexp_args__009_ with
+         | [ arg0__010_ ] ->
+           let res0__011_ = _of_a__001_ arg0__010_ in
+           Ok res0__011_
+         | _ ->
+           Sexplib0.Sexp_conv_error.stag_incorrect_n_args
+             error_source__005_
+             _tag__008_
+             _sexp__007_)
+      | Sexplib0.Sexp.List
+          (Sexplib0.Sexp.Atom (("error" | "Error") as _tag__013_) :: sexp_args__014_) as
+        _sexp__012_ ->
+        (match sexp_args__014_ with
+         | [ arg0__015_ ] ->
+           let res0__016_ = _of_b__002_ arg0__015_ in
+           Error res0__016_
+         | _ ->
+           Sexplib0.Sexp_conv_error.stag_incorrect_n_args
+             error_source__005_
+             _tag__013_
+             _sexp__012_)
+      | Sexplib0.Sexp.Atom ("ok" | "Ok") as sexp__006_ ->
+        Sexplib0.Sexp_conv_error.stag_takes_args error_source__005_ sexp__006_
+      | Sexplib0.Sexp.Atom ("error" | "Error") as sexp__006_ ->
+        Sexplib0.Sexp_conv_error.stag_takes_args error_source__005_ sexp__006_
+      | Sexplib0.Sexp.List (Sexplib0.Sexp.List _ :: _) as sexp__004_ ->
+        Sexplib0.Sexp_conv_error.nested_list_invalid_sum error_source__005_ sexp__004_
+      | Sexplib0.Sexp.List [] as sexp__004_ ->
+        Sexplib0.Sexp_conv_error.empty_list_invalid_sum error_source__005_ sexp__004_
+      | sexp__004_ ->
+        Sexplib0.Sexp_conv_error.unexpected_stag error_source__005_ sexp__004_
 ;;
 
-let sexp_of_t
-  : type a b.
-    (a -> Ppx_sexp_conv_lib.Sexp.t)
-    -> (b -> Ppx_sexp_conv_lib.Sexp.t)
-    -> (a, b) t
-    -> Ppx_sexp_conv_lib.Sexp.t
+let sexp_of_t :
+  'a 'b.
+  ('a -> Sexplib0.Sexp.t) -> ('b -> Sexplib0.Sexp.t) -> ('a, 'b) t -> Sexplib0.Sexp.t
   =
-  fun _of_a _of_b -> function
-    | Ok v0 ->
-      let v0 = _of_a v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Ok"; v0 ]
-    | Error v0 ->
-      let v0 = _of_b v0 in
-      Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Error"; v0 ]
+  fun (type a__025_ b__026_)
+      :  ((a__025_ -> Sexplib0.Sexp.t) -> (b__026_ -> Sexplib0.Sexp.t)
+          -> (a__025_, b__026_) t -> Sexplib0.Sexp.t) ->
+    fun _of_a__019_ _of_b__020_ -> function
+      | Ok arg0__021_ ->
+        let res0__022_ = _of_a__019_ arg0__021_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Ok"; res0__022_ ]
+      | Error arg0__023_ ->
+        let res0__024_ = _of_b__020_ arg0__023_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Error"; res0__024_ ]
+;;
+
+let (t_sexp_grammar :
+       'a Sexplib0.Sexp_grammar.t
+     -> 'b Sexplib0.Sexp_grammar.t
+     -> ('a, 'b) t Sexplib0.Sexp_grammar.t)
+  =
+  fun _'a_sexp_grammar _'b_sexp_grammar ->
+  { untyped =
+      Variant
+        { case_sensitivity = Case_sensitive_except_first_character
+        ; clauses =
+            [ No_tag
+                { name = "Ok"
+                ; clause_kind =
+                    List_clause { args = Cons (_'a_sexp_grammar.untyped, Empty) }
+                }
+            ; No_tag
+                { name = "Error"
+                ; clause_kind =
+                    List_clause { args = Cons (_'b_sexp_grammar.untyped, Empty) }
+                }
+            ]
+        }
+  }
 ;;
 
 let compare :
   'a 'b. ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
   =
-  fun _cmp__a _cmp__b a__001_ b__002_ ->
-  if Ppx_compare_lib.phys_equal a__001_ b__002_
+  fun _cmp__a _cmp__b a__027_ b__028_ ->
+  if Ppx_compare_lib.phys_equal a__027_ b__028_
   then 0
   else (
-    match a__001_, b__002_ with
-    | Ok _a__003_, Ok _b__004_ -> _cmp__a _a__003_ _b__004_
+    match a__027_, b__028_ with
+    | Ok _a__029_, Ok _b__030_ -> _cmp__a _a__029_ _b__030_
     | Ok _, _ -> -1
     | _, Ok _ -> 1
-    | Error _a__005_, Error _b__006_ -> _cmp__b _a__005_ _b__006_)
+    | Error _a__031_, Error _b__032_ -> _cmp__b _a__031_ _b__032_)
 ;;
 
 let equal :
   'a 'b. ('a -> 'a -> bool) -> ('b -> 'b -> bool) -> ('a, 'b) t -> ('a, 'b) t -> bool
   =
-  fun _cmp__a _cmp__b a__007_ b__008_ ->
-  if Ppx_compare_lib.phys_equal a__007_ b__008_
+  fun _cmp__a _cmp__b a__033_ b__034_ ->
+  if Ppx_compare_lib.phys_equal a__033_ b__034_
   then true
   else (
-    match a__007_, b__008_ with
-    | Ok _a__009_, Ok _b__010_ -> _cmp__a _a__009_ _b__010_
+    match a__033_, b__034_ with
+    | Ok _a__035_, Ok _b__036_ -> _cmp__a _a__035_ _b__036_
     | Ok _, _ -> false
     | _, Ok _ -> false
-    | Error _a__011_, Error _b__012_ -> _cmp__b _a__011_ _b__012_)
+    | Error _a__037_, Error _b__038_ -> _cmp__b _a__037_ _b__038_)
 ;;
 
 let hash_fold_t
@@ -140,6 +175,19 @@ let map_error t ~f =
   | Ok _ as x -> x
   | Error x -> Error (f x)
 ;;
+
+module Error = Monad.Make2 (struct
+    type nonrec ('a, 'b) t = ('b, 'a) t
+
+    let bind x ~f =
+      match x with
+      | Ok _ as ok -> ok
+      | Error e -> f e
+    ;;
+
+    let map = `Custom map_error
+    let return e = Error e
+  end)
 
 let is_ok = function
   | Ok _ -> true

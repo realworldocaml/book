@@ -1,0 +1,13 @@
+(library (name ocaml_intrinsics_test) (preprocessor_deps config.h)
+ (libraries ocaml_intrinsics core expect_test_helpers_core)
+ (c_names test_stubs) (preprocess (pps ppx_jane)))
+
+(rule (targets config.h) (deps)
+ (action (bash "cp %{lib:jst-config:config.h} .")))
+
+(alias (name runtest)
+ (deps inline_tests_runner inline_tests_runner.bc
+  (alias runtime-deps-of-tests))
+ (action
+  (bash
+   "INLINE_TESTS_RUNNER_EXE=./inline_tests_runner.bc ./inline_tests_runner > /dev/null")))

@@ -145,7 +145,7 @@ Error: Some type variables are unbound in this type:
              method pop : 'b option
              method push : 'b -> unit
            end
-       The method pop has type 'b option where 'b is unbound
+       The method pop has type 'a option where 'a is unbound
 ```
 
 In general, we need to provide enough constraints so that the compiler will

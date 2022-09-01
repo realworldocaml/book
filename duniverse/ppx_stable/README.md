@@ -4,8 +4,8 @@ ppx\_stable
 A ppx extension for easier implementation of conversion functions between almost
 identical types.
 
-Overview
---------
+
+# Overview
 
 It's very common in the stable types idiom to have types like these:
 
@@ -26,7 +26,7 @@ module Stable = struct
       { x0 : X0.t
       ; x1 : X1.t
       ; ...
-      ; x(n+1) : X(n+1).t
+      ; xnp1 : Xnp1.t
       }
     end
   end
@@ -38,16 +38,16 @@ implementation is linear to the size of record instead of linear to the number
 of differences between the records, i.e.
 
 ```ocaml
-let v1_of_v2 { V2. x0 ; x1 ; ... ; xn ; x(n+1) } =
-  ignore (x(n+1) : X(n+1).t); (* forget the new value *)
-  { V1. x0 ; x1 ; ...  ; xn }
+let v1_of_v2 { V2. x0 ; x1 ; ... ; xn ; xnp1 } =
+  ignore (xnp1 : Xnp1.t); (* forget the new value *)
+  { V1. x0 ; x1 ; ... ; xn }
 ```
 
 If there are more changes to the type the conversion function get unnecessarily
 complicated.
 
-This extension proposes a syntax that essentially describes the differences
-between the types:
+This extension automatically generates the appropriate conversion
+function given a description of the difference between the types:
 
 ```ocaml
 module V2 = struct
@@ -55,19 +55,17 @@ module V2 = struct
     { x0 : X0.t
     ; x1 : X1.t
     ; ...
-    ; x(n+1) : X(n+1).t
-    } [@@deriving stable_record ~version:V1.t ~remove:[x(n+1)]]
+    ; xnp1 : Xnp1.t
+    } [@@deriving stable_record ~version:V1.t ~remove:[ xnp1 ]]
   end
 end
 ```
 
-and automatically generates the appropriate conversion function.
+# Details
 
-Details
-------
-
-It supports records with conversion from the _current_ type to the previous
-and from previous to _current_. It works for variants and records.
+It supports records with conversion from the _current_ type to the
+previous and from the previous type to the _current_ type. It works
+for potentially-recursive variants and records.
 
 ## Records
 
@@ -202,7 +200,7 @@ let convert_of_v1 (v1 : V1.t) : V2.t =
 ```ocaml
 module V1 = struct
   type t =
-    | X0 of X0.t
+   | X0 of X0.t
   [@@deriving stable_variant]
 end
 
@@ -237,4 +235,56 @@ module V2 = struct
 end
 
 let v2_of_v1 : V1.t -> V2.t = V2.of_V1_t ~remove_Mi:(fun i -> V2.Ew i)
+```
+
+## Recursive types
+
+If your type is recursive, the invocation of `t` looks like it didn't
+change but it actually did. That `t` means `V1.t` in the old type but
+`V2.t` in the new type. Fortunately, we already know the conversion
+from `V1.t` to `V2.t` recursively, so we invoke the constructed
+conversion function automatically in each place that contains a `t`.
+
+```ocaml
+module V1 = struct
+  type t = One | S of t
+  [@@deriving stable_variant]
+end
+
+module V2 = struct
+  type t = Zero | S of t
+  [@@deriving stable_variant ~version:V1.t ~remove:[ Zero ] ~add:[ One ]]
+end
+
+let v2_of_v1 : V1.t -> V2.t = V2.of_V1_t ~remove_One:(fun () -> S Zero)
+```
+
+In order to figure out where to apply the conversion function, we
+inspect the type of the arguments to the constructor. We are able to
+discover recursive invocations inside
+
+- pervasives (`lazy_t`, `ref`, `list`, `option`, and `array`)
+- tuples (e.g. `t * int`)
+- containers that implement the stable module interface (e.g. `t
+  Or_error.t`). They need to have a map function
+
+It should be easy to add support for polymorphic variants and object types.
+
+Unfortunately, we can't implement mapping for `t`s inside other abstract
+polymorphic types, so those will constructors will need to be added to the
+`modify` section.
+
+```ocaml
+module Container_without_map = struct
+  type 'a t = 'a option
+end
+
+module V1 = struct
+  type t = { bad : t Container_without_map.t }
+end
+
+module V2 = struct
+  type t = { bad : t Container_without_map.t }
+  [@@deriving stable_record ~version:V1.t ~modify:[ bad ]
+end
 ```

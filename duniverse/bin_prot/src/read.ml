@@ -28,7 +28,7 @@ let min_int_int32 = if arch_sixtyfour then Int32.max_int else Int32.of_int min_i
 let max_int_int64 = Int64.of_int max_int
 let min_int_int64 = Int64.of_int min_int
 
-let safe_int_of_int32 pos x =
+let[@inline always] safe_int_of_int32 pos x =
   if arch_sixtyfour
   then Int32.to_int x
   else if x >= min_int_int32 && x <= max_int_int32
@@ -36,7 +36,7 @@ let safe_int_of_int32 pos x =
   else raise_read_error ReadError.Int_overflow pos
 ;;
 
-let safe_int_of_int64 pos x =
+let[@inline always] safe_int_of_int64 pos x =
   if x >= min_int_int64 && x <= max_int_int64
   then Int64.to_int x
   else raise_read_error ReadError.Int_overflow pos
@@ -46,7 +46,7 @@ let safe_nativeint_of_int64 =
   if arch_sixtyfour
   then fun _pos x -> Int64.to_nativeint x
   else
-    fun pos x ->
+    fun [@inline always] pos x ->
       if x >= Int64.of_nativeint Nativeint.min_int
       && x <= Int64.of_nativeint Nativeint.max_int
       then Int64.to_nativeint x
@@ -61,39 +61,27 @@ external bswap32 : int32 -> int32 = "%bswap_int32"
 external bswap64 : int64 -> int64 = "%bswap_int64"
 
 let unsafe_get16be_unsigned =
-  if arch_big_endian
-  then unsafe_get16
-  else fun buf pos -> unsafe_get16 buf pos |> bswap16
+  if arch_big_endian then unsafe_get16 else fun buf pos -> unsafe_get16 buf pos |> bswap16
 ;;
 
 let unsafe_get32be =
-  if arch_big_endian
-  then unsafe_get32
-  else fun buf pos -> unsafe_get32 buf pos |> bswap32
+  if arch_big_endian then unsafe_get32 else fun buf pos -> unsafe_get32 buf pos |> bswap32
 ;;
 
 let unsafe_get64be =
-  if arch_big_endian
-  then unsafe_get64
-  else fun buf pos -> unsafe_get64 buf pos |> bswap64
+  if arch_big_endian then unsafe_get64 else fun buf pos -> unsafe_get64 buf pos |> bswap64
 ;;
 
 let unsafe_get16le_unsigned =
-  if arch_big_endian
-  then fun buf pos -> unsafe_get16 buf pos |> bswap16
-  else unsafe_get16
+  if arch_big_endian then fun buf pos -> unsafe_get16 buf pos |> bswap16 else unsafe_get16
 ;;
 
 let unsafe_get32le =
-  if arch_big_endian
-  then fun buf pos -> unsafe_get32 buf pos |> bswap32
-  else unsafe_get32
+  if arch_big_endian then fun buf pos -> unsafe_get32 buf pos |> bswap32 else unsafe_get32
 ;;
 
 let unsafe_get64le =
-  if arch_big_endian
-  then fun buf pos -> unsafe_get64 buf pos |> bswap64
-  else unsafe_get64
+  if arch_big_endian then fun buf pos -> unsafe_get64 buf pos |> bswap64 else unsafe_get64
 ;;
 
 let unsafe_get16le_signed buf pos =
@@ -268,8 +256,7 @@ let bin_read_nat0 buf ~pos_ref =
 let bin_read_bytes buf ~pos_ref =
   let start_pos = !pos_ref in
   let len = (bin_read_nat0 buf ~pos_ref :> int) in
-  if len > Sys.max_string_length
-  then raise_read_error ReadError.String_too_long start_pos;
+  if len > Sys.max_string_length then raise_read_error ReadError.String_too_long start_pos;
   let pos = !pos_ref in
   let next = pos + len in
   check_next buf next;
@@ -440,7 +427,7 @@ let max_float_array_length =
   if arch_sixtyfour then Sys.max_array_length else Sys.max_array_length / 2
 ;;
 
-let bin_read_float_array buf ~pos_ref =
+let[@inline always] bin_read_float_array_gen ~create ~blit buf ~pos_ref =
   let pos = !pos_ref in
   let len = (bin_read_nat0 buf ~pos_ref :> int) in
   if len > max_float_array_length then raise_read_error ReadError.Array_too_long pos;
@@ -448,10 +435,26 @@ let bin_read_float_array buf ~pos_ref =
   let pos = !pos_ref in
   let next = pos + size in
   check_next buf next;
-  let arr = Array.create_float len in
-  unsafe_blit_buf_float_array buf arr ~src_pos:pos ~dst_pos:0 ~len;
+  let arr = create len in
+  blit ~src_pos:pos buf ~dst_pos:0 arr ~len;
   pos_ref := next;
   arr
+;;
+
+let bin_read_floatarray buf ~pos_ref =
+  bin_read_float_array_gen
+    ~create:Float.Array.create
+    ~blit:unsafe_blit_buf_floatarray
+    buf
+    ~pos_ref
+;;
+
+let bin_read_float_array buf ~pos_ref =
+  bin_read_float_array_gen
+    ~create:Array.create_float
+    ~blit:unsafe_blit_buf_float_array
+    buf
+    ~pos_ref
 ;;
 
 let bin_read_array (type a) bin_read_el buf ~pos_ref =
@@ -677,8 +680,7 @@ let bin_read_network64_int64 buf ~pos_ref =
   unsafe_get64be buf pos
 ;;
 
-[%%if
-  ocaml_version < (4, 07, 0)]
+[%%if ocaml_version < (4, 07, 0)]
 
 external unsafe_bytes_set32 : bytes -> int -> int32 -> unit = "%caml_string_set32u"
 external unsafe_bytes_set64 : bytes -> int -> int64 -> unit = "%caml_string_set64u"

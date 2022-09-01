@@ -1,6 +1,8 @@
 (library (name async_unix) (public_name async_unix)
- (libraries async_kernel core.bigstring_unix core_kernel.bounded_int_table
-  core core.iobuf_unix core.nano_mutex core.squeue thread_pool
-  thread_safe_ivar core.time_stamp_counter core.uuid)
- (c_names dump_core_on_job_delay_stubs)
- (preprocess (pps ppx_jane -annotated-ignores -check-doc-comments)))
+ (libraries async_kernel core_unix.bigstring_unix
+  core_kernel.bounded_int_table core core_unix.filename_unix
+  core_unix.iobuf_unix core_unix.nano_mutex async_kernel.read_write_pair
+  core_unix.squeue core_unix.sys_unix thread_pool thread_safe_ivar
+  core_unix.time_ns_unix core_unix.time_stamp_counter core_unix.time_unix
+  core_unix.uuid)
+ (c_names dump_core_on_job_delay_stubs) (preprocess (pps ppx_jane)))

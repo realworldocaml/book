@@ -5,7 +5,7 @@ let do_hash file =
 
 let regular_file =
   Command.Arg_type.create (fun filename ->
-      match Sys.is_file filename with
+      match Sys_unix.is_file filename with
       | `Yes -> filename
       | `No -> failwith "Not a regular file"
       | `Unknown ->
@@ -20,4 +20,4 @@ let command =
      in
      fun () -> do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command

@@ -1,3 +1,4 @@
 (executables (names test_bench mv_regr)
- (libraries core core_bench core.time_stamp_counter)
+ (libraries core_unix.command_unix core core_bench
+  core_unix.time_stamp_counter)
  (preprocess no_preprocessing))

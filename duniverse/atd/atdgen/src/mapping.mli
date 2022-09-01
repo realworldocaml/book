@@ -17,6 +17,7 @@ type ('a, 'b) mapping =
   | Int of loc * 'a * 'b
   | Float of loc * 'a * 'b
   | String of loc * 'a * 'b
+  | Abstract of loc * 'a * 'b
   | Sum of loc * ('a, 'b) variant_mapping array * 'a * 'b
   | Record of loc * ('a, 'b) field_mapping array * 'a * 'b
   | Tuple of loc * ('a, 'b) cell_mapping array * 'a * 'b

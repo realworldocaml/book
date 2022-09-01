@@ -9,8 +9,7 @@ module Array = Array0
 type t = Caml.Obj.t array
 
 let invariant t = assert (Caml.Obj.tag (Caml.Obj.repr t) <> Caml.Obj.double_array_tag)
-let length = Array.length
-let swap t i j = Array.swap t i j
+let length = Array.length (* would check for float arrays in 32 bit, but whatever *)
 
 let sexp_of_t t =
   Sexp.Atom
@@ -22,21 +21,6 @@ let zero_obj = Caml.Obj.repr (0 : int)
 (* We call [Array.create] with a value that is not a float so that the array doesn't get
    tagged with [Double_array_tag]. *)
 let create_zero ~len = Array.create ~len zero_obj
-
-let create ~len x =
-  (* If we can, use [Array.create] directly. *)
-  if Caml.Obj.tag x <> Caml.Obj.double_tag
-  then Array.create ~len x
-  else (
-    (* Otherwise use [create_zero] and set the contents *)
-    let t = create_zero ~len in
-    let x = Sys.opaque_identity x in
-    for i = 0 to len - 1 do
-      Array.unsafe_set t i x
-    done;
-    t)
-;;
-
 let empty = [||]
 
 type not_a_float =
@@ -73,6 +57,12 @@ let[@inline always] unsafe_set_with_caml_modify t i obj =
     (Caml.Obj.obj (Sys.opaque_identity obj) : not_a_float)
 ;;
 
+let[@inline always] set_with_caml_modify t i obj =
+  (* same as unsafe_set_with_caml_modify but safe *)
+  (Caml.Obj.magic (t : t) : not_a_float array).(i)
+  <- (Caml.Obj.obj (Sys.opaque_identity obj) : not_a_float)
+;;
+
 let[@inline always] unsafe_set_int_assuming_currently_int t i int =
   (* This skips [caml_modify], which is OK if both the old and new values are integers. *)
   Array.unsafe_set (Caml.Obj.magic (t : t) : int array) i (Sys.opaque_identity int)
@@ -107,6 +97,27 @@ let[@inline always] unsafe_set_omit_phys_equal_check t i obj =
   if Caml.Obj.is_int old_obj && Caml.Obj.is_int obj
   then unsafe_set_int_assuming_currently_int t i (Caml.Obj.obj obj : int)
   else unsafe_set_with_caml_modify t i obj
+;;
+
+let swap t i j =
+  let a = get t i in
+  let b = get t j in
+  unsafe_set t i b;
+  unsafe_set t j a
+;;
+
+let create ~len x =
+  (* If we can, use [Array.create] directly. *)
+  if Caml.Obj.tag x <> Caml.Obj.double_tag
+  then Array.create ~len x
+  else (
+    (* Otherwise use [create_zero] and set the contents *)
+    let t = create_zero ~len in
+    let x = Sys.opaque_identity x in
+    for i = 0 to len - 1 do
+      unsafe_set_with_caml_modify t i x
+    done;
+    t)
 ;;
 
 let singleton obj = create ~len:1 obj

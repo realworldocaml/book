@@ -14,7 +14,8 @@ let%expect_test "ansi escape code in input" =
     (fg:black)@|(+bold)-1,1 +1,1(off) ============================================================
     (fg:black bg:red)-|
     (fg:black bg:green)+|
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;
 
 let acolored_text = "\027[0;33myellow text\027[0m\n"
@@ -29,5 +30,6 @@ let%expect_test "colored text" =
     (fg:black)@|(+bold)-1,1 +1,1(off) ============================================================
     (fg:black bg:red)-|(fg:yellow)yellow(off) text
     (fg:black bg:green)+|(fg:blue)blue(off) text
-    ("Unclean exit" (Exit_non_zero 1)) |}]
+    ("Unclean exit" (Exit_non_zero 1)) |}];
+  return ()
 ;;

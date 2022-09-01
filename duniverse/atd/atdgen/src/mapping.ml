@@ -11,6 +11,7 @@ type ('a, 'b) mapping =
   | Int of loc * 'a * 'b
   | Float of loc * 'a * 'b
   | String of loc * 'a * 'b
+  | Abstract of loc * 'a * 'b
   | Sum of loc * ('a, 'b) variant_mapping array * 'a * 'b
   | Record of loc * ('a, 'b) field_mapping array * 'a * 'b
   | Tuple of loc * ('a, 'b) cell_mapping array * 'a * 'b
@@ -55,7 +56,6 @@ type ('a, 'b) def = {
   def_brepr : 'b;
 }
 
-
 let as_abstract = function
     Atd.Ast.Name (_, (loc, "abstract", l), a) ->
       if l <> [] then
@@ -66,7 +66,6 @@ let as_abstract = function
 
 let is_abstract x = as_abstract x <> None
 
-
 let loc_of_mapping x =
   match (x : (_, _) mapping) with
     | Unit (loc, _, _)
@@ -74,6 +73,7 @@ let loc_of_mapping x =
     | Int (loc, _, _)
     | Float (loc, _, _)
     | String (loc, _, _)
+    | Abstract (loc, _, _)
     | Sum (loc, _, _, _)
     | Record (loc, _, _, _)
     | Tuple (loc, _, _, _)
@@ -94,7 +94,8 @@ let rec subst env (x : (_, _) mapping) =
   | Bool (_, _, _)
   | Int (_, _, _)
   | Float (_, _, _)
-  | String (_, _, _) -> x
+  | String (_, _, _)
+  | Abstract (_, _, _) -> x
   | Sum (loc, ar, a, b) ->
       Sum (loc, Array.map (subst_variant env) ar, a, b)
   | Record (loc, ar, a, b) ->

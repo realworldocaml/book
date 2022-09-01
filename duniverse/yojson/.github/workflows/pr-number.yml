@@ -1,0 +1,8 @@
+name: PR number update
+on: [pull_request_target]
+jobs:
+  PR-Number-Update:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Update PR number
+        uses: tarides/pr-number-action@v1.1

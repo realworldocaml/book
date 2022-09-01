@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Int.Replace_polymorphic_compare
 
 let%test_module _ =
@@ -108,5 +108,5 @@ let%test_module _ =
 ;;
 
 let%test_module "unit tests from core" =
-  (module Core_kernel_test.Hashtbl_unit_tests.Make (Pooled_hashtbl))
+  (module Core_test.Hashtbl_unit_tests.Make (Pooled_hashtbl))
 ;;

@@ -7,14 +7,13 @@ variant types that are enumerable, i.e., that are sexpable and that implement an
 function. Currently the main use case is to auto-generate ~Command.Param~ command-line
 parameters from these types.
 
+* Quick start example
+
 Suppose for example we had this simple variant type:
 |}]
 
 open! Core
-
 open Expect_test_helpers_core
-
-open Expect_test_helpers_async
 
 module Mode = struct
   type t =
@@ -45,6 +44,9 @@ something-else
 
 [%%org
   {|
+Note that single quote (') characters are stripped from the string to prevent them from
+needing to be escaped in the command line.
+
 ~Enum.make_param~ can then be used to build a command line parameter from our variant. It
 even generates documentation that shows all the options to the user:
 |}]
@@ -65,7 +67,8 @@ let main =
 let () =
   print_s
     [%sexp
-      (Command.Shape.fully_forced (Command.shape main) : Command.Shape.Fully_forced.t)]
+      (Command.Shape.fully_forced (Command_unix.shape main)
+       : Command.Shape.Fully_forced.t)]
 ;;
 
 [%%expect
@@ -74,8 +77,8 @@ let () =
   (summary "Run my server")
   (anons (Grammar Zero))
   (flags (
-    ((name "[-mode (dev|prod|something-else|unit-test)]")
-     (doc  "Running mode")
+    ((name "[-mode _]")
+     (doc "Running mode (can be: dev, prod, something-else, unit-test)")
      (aliases ()))
     ((name [-help])
      (doc  "print this help text and exit")
@@ -84,7 +87,11 @@ let () =
 
 [%%org
   {|
-To be more precise, a type is "enumerable" if it exposes the following interface:
+
+* More detail
+
+To be more precise, a type is "enumerable" if it exposes the following interface and
+ sexp_of is an sexp atom:
 |}]
 
 module type S = sig
@@ -140,21 +147,8 @@ choices. Example:
     v}
 
 [Command] does a much better job of aligning this.
-|}]
 
-let () =
-  Enum.doc
-    (module T)
-    ~represent_choice_with:"T"
-    ~doc:"doc with custom [represent_choice_with]"
-  |> print_endline
-;;
-
-[%%expect {| T doc with custom [represent_choice_with], T can be (a|a-also|b) |}]
-
-[%%org
-  {|
-  [Enum.Make\_stringable] converts [Enum.S] modules to [Stringable] modules.
+[Enum.Make\_stringable] converts [Enum.S] modules to [Stringable] modules.
 |}]
 
 module M = struct
@@ -229,3 +223,99 @@ let () =
 ;;
 
 [%%expect {| |}]
+
+[%%org
+  {|
+~Enum.make_param_one_of_flags~ can be used to build a Command.Param.t very similar to
+~Enum.make_flags~, except each enum becomes its own standalone flag, one of which must be passed.
+|}]
+
+let main =
+  Command.basic
+    ~summary:"Run my server"
+    (let%map_open.Command mode =
+       Enum.make_param_one_of_flags
+         (module Mode)
+         ~aliases:(function
+           | Mode.Unit_test -> [ "test" ]
+           | _ -> [])
+         ~doc:(function
+           | Mode.Prod -> "run in prod"
+           | Dev -> "run for development, not in prod"
+           | Unit_test -> "run in testing"
+           | Something_else -> "something else")
+     in
+     fun () -> print_s [%message "Running in mode" (mode : Mode.t)])
+;;
+
+let () =
+  print_s
+    [%sexp
+      (Command.Shape.fully_forced (Command_unix.shape main)
+       : Command.Shape.Fully_forced.t)]
+;;
+
+[%%expect
+  {|
+(Basic (
+  (summary "Run my server")
+  (anons (Grammar Zero))
+  (flags (
+    ((name [-dev])
+     (doc  "run for development, not in prod")
+     (aliases ()))
+    ((name [-prod])           (doc "run in prod")    (aliases ()))
+    ((name [-something-else]) (doc "something else") (aliases ()))
+    ((name [-unit-test])
+     (doc  "run in testing")
+     (aliases (-test)))
+    ((name [-help])
+     (doc  "print this help text and exit")
+     (aliases (-?)))))))
+|}]
+
+[%%org
+  {|
+
+* =Enum.Single=
+
+Some =Enum= operations do not need to enumerate the type, because they are given
+a single value to use. =Enum.Single= exports these operations as functions on
+modules deriving only =sexp_of=, without deriving =enumerate=.
+
+For example, suppose our app takes key-value pairs on the command line to set
+fields of a record:
+
+#+begin_example
+foo -set-field name=value
+#+end_example
+
+|}]
+
+type t =
+  { here's_an_int : int
+  ; and_a_string : string
+  ; plus_a_bool : bool
+  }
+[@@deriving fields]
+
+let complete _ ~part =
+  (* We might as well suggest the = that goes between a field and its value. *)
+  let f field = Enum.Single.to_string_hum (module String) (Field.name field) ^ "=" in
+  Fields.to_list ~here's_an_int:f ~and_a_string:f ~plus_a_bool:f
+  |> List.filter ~f:(String.is_prefix ~prefix:part)
+;;
+
+let () = complete () ~part:"" |> List.iter ~f:print_endline
+
+[%%expect {|
+heres-an-int=
+and-a-string=
+plus-a-bool=
+|}]
+
+let () = complete () ~part:"h" |> List.iter ~f:print_endline
+
+[%%expect {|
+heres-an-int=
+|}]

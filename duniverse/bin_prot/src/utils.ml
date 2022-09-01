@@ -52,8 +52,8 @@ let bin_read_stream ?max_size ~read reader =
     else (
       let msg =
         Printf.sprintf
-          "Bin_prot.Utils.bin_read_stream: protocol lied about length of value: \
-           expected %d, received %d"
+          "Bin_prot.Utils.bin_read_stream: protocol lied about length of value: expected \
+           %d, received %d"
           len
           !pos_ref
       in
@@ -253,8 +253,7 @@ struct
   ;;
 end
 
-module Make_binable_with_uuid (S : Make_binable_with_uuid_spec) =
-  Make_binable_gen (struct
+module Make_binable_with_uuid (S : Make_binable_with_uuid_spec) = Make_binable_gen (struct
     include S
 
     let maybe_caller_identity = Some S.caller_identity
@@ -609,13 +608,7 @@ module Make_iterable_binable3 (S : Make_iterable_binable3_spec) = struct
            bin_read_t bin_reader1.read bin_reader2.read bin_reader3.read buf ~pos_ref)
     ; vtag_read =
         (fun buf ~pos_ref n ->
-           __bin_read_t__
-             bin_reader1.read
-             bin_reader2.read
-             bin_reader3.read
-             buf
-             ~pos_ref
-             n)
+           __bin_read_t__ bin_reader1.read bin_reader2.read bin_reader3.read buf ~pos_ref n)
     }
   ;;
 

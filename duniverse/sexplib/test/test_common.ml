@@ -26,14 +26,6 @@ let wrap_in_context ?(no_following_sibling = false) () =
     ]
 ;;
 
-let explode s =
-  let acc = ref [] in
-  for i = String.length s - 1 downto 0 do
-    acc := s.[i] :: !acc
-  done;
-  !acc
-;;
-
 let newline_adapters =
   [ (fun s -> s), "unix"
   ; ( (fun s ->
@@ -43,7 +35,7 @@ let newline_adapters =
              (function
                | '\n' -> "\r\n"
                | c -> String.make 1 c)
-             (explode s)))
+             (Base.String.to_list s)))
     , "windows" )
   ]
 ;;

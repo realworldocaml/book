@@ -13,6 +13,34 @@ module Default = struct
 
   include Ast_builder_generated.M
 
+  module Latest = struct
+    let ppat_construct = ppat_construct
+
+    let constructor_declaration ~loc ~name ~vars ~args ~res () =
+      constructor_declaration ~loc ~name ~vars ~args ~res
+  end
+
+  (*------ stable layer above Ast_builder_generated.M -----*)
+  let ppat_construct ~loc lid p =
+    {
+      ppat_loc_stack = [];
+      ppat_attributes = [];
+      ppat_loc = loc;
+      ppat_desc = Ppat_construct (lid, Option.map p ~f:(fun p -> ([], p)));
+    }
+
+  let constructor_declaration ~loc ~name ~args ~res =
+    {
+      pcd_name = name;
+      pcd_vars = [];
+      pcd_args = args;
+      pcd_res = res;
+      pcd_loc = loc;
+      pcd_attributes = [];
+    }
+
+  (*-------------------------------------------------------*)
+
   let pstr_value_list ~loc rec_flag = function
     | [] -> []
     | vbs -> [ pstr_value ~loc rec_flag vbs ]
@@ -252,12 +280,65 @@ module Default = struct
 end
 
 module type Loc = Ast_builder_intf.Loc
-module type S = Ast_builder_intf.S
+
+module type S = sig
+  include Ast_builder_intf.S
+
+  module Latest : sig
+    val ppat_construct :
+      longident loc -> (label loc list * pattern) option -> pattern
+
+    val constructor_declaration :
+      name:label loc ->
+      vars:label loc list ->
+      args:constructor_arguments ->
+      res:core_type option ->
+      unit ->
+      constructor_declaration
+  end
+
+  val ppat_construct : longident loc -> pattern option -> pattern
+
+  val constructor_declaration :
+    name:label loc ->
+    args:constructor_arguments ->
+    res:core_type option ->
+    constructor_declaration
+end
 
 module Make (Loc : sig
   val loc : Location.t
 end) : S = struct
   include Ast_builder_generated.Make (Loc)
+
+  module Latest = struct
+    let ppat_construct = ppat_construct
+
+    let constructor_declaration ~name ~vars ~args ~res () =
+      constructor_declaration ~name ~vars ~args ~res
+  end
+
+  (*----- stable layer above Ast_builder_generated.Make (Loc) -----*)
+
+  let ppat_construct lid p =
+    {
+      ppat_loc_stack = [];
+      ppat_attributes = [];
+      ppat_loc = loc;
+      ppat_desc = Ppat_construct (lid, Option.map p ~f:(fun p -> ([], p)));
+    }
+
+  let constructor_declaration ~name ~args ~res =
+    {
+      pcd_name = name;
+      pcd_vars = [];
+      pcd_args = args;
+      pcd_res = res;
+      pcd_loc = loc;
+      pcd_attributes = [];
+    }
+
+  (*---------------------------------------------------------------*)
 
   let pstr_value_list = Default.pstr_value_list
 

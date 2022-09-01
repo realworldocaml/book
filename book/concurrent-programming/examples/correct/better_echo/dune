@@ -1,4 +1,4 @@
 (executable
   (name      echo)
-  (libraries core async)
+  (libraries core async core_unix.command_unix)
   (preprocess (pps ppx_jane)))

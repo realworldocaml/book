@@ -56,21 +56,21 @@ val %s_tag : Bi_io.node_tag
     bprintf buf "\
 val write_untagged_%s :%s
   Bi_outbuf.t -> %s -> unit
-  (** Output an untagged biniou value of type {!%s}. *)
+  (** Output an untagged biniou value of type {!type:%s}. *)
 
 " x.def_name writer_params full_name x.def_name;
 
     bprintf buf "\
 val write_%s :%s
   Bi_outbuf.t -> %s -> unit
-  (** Output a biniou value of type {!%s}. *)
+  (** Output a biniou value of type {!type:%s}. *)
 
 " x.def_name writer_params full_name x.def_name;
 
     bprintf buf "\
 val string_of_%s :%s
   ?len:int -> %s -> string
-  (** Serialize a value of type {!%s} into
+  (** Serialize a value of type {!type:%s} into
       a biniou string. *)
 
 " x.def_name writer_params full_name x.def_name;
@@ -81,21 +81,21 @@ val string_of_%s :%s
 val get_%s_reader :%s
   Bi_io.node_tag -> (Bi_inbuf.t -> %s)
   (** Return a function that reads an untagged
-      biniou value of type {!%s}. *)
+      biniou value of type {!type:%s}. *)
 
 " x.def_name reader_params full_name x.def_name;
 
     bprintf buf "\
 val read_%s :%s
   Bi_inbuf.t -> %s
-  (** Input a tagged biniou value of type {!%s}. *)
+  (** Input a tagged biniou value of type {!type:%s}. *)
 
 " x.def_name reader_params full_name x.def_name;
 
     bprintf buf "\
 val %s_of_string :%s
   ?pos:int -> string -> %s
-  (** Deserialize a biniou value of type {!%s}.
+  (** Deserialize a biniou value of type {!type:%s}.
       @param pos specifies the position where
                  reading starts. Default: 0. *)
 

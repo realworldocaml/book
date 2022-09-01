@@ -525,9 +525,9 @@ module Vars = struct
 
     let get_int_opt t var =
       Option.bind (get_opt t var) ~f:(fun s ->
-          match int_of_string s with
-          | x -> Some x
-          | exception _ -> fail "Value of %S is not an integer: %s." var s)
+          match Int.of_string s with
+          | Some x -> Some x
+          | None -> fail "Value of %S is not an integer: %s." var s)
 
     let get_words t var =
       match get_opt t var with
@@ -671,7 +671,11 @@ let make vars =
     let cmt_magic_number = get vars "cmt_magic_number" in
     let windows_unicode = get_bool vars "windows_unicode" in
     let natdynlink_supported =
-      Sys.file_exists (Filename.concat standard_library "dynlink.cmxa")
+      let lib = "dynlink.cmxa" in
+      let lib =
+        if version >= (5, 0, 0) then Filename.concat "dynlink" lib else lib
+      in
+      Sys.file_exists (Filename.concat standard_library lib)
     in
     let file =
       let stdlib = Path.external_ (Path.External.of_string standard_library) in

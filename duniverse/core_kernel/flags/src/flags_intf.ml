@@ -4,7 +4,7 @@
     [Flags] defines a module type [Flags.S], the interface for a flags, and a functor
     [Flags.Make] for creating a flags implementation. *)
 
-open! Core_kernel
+open! Core
 
 (** [module type S] is the interface for a set of flags.  Values of [type t] are set of
     flags, and the various functions operate on sets of flags.  There is a finite universe

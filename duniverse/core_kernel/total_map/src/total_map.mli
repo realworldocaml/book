@@ -28,7 +28,7 @@
     determined by the comparison function.
 *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Enumeration = Enumeration
 
@@ -117,7 +117,7 @@ module type S = sig
   type enumeration_witness
 
   type nonrec 'a t = (Key.t, 'a, comparator_witness, enumeration_witness) t
-  [@@deriving sexp, bin_io, compare]
+  [@@deriving sexp, bin_io, compare, equal]
 
   include Applicative with type 'a t := 'a t
 

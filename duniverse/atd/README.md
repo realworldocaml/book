@@ -12,6 +12,12 @@ Target languages currently supported:
 * OCaml, Bucklescript: [atdgen](atdgen)
 * Python: [atdpy](atdpy)
 * Scala: [atds](atds)
+* TypeScript: [atdts](atdts)
+
+All can installed with opam e.g.
+```
+$ opam install atdgen
+```
 
 Documentation
 --

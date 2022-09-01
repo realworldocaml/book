@@ -1,39 +1,35 @@
 open! Base
-open! Import
 
 type t = Caml.in_channel
 
 let equal (t1 : t) t2 = phys_equal t1 t2
-
-let seek   = Caml.LargeFile.seek_in
-let pos    = Caml.LargeFile.pos_in
+let seek = Caml.LargeFile.seek_in
+let pos = Caml.LargeFile.pos_in
 let length = Caml.LargeFile.in_channel_length
-
 let stdin = Caml.stdin
 
 let create ?(binary = true) file =
-  let flags = [Open_rdonly] in
+  let flags = [ Open_rdonly ] in
   let flags = if binary then Open_binary :: flags else flags in
   Caml.open_in_gen flags 0o000 file
 ;;
 
 let close = Caml.close_in
-
 let with_file ?binary file ~f = Exn.protectx (create ?binary file) ~f ~finally:close
 
-let may_eof f = try Some (f ()) with End_of_file -> None
+let may_eof f =
+  try Some (f ()) with
+  | End_of_file -> None
+;;
 
 let input t ~buf ~pos ~len = Caml.input t buf pos len
-let really_input t ~buf ~pos ~len =
-  may_eof (fun () -> Caml.really_input t buf pos len)
-let really_input_exn t ~buf ~pos ~len =
-  Caml.really_input t buf pos len
+let really_input t ~buf ~pos ~len = may_eof (fun () -> Caml.really_input t buf pos len)
+let really_input_exn t ~buf ~pos ~len = Caml.really_input t buf pos len
 let input_byte t = may_eof (fun () -> Caml.input_byte t)
 let input_char t = may_eof (fun () -> Caml.input_char t)
 let input_binary_int t = may_eof (fun () -> Caml.input_binary_int t)
 let unsafe_input_value t = may_eof (fun () -> Caml.input_value t)
 let input_buffer t buf ~len = may_eof (fun () -> Caml.Buffer.add_channel buf t len)
-
 let set_binary_mode = Caml.set_binary_mode_in
 
 let input_all t =
@@ -49,14 +45,14 @@ let input_all t =
 ;;
 
 let trim ~fix_win_eol line =
-  if fix_win_eol then begin
+  if fix_win_eol
+  then (
     let len = String.length line in
-    if len > 0
-    && Char.equal (String.get line (len - 1)) '\r'
+    if len > 0 && Char.equal (String.get line (len - 1)) '\r'
     then String.sub line ~pos:0 ~len:(len - 1)
-    else line
-  end
+    else line)
   else line
+;;
 
 let input_line ?(fix_win_eol = true) t =
   match may_eof (fun () -> Caml.input_line t) with
@@ -67,6 +63,7 @@ let input_line ?(fix_win_eol = true) t =
 let input_line_exn ?(fix_win_eol = true) t =
   let line = Caml.input_line t in
   trim ~fix_win_eol line
+;;
 
 let fold_lines ?fix_win_eol t ~init ~f =
   let rec loop ac =
@@ -78,8 +75,7 @@ let fold_lines ?fix_win_eol t ~init ~f =
 ;;
 
 let input_lines ?fix_win_eol t =
-  List.rev
-    (fold_lines ?fix_win_eol t ~init:[] ~f:(fun lines line -> line :: lines))
+  List.rev (fold_lines ?fix_win_eol t ~init:[] ~f:(fun lines line -> line :: lines))
 ;;
 
 let iter_lines ?fix_win_eol t ~f =
@@ -87,5 +83,4 @@ let iter_lines ?fix_win_eol t ~f =
 ;;
 
 let read_lines ?fix_win_eol fname = with_file fname ~f:(input_lines ?fix_win_eol)
-
 let read_all fname = with_file fname ~f:input_all

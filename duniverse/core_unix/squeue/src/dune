@@ -1,2 +1,2 @@
-(library (name core_unix_squeue) (public_name core_unix.squeue)
-  (libraries core.squeue) (preprocess no_preprocessing))
+(library (name squeue) (public_name core_unix.squeue)
+ (libraries core error_checking_mutex) (preprocess (pps ppx_jane)))

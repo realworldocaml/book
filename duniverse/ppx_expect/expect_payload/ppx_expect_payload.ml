@@ -87,6 +87,6 @@ let pattern () =
   Ast_pattern.(
     map
       (single_expr_payload (pexp_loc __ (pexp_constant (pconst_string __ __ __))))
-      ~f:(fun f loc s _loc tag -> f (Some (loc, s, tag)))
+      ~f:(fun f loc s _ tag -> f (Some (loc, s, tag)))
     ||| map (pstr nil) ~f:(fun f -> f None))
 ;;

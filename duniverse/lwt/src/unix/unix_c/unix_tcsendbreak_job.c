@@ -16,7 +16,6 @@
 */
 
 /* Caml headers. */
-#define CAML_NAME_SPACE
 #include <lwt_unix.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>

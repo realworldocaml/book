@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Import
 include Scheduler0
 module Synchronous_time_source = Synchronous_time_source0
@@ -73,8 +73,12 @@ type t = Scheduler0.t =
   ; mutable cycle_count : int
   ; mutable cycle_start : Time_ns.t
   ; mutable in_cycle : bool
-  ; mutable run_every_cycle_start : (unit -> unit) list
-  ; mutable run_every_cycle_end : (unit -> unit) list
+  ; mutable run_every_cycle_start : (Types.Cycle_hook.t[@sexp.opaque]) list
+  ; run_every_cycle_start_state :
+      (Types.Cycle_hook_handle.t, (Types.Cycle_hook.t[@sexp.opaque])) Hashtbl.t
+  ; mutable run_every_cycle_end : (Types.Cycle_hook.t[@sexp.opaque]) list
+  ; run_every_cycle_end_state :
+      (Types.Cycle_hook_handle.t, (Types.Cycle_hook.t[@sexp.opaque])) Hashtbl.t
   ; mutable last_cycle_time : Time_ns.Span.t
   ; mutable last_cycle_num_jobs : int
   ; mutable total_cycle_time : Time_ns.Span.t
@@ -109,8 +113,6 @@ type t = Scheduler0.t =
   ; mutable check_invariants : bool
   ; mutable max_num_jobs_per_priority_per_cycle : Max_num_jobs_per_priority_per_cycle.t
   ; mutable record_backtraces : bool
-  ; mutable on_start_of_cycle : unit -> unit
-  ; mutable on_end_of_cycle : unit -> unit
   }
 [@@deriving fields, sexp_of]
 
@@ -134,6 +136,23 @@ let num_jobs_run t =
 
 let last_cycle_num_jobs t = t.last_cycle_num_jobs
 
+let unordered_is_sublist ~equal ~sublist:small large =
+  let remove l x =
+    match List.split_while l ~f:(fun y -> not (equal y x)) with
+    | _, [] -> None
+    | l, _ :: r -> Some (l @ r)
+  in
+  Option.is_some
+    (List.fold small ~init:(Some large) ~f:(fun acc x ->
+       Option.bind acc ~f:(fun l -> remove l x)))
+;;
+
+let check_hook_table_invariant table list =
+  (* You can in fact have hooks in the list for which there is no corresponding entry in
+     the table. Such hooks can never be removed. *)
+  assert (unordered_is_sublist ~equal:phys_equal ~sublist:(Hashtbl.data table) list)
+;;
+
 let invariant t : unit =
   try
     let check f field = f (Field.get field t) in
@@ -153,7 +172,15 @@ let invariant t : unit =
       ~cycle_start:ignore
       ~in_cycle:ignore
       ~run_every_cycle_start:ignore
+      ~run_every_cycle_start_state:
+        (check (fun run_every_cycle_start_state ->
+           check_hook_table_invariant
+             run_every_cycle_start_state
+             t.run_every_cycle_start))
       ~run_every_cycle_end:ignore
+      ~run_every_cycle_end_state:
+        (check (fun run_every_cycle_end_state ->
+           check_hook_table_invariant run_every_cycle_end_state t.run_every_cycle_end))
       ~last_cycle_time:ignore
       ~total_cycle_time:ignore
       ~last_cycle_num_jobs:
@@ -171,8 +198,6 @@ let invariant t : unit =
       ~check_invariants:ignore
       ~max_num_jobs_per_priority_per_cycle:ignore
       ~record_backtraces:ignore
-      ~on_start_of_cycle:ignore
-      ~on_end_of_cycle:ignore
   with
   | exn -> raise_s [%message "Scheduler.invariant failed" (exn : exn) (t : t)]
 ;;
@@ -229,7 +254,9 @@ let create () =
     ; cycle_count = 0
     ; in_cycle = false
     ; run_every_cycle_start = []
+    ; run_every_cycle_start_state = Hashtbl.create (module Types.Cycle_hook_handle)
     ; run_every_cycle_end = []
+    ; run_every_cycle_end_state = Hashtbl.create (module Types.Cycle_hook_handle)
     ; last_cycle_time = sec 0.
     ; last_cycle_num_jobs = 0
     ; total_cycle_time = sec 0.
@@ -244,8 +271,6 @@ let create () =
     ; max_num_jobs_per_priority_per_cycle =
         Async_kernel_config.max_num_jobs_per_priority_per_cycle
     ; record_backtraces = Async_kernel_config.record_backtraces
-    ; on_start_of_cycle = Fn.id
-    ; on_end_of_cycle = Fn.id
     }
   and events =
     Timing_wheel.create ~config:Async_kernel_config.timing_wheel_config ~start:now
@@ -255,9 +280,9 @@ let create () =
     ; am_advancing = false
     ; events
     ; handle_fired = (fun alarm -> handle_fired time_source (Alarm.value events alarm))
-    ; fired_events = Event.none
+    ; fired_events = Event.Option.none
     ; is_wall_clock = true
-    ; most_recently_fired = Event.none
+    ; most_recently_fired = Event.Option.none
     ; scheduler = t
     }
   in
@@ -293,11 +318,13 @@ let current_execution_context t =
   else t.current_execution_context
 ;;
 
-let with_execution_context t tmp_context ~f =
+let with_execution_context1 t tmp_context ~f x =
   let old_context = current_execution_context t in
   set_execution_context t tmp_context;
-  protect ~f ~finally:(fun () -> set_execution_context t old_context)
+  protectx ~f x ~finally:(fun _ -> set_execution_context t old_context)
 ;;
+
+let with_execution_context t tmp_context ~f = with_execution_context1 t tmp_context ~f ()
 
 let create_job (type a) t execution_context f a =
   if Pool.is_full t.job_pool then t.job_pool <- Pool.grow t.job_pool;
@@ -361,9 +388,9 @@ let create_time_source
     ; am_advancing = false
     ; events
     ; handle_fired = (fun alarm -> handle_fired time_source (Alarm.value events alarm))
-    ; fired_events = Event.none
+    ; fired_events = Event.Option.none
     ; is_wall_clock = false
-    ; most_recently_fired = Event.none
+    ; most_recently_fired = Event.Option.none
     ; scheduler = t
     }
   in

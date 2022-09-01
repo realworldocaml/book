@@ -29,7 +29,6 @@ type input = {
 (* {2 Output} *)
 
 let add_warning input warning = input.warnings := warning :: !(input.warnings)
-
 let junk input = Stream.junk input.tokens
 
 let peek input =
@@ -54,7 +53,8 @@ type token_that_always_begins_an_inline_element =
   | `Simple_reference of string
   | `Begin_reference_with_replacement_text of string
   | `Simple_link of string
-  | `Begin_link_with_replacement_text of string ]
+  | `Begin_link_with_replacement_text of string
+  | `Math_span of string ]
 
 (* Check that the token constructors above actually are all in [Token.t]. *)
 let _check_subset : token_that_always_begins_an_inline_element -> Token.t =
@@ -99,12 +99,9 @@ let rec inline_element :
   | `Plus ->
       junk input;
       Loc.at location (`Word "+")
-  | `Code_span c ->
+  | (`Code_span _ | `Math_span _ | `Raw_markup _) as token ->
       junk input;
-      Loc.at location (`Code_span c)
-  | `Raw_markup (raw_markup_target, s) ->
-      junk input;
-      Loc.at location (`Raw_markup (raw_markup_target, s))
+      Loc.at location token
   | `Begin_style s as parent_markup ->
       junk input;
 
@@ -357,7 +354,8 @@ let paragraph : input -> Ast.nestable_block_element with_location =
    fun acc ->
     match npeek 2 input with
     | { value = `Single_newline ws; location }
-      :: { value = #token_that_always_begins_an_inline_element; _ } :: _ ->
+      :: { value = #token_that_always_begins_an_inline_element; _ }
+      :: _ ->
         junk input;
         let acc = Loc.at location (`Space ws) :: acc in
         let acc = paragraph_line acc in
@@ -373,34 +371,34 @@ let paragraph : input -> Ast.nestable_block_element with_location =
 (* {3 Helper types} *)
 
 (* The interpretation of tokens in the block parser depends on where on a line
-   each token appears. The five possible "locations" are:
+    each token appears. The five possible "locations" are:
 
-   - [`At_start_of_line], when only whitespace has been read on the current
-     line.
-   - [`After_tag], when a valid tag token, such as [@deprecated], has been read,
-     and only whitespace has been read since.
-   - [`After_shorthand_bullet], when a valid shorthand list item bullet, such as
-     [-], has been read, and only whitespace has been read since.
-   - [`After_explicit_list_bullet], when a valid explicit bullet, such as [{li],
-     has been read, and only whitespace has been read since.
-   - [`After_text], when any other valid non-whitespace token has already been
-     read on the current line.
+    - [`At_start_of_line], when only whitespace has been read on the current
+      line.
+    - [`After_tag], when a valid tag token, such as [@deprecated], has been read,
+      and only whitespace has been read since.
+    - [`After_shorthand_bullet], when a valid shorthand list item bullet, such as
+      [-], has been read, and only whitespace has been read since.
+    - [`After_explicit_list_bullet], when a valid explicit bullet, such as [{li],
+      has been read, and only whitespace has been read since.
+    - [`After_text], when any other valid non-whitespace token has already been
+      read on the current line.
 
-   Here are some examples of how this affects the interpretation of tokens:
+    Here are some examples of how this affects the interpretation of tokens:
 
-   - A paragraph can start anywhere except [`After_text] (two paragraphs cannot
-     be on the same line, but paragraphs can be nested in just about anything).
-   - [`Minus] is interpreted as a list item bullet [`At_start_of_line],
-     [`After_tag], and [`After_explicit_list_bullet].
-   - Tags are only allowed [`At_start_of_line].
+    - A paragraph can start anywhere except [`After_text] (two paragraphs cannot
+      be on the same line, but paragraphs can be nested in just about anything).
+    - [`Minus] is interpreted as a list item bullet [`At_start_of_line],
+      [`After_tag], and [`After_explicit_list_bullet].
+    - Tags are only allowed [`At_start_of_line].
 
-  To track the location accurately, the functions that make up the block parser
-  pass explicit [where_in_line] values around and return them.
+   To track the location accurately, the functions that make up the block parser
+   pass explicit [where_in_line] values around and return them.
 
-  In a few cases, [where_in_line] can be inferred from what helper was called.
-  For example, the [paragraph] parser always stops on the same line as the last
-  significant token that is in the paragraph it consumed, so the location must
-  be [`After_text]. *)
+   In a few cases, [where_in_line] can be inferred from what helper was called.
+   For example, the [paragraph] parser always stops on the same line as the last
+   significant token that is in the paragraph it consumed, so the location must
+   be [`After_text]. *)
 type where_in_line =
   [ `At_start_of_line
   | `After_tag
@@ -440,7 +438,6 @@ type stopped_implicitly =
 
 (* Ensure that the above two types are really subsets of [Token.t]. *)
 let _check_subset : stops_at_delimiters -> Token.t = fun t -> (t :> Token.t)
-
 let _check_subset : stopped_implicitly -> Token.t = fun t -> (t :> Token.t)
 
 (* The different contexts in which the block parser [block_element_list] can be
@@ -730,10 +727,11 @@ let rec block_element_list :
         let block = Loc.at location block in
         let acc = block :: acc in
         consume_block_elements ~parsed_a_tag `After_text acc
-    | { value = `Code_block (_, s) as token; location } as next_token ->
+    | ( { value = `Code_block (_, { value = s; _ }) as token; location }
+      | { value = `Math_block s as token; location } ) as next_token ->
         warn_if_after_tags next_token;
         warn_if_after_text next_token;
-        if s.value = "" then
+        if s = "" then
           Parse_error.should_not_be_empty ~what:(Token.describe token) location
           |> add_warning input;
 
@@ -908,8 +906,7 @@ let rec block_element_list :
           |> accepted_in_all_contexts context
           |> Loc.at location
         in
-        consume_block_elements ~parsed_a_tag `At_start_of_line
-          (paragraph :: acc)
+        consume_block_elements ~parsed_a_tag `At_start_of_line (paragraph :: acc)
   in
 
   let where_in_line =
@@ -994,8 +991,7 @@ and explicit_list_items :
     let next_token = peek input in
     match next_token.value with
     | `End ->
-        Parse_error.not_allowed next_token.location
-          ~what:(Token.describe `End)
+        Parse_error.not_allowed next_token.location ~what:(Token.describe `End)
           ~in_what:(Token.describe parent_markup)
         |> add_warning input;
         (List.rev acc, next_token.location)
@@ -1044,8 +1040,7 @@ and explicit_list_items :
         | `Right_brace -> junk input
         | `End ->
             Parse_error.not_allowed token_after_list_item.location
-              ~what:(Token.describe `End)
-              ~in_what:(Token.describe token)
+              ~what:(Token.describe `End) ~in_what:(Token.describe token)
             |> add_warning input);
 
         let acc = content :: acc in
@@ -1093,7 +1088,7 @@ let parse warnings tokens =
         in
 
         junk input;
-        elements @ block :: parse_block_elements ()
+        elements @ (block :: parse_block_elements ())
   in
   let ast = parse_block_elements () in
   (ast, List.rev !(input.warnings))

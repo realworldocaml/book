@@ -94,29 +94,29 @@ module Nfs = struct
   let critical_section ?message path ~abort ~f =
     waiting_create ~abort ?message path
     >>= fun () ->
-    Monitor.protect f ~finally:(fun () -> unlock_exn path)
+    Monitor.protect ~run:(`Schedule)  ~rest:(`Log)  f ~finally:(fun () -> unlock_exn path)
   ;;
 end
 
 module Flock = struct
   type t = Lock_file_blocking.Flock.t
 
-  let lock_exn ~lock_path =
-    In_thread.run (fun () -> Lock_file_blocking.Flock.lock_exn ~lock_path)
+  let lock_exn ?lock_owner_uid ~lock_path () =
+    In_thread.run (fun () -> Lock_file_blocking.Flock.lock_exn ?lock_owner_uid () ~lock_path)
   ;;
 
-  let lock ~lock_path =
-    Monitor.try_with_or_error ~extract_exn:true (fun () -> lock_exn ~lock_path)
+  let lock ?lock_owner_uid ~lock_path () =
+    Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () -> lock_exn ?lock_owner_uid () ~lock_path)
   ;;
 
   let unlock_exn t = In_thread.run (fun () -> Lock_file_blocking.Flock.unlock_exn t)
-  let unlock t = Monitor.try_with_or_error ~extract_exn:true (fun () -> unlock_exn t)
+  let unlock t = Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () -> unlock_exn t)
 
-  let wait_for_lock_exn ?(abort = Deferred.never ()) ~lock_path () =
+  let wait_for_lock_exn ?(abort = Deferred.never ()) ?lock_owner_uid ~lock_path () =
     let lock_handle = Set_once.create () in
     let%map () =
       repeat_with_abort ~abort ~f:(fun () ->
-        match%map lock_exn ~lock_path with
+        match%map lock_exn ?lock_owner_uid () ~lock_path with
         | `We_took_it t ->
           Set_once.set_exn lock_handle [%here] t;
           true
@@ -126,9 +126,9 @@ module Flock = struct
     Set_once.get_exn lock_handle [%here]
   ;;
 
-  let wait_for_lock ?abort ~lock_path () =
-    Monitor.try_with_or_error ~extract_exn:true (fun () ->
-      wait_for_lock_exn ?abort ~lock_path ())
+  let wait_for_lock ?abort ?lock_owner_uid ~lock_path () =
+    Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () ->
+      wait_for_lock_exn ?abort ?lock_owner_uid ~lock_path ())
   ;;
 end
 
@@ -140,11 +140,11 @@ module Symlink = struct
   ;;
 
   let lock ~lock_path ~metadata =
-    Monitor.try_with_or_error ~extract_exn:true (fun () -> lock_exn ~lock_path ~metadata)
+    Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () -> lock_exn ~lock_path ~metadata)
   ;;
 
   let unlock_exn t = In_thread.run (fun () -> Lock_file_blocking.Symlink.unlock_exn t)
-  let unlock t = Monitor.try_with_or_error ~extract_exn:true (fun () -> unlock_exn t)
+  let unlock t = Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () -> unlock_exn t)
 
   let wait_for_lock_exn ?(abort = Deferred.never ()) ~lock_path ~metadata () =
     let lock_handle = Set_once.create () in
@@ -167,7 +167,7 @@ module Symlink = struct
   ;;
 
   let wait_for_lock ?abort ~lock_path ~metadata () =
-    Monitor.try_with_or_error ~extract_exn:true (fun () ->
+    Monitor.try_with_or_error ~rest:(`Log)  ~extract_exn:true (fun () ->
       wait_for_lock_exn ?abort ~lock_path ~metadata ())
   ;;
 end

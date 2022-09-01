@@ -1,0 +1,107 @@
+---
+name: Build
+on:
+  push:
+    branches:
+      - master  # forall push/merge in master
+  pull_request:
+    branches:
+      - "**"  # forall submitted Pull Requests
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        ocaml-version:
+          - 4.02.x
+          - 4.03.x
+          - 4.04.x
+          - 4.05.x
+          - 4.06.x
+          - 4.07.x
+          - 4.08.x
+          - 4.09.x
+          - 4.10.x
+          - 4.11.x
+          - 4.12.x
+          - 4.13.x
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      SKIP_BUILD: |
+        dose
+        lilis
+        rotor
+      SKIP_TEST: |
+        0install
+        bisect_ppx
+        cconv-ppx
+        decompress
+        extlib-compat
+        General
+
+    steps:
+      - name: Prepare git
+        run: |
+          git config --global core.autocrlf false
+          git config --global init.defaultBranch master
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+
+      - name: Install dependencies
+        run: opam install --deps-only .
+
+      - name: List installed packages
+        run: opam list
+
+      - name: Build locally
+        run: opam exec -- make
+
+      - name: Upload the build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-cppo.exe
+          path: _build/default/src/cppo_main.exe
+
+      - name: Build, test, and install package
+        run: opam install -t .
+
+      - name: Test dependants
+        if: >
+          (runner.os == 'Linux' && matrix.ocaml-version >= '4.04') ||
+          (runner.os == 'macOS' && matrix.ocaml-version >= '4.13')
+        run: |
+          PACKAGES=`opam list -s --color=never --installable --depends-on cppo,cppo_ocamlbuild`
+          echo "Dependants:" $PACKAGES
+          for PACKAGE in $PACKAGES
+          do
+             echo $SKIP_BUILD | tr ' ' '\n' | grep ^$PACKAGE$ > /dev/null &&
+               echo Skip $PACKAGE && continue
+             OPAMWITHTEST=true
+             echo $SKIP_TEST | tr ' ' '\n' | grep ^$PACKAGE$ > /dev/null &&
+                 OPAMWITHTEST=false
+             ([ $OPAMWITHTEST == false ] &&
+              echo ::group::Build          $PACKAGE) ||
+              echo ::group::Build and test $PACKAGE
+             DEPS_FAILED=false
+             (opam depext $PACKAGE &&
+              opam install --deps-only -t $PACKAGE) || DEPS_FAILED=true
+             [ $DEPS_FAILED == false ] && opam install $PACKAGE
+             echo ::endgroup::
+             [ $DEPS_FAILED == false ] || echo Dependencies broken
+          done
+
+      - name: Uninstall package
+        run: opam uninstall .

@@ -8,14 +8,13 @@
     [Reader] and [Writer] modules.
 *)
 
-open! Core_kernel
+open! Core
 open! Async_kernel
 
 (** Binary headers containing message lengths.  All transports should use this to ensure
     binary compatibility. *)
 module Header : sig
   val length : int
-
   val unsafe_get_payload_length : Bigstring.t -> pos:int -> int
   val unsafe_set_payload_length : Bigstring.t -> pos:int -> int -> unit
 end
@@ -24,6 +23,7 @@ module Handler_result = Transport_intf.Handler_result
 
 module Reader : sig
   module type S = Transport_intf.Reader
+
   include S
 
   val pack : (module S with type t = 'a) -> 'a -> t
@@ -42,6 +42,7 @@ module Send_result = Transport_intf.Send_result
 
 module Writer : sig
   module type S = Transport_intf.Writer
+
   include S
 
   val pack : (module S with type t = 'a) -> 'a -> t

@@ -23,7 +23,7 @@
     There is a debugging functor, [Tuple_pool.Error_check], that is useful for building
     pools to help debug incorrect pointer usage. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 (** [S] is the module type for a pool. *)
@@ -78,11 +78,7 @@ module type S = sig
   (** [create slots ~capacity ~dummy] creates an empty pool that can hold up to [capacity]
       N-tuples.  The slots of [dummy] are stored in free tuples.  [create] raises if
       [capacity < 0 || capacity > max_capacity ~slots_per_tuple]. *)
-  val create
-    :  (('tuple, _) Slots.t as 'slots)
-    -> capacity:int
-    -> dummy:'tuple
-    -> 'slots t
+  val create : (('tuple, _) Slots.t as 'slots) -> capacity:int -> dummy:'tuple -> 'slots t
 
   (** [max_capacity] returns the maximum capacity allowed when creating a pool. *)
   val max_capacity : slots_per_tuple:int -> int
@@ -348,8 +344,7 @@ module type Tuple_pool = sig
   (** This uses a [Uniform_array.t] to implement the pool.  We expose that [Pointer.t] is
       an [int] so that OCaml can avoid the write barrier, due to knowing that [Pointer.t]
       isn't an OCaml pointer. *)
-  include
-    S with type 'a Pointer.t = private int
+  include S with type 'a Pointer.t = private int
   (** @inline *)
 
   (** An [Unsafe] pool is like an ordinary pool, except that the [create] function does

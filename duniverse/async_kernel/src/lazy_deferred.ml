@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Deferred_std
 
 module T = struct
@@ -12,7 +12,20 @@ module T = struct
     { start
     ; result =
         (let%bind () = Ivar.read start in
-         Monitor.try_with_or_error f)
+         Monitor.try_with_or_error
+           ~rest:`Log
+           f)
+    }
+  ;;
+
+  let create_or_error f =
+    let start = Ivar.create () in
+    { start
+    ; result =
+        (let%bind () = Ivar.read start in
+         Monitor.try_with_join_or_error
+           ~rest:`Log
+           f)
     }
   ;;
 

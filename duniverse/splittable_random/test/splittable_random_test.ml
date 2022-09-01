@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open  Expect_test_helpers_core
 
 let%expect_test "bool fairness" =

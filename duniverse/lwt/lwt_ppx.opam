@@ -2,7 +2,7 @@ opam-version: "2.0"
 
 synopsis: "PPX syntax for Lwt, providing something similar to async/await from JavaScript"
 
-version: "2.0.3"
+version: "2.1.0"
 license: "MIT"
 homepage: "https://github.com/ocsigen/lwt"
 doc: "https://ocsigen.org/lwt/dev/api/Ppx_lwt"
@@ -19,7 +19,7 @@ dev-repo: "git+https://github.com/ocsigen/lwt.git"
 depends: [
   "dune" {>= "1.8.0"}
   "lwt"
-  "ocaml" {>= "4.02.0"}
+  "ocaml" {>= "4.08"}
   "ppxlib" {>= "0.16.0"}
 ]
 

@@ -1,4 +1,4 @@
-(lang dune 2.5)
+(lang dune 2.7)
 (generate_opam_files true)
 (formatting disabled)
 
@@ -35,5 +35,5 @@ but will be maintained and distributed separately in this camlpstreams package.
 ")
 
  (depends
-  (ocaml (>= 4.05.0)))
+  (ocaml (>= 4.02.3)))
 )

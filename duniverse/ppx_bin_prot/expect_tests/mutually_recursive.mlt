@@ -1,22 +1,24 @@
-open Bin_prot.Std
+open Bin_prot.Std;;
 
-#verbose true;;
+#verbose true
 
 module Test = struct
- type ('a, 'm) branch =
+  type ('a, 'm) branch =
     { branch_on : 'm
     ; value : float
     ; if_lt : ('a, 'm) t'
     ; if_geq : ('a, 'm) t'
     }
+
   and ('a, 'm) t' =
-    [ `leaf   of 'a
+    [ `leaf of 'a
     | `branch of ('a, 'm) branch
     ]
   [@@deriving bin_io]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Test :
   sig
     type ('a, 'm) branch = {

@@ -6,3 +6,5 @@
 #
 # Interim maintainers who won't be very responsive :-(
 * @mjambon @pmetzger
+*.opam @liyishuai
+.github/workflows/ @liyishuai

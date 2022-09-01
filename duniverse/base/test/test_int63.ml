@@ -1,7 +1,7 @@
 open! Import
 open! Int63
 
-let%expect_test ("hash coherence"[@tags "64-bits-only"]) =
+let%expect_test ("hash coherence" [@tags "64-bits-only"]) =
   check_int_hash_coherence [%here] (module Int63);
   [%expect {| |}]
 ;;
@@ -58,6 +58,35 @@ let%test_module "Overflow_exn" =
         let%test "max_value - -max_value" =
           Exn.does_raise (fun () -> max_value - neg max_value)
         ;;
+      end)
+    ;;
+
+    let is_overflow = Exn.does_raise
+
+    let%test_module "( * )" =
+      (module struct
+        let%test "1 * 1" = one * one = one
+        let%test "1 * 0" = one * zero = zero
+        let%test "0 * 1" = zero * one = zero
+        let%test "min_value * -1" = is_overflow (fun () -> min_value * neg one)
+        let%test "-1 * min_value" = is_overflow (fun () -> neg one * min_value)
+
+        let%test "46116860184273879 * 100" =
+          of_int64_exn 46116860184273879L * of_int 100 = of_int64_exn 4611686018427387900L
+        ;;
+
+        let%test "46116860184273879 * 101" =
+          is_overflow (fun () -> of_int64_exn 46116860184273879L * of_int 101)
+        ;;
+      end)
+    ;;
+
+    let%test_module "( / )" =
+      (module struct
+        let%test "1 / 1" = one / one = one
+        let%test "min_value / -1" = is_overflow (fun () -> min_value / neg one)
+        let%test "min_value / 1" = min_value / one = min_value
+        let%test "max_value / -1" = max_value / neg one = min_value + one
       end)
     ;;
   end)

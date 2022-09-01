@@ -3,9 +3,7 @@
    for error messages. *)
 
 type section_heading = [ `Begin_section_heading of int * string option ]
-
 type style = [ `Bold | `Italic | `Emphasis | `Superscript | `Subscript ]
-
 type paragraph_style = [ `Left | `Center | `Right ]
 
 type tag =
@@ -53,6 +51,8 @@ type t =
     string
   | `Code_span of string
   | `Raw_markup of string option * string
+  | `Math_span of string
+  | `Math_block of string
   | `Begin_style of style
   | `Begin_paragraph_style of paragraph_style
   | (* Other inline element markup. *)
@@ -123,6 +123,8 @@ let describe : [< t | `Comment ] -> string = function
   | `Begin_style `Emphasis -> "'{e ...}' (emphasized text)"
   | `Begin_style `Superscript -> "'{^...}' (superscript)"
   | `Begin_style `Subscript -> "'{_...}' (subscript)"
+  | `Math_span _ -> "'{m ...}' (math span)"
+  | `Math_block _ -> "'{math ...}' (math block)"
   | `Simple_reference _ -> "'{!...}' (cross-reference)"
   | `Begin_reference_with_replacement_text _ ->
       "'{{!...} ...}' (cross-reference)"

@@ -1,10 +1,10 @@
 val prettify : ?std:bool -> string -> string
   (** Combined parser and pretty-printer.
-      See [to_string] for the role of the optional [std] argument. *)
+      See [to_string] for the role of the optional [std] argument and raised exceptions. *)
 
 val compact : ?std:bool -> string -> string
   (** Combined parser and printer.
-      See [to_string] for the role of the optional [std] argument. *)
+      See [to_string] for the role of the optional [std] argument and raised exceptions. *)
 
 (** {2 JSON readers} *)
 
@@ -12,7 +12,7 @@ exception Finally of exn * exn
 (** Exception describing a failure in both finalizer and parsing. *)
 
 val from_string :
-  ?buf:Bi_outbuf.t ->
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> t
@@ -22,27 +22,28 @@ val from_string :
       @param fname data file name to be used in error messages. It does
       not have to be a real file.
       @param lnum number of the first line of input. Default is 1.
+      @raise Json_error if parsing fails.
   *)
 
 val from_channel :
-  ?buf:Bi_outbuf.t ->
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
   in_channel -> t
   (** Read a JSON value from a channel.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 val from_file :
-  ?buf:Bi_outbuf.t ->
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
   string -> t
   (** Read a JSON value from a file.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
 
 type lexer_state = Lexer_state.t = {
-  buf : Bi_outbuf.t;
+  buf : Buffer.t;
   mutable lnum : int;
   mutable bol : int;
   mutable fname : string option;
@@ -52,7 +53,7 @@ type lexer_state = Lexer_state.t = {
     *)
 
 val init_lexer :
-  ?buf: Bi_outbuf.t ->
+  ?buf: Buffer.t ->
   ?fname: string ->
   ?lnum: int ->
   unit -> lexer_state
@@ -65,90 +66,90 @@ val from_lexbuf :
   Lexing.lexbuf -> t
   (** Read a JSON value from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
-      See [from_string] for the meaning of the optional arguments.
+      See [from_string] for the meaning of the optional arguments and raised exceptions.
 
       @param stream indicates whether more data may follow. The default value
       is false and indicates that only JSON whitespace can be found between
       the end of the JSON value and the end of the input. *)
 
-val stream_from_string :
-  ?buf:Bi_outbuf.t ->
+val seq_from_string :
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> t Stream.t
+  string -> t Seq.t
   (** Input a sequence of JSON values from a string.
       Whitespace between JSON values is fine but not required.
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
-val stream_from_channel :
-  ?buf:Bi_outbuf.t ->
+val seq_from_channel :
+  ?buf:Buffer.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> t Stream.t
+  in_channel -> t Seq.t
   (** Input a sequence of JSON values from a channel.
       Whitespace between JSON values is fine but not required.
       @param fin finalization function executed once when the end of the
-      stream is reached either because there is no more input or because
+      sequence is reached either because there is no more input or because
       the input could not be parsed, raising an exception.
       @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and other raised exceptions. *)
 
-val stream_from_file :
-  ?buf:Bi_outbuf.t ->
+val seq_from_file :
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> t Stream.t
+  string -> t Seq.t
   (** Input a sequence of JSON values from a file.
       Whitespace between JSON values is fine but not required.
 
-      See [from_string] for the meaning of the optional arguments. *)
+      See [from_string] for the meaning of the optional arguments and raised exceptions. *)
 
-val stream_from_lexbuf :
+val seq_from_lexbuf :
   lexer_state ->
   ?fin:(unit -> unit) ->
-  Lexing.lexbuf -> t Stream.t
+  Lexing.lexbuf -> t Seq.t
   (** Input a sequence of JSON values from a lexbuf.
       A valid initial [lexer_state] can be created with [init_lexer].
       Whitespace between JSON values is fine but not required.
       @raise Finally When the parsing and the finalizer both raised, [Finally (exn, fin_exn)]
       is raised, [exn] being the parsing exception and [fin_exn] the finalizer one.
 
-      See [stream_from_channel] for the meaning of the optional [fin]
-      argument. *)
+      See [seq_from_channel] for the meaning of the optional [fin]
+      argument and other raised exceptions. *)
 
 
 type json_line = [ `Json of t | `Exn of exn ]
     (** The type of values resulting from a parsing attempt of a JSON value. *)
 
-val linestream_from_channel :
-  ?buf:Bi_outbuf.t ->
+val lineseq_from_channel :
+  ?buf:Buffer.t ->
   ?fin:(unit -> unit) ->
   ?fname:string ->
   ?lnum:int ->
-  in_channel -> json_line Stream.t
+  in_channel -> json_line Seq.t
   (** Input a sequence of JSON values, one per line, from a channel.
       Exceptions raised when reading malformed lines are caught
       and represented using [`Exn].
 
-      See [stream_from_channel] for the meaning of the optional [fin]
+      See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
-val linestream_from_file :
-  ?buf:Bi_outbuf.t ->
+val lineseq_from_file :
+  ?buf:Buffer.t ->
   ?fname:string ->
   ?lnum:int ->
-  string -> json_line Stream.t
+  string -> json_line Seq.t
   (** Input a sequence of JSON values, one per line, from a file.
       Exceptions raised when reading malformed lines are caught
       and represented using [`Exn].
 
-      See [stream_from_channel] for the meaning of the optional [fin]
+      See [seq_from_channel] for the meaning of the optional [fin]
       argument.
-      See [from_string] for the meaning of the other optional arguments. *)
+      See [from_string] for the meaning of the other optional arguments and raised exceptions. *)
 
 val read_t : lexer_state -> Lexing.lexbuf -> t
 (** Read a JSON value from the given lexer_state and lexing buffer and return it.
@@ -260,13 +261,6 @@ val read_colon : lexer_state -> Lexing.lexbuf -> unit
 val read_json : lexer_state -> Lexing.lexbuf -> t
 val skip_json : lexer_state -> Lexing.lexbuf -> unit
 val buffer_json : lexer_state -> Lexing.lexbuf -> unit
-
-val validate_json : 'path -> t -> 'error option
-  (* always returns [None].
-     Provided so that atdgen users can write:
-
-       type t <ocaml module="Yojson.Safe"> = abstract
-  *)
 
 (* end undocumented section *)
 (**/**)

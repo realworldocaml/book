@@ -1,12 +1,13 @@
-open Bin_prot.Std
+open Bin_prot.Std;;
 
-#verbose true;;
+#verbose true
 
 module Simple = struct
   type 'a t = C of 'a list t * string t [@@deriving bin_io]
 end
 
-[%%expect{|
+[%%expect
+  {|
 module Simple :
   sig
     type 'a t = C of 'a list t * string t

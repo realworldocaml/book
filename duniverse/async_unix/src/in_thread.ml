@@ -125,14 +125,14 @@ module Helper_thread = struct
   ;;
 
   let create_now ?priority ?name () =
-    let scheduler = the_one_and_only ~should_lock:true in
+    let scheduler = the_one_and_only () in
     Result.map
       (Thread_pool.create_helper_thread scheduler.thread_pool ?name ?priority)
       ~f:(fun helper_thread -> create_internal scheduler helper_thread)
   ;;
 
   let create ?priority ?name () =
-    let scheduler = the_one_and_only ~should_lock:true in
+    let scheduler = the_one_and_only () in
     let%map helper_thread =
       run (fun () ->
         Thread_pool.become_helper_thread scheduler.thread_pool ?name ?priority)

@@ -67,7 +67,7 @@ let run t args =
   String.trim s
 
 let git_accept () =
-  Process.Accept (Predicate_lang.union [ Element 0; Element 128 ])
+  Process.Accept (Predicate.create (fun x -> Int.equal x 0 || Int.equal x 128))
 
 let run_git t args =
   let res =
@@ -98,10 +98,10 @@ let hg_describe t =
     match s with
     | "null" -> id
     | _ -> (
-      match int_of_string dist with
-      | 1 -> s
-      | n -> sprintf "%s-%d-%s" s (n - 1) id
-      | exception _ -> sprintf "%s-%s-%s" s dist id)
+      match Int.of_string dist with
+      | Some 1 -> s
+      | Some n -> sprintf "%s-%d-%s" s (n - 1) id
+      | None -> sprintf "%s-%s-%s" s dist id)
   in
   s ^ dirty_suffix
 

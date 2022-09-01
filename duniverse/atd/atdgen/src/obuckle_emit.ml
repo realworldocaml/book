@@ -1,5 +1,6 @@
 open Atd.Import
 open Indent
+module Json = Atd.Json
 
 type param =
   { deref
@@ -121,10 +122,7 @@ let rec get_reader_name
 let read_with_adapter adapter reader =
   match adapter.Json.ocaml_adapter with
   | None -> reader
-  | Some adapter_path ->
-      let normalize =
-        Oj_mapping.json_normalizer_of_adapter_path adapter_path
-      in
+  | Some { normalize; _ } ->
       [
         Line (
           sprintf "%s %s (" (decoder_ident "adapter") normalize
@@ -401,8 +399,7 @@ let rec get_writer_name
 let write_with_adapter adapter writer =
   match adapter.Json.ocaml_adapter with
   | None -> writer
-  | Some adapter_path ->
-      let restore = Oj_mapping.json_restorer_of_adapter_path adapter_path in
+  | Some { restore; _ } ->
       [
         Line (
           sprintf "%s %s (" (encoder_ident "adapter") restore

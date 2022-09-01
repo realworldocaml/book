@@ -10,6 +10,7 @@
 #include <caml/alloc.h>
 #include <caml/mlvalues.h>
 #include <caml/unixsupport.h>
+#include <caml/version.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -28,6 +29,10 @@
 #endif
 #ifndef O_RSYNC
 #define O_RSYNC 0
+#endif
+
+#if OCAML_VERSION_MAJOR < 5
+#define caml_unix_cloexec_default unix_cloexec_default
 #endif
 
 static int open_flag_table[] = {
@@ -64,11 +69,7 @@ static void worker_open(struct job_open *job)
     else if (job->fd & KEEPEXEC)
         cloexec = 0;
     else
-#if OCAML_VERSION_MAJOR >= 4 && OCAML_VERSION_MINOR >= 5
-        cloexec = unix_cloexec_default;
-#else
-        cloexec = 0;
-#endif
+        cloexec = caml_unix_cloexec_default;
 
 #if defined(O_CLOEXEC)
     if (cloexec) job->flags |= O_CLOEXEC;

@@ -9,6 +9,13 @@ let preprocess =
 let () = Jbuild_plugin.V1.send @@ {|
 
 (rule
+ (targets lwt_process.ml)
+ (deps (:ml lwt_process.cppo.ml))
+ (action
+  (chdir %{project_root}
+   (run %{bin:cppo} -V OCAML:%{ocaml_version} %{ml} -o %{targets}))))
+
+(rule
  (targets lwt_unix.ml)
  (deps (:ml lwt_unix.cppo.ml))
  (action
@@ -42,7 +49,7 @@ let () = Jbuild_plugin.V1.send @@ {|
  (synopsis "Unix support for Lwt")
  (optional)
  (wrapped false)
- (libraries bigarray lwt mmap ocplib-endian.bigstring threads unix)
+ (libraries bigarray lwt ocplib-endian.bigstring threads unix)
  |} ^ preprocess ^ {|
  (c_names
   lwt_unix_stubs

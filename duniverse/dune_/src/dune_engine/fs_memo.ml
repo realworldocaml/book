@@ -1,5 +1,4 @@
-open! Stdune
-open! Import
+open Import
 open Memo.O
 
 (* Watching and invalidating paths. *)
@@ -253,6 +252,11 @@ let file_exists path =
   | Ok kind -> File_kind.equal kind S_REG
   | Error (_ : Unix_error.Detailed.t) -> false
 
+let is_directory path =
+  path_kind path >>| function
+  | Ok kind -> Ok (File_kind.equal kind S_DIR)
+  | Error e -> Error e
+
 let dir_exists path =
   path_kind path >>| function
   | Ok kind -> File_kind.equal kind S_DIR
@@ -280,7 +284,7 @@ let dir_contents ?(force_update = false) path =
    because the result's type depends on [f]. There are only two call sites of
    [with_lexbuf_from_file], so perhaps we could just replace this more general
    function with two simpler ones that can be cached independently. *)
-let with_lexbuf_from_file path ~f =
+let tracking_file_digest path =
   let+ () = Watcher.watch ~try_to_watch_via_parent:true path in
   (* This is a bit of a hack. By reading [file_digest], we cause the [path] to
      be recorded in the [Fs_cache.Untracked.file_digest], so the build will be
@@ -288,7 +292,15 @@ let with_lexbuf_from_file path ~f =
   let (_ : Cached_digest.Digest_result.t) =
     Fs_cache.read Fs_cache.Untracked.file_digest path
   in
+  ()
+
+let with_lexbuf_from_file path ~f =
+  let+ () = tracking_file_digest path in
   Io.Untracked.with_lexbuf_from_file path ~f
+
+let file_contents path =
+  let+ () = tracking_file_digest path in
+  Io.read_file path
 
 (* When a file or directory is created or deleted, we need to also invalidate
    the parent directory, so that the [dir_contents] queries are re-executed. *)

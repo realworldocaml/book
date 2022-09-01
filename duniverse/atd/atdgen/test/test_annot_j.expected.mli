@@ -8,12 +8,12 @@ type pointB = ProtoD_t.pointB = { f: float }
 type pointA = ProtoA_t.pointA = { f: float }
 
 val write_pointC :
-  Bi_outbuf.t -> pointC -> unit
-  (** Output a JSON value of type {!pointC}. *)
+  Buffer.t -> pointC -> unit
+  (** Output a JSON value of type {!type:pointC}. *)
 
 val string_of_pointC :
   ?len:int -> pointC -> string
-  (** Serialize a value of type {!pointC}
+  (** Serialize a value of type {!type:pointC}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
@@ -21,19 +21,19 @@ val string_of_pointC :
 
 val read_pointC :
   Yojson.Safe.lexer_state -> Lexing.lexbuf -> pointC
-  (** Input JSON data of type {!pointC}. *)
+  (** Input JSON data of type {!type:pointC}. *)
 
 val pointC_of_string :
   string -> pointC
-  (** Deserialize JSON data of type {!pointC}. *)
+  (** Deserialize JSON data of type {!type:pointC}. *)
 
 val write_pointB :
-  Bi_outbuf.t -> pointB -> unit
-  (** Output a JSON value of type {!pointB}. *)
+  Buffer.t -> pointB -> unit
+  (** Output a JSON value of type {!type:pointB}. *)
 
 val string_of_pointB :
   ?len:int -> pointB -> string
-  (** Serialize a value of type {!pointB}
+  (** Serialize a value of type {!type:pointB}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
@@ -41,19 +41,19 @@ val string_of_pointB :
 
 val read_pointB :
   Yojson.Safe.lexer_state -> Lexing.lexbuf -> pointB
-  (** Input JSON data of type {!pointB}. *)
+  (** Input JSON data of type {!type:pointB}. *)
 
 val pointB_of_string :
   string -> pointB
-  (** Deserialize JSON data of type {!pointB}. *)
+  (** Deserialize JSON data of type {!type:pointB}. *)
 
 val write_pointA :
-  Bi_outbuf.t -> pointA -> unit
-  (** Output a JSON value of type {!pointA}. *)
+  Buffer.t -> pointA -> unit
+  (** Output a JSON value of type {!type:pointA}. *)
 
 val string_of_pointA :
   ?len:int -> pointA -> string
-  (** Serialize a value of type {!pointA}
+  (** Serialize a value of type {!type:pointA}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
@@ -61,9 +61,9 @@ val string_of_pointA :
 
 val read_pointA :
   Yojson.Safe.lexer_state -> Lexing.lexbuf -> pointA
-  (** Input JSON data of type {!pointA}. *)
+  (** Input JSON data of type {!type:pointA}. *)
 
 val pointA_of_string :
   string -> pointA
-  (** Deserialize JSON data of type {!pointA}. *)
+  (** Deserialize JSON data of type {!type:pointA}. *)
 

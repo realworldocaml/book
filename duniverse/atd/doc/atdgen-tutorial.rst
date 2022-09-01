@@ -1295,10 +1295,27 @@ or a field ``labels`` of type ``string``:
 
   (* File untypable.atd *)
 
+  type obj_list = obj list
+
+  type obj = {
+    ?label: string option;
+    ?labels: string list option;
+    value: abstract  (* requires ATD >= 2.6.0 *)
+  }
+
+Until ATD 2.5, ``abstract`` could not be used as freely and would not
+stand for raw JSON by default. One had to write a dedicated type
+definition as shown below:
+
+.. code-block:: ocaml
+
+  (* File untypable.atd *)
+
+  (* deprecated since ATD 2.6 *)
   type json <ocaml module="Yojson.Safe"> = abstract
     (* uses type Yojson.Safe.t,
-      with the functions Yojson.Safe.write_json
-      and Yojson.Safe.read_json *)
+       with the functions Yojson.Safe.write_json
+       and Yojson.Safe.read_json *)
 
   type obj_list = obj list
 
@@ -1314,10 +1331,11 @@ in the annotation, i.e.:
 
 .. code-block:: ocaml
 
+  (* deprecated since ATD 2.6 *)
   type raw_json <ocaml module="Yojson.Safe" t="json"> = abstract
     (* uses type Yojson.Safe.t,
-      with the functions Yojson.Safe.write_json
-      and Yojson.Safe.read_json *)
+       with the functions Yojson.Safe.write_json
+       and Yojson.Safe.read_json *)
 
   type obj_list = obj list
 
@@ -1327,7 +1345,7 @@ in the annotation, i.e.:
     value: raw_json
   }
 
-Compile the example with:
+Compile either example with:
 
 ::
 

@@ -1,2 +1,2 @@
-(library (name fheap) (public_name core_kernel.fheap) (libraries core_kernel)
+(library (name fheap) (public_name core_kernel.fheap) (libraries core)
  (preprocess (pps ppx_jane)))

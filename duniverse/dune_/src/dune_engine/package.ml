@@ -1,4 +1,5 @@
 open! Import
+module Stanza = Dune_lang.Stanza
 
 let opam_ext = ".opam"
 
@@ -390,7 +391,7 @@ end
 module Info = struct
   type t =
     { source : Source_kind.t option
-    ; license : string option
+    ; license : string list option
     ; authors : string list option
     ; homepage : string option
     ; bug_reports : string option
@@ -436,7 +437,7 @@ module Info = struct
              ; user = "username"
              ; repo = "reponame"
              })
-    ; license = Some "LICENSE"
+    ; license = Some [ "LICENSE" ]
     ; authors = Some [ "Author Name" ]
     ; maintainers = Some [ "Maintainer Name" ]
     ; documentation =
@@ -458,7 +459,7 @@ module Info = struct
     let open Dyn in
     record
       [ ("source", (option Source_kind.to_dyn) source)
-      ; ("license", (option string) license)
+      ; ("license", (option (list string)) license)
       ; ("homepage", (option string) homepage)
       ; ("documentation", (option string) documentation)
       ; ("bug_reports", (option string) bug_reports)
@@ -480,7 +481,7 @@ module Info = struct
       [ field_o "source" Source_kind.encode source
       ; field_l "authors" string (Option.value ~default:[] authors)
       ; field_l "maintainers" string (Option.value ~default:[] maintainers)
-      ; field_o "license" string license
+      ; field_l "license" string (Option.value ~default:[] license)
       ; field_o "homepage" string homepage
       ; field_o "documentation" string documentation
       ; field_o "bug_reports" string bug_reports
@@ -497,7 +498,10 @@ module Info = struct
         (Dune_lang.Syntax.since Stanza.syntax (v (1, 9)) >>> repeat string)
     and+ license =
       field_o "license"
-        (Dune_lang.Syntax.since Stanza.syntax (v (1, 9)) >>> string)
+        (Dune_lang.Syntax.since Stanza.syntax (v (3, 2))
+        >>> repeat1 string
+        <|> ( Dune_lang.Syntax.since Stanza.syntax (v (1, 9)) >>> string
+            >>| fun s -> [ s ] ))
     and+ homepage =
       field_o "homepage"
         (Dune_lang.Syntax.since Stanza.syntax (v (1, 10)) >>> string)
@@ -725,12 +729,18 @@ let default name dir =
   }
 
 let load_opam_file file name =
-  let open Option.O in
   let loc = Loc.in_file (Path.source file) in
-  let opam =
-    match Opam_file.load (Path.source file) with
-    | s -> Some s
-    | exception exn ->
+  let open Memo.O in
+  let+ opam =
+    let+ opam =
+      Path.source file
+      |> Fs_memo.with_lexbuf_from_file ~f:(fun lexbuf ->
+             try Ok (Opam_file.parse lexbuf)
+             with User_error.E _ as exn -> Error exn)
+    in
+    match opam with
+    | Ok s -> Some s
+    | Error exn ->
       User_warning.emit ~loc
         [ Pp.text
             "Unable to read opam file. Some information about this package \
@@ -739,6 +749,7 @@ let load_opam_file file name =
         ];
       None
   in
+  let open Option.O in
   let get_one name =
     let* opam = opam in
     let* value = Opam_file.get_field opam name in
@@ -775,7 +786,7 @@ let load_opam_file file name =
       ; homepage = get_one "homepage"
       ; bug_reports = get_one "bug-reports"
       ; documentation = get_one "doc"
-      ; license = get_one "license"
+      ; license = get_many "license"
       ; source =
           (let+ url = get_one "dev-repo" in
            Source_kind.Url url)

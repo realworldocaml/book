@@ -1,6 +1,5 @@
 open Core
 open Import
-module File_descr = Unix.File_descr
 module Scheduler = Raw_scheduler
 module Fd = Raw_fd
 include Fd.T
@@ -34,18 +33,13 @@ module Kind = struct
 end
 
 let to_string t = Sexp.to_string_hum (sexp_of_t t)
-let the_one_and_only () = Scheduler.the_one_and_only ~should_lock:true
+let the_one_and_only () = Scheduler.the_one_and_only ()
 
-let create ?avoid_nonblock_if_possible kind file_descr info =
-  Scheduler.create_fd
-    ?avoid_nonblock_if_possible
-    (the_one_and_only ())
-    kind
-    file_descr
-    info
+let create ?avoid_setting_nonblock kind file_descr info =
+  Scheduler.create_fd ?avoid_setting_nonblock (the_one_and_only ()) kind file_descr info
 ;;
 
-(* If possible, we try not to treat [stdin], [stdout], or [stderr] as nonblocking so that
+(* We do not make [stdin], [stdout], or [stderr] nonblocking so that
    one can use Core I/O libraries simultaneously with async without them failing due to
    [Sys_blocked_io]. *)
 let create_std_descr file_descr info =
@@ -53,7 +47,7 @@ let create_std_descr file_descr info =
     (Kind.blocking_infer_using_stat file_descr)
     file_descr
     info
-    ~avoid_nonblock_if_possible:true
+    ~avoid_setting_nonblock:true
 ;;
 
 let stdin = Memo.unit (fun () -> create_std_descr Unix.stdin (Info.of_string "<stdin>"))
@@ -66,14 +60,18 @@ let stderr =
   Memo.unit (fun () -> create_std_descr Unix.stderr (Info.of_string "<stderr>"))
 ;;
 
+let supports_nonblock t = Fd.supports_nonblock t
+
 let clear_nonblock t =
-  if t.supports_nonblock
-  then (
-    t.supports_nonblock <- false;
-    if t.have_set_nonblock
-    then (
-      t.have_set_nonblock <- false;
-      Unix.clear_nonblock t.file_descr))
+  (* By setting [t.can_set_nonblock] to false we're making the user choice persistent:
+     the next time a nonblocking operation is attempted it simply won't work, instead of
+     ignoring the user choice and setting nonblock anyway *)
+  t.can_set_nonblock <- false;
+  match t.nonblock_status with
+  | Blocking -> ()
+  | Nonblocking | Unknown ->
+    t.nonblock_status <- Blocking;
+    Unix.clear_nonblock t.file_descr
 ;;
 
 module Close = struct
@@ -98,9 +96,11 @@ module Close = struct
               | Do_not_close_file_descriptor -> return ()
               | Close_file_descriptor socket_handling ->
                 Monitor.protect
+                  ~run:
+                    `Schedule
+                  ~rest:`Log
                   ~finally:(fun () ->
-                    In_thread.syscall_exn ~name:"close" (fun () ->
-                      Unix.close t.file_descr))
+                    In_thread.syscall_exn ~name:"close" (fun () -> Unix.close t.file_descr))
                   (fun () ->
                      match t.kind, socket_handling with
                      | Socket `Active, Shutdown_socket ->
@@ -135,13 +135,35 @@ let close_started t =
   | Close_requested _ | Closed -> return ()
 ;;
 
-let with_close t ~f = Monitor.protect (fun () -> f t) ~finally:(fun () -> close t)
+let create_borrowed ?avoid_setting_nonblock kind file_descr info ~f =
+  let fd = create ?avoid_setting_nonblock kind file_descr info in
+  Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
+    ~name:"Fd.create_borrowed"
+    (fun () -> f fd)
+    ~finally:(fun () -> close ~file_descriptor_handling:Do_not_close_file_descriptor fd)
+;;
+
+let with_close t ~f =
+  Monitor.protect
+    ~run:`Schedule
+    ~rest:`Log
+    (fun () -> f t)
+    ~finally:(fun () -> close t)
+;;
 
 let with_file_descr_deferred t f =
   match inc_num_active_syscalls t with
   | `Already_closed -> return `Already_closed
   | `Ok ->
-    let%map result = Monitor.try_with (fun () -> f t.file_descr) in
+    let%map result =
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        (fun () -> f t.file_descr)
+    in
     Scheduler.dec_num_active_syscalls_fd (the_one_and_only ()) t;
     (match result with
      | Ok x -> `Ok x
@@ -158,7 +180,8 @@ let with_file_descr_deferred_exn t f =
 
 let start_watching t read_or_write watching =
   if debug
-  then Debug.log "Fd.start_watching" (t, read_or_write) [%sexp_of: t * Read_write.Key.t];
+  then
+    Debug.log "Fd.start_watching" (t, read_or_write) [%sexp_of: t * Read_write_pair.Key.t];
   let r = the_one_and_only () in
   match Scheduler.request_start_watching r t read_or_write watching with
   | (`Unsupported | `Already_closed | `Watching) as x -> x
@@ -194,7 +217,7 @@ let interruptible_ready_to t read_or_write ~interrupt =
     Debug.log
       "Fd.interruptible_ready_to"
       (t, read_or_write)
-      [%sexp_of: t * Read_write.Key.t];
+      [%sexp_of: t * Read_write_pair.Key.t];
   let ready = Ivar.create () in
   match start_watching t read_or_write (Watch_once ready) with
   | `Already_closed -> return `Closed
@@ -202,18 +225,23 @@ let interruptible_ready_to t read_or_write ~interrupt =
     return (if Deferred.is_determined interrupt then `Interrupted else `Ready)
   | `Watching ->
     stop_watching_upon_interrupt t read_or_write ready ~interrupt;
-    Ivar.read ready
+    Deferred.map (Ivar.read ready) ~f:(function
+      | `Unsupported ->
+        if Deferred.is_determined interrupt then `Interrupted else `Ready
+      | (`Bad_fd | `Closed | `Interrupted | `Ready) as res -> res)
 ;;
 
 let ready_to t read_or_write =
   if debug
-  then Debug.log "Fd.ready_to" (t, read_or_write) [%sexp_of: t * Read_write.Key.t];
+  then Debug.log "Fd.ready_to" (t, read_or_write) [%sexp_of: t * Read_write_pair.Key.t];
   let ready = Ivar.create () in
   match start_watching t read_or_write (Watch_once ready) with
   | `Already_closed -> return `Closed
-  | `Unsupported -> return `Ready
+  | `Unsupported ->
+    return `Ready
   | `Watching ->
     (match%map Ivar.read ready with
+     | `Unsupported -> `Ready
      | (`Bad_fd | `Closed | `Ready) as x -> x
      | `Interrupted -> (* impossible *) assert false)
 ;;
@@ -224,7 +252,7 @@ let interruptible_every_ready_to t read_or_write ~interrupt f x =
     Debug.log
       "Fd.interruptible_every_ready_to"
       (t, read_or_write)
-      [%sexp_of: t * Read_write.Key.t];
+      [%sexp_of: t * Read_write_pair.Key.t];
   let job = Scheduler.(create_job (t ())) f x in
   let finished = Ivar.create () in
   match start_watching t read_or_write (Watch_repeatedly (job, finished)) with
@@ -232,13 +260,13 @@ let interruptible_every_ready_to t read_or_write ~interrupt f x =
   | `Unsupported -> return `Unsupported
   | `Watching ->
     stop_watching_upon_interrupt t read_or_write finished ~interrupt;
-    (Ivar.read finished
-     :> [ `Bad_fd | `Closed | `Unsupported | `Interrupted ] Deferred.t)
+    (Ivar.read finished :> [ `Bad_fd | `Closed | `Unsupported | `Interrupted ] Deferred.t)
 ;;
 
 let every_ready_to t read_or_write f x =
   if debug
-  then Debug.log "Fd.every_ready_to" (t, read_or_write) [%sexp_of: t * Read_write.Key.t];
+  then
+    Debug.log "Fd.every_ready_to" (t, read_or_write) [%sexp_of: t * Read_write_pair.Key.t];
   let job = Scheduler.(create_job (t ())) f x in
   let finished = Ivar.create () in
   match start_watching t read_or_write (Watch_repeatedly (job, finished)) with
@@ -246,7 +274,7 @@ let every_ready_to t read_or_write f x =
   | `Unsupported -> return `Unsupported
   | `Watching ->
     (match%map Ivar.read finished with
-     | (`Bad_fd | `Closed) as x -> x
+     | (`Unsupported | `Bad_fd | `Closed) as x -> x
      | `Interrupted -> (* impossible *) assert false)
 ;;
 
@@ -298,6 +326,20 @@ let file_descr_exn t =
 ;;
 
 let to_int_exn t = File_descr.to_int (file_descr_exn t)
+
+let expect_file_descr_redirection_for_fd fd ~f =
+  if fd.num_active_syscalls > 0
+  then raise_s [%sexp "File descriptor can't be redirected while in use", (fd : t)];
+  Exn.protect ~f ~finally:(fun () ->
+    fd.kind <- Kind.blocking_infer_using_stat fd.file_descr)
+;;
+
+let expect_file_descr_redirection file_descr ~f =
+  let fd_by_descr = Raw_scheduler.fd_by_descr (the_one_and_only ()) in
+  match Fd_by_descr.find fd_by_descr file_descr with
+  | None -> f ()
+  | Some fd -> expect_file_descr_redirection_for_fd fd ~f
+;;
 
 module Private = struct
   let replace t kind info =

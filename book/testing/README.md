@@ -162,9 +162,8 @@ $ dune runtest
 File "test.ml", line 3, characters 0-79: rev threw
 (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
   ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+  Raised at Ppx_assert_lib__Runtime.test_eq in file "duniverse/ppx_assert/runtime-lib/runtime.ml", line 95, characters 22-69
+  Called from Foo__Test.(fun) in file "test.ml", line 4, characters 13-21
 
 FAILED 1 / 1 tests
 [1]
@@ -576,7 +575,8 @@ examples shorter and easier to read.
 ```ocaml file=examples/correct/rate_limiter_show_bug/test.ml,part=1
 open Core
 
-let start_time = Time_ns.of_string "2021-06-01 7:00:00"
+let start_time =
+  Time_ns.of_string_with_utc_offset "2021-06-01 7:00:00Z"
 
 let limiter () =
   Rate_limiter.create

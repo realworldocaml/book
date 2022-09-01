@@ -48,42 +48,42 @@ val string_of__of__sexp_of : ('a -> Sexp.t) -> 'a -> string
 
 (** {6 Conversion of S-expressions to OCaml-values} *)
 
-val bigstring_sexp_grammar : Sexplib0.Private.Raw_grammar.t
+val bigstring_sexp_grammar : bigstring Sexplib0.Sexp_grammar.t
 
 (** [bigstring_of_sexp sexp] converts S-expression [sexp] to a
     bigstring (character bigarray in C-layout). *)
 val bigstring_of_sexp : Sexp.t -> bigstring
 
-val float32_vec_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val float32_vec_sexp_grammar : float32_vec Sexplib0.Sexp_grammar.t
 
 (** [float32_vec_of_sexp sexp] converts S-expression [sexp] to a
     one-dimensional bigarray of 32-bit floats in Fortran-layout. *)
 val float32_vec_of_sexp : Sexp.t -> float32_vec
 
-val float64_vec_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val float64_vec_sexp_grammar : float64_vec Sexplib0.Sexp_grammar.t
 
 (** [float64_vec_of_sexp sexp] converts S-expression [sexp] to a
     one-dimensional bigarray of 64-bit floats in Fortran-layout. *)
 val float64_vec_of_sexp : Sexp.t -> float64_vec
 
-val vec_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val vec_sexp_grammar : vec Sexplib0.Sexp_grammar.t
 
 (** [vec_of_sexp sexp] same as {!float64_vec_of_sexp}. *)
 val vec_of_sexp : Sexp.t -> vec
 
-val float32_mat_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val float32_mat_sexp_grammar : float32_mat Sexplib0.Sexp_grammar.t
 
 (** [float32_mat_of_sexp sexp] converts S-expression [sexp] to a
     two-dimensional bigarray of 32-bit floats in Fortran-layout. *)
 val float32_mat_of_sexp : Sexp.t -> float32_mat
 
-val float64_mat_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val float64_mat_sexp_grammar : float64_mat Sexplib0.Sexp_grammar.t
 
 (** [float64_mat_of_sexp sexp] converts S-expression [sexp] to a
     two-dimensional bigarray of 64-bit floats in Fortran-layout. *)
 val float64_mat_of_sexp : Sexp.t -> float64_mat
 
-val mat_sexp_grammar : Sexplib0.Sexp.Private.Raw_grammar.t
+val mat_sexp_grammar : mat Sexplib0.Sexp_grammar.t
 
 (** [mat_of_sexp sexp] same as {!Conv.float64_mat_of_sexp}. *)
 val mat_of_sexp : Sexp.t -> mat

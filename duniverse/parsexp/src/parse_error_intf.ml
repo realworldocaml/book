@@ -1,21 +1,23 @@
 open! Import
 
 module Reason = struct
-  (*_ To be kept in sync with the Error module in gen/gen_parser_automaton.ml *)
+  (*_ Some of these come from [Parsexp_symbolic_automaton.Parse_error_reason]. *)
   type t =
-    | Unexpected_char_parsing_hex_escape
-    | Unexpected_char_parsing_dec_escape
-    | Unterminated_quoted_string
-    | Unterminated_block_comment
-    | Escape_sequence_out_of_range
-    | Unclosed_paren
-    | Too_many_sexps
-    | Closed_paren_without_opened
-    | Comment_token_in_unquoted_atom
-    | Sexp_comment_without_sexp
-    | Unexpected_character_after_cr
-    | No_sexp_found_in_input
+    (*$ Parsexp_cinaps_helpers.Gen_parse_error.print_constructors () *)
     | Automaton_in_error_state
+    | Comment_token_in_unquoted_atom
+    | Unexpected_char_parsing_dec_escape
+    | Unexpected_char_parsing_hex_escape
+    | Unexpected_character_after_cr
+    | Unterminated_block_comment
+    | Unterminated_quoted_string
+    (*$*)
+    | Closed_paren_without_opened
+    | Escape_sequence_out_of_range
+    | No_sexp_found_in_input
+    | Sexp_comment_without_sexp
+    | Too_many_sexps
+    | Unclosed_paren
 end
 
 module type Parse_error = sig
@@ -24,7 +26,7 @@ module type Parse_error = sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val sexp_of_t : t -> Sexplib0.Sexp.t
   end
   [@@ocaml.doc "@inline"]
 

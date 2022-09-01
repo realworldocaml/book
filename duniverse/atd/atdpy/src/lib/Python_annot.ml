@@ -1,7 +1,7 @@
 (*
    ATD annotations to be interpreted specifically by atdpy.
 
-   Atdpy also honors json-related annotations defined in Atdgen_emit.Json.
+   Atdpy also honors json-related annotations defined in Atd.Json.
 *)
 
 type assoc_repr =

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 module Deferred = Deferred1
 
 module T = struct

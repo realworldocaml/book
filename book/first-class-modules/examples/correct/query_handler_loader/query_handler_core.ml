@@ -55,7 +55,7 @@ module List_dir = struct
         if is_abs dir then dir
         else Filename.concat t.cwd dir
       in
-      Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+      Ok (Array.sexp_of_t String.sexp_of_t (Sys_unix.readdir dir))
 end
 
 module type Query_handler_instance = sig

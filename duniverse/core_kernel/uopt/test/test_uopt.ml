@@ -53,3 +53,17 @@ let%expect_test "[match%optional some]" =
      | None -> false
      | Some x -> x = 13)
 ;;
+
+let%expect_test "ensure no miscompilation due to unboxing of the float" =
+  let[@inline never] f n p =
+    let t = if p then Uopt.some (Float.of_int n) else Uopt.none in
+    match%optional t with
+    | None -> "none"
+    | Some x -> Float.to_string x
+  in
+  print_endline (f 100 true);
+  print_endline (f 100 false);
+  [%expect {|
+    100.
+    none |}]
+;;

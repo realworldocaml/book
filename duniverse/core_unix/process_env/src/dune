@@ -1,2 +1,2 @@
-(library (name core_unix_process_env) (public_name core_unix.process_env)
-  (libraries core.process_env) (preprocess no_preprocessing))
+(library (name process_env) (public_name core_unix.process_env)
+ (libraries core core_unix) (preprocess (pps ppx_jane)))

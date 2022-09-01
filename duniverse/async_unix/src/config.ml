@@ -1,4 +1,5 @@
 open! Core
+module Unix = Core_unix
 include Async_kernel.Async_kernel_config
 
 let file_descr_watcher =

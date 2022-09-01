@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 
 include Monad.S2 with type ('a, 'b) t = ('a, 'b) Result.t Deferred1.t (** @open *)
 

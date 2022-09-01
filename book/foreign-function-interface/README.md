@@ -482,10 +482,16 @@ val difftime : time_t -> time_t -> float = <fun>
 \noindent
 Here's the resulting function `difftime` in action.
 
+<!-- TODO: explain #require -->
+
+```ocaml env=posix,non-deterministic=output
+# #require "core_unix"
+```
+
 ```ocaml env=posix,non-deterministic=output
 # let delta =
     let t1 = time' () in
-    Unix.sleep 2;
+    Core_unix.sleep 2;
     let t2 = time' () in
     difftime t2 t1;;
 val delta : float = 2.
@@ -796,7 +802,7 @@ let () =
        flag "-a" no_arg ~doc:" Human-readable output format"
      in
      if human then ascii_time else float_time)
-  |> Command.run
+  |> Command_unix.run
 ```
 
 This can be compiled and run in the usual way: [returning function]{.idx}
@@ -805,7 +811,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 (executable
   (name      datetime)
   (preprocess (pps ppx_jane))
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign core_unix.command_unix))
 ```
 
 
@@ -1056,7 +1062,7 @@ let () =
     ~summary:"Sort integers on standard input"
     Command.Spec.empty
     sort_stdin
-  |> Command.run
+  |> Command_unix.run
 ```
 
 Compile it in the usual way with *dune* and test it against some input data,
@@ -1065,7 +1071,7 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme file=examples/correct/ffi_qsort/dune
 (executable
   (name      qsort)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign core_unix.command_unix))
 ```
 
 ```sh dir=examples/correct/ffi_qsort

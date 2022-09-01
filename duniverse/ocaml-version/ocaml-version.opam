@@ -1,4 +1,4 @@
-version: "3.4.0"
+version: "3.5.0"
 opam-version: "2.0"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 authors: "Anil Madhavapeddy <anil@recoil.org>"

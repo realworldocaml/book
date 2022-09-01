@@ -46,7 +46,7 @@ module Make (Hashtbl : Hashtbl_for_testing) = struct
   ;;
 
   (* In js_of_ocaml, strings can be hashconst-ed. *)
-  let%test ("findi_and_call"[@tags "no-js"]) =
+  let%test ("findi_and_call" [@tags "no-js"]) =
     let our_hash = Hashtbl.copy test_hash in
     let test_string = "test string" in
     Hashtbl.add_exn our_hash ~key:test_string ~data:10;
@@ -331,8 +331,7 @@ module Make (Hashtbl : Hashtbl_for_testing) = struct
     let t1 = make [ 1, 111; 2, 222; 3, 333 ] in
     let t2 = make [ 1, 123; 2, 222; 4, 444 ] in
     [%test_result: (int * [ `Left of int | `Right of int | `Both of int * int ]) List.t]
-      (Hashtbl.merge t1 t2 ~f:(fun ~key:_ ->
-         function
+      (Hashtbl.merge t1 t2 ~f:(fun ~key:_ -> function
          | `Left x -> Some (`Left x)
          | `Right y -> Some (`Right y)
          | `Both (x, y) -> if x = y then None else Some (`Both (x, y)))
@@ -340,4 +339,35 @@ module Make (Hashtbl : Hashtbl_for_testing) = struct
        |> List.sort ~compare:(fun (x, _) (y, _) -> Int.compare x y))
       ~expect:[ 1, `Both (111, 123); 3, `Left 333; 4, `Right 444 ]
   ;;
+end
+
+(* typechecking this code is a compile-time test that [Creators] is a specialization of
+   [Creators_generic].  *)
+module _ : sig end = struct
+  module Make_creators_check
+      (Type : T.T2)
+      (Key : T.T1)
+      (Options : T.T3)
+      (_ : Hashtbl.Private.Creators_generic
+       with type ('a, 'b) t := ('a, 'b) Type.t
+       with type 'a key := 'a Key.t
+       with type ('a, 'b, 'z) create_options := ('a, 'b, 'z) Options.t) =
+  struct end
+
+  module _ (M : Hashtbl.Creators) =
+    Make_creators_check
+      (struct
+        type ('a, 'b) t = ('a, 'b) M.t
+      end)
+      (struct
+        type 'a t = 'a
+      end)
+      (struct
+        type ('a, 'b, 'z) t = ('a, 'b, 'z) Hashtbl.create_options
+      end)
+      (struct
+        include M
+
+        let create ?growth_allowed ?size m () = create ?growth_allowed ?size m
+      end)
 end

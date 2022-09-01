@@ -1,0 +1,63 @@
+(* -*- tuareg -*- *)
+
+(* camlp-streams is built in three different ways, depending on the version of
+   OCaml it's built for:
+   - 4.07 and earlier: empty library; Standard Library Stream and Genlex used
+     directly, since it's not possible in these versions to override the modules
+   - 4.08-4.14: Standard Library Stream and Genlex re-exported (without
+     deprecation for 4.14)
+   - 5.0+: modules in src/ are compiled
+ *)
+
+open Jbuild_plugin.V1
+
+let modules =
+  let version = Scanf.sscanf ocaml_version "%u.%u" (fun a b -> (a, b)) in
+  if version >= (4, 08) then ":standard" else ""
+
+let dune_fragment_for mod_name basename =
+  Printf.sprintf {|
+(rule
+  (target %s.mli)
+  (action (copy src/%%{target} %%{target}))
+  (enabled_if (>= %%{ocaml_version} 5.0)))
+
+(rule
+  (target %s.ml)
+  (action (copy src/%%{target} %%{target}))
+  (enabled_if (>= %%{ocaml_version} 5.0)))
+
+(rule
+  (target %s.mli)
+  (action (with-stdout-to %%{target}
+    (echo "include module type of struct include %s end")))
+  (enabled_if (< %%{ocaml_version} 5.0)))
+
+(rule
+  (target %s.ml)
+  (action (with-stdout-to %%{target}
+    (echo "include %s")))
+  (enabled_if (< %%{ocaml_version} 5.0)))|}
+    basename basename basename mod_name basename mod_name
+
+let () =
+  let stream = dune_fragment_for "Stream" "stream" in
+  let genlex = dune_fragment_for "Genlex" "genlex" in
+  Printf.ksprintf send {|
+%s %s
+(rule
+  (action (with-stdout-to flags.sexp (echo "(-w -9)")))
+  (enabled_if (>= %%{ocaml_version} 5.0)))
+(rule
+  (action (with-stdout-to flags.sexp (echo "(-w -3)")))
+  (enabled_if (and (>= %%{ocaml_version} 4.14) (< %%{ocaml_version} 5.0))))
+(rule
+  (action (with-stdout-to flags.sexp (echo "()")))
+  (enabled_if (< %%{ocaml_version} 4.14)))
+
+(library
+  (name camlp_streams)
+  (public_name camlp-streams)
+  (modules %s)
+  (wrapped false)
+  (flags :standard (:include flags.sexp)))|} stream genlex modules

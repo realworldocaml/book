@@ -42,6 +42,7 @@ module Repr : sig
     | Int of atd_ocaml_int
     | Float
     | String
+    | Abstract
     | Sum of atd_ocaml_sum
     | Record of atd_ocaml_record
     | Tuple

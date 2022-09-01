@@ -1,3 +1,3 @@
-From foo Require Import a.
+From Foo Require Import a.
 
 Definition bar := a.foo.

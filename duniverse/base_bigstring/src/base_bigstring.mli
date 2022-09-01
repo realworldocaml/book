@@ -7,7 +7,6 @@ open Stdlib.Bigarray
 
 (** {2 Types and exceptions} *)
 
-
 (** Type of bigstrings *)
 type t = (char, int8_unsigned_elt, c_layout) Array1.t [@@deriving compare, sexp]
 
@@ -133,6 +132,8 @@ val memset : t -> pos:int -> len:int -> char -> unit
     on the subregions of [t1] and [t2] defined by [pos1], [pos2], and [len]. *)
 val memcmp : t -> pos1:int -> t -> pos2:int -> len:int -> int
 
+(** [memcmp_bytes], for efficient [memcmp] between [Bigstring] and [Bytes] data. *)
+val memcmp_bytes : t -> pos1:int -> Bytes.t -> pos2:int -> len:int -> int
 
 (** {2 Search} *)
 
@@ -142,6 +143,7 @@ val memcmp : t -> pos1:int -> t -> pos2:int -> len:int -> int
     @param pos default = 0
     @param len default = [length bstr - pos] *)
 val find : ?pos:int -> ?len:int -> char -> t -> int option
+
 
 (** Same as [find], but does no bounds checking, and returns a negative value instead of
     [None] if [char] is not found. *)
@@ -273,6 +275,16 @@ val unsafe_get_int64_t_le : t -> pos:int -> Int64.t
 val unsafe_get_int64_t_be : t -> pos:int -> Int64.t
 val unsafe_set_int64_t_le : t -> pos:int -> Int64.t -> unit
 val unsafe_set_int64_t_be : t -> pos:int -> Int64.t -> unit
+
+module Int_repr : sig
+  include Int_repr.Get with type t := t
+  include Int_repr.Set with type t := t
+
+  module Unsafe : sig
+    include Int_repr.Get with type t := t
+    include Int_repr.Set with type t := t
+  end
+end
 
 (*_ See the Jane Street Style Guide for an explanation of [Private] submodules:
 

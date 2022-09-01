@@ -1,5 +1,6 @@
 (executable
  (name ydump)
  (public_name ydump)
+ (package yojson)
  (flags (-safe-string))
  (libraries yojson))

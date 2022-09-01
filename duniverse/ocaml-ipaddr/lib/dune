@@ -2,7 +2,7 @@
  (name ipaddr)
  (public_name ipaddr)
  (modules ipaddr)
- (libraries macaddr domain-name stdlib-shims))
+ (libraries macaddr domain-name))
 
 (library
  (name macaddr)

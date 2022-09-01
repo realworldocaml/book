@@ -104,6 +104,15 @@ let set_field ~loc ~section:k ~field:k2 v l : Ast.annot =
       in
       List.assoc_update k (section_loc, section) l
 
+let get_loc ~sections:k ~field:k2 l =
+  k
+  |> List.find_map (fun k1 ->
+    let open Option.O in
+    field l ~section:k1 ~field:k2 >>= fun (loc, _o) -> Some loc)
+
+let get_loc_exn ~sections ~field l =
+  get_loc ~sections ~field l |> Option.value_exn
+
 let collapse merge l =
   let tbl = Hashtbl.create 10 in
   let n = ref 0 in
