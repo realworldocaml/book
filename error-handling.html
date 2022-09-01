@@ -516,7 +516,7 @@ this test, then we can trigger the <code>assert</code>:</p>
   loop xs ys;;
 &gt;val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list = &lt;fun&gt;
 merge_lists [1;2;3] [-1] ~f:(+);;
-&gt;Exception: "Assert_failure //toplevel//:6:14"
+&gt;Exception: "Assert_failure //toplevel//:6:14".
 </code></pre>
 </div>
 <p>This shows what’s special about <code>assert</code>: it captures the
@@ -791,7 +791,8 @@ let () =
     Bench.Test.create ~name:"end with exn notrace" (fun () -&gt;
         computation_with_handler Raise_no_backtrace);
   ]
-  |&gt; Bench.make_command |&gt; Command.run</code></pre>
+  |&gt; Bench.make_command
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>We’re testing four cases here: <a data-secondary="raising
 exceptions without one" data-primary="backtraces" data-type="indexterm">&nbsp;</a> <a data-primary="raise_notrace" data-type="indexterm">&nbsp;</a>

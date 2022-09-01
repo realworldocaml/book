@@ -34,6 +34,7 @@ well-integrated support for efficient binary serializers; and much more.
 At the same time, it has many more dependencies, and so takes longer to
 build, and will add more to the size of your executables.</p></li>
 </ul>
+
 <p>As of the version of <code>Base</code> and <code>Core</code> used in
 this book (version <code>v0.14</code>), <code>Core</code> is less
 portable than <code>Base</code>, running only on UNIX-like systems. For
@@ -402,7 +403,7 @@ is_a_multiple 8 2;;
 &gt;- : bool = true
 is_a_multiple 8 0;;
 &gt;Exception:
-&gt;(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
+&gt;Invalid_argument "8 % 0 in core_int.ml: modulus should be positive".
 </code></pre>
 </div>
 <p>The distinction here is that type errors will stop you whether or not
@@ -645,7 +646,7 @@ we’ll see that it works on nonempty lists and fails on empty ones:</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">my_favorite_language ["English";"Spanish";"French"];;
 &gt;- : string = "English"
 my_favorite_language [];;
-&gt;Exception: "Match_failure //toplevel//:1:26"
+&gt;Exception: Match_failure ("//toplevel//", 1, 26).
 </code></pre>
 </div>
 <p>You can avoid these warnings, and more importantly make sure that
@@ -1267,7 +1268,7 @@ function to avoid the short-circuiting:</p>
   if !pos = Array.length array then None else Some !pos;;
 &gt;val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
 find_first_negative_entry [|1;2;0;3|];;
-&gt;Exception: (Invalid_argument "index out of bounds")
+&gt;Exception: Invalid_argument "index out of bounds".
 </code></pre>
 </div>
 <p>The or operator, <code>||</code>, short-circuits in a similar way to

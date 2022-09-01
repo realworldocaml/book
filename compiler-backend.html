@@ -51,14 +51,14 @@ let test v =
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_monomorphic_large.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_monomorphic_large!
 &gt;  (let
-&gt;    (test/86 =
-&gt;       (function v/88 : int
-&gt;         (switch* v/88
+&gt;    (test/272 =
+&gt;       (function v/274[int] : int
+&gt;         (switch* v/274
 &gt;          case int 0: 100
 &gt;          case int 1: 101
 &gt;          case int 2: 102
 &gt;          case int 3: 103)))
-&gt;    (makeblock 0 test/86)))
+&gt;    (makeblock 0 test/272)))
 </code></pre>
 </div>
 <p>It’s not important to understand every detail of this internal form,
@@ -98,8 +98,8 @@ let test v =
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_monomorphic_small.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_monomorphic_small!
-&gt;  (let (test/84 = (function v/86 : int (if v/86 101 100)))
-&gt;    (makeblock 0 test/84)))
+&gt;  (let (test/270 = (function v/272[int] : int (if v/272 101 100)))
+&gt;    (makeblock 0 test/270)))
 </code></pre>
 </div>
 <p>The compiler emits simpler conditional jumps rather than setting up a
@@ -121,11 +121,11 @@ polymorphic variants:</p>
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlc -dlambda -c pattern_polymorphic.ml 2&gt;&amp;1
 &gt;(setglobal Pattern_polymorphic!
 &gt;  (let
-&gt;    (test/81 =
-&gt;       (function v/83 : int
-&gt;         (if (&gt;= v/83 482771474) (if (&gt;= v/83 884917024) 100 102)
-&gt;           (if (&gt;= v/83 3306965) 101 103))))
-&gt;    (makeblock 0 test/81)))
+&gt;    (test/267 =
+&gt;       (function v/269[int] : int
+&gt;         (if (&gt;= v/269 482771474) (if (&gt;= v/269 884917024) 100 102)
+&gt;           (if (&gt;= v/269 3306965) 101 103))))
+&gt;    (makeblock 0 test/267)))
 </code></pre>
 </div>
 <p>We mentioned in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a> that pattern matching over polymorphic
@@ -227,7 +227,7 @@ let () =
   List.map benchmarks ~f:(fun (name, test) -&gt;
       Bench.Test.create ~name test)
   |&gt; Bench.make_command
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Building and executing this example will run for around 30 seconds by
 default, and you’ll see the results summarized in a neat table:</p>
@@ -676,7 +676,7 @@ let tests =
 let () =
   List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
   |&gt; Bench.make_command
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Running this shows quite a significant runtime difference between the
 two:</p>

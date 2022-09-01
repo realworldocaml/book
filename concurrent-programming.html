@@ -287,9 +287,9 @@ corresponding deferred to become determined, using
 &gt;val ivar : '_weak1 Ivar.t =
 &gt;  {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 let def = Ivar.read ivar;;
-&gt;val def : '_weak2 Deferred.t = &lt;abstr&gt;
+&gt;val def : '_weak1 Deferred.t = &lt;abstr&gt;
 Deferred.peek def;;
-&gt;- : '_weak3 option = None
+&gt;- : '_weak2 option = None
 Ivar.fill ivar "Hello";;
 &gt;- : unit = ()
 Deferred.peek def;;
@@ -668,7 +668,7 @@ let () =
          ~doc:" Port to listen on (default 8765)"
      in
      fun () -&gt; run ~uppercase ~port)
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Note the use of <code>Deferred.never</code> in the <code>run</code>
 function. As you might guess from the name, <code>Deferred.never</code>
@@ -684,8 +684,8 @@ Async, so it’s worth discussing them in some detail. <a data-primary="pipes" d
 <p>Pipes are created in connected read/write pairs:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
-&gt;val r : '_weak4 Pipe.Reader.t = &lt;abstr&gt;
-&gt;val w : '_weak4 Pipe.Writer.t = &lt;abstr&gt;
+&gt;val r : '_weak3 Pipe.Reader.t = &lt;abstr&gt;
+&gt;val w : '_weak3 Pipe.Writer.t = &lt;abstr&gt;
 </code></pre>
 </div>
 <p><code>r</code> and <code>w</code> are really just read and write
@@ -707,8 +707,8 @@ the deferred returned by a write is determined only when the value is
 read out of the pipe.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (r,w) = Pipe.create ();;
-&gt;val r : '_weak5 Pipe.Reader.t = &lt;abstr&gt;
-&gt;val w : '_weak5 Pipe.Writer.t = &lt;abstr&gt;
+&gt;val r : '_weak4 Pipe.Reader.t = &lt;abstr&gt;
+&gt;val w : '_weak4 Pipe.Writer.t = &lt;abstr&gt;
 let write_complete = Pipe.write w "Hello World!";;
 &gt;val write_complete : unit Deferred.t = &lt;abstr&gt;
 Pipe.read r;;
@@ -751,7 +751,7 @@ contains the <code>async</code> call:</p>
 </div>
 <p>This differs from the ordinary <code>Command.basic</code> call in
 that the main function must return a <code>Deferred.t</code>, and that
-the running of the command (using <code>Command.run</code>)
+the running of the command (using <code>Command_unix.run</code>)
 automatically starts the Async scheduler, without requiring an explicit
 call to <code>Scheduler.go</code>.<a data-secondary="running async commands" data-primary="command-line
 parsing" data-type="indexterm">&nbsp;</a></p>
@@ -963,7 +963,7 @@ see the type of this function in <code>utop</code>:</p>
        anon (sequence ("word" %: string))
      in
      fun () -&gt; search_and_print words)
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>And that’s all we need for a simple but usable definition
 searcher:</p>
@@ -1407,9 +1407,9 @@ function that is called if and only if that deferred is chosen. Here’s
 the type signature of <code>choice</code> and <code>choose</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">choice;;
-&gt;- : 'a Deferred.t -&gt; ('a -&gt; 'b) -&gt; 'b Deferred.choice = &lt;fun&gt;
+&gt;- : 'a Deferred.t -&gt; ('a -&gt; 'b) -&gt; 'b Deferred.Choice.t = &lt;fun&gt;
 choose;;
-&gt;- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;
+&gt;- : 'a Deferred.Choice.t list -&gt; 'a Deferred.t = &lt;fun&gt;
 </code></pre>
 </div>
 <p>Note that there’s no guarantee that the winning deferred will be the

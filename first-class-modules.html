@@ -400,6 +400,11 @@ Unique.eval unique (Sexp.List []);;
 <p>Here’s another example: a query handler that does directory listings.
 Here, the config is the default directory that relative paths are
 interpreted within:</p>
+
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_unix.sys_unix";;
+</code></pre>
+</div>
 <div class="highlight">
 <pre><code class="language-ocaml">module List_dir = struct
   type config = string [@@deriving sexp]
@@ -420,7 +425,7 @@ interpreted within:</p>
         if is_abs dir then dir
         else Core.Filename.concat t.cwd dir
       in
-      Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
+      Ok (Array.sexp_of_t String.sexp_of_t (Sys_unix.readdir dir))
 end;;</code></pre>
 </div>
 <p>Again, we can create an instance of this query handler and interact

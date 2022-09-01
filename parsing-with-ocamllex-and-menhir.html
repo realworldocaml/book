@@ -661,7 +661,7 @@ let () =
   Command.basic_spec ~summary:"Parse and display JSON"
     Command.Spec.(empty +&gt; anon ("filename" %: string))
     loop
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Here’s a test input file we can use to test the code we just
 wrote:</p>

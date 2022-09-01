@@ -738,17 +738,18 @@ Extended_interval.contains (Extended_interval.create 3 10) 4;;
 extended version of the <code>Option</code> module, where you’ve added
 some functionality not present in the module as distributed in
 <code>Base</code>. That’s a job for <code>include</code>.</p>
+
 <div class="highlight">
 <pre><code class="language-ocaml">open Base
+
+(* The full contents of the option module *)
+include Option
 
 (* The new function we're going to add *)
 let apply f_opt x =
   match f_opt with
   | None -&gt; None
-  | Some f -&gt; Some (f x)
-
-(* The remainder of the option module *)
-include Option</code></pre>
+  | Some f -&gt; Some (f x)</code></pre>
 </div>
 <p>Now, how do we write an interface for this new module? It turns out
 that <code>include</code> works on signatures as well, so we can pull
@@ -766,11 +767,11 @@ include module type of Option
 (* Signature of function we're adding *)
 val apply : ('a -&gt; 'b) t -&gt; 'a -&gt; 'b t</code></pre>
 </div>
-<p>Note that the order of declarations in the <code>mli</code> does not
-need to match the order of declarations in the <code>ml</code>. The
-order of declarations in the <code>ml</code> mostly matters insofar as
-it affects which values are shadowed. If we wanted to replace a function
-in <code>Option</code> with a new function of the same name, the
+<p>The order of declarations in the <code>mli</code> doesn’t need to
+match the order of declarations in the <code>ml</code>. The order of
+declarations in the <code>ml</code> mostly matters insofar as it affects
+which values are shadowed. If we wanted to replace a function in
+<code>Option</code> with a new function of the same name, the
 declaration of that function in the <code>ml</code> would have to come
 after the <code>include Option</code> declaration.</p>
 <p>We can now use <code>Ext_option</code> as a replacement for
@@ -818,6 +819,9 @@ val touch : string -&gt; t -&gt; t</code></pre>
 &gt;           ('a, int, 'b) Base.Map.t -&gt; 'a -&gt; ('a, int, 'b) Base.Map.t
 &gt;       is not included in
 &gt;         val touch : string -&gt; t -&gt; t
+&gt;       The type ('a, int, 'b) Base.Map.t -&gt; 'a -&gt; ('a, int, 'b) Base.Map.t
+&gt;       is not compatible with the type string -&gt; t -&gt; t
+&gt;       Type ('a, int, 'b) Base.Map.t is not compatible with type string
 &gt;       File "counter.mli", line 16, characters 0-28: Expected declaration
 &gt;       File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]</code></pre>
@@ -876,7 +880,7 @@ val median : t -&gt; median</code></pre>
 &gt;         type median = Median of string | Before_and_after of string * string
 &gt;       is not included in
 &gt;         type median = Before_and_after of string * string | Median of string
-&gt;       Constructors number 1 have different names, Median and Before_and_after.
+&gt;       Constructor Before_and_after has been moved from position 1 to 2.
 &gt;       File "counter.mli", lines 21-23, characters 0-20: Expected declaration
 &gt;       File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]</code></pre>

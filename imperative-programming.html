@@ -1148,7 +1148,7 @@ of <code>x</code> work if we use OCaml’s laziness:</p>
 itself as part of its own evaluation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">force x;;
-&gt;Exception: Lazy.Undefined
+&gt;Exception: Lazy.Undefined.
 </code></pre>
 </div>
 <p>But we can also create useful recursive definitions with
@@ -1242,11 +1242,11 @@ let () =
   match In_channel.(input_line stdin) with
   | None -&gt; failwith "No timezone provided"
   | Some zone_string -&gt;
-    let zone = Time.Zone.find_exn zone_string in
+    let zone = Time_unix.Zone.find_exn zone_string in
     let time_string = Time.to_string_abs (Time.now ()) ~zone in
     Out_channel.output_string stdout
       (String.concat
-         ["The time in ";Time.Zone.to_string zone;" is ";time_string;".\n"]);
+         ["The time in ";Time_unix.Zone.to_string zone;" is ";time_string;".\n"]);
     Out_channel.flush stdout</code></pre>
 </div>
 <p>We can build this program using <code>dune</code> and run it, though
@@ -1374,9 +1374,9 @@ let () =
   match In_channel.input_line In_channel.stdin with
   | None -&gt; failwith "No timezone provided"
   | Some zone_string -&gt;
-    let zone = Time.Zone.find_exn zone_string in
+    let zone = Time_unix.Zone.find_exn zone_string in
     let time_string = Time.to_string_abs (Time.now ()) ~zone in
-    printf "The time in %s is %s.\n%!" (Time.Zone.to_string zone) time_string</code></pre>
+    printf "The time in %s is %s.\n%!" (Time_unix.Zone.to_string zone) time_string</code></pre>
 </div>
 <p>In the preceding example, we’ve used only two formatting directives:
 <code>%s</code>, for including a string, and <code>%!</code> which

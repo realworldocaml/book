@@ -454,10 +454,15 @@ list:</p>
 </code></pre>
 </div>
 <p> Here’s the resulting function <code>difftime</code> in action.</p>
+
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_unix"
+</code></pre>
+</div>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let delta =
   let t1 = time' () in
-  Unix.sleep 2;
+  Core_unix.sleep 2;
   let t2 = time' () in
   difftime t2 t1;;
 &gt;val delta : float = 2.
@@ -752,14 +757,14 @@ let () =
        flag "-a" no_arg ~doc:" Human-readable output format"
      in
      if human then ascii_time else float_time)
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>This can be compiled and run in the usual way: <a data-primary="returning function" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      datetime)
   (preprocess (pps ppx_jane))
-  (libraries core ctypes-foreign))</code></pre>
+  (libraries core ctypes-foreign core_unix.command_unix))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build datetime.exe
@@ -988,7 +993,7 @@ let () =
     ~summary:"Sort integers on standard input"
     Command.Spec.empty
     sort_stdin
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Compile it in the usual way with <em>dune</em> and test it against
 some input data, and also build the inferred interface so we can examine
@@ -996,7 +1001,7 @@ it more closely:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      qsort)
-  (libraries core ctypes-foreign))</code></pre>
+  (libraries core ctypes-foreign core_unix.command_unix))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">echo 2 4 1 3 | dune exec ./qsort.exe

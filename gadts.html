@@ -387,12 +387,15 @@ work.</p>
 &gt;Line 4, characters 43-44:
 &gt;Error: This expression has type a expr but an expression was expected of type
 &gt;         bool expr
-&gt;       The type constructor a would escape its scope
+&gt;       Type a is not compatible with type bool
 </code></pre>
 </div>
 <p> This is a pretty unhelpful error message, but the basic problem is
 that <code>eval</code> is recursive, and inference of GADTs doesn’t play
 well with recursive calls.</p>
+
+
+
 <p>More specifically, the issue is that the type-checker is trying to
 merge the locally abstract type <code>a</code> into the type of the
 recursive function <code>eval</code>, and merging it into the outer
@@ -468,7 +471,7 @@ of different types.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.find ~f:(fun x -&gt; x &gt; 3) [1;3;5;2];;
 &gt;- : int option = Some 5
 List.find ~f:(Char.is_uppercase) ['a';'B';'C'];;
-&gt;- : char option = Some B
+&gt;- : char option = Some 'B'
 </code></pre>
 </div>
 <p>But this approach is limited to simple dependencies between types
@@ -518,7 +521,7 @@ accordingly.</p>
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10);;
 &gt;- : int option = Some 10
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise;;
-&gt;Exception: (Failure "Element not found")
+&gt;Exception: (Failure "Element not found").
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;;
 &gt;- : int option = Some 20
 </code></pre>
@@ -578,7 +581,7 @@ which means it can depend on the particular variant of
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] (Default_to 10);;
 &gt;- : int = 10
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;5] Raise;;
-&gt;Exception: (Failure "No matching item found")
+&gt;Exception: (Failure "No matching item found").
 flexible_find ~f:(fun x -&gt; x &gt; 10) [1;2;20] Raise;;
 &gt;- : int = 20
 </code></pre>
@@ -689,12 +692,13 @@ the next step. This is analogous to a shell pipeline, and is useful for
 all sorts of system automation tasks.</p>
 <p>But, can’t we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:</p>
+
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
 let sum_file_sizes () =
-  Sys.ls_dir "."
-  |&gt; List.filter ~f:Sys.is_file_exn
-  |&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
+  Sys_unix.ls_dir "."
+  |&gt; List.filter ~f:Sys_unix.is_file_exn
+  |&gt; List.map ~f:(fun file_name -&gt; (Core_unix.lstat file_name).st_size)
   |&gt; List.sum (module Int) ~f:Int64.to_int_exn;;
 &gt;val sum_file_sizes : unit -&gt; int = &lt;fun&gt;
 </code></pre>
@@ -735,9 +739,9 @@ write code using the pipeline API before we’ve implemented it.</p>
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Example_pipeline (Pipeline : Pipeline) = struct
   open Pipeline
   let sum_file_sizes =
-    (fun () -&gt; Sys.ls_dir ".")
-    @&gt; List.filter ~f:Sys.is_file_exn
-    @&gt; List.map ~f:(fun file_name -&gt; (Unix.lstat file_name).st_size)
+    (fun () -&gt; Sys_unix.ls_dir ".")
+    @&gt; List.filter ~f:Sys_unix.is_file_exn
+    @&gt; List.map ~f:(fun file_name -&gt; (Core_unix.lstat file_name).st_size)
     @&gt; List.sum (module Int) ~f:Int64.to_int_exn
     @&gt; empty
 end;;
@@ -1409,8 +1413,8 @@ doesn’t always work with GADTs.</p>
 [@@deriving sexp];;
 &gt;Lines 1-4, characters 1-20:
 &gt;Error: This expression has type int number_kind
-&gt;       but an expression was expected of type a__001_ number_kind
-&gt;       Type int is not compatible with type a__001_
+&gt;       but an expression was expected of type a__007_ number_kind
+&gt;       Type int is not compatible with type a__007_
 </code></pre>
 </div>
 <p>The error message is pretty awful, but if you stop and think about

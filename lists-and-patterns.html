@@ -363,7 +363,7 @@ we might write:<a data-secondary="List.map2_exn" data-primary="List module" data
 exception if the lists are of mismatched length:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-&gt;Exception: (Invalid_argument "length mismatch in map2_exn: 3 &lt;&gt; 4")
+&gt;Exception: (Invalid_argument "length mismatch in map2_exn: 3 &lt;&gt; 4").
 </code></pre>
 </div>
 <p><code>List.fold</code> is the most complicated of the three, taking
@@ -622,16 +622,18 @@ list of lists:</p>
 <p>Here’s an example of using <code>List.concat</code> along with
 <code>List.map</code> to compute a recursive listing of a directory
 tree.</p>
+
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Sys = Core.Sys
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_unix.sys_unix";;
+module Sys = Core.Sys
 module Filename = Core.Filename;;
 &gt;module Sys = Core.Sys
 &gt;module Filename = Core.Filename
 let rec ls_rec s =
-  if Sys.is_file_exn ~follow_symlinks:true s
+  if Sys_unix.is_file_exn ~follow_symlinks:true s
   then [s]
   else
-    Sys.ls_dir s
+    Sys_unix.ls_dir s
     |&gt; List.map ~f:(fun sub -&gt; ls_rec (Filename.concat s sub))
     |&gt; List.concat;;
 &gt;val ls_rec : string -&gt; string list = &lt;fun&gt;
@@ -646,10 +648,10 @@ the filesystem and dealing with filenames.</p>
 efficient operation:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec ls_rec s =
-  if Sys.is_file_exn ~follow_symlinks:true s
+  if Sys_unix.is_file_exn ~follow_symlinks:true s
   then [s]
   else
-    Sys.ls_dir s
+    Sys_unix.ls_dir s
     |&gt; List.concat_map ~f:(fun sub -&gt; ls_rec (Filename.concat s sub));;
 &gt;val ls_rec : string -&gt; string list = &lt;fun&gt;
 </code></pre>
@@ -894,7 +896,7 @@ can learn more about this structure in <a data-type="xref" href="runtime-memory-
 fail at runtime if it encounters a function value.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;
-&gt;Exception: (Invalid_argument "compare: functional value")
+&gt;Exception: (Invalid_argument "compare: functional value").
 </code></pre>
 </div>
 <p>Similarly, it will fail on values that come from outside the OCaml

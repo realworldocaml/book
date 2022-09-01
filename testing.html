@@ -140,9 +140,8 @@ let%test_unit "rev" =
 &gt;File "test.ml", line 3, characters 0-79: rev threw
 &gt;(duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
 &gt;  ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-&gt;  Raised at Base__Exn.protectx in file "duniverse/base/src/exn.ml", line 71, characters 4-114
-&gt;  Called from Ppx_inline_test_lib__Runtime.time_and_reset_random_seeds in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
-&gt;  Called from Ppx_inline_test_lib__Runtime.test in file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
+&gt;  Raised at Ppx_assert_lib__Runtime.test_eq in file "duniverse/ppx_assert/runtime-lib/runtime.ml", line 95, characters 22-69
+&gt;  Called from Foo__Test.(fun) in file "test.ml", line 4, characters 13-21
 &gt;
 &gt;FAILED 1 / 1 tests
 [1]</code></pre>
@@ -506,7 +505,8 @@ shorter and easier to read.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 
-let start_time = Time_ns.of_string "2021-06-01 7:00:00"
+let start_time =
+  Time_ns.of_string_with_utc_offset "2021-06-01 7:00:00Z"
 
 let limiter () =
   Rate_limiter.create

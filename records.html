@@ -506,9 +506,14 @@ example, imagine our logging server had a record type for representing
 the state of a given client, including when the last heartbeat was
 received from that client. <a data-primary="functional updates" data-type="indexterm">&nbsp;</a>
 <a data-secondary="functional updates to" data-primary="records" data-type="indexterm">&nbsp;</a></p>
+
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_unix";;
+</code></pre>
+</div>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -553,7 +558,7 @@ accommodate the new fields. Consider what happens if we decided to add a
 field for the status message received on the last heartbeat:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -587,7 +592,7 @@ code, we’ve made the last two fields of <code>client_info</code>
 mutable:<a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a><a data-secondary="mutable fields in" data-primary="records" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type client_info =
-  { addr: Unix.Inet_addr.t;
+  { addr: Core_unix.Inet_addr.t;
     port: int;
     user: string;
     credentials: string;
@@ -764,13 +769,18 @@ function for displaying a record field:</p>
 <p>This takes three arguments: the <code>Field.t</code>, a function for
 converting the contents of the field in question to a string, and a
 record from which the field can be grabbed.</p>
+
+
+
 <p>Here’s an example of <code>show_field</code> in action:</p>
 <div class="highlight">
-<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let logon = { Logon.
-              session_id = "26685";
-              time = Time_ns.of_string "2017-07-21 10:11:45 EST";
-              user = "yminsky";
-              credentials = "Xy2d9W"; };;
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let logon =
+ { Logon.
+   session_id = "26685";
+   time = Time_ns.of_string_with_utc_offset "2017-07-21 10:11:45Z";
+   user = "yminsky";
+   credentials = "Xy2d9W";
+ };;
 &gt;val logon : Logon.t =
 &gt;  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
 &gt;   user = "yminsky"; credentials = "Xy2d9W"}

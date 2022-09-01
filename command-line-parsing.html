@@ -151,18 +151,19 @@ written equivalently as follows.</p>
 </section>
 <section class="level3" id="running-basic-commands">
 <h3>Running Commands</h3>
+
 <p>Once we’ve defined the basic command, running it is just one function
 call away.</p>
 <div class="highlight">
-<pre><code class="language-ocaml">let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+<pre><code class="language-ocaml">let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
-<p><code>Command.run</code> takes a couple of optional arguments that
-are useful to identify which version of the binary you are running in
-production. You’ll need the following <code>dune</code> file:</p>
+<p><code>Command_unix.run</code> takes a couple of optional arguments
+that are useful to identify which version of the binary you are running
+in production. You’ll need the following <code>dune</code> file:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name       md5)
-  (libraries  core)
+  (libraries  core core_unix.command_unix)
   (preprocess (pps ppx_jane)))</code></pre>
 </div>
 <p>At which point we can build and execute the program using
@@ -176,9 +177,9 @@ dune exec -- ./md5.exe -build-info
 </code></pre>
 </div>
 <p>The versions that you see in the output were defined via the optional
-arguments to <code>Command.run</code>. You can leave these blank in your
-own programs or get your build system to generate them directly from
-your version control system. Dune provides a <a href="https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables"><code>dune-build-info</code>
+arguments to <code>Command_unix.run</code>. You can leave these blank in
+your own programs or get your build system to generate them directly
+from your version control system. Dune provides a <a href="https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables"><code>dune-build-info</code>
 library</a> that automates this process for most common workflows.</p>
 <p>We can invoke our binary with <code>-help</code> to see the
 auto-generated help.</p>
@@ -192,10 +193,9 @@ auto-generated help.</p>
 &gt;
 &gt;=== flags ===
 &gt;
-&gt;  [-build-info]  print info about this build and exit
-&gt;  [-version]     print the version of this build and exit
-&gt;  [-help]        print this help text and exit
-&gt;                 (alias: -?)
+&gt;  [-build-info]              . print info about this build and exit
+&gt;  [-version]                 . print the version of this build and exit
+&gt;  [-help], -?                . print this help text and exit
 </code></pre>
 </div>
 <p>If you supply the <code>filename</code> argument, then
@@ -203,7 +203,7 @@ auto-generated help.</p>
 displayed to the standard output.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe md5.ml
-&gt;2ae55d17ff11d337492a1ca5510ee01b
+&gt;045215e7e7891779b261851a8458b656
 </code></pre>
 </div>
 <p>And that’s all it takes to build our little MD5 utility! Here’s a
@@ -224,7 +224,7 @@ let command =
         (anon ("filename" %: string))
         ~f:(fun filename () -&gt; do_hash filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 </section>
 <section class="level3" id="multiple-arguments">
@@ -266,13 +266,13 @@ let command =
         ~f:(fun (hash_length, filename) () -&gt;
           do_hash hash_length filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 <p>Building and running this command, we can see that it now indeed
 expects two arguments.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe 5 md5.ml
-&gt;f8824
+&gt;bc879
 </code></pre>
 </div>
 <p>This works well enough for two parameters, but if you want longer
@@ -333,7 +333,7 @@ valid filename, and not just any string.</p>
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -&gt; "More detailed information")
     (let%map_open.Command file =
-       anon ("filename" %: Filename.arg_type)
+       anon ("filename" %: Filename_unix.arg_type)
      in
      fun () -&gt; do_hash file)</code></pre>
 </div>
@@ -354,7 +354,7 @@ let do_hash file =
 
 let regular_file =
   Command.Arg_type.create (fun filename -&gt;
-      match Sys.is_file filename with
+      match Sys_unix.is_file filename with
       | `Yes -&gt; filename
       | `No -&gt; failwith "Not a regular file"
       | `Unknown -&gt;
@@ -369,7 +369,7 @@ let command =
      in
      fun () -&gt; do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 <p>The <code>regular_file</code> function transforms a
 <code>filename</code> string parameter into the same string but first
@@ -378,7 +378,7 @@ and run this code, you will see the new error messages if you try to
 open a special device such as <code>/dev/null</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe md5.ml
-&gt;5df5ec6301ea37bebc22912ceaa6b2e2
+&gt;6a6c128cdc8e75f3b174559316e49a5d
 dune exec -- ./md5.exe /dev/null
 &gt;Error parsing command line:
 &gt;
@@ -444,11 +444,11 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -&gt; "More detailed information")
     (let%map_open.Command filename =
-       anon (maybe ("filename" %: Filename.arg_type))
+       anon (maybe ("filename" %: Filename_unix.arg_type))
      in
      fun () -&gt; do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 <p>The <code>filename</code> parameter to <code>do_hash</code> is now a
 <code>string option</code> type. This is resolved into a string via
@@ -457,7 +457,7 @@ input or a file, and then the rest of the command is similar to our
 previous examples.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat md5.ml | dune exec -- ./md5.exe
-&gt;54fd98cd30f8faa76be46be0005f00bf
+&gt;068f02a29536dbcf111e7adebb085aa1
 </code></pre>
 </div>
 <p>Another possible way to handle this would be to supply a dash as the
@@ -485,17 +485,17 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -&gt; "More detailed information")
     (let%map_open.Command filename =
-       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+       anon (maybe_with_default "-" ("filename" %: Filename_unix.arg_type))
      in
      fun () -&gt; do_hash filename)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 <p>Building and running this confirms that it has the same behavior as
 before.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat md5.ml | dune exec -- ./md5.exe
-&gt;f0ea4085ca226eef2c0d70026619a244
+&gt;370616ab5fad3dd995c136f09d0adb29
 </code></pre>
 </div>
 </section>
@@ -522,14 +522,14 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -&gt; "More detailed information")
     (let%map_open.Command files =
-       anon (sequence ("filename" %: Filename.arg_type))
+       anon (sequence ("filename" %: Filename_unix.arg_type))
      in
      fun () -&gt;
        match files with
        | [] -&gt; do_hash "-"
        | _ -&gt; List.iter files ~f:do_hash)
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
 </div>
 <p>The callback function is a little more complex now, to handle the
 extra options. The <code>files</code> are now a
@@ -582,7 +582,7 @@ let command =
          ~doc:"string Checksum the given string"
      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
      and filename =
-       anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+       anon (maybe_with_default "-" ("filename" %: Filename_unix.arg_type))
      in
      fun () -&gt;
        if trial
@@ -592,7 +592,7 @@ let command =
          | Some buf -&gt; checksum_from_string buf
          | None -&gt; checksum_from_file filename))
 
-let () = Command.run command</code></pre>
+let () = Command_unix.run command</code></pre>
 </div>
 <p>The specification now uses the <code>flag</code> function to define
 the two new labeled, command-line arguments. The <code>doc</code> string
@@ -609,12 +609,11 @@ preceding code looks like this:</p>
 &gt;
 &gt;=== flags ===
 &gt;
-&gt;  [-s string]    Checksum the given string
-&gt;  [-t]           run a built-in time trial
-&gt;  [-build-info]  print info about this build and exit
-&gt;  [-version]     print the version of this build and exit
-&gt;  [-help]        print this help text and exit
-&gt;                 (alias: -?)
+&gt;  [-s string]                . Checksum the given string
+&gt;  [-t]                       . run a built-in time trial
+&gt;  [-build-info]              . print info about this build and exit
+&gt;  [-version]                 . print the version of this build and exit
+&gt;  [-help], -?                . print this help text and exit
 &gt;
 dune exec -- ./md5.exe -s "ocaml rocks"
 &gt;5a118fe92ac3b6c7854c595ecf6419cb
@@ -700,7 +699,7 @@ let add =
      fun () -&gt;
        Date.add_days base days |&gt; Date.to_string |&gt; print_endline)
 
-let () = Command.run add</code></pre>
+let () = Command_unix.run add</code></pre>
 </div>
 <p>Everything in this command should be familiar to you by now, and it
 works as you might expect.</p>
@@ -712,10 +711,9 @@ works as you might expect.</p>
 &gt;
 &gt;=== flags ===
 &gt;
-&gt;  [-build-info]  print info about this build and exit
-&gt;  [-version]     print the version of this build and exit
-&gt;  [-help]        print this help text and exit
-&gt;                 (alias: -?)
+&gt;  [-build-info]              . print info about this build and exit
+&gt;  [-version]                 . print the version of this build and exit
+&gt;  [-help], -?                . print this help text and exit
 &gt;
 dune exec -- ./cal.exe 2012-12-25 40
 &gt;2013-02-03
@@ -748,7 +746,7 @@ let command =
     ~summary:"Manipulate dates"
     [ "add", add; "diff", diff ]
 
-let () = Command.run command</code></pre>
+let () = Command_unix.run command</code></pre>
 </div>
 <p>And that’s all you really need to add subcommand support! Let’s build
 the example first in the usual way and inspect the help output, which
@@ -756,7 +754,7 @@ now reflects the subcommands we just added.</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name       cal)
-  (libraries  core)
+  (libraries  core core_unix.command_unix)
   (preprocess (pps ppx_jane)))</code></pre>
 </div>
 <div class="highlight">
@@ -767,10 +765,10 @@ now reflects the subcommands we just added.</p>
 &gt;
 &gt;=== subcommands ===
 &gt;
-&gt;  add      Add [days] to the [base] date
-&gt;  diff     Show days between [date1] and [date2]
-&gt;  version  print version information
-&gt;  help     explain a given subcommand (perhaps recursively)
+&gt;  add                        . Add [days] to the [base] date
+&gt;  diff                       . Show days between [date1] and [date2]
+&gt;  version                    . print version information
+&gt;  help                       . explain a given subcommand (perhaps recursively)
 </code></pre>
 </div>
 <p>We can invoke the two commands we just defined to verify that they
@@ -799,7 +797,7 @@ let add =
      fun () -&gt;
        Date.add_days base days |&gt; Date.to_string |&gt; print_endline)
 
-let () = Command.run add</code></pre>
+let () = Command_unix.run add</code></pre>
 </div>
 <p>This program requires you to specify both the <code>base</code> date
 and the number of <code>days</code> to add onto it. If <code>days</code>
@@ -830,7 +828,7 @@ let add =
      in
      fun () -&gt; add_days base days)
 
-let () = Command.run add</code></pre>
+let () = Command_unix.run add</code></pre>
 </div>
 <p>The <code>days</code> anonymous argument is now an optional integer
 in the spec, and when it isn’t there, we simply prompt for the value as

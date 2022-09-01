@@ -148,23 +148,20 @@ Map.find digit_map 3;;
 provided association list, throwing an exception if a key is used more
 than once. Let’s take a look at the type signature of
 <code>Map.of_alist_exn</code>.</p>
+
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Map.of_alist_exn;;
 &gt;val of_alist_exn :
-&gt;  ('a, 'cmp) Map.comparator -&gt; ('a * 'b) list -&gt; ('a, 'b, 'cmp) Map.t
+&gt;  ('a, 'cmp) Set.comparator -&gt; ('a * 'b) list -&gt; ('a, 'b, 'cmp) Map.t
 </code></pre>
 </div>
 <p>The type <code>Map.comparator</code> is actually an alias for a
 first-class module type, representing any module that matches the
 signature <code>Comparator.S</code>, shown below.</p>
+
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Base.Comparator.S;;
-&gt;module type S =
-&gt;  sig
-&gt;    type t
-&gt;    type comparator_witness
-&gt;    val comparator : (t, comparator_witness) Comparator.t
-&gt;  end
+&gt;module type S = Base.Comparator.S
 </code></pre>
 </div>
 <p>Such a module must contain the type of the key itself, as well as the
@@ -207,10 +204,10 @@ a map, as you can see.</p>
 &gt;Error: Signature mismatch:
 &gt;       ...
 &gt;       The type `comparator_witness' is required but not provided
-&gt;       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
+&gt;       File "duniverse/base/src/comparator.mli", line 18, characters 2-25:
 &gt;         Expected declaration
 &gt;       The value `comparator' is required but not provided
-&gt;       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
+&gt;       File "duniverse/base/src/comparator.mli", line 20, characters 2-53:
 &gt;         Expected declaration
 </code></pre>
 </div>
@@ -374,9 +371,9 @@ function. Thus, the compiler rejects the following:</p>
 &gt;Line 3, characters 5-43:
 &gt;Error: This expression has type (int, string, Int.comparator_witness) Map.t
 &gt;       but an expression was expected of type
-&gt;         (int, string, Comparator.Poly.comparator_witness) Map.t
+&gt;         (int, string, Map.Poly.comparator_witness) Map.t
 &gt;       Type Int.comparator_witness is not compatible with type
-&gt;         Comparator.Poly.comparator_witness
+&gt;         Map.Poly.comparator_witness
 </code></pre>
 </div>
 <p>This is rejected for good reason: there’s no guarantee that the
@@ -421,7 +418,7 @@ comparison by default, but it is available within the <code>Poly</code>
 module. <a data-primary="Base.Poly" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(m1 = m2);;
-&gt;Exception: (Invalid_argument "compare: functional value")
+&gt;Exception: Invalid_argument "compare: functional value".
 </code></pre>
 </div>
 <p>This comparison failed because polymorphic compare doesn’t work on
@@ -716,15 +713,11 @@ purpose, but if you want to create a hash table from one of your own
 types, you need to do some work to prepare it. In order for a module to
 be suitable for passing to <code>Hashtbl.create</code>, it has to match
 the following interface.</p>
+
+
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Base.Hashtbl.Key.S;;
-&gt;module type S =
-&gt;  sig
-&gt;    type t
-&gt;    val compare : t -&gt; t -&gt; int
-&gt;    val sexp_of_t : t -&gt; Sexp.t
-&gt;    val hash : t -&gt; int
-&gt;  end
+&gt;module type S = Base__Hashtbl_intf.Key.S
 </code></pre>
 </div>
 <p>Note that there’s no equivalent to the comparator witness that came
@@ -876,14 +869,14 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:1000 ~iterations:100_000
   |&gt; Bench.make_command
-  |&gt; Core.Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>The results show the hash table version to be around four times
 faster than the map version:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      map_vs_hash)
-  (libraries base core_bench))</code></pre>
+  (libraries base core_bench core_unix.command_unix))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build map_vs_hash.exe
@@ -954,14 +947,14 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:50 ~iterations:1000
   |&gt; Bench.make_command
-  |&gt; Core.Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Unsurprisingly, maps perform far better than hash tables on this
 benchmark, in this case by more than a factor of 10:</p>
 <div class="highlight">
 <pre><code class="language-scheme">(executable
   (name      map_vs_hash2)
-  (libraries core_bench))</code></pre>
+  (libraries core_bench core_unix.command_unix))</code></pre>
 </div>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build map_vs_hash2.exe

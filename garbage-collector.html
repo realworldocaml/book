@@ -512,7 +512,7 @@ let () =
           Immutable.test { iters; count })
     ]
   in
-  Bench.make_command tests |&gt; Command.run</code></pre>
+  Bench.make_command tests |&gt; Command_unix.run</code></pre>
 </div>
 <p>This program defines a type <code>t1</code> that is mutable and
 <code>t2</code> that is immutable. The benchmark loop iterates over both
@@ -615,7 +615,7 @@ type t = { foo : bool }
 let main () =
   attach_finalizer "allocated variant" (`Foo (Random.bool ()));
   attach_finalizer "allocated string" (Bytes.create 4);
-  attach_finalizer "allocated record" { foo = (Random.bool ()) };
+  attach_finalizer "allocated record" { foo = Random.bool () };
   Gc.compact ();
   return ()
 
@@ -623,7 +623,7 @@ let () =
   Command.async
     ~summary:"Testing finalizers"
     (Command.Param.return main)
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>Building and running this should show the following output:</p>
 <div class="highlight">

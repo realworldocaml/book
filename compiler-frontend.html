@@ -492,7 +492,7 @@ have this as your <code>ml</code> file:</p>
 &gt;         type t = Foo
 &gt;       is not included in
 &gt;         type t = Bar
-&gt;       Constructors number 1 have different names, Foo and Bar.
+&gt;       Constructors have different names, Foo and Bar.
 &gt;       File "conflicting_interface.mli", line 1, characters 0-12:
 &gt;         Expected declaration
 &gt;       File "conflicting_interface.ml", line 1, characters 0-12:
@@ -1155,7 +1155,7 @@ file can be displayed in a more developer-readable form via the
 &gt;  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
 &gt;    Tstr_type Rec
 &gt;    [
-&gt;      type_declaration t/81 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+&gt;      type_declaration t/267 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
 &gt;        ptype_params =
 &gt;          []
 &gt;        ptype_cstrs =
@@ -1164,11 +1164,11 @@ file can be displayed in a more developer-readable form via the
 &gt;          Ttype_variant
 &gt;            [
 &gt;              (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-&gt;                Foo/82
+&gt;                Foo/268
 &gt;                []
 &gt;                None
 &gt;              (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-&gt;                Bar/83
+&gt;                Bar/269
 &gt;                []
 &gt;                None
 &gt;            ]
@@ -1181,7 +1181,7 @@ file can be displayed in a more developer-readable form via the
 &gt;    [
 &gt;      &lt;def&gt;
 &gt;        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-&gt;          Tpat_var "v/84"
+&gt;          Tpat_var "v/270"
 &gt;        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
 &gt;          Texp_construct "Foo"
 &gt;          []

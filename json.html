@@ -853,7 +853,7 @@ let () =
   Command.basic_spec ~summary:"Print Github organization information"
     Command.Spec.(empty +&gt; anon ("organization" %: string))
     print_org
-  |&gt; Command.run</code></pre>
+  |&gt; Command_unix.run</code></pre>
 </div>
 <p>The following is a short shell script that generates all of the OCaml
 code and also builds the final executable:</p>
@@ -872,7 +872,7 @@ code and also builds the final executable:</p>
 
 (executable
   (name      github_org_info)
-  (libraries core yojson atdgen shell)
+  (libraries core yojson atdgen shell core_unix.command_unix)
   (flags     :standard -w -32)
   (modules   github_org_info github_org_t github_org_j))</code></pre>
 </div>
