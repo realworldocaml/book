@@ -439,15 +439,16 @@ val unique : Unique.t = {Unique.next_id = 0}
 - : (Sexp.t, Error.t) result = Ok 1
 ```
 
-Here's another example: a query handler that does directory listings. Here,
-the config is the default directory that relative paths are interpreted
-within:
-
-<!-- TODO: explain #require -->
+Now let's walk through another example: a query handler that does
+directory listings. For this, we're going to load up some Unix
+libraries, that are part of the `core_unix` package.
 
 ```ocaml env=query_handler
 # #require "core_unix.sys_unix";;
 ```
+
+Below is the `List_dir` query handler.  The config is the default
+directory that relative paths are interpreted within:
 
 ```ocaml env=query_handler
 module List_dir = struct
