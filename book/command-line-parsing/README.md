@@ -159,14 +159,17 @@ Command.Param.map filename_param ~f:(fun filename ->
 
 ### Running Commands {#running-basic-commands}
 
-<!-- TODO: Explain command_unix properly -->
-
-Once we've defined the basic command, running it is just one function call
-away.
+Once we've defined the basic command, running it is just one function
+call away.
 
 ```ocaml file=examples/correct/md5/md5.ml,part=3
 let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command
 ```
+
+Note that the `run` function is in the `Command_unix` library, rather
+than `Command` proper. That's because `Command`, being part of `Core`,
+is portable, and `Command_unix` uses OS-specific hooks that don't make
+sense when, for example, executing in JavaScript on a web browser.
 
 `Command_unix.run` takes a couple of optional arguments that are useful to
 identify which version of the binary you are running in production.

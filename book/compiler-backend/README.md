@@ -286,7 +286,7 @@ executable code. The OCaml toolchain branches into two separate compilers at
 this point. We'll describe the bytecode compiler first, which consists of two
 pieces:
 [OCaml toolchain/ocamlrun]{.idx}
-[OCaml toolchain/ocamlc]{.idx} <!-- TODO: bad index-->
+[OCaml toolchain/ocamlc]{.idx}
 [bytecode compiler/tools used]{.idx}
 [compilation process/portable bytecode]{.idx}
 
@@ -327,19 +327,19 @@ examples:
 
 ```sh dir=examples/back-end
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
-	branch L2
-L1:	acc 0
-	branchifnot L3
-	const 101
-	return 1
-L3:	const 100
-	return 1
-L2:	closure L1, 0
-	push
-	acc 0
-	makeblock 1, 0
-	pop 1
-	setglobal Pattern_monomorphic_small!
+    branch L2
+L1: acc 0
+    branchifnot L3
+    const 101
+    return 1
+L3: const 100
+    return 1
+L2: closure L1, 0
+    push
+    acc 0
+    makeblock 1, 0
+    pop 1
+    setglobal Pattern_monomorphic_small!
 
 ```
 
@@ -1066,7 +1066,7 @@ output a standalone native object file just as the bytecode compiler can.
 This object file has no further dependencies on OCaml except for the runtime
 library.
 [libasmrun.a library]{.idx}
-[native-code compiler/embedding code in C]{.idx} <!-- TODO: bad index   -->
+[native-code compiler/embedding code in C]{.idx}
 
 The native code runtime is a different library from the bytecode one, and is
 installed as `libasmrun.a` in the OCaml standard library directory.
