@@ -781,12 +781,13 @@ val sum_file_sizes : unit -> int = <fun>
 ```
 
 \noindent
-This works well enough, but the advantage of a custom pipeline type is
-that it lets you build extra services beyond basic execution of the
-pipeline, e.g.:
+This works fine in terms of giving you an easy way of expressing a
+pipeline that you can then execute. But by building our own pipeline
+type, we'll be able to provide a platform on which to build extra
+services beyond mere execution, such as:
 
-- Profiling, so that when you run a pipeline, you get a
-  report of how long each step of the pipeline took.
+- Profiling, so that when you run a pipeline, you get a report of how
+  long each step of the pipeline took.
 - Control over execution, like allowing users to pause the pipeline
   mid-execution, and restart it later.
 - Custom error handling, so, for example, you could build a pipeline
