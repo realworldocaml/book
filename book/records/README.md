@@ -560,12 +560,15 @@ heartbeat was received from that client.
 [functional updates]{.idx}
 [records/functional updates to]{.idx}
 
-<!-- TODO: explain why we're requiring core_unix here. -->
+We're going to want to use some unix-specific functionality here, so
+we'll need to load the `Core_unix` module, which is distributed
+separately from the rest of `Core`.
 
 ```ocaml env=main
 # #require "core_unix";;
 ```
 
+With that in hand, here's the record type:
 
 ```ocaml env=main
 type client_info =
@@ -574,7 +577,7 @@ type client_info =
     user: string;
     credentials: string;
     last_heartbeat_time: Time_ns.t;
-}
+ }
 ```
 
 We could define a function for updating the client information when a
@@ -837,13 +840,9 @@ This takes three arguments: the `Field.t`, a function for converting
 the contents of the field in question to a string, and a record from
 which the field can be grabbed.
 
-<!-- TODO: need to rerun this non-determinstic output, since the time -->
-<!-- has now changed timezone, and the output doesn't reflect -->
-<!-- it. (Also, why is this non-deterministic at all?) -->
-
 Here's an example of `show_field` in action:
 
-```ocaml env=main,non-deterministic=output
+```ocaml env=main
 # let logon =
    { Logon.
      session_id = "26685";
@@ -852,12 +851,10 @@ Here's an example of `show_field` in action:
      credentials = "Xy2d9W";
    };;
 val logon : Logon.t =
-  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
-   user = "yminsky"; credentials = "Xy2d9W"}
+  {Logon.session_id = "26685"; time = 1500631905000000000; user = "yminsky";
+   credentials = "Xy2d9W"}
 # show_field Logon.Fields.user Fn.id logon;;
 - : string = "user: yminsky"
-# show_field Logon.Fields.time Time_ns.to_string logon;;
-- : string = "time: 2017-07-21 15:11:45.000000000Z"
 ```
 
 As a side note, the preceding example is our first use of the `Fn`

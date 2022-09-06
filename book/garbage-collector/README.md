@@ -17,7 +17,7 @@ from running OCaml programs. The runtime manages a *heap*, which is a
 collection of memory regions that it obtains from the operating system. The
 runtime uses this memory to hold *heap blocks* that it fills up with OCaml
 values in response to allocation requests by the OCaml program.
-[values/allocation requests and]{.idx} <!-- TODO: bad index -->
+[values/allocation requests and]{.idx}
 [heaps/heap blocks]{.idx}
 [heaps/definition of]{.idx}
 
@@ -573,13 +573,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 ...
 ```
 

@@ -480,15 +480,13 @@ val difftime : time_t -> time_t -> float = <fun>
 ```
 
 \noindent
-Here's the resulting function `difftime` in action.
-
-<!-- TODO: explain #require -->
+Here's the resulting function `difftime` in action.  Note that we're
+going to load the `core_unix` library for this example, to pull up
+some unix-specific operations that are excluded from `Core` for
+portability reasons.
 
 ```ocaml env=posix,non-deterministic=output
 # #require "core_unix"
-```
-
-```ocaml env=posix,non-deterministic=output
 # let delta =
     let t1 = time' () in
     Core_unix.sleep 2;

@@ -159,25 +159,22 @@ The function `Map.of_alist_exn` constructs a map from a provided association
 list, throwing an exception if a key is used more than once. Let's take a
 look at the type signature of `Map.of_alist_exn`.
 
-<!-- TODO: explain why Set.comparator shows up, not Map.comparator (or
-     some other better name)-->
-
-```ocaml env=main
-# #show Map.of_alist_exn;;
+```ocaml env=main,skip
 val of_alist_exn :
-  ('a, 'cmp) Set.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
+  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
-The type `Map.comparator` is actually an alias for a first-class module type,
-representing any module that matches the signature `Comparator.S`, shown
-below.
+The type `Map.comparator`, is an alias for a first-class module type,
+representing any module that matches the signature `Comparator.S`,
+shown below.
 
-<!-- TODO: Something broke show here, so we don't actually see the
-    definition -->
+```ocaml env=main,skip
+module type S = sig
+  type t
+  type comparator_witness
 
-```ocaml env=main
-# #show Base.Comparator.S;;
-module type S = Base.Comparator.S
+  val comparator : (t, comparator_witness) comparator
+end
 ```
 
 Such a module must contain the type of the key itself, as well as the
@@ -782,24 +779,23 @@ if you want to create a hash table from one of your own types, you need to do
 some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
-<!-- TODO: explain Exported_for_specific_uses.Ppx_compare_lib.compare,
-     and why it shows up here.
--->
+<!-- TODO: One day, use #show again once it works -->
 
-<!-- TODO: Something broke show here, so we don't actually see the
-    definition -->
+```ocaml skip
+module type S = sig
+  type t
 
-
-```ocaml env=main
-# #show Base.Hashtbl.Key.S;;
-module type S = Base__Hashtbl_intf.Key.S
+  val sexp_of : t -> sexp
+  val compare : t -> t -> int
+  val hash : t -> int
+end
 ```
 
-Note that there's no equivalent to the comparator witness that came up for
-maps and sets. That's because the requirement for multiple objects to share a
-comparison function or a hash function mostly just doesn't come up for hash
-tables. That makes building a module suitable for use with a hash table
-simpler.
+Note that there's no equivalent to the comparator witness that came up
+for maps and sets. That's because the requirement for multiple objects
+to share a comparison function or a hash function mostly just doesn't
+come up for hash tables. That makes building a module suitable for use
+with a hash table simpler.
 
 ```ocaml env=main
 # module Book = struct

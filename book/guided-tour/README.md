@@ -1,4 +1,4 @@
-# A Guided Tour
+c# A Guided Tour
 
 This chapter gives an overview of OCaml by walking through a series of small
 examples that cover most of the major features of the language. This should
@@ -37,16 +37,9 @@ but it's worth understanding the differences between these libraries.
   same time, it has many more dependencies, and so takes longer to
   build, and will add more to the size of your executables.
 
-<!-- TODO: Rewrite the following section to be more up to date. -->
-
-As of the version of `Base` and `Core` used in this book (version
-`v0.14`), `Core` is less portable than `Base`, running only on
-UNIX-like systems.  For that reason, there is another package,
-`Core_kernel`, which is the portable subset of `Core`.  That said, in
-the latest stable release, `v0.15` (which was released too late to be
-adopted for this edition of the book) `Core` is portable, and
-`Core_kernel` has been deprecated. Given that, we don't use
-`Core_kernel` in this text.
+Note that `Core` used to be less portable than `Base`, but today, both
+work on the full set of platforms that OCaml does, including compiling
+down to JavaScript via `Js_of_ocaml`.
 
 :::
 

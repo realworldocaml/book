@@ -439,21 +439,15 @@ Error: This expression has type a expr but an expression was expected of type
 ```
 
 \noindent
-This is a pretty unhelpful error message, but the basic problem is
-that `eval` is recursive, and inference of GADTs doesn't play well
-with recursive calls.
+The basic problem is that `eval` is recursive, and inference of GADTs
+doesn't play well with recursive calls.  More specifically, the the
+type-checker is trying to merge the locally abstract type `a` into the
+type of the recursive function `eval`, and it fails because it doesn't
+recognize the equality between `bool` and `a`.
 
-<!-- TODO: we should fix the text below, which is explaining a -->
-<!-- confusing error message about "the type constructor a would -->
-<!-- escape its scope", which is not there anymore -->
-
-More specifically, the issue is that the type-checker is trying to
-merge the locally abstract type `a` into the type of the recursive
-function `eval`, and merging it into the outer scope within which
-`eval` is defined is the way in which `a` is escaping its scope.
-
-We can fix this by explicitly marking `eval` as polymorphic, which
-OCaml has a handy type annotation for.
+We can fix this by explicitly marking `eval` as polymorphic, at which
+point `eval` can be used ato multiple different types.  OCaml has a
+handy type annotation for just this.
 
 ```ocaml env=main
 # let rec eval : 'a. 'a expr -> 'a =
@@ -466,17 +460,13 @@ OCaml has a handy type annotation for.
 val eval : 'a expr -> 'a = <fun>
 ```
 
-\noindent
-This works because by marking `eval` as polymorphic, the type of
-`eval` isn't specialized to `a`, and so `a` doesn't escape its scope.
-
-It's also helpful here because `eval` itself is an example of
-*polymorphic recursion*, which is to say that `eval` needs to call
-itself at multiple different types. This comes up, for example, with
-`If`, since the `If` itself must be of type `bool`, but the type of
-the then and else clauses could be of type `int`. This means that when
-evaluating `If`, we'll dispatch `eval` at a different type than it was
-called on.  [polymorphic recursion]{.idx}
+Marking `eval` as polymorphic is also helpful here because `eval`
+itself is an example of *polymorphic recursion*, which is to say that
+`eval` needs to call itself at multiple different types. This comes
+up, for example, with `If`, since the `If` itself must be of type
+`bool`, but the type of the then and else clauses could be of type
+`int`. This means that when evaluating `If`, we'll dispatch `eval` at
+a different type than it was called on.  [polymorphic recursion]{.idx}
 
 As such, `eval` needs to see itself as polymorphic.  This kind of
 polymorphism is basically impossible to infer automatically, which is
@@ -767,12 +757,21 @@ to the next step.  This is analogous to a shell pipeline, and is
 useful for all sorts of system automation tasks.
 
 But, can't we write pipelines already? After all, OCaml comes with a
-perfectly serviceable pipeline operator:
+perfectly serviceable pipeline operator.
 
-<!-- TODO: Maybe add #require's for Sys_unix and Core_unix -->
+Before doing that, let's load up some extra Unix libraries, and open
+`Core`.
 
 ```ocaml env=abstracting
+# #require "core_unix";;
+# #require "core_unix.sys_unix";;
 # open Core;;
+```
+
+That done, we can create a simple pipeline, using just the `|>`
+operator.
+
+```ocaml env=abstracting
 # let sum_file_sizes () =
     Sys_unix.ls_dir "."
     |> List.filter ~f:Sys_unix.is_file_exn
