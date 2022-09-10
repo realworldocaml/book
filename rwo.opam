@@ -62,4 +62,6 @@ dev-repo: "git+https://github.com/realworldocaml/book.git"
 pin-depends: [
  [ "async_graphics.0.7.0+dev" "git+https://github.com/avsm/async_graphics.git#update-to-v15" ]
 ]
-
+depexts: [
+  ["texlive-full"] {os-family = "debian"}
+]

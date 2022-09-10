@@ -253,6 +253,7 @@ depexts: [
   ["tex-formats"] {os = "freebsd"}
   ["texlive"] {os-family = "alpine"}
   ["texlive-core"] {os-family = "arch"}
+  ["texlive-full"] {os-family = "debian"}
   ["texlive-latex"] {os-distribution = "centos"}
   ["texlive-latex"] {os-distribution = "fedora"}
   ["texlive-latex"] {os-distribution = "ol"}
