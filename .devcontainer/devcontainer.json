@@ -1,17 +1,10 @@
 {
-	"name": "OCaml (Community)",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"args": { "OCAML_VERSION": "4.14" }
-	},
+	"name": "OCaml",
+        "image": "mcr.microsoft.com/devcontainers/base:bullseye",
 	"settings": {},
-	"extensions": [
-           "ocamllabs.ocaml-platform"
-        ],
+        "features": { "ghcr.io/avsm/ocaml-devcontainers-feature/ocaml:latest": {} },
 	"postCreateCommand": "opam init -ay --disable-sandboxing && sudo chown vscode _build && sudo apt-get update && opam-monorepo depext -y",
-        "postAttachCommand": "dune build --watch --terminal-persistence=clear-on-rebuild",
+        "postAttachCommand": "dune build @runtest @site --watch --terminal-persistence=clear-on-rebuild",
 	"mounts": ["source=${localWorkspaceFolderBasename}-ocaml-build,target=${containerWorkspaceFolder}/_build,type=volume"],
-	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-
 	"remoteUser": "vscode"
 }
