@@ -106,10 +106,10 @@ let sign hash ?scheme key data =
     | #ecdsa as key, `ECDSA ->
       let* d = hashed () in
       Ok (ecdsa_to_cs (match key with
-          | `P224 key -> P224.Dsa.sign ~key d
-          | `P256 key -> P256.Dsa.sign ~key d
-          | `P384 key -> P384.Dsa.sign ~key d
-          | `P521 key -> P521.Dsa.sign ~key d))
+          | `P224 key -> P224.Dsa.(sign ~key (Public_key.trunc byte_length d))
+          | `P256 key -> P256.Dsa.(sign ~key (Public_key.trunc byte_length d))
+          | `P384 key -> P384.Dsa.(sign ~key (Public_key.trunc byte_length d))
+          | `P521 key -> P521.Dsa.(sign ~key (Public_key.trunc byte_length d))))
     | _ -> Error (`Msg "invalid key and signature scheme combination")
   with
   | Mirage_crypto_pk.Rsa.Insufficient_key ->

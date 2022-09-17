@@ -14,11 +14,14 @@ let setup_rng =
    `let main = Mirage.foreign \"Unikernel.Main\" (random @-> job)`, \
    and `let () = register \"my_unikernel\" [main $ default_random]`. \
    \n  If you are using Lwt, execute \
-   `Mirage_crypto_rng_lwt.initialize ()` at the beginning of \
-   your event loop (`Lwt_main.run`) execution. \
-   \n  If you're using neither MirageOS nor lwt, there is no periodic \
-   reseeding. For an initial seed from getrandom(), execute \
-   `Mirage_crypto_rng_unix.initialize ()`. You can use \
+   `Mirage_crypto_rng_lwt.initialize ()` at startup. \
+   \n  If you are using Async, execute \
+   `Mirage_crypto_eng_async.initialize (module Mirage_crypto_rng.Fortuna)` \
+   at startup. \
+   \n  If you are using Eio, execute in one of the fibers \
+   `Mirage_crypto_rng_eio.run (module Fortuna) env` (`env` from `Eio_main.run`).
+   \n  Otherwise, there is no periodic reseeding. For an initial seed from \
+   getrandom(), execute `Mirage_crypto_rng_unix.initialize ()`. You can use \
    `Mirage_crypto_rng.accumulate` and `Mirage_crypto_rng.reseed` to \
    reseed the RNG manually."
 
@@ -52,6 +55,8 @@ let create (type a) ?g ?seed ?(strict=false) ?time (m : a generator) =
 let _default_generator = ref None
 
 let set_default_generator g = _default_generator := Some g
+
+let unset_default_generator () = _default_generator := None
 
 let default_generator () =
   match !_default_generator with
