@@ -113,7 +113,7 @@ val bin_reader_ref : ('a, 'a ref) S1.reader
 val bin_shape_ref : Shape.t -> Shape.t
 val bin_ref : ('a, 'a ref) S1.t
 
-(*$ mk_base1_tp "lazy" "lazy_t"*)
+(*$ mk_base1_tp "lazy" "lazy_t" *)
 val bin_writer_lazy : ('a, 'a lazy_t) S1.writer
 val bin_reader_lazy : ('a, 'a lazy_t) S1.reader
 val bin_shape_lazy : Shape.t -> Shape.t
@@ -124,7 +124,6 @@ val bin_writer_option : ('a, 'a option) S1.writer
 val bin_reader_option : ('a, 'a option) S1.reader
 val bin_shape_option : Shape.t -> Shape.t
 val bin_option : ('a, 'a option) S1.t
-
 (*$*)
 
 val bin_writer_pair : ('a, 'b, 'a * 'b) S2.writer
@@ -193,18 +192,48 @@ val bin_writer_bigstring : buf writer
 val bin_reader_bigstring : buf reader
 val bin_shape_bigstring : Shape.t
 val bin_bigstring : buf t
+(*$*)
 
+(*$ mk_base "floatarray" *)
+val bin_writer_floatarray : floatarray writer
+val bin_reader_floatarray : floatarray reader
+val bin_shape_floatarray : Shape.t
+val bin_floatarray : floatarray t
+(*$*)
+
+(*$
+  mk_base_tp
+    ~deprecate:
+      "[@@ocaml.deprecated \"[since 2021-09] use ppx_bin_prot with type [float array] or \
+       [floatarray] or the 'floatarray' functions\"]"
+    "float_array"
+    "float array"
+*)
+val bin_writer_float_array : float array writer
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
+val bin_reader_float_array : float array reader
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
+val bin_shape_float_array : Shape.t
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
+val bin_float_array : float array t
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
 (*$*)
 
 type float_array = float array
-
-(*$ mk_base "float_array" *)
-val bin_writer_float_array : float_array writer
-val bin_reader_float_array : float_array reader
-val bin_shape_float_array : Shape.t
-val bin_float_array : float_array t
-
-(*$*)
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
 
 val bin_writer_variant_int : int writer
 val bin_reader_variant_int : int reader
@@ -269,7 +298,6 @@ val bin_writer_network64_int64 : int64 writer
 val bin_reader_network64_int64 : int64 reader
 val bin_shape_network64_int64 : Shape.t
 val bin_network64_int64 : int64 t
-
 (*$*)
 
 val bin_writer_array_no_length : ('a, 'a array) S1.writer

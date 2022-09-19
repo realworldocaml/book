@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Scheduler = Scheduler0
 
@@ -16,7 +16,7 @@ type t = Types.Job_queue.t =
   ; (* [jobs] is an array of length [capacity t * slots_per_elt], where each elt has the
        three components of a job ([execution_context], [f], [a]) in consecutive spots in
        [jobs].  [enqueue] doubles the length of [jobs] if [jobs] is full.  [jobs] never
-       shrinks.  [jobs] is somewhat like a [Core_kernel.Pool] specialized to 3-tuples; we
+       shrinks.  [jobs] is somewhat like a [Core.Pool] specialized to 3-tuples; we
        don't use [Pool] because that implements a set, where [jobs] is a queue. *)
     mutable jobs : (Obj.t A.t[@sexp.opaque])
   ; (* [mask] is [capacity t - 1], and is used for quickly computing [i mod (capacity

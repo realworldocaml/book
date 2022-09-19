@@ -7,22 +7,20 @@ let hex n =
   )
 
 let write_special src start stop ob str =
-  Bi_outbuf.add_substring ob src !start (stop - !start);
-  Bi_outbuf.add_string ob str;
+  Buffer.add_substring ob src !start (stop - !start);
+  Buffer.add_string ob str;
   start := stop + 1
 
 let write_control_char src start stop ob c =
-  Bi_outbuf.add_substring ob src !start (stop - !start);
-  let i = Bi_outbuf.alloc ob 6 in
-  let dst = ob.o_s in
-  Bytes.blit_string "\\u00" 0 dst i 4;
-  Bytes.set dst (i+4) (hex (Char.code c lsr 4));
-  Bytes.set dst (i+5) (hex (Char.code c land 0xf));
+  Buffer.add_substring ob src !start (stop - !start);
+  Buffer.add_string ob "\\u00";
+  Buffer.add_char ob (hex (Char.code c lsr 4));
+  Buffer.add_char ob (hex (Char.code c land 0xf));
   start := stop + 1
 
 let finish_string src start ob =
   try
-    Bi_outbuf.add_substring ob src !start (String.length src - !start)
+    Buffer.add_substring ob src !start (String.length src - !start)
   with exc ->
     Printf.eprintf "src=%S start=%i len=%i\n%!"
       src !start (String.length src - !start);
@@ -46,14 +44,14 @@ let write_string_body ob s =
   finish_string s start ob
 
 let write_string ob s =
-  Bi_outbuf.add_char ob '"';
+  Buffer.add_char ob '"';
   write_string_body ob s;
-  Bi_outbuf.add_char ob '"'
+  Buffer.add_char ob '"'
 
 let json_string_of_string s =
-  let ob = Bi_outbuf.create 10 in
+  let ob = Buffer.create 10 in
   write_string ob s;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 
 let test_string () =
   let s = Bytes.create 256 in
@@ -64,10 +62,10 @@ let test_string () =
 
 
 let write_null ob () =
-  Bi_outbuf.add_string ob "null"
+  Buffer.add_string ob "null"
 
 let write_bool ob x =
-  Bi_outbuf.add_string ob (if x then "true" else "false")
+  Buffer.add_string ob (if x then "true" else "false")
 
 
 let max_digits =
@@ -78,26 +76,22 @@ let max_digits =
 let dec n =
   Char.chr (n + 48)
 
-let rec write_digits s pos x =
-  if x = 0 then pos
+let rec write_digits s x =
+  if x = 0 then ()
   else
     let d = x mod 10 in
-    let pos = write_digits s pos (x / 10) in
-    Bytes.set s pos (dec (abs d));
-    pos + 1
+    write_digits s (x / 10);
+    Buffer.add_char s (dec (abs d))
 
 let write_int ob x =
-  Bi_outbuf.extend ob max_digits;
   if x > 0 then
-    ob.o_len <- write_digits ob.o_s ob.o_len x
+    write_digits ob x
   else if x < 0 then (
-    let s = ob.o_s in
-    let pos = ob.o_len in
-    Bytes.set s pos '-';
-    ob.o_len <- write_digits s (pos + 1) x
+    Buffer.add_char ob '-';
+    write_digits ob x
   )
   else
-    Bi_outbuf.add_char ob '0'
+    Buffer.add_char ob '0'
 
 
 let json_string_of_int i =
@@ -121,39 +115,24 @@ let float_needs_period s =
     false
 
 (*
-  Both write_float_fast and write_float guarantee
-  that a sufficient number of digits are printed in order to
-  allow reversibility.
-
-  The _fast version is faster but often produces unnecessarily long numbers.
+  Guarantees that a sufficient number of digits are printed in order to allow
+  reversibility.
 *)
-let write_float_fast ob x =
-  match classify_float x with
-    FP_nan ->
-      Bi_outbuf.add_string ob "NaN"
-  | FP_infinite ->
-      Bi_outbuf.add_string ob (if x > 0. then "Infinity" else "-Infinity")
-  | _ ->
-      let s = Printf.sprintf "%.17g" x in
-      Bi_outbuf.add_string ob s;
-      if float_needs_period s then
-        Bi_outbuf.add_string ob ".0"
-
 let write_float ob x =
   match classify_float x with
     FP_nan ->
-      Bi_outbuf.add_string ob "NaN"
+      Buffer.add_string ob "NaN"
   | FP_infinite ->
-      Bi_outbuf.add_string ob (if x > 0. then "Infinity" else "-Infinity")
+      Buffer.add_string ob (if x > 0. then "Infinity" else "-Infinity")
   | _ ->
       let s1 = Printf.sprintf "%.16g" x in
       let s =
         if float_of_string s1 = x then s1
         else Printf.sprintf "%.17g" x
       in
-      Bi_outbuf.add_string ob s;
+      Buffer.add_string ob s;
       if float_needs_period s then
-        Bi_outbuf.add_string ob ".0"
+        Buffer.add_string ob ".0"
 
 let write_normal_float_prec significant_figures ob x =
   let open Printf in
@@ -177,40 +156,25 @@ let write_normal_float_prec significant_figures ob x =
       | 16 -> sprintf "%.16g" x
       | _ -> sprintf "%.17g" x
   in
-  Bi_outbuf.add_string ob s;
+  Buffer.add_string ob s;
   if float_needs_period s then
-    Bi_outbuf.add_string ob ".0"
+    Buffer.add_string ob ".0"
 
+(* used by atdgen *)
 let write_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
-      Bi_outbuf.add_string ob "NaN"
+      Buffer.add_string ob "NaN"
   | FP_infinite ->
-      Bi_outbuf.add_string ob (if x > 0. then "Infinity" else "-Infinity")
+      Buffer.add_string ob (if x > 0. then "Infinity" else "-Infinity")
   | _ ->
       write_normal_float_prec significant_figures ob x
 
 let json_string_of_float x =
-  let ob = Bi_outbuf.create 20 in
+  let ob = Buffer.create 20 in
   write_float ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 
-
-let write_std_float_fast ob x =
-  match classify_float x with
-    FP_nan ->
-      json_error "NaN value not allowed in standard JSON"
-  | FP_infinite ->
-      json_error
-        (if x > 0. then
-           "Infinity value not allowed in standard JSON"
-         else
-           "-Infinity value not allowed in standard JSON")
-  | _ ->
-      let s = Printf.sprintf "%.17g" x in
-      Bi_outbuf.add_string ob s;
-      if float_needs_period s then
-        Bi_outbuf.add_string ob ".0"
 
 let write_std_float ob x =
   match classify_float x with
@@ -228,10 +192,11 @@ let write_std_float ob x =
         if float_of_string s1 = x then s1
         else Printf.sprintf "%.17g" x
       in
-      Bi_outbuf.add_string ob s;
+      Buffer.add_string ob s;
       if float_needs_period s then
-        Bi_outbuf.add_string ob ".0"
+        Buffer.add_string ob ".0"
 
+(* used by atdgen *)
 let write_std_float_prec significant_figures ob x =
   match classify_float x with
     FP_nan ->
@@ -246,9 +211,9 @@ let write_std_float_prec significant_figures ob x =
       write_normal_float_prec significant_figures ob x
 
 let std_json_string_of_float x =
-  let ob = Bi_outbuf.create 20 in
+  let ob = Buffer.create 20 in
   write_std_float ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 
 
 let test_float () =
@@ -271,9 +236,9 @@ let test_float () =
 let () = test_float ()
 *)
 
-let write_intlit = Bi_outbuf.add_string
-let write_floatlit = Bi_outbuf.add_string
-let write_stringlit = Bi_outbuf.add_string
+let write_intlit = Buffer.add_string
+let write_floatlit = Buffer.add_string
+let write_stringlit = Buffer.add_string
 
 let rec iter2_aux f_elt f_sep x = function
     [] -> ()
@@ -289,7 +254,7 @@ let iter2 f_elt f_sep x = function
       iter2_aux f_elt f_sep x l
 
 let f_sep ob =
-  Bi_outbuf.add_char ob ','
+  Buffer.add_char ob ','
 
 let rec write_json ob (x : t) =
   match x with
@@ -299,19 +264,19 @@ let rec write_json ob (x : t) =
     | `Int i -> write_int ob i
 #endif
 #ifdef INTLIT
-    | `Intlit s -> Bi_outbuf.add_string ob s
+    | `Intlit s -> Buffer.add_string ob s
 #endif
 #ifdef FLOAT
     | `Float f -> write_float ob f
 #endif
 #ifdef FLOATLIT
-    | `Floatlit s -> Bi_outbuf.add_string ob s
+    | `Floatlit s -> Buffer.add_string ob s
 #endif
 #ifdef STRING
     | `String s -> write_string ob s
 #endif
 #ifdef STRINGLIT
-    | `Stringlit s -> Bi_outbuf.add_string ob s
+    | `Stringlit s -> Buffer.add_string ob s
 #endif
     | `Assoc l -> write_assoc ob l
     | `List l -> write_list ob l
@@ -325,36 +290,36 @@ let rec write_json ob (x : t) =
 and write_assoc ob l =
   let f_elt ob (s, x) =
     write_string ob s;
-    Bi_outbuf.add_char ob ':';
+    Buffer.add_char ob ':';
     write_json ob x
   in
-  Bi_outbuf.add_char ob '{';
+  Buffer.add_char ob '{';
   iter2 f_elt f_sep ob l;
-  Bi_outbuf.add_char ob '}';
+  Buffer.add_char ob '}';
 
 and write_list ob l =
-  Bi_outbuf.add_char ob '[';
+  Buffer.add_char ob '[';
   iter2 write_json f_sep ob l;
-  Bi_outbuf.add_char ob ']'
+  Buffer.add_char ob ']'
 
 #ifdef TUPLE
 and write_tuple ob l =
-  Bi_outbuf.add_char ob '(';
+  Buffer.add_char ob '(';
   iter2 write_json f_sep ob l;
-  Bi_outbuf.add_char ob ')'
+  Buffer.add_char ob ')'
 #endif
 
 #ifdef VARIANT
 and write_variant ob s o =
-  Bi_outbuf.add_char ob '<';
+  Buffer.add_char ob '<';
   write_string ob s;
   (match o with
        None -> ()
      | Some x ->
-         Bi_outbuf.add_char ob ':';
+         Buffer.add_char ob ':';
          write_json ob x
   );
-  Bi_outbuf.add_char ob '>'
+  Buffer.add_char ob '>'
 #endif
 
 let write_t = write_json
@@ -367,19 +332,19 @@ let rec write_std_json ob (x : t) =
     | `Int i -> write_int ob i
 #endif
 #ifdef INTLIT
-    | `Intlit s -> Bi_outbuf.add_string ob s
+    | `Intlit s -> Buffer.add_string ob s
 #endif
 #ifdef FLOAT
     | `Float f -> write_std_float ob f
 #endif
 #ifdef FLOATLIT
-    | `Floatlit s -> Bi_outbuf.add_string ob s
+    | `Floatlit s -> Buffer.add_string ob s
 #endif
 #ifdef STRING
     | `String s -> write_string ob s
 #endif
 #ifdef STRINGLIT
-    | `Stringlit s -> Bi_outbuf.add_string ob s
+    | `Stringlit s -> Buffer.add_string ob s
 #endif
     | `Assoc l -> write_std_assoc ob l
     | `List l -> write_std_list ob l
@@ -393,116 +358,117 @@ let rec write_std_json ob (x : t) =
 and write_std_assoc ob l =
   let f_elt ob (s, x) =
     write_string ob s;
-    Bi_outbuf.add_char ob ':';
+    Buffer.add_char ob ':';
     write_std_json ob x
   in
-  Bi_outbuf.add_char ob '{';
+  Buffer.add_char ob '{';
   iter2 f_elt f_sep ob l;
-  Bi_outbuf.add_char ob '}';
+  Buffer.add_char ob '}';
 
 and write_std_list ob l =
-  Bi_outbuf.add_char ob '[';
+  Buffer.add_char ob '[';
   iter2 write_std_json f_sep ob l;
-  Bi_outbuf.add_char ob ']'
+  Buffer.add_char ob ']'
 
 and write_std_tuple ob l =
-  Bi_outbuf.add_char ob '[';
+  Buffer.add_char ob '[';
   iter2 write_std_json f_sep ob l;
-  Bi_outbuf.add_char ob ']'
+  Buffer.add_char ob ']'
 
 #ifdef VARIANT
 and write_std_variant ob s o =
   match o with
       None -> write_string ob s
     | Some x ->
-        Bi_outbuf.add_char ob '[';
+        Buffer.add_char ob '[';
         write_string ob s;
-        Bi_outbuf.add_char ob ',';
+        Buffer.add_char ob ',';
         write_std_json ob x;
-        Bi_outbuf.add_char ob ']'
+        Buffer.add_char ob ']'
 #endif
 
 
-let to_outbuf ?(std = false) ob x =
-  if std then (
-    if not (is_object_or_array x) then
-      json_error "Root is not an object or array"
-    else
-      write_std_json ob x
-  )
+let to_buffer ?(suf = "") ?(std = false) ob x =
+  if std then
+    write_std_json ob x
   else
-    write_json ob x
+    write_json ob x;
+  Buffer.add_string ob suf
 
-
-let to_string ?buf ?(len = 256) ?std x =
+let to_string ?buf ?(len = 256) ?(suf = "") ?std x =
   let ob =
     match buf with
-        None -> Bi_outbuf.create len
+        None -> Buffer.create len
       | Some ob ->
-          Bi_outbuf.clear ob;
+          Buffer.clear ob;
           ob
   in
-  to_outbuf ?std ob x;
-  let s = Bi_outbuf.contents ob in
-  Bi_outbuf.clear ob;
+  to_buffer ~suf ?std ob x;
+  let s = Buffer.contents ob in
+  Buffer.clear ob;
   s
 
-let to_channel ?buf ?len ?std oc x =
+let to_channel ?buf ?(len=4096) ?(suf = "") ?std oc x =
   let ob =
     match buf with
-        None -> Bi_outbuf.create_channel_writer ?len oc
-      | Some ob -> ob
+        None -> Buffer.create len
+      | Some ob -> Buffer.clear ob; ob
   in
-  to_outbuf ?std ob x;
-  Bi_outbuf.flush_channel_writer ob
+  to_buffer ~suf ?std ob x;
+  Buffer.output_buffer oc ob;
+  Buffer.clear ob
 
-let to_output ?buf ?len ?std out x =
+let to_output ?buf ?(len=4096) ?(suf = "") ?std out x =
   let ob =
     match buf with
-        None -> Bi_outbuf.create_output_writer ?len out
-      | Some ob -> ob
+        None -> Buffer.create len
+      | Some ob -> Buffer.clear ob; ob
   in
-  to_outbuf ?std ob x;
-  Bi_outbuf.flush_output_writer ob
+  to_buffer ~suf ?std ob x;
+  out#output (Buffer.contents ob) 0 (Buffer.length ob);
+  Buffer.clear ob
 
-let to_file ?len ?std file x =
+let to_file ?len ?std ?(suf = "\n") file x =
   let oc = open_out file in
   try
-    to_channel ?len ?std oc x;
+    to_channel ?len ~suf ?std oc x;
     close_out oc
   with e ->
     close_out_noerr oc;
     raise e
 
-let stream_to_outbuf ?std ob st =
-  Stream.iter (to_outbuf ?std ob) st
+let seq_to_buffer ?(suf = "\n") ?std ob st =
+  Seq.iter (to_buffer ~suf ?std ob) st
 
-let stream_to_string ?buf ?(len = 256) ?std st =
+let seq_to_string ?buf ?(len = 256) ?(suf = "\n") ?std st =
   let ob =
     match buf with
-        None -> Bi_outbuf.create len
+        None -> Buffer.create len
       | Some ob ->
-          Bi_outbuf.clear ob;
+          Buffer.clear ob;
           ob
   in
-  stream_to_outbuf ?std ob st;
-  let s = Bi_outbuf.contents ob in
-  Bi_outbuf.clear ob;
+  seq_to_buffer ~suf ?std ob st;
+  let s = Buffer.contents ob in
+  Buffer.clear ob;
   s
 
-let stream_to_channel ?buf ?len ?std oc st =
+let seq_to_channel ?buf ?(len=2096) ?(suf = "\n") ?std oc seq =
   let ob =
     match buf with
-        None -> Bi_outbuf.create_channel_writer ?len oc
-      | Some ob -> ob
+        None -> Buffer.create len
+      | Some ob -> Buffer.clear ob; ob
   in
-  stream_to_outbuf ?std ob st;
-  Bi_outbuf.flush_channel_writer ob
+  Seq.iter (fun json ->
+    to_buffer ~suf ?std ob json;
+    Buffer.output_buffer oc ob;
+    Buffer.clear ob;
+  ) seq
 
-let stream_to_file ?len ?std file st =
+let seq_to_file ?len ?(suf = "\n") ?std file st =
   let oc = open_out file in
   try
-    stream_to_channel ?len ?std oc st;
+    seq_to_channel ?len ~suf ?std oc st;
     close_out oc
   with e ->
     close_out_noerr oc;

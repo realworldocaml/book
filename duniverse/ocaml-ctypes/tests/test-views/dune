@@ -1,6 +1,7 @@
 (test
  (name test_views)
  (package ctypes-foreign)
+ (deps ../clib/clib%{ext_dll})
  (link_flags
   (:include ../flags/link-flags.sexp))
  (libraries ounit2 ctypes test_views_stubs test_views_bindings tests_common))

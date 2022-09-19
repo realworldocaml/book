@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 module Color_256 = Color_256
 
 (* NOTE: assorted content lifted from lib/console/src/console.ml *)
@@ -66,8 +66,7 @@ module Attr = struct
         "\027[%sm"
         (String.concat
            ~sep:";"
-           (List.concat_map l ~f:(fun att ->
-              to_int_list att |> List.map ~f:string_of_int)))
+           (List.concat_map l ~f:(fun att -> to_int_list att |> List.map ~f:string_of_int)))
   ;;
 end
 
@@ -94,7 +93,6 @@ module With_all_attrs = struct
         "\027[%sm"
         (String.concat
            ~sep:";"
-           (List.concat_map l ~f:(fun att ->
-              to_int_list att |> List.map ~f:string_of_int)))
+           (List.concat_map l ~f:(fun att -> to_int_list att |> List.map ~f:string_of_int)))
   ;;
 end

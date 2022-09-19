@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 module M = Limiter.Token_bucket
 
 let%bench_fun "always limited" =

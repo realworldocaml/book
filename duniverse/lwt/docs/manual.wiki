@@ -58,9 +58,9 @@
 
 === Lwt concepts ===
 
-  Let's take a classic function of the {{{Pervasives}}} module:
+  Let's take a classic function of the {{{Stdlib}}} module:
 
-<<code language="ocaml" |# Pervasives.input_char;;
+<<code language="ocaml" |# Stdlib.input_char;;
 - : in_channel -> char = <fun>
 >>
 
@@ -202,7 +202,7 @@ val p : char Lwt.t = <abstr>
   {{{catch f g}}} will call {{{f ()}}}, then wait for it to become
   resolved, and if it was rejected with an exception {{{exn}}}, call
   {{{g exn}}} to handle it. Note that both exceptions raised with
-  {{{Pervasives.raise}}} and {{{Lwt.fail}}} are caught by
+  {{{Stdlib.raise}}} and {{{Lwt.fail}}} are caught by
   {{{catch}}}.
 
 ==== Cancelable promises ====
@@ -412,10 +412,10 @@ val p3 : '_a Lwt.t = <abstr>
 
 === {{{let*}}} syntax ===
 
-  To use Lwt with the {{{let*}}} syntax introduced in OCaml 4.08, you can define:
+  To use Lwt with the {{{let*}}} syntax introduced in OCaml 4.08, you can open
+  the {{{Syntax}}} module:
 
-<<code language="ocaml" |let (let*) = Lwt.bind
-let (and*) = Lwt.both
+<<code language="ocaml" |open Syntax
 >>
 
   Then, you can write
@@ -729,6 +729,30 @@ let () =
 >>
 
 == Other libraries ==
+
+=== Parallelise computations to other cores ===
+
+  If you have some compute-intensive steps within your program, you can execute
+  them on a separate core. You can get performance benefits from the
+  parallelisation. In addition, whilst your compute-intensive function is running
+  on a different core, your normal I/O-bound tasks continue running on the
+  original core.
+
+  The module {{{Lwt_domain}}} from the {{{lwt_domain}}} package provides all the
+  necessary helpers to achieve this. It is based on the {{{Domainslib}}} library
+  and uses similar concepts (such as tasks and pools).
+
+  First, you need to create a task pool:
+
+<<code language="ocaml" |val setup_pool : ?name:string -> int -> pool
+>>
+
+  Then you simple detach the function calls to the created pool:
+
+<<code language="ocaml" |val detach : pool -> ('a -> 'b) -> 'a -> 'b Lwt.t
+>>
+
+  The returned promise resolves as soon as the function returns.
 
 === Detaching computation to preemptive threads ===
 

@@ -308,9 +308,9 @@ ivar, thus causing the corresponding deferred to become determined, using
 val ivar : '_weak1 Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 # let def = Ivar.read ivar;;
-val def : '_weak2 Deferred.t = <abstr>
+val def : '_weak1 Deferred.t = <abstr>
 # Deferred.peek def;;
-- : '_weak3 option = None
+- : '_weak2 option = None
 # Ivar.fill ivar "Hello";;
 - : unit = ()
 # Deferred.peek def;;
@@ -720,7 +720,7 @@ let () =
          ~doc:" Port to listen on (default 8765)"
      in
      fun () -> run ~uppercase ~port)
-  |> Command.run
+  |> Command_unix.run
 ```
 
 Note the use of `Deferred.never` in the `run` function. As you might guess
@@ -740,8 +740,8 @@ Pipes are created in connected read/write pairs:
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak4 Pipe.Reader.t = <abstr>
-val w : '_weak4 Pipe.Writer.t = <abstr>
+val r : '_weak3 Pipe.Reader.t = <abstr>
+val w : '_weak3 Pipe.Writer.t = <abstr>
 ```
 
 `r` and `w` are really just read and write handles to the same underlying
@@ -765,8 +765,8 @@ read out of the pipe.
 
 ```ocaml env=main
 # let (r,w) = Pipe.create ();;
-val r : '_weak5 Pipe.Reader.t = <abstr>
-val w : '_weak5 Pipe.Writer.t = <abstr>
+val r : '_weak4 Pipe.Reader.t = <abstr>
+val w : '_weak4 Pipe.Writer.t = <abstr>
 # let write_complete = Pipe.write w "Hello World!";;
 val write_complete : unit Deferred.t = <abstr>
 # Pipe.read r;;
@@ -811,10 +811,10 @@ val async_spec :
   ('a, unit Deferred.t) Async.Command.basic_spec_command Command.with_options
 ```
 
-This differs from the ordinary `Command.basic` call in that the main function
-must return a `Deferred.t`, and that the running of the command (using
-`Command.run`) automatically starts the Async scheduler, without requiring an
-explicit call to
+This differs from the ordinary `Command.basic` call in that the main
+function must return a `Deferred.t`, and that the running of the
+command (using `Command_unix.run`) automatically starts the Async
+scheduler, without requiring an explicit call to
 `Scheduler.go`.[command-line parsing/running async commands]{.idx}
 
 
@@ -1036,7 +1036,7 @@ let () =
        anon (sequence ("word" %: string))
      in
      fun () -> search_and_print words)
-  |> Command.run
+  |> Command_unix.run
 ```
 
 And that's all we need for a simple but usable definition
@@ -1519,9 +1519,9 @@ the type signature of `choice` and `choose`:
 
 ```ocaml env=main
 # choice;;
-- : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.choice = <fun>
+- : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.Choice.t = <fun>
 # choose;;
-- : 'a Deferred.choice list -> 'a Deferred.t = <fun>
+- : 'a Deferred.Choice.t list -> 'a Deferred.t = <fun>
 ```
 
 Note that there's no guarantee that the winning deferred will be the one that

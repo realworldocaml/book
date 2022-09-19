@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/ft3167hf8yr2n5d3?svg=true)](https://ci.appveyor.com/project/Chris00/cppo-pnjtx)
+[![Build status](https://github.com/ocaml-community/cppo/workflows/Build/badge.svg?branch=master)](https://github.com/ocaml-community/cppo/actions?query=workflow:Build)
 
 Cppo: cpp for OCaml
 ===================
@@ -12,6 +12,38 @@ Cppo is:
 * easy to learn without consulting a manual
 * reasonably fast
 * simple to install and to maintain
+
+Meta
+----
+
+* Author: Martin Jambon
+* OCaml-community maintainers:
+  - Martin Jambon ([**@mjambon**](https://github.com/mjambon))
+  - Yishuai Li ([**@liyishuai**](https://github.com/liyishuai))
+* License: [BSD 3-Clause "New" or "Revised" License](LICENSE.md)
+* Compatible OCaml versions: 4.02.3 or later
+* Additional dependencies:
+  - [Dune](https://dune.build) 1.10 or later
+  - [OCamlbuild](https://github.com/ocaml/ocamlbuild) and [Findlib](http://projects.camlcity.org/projects/findlib.html), for Ocamlbuild plugin
+
+Building and installation instructions
+--------------------------------------
+
+The easiest way to install the latest released version of cppo
+is via [OPAM](https://opam.ocaml.org/doc/Install.html):
+
+```shell
+opam install cppo
+```
+
+To instead build and install manually, do:
+
+``` shell
+git clone https://github.com/ocaml-community/cppo.git
+cd cppo
+make
+make install
+```
 
 User guide
 ----------

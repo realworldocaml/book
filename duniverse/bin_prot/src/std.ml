@@ -78,18 +78,68 @@ let __bin_read_float__ _buf ~pos_ref _vint =
   Common.raise_variant_wrong_type "float" !pos_ref
 ;;
 
-type float_array = float array
+let bin_floatarray = Type_class.bin_floatarray
+let bin_shape_floatarray = Type_class.bin_shape_floatarray
+let bin_writer_floatarray = Type_class.bin_writer_floatarray
+let bin_write_floatarray = Write.bin_write_floatarray
+let bin_reader_floatarray = Type_class.bin_reader_floatarray
+let bin_read_floatarray = Read.bin_read_floatarray
 
-let bin_float_array = Type_class.bin_float_array
-let bin_shape_float_array = Type_class.bin_shape_float_array
-let bin_writer_float_array = Type_class.bin_writer_float_array
-let bin_write_float_array = Write.bin_write_float_array
-let bin_reader_float_array = Type_class.bin_reader_float_array
-let bin_read_float_array = Read.bin_read_float_array
-
-let __bin_read_float_array__ _buf ~pos_ref _vint =
-  Common.raise_variant_wrong_type "float_array" !pos_ref
+let __bin_read_floatarray__ _buf ~pos_ref _vint =
+  Common.raise_variant_wrong_type "floatarray" !pos_ref
 ;;
+
+include struct
+  type float_array = float array
+  [@@deprecated "[since 2021-09] Use [float array] or [floatarray] instead"]
+
+  let (bin_shape_float_array [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float array] \
+          or [floatarray] or the 'floatarray' functions"])
+    =
+    Type_class.bin_shape_float_array
+  ;;
+
+  let (bin_writer_float_array [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float \
+          array] or [floatarray] or the 'floatarray' functions"])
+    =
+    Type_class.bin_writer_float_array
+  ;;
+
+  let (bin_write_float_array [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float array] \
+          or [floatarray] or the 'floatarray' functions"])
+    =
+    Write.bin_write_float_array
+  ;;
+
+  let (bin_reader_float_array [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float \
+          array] or [floatarray] or the 'floatarray' functions \
+          directly"])
+    =
+    Type_class.bin_reader_float_array
+  ;;
+
+  let (bin_read_float_array [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float array] \
+          or [floatarray] or the 'floatarray' functions"])
+    =
+    Read.bin_read_float_array
+  ;;
+
+  let __bin_read_float_array__ _buf ~pos_ref _vint =
+    Common.raise_variant_wrong_type "float_array" !pos_ref
+  ;;
+
+  let (__bin_read_float_array__ [@deprecated
+         "[since 2021-09] use ppx_bin_prot with type [float \
+          array] or [floatarray] or the floatarray functions"])
+    =
+    __bin_read_float_array__
+  ;;
+end [@alert "-deprecated"]
 
 let bin_int32 = Type_class.bin_int32
 let bin_shape_int32 = Type_class.bin_shape_int32

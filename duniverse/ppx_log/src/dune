@@ -1,0 +1,3 @@
+(library (name ppx_log) (public_name ppx_log) (kind ppx_rewriter)
+ (ppx_runtime_libraries ppx_sexp_conv.runtime-lib) (libraries ppx_log_kernel)
+ (preprocess no_preprocessing))

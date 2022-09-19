@@ -1,7 +1,6 @@
 type abstract [@@deriving quickcheck]
 
-[%%expect
-  {|
+[%%expect {|
 Line _, characters _-_:
 Error: ppx_quickcheck: unsupported: abstract type
 |}]
@@ -57,10 +56,12 @@ Line _, characters _-_:
 Error: ppx_quickcheck: unsupported: uknown extension: arbitrary.tag
 |}]
 
-let _ = [%quickcheck.observer: [%custom ;;
-  1
-  ;;
-  2]]
+let _ =
+  [%quickcheck.observer:
+    [%custom
+      1;;
+      2]]
+;;
 
 [%%expect
   {|
@@ -78,8 +79,7 @@ Error: ppx_quickcheck: invalid syntax: [%custom] extension expects a single expr
 
 let _ = [%quickcheck.generator: _ list]
 
-[%%expect
-  {|
+[%%expect {|
 Line _, characters _-_:
 Error: ppx_quickcheck: unsupported: wildcard type
 |}]

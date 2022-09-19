@@ -15,9 +15,12 @@ let all =
     (4, 12);
     (4, 13);
     (4, 14);
+    (5, 0);
   ]
 
-let to_string (a, b) = Printf.sprintf "%d.%02d" a b
+let to_string (a, b) =
+  if a < 5 then Printf.sprintf "%d.%02d" a b else Printf.sprintf "%d.%d" a b
+
 let to_int (a, b) = (a * 100) + b
 
 let of_string s =

@@ -4,7 +4,7 @@
 
 open Printf
 
-type 'a write = Bi_outbuf.t -> 'a -> unit
+type 'a write = Buffer.t -> 'a -> unit
 
 exception Error of string
 
@@ -47,67 +47,67 @@ let array_iter f sep x a =
   )
 
 let write_comma ob =
-  Bi_outbuf.add_char ob ','
+  Buffer.add_char ob ','
 
 let write_list write_item ob l =
-  Bi_outbuf.add_char ob '[';
+  Buffer.add_char ob '[';
   list_iter write_item write_comma ob l;
-  Bi_outbuf.add_char ob ']'
+  Buffer.add_char ob ']'
 
 let write_array write_item ob a =
-  Bi_outbuf.add_char ob '[';
+  Buffer.add_char ob '[';
   array_iter write_item write_comma ob a;
-  Bi_outbuf.add_char ob ']'
+  Buffer.add_char ob ']'
 
 let write_assoc_list write_key write_item ob l =
-  Bi_outbuf.add_char ob '{';
+  Buffer.add_char ob '{';
   list_iter (
     fun ob (k, v) ->
       write_key ob k;
-      Bi_outbuf.add_char ob ':';
+      Buffer.add_char ob ':';
       write_item ob v
   ) write_comma ob l;
-  Bi_outbuf.add_char ob '}'
+  Buffer.add_char ob '}'
 
 let write_assoc_array write_key write_item ob l =
-  Bi_outbuf.add_char ob '{';
+  Buffer.add_char ob '{';
   array_iter (
     fun ob (k, v) ->
       write_key ob k;
-      Bi_outbuf.add_char ob ':';
+      Buffer.add_char ob ':';
       write_item ob v
   ) write_comma ob l;
-  Bi_outbuf.add_char ob '}'
+  Buffer.add_char ob '}'
 
 
 let write_option write_item ob = function
-    None -> Bi_outbuf.add_string ob "<\"None\">"
+    None -> Buffer.add_string ob "<\"None\">"
   | Some x ->
-      Bi_outbuf.add_string ob "<\"Some\":";
+      Buffer.add_string ob "<\"Some\":";
       write_item ob x;
-      Bi_outbuf.add_string ob ">"
+      Buffer.add_string ob ">"
 
 let write_std_option write_item ob = function
-    None -> Bi_outbuf.add_string ob "\"None\""
+    None -> Buffer.add_string ob "\"None\""
   | Some x ->
-      Bi_outbuf.add_string ob "[\"Some\",";
+      Buffer.add_string ob "[\"Some\",";
       write_item ob x;
-      Bi_outbuf.add_string ob "]"
+      Buffer.add_string ob "]"
 
 let write_nullable write_item ob = function
-    None -> Bi_outbuf.add_string ob "null"
+    None -> Buffer.add_string ob "null"
   | Some x -> write_item ob x
 
 let write_int8 ob x =
   Yojson.Safe.write_int ob (int_of_char x)
 
 let write_int32 ob x =
-  Bi_outbuf.add_string ob (Int32.to_string x)
+  Buffer.add_string ob (Int32.to_string x)
 
 let write_int64 ob x =
-  Bi_outbuf.add_char ob '"';
-  Bi_outbuf.add_string ob (Int64.to_string x);
-  Bi_outbuf.add_char ob '"'
+  Buffer.add_char ob '"';
+  Buffer.add_string ob (Int64.to_string x);
+  Buffer.add_char ob '"'
 
 let min_float = float min_int
 let max_float = float max_int
@@ -120,7 +120,7 @@ let write_float_as_int ob x =
     match classify_float x with
         FP_normal
       | FP_subnormal
-      | FP_zero -> Bi_outbuf.add_string ob (Printf.sprintf "%.0f" x)
+      | FP_zero -> Buffer.add_string ob (Printf.sprintf "%.0f" x)
       | FP_infinite -> error "Cannot convert inf or -inf into a JSON int"
       | FP_nan -> error "Cannot convert NaN into a JSON int"
 
@@ -157,6 +157,10 @@ let read_number p lb =
 let read_string p lb =
   Yojson.Safe.read_space p lb;
   Yojson.Safe.read_string p lb
+
+let read_json p lb =
+  Yojson.Safe.read_space p lb;
+  Yojson.Safe.read_json p lb
 
 let read_list read_item p lb =
   Yojson.Safe.read_space p lb;
@@ -231,12 +235,12 @@ let read_with_adapter normalize reader p lb =
   reader p lb'
 
 let write_with_adapter restore writer ob x =
-  let ob_tmp = Bi_outbuf.create 1024 in
+  let ob_tmp = Buffer.create 1024 in
   writer ob_tmp x;
-  let s_tmp = Bi_outbuf.contents ob_tmp in
+  let s_tmp = Buffer.contents ob_tmp in
   let ast = Yojson.Safe.from_string s_tmp in
   let ast' = restore ast in
-  Yojson.Safe.to_outbuf ob ast'
+  Yojson.Safe.to_buffer ob ast'
 
 (*
   Checking at runtime that our assumptions on unspecified compiler behavior

@@ -20,8 +20,8 @@ sudo apt-get install -y \
   python-is-python3 \
   scala
 
-# For atdpy
-pip install pytest mypy flake8
+# For JSON Schema and atdpy testing
+pip install jsonschema pytest mypy flake8
 
 ###### Sanity checks ######
 
@@ -39,6 +39,9 @@ scalac -version
 
 echo 'check python3'
 python3 --version
+
+echo 'check jsonschema'
+python3 -m jsonschema --version
 
 echo 'check pytest'
 python3 -m pytest --version

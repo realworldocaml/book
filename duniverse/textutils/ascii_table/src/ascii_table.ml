@@ -14,6 +14,7 @@ type ('row, 'rest) renderer =
   -> ?header_attr:Attr.t list
   -> ?bars:[ `Ascii | `Unicode ] (* defaults to [`Unicode] *)
   -> ?display_empty_rows:bool (* Default: false *)
+  -> ?prefer_split_on_spaces:bool
   -> 'row Column.t list
   -> 'row list
   -> 'rest
@@ -25,6 +26,7 @@ let output
       ?header_attr
       ?(bars = `Unicode)
       ?display_empty_rows
+      ?(prefer_split_on_spaces = false)
       cols
       data
       ~oc
@@ -36,6 +38,7 @@ let output
        ?limit_width_to
        ?header_attr
        ?display_empty_rows
+       ~prefer_split_on_spaces
        cols
        data)
     ~f:(fun screen -> output_screen ~screen ~bars ~oc)
@@ -48,6 +51,7 @@ let to_string_gen
       ?header_attr
       ?(bars = `Unicode)
       ?display_empty_rows
+      ?(prefer_split_on_spaces = false)
       cols
       data
       ~string_with_attr
@@ -59,6 +63,7 @@ let to_string_gen
       ?limit_width_to
       ?header_attr
       ?display_empty_rows
+      ~prefer_split_on_spaces
       cols
       data
   with
@@ -69,13 +74,18 @@ let to_string_gen
 let to_string_noattr = to_string_gen ~string_with_attr:(fun _attrs str -> str)
 let to_string = to_string_gen ~string_with_attr:Console.Ansi.string_with_attr
 
-let simple_list_table
+let simple_list_table_internal
       ?(index = false)
-      ?(limit_width_to = 160)
-      ?(oc = stdout)
       ?(display = Ascii_table_kernel.Display.line)
+      ?spacing
+      ?(limit_width_to = 160)
+      ?header_attr
+      ?bars
+      ?display_empty_rows
+      ?prefer_split_on_spaces
       cols
       data
+      ~(f : (_, _) renderer)
   =
   let cols, data =
     if index
@@ -91,5 +101,17 @@ let simple_list_table
       in
       Ascii_table_kernel.Column.create col (fun ls -> List.nth_exn ls i) ~align)
   in
-  output ~oc ~display ~limit_width_to cols data
+  f
+    ~display
+    ?spacing
+    ~limit_width_to
+    ?header_attr
+    ?bars
+    ?display_empty_rows
+    ?prefer_split_on_spaces
+    cols
+    data
 ;;
+
+let simple_list_table ?(oc = stdout) = simple_list_table_internal ~f:(output ~oc)
+let simple_list_table_string = simple_list_table_internal ~f:to_string

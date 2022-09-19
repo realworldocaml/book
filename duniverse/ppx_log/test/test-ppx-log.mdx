@@ -1,0 +1,172 @@
+# ppx_log Testing
+
+# ppx_log Testing
+
+`ppx_log` is a ppx that provides a new extension
+
+* `[%log.debug log ARGS]`
+
+and the analogous global extension
+
+* `[%log.global.debug ARGS]`
+
+which get transformed to
+
+```
+if Ppx_log_syntax.would_log log (Some `Debug)
+then Ppx_log_syntax.sexp ~level:`Debug ?pos:None log [%message ARGS]
+else ()
+```
+
+and
+
+```
+if Ppx_log_syntax.Global.would_log (Some `Debug)
+then Ppx_log_syntax.Global.sexp ~level:`Debug ?pos:None [%message ARGS]
+else ()
+```
+
+This is useful because in cases where the sexp will not be
+logged, it is never constructed, making it feasible to place debug logs in
+hotloops. If the module `Ppx_log_syntax` is not in scope, using one of these
+extensions fails like so:
+
+```ocaml
+# open Core;;
+# [%log.debug l_debug "wow"] ; flush ()
+Line 1, characters 1-27:
+Error: Unbound module Ppx_log_syntax
+```
+
+We can open `Async` to provide a `Ppx_log_syntax`.
+
+```ocaml
+# open Async;;
+```
+
+Let's set up some useful functions for logging.
+
+```ocaml
+let l_debug = Log.For_testing.create ~map_output:(fun x ->  "logged: " ^ x ) `Debug;;
+let l_info = Log.For_testing.create ~map_output:(fun x ->  "logged: " ^ x ) `Info;;
+let flush () = Thread_safe.block_on_async_exn (fun () ->
+  Log.flushed l_debug
+  >>= fun () ->
+  Log.flushed l_info
+  >>= fun () ->
+  Log.Global.flushed ()
+) ;;
+```
+
+And then make an assertion on a vanilla log statement:
+
+```ocaml
+# Log.info l_debug "a" ; flush ()
+logged: a
+- : unit = ()
+```
+
+We can instead use `ppx_log`, sending a debug message to the Debug log:
+
+```ocaml
+# [%log.debug l_debug "wow"] ; flush ()
+logged: wow
+- : unit = ()
+```
+
+Debug messages should not show up using the Info log:
+
+```ocaml
+# [%log.debug l_info "debug"]
+- : unit = ()
+# [%log.info l_info "info"]
+- : unit = ()
+# [%log.error l_info "error"] ; flush ()
+logged: info
+logged: error
+- : unit = ()
+```
+
+Let's define some variables to use going forward:
+
+```ocaml
+let year = 2014;;
+let suffix = "CE";;
+```
+
+And try printing them as a sexp:
+
+```ocaml
+# [%log.debug l_debug "Just like sexp message" (year : int) (suffix : string)] ; flush ()
+logged: ("Just like sexp message"(year 2014)(suffix CE))
+- : unit = ()
+```
+
+Or some different configurations of message syntax:
+
+```ocaml
+# [%log.debug l_debug ~ce:(year : int)] ; flush ()
+logged: (ce 2014)
+- : unit = ()
+# [%log.debug l_debug (suffix : string) (year : int)] ; flush ()
+logged: ((suffix CE)(year 2014))
+- : unit = ()
+```
+
+But how do I know that this isn't constructing my sexp? That's the whole point right?
+
+```ocaml
+# [%log.debug l_info "this won't print or throw" ((let (_ : 'a) = failwith "error" in year) : int)] ; flush ()
+- : unit = ()
+```
+
+and it does throw if you're logging to the debug log
+
+```ocaml
+# [%log.debug l_debug "this won't print or throw" ((let (_ : 'a) = failwith "error" in year) : int)] ; flush ()
+Exception: (Failure error).
+```
+
+Time to try logging globally! Let's set up our global logger.
+
+```ocaml
+# Log.Global.set_level `Debug
+- : unit = ()
+# Log.Global.set_output [Log.For_testing.create_output ~map_output:(fun s -> "globally logged: " ^ s)]
+- : unit = ()
+```
+
+And print some logs!
+
+```ocaml
+# Log.Global.debug_s [%message "Hello there" (year: int)]; flush ()
+globally logged: ("Hello there"(year 2014))
+- : unit = ()
+# [%log.global.debug "Hello there" (year : int)] ; flush ()
+globally logged: ("Hello there"(year 2014))
+- : unit = ()
+# [%log.global.info "Info" (year : int)] ; flush ()
+globally logged: (Info(year 2014))
+- : unit = ()
+# [%log.global.error "Error" (year : int)] ; flush ()
+globally logged: (Error(year 2014))
+- : unit = ()
+```
+
+And if you prever to avoid global logging, open
+`Async.Ppx_log_syntax.No_global` instead:
+
+```ocaml
+# open Async.Ppx_log_syntax.No_global;;
+```
+
+And any use of global logging will return a warning type:
+
+```ocaml
+# let `Do_not_use_because_it_will_not_log = [%log.global.error "this should not log"];
+# flush ();
+- : unit = ()
+```
+
+For advanced users: the `Ppx_log_syntax` module can be overridden to
+customize behavior.  `Async.Ppx_log_syntax.No_global` is an example of this.

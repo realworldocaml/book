@@ -1,5 +1,5 @@
 open! Base
-open Import
+open Base.Exported_for_specific_uses (* for [Ppx_compare_lib] *)
 
 module Body : sig
   type 'a t =
@@ -12,9 +12,10 @@ module Body : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+    val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
+
+    include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+    include Ppx_compare_lib.Equal.S1 with type 'a t := 'a t
   end
   [@@ocaml.doc "@inline"]
 
@@ -38,9 +39,10 @@ type 'a t =
 include sig
   [@@@ocaml.warning "-32"]
 
-  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-  val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+  val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
+
+  include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+  include Ppx_compare_lib.Equal.S1 with type 'a t := 'a t
 end
 [@@ocaml.doc "@inline"]
 
@@ -52,8 +54,9 @@ module Raw : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexplib0.Sexp.t
+
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 

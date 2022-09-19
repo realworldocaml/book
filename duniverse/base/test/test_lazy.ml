@@ -58,3 +58,35 @@ let%test_module _ =
     ;;
   end)
 ;;
+
+let%expect_test "equal" =
+  let lazy_a =
+    lazy
+      (print_endline "force lazy_a";
+       1)
+  in
+  let lazy_b =
+    lazy
+      (print_endline "force lazy_b";
+       1)
+  in
+  let lazy_c =
+    lazy
+      (print_endline "force lazy_c";
+       2)
+  in
+  (* [phys_equal] short-circuiting without [force] *)
+  print_s [%sexp (equal Int.equal lazy_a lazy_a : bool)];
+  [%expect {| true |}];
+  (* [force], resulting in [true] *)
+  print_s [%sexp (equal Int.equal lazy_a lazy_b : bool)];
+  [%expect {|
+    force lazy_b
+    force lazy_a
+    true |}];
+  (* [force], resulting in [false] *)
+  print_s [%sexp (equal Int.equal lazy_b lazy_c : bool)];
+  [%expect {|
+    force lazy_c
+    false |}]
+;;

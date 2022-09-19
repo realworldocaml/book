@@ -18,4 +18,4 @@ let command =
         ~f:(fun (hash_length, filename) () ->
           do_hash hash_length filename))
 
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command_unix.run ~version:"1.0" ~build_info:"RWO" command

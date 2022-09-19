@@ -1,2 +1,2 @@
 (library (name time_ns_unix) (public_name core_unix.time_ns_unix)
-  (libraries core) (preprocess no_preprocessing))
+ (libraries core time_unix) (preprocess (pps ppx_jane)))

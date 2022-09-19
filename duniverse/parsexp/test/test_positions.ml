@@ -65,8 +65,7 @@ let%expect_test "build_positions_simple" =
       (offset 0)))
   |}];
   f ". .";
-  [%expect
-    {|
+  [%expect {|
     (((line 1) (col 0) (offset 0))
      ((line 1) (col 2) (offset 2)))
   |}];

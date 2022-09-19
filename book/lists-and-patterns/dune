@@ -4,5 +4,6 @@
   core
   core_bench
   mdx
+  core_unix
   ppx_jane)
  (preludes prelude.ml))

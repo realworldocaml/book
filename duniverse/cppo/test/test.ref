@@ -1,0 +1,142 @@
+# 1 "test.cppo"
+(* comment *)
+
+# 4 "test.cppo"
+f(1)
+# 6 "test.cppo"
+ 2+ 3.14  
+# 8 "test.cppo"
+ 3+ 3.14  
+
+# 13 "test.cppo"
+"g" is not defined
+
+# 18 "test.cppo"
+ b() 
+
+# 20 "test.cppo"
+debug("a")
+debug("b")
+
+
+
+
+# 33 "test.cppo"
+success
+
+# 45 "test.cppo"
+ 
+"abc\
+ xyz
+ def" 
+(* 123 \
+   789
+   456 *) 
+
+# 48 "test.cppo"
+ "a" "b" 
+
+# 51 "test.cppo"
+ aa ,bb   123   
+
+# 54 "test.cppo"
+  , ) ( 
+
+# 56 "test.cppo"
+blah #define xyz
+
+# 63 "test.cppo"
+  _ _ (* the 2 underscores should be space-separated *) 
+
+# 67 "test.cppo"
+ + + (* there should be some space between the pluses *) 
+
+# 69 "test.cppo"
+(* (* nested comment with single single quote: ' *) "*)" *)
+
+# 72 "test.cppo"
+obj
+   # define 
+# 73 "test.cppo"
+             
+
+# 75 "test.cppo"
+'  (* lone single quote *)
+
+# 78 "test.cppo"
+ 1  
+# 78 "test.cppo"
+    = 1
+
+# 82 "test.cppo"
+ #  
+# 82 "test.cppo"
+  is #
+
+# 98 "test.cppo"
+good maths
+
+
+
+
+# 117 "test.cppo"
+ 
+let g x = 
+  printf "call %s\n%!" "g"; 
+  let y = g x in 
+  printf "return %s\n%!" "g"; 
+  y 
+;; 
+
+
+# 124 "test.cppo"
+class foo () =
+object
+  
+# 126 "test.cppo"
+   
+  val mutable field_1 :  int option 
+  method  get_field_1  = field_1 
+  method  set_field_1  x = field_1 <- Some x 
+  
+# 127 "test.cppo"
+   
+  val mutable field_2 :  string option 
+  method  get_field_2  = field_2 
+  method  set_field_2  x = field_2 <- Some x 
+# 128 "test.cppo"
+end
+
+# 135 "test.cppo"
+ 
+  (if !debug then 
+    eprintf "[debug] %s %i: "  "test.cppo"   135 ; 
+    eprintf "test1 %i %i" x y; 
+    eprintf "\n") 
+# 136 "test.cppo"
+ 
+  (if !debug then 
+    eprintf "[debug] %s %i: "  "test.cppo"   136 ; 
+    eprintf "test2 %i" x; 
+    eprintf "\n") 
+
+# 1 "incl.cppo"
+included
+
+# 1 "incl2.cppo"
+ok
+# 139 "test.cppo"
+
+# 123456
+
+
+# 789 "test"
+# 1 "incl.cppo"
+included
+
+# 1 "incl2.cppo"
+ok
+
+
+# 793 "test"
+end

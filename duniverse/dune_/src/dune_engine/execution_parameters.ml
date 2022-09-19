@@ -1,4 +1,4 @@
-open Stdune
+open Import
 
 module Action_output_on_success = struct
   type t =
@@ -45,7 +45,7 @@ let hash
     ; action_stderr_on_success
     ; expand_aliases_in_sandbox
     } =
-  Hashtbl.hash
+  Poly.hash
     ( Dune_lang.Syntax.Version.hash dune_version
     , Action_output_on_success.hash action_stdout_on_success
     , Action_output_on_success.hash action_stderr_on_success
@@ -67,7 +67,7 @@ let to_dyn
     ]
 
 let builtin_default =
-  { dune_version = Stanza.latest_version
+  { dune_version = Dune_lang.Stanza.latest_version
   ; action_stdout_on_success = Print
   ; action_stderr_on_success = Print
   ; expand_aliases_in_sandbox = true

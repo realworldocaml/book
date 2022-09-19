@@ -31,9 +31,11 @@ test/driver/attributes/test.ml
 test/driver/instrument/test.ml
 test/driver/non-compressible-suffix/test.ml
 test/driver/transformations/test.ml
+test/expand-header-and-footer/test.ml
 test/expansion_inside_payloads/test.ml
 test/extensions_and_deriving/test.ml
 test/location/exception/test.ml
+test/metaquot/test.ml
 test/ppx_import_support/test.ml
 test/quoter/test.ml
 test/traverse/test.ml

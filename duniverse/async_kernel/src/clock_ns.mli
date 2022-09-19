@@ -1,6 +1,6 @@
 (** Provides a {{!Async_kernel.Clock_intf.Clock}[Clock]} with [Time_ns] as the unit. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 module type Clock = Clock_intf.Clock

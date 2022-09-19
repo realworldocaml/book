@@ -1,4 +1,4 @@
 (library (name core_bench) (public_name core_bench)
- (libraries textutils.ascii_table core core.time_stamp_counter
-  core_kernel.version_util)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (libraries textutils.ascii_table core core_bench_internals
+  core_unix.filename_unix core_unix.time_stamp_counter core_unix.time_unix)
+ (preprocess (pps ppx_compare ppx_fields_conv ppx_let ppx_sexp_conv)))

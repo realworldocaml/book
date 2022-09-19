@@ -1,1 +1,1 @@
-(packages base async_graphics)
+(packages base async async_kernel async_graphics)

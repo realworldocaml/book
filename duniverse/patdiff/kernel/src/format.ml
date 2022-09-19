@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 module Color = struct
@@ -198,18 +198,21 @@ module Location_style = struct
     | Diff
     | Omake
     | None
+    | Separator
   [@@deriving bin_io, compare, quickcheck, enumerate, equal, sexp]
 
   let to_string = function
     | Diff -> "diff"
     | Omake -> "omake"
     | None -> "none"
+    | Separator -> "separator"
   ;;
 
   let of_string = function
     | "diff" -> Diff
     | "omake" -> Omake
     | "none" -> None
+    | "separator" -> Separator
     | other -> failwiths ~here:[%here] "invalid location style" other [%sexp_of: string]
   ;;
 
@@ -233,12 +236,12 @@ module Location_style = struct
       (* Print line number of first difference, skipping past context lines. *)
       let prev_start =
         with_return (fun r ->
-          List.fold hunk.ranges ~init:hunk.prev_start ~f:(fun init ->
-            function
+          List.fold hunk.ranges ~init:hunk.prev_start ~f:(fun init -> function
             | Same s -> init + Array.length s
             | Prev _ | Next _ | Replace _ | Unified _ -> r.return init))
       in
       omake_style_error_message_start ~file:prev_filename ~line:prev_start
     | None -> rule ""
+    | Separator -> rule "=== DIFF HUNK ==="
   ;;
 end

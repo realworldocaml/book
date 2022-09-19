@@ -23,7 +23,7 @@ CAMLprim value lwt_unix_set_affinity(value val_pid, value val_cpus)
 {
     cpu_set_t cpus;
     CPU_ZERO(&cpus);
-    for (; Is_block(val_cpus); val_cpus = Field(val_cpus, 1))
+    for (/*nothing*/; val_cpus != Val_emptylist; val_cpus = Field(val_cpus, 1))
         CPU_SET(Int_val(Field(val_cpus, 0)), &cpus);
     if (sched_setaffinity(Int_val(val_pid), sizeof(cpu_set_t), &cpus) < 0)
         uerror("sched_setaffinity", Nothing);

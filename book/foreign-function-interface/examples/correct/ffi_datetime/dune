@@ -1,4 +1,4 @@
 (executable
   (name      datetime)
   (preprocess (pps ppx_jane))
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign core_unix.command_unix))

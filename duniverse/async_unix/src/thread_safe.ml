@@ -58,9 +58,7 @@ let block_on_async t f =
      context.  So we save and restore the execution context, if we're in the main thread.
      The restoration is necessary because subsequent code in the main thread can do
      operations that rely on the execution context. *)
-  let execution_context =
-    Kernel_scheduler.current_execution_context t.kernel_scheduler
-  in
+  let execution_context = Kernel_scheduler.current_execution_context t.kernel_scheduler in
   (* Create a scheduler thread if the scheduler isn't already running. *)
   if not t.is_running
   then (
@@ -70,20 +68,31 @@ let block_on_async t f =
     let scheduler_ran_a_job = Thread_safe_ivar.create () in
     upon (return ()) (fun () -> Thread_safe_ivar.fill scheduler_ran_a_job ());
     ignore
-      (Core.Thread.create
+      (Core_thread.create
          ~on_uncaught_exn:`Print_to_stderr
          (fun () ->
             Exn.handle_uncaught ~exit:true (fun () ->
+              let () =
+                match Linux_ext.pr_set_name_first16 with
+                | Ok f -> f "async-scheduler"
+                | Error _ -> ()
+              in
               lock t;
               never_returns (be_the_scheduler t)))
          ()
-       : Core.Thread.t);
+       : Core_thread.t);
     (* Block until the scheduler has run the above job. *)
     Thread_safe_ivar.read scheduler_ran_a_job);
   let maybe_blocked =
     run_holding_async_lock
       t
-      (fun () -> Monitor.try_with f ~name:"block_on_async")
+      (fun () ->
+         Monitor.try_with
+           ~run:
+             `Schedule
+           ~rest:`Log
+           f
+           ~name:"block_on_async")
       ~finish:(fun res ->
         match res with
         | Error exn -> `Available (Error exn)
@@ -167,7 +176,7 @@ let deferred t =
   Ivar.read ivar, fill
 ;;
 
-let t () = the_one_and_only ~should_lock:false
+let t () = the_one_and_only ()
 let am_holding_async_lock () = am_holding_lock (t ())
 let deferred () = deferred (t ())
 
@@ -182,3 +191,20 @@ let block_on_async_exn f = block_on_async_exn (t ()) f
 let run_in_async_wait f = run_in_async_wait (t ()) f
 let run_in_async_wait_exn f = run_in_async_wait_exn (t ()) f
 let reset_scheduler () = reset_scheduler (t ())
+
+let ok_to_drop_lock t =
+  is_main_thread () && not (Kernel_scheduler.in_cycle t.kernel_scheduler)
+;;
+
+let without_async_lock f =
+  let t = t () in
+  if i_am_the_scheduler t || (am_holding_lock t && not (ok_to_drop_lock t))
+  then
+    raise_s
+      [%message "called [become_helper_thread_and_block_on_async] from within async"]
+  else if am_holding_lock t
+  then (
+    unlock t;
+    protect ~f ~finally:(fun () -> lock t))
+  else f ()
+;;

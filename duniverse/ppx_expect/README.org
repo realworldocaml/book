@@ -154,7 +154,7 @@ If you are writing expect tests for a system using Async, Lwt or any
 other libraries for cooperative threading, you need some preparation
 so that everything works well. For instance, you probably need to
 flush some =stdout= channel. The expect test runtime takes care of
-flushing =Caml.stdout= but it doesn't know about
+flushing =Stdlib.stdout= but it doesn't know about
 =Async.Writer.stdout=, =Lwt_io.stdout= or anything else.
 
 To deal with this, expect\_test provides some hooks in the form of a
@@ -188,12 +188,26 @@ as the former.
 This is what you would need to write expect tests with Lwt:
 
 #+begin_src ocaml
-module Expect_test_config
-  : Expect_test_config.S with module IO = Lwt =
-struct
-  module IO = Lwt
-  let flush () = Lwt_io.(flush stdout)
-  let run = Lwt_main.run
+module Lwt_io_run = struct
+  type 'a t = 'a Lwt.t
+end
+
+module Lwt_io_flush = struct
+  type 'a t = 'a Lwt.t
+  let return x = Lwt.return x
+  let bind x ~f = Lwt.bind x f
+  let to_run x = x
+end
+
+module Expect_test_config :
+  Expect_test_config_types.S
+    with module IO_run = Lwt_io_run
+     and module IO_flush = Lwt_io_flush = struct
+  module IO_run = Lwt_io_run
+  module IO_flush = Lwt_io_flush
+  let run x = Lwt_main.run (x ())
+  let flushed () = Lwt_io.(buffered stdout = 0)
+  let upon_unreleasable_issue = `CR
 end
 #+end_src
 

@@ -1,7 +1,7 @@
 open! Import
 open Ppx_quickcheck_test_examples
 
-module Helpers = struct
+open struct
   module type S = sig
     type t
 
@@ -31,7 +31,12 @@ module Helpers = struct
   ;;
 end
 
-open Helpers
+include struct
+  module Base = struct end
+  module Base_quickcheck = struct end
+  module Quickcheckable = struct end
+end
+
 module Simple_reference = Simple_reference
 module Dotted_reference = Dotted_reference
 module Nonrec_reference = Nonrec_reference
@@ -237,7 +242,7 @@ module Simple_higher_order = Simple_higher_order
 module Named_higher_order = Named_higher_order
 module Optional_higher_order = Optional_higher_order
 
-let%expect_test ("higher order arrow type"[@tags "64-bits-only"]) =
+let%expect_test ("higher order arrow type" [@tags "64-bits-only"]) =
   let config = { Test.default_config with test_count = 100 } in
   let test m = test ~config ~shrinker:`atomic m in
   test
@@ -270,6 +275,8 @@ module Poly_unary = Poly_unary
 module Instance_of_unary = Instance_of_unary
 module Poly_binary = Poly_binary
 module Instance_of_binary = Instance_of_binary
+module Poly_ternary = Poly_ternary
+module Instance_of_ternary = Instance_of_ternary
 module Poly_with_variance = Poly_with_variance
 module Instance_with_variance = Instance_with_variance
 module Poly_with_phantom = Poly_with_phantom
@@ -294,6 +301,30 @@ let%expect_test "polymorphic type" =
     (generator exhaustive)
     (observer transparent)
     (shrinker (((false (())) => (false ())) ((true (())) => (true ())))) |}];
+  test
+    (module Instance_of_ternary)
+    (m_triple m_bool (m_option m_unit) (m_pair (m_option m_unit) m_bool));
+  [%expect
+    {|
+    (generator exhaustive)
+    (observer transparent)
+    (shrinker
+     (((false () ((()) false)) => (false () (() false)))
+      ((false () ((()) true)) => (false () (() true)))
+      ((false (()) (() false)) => (false () (() false)))
+      ((false (()) (() true)) => (false () (() true)))
+      ((false (()) ((()) false)) => (false () ((()) false)))
+      ((false (()) ((()) false)) => (false (()) (() false)))
+      ((false (()) ((()) true)) => (false () ((()) true)))
+      ((false (()) ((()) true)) => (false (()) (() true)))
+      ((true () ((()) false)) => (true () (() false)))
+      ((true () ((()) true)) => (true () (() true)))
+      ((true (()) (() false)) => (true () (() false)))
+      ((true (()) (() true)) => (true () (() true)))
+      ((true (()) ((()) false)) => (true () ((()) false)))
+      ((true (()) ((()) false)) => (true (()) (() false)))
+      ((true (()) ((()) true)) => (true () ((()) true)))
+      ((true (()) ((()) true)) => (true (()) (() true))))) |}];
   test
     (module Instance_with_variance)
     (m_pair (m_option m_unit) (m_arrow m_bool (m_option m_unit)));
@@ -349,8 +380,7 @@ let%expect_test "recursive type with indirect base case" =
     [@@deriving compare, hash, sexp_of]
 
     let examples =
-      List.init 3 ~f:(fun n ->
-        { children = List.init n ~f:(Fn.const { children = [] }) })
+      List.init 3 ~f:(fun n -> { children = List.init n ~f:(Fn.const { children = [] }) })
     ;;
   end
   in
@@ -404,6 +434,41 @@ let%expect_test "mutually recursive types" =
   [%expect
     {|
     (generator "generated 5_895 distinct values in 10_000 iterations")
+    (observer transparent)
+    (shrinker atomic) |}]
+;;
+
+module Poly_recursive = Poly_recursive
+module Instance_of_recursive = Instance_of_recursive
+
+let%expect_test "polymorphic recursive type" =
+  let module Poly_recursive' = struct
+    type 'a t = 'a Poly_recursive.t =
+      | Zero
+      | Succ of 'a * 'a t
+    [@@deriving compare, sexp_of]
+
+    let rec of_list = function
+      | [] -> Zero
+      | head :: tail -> Succ (head, of_list tail)
+    ;;
+
+    let examples (type a) (m_elt : (module With_examples with type t = a)) =
+      let module M = (val m_list m_elt) in
+      List.map M.examples ~f:of_list
+    ;;
+  end
+  in
+  let module Instance_of_recursive' = struct
+    type t = bool Poly_recursive'.t [@@deriving compare, sexp_of]
+
+    let examples = Poly_recursive'.examples m_bool
+  end
+  in
+  test ~shrinker:`atomic (module Instance_of_recursive) (module Instance_of_recursive');
+  [%expect
+    {|
+    (generator "generated 154 distinct values in 10_000 iterations")
     (observer transparent)
     (shrinker atomic) |}]
 ;;
@@ -603,8 +668,7 @@ let%expect_test "polymorphic wildcard" =
     (observer transparent)
     (shrinker ((a => ""))) |}];
   let module Opaque = struct
-    type t = int64 Deriving_from_wildcard.opaque
-    [@@deriving compare, quickcheck, sexp_of]
+    type t = int64 Deriving_from_wildcard.opaque [@@deriving compare, quickcheck, sexp_of]
 
     let examples = Deriving_from_wildcard.opaque_examples
   end
@@ -615,4 +679,52 @@ let%expect_test "polymorphic wildcard" =
     (generator "generated 4_207 distinct values in 10_000 iterations")
     (observer transparent)
     (shrinker (((0) => ()) ((1) => ()))) |}]
+;;
+
+module Do_not_generate_clauses = Do_not_generate_clauses
+
+let%expect_test "variant with clauses excluded from generator" =
+  let module Do_not_generate_clauses' = struct
+    type t = Do_not_generate_clauses.t =
+      | Can_generate of bool
+      | Cannot_generate of Do_not_generate_clauses.Cannot_generate.t
+    [@@deriving compare, enumerate, sexp_of]
+  end
+  in
+  test
+    ~generator:`inexhaustive
+    (module Do_not_generate_clauses)
+    (m_all (module Do_not_generate_clauses'));
+  [%expect
+    {|
+    (generator
+     ("generated 2 distinct values in 10_000 iterations"
+      ("did not generate these values"
+       ((Cannot_generate ()) (Cannot_generate (false)) (Cannot_generate (true))))))
+    (observer transparent)
+    (shrinker
+     (((Cannot_generate (false)) => (Cannot_generate ()))
+      ((Cannot_generate (true)) => (Cannot_generate ())))) |}];
+  let module Poly' = struct
+    type t =
+      [ `Can_generate of bool
+      | `Cannot_generate of Do_not_generate_clauses.Cannot_generate.t
+      ]
+    [@@deriving compare, enumerate, sexp_of]
+  end
+  in
+  test
+    ~generator:`inexhaustive
+    (module Do_not_generate_clauses.Poly)
+    (m_all (module Poly'));
+  [%expect
+    {|
+    (generator
+     ("generated 2 distinct values in 10_000 iterations"
+      ("did not generate these values"
+       ((Cannot_generate ()) (Cannot_generate (false)) (Cannot_generate (true))))))
+    (observer transparent)
+    (shrinker
+     (((Cannot_generate (false)) => (Cannot_generate ()))
+      ((Cannot_generate (true)) => (Cannot_generate ())))) |}]
 ;;

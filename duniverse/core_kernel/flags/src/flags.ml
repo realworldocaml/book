@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open Poly
 include Flags_intf
 
@@ -30,8 +30,7 @@ module Make (M : Make_arg) = struct
 
   let error message a sexp_of_a =
     let e = Error.create message a sexp_of_a in
-    if M.should_print_error
-    then eprintf "%s\n%!" (Sexp.to_string_hum (Error.sexp_of_t e));
+    if M.should_print_error then eprintf "%s\n%!" (Sexp.to_string_hum (Error.sexp_of_t e));
     Error.raise e
   ;;
 
@@ -65,10 +64,7 @@ module Make (M : Make_arg) = struct
     let bad = List.filter known ~f:(fun (flag, _) -> flag = Int63.zero) in
     if not (List.is_empty bad)
     then
-      error
-        "Flag.Make got flags with no bits set"
-        bad
-        [%sexp_of: (Int63.t * string) list]
+      error "Flag.Make got flags with no bits set" bad [%sexp_of: (Int63.t * string) list]
   ;;
 
   type sexp_format = string list [@@deriving sexp]
@@ -102,8 +98,7 @@ module Make (M : Make_arg) = struct
       ~f:(fun t name ->
         match Hashtbl.find known_by_name name with
         | Some mask -> t + mask
-        | None ->
-          of_sexp_error (sprintf "Flags.t_of_sexp got unknown name: %s" name) sexp)
+        | None -> of_sexp_error (sprintf "Flags.t_of_sexp got unknown name: %s" name) sexp)
   ;;
 
   (* total order such that [subset a b] implies [a <= b] *)

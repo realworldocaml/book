@@ -2,4 +2,4 @@
   (name      finalizer)
   (modules   finalizer)
   (preprocess (pps ppx_jane))
-  (libraries core async))
+  (libraries core async core_unix.command_unix))

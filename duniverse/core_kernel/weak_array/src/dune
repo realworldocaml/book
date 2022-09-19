@@ -1,2 +1,2 @@
 (library (name weak_array) (public_name core_kernel.weak_array)
- (libraries core_kernel) (preprocess (pps ppx_jane)))
+ (libraries core) (preprocess (pps ppx_jane)))

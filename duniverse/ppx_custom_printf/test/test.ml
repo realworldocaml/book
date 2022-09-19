@@ -27,9 +27,9 @@ end = struct
 end
 
 let%test _ = sprintf !"The time is %{Time} and the timezone is %{Zone}.\n"
-  (Time.now ()) Zone.local
-  = "The time is [Time.to_string (Time.now ())] and the timezone is \
-     [Zone.to_string Zone.local].\n"
+               (Time.now ()) Zone.local
+             = "The time is [Time.to_string (Time.now ())] and the timezone is \
+                [Zone.to_string Zone.local].\n"
 
 (* check that custom directives with nothing in between are properly translated *)
 let%test _ = sprintf !"%{sexp:int}%{sexp:int}%{sexp:int}%{sexp:int}" 1 2 3 4 = "1234"
@@ -56,7 +56,7 @@ let%test _ =
   = "[Time.to_string (Time.now ())], [Time.to_string_sec (Time.now ())], \
      [Time.to_string_abs (Time.now ())]\n"
 
-(* testing what happens is the expression to the left of the format string
+(* testing what happens if the expression to the left of the format string
    is a bit complicated *)
 let%test _ =
   let s = ksprintf (fun s ->

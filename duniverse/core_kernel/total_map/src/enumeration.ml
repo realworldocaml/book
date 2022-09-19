@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 type ('a, 'b) t = { all : 'a list }

@@ -1,7 +1,5 @@
 open Core
 open Import
-module Async_reader = Reader
-module Async_writer = Writer
 module Kernel_transport = Rpc_kernel.Transport
 module Header = Kernel_transport.Header
 module Handler_result = Kernel_transport.Handler_result
@@ -61,7 +59,9 @@ module Unix_reader = struct
   let all_unit_then_return l ret_val =
     match l with
     | [] -> return ret_val (* avoid deferred operations in the common case *)
-    | _ -> Deferred.all_unit l >>| fun () -> ret_val
+    | _ ->
+      let%map () = Deferred.all_unit l in
+      ret_val
   ;;
 
   let read_forever t ~on_message ~on_end_of_batch =
@@ -109,8 +109,7 @@ module Unix_reader = struct
     let handle_chunk buf ~pos ~len =
       loop buf ~pos ~len ~consumed:0 ~wait_before_reading:[]
     in
-    Reader.read_one_chunk_at_a_time t.t ~handle_chunk
-    >>| function
+    match%map Reader.read_one_chunk_at_a_time t.t ~handle_chunk with
     | `Eof | `Eof_with_unconsumed_data _ -> Error `Eof
     | `Stopped x -> Ok x
   ;;
@@ -143,11 +142,7 @@ module Unix_writer = struct
     pos + Header.length
   ;;
 
-  let send_bin_prot_internal
-        t
-        (bin_writer : _ Bin_prot.Type_class.writer)
-        x
-        ~followup_len
+  let send_bin_prot_internal t (bin_writer : _ Bin_prot.Type_class.writer) x ~followup_len
     : _ Send_result.t
     =
     if not (Writer.is_closed t.t)
@@ -167,9 +162,7 @@ module Unix_writer = struct
     else Closed
   ;;
 
-  let send_bin_prot t bin_writer x =
-    send_bin_prot_internal t bin_writer x ~followup_len:0
-  ;;
+  let send_bin_prot t bin_writer x = send_bin_prot_internal t bin_writer x ~followup_len:0
 
   let send_bin_prot_and_bigstring t bin_writer x ~buf ~pos ~len : _ Send_result.t =
     match send_bin_prot_internal t bin_writer x ~followup_len:len with
@@ -190,10 +183,19 @@ module Unix_writer = struct
   ;;
 end
 
+let default_max_message_size =
+  Lazy.from_fun (fun () ->
+    match Sys.getenv "ASYNC_RPC_MAX_MESSAGE_SIZE" with
+    | None ->
+      (* unfortunately, copied from reader0.ml *)
+      100 * 1024 * 1024
+    | Some max_message_size -> Int.of_string max_message_size)
+;;
+
 module Reader = struct
   include Kernel_transport.Reader
 
-  let of_reader ~max_message_size reader =
+  let of_reader ?(max_message_size = force default_max_message_size) reader =
     pack (module Unix_reader) (Unix_reader.create ~reader ~max_message_size)
   ;;
 end
@@ -201,7 +203,7 @@ end
 module Writer = struct
   include Kernel_transport.Writer
 
-  let of_writer ~max_message_size writer =
+  let of_writer ?(max_message_size = force default_max_message_size) writer =
     pack (module Unix_writer) (Unix_writer.create ~writer ~max_message_size)
   ;;
 end
@@ -214,9 +216,9 @@ type t = Kernel_transport.t =
 
 let close = Kernel_transport.close
 
-let of_reader_writer ~max_message_size reader writer =
-  { reader = Reader.of_reader reader ~max_message_size
-  ; writer = Writer.of_writer writer ~max_message_size
+let of_reader_writer ?max_message_size reader writer =
+  { reader = Reader.of_reader ?max_message_size reader
+  ; writer = Writer.of_writer ?max_message_size writer
   }
 ;;
 
@@ -226,3 +228,89 @@ let of_fd ?buffer_age_limit ?reader_buffer_size ~max_message_size fd =
     (Async_unix.Reader.create ?buf_len:reader_buffer_size fd)
     (Async_unix.Writer.create ?buffer_age_limit fd)
 ;;
+
+module Tcp = struct
+  let default_transport_maker fd ~max_message_size = of_fd fd ~max_message_size
+
+  let make_serve_func
+        tcp_creator
+        ~where_to_listen
+        ?max_connections
+        ?backlog
+        ?drop_incoming_connections
+        ?time_source
+        ?(max_message_size = force default_max_message_size)
+        ?(make_transport = default_transport_maker)
+        ?(auth = fun _ -> true)
+        ?(on_handler_error = `Ignore)
+        handle_transport
+    =
+    tcp_creator
+      ?max_connections
+      ?max_accepts_per_batch:None
+      ?backlog
+      ?drop_incoming_connections
+      ?socket:None
+      ?time_source
+      ~on_handler_error
+      where_to_listen
+      (fun client_addr socket ->
+         match auth client_addr with
+         | false -> return ()
+         | true ->
+           let transport = make_transport ~max_message_size (Socket.fd socket) in
+           let%bind result =
+             Monitor.try_with
+               ~run:
+                 `Schedule
+               ~rest:`Raise
+               (fun () ->
+                  handle_transport
+                    ~client_addr
+                    ~server_addr:(Socket.getsockname socket)
+                    transport)
+           in
+           let%bind () = close transport in
+           (match result with
+            | Ok () -> return ()
+            | Error exn -> raise exn))
+  ;;
+
+  (* eta-expand [where_to_listen] to avoid value restriction. *)
+  let serve ~where_to_listen = make_serve_func Tcp.Server.create_sock ~where_to_listen
+
+  (* eta-expand [where_to_listen] to avoid value restriction. *)
+  let serve_inet ~where_to_listen =
+    make_serve_func Tcp.Server.create_sock_inet ~where_to_listen
+  ;;
+
+  let connect
+        ?(max_message_size = force default_max_message_size)
+        ?(make_transport = default_transport_maker)
+        ?(tcp_connect_timeout =
+          Async_rpc_kernel.Async_rpc_kernel_private.default_handshake_timeout)
+        where_to_connect
+    =
+    let%bind sock =
+      Monitor.try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        (fun () ->
+           Tcp.connect_sock
+             ~timeout:(Time_ns.Span.to_span_float_round_nearest tcp_connect_timeout)
+             where_to_connect)
+    in
+    match sock with
+    | Error _ as error -> return error
+    | Ok sock ->
+      (match Socket.getpeername sock with
+       | exception exn_could_be_raised_if_the_socket_is_diconnected_now ->
+         Socket.shutdown sock `Both;
+         don't_wait_for (Unix.close (Socket.fd sock));
+         return (Error exn_could_be_raised_if_the_socket_is_diconnected_now)
+       | sock_peername ->
+         let transport = make_transport (Socket.fd sock) ~max_message_size in
+         return (Ok (transport, sock_peername)))
+  ;;
+end

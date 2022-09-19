@@ -1,2 +1,2 @@
 (library (name tuple_pool_test) (libraries tuple_pool)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (preprocess (pps ppx_jane)))

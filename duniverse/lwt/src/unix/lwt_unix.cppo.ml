@@ -604,9 +604,7 @@ type open_flag =
   | O_RSYNC
   | O_SHARE_DELETE
   | O_CLOEXEC
-#if OCAML_VERSION >= (4, 05, 0)
   | O_KEEPEXEC
-#endif
 
 external open_job : string -> Unix.open_flag list -> int -> (Unix.file_descr * bool) job = "lwt_unix_open_job"
 
@@ -1235,12 +1233,7 @@ let access name mode =
 
 let dup ?cloexec ch =
   check_descriptor ch;
-#if OCAML_VERSION >= (4, 05, 0)
   let fd = Unix.dup ?cloexec ch.fd in
-#else
-  let fd = Unix.dup ch.fd in
-  if cloexec = Some true then Unix.set_close_on_exec fd;
-#endif
   {
     fd = fd;
     state = Opened;
@@ -1259,12 +1252,7 @@ let dup ?cloexec ch =
 
 let dup2 ?cloexec ch1 ch2 =
   check_descriptor ch1;
-#if OCAML_VERSION >= (4, 05, 0)
   Unix.dup2 ?cloexec ch1.fd ch2.fd;
-#else
-  Unix.dup2 ch1.fd ch2.fd;
-  if cloexec = Some true then Unix.set_close_on_exec ch2.fd;
-#endif
   ch2.set_flags <- ch1.set_flags;
   ch2.blocking <- (
     if ch2.set_flags then
@@ -1450,39 +1438,15 @@ let files_of_directory path =
    +-----------------------------------------------------------------+ *)
 
 let pipe ?cloexec () =
-#if OCAML_VERSION >= (4, 05, 0)
   let (out_fd, in_fd) = Unix.pipe ?cloexec () in
-#else
-  let (out_fd, in_fd) = Unix.pipe () in
-  if cloexec = Some true then begin
-    Unix.set_close_on_exec out_fd;
-    Unix.set_close_on_exec in_fd
-  end;
-#endif
   (mk_ch ~blocking:Sys.win32 out_fd, mk_ch ~blocking:Sys.win32 in_fd)
 
 let pipe_in ?cloexec () =
-#if OCAML_VERSION >= (4, 05, 0)
    let (out_fd, in_fd) = Unix.pipe ?cloexec () in
-#else
-   let (out_fd, in_fd) = Unix.pipe () in
-   if cloexec = Some true then begin
-     Unix.set_close_on_exec out_fd;
-     Unix.set_close_on_exec in_fd
-   end;
-#endif
   (mk_ch ~blocking:Sys.win32 out_fd, in_fd)
 
 let pipe_out ?cloexec () =
-#if OCAML_VERSION >= (4, 05, 0)
   let (out_fd, in_fd) = Unix.pipe ?cloexec () in
-#else
-  let (out_fd, in_fd) = Unix.pipe () in
-  if cloexec = Some true then begin
-    Unix.set_close_on_exec out_fd;
-    Unix.set_close_on_exec in_fd
-  end;
-#endif
   (out_fd, mk_ch ~blocking:Sys.win32 in_fd)
 
 external mkfifo_job : string -> int -> unit job = "lwt_unix_mkfifo_job"
@@ -1500,14 +1464,9 @@ let mkfifo name perms =
 external symlink_job : string -> string -> unit job = "lwt_unix_symlink_job"
 
 let symlink ?to_dir name1 name2 =
-  if Sys.win32 then begin
-#if OCAML_VERSION >= (4, 03, 0)
+  if Sys.win32 then
     Lwt.return (Unix.symlink ?to_dir name1 name2)
-  #else
-    ignore to_dir;
-    Lwt.return (Unix.symlink name1 name2)
-#endif
-  end else
+  else
     run_job (symlink_job name1 name2)
 
 external readlink_job : string -> string job = "lwt_unix_readlink_job"
@@ -1699,12 +1658,7 @@ type socket_type =
 type sockaddr = Unix.sockaddr = ADDR_UNIX of string | ADDR_INET of inet_addr * int
 
 let socket ?cloexec dom typ proto =
-#if OCAML_VERSION >= (4, 05, 0)
   let s = Unix.socket ?cloexec dom typ proto in
-#else
-  let s = Unix.socket dom typ proto in
-  if cloexec = Some true then Unix.set_close_on_exec s;
-#endif
   mk_ch ~blocking:false s
 
 type shutdown_command =
@@ -1717,17 +1671,7 @@ let shutdown ch shutdown_command =
   check_descriptor ch;
   Unix.shutdown ch.fd shutdown_command
 
-external stub_socketpair : socket_domain -> socket_type -> int -> Unix.file_descr * Unix.file_descr = "lwt_unix_socketpair_stub"
-
-#if OCAML_VERSION >= (4, 05, 0)
-let stub_socketpair ?cloexec dom typ proto =
-  let (s1, s2) = stub_socketpair dom typ proto in
-  if cloexec = Some true then begin
-    Unix.set_close_on_exec s1;
-    Unix.set_close_on_exec s2
-  end;
-  (s1, s2)
-#endif
+external stub_socketpair : ?cloexec:bool -> socket_domain -> socket_type -> int -> Unix.file_descr * Unix.file_descr = "lwt_unix_socketpair_stub"
 
 let socketpair ?cloexec dom typ proto =
   let (s1, s2) =
@@ -1735,16 +1679,16 @@ let socketpair ?cloexec dom typ proto =
     if Sys.win32 && (dom <> Unix.PF_UNIX) then
       stub_socketpair ?cloexec dom typ proto
     else Unix.socketpair ?cloexec dom typ proto in
-#elif OCAML_VERSION >= (4, 05, 0)
-    if Sys.win32 then stub_socketpair ?cloexec dom typ proto
-    else Unix.socketpair ?cloexec dom typ proto in
 #else
-    if Sys.win32 then stub_socketpair dom typ proto
-    else Unix.socketpair dom typ proto in
-  if cloexec = Some true then begin
-    Unix.set_close_on_exec s1;
-    Unix.set_close_on_exec s2
-  end;
+    if Sys.win32 then stub_socketpair ?cloexec dom typ proto
+    else begin
+      let (s1, s2) = Unix.socketpair dom typ proto in
+      if cloexec = Some true then begin
+        Unix.set_close_on_exec s1;
+        Unix.set_close_on_exec s2
+      end;
+      (s1, s2)
+    end in
 #endif
   (mk_ch ~blocking:false s1, mk_ch ~blocking:false s2)
 
@@ -1757,12 +1701,7 @@ let accept_and_set_nonblock ?cloexec ch_fd =
     let (fd, addr) = accept4 ?cloexec ~nonblock:true ch_fd in
     (mk_ch ~blocking:false ~set_flags:false fd, addr)
   else
-#if OCAML_VERSION >= (4, 05, 0)
     let (fd, addr) = Unix.accept ?cloexec ch_fd in
-#else
-    let (fd, addr) = Unix.accept ch_fd in
-    if cloexec = Some true then Unix.set_close_on_exec fd;
-#endif
     (mk_ch ~blocking:false fd, addr)
 
 let accept ?cloexec ch =
@@ -1899,7 +1838,7 @@ type socket_int_option =
   Unix.socket_int_option =
   | SO_SNDBUF
   | SO_RCVBUF
-  | SO_ERROR
+  | SO_ERROR [@ocaml.deprecated "Use Unix.getsockopt_error instead."]
   | SO_TYPE
   | SO_RCVLOWAT
   | SO_SNDLOWAT
@@ -2495,7 +2434,11 @@ let wait () = waitpid [] (-1)
 
 external system_job : string -> int job = "lwt_unix_system_job"
 
+#if OCAML_VERSION >= (5, 0, 0)
+external unix_exit : int -> 'a = "caml_unix_exit"
+#else
 external unix_exit : int -> 'a = "unix_exit"
+#endif
 
 let system cmd =
   if Sys.win32 then

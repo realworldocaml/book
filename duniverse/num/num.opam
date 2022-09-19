@@ -1,5 +1,5 @@
+version: "v1.4+dune2"
 opam-version: "2.0"
-version: "1.4"
 maintainer: "Xavier Leroy <xavier.leroy@inria.fr>"
 authors: [
   "Valérie Ménissier-Morain"
@@ -9,18 +9,11 @@ authors: [
 license: "LGPL-2.1-only with OCaml-LGPL-linking-exception"
 homepage: "https://github.com/ocaml/num/"
 bug-reports: "https://github.com/ocaml/num/issues"
-dev-repo: "git+https://github.com/ocaml/num.git"
-build: [
-  [make]
-]
-install: [
-  make
-  "install" {!ocaml:preinstalled}
-  "findlib-install" {ocaml:preinstalled}
-]
+dev-repo: "git+https://github.com/dune-universe/num.git"
+build: [ "dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} ]
 depends: [
   "ocaml" {>= "4.06.0"}
-  "ocamlfind" {build & >= "1.7.3"}
+  "dune" {>= "2.0"}
 ]
 conflicts: [ "base-num" ]
 synopsis:

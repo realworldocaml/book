@@ -1,4 +1,4 @@
 requires = "num.core"
-version = "%%VERSION%%"
+version = "v1.4+dune2"
 description = "Add-on for num inside toploops"
 archive(byte,toploop) = "num_top.cma"

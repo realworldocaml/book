@@ -1,10 +1,10 @@
-open Core_kernel
+open Core
 open Poly
 
 module Time = struct
   include Time
 
-  let sexp_of_t x = Sexp.Atom (Time.to_string x)
+  let sexp_of_t x = Sexp.Atom (Time.to_string_utc x)
 end
 
 let%test _ =
@@ -28,12 +28,12 @@ let%test_module "Zone.V1" =
          [ zone "nyc", "America/New_York", "\016America/New_York"
          ; zone "ldn", "Europe/London", "\013Europe/London"
          ; zone "hkg", "Asia/Hong_Kong", "\014Asia/Hong_Kong"
+         ; zone "UTC", "UTC", "\003UTC"
+         ; zone "GMT", "GMT", "\003GMT"
          ]
        ;;
 
-       let%test_unit "special form [Local]" =
-         ignore (t_of_sexp (Sexp.of_string "Local") : t)
-       ;;
+       let%test_unit "special form [Local]" = ignore (t_of_sexp (Sexp.of_string "Local") : t)
      end))
 ;;
 
@@ -51,9 +51,7 @@ let%test_module "Zone.V1" =
          ]
        ;;
 
-       let%test_unit "special form [Local]" =
-         ignore (t_of_sexp (Sexp.of_string "Local") : t)
-       ;;
+       let%test_unit "special form [Local]" = ignore (t_of_sexp (Sexp.of_string "Local") : t)
      end))
 ;;
 
@@ -188,8 +186,7 @@ let%test_module "clock shift stuff" =
       [%test_result: Date.t] ~expect:date d;
       [%test_result: Time.Ofday.t] ~expect:ofday o;
       [%test_result: to_date_ofday_ambiguity]
-        ~expect:
-          (`Also_skipped (date, Option.value_exn (Time.Ofday.sub o Time.Span.hour)))
+        ~expect:(`Also_skipped (date, Option.value_exn (Time.Ofday.sub o Time.Span.hour)))
         a
     ;;
 

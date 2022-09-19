@@ -6,7 +6,7 @@
     may throw exceptions since some of the code is not tail-recursive.
 *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type t

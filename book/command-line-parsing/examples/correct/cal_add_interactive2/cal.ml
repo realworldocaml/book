@@ -27,4 +27,4 @@ let add =
 
 [@@@part "2"]
 
-let () = Command.run add
+let () = Command_unix.run add

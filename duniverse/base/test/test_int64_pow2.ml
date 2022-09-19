@@ -30,7 +30,7 @@ let%expect_test "[floor_log2]" =
     (65 (Ok 6)) |}]
 ;;
 
-let%expect_test ("[floor_log2]"[@tags "64-bits-only"]) =
+let%expect_test ("[floor_log2]" [@tags "64-bits-only"]) =
   print_for examples_64_bit floor_log2;
   [%expect
     {|
@@ -61,7 +61,7 @@ let%expect_test "[ceil_log2]" =
     (65 (Ok 7)) |}]
 ;;
 
-let%expect_test ("[ceil_log2]"[@tags "64-bits-only"]) =
+let%expect_test ("[ceil_log2]" [@tags "64-bits-only"]) =
   print_for examples_64_bit ceil_log2;
   [%expect
     {|

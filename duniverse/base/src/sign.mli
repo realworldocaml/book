@@ -6,15 +6,16 @@ type t = Sign0.t =
   | Neg
   | Zero
   | Pos
-[@@deriving_inline enumerate]
+[@@deriving_inline enumerate, sexp_grammar]
 
-val all : t list
+include Ppx_enumerate_lib.Enumerable.S with type t := t
+
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
 (** This provides [to_string]/[of_string], sexp conversion, Map, Hashtbl, etc. *)
-include
-  Identifiable.S with type t := t
+include Identifiable.S with type t := t
 
 val of_int : int -> t
 

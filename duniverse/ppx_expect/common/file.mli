@@ -1,5 +1,5 @@
 open! Base
-open Import
+open Base.Exported_for_specific_uses (* for [Ppx_compare_lib] *)
 
 module Name : sig
   (** Strongly-typed filename *)
@@ -8,9 +8,8 @@ module Name : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
-
-    val compare : t -> t -> int
+    include Sexplib0.Sexpable.S with type t := t
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 
@@ -37,15 +36,15 @@ module Location : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
-
-    val compare : t -> t -> int
+    include Sexplib0.Sexpable.S with type t := t
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 
   [@@@end]
 
   val beginning_of_file : Name.t -> t
+  val of_source_code_position : Source_code_position.t -> t
 
   include Comparable.S with type t := t
 end
@@ -56,8 +55,9 @@ module Digest : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexplib0.Sexp.t
+
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 

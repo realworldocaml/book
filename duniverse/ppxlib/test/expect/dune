@@ -10,6 +10,7 @@
   ppxlib
   ppxlib.metaquot
   ppxlib.traverse
+  ppxlib.astlib
   findlib.top
   ppxlib_ast
   ;; We don't actually use findlib.dynload, however it is a

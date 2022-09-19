@@ -1,8 +1,6 @@
-open! Core_kernel
+open! Core
 open! Import
 open Pool
-module Pointer = Pointer
-module Slot = Slot
 
 let dummy_e = Execution_context.main
 let dummy_f : Obj.t -> unit = ignore

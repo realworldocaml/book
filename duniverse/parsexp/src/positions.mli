@@ -14,17 +14,18 @@ open! Import
     Note that a [t] can hold the same given positions no more than twice. The parser
     stores the same position twice for non-quoted single character atoms.
 *)
-type t [@@deriving_inline sexp_of, compare]
+type t [@@deriving_inline sexp_of]
 
 include sig
   [@@@ocaml.warning "-32"]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  val compare : t -> t -> int
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 end
 [@@ocaml.doc "@inline"]
 
 [@@@end]
+
+val compare : t -> t -> int
 
 (** Represent a position in the input *)
 type pos =
@@ -34,18 +35,18 @@ type pos =
   (** Number of bytes from the beginning of the input. The first
       byte has offset [0]. *)
   }
-[@@deriving_inline sexp_of, compare]
+[@@deriving_inline sexp_of]
 
 include sig
   [@@@ocaml.warning "-32"]
 
-  val sexp_of_pos : pos -> Ppx_sexp_conv_lib.Sexp.t
-  val compare_pos : pos -> pos -> int
+  val sexp_of_pos : pos -> Sexplib0.Sexp.t
 end
 [@@ocaml.doc "@inline"]
 
 [@@@end]
 
+val compare_pos : pos -> pos -> int
 val beginning_of_file : pos
 val shift_pos : pos -> cols:int -> pos
 
@@ -59,17 +60,18 @@ type range =
   { start_pos : pos
   ; end_pos : pos
   }
-[@@deriving_inline sexp_of, compare]
+[@@deriving_inline sexp_of]
 
 include sig
   [@@@ocaml.warning "-32"]
 
-  val sexp_of_range : range -> Ppx_sexp_conv_lib.Sexp.t
-  val compare_range : range -> range -> int
+  val sexp_of_range : range -> Sexplib0.Sexp.t
 end
 [@@ocaml.doc "@inline"]
 
 [@@@end]
+
+val compare_range : range -> range -> int
 
 (** Make a range from two positions where both positions are inclusive, i.e. [start_pos]
     points to the first character and [end_pos] points to the last one.

@@ -3,7 +3,7 @@
 
    This interface serves as a reference of which TypeScript-specific
    ATD annotations are supported. Atdts also honors JSON-related annotations
-   defined in [Atdgen_emit.Json].
+   defined in [Atd.Json].
 *)
 
 (** Whether an association list of ATD type [(string * foo) list]

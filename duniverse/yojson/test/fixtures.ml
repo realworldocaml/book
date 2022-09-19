@@ -19,3 +19,11 @@ let json_string =
   ^ {|"string":"string",|}
   ^ {|"list":[0,1,2]|}
   ^ "}"
+
+let unquoted_json = {|{foo: null}|}
+
+let unquoted_value = `Assoc [("foo", `Null)]
+
+let json_string_newline =
+  json_string
+  ^ "\n"

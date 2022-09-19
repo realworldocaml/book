@@ -1,9 +1,9 @@
 (Binary ((name patdiff)
  (version_release (Manual (
    Simple (
-     (major_number   122)
-     (minor_number   22)
-     (release_number 42)))))
+     (major_number   125)
+     (minor_number   06)
+     (release_number 120)))))
  (license     Proprietary)
  (group       "JS Core Utils")
  (build_arch  x86_64)

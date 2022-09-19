@@ -1,0 +1,50 @@
+type 'a t =
+  | Zero
+  | Succ of 'a t
+[@@deriving quickcheck]
+
+[%%expect {|
+|}]
+
+module With_base_shadowed = struct
+  module Base = struct end
+
+  type t =
+    | A
+    | B
+  [@@deriving quickcheck]
+end
+
+[%%expect {|
+|}]
+
+module With_base_quickcheck_shadowed = struct
+  module Base_quickcheck = struct end
+
+  type t =
+    | X
+    | Y
+  [@@deriving quickcheck]
+end
+
+[%%expect {|
+|}]
+
+(* Make sure [@quickcheck.do_not_generate] works with recursive variant types.
+   (There was formerly an issue with this.) *)
+type recursive_with_do_not_generate =
+  | A
+  | B of recursive_with_do_not_generate [@quickcheck.do_not_generate]
+[@@deriving quickcheck]
+
+[%%expect {|
+|}]
+
+type recursive_with_do_not_generate2 =
+  | A
+  | B [@quickcheck.do_not_generate]
+  | C of recursive_with_do_not_generate2
+[@@deriving quickcheck]
+
+[%%expect {|
+|}]

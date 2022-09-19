@@ -34,6 +34,7 @@ module Key = struct
   (** {1 Definitions of supported keys} *)
 
   module Arg = Cmdliner.Arg
+  module Cmd = Cmdliner.Cmd
 
   module And_exit = struct
     type t = bool
@@ -49,7 +50,7 @@ module Key = struct
 
   module Verbose = Flag (struct
     let term =
-      let env = Arg.env_var "ALCOTEST_VERBOSE" in
+      let env = Cmd.Env.info "ALCOTEST_VERBOSE" in
       let doc =
         "Display the test outputs. $(b,WARNING:) when using this option the \
          output logs will not be available for further inspection."
@@ -59,14 +60,14 @@ module Key = struct
 
   module Compact = Flag (struct
     let term =
-      let env = Arg.env_var "ALCOTEST_COMPACT" in
+      let env = Cmd.Env.info "ALCOTEST_COMPACT" in
       let doc = "Compact the output of the tests." in
       Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
   end)
 
   module Bail = Flag (struct
     let term =
-      let env = Arg.env_var "ALCOTEST_BAIL" in
+      let env = Cmd.Env.info "ALCOTEST_BAIL" in
       let doc = "Stop running tests after the first failure." in
       Arg.(value & flag & info ~env [ "bail" ] ~docv:"" ~doc)
   end)
@@ -79,14 +80,14 @@ module Key = struct
 
   module Show_errors = Flag (struct
     let term =
-      let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
+      let env = Cmd.Env.info "ALCOTEST_SHOW_ERRORS" in
       let doc = "Display the test errors." in
       Arg.(value & flag & info ~env [ "e"; "show-errors" ] ~docv:"" ~doc)
   end)
 
   module Quick_only = Flag (struct
     let term =
-      let env = Arg.env_var "ALCOTEST_QUICK_TESTS" in
+      let env = Cmd.Env.info "ALCOTEST_QUICK_TESTS" in
       let doc = "Run only the quick tests." in
       Arg.(value & flag & info ~env [ "q"; "quick-tests" ] ~docv:"" ~doc)
   end)
@@ -116,7 +117,7 @@ module Key = struct
     let limit = Arg.conv (limit_parser, limit_printer)
 
     let term =
-      let env = Arg.env_var "ALCOTEST_TAIL_ERRORS" in
+      let env = Cmd.Env.info "ALCOTEST_TAIL_ERRORS" in
       let doc =
         "Show only the last $(docv) lines of output in case of an error."
       in

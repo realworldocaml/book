@@ -116,7 +116,7 @@ section :ref:`dune-workspace` for the syntax of this file. The scope
 of ``dune-project`` files is wider than the scope ``dune-workspace``
 files. For instance, a ``dune-project`` file may specify the name of
 the project which is a universal property of the project, while a
-``dune-workspace`` file may specify an Opam switch name which is valid
+``dune-workspace`` file may specify an opam switch name which is valid
 only on a given machine. For this reason, it is common and recommended
 to commit ``dune-project`` files in repositories, while it is less
 common to commit ``dune-workspace`` files.
@@ -306,8 +306,8 @@ in the installed world and expect it to be already compiled.
 It looks up external libraries using a specific list of search paths,
 and each build context has a specific list of search paths.
 
-When running inside an Opam environment, Dune will look for installed
-libraries in ``$OPAM_SWITCH_PREFIX/lib``. This includes both Opam
+When running inside an opam environment, Dune will look for installed
+libraries in ``$OPAM_SWITCH_PREFIX/lib``. This includes both opam
 build context configured via the ``dune-workspace`` file and the
 default build context when the variable ``$OPAM_SWITCH_PREFIX`` is
 set.
@@ -410,7 +410,7 @@ dune subst
 
 One of the features ``dune-release`` provides is watermarking; it replaces
 various strings of the form ``%%ID%%`` in all your project files
-before creating a release tarball or when the Opam user pins the package.
+before creating a release tarball or when the opam user pins the package.
 
 This is especially interesting for the ``VERSION`` watermark, which gets
 replaced by the version obtained from the Version-Control System (VCS). For instance, if you're using
@@ -438,20 +438,20 @@ More precisely, it replaces the following watermarks in the source files:
   ``v`` or ``V`` dropped
 - ``VCS_COMMIT_ID``, commit hash from the vcs
 - ``PKG_MAINTAINER``, contents of the ``maintainer`` field from the
-  Opam file
-- ``PKG_AUTHORS``, contents of the ``authors`` field from the Opam file
-- ``PKG_HOMEPAGE``, contents of the ``homepage`` field from the Opam file
-- ``PKG_ISSUES``, contents of the ``issues`` field from the Opam file
-- ``PKG_DOC``, contents of the ``doc`` field from the Opam file
-- ``PKG_LICENSE``, contents of the ``license`` field from the Opam file
-- ``PKG_REPO``, contents of the ``repo`` field from the Opam file
+  opam file
+- ``PKG_AUTHORS``, contents of the ``authors`` field from the opam file
+- ``PKG_HOMEPAGE``, contents of the ``homepage`` field from the opam file
+- ``PKG_ISSUES``, contents of the ``issues`` field from the opam file
+- ``PKG_DOC``, contents of the ``doc`` field from the opam file
+- ``PKG_LICENSE``, contents of the ``license`` field from the opam file
+- ``PKG_REPO``, contents of the ``repo`` field from the opam file
 
 The project name is obtained by reading the ``dune-project``
 file in the directory where ``dune subst`` is called. The
 ``dune-project`` file must exist and contain a valid ``(name ...)``
 field.
 
-Note that ``dune subst`` is meant to be called from the Opam file and
+Note that ``dune subst`` is meant to be called from the opam file and
 behaves a bit different to other Dune commands. In
 particular it doesn't try to detect the root of the workspace and must
 be called from the root of the project.
@@ -482,7 +482,7 @@ Via opam
 When releasing a package using Dune in opam, there's nothing special
 to do.  Dune generates a file called ``<package-name>.install`` at the
 root of the project.  This contains a list of files to install, and
-Opamreads it in order to perform the installation.
+opam reads it in order to perform the installation.
 
 Manually
 --------
@@ -504,42 +504,16 @@ build contexts.
 Destination Directory
 ---------------------
 
-The ``<prefix>`` directory is determined as follows for a given build
-context:
+For a given build context, the installation directories are determined with a
+single scheme for all installation sections. Taking the ``lib`` installation
+section as an example, the priorities of this scheme are as follows:
 
-#. if an explicit ``--prefix <path>`` argument is passed, use this path
-#. if ``opam`` is present in the ``PATH`` and is configured, use the
-   output of ``opam config var prefix``
-#. otherwise, take the parent of the directory where ``ocamlc`` was found.
-
-As an exception to this rule, library files might be copied to a
-different location. The reason for this is that they often need to be
-copied to a particular location for the various build system used in
-OCaml projects to find them, and this location might be different from
-``<prefix>/lib`` on some systems.
-
-Historically, the location where to store OCaml library files was
-configured through `findlib
-<http://projects.camlcity.org/projects/findlib.html>`__, and the
-``ocamlfind`` command-line tool was used to both install
-and locate these files. Many Linux distributions (or other packaging systems)
-use this mechanism to setup where OCaml library files should be
-copied.
-
-As a result, if neither ``--libdir`` or ``--prefix`` is passed to ``dune
-install``, and ``ocamlfind`` is present in the ``PATH``, then Dune copies library files
-to the directory reported by ``ocamlfind printconf destdir``. This
-ensures that ``dune install`` can be used without Opam. When using opam,
-``ocamlfind`` is configured to point to the Opam directory, so this rule makes
-no difference.
-
-Note that ``--prefix`` and ``--libdir`` are only supported if a single build
-context is in use.
-
-Also note that ``dune install`` (and Dune's ``configure``) supports
-additional parameters to override install directories in addition to
-``--prefix``, in particular. ``--mandir``, ``--docdir``, and
-``--etcdir`` are supported
+#. if an explicit ``--lib <path>`` argument is passed, use this path
+#. if an explicit ``--prefix <path>`` argument is passed, use ``<path>/lib``
+#. if ``--lib <path>`` argument is passed before during dune compilation to
+   ``./configure``, use this paths
+#. if ``OPAM_SWITCH_PREFIX`` is present in the environment use ``$OPAM_SWITCH_PREFIX/lib``
+#. otherwise, fail
 
 Relocation Mode
 ---------------
@@ -617,30 +591,4 @@ For example, if you use the ``cppo`` preprocessor to generate the file
 Running a Coq Toplevel
 ======================
 
-Dune supports running a Coq toplevel like ``coqtop``, which is typically used
-for Coq to interact with proof editors like CoqIDE or Proof General.
-
-.. code:: bash
-
-   $ dune coq top <file> -- <args>
-
-Run a Coq toplevel (``coqtop`` by default) on the given Coq file ``<file>``,
-after having re-compiled its dependencies if necessary. The given arguments
-``<args>`` are forwarded to the invoked command. For example, this can be used
-to pass a ``-emacs`` flag to ``coqtop``.
-
-A different toplevel can be chosen with ``dune coq top --toplevel CMD <file>``.
-Note that using ``--toplevel echo`` is one way to observe what options are
-actually passed to the toplevel. These options are computed based on the
-options that would be passed to the Coq compiler if it was invoked on the Coq
-file ``<file>``.
-
-Limitations
------------
-
-* Only files that are part of a stanza can be loaded in a Coq toplevel.
-* When a file is created, it must be written to the file system before the Coq
-  toplevel is started.
-* When new dependencies are added to a file (via a Coq ``Require`` vernacular
-  command), it is in principle required to save the file and restart to Coq
-  toplevel process.
+See :ref:`running-coq-top`.

@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Async_kernel
 
 type 'a message_handler = Bigstring.t -> pos:int -> len:int -> 'a
@@ -17,7 +17,7 @@ end
 module type Reader = sig
   type t [@@deriving sexp_of]
 
-  val close     : t -> unit Deferred.t
+  val close : t -> unit Deferred.t
   val is_closed : t -> bool
 
   (** Start reading incoming messages and pass them to [on_message], until it returns
@@ -34,7 +34,7 @@ end
 
 module Send_result = struct
   type message_too_big =
-    { size             : int
+    { size : int
     ; max_message_size : int
     }
   [@@deriving sexp_of]
@@ -49,10 +49,9 @@ end
 module type Writer = sig
   type t [@@deriving sexp_of]
 
-  val close     : t -> unit Deferred.t
+  val close : t -> unit Deferred.t
   val is_closed : t -> bool
-
-  val monitor        : t -> Monitor.t
+  val monitor : t -> Monitor.t
   val bytes_to_write : t -> int
 
   (** Becomes determined when it is no longer possible to send message using this writer,
@@ -76,11 +75,7 @@ module type Writer = sig
 
   (** All the following functions send exactly one message. *)
 
-  val send_bin_prot
-    :  t
-    -> 'a Bin_prot.Type_class.writer
-    -> 'a
-    -> unit Send_result.t
+  val send_bin_prot : t -> 'a Bin_prot.Type_class.writer -> 'a -> unit Send_result.t
 
   val send_bin_prot_and_bigstring
     :  t

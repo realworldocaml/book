@@ -12,9 +12,9 @@ open! Import
     represented as a string with newlines separating the frames.  [sexp_of_t] splits the
     string at newlines and removes some of the cruft, leaving a human-friendly list of
     frames, but [to_string] does not. *)
-type t [@@deriving_inline sexp_of]
+type t = Caml.Printexc.raw_backtrace [@@deriving_inline sexp_of]
 
-val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+val sexp_of_t : t -> Sexplib0.Sexp.t
 
 [@@@end]
 
@@ -28,7 +28,7 @@ val to_string_list : t -> string list
     When set to [true], these functions will ignore their argument and return a message
     indicating that behavior.
 
-    The default value is {!am_testing}. *)
+    The default value is [false]. *)
 val elide : bool ref
 
 (** [Backtrace.Exn] has functions for controlling and printing the backtrace of the most
@@ -69,10 +69,37 @@ module Exn : sig
   val with_recording : bool -> f:(unit -> 'a) -> 'a
 
   (** [most_recent ()] returns a backtrace containing the stack that was unwound by the
-      most recently raised exception. *)
+      most recently raised exception.
+
+      Normally this includes just the function calls that lead from the exception handler
+      being set up to the exception being raised. However, due to inlining, the stack
+      frame that has the exception handler may correspond to a chain of multiple function
+      calls. All of those function calls are then reported in this backtrace, even though
+      they are not themselves on the path from the exception handler to the "raise". *)
   val most_recent : unit -> t
+
+  (** [most_recent_for_exn exn] returns a backtrace containing the stack that was unwound
+      when raising [exn] if [exn] is the most recently raised exception.  Otherwise it
+      returns [None].
+
+      Note that this may return a misleading backtrace instead of [None] if
+      different raise events happen to raise physically equal exceptions.
+      Consider the example below. Here if [e = Not_found] and [g] usees
+      [Not_found] internally then the backtrace will correspond to the
+      internal backtrace in [g] instead of the one used in [f], which is
+      not desirable.
+
+      {[
+        try f () with
+        | e ->
+          g ();
+          let bt = Backtrace.Exn.most_recent_for_exn e in
+          ...
+      ]}
+  *)
+  val most_recent_for_exn : Exn.t -> t option
 end
 
-(** User code never calls this.  It is called only in [std_kernel.ml], as a top-level side
+(** User code never calls this.  It is called only in [base.ml], as a top-level side
     effect, to initialize [am_recording ()] as specified above. *)
 val initialize_module : unit -> unit

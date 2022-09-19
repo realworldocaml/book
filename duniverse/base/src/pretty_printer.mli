@@ -8,8 +8,15 @@
     ]}
 
     The names are actually OCaml identifier names, e.g., "Base.Int.pp".  Code for
-    building toplevels (this code is not in Base) evaluates the strings to yield the
-    pretty printers and register them with the OCaml runtime. *)
+    building toplevels evaluates the strings to yield the
+    pretty printers and register them with the OCaml runtime.
+
+    This module is only responsible for collecting the pretty-printers. Another mechanism
+    is needed to register this collection with the "toploop" library for pretty-printing
+    to actually happen. How to do that depends on how you build and deploy
+    the OCaml toplevel. One common way to do it in vanilla toplevel is to call
+    [#require "core.top"].
+*)
 
 open! Import
 

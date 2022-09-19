@@ -23,6 +23,58 @@ let equal_abstract ~type_name _ _ =
 type 'a compare = 'a -> 'a -> int
 type 'a equal = 'a -> 'a -> bool
 
+module Comparable = struct
+  module type S = sig
+    type t
+
+    val compare : t compare
+  end
+
+  module type S1 = sig
+    type 'a t
+
+    val compare : 'a compare -> 'a t compare
+  end
+
+  module type S2 = sig
+    type ('a, 'b) t
+
+    val compare : 'a compare -> 'b compare -> ('a, 'b) t compare
+  end
+
+  module type S3 = sig
+    type ('a, 'b, 'c) t
+
+    val compare : 'a compare -> 'b compare -> 'c compare -> ('a, 'b, 'c) t compare
+  end
+end
+
+module Equal = struct
+  module type S = sig
+    type t
+
+    val equal : t equal
+  end
+
+  module type S1 = sig
+    type 'a t
+
+    val equal : 'a equal -> 'a t equal
+  end
+
+  module type S2 = sig
+    type ('a, 'b) t
+
+    val equal : 'a equal -> 'b equal -> ('a, 'b) t equal
+  end
+
+  module type S3 = sig
+    type ('a, 'b, 'c) t
+
+    val equal : 'a equal -> 'b equal -> 'c equal -> ('a, 'b, 'c) t equal
+  end
+end
+
 module Builtin = struct
   let compare_bool : bool compare = Poly.compare
   let compare_char : char compare = Poly.compare

@@ -1,0 +1,5 @@
+(library (name ppx_log_kernel) (public_name ppx_log.kernel)
+ (kind ppx_rewriter)
+ (ppx_runtime_libraries ppx_sexp_conv.runtime-lib ppx_log.types)
+ (libraries ppxlib ppx_here.expander ppx_sexp_message.expander)
+ (preprocess (pps ppxlib.metaquot)))

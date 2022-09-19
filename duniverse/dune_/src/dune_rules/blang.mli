@@ -1,5 +1,3 @@
-open! Dune_engine
-open! Stdune
 open Import
 
 module Op : sig
@@ -14,6 +12,7 @@ end
 
 type t =
   | Const of bool
+  | Not of t
   | Expr of String_with_vars.t
   | And of t list
   | Or of t list

@@ -21,18 +21,49 @@ module type Indexable1 = sig
   val length : _ t -> int
 end
 
+module Which_target_by_key = struct
+  type t =
+    [ `Last_strictly_less_than (**        {v | < elt X |                       v} *)
+    | `Last_less_than_or_equal_to (**     {v |      <= elt       X |           v} *)
+    | `Last_equal_to (**                  {v           |   = elt X |           v} *)
+    | `First_equal_to (**                 {v           | X = elt   |           v} *)
+    | `First_greater_than_or_equal_to (** {v           | X       >= elt      | v} *)
+    | `First_strictly_greater_than (**    {v                       | X > elt | v} *)
+    ]
+  [@@deriving_inline enumerate]
+
+  let all =
+    ([ `Last_strictly_less_than
+     ; `Last_less_than_or_equal_to
+     ; `Last_equal_to
+     ; `First_equal_to
+     ; `First_greater_than_or_equal_to
+     ; `First_strictly_greater_than
+     ]
+     : t list)
+  ;;
+
+  [@@@end]
+end
+
+module Which_target_by_segment = struct
+  type t =
+    [ `Last_on_left
+    | `First_on_right
+    ]
+  [@@deriving_inline enumerate]
+
+  let all = ([ `Last_on_left; `First_on_right ] : t list)
+
+  [@@@end]
+end
+
 type ('t, 'elt, 'key) binary_search =
   ?pos:int
   -> ?len:int
   -> 't
   -> compare:('elt -> 'key -> int)
-  -> [ `Last_strictly_less_than (**        {v | < elt X |                       v} *)
-     | `Last_less_than_or_equal_to (**     {v |      <= elt       X |           v} *)
-     | `Last_equal_to (**                  {v           |   = elt X |           v} *)
-     | `First_equal_to (**                 {v           | X = elt   |           v} *)
-     | `First_greater_than_or_equal_to (** {v           | X       >= elt      | v} *)
-     | `First_strictly_greater_than (**    {v                       | X > elt | v} *)
-     ]
+  -> Which_target_by_key.t
   -> 'key
   -> int option
 
@@ -41,7 +72,7 @@ type ('t, 'elt) binary_search_segmented =
   -> ?len:int
   -> 't
   -> segment_of:('elt -> [ `Left | `Right ])
-  -> [ `Last_on_left | `First_on_right ]
+  -> Which_target_by_segment.t
   -> int option
 
 module type S = sig
@@ -67,6 +98,9 @@ module type Binary_searchable = sig
   module type S1 = S1
   module type Indexable = Indexable
   module type Indexable1 = Indexable1
+
+  module Which_target_by_key = Which_target_by_key
+  module Which_target_by_segment = Which_target_by_segment
 
   type nonrec ('t, 'elt, 'key) binary_search = ('t, 'elt, 'key) binary_search
   type nonrec ('t, 'elt) binary_search_segmented = ('t, 'elt) binary_search_segmented

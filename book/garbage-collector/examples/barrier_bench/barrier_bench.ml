@@ -38,4 +38,4 @@ let () =
           Immutable.test { iters; count })
     ]
   in
-  Bench.make_command tests |> Command.run
+  Bench.make_command tests |> Command_unix.run

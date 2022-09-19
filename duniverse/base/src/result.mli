@@ -17,34 +17,23 @@ open! Import
 type ('ok, 'err) t = ('ok, 'err) Caml.result =
   | Ok of 'ok
   | Error of 'err
-[@@deriving_inline sexp, compare, equal, hash]
+[@@deriving_inline sexp, sexp_grammar, compare, equal, hash]
 
-include Ppx_sexp_conv_lib.Sexpable.S2 with type ('ok, 'err) t := ('ok, 'err) t
+include Sexplib0.Sexpable.S2 with type ('ok, 'err) t := ('ok, 'err) t
 
-val compare
-  :  ('ok -> 'ok -> int)
-  -> ('err -> 'err -> int)
-  -> ('ok, 'err) t
-  -> ('ok, 'err) t
-  -> int
+val t_sexp_grammar
+  :  'ok Sexplib0.Sexp_grammar.t
+  -> 'err Sexplib0.Sexp_grammar.t
+  -> ('ok, 'err) t Sexplib0.Sexp_grammar.t
 
-val equal
-  :  ('ok -> 'ok -> bool)
-  -> ('err -> 'err -> bool)
-  -> ('ok, 'err) t
-  -> ('ok, 'err) t
-  -> bool
-
-val hash_fold_t
-  :  (Ppx_hash_lib.Std.Hash.state -> 'ok -> Ppx_hash_lib.Std.Hash.state)
-  -> (Ppx_hash_lib.Std.Hash.state -> 'err -> Ppx_hash_lib.Std.Hash.state)
-  -> Ppx_hash_lib.Std.Hash.state
-  -> ('ok, 'err) t
-  -> Ppx_hash_lib.Std.Hash.state
+include Ppx_compare_lib.Comparable.S2 with type ('ok, 'err) t := ('ok, 'err) t
+include Ppx_compare_lib.Equal.S2 with type ('ok, 'err) t := ('ok, 'err) t
+include Ppx_hash_lib.Hashable.S2 with type ('ok, 'err) t := ('ok, 'err) t
 
 [@@@end]
 
 include Monad.S2 with type ('a, 'err) t := ('a, 'err) t
+module Error : Monad.S2 with type ('err, 'a) t := ('a, 'err) t
 
 include Invariant_intf.S2 with type ('ok, 'err) t := ('ok, 'err) t
 

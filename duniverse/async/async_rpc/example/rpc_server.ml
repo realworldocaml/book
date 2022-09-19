@@ -32,29 +32,30 @@ let main ~port =
     Rpc.Implementations.create ~implementations ~on_unknown_rpc:`Close_connection
   in
   match implementations with
-  | Error (`Duplicate_implementations _descrs) -> assert false
+  | Error (`Duplicate_implementations (_ : Rpc.Description.t list)) -> assert false
   | Ok implementations ->
     let server =
       Tcp.Server.create
         (Tcp.Where_to_listen.of_port port)
         ~on_handler_error:`Ignore
-        (fun _addr reader writer ->
+        (fun (_ : Socket.Address.Inet.t) reader writer ->
            Rpc.Connection.server_with_close
              reader
              writer
              ~implementations
-             ~connection_state:(fun _ -> counter)
+             ~connection_state:(fun (_ : Rpc.Connection.t) -> counter)
              ~on_handshake_error:`Ignore)
     in
-    ignore (server : (_, _) Tcp.Server.t Deferred.t);
-    Deferred.never ()
+    ignore (server : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
+    never ()
 ;;
 
 let () =
-  Command.async_spec
+  Command.async
     ~summary:"A trivial Async-RPC server"
-    Command.Spec.(
-      empty +> flag "-port" ~doc:" Port to listen on" (optional_with_default 8080 int))
-    (fun port () -> main ~port)
-  |> Command.run
+    (let%map_open.Command port =
+       flag "-port" ~doc:" Port to listen on" (optional_with_default 8080 int)
+     in
+     fun () -> main ~port)
+  |> Command_unix.run
 ;;

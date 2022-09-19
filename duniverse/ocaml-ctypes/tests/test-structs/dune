@@ -52,6 +52,7 @@
  (name test_structs)
  (modules test_structs)
  (package ctypes-foreign)
+ (deps ../clib/clib%{ext_dll})
  (action
   (run %{test} -runner sequential))
  (link_flags

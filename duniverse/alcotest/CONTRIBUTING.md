@@ -69,7 +69,7 @@ The high-level project structure is as follows:
 ## Expect tests
 
 The repository contains a number of 'expect' tests in
-https://github.com/mirage/alcotest/tree/master/test/e2e. These are short,
+https://github.com/mirage/alcotest/tree/main/test/e2e. These are short,
 self-contained usages of the Alcotest API, with the corresponding output
 snapshotted in an `.expected` file:
 

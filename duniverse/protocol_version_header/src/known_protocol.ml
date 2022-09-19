@@ -1,16 +1,18 @@
-open! Core_kernel
+open! Core
 
 type t =
   | Krb
   | Krb_test_mode
   | Rpc
-[@@deriving compare, enumerate, sexp]
+[@@deriving compare, enumerate, sexp, bin_io]
 
 let magic_word = function
   | Krb -> "KRB2"
   | Krb_test_mode -> "KBT"
   | Rpc -> "RPC"
 ;;
+
+let magic_number_bin_size = 5
 
 let gen_magic_number word =
   String.to_list_rev word
@@ -39,4 +41,11 @@ let%test_unit "magic numbers" =
   assert (magic_number Krb = 843_207_243);
   assert (magic_number Krb_test_mode = 5_521_995);
   assert (magic_number Rpc = 4_411_474)
+;;
+
+let%test_unit "magic_number_bin_size is correct" =
+  List.iter all ~f:(fun t ->
+    let magic_number = magic_number t in
+    let size = Int.bin_size_t magic_number in
+    [%test_eq: int] size magic_number_bin_size)
 ;;

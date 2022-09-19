@@ -254,6 +254,31 @@ let shrinker_impl type_decl ~rec_names:_ =
   { loc; pat; var; exp }
 ;;
 
+let close_the_loop ~of_lazy decl impl =
+  let loc = impl.loc in
+  let exp = impl.var in
+  match decl.ptype_params with
+  | [] -> eapply ~loc of_lazy [ exp ]
+  | params ->
+    let pats, exps =
+      gensyms "recur" (List.map params ~f:(fun (core_type, _) -> core_type.ptyp_loc))
+    in
+    eabstract
+      ~loc
+      pats
+      (eapply
+         ~loc
+         of_lazy
+         [ [%expr
+           lazy
+             [%e
+               eapply
+                 ~loc
+                 (eapply ~loc [%expr Ppx_quickcheck_runtime.Base.Lazy.force] [ exp ])
+                 exps]]
+         ])
+;;
+
 let maybe_mutually_recursive decls ~loc ~rec_flag ~of_lazy ~impl =
   let decls = List.map decls ~f:name_type_params_in_td in
   let rec_names =
@@ -274,21 +299,26 @@ let maybe_mutually_recursive decls ~loc ~rec_flag ~of_lazy ~impl =
     let pats = List.map impls ~f:(fun impl -> impl.pat) in
     let bindings =
       let inner_bindings =
-        List.map impls ~f:(fun inner ->
+        List.map2_exn decls impls ~f:(fun decl inner ->
           value_binding
             ~loc:inner.loc
             ~pat:inner.pat
-            ~expr:[%expr [%e of_lazy] [%e inner.var]])
+            ~expr:(close_the_loop ~of_lazy decl inner))
       in
       List.map impls ~f:(fun impl ->
-        let body = pexp_let ~loc:impl.loc Nonrecursive inner_bindings impl.exp in
+        let exp =
+          List.fold impls ~init:impl.exp ~f:(fun acc impl ->
+            let ign = [%expr ignore [%e impl.var]] in
+            pexp_sequence ~loc ign acc)
+        in
+        let body = pexp_let ~loc:impl.loc Nonrecursive inner_bindings exp in
         let lazy_expr = [%expr lazy [%e body]] in
         value_binding ~loc:impl.loc ~pat:impl.pat ~expr:lazy_expr)
     in
     let body =
       pexp_tuple
         ~loc
-        (List.map impls ~f:(fun impl -> [%expr [%e of_lazy] [%e impl.var]]))
+        (List.map2_exn decls impls ~f:(fun decl impl -> close_the_loop ~of_lazy decl impl))
     in
     pstr_value_list
       ~loc
@@ -305,7 +335,7 @@ let generator_impl_list decls ~loc ~rec_flag =
     decls
     ~loc
     ~rec_flag
-    ~of_lazy:[%expr Base_quickcheck.Generator.of_lazy]
+    ~of_lazy:[%expr Ppx_quickcheck_runtime.Base_quickcheck.Generator.of_lazy]
     ~impl:generator_impl
 ;;
 
@@ -314,7 +344,7 @@ let observer_impl_list decls ~loc ~rec_flag =
     decls
     ~loc
     ~rec_flag
-    ~of_lazy:[%expr Base_quickcheck.Observer.of_lazy]
+    ~of_lazy:[%expr Ppx_quickcheck_runtime.Base_quickcheck.Observer.of_lazy]
     ~impl:observer_impl
 ;;
 
@@ -323,13 +353,17 @@ let shrinker_impl_list decls ~loc ~rec_flag =
     decls
     ~loc
     ~rec_flag
-    ~of_lazy:[%expr Base_quickcheck.Shrinker.of_lazy]
+    ~of_lazy:[%expr Ppx_quickcheck_runtime.Base_quickcheck.Shrinker.of_lazy]
     ~impl:shrinker_impl
 ;;
 
 let intf type_decl ~f ~covar ~contravar =
-  let covar = Longident.parse ("Base_quickcheck." ^ covar ^ ".t") in
-  let contravar = Longident.parse ("Base_quickcheck." ^ contravar ^ ".t") in
+  let covar =
+    Longident.parse ("Ppx_quickcheck_runtime.Base_quickcheck." ^ covar ^ ".t")
+  in
+  let contravar =
+    Longident.parse ("Ppx_quickcheck_runtime.Base_quickcheck." ^ contravar ^ ".t")
+  in
   let type_decl = name_type_params_in_td type_decl in
   let loc = type_decl.ptype_loc in
   let name = loc_map type_decl.ptype_name ~f in
@@ -347,12 +381,11 @@ let intf type_decl ~f ~covar ~contravar =
     List.fold_right
       type_decl.ptype_params
       ~init:result
-      ~f:(fun (core_type, (variance, injectivity)) result ->
+      ~f:(fun (core_type, (variance, _)) result ->
         let id =
-          match (variance, injectivity) with
-          | ((NoVariance | Covariant), NoInjectivity) -> covar
-          | (Contravariant, NoInjectivity) -> contravar
-          | (_, Injective) -> Location.raise_errorf ~loc "Injective type parameters aren't supported."
+          match variance with
+          | NoVariance | Covariant -> covar
+          | Contravariant -> contravar
         in
         let arg = ptyp_constr ~loc { loc; txt = id } [ core_type ] in
         [%type: [%t arg] -> [%t result]])
@@ -367,9 +400,33 @@ let generator_intf_list type_decl_list = List.map type_decl_list ~f:generator_in
 let observer_intf_list type_decl_list = List.map type_decl_list ~f:observer_intf
 let shrinker_intf_list type_decl_list = List.map type_decl_list ~f:shrinker_intf
 
+let try_include_decl type_decl_list ~loc =
+  match type_decl_list with
+  | [ type_decl ] ->
+    let has_contravariant_arg =
+      List.exists type_decl.ptype_params ~f:(fun (_type, (variance, _inj)) ->
+        match variance with
+        | Contravariant -> true
+        | NoVariance | Covariant -> false)
+    in
+    if has_contravariant_arg
+    then None
+    else (
+      let sg_name = "Ppx_quickcheck_runtime.Quickcheckable.S" in
+      mk_named_sig ~loc ~sg_name ~handle_polymorphic_variant:true type_decl_list
+      |> Option.map ~f:(fun include_info -> psig_include ~loc include_info))
+  | _ ->
+    (* Don't bother testing anything since [mk_named_sig] will definitely return
+       [None] anyway *)
+    None
+;;
+
 let sig_type_decl =
-  Deriving.Generator.make_noarg (fun ~loc:_ ~path:_ (_, decls) ->
-    generator_intf_list decls @ observer_intf_list decls @ shrinker_intf_list decls)
+  Deriving.Generator.make_noarg (fun ~loc ~path:_ (_, decls) ->
+    match try_include_decl ~loc decls with
+    | Some decl -> [ decl ]
+    | None ->
+      generator_intf_list decls @ observer_intf_list decls @ shrinker_intf_list decls)
 ;;
 
 let str_type_decl =

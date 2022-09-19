@@ -1239,7 +1239,7 @@ evaluation.
 
 ```ocaml env=main
 # force x;;
-Exception: Lazy.Undefined
+Exception: Lazy.Undefined.
 ```
 
 But we can also create useful recursive definitions with `lazy`. In
@@ -1335,11 +1335,11 @@ let () =
   match In_channel.(input_line stdin) with
   | None -> failwith "No timezone provided"
   | Some zone_string ->
-    let zone = Time.Zone.find_exn zone_string in
+    let zone = Time_unix.Zone.find_exn zone_string in
     let time_string = Time.to_string_abs (Time.now ()) ~zone in
     Out_channel.output_string stdout
       (String.concat
-         ["The time in ";Time.Zone.to_string zone;" is ";time_string;".\n"]);
+         ["The time in ";Time_unix.Zone.to_string zone;" is ";time_string;".\n"]);
     Out_channel.flush stdout
 ```
 
@@ -1481,9 +1481,9 @@ let () =
   match In_channel.input_line In_channel.stdin with
   | None -> failwith "No timezone provided"
   | Some zone_string ->
-    let zone = Time.Zone.find_exn zone_string in
+    let zone = Time_unix.Zone.find_exn zone_string in
     let time_string = Time.to_string_abs (Time.now ()) ~zone in
-    printf "The time in %s is %s.\n%!" (Time.Zone.to_string zone) time_string
+    printf "The time in %s is %s.\n%!" (Time_unix.Zone.to_string zone) time_string
 ```
 
 In the preceding example, we've used only two formatting directives:

@@ -1,6 +1,6 @@
 (* WARNING: never accept the corrected output for this file, it must never change! *)
 
-let%expect_test ("64 bit integer tests"[@tags "64-bits-only"]) =
+let%expect_test ("64 bit integer tests" [@tags "64-bits-only"]) =
   Integers_repr.run_tests ();
   [%expect
     {|

@@ -2,10 +2,10 @@ open Stdune
 open Dune_lang.Decoder
 module Scheduler = Dune_engine.Scheduler
 module Sandbox_mode = Dune_engine.Sandbox_mode
-module Stanza = Dune_engine.Stanza
+module Stanza = Dune_lang.Stanza
 module Config = Dune_util.Config
-module String_with_vars = Dune_engine.String_with_vars
-module Pform = Dune_engine.Pform
+module String_with_vars = Dune_lang.String_with_vars
+module Pform = Dune_lang.Pform
 module Log = Dune_util.Log
 
 (* the configuration file use the same version numbers as dune-project files for
@@ -38,9 +38,9 @@ module Concurrency = struct
   let of_string = function
     | "auto" -> Ok Auto
     | s -> (
-      match int_of_string s with
-      | exception _ -> error
-      | n -> if n >= 1 then Ok (Fixed n) else error)
+      match Int.of_string s with
+      | None -> error
+      | Some n -> if n >= 1 then Ok (Fixed n) else error)
 
   let decode =
     plain_string (fun ~loc s ->
@@ -249,14 +249,14 @@ include
       let field f = f
     end)
 
-let hash = Hashtbl.hash
+let hash = Poly.hash
 
 let equal a b = Poly.equal a b
 
 let default =
   { display = { verbosity = Quiet; status_line = not Config.inside_dune }
   ; concurrency = (if Config.inside_dune then Fixed 1 else Auto)
-  ; terminal_persistence = Terminal_persistence.Preserve
+  ; terminal_persistence = Clear_on_rebuild
   ; sandboxing_preference = []
   ; cache_enabled = Disabled
   ; cache_reproducibility_check = Skip
@@ -406,7 +406,7 @@ let auto_concurrency =
                 ~stderr:(Lazy.force Config.dev_null_out)
                 ()
             with
-            | exception _ ->
+            | exception Unix.Unix_error _ ->
               Unix.close fdw;
               Unix.close fdr;
               loop commands
@@ -425,7 +425,7 @@ let auto_concurrency =
       in
       loop commands)
 
-let for_scheduler (t : t) rpc stats =
+let for_scheduler (t : t) stats ~insignificant_changes ~signal_watcher =
   let concurrency =
     match t.concurrency with
     | Fixed i -> i
@@ -434,4 +434,9 @@ let for_scheduler (t : t) rpc stats =
       Log.info [ Pp.textf "Auto-detected concurrency: %d" n ];
       n
   in
-  { Scheduler.Config.concurrency; display = t.display; rpc; stats }
+  { Scheduler.Config.concurrency
+  ; display = t.display
+  ; stats
+  ; insignificant_changes
+  ; signal_watcher
+  }

@@ -23,6 +23,21 @@ let%test_module "Blit" =
        (Array))
 ;;
 
+module List_helpers = struct
+  let rec sprinkle x xs =
+    (x :: xs)
+    ::
+    (match xs with
+     | [] -> []
+     | x' :: xs' -> List.map (sprinkle x xs') ~f:(fun sprinkled -> x' :: sprinkled))
+  ;;
+
+  let rec permutations = function
+    | [] -> [ [] ]
+    | x :: xs -> List.concat_map (permutations xs) ~f:(fun perms -> sprinkle x perms)
+  ;;
+end
+
 let%test_module "Sort" =
   (module struct
     open Private.Sort
@@ -31,21 +46,7 @@ let%test_module "Sort" =
       (module struct
         (* run [five_element_sort] on all permutations of an array of five elements *)
 
-        let rec sprinkle x xs =
-          (x :: xs)
-          ::
-          (match xs with
-           | [] -> []
-           | x' :: xs' -> List.map (sprinkle x xs') ~f:(fun sprinkled -> x' :: sprinkled))
-        ;;
-
-        let rec permutations = function
-          | [] -> [ [] ]
-          | x :: xs ->
-            List.concat_map (permutations xs) ~f:(fun perms -> sprinkle x perms)
-        ;;
-
-        let all_perms = permutations [ 1; 2; 3; 4; 5 ]
+        let all_perms = List_helpers.permutations [ 1; 2; 3; 4; 5 ]
 
         let%test _ = List.length all_perms = 120
         let%test _ = not (List.contains_dup ~compare:[%compare: int list] all_perms)
@@ -72,11 +73,7 @@ let%test_module "Sort" =
         M.sort arr ~left:0 ~right:(Array.length arr - 1) ~compare:[%compare: int];
         let len = Array.length arr in
         let rec loop i prev =
-          if i = len
-          then true
-          else if arr.(i) < prev
-          then false
-          else loop (i + 1) arr.(i)
+          if i = len then true else if arr.(i) < prev then false else loop (i + 1) arr.(i)
         in
         loop 0 (-1)
       ;;
@@ -92,20 +89,6 @@ let%test_module "Sort" =
     let%test_module _ = (module Test (Insertion_sort))
     let%test_module _ = (module Test (Heap_sort))
     let%test_module _ = (module Test (Intro_sort))
-
-    let%expect_test "Array.sort [||] only allocates when computing bounds" =
-      require_allocation_does_not_exceed (Minor_words 3) [%here] (fun () ->
-        Array.sort ~compare:Int.compare [||]);
-      [%expect {||}]
-    ;;
-
-    let%expect_test "Array.sort [| 5; 2; 3; 4; 1 |] only allocates when computing bounds"
-      =
-      let arr = [| 5; 2; 3; 4; 1 |] in
-      require_allocation_does_not_exceed (Minor_words 3) [%here] (fun () ->
-        Array.sort ~compare:Int.compare arr);
-      [%expect {||}]
-    ;;
   end)
 ;;
 
@@ -127,6 +110,85 @@ let%test_unit _ =
     ; [ 1; 1; 3 ], false
     ; [ 1; 2; 2 ], false
     ]
+;;
+
+let%expect_test "merge" =
+  let test a1 a2 =
+    let res = merge a1 a2 ~compare:Int.compare in
+    print_s ([%sexp_of: int array] res);
+    require_equal
+      [%here]
+      (module struct
+        type t = int list [@@deriving equal, sexp_of]
+      end)
+      (to_list res)
+      (List.merge (to_list a1) (to_list a2) ~compare:Int.compare)
+  in
+  test [||] [||];
+  [%expect {| () |}];
+  test [| 1; 2; 3 |] [||];
+  [%expect {| (1 2 3) |}];
+  test [||] [| 1; 2; 3 |];
+  [%expect {| (1 2 3) |}];
+  test [| 1; 2; 3 |] [| 1; 2; 3 |];
+  [%expect {| (1 1 2 2 3 3) |}];
+  test [| 1; 2; 3 |] [| 4; 5; 6 |];
+  [%expect {| (1 2 3 4 5 6) |}];
+  test [| 4; 5; 6 |] [| 1; 2; 3 |];
+  [%expect {| (1 2 3 4 5 6) |}];
+  test [| 3; 5 |] [| 1; 2; 4; 6 |];
+  [%expect {| (1 2 3 4 5 6) |}];
+  test [| 1; 3; 7; 8; 9 |] [| 2; 4; 5; 6 |];
+  [%expect {| (1 2 3 4 5 6 7 8 9) |}];
+  test [| 1; 2; 2; 3 |] [| 2; 2; 3; 4 |];
+  [%expect {| (1 2 2 2 2 3 3 4) |}]
+;;
+
+let%expect_test "merge with duplicates" =
+  (* Testing that equal elements from a1 come before equal elements from a2 *)
+  let test a1 a2 =
+    let compare = Comparable.lift Int.compare ~f:fst in
+    let res = merge a1 a2 ~compare in
+    print_s ([%sexp_of: (int * string) array] res);
+    require_equal
+      [%here]
+      (module struct
+        type t = (int * string) list [@@deriving equal, sexp_of]
+      end)
+      (to_list res)
+      (List.merge (to_list a1) (to_list a2) ~compare)
+  in
+  test [| 1, "a1" |] [| 1, "a2" |];
+  [%expect {|
+    ((1 a1)
+     (1 a2)) |}];
+  test [| 1, "a1"; 2, "a1"; 3, "a1" |] [| 3, "a2"; 4, "a2"; 5, "a2" |];
+  [%expect {|
+    ((1 a1)
+     (2 a1)
+     (3 a1)
+     (3 a2)
+     (4 a2)
+     (5 a2)) |}];
+  test [| 3, "a1"; 4, "a1"; 5, "a1" |] [| 1, "a2"; 2, "a2"; 3, "a2" |];
+  [%expect {|
+    ((1 a2)
+     (2 a2)
+     (3 a1)
+     (3 a2)
+     (4 a1)
+     (5 a1)) |}];
+  test [| 1, "a1"; 3, "a1"; 3, "a1"; 5, "a1" |] [| 2, "a2"; 3, "a2"; 3, "a2"; 4, "a2" |];
+  [%expect
+    {|
+    ((1 a1)
+     (2 a2)
+     (3 a1)
+     (3 a1)
+     (3 a2)
+     (3 a2)
+     (4 a2)
+     (5 a1)) |}]
 ;;
 
 let%test _ = foldi [||] ~init:13 ~f:(fun _ _ _ -> failwith "bad") = 13
@@ -392,14 +454,80 @@ let%test_unit _ =
     ~expect:(0, [||])
 ;;
 
-let%test "equal does not allocate" =
-  let arr1 = [| 1; 2; 3; 4 |] in
-  let arr2 = [| 1; 2; 4; 3 |] in
-  require_no_allocation [%here] (fun () -> not (equal Int.equal arr1 arr2))
+let%test_module "permute" =
+  (module struct
+    module Int_list = struct
+      type t = int list [@@deriving compare, sexp_of]
+
+      include (val Comparator.make ~compare ~sexp_of_t)
+    end
+
+    let test_permute initial_contents ~pos ~len =
+      let all_permutations =
+        let pos, len =
+          Ordered_collection_common.get_pos_len_exn
+            ?pos
+            ?len
+            ~total_length:(List.length initial_contents)
+            ()
+        in
+        let left = List.take initial_contents pos in
+        let middle = List.sub initial_contents ~pos ~len in
+        let right = List.drop initial_contents (pos + len) in
+        Set.of_list
+          (module Int_list)
+          (List_helpers.permutations middle
+           |> List.map ~f:(fun middle -> left @ middle @ right))
+      in
+      let not_yet_seen = ref all_permutations in
+      while not (Set.is_empty !not_yet_seen) do
+        let array = of_list initial_contents in
+        permute ?pos ?len array;
+        let permutation = to_list array in
+        if not (Set.mem all_permutations permutation)
+        then
+          raise_s
+            [%sexp
+              "invalid permutation"
+            , { array_length = (List.length initial_contents : int)
+              ; permutation : int list
+              ; pos : int option
+              ; len : int option
+              }];
+        not_yet_seen := Set.remove !not_yet_seen permutation
+      done
+    ;;
+
+    let%expect_test "permute different array lengths and subranges" =
+      let indices = None :: List.map [ 0; 1; 2; 3; 4 ] ~f:Option.some in
+      for array_length = 0 to 4 do
+        let initial_contents = List.init array_length ~f:Int.succ in
+        List.iter indices ~f:(fun pos ->
+          List.iter indices ~f:(fun len ->
+            match
+              Ordered_collection_common.get_pos_len
+                ?pos
+                ?len
+                ~total_length:array_length
+                ()
+            with
+            | Ok _ -> test_permute initial_contents ~pos ~len
+            | Error _ ->
+              require
+                [%here]
+                (Exn.does_raise (fun () ->
+                   permute ?pos ?len (Array.of_list initial_contents)))))
+      done;
+      [%expect {| |}]
+    ;;
+  end)
 ;;
 
-let%test "foldi does not allocate" =
-  let arr = [| 1; 2; 3; 4 |] in
-  let f i x y = i + x + y in
-  require_no_allocation [%here] (fun () -> 16 = foldi ~init:0 ~f arr)
+let%expect_test "create_float_uninitialized" =
+  let array = create_float_uninitialized ~len:10 in
+  (* make sure reading/writing the array is safe *)
+  Array.permute array;
+  (* sanity check without depending on specific contents *)
+  print_s [%sexp (Array.length array : int)];
+  [%expect {| 10 |}]
 ;;

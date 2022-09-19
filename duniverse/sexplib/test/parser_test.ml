@@ -54,9 +54,7 @@ let parsers =
   ; (fun s -> Sexp.Annotated.get_sexp (Sexp.Annotated.of_string s)), "annot"
   ; ( (fun s ->
         let sexps_with_layout =
-          Sexp.With_layout.Parser.sexps
-            Sexp.With_layout.Lexer.main
-            (Lexing.from_string s)
+          Sexp.With_layout.Parser.sexps Sexp.With_layout.Lexer.main (Lexing.from_string s)
         in
         sexp_of_layout_sexps_or_something sexps_with_layout)
     , "layout-sexps" )
@@ -104,9 +102,7 @@ let list_parsers =
     , "annot" )
   ; ( (fun s ->
         let sexps_with_layout =
-          Sexp.With_layout.Parser.sexps
-            Sexp.With_layout.Lexer.main
-            (Lexing.from_string s)
+          Sexp.With_layout.Parser.sexps Sexp.With_layout.Lexer.main (Lexing.from_string s)
         in
         let sexps = Sexp.With_layout.Forget.t_or_comments sexps_with_layout in
         Sexp.List sexps)
@@ -125,8 +121,7 @@ let string_of_loc loc =
     (loc.Lexing.pos_cnum - loc.Lexing.pos_bol)
 ;;
 
-let same_parse_tree ?no_following_sibling ?(use_list_parsers = false) loc string1 string2
-  =
+let same_parse_tree ?no_following_sibling ?(use_list_parsers = false) loc string1 string2 =
   let context_wrappers = wrap_in_context ?no_following_sibling () in
   List.iter
     (fun context_wrapper ->

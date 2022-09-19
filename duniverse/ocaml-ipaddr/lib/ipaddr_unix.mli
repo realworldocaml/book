@@ -17,7 +17,7 @@
 
 (** Convert to and from [Unix] to [Ipaddr] representations
 
-    {e v5.3.0 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
+    {e v5.3.1 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
 
 val to_inet_addr : Ipaddr.t -> Unix.inet_addr
 (** [to_inet_addr ip] is the {!Unix.inet_addr} equivalent of the IPv4 or IPv6

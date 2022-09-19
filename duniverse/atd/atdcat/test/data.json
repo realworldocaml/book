@@ -1,0 +1,15 @@
+{
+  "ID": "abc",
+  "items": [ [], [ 1, 2 ] ],
+  "extras": [ 17, 53 ],
+  "answer": 42,
+  "aliased": [ 8, 9, 10 ],
+  "point": [ 3.3, -77.22 ],
+  "kinds": [ "wow", [ "Thing", 99 ], [ "!!!", [ "a", "b" ] ], "Root" ],
+  "assoc1": [ [ 1.1, 1 ], [ 2.2, 2 ] ],
+  "assoc2": { "c": 3, "d": 4 },
+  "options": [ [ "Some", 10 ], "None", [ "Some", 88 ] ],
+  "nullables": [ 13, 71, null ],
+  "untyped_things": [123, [[""]], {}],
+  "extra": "ignore me please"
+}

@@ -18,6 +18,7 @@ end
 
 module Stable = struct
   open! Core.Core_stable
+  module Time = Time_unix.Stable
 
   module Level = struct
     module V1 = struct
@@ -190,7 +191,8 @@ module Stable = struct
         t_of_versioned_serializable versioned_t
       ;;
 
-      include Binable.Of_binable.V1 [@alert "-legacy"]
+      include
+        Binable.Of_binable.V1 [@alert "-legacy"]
           (struct
             type t = versioned_serializable [@@deriving bin_io]
           end)
@@ -238,7 +240,8 @@ module Stable = struct
         }
       ;;
 
-      include Binable.Of_binable.V1 [@alert "-legacy"]
+      include
+        Binable.Of_binable.V1 [@alert "-legacy"]
           (struct
             type t = v0_t [@@deriving bin_io]
           end)
@@ -264,33 +267,35 @@ module Sys = Async_sys
 module Unix = Unix_syscalls
 
 module Level = struct
-  type t =
-    [ `Debug
-    | `Info
-    | `Error
-    ]
-  [@@deriving bin_io, compare, sexp]
+  module T = struct
+    type t =
+      [ `Debug
+      | `Info
+      | `Error
+      ]
+    [@@deriving bin_io, compare, enumerate, sexp]
 
-  let to_string = function
-    | `Debug -> "Debug"
-    | `Info -> "Info"
-    | `Error -> "Error"
-  ;;
+    let to_string = function
+      | `Debug -> "Debug"
+      | `Info -> "Info"
+      | `Error -> "Error"
+    ;;
 
-  let of_string = function
-    | "Debug" -> `Debug
-    | "Info" -> `Info
-    | "Error" -> `Error
-    | s -> failwithf "not a valid level %s" s ()
-  ;;
+    let of_string = function
+      | "Debug" -> `Debug
+      | "Info" -> `Info
+      | "Error" -> `Error
+      | s -> failwithf "not a valid level %s" s ()
+    ;;
+  end
 
-  let all = [ `Debug; `Info; `Error ]
+  include T
 
   let arg =
-    Command.Spec.Arg_type.of_alist_exn
-      (List.concat_map all ~f:(fun t ->
-         let s = to_string t in
-         [ String.lowercase s, t; String.capitalize s, t; String.uppercase s, t ]))
+    Command.Arg_type.enumerated
+      ~list_values_in_help:true
+      ~case_sensitive:false
+      (module T : Command.Enumerable_stringable with type t = t)
   ;;
 
   (* Ordering of log levels in terms of verbosity. *)
@@ -548,6 +553,7 @@ module Output : sig
   val rotating_file
     :  ?perm:Unix.file_perm
     -> ?time_source:Synchronous_time_source.t
+    -> ?log_on_rotation:(unit -> Message.t list)
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -556,6 +562,7 @@ module Output : sig
   val rotating_file_with_tail
     :  ?perm:Unix.file_perm
     -> ?time_source:Synchronous_time_source.t
+    -> ?log_on_rotation:(unit -> Message.t list)
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -563,6 +570,10 @@ module Output : sig
 
   val filter_to_level : t -> level:Level.t -> t
   val combine : t list -> t
+
+  module For_testing : sig
+    val create : map_output:(string -> string) -> t
+  end
 end = struct
   module Format = struct
     type machine_readable =
@@ -637,7 +648,9 @@ end = struct
       | ts ->
         fun f ->
           Deferred.List.map ~how:`Sequential ts ~f:(fun t ->
-            Monitor.try_with_or_error (fun () -> f t))
+            Monitor.try_with_or_error
+              ~rest:`Log
+              (fun () -> f t))
           >>| Or_error.combine_errors_unit
           >>| Or_error.ok_exn
     in
@@ -645,12 +658,7 @@ end = struct
     let rotate () = iter_combine_exns (fun t -> t.rotate ()) in
     let close () = iter_combine_exns (fun t -> t.close ()) in
     let flush () = iter_combine_exns (fun t -> t.flush ()) in
-    { write
-    ; rotate
-    ; close
-    ; flush
-    ; heap_block = Definitely_a_heap_block.the_one_and_only
-    }
+    { write; rotate; close; flush; heap_block = Definitely_a_heap_block.the_one_and_only }
   ;;
 
   let filter_to_level t ~level =
@@ -713,8 +721,7 @@ end = struct
       let w = open_writer ~filename ~perm in
       create
         ~close:(fun () -> if Lazy.is_val w then force w >>= Writer.close else return ())
-        ~flush:(fun () ->
-          if Lazy.is_val w then force w >>= Writer.flushed else return ())
+        ~flush:(fun () -> if Lazy.is_val w then force w >>= Writer.flushed else return ())
         (fun msgs ->
            let%map (_ : Int63.t) = write' (force w) format msgs in
            ())
@@ -742,6 +749,7 @@ end = struct
       -> Format.t
       -> basename:string
       -> Rotation.t
+      -> log_on_rotation:(unit -> Message.t list) option
       -> t * string Tail.t
   end = struct
     module Make (Id : Rotation.Id_intf) = struct
@@ -784,7 +792,11 @@ end = struct
            let now = Time.now () in
            let cutoff = Time.sub now span in
            Deferred.List.filter files ~f:(fun (_, filename) ->
-             Deferred.Or_error.try_with (fun () -> Unix.stat filename)
+             Deferred.Or_error.try_with
+               ~run:
+                 `Schedule
+               ~rest:`Log
+               (fun () -> Unix.stat filename)
              >>| function
              | Error _ -> false
              | Ok stats -> Time.( < ) stats.mtime cutoff)
@@ -796,7 +808,11 @@ end = struct
            in
            List.drop files i)
         >>= Deferred.List.map ~f:(fun (_i, filename) ->
-          Deferred.Or_error.try_with (fun () -> Unix.unlink filename))
+          Deferred.Or_error.try_with
+            ~run:
+              `Schedule
+            ~rest:`Log
+            (fun () -> Unix.unlink filename))
         >>| fun (_ : unit Or_error.t list) -> ()
       ;;
 
@@ -811,6 +827,7 @@ end = struct
         ; mutable last_size : int
         ; mutable last_time : Time.t
         ; log_files : string Tail.t
+        ; log_on_rotation : unit -> Message.t list
         ; perm : int option
         }
       [@@deriving sexp_of]
@@ -864,17 +881,27 @@ end = struct
               ~last_size:(Byte_units.of_bytes_int t.last_size)
               ~last_time:t.last_time
               ~current_time
-         then rotate ~time_source t
-         else return ())
-        >>= fun () ->
+         then
+           rotate ~time_source t
+           >>= fun () ->
+           let msgs = t.log_on_rotation () |> Queue.of_list in
+           let rotation_msgs = Queue.length msgs in
+           write' (Lazy.force t.writer) t.format msgs >>| fun size -> rotation_msgs, size
+         else return (0, Int63.zero))
+        >>= fun (rotation_msgs, on_rotation_log_size) ->
         write' (Lazy.force t.writer) t.format msgs
         >>| fun size ->
-        t.last_messages <- t.last_messages + Queue.length msgs;
-        t.last_size <- Int63.to_int_exn size;
+        t.last_messages <- t.last_messages + rotation_msgs + Queue.length msgs;
+        t.last_size <- Int63.to_int_exn size + Int63.to_int_exn on_rotation_log_size;
         t.last_time <- current_time
       ;;
 
-      let create ?perm ?time_source format ~basename rotation =
+      let create ?perm ?time_source ~log_on_rotation format ~basename rotation =
+        let log_on_rotation =
+          match log_on_rotation with
+          | None -> Fn.const []
+          | Some f -> f
+        in
         let basename, dirname =
           (* make dirname absolute, because cwd may change *)
           match Filename.is_absolute basename with
@@ -901,6 +928,7 @@ end = struct
           ; last_messages = 0
           ; last_time = now ~time_source
           ; log_files
+          ; log_on_rotation
           ; perm
           }
         in
@@ -954,7 +982,7 @@ end = struct
         type t = Time.t
 
         let create ?time_source _zone = now ~time_source
-        let rotate_one = ident
+        let rotate_one = Fn.id
 
         let to_string_opt ts =
           Some (Time.to_filename_string ~zone:(force Time.Zone.local) ts)
@@ -974,7 +1002,7 @@ end = struct
         type t = Date.t
 
         let create ?time_source zone = Date.of_time (now ~time_source) ~zone
-        let rotate_one = ident
+        let rotate_one = Fn.id
         let to_string_opt date = Some (Date.to_string date)
         let cmp_newest_first = Date.descending
 
@@ -996,11 +1024,22 @@ end = struct
     ;;
   end
 
-  let rotating_file ?perm ?time_source format ~basename rotation =
-    fst (Rotating_file.create format ~basename rotation ?perm ?time_source)
+  let rotating_file ?perm ?time_source ?log_on_rotation format ~basename rotation =
+    fst
+      (Rotating_file.create format ~basename ~log_on_rotation rotation ?perm ?time_source)
   ;;
 
-  let rotating_file_with_tail = Rotating_file.create
+  let rotating_file_with_tail
+        ?perm
+        ?time_source
+        ?log_on_rotation
+        format
+        ~basename
+        rotation
+    =
+    Rotating_file.create format ~basename ~log_on_rotation rotation ?perm ?time_source
+  ;;
+
   let file = File.create
   let writer = Log_writer.create
 
@@ -1017,6 +1056,17 @@ end = struct
     in
     fun ?(format = `Text) () -> make format
   ;;
+
+  module For_testing = struct
+    let create ~map_output =
+      let stdout = force Writer.stdout in
+      let we_flush_after_each_message_is_processed () = Deferred.unit in
+      create ~flush:we_flush_after_each_message_is_processed (fun queue ->
+        Queue.iter queue ~f:(fun message ->
+          map_output (Message.message message) |> print_endline);
+        Writer.flushed stdout)
+    ;;
+  end
 end
 
 (* A log is a pipe that can take one of four messages.
@@ -1045,6 +1095,14 @@ module Update = struct
   let to_string t = Sexp.to_string (sexp_of_t t)
 end
 
+let default_time_source =
+  if am_running_inline_test
+  then
+    Synchronous_time_source.read_only
+      (Synchronous_time_source.create ~now:Time_ns.epoch ())
+  else Synchronous_time_source.wall_clock ()
+;;
+
 type t =
   { updates : Update.t Pipe.Writer.t
   ; mutable on_error : [ `Raise | `Call of Error.t -> unit ]
@@ -1070,7 +1128,7 @@ let push_update t update =
 ;;
 
 let flushed t = Deferred.create (fun i -> push_update t (Flush i))
-let rotate t = Deferred.create (fun i -> push_update t (Rotate i))
+let rotate t = Deferred.create (fun rotated -> push_update t (Rotate rotated))
 let is_closed t = Pipe.is_closed t.updates
 
 module Flush_at_exit_or_gc : sig
@@ -1193,9 +1251,12 @@ let create_log_processor ~output =
 ;;
 
 let process_log_redirecting_all_errors t r output =
-  Monitor.try_with (fun () ->
-    let process_log = create_log_processor ~output in
-    Pipe.iter' r ~f:process_log)
+  Monitor.try_with
+    ~run:`Schedule
+    ~rest:`Log
+    (fun () ->
+       let process_log = create_log_processor ~output in
+       Pipe.iter' r ~f:process_log)
   >>| function
   | Ok () -> ()
   | Error e ->
@@ -1204,12 +1265,14 @@ let process_log_redirecting_all_errors t r output =
      | `Call f -> f (Error.of_exn e))
 ;;
 
-let create ~level ~output ~on_error ?time_source ?transform () : t =
+let create_internal ~level ~output ~on_error ~time_source ~transform : t =
+  (* this has no optional args so that we make sure to update/consider all internal call
+     sites if the signature changes *)
   let r, w = Pipe.create () in
   let time_source =
     match time_source with
     | Some time_source -> time_source
-    | None -> Synchronous_time_source.wall_clock ()
+    | None -> default_time_source
   in
   let t =
     { updates = w
@@ -1226,6 +1289,13 @@ let create ~level ~output ~on_error ?time_source ?transform () : t =
   t
 ;;
 
+module For_external_use_only = struct
+  (* a more convenient interface for use externally *)
+  let create ~level ~output ~on_error ?time_source ?transform () : t =
+    create_internal ~level ~output ~on_error ~time_source ~transform
+  ;;
+end
+
 let set_output t outputs =
   t.output_is_disabled <- List.is_empty outputs;
   t.current_output <- outputs;
@@ -1233,6 +1303,7 @@ let set_output t outputs =
 ;;
 
 let get_output t = t.current_output
+let get_on_error t = t.on_error
 let set_on_error t handler = t.on_error <- handler
 let level t = t.current_level
 let set_level t level = t.current_level <- level
@@ -1240,6 +1311,15 @@ let get_time_source t = t.current_time_source
 let set_time_source t time_source = t.current_time_source <- time_source
 let get_transform t = t.transform
 let set_transform t f = t.transform <- f
+
+let copy t =
+  create_internal
+    ~level:(level t)
+    ~output:(get_output t)
+    ~on_error:(get_on_error t)
+    ~time_source:(Some (get_time_source t))
+    ~transform:(get_transform t)
+;;
 
 (* would_log is broken out and tested separately for every sending function to avoid the
    overhead of message allocation when we are just going to drop the message. *)
@@ -1338,7 +1418,11 @@ let surroundf_gen
 let surround_s ?level ?time ?tags t msg f =
   surround_s_gen
     ?tags
-    ~try_with:Monitor.try_with
+    ~try_with:
+      (Monitor.try_with
+         ~run:
+           `Schedule
+         ~rest:`Log )
     ~map_return:Deferred.map
     ~log_sexp:(fun ?tags s -> sexp ?tags ?level ?time t s)
     ~f
@@ -1348,7 +1432,11 @@ let surround_s ?level ?time ?tags t msg f =
 let surroundf ?level ?time ?tags t fmt =
   surroundf_gen
     ?tags
-    ~try_with:Monitor.try_with
+    ~try_with:
+      (Monitor.try_with
+         ~run:
+           `Schedule
+         ~rest:`Log )
     ~map_return:Deferred.map
     ~log_string:(fun ?tags -> string ?tags ?level ?time t)
     fmt
@@ -1358,9 +1446,7 @@ let set_level_via_param_helper ~f =
   let open Command.Param in
   map
     (flag "log-level" (optional Level.arg) ~doc:"LEVEL The log level")
-    ~f:(function
-      | None -> ()
-      | Some level -> f level)
+    ~f:(Option.iter ~f)
 ;;
 
 let set_level_via_param log = set_level_via_param_helper ~f:(set_level log)
@@ -1381,11 +1467,12 @@ let error_s ?time ?tags t the_sexp = sexp ~level:`Error ?time ?tags t the_sexp
 let%bench_module "unused log messages" =
   (module struct
     let (log : t) =
-      create
+      create_internal
         ~level:`Info
         ~output:[ Output.file `Text ~filename:"/dev/null" ]
         ~on_error:`Raise
-        ()
+        ~time_source:None
+        ~transform:None
     ;;
 
     let%bench "unused printf" = debug log "blah"
@@ -1478,6 +1565,10 @@ module type Global_intf = sig
     -> ?tags:(string * string) list
     -> ('a, unit, string, (unit -> 'b Deferred.t) -> 'b Deferred.t) format4
     -> 'a
+
+  module For_testing : sig
+    val use_test_output : ?map_output:(string -> string) -> unit -> unit
+  end
 end
 
 module Make_global () : Global_intf = struct
@@ -1491,11 +1582,12 @@ module Make_global () : Global_intf = struct
 
   let log =
     lazy
-      (create
+      (create_internal
          ~level:`Info
          ~output:[ Output.stderr () ]
          ~on_error:(`Call send_errors_to_top_level_monitor)
-         ())
+         ~time_source:None
+         ~transform:None)
   ;;
 
   let level () = level (Lazy.force log)
@@ -1537,11 +1629,14 @@ module Make_global () : Global_intf = struct
     surround_s ?level ?time ?tags (Lazy.force log) msg f
   ;;
 
-  let surroundf ?level ?time ?tags fmt =
-    surroundf ?level ?time ?tags (Lazy.force log) fmt
-  ;;
-
+  let surroundf ?level ?time ?tags fmt = surroundf ?level ?time ?tags (Lazy.force log) fmt
   let set_level_via_param () = set_level_via_param_lazy log
+
+  module For_testing = struct
+    let use_test_output ?(map_output = Fn.id) () =
+      set_output [ Output.For_testing.create ~map_output ]
+    ;;
+  end
 end
 
 module Blocking : sig
@@ -1612,7 +1707,7 @@ end = struct
   module Output = struct
     type t = Message.t -> unit
 
-    let create = ident
+    let create = Fn.id
     let write print msg = print (Message.to_write_only_text msg)
     let stdout = write (Core.Printf.printf "%s\n%!")
     let stderr = write (Core.Printf.eprintf "%s\n%!")
@@ -1620,7 +1715,7 @@ end = struct
 
   let level : Level.t ref = ref `Info
   let write = ref Output.stderr
-  let time_source = ref (Synchronous_time_source.wall_clock ())
+  let time_source = ref default_time_source
   let transform = ref None
   let set_level l = level := l
   let level () = !level
@@ -1743,22 +1838,16 @@ module Reader = struct
 end
 
 module For_testing = struct
-  let create_output ~map_output =
-    let stdout = force Writer.stdout in
-    let we_flush_after_each_message_is_processed () = Deferred.unit in
-    Output.create ~flush:we_flush_after_each_message_is_processed (fun queue ->
-      Queue.iter queue ~f:(fun message ->
-        map_output (Message.message message) |> print_endline);
-      Writer.flushed stdout)
-  ;;
+  let create_output = Output.For_testing.create
 
   let create ~map_output level =
     let output = [ create_output ~map_output ] in
-    create ~output ~level ~on_error:`Raise ()
+    create_internal ~output ~level ~on_error:`Raise ~time_source:None ~transform:None
   ;;
 end
 
 module Private = struct
   module Message = Message
-  module Stable = Stable
 end
+
+include For_external_use_only

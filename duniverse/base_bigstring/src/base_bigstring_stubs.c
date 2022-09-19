@@ -146,19 +146,33 @@ CAMLprim value bigstring_memset_stub(value v_t, value v_pos, value v_len, value 
 
 /* Comparison */
 
+static inline value caml_memcmp(unsigned char * s1, unsigned char * s2, size_t n)
+{
+  int res = memcmp(s1, s2, n);
+  if (res < 0) return Val_int(-1);
+  if (res > 0) return Val_int(1);
+  return Val_int(0);
+}
+
 CAMLprim value bigstring_memcmp_stub(value v_s1, value v_s1_pos,
                                      value v_s2, value v_s2_pos,
                                      value v_len) /* noalloc */
 {
   struct caml_ba_array *ba_s1 = Caml_ba_array_val(v_s1);
   struct caml_ba_array *ba_s2 = Caml_ba_array_val(v_s2);
-  char *s1 = (char *) ba_s1->data + Long_val(v_s1_pos);
-  char *s2 = (char *) ba_s2->data + Long_val(v_s2_pos);
-  int res;
-  res = memcmp(s1, s2, Long_val(v_len));
-  if (res < 0) return Val_int(-1);
-  if (res > 0) return Val_int(1);
-  return Val_int(0);
+  return caml_memcmp((unsigned char *) ba_s1->data + Long_val(v_s1_pos),
+                     (unsigned char *) ba_s2->data + Long_val(v_s2_pos),
+                     Long_val(v_len));
+}
+
+CAMLprim value bigstring_memcmp_bytes_stub(value v_bstr, value v_s1_pos,
+                                           value v_bytes, value v_s2_pos,
+                                           value v_len) /* noalloc */
+{
+  struct caml_ba_array *ba_s1 = Caml_ba_array_val(v_bstr);
+  return caml_memcmp((unsigned char *) ba_s1->data + Long_val(v_s1_pos),
+                     Bytes_val(v_bytes) + Long_val(v_s2_pos),
+                     Long_val(v_len));
 }
 
 /* Hashing */

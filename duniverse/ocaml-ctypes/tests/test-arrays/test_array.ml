@@ -8,6 +8,7 @@
 open OUnit2
 open Ctypes
 
+let _ = Dl.(dlopen ~filename:"../clib/clib.so" ~flags:[RTLD_NOW])
 
 (*
   Creating multidimensional arrays, and reading and writing elements.

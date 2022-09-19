@@ -5,18 +5,21 @@ PKGS=\
 	-package bytes -package result \
 	-package bigarray -package unix \
 	-package ocaml-migrate-parsetree -package ppx_tools_versioned \
-	-package react
+	-package react \
+	-package domainslib
 
 INCS=\
 	-I ${BLD}/core/.lwt.objs/byte \
 	-I ${BLD}/ppx/.ppx_lwt.objs/byte \
 	-I ${BLD}/react/.lwt_react.objs/byte \
+	-I ${BLD}/domain/.lwt_domain.objs/byte \
 	-I ${BLD}/unix/.lwt_unix.objs/byte
 
 MLIS=\
 	$(wildcard ${SRC}/core/*.mli) \
 	$(wildcard ${SRC}/ppx/*.mli) \
 	$(wildcard ${SRC}/react/*.mli) \
+	$(wildcard ${SRC}/domain/*.mli) \
 	$(filter-out ${BLD}/unix/lwt_unix.cppo.mli,$(wildcard ${BLD}/unix/*.mli))
 
 MLIS := $(filter-out %.pp.mli,$(MLIS))

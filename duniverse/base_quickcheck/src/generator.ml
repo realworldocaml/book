@@ -276,6 +276,10 @@ let list_permutations list =
     Array.to_list array)
 ;;
 
+let array t = map (list t) ~f:Array.of_list
+let ref t = map t ~f:Ref.create
+let lazy_t t = map t ~f:Lazy.from_val
+
 let char_uniform_inclusive lo hi =
   create (fun ~size:_ ~random ->
     Splittable_random.int random ~lo:(Char.to_int lo) ~hi:(Char.to_int hi)
@@ -602,11 +606,16 @@ let float_uniform_exclusive lower_bound upper_bound =
 ;;
 
 let float_inclusive lower_bound upper_bound =
-  weighted_union
-    [ 0.05, return lower_bound
-    ; 0.05, return upper_bound
-    ; 0.9, float_uniform_exclusive lower_bound upper_bound
-    ]
+  if Float.equal lower_bound upper_bound
+  then return lower_bound
+  else if Float.( = ) (Float.one_ulp `Up lower_bound) upper_bound
+  then union [ return lower_bound; return upper_bound ]
+  else
+    weighted_union
+      [ 0.05, return lower_bound
+      ; 0.05, return upper_bound
+      ; 0.9, float_uniform_exclusive lower_bound upper_bound
+      ]
 ;;
 
 let string_with_length_of char_gen ~length =
@@ -626,6 +635,7 @@ let string_non_empty_of char_gen =
 let string = string_of char
 let string_non_empty = string_non_empty_of char
 let string_with_length ~length = string_with_length_of char ~length
+let bytes = map string ~f:Bytes.of_string
 
 let sexp_of atom =
   fixed_point (fun self ->
@@ -718,3 +728,25 @@ let bigarray2 t kind layout =
 
 let float32_mat = bigarray2 float Float32 Fortran_layout
 let float64_mat = bigarray2 float Float64 Fortran_layout
+
+module Debug = struct
+  let coverage
+        (type k cmp)
+        (module Cmp : Comparator.S with type t = k and type comparator_witness = cmp)
+        sample
+    =
+    Sequence.fold
+      sample
+      ~init:(Map.empty (module Cmp))
+      ~f:(fun counts value ->
+        Map.update counts value ~f:(function
+          | None -> 1
+          | Some prev -> prev + 1))
+  ;;
+
+  let monitor t ~f =
+    map t ~f:(fun value ->
+      f value;
+      value)
+  ;;
+end

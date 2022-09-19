@@ -45,13 +45,14 @@ let%expect_test _ =
     Host_and_port.create ~host:"localhost" ~port:(Tcp.Server.listening_on server)
   in
   (* test Persistent_connection.Rpc *)
-  let on_unversioned_event : Persistent_connection.Rpc.Event.t -> unit Deferred.t
+  let on_unversioned_event
+    : Host_and_port.t Persistent_connection.Rpc.Event.t -> unit Deferred.t
     = function
       | Obtained_address _ ->
         printf "(Obtained_address <elided>)\n";
         return ()
       | event ->
-        print_s [%sexp (event : Persistent_connection.Rpc.Event.t)];
+        print_s [%sexp (event : Host_and_port.t Persistent_connection.Rpc.Event.t)];
         return ()
   in
   let unversioned_conn =
@@ -60,27 +61,26 @@ let%expect_test _ =
       ~server_name:"unversioned rpc"
       (fun () -> return (Ok host_and_port))
   in
-  let%bind () = [%expect {| Attempting_to_connect |}] in
+  [%expect {| Attempting_to_connect |}];
   let%bind this_conn = Persistent_connection.Rpc.connected unversioned_conn in
-  let%bind () =
-    [%expect
-      {|
+  [%expect {|
         (Obtained_address <elided>)
         (Connected <opaque>)
-      |}]
-  in
+      |}];
   let%bind () = Rpc.Rpc.dispatch_exn Hello.V1.rpc this_conn () in
-  let%bind () = [%expect {| server says hi |}] in
+  [%expect {| server says hi |}];
   let%bind () = Persistent_connection.Rpc.close unversioned_conn in
-  let%bind () = [%expect {| Disconnected |}] in
+  [%expect {| Disconnected |}];
   (* test Persistent_connection.Versioned_rpc *)
-  let on_versioned_event : Persistent_connection.Versioned_rpc.Event.t -> unit Deferred.t
+  let on_versioned_event
+    : Host_and_port.t Persistent_connection.Versioned_rpc.Event.t -> unit Deferred.t
     = function
       | Obtained_address _ ->
         printf "(Obtained_address <elided>)\n";
         return ()
       | event ->
-        print_s [%sexp (event : Persistent_connection.Versioned_rpc.Event.t)];
+        print_s
+          [%sexp (event : Host_and_port.t Persistent_connection.Versioned_rpc.Event.t)];
         return ()
   in
   let versioned_conn =
@@ -89,19 +89,16 @@ let%expect_test _ =
       ~server_name:"versioned rpc"
       (fun () -> return (Ok host_and_port))
   in
-  let%bind () = [%expect {| Attempting_to_connect |}] in
+  [%expect {| Attempting_to_connect |}];
   let%bind this_conn = Persistent_connection.Versioned_rpc.connected versioned_conn in
-  let%bind () =
-    [%expect
-      {|
+  [%expect {|
         (Obtained_address <elided>)
         (Connected <opaque>)
-      |}]
-  in
+      |}];
   let%bind () = Hello.dispatch_multi this_conn () |> Deferred.Or_error.ok_exn in
-  let%bind () = [%expect {| server says hi |}] in
+  [%expect {| server says hi |}];
   let%bind () = Persistent_connection.Versioned_rpc.close versioned_conn in
-  let%bind () = [%expect {|
-    Disconnected |}] in
+  [%expect {|
+    Disconnected |}];
   return ()
 ;;

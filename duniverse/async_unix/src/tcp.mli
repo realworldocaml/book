@@ -41,6 +41,7 @@ type 'a with_connect_options =
   -> ?reader_buffer_size:int
   -> ?writer_buffer_size:int
   -> ?timeout:Time.Span.t
+  -> ?time_source:Time_source.t (** default is [Time_source.wall_clock ()] *)
   -> 'a
 
 
@@ -71,6 +72,7 @@ val connect_sock
   :  ?socket:([ `Unconnected ], 'addr) Socket.t
   -> ?interrupt:unit Deferred.t
   -> ?timeout:Time.Span.t
+  -> ?time_source:[> read ] Time_source.T1.t (** default is [Time_source.wall_clock ()] *)
   -> 'addr Where_to_connect.t
   -> ([ `Active ], 'addr) Socket.t Deferred.t
 
@@ -202,6 +204,10 @@ module Server : sig
       only service a small number of connections at a time should see little to no
       difference in behavior for different values of [max_accepts_per_branch].
 
+      [drop_incoming_connections] determines whether connections will be immediately
+      dropped when the server is created.  It can be modified later with
+      [set_drop_incoming_connections]; see that function for a more detailed description.
+
       Supplying [socket] causes the server to use [socket] rather than create a new
       socket.  In this usage, creation does not set [Socket.Opt.reuseaddr] to [true]; if
       you want that, you must set [reuseaddr] before creation.
@@ -223,7 +229,10 @@ module Server : sig
     :  ?max_connections:int (** defaults to [10_000]. *)
     -> ?max_accepts_per_batch:int (** defaults to [1]. *)
     -> ?backlog:int (** defaults to [64] *)
+    -> ?drop_incoming_connections:bool (** defaults to [false] *)
     -> ?socket:([ `Unconnected ], ([< Socket.Address.t ] as 'address)) Socket.t
+    -> ?time_source:[> read ] Time_source.T1.t
+    (** default is [Time_source.wall_clock ()] *)
     -> on_handler_error:[ `Call of 'address -> exn -> unit | `Ignore | `Raise ]
     -> ('address, 'listening_on) Where_to_listen.t
     -> ('address -> ([ `Active ], 'address) Socket.t -> unit Deferred.t)
@@ -235,11 +244,12 @@ module Server : sig
     :  ?max_connections:int
     -> ?max_accepts_per_batch:int
     -> ?backlog:int
+    -> ?drop_incoming_connections:bool (** defaults to [false] *)
     -> ?socket:([ `Unconnected ], Socket.Address.Inet.t) Socket.t
-    -> on_handler_error:[ `Call of Socket.Address.Inet.t -> exn -> unit
-                        | `Ignore
-                        | `Raise
-                        ]
+    -> ?time_source:[> read ] Time_source.T1.t
+    (** default is [Time_source.wall_clock ()] *)
+    -> on_handler_error:
+         [ `Call of Socket.Address.Inet.t -> exn -> unit | `Ignore | `Raise ]
     -> Where_to_listen.inet
     -> (Socket.Address.Inet.t
         -> ([ `Active ], Socket.Address.Inet.t) Socket.t
@@ -257,7 +267,10 @@ module Server : sig
     -> ?max_connections:int (** defaults to [10_000]. *)
     -> ?max_accepts_per_batch:int (** defaults to [1]. *)
     -> ?backlog:int (** defaults to [64]. *)
+    -> ?drop_incoming_connections:bool (** defaults to [false] *)
     -> ?socket:([ `Unconnected ], ([< Socket.Address.t ] as 'address)) Socket.t
+    -> ?time_source:[> read ] Time_source.T1.t
+    (** default is [Time_source.wall_clock ()] *)
     -> on_handler_error:[ `Call of 'address -> exn -> unit | `Ignore | `Raise ]
     -> ('address, 'listening_on) Where_to_listen.t
     -> ('address -> Reader.t -> Writer.t -> unit Deferred.t)
@@ -268,11 +281,12 @@ module Server : sig
     -> ?max_connections:int (** defaults to [10_000]. *)
     -> ?max_accepts_per_batch:int (** defaults to [1]. *)
     -> ?backlog:int (** defaults to [64]. *)
+    -> ?drop_incoming_connections:bool (** defaults to [false] *)
     -> ?socket:([ `Unconnected ], Socket.Address.Inet.t) Socket.t
-    -> on_handler_error:[ `Call of Socket.Address.Inet.t -> exn -> unit
-                        | `Ignore
-                        | `Raise
-                        ]
+    -> ?time_source:[> read ] Time_source.T1.t
+    (** default is [Time_source.wall_clock ()] *)
+    -> on_handler_error:
+         [ `Call of Socket.Address.Inet.t -> exn -> unit | `Ignore | `Raise ]
     -> Where_to_listen.inet
     -> (Socket.Address.Inet.t -> Reader.t -> Writer.t -> unit Deferred.t)
     -> (Socket.Address.Inet.t, int) t

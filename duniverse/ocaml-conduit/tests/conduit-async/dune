@@ -1,5 +1,5 @@
 (executable
- (libraries async conduit-async)
+ (libraries async core_unix.command_unix conduit-async)
  (name ssl_echo))
 
 (rule

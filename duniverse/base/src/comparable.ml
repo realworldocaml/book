@@ -1,49 +1,18 @@
 open! Import
 include Comparable_intf
 
-module Validate (T : sig
-    type t [@@deriving_inline compare, sexp_of]
-
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-
-    [@@@end]
-  end) : Validate with type t := T.t = struct
-  module V = Validate
-  open Maybe_bound
-
-  let to_string t = Sexp.to_string (T.sexp_of_t t)
-
-  let validate_bound ~min ~max t =
-    V.bounded ~name:to_string ~lower:min ~upper:max ~compare:T.compare t
-  ;;
-
-  let validate_lbound ~min t = validate_bound ~min ~max:Unbounded t
-  let validate_ubound ~max t = validate_bound ~max ~min:Unbounded t
-end
-
 module With_zero (T : sig
     type t [@@deriving_inline compare]
 
-    val compare : t -> t -> int
+    include Ppx_compare_lib.Comparable.S with type t := t
 
     [@@@end]
 
     val zero : t
-
-    include Validate with type t := t
   end) =
 struct
   open T
 
-  (* Preallocate the interesting bounds to minimize allocation in the implementations of
-     [validate_*]. *)
-  let excl_zero = Maybe_bound.Excl zero
-  let incl_zero = Maybe_bound.Incl zero
-  let validate_positive t = validate_lbound ~min:excl_zero t
-  let validate_non_negative t = validate_lbound ~min:incl_zero t
-  let validate_negative t = validate_ubound ~max:excl_zero t
-  let validate_non_positive t = validate_ubound ~max:incl_zero t
   let is_positive t = compare t zero > 0
   let is_non_negative t = compare t zero >= 0
   let is_negative t = compare t zero < 0
@@ -51,30 +20,10 @@ struct
   let sign t = Sign0.of_int (compare t zero)
 end
 
-module Validate_with_zero (T : sig
-    type t [@@deriving_inline compare, sexp_of]
-
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-
-    [@@@end]
-
-    val zero : t
-  end) =
-struct
-  module V = Validate (T)
-  include V
-
-  include With_zero (struct
-      include T
-      include V
-    end)
-end
-
 module Poly (T : sig
     type t [@@deriving_inline sexp_of]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) =
@@ -82,7 +31,7 @@ struct
   module Replace_polymorphic_compare = struct
     type t = T.t [@@deriving_inline sexp_of]
 
-    let sexp_of_t = (T.sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t)
+    let sexp_of_t = (T.sexp_of_t : t -> Sexplib0.Sexp.t)
 
     [@@@end]
 
@@ -115,15 +64,6 @@ struct
   end
 
   include C
-
-  include Validate (struct
-      type nonrec t = t [@@deriving_inline compare, sexp_of]
-
-      let compare = (compare : t -> t -> int)
-      let sexp_of_t = (sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t)
-
-      [@@@end]
-    end)
 end
 
 let gt cmp a b = cmp a b > 0
@@ -138,7 +78,7 @@ let max cmp t t' = if geq cmp t t' then t else t'
 module Infix (T : sig
     type t [@@deriving_inline compare]
 
-    val compare : t -> t -> int
+    include Ppx_compare_lib.Comparable.S with type t := t
 
     [@@@end]
   end) : Infix with type t := T.t = struct
@@ -153,7 +93,7 @@ end
 module Polymorphic_compare (T : sig
     type t [@@deriving_inline compare]
 
-    val compare : t -> t -> int
+    include Ppx_compare_lib.Comparable.S with type t := t
 
     [@@@end]
   end) : Polymorphic_compare with type t := T.t = struct
@@ -168,7 +108,7 @@ end
 module Make_using_comparator (T : sig
     type t [@@deriving_inline sexp_of]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
 
@@ -203,15 +143,14 @@ module Make_using_comparator (T : sig
            [ "min", T.sexp_of_t min; "max", T.sexp_of_t max ])
     else Ok (clamp_unchecked t ~min ~max)
   ;;
-
-  include Validate (T)
 end
 
 module Make (T : sig
     type t [@@deriving_inline compare, sexp_of]
 
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S with type t := t
+
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) =
@@ -223,13 +162,13 @@ module Make (T : sig
 module Inherit (C : sig
     type t [@@deriving_inline compare]
 
-    val compare : t -> t -> int
+    include Ppx_compare_lib.Comparable.S with type t := t
 
     [@@@end]
   end) (T : sig
           type t [@@deriving_inline sexp_of]
 
-          val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+          val sexp_of_t : t -> Sexplib0.Sexp.t
 
           [@@@end]
 
@@ -238,7 +177,7 @@ module Inherit (C : sig
   Make (struct
     type t = T.t [@@deriving_inline sexp_of]
 
-    let sexp_of_t = (T.sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t)
+    let sexp_of_t = (T.sexp_of_t : t -> Sexplib0.Sexp.t)
 
     [@@@end]
 

@@ -1,0 +1,2 @@
+(library (name text_graph) (public_name textutils_kernel.text_graph)
+ (libraries core) (preprocess (pps ppx_jane)))

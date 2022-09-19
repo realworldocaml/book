@@ -1,13 +1,20 @@
-(** Unicode character operations. *)
+(** Unicode character operations.
+
+    A [Uchar.t] represents a Unicode code point -- that is, an integer identifying the
+    character in abstract. This module does not provide any utilties for converting
+    [Uchar.t]s to and from strings -- in order to do so, one needs to settle on a
+    particular encoding, such as UTF-8 or UTF-16. See, for instance, the [utf8_text]
+    library for converting to and from UTF-8.
+*)
 
 open! Import
 
-type t = Uchar0.t [@@deriving_inline hash, sexp]
+type t = Uchar0.t [@@deriving_inline hash, sexp, sexp_grammar]
 
-val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+include Ppx_hash_lib.Hashable.S with type t := t
+include Sexplib0.Sexpable.S with type t := t
 
-include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
@@ -51,6 +58,12 @@ val of_scalar_exn : int -> t
 
 (** [to_scalar t] is [t] as an integer scalar value. *)
 val to_scalar : t -> int
+
+(** [utf8_byte_width t] returns the number of bytes needed to represent [t] in the UTF-8
+    encoding (https://en.wikipedia.org/wiki/UTF-8).
+
+*)
+val utf8_byte_length : t -> int
 
 val min_value : t
 val max_value : t

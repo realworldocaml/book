@@ -74,7 +74,7 @@ val pp : Format.formatter -> t -> unit [@@ocaml.toplevel_printer]
     These definitions cover the CPU architectures that OCaml
     runs and is supported on. *)
 
-type arch = [ `I386 | `X86_64 | `Aarch64 | `Aarch32 | `Ppc64le | `S390x ]
+type arch = [ `I386 | `X86_64 | `Aarch64 | `Aarch32 | `Ppc64le | `S390x | `Riscv64 ]
 (** Type of CPU architectures.
     This is currently an incomplete list, and lists just
     those used by the opam test systems. Contributions welcome
@@ -314,8 +314,23 @@ module Releases : sig
   val v4_13 : t
   (** Latest release in the 4.13.x series *)
 
+  val v4_14_0 : t
+  (** Version 4.14.0 *)
+
   val v4_14 : t
   (** Latest release in the 4.14.x series *)
+
+  val v5_0_0 : t
+  (** Version 5.0.0 *)
+
+  val v5_0 : t
+  (** Latest release in the 5.0.x series *)
+
+  val v5_1_0 : t
+  (** Version 5.1.0 *)
+
+  val v5_1 : t
+  (** Latest release in the 5.1.x series *)
 
   val all_patches : t list
   (** [all_patches] is an enumeration of all OCaml releases, including every patch release.

@@ -19,26 +19,31 @@ module Code = struct
 end
 
 module Sig = struct
-  let mk_base_tp (name : string) (typ : string) : unit =
+  let mk_base_tp ?deprecate (name : string) (typ : string) : unit =
+    let deprecate = Option.value ~default:"" deprecate in
     let name () = name
     and typ () = typ in
     printf
       !{|
-val bin_writer_%{name} : %{typ} writer
-val bin_reader_%{name} : %{typ} reader
-val bin_shape_%{name} : Shape.t
-val bin_%{name} : %{typ} t
+val bin_writer_%{name} : %{typ} writer%s
+val bin_reader_%{name} : %{typ} reader%s
+val bin_shape_%{name} : Shape.t%s
+val bin_%{name} : %{typ} t%s
 |}
       ()
       ()
+      deprecate
       ()
       ()
+      deprecate
+      ()
+      deprecate
       ()
       ()
-      ()
+      deprecate
   ;;
 
-  let mk_base name : unit = mk_base_tp name name
+  let mk_base ?deprecate name : unit = mk_base_tp ?deprecate name name
 
   let mk_base1_tp name typ =
     let name () = name

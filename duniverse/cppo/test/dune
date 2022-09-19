@@ -72,6 +72,17 @@
    %{targets}
    (run %{bin:cppo} -V X:123.05.2-alpha.1+foo-2.1 -V COQ:8.13+beta1 %{<}))))
 
+(rule
+ (targets test.out)
+ (deps
+  (:< test.cppo)
+  incl.cppo
+  incl2.cppo)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{bin:cppo} %{<}))))
+
 (alias
  (name runtest)
  (package cppo)
@@ -111,7 +122,8 @@
 (alias
  (name runtest)
  (package cppo)
- (deps version.out))
+ (action
+  (diff version.ref version.out)))
 
 (alias
  (name runtest)
@@ -122,9 +134,5 @@
 (alias
  (name runtest)
  (package cppo)
- (deps
-  (:< test.cppo)
-  incl.cppo
-  incl2.cppo)
  (action
-  (ignore-stdout (run %{bin:cppo} %{<}))))
+  (diff test.ref test.out)))

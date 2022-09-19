@@ -8,13 +8,6 @@ let preprocess =
 
 let () = Jbuild_plugin.V1.send @@ {|
 
-(rule
- (targets lwt_react.ml)
- (deps (:ml lwt_react.cppo.ml))
- (action
-  (chdir %{project_root}
-   (run %{bin:cppo} -V OCAML:%{ocaml_version} %{ml} -o %{targets}))))
-
 (library
  (public_name lwt_react)
  (synopsis "Reactive programming helpers for Lwt")

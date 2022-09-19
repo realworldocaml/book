@@ -17,7 +17,17 @@ let max_finite_value = Caml.max_float
 let epsilon_float = Caml.epsilon_float
 let classify_float = Caml.classify_float
 let abs_float = Caml.abs_float
+let is_integer = Caml.Float.is_integer
 let ( ** ) = Caml.( ** )
+
+let ( %. ) a b =
+  (* Raise in case of a negative modulus, as does Int.( % ). *)
+  if b < 0.
+  then Printf.invalid_argf "%f %% %f in float0.ml: modulus should be positive" a b ();
+  let m = Caml.mod_float a b in
+  (* Produce a non-negative result in analogy with Int.( % ). *)
+  if m < 0. then m +. b else m
+;;
 
 (* The bits of INRIA's [Pervasives] that we just want to expose in [Float]. Most are
    already deprecated in [Pervasives], and eventually all of them should be. *)
@@ -33,8 +43,7 @@ include (
       = "caml_ldexp_float" "caml_ldexp_float_unboxed"
     [@@noalloc]
 
-    external log10 : float -> float = "caml_log10_float" "log10"
-    [@@unboxed] [@@noalloc]
+    external log10 : float -> float = "caml_log10_float" "log10" [@@unboxed] [@@noalloc]
 
     external expm1 : float -> float = "caml_expm1_float" "caml_expm1"
     [@@unboxed] [@@noalloc]

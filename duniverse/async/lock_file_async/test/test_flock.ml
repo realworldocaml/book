@@ -6,7 +6,7 @@ let%expect_test "Flock" =
     let lock_path = tempdir ^/ "lock-file" in
     let second_thread_started = Ivar.create () in
     let%bind flock =
-      match%map Lock_file_async.Flock.lock_exn ~lock_path with
+      match%map Lock_file_async.Flock.lock_exn () ~lock_path with
       | `Somebody_else_took_it -> assert false
       | `We_took_it flock ->
         print_endline "original thread took lock";
@@ -25,15 +25,13 @@ let%expect_test "Flock" =
       let%map () = Lock_file_async.Flock.unlock_exn flock in
       print_endline "waiting thread released lock"
     in
-    let%bind () =
-      [%expect
-        {|
+    [%expect
+      {|
       original thread took lock
       waiting thread started
       original thread releasing lock
       waiting thread took lock
-      waiting thread released lock |}]
-    in
+      waiting thread released lock |}];
     return ())
 ;;
 
@@ -74,14 +72,12 @@ let%expect_test "Symlink" =
       let%map () = Lock_file_async.Symlink.unlock_exn flock in
       print_endline "waiting thread released lock"
     in
-    let%bind () =
-      [%expect
-        {|
+    [%expect
+      {|
       original thread took lock
       (waiting_thread_sees (lock_taken_by (Ok original-thread)))
       original thread releasing lock
       waiting thread took lock
-      waiting thread released lock |}]
-    in
+      waiting thread released lock |}];
     return ())
 ;;

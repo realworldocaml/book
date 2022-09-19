@@ -1,3 +1,4 @@
+(* deprecated since ATD 2.6 *)
 type raw_json <ocaml module="Yojson.Safe" t="json"> = abstract
   (* uses type Yojson.Safe.t,
      with the functions Yojson.Safe.write_json

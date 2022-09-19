@@ -1,0 +1,4 @@
+(library (name ppx_ignore_instrumentation_sample)
+ (preprocess (pps ppx_ignore_instrumentation)))
+
+(alias (name DEFAULT) (deps test.ml.pp))

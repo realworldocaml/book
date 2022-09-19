@@ -4,6 +4,7 @@ include Console_intf
 (** Color printing in terminals  *)
 open Core
 
+module Unix = Core_unix
 open Poly
 
 module Make (Io : Io) = struct
@@ -14,6 +15,7 @@ module Make (Io : Io) = struct
     let erase_to_start_of_screen () = Io.print_string "\027[1J"
     let erase_all () = Io.print_string "\027[2J"
     let bell () = Io.print_string "\007"
+    let home () = Io.print_string "\027[H"
     let home_cursor () = Io.print_string "\027[0G"
     let cursor_up () = Io.print_string "\027[A"
     let cursor_down () = Io.print_string "\027[B"
@@ -63,17 +65,11 @@ module Make (Io : Io) = struct
     ;;
 
     let eprintf style fmt =
-      Io.fprintf
-        ~attrs:(All_attr.list_to_string (style :> All_attr.t list))
-        Io.stderr
-        fmt
+      Io.fprintf ~attrs:(All_attr.list_to_string (style :> All_attr.t list)) Io.stderr fmt
     ;;
 
     let printf style fmt =
-      Io.fprintf
-        ~attrs:(All_attr.list_to_string (style :> All_attr.t list))
-        Io.stdout
-        fmt
+      Io.fprintf ~attrs:(All_attr.list_to_string (style :> All_attr.t list)) Io.stdout fmt
     ;;
   end
 

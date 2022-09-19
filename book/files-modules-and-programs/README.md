@@ -809,17 +809,20 @@ extended version of the `Option` module, where you've added some
 functionality not present in the module as distributed in
 `Base`. That's a job for `include`.
 
+<!-- TODO: Option now has an apply already; so, add something else!
+     And revert the order of the definition and the include.  -->
+
 ```ocaml file=examples/correct/ext-option/ext_option.ml
 open Base
+
+(* The full contents of the option module *)
+include Option
 
 (* The new function we're going to add *)
 let apply f_opt x =
   match f_opt with
   | None -> None
   | Some f -> Some (f x)
-
-(* The remainder of the option module *)
-include Option
 ```
 
 Now, how do we write an interface for this new module? It turns out
@@ -838,12 +841,12 @@ include module type of Option
 val apply : ('a -> 'b) t -> 'a -> 'b t
 ```
 
-Note that the order of declarations in the `mli` does not need to match the
-order of declarations in the `ml`. The order of declarations in the `ml`
-mostly matters insofar as it affects which values are shadowed. If we wanted
-to replace a function in `Option` with a new function of the same name, the
-declaration of that function in the `ml` would have to come after the
-`include Option` declaration.
+The order of declarations in the `mli` doesn't need to match the order
+of declarations in the `ml`.  The order of declarations in the `ml`
+mostly matters insofar as it affects which values are shadowed.  If we
+wanted to replace a function in `Option` with a new function of the
+same name, the declaration of that function in the `ml` would have to
+come after the `include Option` declaration.
 
 We can now use `Ext_option` as a replacement for `Option`. If we want
 to use `Ext_option` in preference to `Option` in our project, we can
@@ -897,6 +900,9 @@ Error: The implementation counter.ml
            ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
        is not included in
          val touch : string -> t -> t
+       The type ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
+       is not compatible with the type string -> t -> t
+       Type ('a, int, 'b) Base.Map.t is not compatible with type string
        File "counter.mli", line 16, characters 0-28: Expected declaration
        File "counter.ml", line 8, characters 4-9: Actual declaration
 [1]
@@ -960,7 +966,7 @@ Error: The implementation counter.ml
          type median = Median of string | Before_and_after of string * string
        is not included in
          type median = Before_and_after of string * string | Median of string
-       Constructors number 1 have different names, Median and Before_and_after.
+       Constructor Before_and_after has been moved from position 1 to 2.
        File "counter.mli", lines 21-23, characters 0-20: Expected declaration
        File "counter.ml", lines 17-19, characters 0-39: Actual declaration
 [1]

@@ -104,27 +104,59 @@ module Context = struct
     | Ppx_import, type_decl -> get_ppx_import_extension type_decl
     | _ -> None
 
-  let merge_attributes : type a. a t -> a -> attributes -> a =
+  let node_of_extension :
+      type a. ?loc:Location.t -> ?x:a -> a t -> extension -> a =
+   fun ?(loc = Location.none) ?x t ->
+    let open Ast_builder.Default in
+    match (t, x) with
+    | Class_expr, _ -> pcl_extension ~loc
+    | Class_field, _ -> pcf_extension ~loc
+    | Class_type_field, _ -> pctf_extension ~loc
+    | Class_type, _ -> pcty_extension ~loc
+    | Core_type, _ -> ptyp_extension ~loc
+    | Expression, _ -> pexp_extension ~loc
+    | Module_expr, _ -> pmod_extension ~loc
+    | Module_type, _ -> pmty_extension ~loc
+    | Pattern, _ -> ppat_extension ~loc
+    | Signature_item, _ -> fun ext -> psig_extension ~loc ext []
+    | Structure_item, _ -> fun ext -> pstr_extension ~loc ext []
+    | Ppx_import, Some x ->
+        fun ext ->
+          {
+            x with
+            ptype_manifest = Some (Ast_builder.Default.ptyp_extension ~loc ext);
+          }
+    | Ppx_import, None ->
+        failwith
+          "Ppxlib internal error: Item not provided to build an extension node \
+           from a Ppx_import context."
+
+  let merge_attributes_res :
+      type a.
+      a t -> a -> attributes -> (a, Location.Error.t NonEmptyList.t) result =
    fun t x attrs ->
     match t with
-    | Class_expr -> { x with pcl_attributes = x.pcl_attributes @ attrs }
-    | Class_field -> { x with pcf_attributes = x.pcf_attributes @ attrs }
-    | Class_type -> { x with pcty_attributes = x.pcty_attributes @ attrs }
-    | Class_type_field -> { x with pctf_attributes = x.pctf_attributes @ attrs }
-    | Core_type -> { x with ptyp_attributes = x.ptyp_attributes @ attrs }
-    | Expression -> { x with pexp_attributes = x.pexp_attributes @ attrs }
-    | Module_expr -> { x with pmod_attributes = x.pmod_attributes @ attrs }
-    | Module_type -> { x with pmty_attributes = x.pmty_attributes @ attrs }
-    | Pattern -> { x with ppat_attributes = x.ppat_attributes @ attrs }
-    | Signature_item ->
-        assert_no_attributes attrs;
-        x
-    | Structure_item ->
-        assert_no_attributes attrs;
-        x
-    | Ppx_import ->
-        assert_no_attributes attrs;
-        x
+    | Class_expr -> Ok { x with pcl_attributes = x.pcl_attributes @ attrs }
+    | Class_field -> Ok { x with pcf_attributes = x.pcf_attributes @ attrs }
+    | Class_type -> Ok { x with pcty_attributes = x.pcty_attributes @ attrs }
+    | Class_type_field ->
+        Ok { x with pctf_attributes = x.pctf_attributes @ attrs }
+    | Core_type -> Ok { x with ptyp_attributes = x.ptyp_attributes @ attrs }
+    | Expression -> Ok { x with pexp_attributes = x.pexp_attributes @ attrs }
+    | Module_expr -> Ok { x with pmod_attributes = x.pmod_attributes @ attrs }
+    | Module_type -> Ok { x with pmty_attributes = x.pmty_attributes @ attrs }
+    | Pattern -> Ok { x with ppat_attributes = x.ppat_attributes @ attrs }
+    | Signature_item -> (
+        match attributes_errors attrs with [] -> Ok x | t :: q -> Error (t, q))
+    | Structure_item -> (
+        match attributes_errors attrs with [] -> Ok x | t :: q -> Error (t, q))
+    | Ppx_import -> (
+        match attributes_errors attrs with [] -> Ok x | t :: q -> Error (t, q))
+
+  let merge_attributes : type a. a t -> a -> attributes -> a =
+   fun t x attrs ->
+    merge_attributes_res t x attrs
+    |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
 end
 
 let registrar =
@@ -176,29 +208,35 @@ struct
     let { txt = name; loc } = fst ext in
     let name, arg = Name.split_path name in
     match List.filter ts ~f:(fun t -> Name.Pattern.matches t.name name) with
-    | [] -> None
+    | [] -> Ok None
     | _ :: _ :: _ as l ->
-        Location.raise_errorf ~loc "Multiple match for extensions: %s"
-          (String.concat ~sep:", "
-             (List.map l ~f:(fun t -> Name.Pattern.name t.name)))
+        Error
+          ( Location.Error.createf ~loc "Multiple match for extensions: %s"
+              (String.concat ~sep:", "
+                 (List.map l ~f:(fun t -> Name.Pattern.name t.name))),
+            [] )
     | [ t ] ->
         if (not t.with_arg) && Option.is_some arg then
-          Location.raise_errorf ~loc
-            "Extension %s doesn't expect a path argument" name;
-        let arg =
-          Option.map arg ~f:(fun s ->
-              let shift = String.length name + 1 in
-              let start = loc.loc_start in
-              {
-                txt = Longident.parse s;
-                loc =
-                  {
-                    loc with
-                    loc_start = { start with pos_cnum = start.pos_cnum + shift };
-                  };
-              })
-        in
-        Some (t, arg)
+          Error
+            ( Location.Error.createf ~loc
+                "Extension %s doesn't expect a path argument" name,
+              [] )
+        else
+          let arg =
+            Option.map arg ~f:(fun s ->
+                let shift = String.length name + 1 in
+                let start = loc.loc_start in
+                {
+                  txt = Longident.parse s;
+                  loc =
+                    {
+                      loc with
+                      loc_start =
+                        { start with pos_cnum = start.pos_cnum + shift };
+                    };
+                })
+          in
+          Ok (Some (t, arg))
 end
 
 module Expert = struct
@@ -212,11 +250,18 @@ module Expert = struct
   let declare name ctx patt f =
     declare ~with_arg:false name ctx patt (fun ~arg:_ -> f)
 
-  let convert ts ~loc ext =
-    match find ts ext with
-    | None -> None
+  let convert_res ts ~loc ext =
+    let open Result in
+    find ts ext >>= fun r ->
+    match r with
+    | None -> Ok None
     | Some ({ payload = Payload_parser (pattern, f); _ }, arg) ->
-        Some (Ast_pattern.parse pattern loc (snd ext) (f ~arg))
+        Ast_pattern.parse_res pattern loc (snd ext) (f ~arg) >>| fun payload ->
+        Some payload
+
+  let convert ts ~loc ext =
+    convert_res ts ~loc ext
+    |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
 end
 
 module M = Make (struct
@@ -229,23 +274,37 @@ type 'a expander_result = Simple of 'a | Inline of 'a list
 module For_context = struct
   type 'a t = ('a, 'a expander_result) M.t
 
-  let convert ts ~ctxt ext =
+  let convert_res ts ~ctxt ext =
     let loc = Expansion_context.Extension.extension_point_loc ctxt in
-    match M.find ts ext with
-    | None -> None
+    let open Result in
+    M.find ts ext >>= fun found ->
+    match found with
+    | None -> Ok None
     | Some ({ payload = M.Payload_parser (pattern, f); _ }, arg) -> (
-        match Ast_pattern.parse pattern loc (snd ext) (f ~ctxt ~arg) with
+        Ast_pattern.parse_res pattern loc (snd ext) (f ~ctxt ~arg)
+        >>| fun payload ->
+        match payload with
         | Simple x -> Some x
         | Inline _ -> failwith "Extension.convert")
 
-  let convert_inline ts ~ctxt ext =
+  let convert ts ~ctxt ext =
+    convert_res ts ~ctxt ext
+    |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
+
+  let convert_inline_res ts ~ctxt ext =
     let loc = Expansion_context.Extension.extension_point_loc ctxt in
-    match M.find ts ext with
-    | None -> None
+    let open Result in
+    M.find ts ext >>= fun found ->
+    match found with
+    | None -> Ok None
     | Some ({ payload = M.Payload_parser (pattern, f); _ }, arg) -> (
-        match Ast_pattern.parse pattern loc (snd ext) (f ~ctxt ~arg) with
-        | Simple x -> Some [ x ]
-        | Inline l -> Some l)
+        Ast_pattern.parse_res pattern loc (snd ext) (f ~ctxt ~arg)
+        >>| fun payload ->
+        match payload with Simple x -> Some [ x ] | Inline l -> Some l)
+
+  let convert_inline ts ~ctxt ext =
+    convert_inline_res ts ~ctxt ext
+    |> Result.handle_error ~f:(fun (err, _) -> Location.Error.raise err)
 end
 
 type t = T : _ For_context.t -> t
@@ -271,72 +330,143 @@ let rec filter_by_context :
       | Eq -> t :: filter_by_context context rest
       | Ne -> filter_by_context context rest)
 
-let fail ctx (name, _) =
+let unhandled_extension_error ctx (name, _) =
   if
     not
-      (Name.Whitelisted.is_whitelisted ~kind:`Extension name.txt
+      (Name.Allowlisted.is_allowlisted ~kind:`Extension name.txt
       || Name.ignore_checks name.txt)
   then
-    Name.Registrar.raise_errorf registrar (Context.T ctx)
-      "Extension `%s' was not translated" name
+    [
+      Name.Registrar.Error.createf registrar (Context.T ctx)
+        "Extension `%s' was not translated" name;
+    ]
+  else []
+
+let collect_unhandled_extension_errors =
+  object
+    inherit [Location.Error.t list] Ast_traverse.fold as super
+
+    method! extension (name, _) acc =
+      acc
+      @ [
+          Location.Error.createf ~loc:name.loc
+            "extension not expected here, Ppxlib.Extension needs updating!";
+        ]
+
+    method! core_type_desc x acc =
+      match x with
+      | Ptyp_extension ext -> acc @ unhandled_extension_error Core_type ext
+      | x -> super#core_type_desc x acc
+
+    method! pattern_desc x acc =
+      match x with
+      | Ppat_extension ext -> acc @ unhandled_extension_error Pattern ext
+      | x -> super#pattern_desc x acc
+
+    method! expression_desc x acc =
+      match x with
+      | Pexp_extension ext -> acc @ unhandled_extension_error Expression ext
+      | x -> super#expression_desc x acc
+
+    method! class_type_desc x acc =
+      match x with
+      | Pcty_extension ext -> acc @ unhandled_extension_error Class_type ext
+      | x -> super#class_type_desc x acc
+
+    method! class_type_field_desc x acc =
+      match x with
+      | Pctf_extension ext ->
+          acc @ unhandled_extension_error Class_type_field ext
+      | x -> super#class_type_field_desc x acc
+
+    method! class_expr_desc x acc =
+      match x with
+      | Pcl_extension ext -> acc @ unhandled_extension_error Class_expr ext
+      | x -> super#class_expr_desc x acc
+
+    method! class_field_desc x acc =
+      match x with
+      | Pcf_extension ext -> acc @ unhandled_extension_error Class_field ext
+      | x -> super#class_field_desc x acc
+
+    method! module_type_desc x acc =
+      match x with
+      | Pmty_extension ext -> acc @ unhandled_extension_error Module_type ext
+      | x -> super#module_type_desc x acc
+
+    method! signature_item_desc x acc =
+      match x with
+      | Psig_extension (ext, _) ->
+          acc @ unhandled_extension_error Signature_item ext
+      | x -> super#signature_item_desc x acc
+
+    method! module_expr_desc x acc =
+      match x with
+      | Pmod_extension ext -> acc @ unhandled_extension_error Module_expr ext
+      | x -> super#module_expr_desc x acc
+
+    method! structure_item_desc x acc =
+      match x with
+      | Pstr_extension (ext, _) ->
+          acc @ unhandled_extension_error Structure_item ext
+      | x -> super#structure_item_desc x acc
+  end
+
+let error_list_to_exception = function
+  | [] -> ()
+  | err :: _ -> Location.Error.raise err
 
 let check_unused =
   object
-    inherit Ast_traverse.iter as super
+    inherit Ast_traverse.iter
 
     method! extension (name, _) =
       Location.raise_errorf ~loc:name.loc
         "extension not expected here, Ppxlib.Extension needs updating!"
 
-    method! core_type_desc =
-      function
-      | Ptyp_extension ext -> fail Core_type ext | x -> super#core_type_desc x
+    method! core_type_desc x =
+      collect_unhandled_extension_errors#core_type_desc x []
+      |> error_list_to_exception
 
-    method! pattern_desc =
-      function
-      | Ppat_extension ext -> fail Pattern ext | x -> super#pattern_desc x
+    method! pattern_desc x =
+      collect_unhandled_extension_errors#pattern_desc x []
+      |> error_list_to_exception
 
-    method! expression_desc =
-      function
-      | Pexp_extension ext -> fail Expression ext | x -> super#expression_desc x
+    method! expression_desc x =
+      collect_unhandled_extension_errors#expression_desc x []
+      |> error_list_to_exception
 
-    method! class_type_desc =
-      function
-      | Pcty_extension ext -> fail Class_type ext | x -> super#class_type_desc x
+    method! class_type_desc x =
+      collect_unhandled_extension_errors#class_type_desc x []
+      |> error_list_to_exception
 
-    method! class_type_field_desc =
-      function
-      | Pctf_extension ext -> fail Class_type_field ext
-      | x -> super#class_type_field_desc x
+    method! class_type_field_desc x =
+      collect_unhandled_extension_errors#class_type_field_desc x []
+      |> error_list_to_exception
 
-    method! class_expr_desc =
-      function
-      | Pcl_extension ext -> fail Class_expr ext | x -> super#class_expr_desc x
+    method! class_expr_desc x =
+      collect_unhandled_extension_errors#class_expr_desc x []
+      |> error_list_to_exception
 
-    method! class_field_desc =
-      function
-      | Pcf_extension ext -> fail Class_field ext
-      | x -> super#class_field_desc x
+    method! class_field_desc x =
+      collect_unhandled_extension_errors#class_field_desc x []
+      |> error_list_to_exception
 
-    method! module_type_desc =
-      function
-      | Pmty_extension ext -> fail Module_type ext
-      | x -> super#module_type_desc x
+    method! module_type_desc x =
+      collect_unhandled_extension_errors#module_type_desc x []
+      |> error_list_to_exception
 
-    method! signature_item_desc =
-      function
-      | Psig_extension (ext, _) -> fail Signature_item ext
-      | x -> super#signature_item_desc x
+    method! signature_item_desc x =
+      collect_unhandled_extension_errors#signature_item_desc x []
+      |> error_list_to_exception
 
-    method! module_expr_desc =
-      function
-      | Pmod_extension ext -> fail Module_expr ext
-      | x -> super#module_expr_desc x
+    method! module_expr_desc x =
+      collect_unhandled_extension_errors#module_expr_desc x []
+      |> error_list_to_exception
 
-    method! structure_item_desc =
-      function
-      | Pstr_extension (ext, _) -> fail Structure_item ext
-      | x -> super#structure_item_desc x
+    method! structure_item_desc x =
+      collect_unhandled_extension_errors#structure_item_desc x []
+      |> error_list_to_exception
   end
 
 module V3 = struct

@@ -48,6 +48,86 @@ module Current_file = struct
   ;;
 end
 
+module Instance = struct
+  type t =
+    { mutable saved : (File.Location.t * int) list
+    ; chan : out_channel
+    ; filename : File.Name.t
+    }
+
+  external before_test
+    :  output:out_channel
+    -> stdout:out_channel
+    -> stderr:out_channel
+    -> unit
+    = "expect_test_collector_before_test"
+
+  external after_test
+    :  stdout:out_channel
+    -> stderr:out_channel
+    -> unit
+    = "expect_test_collector_after_test"
+
+  external pos_out : out_channel -> int = "caml_out_channel_pos_fd"
+
+  let get_position () = pos_out stdout
+
+  let create () =
+    let filename = Filename.temp_file "expect-test" "output" in
+    let chan = open_out_bin filename in
+    before_test ~output:chan ~stdout ~stderr;
+    { chan; filename = File.Name.of_string filename; saved = [] }
+  ;;
+
+  let relative_filename t = File.Name.relative_to ~dir:(File.initial_dir ()) t.filename
+
+  let with_ic fname ~f =
+    let ic = open_in_bin fname in
+    protect ~finally:(fun () -> close_in ic) ~f:(fun () -> f ic)
+  ;;
+
+  let current_test : (File.Location.t * t) option ref = ref None
+
+  let get_current () =
+    match !current_test with
+    | Some (_, t) -> t
+    | None -> failwith "Expect_test_collector.Instance.get_current called outside a test."
+  ;;
+
+  let save_output_without_flush t location =
+    let pos = get_position () in
+    t.saved <- (location, pos) :: t.saved
+  ;;
+
+  let save_and_return_output_without_flush t location =
+    let pos = get_position () in
+    let prev_pos =
+      match t.saved with
+      | [] -> 0
+      | (_, prev_pos) :: _ -> prev_pos
+    in
+    t.saved <- (location, pos) :: t.saved;
+    flush t.chan;
+    let len = pos - prev_pos in
+    with_ic (relative_filename t) ~f:(fun ic ->
+      seek_in ic prev_pos;
+      really_input_string ic len)
+  ;;
+end
+
+let basic_flush () =
+  Format.pp_print_flush Format.std_formatter ();
+  Format.pp_print_flush Format.err_formatter ();
+  Stdlib.flush Stdlib.stdout;
+  Stdlib.flush Stdlib.stderr
+;;
+
+let save_and_return_output location =
+  let instance = Instance.get_current () in
+  basic_flush ();
+  Instance.save_and_return_output_without_flush instance location
+;;
+
 module Make (C : Expect_test_config_types.S) = struct
   let ( >>= ) t f = C.IO_flush.bind t ~f
   let return = C.IO_flush.return
@@ -56,15 +136,12 @@ module Make (C : Expect_test_config_types.S) = struct
     include C
 
     let flush () =
-      Format.pp_print_flush Format.std_formatter ();
-      Format.pp_print_flush Format.err_formatter ();
-      Caml.flush Caml.stdout;
-      Caml.flush Caml.stderr;
-      C.flush ()
+      basic_flush ();
+      C.IO_flush.return ()
     ;;
   end
 
-  module Instance : sig
+  module Instance_io : sig
     val save_output : File.Location.t -> unit C.IO_flush.t
     val save_and_return_output : File.Location.t -> string C.IO_flush.t
 
@@ -76,38 +153,10 @@ module Make (C : Expect_test_config_types.S) = struct
       -> f:(unit -> unit C.IO_run.t)
       -> unit
   end = struct
-    type t =
-      { mutable saved : (File.Location.t * int) list
-      ; chan : out_channel
-      ; filename : File.Name.t
-      }
+    open Instance
 
-    external before_test
-      :  output:out_channel
-      -> stdout:out_channel
-      -> stderr:out_channel
-      -> unit
-      = "expect_test_collector_before_test"
-
-    external after_test
-      :  stdout:out_channel
-      -> stderr:out_channel
-      -> unit
-      = "expect_test_collector_after_test"
-
-    external pos_out : out_channel -> int = "caml_out_channel_pos_fd"
-
-    let get_position () = pos_out stdout
-
-    let create () =
-      let filename = Filename.temp_file "expect-test" "output" in
-      let chan = open_out_bin filename in
-      before_test ~output:chan ~stdout ~stderr;
-      { chan; filename = File.Name.of_string filename; saved = [] }
-    ;;
-
-    let extract_output ic len =
-      let s = really_input_string ic len in
+    let extract_output_and_sanitize ic len =
+      let s = really_input_string ic len |> C.sanitize in
       if not (Check_backtraces.contains_backtraces s)
       then s
       else
@@ -115,13 +164,6 @@ module Make (C : Expect_test_config_types.S) = struct
         .message_when_expectation_contains_backtrace
           C.upon_unreleasable_issue
         ^ s
-    ;;
-
-    let relative_filename t = File.Name.relative_to ~dir:(File.initial_dir ()) t.filename
-
-    let with_ic fname ~f =
-      let ic = open_in_bin fname in
-      protect ~finally:(fun () -> close_in ic) ~f:(fun () -> f ic)
     ;;
 
     let get_outputs_and_cleanup t =
@@ -138,52 +180,28 @@ module Make (C : Expect_test_config_types.S) = struct
                 (List.rev t.saved)
                 ~init:(0, [])
                 ~f:(fun (ofs, acc) (loc, next_ofs) ->
-                  let s = extract_output ic (next_ofs - ofs) in
+                  let s = extract_output_and_sanitize ic (next_ofs - ofs) in
                   next_ofs, (loc, s) :: acc)
             in
-            let trailing_output = extract_output ic (last_ofs - ofs) in
+            let trailing_output = extract_output_and_sanitize ic (last_ofs - ofs) in
             List.rev outputs, trailing_output))
-    ;;
-
-    let current_test : (File.Location.t * t) option ref = ref None
-
-    let get_current () =
-      match !current_test with
-      | Some (_, t) -> t
-      | None ->
-        failwith "Expect_test_collector.Instance.get_current called outside a test."
     ;;
 
     let save_output location =
       let t = get_current () in
       C.flush ()
       >>= fun () ->
-      let pos = get_position () in
-      t.saved <- (location, pos) :: t.saved;
+      save_output_without_flush t location;
       return ()
     ;;
 
     let save_and_return_output location =
       let t = get_current () in
-      C.flush ()
-      >>= fun () ->
-      let pos = get_position () in
-      let prev_pos =
-        match t.saved with
-        | [] -> 0
-        | (_, prev_pos) :: _ -> prev_pos
-      in
-      t.saved <- (location, pos) :: t.saved;
-      flush t.chan;
-      let len = pos - prev_pos in
-      return
-        (with_ic (relative_filename t) ~f:(fun ic ->
-           seek_in ic prev_pos;
-           really_input_string ic len))
+      C.flush () >>= fun () -> return (save_and_return_output_without_flush t location)
     ;;
 
     let () =
-      Caml.at_exit (fun () ->
+      Stdlib.at_exit (fun () ->
         match !current_test with
         | None -> ()
         | Some (loc, t) ->
@@ -249,8 +267,8 @@ module Make (C : Expect_test_config_types.S) = struct
     ;;
   end
 
-  let save_output = Instance.save_output
-  let save_and_return_output = Instance.save_and_return_output
+  let save_output = Instance_io.save_output
+  let save_and_return_output = Instance_io.save_and_return_output
 
   let run
         ~file_digest
@@ -266,9 +284,10 @@ module Make (C : Expect_test_config_types.S) = struct
     Ppx_inline_test_lib.Runtime.test
       ~config:inline_test_config
       ~descr:
-        (match description with
-         | None -> ""
-         | Some s -> ": " ^ s)
+        (lazy
+          (match description with
+           | None -> ""
+           | Some s -> s))
       ~tags
       ~filename:(File.Name.to_string location.filename)
       ~line_number:location.line_number
@@ -289,7 +308,12 @@ module Make (C : Expect_test_config_types.S) = struct
          else (
            (* To avoid capturing not-yet flushed data of the stdout buffer *)
            C.run (fun () -> C.IO_flush.to_run (C.flush ()));
-           Instance.exec ~file_digest ~location ~expectations ~uncaught_exn_expectation ~f;
+           Instance_io.exec
+             ~file_digest
+             ~location
+             ~expectations
+             ~uncaught_exn_expectation
+             ~f;
            true))
   ;;
 end

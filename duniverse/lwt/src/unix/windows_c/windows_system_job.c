@@ -7,8 +7,6 @@
 
 #if defined(LWT_ON_WINDOWS)
 
-#define CAML_NAME_SPACE
-#include <caml/version.h>
 #if OCAML_VERSION < 41300
 #define CAML_INTERNALS
 #endif

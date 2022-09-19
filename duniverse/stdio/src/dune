@@ -3,3 +3,5 @@
  (lint
   (pps ppx_base -check-doc-comments -type-conv-keep-w32=impl
    -apply=js_style,type_conv)))
+
+(documentation)

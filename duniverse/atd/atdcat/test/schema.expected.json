@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "root",
+  "description": "Translated by atdcat from 'schema.atd'.\n\nThis is the title. Here's a code block:\n\n{{{\nthis is line 1\nthis is line 2\n}}}\n\nThis is the root object. For example, the empty object {{ {} }} is invalid.",
+  "type": "object",
+  "required": [
+    "ID", "items", "aliased", "point", "kinds", "assoc1", "assoc2"
+  ],
+  "properties": {
+    "ID": { "description": "This is the 'id' field.", "type": "string" },
+    "items": {
+      "description": "An example of JSON value is {{[[1, 2], [3], [4, 5, 6]]}}",
+      "type": "array",
+      "items": { "type": "array", "items": { "type": "integer" } }
+    },
+    "maybe": { "type": "integer" },
+    "extras": { "type": "array", "items": { "type": "integer" } },
+    "answer": { "type": "integer" },
+    "aliased": { "$ref": "#/definitions/alias" },
+    "point": {
+      "type": "array",
+      "minItems": 2,
+      "items": false,
+      "prefixItems": [ { "type": "number" }, { "type": "number" } ]
+    },
+    "kinds": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/different_kinds_of_things" }
+    },
+    "assoc1": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "items": false,
+        "prefixItems": [ { "type": "number" }, { "type": "integer" } ]
+      }
+    },
+    "assoc2": {
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "array",
+            "minItems": 2,
+            "items": false,
+            "prefixItems": [ { "const": "Some" }, { "type": "integer" } ]
+          },
+          { "const": "None" }
+        ]
+      }
+    },
+    "nullables": {
+      "type": "array",
+      "items": { "type": [ "integer", "null" ] }
+    },
+    "untyped_things": { "type": "array", "items": {} }
+  },
+  "definitions": {
+    "different_kinds_of_things": {
+      "oneOf": [
+        { "description": "this is Root", "const": "Root" },
+        {
+          "type": "array",
+          "minItems": 2,
+          "items": false,
+          "prefixItems": [
+            { "description": "this is Thing", "const": "Thing" },
+            { "type": "integer" }
+          ]
+        },
+        { "const": "wow" },
+        {
+          "type": "array",
+          "minItems": 2,
+          "items": false,
+          "prefixItems": [
+            { "const": "!!!" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      ]
+    },
+    "alias": { "type": "array", "items": { "type": "integer" } },
+    "pair": {
+      "type": "array",
+      "minItems": 2,
+      "items": false,
+      "prefixItems": [ { "type": "string" }, { "type": "integer" } ]
+    }
+  }
+}

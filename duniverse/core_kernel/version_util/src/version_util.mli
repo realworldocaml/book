@@ -9,20 +9,44 @@
     linked in.
 *)
 
-open! Core_kernel
+open! Core
 
-val version : string (** all hg repos and their versions *)
+(** All hg repos and their revision. *)
+val version_list : string list
 
-val version_list : string list (** same as [version], but one string per line *)
+(** Like [version_list] but space separated. Consider using [version_list] instead. *)
+val version : string
 
-(** [Version] may be used to parse a single entry from [version_list]. *)
 module Version : sig
+  (** [t] is the structured representation of a single entry from [version_list]. *)
   type t =
     { repo : string
     ; version : string
-    } [@@deriving sexp_of]
+    }
+  [@@deriving sexp_of]
 
-  val parse : string -> t Or_error.t
+  (** Parse a single line of version-util. It's almost always better to use one of the
+      functions below, because applying this to [Version_util.version] results in the
+      following weird behaviors:
+
+      - NO_VERSION_UTIL gets parsed { repo = "NO_VERSION"; version="UTIL" }
+      - "repo1_rev1 repo2_rev2" gets parsed as { repo = "repo1_rev1 repo2"; version = "rev2" }
+  *)
+  val parse1 : string -> t Or_error.t
+
+  (** In the following functions [Error _] means the format is unparsable, [Ok None] means
+      the version is NO_VERSION_UTIL. *)
+
+  val parse_list : string list -> t list option Or_error.t
+  val parse_lines : string -> t list option Or_error.t
+  val current_version : unit -> t list option
+
+  (** The [_present] functions return [Error] instead of [None] when there's no version
+      util. There is no version util during most builds. *)
+
+  val parse_list_present : string list -> t list Or_error.t
+  val parse_lines_present : string -> t list Or_error.t
+  val current_version_present : unit -> t list Or_error.t
 end
 
 val arg_spec : (string * Arg.spec * string) list
@@ -41,26 +65,47 @@ end
     and order of the fields but more importantly allows to display times in the current
     zone. *)
 val build_info : string
+
 val build_info_as_sexp : Sexp.t
 val reprint_build_info : (Time.t -> Sexp.t) -> string
+val username : string option
+val hostname : string option
+val kernel : string option
+val build_time : Time.t option
+val x_library_inlining : bool
+val dynlinkable_code : bool
+val compiled_for_speed : bool
+val application_specific_fields : Application_specific_fields.t option
+val ocaml_version : string
+val allowed_projections : string list option
 
-val username                       : string option
-val hostname                       : string option
-val kernel                         : string option
-val build_time                     : Time.t option
-val x_library_inlining             : bool
-val portable_int63                 : bool
-val dynlinkable_code               : bool
-val compiled_for_speed             : bool
-val application_specific_fields    : Application_specific_fields.t option
-val ocaml_version                  : string
-val allowed_projections            : string list option
+(** Relative to OMakeroot dir *)
+val executable_path : string
 
-val executable_path                : string (** Relative to OMakeroot dir *)
-
-val build_system                   : string
-val with_fdo                       : (string * Md5.t option) option
+val build_system : string
+val with_fdo : (string * Md5.t option) option
 
 module For_tests : sig
   val parse_generated_hg_version : string -> string list
+end
+
+(** If [false], all the variables above are filled in with bogus values.
+    The value is [false] in tests at the moment. *)
+val build_system_supports_version_util : bool
+
+module Expert : sig
+  (** Inserts the given version util into the executable text given. Returns None if this
+      could not happen (maybe this is an executable that doesn't link in the current
+      library, maybe it already has version util). *)
+  val insert_version_util : contents_of_exe:string -> Version.t list -> string option
+
+  (** Undoes the operation above. Note that as currently implemented, this only removes
+      version util added by [insert_version_util]. It does not remove version added when
+      building with [VERSION_UTIL_SUPPORT=true]. The point of this operation is to make it
+      possible to compare executables up to version util. *)
+  val remove_version_util : contents_of_exe:string -> string option
+
+  module For_tests : sig
+    val count_pattern_occurrences : contents_of_exe:string -> int
+  end
 end

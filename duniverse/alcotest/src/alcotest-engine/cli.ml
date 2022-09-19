@@ -38,7 +38,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
   open Cmdliner_syntax
 
   let set_color =
-    let env = Arg.env_var "ALCOTEST_COLOR" in
+    let env = Cmd.Env.info "ALCOTEST_COLOR" in
     let+ color_flag =
       let enum = [ ("auto", `Auto); ("always", `Ansi_tty); ("never", `None) ] in
       let color = Arg.enum enum in
@@ -77,7 +77,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
     in
-    (term, Term.info exec_name ~doc)
+    (term, Cmd.info exec_name ~doc)
 
   let test_cmd config args library_name tests =
     let doc = "Run a subset of the tests." in
@@ -88,33 +88,37 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
     in
-    (term, Term.info "test" ~doc)
+    (term, Cmd.info "test" ~doc)
 
   let list_cmd tests =
     let doc = "List all available tests." in
     ( (let+ () = set_color in
        list_tests tests),
-      Term.info "list" ~doc )
+      Cmd.info "list" ~doc )
 
   let run_with_args' (type a) ~argv config name (args : a Term.t)
       (tl : a test list) =
     let ( >>= ) = M.bind in
-    let choices = [ list_cmd tl; test_cmd config args name tl ] in
+    let choices =
+      List.map
+        (fun (term, info) -> Cmd.v info term)
+        [ list_cmd tl; test_cmd config args name tl ]
+    in
     let and_exit = Config.User.and_exit config in
-    let exit_or_return result =
-      if and_exit then exit (Term.exit_status_of_result result) else M.return ()
+    let exit_or_return exit_code =
+      if and_exit then exit exit_code else M.return ()
     in
     let result =
-      Term.eval_choice ?argv
+      let default, info = default_cmd config args name tl in
+      Cmd.eval_value ?argv
         ~catch:and_exit (* Only log exceptions not raised to the user code *)
-        (default_cmd config args name tl)
-        choices
+        (Cmd.group ~default info choices)
     in
     match result with
-    | `Ok unit_m -> unit_m >>= fun () -> exit_or_return (`Ok ())
-    | (`Help | `Version | `Error `Exn) as result -> exit_or_return result
-    | `Error (`Parse | `Term) as result ->
-        exit (Term.exit_status_of_result result)
+    | Ok (`Ok unit_m) -> unit_m >>= fun () -> exit_or_return Cmd.Exit.ok
+    | Ok (`Help | `Version) -> exit_or_return Cmd.Exit.ok
+    | Error (`Parse | `Term) -> exit_or_return Cmd.Exit.cli_error
+    | Error `Exn -> exit Cmd.Exit.internal_error
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
       ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?argv =
@@ -124,7 +128,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
 
   let run =
     Config.User.kcreate (fun config ?argv name tl ->
-        run_with_args' config ~argv name (Term.pure ()) tl)
+        run_with_args' config ~argv name (Term.const ()) tl)
 end
 
 module V1 = struct

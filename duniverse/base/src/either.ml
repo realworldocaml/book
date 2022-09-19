@@ -1,6 +1,5 @@
 open! Import
 include Either_intf
-module Array = Array0
 module List = List0
 include Either0
 

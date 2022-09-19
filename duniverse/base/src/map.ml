@@ -13,30 +13,7 @@
 
 open! Import
 module List = List0
-
-include (
-  Map_intf :
-  sig
-    module Or_duplicate = Map_intf.Or_duplicate
-    module Continue_or_stop = Map_intf.Continue_or_stop
-    module With_comparator = Map_intf.With_comparator
-    module With_first_class_module = Map_intf.With_first_class_module
-    module Without_comparator = Map_intf.Without_comparator
-
-    (* The module susbstitutions below are needed for older versions of OCaml
-       (before 4.07), because back then [module type of] did not keep module
-       aliases. *)
-
-    include module type of struct
-      include Map_intf
-    end
-    with module Finished_or_unfinished := Map_intf.Finished_or_unfinished
-     and module Or_duplicate := Or_duplicate
-     and module Continue_or_stop := Continue_or_stop
-     and module With_comparator := With_comparator
-     and module With_first_class_module := With_first_class_module
-     and module Without_comparator := Without_comparator
-  end)
+include Map_intf
 
 module Finished_or_unfinished = struct
   include Map_intf.Finished_or_unfinished
@@ -47,13 +24,46 @@ module Finished_or_unfinished = struct
   let to_continue_or_stop : t -> Continue_or_stop.t = Caml.Obj.magic
 end
 
+module Merge_element = struct
+  include Map_intf.Merge_element
+
+  let left = function
+    | `Right _ -> None
+    | `Left left | `Both (left, _) -> Some left
+  ;;
+
+  let right = function
+    | `Left _ -> None
+    | `Right right | `Both (_, right) -> Some right
+  ;;
+
+  let left_value t ~default =
+    match t with
+    | `Right _ -> default
+    | `Left left | `Both (left, _) -> left
+  ;;
+
+  let right_value t ~default =
+    match t with
+    | `Left _ -> default
+    | `Right right | `Both (_, right) -> right
+  ;;
+
+  let values t ~left_default ~right_default =
+    match t with
+    | `Left left -> left, right_default
+    | `Right right -> left_default, right
+    | `Both (left, right) -> left, right
+  ;;
+end
+
 let with_return = With_return.with_return
 
 exception Duplicate [@@deriving_inline sexp]
 
 let () =
-  Ppx_sexp_conv_lib.Conv.Exn_converter.add [%extension_constructor Duplicate] (function
-    | Duplicate -> Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Duplicate"
+  Sexplib0.Sexp_conv.Exn_converter.add [%extension_constructor Duplicate] (function
+    | Duplicate -> Sexplib0.Sexp.Atom "map.ml.Duplicate"
     | _ -> assert false)
 ;;
 
@@ -111,7 +121,7 @@ module Tree0 = struct
   let singleton key data = Leaf (key, data)
 
   (* We must call [f] with increasing indexes, because the bin_prot reader in
-     Core_kernel.Map needs it. *)
+     Core.Map needs it. *)
   let of_increasing_iterator_unchecked ~len ~f =
     let rec loop n ~f i : (_, _) t =
       match n with
@@ -160,14 +170,12 @@ module Tree0 = struct
       with_return (fun r ->
         let increasing =
           match compare_key (fst array.(0)) (fst array.(1)) with
-          | 0 ->
-            r.return (Or_error.error_string "of_sorted_array: duplicated elements")
+          | 0 -> r.return (Or_error.error_string "of_sorted_array: duplicated elements")
           | i -> i < 0
         in
         for i = 1 to Array.length array - 2 do
           match compare_key (fst array.(i)) (fst array.(i + 1)) with
-          | 0 ->
-            r.return (Or_error.error_string "of_sorted_array: duplicated elements")
+          | 0 -> r.return (Or_error.error_string "of_sorted_array: duplicated elements")
           | i ->
             if Poly.( <> ) (i < 0) increasing
             then
@@ -192,8 +200,7 @@ module Tree0 = struct
         else (
           match lr with
           | Empty -> invalid_arg "Map.bal"
-          | Leaf (lrv, lrd) ->
-            create (create ll lv ld Empty) lrv lrd (create Empty x d r)
+          | Leaf (lrv, lrd) -> create (create ll lv ld Empty) lrv lrd (create Empty x d r)
           | Node (lrl, lrv, lrd, lrr, _) ->
             create (create ll lv ld lrl) lrv lrd (create lrr x d r)))
     else if hr > hl + 2
@@ -207,8 +214,7 @@ module Tree0 = struct
         else (
           match rl with
           | Empty -> invalid_arg "Map.bal"
-          | Leaf (rlv, rld) ->
-            create (create l x d Empty) rlv rld (create Empty rv rd rr)
+          | Leaf (rlv, rld) -> create (create l x d Empty) rlv rld (create Empty rv rd rr)
           | Node (rll, rlv, rld, rlr, _) ->
             create (create l x d rll) rlv rld (create rlr rv rd rr)))
     else create l x d r
@@ -267,39 +273,18 @@ module Tree0 = struct
       else if c < 0
       then (
         let l, length =
-          find_and_add_or_set
-            ~length
-            ~key:x
-            ~data
-            l
-            ~compare_key
-            ~sexp_of_key
-            ~add_or_set
+          find_and_add_or_set ~length ~key:x ~data l ~compare_key ~sexp_of_key ~add_or_set
         in
         bal l v d r, length)
       else (
         let r, length =
-          find_and_add_or_set
-            ~length
-            ~key:x
-            ~data
-            r
-            ~compare_key
-            ~sexp_of_key
-            ~add_or_set
+          find_and_add_or_set ~length ~key:x ~data r ~compare_key ~sexp_of_key ~add_or_set
         in
         bal l v d r, length)
   ;;
 
   let add_exn t ~length ~key ~data ~compare_key ~sexp_of_key =
-    find_and_add_or_set
-      t
-      ~length
-      ~key
-      ~data
-      ~compare_key
-      ~sexp_of_key
-      ~add_or_set:Add_exn
+    find_and_add_or_set t ~length ~key ~data ~compare_key ~sexp_of_key ~add_or_set:Add_exn
   ;;
 
   let add_exn_internal t ~length ~key ~data ~compare_key ~sexp_of_key =
@@ -375,7 +360,7 @@ module Tree0 = struct
       fun t ~key ~data -> go t (Fragment.singleton ~key ~data)
     ;;
 
-    let to_tree =
+    let to_tree_unchecked =
       let rec go t r =
         match t with
         | Zero () -> r
@@ -407,7 +392,7 @@ module Tree0 = struct
                 (Or_error.error_string "of_increasing_sequence: non-increasing key")
             | _ -> Build_increasing.add_unchecked builder ~key ~data, length + 1)
       in
-      Ok (Build_increasing.to_tree builder, length))
+      Ok (Build_increasing.to_tree_unchecked builder, length))
   ;;
 
   (* Like [bal] but allows any difference in height between [l] and [r].
@@ -486,8 +471,7 @@ module Tree0 = struct
       let mid, right =
         match upper_bound with
         | Unbounded -> mid_and_right, empty
-        | Incl lb ->
-          split_and_reinsert_boundary ~into:`Left mid_and_right lb ~compare_key
+        | Incl lb -> split_and_reinsert_boundary ~into:`Left mid_and_right lb ~compare_key
         | Excl lb ->
           split_and_reinsert_boundary ~into:`Right mid_and_right lb ~compare_key
       in
@@ -524,9 +508,7 @@ module Tree0 = struct
       | Leaf (v, d) -> if compare_key x v = 0 then d else if_not_found x ~sexp_of_key
       | Node (l, v, d, r, _) ->
         let c = compare_key x v in
-        if c = 0
-        then d
-        else find_exn (if c < 0 then l else r) x ~compare_key ~sexp_of_key
+        if c = 0 then d else find_exn (if c < 0 then l else r) x ~compare_key ~sexp_of_key
     in
     (* named to preserve symbol in compiled binary *)
     find_exn
@@ -544,11 +526,11 @@ module Tree0 = struct
   exception Map_min_elt_exn_of_empty_map [@@deriving_inline sexp]
 
   let () =
-    Ppx_sexp_conv_lib.Conv.Exn_converter.add
+    Sexplib0.Sexp_conv.Exn_converter.add
       [%extension_constructor Map_min_elt_exn_of_empty_map]
       (function
         | Map_min_elt_exn_of_empty_map ->
-          Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Tree0.Map_min_elt_exn_of_empty_map"
+          Sexplib0.Sexp.Atom "map.ml.Tree0.Map_min_elt_exn_of_empty_map"
         | _ -> assert false)
   ;;
 
@@ -557,11 +539,11 @@ module Tree0 = struct
   exception Map_max_elt_exn_of_empty_map [@@deriving_inline sexp]
 
   let () =
-    Ppx_sexp_conv_lib.Conv.Exn_converter.add
+    Sexplib0.Sexp_conv.Exn_converter.add
       [%extension_constructor Map_max_elt_exn_of_empty_map]
       (function
         | Map_max_elt_exn_of_empty_map ->
-          Ppx_sexp_conv_lib.Sexp.Atom "map.ml.Tree0.Map_max_elt_exn_of_empty_map"
+          Sexplib0.Sexp.Atom "map.ml.Tree0.Map_max_elt_exn_of_empty_map"
         | _ -> assert false)
   ;;
 
@@ -598,8 +580,7 @@ module Tree0 = struct
     match max_elt lower_part, min_elt upper_part with
     | None, _ -> `Ok upper_part
     | _, None -> `Ok lower_part
-    | Some (max_lower, _), Some (min_upper, v) when compare_key max_lower min_upper < 0
-      ->
+    | Some (max_lower, _), Some (min_upper, v) when compare_key max_lower min_upper < 0 ->
       let upper_part_without_min = remove_min_elt upper_part in
       `Ok (join ~compare_key lower_part min_upper v upper_part_without_min)
     | _ -> `Overlapping_key_ranges
@@ -661,21 +642,30 @@ module Tree0 = struct
       bal t1 x d (remove_min_elt t2)
   ;;
 
-  let rec remove t x ~length ~compare_key =
-    match t with
-    | Empty -> Empty, length
-    | Leaf (v, _) -> if compare_key x v = 0 then Empty, length - 1 else t, length
-    | Node (l, v, d, r, _) ->
-      let c = compare_key x v in
-      if c = 0
-      then concat_unchecked l r, length - 1
-      else if c < 0
-      then (
-        let l, length = remove l x ~length ~compare_key in
-        bal l v d r, length)
-      else (
-        let r, length = remove r x ~length ~compare_key in
-        bal l v d r, length)
+  exception Remove_no_op
+
+  let remove t x ~length ~compare_key =
+    let rec remove_loop t x ~length ~compare_key =
+      match t with
+      | Empty -> Exn.raise_without_backtrace Remove_no_op
+      | Leaf (v, _) ->
+        if compare_key x v = 0
+        then Empty, length - 1
+        else Exn.raise_without_backtrace Remove_no_op
+      | Node (l, v, d, r, _) ->
+        let c = compare_key x v in
+        if c = 0
+        then concat_unchecked l r, length - 1
+        else if c < 0
+        then (
+          let l, length = remove_loop l x ~length ~compare_key in
+          bal l v d r, length)
+        else (
+          let r, length = remove_loop r x ~length ~compare_key in
+          bal l v d r, length)
+    in
+    try remove_loop t x ~length ~compare_key with
+    | Remove_no_op -> t, length
   ;;
 
   (* Use exception to avoid tree-rebuild in no-op case *)
@@ -836,6 +826,24 @@ module Tree0 = struct
     | Empty -> accu
     | Leaf (v, d) -> f ~key:v ~data:d accu
     | Node (l, v, d, r, _) -> fold ~f r ~init:(f ~key:v ~data:d (fold ~f l ~init:accu))
+  ;;
+
+  let fold_until t ~init ~f ~finish =
+    let rec fold_until_loop t ~acc ~f : (_, _) Container.Continue_or_stop.t =
+      match t with
+      | Empty -> Continue acc
+      | Leaf (v, d) -> f ~key:v ~data:d acc
+      | Node (l, v, d, r, _) ->
+        (match fold_until_loop l ~acc ~f with
+         | Stop final -> Stop final
+         | Continue acc ->
+           (match f ~key:v ~data:d acc with
+            | Stop final -> Stop final
+            | Continue acc -> fold_until_loop r ~acc ~f))
+    in
+    match fold_until_loop t ~acc:init ~f with
+    | Continue acc -> finish acc
+    | Stop stop -> stop
   ;;
 
   let rec fold_right t ~init:accu ~f =
@@ -1025,8 +1033,7 @@ module Tree0 = struct
           Sequence.Step.Yield ((key, `Right data), (End, cons tree enum))
         | More (key, data, tree, enum), End ->
           Sequence.Step.Yield ((key, `Left data), (cons tree enum, End))
-        | (More (k1, v1, tree1, enum1) as left), (More (k2, v2, tree2, enum2) as right)
-          ->
+        | (More (k1, v1, tree1, enum1) as left), (More (k2, v2, tree2, enum2) as right) ->
           let compare_result = compare_key k1 k2 in
           if compare_result = 0
           then (
@@ -1052,8 +1059,7 @@ module Tree0 = struct
         match left, right with
         | End, enum -> fold enum ~init:acc ~f:(fun ~key ~data acc -> add acc key data)
         | enum, End -> fold enum ~init:acc ~f:(fun ~key ~data acc -> remove acc key data)
-        | (More (k1, v1, tree1, enum1) as left), (More (k2, v2, tree2, enum2) as right)
-          ->
+        | (More (k1, v1, tree1, enum1) as left), (More (k2, v2, tree2, enum2) as right) ->
           let compare_result = compare_key k1 k2 in
           if compare_result = 0
           then (
@@ -1153,14 +1159,10 @@ module Tree0 = struct
        slower, as we have to allocate quite a lot of state to track enumeration of a tree.
        Avoid if we can.
     *)
-    let slow x y ~init =
-      Enum.fold_symmetric_diff x y ~compare_key ~data_equal ~f ~init
-    in
+    let slow x y ~init = Enum.fold_symmetric_diff x y ~compare_key ~data_equal ~f ~init in
     let add acc k v = f acc (k, `Right v) in
     let remove acc k v = f acc (k, `Left v) in
-    let delta acc k v v' =
-      if data_equal v v' then acc else f acc (k, `Unequal (v, v'))
-    in
+    let delta acc k v v' = if data_equal v v' then acc else f acc (k, `Unequal (v, v')) in
     (* If two trees have the same structure at the root (and the same key, if they're
        [Node]s) we can trivially diff each subpart in obvious ways. *)
     let rec loop t t' acc =
@@ -1263,10 +1265,7 @@ module Tree0 = struct
       match of_foldable foldable ~compare_key:comparator.Comparator.compare with
       | `Ok x -> x
       | `Duplicate_key key ->
-        Error.create
-          ("Map.of_" ^ M.name ^ "_exn: duplicate key")
-          key
-          comparator.sexp_of_t
+        Error.create ("Map.of_" ^ M.name ^ "_exn: duplicate key") key comparator.sexp_of_t
         |> Error.raise
     ;;
   end
@@ -1368,6 +1367,21 @@ module Tree0 = struct
     tree, len
   ;;
 
+  let merge_skewed =
+    let merge_large_first length_large t_large t_small ~call ~combine ~compare_key =
+      fold t_small ~init:(t_large, length_large) ~f:(fun ~key ~data:data' (t, length) ->
+        update t key ~length ~compare_key ~f:(function
+          | None -> data'
+          | Some data -> call combine ~key data data'))
+    in
+    let call f ~key x y = f ~key x y in
+    let swap f ~key x y = f ~key y x in
+    fun t1 t2 ~length1 ~length2 ~combine ~compare_key ->
+      if length2 <= length1
+      then merge_large_first length1 t1 t2 ~call ~combine ~compare_key
+      else merge_large_first length2 t2 t1 ~call:swap ~combine ~compare_key
+  ;;
+
   module Closest_key_impl = struct
     (* [marker] and [repackage] allow us to create "logical" options without actually
        allocating any options. Passing [Found key value] to a function is equivalent to
@@ -1391,10 +1405,15 @@ module Tree0 = struct
 
     (* The type signature is explicit here to allow polymorphic recursion. *)
     let rec loop :
-      'k 'v 'k_opt 'v_opt. ('k, 'v) tree
+      'k 'v 'k_opt 'v_opt.
+      ('k, 'v) tree
       -> [ `Greater_or_equal_to | `Greater_than | `Less_or_equal_to | `Less_than ]
-      -> 'k -> compare_key:('k -> 'k -> int) -> ('k, 'v, 'k_opt, 'v_opt) marker
-      -> 'k_opt -> 'v_opt -> ('k * 'v) option
+      -> 'k
+      -> compare_key:('k -> 'k -> int)
+      -> ('k, 'v, 'k_opt, 'v_opt) marker
+      -> 'k_opt
+      -> 'v_opt
+      -> ('k * 'v) option
       =
       fun t dir k ~compare_key found_marker found_key found_value ->
         match t with
@@ -1416,13 +1435,9 @@ module Tree0 = struct
             match dir with
             | `Greater_or_equal_to | `Less_or_equal_to -> Some (k', v')
             | `Greater_than ->
-              if is_empty r
-              then repackage found_marker found_key found_value
-              else min_elt r
+              if is_empty r then repackage found_marker found_key found_value else min_elt r
             | `Less_than ->
-              if is_empty l
-              then repackage found_marker found_key found_value
-              else max_elt l)
+              if is_empty l then repackage found_marker found_key found_value else max_elt l)
           else (
             (* We are guaranteed here that k' <> k. *)
             (* This is the only recursive case. *)
@@ -1512,9 +1527,7 @@ module Tree0 = struct
     | `Last_less_than_or_equal_to ->
       find_last_satisfying t ~f:(fun ~key ~data -> compare ~key ~data v <= 0)
     | `First_equal_to ->
-      (match
-         find_first_satisfying t ~f:(fun ~key ~data -> compare ~key ~data v >= 0)
-       with
+      (match find_first_satisfying t ~f:(fun ~key ~data -> compare ~key ~data v >= 0) with
        | Some (key, data) as pair when compare ~key ~data v = 0 -> pair
        | None | Some _ -> None)
     | `Last_equal_to ->
@@ -1539,6 +1552,48 @@ module Tree0 = struct
     | `First_on_right -> find_first_satisfying t ~f:is_right
   ;;
 
+  (* [binary_search_one_sided_bound] finds the key in [t] which satisfies [maybe_bound]
+     and the relevant one of [if_exclusive] or [if_inclusive], as judged by [compare]. *)
+  let binary_search_one_sided_bound t maybe_bound ~compare ~if_exclusive ~if_inclusive =
+    let find_bound t how bound ~compare : _ Maybe_bound.t option =
+      match binary_search t how bound ~compare with
+      | Some (bound, _) -> Some (Incl bound)
+      | None -> None
+    in
+    match (maybe_bound : _ Maybe_bound.t) with
+    | Excl bound -> find_bound t if_exclusive bound ~compare
+    | Incl bound -> find_bound t if_inclusive bound ~compare
+    | Unbounded -> Some Unbounded
+  ;;
+
+  (* [binary_search_two_sided_bounds] finds the (not necessarily distinct) keys in [t]
+     which most closely approach (but do not cross) [lower_bound] and [upper_bound], as
+     judged by [compare]. It returns [None] if no keys in [t] are within that range. *)
+  let binary_search_two_sided_bounds t ~compare ~lower_bound ~upper_bound =
+    let find_lower_bound t maybe_bound ~compare =
+      binary_search_one_sided_bound
+        t
+        maybe_bound
+        ~compare
+        ~if_exclusive:`First_strictly_greater_than
+        ~if_inclusive:`First_greater_than_or_equal_to
+    in
+    let find_upper_bound t maybe_bound ~compare =
+      binary_search_one_sided_bound
+        t
+        maybe_bound
+        ~compare
+        ~if_exclusive:`Last_strictly_less_than
+        ~if_inclusive:`Last_less_than_or_equal_to
+    in
+    match find_lower_bound t lower_bound ~compare with
+    | None -> None
+    | Some lower_bound ->
+      (match find_upper_bound t upper_bound ~compare with
+       | None -> None
+       | Some upper_bound -> Some (lower_bound, upper_bound))
+  ;;
+
   type ('k, 'v) acc =
     { mutable bad_key : 'k option
     ; mutable map_length : ('k, 'v) t * int
@@ -1555,6 +1610,14 @@ module Tree0 = struct
     match acc.bad_key with
     | None -> `Ok acc.map_length
     | Some key -> `Duplicate_key key
+  ;;
+
+  let of_iteri_exn ~iteri ~(comparator : _ Comparator.t) =
+    match of_iteri ~iteri ~compare_key:comparator.compare with
+    | `Ok v -> v
+    | `Duplicate_key key ->
+      Error.create "Map.of_iteri_exn: duplicate key" key comparator.sexp_of_t
+      |> Error.raise
   ;;
 
   let t_of_sexp_direct key_of_sexp value_of_sexp sexp ~(comparator : _ Comparator.t) =
@@ -1587,6 +1650,28 @@ module Tree0 = struct
     then Ok oks
     else Or_error.error_s (sexp_of_t sexp_of_key Error.sexp_of_t error_tree)
   ;;
+
+  let map_keys
+        t1
+        ~f
+        ~comparator:({ compare = compare_key; sexp_of_t = sexp_of_key } : _ Comparator.t)
+    =
+    with_return (fun { return } ->
+      `Ok
+        (fold t1 ~init:(empty, 0) ~f:(fun ~key ~data (t2, length) ->
+           let key = f key in
+           try add_exn_internal t2 ~length ~key ~data ~compare_key ~sexp_of_key with
+           | Duplicate -> return (`Duplicate_key key))))
+  ;;
+
+  let map_keys_exn t ~f ~comparator =
+    match map_keys t ~f ~comparator with
+    | `Ok result -> result
+    | `Duplicate_key key ->
+      let sexp_of_key = comparator.Comparator.sexp_of_t in
+      Error.raise_s
+        (Sexp.message "Map.map_keys_exn: duplicate key" [ "key", key |> sexp_of_key ])
+  ;;
 end
 
 type ('k, 'v, 'comparator) t =
@@ -1609,6 +1694,12 @@ let like { tree = _; length = _; comparator } (tree, length) =
 ;;
 
 let like2 x (y, z) = like x y, like x z
+
+let like_maybe_no_op ({ tree = old_tree; length = _; comparator } as old_t) (tree, length)
+  =
+  if phys_equal old_tree tree then old_t else { tree; length; comparator }
+;;
+
 let with_same_length { tree = _; comparator; length } tree = { tree; comparator; length }
 let of_tree ~comparator tree = { tree; comparator; length = Tree0.length tree }
 
@@ -1619,7 +1710,11 @@ let of_tree_unsafe ~comparator ~length tree = { tree; comparator; length }
 module Accessors = struct
   let comparator t = t.comparator
   let to_tree t = t.tree
-  let invariants t = Tree0.invariants t.tree ~compare_key:(compare_key t)
+
+  let invariants t =
+    Tree0.invariants t.tree ~compare_key:(compare_key t) && Tree0.length t.tree = t.length
+  ;;
+
   let is_empty t = Tree0.is_empty t.tree
   let length t = t.length
 
@@ -1688,7 +1783,9 @@ module Accessors = struct
   let find t key = Tree0.find t.tree key ~compare_key:(compare_key t)
 
   let remove t key =
-    like t (Tree0.remove t.tree key ~length:t.length ~compare_key:(compare_key t))
+    like_maybe_no_op
+      t
+      (Tree0.remove t.tree key ~length:t.length ~compare_key:(compare_key t))
   ;;
 
   let mem t key = Tree0.mem t.tree key ~compare_key:(compare_key t)
@@ -1700,23 +1797,18 @@ module Accessors = struct
   let map t ~f = with_same_length t (Tree0.map t.tree ~f)
   let mapi t ~f = with_same_length t (Tree0.mapi t.tree ~f)
   let fold t ~init ~f = Tree0.fold t.tree ~f ~init
+  let fold_until t ~init ~f = Tree0.fold_until t.tree ~f ~init
   let fold_right t ~init ~f = Tree0.fold_right t.tree ~f ~init
 
   let fold2 t1 t2 ~init ~f =
     Tree0.fold2 t1.tree t2.tree ~init ~f ~compare_key:(compare_key t1)
   ;;
 
-  let filter_keys t ~f =
-    like t (Tree0.filter_keys t.tree ~f ~compare_key:(compare_key t))
-  ;;
-
+  let filter_keys t ~f = like t (Tree0.filter_keys t.tree ~f ~compare_key:(compare_key t))
   let filter t ~f = like t (Tree0.filter t.tree ~f ~compare_key:(compare_key t))
   let filteri t ~f = like t (Tree0.filteri t.tree ~f ~compare_key:(compare_key t))
   let filter_map t ~f = like t (Tree0.filter_map t.tree ~f ~compare_key:(compare_key t))
-
-  let filter_mapi t ~f =
-    like t (Tree0.filter_mapi t.tree ~f ~compare_key:(compare_key t))
-  ;;
+  let filter_mapi t ~f = like t (Tree0.filter_mapi t.tree ~f ~compare_key:(compare_key t))
 
   let partition_mapi t ~f =
     like2 t (Tree0.partition_mapi t.tree ~f ~compare_key:(compare_key t))
@@ -1747,15 +1839,10 @@ module Accessors = struct
     Tree0.compare (compare_key t1) compare_data t1.tree t2.tree
   ;;
 
-  let equal compare_data t1 t2 =
-    Tree0.equal (compare_key t1) compare_data t1.tree t2.tree
-  ;;
-
+  let equal compare_data t1 t2 = Tree0.equal (compare_key t1) compare_data t1.tree t2.tree
   let keys t = Tree0.keys t.tree
   let data t = Tree0.data t.tree
   let to_alist ?key_order t = Tree0.to_alist ?key_order t.tree
-  let validate ~name f t = Validate.alist ~name f (to_alist t)
-  let validatei ~name f t = Validate.list ~name:(Fn.compose name fst) f (to_alist t)
 
   let symmetric_diff t1 t2 ~data_equal =
     Tree0.symmetric_diff t1.tree t2.tree ~compare_key:(compare_key t1) ~data_equal
@@ -1773,6 +1860,19 @@ module Accessors = struct
 
   let merge t1 t2 ~f =
     like t1 (Tree0.merge t1.tree t2.tree ~f ~compare_key:(compare_key t1))
+  ;;
+
+  let merge_skewed t1 t2 ~combine =
+    (* This is only a no-op in the case where at least one of the maps is empty. *)
+    like_maybe_no_op
+      (if t2.length <= t1.length then t1 else t2)
+      (Tree0.merge_skewed
+         t1.tree
+         t2.tree
+         ~length1:t1.length
+         ~length2:t2.length
+         ~combine
+         ~compare_key:(compare_key t1))
   ;;
 
   let min_elt t = Tree0.min_elt t.tree
@@ -1870,6 +1970,14 @@ module Accessors = struct
   let hash_fold_direct hash_fold_key hash_fold_data state t =
     Tree0.hash_fold_t_ignoring_structure hash_fold_key hash_fold_data state t.tree
   ;;
+
+  let binary_search_subrange t ~compare ~lower_bound ~upper_bound =
+    match
+      Tree0.binary_search_two_sided_bounds t.tree ~compare ~lower_bound ~upper_bound
+    with
+    | Some (lower_bound, upper_bound) -> subrange t ~lower_bound ~upper_bound
+    | None -> like_maybe_no_op t (Empty, 0)
+  ;;
 end
 
 (* [0] is used as the [length] argument everywhere in this module, since trees do not
@@ -1883,8 +1991,7 @@ module Tree = struct
   let singleton ~comparator:_ k v = Tree0.singleton k v
 
   let of_sorted_array_unchecked ~comparator array =
-    fst
-      (Tree0.of_sorted_array_unchecked array ~compare_key:comparator.Comparator.compare)
+    fst (Tree0.of_sorted_array_unchecked array ~compare_key:comparator.Comparator.compare)
   ;;
 
   let of_sorted_array ~comparator array =
@@ -1921,6 +2028,8 @@ module Tree = struct
     | `Ok (tree, _size) -> `Ok tree
     | `Duplicate_key _ as d -> d
   ;;
+
+  let of_iteri_exn ~comparator ~iteri = fst (Tree0.of_iteri_exn ~iteri ~comparator)
 
   let of_increasing_iterator_unchecked ~comparator:_required_by_intf ~len ~f =
     Tree0.of_increasing_iterator_unchecked ~len ~f
@@ -2014,9 +2123,7 @@ module Tree = struct
       ~sexp_of_key:comparator.Comparator.sexp_of_t
   ;;
 
-  let find ~comparator t key =
-    Tree0.find t key ~compare_key:comparator.Comparator.compare
-  ;;
+  let find ~comparator t key = Tree0.find t key ~compare_key:comparator.Comparator.compare
 
   let remove ~comparator t key =
     fst (Tree0.remove t key ~length:0 ~compare_key:comparator.Comparator.compare)
@@ -2035,6 +2142,7 @@ module Tree = struct
   let map t ~f = Tree0.map t ~f
   let mapi t ~f = Tree0.mapi t ~f
   let fold t ~init ~f = Tree0.fold t ~f ~init
+  let fold_until t ~init ~f ~finish = Tree0.fold_until t ~f ~init ~finish
   let fold_right t ~init ~f = Tree0.fold_right t ~f ~init
 
   let fold2 ~comparator t1 t2 ~init ~f =
@@ -2109,8 +2217,6 @@ module Tree = struct
   let keys t = Tree0.keys t
   let data t = Tree0.data t
   let to_alist ?key_order t = Tree0.to_alist ?key_order t
-  let validate ~name f t = Validate.alist ~name f (to_alist t)
-  let validatei ~name f t = Validate.list ~name:(Fn.compose name fst) f (to_alist t)
 
   let symmetric_diff ~comparator t1 t2 ~data_equal =
     Tree0.symmetric_diff t1 t2 ~compare_key:comparator.Comparator.compare ~data_equal
@@ -2128,6 +2234,19 @@ module Tree = struct
 
   let merge ~comparator t1 t2 ~f =
     fst (Tree0.merge t1 t2 ~f ~compare_key:comparator.Comparator.compare)
+  ;;
+
+  let merge_skewed ~comparator t1 t2 ~combine =
+    (* Length computation makes this significantly slower than [merge_skewed] on a map
+       with a [length] field, but does preserve amount of allocation. *)
+    fst
+      (Tree0.merge_skewed
+         t1
+         t2
+         ~length1:(length t1)
+         ~length2:(length t2)
+         ~combine
+         ~compare_key:comparator.Comparator.compare)
   ;;
 
   let min_elt t = Tree0.min_elt t
@@ -2175,13 +2294,9 @@ module Tree = struct
     Tree0.closest_key t dir key ~compare_key:comparator.Comparator.compare
   ;;
 
-  let nth ~comparator:_ t n = Tree0.nth t n
-  let nth_exn ~comparator t n = Option.value_exn (nth ~comparator t n)
-
-  let rank ~comparator t key =
-    Tree0.rank t key ~compare_key:comparator.Comparator.compare
-  ;;
-
+  let nth t n = Tree0.nth t n
+  let nth_exn t n = Option.value_exn (nth t n)
+  let rank ~comparator t key = Tree0.rank t key ~compare_key:comparator.Comparator.compare
   let sexp_of_t sexp_of_k sexp_of_v _ t = Tree0.sexp_of_t sexp_of_k sexp_of_v t
 
   let t_of_sexp_direct ~comparator k_of_sexp v_of_sexp sexp =
@@ -2189,12 +2304,7 @@ module Tree = struct
   ;;
 
   let to_sequence ~comparator ?order ?keys_greater_or_equal_to ?keys_less_or_equal_to t =
-    Tree0.to_sequence
-      comparator
-      ?order
-      ?keys_greater_or_equal_to
-      ?keys_less_or_equal_to
-      t
+    Tree0.to_sequence comparator ?order ?keys_greater_or_equal_to ?keys_less_or_equal_to t
   ;;
 
   let binary_search ~comparator:_ t ~compare how v = Tree0.binary_search t ~compare how v
@@ -2202,6 +2312,35 @@ module Tree = struct
   let binary_search_segmented ~comparator:_ t ~segment_of how =
     Tree0.binary_search_segmented t ~segment_of how
   ;;
+
+  let binary_search_subrange ~comparator t ~compare ~lower_bound ~upper_bound =
+    match Tree0.binary_search_two_sided_bounds t ~compare ~lower_bound ~upper_bound with
+    | Some (lower_bound, upper_bound) -> subrange ~comparator t ~lower_bound ~upper_bound
+    | None -> Empty
+  ;;
+
+  let map_keys ~comparator t ~f =
+    match Tree0.map_keys ~comparator t ~f with
+    | `Ok (t, _) -> `Ok t
+    | `Duplicate_key _ as dup -> dup
+  ;;
+
+  let map_keys_exn ~comparator t ~f = fst (Tree0.map_keys_exn ~comparator t ~f)
+
+  module Build_increasing = struct
+    type ('k, 'v, 'w) t = ('k, 'v) Tree0.Build_increasing.t
+
+    let empty = Tree0.Build_increasing.empty
+
+    let add_exn t ~comparator ~key ~data =
+      match Tree0.Build_increasing.max_key t with
+      | Some prev_key when comparator.Comparator.compare prev_key key >= 0 ->
+        Error.raise_s (Sexp.Atom "Map.Build_increasing.add: non-increasing key")
+      | _ -> Tree0.Build_increasing.add_unchecked t ~key ~data
+    ;;
+
+    let to_tree t = Tree0.Build_increasing.to_tree_unchecked t
+  end
 end
 
 module Using_comparator = struct
@@ -2266,6 +2405,10 @@ module Using_comparator = struct
     | `Duplicate_key _ as z -> z
   ;;
 
+  let of_iteri_exn ~comparator ~iteri =
+    of_tree0 ~comparator (Tree0.of_iteri_exn ~comparator ~iteri)
+  ;;
+
   let of_increasing_iterator_unchecked ~comparator ~len ~f =
     of_tree0 ~comparator (Tree0.of_increasing_iterator_unchecked ~len ~f, len)
   ;;
@@ -2313,6 +2456,16 @@ module Using_comparator = struct
     of_tree0 ~comparator (Tree0.t_of_sexp_direct k_of_sexp v_of_sexp sexp ~comparator)
   ;;
 
+  let map_keys ~comparator t ~f =
+    match Tree0.map_keys t.tree ~f ~comparator with
+    | `Ok pair -> `Ok (of_tree0 ~comparator pair)
+    | `Duplicate_key _ as dup -> dup
+  ;;
+
+  let map_keys_exn ~comparator t ~f =
+    of_tree0 ~comparator (Tree0.map_keys_exn t.tree ~f ~comparator)
+  ;;
+
   module Empty_without_value_restriction (K : Comparator.S1) = struct
     let empty = { tree = Tree0.empty; comparator = K.comparator; length = 0 }
   end
@@ -2335,6 +2488,11 @@ let comparator_s (type k cmp) t : (k, cmp) comparator =
 ;;
 
 let to_comparator (type k cmp) ((module M) : (k, cmp) comparator) = M.comparator
+
+let of_tree (type k cmp) ((module M) : (k, cmp) comparator) tree =
+  of_tree ~comparator:M.comparator tree
+;;
+
 let empty m = Using_comparator.empty ~comparator:(to_comparator m)
 let singleton m a = Using_comparator.singleton ~comparator:(to_comparator m) a
 let of_alist m a = Using_comparator.of_alist ~comparator:(to_comparator m) a
@@ -2358,11 +2516,12 @@ let of_sorted_array_unchecked m a =
   Using_comparator.of_sorted_array_unchecked ~comparator:(to_comparator m) a
 ;;
 
-let of_sorted_array m a =
-  Using_comparator.of_sorted_array ~comparator:(to_comparator m) a
-;;
-
+let of_sorted_array m a = Using_comparator.of_sorted_array ~comparator:(to_comparator m) a
 let of_iteri m ~iteri = Using_comparator.of_iteri ~iteri ~comparator:(to_comparator m)
+
+let of_iteri_exn m ~iteri =
+  Using_comparator.of_iteri_exn ~iteri ~comparator:(to_comparator m)
+;;
 
 let of_increasing_iterator_unchecked m ~len ~f =
   Using_comparator.of_increasing_iterator_unchecked ~len ~f ~comparator:(to_comparator m)
@@ -2378,9 +2537,7 @@ let of_sequence_or_error m s =
   Using_comparator.of_sequence_or_error ~comparator:(to_comparator m) s
 ;;
 
-let of_sequence_exn m s =
-  Using_comparator.of_sequence_exn ~comparator:(to_comparator m) s
-;;
+let of_sequence_exn m s = Using_comparator.of_sequence_exn ~comparator:(to_comparator m) s
 
 let of_sequence_multi m s =
   Using_comparator.of_sequence_multi ~comparator:(to_comparator m) s
@@ -2394,6 +2551,9 @@ let of_sequence_reduce m s ~f =
   Using_comparator.of_sequence_reduce ~comparator:(to_comparator m) s ~f
 ;;
 
+let map_keys m t ~f = Using_comparator.map_keys ~comparator:(to_comparator m) t ~f
+let map_keys_exn m t ~f = Using_comparator.map_keys_exn ~comparator:(to_comparator m) t ~f
+
 module M (K : sig
     type t
     type comparator_witness
@@ -2405,7 +2565,7 @@ end
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 
   [@@@end]
 end
@@ -2413,11 +2573,19 @@ end
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
 
-  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+  val t_of_sexp : Sexplib0.Sexp.t -> t
 
   [@@@end]
 
   include Comparator.S with type t := t
+end
+
+module type M_sexp_grammar = sig
+  type t [@@deriving_inline sexp_grammar]
+
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+  [@@@end]
 end
 
 module type Compare_m = sig end
@@ -2437,35 +2605,23 @@ let m__t_of_sexp
   Using_comparator.t_of_sexp_direct ~comparator:K.comparator K.t_of_sexp v_of_sexp sexp
 ;;
 
-let m__t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t =
-  Inline
-    (Explicit_bind
-       ( [ "'k"; "'v" ]
-       , Apply
-           ( Grammar list_sexp_grammar
-           , [ Apply
-                 ( Grammar Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.tuple2_sexp_grammar
-                 , [ Explicit_var 0; Explicit_var 1 ] )
-             ] ) ))
+let m__t_sexp_grammar
+      (type k)
+      (module K : M_sexp_grammar with type t = k)
+      (v_grammar : _ Sexplib0.Sexp_grammar.t)
+  : _ Sexplib0.Sexp_grammar.t
+  =
+  { untyped =
+      List
+        (Many (List (Cons (K.t_sexp_grammar.untyped, Cons (v_grammar.untyped, Empty)))))
+  }
 ;;
 
-let compare_m__t (module K : Compare_m) compare_v t1 t2 = compare_direct compare_v t1 t2
-let equal_m__t (module K : Equal_m) equal_v t1 t2 = equal equal_v t1 t2
+let compare_m__t (module _ : Compare_m) compare_v t1 t2 = compare_direct compare_v t1 t2
+let equal_m__t (module _ : Equal_m) equal_v t1 t2 = equal equal_v t1 t2
 
 let hash_fold_m__t (type k) (module K : Hash_fold_m with type t = k) hash_fold_v state =
   hash_fold_direct K.hash_fold_t hash_fold_v state
-;;
-
-let merge_skewed t1 t2 ~combine =
-  let t1, t2, combine =
-    if length t2 <= length t1
-    then t1, t2, combine
-    else t2, t1, fun ~key v1 v2 -> combine ~key v2 v1
-  in
-  fold t2 ~init:t1 ~f:(fun ~key ~data:v2 t1 ->
-    change t1 key ~f:(function
-      | None -> Some v2
-      | Some v1 -> Some (combine ~key v1 v2)))
 ;;
 
 module Poly = struct
@@ -2494,15 +2650,13 @@ module Poly = struct
 
   let of_sorted_array a = Using_comparator.of_sorted_array ~comparator a
   let of_iteri ~iteri = Using_comparator.of_iteri ~iteri ~comparator
+  let of_iteri_exn ~iteri = Using_comparator.of_iteri_exn ~iteri ~comparator
 
   let of_increasing_iterator_unchecked ~len ~f =
     Using_comparator.of_increasing_iterator_unchecked ~len ~f ~comparator
   ;;
 
-  let of_increasing_sequence seq =
-    Using_comparator.of_increasing_sequence ~comparator seq
-  ;;
-
+  let of_increasing_sequence seq = Using_comparator.of_increasing_sequence ~comparator seq
   let of_sequence s = Using_comparator.of_sequence ~comparator s
   let of_sequence_or_error s = Using_comparator.of_sequence_or_error ~comparator s
   let of_sequence_exn s = Using_comparator.of_sequence_exn ~comparator s
@@ -2513,4 +2667,6 @@ module Poly = struct
   ;;
 
   let of_sequence_reduce s ~f = Using_comparator.of_sequence_reduce ~comparator s ~f
+  let map_keys t ~f = Using_comparator.map_keys ~comparator t ~f
+  let map_keys_exn t ~f = Using_comparator.map_keys_exn ~comparator t ~f
 end

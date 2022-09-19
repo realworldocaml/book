@@ -18,7 +18,7 @@
     started will continue, and return [`Ok] or [`Raised] as usual when they finish.  Jobs
     enqueued into a killed throttle will be immediately aborted. *)
 
-open! Core_kernel
+open! Core
 module Deferred := Deferred1
 
 (** We use a phantom type to distinguish between throttles, which have
@@ -73,12 +73,12 @@ val enqueue_exclusive : ('a, _) T2.t -> (unit -> 'b Deferred.t) -> 'b Deferred.t
     uses a throttle to limit the number of concurrent invocations that can be running
     simultaneously.  The throttle has [continue_on_error = false]. *)
 val monad_sequence_how
-  :  ?how:Monad_sequence.how
+  :  how:Monad_sequence.how
   -> f:('a -> 'b Deferred.t)
   -> ('a -> 'b Deferred.t) Staged.t
 
 val monad_sequence_how2
-  :  ?how:Monad_sequence.how
+  :  how:Monad_sequence.how
   -> f:('a1 -> 'a2 -> 'b Deferred.t)
   -> ('a1 -> 'a2 -> 'b Deferred.t) Staged.t
 

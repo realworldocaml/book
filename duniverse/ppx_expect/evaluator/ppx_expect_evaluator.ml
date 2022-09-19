@@ -9,8 +9,8 @@ module Obj = struct
   module Extension_constructor = struct
     [@@@ocaml.warning "-3"]
 
-    let of_val = Caml.Obj.extension_constructor
-    let name = Caml.Obj.extension_name
+    let of_val = Stdlib.Obj.extension_constructor
+    let name = Stdlib.Obj.extension_name
   end
 end
 
@@ -46,7 +46,7 @@ let convert_collector_test ~allow_output_patterns (test : Collector_test_outcome
           Printf.sprintf "(\"%s(Cannot print more details, Exn.to_string failed)\")" name
       in
       Some
-        (match Caml.Printexc.raw_backtrace_to_string bt with
+        (match Stdlib.Printexc.raw_backtrace_to_string bt with
          | "" -> exn
          | bt ->
            Expect_test_config_types.Upon_unreleasable_issue
@@ -89,15 +89,15 @@ let resolve_filename filename =
     match Ppx_inline_test_lib.Runtime.source_tree_root with
     | None -> File.initial_dir ()
     | Some root ->
-      if Caml.Filename.is_relative root
+      if Stdlib.Filename.is_relative root
       then (
         let initial_dir = File.initial_dir () in
         (* Simplification for the common case where [root] is of the form [(../)*..] *)
         let l = String.split_on_chars root ~on:dir_seps in
-        if List.for_all l ~f:(String.equal Caml.Filename.parent_dir_name)
+        if List.for_all l ~f:(String.equal Stdlib.Filename.parent_dir_name)
         then
-          List.fold_left l ~init:initial_dir ~f:(fun dir _ -> Caml.Filename.dirname dir)
-        else Caml.Filename.concat initial_dir root)
+          List.fold_left l ~init:initial_dir ~f:(fun dir _ -> Stdlib.Filename.dirname dir)
+        else Stdlib.Filename.concat initial_dir root)
       else root
   in
   File.Name.relative_to ~dir:relative_to filename
@@ -121,7 +121,7 @@ let create_group ~allow_output_patterns (filename, tests) =
   in
   let file_contents = In_channel.read_all (resolve_filename filename) in
   let current_digest =
-    Caml.Digest.string file_contents |> Caml.Digest.to_hex |> D.of_string
+    Stdlib.Digest.string file_contents |> Stdlib.Digest.to_hex |> D.of_string
   in
   if D.compare expected_digest current_digest <> 0
   then
@@ -166,12 +166,12 @@ let process_group
   in
   let filename = resolve_filename filename in
   let dot_corrected = filename ^ ".corrected" in
-  let remove file = if Caml.Sys.file_exists file then Caml.Sys.remove file in
+  let remove file = if Stdlib.Sys.file_exists file then Stdlib.Sys.remove file in
   match bad_outcomes with
   | [] ->
     remove dot_corrected;
     Success
-  | _ ->
+  | _ :: _ ->
     let no_diff =
       match diff_command with
       | Some "-" -> true
@@ -195,19 +195,20 @@ let process_group
             (* We need a temporary file for corrections to allow [Ppxlib_print_diff] to work when
                multiple inline_tests_runner are run simultaneously. Otherwise one copy may
                remove the corrected file before the other can print the diff. *)
-            Caml.Filename.temp_file
-              (Caml.Filename.basename filename)
+            Stdlib.Filename.temp_file
+              (Stdlib.Filename.basename filename)
               ".corrected.tmp"
-              ~temp_dir:(Caml.Filename.dirname filename)
+              ~temp_dir:(Stdlib.Filename.dirname filename)
           in
           write_corrected ~file:tmp_corrected;
           Ppxlib_print_diff.print
             ~file1:filename
             ~file2:tmp_corrected
+            ~extra_patdiff_args:[ "-alt-new"; dot_corrected ]
             ~use_color
             ?diff_command
             ();
-          Caml.Sys.rename tmp_corrected dot_corrected;
+          Stdlib.Sys.rename tmp_corrected dot_corrected;
           Failure))
 ;;
 
@@ -218,12 +219,12 @@ let evaluate_tests ~use_color ~in_place ~diff_command ~allow_output_patterns =
       process_group ~use_color ~in_place ~diff_command ~allow_output_patterns group
     with
     | exception exn ->
-      let bt = Caml.Printexc.get_raw_backtrace () in
+      let bt = Stdlib.Printexc.get_raw_backtrace () in
       raise_s
         (Sexp.message
            "Expect test evaluator bug"
            [ "exn", sexp_of_exn exn
-           ; "backtrace", Atom (Caml.Printexc.raw_backtrace_to_string bt)
+           ; "backtrace", Atom (Stdlib.Printexc.raw_backtrace_to_string bt)
            ; "filename", File.Name.sexp_of_t group.filename
            ])
     | res -> res)

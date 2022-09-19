@@ -1,41 +1,33 @@
+(*
+   Unit tests for atdgen
+*)
+
 open Atd.Import
 
-let current_section = ref ""
-
-let section =
-  let first_section = ref true in
-  fun name ->
-    current_section := name;
-    if !first_section then
-      first_section := false
-
-let errors = ref []
-
-exception Failed
-
-let fail () =
-  errors := !current_section :: !errors;
-  raise Failed
-
-let check b =
-  if not b then fail ()
-
-let check_valid = function
-  | None -> ()
-  | Some _ -> fail ()
-
-let check_invalid = function
-  | None -> fail ()
-  | Some _ -> ()
+(* deprecated. Use the type-aware functions from Alcotest for better
+   error reporting, e.g.
+     Alcotest.(check int) "equal" 42 actual_result
+*)
+let check success =
+  Alcotest.(check bool) "true" true success
 
 let expect_error f x =
   try
     ignore (f x);
-    eprintf "Did not get expected error\n%!";
-    fail ()
+    Alcotest.fail "did not get expected error"
   with
     Atdgen_runtime.Ob_run.Error _
   | Atdgen_runtime.Oj_run.Error _ -> ()
+
+(* check that an atdgen validator doesn't return an error *)
+let check_valid = function
+  | None -> ()
+  | Some _error -> Alcotest.fail "validation failed"
+
+(* check that an atdgen validator returns an error *)
+let check_invalid = function
+  | None -> Alcotest.fail "validation succeeded but was expected to fail"
+  | Some _error -> ()
 
 let test_missing_record = {
   Test.b0 = 123;
@@ -174,8 +166,6 @@ let get_extended_reader = (
   *)
 
 let test_ocaml_internals () =
-  section "ocaml internals";
-
   let opaque_identity =
     (* neat trick to fallback to just the identity if we are using
        a <4.03 version and Sys.opaque_identity is not available; found
@@ -190,7 +180,7 @@ let test_ocaml_internals () =
   Gc.compact ();
   int := 123;
   Gc.compact ();
-  check ({ int = !int }.int = 123);
+  Alcotest.(check int) "equal" 123 { int = !int }.int;
 
   let float = ref (Obj.magic 0) in
   Gc.compact ();
@@ -199,37 +189,30 @@ let test_ocaml_internals () =
   check ({ float = !float }.float = 4.5)
 
 let test_biniou_missing_field () =
-  section "biniou missing record fields";
   expect_error
     Test.extended_of_string (Test.string_of_base test_missing_record)
 
 let test_biniou_missing_cell () =
-  section "biniou missing tuple fields";
   expect_error
     Test.extended_tuple_of_string
     (Test.string_of_base_tuple test_missing_tuple)
 
 let test_biniou_read_write_unit () =
-  section "biniou read/write unit";
   Test_unit_biniou_b.t_of_string (Test_unit_biniou_b.string_of_t ())
 
 let test_json_missing_field () =
-  section "json missing record fields";
   expect_error
     Testj.extended_of_string (Testj.string_of_base test_missing_record)
 
 let test_json_missing_cell () =
-  section "json missing tuple fields";
   expect_error
     Testj.extended_tuple_of_string
     (Testj.string_of_base_tuple test_missing_tuple)
 
 let test_json_extra_field_warning () =
-  section "json extra field warning";
   ignore (Testj.base_of_string (Testj.string_of_extended test_extended_record))
 
 let test_json_assoc_list () =
-  section "json association list";
   let f l =
     let s = Testj.string_of_int_assoc_list l in
     check (Testj.int_assoc_list_of_string s = l)
@@ -239,7 +222,6 @@ let test_json_assoc_list () =
   f [ ("a", 0); ("b", 1) ]
 
 let test_json_assoc_array () =
-  section "json association array";
   let f a =
     let s = Testj.string_of_int_assoc_array a in
     check (Testj.int_assoc_array_of_string s = a)
@@ -249,7 +231,6 @@ let test_json_assoc_array () =
   f [| ("a", 0); ("b", 1) |]
 
 let test_json_int_ocaml_float_gen of_json to_json kind () =
-  section ("json ints derived from ocaml floats: " ^ kind);
   let l1 = [0.; 0.1; -0.1; 0.6; -0.6] in
   check (of_json (to_json l1) = [0.; 0.; 0.; 1.; -1.]);
 
@@ -270,8 +251,6 @@ let test_json_int_ocaml_float () =
     Testj.unixtime_list_of_string
     Testj.string_of_unixtime_list
     "float <json repr=\"int\">" ()
-
-
 
 let make_mixed_record_array n =
   Array.init n (
@@ -307,7 +286,6 @@ let make_mixed ~top_len ~tab_len ~ar_len =
   List.init top_len (fun _ ->
     (make_mixed_record_array tab_len, make_mixed_record_array ar_len)
   )
-
 
 let test_correctness_data = {
   Test.x0 = Some 123;
@@ -348,7 +326,6 @@ let save file s =
   close_out oc
 
 let test_biniou_correctness () =
-  section "biniou correctness";
   let x = test_correctness_data in
   let s = Test.string_of_test x in
   save "test.bin" s;
@@ -367,11 +344,10 @@ let test_biniou_correctness () =
       eprintf "2nd and 3rd generation data match\n"
     else
       eprintf "2nd and 3rd generation data differ\n";
-    fail ()
+    Alcotest.fail "failed"
   )
 
 let test_json_correctness () =
-  section "json correctness";
   let x = test_correctness_data in
   let s = Testj.string_of_test x in
   save "test.json" s;
@@ -394,24 +370,20 @@ let test_json_correctness () =
       eprintf "2nd and 3rd generation data match\n"
     else
       eprintf "2nd and 3rd generation data differ\n";
-    fail ()
+    Alcotest.fail "failed"
   );
   check (std_x' = std_x'');
   assert (x = std_x')
 
 let test_json_space () =
-  section "json space";
   let s = Testj.string_of_test test_correctness_data in
   let pp = Yojson.Safe.prettify s in
   ignore (Testj.test_of_string pp)
 
-
 let test_validators0 () =
-  section "validators0";
   check_valid (Testv.validate_test [] test_correctness_data)
 
 let test_validators1 () =
-  section "validators1";
   let valid = (0, 1.) in
   let invalid = (1, 0.) in
   check_valid (Testv.validate_base_tuple [] valid);
@@ -433,25 +405,21 @@ let test_validators1 () =
   check_invalid (Testv.validate_extended [] x3)
 
 let test_validators2 () =
-  section "validators2";
   let v1 = `A in
   check_invalid (Testv.validate_p [] v1);
   let v2 = `B { Test.a = 0; b = true; c = `C } in
   check_valid (Testv.validate_p [] v2)
 
 let test_validators3 () =
-  section "validators3";
   let o = Some 0 in
   check_invalid (Testv.validate_option_validation [] o)
 
 let test_validators4 () =
-  section "validators4";
   let x = { Test.val2_x = { Test.val1_x = 0 };
             val2_y = Some { Test.val1_x = 1 } } in
   check_invalid (Testv.validate_val2 [] x)
 
 let test_json_files () =
-  section "json files";
   let x = Some 123 in
   let s = Atdgen_runtime.Util.Json.to_string Testj.write_intopt x in
   let x' = Atdgen_runtime.Util.Json.from_string Testj.read_intopt s in
@@ -461,7 +429,6 @@ let test_json_files () =
   check (x = x'')
 
 let test_json_streams () =
-  section "json streams";
   let l = [ Some 1; None; Some 2; Some 3 ] in
   let s = Atdgen_runtime.Util.Json.list_to_string Testj.write_intopt l in
   let l' = Atdgen_runtime.Util.Json.list_from_string Testj.read_intopt s in
@@ -472,18 +439,7 @@ let test_json_streams () =
   in
   check (l = l'')
 
-let test_raw_json () =
-  section "raw json";
-  let x = { Test3j_t.foo = 12345;
-            bar = `List [ `Int 12; `String "abc" ];
-            baz = `Bool false }
-  in
-  let s = Test3j_j.string_of_t x in
-  let x' = Test3j_j.t_of_string s in
-  check (x = x')
-
 let test_wrapping_ints () =
-  section "ocaml wrapping - ints";
   let x = Test_lib.Natural.wrap 7 in
   let json = Testj.string_of_natural x in
   let x' = Testj.natural_of_string json in
@@ -497,7 +453,6 @@ let test_wrapping_ints () =
   with Failure _ -> ()
 
 let test_double_wrapping () =
-  section "ocaml wrapping - double wrapping";
   let x = Test_lib.Even_natural.wrap (Test_lib.Natural.wrap 10) in
   let json = Testj.string_of_even_natural x in
   let x' = Testj.even_natural_of_string json in
@@ -505,20 +460,17 @@ let test_double_wrapping () =
 
 [@@@warning "-52"]
 let test_wrapping_with_validation () =
-  section "ocaml wrapping - with validation";
   let x = `Id "" in
   try ignore (Testv.validate_id [] x); check false
   with Failure "empty" -> ()
 
 let test_ignored_wrap () =
-  section "ocaml wrapping - wrap constructor without wrapper";
   let x = { Test.some_field = 0 } in
   try ignore (Testv.validate_no_real_wrap [] x); check false
   with Failure "passed" -> ()
 [@@@warning "+52"]
 
 let test_biniou_float32 () =
-  section "check length of floats serialized as float32";
   let x = { Test.f32 = 1.23456789; Test.f64 = 1.98765432 } in
   let s = Test.string_of_floats x in
   let x' = Test.floats_of_string s in
@@ -526,7 +478,6 @@ let test_biniou_float32 () =
   check (String.length s = 24)
 
 let test_json_float_decimals () =
-  section "print JSON floats with maximum number of decimal places";
   let x = {
     Testj.sqrt2_5 = sqrt 2.;
     small_2 = 0.000123456789;
@@ -536,7 +487,6 @@ let test_json_float_decimals () =
   check (s = "{\"sqrt2_5\":1.4142,\"small_2\":0.00012,\"large_2\":1.2e+12}")
 
 let test_patch () =
-  section "read json record with null fields meaning (Some None)";
   let json = {| { "patch1": 1, "patch2": null } |} in
   let open Test3j_t in
   let x = Test3j_j.patch_of_string json in
@@ -545,8 +495,6 @@ let test_patch () =
   check (x.patch3 = None)
 
 let test_adapted () =
-  section "read and write a variant represented as a json object \
-           with a `type` field";
   let json_a = {| {
     "type": "a",
     "thing": "abc",
@@ -567,8 +515,28 @@ let test_adapted () =
   check (expected_a = rewritten_a);
   check (expected_b = rewritten_b)
 
+let test_adapted_f () =
+  let json_a = {| {
+    "type": "fa",
+    "thing": "abc",
+    "other_thing": true,
+    "ignored": 555
+  } |} in
+  let json_b =  {| {
+    "thing": 123,
+    "type": "fb",
+    "other_thing": true
+  } |} in
+  let expected_a = {|{"type":"fa","thing":"abc","other_thing":true}|} in
+  let expected_b = {|{"type":"fb","thing":123}|} in
+  let a = Test3j_j.adapted_f_of_string json_a in
+  let b = Test3j_j.adapted_f_of_string json_b in
+  let rewritten_a = Test3j_j.string_of_adapted_f a in
+  let rewritten_b = Test3j_j.string_of_adapted_f b in
+  check (expected_a = rewritten_a);
+  check (expected_b = rewritten_b)
+
 let test_one_field () =
-  section "test variants represented with single-field json objects";
   let a_json = {| {"a": true} |} in
   let b_json = {| {"b": 17 } |} in
   let a = Test3j_j.sf_adapted_of_string a_json in
@@ -581,7 +549,6 @@ let test_one_field () =
   check (Test3j_j.sf_adapted_of_string b_json2 = b)
 
 let test_tag_field_emulation () =
-  section "emulate the retired tag_field feature";
   let json_in = {| { "the_type": "a", "the_value": 123, "etc": "blah" } |} in
   let x = Test3j_j.tf_record_of_string json_in in
   check (x = { the_value = `A 123; etc = "blah" });
@@ -590,8 +557,6 @@ let test_tag_field_emulation () =
   check (x2 = x)
 
 let test_tag_field_emulation_with_catchall () =
-  section "emulate the retired tag_field feature, with a catch-all \
-           for unknown tags";
   let json_in = {| { "the_type": "x", "the_value2": 3, "etc2": "blah" } |} in
   let x = Test3j_j.tf_record2_of_string json_in in
   check (x = { the_value2 = `Unknown ("x", Some (`Int 3)); etc2 = "blah" });
@@ -600,7 +565,6 @@ let test_tag_field_emulation_with_catchall () =
   check (x2 = x)
 
 let test_json_open_enum () =
-  section "test <json open_enum>";
   let json_in = {| ["Alpha", "Gamma"] |} in
   let x = Test3j_j.sample_open_enums_of_string json_in in
   check (x = [`Alpha; `Other "Gamma"]);
@@ -609,7 +573,6 @@ let test_json_open_enum () =
   check (x2 = x)
 
 let test_ambiguous_record () =
-  section "test ambiguous record with json adapters";
   let json_in = {|{ambiguous:"x", not_ambiguous1:0}|} in
   let json_in' = {|{ambiguous:"x'", not_ambiguous2:1}|} in
   let x, x' =
@@ -624,8 +587,7 @@ let test_ambiguous_record () =
   check ((x, x') = (x2, x2'))
 
 let test_polymorphic_wrap () =
-  section "test wrapping of polymorphic types";
-  let json_in = {|["1", ["2"]]|} in
+  let json_in = {|["1", "2"]|} in
   let x =
     Test_polymorphic_wrap_j.t_of_string Yojson.Safe.read_string json_in in
   let json_out =
@@ -635,73 +597,83 @@ let test_polymorphic_wrap () =
   check (x = x2)
 
 let test_encoding_int64 () =
-  section "json encoding int64 as string";
   let encoded = Test_int64_enc_j.string_of_int64 Int64.max_int in
   check (String.equal encoded {|"9223372036854775807"|})
 
 let test_encoding_decoding_int64 () =
-  section "json encoding & decoding int64";
   let encoded = Test_int64_enc_j.string_of_int64 Int64.max_int in
   let decoded = Test_int64_enc_j.int64_of_string encoded in
   check (decoded = Int64.max_int)
 
-let all_tests = [
-  test_ocaml_internals;
-  test_biniou_missing_field;
-  test_biniou_missing_cell;
-  test_json_missing_field;
-  test_json_missing_cell;
-  test_json_extra_field_warning;
-  test_json_assoc_list;
-  test_json_assoc_array;
-  test_json_int_ocaml_float;
-  test_biniou_read_write_unit;
-  test_biniou_correctness;
-  test_json_correctness;
-  test_json_space;
-  test_validators0;
-  test_validators1;
-  test_validators2;
-  test_validators3;
-  test_validators4;
-  test_json_files;
-  test_json_streams;
-  test_raw_json;
-  test_wrapping_ints;
-  test_double_wrapping;
-  test_wrapping_with_validation;
-  test_ignored_wrap;
-  test_biniou_float32;
+let test_raw_json () =
+  let x = { Test3j_t.foo = 12345;
+            bar = `List [ `Int 12; `String "abc" ];
+            baz = `Bool false }
+  in
+  let s = Test3j_j.string_of_t x in
+  let x' = Test3j_j.t_of_string s in
+  check (x = x')
+
+let test_abstract_types () =
+  let input = ["a", 1; "b", 2] in
+  let encoded = Test_abstract_j.string_of_int_assoc_list input in
+  let decoded = Test_abstract_j.int_assoc_list_of_string encoded in
+  check (decoded = input)
+
+(* see also 'test_raw_json' which uses the legacy, more complicated way *)
+let test_untyped_json () =
+  let input = {|["hello",42,{}]|} in
+  let decoded = Test_abstract_j.any_items_of_string input in
+  let encoded = Test_abstract_j.string_of_any_items decoded in
+  check (encoded = input)
+
+let all_tests : (string * (unit -> unit)) list = [
+  "ocaml internals", test_ocaml_internals;
+  "biniou missing record fields", test_biniou_missing_field;
+  "biniou missing tuple fields", test_biniou_missing_cell;
+  "biniou read/write unit", test_biniou_read_write_unit;
+  "json missing record fields", test_json_missing_field;
+  "json missing tuple fields", test_json_missing_cell;
+  "json extra field warning", test_json_extra_field_warning;
+  "json association list", test_json_assoc_list;
+  "json association array", test_json_assoc_array;
+  "json ints derived from ocaml floats", test_json_int_ocaml_float;
+  "biniou correctness", test_biniou_correctness;
+  "json correctness", test_json_correctness;
+  "json space", test_json_space;
+  "validators0", test_validators0;
+  "validators1", test_validators1;
+  "validators2", test_validators2;
+  "validators3", test_validators3;
+  "validators4", test_validators4;
+  "json files", test_json_files;
+  "json streams", test_json_streams;
+  "raw JSON", test_raw_json;
+  "ocaml wrapping - ints", test_wrapping_ints;
+  "ocaml wrapping - double wrapping", test_double_wrapping;
+  "ocaml wrapping - with validation", test_wrapping_with_validation;
+  "ocaml wrapping - wrap constructor without wrapper", test_ignored_wrap;
+  "check length of floats serialized as float32", test_biniou_float32;
+  "print JSON floats with maximum number of decimal places",
   test_json_float_decimals;
-  test_patch;
+  "read json record with null fields meaning (Some None)", test_patch;
+  "read and write a variant represented as a json object with a `type` field",
   test_adapted;
-  test_one_field;
-  test_tag_field_emulation;
-  test_tag_field_emulation_with_catchall;
-  test_json_open_enum;
-  test_ambiguous_record;
-  test_encoding_int64;
-  test_encoding_decoding_int64;
+  "read and write a variant represented as a json object \
+   with a `type` field (pair of functions)", test_adapted_f;
+  "test variants represented with single-field json objects", test_one_field;
+  "emulate the retired tag_field feature", test_tag_field_emulation;
+  "emulate the retired tag_field feature, with a catch-all \
+   for unknown tags", test_tag_field_emulation_with_catchall;
+  "test <json open_enum>", test_json_open_enum;
+  "test ambiguous record with json adapters", test_ambiguous_record;
+  "test wrapping of polymorphic types", test_polymorphic_wrap;
+  "json encoding int64 as string", test_encoding_int64;
+  "json encoding & decoding int64", test_encoding_decoding_int64;
+  "abstract types", test_abstract_types;
+  "untyped json", test_untyped_json;
 ]
 
-(* TODO: use Alcotest to run the test suite. *)
-let quality_test () =
-  List.iter (fun f ->
-    try f ()
-    with Failed -> ())
-    all_tests;
-  match List.rev !errors with
-  | [] ->
-      ()
-  | l ->
-      eprintf "\nThe following tests failed:\n%s\n"
-        (String.concat "\n" l);
-      eprintf "*** FAILURE ***\n";
-      exit 1
-
-let () = quality_test ()
-
-
-
-
-
+let () =
+  let tests = List.map (fun (name, func) -> (name, `Quick, func)) all_tests in
+  Alcotest.run "atdgen" ["atdgen", tests]

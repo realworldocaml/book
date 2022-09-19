@@ -1,1 +1,2 @@
-(library (name async_rpc_test) (libraries async) (preprocess (pps ppx_jane)))
+(library (name async_rpc_test) (libraries async sexp_select)
+ (preprocess (pps ppx_jane)))

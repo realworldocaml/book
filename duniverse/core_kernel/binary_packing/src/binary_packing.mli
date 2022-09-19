@@ -9,7 +9,7 @@
     is no difference, because endian-ness only changes the order of bytes, not bits.
 *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type endian =

@@ -1,0 +1,3 @@
+(library (name base_test_allocation)
+ (libraries base expect_test_helpers_core compiler-libs.common)
+ (preprocess (pps ppx_jane)))

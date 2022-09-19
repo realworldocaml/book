@@ -1,0 +1,110 @@
+(* This toplevel test exercises some polymorphic variants that sexp_grammar rejects. We
+   show that in each case, the compiler or sexp would have given an error anyway. *)
+
+open Base
+
+type t = [ `A of int & string ] [@@deriving sexp]
+
+[%%expect {|
+Line _, characters _-_:
+Error: split_row_field/&
+|}]
+
+type t = [ `A of int & string ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: sexp_grammar: intersection types are unsupported
+|}]
+
+type t = [> `A ] [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [of_sexp] conversion
+|}]
+
+type t = [> `A ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: sexp_grammar: open polymorphic variant types are unsupported
+|}]
+
+type t = [< `A ] [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: A type variable is unbound in this type declaration.
+In type [< `A ] as 'a the variable 'a is unbound
+|}]
+
+type t = [< `A ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: A type variable is unbound in this type declaration.
+In type [< `A ] as 'a the variable 'a is unbound
+|}]
+
+type 'a t = [< `A ] as 'a [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [of_sexp] conversion
+|}]
+
+type 'a t = [< `A ] as 'a [@@deriving sexp_grammar]
+
+[%%expect {|
+Line _, characters _-_:
+Error: sexp_grammar: type aliases are unsupported
+|}]
+
+type a = A : [> ] -> a [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [of_sexp] conversion
+|}]
+
+type a = A : [> ] -> a [@@deriving sexp_of]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [sexp_of] conversion
+|}]
+
+type a = [ `A ] [@@deriving sexp];;
+
+#verbose true
+
+let f = [%sexp_of: [< a ]]
+
+[%%expect {|
+val f : [< a ] -> Sexp.t = <fun>
+|}]
+
+let f = [%of_sexp: [> a ]]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [of_sexp] conversion
+|}]
+
+let f = [%of_sexp: [ | a ]]
+
+[%%expect {|
+val f : Sexp.t -> a = <fun>
+|}];;
+
+#verbose false

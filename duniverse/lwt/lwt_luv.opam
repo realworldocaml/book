@@ -17,9 +17,8 @@ dev-repo: "git+https://github.com/ocsigen/lwt.git"
 depends: [
   "lwt"
   "dune" {>= "1.8.0"}
-  "ocaml" {>= "4.02.0"}
+  "ocaml" {>= "4.08"}
   "luv"
-  "result" # result is needed as long as Lwt supports OCaml 4.02.
 
   # Until https://github.com/aantron/bisect_ppx/pull/327.
   # "bisect_ppx" {dev & >= "2.0.0"}

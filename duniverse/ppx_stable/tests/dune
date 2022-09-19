@@ -1,0 +1,2 @@
+(library (name ppx_stable_test) (libraries ppx_stable)
+ (preprocess (pps ppx_jane)))

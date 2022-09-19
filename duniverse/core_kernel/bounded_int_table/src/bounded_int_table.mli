@@ -19,7 +19,7 @@
     [length] of the table, not [num_keys].
 *)
 
-open! Core_kernel
+open! Core
 
 type ('key, 'data) t [@@deriving sexp_of]
 type ('a, 'b) table = ('a, 'b) t
@@ -28,8 +28,7 @@ include Invariant.S2 with type ('a, 'b) t := ('a, 'b) t
 
 (** Equality only requires the keys and values to be the same, not the bin or sexp
     formatting or the integers the keys correspond to (see [key_to_int]).*)
-include
-  Equal.S2 with type ('a, 'b) t := ('a, 'b) t
+include Equal.S2 with type ('a, 'b) t := ('a, 'b) t
 
 (** [create ~num_keys ~key_to_int] returns a table where the keys can map to 0
     ... [num_keys] - 1, according to [key_to_int]. It is an error if [num_keys < 0].

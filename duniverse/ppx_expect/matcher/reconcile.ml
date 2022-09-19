@@ -1,7 +1,7 @@
 open! Base
 open Import
 open Expect_test_common
-open Ppx_sexp_conv_lib.Conv
+open Sexplib0.Sexp_conv
 
 module Result = struct
   (* Either match with an explicit success, or (lazily) produce a correction. *)
@@ -12,28 +12,27 @@ module Result = struct
 
   let _ = fun (_ : 'a t) -> ()
 
-  let sexp_of_t
-    : type a. (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t
-    =
-    fun _of_a -> function
-      | Match -> Ppx_sexp_conv_lib.Sexp.Atom "Match"
-      | Correction v0 ->
-        let v0 = _of_a v0 in
-        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Correction"; v0 ]
+  let sexp_of_t : 'a. ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t =
+    fun (type a__004_) : ((a__004_ -> Sexplib0.Sexp.t) -> a__004_ t -> Sexplib0.Sexp.t) ->
+    fun _of_a__001_ -> function
+      | Match -> Sexplib0.Sexp.Atom "Match"
+      | Correction arg0__002_ ->
+        let res0__003_ = _of_a__001_ arg0__002_ in
+        Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "Correction"; res0__003_ ]
   ;;
 
   let _ = sexp_of_t
 
   let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
-    fun _cmp__a a__001_ b__002_ ->
-    if Ppx_compare_lib.phys_equal a__001_ b__002_
+    fun _cmp__a a__005_ b__006_ ->
+    if Ppx_compare_lib.phys_equal a__005_ b__006_
     then 0
     else (
-      match a__001_, b__002_ with
+      match a__005_, b__006_ with
       | Match, Match -> 0
       | Match, _ -> -1
       | _, Match -> 1
-      | Correction _a__003_, Correction _b__004_ -> _cmp__a _a__003_ _b__004_)
+      | Correction _a__007_, Correction _b__008_ -> _cmp__a _a__007_ _b__008_)
   ;;
 
   let _ = compare
@@ -103,11 +102,14 @@ let rec lines_match
   | [], _ -> false
   | _, [] -> false
   | expect :: expect_lines, actual :: actual_lines ->
-    let format = Cst.Line.data expect ~blank:(Literal "") in
+    let format =
+      Cst.Line.data expect ~blank:(Literal "") ~conflict_marker:(fun marker ->
+        Literal marker)
+    in
     let line = reconcile_line ~expect:format ~actual ~allow_output_patterns in
     (match line with
      | Match -> lines_match ~expect_lines ~actual_lines ~allow_output_patterns
-     | _ -> false)
+     | Correction _ -> false)
 ;;
 
 let rec corrected_rev
@@ -124,7 +126,10 @@ let rec corrected_rev
       literal_line x ~allow_output_patterns :: acc)
   | _, [] -> acc
   | expect :: expect_lines, actual :: actual_lines ->
-    let format = Cst.Line.data expect ~blank:(Literal "") in
+    let format =
+      Cst.Line.data expect ~blank:(Literal "") ~conflict_marker:(fun marker ->
+        Literal marker)
+    in
     let line =
       reconcile_line ~expect:format ~actual ~allow_output_patterns
       |> Result.value ~success:expect

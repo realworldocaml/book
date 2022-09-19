@@ -2,7 +2,7 @@ open! Import
 
 type t = exn [@@deriving_inline sexp_of]
 
-let sexp_of_t = (sexp_of_exn : t -> Ppx_sexp_conv_lib.Sexp.t)
+let sexp_of_t = (sexp_of_exn : t -> Sexplib0.Sexp.t)
 
 [@@@end]
 
@@ -11,12 +11,11 @@ let exit = Caml.exit
 exception Finally of t * t [@@deriving_inline sexp]
 
 let () =
-  Ppx_sexp_conv_lib.Conv.Exn_converter.add [%extension_constructor Finally] (function
-    | Finally (v0, v1) ->
-      let v0 = sexp_of_t v0
-      and v1 = sexp_of_t v1 in
-      Ppx_sexp_conv_lib.Sexp.List
-        [ Ppx_sexp_conv_lib.Sexp.Atom "exn.ml.Finally"; v0; v1 ]
+  Sexplib0.Sexp_conv.Exn_converter.add [%extension_constructor Finally] (function
+    | Finally (arg0__001_, arg1__002_) ->
+      let res0__003_ = sexp_of_t arg0__001_
+      and res1__004_ = sexp_of_t arg1__002_ in
+      Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "exn.ml.Finally"; res0__003_; res1__004_ ]
     | _ -> assert false)
 ;;
 
@@ -25,12 +24,12 @@ let () =
 exception Reraised of string * t [@@deriving_inline sexp]
 
 let () =
-  Ppx_sexp_conv_lib.Conv.Exn_converter.add [%extension_constructor Reraised] (function
-    | Reraised (v0, v1) ->
-      let v0 = sexp_of_string v0
-      and v1 = sexp_of_t v1 in
-      Ppx_sexp_conv_lib.Sexp.List
-        [ Ppx_sexp_conv_lib.Sexp.Atom "exn.ml.Reraised"; v0; v1 ]
+  Sexplib0.Sexp_conv.Exn_converter.add [%extension_constructor Reraised] (function
+    | Reraised (arg0__005_, arg1__006_) ->
+      let res0__007_ = sexp_of_string arg0__005_
+      and res1__008_ = sexp_of_t arg1__006_ in
+      Sexplib0.Sexp.List
+        [ Sexplib0.Sexp.Atom "exn.ml.Reraised"; res0__007_; res1__008_ ]
     | _ -> assert false)
 ;;
 
@@ -48,7 +47,7 @@ exception Sexp of Sexp.t
 
    to eliminate the extra wrapping of [(Sexp ...)]. *)
 let () =
-  Sexplib.Conv.Exn_converter.add [%extension_constructor Sexp] (function
+  Sexplib0.Sexp_conv.Exn_converter.add [%extension_constructor Sexp] (function
     | Sexp t -> t
     | _ ->
       (* Reaching this branch indicates a bug in sexplib. *)
@@ -56,7 +55,22 @@ let () =
 ;;
 
 let create_s sexp = Sexp sexp
-let reraise exc str = raise (Reraised (str, exc))
+
+let raise_with_original_backtrace t backtrace =
+  Caml.Printexc.raise_with_backtrace t backtrace
+;;
+
+external is_phys_equal_most_recent : t -> bool = "Base_caml_exn_is_most_recent_exn"
+
+let reraise exn str =
+  let exn' = Reraised (str, exn) in
+  if is_phys_equal_most_recent exn
+  then (
+    let bt = Caml.Printexc.get_raw_backtrace () in
+    raise_with_original_backtrace exn' bt)
+  else raise exn'
+;;
+
 let reraisef exc format = Printf.ksprintf (fun str () -> reraise exc str) format
 let to_string exc = Sexp.to_string_hum ~indent:2 (sexp_of_exn exc)
 let to_string_mach exc = Sexp.to_string_mach (sexp_of_exn exc)
@@ -68,10 +82,12 @@ let protectx ~f x ~(finally : _ -> unit) =
     finally x;
     res
   | exception exn ->
-    raise
-      (match finally x with
-       | () -> exn
-       | exception final_exn -> Finally (exn, final_exn))
+    let bt = Caml.Printexc.get_raw_backtrace () in
+    (match finally x with
+     | () -> raise_with_original_backtrace exn bt
+     | exception final_exn ->
+       (* Unfortunately, the backtrace of the [final_exn] is discarded here. *)
+       raise_with_original_backtrace (Finally (exn, final_exn)) bt)
 ;;
 
 let protect ~f ~finally = protectx ~f () ~finally
@@ -136,7 +152,9 @@ let handle_uncaught ~exit:must_exit f =
 
 let reraise_uncaught str func =
   try func () with
-  | exn -> raise (Reraised (str, exn))
+  | exn ->
+    let bt = Caml.Printexc.get_raw_backtrace () in
+    raise_with_original_backtrace (Reraised (str, exn)) bt
 ;;
 
 external clear_backtrace : unit -> unit = "Base_clear_caml_backtrace_pos" [@@noalloc]

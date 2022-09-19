@@ -4,8 +4,6 @@ open Format
 open Bigarray
 
 module type S = sig
-  module Raw_grammar = Sexplib0.Sexp.Private.Raw_grammar
-
   (** Type of S-expressions *)
   type t = Type.t =
     | Atom of string
@@ -37,9 +35,8 @@ module type S = sig
       intermediate strings. *)
   val scan_sexp : ?buf:Buffer.t -> Lexing.lexbuf -> t
 
-  (** [scan_sexps ?buf lexbuf] reads a list of whitespace separated
-      S-expressions from lex buffer [lexbuf] using the optional string
-      buffer [buf] for storing intermediate strings. *)
+  (** [scan_sexps ?buf lexbuf] reads a list of S-expressions from lex buffer [lexbuf]
+      using the optional string buffer [buf] for storing intermediate strings. *)
   val scan_sexps : ?buf:Buffer.t -> Lexing.lexbuf -> t list
 
   (** [scan_rev_sexps ?buf lexbuf] same as {!scan_sexps}, but returns the
@@ -50,16 +47,14 @@ module type S = sig
       except that it returns [None] when the eof is reached. *)
   val scan_sexp_opt : ?buf:Buffer.t -> Lexing.lexbuf -> t option
 
-  (** [scan_iter_sexps ?buf ~f lexbuf] iterates over all whitespace
-      separated S-expressions scanned from lex buffer [lexbuf] using
-      function [f], and the optional string buffer [buf] for storing
-      intermediate strings. *)
+  (** [scan_iter_sexps ?buf ~f lexbuf] iterates over all S-expressions scanned from
+      lex buffer [lexbuf] using function [f], and the optional string buffer [buf] for
+      storing intermediate strings. *)
   val scan_iter_sexps : ?buf:Buffer.t -> f:(t -> unit) -> Lexing.lexbuf -> unit
 
-  (** [scan_fold_sexps ?buf ~f ~init lexbuf] folds over all whitespace
-      separated S-expressions scanned from lex buffer [lexbuf] using
-      function [f], initial state [init], and the optional string buffer
-      [buf] for storing intermediate strings. *)
+  (** [scan_fold_sexps ?buf ~f ~init lexbuf] folds over all S-expressions scanned from lex
+      buffer [lexbuf] using function [f], initial state [init], and the optional string
+      buffer [buf] for storing intermediate strings. *)
   val scan_fold_sexps
     :  ?buf:Buffer.t
     -> f:('a -> t -> 'a)
@@ -67,10 +62,9 @@ module type S = sig
     -> Lexing.lexbuf
     -> 'a
 
-  (** [scan_sexps_conv ?buf ~f lexbuf] maps all whitespace separated
-      S-expressions scanned from lex buffer [lexbuf] to some list using
-      function [f], and the optional string buffer [buf] for storing
-      intermediate strings. *)
+  (** [scan_sexps_conv ?buf ~f lexbuf] maps all S-expressions scanned from lex buffer
+      [lexbuf] to some list using function [f], and the optional string buffer [buf] for
+      storing intermediate strings. *)
   val scan_sexps_conv : ?buf:Buffer.t -> f:(t -> 'a) -> Lexing.lexbuf -> 'a list
 
   (** {6 Type and exception definitions for (partial) parsing} *)
@@ -310,7 +304,7 @@ module type S = sig
   *)
   val input_sexp : ?parse_pos:Parse_pos.t -> in_channel -> t
 
-  (** [input_sexps ?parse_pos ?buf ic] parses whitespace separated
+  (** [input_sexps ?parse_pos ?buf ic] parses
       S-expressions from input channel [ic] until EOF is reached.  Faster than
       the scan-functions.
 
@@ -341,7 +335,7 @@ module type S = sig
   *)
   val load_sexp : ?strict:bool -> ?buf:bytes -> string -> t
 
-  (** [load_sexps ?buf file] reads a list of whitespace separated S-expressions
+  (** [load_sexps ?buf file] reads a list of S-expressions
       from [file] using buffer [buf] for storing intermediate data.
       Faster than the scan-functions.
 
@@ -496,15 +490,30 @@ module type S = sig
     exception E of t
   end
 
-  (** [of_string str] converts string [str] to an S-expression.  NOTE:
-      trailing whitespace is considered an error, which may be overly
-      strict for some applications.  Either strip the string of trailing
-      whitespace first, or, even cheaper, use {!parse} instead. *)
+  (** [of_string str] parses a string [str] as an S-expression. *)
   val of_string : string -> t
+
+  (** [of_string_many] parses a string containing zero or more S-expressions.
+
+      Unlike many other functions in this module, on parse failure it raises
+      [Parsexp.Parse_error] rather than a native [Sexplib.Sexp.Parse_error].
+  *)
+  val of_string_many : string -> t list
 
   (** [of_string_conv str conv] like {!of_string}, but performs type conversion
       with [conv].  @return conversion result. *)
   val of_string_conv : string -> (t -> 'a) -> 'a Annotated.conv
+
+  (** [of_string_many_conv_exn str conv] like {!of_string_many}, but performs type
+      conversion with [conv]. Raises if type conversion fails.
+
+      Unlike many other functions in this module, on parse failure it raises
+      [Parsexp.Parse_error] rather than a native [Sexplib.Sexp.Parse_error].
+
+      It still raises [Sexplib.Sexp.Of_string_conv_exn] on sexp conversion errors.
+
+      @return conversion result. *)
+  val of_string_many_conv_exn : string -> (t -> 'a) -> 'a list
 
   (** [of_string_conv_exn str conv] like {!of_string_conv}, but raises
       {!Of_string_conv_exn.E} if type conversion fails.  @return converted
@@ -579,7 +588,7 @@ module type S = sig
       automated S-expression conversion to themselves. *)
   val t_of_sexp : t -> t
 
-  val t_sexp_grammar : Sexplib0.Private.Raw_grammar.t
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   (** {6 Utilities for conversion error handling} *)
 

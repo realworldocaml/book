@@ -18,6 +18,7 @@ Lwt_pool
 Lwt_stream
 Lwt_switch
 Lwt_sequence
+Lwt_seq
 Lwt_pqueue
 }
 
@@ -69,6 +70,18 @@ Syntactic sugar for Lwt, such as [let%lwt x = e in e'] syntax for [bind].
 {!modules:
 Ppx_lwt
 }
+
+{2 Multicore helpers}
+
+The {e lwt_domain} package provides helpers for executing some computations on
+different cores. It is an Lwt-specific abstraction over the {e domainslib}
+package.
+
+{!modules:
+Lwt_domain
+}
+
+This package depends on the {e core} library and the {e domainslib} package.
 
 {2 Miscellaneous}
 

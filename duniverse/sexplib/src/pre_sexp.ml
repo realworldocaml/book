@@ -20,6 +20,8 @@ include (
 
 include Private
 
+let t_sexp_grammar = Conv.sexp_t_sexp_grammar
+
 (* Output of S-expressions to I/O-channels *)
 
 let with_new_buffer oc f =
@@ -433,10 +435,7 @@ end = struct
       let next_pos = pos + (offset - previous_offset) in
       Done (result, parse_pos_of_state state next_pos)
     | exception Parsexp.Parse_error.Parse_error err ->
-      handle_parsexp_error
-        state
-        (pos + (T.Impl.State.offset state - previous_offset))
-        err
+      handle_parsexp_error state (pos + (T.Impl.State.offset state - previous_offset)) err
 
   and mk_cont_state state stack =
     let parse_fun =
@@ -657,9 +656,8 @@ let of_string_bigstring loc my_parse ws_buf get_len get_sub str =
             (get_sub str 0 (get_len str))))
 ;;
 
-let of_string str =
-  of_string_bigstring "of_string" parse " " String.length String.sub str
-;;
+let of_string str = of_string_bigstring "of_string" parse " " String.length String.sub str
+let of_string_many str = Parsexp.Many.parse_string_exn str
 
 let get_bstr_sub_str bstr pos len =
   let str = Bytes.create len in
@@ -887,6 +885,11 @@ let gen_of_string_conv_exn of_string str f =
 
 let of_string_conv_exn str f = gen_of_string_conv_exn of_string str f
 let of_bigstring_conv_exn bstr f = gen_of_string_conv_exn of_bigstring bstr f
+
+let of_string_many_conv_exn str f =
+  let sexps = of_string_many str in
+  List.map (fun sexp -> gen_of_string_conv_exn (fun x -> x) sexp f) sexps
+;;
 
 (* Utilities for automated type conversions *)
 

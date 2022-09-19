@@ -4,9 +4,9 @@ freebsd_instance:
 freebsd_task:
   env:
     matrix:
-      - OCAML_VERSION: 4.10.1
       - OCAML_VERSION: 4.11.1
-  pkg_install_script: pkg install -y ocaml-opam gmp gmake pkgconf bash
+      - OCAML_VERSION: 4.12.0
+  pkg_install_script: pkg install -y ocaml-opam gmake bash
   ocaml_script: opam init -a --comp=$OCAML_VERSION
   dependencies_script: eval `opam env` && opam install -y --deps-only .
   build_script: eval `opam env` && dune build @install

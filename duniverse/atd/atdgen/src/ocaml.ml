@@ -10,6 +10,7 @@ open Atd.Import
 open Easy_format
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 type pp_convs =
   | Camlp4 of string list
@@ -62,6 +63,7 @@ module Repr = struct
     | Int of atd_ocaml_int
     | Float
     | String
+    | Abstract
     | Sum of atd_ocaml_sum
     | Record of atd_ocaml_record
     | Tuple
@@ -85,6 +87,7 @@ end
 
 type target = Default | Biniou | Json | Validate | Bucklescript
 
+let all_targets = [ Default; Biniou; Json; Validate; Bucklescript ]
 
 let ocaml_int_of_string s : atd_ocaml_int option =
   match s with
@@ -197,6 +200,7 @@ let get_ocaml_type_path target atd_name an =
       | "int" -> `Int (get_ocaml_int target an)
       | "float" -> `Float
       | "string" -> `String
+      | "abstract" -> `Abstract
       | s -> `Name s
   in
   match x with
@@ -205,6 +209,7 @@ let get_ocaml_type_path target atd_name an =
     | `Int x -> string_of_ocaml_int x
     | `Float -> "float"
     | `String -> "string"
+    | `Abstract -> "Yojson.Safe.t"
     | `Name s -> s
 
 let get_ocaml_sum target an =
@@ -404,6 +409,16 @@ and ocaml_variant =
 and ocaml_field =
     (string * bool (* is mutable? *)) * ocaml_expr * Atd.Doc.doc option
 
+(*
+   OCaml type definition:
+
+     type foo = Baz_t.foo = bar list [@@what ever]
+          ^^^   ^^^^^^^^^   ^^^^^^^^ ^^^^^^^^^^^^^
+          name  alias       expr     ppx attrs
+
+  A useful definition in the context of ATD would have at least an expr
+  or an alias.
+*)
 type ocaml_def = {
   o_def_name : (string * ocaml_type_param);
   o_def_alias : (string * ocaml_type_param) option;
@@ -495,15 +510,64 @@ and map_field target ocaml_field_prefix (x : field) : ocaml_field =
       let is_mutable = get_ocaml_mutable target an in
       ((fname, is_mutable), map_expr target [] x, Atd.Doc.get_doc loc an)
 
+
+(* hack to deal with legacy behavior *)
+let lhs_has_possibly_relevant_annotation
+    ((loc, (name, param, an1), x) : type_def) =
+  List.exists
+    (fun target -> get_ocaml_module_and_t target name an1 <> None)
+    all_targets
+
+(* hack to deal with legacy behavior *)
+let rhs_is_just_abstract ((loc, (name, param, an1), x) : type_def) =
+  match x with
+  | Atd.Ast.Name (_, (loc, "abstract", type_params), an2) ->
+      if type_params <> [] then
+        Error.error loc "\"abstract\" takes no type parameters";
+      true
+  | _ ->
+      false
+
+(*
+   This is an ATD definition of the form
+
+     type foo <...> = abstract
+
+   e.g.
+
+     type foo <ocaml from="Foo"> = abstract
+
+   where the right-hand side is exactly 'abstract' and is ignored.
+   This is weird and will be deprecated as soon as we implement
+   a clean module system allowing us to import whole modules without
+   special annotations.
+
+   The annotation <...> on the left-hand side specifies the type name and
+   readers/writers to be used. They are placed there rather than
+   directly on 'abstract' for "historical reasons". We preserve the legacy
+   behavior unless there's no suitable left-hand side annotation.
+
+   The following is valid and follows the more recent convention that
+   'abstract' means "untyped data". It is NOT considered an abstract
+   definition:
+
+     type foo = abstract
+                ^^^^^^^^
+                JSON or biniou AST representing raw data
+*)
+let is_abstract_def (x : type_def) =
+  lhs_has_possibly_relevant_annotation x
+  && rhs_is_just_abstract x
+
 let map_def
     ~(target : target)
     ~(type_aliases : string option)
-    ((loc, (s, param, an1), x) : type_def) : ocaml_def option =
+    ((loc, (s, param, an1), x) as def : type_def) : ocaml_def option =
   if is_ocaml_keyword s then
     Error.error loc
       ("\"" ^ s ^ "\" cannot be used as type name (reserved OCaml keyword)");
   let is_predef = get_ocaml_predef target an1 in
-  let is_abstract = Mapping.is_abstract x in
+  let is_abstract = is_abstract_def def in
   let define_alias =
     if is_predef || is_abstract || type_aliases <> None then
       match get_ocaml_module_and_t target s an1, type_aliases with
@@ -523,9 +587,19 @@ let map_def
     let alias, x =
       match define_alias with
           None ->
+            (* Ordinary type definitions or aliases:
+                 type foo = string * int
+                 type foo = bar
+                 type foo = { hello: string }
+            *)
             if is_abstract then (None, None)
             else (None, Some (map_expr target param x))
         | Some (module_path, ext_name) ->
+            (*
+                 type foo = Bar_t.foo = { hello: string }
+               or
+                 type foo = Bar_t.foo = Alpha | Beta of int
+            *)
             let alias = Some (module_path ^ "." ^ ext_name, param) in
             let x =
               match map_expr target param x with
@@ -587,6 +661,7 @@ let rec ocaml_of_expr_mapping (x : (Repr.t, _) mapping) : ocaml_expr =
       `Name (s, List.map ocaml_of_expr_mapping l)
   | Tvar (_, s) ->
       `Tvar s
+  | Abstract _ -> `Name ("Yojson.Safe.t", [])
   | _ -> assert false
 
 and ocaml_of_variant_mapping x =

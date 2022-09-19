@@ -20,7 +20,7 @@ val bswap16 : t -> t
 val bswap32 : t -> t
 val bswap48 : t -> t
 
-(*_ exported for Core_kernel *)
+(*_ exported for Core *)
 module W : sig
   val wrap_exn : int64 -> t
   val unwrap : t -> int64

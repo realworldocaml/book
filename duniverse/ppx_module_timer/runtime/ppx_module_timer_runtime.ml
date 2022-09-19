@@ -1,13 +1,13 @@
 open! Base
-module Gc = Caml.Gc
+module Gc = Stdlib.Gc
 
 external __MODULE__ : string = "%loc_MODULE"
 
 let am_recording_environment_variable = "PPX_MODULE_TIMER"
 
 let get_am_recording_environment_variable () =
-  (* avoid Caml.Sys.getenv_opt to preserve 4.04.x compatibility *)
-  match Caml.Sys.getenv am_recording_environment_variable with
+  (* avoid Stdlib.Sys.getenv_opt to preserve 4.04.x compatibility *)
+  match Stdlib.Sys.getenv am_recording_environment_variable with
   | value -> Some value
   | exception _ -> None
 ;;
@@ -168,8 +168,7 @@ let rec timing_events_to_strings list ~indent =
   List.map2_exn
     duration_strings
     list
-    ~f:(fun duration_string
-         { runtime = _; description; gc_events; nested_timing_events }
+    ~f:(fun duration_string { runtime = _; description; gc_events; nested_timing_events }
          ->
            ( duration_string
            , description
@@ -190,23 +189,21 @@ let fake_timing_events =
     }
   in
   lazy
-    (List.init 12 ~f:(fun i ->
-       ({ description = Printf.sprintf "Fake__Dependency_%d" (i + 1)
-        ; runtime = Int63.of_int (900 * (i + 1))
-        ; gc_events = gc_events i
-        ; nested_timing_events =
-            (if (i + 1) % 4 = 0
-             then
-               List.init (i + 1) ~f:(fun j ->
-                 ({ description = Printf.sprintf "Line %d" (j + 1)
-                  ; runtime = Int63.of_int (900 * (j + 1))
-                  ; gc_events = gc_events j
-                  ; nested_timing_events = []
-                  }
-                  : Timing_event.t))
-             else [])
-        }
-        : Timing_event.t)))
+    (List.init 12 ~f:(fun i : Timing_event.t ->
+       { description = Printf.sprintf "Fake__Dependency_%d" (i + 1)
+       ; runtime = Int63.of_int (900 * (i + 1))
+       ; gc_events = gc_events i
+       ; nested_timing_events =
+           (if (i + 1) % 4 = 0
+            then
+              List.init (i + 1) ~f:(fun j : Timing_event.t ->
+                { description = Printf.sprintf "Line %d" (j + 1)
+                ; runtime = Int63.of_int (900 * (j + 1))
+                ; gc_events = gc_events j
+                ; nested_timing_events = []
+                })
+            else [])
+       }))
 ;;
 
 let print_recorded_timing_events timing_events =
@@ -240,7 +237,7 @@ let print_recorded_timing_events timing_events =
 let () =
   if am_recording
   then
-    Caml.at_exit (fun () ->
+    Stdlib.at_exit (fun () ->
       print_recorded_timing_events
         (List.rev module_timer.timing_events_in_reverse_chronological_order))
 ;;

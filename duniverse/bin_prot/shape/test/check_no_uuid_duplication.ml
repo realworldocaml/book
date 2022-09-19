@@ -18,7 +18,7 @@ let main () =
       (not (String.is_prefix fn ~prefix:"external/"))
       && (* Filter out symlinks and other things. Use core as it would be too slow with
             async. *)
-      (Core.Unix.lstat fn).st_kind = S_REG)
+      (Core_unix.lstat fn).st_kind = S_REG)
   in
   let%bind uuids =
     (* Break the list into chunks of 200 to stay under the command line length

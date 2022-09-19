@@ -73,11 +73,13 @@ module V1_types = struct
         - [show_errors] (default [false]). Display the test errors.
         - [json] (default [false]). Print test results in a JSON-compatible
           format.
+        - [filter]. Filter tests according to [~name], the name of the test, and
+          [~index], the number of the test case.
         - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
           log the output of the tests (if [verbose] is not set).
         - [bail] (default [false]). If true, stop running the tests after the
           first failure.
-        - [record_backtrace] (defualt [true]). Enable backtrace recording before
+        - [record_backtrace] (default [true]). Enable backtrace recording before
           beginning testing. *)
 
     val run : (string -> unit test list -> return) with_options

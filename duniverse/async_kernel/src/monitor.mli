@@ -2,16 +2,16 @@
     what to do when there is an unhandled exception.
 
     Every Async computation runs within the context of some monitor, which, when the
-    computation is running, is referred to as the "current" monitor.  Monitors are
-    arranged in a tree -- when a new monitor is created, it is a child of the current
-    monitor.
+    computation is running, is referred to as the "current" monitor. By default, a monitor
+    is set up to forward exceptions to another monitor, called a parent monitor, which is
+    always the monitor of the current execution context.
 
-    If a computation raises an unhandled exception, the behavior depends on whether the
-    current monitor is "detached" or "attached".  If the monitor has been "detached", via
-    one of the [detach*] functions, then whoever detached it is responsible for dealing
-    with the exception.  If the monitor is still attached, then the exception bubbles to
-    monitor's parent.  If an exception bubbles to the initial monitor, i.e., the root of
-    the monitor tree, that prints an unhandled-exception message and calls exit 1.
+    The user can "detach" a monitor via one of the [detach*] functions, causing the
+    exception to no longer propagate to the parent monitor. Then whoever
+    detached it is responsible for dealing with the exception.  If the monitor is still
+    attached, then the exception bubbles to monitor's parent.  If an exception bubbles
+    to the root of the monitor tree, that prints an unhandled-exception message and
+    calls exit 1.
 
     {2 Note about the toplevel monitor}
 
@@ -37,7 +37,7 @@
     [try_with] creates its own monitor and uses [Scheduler.within], so it does not have
     this problem. *)
 
-open! Core_kernel
+open! Core
 module Deferred = Deferred1
 
 type t = Monitor0.t [@@deriving sexp_of]
@@ -54,17 +54,17 @@ val create : (unit -> t) with_optional_monitor_name
     [create]. *)
 val name : t -> Info.t
 
-val parent : t -> t option
-val depth : t -> int
-
 (** [current ()] returns the current monitor. *)
 val current : unit -> t
 
+(** [detach t] detaches [t], removing its parent, so that errors raised to [t] are not
+    passed to its former parent monitor.  If those errors aren't handled in some other
+    way (e.g. via [get_next_error]), then they will be ignored.  One should usually use
+    [detach_and_iter_errors] so that errors are not ignored.
 
-(** [detach t] detaches [t] so that errors raised to [t] are not passed to [t]'s parent
-    monitor.  If those errors aren't handled in some other way, then they will effectively
-    be ignored.  One should usually use [detach_and_iter_errors] so that errors are not
-    ignored. *)
+    If [t] is already detached, then [detach] does nothing. For example, it does not
+    remove existing handlers added with [detach_and_iter_errors].
+*)
 val detach : t -> unit
 
 
@@ -86,8 +86,24 @@ val detach_and_get_error_stream : t -> exn Tail.Stream.t
 
 (** [get_next_error t] returns a deferred that becomes determined the next time [t] gets
     an error, if ever.  Calling [get_next_error t] does not detach [t], and if no other
-    call has detached [t], then errors will still bubble up the monitor tree. *)
+    call has detached [t], then errors will still bubble up the monitor tree.  That
+    includes the error returned by [get_next_error], which will then be handled twice. *)
 val get_next_error : t -> exn Deferred.t
+
+module Monitor_exn : sig
+  type t
+
+  (** Extract the exception as it was originally received by an async monitor. *)
+  val extract_exn : t -> exn
+
+  (** Extract the backtrace originally captured at the point the exception was received
+      by an async monitor. *)
+  val backtrace : t -> Backtrace.t option
+end
+
+(** When [extract_exn] is set to false, exceptions returned by [try_with] are wrapped
+    into this exception type which also provides backtrace information. *)
+type exn += private Monitor_exn of Monitor_exn.t
 
 (** [extract_exn exn] extracts the exn from an error exn that comes from a monitor. If it
     is not supplied such an error exn, it returns the exn itself.  It removes the
@@ -98,9 +114,9 @@ val extract_exn : exn -> exn
 val has_seen_error : t -> bool
 
 (** [send_exn t exn ?backtrace] sends the exception [exn] as an error to be handled by
-    monitor [t].  By default, the error will not contain a backtrace.  However, the caller
-    can supply one using [`This], or use [`Get] to request that [send_exn] obtain one
-    using [Backtrace.Exn.most_recent ()]. *)
+    monitor [t].  If the backtrace is not specified, it defaults to [`Get], which means
+    that the backtrace will be collected automatically. Automatic backtrace collection
+    only works if [exn] is the most recently raised exception. *)
 val send_exn : t -> ?backtrace:[ `Get | `This of Backtrace.t ] -> exn -> unit
 
 (** [try_with f] runs [f ()] in a monitor and returns the result as [Ok x] if [f] finishes
@@ -110,23 +126,18 @@ val send_exn : t -> ?backtrace:[ `Get | `This of Backtrace.t ] -> exn -> unit
 
     - [`Log]: Logged to a global error log (cannot raise).
     - [`Raise]: Reraised to the monitor of [try_with]'s caller.
-    - [`Call f]: Passed to [f] within the context of the caller of [try_with]'s monitor.
+    - [`Call f]: Passed to [f] within the context of the monitor of [try_with]'s caller.
 
     The [name] argument is used to give a name to the monitor the computation will be
     running in.  This name will appear when printing errors.
-
-    [try_with] runs [f ()] in a new monitor [t] that has no parent.  This works because
-    [try_with] calls [detach_and_get_error_stream t] and explicitly handles all errors
-    sent to [t].  No errors would ever implicitly propagate to [t]'s parent, although
-    [try_with] will explicitly send them to [t]'s parent with [rest = `Raise].
 
     If [extract_exn = true], then in an [Error exn] result, the [exn] will be the actual
     exception raised by the computation.  If [extract_exn = false], then the [exn] will
     include additional information, like the monitor and backtrace. *)
 val try_with
   : (?extract_exn:bool (** default is [false] *)
-     -> ?run:[ `Now | `Schedule ] (** default is [`Schedule] *)
-     -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Log] *)
+     -> ?run:[ `Now | `Schedule ] (** default is [`Now] *)
+     -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
      -> (unit -> 'a Deferred.t)
      -> ('a, exn) Result.t Deferred.t)
       with_optional_monitor_name
@@ -136,13 +147,11 @@ val try_with
     instead of [('a,exn) Result.t Deferred.t].  More precisely:
 
     {[
-      try_with_or_error f ?extract_exn
-      = try_with f ?extract_exn ~run:`Now ~rest:`Log >>| Or_error.of_exn_result ]}
-
-    [~run:`Now] is different from [try_with]'s default, [~run:`Schedule].  Based on
-    experience, we think [~run:`Now] is a better behavior. *)
+      try_with_or_error f ?extract_exn ~rest
+      = try_with f ?extract_exn ~run:`Now ~rest >>| Or_error.of_exn_result ]} *)
 val try_with_or_error
   : (?extract_exn:bool (** default is [false] *)
+     -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
      -> (unit -> 'a Deferred.t)
      -> 'a Or_error.t Deferred.t)
       with_optional_monitor_name
@@ -150,6 +159,7 @@ val try_with_or_error
 (** [try_with_join_or_error f = try_with_or_error f >>| Or_error.join]. *)
 val try_with_join_or_error
   : (?extract_exn:bool (** default is [false] *)
+     -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
      -> (unit -> 'a Or_error.t Deferred.t)
      -> 'a Or_error.t Deferred.t)
       with_optional_monitor_name
@@ -162,8 +172,7 @@ val try_with_join_or_error
     Errors that are raised after [f ()] becomes determined will still be sent to
     [handler], i.e., the new monitor lives as long as jobs created by [f] live. *)
 val handle_errors
-  : ((unit -> 'a Deferred.t) -> (exn -> unit) -> 'a Deferred.t)
-      with_optional_monitor_name
+  : ((unit -> 'a Deferred.t) -> (exn -> unit) -> 'a Deferred.t) with_optional_monitor_name
 
 (** [catch_stream ?name f] runs [f ()] inside a new monitor [m] and returns the stream of
     errors raised to [m]. *)
@@ -185,7 +194,8 @@ val catch_error : ((unit -> unit) -> Error.t Deferred.t) with_optional_monitor_n
     running in.  This name will appear when printing the errors. *)
 val protect
   : (?extract_exn:bool (** default is [false] *)
-     -> ?run:[ `Now | `Schedule ] (** default is [`Schedule] *)
+     -> ?run:[ `Now | `Schedule ] (** default is [`Now] *)
+     -> ?rest:[ `Log | `Raise | `Call of exn -> unit ] (** default is [`Raise] *)
      -> (unit -> 'a Deferred.t)
      -> finally:(unit -> unit Deferred.t)
      -> 'a Deferred.t)
@@ -215,4 +225,9 @@ module Exported_for_scheduler : sig
   val preserve_execution_context'
     :  ('a -> 'b Deferred.t)
     -> ('a -> 'b Deferred.t) Staged.t
+end
+
+module For_tests : sig
+  val parent : t -> t option
+  val depth : t -> int
 end

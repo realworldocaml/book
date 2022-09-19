@@ -35,7 +35,13 @@ val bin_size_float32_mat : mat32 sizer
 val bin_size_float64_mat : mat64 sizer
 val bin_size_mat : mat sizer
 val bin_size_bigstring : buf sizer
+val bin_size_floatarray : floatarray sizer
+
 val bin_size_float_array : float array sizer
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
 val bin_size_variant_int : int sizer
 val bin_size_int_8bit : int sizer
 val bin_size_int_16bit : int sizer
@@ -111,6 +117,7 @@ module Minimum : sig
   val bin_size_float64_mat : int
   val bin_size_mat : int
   val bin_size_bigstring : int
+  val bin_size_floatarray : int
   val bin_size_float_array : int
   val bin_size_variant_int : int
   val bin_size_int_8bit : int

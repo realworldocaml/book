@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Pooled_hashtbl
 
 let%bench_module "Pooled_hashtbl" =

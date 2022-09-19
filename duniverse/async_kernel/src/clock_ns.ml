@@ -1,9 +1,10 @@
-open! Core_kernel
+open! Core
 open! Import
 
 module type Clock = Clock_intf.Clock
 module type Clock_deprecated = Clock_intf.Clock_deprecated
 
+module Or_timeout = Clock_intf.Or_timeout
 module Scheduler = Scheduler1
 
 let time_source () = (Scheduler.t ()).time_source |> Time_source.of_synchronous
@@ -30,13 +31,7 @@ let run_after span f a = Time_source.run_after (time_source ()) span f a
 let run_at time f a = Time_source.run_at (time_source ()) time f a
 
 let run_at_intervals ?start ?stop ?continue_on_error interval f =
-  Time_source.run_at_intervals
-    ?start
-    ?stop
-    ?continue_on_error
-    (time_source ())
-    interval
-    f
+  Time_source.run_at_intervals ?start ?stop ?continue_on_error (time_source ()) interval f
 ;;
 
 let run_at_intervals' ?start ?stop ?continue_on_error interval f =
@@ -50,6 +45,7 @@ let run_at_intervals' ?start ?stop ?continue_on_error interval f =
 ;;
 
 let with_timeout span d = Time_source.with_timeout (time_source ()) span d
+let duration_of f = Time_source.duration_of (time_source ()) f
 
 module Event = struct
   include Time_source.Event

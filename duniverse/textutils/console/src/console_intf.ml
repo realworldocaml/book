@@ -31,6 +31,7 @@ module type S = sig
     val erase_to_start_of_screen : unit -> unit
     val erase_all : unit -> unit
     val bell : unit -> unit
+    val home : unit -> unit
     val home_cursor : unit -> unit
     val cursor_up : unit -> unit
     val cursor_down : unit -> unit

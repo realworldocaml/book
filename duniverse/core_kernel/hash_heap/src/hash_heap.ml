@@ -1,5 +1,4 @@
-
-open! Core_kernel
+open! Core
 open! Import
 open Hash_heap_intf
 
@@ -158,5 +157,10 @@ module Make (Key : Key) : S with module Key = Key = struct
     let t' = create t.cmp in
     iteri t ~f:(fun ~key ~data -> push_exn t' ~key ~data);
     t'
+  ;;
+
+  let clear t =
+    Heap.clear t.heap;
+    Hashtbl.clear t.tbl
   ;;
 end

@@ -1,6 +1,6 @@
 (** Internal to Async -- see {!Ivar} for the public API. *)
 
-open! Core_kernel
+open! Core
 open! Import
 module Cell = Types.Cell
 

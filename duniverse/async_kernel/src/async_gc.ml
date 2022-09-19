@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 include Gc
 
 (** [add_finalizer f x] is like [Gc.finalise f x], except that the finalizer is guaranteed

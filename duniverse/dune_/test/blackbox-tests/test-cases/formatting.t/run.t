@@ -122,6 +122,21 @@ And fixable files can be promoted:
   (library
    (name lib_reason))
 
+The fmt command automatically promotes the formatted files:
+
+  $ touch fmt-cmd/.ocamlformat
+  $ cat > fmt-cmd/ocaml_file.ml << EOF
+  > let  y=()
+  > EOF
+  $ cat > fmt-cmd/reason_file.re << EOF
+  > let  y = ();
+  > EOF
+  $ (cd fmt-cmd && dune fmt)
+  $ cat fmt-cmd/ocaml_file.ml
+  let  y=()
+  $ cat fmt-cmd/reason_file.re
+  let  y = ();
+
 All .ocamlformat files are considered dependencies:
 
   $ echo 'margin = 70' > .ocamlformat

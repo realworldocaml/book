@@ -139,7 +139,7 @@ end
 
 module Make0 (T : Make0_arg) = struct
   include Make_gen (struct
-      include (T : Make0_arg with type t := T.t with module Elt := T.Elt)
+      include T
 
       type 'a t = T.t
       type 'a elt = T.Elt.t
@@ -147,67 +147,3 @@ module Make0 (T : Make0_arg) = struct
 
   let mem t elt = exists t ~f:(T.Elt.equal elt)
 end
-
-open T
-
-
-(* The following functors exist as a consistency check among all the various [S?]
-   interfaces.  They ensure that each particular [S?] is an instance of a more generic
-   signature. *)
-module Check
-    (T : T1)
-    (Elt : T1)
-    (M : Generic with type 'a t := 'a T.t with type 'a elt := 'a Elt.t) =
-struct end
-
-module Check_S0 (M : S0) =
-  Check
-    (struct
-      type 'a t = M.t
-    end)
-    (struct
-      type 'a t = M.elt
-    end)
-    (M)
-
-module Check_S0_phantom (M : S0_phantom) =
-  Check
-    (struct
-      type 'a t = 'a M.t
-    end)
-    (struct
-      type 'a t = M.elt
-    end)
-    (M)
-
-module Check_S1 (M : S1) =
-  Check
-    (struct
-      type 'a t = 'a M.t
-    end)
-    (struct
-      type 'a t = 'a
-    end)
-    (M)
-
-type phantom
-
-module Check_S1_phantom (M : S1_phantom) =
-  Check
-    (struct
-      type 'a t = ('a, phantom) M.t
-    end)
-    (struct
-      type 'a t = 'a
-    end)
-    (M)
-
-module Check_S1_phantom_invariant (M : S1_phantom_invariant) =
-  Check
-    (struct
-      type 'a t = ('a, phantom) M.t
-    end)
-    (struct
-      type 'a t = 'a
-    end)
-    (M)

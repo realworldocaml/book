@@ -9,8 +9,9 @@ let print_expr expr =
 
 let%expect_test "while%bind expansion" =
   Ppx_let_expander.expand
+    Ppx_let_expander.bind
+    Ppx_let_expander.Extension_kind.default
     ~modul:None
-    Bind
     [%expr
       while MY_CONDITION do
         MY_BODY

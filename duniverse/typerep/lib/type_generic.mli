@@ -29,16 +29,18 @@ open Std_internal
     that allows one to get the generic computation operating on a given type ['a].
 *)
 
-module Variant_and_record_intf : (module type of Variant_and_record_intf)
+module Variant_and_record_intf : module type of Variant_and_record_intf
 
 module Helper (A : Variant_and_record_intf.S) (B : Variant_and_record_intf.S) : sig
   type map = { map : 'a. 'a A.t -> 'a B.t }
+
   val map_variant : map -> 'a A.Variant.t -> 'a B.Variant.t
   val map_record : map -> 'a A.Record.t -> 'a B.Record.t
 end
 
 module type Named = sig
   type 'a computation
+
   module Context : sig
     (**
        Mutable context used to memorize some info during the traversal of a typerep.
@@ -48,6 +50,7 @@ module type Named = sig
        available while creating a new value of type ['a Named.t]
     *)
     type t
+
     val create : unit -> t
   end
 
@@ -66,6 +69,7 @@ module type Named = sig
      type_name inside the typerep, going further on.
   *)
   type 'a t
+
   val init : Context.t -> 'a Typename.t -> 'a t
   val get_wip_computation : 'a t -> 'a computation
   val set_final_computation : 'a t -> 'a computation -> 'a computation
@@ -122,17 +126,17 @@ end
 (**
    Not all computations are arrow types. For example:
 
-     ['a computation = Type_hash.t]
+   ['a computation = Type_hash.t]
 
    However, arrow types computation such as [of_sexp], [sexp_of], [json_of], etc.  are
    such a standard case that is seems reasonable to share this extra layer of functor for
    it to build the [Named] module.
 *)
 module Make_named_for_closure (X : sig
-  type 'a input
-  type 'a output
-  type 'a t = 'a input -> 'a output
-end) : Named with type 'a computation := 'a X.t
+    type 'a input
+    type 'a output
+    type 'a t = 'a input -> 'a output
+  end) : Named with type 'a computation := 'a X.t
 
 module Ident : sig
   (**
@@ -152,7 +156,6 @@ module Ident : sig
 end
 
 module type S = sig
-
   type 'a t
   type 'a computation = 'a t
 
@@ -173,6 +176,7 @@ module type S = sig
      ...
   *)
   val register0 : (module S) -> unit
+
   val register1 : (module S1) -> unit
   val register2 : (module S2) -> unit
   val register3 : (module S3) -> unit
@@ -200,9 +204,10 @@ end
    other computation [A,B,C] then X.required shall be [ A.ident ; B.ident ; C.ident ]
 *)
 module Make (X : sig
-  type 'a t
-  val name : string
-  val required : Ident.t list
-  include Computation
-  with type 'a t := 'a t
-end) : S with type 'a t = 'a X.t
+    type 'a t
+
+    val name : string
+    val required : Ident.t list
+
+    include Computation with type 'a t := 'a t
+  end) : S with type 'a t = 'a X.t

@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 (* The choice of 8000 bytes is copied from git:

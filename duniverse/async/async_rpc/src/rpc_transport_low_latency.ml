@@ -6,7 +6,7 @@ module Handler_result = Kernel_transport.Handler_result
 module Send_result = Kernel_transport.Send_result
 
 external writev2
-  :  Core.Unix.File_descr.t
+  :  Core_unix.File_descr.t
   -> buf1:Bigstring.t
   -> pos1:int
   -> len1:int
@@ -174,13 +174,8 @@ module Reader_internal = struct
     else (
       match Unix.Syscall_result.Int.error_exn result with
       | EAGAIN | EWOULDBLOCK | EINTR -> `Nothing_available
-      | EPIPE
-      | ECONNRESET
-      | EHOSTUNREACH
-      | ENETDOWN
-      | ENETRESET
-      | ENETUNREACH
-      | ETIMEDOUT -> `Eof
+      | EPIPE | ECONNRESET | EHOSTUNREACH | ENETDOWN | ENETRESET | ENETUNREACH | ETIMEDOUT
+        -> `Eof
       | error -> raise (Unix.Unix_error (error, "read", "")))
   ;;
 
@@ -227,7 +222,20 @@ module Reader_internal = struct
     else Message_len.none
   ;;
 
-  module Dispatcher = struct
+  module Dispatcher : sig
+    val run
+      :  t
+      -> on_message:(Bigstring.t -> pos:int -> len:int -> 'a Handler_result.t)
+      -> on_end_of_batch:(unit -> unit)
+      -> read_or_peek:[ `Peek | `Read ]
+      -> ('a, [ `Closed | `Eof ]) result Deferred.t
+
+    val peek_once_without_buffering_from_socket
+      :  t
+      -> on_message:(Bigstring.t -> pos:int -> len:int -> 'a Handler_result.t)
+      -> len:int
+      -> ('a, [ `Closed | `Not_enough_data ]) result Deferred.t
+  end = struct
     (* This module does a [Fd.every_ready_to] and takes care of exiting it when the
        callback returns [Wait _]. *)
 
@@ -264,7 +272,7 @@ module Reader_internal = struct
 
     let can_process_message t = (not t.reader.closed) && is_running t
 
-    let rec process_received_messages t =
+    let rec process_received_messages t ~read_or_peek =
       if can_process_message t
       then (
         let len = get_payload_length_of_next_available_message t.reader in
@@ -272,24 +280,28 @@ module Reader_internal = struct
         then (
           let len = Message_len.value_exn len in
           let start = t.reader.pos + Header.length in
-          t.reader.pos <- start + len;
+          let () =
+            match read_or_peek with
+            | `Read -> t.reader.pos <- start + len
+            | `Peek -> ()
+          in
           match t.on_message t.reader.buf ~pos:start ~len with
           | Stop x -> interrupt t (Stopped_by_user x)
-          | Continue -> process_received_messages t
+          | Continue -> process_received_messages t ~read_or_peek
           | Wait d ->
             if Deferred.is_determined d
-            then process_received_messages t
+            then process_received_messages t ~read_or_peek
             else interrupt t (Waiting_for_handler d))
         else t.on_end_of_batch ())
     ;;
 
-    let process_incoming t =
+    let process_incoming t ~read_or_peek =
       if can_process_message t
       then (
         match refill t.reader with
         | `Eof -> interrupt t Eof_reached
         | `Nothing_available -> ()
-        | `Read_some -> process_received_messages t)
+        | `Read_some -> process_received_messages t ~read_or_peek)
     ;;
 
     (* We want to stop reading/dispatching as soon as we get an error *)
@@ -301,7 +313,7 @@ module Reader_internal = struct
         Monitor.send_exn parent exn)
     ;;
 
-    let rec run reader ~on_message ~on_end_of_batch =
+    let rec run reader ~on_message ~on_end_of_batch ~read_or_peek =
       let t =
         { reader
         ; interrupt = Ivar.create ()
@@ -317,17 +329,23 @@ module Reader_internal = struct
           ()
       in
       stop_watching_on_error t ~monitor;
-      Scheduler.within' ~monitor (fun () ->
-        (* Process messages currently in the buffer. *)
-        (* This will fill [t.interrupt] if [on_message] returns [Wait _]. However, we
-           expect [on_message] to almost never return [Wait _] with this transport, since
-           even the "non-copying" writes return [Deferred.unit]. *)
-        process_received_messages t;
-        let interrupt =
-          Deferred.any [ Ivar.read t.interrupt; close_finished t.reader ]
-        in
-        Fd.interruptible_every_ready_to ~interrupt t.reader.fd `Read process_incoming t)
-      >>= function
+      match%bind
+        Scheduler.within' ~monitor (fun () ->
+          (* Process messages currently in the buffer. *)
+          (* This will fill [t.interrupt] if [on_message] returns [Wait _]. However, we
+             expect [on_message] to almost never return [Wait _] with this transport, since
+             even the "non-copying" writes return [Deferred.unit]. *)
+          process_received_messages t ~read_or_peek;
+          let interrupt =
+            Deferred.any [ Ivar.read t.interrupt; close_finished t.reader ]
+          in
+          Fd.interruptible_every_ready_to
+            ~interrupt
+            t.reader.fd
+            `Read
+            (process_incoming ~read_or_peek)
+            t)
+      with
       | `Bad_fd | `Unsupported ->
         failwith
           "Rpc_transport_low_latency.Reader.read_forever: file descriptor doesn't \
@@ -340,29 +358,150 @@ module Reader_internal = struct
          | Stopped (Stopped_by_user x) -> return (Ok x)
          | Stopped Handler_raised ->
            (* The exception has been propagated, we only arrive here because we forced the
-              [every_ready_to] to be interrupted. *)
+              [interruptible_every_ready_to] to be interrupted. *)
            Deferred.never ()
          | Stopped Eof_reached -> return (Error `Eof)
          | Stopped (Waiting_for_handler d) ->
-           d
-           >>= fun () ->
+           let%bind () = d in
            if reader.closed
            then return (Error `Closed)
-           else run reader ~on_message ~on_end_of_batch)
+           else run reader ~on_message ~on_end_of_batch ~read_or_peek)
+    ;;
+
+    let peek_once_without_buffering_from_socket reader ~on_message ~len =
+      let t =
+        { reader
+        ; interrupt = Ivar.create ()
+        ; state = Running
+        ; on_message
+        ; on_end_of_batch = ignore
+        }
+      in
+      let monitor =
+        Monitor.create
+          ~here:[%here]
+          ~name:
+            "Rpc_transport_low_latency.Reader_internal.Dispatcher.peek_once_without_buffering_from_socket"
+          ()
+      in
+      let buf = Bigstring.create len in
+      stop_watching_on_error t ~monitor;
+      match%bind
+        Scheduler.within' ~monitor (fun () ->
+          Fd.interruptible_every_ready_to
+            ~interrupt:(Deferred.any [ Ivar.read t.interrupt; close_finished t.reader ])
+            t.reader.fd
+            `Read
+            (fun t ->
+               if can_process_message t
+               then (
+                 let peek_len =
+                   (* [Fd.syscall_exn] catches EINTR and retries the function. This is better
+                      than calling [recv_peek_assume_fd_is_nonblocking] directly.
+                   *)
+                   Fd.syscall_exn t.reader.fd (fun file_descr ->
+                     Bigstring_unix.recv_peek_assume_fd_is_nonblocking
+                       file_descr
+                       ~pos:0
+                       ~len
+                       buf)
+                 in
+                 if peek_len >= len
+                 then (
+                   match on_message buf ~pos:0 ~len with
+                   | Stop x -> interrupt t (Stopped_by_user x)
+                   | Continue | Wait _ ->
+                     failwith
+                       "Rpc_transport_low_latency.Reader_internal.Dispatcher.peek_once_without_buffering_from_socket: \
+                        on_message returned unexpected value")
+                 else interrupt t Eof_reached))
+            t)
+      with
+      | `Bad_fd | `Unsupported ->
+        failwith
+          "Rpc_transport_low_latency.Reader_internal.Dispatcher.peek_once_without_buffering_from_socket \
+           file descriptor doesn't support watching"
+      | `Closed | `Interrupted ->
+        (match t.state with
+         | Running ->
+           assert (Fd.is_closed t.reader.fd || t.reader.closed);
+           return (Error `Closed)
+         | Stopped (Stopped_by_user x) -> return (Ok x)
+         | Stopped Eof_reached -> return (Error `Not_enough_data)
+         | Stopped Handler_raised ->
+           (* The exception has been propagated, we only arrive here because we forced the
+              [interruptible_every_ready_to] to be interrupted. *)
+           Deferred.never ()
+         | Stopped (Waiting_for_handler _) ->
+           failwith
+             "Rpc_transport_low_latency.Reader_internal.Dispatcher.peek_once_without_buffering_from_socket: \
+              unexpected state Waiting_for_handler")
     ;;
   end
 
-  let read_forever t ~on_message ~on_end_of_batch =
-    if t.closed then failwith "Rpc_transport_low_latency.Reader: reader closed";
-    if t.reading then failwith "Rpc_transport_low_latency.Reader: already reading";
+  let read_or_peek_dispatcher t ~dispatcher_impl ~caller_name =
+    if t.closed
+    then
+      failwiths
+        ~here:[%here]
+        "Rpc_transport_low_latency.Reader: reader closed"
+        ""
+        [%sexp_of: string];
+    if t.reading
+    then
+      failwiths
+        ~here:[%here]
+        "Rpc_transport_low_latency.Reader: already reading"
+        ""
+        [%sexp_of: string];
     t.reading <- true;
     Monitor.protect
+      ~run:`Now
+      ~rest:`Raise
       ~here:[%here]
-      ~name:"Rpc_transport_low_latency.Reader_internal.read_forever"
+      ~name:caller_name
       ~finally:(fun () ->
         t.reading <- false;
         Deferred.unit)
-      (fun () -> Dispatcher.run t ~on_message ~on_end_of_batch)
+      (fun () -> dispatcher_impl ())
+  ;;
+
+  let read_forever t ~on_message ~on_end_of_batch =
+    read_or_peek_dispatcher
+      t
+      ~dispatcher_impl:(fun () ->
+        Dispatcher.run t ~on_message ~on_end_of_batch ~read_or_peek:`Read)
+      ~caller_name:"Rpc_transport_low_latency.Reader_internal.read_forever"
+  ;;
+
+  let peek_bin_prot t (bin_reader : _ Bin_prot.Type_class.reader) =
+    let on_message buf ~pos ~len =
+      let pos_ref = ref pos in
+      let x = bin_reader.read buf ~pos_ref in
+      if !pos_ref <> pos + len
+      then
+        failwithf
+          "peek_bin_prot: message length (%d) did not match expected length (%d)"
+          (!pos_ref - pos)
+          len
+          ()
+      else Handler_result.Stop x
+    in
+    read_or_peek_dispatcher
+      t
+      ~dispatcher_impl:(fun () ->
+        Dispatcher.run t ~on_message ~on_end_of_batch:ignore ~read_or_peek:`Peek)
+      ~caller_name:"Rpc_transport_low_latency.Reader_internal.peek_bin_prot"
+  ;;
+
+  let peek_once_without_buffering_from_socket t ~len =
+    let on_message buf ~pos:_ ~len:_ = Handler_result.Stop buf in
+    read_or_peek_dispatcher
+      t
+      ~dispatcher_impl:(fun () ->
+        Dispatcher.peek_once_without_buffering_from_socket t ~on_message ~len)
+      ~caller_name:
+        "Rpc_transport_low_latency.Reader_internal.peek_once_without_buffering_from_socket"
   ;;
 
   let close t =
@@ -674,8 +813,7 @@ module Writer_internal = struct
       t.pos <- stop + len;
       Sent ())
     else
-      Message_too_big
-        { size = payload_len; max_message_size = t.config.max_message_size }
+      Message_too_big { size = payload_len; max_message_size = t.config.max_message_size }
   ;;
 
   let should_send_now t =
@@ -780,11 +918,36 @@ let make_create f ?(config = Config.default) ~max_message_size fd =
 module Reader = struct
   include Kernel_transport.Reader
 
-  let create_internal fd config =
-    pack (module Reader_internal) (Reader_internal.create fd config)
-  ;;
+  module With_internal_reader = struct
+    type t =
+      { internal_reader : Reader_internal.t
+      ; reader : Kernel_transport.Reader.t
+      }
 
-  let create = make_create create_internal
+    let create_internal fd config =
+      let internal_reader = Reader_internal.create fd config in
+      let reader = pack (module Reader_internal) internal_reader in
+      { internal_reader; reader }
+    ;;
+
+    let create = make_create create_internal
+    let transport_reader t = t.reader
+
+    let peek_bin_prot t bin_reader =
+      Reader_internal.peek_bin_prot t.internal_reader bin_reader
+    ;;
+
+    let peek_once_without_buffering_from_socket t ~len =
+      Reader_internal.peek_once_without_buffering_from_socket t.internal_reader ~len
+    ;;
+  end
+
+  let create ?config ~max_message_size fd =
+    let internal =
+      make_create With_internal_reader.create_internal ?config ~max_message_size fd
+    in
+    internal.reader
+  ;;
 end
 
 module Writer = struct
@@ -803,12 +966,26 @@ type t = Kernel_transport.t =
   }
 [@@deriving sexp_of]
 
+module With_internal_reader = struct
+  type t =
+    { reader_with_internal_reader : Reader.With_internal_reader.t
+    ; writer : Writer.t
+    }
+
+  let create_internal fd config =
+    { reader_with_internal_reader = Reader.With_internal_reader.create_internal fd config
+    ; writer = Writer.create_internal fd config
+    }
+  ;;
+
+  let create = make_create create_internal
+end
+
 let close = Kernel_transport.close
 
-let create_internal fd config =
-  { reader = Reader.create_internal fd config
-  ; writer = Writer.create_internal fd config
-  }
+let create ?config ~max_message_size fd =
+  let internal =
+    make_create With_internal_reader.create_internal ?config ~max_message_size fd
+  in
+  { reader = internal.reader_with_internal_reader.reader; writer = internal.writer }
 ;;
-
-let create = make_create create_internal

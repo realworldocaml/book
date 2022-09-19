@@ -58,14 +58,41 @@ let%test_module "Sequence.merge*" =
         [ Both (2, 2); Left 1; Right 3 ]
     ;;
 
-    let%test_unit _ =
-      [%test_eq: (int * string) list]
-        (to_list
-           (merge
-              (of_list [ 0, "A"; 1, "A" ])
-              (of_list [ 1, "B"; 2, "B" ])
-              ~compare:(fun a b -> [%compare: int] (fst a) (fst b))))
-        [ 0, "A"; 1, "A"; 2, "B" ]
+    let test_merge_semantics ~merge ~normalize_list =
+      Base_quickcheck.Test.run_exn
+        (module struct
+          module Deduped_and_sorted_int_list = struct
+            type t = int list [@@deriving quickcheck, sexp_of]
+
+            let sort t = normalize_list t ~compare:Int.compare
+
+            let quickcheck_generator =
+              Base_quickcheck.Generator.map quickcheck_generator ~f:sort
+            ;;
+
+            let quickcheck_shrinker =
+              Base_quickcheck.Shrinker.map quickcheck_shrinker ~f:sort ~f_inverse:sort
+            ;;
+          end
+
+          type t = Deduped_and_sorted_int_list.t * Deduped_and_sorted_int_list.t
+          [@@deriving quickcheck, sexp_of]
+        end)
+        ~f:(fun (xs, ys) ->
+          [%test_result: int list]
+            (Sequence.to_list
+               (merge (Sequence.of_list xs) (Sequence.of_list ys) ~compare:Int.compare))
+            ~expect:(normalize_list (xs @ ys) ~compare:Int.compare))
+    ;;
+
+    let%test_unit "merge_deduped_and_sorted" =
+      test_merge_semantics
+        ~merge:Sequence.merge_deduped_and_sorted
+        ~normalize_list:List.dedup_and_sort
+    ;;
+
+    let%test_unit "merge_sorted" =
+      test_merge_semantics ~merge:Sequence.merge_sorted ~normalize_list:List.sort
     ;;
   end)
 ;;
@@ -352,10 +379,7 @@ let%test_unit _ =
   [%test_result: int list] (to_list (sub s12345 ~pos:1 ~len:2)) ~expect:[ 2; 3 ]
 ;;
 
-let%test_unit _ =
-  [%test_result: int list] (to_list (sub s12345 ~pos:0 ~len:0)) ~expect:[]
-;;
-
+let%test_unit _ = [%test_result: int list] (to_list (sub s12345 ~pos:0 ~len:0)) ~expect:[]
 let%test_unit _ = [%test_result: int list] (to_list (take s12345 2)) ~expect:[ 1; 2 ]
 let%test_unit _ = [%test_result: int list] (to_list (take s12345 0)) ~expect:[]
 

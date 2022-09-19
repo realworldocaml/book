@@ -1,3 +1,4 @@
+open! Base
 open! Import
 
 type 'a t = 'a Generator.t
@@ -381,18 +382,14 @@ let%expect_test "option" =
 let either = Generator.either
 
 let%expect_test "either" =
-  test_generator
-    (Generator.either Generator.bool Generator.bool)
-    (m_either m_bool m_bool);
+  test_generator (Generator.either Generator.bool Generator.bool) (m_either m_bool m_bool);
   [%expect {| (generator exhaustive) |}]
 ;;
 
 let result = Generator.result
 
 let%expect_test "result" =
-  test_generator
-    (Generator.result Generator.bool Generator.bool)
-    (m_result m_bool m_bool);
+  test_generator (Generator.result Generator.bool Generator.bool) (m_result m_bool m_bool);
   [%expect {| (generator exhaustive) |}]
 ;;
 
@@ -439,14 +436,14 @@ let%expect_test "small_strictly_positive_int" =
 
 let int = Generator.int
 
-let%expect_test ("int"[@tags "64-bits-only"]) =
+let%expect_test ("int" [@tags "64-bits-only"]) =
   test_generator Generator.int (m_int (module Int));
   [%expect {| (generator "generated 8_006 distinct values in 10_000 iterations") |}]
 ;;
 
 let int_uniform = Generator.int_uniform
 
-let%expect_test ("int_uniform"[@tags "64-bits-only"]) =
+let%expect_test ("int_uniform" [@tags "64-bits-only"]) =
   test_generator ~mode:`inexhaustive Generator.int_uniform (m_int (module Int));
   [%expect
     {|
@@ -874,14 +871,14 @@ let%expect_test "int64_log_uniform_inclusive" =
 
 let nativeint = Generator.nativeint
 
-let%expect_test ("nativeint"[@tags "64-bits-only"]) =
+let%expect_test ("nativeint" [@tags "64-bits-only"]) =
   test_generator Generator.nativeint (m_int (module Nativeint));
   [%expect {| (generator "generated 8_047 distinct values in 10_000 iterations") |}]
 ;;
 
 let nativeint_uniform = Generator.nativeint_uniform
 
-let%expect_test ("nativeint_uniform"[@tags "64-bits-only"]) =
+let%expect_test ("nativeint_uniform" [@tags "64-bits-only"]) =
   test_generator
     ~mode:`inexhaustive
     Generator.nativeint_uniform
@@ -1123,6 +1120,53 @@ let%expect_test "float_inclusive" =
         INF)))) |}]
 ;;
 
+let%expect_test "float_inclusive singular range edge case" =
+  test_generator ~mode:`inexhaustive (Generator.float_inclusive 1. 1.) m_float;
+  [%expect
+    {|
+    (generator
+     ("generated 1 distinct values in 10_000 iterations"
+      ("did not generate these values"
+       (NAN
+        -INF
+        -1.7976931348623157E+308
+        -2.2250738585072014E-308
+        -2.2250738585072009E-308
+        -4.94065645841247E-324
+        0
+        4.94065645841247E-324
+        2.2250738585072009E-308
+        2.2250738585072014E-308
+        1.7976931348623157E+308
+        INF)))) |}]
+;;
+
+let%expect_test "float_inclusive two-value range edge case" =
+  show_raise (fun () ->
+    test_generator
+      ~mode:`inexhaustive
+      (Generator.float_inclusive 5000000000000000. 5000000000000001.)
+      m_float);
+  [%expect
+    {|
+    (generator
+     ("generated 2 distinct values in 10_000 iterations"
+      ("did not generate these values"
+       (NAN
+        -INF
+        -1.7976931348623157E+308
+        -2.2250738585072014E-308
+        -2.2250738585072009E-308
+        -4.94065645841247E-324
+        0
+        4.94065645841247E-324
+        2.2250738585072009E-308
+        2.2250738585072014E-308
+        1.7976931348623157E+308
+        INF))))
+    "did not raise" |}]
+;;
+
 let float_uniform_exclusive = Generator.float_uniform_exclusive
 
 let%expect_test "float_uniform_exclusive" =
@@ -1356,6 +1400,17 @@ let%expect_test "string_with_length_of" =
        ("" "\000" " " 0 A _ z "\000\000" "  " 00 AA __)))) |}]
 ;;
 
+let bytes = Generator.bytes
+
+let%expect_test "bytes" =
+  test_generator ~mode:`inexhaustive Generator.bytes m_bytes;
+  [%expect
+    {|
+    (generator
+     ("generated 8_583 distinct values in 10_000 iterations"
+      ("did not generate these values" (" " "\000\000" "  " 00 AA __ zz)))) |}]
+;;
+
 let sexp = Generator.sexp
 
 let%expect_test "sexp" =
@@ -1446,6 +1501,27 @@ let%expect_test "list_permutations" =
   [%expect {| (generator "generated 24 distinct values in 10_000 iterations") |}]
 ;;
 
+let array = Generator.array
+
+let%expect_test "array" =
+  test_generator (Generator.array Generator.bool) (m_array m_bool);
+  [%expect {| (generator "generated 2_248 distinct values in 10_000 iterations") |}]
+;;
+
+let ref = Generator.ref
+
+let%expect_test "ref" =
+  test_generator (Generator.ref Generator.bool) (m_ref m_bool);
+  [%expect {| (generator exhaustive) |}]
+;;
+
+let lazy_t = Generator.lazy_t
+
+let%expect_test "lazy_t" =
+  test_generator (Generator.lazy_t Generator.bool) (m_lazy_t m_bool);
+  [%expect {| (generator exhaustive) |}]
+;;
+
 let of_lazy = Generator.of_lazy
 
 let%expect_test "of_lazy, forced" =
@@ -1515,3 +1591,69 @@ let%expect_test "[float32_mat], [float64_mat]" =
   test float64_mat [%sexp_of: float];
   [%expect {| (generator "generated 7_022 distinct values in 10_000 iterations") |}]
 ;;
+
+module Debug = struct
+  let coverage = Generator.Debug.coverage
+
+  let%expect_test "[coverage]" =
+    let test config =
+      Generator.string_of (Generator.return '.')
+      |> Test.with_sample_exn ~config ~f:(fun sample ->
+        let counts = coverage (module Int) (Sequence.map sample ~f:String.length) in
+        counts |> [%sexp_of: int Map.M(Int).t] |> print_s)
+    in
+    (* small sample size *)
+    test { Test.default_config with test_count = 3 };
+    [%expect {| ((0 1) (1 1) (3 1)) |}];
+    (* larger sample size *)
+    test { Test.default_config with test_count = 10 };
+    [%expect {| ((0 2) (1 2) (2 1) (3 1) (4 2) (6 1) (10 1)) |}];
+    (* nonstandard sizes *)
+    test { Test.default_config with sizes = Sequence.cycle_list_exn [ 1; 2 ] };
+    [%expect {| ((0 2466) (1 2534) (2 3304) (3 1696)) |}];
+    (* not enough sizes *)
+    require_does_raise [%here] (fun () ->
+      test { Test.default_config with sizes = Sequence.init 10 ~f:Fn.id });
+    [%expect
+      {|
+      ("Base_quickcheck.Test.run: insufficient size values for test count"
+       (test_count 10000)
+       (number_of_size_values 10)) |}]
+  ;;
+
+  let monitor = Generator.Debug.monitor
+
+  let%expect_test "[iter]" =
+    let before = Base.ref 0 in
+    let after = Base.ref 0 in
+    let test n ~f =
+      let t =
+        bool
+        |> monitor ~f:(fun _ -> Int.incr before)
+        |> Generator.filter ~f
+        |> monitor ~f:(fun _ -> Int.incr after)
+      in
+      Test.with_sample_exn
+        t
+        ~config:{ Test.default_config with test_count = n }
+        ~f:(Sequence.iter ~f:ignore);
+      print_s [%message "counts" (before : int ref) (after : int ref)]
+    in
+    let all (_ : bool) = true in
+    let half bool = bool in
+    test 10 ~f:all;
+    [%expect {| (counts (before 10) (after 10)) |}];
+    (* state must be reset manually *)
+    test 10 ~f:all;
+    [%expect {| (counts (before 20) (after 20)) |}];
+    before := 0;
+    test 0 ~f:all;
+    [%expect {| (counts (before 0) (after 20)) |}];
+    after := 0;
+    test 0 ~f:all;
+    [%expect {| (counts (before 0) (after 0)) |}];
+    (* [iter] reflects internal behavior such as filtering *)
+    test 10 ~f:half;
+    [%expect {| (counts (before 16) (after 10)) |}]
+  ;;
+end

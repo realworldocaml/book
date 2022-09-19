@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 type 'a t = { waits : 'a Ivar.t Queue.t } [@@deriving sexp_of]
 

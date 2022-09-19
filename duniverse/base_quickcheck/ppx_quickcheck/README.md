@@ -57,6 +57,8 @@ let observer = [%quickcheck.observer: float * int * [`A | `B | `C]]
 let shrinker = [%quickcheck.shrinker: float * int * [`A | `B | `C]]
 ```
 
+For maps, the syntax that works is `[%quickcheck.generator: bool Map.M(String).t]`.
+
 Attributes
 ----------
 
@@ -78,6 +80,18 @@ type tree =
   | Leaf
   | Node1 of tree * int * tree [@quickcheck.weight 1. /. 2.]
   | Node2 of tree * int * tree * int * tree [@quickcheck.weight 1. /. 3.]
+[@@deriving quickcheck]
+```
+
+The `@quickcheck.do_not_generate` attribute leaves a variant out of
+the generator entirely. This is similar to `[@quickcheck.weight 0.]`,
+but it does not require generators for the variant arguments to exist.
+Observers and shrinkers are not altered by this attribute.
+
+```ocaml
+type v =
+  | A
+  | B of Something_that_cannot_be_generated.t [@quickcheck.do_not_generate]
 [@@deriving quickcheck]
 ```
 

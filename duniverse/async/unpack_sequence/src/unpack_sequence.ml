@@ -98,11 +98,15 @@ let unpack_all ~(from : Unpack_from.t) ~(to_ : _ Unpack_to.t) ~using:unpack_buff
     | Reader input ->
       (* In rare situations, a reader can asynchronously raise.  We'd rather not raise
          here, since we have a natural place to report the error. *)
-      try_with (fun () ->
-        Reader.read_one_chunk_at_a_time input ~handle_chunk:(fun buf ~pos ~len ->
-          match Unpack_buffer.feed unpack_buffer buf ~pos ~len with
-          | Error error -> return (`Stop (Unpack_result.Unpack_error error))
-          | Ok () -> unpack_all_available ()))
+      try_with
+        ~run:
+          `Schedule
+        ~rest:`Log
+        (fun () ->
+           Reader.read_one_chunk_at_a_time input ~handle_chunk:(fun buf ~pos ~len ->
+             match Unpack_buffer.feed unpack_buffer buf ~pos ~len with
+             | Error error -> return (`Stop (Unpack_result.Unpack_error error))
+             | Ok () -> unpack_all_available ()))
       >>| (function
         | Error exn -> Unpack_result.Unpack_error (Error.of_exn exn)
         | Ok (`Stopped result) -> result
@@ -341,9 +345,7 @@ let%test_module _ =
               then return (`Finished ())
               else (
                 let pieces = break_into_pieces data ~of_size in
-                Pipe.transfer_in_without_pushback
-                  input
-                  ~from:(Queue.of_list pieces);
+                Pipe.transfer_in_without_pushback input ~from:(Queue.of_list pieces);
                 Pipe.read_exactly output ~num_values:(List.length values)
                 >>| function
                 | `Eof | `Fewer _ -> assert false

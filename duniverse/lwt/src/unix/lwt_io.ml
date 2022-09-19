@@ -848,9 +848,7 @@ struct
     let buffer = Bytes.create (20 + bsize) in
     Bytes.unsafe_blit header 0 buffer 0 20;
     unsafe_read_into_exactly ic buffer 20 bsize >>= fun () ->
-    (* Marshal.from_bytes should be used here, but we want 4.01
-       compat. *)
-    Lwt.return (Marshal.from_string (Bytes.unsafe_to_string buffer) 0)
+    Lwt.return (Marshal.from_bytes buffer 0)
 
   (* +---------------------------------------------------------------+
      | Writing                                                       |
@@ -1367,8 +1365,8 @@ let eprintl txt = write_line stderr txt
 let eprintf fmt = Printf.ksprintf eprint fmt
 let eprintlf fmt = Printf.ksprintf eprintl fmt
 
-let pipe ?in_buffer ?out_buffer _ =
-  let fd_r, fd_w = Lwt_unix.pipe () in
+let pipe ?cloexec ?in_buffer ?out_buffer _ =
+  let fd_r, fd_w = Lwt_unix.pipe ?cloexec () in
   (of_fd ?buffer:in_buffer ~mode:input fd_r,
    of_fd ?buffer:out_buffer ~mode:output fd_w)
 

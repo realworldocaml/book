@@ -35,7 +35,7 @@ Usage
 -----
 
 This is normally used so exceptions can contain better positions. An example is
-`Core_kernel.Option.value_exn`, which takes an optional position so that if you have a
+`Core.Option.value_exn`, which takes an optional position so that if you have a
 stack trace, you can get still the origin of the exception.
 
 It can also be used in cases where stack traces are useless (for instance in monads with a

@@ -1,0 +1,306 @@
+(* Removing unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~remove:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be removed but they were not found: `y'
+|}]
+
+(* Modifying unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~modify:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be modified but they were not found: `y'
+|}]
+
+(* Adding unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~add:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This record expression is expected to have type V1.t
+       The field y does not belong to type V1.t
+|}]
+
+(* Intersecting sets of add/remove. *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~add:[ f ] ~remove:[ f ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `add' and `remove' must be disjoint but they are not: `f' found in both
+|}]
+
+(* Intersecting sets of modify/set. *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~modify:[ x ] ~set:[ x ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `modify' and `set' must be disjoint but they are not: `x' found in both
+|}]
+
+(* Wrong casing *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { y : int } [@@deriving stable_record ~version:V1.t ~add:[ x ] ~remove:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be removed but they were not found: `Y'
+|}]
+
+(* omitted [~version] argument *)
+module Stable = struct
+  module V2 = struct
+    type t =
+      { x : int
+      ; f : float
+      ; z : string
+      }
+    [@@deriving stable_record ~add:[ y ] ~remove:[ f ] ~modify:[ z ]]
+  end
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: stable_record: missing target version
+|}]
+
+(* Removing unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~remove:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be removed but they were not found: `Y'
+|}]
+
+(* Modifying unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~modify:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be modified but they were not found: `Y'
+|}]
+
+(* Adding unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~add:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type t but an expression was expected of type
+         y:'a -> 'b
+|}]
+
+(* Intersecting sets of add/remove. *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~add:[ F ] ~remove:[ F ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `add' and `remove' must be disjoint but they are not: `F' found in both
+|}]
+
+(* Wrong casing *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = Y [@@deriving stable_variant ~version:V1.t ~add:[ X ] ~remove:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be removed but they were not found: `y'
+|}]
+
+module Missing_type_argument_on_record = struct
+  module V1 = struct
+    type 'a t = { lst : 'a list }
+  end
+
+  module V2 = struct
+    type ('a, 'b) t = { pair_lst : ('a * 'b) list }
+    [@@deriving stable_record ~version:V1.t ~add:[ lst ] ~remove:[ pair_lst ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: The type constructor V1.t expects 1 argument(s),
+       but is here applied to 0 argument(s)
+|}]
+
+module Missing_type_argument_on_variant = struct
+  module V1 = struct
+    type 'a t = Foo of 'a [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b) t =
+      | Foo of 'a * int
+      | Bar of 'b
+    [@@deriving stable_variant ~version:V1.t ~modify:[ Foo ] ~remove:[ Bar ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: The type constructor V1.t expects 1 argument(s),
+       but is here applied to 0 argument(s)
+|}]
+
+module Mixing_stable_record_and_variant = struct
+  module V1 = struct
+    type 'a t = { foo : 'a } [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b) t =
+      | Foo of 'a * int
+      | Bar of 'b
+    [@@deriving
+      stable_variant ~version:[%stable: ('a * int) V1.t] ~modify:[ Foo ] ~remove:[ Bar ]]
+  end
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: stable_variant: missing target version
+|}]
+
+module Recursiveness_requires_map = struct
+  module Container_with_no_map = struct
+    type 'a t = { a : 'a }
+  end
+
+  module V1 = struct
+    type t = { c_bad : t Container_with_no_map.t }
+  end
+
+  module V2 = struct
+    type t = { c_bad : t Container_with_no_map.t }
+    [@@deriving stable_record ~version:V1.t]
+  end
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: Unbound value Container_with_no_map.map
+|}]
+
+module Action_attribute_and_arguments = struct
+  module V1 = struct
+    type t = Foo of int [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t =
+      | Foo of float
+      | Bar
+    [@@deriving stable_variant ~version:V1.t ~remove:[ Bar ]]
+    [@@stable.changes "" ~modify:[ Foo ]]
+
+    (* Please note we complain even if those are not actually conflicting. *)
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: The changes (add, modify, set, or remove) passed to
+[@@deriving stable_variant] are unnecessary. They are already
+specified by the [@@stable.changes] attribute.
+|}]

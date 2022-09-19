@@ -1,7 +1,7 @@
 (** A "force_once" is a thunk that can only be forced once.  Subsequent forces
     will raise an exception. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type 'a t

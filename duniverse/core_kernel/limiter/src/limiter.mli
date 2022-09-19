@@ -1,3 +1,4 @@
+
 (** Implements a token-bucket-based throttling rate limiter. This module is useful for
     limiting network clients to a sensible query rate, or in any case where you have jobs
     that consume a scarce but replenishable resource.
@@ -30,7 +31,7 @@
     expected to be monotonically increasing. [now]'s that are set in the past are
     effectively moved up to the current time of the bucket. *)
 
-open! Core_kernel
+open! Core
 open! Import
 
 type t [@@deriving sexp_of]
@@ -63,9 +64,9 @@ module Tokens_may_be_available_result : sig
     | When_return_to_hopper_is_called
 end
 
-module Try_increase_bucket_limit_result : sig
+module Try_reconfigure_result : sig
   type t =
-    | Increased
+    | Reconfigured
     | Unable
   [@@deriving sexp_of]
 end
@@ -100,13 +101,14 @@ module Token_bucket : sig
     val create_exn : now:Time_ns.t -> burst_size:int -> sustained_rate_per_sec:float -> t
 
     (** Increases the [bucket_limit] and the current [bucket_level] by the difference
-        between the current and new bucket limits. Decreasing the bucket_limit may cause the
-        bucket_level to become negative, breaking an invariant. If the new limit is lower
-        than the current limit, [Unable] is returned. *)
-    val try_increase_bucket_limit
+        between the current and new bucket limits. Decreasing the bucket_limit may cause
+        the [bucket_level] to become negative, breaking an invariant. If the new limit is
+        lower than the current limit, [Unable] is returned. *)
+    val try_reconfigure
       :  t
-      -> new_limit:int
-      -> Try_increase_bucket_limit_result.t
+      -> burst_size:int
+      -> sustained_rate_per_sec:float
+      -> Try_reconfigure_result.t
   end
 end
 

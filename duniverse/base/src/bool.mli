@@ -5,11 +5,10 @@ open! Import
 
 type t = bool [@@deriving_inline enumerate, sexp, sexp_grammar]
 
-val all : t list
+include Ppx_enumerate_lib.Enumerable.S with type t := t
+include Sexplib0.Sexpable.S with type t := t
 
-include Ppx_sexp_conv_lib.Sexpable.S with type t := t
-
-val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 

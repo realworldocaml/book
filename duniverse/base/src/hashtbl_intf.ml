@@ -1,11 +1,13 @@
 open! Import
 
+(** @canonical Base.Hashtbl.Key *)
 module Key = struct
   module type S = sig
     type t [@@deriving_inline compare, sexp_of]
 
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S with type t := t
+
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
 
@@ -17,6 +19,7 @@ module Key = struct
   type 'a t = (module S with type t = 'a)
 end
 
+(** @canonical Base.Hashtbl.Merge_into_action *)
 module Merge_into_action = struct
   type 'a t =
     | Remove
@@ -81,6 +84,9 @@ module type Accessors = sig
   (** [update t key ~f] is [change t key ~f:(fun o -> Some (f o))]. *)
   val update : ('a, 'b) t -> 'a key -> f:('b option -> 'b) -> unit
 
+  (** [update_and_return t key ~f] is [update], but returns the result of [f o]. *)
+  val update_and_return : ('a, 'b) t -> 'a key -> f:('b option -> 'b) -> 'b
+
   (** [map t f] returns a new table with values replaced by the result of applying [f]
       to the current values.
 
@@ -120,10 +126,7 @@ module type Accessors = sig
 
   (** Returns new tables with bound values partitioned by [f] applied to the bound
       values. *)
-  val partition_map
-    :  ('a, 'b) t
-    -> f:('b -> ('c, 'd) Either.t)
-    -> ('a, 'c) t * ('a, 'd) t
+  val partition_map : ('a, 'b) t -> f:('b -> ('c, 'd) Either.t) -> ('a, 'c) t * ('a, 'd) t
 
   (** Like [partition_map], but the function [f] takes both key and data as arguments. *)
   val partition_mapi
@@ -296,11 +299,6 @@ module type Accessors = sig
 
   (** Returns the list of all (key, data) pairs for given hashtable. *)
   val to_alist : ('a, 'b) t -> ('a key * 'b) list
-
-  val validate
-    :  name:('a key -> string)
-    -> 'b Validate.check
-    -> ('a, 'b) t Validate.check
 
 
   (** [remove_if_zero]'s default is [false]. *)
@@ -597,13 +595,11 @@ module type S_without_submodules = sig
 
   include Creators with type ('a, 'b) t := ('a, 'b) t (** @inline *)
 
-  include
-    Accessors with type ('a, 'b) t := ('a, 'b) t with type 'a key = 'a
+  include Accessors with type ('a, 'b) t := ('a, 'b) t with type 'a key = 'a
   (** @inline *)
 
 
-  include
-    Multi with type ('a, 'b) t := ('a, 'b) t with type 'a key := 'a key
+  include Multi with type ('a, 'b) t := ('a, 'b) t with type 'a key := 'a key
   (** @inline *)
 
   val hashable_s : ('key, _) t -> 'key Key.t
@@ -612,9 +608,14 @@ module type S_without_submodules = sig
 end
 
 module type S_poly = sig
-  type ('a, 'b) t [@@deriving_inline sexp]
+  type ('a, 'b) t [@@deriving_inline sexp, sexp_grammar]
 
-  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+  include Sexplib0.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
+  val t_sexp_grammar
+    :  'a Sexplib0.Sexp_grammar.t
+    -> 'b Sexplib0.Sexp_grammar.t
+    -> ('a, 'b) t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -639,7 +640,7 @@ module type For_deriving = sig
   module type Sexp_of_m = sig
     type t [@@deriving_inline sexp_of]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
   end
@@ -647,12 +648,22 @@ module type For_deriving = sig
   module type M_of_sexp = sig
     type t [@@deriving_inline of_sexp]
 
-    val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+    val t_of_sexp : Sexplib0.Sexp.t -> t
 
     [@@@end]
 
     include Key.S with type t := t
   end
+
+  module type M_sexp_grammar = sig
+    type t [@@deriving_inline sexp_grammar]
+
+    val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+    [@@@end]
+  end
+
+  module type Equal_m = sig end
 
   val sexp_of_m__t
     :  (module Sexp_of_m with type t = 'k)
@@ -665,6 +676,18 @@ module type For_deriving = sig
     -> (Sexp.t -> 'v)
     -> Sexp.t
     -> ('k, 'v) t
+
+  val m__t_sexp_grammar
+    :  (module M_sexp_grammar with type t = 'k)
+    -> 'v Sexplib0.Sexp_grammar.t
+    -> ('k, 'v) t Sexplib0.Sexp_grammar.t
+
+  val equal_m__t
+    :  (module Equal_m)
+    -> ('v -> 'v -> bool)
+    -> ('k, 'v) t
+    -> ('k, 'v) t
+    -> bool
 end
 
 module type Hashtbl = sig
@@ -746,7 +769,6 @@ module type Hashtbl = sig
 
   module type Accessors = Accessors
   module type Creators = Creators
-  module type Key = Key.S [@@deprecated "[since 2019-03] Use [Hashtbl.Key.S]"]
   module type Multi = Multi
   module type S_poly = S_poly
   module type S_without_submodules = S_without_submodules

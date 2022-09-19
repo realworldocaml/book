@@ -30,16 +30,18 @@ type t =
   | Less
   | Equal
   | Greater
-[@@deriving_inline compare, enumerate, hash, sexp]
+[@@deriving_inline compare, hash, sexp, sexp_grammar]
 
-val compare : t -> t -> int
-val all : t list
-val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+include Ppx_compare_lib.Comparable.S with type t := t
+include Ppx_hash_lib.Hashable.S with type t := t
+include Sexplib0.Sexpable.S with type t := t
 
-include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
+
+(*_ Avoid [@@deriving_inline enumerate] due to circular dependency *)
+val all : t list
 
 include Equal.S with type t := t
 

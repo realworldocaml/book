@@ -62,15 +62,11 @@ let int32_to_int x =
 ;;
 
 let int_to_int32_exn x =
-  if int_is_representable_as_int32 x
-  then int_to_int32_trunc x
-  else int_to_int32_failure x
+  if int_is_representable_as_int32 x then int_to_int32_trunc x else int_to_int32_failure x
 ;;
 
 let int32_to_int_exn x =
-  if int32_is_representable_as_int x
-  then int32_to_int_trunc x
-  else int32_to_int_failure x
+  if int32_is_representable_as_int x then int32_to_int_trunc x else int32_to_int_failure x
 ;;
 
 (* int <-> int64 *)
@@ -91,9 +87,7 @@ let int64_to_int x =
 ;;
 
 let int64_to_int_exn x =
-  if int64_is_representable_as_int x
-  then int64_to_int_trunc x
-  else int64_to_int_failure x
+  if int64_is_representable_as_int x then int64_to_int_trunc x else int64_to_int_failure x
 ;;
 
 (* int <-> nativeint *)
@@ -286,9 +280,8 @@ end
 module Make_hex (I : sig
     type t [@@deriving_inline compare, hash]
 
-    val compare : t -> t -> int
-    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+    include Ppx_compare_lib.Comparable.S with type t := t
+    include Ppx_hash_lib.Hashable.S with type t := t
 
     [@@@end]
 
@@ -349,6 +342,10 @@ struct
         | Some (Neg body) -> I.neg (of_string_with_delimiter body)
         | Some (Pos body) -> of_string_with_delimiter body)
       else invalid str
+    ;;
+
+    let (t_sexp_grammar : t Sexplib0.Sexp_grammar.t) =
+      Sexplib0.Sexp_grammar.coerce String.t_sexp_grammar
     ;;
   end
 

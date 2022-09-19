@@ -1,7 +1,7 @@
 opam-version: "2.0"
-version: "v0.14.0"
-maintainer: "opensource@janestreet.com"
-authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
+version: "v0.15.0"
+maintainer: "Jane Street developers"
+authors: ["Jane Street Group, LLC"]
 homepage: "https://github.com/janestreet/base"
 bug-reports: "https://github.com/janestreet/base/issues"
 dev-repo: "git+https://github.com/janestreet/base.git"
@@ -11,8 +11,8 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml"             {>= "4.07.0"}
-  "sexplib0"          {>= "v0.14" & < "v0.15"}
+  "ocaml"             {>= "4.10.0"}
+  "sexplib0"          {>= "v0.15" & < "v0.16"}
   "dune"              {>= "2.0.0"}
   "dune-configurator"
 ]

@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 
 type t = string Patience_diff.Hunk.t list [@@deriving sexp_of]

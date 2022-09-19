@@ -522,13 +522,9 @@ and string e = parse
 
   | '\r'? '\n'
       {
-        if e.in_directive then
-          lexer_error lexbuf "Unterminated string literal"
-        else (
           add e (lexeme lexbuf);
           new_line e;
           string e lexbuf
-        )
       }
 
   | _ as c

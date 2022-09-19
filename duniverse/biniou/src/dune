@@ -4,4 +4,4 @@
  (synopsis "Extensible binary serialization format")
  (wrapped false)
  (flags -safe-string)
- (libraries easy-format))
+ (libraries easy-format camlp-streams))

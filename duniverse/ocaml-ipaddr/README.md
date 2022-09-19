@@ -4,7 +4,7 @@ A library for manipulation of IP and MAC address representations.
 
 Features:
 
- * oUnit-based tests
+ * ounit2-based tests
  * IPv4 and IPv6 support
  * IPv4 and IPv6 CIDR prefix support
  * IPv4 and IPv6 [CIDR-scoped address](http://tools.ietf.org/html/rfc4291#section-2.3) support

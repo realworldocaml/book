@@ -1,8 +1,6 @@
 open Hash.Builtin
 open Ppx_compare_lib.Builtin
-module List = List0
-module String = String0
-include (Sexplib0.Sexp : module type of Sexplib0.Sexp with type t := Sexplib0.Sexp.t)
+include Sexplib0.Sexp
 
 (** Type of S-expressions *)
 type t = Sexplib0.Sexp.t =
@@ -47,5 +45,6 @@ and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
 
 [@@@end]
 
+let t_sexp_grammar = Sexplib0.Sexp_conv.sexp_t_sexp_grammar
 let of_string = ()
 let invariant (_ : t) = ()

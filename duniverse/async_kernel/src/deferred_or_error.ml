@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Deferred = Deferred1
 
@@ -56,6 +56,7 @@ let error_string msg = Deferred.return (Or_error.error_string msg)
 let errorf format = ksprintf error_string format
 let tag t ~tag = Deferred.map t ~f:(Or_error.tag ~tag)
 let tag_s t ~tag = Deferred.map t ~f:(Or_error.tag_s ~tag)
+let tag_s_lazy t ~tag = Deferred.map t ~f:(Or_error.tag_s_lazy ~tag)
 
 let tag_arg t message a sexp_of_a =
   Deferred.map t ~f:(fun t -> Or_error.tag_arg t message a sexp_of_a)
@@ -83,14 +84,14 @@ let find_map_ok l ~f =
 
 let ok_unit = return ()
 
-let try_with ?extract_exn ?run ?here ?name f =
-  Deferred.map (Monitor.try_with ?extract_exn ?run ?here ?name f) ~f:(function
+let try_with ?extract_exn ?run ?rest ?here ?name f =
+  Deferred.map (Monitor.try_with ?extract_exn ?run ?rest ?here ?name f) ~f:(function
     | Error exn -> Error (Error.of_exn exn)
     | Ok _ as ok -> ok)
 ;;
 
-let try_with_join ?extract_exn ?run ?here ?name f =
-  Deferred.map (try_with ?extract_exn ?run ?here ?name f) ~f:Or_error.join
+let try_with_join ?extract_exn ?run ?rest ?here ?name f =
+  Deferred.map (try_with ?extract_exn ?run ?rest ?here ?name f) ~f:Or_error.join
 ;;
 
 module List = struct

@@ -60,14 +60,16 @@ let make_server ?heartbeat_config ?port ~implementations ~initial_connection_sta
       | None -> Tcp.Where_to_listen.of_port_chosen_by_os
       | Some port -> Tcp.Where_to_listen.of_port port
     in
-    Connection.serve
-      ?heartbeat_config
-      ~implementations
-      ~initial_connection_state:(fun _ x -> initial_connection_state x)
-      ~make_transport
-      ~where_to_listen
-      ()
-    >>| fun s -> Server.Tcp s
+    let%map s =
+      Connection.serve
+        ?heartbeat_config
+        ~implementations
+        ~initial_connection_state:(fun _ x -> initial_connection_state x)
+        ~make_transport
+        ~where_to_listen
+        ()
+    in
+    Server.Tcp s
   | Netkit network ->
     let sockaddr =
       Sockaddr.create ~addr:Sockaddr.Addr.any ~port:(Option.value ~default:0 port)
@@ -96,16 +98,13 @@ let spec =
     | Some network -> network
     | None ->
       let network = Netkit_sockets.create ~ifname () in
-      Netkit.Network.add_exn
-        Netkit_sockets.kind
-        ~name:ifname
-        (module Netkit_sockets)
-        network;
+      Netkit.Network.add_exn ~name:ifname (module Netkit_sockets) network;
       Netkit.Network.find_exn ~name:ifname
   in
   let netkit netkit_ifname = Netkit (network netkit_ifname) in
   let typ =
     Arg_type.of_alist_exn
+      ~list_values_in_help:false
       [ "standard", standard; "low-latency", low_latency; "netkit", netkit ]
   in
   let transport_flag = optional_with_default standard typ in

@@ -1,4 +1,3 @@
-open! Stdune
 open Import
 open Memo.O
 
@@ -67,13 +66,17 @@ module Dune_file = struct
     | Some t -> Sub_dirs.or_default t.plain.contents.subdir_status
 
   let load_plain sexps ~file ~from_parent ~project =
-    let decoder =
-      Dune_project.set_parsing_context project (Sub_dirs.decode ~file)
-    in
-    let active =
-      let parsed =
-        Dune_lang.Decoder.parse decoder Univ_map.empty
-          (Dune_lang.Ast.List (Loc.none, sexps))
+    let+ active =
+      let+ parsed =
+        let decoder =
+          { Sub_dirs.decode =
+              (fun ast d ->
+                let d = Dune_project.set_parsing_context project d in
+                Dune_lang.Decoder.parse d Univ_map.empty
+                  (Dune_lang.Ast.List (Loc.none, ast)))
+          }
+        in
+        Sub_dirs.decode ~file decoder sexps
       in
       match from_parent with
       | None -> parsed
@@ -84,16 +87,22 @@ module Dune_file = struct
 
   let load file ~file_exists ~from_parent ~project =
     let+ kind, plain =
+      let load_plain = load_plain ~file ~from_parent ~project in
       match file_exists with
-      | false -> Memo.return (Plain, load_plain [] ~file ~from_parent ~project)
+      | false ->
+        let+ plain = load_plain [] in
+        (Plain, plain)
       | true ->
-        Fs_memo.with_lexbuf_from_file (Path.source file) ~f:(fun lb ->
-            if Dune_lexer.is_script lb then
-              let from_parent = load_plain [] ~file ~from_parent ~project in
-              (Ocaml_script, from_parent)
-            else
-              let sexps = Dune_lang.Parser.parse lb ~mode:Many in
-              (Plain, load_plain sexps ~file ~from_parent ~project))
+        let* kind, ast =
+          Fs_memo.with_lexbuf_from_file (Path.source file) ~f:(fun lb ->
+              let kind, ast =
+                if Dune_lang.Dune_lexer.is_script lb then (Ocaml_script, [])
+                else (Plain, Dune_lang.Parser.parse lb ~mode:Many)
+              in
+              (kind, ast))
+        in
+        let+ ast = load_plain ast in
+        (kind, ast)
     in
     { path = file; kind; plain }
 end
@@ -571,11 +580,10 @@ end = struct
       | Ok dir -> dir
       | Error unix_error -> error_unable_to_load ~path unix_error
     in
-    let project =
-      match
-        Dune_project.load ~dir:path ~files:readdir.files
-          ~infer_from_opam_files:true ~dir_status
-      with
+    let* project =
+      Dune_project.load ~dir:path ~files:readdir.files
+        ~infer_from_opam_files:true ~dir_status
+      >>| function
       | None -> Dune_project.anonymous ~dir:path ()
       | Some p -> p
     in
@@ -629,13 +637,14 @@ end = struct
             | Ok dir -> dir
             | Error _ -> Readdir.empty path
         in
-        let project =
-          if dir_status = Data_only then parent_dir.project
+        let* project =
+          if dir_status = Data_only then Memo.return parent_dir.project
           else
-            Option.value
-              (Dune_project.load ~dir:path ~files:readdir.files
-                 ~infer_from_opam_files:false ~dir_status)
-              ~default:parent_dir.project
+            let+ project =
+              Dune_project.load ~dir:path ~files:readdir.files
+                ~infer_from_opam_files:false ~dir_status
+            in
+            Option.value project ~default:parent_dir.project
         in
         let* readdir = Readdir.filter_files readdir project in
         let vcs = get_vcs ~default:parent_dir.vcs ~readdir in
@@ -770,7 +779,7 @@ module Dir = struct
                 Some
                   (if String.Set.mem files fname then Ok test
                   else Error (Missing_run_t test)))
-        >>| List.filter_map ~f:Fun.id
+        >>| List.filter_opt
       in
       file_tests @ dir_tests
 end
@@ -795,16 +804,6 @@ module Make_map_reduce_with_progress (M : Memo.S) (Outcome : Monoid) = struct
     Console.Status_line.remove_overlay overlay;
     res
 end
-
-(* jeremiedimino: it feels like this should go in the bin/ directory *)
-let find_dir_specified_on_command_line ~dir =
-  find_dir dir >>| function
-  | Some dir -> dir
-  | None ->
-    User_error.raise
-      [ Pp.textf "Don't know about directory %s specified on the command line!"
-          (Path.Source.to_string_maybe_quoted dir)
-      ]
 
 let is_vendored dir =
   find_dir dir >>| function

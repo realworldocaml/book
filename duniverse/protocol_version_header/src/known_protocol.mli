@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 
 type t =
   | Krb
@@ -8,3 +8,7 @@ type t =
 
 val magic_number : t -> int
 val by_magic_number : t Int.Map.t
+
+(** The number of bytes in the bin_io representation of a [magic_number t]. All magic
+    numbers are represented in this fixed number of bytes. *)
+val magic_number_bin_size : int

@@ -1,9 +1,10 @@
-open! Core_kernel
+open! Core
 open Poly
+module IR = Int_repr
 open! Iobuf
 open Expect_test_helpers_core
 
-let arch_sixtyfour = Sys.word_size = 64
+let arch_sixtyfour = Sys.word_size_in_bits = 64
 let is_error = Result.is_error
 let is_ok = Result.is_ok
 let ok_exn = Or_error.ok_exn
@@ -50,9 +51,7 @@ let%test_module "[Peek]" =
     let%test_unit "bin_prot int" =
       let ints = [ 0; 1; -1; 12345; -67890; Int.min_value; Int.max_value; 666 ] in
       let buf = Bigstring.create 1000 in
-      let end_pos =
-        List.fold ints ~init:0 ~f:(fun pos i -> Int.bin_write_t buf ~pos i)
-      in
+      let end_pos = List.fold ints ~init:0 ~f:(fun pos i -> Int.bin_write_t buf ~pos i) in
       let t = of_bigstring buf in
       List.fold ints ~init:0 ~f:(fun pos i ->
         [%test_eq: int] i (bin_prot Int.bin_reader_t t ~pos);
@@ -99,10 +98,6 @@ type nonrec no_seek = no_seek [@@deriving sexp_of]
 module type Bound = Bound
 
 (* see iobuf_view_tests.ml for expect-tests of these *)
-module Window = Window
-module Limits = Limits
-module Debug = Debug
-module Hexdump = Hexdump
 
 let read_only = read_only
 let no_seek = no_seek
@@ -226,8 +221,60 @@ let%test_module "lengths" =
   end)
 ;;
 
+module IR_Int8 = struct
+  include IR.Int8
+
+  let to_string x = x |> to_base_int |> Int.to_string
+  let of_string s = s |> Int.of_string |> of_base_int_exn
+end
+
+module IR_Uint8 = struct
+  include IR.Uint8
+
+  let to_string x = x |> to_base_int |> Int.to_string
+  let of_string s = s |> Int.of_string |> of_base_int_exn
+end
+
+module IR_Int16 = struct
+  include IR.Int16
+
+  let to_string x = x |> to_base_int |> Int.to_string
+  let of_string s = s |> Int.of_string |> of_base_int_exn
+end
+
+module IR_Uint16 = struct
+  include IR.Uint16
+
+  let to_string x = x |> to_base_int |> Int.to_string
+  let of_string s = s |> Int.of_string |> of_base_int_exn
+end
+
+module IR_Int32 = struct
+  include IR.Int32
+
+  let to_string x = x |> to_base_int32 |> Int32.to_string
+  let of_string s = s |> Int32.of_string |> of_base_int32
+end
+
+module IR_Uint32 = struct
+  include IR.Uint32
+
+  let to_string x = x |> to_base_int32_trunc |> Int32.to_string
+  let of_string s = s |> Int32.of_string |> of_base_int32_trunc
+end
+
+module IR_Int64 = struct
+  include IR.Int64
+
+  let to_string = Int64.to_string
+  let of_string = Int64.of_string
+end
+
 module Accessors (Accessors : sig
-    include module type of Unsafe
+    module Consume : module type of Consume
+    module Fill : module type of Fill
+    module Peek : module type of Peek
+    module Poke : module type of Poke
 
     val is_safe : bool
   end) =
@@ -607,8 +654,7 @@ struct
         assert (String.equal (to_string buf) "123abcDEF" && String.equal !sub "abc");
         sub := ""
     in
-    test_and_reset (fun () ->
-      Iobuf.protect_window_and_bounds buf ~f:(fun buf -> f buf 3));
+    test_and_reset (fun () -> Iobuf.protect_window_and_bounds buf ~f:(fun buf -> f buf 3));
     test_and_reset (fun () -> Iobuf.protect_window_and_bounds_1 buf 3 ~f)
   ;;
 
@@ -665,8 +711,7 @@ struct
           | Error _ -> assert (not is_valid)
           | Ok t ->
             assert is_valid;
-            assert (
-              String.equal (to_string t) (Bigstring.to_string bigstring ?pos ?len))))
+            assert (String.equal (to_string t) (Bigstring.to_string bigstring ?pos ?len))))
   ;;
 
   let advance = advance
@@ -831,13 +876,7 @@ struct
       string_pos_1 2 (stringo ~str_pos:1 ~len:2) ~skip:1 "\00023" "A23mEFGHIJ";
       bigstring_pos_1 2 (bigstringo ~str_pos:1 ~len:2) ~skip:1 "\000lm" "AlmmEFGHIJ";
       let int64_pos_1 f value with_value =
-        accessor_pos_1
-          ~without_value:buf
-          ~value_len:8
-          f
-          ~value
-          ~with_value
-          (module Int64)
+        accessor_pos_1 ~without_value:buf ~value_len:8 f ~value ~with_value (module Int64)
       in
       int64_pos_1 int64_t_be 1L "A\000\000\000\000\000\000\000\001J";
       int64_pos_1 int64_t_le 1L "A\001\000\000\000\000\000\000\000J";
@@ -963,6 +1002,169 @@ struct
 
         type 'a bin_prot = 'a Bin_prot.Type_class.reader
       end)
+
+    module Int_repr = Intf.Int_repr
+
+    let%test_unit _ =
+      let buf = of_string "ABCDEFGHIJ" in
+      let int_pos_1 (type i) n a v (module I : Accessee with type t = i) s =
+        accessor_pos_1 ~without_value:buf ~value_len:n a ~value:v ~with_value:s (module I)
+      in
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn 127)
+        (module IR_Int8)
+        "A\127CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-1))
+        (module IR_Int8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-128))
+        (module IR_Int8)
+        "A\128CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 0)
+        (module IR_Uint8)
+        "A\000CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 255)
+        (module IR_Uint8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-1))
+        (module IR_Int8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 12)
+        (module IR_Uint8)
+        "A\012CDEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn 0x0102)
+        (module IR_Int16)
+        "A\001\002DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn 0x0304)
+        (module IR_Int16)
+        "A\004\003DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn (-2))
+        (module IR_Int16)
+        "A\255\254DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn (-3))
+        (module IR_Int16)
+        "A\253\255DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.uint16_be
+        (IR_Uint16.of_base_int_exn 0xFFFE)
+        (module IR_Uint16)
+        "A\255\254DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.uint16_le
+        (IR_Uint16.of_base_int_exn 0xFDFC)
+        (module IR_Uint16)
+        "A\252\253DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn 0x0506)
+        (module IR_Int16)
+        "A\005\006DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn 0x0708)
+        (module IR_Int16)
+        "A\008\007DEFGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_be
+        (IR_Int32.of_base_int32 0x0A0B0C0Dl)
+        (module IR_Int32)
+        "A\010\011\012\013FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_le
+        (IR_Int32.of_base_int32 0x01020304l)
+        (module IR_Int32)
+        "A\004\003\002\001FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_be
+        (IR_Int32.of_base_int32 (-0x01020305l))
+        (module IR_Int32)
+        "A\254\253\252\251FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_le
+        (IR_Int32.of_base_int32 (-0x05060709l))
+        (module IR_Int32)
+        "A\247\248\249\250FGHIJ";
+      if arch_sixtyfour
+      then (
+        int_pos_1
+          4
+          Int_repr.uint32_be
+          (IR_Uint32.of_base_int32_trunc
+             (Int32.of_int_trunc (large_int 0 0 0xF6F5 0xF4F3)))
+          (module IR_Uint32)
+          "A\246\245\244\243FGHIJ";
+        int_pos_1
+          4
+          Int_repr.uint32_le
+          (IR_Uint32.of_base_int32_trunc
+             (Int32.of_int_trunc (large_int 0 0 0xFBFA 0xF9F8)))
+          (module IR_Uint32)
+          "A\248\249\250\251FGHIJ";
+        int_pos_1
+          8
+          Int_repr.int64_be
+          (Int64.of_int (large_int 0x0102 0x0304 0x0506 0x0708))
+          (module IR_Int64)
+          "A\001\002\003\004\005\006\007\008J";
+        int_pos_1
+          8
+          Int_repr.int64_le
+          (Int64.of_int (large_int 0x090a 0x0b0c 0x0d0e 0x0f10))
+          (module IR_Int64)
+          "A\016\015\014\013\012\011\010\009J";
+        int_pos_1
+          8
+          Int_repr.int64_be
+          (Int64.of_int (-large_int 0x0102 0x0304 0x0506 0x0709))
+          (module IR_Int64)
+          "A\254\253\252\251\250\249\248\247J";
+        int_pos_1
+          8
+          Int_repr.int64_le
+          (Int64.of_int (-large_int 0x0102 0x0304 0x0506 0x0709))
+          (module IR_Int64)
+          "A\247\248\249\250\251\252\253\254J")
+    ;;
   end
 
   module Intf_write (Intf : sig
@@ -1031,16 +1233,8 @@ struct
       int_pos_1 4 int32_le_trunc (-0x05060709) "A\247\248\249\250FGHIJ";
       if arch_sixtyfour
       then (
-        int_pos_1
-          4
-          uint32_be_trunc
-          (large_int 0 0 0xF6F5 0xF4F3)
-          "A\246\245\244\243FGHIJ";
-        int_pos_1
-          4
-          uint32_le_trunc
-          (large_int 0 0 0xFBFA 0xF9F8)
-          "A\248\249\250\251FGHIJ";
+        int_pos_1 4 uint32_be_trunc (large_int 0 0 0xF6F5 0xF4F3) "A\246\245\244\243FGHIJ";
+        int_pos_1 4 uint32_le_trunc (large_int 0 0 0xFBFA 0xF9F8) "A\248\249\250\251FGHIJ";
         int_pos_1
           8
           int64_be
@@ -1068,6 +1262,167 @@ struct
 
         type 'a bin_prot = 'a Bin_prot.Type_class.writer
       end)
+
+    module Int_repr = Intf.Int_repr
+
+    let%test_unit _ =
+      let buf = of_string "ABCDEFGHIJ" in
+      let int_pos_1 (type i) n a v (module I : Accessee with type t = i) s =
+        accessor_pos_1 ~without_value:buf ~value_len:n a ~value:v ~with_value:s (module I)
+      in
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn 127)
+        (module IR_Int8)
+        "A\127CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-1))
+        (module IR_Int8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-128))
+        (module IR_Int8)
+        "A\128CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 0)
+        (module IR_Uint8)
+        "A\000CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 255)
+        (module IR_Uint8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.int8
+        (IR_Int8.of_base_int_exn (-1))
+        (module IR_Int8)
+        "A\255CDEFGHIJ";
+      int_pos_1
+        1
+        Int_repr.uint8
+        (IR_Uint8.of_base_int_exn 12)
+        (module IR_Uint8)
+        "A\012CDEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn 0x0102)
+        (module IR_Int16)
+        "A\001\002DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn 0x0304)
+        (module IR_Int16)
+        "A\004\003DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn (-2))
+        (module IR_Int16)
+        "A\255\254DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn (-3))
+        (module IR_Int16)
+        "A\253\255DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.uint16_be
+        (IR_Uint16.of_base_int_exn 0xFFFE)
+        (module IR_Uint16)
+        "A\255\254DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.uint16_le
+        (IR_Uint16.of_base_int_exn 0xFDFC)
+        (module IR_Uint16)
+        "A\252\253DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_be
+        (IR_Int16.of_base_int_exn 0x0506)
+        (module IR_Int16)
+        "A\005\006DEFGHIJ";
+      int_pos_1
+        2
+        Int_repr.int16_le
+        (IR_Int16.of_base_int_exn 0x0708)
+        (module IR_Int16)
+        "A\008\007DEFGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_be
+        (IR_Int32.of_base_int32 0x0A0B0C0Dl)
+        (module IR_Int32)
+        "A\010\011\012\013FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_le
+        (IR_Int32.of_base_int32 0x01020304l)
+        (module IR_Int32)
+        "A\004\003\002\001FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_be
+        (IR_Int32.of_base_int32 (-0x01020305l))
+        (module IR_Int32)
+        "A\254\253\252\251FGHIJ";
+      int_pos_1
+        4
+        Int_repr.int32_le
+        (IR_Int32.of_base_int32 (-0x05060709l))
+        (module IR_Int32)
+        "A\247\248\249\250FGHIJ";
+      if arch_sixtyfour
+      then (
+        int_pos_1
+          4
+          Int_repr.uint32_be
+          (IR_Uint32.of_base_int32_trunc 0xF6F5F4F3l)
+          (module IR_Uint32)
+          "A\246\245\244\243FGHIJ";
+        int_pos_1
+          4
+          Int_repr.uint32_le
+          (IR_Uint32.of_base_int32_trunc 0xFBFAF9F8l)
+          (module IR_Uint32)
+          "A\248\249\250\251FGHIJ";
+        int_pos_1
+          8
+          Int_repr.int64_be
+          (Int64.of_int (large_int 0x0102 0x0304 0x0506 0x0708))
+          (module IR_Int64)
+          "A\001\002\003\004\005\006\007\008J";
+        int_pos_1
+          8
+          Int_repr.int64_le
+          (Int64.of_int (large_int 0x090a 0x0b0c 0x0d0e 0x0f10))
+          (module IR_Int64)
+          "A\016\015\014\013\012\011\010\009J";
+        int_pos_1
+          8
+          Int_repr.int64_be
+          (Int64.of_int (-large_int 0x0102 0x0304 0x0506 0x0709))
+          (module IR_Int64)
+          "A\254\253\252\251\250\249\248\247J";
+        int_pos_1
+          8
+          Int_repr.int64_le
+          (Int64.of_int (-large_int 0x0102 0x0304 0x0506 0x0709))
+          (module IR_Int64)
+          "A\247\248\249\250\251\252\253\254J")
+    ;;
   end
 
   let cases_for_testing_decimal =
@@ -1109,10 +1464,7 @@ struct
           then
             raise_s
               [%message
-                "Poke accessor_pos_1 failed"
-                  (str : string)
-                  (buf_str : string)
-                  (arg : Arg.t)]
+                "Poke accessor_pos_1 failed" (str : string) (buf_str : string) (arg : Arg.t)]
         ;;
 
         let bin_prot_char t ~pos a = bin_prot Char.bin_writer_t t ~pos a
@@ -1247,10 +1599,7 @@ struct
           then
             raise_s
               [%message
-                "Peek accessor_pos_1 failed"
-                  (res : Res.t)
-                  (expected : Res.t)
-                  (str : string)]
+                "Peek accessor_pos_1 failed" (res : Res.t) (expected : Res.t) (str : string)]
         ;;
 
         let bin_prot_char t ~pos = bin_prot Char.bin_reader_t t ~pos
@@ -1264,7 +1613,9 @@ struct
         let%test _ = char_a_pos_0 (of_string "a" : (read_write, _) Iobuf.t)
       end)
 
-    module To_bytes = struct
+    let index = Peek.index
+
+    module _ = struct
       open Peek.To_bytes
 
       let blito = blito
@@ -1272,7 +1623,7 @@ struct
       let%test_unit _ = test_peek_to_string blito
     end
 
-    module To_bigstring = struct
+    module _ = struct
       open Peek.To_bigstring
 
       let blito = blito
@@ -1295,6 +1646,51 @@ struct
       assert (is_error (try_with (fun () -> Poke.char t ~pos:(-1) 'z')));
       assert (is_error (try_with (fun () -> Peek.char t ~pos:(String.length s))));
       assert (is_error (try_with (fun () -> Poke.char t ~pos:(String.length s) 'z'))))
+  ;;
+
+  let%expect_test "index" =
+    let s = "hello" in
+    let t = of_string s in
+    let test ?pos ?len char =
+      let index = Peek.index t ?pos ?len char in
+      print_s
+        [%message
+          (pos : (int option[@sexp.option]))
+            (len : (int option[@sexp.option]))
+            (char : char)
+            (index : int option)];
+      match index with
+      | None -> require [%here] (not (String.mem (String.subo ?pos ?len s) char))
+      | Some pos -> require_equal [%here] (module Char) (Peek.char t ~pos) char
+    in
+    let require_error here f =
+      (* Do this instead of [require_does_raise] because the latter prints out the exn.
+         We need to have the same output in the safe and unsafe variants. *)
+      require_error here [%sexp_of: unit] (try_with f)
+    in
+    test 'h';
+    test 'l';
+    test 'l' ~pos:3;
+    test 'o';
+    test 'o' ~len:3;
+    test 'z';
+    [%expect
+      {|
+      ((char h) (index (0)))
+      ((char l) (index (2)))
+      ((pos  3)
+       (char l)
+       (index (3)))
+      ((char o) (index (4)))
+      ((len  3)
+       (char o)
+       (index ()))
+      ((char z) (index ())) |}];
+    if is_safe
+    then (
+      require_error [%here] (fun () -> test 'z' ~pos:(-1));
+      require_error [%here] (fun () -> test 'z' ~pos:0 ~len:10);
+      require_error [%here] (fun () -> test 'z' ~pos:4 ~len:(-1)))
   ;;
 
   let%test_unit _ =
@@ -1485,12 +1881,7 @@ struct
   ;;
 
   let test_consume_to_string blito =
-    test_consume_to
-      blito
-      Bytes.create
-      Bytes.To_string.sub
-      Bytes.of_string
-      Bytes.to_string
+    test_consume_to blito Bytes.create Bytes.To_string.sub Bytes.of_string Bytes.to_string
   ;;
 
   let test_consume_to_bigstring blito =
@@ -1549,7 +1940,7 @@ struct
 
     open Consume
 
-    module To_bytes = struct
+    module _ = struct
       open To_bytes
 
       let blito = blito
@@ -1557,7 +1948,7 @@ struct
       let%test_unit _ = test_consume_to_string blito
     end
 
-    module To_bigstring = struct
+    module _ = struct
       open To_bigstring
 
       let blito = blito
@@ -1726,7 +2117,7 @@ struct
       assert (is_error (try_write ~str_pos:0 ~len:(len + 1) ())))
   ;;
 
-  module Blit_consume_and_fill = struct
+  module _ = struct
     open Blit_consume_and_fill
 
     let blit = blit
@@ -1774,7 +2165,7 @@ struct
     ;;
   end
 
-  module Blit_fill = struct
+  module _ = struct
     open Blit_fill
 
     let blit = blit
@@ -1829,7 +2220,7 @@ struct
     ;;
   end
 
-  module Blit_consume = struct
+  module _ = struct
     open Blit_consume
 
     let blit = blit
@@ -1920,7 +2311,7 @@ struct
     ;;
   end
 
-  module Blit = struct
+  module _ = struct
     open Blit
 
     let blit = blit
@@ -2017,10 +2408,12 @@ struct
     ;;
   end
 
-  module Expert = struct
+  module _ = struct
     let buf = Expert.buf
     let reinitialize_of_bigstring = Expert.reinitialize_of_bigstring
     let protect_window = Expert.protect_window
+    let protect_window_1 = Expert.protect_window_1
+    let protect_window_2 = Expert.protect_window_2
 
     let%test_unit "reinitialize_of_bigstring" =
       let iobuf = Iobuf.of_string "1234" in
@@ -2052,6 +2445,20 @@ struct
       [%expect {| "in-long-window in-short-window in-long-window" |}];
       let buf = no_seek buf in
       protect_window buf ~f:(fun buf ->
+        Iobuf.advance buf 15;
+        Iobuf.resize buf ~len:(Iobuf.length buf - 15);
+        print_s [%sexp (buf : (_, _) Iobuf.Window.Hexdump.Pretty.t)];
+        [%expect {| in-short-window |}]);
+      print_s [%sexp (buf : (_, _) Iobuf.Window.Hexdump.Pretty.t)];
+      [%expect {| "in-long-window in-short-window in-long-window" |}];
+      protect_window_1 buf () ~f:(fun buf () ->
+        Iobuf.advance buf 15;
+        Iobuf.resize buf ~len:(Iobuf.length buf - 15);
+        print_s [%sexp (buf : (_, _) Iobuf.Window.Hexdump.Pretty.t)];
+        [%expect {| in-short-window |}]);
+      print_s [%sexp (buf : (_, _) Iobuf.Window.Hexdump.Pretty.t)];
+      [%expect {| "in-long-window in-short-window in-long-window" |}];
+      protect_window_2 buf () () ~f:(fun buf () () ->
         Iobuf.advance buf 15;
         Iobuf.resize buf ~len:(Iobuf.length buf - 15);
         print_s [%sexp (buf : (_, _) Iobuf.Window.Hexdump.Pretty.t)];
@@ -2191,8 +2598,18 @@ include Accessors (struct
     let is_safe = true
   end)
 
-module Unsafe = Accessors (struct
+module _ = Accessors (struct
     include Unsafe
+
+    module Peek = struct
+      include Peek
+
+      let index t ?(pos = 0) ?(len = length t - pos) char =
+        match index_or_neg t ~pos ~len char with
+        | index when index < 0 -> None
+        | index -> Some index
+      ;;
+    end
 
     let is_safe = false
   end)
@@ -2278,4 +2695,30 @@ let%expect_test "check seek-indifferent r/w interfaces work on both kinds" =
   Iobuf.Blit.blito ~dst:t ~src ();
   Iobuf.Blit.blito ~dst:(Iobuf.no_seek t) ~src ();
   [%expect {| |}]
+;;
+
+let%expect_test "concat" =
+  let test arr = print_string (Iobuf.to_string (Iobuf.concat arr)) in
+  test [||];
+  [%expect {| |}];
+  test [| Iobuf.of_string "foo" |];
+  [%expect {| foo |}];
+  test [| Iobuf.of_string "foo"; Iobuf.of_string "bar" |];
+  [%expect {| foobar |}];
+  let long = Iobuf.of_string "PREFIXfooFILLERbarSUFFIX" in
+  test [| Iobuf.sub_shared ~pos:6 ~len:3 long; Iobuf.sub_shared ~pos:15 ~len:3 long |];
+  [%expect {| foobar |}]
+;;
+
+let%expect_test "transfer" =
+  let src = Iobuf.of_string "holy guacamole!" in
+  let dst = Iobuf.create ~len:20 in
+  Iobuf.transfer ~src ~dst;
+  let dump t = [%sexp (t : (_, _) Iobuf.Window.Hexdump.t)] in
+  let src, dst = dump src, dump dst in
+  require_equal [%here] (module Sexp) src dst;
+  print_s [%sexp (dst : Sexp.t)];
+  [%expect
+    {|
+    ("00000000  68 6f 6c 79 20 67 75 61  63 61 6d 6f 6c 65 21     |holy guacamole!|") |}]
 ;;

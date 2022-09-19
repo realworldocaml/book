@@ -89,8 +89,8 @@ let () =
      and timeout =
        flag
          "-timeout"
-         (optional_with_default (sec 5.) Time.Span.arg_type)
+         (optional_with_default (sec 5.) Time_unix.Span.arg_type)
          ~doc:" Abandon queries that take longer than this time"
      in
      fun () -> search_and_print ~servers ~timeout words)
-  |> Command.run
+  |> Command_unix.run

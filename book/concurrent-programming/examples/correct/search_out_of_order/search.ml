@@ -66,4 +66,4 @@ let () =
        anon (sequence ("word" %: string))
      in
      fun () -> search_and_print words)
-  |> Command.run
+  |> Command_unix.run

@@ -3,5 +3,5 @@
  (names        app convert_md)
  (public_names rwo-build rwo-convert_md)
  (preprocess   (pps ppx_jane))
- (libraries    rwo lambdasoup sexp_pretty mdx cmdliner fmt)
+ (libraries    rwo lambdasoup sexp_pretty mdx cmdliner fmt core_unix.command_unix)
  (flags        :standard -short-paths))

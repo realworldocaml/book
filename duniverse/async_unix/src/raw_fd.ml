@@ -51,6 +51,7 @@ type ready_to_result =
   | `Bad_fd
   | `Closed
   | `Interrupted
+  | `Unsupported
   ]
 [@@deriving sexp_of]
 
@@ -74,7 +75,8 @@ module Watching = struct
   type t =
     | Not_watching
     | Watch_once of ready_to_result Ivar.t
-    | Watch_repeatedly of Job.t * [ `Bad_fd | `Closed | `Interrupted ] Ivar.t
+    | Watch_repeatedly of
+        Job.t * [ `Bad_fd | `Closed | `Interrupted | `Unsupported ] Ivar.t
     | Stop_requested
   [@@deriving sexp_of]
 
@@ -89,6 +91,15 @@ module Watching = struct
   ;;
 end
 
+module Nonblock_status = struct
+  (* Encodes the knowledge of the O_NONBLOCK flag of an fd. *)
+  type t =
+    | Blocking
+    | Nonblocking
+    | Unknown
+  [@@deriving sexp_of]
+end
+
 module T = struct
   type t =
     { file_descr : File_descr.t
@@ -97,15 +108,15 @@ module T = struct
       mutable info : Info.t
     ; (* [kind] is mutable because it changes after [bind], [listen], or [connect]. *)
       mutable kind : Kind.t
-    ; (* [supports_nonblock] reflects whether the file_descr supports nonblocking
-         system calls (read, write, etc.).  It is mutable because we allow users to
-         change from [supports_nonblock = true] to [supports_nonblock = false]. *)
-      mutable supports_nonblock : bool
-    ; (* [have_set_nonblock] is true if we have called [Unix.set_nonblock file_descr],
-         which we must do before making any system calls that we expect to not block. *)
-      mutable have_set_nonblock : bool
+    ; (* if [can_set_nonblock] is true, async will switch the underlying file
+         descriptor into nonblocking mode any time a non-blocking operation is attempted.
+         It can be [false] if the user explicitly tells async to avoid modifying that
+         flag on the underlying fd, or if Async detects that the file descriptor
+         doesn't support nonblocking I/O. *)
+      mutable can_set_nonblock : bool
+    ; mutable nonblock_status : Nonblock_status.t
     ; mutable state : State.t
-    ; watching : Watching.t Read_write.Mutable.t
+    ; watching : Watching.t Read_write_pair.Mutable.t
     ; (* [watching_has_changed] is true if [watching] has changed since the last time
          [watching] was synchronized with the file_descr_watcher.  In this case, the
          fd appears in the scheduler's [fds_whose_watching_has_changed] list so that
@@ -150,18 +161,17 @@ let invariant t : unit =
       ~info:ignore
       ~file_descr:ignore
       ~kind:ignore
-      ~supports_nonblock:ignore
-      ~have_set_nonblock:
-        (check (fun have_set_nonblock ->
-           if not t.supports_nonblock then assert (not have_set_nonblock)))
+      ~can_set_nonblock:ignore
+      ~nonblock_status:ignore
       ~state:ignore
-      ~watching:(check (fun watching -> Read_write.iter watching ~f:Watching.invariant))
+      ~watching:
+        (check (fun watching -> Read_write_pair.iter watching ~f:Watching.invariant))
       ~watching_has_changed:ignore
       ~num_active_syscalls:
         (check (fun num_active_syscalls ->
            assert (t.num_active_syscalls >= 0);
            let watching read_or_write =
-             match Read_write.get t.watching read_or_write with
+             match Read_write_pair.get t.watching read_or_write with
              | Not_watching -> 0
              | Stop_requested | Watch_once _ | Watch_repeatedly _ -> 1
            in
@@ -183,43 +193,51 @@ let invariant t : unit =
 
 let to_int t = File_descr.to_int t.file_descr
 
-let create ?(avoid_nonblock_if_possible = false) (kind : Kind.t) file_descr info =
-  let supports_nonblock =
-    match kind with
-    (* No point in setting nonblocking for files.  Unix doesn't care. *)
-    | File -> false
-    (* We don't use nonblocking I/O for char devices because we don't want to change the
-       blocking status of TTYs, which would affect all processes currently attached to
-       that TTY and even persist after this process terminates.
+let create ?(avoid_setting_nonblock = false) (kind : Kind.t) file_descr info =
+  let can_set_nonblock =
+    if avoid_setting_nonblock
+    then false
+    else (
+      match kind with
+      (* No point in setting nonblocking for files.  Unix doesn't care. *)
+      | File -> false
+      (* We don't use nonblocking I/O for char devices because we don't want to change the
+         blocking status of TTYs, which would affect all processes currently attached to
+         that TTY and even persist after this process terminates.
 
-       Also, /dev/null is a char device not supported by epoll.
+         Also, /dev/null is a char device not supported by epoll.
 
-       We don't really care about doing nonblocking I/O on other character devices,
-       e.g. /dev/random. *)
-    | Char -> false
-    | Fifo -> not avoid_nonblock_if_possible
-    (* All one can do on a `Bound socket is listen() to it, and we don't use listen()
-       in a nonblocking way. *)
-    | Socket `Bound -> false
-    (* `Unconnected sockets support nonblocking so we can connect() them.
-       `Passive     sockets support nonblocking so we can accept() them.
-       `Active      sockets support nonblocking so we can read() and write() them.
+         We don't really care about doing nonblocking I/O on other character devices,
+         e.g. /dev/random. *)
+      | Char -> false
+      | Fifo -> true
+      | Socket _ ->
+        (* All one can do on a `Bound socket is listen() to it, and we don't use listen()
+           in a nonblocking way.
+           `Unconnected sockets support nonblocking so we can connect() them.
+           `Passive     sockets support nonblocking so we can accept() them.
+           `Active      sockets support nonblocking so we can read() and write() them.
 
-       We can't use [avoid_nonblock_if_possible] for [`Unconnected] and [`Passive]
-       sockets, because [accept_interruptible] and [connect_interruptible] in
-       unix_syscalls.ml assume that such sockets are nonblocking.  On the other hand,
-       there is no such assumption about [`Active] sockets. *)
-    | Socket (`Unconnected | `Passive) -> true
-    | Socket `Active -> not avoid_nonblock_if_possible
+           We need the sockets to be in nonblocking mode for [`Unconnected] and [`Passive]
+           sockets, because [accept_interruptible] and [connect_interruptible] in
+           unix_syscalls.ml assume that such sockets are nonblocking.  On the other hand,
+           there is no such assumption about [`Active] sockets.
+
+           In any case, returning [true] here makes sense. Not only is it harmless
+           in case we don't end up using it, but this field is also not updated by
+           socket state transitions ([Fd.Private.replace]), so its value needs to be the
+           same across the different socket states.
+        *)
+        true)
   in
   let t =
     { info
     ; file_descr
     ; kind
-    ; supports_nonblock
-    ; have_set_nonblock = false
+    ; can_set_nonblock
+    ; nonblock_status = Nonblock_status.Unknown
     ; state = State.Open (Ivar.create ())
-    ; watching = Read_write.create_both Watching.Not_watching
+    ; watching = Read_write_pair.create_both Watching.Not_watching
     ; watching_has_changed = false
     ; num_active_syscalls = 0
     ; close_finished = Ivar.create ()
@@ -252,19 +270,39 @@ let set_state t new_state =
 let is_open t = State.is_open t.state
 let is_closed t = not (is_open t)
 
+let determine_nonblock_status t =
+  match t.nonblock_status with
+  | Unknown ->
+    let flags = Core_unix.fcntl_getfl t.file_descr in
+    let nonblock =
+      Core_unix.Open_flags.is_subset Core_unix.Open_flags.nonblock ~of_:flags
+    in
+    t.nonblock_status
+    <- (match nonblock with
+      | false -> Blocking
+      | true -> Nonblocking);
+    nonblock
+  | Nonblocking -> true
+  | Blocking -> false
+;;
+
+let supports_nonblock t = if t.can_set_nonblock then true else determine_nonblock_status t
+
 let set_nonblock_if_necessary ?(nonblocking = false) t =
   if nonblocking
   then (
-    if not t.supports_nonblock
-    then
-      raise_s
-        [%message
-          "Fd.set_nonblock_if_necessary called on fd that does not support nonblock"
-            ~fd:(t : t)];
-    if not t.have_set_nonblock
-    then (
-      Unix.set_nonblock t.file_descr;
-      t.have_set_nonblock <- true))
+    match determine_nonblock_status t with
+    | true -> ()
+    | false ->
+      if t.can_set_nonblock
+      then (
+        Unix.set_nonblock t.file_descr;
+        t.nonblock_status <- Nonblocking)
+      else
+        raise_s
+          [%message
+            "Fd.set_nonblock_if_necessary called on fd that does not support nonblock"
+              ~fd:(t : t)])
 ;;
 
 let with_file_descr_exn ?nonblocking t f =

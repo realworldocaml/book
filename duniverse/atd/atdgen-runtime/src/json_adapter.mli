@@ -76,6 +76,27 @@ module Kind = Type_field.Make (struct type_field_name = "kind" end)
   module Make (Param : Param) : S
 end
 
+(** Alternatively, function-based definition of the JSON adapter is supported.
+    For example, an ATD annotation
+    [<json
+       adapter.to_ocaml="Atdgen_runtime.Json_adapter.normalize_type_field \"type\""
+       adapter.from_ocaml="Atdgen_runtime.Json_adapter.restore_type_field \"type\"">]
+    specifies two functions [Yojson.Safe.t -> Yojson.Safe.t]
+    and in this case functionally equivalent to
+    [<json
+       adapter.ocaml="Atdgen_runtime.Json_adapter.Type_field"].
+
+    The form could be useful though, when more specific per-type data
+    processing is needed and defining the new module for each case could
+    become cumbersome.
+*)
+
+(** Normalize JSON representation, as specified in [Type_field] *)
+val normalize_type_field : string -> Yojson.Safe.t -> Yojson.Safe.t
+
+(** Restore JSON representation, as specified in [Type_field] *)
+val restore_type_field : string -> Yojson.Safe.t -> Yojson.Safe.t
+
 (** Support for objects with a single field whose name indicates the type
     of the value.
     For instance,

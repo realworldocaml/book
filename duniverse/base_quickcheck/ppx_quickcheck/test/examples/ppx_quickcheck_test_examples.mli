@@ -1,5 +1,11 @@
 open Base
-open Base_quickcheck
+
+(* ensure that shadowing doesn't break anything *)
+include module type of struct
+  module Base = struct end
+  module Base_quickcheck = struct end
+  module Quickcheckable = struct end
+end
 
 module Simple_reference : sig
   type t = bool [@@deriving quickcheck]
@@ -120,6 +126,15 @@ module Instance_of_binary : sig
   type t = (bool, unit option) Poly_binary.t [@@deriving quickcheck]
 end
 
+module Poly_ternary : sig
+  type ('a, 'b, 'c) t = 'a * 'b * 'c [@@deriving quickcheck]
+end
+
+module Instance_of_ternary : sig
+  type t = (bool, unit option, (unit option, bool) Poly_binary.t) Poly_ternary.t
+  [@@deriving quickcheck]
+end
+
 module Poly_with_variance : sig
   type (-'a, +'b) t = 'b * ('a -> 'b) [@@deriving quickcheck]
 end
@@ -163,23 +178,27 @@ module Mutually_recursive : sig
   and args = expr list [@@deriving quickcheck]
 end
 
+module Poly_recursive : sig
+  type 'a t =
+    | Zero
+    | Succ of 'a * 'a t
+  [@@deriving quickcheck]
+end
+
+module Instance_of_recursive : sig
+  type t = bool Poly_recursive.t [@@deriving quickcheck]
+end
+
 module Extensions : sig
   type t =
     [ `A
     | `B of bool * unit option
     ]
-
-  val quickcheck_generator : t Generator.t
-  val quickcheck_observer : t Observer.t
-  val quickcheck_shrinker : t Shrinker.t
+  [@@deriving quickcheck]
 end
 
 module Escaped : sig
-  type t = int * char * bool option
-
-  val quickcheck_generator : t Generator.t
-  val quickcheck_observer : t Observer.t
-  val quickcheck_shrinker : t Shrinker.t
+  type t = int * char * bool option [@@deriving quickcheck]
 end
 
 module Wildcard (Elt : sig
@@ -213,4 +232,27 @@ module Deriving_from_wildcard : sig
   val compare_opaque : ('a -> 'a -> int) -> 'a opaque -> 'a opaque -> int
   val sexp_of_opaque : ('a -> Sexp.t) -> 'a opaque -> Sexp.t
   val opaque_examples : int64 opaque list
+end
+
+module Do_not_generate_clauses : sig
+  module Cannot_generate : sig
+    type t
+
+    val all : t list
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+  end
+
+  type t =
+    | Can_generate of bool
+    | Cannot_generate of Cannot_generate.t
+  [@@deriving quickcheck]
+
+  module Poly : sig
+    type t =
+      [ `Can_generate of bool
+      | `Cannot_generate of Cannot_generate.t
+      ]
+    [@@deriving quickcheck]
+  end
 end

@@ -10,9 +10,13 @@
 open! Import
 
 (** See [Base.Array] for comments. *)
-type 'a t [@@deriving_inline sexp]
+type 'a t [@@deriving_inline sexp, sexp_grammar, compare]
 
-include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+include Sexplib0.Sexpable.S1 with type 'a t := 'a t
+
+val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
+
+include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
 
 [@@@end]
 
@@ -35,12 +39,24 @@ val swap : _ t -> int -> int -> unit
     values are [phys_equal]. *)
 val unsafe_set_omit_phys_equal_check : 'a t -> int -> 'a -> unit
 
+(** [unsafe_set_with_caml_modify] always calls [caml_modify] before setting and never gets
+    the old value.  This is like [unsafe_set_omit_phys_equal_check] except it doesn't
+    check whether the old value and the value being set are integers to try to skip
+    [caml_modify]. *)
+val unsafe_set_with_caml_modify : 'a t -> int -> 'a -> unit
+
+(** Same as [unsafe_set_with_caml_modify], but with bounds check. *)
+val set_with_caml_modify : 'a t -> int -> 'a -> unit
+
 val map : 'a t -> f:('a -> 'b) -> 'b t
+val mapi : 'a t -> f:(int -> 'a -> 'b) -> 'b t
 val iter : 'a t -> f:('a -> unit) -> unit
 
 (** Like {!iter}, but the function is applied to the index of the element as first
     argument, and the element itself as second argument. *)
 val iteri : 'a t -> f:(int -> 'a -> unit) -> unit
+
+val foldi : 'a t -> init:'b -> f:(int -> 'b -> 'a -> 'b) -> 'b
 
 (** [of_array] and [to_array] return fresh arrays with the same contents rather than
     returning a reference to the underlying array. *)
@@ -84,6 +100,9 @@ val unsafe_clear_if_pointer : Caml.Obj.t t -> int -> unit
 
 (** As [Array.exists]. *)
 val exists : 'a t -> f:('a -> bool) -> bool
+
+(** As [Array.for_all]. *)
+val for_all : 'a t -> f:('a -> bool) -> bool
 
 (** Functions with the 2 suffix raise an exception if the lengths of the two given arrays
     aren't the same. *)

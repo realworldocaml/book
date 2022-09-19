@@ -19,3 +19,4 @@ val find_exn : t -> File_descr.t -> Raw_fd.t
 val remove : t -> Raw_fd.t -> unit
 val fold : t -> init:'a -> f:('a -> Raw_fd.t -> 'a) -> 'a
 val iter : t -> f:(Raw_fd.t -> unit) -> unit
+val exists : t -> f:(Raw_fd.t -> bool) -> bool

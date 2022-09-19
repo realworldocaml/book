@@ -1,5 +1,12 @@
 (executable
  (name filtering)
+ (modules filtering)
+ (flags (-safe-string))
+ (libraries yojson))
+
+(executable
+ (name constructing)
+ (modules constructing)
  (flags (-safe-string))
  (libraries yojson))
 

@@ -1,12 +1,11 @@
-(** A type-indexed value that allows one to compare (and for generating error messages,
-    serialize) values of the type in question.
-
-    One of the type parameters is a phantom parameter used to distinguish comparators
-    potentially built on different comparison functions.  In particular, we want to
-    distinguish those using polymorphic compare from those using a monomorphic compare. *)
+(** Comparison and serialization for a type, using a witness type to distinguish between
+    comparison functions with different behavior. *)
 
 open! Import
 
+(** [('a, 'witness) t] contains a comparison function for values of type ['a].  Two values
+    of type [t] with the same ['witness] are guaranteed to have the same comparison
+    function. *)
 type ('a, 'witness) t = private
   { compare : 'a -> 'a -> int
   ; sexp_of_t : 'a -> Sexp.t
@@ -37,13 +36,22 @@ end
 
 (** [make] creates a comparator witness for the given comparison. It is intended as a
     lightweight alternative to the functors below, to be used like so:
-    [include (val Comparator.make ~compare ~sexp_of_t)] *)
+
+    {[
+      include (val Comparator.make ~compare ~sexp_of_t)
+    ]}
+*)
 val make
   :  compare:('a -> 'a -> int)
   -> sexp_of_t:('a -> Sexp.t)
   -> (module S_fc with type comparable_t = 'a)
 
 module Poly : S1 with type 'a t = 'a
+
+module Module : sig
+  (** First-class module providing a comparator and witness type. *)
+  type ('a, 'b) t = (module S with type t = 'a and type comparator_witness = 'b)
+end
 
 module S_to_S1 (S : S) :
   S1 with type 'a t = S.t with type comparator_witness = S.comparator_witness
@@ -53,11 +61,13 @@ module S_to_S1 (S : S) :
 module Make (M : sig
     type t [@@deriving_inline compare, sexp_of]
 
-    val compare : t -> t -> int
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S with type t := t
+
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) : S with type t := M.t
+
 
 (** [Make1] creates a [comparator] value and its phantom [comparator_witness] type for a
     unary type.  It takes a [compare] and [sexp_of_t] that have
@@ -82,8 +92,9 @@ end
 module Derived (M : sig
     type 'a t [@@deriving_inline compare, sexp_of]
 
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Comparable.S1 with type 'a t := 'a t
+
+    val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
 
     [@@@end]
   end) : Derived with type 'a t := 'a M.t
@@ -103,13 +114,13 @@ end
 module Derived2 (M : sig
     type ('a, 'b) t [@@deriving_inline compare, sexp_of]
 
-    val compare : ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
+    include Ppx_compare_lib.Comparable.S2 with type ('a, 'b) t := ('a, 'b) t
 
     val sexp_of_t
-      :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
-      -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+      :  ('a -> Sexplib0.Sexp.t)
+      -> ('b -> Sexplib0.Sexp.t)
       -> ('a, 'b) t
-      -> Ppx_sexp_conv_lib.Sexp.t
+      -> Sexplib0.Sexp.t
 
     [@@@end]
   end) : Derived2 with type ('a, 'b) t := ('a, 'b) M.t

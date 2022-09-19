@@ -1,4 +1,4 @@
 (coq.theory
- (name b)
- (package subtheory)
- (theories foo.a))
+ (name B)
+ (package Subtheory)
+ (theories Foo.A))

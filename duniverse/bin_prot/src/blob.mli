@@ -42,7 +42,7 @@ type 'a id = 'a
 (*_ This type synonym is introduced because older versions of OCaml
   do not support destructive substitutions with `type 'a t1 = t2`. *)
 
-type 'a t = 'a [@@deriving compare]
+type 'a t = 'a [@@deriving compare, sexp_of]
 
 include Binable.S1 with type 'a t := 'a id
 
@@ -61,14 +61,18 @@ include Binable.S1 with type 'a t := 'a id
 *)
 module Opaque : sig
   module Bigstring : sig
-    include Binable.S
+    type t [@@deriving compare, sexp_of]
+
+    include Binable.S with type t := t
 
     val to_opaque : 'a -> 'a Type_class.writer -> t
     val of_opaque_exn : t -> 'a Type_class.reader -> 'a
   end
 
   module String : sig
-    include Binable.S
+    type t [@@deriving compare, sexp_of]
+
+    include Binable.S with type t := t
 
     (** For performance's concern, we require caller of [to_opaque] and [of_opaque_exn] to
         pass in the [buf] as the intermediate buffer for bin_prot conversion. These two

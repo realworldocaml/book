@@ -1,4 +1,0 @@
-(executable
- (name main)
- (public_name octavius)
- (libraries octavius compiler-libs.common))

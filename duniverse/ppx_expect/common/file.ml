@@ -7,9 +7,8 @@ module Name : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
-
-    val compare : t -> t -> int
+    include Sexplib0.Sexpable.S with type t := t
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 
@@ -22,13 +21,13 @@ end = struct
   include String
 
   let relative_to ~dir t =
-    if not (Caml.Filename.is_relative t) then t else Caml.Filename.concat dir t
+    if not (Stdlib.Filename.is_relative t) then t else Stdlib.Filename.concat dir t
   ;;
 end
 
 let initial_dir =
   let dir_or_error =
-    match Caml.Sys.getcwd () with
+    match Stdlib.Sys.getcwd () with
     | v -> `Ok v
     | exception exn -> `Exn exn
   in
@@ -52,189 +51,206 @@ module Location = struct
     let _ = fun (_ : t) -> ()
 
     let t_of_sexp =
-      (let _tp_loc = "file.ml.Location.T.t" in
+      (let error_source__024_ = "file.ml.Location.T.t" in
        function
-       | Ppx_sexp_conv_lib.Sexp.List field_sexps as sexp ->
-         let filename_field = ref Ppx_sexp_conv_lib.Option.None
-         and line_number_field = ref Ppx_sexp_conv_lib.Option.None
-         and line_start_field = ref Ppx_sexp_conv_lib.Option.None
-         and start_pos_field = ref Ppx_sexp_conv_lib.Option.None
-         and end_pos_field = ref Ppx_sexp_conv_lib.Option.None
-         and duplicates = ref []
-         and extra = ref [] in
-         let rec iter = function
-           | Ppx_sexp_conv_lib.Sexp.List
-               (Ppx_sexp_conv_lib.Sexp.Atom field_name :: (([] | [ _ ]) as _field_sexps))
-             :: tail ->
-             let _field_sexp () =
-               match _field_sexps with
-               | [ x ] -> x
+       | Sexplib0.Sexp.List field_sexps__003_ as sexp__002_ ->
+         let filename__004_ = Stdlib.ref Stdlib.Option.None
+         and line_number__006_ = Stdlib.ref Stdlib.Option.None
+         and line_start__008_ = Stdlib.ref Stdlib.Option.None
+         and start_pos__010_ = Stdlib.ref Stdlib.Option.None
+         and end_pos__012_ = Stdlib.ref Stdlib.Option.None
+         and duplicates__014_ = Stdlib.ref []
+         and extra__015_ = Stdlib.ref [] in
+         let rec iter__025_ = function
+           | Sexplib0.Sexp.List
+               (Sexplib0.Sexp.Atom field_name__016_
+                :: (([] | [ _ ]) as _field_sexps__018_))
+             :: tail__026_ ->
+             let _field_sexp__017_ () =
+               match _field_sexps__018_ with
+               | [ x__027_ ] -> x__027_
                | [] ->
-                 Ppx_sexp_conv_lib.Conv_error.record_only_pairs_expected _tp_loc sexp
+                 Sexplib0.Sexp_conv_error.record_only_pairs_expected
+                   error_source__024_
+                   sexp__002_
                | _ -> assert false
              in
-             (match field_name with
+             (match field_name__016_ with
               | "filename" ->
-                (match !filename_field with
-                 | Ppx_sexp_conv_lib.Option.None ->
-                   let _field_sexp = _field_sexp () in
-                   let fvalue = Name.t_of_sexp _field_sexp in
-                   filename_field := Ppx_sexp_conv_lib.Option.Some fvalue
-                 | Ppx_sexp_conv_lib.Option.Some _ ->
-                   duplicates := field_name :: !duplicates)
+                (match Stdlib.( ! ) filename__004_ with
+                 | Stdlib.Option.None ->
+                   let _field_sexp__017_ = _field_sexp__017_ () in
+                   let fvalue__023_ = Name.t_of_sexp _field_sexp__017_ in
+                   Stdlib.( := ) filename__004_ (Stdlib.Option.Some fvalue__023_)
+                 | Stdlib.Option.Some _ ->
+                   Stdlib.( := )
+                     duplicates__014_
+                     (field_name__016_ :: Stdlib.( ! ) duplicates__014_))
               | "line_number" ->
-                (match !line_number_field with
-                 | Ppx_sexp_conv_lib.Option.None ->
-                   let _field_sexp = _field_sexp () in
-                   let fvalue = int_of_sexp _field_sexp in
-                   line_number_field := Ppx_sexp_conv_lib.Option.Some fvalue
-                 | Ppx_sexp_conv_lib.Option.Some _ ->
-                   duplicates := field_name :: !duplicates)
+                (match Stdlib.( ! ) line_number__006_ with
+                 | Stdlib.Option.None ->
+                   let _field_sexp__017_ = _field_sexp__017_ () in
+                   let fvalue__022_ = int_of_sexp _field_sexp__017_ in
+                   Stdlib.( := ) line_number__006_ (Stdlib.Option.Some fvalue__022_)
+                 | Stdlib.Option.Some _ ->
+                   Stdlib.( := )
+                     duplicates__014_
+                     (field_name__016_ :: Stdlib.( ! ) duplicates__014_))
               | "line_start" ->
-                (match !line_start_field with
-                 | Ppx_sexp_conv_lib.Option.None ->
-                   let _field_sexp = _field_sexp () in
-                   let fvalue = int_of_sexp _field_sexp in
-                   line_start_field := Ppx_sexp_conv_lib.Option.Some fvalue
-                 | Ppx_sexp_conv_lib.Option.Some _ ->
-                   duplicates := field_name :: !duplicates)
+                (match Stdlib.( ! ) line_start__008_ with
+                 | Stdlib.Option.None ->
+                   let _field_sexp__017_ = _field_sexp__017_ () in
+                   let fvalue__021_ = int_of_sexp _field_sexp__017_ in
+                   Stdlib.( := ) line_start__008_ (Stdlib.Option.Some fvalue__021_)
+                 | Stdlib.Option.Some _ ->
+                   Stdlib.( := )
+                     duplicates__014_
+                     (field_name__016_ :: Stdlib.( ! ) duplicates__014_))
               | "start_pos" ->
-                (match !start_pos_field with
-                 | Ppx_sexp_conv_lib.Option.None ->
-                   let _field_sexp = _field_sexp () in
-                   let fvalue = int_of_sexp _field_sexp in
-                   start_pos_field := Ppx_sexp_conv_lib.Option.Some fvalue
-                 | Ppx_sexp_conv_lib.Option.Some _ ->
-                   duplicates := field_name :: !duplicates)
+                (match Stdlib.( ! ) start_pos__010_ with
+                 | Stdlib.Option.None ->
+                   let _field_sexp__017_ = _field_sexp__017_ () in
+                   let fvalue__020_ = int_of_sexp _field_sexp__017_ in
+                   Stdlib.( := ) start_pos__010_ (Stdlib.Option.Some fvalue__020_)
+                 | Stdlib.Option.Some _ ->
+                   Stdlib.( := )
+                     duplicates__014_
+                     (field_name__016_ :: Stdlib.( ! ) duplicates__014_))
               | "end_pos" ->
-                (match !end_pos_field with
-                 | Ppx_sexp_conv_lib.Option.None ->
-                   let _field_sexp = _field_sexp () in
-                   let fvalue = int_of_sexp _field_sexp in
-                   end_pos_field := Ppx_sexp_conv_lib.Option.Some fvalue
-                 | Ppx_sexp_conv_lib.Option.Some _ ->
-                   duplicates := field_name :: !duplicates)
+                (match Stdlib.( ! ) end_pos__012_ with
+                 | Stdlib.Option.None ->
+                   let _field_sexp__017_ = _field_sexp__017_ () in
+                   let fvalue__019_ = int_of_sexp _field_sexp__017_ in
+                   Stdlib.( := ) end_pos__012_ (Stdlib.Option.Some fvalue__019_)
+                 | Stdlib.Option.Some _ ->
+                   Stdlib.( := )
+                     duplicates__014_
+                     (field_name__016_ :: Stdlib.( ! ) duplicates__014_))
               | _ ->
-                if !Ppx_sexp_conv_lib.Conv.record_check_extra_fields
-                then extra := field_name :: !extra
+                if Stdlib.( ! ) Sexplib0.Sexp_conv.record_check_extra_fields
+                then
+                  Stdlib.( := ) extra__015_ (field_name__016_ :: Stdlib.( ! ) extra__015_)
                 else ());
-             iter tail
-           | ((Ppx_sexp_conv_lib.Sexp.Atom _ | Ppx_sexp_conv_lib.Sexp.List _) as sexp)
-             :: _ -> Ppx_sexp_conv_lib.Conv_error.record_only_pairs_expected _tp_loc sexp
+             iter__025_ tail__026_
+           | ((Sexplib0.Sexp.Atom _ | Sexplib0.Sexp.List _) as sexp__002_) :: _ ->
+             Sexplib0.Sexp_conv_error.record_only_pairs_expected
+               error_source__024_
+               sexp__002_
            | [] -> ()
          in
-         iter field_sexps;
-         (match !duplicates with
+         iter__025_ field_sexps__003_;
+         (match Stdlib.( ! ) duplicates__014_ with
           | _ :: _ ->
-            Ppx_sexp_conv_lib.Conv_error.record_duplicate_fields _tp_loc !duplicates sexp
+            Sexplib0.Sexp_conv_error.record_duplicate_fields
+              error_source__024_
+              (Stdlib.( ! ) duplicates__014_)
+              sexp__002_
           | [] ->
-            (match !extra with
+            (match Stdlib.( ! ) extra__015_ with
              | _ :: _ ->
-               Ppx_sexp_conv_lib.Conv_error.record_extra_fields _tp_loc !extra sexp
+               Sexplib0.Sexp_conv_error.record_extra_fields
+                 error_source__024_
+                 (Stdlib.( ! ) extra__015_)
+                 sexp__002_
              | [] ->
                (match
-                  ( !filename_field
-                  , !line_number_field
-                  , !line_start_field
-                  , !start_pos_field
-                  , !end_pos_field )
+                  ( Stdlib.( ! ) filename__004_
+                  , Stdlib.( ! ) line_number__006_
+                  , Stdlib.( ! ) line_start__008_
+                  , Stdlib.( ! ) start_pos__010_
+                  , Stdlib.( ! ) end_pos__012_ )
                 with
-                | ( Ppx_sexp_conv_lib.Option.Some filename_value
-                  , Ppx_sexp_conv_lib.Option.Some line_number_value
-                  , Ppx_sexp_conv_lib.Option.Some line_start_value
-                  , Ppx_sexp_conv_lib.Option.Some start_pos_value
-                  , Ppx_sexp_conv_lib.Option.Some end_pos_value ) ->
-                  { filename = filename_value
-                  ; line_number = line_number_value
-                  ; line_start = line_start_value
-                  ; start_pos = start_pos_value
-                  ; end_pos = end_pos_value
+                | ( Stdlib.Option.Some filename__005_
+                  , Stdlib.Option.Some line_number__007_
+                  , Stdlib.Option.Some line_start__009_
+                  , Stdlib.Option.Some start_pos__011_
+                  , Stdlib.Option.Some end_pos__013_ ) ->
+                  { filename = filename__005_
+                  ; line_number = line_number__007_
+                  ; line_start = line_start__009_
+                  ; start_pos = start_pos__011_
+                  ; end_pos = end_pos__013_
                   }
                 | _ ->
-                  Ppx_sexp_conv_lib.Conv_error.record_undefined_elements
-                    _tp_loc
-                    sexp
-                    [ ( Ppx_sexp_conv_lib.Conv.( = )
-                          !filename_field
-                          Ppx_sexp_conv_lib.Option.None
+                  Sexplib0.Sexp_conv_error.record_undefined_elements
+                    error_source__024_
+                    sexp__002_
+                    [ ( Sexplib0.Sexp_conv.( = )
+                          (Stdlib.( ! ) filename__004_)
+                          Stdlib.Option.None
                       , "filename" )
-                    ; ( Ppx_sexp_conv_lib.Conv.( = )
-                          !line_number_field
-                          Ppx_sexp_conv_lib.Option.None
+                    ; ( Sexplib0.Sexp_conv.( = )
+                          (Stdlib.( ! ) line_number__006_)
+                          Stdlib.Option.None
                       , "line_number" )
-                    ; ( Ppx_sexp_conv_lib.Conv.( = )
-                          !line_start_field
-                          Ppx_sexp_conv_lib.Option.None
+                    ; ( Sexplib0.Sexp_conv.( = )
+                          (Stdlib.( ! ) line_start__008_)
+                          Stdlib.Option.None
                       , "line_start" )
-                    ; ( Ppx_sexp_conv_lib.Conv.( = )
-                          !start_pos_field
-                          Ppx_sexp_conv_lib.Option.None
+                    ; ( Sexplib0.Sexp_conv.( = )
+                          (Stdlib.( ! ) start_pos__010_)
+                          Stdlib.Option.None
                       , "start_pos" )
-                    ; ( Ppx_sexp_conv_lib.Conv.( = )
-                          !end_pos_field
-                          Ppx_sexp_conv_lib.Option.None
+                    ; ( Sexplib0.Sexp_conv.( = )
+                          (Stdlib.( ! ) end_pos__012_)
+                          Stdlib.Option.None
                       , "end_pos" )
                     ])))
-       | Ppx_sexp_conv_lib.Sexp.Atom _ as sexp ->
-         Ppx_sexp_conv_lib.Conv_error.record_list_instead_atom _tp_loc sexp
-         : Ppx_sexp_conv_lib.Sexp.t -> t)
+       | Sexplib0.Sexp.Atom _ as sexp__002_ ->
+         Sexplib0.Sexp_conv_error.record_list_instead_atom error_source__024_ sexp__002_
+         : Sexplib0.Sexp.t -> t)
     ;;
 
     let _ = t_of_sexp
 
     let sexp_of_t =
-      (function
-        | { filename = v_filename
-          ; line_number = v_line_number
-          ; line_start = v_line_start
-          ; start_pos = v_start_pos
-          ; end_pos = v_end_pos
-          } ->
-          let bnds = [] in
-          let bnds =
-            let arg = sexp_of_int v_end_pos in
-            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "end_pos"; arg ]
-            :: bnds
-          in
-          let bnds =
-            let arg = sexp_of_int v_start_pos in
-            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "start_pos"; arg ]
-            :: bnds
-          in
-          let bnds =
-            let arg = sexp_of_int v_line_start in
-            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "line_start"; arg ]
-            :: bnds
-          in
-          let bnds =
-            let arg = sexp_of_int v_line_number in
-            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "line_number"; arg ]
-            :: bnds
-          in
-          let bnds =
-            let arg = Name.sexp_of_t v_filename in
-            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "filename"; arg ]
-            :: bnds
-          in
-          Ppx_sexp_conv_lib.Sexp.List bnds
-          : t -> Ppx_sexp_conv_lib.Sexp.t)
+      (fun { filename = filename__029_
+           ; line_number = line_number__031_
+           ; line_start = line_start__033_
+           ; start_pos = start_pos__035_
+           ; end_pos = end_pos__037_
+           } ->
+        let bnds__028_ = [] in
+        let bnds__028_ =
+          let arg__038_ = sexp_of_int end_pos__037_ in
+          Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "end_pos"; arg__038_ ] :: bnds__028_
+        in
+        let bnds__028_ =
+          let arg__036_ = sexp_of_int start_pos__035_ in
+          Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "start_pos"; arg__036_ ] :: bnds__028_
+        in
+        let bnds__028_ =
+          let arg__034_ = sexp_of_int line_start__033_ in
+          Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "line_start"; arg__034_ ] :: bnds__028_
+        in
+        let bnds__028_ =
+          let arg__032_ = sexp_of_int line_number__031_ in
+          Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "line_number"; arg__032_ ]
+          :: bnds__028_
+        in
+        let bnds__028_ =
+          let arg__030_ = Name.sexp_of_t filename__029_ in
+          Sexplib0.Sexp.List [ Sexplib0.Sexp.Atom "filename"; arg__030_ ] :: bnds__028_
+        in
+        Sexplib0.Sexp.List bnds__028_
+        : t -> Sexplib0.Sexp.t)
     ;;
 
     let _ = sexp_of_t
 
     let compare =
-      (fun a__001_ b__002_ ->
-         if Ppx_compare_lib.phys_equal a__001_ b__002_
+      (fun a__039_ b__040_ ->
+         if Ppx_compare_lib.phys_equal a__039_ b__040_
          then 0
          else (
-           match Name.compare a__001_.filename b__002_.filename with
+           match Name.compare a__039_.filename b__040_.filename with
            | 0 ->
-             (match compare_int a__001_.line_number b__002_.line_number with
+             (match compare_int a__039_.line_number b__040_.line_number with
               | 0 ->
-                (match compare_int a__001_.line_start b__002_.line_start with
+                (match compare_int a__039_.line_start b__040_.line_start with
                  | 0 ->
-                   (match compare_int a__001_.start_pos b__002_.start_pos with
-                    | 0 -> compare_int a__001_.end_pos b__002_.end_pos
+                   (match compare_int a__039_.start_pos b__040_.start_pos with
+                    | 0 -> compare_int a__039_.end_pos b__040_.end_pos
                     | n -> n)
                  | n -> n)
               | n -> n)
@@ -245,12 +261,6 @@ module Location = struct
     let _ = compare
 
     [@@@end]
-
-    let compare a b =
-      if not (Name.equal a.filename b.filename)
-      then invalid_arg "Expect_test_collector.File.Location.compare"
-      else compare a b
-    ;;
   end
 
   include T
@@ -258,6 +268,15 @@ module Location = struct
 
   let beginning_of_file filename =
     { filename; line_number = 1; line_start = 0; start_pos = 0; end_pos = 0 }
+  ;;
+
+  let of_source_code_position (pos : Source_code_position.t) =
+    { filename = Name.of_string (Caml.Filename.basename pos.pos_fname)
+    ; line_number = pos.pos_lnum
+    ; line_start = pos.pos_bol
+    ; start_pos = pos.pos_cnum
+    ; end_pos = pos.pos_cnum
+    }
   ;;
 end
 
@@ -267,8 +286,9 @@ module Digest : sig
   include sig
     [@@@ocaml.warning "-32"]
 
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexplib0.Sexp.t
+
+    include Ppx_compare_lib.Comparable.S with type t := t
   end
   [@@ocaml.doc "@inline"]
 
@@ -280,7 +300,7 @@ end = struct
   type t = string [@@deriving_inline sexp_of, compare]
 
   let _ = fun (_ : t) -> ()
-  let sexp_of_t = (sexp_of_string : t -> Ppx_sexp_conv_lib.Sexp.t)
+  let sexp_of_t = (sexp_of_string : t -> Sexplib0.Sexp.t)
   let _ = sexp_of_t
   let compare = (compare_string : t -> t -> int)
   let _ = compare

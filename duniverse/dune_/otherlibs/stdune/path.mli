@@ -98,6 +98,8 @@ module Source : sig
 
   val of_local : Local.t -> t
 
+  (** [relative dir s] if s can be ".." it could escape the working directory.
+      {!Path.relative} should be used instead. *)
   val relative : ?error_loc:Loc0.t -> t -> string -> t
 
   val split_first_component : t -> (string * Local.t) option
@@ -227,6 +229,11 @@ val is_managed : t -> bool
 
 val relative : ?error_loc:Loc0.t -> t -> string -> t
 
+(** [relative_to_source_in_build ~dir s] compute the path [s] relative to the
+    source directory corresponding to [dir] *)
+val relative_to_source_in_build_or_external :
+  ?error_loc:Loc0.t -> dir:Build.t -> string -> t
+
 (** Create an external path. If the argument is relative, assume it is relative
     to the initial directory dune was launched in. *)
 val of_filename_relative_to_initial_cwd : string -> t
@@ -320,6 +327,8 @@ val as_in_build_dir : t -> Build.t option
 
 val as_in_build_dir_exn : t -> Build.t
 
+val as_external : t -> External.t option
+
 (** [is_strict_descendant_of_build_dir t = is_in_build_dir t && t <> build_dir] *)
 val is_strict_descendant_of_build_dir : t -> bool
 
@@ -408,6 +417,8 @@ val lstat_exn : t -> Unix.stats
 val set_of_source_paths : Source.Set.t -> Set.t
 
 val set_of_build_paths_list : Build.t list -> Set.t
+
+val set_of_external_paths : External.Set.t -> Set.t
 
 (** Rename a file. [rename oldpath newpath] renames the file called [oldpath] to
     [newpath], moving it between directories if needed. If [newpath] already

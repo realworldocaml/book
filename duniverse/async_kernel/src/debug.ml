@@ -1,5 +1,5 @@
 module Time_ns_in_this_directory = Time_ns
-open Core_kernel
+open Core
 module Time_ns = Time_ns_in_this_directory
 include Async_kernel_config.Print_debug_messages_for
 

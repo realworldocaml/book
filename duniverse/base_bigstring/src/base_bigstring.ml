@@ -20,11 +20,7 @@ end
 
 include Bigstring0
 
-external aux_create
-  :  max_mem_waiting_gc_in_bytes:int
-  -> size:int
-  -> t
-  = "bigstring_alloc"
+external aux_create : max_mem_waiting_gc_in_bytes:int -> size:int -> t = "bigstring_alloc"
 
 let sprintf = Printf.sprintf
 
@@ -210,13 +206,7 @@ let concat =
       dst
 ;;
 
-external unsafe_memset
-  :  t
-  -> pos:int
-  -> len:int
-  -> char
-  -> unit
-  = "bigstring_memset_stub"
+external unsafe_memset : t -> pos:int -> len:int -> char -> unit = "bigstring_memset_stub"
 [@@noalloc]
 
 let memset t ~pos ~len c =
@@ -240,6 +230,25 @@ let memcmp t1 ~pos1 t2 ~pos2 ~len =
   Ordered_collection_common.check_pos_len_exn ~pos:pos1 ~len ~total_length:(length t1);
   Ordered_collection_common.check_pos_len_exn ~pos:pos2 ~len ~total_length:(length t2);
   unsafe_memcmp t1 ~pos1 t2 ~pos2 ~len
+;;
+
+external unsafe_memcmp_bytes
+  :  t
+  -> pos1:int
+  -> Bytes.t
+  -> pos2:int
+  -> len:int
+  -> int
+  = "bigstring_memcmp_bytes_stub"
+[@@noalloc]
+
+let memcmp_bytes t1 ~pos1 bytes ~pos2 ~len =
+  Ordered_collection_common.check_pos_len_exn ~pos:pos1 ~len ~total_length:(length t1);
+  Ordered_collection_common.check_pos_len_exn
+    ~pos:pos2
+    ~len
+    ~total_length:(Bytes.length bytes);
+  unsafe_memcmp_bytes t1 ~pos1 bytes ~pos2 ~len
 ;;
 
 let compare t1 t2 =
@@ -450,18 +459,26 @@ let write_int32_int_swap_exn t ~pos x =
   set_32 t pos (swap32 (int32_of_int x))
 ;;
 
-let unsafe_read_int64_int t ~pos = int64_to_int (unsafe_get_64 t pos)
-let unsafe_read_int64_int_swap t ~pos = int64_to_int (swap64 (unsafe_get_64 t pos))
-let unsafe_read_int64 t ~pos = unsafe_get_64 t pos
-let unsafe_read_int64_swap t ~pos = swap64 (unsafe_get_64 t pos)
-let unsafe_write_int64 t ~pos x = unsafe_set_64 t pos x
-let unsafe_write_int64_swap t ~pos x = unsafe_set_64 t pos (swap64 x)
-let unsafe_write_int64_int t ~pos x = unsafe_set_64 t pos (int64_of_int x)
-let unsafe_write_int64_int_swap t ~pos x = unsafe_set_64 t pos (swap64 (int64_of_int x))
-let read_int64_int t ~pos = int64_to_int (get_64 t pos)
-let read_int64_int_swap t ~pos = int64_to_int (swap64 (get_64 t pos))
-let read_int64 t ~pos = get_64 t pos
-let read_int64_swap t ~pos = swap64 (get_64 t pos)
+let[@inline always] unsafe_read_int64_int t ~pos = int64_to_int (unsafe_get_64 t pos)
+
+let[@inline always] unsafe_read_int64_int_swap t ~pos =
+  int64_to_int (swap64 (unsafe_get_64 t pos))
+;;
+
+let[@inline always] unsafe_read_int64 t ~pos = unsafe_get_64 t pos
+let[@inline always] unsafe_read_int64_swap t ~pos = swap64 (unsafe_get_64 t pos)
+let[@inline always] unsafe_write_int64 t ~pos x = unsafe_set_64 t pos x
+let[@inline always] unsafe_write_int64_swap t ~pos x = unsafe_set_64 t pos (swap64 x)
+let[@inline always] unsafe_write_int64_int t ~pos x = unsafe_set_64 t pos (int64_of_int x)
+
+let[@inline always] unsafe_write_int64_int_swap t ~pos x =
+  unsafe_set_64 t pos (swap64 (int64_of_int x))
+;;
+
+let[@inline always] read_int64_int t ~pos = int64_to_int (get_64 t pos)
+let[@inline always] read_int64_int_swap t ~pos = int64_to_int (swap64 (get_64 t pos))
+let[@inline always] read_int64 t ~pos = get_64 t pos
+let[@inline always] read_int64_swap t ~pos = swap64 (get_64 t pos)
 let write_int64 t ~pos x = set_64 t pos x
 let write_int64_swap t ~pos x = set_64 t pos (swap64 x)
 let write_int64_int t ~pos x = set_64 t pos (int64_of_int x)
@@ -614,7 +631,7 @@ let uint64_conv_error () =
 ;;
 
 (* [Poly] is required so that we can compare unboxed [int64]. *)
-let int64_to_int_exn n =
+let[@inline always] int64_to_int_exn n =
   if arch_sixtyfour
   then
     if Poly.(n >= -0x4000_0000_0000_0000L && n < 0x4000_0000_0000_0000L)
@@ -625,7 +642,7 @@ let int64_to_int_exn n =
   else int64_conv_error ()
 ;;
 
-let uint64_to_int_exn n =
+let[@inline always] uint64_to_int_exn n =
   if arch_sixtyfour
   then
     if Poly.(n >= 0L && n < 0x4000_0000_0000_0000L)
@@ -636,12 +653,25 @@ let uint64_to_int_exn n =
   else uint64_conv_error ()
 ;;
 
-let unsafe_get_int64_be_exn t ~pos = int64_to_int_exn (unsafe_get_int64_t_be t ~pos)
-let unsafe_get_int64_le_exn t ~pos = int64_to_int_exn (unsafe_get_int64_t_le t ~pos)
+let[@inline] unsafe_get_int64_be_exn t ~pos =
+  int64_to_int_exn (unsafe_get_int64_t_be t ~pos)
+;;
+
+let[@inline] unsafe_get_int64_le_exn t ~pos =
+  int64_to_int_exn (unsafe_get_int64_t_le t ~pos)
+;;
+
 let get_int64_be_exn t ~pos = int64_to_int_exn (get_int64_t_be t ~pos)
 let get_int64_le_exn t ~pos = int64_to_int_exn (get_int64_t_le t ~pos)
-let unsafe_get_uint64_be_exn t ~pos = uint64_to_int_exn (unsafe_get_int64_t_be t ~pos)
-let unsafe_get_uint64_le_exn t ~pos = uint64_to_int_exn (unsafe_get_int64_t_le t ~pos)
+
+let[@inline] unsafe_get_uint64_be_exn t ~pos =
+  uint64_to_int_exn (unsafe_get_int64_t_be t ~pos)
+;;
+
+let[@inline] unsafe_get_uint64_le_exn t ~pos =
+  uint64_to_int_exn (unsafe_get_int64_t_le t ~pos)
+;;
+
 let get_uint64_be_exn t ~pos = uint64_to_int_exn (get_int64_t_be t ~pos)
 let get_uint64_le_exn t ~pos = uint64_to_int_exn (get_int64_t_le t ~pos)
 let unsafe_set_uint64_be = unsafe_set_int64_be
@@ -697,24 +727,25 @@ let get_int8 (t : t) ~pos =
   if n >= 128 then n - 256 else n
 ;;
 
-let unsafe_set_uint32_le t ~pos n =
-  let n = if not_on_32bit && n >= 1 lsl 31 then n - (1 lsl 32) else n in
-  unsafe_set_int32_le t ~pos n
+let mask32_n = Caml.Nativeint.(sub (shift_left 1n 32) 1n)
+
+let[@inline always] uint32_of_int32_t n =
+  if not_on_32bit
+  then
+    (* use Caml.Nativeint to ensure inlining even without x-library-inlining *)
+    Caml.Nativeint.(to_int (logand (of_int32 n) mask32_n))
+  else int32_to_int n
 ;;
 
-let unsafe_set_uint32_be t ~pos n =
-  let n = if not_on_32bit && n >= 1 lsl 31 then n - (1 lsl 32) else n in
-  unsafe_set_int32_be t ~pos n
+let[@inline] unsafe_set_uint32_le t ~pos n = unsafe_set_int32_t_le t ~pos (int32_of_int n)
+let[@inline] unsafe_set_uint32_be t ~pos n = unsafe_set_int32_t_be t ~pos (int32_of_int n)
+
+let[@inline] unsafe_get_uint32_le t ~pos =
+  uint32_of_int32_t (unsafe_get_int32_t_le t ~pos)
 ;;
 
-let unsafe_get_uint32_le t ~pos =
-  let n = unsafe_get_int32_le t ~pos in
-  if not_on_32bit && n < 0 then n + (1 lsl 32) else n
-;;
-
-let unsafe_get_uint32_be t ~pos =
-  let n = unsafe_get_int32_be t ~pos in
-  if not_on_32bit && n < 0 then n + (1 lsl 32) else n
+let[@inline] unsafe_get_uint32_be t ~pos =
+  uint32_of_int32_t (unsafe_get_int32_t_be t ~pos)
 ;;
 
 let set_uint32_le_exn t ~pos n =
@@ -729,15 +760,44 @@ let set_uint32_be_exn t ~pos n =
   set_int32_be_exn t ~pos n
 ;;
 
-let get_uint32_le t ~pos =
-  let n = get_int32_le t ~pos in
-  if not_on_32bit && n < 0 then n + (1 lsl 32) else n
-;;
+let get_uint32_le t ~pos = uint32_of_int32_t (get_int32_t_le t ~pos)
+let get_uint32_be t ~pos = uint32_of_int32_t (get_int32_t_be t ~pos)
 
-let get_uint32_be t ~pos =
-  let n = get_int32_be t ~pos in
-  if not_on_32bit && n < 0 then n + (1 lsl 32) else n
-;;
+module Int_repr = struct
+  module F = struct
+    type t = t_frozen
+
+    let get_uint8 t pos = get_uint8 t ~pos
+    let set_uint8 t pos x = Array1.set t pos (Char.unsafe_of_int x)
+    let get_uint16_ne t pos = get_16 t pos
+    let set_uint16_ne t pos x = set_16_trunc t pos x
+    let get_int32_ne t pos = get_32 t pos
+    let set_int32_ne t pos x = set_32 t pos x
+    let get_int64_ne t pos = get_64 t pos
+    let set_int64_ne t pos x = set_64 t pos x
+  end
+
+  include Int_repr.Make_get (F)
+  include Int_repr.Make_set (F)
+
+  module Unsafe = struct
+    module F = struct
+      type t = t_frozen
+
+      let get_uint8 t pos = unsafe_get_uint8 t ~pos
+      let set_uint8 t pos x = unsafe_set_uint8 t ~pos x
+      let get_uint16_ne t pos = unsafe_get_16 t pos
+      let set_uint16_ne t pos x = unsafe_set_16 t pos x
+      let get_int32_ne t pos = unsafe_get_32 t pos
+      let set_int32_ne t pos x = unsafe_set_32 t pos x
+      let get_int64_ne t pos = unsafe_get_64 t pos
+      let set_int64_ne t pos x = unsafe_set_64 t pos x
+    end
+
+    include Int_repr.Make_get (F)
+    include Int_repr.Make_set (F)
+  end
+end
 
 module Private = struct
   let sign_extend_16 = sign_extend_16

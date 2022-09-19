@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Import
 
 (** [apply hunks tolerance ~context] converts diff ranges into context if the diff looks

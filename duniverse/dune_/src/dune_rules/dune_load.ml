@@ -1,6 +1,5 @@
-open! Dune_engine
-open! Dune_engine.Import
-open! Stdune
+open Import
+open Memo.O
 
 module Jbuild_plugin : sig
   val create_plugin_wrapper :
@@ -9,7 +8,7 @@ module Jbuild_plugin : sig
     -> plugin:Path.t
     -> wrapper:Path.Build.t
     -> target:Path.Build.t
-    -> unit
+    -> unit Memo.t
 end = struct
   let replace_in_template =
     let template =
@@ -103,77 +102,147 @@ end = struct
 
   let create_plugin_wrapper (context : Context.t) ~exec_dir ~plugin ~wrapper
       ~target =
-    let plugin_contents = Io.read_file plugin in
+    let open Memo.O in
+    let+ plugin_contents = Fs_memo.file_contents plugin in
     Io.with_file_out (Path.build wrapper) ~f:(fun oc ->
         write oc ~context ~target ~exec_dir ~plugin ~plugin_contents);
     check_no_requires plugin plugin_contents
 end
 
-module Dune_files = struct
+module Script = struct
   type script =
     { dir : Path.Source.t
     ; file : Path.Source.t
     ; project : Dune_project.t
     }
 
-  type one =
-    | Literal of Dune_file.t
-    | Script of
-        { script : script
-        ; from_parent : Dune_lang.Ast.t list
-        }
-
-  type t = one list
+  type t =
+    { script : script
+    ; from_parent : Dune_lang.Ast.t list
+    }
 
   let generated_dune_files_dir = Path.Build.relative Path.Build.root ".dune"
 
   let ensure_parent_dir_exists path =
     Path.build path |> Path.parent |> Option.iter ~f:Path.mkdir_p
 
+  let eval_one
+      ((context : Context.t), { script = { dir; file; project }; from_parent })
+      =
+    let generated_dune_file =
+      Path.Build.append_source
+        (Path.Build.relative generated_dune_files_dir
+           (Context_name.to_string context.name))
+        file
+    in
+    let wrapper =
+      Path.Build.extend_basename generated_dune_file ~suffix:".ml"
+    in
+    ensure_parent_dir_exists generated_dune_file;
+    let* () =
+      Jbuild_plugin.create_plugin_wrapper context ~exec_dir:(Path.source dir)
+        ~plugin:(Path.source file) ~wrapper ~target:generated_dune_file
+    in
+    let context = Option.value context.for_host ~default:context in
+    let args =
+      List.concat
+        [ [ "-I"; "+compiler-libs" ]
+        ; [ Path.to_absolute_filename (Path.build wrapper) ]
+        ]
+    in
+    let ocaml = Action.Prog.ok_exn context.ocaml in
+    let* () =
+      let* (_ : Memo.Run.t) = Memo.current_run () in
+      Memo.of_reproducible_fiber
+        (Process.run Strict ~dir:(Path.source dir) ~env:context.env ocaml args)
+    in
+    if not (Path.Untracked.exists (Path.build generated_dune_file)) then
+      User_error.raise
+        [ Pp.textf "%s failed to produce a valid dune_file file."
+            (Path.Source.to_string_maybe_quoted file)
+        ; Pp.textf "Did you forgot to call [Jbuild_plugin.V*.send]?"
+        ];
+    Path.build generated_dune_file
+    |> Io.Untracked.with_lexbuf_from_file ~f:(Dune_lang.Parser.parse ~mode:Many)
+    |> List.rev_append from_parent
+    |> Dune_file.parse ~dir ~file ~project
+
+  let eval_one =
+    let module Input = struct
+      type nonrec t = Context.t * t
+
+      let equal = Tuple.T2.equal Context.equal ( == )
+
+      let hash = Tuple.T2.hash Context.hash Poly.hash
+
+      let to_dyn = Dyn.opaque
+    end in
+    let memo = Memo.create "Script.eval_one" ~input:(module Input) eval_one in
+    fun ~context t -> Memo.exec memo (context, t)
+end
+
+module Dune_files = struct
+  type one =
+    | Literal of Dune_file.t
+    | Script of Script.t
+
+  type t = one list
+
+  let interpret =
+    let impl (dir, project, dune_file) =
+      let file = Source_tree.Dune_file.path dune_file in
+      let static = Source_tree.Dune_file.get_static_sexp dune_file in
+      match Source_tree.Dune_file.kind dune_file with
+      | Ocaml_script ->
+        Memo.return
+          (Script { script = { dir; project; file }; from_parent = static })
+      | Plain ->
+        let open Memo.O in
+        let+ stanzas = Dune_file.parse static ~dir ~file ~project in
+        Literal stanzas
+    in
+    let module Input = struct
+      type t = Path.Source.t * Dune_project.t * Source_tree.Dune_file.t
+
+      let equal = Tuple.T3.equal Path.Source.equal Dune_project.equal ( == )
+
+      let hash = Tuple.T3.hash Path.Source.hash Dune_project.hash Poly.hash
+
+      let to_dyn = Dyn.opaque
+    end in
+    let memo = Memo.create "Dune_files.interpret" ~input:(module Input) impl in
+    fun ~dir ~project ~(dune_file : Source_tree.Dune_file.t) ->
+      Memo.exec memo (dir, project, dune_file)
+
+  let in_dir dir =
+    let source_dir = Path.Build.drop_build_context_exn dir in
+    let* context = Context.DB.by_dir dir in
+    let* dir = Source_tree.find_dir source_dir in
+    match dir with
+    | None -> Memo.return None
+    | Some d -> (
+      let project = Source_tree.Dir.project d in
+      match Source_tree.Dir.dune_file d with
+      | None ->
+        let dir = Source_tree.Dir.path d in
+        Memo.return (Some { Dune_file.dir; project; stanzas = [] })
+      | Some dune_file -> (
+        let* dune_file = interpret ~dir:source_dir ~project ~dune_file in
+        match dune_file with
+        | Literal dune_file -> Memo.return (Some dune_file)
+        | Script script ->
+          let+ dune_file = Script.eval_one ~context script in
+          Some dune_file))
+
   let eval dune_files ~(context : Context.t) =
     let open Memo.O in
     let static, dynamic =
       List.partition_map dune_files ~f:(function
         | Literal x -> Left x
-        | Script { script; from_parent } -> Right (script, from_parent))
+        | Script y -> Right y)
     in
-    Memo.parallel_map dynamic ~f:(fun ({ dir; file; project }, from_parent) ->
-        let generated_dune_file =
-          Path.Build.append_source
-            (Path.Build.relative generated_dune_files_dir
-               (Context_name.to_string context.name))
-            file
-        in
-        let wrapper =
-          Path.Build.extend_basename generated_dune_file ~suffix:".ml"
-        in
-        ensure_parent_dir_exists generated_dune_file;
-        Jbuild_plugin.create_plugin_wrapper context ~exec_dir:(Path.source dir)
-          ~plugin:(Path.source file) ~wrapper ~target:generated_dune_file;
-        let context = Option.value context.for_host ~default:context in
-        let args =
-          List.concat
-            [ [ "-I"; "+compiler-libs" ]
-            ; [ Path.to_absolute_filename (Path.build wrapper) ]
-            ]
-        in
-        let ocaml = Action.Prog.ok_exn context.ocaml in
-        let* () =
-          Memo.of_reproducible_fiber
-            (Process.run Strict ~dir:(Path.source dir) ~env:context.env ocaml
-               args)
-        in
-        if not (Path.exists (Path.build generated_dune_file)) then
-          User_error.raise
-            [ Pp.textf "%s failed to produce a valid dune_file file."
-                (Path.Source.to_string_maybe_quoted file)
-            ; Pp.textf "Did you forgot to call [Jbuild_plugin.V*.send]?"
-            ];
-        Memo.return
-          (Dune_lang.Parser.load (Path.build generated_dune_file) ~mode:Many
-          |> List.rev_append from_parent
-          |> Dune_file.parse ~dir ~file ~project))
-    >>| fun dynamic -> static @ dynamic
+    let+ dynamic = Memo.parallel_map dynamic ~f:(Script.eval_one ~context) in
+    static @ dynamic
 end
 
 type conf =
@@ -181,14 +250,6 @@ type conf =
   ; packages : Package.t Package.Name.Map.t
   ; projects : Dune_project.t list
   }
-
-let interpret ~dir ~project ~(dune_file : Source_tree.Dune_file.t) =
-  let file = Source_tree.Dune_file.path dune_file in
-  let static = Source_tree.Dune_file.get_static_sexp dune_file in
-  match Source_tree.Dune_file.kind dune_file with
-  | Ocaml_script ->
-    Dune_files.Script { script = { dir; project; file }; from_parent = static }
-  | Plain -> Literal (Dune_file.parse static ~dir ~file ~project)
 
 module Projects_and_dune_files =
   Monoid.Product
@@ -204,7 +265,7 @@ module Source_tree_map_reduce =
 
 let load () =
   let open Memo.O in
-  let+ projects, dune_files =
+  let* projects, dune_files =
     let f dir : Projects_and_dune_files.t Memo.t =
       let path = Source_tree.Dir.path dir in
       let project = Source_tree.Dir.project dir in
@@ -237,9 +298,10 @@ let load () =
                       (Path.Source.to_string_maybe_quoted (Package.opam_file b))
                   ])))
   in
-  let dune_files =
-    List.map (Appendable_list.to_list dune_files)
-      ~f:(fun (dir, project, dune_file) -> interpret ~dir ~project ~dune_file)
+  let+ dune_files =
+    Appendable_list.to_list dune_files
+    |> Memo.parallel_map ~f:(fun (dir, project, dune_file) ->
+           Dune_files.interpret ~dir ~project ~dune_file)
   in
   { dune_files; packages; projects }
 

@@ -11,8 +11,7 @@ module IO_flush = struct
   let to_run t = t
 end
 
-let flush () = () (* the runtime already flushes [stdout] *)
-
+let sanitize s = s
 let run f = f ()
 let flushed () = true (* the runtime flushed [stdout] before calling this function *)
 

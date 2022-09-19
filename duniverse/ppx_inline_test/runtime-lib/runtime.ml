@@ -43,8 +43,8 @@ type start_pos = int
 type end_pos = int
 type config = (module Inline_test_config.S)
 type 'a test_function_args
-   = config:config
-  -> descr:descr
+  = config:config
+  -> descr:descr Lazy.t
   -> tags:string list
   -> filename:filename
   -> line_number:line_number
@@ -82,6 +82,7 @@ end
 type which_tests =
   { libname : string
   ; only_test_location : (filename * line_number option * bool ref) list
+  ; name_filter : string list
   ; which_tags : Tag_predicate.t
   }
 type test_mode =
@@ -162,8 +163,9 @@ module Module_context = struct
     let prev = !current in
     current := { T. descr; tags } :: prev;
     try
-      f ();
+      let x = f () in
       current := prev;
+      x
     with e ->
       current := prev;
       raise e
@@ -189,34 +191,18 @@ let diff_command = ref None
 let source_tree_root = ref None
 let allow_output_patterns = ref false
 
-let displayed_descr descr filename line start_pos end_pos =
+let displayed_descr (lazy descr) filename line start_pos end_pos =
   Printf.sprintf "File %S, line %d, characters %d-%d%s"
-    filename line start_pos end_pos descr
+    filename line start_pos end_pos
+    (if descr = "" then "" else ": " ^ descr)
 let parse_descr str =
   try Some (Scanf.sscanf str " File %S , line %d , characters %d - %d %!"
               (fun file line _start_pos _end_pos -> file, Some line))
   with _ ->
-    try Some (Scanf.sscanf str " File %S , line %d %!" (fun file line -> file, Some line))
-    with _ ->
-      try Some (Scanf.sscanf str " File %S %!" (fun file -> file, None))
-      with _ -> None
-
-let indent ~by = function
-  | "" -> ""
-  | str ->
-    let len = String.length str in
-    let buf = Buffer.create (len * 2) in
-    let indentation = String.make by ' ' in
-    Buffer.add_string buf indentation;
-    for i = 0 to len - 1; do
-      Buffer.add_char buf str.[i];
-      if str.[i] = '\n' && i <> len - 1 then Buffer.add_string buf indentation
-    done;
-    Buffer.contents buf
-
-let backtrace_indented ~by =
-  let str = Printexc.get_backtrace () in
-  indent str ~by
+  try Some (Scanf.sscanf str " File %S , line %d %!" (fun file line -> file, Some line))
+  with _ ->
+  try Some (Scanf.sscanf str " File %S %!" (fun file -> file, None))
+  with _ -> None
 
 let () =
   match Array.to_list Sys.argv with
@@ -227,6 +213,7 @@ let () =
       let list_partitions = ref false in
       let partition = ref None in
       let tag_predicate = ref Tag_predicate.enable_everything in
+      let name_filter = ref [] in
       parse_argv (Array.of_list (name :: rest)) (Arg.align [
         "-list-test-names", Arg.Unit (fun () -> list_test_names := true; verbose := true),
         " Do not run tests but show what would have been run";
@@ -249,6 +236,8 @@ let () =
         "-require-tag", Arg.String (fun s ->
           tag_predicate := Tag_predicate.require !tag_predicate s
         ), "tag Only run tests tagged with [tag] (overrides previous -drop-tag)";
+        "-matching", Arg.String (fun s -> name_filter := s :: !name_filter),
+        "substring Only run tests whose names contain the given substring";
         "-only-test", Arg.String (fun s ->
           let filename, index =
             match parse_descr s with
@@ -295,6 +284,7 @@ let () =
               { libname = lib
               ; only_test_location = !tests;
                 which_tags = !tag_predicate;
+                name_filter = !name_filter
               }
           ; what_to_do =
               if !list_partitions
@@ -315,7 +305,7 @@ let am_running_inline_test_env_var =
      to what PPX_INLINE_TEST_LIB_AM_RUNNING_INLINE_TEST used to be *)
   "TESTING_FRAMEWORK"
 
-(* This value is deprecated in principle, in favor of Core_kernel.am_running_test, so
+(* This value is deprecated in principle, in favor of Core.am_running_test, so
    we're going to live with the ugly pattern match. *)
 let am_running_inline_test =
   match Sys.getenv "PPX_INLINE_TEST_LIB_AM_RUNNING_INLINE_TEST" with
@@ -338,23 +328,39 @@ let wall_time_clock_ns () =
   Time_now.nanoseconds_since_unix_epoch ()
 
 
+let where_to_cut_backtrace = lazy (
+  Base.String.Search_pattern.create (__MODULE__ ^ "." ^ "time_without_resetting_random_seeds"))
+
 let time_without_resetting_random_seeds f =
   let before_ns = wall_time_clock_ns () in
-  Base.Exn.protect ~finally:(fun[@inline] () ->
-    time_sec := Base.Int63.(wall_time_clock_ns () - before_ns |> to_float)  /. 1e9)
-    ~f
+  let res =
+    (* To avoid noise in backtraces, we do two things.
+
+       We use [where_to_cut_backtrace] above to remove the stack frames for the current
+       function and any function it gets inlined into, as it's not of any interest to the
+       user, since it's not talking about their test but instead talking about the
+       ppx_inline_test machinery.
+
+       We also avoid inserting any code between the [f] that comes from the user's file
+       and grabbing the backtrace from its exceptions (no wrapping of [f] with high order
+       functions like Exn.protect, or (fun () -> f (); true)). *)
+    try Ok (f ())
+    with exn -> Error (exn, Printexc.get_backtrace ())
+  in
+  time_sec := Base.Int63.(wall_time_clock_ns () - before_ns |> to_float)  /. 1e9;
+  res
 
 
-let saved_caml_random_state = lazy (Caml.Random.State.make [| 100; 200; 300 |])
+let saved_caml_random_state = lazy (Stdlib.Random.State.make [| 100; 200; 300 |])
 let saved_base_random_state = lazy (Base.Random.State.make [| 111; 222; 333 |])
 
 let time_and_reset_random_seeds f =
-  let caml_random_state = Caml.Random.get_state () in
+  let caml_random_state = Stdlib.Random.get_state () in
   let base_random_state = Base.Random.State.copy Base.Random.State.default in
-  Caml.Random.set_state (Lazy.force saved_caml_random_state);
+  Stdlib.Random.set_state (Lazy.force saved_caml_random_state);
   Base.Random.set_state (Lazy.force saved_base_random_state);
   let result = time_without_resetting_random_seeds f in
-  Caml.Random.set_state caml_random_state;
+  Stdlib.Random.set_state caml_random_state;
   Base.Random.set_state base_random_state;
   result
 
@@ -370,19 +376,25 @@ let position_match def_filename def_line_number l =
       String.length def_filename - String.length filename in
     let found =
       position_start >= 0 &&
-        let end_of_def_filename =
-          String.sub def_filename
-            position_start
-            (String.length filename) in
-        end_of_def_filename = filename
-        && (position_start = 0 || def_filename.[position_start - 1] = '/')
-        && (match line_number_opt with
-            | None -> true
-            | Some line_number -> def_line_number = line_number)
+      let end_of_def_filename =
+        String.sub def_filename
+          position_start
+          (String.length filename) in
+      end_of_def_filename = filename
+      && (position_start = 0 || def_filename.[position_start - 1] = '/')
+      && (match line_number_opt with
+        | None -> true
+        | Some line_number -> def_line_number = line_number)
     in
     if found then used := true;
     found
   ) l
+
+let name_filter_match ~name_filter descr =
+  match name_filter with
+  | [] -> true
+  | _ :: _ ->
+    List.exists (fun substring -> Base.String.is_substring ~substring descr) name_filter
 
 let print_delayed_errors () =
   match List.rev !delayed_errors with
@@ -406,13 +418,22 @@ let eprintf_or_delay fmt =
 let add_hooks ((module C) : config) f =
   fun () -> C.pre_test_hook (); f ()
 
-let[@inline never] test ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
-      ~start_pos ~end_pos f =
+let hum_backtrace backtrace =
+  let open Base in
+  backtrace
+  |> String.split_lines
+  |> List.take_while ~f:(fun str ->
+    not (String.Search_pattern.matches (force where_to_cut_backtrace) str))
+  |> List.map ~f:(fun str -> "  " ^ str ^ "\n")
+  |> String.concat
+
+let[@inline never] test_inner ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
+                     ~start_pos ~end_pos f bool_of_f =
   match Action.get () with
   | `Ignore -> ()
-  | `Test_mode { which_tests = { libname; only_test_location; which_tags }; what_to_do } ->
+  | `Test_mode { which_tests = { libname; only_test_location; which_tags; name_filter }; what_to_do } ->
     let f = add_hooks config f in
-    let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
+    let descr = lazy (displayed_descr descr def_filename def_line_number start_pos end_pos) in
     let complete_tags = tags @ Module_context.current_tags () in
     let should_run =
       Some libname = !dynamic_lib
@@ -421,43 +442,47 @@ let[@inline never] test ~config ~descr ~tags ~filename:def_filename ~line_number
         | _ :: _ -> position_match def_filename def_line_number only_test_location
       end
       && not (Tag_predicate.disabled which_tags ~complete_tags)
+      && name_filter_match ~name_filter (Lazy.force descr)
     in
     if should_run then begin
       match what_to_do with
       | `List_partitions -> Partition.found_test ()
       | `Run_partition partition ->
-       if Partition.is_current partition then begin
-         let descr = descr () in
-         incr tests_ran;
-         begin match !log with
-         | None -> ()
-         | Some ch -> Printf.fprintf ch "%s\n%s" descr (string_of_module_descr ())
-         end;
-         if !verbose then begin
-           Printf.printf "%s%!" descr
-         end;
-         let print_time_taken () =
-           (* If !list_test_names, this is is a harmless zero. *)
-           if !verbose then Printf.printf " (%.3f sec)\n%!" !time_sec;
-         in
-         try
-           let failed = not !list_test_names && not (time_and_reset_random_seeds f) in
-           print_time_taken ();
-           if failed then begin
-             incr tests_failed;
-             eprintf_or_delay "%s is false.\n%s\n%!" descr
-               (string_of_module_descr ())
-           end
-         with exn ->
-           print_time_taken ();
-           let backtrace = backtrace_indented ~by:2 in
-           incr tests_failed;
-           let exn_str = Printexc.to_string exn in
-           let sep = if String.contains exn_str '\n' then "\n" else " " in
-           eprintf_or_delay "%s threw%s%s.\n%s%s\n%!" descr sep exn_str
-             backtrace (string_of_module_descr ())
-       end
-   end
+        if Partition.is_current partition then begin
+          let descr = Lazy.force descr in
+          incr tests_ran;
+          begin match !log with
+          | None -> ()
+          | Some ch -> Printf.fprintf ch "%s\n%s" descr (string_of_module_descr ())
+          end;
+          if !verbose then begin
+            Printf.printf "%s%!" descr
+          end;
+          let result =
+            if !list_test_names
+            then Ok true
+            else
+              (* See [time_without_resetting_random_seeds] for why we use [bool_of_f]
+                 rather have the caller wrap [f] to adjust its return value. *)
+              Result.map bool_of_f (time_and_reset_random_seeds f)
+          in
+          (* If !list_test_names, this is is a harmless zero. *)
+          if !verbose then Printf.printf " (%.3f sec)\n%!" !time_sec;
+          match result with
+          | Ok true -> ()
+          | Ok false ->
+            incr tests_failed;
+            eprintf_or_delay "%s is false.\n%s\n%!" descr
+              (string_of_module_descr ())
+          | Error (exn, backtrace) ->
+            incr tests_failed;
+            let backtrace = hum_backtrace backtrace in
+            let exn_str = Sexplib0.Sexp_conv.printexc_prefer_sexp exn in
+            let sep = if String.contains exn_str '\n' then "\n" else " " in
+            eprintf_or_delay "%s threw%s%s.\n%s%s\n%!" descr sep exn_str
+              backtrace (string_of_module_descr ())
+        end
+    end
 
 let set_lib_and_partition static_lib partition =
   match !dynamic_lib with
@@ -492,15 +517,19 @@ let unset_lib static_lib =
   | Some lib ->
     if lib = static_lib then dynamic_lib := None
 
+let test ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos f =
+  test_inner ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos
+    f (fun b -> b)
+
 let test_unit ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos f =
-  test ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos
-    (fun () -> f (); true)
+  test_inner ~config ~descr ~tags ~filename ~line_number ~start_pos ~end_pos
+    f (fun () -> true)
 
 let[@inline never] test_module ~config ~descr ~tags ~filename:def_filename ~line_number:def_line_number
-      ~start_pos ~end_pos f =
+                     ~start_pos ~end_pos f =
   match Action.get () with
   | `Ignore -> ()
-  | `Test_mode { which_tests = { libname; only_test_location = _; which_tags }; what_to_do } ->
+  | `Test_mode { which_tests = { libname; only_test_location = _; name_filter = _; which_tags }; what_to_do } ->
     let f = add_hooks config f in
     let descr () = displayed_descr descr def_filename def_line_number start_pos end_pos in
     let partial_tags = tags @ Module_context.current_tags () in
@@ -523,7 +552,7 @@ let[@inline never] test_module ~config ~descr ~tags ~filename:def_filename ~line
         if Partition.is_current partition then begin
           incr test_modules_ran;
           let descr = descr () in
-          try
+          match
             Module_context.with_ ~descr ~tags (fun () ->
               (* We do not reset random states upon entering [let%test_module].
 
@@ -536,10 +565,12 @@ let[@inline never] test_module ~config ~descr ~tags ~filename:def_filename ~line
                  code into and out of [let%test_module] does not change its random seed.
               *)
               time_without_resetting_random_seeds f)
-          with exn ->
-            let backtrace = backtrace_indented ~by:2 in
+          with
+          | Ok () -> ()
+          | Error (exn, backtrace) ->
             incr test_modules_failed;
-            let exn_str = Printexc.to_string exn in
+            let backtrace = hum_backtrace backtrace in
+            let exn_str = Sexplib0.Sexp_conv.printexc_prefer_sexp exn in
             let sep = if String.contains exn_str '\n' then "\n" else " " in
             eprintf_or_delay ("TES" ^^ "T_MODULE at %s threw%s%s.\n%s%s\n%!")
               (String.uncapitalize_ascii descr) sep exn_str backtrace (string_of_module_descr ())

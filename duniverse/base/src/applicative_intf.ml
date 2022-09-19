@@ -239,8 +239,7 @@ module type S3 = sig
   val all : ('a, 'd, 'e) t list -> ('a list, 'd, 'e) t
   val all_unit : (unit, 'd, 'e) t list -> (unit, 'd, 'e) t
 
-  module Applicative_infix :
-    Applicative_infix3 with type ('a, 'd, 'e) t := ('a, 'd, 'e) t
+  module Applicative_infix : Applicative_infix3 with type ('a, 'd, 'e) t := ('a, 'd, 'e) t
 end
 
 module type Let_syntax3 = sig

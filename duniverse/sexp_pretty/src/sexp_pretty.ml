@@ -1,6 +1,8 @@
-open Base
-open Config
+open! Base
+include Sexp_pretty_intf
 module Sexp = Sexplib.Sexp
+module Config = Config
+open Config
 
 
 module W = Sexp.With_layout
@@ -26,12 +28,18 @@ module Format = struct
   ;;
 end
 
-module Config = Config
+type comment_kind =
+  | Sexp_comment
+  | Line_comment
 
-type state = { is_comment : bool }
+type content_kind =
+  | Sexp
+  | Comment of comment_kind
 
-let start_state = { is_comment = false }
-let split = Re.Str.regexp "[ \t]+"
+type state = { content_kind : content_kind }
+
+let start_state = { content_kind = Sexp }
+let split = lazy (Re.Str.regexp "[ \t]+")
 
 let color_to_code = function
   | Black -> 30
@@ -46,7 +54,7 @@ let color_to_code = function
 ;;
 
 let rainbow_open_tag conf tag =
-  let args = Re.Str.split split tag in
+  let args = Re.Str.split (force split) tag in
   let color_count = Array.length conf.color_scheme in
   match args with
   | [ "d"; n ] ->
@@ -81,13 +89,13 @@ let rainbow_tags conf =
 
 (* Opens n parentheses, starting at level depth. *)
 let open_parens conf state ~depth fmt n =
-  match conf.paren_coloring, state.is_comment, conf.comments with
+  match conf.paren_coloring, state.content_kind, conf.comments with
   (* Overrides the option not to color parentheses. *)
-  | _, true, Print (_, Some _, _) ->
+  | _, Comment _, Print (_, Some _, _) ->
     for i = depth to depth + n - 1 do
       Format.fprintf fmt "@{<c %d>(@}" i
     done
-  | true, false, _ ->
+  | true, Sexp, _ ->
     for i = depth to depth + n - 1 do
       Format.fprintf fmt "@{<d %d>(@}" i
     done
@@ -100,12 +108,12 @@ let open_parens conf state ~depth fmt n =
 (* Closes n parentheses, starting at level depth+(n-1) to depth. *)
 let close_parens conf state ~depth fmt n =
   (* Overrides the option not to color parentheses. *)
-  match conf.paren_coloring, state.is_comment, conf.comments with
-  | _, true, Print (_, Some _, _) ->
+  match conf.paren_coloring, state.content_kind, conf.comments with
+  | _, Comment _, Print (_, Some _, _) ->
     for i = depth + (n - 1) downto depth do
       Format.fprintf fmt "@{<c %d>)@}" i
     done
-  | true, false, _ ->
+  | true, Sexp, _ ->
     for i = depth + (n - 1) downto depth do
       Format.fprintf fmt "@{<d %d>)@}" i
     done
@@ -153,14 +161,17 @@ let atom_printing_len_exn conf at =
 
 let pp_atom conf state ~depth ~len index fmt at =
   let at =
-    if state.is_comment
-    then at
-    else if must_escape at
-    then (
-      match conf.atom_printing with
-      | Escaped | Interpreted -> Sexplib.Pre_sexp.esc_str at
-      | Minimal_escaping -> minimal_escaping at)
-    else at
+    match state.content_kind with
+    | Comment Line_comment ->
+      (* we never need to escape a line comment *)
+      at
+    | Sexp | Comment Sexp_comment ->
+      if must_escape at
+      then (
+        match conf.atom_printing with
+        | Escaped | Interpreted -> Sexplib.Pre_sexp.esc_str at
+        | Minimal_escaping -> minimal_escaping at)
+      else at
   in
   let should_be_colored =
     match conf.atom_coloring with
@@ -168,15 +179,16 @@ let pp_atom conf state ~depth ~len index fmt at =
     | Color_first threshold -> Int.equal index 0 && len <= threshold
     | Color_all -> true
   in
-  if state.is_comment
-  then (
-    match conf.comments with
-    | Drop -> assert false
-    | Print (_, Some _, _) -> Format.fprintf fmt "@{<c %d>%s@}" depth at
-    | Print (_, None, _) -> Format.fprintf fmt "%s" at)
-  else if should_be_colored
-  then Format.fprintf fmt "@{<d %d>%s@}" depth at
-  else Format.fprintf fmt "%s" at
+  match state.content_kind with
+  | Comment _ ->
+    (match conf.comments with
+     | Drop -> assert false
+     | Print (_, Some _, _) -> Format.fprintf fmt "@{<c %d>%s@}" depth at
+     | Print (_, None, _) -> Format.fprintf fmt "%s" at)
+  | Sexp ->
+    if should_be_colored
+    then Format.fprintf fmt "@{<d %d>%s@}" depth at
+    else Format.fprintf fmt "%s" at
 ;;
 
 let pp_associated_comments conf ~depth fmt associated_comments =
@@ -186,7 +198,7 @@ let pp_associated_comments conf ~depth fmt associated_comments =
     Format.pp_open_vbox fmt 0;
     List.iteri associated_comments ~f:(fun i comment ->
       if i > 0 then Format.pp_print_break fmt 0 0;
-      pp_atom conf { is_comment = true } ~depth ~len:1 0 fmt comment);
+      pp_atom conf { content_kind = Comment Line_comment } ~depth ~len:1 0 fmt comment);
     Format.pp_close_box fmt ())
 ;;
 
@@ -208,17 +220,27 @@ module Normalize = struct
 
   module Pos = Sexplib.Src_pos.Relative
 
-  let block_comment = Re.Str.regexp "#|\\(\\([\t ]*\\)\\(\\(\n\\|.\\)*\\)\\)|#"
-  let line_split = Re.Str.regexp "\n[ \t]*"
-  let word_split = Re.Str.regexp "[ \n\t]+"
-  let trailing = Re.Str.regexp "\\(.*\\b\\)[ \t]*$"
+  let block_comment =
+    lazy
+      Re.(
+        seq
+          [ str "#|"
+          ; group (seq [ group (rep (set "\t ")); rep (alt [ char '\n'; any ]) ])
+          ; str "|#"
+          ]
+        |> compile)
+  ;;
+
+  let word_split = lazy (Re.Str.regexp "[ \n\t]+")
+  let trailing = lazy (Re.Str.regexp "\\(.*\\b\\)[ \t]*$")
   let tab_size = 2
 
   type match_dimension =
     | Horizontal
     | Vertical
 
-  let is_block_comment comment = Re.Str.string_match block_comment comment 0
+  let match_block_comment comment = Re.exec_opt (force block_comment) comment
+  let is_block_comment comment = Option.is_some (match_block_comment comment)
 
   let grab_comments pos list =
     let rec loop dimension acc pos = function
@@ -319,20 +341,16 @@ module Normalize = struct
   ;;
 
   let pre_process_block_comment style comment =
-    (* Split along lines or words. *)
-    let contents =
-      match style with
-      | Pretty_print -> Re.Str.split word_split comment
-      | Conservative_print -> Re.Str.split line_split comment
-    in
-    (* Remove trailing spaces. *)
-    let contents =
-      List.map contents ~f:(fun line ->
-        if Re.Str.string_match trailing line 0
+    match style with
+    | Conservative_print -> String.split comment ~on:'\n'
+    | Pretty_print ->
+      String.strip comment
+      |> Re.Str.split (force word_split)
+      |> List.map ~f:(fun line ->
+        if Re.Str.string_match (force trailing) line 0
         then Re.Str.matched_group 1 line
         else line)
-    in
-    List.filter contents ~f:(fun s -> String.length s > 0)
+      |> List.filter ~f:(fun s -> String.length s > 0)
   ;;
 
   let get_size string =
@@ -378,42 +396,43 @@ module Normalize = struct
     | Print _ ->
       (* Re-orders comments to have comment that belong to a sexp before it, not after. If
          [conf.sticky_comments = Same_line], it ties the comments to the sexp instead *)
-      let rec reorder = function
-        | [] -> []
+      let rec reorder acc = function
+        | [] -> acc
         | W.Sexp (W.Atom (pos, atom, quoted) as sexp) :: rest ->
-          reorder_comments (atom_end_position ~pos ~atom ~quoted) sexp rest
-        | W.Sexp (W.List (_, _, pos) as sexp) :: rest -> reorder_comments pos sexp rest
-        | W.Comment comment :: rest -> Comment (of_comment conf comment) :: reorder rest
-      and reorder_comments pos sexp rest =
+          reorder_comments acc (atom_end_position ~pos ~atom ~quoted) sexp rest
+        | W.Sexp (W.List (_, _, pos) as sexp) :: rest ->
+          reorder_comments acc pos sexp rest
+        | W.Comment comment :: rest ->
+          reorder (Comment (of_comment conf comment) :: acc) rest
+      and reorder_comments acc pos sexp rest =
         let comments, rest = grab_comments pos rest in
+        let sexp = of_sexp conf sexp in
+        let with_comments init =
+          List.fold comments ~init ~f:(fun acc comment ->
+            Comment (Line_comment comment) :: acc)
+        in
         match conf.sticky_comments with
-        | Same_line -> Sexp (of_sexp conf sexp, comments) :: reorder rest
-        | Before ->
-          List.map comments ~f:(fun comment -> Comment (Line_comment comment))
-          @ [ Sexp (of_sexp conf sexp, []) ]
-          @ reorder rest
-        | After ->
-          [ Sexp (of_sexp conf sexp, []) ]
-          @ List.map comments ~f:(fun comment -> Comment (Line_comment comment))
-          @ reorder rest
+        | Same_line -> reorder (Sexp (sexp, comments) :: acc) rest
+        | Before -> reorder (Sexp (sexp, []) :: with_comments acc) rest
+        | After -> reorder (with_comments (Sexp (sexp, []) :: acc)) rest
       in
-      List (reorder list)
+      List (reorder [] list |> List.rev)
 
   and of_comment (conf : Config.t) : W.comment -> comment = function
     | W.Plain_comment (_, comment) ->
       (match conf.comments with
        | Drop -> raise Drop_exn
        | Print (indent, _, style) ->
-         if is_block_comment comment
-         then (
-           let ind =
-             match indent with
-             | Auto_indent_comment -> get_size (Re.Str.matched_group 2 comment) + 2
-             | Indent_comment i -> i
-           in
-           Block_comment
-             (ind, pre_process_block_comment style (Re.Str.matched_group 3 comment)))
-         else Line_comment comment)
+         (match match_block_comment comment with
+          | Some group ->
+            let indent =
+              match indent with
+              | Auto_indent_comment -> get_size (Re.Group.get group 2) + 2
+              | Indent_comment i -> i
+            in
+            let text = pre_process_block_comment style (Re.Group.get group 1) in
+            Block_comment (indent, text)
+          | None -> Line_comment comment))
     | W.Sexp_comment (_, comment_list, sexp) ->
       (match conf.comments with
        | Drop -> raise Drop_exn
@@ -629,8 +648,7 @@ module Print = struct
 
   let get_leading_atoms conf (list : Normalize.t list) =
     match conf.leading_threshold with
-    | Atom_threshold leading_atom_threshold, Character_threshold leading_char_threshold
-      ->
+    | Atom_threshold leading_atom_threshold, Character_threshold leading_char_threshold ->
       let rec get_leading_atoms_inner acc ~atom_count ~char_count = function
         | [] -> List.rev acc, []
         | N.Sexp (N.Atom atom, []) :: tl as list ->
@@ -698,9 +716,7 @@ module Print = struct
         | (N.Comment _ as comment) :: tl ->
           try_align_inner (T (preprocess_t comment) :: acc) tl
         | N.Sexp ((N.Atom _ as sexp), associated_comments) :: tl ->
-          try_align_inner
-            (T (Sexp (preprocess_sexp sexp, associated_comments)) :: acc)
-            tl
+          try_align_inner (T (Sexp (preprocess_sexp sexp, associated_comments)) :: acc) tl
         | N.Sexp ((N.List list as sexp), associated_comments) :: tl ->
           let shape = get_shape conf list ~atom_thresh ~char_thresh ~depth_thresh in
           (match shape with
@@ -757,7 +773,7 @@ module Print = struct
           close_parens conf state ~depth:(depth + 1) fmt 1;
           trailing_spaces)
     in
-    ignore (set_up_markers ~depth ~index:0 shape)
+    ignore (set_up_markers ~depth ~index:0 shape : int)
   ;;
 
   (* The closing paren goes on a new line, or the last element forces a breakline. *)
@@ -947,33 +963,56 @@ module Print = struct
       ();
       (match comment with
        | Line_comment comment ->
-         pp_atom conf { is_comment = true } ~depth ~len:1 index fmt comment
+         pp_atom
+           conf
+           { content_kind = Comment Line_comment }
+           ~depth
+           ~len:1
+           index
+           fmt
+           comment
        | Block_comment (indent, comment_list) ->
          (match conf.comments with
           | Drop -> assert false (* Would have dropped the comment at pre-processing. *)
-          | Print (_, Some _, Conservative_print) ->
-            Format.fprintf fmt "@{<c %d>@[<h>@[<hv>@[<hv %d>#|%a%a@]@ @]|#@]@}"
-          (* This is an ugly hack not to print anything if colors are disabled. The opening
-             tag works fine, as it checks whether or not anything should be printed. The
-             closing one doesn't (it can't have any arguments, which is bad).
-          *)
-          | Print (_, None, Conservative_print) ->
-            Format.fprintf fmt "@{<c %d}@[<h>@[<hv>@[<hv %d>#|%a%a@]@ @]|#@]"
-          | Print (_, Some _, Pretty_print) ->
-            Format.fprintf fmt "@{<c %d>@[<h>@[<hv>@[<hv %d>#|%a@[<hov>%a@]@]@ @]|#@]@}"
-          | Print (_, None, Pretty_print) ->
-            Format.fprintf fmt "@{<c %d>@[<h>@[<hv>@[<hv %d>#|%a@[<hov>%a@]@]@ @]|#@]")
-           depth
-           indent
-           (fun fmt spaces -> Format.pp_print_break fmt spaces 0)
-           (if indent > 2 && not (List.is_empty comment_list) then indent - 2 else 0)
-           (fun fmt comment_list ->
-              Format.pp_list
-                "@ "
-                (fun fmt comm -> Format.fprintf fmt "%s" comm)
-                fmt
-                comment_list)
-           comment_list
+          | Print (_, color, Conservative_print) ->
+            let f =
+              match color with
+              | Some _ -> Format.fprintf fmt "@{<c %d>@[<h>#|%a|#@]@}"
+              (* This is an ugly hack not to print anything if colors are disabled. The opening
+                 tag works fine, as it checks whether or not anything should be printed. The
+                 closing one doesn't (it can't have any arguments, which is bad).
+              *)
+              | None -> Format.fprintf fmt "@{<c %d}@[<h>#|%a|#@]"
+            in
+            f
+              depth
+              (fun fmt comment_list ->
+                 Format.pp_list
+                   "@."
+                   (fun fmt comm -> Format.fprintf fmt "%s" comm)
+                   fmt
+                   comment_list)
+              comment_list
+          | Print (_, color, Pretty_print) ->
+            let f =
+              match color with
+              | Some _ ->
+                Format.fprintf fmt "@{<c %d>@[<h>@[<hv>@[<hv %d>#|%a@[<hov>%a@]@]@ @]|#@]@}"
+              | None ->
+                Format.fprintf fmt "@{<c %d>@[<h>@[<hv>@[<hv %d>#|%a@[<hov>%a@]@]@ @]|#@]"
+            in
+            f
+              depth
+              indent
+              (fun fmt spaces -> Format.pp_print_break fmt spaces 0)
+              (if indent > 2 && not (List.is_empty comment_list) then indent - 2 else 0)
+              (fun fmt comment_list ->
+                 Format.pp_list
+                   "@ "
+                   (fun fmt comm -> Format.fprintf fmt "%s" comm)
+                   fmt
+                   comment_list)
+              comment_list)
        | Sexp_comment ((comments, _), sexp) ->
          (match conf.comments with
           | Drop -> assert false
@@ -982,7 +1021,14 @@ module Print = struct
          List.iteri comments ~f:(fun i comm ->
            pp_comment conf state depth ~index:i fmt comm);
          if not (List.is_empty comments) then Format.pp_print_space fmt ();
-         pp_sexp conf { is_comment = true } ~opened:Closed depth ~index fmt sexp)
+         pp_sexp
+           conf
+           { content_kind = Comment Sexp_comment }
+           ~opened:Closed
+           depth
+           ~index
+           fmt
+           sexp)
 
   and pp_aligned conf state depth fmt shape associated_comments align_list =
     let parens_aligned =
@@ -1030,7 +1076,7 @@ module Print = struct
 end
 
 let setup conf fmt =
-  (Format.pp_set_formatter_tag_functions fmt (rainbow_tags conf) [@ocaml.warning "-3"]);
+  Format.pp_set_formatter_tag_functions fmt (rainbow_tags conf) [@ocaml.warning "-3"];
   Format.pp_set_tags fmt true
 ;;
 
@@ -1072,25 +1118,6 @@ let rec sexp_to_sexp_or_comment = function
   | Sexp.List list ->
     W.Sexp (W.List (dummy_pos, List.map list ~f:sexp_to_sexp_or_comment, dummy_pos))
 ;;
-
-module type S = sig
-  type sexp
-  type 'a writer = Config.t -> 'a -> sexp -> unit
-
-  val pp_formatter : Format.formatter writer
-
-  val pp_formatter'
-    :  next:(unit -> sexp option)
-    -> Config.t
-    -> Caml.Format.formatter
-    -> unit
-
-  val pp_buffer : Buffer.t writer
-  val pp_out_channel : Caml.out_channel writer
-  val pp_blit : (string, unit) Blit.sub writer
-  val pretty_string : Config.t -> sexp -> string
-  val sexp_to_string : sexp -> string
-end
 
 module Make (M : sig
     type t

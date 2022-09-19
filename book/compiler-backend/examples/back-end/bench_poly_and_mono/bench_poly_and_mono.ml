@@ -20,4 +20,4 @@ let tests =
 let () =
   List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
   |> Bench.make_command
-  |> Command.run
+  |> Command_unix.run

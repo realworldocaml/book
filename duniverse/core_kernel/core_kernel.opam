@@ -1,7 +1,7 @@
 opam-version: "2.0"
-version: "v0.14.0"
-maintainer: "opensource@janestreet.com"
-authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
+version: "v0.15.0"
+maintainer: "Jane Street developers"
+authors: ["Jane Street Group, LLC"]
 homepage: "https://github.com/janestreet/core_kernel"
 bug-reports: "https://github.com/janestreet/core_kernel/issues"
 dev-repo: "git+https://github.com/janestreet/core_kernel.git"
@@ -11,28 +11,13 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocaml"               {>= "4.08.0"}
-  "base"                {>= "v0.14" & < "v0.15"}
-  "base_bigstring"      {>= "v0.14" & < "v0.15"}
-  "base_quickcheck"     {>= "v0.14" & < "v0.15"}
-  "bin_prot"            {>= "v0.14" & < "v0.15"}
-  "fieldslib"           {>= "v0.14" & < "v0.15"}
-  "jane-street-headers" {>= "v0.14" & < "v0.15"}
-  "jst-config"          {>= "v0.14" & < "v0.15"}
-  "ppx_assert"          {>= "v0.14" & < "v0.15"}
-  "ppx_base"            {>= "v0.14" & < "v0.15"}
-  "ppx_hash"            {>= "v0.14" & < "v0.15"}
-  "ppx_inline_test"     {>= "v0.14" & < "v0.15"}
-  "ppx_jane"            {>= "v0.14" & < "v0.15"}
-  "ppx_sexp_conv"       {>= "v0.14" & < "v0.15"}
-  "ppx_sexp_message"    {>= "v0.14" & < "v0.15"}
-  "sexplib"             {>= "v0.14" & < "v0.15"}
-  "splittable_random"   {>= "v0.14" & < "v0.15"}
-  "stdio"               {>= "v0.14" & < "v0.15"}
-  "time_now"            {>= "v0.14" & < "v0.15"}
-  "typerep"             {>= "v0.14" & < "v0.15"}
-  "variantslib"         {>= "v0.14" & < "v0.15"}
-  "dune"                {>= "2.0.0"}
+  "ocaml"        {>= "4.11.0"}
+  "base"         {>= "v0.15" & < "v0.16"}
+  "core"         {>= "v0.15" & < "v0.16"}
+  "int_repr"     {>= "v0.15" & < "v0.16"}
+  "ppx_jane"     {>= "v0.15" & < "v0.16"}
+  "base-threads"
+  "dune"         {>= "2.0.0"}
 ]
 synopsis: "Industrial strength alternative to OCaml's standard library"
 description: "

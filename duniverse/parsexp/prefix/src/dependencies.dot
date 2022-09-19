@@ -1,0 +1,8 @@
+digraph {
+	sexp_prefix -> parsexp_prefix;
+	atom_prefix -> sexp_prefix_intf;
+	sexp_prefix_intf -> sexp_prefix;
+	import -> atom_prefix_intf;
+	atom_prefix_intf -> atom_prefix;
+}
+

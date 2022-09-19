@@ -35,5 +35,5 @@
     variant in the last field of a record).  It's easy to verify that this is true.
 *)
 
-val of_writer     : 'a Bin_prot.Type_class.writer -> 'a Bin_prot.Type_class.writer
-val of_type_class : 'a Bin_prot.Type_class.t      -> 'a Bin_prot.Type_class.writer
+val of_writer : 'a Bin_prot.Type_class.writer -> 'a Bin_prot.Type_class.writer
+val of_type_class : 'a Bin_prot.Type_class.t -> 'a Bin_prot.Type_class.writer

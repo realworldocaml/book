@@ -25,11 +25,7 @@ let%test _ =
   invariants (of_increasing_iterator_unchecked (module Int) ~len:20 ~f:(fun x -> x, x))
 ;;
 
-let%test _ =
-  invariants (Poly.of_increasing_iterator_unchecked ~len:20 ~f:(fun x -> x, x))
-;;
-
-module M = M
+let%test _ = invariants (Poly.of_increasing_iterator_unchecked ~len:20 ~f:(fun x -> x, x))
 
 let add12 t = add_exn t ~key:1 ~data:2
 
@@ -153,20 +149,22 @@ let%expect_test "combine_errors" =
       (2 two))) |}]
 ;;
 
-module Poly = struct
-  let%test _ = length Poly.empty = 0
+let%test_module "Poly" =
+  (module struct
+    let%test _ = length Poly.empty = 0
 
-  let%test _ =
-    let a = Poly.of_alist_exn [] in
-    Poly.equal Base.Poly.equal a Poly.empty
-  ;;
+    let%test _ =
+      let a = Poly.of_alist_exn [] in
+      Poly.equal Base.Poly.equal a Poly.empty
+    ;;
 
-  let%test _ =
-    let a = Poly.of_alist_exn [ "a", 1 ] in
-    let b = Poly.of_alist_exn [ 1, "b" ] in
-    length a = length b
-  ;;
-end
+    let%test _ =
+      let a = Poly.of_alist_exn [ "a", 1 ] in
+      let b = Poly.of_alist_exn [ 1, "b" ] in
+      length a = length b
+    ;;
+  end)
+;;
 
 let%test_module "[symmetric_diff]" =
   (module struct
@@ -292,4 +290,47 @@ let%test_module "of_alist_multi key equality" =
         (Map.of_sequence_multi (module Key) (Sequence.of_list alist))
     ;;
   end)
+;;
+
+let%expect_test "remove returns the same object if there's nothing to do" =
+  let map1 = Map.of_alist_exn (module Int) [ 1, "one"; 3, "three" ] in
+  let map2 = Map.remove map1 2 in
+  require [%here] (phys_equal map1 map2)
+;;
+
+let%expect_test "[map_keys]" =
+  let test m c ~f =
+    print_s
+      [%sexp
+        (Map.map_keys c ~f m
+         : [ `Duplicate_key of string | `Ok of string Map.M(String).t ])]
+  in
+  let map = Map.of_alist_exn (module Int) [ 1, "one"; 2, "two"; 3, "three" ] in
+  test map (module String) ~f:Int.to_string;
+  [%expect {|
+    (Ok (
+      (1 one)
+      (2 two)
+      (3 three))) |}];
+  test map (module String) ~f:(fun x -> Int.to_string (x / 2));
+  [%expect {| (Duplicate_key 1) |}]
+;;
+
+let%expect_test "[fold_until]" =
+  let test t =
+    print_s
+      [%sexp
+        (Map.fold_until
+           t
+           ~init:0
+           ~f:(fun ~key ~data acc -> if key > 2 then Stop data else Continue (acc + key))
+           ~finish:Int.to_string
+         : string)]
+  in
+  let map = Map.of_alist_exn (module Int) [ 1, "one"; 2, "two"; 3, "three" ] in
+  test map;
+  [%expect {| three |}];
+  let map = Map.of_alist_exn (module Int) [ -1, "minus-one"; 1, "one"; 2, "two" ] in
+  test map;
+  [%expect {| 2 |}]
 ;;

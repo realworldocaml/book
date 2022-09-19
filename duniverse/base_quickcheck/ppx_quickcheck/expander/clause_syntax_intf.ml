@@ -14,8 +14,9 @@ module type S = sig
   (** location of the clause's definition *)
   val location : t -> location
 
-  (** weight of the clause relative to other clauses in the generator distribution *)
-  val weight : t -> expression
+  (** weight of the clause relative to other clauses in the generator distribution, or
+      [None] if the clause should be excluded from the distribution *)
+  val weight : t -> expression option
 
   (** types of the clause's arguments *)
   val core_type_list : t -> core_type list

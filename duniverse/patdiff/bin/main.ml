@@ -1,7 +1,7 @@
 open Core
 
 let () =
-  let result = Result.try_with (fun () -> Command.run Compare.command) in
+  let result = Result.try_with (fun () -> Command_unix.run Compare.command) in
   match result with
   | Ok () -> ()
   | Error exn ->

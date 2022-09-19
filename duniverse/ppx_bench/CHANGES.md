@@ -1,7 +1,3 @@
-## v0.14.1
-
-Upgrade to use ppxlib 0.14.0
-
 ## v0.11
 
 Depend on ppxlib instead of (now deprecated) ppx\_core

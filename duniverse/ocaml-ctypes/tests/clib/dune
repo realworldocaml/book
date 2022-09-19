@@ -6,3 +6,18 @@
   (names test_functions))
  (c_library_flags -pthread)
  (libraries ctypes))
+
+(rule
+ (target clib%{ext_dll})
+ (deps (source_tree ../../src/ctypes) test_functions.h)
+ (action
+  (run
+   %{cc}
+   -I
+   ../../src/ctypes
+   -I
+   %{ocaml_where}
+   -o
+   %{target}
+   -shared
+   %{dep:test_functions.c})))

@@ -1,7 +1,6 @@
 (** Scheduling *)
 
 open! Import
-open Stdune
 
 module Config : sig
   module Display : sig
@@ -26,13 +25,10 @@ module Config : sig
   type t =
     { concurrency : int
     ; display : Display.t
-    ; rpc : Dune_rpc.Where.t option
     ; stats : Dune_stats.t option
+    ; insignificant_changes : [ `Ignore | `React ]
+    ; signal_watcher : [ `Yes | `No ]
     }
-
-  (** [add_to_env env] adds to [env] the environment variable that describes
-      where the current RPC server is listening (if it's running) *)
-  val add_to_env : t -> Env.t -> Env.t
 end
 
 module Run : sig
@@ -54,10 +50,26 @@ module Run : sig
     | Automatic
     | No_watcher
 
-  (** Raised when [go] terminates due to the user requesting a shutdown via rpc.
-      The caller needs to know about this to set the exit code to 0 for such
-      cases *)
-  exception Shutdown_requested
+  module Shutdown : sig
+    module Signal : sig
+      (* TODO move this stuff into stdune? *)
+      type t =
+        | Int
+        | Quit
+        | Term
+    end
+
+    module Reason : sig
+      type t =
+        | Requested
+        | Signal of Signal.t
+    end
+
+    (** Raised when [go] terminates due to the user requesting a shutdown via
+        rpc or raising a signal. The caller needs to know about this to set the
+        exit code correctly *)
+    exception E of Reason.t
+  end
 
   exception Build_cancelled
 
@@ -113,8 +125,9 @@ type t
 val t : unit -> t Fiber.t
 
 (** [with_job_slot f] waits for one job slot (as per [-j <jobs] to become
-    available and then calls [f]. *)
-val with_job_slot : (Config.t -> 'a Fiber.t) -> 'a Fiber.t
+    available and then calls [f]. The cancellation token is provided to [f] to
+    avoid doing some work if the job's result is no longer necessary. *)
+val with_job_slot : (Fiber.Cancel.t -> Config.t -> 'a Fiber.t) -> 'a Fiber.t
 
 (** Wait for the following process to terminate. If [is_process_group_leader] is
     true, kill the entire process group instead of just the process in case of

@@ -9,9 +9,9 @@ let write__1 write__a = (
   )
 )
 let string_of__1 write__a ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__1 write__a ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__1 read__a = (
   Atdgen_runtime.Oj_run.read_list (
     read__a
@@ -26,9 +26,9 @@ let write__2 write__a = (
     ) ob x)
 )
 let string_of__2 write__a ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__2 write__a ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__2 read__a = (
   fun p lb ->
     let x = (
@@ -42,9 +42,9 @@ let write_t write__a = (
   write__2 write__a
 )
 let string_of_t write__a ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_t write__a ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_t read__a = (
   read__2 read__a
 )

@@ -1,4 +1,4 @@
-(library (name example_ppx_sexp_value_lib) (libraries core)
- (preprocess (pps ppx_sexp_value)))
+(library (name example_ppx_sexp_value_lib)
+ (libraries core core_unix.time_unix) (preprocess (pps ppx_sexp_value)))
 
 (alias (name DEFAULT) (deps example.ml.pp))

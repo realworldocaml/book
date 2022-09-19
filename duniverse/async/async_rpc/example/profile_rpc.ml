@@ -10,11 +10,6 @@ let measure_words obj =
     diff
 ;;
 
-type addr =
-  { host : string
-  ; port : int
-  }
-
 let query_counter = ref 0
 
 let words () =
@@ -32,11 +27,12 @@ let direct_impl =
 ;;
 
 let server_cmd =
-  Command.async_spec
+  Command.async
     ~summary:"A simple Async-RPC server with memory usage output"
-    Command.Spec.(
-      empty +> flag "-port" ~doc:"INT Port to listen on" (optional_with_default 8080 int))
-    (fun port () ->
+    (let%map_open.Command port =
+       flag "-port" ~doc:"INT Port to listen on" (optional_with_default 8080 int)
+     in
+     fun () ->
        let implementations =
          Rpc.Implementations.create
            ~on_unknown_rpc:`Close_connection
@@ -66,12 +62,12 @@ let server_cmd =
            else (
              let words = words () - !words_when_conn_created in
              printf "%d queries, %d words/query\n" num_queries (words / num_queries)));
-         Deferred.never ())
+         never ())
 ;;
 
-let pipe_dispatch rpc { host; port } arg f =
-  let a = Pipe.create () in
-  printf "1 pipe = %d words\n%!" (Ocaml_value_size.words (fst a));
+let pipe_dispatch_exn rpc { Host_and_port.host; port } arg f =
+  let reader, (_ : _ Pipe.Writer.t) = Pipe.create () in
+  printf "1 pipe = %d words\n%!" (Ocaml_value_size.words reader);
   printf "1 queue = %d words\n%!" (Ocaml_value_size.words (Queue.create ()));
   printf "1 ivar = %d words\n%!" (Ocaml_value_size.words (Ivar.create ()));
   Rpc.Connection.with_client
@@ -84,14 +80,11 @@ let pipe_dispatch rpc { host; port } arg f =
          let n = 1_000 in
          for _ = 0 to n - 1 do
            don't_wait_for
-             (Rpc.Pipe_rpc.dispatch_iter rpc conn arg ~f
-              >>| ok_exn
-              >>| function
+             (match%map Rpc.Pipe_rpc.dispatch_iter rpc conn arg ~f >>| ok_exn with
               | Error () -> assert false
               | Ok id -> Queue.enqueue pipes id)
          done;
-         Clock.after (sec 5.)
-         >>| fun () ->
+         let%map () = Clock.after (sec 5.) in
          printf "\n%d words/rpc, %d words/pipe\n%!" (rpc_words () / n) (pipe_words () / n)
        in
        Deferred.forever () start;
@@ -99,30 +92,33 @@ let pipe_dispatch rpc { host; port } arg f =
   >>| Result.ok_exn
 ;;
 
-let counter_values addr =
-  pipe_dispatch Rpc_intf.counter_values addr () (fun _ ->
+let counter_values_exn addr =
+  pipe_dispatch_exn Rpc_intf.counter_values addr () (fun _ ->
     printf ".";
     Continue)
 ;;
 
 (* Setting up the command-line interface *)
 
-let host_and_port () =
-  let open Command.Spec in
-  step (fun k host port -> k { host; port })
-  +> flag "-host" ~doc:" server IP" (optional_with_default "127.0.0.1" string)
-  +> flag "-port" ~doc:" server port" (optional_with_default 8080 int)
+let host_and_port_param =
+  let open Command.Param in
+  flag
+    "-host-and-port"
+    (optional_with_default
+       { Host_and_port.host = "127.0.0.1"; port = 8080 }
+       host_and_port)
+    ~doc:"HOST:PORT server host and port"
 ;;
 
 let client_cmd =
-  Command.async_spec
+  Command.async
     ~summary:"measure memory usage of client"
-    (host_and_port ())
-    (fun addr () -> counter_values addr)
+    (let%map.Command host_and_port = host_and_port_param in
+     fun () -> counter_values_exn host_and_port)
 ;;
 
 let () =
-  Command.run
+  Command_unix.run
     (Command.group
        ~summary:"profiling async rpc"
        [ "server", server_cmd; "client", client_cmd ])

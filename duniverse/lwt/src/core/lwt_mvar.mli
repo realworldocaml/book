@@ -28,7 +28,7 @@
 
 (** Mailbox variables *)
 
-(** "Mailbox" variables implement a synchronising variable, used for
+(** “Mailbox” variables implement a synchronising variable, used for
     communication between concurrent threads. *)
 
 type 'a t

@@ -1,7 +1,6 @@
 {
-  open Import
   open Expect_test_common
-  open Ppx_sexp_conv_lib.Conv
+  open Sexplib0.Sexp_conv
 
   let escaped s =
     let unescaped = Scanf.unescaped s in
@@ -15,6 +14,11 @@
 let space = [' ' '\t']
 let line_contents = [^' ' '\t' '\n']+ (space* [^' ' '\t' '\n']+)*
 let lowercase = ['a'-'z' '_']
+
+let conflict_marker = "<<<<<<< " line_contents space*
+                    | "||||||| " line_contents space*
+                    | "======="
+                    | ">>>>>>> " line_contents space*
 
 rule pretty_line = parse
   | space* line_contents as s space* "(escaped)" eof { escaped s  }
@@ -35,6 +39,10 @@ and leading_spaces = parse
   | (space* '\n')* as s { s }
 
 and lines_with_identation acc = parse
+  | conflict_marker as c '\n'
+    { let line = Cst.Line.Conflict_marker c in
+      lines_with_identation (line :: acc) lexbuf
+    }
   | space* as sp '\n'
     { let line = Cst.Line.Blank sp in
       lines_with_identation (line :: acc) lexbuf

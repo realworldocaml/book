@@ -33,14 +33,14 @@ include Blit_s
 include Base_for_tests.Test_blit.Test (Blit_elt) (Bigstring_sequence) (Blit_s)
 module From_bytes = From_bytes
 
-include Base_for_tests.Test_blit.Test_distinct (Blit_elt) (Bytes_sequence)
-    (Bigstring_sequence)
+include
+  Base_for_tests.Test_blit.Test_distinct (Blit_elt) (Bytes_sequence) (Bigstring_sequence)
     (From_bytes)
 
 module To_bytes = To_bytes
 
-include Base_for_tests.Test_blit.Test_distinct (Blit_elt) (Bigstring_sequence)
-    (Bytes_sequence)
+include
+  Base_for_tests.Test_blit.Test_distinct (Blit_elt) (Bigstring_sequence) (Bytes_sequence)
     (To_bytes)
 
 module From_string = From_string
@@ -121,8 +121,7 @@ let set_uint64_be_exn = set_uint64_be_exn
 let%expect_test "checking setters (should end in [_exn])" =
   let test setters z =
     try_setters z setters
-    |> List.iteri ~f:(fun i ->
-      function
+    |> List.iteri ~f:(fun i -> function
       | Ok bytes ->
         raise_s [%message "didn't raise" (z : Int.Hex.t) (i : int) (bytes : int list)]
       | Error _ -> ())
@@ -174,7 +173,7 @@ let%test_module "truncating setters (should end in [_trunc] or begin with [unsaf
       [%expect {| ff ff ff ff ff ff ff ff ; ff ff ff ff ff ff ff ff ; |}]
     ;;
 
-    let%expect_test (_[@tags "64-bits-only"]) =
+    let%expect_test (_ [@tags "64-bits-only"]) =
       Option.iter (Int64.to_int 0x90_8070_6050L) ~f:(fun z ->
         test [ unsafe_set_int32_le; unsafe_set_int32_be ] z);
       [%expect {| 50 60 70 80 0 0 0 0 ; 80 70 60 50 0 0 0 0 ; |}]
@@ -203,7 +202,7 @@ let%test_module "truncating getters (should end in [_trunc] or begin with [unsaf
           printf !"0x%x (= %d)\n" i i)
     ;;
 
-    let%expect_test ("63-bit int"[@tags "64-bits-only"]) =
+    let%expect_test ("63-bit int" [@tags "64-bits-only"]) =
       test get_int64_le_trunc;
       [%expect
         {|
@@ -226,30 +225,26 @@ let%test_module "truncating getters (should end in [_trunc] or begin with [unsaf
           0x41c2c3c4c5c6c7c8 (= -4484807029008447544) |}]
     ;;
 
-    let%expect_test ("31-bit int"[@tags "32-bits-only", "no-js"]) =
+    let%expect_test ("31-bit int" [@tags "32-bits-only", "no-js"]) =
       test get_int64_le_trunc;
-      [%expect
-        {|
+      [%expect {|
           0x4838281 (= 75727489)
           0x44c3c2c1 (= -993803583) |}];
       test get_int64_be_trunc;
-      [%expect
-        {|
+      [%expect {|
           0x5868788 (= 92702600)
           0x45c6c7c8 (= -976828472) |}];
       test unsafe_get_int64_le_trunc;
-      [%expect
-        {|
+      [%expect {|
           0x4838281 (= 75727489)
           0x44c3c2c1 (= -993803583) |}];
       test unsafe_get_int64_be_trunc;
-      [%expect
-        {|
+      [%expect {|
           0x5868788 (= 92702600)
           0x45c6c7c8 (= -976828472) |}]
     ;;
 
-    let%expect_test ("32-bit int"[@tags "js-only"]) =
+    let%expect_test ("32-bit int" [@tags "js-only"]) =
       test get_int64_le_trunc;
       [%expect
         {|
@@ -292,8 +287,7 @@ let try_getters ~first_bigstring_byte =
 let%expect_test "checking getters (should end in [_exn])" =
   let test getters ~first_bigstring_byte =
     try_getters getters ~first_bigstring_byte
-    |> List.iteri ~f:(fun i ->
-      function
+    |> List.iteri ~f:(fun i -> function
       | Ok z -> raise_s [%message "didn't raise" (i : int) (z : Int.Hex.t)]
       | Error _ -> ())
   in
@@ -503,13 +497,27 @@ let%expect_test "basic get_opt_len" =
 ;;
 
 let memcmp = memcmp
+let memcmp_bytes = memcmp_bytes
 
-let%expect_test "basic memcmp" =
-  let t1 = of_string "221007247563588720" in
-  let t2 = of_string "1650905272620466461" in
-  [%test_result: int] ~expect:0 (memcmp t1 ~pos1:0 t2 ~pos2:0 ~len:0);
-  [%test_pred: int] Int.is_positive (memcmp t1 ~pos1:0 t2 ~pos2:0 ~len:3);
-  [%test_pred: int] Int.is_negative (memcmp t1 ~pos1:0 t2 ~pos2:1 ~len:3)
+let%test_module "basic memcmp" =
+  (module struct
+    let s1 = "221007247563588720"
+    let s2 = "1650905272620466461"
+
+    let test_memcmp ~memcmp t1 t2 =
+      [%test_result: int] ~expect:0 (memcmp t1 ~pos1:0 t2 ~pos2:0 ~len:0);
+      [%test_pred: int] Int.is_positive (memcmp t1 ~pos1:0 t2 ~pos2:0 ~len:3);
+      [%test_pred: int] Int.is_negative (memcmp t1 ~pos1:0 t2 ~pos2:1 ~len:3)
+    ;;
+
+    let%expect_test "bigstring to bigstring" =
+      test_memcmp ~memcmp (of_string s1) (of_string s2)
+    ;;
+
+    let%expect_test "bigstring to bytes" =
+      test_memcmp ~memcmp:memcmp_bytes (of_string s1) (Bytes.of_string s2)
+    ;;
+  end)
 ;;
 
 let memset = memset
@@ -606,3 +614,6 @@ let%expect_test "basic equal" =
 
 type nonrec t = t
 type nonrec t_frozen = t_frozen [@@deriving compare, hash, sexp]
+
+(* Effectively tested in lib/int_repr *)
+module Int_repr = Base_bigstring.Int_repr

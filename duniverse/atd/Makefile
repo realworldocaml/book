@@ -9,6 +9,8 @@ DUNE ?= dune
 # via opam.
 .PHONY: all
 all:
+	$(MAKE) -C atdpy clean-for-dune
+	$(MAKE) -C atdts clean-for-dune
 	$(DUNE) build
 
 # Install the OCaml dependencies for the build.

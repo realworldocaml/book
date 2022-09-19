@@ -10,6 +10,11 @@ function Base_clear_caml_backtrace_pos(x) {
   return 0;
 }
 
+//Provides: Base_caml_exn_is_most_recent_exn const
+function Base_caml_exn_is_most_recent_exn(x) {
+  return 1;
+}
+
 //Provides: Base_int_math_int32_clz const
 function Base_int_math_int32_clz(x) {
   var n = 32;

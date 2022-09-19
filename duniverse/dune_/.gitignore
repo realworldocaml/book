@@ -13,10 +13,16 @@ _perf
 # emacs lock files
 .#*
 
+# vscode settings
+.vscode
+
+# git-ps hooks
+.git-ps
+
 .duneboot.*
 /boot/*.cm*
 dune.exe
 Makefile.dev
-src/dune/setup.ml
+src/dune_rules/setup.ml
 
 .DS_Store

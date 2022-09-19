@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Deferred_std
 module Deferred = Deferred1
 
@@ -16,7 +16,7 @@ let fold t ~init ~f = foldi t ~init ~f:(fun _ a x -> f a x)
 
 let seqmapi t ~f =
   let%map bs = foldi t ~init:[] ~f:(fun i bs a -> f i a >>| fun b -> b :: bs) in
-  Array.of_list (Core_kernel.List.rev bs)
+  Array.of_list (Core.List.rev bs)
 ;;
 
 let all ds = seqmapi ds ~f:(fun _ x -> x)

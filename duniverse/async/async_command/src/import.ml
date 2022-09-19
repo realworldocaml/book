@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 include Int.Replace_polymorphic_compare
 include Async_kernel
 include Async_unix

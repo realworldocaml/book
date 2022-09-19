@@ -1,0 +1,35 @@
+11a12
+> module Unix = Core_unix
+86a88
+>       let c1 = Time_stamp_counter.now () in
+93a96
+>       let c2 = Time_stamp_counter.now () in
+102c105
+<       s.M.cycles <- Int63.zero;
+---
+>       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
+180c183,204
+<   List.map tests ~f:(measure run_config)
+---
+>   if RC.fork_each_benchmark run_config
+>   then (
+>     let fds = List.map tests ~f:(fun _ -> Unix.pipe ()) in
+>     let () =
+>       Caml.List.iter2
+>         (fun test (_fdr, fdw) ->
+>            match Caml_unix.fork () with
+>            | 0 ->
+>              let x = measure run_config test in
+>              let open Caml in
+>              let oc = Caml_unix.out_channel_of_descr fdw in
+>              Marshal.to_channel oc x [];
+>              exit 0
+>            | pid -> ignore (Caml_unix.waitpid [] pid : int * Caml_unix.process_status))
+>         tests
+>         fds
+>     in
+>     List.map fds ~f:(fun (fdr, _fdw) ->
+>       let open Caml in
+>       let ic = Caml_unix.in_channel_of_descr fdr in
+>       Marshal.from_channel ic))
+>   else List.map tests ~f:(measure run_config)

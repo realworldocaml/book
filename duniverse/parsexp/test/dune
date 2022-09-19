@@ -1,5 +1,6 @@
 (library (name parsexp_test)
- (libraries base stdio parsexp gen_parsexp_lib expect_test_helpers_core)
- (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+ (libraries base stdio parsexp parsexp_symbolic_automaton
+  expect_test_helpers_core)
+ (preprocess (pps ppx_jane)))
 
 (ocamllex lexer)

@@ -1,12 +1,12 @@
 module Test_double_else = struct
 
-[%% if true ]
-let x = 1
-[%% else ]
-let x = 2
-[%% else ]
-let x = 3
-[%% endif]
+  [%% if true ]
+  let x = 1
+  [%% else ]
+  let x = 2
+  [%% else ]
+  let x = 3
+  [%% endif]
 
 end
 [%%expect{|
@@ -16,13 +16,13 @@ Error: optcomp: second else clause.
 
 module Test_else_elif = struct
 
-[%% if true ]
-let x = 1
-[%% else ]
-let x = 2
-[%% elif false ]
-let x = 3
-[%% endif]
+  [%% if true ]
+  let x = 1
+  [%% else ]
+  let x = 2
+  [%% elif false ]
+  let x = 3
+  [%% endif]
 
 end
 [%%expect{|
@@ -32,8 +32,8 @@ Error: optcomp: elif after else clause.
 
 module Test_unterminated_if = struct
 
-[%% if true ]
- let x = a
+  [%% if true ]
+  let x = a
 
 end
 [%%expect{|
@@ -43,7 +43,7 @@ Error: optcomp: unterminated if
 
 module Test_import_nonexistent = struct
 
-[%% import "non_existent_file.h"]
+  [%% import "non_existent_file.h"]
 
 end
 [%%expect{|

@@ -21,7 +21,7 @@ module Level : sig
     | `Info (** default level *)
     | `Error
     ]
-  [@@deriving bin_io, compare, sexp]
+  [@@deriving bin_io, compare, enumerate, sexp]
 
   include Stringable with type t := t
 
@@ -120,11 +120,8 @@ module Rotation : sig
     -> ?time:Time.Ofday.t
     -> ?zone:Time.Zone.t
     -> keep:[ `All | `Newer_than of Time.Span.t | `At_least of int ]
-    -> naming_scheme:[ `Numbered
-                     | `Timestamped
-                     | `Dated
-                     | `User_defined of (module Id_intf)
-                     ]
+    -> naming_scheme:
+         [ `Numbered | `Timestamped | `Dated | `User_defined of (module Id_intf) ]
     -> unit
     -> t
 
@@ -213,6 +210,7 @@ module Output : sig
   val rotating_file
     :  ?perm:Unix.file_perm
     -> ?time_source:Synchronous_time_source.t
+    -> ?log_on_rotation:(unit -> Message.t list)
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -223,6 +221,7 @@ module Output : sig
   val rotating_file_with_tail
     :  ?perm:Unix.file_perm
     -> ?time_source:Synchronous_time_source.t
+    -> ?log_on_rotation:(unit -> Message.t list)
     -> Format.t
     -> basename:string
     -> Rotation.t
@@ -410,6 +409,17 @@ module type Global_intf = sig
     -> ?tags:(string * string) list
     -> ('a, unit, string, (unit -> 'b Deferred.t) -> 'b Deferred.t) format4
     -> 'a
+
+  module For_testing : sig
+    (** Change the output of the global log so that it only prints the bodies of messages
+        to stdout, discarding any information about tags, levels, or timestamps.
+        [map_output] can be used to transform messages before they make it to stdout; by
+        default it is [Fn.id].
+
+        This is equivalent to:
+        [Log.Global.set_output [ Log.For_testing.create_output ~map_output ]] *)
+    val use_test_output : ?map_output:(string -> string) -> unit -> unit
+  end
 end
 
 (** This functor can be called to generate "singleton" logging modules. *)
@@ -454,10 +464,11 @@ val get_transform : t -> (Message.t -> Message.t) option
 
 val set_transform : t -> (Message.t -> Message.t) option -> unit
 
-
 (** If [`Raise] is given, then background errors raised by logging will be raised to the
     monitor that was in scope when [create] was called.  Errors can be redirected anywhere
     by providing [`Call f]. *)
+val get_on_error : t -> [ `Raise | `Call of Error.t -> unit ]
+
 val set_on_error : t -> [ `Raise | `Call of Error.t -> unit ] -> unit
 
 (** Any call that writes to a log after [close] is called will raise. *)
@@ -483,6 +494,9 @@ val create
   -> ?transform:(Message.t -> Message.t)
   -> unit
   -> t
+
+(** Creates a copy of a log, which has the same settings and logs to the same outputs. *)
+val copy : t -> t
 
 (** Printf-like logging for messages at each log level or raw (no level) messages. Raw
     messages still include a timestamp. *)

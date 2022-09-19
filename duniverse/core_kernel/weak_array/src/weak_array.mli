@@ -4,7 +4,7 @@
     This module is like the OCaml standard library module of the same name, except that it
     requires that the values in the weak set are heap blocks. *)
 
-open! Core_kernel
+open! Core
 
 type 'a t [@@deriving sexp_of]
 

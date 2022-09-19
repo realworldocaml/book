@@ -8,9 +8,9 @@ let write_poly write__aa write__bb = (
   Testj.write_poly write__aa write__bb
 )
 let string_of_poly write__aa write__bb ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_poly write__aa write__bb ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_poly read__aa read__bb = (
   Testj.read_poly read__aa read__bb
 )
@@ -20,9 +20,9 @@ let write__1 = (
   write_poly Yojson.Safe.write_int Yojson.Safe.write_int
 )
 let string_of__1 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__1 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__1 = (
   read_poly Atdgen_runtime.Oj_run.read_int Atdgen_runtime.Oj_run.read_int
 )
@@ -32,9 +32,9 @@ let write_poly_int2 = (
   write__1
 )
 let string_of_poly_int2 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_poly_int2 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_poly_int2 = (
   read__1
 )
@@ -46,9 +46,9 @@ let write__3 = (
   )
 )
 let string_of__3 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__3 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__3 = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
@@ -101,9 +101,9 @@ let write__4 = (
   write_poly Yojson.Safe.write_int write__3
 )
 let string_of__4 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__4 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__4 = (
   read_poly Atdgen_runtime.Oj_run.read_int read__3
 )
@@ -111,13 +111,13 @@ let _4_of_string s =
   read__4 (Yojson.Safe.init_lexer ()) (Lexing.from_string s)
 let write_test2 : _ -> test2 -> _ = (
   fun ob (x : test2) ->
-    Bi_outbuf.add_char ob '{';
+    Buffer.add_char ob '{';
     let is_first = ref true in
     if !is_first then
       is_first := false
     else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"test0\":";
+      Buffer.add_char ob ',';
+      Buffer.add_string ob "\"test0\":";
     (
       write_poly_int2
     )
@@ -125,18 +125,18 @@ let write_test2 : _ -> test2 -> _ = (
     if !is_first then
       is_first := false
     else
-      Bi_outbuf.add_char ob ',';
-    Bi_outbuf.add_string ob "\"test1\":";
+      Buffer.add_char ob ',';
+      Buffer.add_string ob "\"test1\":";
     (
       write__4
     )
       ob x.test1;
-    Bi_outbuf.add_char ob '}';
+    Buffer.add_char ob '}';
 )
 let string_of_test2 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_test2 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_test2 = (
   fun p lb ->
     Yojson.Safe.read_space p lb;
@@ -150,7 +150,7 @@ let read_test2 = (
       let f =
         fun s pos len ->
           if pos < 0 || len < 0 || pos + len > String.length s then
-            invalid_arg "out-of-bounds substring position or length";
+            invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
           if len = 5 && String.unsafe_get s pos = 't' && String.unsafe_get s (pos+1) = 'e' && String.unsafe_get s (pos+2) = 's' && String.unsafe_get s (pos+3) = 't' then (
             match String.unsafe_get s (pos+4) with
               | '0' -> (
@@ -198,7 +198,7 @@ let read_test2 = (
         let f =
           fun s pos len ->
             if pos < 0 || len < 0 || pos + len > String.length s then
-              invalid_arg "out-of-bounds substring position or length";
+              invalid_arg (Printf.sprintf "out-of-bounds substring position or length: string = %S, requested position = %i, requested length = %i" s pos len);
             if len = 5 && String.unsafe_get s pos = 't' && String.unsafe_get s (pos+1) = 'e' && String.unsafe_get s (pos+2) = 's' && String.unsafe_get s (pos+3) = 't' then (
               match String.unsafe_get s (pos+4) with
                 | '0' -> (
@@ -256,9 +256,9 @@ let write__2 = (
   write_poly Yojson.Safe.write_int Yojson.Safe.write_string
 )
 let string_of__2 ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write__2 ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read__2 = (
   read_poly Atdgen_runtime.Oj_run.read_int Atdgen_runtime.Oj_run.read_string
 )
@@ -268,9 +268,9 @@ let write_poly_int_string = (
   write__2
 )
 let string_of_poly_int_string ?(len = 1024) x =
-  let ob = Bi_outbuf.create len in
+  let ob = Buffer.create len in
   write_poly_int_string ob x;
-  Bi_outbuf.contents ob
+  Buffer.contents ob
 let read_poly_int_string = (
   read__2
 )

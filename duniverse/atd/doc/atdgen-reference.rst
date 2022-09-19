@@ -795,6 +795,38 @@ care of converting between these two forms. For information on how to
 write your own adapter, please consult the documentation for the yojson
 library.
 
+
+Fields ``adapter.to_ocaml`` and ``adapter.from_ocaml``
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+This is an alternative form of specifying ``adapter.ocaml``. It permits to
+specify arbitrary code and doesn't require the "adapter" module to be defined
+in advance.
+
+For example, the above usage of ``adapter.ocaml`` can be rewritten as
+following:
+
+.. code:: ocaml
+
+    type document = [
+      | Image of image
+      | Text of text
+    ]
+    <json
+      adapter.to_ocaml="Atdgen_runtime.Json_adapter.normalize_type_field \"type\""
+      adapter.from_ocaml="Atdgen_runtime.Json_adapter.restore_type_field \"type\""
+    >
+
+    type image = {
+      url: string;
+    }
+
+    type text = {
+      title: string;
+      body: string;
+    }
+
+
 Section ``biniou``
 ^^^^^^^^^^^^^^^^^^
 
@@ -1638,7 +1670,7 @@ comments:
 
     (**
       The type of a point. A value [p] can be created as follows:
-      
+
     {v
     let p = \{ x = 1.2; y = 5.0 \}
     v}

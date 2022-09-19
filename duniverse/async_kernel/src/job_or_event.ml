@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 module Event = Types.Event
 module Job = Types.Job
@@ -6,7 +6,7 @@ include Types.Job_or_event
 
 (* This redefinition of [Event] is here so the type checks are right next to
    [Obj.magic]s. *)
-module Event_is_block : sig end = struct
+module _ : sig end = struct
   open Types
   open Event
 
@@ -17,12 +17,13 @@ module Event_is_block : sig end = struct
     ; callback : unit -> unit
     ; execution_context : Execution_context.t
     ; mutable interval : Time_ns.Span.t option
-    ; mutable next_fired : t
+    ; mutable next_fired : Option.t
+    ; mutable prev_fired : Option.t
     ; mutable status : Status.t
     }
 end
 
-module Job_is_not_block : sig end = struct
+module _ : sig end = struct
   module Ensure_private_int (M : sig
       type t = private int
     end) =
@@ -43,7 +44,7 @@ module Match = struct
     | Event : Event.t kind
     | Job : Job.t kind
 
-  type packed = K : _ kind -> packed
+  type packed = K : _ kind -> packed [@@unboxed]
 
   let kind t = if is_event t then K Event else K Job
   let project (type a) (_ : a kind) job_or_event = (Obj.magic : t -> a) job_or_event

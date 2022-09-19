@@ -1,13 +1,10 @@
 open Base
+open Expect_test_helpers_base;;
 
-open Expect_test_helpers_core
-
-;;
 print_s [%sexp (Not_found_s [%message "foo"] : exn)]
 
-[%%expect {| (Not_found_s foo) |}]
+[%%expect {| (Not_found_s foo) |}];;
 
-;;
 Not_found
 
 [%%expect

@@ -1,3 +1,2 @@
 (library (name sexp_pretty) (public_name sexp_pretty)
- (preprocess (pps ppx_base -allow-unannotated-ignores))
- (libraries base re sexplib))
+ (preprocess (pps ppx_base)) (libraries base re sexplib))

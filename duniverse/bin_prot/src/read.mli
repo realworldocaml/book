@@ -38,7 +38,13 @@ val bin_read_float32_mat : mat32 reader
 val bin_read_float64_mat : mat64 reader
 val bin_read_mat : mat reader
 val bin_read_bigstring : buf reader
+val bin_read_floatarray : floatarray reader
+
 val bin_read_float_array : float array reader
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
 val bin_read_variant_int : int reader
 val bin_read_int_8bit : int reader
 val bin_read_int_16bit : int reader

@@ -1,11 +1,12 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
-   Generates the command line interface to [Core_bench]. *)
+    Generates the command line interface to [Core_bench]. *)
 
 open! Core
+open! Core_bench_internals
 
-type callback_bench
-  =  ?run_config:Run_config.t
+type callback_bench =
+  ?run_config:Run_config.t
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
   -> ?save_to_file:(Measurement.t -> string)
@@ -13,8 +14,8 @@ type callback_bench
   -> Test.t list
   -> unit
 
-type callback_load_analyze_and_display
-  = filenames:string list
+type callback_load_analyze_and_display =
+  filenames:string list
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
   -> unit
@@ -28,9 +29,11 @@ val make
 
 val make_ext
   :  summary:string
-  -> (Analysis_config.t list * Display_config.t *
-      [ `From_file of string list
-      | `Run of (Measurement.t -> string) option * Run_config.t ]
+  -> (Analysis_config.t list
+      * Display_config.t
+      * [ `From_file of string list
+        | `Run of (Measurement.t -> string) option * Run_config.t
+        ]
       -> unit)
-     Command.Param.t
+       Command.Param.t
   -> Command.t

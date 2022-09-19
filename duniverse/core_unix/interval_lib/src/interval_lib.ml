@@ -1,1 +1,1 @@
-module Interval = Core.Interval
+module Interval = Interval

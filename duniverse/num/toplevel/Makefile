@@ -24,7 +24,7 @@ TOINSTALL=\
 VERSION=$(shell sed -ne 's/^ *version *: *"\([^"]*\)".*$$/\1/p' ../num.opam)
 
 install:
-	sed -e 's/%%VERSION%%/$(VERSION)/g' META.in > META
+	sed -e 's/v1.4+dune2/$(VERSION)/g' META.in > META
 	$(OCAMLFIND) install num-top META $(TOINSTALL)
 	rm -f META
 

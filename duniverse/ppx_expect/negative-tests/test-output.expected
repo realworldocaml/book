@@ -5,4 +5,4 @@ File "export_test.ml", line 2, characters 2-24 threw
   \n- trying to run it from ppx/ppx_expect/negative-tests/import_test.ml\
   \n").
 
-FAILED 1 / 41 tests
+FAILED 1 / 43 tests

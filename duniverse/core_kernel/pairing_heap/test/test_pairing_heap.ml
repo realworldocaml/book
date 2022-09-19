@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open Poly
 open Expect_test_helpers_core
 module Heap = Pairing_heap
@@ -257,19 +257,31 @@ let%test_module _ =
   end)
 ;;
 
-let test_copy ~add_removable ~remove =
-  let sum t = fold t ~init:0 ~f:(fun acc i -> acc + i) in
+let integers n =
   let t = create ~cmp:Int.compare () in
-  for i = 1 to 99 do
+  for i = 1 to n do
     add t i;
     if i % 10 = 0
     (* We need to pop from time to time to trigger the amortized tree reorganizations.  If
-       we don't do this the resulting structure is just a linked list and the copy
-       function is not flexed as completely as it should be. *)
+       we don't do this the resulting structure is just a linked list and the caller is
+       not flexed as completely as it should be. *)
     then (
       ignore (pop t);
       add t i)
   done;
+  t
+;;
+
+let%test_unit _ =
+  let t = integers 99 in
+  clear t;
+  if length t <> 0
+  then failwithf "not empty after clear: contains %d elements" (length t) ()
+;;
+
+let test_copy ~add_removable ~remove =
+  let sum t = fold t ~init:0 ~f:(fun acc i -> acc + i) in
+  let t = integers 99 in
   let token = add_removable t 100 in
   invariant Fn.ignore t;
   let t' = copy t in

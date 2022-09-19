@@ -73,3 +73,28 @@ let%expect_test "union" =
   print_union [ 0; 1; 2 ] [ 1; 2; 3 ];
   [%expect {| (0 1 2 3) |}]
 ;;
+
+let%expect_test "deriving equal" =
+  let module Hs = struct
+    type t = { hs : Hash_set.M(Int).t } [@@deriving equal]
+
+    let of_list lst = { hs = Hash_set.of_list (module Int) lst }
+  end
+  in
+  require [%here] (Hs.equal (Hs.of_list []) (Hs.of_list []));
+  require [%here] (not (Hs.equal (Hs.of_list [ 1 ]) (Hs.of_list [])));
+  require [%here] (not (Hs.equal (Hs.of_list [ 1 ]) (Hs.of_list [ 2 ])));
+  require [%here] (Hs.equal (Hs.of_list [ 1 ]) (Hs.of_list [ 1 ]))
+;;
+
+(* This module exists to check, at compile-time, that [Creators] is a subset of
+   [Creators_generic]. *)
+module _ (M : Creators) :
+  Creators_generic
+  with type 'a t := 'a M.t
+  with type 'a elt := 'a
+  with type ('a, 'z) create_options := ('a, 'z) create_options = struct
+  include M
+
+  let create ?growth_allowed ?size m () = create ?growth_allowed ?size m
+end

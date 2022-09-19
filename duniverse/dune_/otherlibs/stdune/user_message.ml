@@ -48,6 +48,15 @@ type t =
   ; annots : Annots.t
   }
 
+let compare { loc; paragraphs; hints; annots } t =
+  let open Ordering.O in
+  let= () = Option.compare Loc0.compare loc t.loc in
+  let= () = List.compare paragraphs t.paragraphs ~compare:Poly.compare in
+  let= () = List.compare hints t.hints ~compare:Poly.compare in
+  Poly.compare annots t.annots
+
+let equal a b = Ordering.is_eq (compare a b)
+
 let make ?loc ?prefix ?(hints = []) ?(annots = Annots.empty) paragraphs =
   let paragraphs =
     match (prefix, paragraphs) with

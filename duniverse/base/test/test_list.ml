@@ -391,15 +391,20 @@ let%expect_test _ =
   [%expect {| (raised (Invalid_argument "length mismatch in zip_exn: 1 <> 3")) |}]
 ;;
 
+let%expect_test _ =
+  show_raise (fun () ->
+    rev_map3_exn [ 1 ] [ 4; 5; 6 ] [ 2; 3 ] ~f:(fun a b c -> a + b + c));
+  [%expect
+    {| (raised (Invalid_argument "length mismatch in rev_map3_exn: 1 <> 3 || 3 <> 2")) |}]
+;;
+
 let%test_unit _ =
   [%test_result: (int * string) list]
     (mapi ~f:(fun i x -> i, x) [ "one"; "two"; "three"; "four" ])
     ~expect:[ 0, "one"; 1, "two"; 2, "three"; 3, "four" ]
 ;;
 
-let%test_unit _ =
-  [%test_result: (int * _) list] (mapi ~f:(fun i x -> i, x) []) ~expect:[]
-;;
+let%test_unit _ = [%test_result: (int * _) list] (mapi ~f:(fun i x -> i, x) []) ~expect:[]
 
 let%test_module "group" =
   (module struct
@@ -451,6 +456,92 @@ let%test_module "group" =
   end)
 ;;
 
+let%test_module "sort_and_group" =
+  (module struct
+    let%expect_test _ =
+      let compare =
+        Comparable.lift String.compare ~f:(String.rstrip ~drop:Char.is_digit)
+      in
+      [%test_result: string list list]
+        (sort_and_group [ "b1"; "c1"; "a1"; "a2"; "b2"; "a3" ] ~compare)
+        ~expect:[ [ "a1"; "a2"; "a3" ]; [ "b1"; "b2" ]; [ "c1" ] ]
+    ;;
+  end)
+;;
+
+let%test_module "Assoc.group" =
+  (module struct
+    let%expect_test _ =
+      let test alist =
+        let multi = Assoc.group alist ~equal:String.Caseless.equal in
+        print_s [%sexp (multi : (string * int list) list)];
+        let round_trip =
+          List.concat_map multi ~f:(fun (key, data) ->
+            List.map data ~f:(fun datum -> key, datum))
+        in
+        require_equal
+          [%here]
+          (module struct
+            type t = (String.Caseless.t * int) list [@@deriving equal, sexp_of]
+          end)
+          alist
+          round_trip
+      in
+      test [];
+      [%expect {| () |}];
+      test [ "a", 1; "A", 2 ];
+      [%expect {| ((a (1 2))) |}];
+      test [ "a", 1; "b", 2 ];
+      [%expect {|
+        ((a (1))
+         (b (2))) |}];
+      test [ "odd", 1; "even", 2; "Odd", 3; "Even", 4; "ODD", 5; "EVEN", 6 ];
+      [%expect
+        {|
+        ((odd  (1))
+         (even (2))
+         (Odd  (3))
+         (Even (4))
+         (ODD  (5))
+         (EVEN (6))) |}];
+      test [ "odd", 1; "Odd", 3; "ODD", 5; "even", 2; "Even", 4; "EVEN", 6 ];
+      [%expect {|
+        ((odd  (1 3 5))
+         (even (2 4 6))) |}]
+    ;;
+  end)
+;;
+
+let%test_module "Assoc.sort_and_group" =
+  (module struct
+    let%expect_test _ =
+      let test alist =
+        let multi = Assoc.sort_and_group alist ~compare:String.Caseless.compare in
+        print_s [%sexp (multi : (string * int list) list)];
+        require_equal
+          [%here]
+          (module struct
+            type t = (string * int list) list [@@deriving equal, sexp_of]
+          end)
+          multi
+          (Map.to_alist (Map.of_alist_multi (module String.Caseless) alist))
+      in
+      test [];
+      [%expect {| () |}];
+      test [ "a", 1; "A", 2 ];
+      [%expect {| ((a (1 2))) |}];
+      test [ "a", 1; "b", 2 ];
+      [%expect {|
+        ((a (1))
+         (b (2))) |}];
+      test [ "odd", 1; "even", 2; "Odd", 3; "Even", 4; "ODD", 5; "EVEN", 6 ];
+      [%expect {|
+        ((even (2 4 6))
+         (odd  (1 3 5))) |}]
+    ;;
+  end)
+;;
+
 let%test_module "chunks_of" =
   (module struct
     let test length break_every =
@@ -497,26 +588,6 @@ let%test _ = is_suffix [ 1 ] ~suffix:[ 1 ] ~equal:( = )
 let%test _ = not (is_suffix [ 1 ] ~suffix:[ 1; 2 ] ~equal:( = ))
 let%test _ = not (is_suffix [ 1; 3 ] ~suffix:[ 1; 2 ] ~equal:( = ))
 let%test _ = is_suffix [ 1; 2; 3 ] ~suffix:[ 2; 3 ] ~equal:( = )
-
-let%expect_test "is_prefix does not allocate" =
-  let list = Sys.opaque_identity [ 1; 2; 3 ] in
-  let prefix = Sys.opaque_identity [ 1; 2 ] in
-  let equal = Int.equal in
-  let (_ : bool) =
-    require_no_allocation [%here] (fun () -> is_prefix list ~equal ~prefix)
-  in
-  [%expect {| |}]
-;;
-
-let%expect_test "is_suffix does not allocate" =
-  let list = Sys.opaque_identity [ 1; 2; 3 ] in
-  let suffix = Sys.opaque_identity [ 2; 3 ] in
-  let equal = Int.equal in
-  let (_ : bool) =
-    require_no_allocation [%here] (fun () -> is_suffix list ~equal ~suffix)
-  in
-  [%expect {| |}]
-;;
 
 let%test_unit _ =
   List.iter
@@ -792,9 +863,7 @@ let%test_unit _ =
 ;;
 
 let%test_unit _ =
-  [%test_result: bool]
-    (contains_dup ~compare:Int.compare [ 3; 5; 4; 5; 12 ])
-    ~expect:true
+  [%test_result: bool] (contains_dup ~compare:Int.compare [ 3; 5; 4; 5; 12 ]) ~expect:true
 ;;
 
 let%test_unit _ =
@@ -886,9 +955,7 @@ let%test_unit _ =
     ~expect:Test_values.l1
 ;;
 
-let%test_unit _ =
-  [%test_result: int list] (filter_map ~f:(fun x -> Some x) []) ~expect:[]
-;;
+let%test_unit _ = [%test_result: int list] (filter_map ~f:(fun x -> Some x) []) ~expect:[]
 
 let%test_unit _ =
   [%test_result: int list] (filter_map ~f:(fun _x -> None) [ 1.; 2.; 3. ]) ~expect:[]
@@ -1020,10 +1087,7 @@ let%test_unit _ =
 ;;
 
 let%test_unit _ = [%test_result: bool] (is_sorted [] ~compare:Int.compare) ~expect:true
-
-let%test_unit _ =
-  [%test_result: bool] (is_sorted [ 1 ] ~compare:Int.compare) ~expect:true
-;;
+let%test_unit _ = [%test_result: bool] (is_sorted [ 1 ] ~compare:Int.compare) ~expect:true
 
 let%test_unit _ =
   [%test_result: bool] (is_sorted [ 1; 2; 3; 4 ] ~compare:Int.compare) ~expect:true
@@ -1083,6 +1147,30 @@ let%test_module "transpose" =
 
     let%test_unit _ =
       round_trip [ [ 1; 2; 3 ]; [ 4; 5; 6 ] ] [ [ 1; 4 ]; [ 2; 5 ]; [ 3; 6 ] ]
+    ;;
+
+    let%test_unit _ =
+      round_trip
+        [ [ 1; 2; 3 ]; [ 4; 5; 6 ]; [ 7; 8; 9 ] ]
+        [ [ 1; 4; 7 ]; [ 2; 5; 8 ]; [ 3; 6; 9 ] ]
+    ;;
+
+    let%test_unit _ =
+      round_trip
+        [ [ 1; 2; 3; 4 ]; [ 5; 6; 7; 8 ]; [ 9; 10; 11; 12 ] ]
+        [ [ 1; 5; 9 ]; [ 2; 6; 10 ]; [ 3; 7; 11 ]; [ 4; 8; 12 ] ]
+    ;;
+
+    let%test_unit _ =
+      round_trip
+        [ [ 1; 2; 3; 4 ]; [ 5; 6; 7; 8 ]; [ 9; 10; 11; 12 ]; [ 13; 14; 15; 16 ] ]
+        [ [ 1; 5; 9; 13 ]; [ 2; 6; 10; 14 ]; [ 3; 7; 11; 15 ]; [ 4; 8; 12; 16 ] ]
+    ;;
+
+    let%test_unit _ =
+      round_trip
+        [ [ 1; 2; 3 ]; [ 4; 5; 6 ]; [ 7; 8; 9 ]; [ 10; 11; 12 ] ]
+        [ [ 1; 4; 7; 10 ]; [ 2; 5; 8; 11 ]; [ 3; 6; 9; 12 ] ]
     ;;
 
     let%test_unit _ =
@@ -1172,4 +1260,90 @@ let%expect_test "drop_last_exn" =
   [%expect {| (Failure "List.drop_last_exn: empty list") |}];
   require_does_not_raise [%here] (fun () -> print_drop_last_exn [ 1 ]);
   [%expect {| () |}]
+;;
+
+let%expect_test "[all_equal]" =
+  let test list =
+    print_s [%sexp (all_equal list ~equal:Char.Caseless.equal : char option)]
+  in
+  (* empty list *)
+  test [];
+  [%expect {| () |}];
+  (* singleton *)
+  test [ 'a' ];
+  [%expect {| (a) |}];
+  (* homogenous pairs (up to [equal]) *)
+  test [ 'a'; 'a' ];
+  [%expect {| (a) |}];
+  test [ 'a'; 'A' ];
+  [%expect {| (a) |}];
+  test [ 'A'; 'a' ];
+  [%expect {| (A) |}];
+  (* heterogenous pairs *)
+  test [ 'a'; 'b' ];
+  [%expect {| () |}];
+  test [ 'b'; 'a' ];
+  [%expect {| () |}];
+  (* heterogenous lists *)
+  test [ 'a'; 'b'; 'a'; 'b'; 'a'; 'b' ];
+  [%expect {| () |}];
+  test [ 'a'; 'b'; 'c'; 'd'; 'e'; 'f' ];
+  [%expect {| () |}];
+  (* homogenous lists (up to [equal]) *)
+  test [ 'a'; 'a'; 'a'; 'a'; 'a'; 'a' ];
+  [%expect {| (a) |}];
+  test [ 'A'; 'a'; 'A'; 'a'; 'A'; 'a' ];
+  [%expect {| (A) |}]
+;;
+
+let%expect_test "[Cartesian_product.apply] identity" =
+  let test list =
+    require_equal
+      [%here]
+      (module struct
+        type t = char list [@@deriving equal, sexp_of]
+      end)
+      list
+      (List.Cartesian_product.apply (return Fn.id) list)
+  in
+  test [];
+  test [ 'a'; 'b'; 'c' ];
+  test [ 'a'; 'z'; 'd'; 'b' ]
+;;
+
+let%expect_test "[Cartesian_product]" =
+  (let%map.List.Cartesian_product letter = [ 'a'; 'b'; 'c' ]
+   and number = [ 1; 2; 3 ]
+   and solfege = [ "do"; "re"; "mi" ] in
+   [%sexp (letter : char), (number : int), (solfege : string)])
+  |> List.iter ~f:print_s;
+  [%expect
+    {|
+    (a 1 do)
+    (a 1 re)
+    (a 1 mi)
+    (a 2 do)
+    (a 2 re)
+    (a 2 mi)
+    (a 3 do)
+    (a 3 re)
+    (a 3 mi)
+    (b 1 do)
+    (b 1 re)
+    (b 1 mi)
+    (b 2 do)
+    (b 2 re)
+    (b 2 mi)
+    (b 3 do)
+    (b 3 re)
+    (b 3 mi)
+    (c 1 do)
+    (c 1 re)
+    (c 1 mi)
+    (c 2 do)
+    (c 2 re)
+    (c 2 mi)
+    (c 3 do)
+    (c 3 re)
+    (c 3 mi) |}]
 ;;

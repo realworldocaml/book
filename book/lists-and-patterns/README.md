@@ -391,7 +391,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4")
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4").
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a
@@ -669,16 +669,19 @@ In addition, there is `List.concat`, for concatenating a list of lists:
 Here's an example of using `List.concat` along with `List.map` to compute a
 recursive listing of a directory tree.
 
+<!-- TODO: explain require -->
+
 ```ocaml env=main
+# #require "core_unix.sys_unix";;
 # module Sys = Core.Sys
   module Filename = Core.Filename;;
 module Sys = Core.Sys
 module Filename = Core.Filename
 # let rec ls_rec s =
-    if Sys.is_file_exn ~follow_symlinks:true s
+    if Sys_unix.is_file_exn ~follow_symlinks:true s
     then [s]
     else
-      Sys.ls_dir s
+      Sys_unix.ls_dir s
       |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
       |> List.concat;;
 val ls_rec : string -> string list = <fun>
@@ -695,10 +698,10 @@ efficient operation:
 
 ```ocaml env=main
 # let rec ls_rec s =
-    if Sys.is_file_exn ~follow_symlinks:true s
+    if Sys_unix.is_file_exn ~follow_symlinks:true s
     then [s]
     else
-      Sys.ls_dir s
+      Sys_unix.ls_dir s
       |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub));;
 val ls_rec : string -> string list = <fun>
 ```
@@ -953,7 +956,7 @@ fail at runtime if it encounters a function value.
 
 ```ocaml env=poly
 # (fun x -> x + 1) = (fun x -> x + 1);;
-Exception: (Invalid_argument "compare: functional value")
+Exception: (Invalid_argument "compare: functional value").
 ```
 
 Similarly, it will fail on values that come from outside the OCaml

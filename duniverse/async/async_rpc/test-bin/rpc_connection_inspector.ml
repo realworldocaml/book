@@ -55,22 +55,24 @@ let copy conn_number desc reader writer =
 
 let main ~host ~lport ~dport =
   let n = ref 0 in
-  Tcp.Server.create_sock
-    (Tcp.Where_to_listen.of_port lport)
-    ~on_handler_error:`Raise
-    (fun _inet s1 ->
-       let num = !n in
-       incr n;
-       let%bind s2 =
-         Tcp.connect_sock (Tcp.Where_to_connect.of_host_and_port { host; port = dport })
-       in
-       let t1 = T.of_fd (Socket.fd s1) ~max_message_size:(1 lsl 30) in
-       let t2 = T.of_fd (Socket.fd s2) ~max_message_size:(1 lsl 30) in
-       Deferred.all_unit
-         [ copy num "client->server" t1.reader t2.writer
-         ; copy num "server->client" t2.reader t1.writer
-         ])
-  >>= fun _ -> Deferred.never ()
+  let%bind _ =
+    Tcp.Server.create_sock
+      (Tcp.Where_to_listen.of_port lport)
+      ~on_handler_error:`Raise
+      (fun _inet s1 ->
+         let num = !n in
+         incr n;
+         let%bind s2 =
+           Tcp.connect_sock (Tcp.Where_to_connect.of_host_and_port { host; port = dport })
+         in
+         let t1 = T.of_fd (Socket.fd s1) ~max_message_size:(1 lsl 30) in
+         let t2 = T.of_fd (Socket.fd s2) ~max_message_size:(1 lsl 30) in
+         Deferred.all_unit
+           [ copy num "client->server" t1.reader t2.writer
+           ; copy num "server->client" t2.reader t1.writer
+           ])
+  in
+  Deferred.never ()
 ;;
 
 let param =

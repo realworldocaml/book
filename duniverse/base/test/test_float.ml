@@ -2,7 +2,7 @@ open! Import
 open! Float
 open! Float.Private
 
-let%expect_test ("hash coherence"[@tags "64-bits-only"]) =
+let%expect_test ("hash coherence" [@tags "64-bits-only"]) =
   check_hash_coherence [%here] (module Float) [ min_value; 0.; 37.; max_value ];
   [%expect {| |}]
 ;;
@@ -267,11 +267,11 @@ let%test_module _ =
        http://www.exploringbinary.com/inconsistent-rounding-of-printed-floating-point-numbers/
        Ties are resolved differently in JavaScript - mark some tests as no running with JavaScript.
     *)
-    let%test_unit (_[@tags "no-js"]) =
+    let%test_unit (_ [@tags "no-js"]) =
       boundary (* tie *) 0.25 ~closer_to_zero:"0.2" ~at:"0.2"
     ;;
 
-    let%test_unit (_[@tags "no-js"]) =
+    let%test_unit (_ [@tags "no-js"]) =
       boundary (incr 0.25) ~closer_to_zero:"0.2" ~at:"0.3"
     ;;
 
@@ -285,9 +285,9 @@ let%test_module _ =
     let%test_unit _ = boundary 0.85 ~closer_to_zero:"0.8" ~at:"0.9"
     let%test_unit _ = boundary 0.95 ~closer_to_zero:"0.9" ~at:"1  "
     let%test_unit _ = boundary 1.05 ~closer_to_zero:"1  " ~at:"1.1"
-    let%test_unit (_[@tags "no-js"]) = boundary 3.25 ~closer_to_zero:"3.2" ~at:"3.2"
+    let%test_unit (_ [@tags "no-js"]) = boundary 3.25 ~closer_to_zero:"3.2" ~at:"3.2"
 
-    let%test_unit (_[@tags "no-js"]) =
+    let%test_unit (_ [@tags "no-js"]) =
       boundary (incr 3.25) ~closer_to_zero:"3.2" ~at:"3.3"
     ;;
 
@@ -296,11 +296,11 @@ let%test_module _ =
     let%test_unit _ = boundary 10.05 ~closer_to_zero:"10  " ~at:"10.1"
     let%test_unit _ = boundary 100.05 ~closer_to_zero:"100  " ~at:"100.1"
 
-    let%test_unit (_[@tags "no-js"]) =
+    let%test_unit (_ [@tags "no-js"]) =
       boundary (* tie *) 999.25 ~closer_to_zero:"999.2" ~at:"999.2"
     ;;
 
-    let%test_unit (_[@tags "no-js"]) =
+    let%test_unit (_ [@tags "no-js"]) =
       boundary (incr 999.25) ~closer_to_zero:"999.2" ~at:"999.3"
     ;;
 
@@ -374,7 +374,7 @@ let%test "int_pow misc" =
 ;;
 
 (* some ugly corner cases with extremely large exponents and some serious precision loss *)
-let%test ("int_pow bad cases"[@tags "64-bits-only"]) =
+let%test ("int_pow bad cases" [@tags "64-bits-only"]) =
   let a = one_ulp `Down 1. in
   let b = one_ulp `Up 1. in
   let large = 1 lsl 61 in
@@ -407,26 +407,6 @@ let%test_unit "sign_or_nan" =
 
 let%test_module _ =
   (module struct
-    let check v expect =
-      match Validate.result v, expect with
-      | Ok (), `Ok | Error _, `Error -> ()
-      | r, expect ->
-        raise_s [%message "mismatch" (r : unit Or_error.t) (expect : [ `Ok | `Error ])]
-    ;;
-
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) nan) `Error
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) infinity) `Error
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) neg_infinity) `Error
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) (-1.)) `Error
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) 0.) `Ok
-    let%test_unit _ = check (validate_lbound ~min:(Incl 0.) 1.) `Ok
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) nan) `Error
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) infinity) `Error
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) neg_infinity) `Error
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) (-1.)) `Ok
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) 0.) `Ok
-    let%test_unit _ = check (validate_ubound ~max:(Incl 0.) 1.) `Error
-
     (* Some of the following tests used to live in lib_test/core_float_test.ml. *)
 
     let () = Random.init 137
@@ -939,6 +919,19 @@ let%test _ = round_nearest_half_to_even 5.5 = 6.
 let%test _ = round_nearest_half_to_even 6.5 = 6.
 let%test _ = round_nearest_half_to_even (one_ulp `Up (-.(2. **. 52.))) = -.(2. **. 52.)
 let%test _ = round_nearest (one_ulp `Up (-.(2. **. 52.))) = 1. -. (2. **. 52.)
+let%test _ = is_integer 1.
+let%test _ = is_integer 0.
+let%test _ = is_integer (-0.)
+let%test _ = is_integer (-1.)
+let%test _ = is_integer 8.98e307
+let%test _ = is_integer ((2. ** 53.) -. 0.5)
+let%test _ = not (is_integer ((2. ** 52.) -. 0.5))
+let%test _ = not (is_integer 0.0000000000000001)
+let%test _ = not (is_integer (-0.0000000000000001))
+let%test _ = not (is_integer 0.9999999999999999)
+let%test _ = not (is_integer nan)
+let%test _ = not (is_integer infinity)
+let%test _ = not (is_integer neg_infinity)
 
 let%test_module _ =
   (module struct
@@ -955,11 +948,7 @@ let%test_module _ =
     let%test _ = must_fail int63_round_nearest_portable_alloc_exn min_value
     let%test _ = must_fail int63_round_nearest_portable_alloc_exn (2. **. 63.)
     let%test _ = must_fail int63_round_nearest_portable_alloc_exn ~-.(2. **. 63.)
-
-    let%test _ =
-      must_succeed int63_round_nearest_portable_alloc_exn ((2. **. 62.) -. 512.)
-    ;;
-
+    let%test _ = must_succeed int63_round_nearest_portable_alloc_exn ((2. **. 62.) -. 512.)
     let%test _ = must_fail int63_round_nearest_portable_alloc_exn (2. **. 62.)
 
     let%test _ =
@@ -1007,11 +996,7 @@ let%test_module _ =
     let%test_unit _ = test ~decimals:3 0.99999 "1.000" "1"
     let%test_unit _ = test ~decimals:3 0.00001 "0.000" "0"
     let%test_unit _ = test ~decimals:3 ~-.12345.1 "-12_345.100" "-12_345.1"
-
-    let%test_unit _ =
-      test ~delimiter:',' ~decimals:3 ~-.12345.1 "-12,345.100" "-12,345.1"
-    ;;
-
+    let%test_unit _ = test ~delimiter:',' ~decimals:3 ~-.12345.1 "-12,345.100" "-12,345.1"
     let%test_unit _ = test ~decimals:0 0.99999 "1" "1"
     let%test_unit _ = test ~decimals:0 0.00001 "0" "0"
     let%test_unit _ = test ~decimals:0 ~-.12345.1 "-12_345" "-12_345"
@@ -1092,13 +1077,6 @@ let%test _ = not (is_negative Float.nan)
 let%test _ = not (is_non_positive Float.nan)
 let%test _ = is_non_negative (-0.)
 
-let%expect_test "iround_nearest_exn noalloc" =
-  let t = Sys.opaque_identity 205.414 in
-  Expect_test_helpers_core.require_no_allocation [%here] (fun () -> iround_nearest_exn t)
-  |> printf "%d\n";
-  [%expect {| 205 |}]
-;;
-
 let%test_unit "int to float conversion consistency" =
   let test_int63 x =
     [%test_result: float] (Float.of_int63 x) ~expect:(Float.of_int64 (Int63.to_int64 x))
@@ -1115,9 +1093,7 @@ let%test_unit "int to float conversion consistency" =
   test_int63 Int63.zero;
   test_int63 Int63.min_value;
   test_int63 Int63.max_value;
-  let rand =
-    Random.State.make [| Hashtbl.hash "int to float conversion consistency" |]
-  in
+  let rand = Random.State.make [| Hashtbl.hash "int to float conversion consistency" |] in
   for _i = 0 to 100 do
     let x = Random.State.int rand Int.max_value in
     test_int x
@@ -1151,4 +1127,40 @@ let%expect_test "min and max" =
     -inf  inf -inf -inf  inf  inf
        0   -0   -0    0   -0    0
     |}]
+;;
+
+let%expect_test "is_nan, is_inf, and is_finite" =
+  List.iter
+    ~f:(fun x ->
+      printf
+        !"%24s %5s %5s %5s\n"
+        (to_string x)
+        (Bool.to_string (is_nan x))
+        (Bool.to_string (is_inf x))
+        (Bool.to_string (is_finite x)))
+    [ nan
+    ; neg_infinity
+    ; -.max_finite_value
+    ; -1.
+    ; -.min_positive_subnormal_value
+    ; -0.
+    ; 0.
+    ; min_positive_subnormal_value
+    ; 1.
+    ; max_finite_value
+    ; infinity
+    ];
+  [%expect
+    {|
+                         nan  true false false
+                        -inf false  true false
+    -1.7976931348623157e+308 false false  true
+                         -1. false false  true
+      -4.94065645841247e-324 false false  true
+                         -0. false false  true
+                          0. false false  true
+       4.94065645841247e-324 false false  true
+                          1. false false  true
+     1.7976931348623157e+308 false false  true
+                         inf false  true false |}]
 ;;

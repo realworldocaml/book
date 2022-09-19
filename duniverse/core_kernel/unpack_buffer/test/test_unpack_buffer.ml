@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open Poly
 open! Expect_test_helpers_core
 open! Unpack_buffer
@@ -364,7 +364,9 @@ let%expect_test "[feed] and [unpack_iter] allocation" =
       unpack_iter unpack ~f
       |> Or_error.ok_exn;
   in
-  let fixed_cost_of_feed = 20 in
+  (* Starting from 4.12 the GC is able to track more allocations from bigstrings
+     (see https://github.com/ocaml/ocaml/pull/10025) hence the bump. *)
+  let fixed_cost_of_feed = 30 in
   let buf = Example.pack [] in
   require_allocation_does_not_exceed (Minor_words fixed_cost_of_feed) [%here] (fun () ->
     feed unpack buf |> Or_error.ok_exn);
@@ -377,6 +379,6 @@ let%expect_test "[feed] and [unpack_iter] allocation" =
   let expected_allocation = num_objects * (cost_per_unpack + Example.object_size) in
   require_allocation_does_not_exceed (Minor_words expected_allocation) [%here]
     unpack_iter;
-  [%test_result: int] ~expect:num_objects !num_unpacked;
+  [%test_result: int] ~expect:num_objects !num_unpacked ;
   [%expect {| |}]
 ;;

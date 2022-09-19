@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Expect_test_helpers_core
 open! Flags
 
@@ -23,9 +23,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let print_hex bit =
-    print_s [%sexp (create ~bit |> Int63.Hex.to_string_hum : string)]
-  in
+  let print_hex bit = print_s [%sexp (create ~bit |> Int63.Hex.to_string_hum : string)] in
   print_hex 0;
   [%expect {|
     0x1 |}];
@@ -227,7 +225,7 @@ let%expect_test "[compare] is a total order consistent with [is_subset]" =
 let%test _ =
   Result.is_error
     (Result.try_with (fun () ->
-       let module M =
+       let module _ =
          Make (struct
            let allow_intersecting = false
            let should_print_error = false

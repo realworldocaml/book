@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 include Patdiff_core_intf
 
@@ -21,7 +21,7 @@ let is_ws = Re.execp ws_rex_anchored
 let words_rex =
   let open Re in
   let delim = set {|"{}[]#,.;()_|} in
-  let punct = rep1 (set {|=`+-/!@$%^&*:|}) in
+  let punct = rep1 (set {|=`+-/!@$%^&*:|<>|}) in
   let space = rep1 space in
   (* We don't want to split up ANSI color sequences, so let's make sure they get through
      intact. *)
@@ -109,14 +109,7 @@ module Make (Output_impls : Output_impls) = struct
       let apply hunks ~rules ~output = map_ranges hunks ~f:(to_string rules output)
     end
 
-    let print
-          ~print_global_header
-          ~file_names
-          ~rules
-          ~output
-          ~print
-          ~location_style
-          hunks
+    let print ~print_global_header ~file_names ~rules ~output ~print ~location_style hunks
       =
       let formatted_hunks = Rules.apply ~rules ~output hunks in
       let (module O) = Output_impls.implementation output in
@@ -138,6 +131,7 @@ module Make (Output_impls : Output_impls) = struct
       ~big_enough:line_big_enough
       ~prev
       ~next
+      ()
   ;;
 
   type word_or_newline =
@@ -345,6 +339,7 @@ module Make (Output_impls : Output_impls) = struct
       ~big_enough:word_big_enough
       ~prev:prev_pieces
       ~next:next_pieces
+      ()
   ;;
 
   let ranges_are_just_whitespace (ranges : _ Patience_diff.Range.t list) =
@@ -369,8 +364,7 @@ module Make (Output_impls : Output_impls) = struct
         | Next _ | Prev _ | Replace _ | Unified _ -> false
         | Same seq ->
           let first_newline =
-            Array.find_mapi seq ~f:(fun i ->
-              function
+            Array.find_mapi seq ~f:(fun i -> function
               | `Word _, _ | _, `Word _ | `Newline (0, _), _ | _, `Newline (0, _) ->
                 None
               | `Newline first_nlA, `Newline first_nlB -> Some (i, first_nlA, first_nlB))
@@ -389,7 +383,7 @@ module Make (Output_impls : Output_impls) = struct
                let suf = Array.sub seq ~pos:i ~len:(Array.length seq - i) in
                let decr_first (x, y) = x - 1, y in
                suf.(0)
-               <- (`Newline (decr_first first_nlA), `Newline (decr_first first_nlB));
+               <- `Newline (decr_first first_nlA), `Newline (decr_first first_nlB);
                append_range (Same suf);
                true))
       in

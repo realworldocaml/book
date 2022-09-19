@@ -144,7 +144,7 @@ class libev : ?backend:Ev_backend.t -> unit -> object
     (** Returns [loop]. *)
 end
 
-(** Engine based on [Unix.select]. *)
+(** Engine based on {!Unix.select}. *)
 class select : t
 
 (** Abstract class for engines based on a select-like function. *)

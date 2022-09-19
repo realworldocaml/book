@@ -1,0 +1,721 @@
+{0 Ppxlib's manual}
+
+{1:what-is-ppx What is ppx}
+
+{2 Overview}
+
+Ppx is a meta-programming system for the OCaml programming language. It allows
+developers to generate code at compile time in a principled way. The
+distinguishing feature of ppx is that it is tightly integrated with the OCaml
+parser and instead of operating at the text level it operates on the internal
+structured representation of the language in the compiler, called the Abstract
+Syntax Tree or AST for short.
+
+A few years ago, the OCaml language was extended with two new constructions:
+annotations and extension points. Annotations are arbitrary pieces of
+information that can be attached to most parts of the OCaml language. They can
+be used to control the behavior of the OCaml compiler, or in some specific cases
+to generate code at compile time.
+
+Extension points are compile time functions. The compiler itself doesn't know
+how to interpret them and they must all be rewritten by the ppx system before
+the compiler can process input files further.
+
+Ppxlib mainly supports two ways of generating code at compile time: by expanding
+an extension point or by expanding a [[@@deriving ...]] attribute after a type
+declaration.
+
+{2 How does it works?}
+
+The ppx system is composed of 3 parts:
+
+- individual ppx rewriters
+- ppxlib
+- a hook in the compiler
+
+Individual ppx rewriters are those implemented by various developers to provide
+features to end users, such as
+{{:https://github.com/janestreet/ppx_expect}ppx_expect} which provides a good
+inline testing framework.
+
+All these rewriters are written against the ppxlib API. Ppxlib is responsible
+for acknowledging the various rewriters an end user wants to use, making sure
+they can be composed together and performing the actual rewriting of input
+files.
+
+The hook in the compiler allows ppxlib to insert itself in the compilation
+pipeline and perform the rewriting of input files based on a list of ppx
+rewriters specified by the user. The hooks take the form of command line flags
+that take a command to execute. The compiler supports two slightly different
+flags, for providing commands that are executed at different stages: [-pp] and
+[-ppx]. The difference between the two is as follow:
+
+- [-pp] takes as argument a command that is used to parse the textual
+  representation. Such a command can produce either a plain OCaml source file or
+  a serialised representation of the AST
+
+- [-ppx] takes as argument a command that is given a serialised representation
+  of the AST and produces another serialised AST
+
+Ppxlib generally uses the first one as it yields faster compilation times,
+however it supports both methods of operation.
+
+{2 Is ppxlib necessary?}
+
+Yes. While authors of ppx rewriters may in theory use the compiler hooks
+directly, doing so is strongly discouraged for the following reasons:
+
+- composing such ppx rewriters is slow and yields much slower compilation times
+- the ABI of the hook is not stable and regularly changes in incompatible ways.
+  This means that a ppx rewriter using the compiler hook directly is likely to
+  work only with a single version of the OCaml compiler
+- the compiler does not provide good composition semantics, which means that
+  input files will not always be transformed as expected. It is hard to predict
+  what the final result will be, and for end users it is hard to understand what
+  is happening when things go wrong
+- the compiler doesn't handle hygiene: if an attribute is mistyped or misplaced,
+  it is silently ignored by the compiler. If two ppx rewriters want to interpret
+  the same attribute or extension point in incompatible ways, the result is not
+  specified
+
+In summary, ppxlib abstracts away the low-level details of the ppx
+system and exposes a consistent model to authors of ppx rewriters and end users.
+
+{2 Current state of the ppx ecosystem}
+
+Ppxlib was developed after the introduction of the ppx system. As a result, many
+ppx rewriters do not currently use ppxlib and are using the compiler hooks
+directly. Ppxlib can acknowledge such rewriters so that they can be used in
+conjunction with more modern rewriters, however it cannot provide a good
+composition or hygiene story when using such ppx rewriters.
+
+{2 Note on stability regarding new compiler releases}
+
+Due to the nature of the ppx system, it is hard for ppxlib to provide full
+protection against compiler changes. This means that a ppx rewriter written
+against ppxlib today can be broken by a future release of the OCaml compiler and
+a new release of the ppx rewriter will be necessary to support the new compiler.
+
+However the following is true: every time this might happen, it will be possible
+to extend ppxlib to provide a greater protection, so that eventually the whole
+ppx ecosystem is completely shielded from breaking compiler changes.
+
+{1:ppxlib-for-end-users PPX for end users}
+
+This section describes how to use ppx rewriters for end users.
+
+{2 Using a ppx rewriter in your project}
+
+
+To use one or more ppx rewriters written by you or someone else, simply list
+them in the [preprocess] field of your [dune] file. For instance:
+
+{[
+
+          (library
+           (name my_lib)
+           (preprocess (pps (ppx_sexp_conv ppx_expect))))
+]}
+
+Some ppx rewriters takes parameters in the form of command line flags. These can
+be specified using the usual convention for command line flags: atoms starting
+with [-] are treated as flags and [--] can be used to separate ppx rewriter
+names from more command line flags. For instance:
+
+{[
+          (library
+           (name my_lib)
+           (preprocess
+            (pps (ppx_sexp_conv ppx_expect -inline-test-drop))))
+
+          (library
+           (name my_lib)
+           (preprocess
+            (pps (ppx_sexp_conv ppx_expect -- --cookie "x=42"))))
+]}
+
+Once this is done, you can use whatever feature is offered by the ppx rewriter.
+
+{2 Looking at the generated code}
+
+At the time of writing this manual, there is no easy way to look at the fully
+transformed input file in order to see exactly what will be compiled by OCaml.
+You can however use the following method, which is not great but works: run
+[ocamlc -dsource _build/default/<input-file-with-.pp.ml-extension>]. For
+instance to see the transformed version of [src/foo.ml], run:
+
+{[
+          $ ocamlc -dsource _build/default/src/foo.pp.ml
+]}
+
+{2 [@@deriving_inline]}
+
+Ppxlib supports attaching the [[@@deriving]] attribute to type declaration. This
+is used to generate code at compile time based on the structure of the type. For
+this particular case, ppxlib supports an alternative way to look at the
+generated code: replace [[@@deriving <derivers>]] by [[@@deriving_inline
+<derivers>][@@@end]]. Then run the following command:
+
+{[
+          $ dune build --auto-promote
+]}
+
+If you reload the file in your editor, you should now see the contents of the
+generated code between the [[@@deriving_inline]] and [[@@@end]] attribute. This
+can help understanding what is provided by a ppx rewriter or debug compilation
+errors.
+
+{2 Dropping ppx dependencies with [@@deriving_inline]}
+
+You might notice that the resulting file when using [[@@deriving_inline]] needs
+no special treatment to be compiled. In particular, you can build it without the
+ppx rewriter or even ppxlib. You only need them while developing the project, in
+order to automatically produce the generated code but that's it. End users of
+your project do not need to install ppxlib and other ppx rewriters themselves.
+
+{{:https://dune.build/}Dune} gracefully supports this workflow: simply replace
+[preprocess] in your [dune] file by [lint]. For instance:
+
+{[
+          (library
+           (name my_lib)
+           (lint (pps (ppx_sexp_conv))))
+]}
+
+Then to regenerate the parts between [[@@deriving_inline]] and [[@@@end]], run
+the following command:
+
+{[
+          $ dune build @lint --auto-promote
+]}
+
+{1:ppxlib-for-plugin-authors PPX for plugin authors}
+
+This section describes how to use [ppxlib] for PPX plugin authors.
+
+{2 Getting started}
+
+There are two main kinds of PPX plugins you can write with [ppxlib]:
+
+- Extension rewriters i.e. ppx plugins that rewrite extension points such as
+  [[%my_ext ...]] into valid OCaml code.
+- Derivers i.e. ppx plugins that generate code from type, module or exception
+  declarations annotated with [[@@deriving my_deriver]].
+
+It is also possible to write more advanced transformations such as rewriting
+constants that bear the right suffix, rewriting function calls based on the
+function identifier or to generate code from items annotated with a custom
+attribute but we won't cover those in this section.
+
+[ppxlib] compiles those transformations into rules which allows it to apply them
+to the right AST nodes, even recursively in nodes generated by other
+transformations, in a single AST traversal.
+
+Note that you can also write arbitrary, whole AST transformations with ppxlib
+but they don't have a clear composition semantic since they have to be applied
+sequentially as opposed to the other, better defined rewriting rule. You should
+always prefer the above mentioned transformations instead when possible.
+
+{3 The OCaml AST}
+
+As described in {!page-"ppx-overview"}, PPX rewriters don't operate at the text
+level but instead used the compiler's internal representation of the source
+code: the Abstract Syntax Tree or AST.
+
+A lot of the following sections of the manual assume a certain level of
+familiarity with the OCaml AST so we'll try to cover the basics here and to give
+you some pointers to deepen your knowledge on the subject.
+
+The types describing the AST are defined in the [Parsetree] module of OCaml's
+compiler-libs. Note that they vary from one version of the compiler to another
+so make sure you look at an up to date version and most importantly to the one
+corresponding to what ppxlib's using internally. You can find the module's API
+documentation online
+{{:https://caml.inria.fr/pub/docs/manual-ocaml/compilerlibref/Parsetree.html}here}.
+If you're new to these parts of OCaml it's not always easy to navigate as it
+just contains the raw type declarations but no actual documentation. This
+documentation is actually written in [parsetree.mli] but not in a way that
+allows it to make its way to the online doc unfortunately. Until this is fixed
+in the compiler you can look at the local copy in one of your opam switches:
+[<path-to-opam-switch>/lib/ocaml/compiler-libs/parsetree.mli]. Here you'll find
+detailed explanations as to which part of the concrete syntax the various types
+correspond to.
+
+Ppxlib includes a [Parsetree] module for every version of OCaml since [4.02].
+For instance, the version for [4.05] is in {!Astlib.Ast_405.Parsetree}. In what
+comes next, we will link the values we describe to the {!Ppxlib.Parsetree}
+module, which corresponds to one version of [Parsetree].
+
+[Parsetree] is quite a large module and there are plenty of types there, a lot
+of which you don't necessarily have to know when writing a rewriter. The two
+main entry points are the [structure] and [signature] types which, amongst other
+things, describe respectively the content of [.ml] and [.mli] files. Other types
+you should be familiar with are:
+
+- {{!Ppxlib.Parsetree.expression}[expression]} which describes anything in OCaml
+  that evaluates to a value, the right hand side of a let binding or the
+  branches of an if-then-else for instance. -
+  {{!Ppxlib.Parsetree.pattern}[pattern]} which is what you use to deconstruct an
+  OCaml value, the left hand side of a let binding or a pattern-matching case
+  for example. - {{!Ppxlib.Parsetree.core_type}[core_type]} which describes type
+  expressions ie what you use to explicitly constrain the type of an expression
+  or describe the type of a value in your [.mli] files. Usually it's what comes
+  after a [:]. - {{!Ppxlib.Parsetree.structure_item}[structure_item]} and
+  {{!Ppxlib.Parsetree.signature_item}[signature_item]} which describe the top
+  level AST nodes you can find in a structure or signature such as type
+  definitions, value declarations or module declarations.
+
+Knowing what these types correspond to puts you in a good position to write a
+PPX plugin as they are the parts of the AST you will deal with the most in
+general.
+
+{3 Writing an extension rewriter}
+
+To write your ppx plugin you'll need to add the following stanza in your dune
+file:
+
+{[
+   (library
+    (public_name my_ppx_rewriter)
+    (kind ppx_rewriter)
+    (libraries ppxlib))
+]}
+
+You'll note that you have to let dune know this is not a regular library but a
+ppx_rewriter using the [kind] field. The public name you chose here is the name
+your users will refer to your ppx in there [preprocess] field. E.g. here to use
+this ppx rewriter one would add the [(preprocess (pps my_ppx_rewriter))] to
+their [library] or [executable] stanza.
+
+You will also need the following [my_ppx_rewriter.ml]:
+
+{[
+   open Ppxlib
+
+   let expand ~ctxt payload =
+     ...
+
+   let my_extension =
+     Extension.V3.declare
+       "my_ext"
+       <extension_context>
+       <ast_pattern>
+       expand
+
+   let rule = Ppxlib.Context_free.Rule.extension my_extension
+
+   let () =
+     Driver.register_transformation
+       ~rules:[rule]
+       "my_ext"
+]}
+
+There are a few things to explain here. The last part, i.e. the call to
+{{!Ppxlib.Driver.register_transformation}[Driver.register_transformation]} is
+common to almost all ppxlib-based PPX plugins and is how you let [ppxlib] know
+about your transformation. You'll note that here we register a single rule but
+it is possible to register several rules for a single logical transformation.
+
+The above is specific to extension rewriters. You need to declare a ppxlib
+{{!Ppxlib.Extension}[Extension]}. The first argument is the extension name,
+that's what will appear after the [%] in the extension point when using your
+rewriter, e.g. here this will transform [[%my_ext ...]] nodes. The
+[<extension_context>] argument describes where in OCaml code your this extension
+can be used. You can find the full list in the API documentation in the
+{{!Ppxlib.Extension.Context}[Extension.Context]} module. The [<ast_pattern>]
+argument helps you restrict what users can put into the payload of your
+extension, i.e. [[%my_ext <what goes there!>]]. We cover
+{{!Ppxlib.Ast_pattern}[Ast_pattern]} in depths here but the simplest form it can
+take is {{!Ppxlib.Ast_pattern.__}[Ast_pattern.__]} which allows any payload
+allowed by the language and passes it to the expand function which is the last
+argument here. The expand function is where the logic for your transformation is
+implemented. It receives an
+{{!Ppxlib.Expansion_context.Extension.t}[Expansion_context.Extension.t]}
+argument labelled [ctxt] and other arguments whose type and number depends on
+the [<ast_pattern>] argument. The return type of the function is determined by
+the [<extension_context>] argument, e.g. in the following example:
+
+{[
+   Extension.V3.declare "my_ext" Extension.Context.expression Ast_pattern.__ expand
+]}
+
+The type of the [expand] function is:
+
+{[
+   val expand : ctxt: Expansion_context.Extension.t -> payload -> expression
+]}
+
+If you want to look at a concrete example of extension rewriter you can find one
+in the [examples/] folder of the [ppxlib] repository
+{{:https://github.com/ocaml-ppx/ppxlib/tree/main/examples/simple-extension-rewriter}here}.
+
+{3 Writing a deriver}
+
+Similarly to extension rewriters, derivers must be declared as such to dune. To
+do so you can use the following stanza in your dune file:
+
+{[
+   (library
+    (public_name my_ppx_deriver)
+    (kind ppx_deriver)
+    (libraries ppxlib))
+]}
+
+Same as above, the public name used here determines how users will refer to your
+ppx deriver in their dune stanzas.
+
+You will also need the following [my_ppx_deriver.ml]:
+
+{[
+   open Ppxlib
+
+   let generate_impl ~ctxt (rec_flag, type_declarations) =
+     ...
+
+   let generate_intf ~ctxt (rec_flag, type_declarations) =
+     ...
+
+   let impl_generator = Deriving.Generator.V2.make_noarg generate_impl
+
+   let intf_generator = Deriving.Generator.V2.make_noarg generate_intf
+
+   let my_deriver =
+     Deriving.add
+       "my_deriver"
+       ~str_type_decl:impl_generator
+       ~sig_type_decl:intf_generator
+]}
+
+The call to {{!Ppxlib.Deriving.add}[Deriving.add]} is how you'll let [ppxlib]
+know about your deriver. The first string argument is the name of the deriver as
+referred to by your users, in the above example one would add a [[@@deriving
+my_deriver]] annotation to use this plugin. Here our deriver can be used on type
+declarations, be it in structures or signatures (i.e. implementation or
+interfaces, [.ml] or [.mli]).
+
+To add a deriver you first have to define a generator. You need one for each
+node you want to derive code from. Here we just need one for type declarations
+in structures and one for type declarations in signatures. To do that you need
+the
+{{!Ppxlib.Deriving.Generator.V2.make_noarg}[Deriving.Generator.V2.make_noarg]}
+constructor. You'll note that there exists
+{{!Ppxlib.Deriving.Generator.V2.make}[Deriving.Generator.V2.make]} variant if
+you wish to allow passing arguments to your deriver but to keep this tutorial
+simple we won't cover this here. The only mandatory argument to the constructor
+is a function which takes a labelled
+{{!Ppxlib.Expansion_context.Deriving.t}[Expansion_context.Deriving.t]}, an
+['input_ast] and returns an ['output_ast] and that will give us a [('output_ast,
+'input_ast) Deriving.Generator.t]. Much like the [expand] function described in
+the section about extension rewriters, this function is where the actual
+implementation for your deriver lives. The [str_type_decl] argument of
+{{!Ppxlib.Deriving.add}[Deriving.add]} expects a [(structure, rec_flag *
+type_declaration list) Generator.t] so our [generate_impl] function must take a
+pair [(rec_flag, type_declaration list)] and return a [structure] i.e. a
+[structure_item list], for instance a list of function or module declaration.
+The same goes for the [generate_intf] function except that it must return a
+[signature]. It is often the case that a deriver has a generator for both the
+structure and signature variants of a node. That allows users to generate the
+signature corresponding to the code generated by the deriver in their [.ml]
+files instead of having to type it and maintain it themselves.
+
+If you want to look at a concrete example of deriver you can find one in the
+[examples/] folder of the [ppxlib] repository
+{{:https://github.com/ocaml-ppx/ppxlib/tree/main/examples/simple-deriver}here}.
+
+{2 Metaquot}
+
+[metaquot] is a PPX plugin that helps you write PPX plugins. It lets you write
+AST node values using the actual corresponding OCaml syntax instead of building
+them with the more verbose AST types or [Ast_builder].
+
+To use [metaquot] you need to add it to the list of preprocessor for your PPX
+plugin:
+
+{[
+          (library
+           (name my_plugin_lib)
+           (preprocess (pps ppxlib.metaquot)))
+]}
+
+[metaquot] can be used both to write expressions of some of the AST types or to
+write patterns to match over those same types. The various extensions it exposes
+can be used in both contexts, expressions or patterns.
+
+The extension you should use depends on the type of AST node you're trying to
+write or to pattern-match over. You can use the following extensions with the
+following syntax:
+
+- [expr] for {{!Ppxlib.Parsetree.expression}[Parsetree.expression]}:
+  [[%expr 1 + 1]]
+- [pat] for {{!Ppxlib.Parsetree.pattern}[Parsetree.pattern]}: [[%pat? ("", _)]]
+- [type] for {{!Ppxlib.Parsetree.core_type}[Parsetree.core_type]}:
+  [[%type: int -> string]]
+- [stri] for {{!Ppxlib.Parsetree.structure_item}[Parsetree.structure_item]}:
+  [[%stri let a = 1]]
+- [sigi] for {{!Ppxlib.Parsetree.signature_item}[Parsetree.signature_item]}:
+  [[%sigi: val i : int]]
+- [str] and [sig] respectively for
+  {{!Ppxlib.Parsetree.structure}[Parsetree.structure]}
+  and {{!Ppxlib.Parsetree.signature}[Parsetree.signature]}. They use similar
+  syntax to the [_item] extensions above as they are just a list of such items.
+
+If you consider the first example [[%expr 1 + 1]], in an expression context,
+[metaquot] will actually expand it into:
+
+{[
+          {
+            pexp_desc =
+              (Pexp_apply
+                 ({
+                    pexp_desc = (Pexp_ident { txt = (Lident "+"); loc });
+                    pexp_loc = loc;
+                    pexp_attributes = []
+                  },
+                   [(Nolabel,
+                      {
+                        pexp_desc = (Pexp_constant (Pconst_integer ("1", None)));
+                        pexp_loc = loc;
+                        pexp_attributes = []
+                      });
+                   (Nolabel,
+                     {
+                       pexp_desc = (Pexp_constant (Pconst_integer ("1", None)));
+                       pexp_loc = loc;
+                       pexp_attributes = []
+                     })]));
+            pexp_loc = loc;
+            pexp_attributes = []
+          }
+]}
+
+For this to compile you need the AST types to be in the scope so you should
+always use [metaquot] where [Ppxlib] is opened. You'll also note that the
+generated node expects a [loc : Location.t] value to be available. The produced
+AST node value and every other nodes within it will be located to [loc]. You
+should make sure [loc] is the location you want for your generated code when
+using [metaquot].
+
+When using the pattern extension, it will produce a pattern that matches no
+matter what the location and attributes are. For the previous example for
+instance, it will produce the following pattern:
+
+{[
+          {
+            pexp_desc =
+              (Pexp_apply
+                 ({
+                    pexp_desc = (Pexp_ident { txt = (Lident "+"); loc = _ });
+                    pexp_loc = _;
+                    pexp_attributes = _
+                  },
+                   [(Nolabel,
+                      {
+                        pexp_desc = (Pexp_constant (Pconst_integer ("1", None)));
+                        pexp_loc = _;
+                        pexp_attributes = _
+                      });
+                   (Nolabel,
+                     {
+                       pexp_desc = (Pexp_constant (Pconst_integer ("1", None)));
+                       pexp_loc = _;
+                       pexp_attributes = _
+                     })]));
+            pexp_loc = _;
+            pexp_attributes = _
+          }
+]}
+
+Using these extensions alone, you can only produce constant/static AST nodes.
+You can't bind variables in the generated patterns either. [metaquot] has a
+solution for that as well: anti-quotation. You can use anti-quotation to insert
+any expression or pattern representing an AST node. That way you can include
+dynamically generated nodes inside a [metaquot] expression extension point or
+use a wildcard or variable pattern in a pattern extension.
+
+Consider the following example:
+
+{[
+          let with_suffix_expr ~loc s =
+            let dynamic_node = Ast_builder.Default.estring ~loc s in
+            [%expr [%e dynamic_node] ^ "some_fixed_suffix"]
+]}
+
+The [with_suffix_expr] function will create an [expression] which is the
+concatenation of the [s] argument and the fixed suffix. I.e. [with_suffix_expr
+"some_dynamic_stem"] is equivalent to [[%expr "some_dynamic_steme" ^
+"some_fixed_suffix"]].
+
+Similarly if you want to ignore some parts of AST nodes and extract some others
+when pattern-matching over them, you can use anti-quotation:
+
+{[
+          match some_expr_node with
+          | [%expr 1 + [%e? _] + [%e? third]] -> do_something_with third
+]}
+
+The syntax for anti-quotation depends on the type of the node you wish to insert:
+
+- [e] to anti-quote values of type
+  {{!Ppxlib.Parsetree.expression}[Parsetree.expression]}:
+  [[%expr 1 + [%e some_expr_node]]]
+- [p] to anti-quote values of type
+  {{!Ppxlib.Parsetree.pattern}[Parsetree.pattern]}:
+  [[%pat? (1, [%p some_pat_node])]]
+- [t] to anti-quote values of type
+  {{!Ppxlib.Parsetree.core_type}[Parsetree.core_type]}:
+  [[%type: int -> [%t some_core_type_node]]]
+- [m] to anti-quote values of type
+  {{!Ppxlib.Parsetree.module_expr}[Parsetree.module_expr]}
+  or {{!Ppxlib.Parsetree.module_type}[module_type]}:
+  [[%expr let module M = [%m some_module_expr_node]]] or
+  [[%sigi: module M : [%m some_module_type_node]]]
+- [i] to anti-quote values of type
+  {{!Ppxlib.Parsetree.structure_item}[Parsetree.structure_item]} or
+  {{!Ppxlib.Parsetree.signature_item}[signature_item]}:
+  [[%str let a = 1 [%%i some_structure_item_node]]] or
+  [[%sig: val a : int [%%i some_signature_item_node]]]
+
+Note that when anti-quoting in a pattern context you must always use the [?] in
+the anti-quotation extension as its payload should always be a pattern the same
+way it must always be an expression in an expression context.
+
+As you may have noticed, you can anti-quote expressions which type differs from
+the type of the whole [metaquot] extension point. E.g. you can write:
+
+{[
+          let structure_item =
+            [%stri let [%p some_pat] : [%t some_type] = [%e some_expr]]
+]}
+
+{2 Handling errors}
+
+
+In order to give a nice user experience when reporting errors or failures in a ppx, it is necessary to include as much of the generated content as possible. Most IDE tools, such as Merlin, rely on the AST for their features, such as displaying type, jumping to definition or showing the list of errors.
+
+{3 Embedding the errors in the AST}
+
+A common way to report an error is to throw an exception. However, this method interrupts the execution flow of the ppxlib driver and leaves later PPX's unexpanded when handing the AST over to merlin.
+
+Instead, it is better to always return a valid AST, as complete as possible, but with "error extension nodes" at every place where successful code generation was impossible. Error extension nodes are special extension nodes [[%ocaml.error error_message]], which can be embedded into a valid AST and are interpreted later as errors, for instance by the compiler or Merlin. As all extension nodes, they can be put {{:https://ocaml.org/manual/extensionnodes.html}at many places in the AST}, to replace for instance structure items, expressions or patterns.
+
+So whenever you're in doubt if to throw an exception or if to embed the error as an error extension node when writing a ppx rewriter, the answer is most likely: embed the error is the way to go! And whenever you're in doubt about where exactly inside the AST to embed the error, a good rule of thumb is: as deep in the AST as possible.
+
+For instance, suppose a rewriter is supposed to define a new record type, but there is an error in the generation of the type of one field. In order to have the most complete AST as output, the rewriter can still define the type and all of its fields, putting an extension node in place of the type of the faulty field:
+
+{[
+   type long_record = {
+     field_1: int;
+     field_2: [%ocaml.error "field_2 could not be implemented due to foo"];
+   }
+]}
+
+Ppxlib provides a function in its API to create error extension nodes: {{!Ppxlib.Location.error_extensionf}[error_extensionf]}. This function creates an extension node, which has then to be transformed in the right kind of node using functions such as for instance {{!Ppxlib.Ast_builder.Default.pexp_extension}[pexp_extension]}.
+
+{3 A documented example}
+
+Let us give an example. We will define a deriver on types records, which constructs a default value from a given type. For instance, the derivation on the type [type t = { x:int; y: float; z: string}] would yield [let default_t = {x= 0; y= 0.; z= ""}]. This deriver has two limitations:
+
+{ol
+{- It does not work on other types than records,}
+{- It only works for records containing fields of type [string], [int] or [float].}
+}
+
+The rewriter should warn the user about these limitations with a good error reporting. Let us first look at the second point. Here is the function mapping the fields from the type definition to a default expression.
+
+{[
+          let create_record ~loc fields =
+            let declaration_to_instantiation (ld : label_declaration) =
+              let loc = ld.pld_loc in
+              let { pld_type; pld_name; _ } = ld in
+              let e =
+                match pld_type with
+                | { ptyp_desc = Ptyp_constr ({ txt = Lident "string"; _ }, []); _ } ->
+                    pexp_constant ~loc (Pconst_string ("", loc, None))
+                | { ptyp_desc = Ptyp_constr ({ txt = Lident "int"; _ }, []); _ } ->
+                    pexp_constant ~loc (Pconst_integer ("0", None))
+                | { ptyp_desc = Ptyp_constr ({ txt = Lident "float"; _ }, []); _ } ->
+                    pexp_constant ~loc (Pconst_float ("0.", None))
+                | _ ->
+                    pexp_extension ~loc
+                    @@ Location.error_extensionf ~loc
+                         "Default value can only be derived for int, float, and string."
+              in
+              ({ txt = Lident pld_name.txt; loc }, e)
+            in
+            let l = List.map fields ~f:declaration_to_instantiation in
+            pexp_record ~loc l None
+]}
+
+
+When the record definition contains several fields with types other than [int], [float] or [string], several error nodes are added in the AST. Moreover, the location of the error nodes corresponds to the definition of the record fields. This allows tools such as Merlin to report all errors at once, at the right location, resulting in a better workflow than having to recompile everytime one error is corrected to see the next one.
+
+The first limitation is that the deriver cannot work on non record types. However, we decided here to derive a default value even in the case of non-record types, so that it does not appear as undefined in the remaining of the file. This impossible value consists of an error extension node.
+
+{[
+          let generate_impl ~ctxt (_rec_flag, type_declarations) =
+            let loc = Expansion_context.Deriver.derived_item_loc ctxt in
+            List.map type_declarations ~f:(fun (td : type_declaration) ->
+                let e, name =
+                  match td with
+                  | { ptype_kind = Ptype_record fields; ptype_name; ptype_loc; _ } ->
+                      (create_record ~loc:ptype_loc fields, ptype_name)
+                  | { ptype_name; ptype_loc; _ } ->
+                      ( pexp_extension ~loc
+                        @@ Location.error_extensionf ~loc:ptype_loc
+                             "Cannot derive accessors for non record type %s"
+                             ptype_name.txt,
+                        ptype_name )
+                in
+                [
+                  pstr_value ~loc Nonrecursive
+                    [
+                      {
+                        pvb_pat = ppat_var ~loc { txt = "default_" ^ name.txt; loc };
+                        pvb_expr = e;
+                        pvb_attributes = [];
+                        pvb_loc = loc;
+                      };
+                    ];
+                ])
+            |> List.concat
+]}
+
+{3 In case of panic}
+
+In some rare cases, it might happen that a whole file rewriter is not able to output a meaningful AST. In this case, they might be tempted to raise a located error: an exception that includes the location of the error. Moreover, this h as historically been what was suggested to do by ppxlib examples, but is now discouraged in most of the cases, as it prevents Merlin features to work well.
+
+If such an exception is uncaught, the ppx driver will return with an error code and the exception will be pretty-printed, including the location (that's the case when the driver is called by dune). When the driver is spawned with the [-embed-errors] or [-as-ppx] flags (that's the case when the driver is called by merlin), the driver will look for located error. If it catches one, it will stop its chain of rewriting at this point, and output an AST consisting of the located error followed by the last valid AST: the one passed to the raising rewriter.
+
+Even more in context-free rewriters, raising should be avoided, in favour of outputting a single error node when a finer grained reporting is not needed or possible. As the whole context-free rewriting is done in one traverse of the AST, a single raise will cancel both the context-free pass and upcoming rewriters, and the AST prior to the context-free pass will be outputted together with the error.
+
+The function provided by the API to raise located errors is {{!Ppxlib.Location.raise_errorf}[raise_errorf]}.
+
+{3 Migrating from raising to embedding errors}
+
+Lots of ppx-es exclusively use {{!Ppxlib.Location.raise_errorf}[raise_errorf]} to report errors, instead of the more merlin friendly way consisting of embedding errors in the AST, as described in this section.
+
+If you want to migrate such a codebase to the embedding approach, here are a few recipes to do that. Indeed, it might not be completely trivial, as raising can be done anywhere in the code, including in places where "embedding" would not make sense. What you can do is to turn your internal raising functions to function returning a [result] type.
+
+The workflow for this change would look like this:
+
+{ol
+{- Search through your code all uses of {{!Ppxlib.Location.raise_errorf}[raise_errorf]}, using for instance [grep].}
+{- For each of them, turn them into function returning a [(_, extension) result] type, using {{!Ppxlib.Location.error_extensionf}[error_extensionf]} to generate the [Error].}
+{- Let the compiler or merlin tell you where you need to propagate the [result] type (most certainly using [map]s and [bind]s).}
+{- When you have propagated until a point where you can, embed the extension in case of [Error extension].}
+}
+
+This is quite convenient, as it allows you to do a "type-driven" modification, using at full the static analysis of OCaml to never omit a special case, and to confidently find the place the most deeply in the AST to embed the error. However, it might induces quite a lot of code modification, and exceptions are sometimes convenient to use, depending on the taste. In case you want to do only a very simple to keep using exception, catch them and turn them into extension points embedded in the AST, here is an example:
+
+{[
+let rewrite_extension_point loc payload =
+  try generate_ast payload
+  with exn ->
+    let get_error exn =
+      match Location.Error.of_exn exn with
+      | None -> raise exn
+      | Some error -> error
+    in
+    let extension = exn |> get_error |> Location.Error.to_extension in
+    Ast_builder.Default.pstr_extension ~loc ext []
+]}

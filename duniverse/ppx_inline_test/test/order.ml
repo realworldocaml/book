@@ -29,10 +29,10 @@ let%test_module _ = (module struct
   let%test _ = check 8; true
   let%test_module _ = (module struct
     let () = check 9
-    module M = F(struct let start = 10 end)
+    module _ = F(struct let start = 10 end)
     let () = check 13
   end)
-  module M = F(struct let start = 14 end)
+  module _ = F(struct let start = 14 end)
   let () = check 17
 end)
 

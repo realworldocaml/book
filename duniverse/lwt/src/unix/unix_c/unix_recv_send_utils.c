@@ -73,11 +73,10 @@ value wrapper_send_msg(int fd, int n_iovs, struct iovec *iovs,
     msg.msg_iov = iovs;
     msg.msg_iovlen = n_iovs;
 
-    /* dest: Unix.sockaddr option */
-    if (Is_block(dest)) {
+    if (Is_some(dest)) {
       union sock_addr_union addr;
       socklen_t addr_len;
-      get_sockaddr(Field(dest, 0), &addr, &addr_len);
+      get_sockaddr(Some_val(dest), &addr, &addr_len);
 
       msg.msg_name = &addr.s_gen;
       msg.msg_namelen = addr_len;
@@ -97,7 +96,7 @@ value wrapper_send_msg(int fd, int n_iovs, struct iovec *iovs,
         cm->cmsg_len = CMSG_LEN(n_fds * sizeof(int));
 
         int *fds = (int *)CMSG_DATA(cm);
-        for (; Is_block(val_fds); val_fds = Field(val_fds, 1), fds++)
+        for (/*nothing*/; val_fds != Val_emptylist; val_fds = Field(val_fds, 1), fds++)
             *fds = Int_val(Field(val_fds, 0));
     };
 #else

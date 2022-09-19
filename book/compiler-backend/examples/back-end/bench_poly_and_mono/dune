@@ -1,4 +1,4 @@
 (executable
   (name      bench_poly_and_mono)
   (modules   bench_poly_and_mono)
-  (libraries core_bench))
+  (libraries core_bench core_unix.command_unix))

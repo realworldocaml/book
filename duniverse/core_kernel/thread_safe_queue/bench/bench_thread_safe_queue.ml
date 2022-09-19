@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Thread_safe_queue
 
 (* The benchmarks below first allocate the queue and a queue elt and then do a

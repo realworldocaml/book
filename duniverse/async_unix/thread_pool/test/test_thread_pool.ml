@@ -2,6 +2,8 @@ open! Core
 open! Expect_test_helpers_core
 open! Thread_pool
 open! Thread_pool.Private
+module Thread = Core_thread
+module Time_ns = Time_ns_unix
 module Debug = Async_kernel.Async_kernel_private.Debug
 
 let debug = Debug.thread_pool
@@ -59,7 +61,7 @@ let%test_module _ =
     let%expect_test _ =
       List.iter [ 1; 2; 5; 10; 100; 1000 ] ~f:(fun num_jobs ->
         List.iter ([ 1; 2; 5; 10 ]
-                   @ if Sys.word_size = 32
+                   @ if Sys.word_size_in_bits = 32
                    then [] (* not enough address space when the stack limit is high *)
                    else [ 100 ]) ~f:(fun max_num_threads ->
           if debug
@@ -76,8 +78,8 @@ let%test_module _ =
           let t = ok_exn (create ~max_num_threads ()) in
           let worker_threads_have_fully_started = Thread_safe_ivar.create () in
           let worker_threads_should_continue = Thread_safe_ivar.create () in
-          let (_ : Core.Thread.t) =
-            Core.Thread.create
+          let (_ : Core_thread.t) =
+            Core_thread.create
               ~on_uncaught_exn:`Print_to_stderr
               (fun () ->
                  let start = Time_ns.now () in
@@ -207,7 +209,7 @@ let%test_module _ =
 
     (* Setting thread name and priority. *)
     let%expect_test _ =
-      let module RLimit = Core.Unix.RLimit in
+      let module RLimit = Core_unix.RLimit in
       Result.iter RLimit.nice ~f:(fun rlimit_nice ->
         let test_parameters =
           let nice_limit = RLimit.get rlimit_nice in
@@ -223,7 +225,7 @@ let%test_module _ =
         match test_parameters with
         | `Cannot_test -> ()
         | `Test (nice_limit, cur_limit) ->
-          Core.Unix.RLimit.set rlimit_nice nice_limit;
+          Core_unix.RLimit.set rlimit_nice nice_limit;
           for priority = 20 - cur_limit to 20 do
             let initial_priority = Priority.of_int priority in
             match Linux_ext.getpriority, Linux_ext.pr_get_name with
@@ -293,7 +295,7 @@ let%test_module _ =
           done)
     ;;
 
-    (* [Core.Thread.create] failure *)
+    (* [Core_thread.create] failure *)
     let%expect_test _ =
       let t = ok_exn (create ~max_num_threads:2 ()) in
       (* simulate failure *)

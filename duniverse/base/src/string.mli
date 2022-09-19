@@ -5,16 +5,16 @@ open! Import
 
 type t = string [@@deriving_inline sexp, sexp_grammar]
 
-include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+include Sexplib0.Sexpable.S with type t := t
 
-val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
 [@@@end]
 
 val sub : (t, t) Blit.sub
 val subo : (t, t) Blit.subo
 
-include Container.S0 with type t := t with type elt = char
+include Indexed_container.S0 with type t := t with type elt = char
 include Identifiable.S with type t := t
 include Invariant.S with type t := t
 
@@ -67,17 +67,6 @@ val capitalize : t -> t
 
 val uncapitalize : t -> t
 
-(** [index] gives the index of the first appearance of [char] in the string when
-    searching from left to right, or [None] if it's not found. [rindex] does the same but
-    searches from the right.
-
-    For example, [String.index "Foo" 'o'] is [Some 1] while [String.rindex "Foo" 'o'] is
-    [Some 2].
-
-    The [_exn] versions return the actual index (instead of an option) when [char] is
-    found, and throw an exception otherwise.
-*)
-
 (** [Caseless] compares and hashes strings ignoring case, so that for example
     [Caseless.equal "OCaml" "ocaml"] and [Caseless.("apple" < "Banana")] are [true].
 
@@ -85,12 +74,12 @@ val uncapitalize : t -> t
     that for example [Caseless.is_suffix "OCaml" ~suffix:"AmL"] and [Caseless.is_prefix
     "OCaml" ~prefix:"oc"] are [true]. *)
 module Caseless : sig
-  type nonrec t = t [@@deriving_inline hash, sexp]
+  type nonrec t = t [@@deriving_inline hash, sexp, sexp_grammar]
 
-  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+  include Ppx_hash_lib.Hashable.S with type t := t
+  include Sexplib0.Sexpable.S with type t := t
 
-  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
 
   [@@@end]
 
@@ -107,19 +96,24 @@ module Caseless : sig
   val substr_replace_all : t -> pattern:t -> with_:t -> t
 end
 
-(** [index_exn] and [index_from_exn] raise [Caml.Not_found] or [Not_found_s] when [char]
-    cannot be found in [s]. *)
-val index : t -> char -> int option
+(** [index] gives the index of the first appearance of [char] in the string when
+    searching from left to right, or [None] if it's not found. [rindex] does the same but
+    searches from the right.
 
+    For example, [String.index "Foo" 'o'] is [Some 1] while [String.rindex "Foo" 'o'] is
+    [Some 2].
+
+    The [_exn] versions return the actual index (instead of an option) when [char] is
+    found, and raise [Caml.Not_found] or [Not_found_s] otherwise.
+*)
+
+val index : t -> char -> int option
 val index_exn : t -> char -> int
 val index_from : t -> int -> char -> int option
 val index_from_exn : t -> int -> char -> int
 
 
-(** [rindex_exn] and [rindex_from_exn] raise [Caml.Not_found] or [Not_found_s] when [char]
-    cannot be found in [s]. *)
 val rindex : t -> char -> int option
-
 val rindex_exn : t -> char -> int
 val rindex_from : t -> int -> char -> int option
 val rindex_from_exn : t -> int -> char -> int
@@ -132,7 +126,7 @@ val rindex_from_exn : t -> int -> char -> int
 module Search_pattern : sig
   type t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 
   [@@@end]
 
@@ -176,6 +170,10 @@ module Search_pattern : sig
 
   val replace_all : t -> in_:string -> with_:string -> string
 
+  (** Similar to [String.split] or [String.split_on_chars], but instead uses a given
+      search pattern as the separator.  Separators are non-overlapping.  *)
+  val split_on : t -> string -> string list
+
   (**/**)
 
   (*_ See the Jane Street Style Guide for an explanation of [Private] submodules:
@@ -191,8 +189,9 @@ module Search_pattern : sig
       }
     [@@deriving_inline equal, sexp_of]
 
-    val equal : t -> t -> bool
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+    include Ppx_compare_lib.Equal.S with type t := t
+
+    val sexp_of_t : t -> Sexplib0.Sexp.t
 
     [@@@end]
 
@@ -304,6 +303,9 @@ val concat_map : ?sep:t -> t -> f:(char -> t) -> t
 (** [filter s ~f:predicate] discards characters not satisfying [predicate]. *)
 val filter : t -> f:(char -> bool) -> t
 
+(** Like [filter], but passes each character's index to [f] along with the char. *)
+val filteri : t -> f:(int -> char -> bool) -> t
+
 (** [tr ~target ~replacement s] replaces every instance of [target] in [s] with
     [replacement]. *)
 val tr : target:char -> replacement:char -> t -> t
@@ -359,6 +361,30 @@ val drop_suffix : t -> int -> t
 (** [drop_prefix s n] drops the longest prefix of [s] of length less than or equal to
     [n]. *)
 val drop_prefix : t -> int -> t
+
+(** Produces the longest common suffix, or [""] if the list is empty. *)
+val common_suffix : t list -> t
+
+(** Produces the longest common prefix, or [""] if the list is empty. *)
+val common_prefix : t list -> t
+
+(** Produces the length of the longest common suffix, or 0 if the list is empty. *)
+val common_suffix_length : t list -> int
+
+(** Produces the length of the longest common prefix, or 0 if the list is empty. *)
+val common_prefix_length : t list -> int
+
+(** Produces the longest common suffix. *)
+val common_suffix2 : t -> t -> t
+
+(** Produces the longest common prefix. *)
+val common_prefix2 : t -> t -> t
+
+(** Produces the length of the longest common suffix. *)
+val common_suffix2_length : t -> t -> int
+
+(** Produces the length of the longest common prefix. *)
+val common_prefix2_length : t -> t -> int
 
 (** [concat_array sep ar] like {!String.concat}, but operates on arrays. *)
 val concat_array : ?sep:t -> t array -> t

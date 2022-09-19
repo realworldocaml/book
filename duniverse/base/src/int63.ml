@@ -124,6 +124,30 @@ module Overflow_exn = struct
     else diff
   ;;
 
+  let negative_one = of_int (-1)
+  let div_would_overflow t u = t = min_value && u = negative_one
+
+  let ( * ) t u =
+    let product = t * u in
+    if u <> zero && (div_would_overflow product u || product / u <> t)
+    then
+      raise_s
+        (Sexp.message
+           "( * ) overflow"
+           [ "t", sexp_of_t t; "u", sexp_of_t u; "product", sexp_of_t product ])
+    else product
+  ;;
+
+  let ( / ) t u =
+    if div_would_overflow t u
+    then
+      raise_s
+        (Sexp.message
+           "( / ) overflow"
+           [ "t", sexp_of_t t; "u", sexp_of_t u; "product", sexp_of_t (t / u) ])
+    else t / u
+  ;;
+
   let abs t = if t = min_value then failwith "abs overflow" else abs t
   let neg t = if t = min_value then failwith "neg overflow" else neg t
 end

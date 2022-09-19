@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Async_kernel
 open Limiter.Infinite_or_finite
 
@@ -13,7 +13,7 @@ end
 module Job = struct
   type t =
     | Immediate : Monitor.t * ('a -> unit) * 'a -> t
-    | Deferred  : ('a -> 'b Deferred.t) * 'a * 'b Outcome.t Ivar.t -> t
+    | Deferred : ('a -> 'b Deferred.t) * 'a * 'b Outcome.t Ivar.t -> t
 end
 
 module Expert = struct
@@ -21,15 +21,15 @@ module Expert = struct
     { continue_on_error : bool
     (* [is_dead] is true if [t] was killed due to a job raising an exception or [kill t]
        being called. *)
-    ; mutable is_dead       : bool
+    ; mutable is_dead : bool
     (* Ivar that is filled the next time return_to_hopper is called. *)
     ; mutable hopper_filled : unit Ivar.t option
-    ; limiter               : Limiter.t
-    ; throttle_queue        : ((int * Job.t) Queue.t [@sexp.opaque]) }
+    ; limiter : Limiter.t
+    ; throttle_queue : ((int * Job.t) Queue.t[@sexp.opaque])
+    }
   [@@deriving sexp_of]
 
   let to_jane_limiter t = t.limiter
-
   let cycle_start () = Async_kernel_scheduler.cycle_start_ns ()
 
   let create_exn
@@ -50,197 +50,206 @@ module Expert = struct
         ~initial_hopper_level
     in
     let throttle_queue = Queue.create () in
-    { continue_on_error
-    ; is_dead       = false
-    ; hopper_filled = None
-    ; limiter
-    ; throttle_queue
-    }
+    { continue_on_error; is_dead = false; hopper_filled = None; limiter; throttle_queue }
   ;;
 
   let is_dead t = t.is_dead
 
   let kill_job = function
-    | Job.Deferred  (_, _, i)       -> Ivar.fill_if_empty i Aborted
+    | Job.Deferred (_, _, i) -> Ivar.fill_if_empty i Aborted
     | Job.Immediate (monitor, _, _) ->
       Monitor.send_exn monitor ~backtrace:`Get (Failure "Limiter killed")
   ;;
 
   let kill t =
-    if not t.is_dead then begin
+    if not t.is_dead
+    then (
       t.is_dead <- true;
-      Queue.iter t.throttle_queue ~f:(fun (_, job) -> kill_job job)
-    end;
+      Queue.iter t.throttle_queue ~f:(fun (_, job) -> kill_job job))
   ;;
 
-  let saw_error t = if not t.continue_on_error then (kill t)
+  let saw_error t = if not t.continue_on_error then kill t
 
   let wait_for_hopper_fill t =
     match t.hopper_filled with
     | Some i -> Ivar.read i
-    | None   ->
+    | None ->
       let i = Ivar.create () in
       t.hopper_filled <- Some i;
       Ivar.read i
   ;;
 
   let return_to_hopper t ~now amount =
-    begin match t.hopper_filled with
-    | None   -> ()
-    | Some i ->
-      Ivar.fill i ();
-      t.hopper_filled <- None;
-    end;
+    (match t.hopper_filled with
+     | None -> ()
+     | Some i ->
+       Ivar.fill i ();
+       t.hopper_filled <- None);
     Limiter.Expert.return_to_hopper t.limiter ~now amount
   ;;
 
   let run_job_now t job ~return_after : unit =
     if t.is_dead
-    then (kill_job job)
-    else begin
+    then kill_job job
+    else (
       match job with
-      | Job.Immediate (monitor, f, v)    ->
-        begin try
-          f v
-        with
-        | e -> Monitor.send_exn monitor ~backtrace:`Get e
-        end;
+      | Job.Immediate (monitor, f, v) ->
+        (try f v with
+         | e -> Monitor.send_exn monitor ~backtrace:`Get e);
         return_to_hopper t ~now:(cycle_start ()) return_after
-      | Job.Deferred  (f, v, i) ->
-        Monitor.try_with (fun () ->
-          f v)
+      | Job.Deferred (f, v, i) ->
+        Monitor.try_with
+          ~run:
+            `Schedule
+          ~rest:`Log
+          (fun () -> f v)
         >>> fun res ->
         return_to_hopper t ~now:(cycle_start ()) return_after;
-        match res with
-        | Error e ->
-          Ivar.fill_if_empty i (Raised e);
-          saw_error t
-        | Ok v    ->
-          Ivar.fill_if_empty i (Ok v)
-    end
+        (match res with
+         | Error e ->
+           Ivar.fill_if_empty i (Raised e);
+           saw_error t
+         | Ok v -> Ivar.fill_if_empty i (Ok v)))
   ;;
 
   (* given a job, immediately creates and runs a job that fails with the given (as a
      format string) message *)
   let fail_job t job k =
-    ksprintf (fun s ->
-      let f () = failwith s in
-      let job =
-        match job with
-        | Job.Immediate (monitor, _, _) -> Job.Immediate (monitor, f, ())
-        | Job.Deferred (_, _, i)        -> Job.Deferred (f, (), i)
-      in
-      run_job_now t job ~return_after:0)
+    ksprintf
+      (fun s ->
+         let f () = failwith s in
+         let job =
+           match job with
+           | Job.Immediate (monitor, _, _) -> Job.Immediate (monitor, f, ())
+           | Job.Deferred (_, _, i) -> Job.Deferred (f, (), i)
+         in
+         run_job_now t job ~return_after:0)
       k
   ;;
 
   let rec run_throttled_jobs_until_empty t =
     if Queue.length t.throttle_queue = 0
     then ()
-    else begin
+    else (
       let amount, job = Queue.peek_exn t.throttle_queue in
-      let now         = cycle_start () in
+      let now = cycle_start () in
       match Limiter.Expert.try_take t.limiter ~now amount with
       | Asked_for_more_than_bucket_limit ->
-        fail_job t job !"job asked for more tokens (%i) than possible (%i)"
-          amount (Limiter.bucket_limit t.limiter);
+        fail_job
+          t
+          job
+          !"job asked for more tokens (%i) than possible (%i)"
+          amount
+          (Limiter.bucket_limit t.limiter);
         run_throttled_jobs_until_empty t
       | Taken ->
         (* Safe, because we checked the length above.  And, we're guaranteed that
            dequeue_exn gets out the same job that peek_exn does.  *)
-        ignore (Queue.dequeue_exn t.throttle_queue : (int * Job.t));
+        ignore (Queue.dequeue_exn t.throttle_queue : int * Job.t);
         run_job_now t job ~return_after:amount;
         run_throttled_jobs_until_empty t
       | Unable ->
-        begin match Limiter.Expert.tokens_may_be_available_when t.limiter ~now amount with
-        | Never_because_greater_than_bucket_limit ->
-          fail_job t job !"job asked for more tokens (%i) than possible (%i)"
-            amount (Limiter.bucket_limit t.limiter);
-          run_throttled_jobs_until_empty t
-        | When_return_to_hopper_is_called   ->
-          wait_for_hopper_fill t
-          >>> fun () ->
-          run_throttled_jobs_until_empty t
-        | At expected_fill_time ->
-          let min_fill_time =
-            Time_ns.add (cycle_start ()) (Async_kernel_scheduler.event_precision_ns ())
-          in
-          Clock_ns.at (Time_ns.max expected_fill_time min_fill_time)
-          >>> fun () ->
-          run_throttled_jobs_until_empty t
-        end
-    end
+        (match Limiter.Expert.tokens_may_be_available_when t.limiter ~now amount with
+         | Never_because_greater_than_bucket_limit ->
+           fail_job
+             t
+             job
+             !"job asked for more tokens (%i) than possible (%i)"
+             amount
+             (Limiter.bucket_limit t.limiter);
+           run_throttled_jobs_until_empty t
+         | When_return_to_hopper_is_called ->
+           wait_for_hopper_fill t >>> fun () -> run_throttled_jobs_until_empty t
+         | At expected_fill_time ->
+           let min_fill_time =
+             Time_ns.add (cycle_start ()) (Async_kernel_scheduler.event_precision_ns ())
+           in
+           Clock_ns.at (Time_ns.max expected_fill_time min_fill_time)
+           >>> fun () -> run_throttled_jobs_until_empty t))
   ;;
 
   let enqueue_job_and_maybe_start_queue_runner t amount job ~allow_immediate_run =
     let bucket_limit = Limiter.bucket_limit t.limiter in
     if bucket_limit < amount
-    then (fail_job t job !"requested job size (%i) exceeds the possible size (%i)"
-            amount bucket_limit);
+    then
+      fail_job
+        t
+        job
+        !"requested job size (%i) exceeds the possible size (%i)"
+        amount
+        bucket_limit;
     if t.is_dead
-    then (kill_job job)
-    else begin
-      if Queue.length t.throttle_queue > 0
-      then (Queue.enqueue t.throttle_queue (amount, job))
-      else begin
-        let now = cycle_start () in
-        match Limiter.Expert.try_take t.limiter ~now amount with
-        | Asked_for_more_than_bucket_limit ->
-          fail_job t job !"requested job size (%i) exceeds the possible size (%i)"
-            amount bucket_limit;
-        | Taken  ->
-          (* These semantics are copied from the current Throttle, and it was
-             important enough there to add a specific unit test.  If you have
+    then kill_job job
+    else if Queue.length t.throttle_queue > 0
+    then Queue.enqueue t.throttle_queue (amount, job)
+    else (
+      let now = cycle_start () in
+      match Limiter.Expert.try_take t.limiter ~now amount with
+      | Asked_for_more_than_bucket_limit ->
+        fail_job
+          t
+          job
+          !"requested job size (%i) exceeds the possible size (%i)"
+          amount
+          bucket_limit
+      | Taken ->
+        (* These semantics are copied from the current Throttle, and it was
+           important enough there to add a specific unit test.  If you have
 
-             do_f ();
-             enqueue thing_to_do_later;
-             do_g ();
+           do_f ();
+           enqueue thing_to_do_later;
+           do_g ();
 
-             it is surprising if any portion of the closure thing_to_do_later happens, so
-             we always schedule the work for later on the Async queue.
+           it is surprising if any portion of the closure thing_to_do_later happens, so
+           we always schedule the work for later on the Async queue.
 
-             This isn't as efficient as it could be for immediate jobs and can be avoided
-             with [run_or_enqueue].
-          *)
-          if allow_immediate_run
-          then (run_job_now t job ~return_after:amount)
-          else (Async_kernel_scheduler.enqueue_job
-                  Execution_context.main
-                  (fun t ->
-                     run_job_now t job ~return_after:amount) t)
-        | Unable ->
-          Queue.enqueue t.throttle_queue (amount, job);
-          run_throttled_jobs_until_empty t
-      end
-    end
+           This isn't as efficient as it could be for immediate jobs and can be avoided
+           with [run_or_enqueue].
+        *)
+        if allow_immediate_run
+        then run_job_now t job ~return_after:amount
+        else
+          Async_kernel_scheduler.enqueue_job
+            Execution_context.main
+            (fun t -> run_job_now t job ~return_after:amount)
+            t
+      | Unable ->
+        Queue.enqueue t.throttle_queue (amount, job);
+        run_throttled_jobs_until_empty t)
   ;;
 
-  let enqueue_exn t ?(allow_immediate_run=false) amount f v =
-    enqueue_job_and_maybe_start_queue_runner t amount ~allow_immediate_run
+  let enqueue_exn t ?(allow_immediate_run = false) amount f v =
+    enqueue_job_and_maybe_start_queue_runner
+      t
+      amount
+      ~allow_immediate_run
       (Immediate (Monitor.current (), f, v))
   ;;
 
   let enqueue' t amount f v =
     Deferred.create (fun i ->
       try
-        enqueue_job_and_maybe_start_queue_runner t amount (Deferred (f, v, i))
+        enqueue_job_and_maybe_start_queue_runner
+          t
+          amount
+          (Deferred (f, v, i))
           ~allow_immediate_run:false
-      with e -> Ivar.fill i (Raised e))
+      with
+      | e -> Ivar.fill i (Raised e))
   ;;
 
   let cost_of_jobs_waiting_to_start t =
-    Queue.fold t.throttle_queue ~init:0
-      ~f:(fun sum (cost, _) -> cost + sum)
+    Queue.fold t.throttle_queue ~init:0 ~f:(fun sum (cost, _) -> cost + sum)
   ;;
-
 end
 
 open Expert
+
 type t = Expert.t [@@deriving sexp_of]
 type limiter = t [@@deriving sexp_of]
 
 module Common = struct
-  let to_limiter (t:t) = t
+  let to_limiter (t : t) = t
   let kill = Expert.kill
   let is_dead = Expert.is_dead
 end
@@ -274,7 +283,7 @@ module Token_bucket = struct
     =
     let in_flight_limit =
       match in_flight_limit with
-      | None       -> Infinite
+      | None -> Infinite
       | Some limit -> Finite limit
     in
     Expert.create_exn
@@ -286,15 +295,14 @@ module Token_bucket = struct
       ~continue_on_error
   ;;
 
-  let enqueue_exn        = Expert.enqueue_exn
-  let enqueue'           = Expert.enqueue'
+  let enqueue_exn = Expert.enqueue_exn
+  let enqueue' = Expert.enqueue'
 
   include Common
 end
 
 module Throttle = struct
-  type t = limiter
-  [@@deriving sexp_of]
+  type t = limiter [@@deriving sexp_of]
   type _ u = t
 
   let create_exn
@@ -305,17 +313,20 @@ module Throttle = struct
         ()
     =
     if concurrent_jobs_target < 1
-    then (failwithf !"concurrent_jobs_target < 1 (%i) doesn't make sense"
-            concurrent_jobs_target ());
+    then
+      failwithf
+        !"concurrent_jobs_target < 1 (%i) doesn't make sense"
+        concurrent_jobs_target
+        ();
     let concurrent_jobs_target = concurrent_jobs_target in
     let hopper_to_bucket_rate_per_sec =
       match sustained_rate_per_sec with
-      | None      -> Infinite
+      | None -> Infinite
       | Some rate -> Finite rate
     in
     let bucket_limit =
       match burst_size with
-      | None            -> concurrent_jobs_target
+      | None -> concurrent_jobs_target
       | Some burst_size -> burst_size
     in
     let initial_bucket_level = bucket_limit in
@@ -332,16 +343,9 @@ module Throttle = struct
     Expert.enqueue_exn t ?allow_immediate_run 1 f v
   ;;
 
-  let enqueue' t f v =
-    Expert.enqueue' t 1 f v
-
+  let enqueue' t f v = Expert.enqueue' t 1 f v
   let jlimiter = Expert.to_jane_limiter
-
-  let concurrent_jobs_target t =
-    jlimiter t
-    |> Limiter.bucket_limit
-  ;;
-
+  let concurrent_jobs_target t = jlimiter t |> Limiter.bucket_limit
   let num_jobs_waiting_to_start t = Queue.length t.throttle_queue
 
   let num_jobs_running t =
@@ -354,9 +358,13 @@ end
 module Sequencer = struct
   include Throttle
 
-  let create ?(continue_on_error=false) ?burst_size ?sustained_rate_per_sec () =
-    create_exn ~concurrent_jobs_target:1
-      ~continue_on_error ?burst_size ?sustained_rate_per_sec ()
+  let create ?(continue_on_error = false) ?burst_size ?sustained_rate_per_sec () =
+    create_exn
+      ~concurrent_jobs_target:1
+      ~continue_on_error
+      ?burst_size
+      ?sustained_rate_per_sec
+      ()
   ;;
 
   include Common
@@ -364,8 +372,9 @@ end
 
 module Resource_throttle = struct
   type 'a t =
-    { throttle  : Throttle.t
-    ; resources : 'a Queue.t }
+    { throttle : Throttle.t
+    ; resources : 'a Queue.t
+    }
   [@@deriving sexp_of]
 
   let create_exn ~resources ~continue_on_error ?burst_size ?sustained_rate_per_sec () =
@@ -385,8 +394,7 @@ module Resource_throttle = struct
   let enqueue_gen t ?allow_immediate_run f enqueue =
     let f () =
       let v = Queue.dequeue_exn t.resources in
-      protect ~f:(fun () -> f v)
-        ~finally:(fun () -> Queue.enqueue t.resources v)
+      protect ~f:(fun () -> f v) ~finally:(fun () -> Queue.enqueue t.resources v)
     in
     enqueue t.throttle ?allow_immediate_run f ()
   ;;
@@ -398,16 +406,21 @@ module Resource_throttle = struct
   let enqueue' t f =
     let f () =
       let v = Queue.dequeue_exn t.resources in
-      Monitor.protect (fun () -> f v)
-        ~finally:(fun () -> Queue.enqueue t.resources v; Deferred.unit)
+      Monitor.protect
+        ~run:
+          `Schedule
+        ~rest:`Log
+        (fun () ->
+          f v)
+        ~finally:(fun () ->
+          Queue.enqueue t.resources v;
+          Deferred.unit)
     in
     Throttle.enqueue' t.throttle f ()
   ;;
 
   let max_concurrent_jobs t = Throttle.concurrent_jobs_target t.throttle
-
   let to_limiter t = t.throttle
-  let kill       t = kill    t.throttle
-  let is_dead    t = is_dead t.throttle
+  let kill t = kill t.throttle
+  let is_dead t = is_dead t.throttle
 end
-

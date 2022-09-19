@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 
 type t = int [@@deriving sexp_of, compare, hash, equal]
 
@@ -53,8 +53,7 @@ let level_map_1000_per_channel =
    index, in [0,5]. *)
 let closest_cube_index v ~iterp_map =
   match
-    List.findi iterp_map ~f:(fun _idx iterp_val ->
-      Float.( < ) (Float.of_int v) iterp_val)
+    List.findi iterp_map ~f:(fun _idx iterp_val -> Float.( < ) (Float.of_int v) iterp_val)
   with
   | Some (level, _) -> level
   | None -> 5

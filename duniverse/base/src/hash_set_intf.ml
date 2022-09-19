@@ -71,39 +71,74 @@ module type Creators_generic = sig
   val of_list : ('a, 'a elt list -> 'a t) create_options
 end
 
-module Check = struct
-  module Make_creators_check
-      (Type : T.T1)
-      (Elt : T.T1)
-      (Options : T.T2)
-      (M : Creators_generic
-       with type 'a t := 'a Type.t
-       with type 'a elt := 'a Elt.t
-       with type ('a, 'z) create_options := ('a, 'z) Options.t) =
-  struct end
+module type Sexp_of_m = sig
+  type t [@@deriving_inline sexp_of]
 
-  module Check_creators_is_specialization_of_creators_generic (M : Creators) =
-    Make_creators_check
-      (struct
-        type 'a t = 'a M.t
-      end)
-      (struct
-        type 'a t = 'a
-      end)
-      (struct
-        type ('a, 'z) t = ('a, 'z) create_options
-      end)
-      (struct
-        include M
+  val sexp_of_t : t -> Sexplib0.Sexp.t
 
-        let create ?growth_allowed ?size m () = create ?growth_allowed ?size m
-      end)
+  [@@@end]
+end
+
+module type M_of_sexp = sig
+  type t [@@deriving_inline of_sexp]
+
+  val t_of_sexp : Sexplib0.Sexp.t -> t
+
+  [@@@end]
+
+  include Hashtbl_intf.Key.S with type t := t
+end
+
+module type M_sexp_grammar = sig
+  type t [@@deriving_inline sexp_grammar]
+
+  val t_sexp_grammar : t Sexplib0.Sexp_grammar.t
+
+  [@@@end]
+end
+
+module type Equal_m = sig end
+
+module type For_deriving = sig
+  type 'a t
+
+  module type M_of_sexp = M_of_sexp
+  module type Sexp_of_m = Sexp_of_m
+  module type Equal_m = Equal_m
+
+  (** [M] is meant to be used in combination with OCaml applicative functor types:
+
+      {[
+        type string_hash_set = Hash_set.M(String).t
+      ]}
+
+      which stands for:
+
+      {[
+        type string_hash_set = String.t Hash_set.t
+      ]}
+
+      The point is that [Hash_set.M(String).t] supports deriving, whereas the second
+      syntax doesn't (because [t_of_sexp] doesn't know what comparison/hash function to
+      use). *)
+  module M (Elt : T.T) : sig
+    type nonrec t = Elt.t t
+  end
+
+  val sexp_of_m__t : (module Sexp_of_m with type t = 'elt) -> 'elt t -> Sexp.t
+  val m__t_of_sexp : (module M_of_sexp with type t = 'elt) -> Sexp.t -> 'elt t
+
+  val m__t_sexp_grammar
+    :  (module M_sexp_grammar with type t = 'elt)
+    -> 'elt t Sexplib0.Sexp_grammar.t
+
+  val equal_m__t : (module Equal_m) -> 'elt t -> 'elt t -> bool
 end
 
 module type Hash_set = sig
   type 'a t [@@deriving_inline sexp_of]
 
-  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+  val sexp_of_t : ('a -> Sexplib0.Sexp.t) -> 'a t -> Sexplib0.Sexp.t
 
   [@@@end]
 
@@ -116,6 +151,7 @@ module type Hash_set = sig
 
   module type Creators = Creators
   module type Creators_generic = Creators_generic
+  module type For_deriving = For_deriving
 
   type nonrec ('key, 'z) create_options = ('key, 'z) create_options
 
@@ -132,9 +168,11 @@ module type Hash_set = sig
 
   (** A hash set that uses polymorphic comparison *)
   module Poly : sig
-    type nonrec 'a t = 'a t [@@deriving_inline sexp]
+    type nonrec 'a t = 'a t [@@deriving_inline sexp, sexp_grammar]
 
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+    include Sexplib0.Sexpable.S1 with type 'a t := 'a t
+
+    val t_sexp_grammar : 'a Sexplib0.Sexp_grammar.t -> 'a t Sexplib0.Sexp_grammar.t
 
     [@@@end]
 
@@ -148,62 +186,22 @@ module type Hash_set = sig
     include Accessors with type 'a t := 'a t with type 'a elt := 'a elt
   end
 
-  (** [M] is meant to be used in combination with OCaml applicative functor types:
-
-      {[
-        type string_hash_set = Hash_set.M(String).t
-      ]}
-
-      which stands for:
-
-      {[
-        type string_hash_set = (String.t, int) Hash_set.t
-      ]}
-
-      The point is that [Hash_set.M(String).t] supports deriving, whereas the second
-      syntax doesn't (because [t_of_sexp] doesn't know what comparison/hash function to
-      use). *)
-  module M (Elt : T.T) : sig
-    type nonrec t = Elt.t t
-  end
-
-  module type Sexp_of_m = sig
-    type t [@@deriving_inline sexp_of]
-
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-
-    [@@@end]
-  end
-
-  module type M_of_sexp = sig
-    type t [@@deriving_inline of_sexp]
-
-    val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-
-    [@@@end]
-
-    include Hashtbl_intf.Key.S with type t := t
-  end
-
-  val sexp_of_m__t : (module Sexp_of_m with type t = 'elt) -> 'elt t -> Sexp.t
-  val m__t_of_sexp : (module M_of_sexp with type t = 'elt) -> Sexp.t -> 'elt t
-
   module Creators (Elt : sig
       type 'a t
 
       val hashable : 'a t Hashable.t
     end) : sig
-    type 'a t_ = 'a Elt.t t
-
-    val t_of_sexp : (Sexp.t -> 'a Elt.t) -> Sexp.t -> 'a t_
+    val t_of_sexp : (Sexp.t -> 'a Elt.t) -> Sexp.t -> 'a Elt.t t
 
     include
       Creators_generic
-      with type 'a t := 'a t_
+      with type 'a t := 'a Elt.t t
       with type 'a elt := 'a Elt.t
       with type ('elt, 'z) create_options :=
         ('elt, 'z) create_options_without_first_class_module
   end
+
+  include For_deriving with type 'a t := 'a t
 
   (**/**)
 

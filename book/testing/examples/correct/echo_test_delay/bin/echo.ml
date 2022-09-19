@@ -34,4 +34,4 @@ let () =
           ~doc:" Port to listen on (default 8765)"
       in
       fun () -> run ~uppercase ~port)
-  |> Command.run
+  |> Command_unix.run

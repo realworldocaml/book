@@ -2274,11 +2274,10 @@ let choose_tests = suite "choose" [
   end;
 
   test "multiple resolved" begin fun () ->
-    (* This is run in a loop to exercise the internal PRNG. *)
-    let outcomes = Array.make 3 0 in
+    (* This is run in a loop to check that it consistently returns the failed
+       result as per documentation. *)
     let rec repeat n =
-      if n <= 0 then ()
-      else
+      n <= 0 || begin
         let p =
           Lwt.choose
             [fst (Lwt.wait ());
@@ -2286,19 +2285,15 @@ let choose_tests = suite "choose" [
              Lwt.fail Exception;
              Lwt.return "bar"]
         in
-        begin match Lwt.state p with
-        | Lwt.Return "foo" -> outcomes.(0) <- outcomes.(0) + 1
-        | Lwt.Fail Exception -> outcomes.(1) <- outcomes.(1) + 1
-        | Lwt.Return "bar" -> outcomes.(2) <- outcomes.(2) + 1
+        match Lwt.state p with
+        | Lwt.Return "foo" -> false
+        | Lwt.Fail Exception -> repeat (n - 1)
+        | Lwt.Return "bar" -> false
         | _ -> assert false
         end [@ocaml.warning "-4"];
-        repeat (n - 1)
     in
-    let count = 1000 in
-    repeat count;
-    Lwt.return
-      (outcomes.(0) > 0 && outcomes.(1) > 0 && outcomes.(2) > 0 &&
-       outcomes.(0) + outcomes.(1) + outcomes.(2) = count)
+    let count = 100 in
+    Lwt.return (repeat count)
   end;
 
   test "pending" begin fun () ->
@@ -2982,31 +2977,29 @@ let pick_tests = suite "pick" [
   end;
 
   test "multiple resolved" begin fun () ->
-    (* This is run in a loop to exercise the internal PRNG. *)
-    let outcomes = Array.make 3 0 in
+    (* This is run in a loop to check that it consistently returns the failed
+       result as per documentation. *)
     let rec repeat n =
-      if n <= 0 then ()
-      else
+      n <= 0 || begin
+        let (waiter, _) = Lwt.task () in
         let p =
           Lwt.pick
-            [fst (Lwt.wait ());
+            [waiter;
              Lwt.return "foo";
              Lwt.fail Exception;
              Lwt.return "bar"]
         in
-        begin match Lwt.state p with
-        | Lwt.Return "foo" -> outcomes.(0) <- outcomes.(0) + 1
-        | Lwt.Fail Exception -> outcomes.(1) <- outcomes.(1) + 1
-        | Lwt.Return "bar" -> outcomes.(2) <- outcomes.(2) + 1
+        match Lwt.state p with
+        | Lwt.Return "foo" -> false
+        | Lwt.Fail Exception ->
+            Lwt.state waiter = Lwt.Fail Lwt.Canceled
+            && repeat (n - 1)
+        | Lwt.Return "bar" -> false
         | _ -> assert false
         end [@ocaml.warning "-4"];
-        repeat (n - 1)
     in
-    let count = 1000 in
-    repeat count;
-    Lwt.return
-      (outcomes.(0) > 0 && outcomes.(1) > 0 && outcomes.(2) > 0 &&
-       outcomes.(0) + outcomes.(1) + outcomes.(2) = count)
+    let count = 100 in
+    Lwt.return (repeat count)
   end;
 
   test "pending" begin fun () ->

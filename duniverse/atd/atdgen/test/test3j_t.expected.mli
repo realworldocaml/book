@@ -39,4 +39,6 @@ type b = { thing: int }
 
 type a = { thing: string; other_thing: bool }
 
+type adapted_f = [ `FA of a | `FB of b ]
+
 type adapted = [ `A of a | `B of b ]

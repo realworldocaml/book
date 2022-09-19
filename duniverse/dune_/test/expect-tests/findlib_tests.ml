@@ -33,19 +33,57 @@ let findlib =
     ; ccomp_type = Other "gcc"
     ; profile = Profile.Dev
     ; ocaml_version_string = "4.02.3"
-    ; ocaml_version = Ocaml_version.make (4, 2, 3)
+    ; ocaml_version = Ocaml.Version.make (4, 2, 3)
     ; instrument_with = []
     ; context_name = Context_name.of_string "default"
     }
   in
-  Findlib.create ~paths:[ db_path ] ~lib_config
+  Memo.lazy_ (fun () -> Findlib.create ~paths:[ db_path ] ~lib_config)
+
+let resolve_pkg s =
+  (let lib_name = Lib_name.of_string s in
+   let open Memo.O in
+   let* findlib = Memo.Lazy.force findlib in
+   Findlib.find findlib lib_name)
+  |> Memo.run
+  |> Test_scheduler.(run (create ()))
+
+let elide_db_path path =
+  let prefix = Path.to_string db_path in
+  let path = Path.to_string path in
+  String.drop_prefix_if_exists path ~prefix
+
+let print_pkg_archives pkg =
+  let pkg = resolve_pkg pkg in
+  let pkg =
+    match pkg with
+    | Ok (Library x) ->
+      Ok
+        (Ocaml.Mode.Dict.map
+           (Lib_info.archives (Dune_package.Lib.info x))
+           ~f:(List.map ~f:elide_db_path))
+    | Ok _ -> assert false
+    | Error _ as err -> err
+  in
+  let to_dyn =
+    Result.to_dyn
+      (Ocaml.Mode.Dict.to_dyn (Dyn.list Dyn.string))
+      Findlib.Unavailable_reason.to_dyn
+  in
+  let pp = Dyn.pp (to_dyn pkg) in
+  Format.printf "%a@." Pp.to_fmt pp
+
+let%expect_test _ =
+  print_pkg_archives "qux";
+  [%expect {| Ok { byte = [ "/qux/qux.cma" ]; native = [] } |}]
+
+let%expect_test _ =
+  print_pkg_archives "xyz";
+  [%expect {| Ok { byte = [ "/xyz.cma" ]; native = [] } |}]
 
 let%expect_test _ =
   let pkg =
-    match
-      Lib_name.of_string "foo" |> Findlib.find findlib |> Memo.run
-      |> Test_scheduler.(run (create ()))
-    with
+    match resolve_pkg "foo" with
     | Ok (Library x) -> x
     | _ -> assert false
   in

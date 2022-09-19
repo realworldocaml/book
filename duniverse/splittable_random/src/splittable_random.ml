@@ -296,7 +296,7 @@ module Log_uniform = struct
       !n
 
     let%test_unit "bits_to_represent" =
-      let test n expect = [%test_result: int] (bits_to_represent n) ~expect in
+      let test n expect = [%test_result: int] (bits_to_represent n) ~expect  in
       test (M.of_int_exn 0)   0;
       test (M.of_int_exn 1)   1;
       test (M.of_int_exn 2)   2;
@@ -330,7 +330,7 @@ module Log_uniform = struct
       pred (shift_left one n)
 
     let%test_unit "max_represented_by_n_bits" =
-      let test n expect = [%test_result: M.t] (max_represented_by_n_bits n) ~expect in
+      let test n expect = [%test_result: M.t] (max_represented_by_n_bits n) ~expect  in
       test 0 (M.of_int_exn 0);
       test 1 (M.of_int_exn 1);
       test 2 (M.of_int_exn 3);

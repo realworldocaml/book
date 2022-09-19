@@ -1,4 +1,5 @@
-open! Core_kernel
+open! Core
+module Known_protocol = Known_protocol
 
 module Bounded_list_in_case_someone_sends_garbage_on_the_wire =
   List_with_max_len.Make (struct
@@ -94,6 +95,56 @@ let any_magic_prefix =
   Bin_prot.Type_class.cnv_reader f bin_t.reader
 ;;
 
+module Magic_prefix_bin_repr = struct
+  type t = int [@@deriving bin_shape, bin_write]
+
+  (* The bin prot representation of a protocol version header is the standard
+     representation for an int list:
+
+     | nat0 indicating size | element 0 | element 1 | ...
+
+     [create_exn] will always put the known protocol magic number as "element 0".
+
+     The bin size of "nat0 indicating size" and "element 0" is fixed (there are expect
+     tests to make sure we never change them). *)
+  let bin_size =
+    bin_size_t Bounded_list_in_case_someone_sends_garbage_on_the_wire.max_len
+    + Known_protocol.magic_number_bin_size
+  ;;
+
+  let bin_read_t buf ~pos_ref =
+    let (_list_length : Bin_prot.Nat0.t) = Bin_prot.Read.bin_read_nat0 buf ~pos_ref in
+    Bin_prot.Read.bin_read_int buf ~pos_ref
+  ;;
+
+  let bin_reader_t =
+    { Bin_prot.Type_class.read = bin_read_t; vtag_read = Int.__bin_read_t__ }
+  ;;
+end
+
+let any_magic_prefix_from_six_bytes =
+  Bin_prot.Type_class.cnv_reader
+    (fun magic_number -> (Map.find Known_protocol.by_magic_number) magic_number)
+    Magic_prefix_bin_repr.bin_reader_t
+;;
+
+let any_magic_prefix_from_six_bytes_bin_size = Magic_prefix_bin_repr.bin_size
+
 module For_test = struct
   module Make_list_with_max_len = List_with_max_len.Make
 end
+
+let%test_unit "bin sizes are not changed by accident" =
+  (* Ensure the bin_size of Bounded_list_in_case_someone_sends_garbage_on_the_wire.max_len
+     is always 1. This means that regardless of how long the list of versions in the
+     protocol header is, the representation will be the same number of bytes. The
+     representation of an int jumps to 3 bytes at the value 128. *)
+  let bounded_list_bin_size =
+    Int.bin_size_t Bounded_list_in_case_someone_sends_garbage_on_the_wire.max_len
+  in
+  assert (bounded_list_bin_size = 1);
+  assert (6 = Known_protocol.magic_number_bin_size + bounded_list_bin_size);
+  assert (
+    any_magic_prefix_from_six_bytes_bin_size
+    = Known_protocol.magic_number_bin_size + bounded_list_bin_size)
+;;

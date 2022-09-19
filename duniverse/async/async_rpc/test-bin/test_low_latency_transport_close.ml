@@ -1,5 +1,6 @@
 open! Core
 open! Async
+module Thread = Core_thread
 
 module Rpcs = struct
   module From_server = struct
@@ -143,9 +144,7 @@ let server_command =
          | _ ->
            raise_s
              [%message
-               "invalid closing mode selection"
-                 valid_closing_modes
-                 (closing_mode : string)]
+               "invalid closing mode selection" valid_closing_modes (closing_mode : string)]
        in
        run_server ~port ~closing_mode ~use_regular_transport)
 ;;
@@ -166,4 +165,4 @@ let command =
   Command.group ~summary:"" [ "server", server_command; "client", client_command ]
 ;;
 
-let () = Command.run command
+let () = Command_unix.run command

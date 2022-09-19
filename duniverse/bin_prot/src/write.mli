@@ -37,7 +37,13 @@ val bin_write_float32_mat : mat32 writer
 val bin_write_float64_mat : mat64 writer
 val bin_write_mat : mat writer
 val bin_write_bigstring : buf writer
+val bin_write_floatarray : floatarray writer
+
 val bin_write_float_array : float array writer
+[@@ocaml.deprecated
+  "[since 2021-09] use ppx_bin_prot with type [float array] or [floatarray] or the \
+   'floatarray' functions"]
+
 val bin_write_md5 : Md5_lib.t writer
 
 (** [bin_write_variant_int] writes out the exact little-endian bit

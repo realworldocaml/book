@@ -34,12 +34,12 @@ module Test_nested_if = struct
   [%% define ABC true ]
   [%% define xyz false ]
   [%% if ABC ]
-    let x = "OK1"
+  let x = "OK1"
   [%% else ]
-    [%% if xyz ]
-      let x = "BAD1"
-    [%% endif]
-    let x = "BAD2"
+  [%% if xyz ]
+  let x = "BAD1"
+  [%% endif]
+  let x = "BAD2"
   [%% endif]
   let y = "OK2"
 
@@ -144,29 +144,29 @@ module Test_order = struct
   let () = printf "%s" "b"
 
   [%% if true ]
-   let () = printf "%s" "c"
-   let () = printf "%s" "d"
-   [%% define ABC]
-   let () = printf "%s" "e"
-   let () = printf "%s" "f"
+  let () = printf "%s" "c"
+  let () = printf "%s" "d"
+  [%% define ABC]
+  let () = printf "%s" "e"
+  let () = printf "%s" "f"
   [%% endif ]
 
   [%% if false ]
   [%% else ]
-   let () = printf "%s" "g"
-   let () = printf "%s" "h"
-   [%% define ABC]
-   let () = printf "%s" "i"
-   let () = printf "%s" "j"
+  let () = printf "%s" "g"
+  let () = printf "%s" "h"
+  [%% define ABC]
+  let () = printf "%s" "i"
+  let () = printf "%s" "j"
   [%% endif ]
 
   [%% if false ]
   [%% elif true ]
-   let () = printf "%s" "k"
-   let () = printf "%s" "l"
-   [%% define ABC]
-   let () = printf "%s" "m"
-   let () = printf "%s" "n"
+  let () = printf "%s" "k"
+  let () = printf "%s" "l"
+  [%% define ABC]
+  let () = printf "%s" "m"
+  let () = printf "%s" "n"
   [%% endif ]
 
   let () = printf "%s" "o"
@@ -181,7 +181,7 @@ module Test_show = struct
   open Core
 
   [%% if (show (3+3*3)) > 0]
-   let () = printf "%s" "OK";
+  let () = printf "%s" "OK";
   [%% endif ]
 
   [%% define x "OK"]
@@ -205,19 +205,19 @@ module Test_optional_match = struct
   [%%undef BAR]
 
   type t =
-  | OK1 of string
-  | OK2 of string * int [@if defined FOO]
-  | BAD of int [@if defined BAR]
+    | OK1 of string
+    | OK2 of string * int [@if defined FOO]
+    | BAD of int [@if defined BAR]
 
   let () = match ((OK2 ("OK", 2)): t) with
-  | OK1 s -> printf "%s" s
-  | OK2 (y,z) [@if defined FOO] -> printf "%s %i\n" y z
-  | BAD _ [@if defined BAR] -> printf "This will cause error if not dropped %s" undefined_ident
+    | OK1 s -> printf "%s" s
+    | OK2 (y,z) [@if defined FOO] -> printf "%s %i\n" y z
+    | BAD _ [@if defined BAR] -> printf "This will cause error if not dropped %s" undefined_ident
 
   let f = function
-   | OK1 _ -> "OK"
-   | OK2 _ -> "OK"
-   | BAD _ [@if defined BAR] -> "BAD"
+    | OK1 _ -> "OK"
+    | OK2 _ -> "OK"
+    | BAD _ [@if defined BAR] -> "BAD"
 
   let () = printf "%s" (f (OK1 "abc"))
 end
@@ -230,16 +230,16 @@ OK
 
 module Test_signature : sig
   [%% if defined FOO]
-   type t
+  type t
   [%%else]
-   type s
+  type s
   [%%endif]
-type u
+  type u
 end = struct
   [%% if defined FOO]
-   type t
+  type t
   [%%else]
-   type s
+  type s
   [%%endif]
   type u
 end
@@ -281,7 +281,7 @@ module Test_scoping = struct
     module A = struct
       [%%define x "BAD1"]
       [%%ifdef x]
-        let () = printf "%s" "OK2"
+      let () = printf "%s" "OK2"
       [%%endif]
     end
     [%%define y (show x)]

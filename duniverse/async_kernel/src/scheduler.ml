@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 open! Import
 open! Deferred_std
 module Deferred = Deferred1
@@ -29,6 +29,54 @@ let event_precision t = Timing_wheel.alarm_precision (events t)
 let cycle_start t = t.cycle_start
 let run_every_cycle_start t ~f = t.run_every_cycle_start <- f :: t.run_every_cycle_start
 let run_every_cycle_end t ~f = t.run_every_cycle_end <- f :: t.run_every_cycle_end
+
+let add_every_cycle_start_hook t ~f =
+  let handle = Types.Cycle_hook_handle.create () in
+  Hashtbl.add_exn t.run_every_cycle_start_state ~key:handle ~data:f;
+  run_every_cycle_start t ~f;
+  handle
+;;
+
+let add_every_cycle_end_hook t ~f =
+  let handle = Types.Cycle_hook_handle.create () in
+  Hashtbl.add_exn t.run_every_cycle_end_state ~key:handle ~data:f;
+  run_every_cycle_end t ~f;
+  handle
+;;
+
+(* Unbelievable that [List.remove] is not a thing *)
+let list_remove_first lst ~f =
+  match List.split_while ~f:(fun x -> not (f x)) lst with
+  | _, [] -> None
+  | l, _ :: r -> Some (l @ r)
+;;
+
+let remove_single_cycle_hook lst f =
+  (* Remove a single instance of [f] from [lst]. More than one instance may be present,
+     but removal is reference-counted by [run_every_cycle_(start|end)_state] tables. *)
+  match list_remove_first ~f:(phys_equal f) lst with
+  | Some lst -> lst
+  | None ->
+    (* This should be unreachable, see the [invariant] in [scheduler1.ml]. *)
+    raise_s
+      [%message
+        "Scheduler.remove_single_cycle_hook called with a hook that isn't registered"]
+;;
+
+let remove_every_cycle_start_hook_exn t handle =
+  match Hashtbl.find_and_remove t.run_every_cycle_start_state handle with
+  | None ->
+    failwith "Attempted to remove a cycle start hook which has already been removed."
+  | Some f ->
+    t.run_every_cycle_start <- remove_single_cycle_hook t.run_every_cycle_start f
+;;
+
+let remove_every_cycle_end_hook_exn t handle =
+  match Hashtbl.find_and_remove t.run_every_cycle_end_state handle with
+  | None ->
+    failwith "Attempted to remove a cycle end hook which has already been removed."
+  | Some f -> t.run_every_cycle_end <- remove_single_cycle_hook t.run_every_cycle_end f
+;;
 
 let map_cycle_times t ~f =
   Stream.create (fun tail ->
@@ -94,7 +142,7 @@ let add_finalizer t heap_block f =
     thread_safe_enqueue_external_job t execution_context f heap_block
   in
   if Debug.finalizers then Debug.log_string "adding finalizer";
-  (* We use [Caml.Gc.finalise] instead of [Core_kernel.Gc.add_finalizer] because the latter
+  (* We use [Caml.Gc.finalise] instead of [Core.Gc.add_finalizer] because the latter
      has its own wrapper around [Caml.Gc.finalise] to run finalizers synchronously. *)
   try Caml.Gc.finalise finalizer heap_block with
   | Invalid_argument _ ->
@@ -118,7 +166,7 @@ let add_finalizer_last t heap_block f =
     thread_safe_enqueue_external_job t execution_context f ()
   in
   if Debug.finalizers then Debug.log_string "adding finalizer (using 'last' semantic)";
-  (* We use [Caml.Gc.finalise_last] instead of [Core_kernel.Gc.add_finalizer_last] because
+  (* We use [Caml.Gc.finalise_last] instead of [Core.Gc.add_finalizer_last] because
      the latter has its own wrapper around [Caml.Gc.finalise_last] to run finalizers
      synchronously. *)
   try Caml.Gc.finalise_last finalizer heap_block with
@@ -146,7 +194,6 @@ let advance_clock t ~now =
 
 let run_cycle t =
   if debug then Debug.log "run_cycle starting" t [%sexp_of: t];
-  t.on_start_of_cycle ();
   let now = Time_ns.now () in
   t.cycle_count <- t.cycle_count + 1;
   t.cycle_start <- now;
@@ -174,7 +221,6 @@ let run_cycle t =
   then Bvar.broadcast t.yield_until_no_jobs_remain ();
   List.iter t.run_every_cycle_end ~f:(fun f -> f ());
   t.in_cycle <- false;
-  t.on_end_of_cycle ();
   if debug
   then
     Debug.log
@@ -222,8 +268,6 @@ let reset_in_forked_process () =
 let check_invariants t = t.check_invariants
 let set_check_invariants t b = t.check_invariants <- b
 let set_record_backtraces t b = t.record_backtraces <- b
-let set_on_start_of_cycle t f = t.on_start_of_cycle <- f
-let set_on_end_of_cycle t f = t.on_end_of_cycle <- f
 let yield t = Bvar.wait t.yield
 
 let yield_until_no_jobs_remain ?(may_return_immediately = false) t =
@@ -308,3 +352,5 @@ end
 module For_bench = struct
   let advance_clock = advance_clock
 end
+
+let in_cycle t = t.in_cycle

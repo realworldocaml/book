@@ -1,6 +1,6 @@
-open Core_kernel
+open Core
 include Timezone_intf
-include Core_kernel_private.Time_zone
+include Core_private.Time_zone
 
 module type Extend_zone = Timezone_intf.Extend_zone
 
@@ -13,7 +13,7 @@ module Zone_cache = struct
 
   let the_one_and_only =
     { full = false
-    ; basedir = Option.value (Sys.getenv_opt "TZDIR") ~default:"/usr/share/zoneinfo/"
+    ; basedir = Option.value (Sys.getenv "TZDIR") ~default:"/usr/share/zoneinfo/"
     ; table = String.Table.create ()
     }
   ;;
@@ -44,10 +44,10 @@ module Zone_cache = struct
       if depth < 1
       then ()
       else
-        Array.iter (Sys.readdir dir) ~f:(fun fn ->
+        Array.iter (Caml.Sys.readdir dir) ~f:(fun fn ->
           let fn = dir ^ "/" ^ fn in
           let relative_fn = String.drop_prefix fn basedir_len in
-          match Sys.is_directory fn with
+          match Caml.Sys.is_directory fn with
           | true ->
             if not
                  (List.exists skip_prefixes ~f:(fun prefix ->
@@ -68,8 +68,8 @@ module Zone_cache = struct
 
   let to_alist () = Hashtbl.to_alist the_one_and_only.table
 
-  let initialized_zones t =
-    List.sort ~compare:(fun a b -> String.ascending (fst a) (fst b)) (to_alist t)
+  let initialized_zones () =
+    List.sort ~compare:(fun a b -> String.ascending (fst a) (fst b)) (to_alist ())
   ;;
 
   let find_or_load_matching t1 =
@@ -82,9 +82,7 @@ module Zone_cache = struct
     let t1_file_size = Option.map (original_filename t1) ~f:file_size in
     with_return (fun r ->
       let return_if_matches zone_name =
-        let filename =
-          String.concat ~sep:"/" [ the_one_and_only.basedir; zone_name ]
-        in
+        let filename = String.concat ~sep:"/" [ the_one_and_only.basedir; zone_name ] in
         let matches =
           try
             [%compare.equal: int64 option] t1_file_size (Some (file_size filename))
@@ -133,7 +131,7 @@ let find_exn zone =
 let local =
   (* Load [TZ] immediately so that subsequent modifications to the environment cannot
      alter the result of [force local]. *)
-  let local_zone_name = Sys.getenv_opt "TZ" in
+  let local_zone_name = Sys.getenv "TZ" in
   let load () =
     match local_zone_name with
     | Some zone_name -> find_exn zone_name
@@ -152,7 +150,7 @@ let local =
 ;;
 
 module Stable = struct
-  include Core_kernel_private.Time_zone.Stable
+  include Core_private.Time_zone.Stable
 
   module V1 = struct
     type nonrec t = t
@@ -161,35 +159,31 @@ module Stable = struct
       match sexp with
       | Sexp.Atom "Local" -> Lazy.force local
       | Sexp.Atom name ->
-        ((* This special handling is needed because the offset directionality of the
-            zone files in /usr/share/zoneinfo for GMT<offset> files is the reverse of
-            what is generally expected.  That is, GMT+5 is what most people would call
-            GMT-5. *)
-          try
-            if String.is_prefix name ~prefix:"GMT-"
-            || String.is_prefix name ~prefix:"GMT+"
-            || String.is_prefix name ~prefix:"UTC-"
-            || String.is_prefix name ~prefix:"UTC+"
-            || String.equal name "GMT"
-            || String.equal name "UTC"
-            then (
-              let offset =
-                if String.equal name "GMT" || String.equal name "UTC"
-                then 0
-                else (
-                  let base =
-                    Int.of_string (String.sub name ~pos:4 ~len:(String.length name - 4))
-                  in
-                  match name.[3] with
-                  | '-' -> -1 * base
-                  | '+' -> base
-                  | _ -> assert false)
-              in
-              of_utc_offset ~hours:offset)
-            else find_exn name
-          with
-          | exc ->
-            of_sexp_error (sprintf "Timezone.t_of_sexp: %s" (Exn.to_string exc)) sexp)
+        (try
+           if String.equal name "UTC" || String.equal name "GMT"
+           then of_utc_offset_explicit_name ~name ~hours:0
+           else if (* This special handling is needed because the offset directionality of the
+                      zone files in /usr/share/zoneinfo for GMT<offset> files is the reverse of
+                      what is generally expected.  That is, GMT+5 is what most people would call
+                      GMT-5. *)
+             String.is_prefix name ~prefix:"GMT-"
+             || String.is_prefix name ~prefix:"GMT+"
+             || String.is_prefix name ~prefix:"UTC-"
+             || String.is_prefix name ~prefix:"UTC+"
+           then (
+             let offset =
+               let base =
+                 Int.of_string (String.sub name ~pos:4 ~len:(String.length name - 4))
+               in
+               match name.[3] with
+               | '-' -> -1 * base
+               | '+' -> base
+               | _ -> assert false
+             in
+             of_utc_offset_explicit_name ~name ~hours:offset)
+           else find_exn name
+         with
+         | exc -> of_sexp_error (sprintf "Timezone.t_of_sexp: %s" (Exn.to_string exc)) sexp)
       | _ -> of_sexp_error "Timezone.t_of_sexp: expected atom" sexp
     ;;
 

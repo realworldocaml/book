@@ -64,7 +64,7 @@
 
 module Configurator = Configurator.V1
 let split = Configurator.Flags.extract_blank_separated_words
-let uppercase = String.uppercase [@ocaml.warning "-3"]
+let uppercase = String.uppercase_ascii
 
 
 
@@ -463,10 +463,10 @@ struct
            linking with -lpthread fails. So, try to link the test code without
            any flags first.
 
-           If that fails and we are not targetting Android, try to link with
+           If that fails and we are not targeting Android, try to link with
            -lpthread. If *that* fails, search for libpthread in the filesystem.
 
-           When targetting Android, compiling without -lpthread is the only way
+           When targeting Android, compiling without -lpthread is the only way
            to link with pthread, and we don't to search for libpthread, because
            if we find it, it is likely the host's libpthread. *)
         match compiles context code with

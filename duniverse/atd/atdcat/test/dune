@@ -17,3 +17,58 @@
  (alias runtest)
  (deps test2.out.atd)
  (action (diff test2.expected.atd test2.out.atd)))
+
+;;;;;;;;;;;;;;;;;;;;;; Test JSON Schema output
+
+; Translate ATD -> JSON Schema
+(rule
+ (targets schema.json)
+ (deps schema.atd)
+ (action (run %{bin:atdcat} %{deps} -o %{targets} -jsonschema root)))
+
+; Same, with some options for a different JSON Schema output
+(rule
+ (targets schema-no-xprop.json)
+ (deps schema.atd)
+ (action (run %{bin:atdcat} %{deps} -o %{targets} -jsonschema root
+                -jsonschema-no-additional-properties)))
+
+; Same, targeting an earlier version of the standard
+(rule
+ (targets schema-draft-2019-09.json)
+ (deps schema.atd)
+ (action (run %{bin:atdcat} %{deps} -o %{targets}
+                -jsonschema root
+                -jsonschema-version draft-2019-09)))
+
+(rule
+ (alias runtest)
+ (deps
+   schema.json
+   data.json
+ )
+ (action
+   (progn
+     ; Check JSON Schema output
+     (diff schema.expected.json schema.json)
+     (diff schema-no-xprop.expected.json schema-no-xprop.json)
+     (diff schema-draft-2019-09.expected.json schema-draft-2019-09.json)
+
+     ; Check that the JSON Schema is valid and compatible with some JSON data
+     (run python3 -m jsonschema schema.json -i data.json)
+
+     ; Check that validation fails due to an extra property in the JSON data
+     (with-accepted-exit-codes 1
+       (run python3 -m jsonschema schema-no-xprop.json -i data.json)
+     )
+
+     ; Test other versions of the JSON Schema standard
+     (run python3 -m jsonschema
+       ; we should use Draft201909Validator but it causes a stack overflow
+       ; apparently related to tuples.
+       -V Draft7Validator
+       schema-draft-2019-09.json -i data.json
+     )
+   )
+ )
+)

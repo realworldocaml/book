@@ -8,6 +8,7 @@ open Indent
 
 open Atd.Ast
 open Mapping
+module Json = Atd.Json
 
 let target : Ocaml.target = Json
 let annot_schema = Ocaml.annot_schema_of_target target
@@ -42,7 +43,7 @@ let make_ocaml_json_intf ~with_create buf deref defs =
     let writer_params =
       String.concat "" (
         List.map
-          (fun s -> sprintf "\n  (Bi_outbuf.t -> '%s -> unit) ->" s)
+          (fun s -> sprintf "\n  (Buffer.t -> '%s -> unit) ->" s)
           x.def_param
       )
     in
@@ -57,8 +58,8 @@ let make_ocaml_json_intf ~with_create buf deref defs =
     in
     bprintf buf "\
 val write_%s :%s
-  Bi_outbuf.t -> %s -> unit
-  (** Output a JSON value of type {!%s}. *)
+  Buffer.t -> %s -> unit
+  (** Output a JSON value of type {!type:%s}. *)
 
 "
       s writer_params
@@ -68,7 +69,7 @@ val write_%s :%s
     bprintf buf "\
 val string_of_%s :%s
   ?len:int -> %s -> string
-  (** Serialize a value of type {!%s}
+  (** Serialize a value of type {!type:%s}
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
@@ -82,7 +83,7 @@ val string_of_%s :%s
     bprintf buf "\
 val read_%s :%s
   Yojson.Safe.lexer_state -> Lexing.lexbuf -> %s
-  (** Input JSON data of type {!%s}. *)
+  (** Input JSON data of type {!type:%s}. *)
 
 "
       s reader_params
@@ -92,7 +93,7 @@ val read_%s :%s
     bprintf buf "\
 val %s_of_string :%s
   string -> %s
-  (** Deserialize JSON data of type {!%s}. *)
+  (** Deserialize JSON data of type {!type:%s}. *)
 
 "
       s reader_params
@@ -152,6 +153,9 @@ let rec get_writer_name
   | String (_, String, String) ->
       "Yojson.Safe.write_string"
 
+  | Abstract (_, Abstract, Abstract) ->
+      "Yojson.Safe.write_json"
+
   | Tvar (_, s) -> "write_" ^ (Ox_emit.name_of_var s)
 
   | Name (_, s, args, None, None) ->
@@ -169,7 +173,9 @@ let rec get_writer_name
       if paren && l <> [] then "(" ^ s ^ ")"
       else s
 
-  | _ -> assert false
+  | Unit _ | Bool _ | Int _ | Float _ | String _ | Abstract _
+  | Sum _ | Record _ | Tuple _ | List _ | Option _ | Nullable _
+  | Wrap _ | Name _ | External _ -> assert false
 
 
 let get_left_writer_name p name param =
@@ -203,6 +209,8 @@ let rec get_reader_name
 
   | String (_, String, String) -> "Atdgen_runtime.Oj_run.read_string"
 
+  | Abstract (_, Abstract, Abstract) -> "Atdgen_runtime.Oj_run.read_json"
+
   | Tvar (_, s) -> "read_" ^ Ox_emit.name_of_var s
 
   | Name (_, s, args, None, None) ->
@@ -220,7 +228,9 @@ let rec get_reader_name
       if paren && l <> [] then "(" ^ s ^ ")"
       else s
 
-  | _ -> assert false
+  | Unit _ | Bool _ | Int _ | Float _ | String _ | Abstract _
+  | Sum _ | Record _ | Tuple _ | List _ | Option _ | Nullable _
+  | Wrap _ | Name _ | External _ -> assert false
 
 
 let get_left_reader_name p name param =
@@ -235,9 +245,7 @@ let get_left_of_string_name p name param =
 let write_with_adapter adapter writer =
   match adapter.Json.ocaml_adapter with
   | None -> writer
-  | Some adapter_path ->
-      let restore =
-        Oj_mapping.json_restorer_of_adapter_path adapter_path in
+  | Some { restore; _ } ->
       [
         Line (
           sprintf "Atdgen_runtime.Oj_run.write_with_adapter %s (" restore
@@ -259,6 +267,7 @@ let rec make_writer ?type_constraint p (x : Oj_mapping.t) : Indent.t list =
   | Int _
   | Float _
   | String _
+  | Abstract _
   | Name _
   | External _
   | Tvar _ -> [ Line (get_writer_name p x) ]
@@ -313,7 +322,7 @@ let rec make_writer ?type_constraint p (x : Oj_mapping.t) : Indent.t list =
         ) a
       in
       let l =
-        insert (Line "Bi_outbuf.add_char ob ',';") (Array.to_list a)
+        insert (Line "Buffer.add_char ob ',';") (Array.to_list a)
       in
       let op, cl =
         if p.std then '[', ']'
@@ -322,9 +331,9 @@ let rec make_writer ?type_constraint p (x : Oj_mapping.t) : Indent.t list =
       [
         Annot ("fun", Line "fun ob x ->");
         Block [
-          Line (sprintf "Bi_outbuf.add_char ob %C;" op);
+          Line (sprintf "Buffer.add_char ob %C;" op);
           Inline l;
-          Line (sprintf "Bi_outbuf.add_char ob %C;" cl);
+          Line (sprintf "Buffer.add_char ob %C;" cl);
         ]
       ]
 
@@ -387,7 +396,8 @@ let rec make_writer ?type_constraint p (x : Oj_mapping.t) : Indent.t list =
            ]
       )
 
-  | _ -> assert false
+  | Sum _ | Record _ | Tuple _ | List _ | Option _ | Nullable _ | Wrap _ ->
+      assert false
 
 
 and make_variant_writer p ~tick ~open_enum x : Indent.t list =
@@ -405,7 +415,7 @@ and make_variant_writer p ~tick ~open_enum x : Indent.t list =
         else "<" ^ s ^ ">"
       in
       [
-        Line (sprintf "| %s%s -> Bi_outbuf.add_string ob %S"
+        Line (sprintf "| %s%s -> Buffer.add_string ob %S"
                 tick ocaml_cons
                 (enclose (make_json_string json_cons)))
       ]
@@ -426,12 +436,12 @@ and make_variant_writer p ~tick ~open_enum x : Indent.t list =
       [
         Line (sprintf "| %s%s x ->" tick ocaml_cons);
         Block [
-          Line (sprintf "Bi_outbuf.add_string ob %S;"
+          Line (sprintf "Buffer.add_string ob %S;"
                   (op ^ make_json_string json_cons ^ sep));
           Line "(";
           Block (make_writer p v);
           Line ") ob x;";
-          Line (sprintf "Bi_outbuf.add_char ob %C" cl);
+          Line (sprintf "Buffer.add_char ob %C" cl);
         ]
       ]
 
@@ -446,7 +456,7 @@ and make_record_writer p a record_kind =
       ];
       Line "else";
       Block [
-        Line "Bi_outbuf.add_char ob ',';";
+        Line "Buffer.add_char ob ',';";
       ];
     ]
   in
@@ -457,7 +467,7 @@ and make_record_writer p a record_kind =
            ; json_fname ; optional ; unwrapped } as field) ->
         let f_value = unwrap_f_value field p in
         let write_field_tag =
-          sprintf "Bi_outbuf.add_string ob %S;"
+          sprintf "  Buffer.add_string ob %S;"
             (make_json_string json_fname ^ ":")
         in
         let app v =
@@ -497,10 +507,10 @@ and make_record_writer p a record_kind =
     ) fields
   in
   [
-    Line "Bi_outbuf.add_char ob '{';";
+    Line "Buffer.add_char ob '{';";
     Line "let is_first = ref true in";
     Inline write_fields;
-    Line "Bi_outbuf.add_char ob '}';";
+    Line "Buffer.add_char ob '}';";
   ]
 
 let wrap_tmp_required_value value =
@@ -584,9 +594,7 @@ let study_record ~ocaml_version fields =
 let read_with_adapter adapter reader =
   match adapter.Json.ocaml_adapter with
   | None -> reader
-  | Some adapter_path ->
-      let normalize =
-        Oj_mapping.json_normalizer_of_adapter_path adapter_path in
+  | Some { normalize; _ } ->
       [
         Line (
           sprintf "Atdgen_runtime.Oj_run.read_with_adapter %s (" normalize
@@ -602,6 +610,7 @@ let rec make_reader p type_annot (x : Oj_mapping.t) : Indent.t list =
   | Int _
   | Float _
   | String _
+  | Abstract _
   | Name _
   | External _
   | Tvar _ -> [ Line (get_reader_name p x) ]
@@ -771,7 +780,8 @@ let rec make_reader p type_annot (x : Oj_mapping.t) : Indent.t list =
            ]
       )
 
-  | _ -> assert false
+  | Sum _ | Record _ | Tuple _ | List _ | Option _ | Nullable _ | Wrap _ ->
+      assert false
 
 (*
    Return a pair (optional json constructor, expression) to be converted
@@ -1190,9 +1200,9 @@ let make_ocaml_json_writer p ~original_types is_rec let1 let2 def =
     Line (sprintf ")%s" extra_args);
     Line (sprintf "%s %s ?(len = 1024) x =" let2 to_string);
     Block [
-      Line "let ob = Bi_outbuf.create len in";
+      Line "let ob = Buffer.create len in";
       Line (sprintf "%s ob x;" write);
-      Line "Bi_outbuf.contents ob"
+      Line "Buffer.contents ob"
     ]
   ]
 

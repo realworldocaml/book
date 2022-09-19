@@ -1,7 +1,6 @@
 (** Dune representation of the source tree *)
-open! Stdune
 
-open! Import
+open Import
 
 module Dune_file : sig
   val fname : string
@@ -95,8 +94,6 @@ val is_vendored : Path.Source.t -> bool Memo.t
 
 (** [true] iff the path is a file *)
 val file_exists : Path.Source.t -> bool Memo.t
-
-val find_dir_specified_on_command_line : dir:Path.Source.t -> Dir.t Memo.t
 
 (** Return the execution parameters for the following directory *)
 val execution_parameters_of_dir : Path.Source.t -> Execution_parameters.t Memo.t

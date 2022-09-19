@@ -1,0 +1,4 @@
+(library (name expect_test_patdiff) (public_name patdiff.expect_test_patdiff)
+ (libraries core expect_test_helpers_core.expect_test_helpers_base
+  patdiff_kernel)
+ (preprocess (pps ppx_jane)))

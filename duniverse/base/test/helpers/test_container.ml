@@ -57,11 +57,9 @@ struct
           sorts_are_equal list (Container.fold c ~init:[] ~f:(fun ac e -> e :: ac)));
         assert (sorts_are_equal list (Container.to_list c));
         assert (sorts_are_equal list (Array.to_list (Container.to_array c)));
+        assert (n > 0 = Option.is_some (Container.find c ~f:(fun e -> Elt.to_int e = 0)));
         assert (
-          n > 0 = Option.is_some (Container.find c ~f:(fun e -> Elt.to_int e = 0)));
-        assert (
-          n > 0 = Option.is_some (Container.find c ~f:(fun e -> Elt.to_int e = n - 1))
-        );
+          n > 0 = Option.is_some (Container.find c ~f:(fun e -> Elt.to_int e = n - 1)));
         assert (Option.is_none (Container.find c ~f:(fun e -> Elt.to_int e = n)));
         assert (n > 0 = Container.mem c (Elt.of_int 0) ~equal:( = ));
         assert (n > 0 = Container.mem c (Elt.of_int (n - 1)) ~equal:( = ));
@@ -134,8 +132,7 @@ struct
         let forall_should_be = List.fold bools ~init:true ~f:(fun ac b -> b && ac) in
         let exists_should_be = List.fold bools ~init:false ~f:(fun ac b -> b || ac) in
         match
-          Container.of_list
-            (List.map bools ~f:(fun b -> Elt.of_int (if b then 1 else 0)))
+          Container.of_list (List.map bools ~f:(fun b -> Elt.of_int (if b then 1 else 0)))
         with
         | `Skip_test -> ()
         | `Ok container ->
@@ -155,7 +152,8 @@ module Test_S1_allow_skipping_tests (Container : sig
     val of_list : 'a list -> [ `Ok of 'a t | `Skip_test ]
   end) =
 struct
-  include Test_generic
+  include
+    Test_generic
       (struct
         type 'a t = 'a
 

@@ -8,8 +8,7 @@ class values representing record fields, and additional routines, to
 get and set record fields, iterate and fold over all fields of a
 record and create new record values.
 
-Basic Usage
------------
+# Basic Usage
 
 If you define a type as follows:
 
@@ -180,8 +179,7 @@ val name : (_, _, _) t_with_perm -> string
 val get  : (_, 'r, 'a) t_with_perm -> 'r -> 'a
 ```
 
-Functions over all fields
--------------------------
+# Functions over all fields
 
 Use of the generated functions together with `Fieldslib` allow us to
 define functions over t which check exhaustiveness w.r.t record
@@ -243,3 +241,40 @@ let to_string t =
 
 Addition of a new field would cause a type error reminding you to
 update the definition of `to_string`.
+
+# Opt-in functions
+
+There are some extra functions that `ppx_fields_conv` can also
+derive. These functions are not derived by default to avoid adding
+bloat to the generated code as they are not frequently needed.
+
+## `fold_right`
+
+Using `[@@deriving fields ~fold_right]` instead of `[@@deriving
+fields] on the type definition above would add two functions that are
+similar to `fold` but iterate in the opposite order (for brevity, the
+rest of the signature is omitted):
+
+```ocaml
+(* ... *)
+val fold_right
+  :  dir      :((t, [ `Buy | `Sell ]) Field.t -> 'd -> 'e)
+  -> quantity :((t, int             ) Field.t -> 'c -> 'd)
+  -> price    :((t, float           ) Field.t -> 'b -> 'c)
+  -> cancelled:((t, bool            ) Field.t -> 'a -> 'b)
+  -> init:'a
+  -> 'e
+(* ... *)
+module Direct : sig
+  (* ... *)
+  val fold_right
+    :  t
+    -> dir      :((t, [ `Buy | `Sell ]) Field.t -> t -> [ `Buy | `Sell ] -> 'd -> 'e)
+    -> quantity :((t, int             ) Field.t -> t -> int              -> 'c -> 'd)
+    -> price    :((t, float           ) Field.t -> t -> float            -> 'b -> 'c)
+    -> cancelled:((t, bool            ) Field.t -> t -> bool             -> 'a -> 'b)
+    -> init:'a
+    -> 'e
+  (* ... *)
+end
+```

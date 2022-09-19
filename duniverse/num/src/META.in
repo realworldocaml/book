@@ -6,11 +6,11 @@
 
 requires = "num.core"
 requires(toploop) = "num.core,num-top"
-version = "%%VERSION%%"
+version = "v1.4+dune2"
 description = "Arbitrary-precision rational arithmetic"
 package "core" (
   directory = "^"
-  version = "%%VERSION%%"
+  version = "v1.4+dune2"
   browse_interfaces = ""
   archive(byte) = "nums.cma"
   archive(native) = "nums.cmxa"

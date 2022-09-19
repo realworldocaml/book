@@ -1,4 +1,4 @@
-open! Core_kernel
+open! Core
 
 module type Config = sig
   val max_len : int
@@ -10,6 +10,8 @@ module type S = sig
 
   (** [of_list_exn l] raises if [List.length l] is larger than the supplied [max_len]. *)
   val of_list_exn : 'a list -> 'a t
+
+  val max_len : int
 end
 
 module type List_with_max_len = sig

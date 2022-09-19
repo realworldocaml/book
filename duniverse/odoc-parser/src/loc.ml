@@ -1,17 +1,11 @@
 type point = { line : int; column : int }
-
 type span = { file : string; start : point; end_ : point }
-
 type +'a with_location = { location : span; value : 'a }
 
 let at location value = { location; value }
-
 let location { location; _ } = location
-
 let value { value; _ } = value
-
 let map f annotated = { annotated with value = f annotated.value }
-
 let same annotated value = { annotated with value }
 
 let span spans =

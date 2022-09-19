@@ -1,4 +1,4 @@
-open Core_kernel
+open Core
 open Async_kernel
 
 (* The reason for defining this module type explicitly is so that we can internally keep
@@ -10,14 +10,11 @@ module type S = sig
     type t [@@deriving sexp, bin_io]
 
     (** Each side of the connection has its own heartbeat config. It sends a heartbeat
-        every [send_every]. If it doesn't receive a heartbeat for [timeout], it drops the
-        connection. It only checks whether [timeout] has elapsed when it sends heartbeats,
-        so effectively [timeout] is rounded up to the nearest multiple of [send_every]. *)
-    val create
-      :  ?timeout : Time_ns.Span.t
-      -> ?send_every : Time_ns.Span.t
-      -> unit
-      -> t
+        every [send_every]. If it doesn't receive any messages for [timeout], whether it's
+        a heartbeat or not, it drops the connection. It only checks whether [timeout] has
+        elapsed when it sends heartbeats, so effectively [timeout] is rounded up to the
+        nearest multiple of [send_every]. *)
+    val create : ?timeout:Time_ns.Span.t -> ?send_every:Time_ns.Span.t -> unit -> t
 
     val timeout : t -> Time_ns.Span.t
     val send_every : t -> Time_ns.Span.t
@@ -26,7 +23,7 @@ module type S = sig
   module Client_implementations : sig
     type nonrec 's t =
       { connection_state : t -> 's
-      ; implementations  : 's Implementations.t
+      ; implementations : 's Implementations.t
       }
 
     val null : unit -> unit t
@@ -51,12 +48,12 @@ module type S = sig
       [time_source] can be given to define the time_source for which the heartbeating
       events will be scheduled. Defaults to wall-clock. *)
   val create
-    :  ?implementations   : 's Implementations.t
-    -> connection_state   : (t -> 's)
-    -> ?handshake_timeout : Time_ns.Span.t
-    -> ?heartbeat_config  : Heartbeat_config.t
-    -> ?description       : Info.t
-    -> ?time_source       : Synchronous_time_source.t
+    :  ?implementations:'s Implementations.t
+    -> connection_state:(t -> 's)
+    -> ?handshake_timeout:Time_ns.Span.t
+    -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
+    -> ?time_source:Synchronous_time_source.t
     -> Transport.t
     -> (t, Exn.t) Result.t Deferred.t
 
@@ -67,9 +64,17 @@ module type S = sig
 
   val description : t -> Info.t
 
-  (** After [add_heartbeat_callback t f], [f ()] will be called on every subsequent
-      heartbeat to [t]. *)
+  (** After [add_heartbeat_callback t f], [f ()] will be called after every subsequent
+      heartbeat received by [t]. *)
   val add_heartbeat_callback : t -> (unit -> unit) -> unit
+
+  (** Changes the heartbeat timeout and restarts the timer by setting [last_seen_alive] to
+      the current time. *)
+  val reset_heartbeat_timeout : t -> Time_ns.Span.t -> unit
+
+  (** The last time either any message has been received or [reset_heartbeat_timeout] was
+      called. *)
+  val last_seen_alive : t -> Time_ns.t
 
   (** [close] starts closing the connection's transport, and returns a deferred that
       becomes determined when its close completes.  It is ok to call [close] multiple
@@ -96,7 +101,7 @@ module type S = sig
   (** [close_reason ~on_close t] becomes determined when close starts or finishes
       based on [on_close], but additionally returns the reason that the connection was
       closed. *)
-  val close_reason : t -> on_close: [`started | `finished] -> Info.t Deferred.t
+  val close_reason : t -> on_close:[ `started | `finished ] -> Info.t Deferred.t
 
   (** [is_closed t] returns [true] iff [close t] has been called.  [close] may be called
       internally upon errors or timeouts. *)
@@ -105,6 +110,7 @@ module type S = sig
   (** [bytes_to_write] and [flushed] just call the similarly named functions on the
       [Transport.Writer.t] within a connection. *)
   val bytes_to_write : t -> int
+
   val flushed : t -> unit Deferred.t
 
   (** [with_close] tries to create a [t] using the given transport.  If a handshake error
@@ -112,7 +118,7 @@ module type S = sig
       raise an exception.  If no error results, [dispatch_queries] is called on [t].
 
       After [dispatch_queries] returns, if [server] is None, the [t] will be closed and
-      the deferred returned by [dispatch_queries] wil be determined immediately.
+      the deferred returned by [dispatch_queries] will be determined immediately.
       Otherwise, we'll wait until the other side closes the connection and then close [t]
       and determine the deferred returned by [dispatch_queries].
 
@@ -126,24 +132,28 @@ module type S = sig
       and not determine its result until you are done with the pipe, or use a different
       function like [create]. *)
   val with_close
-    :  ?implementations    : 's Implementations.t
-    -> ?handshake_timeout  : Time_ns.Span.t
-    -> ?heartbeat_config   : Heartbeat_config.t
-    -> connection_state    : (t -> 's)
+    :  ?implementations:'s Implementations.t
+    -> ?handshake_timeout:Time_ns.Span.t
+    -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
+    -> ?time_source:Synchronous_time_source.t
+    -> connection_state:(t -> 's)
     -> Transport.t
-    -> dispatch_queries    : (t -> 'a Deferred.t)
-    -> on_handshake_error  : [ `Raise | `Call of (Exn.t -> 'a Deferred.t) ]
+    -> dispatch_queries:(t -> 'a Deferred.t)
+    -> on_handshake_error:[ `Raise | `Call of Exn.t -> 'a Deferred.t ]
     -> 'a Deferred.t
 
   (** Runs [with_close] but dispatches no queries. The implementations are required
       because this function doesn't let you dispatch any queries (i.e., act as a client),
       it would be pointless to call it if you didn't want to act as a server.*)
   val server_with_close
-    :  ?handshake_timeout  : Time_ns.Span.t
-    -> ?heartbeat_config   : Heartbeat_config.t
+    :  ?handshake_timeout:Time_ns.Span.t
+    -> ?heartbeat_config:Heartbeat_config.t
+    -> ?description:Info.t
+    -> ?time_source:Synchronous_time_source.t
     -> Transport.t
-    -> implementations     : 's Implementations.t
-    -> connection_state    : (t -> 's)
-    -> on_handshake_error  : [ `Raise | `Ignore | `Call of (Exn.t -> unit Deferred.t) ]
+    -> implementations:'s Implementations.t
+    -> connection_state:(t -> 's)
+    -> on_handshake_error:[ `Raise | `Ignore | `Call of Exn.t -> unit Deferred.t ]
     -> unit Deferred.t
 end

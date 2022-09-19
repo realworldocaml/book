@@ -1,0 +1,3 @@
+(library (name ppx_disable_unused_warnings)
+ (public_name ppx_disable_unused_warnings) (kind ppx_rewriter)
+ (libraries base ppxlib) (preprocess no_preprocessing))

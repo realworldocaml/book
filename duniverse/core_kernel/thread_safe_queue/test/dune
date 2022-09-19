@@ -1,2 +1,3 @@
-(library (name thread_safe_queue_test) (libraries core thread_safe_queue)
+(library (name thread_safe_queue_test)
+ (libraries core core_unix.core_thread thread_safe_queue core_unix.time_unix)
  (preprocess (pps ppx_jane)))

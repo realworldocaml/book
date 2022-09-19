@@ -5,7 +5,7 @@ module Fd = Raw_fd
 let debug = Debug.interruptor
 
 type t =
-  { pipe : Fd.t Read_write.t
+  { pipe : Fd.t Read_write_pair.t
   ; (* [already_interrupted] keeps track of whether we've already interrupted since the
        most recent call to [clear], and if so, avoid writing to the pipe again.
        [already_interrupted] does not exactly track the state of [pipe].  It is possible
@@ -17,7 +17,7 @@ type t =
 [@@deriving sexp_of]
 
 let invariant _ = ()
-let read_fd t = Read_write.get t.pipe `Read
+let read_fd t = Read_write_pair.get t.pipe `Read
 
 let create ~create_fd =
   let pipe_read, pipe_write = Unix.pipe () in
@@ -27,7 +27,7 @@ let create ~create_fd =
     create_fd Fd.Kind.Fifo pipe_read (Info.of_string "interruptor_pipe_read")
   in
   let pipe_write = create_fd Fifo pipe_write (Info.of_string "interruptor_pipe_write") in
-  { pipe = Read_write.create ~read:pipe_read ~write:pipe_write
+  { pipe = Read_write_pair.create ~read:pipe_read ~write:pipe_write
   ; already_interrupted = false
   ; clearbuffer = Bytes.make 1024 ' '
   }
@@ -50,7 +50,7 @@ let thread_safe_interrupt t =
     (* END ATOMIC *)
     if debug then Debug.log_string "writing to interrupt_pipe_write";
     Fd.syscall_exn
-      (Read_write.get t.pipe `Write)
+      (Read_write_pair.get t.pipe `Write)
       ~nonblocking:true
       (fun file_descr ->
          try ignore (Unix.write_assume_fd_is_nonblocking file_descr bytes_w : int) with
@@ -64,7 +64,7 @@ let clear t =
   if t.already_interrupted
   then
     Fd.syscall_exn
-      (Read_write.get t.pipe `Read)
+      (Read_write_pair.get t.pipe `Read)
       ~nonblocking:true
       (fun file_descr ->
          let rec loop () =

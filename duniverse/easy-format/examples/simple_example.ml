@@ -93,7 +93,7 @@ let format_matrix
     (format_array ~align_closing: align_closing2 ~wrap: wrap2 format_float) m
 
 
-let format_record f l0 =
+let _format_record f l0 =
   let l =
     List.map
       (fun (s, x) -> Label ((Atom (s ^ ":", atom), label), f x))

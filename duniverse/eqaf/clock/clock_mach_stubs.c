@@ -31,5 +31,5 @@ clock_mach_get_time(value unit)
 
   now = mach_absolute_time();
 
-  return copy_int64(now * s.numer / s.denom);
+  return caml_copy_int64(now * s.numer / s.denom);
 }

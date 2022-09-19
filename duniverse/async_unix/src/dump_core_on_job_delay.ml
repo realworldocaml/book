@@ -19,7 +19,7 @@ module How_to_dump = struct
     | Call_abort -> Call_abort
     | Call_gcore -> Call_gcore
     | Default ->
-      (match Core.Sys.file_exists "/usr/bin/gcore" with
+      (match Sys_unix.file_exists "/usr/bin/gcore" with
        | `Yes -> Call_gcore
        | `No | `Unknown -> Call_abort)
   ;;

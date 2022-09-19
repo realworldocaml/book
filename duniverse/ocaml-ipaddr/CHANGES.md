@@ -1,3 +1,8 @@
+## v5.3.1 (2022-07-04)
+
+* Remove stdlib-shims dependency, require OCaml 4.08+ (@hannesm, #112)
+* Switch to ounit2 (@Alessandro-Barbieri, #111)
+
 ## v5.3.0 (2022-03-04)
 
 * Add `with_port_of_string` function (@dinosaure, @hannesm, #108)
