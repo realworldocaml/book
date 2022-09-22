@@ -38,6 +38,8 @@ depends: [
   "textwrap"
   "tls"
   "yojson"
+  "conf-pandoc"
+  "conf-texlive"
   "odoc" {with-doc}
 ]
 build: [
@@ -58,6 +60,8 @@ build: [
 ]
 dev-repo: "git+https://github.com/realworldocaml/book.git"
 pin-depends: [
- [ "async_graphics.dev" "git+https://github.com/avsm/async_graphics.git#update-to-v15" ]
+ [ "async_graphics.0.7.0+dev" "git+https://github.com/avsm/async_graphics.git#update-to-v15" ]
 ]
-
+depexts: [
+  ["texlive-full"] {os-family = "debian"}
+]

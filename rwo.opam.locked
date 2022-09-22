@@ -38,7 +38,9 @@ depends: [
   "conf-libpcre" {= "1"}
   "conf-libX11" {= "1"}
   "conf-ncurses" {= "1"}
+  "conf-pandoc" {= "0.1"}
   "conf-pkg-config" {= "2"}
+  "conf-texlive" {= "1"}
   "conf-tzdata" {= "1"}
   "core" {= "v0.15.0" & ?vendor}
   "core_bench" {= "v0.15.0" & ?vendor}
@@ -171,7 +173,9 @@ depends: [
   "zarith" {= "1.12+dune" & ?vendor}
 ]
 depexts: [
+  ["basictex"] {os-distribution = "homebrew" & os = "macos"}
   ["devel/pkgconf"] {os = "openbsd"}
+  ["epel-release" "pandoc"] {os-distribution = "centos"}
   ["gmp"] {os = "freebsd"}
   ["gmp"] {os = "openbsd"}
   ["gmp"] {os-distribution = "nixos"}
@@ -216,6 +220,10 @@ depexts: [
   ["ncurses-devel"] {os-distribution = "ol"}
   ["ncurses-devel"] {os-distribution = "rhel"}
   ["ncurses-devel"] {os-family = "suse"}
+  ["pandoc"] {os-distribution = "fedora"}
+  ["pandoc"] {os-family = "debian"}
+  ["pandoc"] {os-family = "suse"}
+  ["pandoc"] {os = "macos" & os-distribution = "homebrew"}
   ["pcre"] {os = "freebsd"}
   ["pcre"] {os-family = "arch"}
   ["pcre"] {os = "macos" & os-distribution = "homebrew"}
@@ -242,6 +250,19 @@ depexts: [
   ["pkgconfig"] {os-distribution = "ol" & os-version <= "7"}
   ["pkgconfig"] {os-distribution = "rhel" & os-version <= "7"}
   ["system:pkgconf"] {os = "win32" & os-distribution = "cygwinports"}
+  ["tex-formats"] {os = "freebsd"}
+  ["texlive"] {os-family = "alpine"}
+  ["texlive-core"] {os-family = "arch"}
+  ["texlive-full"] {os-family = "debian"}
+  ["texlive-latex"] {os-distribution = "centos"}
+  ["texlive-latex"] {os-distribution = "fedora"}
+  ["texlive-latex"] {os-distribution = "ol"}
+  ["texlive-latex"] {os-distribution = "rhel"}
+  ["texlive-latex-base"] {os-family = "debian"}
+  ["texlive-latex-base"] {os-family = "ubuntu"}
+  ["texlive-latex-bin-bin"] {os-family = "suse"}
+  ["texlive-latex-bin-bin"] {os-distribution = "centos" & os-version < "8"}
+  ["texlive-latex-bin-bin"] {os-distribution = "ol" & os-version < "8"}
   ["timezone"] {os-family = "suse"}
   ["tzdata"] {os-distribution = "alpine"}
   ["tzdata"] {os-family = "debian"}

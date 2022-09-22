@@ -41,7 +41,7 @@ let title_bar,title_bar_frontpage =
   in
   let h1 = h1 [`Data "Real World OCaml"] in
   let h4 = h4 [`Data "Functional programming for the masses"] in
-  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (published in Q4 2021)"] in
+  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (published in Q4 2022)"] in
   let title_bar =
     div ~a:["class","title-bar"] [
       div ~a:["class","title"] [h1; h5; nav]

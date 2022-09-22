@@ -44,4 +44,6 @@ second edition book. See https://realworldocaml.org/")
   sexp_pretty
   textwrap
   tls
-  yojson))
+  yojson
+  conf-pandoc
+  conf-texlive))
