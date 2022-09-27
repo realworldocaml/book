@@ -1,5 +1,16 @@
+(library
+ (name pandoc)
+ (modules pandoc)
+ (libraries yojson))
+
 (executable
-  (public_name pandoc-rwo)
-  (name pandoc_rwo)
-  (libraries yojson)
-)
+ (public_name pandoc-rwo)
+ (name pandoc_rwo)
+ (modules pandoc_rwo)
+ (libraries yojson pandoc))
+
+(executable
+ (public_name pandoc-rwo-epub)
+ (name pandoc_rwo_epub)
+ (modules pandoc_rwo_epub)
+ (libraries yojson pandoc))

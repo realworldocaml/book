@@ -24,7 +24,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install pandoc
-        run: brew install pandoc
+        run: sudo apt-get -y install pandoc
+
+      - name: Install LaTeX dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get -y install texlive-xetex texlive-science texlive-fonts-extra
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
@@ -36,7 +40,7 @@ jobs:
         run: opam install dune>=3.4.1
 
       - name: Build HTML book
-        run: opam exec -- dune build @site
+        run: opam exec -- dune build
 
       - name: Deploy site
         uses: peaceiris/actions-gh-pages@v3
@@ -44,3 +48,29 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_build/default/static
+
+      - name: Upload artifacts (html, pdf, md, tex)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: static
+          path: ./_build/default/static
+
+      - name: Upload PDF artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: book.pdf
+          path: ./_build/default/static/book.pdf
+
+      - name: Convert to EPUB
+        if: runner.os == 'Linux'
+        working-directory: ./_build/default/static
+        run: pandoc --top-level-division=part --filter=../bin/pandoc-rwo/pandoc_rwo_epub.exe --metadata-file=../book/book.yml --listings -o book.epub -t epub -s book.md
+
+      - name: Upload EPUB artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2
+        with:
+          name: book.epub
+          path: ./_build/default/static/book.epub
