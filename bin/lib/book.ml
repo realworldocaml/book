@@ -35,13 +35,13 @@ let title_bar,title_bar_frontpage =
     a ~a:["href","toc.html"] [`Data "Table of Contents"];
     a ~a:["href","faqs.html"] [`Data "FAQs"];
     a ~a:["href","install.html"] [`Data "Install"];
-    a ~a:["href","https://ocaml.janestreet.com/ocaml-core/"]
+    a ~a:["href","https://ocaml.org/p/core/"]
       [`Data "API Docs"];
   ]
   in
   let h1 = h1 [`Data "Real World OCaml"] in
   let h4 = h4 [`Data "Functional programming for the masses"] in
-  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (published in Q4 2022)"] in
+  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (Oct 2022)"] in
   let title_bar =
     div ~a:["class","title-bar"] [
       div ~a:["class","title"] [h1; h5; nav]
@@ -61,8 +61,8 @@ let footer_item : Html.item =
     "http://twitter.com/realworldocaml", "@realworldocaml";
     "http://twitter.com/yminsky", "@yminsky";
     "http://twitter.com/avsm", "@avsm";
-    "https://github.com/realworldocaml", "GitHub";
-    "http://www.goodreads.com/book/show/16087552-real-world-ocaml", "goodreads";
+    "https://github.com/realworldocaml/book", "GitHub";
+    "https://www.amazon.com/Real-World-OCaml-Functional-Programming/dp/100912580X/", "Amazon";
   ]
   |> List.map ~f:(fun (href,text) -> li [a ~a:["href",href] [`Data text]])
   |> ul
