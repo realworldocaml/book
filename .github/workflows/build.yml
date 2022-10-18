@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install pandoc
-        run: brew install pandoc
+        run: sudo apt-get -y install pandoc
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
