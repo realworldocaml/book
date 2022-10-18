@@ -1,34 +1,19 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Data Serialization with S-Expressions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="data-serialization-with-s-expressions">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Data Serialization with S-Expressions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (Oct 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.org/p/core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="data-serialization-with-s-expressions">
 <h1>Data Serialization with S-Expressions</h1>
-<p>S-expressions are nested parenthetical expressions whose atomic
-values are strings. They were first popularized by the Lisp programming
-language in the 1960s, and have remained one of the simplest and most
-effective ways to encode structured data in a human-readable and
-editable form. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a> <a data-secondary="s-expressions" data-primary="serialization formats" data-type="indexterm">&nbsp;</a> <a data-secondary="with s-expressions" data-primary="data serialization" data-type="indexterm">&nbsp;</a></p>
+<p>S-expressions are nested parenthetical expressions whose atomic values are strings. They were first popularized by the Lisp programming language in the 1960s, and have remained one of the simplest and most effective ways to encode structured data in a human-readable and editable form. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a> <a data-secondary="s-expressions" data-primary="serialization formats" data-type="indexterm">&nbsp;</a> <a data-secondary="with s-expressions" data-primary="data serialization" data-type="indexterm">&nbsp;</a></p>
 <p>An example s-expression might look like this.</p>
 <div class="highlight">
 <pre><code class="language-clike">(this (is an) (s expression))</code></pre>
 </div>
-<p>S-expressions play a major role in Base and Core, effectively acting
-as the default serialization format. Indeed, we’ve encountered
-s-expressions multiple times already, including in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error
-Handling</a>, <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>, and <a data-type="xref" href="first-class-modules.html#first-class-modules">Chapter 11, First Class Modules</a>.</p>
-<p>This chapter will go into s-expressions in more depth. In particular,
-we’ll discuss:</p>
+<p>S-expressions play a major role in Base and Core, effectively acting as the default serialization format. Indeed, we’ve encountered s-expressions multiple times already, including in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>, and <a data-type="xref" href="first-class-modules.html#first-class-modules">Chapter 11, First Class Modules</a>.</p>
+<p>This chapter will go into s-expressions in more depth. In particular, we’ll discuss:</p>
 <ul>
-<li><p>The details of the s-expression format, including how to parse it
-while generating good error messages for debugging malformed
-inputs</p></li>
-<li><p>How to generate converters between s-expressions and arbitrary
-OCaml types</p></li>
-<li><p>How to use annotations to control the behavior of these generated
-converters</p></li>
-<li><p>How to integrate s-expressions into your interfaces, in
-particular how to add s-expression converters to a module without
-breaking abstraction boundaries</p></li>
+<li><p>The details of the s-expression format, including how to parse it while generating good error messages for debugging malformed inputs</p></li>
+<li><p>How to generate converters between s-expressions and arbitrary OCaml types</p></li>
+<li><p>How to use annotations to control the behavior of these generated converters</p></li>
+<li><p>How to integrate s-expressions into your interfaces, in particular how to add s-expression converters to a module without breaking abstraction boundaries</p></li>
 </ul>
-<p>We’ll tie this together at the end of the chapter with a simple
-s-expression formatted configuration file for a web server</p>
+<p>We’ll tie this together at the end of the chapter with a simple s-expression formatted configuration file for a web server</p>
 <section class="level2" id="basic-usage">
 <h2>Basic Usage</h2>
 <p>The type used to represent an s-expression is quite simple: <a data-secondary="basic usage of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
@@ -39,12 +24,7 @@ s-expression formatted configuration file for a web server</p>
   | List of t list
 end</code></pre>
 </div>
-<p>An s-expression can be thought of as a tree where each node contains
-a list of its children, and where the leaves of the tree are strings.
-Core provides good support for s-expressions in its <code>Sexp</code>
-module, including functions for converting s-expressions to and from
-strings. Let’s rewrite our example s-expression in terms of this
-type:</p>
+<p>An s-expression can be thought of as a tree where each node contains a list of its children, and where the leaves of the tree are strings. Core provides good support for s-expressions in its <code>Sexp</code> module, including functions for converting s-expressions to and from strings. Let’s rewrite our example s-expression in terms of this type:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
 Sexp.List [
@@ -55,10 +35,7 @@ Sexp.List [
 &gt;- : Sexp.t = (this (is an) (s expression))
 </code></pre>
 </div>
-<p>This prints out nicely because Core registers a pretty printer with
-the toplevel. This pretty printer is based on the functions in
-<code>Sexp</code> for converting s-expressions to and from strings:
-<a data-primary="pretty printers" data-type="indexterm">&nbsp;</a></p>
+<p>This prints out nicely because Core registers a pretty printer with the toplevel. This pretty printer is based on the functions in <code>Sexp</code> for converting s-expressions to and from strings: <a data-primary="pretty printers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);;
 &gt;- : string = "(1 2)"
@@ -66,12 +43,9 @@ Sexp.of_string ("(1 2 (3 4))");;
 &gt;- : Sexp.t = (1 2 (3 4))
 </code></pre>
 </div>
-<section data-type="note" class="level4" id="base-core-and-parsexp">
-<h4>Base, Core, and Parsexp</h4>
-<p>In these examples, we’re using Core rather than Base because Core has
-integrated support for parsing s-expressions, courtesy of the
-<code>Parsexp</code> library. If you just use Base, you’ll find that you
-don’t have <code>Sexp.of_string</code> at your disposal.</p>
+<div data-type="note">
+<h4 id="base-core-and-parsexp">Base, Core, and Parsexp</h4>
+<p>In these examples, we’re using Core rather than Base because Core has integrated support for parsing s-expressions, courtesy of the <code>Parsexp</code> library. If you just use Base, you’ll find that you don’t have <code>Sexp.of_string</code> at your disposal.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 Sexp.of_string "(1 2 3)";;
@@ -83,20 +57,14 @@ Sexp.of_string "(1 2 3)";;
 &gt;       This is not a function; it cannot be applied.
 </code></pre>
 </div>
-<p>That’s because, in an attempt to keep <code>Base</code> light, the
-s-expression parsing functions aren’t included. That said, you can
-always use them by calling out to the corresponding functions from the
-<code>Parsexp</code> library:</p>
+<p>That’s because, in an attempt to keep <code>Base</code> light, the s-expression parsing functions aren’t included. That said, you can always use them by calling out to the corresponding functions from the <code>Parsexp</code> library:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Parsexp.Single.parse_string_exn "(1 2 3)";;
 &gt;- : Sexp.t = (1 2 3)
 </code></pre>
 </div>
-</section>
-<p>In addition to providing the <code>Sexp</code> module, most of the
-base types in Base and Core support conversion to and from
-s-expressions. For example, we can use the conversion functions defined
-in the respective modules for integers, strings, and exceptions:</p>
+</div>
+<p>In addition to providing the <code>Sexp</code> module, most of the base types in Base and Core support conversion to and from s-expressions. For example, we can use the conversion functions defined in the respective modules for integers, strings, and exceptions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.sexp_of_t 3;;
 &gt;- : Sexp.t = 3
@@ -106,50 +74,35 @@ Exn.sexp_of_t (Invalid_argument "foo");;
 &gt;- : Sexp.t = (Invalid_argument foo)
 </code></pre>
 </div>
-<p>It’s also possible to convert container types such as lists or arrays
-that are polymorphic over the type of data they contain.</p>
+<p>It’s also possible to convert container types such as lists or arrays that are polymorphic over the type of data they contain.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show List.sexp_of_t;;
 &gt;val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a list -&gt; Sexp.t
 </code></pre>
 </div>
-<p>Notice that <code>List.sexp_of_t</code> is polymorphic and takes as
-its first argument another conversion function to handle the elements of
-the list to be converted. Base and Core use this scheme more generally
-for defining sexp converters for polymorphic types. Here’s an example of
-it in action.</p>
+<p>Notice that <code>List.sexp_of_t</code> is polymorphic and takes as its first argument another conversion function to handle the elements of the list to be converted. Base and Core use this scheme more generally for defining sexp converters for polymorphic types. Here’s an example of it in action.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 &gt;- : Sexp.t = (1 2 3)
 </code></pre>
 </div>
-<p>The functions that go in the other direction, <em>i.e.</em>,
-reconstruct an OCaml value from an s-expression, use essentially the
-same trick for handling polymorphic types, as shown below.</p>
+<p>The functions that go in the other direction, <em>i.e.</em>, reconstruct an OCaml value from an s-expression, use essentially the same trick for handling polymorphic types, as shown below.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 &gt;- : int list = [1; 2; 3]
 </code></pre>
 </div>
-<p>Such a function will fail with an exception when presented with an
-s-expression that doesn’t match the structure of the OCaml type in
-question.</p>
+<p>Such a function will fail with an exception when presented with an s-expression that doesn’t match the structure of the OCaml type in question.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 &gt;Exception:
 &gt;(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 </code></pre>
 </div>
-<section data-type="note" class="level4" id="more-on-top-level-printing">
-<h4>More on Top-Level Printing</h4>
-<p>The values of the s-expressions that we created were printed properly
-as s-expressions in the toplevel, instead of as the tree of
-<code>Atom</code> and <code>List</code> variants that they’re actually
-made of. <a data-primary="top-level printers" data-type="indexterm">&nbsp;</a></p>
-<p>This is due to OCaml’s facility for installing custom <em>top-level
-printers</em> that can rewrite some values into more top-level-friendly
-equivalents. They are generally installed as <code>ocamlfind</code>
-packages ending in <code>top</code>:</p>
+<div data-type="note">
+<h4 id="more-on-top-level-printing">More on Top-Level Printing</h4>
+<p>The values of the s-expressions that we created were printed properly as s-expressions in the toplevel, instead of as the tree of <code>Atom</code> and <code>List</code> variants that they’re actually made of. <a data-primary="top-level printers" data-type="indexterm">&nbsp;</a></p>
+<p>This is due to OCaml’s facility for installing custom <em>top-level printers</em> that can rewrite some values into more top-level-friendly equivalents. They are generally installed as <code>ocamlfind</code> packages ending in <code>top</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlfind list | grep top
 &gt;astring.top         (version: 0.8.3)
@@ -161,17 +114,11 @@ packages ending in <code>top</code>:</p>
 &gt;utop                (version: 2.1.0)
 </code></pre>
 </div>
-<p>The <code>core.top</code> package (which you should have loaded by
-default in your <code>.ocamlinit</code> file) loads in printers for the
-Core extensions already, so you don’t need to do anything special to use
-the s-expression printer.</p>
-</section>
+<p>The <code>core.top</code> package (which you should have loaded by default in your <code>.ocamlinit</code> file) loads in printers for the Core extensions already, so you don’t need to do anything special to use the s-expression printer.</p>
+</div>
 <section class="level3" id="s-expression-converters-for-new-types">
 <h3>S-Expression Converters for New Types</h3>
-<p>But what if you want a function to convert a brand new type to an
-s-expression? You can of course write it yourself manually. Here’s an
-example. <a data-secondary="generating from OCaml
-types" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>But what if you want a function to convert a brand new type to an s-expression? You can of course write it yourself manually. Here’s an example. <a data-secondary="generating from OCaml types" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type t = { foo: int; bar: float };;
 &gt;type t = { foo : int; bar : float; }
@@ -184,19 +131,8 @@ sexp_of_t { foo = 3; bar = -5.5 };;
 &gt;- : Sexp.t = ((foo 3) (bar -5.5))
 </code></pre>
 </div>
-<p>This is somewhat tiresome to write, and it gets more so when you
-consider the parser, i.e., <code>t_of_sexp</code>, which is considerably
-more complex. Writing this kind of parsing and printing code by hand is
-mechanical and error prone, not to mention a drag.</p>
-<p>Given how mechanical the code is, you could imagine writing a program
-that inspects the type definition and automatically generates the
-conversion code for you. As it turns out, there’s a <em>syntax
-extension</em> called <code>ppx_sexp_conv</code> which does just that,
-creating the required functions for every type annotated with
-<code>[@@deriving sexp]</code>. To enable <code>ppx_sexp_conv</code>,
-we’re going to enable <code>ppx_jane</code>, which is a larger
-collection of useful extensions that includes
-<code>ppx_sexp_conv</code>. <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a></p>
+<p>This is somewhat tiresome to write, and it gets more so when you consider the parser, i.e., <code>t_of_sexp</code>, which is considerably more complex. Writing this kind of parsing and printing code by hand is mechanical and error prone, not to mention a drag.</p>
+<p>Given how mechanical the code is, you could imagine writing a program that inspects the type definition and automatically generates the conversion code for you. As it turns out, there’s a <em>syntax extension</em> called <code>ppx_sexp_conv</code> which does just that, creating the required functions for every type annotated with <code>[@@deriving sexp]</code>. To enable <code>ppx_sexp_conv</code>, we’re going to enable <code>ppx_jane</code>, which is a larger collection of useful extensions that includes <code>ppx_sexp_conv</code>. <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
@@ -211,18 +147,13 @@ t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
 &gt;- : t = {foo = 3; bar = 35.}
 </code></pre>
 </div>
-<p>The syntax extension can be used outside of type declarations as
-well. As discussed in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, <code>[@@deriving sexp]</code> can
-be attached to the declaration of an exception to improve the quality of
-errors printed by OCaml’s top-level exception handler.</p>
-<p>Here are two exception declarations, one with an annotation, and one
-without:</p>
+<p>The syntax extension can be used outside of type declarations as well. As discussed in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, <code>[@@deriving sexp]</code> can be attached to the declaration of an exception to improve the quality of errors printed by OCaml’s top-level exception handler.</p>
+<p>Here are two exception declarations, one with an annotation, and one without:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">exception Ordinary_exn of string list;;
 exception Exn_with_sexp of string list [@@deriving sexp];;</code></pre>
 </div>
-<p> And here’s the difference in what you see when you throw these
-exceptions.</p>
+<p> And here’s the difference in what you see when you throw these exceptions.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">raise (Ordinary_exn ["1";"2";"3"]);;
 &gt;Exception: Ordinary_exn(_).
@@ -230,8 +161,7 @@ raise (Exn_with_sexp ["1";"2";"3"]);;
 &gt;Exception: (//toplevel//.Exn_with_sexp (1 2 3))
 </code></pre>
 </div>
-<p><code>ppx_sexp_conv</code> also supports inline declarations that
-generate converters for anonymous types.</p>
+<p><code>ppx_sexp_conv</code> also supports inline declarations that generate converters for anonymous types.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[%sexp_of: int * string ];;
 &gt;- : int * string -&gt; Sexp.t = &lt;fun&gt;
@@ -239,54 +169,25 @@ generate converters for anonymous types.</p>
 &gt;- : Sexp.t = (3 foo)
 </code></pre>
 </div>
-<p>The syntax extensions bundled with Base and Core almost all have the
-same basic structure: they auto-generate code based on type definitions,
-implementing functionality that you could in theory have implemented by
-hand, but with far less programmer effort.</p>
-<section data-type="note" class="level4" id="syntax-extensions-and-ppx">
-<h4>Syntax Extensions and PPX</h4>
-<p>OCaml doesn’t directly support deriving s-expression converters from
-type definitions. Instead, it provides a mechanism called <em>PPX</em>
-which allows you to add to the compilation pipeline code for
-transforming OCaml programs at the syntactic level, via the
-<code>-ppx</code> compiler flag.</p>
-<p>PPXs operate on OCaml’s <em>abstract syntax tree</em>, or AST, which
-is a data type that represents the syntax of a well-formed OCaml
-program. Annotations like <code>[%sexp_of: int]</code> or
-<code>[@@deriving sexp]</code> are part of special extensions to the
-syntax, called <em>extension points</em>, which were added to the
-language to give a place to put information that would be consumed by
-syntax extensions like <code>ppx_sexp_conv</code>. <a data-primary="PPX
-syntax extensions" data-type="indexterm">&nbsp;</a><a data-primary="syntax extension with
-PPX" data-type="indexterm">&nbsp;</a></p>
-<p><code>ppx_sexp_conv</code> is part of a family of syntax extensions,
-including <code>ppx_compare</code>, described in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>, and <code>ppx_fields</code>,
-described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>, that generate code based on type
-declarations. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a>
-<a data-secondary="ppx_compare" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_compare" data-type="indexterm">&nbsp;</a></p>
-<p>Using these extensions from a <code>dune</code> file is as simple as
-adding this directive to a <code>(library)</code> or
-<code>(executable)</code> stanza to indicate that the files should be
-run through a preprocessor:</p>
+<p>The syntax extensions bundled with Base and Core almost all have the same basic structure: they auto-generate code based on type definitions, implementing functionality that you could in theory have implemented by hand, but with far less programmer effort.</p>
+<div data-type="note">
+<h4 id="syntax-extensions-and-ppx">Syntax Extensions and PPX</h4>
+<p>OCaml doesn’t directly support deriving s-expression converters from type definitions. Instead, it provides a mechanism called <em>PPX</em> which allows you to add to the compilation pipeline code for transforming OCaml programs at the syntactic level, via the <code>-ppx</code> compiler flag.</p>
+<p>PPXs operate on OCaml’s <em>abstract syntax tree</em>, or AST, which is a data type that represents the syntax of a well-formed OCaml program. Annotations like <code>[%sexp_of: int]</code> or <code>[@@deriving sexp]</code> are part of special extensions to the syntax, called <em>extension points</em>, which were added to the language to give a place to put information that would be consumed by syntax extensions like <code>ppx_sexp_conv</code>. <a data-primary="PPX syntax extensions" data-type="indexterm">&nbsp;</a><a data-primary="syntax extension with PPX" data-type="indexterm">&nbsp;</a></p>
+<p><code>ppx_sexp_conv</code> is part of a family of syntax extensions, including <code>ppx_compare</code>, described in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>, and <code>ppx_fields</code>, described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>, that generate code based on type declarations. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_compare" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_compare" data-type="indexterm">&nbsp;</a></p>
+<p>Using these extensions from a <code>dune</code> file is as simple as adding this directive to a <code>(library)</code> or <code>(executable)</code> stanza to indicate that the files should be run through a preprocessor:</p>
 <div class="highlight">
 <pre><code class="language-sexp">(executable
   (name hello)
   (preprocess (pps ppx_sexp_conv))
 )</code></pre>
 </div>
-</section>
+</div>
 </section>
 </section>
 <section class="level2" id="the-sexp-format">
 <h2>The Sexp Format</h2>
-<p>The textual representation of s-expressions is pretty
-straightforward. An s-expression is written down as a nested
-parenthetical expression, with whitespace-separated strings as the
-atoms. Quotes are used for atoms that contain parentheses or spaces
-themselves; backslash is the escape character; and semicolons are used
-to introduce single-line comments. Thus, the following file,
-<code>example.scm</code>: <a data-secondary="format
-of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>The textual representation of s-expressions is pretty straightforward. An s-expression is written down as a nested parenthetical expression, with whitespace-separated strings as the atoms. Quotes are used for atoms that contain parentheses or spaces themselves; backslash is the escape character; and semicolons are used to introduce single-line comments. Thus, the following file, <code>example.scm</code>: <a data-secondary="format of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">((foo 3.3) ;; This is a comment
  (bar "this is () an \" atom"))</code></pre>
@@ -297,21 +198,17 @@ of" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 &gt;- : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 </code></pre>
 </div>
-<p> As you can see, the comment is not part of the loaded
-s-expression.</p>
+<p> As you can see, the comment is not part of the loaded s-expression.</p>
 <p>All in, the s-expression format supports three comment syntaxes:</p>
 <dl>
 <dt><code>;</code></dt>
-<dd>
-Comments out everything to the end of line
+<dd>Comments out everything to the end of line
 </dd>
 <dt><code>#|,|#</code></dt>
-<dd>
-Delimiters for commenting out a block
+<dd>Delimiters for commenting out a block
 </dd>
 <dt><code>#;</code></dt>
-<dd>
-Comments out the first complete s-expression that follows
+<dd>Comments out the first complete s-expression that follows
 </dd>
 </dl>
 <p>The following example shows all of these in action:</p>
@@ -334,10 +231,7 @@ Comments out the first complete s-expression that follows
 &gt;- : Sexp.t = ((this is included) (this stays) (and now we're done))
 </code></pre>
 </div>
-<p>If we introduce an error into our s-expression, by, say, creating a
-file <code>broken_example.scm</code> which is <code>example.scm</code>,
-without the open-paren in front of <code>bar</code>, we’ll get a parse
-error:</p>
+<p>If we introduce an error into our s-expression, by, say, creating a file <code>broken_example.scm</code> which is <code>example.scm</code>, without the open-paren in front of <code>bar</code>, we’ll get a parse error:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Sexp.load_sexp "example_broken.scm";;
 &gt;Exception:
@@ -349,20 +243,9 @@ error:</p>
 </section>
 <section class="level2" id="preserving-invariants">
 <h2>Preserving Invariants</h2>
-<p>Modules and module interfaces are an important part of how OCaml code
-is structured and designed. One of the key reasons we use module
-interfaces is to make it possible to enforce invariants. In particular,
-by restricting how values of a given type can be created and
-transformed, interfaces let you enforce various rules, including
-ensuring that your data is well-formed. <a data-secondary="preserving invariants in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
-<p>When you add s-expression converters (or really any deserializer) to
-an API, you’re adding an alternate path for creating values, and if
-you’re not careful, that alternate path can violate the carefully
-maintained invariants of your code.</p>
-<p>In the following, we’ll show how this problem can crop up, and how to
-resolve it. Let’s consider a module <code>Int_interval</code> for
-representing closed integer intervals, similar to the one described in
-<a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>.</p>
+<p>Modules and module interfaces are an important part of how OCaml code is structured and designed. One of the key reasons we use module interfaces is to make it possible to enforce invariants. In particular, by restricting how values of a given type can be created and transformed, interfaces let you enforce various rules, including ensuring that your data is well-formed. <a data-secondary="preserving invariants in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>When you add s-expression converters (or really any deserializer) to an API, you’re adding an alternate path for creating values, and if you’re not careful, that alternate path can violate the carefully maintained invariants of your code.</p>
+<p>In the following, we’ll show how this problem can crop up, and how to resolve it. Let’s consider a module <code>Int_interval</code> for representing closed integer intervals, similar to the one described in <a data-type="xref" href="functors.html#functors">Chapter 10, Functors</a>.</p>
 <p>Here’s the signature.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t [@@deriving sexp]
@@ -374,11 +257,7 @@ val create : int -&gt; int -&gt; t
 val is_empty : t -&gt; bool
 val contains : t -&gt; int -&gt; bool</code></pre>
 </div>
-<p>In addition to basic operations for creating and evaluating
-intervals, this interface also exposes s-expression converters. Note
-that the <code>[@@deriving sexp]</code> syntax works in a signature as
-well, but in this case, it just adds the signature for the conversion
-functions, not the implementation.</p>
+<p>In addition to basic operations for creating and evaluating intervals, this interface also exposes s-expression converters. Note that the <code>[@@deriving sexp]</code> syntax works in a signature as well, but in this case, it just adds the signature for the conversion functions, not the implementation.</p>
 <p>Here’s the implementation of <code>Int_interval</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
@@ -400,14 +279,8 @@ let contains i x =
   | Empty -&gt; false
   | Range (low, high) -&gt; x &gt;= low &amp;&amp; x &lt;= high</code></pre>
 </div>
-<p>One critical invariant here is that <code>Range</code> is only used
-to represent non-empty intervals. A call to <code>create</code> with a
-lower bound above the upper bound will return an <code>Empty</code>.</p>
-<p>Now, let’s demonstrate the functionality with some tests, using the
-expect test framework described in <a data-type="xref" href="testing.html#expect-tests">Chapter 17, Testing</a>. First, we’ll write a test helper that
-takes an interval and a list of points, and prints out the result of
-checking for emptiness, and a classification of which points are inside
-and outside the interval.</p>
+<p>One critical invariant here is that <code>Range</code> is only used to represent non-empty intervals. A call to <code>create</code> with a lower bound above the upper bound will return an <code>Empty</code>.</p>
+<p>Now, let’s demonstrate the functionality with some tests, using the expect test framework described in <a data-type="xref" href="testing.html#expect-tests">Chapter 17, Testing</a>. First, we’ll write a test helper that takes an interval and a list of points, and prints out the result of checking for emptiness, and a classification of which points are inside and outside the interval.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let test_interval i points =
   let in_, out =
@@ -443,12 +316,8 @@ and outside the interval.</p>
     in:
     out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]</code></pre>
 </div>
-<p> Note that the result of checking <code>is_empty</code> lines up with
-the test of what elements are contained and not contained in the
-interval.</p>
-<p>Now, let’s test out the s-expression converters, starting with
-<code>sexp_of_t</code>. This test lets you see that a flipped-bounds
-interval is represented by <code>Empty</code>.</p>
+<p> Note that the result of checking <code>is_empty</code> lines up with the test of what elements are contained and not contained in the interval.</p>
+<p>Now, let’s test out the s-expression converters, starting with <code>sexp_of_t</code>. This test lets you see that a flipped-bounds interval is represented by <code>Empty</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test "test to_sexp" =
   let t lo hi =
@@ -462,12 +331,7 @@ interval is represented by <code>Empty</code>.</p>
   t 6 3;
   [%expect {| Empty |}]</code></pre>
 </div>
-<p>The next thing to check is the <code>t_of_sexp</code> converters, and
-here, we run into a problem. In particular, consider what would happen
-if we create an interval from the s-expression <code>(Range 6 3)</code>.
-That’s an s-expression that shouldn’t ever be generated by the library,
-since intervals should never have swapped bounds. But there’s nothing to
-stop us from generating that s-expression by hand.</p>
+<p>The next thing to check is the <code>t_of_sexp</code> converters, and here, we run into a problem. In particular, consider what would happen if we create an interval from the s-expression <code>(Range 6 3)</code>. That’s an s-expression that shouldn’t ever be generated by the library, since intervals should never have swapped bounds. But there’s nothing to stop us from generating that s-expression by hand.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test "test (range 6 3)" =
   let i = Int_interval.t_of_sexp (Sexp.of_string "(Range 6 3)") in
@@ -478,27 +342,15 @@ stop us from generating that s-expression by hand.</p>
     in:
     out: 1, 2, 3, 4, 5, 6, 7, 8, 9 |}]</code></pre>
 </div>
-<p>You can see something bad has happened, since this interval is
-detected as non-empty, but doesn’t appear to contain anything. The
-problem traces back to the fact that <code>t_of_sexp</code> doesn’t
-check the same invariant that <code>create</code> does. We can fix this,
-by overriding the auto-generated s-expression converter with one that
-checks the invariant, in this case, by calling <code>create</code>.</p>
+<p>You can see something bad has happened, since this interval is detected as non-empty, but doesn’t appear to contain anything. The problem traces back to the fact that <code>t_of_sexp</code> doesn’t check the same invariant that <code>create</code> does. We can fix this, by overriding the auto-generated s-expression converter with one that checks the invariant, in this case, by calling <code>create</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let t_of_sexp sexp =
   match t_of_sexp sexp with
   | Empty -&gt; Empty
   | Range (x, y) -&gt; create x y</code></pre>
 </div>
-<p>Overriding an existing function definition with a new one is
-perfectly acceptable in OCaml. Since <code>t_of_sexp</code> is defined
-with an ordinary <code>let</code> rather than a <code>let rec</code>,
-the call to the <code>t_of_sexp</code> goes to the derived version of
-the function, rather than being a recursive call.</p>
-<p>Note that, rather than fixing up the invariant, we could have instead
-thrown an exception if the invariant was violated. In any case, the
-approach we took means that rerunning our test produces a more
-consistent and sensible result.</p>
+<p>Overriding an existing function definition with a new one is perfectly acceptable in OCaml. Since <code>t_of_sexp</code> is defined with an ordinary <code>let</code> rather than a <code>let rec</code>, the call to the <code>t_of_sexp</code> goes to the derived version of the function, rather than being a recursive call.</p>
+<p>Note that, rather than fixing up the invariant, we could have instead thrown an exception if the invariant was violated. In any case, the approach we took means that rerunning our test produces a more consistent and sensible result.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let%expect_test "test (range 6 3)" =
   let i = Int_interval.t_of_sexp (Sexp.of_string "(Range 6 3)") in
@@ -512,12 +364,7 @@ consistent and sensible result.</p>
 </section>
 <section class="level2" id="getting-good-error-messages">
 <h2>Getting Good Error Messages</h2>
-<p>There are two steps to deserializing a type from an s-expression:
-first, converting the bytes in a file to an s-expression; and the
-second, converting that s-expression into the type in question. One
-problem with this is that it can be hard to localize errors to the right
-place using this scheme. Consider the following example. <a data-secondary="s-expressions" data-primary="debugging" data-type="indexterm">&nbsp;</a><a data-secondary="error
-messages with s-expressions" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="deserializing a type from" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>There are two steps to deserializing a type from an s-expression: first, converting the bytes in a file to an s-expression; and the second, converting that s-expression into the type in question. One problem with this is that it can be hard to localize errors to the right place using this scheme. Consider the following example. <a data-secondary="s-expressions" data-primary="debugging" data-type="indexterm">&nbsp;</a><a data-secondary="error messages with s-expressions" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="deserializing a type from" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 
@@ -538,9 +385,7 @@ let () =
  (b not-a-string)
  (c 1.0))</code></pre>
 </div>
-<p> you’ll get the following error. (Note that we set the
-<code>OCAMLRUNPARAM</code> environment variable to suppress the stack
-trace here.)</p>
+<p> you’ll get the following error. (Note that we set the <code>OCAMLRUNPARAM</code> environment variable to suppress the stack trace here.)</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">OCAMLRUNPARAM=b=0 dune exec -- ./read_foo.exe
 &gt;Uncaught exception:
@@ -550,12 +395,8 @@ trace here.)</p>
 &gt;
 [2]</code></pre>
 </div>
-<p>If all you have is the error message and the string, it’s not
-terribly informative. In particular, you know that the parsing errored
-out on the atom “not-an-integer,” but you don’t know which one! In a
-large file, this kind of bad error message can be pure misery.</p>
-<p>But there’s hope! We can make a small change to the code to improve
-the error message greatly:</p>
+<p>If all you have is the error message and the string, it’s not terribly informative. In particular, you know that the parsing errored out on the atom “not-an-integer,” but you don’t know which one! In a large file, this kind of bad error message can be pure misery.</p>
+<p>But there’s hope! We can make a small change to the code to improve the error message greatly:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">open Core
 
@@ -580,34 +421,15 @@ let () =
 &gt;
 [2]</code></pre>
 </div>
-<p>Here, <code>example.scm:2:5</code> tells us that the error occurred
-in the file <code>"example.scm"</code> on line 2, character 5. This is a
-much better start for figuring out what went wrong. The ability to find
-the precise location of the error depends on the sexp converter
-reporting errors using the function <code>of_sexp_error</code>. This is
-already done by converters generated by <code>ppx_sexp_conv</code>, but
-you should make sure to do the same when you write custom
-converters.</p>
+<p>Here, <code>example.scm:2:5</code> tells us that the error occurred in the file <code>"example.scm"</code> on line 2, character 5. This is a much better start for figuring out what went wrong. The ability to find the precise location of the error depends on the sexp converter reporting errors using the function <code>of_sexp_error</code>. This is already done by converters generated by <code>ppx_sexp_conv</code>, but you should make sure to do the same when you write custom converters.</p>
 </section>
 <section class="level2" id="sexp-conversion-directives">
 <h2>Sexp-Conversion Directives</h2>
-<p><code>ppx_sexp_conv</code> supports a collection of directives for
-modifying the default behavior of the auto-generated sexp converters.
-These directives allow you to customize the way in which types are
-represented as s-expressions without having to write a custom converter.
-<a data-secondary="directives" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p><code>ppx_sexp_conv</code> supports a collection of directives for modifying the default behavior of the auto-generated sexp converters. These directives allow you to customize the way in which types are represented as s-expressions without having to write a custom converter. <a data-secondary="directives" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
 <section class="level3" id="sexp_opaque">
 <h3><code>@sexp.opaque</code></h3>
-<p>The most commonly used directive is <code>[@sexp_opaque]</code>,
-whose purpose is to mark a given component of a type as being
-unconvertible. Anything marked with the <code>[@sexp.opaque]</code>
-attribute will be presented as the atom <code>&lt;opaque&gt;</code> by
-the to-sexp converter, and will trigger an exception from the from-sexp
-converter. <a data-secondary="sexp.opaque" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
-<p>Note that the type of a component marked as opaque doesn’t need to
-have a sexp converter defined. By default, if we define a type without a
-sexp converter and then try to use it as part of another type with a
-sexp converter, we’ll error out:</p>
+<p>The most commonly used directive is <code>[@sexp_opaque]</code>, whose purpose is to mark a given component of a type as being unconvertible. Anything marked with the <code>[@sexp.opaque]</code> attribute will be presented as the atom <code>&lt;opaque&gt;</code> by the to-sexp converter, and will trigger an exception from the from-sexp converter. <a data-secondary="sexp.opaque" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p>Note that the type of a component marked as opaque doesn’t need to have a sexp converter defined. By default, if we define a type without a sexp converter and then try to use it as part of another type with a sexp converter, we’ll error out:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type no_converter = int * int;;
 &gt;type no_converter = int * int
@@ -616,24 +438,20 @@ type t = { a: no_converter; b: string } [@@deriving sexp];;
 &gt;Error: Unbound value no_converter_of_sexp
 </code></pre>
 </div>
-<p> But with <code>[@sexp.opaque]</code>, we can embed our opaque
-<code>no_converter</code> type within the other data structure without
-an error.</p>
+<p> But with <code>[@sexp.opaque]</code>, we can embed our opaque <code>no_converter</code> type within the other data structure without an error.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t =
   { a: (no_converter [@sexp.opaque]);
     b: string
   } [@@deriving sexp];;</code></pre>
 </div>
-<p> And if we now convert a value of this type to an s-expression, we’ll
-see the contents of field <code>a</code> marked as opaque:</p>
+<p> And if we now convert a value of this type to an s-expression, we’ll see the contents of field <code>a</code> marked as opaque:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_t { a = (3,4); b = "foo" };;
 &gt;- : Sexp.t = ((a &lt;opaque&gt;) (b foo))
 </code></pre>
 </div>
-<p>Note that <code>t_of_sexp</code> is still generated, but will fail at
-runtime when called.</p>
+<p>Note that <code>t_of_sexp</code> is still generated, but will fail at runtime when called.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
 &gt;Exception:
@@ -641,32 +459,24 @@ runtime when called.</p>
 &gt;  (invalid_sexp whatever))
 </code></pre>
 </div>
-<p>It might seem perverse to create a parser for a type containing a
-<code>[@sexp.opaque]</code> value, but it’s not as useless as it seems.
-In particular, such a converter won’t necessarily fail on all inputs.
-Consider a record containing a list of opaque values:</p>
+<p>It might seem perverse to create a parser for a type containing a <code>[@sexp.opaque]</code> value, but it’s not as useless as it seems. In particular, such a converter won’t necessarily fail on all inputs. Consider a record containing a list of opaque values:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t =
   { a: (no_converter [@sexp.opaque]) list;
     b: string
   } [@@deriving sexp];;</code></pre>
 </div>
-<p> The <code>t_of_sexp</code> function can still succeed, as long as
-the list is empty.</p>
+<p> The <code>t_of_sexp</code> function can still succeed, as long as the list is empty.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
 &gt;- : t = {a = []; b = "foo"}
 </code></pre>
 </div>
-<p>Sometimes, though, one or other of the converters is useless, and you
-want to explicitly choose what to generate. You can do that by using
-<code>[@@deriving sexp_of]</code> or <code>[@@deriving of_sexp]</code>
-instead of <code>[@@deriving sexp]</code>.</p>
+<p>Sometimes, though, one or other of the converters is useless, and you want to explicitly choose what to generate. You can do that by using <code>[@@deriving sexp_of]</code> or <code>[@@deriving of_sexp]</code> instead of <code>[@@deriving sexp]</code>.</p>
 </section>
 <section class="level3" id="sexp_list">
 <h3><code>@sexp.list</code></h3>
-<p>Sometimes, sexp converters have more parentheses than one would
-ideally like. Consider the following variant type. <a data-secondary="sexp.list" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p>Sometimes, sexp converters have more parentheses than one would ideally like. Consider the following variant type. <a data-secondary="sexp.list" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type compatible_versions =
   | Specific of string list
@@ -680,9 +490,7 @@ ideally like. Consider the following variant type. <a data-secondary="sexp.list"
 &gt;- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
 </code></pre>
 </div>
-<p>The set of parens around the list of versions is arguably excessive.
-We can drop those parens using the <code>[@sexp.list]</code>
-directive.</p>
+<p>The set of parens around the list of versions is arguably excessive. We can drop those parens using the <code>[@sexp.list]</code> directive.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type compatible_versions =
   | Specific of string list [@sexp.list]
@@ -697,9 +505,7 @@ directive.</p>
 </section>
 <section class="level3" id="sexp_option">
 <h3><code>@sexp.option</code></h3>
-<p>By default, optional values are represented either as <code>()</code>
-for <code>None</code>. Here’s an example of a record type containing an
-option: <a data-secondary="sexp.option" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p>By default, optional values are represented either as <code>()</code> for <code>None</code>. Here’s an example of a record type containing an option: <a data-secondary="sexp.option" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t =
   { a: int option;
@@ -714,20 +520,14 @@ sexp_of_t { a = Some 3; b = "hello" };;
 &gt;- : Sexp.t = ((a (3)) (b hello))
 </code></pre>
 </div>
-<p>This all works as you might expect, but in the context of a record,
-you might want a different behavior, which is to make the field itself
-optional. The <code>[@sexp.option]</code> directive gives you just
-that.</p>
+<p>This all works as you might expect, but in the context of a record, you might want a different behavior, which is to make the field itself optional. The <code>[@sexp.option]</code> directive gives you just that.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type t =
   { a: int option [@sexp.option];
     b: string;
   } [@@deriving sexp]</code></pre>
 </div>
-<p> And here is the new syntax. Note that when the value of
-<code>a</code> is <code>Some</code>, it shows up in the s-expression
-unadorned, and when it’s <code>None</code>, the entire record field is
-omitted.</p>
+<p> And here is the new syntax. Note that when the value of <code>a</code> is <code>Some</code>, it shows up in the s-expression unadorned, and when it’s <code>None</code>, the entire record field is omitted.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_t { a = Some 3; b = "hello" };;
 &gt;- : Sexp.t = ((a 3) (b hello))
@@ -738,11 +538,8 @@ sexp_of_t { a = None; b = "hello" };;
 </section>
 <section class="level3" id="specifying-defaults">
 <h3>Specifying Defaults</h3>
-<p><code>[@sexp.option]</code> gives you a way of interpreting the
-s-expression for a record where some of the fields are left unspecified.
-The <code>[@default]</code> directive provides another. <a data-secondary="specifying defaults in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a> <a data-secondary="default" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
-<p>Consider the following type, which represents the configuration of a
-very simple web server:</p>
+<p><code>[@sexp.option]</code> gives you a way of interpreting the s-expression for a record where some of the fields are left unspecified. The <code>[@default]</code> directive provides another. <a data-secondary="specifying defaults in" data-primary="s-expressions" data-type="indexterm">&nbsp;</a> <a data-secondary="default" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p>Consider the following type, which represents the configuration of a very simple web server:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type http_server_config = {
   web_root: string;
@@ -750,9 +547,7 @@ very simple web server:</p>
   addr: string;
 } [@@deriving sexp];;</code></pre>
 </div>
-<p>One could imagine making some of these parameters optional; in
-particular, by default, we might want the web server to bind to port 80,
-and to listen as localhost. We can do this as follows:</p>
+<p>One could imagine making some of these parameters optional; in particular, by default, we might want the web server to bind to port 80, and to listen as localhost. We can do this as follows:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type http_server_config = {
   web_root: string;
@@ -760,9 +555,7 @@ and to listen as localhost. We can do this as follows:</p>
   addr: string [@default "localhost"];
 } [@@deriving sexp];;</code></pre>
 </div>
-<p>Now, if we try to convert an s-expression that specifies only the
-<code>web_root</code>, we’ll see that the other values are filled in
-with the desired defaults:</p>
+<p>Now, if we try to convert an s-expression that specifies only the <code>web_root</code>, we’ll see that the other values are filled in with the desired defaults:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let cfg =
   "((web_root /var/www/html))"
@@ -772,16 +565,13 @@ with the desired defaults:</p>
 &gt;  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 </code></pre>
 </div>
-<p>If we convert the configuration back out to an s-expression, you’ll
-notice that all of the fields are present, even though they’re not
-strictly necessary:</p>
+<p>If we convert the configuration back out to an s-expression, you’ll notice that all of the fields are present, even though they’re not strictly necessary:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config cfg;;
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
 </code></pre>
 </div>
-<p>We could make the generated s-expression also drop default values, by
-using the <code>[@sexp_drop_default]</code> directive: <a data-secondary="sexp_drop_default" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
+<p>We could make the generated s-expression also drop default values, by using the <code>[@sexp_drop_default]</code> directive: <a data-secondary="sexp_drop_default" data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">type http_server_config = {
   web_root: string;
@@ -801,10 +591,7 @@ sexp_of_http_server_config cfg;;
 &gt;- : Sexp.t = ((web_root /var/www/html))
 </code></pre>
 </div>
-<p>As you can see, the fields that are at their default values are
-omitted from the generated s-expression. On the other hand, if we
-convert a config with non-default values, they will show up in the
-generated s-expression.</p>
+<p>As you can see, the fields that are at their default values are omitted from the generated s-expression. On the other hand, if we convert a config with non-default values, they will show up in the generated s-expression.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">sexp_of_http_server_config { cfg with port = 8080 };;
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 8080))
@@ -813,27 +600,16 @@ sexp_of_http_server_config
 &gt;- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
 </code></pre>
 </div>
-<p>This can be very useful in designing config file formats that are
-both reasonably terse and easy to generate and maintain. It can also be
-useful for backwards compatibility: if you add a new field to your
-config record but make that field optional, then you should still be
-able to parse older versions of your config.</p>
-<p>The exact attribute you use depends on the comparison functions
-available over the type that you wish to drop:</p>
+<p>This can be very useful in designing config file formats that are both reasonably terse and easy to generate and maintain. It can also be useful for backwards compatibility: if you add a new field to your config record but make that field optional, then you should still be able to parse older versions of your config.</p>
+<p>The exact attribute you use depends on the comparison functions available over the type that you wish to drop:</p>
 <ul>
-<li><code>[@sexp_drop_default.compare]</code> if the type supports
-<code>[%compare]</code></li>
-<li><code>[@sexp_drop_default.equal]</code> if the type supports
-<code>[%equal]</code></li>
-<li><code>[@sexp_drop_default.sexp]</code> if you want to compare the
-sexp representations</li>
-<li><code>[@sexp_drop_default f]</code> and give an explicit equality
-function</li>
+<li><code>[@sexp_drop_default.compare]</code> if the type supports <code>[%compare]</code></li>
+<li><code>[@sexp_drop_default.equal]</code> if the type supports <code>[%equal]</code></li>
+<li><code>[@sexp_drop_default.sexp]</code> if you want to compare the sexp representations</li>
+<li><code>[@sexp_drop_default f]</code> and give an explicit equality function</li>
 </ul>
-<p>Most of the type definitions supplied with Base and Core provide the
-comparison and equality operations, so those are reasonable default
-attributes to use.</p>
+<p>Most of the type definitions supplied with Base and Core provide the comparison and equality operations, so those are reasonable default attributes to use.</p>
 </section>
 </section>
 </section>
-</article></div><a href="platform.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 21</small>The OCaml Platform</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="platform.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 21</small>The OCaml Platform</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml/book">GitHub</a></li><li><a href="https://www.amazon.com/Real-World-OCaml-Functional-Programming/dp/100912580X/">Amazon</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

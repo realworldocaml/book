@@ -1,38 +1,15 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variables and Functions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variables-and-functions">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variables and Functions - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (Oct 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.org/p/core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variables-and-functions">
 <h1>Variables and Functions</h1>
-<p>Variables and functions are fundamental ideas that show up in
-virtually all programming languages. OCaml has a different take on these
-concepts than most languages you’re likely to have encountered, so this
-chapter will cover OCaml’s approach to variables and functions in some
-detail, starting with the basics of how to define a variable, and ending
-with the intricacies of functions with labeled and optional
-arguments.</p>
-<p>Don’t be discouraged if you find yourself overwhelmed by some of the
-details, especially toward the end of the chapter. The concepts here are
-important, but if they don’t connect for you on your first read, you
-should return to this chapter after you’ve gotten a better sense of the
-rest of the language.</p>
+<p>Variables and functions are fundamental ideas that show up in virtually all programming languages. OCaml has a different take on these concepts than most languages you’re likely to have encountered, so this chapter will cover OCaml’s approach to variables and functions in some detail, starting with the basics of how to define a variable, and ending with the intricacies of functions with labeled and optional arguments.</p>
+<p>Don’t be discouraged if you find yourself overwhelmed by some of the details, especially toward the end of the chapter. The concepts here are important, but if they don’t connect for you on your first read, you should return to this chapter after you’ve gotten a better sense of the rest of the language.</p>
 <section class="level2" id="variables">
 <h2>Variables</h2>
-<p>At its simplest, a variable is an identifier whose meaning is bound
-to a particular value. In OCaml these bindings are often introduced
-using the <code>let</code> keyword. We can type a so-called
-<em>top-level</em> <code>let</code> binding with the following syntax.
-Note that variable names must start with a lowercase letter or an
-underscore. <a data-secondary="top-level" data-primary="bindings" data-type="indexterm">&nbsp;</a><a data-primary="top-level bindings" data-type="indexterm">&nbsp;</a><a data-secondary="top-level bindings" data-primary="let
-syntax" data-type="indexterm">&nbsp;</a></p>
+<p>At its simplest, a variable is an identifier whose meaning is bound to a particular value. In OCaml these bindings are often introduced using the <code>let</code> keyword. We can type a so-called <em>top-level</em> <code>let</code> binding with the following syntax. Note that variable names must start with a lowercase letter or an underscore. <a data-secondary="top-level" data-primary="bindings" data-type="indexterm">&nbsp;</a><a data-primary="top-level bindings" data-type="indexterm">&nbsp;</a><a data-secondary="top-level bindings" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">let &lt;variable&gt; = &lt;expr&gt;</code></pre>
 </div>
-<p> As we’ll see when we get to the module system in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, this same syntax is
-used for <code>let</code> bindings at the top level of a module.</p>
-<p>Every variable binding has a <em>scope</em>, which is the portion of
-the code that can refer to that binding. When using <code>utop</code>,
-the scope of a top-level <code>let</code> binding is everything that
-follows it in the session. When it shows up in a module, the scope is
-the remainder of that module.<a data-secondary="scope
-of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-secondary="scope of" data-primary="let bindings" data-type="indexterm">&nbsp;</a><a data-primary="scope" data-type="indexterm">&nbsp;</a><a data-secondary="top-level" data-primary="let
-bindings" data-type="indexterm">&nbsp;</a></p>
+<p> As we’ll see when we get to the module system in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>, this same syntax is used for <code>let</code> bindings at the top level of a module.</p>
+<p>Every variable binding has a <em>scope</em>, which is the portion of the code that can refer to that binding. When using <code>utop</code>, the scope of a top-level <code>let</code> binding is everything that follows it in the session. When it shows up in a module, the scope is the remainder of that module.<a data-secondary="scope of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-secondary="scope of" data-primary="let bindings" data-type="indexterm">&nbsp;</a><a data-primary="scope" data-type="indexterm">&nbsp;</a><a data-secondary="top-level" data-primary="let bindings" data-type="indexterm">&nbsp;</a></p>
 <p>Here’s a simple example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
@@ -44,16 +21,11 @@ let z = x + y;;
 &gt;val z : int = 7
 </code></pre>
 </div>
-<p><code>let</code> can also be used to create a variable binding whose
-scope is limited to a particular expression, using the following
-syntax.</p>
+<p><code>let</code> can also be used to create a variable binding whose scope is limited to a particular expression, using the following syntax.</p>
 <div class="highlight">
 <pre><code class="language-clike">let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;</code></pre>
 </div>
-<p> This first evaluates <em><code>expr1</code></em> and then evaluates
-<em><code>expr2</code></em> with <em><code>variable</code></em> bound to
-whatever value was produced by the evaluation of
-<em><code>expr1</code></em>. Here’s how it looks in practice.</p>
+<p> This first evaluates <em><code>expr1</code></em> and then evaluates <em><code>expr2</code></em> with <em><code>variable</code></em> bound to whatever value was produced by the evaluation of <em><code>expr1</code></em>. Here’s how it looks in practice.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";;
 &gt;val languages : string = "OCaml,Perl,C++,C"
@@ -63,19 +35,14 @@ let dashed_languages =
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
-<p> Note that the scope of <code>language_list</code> is just the
-expression <code>String.concat ~sep:"-" language_list</code> and is not
-available at the toplevel, as we can see if we try to access it now.
-[let bindings/local]</p>
+<p> Note that the scope of <code>language_list</code> is just the expression <code>String.concat ~sep:"-" language_list</code> and is not available at the toplevel, as we can see if we try to access it now. [let bindings/local]</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">language_list;;
 &gt;Line 1, characters 1-14:
 &gt;Error: Unbound value language_list
 </code></pre>
 </div>
-<p>A <code>let</code> binding in an inner scope can <em>shadow</em>, or
-hide, the definition from an outer scope. So, for example, we could have
-written the <code>dashed_languages</code> example as follows. <a data-secondary="shadowing of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-primary="shadowing" data-type="indexterm">&nbsp;</a></p>
+<p>A <code>let</code> binding in an inner scope can <em>shadow</em>, or hide, the definition from an outer scope. So, for example, we could have written the <code>dashed_languages</code> example as follows. <a data-secondary="shadowing of" data-primary="variables" data-type="indexterm">&nbsp;</a><a data-primary="shadowing" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = "OCaml,Perl,C++,C";;
 &gt;val languages : string = "OCaml,Perl,C++,C"
@@ -85,22 +52,13 @@ let dashed_languages =
 &gt;val dashed_languages : string = "OCaml-Perl-C++-C"
 </code></pre>
 </div>
-<p> This time, in the inner scope we called the list of strings
-<code>languages</code> instead of <code>language_list</code>, thus
-hiding the original definition of <code>languages</code>. But once the
-definition of <code>dashed_languages</code> is complete, the inner scope
-has closed and the original definition of languages is still
-available.</p>
+<p> This time, in the inner scope we called the list of strings <code>languages</code> instead of <code>language_list</code>, thus hiding the original definition of <code>languages</code>. But once the definition of <code>dashed_languages</code> is complete, the inner scope has closed and the original definition of languages is still available.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;;
 &gt;- : string = "OCaml,Perl,C++,C"
 </code></pre>
 </div>
-<p>One common idiom is to use a series of nested
-<code>let</code>/<code>in</code> expressions to build up the components
-of a larger computation. Thus, we might write. <a data-secondary="nested bindings" data-primary="let
-syntax" data-type="indexterm">&nbsp;</a><a data-primary="nested let
-binding" data-type="indexterm">&nbsp;</a></p>
+<p>One common idiom is to use a series of nested <code>let</code>/<code>in</code> expressions to build up the components of a larger computation. Thus, we might write. <a data-secondary="nested bindings" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-primary="nested let binding" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area_of_ring inner_radius outer_radius =
   let pi = Float.pi in
@@ -111,10 +69,7 @@ area_of_ring 1. 3.;;
 &gt;- : float = 25.132741228718345
 </code></pre>
 </div>
-<p>It’s important not to confuse a sequence of <code>let</code> bindings
-with the modification of a mutable variable. For example, consider how
-<code>area_of_ring</code> would work if we had instead written this
-purposefully confusing bit of code:</p>
+<p>It’s important not to confuse a sequence of <code>let</code> bindings with the modification of a mutable variable. For example, consider how <code>area_of_ring</code> would work if we had instead written this purposefully confusing bit of code:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area_of_ring inner_radius outer_radius =
   let pi = Float.pi in
@@ -126,64 +81,25 @@ purposefully confusing bit of code:</p>
 &gt;val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Here, we redefined <code>pi</code> to be zero after the definition of
-<code>area_of_circle</code>. You might think that this would mean that
-the result of the computation would now be zero, but in fact, the
-behavior of the function is unchanged. That’s because the original
-definition of <code>pi</code> wasn’t changed; it was just shadowed,
-which means that any subsequent reference to <code>pi</code> would see
-the new definition of <code>pi</code> as <code>0</code>, but earlier
-references would still see the old one. But there is no later use of
-<code>pi</code>, so the binding of <code>pi</code> to <code>0.</code>
-made no difference at all. This explains the warning produced by the
-toplevel telling us that there is an unused variable.</p>
-<p>In OCaml, <code>let</code> bindings are immutable. There are many
-kinds of mutable values in OCaml, which we’ll discuss in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, but there are no mutable
-variables.</p>
-<section data-type="note" class="level4" id="why-dont-variables-vary">
-<h4>Why Don’t Variables Vary?</h4>
-<p>One source of confusion for people new to OCaml is the fact that
-variables are immutable. This seems pretty surprising even on linguistic
-terms. Isn’t the whole point of a variable that it can vary?<a data-secondary="immutability of" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
-<p>The answer to this is that variables in OCaml (and generally in
-functional languages) are really more like variables in an equation than
-a variable in an imperative language. If you think about the
-mathematical identity <code>x(y + z) = xy + xz</code>, there’s no notion
-of mutating the variables <code>x</code>, <code>y</code>, and
-<code>z</code>. They vary in the sense that you can instantiate this
-equation with different numbers for those variables, and it still
-holds.</p>
-<p>The same is true in a functional language. A function can be applied
-to different inputs, and thus its variables will take on different
-values, even without mutation.</p>
-</section>
+<p>Here, we redefined <code>pi</code> to be zero after the definition of <code>area_of_circle</code>. You might think that this would mean that the result of the computation would now be zero, but in fact, the behavior of the function is unchanged. That’s because the original definition of <code>pi</code> wasn’t changed; it was just shadowed, which means that any subsequent reference to <code>pi</code> would see the new definition of <code>pi</code> as <code>0</code>, but earlier references would still see the old one. But there is no later use of <code>pi</code>, so the binding of <code>pi</code> to <code>0.</code> made no difference at all. This explains the warning produced by the toplevel telling us that there is an unused variable.</p>
+<p>In OCaml, <code>let</code> bindings are immutable. There are many kinds of mutable values in OCaml, which we’ll discuss in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, but there are no mutable variables.</p>
+<div data-type="note">
+<h4 id="why-dont-variables-vary">Why Don’t Variables Vary?</h4>
+<p>One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn’t the whole point of a variable that it can vary?<a data-secondary="immutability of" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
+<p>The answer to this is that variables in OCaml (and generally in functional languages) are really more like variables in an equation than a variable in an imperative language. If you think about the mathematical identity <code>x(y + z) = xy + xz</code>, there’s no notion of mutating the variables <code>x</code>, <code>y</code>, and <code>z</code>. They vary in the sense that you can instantiate this equation with different numbers for those variables, and it still holds.</p>
+<p>The same is true in a functional language. A function can be applied to different inputs, and thus its variables will take on different values, even without mutation.</p>
+</div>
 <section class="level3" id="pattern-matching-and-let">
 <h3>Pattern Matching and Let</h3>
-<p>Another useful feature of <code>let</code> bindings is that they
-support the use of <em>patterns</em> on the left-hand side. Consider the
-following code, which uses <code>List.unzip</code>, a function for
-converting a list of pairs into a pair of lists.<a data-secondary="and let" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="let
-syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern
-matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
+<p>Another useful feature of <code>let</code> bindings is that they support the use of <em>patterns</em> on the left-hand side. Consider the following code, which uses <code>List.unzip</code>, a function for converting a list of pairs into a pair of lists.<a data-secondary="and let" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 &gt;val ints : int list = [1; 2; 3]
 &gt;val strings : string list = ["one"; "two"; "three"]
 </code></pre>
 </div>
-<p>Here, <code>(ints,strings)</code> is a pattern, and the
-<code>let</code> binding assigns values to both of the identifiers that
-show up in that pattern. A pattern is essentially a description of the
-shape of a data structure, where some components are names to be bound
-to values. As we saw in <a data-type="xref" href="guided-tour.html#tuples-lists-options-and-pattern-matching">Chapter 1, Tuples Lists Options And Pattern Matching</a>, OCaml
-has patterns for a variety of different data types.</p>
-<p>Using a pattern in a <code>let</code> binding makes the most sense
-for a pattern that is <em>irrefutable</em>, <em>i.e.</em>, where any
-value of the type in question is guaranteed to match the pattern. Tuple
-and record patterns are irrefutable, but list patterns are not. Consider
-the following code that implements a function for upper casing the first
-element of a comma-separated list.<a data-primary="irrefutable
-patterns" data-type="indexterm">&nbsp;</a></p>
+<p>Here, <code>(ints,strings)</code> is a pattern, and the <code>let</code> binding assigns values to both of the identifiers that show up in that pattern. A pattern is essentially a description of the shape of a data structure, where some components are names to be bound to values. As we saw in <a data-type="xref" href="guided-tour.html#tuples-lists-options-and-pattern-matching">Chapter 1, Tuples Lists Options And Pattern Matching</a>, OCaml has patterns for a variety of different data types.</p>
+<p>Using a pattern in a <code>let</code> binding makes the most sense for a pattern that is <em>irrefutable</em>, <em>i.e.</em>, where any value of the type in question is guaranteed to match the pattern. Tuple and record patterns are irrefutable, but list patterns are not. Consider the following code that implements a function for upper casing the first element of a comma-separated list.<a data-primary="irrefutable patterns" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let upcase_first_entry line =
   let (first :: rest) = String.split ~on:',' line in
@@ -195,9 +111,7 @@ patterns" data-type="indexterm">&nbsp;</a></p>
 &gt;val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This case can’t really come up in practice, because
-<code>String.split</code> always returns a list with at least one
-element, even when given the empty string.</p>
+<p>This case can’t really come up in practice, because <code>String.split</code> always returns a list with at least one element, even when given the empty string.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">upcase_first_entry "one,two,three";;
 &gt;- : string = "ONE,two,three"
@@ -205,9 +119,7 @@ upcase_first_entry "";;
 &gt;- : string = ""
 </code></pre>
 </div>
-<p> But the compiler doesn’t know this, and so it emits the warning.
-It’s generally better to use a <code>match</code> expression to handle
-such cases explicitly:</p>
+<p> But the compiler doesn’t know this, and so it emits the warning. It’s generally better to use a <code>match</code> expression to handle such cases explicitly:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let upcase_first_entry line =
   match String.split ~on:',' line with
@@ -216,43 +128,27 @@ such cases explicitly:</p>
 &gt;val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Note that this is our first use of <code>assert</code>, which is
-useful for marking cases that should be impossible. We’ll discuss
-<code>assert</code> in more detail in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error
-Handling</a>.</p>
+<p>Note that this is our first use of <code>assert</code>, which is useful for marking cases that should be impossible. We’ll discuss <code>assert</code> in more detail in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>.</p>
 </section>
 </section>
 <section class="level2" id="functions">
 <h2>Functions</h2>
-<p>Given that OCaml is a functional language, it’s no surprise that
-functions are important and pervasive. Indeed, functions have come up in
-almost every example we’ve looked at so far. This section will go into
-more depth, explaining the details of how OCaml’s functions work. As
-you’ll see, functions in OCaml differ in a variety of ways from what
-you’ll find in most mainstream languages.</p>
+<p>Given that OCaml is a functional language, it’s no surprise that functions are important and pervasive. Indeed, functions have come up in almost every example we’ve looked at so far. This section will go into more depth, explaining the details of how OCaml’s functions work. As you’ll see, functions in OCaml differ in a variety of ways from what you’ll find in most mainstream languages.</p>
 <section class="level3" id="anonymous-functions">
 <h3>Anonymous Functions</h3>
-<p>We’ll start by looking at the most basic style of function
-declaration in OCaml: the <em>anonymous function</em>. An anonymous
-function is a function that is declared without being named. These can
-be declared using the <code>fun</code> keyword, as shown here. <a data-primary="fun keyword" data-type="indexterm">&nbsp;</a><a data-primary="anonymous
-functions" data-type="indexterm">&nbsp;</a><a data-secondary="anonymous
-functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll start by looking at the most basic style of function declaration in OCaml: the <em>anonymous function</em>. An anonymous function is a function that is declared without being named. These can be declared using the <code>fun</code> keyword, as shown here. <a data-primary="fun keyword" data-type="indexterm">&nbsp;</a><a data-primary="anonymous functions" data-type="indexterm">&nbsp;</a><a data-secondary="anonymous functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1);;
 &gt;- : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Anonymous functions operate in much the same way as named functions.
-For example, we can apply an anonymous function to an argument:</p>
+<p>Anonymous functions operate in much the same way as named functions. For example, we can apply an anonymous function to an argument:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
 &gt;- : int = 8
 </code></pre>
 </div>
-<p> or pass it to another function. Passing functions to iteration
-functions like <code>List.map</code> is probably the most common use
-case for anonymous functions.</p>
+<p> or pass it to another function. Passing functions to iteration functions like <code>List.map</code> is probably the most common use case for anonymous functions.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:(fun x -&gt; x + 1) [1;2;3];;
 &gt;- : int list = [2; 3; 4]
@@ -266,19 +162,8 @@ List.map ~f:(fun g -&gt; g "Hello World") transforms;;
 &gt;- : string list = ["HELLO WORLD"; "hello world"]
 </code></pre>
 </div>
-<p> It’s worth stopping for a moment to puzzle this example out. Notice
-that <code>(fun g -&gt; g "Hello World")</code> is a function that takes
-a function as an argument, and then applies that function to the string
-<code>"Hello World"</code>. The invocation of <code>List.map</code>
-applies <code>(fun g -&gt; g "Hello World")</code> to the elements of
-<code>transforms</code>, which are themselves functions. The returned
-list contains the results of these function applications.</p>
-<p>The key thing to understand is that functions are ordinary values in
-OCaml, and you can do everything with them that you’d do with an
-ordinary value, including passing them to and returning them from other
-functions and storing them in data structures. We even name functions in
-the same way that we name other values, by using a <code>let</code>
-binding.</p>
+<p> It’s worth stopping for a moment to puzzle this example out. Notice that <code>(fun g -&gt; g "Hello World")</code> is a function that takes a function as an argument, and then applies that function to the string <code>"Hello World"</code>. The invocation of <code>List.map</code> applies <code>(fun g -&gt; g "Hello World")</code> to the elements of <code>transforms</code>, which are themselves functions. The returned list contains the results of these function applications.</p>
+<p>The key thing to understand is that functions are ordinary values in OCaml, and you can do everything with them that you’d do with an ordinary value, including passing them to and returning them from other functions and storing them in data structures. We even name functions in the same way that we name other values, by using a <code>let</code> binding.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone = (fun x -&gt; x + 1);;
 &gt;val plusone : int -&gt; int = &lt;fun&gt;
@@ -286,24 +171,16 @@ plusone 3;;
 &gt;- : int = 4
 </code></pre>
 </div>
-<p>Defining named functions is so common that there is some syntactic
-sugar for it. Thus, the following definition of <code>plusone</code> is
-equivalent to the previous definition.</p>
+<p>Defining named functions is so common that there is some syntactic sugar for it. Thus, the following definition of <code>plusone</code> is equivalent to the previous definition.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plusone x = x + 1;;
 &gt;val plusone : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p> This is the most common and convenient way to declare a function,
-but syntactic niceties aside, the two styles of function definition are
-equivalent.</p>
-<section data-type="note" class="level4" id="let-and-fun">
-<h4><code>let</code> and <code>fun</code></h4>
-<p>Functions and <code>let</code> bindings have a lot to do with each
-other. In some sense, you can think of the parameter of a function as a
-variable being bound to the value passed by the caller. Indeed, the
-following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let
-syntax" data-type="indexterm">&nbsp;</a></p>
+<p> This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.</p>
+<div data-type="note">
+<h4 id="let-and-fun"><code>let</code> and <code>fun</code></h4>
+<p>Functions and <code>let</code> bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
 &gt;- : int = 8
@@ -311,9 +188,8 @@ let x = 7 in x + 1;;
 &gt;- : int = 8
 </code></pre>
 </div>
-<p> This connection is important, and will come up more when programming
-in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
-</section>
+<p> This connection is important, and will come up more when programming in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
+</div>
 </section>
 <section class="level3" id="multi-argument-functions">
 <h3>Multiargument Functions</h3>
@@ -325,39 +201,20 @@ abs_diff 3 4;;
 &gt;- : int = 1
 </code></pre>
 </div>
-<p> You may find the type signature of <code>abs_diff</code> with all of
-its arrows a little hard to parse. To understand what’s going on, let’s
-rewrite <code>abs_diff</code> in an equivalent form, using the
-<code>fun</code> keyword.</p>
+<p> You may find the type signature of <code>abs_diff</code> with all of its arrows a little hard to parse. To understand what’s going on, let’s rewrite <code>abs_diff</code> in an equivalent form, using the <code>fun</code> keyword.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff =
 (fun x -&gt; (fun y -&gt; abs (x - y)));;
 &gt;val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This rewrite makes it explicit that <code>abs_diff</code> is actually
-a function of one argument that returns another function of one
-argument, which itself returns the final result. Because the functions
-are nested, the inner expression <code>abs (x - y)</code> has access to
-both <code>x</code>, which was bound by the outer function application,
-and <code>y</code>, which was bound by the inner one.</p>
-<p>This style of function is called a <em>curried</em> function.
-(Currying is named after Haskell Curry, a logician who had a significant
-impact on the design and theory of programming languages.) The key to
-interpreting the type signature of a curried function is the observation
-that <code>-&gt;</code> is right-associative. The type signature of
-<code>abs_diff</code> can therefore be parenthesized as follows. <a data-primary="curried functions" data-type="indexterm">&nbsp;</a><a data-secondary="curried
-functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>This rewrite makes it explicit that <code>abs_diff</code> is actually a function of one argument that returns another function of one argument, which itself returns the final result. Because the functions are nested, the inner expression <code>abs (x - y)</code> has access to both <code>x</code>, which was bound by the outer function application, and <code>y</code>, which was bound by the inner one.</p>
+<p>This style of function is called a <em>curried</em> function. (Currying is named after Haskell Curry, a logician who had a significant impact on the design and theory of programming languages.) The key to interpreting the type signature of a curried function is the observation that <code>-&gt;</code> is right-associative. The type signature of <code>abs_diff</code> can therefore be parenthesized as follows. <a data-primary="curried functions" data-type="indexterm">&nbsp;</a><a data-secondary="curried functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">val abs_diff : int -&gt; (int -&gt; int)</code></pre>
 </div>
-<p> The parentheses don’t change the meaning of the signature, but they
-make it easier to see the currying.</p>
-<p>Currying is more than just a theoretical curiosity. You can make use
-of currying to specialize a function by feeding in some of the
-arguments. Here’s an example where we create a specialized version of
-<code>abs_diff</code> that measures the distance of a given number from
-<code>3</code>.</p>
+<p> The parentheses don’t change the meaning of the signature, but they make it easier to see the currying.</p>
+<p>Currying is more than just a theoretical curiosity. You can make use of currying to specialize a function by feeding in some of the arguments. Here’s an example where we create a specialized version of <code>abs_diff</code> that measures the distance of a given number from <code>3</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dist_from_3 = abs_diff 3;;
 &gt;val dist_from_3 : int -&gt; int = &lt;fun&gt;
@@ -367,24 +224,15 @@ dist_from_3 (-1);;
 &gt;- : int = 4
 </code></pre>
 </div>
-<p> The practice of applying some of the arguments of a curried function
-to get a new function is called <em>partial application</em>. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
-<p>Note that the <code>fun</code> keyword supports its own syntax for
-currying, so the following definition of <code>abs_diff</code> is
-equivalent to the previous one.<a data-secondary="currying
-syntax" data-primary="fun keyword" data-type="indexterm">&nbsp;</a></p>
+<p> The practice of applying some of the arguments of a curried function to get a new function is called <em>partial application</em>. <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
+<p>Note that the <code>fun</code> keyword supports its own syntax for currying, so the following definition of <code>abs_diff</code> is equivalent to the previous one.<a data-secondary="currying syntax" data-primary="fun keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff = (fun x y -&gt; abs (x - y));;
 &gt;val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>You might worry that curried functions are terribly expensive, but
-this is not the case. In OCaml, there is no penalty for calling a
-curried function with all of its arguments. (Partial application,
-unsurprisingly, does have a small extra cost.)</p>
-<p>Currying is not the only way of writing a multiargument function in
-OCaml. It’s also possible to use the different parts of a tuple as
-different arguments. So, we could write.</p>
+<p>You might worry that curried functions are terribly expensive, but this is not the case. In OCaml, there is no penalty for calling a curried function with all of its arguments. (Partial application, unsurprisingly, does have a small extra cost.)</p>
+<p>Currying is not the only way of writing a multiargument function in OCaml. It’s also possible to use the different parts of a tuple as different arguments. So, we could write.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let abs_diff (x,y) = abs (x - y);;
 &gt;val abs_diff : int * int -&gt; int = &lt;fun&gt;
@@ -392,29 +240,13 @@ abs_diff (3,4);;
 &gt;- : int = 1
 </code></pre>
 </div>
-<p>OCaml handles this calling convention efficiently as well. In
-particular it does not generally have to allocate a tuple just for the
-purpose of sending arguments to a tuple-style function. You can’t,
-however, use partial application for this style of function.</p>
-<p>There are small trade-offs between these two approaches, but most of
-the time, one should stick to currying, since it’s the default style in
-the OCaml world.</p>
+<p>OCaml handles this calling convention efficiently as well. In particular it does not generally have to allocate a tuple just for the purpose of sending arguments to a tuple-style function. You can’t, however, use partial application for this style of function.</p>
+<p>There are small trade-offs between these two approaches, but most of the time, one should stick to currying, since it’s the default style in the OCaml world.</p>
 </section>
 <section class="level3" id="recursive-functions">
 <h3>Recursive Functions</h3>
-<p>A function is <em>recursive</em> if it refers to itself in its
-definition. Recursion is important in any programming language, but is
-particularly important in functional languages, because it is the way
-that you build looping constructs. (As will be discussed in more detail
-in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, OCaml also supports
-imperative looping constructs like <code>for</code> and
-<code>while</code>, but these are only useful when using OCaml’s
-imperative features.)<a data-secondary="definition
-of" data-primary="recursive functions" data-type="indexterm">&nbsp;</a><a data-secondary="recursive functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
-<p>In order to define a recursive function, you need to mark the
-<code>let</code> binding as recursive with the <code>rec</code> keyword,
-as shown in this function for finding the first sequentially repeated
-element in a list.<a data-primary="rec keyword" data-type="indexterm">&nbsp;</a></p>
+<p>A function is <em>recursive</em> if it refers to itself in its definition. Recursion is important in any programming language, but is particularly important in functional languages, because it is the way that you build looping constructs. (As will be discussed in more detail in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, OCaml also supports imperative looping constructs like <code>for</code> and <code>while</code>, but these are only useful when using OCaml’s imperative features.)<a data-secondary="definition of" data-primary="recursive functions" data-type="indexterm">&nbsp;</a><a data-secondary="recursive functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>In order to define a recursive function, you need to mark the <code>let</code> binding as recursive with the <code>rec</code> keyword, as shown in this function for finding the first sequentially repeated element in a list.<a data-primary="rec keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec find_first_repeat list =
   match list with
@@ -426,15 +258,8 @@ element in a list.<a data-primary="rec keyword" data-type="indexterm">&nbsp;</a>
 &gt;val find_first_repeat : int list -&gt; int option = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The pattern <code>[] | [_]</code> is itself a disjunction of multiple
-patterns, otherwise known as an <em>or-pattern</em>. An or-pattern
-matches if any of the sub-patterns match. In this case, <code>[]</code>
-matches the empty list, and <code>[_]</code> matches any single element
-list. The <code>_</code> is there so we don’t have to put an explicit
-name on that single element.<a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
-<p>We can also define multiple mutually recursive values by using
-<code>let rec</code> combined with the <code>and</code> keyword. Here’s
-a (gratuitously inefficient) example.</p>
+<p>The pattern <code>[] | [_]</code> is itself a disjunction of multiple patterns, otherwise known as an <em>or-pattern</em>. An or-pattern matches if any of the sub-patterns match. In this case, <code>[]</code> matches the empty list, and <code>[_]</code> matches any single element list. The <code>_</code> is there so we don’t have to put an explicit name on that single element.<a data-primary="or-patterns" data-type="indexterm">&nbsp;</a></p>
+<p>We can also define multiple mutually recursive values by using <code>let rec</code> combined with the <code>and</code> keyword. Here’s a (gratuitously inefficient) example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec is_even x =
   if x = 0 then true else is_odd (x - 1)
@@ -448,27 +273,13 @@ List.map ~f:is_odd [0;1;2;3;4;5];;
 &gt;- : bool list = [false; true; false; true; false; true]
 </code></pre>
 </div>
-<p>OCaml distinguishes between nonrecursive definitions (using
-<code>let</code>) and recursive definitions (using <code>let rec</code>)
-largely for technical reasons: the type-inference algorithm needs to
-know when a set of function definitions are mutually recursive, and
-these have to be marked explicitly by the programmer. <a data-secondary="nonrecursive vs.&nbsp;recursive functions" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
-<p>But this decision has some good effects. For one thing, recursive
-(and especially mutually recursive) definitions are harder to reason
-about than nonrecursive ones. It’s therefore useful that, in the absence
-of an explicit <code>rec</code>, you can assume that a <code>let</code>
-binding is nonrecursive, and so can only build upon previous
-definitions.</p>
-<p>In addition, having a nonrecursive form makes it easier to create a
-new definition that extends and supersedes an existing one by shadowing
-it.</p>
+<p>OCaml distinguishes between nonrecursive definitions (using <code>let</code>) and recursive definitions (using <code>let rec</code>) largely for technical reasons: the type-inference algorithm needs to know when a set of function definitions are mutually recursive, and these have to be marked explicitly by the programmer. <a data-secondary="nonrecursive vs.&nbsp;recursive functions" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
+<p>But this decision has some good effects. For one thing, recursive (and especially mutually recursive) definitions are harder to reason about than nonrecursive ones. It’s therefore useful that, in the absence of an explicit <code>rec</code>, you can assume that a <code>let</code> binding is nonrecursive, and so can only build upon previous definitions.</p>
+<p>In addition, having a nonrecursive form makes it easier to create a new definition that extends and supersedes an existing one by shadowing it.</p>
 </section>
 <section class="level3" id="prefix-and-infix-operators">
 <h3>Prefix and Infix Operators</h3>
-<p>So far, we’ve seen examples of functions used in both prefix and
-infix style.<a data-secondary="prefix and infix
-operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="infix operators" data-type="indexterm">&nbsp;</a><a data-primary="prefix operators" data-type="indexterm">&nbsp;</a><a data-secondary="prefix
-and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>So far, we’ve seen examples of functions used in both prefix and infix style.<a data-secondary="prefix and infix operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="infix operators" data-type="indexterm">&nbsp;</a><a data-primary="prefix operators" data-type="indexterm">&nbsp;</a><a data-secondary="prefix and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 4  (* prefix *);;
 &gt;- : int = 4
@@ -476,11 +287,7 @@ and infix operators" data-primary="functions" data-type="indexterm">&nbsp;</a></
 &gt;- : int = 7
 </code></pre>
 </div>
-<p>You might not have thought of the second example as an ordinary
-function, but it very much is. Infix operators like <code>+</code>
-really only differ syntactically from other functions. In fact, if we
-put parentheses around an infix operator, you can use it as an ordinary
-prefix function.</p>
+<p>You might not have thought of the second example as an ordinary function, but it very much is. Infix operators like <code>+</code> really only differ syntactically from other functions. In fact, if we put parentheses around an infix operator, you can use it as an ordinary prefix function.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(+) 3 4;;
 &gt;- : int = 7
@@ -488,25 +295,14 @@ List.map ~f:((+) 3) [4;5;6];;
 &gt;- : int list = [7; 8; 9]
 </code></pre>
 </div>
-<p> In the second expression, we’ve partially applied <code>(+)</code>
-to create a function that increments its single argument by
-<code>3</code>.</p>
-<p>A function is treated syntactically as an operator if the name of
-that function is chosen from one of a specialized set of identifiers.
-This set includes identifiers that are sequences of characters from the
-following set:</p>
+<p> In the second expression, we’ve partially applied <code>(+)</code> to create a function that increments its single argument by <code>3</code>.</p>
+<p>A function is treated syntactically as an operator if the name of that function is chosen from one of a specialized set of identifiers. This set includes identifiers that are sequences of characters from the following set:</p>
 <div class="highlight">
 <pre><code class="language-clike">~ ! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ |</code></pre>
 </div>
-<p> as long as the first character is not <code>~</code>,
-<code>!</code>, or <code>$</code>.</p>
-<p>There are also a handful of predetermined strings that count as infix
-operators, including <code>mod</code>, the modulus operator, and
-<code>lsl</code>, for “logical shift left,” a bit-shifting
-operation.</p>
-<p>We can define (or redefine) the meaning of an operator. Here’s an
-example of a simple vector-addition operator on <code>int</code>
-pairs.</p>
+<p> as long as the first character is not <code>~</code>, <code>!</code>, or <code>$</code>.</p>
+<p>There are also a handful of predetermined strings that count as infix operators, including <code>mod</code>, the modulus operator, and <code>lsl</code>, for “logical shift left,” a bit-shifting operation.</p>
+<p>We can define (or redefine) the meaning of an operator. Here’s an example of a simple vector-addition operator on <code>int</code> pairs.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 &gt;val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
@@ -514,8 +310,7 @@ pairs.</p>
 &gt;- : int * int = (1, 6)
 </code></pre>
 </div>
-<p> You have to be careful when dealing with operators containing
-<code>*</code>. Consider the following example.</p>
+<p> You have to be careful when dealing with operators containing <code>*</code>. Consider the following example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (***) x y = (x **. y) **. y;;
 &gt;Line 1, characters 18-19:
@@ -523,30 +318,14 @@ pairs.</p>
 &gt;         float
 </code></pre>
 </div>
-<p>What’s going on is that <code>(***)</code> isn’t interpreted as an
-operator at all; it’s read as a comment! To get this to work properly,
-we need to put spaces around any operator that begins or ends with
-<code>*</code>.</p>
+<p>What’s going on is that <code>(***)</code> isn’t interpreted as an operator at all; it’s read as a comment! To get this to work properly, we need to put spaces around any operator that begins or ends with <code>*</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ( *** ) x y = (x **. y) **. y;;
 &gt;val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The syntactic role of an operator is typically determined by its
-first character or two, though there are a few exceptions. The OCaml
-manual has an explicit <a href="https://ocaml.org/manual/expr.html#ss:precedence-and-associativity">table
-of each class of operator</a> and its associated precedence.</p>
-<p>We won’t go through the full list here, but there’s one important
-special case worth mentioning: <code>-</code> and <code>-.</code>, which
-are the integer and floating-point subtraction operators, and can act as
-both prefix operators (for negation) and infix operators (for
-subtraction). So, both <code>-x</code> and <code>x - y</code> are
-meaningful expressions. Another thing to remember about negation is that
-it has lower precedence than function application, which means that if
-you want to pass a negative value, you need to wrap it in parentheses,
-as you can see in this code.<a data-secondary="negation
-operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction
-operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation operators" data-type="indexterm">&nbsp;</a></p>
+<p>The syntactic role of an operator is typically determined by its first character or two, though there are a few exceptions. The OCaml manual has an explicit <a href="https://ocaml.org/manual/expr.html#ss:precedence-and-associativity">table of each class of operator</a> and its associated precedence.</p>
+<p>We won’t go through the full list here, but there’s one important special case worth mentioning: <code>-</code> and <code>-.</code>, which are the integer and floating-point subtraction operators, and can act as both prefix operators (for negation) and infix operators (for subtraction). So, both <code>-x</code> and <code>x - y</code> are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code.<a data-secondary="negation operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="subtraction operators" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-primary="subtraction operators" data-type="indexterm">&nbsp;</a><a data-primary="negation operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.max 3 (-4);;
 &gt;- : int = 3
@@ -559,8 +338,7 @@ Int.max 3 -4;;
 &gt;       but an expression was expected of type int
 </code></pre>
 </div>
-<p> Here, OCaml is interpreting the second expression as equivalent
-to.</p>
+<p> Here, OCaml is interpreting the second expression as equivalent to.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Int.max 3) - 4;;
 &gt;Line 1, characters 1-12:
@@ -572,23 +350,13 @@ to.</p>
 </code></pre>
 </div>
 <p> which obviously doesn’t make sense.</p>
-<p>Here’s an example of a very useful operator from the standard library
-whose behavior depends critically on the precedence rules described
-previously. <a data-secondary="reverse application
-operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
+<p>Here’s an example of a very useful operator from the standard library whose behavior depends critically on the precedence rules described previously. <a data-secondary="reverse application operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (|&gt;) x f = f x;;
 &gt;val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This is called the <em>reverse application operator</em>, and it’s
-not quite obvious at first what its purpose is: it just takes a value
-and a function and applies the function to the value. Despite that
-bland-sounding description, it has the useful role of sequencing
-operations, similar in spirit to using the pipe character in the UNIX
-shell. Consider, for example, the following code for printing out the
-unique elements of your <code>PATH</code>. <a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a> <a data-primary="duplicates,
-removing" data-type="indexterm">&nbsp;</a> <a data-primary="List.dedup_and_sort" data-type="indexterm">&nbsp;</a></p>
+<p>This is called the <em>reverse application operator</em>, and it’s not quite obvious at first what its purpose is: it just takes a value and a function and applies the function to the value. Despite that bland-sounding description, it has the useful role of sequencing operations, similar in spirit to using the pipe character in the UNIX shell. Consider, for example, the following code for printing out the unique elements of your <code>PATH</code>. <a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a> <a data-primary="duplicates, removing" data-type="indexterm">&nbsp;</a> <a data-primary="List.dedup_and_sort" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
@@ -603,8 +371,7 @@ String.split ~on:':' path
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>We can do this without <code>|&gt;</code> by naming the intermediate
-values, but the result is a bit more verbose.</p>
+<p>We can do this without <code>|&gt;</code> by naming the intermediate values, but the result is a bit more verbose.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let split_path = String.split ~on:':' path in
 let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
@@ -616,10 +383,7 @@ List.iter ~f:print_endline deduped_path;;
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p>An important part of what’s happening here is partial application.
-For example, <code>List.iter</code> takes two arguments: a function to
-be called on each element of the list, and the list to iterate over. We
-can call <code>List.iter</code> with all its arguments: <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
+<p>An important part of what’s happening here is partial application. For example, <code>List.iter</code> takes two arguments: a function to be called on each element of the list, and the list to iterate over. We can call <code>List.iter</code> with all its arguments: <a data-primary="partial application" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline ["Two"; "lines"];;
 &gt;Two
@@ -627,18 +391,14 @@ can call <code>List.iter</code> with all its arguments: <a data-primary="partial
 &gt;- : unit = ()
 </code></pre>
 </div>
-<p> or, we can pass it just the function argument, leaving us with a
-function for printing out a list of strings.</p>
+<p> or, we can pass it just the function argument, leaving us with a function for printing out a list of strings.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.iter ~f:print_endline;;
 &gt;- : string list -&gt; unit = &lt;fun&gt;
 </code></pre>
 </div>
-<p> It is this later form that we’re using in the preceding
-<code>|&gt;</code> pipeline.</p>
-<p>But <code>|&gt;</code> only works in the intended way because it is
-left-associative. Let’s see what happens if we try using a
-right-associative operator, like (^&gt;).</p>
+<p> It is this later form that we’re using in the preceding <code>|&gt;</code> pipeline.</p>
+<p>But <code>|&gt;</code> only works in the intended way because it is left-associative. Let’s see what happens if we try using a right-associative operator, like (^&gt;).</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (^&gt;) x f = f x;;
 &gt;val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
@@ -653,43 +413,22 @@ String.split ~on:':' path
 &gt;         string list -&gt; string list
 </code></pre>
 </div>
-<p>The type error is a little bewildering at first glance. What’s going
-on is that, because <code>^&gt;</code> is right associative, the
-operator is trying to feed the value
-<code>List.dedup_and_sort ~compare:String.compare</code> to the function
-<code>List.iter ~f:print_endline</code>. But
-<code>List.iter ~f:print_endline</code> expects a list of strings as its
-input, not a function.</p>
-<p>The type error aside, this example highlights the importance of
-choosing the operator you use with care, particularly with respect to
-associativity.</p>
-<section data-type="note" class="level4" id="the-application-operator">
-<h4>The Application Operator</h4>
-<p><code>|&gt;</code> is known as the <em>reverse application
-operator</em>. You might be unsurprised to learn that there’s also an
-<em>application operator</em>: <a data-secondary="application
-operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
+<p>The type error is a little bewildering at first glance. What’s going on is that, because <code>^&gt;</code> is right associative, the operator is trying to feed the value <code>List.dedup_and_sort ~compare:String.compare</code> to the function <code>List.iter ~f:print_endline</code>. But <code>List.iter ~f:print_endline</code> expects a list of strings as its input, not a function.</p>
+<p>The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.</p>
+<div data-type="note">
+<h4 id="the-application-operator">The Application Operator</h4>
+<p><code>|&gt;</code> is known as the <em>reverse application operator</em>. You might be unsurprised to learn that there’s also an <em>application operator</em>: <a data-secondary="application operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(@@);;
 &gt;- : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 </code></pre>
 </div>
-<p>This one is useful for cases where you want to avoid many layers of
-parentheses when applying functions to complex expressions. In
-particular, you can replace <code>f (g (h x))</code> with
-<code>f @@ g @@ h x</code>. Note that, just as we needed
-<code>|&gt;</code> to be left associative, we need <code>@@</code> to be
-right associative.</p>
-</section>
+<p>This one is useful for cases where you want to avoid many layers of parentheses when applying functions to complex expressions. In particular, you can replace <code>f (g (h x))</code> with <code>f @@ g @@ h x</code>. Note that, just as we needed <code>|&gt;</code> to be left associative, we need <code>@@</code> to be right associative.</p>
+</div>
 </section>
 <section class="level3" id="declaring-functions-with-function">
 <h3>Declaring Functions with <code>function</code></h3>
-<p>Another way to define a function is using the <code>function</code>
-keyword. Instead of having syntactic support for declaring multiargument
-(curried) functions, <code>function</code> has built-in pattern
-matching. Here’s an example.<a data-secondary="defining" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="function
-keyword" data-type="indexterm">&nbsp;</a><a data-secondary="declaring with function
-keyword" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>Another way to define a function is using the <code>function</code> keyword. Instead of having syntactic support for declaring multiargument (curried) functions, <code>function</code> has built-in pattern matching. Here’s an example.<a data-secondary="defining" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="function keyword" data-type="indexterm">&nbsp;</a><a data-secondary="declaring with function keyword" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_zero = function
   | Some x -&gt; x
@@ -699,8 +438,7 @@ List.map ~f:some_or_zero [Some 3; None; Some 4];;
 &gt;- : int list = [3; 0; 4]
 </code></pre>
 </div>
-<p> This is equivalent to combining an ordinary function definition with
-a <code>match</code>.</p>
+<p> This is equivalent to combining an ordinary function definition with a <code>match</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_zero num_opt =
   match num_opt with
@@ -709,9 +447,7 @@ a <code>match</code>.</p>
 &gt;val some_or_zero : int option -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can also combine the different styles of function declaration
-together, as in the following example, where we declare a two-argument
-(curried) function with a pattern match on the second argument.</p>
+<p>We can also combine the different styles of function declaration together, as in the following example, where we declare a two-argument (curried) function with a pattern match on the second argument.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let some_or_default default = function
   | Some x -&gt; x
@@ -723,29 +459,17 @@ List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 &gt;- : int list = [3; 100; 4]
 </code></pre>
 </div>
-<p>Also, note the use of partial application to generate the function
-passed to <code>List.map</code>. In other words,
-<code>some_or_default 100</code> is a function that was created by
-feeding just the first argument to <code>some_or_default</code>.</p>
+<p>Also, note the use of partial application to generate the function passed to <code>List.map</code>. In other words, <code>some_or_default 100</code> is a function that was created by feeding just the first argument to <code>some_or_default</code>.</p>
 </section>
 <section class="level3" id="labeled-arguments">
 <h3>Labeled Arguments</h3>
-<p>Up until now, the functions we’ve defined have specified their
-arguments positionally, <em>i.e.</em>, by the order in which the
-arguments are passed to the function. OCaml also supports labeled
-arguments, which let you identify a function argument by name. Indeed,
-we’ve already encountered functions from <code>Base</code> like
-<code>List.map</code> that use labeled arguments. Labeled arguments are
-marked by a leading tilde, and a label (followed by a colon) is put in
-front of the variable to be labeled. Here’s an example.<a data-primary="labeled arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled
-arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>Up until now, the functions we’ve defined have specified their arguments positionally, <em>i.e.</em>, by the order in which the arguments are passed to the function. OCaml also supports labeled arguments, which let you identify a function argument by name. Indeed, we’ve already encountered functions from <code>Base</code> like <code>List.map</code> that use labeled arguments. Labeled arguments are marked by a leading tilde, and a label (followed by a colon) is put in front of the variable to be labeled. Here’s an example.<a data-primary="labeled arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="labeled arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio ~num ~denom = Float.of_int num /. Float.of_int denom;;
 &gt;val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;
 </code></pre>
 </div>
-<p>We can then provide a labeled argument using a similar convention. As
-you can see, the arguments can be provided in any order.</p>
+<p>We can then provide a labeled argument using a similar convention. As you can see, the arguments can be provided in any order.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ratio ~num:3 ~denom:10;;
 &gt;- : float = 0.3
@@ -753,11 +477,7 @@ ratio ~denom:10 ~num:3;;
 &gt;- : float = 0.3
 </code></pre>
 </div>
-<p>OCaml also supports <em>label punning</em>, meaning that you get to
-drop the text after the colon if the name of the label and the name of
-the variable being used are the same. We were actually already using
-label punning when defining <code>ratio</code>. The following shows how
-punning can be used when invoking a function.<a data-primary="punning" data-type="indexterm">&nbsp;</a><a data-primary="label punning" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml also supports <em>label punning</em>, meaning that you get to drop the text after the colon if the name of the label and the name of the variable being used are the same. We were actually already using label punning when defining <code>ratio</code>. The following shows how punning can be used when invoking a function.<a data-primary="punning" data-type="indexterm">&nbsp;</a><a data-primary="label punning" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let num = 3 in
 let denom = 4 in
@@ -767,60 +487,39 @@ ratio ~num ~denom;;
 </div>
 <section class="level4" id="where-are-labels-useful">
 <h4>Where Are Labels Useful?</h4>
-<p>Labeled arguments are a surprisingly useful feature, and it’s worth
-walking through some of the cases where they come up.</p>
+<p>Labeled arguments are a surprisingly useful feature, and it’s worth walking through some of the cases where they come up.</p>
 <section class="level5" id="explicating-long-argument-lists">
 <h5>Explicating Long Argument Lists</h5>
-<p>Beyond a certain number, arguments are easier to remember by name
-than by position. Letting the names be used at the call-site (and used
-in any order) makes client code easier to read and to write.</p>
+<p>Beyond a certain number, arguments are easier to remember by name than by position. Letting the names be used at the call-site (and used in any order) makes client code easier to read and to write.</p>
 </section>
 <section class="level5" id="adding-information-to-uninformative-argument-types">
 <h5>Adding Information to Uninformative Argument Types</h5>
-<p>Consider a function for creating a hash table whose first argument is
-the initial size of the array backing the hash table, and the second is
-a Boolean flag, which indicates whether that array will ever shrink when
-elements are removed.</p>
+<p>Consider a function for creating a hash table whose first argument is the initial size of the array backing the hash table, and the second is a Boolean flag, which indicates whether that array will ever shrink when elements are removed.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t</code></pre>
 </div>
-<p>The signature makes it hard to divine the meaning of those two
-arguments. but with labeled arguments, we can make the intent
-immediately clear.</p>
+<p>The signature makes it hard to divine the meaning of those two arguments. but with labeled arguments, we can make the intent immediately clear.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val create_hashtable :
   init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t</code></pre>
 </div>
-<p>Choosing label names well is especially important for Boolean values,
-since it’s often easy to get confused about whether a value being true
-is meant to enable or disable a given feature.</p>
+<p>Choosing label names well is especially important for Boolean values, since it’s often easy to get confused about whether a value being true is meant to enable or disable a given feature.</p>
 </section>
 <section class="level5" id="disambiguating-similar-arguments">
 <h5>Disambiguating Similar Arguments</h5>
-<p>This issue comes up most often when a function has multiple arguments
-of the same type. Consider this signature for a function that extracts a
-substring.</p>
+<p>This issue comes up most often when a function has multiple arguments of the same type. Consider this signature for a function that extracts a substring.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val substring: string -&gt; int -&gt; int -&gt; string</code></pre>
 </div>
-<p>Here, the two <code>ints</code> are the starting position and length
-of the substring to extract, respectively, but you wouldn’t know that
-from the type signature. We can make the signature more informative by
-adding labels.</p>
+<p>Here, the two <code>ints</code> are the starting position and length of the substring to extract, respectively, but you wouldn’t know that from the type signature. We can make the signature more informative by adding labels.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val substring: string -&gt; pos:int -&gt; len:int -&gt; string</code></pre>
 </div>
-<p>This improves the readability of both the signature and of client
-code, and makes it harder to accidentally swap the position and the
-length.</p>
+<p>This improves the readability of both the signature and of client code, and makes it harder to accidentally swap the position and the length.</p>
 </section>
 <section class="level5" id="flexible-argument-ordering-and-partial-application">
 <h5>Flexible Argument Ordering and Partial Application</h5>
-<p>Consider a function like <code>List.iter</code> which takes two
-arguments: a function and a list of elements to call that function on. A
-common pattern is to partially apply <code>List.iter</code> by giving it
-just the function, as in the following example from earlier in the
-chapter.</p>
+<p>Consider a function like <code>List.iter</code> which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply <code>List.iter</code> by giving it just the function, as in the following example from earlier in the chapter.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">String.split ~on:':' path
 |&gt; List.dedup_and_sort ~compare:String.compare
@@ -833,46 +532,30 @@ chapter.</p>
 </code></pre>
 </div>
 <p> This requires that we put the function argument first.</p>
-<p>Other orderings can be useful either for partial application, or for
-simple reasons of readability. For example, when using
-<code>List.iter</code> with a complex, multi-line iteration function,
-it’s generally easier to read if the function comes second, after the
-statement of what list is being iterated over. On the other hand, when
-calling <code>List.iter</code> with a small function, but a large,
-explicitly written list of values, it’s generally easier if the values
-come last.</p>
+<p>Other orderings can be useful either for partial application, or for simple reasons of readability. For example, when using <code>List.iter</code> with a complex, multi-line iteration function, it’s generally easier to read if the function comes second, after the statement of what list is being iterated over. On the other hand, when calling <code>List.iter</code> with a small function, but a large, explicitly written list of values, it’s generally easier if the values come last.</p>
 </section>
 </section>
 <section class="level4" id="higher-order-functions-and-labels">
 <h4>Higher-Order Functions and Labels</h4>
-<p>One surprising gotcha with labeled arguments is that while order
-doesn’t matter when calling a function with labeled arguments, it does
-matter in a higher-order context, <em>e.g.</em>, when passing a function
-with labeled arguments to another function. Here’s an example.<a data-primary="higher-order functions, and labels" data-type="indexterm">&nbsp;</a><a data-secondary="higher-order and labels" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>One surprising gotcha with labeled arguments is that while order doesn’t matter when calling a function with labeled arguments, it does matter in a higher-order context, <em>e.g.</em>, when passing a function with labeled arguments to another function. Here’s an example.<a data-primary="higher-order functions, and labels" data-type="indexterm">&nbsp;</a><a data-secondary="higher-order and labels" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;;
 &gt;val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Here, the definition of <code>apply_to_tuple</code> sets up the
-expectation that its first argument is a function with two labeled
-arguments, <code>first</code> and <code>second</code>, listed in that
-order. We could have defined <code>apply_to_tuple</code> differently to
-change the order in which the labeled arguments were listed.</p>
+<p>Here, the definition of <code>apply_to_tuple</code> sets up the expectation that its first argument is a function with two labeled arguments, <code>first</code> and <code>second</code>, listed in that order. We could have defined <code>apply_to_tuple</code> differently to change the order in which the labeled arguments were listed.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple_2 f (first,second) = f ~second ~first;;
 &gt;val apply_to_tuple_2 : (second:'a -&gt; first:'b -&gt; 'c) -&gt; 'b * 'a -&gt; 'c = &lt;fun&gt;
 </code></pre>
 </div>
-<p>It turns out this order matters. In particular, if we define a
-function that has a different order:</p>
+<p>It turns out this order matters. In particular, if we define a function that has a different order:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide ~first ~second = first / second;;
 &gt;val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p> we’ll find that it can’t be passed in to
-<code>apply_to_tuple_2</code>.</p>
+<p> we’ll find that it can’t be passed in to <code>apply_to_tuple_2</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">apply_to_tuple_2 divide (3,4);;
 &gt;Line 1, characters 18-24:
@@ -880,8 +563,7 @@ function that has a different order:</p>
 &gt;       but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c
 </code></pre>
 </div>
-<p> But, it works smoothly with the original
-<code>apply_to_tuple</code>.</p>
+<p> But, it works smoothly with the original <code>apply_to_tuple</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let apply_to_tuple f (first,second) = f ~first ~second;;
 &gt;val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
@@ -889,21 +571,13 @@ apply_to_tuple divide (3,4);;
 &gt;- : int = 0
 </code></pre>
 </div>
-<p>As a result, when passing labeled functions as arguments, you need to
-take care to be consistent in your ordering of labeled arguments.</p>
+<p>As a result, when passing labeled functions as arguments, you need to take care to be consistent in your ordering of labeled arguments.</p>
 </section>
 </section>
 <section class="level3" id="optional-arguments">
 <h3>Optional Arguments</h3>
-<p>An optional argument is like a labeled argument that the caller can
-choose whether or not to provide. Optional arguments are passed in using
-the same syntax as labeled arguments, and, like labeled arguments, can
-be provided in any order.<a data-secondary="optional
-arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="optional
-arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
-<p>Here’s an example of a string concatenation function with an optional
-separator. This function uses the <code>^</code> operator for pairwise
-string concatenation.</p>
+<p>An optional argument is like a labeled argument that the caller can choose whether or not to provide. Optional arguments are passed in using the same syntax as labeled arguments, and, like labeled arguments, can be provided in any order.<a data-secondary="optional arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="optional arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>Here’s an example of a string concatenation function with an optional separator. This function uses the <code>^</code> operator for pairwise string concatenation.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?sep x y =
   let sep = match sep with None -&gt; "" | Some s -&gt; s in
@@ -915,49 +589,20 @@ concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;
 &gt;- : string = "foo:bar"
 </code></pre>
 </div>
-<p>Here, <code>?</code> is used in the definition of the function to
-mark <code>sep</code> as optional. And while the caller can pass a value
-of type <code>string</code> for <code>sep</code>, internally to the
-function, <code>sep</code> is seen as a <code>string option</code>, with
-<code>None</code> appearing when <code>sep</code> is not provided by the
-caller.</p>
-<p>The preceding example needed a bit of boilerplate to choose a default
-separator when none was provided. This is a common enough pattern that
-there’s an explicit syntax for providing a default value, which allows
-us to write <code>concat</code> more concisely.</p>
+<p>Here, <code>?</code> is used in the definition of the function to mark <code>sep</code> as optional. And while the caller can pass a value of type <code>string</code> for <code>sep</code>, internally to the function, <code>sep</code> is seen as a <code>string option</code>, with <code>None</code> appearing when <code>sep</code> is not provided by the caller.</p>
+<p>The preceding example needed a bit of boilerplate to choose a default separator when none was provided. This is a common enough pattern that there’s an explicit syntax for providing a default value, which allows us to write <code>concat</code> more concisely.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat ?(sep="") x y = x ^ sep ^ y;;
 &gt;val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Optional arguments are very useful, but they’re also easy to abuse.
-The key advantage of optional arguments is that they let you write
-functions with multiple arguments that users can ignore most of the
-time, only worrying about them when they specifically want to invoke
-those options. They also allow you to extend an API with new
-functionality without changing existing code.</p>
-<p>The downside is that the caller may be unaware that there is a choice
-to be made, and so may unknowingly (and wrongly) pick the default
-behavior. Optional arguments really only make sense when the extra
-concision of omitting the argument outweighs the corresponding loss of
-explicitness.</p>
-<p>This means that rarely used functions should not have optional
-arguments. A good rule of thumb is to avoid optional arguments for
-functions internal to a module, <em>i.e.</em>, functions that are not
-included in the module’s interface, or <code>mli</code> file. We’ll
-learn more about <code>mli</code>s in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>.</p>
+<p>Optional arguments are very useful, but they’re also easy to abuse. The key advantage of optional arguments is that they let you write functions with multiple arguments that users can ignore most of the time, only worrying about them when they specifically want to invoke those options. They also allow you to extend an API with new functionality without changing existing code.</p>
+<p>The downside is that the caller may be unaware that there is a choice to be made, and so may unknowingly (and wrongly) pick the default behavior. Optional arguments really only make sense when the extra concision of omitting the argument outweighs the corresponding loss of explicitness.</p>
+<p>This means that rarely used functions should not have optional arguments. A good rule of thumb is to avoid optional arguments for functions internal to a module, <em>i.e.</em>, functions that are not included in the module’s interface, or <code>mli</code> file. We’ll learn more about <code>mli</code>s in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>.</p>
 <section class="level4" id="explicit-passing-of-an-optional-argument">
 <h4>Explicit Passing of an Optional Argument</h4>
-<p>Under the covers, a function with an optional argument receives
-<code>None</code> when the caller doesn’t provide the argument, and
-<code>Some</code> when it does. But the <code>Some</code> and
-<code>None</code> are normally not explicitly passed in by the
-caller.</p>
-<p>But sometimes, passing in <code>Some</code> or <code>None</code>
-explicitly is exactly what you want. OCaml lets you do this by using
-<code>?</code> instead of <code>~</code> to mark the argument. Thus, the
-following two lines are equivalent ways of specifying the
-<code>sep</code> argument to <code>concat</code>: <a data-secondary="explicit passing of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
+<p>Under the covers, a function with an optional argument receives <code>None</code> when the caller doesn’t provide the argument, and <code>Some</code> when it does. But the <code>Some</code> and <code>None</code> are normally not explicitly passed in by the caller.</p>
+<p>But sometimes, passing in <code>Some</code> or <code>None</code> explicitly is exactly what you want. OCaml lets you do this by using <code>?</code> instead of <code>~</code> to mark the argument. Thus, the following two lines are equivalent ways of specifying the <code>sep</code> argument to <code>concat</code>: <a data-secondary="explicit passing of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
 &gt;- : string = "foo:bar"
@@ -965,8 +610,7 @@ concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
 &gt;- : string = "foo:bar"
 </code></pre>
 </div>
-<p> and the following two lines are equivalent ways of calling
-<code>concat</code> without specifying <code>sep</code>.</p>
+<p> and the following two lines are equivalent ways of calling <code>concat</code> without specifying <code>sep</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "foo" "bar" (* don't provide the optional argument *);;
 &gt;- : string = "foobar"
@@ -974,12 +618,7 @@ concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
 &gt;- : string = "foobar"
 </code></pre>
 </div>
-<p>One use case for this is when you want to define a wrapper function
-that mimics the optional arguments of the function it’s wrapping. For
-example, imagine we wanted to create a function called
-<code>uppercase_concat</code>, which is the same as <code>concat</code>
-except that it converts the first string that it’s passed to uppercase.
-We could write the function as follows.</p>
+<p>One use case for this is when you want to define a wrapper function that mimics the optional arguments of the function it’s wrapping. For example, imagine we wanted to create a function called <code>uppercase_concat</code>, which is the same as <code>concat</code> except that it converts the first string that it’s passed to uppercase. We could write the function as follows.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b;;
 &gt;val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
@@ -989,37 +628,18 @@ uppercase_concat "foo" "bar" ~sep:":";;
 &gt;- : string = "FOO:bar"
 </code></pre>
 </div>
-<p>In the way we’ve written it, we’ve been forced to separately make the
-decision as to what the default separator is. Thus, if we later change
-<code>concat</code>’s default behavior, we’ll need to remember to change
-<code>uppercase_concat</code> to match it.</p>
-<p>Instead, we can have <code>uppercase_concat</code> simply pass
-through the optional argument to <code>concat</code> using the
-<code>?</code> syntax.</p>
+<p>In the way we’ve written it, we’ve been forced to separately make the decision as to what the default separator is. Thus, if we later change <code>concat</code>’s default behavior, we’ll need to remember to change <code>uppercase_concat</code> to match it.</p>
+<p>Instead, we can have <code>uppercase_concat</code> simply pass through the optional argument to <code>concat</code> using the <code>?</code> syntax.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b;;
 &gt;val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p> Now, if someone calls <code>uppercase_concat</code> without an
-argument, an explicit <code>None</code> will be passed to
-<code>concat</code>, leaving <code>concat</code> to decide what the
-default behavior should be.</p>
+<p> Now, if someone calls <code>uppercase_concat</code> without an argument, an explicit <code>None</code> will be passed to <code>concat</code>, leaving <code>concat</code> to decide what the default behavior should be.</p>
 </section>
 <section class="level4" id="inference-of-labeled-and-optional-arguments">
 <h4>Inference of Labeled and Optional Arguments</h4>
-<p>One subtle aspect of labeled and optional arguments is how they are
-inferred by the type system. Consider the following example for
-computing numerical derivatives of a function of two real variables. The
-function takes an argument <code>delta</code>, which determines the
-scale at which to compute the derivative; values <code>x</code> and
-<code>y</code>, which determine at which point to compute the
-derivative; and the function <code>f</code>, whose derivative is being
-computed. The function <code>f</code> itself takes two labeled
-arguments, <code>x</code> and <code>y</code>. Note that you can use an
-apostrophe as part of a variable name, so <code>x'</code> and
-<code>y'</code> are just ordinary variables.<a data-secondary="argument inference" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="labeled
-arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
+<p>One subtle aspect of labeled and optional arguments is how they are inferred by the type system. Consider the following example for computing numerical derivatives of a function of two real variables. The function takes an argument <code>delta</code>, which determines the scale at which to compute the derivative; values <code>x</code> and <code>y</code>, which determine at which point to compute the derivative; and the function <code>f</code>, whose derivative is being computed. The function <code>f</code> itself takes two labeled arguments, <code>x</code> and <code>y</code>. Note that you can use an apostrophe as part of a variable name, so <code>x'</code> and <code>y'</code> are just ordinary variables.<a data-secondary="argument inference" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="labeled arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data-primary="optional arguments" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numeric_deriv ~delta ~x ~y ~f =
   let x' = x +. delta in
@@ -1034,27 +654,15 @@ arguments" data-type="indexterm">&nbsp;</a><a data-secondary="inference of" data
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>In principle, it’s not obvious how the order of the arguments to
-<code>f</code> should be chosen. Since labeled arguments can be passed
-in arbitrary order, it seems like it could as well be
-<code>y:float -&gt; x:float -&gt; float</code> as it is
-<code>x:float -&gt; y:float -&gt; float</code>.</p>
-<p>Even worse, it would be perfectly consistent for <code>f</code> to
-take an optional argument instead of a labeled one, which could lead to
-this type signature for <code>numeric_deriv</code>.</p>
+<p>In principle, it’s not obvious how the order of the arguments to <code>f</code> should be chosen. Since labeled arguments can be passed in arbitrary order, it seems like it could as well be <code>y:float -&gt; x:float -&gt; float</code> as it is <code>x:float -&gt; y:float -&gt; float</code>.</p>
+<p>Even worse, it would be perfectly consistent for <code>f</code> to take an optional argument instead of a labeled one, which could lead to this type signature for <code>numeric_deriv</code>.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">val numeric_deriv :
   delta:float -&gt;
   x:float -&gt; y:float -&gt; f:(?x:float -&gt; y:float -&gt; float) -&gt; float * float</code></pre>
 </div>
-<p>Since there are multiple plausible types to choose from, OCaml needs
-some heuristic for choosing between them. The heuristic the compiler
-uses is to prefer labels to options and to choose the order of arguments
-that shows up in the source code.</p>
-<p>Note that these heuristics might at different points in the source
-suggest different types. Here’s a version of <code>numeric_deriv</code>
-where different invocations of <code>f</code> list the arguments in
-different orders.</p>
+<p>Since there are multiple plausible types to choose from, OCaml needs some heuristic for choosing between them. The heuristic the compiler uses is to prefer labels to options and to choose the order of arguments that shows up in the source code.</p>
+<p>Note that these heuristics might at different points in the source suggest different types. Here’s a version of <code>numeric_deriv</code> where different invocations of <code>f</code> list the arguments in different orders.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numeric_deriv ~delta ~x ~y ~f =
   let x' = x +. delta in
@@ -1069,10 +677,7 @@ different orders.</p>
 &gt;       This is only allowed when the real type is known.
 </code></pre>
 </div>
-<p>As suggested by the error message, we can get OCaml to accept the
-fact that <code>f</code> is used with different argument orders if we
-provide explicit type information. Thus, the following code compiles
-without error, due to the type annotation on <code>f</code>. <a data-primary="type annotations" data-type="indexterm">&nbsp;</a> </p>
+<p>As suggested by the error message, we can get OCaml to accept the fact that <code>f</code> is used with different argument orders if we provide explicit type information. Thus, the following code compiles without error, due to the type annotation on <code>f</code>. <a data-primary="type annotations" data-type="indexterm">&nbsp;</a> </p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =
   let x' = x +. delta in
@@ -1090,9 +695,7 @@ without error, due to the type annotation on <code>f</code>. <a data-primary="ty
 </section>
 <section class="level4" id="optional-arguments-and-partial-application">
 <h4>Optional Arguments and Partial Application</h4>
-<p>Optional arguments can be tricky to think about in the presence of
-partial application. We can of course partially apply the optional
-argument itself.</p>
+<p>Optional arguments can be tricky to think about in the presence of partial application. We can of course partially apply the optional argument itself.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let colon_concat = concat ~sep:":";;
 &gt;val colon_concat : string -&gt; string -&gt; string = &lt;fun&gt;
@@ -1108,9 +711,7 @@ prepend_pound "a BASH comment";;
 &gt;- : string = "# a BASH comment"
 </code></pre>
 </div>
-<p> The optional argument <code>?sep</code> has now disappeared, or been
-<em>erased</em>. Indeed, if we try to pass in that optional argument
-now, it will be rejected.</p>
+<p> The optional argument <code>?sep</code> has now disappeared, or been <em>erased</em>. Indeed, if we try to pass in that optional argument now, it will be rejected.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">prepend_pound "a BASH comment" ~sep:":";;
 &gt;Line 1, characters 1-14:
@@ -1119,19 +720,13 @@ now, it will be rejected.</p>
 </code></pre>
 </div>
 <p> So when does OCaml decide to erase an optional argument?</p>
-<p>The rule is: an optional argument is erased as soon as the first
-positional (i.e., neither labeled nor optional) argument defined
-<em>after</em> the optional argument is passed in. That explains the
-behavior of <code>prepend_pound</code>. But if we had instead defined
-<code>concat</code> with the optional argument in the second
-position:</p>
+<p>The rule is: an optional argument is erased as soon as the first positional (i.e., neither labeled nor optional) argument defined <em>after</em> the optional argument is passed in. That explains the behavior of <code>prepend_pound</code>. But if we had instead defined <code>concat</code> with the optional argument in the second position:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x ?(sep="") y = x ^ sep ^ y;;
 &gt;val concat : string -&gt; ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p> then application of the first argument would not cause the optional
-argument to be erased.</p>
+<p> then application of the first argument would not cause the optional argument to be erased.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let prepend_pound = concat "# ";;
 &gt;val prepend_pound : ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
@@ -1141,17 +736,13 @@ prepend_pound "a BASH comment" ~sep:"--- ";;
 &gt;- : string = "# --- a BASH comment"
 </code></pre>
 </div>
-<p>However, if all arguments to a function are presented at once, then
-erasure of optional arguments isn’t applied until all of the arguments
-are passed in. This preserves our ability to pass in optional arguments
-anywhere on the argument list. Thus, we can write.</p>
+<p>However, if all arguments to a function are presented at once, then erasure of optional arguments isn’t applied until all of the arguments are passed in. This preserves our ability to pass in optional arguments anywhere on the argument list. Thus, we can write.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b" ~sep:"=";;
 &gt;- : string = "a=b"
 </code></pre>
 </div>
-<p>An optional argument that doesn’t have any following positional
-arguments can’t be erased at all, which leads to a compiler warning.</p>
+<p>An optional argument that doesn’t have any following positional arguments can’t be erased at all, which leads to a compiler warning.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let concat x y ?(sep="") = x ^ sep ^ y;;
 &gt;Line 1, characters 18-24:
@@ -1159,21 +750,15 @@ arguments can’t be erased at all, which leads to a compiler warning.</p>
 &gt;val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p> And indeed, when we provide the two positional arguments, the
-<code>sep</code> argument is not erased, instead returning a function
-that expects the <code>sep</code> argument to be provided.</p>
+<p> And indeed, when we provide the two positional arguments, the <code>sep</code> argument is not erased, instead returning a function that expects the <code>sep</code> argument to be provided.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">concat "a" "b";;
 &gt;- : ?sep:string -&gt; string = &lt;fun&gt;
 </code></pre>
 </div>
-<p>As you can see, OCaml’s support for labeled and optional arguments is
-not without its complexities. But don’t let these complexities obscure
-the usefulness of these features. Labels and optional arguments are very
-effective tools for making your APIs both more convenient and safer, and
-it’s worth the effort of learning how to use them effectively.</p>
+<p>As you can see, OCaml’s support for labeled and optional arguments is not without its complexities. But don’t let these complexities obscure the usefulness of these features. Labels and optional arguments are very effective tools for making your APIs both more convenient and safer, and it’s worth the effort of learning how to use them effectively.</p>
 </section>
 </section>
 </section>
 </section>
-</article></div><a href="lists-and-patterns.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 03</small>Lists and Patterns</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="lists-and-patterns.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 03</small>Lists and Patterns</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml/book">GitHub</a></li><li><a href="https://www.amazon.com/Real-World-OCaml-Functional-Programming/dp/100912580X/">Amazon</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

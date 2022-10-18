@@ -1438,7 +1438,7 @@ h6 {
 
  body:after{
      z-index:1000;
-     content: "beta";
+     content: "2nd Ed";
      position: fixed;
      width: 130px;
      height: 40px;

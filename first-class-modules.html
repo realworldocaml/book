@@ -1,29 +1,14 @@
-<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>First-Class Modules - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (published in Q4 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="first-class-modules">
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>First-Class Modules - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (Oct 2022)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.org/p/core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="first-class-modules">
 <h1>First-Class Modules</h1>
-<p>You can think of OCaml as being broken up into two parts: a core
-language that is concerned with values and types, and a module language
-that is concerned with modules and module signatures. These sublanguages
-are stratified, in that modules can contain types and values, but
-ordinary values can’t contain modules or module types. That means you
-can’t do things like define a variable whose value is a module, or a
-function that takes a module as an argument. <a data-secondary="first-class modules" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
-<p>OCaml provides a way around this stratification in the form of
-<em>first-class modules</em>. First-class modules are ordinary values
-that can be created from and converted back to regular modules. <a data-secondary="working with" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
-<p>First-class modules are a sophisticated technique, and you’ll need to
-get comfortable with some advanced aspects of the language to use them
-effectively. But it’s worth learning, because letting modules into the
-core language is quite powerful, increasing the range of what you can
-express and making it easier to build flexible and modular systems.</p>
+<p>You can think of OCaml as being broken up into two parts: a core language that is concerned with values and types, and a module language that is concerned with modules and module signatures. These sublanguages are stratified, in that modules can contain types and values, but ordinary values can’t contain modules or module types. That means you can’t do things like define a variable whose value is a module, or a function that takes a module as an argument. <a data-secondary="first-class modules" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml provides a way around this stratification in the form of <em>first-class modules</em>. First-class modules are ordinary values that can be created from and converted back to regular modules. <a data-secondary="working with" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
+<p>First-class modules are a sophisticated technique, and you’ll need to get comfortable with some advanced aspects of the language to use them effectively. But it’s worth learning, because letting modules into the core language is quite powerful, increasing the range of what you can express and making it easier to build flexible and modular systems.</p>
 <section class="level2" id="working-with-first-class-modules">
 <h2>Working with First-Class Modules</h2>
-<p>We’ll start out by covering the basic mechanics of first-class
-modules by working through some toy examples. We’ll get to more
-realistic examples in the next section.</p>
+<p>We’ll start out by covering the basic mechanics of first-class modules by working through some toy examples. We’ll get to more realistic examples in the next section.</p>
 <section class="level3" id="creating-first-class-modules">
 <h3>Creating First-Class Modules</h3>
-<p>In that light, consider the following signature of a module with a
-single integer variable:</p>
+<p>In that light, consider the following signature of a module with a single integer variable:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
 module type X_int = sig val x : int end;;
@@ -38,14 +23,11 @@ Three.x;;
 &gt;- : int = 3
 </code></pre>
 </div>
-<p>A first-class module is created by packaging up a module with a
-signature that it satisfies. This is done using the <code>module</code>
-keyword. <a data-primary="module keyword" data-type="indexterm">&nbsp;</a></p>
+<p>A first-class module is created by packaging up a module with a signature that it satisfies. This is done using the <code>module</code> keyword. <a data-primary="module keyword" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">(module &lt;Module&gt; : &lt;Module_type&gt;)</code></pre>
 </div>
-<p>We can convert <code>Three</code> into a first-class module as
-follows:</p>
+<p>We can convert <code>Three</code> into a first-class module as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = (module Three : X_int);;
 &gt;val three : (module X_int) = &lt;module&gt;
@@ -54,8 +36,7 @@ follows:</p>
 </section>
 <section class="level3" id="inference-and-anonymous-modules">
 <h3>Inference and Anonymous Modules</h3>
-<p>The module type doesn’t need to be part of the construction of a
-first-class module if it can be inferred. Thus, we can write:</p>
+<p>The module type doesn’t need to be part of the construction of a first-class module if it can be inferred. Thus, we can write:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Four = struct let x = 4 end;;
 &gt;module Four : sig val x : int end
@@ -72,9 +53,7 @@ let numbers = [ three; (module Four) ];;
 </section>
 <section class="level3" id="unpacking-first-class-modules">
 <h3>Unpacking First-Class Modules</h3>
-<p>In order to access the contents of a first-class module, you need to
-unpack it into an ordinary module. This can be done using the
-<code>val</code> keyword, using this syntax:</p>
+<p>In order to access the contents of a first-class module, you need to unpack it into an ordinary module. This can be done using the <code>val</code> keyword, using this syntax:</p>
 <div class="highlight">
 <pre><code class="language-clike">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)</code></pre>
 </div>
@@ -89,12 +68,7 @@ New_three.x;;
 </section>
 <section class="level3" id="functions-for-manipulating-first-class-modules">
 <h3>Functions for Manipulating First-Class Modules</h3>
-<p>We can also write ordinary functions which consume and create
-first-class modules. The following shows the definition of two
-functions: <code>to_int</code>, which converts a
-<code>(module X_int)</code> into an <code>int</code>; and
-<code>plus</code>, which returns the sum of two
-<code>(module X_int)</code>:</p>
+<p>We can also write ordinary functions which consume and create first-class modules. The following shows the definition of two functions: <code>to_int</code>, which converts a <code>(module X_int)</code> into an <code>int</code>; and <code>plus</code>, which returns the sum of two <code>(module X_int)</code>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let to_int m =
   let module M = (val m : X_int) in
@@ -107,16 +81,13 @@ let plus m1 m2 =
 &gt;val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;
 </code></pre>
 </div>
-<p>You can also unpack a first-class module with a pattern match, which
-lets us write <code>to_int</code> more concisely:</p>
+<p>You can also unpack a first-class module with a pattern match, which lets us write <code>to_int</code> more concisely:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let to_int (module M : X_int) = M.x;;
 &gt;val to_int : (module X_int) -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-<p>With these functions in hand, we can now work with values of type
-<code>(module X_int)</code> in a more natural style, taking advantage of
-the concision and simplicity of the core language:</p>
+<p>With these functions in hand, we can now work with values of type <code>(module X_int)</code> in a more natural style, taking advantage of the concision and simplicity of the core language:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let six = plus three three;;
 &gt;val six : (module X_int) = &lt;module&gt;
@@ -127,10 +98,7 @@ to_int (List.fold ~init:six ~f:plus [three;three]);;
 </section>
 <section class="level3" id="richer-first-class-modules">
 <h3>Richer First-Class Modules</h3>
-<p>First-class modules can contain types and functions in addition to
-simple values like <code>int</code>. Here’s an interface that contains a
-type and a corresponding <code>bump</code> operation that takes a value
-of the type and produces a new one:</p>
+<p>First-class modules can contain types and functions in addition to simple values like <code>int</code>. Here’s an interface that contains a type and a corresponding <code>bump</code> operation that takes a value of the type and produces a new one:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Bumpable = sig
   type t
@@ -139,8 +107,7 @@ end;;
 &gt;module type Bumpable = sig type t val bump : t -&gt; t end
 </code></pre>
 </div>
-<p> We can create multiple instances of this module with different
-underlying types:</p>
+<p> We can create multiple instances of this module with different underlying types:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Int_bumper = struct
   type t = int
@@ -163,10 +130,7 @@ end;;
 </section>
 <section class="level3" id="exposing-types">
 <h3>Exposing types</h3>
-<p>You can’t do much with <code>int_bumper</code> because it’s fully
-abstract, so we can’t take advantage of the fact that the type in
-question is <code>int</code>, which makes it impossible to construct or
-really do anything with values of type <code>Bumper.t</code>.</p>
+<p>You can’t do much with <code>int_bumper</code> because it’s fully abstract, so we can’t take advantage of the fact that the type in question is <code>int</code>, which makes it impossible to construct or really do anything with values of type <code>Bumper.t</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (module Bumper) = int_bumper in
 Bumper.bump 3;;
@@ -175,10 +139,7 @@ Bumper.bump 3;;
 &gt;         Bumper.t
 </code></pre>
 </div>
-<p>To make <code>int_bumper</code> usable, we need to expose that the
-type <code>Bumpable.t</code> is actually equal to <code>int</code>.
-Below we’ll do that for <code>int_bumper</code>, and also provide the
-corresponding definition for <code>float_bumper</code>.</p>
+<p>To make <code>int_bumper</code> usable, we need to expose that the type <code>Bumpable.t</code> is actually equal to <code>int</code>. Below we’ll do that for <code>int_bumper</code>, and also provide the corresponding definition for <code>float_bumper</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 &gt;val int_bumper : (module Bumpable with type t = int) = &lt;module&gt;
@@ -186,9 +147,7 @@ let float_bumper = (module Float_bumper : Bumpable with type t = float);;
 &gt;val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;
 </code></pre>
 </div>
-<p>The addition of the sharing constraint has exposed the type
-<code>t</code>, which lets us actually use the values within the
-module.</p>
+<p>The addition of the sharing constraint has exposed the type <code>t</code>, which lets us actually use the values within the module.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (module Bumper) = int_bumper in
 Bumper.bump 3;;
@@ -198,12 +157,7 @@ Bumper.bump 3.5;;
 &gt;- : float = 4.5
 </code></pre>
 </div>
-<p>We can also use these first-class modules polymorphically. The
-following function takes two arguments: a <code>Bumpable</code> module
-and a list of elements of the same type as the type <code>t</code> of
-the module: <a data-secondary="in first-class
-modules" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphism
-in" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
+<p>We can also use these first-class modules polymorphically. The following function takes two arguments: a <code>Bumpable</code> module and a list of elements of the same type as the type <code>t</code> of the module: <a data-secondary="in first-class modules" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphism in" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let bump_list
       (type a)
@@ -215,17 +169,8 @@ in" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>In this example, <code>a</code> is a <em>locally abstract type</em>.
-For any function, you can declare a pseudoparameter of the form
-<code>(type a)</code> which introduces a fresh type named
-<code>a</code>. This type acts like an abstract type within the context
-of the function. In the example above, the locally abstract type was
-used as part of a sharing constraint that ties the type <code>B.t</code>
-with the type of the elements of the list passed in. <a data-secondary="locally abstract types" data-primary="datatypes" data-type="indexterm">&nbsp;</a> <a data-primary="abstract types" data-type="indexterm">&nbsp;</a><a data-primary="locally abstract
-types" data-type="indexterm">&nbsp;</a><a data-primary="sharing constraint" data-type="indexterm">&nbsp;</a></p>
-<p>The resulting function is polymorphic in both the type of the list
-element and the type <code>Bumpable.t</code>. We can see this function
-in action:</p>
+<p>In this example, <code>a</code> is a <em>locally abstract type</em>. For any function, you can declare a pseudoparameter of the form <code>(type a)</code> which introduces a fresh type named <code>a</code>. This type acts like an abstract type within the context of the function. In the example above, the locally abstract type was used as part of a sharing constraint that ties the type <code>B.t</code> with the type of the elements of the list passed in. <a data-secondary="locally abstract types" data-primary="datatypes" data-type="indexterm">&nbsp;</a> <a data-primary="abstract types" data-type="indexterm">&nbsp;</a><a data-primary="locally abstract types" data-type="indexterm">&nbsp;</a><a data-primary="sharing constraint" data-type="indexterm">&nbsp;</a></p>
+<p>The resulting function is polymorphic in both the type of the list element and the type <code>Bumpable.t</code>. We can see this function in action:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">bump_list int_bumper [1;2;3];;
 &gt;- : int list = [2; 3; 4]
@@ -233,34 +178,24 @@ bump_list float_bumper [1.5;2.5;3.5];;
 &gt;- : float list = [2.5; 3.5; 4.5]
 </code></pre>
 </div>
-<p>Polymorphic first-class modules are important because they allow you
-to connect the types associated with a first-class module to the types
-of other values you’re working with.</p>
-<section data-type="note" class="level4" id="more-on-locally-abstract-types">
-<h4>More on Locally Abstract Types</h4>
-<p>One of the key properties of locally abstract types is that they’re
-dealt with as abstract types in the function they’re defined within, but
-are polymorphic from the outside. Consider the following example: <a data-secondary="in locally abstract types" data-primary="polymorphism" data-type="indexterm">&nbsp;</a></p>
+<p>Polymorphic first-class modules are important because they allow you to connect the types associated with a first-class module to the types of other values you’re working with.</p>
+<div data-type="note">
+<h4 id="more-on-locally-abstract-types">More on Locally Abstract Types</h4>
+<p>One of the key properties of locally abstract types is that they’re dealt with as abstract types in the function they’re defined within, but are polymorphic from the outside. Consider the following example: <a data-secondary="in locally abstract types" data-primary="polymorphism" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let wrap_in_list (type a) (x:a) = [x];;
 &gt;val wrap_in_list : 'a -&gt; 'a list = &lt;fun&gt;
 </code></pre>
 </div>
-<p>The type <code>a</code> is used in a way that is compatible with it
-being abstract, but the type of the function that is inferred is
-polymorphic.</p>
-<p>If, on the other hand, we try to use the type <code>a</code> as if it
-were equivalent to some concrete type, say, <code>int</code>, then the
-compiler will complain.</p>
+<p>The type <code>a</code> is used in a way that is compatible with it being abstract, but the type of the function that is inferred is polymorphic.</p>
+<p>If, on the other hand, we try to use the type <code>a</code> as if it were equivalent to some concrete type, say, <code>int</code>, then the compiler will complain.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let double_int (type a) (x:a) = x + x;;
 &gt;Line 1, characters 33-34:
 &gt;Error: This expression has type a but an expression was expected of type int
 </code></pre>
 </div>
-<p>One common use of locally abstract types is to create a new type that
-can be used in constructing a module. Here’s an example of doing this to
-create a new first-class module:</p>
+<p>One common use of locally abstract types is to create a new type that can be used in constructing a module. Here’s an example of doing this to create a new first-class module:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Comparable = sig
   type t
@@ -280,30 +215,15 @@ create_comparable Float.compare;;
 &gt;- : (module Comparable with type t = float) = &lt;module&gt;
 </code></pre>
 </div>
-<p>This technique is useful beyond first-class modules. For example, we
-can use the same approach to construct a local module to be fed to a
-functor.</p>
-</section>
+<p>This technique is useful beyond first-class modules. For example, we can use the same approach to construct a local module to be fed to a functor.</p>
+</div>
 </section>
 </section>
 <section class="level2" id="example-a-query-handling-framework">
 <h2>Example: A Query-Handling Framework</h2>
-<p>Now let’s look at first-class modules in the context of a more
-complete and realistic example. In particular, we’re going to implement
-a system for responding to user-generated queries.</p>
-<p>This system will use <em>s-expressions</em> for formatting queries
-and responses, as well as the configuration for the query handler.
-S-expressions are a simple, flexible, and human-readable serialization
-format commonly used in <code>Base</code> and related libraries. For
-now, it’s enough to think of them as balanced parenthetical expressions
-whose atomic values are strings, e.g.,
-<code>(this (is an) (s expression))</code>. S-expressions are covered in
-more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S-Expressions</a>. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
-<p>The following signature for a module that implements a system for
-responding to user-generated queries. Here, we use Base’s
-<code>Sexp</code> module for handling s-expressions. Note that we could
-just as easily have used another serialization format, like JSON, as
-discussed in <a data-type="xref" href="json.html#handling-json-data">Chapter 18, Handling JSON Data</a>. <a data-secondary="and first-class modules" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
+<p>Now let’s look at first-class modules in the context of a more complete and realistic example. In particular, we’re going to implement a system for responding to user-generated queries.</p>
+<p>This system will use <em>s-expressions</em> for formatting queries and responses, as well as the configuration for the query handler. S-expressions are a simple, flexible, and human-readable serialization format commonly used in <code>Base</code> and related libraries. For now, it’s enough to think of them as balanced parenthetical expressions whose atomic values are strings, e.g., <code>(this (is an) (s expression))</code>. S-expressions are covered in more detail in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S-Expressions</a>. <a data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
+<p>The following signature for a module that implements a system for responding to user-generated queries. Here, we use Base’s <code>Sexp</code> module for handling s-expressions. Note that we could just as easily have used another serialization format, like JSON, as discussed in <a data-type="xref" href="json.html#handling-json-data">Chapter 18, Handling JSON Data</a>. <a data-secondary="and first-class modules" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">module type Query_handler = sig
 
@@ -327,21 +247,12 @@ discussed in <a data-type="xref" href="json.html#handling-json-data">Chapter 18,
   val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
 end;;</code></pre>
 </div>
-<p>Implementing s-expression converters by hand is tedious and
-error-prone, but happily, we have an alternative.
-<code>ppx_sexp_conv</code> is a syntax extension which can be used to
-automatically generate s-expression converters based on their type
-definition. We’ll enable <code>ppx_sexp_conv</code> by enabling
-<code>ppx_jane</code>, which brings in a larger family of syntax
-extensions. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a>
-<a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a></p>
+<p>Implementing s-expression converters by hand is tedious and error-prone, but happily, we have an alternative. <code>ppx_sexp_conv</code> is a syntax extension which can be used to automatically generate s-expression converters based on their type definition. We’ll enable <code>ppx_sexp_conv</code> by enabling <code>ppx_jane</code>, which brings in a larger family of syntax extensions. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_jane" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_jane" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ppx_jane";;
 </code></pre>
 </div>
-<p>Here’s an example of the extension in action. Note that we need the
-annotation <code>[@@deriving sexp]</code> to kick off the generation of
-the converters.</p>
+<p>Here’s an example of the extension in action. Note that we need the annotation <code>[@@deriving sexp]</code> to kick off the generation of the converters.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type u = { a: int; b: float } [@@deriving sexp];;
 &gt;type u = { a : int; b : float; }
@@ -353,8 +264,7 @@ u_of_sexp (Core.Sexp.of_string "((a 43) (b 3.4))");;
 &gt;- : u = {a = 43; b = 3.4}
 </code></pre>
 </div>
-<p> The same annotations can be attached within a signature to add the
-appropriate type signature.</p>
+<p> The same annotations can be attached within a signature to add the appropriate type signature.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type M = sig type t [@@deriving sexp] end;;
 &gt;module type M =
@@ -363,12 +273,7 @@ appropriate type signature.</p>
 </div>
 <section class="level3" id="implementing-a-query-handler">
 <h3>Implementing a Query Handler</h3>
-<p>Now we can construct an example of a query handler that satisfies the
-<code>Query_handler</code> interface. We’ll start with a handler that
-produces unique integer IDs, which works by keeping an internal counter
-that’s bumped every time a new value is requested. The input to the
-query in this case is just the trivial s-expression <code>()</code>,
-otherwise known as <code>Sexp.unit</code>: <a data-secondary="implementation of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
+<p>Now we can construct an example of a query handler that satisfies the <code>Query_handler</code> interface. We’ll start with a handler that produces unique integer IDs, which works by keeping an internal counter that’s bumped every time a new value is requested. The input to the query in this case is just the trivial s-expression <code>()</code>, otherwise known as <code>Sexp.unit</code>: <a data-secondary="implementation of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Unique = struct
   type config = int [@@deriving sexp]
@@ -386,8 +291,7 @@ otherwise known as <code>Sexp.unit</code>: <a data-secondary="implementation of"
       response
 end;;</code></pre>
 </div>
-<p> We can use this module to create an instance of the
-<code>Unique</code> query handler and interact with it directly:</p>
+<p> We can use this module to create an instance of the <code>Unique</code> query handler and interact with it directly:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique = Unique.create 0;;
 &gt;val unique : Unique.t = {Unique.next_id = 0}
@@ -397,9 +301,7 @@ Unique.eval unique (Sexp.List []);;
 &gt;- : (Sexp.t, Error.t) result = Ok 1
 </code></pre>
 </div>
-<p>Here’s another example: a query handler that does directory listings.
-Here, the config is the default directory that relative paths are
-interpreted within:</p>
+<p>Here’s another example: a query handler that does directory listings. Here, the config is the default directory that relative paths are interpreted within:</p>
 
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_unix.sys_unix";;
@@ -428,8 +330,7 @@ interpreted within:</p>
       Ok (Array.sexp_of_t String.sexp_of_t (Sys_unix.readdir dir))
 end;;</code></pre>
 </div>
-<p>Again, we can create an instance of this query handler and interact
-with it directly:</p>
+<p>Again, we can create an instance of this query handler and interact with it directly:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let list_dir = List_dir.create "/var";;
 &gt;val list_dir : List_dir.t = {List_dir.cwd = "/var"}
@@ -445,14 +346,7 @@ List_dir.eval list_dir (sexp_of_string "yp");;
 </section>
 <section class="level3" id="dispatching-to-multiple-query-handlers">
 <h3>Dispatching to Multiple Query Handlers</h3>
-<p>Now, what if we want to dispatch queries to any of an arbitrary
-collection of handlers? Ideally, we’d just like to pass in the handlers
-as a simple data structure like a list. This is awkward to do with
-modules and functors alone, but it’s quite natural with first-class
-modules. The first thing we’ll need to do is create a signature that
-combines a <code>Query_handler</code> module with an instantiated query
-handler:<a data-secondary="dispatching to
-multiple" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
+<p>Now, what if we want to dispatch queries to any of an arbitrary collection of handlers? Ideally, we’d just like to pass in the handlers as a simple data structure like a list. This is awkward to do with modules and functors alone, but it’s quite natural with first-class modules. The first thing we’ll need to do is create a signature that combines a <code>Query_handler</code> module with an instantiated query handler:<a data-secondary="dispatching to multiple" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module type Query_handler_instance = sig
   module Query_handler : Query_handler
@@ -462,9 +356,7 @@ end;;
 &gt;  sig module Query_handler : Query_handler val this : Query_handler.t end
 </code></pre>
 </div>
-<p>With this signature, we can create a first-class module that
-encompasses both an instance of the query and the matching operations
-for working with that query.</p>
+<p>With this signature, we can create a first-class module that encompasses both an instance of the query and the matching operations for working with that query.</p>
 <p>We can create an instance as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique_instance =
@@ -475,9 +367,7 @@ end : Query_handler_instance);;
 &gt;val unique_instance : (module Query_handler_instance) = &lt;module&gt;
 </code></pre>
 </div>
-<p>Constructing instances in this way is a little verbose, but we can
-write a function that eliminates most of this boilerplate. Note that we
-are again making use of a locally abstract type:</p>
+<p>Constructing instances in this way is a little verbose, but we can write a function that eliminates most of this boilerplate. Note that we are again making use of a locally abstract type:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let build_instance
       (type a)
@@ -493,8 +383,7 @@ are again making use of a locally abstract type:</p>
 &gt;  'a -&gt; (module Query_handler_instance) = &lt;fun&gt;
 </code></pre>
 </div>
-<p> Using <code>build_instance</code>, constructing a new instance
-becomes a one-liner:</p>
+<p> Using <code>build_instance</code>, constructing a new instance becomes a one-liner:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique_instance = build_instance (module Unique) 0;;
 &gt;val unique_instance : (module Query_handler_instance) = &lt;module&gt;
@@ -502,17 +391,12 @@ let list_dir_instance = build_instance (module List_dir)  "/var";;
 &gt;val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;
 </code></pre>
 </div>
-<p>We can now write code that lets you dispatch queries to one of a list
-of query handler instances. We assume that the shape of the query is as
-follows:</p>
+<p>We can now write code that lets you dispatch queries to one of a list of query handler instances. We assume that the shape of the query is as follows:</p>
 <div class="highlight">
 <pre><code class="language-clike">(query-name query)</code></pre>
 </div>
-<p> where <em><code>query-name</code></em> is the name used to determine
-which query handler to dispatch the query to, and
-<em><code>query</code></em> is the body of the query.</p>
-<p>The first thing we’ll need is a function that takes a list of query
-handler instances and constructs a dispatch table from it:</p>
+<p> where <em><code>query-name</code></em> is the name used to determine which query handler to dispatch the query to, and <em><code>query</code></em> is the body of the query.</p>
+<p>The first thing we’ll need is a function that takes a list of query handler instances and constructs a dispatch table from it:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let build_dispatch_table handlers =
   let table = Hashtbl.create (module String) in
@@ -525,8 +409,7 @@ handler instances and constructs a dispatch table from it:</p>
 &gt;  (string, (module Query_handler_instance)) Hashtbl.Poly.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p>Next, we’ll need a function that dispatches to a handler using a
-dispatch table:</p>
+<p>Next, we’ll need a function that dispatches to a handler using a dispatch table:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let dispatch dispatch_table name_and_query =
   match name_and_query with
@@ -545,19 +428,9 @@ dispatch table:</p>
 &gt;  Sexp.t -&gt; Sexp.t Or_error.t = &lt;fun&gt;
 </code></pre>
 </div>
-<p> This function interacts with an instance by unpacking it into a
-module <code>I</code> and then using the query handler instance
-(<code>I.this</code>) in concert with the associated module
-(<code>I.Query_handler</code>).</p>
-<p>The bundling together of the module and the value is in many ways
-reminiscent of object-oriented languages. One key difference is that
-first-class modules allow you to package up more than just functions or
-methods. As we’ve seen, you can also include types and even modules.
-We’ve only used it in a small way here, but this extra power allows you
-to build more sophisticated components that involve multiple
-interdependent types and values.</p>
-<p>We can turn this into a complete, running example by adding a
-command-line interface:</p>
+<p> This function interacts with an instance by unpacking it into a module <code>I</code> and then using the query handler instance (<code>I.this</code>) in concert with the associated module (<code>I.Query_handler</code>).</p>
+<p>The bundling together of the module and the value is in many ways reminiscent of object-oriented languages. One key difference is that first-class modules allow you to package up more than just functions or methods. As we’ve seen, you can also include types and even modules. We’ve only used it in a small way here, but this extra power allows you to build more sophisticated components that involve multiple interdependent types and values.</p>
+<p>We can turn this into a complete, running example by adding a command-line interface:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Stdio;;
 let rec cli dispatch_table =
@@ -586,9 +459,7 @@ let rec cli dispatch_table =
 &gt;  &lt;fun&gt;
 </code></pre>
 </div>
-<p>We’ll run this command-line interface from a standalone program by
-putting the above code in a file, and adding the following to launch the
-interface.</p>
+<p>We’ll run this command-line interface from a standalone program by putting the above code in a file, and adding the following to launch the interface.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let () =
   cli (build_dispatch_table [unique_instance; list_dir_instance])</code></pre>
@@ -611,15 +482,8 @@ interface.</p>
 </section>
 <section class="level3" id="loading-and-unloading-query-handlers">
 <h3>Loading and Unloading Query Handlers</h3>
-<p>One of the advantages of first-class modules is that they afford a
-great deal of dynamism and flexibility. For example, it’s a fairly
-simple matter to change our design to allow query handlers to be loaded
-and unloaded at runtime. <a data-secondary="loading and
-unloading of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
-<p>We’ll do this by creating a query handler whose job is to control the
-set of active query handlers. The module in question will be called
-<code>Loader</code>, and its configuration is a list of known
-<code>Query_handler</code> modules. Here are the basic types:</p>
+<p>One of the advantages of first-class modules is that they afford a great deal of dynamism and flexibility. For example, it’s a fairly simple matter to change our design to allow query handlers to be loaded and unloaded at runtime. <a data-secondary="loading and unloading of" data-primary="query-handlers" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll do this by creating a query handler whose job is to control the set of active query handlers. The module in question will be called <code>Loader</code>, and its configuration is a list of known <code>Query_handler</code> modules. Here are the basic types:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">module Loader = struct
   type config = (module Query_handler) list [@sexp.opaque]
@@ -631,14 +495,8 @@ set of active query handlers. The module in question will be called
 
   let name = "loader"</code></pre>
 </div>
-<p>Note that a <code>Loader.t</code> has two tables: one containing the
-known query handler modules, and one containing the active query handler
-instances. The <code>Loader.t</code> will be responsible for creating
-new instances and adding them to the table, as well as for removing
-instances, all in response to user queries.</p>
-<p>Next, we’ll need a function for creating a <code>Loader.t</code>.
-This function requires the list of known query handler modules. Note
-that the table of active modules starts out as empty:</p>
+<p>Note that a <code>Loader.t</code> has two tables: one containing the known query handler modules, and one containing the active query handler instances. The <code>Loader.t</code> will be responsible for creating new instances and adding them to the table, as well as for removing instances, all in response to user queries.</p>
+<p>Next, we’ll need a function for creating a <code>Loader.t</code>. This function requires the list of known query handler modules. Note that the table of active modules starts out as empty:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let create known_list =
     let active = String.Table.create () in
@@ -648,13 +506,7 @@ that the table of active modules starts out as empty:</p>
         Hashtbl.set known ~key:Q.name ~data:q);
     { known; active }</code></pre>
 </div>
-<p>Now we can write the functions for manipulating the table of active
-query handlers. We’ll start with the function for loading an instance.
-Note that it takes as an argument both the name of the query handler and
-the configuration for instantiating that handler in the form of an
-s-expression. These are used for creating a first-class module of type
-<code>(module Query_handler_instance)</code>, which is then added to the
-active table:</p>
+<p>Now we can write the functions for manipulating the table of active query handlers. We’ll start with the function for loading an instance. Note that it takes as an argument both the name of the query handler and the configuration for instantiating that handler in the form of an s-expression. These are used for creating a first-class module of type <code>(module Query_handler_instance)</code>, which is then added to the active table:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let load t handler_name config =
     if Hashtbl.mem t.active handler_name then
@@ -674,9 +526,7 @@ active table:</p>
         Hashtbl.set t.active ~key:handler_name ~data:instance;
         Ok Sexp.unit</code></pre>
 </div>
-<p>Since the <code>load</code> function will refuse to <code>load</code>
-an already active handler, we also need the ability to unload a handler.
-Note that the handler explicitly refuses to unload itself:</p>
+<p>Since the <code>load</code> function will refuse to <code>load</code> an already active handler, we also need the ability to unload a handler. Note that the handler explicitly refuses to unload itself:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
@@ -688,10 +538,7 @@ Note that the handler explicitly refuses to unload itself:</p>
       Ok Sexp.unit
     )</code></pre>
 </div>
-<p>Finally, we need to implement the <code>eval</code> function, which
-will determine the query interface presented to the user. We’ll do this
-by creating a variant type, and using the s-expression converter
-generated for that type to parse the query from the user:</p>
+<p>Finally, we need to implement the <code>eval</code> function, which will determine the query interface presented to the user. We’ll do this by creating a variant type, and using the s-expression converter generated for that type to parse the query from the user:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">type request =
     | Load of string * Sexp.t
@@ -700,14 +547,8 @@ generated for that type to parse the query from the user:</p>
     | Active_services
   [@@deriving sexp]</code></pre>
 </div>
-<p>The <code>eval</code> function itself is fairly straightforward,
-dispatching to the appropriate functions to respond to each type of
-query. Note that we write
-<code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to autogenerate a
-function for converting a list of strings to an s-expression, as
-described in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S Expressions</a>.</p>
-<p>This function ends the definition of the <code>Loader</code>
-module:</p>
+<p>The <code>eval</code> function itself is fairly straightforward, dispatching to the appropriate functions to respond to each type of query. Note that we write <code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to autogenerate a function for converting a list of strings to an s-expression, as described in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 20, Data Serialization With S Expressions</a>.</p>
+<p>This function ends the definition of the <code>Loader</code> module:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let eval t sexp =
     match Or_error.try_with (fun () -&gt; request_of_sexp sexp) with
@@ -722,10 +563,7 @@ module:</p>
         Ok ([%sexp_of: string list] (Hashtbl.keys t.active))
 end</code></pre>
 </div>
-<p>Finally, we can put this all together with the command-line
-interface. We first create an instance of the loader query handler and
-then add that instance to the loader’s active table. We can then launch
-the command-line interface, passing it the active table.</p>
+<p>Finally, we can put this all together with the command-line interface. We first create an instance of the loader query handler and then add that instance to the loader’s active table. We can then launch the command-line interface, passing it the active table.</p>
 <div class="highlight">
 <pre><code class="language-ocaml">let () =
   let loader = Loader.create [(module Unique); (module List_dir)] in
@@ -739,11 +577,7 @@ the command-line interface, passing it the active table.</p>
     ~key:Loader.name ~data:loader_instance;
   cli loader.active</code></pre>
 </div>
-<p>The resulting command-line interface behaves much as you’d expect,
-starting out with no query handlers available but giving you the ability
-to load and unload them. Here’s an example of it in action. As you can
-see, we start out with <code>loader</code> itself as the only active
-handler.</p>
+<p>The resulting command-line interface behaves much as you’d expect, starting out with no query handlers available but giving you the ability to load and unload them. Here’s an example of it in action. As you can see, we start out with <code>loader</code> itself as the only active handler.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./query_handler_loader.exe
 &gt;&gt;&gt;&gt; (loader known_services)
@@ -757,10 +591,7 @@ handler.</p>
 <pre><code class="language-clike">&gt;&gt;&gt; (ls .)
 Could not find matching handler: ls</code></pre>
 </div>
-<p> But, we can load the <code>ls</code> handler with a config of our
-choice, at which point it will be available for use. And once we unload
-it, it will be unavailable yet again and could be reloaded with a
-different config.</p>
+<p> But, we can load the <code>ls</code> handler with a config of our choice, at which point it will be available for use. And once we unload it, it will be unavailable yet again and could be reloaded with a different config.</p>
 <div class="highlight">
 <pre><code class="language-clike">&gt;&gt;&gt; (loader (load ls /var))
 ()
@@ -772,26 +603,17 @@ different config.</p>
 &gt;&gt;&gt; (ls .)
 Could not find matching handler: ls</code></pre>
 </div>
-<p>Notably, the loader can’t be loaded (since it’s not on the list of
-known handlers) and can’t be unloaded either:</p>
+<p>Notably, the loader can’t be loaded (since it’s not on the list of known handlers) and can’t be unloaded either:</p>
 <div class="highlight">
 <pre><code class="language-clike">&gt;&gt;&gt; (loader (unload loader))
 It's unwise to unload yourself</code></pre>
 </div>
-<p>Although we won’t describe the details here, we can push this
-dynamism yet further using OCaml’s dynamic linking facilities, which
-allow you to compile and link in new code to a running program. This can
-be automated using libraries like <code>ocaml_plugin</code>, which can
-be installed via OPAM, and which takes care of much of the workflow
-around setting up dynamic linking.</p>
+<p>Although we won’t describe the details here, we can push this dynamism yet further using OCaml’s dynamic linking facilities, which allow you to compile and link in new code to a running program. This can be automated using libraries like <code>ocaml_plugin</code>, which can be installed via OPAM, and which takes care of much of the workflow around setting up dynamic linking.</p>
 </section>
 </section>
 <section class="level2" id="living-without-first-class-modules">
 <h2>Living Without First-Class Modules</h2>
-<p>It’s worth noting that most designs that can be done with first-class
-modules can be simulated without them, with some level of awkwardness.
-For example, we could rewrite our query handler example without
-first-class modules using the following types:<a data-secondary="alternatives to" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
+<p>It’s worth noting that most designs that can be done with first-class modules can be simulated without them, with some level of awkwardness. For example, we could rewrite our query handler example without first-class modules using the following types:<a data-secondary="alternatives to" data-primary="first-class modules" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type query_handler_instance =
   { name : string
@@ -804,10 +626,7 @@ type query_handler = Sexp.t -&gt; query_handler_instance;;
 &gt;type query_handler = Sexp.t -&gt; query_handler_instance
 </code></pre>
 </div>
-<p>The idea here is that we hide the true types of the objects in
-question behind the functions stored in the closure. Thus, we could put
-the <code>Unique</code> query handler into this framework as
-follows:</p>
+<p>The idea here is that we hide the true types of the objects in question behind the functions stored in the closure. Thus, we could put the <code>Unique</code> query handler into this framework as follows:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in
@@ -818,12 +637,7 @@ follows:</p>
 &gt;val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
 </code></pre>
 </div>
-<p>For an example on this scale, the preceding approach is completely
-reasonable, and first-class modules are not really necessary. But the
-more functionality you need to hide away behind a set of closures, and
-the more complicated the relationships between the different types in
-question, the more awkward this approach becomes, and the better it is
-to use first-class modules.</p>
+<p>For an example on this scale, the preceding approach is completely reasonable, and first-class modules are not really necessary. But the more functionality you need to hide away behind a set of closures, and the more complicated the relationships between the different types in question, the more awkward this approach becomes, and the better it is to use first-class modules.</p>
 </section>
 </section>
-</article></div><a href="objects.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 12</small>Objects</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
+</article></div><a href="objects.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 12</small>Objects</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://github.com/realworldocaml/book">GitHub</a></li><li><a href="https://www.amazon.com/Real-World-OCaml-Functional-Programming/dp/100912580X/">Amazon</a></li></ul><p>Copyright 2012-2022 Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
