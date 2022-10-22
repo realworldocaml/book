@@ -6,5 +6,8 @@ hidden = ["_build"]
 [languages.OCaml]
 pattern = "**/*.{ml,mli}"
 
+[env]
+TZ="GB"
+
 [nix]
 channel = "stable-22_05"
