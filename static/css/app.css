@@ -1228,7 +1228,7 @@ h6 {
 }
 
  /* Notes & Warnings */
- section div[data-type=note] {
+ section[data-type=note] {
      background: #fdedd4;
      border: 1px solid #f39c12;
  }
@@ -1237,18 +1237,18 @@ h6 {
      border: 1px solid #F1948A;
  }
 
- section div[data-type=note],
+ section[data-type=note],
  section div[data-type=warning] {
      border-radius: 3px;
      margin-bottom: 1.6875rem;
      padding: 1.6875rem;
      padding-top: 0;
 }
- section div[data-type=note] p {
+ section[data-type=note] p {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
 }
- section div[data-type=note] div.highlight {
+ section[data-type=note] div.highlight {
      padding: 0 1.6875rem;
 }
 
