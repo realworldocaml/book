@@ -2,8 +2,8 @@
 <h1>The OCaml Platform</h1>
 <p>So far in Part II, we’ve gone through a number of libraries and techniques you can use to build larger scale OCaml programs. We’ll now wrap up this part by examining the tools you can use for editing, compiling, testing, documenting and publishing your own projects.</p>
 <p>The OCaml community has developed a suite of modern tools to interface it with IDEs such as Visual Studio Code, and to generate API documentation and implement modern software engineering practices such as continuous integration (CI) and unit or fuzz testing. All you need to do is to specify your project metadata (for example, library dependencies and compiler versions), and the OCaml Platform tools that we’ll describe next will do much of the heavy lifting.</p>
-<div data-type="note">
-<h4 id="using-the-opam-source-based-package-manager">Using the Opam Source-Based Package Manager</h4>
+<section data-type="note" class="level4" id="using-the-opam-source-based-package-manager">
+<h4>Using the Opam Source-Based Package Manager</h4>
 <p>opam is the official package manager and metadata packaging format that is used in the OCaml community. We’ve been using it in earlier chapters to install OCaml libraries, and we’re going to take a closer look at how to use opam within a full project next. You’ve almost certainly done this already at this point in the book, but in case you’ve skipped straight to this chapter make sure you first initialize opam’s global state.<a data-secondary="initializing" data-primary="opam package manager" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-clike">$ opam init</code></pre>
@@ -16,7 +16,7 @@
 &gt;   default   ocaml.4.13.1  default
 </code></pre>
 </div>
-</div>
+</section>
 <section class="level2" id="a-hello-world-ocaml-project">
 <h2>A Hello World OCaml Project</h2>
 <p>Let’s start by creating a sample OCaml project and navigating around it. Dune has a basic built-in command to initialize a project template that is suitable to get us started.<a data-secondary="initializing a project" data-primary="dune" data-type="indexterm">&nbsp;</a></p>
@@ -218,11 +218,11 @@ dune exec -- bin/main.exe
 <pre><code class="language-clike">opam install ocaml-lsp-server</code></pre>
 </div>
 <p>Once installed, the VSCode OCaml plugin will ask you which opam switch to use. Just the default one should be sufficient to get you going with building and browsing your interfaces.</p>
-<div data-type="note">
-<h4 id="what-is-the-language-server-protocol">What Is The Language Server Protocol?</h4>
+<section data-type="note" class="level4" id="what-is-the-language-server-protocol">
+<h4>What Is The Language Server Protocol?</h4>
 <p>The Language Server Protocol defines a communications standard between an editor or IDE and a language-specific server that provides features such as auto-completion, definition search, reference indexing and other facilities that require specialized support from language tooling. This allows a programming language toolchain to implement all this functionality just once, and then integrate cleanly into the multiplicity of IDE environments available these days – and even go beyond conventional desktop environments to web-based notebooks such as Jupyter.</p>
 <p>Since OCaml has a complete and mature LSP server, you’ll find that an increasing number of IDEs will just support it out of the box once you install the ocaml-lsp-server. It integrates automatically with the various tools we’ve used in this book, such as detecting opam switches, invoking dune rules, and so on.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="browsing-interface-documentation">
 <h3>Browsing Interface Documentation</h3>
@@ -282,8 +282,8 @@ $ opam install ocamlformat.0.20.1</code></pre>
 <h3>Defining Opam Packages</h3>
 <p>The only metadata file that is really <em>required</em> to participate in the open-source OCaml ecosystem is an <code>opam</code> file in your source tree. Each <code>opam</code> file defines a <em>package</em> – a collection of OCaml libraries and executable binaries or application data. Each opam package can define dependencies on other opam packages, and includes build and testing directions for your project. This is what’s installed when you eventually publish the package and someone else types in <code>opam install hello</code>.</p>
 <p>A collection of <code>opam</code> files can be stored in an <em>opam repository</em> to create a package database, with a central one for the OCaml ecosystem available at <a class="uri" href="https://github.com/ocaml/opam-repository">https://github.com/ocaml/opam-repository</a>. The official (but not exclusive) tool used for manipulating <code>opam</code> files is the eponymous <a href="https://opam.ocaml.org">opam package manager</a> that we’ve been using throughout this book.</p>
-<div data-type="note">
-<h4 id="how-do-we-name-ocaml-modules-libraries-and-packages">How Do We Name OCaml Modules, Libraries and Packages?</h4>
+<section data-type="note" class="level4" id="how-do-we-name-ocaml-modules-libraries-and-packages">
+<h4>How Do We Name OCaml Modules, Libraries and Packages?</h4>
 <p>Much of the time, the module, library, and package names are all the same. But there are reasons for these names to be distinct as well:</p>
 <ul>
 <li>Some libraries are exposed as multiple top-level modules, which means you need a different name for that collection of modules.</li>
@@ -291,7 +291,7 @@ $ opam install ocamlformat.0.20.1</code></pre>
 <li>Package names might differ from library names if a package combines multiple libraries and/or binaries together.</li>
 </ul>
 <p>It’s important to understand the difference between modules, libraries and packages as you work on bigger projects. These can easily have thousands of modules, hundreds of libraries and dozens of opam packages in a single codebase.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="generating-project-metadata-from-dune">
 <h3>Generating Project Metadata from Dune</h3>
@@ -406,8 +406,8 @@ $ git diff</code></pre>
 </div>
 <p>This will begin an interactive session where you will need to enter some GitHub authentication details (via creating a personal access token). Once that is completed, the tool will run all local tests, generate documentation and upload it to your GitHub pages branch for that project, and finally offer to open a pull request to the central opam-repository. Recall that the central opam package set is all just a normal git repository, and so your opam file will be added to that and your GitHub account will create a PR.</p>
 <p>At this point, you can sit back and relax while the central opam repository test system runs your package through a battery of installations (including on exotic architectures you might not access to, such as S390X mainframes or 32-bit ARMv7). If there is a problem detected, some friendly maintainers from the OCaml community will comment on the pull request and guide you through how to address it. You can simply delete the git tag and re-run the release process until the package is merged. Once it is merged, you can navigate to the &lt;ocaml.org&gt; site and view it online in an hour or so. It will also be available in the central repository for other users to install.</p>
-<div data-type="note">
-<h4 id="creating-lock-files-for-your-projects">Creating Lock Files for Your Projects</h4>
+<section data-type="note" class="level4" id="creating-lock-files-for-your-projects">
+<h4>Creating Lock Files for Your Projects</h4>
 <p>Before you publish a project, you might also want to create an opam lock file to include with the archive. A lock file records the exact versions of all the transitive opam dependencies at the time you generate it. All you need to do is to run:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">opam lock
@@ -420,7 +420,7 @@ opam switch create . --locked
 </code></pre>
 </div>
 <p>Lock files are an optional but useful step to take when releasing your project to the Internet.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="learning-more-from-real-projects">

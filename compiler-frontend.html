@@ -297,13 +297,13 @@ let v = Foo</code></pre>
 &gt;         Actual declaration
 [2]</code></pre>
 </div>
-<div data-type="note" class="allow_break">
-<h4 id="which-comes-first-the-ml-or-the-mli">Which Comes First: The ml or the mli?</h4>
+<section data-type="note" class="level4 allow_break" id="which-comes-first-the-ml-or-the-mli">
+<h4>Which Comes First: The ml or the mli?</h4>
 <p>There are two schools of thought on which order OCaml code should be written in. It’s very easy to begin writing code by starting with an <code>ml</code> file and using the type inference to guide you as you build up your functions. The <code>mli</code> file can then be generated as described, and the exported functions documented. <a data-primary="mli files" data-type="indexterm">&nbsp;</a><a data-secondary="mli files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-primary="ml files" data-type="indexterm">&nbsp;</a><a data-secondary="ml files" data-primary="files" data-type="indexterm">&nbsp;</a></p>
 <p>If you’re writing code that spans multiple files, it’s sometimes easier to start by writing all the <code>mli</code> signatures and checking that they type-check against one another. Once the signatures are in place, you can write the implementations with the confidence that they’ll all glue together correctly, with no cyclic dependencies among the modules.</p>
 <p>As with any such stylistic debate, you should experiment with which system works best for you. Everyone agrees on one thing though: no matter in what order you write them, production code should always explicitly define an <code>mli</code> file for every <code>ml</code> file in the project. It’s also perfectly fine to have an <code>mli</code> file without a corresponding <code>ml</code> file if you’re only declaring signatures (such as module types).</p>
 <p>Signature files provide a place to write succinct documentation and to abstract internal details that shouldn’t be exported. Maintaining separate signature files also speeds up incremental compilation in larger code bases, since recompiling a <code>mli</code> signature is much faster than a full compilation of the implementation to native code.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="type-inference-1">
 <h3>Type Inference</h3>
@@ -517,8 +517,9 @@ end</code></pre>
 <p>The type checker resolves such module references into concrete structures and signatures in order to unify types across module boundaries. It does this by searching a list of directories for a compiled interface file matching that module’s name. For example, it will look for <code>alice.cmi</code> and <code>bob.cmi</code> on the search path and use the first ones it encounters as the interfaces for <code>Alice</code> and <code>Bob</code>.</p>
 <p>The module search path is set by adding <code>-I</code> flags to the compiler command line with the directory containing the <code>cmi</code> files as the argument. Manually specifying these flags gets complex when you have lots of libraries, and is the reason why tools like <code>dune</code> and <code>ocamlfind</code> exist. They both automate the process of turning third-party package names and build descriptions into command-line flags that are passed to the compiler command line.</p>
 <p>By default, only the current directory and the OCaml standard library will be searched for <code>cmi</code> files. The <code>Stdlib</code> module from the standard library will also be opened by default in every compilation unit. The standard library location is obtained by running <code>ocamlc -where</code> and can be overridden by setting the <code>CAMLLIB</code> environment variable. Needless to say, don’t override the default path unless you have a good reason to (such as setting up a cross-compilation environment). <a data-primary="cmi files" data-type="indexterm">&nbsp;</a><a data-secondary="cmi files" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlogjinfo" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="inspecting-compilation-units-with-ocamlobjinfo">Inspecting Compilation Units with ocamlobjinfo</h4>
+</section>
+<section data-type="note" class="level4" id="inspecting-compilation-units-with-ocamlobjinfo">
+<h4>Inspecting Compilation Units with ocamlobjinfo</h4>
 <p>For separate compilation to be sound, we need to ensure that all the <code>cmi</code> files used to type-check a module are the same across compilation runs. If they vary, this raises the possibility of two modules checking different type signatures for a common module with the same name. This in turn lets the program completely violate the static type system and can lead to memory corruption and crashes.</p>
 <p>OCaml guards against this by recording a MD5 checksum in every <code>cmi</code>. Let’s examine our earlier <code>typedef.ml</code> more closely:</p>
 <div class="highlight">
@@ -542,7 +543,6 @@ Error: The files /home/build/bar.cmi
        over interface Map</code></pre>
 </div>
 <p>This hash check is very conservative, but ensures that separate compilation remains type-safe all the way up to the final link phase. Your build system should ensure that you never see the preceding error messages, but if you do run into it, just clean out your intermediate files and recompile from scratch.</p>
-</div>
 </section>
 </section>
 <section class="level3" id="wrapping-libraries-with-module-aliases">

@@ -3,8 +3,8 @@
 <p>This chapter gives an overview of OCaml by walking through a series of small examples that cover most of the major features of the language. This should provide a sense of what OCaml can do, without getting too deep into any one topic.</p>
 <p>Throughout the book we’re going to use <code>Base</code>, a more full-featured and capable replacement for OCaml’s standard library. We’ll also use <code>utop</code>, a shell that lets you type in expressions and evaluate them interactively. <code>utop</code> is an easier-to-use version of OCaml’s standard toplevel (which you can start by typing <em>ocaml</em> at the command line). These instructions will assume you’re using <code>utop</code>, but the ordinary toplevel should mostly work fine.</p>
 <p>Before going any further, make sure you’ve followed the steps in <a href="http://dev.realworldocaml.org/install.html">the installation page</a>.</p>
-<div data-type="note">
-<h4 id="base-and-core"><code>Base</code> and <code>Core</code></h4>
+<section data-type="note" class="level4" id="base-and-core">
+<h4><code>Base</code> and <code>Core</code></h4>
 <p><code>Base</code> comes along with another, yet more extensive standard library replacement, called <code>Core</code>. We’re going to mostly stick to <code>Base</code>, but it’s worth understanding the differences between these libraries. <a data-primary="Base standard library" data-type="indexterm">&nbsp;</a> <a data-primary="Core standard library" data-type="indexterm">&nbsp;</a></p>
 <ul>
 <li><p><em><code>Base</code></em> is designed to be lightweight, portable, and stable, while providing all of the fundamentals you need from a standard library. It comes with a minimum of external dependencies, so <code>Base</code> just takes seconds to build and install.</p></li>
@@ -12,7 +12,7 @@
 </ul>
 
 <p>As of the version of <code>Base</code> and <code>Core</code> used in this book (version <code>v0.14</code>), <code>Core</code> is less portable than <code>Base</code>, running only on UNIX-like systems. For that reason, there is another package, <code>Core_kernel</code>, which is the portable subset of <code>Core</code>. That said, in the latest stable release, <code>v0.15</code> (which was released too late to be adopted for this edition of the book) <code>Core</code> is portable, and <code>Core_kernel</code> has been deprecated. Given that, we don’t use <code>Core_kernel</code> in this text.</p>
-</div>
+</section>
 <p>Before getting started, make sure you have a working OCaml installation so you can try out the examples as you read through the chapter.</p>
 <section class="level2" id="ocaml-as-a-calculator">
 <h2>OCaml as a Calculator</h2>
@@ -200,8 +200,8 @@ first_if_true big_number 4 3;;
 </code></pre>
 </div>
 <p>In this example, <code>big_number</code> requires that <code>'a</code> be instantiated as <code>int</code>, whereas <code>"short"</code> and <code>"loooooong"</code> require that <code>'a</code> be instantiated as <code>string</code>, and they can’t both be right at the same time.</p>
-<div data-type="note">
-<h4 id="type-errors-versus-exceptions">Type Errors Versus Exceptions</h4>
+<section data-type="note" class="level4" id="type-errors-versus-exceptions">
+<h4>Type Errors Versus Exceptions</h4>
 <p>There’s a big difference in OCaml between errors that are caught at compile time and those that are caught at runtime. It’s better to catch errors as early as possible in the development process, and compilation time is best of all.<a data-primary="runtime exceptions vs.&nbsp;type errors" data-type="indexterm">&nbsp;</a><a data-secondary="runtime vs.&nbsp;compile time" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;type errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-primary="type errors vs.&nbsp;exceptions" data-type="indexterm">&nbsp;</a></p>
 <p>Working in the toplevel somewhat obscures the difference between runtime and compile-time errors, but that difference is still there. Generally, type errors like this one:</p>
 <div class="highlight">
@@ -225,7 +225,7 @@ is_a_multiple 8 0;;
 </code></pre>
 </div>
 <p>The distinction here is that type errors will stop you whether or not the offending code is ever actually executed. Merely defining <code>add_potato</code> is an error, whereas <code>is_a_multiple</code> only fails when it’s called, and then, only when it’s called with an input that triggers the exception.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="tuples-lists-options-and-pattern-matching">
@@ -264,12 +264,12 @@ let another_tuple = (3,"four",5.);;
 </div>
 <p> The <code>**.</code> operator used above is for raising a floating-point number to a power.</p>
 <p>This is just a first taste of pattern matching. Pattern matching is a pervasive tool in OCaml, and as you’ll see, it has surprising power.</p>
-<div data-type="note">
-<h4 id="operators-in-base-and-the-stdlib">Operators in <code>Base</code> and the Stdlib</h4>
+<section data-type="note" class="level4" id="operators-in-base-and-the-stdlib">
+<h4>Operators in <code>Base</code> and the Stdlib</h4>
 <p>OCaml’s standard library and <code>Base</code> mostly use the same operators for the same things, but there are some differences. For example, in <code>Base</code>, <code>**.</code> is float exponentiation, and <code>**</code> is integer exponentiation, whereas in the standard library, <code>**</code> is float exponentiation, and integer exponentiation isn’t exposed as an operator.</p>
 <p><code>Base</code> does what it does to be consistent with other numerical operators like <code>*.</code> and <code>*</code>, where the period at the end is used to mark the floating-point versions.</p>
 <p>In general, <code>Base</code> is not shy about presenting different APIs than OCaml’s standard library when it’s done in the service of consistency and clarity.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="lists">
 <h3>Lists</h3>
@@ -324,8 +324,9 @@ let another_tuple = (3,"four",5.);;
 &gt;- : string list = ["OCaml"; "Perl"; "C"]
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="semicolons-versus-commas">Semicolons Versus Commas</h4>
+</section>
+<section data-type="note" class="level4" id="semicolons-versus-commas">
+<h4>Semicolons Versus Commas</h4>
 <p>Unlike many other languages, OCaml uses semicolons to separate list elements in lists rather than commas. Commas, instead, are used for separating elements in a tuple. If you try to use commas in a list, you’ll see that your code compiles but doesn’t do quite what you might expect:<a data-primary="commas vs. semicolons" data-type="indexterm">&nbsp;</a><a data-primary="semicolons vs.&nbsp;commas" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">["OCaml", "Perl", "C"];;
@@ -340,7 +341,7 @@ let another_tuple = (3,"four",5.);;
 </code></pre>
 </div>
 <p>to allocate a tuple of integers. This is generally considered poor style and should be avoided.</p>
-</div>
+</section>
 <p>The bracket notation for lists is really just syntactic sugar for <code>::</code>. Thus, the following declarations are all equivalent. Note that <code>[]</code> is used to represent the empty list and that <code>::</code> is right-associative:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1; 2; 3];;
@@ -358,7 +359,6 @@ let another_tuple = (3,"four",5.);;
 </code></pre>
 </div>
 <p>It’s important to remember that, unlike <code>::</code>, this is not a constant-time operation. Concatenating two lists takes time proportional to the length of the first list.</p>
-</section>
 <section class="level4" id="list-patterns-using-match">
 <h4>List Patterns Using Match</h4>
 <p>The elements of a list can be accessed through pattern matching. List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here’s a simple example:<a data-secondary="in lists" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
@@ -566,10 +566,10 @@ is_inside_scene {x=3.;y=7.}
 <p>You might at this point notice that the use of <code>match</code> here is reminiscent of how we used <code>match</code> with <code>option</code> and <code>list</code>. This is no accident: <code>option</code> and <code>list</code> are just examples of variant types that are important enough to be defined in the standard library (and in the case of lists, to have some special syntax).</p>
 <p>We also made our first use of an <em>anonymous function</em> in the call to <code>List.exists</code>. Anonymous functions are declared using the <code>fun</code> keyword, and don’t need to be explicitly named. Such functions are common in OCaml, particularly when using iteration functions like <code>List.exists</code>.<a data-primary="anonymous functions" data-type="indexterm">&nbsp;</a><a data-secondary="anonymous functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <p>The purpose of <code>List.exists</code> is to check if there are any elements of the list in question for which the provided function evaluates to <code>true</code>. In this case, we’re using <code>List.exists</code> to check if there is a scene element within which our point resides.</p>
-<div data-type="note">
-<h4 id="base-and-polymorphic-comparison"><code>Base</code> and Polymorphic Comparison</h4>
+<section data-type="note" class="level4" id="base-and-polymorphic-comparison">
+<h4><code>Base</code> and Polymorphic Comparison</h4>
 <p>One other thing to notice was the fact that we opened <code>Float.O</code> in the definition of <code>is_inside_scene_element</code>. That allowed us to use the simple, un-dotted infix operators, but more importantly it brought the float comparison operators into scope. When using <code>Base</code>, the default comparison operators work only on integers, and you need to explicitly choose other comparison operators when you want them. OCaml also offers a special set of <em>polymorphic comparison operators</em> that can work on almost any type, but those are considered to be problematic, and so are hidden by default by <code>Base</code>. We’ll learn more about polymorphic compare in <a data-type="xref" href="lists-and-patterns.html#terser-and-faster-patterns">Chapter 3, Terser and Faster Patterns</a>.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="imperative-programming">
 <h2>Imperative Programming</h2>
@@ -684,8 +684,8 @@ let (:=) r x = r.contents &lt;- x;;
 </code></pre>
 </div>
 <p>This isn’t the most idiomatic way to sum up a list, but it shows how you can use a <code>ref</code> in place of a mutable variable.</p>
-<div data-type="note">
-<h4 id="nesting-lets-with-let-and-in">Nesting lets with <code>let</code> and <code>in</code></h4>
+<section data-type="note" class="level4" id="nesting-lets-with-let-and-in">
+<h4>Nesting lets with <code>let</code> and <code>in</code></h4>
 <p>The definition of <code>sum</code> in the above examples was our first use of <code>let</code> to define a new variable within the body of a function. A <code>let</code> paired with an <code>in</code> can be used to introduce a new binding within any local scope, including a function body. The <code>in</code> marks the beginning of the scope within which the new variable can be used. Thus, we could write:<a data-secondary="local" data-primary="let binding" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
@@ -709,7 +709,7 @@ x + y;;
 </code></pre>
 </div>
 <p>This kind of nested <code>let</code> binding is a common way of building up a complex expression, with each <code>let</code> naming some component, before combining them in one final expression.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="for-and-while-loops">
 <h3>For and While Loops</h3>

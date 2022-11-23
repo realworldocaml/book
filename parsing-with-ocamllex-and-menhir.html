@@ -8,12 +8,12 @@
 <p>Often, you can find an existing parsing library that handles these issues for you. But there are tools to simplify the task when you do need to write a parser, in the form of <em>parser generators</em>. A parser generator creates a parser from a specification of the data format that you want to parse, and uses that to generate a parser. <a data-secondary="parser generators" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
 <p>Parser generators have a long history, including tools like <code>lex</code> and <code>yacc</code> that date back to the early 1970s. OCaml has its own alternatives, including <code>ocamllex</code>, which replaces <code>lex</code>, and <code>ocamlyacc</code> and <code>menhir</code>, which replace <code>yacc</code>. We’ll explore these tools in the course of walking through the implementation of a parser for the JSON serialization format that we discussed in <a data-type="xref" href="json.html#handling-json-data">Chapter 18, Handling Json Data</a>.</p>
 <p>Parsing is a broad and often intricate topic, and our purpose here is not to teach all of the theoretical issues, but to provide a pragmatic introduction of how to build a parser in OCaml. <a data-primary="ocamlyacc parser generator" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;ocamlyacc" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="menhir-versus-ocamlyacc">Menhir Versus ocamlyacc</h4>
+<section data-type="note" class="level4" id="menhir-versus-ocamlyacc">
+<h4>Menhir Versus ocamlyacc</h4>
 <p>Menhir is an alternative parser generator that is generally superior to the venerable <code>ocamlyacc</code>, which dates back quite a few years. Menhir is mostly compatible with <code>ocamlyacc</code> grammars, and so you can usually just switch to Menhir and expect older code to work (with some minor differences described in the Menhir manual).</p>
 <p>The biggest advantage of Menhir is that its error messages are generally more human-comprehensible, and the parsers that it generates are fully reentrant and can be parameterized in OCaml modules more easily. We recommend that any new code you develop should use Menhir instead of <code>ocamlyacc</code>.</p>
 <p>Menhir isn’t distributed directly with OCaml but is available through OPAM by running <code>opam install menhir</code>.</p>
-</div>
+</section>
 <section class="level2" id="lexing-and-parsing">
 <h2>Lexing and Parsing</h2>
 <p>Parsing is traditionally broken down into two parts: <em>lexical analysis</em>, which is a kind of simplified parsing phase that converts a stream of characters into a stream of logical tokens; and full-on parsing, which involves converting a stream of tokens into the final representation, which is often in the form of a tree-like data structure called an <em>abstract syntax tree</em>, or AST. <a data-primary="AST (abstract syntax-tree)" data-type="indexterm">&nbsp;</a><a data-primary="lexical analysis (lexing)" data-type="indexterm">&nbsp;</a></p>
@@ -296,15 +296,15 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</code></pre>
 <li><p>The longest match always wins. For example, the first input <code>trueX: 167</code> matches the regular expression <code>"true"</code> for four characters, and it matches <code>id</code> for five characters. The longer match wins, and the return value is <code>ID "trueX"</code>.</p></li>
 <li><p>If all matches have the same length, then the first action wins. If the input were <code>true: 167</code>, then both <code>"true"</code> and <code>id</code> match the first four characters; <code>"true"</code> is first, so the return value is <code>TRUE</code>.</p></li>
 </ul>
-<div data-type="note">
-<h4 id="unused-lexing-values">Unused Lexing Values</h4>
+<section data-type="note" class="level4" id="unused-lexing-values">
+<h4>Unused Lexing Values</h4>
 <p>In our parser, we have not used all the token regexps that we defined in the lexer. For instance, <code>id</code> is unused since we do not parse unquoted strings for object identifiers (something that is allowed by JavaScript, but not the subset of it that is JSON). If we included a token pattern match for this in the lexer, then we would have to adjust the parser accordingly to add a <code>%token &lt;string&gt; ID</code>. This would in turn trigger an “unused” warning since the parser never constructs a value with type ID:</p>
 <div class="highlight">
 <pre><code class="language-clike">File "parser.mly", line 4, characters 16-18:
 Warning: the token ID is unused.</code></pre>
 </div>
 <p>It’s completely fine to define unused regexps as we’ve done, and to hook them into parsers as required. For example, we might use <code>ID</code> if we add an extension to our parser for supporting unquoted string identifiers as a non-standard JSON extension.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="recursive-rules">
 <h3>Recursive Rules</h3>
@@ -330,8 +330,8 @@ Warning: the token ID is unused.</code></pre>
 <p>This rule takes a <code>buf : Buffer.t</code> as an argument. If we reach the terminating double quote <code>"</code>, then we return the contents of the buffer as a <code>STRING</code>.</p>
 <p>The other cases are for handling the string contents. The action <code>[^ '"' '\\']+ { ... }</code> matches normal input that does not contain a double quote or backslash. The actions beginning with a backslash <code>\</code> define what to do for escape sequences. In each of these cases, the final step includes a recursive call to the lexer.</p>
 <p>That covers the lexer. Next, we need to combine the lexer with the parser to bring it all together. <a data-secondary="Unicode parsing" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-primary="Uutf Unicode codec" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="sedlex lexer generator" data-type="indexterm">&nbsp;</a><a data-primary="Camomile unicode parser" data-type="indexterm">&nbsp;</a><a data-primary="Unicode, parsing solutions for" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="handling-unicode">Handling Unicode</h4>
+<section data-type="note" class="level4" id="handling-unicode">
+<h4>Handling Unicode</h4>
 <p>We’ve glossed over an important detail here: parsing Unicode characters to handle the full spectrum of the world’s writing systems. OCaml has several third-party solutions to handling Unicode, with varying degrees of flexibility and complexity:</p>
 <ul>
 <li><p><a href="http://erratique.ch/software/uutf">Uutf</a> is a nonblocking streaming Unicode codec for OCaml, available as a standalone library. It is accompanied by the <a href="http://erratique.ch/software/uunf">Uunf</a> text normalization and <a href="http://erratique.ch/software/uucd">Uucd</a> Unicode character database libraries. There is also a robust parser for <a href="http://erratique.ch/software/jsonm">JSON</a> available that illustrates the use of Uutf in your own libraries.</p></li>
@@ -339,7 +339,7 @@ Warning: the token ID is unused.</code></pre>
 <li><p><a href="https://github.com/ocaml-community/sedlex">sedlex</a> is a lexer generator for Unicode that can serve as a Unicode-aware replacement for <code>ocamllex</code>.</p></li>
 </ul>
 <p>All of these libraries are available via opam under their respective names.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="bringing-it-all-together">

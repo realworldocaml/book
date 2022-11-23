@@ -286,8 +286,8 @@ render_separator [3;6;2];;
 </code></pre>
 </div>
 <p> Note that we make the line of dashes two larger than the provided width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="performance-of-string.concat-and">Performance of <code>String.concat</code> and <code>^</code></h4>
+<section data-type="note" class="level4" id="performance-of-string.concat-and">
+<h4>Performance of <code>String.concat</code> and <code>^</code></h4>
 <p>In the preceding code we’ve concatenated strings two different ways: <code>String.concat</code>, which operates on lists of strings; and <code>^</code>, which is a pairwise operator. You should avoid <code>^</code> for joining large numbers of strings, since it allocates a new string every time it runs. Thus, the following code</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
@@ -301,7 +301,7 @@ render_separator [3;6;2];;
 </code></pre>
 </div>
 <p> allocates one string of size 7, as well as a list of length 7. At these small sizes, the differences don’t amount to much, but for assembling large strings, it can be a serious performance issue.</p>
-</div>
+</section>
 <p>Now we need code for rendering a row with data in it. We’ll first write a function called <code>pad</code>, for padding out a string to a specified length:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let pad s length =
@@ -550,8 +550,8 @@ length [1;2;3;4];;
 &gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="polymorphic-compare">Polymorphic Compare</h4>
+<section data-type="note" class="level4" id="polymorphic-compare">
+<h4>Polymorphic Compare</h4>
 <p>You might have noticed that <code>remove_sequential_duplicates</code> is specialized to lists of integers. That’s because <code>Base</code>’s default equality operator is specialized to integers, as you can see if you try to apply it to values of a different type. <a data-primary="polymorphic compare" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
@@ -605,7 +605,7 @@ remove_sequential_duplicates ["one";"two";"two";"two";"three"];;
 <p>For simple atomic types, polymorphic compare has the semantics you would expect: for floating-point numbers and integers, polymorphic compare corresponds to the expected numerical comparison functions. For strings, it’s a lexicographic comparison.</p>
 <p>That said, experienced OCaml developers typically avoid polymorphic comparison. That’s surprising, given how obviously useful it is, but there’s a good reason. While it’s very convenient, in some cases, the type oblivious nature of polymorphic compare means that it does something that doesn’t make sense for the particular type of values you’re dealing with. This can lead to surprising and hard to resolve bugs in your code. It’s for this reason that <code>Base</code> discourages the use of polymorphic compare by hiding it by default.</p>
 <p>We’ll discuss the downsides of polymorphic compare in more detail in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>.</p>
-</div>
+</section>
 <p>Note that <code>when</code> clauses have some downsides. As we noted earlier, the static checks associated with pattern matches rely on the fact that patterns are restricted in what they can express. Once we add the ability to add an arbitrary condition to a pattern, something is lost. In particular, the ability of the compiler to determine if a match is exhaustive, or if some case is redundant, is compromised.</p>
 <p>Consider the following function, which takes a list of optional values, and returns the number of those values that are <code>Some</code>. Because this implementation uses <code>when</code> clauses, the compiler can’t tell that the code is exhaustive:</p>
 <div class="highlight">

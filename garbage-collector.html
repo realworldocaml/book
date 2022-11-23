@@ -21,11 +21,11 @@
 </ul>
 <p>A typical functional programming style means that young blocks tend to die young and old blocks tend to stay around for longer than young ones. This is often referred to as the <em>generational hypothesis</em>. <a data-primary="generational hypothesis" data-type="indexterm">&nbsp;</a></p>
 <p>OCaml uses different memory layouts and garbage-collection algorithms for the major and minor heaps to account for this generational difference. We’ll explain how they differ in more detail next.</p>
-<div data-type="note">
-<h4 id="the-gc-module-and-ocamlrunparam">The Gc Module and OCAMLRUNPARAM</h4>
+<section data-type="note" class="level4" id="the-gc-module-and-ocamlrunparam">
+<h4>The Gc Module and OCAMLRUNPARAM</h4>
 <p>OCaml provides several mechanisms to query and alter the behavior of the runtime system. The <code>Gc</code> module provides this functionality from within OCaml code, and we’ll frequently refer to it in the rest of the chapter. As with several other standard library modules, Core alters the <code>Gc</code> interface from the standard OCaml library. We’ll assume that you’ve opened <code>Core</code> in our explanations. <a data-primary="OCAMLRUNPARAM" data-type="indexterm">&nbsp;</a><a data-primary="Gc module" data-type="indexterm">&nbsp;</a></p>
 <p>You can also control the behavior of OCaml programs by setting the <code>OCAMLRUNPARAM</code> environment variable before launching your application. This lets you set GC parameters without recompiling, for example to benchmark the effects of different settings. The format of <code>OCAMLRUNPARAM</code> is documented in the <a href="https://ocaml.org/manual/runtime.html">OCaml manual</a>.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="the-fast-minor-heap">
 <h2>The Fast Minor Heap</h2>
@@ -46,8 +46,9 @@
 <p>It is possible to write loops or recurse in a way that may take a long time to do an allocation - if at all. To ensure that UNIX signals and other internal bookkeeping that require interrupting the running OCaml program still happen the compiler introduces <em>poll points</em> into generated native code.</p>
 <p>These poll points check <code>ptr</code> against <code>limit</code> and developers should expect them to be placed at the start of every function and the back edge of loops. The compiler includes a dataflow pass that removes all but the minimum set of points necessary to ensure these checks happen in a bounded amount of time.</p>
 <p><a data-secondary="setting size of" data-primary="minor heaps" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="setting-the-size-of-the-minor-heap">Setting the Size of the Minor Heap</h4>
+</section>
+<section data-type="note" class="level4" id="setting-the-size-of-the-minor-heap">
+<h4>Setting the Size of the Minor Heap</h4>
 <p>The default minor heap size in OCaml is normally 2 MB on 64-bit platforms, but this is increased to 8 MB if you use Core (which generally prefers default settings that improve performance, but at the cost of a bigger memory profile). This setting can be overridden via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started by calling the <code>Gc.set</code> function:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Core;;
@@ -63,7 +64,6 @@ Gc.tune ~minor_heap_size:(262144 * 2) ();;
 </code></pre>
 </div>
 <p>Changing the GC size dynamically will trigger an immediate minor heap collection. Note that Core increases the default minor heap size from the standard OCaml installation quite significantly, and you’ll want to reduce this if running in very memory-constrained environments.</p>
-</div>
 </section>
 </section>
 </section>
@@ -159,11 +159,11 @@ Gc.full_major ();;
 <h3>Heap Compaction</h3>
 <p>After a certain number of major GC cycles have completed, the heap may begin to be fragmented due to values being deallocated out of order from how they were allocated. This makes it harder for the GC to find a contiguous block of memory for fresh allocations, which in turn would require the heap to be grown unnecessarily. <a data-secondary="reducing fragmentation of" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-primary="compaction" data-type="indexterm">&nbsp;</a><a data-secondary="heap compaction" data-primary="major heaps" data-type="indexterm">&nbsp;</a></p>
 <p>The heap compaction cycle avoids this by relocating all the values in the major heap into a fresh heap that places them all contiguously in memory again. A naive implementation of the algorithm would require extra memory to store the new heap, but OCaml performs the compaction in place within the existing heap.</p>
-<div data-type="note">
-<h4 id="controlling-frequency-of-compactions">Controlling Frequency of Compactions</h4>
+<section data-type="note" class="level4" id="controlling-frequency-of-compactions">
+<h4>Controlling Frequency of Compactions</h4>
 <p>The <code>max_overhead</code> setting in the <code>Gc</code> module defines the connection between free memory and allocated memory after which compaction is activated.</p>
 <p>A value of <code>0</code> triggers a compaction after every major garbage collection cycle, whereas the maximum value of <code>1000000</code> disables heap compaction completely. The default settings should be fine unless you have unusual allocation patterns that are causing a higher-than-usual rate of compactions:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Gc.tune ~max_overhead:0 ();;
 &gt;- : unit = ()
@@ -258,11 +258,11 @@ let () =
 <section class="level2" id="attaching-finalizer-functions-to-values">
 <h2>Attaching Finalizer Functions to Values</h2>
 <p>OCaml’s automatic memory management guarantees that a value will eventually be freed when it’s no longer in use, either via the GC sweeping it or the program terminating. It’s sometimes useful to run extra code just before a value is freed by the GC, for example, to check that a file descriptor has been closed, or that a log message is recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in grabage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="what-values-can-be-finalized">What Values Can Be Finalized?</h4>
+<section data-type="note" class="level4" id="what-values-can-be-finalized">
+<h4>What Values Can Be Finalized?</h4>
 <p>Various values cannot have finalizers attached since they aren’t heap-allocated. Some examples of values that are not heap-allocated are integers, constant constructors, Booleans, the empty array, the empty list, and the unit value. The exact list of what is heap-allocated or not is implementation-dependent, which is why Core provides the <code>Heap_block</code> module to explicitly check before attaching the finalizer.</p>
 <p>Some constant values can be heap-allocated but never deallocated during the lifetime of the program, for example, a list of integer constants. <code>Heap_block</code> explicitly checks to see if the value is in the major or minor heap, and rejects most constant values. Compiler optimizations may also duplicate some immutable values such as floating-point values in arrays. These may be finalized while another duplicate copy is being used by the program.</p>
-</div>
+</section>
 <p>Core provides a <code>Heap_block</code> module that dynamically checks if a given value is suitable for finalizing. Core keeps the functions for registering finalizers in the <code>Core.Gc.Expert</code> module. Finalizers can run at any time in any thread, so they can be pretty hard to reason about in multi-threaded contexts. <a data-secondary="Heap_block module" data-primary="heaps" data-type="indexterm">&nbsp;</a> Async, which we discussed in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming with Async</a>, shadows the <code>Gc</code> module with its own module that contains a function, <code>Gc.add_finalizer</code>, which is concurrency-safe. In particular, finalizers are scheduled in their own Async job, and care is taken by Async to capture exceptions and raise them to the appropriate monitor for error-handling. <a data-secondary="finalizers" data-primary="Async library" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s explore this with a small example that finalizes values of different types, all of which are heap-allocated.</p>
 <div class="highlight">

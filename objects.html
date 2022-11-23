@@ -4,8 +4,8 @@
 <p><em>This chapter was written by Leo White and Jason Hickey.</em></p>
 </div>
 <p>We’ve already seen several tools that OCaml provides for organizing programs, particularly modules. In addition, OCaml also supports object-oriented programming. There are objects, classes, and their associated types. In this chapter, we’ll introduce you to OCaml objects and subtyping. In the next chapter, <a data-type="xref" href="classes.html#classes">Chapter 13, Classes</a>, we’ll introduce you to classes and inheritance. <a data-secondary="in object-oriented programming" data-primary="objects" data-type="indexterm">&nbsp;</a><a data-primary="object-oriented programming (OOP)" data-type="indexterm">&nbsp;</a><a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="what-is-object-oriented-programming">What Is Object-Oriented Programming?</h4>
+<section data-type="note" class="level4" id="what-is-object-oriented-programming">
+<h4>What Is Object-Oriented Programming?</h4>
 <p>Object-oriented programming (often shortened to OOP) is a programming style that encapsulates computation and data within logical <em>objects</em>. Each object contains some data stored in <em>fields</em> and has <em>method</em> functions that can be invoked against the data within the object (also called “sending a message” to the object). The code definition behind an object is called a <em>class</em>, and objects are constructed from a class definition by calling a constructor with the data that the object will use to build itself.</p>
 <p>There are five fundamental properties that differentiate OOP from other styles:</p>
 <dl>
@@ -26,7 +26,7 @@
 </dd>
 </dl>
 <p>Almost every notable modern programming language has been influenced by OOP, and you’ll have run across these terms if you’ve ever used C++, Java, C#, Ruby, Python, or JavaScript.</p>
-</div>
+</section>
 <section class="level2" id="ocaml-objects">
 <h2>OCaml Objects</h2>
 <p>If you already know about object-oriented programming in a language like Java or C++, the OCaml object system may come as a surprise. Foremost is the complete separation of objects and their types from the class system. In a language like Java, a class name is also used as the type of objects created by instantiating it, and the relationships between these object types correspond to inheritance. For example, if we implement a class <code>Deque</code> in Java by inheriting from a class <code>Stack</code>, we would be allowed to pass a deque anywhere a stack is expected. <a data-secondary="in OCaml" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
@@ -125,8 +125,8 @@ area_closed sq;;
 &gt;       The second object type has no method name
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="elisions-are-polymorphic">Elisions Are Polymorphic</h4>
+<section data-type="note" class="level4" id="elisions-are-polymorphic">
+<h4>Elisions Are Polymorphic</h4>
 <p>The <code>..</code> in an open object type is an elision, standing for “possibly more methods.” It may not be apparent from the syntax, but an elided object type is actually polymorphic. For example, if we try to write a type definition, we get an “unbound type variable” error: <a data-secondary="row polymorphism" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="row polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="ellipses (..)" data-type="indexterm">&nbsp;</a><a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt;;;
@@ -137,7 +137,7 @@ area_closed sq;;
 </div>
 <p> This is because <code>..</code> is really a special kind of type variable called a <em>row variable</em>.</p>
 <p>This kind of typing scheme using row variables is called <em>row polymorphism</em>. Row polymorphism is also used in polymorphic variant types, and there is a close relationship between objects and polymorphic variants: objects are to records what polymorphic variants are to ordinary variants.</p>
-</div>
+</section>
 <p>An object of type <code>&lt; pop : int option; .. &gt;</code> can be any object with a method <code>pop : int option</code>; it doesn’t matter how it is implemented. When the method <code>#pop</code> is invoked, the actual method that is run is determined by the object. Consider the following function.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop;;
@@ -287,8 +287,8 @@ let items = [ (coin :&gt; item) ; (map :&gt; item) ];;
 &gt;val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="polymorphic-variant-subtyping">Polymorphic Variant Subtyping</h4>
+<section data-type="note" class="level4" id="polymorphic-variant-subtyping">
+<h4>Polymorphic Variant Subtyping</h4>
 <p>Subtyping can also be used to coerce a polymorphic variant into a larger polymorphic variant type. A polymorphic variant type <em>A</em> is a subtype of <em>B</em>, if the tags of <em>A</em> are a subset of the tags of <em>B</em>:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type num = [ `Int of int | `Float of float ];;
@@ -301,7 +301,7 @@ let c : const = (n :&gt; const);;
 &gt;val c : const = `Int 3
 </code></pre>
 </div>
-</div>
+</section>
 </section>
 <section class="level3" id="variance">
 <h3>Variance</h3>

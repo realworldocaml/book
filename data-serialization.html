@@ -43,8 +43,8 @@ Sexp.of_string ("(1 2 (3 4))");;
 &gt;- : Sexp.t = (1 2 (3 4))
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="base-core-and-parsexp">Base, Core, and Parsexp</h4>
+<section data-type="note" class="level4" id="base-core-and-parsexp">
+<h4>Base, Core, and Parsexp</h4>
 <p>In these examples, we’re using Core rather than Base because Core has integrated support for parsing s-expressions, courtesy of the <code>Parsexp</code> library. If you just use Base, you’ll find that you don’t have <code>Sexp.of_string</code> at your disposal.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
@@ -63,7 +63,7 @@ Sexp.of_string "(1 2 3)";;
 &gt;- : Sexp.t = (1 2 3)
 </code></pre>
 </div>
-</div>
+</section>
 <p>In addition to providing the <code>Sexp</code> module, most of the base types in Base and Core support conversion to and from s-expressions. For example, we can use the conversion functions defined in the respective modules for integers, strings, and exceptions:</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Int.sexp_of_t 3;;
@@ -99,8 +99,8 @@ Exn.sexp_of_t (Invalid_argument "foo");;
 &gt;(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="more-on-top-level-printing">More on Top-Level Printing</h4>
+<section data-type="note" class="level4" id="more-on-top-level-printing">
+<h4>More on Top-Level Printing</h4>
 <p>The values of the s-expressions that we created were printed properly as s-expressions in the toplevel, instead of as the tree of <code>Atom</code> and <code>List</code> variants that they’re actually made of. <a data-primary="top-level printers" data-type="indexterm">&nbsp;</a></p>
 <p>This is due to OCaml’s facility for installing custom <em>top-level printers</em> that can rewrite some values into more top-level-friendly equivalents. They are generally installed as <code>ocamlfind</code> packages ending in <code>top</code>:</p>
 <div class="highlight">
@@ -115,7 +115,7 @@ Exn.sexp_of_t (Invalid_argument "foo");;
 </code></pre>
 </div>
 <p>The <code>core.top</code> package (which you should have loaded by default in your <code>.ocamlinit</code> file) loads in printers for the Core extensions already, so you don’t need to do anything special to use the s-expression printer.</p>
-</div>
+</section>
 <section class="level3" id="s-expression-converters-for-new-types">
 <h3>S-Expression Converters for New Types</h3>
 <p>But what if you want a function to convert a brand new type to an s-expression? You can of course write it yourself manually. Here’s an example. <a data-secondary="generating from OCaml types" data-primary="s-expressions" data-type="indexterm">&nbsp;</a></p>
@@ -170,8 +170,8 @@ raise (Exn_with_sexp ["1";"2";"3"]);;
 </code></pre>
 </div>
 <p>The syntax extensions bundled with Base and Core almost all have the same basic structure: they auto-generate code based on type definitions, implementing functionality that you could in theory have implemented by hand, but with far less programmer effort.</p>
-<div data-type="note">
-<h4 id="syntax-extensions-and-ppx">Syntax Extensions and PPX</h4>
+<section data-type="note" class="level4" id="syntax-extensions-and-ppx">
+<h4>Syntax Extensions and PPX</h4>
 <p>OCaml doesn’t directly support deriving s-expression converters from type definitions. Instead, it provides a mechanism called <em>PPX</em> which allows you to add to the compilation pipeline code for transforming OCaml programs at the syntactic level, via the <code>-ppx</code> compiler flag.</p>
 <p>PPXs operate on OCaml’s <em>abstract syntax tree</em>, or AST, which is a data type that represents the syntax of a well-formed OCaml program. Annotations like <code>[%sexp_of: int]</code> or <code>[@@deriving sexp]</code> are part of special extensions to the syntax, called <em>extension points</em>, which were added to the language to give a place to put information that would be consumed by syntax extensions like <code>ppx_sexp_conv</code>. <a data-primary="PPX syntax extensions" data-type="indexterm">&nbsp;</a><a data-primary="syntax extension with PPX" data-type="indexterm">&nbsp;</a></p>
 <p><code>ppx_sexp_conv</code> is part of a family of syntax extensions, including <code>ppx_compare</code>, described in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 14, Maps And Hash Tables</a>, and <code>ppx_fields</code>, described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>, that generate code based on type declarations. <a data-secondary="ppx_sexp_conv" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-secondary="ppx_compare" data-primary="syntax extension" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_sexp_conv" data-type="indexterm">&nbsp;</a> <a data-primary="ppx_compare" data-type="indexterm">&nbsp;</a></p>
@@ -182,7 +182,7 @@ raise (Exn_with_sexp ["1";"2";"3"]);;
   (preprocess (pps ppx_sexp_conv))
 )</code></pre>
 </div>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="the-sexp-format">

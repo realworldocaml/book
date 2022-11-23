@@ -685,11 +685,11 @@ $ ./cal_add_sub_days.native &lt;tab&gt;
 add      diff     help     version</code></pre>
 </div>
 <p>Command completion support works for flags and grouped commands and is very useful when building larger command-line interfaces. Don’t forget to install the shell fragment into your global <em class="filename">bash_completion.d</em> directory if you want it to be loaded in all of your login shells. <a data-primary="completion handlers" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="installing-a-generic-completion-handler">Installing a Generic Completion Handler</h4>
+<section data-type="note" class="level4" id="installing-a-generic-completion-handler">
+<h4>Installing a Generic Completion Handler</h4>
 <p>Sadly, <code>bash</code> doesn’t support installing a generic handler for all Command-based applications. This means you have to install the completion script for every application, but you should be able to automate this in the build and packaging system for your application.</p>
 <p>It will help to check out how other applications install tab-completion scripts and follow their lead, as the details are very OS-specific.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="alternative-command-line-parsers">

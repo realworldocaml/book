@@ -101,12 +101,12 @@ let%test_unit "rev" =
 <li><p><strong>Testing mindset</strong>. Writing tests on the inside of your libraries lets you write tests against any part of your implementation, rather than just the exposed API. This freedom is useful, but can also put you in the wrong testing mindset. Testing that’s phrased in terms of the public API often does a better job of testing what’s fundamental about your code, and will better survive refactoring of the implementation. Also, the discipline of keeping tests outside of requires you to write code that can be tested that way, which pushes towards better designs.</p></li>
 </ul>
 <p>For all of these reasons, our recommendation is to put the bulk of your tests in test-only libraries created for that purpose. There are some legitimate reasons to want to put some test directly in your production library, e.g., when you need access to some functionality to do the test that’s important but is really awkward to expose. But such cases are very much the exception.</p>
-<div data-type="note">
-<h4 id="why-cant-inline-tests-go-in-executables">Why Can’t Inline Tests Go in Executables?</h4>
+<section data-type="note" class="level4" id="why-cant-inline-tests-go-in-executables">
+<h4>Why Can’t Inline Tests Go in Executables?</h4>
 <p>We’ve only talked about putting tests into libraries. What about executables? It turns out you can’t do this directly, because Dune doesn’t support the <code>inline_tests</code> declaration in source files that are directly part of an executable.</p>
 <p>There’s a good reason for this: the <code>ppx_inline_test</code> test runner needs to instantiate the modules that contain the tests. If those modules have toplevel side-effects, that’s a recipe for disaster, since you don’t want those top-level effects to be triggered by the test framework.</p>
 <p>So, how do we test code that’s part of an executable? The solution is to break up your program into two pieces: a directory containing a library that contains the logic of your program, but no top-level effects; and a directory for the executable that links in the library, and is responsible for launching the code.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="expect-tests">
@@ -122,12 +122,12 @@ open Stdio
 
 let%expect_test "trivial" = print_endline "Hello World!"</code></pre>
 </div>
-<div data-type="note">
-<h4 id="open-and-open"><code>open</code> and <code>open!</code></h4>
+<section data-type="note" class="level4" id="open-and-open">
+<h4><code>open</code> and <code>open!</code></h4>
 <p>In this example, we use <code>open!</code> instead of <code>open</code> because we happen not to be using any values from <code>Base</code>, and so the compiler will warn us about an unused open.</p>
 <p>But because <code>Base</code> is effectively our standard library, we want to keep it open anyway, since we want any new code we write to find <code>Base</code>’s modules rather than those from the ordinary standard library. The exclamation point at the end of <code>open</code> suppresses that warning.</p>
 <p>A sensible idiom is to always use <code>open!</code> when opening a library like <code>Base</code>, so that you don’t have to choose when to use the <code>!</code>, and when not to.</p>
-</div>
+</section>
 <p>If we run the test, we’ll be presented with a diff between what we wrote, and a <em>corrected</em> version of the source file that now has an <code>[%expect]</code> clause containing the output. Note that Dune will use the <code>patdiff</code> tool if it’s available, which generates easier-to-read diffs. You can install <code>patdiff</code> with <code>opam</code>.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest
@@ -224,8 +224,8 @@ let get_href_hosts soup =
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)]</code></pre>
 </div>
-<div data-type="note">
-<h4 id="quoted-strings">Quoted Strings</h4>
+<section data-type="note" class="level4" id="quoted-strings">
+<h4>Quoted Strings</h4>
 <p>The example above used a new syntax for string literals, called <em>quoted strings</em>. Here’s an example.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">{|This is a quoted string|};;
@@ -246,7 +246,7 @@ let get_href_hosts soup =
 &gt;- : string = "This is how you quote a {|quoted string|}"
 </code></pre>
 </div>
-</div>
+</section>
 <p>If we run the test, we’ll see that the output isn’t exactly what was intended.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune runtest

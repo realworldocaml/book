@@ -83,12 +83,12 @@ area_of_ring 1. 3.;;
 </div>
 <p>Here, we redefined <code>pi</code> to be zero after the definition of <code>area_of_circle</code>. You might think that this would mean that the result of the computation would now be zero, but in fact, the behavior of the function is unchanged. That’s because the original definition of <code>pi</code> wasn’t changed; it was just shadowed, which means that any subsequent reference to <code>pi</code> would see the new definition of <code>pi</code> as <code>0</code>, but earlier references would still see the old one. But there is no later use of <code>pi</code>, so the binding of <code>pi</code> to <code>0.</code> made no difference at all. This explains the warning produced by the toplevel telling us that there is an unused variable.</p>
 <p>In OCaml, <code>let</code> bindings are immutable. There are many kinds of mutable values in OCaml, which we’ll discuss in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, but there are no mutable variables.</p>
-<div data-type="note">
-<h4 id="why-dont-variables-vary">Why Don’t Variables Vary?</h4>
+<section data-type="note" class="level4" id="why-dont-variables-vary">
+<h4>Why Don’t Variables Vary?</h4>
 <p>One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn’t the whole point of a variable that it can vary?<a data-secondary="immutability of" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
 <p>The answer to this is that variables in OCaml (and generally in functional languages) are really more like variables in an equation than a variable in an imperative language. If you think about the mathematical identity <code>x(y + z) = xy + xz</code>, there’s no notion of mutating the variables <code>x</code>, <code>y</code>, and <code>z</code>. They vary in the sense that you can instantiate this equation with different numbers for those variables, and it still holds.</p>
 <p>The same is true in a functional language. A function can be applied to different inputs, and thus its variables will take on different values, even without mutation.</p>
-</div>
+</section>
 <section class="level3" id="pattern-matching-and-let">
 <h3>Pattern Matching and Let</h3>
 <p>Another useful feature of <code>let</code> bindings is that they support the use of <em>patterns</em> on the left-hand side. Consider the following code, which uses <code>List.unzip</code>, a function for converting a list of pairs into a pair of lists.<a data-secondary="and let" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching in" data-primary="variables" data-type="indexterm">&nbsp;</a></p>
@@ -178,8 +178,8 @@ plusone 3;;
 </code></pre>
 </div>
 <p> This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.</p>
-<div data-type="note">
-<h4 id="let-and-fun"><code>let</code> and <code>fun</code></h4>
+<section data-type="note" class="level4" id="let-and-fun">
+<h4><code>let</code> and <code>fun</code></h4>
 <p>Functions and <code>let</code> bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent. <a data-secondary="functions and" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) 7;;
@@ -189,7 +189,7 @@ let x = 7 in x + 1;;
 </code></pre>
 </div>
 <p> This connection is important, and will come up more when programming in a monadic style, as we’ll see in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 16, Concurrent Programming With Async</a>.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="multi-argument-functions">
 <h3>Multiargument Functions</h3>
@@ -415,8 +415,8 @@ String.split ~on:':' path
 </div>
 <p>The type error is a little bewildering at first glance. What’s going on is that, because <code>^&gt;</code> is right associative, the operator is trying to feed the value <code>List.dedup_and_sort ~compare:String.compare</code> to the function <code>List.iter ~f:print_endline</code>. But <code>List.iter ~f:print_endline</code> expects a list of strings as its input, not a function.</p>
 <p>The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.</p>
-<div data-type="note">
-<h4 id="the-application-operator">The Application Operator</h4>
+<section data-type="note" class="level4" id="the-application-operator">
+<h4>The Application Operator</h4>
 <p><code>|&gt;</code> is known as the <em>reverse application operator</em>. You might be unsurprised to learn that there’s also an <em>application operator</em>: <a data-secondary="application operator" data-primary="operators" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(@@);;
@@ -424,7 +424,7 @@ String.split ~on:':' path
 </code></pre>
 </div>
 <p>This one is useful for cases where you want to avoid many layers of parentheses when applying functions to complex expressions. In particular, you can replace <code>f (g (h x))</code> with <code>f @@ g @@ h x</code>. Note that, just as we needed <code>|&gt;</code> to be left associative, we need <code>@@</code> to be right associative.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="declaring-functions-with-function">
 <h3>Declaring Functions with <code>function</code></h3>

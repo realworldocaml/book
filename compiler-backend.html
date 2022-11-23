@@ -225,12 +225,12 @@ let () =
 </div>
 <p>The preceding bytecode has been simplified from the lambda form into a set of simple instructions that are executed serially by the interpreter.</p>
 <p>There are around 140 instructions in total, but most are just minor variants of commonly encountered operations (e.g., function application at a specific arity). You can find full details <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>. <a data-secondary="instruction set for" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="where-did-the-bytecode-instruction-set-come-from">Where Did the Bytecode Instruction Set Come From?</h4>
+<section data-type="note" class="level4" id="where-did-the-bytecode-instruction-set-come-from">
+<h4>Where Did the Bytecode Instruction Set Come From?</h4>
 <p>The bytecode interpreter is much slower than compiled native code, but is still remarkably performant for an interpreter without a JIT compiler. Its efficiency can be traced back to Xavier Leroy’s ground-breaking work in 1990, <a href="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">“The ZINC experiment: An Economical Implementation of the ML Language”.</a></p>
 <p>This paper laid the theoretical basis for the implementation of an instruction set for a strictly evaluated functional language such as OCaml. The bytecode interpreter in modern OCaml is still based on the ZINC model. The native code compiler uses a different model since it uses CPU registers for function calls instead of always passing arguments on the stack, as the bytecode interpreter does.</p>
 <p>Understanding the reasoning behind the different implementations of the bytecode interpreter and the native compiler is a very useful exercise for any budding language hacker.</p>
-</div>
+</section>
 <section class="level3" id="compiling-and-linking-bytecode">
 <h3>Compiling and Linking Bytecode</h3>
 <p>The <code>ocamlc</code> command compiles individual <code>ml</code> files into bytecode files that have a <code>cmo</code> extension. The compiled bytecode files are matched with the associated <code>cmi</code> interface, which contains the type signature exported to other compilation units. <a data-secondary="compiling and linking code" data-primary="bytecode compiler" data-type="indexterm">&nbsp;</a></p>
@@ -439,10 +439,10 @@ let () =
 </code></pre>
 </div>
 <p>We see that the polymorphic comparison is close to 10 times slower! These results shouldn’t be taken too seriously, as this is a very narrow test that, like all such microbenchmarks, isn’t representative of more complex codebases. However, if you’re building numerical code that runs many iterations in a tight inner loop, it’s worth manually peering at the produced assembly code to see if you can hand-optimize it.</p>
-<div data-type="note">
-<h4 id="accessing-stdlib-modules-from-within-core">Accessing Stdlib Modules from Within Core</h4>
+</section>
+<section data-type="note" class="level4" id="accessing-stdlib-modules-from-within-core">
+<h4>Accessing Stdlib Modules from Within Core</h4>
 <p>In the benchmark above comparing polymorphic and monomorphic comparison, you may have noticed that we prepended the comparison functions with <code>Stdlib</code>. This is because the Core module explicitly redefines the <code>&gt;</code> and <code>&lt;</code> and <code>=</code> operators to be specialized for operating over <code>int</code> types, as explained in <a data-type="xref" href="maps-and-hashtables.html#the-polymorphic-comparator">Chapter 14, Maps and Hashtables</a>. You can always recover any of the OCaml standard library functions by accessing them through the <code>Stdlib</code> module, as we did in our benchmark.</p>
-</div>
 </section>
 </section>
 <section class="level3" id="debugging-native-code-binaries">
@@ -607,8 +607,9 @@ Estimated testing time 20s (change using -quota SECS).
 </div>
 <p>This trace broadly reflects the results of the benchmark itself. The mutable benchmark consists of the combination of the call to <code>test_mutable</code> and the <code>caml_modify</code> write barrier function in the runtime. This adds up to slightly over half the execution time of the application.</p>
 <p>Perf has a growing collection of other commands that let you archive these runs and compare them against each other. You can read more on the <a href="http://perf.wiki.kernel.org">home page</a>. <a data-primary="frame pointers" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="using-the-frame-pointer-to-get-more-accurate-traces">Using the Frame Pointer to Get More Accurate Traces</h4>
+</section>
+<section data-type="note" class="level4" id="using-the-frame-pointer-to-get-more-accurate-traces">
+<h4>Using the Frame Pointer to Get More Accurate Traces</h4>
 <p>Although Perf doesn’t require adding in explicit probes to the binary, it does need to understand how to unwind function calls so that the kernel can accurately record the function backtrace for every event. Since Linux 3.9 the kernel has had support for using DWARF debug information to parse the program stack, which is emitted when the <code>-g</code> flag is passed to the OCaml compiler. For even more accurate stack parsing, we need the compiler to fall back to using the same conventions as C for function calls. On 64-bit Intel systems, this means that a special register known as the <em>frame pointer</em> is used to record function call history. Using the frame pointer in this fashion means a slowdown (typically around 3-5%) since it’s no longer available for general-purpose use.</p>
 <p>OCaml thus makes the frame pointer an optional feature that can be used to improve the resolution of Perf traces. opam provides a compiler switch that compiles OCaml with the frame pointer activated:</p>
 <div class="highlight">
@@ -616,7 +617,6 @@ Estimated testing time 20s (change using -quota SECS).
 </code></pre>
 </div>
 <p>Using the frame pointer changes the OCaml calling convention, but opam takes care of recompiling all your libraries with the new interface.</p>
-</div>
 </section>
 </section>
 <section class="level3" id="embedding-native-code-in-c">
@@ -635,11 +635,11 @@ hello embedded world 2
 After calling OCaml</code></pre>
 </div>
 <p>The <code>embed_native.o</code> is a standalone object file that has no further references to OCaml code beyond the runtime library, just as with the bytecode runtime. Do remember that the link order of the libraries is significant in modern GNU toolchains (especially as used in Ubuntu 11.10 and later) that resolve symbols from left to right in a single pass.<a data-secondary="activating debug runtime" data-primary="debugging" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="activating-the-debug-runtime">Activating the Debug Runtime</h4>
+<section data-type="note" class="level4" id="activating-the-debug-runtime">
+<h4>Activating the Debug Runtime</h4>
 <p>Despite your best efforts, it is easy to introduce a bug into some components, such as C bindings, that causes heap invariants to be violated. OCaml includes a <code>libasmrund.a</code> variant of the runtime library which is compiled with extra debugging checks that perform extra memory integrity checks during every garbage collection cycle. Running these extra checks will abort the program nearer the point of corruption and help isolate the bug in the C code.</p>
 <p>To use the debug library, just link your program with the <code>-runtime-variant d</code> flag:</p>
-</div>
+</section>
 <div class="highlight">
 <pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 &gt;+ as  -o 'hello.o' '/tmp/build_cd0b96_dune/camlasmd3c336.s'

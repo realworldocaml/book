@@ -272,8 +272,8 @@ Map.min_elt rev_map;;
 </code></pre>
 </div>
 <p>This is rejected for good reason: there’s no guarantee that the comparator associated with a given type will order things in the same way that polymorphic compare does.</p>
-<div data-type="warning">
-<h5 id="the-perils-of-polymorphic-compare">The Perils of Polymorphic Compare</h5>
+<section data-type="warning" class="level5" id="the-perils-of-polymorphic-compare">
+<h5>The Perils of Polymorphic Compare</h5>
 <p>Polymorphic compare is awfully convenient, but it has serious downsides and should mostly be avoided in production code. To understand why, it helps to understand how polymorphic compare works.</p>
 <p>Polymorphic compare operates directly on the runtime representation of OCaml values, walking the structure of those values without regard for their type.</p>
 <p>And despite ignoring types, it mostly behaves as you would hope. Comparisons on <code>int</code>s and <code>float</code>s respect the ordinary ordering of numeric values, and containers like strings, lists, and arrays are compared lexicographically. And it works on almost every OCaml type, with some important exceptions like functions.</p>
@@ -307,7 +307,7 @@ let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"];;
 </div>
 <p> As you can see, polymorphic compare now produces a result, but it’s not the result we want.</p>
 <p>The abstraction-breaking nature of polymorphic compare can cause real and quite subtle bugs. If, for example, you build a map whose keys are sets (which have the same issues with polymorphic compare that maps do), then the map built with the polymorphic comparator will behave incorrectly, separating out keys that should be aggregated together. Even worse, it will behave inconsistently, since the behavior of polymorphic compare will depend on the order in which the sets were built.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="satisfying-comparator.s-with-deriving">
 <h3>Satisfying <code>Comparator.S</code> with <code>[@@deriving]</code></h3>
@@ -349,8 +349,8 @@ end</code></pre>
 end;;</code></pre>
 </div>
 <p>If you want a comparison function that orders things in a particular way, you can always write your own by hand; but if all you need is a total order suitable for creating maps and sets with, then <code>[@@deriving compare]</code> is a good choice.</p>
-<div data-type="note">
-<h4 id="and-phys_equal">=, ==, and phys_equal</h4>
+<section data-type="note" class="level4" id="and-phys_equal">
+<h4>=, ==, and phys_equal</h4>
 <p>OCaml has multiple notions of equality, and picking the right one can be tricky. If you don’t open <code>Base</code>, you’ll find that the <code>==</code> operator tests for <em>physical</em> equality, while the <code>=</code> operator is the polymorphic equality function.</p>
 <p>Two values are considered physically equal if they are the same pointer in memory. Two data structures that have identical contents but are constructed separately will not be considered equal by <code>==</code>. Polymorphic equality, on the other hand, is <em>structural</em>, which effectively means that it considers values to be equal if they have the same contents.</p>
 <p>Most of the time you don’t want either of these forms of equality! Polymorphic equality is problematic for reasons we explained earlier in the chapter, and physical equality, while useful, is something that’s needed in particular cases, most often when you’re dealing with mutable objects, where the physical identity of the object matters.</p>
@@ -383,7 +383,7 @@ phys_equal (ref 1) (ref 1);;
 </code></pre>
 </div>
 <p>This is just a small way in which <code>Base</code> tries to avoid error-prone APIs.</p>
-</div>
+</section>
 </section>
 <section class="level3" id="applying-deriving-to-maps-and-sets">
 <h3>Applying <code>[@@deriving]</code> to Maps and Sets</h3>
@@ -451,12 +451,12 @@ phys_equal (ref 1) (ref 1);;
 <h2>Hash Tables</h2>
 <p>Hash tables are the imperative cousin of maps. We walked through a basic hash table implementation in <a data-type="xref" href="imperative-programming.html#imperative-programming-1">Chapter 8, Imperative Programming</a>, so in this section we’ll mostly discuss the pragmatics of Core’s <code>Hashtbl</code> module. We’ll cover this material more briefly than we did with maps because many of the concepts are shared. <a data-secondary="basics of" data-primary="hash tables" data-type="indexterm">&nbsp;</a></p>
 <p>Hash tables differ from maps in a few key ways. First, hash tables are mutable, meaning that adding a key/value pair to a hash table modifies the table, rather than creating a new table with the binding added. Second, hash tables generally have better time-complexity than maps, providing constant-time lookup and modifications, as opposed to logarithmic for maps. And finally, just as maps depend on having a comparison function for creating the ordered binary tree that underlies a map, hash tables depend on having a <em>hash function</em>, i.e., a function for converting a key to an integer. <a data-secondary="hash functions" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-primary="Hashtbl module" data-type="indexterm">&nbsp;</a><a data-secondary="time complexity of" data-primary="hash tables" data-type="indexterm">&nbsp;</a></p>
-<div data-type="warning" class="allow_break">
-<h3 id="time-complexity-of-hash-tables">Time Complexity of Hash Tables</h3>
+<section data-type="warning" class="level3 allow_break" id="time-complexity-of-hash-tables">
+<h3>Time Complexity of Hash Tables</h3>
 <p>The statement that hash tables provide constant-time access hides some complexities. First of all, most hash table implementations, OCaml’s included, need to resize the table when it gets too full. A resize requires allocating a new backing array for the hash table and copying over all entries, and so it is quite an expensive operation. That means adding a new element to the table is only <em>amortized</em> constant, which is to say, it’s constant on average over a long sequence of operations, but some of the individual operations can cost more.</p>
 <p>Another hidden cost of hash tables has to do with the hash function you use. If you end up with a pathologically bad hash function that hashes all of your data to the same number, then all of your insertions will hash to the same underlying bucket, meaning you no longer get constant-time access at all. <code>Base</code>’s hash table implementation uses binary trees for the hash-buckets, so this case only leads to logarithmic time, rather than linear for a traditional implementation.</p>
 <p>The logarithmic behavior of Base’s hash tables in the presence of hash collisions also helps protect against some denial-of-service attacks. One well-known type of attack is to send queries to a service with carefully chosen keys to cause many collisions. This, in combination with the linear behavior of most hashtables, can cause the service to become unresponsive due to high CPU load. Base’s hash tables would be much less susceptible to such an attack because the amount of degradation would be far less. <a data-secondary="denial-of-service attacks" data-primary="security issues" data-type="indexterm">&nbsp;</a><a data-primary="denial-of-service attacks, avoiding" data-type="indexterm">&nbsp;</a></p>
-</div>
+</section>
 <p>We create a hashtable in a way that’s similar to how we create maps, by providing a first-class module from which the required operations for building a hashtable can be obtained.</p>
 <div class="highlight">
 <pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let table = Hashtbl.create (module String);;
@@ -505,8 +505,8 @@ Hashtbl.find table ("foo",3,[1;2;3]);;
 </code></pre>
 </div>
 <p>This is highly convenient, but polymorphic comparison can behave in surprising ways, so it’s generally best to avoid this for code where correctness matters.</p>
-<div data-type="warning">
-<h3 id="collisions-with-the-polymorphic-hash-function">Collisions with the Polymorphic Hash Function</h3>
+<section data-type="warning" class="level3" id="collisions-with-the-polymorphic-hash-function">
+<h3>Collisions with the Polymorphic Hash Function</h3>
 <p>The polymorphic hash function, like polymorphic compare, has problems that derive from the fact that it doesn’t pay any attention to the type, just blindly walking down the structure of a data type and computing a hash from what it sees. That means that for data structures like maps and sets where equivalent instances can have different structures, it will do the wrong thing.</p>
 <p>But there’s another problem with polymorphic hash, which is that it is prone to creating hash collisions. OCaml’s polymorphic hash function works by walking over the data structure it’s given using a breadth-first traversal that is bounded in the number of nodes it’s willing to traverse. By default, that bound is set at 10 “meaningful” nodes. <a data-secondary="polymorphic hash function" data-primary="hash tables" data-type="indexterm">&nbsp;</a></p>
 <p>The bound on the traversal means that the hash function may ignore part of the data structure, and this can lead to pathological cases where every value you store has the same hash value. We’ll demonstrate this below, using the function <code>List.range</code> to allocate lists of integers of different length:</p>
@@ -534,7 +534,7 @@ Hashtbl.Poly.hashable.hash (List.range 0 100);;
 </code></pre>
 </div>
 <p>Note that rather than declaring a type and using <code>[@@deriving hash]</code> to invoke ppx_hash, we use <code>[%hash]</code>, a shorthand for creating a hash function inline in an expression.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="choosing-between-maps-and-hash-tables">
 <h2>Choosing Between Maps and Hash Tables</h2>

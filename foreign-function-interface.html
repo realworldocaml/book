@@ -12,8 +12,8 @@
 </ul>
 <p>The simplest foreign function interface in OCaml doesn’t even require you to write any C code at all! The Ctypes library lets you define the C interface in pure OCaml, and the library then takes care of loading the C symbols and invoking the foreign function call.<a data-primary="libffi library" data-type="indexterm">&nbsp;</a><a data-primary="Ncurses terminal toolkit" data-type="indexterm">&nbsp;</a><a data-secondary="installation of" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
 <p>Let’s dive straight into a realistic example to show you how the library looks. We’ll create a binding to the Ncurses terminal toolkit, as it’s widely available on most systems and doesn’t have any complex dependencies.</p>
-<div data-type="note">
-<h4 id="installing-the-ctypes-library">Installing the Ctypes Library</h4>
+<section data-type="note" class="level4" id="installing-the-ctypes-library">
+<h4>Installing the Ctypes Library</h4>
 <p>If you want to use Ctypes interactively, you’ll also need to install the <code>libffi</code> library as a prerequisite to using Ctypes. It’s a fairly popular library and should be available in your OS package manager. If you’re using opam 2.1 or higher, it will prompt you to install it automatically when you install <code>ctypes-foreign</code>.</p>
 <div class="highlight">
 <pre><code class="language-clike">$ opam install ctypes ctypes-foreign
@@ -21,7 +21,7 @@ $ utop
 # require "ctypes-foreign" ;;</code></pre>
 </div>
 <p>You’ll also need the Ncurses library for the first example. This comes preinstalled on many operating systems such as macOS, and Debian Linux provides it as the <code>libncurses5-dev</code> package.</p>
-</div>
+</section>
 <section class="level2" id="example-a-terminal-interface">
 <h2>Example: A Terminal Interface</h2>
 <p>Ncurses is a library to help build terminal-independent text interfaces in a reasonably efficient way. It’s used in console mail clients like Mutt and Pine, and console web browsers such as Lynx.<a data-secondary="terminal interface example" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
@@ -155,14 +155,14 @@ let () =
 <p>Running <code>hello.exe</code> should now display a Hello World in your terminal!</p>
 <p>Ctypes wouldn’t be very useful if it were limited to only defining simple C types, of course. It provides full support for C pointer arithmetic, pointer conversions, and reading and writing through pointers, using OCaml functions as function pointers to C code, as well as struct and union definitions.</p>
 <p>We’ll go over some of these features in more detail for the remainder of the chapter by using some POSIX date functions as running examples.</p>
-<div data-type="note">
-<h4 id="linking-modes-libffi-and-stub-generation">Linking Modes: libffi and Stub Generation</h4>
+<section data-type="note" class="level4" id="linking-modes-libffi-and-stub-generation">
+<h4>Linking Modes: libffi and Stub Generation</h4>
 <p>The core of ctypes is a set of OCaml combinators for describing the structure of C types (numeric types, arrays, pointers, structs, unions and functions). You can then use these combinators to describe the types of the C functions that you want to call. There are two entirely distinct ways to actually link to the system libraries that contain the function definitions: <em>dynamic linking</em> and <em>stub generation</em>.</p>
 <p>The <code>ctypes-foreign</code> package used in this chapter uses the low-level <code>libffi</code> library to dynamically open C libraries, search for the relevant symbols for the function call being invoked, and marshal the function parameters according to the operating system’s application binary interface (ABI). While much of this happens behind-the-scenes and permits convenient interactive programming while developing bindings, it is not always the solution you want to use in production.</p>
 <p>The <code>ctypes-cstubs</code> package provides an alternative mechanism to shift much of the linking work to be done once at build time, instead of doing it on every invocation of the function. It does this by taking the <em>same</em> OCaml binding descriptions, and generating intermediate C source files that contain the corresponding C/OCaml glue code. When these are compiled with a normal dune build, the generated C code is treated just as any handwritten code might be, and compiled against the system header files. This allows certain C values to be used that cannot be dynamically probed (e.g.&nbsp;preprocessor macro definitions), and can also catch definition errors if there is a C header mismatch at compile time.</p>
 <p>C rarely makes life easier though. There are some definitions that cannot be entirely expressed as static C code (e.g.&nbsp;dynamic function pointers), and those require the use of <code>ctypes-foreign</code> (and <code>libffi</code>). Using ctypes does make it possible to share the majority of definitions across both linking modes, all while avoiding writing C code directly.</p>
 <p>While we do not cover the details of C stub generation further in this chapter, you can read more about how to use this mode in the “Dealing with foreign libraries” chapter in the dune manual.</p>
-</div>
+</section>
 </section>
 <section class="level2" id="basic-scalar-c-types">
 <h2>Basic Scalar C Types</h2>
@@ -344,12 +344,12 @@ val char_ptr_of_string : string -&gt; char ptr</code></pre>
 <div class="highlight">
 <pre><code class="language-ocaml">val string    : string typ</code></pre>
 </div>
-<div data-type="note">
-<h4 id="ocaml-strings-versus-c-character-buffers">OCaml Strings Versus C Character Buffers</h4>
+<section data-type="note" class="level4" id="ocaml-strings-versus-c-character-buffers">
+<h4>OCaml Strings Versus C Character Buffers</h4>
 <p>Although OCaml strings may look like C character buffers from an interface perspective, they’re very different in terms of their memory representations.</p>
 <p>OCaml strings are stored in the OCaml heap with a header that explicitly defines their length. C buffers are also fixed-length, but by convention, a C string is terminated by a null (a <code>\0</code> byte) character. The C string functions calculate their length by scanning the buffer until the first null character is encountered.</p>
 <p>This means that you need to be careful that OCaml strings that you pass to C functions don’t contain any null values, since the first occurrence of a null character will be treated as the end of the C string. Ctypes also defaults to a <em>copying</em> interface for strings, which means that you shouldn’t use them when you want the library to mutate the buffer in-place. In that situation, use the Ctypes <code>Bigarray</code> support to pass memory by reference instead.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="structs-and-unions">
@@ -512,8 +512,9 @@ let () =
 &gt;Mon Oct 11 15:57:38 2021
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="why-do-we-need-to-use-returning">Why Do We Need to Use returning?</h4>
+</section>
+<section data-type="note" class="level4" id="why-do-we-need-to-use-returning">
+<h4>Why Do We Need to Use returning?</h4>
 <p>The alert reader may be curious about why all these function definitions have to be terminated by <code>returning</code>:</p>
 <div class="highlight">
 <pre><code class="language-ocaml">(* correct types *)
@@ -558,7 +559,6 @@ function_t *f = curried_C(3); f(4);</code></pre>
 </div>
 <p>The OCaml type of <code>uncurried_C</code> when bound by Ctypes is <code>int -&gt; int -&gt; int</code>: a two-argument function. The OCaml type of <code>curried_C</code> when bound by <code>ctypes</code> is <code>int -&gt; (int -&gt; int)</code>: a one-argument function that returns a one-argument function.</p>
 <p>In OCaml, of course, these types are absolutely equivalent. Since the OCaml types are the same but the C semantics are quite different, we need some kind of marker to distinguish the cases. This is the purpose of <code>returning</code> in function definitions.</p>
-</div>
 </section>
 </section>
 <section class="level3" id="defining-arrays">
@@ -703,14 +703,14 @@ let () =
 </div>
 <p>The <code>qsort'</code> wrapper function has a much more canonical OCaml interface than the raw binding. It accepts a comparator function and a Ctypes array, and returns unit.</p>
 <p>Using <code>qsort'</code> to sort arrays is straightforward. Our example code reads the standard input as a list, converts it to a C array, passes it through qsort, and outputs the result to the standard output. Again, remember to not confuse the <code>Ctypes.Array</code> module with the <code>Core.Array</code> module: the former is in scope since we opened <code>Ctypes</code> at the start of the file. <a data-secondary="and allocated Ctypes" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="lifetime of allocated Ctypes" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a><a data-secondary="of allocated Ctypes" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
-<div data-type="note">
-<h4 id="lifetime-of-allocated-ctypes">Lifetime of Allocated Ctypes</h4>
+<section data-type="note" class="level4" id="lifetime-of-allocated-ctypes">
+<h4>Lifetime of Allocated Ctypes</h4>
 <p>Values allocated via Ctypes (i.e., using <code>allocate</code>, <code>Array.make</code>, and so on) will not be garbage-collected as long as they are reachable from OCaml values. The system memory they occupy is freed when they do become unreachable, via a finalizer function registered with the garbage collector (GC).</p>
 <p>The definition of reachability for Ctypes values is a little different from conventional OCaml values, though. The allocation functions return an OCaml-managed pointer to the value, and as long as some derivative pointer is still reachable by the GC, the value won’t be collected.</p>
 <p>“Derivative” means a pointer that’s computed from the original pointer via arithmetic, so a reachable reference to an array element or a structure field protects the whole object from collection.</p>
 <p>A corollary of the preceding rule is that pointers written into the C heap don’t have any effect on reachability. For example, if you have a C-managed array of pointers to structs, then you’ll need some additional way of keeping the structs themselves around to protect them from collection. You could achieve this via a global array of values on the OCaml side that would keep them live until they’re no longer needed.</p>
 <p>Functions passed to C have similar considerations regarding lifetime. On the OCaml side, functions created at runtime may be collected when they become unreachable. As we’ve seen, OCaml functions passed to C are converted to function pointers, and function pointers written into the C heap have no effect on the reachability of the OCaml functions they reference. With <code>qsort</code> things are straightforward, since the comparison function is only used during the call to <code>qsort</code> itself. However, other C libraries may store function pointers in global variables or elsewhere, in which case you’ll need to take care that the OCaml functions you pass to them aren’t prematurely garbage-collected.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="learning-more-about-c-bindings">

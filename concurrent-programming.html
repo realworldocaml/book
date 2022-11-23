@@ -221,8 +221,8 @@ end;;
 </code></pre>
 </div>
 <p>This code isn’t particularly long, but it is subtle. In particular, note how the queue of thunks is used to ensure that the enqueued actions are run in the order they were scheduled, even if the thunks scheduled by <code>upon</code> are run out of order. This kind of subtlety is typical of code that involves ivars and <code>upon</code>, and because of this, you should stick to the simpler map/bind/return style of working with deferreds when you can.</p>
-<div data-type="note">
-<h4 id="understanding-bind-in-terms-of-ivars-and-upon">Understanding <code>bind</code> in Terms of Ivars and <code>upon</code></h4>
+<section data-type="note" class="level4" id="understanding-bind-in-terms-of-ivars-and-upon">
+<h4>Understanding <code>bind</code> in Terms of Ivars and <code>upon</code></h4>
 <p>Here’s roughly what happens when you write <code>let d' = Deferred.bind d ~f</code>.</p>
 <ul>
 <li><p>A new ivar <code>i</code> is created to hold the final result of the computation. The corresponding deferred is returned</p></li>
@@ -242,7 +242,7 @@ end;;
 </code></pre>
 </div>
 <p>Async’s real implementation has more optimizations and is therefore more complicated. But the above implementation is still a useful first-order mental model for how bind works under the covers. And it’s another good example of how <code>upon</code> and ivars can be useful for building concurrency primitives.</p>
-</div>
+</section>
 </section>
 </section>
 <section class="level2" id="examples-an-echo-server">
@@ -271,12 +271,12 @@ let rec copy_blocks buffer r w =
 </ul>
 <p>If we hit an end-of-file condition, the loop is ended. The deferred returned by a call to <code>copy_blocks</code> becomes determined only once the end-of-file condition is hit. <a data-primary="end-of-file condition" data-type="indexterm">&nbsp;</a></p>
 <p>One important aspect of how <code>copy_blocks</code> is written is that it provides <em>pushback</em>, which is to say that if the process can’t make progress writing, it will stop reading. If you don’t implement pushback in your servers, then anything that prevents you from writing (e.g., a client that is unable to keep up) will cause your program to allocate unbounded amounts of memory, as it keeps track of all the data it intends to write but hasn’t been able to yet.</p>
-<div data-type="note">
-<h4 id="tail-calls-and-chains-of-deferreds">Tail-Calls and Chains of Deferreds</h4>
+<section data-type="note" class="level4" id="tail-calls-and-chains-of-deferreds">
+<h4>Tail-Calls and Chains of Deferreds</h4>
 <p>There’s another memory problem you might be concerned about, which is the allocation of deferreds. If you think about the execution of <code>copy_blocks</code>, you’ll see it’s creating a chain of deferreds, two per time through the loop. The length of this chain is unbounded, and so, naively, you’d think this would take up an unbounded amount of memory as the echo process continues.</p>
 <p>Happily, this is a case that Async knows how to optimize. In particular, the whole chain of deferreds should become determined precisely when the final deferred in the chain is determined, in this case, when the <code>Eof</code> condition is hit. Because of this, we could safely replace all of these deferreds with a single deferred. Async does just this, and so there’s no memory leak after all.</p>
 <p>This is essentially a form of tail-call optimization, lifted to the Deferred monad. Indeed, you can tell that the bind in question doesn’t lead to a memory leak in more or less the same way you can tell that the tail recursion optimization should apply, which is that the bind that creates the deferred is in tail-position. In other words, nothing is done to that deferred once it’s created; it’s simply returned as is. <a data-primary="tail calls" data-type="indexterm">&nbsp;</a></p>
-</div>
+</section>
 <p><code>copy_blocks</code> provides the logic for handling a client connection, but we still need to set up a server to receive such connections and dispatch to <code>copy_blocks</code>. For this, we’ll use Async’s <code>Tcp</code> module, which has a collection of utilities for creating TCP clients and servers: <a data-secondary="servers" data-primary="TCP clients" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
 <pre><code class="language-ocaml">(** Starts a TCP server, which listens on the specified port, invoking
@@ -315,8 +315,8 @@ echo "It repeats whatever I write" | nc 127.0.0.1 8765
 killall echo.exe
 </code></pre>
 </div>
-<div data-type="note">
-<h4 id="functions-that-never-return">Functions that Never Return</h4>
+<section data-type="note" class="level4" id="functions-that-never-return">
+<h4>Functions that Never Return</h4>
 <p>The call to <code>never_returns</code> around the call to <code>Scheduler.go</code> is a little bit surprising, but it has a purpose: to make it clear to whoever invokes <code>Scheduler.go</code> that the function never returns. <a data-primary="Scheduler.go" data-type="indexterm">&nbsp;</a><a data-primary="never_returns" data-type="indexterm">&nbsp;</a><a data-secondary="non-returning" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
 <p>By default, a function that doesn’t return will have an inferred return type of <code>'a</code>:</p>
 <div class="highlight">
@@ -368,7 +368,7 @@ let always_fail () = assert false;;
 &gt;val do_stuff : int -&gt; int = &lt;fun&gt;
 </code></pre>
 </div>
-</div>
+</section>
 <section class="level3" id="improving-the-echo-server">
 <h3>Improving the Echo Server</h3>
 <p>Let’s try to go a little bit farther with our echo server by walking through a few improvements. In particular, we will:</p>
@@ -948,12 +948,12 @@ choose;;
 <p>Given that threads don’t provide physical parallelism, why are they useful at all?</p>
 <p>The most common reason for using system threads is that there are some operating system calls that have no nonblocking alternative, which means that you can’t run them directly in a system like Async without blocking your entire program. For this reason, Async maintains a thread pool for running such calls. Most of the time, as a user of Async you don’t need to think about this, but it is happening under the covers. <a data-secondary="benefits of" data-primary="threads" data-type="indexterm">&nbsp;</a></p>
 <p>Another reason to have multiple threads is to deal with non-OCaml libraries that have their own event loop or for another reason need their own threads. In that case, it’s sometimes useful to run some OCaml code on the foreign thread as part of the communication to your main program. OCaml’s foreign function interface is discussed in more detail in <a data-type="xref" href="foreign-function-interface.html#foreign-function-interface">Chapter 22, Foreign Function Interface</a>.</p>
-<div data-type="note">
-<h4 id="multicore-ocaml">Multicore OCaml</h4>
+<section data-type="note" class="level4" id="multicore-ocaml">
+<h4>Multicore OCaml</h4>
 <p>OCaml doesn’t support truly parallel threads today, but it will soon. The current development branch of OCaml, which is expected to be released in 2022 as OCaml 5.0, has a long awaited multicore-capable garbage collector, which is the result of years of research and hard implementation work. <a data-primary="multicore" data-type="indexterm">&nbsp;</a></p>
 <p>We won’t discuss the multicore gc here in part because it’s not yet released, and in part because there’s a lot of open questions about how OCaml programs should take advantage of multicore in a way that’s safe, convenient, and performant. Given all that, we just don’t know enough to write a chapter about multicore today.</p>
 <p>In any case, while multicore OCaml isn’t here yet, it’s an exciting part of OCaml’s near-term future.</p>
-</div>
+</section>
 <p>Another occasional use for system threads is to better interoperate with compute-intensive OCaml code. In Async, if you have a long-running computation that never calls <code>bind</code> or <code>map</code>, then that computation will block out the Async runtime until it completes.</p>
 <p>One way of dealing with this is to explicitly break up the calculation into smaller pieces that are separated by binds. But sometimes this explicit yielding is impractical, since it may involve intrusive changes to an existing codebase. Another solution is to run the code in question in a separate thread. Async’s <code>In_thread</code> module provides multiple facilities for doing just this, <code>In_thread.run</code> being the simplest. We can simply write: <a data-primary="In_thread module" data-type="indexterm">&nbsp;</a></p>
 <div class="highlight">
