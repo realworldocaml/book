@@ -21,8 +21,8 @@ module Primitives = struct
   external get : bytes -> int -> char = "%bytes_safe_get"
   external length : bytes -> int = "%bytes_length"
   external unsafe_get : bytes -> int -> char = "%bytes_unsafe_get"
-
-  include Bytes_set_primitives
+  external set        : bytes -> int -> char -> unit = "%bytes_safe_set"
+  external unsafe_set : bytes -> int -> char -> unit = "%bytes_unsafe_set"
 
   (* [unsafe_blit_string] is not exported in the [stdlib] so we export it here *)
   external unsafe_blit_string

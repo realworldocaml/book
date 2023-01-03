@@ -20,7 +20,7 @@
 #include <stdint.h>
 typedef unsigned char fiat_np224_uint1;
 typedef signed char fiat_np224_int1;
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #  define FIAT_NP224_FIAT_EXTENSION __extension__
 #  define FIAT_NP224_FIAT_INLINE __inline__
 #else
@@ -1726,7 +1726,7 @@ static void fiat_np224_from_bytes(uint64_t out1[4], const uint8_t arg1[28]) {
  * The function fiat_np224_selectznz is a multi-limb conditional select.
  *
  * Postconditions:
- *   eval out1 = (if arg1 = 0 then eval arg2 else eval arg3)
+ *   out1 = (if arg1 = 0 then arg2 else arg3)
  *
  * Input Bounds:
  *   arg1: [0x0 ~> 0x1]

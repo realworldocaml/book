@@ -46,6 +46,14 @@ class virtual ['res] lift :
     method t : t -> 'res
     method u : u -> 'res
   end
+class virtual ['ctx, 'res] lift_map_with_context :
+  object
+    method virtual constr : 'ctx -> string -> 'res list -> 'res
+    method virtual int : 'ctx -> int -> int * 'res
+    method virtual record : 'ctx -> (string * 'res) list -> 'res
+    method t : 'ctx -> t -> t * 'res
+    method u : 'ctx -> u -> u * 'res
+  end
 |}]
 
 type t =

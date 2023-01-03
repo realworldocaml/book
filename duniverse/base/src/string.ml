@@ -1,7 +1,9 @@
 open! Import
 module Array = Array0
-module Bytes = Bytes0
 include String0
+module Bytes = Bytes0
+(* This alias is necessary despite [String0] defining [Bytes = Bytes0], in order to
+   convince ocamldep that this file doesn't depend on bytes.ml. *)
 
 let invalid_argf = Printf.invalid_argf
 let raise_s = Error.raise_s

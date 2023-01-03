@@ -113,6 +113,12 @@ let hashed hash data =
     let n = Cstruct.length d and m = Mirage_crypto.Hash.digest_size hash in
     if n = m then Ok d else Error (`Msg "digested data of invalid size")
 
+let trunc len data =
+  if Cstruct.length data > len then
+    Cstruct.sub data 0 len
+  else
+    data
+
 let verify hash ?scheme ~signature key data =
   let open Mirage_crypto_ec in
   let ok_if_true p = if p then Ok () else Error (`Msg "bad signature") in
@@ -141,10 +147,10 @@ let verify hash ?scheme ~signature key data =
     let* s = ecdsa_of_cs signature in
     ok_if_true
       (match key with
-       | `P224 key -> P224.Dsa.verify ~key s d
-       | `P256 key -> P256.Dsa.verify ~key s d
-       | `P384 key -> P384.Dsa.verify ~key s d
-       | `P521 key -> P521.Dsa.verify ~key s d)
+       | `P224 key -> P224.Dsa.verify ~key s (trunc P224.Dsa.byte_length d)
+       | `P256 key -> P256.Dsa.verify ~key s (trunc P256.Dsa.byte_length d)
+       | `P384 key -> P384.Dsa.verify ~key s (trunc P384.Dsa.byte_length d)
+       | `P521 key -> P521.Dsa.verify ~key s (trunc P521.Dsa.byte_length d))
   | _ -> Error (`Msg "invalid key and signature scheme combination")
 
 let encode_der = Asn.pub_info_to_cstruct

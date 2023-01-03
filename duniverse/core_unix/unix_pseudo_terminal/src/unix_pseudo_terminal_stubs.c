@@ -92,4 +92,8 @@ CAMLprim value unix_ptsname(value mlfd)
   CAMLreturn (mlname);
 }
 
+#else
+
+void avoid_empty_translation_unit_compilation_error_in_core_unix_pseudo_terminal(void) {}
+
 #endif /* JSC_UNIX_PTY */

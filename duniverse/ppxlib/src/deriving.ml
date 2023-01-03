@@ -141,7 +141,6 @@ module Generator = struct
         spec : ('c, 'a) Args.t;
         gen : ctxt:Expansion_context.Deriver.t -> 'b -> 'c;
         arg_names : String.Set.t;
-        attributes : Attribute.packed list;
         deps : deriver list;
       }
         -> ('a, 'b) t
@@ -149,9 +148,9 @@ module Generator = struct
   let deps (T t) = t.deps
 
   module V2 = struct
-    let make ?(attributes = []) ?(deps = []) spec gen =
+    let make ?attributes:(_ = []) ?(deps = []) spec gen =
       let arg_names = String.Set.of_list (Args.names spec) in
-      T { spec; gen; arg_names; attributes; deps }
+      T { spec; gen; arg_names; deps }
 
     let make_noarg ?attributes ?deps gen = make ?attributes ?deps Args.empty gen
   end
@@ -655,29 +654,6 @@ let wrap_sig ~loc ~hide sg =
   in
   if wrap then wrap_sig ~loc ~hide sg else sg
 
-(* +-----------------------------------------------------------------+
-   | Remove attributes used by syntax extensions                     |
-   +-----------------------------------------------------------------+ *)
-(*
-let remove generators =
-  let attributes =
-    List.concat_map generators ~f:(fun (_, actual_generators, _) ->
-      List.concat_map actual_generators ~f:(fun (Generator.T g) -> g.attributes))
-  in
-  object
-    inherit Ast_traverse.map
-
-    (* Don't recurse through attributes and extensions *)
-    method! attribute x = x
-    method! extension x = x
-
-    method! label_declaration ld =
-      Attribute.remove_seen Attribute.Context.label_declaration attributes ld
-
-    method! constructor_declaration cd =
-      Attribute.remove_seen Attribute.Context.constructor_declaration attributes cd
-  end
-*)
 (* +-----------------------------------------------------------------+
    | Main expansion                                                  |
    +-----------------------------------------------------------------+ *)

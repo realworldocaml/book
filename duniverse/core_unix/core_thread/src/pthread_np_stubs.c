@@ -66,4 +66,9 @@ CAMLprim value pthread_np_getaffinity_self()
   }
   CAMLreturn(v_cpus);
 }
+
+#else
+
+void avoid_empty_translation_unit_compilation_error_in_core_unix_core_thread(void) {}
+
 #endif /* JSC_PTHREAD_NP */

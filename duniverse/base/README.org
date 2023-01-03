@@ -1,5 +1,7 @@
 * Base
 
+[[https://github.com/janestreet/base/actions][https://github.com/janestreet/base/actions/workflows/workflow.yml/badge.svg]]
+
 Base is a standard library for OCaml. It provides a standard set of
 general purpose modules that are well-tested, performant, and
 fully-portable across any environment that can run OCaml code. Unlike

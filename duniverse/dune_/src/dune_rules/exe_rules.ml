@@ -50,13 +50,20 @@ let programs ~modules ~(exes : Executables.t) =
                 (Module_name.to_string mod_name)
             ]
       | None ->
-        User_error.raise ~loc
-          [ Pp.textf "Module %S doesn't exist." (Module_name.to_string mod_name)
-          ])
+        let msg =
+          match Ordered_set_lang.loc exes.buildable.modules with
+          | None ->
+            Pp.textf "Module %S doesn't exist." (Module_name.to_string mod_name)
+          | Some _ ->
+            Pp.textf
+              "The name %S is not listed in the (modules) field of this stanza."
+              (Module_name.to_string mod_name)
+        in
+        User_error.raise ~loc [ msg ])
 
 let o_files sctx ~dir ~expander ~(exes : Executables.t) ~linkages ~dir_contents
     ~requires_compile =
-  if not (Executables.has_foreign exes) then Memo.return []
+  if not (Executables.has_foreign exes) then Memo.return @@ Mode.Map.empty
   else
     let what =
       if List.is_empty exes.buildable.Buildable.foreign_stubs then "archives"
@@ -75,12 +82,16 @@ let o_files sctx ~dir ~expander ~(exes : Executables.t) ~linkages ~dir_contents
       let first_exe = first_exe exes in
       Foreign_sources.for_exes foreign_sources ~first_exe
     in
+    let foreign_o_files =
+      let { Lib_config.ext_obj; _ } = (Super_context.context sctx).lib_config in
+      Foreign.Objects.build_paths exes.buildable.extra_objects ~ext_obj ~dir
+    in
     let+ o_files =
       Foreign_rules.build_o_files ~sctx ~dir ~expander
         ~requires:requires_compile ~dir_contents ~foreign_sources
-      |> Memo.all_concurrently
     in
-    List.map o_files ~f:Path.build
+    (* [foreign_o_files] are not mode-dependent *)
+    Mode.Map.Multi.add_all o_files All foreign_o_files
 
 let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
     ~embed_in_plugin_libraries (exes : Dune_file.Executables.t) =
@@ -99,8 +110,9 @@ let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
   let linkages = linkages ctx ~exes ~explicit_js_mode in
   let* flags = Super_context.ocaml_flags sctx ~dir exes.buildable.flags in
   let* modules, pp =
-    Buildable_rules.modules_rules sctx exes.buildable expander ~dir scope
-      modules ~lib_name:None ~empty_intf_modules:(`Exe_mains exes.names)
+    Buildable_rules.modules_rules sctx
+      (Executables (exes.buildable, exes.names))
+      expander ~dir scope modules
   in
   let* cctx =
     let requires_compile = Lib.Compile.direct_requires compile_info in
@@ -147,13 +159,11 @@ let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
       in
       let+ flags = link_flags
       and+ ctypes_cclib_flags =
-        Ctypes_rules.ctypes_cclib_flags ~scope
-          ~standard:(Action_builder.return []) ~expander
-          ~buildable:exes.buildable
+        Ctypes_rules.ctypes_cclib_flags sctx ~expander ~buildable:exes.buildable
       in
       Command.Args.S
-        [ Command.Args.As flags
-        ; Command.Args.S
+        [ As flags
+        ; S
             (let ext_lib = ctx.lib_config.ext_lib in
              let foreign_archives =
                exes.buildable.foreign_archives |> List.map ~f:snd
@@ -161,19 +171,23 @@ let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
              (* XXX: don't these need the msvc hack being done in lib_rules? *)
              (* XXX: also the Command.quote_args being done in lib_rules? *)
              List.map foreign_archives ~f:(fun archive ->
-                 let lib = Foreign.Archive.lib_file ~archive ~dir ~ext_lib in
+                 let lib =
+                   Foreign.Archive.lib_file ~archive ~dir ~ext_lib
+                     ~mode:Mode.Select.All
+                 in
                  Command.Args.S [ A "-cclib"; Dep (Path.build lib) ]))
           (* XXX: don't these need the msvc hack being done in lib_rules? *)
           (* XXX: also the Command.quote_args being done in lib_rules? *)
-        ; Command.Args.As
-            (List.concat_map ctypes_cclib_flags ~f:(fun f -> [ "-cclib"; f ]))
+        ; As (List.concat_map ctypes_cclib_flags ~f:(fun f -> [ "-cclib"; f ]))
         ]
     in
     let* o_files =
       o_files sctx ~dir ~expander ~exes ~linkages ~dir_contents
         ~requires_compile
     in
-    let* () = Check_rules.add_files sctx ~dir o_files in
+    let* () =
+      Check_rules.add_files sctx ~dir @@ Mode.Map.Multi.to_flat_list o_files
+    in
     let buildable = exes.buildable in
     match buildable.ctypes with
     | None ->
@@ -202,7 +216,7 @@ let executables_rules ~sctx ~dir ~expander ~dir_contents ~scope ~compile_info
       ~preprocess ~obj_dir
       ~dialects:(Dune_project.dialects (Scope.project scope))
       ~ident:(Lib.Compile.merlin_ident compile_info)
-      () )
+      ~modes:`Exe () )
 
 let compile_info ~scope (exes : Dune_file.Executables.t) =
   let dune_version = Scope.project scope |> Dune_project.dune_version in

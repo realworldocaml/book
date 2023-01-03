@@ -1,3 +1,8 @@
+## v0.15.4 (2022-09-27)
+
+* New package tls-eio (#451 @talex5)
+* Tls_async: expose tls_handler (#448 @mbacarella, reviewed by @torinnd)
+
 ## v0.15.3 (2022-03-29)
 
 * Upgrade to v0.15 of Jane Street packages (#444 @bcc32)

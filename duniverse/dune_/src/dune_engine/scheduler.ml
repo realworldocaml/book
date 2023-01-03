@@ -39,7 +39,7 @@ module Config = struct
     let console_backend t =
       match t.status_line with
       | false -> Console.Backend.dumb
-      | true -> Console.Backend.progress
+      | true -> Console.Backend.progress ()
   end
 
   type t =
@@ -139,6 +139,11 @@ end = struct
         | `No -> ()
       in
       Thread.create f x
+
+  let () =
+    Fdecl.set Console.Backend.spawn_thread (fun f ->
+        let (_ : Thread.t) = create ~signal_watcher:`Yes f () in
+        ())
 
   let spawn ~signal_watcher f =
     let (_ : Thread.t) = create ~signal_watcher f () in
@@ -843,10 +848,10 @@ end = struct
     Mutex.unlock t.mutex
 end
 
-(** All fields of [t] must be immutable. This is because we re-create [t]
-    everytime we start a new build to locally set the [cancel] field. However,
-    all instances of [t] must share all other fields, in particular the
-    references such as [status].
+(** All fields of [t] must be immutable. This is because we re-create [t] every
+    time we start a new build to locally set the [cancel] field. However, all
+    instances of [t] must share all other fields, in particular the references
+    such as [status].
 
     Another option would be to split [t] in two records such as:
 
@@ -887,6 +892,10 @@ let set x f = Fiber.Var.set t x f
 let t_opt () = Fiber.Var.get t
 
 let t () = Fiber.Var.get_exn t
+
+let stats () =
+  let+ t = t () in
+  t.config.stats
 
 let running_jobs_count t = Event.Queue.pending_jobs t.events
 
@@ -1398,10 +1407,6 @@ let sleep duration =
   | `Cancelled ->
     (* cancellation mechanism isn't exposed to the user *)
     assert false
-
-let flush_file_watcher () =
-  let* t = t () in
-  flush_file_watcher t
 
 let wait_for_build_input_change () =
   let* t = t () in

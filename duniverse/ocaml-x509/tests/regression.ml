@@ -265,6 +265,19 @@ let ip_address () =
   | Error ce -> Alcotest.failf "validation of IP address failed: %a"
                   Validation.pp_chain_error ce
 
+let p256_sha384 () =
+  let file = "p256_sha384" in
+  match Certificate.decode_pem (regression file) with
+  | Error (`Msg msg) ->
+    Alcotest.failf "P256 certificate with SHA384 %s, decoding error %s"
+      file msg
+  | Ok cert ->
+    match Validation.valid_ca cert with
+    | Error e ->
+      Alcotest.failf "verifying P256 certificate failed %a"
+        Validation.pp_ca_error e
+    | Ok () -> ()
+
 let regression_tests = [
   "RSA: key too small (jc_jc)", `Quick, test_jc_jc ;
   "jc_ca", `Quick, test_jc_ca_fail ;
@@ -286,6 +299,7 @@ let regression_tests = [
   "p384 certificate", `Quick, le_p384_root ;
   "p256 key", `Quick, p256_key ;
   "ip_address", `Quick, ip_address ;
+  "p256 with sha384", `Quick, p256_sha384 ;
 ]
 
 let host_set_test =

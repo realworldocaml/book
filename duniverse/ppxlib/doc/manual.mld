@@ -2,7 +2,7 @@
 
 {1:what-is-ppx What is ppx}
 
-{2 Overview}
+{2:ppx-overview Overview}
 
 Ppx is a meta-programming system for the OCaml programming language. It allows
 developers to generate code at compile time in a principled way. The
@@ -25,7 +25,7 @@ Ppxlib mainly supports two ways of generating code at compile time: by expanding
 an extension point or by expanding a [[@@deriving ...]] attribute after a type
 declaration.
 
-{2 How does it works?}
+{2 How does it work?}
 
 The ppx system is composed of 3 parts:
 
@@ -114,7 +114,7 @@ them in the [preprocess] field of your [dune] file. For instance:
 
           (library
            (name my_lib)
-           (preprocess (pps (ppx_sexp_conv ppx_expect))))
+           (preprocess (pps ppx_sexp_conv ppx_expect)))
 ]}
 
 Some ppx rewriters takes parameters in the form of command line flags. These can
@@ -126,12 +126,12 @@ names from more command line flags. For instance:
           (library
            (name my_lib)
            (preprocess
-            (pps (ppx_sexp_conv ppx_expect -inline-test-drop))))
+            (pps ppx_sexp_conv ppx_expect -inline-test-drop)))
 
           (library
            (name my_lib)
            (preprocess
-            (pps (ppx_sexp_conv ppx_expect -- --cookie "x=42"))))
+            (pps ppx_sexp_conv ppx_expect -- --cookie "x=42")))
 ]}
 
 Once this is done, you can use whatever feature is offered by the ppx rewriter.
@@ -179,7 +179,7 @@ your project do not need to install ppxlib and other ppx rewriters themselves.
 {[
           (library
            (name my_lib)
-           (lint (pps (ppx_sexp_conv))))
+           (lint (pps ppx_sexp_conv)))
 ]}
 
 Then to regenerate the parts between [[@@deriving_inline]] and [[@@@end]], run
@@ -218,7 +218,7 @@ always prefer the above mentioned transformations instead when possible.
 
 {3 The OCaml AST}
 
-As described in {!page-"ppx-overview"}, PPX rewriters don't operate at the text
+As described in {!"ppx-overview"}, PPX rewriters don't operate at the text
 level but instead used the compiler's internal representation of the source
 code: the Abstract Syntax Tree or AST.
 
@@ -254,13 +254,15 @@ you should be familiar with are:
 
 - {{!Ppxlib.Parsetree.expression}[expression]} which describes anything in OCaml
   that evaluates to a value, the right hand side of a let binding or the
-  branches of an if-then-else for instance. -
-  {{!Ppxlib.Parsetree.pattern}[pattern]} which is what you use to deconstruct an
+  branches of an if-then-else for instance.
+- {{!Ppxlib.Parsetree.pattern}[pattern]} which is what you use to deconstruct an
   OCaml value, the left hand side of a let binding or a pattern-matching case
-  for example. - {{!Ppxlib.Parsetree.core_type}[core_type]} which describes type
+  for example.
+- {{!Ppxlib.Parsetree.core_type}[core_type]} which describes type
   expressions ie what you use to explicitly constrain the type of an expression
   or describe the type of a value in your [.mli] files. Usually it's what comes
-  after a [:]. - {{!Ppxlib.Parsetree.structure_item}[structure_item]} and
+  after a [:].
+- {{!Ppxlib.Parsetree.structure_item}[structure_item]} and
   {{!Ppxlib.Parsetree.signature_item}[signature_item]} which describe the top
   level AST nodes you can find in a structure or signature such as type
   definitions, value declarations or module declarations.
@@ -403,7 +405,7 @@ constructor. You'll note that there exists
 you wish to allow passing arguments to your deriver but to keep this tutorial
 simple we won't cover this here. The only mandatory argument to the constructor
 is a function which takes a labelled
-{{!Ppxlib.Expansion_context.Deriving.t}[Expansion_context.Deriving.t]}, an
+{{!Ppxlib.Expansion_context.Deriver.t}[Expansion_context.Deriver.t]}, an
 ['input_ast] and returns an ['output_ast] and that will give us a [('output_ast,
 'input_ast) Deriving.Generator.t]. Much like the [expand] function described in
 the section about extension rewriters, this function is where the actual

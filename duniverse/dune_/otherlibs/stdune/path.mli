@@ -63,8 +63,6 @@ module Local : sig
     val relative : ?error_loc:Loc0.t -> t -> string list -> t
   end
 
-  val relative : ?error_loc:Loc0.t -> t -> string -> t
-
   val split_first_component : t -> (string * t) option
 
   val explode : t -> string list
@@ -98,10 +96,6 @@ module Source : sig
 
   val of_local : Local.t -> t
 
-  (** [relative dir s] if s can be ".." it could escape the working directory.
-      {!Path.relative} should be used instead. *)
-  val relative : ?error_loc:Loc0.t -> t -> string -> t
-
   val split_first_component : t -> (string * Local.t) option
 
   val explode : t -> string list
@@ -134,6 +128,28 @@ module Permissions : sig
   val remove : t -> int -> int
 end
 
+module Outside_build_dir : sig
+  type t =
+    | External of External.t
+    | In_source_dir of Source.t
+
+  val hash : t -> int
+
+  val equal : t -> t -> bool
+
+  val to_dyn : t -> Dyn.t
+
+  val of_string : string -> t
+
+  val to_string : t -> string
+
+  val to_string_maybe_quoted : t -> string
+
+  val parent : t -> t option
+
+  module Table : Hashtbl.S with type key = t
+end
+
 module Build : sig
   type w
 
@@ -153,8 +169,6 @@ module Build : sig
   module L : sig
     val relative : ?error_loc:Loc0.t -> t -> string list -> t
   end
-
-  val relative : ?error_loc:Loc0.t -> t -> string -> t
 
   val split_first_component : t -> (string * Local.t) option
 
@@ -182,17 +196,9 @@ module Build : sig
       "righter" type. *)
   val extract_first_component : t -> (string * Local.t) option
 
-  module Kind : sig
-    type t = private
-      | External of External.t
-      | In_source_dir of Local.t
-
-    val of_string : string -> t
-  end
-
   (** Set the build directory. Can only be called once and must be done before
       paths are converted to strings elsewhere. *)
-  val set_build_dir : Kind.t -> unit
+  val set_build_dir : Outside_build_dir.t -> unit
 
   val split_sandbox_root : t -> t option * t
 
@@ -214,6 +220,13 @@ type t = private
 
 include Path_intf.S with type t := t
 
+val as_outside_build_dir_exn : t -> Outside_build_dir.t
+
+val destruct_build_dir :
+  t -> [ `Inside of Build.t | `Outside of Outside_build_dir.t ]
+
+val outside_build_dir : Outside_build_dir.t -> t
+
 val hash : t -> int
 
 (** [to_string_maybe_quoted t] is [maybe_quoted (to_string t)] *)
@@ -226,8 +239,6 @@ val external_ : External.t -> t
 val is_root : t -> bool
 
 val is_managed : t -> bool
-
-val relative : ?error_loc:Loc0.t -> t -> string -> t
 
 (** [relative_to_source_in_build ~dir s] compute the path [s] relative to the
     source directory corresponding to [dir] *)

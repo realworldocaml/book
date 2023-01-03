@@ -21,4 +21,52 @@ jobs:
       - name: Use OCaml ${{ matrix.ocaml-version }}
         uses: ocaml/setup-ocaml@v2
         with:
+          opam-local-packages: |
+            *.opam
+            !mirage-crypto-rng-eio.opam
           ocaml-compiler: ${{ matrix.ocaml-version }}
+
+      - name: Install dependencies
+        run: opam install --deps-only -t mirage-crypto mirage-crypto-rng mirage-crypto-rng-mirage mirage-crypto-pk mirage-crypto-ec mirage-crypto-rng-async
+
+      - name: Build
+        run: opam exec -- dune build -p mirage-crypto,mirage-crypto-rng,mirage-crypto-rng-mirage,mirage-crypto-pk,mirage-crypto-ec,mirage-crypto-rng-async
+
+      - name: Test
+        run: opam exec -- dune runtest -p mirage-crypto,mirage-crypto-rng,mirage-crypto-rng-mirage,mirage-crypto-pk,mirage-crypto-ec,mirage-crypto-rng-async
+
+  build-test-unix-eio:
+    name : Unix (eio)
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version: [ocaml-variants.5.0.0+trunk]
+        operating-system: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          opam-local-packages: |
+            mirage-crypto.opam
+            mirage-crypto-rng.opam
+            mirage-crypto-rng-eio.opam
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+          opam-repositories: |
+            default: https://github.com/ocaml/opam-repository.git
+            alpha: https://github.com/kit-ty-kate/opam-alpha-repository.git
+
+      - name: Install dependencies
+        run: opam install --deps-only -t mirage-crypto mirage-crypto-rng mirage-crypto-rng-eio
+
+      - name: Build
+        run: opam exec -- dune build -p mirage-crypto,mirage-crypto-rng,mirage-crypto-rng-eio
+
+      - name: Test
+        run: opam exec -- dune runtest -p mirage-crypto,mirage-crypto-rng,mirage-crypto-rng-eio

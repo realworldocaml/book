@@ -841,7 +841,7 @@ let parse ~dir ~lang ~file ~dir_status =
                        User_error.raise ~loc
                          [ Pp.text
                              "This opam file doesn't have a corresponding \
-                              (package ...) stanza in the dune-project_file. \
+                              (package ...) stanza in the dune-project file. \
                               Since you have at least one other (package ...) \
                               stanza in your dune-project file, you must a \
                               (package ...) stanza for each opam package in \
@@ -961,7 +961,7 @@ let load_dune_project ~dir opam_packages ~dir_status : t Memo.t =
   let file = Path.Source.relative dir filename in
   let open Memo.O in
   let* f =
-    Fs_memo.with_lexbuf_from_file (Path.source file) ~f:(fun lexbuf ->
+    Fs_memo.with_lexbuf_from_file (In_source_dir file) ~f:(fun lexbuf ->
         parse_contents lexbuf ~f:(fun lang ->
             parse ~dir ~lang ~file ~dir_status))
   in

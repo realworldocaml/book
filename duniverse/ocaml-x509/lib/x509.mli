@@ -49,7 +49,7 @@
    extension is marked as critical in a certificate, but not handled, the
    validation will fail.
 
-    {e v0.16.0 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
+    {e v0.16.2 - {{:https://github.com/mirleft/ocaml-x509 }homepage}} *)
 
 (** Hostnames (strict, wildcard), used for validation. *)
 module Host : sig

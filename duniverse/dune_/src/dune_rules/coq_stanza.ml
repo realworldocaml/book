@@ -1,15 +1,25 @@
 open Import
 open Dune_lang.Decoder
 
+let coq_syntax =
+  Dune_lang.Syntax.create ~name:"coq" ~desc:"the Coq language"
+    [ ((0, 1), `Since (1, 9))
+    ; ((0, 2), `Since (2, 5))
+    ; ((0, 3), `Since (2, 8))
+    ; ((0, 4), `Since (3, 3))
+    ; ((0, 5), `Since (3, 4))
+    ; ((0, 6), `Since (3, 5))
+    ]
+
 module Coqpp = struct
   type t =
-    { modules : string list
+    { modules : Ordered_set_lang.t
     ; loc : Loc.t
     }
 
   let decode =
     fields
-      (let+ modules = field "modules" (repeat string)
+      (let+ modules = Ordered_set_lang.field "modules"
        and+ loc = loc in
        { modules; loc })
 
@@ -18,20 +28,12 @@ module Coqpp = struct
   let p = ("coq.pp", decode >>| fun x -> [ T x ])
 end
 
-let coq_syntax =
-  Dune_lang.Syntax.create ~name:"coq" ~desc:"the Coq language"
-    [ ((0, 1), `Since (1, 9))
-    ; ((0, 2), `Since (2, 5))
-    ; ((0, 3), `Since (2, 8))
-    ; ((0, 4), `Since (3, 3))
-    ; ((0, 5), `Since (3, 4))
-    ]
-
 module Buildable = struct
   type t =
     { flags : Ordered_set_lang.Unexpanded.t
     ; coq_lang_version : Dune_sexp.Syntax.Version.t
     ; mode : Loc.t * Coq_mode.t
+    ; use_stdlib : bool
     ; plugins : (Loc.t * Lib_name.t) list  (** ocaml libraries *)
     ; theories : (Loc.t * Coq_lib_name.t) list  (** coq libraries *)
     ; loc : Loc.t
@@ -60,6 +62,10 @@ module Buildable = struct
       located
         (field "mode" ~default
            (Dune_lang.Syntax.since coq_syntax (0, 3) >>> Coq_mode.decode))
+    and+ use_stdlib =
+      field ~default:true "stdlib"
+        (Dune_lang.Syntax.since coq_syntax (0, 6)
+        >>> enum [ ("yes", true); ("no", false) ])
     and+ libraries =
       field "libraries" ~default:[]
         (Dune_sexp.Syntax.deprecated_in coq_syntax (0, 5)
@@ -73,7 +79,7 @@ module Buildable = struct
         ~default:[]
     in
     let plugins = merge_plugins_libraries ~plugins ~libraries in
-    { flags; mode; coq_lang_version; plugins; theories; loc }
+    { flags; mode; use_stdlib; coq_lang_version; plugins; theories; loc }
 end
 
 module Extraction = struct
@@ -144,7 +150,7 @@ module Theory = struct
         [ Pp.text
             "Cannot both use 'package' and 'public_name', please remove \
              'public_name' as it has been deprecated since version 0.5 of the \
-             Coq langugage. It will be removed before version 1.0."
+             Coq language. It will be removed before version 1.0."
         ]
 
   let boot_has_deps loc =

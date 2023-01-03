@@ -136,12 +136,14 @@ end = struct
     let+ generated_files =
       Memo.parallel_map stanzas ~f:(fun stanza ->
           match (stanza : Stanza.t) with
-          (* XXX What about mli files? *)
           | Coq_stanza.Coqpp.T { modules; _ } ->
-            Memo.return (List.map modules ~f:(fun m -> m ^ ".ml"))
+            let+ mlg_files = Coq_sources.mlg_files ~sctx ~dir ~modules in
+            List.rev_map mlg_files ~f:(fun mlg_file ->
+                Path.Build.set_extension mlg_file ~ext:".ml"
+                |> Path.Build.basename)
           | Coq_stanza.Extraction.T s ->
             Memo.return (Coq_stanza.Extraction.ml_target_fnames s)
-          | Menhir.T menhir -> Memo.return (Menhir.targets menhir)
+          | Menhir_stanza.T menhir -> Memo.return (Menhir_stanza.targets menhir)
           | Rule rule -> (
             Simple_rules.user_rule sctx rule ~dir ~expander >>| function
             | None -> []
@@ -205,9 +207,7 @@ end = struct
     let hash = Tuple.T2.hash Super_context.hash Path.Build.hash
   end
 
-  let lookup_vlib sctx ~dir =
-    let* t = Load.get sctx ~dir in
-    Memo.Lazy.force t.ml
+  let lookup_vlib sctx ~dir = Load.get sctx ~dir >>= ocaml
 
   let collect_group ~st_dir ~dir =
     let rec walk st_dir ~dir ~local =

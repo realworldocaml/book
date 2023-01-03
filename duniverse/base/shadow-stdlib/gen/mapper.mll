@@ -2,15 +2,6 @@
 open StdLabels
 open Printf
 
-module String = struct
-  [@@@warning "-32-3"]
-  let capitalize_ascii   = String.capitalize
-  let uncapitalize_ascii = String.uncapitalize
-  let uppercase_ascii    = String.uppercase
-  let lowercase_ascii    = String.lowercase
-  include String
-end
-
 let deprecated_msg ~is_exn what =
   sprintf
     "[%sdeprecated \"\\\n\

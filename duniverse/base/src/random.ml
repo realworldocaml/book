@@ -1,5 +1,4 @@
 open! Import
-module Array = Array0
 module Int = Int0
 module Char = Char0
 
@@ -55,21 +54,7 @@ module State = struct
     Lazy.from_val (Caml.Random.State.make_self_init ())
   ;;
 
-  module Repr = struct
-    type t =
-      { st : int array
-      ; mutable idx : int
-      }
-
-    let of_state : Caml.Random.State.t -> t = Caml.Obj.magic
-  end
-
-  let assign t1 t2 =
-    let t1 = Repr.of_state (Lazy.force t1) in
-    let t2 = Repr.of_state (Lazy.force t2) in
-    Array.blit ~src:t2.st ~src_pos:0 ~dst:t1.st ~dst_pos:0 ~len:(Array.length t1.st);
-    t1.idx <- t2.idx
-  ;;
+  let assign = Random_repr.assign
 
   let full_init t seed = assign t (make seed)
 
@@ -249,22 +234,23 @@ module State = struct
   ;;
 end
 
-let default = State.default
-let bits () = State.bits default
-let int x = State.int default x
-let int32 x = State.int32 default x
-let nativeint x = State.nativeint default x
-let int64 x = State.int64 default x
-let float x = State.float default x
-let int_incl x y = State.int_incl default x y
-let int32_incl x y = State.int32_incl default x y
-let nativeint_incl x y = State.nativeint_incl default x y
-let int64_incl x y = State.int64_incl default x y
-let float_range x y = State.float_range default x y
-let bool () = State.bool default
-let char () = State.char default
-let ascii () = State.ascii default
-let full_init seed = State.full_init default seed
+let default = Random_repr.make_default State.default
+
+let bits () = State.bits (Random_repr.get_state default)
+let int x = State.int (Random_repr.get_state default) x
+let int32 x = State.int32 (Random_repr.get_state default) x
+let nativeint x = State.nativeint (Random_repr.get_state default) x
+let int64 x = State.int64 (Random_repr.get_state default) x
+let float x = State.float (Random_repr.get_state default) x
+let int_incl x y = State.int_incl (Random_repr.get_state default) x y
+let int32_incl x y = State.int32_incl (Random_repr.get_state default) x y
+let nativeint_incl x y = State.nativeint_incl (Random_repr.get_state default) x y
+let int64_incl x y = State.int64_incl (Random_repr.get_state default) x y
+let float_range x y = State.float_range (Random_repr.get_state default) x y
+let bool () = State.bool (Random_repr.get_state default)
+let char () = State.char (Random_repr.get_state default)
+let ascii () = State.ascii (Random_repr.get_state default)
+let full_init seed = State.full_init (Random_repr.get_state default) seed
 let init seed = full_init [| seed |]
 let self_init ?allow_in_tests () = full_init (random_seed ?allow_in_tests ())
-let set_state s = State.assign default s
+let set_state s = State.assign (Random_repr.get_state default) s

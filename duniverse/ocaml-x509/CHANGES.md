@@ -1,3 +1,14 @@
+## v0.16.2 (2022-10-05)
+
+* Improve parse error message of Authenticator.of_string (mirage/ocaml-git#593
+  by @dinosaure, mirage/ocaml-git#582 by @reynir)
+
+## v0.16.1 (2022-09-14)
+
+* Support ECDSA signatures where the hash algorithm output length exceeds the
+  size of the elliptic curve (by truncating, and using the leftmost bits).
+  Reported as #158 by @torinnd, fixed in #159 by @hannesm
+
 ## v0.16.0 (2022-02-15)
 
 * Provide X509.Authenticator.of_string to construct an Authenticator.t from

@@ -35,6 +35,12 @@ val js_of_ocaml_flags :
   -> Js_of_ocaml.Flags.Spec.t
   -> string list Action_builder.t Js_of_ocaml.Flags.t Memo.t
 
+val default_foreign_flags :
+     t
+  -> dir:Path.Build.t
+  -> language:Foreign_language.t
+  -> string list Action_builder.t
+
 val foreign_flags :
      t
   -> dir:Path.Build.t
@@ -57,6 +63,8 @@ val menhir_flags :
     associated directory is [Path.relative dir ".bin"] *)
 val local_binaries :
   t -> dir:Path.Build.t -> File_binding.Expanded.t list Memo.t
+
+val env_node : t -> dir:Path.Build.t -> Env_node.t Memo.t
 
 (** odoc config in the corresponding [(env)] stanza. *)
 val odoc : t -> dir:Path.Build.t -> Env_node.Odoc.t Memo.t

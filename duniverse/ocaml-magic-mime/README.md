@@ -18,7 +18,7 @@ For example, here's how to lookup MIME types in the `utop` REPL:
 
 The following files need to be edited to add MIME types:
 
-- mime.types: this is obtained by synching from the Apache Foundation's
+- mime.types: this is obtained by syncing from the Apache Foundation's
   [mime.types](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
   in the Apache Subversion repository.
 - x-mime.types: these are the extension types, so non-standard `x-` prefixes are used here.

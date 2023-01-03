@@ -4,6 +4,7 @@
 # The lowest bound of fiat-crypto is git commit
 # dabaf4b3132e8bb4a3f5fcd8366eec6ac9bb4232 (July 16th 2021)
 # Generated on FreeBSD 12.2p2 with coq 8.13.1 (OCaml 4.12.0)
+# with fiat-crypto 2a07751f37af74edeac47b19bd51810bc99b91a1 (May 29th 2022)
 
 WBW_MONT ?= ../../../fiat-crypto/src/ExtractionOCaml/word_by_word_montgomery --static --use-value-barrier --inline-internal
 UNSAT_SOLINAS ?= ../../../fiat-crypto/src/ExtractionOCaml/unsaturated_solinas --static --use-value-barrier --inline-internal

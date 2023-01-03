@@ -18,9 +18,9 @@ val gen_symbol : ?prefix:string -> unit -> string
 
 val string_of_core_type : core_type -> string
 val assert_no_attributes : attributes -> unit
-val assert_no_attributes_in : Ast_traverse.iter
+val assert_no_attributes_in : Ast_traverse0.iter
 val attributes_errors : attributes -> Location.Error.t list
-val collect_attributes_errors : Location.Error.t list Ast_traverse.fold
+val collect_attributes_errors : Location.Error.t list Ast_traverse0.fold
 
 val get_type_param_name_res :
   core_type * (variance * injectivity) ->
@@ -39,7 +39,7 @@ class type_is_recursive :
   rec_flag
   -> type_declaration list
   -> object
-       inherit Ast_traverse.iter
+       inherit Ast_traverse0.iter
        val type_names : string list
        method return_true : unit -> unit
        method go : unit -> rec_flag
@@ -85,3 +85,16 @@ val mk_named_sig :
     - there are no constraints on the type parameters
 
     It will take care of giving fresh names to unnamed type parameters. *)
+
+module With_errors : sig
+  type 'a t = 'a * Location.Error.t list
+
+  val return : 'a -> 'a t
+  val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
+  val ( >>| ) : 'a t -> ('a -> 'b) -> 'b t
+
+  val of_result :
+    ('a, Location.Error.t NonEmptyList.t) result -> default:'a -> 'a t
+
+  val combine_errors : 'a t list -> 'a list t
+end

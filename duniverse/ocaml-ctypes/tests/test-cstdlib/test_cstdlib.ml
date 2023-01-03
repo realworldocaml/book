@@ -179,7 +179,7 @@ struct
     let cmpi m1 m2 =
       let mi1 = from_voidp mi m1 in
       let mi2 = from_voidp mi m2 in
-      Stdlib.compare
+      compare
         (as_string (!@(mi1 |-> name)))
         (as_string (!@(mi2 |-> name)))
 

@@ -75,15 +75,16 @@ let rainbow_open_tag conf tag =
 ;;
 
 let rainbow_tags conf =
-  { Format.mark_open_tag =
-      rainbow_open_tag conf
-  ; Format.mark_close_tag =
+  { Format.mark_open_stag = (function
+      | Format.String_tag tag -> rainbow_open_tag conf tag
+      | _ -> "")
+  ; Format.mark_close_stag =
       (fun _ ->
          match conf.comments with
          | Print (_, Some _clr, _) -> ""
          | _ -> "")
-  ; Format.print_open_tag = ignore
-  ; Format.print_close_tag = ignore
+  ; Format.print_open_stag = ignore
+  ; Format.print_close_stag = ignore
   }
 ;;
 
@@ -1076,7 +1077,7 @@ module Print = struct
 end
 
 let setup conf fmt =
-  Format.pp_set_formatter_tag_functions fmt (rainbow_tags conf) [@ocaml.warning "-3"];
+  Format.pp_set_formatter_stag_functions fmt (rainbow_tags conf);
   Format.pp_set_tags fmt true
 ;;
 

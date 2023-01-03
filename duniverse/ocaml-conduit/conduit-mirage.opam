@@ -1,4 +1,4 @@
-version: "5.1.1"
+version: "6.1.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["Anil Madhavapeddy" "Thomas Leonard" "Thomas Gazagnaire"]
@@ -18,7 +18,7 @@ depends: [
   "mirage-flow-combinators" {>= "2.0.0"}
   "mirage-random" {>= "2.0.0"}
   "mirage-time" {>= "2.0.0"}
-  "dns-client" {>= "6.0.0"}
+  "dns-client" {>= "6.4.0"}
   "conduit-lwt" {=version}
   "vchan" {>= "5.0.0"}
   "xenstore"

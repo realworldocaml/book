@@ -218,8 +218,11 @@ module Registrar = struct
     | None -> (
         let other_contexts =
           Hashtbl.fold
-            (fun ctx { all } acc ->
-              if Poly.( <> ) context ctx && String.Map.mem name all then
+            (fun ctx all_from_context acc ->
+              if
+                Poly.( <> ) context ctx
+                && String.Map.mem name all_from_context.all
+              then
                 match t.string_of_context ctx with
                 | None -> acc
                 | Some s -> (s ^ "s") :: acc

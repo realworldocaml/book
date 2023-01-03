@@ -1,0 +1,14 @@
+opam-version: "2.0"
+version: "0.1.0"
+license: "MIT"
+synopsis: "Bytes library distributed with the OCaml compiler"
+maintainer: "Kate <kit.ty.kate@disroot.org>"
+authors: "Kate <kit.ty.kate@disroot.org>"
+homepage: "https://github.com/kit-ty-kate/bytes"
+bug-reports: "https://github.com/kit-ty-kate/bytes/issues"
+dev-repo: "git+https://github.com/kit-ty-kate/bytes"
+depends: [
+  "ocaml" {>= "4.02"}
+  "dune" {>= "1.0"}
+]
+build: ["dune" "build" "-p" name "-j" jobs]

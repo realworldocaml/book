@@ -16,6 +16,23 @@ let tvar_of_var { txt; loc } = ptyp_var ~loc txt
 let evars_of_vars = List.map ~f:evar_of_var
 let pvars_of_vars = List.map ~f:pvar_of_var
 let tvars_of_vars = List.map ~f:tvar_of_var
+let fst_expr ~loc expr = [%expr Stdlib.fst [%e expr]]
+let snd_expr ~loc expr = [%expr Stdlib.snd [%e expr]]
+
+let methods_of_class_exn = function
+  | {
+      pstr_desc =
+        Pstr_class
+          [
+            {
+              pci_expr = { pcl_desc = Pcl_structure { pcstr_fields = l; _ }; _ };
+              _;
+            };
+          ];
+      _;
+    } ->
+      l
+  | _ -> assert false
 
 module Backends = struct
   class reconstructors =
@@ -36,6 +53,8 @@ module Backends = struct
 
       method class_params :
         loc:Location.t -> (core_type * (variance * injectivity)) list
+
+      method virtual_methods : loc:Location.t -> class_field list
 
       method apply :
         loc:Location.t -> expression -> expression list -> expression
@@ -58,6 +77,7 @@ module Backends = struct
       method name = "map"
       inherit reconstructors
       method class_params ~loc:_ = []
+      method virtual_methods ~loc:_ = []
       method apply ~loc expr args = eapply ~loc expr args
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
       method typ ~loc ty = ptyp_arrow ~loc Nolabel ty ty
@@ -75,6 +95,7 @@ module Backends = struct
       method name = "iter"
       inherit reconstructors
       method class_params ~loc:_ = []
+      method virtual_methods ~loc:_ = []
       method apply ~loc expr args = eapply ~loc expr args
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
       method typ ~loc ty = [%type: [%t ty] -> unit]
@@ -96,6 +117,7 @@ module Backends = struct
       method class_params ~loc =
         [ (ptyp_var ~loc "acc", (NoVariance, NoInjectivity)) ]
 
+      method virtual_methods ~loc:_ = []
       method apply ~loc expr args = eapply ~loc expr (args @ [ evar ~loc "acc" ])
 
       method abstract ~loc patt expr =
@@ -123,6 +145,7 @@ module Backends = struct
       method class_params ~loc =
         [ (ptyp_var ~loc "acc", (NoVariance, NoInjectivity)) ]
 
+      method virtual_methods ~loc:_ = []
       method apply ~loc expr args = eapply ~loc expr (args @ [ evar ~loc "acc" ])
 
       method abstract ~loc patt expr =
@@ -169,6 +192,7 @@ module Backends = struct
       method class_params ~loc =
         [ (ptyp_var ~loc "ctx", (NoVariance, NoInjectivity)) ]
 
+      method virtual_methods ~loc:_ = []
       method apply ~loc expr args = eapply ~loc expr (evar ~loc "ctx" :: args)
 
       method abstract ~loc patt expr =
@@ -193,6 +217,17 @@ module Backends = struct
 
       method class_params ~loc =
         [ (ptyp_var ~loc "res", (NoVariance, NoInjectivity)) ]
+
+      method virtual_methods ~loc =
+        methods_of_class_exn
+          [%stri
+            class virtual blah =
+              object
+                method virtual record : (string * 'res) list -> 'res
+                method virtual constr : string -> 'res list -> 'res
+                method virtual tuple : 'res list -> 'res
+                method virtual other : 'a. 'a -> 'res
+              end]
 
       method apply ~loc expr args = eapply ~loc expr args
       method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
@@ -223,8 +258,96 @@ module Backends = struct
       method tuple ~loc es = [%expr self#tuple [%e elist ~loc es]]
     end
 
+  let lift_mapper_with_context : what =
+    let uses_ctx = uses_var "ctx" in
+    object
+      method name = "lift_map_with_context"
+
+      method class_params ~loc =
+        [
+          (ptyp_var ~loc "ctx", (NoVariance, NoInjectivity));
+          (ptyp_var ~loc "res", (NoVariance, NoInjectivity));
+        ]
+
+      method virtual_methods ~loc =
+        methods_of_class_exn
+          [%stri
+            class virtual blah =
+              object
+                method virtual record : 'ctx -> (string * 'res) list -> 'res
+                method virtual constr : 'ctx -> string -> 'res list -> 'res
+                method virtual tuple : 'ctx -> 'res list -> 'res
+                method virtual other : 'a. 'ctx -> 'a -> 'res
+              end]
+
+      method apply ~loc expr args = eapply ~loc expr (evar ~loc "ctx" :: args)
+
+      method abstract ~loc patt expr =
+        let ctx_pat =
+          if uses_ctx expr then pvar ~loc "ctx" else pvar ~loc "_ctx"
+        in
+        eabstract ~loc [ ctx_pat; patt ] expr
+
+      method typ ~loc ty = [%type: 'ctx -> [%t ty] -> [%t ty] * 'res]
+      method any ~loc = [%expr fun ctx x -> (x, self#other ctx x)]
+
+      method combine ~loc combinators ~reconstruct =
+        List.fold_right combinators ~init:reconstruct ~f:(fun (v, expr) acc ->
+            pexp_let ~loc Nonrecursive
+              [ value_binding ~loc ~pat:(pvar_of_var v) ~expr ]
+              acc)
+
+      method record ~loc flds =
+        let record =
+          pexp_record ~loc
+            (List.map flds ~f:(fun (lab, e) -> (lab, fst_expr ~loc e)))
+            None
+        in
+        let flds =
+          elist ~loc
+            (List.map flds ~f:(fun (lab, e) ->
+                 pexp_tuple
+                   ~loc:{ lab.loc with loc_end = e.pexp_loc.loc_end }
+                   [
+                     estring ~loc:lab.loc (string_of_lid lab.txt);
+                     snd_expr ~loc e;
+                   ]))
+        in
+        [%expr [%e record], self#record ctx [%e flds]]
+
+      method construct ~loc id args =
+        let constr =
+          pexp_construct ~loc id
+            (pexp_tuple_opt ~loc (List.map args ~f:(fst_expr ~loc)))
+        in
+        let res =
+          let args = elist ~loc (List.map args ~f:(snd_expr ~loc)) in
+          [%expr
+            self#constr ctx
+              [%e estring ~loc:id.loc (string_of_lid id.txt)]
+              [%e args]]
+        in
+        [%expr [%e constr], [%e res]]
+
+      method tuple ~loc es =
+        let tuple = pexp_tuple ~loc (List.map es ~f:(fst_expr ~loc)) in
+        let res =
+          [%expr
+            self#tuple ctx [%e elist ~loc (List.map es ~f:(snd_expr ~loc))]]
+        in
+        [%expr [%e tuple], [%e res]]
+    end
+
   let all =
-    [ mapper; iterator; folder; fold_mapper; mapper_with_context; lifter ]
+    [
+      mapper;
+      iterator;
+      folder;
+      fold_mapper;
+      mapper_with_context;
+      lifter;
+      lift_mapper_with_context;
+    ]
 end
 
 type what = Backends.what
@@ -429,7 +552,7 @@ let type_deps =
     in
     Longident.Map.bindings map
 
-let lift_virtual_methods ~loc methods =
+let filter_virtual_methods ~methods ~virtual_methods =
   let collect =
     object
       inherit [String.Set.t] Ast_traverse.fold as super
@@ -445,32 +568,7 @@ let lift_virtual_methods ~loc methods =
     end
   in
   let used = collect#list collect#class_field methods String.Set.empty in
-  let all_virtual_methods =
-    match
-      [%stri
-        class virtual blah =
-          object
-            method virtual record : (string * 'res) list -> 'res
-            method virtual constr : string -> 'res list -> 'res
-            method virtual tuple : 'res list -> 'res
-            method virtual other : 'a. 'a -> 'res
-          end]
-    with
-    | {
-     pstr_desc =
-       Pstr_class
-         [
-           {
-             pci_expr = { pcl_desc = Pcl_structure { pcstr_fields = l; _ }; _ };
-             _;
-           };
-         ];
-     _;
-    } ->
-        l
-    | _ -> assert false
-  in
-  List.filter all_virtual_methods ~f:(fun m ->
+  List.filter virtual_methods ~f:(fun m ->
       match m.pcf_desc with
       | Pcf_method (s, _, _) -> String.Set.mem s.txt used
       | _ -> false)
@@ -500,9 +598,8 @@ let gen_class ~(what : what) ~loc tds =
         pcf_method ~loc (td.ptype_name, Public, Cfk_concrete (Fresh, mapper)))
   in
   let virtual_methods =
-    if String.equal what#name "lift" then
-      lift_virtual_methods ~loc methods @ virtual_methods
-    else virtual_methods
+    filter_virtual_methods ~methods ~virtual_methods:(what#virtual_methods ~loc)
+    @ virtual_methods
   in
   let virt = if List.is_empty virtual_methods then Concrete else Virtual in
   class_infos ~loc ~virt ~params:class_params ~name:{ loc; txt = what#name }

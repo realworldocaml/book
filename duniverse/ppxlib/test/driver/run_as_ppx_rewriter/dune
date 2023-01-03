@@ -1,14 +1,8 @@
 (executable
  (name print_greetings)
  (libraries ppxlib)
- (modules print_greetings)
  (preprocess
   (pps ppxlib.metaquot)))
 
-(executable
- (name print_magic_number)
- (libraries astlib)
- (modules print_magic_number))
-
 (cram
- (deps print_greetings.exe print_magic_number.exe))
+ (deps print_greetings.exe))

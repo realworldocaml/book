@@ -38,7 +38,7 @@ module Bin = struct
     let prog = add_exe prog in
     Memo.List.find_map path ~f:(fun dir ->
         let fn = Path.relative dir prog in
-        let+ exists = Fs_memo.file_exists fn in
+        let+ exists = Fs_memo.file_exists (Path.as_outside_build_dir_exn fn) in
         if exists then Some fn else None)
 end
 
@@ -51,7 +51,7 @@ module Program = struct
   let best_path dir program =
     let exe_path program =
       let fn = Path.relative dir (program ^ Bin.exe) in
-      let+ exists = Fs_memo.file_exists fn in
+      let+ exists = Fs_memo.file_exists (Path.as_outside_build_dir_exn fn) in
       if exists then Some fn else None
     in
     if List.mem programs_for_which_we_prefer_opt_ext program ~equal:String.equal
@@ -514,9 +514,8 @@ let create ~(kind : Kind.t) ~path ~env ~env_nodes ~name ~merlin ~targets
       else env
     in
     let env =
-      let cwd = Sys.getcwd () in
       let extend_var var ?(path_sep = Bin.path_sep) v =
-        let v = Filename.concat cwd (Path.Build.to_string v) in
+        let v = Path.to_absolute_filename (Path.build v) in
         match Env.get env var with
         | None -> (var, v)
         | Some prev -> (var, sprintf "%s%c%s" v path_sep prev)
@@ -865,7 +864,7 @@ module DB = struct
     get context
 end
 
-let compiler t (mode : Mode.t) =
+let compiler t (mode : Ocaml.Mode.t) =
   match mode with
   | Byte -> Ok t.ocamlc
   | Native -> t.ocamlopt
@@ -979,7 +978,6 @@ let force_configurator_files =
         List.concat_map ctxs ~f:(fun t ->
             [ Path.build (configurator_v1 t); Path.build (configurator_v2 t) ])
       in
-      Memo.parallel_iter files ~f:(fun file ->
-          Build_system.build_file file >>| ignore))
+      Memo.parallel_iter files ~f:Build_system.build_file)
 
 let make t = Memo.Lazy.force t.make

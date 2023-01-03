@@ -97,3 +97,51 @@ module Functor : functor () -> sig val code_path : string ref end
 - : string =
 "(code_path(main_module_name Test)(submodule_path(Functor _))(enclosing_module First_class)(enclosing_value(x))(value(x))(fully_qualified_path Test.Functor._.x))"
 |}]
+
+module Actual = struct
+  let code_path = [%code_path]
+end [@enter_module Dummy]
+let _ = Actual.code_path
+[%%expect{|
+module Actual : sig val code_path : string end
+- : string =
+"(code_path(main_module_name Test)(submodule_path(Actual Dummy))(enclosing_module Dummy)(enclosing_value(code_path))(value(code_path))(fully_qualified_path Test.Actual.Dummy.code_path))"
+|}]
+
+module Ignore_me = struct
+  let code_path = [%code_path]
+end [@@do_not_enter_module]
+let _ = Ignore_me.code_path
+[%%expect{|
+module Ignore_me : sig val code_path : string end
+- : string =
+"(code_path(main_module_name Test)(submodule_path())(enclosing_module Test)(enclosing_value(code_path))(value(code_path))(fully_qualified_path Test.code_path))"
+|}]
+
+let _ =
+  (let module Ignore_me = struct
+     let code_path = [%code_path]
+   end
+   in
+   Ignore_me.code_path)
+  [@do_not_enter_module]
+[%%expect{|
+- : string =
+"(code_path(main_module_name Test)(submodule_path())(enclosing_module Test)(enclosing_value(code_path))(value())(fully_qualified_path Test))"
+|}]
+
+let _ = ([%code_path] [@ppxlib.enter_value dummy])
+[%%expect{|
+- : string =
+"(code_path(main_module_name Test)(submodule_path())(enclosing_module Test)(enclosing_value(dummy))(value(dummy))(fully_qualified_path Test.dummy))"
+|}]
+
+let _ =
+  let ignore_me = [%code_path]
+  [@@do_not_enter_value]
+  in
+  ignore_me
+[%%expect{|
+- : string =
+"(code_path(main_module_name Test)(submodule_path())(enclosing_module Test)(enclosing_value())(value())(fully_qualified_path Test))"
+|}]

@@ -45,6 +45,8 @@ type 'a ref = 'a Caml.ref = { mutable contents : 'a }
 (* Reshuffle [Caml] so that we choose the modules using labels when available. *)
 module Caml = struct
 
+  include Caml
+
   module Arg = Caml.Arg (** @canonical Caml.Arg *)
 
   module Array = Caml.StdLabels.Array (** @canonical Caml.StdLabels.Array *)
@@ -109,8 +111,6 @@ module Caml = struct
 
   module Stack = Caml.Stack (** @canonical Caml.Stack *)
 
-  module Stream = Caml.Stream [@ocaml.warning "-3"] (** @canonical Caml.Stream *)
-
   module String = Caml.StdLabels.String (** @canonical Caml.StdLabels.String *)
 
   module Sys = Caml.Sys (** @canonical Caml.Sys *)
@@ -118,8 +118,6 @@ module Caml = struct
   module Uchar = Caml.Uchar (** @canonical Caml.Uchar *)
 
   module Unit = Caml.Unit (** @canonical Caml.Unit *)
-
-  include Pervasives [@ocaml.warning "-3"]
 
   exception Not_found = Caml.Not_found
 end

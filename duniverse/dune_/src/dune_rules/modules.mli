@@ -20,11 +20,7 @@ val lib :
 
 val encode : t -> Dune_lang.t
 
-val decode :
-     version:Dune_lang.Syntax.Version.t
-  -> src_dir:Path.t
-  -> implements:bool
-  -> t Dune_lang.Decoder.t
+val decode : src_dir:Path.t -> t Dune_lang.Decoder.t
 
 val impl : t -> vlib:t -> t
 
@@ -48,6 +44,8 @@ val fold_no_vlib : t -> init:'acc -> f:(Module.t -> 'acc -> 'acc) -> 'acc
 val exe_unwrapped : Module.Name_map.t -> t
 
 val exe_wrapped : src_dir:Path.Build.t -> modules:Module.Name_map.t -> t
+
+val melange_wrapped : src_dir:Path.Build.t -> modules:Module.Name_map.t -> t
 
 (** For wrapped libraries, this is the user written entry module for the
     library. For single module libraries, it's the sole module in the library *)

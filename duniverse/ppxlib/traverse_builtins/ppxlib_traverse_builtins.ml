@@ -5,6 +5,7 @@ module T = struct
   type ('a, 'acc) fold_map = 'a -> 'acc -> 'a * 'acc
   type ('ctx, 'a) map_with_context = 'ctx -> 'a -> 'a
   type ('a, 'res) lift = 'a -> 'res
+  type ('ctx, 'a, 'res) lift_map_with_context = 'ctx -> 'a -> 'a * 'res
 end
 
 class map =
@@ -161,6 +162,52 @@ class virtual ['res] lift =
         | x :: l -> self#constr "::" [ f x; self#list f l ]
   end
 
+class virtual ['ctx, 'res] lift_map_with_context =
+  object (self)
+    method virtual other : 'a. 'ctx -> 'a -> 'res
+    method virtual int : ('ctx, int, 'res) T.lift_map_with_context
+    method virtual string : ('ctx, string, 'res) T.lift_map_with_context
+    method virtual bool : ('ctx, bool, 'res) T.lift_map_with_context
+    method virtual char : ('ctx, char, 'res) T.lift_map_with_context
+
+    method virtual array
+        : 'a.
+          ('ctx, 'a, 'res) T.lift_map_with_context ->
+          ('ctx, 'a array, 'res) T.lift_map_with_context
+
+    method virtual float : ('ctx, float, 'res) T.lift_map_with_context
+    method virtual int32 : ('ctx, int32, 'res) T.lift_map_with_context
+    method virtual int64 : ('ctx, int64, 'res) T.lift_map_with_context
+    method virtual nativeint : ('ctx, nativeint, 'res) T.lift_map_with_context
+    method virtual unit : ('ctx, unit, 'res) T.lift_map_with_context
+    method virtual record : 'ctx -> (string * 'res) list -> 'res
+    method virtual constr : 'ctx -> string -> 'res list -> 'res
+    method virtual tuple : 'ctx -> 'res list -> 'res
+
+    method option
+        : 'a.
+          ('ctx, 'a, 'res) T.lift_map_with_context ->
+          ('ctx, 'a option, 'res) T.lift_map_with_context =
+      fun f ctx x ->
+        match x with
+        | None -> (None, self#constr ctx "None" [])
+        | Some x ->
+            let x, res = f ctx x in
+            (Some x, self#constr ctx "Some" [ res ])
+
+    method list
+        : 'a.
+          ('ctx, 'a, 'res) T.lift_map_with_context ->
+          ('ctx, 'a list, 'res) T.lift_map_with_context =
+      fun f ctx l ->
+        match l with
+        | [] -> ([], self#constr ctx "[]" [])
+        | x :: l ->
+            let x, res_head = f ctx x in
+            let l, res_tail = self#list f ctx l in
+            (x :: l, self#constr ctx "::" [ res_head; res_tail ])
+  end
+
 class type ['res] std_lifters =
   object
     method other : 'a. ('a, 'res) T.lift
@@ -179,4 +226,37 @@ class type ['res] std_lifters =
     method unit : (unit, 'res) T.lift
     method option : 'a. ('a, 'res) T.lift -> ('a option, 'res) T.lift
     method list : 'a. ('a, 'res) T.lift -> ('a list, 'res) T.lift
+  end
+
+class type ['ctx, 'res] std_lift_mappers_with_context =
+  object
+    method other : 'a. 'ctx -> 'a -> 'res
+    method int : ('ctx, int, 'res) T.lift_map_with_context
+    method string : ('ctx, string, 'res) T.lift_map_with_context
+    method bool : ('ctx, bool, 'res) T.lift_map_with_context
+    method char : ('ctx, char, 'res) T.lift_map_with_context
+
+    method array :
+      'a.
+      ('ctx, 'a, 'res) T.lift_map_with_context ->
+      ('ctx, 'a array, 'res) T.lift_map_with_context
+
+    method record : 'ctx -> (string * 'res) list -> 'res
+    method constr : 'ctx -> string -> 'res list -> 'res
+    method tuple : 'ctx -> 'res list -> 'res
+    method float : ('ctx, float, 'res) T.lift_map_with_context
+    method int32 : ('ctx, int32, 'res) T.lift_map_with_context
+    method int64 : ('ctx, int64, 'res) T.lift_map_with_context
+    method nativeint : ('ctx, nativeint, 'res) T.lift_map_with_context
+    method unit : ('ctx, unit, 'res) T.lift_map_with_context
+
+    method option :
+      'a.
+      ('ctx, 'a, 'res) T.lift_map_with_context ->
+      ('ctx, 'a option, 'res) T.lift_map_with_context
+
+    method list :
+      'a.
+      ('ctx, 'a, 'res) T.lift_map_with_context ->
+      ('ctx, 'a list, 'res) T.lift_map_with_context
   end

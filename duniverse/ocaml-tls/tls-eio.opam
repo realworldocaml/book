@@ -1,0 +1,44 @@
+version: "0.15.4"
+opam-version: "2.0"
+homepage:     "https://github.com/mirleft/ocaml-tls"
+dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
+bug-reports:  "https://github.com/mirleft/ocaml-tls/issues"
+doc:          "https://mirleft.github.io/ocaml-tls/doc"
+authors:      ["Thomas Leonard"]
+maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.org>"]
+license:      "BSD-2-Clause"
+
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "5.0.0"}
+  "dune" {>= "3.0"}
+  "tls" {= version}
+  "mirage-crypto-rng" {>= "0.8.0"}
+  "mirage-crypto-rng-eio" {>= "0.8.0" with-test}
+  "x509" {>= "0.15.0"}
+  "eio" {>= "0.5"}
+  "eio_main" {>= "0.5" with-test}
+  "mdx" {with-test}
+]
+tags: [ "org:mirage"]
+synopsis: "Transport Layer Security purely in OCaml - Eio"
+description: """
+Transport Layer Security (TLS) is probably the most widely deployed security
+protocol on the Internet. It provides communication privacy to prevent
+eavesdropping, tampering, and message forgery. Furthermore, it optionally
+provides authentication of the involved endpoints. TLS is commonly deployed for
+securing web services ([HTTPS](http://tools.ietf.org/html/rfc2818)), emails,
+virtual private networks, and wireless networks.
+
+TLS uses asymmetric cryptography to exchange a symmetric key, and optionally
+authenticate (using X.509) either or both endpoints. It provides algorithmic
+agility, which means that the key exchange method, symmetric encryption
+algorithm, and hash algorithm are negotiated.
+
+Read [further](https://nqsb.io) and our [Usenix Security 2015 paper](https://usenix15.nqsb.io).
+"""

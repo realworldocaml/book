@@ -1,3 +1,7 @@
+## v0.2.1 (2022-10-11)
+
+* Duration.pp: microseconds suffix is now "μs" instead of "us" (#8 by @MisterDA)
+
 ## 0.2.0 (2021-08-04)
 
 * 32 bit compatibility:

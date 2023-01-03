@@ -1050,7 +1050,7 @@ opam provides a compiler switch that compiles OCaml with the frame pointer
 activated:
 
 ```sh skip
-$ opam switch create 4.13+fp ocaml-variants.4.13.1+options ocaml-option-fp
+$ opam switch create 4.14+fp ocaml-variants.4.14.1+options ocaml-option-fp
 ```
 
 Using the frame pointer changes the OCaml calling convention, but opam takes
@@ -1111,7 +1111,7 @@ To use the debug library, just link your program with the
 $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 + as  -o 'hello.o' '/tmp/build_cd0b96_dune/camlasmd3c336.s'
 + as  -o '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/tmp/build_cd0b96_dune/camlstartup2b2cd3.s'
-+ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/rwo-4.13.1/lib/ocaml'  '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/stdlib.a' '/home/yminsky/.opam/rwo-4.13.1/lib/ocaml/libasmrund.a' -lm -ldl
++ gcc -O2 -fno-strict-aliasing -fwrapv -pthread -Wall -Wdeclaration-after-statement -fno-common -fexcess-precision=standard -fno-tree-vrp -ffunction-sections  -Wl,-E  -o 'hello.native'  '-L/home/yminsky/.opam/rwo-4.14.1/lib/ocaml'  '/tmp/build_cd0b96_dune/camlstartup9d55d0.o' '/home/yminsky/.opam/rwo-4.14.1/lib/ocaml/std_exit.o' 'hello.o' '/home/yminsky/.opam/rwo-4.14.1/lib/ocaml/stdlib.a' '/home/yminsky/.opam/rwo-4.14.1/lib/ocaml/libasmrund.a' -lm -ldl
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words

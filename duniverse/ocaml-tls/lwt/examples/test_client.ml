@@ -45,7 +45,7 @@ open Cmdliner
 
 let cmd =
   let term = Term.(ret (const jump $ setup_log))
-  and info = Cmd.info "test_client" ~version:"0.15.3"
+  and info = Cmd.info "test_client" ~version:"0.15.4"
   in
   Cmd.v info term
 

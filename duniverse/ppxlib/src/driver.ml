@@ -1,6 +1,8 @@
 (*$ open Ppxlib_cinaps_helpers $*)
 open Import
 open Utils
+open Common
+open With_errors
 module Arg = Caml.Arg
 
 let exe_name = Caml.Filename.basename Caml.Sys.executable_name
@@ -22,6 +24,12 @@ let pretty = ref false
 let styler = ref None
 let output_metadata_filename = ref None
 let corrected_suffix = ref ".ppx-corrected"
+
+let ghost =
+  object
+    inherit Ast_traverse.map
+    method! location loc = { loc with loc_ghost = true }
+  end
 
 module Lint_error = struct
   type t = Location.t * string
@@ -69,12 +77,16 @@ module Instrument = struct
 
   type t = {
     transformation :
-      Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure;
+      Expansion_context.Base.t ->
+      Parsetree.structure ->
+      Parsetree.structure With_errors.t;
     position : pos;
   }
 
   module V2 = struct
-    let make transformation ~position = { transformation; position }
+    let make transformation ~position =
+      let transformation ctx st = return (transformation ctx st) in
+      { transformation; position }
   end
 
   let make transformation ~position =
@@ -87,10 +99,14 @@ module Transform = struct
     name : string;
     aliases : string list;
     impl :
-      (Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure)
+      (Expansion_context.Base.t ->
+      Parsetree.structure ->
+      Parsetree.structure With_errors.t)
       option;
     intf :
-      (Expansion_context.Base.t -> Parsetree.signature -> Parsetree.signature)
+      (Expansion_context.Base.t ->
+      Parsetree.signature ->
+      Parsetree.signature With_errors.t)
       option;
     lint_impl :
       (Expansion_context.Base.t -> Parsetree.structure -> Lint_error.t list)
@@ -99,10 +115,14 @@ module Transform = struct
       (Expansion_context.Base.t -> Parsetree.signature -> Lint_error.t list)
       option;
     preprocess_impl :
-      (Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure)
+      (Expansion_context.Base.t ->
+      Parsetree.structure ->
+      Parsetree.structure With_errors.t)
       option;
     preprocess_intf :
-      (Expansion_context.Base.t -> Parsetree.signature -> Parsetree.signature)
+      (Expansion_context.Base.t ->
+      Parsetree.signature ->
+      Parsetree.signature With_errors.t)
       option;
     enclose_impl :
       (Expansion_context.Base.t ->
@@ -142,6 +162,14 @@ module Transform = struct
         Printf.eprintf "  - first time was at %a\n" print_caller_id
           ct.registered_at;
         Printf.eprintf "  - second time is at %a\n" print_caller_id caller_id);
+    let impl = Option.map impl ~f:(fun f ctx ast -> return (f ctx ast)) in
+    let intf = Option.map intf ~f:(fun f ctx ast -> return (f ctx ast)) in
+    let preprocess_impl =
+      Option.map preprocess_impl ~f:(fun f ctx ast -> return (f ctx ast))
+    in
+    let preprocess_intf =
+      Option.map preprocess_intf ~f:(fun f ctx ast -> return (f ctx ast))
+    in
     let ct =
       {
         name;
@@ -212,52 +240,48 @@ module Transform = struct
       match input_name with Some input_name -> input_name | None -> "_none_"
     in
     let map_impl ctxt st_with_attrs =
-      let st =
-        let attrs, st =
-          List.split_while st_with_attrs ~f:(function
-            | { pstr_desc = Pstr_attribute _; _ } -> true
-            | _ -> false)
-        in
-        let file_path = File_path.get_default_path_str st in
-        let base_ctxt =
-          Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
-        in
-        let header, footer =
-          match enclose_impl with
-          | None -> ([], [])
-          | Some f ->
-              let whole_loc =
-                loc_of_list st ~get_loc:(fun st -> st.Parsetree.pstr_loc)
-              in
-              gen_header_and_footer Structure_item whole_loc (f base_ctxt)
-        in
-        map#structure base_ctxt (List.concat [ attrs; header; st; footer ])
+      let attrs, st =
+        List.split_while st_with_attrs ~f:(function
+          | { pstr_desc = Pstr_attribute _; _ } -> true
+          | _ -> false)
       in
-      match impl with None -> st | Some f -> f ctxt st
+      let file_path = File_path.get_default_path_str st in
+      let base_ctxt =
+        Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
+      in
+      let header, footer =
+        match enclose_impl with
+        | None -> ([], [])
+        | Some f ->
+            let whole_loc =
+              loc_of_list st ~get_loc:(fun st -> st.Parsetree.pstr_loc)
+            in
+            gen_header_and_footer Structure_item whole_loc (f base_ctxt)
+      in
+      map#structure base_ctxt (List.concat [ attrs; header; st; footer ])
+      >>= fun st -> match impl with None -> return st | Some f -> f ctxt st
     in
     let map_intf ctxt sg_with_attrs =
-      let sg =
-        let attrs, sg =
-          List.split_while sg_with_attrs ~f:(function
-            | { psig_desc = Psig_attribute _; _ } -> true
-            | _ -> false)
-        in
-        let file_path = File_path.get_default_path_sig sg in
-        let base_ctxt =
-          Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
-        in
-        let header, footer =
-          match enclose_intf with
-          | None -> ([], [])
-          | Some f ->
-              let whole_loc =
-                loc_of_list sg ~get_loc:(fun sg -> sg.Parsetree.psig_loc)
-              in
-              gen_header_and_footer Signature_item whole_loc (f base_ctxt)
-        in
-        map#signature base_ctxt (List.concat [ attrs; header; sg; footer ])
+      let attrs, sg =
+        List.split_while sg_with_attrs ~f:(function
+          | { psig_desc = Psig_attribute _; _ } -> true
+          | _ -> false)
       in
-      match intf with None -> sg | Some f -> f ctxt sg
+      let file_path = File_path.get_default_path_sig sg in
+      let base_ctxt =
+        Expansion_context.Base.top_level ~tool_name ~file_path ~input_name
+      in
+      let header, footer =
+        match enclose_intf with
+        | None -> ([], [])
+        | Some f ->
+            let whole_loc =
+              loc_of_list sg ~get_loc:(fun sg -> sg.Parsetree.psig_loc)
+            in
+            gen_header_and_footer Signature_item whole_loc (f base_ctxt)
+      in
+      map#signature base_ctxt (List.concat [ attrs; header; sg; footer ])
+      >>= fun sg -> match intf with None -> return sg | Some f -> f ctxt sg
     in
     { t with impl = Some map_impl; intf = Some map_intf }
 
@@ -487,20 +511,27 @@ let apply_transforms (type t) ~tool_name ~file_path ~field ~lint_field
     ~dropped_so_far ~hook ~expect_mismatch_handler ~input_name ~f_exception
     ~embed_errors x =
   let exception
-    Wrapper of t list * label loc list * (location * label) list * exn
+    Wrapper of
+      t list
+      * label loc list
+      * (location * label) list
+      * exn
+      * Location.Error.t list
   in
   let cts =
     get_whole_ast_passes ~tool_name ~hook ~expect_mismatch_handler ~input_name
   in
-  let return (x, _dropped, lint_errors) =
+  let finish (x, _dropped, lint_errors, errors) =
     ( x,
       List.map lint_errors ~f:(fun (loc, s) ->
-          Common.attribute_of_warning loc s) )
+          Common.attribute_of_warning loc s),
+      errors )
   in
   try
     let acc =
-      List.fold_left cts ~init:(x, [], [])
-        ~f:(fun (x, dropped, (lint_errors : _ list)) (ct : Transform.t) ->
+      List.fold_left cts ~init:(x, [], [], [])
+        ~f:(fun (x, dropped, (lint_errors : _ list), errors) (ct : Transform.t)
+           ->
           let input_name =
             match input_name with
             | Some input_name -> input_name
@@ -515,15 +546,15 @@ let apply_transforms (type t) ~tool_name ~file_path ~field ~lint_field
             | Some f -> (
                 try lint_errors @ f ctxt x
                 with exn when embed_errors ->
-                  raise @@ Wrapper (x, dropped, lint_errors, exn))
+                  raise @@ Wrapper (x, dropped, lint_errors, exn, errors))
           in
           match field ct with
-          | None -> (x, dropped, lint_errors)
+          | None -> (x, dropped, lint_errors, errors)
           | Some f ->
-              let x =
+              let x, more_errors =
                 try f ctxt x
                 with exn when embed_errors ->
-                  raise @@ Wrapper (x, dropped, lint_errors, exn)
+                  raise @@ Wrapper (x, dropped, lint_errors, exn, errors)
               in
               let dropped =
                 if !debug_attribute_drop then (
@@ -533,11 +564,11 @@ let apply_transforms (type t) ~tool_name ~file_path ~field ~lint_field
                   new_dropped)
                 else []
               in
-              (x, dropped, lint_errors))
+              (x, dropped, lint_errors, errors @ more_errors))
     in
-    Ok (return acc)
-  with Wrapper (x, dropped, lint_errors, exn) ->
-    Error (return (f_exception exn :: x, dropped, lint_errors))
+    Ok (finish acc)
+  with Wrapper (x, dropped, lint_errors, exn, errors) ->
+    Error (finish (f_exception exn :: x, dropped, lint_errors, errors))
 
 (*$*)
 
@@ -615,6 +646,15 @@ let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name
     in
     st
   in
+  let with_errors errors st =
+    List.map errors ~f:(fun error ->
+        Ast_builder.Default.pstr_extension
+          ~loc:(Location.Error.get_location error)
+          (Location.Error.to_extension error)
+          []
+        |> ghost#structure_item)
+    @ st
+  in
   let cookies_and_check st =
     Cookies.call_post_handlers T;
     let errors =
@@ -636,16 +676,10 @@ let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name
            ((enforce_invariants !loc_fname)#structure st
               Non_intersecting_ranges.empty
              : Non_intersecting_ranges.t));
-        let errors =
-          unused_attributes_errors @ unused_extension_errors @ not_seen_errors
-        in
-        errors
-        |> List.map ~f:Location.Error.to_extension
-        |> List.map ~f:(fun e ->
-               Ast_builder.Default.pstr_extension ~loc:Location.none e []))
+        unused_attributes_errors @ unused_extension_errors @ not_seen_errors)
       else []
     in
-    errors @ st
+    with_errors errors st
   in
   let file_path = File_path.get_default_path_str st in
   match
@@ -657,8 +691,10 @@ let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name
       ~f_exception:(fun exn -> exn_to_str_extension exn)
       ~embed_errors
   with
-  | Error (st, lint_errors) -> Error (lint lint_errors st)
-  | Ok (st, lint_errors) -> Ok (st |> lint lint_errors |> cookies_and_check)
+  | Error (st, lint_errors, errors) ->
+      Error (st |> lint lint_errors |> with_errors errors)
+  | Ok (st, lint_errors, errors) ->
+      Ok (st |> lint lint_errors |> cookies_and_check |> with_errors errors)
 
 let map_structure st =
   match
@@ -690,6 +726,15 @@ let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name
     in
     sg
   in
+  let with_errors errors sg =
+    List.map errors ~f:(fun error ->
+        Ast_builder.Default.psig_extension
+          ~loc:(Location.Error.get_location error)
+          (Location.Error.to_extension error)
+          []
+        |> ghost#signature_item)
+    @ sg
+  in
   let cookies_and_check sg =
     Cookies.call_post_handlers T;
     let errors =
@@ -711,16 +756,10 @@ let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name
            ((enforce_invariants !loc_fname)#signature sg
               Non_intersecting_ranges.empty
              : Non_intersecting_ranges.t));
-        let errors =
-          unused_attributes_errors @ unused_extension_errors @ not_seen_errors
-        in
-        errors
-        |> List.map ~f:Location.Error.to_extension
-        |> List.map ~f:(fun e ->
-               Ast_builder.Default.psig_extension ~loc:Location.none e []))
+        unused_attributes_errors @ unused_extension_errors @ not_seen_errors)
       else []
     in
-    errors @ sg
+    with_errors errors sg
   in
   let file_path = File_path.get_default_path_sig sg in
   match
@@ -732,8 +771,10 @@ let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name
       ~f_exception:(fun exn -> exn_to_sig_extension exn)
       ~embed_errors
   with
-  | Error (sg, lint_errors) -> Error (lint lint_errors sg)
-  | Ok (sg, lint_errors) -> Ok (sg |> lint lint_errors |> cookies_and_check)
+  | Error (sg, lint_errors, errors) ->
+      Error (sg |> lint lint_errors |> with_errors errors)
+  | Ok (sg, lint_errors, errors) ->
+      Ok (sg |> lint lint_errors |> cookies_and_check |> with_errors errors)
 
 let map_signature sg =
   match

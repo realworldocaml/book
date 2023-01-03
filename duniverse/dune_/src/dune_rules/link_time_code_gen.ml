@@ -1,6 +1,5 @@
 open Import
 module CC = Compilation_context
-module SC = Super_context
 
 type t =
   { to_link : Lib_flags.Lib_and_module.L.t
@@ -32,7 +31,7 @@ let generate_and_compile_module cctx ~precompiled_cmi ~name ~lib ~code ~requires
   in
   let open Memo.O in
   let* () =
-    SC.add_rule ~dir sctx
+    Super_context.add_rule ~dir sctx
       (let ml =
          Module.file module_ ~ml_kind:Impl
          |> Option.value_exn |> Path.as_in_build_dir_exn
@@ -151,6 +150,8 @@ let build_info_code cctx ~libs ~api_version =
         ((Lib.name lib, v) :: libs, placeholders))
   in
   let libs = List.rev libs in
+  let context = CC.context cctx in
+  let ocaml_version = Ocaml.Version.of_ocaml_config context.ocaml_config in
   let buf = Buffer.create 1024 in
   (* Parse the replacement format described in [artifact_substitution.ml]. *)
   pr buf
@@ -168,7 +169,11 @@ let build_info_code cctx ~libs ~api_version =
     None
 [@@inline never]
 |ocaml};
-  let fmt_eval : _ format6 = "let %s = eval %S" in
+  let fmt_eval : _ format6 =
+    if Ocaml.Version.has_sys_opaque_identity ocaml_version then
+      "let %s = eval (Sys.opaque_identity %S)"
+    else "let %s = eval %S"
+  in
   Path.Source.Map.iteri placeholders ~f:(fun path var ->
       pr buf fmt_eval var
         (Artifact_substitution.encode ~min_len:64 (Vcs_describe path)));

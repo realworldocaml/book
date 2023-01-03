@@ -1,3 +1,10 @@
+v1.3.0 2022-10-31
+-----------------
+
+* Allow an optional default if the MIME type is unknown (@hannesm, #25)
+* Add a function to map MIME type to file extensions (@DolphinChips, #24)
+* Fix documentation (@MisterDA, #23)
+
 v1.2.0 2021-07-13
 -----------------
 

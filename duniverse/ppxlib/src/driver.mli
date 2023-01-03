@@ -174,7 +174,9 @@ val register_code_transformation :
   [@@deprecated "[since 2015-11] use register_transformation instead"]
 (** Same as:
 
-    {[ register_transformation ~name ~impl ~intf () ]} *)
+    {[
+      register_transformation ~name ~impl ~intf ()
+    ]} *)
 
 val register_correction : loc:Location.t -> repl:string -> unit
 (** Rewriters might call this function to suggest a correction to the code

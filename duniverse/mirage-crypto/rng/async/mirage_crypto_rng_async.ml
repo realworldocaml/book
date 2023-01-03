@@ -72,13 +72,13 @@ let initialize ?g ?time_source ?(sleep = Time_ns.Span.of_int_sec 1) generator =
       in
       List.mapi ~f:(fun i f -> f i) init |> Cstruct.concat
     in
-    let rng = 
+    let rng =
       create ?g ~seed ~time:(ns_since_epoch time_source) generator
     in
     set_default_generator rng;
     periodically_collect_cpu_entropy time_source sleep;
-    periodically_collect_getrandom_entropy 
-      time_source 
+    periodically_collect_getrandom_entropy
+      time_source
       (Time_ns.Span.scale_int sleep 10);
     read_cpu_counter_at_the_start_of_every_cycle ();
   end

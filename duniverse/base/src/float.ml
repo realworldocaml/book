@@ -417,11 +417,13 @@ let round_up = ceil
 let round_towards_zero t = if t >= 0. then round_down t else round_up t
 
 (* see the comment above [round_nearest_lb] and [round_nearest_ub] for an explanation *)
-let round_nearest t =
+let[@ocaml.inline] round_nearest_inline t =
   if t > round_nearest_lb && t < round_nearest_ub
   then floor (add_half_for_round_nearest t)
   else t +. 0.
 ;;
+
+let round_nearest t = (round_nearest_inline [@ocaml.inlined always]) t
 
 let round_nearest_half_to_even t =
   if t <= round_nearest_lb || t >= round_nearest_ub
@@ -487,7 +489,7 @@ let int63_round_down_exn t =
 ;;
 
 let int63_round_nearest_portable_alloc_exn t0 =
-  let t = (round_nearest [@ocaml.inlined always]) t0 in
+  let t = (round_nearest_inline [@ocaml.inlined always]) t0 in
   if t > 0.
   then
     if t <= int63_round_ubound

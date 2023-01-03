@@ -207,6 +207,14 @@ Setup
   > EOF
   $ touch virtual_impl2/virtual.ml
 
+  $ mkdir subdir
+  $ mkdir subdir/subfolder
+  $ cat >subdir/subfolder/dune <<EOF
+  > (library
+  >  (name subfolder_lib))
+  > EOF
+  $ touch subdir/subfolder/subfolder_lib.ml
+
 Describe various things
 -----------------------
 
@@ -217,7 +225,9 @@ are reproducible, and are kept consistent between different machines.
 not stable across different setups.
 
   $ dune describe workspace --lang 0.1 --sanitize-for-tests
-  ((executables
+  ((root /WORKSPACE_ROOT)
+   (build_context _build/default)
+   (executables
     ((names (refmt))
      (requires ())
      (modules
@@ -622,6 +632,20 @@ not stable across different setups.
      (modules ())
      (include_dirs (/FINDLIB//stdlib-shims))))
    (library
+    ((name subfolder_lib)
+     (uid edb8ce3704b7983446d5ffb4cea0b51e)
+     (local true)
+     (requires ())
+     (source_dir _build/default/subdir/subfolder)
+     (modules
+      (((name Subfolder_lib)
+        (impl (_build/default/subdir/subfolder/subfolder_lib.ml))
+        (intf ())
+        (cmt
+         (_build/default/subdir/subfolder/.subfolder_lib.objs/byte/subfolder_lib.cmt))
+        (cmti ()))))
+     (include_dirs (_build/default/subdir/subfolder/.subfolder_lib.objs/byte))))
+   (library
     ((name virtual)
      (uid f0299ba46dc29b8d4bd2f5d1cf82587c)
      (local true)
@@ -676,7 +700,9 @@ not stable across different setups.
      (include_dirs (_build/default/virtual_impl2/.virtual_impl2.objs/byte)))))
 
   $ dune describe workspace --lang 0.1 --with-deps --sanitize-for-tests
-  ((executables
+  ((root /WORKSPACE_ROOT)
+   (build_context _build/default)
+   (executables
     ((names (refmt))
      (requires ())
      (modules
@@ -1181,6 +1207,21 @@ not stable across different setups.
      (modules ())
      (include_dirs (/FINDLIB//stdlib-shims))))
    (library
+    ((name subfolder_lib)
+     (uid edb8ce3704b7983446d5ffb4cea0b51e)
+     (local true)
+     (requires ())
+     (source_dir _build/default/subdir/subfolder)
+     (modules
+      (((name Subfolder_lib)
+        (impl (_build/default/subdir/subfolder/subfolder_lib.ml))
+        (intf ())
+        (cmt
+         (_build/default/subdir/subfolder/.subfolder_lib.objs/byte/subfolder_lib.cmt))
+        (cmti ())
+        (module_deps ((for_intf ()) (for_impl ()))))))
+     (include_dirs (_build/default/subdir/subfolder/.subfolder_lib.objs/byte))))
+   (library
     ((name virtual)
      (uid f0299ba46dc29b8d4bd2f5d1cf82587c)
      (local true)
@@ -1247,12 +1288,28 @@ not stable across different setups.
           (for_impl ()))))))
      (include_dirs (_build/default/virtual_impl2/.virtual_impl2.objs/byte)))))
 
+  $ dune describe workspace --lang 0.1 --sanitize-for-tests virtual
+  ((root /WORKSPACE_ROOT)
+   (build_context _build/default)
+   (library
+    ((name virtual)
+     (uid f0299ba46dc29b8d4bd2f5d1cf82587c)
+     (local true)
+     (requires ())
+     (source_dir _build/default/virtual)
+     (modules
+      (((name Virtual)
+        (impl ())
+        (intf (_build/default/virtual/virtual.mli))
+        (cmt ())
+        (cmti (_build/default/virtual/.virtual.objs/byte/virtual.cmti)))))
+     (include_dirs (_build/default/virtual/.virtual.objs/byte)))))
 
 Test other formats
 ------------------
 
   $ dune describe workspace --format csexp --lang 0.1 --sanitize-for-tests | cut -c 1-85
-  ((11:executables((5:names(5:refmt))(8:requires())(7:modules(((4:name5:Refmt)(4:impl(2
+  ((4:root15:/WORKSPACE_ROOT)(13:build_context14:_build/default)(11:executables((5:name
 
 Test errors
 -----------
@@ -1263,16 +1320,21 @@ Test errors
   [1]
 
   $ dune describe --lang 0.1 workspace xxx
-  Error: Too many argument for workspace
+  Error: No such file or directory: xxx
+  [1]
+
+  $ touch yyy
+  $ dune describe --lang 0.1 workspace yyy
+  Error: File exists, but is not a directory: yyy
   [1]
 
   $ dune describe --lang 1.0
-  dune describe: Only --lang 0.1 is available at the moment as this command is not yet
-                 stabilised. If you would like to release a software that relies on the output
-                 of 'dune describe', please open a ticket on
-                 https://github.com/ocaml/dune.
-  Usage: dune describe [OPTION]... [STRING]...
-  Try `dune describe --help' or `dune --help' for more information.
+  dune: Only --lang 0.1 is available at the moment as this command is not yet
+        stabilised. If you would like to release a software that relies on the output
+        of 'dune describe', please open a ticket on
+        https://github.com/ocaml/dune.
+  Usage: dune describe [OPTION]… [STRING]…
+  Try 'dune describe --help' or 'dune --help' for more information.
   [1]
 
 opam file listing
