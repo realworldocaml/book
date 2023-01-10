@@ -3,6 +3,7 @@
  (deps (package ocaml-print-intf))
  (libraries
   core
+  core_unix
   ctypes
   ctypes-foreign
   mdx

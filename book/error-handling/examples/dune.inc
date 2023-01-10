@@ -1,6 +1,7 @@
 
 (rule
  (alias blow_up)
+ (locks /global)
  (deps
   (source_tree ./correct/blow_up)
   (package base)
@@ -14,6 +15,7 @@
 
 (rule
  (alias exn_cost)
+ (locks /global)
  (deps
   (source_tree ./correct/exn_cost)
   (package core)

@@ -1,6 +1,7 @@
 
 (rule
  (alias dictionary)
+ (locks /global)
  (deps
   (source_tree ./correct/dictionary)
   (package base)
@@ -15,6 +16,7 @@
 
 (rule
  (alias dlist)
+ (locks /global)
  (deps
   (source_tree ./correct/dlist)
   (package base))
@@ -27,6 +29,7 @@
 
 (rule
  (alias time_converter)
+ (locks /global)
  (deps
   (source_tree ./correct/time_converter)
   (package core))
@@ -39,6 +42,7 @@
 
 (rule
  (alias time_converter2)
+ (locks /global)
  (deps
   (source_tree ./correct/time_converter2)
   (package core))

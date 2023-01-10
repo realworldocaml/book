@@ -1,6 +1,7 @@
 
 (rule
  (alias ctypes)
+ (locks /global)
  (deps
   (source_tree ./correct/ctypes))
  (action
@@ -12,6 +13,7 @@
 
 (rule
  (alias ffi_datetime)
+ (locks /global)
  (deps
   (source_tree ./correct/ffi_datetime)
   (package core)
@@ -26,6 +28,7 @@
 
 (rule
  (alias ffi_hello)
+ (locks /global)
  (deps
   (source_tree ./correct/ffi_hello)
   (package core)
@@ -40,6 +43,7 @@
 
 (rule
  (alias ffi_ncurses)
+ (locks /global)
  (deps
   (source_tree ./correct/ffi_ncurses)
   (package core)
@@ -54,6 +58,7 @@
 
 (rule
  (alias ffi_ncurses_nointf)
+ (locks /global)
  (deps
   (source_tree ./correct/ffi_ncurses_nointf)
   (package core)
@@ -68,6 +73,7 @@
 
 (rule
  (alias ffi_qsort)
+ (locks /global)
  (deps
   (source_tree ./correct/ffi_qsort)
   (package core)

@@ -1,6 +1,9 @@
 (mdx
  (files README.md)
+ (locks /global)
  (libraries
   core
+  core_unix
+  mdx
   ppx_jane)
  (preludes prelude.ml))

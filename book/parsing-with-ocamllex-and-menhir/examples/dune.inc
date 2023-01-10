@@ -1,6 +1,7 @@
 
 (rule
  (alias parsing-test)
+ (locks /global)
  (deps
   (source_tree ./correct/parsing-test)
   (package base)

@@ -1,6 +1,7 @@
 
 (rule
  (alias shapes)
+ (locks /global)
  (deps
   (source_tree ./correct/shapes)
   (package base)

@@ -1,6 +1,7 @@
 
 (rule
  (alias hello)
+ (locks /global)
  (deps
   (source_tree ./correct/hello)
   (package base)

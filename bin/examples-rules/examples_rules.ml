@@ -40,6 +40,7 @@ let print_rule ~dir_name ~path (config : Config.t) =
     {|
 (rule
  (alias %s)
+ (locks /global)
  (deps
   (source_tree %s)%s)
  (action

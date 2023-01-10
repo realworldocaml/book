@@ -1,6 +1,7 @@
 
 (rule
  (alias abstract-username)
+ (locks /global)
  (deps
   (source_tree ./correct/abstract-username)
   (package base))
@@ -13,6 +14,7 @@
 
 (rule
  (alias ext-option)
+ (locks /global)
  (deps
   (source_tree ./correct/ext-option)
   (package base))
@@ -25,6 +27,7 @@
 
 (rule
  (alias freq-dune)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-dune)
   (package base)
@@ -38,6 +41,7 @@
 
 (rule
  (alias freq-fast)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-fast)
   (package base)
@@ -51,6 +55,7 @@
 
 (rule
  (alias freq-median)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-median)
   (package base)
@@ -64,6 +69,7 @@
 
 (rule
  (alias freq-with-counter)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-with-counter)
   (package base)
@@ -77,6 +83,7 @@
 
 (rule
  (alias freq-with-sig)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-with-sig)
   (package base)
@@ -90,6 +97,7 @@
 
 (rule
  (alias freq-with-sig-abstract-fixed)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-with-sig-abstract-fixed)
   (package base)
