@@ -1,5 +1,5 @@
 description = "Monotonic wall-clock time for OCaml"
-version = "1.4.0+dune2"
+version = "2.0.0+dune"
 requires = ""
 archive(byte) = "mtime.cma"
 archive(native) = "mtime.cmxa"
@@ -8,7 +8,7 @@ plugin(native) = "mtime.cmxs"
 
 package "top" (
   description = "Mtime toplevel support"
-  version = "1.4.0+dune2"
+  version = "2.0.0+dune"
   requires = "mtime"
   directory = "top"
   archive(byte) = "mtime_top.cma"
@@ -19,19 +19,19 @@ package "top" (
 
 package "clock" (
   description = "Monotonic time clock interface"
-  version = "1.4.0+dune2"
+  version = "2.0.0+dune"
   requires = ""
   directory = "clock"
 
   package "os" (
     description = "Mtime_clock for your platform (including JavaScript)"
-    version = "1.4.0+dune2"
+    version = "2.0.0+dune"
     requires = "mtime"
     directory = "os"
     archive(byte) = "mtime_clock.cma"
     archive(native) = "mtime_clock.cmxa"
     plugin(byte) = "mtime_clock.cma"
     plugin(native) = "mtime_clock.cmxs"
-    linkopts(javascript) = "+mtime.clock.os/runtime.js"
+    jsoo_runtime = "runtime.js"
     exists_if = "mtime_clock.cma")
 )

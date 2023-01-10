@@ -75,25 +75,32 @@ module Span : sig
       positive. *)
 
   val ns : span
-  (** [ns] is a nanosecond duration, 1·10{^-9}s. *)
+  (** [ns] is a nanosecond duration, 1·10{^-9}s.
+      @since 1.4.0 *)
 
   val us : span
-  (** [us] is a microsecond duration, 1·10{^-6}s. *)
+  (** [us] is a microsecond duration, 1·10{^-6}s.
+      @since 1.4.0 *)
 
   val ms : span
-  (** [ms] is a millisecond duration, 1·10{^-3}s. *)
+  (** [ms] is a millisecond duration, 1·10{^-3}s.
+      @since 1.4.0 *)
 
   val s : span
-  (** [s] is a second duration, 1s. *)
+  (** [s] is a second duration, 1s.
+      @since 1.4.0 *)
 
   val min : span
-  (** [min] is a minute duration, 60s. *)
+  (** [min] is a minute duration, 60s.
+      @since 1.4.0 *)
 
   val hour : span
-  (** [hour] is an hour duration, 3600s. *)
+  (** [hour] is an hour duration, 3600s.
+      @since 1.4.0 *)
 
   val day : span
-  (** [day] is a day duration, 86'400s. *)
+  (** [day] is a day duration, 86'400s.
+      @since 1.4.0 *)
 
   val year : span
   (** [year] is a Julian year duration (365.25 days), 31'557'600s. *)
@@ -108,41 +115,34 @@ module Span : sig
   (** [of_uint64_ns u] is the {e unsigned} 64-bit integer nanosecond
       span [u] as a span. *)
 
-  val to_ns : span -> float
-  (** [to_ns span] is [span] in nanoseconds (1e-9s). *)
+  val of_float_ns : float -> span option
+  (** [of_float_ns f] is the positive floating point nanosecond span [f] as
+      a span. This is [None] if [f] is negative, non finite, or
+      larger or equal than 2{^53} (~104 days, the largest exact floating point
+      integer).
+      @since 2.0.0 *)
 
-  val to_us : span -> float
-  (** [to_us span] is [span] in microseconds (1e-6s). *)
-
-  val to_ms : span -> float
-  (** [to_ms span] is [span] in milliseconds (1e-3s). *)
-
-  val to_s : span -> float
-  (** [to_s span] is [span] in seconds. *)
-
-  val to_min : span -> float
-  (** [to_min span] is [span] in SI-accepted minutes (60s). *)
-
-  val to_hour : span -> float
-  (** [to_hour span] is [span] in SI-accepted hours (3600s). *)
-
-  val to_day : span -> float
-  (** [to_day span] is [span] in SI-accepted days (24 hours, 86400s). *)
-
-  val to_year : span -> float
-  (** [to_year span] is [span] in Julian years (365.25 days, 31'557'600s). *)
+  val to_float_ns : span -> float
+  (** [to_float_ns s] is [span] as a nanosecond floating point span.
+      Note that if [s] is larger than 2{^53} (~104 days, the largest
+      exact floating point integer) the result is an approximation and
+      will not round trip with {!of_float_ns}.
+      @since 2.0.0 *)
 
   (** {1:fmt Formatters} *)
 
   val pp : Format.formatter -> span -> unit
-  (** [pp_span ppf span] formats an unspecified representation of
-      [span] on [ppf]. The representation is not fixed-width,
-      depends on the magnitude of [span] and uses locale
-      independent {{!convert}standard time scale} abbreviations. *)
+  (** [pp] formats spans according to their magnitude using SI
+      prefixes on seconds and accepted non-SI units. Years are counted
+      in Julian years (365.25 SI-accepted days) as
+      {{:http://www.iau.org/publications/proceedings_rules/units/}defined}
+      by the International Astronomical Union.
 
-  val pp_float_s : Format.formatter -> float -> unit
-  (** [pp_float_s] formats like {!pp} does but on a floating
-      point seconds time span value (which can be negative). *)
+      Rounds towards positive infinity, i.e. over approximates, no
+      duration is formatted shorter than it is.
+
+      The output is UTF-8 encoded, it uses U+03BC for [µs]
+      (10{^-6}[s]). *)
 
   val dump : Format.formatter -> t -> unit
   (** [dump ppf span] formats an unspecified raw representation of [span]
@@ -213,101 +213,13 @@ val sub_span : t -> span -> t option
 (** {2:fmt Formatting} *)
 
 val pp : Format.formatter -> t -> unit
-(** [pp ppf t] formats [t] as an {e unsigned} 64-bit integer
+(** [pp] formats [t] as an {e unsigned} 64-bit integer
     nanosecond timestamp. Note that the absolute value is
     meaningless. *)
 
 val dump : Format.formatter -> t -> unit
 (** [dump ppf t] formats an unspecified raw representation of [t] on
     [ppf]. *)
-
-(** {1:timescale Time scale conversion (deprecated)}
-
-    The following convenience constants relate time scales to seconds.
-    Used as multiplicands they can be used to convert these units
-    to and from seconds.
-
-    The constants are defined according to
-    {{:http://www.bipm.org/en/publications/si-brochure/chapter3.html}SI
-    prefixes} on seconds and
-    {{:http://www.bipm.org/en/publications/si-brochure/table6.html}accepted
-    non-SI units}. Years are counted in Julian years (365.25 SI-accepted days)
-    as {{:http://www.iau.org/publications/proceedings_rules/units/}defined}
-    by the International Astronomical Union (IAU). *)
-
-val ns_to_s : float
-[@@ocaml.deprecated "Use 1e-9 instead."]
-(** [ns_to_s] is [1e-9] the number of seconds in one nanosecond.
-    @deprecated *)
-
-val us_to_s : float
-[@@ocaml.deprecated "Use 1e-6 instead."]
-(** [us_to_s] is [1e-6], the number of seconds in one microsecond.
-    @deprecated *)
-
-val ms_to_s : float
-[@@ocaml.deprecated "Use 1e-3 instead."]
-(** [ms_to_s] is [1e-3], the number of seconds in one millisecond.
-    @deprecated *)
-
-val min_to_s : float
-[@@ocaml.deprecated "Use 60. instead."]
-(** [min_to_s] is [60.], the number of seconds in one SI-accepted minute.
-    @deprecated *)
-
-val hour_to_s : float
-[@@ocaml.deprecated "Use 3600. instead."]
-(** [hour_to_s] is [3600.], the number of seconds in one SI-accepted hour.
-    @deprecated *)
-
-val day_to_s : float
-[@@ocaml.deprecated "Use 86_400. instead."]
-(** [day_to_s] is [86_400.], the number of seconds in one SI-accepted day.
-    @deprecated *)
-
-val year_to_s : float
-[@@ocaml.deprecated "Use 31_557_600. instead."]
-(** [year_to_s] is [31_557_600.], the number of seconds in a Julian year.
-    @deprecated *)
-
-val s_to_ns : float
-[@@ocaml.deprecated "Use 1e9 instead."]
-(** [s_to_ns] is [1e9] the number of nanoseconds in one second.
-    @deprecated *)
-
-val s_to_us : float
-[@@ocaml.deprecated "Use 1e6 instead."]
-(** [s_to_us] is [1e6], the number of microseconds in one second.
-    @deprecated *)
-
-val s_to_ms : float
-[@@ocaml.deprecated "Use 1e3 instead."]
-(** [s_to_ms] is [1e3], the number of milliseconds in one second.
-    @deprecated *)
-
-val s_to_min : float
-[@@ocaml.deprecated "Use (1. /. 60.) instead."]
-(** [s_to_min] is [1. /. 60.], the number of SI-accepted minutes in
-    one second.
-    @deprecated *)
-
-val s_to_hour : float
-[@@ocaml.deprecated "Use (1. /. 3600.) instead."]
-(** [s_to_hour] is [1. /. 3600.], the number of SI-accepted hours in
-    one second.
-    @deprecated *)
-
-val s_to_day : float
-[@@ocaml.deprecated "Use (1. /. 86400.) instead."]
-(** [s_to_day] is [1. /. 86400.], the number of SI-accepted days in
-    one second.
-    @deprecated *)
-
-val s_to_year : float
-[@@ocaml.deprecated "Use (1. /. 31_557_600.) instead."]
-(** [s_to_year] is [1. /. 31_557_600.], the number of Julian years
-    in one second.
-    @deprecated *)
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2015 The mtime programmers

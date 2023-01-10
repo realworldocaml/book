@@ -22,6 +22,9 @@
 
 #elif defined(__unix__) || defined(__unix)
  #include <unistd.h>
+ #if defined(__linux__)
+   #define OCAML_MTIME_LINUX
+ #endif
  #if defined(_POSIX_VERSION)
    #define OCAML_MTIME_POSIX
  #endif
@@ -49,16 +52,16 @@ void ocaml_mtime_clock_init_scale (void)
 CAMLprim value ocaml_mtime_clock_elapsed_ns (value unit)
 {
   static uint64_t start = 0L;
-  if (start == 0L) { start = mach_absolute_time (); }
+  if (start == 0L) { start = mach_continuous_time (); }
   if (scale.denom == 0) { ocaml_mtime_clock_init_scale (); }
-  uint64_t now = mach_absolute_time ();
+  uint64_t now = mach_continuous_time ();
   return caml_copy_int64 (((now - start) * scale.numer) / scale.denom);
 }
 
 CAMLprim value ocaml_mtime_clock_now_ns (value unit)
 {
   if (scale.denom == 0) { ocaml_mtime_clock_init_scale (); }
-  uint64_t now = mach_absolute_time ();
+  uint64_t now = mach_continuous_time ();
   return caml_copy_int64 ((now * scale.numer) / scale.denom);
 }
 
@@ -75,14 +78,21 @@ CAMLprim value ocaml_mtime_clock_elapsed_ns (value unit)
 {
   static struct timespec start = {0};
   struct timespec now;
+  clockid_t clockid;
+
+#if defined(OCAML_MTIME_LINUX)
+  clockid = CLOCK_BOOTTIME;
+#else
+  clockid = CLOCK_MONOTONIC;
+#endif
 
   if (start.tv_sec == 0)
   {
-    if (clock_gettime (CLOCK_MONOTONIC, &start))
+    if (clock_gettime (clockid, &start))
       OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
   }
 
-  if (clock_gettime (CLOCK_MONOTONIC, &now))
+  if (clock_gettime (clockid, &now))
     OCAML_MTIME_RAISE_SYS_ERROR ("clock_gettime () failed");
 
   return caml_copy_int64 ((uint64_t)(now.tv_sec - start.tv_sec) *

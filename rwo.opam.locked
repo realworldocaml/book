@@ -16,7 +16,7 @@ depends: [
   "atdgen-runtime" {= "2.10.0" & ?vendor}
   "base" {= "v0.15.1" & ?vendor}
   "base-bigarray" {= "base"}
-  "base-bytes" {= "base+dune" & ?vendor}
+  "base-bytes" {= "base"}
   "base-threads" {= "base"}
   "base-unix" {= "base"}
   "base64" {= "3.5.0" & ?vendor}
@@ -90,7 +90,7 @@ depends: [
   "mirage-crypto-rng" {= "0.10.7" & ?vendor}
   "mirage-no-solo5" {= "1"}
   "mirage-no-xen" {= "1"}
-  "mtime" {= "1.4.0+dune2" & ?vendor}
+  "mtime" {= "2.0.0+dune" & ?vendor}
   "num" {= "1.4+dune2" & ?vendor}
   "ocaml" {= "4.14.1"}
   "ocaml-base-compiler" {= "4.14.1"}
@@ -322,10 +322,6 @@ pin-depends: [
   [
     "base.v0.15.1"
     "https://github.com/janestreet/base/archive/refs/tags/v0.15.1.tar.gz"
-  ]
-  [
-    "base-bytes.base+dune"
-    "https://github.com/kit-ty-kate/bytes/archive/v0.1.0.tar.gz"
   ]
   [
     "base64.3.5.0"
@@ -560,8 +556,8 @@ pin-depends: [
     "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
   ]
   [
-    "mtime.1.4.0+dune2"
-    "https://github.com/dune-universe/mtime/releases/download/v1.4.0%2Bdune2/mtime-v1.4.0.dune2.tbz"
+    "mtime.2.0.0+dune"
+    "https://github.com/dune-universe/mtime/releases/download/2.0.0%2Bdune/mtime-2.0.0.dune.tbz"
   ]
   [
     "num.1.4+dune2"
@@ -992,11 +988,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/dune-universe/mtime/releases/download/v1.4.0%2Bdune2/mtime-v1.4.0.dune2.tbz"
+    "https://github.com/dune-universe/mtime/releases/download/2.0.0%2Bdune/mtime-2.0.0.dune.tbz"
     "mtime"
     [
-      "sha256=8da1cbd3a3b24e0d26571f1bf3874a1523195518bec5f53ffa82ad4d4aa53301"
-      "sha512=a5166aec2ae9631e42db18731f17dece339b1b5f15fb693fcfe94c6a96fccc47182bfc75bf0bffa46ae94cd316271be64ec811da2caad36122deb140ea73b959"
+      "sha256=7dd6d0ba21acd07c2c76d6519a58c09e420af0fba57cfd8dd8ce08535db03a54"
+      "sha512=75942aaad6e25d97b11e0038effc3bed980d336435bffbaecb67368e83299b17d77db92a79d9a010f5961fc8ede7ae346fa91182e6c002f964ce9e0944b6a9ac"
     ]
   ]
   [
@@ -1168,13 +1164,6 @@ x-opam-monorepo-duniverse-dirs: [
     [
       "sha256=9afdee314fab6c3fcd689ab6eb5608d6b78078e6dede3953a47debde06c19d50"
       "sha512=efdb31d5ec5ea36d0bc80224d4ee04e46ce3428d1662870e6cebece92bc313d6eebee378802c0c059dd6e0cafea515308c31b7dfaf04a098eb4566583c1e9ed4"
-    ]
-  ]
-  [
-    "https://github.com/kit-ty-kate/bytes/archive/v0.1.0.tar.gz"
-    "bytes"
-    [
-      "sha256=795b9bf545841714aaf0e517b62834a589937f65ad815ed4589ea56fa614d238"
     ]
   ]
   [

@@ -1,5 +1,4 @@
 open B0_kit.V000
-open B00_std
 open Result.Syntax
 
 (* OCaml library names *)

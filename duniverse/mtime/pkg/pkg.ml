@@ -8,7 +8,6 @@ let () =
   Ok [ Pkg.mllib "src/mtime.mllib";
        Pkg.mllib ~api:[] "src/mtime_top.mllib" ~dst_dir:"top/";
        Pkg.lib "src/mtime_top_init.ml";
-       Pkg.lib ~exts:Exts.interface "src/mtime_clock" ~dst:"clock/";
        Pkg.mllib "src-clock/mtime_clock.mllib" ~dst_dir:"clock/os/";
        Pkg.clib "src-clock/libmtime_clock_stubs.clib" ~lib_dst_dir:"clock/os/";
        Pkg.lib "src-clock/runtime.js" ~dst:"clock/os/";
