@@ -573,7 +573,7 @@ instances and constructs a dispatch table from it:
     table;;
 val build_dispatch_table :
   (module Query_handler_instance) list ->
-  (string, (module Query_handler_instance)) Hashtbl.Poly.t = <fun>
+  (string, (module Query_handler_instance)) Base.Hashtbl.t = <fun>
 ```
 
 Next, we'll need a function that dispatches to a handler using a
@@ -593,7 +593,7 @@ dispatch table:
     | _ ->
       Or_error.error_string "malformed query";;
 val dispatch :
-  (string, (module Query_handler_instance)) Hashtbl.Poly.t ->
+  (string, (module Query_handler_instance)) Core.Hashtbl.t ->
   Sexp.t -> Sexp.t Or_error.t = <fun>
 ```
 
@@ -637,7 +637,7 @@ command-line interface:
     | `Continue msg ->
       printf "%s\n%!" msg;
       cli dispatch_table;;
-val cli : (string, (module Query_handler_instance)) Hashtbl.Poly.t -> unit =
+val cli : (string, (module Query_handler_instance)) Core.Hashtbl.t -> unit =
   <fun>
 ```
 
