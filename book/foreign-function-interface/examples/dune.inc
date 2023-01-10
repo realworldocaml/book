@@ -18,7 +18,8 @@
   (source_tree ./correct/ffi_datetime)
   (package core)
   (package async)
-  (package ctypes))
+  (package ctypes)
+  (package ctypes-foreign))
  (action
   (system "dune build @all @runtest --root ./correct/ffi_datetime")))
 
@@ -33,7 +34,8 @@
   (source_tree ./correct/ffi_hello)
   (package core)
   (package async)
-  (package ctypes))
+  (package ctypes)
+  (package ctypes-foreign))
  (action
   (system "dune build @all @runtest --root ./correct/ffi_hello")))
 
@@ -48,7 +50,8 @@
   (source_tree ./correct/ffi_ncurses)
   (package core)
   (package async)
-  (package ctypes))
+  (package ctypes)
+  (package ctypes-foreign))
  (action
   (system "dune build @all @runtest --root ./correct/ffi_ncurses")))
 
@@ -63,7 +66,8 @@
   (source_tree ./correct/ffi_ncurses_nointf)
   (package core)
   (package async)
-  (package ctypes))
+  (package ctypes)
+  (package ctypes-foreign))
  (action
   (system "dune build @all @runtest --root ./correct/ffi_ncurses_nointf")))
 
@@ -78,7 +82,8 @@
   (source_tree ./correct/ffi_qsort)
   (package core)
   (package async)
-  (package ctypes))
+  (package ctypes)
+  (package ctypes-foreign))
  (action
   (system "dune build @all @runtest --root ./correct/ffi_qsort")))
 

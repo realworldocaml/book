@@ -2,6 +2,7 @@
  (files README.md)
  (libraries
   core
+  core_unix
   ppx_jane
   yojson)
  (preludes prelude.ml))

@@ -1,6 +1,7 @@
 (mdx
  (files README.md)
  (deps (package ocaml-print-intf))
+ (locks /global)
  (libraries
   core
   core_unix
