@@ -1,6 +1,6 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   core
   core_unix
   mdx

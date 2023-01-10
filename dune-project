@@ -1,7 +1,7 @@
-(lang dune 2.9)
+(lang dune 3.0)
 (name rwo)
 
-(using mdx 0.1)
+(using mdx 0.2)
 
 (formatting disabled)
 

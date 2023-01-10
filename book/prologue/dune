@@ -1,3 +1,2 @@
 (mdx
- (files README.md)
- (packages mdx))
+ (files README.md))

@@ -1,7 +1,6 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   core
-  mdx
   ppx_jane)
  (preludes prelude.ml old_termcolor.ml))
