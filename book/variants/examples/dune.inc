@@ -4,6 +4,7 @@
  (deps
   (source_tree ./correct/variants-termcol)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/variants-termcol")))
 
@@ -16,6 +17,7 @@
  (deps
   (source_tree ./correct/variants-termcol-fixed)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/variants-termcol-fixed")))
 

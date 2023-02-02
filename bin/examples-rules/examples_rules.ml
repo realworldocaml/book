@@ -42,6 +42,7 @@ let print_rule ~dir_name ~path (config : Config.t) =
  (alias %s)
  (deps
   (source_tree %s)%s)
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root %s")))
 

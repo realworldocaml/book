@@ -5,6 +5,7 @@
   (source_tree ./correct/better_echo)
   (package core)
   (package async))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/better_echo")))
 
@@ -18,6 +19,7 @@
   (source_tree ./correct/echo)
   (package core)
   (package async))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/echo")))
 
@@ -31,6 +33,7 @@
   (source_tree ./correct/native_code_log_delays)
   (package core)
   (package async))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/native_code_log_delays")))
 
@@ -47,6 +50,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search")))
 
@@ -63,6 +67,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_out_of_order")))
 
@@ -77,6 +82,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_with_configurable_server")))
 
@@ -91,6 +97,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_with_error_handling")))
 
@@ -107,6 +114,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_with_timeout")))
 
@@ -121,6 +129,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_with_timeout_no_leak")))
 
@@ -135,6 +144,7 @@
   (package cohttp-async)
   (package yojson)
   (package textwrap))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/search_with_timeout_no_leak_simple")))
 

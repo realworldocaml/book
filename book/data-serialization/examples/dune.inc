@@ -5,6 +5,7 @@
   (source_tree ./correct/read_foo)
   (package core)
   (package sexplib))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/read_foo")))
 
@@ -18,6 +19,7 @@
   (source_tree ./correct/read_foo_better_errors)
   (package core)
   (package sexplib))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/read_foo_better_errors")))
 
@@ -30,6 +32,7 @@
  (deps
   (source_tree ./correct/sexp)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/sexp")))
 
@@ -43,6 +46,7 @@
   (source_tree ./correct/test_interval)
   (package core)
   (package sexplib))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/test_interval")))
 
@@ -56,6 +60,7 @@
   (source_tree ./correct/test_interval_override_of_sexp)
   (package core)
   (package sexplib))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/test_interval_override_of_sexp")))
 
