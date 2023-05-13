@@ -590,7 +590,7 @@ be freed when it's no longer in use, either via the GC sweeping it or the
 program terminating. It's sometimes useful to run extra code just before a
 value is freed by the GC, for example, to check that a file descriptor has
 been closed, or that a log message is recorded. [values/finalizer functions
-for]{.idx}[finalizers/in grabage collection]{.idx}[garbage
+for]{.idx}[finalizers/in garbage collection]{.idx}[garbage
 collection/finalizer functions]{.idx}
 
 ::: {data-type=note}
