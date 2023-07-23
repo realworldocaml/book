@@ -19,15 +19,33 @@
 
 <p>Note that Windows is not fully supported by the examples in Real
   World OCaml or by opam, though it's being worked on.  Until that's
-  ready, we recommend using a virtual machine running Debian Linux on
+  ready, we recommend using the
+  <a href="https://diskuv.com/dkmlbook/">DkML Windows distribution</a>, or
+  a virtual machine running Debian Linux on
   your local machine
   through <a href="https://docs.microsoft.com/en-us/windows/wsl/install">WSL2</a>,
   or
-  <a href="https://docker.com">Docker for Windows</a>.</p>
+  <a href="https://docker.com">Docker for Windows</a>. The DkML Windows
+  distribution has callout sections titled <em>Using DkML on Windows?</em> for
+  easy navigation.</p>
 
 <p>Let's get started.</p>
 
 <h2 id="install-opam">Install and set up opam</h2>
+
+<h3>Using DkML on Windows?</h3>
+
+<em>If you use Unix (ex. macOS, Linux) you can skip this section.</em>
+
+<p>
+  opam will be installed and set up by downloading and running the
+  <a href="https://gitlab.com/diskuv-ocaml/distributions/dkml/-/releases/2.0.1/downloads/setup64u.exe">DkML 2.0.1 64-bit installer</a>.
+</p>
+
+<p>
+  After that, skip down to the
+  <a href="#set-up-utop-dkml-on-windows">Set up utop for DkML on Windows</a> section.
+</p>
 
 <h3>Install opam</h3>
 
@@ -107,7 +125,7 @@ opam install core core_bench utop
 <p>Other packages will come up in the book, but you can install them
   when you need them.</p>
 
-<h3>Set up utop</h3>
+<h3>Set up utop on Unix</h3>
 
 <p>You should create an <code>~/.ocamlinit</code> file in your home
   directory with the following contents:</p>
@@ -120,6 +138,39 @@ open Base;;
 
 <p> This will open the Base standard library and set up some useful
   pretty-printers and syntax extensions. Notice that <code>#</code> is
+  used to mark a toplevel directive, not a comment.</p>
+
+<h3 id="set-up-utop-dkml-on-windows">Set up utop for DkML on Windows</h3>
+
+<em>If you use Unix (ex. macOS, Linux) you can skip this section.</em>
+
+<p>You should first create an <code>utop</code> configuration directory.
+  If you use Command Prompt to run command-line programs, run the following:</p>
+
+<pre><code class="language-batch">
+if NOT EXIST %LOCALAPPDATA%\utop ( mkdir %LOCALAPPDATA%\utop )
+</code></pre>
+
+<p>If instead you use PowerShell to run command-line programs, run the
+  following:</p>
+
+<pre><code class="language-powershell">
+New-Item -Force -ItemType Directory $env:LOCALAPPDATA\utop
+</code></pre>
+
+<p>Then you should create an <code>%LOCALAPPDATA%\utop\init.ml</code> file if you
+  use Command Prompt, or create an <code>$env:LOCALAPPDATA/utop/init.ml</code>
+  file if you use PowerShell, with the following contents:</p>
+
+<pre ><code class="language-ocaml">
+#require "base";;
+open Base;;
+</code></pre>
+
+<p>When you save the file the "Encoding" <strong>must</strong> be
+<em>UTF-8</em>, not <em>UTF-8 with BOM</em> or <em>UTF-16</em>.</p>
+
+<p> This will open the Base standard library. Notice that <code>#</code> is
   used to mark a toplevel directive, not a comment.</p>
 
 <h2 id="editor-setup">Set up your editor</h2>
