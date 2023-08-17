@@ -165,7 +165,7 @@ look at the type signature of `Map.of_alist_exn`.
 ```ocaml env=main
 # #show Map.of_alist_exn;;
 val of_alist_exn :
-  ('a, 'cmp) Set.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
+  ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t
 ```
 
 The type `Map.comparator` is actually an alias for a first-class module type,
