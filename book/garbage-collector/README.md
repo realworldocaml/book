@@ -573,13 +573,13 @@ Benchmark for mutable, immutable
   barrier_bench.exe [COLUMN ...]
 
 Columns that can be specified are:
-	time       - Number of nano secs taken.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
+    time       - Number of nano secs taken.
+    cycles     - Number of CPU cycles (RDTSC) taken.
+    alloc      - Allocation of major, minor and promoted words.
+    gc         - Show major and minor collections per 1000 runs.
+    percentage - Relative execution time as a percentage.
+    speedup    - Relative execution cost as a speedup.
+    samples    - Number of samples collected for profiling.
 ...
 ```
 
@@ -590,7 +590,7 @@ be freed when it's no longer in use, either via the GC sweeping it or the
 program terminating. It's sometimes useful to run extra code just before a
 value is freed by the GC, for example, to check that a file descriptor has
 been closed, or that a log message is recorded. [values/finalizer functions
-for]{.idx}[finalizers/in grabage collection]{.idx}[garbage
+for]{.idx}[finalizers/in garbage collection]{.idx}[garbage
 collection/finalizer functions]{.idx}
 
 ::: {data-type=note}
