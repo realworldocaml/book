@@ -56,9 +56,10 @@ you can try out the examples as you read through the chapter.
 
 ## OCaml as a Calculator
 
-Our first step is to open `Base`:
+Our first step is to pull in `"base"` library and open `Base`:
 
 ```ocaml env=main
+# #require "base";;
 # open Base;;
 ```
 
