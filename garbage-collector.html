@@ -242,13 +242,13 @@ let () =
 &gt;  barrier_bench.exe [COLUMN ...]
 &gt;
 &gt;Columns that can be specified are:
-&gt;   time       - Number of nano secs taken.
-&gt;   cycles     - Number of CPU cycles (RDTSC) taken.
-&gt;   alloc      - Allocation of major, minor and promoted words.
-&gt;   gc         - Show major and minor collections per 1000 runs.
-&gt;   percentage - Relative execution time as a percentage.
-&gt;   speedup    - Relative execution cost as a speedup.
-&gt;   samples    - Number of samples collected for profiling.
+&gt;    time       - Number of nano secs taken.
+&gt;    cycles     - Number of CPU cycles (RDTSC) taken.
+&gt;    alloc      - Allocation of major, minor and promoted words.
+&gt;    gc         - Show major and minor collections per 1000 runs.
+&gt;    percentage - Relative execution time as a percentage.
+&gt;    speedup    - Relative execution cost as a speedup.
+&gt;    samples    - Number of samples collected for profiling.
 ...
 </code></pre>
 </div>
@@ -257,7 +257,7 @@ let () =
 </section>
 <section class="level2" id="attaching-finalizer-functions-to-values">
 <h2>Attaching Finalizer Functions to Values</h2>
-<p>OCaml’s automatic memory management guarantees that a value will eventually be freed when it’s no longer in use, either via the GC sweeping it or the program terminating. It’s sometimes useful to run extra code just before a value is freed by the GC, for example, to check that a file descriptor has been closed, or that a log message is recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in grabage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml’s automatic memory management guarantees that a value will eventually be freed when it’s no longer in use, either via the GC sweeping it or the program terminating. It’s sometimes useful to run extra code just before a value is freed by the GC, for example, to check that a file descriptor has been closed, or that a log message is recorded. <a data-secondary="finalizer functions for" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="in garbage collection" data-primary="finalizers" data-type="indexterm">&nbsp;</a><a data-secondary="finalizer functions" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
 <section data-type="note" class="level4" id="what-values-can-be-finalized">
 <h4>What Values Can Be Finalized?</h4>
 <p>Various values cannot have finalizers attached since they aren’t heap-allocated. Some examples of values that are not heap-allocated are integers, constant constructors, Booleans, the empty array, the empty list, and the unit value. The exact list of what is heap-allocated or not is implementation-dependent, which is why Core provides the <code>Heap_block</code> module to explicitly check before attaching the finalizer.</p>
