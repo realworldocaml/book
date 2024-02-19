@@ -7,7 +7,7 @@ depends: [
   "asn1-combinators" {= "0.2.6" & ?vendor}
   "astring" {= "0.8.5+dune" & ?vendor}
   "async" {= "v0.15.0" & ?vendor}
-  "async_graphics" {= "0.7.0+dev" & ?vendor}
+  "async_graphics" {= "dev" & ?vendor}
   "async_kernel" {= "v0.15.0" & ?vendor}
   "async_rpc_kernel" {= "v0.15.0" & ?vendor}
   "async_unix" {= "v0.15.0" & ?vendor}
@@ -84,10 +84,10 @@ depends: [
   "menhir" {= "20220210" & ?vendor}
   "menhirLib" {= "20220210" & ?vendor}
   "menhirSdk" {= "20220210" & ?vendor}
-  "mirage-crypto" {= "0.10.6" & ?vendor}
-  "mirage-crypto-ec" {= "0.10.6" & ?vendor}
-  "mirage-crypto-pk" {= "0.10.6" & ?vendor}
-  "mirage-crypto-rng" {= "0.10.6" & ?vendor}
+  "mirage-crypto" {= "0.10.7" & ?vendor}
+  "mirage-crypto-ec" {= "0.10.7" & ?vendor}
+  "mirage-crypto-pk" {= "0.10.7" & ?vendor}
+  "mirage-crypto-rng" {= "0.10.7" & ?vendor}
   "mirage-no-solo5" {= "1"}
   "mirage-no-xen" {= "1"}
   "mtime" {= "1.4.0+dune2" & ?vendor}
@@ -168,7 +168,7 @@ depends: [
   "uri-sexp" {= "4.2.0" & ?vendor}
   "uutf" {= "1.0.3+dune" & ?vendor}
   "variantslib" {= "v0.15.0" & ?vendor}
-  "x509" {= "0.16.0" & ?vendor}
+  "x509" {= "0.16.1" & ?vendor}
   "yojson" {= "2.0.2" & ?vendor}
   "zarith" {= "1.12+dune" & ?vendor}
 ]
@@ -292,7 +292,7 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.15/files/async-v0.15.0.tar.gz"
   ]
   [
-    "async_graphics.0.7.0+dev"
+    "async_graphics.dev"
     "git+https://github.com/avsm/async_graphics.git#a5a0ade9a31423d979fe395e089737277465e2de"
   ]
   [
@@ -540,20 +540,20 @@ pin-depends: [
     "https://gitlab.inria.fr/fpottier/menhir/-/archive/20220210/archive.tar.gz"
   ]
   [
-    "mirage-crypto.0.10.6"
-    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.6/mirage-crypto-0.10.6.tbz"
+    "mirage-crypto.0.10.7"
+    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
   ]
   [
-    "mirage-crypto-ec.0.10.6"
-    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.6/mirage-crypto-0.10.6.tbz"
+    "mirage-crypto-ec.0.10.7"
+    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
   ]
   [
-    "mirage-crypto-pk.0.10.6"
-    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.6/mirage-crypto-0.10.6.tbz"
+    "mirage-crypto-pk.0.10.7"
+    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
   ]
   [
-    "mirage-crypto-rng.0.10.6"
-    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.6/mirage-crypto-0.10.6.tbz"
+    "mirage-crypto-rng.0.10.7"
+    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
   ]
   [
     "mtime.1.4.0+dune2"
@@ -849,8 +849,8 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.15/files/variantslib-v0.15.0.tar.gz"
   ]
   [
-    "x509.0.16.0"
-    "https://github.com/mirleft/ocaml-x509/releases/download/v0.16.0/x509-0.16.0.tbz"
+    "x509.0.16.1"
+    "https://github.com/mirleft/ocaml-x509/releases/download/v0.16.1/x509-0.16.1.tbz"
   ]
   [
     "yojson.2.0.2"
@@ -1160,11 +1160,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.6/mirage-crypto-0.10.6.tbz"
+    "https://github.com/mirage/mirage-crypto/releases/download/v0.10.7/mirage-crypto-0.10.7.tbz"
     "mirage-crypto"
     [
-      "sha256=01d6477a4edcad007b56983955d327f0e61c3f36494822f3755017d26e8f9410"
-      "sha512=870b7d0d32acde970afcd3fac2cb51131ac74bb20c887d07ddfccd239467a5dc8b700adf463427fa916393c503f106feb733cba5bf4b9d1f8eb57f52b5af9f9c"
+      "sha256=3e818a760c235c5b684c7b6b43b1cdd2a7dd04e0105b680d524f836eb988a69c"
+      "sha512=e9c3e6ac0fa3dae2dda9e91d5362ad08aaa65241b968a0c12484db4042146d6af7b46910784ce41bdd68783eede93f35a81aa37a2cd125dfc43503c78007b8b9"
     ]
   ]
   [
@@ -1240,11 +1240,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/mirleft/ocaml-x509/releases/download/v0.16.0/x509-0.16.0.tbz"
+    "https://github.com/mirleft/ocaml-x509/releases/download/v0.16.1/x509-0.16.1.tbz"
     "ocaml-x509"
     [
-      "sha256=67a6727fb4c38b919334eef2f8ef4eac0237029a439ff981d408eca8b9833595"
-      "sha512=c9b4cf55d16d8b1e6b6faa18fc9ac08065fa09937f07a3447d4b637539b37bea6374c98d184eba159a8ba8eba860303a78563097e47ef30529fedaaf722115c6"
+      "sha256=bc6c5edd8b92871dfb8866a4d60153dc2b9864ab99877690b83af04b8cfa313b"
+      "sha512=830ad6ad28a9ee5fbd24206362d552be166a0aac7de73616e790713b4a2edb07c8225d21eeaa148b202f2cdf2713d0098ac96f0b0a42dbeb07ee61137441d735"
     ]
   ]
   [

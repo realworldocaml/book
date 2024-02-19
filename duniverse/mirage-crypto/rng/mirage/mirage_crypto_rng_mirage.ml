@@ -33,12 +33,12 @@ module Log = (val Logs.src_log src : Logs.LOG)
 module Make (T : Mirage_time.S) (M : Mirage_clock.MCLOCK) = struct
   include Mirage_crypto_rng
 
-  let rdrand_task g delta =
+  let rdrand_task delta =
     match Entropy.cpu_rng with
     | Error `Not_supported -> ()
     | Ok cpu_rng ->
       let open Lwt.Infix in
-      let rdrand = cpu_rng g in
+      let rdrand = cpu_rng None in
       Lwt.async (fun () ->
           let rec one () =
             rdrand ();
@@ -69,8 +69,8 @@ module Make (T : Mirage_time.S) (M : Mirage_clock.MCLOCK) = struct
       in
       let rng = create ?g ~seed ~time:M.elapsed_ns rng in
       set_default_generator rng;
-      rdrand_task (Some rng) sleep;
-      Mirage_runtime.at_enter_iter (Entropy.timer_accumulator (Some rng));
+      rdrand_task sleep;
+      Mirage_runtime.at_enter_iter (Entropy.timer_accumulator None);
       Lwt.return_unit
     end
 end

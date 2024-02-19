@@ -1,3 +1,9 @@
+## v0.16.1 (2022-09-14)
+
+* Support ECDSA signatures where the hash algorithm output length exceeds the
+  size of the elliptic curve (by truncating, and using the leftmost bits).
+  Reported as #158 by @torinnd, fixed in #159 by @hannesm
+
 ## v0.16.0 (2022-02-15)
 
 * Provide X509.Authenticator.of_string to construct an Authenticator.t from

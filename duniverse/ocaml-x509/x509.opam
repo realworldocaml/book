@@ -1,4 +1,4 @@
-version: "0.16.0"
+version: "0.16.1"
 opam-version: "2.0"
 maintainer: [
   "Hannes Mehnert <hannes@mehnert.org>"
@@ -21,7 +21,7 @@ depends: [
   "base64" {>= "3.3.0"}
   "mirage-crypto"
   "mirage-crypto-pk"
-  "mirage-crypto-ec" {>= "0.10.0"}
+  "mirage-crypto-ec" {>= "0.10.7"}
   "mirage-crypto-rng"
   "fmt" {>= "0.8.7"}
   "alcotest" {with-test}

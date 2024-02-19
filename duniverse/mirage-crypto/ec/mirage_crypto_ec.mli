@@ -72,6 +72,9 @@ module type Dsa = sig
   type pub
   (** The type for public keys. *)
 
+  val byte_length : int
+  (** [byte_length] is the size of a ECDSA signature in bytes. *)
+
   (** {2 Serialisation} *)
 
   val priv_of_cstruct : Cstruct.t -> (priv, error) result
