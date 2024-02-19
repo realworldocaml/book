@@ -821,7 +821,7 @@ val remove_sequential_duplicates : int list -> int list = <fun>
 - : int list = [1; 2; 3; 4; 1]
 ```
 
-Note that this code used another variant of the list pattern, `[hd]`, to
+Note that this code used another variant of the list pattern, `[x]`, to
 match a list with a single element. We can do this to match a list with any
 fixed number of elements; for example, `[x;y;z]` will match any list with
 exactly three elements and will bind those elements to the variables
