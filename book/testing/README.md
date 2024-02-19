@@ -1027,7 +1027,7 @@ The example that triggers the exception is `-4611686018427387904`,
 also known as `Int.min_value`, which is the smallest value of type
 `Int.t`.  This uncovers something about integers which may not have
 been obvious, which is that the largest int, `Int.max_value`, is
-smaller in absolute value than `Int.max_value`.
+smaller in absolute value than `Int.min_value`.
 
 ```ocaml env=main
 # Int.min_value;;
