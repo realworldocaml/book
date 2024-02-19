@@ -4,6 +4,7 @@
  (deps
   (source_tree ./correct/query_handler_loader)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/query_handler_loader")))
 

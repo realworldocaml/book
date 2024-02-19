@@ -4,6 +4,7 @@
  (deps
   (source_tree ./correct/abstract-username)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/abstract-username")))
 
@@ -16,6 +17,7 @@
  (deps
   (source_tree ./correct/ext-option)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ext-option")))
 
@@ -29,6 +31,7 @@
   (source_tree ./correct/freq-dune)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-dune")))
 
@@ -42,6 +45,7 @@
   (source_tree ./correct/freq-fast)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-fast")))
 
@@ -55,6 +59,7 @@
   (source_tree ./correct/freq-median)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-median")))
 
@@ -68,6 +73,7 @@
   (source_tree ./correct/freq-with-counter)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-with-counter")))
 
@@ -81,6 +87,7 @@
   (source_tree ./correct/freq-with-sig)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-with-sig")))
 
@@ -94,6 +101,7 @@
   (source_tree ./correct/freq-with-sig-abstract-fixed)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-with-sig-abstract-fixed")))
 

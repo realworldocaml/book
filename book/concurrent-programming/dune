@@ -1,10 +1,11 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   async
+  async_kernel
+  async_unix
   cohttp-async
   core
-  mdx
   ppx_jane
   textwrap
   yojson)

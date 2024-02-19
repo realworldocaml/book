@@ -6,6 +6,7 @@
   (package base)
   (package core)
   (package menhir))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/parsing-test")))
 

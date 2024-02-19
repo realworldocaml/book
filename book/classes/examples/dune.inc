@@ -7,6 +7,7 @@
   (package async)
   (package async_kernel)
   (package async_graphics))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/shapes")))
 

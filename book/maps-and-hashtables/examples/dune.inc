@@ -5,6 +5,7 @@
   (source_tree ./correct/freq-fast)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/freq-fast")))
 
@@ -18,6 +19,7 @@
   (source_tree ./correct/map_vs_hash)
   (package base)
   (package core_bench))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/map_vs_hash")))
 
@@ -30,6 +32,7 @@
  (deps
   (source_tree ./correct/map_vs_hash2)
   (package core_bench))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/map_vs_hash2")))
 

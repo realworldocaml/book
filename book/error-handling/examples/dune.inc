@@ -5,6 +5,7 @@
   (source_tree ./correct/blow_up)
   (package base)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/blow_up")))
 
@@ -18,6 +19,7 @@
   (source_tree ./correct/exn_cost)
   (package core)
   (package core_bench))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/exn_cost")))
 

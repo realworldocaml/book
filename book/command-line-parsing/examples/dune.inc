@@ -4,6 +4,7 @@
  (deps
   (source_tree ./correct/cal_add_days)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/cal_add_days")))
 
@@ -17,6 +18,7 @@
   (source_tree ./correct/cal_add_interactive)
   (package core)
   (package ppx_jane))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/cal_add_interactive")))
 
@@ -29,6 +31,7 @@
  (deps
   (source_tree ./correct/cal_add_interactive2)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/cal_add_interactive2")))
 
@@ -41,6 +44,7 @@
  (deps
   (source_tree ./correct/cal_add_sub_days)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/cal_add_sub_days")))
 
@@ -53,6 +57,7 @@
  (deps
   (source_tree ./correct/md5)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5")))
 
@@ -65,6 +70,7 @@
  (deps
   (source_tree ./correct/md5_as_filename)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_as_filename")))
 
@@ -77,6 +83,7 @@
  (deps
   (source_tree ./correct/md5_let_syntax)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_let_syntax")))
 
@@ -89,6 +96,7 @@
  (deps
   (source_tree ./correct/md5_let_syntax2)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_let_syntax2")))
 
@@ -101,6 +109,7 @@
  (deps
   (source_tree ./correct/md5_multiarg)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_multiarg")))
 
@@ -113,6 +122,7 @@
  (deps
   (source_tree ./correct/md5_sequence)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_sequence")))
 
@@ -125,6 +135,7 @@
  (deps
   (source_tree ./correct/md5_succinct)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_succinct")))
 
@@ -137,6 +148,7 @@
  (deps
   (source_tree ./correct/md5_with_custom_arg)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_with_custom_arg")))
 
@@ -149,6 +161,7 @@
  (deps
   (source_tree ./correct/md5_with_default_file)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_with_default_file")))
 
@@ -161,6 +174,7 @@
  (deps
   (source_tree ./correct/md5_with_flags)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_with_flags")))
 
@@ -173,6 +187,7 @@
  (deps
   (source_tree ./correct/md5_with_optional_file)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/md5_with_optional_file")))
 

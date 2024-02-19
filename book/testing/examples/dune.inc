@@ -9,6 +9,7 @@
   (package ppx_jane)
   (package stdio)
   (package timezone))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/bigger_quickcheck_test")))
 
@@ -25,6 +26,7 @@
   (package core_kernel)
   (package ppx_jane)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/bigger_quickcheck_test_with_ppx")))
 
@@ -39,6 +41,7 @@
   (package core)
   (package async)
   (package ppx_jane))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/echo_test_delay")))
 
@@ -53,6 +56,7 @@
   (package core)
   (package async)
   (package ppx_jane))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/echo_test_reconnect")))
 
@@ -69,6 +73,7 @@
   (package ppx_jane)
   (package stdio)
   (package typerep))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/manual_property_test")))
 
@@ -83,6 +88,7 @@
   (package base)
   (package ppx_jane)
   (package stdio))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/multi_block_expect_test")))
 
@@ -100,6 +106,7 @@
   (package ppx_jane)
   (package stdio)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/rate_limiter_fixed")))
 
@@ -117,6 +124,7 @@
   (package ppx_jane)
   (package stdio)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/rate_limiter_show_bug")))
 
@@ -133,6 +141,7 @@
   (package ppx_jane)
   (package stdio)
   (package typerep))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/simple_expect_test")))
 
@@ -149,6 +158,7 @@
   (package ppx_jane)
   (package stdio)
   (package typerep))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/simple_inline_test")))
 
@@ -167,6 +177,7 @@
   (package stdio)
   (package typerep)
   (package uri))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/soup_test_corrected")))
 
@@ -185,6 +196,7 @@
   (package stdio)
   (package typerep)
   (package uri))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/soup_test_fixed")))
 
@@ -201,6 +213,7 @@
   (package ppx_jane)
   (package stdio)
   (package typerep))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/trivial_expect_test_fixed")))
 

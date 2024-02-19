@@ -10,7 +10,7 @@ license: "ISC"
 homepage: "https://github.com/realworldocaml/book"
 bug-reports: "https://github.com/realworldocaml/book/issues"
 depends: [
-  "dune" {>= "2.9"}
+  "dune" {>= "3.6"}
   "ocaml" {>= "4.14.0" & < "4.15.0"}
   "alcotest"
   "async"
@@ -27,7 +27,7 @@ depends: [
   "ctypes-foreign"
   "fmt"
   "lambdasoup"
-  "mdx"
+  "mdx" {< "2.2"}
   "ocaml-compiler-libs"
   "ocaml-print-intf"
   "patdiff"
@@ -51,12 +51,10 @@ build: [
     name
     "-j"
     jobs
-    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
-  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/realworldocaml/book.git"
 pin-depends: [

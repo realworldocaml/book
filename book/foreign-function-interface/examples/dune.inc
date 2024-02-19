@@ -3,6 +3,7 @@
  (alias ctypes)
  (deps
   (source_tree ./correct/ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ctypes")))
 
@@ -17,6 +18,7 @@
   (package core)
   (package async)
   (package ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ffi_datetime")))
 
@@ -31,6 +33,7 @@
   (package core)
   (package async)
   (package ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ffi_hello")))
 
@@ -45,6 +48,7 @@
   (package core)
   (package async)
   (package ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ffi_ncurses")))
 
@@ -59,6 +63,7 @@
   (package core)
   (package async)
   (package ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ffi_ncurses_nointf")))
 
@@ -73,6 +78,7 @@
   (package core)
   (package async)
   (package ctypes))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/ffi_qsort")))
 

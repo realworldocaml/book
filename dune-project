@@ -1,7 +1,7 @@
-(lang dune 2.9)
+(lang dune 3.6)
 (name rwo)
 
-(using mdx 0.1)
+(using mdx 0.3)
 
 (formatting disabled)
 
@@ -34,7 +34,7 @@ second edition book. See https://realworldocaml.org/")
   ctypes-foreign
   fmt
   lambdasoup
-  mdx
+  (mdx (< 2.2))
   ocaml-compiler-libs
   ocaml-print-intf
   patdiff

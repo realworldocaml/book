@@ -6,6 +6,7 @@
   (package base)
   (package core)
   (package ppx_jane))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/dictionary")))
 
@@ -18,6 +19,7 @@
  (deps
   (source_tree ./correct/dlist)
   (package base))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/dlist")))
 
@@ -30,6 +32,7 @@
  (deps
   (source_tree ./correct/time_converter)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/time_converter")))
 
@@ -42,6 +45,7 @@
  (deps
   (source_tree ./correct/time_converter2)
   (package core))
+ (locks /recursive-dune-run)
  (action
   (system "dune build @all @runtest --root ./correct/time_converter2")))
 
