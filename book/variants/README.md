@@ -430,9 +430,9 @@ takes a list of `client_message`s and returns all messages generated
 by a given user. The code in question is implemented by folding over
 the list of messages, where the accumulator is a pair of:
 
+- The list of messages so far that are associated with the user
 - The set of session identifiers for the user that have been seen thus
   far
-- The set of messages so far that are associated with the user
 
 Here's the concrete code:
 
