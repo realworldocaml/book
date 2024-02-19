@@ -1,3 +1,26 @@
+## v6.1.0 (2022-12-15)
+
+done by @psafont in #417:
+* conduit-lwt-unix-ssl: allow users to create a client ssl_context and use it for
+  any connections. This allows users to manage the lifecycle of the context.
+* conduit-lwt-unix-ssl: domain name verification can be disabled by users,
+  it's enabled by default. The library returns an error when the hostname
+  verification is turned on but it cannot be performed, this follows the TLS
+  implementation.
+* conduit-lwt-unix-ssl: IP verification can be enabled by users, it's disabled
+  by default.
+* conduit-lwt-unix-ssl: SNI is not sent when there isn't a domain name available
+* conduit-lwt-unix: avoid direct use of Ssl in conduit_lwt_unix (#418 @psafont)
+
+## v6.0.1 (2022-10-25)
+
+* conduit-mirage: adapt to dns 6.4.0 changes, Resolver_mirage.v is now in Lwt.t
+  monad (#416 @hannesm)
+
+## v6.0.0 (2022-10-11)
+
+* conduit-mirage: delay parsing of nameservers (#415 @reynir, review by @dinosaure)
+
 ## v5.1.1 (2022-07-04)
 
 * conduit-mirage: pass peer name to Tls.Config.client, fixes

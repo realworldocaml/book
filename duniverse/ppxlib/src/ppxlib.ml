@@ -1,7 +1,9 @@
 (** Standard library for ppx rewriters *)
 
 (** Make sure code using Ppxlib doesn't refer to compiler-libs without being
-    explicit about it *)
+    explicit about it:
+
+    @closed *)
 include struct
   [@@@warning "-3"]
 
@@ -24,12 +26,11 @@ include struct
       with module Pprintast := Pprintast
       with module Syntaxerr := Syntaxerr)
 end
-(** @inline *)
 
-module Ast = Ppxlib_ast.Ast
-(** Expose some modules from Ppxlib_ast; in particular, overwrite some of the
+(** Expose some modules from {!Ppxlib_ast}; in particular, overwrite some of the
     modules above *)
 
+module Ast = Ppxlib_ast.Ast
 module Ast_helper = Ppxlib_ast.Ast_helper
 module Asttypes = Ppxlib_ast.Asttypes
 module Parse = Ppxlib_ast.Parse
@@ -38,7 +39,9 @@ module Pprintast = Ppxlib_ast.Pprintast
 module Selected_ast = Ppxlib_ast.Selected_ast
 
 include Ast
-(** Include all the Ast definitions since we need them in every single ppx *)
+(** Include all the Ast definitions since we need them in every single ppx
+
+    @closed *)
 
 module Ast_builder = Ast_builder
 module Ast_pattern = Ast_pattern
@@ -61,7 +64,9 @@ module Reserved_namespaces = Name.Reserved_namespaces
 module Spellcheck = Spellcheck
 module Quoter = Quoter
 module Ast_io = Utils.Ast_io.Read_bin
+
 include Common
+(** @closed *)
 
 (**/**)
 

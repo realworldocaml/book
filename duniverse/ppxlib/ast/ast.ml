@@ -221,7 +221,9 @@ and core_type_desc = Parsetree.core_type_desc =
             [Ppat_constraint]} node corresponding to a constraint on a
             let-binding:
 
-          {[ let x : 'a1 ... 'an. T = e ... ]}
+          {[
+            let x : 'a1 ... 'an. T = e ...
+          ]}
           - Under {{!class_field_kind.Cfk_virtual} [Cfk_virtual]} for methods
             (not values).
 
@@ -8395,6 +8397,1988 @@ class virtual ['res] lift =
             self#constr "Pdir_bool" [ a ]
 
     method cases : cases -> 'res = self#list self#case
+  end
+
+class virtual ['ctx, 'res] lift_map_with_context =
+  object (self)
+    method virtual record : 'ctx -> (string * 'res) list -> 'res
+    method virtual constr : 'ctx -> string -> 'res list -> 'res
+    method virtual tuple : 'ctx -> 'res list -> 'res
+    method virtual other : 'a. 'ctx -> 'a -> 'res
+    method virtual bool : 'ctx -> bool -> bool * 'res
+    method virtual char : 'ctx -> char -> char * 'res
+    method virtual int : 'ctx -> int -> int * 'res
+
+    method virtual list
+        : 'a. ('ctx -> 'a -> 'a * 'res) -> 'ctx -> 'a list -> 'a list * 'res
+
+    method virtual option
+        : 'a. ('ctx -> 'a -> 'a * 'res) -> 'ctx -> 'a option -> 'a option * 'res
+
+    method virtual string : 'ctx -> string -> string * 'res
+
+    method position : 'ctx -> position -> position * 'res =
+      fun ctx { pos_fname; pos_lnum; pos_bol; pos_cnum } ->
+        let pos_fname = self#string ctx pos_fname in
+        let pos_lnum = self#int ctx pos_lnum in
+        let pos_bol = self#int ctx pos_bol in
+        let pos_cnum = self#int ctx pos_cnum in
+        ( {
+            pos_fname = Stdlib.fst pos_fname;
+            pos_lnum = Stdlib.fst pos_lnum;
+            pos_bol = Stdlib.fst pos_bol;
+            pos_cnum = Stdlib.fst pos_cnum;
+          },
+          self#record ctx
+            [
+              ("pos_fname", Stdlib.snd pos_fname);
+              ("pos_lnum", Stdlib.snd pos_lnum);
+              ("pos_bol", Stdlib.snd pos_bol);
+              ("pos_cnum", Stdlib.snd pos_cnum);
+            ] )
+
+    method location : 'ctx -> location -> location * 'res =
+      fun ctx { loc_start; loc_end; loc_ghost } ->
+        let loc_start = self#position ctx loc_start in
+        let loc_end = self#position ctx loc_end in
+        let loc_ghost = self#bool ctx loc_ghost in
+        ( {
+            loc_start = Stdlib.fst loc_start;
+            loc_end = Stdlib.fst loc_end;
+            loc_ghost = Stdlib.fst loc_ghost;
+          },
+          self#record ctx
+            [
+              ("loc_start", Stdlib.snd loc_start);
+              ("loc_end", Stdlib.snd loc_end);
+              ("loc_ghost", Stdlib.snd loc_ghost);
+            ] )
+
+    method location_stack : 'ctx -> location_stack -> location_stack * 'res =
+      self#list self#location
+
+    method loc
+        : 'a. ('ctx -> 'a -> 'a * 'res) -> 'ctx -> 'a loc -> 'a loc * 'res =
+      fun _a ctx { txt; loc } ->
+        let txt = _a ctx txt in
+        let loc = self#location ctx loc in
+        ( { txt = Stdlib.fst txt; loc = Stdlib.fst loc },
+          self#record ctx [ ("txt", Stdlib.snd txt); ("loc", Stdlib.snd loc) ]
+        )
+
+    method longident : 'ctx -> longident -> longident * 'res =
+      fun ctx x ->
+        match x with
+        | Lident a ->
+            let a = self#string ctx a in
+            (Lident (Stdlib.fst a), self#constr ctx "Lident" [ Stdlib.snd a ])
+        | Ldot (a, b) ->
+            let a = self#longident ctx a in
+            let b = self#string ctx b in
+            ( Ldot (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ldot" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Lapply (a, b) ->
+            let a = self#longident ctx a in
+            let b = self#longident ctx b in
+            ( Lapply (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Lapply" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method longident_loc : 'ctx -> longident_loc -> longident_loc * 'res =
+      self#loc self#longident
+
+    method rec_flag : 'ctx -> rec_flag -> rec_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method direction_flag : 'ctx -> direction_flag -> direction_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method private_flag : 'ctx -> private_flag -> private_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method mutable_flag : 'ctx -> mutable_flag -> mutable_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method virtual_flag : 'ctx -> virtual_flag -> virtual_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method override_flag : 'ctx -> override_flag -> override_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method closed_flag : 'ctx -> closed_flag -> closed_flag * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method label : 'ctx -> label -> label * 'res = self#string
+
+    method arg_label : 'ctx -> arg_label -> arg_label * 'res =
+      fun ctx x ->
+        match x with
+        | Nolabel -> (Nolabel, self#constr ctx "Nolabel" [])
+        | Labelled a ->
+            let a = self#string ctx a in
+            ( Labelled (Stdlib.fst a),
+              self#constr ctx "Labelled" [ Stdlib.snd a ] )
+        | Optional a ->
+            let a = self#string ctx a in
+            ( Optional (Stdlib.fst a),
+              self#constr ctx "Optional" [ Stdlib.snd a ] )
+
+    method variance : 'ctx -> variance -> variance * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method injectivity : 'ctx -> injectivity -> injectivity * 'res =
+      fun ctx x -> (x, self#other ctx x)
+
+    method constant : 'ctx -> constant -> constant * 'res =
+      fun ctx x ->
+        match x with
+        | Pconst_integer (a, b) ->
+            let a = self#string ctx a in
+            let b = self#option self#char ctx b in
+            ( Pconst_integer (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pconst_integer" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pconst_char a ->
+            let a = self#char ctx a in
+            ( Pconst_char (Stdlib.fst a),
+              self#constr ctx "Pconst_char" [ Stdlib.snd a ] )
+        | Pconst_string (a, b, c) ->
+            let a = self#string ctx a in
+            let b = self#location ctx b in
+            let c = self#option self#string ctx c in
+            ( Pconst_string (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pconst_string"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pconst_float (a, b) ->
+            let a = self#string ctx a in
+            let b = self#option self#char ctx b in
+            ( Pconst_float (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pconst_float" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method attribute : 'ctx -> attribute -> attribute * 'res =
+      fun ctx { attr_name; attr_payload; attr_loc } ->
+        let attr_name = self#loc self#string ctx attr_name in
+        let attr_payload = self#payload ctx attr_payload in
+        let attr_loc = self#location ctx attr_loc in
+        ( {
+            attr_name = Stdlib.fst attr_name;
+            attr_payload = Stdlib.fst attr_payload;
+            attr_loc = Stdlib.fst attr_loc;
+          },
+          self#record ctx
+            [
+              ("attr_name", Stdlib.snd attr_name);
+              ("attr_payload", Stdlib.snd attr_payload);
+              ("attr_loc", Stdlib.snd attr_loc);
+            ] )
+
+    method extension : 'ctx -> extension -> extension * 'res =
+      fun ctx (a, b) ->
+        let a = self#loc self#string ctx a in
+        let b = self#payload ctx b in
+        ( (Stdlib.fst a, Stdlib.fst b),
+          self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method attributes : 'ctx -> attributes -> attributes * 'res =
+      self#list self#attribute
+
+    method payload : 'ctx -> payload -> payload * 'res =
+      fun ctx x ->
+        match x with
+        | PStr a ->
+            let a = self#structure ctx a in
+            (PStr (Stdlib.fst a), self#constr ctx "PStr" [ Stdlib.snd a ])
+        | PSig a ->
+            let a = self#signature ctx a in
+            (PSig (Stdlib.fst a), self#constr ctx "PSig" [ Stdlib.snd a ])
+        | PTyp a ->
+            let a = self#core_type ctx a in
+            (PTyp (Stdlib.fst a), self#constr ctx "PTyp" [ Stdlib.snd a ])
+        | PPat (a, b) ->
+            let a = self#pattern ctx a in
+            let b = self#option self#expression ctx b in
+            ( PPat (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "PPat" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method core_type : 'ctx -> core_type -> core_type * 'res =
+      fun ctx { ptyp_desc; ptyp_loc; ptyp_loc_stack; ptyp_attributes } ->
+        let ptyp_desc = self#core_type_desc ctx ptyp_desc in
+        let ptyp_loc = self#location ctx ptyp_loc in
+        let ptyp_loc_stack = self#location_stack ctx ptyp_loc_stack in
+        let ptyp_attributes = self#attributes ctx ptyp_attributes in
+        ( {
+            ptyp_desc = Stdlib.fst ptyp_desc;
+            ptyp_loc = Stdlib.fst ptyp_loc;
+            ptyp_loc_stack = Stdlib.fst ptyp_loc_stack;
+            ptyp_attributes = Stdlib.fst ptyp_attributes;
+          },
+          self#record ctx
+            [
+              ("ptyp_desc", Stdlib.snd ptyp_desc);
+              ("ptyp_loc", Stdlib.snd ptyp_loc);
+              ("ptyp_loc_stack", Stdlib.snd ptyp_loc_stack);
+              ("ptyp_attributes", Stdlib.snd ptyp_attributes);
+            ] )
+
+    method core_type_desc : 'ctx -> core_type_desc -> core_type_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Ptyp_any -> (Ptyp_any, self#constr ctx "Ptyp_any" [])
+        | Ptyp_var a ->
+            let a = self#string ctx a in
+            ( Ptyp_var (Stdlib.fst a),
+              self#constr ctx "Ptyp_var" [ Stdlib.snd a ] )
+        | Ptyp_arrow (a, b, c) ->
+            let a = self#arg_label ctx a in
+            let b = self#core_type ctx b in
+            let c = self#core_type ctx c in
+            ( Ptyp_arrow (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Ptyp_arrow"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Ptyp_tuple a ->
+            let a = self#list self#core_type ctx a in
+            ( Ptyp_tuple (Stdlib.fst a),
+              self#constr ctx "Ptyp_tuple" [ Stdlib.snd a ] )
+        | Ptyp_constr (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#list self#core_type ctx b in
+            ( Ptyp_constr (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ptyp_constr" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ptyp_object (a, b) ->
+            let a = self#list self#object_field ctx a in
+            let b = self#closed_flag ctx b in
+            ( Ptyp_object (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ptyp_object" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ptyp_class (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#list self#core_type ctx b in
+            ( Ptyp_class (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ptyp_class" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ptyp_alias (a, b) ->
+            let a = self#core_type ctx a in
+            let b = self#string ctx b in
+            ( Ptyp_alias (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ptyp_alias" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ptyp_variant (a, b, c) ->
+            let a = self#list self#row_field ctx a in
+            let b = self#closed_flag ctx b in
+            let c = self#option (self#list self#label) ctx c in
+            ( Ptyp_variant (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Ptyp_variant"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Ptyp_poly (a, b) ->
+            let a = self#list (self#loc self#string) ctx a in
+            let b = self#core_type ctx b in
+            ( Ptyp_poly (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ptyp_poly" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ptyp_package a ->
+            let a = self#package_type ctx a in
+            ( Ptyp_package (Stdlib.fst a),
+              self#constr ctx "Ptyp_package" [ Stdlib.snd a ] )
+        | Ptyp_extension a ->
+            let a = self#extension ctx a in
+            ( Ptyp_extension (Stdlib.fst a),
+              self#constr ctx "Ptyp_extension" [ Stdlib.snd a ] )
+
+    method package_type : 'ctx -> package_type -> package_type * 'res =
+      fun ctx (a, b) ->
+        let a = self#longident_loc ctx a in
+        let b =
+          self#list
+            (fun ctx (a, b) ->
+              let a = self#longident_loc ctx a in
+              let b = self#core_type ctx b in
+              ( (Stdlib.fst a, Stdlib.fst b),
+                self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+            ctx b
+        in
+        ( (Stdlib.fst a, Stdlib.fst b),
+          self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method row_field : 'ctx -> row_field -> row_field * 'res =
+      fun ctx { prf_desc; prf_loc; prf_attributes } ->
+        let prf_desc = self#row_field_desc ctx prf_desc in
+        let prf_loc = self#location ctx prf_loc in
+        let prf_attributes = self#attributes ctx prf_attributes in
+        ( {
+            prf_desc = Stdlib.fst prf_desc;
+            prf_loc = Stdlib.fst prf_loc;
+            prf_attributes = Stdlib.fst prf_attributes;
+          },
+          self#record ctx
+            [
+              ("prf_desc", Stdlib.snd prf_desc);
+              ("prf_loc", Stdlib.snd prf_loc);
+              ("prf_attributes", Stdlib.snd prf_attributes);
+            ] )
+
+    method row_field_desc : 'ctx -> row_field_desc -> row_field_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Rtag (a, b, c) ->
+            let a = self#loc self#label ctx a in
+            let b = self#bool ctx b in
+            let c = self#list self#core_type ctx c in
+            ( Rtag (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Rtag"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Rinherit a ->
+            let a = self#core_type ctx a in
+            ( Rinherit (Stdlib.fst a),
+              self#constr ctx "Rinherit" [ Stdlib.snd a ] )
+
+    method object_field : 'ctx -> object_field -> object_field * 'res =
+      fun ctx { pof_desc; pof_loc; pof_attributes } ->
+        let pof_desc = self#object_field_desc ctx pof_desc in
+        let pof_loc = self#location ctx pof_loc in
+        let pof_attributes = self#attributes ctx pof_attributes in
+        ( {
+            pof_desc = Stdlib.fst pof_desc;
+            pof_loc = Stdlib.fst pof_loc;
+            pof_attributes = Stdlib.fst pof_attributes;
+          },
+          self#record ctx
+            [
+              ("pof_desc", Stdlib.snd pof_desc);
+              ("pof_loc", Stdlib.snd pof_loc);
+              ("pof_attributes", Stdlib.snd pof_attributes);
+            ] )
+
+    method object_field_desc
+        : 'ctx -> object_field_desc -> object_field_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Otag (a, b) ->
+            let a = self#loc self#label ctx a in
+            let b = self#core_type ctx b in
+            ( Otag (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Otag" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Oinherit a ->
+            let a = self#core_type ctx a in
+            ( Oinherit (Stdlib.fst a),
+              self#constr ctx "Oinherit" [ Stdlib.snd a ] )
+
+    method pattern : 'ctx -> pattern -> pattern * 'res =
+      fun ctx { ppat_desc; ppat_loc; ppat_loc_stack; ppat_attributes } ->
+        let ppat_desc = self#pattern_desc ctx ppat_desc in
+        let ppat_loc = self#location ctx ppat_loc in
+        let ppat_loc_stack = self#location_stack ctx ppat_loc_stack in
+        let ppat_attributes = self#attributes ctx ppat_attributes in
+        ( {
+            ppat_desc = Stdlib.fst ppat_desc;
+            ppat_loc = Stdlib.fst ppat_loc;
+            ppat_loc_stack = Stdlib.fst ppat_loc_stack;
+            ppat_attributes = Stdlib.fst ppat_attributes;
+          },
+          self#record ctx
+            [
+              ("ppat_desc", Stdlib.snd ppat_desc);
+              ("ppat_loc", Stdlib.snd ppat_loc);
+              ("ppat_loc_stack", Stdlib.snd ppat_loc_stack);
+              ("ppat_attributes", Stdlib.snd ppat_attributes);
+            ] )
+
+    method pattern_desc : 'ctx -> pattern_desc -> pattern_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Ppat_any -> (Ppat_any, self#constr ctx "Ppat_any" [])
+        | Ppat_var a ->
+            let a = self#loc self#string ctx a in
+            ( Ppat_var (Stdlib.fst a),
+              self#constr ctx "Ppat_var" [ Stdlib.snd a ] )
+        | Ppat_alias (a, b) ->
+            let a = self#pattern ctx a in
+            let b = self#loc self#string ctx b in
+            ( Ppat_alias (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_alias" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_constant a ->
+            let a = self#constant ctx a in
+            ( Ppat_constant (Stdlib.fst a),
+              self#constr ctx "Ppat_constant" [ Stdlib.snd a ] )
+        | Ppat_interval (a, b) ->
+            let a = self#constant ctx a in
+            let b = self#constant ctx b in
+            ( Ppat_interval (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_interval" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_tuple a ->
+            let a = self#list self#pattern ctx a in
+            ( Ppat_tuple (Stdlib.fst a),
+              self#constr ctx "Ppat_tuple" [ Stdlib.snd a ] )
+        | Ppat_construct (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b =
+              self#option
+                (fun ctx (a, b) ->
+                  let a = self#list (self#loc self#string) ctx a in
+                  let b = self#pattern ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx b
+            in
+            ( Ppat_construct (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_construct" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_variant (a, b) ->
+            let a = self#label ctx a in
+            let b = self#option self#pattern ctx b in
+            ( Ppat_variant (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_variant" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_record (a, b) ->
+            let a =
+              self#list
+                (fun ctx (a, b) ->
+                  let a = self#longident_loc ctx a in
+                  let b = self#pattern ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx a
+            in
+            let b = self#closed_flag ctx b in
+            ( Ppat_record (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_record" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_array a ->
+            let a = self#list self#pattern ctx a in
+            ( Ppat_array (Stdlib.fst a),
+              self#constr ctx "Ppat_array" [ Stdlib.snd a ] )
+        | Ppat_or (a, b) ->
+            let a = self#pattern ctx a in
+            let b = self#pattern ctx b in
+            ( Ppat_or (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_or" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Ppat_constraint (a, b) ->
+            let a = self#pattern ctx a in
+            let b = self#core_type ctx b in
+            ( Ppat_constraint (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_constraint" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Ppat_type a ->
+            let a = self#longident_loc ctx a in
+            ( Ppat_type (Stdlib.fst a),
+              self#constr ctx "Ppat_type" [ Stdlib.snd a ] )
+        | Ppat_lazy a ->
+            let a = self#pattern ctx a in
+            ( Ppat_lazy (Stdlib.fst a),
+              self#constr ctx "Ppat_lazy" [ Stdlib.snd a ] )
+        | Ppat_unpack a ->
+            let a = self#loc (self#option self#string) ctx a in
+            ( Ppat_unpack (Stdlib.fst a),
+              self#constr ctx "Ppat_unpack" [ Stdlib.snd a ] )
+        | Ppat_exception a ->
+            let a = self#pattern ctx a in
+            ( Ppat_exception (Stdlib.fst a),
+              self#constr ctx "Ppat_exception" [ Stdlib.snd a ] )
+        | Ppat_extension a ->
+            let a = self#extension ctx a in
+            ( Ppat_extension (Stdlib.fst a),
+              self#constr ctx "Ppat_extension" [ Stdlib.snd a ] )
+        | Ppat_open (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#pattern ctx b in
+            ( Ppat_open (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Ppat_open" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method expression : 'ctx -> expression -> expression * 'res =
+      fun ctx { pexp_desc; pexp_loc; pexp_loc_stack; pexp_attributes } ->
+        let pexp_desc = self#expression_desc ctx pexp_desc in
+        let pexp_loc = self#location ctx pexp_loc in
+        let pexp_loc_stack = self#location_stack ctx pexp_loc_stack in
+        let pexp_attributes = self#attributes ctx pexp_attributes in
+        ( {
+            pexp_desc = Stdlib.fst pexp_desc;
+            pexp_loc = Stdlib.fst pexp_loc;
+            pexp_loc_stack = Stdlib.fst pexp_loc_stack;
+            pexp_attributes = Stdlib.fst pexp_attributes;
+          },
+          self#record ctx
+            [
+              ("pexp_desc", Stdlib.snd pexp_desc);
+              ("pexp_loc", Stdlib.snd pexp_loc);
+              ("pexp_loc_stack", Stdlib.snd pexp_loc_stack);
+              ("pexp_attributes", Stdlib.snd pexp_attributes);
+            ] )
+
+    method expression_desc : 'ctx -> expression_desc -> expression_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pexp_ident a ->
+            let a = self#longident_loc ctx a in
+            ( Pexp_ident (Stdlib.fst a),
+              self#constr ctx "Pexp_ident" [ Stdlib.snd a ] )
+        | Pexp_constant a ->
+            let a = self#constant ctx a in
+            ( Pexp_constant (Stdlib.fst a),
+              self#constr ctx "Pexp_constant" [ Stdlib.snd a ] )
+        | Pexp_let (a, b, c) ->
+            let a = self#rec_flag ctx a in
+            let b = self#list self#value_binding ctx b in
+            let c = self#expression ctx c in
+            ( Pexp_let (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pexp_let"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pexp_function a ->
+            let a = self#cases ctx a in
+            ( Pexp_function (Stdlib.fst a),
+              self#constr ctx "Pexp_function" [ Stdlib.snd a ] )
+        | Pexp_fun (a, b, c, d) ->
+            let a = self#arg_label ctx a in
+            let b = self#option self#expression ctx b in
+            let c = self#pattern ctx c in
+            let d = self#expression ctx d in
+            ( Pexp_fun (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c, Stdlib.fst d),
+              self#constr ctx "Pexp_fun"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c; Stdlib.snd d ] )
+        | Pexp_apply (a, b) ->
+            let a = self#expression ctx a in
+            let b =
+              self#list
+                (fun ctx (a, b) ->
+                  let a = self#arg_label ctx a in
+                  let b = self#expression ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx b
+            in
+            ( Pexp_apply (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_apply" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_match (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#cases ctx b in
+            ( Pexp_match (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_match" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_try (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#cases ctx b in
+            ( Pexp_try (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_try" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_tuple a ->
+            let a = self#list self#expression ctx a in
+            ( Pexp_tuple (Stdlib.fst a),
+              self#constr ctx "Pexp_tuple" [ Stdlib.snd a ] )
+        | Pexp_construct (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#option self#expression ctx b in
+            ( Pexp_construct (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_construct" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_variant (a, b) ->
+            let a = self#label ctx a in
+            let b = self#option self#expression ctx b in
+            ( Pexp_variant (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_variant" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_record (a, b) ->
+            let a =
+              self#list
+                (fun ctx (a, b) ->
+                  let a = self#longident_loc ctx a in
+                  let b = self#expression ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx a
+            in
+            let b = self#option self#expression ctx b in
+            ( Pexp_record (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_record" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_field (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#longident_loc ctx b in
+            ( Pexp_field (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_field" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_setfield (a, b, c) ->
+            let a = self#expression ctx a in
+            let b = self#longident_loc ctx b in
+            let c = self#expression ctx c in
+            ( Pexp_setfield (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pexp_setfield"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pexp_array a ->
+            let a = self#list self#expression ctx a in
+            ( Pexp_array (Stdlib.fst a),
+              self#constr ctx "Pexp_array" [ Stdlib.snd a ] )
+        | Pexp_ifthenelse (a, b, c) ->
+            let a = self#expression ctx a in
+            let b = self#expression ctx b in
+            let c = self#option self#expression ctx c in
+            ( Pexp_ifthenelse (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pexp_ifthenelse"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pexp_sequence (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_sequence (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_sequence" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_while (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_while (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_while" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_for (a, b, c, d, e) ->
+            let a = self#pattern ctx a in
+            let b = self#expression ctx b in
+            let c = self#expression ctx c in
+            let d = self#direction_flag ctx d in
+            let e = self#expression ctx e in
+            ( Pexp_for
+                ( Stdlib.fst a,
+                  Stdlib.fst b,
+                  Stdlib.fst c,
+                  Stdlib.fst d,
+                  Stdlib.fst e ),
+              self#constr ctx "Pexp_for"
+                [
+                  Stdlib.snd a;
+                  Stdlib.snd b;
+                  Stdlib.snd c;
+                  Stdlib.snd d;
+                  Stdlib.snd e;
+                ] )
+        | Pexp_constraint (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#core_type ctx b in
+            ( Pexp_constraint (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_constraint" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Pexp_coerce (a, b, c) ->
+            let a = self#expression ctx a in
+            let b = self#option self#core_type ctx b in
+            let c = self#core_type ctx c in
+            ( Pexp_coerce (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pexp_coerce"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pexp_send (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#loc self#label ctx b in
+            ( Pexp_send (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_send" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_new a ->
+            let a = self#longident_loc ctx a in
+            ( Pexp_new (Stdlib.fst a),
+              self#constr ctx "Pexp_new" [ Stdlib.snd a ] )
+        | Pexp_setinstvar (a, b) ->
+            let a = self#loc self#label ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_setinstvar (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_setinstvar" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Pexp_override a ->
+            let a =
+              self#list
+                (fun ctx (a, b) ->
+                  let a = self#loc self#label ctx a in
+                  let b = self#expression ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx a
+            in
+            ( Pexp_override (Stdlib.fst a),
+              self#constr ctx "Pexp_override" [ Stdlib.snd a ] )
+        | Pexp_letmodule (a, b, c) ->
+            let a = self#loc (self#option self#string) ctx a in
+            let b = self#module_expr ctx b in
+            let c = self#expression ctx c in
+            ( Pexp_letmodule (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pexp_letmodule"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pexp_letexception (a, b) ->
+            let a = self#extension_constructor ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_letexception (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_letexception" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Pexp_assert a ->
+            let a = self#expression ctx a in
+            ( Pexp_assert (Stdlib.fst a),
+              self#constr ctx "Pexp_assert" [ Stdlib.snd a ] )
+        | Pexp_lazy a ->
+            let a = self#expression ctx a in
+            ( Pexp_lazy (Stdlib.fst a),
+              self#constr ctx "Pexp_lazy" [ Stdlib.snd a ] )
+        | Pexp_poly (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#option self#core_type ctx b in
+            ( Pexp_poly (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_poly" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_object a ->
+            let a = self#class_structure ctx a in
+            ( Pexp_object (Stdlib.fst a),
+              self#constr ctx "Pexp_object" [ Stdlib.snd a ] )
+        | Pexp_newtype (a, b) ->
+            let a = self#loc self#string ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_newtype (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_newtype" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_pack a ->
+            let a = self#module_expr ctx a in
+            ( Pexp_pack (Stdlib.fst a),
+              self#constr ctx "Pexp_pack" [ Stdlib.snd a ] )
+        | Pexp_open (a, b) ->
+            let a = self#open_declaration ctx a in
+            let b = self#expression ctx b in
+            ( Pexp_open (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pexp_open" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pexp_letop a ->
+            let a = self#letop ctx a in
+            ( Pexp_letop (Stdlib.fst a),
+              self#constr ctx "Pexp_letop" [ Stdlib.snd a ] )
+        | Pexp_extension a ->
+            let a = self#extension ctx a in
+            ( Pexp_extension (Stdlib.fst a),
+              self#constr ctx "Pexp_extension" [ Stdlib.snd a ] )
+        | Pexp_unreachable ->
+            (Pexp_unreachable, self#constr ctx "Pexp_unreachable" [])
+
+    method case : 'ctx -> case -> case * 'res =
+      fun ctx { pc_lhs; pc_guard; pc_rhs } ->
+        let pc_lhs = self#pattern ctx pc_lhs in
+        let pc_guard = self#option self#expression ctx pc_guard in
+        let pc_rhs = self#expression ctx pc_rhs in
+        ( {
+            pc_lhs = Stdlib.fst pc_lhs;
+            pc_guard = Stdlib.fst pc_guard;
+            pc_rhs = Stdlib.fst pc_rhs;
+          },
+          self#record ctx
+            [
+              ("pc_lhs", Stdlib.snd pc_lhs);
+              ("pc_guard", Stdlib.snd pc_guard);
+              ("pc_rhs", Stdlib.snd pc_rhs);
+            ] )
+
+    method letop : 'ctx -> letop -> letop * 'res =
+      fun ctx { let_; ands; body } ->
+        let let_ = self#binding_op ctx let_ in
+        let ands = self#list self#binding_op ctx ands in
+        let body = self#expression ctx body in
+        ( {
+            let_ = Stdlib.fst let_;
+            ands = Stdlib.fst ands;
+            body = Stdlib.fst body;
+          },
+          self#record ctx
+            [
+              ("let_", Stdlib.snd let_);
+              ("ands", Stdlib.snd ands);
+              ("body", Stdlib.snd body);
+            ] )
+
+    method binding_op : 'ctx -> binding_op -> binding_op * 'res =
+      fun ctx { pbop_op; pbop_pat; pbop_exp; pbop_loc } ->
+        let pbop_op = self#loc self#string ctx pbop_op in
+        let pbop_pat = self#pattern ctx pbop_pat in
+        let pbop_exp = self#expression ctx pbop_exp in
+        let pbop_loc = self#location ctx pbop_loc in
+        ( {
+            pbop_op = Stdlib.fst pbop_op;
+            pbop_pat = Stdlib.fst pbop_pat;
+            pbop_exp = Stdlib.fst pbop_exp;
+            pbop_loc = Stdlib.fst pbop_loc;
+          },
+          self#record ctx
+            [
+              ("pbop_op", Stdlib.snd pbop_op);
+              ("pbop_pat", Stdlib.snd pbop_pat);
+              ("pbop_exp", Stdlib.snd pbop_exp);
+              ("pbop_loc", Stdlib.snd pbop_loc);
+            ] )
+
+    method value_description
+        : 'ctx -> value_description -> value_description * 'res =
+      fun ctx { pval_name; pval_type; pval_prim; pval_attributes; pval_loc } ->
+        let pval_name = self#loc self#string ctx pval_name in
+        let pval_type = self#core_type ctx pval_type in
+        let pval_prim = self#list self#string ctx pval_prim in
+        let pval_attributes = self#attributes ctx pval_attributes in
+        let pval_loc = self#location ctx pval_loc in
+        ( {
+            pval_name = Stdlib.fst pval_name;
+            pval_type = Stdlib.fst pval_type;
+            pval_prim = Stdlib.fst pval_prim;
+            pval_attributes = Stdlib.fst pval_attributes;
+            pval_loc = Stdlib.fst pval_loc;
+          },
+          self#record ctx
+            [
+              ("pval_name", Stdlib.snd pval_name);
+              ("pval_type", Stdlib.snd pval_type);
+              ("pval_prim", Stdlib.snd pval_prim);
+              ("pval_attributes", Stdlib.snd pval_attributes);
+              ("pval_loc", Stdlib.snd pval_loc);
+            ] )
+
+    method type_declaration
+        : 'ctx -> type_declaration -> type_declaration * 'res =
+      fun ctx
+          {
+            ptype_name;
+            ptype_params;
+            ptype_cstrs;
+            ptype_kind;
+            ptype_private;
+            ptype_manifest;
+            ptype_attributes;
+            ptype_loc;
+          } ->
+        let ptype_name = self#loc self#string ctx ptype_name in
+        let ptype_params =
+          self#list
+            (fun ctx (a, b) ->
+              let a = self#core_type ctx a in
+              let b =
+                (fun ctx (a, b) ->
+                  let a = self#variance ctx a in
+                  let b = self#injectivity ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                  ctx b
+              in
+              ( (Stdlib.fst a, Stdlib.fst b),
+                self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+            ctx ptype_params
+        in
+        let ptype_cstrs =
+          self#list
+            (fun ctx (a, b, c) ->
+              let a = self#core_type ctx a in
+              let b = self#core_type ctx b in
+              let c = self#location ctx c in
+              ( (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+                self#tuple ctx [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] ))
+            ctx ptype_cstrs
+        in
+        let ptype_kind = self#type_kind ctx ptype_kind in
+        let ptype_private = self#private_flag ctx ptype_private in
+        let ptype_manifest = self#option self#core_type ctx ptype_manifest in
+        let ptype_attributes = self#attributes ctx ptype_attributes in
+        let ptype_loc = self#location ctx ptype_loc in
+        ( {
+            ptype_name = Stdlib.fst ptype_name;
+            ptype_params = Stdlib.fst ptype_params;
+            ptype_cstrs = Stdlib.fst ptype_cstrs;
+            ptype_kind = Stdlib.fst ptype_kind;
+            ptype_private = Stdlib.fst ptype_private;
+            ptype_manifest = Stdlib.fst ptype_manifest;
+            ptype_attributes = Stdlib.fst ptype_attributes;
+            ptype_loc = Stdlib.fst ptype_loc;
+          },
+          self#record ctx
+            [
+              ("ptype_name", Stdlib.snd ptype_name);
+              ("ptype_params", Stdlib.snd ptype_params);
+              ("ptype_cstrs", Stdlib.snd ptype_cstrs);
+              ("ptype_kind", Stdlib.snd ptype_kind);
+              ("ptype_private", Stdlib.snd ptype_private);
+              ("ptype_manifest", Stdlib.snd ptype_manifest);
+              ("ptype_attributes", Stdlib.snd ptype_attributes);
+              ("ptype_loc", Stdlib.snd ptype_loc);
+            ] )
+
+    method type_kind : 'ctx -> type_kind -> type_kind * 'res =
+      fun ctx x ->
+        match x with
+        | Ptype_abstract -> (Ptype_abstract, self#constr ctx "Ptype_abstract" [])
+        | Ptype_variant a ->
+            let a = self#list self#constructor_declaration ctx a in
+            ( Ptype_variant (Stdlib.fst a),
+              self#constr ctx "Ptype_variant" [ Stdlib.snd a ] )
+        | Ptype_record a ->
+            let a = self#list self#label_declaration ctx a in
+            ( Ptype_record (Stdlib.fst a),
+              self#constr ctx "Ptype_record" [ Stdlib.snd a ] )
+        | Ptype_open -> (Ptype_open, self#constr ctx "Ptype_open" [])
+
+    method label_declaration
+        : 'ctx -> label_declaration -> label_declaration * 'res =
+      fun ctx { pld_name; pld_mutable; pld_type; pld_loc; pld_attributes } ->
+        let pld_name = self#loc self#string ctx pld_name in
+        let pld_mutable = self#mutable_flag ctx pld_mutable in
+        let pld_type = self#core_type ctx pld_type in
+        let pld_loc = self#location ctx pld_loc in
+        let pld_attributes = self#attributes ctx pld_attributes in
+        ( {
+            pld_name = Stdlib.fst pld_name;
+            pld_mutable = Stdlib.fst pld_mutable;
+            pld_type = Stdlib.fst pld_type;
+            pld_loc = Stdlib.fst pld_loc;
+            pld_attributes = Stdlib.fst pld_attributes;
+          },
+          self#record ctx
+            [
+              ("pld_name", Stdlib.snd pld_name);
+              ("pld_mutable", Stdlib.snd pld_mutable);
+              ("pld_type", Stdlib.snd pld_type);
+              ("pld_loc", Stdlib.snd pld_loc);
+              ("pld_attributes", Stdlib.snd pld_attributes);
+            ] )
+
+    method constructor_declaration
+        : 'ctx -> constructor_declaration -> constructor_declaration * 'res =
+      fun ctx { pcd_name; pcd_vars; pcd_args; pcd_res; pcd_loc; pcd_attributes } ->
+        let pcd_name = self#loc self#string ctx pcd_name in
+        let pcd_vars = self#list (self#loc self#string) ctx pcd_vars in
+        let pcd_args = self#constructor_arguments ctx pcd_args in
+        let pcd_res = self#option self#core_type ctx pcd_res in
+        let pcd_loc = self#location ctx pcd_loc in
+        let pcd_attributes = self#attributes ctx pcd_attributes in
+        ( {
+            pcd_name = Stdlib.fst pcd_name;
+            pcd_vars = Stdlib.fst pcd_vars;
+            pcd_args = Stdlib.fst pcd_args;
+            pcd_res = Stdlib.fst pcd_res;
+            pcd_loc = Stdlib.fst pcd_loc;
+            pcd_attributes = Stdlib.fst pcd_attributes;
+          },
+          self#record ctx
+            [
+              ("pcd_name", Stdlib.snd pcd_name);
+              ("pcd_vars", Stdlib.snd pcd_vars);
+              ("pcd_args", Stdlib.snd pcd_args);
+              ("pcd_res", Stdlib.snd pcd_res);
+              ("pcd_loc", Stdlib.snd pcd_loc);
+              ("pcd_attributes", Stdlib.snd pcd_attributes);
+            ] )
+
+    method constructor_arguments
+        : 'ctx -> constructor_arguments -> constructor_arguments * 'res =
+      fun ctx x ->
+        match x with
+        | Pcstr_tuple a ->
+            let a = self#list self#core_type ctx a in
+            ( Pcstr_tuple (Stdlib.fst a),
+              self#constr ctx "Pcstr_tuple" [ Stdlib.snd a ] )
+        | Pcstr_record a ->
+            let a = self#list self#label_declaration ctx a in
+            ( Pcstr_record (Stdlib.fst a),
+              self#constr ctx "Pcstr_record" [ Stdlib.snd a ] )
+
+    method type_extension : 'ctx -> type_extension -> type_extension * 'res =
+      fun ctx
+          {
+            ptyext_path;
+            ptyext_params;
+            ptyext_constructors;
+            ptyext_private;
+            ptyext_loc;
+            ptyext_attributes;
+          } ->
+        let ptyext_path = self#longident_loc ctx ptyext_path in
+        let ptyext_params =
+          self#list
+            (fun ctx (a, b) ->
+              let a = self#core_type ctx a in
+              let b =
+                (fun ctx (a, b) ->
+                  let a = self#variance ctx a in
+                  let b = self#injectivity ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                  ctx b
+              in
+              ( (Stdlib.fst a, Stdlib.fst b),
+                self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+            ctx ptyext_params
+        in
+        let ptyext_constructors =
+          self#list self#extension_constructor ctx ptyext_constructors
+        in
+        let ptyext_private = self#private_flag ctx ptyext_private in
+        let ptyext_loc = self#location ctx ptyext_loc in
+        let ptyext_attributes = self#attributes ctx ptyext_attributes in
+        ( {
+            ptyext_path = Stdlib.fst ptyext_path;
+            ptyext_params = Stdlib.fst ptyext_params;
+            ptyext_constructors = Stdlib.fst ptyext_constructors;
+            ptyext_private = Stdlib.fst ptyext_private;
+            ptyext_loc = Stdlib.fst ptyext_loc;
+            ptyext_attributes = Stdlib.fst ptyext_attributes;
+          },
+          self#record ctx
+            [
+              ("ptyext_path", Stdlib.snd ptyext_path);
+              ("ptyext_params", Stdlib.snd ptyext_params);
+              ("ptyext_constructors", Stdlib.snd ptyext_constructors);
+              ("ptyext_private", Stdlib.snd ptyext_private);
+              ("ptyext_loc", Stdlib.snd ptyext_loc);
+              ("ptyext_attributes", Stdlib.snd ptyext_attributes);
+            ] )
+
+    method extension_constructor
+        : 'ctx -> extension_constructor -> extension_constructor * 'res =
+      fun ctx { pext_name; pext_kind; pext_loc; pext_attributes } ->
+        let pext_name = self#loc self#string ctx pext_name in
+        let pext_kind = self#extension_constructor_kind ctx pext_kind in
+        let pext_loc = self#location ctx pext_loc in
+        let pext_attributes = self#attributes ctx pext_attributes in
+        ( {
+            pext_name = Stdlib.fst pext_name;
+            pext_kind = Stdlib.fst pext_kind;
+            pext_loc = Stdlib.fst pext_loc;
+            pext_attributes = Stdlib.fst pext_attributes;
+          },
+          self#record ctx
+            [
+              ("pext_name", Stdlib.snd pext_name);
+              ("pext_kind", Stdlib.snd pext_kind);
+              ("pext_loc", Stdlib.snd pext_loc);
+              ("pext_attributes", Stdlib.snd pext_attributes);
+            ] )
+
+    method type_exception : 'ctx -> type_exception -> type_exception * 'res =
+      fun ctx { ptyexn_constructor; ptyexn_loc; ptyexn_attributes } ->
+        let ptyexn_constructor =
+          self#extension_constructor ctx ptyexn_constructor
+        in
+        let ptyexn_loc = self#location ctx ptyexn_loc in
+        let ptyexn_attributes = self#attributes ctx ptyexn_attributes in
+        ( {
+            ptyexn_constructor = Stdlib.fst ptyexn_constructor;
+            ptyexn_loc = Stdlib.fst ptyexn_loc;
+            ptyexn_attributes = Stdlib.fst ptyexn_attributes;
+          },
+          self#record ctx
+            [
+              ("ptyexn_constructor", Stdlib.snd ptyexn_constructor);
+              ("ptyexn_loc", Stdlib.snd ptyexn_loc);
+              ("ptyexn_attributes", Stdlib.snd ptyexn_attributes);
+            ] )
+
+    method extension_constructor_kind
+        : 'ctx ->
+          extension_constructor_kind ->
+          extension_constructor_kind * 'res =
+      fun ctx x ->
+        match x with
+        | Pext_decl (a, b, c) ->
+            let a = self#list (self#loc self#string) ctx a in
+            let b = self#constructor_arguments ctx b in
+            let c = self#option self#core_type ctx c in
+            ( Pext_decl (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pext_decl"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pext_rebind a ->
+            let a = self#longident_loc ctx a in
+            ( Pext_rebind (Stdlib.fst a),
+              self#constr ctx "Pext_rebind" [ Stdlib.snd a ] )
+
+    method class_type : 'ctx -> class_type -> class_type * 'res =
+      fun ctx { pcty_desc; pcty_loc; pcty_attributes } ->
+        let pcty_desc = self#class_type_desc ctx pcty_desc in
+        let pcty_loc = self#location ctx pcty_loc in
+        let pcty_attributes = self#attributes ctx pcty_attributes in
+        ( {
+            pcty_desc = Stdlib.fst pcty_desc;
+            pcty_loc = Stdlib.fst pcty_loc;
+            pcty_attributes = Stdlib.fst pcty_attributes;
+          },
+          self#record ctx
+            [
+              ("pcty_desc", Stdlib.snd pcty_desc);
+              ("pcty_loc", Stdlib.snd pcty_loc);
+              ("pcty_attributes", Stdlib.snd pcty_attributes);
+            ] )
+
+    method class_type_desc : 'ctx -> class_type_desc -> class_type_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pcty_constr (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#list self#core_type ctx b in
+            ( Pcty_constr (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcty_constr" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pcty_signature a ->
+            let a = self#class_signature ctx a in
+            ( Pcty_signature (Stdlib.fst a),
+              self#constr ctx "Pcty_signature" [ Stdlib.snd a ] )
+        | Pcty_arrow (a, b, c) ->
+            let a = self#arg_label ctx a in
+            let b = self#core_type ctx b in
+            let c = self#class_type ctx c in
+            ( Pcty_arrow (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pcty_arrow"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pcty_extension a ->
+            let a = self#extension ctx a in
+            ( Pcty_extension (Stdlib.fst a),
+              self#constr ctx "Pcty_extension" [ Stdlib.snd a ] )
+        | Pcty_open (a, b) ->
+            let a = self#open_description ctx a in
+            let b = self#class_type ctx b in
+            ( Pcty_open (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcty_open" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method class_signature : 'ctx -> class_signature -> class_signature * 'res =
+      fun ctx { pcsig_self; pcsig_fields } ->
+        let pcsig_self = self#core_type ctx pcsig_self in
+        let pcsig_fields = self#list self#class_type_field ctx pcsig_fields in
+        ( {
+            pcsig_self = Stdlib.fst pcsig_self;
+            pcsig_fields = Stdlib.fst pcsig_fields;
+          },
+          self#record ctx
+            [
+              ("pcsig_self", Stdlib.snd pcsig_self);
+              ("pcsig_fields", Stdlib.snd pcsig_fields);
+            ] )
+
+    method class_type_field
+        : 'ctx -> class_type_field -> class_type_field * 'res =
+      fun ctx { pctf_desc; pctf_loc; pctf_attributes } ->
+        let pctf_desc = self#class_type_field_desc ctx pctf_desc in
+        let pctf_loc = self#location ctx pctf_loc in
+        let pctf_attributes = self#attributes ctx pctf_attributes in
+        ( {
+            pctf_desc = Stdlib.fst pctf_desc;
+            pctf_loc = Stdlib.fst pctf_loc;
+            pctf_attributes = Stdlib.fst pctf_attributes;
+          },
+          self#record ctx
+            [
+              ("pctf_desc", Stdlib.snd pctf_desc);
+              ("pctf_loc", Stdlib.snd pctf_loc);
+              ("pctf_attributes", Stdlib.snd pctf_attributes);
+            ] )
+
+    method class_type_field_desc
+        : 'ctx -> class_type_field_desc -> class_type_field_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pctf_inherit a ->
+            let a = self#class_type ctx a in
+            ( Pctf_inherit (Stdlib.fst a),
+              self#constr ctx "Pctf_inherit" [ Stdlib.snd a ] )
+        | Pctf_val a ->
+            let a =
+              (fun ctx (a, b, c, d) ->
+                let a = self#loc self#label ctx a in
+                let b = self#mutable_flag ctx b in
+                let c = self#virtual_flag ctx c in
+                let d = self#core_type ctx d in
+                ( (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c, Stdlib.fst d),
+                  self#tuple ctx
+                    [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c; Stdlib.snd d ]
+                ))
+                ctx a
+            in
+            ( Pctf_val (Stdlib.fst a),
+              self#constr ctx "Pctf_val" [ Stdlib.snd a ] )
+        | Pctf_method a ->
+            let a =
+              (fun ctx (a, b, c, d) ->
+                let a = self#loc self#label ctx a in
+                let b = self#private_flag ctx b in
+                let c = self#virtual_flag ctx c in
+                let d = self#core_type ctx d in
+                ( (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c, Stdlib.fst d),
+                  self#tuple ctx
+                    [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c; Stdlib.snd d ]
+                ))
+                ctx a
+            in
+            ( Pctf_method (Stdlib.fst a),
+              self#constr ctx "Pctf_method" [ Stdlib.snd a ] )
+        | Pctf_constraint a ->
+            let a =
+              (fun ctx (a, b) ->
+                let a = self#core_type ctx a in
+                let b = self#core_type ctx b in
+                ( (Stdlib.fst a, Stdlib.fst b),
+                  self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx a
+            in
+            ( Pctf_constraint (Stdlib.fst a),
+              self#constr ctx "Pctf_constraint" [ Stdlib.snd a ] )
+        | Pctf_attribute a ->
+            let a = self#attribute ctx a in
+            ( Pctf_attribute (Stdlib.fst a),
+              self#constr ctx "Pctf_attribute" [ Stdlib.snd a ] )
+        | Pctf_extension a ->
+            let a = self#extension ctx a in
+            ( Pctf_extension (Stdlib.fst a),
+              self#constr ctx "Pctf_extension" [ Stdlib.snd a ] )
+
+    method class_infos
+        : 'a.
+          ('ctx -> 'a -> 'a * 'res) ->
+          'ctx ->
+          'a class_infos ->
+          'a class_infos * 'res =
+      fun _a ctx
+          { pci_virt; pci_params; pci_name; pci_expr; pci_loc; pci_attributes } ->
+        let pci_virt = self#virtual_flag ctx pci_virt in
+        let pci_params =
+          self#list
+            (fun ctx (a, b) ->
+              let a = self#core_type ctx a in
+              let b =
+                (fun ctx (a, b) ->
+                  let a = self#variance ctx a in
+                  let b = self#injectivity ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                  ctx b
+              in
+              ( (Stdlib.fst a, Stdlib.fst b),
+                self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+            ctx pci_params
+        in
+        let pci_name = self#loc self#string ctx pci_name in
+        let pci_expr = _a ctx pci_expr in
+        let pci_loc = self#location ctx pci_loc in
+        let pci_attributes = self#attributes ctx pci_attributes in
+        ( {
+            pci_virt = Stdlib.fst pci_virt;
+            pci_params = Stdlib.fst pci_params;
+            pci_name = Stdlib.fst pci_name;
+            pci_expr = Stdlib.fst pci_expr;
+            pci_loc = Stdlib.fst pci_loc;
+            pci_attributes = Stdlib.fst pci_attributes;
+          },
+          self#record ctx
+            [
+              ("pci_virt", Stdlib.snd pci_virt);
+              ("pci_params", Stdlib.snd pci_params);
+              ("pci_name", Stdlib.snd pci_name);
+              ("pci_expr", Stdlib.snd pci_expr);
+              ("pci_loc", Stdlib.snd pci_loc);
+              ("pci_attributes", Stdlib.snd pci_attributes);
+            ] )
+
+    method class_description
+        : 'ctx -> class_description -> class_description * 'res =
+      self#class_infos self#class_type
+
+    method class_type_declaration
+        : 'ctx -> class_type_declaration -> class_type_declaration * 'res =
+      self#class_infos self#class_type
+
+    method class_expr : 'ctx -> class_expr -> class_expr * 'res =
+      fun ctx { pcl_desc; pcl_loc; pcl_attributes } ->
+        let pcl_desc = self#class_expr_desc ctx pcl_desc in
+        let pcl_loc = self#location ctx pcl_loc in
+        let pcl_attributes = self#attributes ctx pcl_attributes in
+        ( {
+            pcl_desc = Stdlib.fst pcl_desc;
+            pcl_loc = Stdlib.fst pcl_loc;
+            pcl_attributes = Stdlib.fst pcl_attributes;
+          },
+          self#record ctx
+            [
+              ("pcl_desc", Stdlib.snd pcl_desc);
+              ("pcl_loc", Stdlib.snd pcl_loc);
+              ("pcl_attributes", Stdlib.snd pcl_attributes);
+            ] )
+
+    method class_expr_desc : 'ctx -> class_expr_desc -> class_expr_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pcl_constr (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#list self#core_type ctx b in
+            ( Pcl_constr (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcl_constr" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pcl_structure a ->
+            let a = self#class_structure ctx a in
+            ( Pcl_structure (Stdlib.fst a),
+              self#constr ctx "Pcl_structure" [ Stdlib.snd a ] )
+        | Pcl_fun (a, b, c, d) ->
+            let a = self#arg_label ctx a in
+            let b = self#option self#expression ctx b in
+            let c = self#pattern ctx c in
+            let d = self#class_expr ctx d in
+            ( Pcl_fun (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c, Stdlib.fst d),
+              self#constr ctx "Pcl_fun"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c; Stdlib.snd d ] )
+        | Pcl_apply (a, b) ->
+            let a = self#class_expr ctx a in
+            let b =
+              self#list
+                (fun ctx (a, b) ->
+                  let a = self#arg_label ctx a in
+                  let b = self#expression ctx b in
+                  ( (Stdlib.fst a, Stdlib.fst b),
+                    self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx b
+            in
+            ( Pcl_apply (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcl_apply" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pcl_let (a, b, c) ->
+            let a = self#rec_flag ctx a in
+            let b = self#list self#value_binding ctx b in
+            let c = self#class_expr ctx c in
+            ( Pcl_let (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pcl_let"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pcl_constraint (a, b) ->
+            let a = self#class_expr ctx a in
+            let b = self#class_type ctx b in
+            ( Pcl_constraint (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcl_constraint" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pcl_extension a ->
+            let a = self#extension ctx a in
+            ( Pcl_extension (Stdlib.fst a),
+              self#constr ctx "Pcl_extension" [ Stdlib.snd a ] )
+        | Pcl_open (a, b) ->
+            let a = self#open_description ctx a in
+            let b = self#class_expr ctx b in
+            ( Pcl_open (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pcl_open" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method class_structure : 'ctx -> class_structure -> class_structure * 'res =
+      fun ctx { pcstr_self; pcstr_fields } ->
+        let pcstr_self = self#pattern ctx pcstr_self in
+        let pcstr_fields = self#list self#class_field ctx pcstr_fields in
+        ( {
+            pcstr_self = Stdlib.fst pcstr_self;
+            pcstr_fields = Stdlib.fst pcstr_fields;
+          },
+          self#record ctx
+            [
+              ("pcstr_self", Stdlib.snd pcstr_self);
+              ("pcstr_fields", Stdlib.snd pcstr_fields);
+            ] )
+
+    method class_field : 'ctx -> class_field -> class_field * 'res =
+      fun ctx { pcf_desc; pcf_loc; pcf_attributes } ->
+        let pcf_desc = self#class_field_desc ctx pcf_desc in
+        let pcf_loc = self#location ctx pcf_loc in
+        let pcf_attributes = self#attributes ctx pcf_attributes in
+        ( {
+            pcf_desc = Stdlib.fst pcf_desc;
+            pcf_loc = Stdlib.fst pcf_loc;
+            pcf_attributes = Stdlib.fst pcf_attributes;
+          },
+          self#record ctx
+            [
+              ("pcf_desc", Stdlib.snd pcf_desc);
+              ("pcf_loc", Stdlib.snd pcf_loc);
+              ("pcf_attributes", Stdlib.snd pcf_attributes);
+            ] )
+
+    method class_field_desc
+        : 'ctx -> class_field_desc -> class_field_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pcf_inherit (a, b, c) ->
+            let a = self#override_flag ctx a in
+            let b = self#class_expr ctx b in
+            let c = self#option (self#loc self#string) ctx c in
+            ( Pcf_inherit (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+              self#constr ctx "Pcf_inherit"
+                [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] )
+        | Pcf_val a ->
+            let a =
+              (fun ctx (a, b, c) ->
+                let a = self#loc self#label ctx a in
+                let b = self#mutable_flag ctx b in
+                let c = self#class_field_kind ctx c in
+                ( (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+                  self#tuple ctx [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] ))
+                ctx a
+            in
+            (Pcf_val (Stdlib.fst a), self#constr ctx "Pcf_val" [ Stdlib.snd a ])
+        | Pcf_method a ->
+            let a =
+              (fun ctx (a, b, c) ->
+                let a = self#loc self#label ctx a in
+                let b = self#private_flag ctx b in
+                let c = self#class_field_kind ctx c in
+                ( (Stdlib.fst a, Stdlib.fst b, Stdlib.fst c),
+                  self#tuple ctx [ Stdlib.snd a; Stdlib.snd b; Stdlib.snd c ] ))
+                ctx a
+            in
+            ( Pcf_method (Stdlib.fst a),
+              self#constr ctx "Pcf_method" [ Stdlib.snd a ] )
+        | Pcf_constraint a ->
+            let a =
+              (fun ctx (a, b) ->
+                let a = self#core_type ctx a in
+                let b = self#core_type ctx b in
+                ( (Stdlib.fst a, Stdlib.fst b),
+                  self#tuple ctx [ Stdlib.snd a; Stdlib.snd b ] ))
+                ctx a
+            in
+            ( Pcf_constraint (Stdlib.fst a),
+              self#constr ctx "Pcf_constraint" [ Stdlib.snd a ] )
+        | Pcf_initializer a ->
+            let a = self#expression ctx a in
+            ( Pcf_initializer (Stdlib.fst a),
+              self#constr ctx "Pcf_initializer" [ Stdlib.snd a ] )
+        | Pcf_attribute a ->
+            let a = self#attribute ctx a in
+            ( Pcf_attribute (Stdlib.fst a),
+              self#constr ctx "Pcf_attribute" [ Stdlib.snd a ] )
+        | Pcf_extension a ->
+            let a = self#extension ctx a in
+            ( Pcf_extension (Stdlib.fst a),
+              self#constr ctx "Pcf_extension" [ Stdlib.snd a ] )
+
+    method class_field_kind
+        : 'ctx -> class_field_kind -> class_field_kind * 'res =
+      fun ctx x ->
+        match x with
+        | Cfk_virtual a ->
+            let a = self#core_type ctx a in
+            ( Cfk_virtual (Stdlib.fst a),
+              self#constr ctx "Cfk_virtual" [ Stdlib.snd a ] )
+        | Cfk_concrete (a, b) ->
+            let a = self#override_flag ctx a in
+            let b = self#expression ctx b in
+            ( Cfk_concrete (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Cfk_concrete" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method class_declaration
+        : 'ctx -> class_declaration -> class_declaration * 'res =
+      self#class_infos self#class_expr
+
+    method module_type : 'ctx -> module_type -> module_type * 'res =
+      fun ctx { pmty_desc; pmty_loc; pmty_attributes } ->
+        let pmty_desc = self#module_type_desc ctx pmty_desc in
+        let pmty_loc = self#location ctx pmty_loc in
+        let pmty_attributes = self#attributes ctx pmty_attributes in
+        ( {
+            pmty_desc = Stdlib.fst pmty_desc;
+            pmty_loc = Stdlib.fst pmty_loc;
+            pmty_attributes = Stdlib.fst pmty_attributes;
+          },
+          self#record ctx
+            [
+              ("pmty_desc", Stdlib.snd pmty_desc);
+              ("pmty_loc", Stdlib.snd pmty_loc);
+              ("pmty_attributes", Stdlib.snd pmty_attributes);
+            ] )
+
+    method module_type_desc
+        : 'ctx -> module_type_desc -> module_type_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pmty_ident a ->
+            let a = self#longident_loc ctx a in
+            ( Pmty_ident (Stdlib.fst a),
+              self#constr ctx "Pmty_ident" [ Stdlib.snd a ] )
+        | Pmty_signature a ->
+            let a = self#signature ctx a in
+            ( Pmty_signature (Stdlib.fst a),
+              self#constr ctx "Pmty_signature" [ Stdlib.snd a ] )
+        | Pmty_functor (a, b) ->
+            let a = self#functor_parameter ctx a in
+            let b = self#module_type ctx b in
+            ( Pmty_functor (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pmty_functor" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pmty_with (a, b) ->
+            let a = self#module_type ctx a in
+            let b = self#list self#with_constraint ctx b in
+            ( Pmty_with (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pmty_with" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pmty_typeof a ->
+            let a = self#module_expr ctx a in
+            ( Pmty_typeof (Stdlib.fst a),
+              self#constr ctx "Pmty_typeof" [ Stdlib.snd a ] )
+        | Pmty_extension a ->
+            let a = self#extension ctx a in
+            ( Pmty_extension (Stdlib.fst a),
+              self#constr ctx "Pmty_extension" [ Stdlib.snd a ] )
+        | Pmty_alias a ->
+            let a = self#longident_loc ctx a in
+            ( Pmty_alias (Stdlib.fst a),
+              self#constr ctx "Pmty_alias" [ Stdlib.snd a ] )
+
+    method functor_parameter
+        : 'ctx -> functor_parameter -> functor_parameter * 'res =
+      fun ctx x ->
+        match x with
+        | Unit -> (Unit, self#constr ctx "Unit" [])
+        | Named (a, b) ->
+            let a = self#loc (self#option self#string) ctx a in
+            let b = self#module_type ctx b in
+            ( Named (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Named" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method signature : 'ctx -> signature -> signature * 'res =
+      self#list self#signature_item
+
+    method signature_item : 'ctx -> signature_item -> signature_item * 'res =
+      fun ctx { psig_desc; psig_loc } ->
+        let psig_desc = self#signature_item_desc ctx psig_desc in
+        let psig_loc = self#location ctx psig_loc in
+        ( { psig_desc = Stdlib.fst psig_desc; psig_loc = Stdlib.fst psig_loc },
+          self#record ctx
+            [
+              ("psig_desc", Stdlib.snd psig_desc);
+              ("psig_loc", Stdlib.snd psig_loc);
+            ] )
+
+    method signature_item_desc
+        : 'ctx -> signature_item_desc -> signature_item_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Psig_value a ->
+            let a = self#value_description ctx a in
+            ( Psig_value (Stdlib.fst a),
+              self#constr ctx "Psig_value" [ Stdlib.snd a ] )
+        | Psig_type (a, b) ->
+            let a = self#rec_flag ctx a in
+            let b = self#list self#type_declaration ctx b in
+            ( Psig_type (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Psig_type" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Psig_typesubst a ->
+            let a = self#list self#type_declaration ctx a in
+            ( Psig_typesubst (Stdlib.fst a),
+              self#constr ctx "Psig_typesubst" [ Stdlib.snd a ] )
+        | Psig_typext a ->
+            let a = self#type_extension ctx a in
+            ( Psig_typext (Stdlib.fst a),
+              self#constr ctx "Psig_typext" [ Stdlib.snd a ] )
+        | Psig_exception a ->
+            let a = self#type_exception ctx a in
+            ( Psig_exception (Stdlib.fst a),
+              self#constr ctx "Psig_exception" [ Stdlib.snd a ] )
+        | Psig_module a ->
+            let a = self#module_declaration ctx a in
+            ( Psig_module (Stdlib.fst a),
+              self#constr ctx "Psig_module" [ Stdlib.snd a ] )
+        | Psig_modsubst a ->
+            let a = self#module_substitution ctx a in
+            ( Psig_modsubst (Stdlib.fst a),
+              self#constr ctx "Psig_modsubst" [ Stdlib.snd a ] )
+        | Psig_recmodule a ->
+            let a = self#list self#module_declaration ctx a in
+            ( Psig_recmodule (Stdlib.fst a),
+              self#constr ctx "Psig_recmodule" [ Stdlib.snd a ] )
+        | Psig_modtype a ->
+            let a = self#module_type_declaration ctx a in
+            ( Psig_modtype (Stdlib.fst a),
+              self#constr ctx "Psig_modtype" [ Stdlib.snd a ] )
+        | Psig_modtypesubst a ->
+            let a = self#module_type_declaration ctx a in
+            ( Psig_modtypesubst (Stdlib.fst a),
+              self#constr ctx "Psig_modtypesubst" [ Stdlib.snd a ] )
+        | Psig_open a ->
+            let a = self#open_description ctx a in
+            ( Psig_open (Stdlib.fst a),
+              self#constr ctx "Psig_open" [ Stdlib.snd a ] )
+        | Psig_include a ->
+            let a = self#include_description ctx a in
+            ( Psig_include (Stdlib.fst a),
+              self#constr ctx "Psig_include" [ Stdlib.snd a ] )
+        | Psig_class a ->
+            let a = self#list self#class_description ctx a in
+            ( Psig_class (Stdlib.fst a),
+              self#constr ctx "Psig_class" [ Stdlib.snd a ] )
+        | Psig_class_type a ->
+            let a = self#list self#class_type_declaration ctx a in
+            ( Psig_class_type (Stdlib.fst a),
+              self#constr ctx "Psig_class_type" [ Stdlib.snd a ] )
+        | Psig_attribute a ->
+            let a = self#attribute ctx a in
+            ( Psig_attribute (Stdlib.fst a),
+              self#constr ctx "Psig_attribute" [ Stdlib.snd a ] )
+        | Psig_extension (a, b) ->
+            let a = self#extension ctx a in
+            let b = self#attributes ctx b in
+            ( Psig_extension (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Psig_extension" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method module_declaration
+        : 'ctx -> module_declaration -> module_declaration * 'res =
+      fun ctx { pmd_name; pmd_type; pmd_attributes; pmd_loc } ->
+        let pmd_name = self#loc (self#option self#string) ctx pmd_name in
+        let pmd_type = self#module_type ctx pmd_type in
+        let pmd_attributes = self#attributes ctx pmd_attributes in
+        let pmd_loc = self#location ctx pmd_loc in
+        ( {
+            pmd_name = Stdlib.fst pmd_name;
+            pmd_type = Stdlib.fst pmd_type;
+            pmd_attributes = Stdlib.fst pmd_attributes;
+            pmd_loc = Stdlib.fst pmd_loc;
+          },
+          self#record ctx
+            [
+              ("pmd_name", Stdlib.snd pmd_name);
+              ("pmd_type", Stdlib.snd pmd_type);
+              ("pmd_attributes", Stdlib.snd pmd_attributes);
+              ("pmd_loc", Stdlib.snd pmd_loc);
+            ] )
+
+    method module_substitution
+        : 'ctx -> module_substitution -> module_substitution * 'res =
+      fun ctx { pms_name; pms_manifest; pms_attributes; pms_loc } ->
+        let pms_name = self#loc self#string ctx pms_name in
+        let pms_manifest = self#longident_loc ctx pms_manifest in
+        let pms_attributes = self#attributes ctx pms_attributes in
+        let pms_loc = self#location ctx pms_loc in
+        ( {
+            pms_name = Stdlib.fst pms_name;
+            pms_manifest = Stdlib.fst pms_manifest;
+            pms_attributes = Stdlib.fst pms_attributes;
+            pms_loc = Stdlib.fst pms_loc;
+          },
+          self#record ctx
+            [
+              ("pms_name", Stdlib.snd pms_name);
+              ("pms_manifest", Stdlib.snd pms_manifest);
+              ("pms_attributes", Stdlib.snd pms_attributes);
+              ("pms_loc", Stdlib.snd pms_loc);
+            ] )
+
+    method module_type_declaration
+        : 'ctx -> module_type_declaration -> module_type_declaration * 'res =
+      fun ctx { pmtd_name; pmtd_type; pmtd_attributes; pmtd_loc } ->
+        let pmtd_name = self#loc self#string ctx pmtd_name in
+        let pmtd_type = self#option self#module_type ctx pmtd_type in
+        let pmtd_attributes = self#attributes ctx pmtd_attributes in
+        let pmtd_loc = self#location ctx pmtd_loc in
+        ( {
+            pmtd_name = Stdlib.fst pmtd_name;
+            pmtd_type = Stdlib.fst pmtd_type;
+            pmtd_attributes = Stdlib.fst pmtd_attributes;
+            pmtd_loc = Stdlib.fst pmtd_loc;
+          },
+          self#record ctx
+            [
+              ("pmtd_name", Stdlib.snd pmtd_name);
+              ("pmtd_type", Stdlib.snd pmtd_type);
+              ("pmtd_attributes", Stdlib.snd pmtd_attributes);
+              ("pmtd_loc", Stdlib.snd pmtd_loc);
+            ] )
+
+    method open_infos
+        : 'a.
+          ('ctx -> 'a -> 'a * 'res) ->
+          'ctx ->
+          'a open_infos ->
+          'a open_infos * 'res =
+      fun _a ctx { popen_expr; popen_override; popen_loc; popen_attributes } ->
+        let popen_expr = _a ctx popen_expr in
+        let popen_override = self#override_flag ctx popen_override in
+        let popen_loc = self#location ctx popen_loc in
+        let popen_attributes = self#attributes ctx popen_attributes in
+        ( {
+            popen_expr = Stdlib.fst popen_expr;
+            popen_override = Stdlib.fst popen_override;
+            popen_loc = Stdlib.fst popen_loc;
+            popen_attributes = Stdlib.fst popen_attributes;
+          },
+          self#record ctx
+            [
+              ("popen_expr", Stdlib.snd popen_expr);
+              ("popen_override", Stdlib.snd popen_override);
+              ("popen_loc", Stdlib.snd popen_loc);
+              ("popen_attributes", Stdlib.snd popen_attributes);
+            ] )
+
+    method open_description
+        : 'ctx -> open_description -> open_description * 'res =
+      self#open_infos self#longident_loc
+
+    method open_declaration
+        : 'ctx -> open_declaration -> open_declaration * 'res =
+      self#open_infos self#module_expr
+
+    method include_infos
+        : 'a.
+          ('ctx -> 'a -> 'a * 'res) ->
+          'ctx ->
+          'a include_infos ->
+          'a include_infos * 'res =
+      fun _a ctx { pincl_mod; pincl_loc; pincl_attributes } ->
+        let pincl_mod = _a ctx pincl_mod in
+        let pincl_loc = self#location ctx pincl_loc in
+        let pincl_attributes = self#attributes ctx pincl_attributes in
+        ( {
+            pincl_mod = Stdlib.fst pincl_mod;
+            pincl_loc = Stdlib.fst pincl_loc;
+            pincl_attributes = Stdlib.fst pincl_attributes;
+          },
+          self#record ctx
+            [
+              ("pincl_mod", Stdlib.snd pincl_mod);
+              ("pincl_loc", Stdlib.snd pincl_loc);
+              ("pincl_attributes", Stdlib.snd pincl_attributes);
+            ] )
+
+    method include_description
+        : 'ctx -> include_description -> include_description * 'res =
+      self#include_infos self#module_type
+
+    method include_declaration
+        : 'ctx -> include_declaration -> include_declaration * 'res =
+      self#include_infos self#module_expr
+
+    method with_constraint : 'ctx -> with_constraint -> with_constraint * 'res =
+      fun ctx x ->
+        match x with
+        | Pwith_type (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#type_declaration ctx b in
+            ( Pwith_type (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_type" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pwith_module (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#longident_loc ctx b in
+            ( Pwith_module (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_module" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pwith_modtype (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#module_type ctx b in
+            ( Pwith_modtype (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_modtype" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pwith_modtypesubst (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#module_type ctx b in
+            ( Pwith_modtypesubst (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_modtypesubst"
+                [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pwith_typesubst (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#type_declaration ctx b in
+            ( Pwith_typesubst (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_typesubst" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Pwith_modsubst (a, b) ->
+            let a = self#longident_loc ctx a in
+            let b = self#longident_loc ctx b in
+            ( Pwith_modsubst (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pwith_modsubst" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method module_expr : 'ctx -> module_expr -> module_expr * 'res =
+      fun ctx { pmod_desc; pmod_loc; pmod_attributes } ->
+        let pmod_desc = self#module_expr_desc ctx pmod_desc in
+        let pmod_loc = self#location ctx pmod_loc in
+        let pmod_attributes = self#attributes ctx pmod_attributes in
+        ( {
+            pmod_desc = Stdlib.fst pmod_desc;
+            pmod_loc = Stdlib.fst pmod_loc;
+            pmod_attributes = Stdlib.fst pmod_attributes;
+          },
+          self#record ctx
+            [
+              ("pmod_desc", Stdlib.snd pmod_desc);
+              ("pmod_loc", Stdlib.snd pmod_loc);
+              ("pmod_attributes", Stdlib.snd pmod_attributes);
+            ] )
+
+    method module_expr_desc
+        : 'ctx -> module_expr_desc -> module_expr_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pmod_ident a ->
+            let a = self#longident_loc ctx a in
+            ( Pmod_ident (Stdlib.fst a),
+              self#constr ctx "Pmod_ident" [ Stdlib.snd a ] )
+        | Pmod_structure a ->
+            let a = self#structure ctx a in
+            ( Pmod_structure (Stdlib.fst a),
+              self#constr ctx "Pmod_structure" [ Stdlib.snd a ] )
+        | Pmod_functor (a, b) ->
+            let a = self#functor_parameter ctx a in
+            let b = self#module_expr ctx b in
+            ( Pmod_functor (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pmod_functor" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pmod_apply (a, b) ->
+            let a = self#module_expr ctx a in
+            let b = self#module_expr ctx b in
+            ( Pmod_apply (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pmod_apply" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pmod_constraint (a, b) ->
+            let a = self#module_expr ctx a in
+            let b = self#module_type ctx b in
+            ( Pmod_constraint (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pmod_constraint" [ Stdlib.snd a; Stdlib.snd b ]
+            )
+        | Pmod_unpack a ->
+            let a = self#expression ctx a in
+            ( Pmod_unpack (Stdlib.fst a),
+              self#constr ctx "Pmod_unpack" [ Stdlib.snd a ] )
+        | Pmod_extension a ->
+            let a = self#extension ctx a in
+            ( Pmod_extension (Stdlib.fst a),
+              self#constr ctx "Pmod_extension" [ Stdlib.snd a ] )
+
+    method structure : 'ctx -> structure -> structure * 'res =
+      self#list self#structure_item
+
+    method structure_item : 'ctx -> structure_item -> structure_item * 'res =
+      fun ctx { pstr_desc; pstr_loc } ->
+        let pstr_desc = self#structure_item_desc ctx pstr_desc in
+        let pstr_loc = self#location ctx pstr_loc in
+        ( { pstr_desc = Stdlib.fst pstr_desc; pstr_loc = Stdlib.fst pstr_loc },
+          self#record ctx
+            [
+              ("pstr_desc", Stdlib.snd pstr_desc);
+              ("pstr_loc", Stdlib.snd pstr_loc);
+            ] )
+
+    method structure_item_desc
+        : 'ctx -> structure_item_desc -> structure_item_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pstr_eval (a, b) ->
+            let a = self#expression ctx a in
+            let b = self#attributes ctx b in
+            ( Pstr_eval (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pstr_eval" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pstr_value (a, b) ->
+            let a = self#rec_flag ctx a in
+            let b = self#list self#value_binding ctx b in
+            ( Pstr_value (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pstr_value" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pstr_primitive a ->
+            let a = self#value_description ctx a in
+            ( Pstr_primitive (Stdlib.fst a),
+              self#constr ctx "Pstr_primitive" [ Stdlib.snd a ] )
+        | Pstr_type (a, b) ->
+            let a = self#rec_flag ctx a in
+            let b = self#list self#type_declaration ctx b in
+            ( Pstr_type (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pstr_type" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pstr_typext a ->
+            let a = self#type_extension ctx a in
+            ( Pstr_typext (Stdlib.fst a),
+              self#constr ctx "Pstr_typext" [ Stdlib.snd a ] )
+        | Pstr_exception a ->
+            let a = self#type_exception ctx a in
+            ( Pstr_exception (Stdlib.fst a),
+              self#constr ctx "Pstr_exception" [ Stdlib.snd a ] )
+        | Pstr_module a ->
+            let a = self#module_binding ctx a in
+            ( Pstr_module (Stdlib.fst a),
+              self#constr ctx "Pstr_module" [ Stdlib.snd a ] )
+        | Pstr_recmodule a ->
+            let a = self#list self#module_binding ctx a in
+            ( Pstr_recmodule (Stdlib.fst a),
+              self#constr ctx "Pstr_recmodule" [ Stdlib.snd a ] )
+        | Pstr_modtype a ->
+            let a = self#module_type_declaration ctx a in
+            ( Pstr_modtype (Stdlib.fst a),
+              self#constr ctx "Pstr_modtype" [ Stdlib.snd a ] )
+        | Pstr_open a ->
+            let a = self#open_declaration ctx a in
+            ( Pstr_open (Stdlib.fst a),
+              self#constr ctx "Pstr_open" [ Stdlib.snd a ] )
+        | Pstr_class a ->
+            let a = self#list self#class_declaration ctx a in
+            ( Pstr_class (Stdlib.fst a),
+              self#constr ctx "Pstr_class" [ Stdlib.snd a ] )
+        | Pstr_class_type a ->
+            let a = self#list self#class_type_declaration ctx a in
+            ( Pstr_class_type (Stdlib.fst a),
+              self#constr ctx "Pstr_class_type" [ Stdlib.snd a ] )
+        | Pstr_include a ->
+            let a = self#include_declaration ctx a in
+            ( Pstr_include (Stdlib.fst a),
+              self#constr ctx "Pstr_include" [ Stdlib.snd a ] )
+        | Pstr_attribute a ->
+            let a = self#attribute ctx a in
+            ( Pstr_attribute (Stdlib.fst a),
+              self#constr ctx "Pstr_attribute" [ Stdlib.snd a ] )
+        | Pstr_extension (a, b) ->
+            let a = self#extension ctx a in
+            let b = self#attributes ctx b in
+            ( Pstr_extension (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pstr_extension" [ Stdlib.snd a; Stdlib.snd b ] )
+
+    method value_binding : 'ctx -> value_binding -> value_binding * 'res =
+      fun ctx { pvb_pat; pvb_expr; pvb_attributes; pvb_loc } ->
+        let pvb_pat = self#pattern ctx pvb_pat in
+        let pvb_expr = self#expression ctx pvb_expr in
+        let pvb_attributes = self#attributes ctx pvb_attributes in
+        let pvb_loc = self#location ctx pvb_loc in
+        ( {
+            pvb_pat = Stdlib.fst pvb_pat;
+            pvb_expr = Stdlib.fst pvb_expr;
+            pvb_attributes = Stdlib.fst pvb_attributes;
+            pvb_loc = Stdlib.fst pvb_loc;
+          },
+          self#record ctx
+            [
+              ("pvb_pat", Stdlib.snd pvb_pat);
+              ("pvb_expr", Stdlib.snd pvb_expr);
+              ("pvb_attributes", Stdlib.snd pvb_attributes);
+              ("pvb_loc", Stdlib.snd pvb_loc);
+            ] )
+
+    method module_binding : 'ctx -> module_binding -> module_binding * 'res =
+      fun ctx { pmb_name; pmb_expr; pmb_attributes; pmb_loc } ->
+        let pmb_name = self#loc (self#option self#string) ctx pmb_name in
+        let pmb_expr = self#module_expr ctx pmb_expr in
+        let pmb_attributes = self#attributes ctx pmb_attributes in
+        let pmb_loc = self#location ctx pmb_loc in
+        ( {
+            pmb_name = Stdlib.fst pmb_name;
+            pmb_expr = Stdlib.fst pmb_expr;
+            pmb_attributes = Stdlib.fst pmb_attributes;
+            pmb_loc = Stdlib.fst pmb_loc;
+          },
+          self#record ctx
+            [
+              ("pmb_name", Stdlib.snd pmb_name);
+              ("pmb_expr", Stdlib.snd pmb_expr);
+              ("pmb_attributes", Stdlib.snd pmb_attributes);
+              ("pmb_loc", Stdlib.snd pmb_loc);
+            ] )
+
+    method toplevel_phrase : 'ctx -> toplevel_phrase -> toplevel_phrase * 'res =
+      fun ctx x ->
+        match x with
+        | Ptop_def a ->
+            let a = self#structure ctx a in
+            ( Ptop_def (Stdlib.fst a),
+              self#constr ctx "Ptop_def" [ Stdlib.snd a ] )
+        | Ptop_dir a ->
+            let a = self#toplevel_directive ctx a in
+            ( Ptop_dir (Stdlib.fst a),
+              self#constr ctx "Ptop_dir" [ Stdlib.snd a ] )
+
+    method toplevel_directive
+        : 'ctx -> toplevel_directive -> toplevel_directive * 'res =
+      fun ctx { pdir_name; pdir_arg; pdir_loc } ->
+        let pdir_name = self#loc self#string ctx pdir_name in
+        let pdir_arg = self#option self#directive_argument ctx pdir_arg in
+        let pdir_loc = self#location ctx pdir_loc in
+        ( {
+            pdir_name = Stdlib.fst pdir_name;
+            pdir_arg = Stdlib.fst pdir_arg;
+            pdir_loc = Stdlib.fst pdir_loc;
+          },
+          self#record ctx
+            [
+              ("pdir_name", Stdlib.snd pdir_name);
+              ("pdir_arg", Stdlib.snd pdir_arg);
+              ("pdir_loc", Stdlib.snd pdir_loc);
+            ] )
+
+    method directive_argument
+        : 'ctx -> directive_argument -> directive_argument * 'res =
+      fun ctx { pdira_desc; pdira_loc } ->
+        let pdira_desc = self#directive_argument_desc ctx pdira_desc in
+        let pdira_loc = self#location ctx pdira_loc in
+        ( {
+            pdira_desc = Stdlib.fst pdira_desc;
+            pdira_loc = Stdlib.fst pdira_loc;
+          },
+          self#record ctx
+            [
+              ("pdira_desc", Stdlib.snd pdira_desc);
+              ("pdira_loc", Stdlib.snd pdira_loc);
+            ] )
+
+    method directive_argument_desc
+        : 'ctx -> directive_argument_desc -> directive_argument_desc * 'res =
+      fun ctx x ->
+        match x with
+        | Pdir_string a ->
+            let a = self#string ctx a in
+            ( Pdir_string (Stdlib.fst a),
+              self#constr ctx "Pdir_string" [ Stdlib.snd a ] )
+        | Pdir_int (a, b) ->
+            let a = self#string ctx a in
+            let b = self#option self#char ctx b in
+            ( Pdir_int (Stdlib.fst a, Stdlib.fst b),
+              self#constr ctx "Pdir_int" [ Stdlib.snd a; Stdlib.snd b ] )
+        | Pdir_ident a ->
+            let a = self#longident ctx a in
+            ( Pdir_ident (Stdlib.fst a),
+              self#constr ctx "Pdir_ident" [ Stdlib.snd a ] )
+        | Pdir_bool a ->
+            let a = self#bool ctx a in
+            ( Pdir_bool (Stdlib.fst a),
+              self#constr ctx "Pdir_bool" [ Stdlib.snd a ] )
+
+    method cases : 'ctx -> cases -> cases * 'res = self#list self#case
   end
 
 [@@@end]

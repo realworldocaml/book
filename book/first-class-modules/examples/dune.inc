@@ -1,6 +1,7 @@
 
 (rule
  (alias query_handler_loader)
+ (locks /global)
  (deps
   (source_tree ./correct/query_handler_loader)
   (package core))

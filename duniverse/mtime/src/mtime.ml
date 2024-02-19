@@ -3,24 +3,6 @@
    Distributed under the ISC license, see terms at the end of the file.
   ---------------------------------------------------------------------------*)
 
-(* Time scale conversion *)
-
-let ns_to_s   = 1e-9
-let us_to_s   = 1e-6
-let ms_to_s   = 1e-3
-let min_to_s  = 60.
-let hour_to_s = 3600.
-let day_to_s  = 86_400.
-let year_to_s = 31_557_600.
-
-let s_to_ns   = 1e9
-let s_to_us   = 1e6
-let s_to_ms   = 1e3
-let s_to_min  = 1. /. min_to_s
-let s_to_hour = 1. /. hour_to_s
-let s_to_day  = 1. /. day_to_s
-let s_to_year = 1. /. year_to_s
-
 (* Time spans
 
    Time spans are in nanoseconds and we represent them by an unsigned
@@ -64,84 +46,95 @@ module Span = struct
   let to_uint64_ns s = s
   let of_uint64_ns ns = ns
 
+  let max_float_int = 9007199254740992. (* 2^53. *)
+  let int64_min_int_float = Int64.to_float Int64.min_int
+  let int64_max_int_float = Int64.to_float Int64.max_int
+
+  let of_float_ns sf =
+    if sf < 0. || sf >= max_float_int || not (Float.is_finite sf)
+    then None else Some (Int64.of_float sf)
+
+  let to_float_ns s =
+    if Int64.compare 0L s <= 0 then Int64.to_float s else
+    int64_max_int_float +. (-. int64_min_int_float +. Int64.to_float s)
+
   let unsafe_of_uint64_ns_option nsopt = nsopt
 
-  let to_ns s = (Int64.to_float s)
-  let to_us s = (Int64.to_float s) *. 1e-3
-  let to_ms s = (Int64.to_float s) *. 1e-6
-  let to_s  s = (Int64.to_float s) *. 1e-9
+  (* Formatting *)
 
-  let ns_to_min = ns_to_s *. s_to_min
-  let to_min s = (Int64.to_float s) *. ns_to_min
+  let pf = Format.fprintf
 
-  let ns_to_hour = ns_to_s *. s_to_hour
-  let to_hour s = (Int64.to_float s) *. ns_to_hour
+  let rec pp_si_span unit_str unit_str_len si_unit si_higher_unit ppf span =
+    let geq x y = Int64.unsigned_compare x y >= 0 in
+    let m = Int64.unsigned_div span si_unit in
+    let n = Int64.unsigned_rem span si_unit in
+    let pp_unit ppf () = Format.pp_print_as ppf unit_str_len unit_str in
+    match m with
+    | m when geq m 100L -> (* No fractional digit *)
+        let m_up = if Int64.equal n 0L then m else Int64.succ m in
+        let span' = Int64.mul m_up si_unit in
+        if geq span' si_higher_unit then pp ppf span' else
+        (pf ppf "%Ld" m_up; pp_unit ppf ())
+    | m when geq m 10L -> (* One fractional digit w.o. trailing zero *)
+        let f_factor = Int64.unsigned_div si_unit 10L in
+        let f_m = Int64.unsigned_div n f_factor in
+        let f_n = Int64.unsigned_rem n f_factor in
+        let f_m_up = if Int64.equal f_n 0L then f_m else Int64.succ f_m in
+        begin match f_m_up with
+        | 0L -> pf ppf "%Ld" m; pp_unit ppf ()
+        | f when geq f 10L ->
+            pp ppf Int64.(add (mul m si_unit) (mul f f_factor))
+        | f -> pf ppf "%Ld.%Ld" m f; pp_unit ppf ()
+        end
+    | m -> (* Two or zero fractional digits w.o. trailing zero *)
+        let f_factor = Int64.unsigned_div si_unit 100L in
+        let f_m = Int64.unsigned_div n f_factor in
+        let f_n = Int64.unsigned_rem n f_factor in
+        let f_m_up = if Int64.equal f_n 0L then f_m else Int64.succ f_m in
+        match f_m_up with
+        | 0L -> pf ppf "%Ld" m; pp_unit ppf ()
+        | f when geq f 100L ->
+            pp ppf Int64.(add (mul m si_unit) (mul f f_factor))
+        | f when Int64.equal (Int64.rem f 10L) 0L ->
+            pf ppf "%Ld.%Ld" m (Int64.div f 10L); pp_unit ppf ()
+        | f ->
+            pf ppf "%Ld.%02Ld" m f; pp_unit ppf ()
 
-  let ns_to_day = ns_to_s *. s_to_day
-  let to_day s = (Int64.to_float s) *. ns_to_day
+  and pp_non_si unit_str unit unit_lo_str unit_lo unit_lo_size ppf span =
+    let geq x y = Int64.unsigned_compare x y >= 0 in
+    let m = Int64.unsigned_div span unit in
+    let n = Int64.unsigned_rem span unit in
+    if Int64.equal n 0L then pf ppf "%Ld%s" m unit_str else
+    let f_m = Int64.unsigned_div n unit_lo in
+    let f_n = Int64.unsigned_rem n unit_lo in
+    let f_m_up = if Int64.equal f_n 0L then f_m else Int64.succ f_m in
+    match f_m_up with
+    | f when geq f unit_lo_size ->
+        pp ppf Int64.(add (mul m unit) (mul f unit_lo))
+    | f ->
+        pf ppf "%Ld%s%Ld%s" m unit_str f unit_lo_str
 
-  let ns_to_year = ns_to_s *. s_to_year
-  let to_year s = (Int64.to_float s) *. ns_to_year
+  and pp ppf span =
+    let geq x y = Int64.unsigned_compare x y >= 0 in
+    let lt x y = Int64.unsigned_compare x y = -1 in
+    match span with
+    | sp when lt sp us -> pf ppf "%Ldns" sp
+    | sp when lt sp ms -> pp_si_span "\xCE\xBCs" 2 us ms ppf sp
+    | sp when lt sp s -> pp_si_span "ms" 2 ms s ppf sp
+    | sp when lt sp min -> pp_si_span "s" 1 s min ppf sp
+    | sp when lt sp hour -> pp_non_si "min" min "s" s 60L ppf sp
+    | sp when lt sp day -> pp_non_si "h" hour "min" min 60L ppf sp
+    | sp when lt sp year -> pp_non_si "d" day "h" hour 24L ppf sp    | sp ->
+        let m = Int64.unsigned_div sp year in
+        let n = Int64.unsigned_rem sp year in
+        if Int64.equal n 0L then pf ppf "%Lda" m else
+        let f_m = Int64.unsigned_div n day in
+        let f_n = Int64.unsigned_rem n day in
+        let f_m_up = if Int64.equal f_n 0L then f_m else Int64.succ f_m in
+        match f_m_up with
+        | f when geq f 366L -> pf ppf "%Lda" (Int64.succ m)
+        | f -> pf ppf "%Lda%Ldd" m f
 
-  (* Formatting
-
-     Maybe one day we could replace this by B00_std.Fmt.uint64_ns_span
-     which does all the arithmetic on uint64. *)
-
-  let round x = floor (x +. 0.5)
-  let round_dfrac d x =             (* rounds [x] to the [d]th decimal digit *)
-    if x -. (round x) = 0. then x else                   (* x is an integer. *)
-    let m = 10. ** (float d) in                       (* m moves 10^-d to 1. *)
-    (floor ((x *. m) +. 0.5)) /. m
-
-  let pp_float_s ppf span =
-    let m = abs_float span in
-    if m < ms_to_s then
-      (* m < 1ms, if <  100us, print us with 3 frac digit w.o. trailing zeros
-                  if >= 100us, print us without frac digit *)
-      let us = span /. us_to_s in
-      let us = if abs_float us < 100. then round_dfrac 3 us else round us in
-      if abs_float us >= 1000. then Format.fprintf ppf "%gms" (copysign 1. us)
-      else Format.fprintf ppf "%gus" us
-    else if m < 1. then
-      (* m < 1s, if <  100ms, print ms with 3 frac digit w.o. trailing zeros
-                 if >= 100ms, print ms without frac digit *)
-      let ms = span /. ms_to_s in
-      let ms = if abs_float ms < 100. then round_dfrac 3 ms else round ms in
-      if abs_float ms >= 1000. then Format.fprintf ppf "%gs" (copysign 1. ms)
-      else Format.fprintf ppf "%gms" ms
-    else if m < min_to_s then
-      (* m < 1min, print [s] with 3 frac digit w.o. trailing zeros *)
-      let s = round_dfrac 3 span in
-      if abs_float s >= 60. then Format.fprintf ppf "%gmin" (copysign 1. s)
-      else Format.fprintf ppf "%gs" s
-    else
-    (* m >= 1min
-       From here on we show the two (or one if the second is zero) largest
-       significant units and no longer care about rounding the lowest unit,
-       we just truncate. *)
-    if m < hour_to_s then
-      let m, rem = truncate (span /. min_to_s), mod_float span min_to_s in
-      let s = truncate rem in
-      if s = 0 then Format.fprintf ppf "%dmin" m else
-      Format.fprintf ppf "%dmin%ds" m (abs s)
-    else if m < day_to_s then
-      let h, rem = truncate (span /. hour_to_s), mod_float span hour_to_s in
-      let m = truncate (rem /. min_to_s) in
-      if m = 0 then Format.fprintf ppf "%dh" h else
-      Format.fprintf ppf "%dh%dmin" h (abs m)
-    else if m < year_to_s then
-      let d, rem = truncate (span /. day_to_s), mod_float span day_to_s in
-      let h = truncate (rem /. hour_to_s) in
-      if h = 0 then Format.fprintf ppf "%dd" d else
-      Format.fprintf ppf "%dd%dh" d (abs h)
-    else
-    let y, rem = truncate (span /. year_to_s), mod_float span year_to_s in
-    let d = truncate (rem /. day_to_s) in
-    if d = 0 then Format.fprintf ppf "%da" y else
-    Format.fprintf ppf "%da%dd" y (abs d)
-
-  let pp ppf s = pp_float_s ppf (to_s s)
   let dump ppf s = Format.fprintf ppf "%Lu" s
 end
 

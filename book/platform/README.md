@@ -42,7 +42,7 @@ available:
 ```sh skip
 $ opam switch
 #  switch    compiler      description
-   default   ocaml.4.13.1  default
+   default   ocaml.4.14.1  default
 ```
 
 :::
@@ -128,11 +128,11 @@ You can use `opam switch list-available` to get a full list of all the
 compilers that are available.
 
 ```
-ocaml-system         4.13.1          The OCaml compiler
+ocaml-system         4.14.1          The OCaml compiler
                                      (system version, from outside
                                       of opam)
-ocaml-base-compiler  4.13.1          Official release 4.13.1
-ocaml-variants       4.13.1+options  Official release of OCaml 4.13.1
+ocaml-base-compiler  4.14.1          Official release 4.14.1
+ocaml-variants       4.14.1+options  Official release of OCaml 4.14.1
 ```
 
 You'll find many more versions present than the snippet above, but notice that
@@ -145,11 +145,11 @@ The only thing needed to create a system switch is to have the right version of
 OCaml already installed (e.g. via `apt` or Homebrew) and to pass the same
 version to the switch creation as an additional argument.
 
-For example, if you have OCaml 4.13.1 installed, then running this
+For example, if you have OCaml 4.14.1 installed, then running this
 command will use the system compiler:
 
 ```
-$ opam switch create . 4.13.1
+$ opam switch create . 4.14.1
 ```
 
 On the other hand, if you didn't have that system compiler installed, then the
@@ -164,7 +164,7 @@ If you always want to locally install a particular compiler, then you can
 refine the package description:
 
 ```
-$ opam switch create . ocaml-base-compiler.4.13.1
+$ opam switch create . ocaml-base-compiler.4.14.1
 ```
 
 Sometimes, you will also need to add custom configuration options to
@@ -174,7 +174,7 @@ presence of various `ocaml-option` packages to activate configuration
 flags.  For example, to build a compiler with `flambda`, you would:
 
 ```sh skip
-$ opam switch create . ocaml-variants.4.13.1+options ocaml-option-flambda
+$ opam switch create . ocaml-variants.4.14.1+options ocaml-option-flambda
 ```
 
 You can specify multiple `ocaml-option` packages to cover all the
@@ -717,7 +717,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         ocaml-compiler:
-          - 4.13.x
+          - 4.14.x
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -733,7 +733,7 @@ jobs:
 
 This workflow file will run your project on OCaml installations on
 Windows, macOS and Linux, using the latest patch release of OCaml
-4.13.  Notice that it also runs the test cases you have defined
+4.14.  Notice that it also runs the test cases you have defined
 earlier on all those different operating systems as well.  You can do
 an awful lot of customization of these continuous integration
 workflows, so refer to the online documentation for more options.

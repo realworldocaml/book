@@ -161,16 +161,22 @@ val init :
   ?src:string ->
   ?tls_own_key:tls_own_key ->
   ?tls_authenticator:Conduit_lwt_tls.X509.authenticator ->
+  ?ssl_ctx:Conduit_lwt_unix_ssl.Client.context ->
+  ?ssl_client_verify:Conduit_lwt_unix_ssl.Client.verify ->
   unit ->
   ctx io
-(** [init ?src ?tls_own_key ()] will initialize a Unix conduit that binds to the
-    [src] interface if specified. If TLS server connections are used, then
-    [tls_server_key] must contain a valid certificate to be used to advertise a
-    TLS connection.
+(** [init ?src ?tls_own_key ?tls_authenticator ?ssl_ctx ()] will initialize a
+    Unix conduit that binds to the [src] interface if specified.
 
-    The certificate is validated using [tls_authenticator]. By default, the
+    If TLS server connections are used, then [tls_own_key] must contain a valid
+    certificate to be used to advertise a TLS connection. In TLS mode the
+    certificate is validated using [tls_authenticator]. By default, the
     validation is using the {{:https://github.com/mirage/ca-certs} OS trust
-    anchors}. *)
+    anchors}.
+
+    If SSL client connections are used, then [tls_own_key] may contain a valid
+    certificate to be used to advertise a TLS connection. If it's not configured
+    [ssl_ctx] will be used to configure OpenSSL. *)
 
 val connect : ctx:ctx -> client -> (flow * ic * oc) io
 (** [connect ~ctx client] establishes an outgoing connection via the [ctx]

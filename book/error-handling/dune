@@ -1,8 +1,7 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   base
   core
-  mdx
   ppx_jane)
  (preludes prelude.ml))

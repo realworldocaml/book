@@ -301,7 +301,7 @@ let mark_as_handled_manually = mark_as_seen
 
 let explicitly_drop =
   object
-    inherit Ast_traverse.iter
+    inherit Ast_traverse0.iter
     method! attribute = mark_as_seen
   end
 
@@ -465,7 +465,7 @@ let collect_attribute_errors registrar context name =
 
 let collect_unused_attributes_errors =
   object (self)
-    inherit [Location.Error.t list] Ast_traverse.fold as super
+    inherit [Location.Error.t list] Ast_traverse0.fold as super
 
     method! attribute { attr_name = name; _ } _ =
       [
@@ -659,7 +659,7 @@ let raise_if_non_empty = function
 
 let check_unused =
   object (self)
-    inherit Ast_traverse.iter as super
+    inherit Ast_traverse0.iter as super
 
     method private check_node : type a. a Context.t -> a -> a =
       fun context node ->
@@ -781,7 +781,7 @@ let reset_checks () = Attribute_table.clear not_seen
 
 let collect =
   object
-    inherit Ast_traverse.iter as super
+    inherit Ast_traverse0.iter as super
 
     method! attribute ({ attr_name = name; attr_payload = payload; _ } as attr)
         =
@@ -807,7 +807,7 @@ let check_all_seen () =
 
 let remove_attributes_present_in table =
   object
-    inherit Ast_traverse.iter as super
+    inherit Ast_traverse0.iter as super
 
     method! attribute { attr_name = name; attr_payload = payload; _ } =
       super#payload payload;

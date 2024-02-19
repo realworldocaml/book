@@ -1,0 +1,13 @@
+(copy_files ../../certificates/*.crt)
+(copy_files ../../certificates/*.key)
+(copy_files ../../certificates/*.pem)
+
+(mdx
+  (package tls-eio)
+  (deps
+    server.pem
+    server.key
+    server-ec.pem
+    server-ec.key
+    (package tls-eio)
+    (package eio_main)))

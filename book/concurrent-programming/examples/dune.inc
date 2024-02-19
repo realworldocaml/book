@@ -1,6 +1,7 @@
 
 (rule
  (alias better_echo)
+ (locks /global)
  (deps
   (source_tree ./correct/better_echo)
   (package core)
@@ -14,6 +15,7 @@
 
 (rule
  (alias echo)
+ (locks /global)
  (deps
   (source_tree ./correct/echo)
   (package core)
@@ -27,6 +29,7 @@
 
 (rule
  (alias native_code_log_delays)
+ (locks /global)
  (deps
   (source_tree ./correct/native_code_log_delays)
   (package core)
@@ -40,6 +43,7 @@
 
 (rule
  (alias search)
+ (locks /global)
  (deps
   (source_tree ./correct/search)
   (package core)
@@ -56,6 +60,7 @@
 
 (rule
  (alias search_out_of_order)
+ (locks /global)
  (deps
   (source_tree ./correct/search_out_of_order)
   (package core)
@@ -72,6 +77,7 @@
 
 (rule
  (alias search_with_configurable_server)
+ (locks /global)
  (deps
   (source_tree ./correct/search_with_configurable_server)
   (package cohttp-async)
@@ -86,6 +92,7 @@
 
 (rule
  (alias search_with_error_handling)
+ (locks /global)
  (deps
   (source_tree ./correct/search_with_error_handling)
   (package cohttp-async)
@@ -100,6 +107,7 @@
 
 (rule
  (alias search_with_timeout)
+ (locks /global)
  (deps
   (source_tree ./correct/search_with_timeout)
   (package core)
@@ -116,6 +124,7 @@
 
 (rule
  (alias search_with_timeout_no_leak)
+ (locks /global)
  (deps
   (source_tree ./correct/search_with_timeout_no_leak)
   (package cohttp-async)
@@ -130,6 +139,7 @@
 
 (rule
  (alias search_with_timeout_no_leak_simple)
+ (locks /global)
  (deps
   (source_tree ./correct/search_with_timeout_no_leak_simple)
   (package cohttp-async)

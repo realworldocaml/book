@@ -1,8 +1,9 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   core
   core_unix
+  core_unix.error_checking_mutex
   mdx
   ppx_jane
   re)

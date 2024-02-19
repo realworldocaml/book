@@ -1,3 +1,16 @@
+## v0.10.7 (2022-09-13)
+
+- mirage-crypto-rng-eio: new package for seeding and feeding entropy to the
+  rng with eio (#155 @bikallem, @talex5, @hannesm)
+- mirage-crypto-ec: expose Dsa.byte_length (#164 @hannesm)
+- CI: various fixes (#154 #164 @hannesm)
+- mirage-crypto-rng-mirage: use 'a generator type alias
+- mirage-crypto-rng: improve setup_rng message (add async, revise lwt) (#161
+  @hannesm)
+- mirage-crypto-rng-mirage: always feed the default generator (as done in
+  a8c7bbd2552a9d2177450e95f280342f80fba01d for the lwt feeding) (#161 @hannesm)
+- ec: update generated code to recent fiat-crypto (#156 @hannesm)
+
 ## v0.10.6 (2022-03-29)
 
 - Use _WIN32 instead of __WIN32__, as proposed by @jonahbeckford in #137

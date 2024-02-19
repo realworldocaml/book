@@ -104,33 +104,6 @@ module Context = struct
     | Ppx_import, type_decl -> get_ppx_import_extension type_decl
     | _ -> None
 
-  let node_of_extension :
-      type a. ?loc:Location.t -> ?x:a -> a t -> extension -> a =
-   fun ?(loc = Location.none) ?x t ->
-    let open Ast_builder.Default in
-    match (t, x) with
-    | Class_expr, _ -> pcl_extension ~loc
-    | Class_field, _ -> pcf_extension ~loc
-    | Class_type_field, _ -> pctf_extension ~loc
-    | Class_type, _ -> pcty_extension ~loc
-    | Core_type, _ -> ptyp_extension ~loc
-    | Expression, _ -> pexp_extension ~loc
-    | Module_expr, _ -> pmod_extension ~loc
-    | Module_type, _ -> pmty_extension ~loc
-    | Pattern, _ -> ppat_extension ~loc
-    | Signature_item, _ -> fun ext -> psig_extension ~loc ext []
-    | Structure_item, _ -> fun ext -> pstr_extension ~loc ext []
-    | Ppx_import, Some x ->
-        fun ext ->
-          {
-            x with
-            ptype_manifest = Some (Ast_builder.Default.ptyp_extension ~loc ext);
-          }
-    | Ppx_import, None ->
-        failwith
-          "Ppxlib internal error: Item not provided to build an extension node \
-           from a Ppx_import context."
-
   let merge_attributes_res :
       type a.
       a t -> a -> attributes -> (a, Location.Error.t NonEmptyList.t) result =

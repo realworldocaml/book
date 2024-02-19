@@ -15,7 +15,7 @@ jobs:
         os:
           - ubuntu-latest
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.1
 
     runs-on: ${{ matrix.os }}
 
@@ -33,7 +33,7 @@ jobs:
           dune-cache: false
 
       - name: Install dune
-        run: opam install dune>=3.4.1
+        run: opam install dune>=3.6.1
 
       - name: Build HTML book
         run: opam exec -- dune build @site

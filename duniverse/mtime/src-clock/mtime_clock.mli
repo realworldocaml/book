@@ -83,11 +83,15 @@ val period_ns : unit -> int64 option
     {1:platform_support Platform support}
 
     {ul
-    {- Platforms with a POSIX clock (includes Linux) use
+    {- Linux uses {{:http://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html}[clock_gettime]}
+       with {{:https://www.man7.org/linux/man-pages/man3/clock_settime.3.html}
+       CLOCK_BOOTTIME}. This means that sleep time is taken into account.}
+    {- Platforms with a POSIX clock use
        {{:http://pubs.opengroup.org/onlinepubs/9699919799/functions/clock_gettime.html}[clock_gettime]}
        with CLOCK_MONOTONIC.}
     {- Darwin uses
-       {{:https://developer.apple.com/library/mac/qa/qa1398/_index.html}[mach_absolute_time]}.}
+       {{:https://developer.apple.com/documentation/kernel/1646199-mach_continuous_time}[mach_continous_time]}.
+       This means that sleep time is taken into account.}
     {- Windows uses
        {{:https://msdn.microsoft.com/en-us/library/windows/desktop/aa373083%28v=vs.85%29.aspx}Performance counters}. }
     {- JavaScript uses

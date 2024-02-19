@@ -69,3 +69,9 @@
  (libraries alcotest mirage-crypto-ec wycheproof asn1-combinators
    mirage-crypto-pk mirage-crypto)
  (package mirage-crypto-ec))
+
+(tests
+ (names     test_eio_rng test_eio_entropy_collection)
+ (modules   test_eio_rng test_eio_entropy_collection)
+ (libraries mirage-crypto-rng-eio duration eio_main)
+ (package   mirage-crypto-rng-eio))

@@ -75,7 +75,7 @@ to find a key in one table isn't a failure of any sort:
       | _ -> mismatches
     );;
 val find_mismatches :
-  ('a, int) Hashtbl.Poly.t -> ('a, int) Hashtbl.Poly.t -> 'a list = <fun>
+  ('a, int) Base.Hashtbl.t -> ('a, int) Base.Hashtbl.t -> 'a list = <fun>
 ```
 
 The use of options to encode errors underlines the fact that it's not clear

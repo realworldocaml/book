@@ -1375,7 +1375,7 @@ case can never be instantiated, and OCaml will tell you as much.
 Line 4, characters 7-14:
 Warning 56 [unreachable-case]: this match case is unreachable.
 Consider replacing it with a refutation case '<pat> -> .'
-val print_result : (int, Nothing.t) result -> unit = <fun>
+val print_result : (int, Core.never_returns) result -> unit = <fun>
 ```
 
 \noindent
@@ -1387,7 +1387,7 @@ We can follow the advice above, and add a so-called *refutation case*.
     match x with
     | Ok x -> printf "%d\n" x
     | Error _ -> .;;
-val print_result : (int, Nothing.t) result -> unit = <fun>
+val print_result : (int, Core.never_returns) result -> unit = <fun>
 ```
 
 The period in the final case tells the compiler that we believe this
@@ -1399,7 +1399,7 @@ refutation case for you, so you don't need to write it out explicitly.
 # let print_result (x : (int, Nothing.t) Result.t) =
     match x with
     | Ok x -> printf "%d\n" x;;
-val print_result : (int, Nothing.t) result -> unit = <fun>
+val print_result : (int, Core.never_returns) result -> unit = <fun>
 ```
 
 Narrowing with uninhabitable types can be useful when using a highly

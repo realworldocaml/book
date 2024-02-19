@@ -35,6 +35,8 @@ let chans_of_fd sock =
   (Lwt_ssl.get_fd sock, ic, oc)
 
 module Client = struct
+  type context = Ssl.context
+
   let create_ctx ?certfile ?keyfile ?password () =
     let ctx = Ssl.create_context Ssl.SSLv23 Ssl.Client_context in
     Ssl.disable_protocols ctx [ Ssl.SSLv23 ];
@@ -52,24 +54,61 @@ module Client = struct
 
   let default_ctx = create_ctx ()
 
-  let connect ?(ctx = default_ctx) ?src ?hostname sa =
+  type verify = { hostname : bool; ip : bool }
+
+  let default_verify = { hostname = true; ip = false }
+
+  let validate_hostname host_addr =
+    try
+      let _ = Domain_name.(host_exn (of_string_exn host_addr)) in
+      host_addr
+    with Invalid_argument msg ->
+      let s =
+        Printf.sprintf "couldn't convert %s to a [`host] Domain_name.t: %s"
+          host_addr msg
+      in
+      invalid_arg s
+
+  let verification { hostname; ip } = function
+    | None, _ when hostname -> invalid_arg "impossible to verify hostname"
+    | _, None when ip -> invalid_arg "impossible to verify ip"
+    | h, i ->
+        let hostname =
+          if hostname && h <> None then Option.map validate_hostname h else None
+        in
+        let ip = if ip && i <> None then i else None in
+        (hostname, ip)
+
+  let connect ?(ctx = default_ctx) ?src ?hostname ?ip ?verify sa =
+    let verify = Option.value ~default:default_verify verify in
+    let to_verify = verification verify (hostname, ip) in
     Conduit_lwt_server.with_socket sa (fun fd ->
         (match src with
         | None -> Lwt.return_unit
         | Some src_sa -> Lwt_unix.bind fd src_sa)
         >>= fun () ->
         Lwt_unix.connect fd sa >>= fun () ->
-        (match hostname with
-        | Some host ->
-            let s = Lwt_ssl.embed_uninitialized_socket fd ctx in
-            let ssl = Lwt_ssl.ssl_socket_of_uninitialized_socket s in
-            Ssl.set_client_SNI_hostname ssl host;
-            (* Enable hostname verification *)
-            Ssl.set_hostflags ssl [ Ssl.No_partial_wildcards ];
-            Ssl.set_host ssl host;
-            Lwt_ssl.ssl_perform_handshake s
-        | None -> Lwt_ssl.ssl_connect fd ctx)
-        >>= fun sock -> Lwt.return (chans_of_fd sock))
+        let with_socket f =
+          let s = Lwt_ssl.embed_uninitialized_socket fd ctx in
+          let socket = Lwt_ssl.ssl_socket_of_uninitialized_socket s in
+          f socket;
+          Lwt_ssl.ssl_perform_handshake s
+        in
+        let maybe_verify ssl = function
+          | Some hostname, Some ip ->
+              Ssl.set_hostflags ssl [ Ssl.No_partial_wildcards ];
+              Ssl.set_client_SNI_hostname ssl hostname;
+              Ssl.set_host ssl hostname;
+              Ssl.set_ip ssl (Ipaddr.to_string ip)
+          | Some hostname, None ->
+              Ssl.set_hostflags ssl [ Ssl.No_partial_wildcards ];
+              Ssl.set_client_SNI_hostname ssl hostname;
+              Ssl.set_host ssl hostname
+          | None, Some ip -> Ssl.set_ip ssl (Ipaddr.to_string ip)
+          | None, None -> ()
+        in
+        with_socket (fun ssl -> maybe_verify ssl to_verify) >>= fun sock ->
+        Lwt.return (chans_of_fd sock))
 end
 
 module Server = struct

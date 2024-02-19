@@ -1,0 +1,5 @@
+(library
+ (name tls_eio)
+ (public_name tls-eio)
+ (wrapped false)
+ (libraries tls eio ptime.clock.os))

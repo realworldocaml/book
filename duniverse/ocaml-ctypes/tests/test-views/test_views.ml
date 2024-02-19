@@ -82,7 +82,7 @@ struct
         (-1) (accepting_possibly_null_funptr None 2 3);
 
       assert_equal ~msg:"passing non-null function pointer"
-        5 (accepting_possibly_null_funptr (Some Pervasives.(+)) 2 3);
+        5 (accepting_possibly_null_funptr (Some (+)) 2 3);
 
       assert_equal ~msg:"passing non-null function pointer obtained from C"
         6 (accepting_possibly_null_funptr (returning_funptr 1) 2 3);

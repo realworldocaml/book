@@ -9,7 +9,9 @@
 
 (rule
  (target clib%{ext_dll})
- (deps (source_tree ../../src/ctypes) test_functions.h)
+ (deps
+  (source_tree ../../src/ctypes)
+  test_functions.h)
  (action
   (run
    %{cc}

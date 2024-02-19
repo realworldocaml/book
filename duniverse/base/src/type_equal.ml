@@ -74,15 +74,6 @@ module Composition_preserves_injectivity (M1 : Injective) (M2 : Injective) = str
   let strip e = M1.strip (M2.strip e)
 end
 
-module Obj = struct
-  module Extension_constructor = struct
-    [@@@ocaml.warning "-3"]
-
-    let id = Caml.Obj.extension_id
-    let of_val = Caml.Obj.extension_constructor
-  end
-end
-
 module Id = struct
   module Uid = Int
 
@@ -100,7 +91,8 @@ module Id = struct
       [@@@end]
 
       let sexp_of_t _sexp_of_a t =
-        `type_witness (Obj.Extension_constructor.id (Obj.Extension_constructor.of_val t))
+        `type_witness
+          (Caml.Obj.Extension_constructor.id (Caml.Obj.Extension_constructor.of_val t))
         |> sexp_of_type_witness_int
       ;;
     end
@@ -126,7 +118,7 @@ module Id = struct
     ;;
 
     let uid (type a) (module M : S with type t = a) =
-      Obj.Extension_constructor.id (Obj.Extension_constructor.of_val M.Key)
+      Caml.Obj.Extension_constructor.id (Caml.Obj.Extension_constructor.of_val M.Key)
     ;;
 
     (* We want a constant allocated once that [same] can return whenever it gets the same

@@ -108,6 +108,8 @@ type ctx = {
   src : Unix.sockaddr option;
   tls_own_key : tls_own_key;
   tls_authenticator : Conduit_lwt_tls.X509.authenticator;
+  ssl_client_verify : Conduit_lwt_unix_ssl.Client.verify;
+  ssl_ctx : Conduit_lwt_unix_ssl.Client.context;
 }
 
 let string_of_unix_sockaddr sa =
@@ -154,19 +156,25 @@ let default_ctx =
       src = None;
       tls_own_key = `None;
       tls_authenticator = Lazy.force Conduit_lwt_tls.X509.default_authenticator;
+      ssl_client_verify = Conduit_lwt_unix_ssl.Client.default_verify;
+      ssl_ctx = Conduit_lwt_unix_ssl.Client.default_ctx;
     }
 
 let init ?src ?(tls_own_key = `None)
     ?(tls_authenticator = Lazy.force Conduit_lwt_tls.X509.default_authenticator)
-    () =
+    ?(ssl_ctx = Conduit_lwt_unix_ssl.Client.default_ctx)
+    ?(ssl_client_verify = Conduit_lwt_unix_ssl.Client.default_verify) () =
+  let no_source_ctx =
+    { src = None; tls_own_key; tls_authenticator; ssl_ctx; ssl_client_verify }
+  in
   match src with
-  | None -> Lwt.return { src = None; tls_own_key; tls_authenticator }
+  | None -> Lwt.return no_source_ctx
   | Some host -> (
       let open Unix in
       Lwt_unix.getaddrinfo host "0" [ AI_PASSIVE; AI_SOCKTYPE SOCK_STREAM ]
       >>= function
       | { ai_addr; _ } :: _ ->
-          Lwt.return { src = Some ai_addr; tls_own_key; tls_authenticator }
+          Lwt.return { no_source_ctx with src = Some ai_addr }
       | [] -> Lwt.fail_with "Invalid conduit source address specified")
 
 module Sockaddr_io = struct
@@ -279,11 +287,11 @@ let connect_with_tls_native ~ctx (`Hostname hostname, `IP ip, `Port port) =
   let flow = TCP { fd; ip; port } in
   (flow, ic, oc)
 
-let connect_with_openssl ~ctx (`Hostname hostname, `IP ip, `Port port) =
+let connect_with_openssl ~ctx (`Hostname host_addr, `IP ip, `Port port) =
   let sa = Unix.ADDR_INET (Ipaddr_unix.to_inet_addr ip, port) in
   let ctx_ssl =
     match ctx.tls_own_key with
-    | `None -> None
+    | `None -> ctx.ssl_ctx
     | `TLS (`Crt_file_path certfile, `Key_file_path keyfile, password) ->
         let password =
           match password with `No_password -> None | `Password fn -> Some fn
@@ -291,9 +299,10 @@ let connect_with_openssl ~ctx (`Hostname hostname, `IP ip, `Port port) =
         let ctx_ssl =
           Conduit_lwt_unix_ssl.Client.create_ctx ~certfile ~keyfile ?password ()
         in
-        Some ctx_ssl
+        ctx_ssl
   in
-  Conduit_lwt_unix_ssl.Client.connect ?ctx:ctx_ssl ?src:ctx.src ~hostname sa
+  Conduit_lwt_unix_ssl.Client.connect ~ctx:ctx_ssl ?src:ctx.src
+    ~hostname:host_addr ~ip ~verify:ctx.ssl_client_verify sa
   >>= fun (fd, ic, oc) ->
   let flow = TCP { fd; ip; port } in
   Lwt.return (flow, ic, oc)

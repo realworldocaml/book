@@ -1,6 +1,5 @@
 open Import
 open! Action_builder.O
-module SC = Super_context
 
 (* This module interprets [(menhir ...)] stanzas -- that is, it provides build
    rules for Menhir parsers. *)
@@ -24,7 +23,7 @@ module SC = Super_context
 
 (* This signature describes the input of the functor [Run], which follows. *)
 
-type stanza = Dune_file.Menhir.t
+type stanza = Menhir_stanza.t
 
 module type PARAMS = sig
   (* [cctx] is the compilation context. *)
@@ -58,6 +57,12 @@ module Run (P : PARAMS) = struct
   let build_dir = (Super_context.context sctx).build_dir
 
   let expander = Compilation_context.expander cctx
+
+  let sandbox =
+    let scope = Compilation_context.scope cctx in
+    let project = Scope.project scope in
+    if Dune_project.dune_version project < (3, 5) then Sandbox_config.default
+    else Sandbox_config.needs_sandboxing
 
   (* ------------------------------------------------------------------------ *)
 
@@ -94,7 +99,8 @@ module Run (P : PARAMS) = struct
   (* Rule generation. *)
 
   let menhir_binary =
-    SC.resolve_program sctx ~dir "menhir" ~loc:None ~hint:"opam install menhir"
+    Super_context.resolve_program sctx ~dir "menhir" ~loc:None
+      ~hint:"opam install menhir"
 
   (* Reminder (from command.mli):
 
@@ -109,11 +115,11 @@ module Run (P : PARAMS) = struct
   let menhir (args : 'a args) :
       Action.Full.t Action_builder.With_targets.t Memo.t =
     Memo.map menhir_binary ~f:(fun prog ->
-        Command.run ~dir:(Path.build build_dir) prog args)
+        Command.run ~sandbox ~dir:(Path.build build_dir) prog args)
 
   let rule ?(mode = stanza.mode) :
       Action.Full.t Action_builder.With_targets.t -> unit Memo.t =
-    SC.add_rule sctx ~dir ~mode ~loc:stanza.loc
+    Super_context.add_rule sctx ~dir ~mode ~loc:stanza.loc
 
   let expand_flags flags = Super_context.menhir_flags sctx ~dir ~expander ~flags
 
@@ -274,8 +280,8 @@ end
 
 (* The final glue. *)
 
-let module_names (stanza : Dune_file.Menhir.t) : Module_name.t list =
-  List.map (Dune_file.Menhir.modules stanza) ~f:(fun s ->
+let module_names (stanza : Menhir_stanza.t) : Module_name.t list =
+  List.map (Menhir_stanza.modules stanza) ~f:(fun s ->
       (* TODO the loc can improved here *)
       Module_name.of_string_allow_invalid (stanza.loc, s))
 

@@ -1,10 +1,10 @@
-Real World OCaml v2
+Real World OCaml v3
 -------------------
 
-This is the source code for the Real World OCaml 2nd edition, which is
+This is the source code for the Real World OCaml 3rd edition, which is
 still a work in progress.  The original edition was written by Yaron
-Minsky, Anil Madhavapeddy and Jason Hickey, and the revised edition is
-being led by Yaron Minsky and Anil Madhavapeddy.  There have been
+Minsky, Anil Madhavapeddy and Jason Hickey, and the 2nd and subsequent
+editions are being led by Yaron Minsky and Anil Madhavapeddy.  There have been
 significant contributions to the revised tooling from Ashish Agarwal,
 Jeremy Yallop, Frederic Bour, and Sander Spies.
 
@@ -27,7 +27,7 @@ mdx is used to keep the examples and the chapter's code block in sync.
 The `bin/` folder contains the OCaml scripts used to generate the books HTML
 and PDF versions.
 
-All of the code and examples are built using OCaml 4.09.0.
+All of the code and examples are built using OCaml 4.14.1.
 
 ## Building
 
@@ -47,8 +47,8 @@ with only `dune` installed to avoid conflicts between the opam and local
 libraries. To set up your RWO development environment you can run:
 
 ```
-opam switch create rwo 4.13.1
-opam install dune=3.0.2
+opam switch create rwo 4.14.1
+opam install dune=3.6.1
 ```
 
 ### Generating the HTML

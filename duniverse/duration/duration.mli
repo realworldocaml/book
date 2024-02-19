@@ -8,7 +8,7 @@
     All functions converting to [t] raise [Invalid_argument] on out of bound
     or negative input.
 
-    {e 0.2.0 - {{:https://github.com/hannesm/duration }homepage}}
+    {e v0.2.1 - {{:https://github.com/hannesm/duration }homepage}}
 *)
 
 (** The type for a duration, exposed as an int64 to provide interoperability. *)

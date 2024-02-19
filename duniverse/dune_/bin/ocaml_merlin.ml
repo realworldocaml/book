@@ -192,7 +192,7 @@ let man =
   ; Common.footer
   ]
 
-let info = Term.info "ocaml-merlin" ~doc ~man
+let info = Cmd.info "ocaml-merlin" ~doc ~man
 
 let term =
   let+ common = Common.term
@@ -207,14 +207,16 @@ let term =
              debugging purposes only and should not be considered as a stable \
              output.")
   in
-  let common = Common.set_print_directory common false in
+  let common =
+    Common.set_print_directory common false |> Common.forbid_builds
+  in
   let config = Common.init common ~log_file:No_log_file in
   Scheduler.go ~common ~config (fun () ->
       match dump_config with
       | Some s -> Server.dump s
       | None -> Server.start ())
 
-let command = (term, info)
+let command = Cmd.v info term
 
 module Dump_dot_merlin = struct
   let doc = "Print Merlin configuration"
@@ -230,7 +232,7 @@ module Dump_dot_merlin = struct
     ; Common.footer
     ]
 
-  let info = Term.info "dump-dot-merlin" ~doc ~man
+  let info = Cmd.info "dump-dot-merlin" ~doc ~man
 
   let term =
     let+ common = Common.term
@@ -249,5 +251,5 @@ module Dump_dot_merlin = struct
         | Some s -> Server.dump_dot_merlin s
         | None -> Server.dump_dot_merlin ".")
 
-  let command = (term, info)
+  let command = Cmd.v info term
 end

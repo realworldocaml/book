@@ -1,6 +1,7 @@
 
 (rule
  (alias cal_add_days)
+ (locks /global)
  (deps
   (source_tree ./correct/cal_add_days)
   (package core))
@@ -13,6 +14,7 @@
 
 (rule
  (alias cal_add_interactive)
+ (locks /global)
  (deps
   (source_tree ./correct/cal_add_interactive)
   (package core)
@@ -26,6 +28,7 @@
 
 (rule
  (alias cal_add_interactive2)
+ (locks /global)
  (deps
   (source_tree ./correct/cal_add_interactive2)
   (package core))
@@ -38,6 +41,7 @@
 
 (rule
  (alias cal_add_sub_days)
+ (locks /global)
  (deps
   (source_tree ./correct/cal_add_sub_days)
   (package core))
@@ -50,6 +54,7 @@
 
 (rule
  (alias md5)
+ (locks /global)
  (deps
   (source_tree ./correct/md5)
   (package core))
@@ -62,6 +67,7 @@
 
 (rule
  (alias md5_as_filename)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_as_filename)
   (package core))
@@ -74,6 +80,7 @@
 
 (rule
  (alias md5_let_syntax)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_let_syntax)
   (package core))
@@ -86,6 +93,7 @@
 
 (rule
  (alias md5_let_syntax2)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_let_syntax2)
   (package core))
@@ -98,6 +106,7 @@
 
 (rule
  (alias md5_multiarg)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_multiarg)
   (package core))
@@ -110,6 +119,7 @@
 
 (rule
  (alias md5_sequence)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_sequence)
   (package core))
@@ -122,6 +132,7 @@
 
 (rule
  (alias md5_succinct)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_succinct)
   (package core))
@@ -134,6 +145,7 @@
 
 (rule
  (alias md5_with_custom_arg)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_with_custom_arg)
   (package core))
@@ -146,6 +158,7 @@
 
 (rule
  (alias md5_with_default_file)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_with_default_file)
   (package core))
@@ -158,6 +171,7 @@
 
 (rule
  (alias md5_with_flags)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_with_flags)
   (package core))
@@ -170,6 +184,7 @@
 
 (rule
  (alias md5_with_optional_file)
+ (locks /global)
  (deps
   (source_tree ./correct/md5_with_optional_file)
   (package core))

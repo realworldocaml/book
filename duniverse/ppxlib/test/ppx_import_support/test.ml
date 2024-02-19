@@ -108,6 +108,6 @@ let id_for_core_types =
     (fun ~ctxt:_ core_type -> core_type)
 [%%expect{|
 Exception:
-(Failure
-  "Some ppx-es tried to register conflicting transformations: Extension 'id' on type declarations matches extension 'id'")
+Failure
+ "Some ppx-es tried to register conflicting transformations: Extension 'id' on type declarations matches extension 'id'".
 |}]

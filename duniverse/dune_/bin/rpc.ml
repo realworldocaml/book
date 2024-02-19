@@ -7,6 +7,7 @@ let active_server () =
   | None -> User_error.raise [ Pp.text "rpc server not running" ]
 
 let client_term common f =
+  let common = Common.forbid_builds common in
   let common = Common.set_print_directory common false in
   let config = Common.init ~log_file:No_log_file common in
   Scheduler.go ~common ~config f
@@ -74,7 +75,7 @@ let establish_client_session ~wait =
       match connection with
       | Ok conn -> Some conn
       | Error message ->
-        Console.print_user_message message;
+        if not wait then Console.print_user_message message;
         None)
   in
   establish_connection_or_raise ~wait once
@@ -130,9 +131,9 @@ module Status = struct
 
   let info =
     let doc = "show active connections" in
-    Term.info "status" ~doc
+    Cmd.info "status" ~doc
 
-  let term = (Term.Group.Term term, info)
+  let cmd = Cmd.v info term
 end
 
 module Build = struct
@@ -163,9 +164,9 @@ module Build = struct
       "build a given target (requires dune to be running in passive watching \
        mode)"
     in
-    Term.info "build" ~doc
+    Cmd.info "build" ~doc
 
-  let term = (Term.Group.Term term, info)
+  let cmd = Cmd.v info term
 end
 
 module Ping = struct
@@ -189,13 +190,13 @@ module Ping = struct
 
   let info =
     let doc = "Ping the build server running in the current directory" in
-    Term.info "ping" ~doc
+    Cmd.info "ping" ~doc
 
   let term =
     let+ (common : Common.t) = Common.term in
     client_term common exec
 
-  let term = (Term.Group.Term term, info)
+  let cmd = Cmd.v info term
 end
 
 let info =
@@ -206,6 +207,6 @@ let info =
     ; `Blocks Common.help_secs
     ]
   in
-  Term.info "rpc" ~doc ~man
+  Cmd.info "rpc" ~doc ~man
 
-let group = (Term.Group.Group [ Status.term; Build.term; Ping.term ], info)
+let group = Cmd.group info [ Status.cmd; Build.cmd; Ping.cmd ]

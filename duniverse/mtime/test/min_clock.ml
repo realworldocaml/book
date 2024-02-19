@@ -8,7 +8,7 @@
      -package mtime.clock.os -linkpkg -o min_clock.byte min_clock.ml
 
     js_of_ocaml \
-      $(ocamlfind query mtime.clock.os -predicates javascript -o-format) \
+      $(ocamlfind query -format "%+(jsoo_runtime)" -r mtime.clock.os) \
       min_clock.byte
 *)
 

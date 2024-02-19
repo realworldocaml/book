@@ -43,6 +43,8 @@ module type Dsa = sig
 
   type pub
 
+  val byte_length : int
+
   val priv_of_cstruct : Cstruct.t -> (priv, error) result
 
   val priv_to_cstruct : priv -> Cstruct.t
@@ -501,6 +503,8 @@ module Make_dsa (Param : Parameters) (F : Foreign_n) (P : Point) (S : Scalar) (H
   let create () = Cstruct.to_bigarray (Cstruct.create Param.fe_length)
 
   type priv = scalar
+
+  let byte_length = Param.byte_length
 
   let priv_of_cstruct = S.of_cstruct
 

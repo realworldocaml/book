@@ -18,7 +18,13 @@
 (** TLS/SSL connections via {{:http://www.openssl.org} OpenSSL} C bindings *)
 
 module Client : sig
-  val default_ctx : Ssl.context
+  type verify = { hostname : bool; ip : bool }
+
+  val default_verify : verify
+
+  type context = Ssl.context
+
+  val default_ctx : context
 
   val create_ctx :
     ?certfile:string ->
@@ -28,9 +34,11 @@ module Client : sig
     Ssl.context
 
   val connect :
-    ?ctx:Ssl.context ->
+    ?ctx:context ->
     ?src:Lwt_unix.sockaddr ->
     ?hostname:string ->
+    ?ip:Ipaddr.t ->
+    ?verify:verify ->
     Lwt_unix.sockaddr ->
     (Lwt_unix.file_descr * Lwt_io.input_channel * Lwt_io.output_channel) Lwt.t
 end

@@ -1,4 +1,4 @@
 (mdx
  (files README.md)
- (packages core mdx ppx_jane)
+ (libraries core core_unix core_unix.error_checking_mutex base ppx_jane)
  (preludes prelude.ml))

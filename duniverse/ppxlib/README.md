@@ -7,8 +7,7 @@
 [appveyor]:       https://ci.appveyor.com/project/diml/ppxlib/branch/main
 [appveyor-img]:   https://ci.appveyor.com/api/projects/status/bogbsm33uvh083jx?svg=true
 
-[User manual][man]
-[API documentation][api-doc]
+[Ppxlib documentation][doc]
 
 # Overview
 
@@ -24,7 +23,7 @@ ways of automatically traversing values of a given type, in particular
 allowing to inject a complex structured value into generated code.
 
 For more information about ppxlib and how to use it, please consult the
-[user manual][man].
+[documentation][doc].
 
 # What is the relation between ppxlib and other ppx libraries?
 
@@ -41,6 +40,5 @@ This repository was created by merging several older smaller projects
 that were developed at Jane Street. See [the history](HISTORY.md) for
 more details.
 
-[man]:           http://ppxlib.readthedocs.io/
-[api-doc]: https://ocaml-ppx.github.io/ppxlib/index.html
+[doc]: https://ocaml-ppx.github.io/ppxlib/ppxlib/index.html
 [future-of-ppx]: https://discuss.ocaml.org/t/the-future-of-ppx/3766

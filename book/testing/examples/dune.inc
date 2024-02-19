@@ -1,6 +1,7 @@
 
 (rule
  (alias bigger_quickcheck_test)
+ (locks /global)
  (deps
   (source_tree ./correct/bigger_quickcheck_test)
   (package base)
@@ -18,6 +19,7 @@
 
 (rule
  (alias bigger_quickcheck_test_with_ppx)
+ (locks /global)
  (deps
   (source_tree ./correct/bigger_quickcheck_test_with_ppx)
   (package base)
@@ -34,6 +36,7 @@
 
 (rule
  (alias echo_test_delay)
+ (locks /global)
  (deps
   (source_tree ./correct/echo_test_delay)
   (package core)
@@ -48,6 +51,7 @@
 
 (rule
  (alias echo_test_reconnect)
+ (locks /global)
  (deps
   (source_tree ./correct/echo_test_reconnect)
   (package core)
@@ -62,6 +66,7 @@
 
 (rule
  (alias manual_property_test)
+ (locks /global)
  (deps
   (source_tree ./correct/manual_property_test)
   (package base)
@@ -78,6 +83,7 @@
 
 (rule
  (alias multi_block_expect_test)
+ (locks /global)
  (deps
   (source_tree ./correct/multi_block_expect_test)
   (package base)
@@ -92,6 +98,7 @@
 
 (rule
  (alias rate_limiter_fixed)
+ (locks /global)
  (deps
   (source_tree ./correct/rate_limiter_fixed)
   (package core)
@@ -109,6 +116,7 @@
 
 (rule
  (alias rate_limiter_show_bug)
+ (locks /global)
  (deps
   (source_tree ./correct/rate_limiter_show_bug)
   (package core)
@@ -126,6 +134,7 @@
 
 (rule
  (alias simple_expect_test)
+ (locks /global)
  (deps
   (source_tree ./correct/simple_expect_test)
   (package base)
@@ -142,6 +151,7 @@
 
 (rule
  (alias simple_inline_test)
+ (locks /global)
  (deps
   (source_tree ./correct/simple_inline_test)
   (package base)
@@ -158,6 +168,7 @@
 
 (rule
  (alias soup_test_corrected)
+ (locks /global)
  (deps
   (source_tree ./correct/soup_test_corrected)
   (package base)
@@ -176,6 +187,7 @@
 
 (rule
  (alias soup_test_fixed)
+ (locks /global)
  (deps
   (source_tree ./correct/soup_test_fixed)
   (package base)
@@ -194,6 +206,7 @@
 
 (rule
  (alias trivial_expect_test_fixed)
+ (locks /global)
  (deps
   (source_tree ./correct/trivial_expect_test_fixed)
   (package base)

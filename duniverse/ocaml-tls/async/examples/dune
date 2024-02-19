@@ -2,10 +2,12 @@
   (name    test_client)
   (modules test_client)
   (preprocess (pps ppx_jane))
+  (enabled_if (< %{ocaml_version} 5.0.0))
   (libraries async core core_unix.command_unix tls-async))
 
 (executable
   (name    test_server)
   (modules test_server)
   (preprocess (pps ppx_jane))
+  (enabled_if (< %{ocaml_version} 5.0.0))
   (libraries async core core_unix.command_unix tls-async))

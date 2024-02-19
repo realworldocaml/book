@@ -22,9 +22,11 @@ Anything else will embed an error extension node
   $ echo "let _ = [%export_string \"string\" \"other\"]" >> parsing_payload_extension.ml
   $ echo "let _ = [%export_string identifier]" >> parsing_payload_extension.ml
   $ ./extender.exe parsing_payload_extension.ml
+  [%%ocaml.error "constant expected"]
+  [%%ocaml.error "constant expected"]
   let _ = "string"
-  let _ = [%ocaml.error "constant expected"]
-  let _ = [%ocaml.error "constant expected"]
+  let _ = [%export_string "string" "other"]
+  let _ = [%export_string identifier]
 
   $ echo "type a = int [@@deriving a_string]" > parsing_payload_deriver.ml
   $ echo "type b = int [@@deriving a_string unexpected_args]" >> parsing_payload_deriver.ml

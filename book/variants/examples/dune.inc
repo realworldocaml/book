@@ -1,6 +1,7 @@
 
 (rule
  (alias variants-termcol)
+ (locks /global)
  (deps
   (source_tree ./correct/variants-termcol)
   (package base))
@@ -13,6 +14,7 @@
 
 (rule
  (alias variants-termcol-fixed)
+ (locks /global)
  (deps
   (source_tree ./correct/variants-termcol-fixed)
   (package base))

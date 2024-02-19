@@ -1,3 +1,25 @@
+v2.0.0 2022-12-02 Zagreb
+------------------------
+
+* Use the new `js_of_ocaml` ocamlfind `META` standard to link JavaScript
+  stubs (#28).
+* `Mtime_clock` use `CLOCK_BOOTTIME` rather than `CLOCK_MONOTONIC`
+  on Linux and `mach_continuous_time` rather than `mach_absolute_time`
+  on macOS. This means that on these platforms sleep time is taken 
+  into account (#10). Thanks to Bikal Lem for the patch.
+* Add `Mtime.{to,of}_float_ns`.
+* Remove deprecated values `Mtime.s_to_*` and `Mtime.Span.to_*` floating
+  points functions. Note that the implementation of `Mtime.Span.to_*`
+  functions was broken if your span exceeded `Int64.max_int`. Thanks
+  to Thomas Leonard for the report (#46).
+* Change implementation of `Mtime.Span.pp` and remove
+  `Mtime.Span.pp_float_s`. The implementation no longer uses floating
+  point arithmetic and always over approximates the result, no
+  duration is printed shorter than it is. The output is no longer
+  US-ASCII but UTF-8 encoded since U+03BC is used for µs.
+* Stop installing the clock interface in `mtime.clock`, this package
+  is now empty (#42).
+
 v1.4.0 2022-02-17 La Forclaz (VS)
 ---------------------------------
 

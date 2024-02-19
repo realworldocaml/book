@@ -1,8 +1,9 @@
 (mdx
  (files README.md)
- (packages
+ (libraries
   core
-  mdx
+  core_unix
+  core_unix.error_checking_mutex
   ppx_jane
   yojson)
  (preludes prelude.ml))

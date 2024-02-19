@@ -5,15 +5,6 @@ open Expect_test_matcher
 module Test_result = Ppx_inline_test_lib.Runtime.Test_result
 module Collector_test_outcome = Expect_test_collector.Test_outcome
 
-module Obj = struct
-  module Extension_constructor = struct
-    [@@@ocaml.warning "-3"]
-
-    let of_val = Stdlib.Obj.extension_constructor
-    let name = Stdlib.Obj.extension_name
-  end
-end
-
 type group =
   { filename : File.Name.t
   ; file_contents : string
@@ -41,7 +32,7 @@ let convert_collector_test ~allow_output_patterns (test : Collector_test_outcome
         try Exn.to_string exn with
         | exn ->
           let name =
-            Obj.Extension_constructor.of_val exn |> Obj.Extension_constructor.name
+            Caml.Obj.Extension_constructor.of_val exn |> Caml.Obj.Extension_constructor.name
           in
           Printf.sprintf "(\"%s(Cannot print more details, Exn.to_string failed)\")" name
       in

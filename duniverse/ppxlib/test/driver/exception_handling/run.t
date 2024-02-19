@@ -102,10 +102,10 @@ and the whole AST is prepended with an error extension node.
 
   $ echo "let _ = [%gen_raise_exc] + [%gen_raise_exc]" > impl.ml
   $ ./extender.exe impl.ml
-  Fatal error: exception (Failure "A raised exception")
+  Fatal error: exception Failure("A raised exception")
   [2]
   $ ./extender.exe -embed-errors impl.ml
-  Fatal error: exception (Failure "A raised exception")
+  Fatal error: exception Failure("A raised exception")
   [2]
 
  In the case of derivers
@@ -113,14 +113,14 @@ and the whole AST is prepended with an error extension node.
   $ echo "type a = int" > impl.ml
   $ echo "type b = int [@@deriving deriver_raised_exception]" >> impl.ml
   $ ./deriver.exe -embed-errors impl.ml
-  Fatal error: exception (Failure "A raised exception")
+  Fatal error: exception Failure("A raised exception")
   [2]
 
  In the case of whole file transformations:
 
   $ ./whole_file_exception.exe impl.ml
-  Fatal error: exception (Failure "An exception in a whole file transform")
+  Fatal error: exception Failure("An exception in a whole file transform")
   [2]
   $ ./whole_file_exception.exe -embed-errors impl.ml
-  Fatal error: exception (Failure "An exception in a whole file transform")
+  Fatal error: exception Failure("An exception in a whole file transform")
   [2]

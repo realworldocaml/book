@@ -77,17 +77,22 @@ let run_build_system ~common ~request =
       Fiber.return ())
 
 let run_build_command_poll_eager ~(common : Common.t) ~config ~request : unit =
-  Import.Scheduler.go_with_rpc_server_and_console_status_reporting ~common
-    ~config (fun () -> Scheduler.Run.poll (run_build_system ~common ~request))
+  Scheduler.go_with_rpc_server_and_console_status_reporting ~common ~config
+    (fun () -> Scheduler.Run.poll (run_build_system ~common ~request))
 
 let run_build_command_poll_passive ~(common : Common.t) ~config ~request:_ :
     unit =
   (* CR-someday aalekseyev: It would've been better to complain if [request] is
      non-empty, but we can't check that here because [request] is a function.*)
   let open Fiber.O in
-  let rpc = Common.rpc common in
-  Import.Scheduler.go_with_rpc_server_and_console_status_reporting ~common
-    ~config (fun () ->
+  let rpc =
+    match Common.rpc common with
+    | `Allow server -> server
+    | `Forbid_builds ->
+      Code_error.raise "rpc server must be allowed in passive mode" []
+  in
+  Scheduler.go_with_rpc_server_and_console_status_reporting ~common ~config
+    (fun () ->
       Scheduler.Run.poll_passive
         ~get_build_request:
           (let+ (Build (targets, ivar)) =
@@ -115,7 +120,7 @@ let run_build_command ~(common : Common.t) ~config ~request =
   | No -> run_build_command_once)
     ~common ~config ~request
 
-let runtest =
+let runtest_info =
   let doc = "Run tests." in
   let man =
     [ `S "DESCRIPTION"
@@ -131,22 +136,24 @@ let runtest =
         ]
     ]
   in
+  Cmd.info "runtest" ~doc ~man ~envs:Common.envs
+
+let runtest_term =
   let name_ = Arg.info [] ~docv:"DIR" in
-  let term =
-    let+ common = Common.term
-    and+ dirs = Arg.(value & pos_all string [ "." ] name_) in
-    let config = Common.init common in
-    let request (setup : Import.Main.build_system) =
-      Action_builder.all_unit
-        (List.map dirs ~f:(fun dir ->
-             let dir = Path.(relative root) (Common.prefix_target common dir) in
-             Alias.in_dir ~name:Dune_engine.Alias.Name.runtest ~recursive:true
-               ~contexts:setup.contexts dir
-             |> Alias.request))
-    in
-    run_build_command ~common ~config ~request
+  let+ common = Common.term
+  and+ dirs = Arg.(value & pos_all string [ "." ] name_) in
+  let config = Common.init common in
+  let request (setup : Import.Main.build_system) =
+    Action_builder.all_unit
+      (List.map dirs ~f:(fun dir ->
+           let dir = Path.(relative root) (Common.prefix_target common dir) in
+           Alias.in_dir ~name:Dune_engine.Alias.Name.runtest ~recursive:true
+             ~contexts:setup.contexts dir
+           |> Alias.request))
   in
-  (term, Term.info "runtest" ~doc ~man)
+  run_build_command ~common ~config ~request
+
+let runtest = Cmd.v runtest_info runtest_term
 
 let build =
   let doc =
@@ -182,7 +189,7 @@ let build =
     in
     run_build_command ~common ~config ~request
   in
-  (term, Term.info "build" ~doc ~man)
+  Cmd.v (Cmd.info "build" ~doc ~man ~envs:Common.envs) term
 
 let fmt =
   let doc = "Format source code." in
@@ -207,4 +214,4 @@ let fmt =
     in
     run_build_command ~common ~config ~request
   in
-  (term, Term.info "fmt" ~doc ~man)
+  Cmd.v (Cmd.info "fmt" ~doc ~man ~envs:Common.envs) term

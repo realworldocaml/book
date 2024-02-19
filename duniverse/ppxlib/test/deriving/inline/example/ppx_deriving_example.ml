@@ -7,7 +7,10 @@ include struct
 
   module Foo = struct end
 
-  let _ = [%foo]
+  let _ =
+    ();
+    ();
+    [%foo]
 end [@@ocaml.doc "@inline"]
 
 [@@@deriving.end]

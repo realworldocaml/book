@@ -1,9 +1,12 @@
 open Ppxlib
+open Ast_builder.Default
 
 (*
    [[@@deriving foo]] expands to:
    {[
-     let _ = [%foo]
+     module Foo = struct end
+
+     let _ = (); (); [%foo]
    ]}
 
    and then [[%foo]] expands to ["foo"].
@@ -53,7 +56,13 @@ let add_deriver () =
                           ppat_loc_stack = [];
                         };
                       pvb_expr =
-                        expr (Pexp_extension ({ loc; txt = "foo" }, PStr []));
+                        esequence ~loc
+                          [
+                            eunit ~loc;
+                            eunit ~loc;
+                            expr
+                              (Pexp_extension ({ loc; txt = "foo" }, PStr []));
+                          ];
                       pvb_attributes = [];
                       pvb_loc = loc;
                     };

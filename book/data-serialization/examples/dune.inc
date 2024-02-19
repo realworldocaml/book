@@ -1,6 +1,7 @@
 
 (rule
  (alias read_foo)
+ (locks /global)
  (deps
   (source_tree ./correct/read_foo)
   (package core)
@@ -14,6 +15,7 @@
 
 (rule
  (alias read_foo_better_errors)
+ (locks /global)
  (deps
   (source_tree ./correct/read_foo_better_errors)
   (package core)
@@ -27,6 +29,7 @@
 
 (rule
  (alias sexp)
+ (locks /global)
  (deps
   (source_tree ./correct/sexp)
   (package base))
@@ -39,6 +42,7 @@
 
 (rule
  (alias test_interval)
+ (locks /global)
  (deps
   (source_tree ./correct/test_interval)
   (package core)
@@ -52,6 +56,7 @@
 
 (rule
  (alias test_interval_override_of_sexp)
+ (locks /global)
  (deps
   (source_tree ./correct/test_interval_override_of_sexp)
   (package core)

@@ -1,6 +1,7 @@
 
 (rule
  (alias sum)
+ (locks /global)
  (deps
   (source_tree ./correct/sum)
   (package base)

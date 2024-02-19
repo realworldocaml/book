@@ -1,6 +1,6 @@
 (lang dune 2.7)
 (name ppxlib)
-(version 0.27.0)
+(version 0.28.0)
 (using cinaps 1.0)
 (allow_approximate_merlin)
 (implicit_transitive_deps false)
@@ -20,7 +20,7 @@
   (ocaml-compiler-libs (>= v0.11.0))
   (ppx_derivers (>= 1.0))
   (sexplib0 (>= v0.12))
-  (sexplib0 (and :with-test (< "v0.15"))) ; Printexc.register_printer in sexplib0 changed
+  (sexplib0 (and :with-test (>= "v0.15"))) ; Printexc.register_printer in sexplib0 changed
   stdlib-shims
   (ocamlfind :with-test)
   (re (and :with-test (>= 1.9.0)))

@@ -58,12 +58,40 @@ class ['ctx] map_with_context :
   end
 
 class map_with_path : [string] map_with_context
-class map_with_expansion_context : [Expansion_context.Base.t] map_with_context
+
+val enter_value : (expression, string loc) Attribute.t
+val enter_module : (module_expr, string loc) Attribute.t
+val do_not_enter_value_binding : (value_binding, unit) Attribute.t
+val do_not_enter_value_description : (value_description, unit) Attribute.t
+val do_not_enter_module_binding : (module_binding, unit) Attribute.t
+val do_not_enter_module_declaration : (module_declaration, unit) Attribute.t
+
+val do_not_enter_module_type_declaration :
+  (module_type_declaration, unit) Attribute.t
+
+val do_not_enter_let_module : (expression, unit) Attribute.t
 
 class virtual ['res] lift :
   object
     inherit ['res] Ppxlib_traverse_builtins.lift
     inherit ['res] Ast.lift
+  end
+
+class virtual ['ctx, 'res] lift_map_with_context :
+  object
+    inherit ['ctx, 'res] Ppxlib_traverse_builtins.lift_map_with_context
+    inherit ['ctx, 'res] Ast.lift_map_with_context
+  end
+
+class map_with_expansion_context_and_errors :
+  object
+    inherit
+      [Expansion_context.Base.t, Location.Error.t list] Ppxlib_traverse_builtins
+                                                        .std_lift_mappers_with_context
+
+    inherit
+      [Expansion_context.Base.t, Location.Error.t list] Ast
+                                                        .lift_map_with_context
   end
 
 class sexp_of :

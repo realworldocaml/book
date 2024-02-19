@@ -169,7 +169,7 @@ the `Gc.set` function:
 ```ocaml env=tune
 # open Core;;
 # let c = Gc.get ();;
-val c : Gc.Control.t =
+val c : Core.Gc.control =
   {Core.Gc.Control.minor_heap_size = 262144; major_heap_increment = 15;
    space_overhead = 120; verbose = 0; max_overhead = 500;
    stack_limit = 1048576; allocation_policy = 2; window_size = 1;

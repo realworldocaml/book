@@ -1,4 +1,3 @@
-
 type t = int64
 
 let of_us_64 m =
@@ -157,4 +156,4 @@ let pp ppf t =
     else if ms > 0L then
       Format.fprintf ppf "%Ld.%03Ldms" ms us
     else (* if us > 0 then *)
-      Format.fprintf ppf "%Ld.%03Ldus" us ns
+      Format.fprintf ppf "%Ld.%03Ldμs" us ns

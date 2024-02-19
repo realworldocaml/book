@@ -6,9 +6,38 @@ freebsd_task:
     matrix:
       - OCAML_VERSION: 4.11.1
       - OCAML_VERSION: 4.12.0
+
   pkg_install_script: pkg install -y ocaml-opam gmp gmake pkgconf bash
-  ocaml_script: opam init -a --comp=$OCAML_VERSION
-  dependencies_script: eval `opam env` && opam install -y --deps-only .
-  build_script: eval `opam env` && dune build @install
-  test_script: eval `opam env` && opam install -y -t --deps-only . && dune build @runtest
-  test_mirage_script: eval `opam env` && opam install -y solo5-bindings-hvt zarith-freestanding opam-depext && opam pin add -y . && ./.test-mirage.sh
+
+  ocaml_script:
+    - opam init -a --comp=$OCAML_VERSION
+    - opam env
+
+  pin_packages_script:
+    - opam install -y solo5-bindings-hvt zarith-freestanding opam-depext
+    - opam pin add mirage-crypto . -y --with-version=0.10.6  --with-test
+    - opam pin add mirage-crypto-rng . -y --with-version=0.10.6 --with-test
+    - opam pin add mirage-crypto-rng-mirage . -y --with-version=0.10.6 --with-test
+    - opam pin add mirage-crypto-pk . -y  --with-version=0.10.6 --with-test
+    - opam pin add mirage-crypto-ec . -y --with-version=0.10.6 --with-test
+    - opam pin add mirage-crypto-rng-async . -y --with-version=0.10.6 --with-test
+
+  test_script: opam exec -- dune runtest -p mirage-crypto,mirage-crypto-rng,mirage-crypto-rng-mirage,mirage-crypto-pk,mirage-crypto-ec,mirage-crypto-rng-async
+
+  test_mirage_script: eval `opam env` && ./.test-mirage.sh
+
+freebsd_eio_task:
+  pkg_install_script: pkg install -y ocaml-opam gmp gmake pkgconf bash
+
+  ocaml_script:
+    - opam init -a --bare
+    - opam update
+    - opam switch create 5.0.0~alpha0 --repositories=default,alpha=git+https://github.com/kit-ty-kate/opam-alpha-repository.git
+    - opam env
+
+  pin_packages_script:
+    - opam pin add mirage-crypto . -y --with-version=dev
+    - opam pin add mirage-crypto-rng . -y --with-version=dev
+    - opam pin add mirage-crypto-rng-eio . -y --with-version=dev --with-test
+
+  test_script: opam exec -- dune runtest -p mirage-crypto-rng-eio

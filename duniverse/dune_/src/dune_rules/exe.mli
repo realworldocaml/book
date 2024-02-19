@@ -21,6 +21,9 @@ module Linkage : sig
   (** Native compilation, extension [.exe] *)
   val native : t
 
+  (** like [custom] but allows for a custom extension *)
+  val custom_with_ext : ext:string -> Context.t -> t
+
   (** Byte compilation with stubs statically linked in, extension [.exe] *)
   val custom : Context.t -> t
 
@@ -50,7 +53,7 @@ type dep_graphs = { for_exes : Module.t list Action_builder.t list }
    between executables without requiring an intermediate library. *)
 val link_many :
      ?link_args:Command.Args.without_targets Command.Args.t Action_builder.t
-  -> ?o_files:Path.t list
+  -> ?o_files:Path.t Mode.Map.Multi.t
   -> ?embed_in_plugin_libraries:(Loc.t * Lib_name.t) list
   -> ?sandbox:Sandbox_config.t
   -> programs:Program.t list
@@ -61,7 +64,7 @@ val link_many :
 
 val build_and_link :
      ?link_args:Command.Args.without_targets Command.Args.t Action_builder.t
-  -> ?o_files:Path.t list
+  -> ?o_files:Path.t Mode.Map.Multi.t
   -> ?embed_in_plugin_libraries:(Loc.t * Lib_name.t) list
   -> ?sandbox:Sandbox_config.t
   -> program:Program.t
@@ -72,7 +75,7 @@ val build_and_link :
 
 val build_and_link_many :
      ?link_args:Command.Args.without_targets Command.Args.t Action_builder.t
-  -> ?o_files:Path.t list
+  -> ?o_files:Path.t Mode.Map.Multi.t
   -> ?embed_in_plugin_libraries:(Loc.t * Lib_name.t) list
   -> ?sandbox:Sandbox_config.t
   -> programs:Program.t list

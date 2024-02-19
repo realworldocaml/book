@@ -116,10 +116,10 @@ module Default = struct
         pexp_fun ~loc Asttypes.Nolabel None p e)
 
   let esequence ~loc el =
-    match el with
+    match List.rev el with
     | [] -> eunit ~loc
     | hd :: tl ->
-        List.fold_left tl ~init:hd ~f:(fun acc e -> pexp_sequence ~loc acc e)
+        List.fold_left tl ~init:hd ~f:(fun acc e -> pexp_sequence ~loc e acc)
 
   let pconstruct cd arg =
     ppat_construct ~loc:cd.pcd_loc (Located.map_lident cd.pcd_name) arg

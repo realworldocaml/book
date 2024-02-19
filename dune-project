@@ -1,7 +1,7 @@
-(lang dune 2.9)
+(lang dune 3.6)
 (name rwo)
 
-(using mdx 0.1)
+(using mdx 0.3)
 
 (formatting disabled)
 
@@ -24,6 +24,7 @@ second edition book. See https://realworldocaml.org/")
   async_graphics
   atdgen
   base
+  (base-bytes (="base"))
   (cmdliner (>= 1.1.0))
   cohttp-async
   conf-ncurses

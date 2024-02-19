@@ -113,20 +113,19 @@ struct
 
   let register ?nameservers s res =
     (* DNS stub resolver *)
-    let nameservers = Option.map (fun ns -> (`Tcp, ns)) nameservers in
-    let dns = DNS.create ?nameservers s in
+    DNS.connect ?nameservers s >|= fun dns ->
     let f = dns_stub_resolver dns in
     Resolver_lwt.add_rewrite ~host:"" ~f res;
     let service = Resolver_lwt.(service res ++ static_service) in
     Resolver_lwt.set_service ~f:service res;
     let vchan_tld = ".xen" in
     let vchan_res = vchan_resolver ~tld:vchan_tld in
-    Resolver_lwt.add_rewrite ~host:vchan_tld ~f:vchan_res res
+    Resolver_lwt.add_rewrite ~host:vchan_tld ~f:vchan_res res;
+    Ok ()
 
   let v ?nameservers stack =
     let res = Resolver_lwt.init () in
-    register ?nameservers stack res;
-    res
+    register ?nameservers stack res >|= Result.map (fun () -> res)
 
   type t = Resolver_lwt.t
 end

@@ -1,0 +1,19 @@
+(executable
+ (name identity_standalone)
+ (libraries ppxlib)
+ (modules identity_standalone))
+
+(executable
+ (name print_magic_number)
+ (libraries astlib)
+ (modules print_magic_number))
+
+(cram
+ (enabled_if
+  (or
+   (= %{system} linux)
+   (= %{system} linux_elf)
+   (= %{system} elf)
+   (= %{system} linux_eabihf)
+   (= %{system} linux_eabi)))
+ (deps identity_standalone.exe print_magic_number.exe))

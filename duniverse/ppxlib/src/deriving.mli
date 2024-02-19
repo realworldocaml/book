@@ -46,31 +46,43 @@ module Generator : sig
   type ('output_ast, 'input_ast) t
 
   val make :
-    ?attributes:Attribute.packed list ->
+    ?attributes:Attribute.packed list (* deprecated, unused *) ->
     ?deps:deriver list ->
     ('f, 'output_ast) Args.t ->
     (loc:Location.t -> path:string -> 'input_ast -> 'f) ->
     ('output_ast, 'input_ast) t
+  (** [make args gen] creates a generator that can be passed to {!Deriving.add}
+      to generate an output AST from an input AST and generator arguments.
+
+      [deps] is a list of derivers that this generator depends on.
+
+      [attributes] is deprecated and unused. It is only kept for backward
+      compatibility. *)
 
   val make_noarg :
-    ?attributes:Attribute.packed list ->
+    ?attributes:Attribute.packed list (* deprecated, unused *) ->
     ?deps:deriver list ->
     (loc:Location.t -> path:string -> 'input_ast -> 'output_ast) ->
     ('output_ast, 'input_ast) t
+  (** Same as {!make}, but without arguments. *)
 
   module V2 : sig
     val make :
-      ?attributes:Attribute.packed list ->
+      ?attributes:Attribute.packed list (* deprecated, unused *) ->
       ?deps:deriver list ->
       ('f, 'output_ast) Args.t ->
       (ctxt:Expansion_context.Deriver.t -> 'input_ast -> 'f) ->
       ('output_ast, 'input_ast) t
+    (** Same as {!Generator.make}, but the generator has access to an expansion
+        context. *)
 
     val make_noarg :
-      ?attributes:Attribute.packed list ->
+      ?attributes:Attribute.packed list (* deprecated, unused *) ->
       ?deps:deriver list ->
       (ctxt:Expansion_context.Deriver.t -> 'input_ast -> 'output_ast) ->
       ('output_ast, 'input_ast) t
+    (** Same as {!Generator.make_noarg}, but the generator has access to an
+        expansion context. *)
   end
 
   val apply :

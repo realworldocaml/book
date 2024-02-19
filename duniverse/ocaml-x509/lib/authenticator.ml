@@ -39,8 +39,21 @@ let fingerprint_of_string s =
   in
   Ok (Cstruct.of_string d)
 
+let format =
+  {|
+The format of an authenticator is:
+- [none]: no authentication
+- [key-fp(:<hash>?):<base64-encoded fingerprint>]: to authenticate a peer via
+  its key fingerprintf (hash is optional and defaults to SHA256)
+- [cert-fp(:<hash>?):<base64-encoded fingerprint>]: to authenticate a peer via
+  its certificate fingerprint (hash is optional and defaults to SHA256)
+- [trust-anchor(:<base64-encoded DER certificate>)+] to authenticate a peer from
+  a list of certificates (certificate must be in PEM format witthout header and
+  footer (----BEGIN CERTIFICATE----) and without newlines).
+|}
+
 let of_string str =
-  match String.split_on_char ':' str with
+  begin match String.split_on_char ':' str with
   | [ "key-fp" ; hash ; tls_key_fingerprint ] ->
     let* hash = hash_of_string (String.lowercase_ascii hash) in
     let* fingerprint = fingerprint_of_string tls_key_fingerprint in
@@ -67,3 +80,4 @@ let of_string str =
     Ok (fun time -> chain_of_trust ~time (List.rev anchors))
   | [ "none" ] -> Ok (fun _ ?ip:_ ~host:_ _ -> Ok None)
   | _ -> Error (`Msg (Fmt.str "Invalid TLS authenticator: %S" str))
+  end |> Result.map_error (function `Msg e -> `Msg (e ^ format))

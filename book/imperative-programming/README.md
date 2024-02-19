@@ -960,7 +960,7 @@ And now we can use this to try out some examples:
 # time (fun () -> edit_distance "OCaml" "ocaml");;
 Time: 0.655651092529 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.13" "ocaml 4.13");;
+# time (fun () -> edit_distance "OCaml 4.14" "ocaml 4.14");;
 Time: 2541.6533947 ms
 - : int = 2
 ```

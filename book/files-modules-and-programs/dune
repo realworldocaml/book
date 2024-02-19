@@ -1,8 +1,7 @@
 (mdx
  (files README.md)
- (packages
+ (deps (package ocamlfind))
+ (libraries
   core
-  mdx
-  ocamlfind
   ppx_jane)
  (preludes prelude.ml))

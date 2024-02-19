@@ -1,3 +1,177 @@
+3.6.1 (2022-11-24)
+------------------
+
+- Fix status line enabled when ANSI colors are forced. (#6503, @MisterDA)
+
+- Fix build with MSVC compiler (#6517, @nojb)
+
+- Do not shadow library interface modules (#6549, fixes #6545, @rgrinberg)
+
+3.6.0 (2022-11-14)
+------------------
+
+- Forbid multiple instances of dune running concurrently in the same workspace.
+  (#6360, fixes #236, @rgrinberg)
+
+- Allow promoting into source directories specified by `subdir` (#6404, fixes
+  #3502, @rgrinberg)
+
+- Make dune describe workspace return the correct root path
+  (#6380, fixes #6379, @esope)
+
+- Introduce a `$ dune ocaml top-module` subcommand to load modules directly
+  without sealing them behind the signature. (#5940, @rgrinberg)
+
+- [ctypes] do not mangle user written names in the ctypes stanza (#6374, fixes
+  #5561, @rgrinberg)
+
+- Support `CLICOLOR` and `CLICOLOR_FORCE` to enable/disable/force ANSI
+  colors. (#6340, fixes #6323, @MisterDA).
+
+- Forbid private libraries with `(package ..)` set from depending on private
+  libraries that don't belong to a package (#6385, fixes #6153, @rgrinberg)
+
+- Allow `Byte_complete` binaries to be installable (#4873, @AltGr, @rgrinberg)
+
+- Revive `$ dune external-lib-deps` under `$ dune describe external-lib-deps`.
+  (#6045, @moyodiallo)
+
+- Fix running inline tests in bytecode mode (#5622, fixes #5515, @dariusf)
+
+- [ctypes] always re-run `pkg-config` because we aren't tracking its external
+  dependencies (#6052, @rgrinberg)
+
+- [ctypes] remove dependency on configurator in the generated rules (#6052,
+  @rgrinberg)
+
+- Build progress status now shows number of failed jobs (#6242, @Alizter)
+
+- Allow absolute build directories to find public executables. For example,
+  those specified with `(deps %{bin:...})` (#6326, @anmonteiro)
+
+- Create a fake socket file `_build/.rpc/dune` on windows to allow rpc clients
+  to connect using the build directory. (#6329, @rgrinberg)
+
+- Prevent crash if absolute paths are used in the install stanza and in
+  recursive globs. These cases now result in a user error. (#6331, @gridbugs)
+
+- Add `(glob_files <glob>)` and `(glob_files_rec <glob>)` terms to the `files`
+  field of the `install` stanza (#6250, closes #6018, @gridbugs)
+
+- Allow `:standard` in the `(modules)` field of the `coq.pp` stanza (#6229,
+  fixes #2414, @Alizter)
+
+- Fix passing of flags to dune coq top (#6369, fixes #6366, @Alizter)
+
+- Extend the promotion CLI to a `dune promotion` group: `dune promote` is moved
+  to `dune promotion apply` (the former still works) and the new `dune promotion
+  diff` command can be used to just display the promotion without applying it.
+  (#6160, fixes #5368, @emillon)
+
+3.5.0 (2022-10-19)
+------------------
+
+- macOS: Handle unknown fsevents without crashing (#6217, @rgrinberg)
+
+- Enable file watching on MacOS SDK < 10.13. (#6218, @rgrinberg)
+
+- Sandbox running cinaps actions starting from cinaps 1.1 (#6176, @rgrinberg)
+
+- Add a `runtime_deps` field in the `cinaps` stanza to specify runtime
+  dependencies for running the cinaps preprocessing action (#6175, @rgrinberg)
+
+- Shadow alias module `Foo__` when building a library `Foo` (#6126, @rgrinberg)
+
+- Extend dune describe to include the root path of the workspace and the
+  relative path to the build directory. (#6136, @reubenrowe)
+
+- Allow dune describe workspace to accept directories as arguments.
+  The provided directories restrict the worskpace description to those
+  directories. (#6107, fixes #3893, @esope)
+
+- Add a terminal persistence mode that attempts to clear the terminal history.
+  It is enabled by setting terminal persistence to
+  `clear-on-rebuild-and-flush-history` (#6065, @rgrinberg)
+
+- Disallow generating targets in sub directories in inferred rules. The check to
+  forbid this was accidentally done only for manually specified targets (#6031,
+  @rgrinberg)
+
+- Do not ignore rules marked `(promote (until-clean))` when
+  `--ignore-promoted-rules` (or `-p`) is passed. (#6010, fixes #4401, @emillon)
+
+- Dune no longer considers .aux files as targets during Coq compilation. This
+  means that .aux files are no longer cached. (#6024, fixes #6004, @alizter)
+
+- Cinaps actions are now sandboxed by default (#6062, @rgrinberg)
+
+- Allow rules producing directory targets to be not sandboxed (#6056,
+  @rgrinberg)
+
+- Introduce a `dirs` field in the `install` stanza to install entire
+  directories (#5097, fixes #5059, @rgrinberg)
+
+- Menhir rules are now sandboxed by default (#6076, @rgrinberg)
+
+- Allow rules producing directory targets to create symlinks (#6077, fixes
+  #5945, @rgrinberg)
+
+- Inline tests are now sandboxed by default (#6079, @rgrinberg)
+
+- Fix build-info version when used with flambda (#6089, fixes #6075, @jberdine)
+
+- Add an `(include <file>)` term to the `include_dirs` field for adding
+  directories to the include paths sourced from a file. (#6058, fixes #3993,
+  @gridbugs)
+
+- Support `(extra_objects ...)` field in `(executable ...)` and `(library
+  ...)` stanzas (#6084, fixes #4129, @gridbugs)
+
+- Fix compilation of Dune under esy on Windows (#6109, fixes #6098, @nojb)
+
+- Improve error message when parsing several licenses in `(license)` (#6114,
+  fixes #6103, @emillon)
+
+- odoc rules now about `ODOC_SYNTAX` and will rerun accordingly (#6010, fixes
+  #1117, @emillon)
+
+- dune install: copy files in an atomic way (#6150, @emillon)
+
+- Add `%{coq:...}` macro for accessing data about the configuration about Coq.
+  For instance `%{coq:version}` (#6049, @Alizter)
+
+- update vendored copy of cmdliner to 1.1.1. This improves the built-in
+  documentation for command groups such as `dune ocaml`. (#6038, @emillon,
+  #6169, @shonfeder)
+
+- The test suite for Coq now requires Coq >= 8.16 due to changes in the
+  plugin loading mechanism upstream (which now uses `Findlib`).
+
+- Starting with Coq build language 0.6, theories can be built without importing
+  Coq's standard library by including `(stdlib no)`.
+  (#6165 #6164, fixes #6163, @ejgallego @Alizter @LasseBlaauwbroek)
+
+- on macOS, sign executables produced by artifact substitution (#6137, #6231,
+  fixes #5650, fixes #6226, @emillon)
+
+- Added an (aliases ...) field to the (rules ...) stanza which allows the
+  specification of multiple aliases per rule (#6194, @Alizter)
+
+- The `(coq.theory ...)` stanza will now ensure that for each declared `(plugin
+ ...)`, the `META` file for it is built before calling `coqdep`. This enables
+ the use of the new `Findlib`-based loading method in Coq 8.16; however as of
+ Coq 8.16.0, Coq itself has some bugs preventing this to work yet. (#6167 ,
+ workarounds #5767, @ejgallego)
+
+- Allow include statement in install stanza (#6139, fixes #256, @gridbugs)
+
+- Handle CSI n K code in ANSI escape codes from commands. (#6214, fixes #5528,
+  @emillon)
+
+- Add a new experimental feature `mode_specific_stubs` that allows the
+  specification of different flags and sources for foreign stubs depending on
+  the build mode (#5649, @voodoos)
+
 3.4.1 (26-07-2022)
 ------------------
 
@@ -86,7 +260,7 @@
 - The `coq.theory` stanza now produces rules for running `coqdoc`. Given a
   theory named `mytheory`, the directory targets `mytheory.html/` and
   `mytheory.tex/` or additionally the aliases `@doc` and `@doc-latex` will
-  build the HTML and LaTeX documentation repsectively. (#5695, fixes #3760,
+  build the HTML and LaTeX documentation respectively. (#5695, fixes #3760,
   @Alizter)
 
 - Coq theories marked as `(boot)` cannot depend on other theories
@@ -413,7 +587,7 @@
   simpler and more reproducible (#4281, @jeremiedimino)
 
 - Remove the `external-lib-deps` command. This command was only
-  approximative and the cost of maintainance was getting too high. We
+  approximative and the cost of maintenance was getting too high. We
   removed it to make room for new more important features (#4298,
   @jeremiedimino)
 
@@ -1395,7 +1569,7 @@
   variable. (#2588, fix #2568, @rgrinberg)
 
 - Add a `forbidden_libraries` field to prevent some library from being
-  linked in an executable. This help detecting who accidently pulls in
+  linked in an executable. This help detecting who accidentally pulls in
   `unix` for instance (#2570, @diml)
 
 - Fix incorrect error message when a variable is expanded in static context:
@@ -1408,7 +1582,7 @@
 
 - Drop support for `jbuild` and `jbuild-ignore` files (#2607, @diml)
 
-- Add a `dune-action-plugin` library for describing dependencies direcly in
+- Add a `dune-action-plugin` library for describing dependencies directly in
   the executable source. Programs that use this feature can be run by a new
   action (dynamic-run <progn> ...). (#2635, @staronj, @aalekseyev)
 
@@ -1614,6 +1788,9 @@
   targets, and a switch `(explicit_js_mode)` to require this mode in order to
   declare JS targets corresponding to executables. (#1941, @nojb)
 
+- Allow unwrapped implementations of public libraries to introduce new public
+  modules (@rgrinberg)
+
 1.10.0 (04/06/2019)
 -------------------
 
@@ -1691,7 +1868,7 @@
 - Fix `chdir` on external and source paths. Dune will also fail gracefully if
   the external or source path does not exist (#2165, fixes #2158, @rgrinberg)
 
-- Support the `.cc` extension fro C++ sources (#2195, fixes #83, @rgrinberg)
+- Support the `.cc` extension for C++ sources (#2195, fixes #83, @rgrinberg)
 
 - Run `ocamlformat` relative to the context root. This improves the locations of
   errors. (#2196, fixes #1370, @rgrinberg)

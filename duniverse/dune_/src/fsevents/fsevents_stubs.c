@@ -7,10 +7,8 @@
 #include <caml/threads.h>
 
 #if defined(__APPLE__)
-#include <Availability.h>
-#endif
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
+#include <Availability.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
 
@@ -89,9 +87,13 @@ static void dune_fsevents_callback(const FSEventStreamRef streamRef,
     if (!(interesting_flags & flags)) {
       continue;
     }
+    CFStringRef cf_path;
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
     CFDictionaryRef details = CFArrayGetValueAtIndex(eventPaths, i);
-    CFStringRef cf_path =
-        CFDictionaryGetValue(details, kFSEventStreamEventExtendedDataPathKey);
+    cf_path = CFDictionaryGetValue(details, kFSEventStreamEventExtendedDataPathKey);
+#else
+    cf_path = (CFStringRef) CFArrayGetValueAtIndex(eventPaths, i);
+#endif
     CFIndex len = CFStringGetLength(cf_path);
     CFIndex byte_len;
     CFIndex res =
@@ -152,7 +154,9 @@ CAMLprim value dune_fsevents_create(value v_paths, value v_latency,
 
   const FSEventStreamEventFlags flags =
       kFSEventStreamCreateFlagNoDefer |
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
       kFSEventStreamCreateFlagUseExtendedData |
+#endif
       kFSEventStreamCreateFlagUseCFTypes | kFSEventStreamCreateFlagFileEvents;
 
   dune_fsevents_t *t;
@@ -266,29 +270,16 @@ CAMLprim value dune_fsevents_action(value v_flags) {
   CAMLlocal1(v_action);
 
   uint32_t flags = Int32_val(v_flags) & action_mask;
-  // XXX slow
-  int count = 0;
-  while (flags) {
-    count += (flags & 1);
-    flags >>= 1;
-  }
-
-  flags = Int32_val(v_flags);
-  if (count >= 2 || flags & kFSEventStreamEventFlagItemRenamed) {
-    // we don't bother tracking renamed acurately for now. macos makes it
-    // tricky by not telling is which path is created and which one is deleted.
-    // it is possible to reverse engineer this from the chain of inodes in the
-    // events, but it's also error prone as inodes can be reused. so for now, we
-    // avoid this is and treat renamed as unknown
+  if (flags & kFSEventStreamEventFlagItemCreated) {
     v_action = Val_int(0);
-  } else if (flags & kFSEventStreamEventFlagItemCreated) {
-    v_action = Val_int(1);
   } else if (flags & kFSEventStreamEventFlagItemRemoved) {
-    v_action = Val_int(2);
+    v_action = Val_int(1);
   } else if (flags & kFSEventStreamEventFlagItemModified) {
+    v_action = Val_int(2);
+  } else if (flags & kFSEventStreamEventFlagItemRenamed) {
     v_action = Val_int(3);
   } else {
-    caml_failwith("fsevents: unexpected event action");
+    v_action = Val_int(4);
   }
 
   CAMLreturn(v_action);
@@ -316,7 +307,9 @@ static const FSEventStreamEventFlags all_flags[] = {
     kFSEventStreamEventFlagOwnEvent,
     kFSEventStreamEventFlagItemIsHardlink,
     kFSEventStreamEventFlagItemIsLastHardlink,
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
     kFSEventStreamEventFlagItemCloned,
+#endif
 };
 
 CAMLprim value dune_fsevents_raw(value v_flags) {
@@ -338,8 +331,7 @@ CAMLprim value dune_fsevents_available(value unit) {
 
 #else
 
-static char *unavailable_message =
-    "fsevents is only available on macos >= 10.13";
+static char *unavailable_message = "fsevents is only available on macos";
 
 CAMLprim value dune_fsevents_stop(value v_t) {
   caml_failwith(unavailable_message);

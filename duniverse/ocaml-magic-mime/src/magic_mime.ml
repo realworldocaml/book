@@ -22,8 +22,22 @@ let get_extension filename =
       String.sub filename (i+1) (String.length filename - i - 1)
     else search_dot (i - 1) in
   search_dot (String.length filename - 1)
+
 (* Given a full filename, lookup its MIME type *)
-let lookup filename =
+let lookup ?default filename =
   match get_extension filename with
-  | "" -> Mime_types.map_file filename
-  | ext -> Mime_types.map_extension (String.lowercase_ascii ext)
+  | "" -> Mime_types.map_file ?default filename
+  | ext -> Mime_types.map_extension ?default (String.lowercase_ascii ext)
+
+let reverse_lookup mime =
+  let mime' =
+    let string_length = String.length mime in
+    let rec strip_parameters i =
+      if i = string_length || mime.[i] = ';' then
+        String.sub mime 0 i
+      else
+        strip_parameters (i + 1)
+    in
+    strip_parameters 0
+  in
+  Mime_types.map_mime mime'

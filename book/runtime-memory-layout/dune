@@ -1,6 +1,4 @@
 (mdx
  (files README.md)
- (packages
-  mdx
-  ocaml-compiler-libs)
+ (deps (package ocaml-compiler-libs))
  (preludes prelude.ml))

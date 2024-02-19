@@ -1,5 +1,5 @@
-(rule (targets bytes_set_primitives.ml)
- (deps (:first_dep select-bytes-set-primitives/select.ml))
+(rule (targets random_repr.ml)
+ (deps (:first_dep select-random-repr/select.ml))
  (action
   (run %{ocaml} %{first_dep} -ocaml-version %{ocaml_version} -o %{targets})))
 

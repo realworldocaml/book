@@ -1,6 +1,7 @@
 
 (rule
  (alias freq-fast)
+ (locks /global)
  (deps
   (source_tree ./correct/freq-fast)
   (package base)
@@ -14,6 +15,7 @@
 
 (rule
  (alias map_vs_hash)
+ (locks /global)
  (deps
   (source_tree ./correct/map_vs_hash)
   (package base)
@@ -27,6 +29,7 @@
 
 (rule
  (alias map_vs_hash2)
+ (locks /global)
  (deps
   (source_tree ./correct/map_vs_hash2)
   (package core_bench))

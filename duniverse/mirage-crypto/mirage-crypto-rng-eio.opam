@@ -1,0 +1,30 @@
+version: "0.10.7"
+opam-version: "2.0"
+homepage:     "https://github.com/mirage/mirage-crypto"
+dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
+bug-reports:  "https://github.com/mirage/mirage-crypto/issues"
+doc:          "https://mirage.github.io/mirage-crypto/doc"
+authors:      ["Bikal Gurung <gbikal@gmail.com>" ]
+maintainer:   "Bikal Gurung <gbikal@gmail.com>"
+license:      "ISC"
+synopsis:     "Feed the entropy source in an eio-friendly way"
+
+build: [ ["dune" "subst"] {dev}
+         ["dune" "build" "-p" name "-j" jobs ]
+         ["dune" "runtest" "-p" name "-j" jobs] {with-test} ]
+
+depends: [
+  "base-domains"
+  "dune" {>= "3.0"}
+  "eio" {>= "0.3"}
+  "cstruct" {>= "6.0.0"}
+  "logs"
+  "mirage-crypto-rng" {=version}
+  "duration"
+  "mtime"
+  "eio_main" {with-test}
+]
+description: """
+Mirage-crypto-rng-eio feeds the entropy source for Mirage_crypto_rng-based
+random number genreator implementations, in an eio-friendly way.
+"""

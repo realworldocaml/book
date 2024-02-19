@@ -27,7 +27,9 @@ val split_path : string -> string * string option
 val dot_suffixes : string -> string list
 (** [fold_dot_suffixes "foo.@bar.blah" ~init ~f] is
 
-    {[ [ "bar.blah"; "foo.bar.blah" ] ]} *)
+    {[
+      [ "bar.blah"; "foo.bar.blah" ]
+    ]} *)
 
 module Registrar : sig
   type 'context t

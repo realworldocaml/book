@@ -16,10 +16,16 @@
 
 (** Database of file extensions to MIME types from RFC2045 onwards. *)
 
-(** [map_extension e] converts the file extension [e] into a MIME type,
-    defaulting to [application/octet-stream] if it is unknown. *)
-val map_extension : string -> string
+(** [map_extension ~default e] converts the file extension [e] into a MIME type,
+    defaulting to [default] (which is [application/octet-stream] by default) if
+    it is unknown. *)
+val map_extension : ?default:string -> string -> string
 
-(** [map_file f] converts the filename [f] into a MIME type,
-    defaulting to [application/octet-stream] if it is unknown. *)
-val map_file : string -> string
+(** [map_file ~default f] converts the filename [f] into a MIME type,
+    defaulting to [default] (which is [application/octet-stream] by default) if
+    it is unknown. *)
+val map_file : ?default:string -> string -> string
+
+(** [map_mime m] converts the MIME type [m] into a list of acceptable
+    file extensions, defaulting to an empty list if it is unknown. *)
+val map_mime : string -> string list

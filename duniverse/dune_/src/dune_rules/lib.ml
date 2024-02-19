@@ -179,14 +179,19 @@ module Error = struct
               (Path.to_string_maybe_quoted dir))
       ]
 
-  let private_deps_not_allowed ~loc private_dep =
+  let private_deps_not_allowed ~kind ~loc private_dep =
     let name = Lib_info.name private_dep in
+
     User_error.E
       (User_error.make ~loc
          [ Pp.textf
-             "Library %S is private, it cannot be a dependency of a public \
-              library. You need to give %S a public name."
-             (Lib_name.to_string name) (Lib_name.to_string name)
+             "Library %S is private, it cannot be a dependency of a %s. You \
+              need to give %S a public name."
+             (Lib_name.to_string name)
+             (match kind with
+             | `Private_package -> "private library attached to a package"
+             | `Public -> "public library")
+             (Lib_name.to_string name)
          ])
 
   let only_ppx_deps_allowed ~loc dep =
@@ -246,8 +251,6 @@ module Id : sig
 
   val to_dep_path_lib : t -> Dep_path.Entry.Lib.t
 
-  val hash : t -> int
-
   val compare : t -> t -> Ordering.t
 
   include Comparator.OPS with type t := t
@@ -280,8 +283,6 @@ end = struct
   let to_dep_path_lib { path; name } = { Dep_path.Entry.Lib.path; name }
 
   include (Comparator.Operators (T) : Comparator.OPS with type t := T.t)
-
-  let hash { path; name } = Tuple.T2.hash Path.hash Lib_name.hash (path, name)
 
   let make ~path ~name = { path; name }
 
@@ -431,9 +432,10 @@ let wrapped t =
       assert false (* will always be specified in dune package *)
     | Some (This x) -> Some x)
 
-let equal l1 l2 = Ordering.is_eq (compare l1 l2)
+(* We can't write a structural equality because of all the lazy fields *)
+let equal = ( == )
 
-let hash t = Id.hash t.unique_id
+let hash = Poly.hash
 
 include Comparable.Make (T)
 
@@ -600,16 +602,17 @@ end = struct
 end
 
 type private_deps =
-  | From_same_project
+  | From_same_project of [ `Public | `Private_package ]
   | Allow_all
 
 let check_private_deps lib ~loc ~(private_deps : private_deps) =
   match private_deps with
   | Allow_all -> Ok lib
-  | From_same_project -> (
+  | From_same_project kind -> (
     match Lib_info.status lib.info with
     | Private (_, Some _) -> Ok lib
-    | Private (_, None) -> Error (Error.private_deps_not_allowed ~loc lib.info)
+    | Private (_, None) ->
+      Error (Error.private_deps_not_allowed ~kind ~loc lib.info)
     | _ -> Ok lib)
 
 module Vlib : sig
@@ -838,8 +841,9 @@ end = struct
       (* [Allow_all] is used for libraries that are installed because we don't
          have to check it again. It has been checked when compiling the
          libraries before their installation *)
-      | Installed_private | Private _ | Installed -> Allow_all
-      | Public (_, _) -> From_same_project
+      | Installed_private | Private (_, None) | Installed -> Allow_all
+      | Private (_, Some _) -> From_same_project `Private_package
+      | Public (_, _) -> From_same_project `Public
     in
     let resolve name = resolve_dep db name ~private_deps in
     let* resolved =
