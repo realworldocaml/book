@@ -239,8 +239,8 @@ you can declare a pseudoparameter of the form `(type a)` which
 introduces a fresh type named `a`. This type acts like an abstract
 type within the context of the function. In the example above, the
 locally abstract type was used as part of a sharing constraint that
-ties the type `B.t` with the type of the elements of the list passed
-in.  [datatypes/locally abstract types]{.idx} [abstract
+ties the type `Bumpable.t` with the type of the elements of the list
+passed in.  [datatypes/locally abstract types]{.idx} [abstract
 types]{.idx}[locally abstract types]{.idx}[sharing constraint]{.idx}
 
 The resulting function is polymorphic in both the type of the list element
