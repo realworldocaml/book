@@ -196,7 +196,7 @@ OK
 The `from_file` function accepts an input filename and takes care of opening
 and closing it for you. It's far more common to use `from_string` to
 construct JSON values though, since these strings come in via a network
-connection (we'll see more of this in
+connection (we see more of this in
 [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref})
 or a database. Finally, the example checks that the two input mechanisms
 actually resulted in the same OCaml data structure.
@@ -340,7 +340,7 @@ val pages : int = 450
 The `tags` field is similar to `title`, but the field is a list of strings
 instead of a single one. Converting this to an OCaml `string list` is a
 two-stage process. First, we convert the JSON `List` to an OCaml list of JSON
-values and then filter out the `String` values as an OCaml `string list`.
+values and then filter out the `String` values into an OCaml `string list`.
 Remember that OCaml lists must contain values of the same type, so any JSON
 values that cannot be converted to a `string` will be skipped from the output
 of `filter_string`:

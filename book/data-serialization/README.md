@@ -805,8 +805,8 @@ And here's the resulting lighter syntax.
 
 ### `@sexp.option` {#sexp_option}
 
-By default, optional values are represented either as `()` for
-`None`. Here's an example of a record type containing an option:
+By default, optional values are represented as `()` for `None`.
+Here's an example of a record type containing an option:
 [ppx_sexp_conv/sexp.option]{.idx}
 
 ```ocaml env=main

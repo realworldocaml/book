@@ -841,12 +841,14 @@ library/DuckDuckGo searching example]{.idx}
   HTTP URLs are an example.
 
 `yojson`
-: A JSON parsing library that was described in
+: A JSON parsing library that is described in
   [Handling Json Data](json.html#handling-json-data){data-type=xref}.
 
 `cohttp`
-: A library for creating HTTP clients and servers. We need Async support,
-  which comes with the `cohttp-async` package.
+: A library for creating HTTP clients and servers. 
+
+`cohttp-async`
+: A package providing Async support for `cohttp`.
 
 Now let's dive into the implementation.
 
@@ -884,7 +886,7 @@ of encoding the URI correctly when outputting it in the network protocol.
 The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
 [RFC4627](http://www.ietf.org/rfc/rfc4627.txt). We'll parse the JSON data
-using the Yojson library, which was introduced in
+using the Yojson library, which is introduced in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}.
 [Yojson library/parsing JSON with]{.idx}[DuckDuckGo search engine/parsing
 JSON strings in]{.idx}[RFC4627]{.idx}

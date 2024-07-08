@@ -403,6 +403,12 @@ parameters: a block with the current value, and a pointer to the rest of the
 list. [debugging/Obj module warning]{.idx}[security issues/Obj module
 warning]{.idx}[Obj module]{.idx}
 
+Due to this encoding, there is a limit around 240 variants with parameters
+that applies to each type definition, but the only limit on the number of
+variants without parameters is the size of the native integer (either 31 or
+63 bits). This limit arises because of the size of the tag byte, and that
+some of the high-numbered tags are reserved.
+
 ::: {data-type=warning}
 ##### Obj Module Considered Harmful
 
@@ -417,13 +423,6 @@ but the external module signatures never expose it. Unless you too have a
 machine proof of correctness to accompany your use of `Obj`, stay away from
 it except for debugging!
 :::
-
-
-Due to this encoding, there is a limit around 240 variants with parameters
-that applies to each type definition, but the only limit on the number of
-variants without parameters is the size of the native integer (either 31 or
-63 bits). This limit arises because of the size of the tag byte, and that
-some of the high-numbered tags are reserved.
 
 ## Polymorphic Variants {#polymorphic-variants-1}
 

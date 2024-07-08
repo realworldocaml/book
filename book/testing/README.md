@@ -208,8 +208,8 @@ libraries has several downsides.
   of the public API often does a better job of testing what's
   fundamental about your code, and will better survive refactoring of
   the implementation.  Also, the discipline of keeping tests outside
-  of requires you to write code that can be tested that way, which
-  pushes towards better designs.
+  of your libraries requires you to write code that can be tested that
+  way, which pushes towards better designs.
 
 For all of these reasons, our recommendation is to put the bulk of
 your tests in test-only libraries created for that purpose.  There are

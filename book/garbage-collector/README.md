@@ -597,11 +597,13 @@ collection/finalizer functions]{.idx}
 #### What Values Can Be Finalized?
 
 Various values cannot have finalizers attached since they aren't
-heap-allocated. Some examples of values that are not heap-allocated are
-integers, constant constructors, Booleans, the empty array, the empty list,
-and the unit value. The exact list of what is heap-allocated or not is
-implementation-dependent, which is why Core provides the `Heap_block` module
-to explicitly check before attaching the finalizer.
+heap-allocated. Core provides a `Heap_block` module that dynamically checks
+if a given value is suitable for finalizing.  Some examples of values that
+are not heap-allocated are integers, constant constructors, Booleans, the
+empty array, the empty list, and the unit value. The exact list of what is
+heap-allocated or not is implementation-dependent, which is why Core
+provides the `Heap_block` module to explicitly check before attaching the
+finalizer.
 
 Some constant values can be heap-allocated but never deallocated during the
 lifetime of the program, for example, a list of integer constants.
@@ -612,8 +614,8 @@ These may be finalized while another duplicate copy is being used by the
 program.
 :::
 
-Core provides a `Heap_block` module that dynamically checks if a given
-value is suitable for finalizing.  Core keeps the functions for
+
+Core keeps the functions for
 registering finalizers in the `Core.Gc.Expert` module. Finalizers
 can run at any time in any thread, so they can be pretty hard to reason
 about in multi-threaded contexts. [heaps/Heap_block module]{.idx}
@@ -667,7 +669,7 @@ $ dune exec -- ./finalizer.exe
 The GC calls the finalization functions in the order of the deallocation. If
 several values become unreachable during the same GC cycle, the finalization
 functions will be called in the reverse order of the corresponding calls to
-`add_finalizer`. Each call to `add_finalizer` adds to the set of functions,
+`add_finalizer`. Each call to `add_finalizer` adds to the set of functions
 which are run when the value becomes unreachable. You can have many
 finalizers all pointing to the same heap block if you wish.
 

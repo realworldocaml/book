@@ -648,10 +648,10 @@ file-descriptor leak.
 We can fix this using Base's `Exn.protect` function, which takes two
 arguments: a thunk `f`, which is the main body of the computation to be run;
 and a thunk `finally`, which is to be called when `f` exits, whether it exits
-normally or with an exception. This is similar to the `try/finally` construct
-available in many programming languages, but it is implemented in a library,
-rather than being a built-in primitive. Here's how it could be used to fix
-our `load` function:
+normally or with an exception. (A thunk is a function whose argument is of
+type unit.) This is similar to the `try/finally` construct available in many
+programming languages, but it is implemented in a library, rather than being
+a built-in primitive. Here's how it could be used to fix our `load` function:
 
 ```ocaml env=main
 # let load filename =
