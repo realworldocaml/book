@@ -769,7 +769,12 @@ useful for all sorts of system automation tasks.
 But, can't we write pipelines already? After all, OCaml comes with a
 perfectly serviceable pipeline operator:
 
-<!-- TODO: Maybe add #require's for Sys_unix and Core_unix -->
+<!-- TODO: explain #require -->
+
+```ocaml env=abstracting
+# #require "core_unix";;
+# #require "core_unix.sys_unix";;
+```
 
 ```ocaml env=abstracting
 # open Core;;
