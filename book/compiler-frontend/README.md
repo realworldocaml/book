@@ -1267,8 +1267,8 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
 ```
 
 The typed AST is more explicit than the untyped syntax tree. For instance,
-the type declaration has been given a unique name (`t/1008`), as has the
-`v` value (`v/1011`).
+the type declaration has been given a unique name (`t/267`), as has the
+`v` value (`v/270`).
 
 You'll rarely need to look at this raw output from the compiler unless you're
 building IDE tools, or are hacking on extensions to the
