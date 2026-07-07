@@ -1,0 +1,9 @@
+{
+  "features": {
+    "ghcr.io/avsm/ocaml-devcontainers-feature/ocaml:latest": {
+      "version": "1.0.0",
+      "resolved": "ghcr.io/avsm/ocaml-devcontainers-feature/ocaml@sha256:443cc6e044faba8d56e034d4e4dd448eee80bc8002f6d54f370811d94cf8b8a3",
+      "integrity": "sha256:443cc6e044faba8d56e034d4e4dd448eee80bc8002f6d54f370811d94cf8b8a3"
+    }
+  }
+}
